@@ -11,6 +11,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { parseTerrain, parseNav } from '../../js/rules/terrain-read.js';
 import { zoneContext, provinceComponents, discProblem, walkLine, fingerprint } from '../../tools/content-place.mjs';
 import { pinnedVignettes } from '../../tools/content-lib.mjs';
+import { boringWalk, LIMIT } from '../../tools/boring-walk.mjs';
 import { connectedSets, gridDist } from '../../tools/province-graph.mjs';
 
 const root = new URL('../../', import.meta.url);
@@ -46,7 +47,8 @@ for (const z of Object.values(Z)) {
   z.ctx = zoneContext({ terrain: z.terrain, nav: z.nav, placements: z.bake, reserve: PLACES.zones[z.eid].asks, province: PCOMP, cell: { gx: z.sheet.grid[0], gy: z.sheet.grid[1] } });
   z.pl = z.file.placements;
 }
-const DISC = ['vignette', 'fort', 'farm', 'cave', 'camp', 'rare', 'hook'];
+const DISC = ['vignette', 'fort', 'farm', 'cave', 'camp', 'rare', 'hook', 'wayside'];
+const WAYSIDE = new Set(J('data/vignettes/wayside.json').kinds.map(k => k.id));
 
 test('every Torbor Downs zone has a placement file made for the bake it sits on', () => {
   for (const z of Object.values(Z)) {
@@ -106,7 +108,7 @@ test('independent check against stream B geometry: no disc touches a road polyli
       for (const c of circles) if (Math.hypot(p.x - c.x, p.z - c.z) < p.radius + c.r) bad.push(`${z.wid} ${p.id}: inside settlement at ${c.x},${c.z}`);
       // dry and gentle at the centre, measured straight off the terrain
       if (z.terrain.waterAt(p.x, p.z).depth > 0) bad.push(`${z.wid} ${p.id}: in water`);
-      if (z.terrain.slopeAt(p.x, p.z) > 30) bad.push(`${z.wid} ${p.id}: slope ${z.terrain.slopeAt(p.x, p.z).toFixed(0)}`);
+      if (z.terrain.slopeAt(p.x, p.z) > (p.type === 'wayside' ? 34 : 30)) bad.push(`${z.wid} ${p.id}: slope ${z.terrain.slopeAt(p.x, p.z).toFixed(0)}`);
     }
   }
   assert.deepEqual(bad, []);
@@ -116,7 +118,10 @@ test('REACHABLE: everything stands in the walkable component of the province hub
   const bad = [];
   for (const z of Object.values(Z)) for (const p of [...z.pl, ...z.file.features]) {
     const pts = p.pts ? p.pts.map(([x, zz]) => ({ x, z: zz })) : [p];
-    for (const q of pts) if (!z.ctx.inMainLoose(q.x, q.z)) bad.push(`${z.wid} ${p.type} ${p.id} at ${q.x},${q.z}`);
+    // a feature AT a ford stands on the river: it counts when the bank within 30 m is reached (B's zone-reach rule)
+    const near = p.where === 'at the crossing' ? 30 : 0;
+    const ok = q => { if (z.ctx.inMainLoose(q.x, q.z)) return true; for (let r = 2; r <= near; r += 2) for (let a = 0; a < 16; a++) if (z.ctx.inMain(q.x + Math.cos(a * 0.3927) * r, q.z + Math.sin(a * 0.3927) * r)) return true; return false; };
+    for (const q of pts) if (!ok(q)) bad.push(`${z.wid} ${p.type} ${p.id} at ${q.x},${q.z}`);
   }
   assert.deepEqual(bad, []);
   // and stream B's own sites: the dungeon door, the event arenas, the world boss arena
@@ -143,6 +148,18 @@ test('stream B keeps its sites: every placement clears B\'s door (r + 40) and ar
     }
   }
   assert.deepEqual(bad, []);
+});
+
+test('LONGEST BORING WALK <= 250 m (PLAN §16): on every road, and cross-country through the emptiest reachable pocket', () => {
+  const zones = EIDS.map(e => ({ id: Z[e].wid, gx: Z[e].sheet.grid[0], gy: Z[e].sheet.grid[1], nav: Z[e].nav, bake: Z[e].bake, file: Z[e].file }));
+  const r = boringWalk(zones, { reachable: gi => PCOMP.label[gi] === PCOMP.main });
+  assert.ok(r.road.worst <= LIMIT, `road: ${r.road.worst} m with nothing in sight on ${JSON.stringify(r.road.at)}`);
+  assert.ok(r.open.worst <= LIMIT, `open ground: ${r.open.worst} m (pocket ${JSON.stringify(r.open.at)})`);
+  // fillers are what they say: a wayside kind from wayside.json, or a camp from the zone's own mix
+  for (const z of Object.values(Z)) for (const p of z.pl.filter(q => q.filler)) {
+    if (p.type === 'wayside') assert.ok(WAYSIDE.has(p.kind), `${z.wid} ${p.id}: kind ${p.kind}`);
+    else { assert.equal(p.type, 'camp'); assert.ok((z.sheet.camps || []).some(c => c.type === p.monster), `${z.wid} ${p.id}: ${p.monster}`); }
+  }
 });
 
 test('minimum spacing: vignettes >= 140 m apart, NPCs >= 3 m apart, waystones >= 20 m apart', () => {
@@ -202,20 +219,31 @@ test('SAMENESS: no two zones carry the same content mix (vignettes + site templa
   assert.equal(new Set(EIDS.map(sig)).size, EIDS.length);
 });
 
-test('settlement names and asks for stream B: renames point at real baked places; asks sit inside the zone and off baked towns', () => {
+test('settlement names and asks for stream B: renames key real World Forge places; asks are baked where asked, or clear of baked towns', () => {
+  const slug = t => String(t).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
   for (const eid of EIDS) {
     const p = PLACES.zones[eid], z = Z[eid];
     assert.equal(p.world, z.wid);
-    for (const id of Object.keys(p.rename)) assert.ok(z.bake.some(b => b.id === id), `${eid}: rename of unknown ${id}`);
+    // B imposes our names and keeps the World Forge one as data.wfName: a rename key is that old name's slug
+    const named = z.bake.filter(b => b.data && (b.data.name || b.data.wfName));
+    for (const [k, v] of Object.entries(p.rename)) {
+      // (a crossing B renamed may not keep wfName: then the target name itself must be baked)
+      const site = named.find(b => slug(b.data.wfName || b.data.name) === k || b.id === k) || named.find(b => b.data.name === v);
+      assert.ok(site, `${eid}: rename of unknown ${k}`);
+      if (site.data.wfName) assert.equal(site.data.name, v, `${eid}: ${k} baked as ${site.data.name}, wanted ${v}`);
+    }
     const names = [z.sheet.town, ...(z.sheet.hamlets || [])];
+    const baked = z.bake.filter(q => q.kind === 'settlement');
     for (const a of p.asks) {
       assert.ok(names.includes(a.name), `${eid}: ask ${a.name} is not a sheet name`);
       const m = a.r + 70;
       assert.ok(a.x >= m && a.z >= m && a.x <= 2048 - m && a.z <= 2048 - m, `${eid}: ask ${a.name} too close to the edge`);
-      for (const b of z.bake.filter(q => q.kind === 'settlement')) assert.ok(Math.hypot(a.x - b.x, a.z - b.z) > a.r + b.data.radius + 100, `${eid}: ask ${a.name} on ${b.id}`);
+      const done = baked.find(b => b.data.name === a.name);
+      if (done) { assert.ok(Math.hypot(done.x - a.x, done.z - a.z) < 1, `${eid}: ${a.name} baked away from its ask`); continue; }
+      for (const b of baked) assert.ok(Math.hypot(a.x - b.x, a.z - b.z) > a.r + b.data.radius + 100, `${eid}: ask ${a.name} on ${b.id}`);
     }
-    // every sheet town/hamlet is either a renamed/kept baked settlement or an ask
-    const have = new Set([...Object.values(p.rename), ...p.asks.map(a => a.name), ...z.bake.filter(b => b.kind === 'settlement').map(b => b.data.name)]);
+    // every sheet town/hamlet is a baked settlement now, or still an open ask
+    const have = new Set([...p.asks.map(a => a.name), ...baked.map(b => b.data.name)]);
     for (const n of names) assert.ok(have.has(n), `${eid}: ${n} has no place`);
   }
 });

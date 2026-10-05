@@ -46,6 +46,12 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
@@ -61,7 +67,7 @@
    "z": 560,
    "r": 140,
    "source": "bake",
-   "bakeId": "wehackkeep"
+   "bakeId": "hermit_s_rest"
   },
   {
    "name": "Charcoal Burners",
@@ -70,7 +76,7 @@
    "z": 224,
    "r": 65,
    "source": "bake",
-   "bakeId": "weephaven"
+   "bakeId": "charcoal_burners"
   },
   {
    "name": "Wildhaven",
@@ -202,23 +208,11 @@
   },
   {
    "type": "vignette",
-   "id": "beekeeper_hives",
-   "name": "The Angry Hives",
-   "x": 1903,
-   "z": 1762,
-   "yaw": 6.09,
-   "radius": 10,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
    "id": "broken_caravan_survivor",
    "name": "The Last Wagon",
-   "x": 1986,
-   "z": 662,
-   "yaw": 2.75,
+   "x": 1903,
+   "z": 1762,
+   "yaw": 3.63,
    "radius": 15,
    "biome": "grassland",
    "biomeFits": true,
@@ -228,9 +222,9 @@
    "type": "vignette",
    "id": "drowned_belfry",
    "name": "The Drowned Belfry",
-   "x": 763,
-   "z": 532,
-   "yaw": 5.93,
+   "x": 715,
+   "z": 524,
+   "yaw": 1.75,
    "radius": 11,
    "biome": "temperateForest",
    "biomeFits": true,
@@ -240,9 +234,9 @@
    "type": "vignette",
    "id": "fen_witch_hut",
    "name": "Old Mabry's Stilt Hut",
-   "x": 1445,
-   "z": 1817,
-   "yaw": 2.63,
+   "x": 1978,
+   "z": 745,
+   "yaw": 6.23,
    "radius": 12,
    "biome": "grassland",
    "biomeFits": true,
@@ -250,25 +244,13 @@
   },
   {
    "type": "vignette",
-   "id": "giants_cookfire",
-   "name": "The Giant's Cookfire",
-   "x": 299,
-   "z": 1935,
-   "yaw": 0.05,
-   "radius": 14,
+   "id": "frozen_tarn",
+   "name": "The Frozen Tarn",
+   "x": 325,
+   "z": 1948,
+   "yaw": 4.39,
+   "radius": 13,
    "biome": "mountains",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "goblin_market_stones",
-   "name": "The Moonlight Stones",
-   "x": 1195,
-   "z": 1194,
-   "yaw": 1.05,
-   "radius": 10,
-   "biome": "grassland",
    "biomeFits": true,
    "level": 1
   },
@@ -276,11 +258,11 @@
    "type": "vignette",
    "id": "hunters_hide",
    "name": "The Hunter's Hide",
-   "x": 1979,
-   "z": 261,
-   "yaw": 5.58,
+   "x": 1449,
+   "z": 1945,
+   "yaw": 2.33,
    "radius": 13,
-   "biome": "temperateForest",
+   "biome": "hills",
    "biomeFits": true,
    "level": 1
   },
@@ -288,9 +270,9 @@
    "type": "vignette",
    "id": "lone_archer_post",
    "name": "The Reed Hide",
-   "x": 1251,
-   "z": 345,
-   "yaw": 0.67,
+   "x": 1986,
+   "z": 103,
+   "yaw": 3.32,
    "radius": 9,
    "biome": "temperateForest",
    "biomeFits": true,
@@ -298,12 +280,36 @@
   },
   {
    "type": "vignette",
-   "id": "warband_totem",
-   "name": "The Warband Totem",
-   "x": 1594,
-   "z": 816,
-   "yaw": 5.08,
-   "radius": 11,
+   "id": "stone_circle_hum",
+   "name": "The Humming Stones",
+   "x": 1180,
+   "z": 1172,
+   "yaw": 6,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "sunken_stair",
+   "name": "The Stair to Nowhere",
+   "x": 1595,
+   "z": 838,
+   "yaw": 5.83,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "wardens_cairn",
+   "name": "The Warden's Cairn",
+   "x": 835,
+   "z": 896,
+   "yaw": 5.33,
+   "radius": 10,
    "biome": "grassland",
    "biomeFits": true,
    "level": 1
@@ -312,11 +318,11 @@
    "type": "vignette",
    "id": "witch_stump",
    "name": "The Wishing Stump",
-   "x": 1969,
-   "z": 1352,
-   "yaw": 6.19,
+   "x": 1225,
+   "z": 341,
+   "yaw": 0.21,
    "radius": 10,
-   "biome": "shrubland",
+   "biome": "temperateForest",
    "biomeFits": true,
    "level": 1
   },
@@ -333,8 +339,8 @@
     2,
     4
    ],
-   "x": 1881,
-   "z": 70,
+   "x": 459,
+   "z": 207,
    "yaw": 0,
    "radius": 10
   },
@@ -351,8 +357,8 @@
     2,
     4
    ],
-   "x": 490,
-   "z": 170,
+   "x": 1393,
+   "z": 72,
    "yaw": 0,
    "radius": 10
   },
@@ -369,8 +375,8 @@
     2,
     4
    ],
-   "x": 902,
-   "z": 959,
+   "x": 1476,
+   "z": 546,
    "yaw": 0,
    "radius": 10
   },
@@ -387,8 +393,8 @@
     2,
     4
    ],
-   "x": 1507,
-   "z": 524,
+   "x": 904,
+   "z": 357,
    "yaw": 0,
    "radius": 10
   },
@@ -405,8 +411,8 @@
     2,
     4
    ],
-   "x": 1911,
-   "z": 980,
+   "x": 1421,
+   "z": 1568,
    "yaw": 0,
    "radius": 10
   },
@@ -441,8 +447,8 @@
     2,
     4
    ],
-   "x": 738,
-   "z": 268,
+   "x": 678,
+   "z": 67,
    "yaw": 0,
    "radius": 10
   },
@@ -459,8 +465,8 @@
     2,
     4
    ],
-   "x": 502,
-   "z": 613,
+   "x": 467,
+   "z": 499,
    "yaw": 0,
    "radius": 10
   },
@@ -477,8 +483,8 @@
     2,
     4
    ],
-   "x": 1419,
-   "z": 71,
+   "x": 1766,
+   "z": 62,
    "yaw": 0,
    "radius": 10
   },
@@ -495,8 +501,8 @@
     2,
     4
    ],
-   "x": 531,
-   "z": 381,
+   "x": 1152,
+   "z": 84,
    "yaw": 0,
    "radius": 10
   },
@@ -513,8 +519,8 @@
     2,
     4
    ],
-   "x": 1171,
-   "z": 79,
+   "x": 681,
+   "z": 280,
    "yaw": 0,
    "radius": 10
   },
@@ -531,8 +537,8 @@
     2,
     4
    ],
-   "x": 743,
-   "z": 74,
+   "x": 1402,
+   "z": 377,
    "yaw": 0,
    "radius": 10
   },
@@ -549,8 +555,8 @@
     1,
     2
    ],
-   "x": 1712,
-   "z": 93,
+   "x": 790,
+   "z": 182,
    "yaw": 0,
    "radius": 10
   },
@@ -567,8 +573,8 @@
     1,
     2
    ],
-   "x": 1433,
-   "z": 334,
+   "x": 1079,
+   "z": 244,
    "yaw": 0,
    "radius": 10
   },
@@ -585,8 +591,8 @@
     1,
     2
    ],
-   "x": 1083,
-   "z": 265,
+   "x": 1964,
+   "z": 295,
    "yaw": 0,
    "radius": 10
   },
@@ -603,8 +609,8 @@
     1,
     2
    ],
-   "x": 363,
-   "z": 492,
+   "x": 535,
+   "z": 375,
    "yaw": 0,
    "radius": 10
   },
@@ -613,30 +619,30 @@
    "id": "rare_antlered_shade",
    "slot": 0,
    "name": "The Antlered Shade",
-   "x": 706,
-   "z": 415,
+   "x": 654,
+   "z": 471,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     624,
-     370
+     693,
+     420
     ],
     [
-     737,
-     353
+     729,
+     487
     ],
     [
-     783,
-     402
+     665,
+     539
     ],
     [
-     748,
-     475
+     590,
+     535
     ],
     [
-     634,
-     465
+     611,
+     429
     ]
    ],
    "respawnMin": [
@@ -650,30 +656,30 @@
    "id": "rare_charcoal_tom",
    "slot": 1,
    "name": "Charcoal Tom",
-   "x": 607,
-   "z": 503,
+   "x": 1838,
+   "z": 153,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     585,
-     423
+     1792,
+     196
     ],
     [
-     668,
-     446
+     1775,
+     137
     ],
     [
-     687,
-     596
+     1830,
+     95
     ],
     [
-     569,
-     580
+     1914,
+     157
     ],
     [
-     480,
-     479
+     1879,
+     213
     ]
    ],
    "respawnMin": [
@@ -686,8 +692,8 @@
    "type": "waystone",
    "id": "ws_z11_03_hermit_s_rest",
    "name": "Hermit's Rest",
-   "x": 1096.7,
-   "z": 406.5,
+   "x": 1097.1,
+   "z": 721.8,
    "yaw": 0,
    "settlement": "Hermit's Rest",
    "radius": 1
@@ -697,7 +703,7 @@
    "id": "ws_z11_03_charcoal_burners",
    "name": "Charcoal Burners",
    "x": 335.6,
-   "z": 182.7,
+   "z": 201.9,
    "yaw": 0,
    "settlement": "Charcoal Burners",
    "radius": 1
@@ -706,8 +712,8 @@
    "type": "waystone",
    "id": "ws_z11_03_wildhaven",
    "name": "Wildhaven",
-   "x": 1336.4,
-   "z": 181.4,
+   "x": 1316.9,
+   "z": 183.4,
    "yaw": 0,
    "settlement": "Wildhaven",
    "radius": 1
@@ -716,8 +722,8 @@
    "type": "waystone",
    "id": "ws_z11_03_door",
    "name": "Barrow entrance",
-   "x": 832.1,
-   "z": 728,
+   "x": 843.7,
+   "z": 748.3,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -728,9 +734,9 @@
    "name": "The Hermit of Wychwood",
    "role": "hermit",
    "at": "Hermit's Rest",
-   "x": 1102.2,
-   "z": 551,
-   "yaw": 5.04,
+   "x": 1103.8,
+   "z": 550.4,
+   "yaw": 6.19,
    "radius": 1
   },
   {
@@ -739,9 +745,9 @@
    "name": "Collier Nan",
    "role": "trader",
    "at": "Charcoal Burners",
-   "x": 251.2,
-   "z": 226.1,
-   "yaw": 5.92,
+   "x": 253,
+   "z": 220.4,
+   "yaw": 4.02,
    "radius": 1
   },
   {
@@ -750,9 +756,9 @@
    "name": "Warden Emrys",
    "role": "guard",
    "at": "the Antler Stockade",
-   "x": 1587,
-   "z": 221.6,
-   "yaw": 2.15,
+   "x": 1583.7,
+   "z": 219.3,
+   "yaw": 1.23,
    "radius": 1
   },
   {
@@ -761,9 +767,9 @@
    "name": "Hob the hunter",
    "role": "hunter",
    "at": "hunters_hide",
-   "x": 1977.2,
-   "z": 259.1,
-   "yaw": 0.92,
+   "x": 1446.5,
+   "z": 1945.8,
+   "yaw": 1.79,
    "radius": 1
   },
   {
@@ -774,8 +780,8 @@
    "clue": "note",
    "how": null,
    "shimmer": null,
-   "x": 1212.7,
-   "z": 656.1,
+   "x": 1167,
+   "z": 690.7,
    "yaw": 0,
    "where": "edge of Hermit's Rest",
    "radius": 1
@@ -788,8 +794,8 @@
    "clue": "carved_arrow",
    "how": null,
    "shimmer": null,
-   "x": 1982,
-   "z": 261.8,
+   "x": 1452,
+   "z": 1944.4,
    "yaw": 0,
    "where": "vignette hunters_hide",
    "radius": 1
@@ -802,11 +808,693 @@
    "clue": null,
    "how": "dig",
    "shimmer": 15,
-   "x": 1797,
-   "z": 174,
+   "x": 1905,
+   "z": 63,
    "yaw": 0,
    "where": "secluded",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_wychwood_0",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 625,
+   "z": 1664,
+   "yaw": 5.69,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f1",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 439,
+   "z": 1019,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_wychwood_2",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 40,
+   "z": 1672,
+   "yaw": 0.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f3",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 976,
+   "z": 1426,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_wychwood_4",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 662,
+   "z": 1979,
+   "yaw": 5.65,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f5",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1872,
+   "z": 1440,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_6",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 339,
+   "z": 1619,
+   "yaw": 4.89,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f7",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1868,
+   "z": 1024,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_8",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 41,
+   "z": 547,
+   "yaw": 5.59,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f9",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1772,
+   "z": 524,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_wychwood_10",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1360,
+   "z": 961,
+   "yaw": 0.5,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f11",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1196,
+   "z": 997,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_wychwood_12",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1672,
+   "z": 1636,
+   "yaw": 6.02,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f13",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 922,
+   "z": 1127,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_wychwood_14",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1396,
+   "z": 1308,
+   "yaw": 1.84,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f15",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1288,
+   "z": 1763,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_wychwood_16",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 592,
+   "z": 726,
+   "yaw": 6.13,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f17",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1744,
+   "z": 1386,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_wychwood_18",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1693,
+   "z": 1892,
+   "yaw": 3.61,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f19",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1985,
+   "z": 501,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_wychwood_20",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1178,
+   "z": 1511,
+   "yaw": 1.23,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f21",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 867,
+   "z": 1659,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_wychwood_22",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 664,
+   "z": 1052,
+   "yaw": 0.3,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f23",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 97,
+   "z": 1875,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_24",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1924,
+   "z": 1232,
+   "yaw": 3.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f25",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 566,
+   "z": 1266,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_26",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1281,
+   "z": 1169,
+   "yaw": 1.16,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f27",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 763,
+   "z": 1531,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_wychwood_28",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 2019,
+   "z": 1570,
+   "yaw": 1.93,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f29",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1544,
+   "z": 1040,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_wychwood_30",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1876,
+   "z": 1976,
+   "yaw": 1.2,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f31",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 439,
+   "z": 1743,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_wychwood_32",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 2023,
+   "z": 930,
+   "yaw": 5.79,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f33",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1825,
+   "z": 1543,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_34",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1162,
+   "z": 1928,
+   "yaw": 1.39,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f35",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1508,
+   "z": 1748,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_wychwood_36",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1768,
+   "z": 736,
+   "yaw": 0.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f37",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 860,
+   "z": 1950,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_38",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 594,
+   "z": 1480,
+   "yaw": 6.19,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f39",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1412,
+   "z": 780,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_wychwood_40",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 40,
+   "z": 348,
+   "yaw": 5.43,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_41",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 38,
+   "z": 1471,
+   "yaw": 0.29,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_wychwood_42",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1552,
+   "z": 1416,
+   "yaw": 1.54,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f43",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 319,
+   "z": 530,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_wychwood_44",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1760,
+   "z": 328,
+   "yaw": 1.83,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f45",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 762,
+   "z": 1808,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
   }
  ],
  "features": []

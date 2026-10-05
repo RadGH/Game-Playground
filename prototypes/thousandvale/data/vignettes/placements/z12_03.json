@@ -46,6 +46,12 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
@@ -56,12 +62,12 @@
  "settlements": [
   {
    "name": "Orrinsford",
-   "kind": "village",
+   "kind": "town",
    "x": 336,
    "z": 576,
-   "r": 65,
+   "r": 90,
    "source": "bake",
-   "bakeId": "wolfkeep"
+   "bakeId": "orrinsford"
   },
   {
    "name": "Pilgrim's Halt",
@@ -70,7 +76,7 @@
    "z": 240,
    "r": 46,
    "source": "bake",
-   "bakeId": "duskhaven"
+   "bakeId": "pilgrim_s_halt"
   }
  ],
  "checks": [
@@ -108,27 +114,27 @@
   {
    "type": "farm",
    "id": "farm_saint_orrins_rise_0",
-   "name": "Orrinsford Sheepfold",
-   "template": "sheep",
+   "name": "Orrinsford Farm",
+   "template": "arable",
    "flavour": null,
    "settlement": "Orrinsford",
-   "x": 287,
-   "z": 689,
-   "yaw": 2.75,
-   "radius": 24,
+   "x": 285,
+   "z": 447,
+   "yaw": 0.79,
+   "radius": 22,
    "level": 3
   },
   {
    "type": "farm",
    "id": "farm_saint_orrins_rise_1",
-   "name": "Pilgrim's Halt Orchard",
-   "template": "orchard",
+   "name": "Pilgrim's Halt Farm",
+   "template": "arable",
    "flavour": null,
    "settlement": "Pilgrim's Halt",
-   "x": 753,
-   "z": 146,
+   "x": 752,
+   "z": 147,
    "yaw": -0.39,
-   "radius": 24,
+   "radius": 22,
    "level": 3
   },
   {
@@ -181,7 +187,7 @@
    "name": "The Stag Shrine",
    "x": 1172,
    "z": 913,
-   "yaw": 2.1,
+   "yaw": 1.56,
    "radius": 10,
    "biome": "hills",
    "biomeFits": true,
@@ -189,25 +195,13 @@
   },
   {
    "type": "vignette",
-   "id": "chained_tree",
-   "name": "The Chained Oak",
+   "id": "cultist_altar",
+   "name": "The Sky Altar",
    "x": 1532,
    "z": 391,
-   "yaw": 4.75,
-   "radius": 11,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "collapsed_tithe_barn",
-   "name": "The Tithe Barn",
-   "x": 1982,
-   "z": 1986,
-   "yaw": 6.15,
+   "yaw": 1.24,
    "radius": 13,
-   "biome": "shrubland",
+   "biome": "grassland",
    "biomeFits": true,
    "level": 1
   },
@@ -215,9 +209,9 @@
    "type": "vignette",
    "id": "drowned_shrine",
    "name": "The Drowned Shrine",
-   "x": 319,
-   "z": 353,
-   "yaw": 5.66,
+   "x": 392,
+   "z": 414,
+   "yaw": 5.84,
    "radius": 11,
    "biome": "marsh",
    "biomeFits": true,
@@ -225,25 +219,61 @@
   },
   {
    "type": "vignette",
-   "id": "hermits_hollow",
-   "name": "The Hermit's Hollow",
-   "x": 333,
-   "z": 1867,
-   "yaw": 2.28,
+   "id": "fairy_ring",
+   "name": "The Toadstool Ring",
+   "x": 1887,
+   "z": 1630,
+   "yaw": 5.51,
    "radius": 9,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "ferryman_shrine",
+   "name": "The Ferryman's Coin",
+   "x": 862,
+   "z": 581,
+   "yaw": 6.25,
+   "radius": 10,
+   "biome": "temperateForest",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "goblin_market_stones",
+   "name": "The Moonlight Stones",
+   "x": 91,
+   "z": 1938,
+   "yaw": 2.46,
+   "radius": 10,
    "biome": "hills",
    "biomeFits": true,
    "level": 1
   },
   {
    "type": "vignette",
-   "id": "hollow_dragon_skull",
-   "name": "The Great Skull",
-   "x": 1988,
-   "z": 93,
-   "yaw": 5.93,
-   "radius": 13,
+   "id": "market_cross",
+   "name": "The Market Cross",
+   "x": 1972,
+   "z": 86,
+   "yaw": 2.78,
+   "radius": 10,
    "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "miners_shrine",
+   "name": "The Miners' Lamp Shrine",
+   "x": 745,
+   "z": 1273,
+   "yaw": 2.84,
+   "radius": 8,
+   "biome": "hills",
    "biomeFits": true,
    "level": 1
   },
@@ -251,23 +281,11 @@
    "type": "vignette",
    "id": "pilgrim_camp",
    "name": "The Pilgrims' Rest",
-   "x": 996,
-   "z": 1961,
-   "yaw": 3.46,
+   "x": 1974,
+   "z": 604,
+   "yaw": 2.19,
    "radius": 13,
-   "biome": "hills",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "pilgrim_footbath",
-   "name": "The Footbath of Saint Ida",
-   "x": 791,
-   "z": 1292,
-   "yaw": 5.35,
-   "radius": 11,
-   "biome": "hills",
+   "biome": "grassland",
    "biomeFits": true,
    "level": 1
   },
@@ -275,23 +293,11 @@
    "type": "vignette",
    "id": "ruined_bell_tower",
    "name": "The Fallen Bell",
-   "x": 1974,
-   "z": 604,
-   "yaw": 2.69,
+   "x": 949,
+   "z": 1988,
+   "yaw": 2.82,
    "radius": 11,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "stone_circle_hum",
-   "name": "The Humming Stones",
-   "x": 1071,
-   "z": 459,
-   "yaw": 2.97,
-   "radius": 12,
-   "biome": "grassland",
+   "biome": "hills",
    "biomeFits": true,
    "level": 1
   },
@@ -308,8 +314,8 @@
     2,
     4
    ],
-   "x": 1473,
-   "z": 1921,
+   "x": 423,
+   "z": 1587,
    "yaw": 0,
    "radius": 10
   },
@@ -326,8 +332,8 @@
     2,
     4
    ],
-   "x": 1246,
-   "z": 84,
+   "x": 417,
+   "z": 910,
    "yaw": 0,
    "radius": 10
   },
@@ -344,8 +350,8 @@
     2,
     4
    ],
-   "x": 689,
-   "z": 608,
+   "x": 1215,
+   "z": 77,
    "yaw": 0,
    "radius": 10
   },
@@ -362,8 +368,8 @@
     2,
     4
    ],
-   "x": 1841,
-   "z": 1553,
+   "x": 65,
+   "z": 128,
    "yaw": 0,
    "radius": 10
   },
@@ -380,8 +386,8 @@
     2,
     4
    ],
-   "x": 1583,
-   "z": 777,
+   "x": 1522,
+   "z": 1805,
    "yaw": 0,
    "radius": 10
   },
@@ -398,8 +404,8 @@
     2,
     4
    ],
-   "x": 475,
-   "z": 1041,
+   "x": 1559,
+   "z": 747,
    "yaw": 0,
    "radius": 10
   },
@@ -416,8 +422,8 @@
     2,
     4
    ],
-   "x": 518,
-   "z": 1499,
+   "x": 861,
+   "z": 1584,
    "yaw": 0,
    "radius": 10
   },
@@ -434,8 +440,8 @@
     2,
     4
    ],
-   "x": 112,
-   "z": 1619,
+   "x": 562,
+   "z": 1900,
    "yaw": 0,
    "radius": 10
   },
@@ -452,8 +458,8 @@
     2,
     4
    ],
-   "x": 125,
-   "z": 69,
+   "x": 104,
+   "z": 742,
    "yaw": 0,
    "radius": 10
   },
@@ -470,8 +476,8 @@
     2,
     4
    ],
-   "x": 789,
-   "z": 929,
+   "x": 1980,
+   "z": 1977,
    "yaw": 0,
    "radius": 10
   },
@@ -488,8 +494,8 @@
     2,
     4
    ],
-   "x": 931,
-   "z": 1590,
+   "x": 1193,
+   "z": 493,
    "yaw": 0,
    "radius": 10
   },
@@ -506,8 +512,8 @@
     2,
     4
    ],
-   "x": 100,
-   "z": 957,
+   "x": 754,
+   "z": 905,
    "yaw": 0,
    "radius": 10
   },
@@ -516,30 +522,30 @@
    "id": "rare_brother_penance",
    "slot": 0,
    "name": "Brother Penance",
-   "x": 93,
-   "z": 750,
+   "x": 102,
+   "z": 1127,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     87,
-     822
+     76,
+     1201
     ],
     [
-     23,
-     736
+     2,
+     1080
     ],
     [
-     49,
-     675
+     107,
+     1021
     ],
     [
-     152,
-     686
+     214,
+     1094
     ],
     [
      144,
-     803
+     1192
     ]
    ],
    "respawnMin": [
@@ -553,30 +559,30 @@
    "id": "rare_vesper_bell_owl",
    "slot": 1,
    "name": "Vesper",
-   "x": 1643,
-   "z": 155,
+   "x": 1673,
+   "z": 70,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1591,
+     1674,
+     14
+    ],
+    [
+     1709,
+     39
+    ],
+    [
+     1724,
+     115
+    ],
+    [
+     1637,
      117
     ],
     [
-     1648,
-     87
-    ],
-    [
-     1705,
-     164
-    ],
-    [
-     1670,
-     200
-    ],
-    [
-     1595,
-     210
+     1606,
+     49
     ]
    ],
    "respawnMin": [
@@ -589,8 +595,8 @@
    "type": "waystone",
    "id": "ws_z12_03_orrinsford",
    "name": "Orrinsford",
-   "x": 259.2,
-   "z": 566.4,
+   "x": 228.1,
+   "z": 567.8,
    "yaw": 0,
    "settlement": "Orrinsford",
    "radius": 1
@@ -621,9 +627,9 @@
    "name": "Prior Wendel",
    "role": "elder",
    "at": "Orrinsford",
-   "x": 329.3,
-   "z": 565.5,
-   "yaw": 3.76,
+   "x": 331.8,
+   "z": 562.8,
+   "yaw": 1.87,
    "radius": 1
   },
   {
@@ -634,7 +640,7 @@
    "at": "Pilgrim's Halt",
    "x": 672,
    "z": 247.9,
-   "yaw": 4.12,
+   "yaw": 3.92,
    "radius": 1
   },
   {
@@ -643,9 +649,9 @@
    "name": "Brother Tobin",
    "role": "guard",
    "at": "the Abbey Wall",
-   "x": 109.4,
-   "z": 1280.5,
-   "yaw": 3.39,
+   "x": 107.5,
+   "z": 1280,
+   "yaw": 3.87,
    "radius": 1
   },
   {
@@ -654,9 +660,9 @@
    "name": "Nell the pilgrim",
    "role": "pilgrim",
    "at": "drowned_shrine",
-   "x": 316.9,
-   "z": 354.4,
-   "yaw": 2.66,
+   "x": 389.5,
+   "z": 414.6,
+   "yaw": 1.27,
    "radius": 1
   },
   {
@@ -667,8 +673,8 @@
    "clue": "gravestone",
    "how": null,
    "shimmer": null,
-   "x": 324,
-   "z": 645,
+   "x": 426.9,
+   "z": 548.3,
    "yaw": 0,
    "where": "edge of Orrinsford",
    "radius": 1
@@ -700,6 +706,816 @@
    "yaw": 0,
    "where": "near the Abbey Wall",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_saint_orrins_rise_0",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1387,
+   "z": 1214,
+   "yaw": 2.54,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f1",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1610,
+   "z": 1526,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_saint_orrins_rise_2",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1056,
+   "z": 1208,
+   "yaw": 5.61,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f3",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1818,
+   "z": 348,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_saint_orrins_rise_4",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1824,
+   "z": 856,
+   "yaw": 2.69,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f5",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 389,
+   "z": 1198,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_saint_orrins_rise_6",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 164,
+   "z": 1672,
+   "yaw": 0.71,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f7",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1004,
+   "z": 280,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_saint_orrins_rise_8",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1191,
+   "z": 1804,
+   "yaw": 5.74,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f9",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1479,
+   "z": 1929,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_saint_orrins_rise_10",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 334,
+   "z": 2024,
+   "yaw": 3.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f11",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1741,
+   "z": 1960,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_saint_orrins_rise_12",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1494,
+   "z": 1038,
+   "yaw": 0.73,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f13",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1774,
+   "z": 1438,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_saint_orrins_rise_14",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 635,
+   "z": 691,
+   "yaw": 4.9,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f15",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1310,
+   "z": 707,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_saint_orrins_rise_16",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1445,
+   "z": 161,
+   "yaw": 4.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f17",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 957,
+   "z": 798,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_saint_orrins_rise_18",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1728,
+   "z": 564,
+   "yaw": 3.42,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f19",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 83,
+   "z": 1754,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_saint_orrins_rise_20",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 591,
+   "z": 1057,
+   "yaw": 2.82,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f21",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1044,
+   "z": 1440,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_saint_orrins_rise_22",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 356,
+   "z": 1800,
+   "yaw": 4.62,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f23",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 276,
+   "z": 200,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_saint_orrins_rise_24",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 633,
+   "z": 1611,
+   "yaw": 3.71,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f25",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 872,
+   "z": 1092,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_saint_orrins_rise_26",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1272,
+   "z": 293,
+   "yaw": 2.34,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f27",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1601,
+   "z": 1294,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_saint_orrins_rise_28",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1930,
+   "z": 1049,
+   "yaw": 0.03,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f29",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 984,
+   "z": 1764,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_saint_orrins_rise_30",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1424,
+   "z": 1419,
+   "yaw": 3.7,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f31",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1908,
+   "z": 1264,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_saint_orrins_rise_32",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 616,
+   "z": 480,
+   "yaw": 0.64,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f33",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1165,
+   "z": 1376,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_saint_orrins_rise_34",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1225,
+   "z": 1107,
+   "yaw": 0.3,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f35",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 108,
+   "z": 340,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_saint_orrins_rise_36",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1114,
+   "z": 667,
+   "yaw": 2.79,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f37",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 82,
+   "z": 1572,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_saint_orrins_rise_38",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1464,
+   "z": 575,
+   "yaw": 1.51,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f39",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1217,
+   "z": 1942,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_saint_orrins_rise_40",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 549,
+   "z": 1301,
+   "yaw": 1.74,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f41",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1297,
+   "z": 1744,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_saint_orrins_rise_42",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1384,
+   "z": 884,
+   "yaw": 1.81,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f43",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 82,
+   "z": 944,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_saint_orrins_rise_44",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 948,
+   "z": 96,
+   "yaw": 5.22,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f45",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1681,
+   "z": 891,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_saint_orrins_rise_46",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1462,
+   "z": 1641,
+   "yaw": 2.15,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f47",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 709,
+   "z": 1928,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_saint_orrins_rise_48",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1736,
+   "z": 1789,
+   "yaw": 3.48,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f49",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 834,
+   "z": 379,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_saint_orrins_rise_50",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 300,
+   "z": 1360,
+   "yaw": 6.16,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f51",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 733,
+   "z": 1381,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_saint_orrins_rise_52",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1924,
+   "z": 1808,
+   "yaw": 2.79,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_f53",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1018,
+   "z": 467,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
   }
  ],
  "features": []

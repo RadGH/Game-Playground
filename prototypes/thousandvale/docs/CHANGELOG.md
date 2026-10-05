@@ -210,3 +210,10 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   Event frames are serialised once per distinct set and shared by a crowd (room.js `send`).
   G's tests/load/herds.test.js on a quiet VM (load ≤ 1.1): stage 1 p99 5.6 / 6.1 / 5.8 ms (worst 29), stage 2 (`--procs 2`,
   pg) p99 5.2 / 6.5 / 6.4 ms (worst 30); bandwidth 1.9 / 10.0 / 9.9 KB/s per player.
+
+## 2026-10-04 — Stream E: re-placed on B's re-bake + the boring-walk gate
+- Re-ran assignment + placer on B's re-bake (names imposed, 8 asked settlements, theme water, fords on rivers, new hubs/doors).
+  Every hook's need is now met except the_long_stair, pinned beside `road_138` in z11_01 for B to cut the cliff.
+- `tools/boring-walk.mjs`: PLAN §16 "longest boring walk ≤ 250 m" (road: 235 m, cross-country: 240 m). The placer fills
+  empty pockets with `wayside` dressing (new `data/vignettes/wayside.json`, 14 kinds) and extra camps (`filler: true`).
+- `torbor_downs-places.json`: rename keys follow B's `wfName`; baked asks stay listed. tests/E: 113 pass (placement 16).

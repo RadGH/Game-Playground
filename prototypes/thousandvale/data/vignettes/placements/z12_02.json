@@ -46,6 +46,12 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
@@ -70,7 +76,7 @@
    "z": 1920,
    "r": 40,
    "source": "bake",
-   "bakeId": "pohelrow"
+   "bakeId": "mawehaven"
   },
   {
    "name": "Wamonhold",
@@ -79,7 +85,7 @@
    "z": 1568,
    "r": 46,
    "source": "bake",
-   "bakeId": "ashford"
+   "bakeId": "wamonhold"
   }
  ],
  "checks": [
@@ -102,8 +108,8 @@
   {
    "id": "elite_hobb_gallowsby",
    "kind": "camp_site",
-   "x": 75,
-   "z": 1973,
+   "x": 72,
+   "z": 1879,
    "reachable": true,
    "openShare": 1
   }
@@ -203,23 +209,23 @@
   {
    "type": "farm",
    "id": "farm_test_6",
-   "name": "Torborhold Piggery",
-   "template": "pig",
+   "name": "Torborhold Mill",
+   "template": "mill",
    "flavour": null,
    "settlement": "Torborhold",
-   "x": 449,
-   "z": 1227,
-   "yaw": 0.79,
-   "radius": 18,
+   "x": 696,
+   "z": 1352,
+   "yaw": -2.36,
+   "radius": 20,
    "level": 1
   },
   {
    "type": "cave",
    "id": "cave_test_0",
-   "name": "Beast den",
-   "template": "beast_den",
+   "name": "Barrow mound",
+   "template": "barrow_mound",
    "plan": {
-    "family": "cave_river",
+    "family": "barrow_maze",
     "floors": 1,
     "level": 2
    },
@@ -232,38 +238,26 @@
   {
    "type": "cave",
    "id": "cave_test_1",
-   "name": "Old mine shaft",
-   "template": "old_shaft",
+   "name": "Beast den",
+   "template": "beast_den",
    "plan": {
-    "family": "mine_descent",
+    "family": "cave_river",
     "floors": 1,
     "level": 2
    },
-   "x": 1030,
-   "z": 557,
-   "yaw": 1.18,
+   "x": 93,
+   "z": 936,
+   "yaw": -1.18,
    "radius": 10,
    "level": 2
   },
   {
    "type": "vignette",
-   "id": "blighted_orchard",
-   "name": "The Grey Orchard",
-   "x": 1758,
-   "z": 800,
-   "yaw": 2.45,
-   "radius": 13,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
    "id": "boar_wallow",
    "name": "Boar Wallow",
-   "x": 1742,
-   "z": 128,
-   "yaw": 3.91,
+   "x": 1758,
+   "z": 800,
+   "yaw": 2.93,
    "radius": 13,
    "biome": "grassland",
    "biomeFits": true,
@@ -271,25 +265,49 @@
   },
   {
    "type": "vignette",
-   "id": "charcoal_clamps",
-   "name": "The Charcoal Burners",
-   "x": 1973,
-   "z": 1607,
-   "yaw": 4.59,
-   "radius": 12,
-   "biome": "temperateForest",
+   "id": "burned_farmstead",
+   "name": "The Burned Farmstead",
+   "x": 1117,
+   "z": 413,
+   "yaw": 0.52,
+   "radius": 13,
+   "biome": "grassland",
    "biomeFits": true,
    "level": 1
   },
   {
    "type": "vignette",
-   "id": "fishwife_stall",
-   "name": "The Abandoned Fish Stall",
-   "x": 820,
-   "z": 120,
-   "yaw": 3.24,
-   "radius": 9,
+   "id": "collapsed_tithe_barn",
+   "name": "The Tithe Barn",
+   "x": 1694,
+   "z": 129,
+   "yaw": 4.92,
+   "radius": 13,
    "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "cult_cellar",
+   "name": "The Cloud-Shouters' Cellar",
+   "x": 1927,
+   "z": 1866,
+   "yaw": 5.78,
+   "radius": 13,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "gallows_crossroads",
+   "name": "Gallows Crossroads",
+   "x": 1944,
+   "z": 1311,
+   "yaw": 2,
+   "radius": 10,
+   "biome": "temperateForest",
    "biomeFits": true,
    "level": 1
   },
@@ -297,9 +315,9 @@
    "type": "vignette",
    "id": "hanging_oak",
    "name": "The Hanging Oak",
-   "x": 338,
-   "z": 709,
-   "yaw": 5.47,
+   "x": 1219,
+   "z": 923,
+   "yaw": 5.55,
    "radius": 12,
    "biome": "grassland",
    "biomeFits": true,
@@ -309,22 +327,10 @@
    "type": "vignette",
    "id": "hedge_witch_garden",
    "name": "The Hedge-Witch's Garden",
-   "x": 1179,
-   "z": 1036,
-   "yaw": 1.25,
+   "x": 718,
+   "z": 666,
+   "yaw": 5.22,
    "radius": 12,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "market_cross",
-   "name": "The Market Cross",
-   "x": 1670,
-   "z": 1979,
-   "yaw": 2.94,
-   "radius": 10,
    "biome": "grassland",
    "biomeFits": true,
    "level": 1
@@ -333,9 +339,9 @@
    "type": "vignette",
    "id": "overturned_cart",
    "name": "The Overturned Cart",
-   "x": 1291,
-   "z": 174,
-   "yaw": 0.65,
+   "x": 81,
+   "z": 1408,
+   "yaw": 1.13,
    "radius": 14,
    "biome": "grassland",
    "biomeFits": true,
@@ -343,24 +349,24 @@
   },
   {
    "type": "vignette",
-   "id": "plague_pit_cairn",
-   "name": "The Lime Cairn",
-   "x": 77,
-   "z": 1477,
-   "yaw": 4.18,
-   "radius": 10,
+   "id": "warband_totem",
+   "name": "The Warband Totem",
+   "x": 800,
+   "z": 107,
+   "yaw": 1.02,
+   "radius": 11,
    "biome": "grassland",
    "biomeFits": true,
    "level": 1
   },
   {
    "type": "vignette",
-   "id": "slag_heap_shrine",
-   "name": "The Slag Saint",
-   "x": 1768,
-   "z": 1210,
-   "yaw": 0.69,
-   "radius": 10,
+   "id": "woodcutter_axe",
+   "name": "The Axe in the Stump",
+   "x": 1064,
+   "z": 1986,
+   "yaw": 2.94,
+   "radius": 9,
    "biome": "grassland",
    "biomeFits": true,
    "level": 1
@@ -378,8 +384,8 @@
     3,
     4
    ],
-   "x": 911,
-   "z": 1439,
+   "x": 421,
+   "z": 949,
    "yaw": 0,
    "radius": 10
   },
@@ -396,8 +402,8 @@
     3,
     4
    ],
-   "x": 619,
-   "z": 859,
+   "x": 997,
+   "z": 1268,
    "yaw": 0,
    "radius": 10
   },
@@ -414,8 +420,8 @@
     2,
     3
    ],
-   "x": 1681,
-   "z": 1593,
+   "x": 1697,
+   "z": 1620,
    "yaw": 0,
    "radius": 10
   },
@@ -432,8 +438,8 @@
     2,
     3
    ],
-   "x": 1185,
-   "z": 1326,
+   "x": 1027,
+   "z": 1558,
    "yaw": 0,
    "radius": 10
   },
@@ -450,8 +456,8 @@
     2,
     4
    ],
-   "x": 80,
-   "z": 1705,
+   "x": 79,
+   "z": 1668,
    "yaw": 0,
    "radius": 10
   },
@@ -468,8 +474,8 @@
     2,
     4
    ],
-   "x": 190,
-   "z": 1688,
+   "x": 218,
+   "z": 1754,
    "yaw": 0,
    "radius": 10
   },
@@ -486,8 +492,8 @@
     1,
     3
    ],
-   "x": 484,
-   "z": 1713,
+   "x": 376,
+   "z": 1585,
    "yaw": 0,
    "radius": 10
   },
@@ -504,8 +510,8 @@
     1,
     3
    ],
-   "x": 372,
-   "z": 1594,
+   "x": 525,
+   "z": 1720,
    "yaw": 0,
    "radius": 10
   },
@@ -522,8 +528,8 @@
     2,
     3
    ],
-   "x": 640,
-   "z": 1571,
+   "x": 1209,
+   "z": 1434,
    "yaw": 0,
    "radius": 10
   },
@@ -540,8 +546,8 @@
     2,
     3
    ],
-   "x": 1616,
-   "z": 1380,
+   "x": 1775,
+   "z": 1399,
    "yaw": 0,
    "radius": 10
   },
@@ -558,8 +564,8 @@
     1,
     2
    ],
-   "x": 1844,
-   "z": 1398,
+   "x": 833,
+   "z": 1412,
    "yaw": 0,
    "radius": 10
   },
@@ -576,8 +582,8 @@
     1,
     2
    ],
-   "x": 504,
-   "z": 1938,
+   "x": 525,
+   "z": 1865,
    "yaw": 0,
    "radius": 10
   },
@@ -586,30 +592,30 @@
    "id": "rare_grisel_thornhide",
    "slot": 0,
    "name": "Grisel Thornhide",
-   "x": 137,
-   "z": 1035,
+   "x": 910,
+   "z": 937,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     44,
-     1062
+     999,
+     973
     ],
     [
-     137,
-     963
+     932,
+     1007
     ],
     [
-     227,
-     982
+     793,
+     953
     ],
     [
-     180,
-     1089
+     854,
+     878
     ],
     [
-     117,
-     1126
+     952,
+     822
     ]
    ],
    "respawnMin": [
@@ -623,30 +629,30 @@
    "id": "rare_sallowmaw",
    "slot": 1,
    "name": "Sallowmaw",
-   "x": 536,
-   "z": 1820,
+   "x": 99,
+   "z": 1760,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     646,
-     1815
+     17,
+     1749
     ],
     [
-     539,
-     1911
+     75,
+     1701
     ],
     [
-     456,
-     1864
+     145,
+     1706
     ],
     [
-     493,
-     1744
+     142,
+     1791
     ],
     [
-     604,
-     1722
+     74,
+     1807
     ]
    ],
    "respawnMin": [
@@ -659,8 +665,8 @@
    "type": "waystone",
    "id": "ws_z12_02_torborhold",
    "name": "Torborhold",
-   "x": 680.6,
-   "z": 1208.4,
+   "x": 681.9,
+   "z": 1223.7,
    "yaw": 0,
    "settlement": "Torborhold",
    "radius": 1
@@ -669,8 +675,8 @@
    "type": "waystone",
    "id": "ws_z12_02_mawehaven",
    "name": "Mawehaven",
-   "x": 275.1,
-   "z": 1976.8,
+   "x": 232.4,
+   "z": 1975.4,
    "yaw": 0,
    "settlement": "Mawehaven",
    "radius": 1
@@ -679,8 +685,8 @@
    "type": "waystone",
    "id": "ws_z12_02_wamonhold",
    "name": "Wamonhold",
-   "x": 1373.8,
-   "z": 1513.9,
+   "x": 1374.5,
+   "z": 1514.4,
    "yaw": 0,
    "settlement": "Wamonhold",
    "radius": 1
@@ -689,8 +695,8 @@
    "type": "waystone",
    "id": "ws_z12_02_door",
    "name": "Barrow entrance",
-   "x": 317.9,
-   "z": 1270.5,
+   "x": 313.7,
+   "z": 1279.8,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -701,9 +707,9 @@
    "name": "Elder Maud Torbor",
    "role": "elder",
    "at": "Torborhold",
-   "x": 583.1,
-   "z": 1278.7,
-   "yaw": 3.83,
+   "x": 580.3,
+   "z": 1276.5,
+   "yaw": 0.56,
    "radius": 1
   },
   {
@@ -712,9 +718,9 @@
    "name": "Reeve Corwin Ashby",
    "role": "guard",
    "at": "Torborhold",
-   "x": 579.5,
-   "z": 1276.7,
-   "yaw": 4.56,
+   "x": 577.6,
+   "z": 1281,
+   "yaw": 3.2,
    "radius": 1
   },
   {
@@ -723,9 +729,9 @@
    "name": "Bryn the Bonesetter",
    "role": "healer",
    "at": "Torborhold",
-   "x": 580.4,
-   "z": 1283,
-   "yaw": 1.17,
+   "x": 582.9,
+   "z": 1281.4,
+   "yaw": 1.62,
    "radius": 1
   },
   {
@@ -734,9 +740,9 @@
    "name": "Goody Harl",
    "role": "farmer",
    "at": "Wamonhold",
-   "x": 1344.2,
+   "x": 1344.6,
    "z": 1570.1,
-   "yaw": 3.17,
+   "yaw": 4.95,
    "radius": 1
   },
   {
@@ -745,9 +751,9 @@
    "name": "Old Pell",
    "role": "shepherd",
    "at": "Wamonhold",
-   "x": 1346.9,
-   "z": 1566.6,
-   "yaw": 4.19,
+   "x": 1346.4,
+   "z": 1565.4,
+   "yaw": 5.16,
    "radius": 1
   },
   {
@@ -756,9 +762,9 @@
    "name": "Tamsin Reed",
    "role": "fisher",
    "at": "Mawehaven",
-   "x": 250.6,
-   "z": 1922,
-   "yaw": 2.23,
+   "x": 252.4,
+   "z": 1926.4,
+   "yaw": 5.09,
    "radius": 1
   },
   {
@@ -767,9 +773,9 @@
    "name": "Dunnet the carter",
    "role": "trader",
    "at": "overturned_cart",
-   "x": 1291.9,
-   "z": 176.4,
-   "yaw": 4.68,
+   "x": 81.6,
+   "z": 1405.6,
+   "yaw": 4.82,
    "radius": 1
   },
   {
@@ -780,8 +786,8 @@
    "clue": "note",
    "how": null,
    "shimmer": null,
-   "x": 335,
-   "z": 708.3,
+   "x": 1222,
+   "z": 923,
    "yaw": 0,
    "where": "vignette hanging_oak",
    "radius": 1
@@ -794,8 +800,8 @@
    "clue": "carved_arrow",
    "how": null,
    "shimmer": null,
-   "x": 41.9,
-   "z": 2006.6,
+   "x": 35.6,
+   "z": 1848.7,
    "yaw": 0,
    "where": "crossing Fitockpi Ford",
    "radius": 1
@@ -808,11 +814,821 @@
    "clue": null,
    "how": "dig",
    "shimmer": 15,
-   "x": 125.3,
-   "z": 1988.4,
+   "x": 26.6,
+   "z": 1683,
    "yaw": 0,
    "where": "near Fitockpi Ford",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_test_0",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 221,
+   "z": 558,
+   "yaw": 5.92,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    3
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1512,
+   "z": 480,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_test_2",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1540,
+   "z": 1104,
+   "yaw": 2.17,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f3",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 498,
+   "z": 292,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_test_4",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1384,
+   "z": 204,
+   "yaw": 0.46,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f5",
+   "monster": "road_brigand",
+   "with": "brigand_archer",
+   "level": [
+    2,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1807,
+   "z": 412,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_test_6",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 66,
+   "z": 24,
+   "yaw": 4.29,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f7",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1441,
+   "z": 1923,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_test_8",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1461,
+   "z": 764,
+   "yaw": 5.09,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f9",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1549,
+   "z": 1651,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_test_10",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 816,
+   "z": 404,
+   "yaw": 3.63,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f11",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    3,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1043,
+   "z": 706,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_test_12",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1856,
+   "z": 1057,
+   "yaw": 0.08,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f13",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    3
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1002,
+   "z": 146,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_test_14",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 443,
+   "z": 688,
+   "yaw": 4.95,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f15",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1292,
+   "z": 1172,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_test_16",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1984,
+   "z": 672,
+   "yaw": 4.87,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f17",
+   "monster": "road_brigand",
+   "with": "brigand_archer",
+   "level": [
+    2,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1961,
+   "z": 1600,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_test_18",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1268,
+   "z": 615,
+   "yaw": 0.19,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f19",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 357,
+   "z": 1408,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_test_20",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 32,
+   "z": 1167,
+   "yaw": 0.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f21",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1668,
+   "z": 1861,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_test_22",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 652,
+   "z": 896,
+   "yaw": 1.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f23",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    3,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 820,
+   "z": 1961,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_test_24",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1704,
+   "z": 1719,
+   "yaw": 6.25,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f25",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    3
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1916,
+   "z": 208,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_test_26",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 964,
+   "z": 1776,
+   "yaw": 1.82,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f27",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 98,
+   "z": 232,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_test_28",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 548,
+   "z": 504,
+   "yaw": 3.4,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f29",
+   "monster": "road_brigand",
+   "with": "brigand_archer",
+   "level": [
+    2,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 291,
+   "z": 706,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_test_30",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1692,
+   "z": 596,
+   "yaw": 1.39,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f31",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1166,
+   "z": 1198,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_test_32",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 36,
+   "z": 660,
+   "yaw": 4.31,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f33",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1588,
+   "z": 1304,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_test_34",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1240,
+   "z": 1872,
+   "yaw": 0.97,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f35",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    3,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 256,
+   "z": 1088,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_test_36",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 327,
+   "z": 392,
+   "yaw": 5.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f37",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    3
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1331,
+   "z": 391,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_test_38",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1183,
+   "z": 224,
+   "yaw": 0.83,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f39",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1940,
+   "z": 884,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_test_40",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 596,
+   "z": 122,
+   "yaw": 3.52,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f41",
+   "monster": "road_brigand",
+   "with": "brigand_archer",
+   "level": [
+    2,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 181,
+   "z": 1474,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_test_42",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1588,
+   "z": 916,
+   "yaw": 0.11,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f43",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1596,
+   "z": 304,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_test_44",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1935,
+   "z": 26,
+   "yaw": 5.77,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f45",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1884,
+   "z": 1744,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_test_46",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 889,
+   "z": 577,
+   "yaw": 5.87,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f47",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    3,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1408,
+   "z": 960,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_test_48",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1748,
+   "z": 1208,
+   "yaw": 4.72,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f49",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    3
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 657,
+   "z": 1988,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_test_50",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1068,
+   "z": 1044,
+   "yaw": 5.41,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f51",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 877,
+   "z": 1124,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_test_52",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 852,
+   "z": 1600,
+   "yaw": 2.97,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_test_f53",
+   "monster": "road_brigand",
+   "with": "brigand_archer",
+   "level": [
+    2,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1128,
+   "z": 1724,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
   }
  ],
  "features": [
@@ -821,11 +1637,11 @@
    "id": "the_singing_ford",
    "name": "The Singing Ford",
    "kind": "compositional",
-   "x": 64,
-   "z": 1984,
+   "x": 48,
+   "z": 1857,
    "yaw": 0,
    "where": "at the crossing",
-   "needMet": false
+   "needMet": true
   }
  ]
 }

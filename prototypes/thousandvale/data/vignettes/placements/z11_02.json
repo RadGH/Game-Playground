@@ -46,6 +46,12 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
@@ -61,7 +67,7 @@
    "z": 448,
    "r": 140,
    "source": "bake",
-   "bakeId": "fengate"
+   "bakeId": "copperdell"
   },
   {
    "name": "Pickaxe Row",
@@ -70,7 +76,7 @@
    "z": 1664,
    "r": 65,
    "source": "bake",
-   "bakeId": "miminhold"
+   "bakeId": "pickaxe_row"
   },
   {
    "name": "Ashhaven",
@@ -210,13 +216,13 @@
   },
   {
    "type": "vignette",
-   "id": "frozen_tarn",
-   "name": "The Frozen Tarn",
-   "x": 1036,
-   "z": 534,
-   "yaw": 1.17,
-   "radius": 13,
-   "biome": "borealForest",
+   "id": "giants_cookfire",
+   "name": "The Giant's Cookfire",
+   "x": 342,
+   "z": 1779,
+   "yaw": 2.33,
+   "radius": 14,
+   "biome": "grassland",
    "biomeFits": true,
    "level": 1
   },
@@ -224,8 +230,8 @@
    "type": "vignette",
    "id": "guildhall_ruin",
    "name": "The Guildhall Shell",
-   "x": 162,
-   "z": 1492,
+   "x": 313,
+   "z": 1153,
    "yaw": 3.81,
    "radius": 13,
    "biome": "grassland",
@@ -234,59 +240,35 @@
   },
   {
    "type": "vignette",
+   "id": "hermits_hollow",
+   "name": "The Hermit's Hollow",
+   "x": 1452,
+   "z": 1358,
+   "yaw": 4.19,
+   "radius": 9,
+   "biome": "temperateForest",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
    "id": "peat_cutters",
    "name": "The Peat Cutters' Camp",
-   "x": 495,
-   "z": 909,
-   "yaw": 5.17,
-   "radius": 12,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "quarry_ledge",
-   "name": "The Quarry Ledge",
-   "x": 538,
-   "z": 1980,
-   "yaw": 2.39,
-   "radius": 14,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "salt_cart_sunk",
-   "name": "The Salt Cart",
-   "x": 1465,
-   "z": 1343,
-   "yaw": 1.78,
-   "radius": 12,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "tide_bell_post",
-   "name": "The Tide Post",
-   "x": 1479,
-   "z": 1758,
-   "yaw": 5.48,
-   "radius": 10,
-   "biome": "marsh",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "wardens_cairn",
-   "name": "The Warden's Cairn",
    "x": 64,
-   "z": 639,
-   "yaw": 0.13,
+   "z": 671,
+   "yaw": 2.34,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "plague_pit_cairn",
+   "name": "The Lime Cairn",
+   "x": 88,
+   "z": 244,
+   "yaw": 4.19,
    "radius": 10,
    "biome": "grassland",
    "biomeFits": true,
@@ -294,12 +276,36 @@
   },
   {
    "type": "vignette",
-   "id": "woodcutter_axe",
-   "name": "The Axe in the Stump",
-   "x": 70,
-   "z": 1064,
-   "yaw": 0.8,
-   "radius": 9,
+   "id": "pump_house",
+   "name": "The Old Pump House",
+   "x": 744,
+   "z": 642,
+   "yaw": 0.7,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "slag_heap_shrine",
+   "name": "The Slag Saint",
+   "x": 1934,
+   "z": 237,
+   "yaw": 0.26,
+   "radius": 10,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "smugglers_cellar",
+   "name": "The Smugglers' Cellar",
+   "x": 60,
+   "z": 1502,
+   "yaw": 2.15,
+   "radius": 14,
    "biome": "grassland",
    "biomeFits": true,
    "level": 1
@@ -317,8 +323,8 @@
     2,
     4
    ],
-   "x": 75,
-   "z": 1945,
+   "x": 1574,
+   "z": 1957,
    "yaw": 0,
    "radius": 10
   },
@@ -335,8 +341,8 @@
     2,
     4
    ],
-   "x": 108,
-   "z": 73,
+   "x": 1810,
+   "z": 1234,
    "yaw": 0,
    "radius": 10
   },
@@ -353,8 +359,8 @@
     2,
     4
    ],
-   "x": 1888,
-   "z": 1214,
+   "x": 688,
+   "z": 1923,
    "yaw": 0,
    "radius": 10
   },
@@ -371,8 +377,8 @@
     2,
     4
    ],
-   "x": 1909,
-   "z": 1974,
+   "x": 545,
+   "z": 1495,
    "yaw": 0,
    "radius": 10
   },
@@ -407,8 +413,8 @@
     1,
     2
    ],
-   "x": 782,
-   "z": 1843,
+   "x": 1137,
+   "z": 497,
    "yaw": 0,
    "radius": 10
   },
@@ -443,8 +449,8 @@
     2,
     4
    ],
-   "x": 1734,
-   "z": 260,
+   "x": 623,
+   "z": 1081,
    "yaw": 0,
    "radius": 10
   },
@@ -461,8 +467,8 @@
     2,
     4
    ],
-   "x": 1567,
-   "z": 367,
+   "x": 1491,
+   "z": 753,
    "yaw": 0,
    "radius": 10
   },
@@ -497,8 +503,8 @@
     2,
     4
    ],
-   "x": 1410,
-   "z": 676,
+   "x": 1361,
+   "z": 667,
    "yaw": 0,
    "radius": 10
   },
@@ -515,8 +521,8 @@
     2,
     4
    ],
-   "x": 673,
-   "z": 1098,
+   "x": 1948,
+   "z": 827,
    "yaw": 0,
    "radius": 10
   },
@@ -525,30 +531,30 @@
    "id": "rare_blind_gammer",
    "slot": 0,
    "name": "Blind Gammer",
-   "x": 688,
-   "z": 607,
+   "x": 387,
+   "z": 802,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     633,
-     621
+     373,
+     851
     ],
     [
-     665,
-     565
+     342,
+     806
     ],
     [
-     720,
-     556
+     354,
+     745
     ],
     [
-     739,
-     632
+     437,
+     784
     ],
     [
-     703,
-     674
+     438,
+     822
     ]
    ],
    "respawnMin": [
@@ -562,30 +568,30 @@
    "id": "rare_copperback",
    "slot": 1,
    "name": "Copperback",
-   "x": 782,
-   "z": 1336,
+   "x": 792,
+   "z": 1858,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     678,
-     1281
+     714,
+     1852
     ],
     [
-     769,
-     1266
+     762,
+     1818
     ],
     [
-     850,
-     1292
+     847,
+     1813
     ],
     [
-     853,
-     1423
+     851,
+     1910
     ],
     [
-     745,
-     1413
+     790,
+     1923
     ]
    ],
    "respawnMin": [
@@ -598,8 +604,8 @@
    "type": "waystone",
    "id": "ws_z11_02_copperdell",
    "name": "Copperdell",
-   "x": 229.8,
-   "z": 539.5,
+   "x": 213.1,
+   "z": 529.7,
    "yaw": 0,
    "settlement": "Copperdell",
    "radius": 1
@@ -608,8 +614,8 @@
    "type": "waystone",
    "id": "ws_z11_02_pickaxe_row",
    "name": "Pickaxe Row",
-   "x": 1097,
-   "z": 1680.1,
+   "x": 1096.6,
+   "z": 1640.5,
    "yaw": 0,
    "settlement": "Pickaxe Row",
    "radius": 1
@@ -618,8 +624,8 @@
    "type": "waystone",
    "id": "ws_z11_02_ashhaven",
    "name": "Ashhaven",
-   "x": 711.4,
-   "z": 983.3,
+   "x": 734.1,
+   "z": 988.8,
    "yaw": 0,
    "settlement": "Ashhaven",
    "radius": 1
@@ -628,8 +634,8 @@
    "type": "waystone",
    "id": "ws_z11_02_door",
    "name": "Barrow entrance",
-   "x": 121.2,
-   "z": 456.1,
+   "x": 179.6,
+   "z": 464.5,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -640,9 +646,9 @@
    "name": "Foreman Hollis",
    "role": "elder",
    "at": "Copperdell",
-   "x": 350.8,
-   "z": 434.8,
-   "yaw": 4.11,
+   "x": 353.8,
+   "z": 431.5,
+   "yaw": 3.43,
    "radius": 1
   },
   {
@@ -651,9 +657,9 @@
    "name": "Gwen Lampwright",
    "role": "trader",
    "at": "Pickaxe Row",
-   "x": 1013.9,
-   "z": 1665.8,
-   "yaw": 4.02,
+   "x": 1011.7,
+   "z": 1661.6,
+   "yaw": 6.18,
    "radius": 1
   },
   {
@@ -662,9 +668,9 @@
    "name": "Sergeant Brask",
    "role": "guard",
    "at": "the Old Headframe Fort",
-   "x": 893.2,
-   "z": 1365.1,
-   "yaw": 1.2,
+   "x": 894.6,
+   "z": 1368,
+   "yaw": 0.28,
    "radius": 1
   },
   {
@@ -673,9 +679,9 @@
    "name": "Old Pike",
    "role": "miner",
    "at": "dry_well",
-   "x": 1961.5,
-   "z": 1596.1,
-   "yaw": 1.69,
+   "x": 1964.7,
+   "z": 1598.4,
+   "yaw": 1.01,
    "radius": 1
   },
   {
@@ -686,8 +692,8 @@
    "clue": "drunks_story",
    "how": null,
    "shimmer": null,
-   "x": 473.4,
-   "z": 527.8,
+   "x": 424.1,
+   "z": 322.2,
    "yaw": 0,
    "where": "edge of Copperdell",
    "radius": 1
@@ -700,8 +706,8 @@
    "clue": "map_piece",
    "how": null,
    "shimmer": null,
-   "x": 1966.6,
-   "z": 1597.6,
+   "x": 1965.5,
+   "z": 1593.4,
    "yaw": 0,
    "where": "vignette dry_well",
    "radius": 1
@@ -714,11 +720,742 @@
    "clue": null,
    "how": "dig",
    "shimmer": 15,
-   "x": 908.4,
-   "z": 1824.1,
+   "x": 1117.7,
+   "z": 1830.2,
    "yaw": 0,
    "where": "near Pickaxe Row",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_delvers_hill_0",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1632,
+   "z": 1632,
+   "yaw": 0.07,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f1",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 687,
+   "z": 1219,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_delvers_hill_2",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 40,
+   "z": 1000,
+   "yaw": 0.52,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f3",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1178,
+   "z": 1177,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_delvers_hill_4",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1539,
+   "z": 1064,
+   "yaw": 2.17,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f5",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 684,
+   "z": 1412,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_delvers_hill_6",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 40,
+   "z": 1820,
+   "yaw": 1.72,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f7",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1544,
+   "z": 450,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_delvers_hill_8",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 2018,
+   "z": 24,
+   "yaw": 5.73,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f9",
+   "monster": "road_brigand",
+   "with": "brigand_archer",
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 706,
+   "z": 1606,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_delvers_hill_10",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 344,
+   "z": 36,
+   "yaw": 5.96,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f11",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1343,
+   "z": 277,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_delvers_hill_12",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 2024,
+   "z": 471,
+   "yaw": 3.23,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f13",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1824,
+   "z": 1812,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_delvers_hill_14",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 988,
+   "z": 716,
+   "yaw": 5.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f15",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 304,
+   "z": 1428,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_delvers_hill_16",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1336,
+   "z": 26,
+   "yaw": 4.48,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f17",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1396,
+   "z": 1660,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_delvers_hill_18",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 570,
+   "z": 1754,
+   "yaw": 5.31,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f19",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 83,
+   "z": 1244,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_delvers_hill_20",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 420,
+   "z": 2012,
+   "yaw": 1.65,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f21",
+   "monster": "road_brigand",
+   "with": "brigand_archer",
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 584,
+   "z": 92,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_delvers_hill_22",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 2024,
+   "z": 1199,
+   "yaw": 0.68,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f23",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1672,
+   "z": 1416,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_delvers_hill_24",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1020,
+   "z": 1004,
+   "yaw": 1.17,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f25",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1728,
+   "z": 320,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_delvers_hill_26",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 488,
+   "z": 1292,
+   "yaw": 0.38,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f27",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 920,
+   "z": 516,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_delvers_hill_28",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1340,
+   "z": 1024,
+   "yaw": 0.82,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f29",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 204,
+   "z": 1948,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_delvers_hill_30",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 180,
+   "z": 844,
+   "yaw": 0.63,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f31",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1648,
+   "z": 900,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_delvers_hill_32",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1063,
+   "z": 297,
+   "yaw": 3.16,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f33",
+   "monster": "road_brigand",
+   "with": "brigand_archer",
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1904,
+   "z": 1408,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_delvers_hill_34",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 872,
+   "z": 1152,
+   "yaw": 1.68,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f35",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 453,
+   "z": 924,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_delvers_hill_36",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 941,
+   "z": 29,
+   "yaw": 1.86,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f37",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 228,
+   "z": 1612,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_delvers_hill_38",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 1404,
+   "z": 1872,
+   "yaw": 4.83,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f39",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 683,
+   "z": 456,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_delvers_hill_40",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 209,
+   "z": 686,
+   "yaw": 4.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f41",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1609,
+   "z": 1236,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_delvers_hill_42",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 659,
+   "z": 261,
+   "yaw": 2.69,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f43",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1260,
+   "z": 1344,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_delvers_hill_44",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1817,
+   "z": 93,
+   "yaw": 0.86,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f45",
+   "monster": "road_brigand",
+   "with": "brigand_archer",
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1376,
+   "z": 1196,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_delvers_hill_46",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 993,
+   "z": 1968,
+   "yaw": 1.23,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_f47",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 176,
+   "z": 88,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_delvers_hill_48",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 1172,
+   "z": 676,
+   "yaw": 0.69,
+   "radius": 4,
+   "filler": true
   }
  ],
  "features": []

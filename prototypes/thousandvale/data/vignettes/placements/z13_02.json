@@ -46,6 +46,12 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
@@ -61,7 +67,7 @@
    "z": 1184,
    "r": 140,
    "source": "bake",
-   "bakeId": "sablegate"
+   "bakeId": "halsbridge"
   },
   {
    "name": "Mill End",
@@ -70,7 +76,7 @@
    "z": 1456,
    "r": 90,
    "source": "bake",
-   "bakeId": "tetatcross"
+   "bakeId": "mill_end"
   },
   {
    "name": "Lower Mossgate",
@@ -193,11 +199,59 @@
   },
   {
    "type": "vignette",
-   "id": "ash_wisp_crater",
-   "name": "The Smoking Crater",
-   "x": 1916,
-   "z": 632,
-   "yaw": 4.51,
+   "id": "broken_caravan_survivor",
+   "name": "The Last Wagon",
+   "x": 427,
+   "z": 472,
+   "yaw": 2.3,
+   "radius": 15,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "chained_tree",
+   "name": "The Chained Oak",
+   "x": 1684,
+   "z": 705,
+   "yaw": 1.74,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "collapsed_mine_mouth",
+   "name": "The Collapsed Adit",
+   "x": 1265,
+   "z": 255,
+   "yaw": 5.42,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "fishwife_stall",
+   "name": "The Abandoned Fish Stall",
+   "x": 1551,
+   "z": 1947,
+   "yaw": 4.12,
+   "radius": 9,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "flooded_mill",
+   "name": "The Flooded Mill",
+   "x": 1924,
+   "z": 86,
+   "yaw": 5.1,
    "radius": 12,
    "biome": "grassland",
    "biomeFits": true,
@@ -205,37 +259,13 @@
   },
   {
    "type": "vignette",
-   "id": "bone_orchard",
-   "name": "The Bone Orchard",
-   "x": 571,
-   "z": 658,
-   "yaw": 5.01,
-   "radius": 12,
+   "id": "noble_folly",
+   "name": "The Lord's Folly",
+   "x": 784,
+   "z": 89,
+   "yaw": 0.64,
+   "radius": 11,
    "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "gallows_crossroads",
-   "name": "Gallows Crossroads",
-   "x": 1358,
-   "z": 349,
-   "yaw": 1.4,
-   "radius": 10,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "lock_keeper_house",
-   "name": "The Lock-Keeper's Cottage",
-   "x": 1830,
-   "z": 1928,
-   "yaw": 2.1,
-   "radius": 12,
-   "biome": "temperateForest",
    "biomeFits": true,
    "level": 1
   },
@@ -243,9 +273,9 @@
    "type": "vignette",
    "id": "quarry_crane",
    "name": "The Quarry Crane",
-   "x": 80,
-   "z": 205,
-   "yaw": 2.78,
+   "x": 103,
+   "z": 881,
+   "yaw": 0.52,
    "radius": 12,
    "biome": "grassland",
    "biomeFits": true,
@@ -253,24 +283,12 @@
   },
   {
    "type": "vignette",
-   "id": "roadside_shrine",
-   "name": "The Wayside Saint",
-   "x": 699,
-   "z": 83,
-   "yaw": 1.13,
-   "radius": 8,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "rotting_gibbet_cage",
-   "name": "The Crow Cage",
-   "x": 1260,
-   "z": 1857,
-   "yaw": 5.36,
-   "radius": 10,
+   "id": "salt_cart_sunk",
+   "name": "The Salt Cart",
+   "x": 70,
+   "z": 82,
+   "yaw": 2.83,
+   "radius": 12,
    "biome": "grassland",
    "biomeFits": true,
    "level": 1
@@ -279,22 +297,10 @@
    "type": "vignette",
    "id": "sewer_grate",
    "name": "The Rattling Grate",
-   "x": 1893,
-   "z": 65,
-   "yaw": 4.1,
+   "x": 577,
+   "z": 963,
+   "yaw": 4.77,
    "radius": 9,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "siege_camp_leftovers",
-   "name": "The Abandoned Siege Camp",
-   "x": 85,
-   "z": 809,
-   "yaw": 3.83,
-   "radius": 15,
    "biome": "grassland",
    "biomeFits": true,
    "level": 1
@@ -303,9 +309,9 @@
    "type": "vignette",
    "id": "sunken_stair",
    "name": "The Stair to Nowhere",
-   "x": 1507,
-   "z": 838,
-   "yaw": 1.49,
+   "x": 1094,
+   "z": 1978,
+   "yaw": 4.7,
    "radius": 10,
    "biome": "grassland",
    "biomeFits": true,
@@ -360,8 +366,8 @@
     2,
     4
    ],
-   "x": 101,
-   "z": 1114,
+   "x": 493,
+   "z": 1566,
    "yaw": 0,
    "radius": 10
   },
@@ -378,8 +384,8 @@
     2,
     4
    ],
-   "x": 468,
-   "z": 1581,
+   "x": 82,
+   "z": 1165,
    "yaw": 0,
    "radius": 10
   },
@@ -414,8 +420,8 @@
     2,
     4
    ],
-   "x": 688,
-   "z": 1205,
+   "x": 684,
+   "z": 1269,
    "yaw": 0,
    "radius": 10
   },
@@ -432,8 +438,8 @@
     2,
     4
    ],
-   "x": 909,
-   "z": 414,
+   "x": 911,
+   "z": 561,
    "yaw": 0,
    "radius": 10
   },
@@ -450,8 +456,8 @@
     2,
     4
    ],
-   "x": 1084,
-   "z": 100,
+   "x": 1986,
+   "z": 1903,
    "yaw": 0,
    "radius": 10
   },
@@ -468,8 +474,8 @@
     2,
     4
    ],
-   "x": 1053,
-   "z": 1368,
+   "x": 1288,
+   "z": 664,
    "yaw": 0,
    "radius": 10
   },
@@ -486,8 +492,8 @@
     2,
     4
    ],
-   "x": 292,
-   "z": 469,
+   "x": 1083,
+   "z": 1420,
    "yaw": 0,
    "radius": 10
   },
@@ -504,8 +510,8 @@
     2,
     4
    ],
-   "x": 392,
-   "z": 942,
+   "x": 65,
+   "z": 449,
    "yaw": 0,
    "radius": 10
   },
@@ -522,8 +528,8 @@
     2,
     4
    ],
-   "x": 1869,
-   "z": 972,
+   "x": 1984,
+   "z": 936,
    "yaw": 0,
    "radius": 10
   },
@@ -532,30 +538,30 @@
    "id": "rare_tithe_collector",
    "slot": 0,
    "name": "Brother Tithe",
-   "x": 1707,
-   "z": 1749,
+   "x": 1750,
+   "z": 1751,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1766,
-     1648
+     1825,
+     1774
     ],
     [
-     1815,
-     1777
+     1743,
+     1798
     ],
     [
      1692,
-     1843
+     1754
     ],
     [
-     1587,
-     1765
+     1738,
+     1705
     ],
     [
-     1672,
-     1667
+     1806,
+     1718
     ]
    ],
    "respawnMin": [
@@ -569,30 +575,30 @@
    "id": "rare_mother_soot",
    "slot": 1,
    "name": "Mother Soot",
-   "x": 1296,
-   "z": 1263,
+   "x": 1760,
+   "z": 1622,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1233,
-     1242
+     1831,
+     1633
     ],
     [
-     1283,
-     1202
+     1793,
+     1686
     ],
     [
-     1360,
-     1255
+     1699,
+     1680
     ],
     [
-     1326,
-     1322
+     1694,
+     1585
     ],
     [
-     1278,
-     1329
+     1816,
+     1536
     ]
    ],
    "respawnMin": [
@@ -625,8 +631,8 @@
    "type": "waystone",
    "id": "ws_z13_02_lower_mossgate",
    "name": "Lower Mossgate",
-   "x": 711.7,
-   "z": 1626.6,
+   "x": 711.2,
+   "z": 1623.3,
    "yaw": 0,
    "settlement": "Lower Mossgate",
    "radius": 1
@@ -645,8 +651,8 @@
    "type": "waystone",
    "id": "ws_z13_02_door",
    "name": "Barrow entrance",
-   "x": 1605.6,
-   "z": 1384.1,
+   "x": 1621.6,
+   "z": 1374.8,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -657,9 +663,9 @@
    "name": "Provost Isolde Hollis",
    "role": "elder",
    "at": "Halsbridge",
-   "x": 1694.5,
-   "z": 1185.3,
-   "yaw": 2.19,
+   "x": 1699,
+   "z": 1185.1,
+   "yaw": 0.09,
    "radius": 1
   },
   {
@@ -668,9 +674,9 @@
    "name": "Sergeant Wat",
    "role": "guard",
    "at": "Halsbridge Gatehouse",
-   "x": 1425,
-   "z": 1310.2,
-   "yaw": 2.86,
+   "x": 1426.5,
+   "z": 1308.1,
+   "yaw": 4.65,
    "radius": 1
   },
   {
@@ -681,7 +687,7 @@
    "at": "Mill End",
    "x": 199.6,
    "z": 1461.2,
-   "yaw": 0.87,
+   "yaw": 0.25,
    "radius": 1
   },
   {
@@ -690,9 +696,9 @@
    "name": "Jory the ratcatcher",
    "role": "trader",
    "at": "Halsbridge",
-   "x": 1699.5,
-   "z": 1183.9,
-   "yaw": 3.31,
+   "x": 1693.8,
+   "z": 1181.5,
+   "yaw": 2.74,
    "radius": 1
   },
   {
@@ -703,8 +709,8 @@
    "clue": "drunks_story",
    "how": null,
    "shimmer": null,
-   "x": 1775.4,
-   "z": 1305.5,
+   "x": 1558.3,
+   "z": 1229.5,
    "yaw": 0,
    "where": "edge of Halsbridge",
    "radius": 1
@@ -736,6 +742,737 @@
    "yaw": 0,
    "where": "near Mill End",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_torbor_cross_0",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 2012,
+   "z": 476,
+   "yaw": 3.12,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1564,
+   "z": 65,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_torbor_cross_2",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 246,
+   "z": 2024,
+   "yaw": 5.72,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f3",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1708,
+   "z": 360,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_torbor_cross_4",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 384,
+   "z": 147,
+   "yaw": 0.85,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f5",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1196,
+   "z": 1697,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_torbor_cross_6",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 656,
+   "z": 688,
+   "yaw": 0.88,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f7",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 360,
+   "z": 756,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_torbor_cross_8",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 692,
+   "z": 360,
+   "yaw": 4.55,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f9",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 988,
+   "z": 300,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_torbor_cross_10",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 848,
+   "z": 1884,
+   "yaw": 1.62,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f11",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1464,
+   "z": 456,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_torbor_cross_12",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 324,
+   "z": 1036,
+   "yaw": 2.43,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f13",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 828,
+   "z": 892,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_torbor_cross_14",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1252,
+   "z": 1964,
+   "yaw": 3.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f15",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1064,
+   "z": 60,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_torbor_cross_16",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 2012,
+   "z": 1564,
+   "yaw": 0.17,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f17",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1476,
+   "z": 852,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_torbor_cross_18",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 408,
+   "z": 1788,
+   "yaw": 3.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f19",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1940,
+   "z": 696,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_torbor_cross_20",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1297,
+   "z": 25,
+   "yaw": 0.08,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f21",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1168,
+   "z": 464,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_torbor_cross_22",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1416,
+   "z": 1760,
+   "yaw": 3.95,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f23",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1044,
+   "z": 747,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_torbor_cross_24",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 163,
+   "z": 651,
+   "yaw": 4.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f25",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 915,
+   "z": 1250,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_torbor_cross_26",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 200,
+   "z": 268,
+   "yaw": 3.43,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f27",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1328,
+   "z": 1799,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_torbor_cross_28",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 496,
+   "z": 1164,
+   "yaw": 3.19,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f29",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 976,
+   "z": 1716,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_torbor_cross_30",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 592,
+   "z": 180,
+   "yaw": 5.44,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f31",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 786,
+   "z": 1112,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_torbor_cross_32",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1904,
+   "z": 301,
+   "yaw": 0.61,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f33",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 72,
+   "z": 1936,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_torbor_cross_34",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1804,
+   "z": 536,
+   "yaw": 2.08,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f35",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1492,
+   "z": 252,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_torbor_cross_36",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1269,
+   "z": 872,
+   "yaw": 4.69,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f37",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1740,
+   "z": 160,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_torbor_cross_38",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 648,
+   "z": 1800,
+   "yaw": 0.9,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f39",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1800,
+   "z": 872,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_torbor_cross_40",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1496,
+   "z": 651,
+   "yaw": 1.96,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f41",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1796,
+   "z": 1944,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_torbor_cross_42",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1249,
+   "z": 1516,
+   "yaw": 3.66,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f43",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1577,
+   "z": 1676,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_torbor_cross_44",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 895,
+   "z": 1443,
+   "yaw": 0.05,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f45",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 612,
+   "z": 516,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_torbor_cross_46",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 1940,
+   "z": 1724,
+   "yaw": 5,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f47",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 548,
+   "z": 1741,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_torbor_cross_48",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 240,
+   "z": 496,
+   "yaw": 4.86,
+   "radius": 4,
+   "filler": true
   }
  ],
  "features": [

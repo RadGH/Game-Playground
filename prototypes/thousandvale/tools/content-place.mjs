@@ -22,6 +22,7 @@ export const KIND_RULES = {
   camp: { townGap: 120, gap: 25, slope: 24 },
   rare: { townGap: 150, gap: 30, slope: 24 },
   hook: { townGap: 40, gap: 30, slope: 26 },
+  wayside: { townGap: 20, gap: 12, slope: 34, edge: 24 },   // a cairn sits fine on a hillside and near a zone edge
   settlement: { townGap: 300, gap: 60, slope: 10 },
 };
 export const ROAD_GAP = 4;          // metres between a disc's edge and the nearest painted road sample
@@ -149,7 +150,7 @@ export function zoneContext({ terrain, nav, placements, start = null, reserve = 
     const i = Math.min(size - 1, Math.max(0, Math.round(x / step))), j = Math.min(size - 1, Math.max(0, Math.round(z / step)));
     return j * size + i;
   };
-  const settlements = placements.filter(p => p.kind === 'settlement').map(p => ({ id: p.id, name: p.data.name, kind: p.data.kind, x: p.x, z: p.z, r: p.data.radius, hub: !!p.data.hub, source: 'bake' }));
+  const settlements = placements.filter(p => p.kind === 'settlement').map(p => ({ id: p.id, name: p.data.name, kind: p.data.kind, x: p.x, z: p.z, r: p.data.radius, hub: !!p.data.hub, wfName: p.data.wfName || null, source: 'bake' }));
   const SITE_R = { dungeon_door: 16, event_site: null, camp_site: null, landmark: 20, lair: 20, crossing: 15, pass: 15, dungeon: 20, bridge: null };
   const siteDiscs = placements.filter(p => p.kind in SITE_R).map(p => ({ kind: p.kind, id: p.id, x: p.x, z: p.z, r: SITE_R[p.kind] ?? (p.data?.r || (p.data?.span ? p.data.span / 2 + 4 : 20)) }));
   const ctx = {
@@ -207,7 +208,7 @@ export function settlementEdge(ctx, x, z) {
  */
 export function discProblem(ctx, kind, x, z, R, { ignore = null, others = ctx.placed } = {}) {
   const rule = KIND_RULES[kind] || KIND_RULES.vignette;
-  const m = Math.max(EDGE_MARGIN, R + 20);
+  const m = Math.max(rule.edge ?? EDGE_MARGIN, R + 20);
   if (x < m || z < m || x > ctx.extent - m || z > ctx.extent - m) return 'edge';
   if (!openPoint(ctx, x, z, { slope: rule.slope, allowSolid: true })) return 'centre not open';
   const ring = R > 14 ? 16 : 8;

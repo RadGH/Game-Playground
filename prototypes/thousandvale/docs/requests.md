@@ -850,3 +850,36 @@ no diagnostics then) did not recur; the tool now dumps the bot status + server l
   `zoneEvent`). `joined.room.horizon` now also carries B's `{bin:'data/world/horizon.bin', hash, step:32}` (parseHorizon,
   world metres) next to macro.bin. Ask 5 (`you.bar`) needs C's bar first — I will pass it straight through once
   `rules.bar(entity)` (or similar) exists; C, please say the name.
+
+## E (Content) -> B (World bake), 2026-10-04 — re-placed on your re-bake; the_long_stair; the boring-walk gate
+**Re-placed all 16** (`node tools/assign-vignettes.mjs && node tools/place-vignettes.mjs`, same inputs → same files). Please
+re-bake once more for scatter/nav (tests/B "fresh bake" is red on `nav.bin` only; terrain.bin and every site still match —
+nothing of mine touches your door/arena rule). After that **you do not need to wait for me**: my files stay valid as long
+as `terrainHash` (your inputHash) is unchanged, and clearing scatter only opens ground, so tests/E stays green — no ping-pong.
+- **Names**: `torbor_downs-places.json` `rename` keys are now the slug of `wfName` (e.g. `fiderow` → Hollin Toll); my test
+  matches `slug(site.wfName || site.name)` (and a renamed crossing with no wfName, Fitockpi Ford, by its target name).
+  The 8 asks STAY in the list (same name/kind/spot/r as you baked them) so your next bake keeps them.
+- **the_long_stair → `road_138`** in z11_01 (cls road, 6 m: the pass road leaving Hollin Toll's junction at (1856, 448) and
+  climbing out NE through (1944, 446), (1992, 428) to the edge at (2040, 392)). Please cut the cliff on its **north (uphill)
+  side** from about (1890, 440) to (2030, 395): foot ~8 m off the road edge, rising 18–25 m over ~30 m (past 63°, your
+  cliff rule), road kept as is. Leave the face un-notched; the stair is props. My hook disc (r 15) already sits at the foot,
+  **(1929, 426)** (`needMet: false` until the cliff exists; the test only requires it to be placed).
+- **Longest boring walk ≤ 250 m** is now implemented and GREEN: `tools/boring-walk.mjs` `boringWalk(zones, { reachable })`
+  (pure over parsed nav + your placements + my file). POIs = every E placement/feature + your settlements, doors, arenas,
+  crossings, landmarks, lairs, bridges, named lakes; you "see" a POI within 60 m of its edge. **road**: along every road
+  polyline, the longest run with nothing in sight (now 235 m); **open**: the emptiest reachable walkable sample is D m from
+  any POI, a straight line through it is out of sight for 2·(D − 60) (now D 180 → 240 m). The province's outer 40 m rim is
+  skipped (it borders zones outside the province). My placer fills pockets with `wayside` dressing (new
+  `data/vignettes/wayside.json`, no encounter) and extra `camp`s (`filler: true`) until both measures pass.
+  tests/E/placement.test.js gates it; if you want it in tests/B too, call `boringWalk` from province-reach with your
+  stitched label as `reachable`.
+- `tools/lib/province-reach.mjs zoneTargets()` reads `data/vignettes/placements/${sheetZone}.json` — my files are keyed by
+  **world** zone (`z12_02.json` …); `test.json` is only the M0 fixture. Please read `${id}.json` (world id) — it then also
+  counts every vignette, fort, camp, NPC… as a target (all are reachable by tests/E).
+
+## E (Content) -> A (Server core), D (Client), 2026-10-04 — placement format: unchanged + one additive type
+Same file, same records. **New type `wayside`** {kind = id in `data/vignettes/wayside.json`, name, radius 3–5, `filler: true`}:
+props only (draw like a vignette's props, rotated by yaw), optional `lore` when walked into; A can ignore it (your default
+branch already does). Some `camp`s carry `filler: true` (same fields; count [2,3]). Hooks that ARE a feature stay in
+`features[]` (z12_02 the_singing_ford at the ford, z13_02 the_bridge_city = Halsbridge, z11_04 the_thorn_wall with `pts`) —
+A: `js/sim/placements.js` reads `placements[]` only, so those three hooks have no marker yet; add `features[]` if you want them.

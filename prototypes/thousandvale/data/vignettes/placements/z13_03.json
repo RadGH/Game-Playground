@@ -46,6 +46,12 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
@@ -61,7 +67,7 @@
    "z": 1648,
    "r": 140,
    "source": "bake",
-   "bakeId": "wedanhold"
+   "bakeId": "millbrook"
   },
   {
    "name": "Three Wheels",
@@ -70,7 +76,7 @@
    "z": 1248,
    "r": 90,
    "source": "bake",
-   "bakeId": "ironwatch"
+   "bakeId": "three_wheels"
   },
   {
    "name": "Stormrow",
@@ -135,78 +141,52 @@
   {
    "type": "farm",
    "id": "farm_millbrook_0",
-   "name": "Millbrook Farm",
-   "template": "arable",
+   "name": "Millbrook Piggery",
+   "template": "pig",
    "flavour": null,
    "settlement": "Millbrook",
-   "x": 485,
-   "z": 1470,
+   "x": 496,
+   "z": 1460,
    "yaw": -0.79,
-   "radius": 22,
+   "radius": 18,
    "level": 3
   },
   {
    "type": "farm",
    "id": "farm_millbrook_1",
-   "name": "Three Wheels Piggery",
-   "template": "pig",
-   "flavour": null,
-   "settlement": "Three Wheels",
-   "x": 1775,
-   "z": 1172,
-   "yaw": -0.79,
-   "radius": 18,
-   "level": 3
-  },
-  {
-   "type": "farm",
-   "id": "farm_millbrook_2",
-   "name": "Stormrow Farm",
-   "template": "arable",
-   "flavour": null,
-   "settlement": "Stormrow",
-   "x": 1185,
-   "z": 173,
-   "yaw": -1.96,
-   "radius": 22,
-   "level": 3
-  },
-  {
-   "type": "farm",
-   "id": "farm_millbrook_3",
-   "name": "Ravencross Sheepfold",
+   "name": "Three Wheels Sheepfold",
    "template": "sheep",
    "flavour": null,
-   "settlement": "Ravencross",
-   "x": 363,
-   "z": 382,
-   "yaw": 1.18,
+   "settlement": "Three Wheels",
+   "x": 1780,
+   "z": 1169,
+   "yaw": -0.79,
    "radius": 24,
    "level": 3
   },
   {
    "type": "farm",
-   "id": "farm_millbrook_4",
-   "name": "Wildmere Piggery",
-   "template": "pig",
+   "id": "farm_millbrook_2",
+   "name": "Stormrow Sheepfold",
+   "template": "sheep",
    "flavour": null,
-   "settlement": "Wildmere",
-   "x": 1530,
-   "z": 642,
-   "yaw": 1.96,
-   "radius": 18,
+   "settlement": "Stormrow",
+   "x": 1186,
+   "z": 174,
+   "yaw": -1.96,
+   "radius": 24,
    "level": 3
   },
   {
    "type": "farm",
-   "id": "farm_millbrook_5",
-   "name": "Millbrook Sheepfold",
-   "template": "sheep",
+   "id": "farm_millbrook_3",
+   "name": "Ravencross Orchard",
+   "template": "orchard",
    "flavour": null,
-   "settlement": "Millbrook",
-   "x": 715,
-   "z": 1849,
-   "yaw": -2.75,
+   "settlement": "Ravencross",
+   "x": 363,
+   "z": 382,
+   "yaw": 1.18,
    "radius": 24,
    "level": 3
   },
@@ -220,9 +200,9 @@
     "floors": 1,
     "level": 4
    },
-   "x": 191,
-   "z": 904,
-   "yaw": -1.57,
+   "x": 290,
+   "z": 770,
+   "yaw": -2.36,
    "radius": 10,
    "level": 4
   },
@@ -231,8 +211,8 @@
    "id": "the_three_wheels",
    "name": "Three Mills, One River",
    "kind": "compositional",
-   "x": 1649,
-   "z": 1417,
+   "x": 1666,
+   "z": 1427,
    "yaw": 0,
    "radius": 20,
    "where": "best fit for: a stream on a slope",
@@ -240,37 +220,25 @@
   },
   {
    "type": "vignette",
-   "id": "burned_farmstead",
-   "name": "The Burned Farmstead",
-   "x": 1011,
-   "z": 1055,
-   "yaw": 3.83,
-   "radius": 13,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "dry_well",
-   "name": "The Dry Well",
-   "x": 1972,
-   "z": 1970,
-   "yaw": 5.93,
+   "id": "beekeeper_hives",
+   "name": "The Angry Hives",
+   "x": 986,
+   "z": 917,
+   "yaw": 4.55,
    "radius": 10,
-   "biome": "badlands",
+   "biome": "grassland",
    "biomeFits": true,
    "level": 1
   },
   {
    "type": "vignette",
-   "id": "fairy_ring",
-   "name": "The Toadstool Ring",
-   "x": 1347,
-   "z": 1934,
-   "yaw": 4.03,
-   "radius": 9,
-   "biome": "grassland",
+   "id": "bone_orchard",
+   "name": "The Bone Orchard",
+   "x": 1203,
+   "z": 1832,
+   "yaw": 0.14,
+   "radius": 12,
+   "biome": "shrubland",
    "biomeFits": true,
    "level": 1
   },
@@ -278,11 +246,23 @@
    "type": "vignette",
    "id": "hanging_sign_inn",
    "name": "The Shut-Up Inn",
-   "x": 80,
-   "z": 1813,
-   "yaw": 4.86,
+   "x": 1972,
+   "z": 1970,
+   "yaw": 4.95,
    "radius": 13,
-   "biome": "grassland",
+   "biome": "badlands",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "old_battlefield",
+   "name": "The Old Battlefield",
+   "x": 73,
+   "z": 1879,
+   "yaw": 2.12,
+   "radius": 15,
+   "biome": "shrubland",
    "biomeFits": true,
    "level": 1
   },
@@ -290,9 +270,9 @@
    "type": "vignette",
    "id": "ore_cart_spill",
    "name": "The Runaway Cart",
-   "x": 821,
-   "z": 597,
-   "yaw": 4.5,
+   "x": 675,
+   "z": 1941,
+   "yaw": 2.34,
    "radius": 10,
    "biome": "grassland",
    "biomeFits": true,
@@ -300,12 +280,12 @@
   },
   {
    "type": "vignette",
-   "id": "pump_house",
-   "name": "The Old Pump House",
-   "x": 715,
-   "z": 107,
-   "yaw": 3.62,
-   "radius": 12,
+   "id": "pilgrim_footbath",
+   "name": "The Footbath of Saint Ida",
+   "x": 712,
+   "z": 69,
+   "yaw": 3.39,
+   "radius": 11,
    "biome": "grassland",
    "biomeFits": true,
    "level": 1
@@ -314,9 +294,9 @@
    "type": "vignette",
    "id": "quarry_ledge",
    "name": "The Quarry Ledge",
-   "x": 72,
-   "z": 1362,
-   "yaw": 0.25,
+   "x": 1194,
+   "z": 1349,
+   "yaw": 4.32,
    "radius": 14,
    "biome": "grassland",
    "biomeFits": true,
@@ -324,12 +304,12 @@
   },
   {
    "type": "vignette",
-   "id": "sinkhole_garden",
-   "name": "The Sinkhole Garden",
-   "x": 1926,
+   "id": "rotting_gibbet_cage",
+   "name": "The Crow Cage",
+   "x": 1982,
    "z": 60,
-   "yaw": 2.9,
-   "radius": 11,
+   "yaw": 0.28,
+   "radius": 10,
    "biome": "temperateForest",
    "biomeFits": true,
    "level": 1
@@ -338,22 +318,22 @@
    "type": "vignette",
    "id": "tinker_wagon",
    "name": "The Tinker's Wagon",
-   "x": 1156,
-   "z": 1494,
-   "yaw": 4.88,
+   "x": 76,
+   "z": 1219,
+   "yaw": 3.69,
    "radius": 12,
-   "biome": "shrubland",
+   "biome": "grassland",
    "biomeFits": true,
    "level": 1
   },
   {
    "type": "vignette",
-   "id": "woodcutter_axe",
-   "name": "The Axe in the Stump",
-   "x": 62,
-   "z": 75,
-   "yaw": 2.38,
-   "radius": 9,
+   "id": "watchtower_ruin",
+   "name": "The Abandoned Watchtower",
+   "x": 1366,
+   "z": 690,
+   "yaw": 4.21,
+   "radius": 12,
    "biome": "grassland",
    "biomeFits": true,
    "level": 1
@@ -371,8 +351,8 @@
     2,
     4
    ],
-   "x": 1502,
-   "z": 166,
+   "x": 467,
+   "z": 1120,
    "yaw": 0,
    "radius": 10
   },
@@ -389,8 +369,8 @@
     2,
     4
    ],
-   "x": 471,
-   "z": 1104,
+   "x": 1525,
+   "z": 171,
    "yaw": 0,
    "radius": 10
   },
@@ -407,8 +387,8 @@
     2,
     4
    ],
-   "x": 1958,
-   "z": 1311,
+   "x": 1971,
+   "z": 1312,
    "yaw": 0,
    "radius": 10
   },
@@ -425,8 +405,8 @@
     2,
     4
    ],
-   "x": 1816,
-   "z": 1410,
+   "x": 1835,
+   "z": 1406,
    "yaw": 0,
    "radius": 10
   },
@@ -443,8 +423,8 @@
     2,
     4
    ],
-   "x": 831,
-   "z": 1528,
+   "x": 165,
+   "z": 1533,
    "yaw": 0,
    "radius": 10
   },
@@ -461,8 +441,8 @@
     2,
     4
    ],
-   "x": 1060,
-   "z": 1809,
+   "x": 66,
+   "z": 918,
    "yaw": 0,
    "radius": 10
   },
@@ -479,8 +459,8 @@
     2,
     4
    ],
-   "x": 387,
-   "z": 1942,
+   "x": 869,
+   "z": 1591,
    "yaw": 0,
    "radius": 10
   },
@@ -497,8 +477,8 @@
     2,
     4
    ],
-   "x": 716,
-   "z": 1265,
+   "x": 765,
+   "z": 1253,
    "yaw": 0,
    "radius": 10
   },
@@ -515,8 +495,8 @@
     2,
     4
    ],
-   "x": 237,
-   "z": 1610,
+   "x": 369,
+   "z": 1978,
    "yaw": 0,
    "radius": 10
   },
@@ -533,8 +513,8 @@
     2,
     4
    ],
-   "x": 305,
-   "z": 1286,
+   "x": 932,
+   "z": 1836,
    "yaw": 0,
    "radius": 10
   },
@@ -551,8 +531,8 @@
     1,
     2
    ],
-   "x": 893,
-   "z": 1947,
+   "x": 295,
+   "z": 1321,
    "yaw": 0,
    "radius": 10
   },
@@ -569,8 +549,8 @@
     1,
     2
    ],
-   "x": 870,
-   "z": 1725,
+   "x": 255,
+   "z": 1744,
    "yaw": 0,
    "radius": 10
   },
@@ -587,8 +567,8 @@
     2,
     4
    ],
-   "x": 573,
-   "z": 1978,
+   "x": 896,
+   "z": 1391,
    "yaw": 0,
    "radius": 10
   },
@@ -605,8 +585,8 @@
     2,
     4
    ],
-   "x": 270,
-   "z": 1787,
+   "x": 563,
+   "z": 1280,
    "yaw": 0,
    "radius": 10
   },
@@ -623,8 +603,8 @@
     2,
     4
    ],
-   "x": 894,
-   "z": 1354,
+   "x": 732,
+   "z": 1454,
    "yaw": 0,
    "radius": 10
   },
@@ -641,8 +621,8 @@
     2,
     4
    ],
-   "x": 490,
-   "z": 1281,
+   "x": 801,
+   "z": 1741,
    "yaw": 0,
    "radius": 10
   },
@@ -651,30 +631,30 @@
    "id": "rare_laughing_hettie",
    "slot": 0,
    "name": "Laughing Hettie",
-   "x": 1880,
-   "z": 1419,
+   "x": 1829,
+   "z": 817,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1808,
-     1416
+     1773,
+     836
     ],
     [
-     1854,
-     1369
+     1807,
+     759
     ],
     [
-     1946,
-     1373
+     1862,
+     762
     ],
     [
-     1937,
-     1427
+     1886,
+     854
     ],
     [
-     1861,
-     1493
+     1832,
+     906
     ]
    ],
    "respawnMin": [
@@ -688,30 +668,30 @@
    "id": "rare_old_mould",
    "slot": 1,
    "name": "Old Mould",
-   "x": 701,
-   "z": 1087,
+   "x": 1106,
+   "z": 1594,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     768,
-     1077
+     1050,
+     1542
     ],
     [
-     728,
-     1143
+     1157,
+     1524
     ],
     [
-     656,
-     1147
+     1171,
+     1594
     ],
     [
-     659,
-     1065
+     1121,
+     1675
     ],
     [
-     723,
-     1020
+     1042,
+     1656
     ]
    ],
    "respawnMin": [
@@ -724,8 +704,8 @@
    "type": "waystone",
    "id": "ws_z13_03_millbrook",
    "name": "Millbrook",
-   "x": 437.3,
-   "z": 1529.9,
+   "x": 428.7,
+   "z": 1543.9,
    "yaw": 0,
    "settlement": "Millbrook",
    "radius": 1
@@ -734,8 +714,8 @@
    "type": "waystone",
    "id": "ws_z13_03_three_wheels",
    "name": "Three Wheels",
-   "x": 1735.6,
-   "z": 1325.2,
+   "x": 1736.3,
+   "z": 1327.3,
    "yaw": 0,
    "settlement": "Three Wheels",
    "radius": 1
@@ -744,8 +724,8 @@
    "type": "waystone",
    "id": "ws_z13_03_stormrow",
    "name": "Stormrow",
-   "x": 1062,
-   "z": 71.7,
+   "x": 1067.3,
+   "z": 56.9,
    "yaw": 0,
    "settlement": "Stormrow",
    "radius": 1
@@ -754,8 +734,8 @@
    "type": "waystone",
    "id": "ws_z13_03_ravencross",
    "name": "Ravencross",
-   "x": 439.1,
-   "z": 502.9,
+   "x": 440.6,
+   "z": 378.5,
    "yaw": 0,
    "settlement": "Ravencross",
    "radius": 1
@@ -764,8 +744,8 @@
    "type": "waystone",
    "id": "ws_z13_03_wildmere",
    "name": "Wildmere",
-   "x": 1653.5,
-   "z": 567.5,
+   "x": 1659.4,
+   "z": 584.9,
    "yaw": 0,
    "settlement": "Wildmere",
    "radius": 1
@@ -774,8 +754,8 @@
    "type": "waystone",
    "id": "ws_z13_03_door",
    "name": "Barrow entrance",
-   "x": 335.2,
-   "z": 1604.7,
+   "x": 356,
+   "z": 1639,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -786,9 +766,9 @@
    "name": "Reeve Garrick Pike",
    "role": "elder",
    "at": "Millbrook",
-   "x": 553.3,
-   "z": 1633.6,
-   "yaw": 1.65,
+   "x": 557.4,
+   "z": 1628.8,
+   "yaw": 1.07,
    "radius": 1
   },
   {
@@ -797,9 +777,9 @@
    "name": "Goodwife Edda",
    "role": "farmer",
    "at": "Three Wheels",
-   "x": 1658.6,
-   "z": 1235.6,
-   "yaw": 5.54,
+   "x": 1664,
+   "z": 1235.4,
+   "yaw": 0.91,
    "radius": 1
   },
   {
@@ -808,9 +788,9 @@
    "name": "Castellan Oswy",
    "role": "guard",
    "at": "Millbrook Keep",
-   "x": 1766.9,
-   "z": 490.1,
-   "yaw": 2.48,
+   "x": 1765,
+   "z": 487.2,
+   "yaw": 5.7,
    "radius": 1
   },
   {
@@ -819,9 +799,9 @@
    "name": "Cadoc the tinker",
    "role": "trader",
    "at": "tinker_wagon",
-   "x": 1154.4,
-   "z": 1495.9,
-   "yaw": 3.58,
+   "x": 77.3,
+   "z": 1221.3,
+   "yaw": 2,
    "radius": 1
   },
   {
@@ -832,8 +812,8 @@
    "clue": "map_piece",
    "how": null,
    "shimmer": null,
-   "x": 1577.9,
-   "z": 1207.3,
+   "x": 1664,
+   "z": 1343.3,
    "yaw": 0,
    "where": "edge of Three Wheels",
    "radius": 1
@@ -846,8 +826,8 @@
    "clue": "carved_arrow",
    "how": null,
    "shimmer": null,
-   "x": 1767.7,
-   "z": 489.9,
+   "x": 1768.1,
+   "z": 486.1,
    "yaw": 0,
    "where": "fort Millbrook Keep",
    "radius": 1
@@ -860,8 +840,8 @@
    "clue": null,
    "how": "dig",
    "shimmer": 15,
-   "x": 1667,
-   "z": 237,
+   "x": 1886,
+   "z": 118,
    "yaw": 0,
    "where": "secluded",
    "radius": 1
@@ -874,8 +854,8 @@
    "clue": "map_piece",
    "how": null,
    "shimmer": null,
-   "x": 1769,
-   "z": 487.5,
+   "x": 1766.4,
+   "z": 490,
    "yaw": 0,
    "where": "fort Millbrook Keep",
    "radius": 1
@@ -888,11 +868,611 @@
    "clue": null,
    "how": "dig",
    "shimmer": 15,
-   "x": 322,
-   "z": 1566.8,
+   "x": 584.3,
+   "z": 1899.7,
    "yaw": 0,
    "where": "near Millbrook",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_millbrook_0",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 864,
+   "z": 545,
+   "yaw": 1.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f1",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1572,
+   "z": 1784,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_millbrook_2",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 660,
+   "z": 825,
+   "yaw": 3.91,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f3",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1304,
+   "z": 1028,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_millbrook_4",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1140,
+   "z": 484,
+   "yaw": 0.55,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f5",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 67,
+   "z": 332,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_millbrook_6",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1560,
+   "z": 908,
+   "yaw": 5.8,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f7",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1408,
+   "z": 1556,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_millbrook_8",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1804,
+   "z": 1672,
+   "yaw": 4.01,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f9",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 740,
+   "z": 332,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_millbrook_10",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1370,
+   "z": 385,
+   "yaw": 0.45,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f11",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1008,
+   "z": 1168,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_millbrook_12",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 432,
+   "z": 132,
+   "yaw": 2.09,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f13",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 864,
+   "z": 86,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_millbrook_14",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 160,
+   "z": 548,
+   "yaw": 0.19,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f15",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1089,
+   "z": 708,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_millbrook_16",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 780,
+   "z": 1016,
+   "yaw": 1.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f17",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 259,
+   "z": 1037,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_millbrook_18",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 1764,
+   "z": 1892,
+   "yaw": 4.93,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f19",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 656,
+   "z": 596,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_millbrook_20",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1964,
+   "z": 1016,
+   "yaw": 3.14,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f21",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 464,
+   "z": 896,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_millbrook_22",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 236,
+   "z": 192,
+   "yaw": 6.11,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f23",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 844,
+   "z": 752,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_millbrook_24",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1368,
+   "z": 1224,
+   "yaw": 0.91,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f25",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1928,
+   "z": 312,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_millbrook_26",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 952,
+   "z": 372,
+   "yaw": 1.65,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f27",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1400,
+   "z": 1892,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_millbrook_28",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 699,
+   "z": 181,
+   "yaw": 0.9,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f29",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1985,
+   "z": 1497,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_millbrook_30",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1936,
+   "z": 644,
+   "yaw": 0.87,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f31",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 100,
+   "z": 724,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_millbrook_32",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 28,
+   "z": 1684,
+   "yaw": 5.92,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f33",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1240,
+   "z": 848,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_millbrook_34",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1299,
+   "z": 74,
+   "yaw": 4.23,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f35",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1724,
+   "z": 980,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_millbrook_36",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1680,
+   "z": 48,
+   "yaw": 2.11,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f37",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1564,
+   "z": 1976,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_millbrook_38",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1752,
+   "z": 272,
+   "yaw": 5.25,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_f39",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1620,
+   "z": 1612,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
   }
  ],
  "features": []

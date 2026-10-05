@@ -46,47 +46,53 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
    "slope": 10
   }
  },
- "mainWalkableShare": 0.996,
+ "mainWalkableShare": 0.943,
  "settlements": [
   {
    "name": "Saltmouth",
-   "kind": "hamlet",
-   "x": 1120,
-   "z": 1808,
-   "r": 46,
+   "kind": "town",
+   "x": 880,
+   "z": 1616,
+   "r": 90,
    "source": "bake",
-   "bakeId": "hollowwick"
+   "bakeId": "saltmouth"
   },
   {
    "name": "Gull Steps",
    "kind": "hamlet",
    "x": 282,
    "z": 1266,
-   "r": 40,
-   "source": "ask",
-   "bakeId": null
+   "r": 46,
+   "source": "bake",
+   "bakeId": "gull_steps"
   }
  ],
  "checks": [
   {
    "id": "door_1",
    "kind": "dungeon_door",
-   "x": 1005,
-   "z": 1683,
+   "x": 855,
+   "z": 1804,
    "reachable": true,
    "openShare": 1
   },
   {
    "id": "event_saltmouth",
    "kind": "event_site",
-   "x": 1072,
-   "z": 1416,
+   "x": 844,
+   "z": 1372,
    "reachable": true,
    "openShare": 1
   }
@@ -99,36 +105,36 @@
    "name": "Saltmouth Battery",
    "template": "stone_keep",
    "friendly": true,
-   "x": 1245,
-   "z": 1967,
-   "yaw": -1.18,
+   "x": 1061,
+   "z": 1949,
+   "yaw": 0.79,
    "radius": 28,
    "level": 6
   },
   {
    "type": "farm",
    "id": "farm_saltmouth_0",
-   "name": "Saltmouth Sheepfold",
-   "template": "sheep",
+   "name": "Saltmouth Fishing Plot",
+   "template": "fishing_plot",
    "flavour": null,
    "settlement": "Saltmouth",
-   "x": 1065,
-   "z": 1725,
-   "yaw": 0.79,
-   "radius": 24,
+   "x": 937,
+   "z": 1443,
+   "yaw": -0.39,
+   "radius": 16,
    "level": 6
   },
   {
    "type": "farm",
    "id": "farm_saltmouth_1",
-   "name": "Gull Steps Sheepfold",
-   "template": "sheep",
+   "name": "Gull Steps Fishing Plot",
+   "template": "fishing_plot",
    "flavour": null,
    "settlement": "Gull Steps",
-   "x": 196,
-   "z": 1301,
-   "yaw": 1.18,
-   "radius": 24,
+   "x": 768,
+   "z": 1196,
+   "yaw": 0.39,
+   "radius": 16,
    "level": 6
   },
   {
@@ -141,25 +147,9 @@
     "floors": 1,
     "level": 7
    },
-   "x": 1935,
-   "z": 1923,
-   "yaw": -1.18,
-   "radius": 10,
-   "level": 7
-  },
-  {
-   "type": "cave",
-   "id": "cave_saltmouth_1",
-   "name": "Smugglers' cave",
-   "template": "smugglers_cave",
-   "plan": {
-    "family": "flooded_cistern",
-    "floors": 1,
-    "level": 7
-   },
-   "x": 1393,
-   "z": 1086,
-   "yaw": 0.39,
+   "x": 1310,
+   "z": 962,
+   "yaw": -1.57,
    "radius": 10,
    "level": 7
   },
@@ -168,34 +158,22 @@
    "id": "the_whale_bones",
    "name": "The Whale Arch",
    "kind": "bespoke",
-   "x": 1054,
-   "z": 1959,
+   "x": 719,
+   "z": 786,
    "yaw": 0,
    "radius": 20,
    "where": "best fit for: a beach road",
-   "needMet": false
+   "needMet": true
   },
   {
    "type": "vignette",
-   "id": "chained_tree",
-   "name": "The Chained Oak",
-   "x": 1899,
-   "z": 578,
-   "yaw": 4.81,
-   "radius": 11,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "dark_lighthouse",
-   "name": "The Dark Lighthouse",
-   "x": 1366,
-   "z": 128,
-   "yaw": 1.55,
-   "radius": 10,
-   "biome": "tundra",
+   "id": "drowned_chapel",
+   "name": "The Drowned Chapel",
+   "x": 1281,
+   "z": 1264,
+   "yaw": 2.92,
+   "radius": 13,
+   "biome": "beach",
    "biomeFits": false,
    "level": 1
   },
@@ -203,9 +181,9 @@
    "type": "vignette",
    "id": "ferry_landing",
    "name": "The Stranded Ferry",
-   "x": 702,
-   "z": 207,
-   "yaw": 0.57,
+   "x": 1581,
+   "z": 383,
+   "yaw": 5.86,
    "radius": 12,
    "biome": "grassland",
    "biomeFits": true,
@@ -213,23 +191,23 @@
   },
   {
    "type": "vignette",
-   "id": "guildhall_ruin",
-   "name": "The Guildhall Shell",
-   "x": 807,
-   "z": 850,
-   "yaw": 2.25,
-   "radius": 13,
+   "id": "ferryman_shrine",
+   "name": "The Ferryman's Coin",
+   "x": 1913,
+   "z": 1752,
+   "yaw": 2.96,
+   "radius": 10,
    "biome": "grassland",
-   "biomeFits": true,
+   "biomeFits": false,
    "level": 1
   },
   {
    "type": "vignette",
-   "id": "hunters_hide",
-   "name": "The Hunter's Hide",
-   "x": 126,
-   "z": 1982,
-   "yaw": 0.18,
+   "id": "guildhall_ruin",
+   "name": "The Guildhall Shell",
+   "x": 167,
+   "z": 1122,
+   "yaw": 4.65,
    "radius": 13,
    "biome": "grassland",
    "biomeFits": true,
@@ -239,9 +217,9 @@
    "type": "vignette",
    "id": "market_cross",
    "name": "The Market Cross",
-   "x": 196,
-   "z": 582,
-   "yaw": 1.63,
+   "x": 237,
+   "z": 350,
+   "yaw": 0.03,
    "radius": 10,
    "biome": "grassland",
    "biomeFits": true,
@@ -249,24 +227,24 @@
   },
   {
    "type": "vignette",
-   "id": "salt_cart_sunk",
-   "name": "The Salt Cart",
-   "x": 1974,
-   "z": 1275,
-   "yaw": 0.88,
+   "id": "mudlark_flats",
+   "name": "The Mudlark Flats",
+   "x": 1382,
+   "z": 1123,
+   "yaw": 2.27,
+   "radius": 13,
+   "biome": "beach",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "pump_house",
+   "name": "The Old Pump House",
+   "x": 1948,
+   "z": 867,
+   "yaw": 3.38,
    "radius": 12,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "slag_heap_shrine",
-   "name": "The Slag Saint",
-   "x": 552,
-   "z": 1661,
-   "yaw": 0.35,
-   "radius": 10,
    "biome": "grassland",
    "biomeFits": true,
    "level": 1
@@ -275,9 +253,9 @@
    "type": "vignette",
    "id": "smugglers_cellar",
    "name": "The Smugglers' Cellar",
-   "x": 193,
-   "z": 65,
-   "yaw": 2.27,
+   "x": 344,
+   "z": 1795,
+   "yaw": 1.46,
    "radius": 14,
    "biome": "grassland",
    "biomeFits": true,
@@ -285,14 +263,26 @@
   },
   {
    "type": "vignette",
-   "id": "stone_circle_hum",
-   "name": "The Humming Stones",
-   "x": 1560,
-   "z": 1570,
-   "yaw": 5.17,
+   "id": "smugglers_cove",
+   "name": "Smugglers' Cove",
+   "x": 1106,
+   "z": 1452,
+   "yaw": 6.2,
    "radius": 12,
-   "biome": "grassland",
+   "biome": "beach",
    "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "stilt_house",
+   "name": "The Empty Stilt House",
+   "x": 744,
+   "z": 1006,
+   "yaw": 1.2,
+   "radius": 10,
+   "biome": "beach",
+   "biomeFits": false,
    "level": 1
   },
   {
@@ -308,8 +298,8 @@
     2,
     4
    ],
-   "x": 1912,
-   "z": 64,
+   "x": 1109,
+   "z": 756,
    "yaw": 0,
    "radius": 10
   },
@@ -326,8 +316,8 @@
     2,
     4
    ],
-   "x": 1226,
-   "z": 637,
+   "x": 930,
+   "z": 721,
    "yaw": 0,
    "radius": 10
   },
@@ -344,8 +334,8 @@
     2,
     4
    ],
-   "x": 800,
-   "z": 1305,
+   "x": 1059,
+   "z": 78,
    "yaw": 0,
    "radius": 10
   },
@@ -362,8 +352,8 @@
     2,
     4
    ],
-   "x": 384,
-   "z": 945,
+   "x": 1932,
+   "z": 86,
    "yaw": 0,
    "radius": 10
   },
@@ -380,8 +370,8 @@
     2,
     4
    ],
-   "x": 553,
-   "z": 569,
+   "x": 1223,
+   "z": 1367,
    "yaw": 0,
    "radius": 10
   },
@@ -398,8 +388,8 @@
     2,
     4
    ],
-   "x": 1172,
-   "z": 1375,
+   "x": 709,
+   "z": 927,
    "yaw": 0,
    "radius": 10
   },
@@ -416,8 +406,8 @@
     2,
     4
    ],
-   "x": 1761,
-   "z": 911,
+   "x": 707,
+   "z": 863,
    "yaw": 0,
    "radius": 10
   },
@@ -434,8 +424,8 @@
     2,
     4
    ],
-   "x": 73,
-   "z": 1630,
+   "x": 1202,
+   "z": 1410,
    "yaw": 0,
    "radius": 10
   },
@@ -452,8 +442,8 @@
     2,
     4
    ],
-   "x": 1056,
-   "z": 309,
+   "x": 1506,
+   "z": 1980,
    "yaw": 0,
    "radius": 10
   },
@@ -470,8 +460,8 @@
     2,
     4
    ],
-   "x": 1558,
-   "z": 498,
+   "x": 693,
+   "z": 316,
    "yaw": 0,
    "radius": 10
   },
@@ -488,8 +478,8 @@
     2,
     4
    ],
-   "x": 773,
-   "z": 1915,
+   "x": 528,
+   "z": 1468,
    "yaw": 0,
    "radius": 10
   },
@@ -506,8 +496,8 @@
     2,
     4
    ],
-   "x": 1469,
-   "z": 1821,
+   "x": 711,
+   "z": 1793,
    "yaw": 0,
    "radius": 10
   },
@@ -524,8 +514,8 @@
     1,
     2
    ],
-   "x": 822,
-   "z": 1598,
+   "x": 1254,
+   "z": 1710,
    "yaw": 0,
    "radius": 10
   },
@@ -542,8 +532,8 @@
     1,
     2
    ],
-   "x": 1287,
-   "z": 1598,
+   "x": 520,
+   "z": 1681,
    "yaw": 0,
    "radius": 10
   },
@@ -560,8 +550,8 @@
     2,
     4
    ],
-   "x": 1017,
-   "z": 1515,
+   "x": 810,
+   "z": 1981,
    "yaw": 0,
    "radius": 10
   },
@@ -578,8 +568,8 @@
     2,
     4
    ],
-   "x": 911,
-   "z": 1817,
+   "x": 730,
+   "z": 1399,
    "yaw": 0,
    "radius": 10
   },
@@ -588,30 +578,30 @@
    "id": "rare_saltjaw",
    "slot": 0,
    "name": "Saltjaw",
-   "x": 964,
-   "z": 1344,
+   "x": 804,
+   "z": 1284,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     996,
-     1402
+     854,
+     1303
     ],
     [
-     920,
-     1402
+     807,
+     1333
     ],
     [
-     902,
-     1321
+     768,
+     1316
     ],
     [
-     964,
-     1285
+     751,
+     1238
     ],
     [
-     1026,
-     1305
+     832,
+     1241
     ]
    ],
    "respawnMin": [
@@ -625,30 +615,30 @@
    "id": "rare_captain_wrackley",
    "slot": 1,
    "name": "Captain Wrackley",
-   "x": 1344,
-   "z": 1387,
+   "x": 1195,
+   "z": 1468,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1321,
-     1465
+     1134,
+     1473
     ],
     [
-     1264,
-     1376
+     1159,
+     1427
     ],
     [
-     1322,
-     1333
+     1224,
+     1418
     ],
     [
-     1393,
-     1350
+     1251,
+     1509
     ],
     [
-     1396,
-     1445
+     1202,
+     1547
     ]
    ],
    "respawnMin": [
@@ -661,8 +651,8 @@
    "type": "waystone",
    "id": "ws_z14_01_saltmouth",
    "name": "Saltmouth",
-   "x": 1068.1,
-   "z": 1793,
+   "x": 793.4,
+   "z": 1570.1,
    "yaw": 0,
    "settlement": "Saltmouth",
    "radius": 1
@@ -671,8 +661,8 @@
    "type": "waystone",
    "id": "ws_z14_01_gull_steps",
    "name": "Gull Steps",
-   "x": 314.5,
-   "z": 1327.6,
+   "x": 237.1,
+   "z": 1296.4,
    "yaw": 0,
    "settlement": "Gull Steps",
    "radius": 1
@@ -681,8 +671,8 @@
    "type": "waystone",
    "id": "ws_z14_01_door",
    "name": "Barrow entrance",
-   "x": 1046.5,
-   "z": 1689.7,
+   "x": 815,
+   "z": 1817.3,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -693,9 +683,9 @@
    "name": "Harbourmaster Orla Pike",
    "role": "elder",
    "at": "Saltmouth",
-   "x": 1121.3,
-   "z": 1817.2,
-   "yaw": 0.34,
+   "x": 889,
+   "z": 1607.3,
+   "yaw": 5.38,
    "radius": 1
   },
   {
@@ -704,9 +694,9 @@
    "name": "Old Netty",
    "role": "fisher",
    "at": "Gull Steps",
-   "x": 278.8,
-   "z": 1266.5,
-   "yaw": 0.79,
+   "x": 290.6,
+   "z": 1272.5,
+   "yaw": 2.75,
    "radius": 1
   },
   {
@@ -715,9 +705,9 @@
    "name": "Gunner Wat",
    "role": "guard",
    "at": "Saltmouth Battery",
-   "x": 1243.7,
-   "z": 1968.8,
-   "yaw": 2.91,
+   "x": 1061.9,
+   "z": 1950.8,
+   "yaw": 0.19,
    "radius": 1
   },
   {
@@ -726,9 +716,9 @@
    "name": "Jory Coombe",
    "role": "smuggler",
    "at": "smugglers_cellar",
-   "x": 194.9,
-   "z": 63.3,
-   "yaw": 5.82,
+   "x": 344.6,
+   "z": 1792.5,
+   "yaw": 6.27,
    "radius": 1
   },
   {
@@ -739,8 +729,8 @@
    "clue": "map_piece",
    "how": null,
    "shimmer": null,
-   "x": 326.4,
-   "z": 1273.9,
+   "x": 288.8,
+   "z": 1215.4,
    "yaw": 0,
    "where": "edge of Gull Steps",
    "radius": 1
@@ -753,11 +743,821 @@
    "clue": "note",
    "how": null,
    "shimmer": null,
-   "x": 192.6,
-   "z": 68.1,
+   "x": 341.6,
+   "z": 1796.9,
    "yaw": 0,
    "where": "vignette smugglers_cellar",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_saltmouth_0",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1804,
+   "z": 1304,
+   "yaw": 5.56,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 61,
+   "z": 711,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_saltmouth_2",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 2008,
+   "z": 472,
+   "yaw": 4.5,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f3",
+   "monster": "dune_centipede",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 61,
+   "z": 1588,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_saltmouth_4",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 24,
+   "z": 38,
+   "yaw": 5,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f5",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1446,
+   "z": 60,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_saltmouth_6",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 424,
+   "z": 40,
+   "yaw": 3.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f7",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1204,
+   "z": 408,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_saltmouth_8",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1592,
+   "z": 1596,
+   "yaw": 2.29,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f9",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1616,
+   "z": 752,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_saltmouth_10",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 400,
+   "z": 647,
+   "yaw": 0.17,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f11",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1680,
+   "z": 1044,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_saltmouth_12",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 416,
+   "z": 964,
+   "yaw": 3.64,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f13",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 772,
+   "z": 61,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_saltmouth_14",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 2008,
+   "z": 1500,
+   "yaw": 3.97,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f15",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 928,
+   "z": 436,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_saltmouth_16",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 2008,
+   "z": 1127,
+   "yaw": 3.89,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f17",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1536,
+   "z": 1344,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_saltmouth_18",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1397,
+   "z": 608,
+   "yaw": 0.79,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f19",
+   "monster": "dune_centipede",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1684,
+   "z": 148,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_saltmouth_20",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1780,
+   "z": 552,
+   "yaw": 5.72,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f21",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 620,
+   "z": 551,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_saltmouth_22",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 96,
+   "z": 1836,
+   "yaw": 2.98,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f23",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 304,
+   "z": 1552,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_saltmouth_24",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 460,
+   "z": 272,
+   "yaw": 3.84,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f25",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1696,
+   "z": 1832,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_saltmouth_26",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1829,
+   "z": 332,
+   "yaw": 4.93,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f27",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1256,
+   "z": 188,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_saltmouth_28",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 208,
+   "z": 892,
+   "yaw": 2.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f29",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 224,
+   "z": 116,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_saltmouth_30",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1796,
+   "z": 1536,
+   "yaw": 0.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f31",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 509,
+   "z": 1159,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_saltmouth_32",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1460,
+   "z": 1768,
+   "yaw": 1.51,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f33",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1289,
+   "z": 1988,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_saltmouth_34",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 64,
+   "z": 484,
+   "yaw": 3.82,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f35",
+   "monster": "dune_centipede",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 532,
+   "z": 1908,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_saltmouth_36",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1397,
+   "z": 1540,
+   "yaw": 1.86,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f37",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1986,
+   "z": 1936,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_saltmouth_38",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 901,
+   "z": 227,
+   "yaw": 4.56,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f39",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1964,
+   "z": 659,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_saltmouth_40",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 2008,
+   "z": 265,
+   "yaw": 5.59,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f41",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1520,
+   "z": 924,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_saltmouth_42",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1388,
+   "z": 344,
+   "yaw": 5.72,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f43",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 72,
+   "z": 1384,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_saltmouth_44",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 233,
+   "z": 564,
+   "yaw": 3.85,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f45",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 433,
+   "z": 460,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_saltmouth_46",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 592,
+   "z": 124,
+   "yaw": 3.41,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f47",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 512,
+   "z": 804,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_saltmouth_48",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1080,
+   "z": 560,
+   "yaw": 1.73,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f49",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1988,
+   "z": 1309,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_saltmouth_50",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1079,
+   "z": 263,
+   "yaw": 2.59,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f51",
+   "monster": "dune_centipede",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 804,
+   "z": 580,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_saltmouth_52",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1571,
+   "z": 576,
+   "yaw": 4.92,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_saltmouth_f53",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1757,
+   "z": 879,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
   }
  ],
  "features": []

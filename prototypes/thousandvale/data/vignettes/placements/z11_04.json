@@ -46,6 +46,12 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
@@ -59,26 +65,26 @@
    "kind": "town",
    "x": 890,
    "z": 1305,
-   "r": 70,
-   "source": "ask",
-   "bakeId": null
+   "r": 90,
+   "source": "bake",
+   "bakeId": "last_lantern"
   },
   {
    "name": "Thornwick",
    "kind": "hamlet",
    "x": 1772,
    "z": 1900,
-   "r": 40,
-   "source": "ask",
-   "bakeId": null
+   "r": 46,
+   "source": "bake",
+   "bakeId": "thornwick"
   }
  ],
  "checks": [
   {
    "id": "door_1",
    "kind": "dungeon_door",
-   "x": 1164,
-   "z": 898,
+   "x": 994,
+   "z": 1171,
    "reachable": true,
    "openShare": 1
   },
@@ -93,8 +99,8 @@
   {
    "id": "event_blackthorn_scar",
    "kind": "event_site",
-   "x": 871,
-   "z": 1071,
+   "x": 877,
+   "z": 1098,
    "reachable": true,
    "openShare": 1
   }
@@ -107,9 +113,9 @@
    "name": "the Warband Stockade",
    "template": "warband_stockade",
    "friendly": false,
-   "x": 1953,
-   "z": 1896,
-   "yaw": -2.36,
+   "x": 1938,
+   "z": 1893,
+   "yaw": 0.79,
    "radius": 26,
    "level": 7
   },
@@ -120,9 +126,9 @@
    "template": "pig",
    "flavour": null,
    "settlement": "Last Lantern",
-   "x": 897,
-   "z": 1192,
-   "yaw": 1.18,
+   "x": 922,
+   "z": 1435,
+   "yaw": -3.14,
    "radius": 18,
    "level": 7
   },
@@ -133,9 +139,9 @@
    "template": "pig",
    "flavour": null,
    "settlement": "Thornwick",
-   "x": 1676,
-   "z": 1913,
-   "yaw": 0.79,
+   "x": 1669,
+   "z": 1926,
+   "yaw": 1.96,
    "radius": 18,
    "level": 7
   },
@@ -146,9 +152,9 @@
    "template": "pig",
    "flavour": "corrupted",
    "settlement": "Last Lantern",
-   "x": 881,
-   "z": 1418,
-   "yaw": 1.18,
+   "x": 791,
+   "z": 1188,
+   "yaw": 0.79,
    "radius": 18,
    "level": 7
   },
@@ -159,25 +165,38 @@
    "template": "pig",
    "flavour": "corrupted",
    "settlement": "Thornwick",
-   "x": 1812,
-   "z": 1826,
-   "yaw": 0.79,
+   "x": 1788,
+   "z": 1795,
+   "yaw": 0,
+   "radius": 18,
+   "level": 7
+  },
+  {
+   "type": "farm",
+   "id": "farm_blackthorn_scar_4",
+   "name": "Blighted Last Lantern Piggery",
+   "template": "pig",
+   "flavour": "corrupted",
+   "settlement": "Last Lantern",
+   "x": 763,
+   "z": 1379,
+   "yaw": 1.96,
    "radius": 18,
    "level": 7
   },
   {
    "type": "cave",
    "id": "cave_blackthorn_scar_0",
-   "name": "Spider hollow",
-   "template": "spider_hollow",
+   "name": "Barrow mound",
+   "template": "barrow_mound",
    "plan": {
-    "family": "cave_river",
+    "family": "barrow_maze",
     "floors": 1,
     "level": 8
    },
-   "x": 478,
-   "z": 269,
-   "yaw": 0.79,
+   "x": 1660,
+   "z": 90,
+   "yaw": 2.75,
    "radius": 10,
    "level": 8
   },
@@ -191,19 +210,19 @@
     "floors": 1,
     "level": 8
    },
-   "x": 1429,
-   "z": 112,
-   "yaw": -3.14,
+   "x": 472,
+   "z": 277,
+   "yaw": 1.18,
    "radius": 10,
    "level": 8
   },
   {
    "type": "vignette",
-   "id": "ash_choir_stones",
-   "name": "The Burnt Choir",
-   "x": 238,
-   "z": 1088,
-   "yaw": 0.79,
+   "id": "ash_wisp_crater",
+   "name": "The Smoking Crater",
+   "x": 1488,
+   "z": 1218,
+   "yaw": 1.41,
    "radius": 12,
    "biome": "mountains",
    "biomeFits": true,
@@ -211,24 +230,36 @@
   },
   {
    "type": "vignette",
-   "id": "bone_orchard",
-   "name": "The Bone Orchard",
-   "x": 1969,
-   "z": 142,
-   "yaw": 4.8,
-   "radius": 12,
+   "id": "blighted_orchard",
+   "name": "The Grey Orchard",
+   "x": 1975,
+   "z": 110,
+   "yaw": 3.07,
+   "radius": 13,
    "biome": "grassland",
    "biomeFits": true,
    "level": 1
   },
   {
    "type": "vignette",
-   "id": "burned_farmstead",
-   "name": "The Burned Farmstead",
-   "x": 354,
-   "z": 1723,
-   "yaw": 4.97,
-   "radius": 13,
+   "id": "bone_pit",
+   "name": "The Bone Pit",
+   "x": 101,
+   "z": 1056,
+   "yaw": 2.12,
+   "radius": 12,
+   "biome": "mountains",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "chained_tree",
+   "name": "The Chained Oak",
+   "x": 143,
+   "z": 1779,
+   "yaw": 2.07,
+   "radius": 11,
    "biome": "mountains",
    "biomeFits": false,
    "level": 1
@@ -237,9 +268,9 @@
    "type": "vignette",
    "id": "cult_cellar",
    "name": "The Cloud-Shouters' Cellar",
-   "x": 1457,
-   "z": 965,
-   "yaw": 1.92,
+   "x": 683,
+   "z": 1977,
+   "yaw": 4.16,
    "radius": 13,
    "biome": "mountains",
    "biomeFits": true,
@@ -247,13 +278,13 @@
   },
   {
    "type": "vignette",
-   "id": "cultist_altar",
-   "name": "The Sky Altar",
-   "x": 1092,
-   "z": 1983,
-   "yaw": 4.72,
-   "radius": 13,
-   "biome": "hills",
+   "id": "drift_mine_entry",
+   "name": "The Drift Entry",
+   "x": 1116,
+   "z": 482,
+   "yaw": 5.87,
+   "radius": 10,
+   "biome": "mountains",
    "biomeFits": true,
    "level": 1
   },
@@ -261,11 +292,11 @@
    "type": "vignette",
    "id": "gallows_crossroads",
    "name": "Gallows Crossroads",
-   "x": 1932,
-   "z": 1256,
-   "yaw": 4.24,
+   "x": 1777,
+   "z": 679,
+   "yaw": 2.42,
    "radius": 10,
-   "biome": "mountains",
+   "biome": "hills",
    "biomeFits": true,
    "level": 1
   },
@@ -273,9 +304,9 @@
    "type": "vignette",
    "id": "heretic_stake",
    "name": "The Heretic's Stake",
-   "x": 1031,
-   "z": 483,
-   "yaw": 3.08,
+   "x": 1973,
+   "z": 1152,
+   "yaw": 1.56,
    "radius": 10,
    "biome": "mountains",
    "biomeFits": true,
@@ -283,25 +314,13 @@
   },
   {
    "type": "vignette",
-   "id": "old_battlefield",
-   "name": "The Old Battlefield",
-   "x": 1759,
-   "z": 581,
-   "yaw": 0.03,
-   "radius": 15,
+   "id": "hollow_dragon_skull",
+   "name": "The Great Skull",
+   "x": 1184,
+   "z": 1931,
+   "yaw": 6.28,
+   "radius": 13,
    "biome": "hills",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "rotting_gibbet_cage",
-   "name": "The Crow Cage",
-   "x": 97,
-   "z": 602,
-   "yaw": 3.66,
-   "radius": 10,
-   "biome": "mountains",
    "biomeFits": true,
    "level": 1
   },
@@ -309,9 +328,9 @@
    "type": "vignette",
    "id": "siege_camp_leftovers",
    "name": "The Abandoned Siege Camp",
-   "x": 1381,
-   "z": 1481,
-   "yaw": 1.68,
+   "x": 106,
+   "z": 572,
+   "yaw": 2.93,
    "radius": 15,
    "biome": "mountains",
    "biomeFits": true,
@@ -330,8 +349,8 @@
     2,
     4
    ],
-   "x": 925,
-   "z": 69,
+   "x": 928,
+   "z": 87,
    "yaw": 0,
    "radius": 10
   },
@@ -348,8 +367,8 @@
     2,
     4
    ],
-   "x": 66,
-   "z": 1450,
+   "x": 1162,
+   "z": 957,
    "yaw": 0,
    "radius": 10
   },
@@ -366,8 +385,8 @@
     2,
     4
    ],
-   "x": 704,
-   "z": 1928,
+   "x": 402,
+   "z": 1184,
    "yaw": 0,
    "radius": 10
   },
@@ -384,8 +403,8 @@
     2,
     4
    ],
-   "x": 1107,
-   "z": 841,
+   "x": 103,
+   "z": 1383,
    "yaw": 0,
    "radius": 10
   },
@@ -402,8 +421,8 @@
     2,
     4
    ],
-   "x": 464,
-   "z": 746,
+   "x": 726,
+   "z": 684,
    "yaw": 0,
    "radius": 10
   },
@@ -420,8 +439,8 @@
     2,
     4
    ],
-   "x": 1963,
-   "z": 894,
+   "x": 1442,
+   "z": 1591,
    "yaw": 0,
    "radius": 10
   },
@@ -438,8 +457,8 @@
     2,
     4
    ],
-   "x": 495,
-   "z": 1368,
+   "x": 428,
+   "z": 1541,
    "yaw": 0,
    "radius": 10
   },
@@ -456,8 +475,8 @@
     2,
     4
    ],
-   "x": 1102,
-   "z": 1642,
+   "x": 1815,
+   "z": 1457,
    "yaw": 0,
    "radius": 10
   },
@@ -474,8 +493,8 @@
     2,
     4
    ],
-   "x": 76,
-   "z": 1915,
+   "x": 1442,
+   "z": 674,
    "yaw": 0,
    "radius": 10
   },
@@ -492,8 +511,8 @@
     2,
     4
    ],
-   "x": 1603,
-   "z": 1255,
+   "x": 1249,
+   "z": 63,
    "yaw": 0,
    "radius": 10
   },
@@ -510,8 +529,8 @@
     2,
     4
    ],
-   "x": 76,
-   "z": 255,
+   "x": 852,
+   "z": 1735,
    "yaw": 0,
    "radius": 10
   },
@@ -528,8 +547,8 @@
     2,
     4
    ],
-   "x": 697,
-   "z": 952,
+   "x": 388,
+   "z": 758,
    "yaw": 0,
    "radius": 10
   },
@@ -538,30 +557,30 @@
    "id": "rare_thornbound_crawler",
    "slot": 0,
    "name": "The Thornbound Crawler",
-   "x": 1278,
-   "z": 1148,
+   "x": 1163,
+   "z": 1668,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1271,
-     1080
+     1259,
+     1623
     ],
     [
-     1307,
-     1114
+     1186,
+     1743
     ],
     [
-     1311,
-     1179
+     1072,
+     1722
     ],
     [
-     1258,
-     1210
+     1096,
+     1629
     ],
     [
-     1210,
-     1142
+     1161,
+     1567
     ]
    ],
    "respawnMin": [
@@ -575,30 +594,30 @@
    "id": "rare_scab",
    "slot": 1,
    "name": "Scab",
-   "x": 1332,
-   "z": 1808,
+   "x": 97,
+   "z": 326,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1393,
-     1766
+     31,
+     422
     ],
     [
-     1385,
-     1858
+     32,
+     275
     ],
     [
-     1324,
-     1865
+     124,
+     233
     ],
     [
-     1277,
-     1810
+     187,
+     302
     ],
     [
-     1337,
-     1732
+     156,
+     408
     ]
    ],
    "respawnMin": [
@@ -611,8 +630,8 @@
    "type": "waystone",
    "id": "ws_z11_04_last_lantern",
    "name": "Last Lantern",
-   "x": 983.8,
-   "z": 1337.3,
+   "x": 816.2,
+   "z": 1240,
    "yaw": 0,
    "settlement": "Last Lantern",
    "radius": 1
@@ -621,8 +640,8 @@
    "type": "waystone",
    "id": "ws_z11_04_thornwick",
    "name": "Thornwick",
-   "x": 1841.1,
-   "z": 1906.8,
+   "x": 1845.5,
+   "z": 1911.1,
    "yaw": 0,
    "settlement": "Thornwick",
    "radius": 1
@@ -631,8 +650,8 @@
    "type": "waystone",
    "id": "ws_z11_04_door",
    "name": "Barrow entrance",
-   "x": 1206,
-   "z": 900.9,
+   "x": 1033.4,
+   "z": 1185.6,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -641,8 +660,8 @@
    "type": "waystone",
    "id": "ws_z11_04_worldboss",
    "name": "Grimtallow's Hollow",
-   "x": 1041.5,
-   "z": 1331.4,
+   "x": 1209.3,
+   "z": 1417.2,
    "yaw": 0,
    "event": "world_grimtallow",
    "radius": 1
@@ -653,9 +672,9 @@
    "name": "Rosa of Last Lantern",
    "role": "elder",
    "at": "Last Lantern",
-   "x": 889.5,
-   "z": 1301.7,
-   "yaw": 1.61,
+   "x": 882.4,
+   "z": 1300.6,
+   "yaw": 5.92,
    "radius": 1
   },
   {
@@ -664,9 +683,9 @@
    "name": "Jory the penitent",
    "role": "pilgrim",
    "at": "Thornwick",
-   "x": 1773.2,
-   "z": 1902.8,
-   "yaw": 1.63,
+   "x": 1768.1,
+   "z": 1896.9,
+   "yaw": 2.53,
    "radius": 1
   },
   {
@@ -675,9 +694,9 @@
    "name": "Outrider Garrick",
    "role": "scout",
    "at": "the Warband Stockade",
-   "x": 1954.4,
-   "z": 1897.5,
-   "yaw": 3.88,
+   "x": 1937.7,
+   "z": 1890.9,
+   "yaw": 4.35,
    "radius": 1
   },
   {
@@ -688,8 +707,8 @@
    "clue": "drunks_story",
    "how": null,
    "shimmer": null,
-   "x": 1797.5,
-   "z": 1937.3,
+   "x": 1792.7,
+   "z": 1946.7,
    "yaw": 0,
    "where": "edge of Thornwick",
    "radius": 1
@@ -702,8 +721,8 @@
    "clue": "gravestone",
    "how": null,
    "shimmer": null,
-   "x": 846.4,
-   "z": 1243.8,
+   "x": 846.8,
+   "z": 1220.3,
    "yaw": 0,
    "where": "edge of Last Lantern",
    "radius": 1
@@ -716,11 +735,731 @@
    "clue": null,
    "how": "chest",
    "shimmer": 15,
-   "x": 1071.2,
-   "z": 1160.4,
+   "x": 754.8,
+   "z": 1422.4,
    "yaw": 0,
    "where": "near Last Lantern",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_0",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 784,
+   "z": 368,
+   "yaw": 4.2,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f1",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1620,
+   "z": 343,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_2",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 43,
+   "z": 24,
+   "yaw": 0.22,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f3",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1672,
+   "z": 964,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_4",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1916,
+   "z": 412,
+   "yaw": 1.64,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f5",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 371,
+   "z": 1988,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_6",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 608,
+   "z": 946,
+   "yaw": 3.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f7",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 493,
+   "z": 581,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_8",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1920,
+   "z": 903,
+   "yaw": 2.79,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f9",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1294,
+   "z": 306,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_10",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 38,
+   "z": 2010,
+   "yaw": 2.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f11",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 580,
+   "z": 1748,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_12",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1424,
+   "z": 2008,
+   "yaw": 4.58,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f13",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 61,
+   "z": 815,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_blackthorn_scar_14",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 2004,
+   "z": 1640,
+   "yaw": 1.92,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f15",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1740,
+   "z": 1218,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_16",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 260,
+   "z": 132,
+   "yaw": 2.73,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f17",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 946,
+   "z": 698,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_blackthorn_scar_18",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 924,
+   "z": 2008,
+   "yaw": 5.11,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f19",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1988,
+   "z": 1356,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_20",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 316,
+   "z": 972,
+   "yaw": 1.13,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f21",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1592,
+   "z": 1416,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_blackthorn_scar_22",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 723,
+   "z": 200,
+   "yaw": 2.15,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f23",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1372,
+   "z": 1801,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_blackthorn_scar_24",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 974,
+   "z": 256,
+   "yaw": 4.97,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f25",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 207,
+   "z": 1572,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_blackthorn_scar_26",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1468,
+   "z": 176,
+   "yaw": 4.8,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f27",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 537,
+   "z": 1354,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_blackthorn_scar_28",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 356,
+   "z": 1740,
+   "yaw": 5.34,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f29",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 475,
+   "z": 81,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_30",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1655,
+   "z": 1616,
+   "yaw": 2.48,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f31",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 820,
+   "z": 908,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_32",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 316,
+   "z": 1368,
+   "yaw": 4.97,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f33",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1828,
+   "z": 236,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_blackthorn_scar_34",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1448,
+   "z": 460,
+   "yaw": 3.93,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f35",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 212,
+   "z": 462,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_36",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1575,
+   "z": 548,
+   "yaw": 2.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f37",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1604,
+   "z": 762,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_38",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 592,
+   "z": 1140,
+   "yaw": 3.55,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f39",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 636,
+   "z": 1568,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_blackthorn_scar_40",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 612,
+   "z": 428,
+   "yaw": 0.33,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f41",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 200,
+   "z": 1220,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_42",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 897,
+   "z": 510,
+   "yaw": 4.46,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f43",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1742,
+   "z": 510,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_44",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1557,
+   "z": 1769,
+   "yaw": 1.04,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f45",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1425,
+   "z": 601,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_blackthorn_scar_46",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1508,
+   "z": 1032,
+   "yaw": 0.55,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_f47",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 60,
+   "z": 1631,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
   }
  ],
  "features": [
@@ -729,132 +1468,128 @@
    "id": "the_thorn_wall",
    "name": "The Thorn Wall",
    "kind": "bespoke",
-   "x": 983,
+   "x": 1114,
    "z": 1024,
    "yaw": 0,
    "pts": [
     [
-     1015,
+     1146,
      80
     ],
     [
-     1030,
+     1161,
      120
     ],
     [
-     1044,
-     160
+     1183,
+     760
     ],
     [
-     1100,
-     400
+     1169,
+     800
     ],
     [
-     1102,
-     440
+     1154,
+     840
     ],
     [
-     1103,
-     480
-    ],
-    [
-     1101,
-     520
-    ],
-    [
-     1098,
-     560
-    ],
-    [
-     1092,
-     600
-    ],
-    [
-     1008,
+     1139,
      880
     ],
     [
-     992,
+     1123,
      920
     ],
     [
-     976,
+     1107,
      960
     ],
     [
-     960,
+     1091,
      1000
     ],
     [
-     945,
+     1076,
      1040
     ],
     [
-     930,
+     1061,
      1080
     ],
     [
-     916,
+     1047,
      1120
     ],
     [
-     903,
+     1034,
      1160
     ],
     [
-     863,
+     1023,
+     1200
+    ],
+    [
+     1014,
+     1240
+    ],
+    [
+     994,
+     1400
+    ],
+    [
+     994,
      1440
     ],
     [
-     866,
+     997,
      1480
     ],
     [
-     870,
+     1001,
      1520
     ],
     [
-     877,
+     1008,
      1560
     ],
     [
-     885,
+     1016,
      1600
     ],
     [
-     896,
+     1027,
      1640
     ],
     [
-     907,
+     1038,
      1680
     ],
     [
-     920,
+     1051,
      1720
     ],
     [
-     934,
+     1065,
      1760
     ],
     [
-     949,
+     1080,
      1800
     ],
     [
-     965,
+     1096,
      1840
     ],
     [
-     981,
+     1112,
      1880
     ],
     [
-     997,
+     1128,
      1920
     ],
     [
-     1013,
+     1144,
      1960
     ]
    ],

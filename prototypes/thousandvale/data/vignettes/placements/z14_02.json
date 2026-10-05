@@ -46,6 +46,12 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
@@ -61,7 +67,7 @@
    "z": 352,
    "r": 90,
    "source": "bake",
-   "bakeId": "tideford"
+   "bakeId": "gullwick"
   },
   {
    "name": "Ferry Hythe",
@@ -70,7 +76,7 @@
    "z": 560,
    "r": 65,
    "source": "bake",
-   "bakeId": "glimrow"
+   "bakeId": "ferry_hythe"
   },
   {
    "name": "Wyrmrow",
@@ -179,25 +185,25 @@
   },
   {
    "type": "vignette",
-   "id": "broken_aqueduct",
-   "name": "The Broken Aqueduct",
+   "id": "dark_lighthouse",
+   "name": "The Dark Lighthouse",
    "x": 1221,
    "z": 1563,
-   "yaw": 1.59,
-   "radius": 14,
+   "yaw": 3.6,
+   "radius": 10,
    "biome": "grassland",
-   "biomeFits": true,
+   "biomeFits": false,
    "level": 1
   },
   {
    "type": "vignette",
-   "id": "drowned_chapel",
-   "name": "The Drowned Chapel",
-   "x": 357,
-   "z": 1913,
-   "yaw": 5.69,
-   "radius": 13,
-   "biome": "marsh",
+   "id": "drowned_belfry",
+   "name": "The Drowned Belfry",
+   "x": 1725,
+   "z": 1141,
+   "yaw": 3.14,
+   "radius": 11,
+   "biome": "temperateForest",
    "biomeFits": true,
    "level": 1
   },
@@ -205,9 +211,9 @@
    "type": "vignette",
    "id": "drowned_shrine",
    "name": "The Drowned Shrine",
-   "x": 1899,
-   "z": 960,
-   "yaw": 3.16,
+   "x": 401,
+   "z": 1950,
+   "yaw": 2.06,
    "radius": 11,
    "biome": "marsh",
    "biomeFits": true,
@@ -215,59 +221,11 @@
   },
   {
    "type": "vignette",
-   "id": "heron_island",
-   "name": "Heron Island",
-   "x": 1452,
-   "z": 877,
-   "yaw": 4.77,
-   "radius": 10,
-   "biome": "marsh",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "mudlark_flats",
-   "name": "The Mudlark Flats",
-   "x": 1101,
-   "z": 1058,
-   "yaw": 2.38,
-   "radius": 13,
-   "biome": "marsh",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "stilt_house",
-   "name": "The Empty Stilt House",
-   "x": 86,
-   "z": 1169,
-   "yaw": 6.19,
-   "radius": 10,
-   "biome": "marsh",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "tide_bell_post",
-   "name": "The Tide Post",
-   "x": 371,
-   "z": 836,
-   "yaw": 4.03,
-   "radius": 10,
-   "biome": "marsh",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "toll_bridge_trolls",
-   "name": "The Toll Bridge",
-   "x": 1919,
-   "z": 1678,
-   "yaw": 1.91,
+   "id": "eel_traps",
+   "name": "The Eel Weir",
+   "x": 1923,
+   "z": 1836,
+   "yaw": 5.26,
    "radius": 11,
    "biome": "grassland",
    "biomeFits": true,
@@ -275,13 +233,61 @@
   },
   {
    "type": "vignette",
-   "id": "will_o_lights",
-   "name": "The Lantern Path",
-   "x": 685,
-   "z": 744,
-   "yaw": 2.85,
-   "radius": 14,
+   "id": "heron_island",
+   "name": "Heron Island",
+   "x": 1423,
+   "z": 883,
+   "yaw": 2.11,
+   "radius": 10,
    "biome": "marsh",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "roadside_shrine",
+   "name": "The Wayside Saint",
+   "x": 1952,
+   "z": 86,
+   "yaw": 5.76,
+   "radius": 8,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "smugglers_beacon",
+   "name": "The False Beacon",
+   "x": 67,
+   "z": 93,
+   "yaw": 3.82,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "toll_bridge_trolls",
+   "name": "The Toll Bridge",
+   "x": 85,
+   "z": 884,
+   "yaw": 0.26,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "weavers_bridge_toll",
+   "name": "The Spider Bridge",
+   "x": 749,
+   "z": 962,
+   "yaw": 4.99,
+   "radius": 12,
+   "biome": "temperateForest",
    "biomeFits": true,
    "level": 1
   },
@@ -289,11 +295,11 @@
    "type": "vignette",
    "id": "wreck_on_the_rocks",
    "name": "The Wreck of the Patience",
-   "x": 858,
-   "z": 81,
-   "yaw": 5.69,
+   "x": 1975,
+   "z": 753,
+   "yaw": 2.29,
    "radius": 14,
-   "biome": "borealForest",
+   "biome": "temperateForest",
    "biomeFits": false,
    "level": 1
   },
@@ -328,8 +334,8 @@
     2,
     4
    ],
-   "x": 1945,
-   "z": 385,
+   "x": 1100,
+   "z": 974,
    "yaw": 0,
    "radius": 10
   },
@@ -346,8 +352,8 @@
     2,
     4
    ],
-   "x": 1549,
-   "z": 699,
+   "x": 65,
+   "z": 1267,
    "yaw": 0,
    "radius": 10
   },
@@ -364,8 +370,8 @@
     2,
     4
    ],
-   "x": 409,
-   "z": 1687,
+   "x": 866,
+   "z": 111,
    "yaw": 0,
    "radius": 10
   },
@@ -382,8 +388,8 @@
     2,
     4
    ],
-   "x": 830,
-   "z": 471,
+   "x": 818,
+   "z": 462,
    "yaw": 0,
    "radius": 10
   },
@@ -400,8 +406,8 @@
     2,
     4
    ],
-   "x": 909,
-   "z": 879,
+   "x": 849,
+   "z": 723,
    "yaw": 0,
    "radius": 10
   },
@@ -418,8 +424,8 @@
     2,
     4
    ],
-   "x": 1686,
-   "z": 1209,
+   "x": 656,
+   "z": 1744,
    "yaw": 0,
    "radius": 10
   },
@@ -436,8 +442,8 @@
     2,
     4
    ],
-   "x": 1978,
-   "z": 1242,
+   "x": 170,
+   "z": 1717,
    "yaw": 0,
    "radius": 10
   },
@@ -454,8 +460,8 @@
     2,
     4
    ],
-   "x": 1302,
-   "z": 255,
+   "x": 1518,
+   "z": 704,
    "yaw": 0,
    "radius": 10
   },
@@ -472,8 +478,8 @@
     2,
     4
    ],
-   "x": 1565,
-   "z": 593,
+   "x": 1307,
+   "z": 260,
    "yaw": 0,
    "radius": 10
   },
@@ -490,8 +496,8 @@
     2,
     4
    ],
-   "x": 1216,
-   "z": 247,
+   "x": 1567,
+   "z": 614,
    "yaw": 0,
    "radius": 10
   },
@@ -508,8 +514,8 @@
     2,
     4
    ],
-   "x": 1523,
-   "z": 644,
+   "x": 1212,
+   "z": 251,
    "yaw": 0,
    "radius": 10
   },
@@ -526,8 +532,8 @@
     2,
     4
    ],
-   "x": 1301,
-   "z": 301,
+   "x": 1529,
+   "z": 583,
    "yaw": 0,
    "radius": 10
   },
@@ -544,8 +550,8 @@
     2,
     4
    ],
-   "x": 1512,
-   "z": 748,
+   "x": 1527,
+   "z": 648,
    "yaw": 0,
    "radius": 10
   },
@@ -560,24 +566,24 @@
    "radius": 15,
    "path": [
     [
-     1325,
-     183
+     1293,
+     246
     ],
     [
-     1273,
-     245
+     1225,
+     235
     ],
     [
-     1197,
-     238
+     1171,
+     165
     ],
     [
-     1184,
-     156
+     1266,
+     118
     ],
     [
-     1274,
-     114
+     1360,
+     158
     ]
    ],
    "respawnMin": [
@@ -591,30 +597,30 @@
    "id": "rare_waterstrider_tolla",
    "slot": 1,
    "name": "Tolla Longlegs",
-   "x": 1453,
-   "z": 672,
+   "x": 1787,
+   "z": 593,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1397,
-     688
+     1763,
+     549
     ],
     [
-     1419,
-     641
+     1836,
+     562
     ],
     [
-     1485,
-     608
+     1831,
+     617
     ],
     [
-     1514,
-     695
+     1761,
+     661
     ],
     [
-     1477,
-     742
+     1735,
+     573
     ]
    ],
    "respawnMin": [
@@ -627,8 +633,8 @@
    "type": "waystone",
    "id": "ws_z14_02_gullwick",
    "name": "Gullwick",
-   "x": 1451,
-   "z": 438.7,
+   "x": 1574.5,
+   "z": 437.4,
    "yaw": 0,
    "settlement": "Gullwick",
    "radius": 1
@@ -637,8 +643,8 @@
    "type": "waystone",
    "id": "ws_z14_02_ferry_hythe",
    "name": "Ferry Hythe",
-   "x": 425,
-   "z": 643.8,
+   "x": 441.2,
+   "z": 636.7,
    "yaw": 0,
    "settlement": "Ferry Hythe",
    "radius": 1
@@ -647,8 +653,8 @@
    "type": "waystone",
    "id": "ws_z14_02_wyrmrow",
    "name": "Wyrmrow",
-   "x": 883.7,
-   "z": 1792.6,
+   "x": 878.6,
+   "z": 1797.3,
    "yaw": 0,
    "settlement": "Wyrmrow",
    "radius": 1
@@ -657,8 +663,8 @@
    "type": "waystone",
    "id": "ws_z14_02_mirekeep",
    "name": "Mirekeep",
-   "x": 967,
-   "z": 1216.4,
+   "x": 952.3,
+   "z": 1296.8,
    "yaw": 0,
    "settlement": "Mirekeep",
    "radius": 1
@@ -667,8 +673,8 @@
    "type": "waystone",
    "id": "ws_z14_02_door",
    "name": "Barrow entrance",
-   "x": 1584.5,
-   "z": 458.1,
+   "x": 1662.8,
+   "z": 488.5,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -679,9 +685,9 @@
    "name": "Ferrywoman Nell",
    "role": "trader",
    "at": "Ferry Hythe",
-   "x": 413.7,
-   "z": 570.4,
-   "yaw": 4.44,
+   "x": 408.2,
+   "z": 571,
+   "yaw": 4.77,
    "radius": 1
   },
   {
@@ -690,9 +696,9 @@
    "name": "Elder Hollis",
    "role": "elder",
    "at": "Gullwick",
-   "x": 1518.2,
-   "z": 363.7,
-   "yaw": 5.27,
+   "x": 1521.1,
+   "z": 368.3,
+   "yaw": 0.17,
    "radius": 1
   },
   {
@@ -701,9 +707,9 @@
    "name": "Stilt-guard Emrys",
    "role": "guard",
    "at": "Stilt Fort",
-   "x": 1112,
-   "z": 640.6,
-   "yaw": 5.48,
+   "x": 1111.9,
+   "z": 640.3,
+   "yaw": 0.89,
    "radius": 1
   },
   {
@@ -712,9 +718,9 @@
    "name": "Tobin the angler",
    "role": "fisher",
    "at": "drowned_shrine",
-   "x": 1898.8,
-   "z": 962.6,
-   "yaw": 3.88,
+   "x": 400.9,
+   "z": 1952.5,
+   "yaw": 6.11,
    "radius": 1
   },
   {
@@ -725,8 +731,8 @@
    "clue": "carved_arrow",
    "how": null,
    "shimmer": null,
-   "x": 1111.3,
-   "z": 639.4,
+   "x": 1111,
+   "z": 642.9,
    "yaw": 0,
    "where": "fort Stilt Fort",
    "radius": 1
@@ -739,8 +745,8 @@
    "clue": null,
    "how": "dig",
    "shimmer": 15,
-   "x": 1041.4,
-   "z": 644.5,
+   "x": 1167,
+   "z": 503.6,
    "yaw": 0,
    "where": "near Stilt Fort",
    "radius": 1
@@ -753,8 +759,8 @@
    "clue": "drunks_story",
    "how": null,
    "shimmer": null,
-   "x": 475.2,
-   "z": 522.5,
+   "x": 363.6,
+   "z": 513.5,
    "yaw": 0,
    "where": "edge of Ferry Hythe",
    "radius": 1
@@ -767,8 +773,8 @@
    "clue": "carved_arrow",
    "how": null,
    "shimmer": null,
-   "x": 1898.8,
-   "z": 957,
+   "x": 403.7,
+   "z": 1951.3,
    "yaw": 0,
    "where": "vignette drowned_shrine",
    "radius": 1
@@ -781,11 +787,761 @@
    "clue": null,
    "how": "dig",
    "shimmer": 15,
-   "x": 1913.3,
-   "z": 821.3,
+   "x": 356.6,
+   "z": 2019.2,
    "yaw": 0,
    "where": "near The Drowned Shrine",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_gullwick_0",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1512,
+   "z": 1872,
+   "yaw": 2.45,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f1",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1652,
+   "z": 1523,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gullwick_2",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 2008,
+   "z": 1460,
+   "yaw": 2.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f3",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 489,
+   "z": 72,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gullwick_4",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1408,
+   "z": 1260,
+   "yaw": 2.85,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f5",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 696,
+   "z": 1439,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_6",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1212,
+   "z": 1888,
+   "yaw": 6.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f7",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1986,
+   "z": 371,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_8",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 416,
+   "z": 1608,
+   "yaw": 2.11,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f9",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 280,
+   "z": 1092,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gullwick_10",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1736,
+   "z": 864,
+   "yaw": 1.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f11",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 284,
+   "z": 252,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_gullwick_12",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 935,
+   "z": 1555,
+   "yaw": 2.63,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f13",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 639,
+   "z": 1189,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_gullwick_14",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 212,
+   "z": 1472,
+   "yaw": 4.43,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f15",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 664,
+   "z": 264,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_gullwick_16",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1444,
+   "z": 1647,
+   "yaw": 3.1,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f17",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 785,
+   "z": 1187,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_gullwick_18",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1723,
+   "z": 25,
+   "yaw": 5.77,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f19",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 141,
+   "z": 652,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_gullwick_20",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1708,
+   "z": 1752,
+   "yaw": 4.57,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f21",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 284,
+   "z": 62,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gullwick_22",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1817,
+   "z": 1348,
+   "yaw": 0.08,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f23",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1300,
+   "z": 1072,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_24",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 156,
+   "z": 1952,
+   "yaw": 2.94,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f25",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1800,
+   "z": 256,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_gullwick_26",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 176,
+   "z": 436,
+   "yaw": 0.89,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f27",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1528,
+   "z": 1068,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gullwick_28",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1876,
+   "z": 1624,
+   "yaw": 5.92,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f29",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1602,
+   "z": 1320,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_gullwick_30",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1072,
+   "z": 1727,
+   "yaw": 3.71,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f31",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 636,
+   "z": 708,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gullwick_32",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1232,
+   "z": 1348,
+   "yaw": 1.71,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f33",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1393,
+   "z": 1461,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gullwick_34",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 655,
+   "z": 1055,
+   "yaw": 3.25,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f35",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1299,
+   "z": 61,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gullwick_36",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 264,
+   "z": 808,
+   "yaw": 4.05,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f37",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 60,
+   "z": 289,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_gullwick_38",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 472,
+   "z": 1112,
+   "yaw": 4.23,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f39",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1988,
+   "z": 566,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_40",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 348,
+   "z": 1771,
+   "yaw": 5.98,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f41",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1760,
+   "z": 1924,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_gullwick_42",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 588,
+   "z": 1912,
+   "yaw": 0.93,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f43",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1980,
+   "z": 1280,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_gullwick_44",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1008,
+   "z": 816,
+   "yaw": 4.43,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f45",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 84,
+   "z": 1080,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_gullwick_46",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 684,
+   "z": 77,
+   "yaw": 0.32,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f47",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1263,
+   "z": 504,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_gullwick_48",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1288,
+   "z": 1732,
+   "yaw": 0.51,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f49",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 472,
+   "z": 260,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
   }
  ],
  "features": []

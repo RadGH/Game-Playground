@@ -46,22 +46,28 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
    "slope": 10
   }
  },
- "mainWalkableShare": 0.997,
+ "mainWalkableShare": 0.994,
  "settlements": [
   {
    "name": "Brackwater",
    "kind": "town",
    "x": 1136,
    "z": 870,
-   "r": 70,
-   "source": "ask",
-   "bakeId": null
+   "r": 90,
+   "source": "bake",
+   "bakeId": "brackwater"
   },
   {
    "name": "Eelwick",
@@ -69,24 +75,24 @@
    "x": 1164,
    "z": 427,
    "r": 40,
-   "source": "ask",
-   "bakeId": null
+   "source": "bake",
+   "bakeId": "eelwick"
   }
  ],
  "checks": [
   {
    "id": "door_1",
    "kind": "dungeon_door",
-   "x": 946,
-   "z": 1186,
+   "x": 1061,
+   "z": 1066,
    "reachable": true,
    "openShare": 1
   },
   {
    "id": "event_brackwater",
    "kind": "event_site",
-   "x": 1024,
-   "z": 1024,
+   "x": 1026,
+   "z": 981,
    "reachable": true,
    "openShare": 1
   }
@@ -99,8 +105,8 @@
    "name": "Reedwall Tower",
    "template": "watchtower_garrison",
    "friendly": true,
-   "x": 1055,
-   "z": 1195,
+   "x": 1031,
+   "z": 397,
    "yaw": 1.57,
    "radius": 16,
    "level": 5
@@ -108,42 +114,42 @@
   {
    "type": "farm",
    "id": "farm_brackwater_0",
-   "name": "Brackwater Piggery",
-   "template": "pig",
+   "name": "Brackwater Fishing Plot",
+   "template": "fishing_plot",
    "flavour": null,
    "settlement": "Brackwater",
-   "x": 1141,
-   "z": 509,
-   "yaw": 1.57,
-   "radius": 18,
+   "x": 1250,
+   "z": 976,
+   "yaw": -1.96,
+   "radius": 16,
    "level": 5
   },
   {
    "type": "farm",
    "id": "farm_brackwater_1",
-   "name": "Eelwick Farm",
-   "template": "arable",
+   "name": "Eelwick Fishing Plot",
+   "template": "fishing_plot",
    "flavour": null,
    "settlement": "Eelwick",
-   "x": 993,
-   "z": 840,
-   "yaw": 1.57,
-   "radius": 22,
+   "x": 1439,
+   "z": 731,
+   "yaw": -1.18,
+   "radius": 16,
    "level": 5
   },
   {
    "type": "cave",
    "id": "cave_brackwater_0",
-   "name": "Spider hollow",
-   "template": "spider_hollow",
+   "name": "Sump grotto",
+   "template": "sump_grotto",
    "plan": {
-    "family": "cave_river",
+    "family": "sunken_temple",
     "floors": 1,
     "level": 6
    },
-   "x": 407,
-   "z": 649,
-   "yaw": -0.39,
+   "x": 1552,
+   "z": 1460,
+   "yaw": -2.75,
    "radius": 10,
    "level": 6
   },
@@ -157,9 +163,9 @@
     "floors": 1,
     "level": 6
    },
-   "x": 1753,
-   "z": 1767,
-   "yaw": 2.75,
+   "x": 1732,
+   "z": 1086,
+   "yaw": -1.96,
    "radius": 10,
    "level": 6
   },
@@ -168,56 +174,20 @@
    "id": "the_drowned_bells",
    "name": "The Drowned Bells",
    "kind": "compositional",
-   "x": 152,
-   "z": 1565,
+   "x": 1304,
+   "z": 1505,
    "yaw": 0,
    "radius": 20,
    "where": "best fit for: deep water",
-   "needMet": false
-  },
-  {
-   "type": "vignette",
-   "id": "beekeeper_hives",
-   "name": "The Angry Hives",
-   "x": 747,
-   "z": 1713,
-   "yaw": 4.79,
-   "radius": 10,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "drowned_belfry",
-   "name": "The Drowned Belfry",
-   "x": 1577,
-   "z": 92,
-   "yaw": 0.38,
-   "radius": 11,
-   "biome": "grassland",
-   "biomeFits": false,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "eel_traps",
-   "name": "The Eel Weir",
-   "x": 1816,
-   "z": 993,
-   "yaw": 4.91,
-   "radius": 11,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
+   "needMet": true
   },
   {
    "type": "vignette",
    "id": "fen_witch_hut",
    "name": "Old Mabry's Stilt Hut",
-   "x": 616,
-   "z": 64,
-   "yaw": 0.69,
+   "x": 171,
+   "z": 1426,
+   "yaw": 1.2,
    "radius": 12,
    "biome": "grassland",
    "biomeFits": true,
@@ -225,23 +195,11 @@
   },
   {
    "type": "vignette",
-   "id": "ferryman_shrine",
-   "name": "The Ferryman's Coin",
-   "x": 524,
-   "z": 1184,
-   "yaw": 0.34,
-   "radius": 10,
-   "biome": "grassland",
-   "biomeFits": false,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "flooded_mill",
-   "name": "The Flooded Mill",
-   "x": 64,
-   "z": 109,
-   "yaw": 5.6,
+   "id": "lock_keeper_house",
+   "name": "The Lock-Keeper's Cottage",
+   "x": 407,
+   "z": 649,
+   "yaw": 1.81,
    "radius": 12,
    "biome": "grassland",
    "biomeFits": true,
@@ -251,48 +209,96 @@
    "type": "vignette",
    "id": "lone_archer_post",
    "name": "The Reed Hide",
-   "x": 1986,
-   "z": 474,
-   "yaw": 0.32,
+   "x": 1078,
+   "z": 1297,
+   "yaw": 4.9,
    "radius": 9,
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "peat_cutters",
+   "name": "The Peat Cutters' Camp",
+   "x": 148,
+   "z": 79,
+   "yaw": 0.73,
+   "radius": 12,
    "biome": "grassland",
-   "biomeFits": false,
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "sinkhole_garden",
+   "name": "The Sinkhole Garden",
+   "x": 625,
+   "z": 1964,
+   "yaw": 5.78,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "stone_circle_hum",
+   "name": "The Humming Stones",
+   "x": 1685,
+   "z": 124,
+   "yaw": 0.12,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
    "level": 1
   },
   {
    "type": "vignette",
    "id": "tar_pits",
    "name": "The Tar Seep",
-   "x": 1226,
-   "z": 1920,
-   "yaw": 4.26,
+   "x": 1375,
+   "z": 1275,
+   "yaw": 2.19,
    "radius": 12,
-   "biome": "grassland",
-   "biomeFits": false,
+   "biome": "marsh",
+   "biomeFits": true,
    "level": 1
   },
   {
    "type": "vignette",
-   "id": "weavers_bridge_toll",
-   "name": "The Spider Bridge",
-   "x": 1501,
-   "z": 1338,
-   "yaw": 4.22,
-   "radius": 12,
-   "biome": "grassland",
-   "biomeFits": false,
+   "id": "tide_bell_post",
+   "name": "The Tide Post",
+   "x": 1529,
+   "z": 990,
+   "yaw": 1.13,
+   "radius": 10,
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "will_o_lights",
+   "name": "The Lantern Path",
+   "x": 1646,
+   "z": 1332,
+   "yaw": 4.92,
+   "radius": 14,
+   "biome": "marsh",
+   "biomeFits": true,
    "level": 1
   },
   {
    "type": "vignette",
    "id": "witch_stump",
    "name": "The Wishing Stump",
-   "x": 70,
-   "z": 981,
-   "yaw": 3.42,
+   "x": 1625,
+   "z": 801,
+   "yaw": 3.57,
    "radius": 10,
-   "biome": "grassland",
-   "biomeFits": false,
+   "biome": "marsh",
+   "biomeFits": true,
    "level": 1
   },
   {
@@ -308,8 +314,8 @@
     2,
     4
    ],
-   "x": 363,
-   "z": 1969,
+   "x": 1943,
+   "z": 1982,
    "yaw": 0,
    "radius": 10
   },
@@ -326,8 +332,8 @@
     2,
     4
    ],
-   "x": 1144,
-   "z": 71,
+   "x": 1535,
+   "z": 1214,
    "yaw": 0,
    "radius": 10
   },
@@ -344,8 +350,8 @@
     2,
     4
    ],
-   "x": 1555,
-   "z": 568,
+   "x": 92,
+   "z": 1972,
    "yaw": 0,
    "radius": 10
   },
@@ -362,8 +368,8 @@
     2,
     4
    ],
-   "x": 1975,
-   "z": 1403,
+   "x": 596,
+   "z": 1131,
    "yaw": 0,
    "radius": 10
   },
@@ -380,8 +386,8 @@
     2,
     4
    ],
-   "x": 818,
-   "z": 367,
+   "x": 1290,
+   "z": 94,
    "yaw": 0,
    "radius": 10
   },
@@ -398,8 +404,8 @@
     2,
     4
    ],
-   "x": 1355,
-   "z": 293,
+   "x": 1473,
+   "z": 372,
    "yaw": 0,
    "radius": 10
   },
@@ -416,8 +422,8 @@
     2,
     4
    ],
-   "x": 1380,
-   "z": 944,
+   "x": 1138,
+   "z": 1107,
    "yaw": 0,
    "radius": 10
   },
@@ -434,8 +440,8 @@
     2,
     4
    ],
-   "x": 815,
-   "z": 1053,
+   "x": 1413,
+   "z": 887,
    "yaw": 0,
    "radius": 10
   },
@@ -452,8 +458,8 @@
     2,
     4
    ],
-   "x": 857,
-   "z": 621,
+   "x": 1363,
+   "z": 1051,
    "yaw": 0,
    "radius": 10
   },
@@ -470,8 +476,8 @@
     2,
     4
    ],
-   "x": 1335,
-   "z": 674,
+   "x": 1500,
+   "z": 820,
    "yaw": 0,
    "radius": 10
   },
@@ -488,8 +494,8 @@
     2,
     4
    ],
-   "x": 1302,
-   "z": 1189,
+   "x": 1176,
+   "z": 1262,
    "yaw": 0,
    "radius": 10
   },
@@ -506,8 +512,8 @@
     2,
     4
    ],
-   "x": 760,
-   "z": 841,
+   "x": 1488,
+   "z": 1074,
    "yaw": 0,
    "radius": 10
   },
@@ -516,30 +522,30 @@
    "id": "rare_reedmother_ysolt",
    "slot": 0,
    "name": "Reedmother Ysolt",
-   "x": 1611,
-   "z": 811,
+   "x": 1188,
+   "z": 1344,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1620,
-     747
+     1129,
+     1343
     ],
     [
-     1663,
-     782
+     1191,
+     1268
     ],
     [
-     1639,
-     900
+     1226,
+     1315
     ],
     [
-     1558,
-     872
+     1222,
+     1391
     ],
     [
-     1564,
-     776
+     1153,
+     1407
     ]
    ],
    "respawnMin": [
@@ -553,30 +559,30 @@
    "id": "rare_lantern_drowner",
    "slot": 1,
    "name": "The Lantern Drowner",
-   "x": 1539,
-   "z": 1102,
+   "x": 1137,
+   "z": 1301,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1642,
-     1075
+     1200,
+     1284
     ],
     [
-     1557,
-     1187
+     1171,
+     1368
     ],
     [
-     1484,
-     1175
+     1097,
+     1382
     ],
     [
-     1479,
-     1067
+     1064,
+     1291
     ],
     [
-     1572,
-     1033
+     1112,
+     1224
     ]
    ],
    "respawnMin": [
@@ -589,8 +595,8 @@
    "type": "waystone",
    "id": "ws_z13_01_brackwater",
    "name": "Brackwater",
-   "x": 1114.6,
-   "z": 782.8,
+   "x": 1068.7,
+   "z": 797.3,
    "yaw": 0,
    "settlement": "Brackwater",
    "radius": 1
@@ -599,8 +605,8 @@
    "type": "waystone",
    "id": "ws_z13_01_eelwick",
    "name": "Eelwick",
-   "x": 1131.8,
-   "z": 367.6,
+   "x": 1159.9,
+   "z": 379,
    "yaw": 0,
    "settlement": "Eelwick",
    "radius": 1
@@ -609,8 +615,8 @@
    "type": "waystone",
    "id": "ws_z13_01_door",
    "name": "Barrow entrance",
-   "x": 918.9,
-   "z": 1218.1,
+   "x": 1092.9,
+   "z": 1093.7,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -621,9 +627,9 @@
    "name": "Reeve Mabry Fenwick",
    "role": "elder",
    "at": "Brackwater",
-   "x": 1133.5,
-   "z": 871.8,
-   "yaw": 5,
+   "x": 1143.5,
+   "z": 875.2,
+   "yaw": 0.87,
    "radius": 1
   },
   {
@@ -632,9 +638,9 @@
    "name": "Wenna Eelwife",
    "role": "fisher",
    "at": "Eelwick",
-   "x": 1162.9,
-   "z": 424,
-   "yaw": 4.43,
+   "x": 1156.7,
+   "z": 429.8,
+   "yaw": 4.27,
    "radius": 1
   },
   {
@@ -643,9 +649,9 @@
    "name": "Keeper Haskel",
    "role": "guard",
    "at": "Reedwall Tower",
-   "x": 1055.8,
-   "z": 1193.1,
-   "yaw": 2.95,
+   "x": 1032.6,
+   "z": 398.3,
+   "yaw": 3.85,
    "radius": 1
   },
   {
@@ -654,9 +660,9 @@
    "name": "Old Mabry",
    "role": "hedge-witch",
    "at": "fen_witch_hut",
-   "x": 613.4,
-   "z": 64.2,
-   "yaw": 1.1,
+   "x": 170.6,
+   "z": 1428.5,
+   "yaw": 1.53,
    "radius": 1
   },
   {
@@ -667,8 +673,8 @@
    "clue": "drunks_story",
    "how": null,
    "shimmer": null,
-   "x": 1155.3,
-   "z": 471.3,
+   "x": 1172.3,
+   "z": 382.7,
    "yaw": 0,
    "where": "edge of Eelwick",
    "radius": 1
@@ -681,8 +687,8 @@
    "clue": "note",
    "how": null,
    "shimmer": null,
-   "x": 618.1,
-   "z": 61.7,
+   "x": 168.4,
+   "z": 1427.6,
    "yaw": 0,
    "where": "vignette fen_witch_hut",
    "radius": 1
@@ -695,11 +701,851 @@
    "clue": null,
    "how": "chest",
    "shimmer": 15,
-   "x": 1055,
-   "z": 1197,
+   "x": 1032.9,
+   "z": 397.6,
    "yaw": 0,
    "where": "fort Reedwall Tower",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_brackwater_0",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 652,
+   "z": 40,
+   "yaw": 3.56,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f1",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1492,
+   "z": 1916,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_brackwater_2",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 720,
+   "z": 1540,
+   "yaw": 2.58,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f3",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1980,
+   "z": 1568,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_brackwater_4",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1092,
+   "z": 1852,
+   "yaw": 0.99,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f5",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1816,
+   "z": 484,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_brackwater_6",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 240,
+   "z": 1056,
+   "yaw": 1.35,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f7",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 357,
+   "z": 1719,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_brackwater_8",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 768,
+   "z": 664,
+   "yaw": 2.99,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f9",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 480,
+   "z": 320,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_brackwater_10",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 964,
+   "z": 76,
+   "yaw": 5.42,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f11",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1732,
+   "z": 1732,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_brackwater_12",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 472,
+   "z": 1392,
+   "yaw": 4.84,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f13",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1004,
+   "z": 1584,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_brackwater_14",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1964,
+   "z": 1268,
+   "yaw": 0.72,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f15",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 768,
+   "z": 292,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_brackwater_16",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1980,
+   "z": 960,
+   "yaw": 1.61,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f17",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 232,
+   "z": 429,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_brackwater_18",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 2024,
+   "z": 296,
+   "yaw": 3.95,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f19",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 840,
+   "z": 1796,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_brackwater_20",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 559,
+   "z": 868,
+   "yaw": 1.05,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f21",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 804,
+   "z": 1304,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_brackwater_22",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 412,
+   "z": 84,
+   "yaw": 2.71,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f23",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 108,
+   "z": 1688,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_brackwater_24",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1856,
+   "z": 728,
+   "yaw": 0.09,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f25",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 216,
+   "z": 812,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_brackwater_26",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 340,
+   "z": 1964,
+   "yaw": 4.65,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f27",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1304,
+   "z": 1768,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_brackwater_28",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 600,
+   "z": 1728,
+   "yaw": 3.2,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f29",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 780,
+   "z": 912,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_brackwater_30",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 596,
+   "z": 512,
+   "yaw": 6.21,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f31",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1512,
+   "z": 1684,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_brackwater_32",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1604,
+   "z": 555,
+   "yaw": 2.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f33",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 972,
+   "z": 612,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_brackwater_34",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 103,
+   "z": 607,
+   "yaw": 3.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f35",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1768,
+   "z": 1516,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_brackwater_36",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 305,
+   "z": 1252,
+   "yaw": 2.82,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f37",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1728,
+   "z": 1956,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_brackwater_38",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1492,
+   "z": 41,
+   "yaw": 0.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f39",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1936,
+   "z": 1768,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_brackwater_40",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 44,
+   "z": 256,
+   "yaw": 4.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f41",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1900,
+   "z": 136,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_brackwater_42",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1364,
+   "z": 541,
+   "yaw": 3.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f43",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 288,
+   "z": 240,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_brackwater_44",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1671,
+   "z": 333,
+   "yaw": 5.45,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f45",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 828,
+   "z": 1104,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_brackwater_46",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 432,
+   "z": 1020,
+   "yaw": 1.46,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f47",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1120,
+   "z": 196,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_brackwater_48",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 908,
+   "z": 1976,
+   "yaw": 2.44,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f49",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 816,
+   "z": 480,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_brackwater_50",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1796,
+   "z": 904,
+   "yaw": 5.42,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f51",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 124,
+   "z": 1208,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_brackwater_52",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 332,
+   "z": 1527,
+   "yaw": 3.83,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f53",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 528,
+   "z": 1564,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_brackwater_54",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1968,
+   "z": 588,
+   "yaw": 0.46,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f55",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1324,
+   "z": 272,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
   }
  ],
  "features": []

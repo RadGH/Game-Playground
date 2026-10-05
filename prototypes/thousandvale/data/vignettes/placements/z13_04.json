@@ -46,22 +46,28 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
    "slope": 10
   }
  },
- "mainWalkableShare": 0.788,
+ "mainWalkableShare": 0.787,
  "settlements": [
   {
    "name": "Gorsehold",
    "kind": "town",
    "x": 1564,
    "z": 1286,
-   "r": 70,
-   "source": "ask",
-   "bakeId": null
+   "r": 90,
+   "source": "bake",
+   "bakeId": "gorsehold"
   },
   {
    "name": "Burnt Barns",
@@ -69,24 +75,24 @@
    "x": 1594,
    "z": 367,
    "r": 40,
-   "source": "ask",
-   "bakeId": null
+   "source": "bake",
+   "bakeId": "burnt_barns"
   }
  ],
  "checks": [
   {
    "id": "door_1",
    "kind": "dungeon_door",
-   "x": 1357,
-   "z": 579,
+   "x": 1364,
+   "z": 1286,
    "reachable": true,
    "openShare": 1
   },
   {
    "id": "event_gorse_march",
    "kind": "event_site",
-   "x": 1218,
-   "z": 1071,
+   "x": 1326,
+   "z": 1155,
    "reachable": true,
    "openShare": 1
   }
@@ -99,9 +105,9 @@
    "name": "Gorsehold Redoubt",
    "template": "ruined_fort",
    "friendly": false,
-   "x": 1361,
-   "z": 335,
-   "yaw": 1.57,
+   "x": 1486,
+   "z": 274,
+   "yaw": 0.79,
    "radius": 22,
    "level": 6
   },
@@ -109,85 +115,69 @@
    "type": "fort",
    "id": "fort_gorse_march_1",
    "name": "Gorsehold Outpost",
-   "template": "warband_stockade",
+   "template": "ruined_fort",
    "friendly": false,
-   "x": 1598,
-   "z": 1679,
-   "yaw": 1.57,
-   "radius": 26,
+   "x": 1767,
+   "z": 1863,
+   "yaw": -2.75,
+   "radius": 22,
    "level": 6
   },
   {
    "type": "farm",
    "id": "farm_gorse_march_0",
-   "name": "Gorsehold Farm",
-   "template": "arable",
+   "name": "Gorsehold Sheepfold",
+   "template": "sheep",
    "flavour": null,
    "settlement": "Gorsehold",
-   "x": 1590,
-   "z": 1167,
-   "yaw": 1.57,
-   "radius": 22,
+   "x": 1692,
+   "z": 1222,
+   "yaw": -1.18,
+   "radius": 24,
    "level": 6
   },
   {
    "type": "farm",
    "id": "farm_gorse_march_1",
-   "name": "Burnt Barns Sheepfold",
-   "template": "sheep",
+   "name": "Burnt Barns Farm",
+   "template": "arable",
    "flavour": null,
    "settlement": "Burnt Barns",
-   "x": 1682,
-   "z": 351,
-   "yaw": 1.57,
-   "radius": 24,
+   "x": 1697,
+   "z": 402,
+   "yaw": -1.96,
+   "radius": 22,
    "level": 6
   },
   {
    "type": "farm",
    "id": "farm_gorse_march_2",
-   "name": "Burned Gorsehold Sheepfold",
-   "template": "sheep",
+   "name": "Burned Gorsehold Farm",
+   "template": "arable",
    "flavour": "burned",
    "settlement": "Gorsehold",
    "x": 1516,
-   "z": 1413,
-   "yaw": 1.57,
-   "radius": 24,
+   "z": 1429,
+   "yaw": 2.75,
+   "radius": 22,
    "level": 6
   },
   {
    "type": "farm",
    "id": "farm_gorse_march_3",
-   "name": "Burned Burnt Barns Farm",
-   "template": "arable",
+   "name": "Burned Burnt Barns Sheepfold",
+   "template": "sheep",
    "flavour": "burned",
    "settlement": "Burnt Barns",
-   "x": 1518,
-   "z": 411,
-   "yaw": 1.57,
-   "radius": 22,
+   "x": 1544,
+   "z": 454,
+   "yaw": 2.75,
+   "radius": 24,
    "level": 6
   },
   {
    "type": "cave",
    "id": "cave_gorse_march_0",
-   "name": "Smugglers' cave",
-   "template": "smugglers_cave",
-   "plan": {
-    "family": "flooded_cistern",
-    "floors": 1,
-    "level": 7
-   },
-   "x": 134,
-   "z": 708,
-   "yaw": 1.57,
-   "radius": 10,
-   "level": 7
-  },
-  {
-   "type": "cave",
-   "id": "cave_gorse_march_1",
    "name": "Beast den",
    "template": "beast_den",
    "plan": {
@@ -195,9 +185,9 @@
     "floors": 1,
     "level": 7
    },
-   "x": 628,
-   "z": 1747,
-   "yaw": 1.57,
+   "x": 555,
+   "z": 1005,
+   "yaw": 2.75,
    "radius": 10,
    "level": 7
   },
@@ -206,8 +196,8 @@
    "id": "the_burning_fields",
    "name": "The Gorse That Will Not Burn Out",
    "kind": "compositional",
-   "x": 894,
-   "z": 877,
+   "x": 852,
+   "z": 329,
    "yaw": 0,
    "radius": 55,
    "where": "best fit for: open scrub 200 m",
@@ -217,10 +207,70 @@
    "type": "vignette",
    "id": "avalanche_shelter",
    "name": "The Avalanche Shelter",
-   "x": 1012,
-   "z": 1390,
-   "yaw": 4.89,
+   "x": 306,
+   "z": 1743,
+   "yaw": 1.73,
    "radius": 10,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "broken_aqueduct",
+   "name": "The Broken Aqueduct",
+   "x": 928,
+   "z": 1876,
+   "yaw": 5.6,
+   "radius": 14,
+   "biome": "savanna",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "collapsed_tithe_barn",
+   "name": "The Tithe Barn",
+   "x": 1175,
+   "z": 906,
+   "yaw": 0.9,
+   "radius": 13,
+   "biome": "badlands",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "dry_well",
+   "name": "The Dry Well",
+   "x": 279,
+   "z": 75,
+   "yaw": 1.17,
+   "radius": 10,
+   "biome": "shrubland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "ferry_landing",
+   "name": "The Stranded Ferry",
+   "x": 1944,
+   "z": 1537,
+   "yaw": 1.29,
+   "radius": 12,
+   "biome": "savanna",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "giants_cookfire",
+   "name": "The Giant's Cookfire",
+   "x": 1970,
+   "z": 796,
+   "yaw": 5.2,
+   "radius": 14,
    "biome": "badlands",
    "biomeFits": true,
    "level": 1
@@ -229,21 +279,9 @@
    "type": "vignette",
    "id": "guildhall_ruin",
    "name": "The Guildhall Shell",
-   "x": 326,
-   "z": 71,
-   "yaw": 5.78,
-   "radius": 13,
-   "biome": "shrubland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "hunters_hide",
-   "name": "The Hunter's Hide",
-   "x": 1967,
-   "z": 805,
-   "yaw": 2.4,
+   "x": 913,
+   "z": 1354,
+   "yaw": 1.26,
    "radius": 13,
    "biome": "badlands",
    "biomeFits": true,
@@ -251,48 +289,12 @@
   },
   {
    "type": "vignette",
-   "id": "noble_folly",
-   "name": "The Lord's Folly",
-   "x": 807,
-   "z": 362,
-   "yaw": 3.97,
-   "radius": 11,
-   "biome": "shrubland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "peat_cutters",
-   "name": "The Peat Cutters' Camp",
-   "x": 1986,
-   "z": 1979,
-   "yaw": 5.91,
+   "id": "lock_keeper_house",
+   "name": "The Lock-Keeper's Cottage",
+   "x": 1345,
+   "z": 1888,
+   "yaw": 2.87,
    "radius": 12,
-   "biome": "badlands",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "salt_cart_sunk",
-   "name": "The Salt Cart",
-   "x": 1988,
-   "z": 1415,
-   "yaw": 3.29,
-   "radius": 12,
-   "biome": "savanna",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "slag_heap_shrine",
-   "name": "The Slag Saint",
-   "x": 1079,
-   "z": 1918,
-   "yaw": 0.03,
-   "radius": 10,
    "biome": "savanna",
    "biomeFits": true,
    "level": 1
@@ -301,9 +303,9 @@
    "type": "vignette",
    "id": "smugglers_cellar",
    "name": "The Smugglers' Cellar",
-   "x": 1397,
-   "z": 785,
-   "yaw": 0.74,
+   "x": 1952,
+   "z": 66,
+   "yaw": 1.59,
    "radius": 14,
    "biome": "badlands",
    "biomeFits": true,
@@ -313,23 +315,11 @@
    "type": "vignette",
    "id": "toppled_statue",
    "name": "The Toppled King",
-   "x": 543,
-   "z": 652,
-   "yaw": 4.55,
+   "x": 514,
+   "z": 585,
+   "yaw": 5.98,
    "radius": 10,
    "biome": "hills",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "watchtower_ruin",
-   "name": "The Abandoned Watchtower",
-   "x": 1972,
-   "z": 62,
-   "yaw": 5.57,
-   "radius": 12,
-   "biome": "badlands",
    "biomeFits": true,
    "level": 1
   },
@@ -346,8 +336,8 @@
     2,
     4
    ],
-   "x": 1540,
-   "z": 60,
+   "x": 1255,
+   "z": 465,
    "yaw": 0,
    "radius": 10
   },
@@ -364,8 +354,8 @@
     2,
     4
    ],
-   "x": 1707,
-   "z": 639,
+   "x": 1635,
+   "z": 721,
    "yaw": 0,
    "radius": 10
   },
@@ -382,8 +372,8 @@
     2,
     4
    ],
-   "x": 1074,
-   "z": 86,
+   "x": 64,
+   "z": 694,
    "yaw": 0,
    "radius": 10
   },
@@ -400,8 +390,8 @@
     2,
     4
    ],
-   "x": 547,
-   "z": 1006,
+   "x": 842,
+   "z": 802,
    "yaw": 0,
    "radius": 10
   },
@@ -418,8 +408,8 @@
     2,
     4
    ],
-   "x": 1257,
-   "z": 1171,
+   "x": 1119,
+   "z": 79,
    "yaw": 0,
    "radius": 10
   },
@@ -436,8 +426,8 @@
     2,
     4
    ],
-   "x": 255,
-   "z": 1897,
+   "x": 1195,
+   "z": 1563,
    "yaw": 0,
    "radius": 10
   },
@@ -454,8 +444,8 @@
     2,
     4
    ],
-   "x": 1117,
-   "z": 585,
+   "x": 1485,
+   "z": 988,
    "yaw": 0,
    "radius": 10
   },
@@ -472,8 +462,8 @@
     2,
     4
    ],
-   "x": 460,
-   "z": 1340,
+   "x": 452,
+   "z": 1339,
    "yaw": 0,
    "radius": 10
   },
@@ -490,8 +480,8 @@
     1,
     2
    ],
-   "x": 1271,
-   "z": 1659,
+   "x": 1252,
+   "z": 1235,
    "yaw": 0,
    "radius": 10
   },
@@ -508,8 +498,8 @@
     1,
     2
    ],
-   "x": 1474,
-   "z": 1945,
+   "x": 1977,
+   "z": 502,
    "yaw": 0,
    "radius": 10
   },
@@ -526,8 +516,8 @@
     2,
     4
    ],
-   "x": 1899,
-   "z": 1113,
+   "x": 1975,
+   "z": 1128,
    "yaw": 0,
    "radius": 10
   },
@@ -544,8 +534,8 @@
     2,
     4
    ],
-   "x": 1962,
-   "z": 407,
+   "x": 713,
+   "z": 1625,
    "yaw": 0,
    "radius": 10
   },
@@ -554,30 +544,30 @@
    "id": "rare_deserter_gutch",
    "slot": 0,
    "name": "Sergeant Gutch",
-   "x": 1302,
-   "z": 85,
+   "x": 1682,
+   "z": 80,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1379,
-     5
+     1691,
+     4
     ],
     [
-     1383,
-     148
+     1751,
+     41
     ],
     [
-     1284,
-     186
+     1709,
+     143
     ],
     [
-     1237,
-     71
+     1643,
+     128
     ],
     [
-     1285,
-     16
+     1631,
+     65
     ]
    ],
    "respawnMin": [
@@ -591,30 +581,30 @@
    "id": "rare_burnt_barns_hound",
    "slot": 1,
    "name": "The Burnt Barns Hound",
-   "x": 1117,
-   "z": 361,
+   "x": 1401,
+   "z": 767,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1100,
-     293
+     1390,
+     682
     ],
     [
-     1221,
-     324
+     1485,
+     703
     ],
     [
-     1185,
-     420
+     1453,
+     835
     ],
     [
-     1087,
-     435
+     1338,
+     868
     ],
     [
-     1048,
-     344
+     1290,
+     733
     ]
    ],
    "respawnMin": [
@@ -627,8 +617,8 @@
    "type": "waystone",
    "id": "ws_z13_04_gorsehold",
    "name": "Gorsehold",
-   "x": 1484.1,
-   "z": 1259.1,
+   "x": 1564.9,
+   "z": 1384.6,
    "yaw": 0,
    "settlement": "Gorsehold",
    "radius": 1
@@ -637,8 +627,8 @@
    "type": "waystone",
    "id": "ws_z13_04_burnt_barns",
    "name": "Burnt Barns",
-   "x": 1661.2,
-   "z": 353.7,
+   "x": 1557.1,
+   "z": 335.8,
    "yaw": 0,
    "settlement": "Burnt Barns",
    "radius": 1
@@ -647,8 +637,8 @@
    "type": "waystone",
    "id": "ws_z13_04_door",
    "name": "Barrow entrance",
-   "x": 1315.9,
-   "z": 570,
+   "x": 1394,
+   "z": 1256.6,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -659,9 +649,9 @@
    "name": "Captain Hollis Gorse",
    "role": "guard",
    "at": "Gorsehold Redoubt",
-   "x": 1360.1,
-   "z": 333.2,
-   "yaw": 1.85,
+   "x": 1484.1,
+   "z": 274.7,
+   "yaw": 0.37,
    "radius": 1
   },
   {
@@ -670,9 +660,9 @@
    "name": "Widow Edda",
    "role": "farmer",
    "at": "Burnt Barns",
-   "x": 1591.5,
-   "z": 368.7,
-   "yaw": 4.92,
+   "x": 1592.8,
+   "z": 372.2,
+   "yaw": 5.39,
    "radius": 1
   },
   {
@@ -681,9 +671,9 @@
    "name": "Garrick the pedlar",
    "role": "trader",
    "at": "Gorsehold",
-   "x": 1563.9,
-   "z": 1282.9,
-   "yaw": 4.63,
+   "x": 1560.1,
+   "z": 1289.6,
+   "yaw": 5.49,
    "radius": 1
   },
   {
@@ -694,8 +684,8 @@
    "clue": "drunks_story",
    "how": null,
    "shimmer": null,
-   "x": 1616.7,
-   "z": 1339.4,
+   "x": 1610.5,
+   "z": 1369,
    "yaw": 0,
    "where": "edge of Gorsehold",
    "radius": 1
@@ -708,11 +698,775 @@
    "clue": "note",
    "how": null,
    "shimmer": null,
-   "x": 1632.8,
-   "z": 344.1,
+   "x": 1549.1,
+   "z": 370.9,
    "yaw": 0,
    "where": "edge of Burnt Barns",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gorse_march_0",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 153,
+   "z": 385,
+   "yaw": 4.86,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_1",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 68,
+   "z": 1507,
+   "yaw": 5.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_2",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 546,
+   "z": 198,
+   "yaw": 1.02,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f3",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 787,
+   "z": 1908,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gorse_march_4",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 936,
+   "z": 1060,
+   "yaw": 1.93,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f5",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1409,
+   "z": 60,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gorse_march_6",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1024,
+   "z": 592,
+   "yaw": 0.64,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gorse_march_7",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 37,
+   "z": 1283,
+   "yaw": 3.86,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_8",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1752,
+   "z": 952,
+   "yaw": 4.19,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f9",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 568,
+   "z": 1779,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_gorse_march_10",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1548,
+   "z": 1704,
+   "yaw": 3.31,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f11",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 768,
+   "z": 1223,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_gorse_march_12",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 143,
+   "z": 1921,
+   "yaw": 5.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f13",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 943,
+   "z": 64,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_gorse_march_14",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1556,
+   "z": 2008,
+   "yaw": 5.14,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f15",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1062,
+   "z": 1595,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_gorse_march_16",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 397,
+   "z": 384,
+   "yaw": 0.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f17",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 196,
+   "z": 977,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_gorse_march_18",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 250,
+   "z": 572,
+   "yaw": 1.17,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f19",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 633,
+   "z": 802,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_20",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 483,
+   "z": 1534,
+   "yaw": 0.41,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f21",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1949,
+   "z": 1986,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_gorse_march_22",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1140,
+   "z": 1804,
+   "yaw": 2.06,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f23",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 637,
+   "z": 639,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_24",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 384,
+   "z": 1156,
+   "yaw": 6.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f25",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1728,
+   "z": 1588,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_26",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 661,
+   "z": 1411,
+   "yaw": 5.15,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f27",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 136,
+   "z": 203,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gorse_march_28",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1896,
+   "z": 1324,
+   "yaw": 6.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f29",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1888,
+   "z": 272,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_30",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 49,
+   "z": 1775,
+   "yaw": 4.99,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f31",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 739,
+   "z": 97,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_gorse_march_32",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1208,
+   "z": 677,
+   "yaw": 2.81,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f33",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 647,
+   "z": 363,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_gorse_march_34",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1112,
+   "z": 300,
+   "yaw": 1.69,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f35",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1183,
+   "z": 1934,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_36",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1812,
+   "z": 624,
+   "yaw": 1,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f37",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 808,
+   "z": 946,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_gorse_march_38",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1284,
+   "z": 220,
+   "yaw": 0.5,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f39",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 922,
+   "z": 609,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_gorse_march_40",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1116,
+   "z": 1387,
+   "yaw": 0.03,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f41",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1376,
+   "z": 1632,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_gorse_march_42",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1060,
+   "z": 1207,
+   "yaw": 0.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f43",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 979,
+   "z": 1752,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_44",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 880,
+   "z": 1544,
+   "yaw": 0.03,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f45",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1928,
+   "z": 1732,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_gorse_march_46",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 367,
+   "z": 1913,
+   "yaw": 0.56,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f47",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 609,
+   "z": 1139,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_gorse_march_48",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 88,
+   "z": 28,
+   "yaw": 3.93,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f49",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1025,
+   "z": 777,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_gorse_march_50",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 25,
+   "z": 523,
+   "yaw": 2.96,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f51",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 426,
+   "z": 77,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
   }
  ],
  "features": []

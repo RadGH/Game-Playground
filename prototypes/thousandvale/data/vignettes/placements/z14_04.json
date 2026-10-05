@@ -46,6 +46,12 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
@@ -59,9 +65,9 @@
    "kind": "town",
    "x": 1219,
    "z": 1026,
-   "r": 70,
-   "source": "ask",
-   "bakeId": null
+   "r": 90,
+   "source": "bake",
+   "bakeId": "lowmoor"
   },
   {
    "name": "Deepdene",
@@ -69,24 +75,24 @@
    "x": 1347,
    "z": 289,
    "r": 40,
-   "source": "ask",
-   "bakeId": null
+   "source": "bake",
+   "bakeId": "deepdene"
   }
  ],
  "checks": [
   {
    "id": "door_1",
    "kind": "dungeon_door",
-   "x": 560,
-   "z": 870,
+   "x": 1401,
+   "z": 1081,
    "reachable": true,
    "openShare": 1
   },
   {
    "id": "event_sunken_wolds",
    "kind": "event_site",
-   "x": 1024,
-   "z": 1024,
+   "x": 1068,
+   "z": 1007,
    "reachable": true,
    "openShare": 1
   }
@@ -99,9 +105,9 @@
    "name": "the Mossy Bastion",
    "template": "ruined_fort",
    "friendly": false,
-   "x": 844,
-   "z": 1416,
-   "yaw": 1.57,
+   "x": 1447,
+   "z": 185,
+   "yaw": -0.79,
    "radius": 22,
    "level": 7
   },
@@ -112,9 +118,9 @@
    "template": "sheep",
    "flavour": null,
    "settlement": "Lowmoor",
-   "x": 1344,
-   "z": 1030,
-   "yaw": 1.57,
+   "x": 1192,
+   "z": 888,
+   "yaw": 0,
    "radius": 24,
    "level": 7
   },
@@ -125,25 +131,25 @@
    "template": "sheep",
    "flavour": null,
    "settlement": "Deepdene",
-   "x": 1277,
-   "z": 222,
-   "yaw": 1.57,
+   "x": 1315,
+   "z": 378,
+   "yaw": 2.75,
    "radius": 24,
    "level": 7
   },
   {
    "type": "cave",
    "id": "cave_sunken_wolds_0",
-   "name": "Spider hollow",
-   "template": "spider_hollow",
+   "name": "Beast den",
+   "template": "beast_den",
    "plan": {
     "family": "cave_river",
     "floors": 1,
     "level": 8
    },
-   "x": 860,
-   "z": 896,
-   "yaw": 0.79,
+   "x": 746,
+   "z": 981,
+   "yaw": 0.39,
    "radius": 10,
    "level": 8
   },
@@ -157,8 +163,8 @@
     "floors": 1,
     "level": 8
    },
-   "x": 745,
-   "z": 983,
+   "x": 818,
+   "z": 938,
    "yaw": 0.39,
    "radius": 10,
    "level": 8
@@ -173,8 +179,8 @@
     "floors": 1,
     "level": 8
    },
-   "x": 799,
-   "z": 936,
+   "x": 737,
+   "z": 1831,
    "yaw": 0.79,
    "radius": 10,
    "level": 8
@@ -184,8 +190,8 @@
    "id": "the_sunken_road",
    "name": "The Sunken Road",
    "kind": "bespoke",
-   "x": 1367,
-   "z": 1634,
+   "x": 1382,
+   "z": 1597,
    "yaw": 0,
    "radius": 20,
    "where": "best fit for: a road through woodland",
@@ -193,25 +199,25 @@
   },
   {
    "type": "vignette",
-   "id": "beekeeper_hives",
-   "name": "The Angry Hives",
-   "x": 351,
-   "z": 293,
-   "yaw": 5.25,
-   "radius": 10,
+   "id": "ash_choir_stones",
+   "name": "The Burnt Choir",
+   "x": 1952,
+   "z": 1055,
+   "yaw": 1.82,
+   "radius": 12,
    "biome": "savanna",
    "biomeFits": true,
    "level": 1
   },
   {
    "type": "vignette",
-   "id": "charcoal_clamps",
-   "name": "The Charcoal Burners",
-   "x": 253,
-   "z": 1762,
-   "yaw": 1.02,
-   "radius": 12,
-   "biome": "badlands",
+   "id": "boar_wallow",
+   "name": "Boar Wallow",
+   "x": 129,
+   "z": 1521,
+   "yaw": 0.26,
+   "radius": 13,
+   "biome": "savanna",
    "biomeFits": true,
    "level": 1
   },
@@ -219,34 +225,10 @@
    "type": "vignette",
    "id": "duel_stones",
    "name": "The Duelling Stones",
-   "x": 1916,
-   "z": 755,
-   "yaw": 5.39,
+   "x": 559,
+   "z": 115,
+   "yaw": 4.3,
    "radius": 10,
-   "biome": "badlands",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "frozen_tarn",
-   "name": "The Frozen Tarn",
-   "x": 70,
-   "z": 877,
-   "yaw": 0.86,
-   "radius": 13,
-   "biome": "badlands",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "giants_cookfire",
-   "name": "The Giant's Cookfire",
-   "x": 1983,
-   "z": 99,
-   "yaw": 4.97,
-   "radius": 14,
    "biome": "savanna",
    "biomeFits": true,
    "level": 1
@@ -255,22 +237,34 @@
    "type": "vignette",
    "id": "hanging_oak",
    "name": "The Hanging Oak",
-   "x": 821,
-   "z": 1962,
-   "yaw": 1.99,
+   "x": 99,
+   "z": 524,
+   "yaw": 4.47,
    "radius": 12,
-   "biome": "savanna",
+   "biome": "badlands",
    "biomeFits": true,
    "level": 1
   },
   {
    "type": "vignette",
-   "id": "hedge_witch_garden",
-   "name": "The Hedge-Witch's Garden",
-   "x": 1862,
-   "z": 1254,
-   "yaw": 5.54,
-   "radius": 12,
+   "id": "hermits_hollow",
+   "name": "The Hermit's Hollow",
+   "x": 142,
+   "z": 1988,
+   "yaw": 4.16,
+   "radius": 9,
+   "biome": "badlands",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "hunters_hide",
+   "name": "The Hunter's Hide",
+   "x": 1973,
+   "z": 463,
+   "yaw": 4.53,
+   "radius": 13,
    "biome": "savanna",
    "biomeFits": true,
    "level": 1
@@ -279,9 +273,9 @@
    "type": "vignette",
    "id": "lone_archer_post",
    "name": "The Reed Hide",
-   "x": 839,
-   "z": 405,
-   "yaw": 3.02,
+   "x": 255,
+   "z": 1032,
+   "yaw": 3.73,
    "radius": 9,
    "biome": "savanna",
    "biomeFits": false,
@@ -289,25 +283,37 @@
   },
   {
    "type": "vignette",
-   "id": "tar_pits",
-   "name": "The Tar Seep",
-   "x": 364,
-   "z": 1289,
-   "yaw": 4.42,
+   "id": "stone_circle_hum",
+   "name": "The Humming Stones",
+   "x": 74,
+   "z": 60,
+   "yaw": 5.8,
    "radius": 12,
+   "biome": "badlands",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "wardens_cairn",
+   "name": "The Warden's Cairn",
+   "x": 951,
+   "z": 1405,
+   "yaw": 3,
+   "radius": 10,
    "biome": "savanna",
    "biomeFits": true,
    "level": 1
   },
   {
    "type": "vignette",
-   "id": "weavers_bridge_toll",
-   "name": "The Spider Bridge",
-   "x": 1528,
-   "z": 582,
-   "yaw": 5,
-   "radius": 12,
-   "biome": "badlands",
+   "id": "woodcutter_axe",
+   "name": "The Axe in the Stump",
+   "x": 872,
+   "z": 480,
+   "yaw": 3.68,
+   "radius": 9,
+   "biome": "savanna",
    "biomeFits": true,
    "level": 1
   },
@@ -324,8 +330,8 @@
     2,
     4
    ],
-   "x": 439,
-   "z": 769,
+   "x": 1639,
+   "z": 748,
    "yaw": 0,
    "radius": 10
   },
@@ -342,8 +348,8 @@
     2,
     4
    ],
-   "x": 1105,
-   "z": 651,
+   "x": 1527,
+   "z": 1209,
    "yaw": 0,
    "radius": 10
   },
@@ -360,8 +366,8 @@
     2,
     4
    ],
-   "x": 1182,
-   "z": 1333,
+   "x": 1240,
+   "z": 1275,
    "yaw": 0,
    "radius": 10
   },
@@ -378,8 +384,8 @@
     2,
     4
    ],
-   "x": 1505,
-   "z": 1291,
+   "x": 1376,
+   "z": 687,
    "yaw": 0,
    "radius": 10
   },
@@ -396,8 +402,8 @@
     2,
     4
    ],
-   "x": 1143,
-   "z": 1826,
+   "x": 1133,
+   "z": 1915,
    "yaw": 0,
    "radius": 10
   },
@@ -414,8 +420,8 @@
     2,
     4
    ],
-   "x": 87,
-   "z": 1362,
+   "x": 1134,
+   "z": 109,
    "yaw": 0,
    "radius": 10
   },
@@ -432,8 +438,8 @@
     1,
     2
    ],
-   "x": 1634,
-   "z": 226,
+   "x": 1661,
+   "z": 428,
    "yaw": 0,
    "radius": 10
   },
@@ -450,8 +456,8 @@
     1,
     2
    ],
-   "x": 1025,
-   "z": 193,
+   "x": 1145,
+   "z": 569,
    "yaw": 0,
    "radius": 10
   },
@@ -468,8 +474,8 @@
     2,
     4
    ],
-   "x": 1648,
-   "z": 1460,
+   "x": 149,
+   "z": 1291,
    "yaw": 0,
    "radius": 10
   },
@@ -486,8 +492,8 @@
     2,
     4
    ],
-   "x": 380,
-   "z": 1033,
+   "x": 1699,
+   "z": 1382,
    "yaw": 0,
    "radius": 10
   },
@@ -504,8 +510,8 @@
     2,
     4
    ],
-   "x": 1118,
-   "z": 420,
+   "x": 522,
+   "z": 1183,
    "yaw": 0,
    "radius": 10
   },
@@ -522,8 +528,8 @@
     2,
     4
    ],
-   "x": 603,
-   "z": 1183,
+   "x": 1863,
+   "z": 1251,
    "yaw": 0,
    "radius": 10
   },
@@ -540,8 +546,8 @@
     2,
     4
    ],
-   "x": 1065,
-   "z": 880,
+   "x": 1021,
+   "z": 686,
    "yaw": 0,
    "radius": 10
   },
@@ -558,8 +564,8 @@
     2,
     4
    ],
-   "x": 988,
-   "z": 531,
+   "x": 1586,
+   "z": 1595,
    "yaw": 0,
    "radius": 10
   },
@@ -576,8 +582,8 @@
     1,
     2
    ],
-   "x": 1492,
-   "z": 1640,
+   "x": 1202,
+   "z": 1695,
    "yaw": 0,
    "radius": 10
   },
@@ -594,8 +600,8 @@
     1,
     2
    ],
-   "x": 212,
-   "z": 1227,
+   "x": 1118,
+   "z": 420,
    "yaw": 0,
    "radius": 10
   },
@@ -612,8 +618,8 @@
     2,
     4
    ],
-   "x": 1155,
-   "z": 143,
+   "x": 1135,
+   "z": 274,
    "yaw": 0,
    "radius": 10
   },
@@ -630,8 +636,8 @@
     2,
     4
    ],
-   "x": 1736,
-   "z": 1341,
+   "x": 456,
+   "z": 1061,
    "yaw": 0,
    "radius": 10
   },
@@ -648,8 +654,8 @@
     1,
     2
    ],
-   "x": 273,
-   "z": 1097,
+   "x": 696,
+   "z": 1162,
    "yaw": 0,
    "radius": 10
   },
@@ -666,8 +672,8 @@
     1,
     2
    ],
-   "x": 682,
-   "z": 1077,
+   "x": 1046,
+   "z": 831,
    "yaw": 0,
    "radius": 10
   },
@@ -676,30 +682,30 @@
    "id": "rare_green_shard",
    "slot": 0,
    "name": "The Green Shard",
-   "x": 894,
-   "z": 1021,
+   "x": 991,
+   "z": 447,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     931,
-     918
+     935,
+     446
     ],
     [
-     965,
-     1013
+     979,
+     387
     ],
     [
-     933,
-     1093
+     1057,
+     409
     ],
     [
-     849,
-     1111
+     1020,
+     487
     ],
     [
-     806,
-     1006
+     960,
+     492
     ]
    ],
    "respawnMin": [
@@ -713,30 +719,30 @@
    "id": "rare_nightjar",
    "slot": 1,
    "name": "Nightjar",
-   "x": 73,
-   "z": 503,
+   "x": 1942,
+   "z": 115,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     6,
-     509
+     2013,
+     113
     ],
     [
-     65,
-     436
+     1989,
+     170
     ],
     [
-     132,
-     456
+     1904,
+     156
     ],
     [
-     126,
-     562
+     1902,
+     90
     ],
     [
-     27,
-     553
+     1953,
+     62
     ]
    ],
    "respawnMin": [
@@ -749,8 +755,8 @@
    "type": "waystone",
    "id": "ws_z14_04_lowmoor",
    "name": "Lowmoor",
-   "x": 1138.5,
-   "z": 1005.6,
+   "x": 1317.7,
+   "z": 1026.1,
    "yaw": 0,
    "settlement": "Lowmoor",
    "radius": 1
@@ -759,8 +765,8 @@
    "type": "waystone",
    "id": "ws_z14_04_deepdene",
    "name": "Deepdene",
-   "x": 1408.5,
-   "z": 261,
+   "x": 1311.2,
+   "z": 255.9,
    "yaw": 0,
    "settlement": "Deepdene",
    "radius": 1
@@ -769,8 +775,8 @@
    "type": "waystone",
    "id": "ws_z14_04_door",
    "name": "Barrow entrance",
-   "x": 545.2,
-   "z": 909.5,
+   "x": 1391.8,
+   "z": 1040,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -781,9 +787,9 @@
    "name": "Elder Coombe",
    "role": "elder",
    "at": "Lowmoor",
-   "x": 1216.4,
-   "z": 1027.7,
-   "yaw": 3.48,
+   "x": 1219.7,
+   "z": 1012.6,
+   "yaw": 6.18,
    "radius": 1
   },
   {
@@ -792,9 +798,9 @@
    "name": "Keeper Isolde",
    "role": "guard",
    "at": "the Mossy Bastion",
-   "x": 844.8,
-   "z": 1417.9,
-   "yaw": 3.52,
+   "x": 1446.2,
+   "z": 186.9,
+   "yaw": 1.97,
    "radius": 1
   },
   {
@@ -804,8 +810,8 @@
    "role": "miner",
    "at": "Deepdene",
    "x": 1347,
-   "z": 286,
-   "yaw": 1.09,
+   "z": 285.8,
+   "yaw": 1.88,
    "radius": 1
   },
   {
@@ -816,8 +822,8 @@
    "clue": "carved_arrow",
    "how": null,
    "shimmer": null,
-   "x": 844.7,
-   "z": 1414.1,
+   "x": 1448.9,
+   "z": 184.4,
    "yaw": 0,
    "where": "fort the Mossy Bastion",
    "radius": 1
@@ -830,8 +836,8 @@
    "clue": null,
    "how": "dig",
    "shimmer": 15,
-   "x": 790.3,
-   "z": 1484.2,
+   "x": 1426.3,
+   "z": 292.6,
    "yaw": 0,
    "where": "near the Mossy Bastion",
    "radius": 1
@@ -844,8 +850,8 @@
    "clue": "note",
    "how": null,
    "shimmer": null,
-   "x": 842.6,
-   "z": 1414.5,
+   "x": 1449,
+   "z": 184.7,
    "yaw": 0,
    "where": "fort the Mossy Bastion",
    "radius": 1
@@ -858,8 +864,8 @@
    "clue": "carved_arrow",
    "how": null,
    "shimmer": null,
-   "x": 1303.1,
-   "z": 277.9,
+   "x": 1363.3,
+   "z": 247,
    "yaw": 0,
    "where": "edge of Deepdene",
    "radius": 1
@@ -872,11 +878,592 @@
    "clue": null,
    "how": "chest",
    "shimmer": 15,
-   "x": 1377.3,
-   "z": 1007.5,
+   "x": 1138.4,
+   "z": 1276.2,
    "yaw": 0,
    "where": "near Lowmoor",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_sunken_wolds_0",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 572,
+   "z": 1532,
+   "yaw": 0.72,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f1",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 388,
+   "z": 388,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_sunken_wolds_2",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 2008,
+   "z": 764,
+   "yaw": 5.42,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f3",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 832,
+   "z": 192,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_sunken_wolds_4",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 196,
+   "z": 768,
+   "yaw": 3.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f5",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 720,
+   "z": 695,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_sunken_wolds_6",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1696,
+   "z": 1004,
+   "yaw": 2.87,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f7",
+   "monster": "hoard_mimic",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 61,
+   "z": 1772,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_sunken_wolds_8",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 940,
+   "z": 1671,
+   "yaw": 1.17,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f9",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 308,
+   "z": 152,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_sunken_wolds_10",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 356,
+   "z": 1632,
+   "yaw": 0.71,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f11",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 648,
+   "z": 380,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_sunken_wolds_12",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 376,
+   "z": 1384,
+   "yaw": 0.91,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f13",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1712,
+   "z": 192,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_sunken_wolds_14",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 920,
+   "z": 2008,
+   "yaw": 6.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f15",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 60,
+   "z": 296,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_sunken_wolds_16",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1828,
+   "z": 640,
+   "yaw": 1.09,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f17",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 732,
+   "z": 1380,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_sunken_wolds_18",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 613,
+   "z": 2008,
+   "yaw": 1.54,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f19",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1329,
+   "z": 62,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_sunken_wolds_20",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1165,
+   "z": 1483,
+   "yaw": 5.68,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f21",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 560,
+   "z": 880,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_sunken_wolds_22",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 908,
+   "z": 1200,
+   "yaw": 4.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f23",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 64,
+   "z": 964,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_sunken_wolds_24",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 760,
+   "z": 1592,
+   "yaw": 0.11,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f25",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1469,
+   "z": 1404,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_sunken_wolds_26",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1832,
+   "z": 848,
+   "yaw": 2.11,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f27",
+   "monster": "hoard_mimic",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1471,
+   "z": 864,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_sunken_wolds_28",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1488,
+   "z": 520,
+   "yaw": 2.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f29",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 764,
+   "z": 61,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_sunken_wolds_30",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 292,
+   "z": 576,
+   "yaw": 5.66,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f31",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 261,
+   "z": 1805,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_sunken_wolds_32",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 540,
+   "z": 541,
+   "yaw": 3.3,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f33",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 356,
+   "z": 868,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_sunken_wolds_34",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1872,
+   "z": 296,
+   "yaw": 4.82,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f35",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    8,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 320,
+   "z": 1208,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_sunken_wolds_36",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 337,
+   "z": 2008,
+   "yaw": 1.48,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sunken_wolds_f37",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    7,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 588,
+   "z": 1716,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_sunken_wolds_38",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 972,
+   "z": 1844,
+   "yaw": 3.34,
+   "radius": 4,
+   "filler": true
   }
  ],
  "features": []

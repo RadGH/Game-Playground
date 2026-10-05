@@ -11,6 +11,7 @@
 // Same inputs -> same files (seeded per zone). See tools/content-place.mjs for the rules every spot obeys.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { parseTerrain, parseNav } from '../js/rules/terrain-read.js';
+import { boringWalk, SIGHT, LIMIT as BORING_LIMIT } from './boring-walk.mjs';
 import { J, ROOT, allVignettes, questFiles, provinceMap } from './content-lib.mjs';
 import { POINT_TYPES, zoneContext, provinceComponents, discProblem, findSpot, findPoint, openPoint, walkLine, hintFrom, hintScore, rngFor, KIND_RULES, settlementEdge } from './content-place.mjs';
 
@@ -29,7 +30,10 @@ const VIG = new Map(allVignettes().map(v => [v.id, v]));
 const QUESTS = Object.fromEntries(questFiles().map(q => [q.zone, q]));
 const ARCH = J('data/provinces/archetypes.json');
 /** names imposed on stream B's World Forge places that the M1 content already uses */
+const WAYSIDE = J('data/vignettes/wayside.json').kinds;
 const IMPOSE_EXTRA = { test: { mipider_ford: 'Fitockpi Ford' } };
+/** hooks pinned beside a named stream B road (the cliff is cut there by B's bake on request): hook id -> road id */
+const HOOK_ROAD = { the_long_stair: 'road_138' };
 
 // reachability is judged from the province hub over every baked zone stitched together
 const PCOMP = (() => {
@@ -43,7 +47,15 @@ if (!zones.length) { console.error('no such zone: ' + arg); process.exit(1); }
 const placesFile = new URL(`data/provinces/${PROV}-places.json`, ROOT);
 const places = existsSync(placesFile) ? JSON.parse(readFileSync(placesFile, 'utf8')) : { zones: {} };
 let bad = 0;
-for (const [eid, wid] of zones) bad += placeZone(eid, wid);
+const states = zones.map(([eid, wid]) => placeZone(eid, wid)).filter(st => st && typeof st === 'object');
+fillBoring(states);
+for (const st of states) {
+  const { file, wid, eid } = st;
+  writeFileSync(new URL(`data/vignettes/placements/${wid}.json`, ROOT), JSON.stringify(file, null, 1) + '\n');
+  const counts = {}; file.placements.forEach(p => counts[p.type] = (counts[p.type] || 0) + 1);
+  console.log(`${wid} ${eid.padEnd(18)} ${JSON.stringify(counts)} asks ${places.zones[eid].asks.length}${file.problems.length ? ' PROBLEMS ' + file.problems.join('; ') : ''}`);
+  bad += file.problems.length;
+}
 places._doc = `Stream E. Settlement names for ${SHEET.name} on stream B's bake (tools/place-vignettes.mjs). Per E zone: \`world\` zone id; \`rename\` = B settlement/crossing id -> the name the sheet and quests use (B: impose at bake time, like Torborhold); \`asks\` = a settlement the sheet needs where the world has none (B: place a planned settlement of that kind and radius at x, z — zone metres — with that name; E's placements already keep clear of the circle). After B re-bakes, E re-runs the placer and asks that now exist drop out.`;
 places.province = PROV;
 writeFileSync(placesFile, JSON.stringify(places, null, 2) + '\n');
@@ -51,7 +63,7 @@ if (bad) { console.error(`${bad} problem(s)`); process.exitCode = 1; }
 
 function placeZone(eid, wid) {
   const dir = `data/zones/${wid}/`;
-  if (!existsSync(new URL(dir + 'nav.bin', ROOT))) { console.error(`${wid}: not baked`); return 1; }
+  if (!existsSync(new URL(dir + "nav.bin", ROOT))) { console.error(`${wid}: not baked`); process.exitCode = 1; return null; }
   const terrain = parseTerrain(readFileSync(new URL(dir + 'terrain.bin', ROOT)));
   const nav = parseNav(readFileSync(new URL(dir + 'nav.bin', ROOT)));
   const bake = J(dir + 'placements.json').placements;
@@ -64,13 +76,18 @@ function placeZone(eid, wid) {
   const bSettle = bake.filter(p => p.kind === 'settlement').sort((a, b) => (b.data.hub - a.data.hub) || (b.data.radius - a.data.radius));
   const rename = { ...(IMPOSE_EXTRA[eid] || {}) };
   const free = [...bSettle];
+  // rename keys are the World Forge name's slug (B keeps it as data.wfName once it has imposed ours), so the file is
+  // the same before and after B's re-bake
+  const wfKey = s => slug(s.data.wfName || s.data.name);
   for (const w of want) {           // a B settlement already carrying the name (Torborhold, or an ask B has baked) keeps it
     const k = free.findIndex(s => s.data.name === w.name);
-    if (k >= 0) { w.at = free[k]; free.splice(k, 1); }
+    if (k >= 0) { w.at = free[k]; free.splice(k, 1); if (w.at.data.wfName && w.at.data.wfName !== w.name) rename[wfKey(w.at)] = w.name; }
   }
-  for (const w of want) if (!w.at && free.length) { w.at = free.shift(); rename[w.at.id] = w.name; }
+  for (const w of want) if (!w.at && free.length) { w.at = free.shift(); rename[wfKey(w.at)] = w.name; }
   const start = bSettle[0] ? { x: bSettle[0].x, z: bSettle[0].z } : null;
-  const asks = [];
+  // an ask stream B has already baked stays in the list (B re-reads it every bake): same name, kind, spot, radius
+  const prevAsks = ((places.zones[eid] || {}).asks || []);
+  const asks = want.filter(w => w.at && w.at.data.ask).map(w => prevAsks.find(a => a.name === w.name) || { name: w.name, kind: w.kind, x: w.at.x, z: w.at.z, r: w.r });
   const cell = { gx: zs.grid[0], gy: zs.grid[1] };
   let ctx = zoneContext({ terrain, nav, placements: bake, start, province: PCOMP, cell });
   for (const w of want.filter(w => !w.at)) {
@@ -94,8 +111,8 @@ function placeZone(eid, wid) {
   }
   // rebuild once so the main component is the one the (first) town sits in
   const town0 = want[0].at ? { x: want[0].at.x, z: want[0].at.z } : asks[0] || start;
-  ctx = zoneContext({ terrain, nav, placements: bake, start: town0, reserve: asks.map(a => ({ ...a })), province: PCOMP, cell });
-  for (const s of ctx.settlements) { if (rename[s.id]) s.name = rename[s.id]; }
+  ctx = zoneContext({ terrain, nav, placements: bake, start: town0, reserve: asks.filter(a => !want.some(w => w.at && w.name === a.name)).map(a => ({ ...a })), province: PCOMP, cell });
+  for (const s of ctx.settlements) { const k = slug(s.wfName || s.name); if (rename[k]) s.name = rename[k]; }
   places.zones[eid] = { world: wid, rename, asks };
 
   const P = ctx.placed, features = [];
@@ -103,7 +120,7 @@ function placeZone(eid, wid) {
   const push = rec => { if (POINT_TYPES.has(rec.type)) rec.radius = 1; P.push(rec); return rec; };
   const named = () => [
     ...ctx.settlements.map(s => ({ name: s.name, x: s.x, z: s.z, r: s.r, kind: 'settlement', id: s.id || s.name })),
-    ...bake.filter(p => ['crossing', 'landmark', 'lair', 'pass'].includes(p.kind)).map(p => ({ name: rename[p.id] || p.data.name, x: p.x, z: p.z, r: 15, kind: p.kind, id: p.id })),
+    ...bake.filter(p => ['crossing', 'landmark', 'lair', 'pass'].includes(p.kind)).map(p => ({ name: rename[slug(p.data.wfName || p.data.name)] || p.data.name, x: p.x, z: p.z, r: 15, kind: p.kind, id: p.id })),
     ...P.filter(p => p.name && p.radius != null && !POINT_TYPES.has(p.type)).map(p => ({ name: p.name, x: p.x, z: p.z, r: p.radius, kind: p.type, id: p.id })),
   ];
   const nearOf = (hint, min, max) => hint.near ? { x: hint.near.x, z: hint.near.z, min: (hint.near.r || 0) + min, max: (hint.near.r || 0) + max } : null;
@@ -234,10 +251,7 @@ function placeZone(eid, wid) {
     rules: KIND_RULES, mainWalkableShare: +ctx.mainShare.toFixed(3), settlements: ctx.settlements.map(s => ({ name: s.name, kind: s.kind, x: s.x, z: s.z, r: s.r, source: s.source, bakeId: s.id || null })),
     checks, problems, placements: P, features,
   };
-  writeFileSync(new URL(`data/vignettes/placements/${wid}.json`, ROOT), JSON.stringify(file, null, 1) + '\n');
-  const counts = {}; P.forEach(p => counts[p.type] = (counts[p.type] || 0) + 1);
-  console.log(`${wid} ${eid.padEnd(18)} ${JSON.stringify(counts)} asks ${asks.length}${problems.length ? ' PROBLEMS ' + problems.join('; ') : ''}`);
-  return problems.length;
+  return { eid, wid, zs, ctx, rnd, file, nav, bake };
 
   // ---- helpers (closures over this zone) -----------------------------------------------------------------
   function ring(p, r) { return Array.from({ length: 16 }, (_, a) => ({ x: p.x + Math.cos(a / 16 * 6.283) * r, z: p.z + Math.sin(a / 16 * 6.283) * r })); }
@@ -314,7 +328,15 @@ function placeZone(eid, wid) {
     const size = +(need.match(/(\d+)\s*m/) || [])[1] || 0;
     const R = Math.max(15, Math.min(55, size ? size / 2 : 20));
     let rec = null;
-    if (/a ford/.test(need) && hint.near && hint.near.kind === 'crossing') rec = { x: hint.near.x, z: hint.near.z, radius: null, how: 'at the crossing' };
+    const pinRoad = HOOK_ROAD[h.id] && bake.find(b => b.id === HOOK_ROAD[h.id]);
+    if (pinRoad) {
+      const pts = pinRoad.data.pts.filter(q => q[0] >= 0 && q[1] >= 0 && q[0] <= ctx.extent && q[1] <= ctx.extent);
+      const mid = pts[Math.floor(pts.length / 2)] || pts[0];
+      const spot = mid && (findSpot(ctx, rnd, 'hook', 15, { near: { x: mid[0], z: mid[1], min: 20, max: 90 }, tries: 3000, spread: 0, score: (x, z) => -ctx.roadDist(x, z) - Math.hypot(x - mid[0], z - mid[1]) * 0.5 - (z > mid[1] ? 40 : 0) }));
+      if (spot) rec = { x: spot.x, z: spot.z, radius: 15, how: `beside ${pinRoad.id} (the pass road): stream B cuts the cliff here` };
+    }
+    if (rec) { /* pinned */ }
+    else if (/a ford/.test(need) && hint.near && hint.near.kind === 'crossing') rec = { x: hint.near.x, z: hint.near.z, radius: null, how: 'at the crossing' };
     else if (/through the city/.test(need) && hint.near && hint.near.kind === 'settlement') rec = { x: hint.near.x, z: hint.near.z, radius: null, r: hint.near.r, how: 'the settlement itself' };
     else if (/line across/.test(need)) {
       const x0 = 900 + Math.round(rnd() * 250), pts = [];
@@ -342,8 +364,64 @@ function placeZone(eid, wid) {
   function needMet(need, rec) {
     const reach = 80 + (rec.radius || rec.r || 0);
     if (/water|lake|beach|stream|ford|river/.test(need)) return ctx.waterDist(rec.x, rec.z) < reach;
+    if (/cliff|slope|hill/.test(need) && /road/.test(need) && ctx.roadDist(rec.x, rec.z) > reach) return false;
     if (/cliff|slope|hill/.test(need)) return ctx.steepDist(rec.x, rec.z) < reach;
     return true;
+  }
+}
+
+/**
+ * PLAN §16 "longest boring walk <= 250 m": while a road stretch or an open pocket is out of sight of everything for
+ * too long, drop a filler there — a wayside dressing (data/vignettes/wayside.json) or a camp from the zone's mix,
+ * alternating. Zones not being placed this run count with their files from disk.
+ */
+function fillBoring(states) {
+  const byWid = new Map(states.map(st => [st.wid, st]));
+  const all = Object.entries(MAP).map(([eid, wid]) => {
+    const st = byWid.get(wid);
+    if (st) return { id: wid, gx: st.zs.grid[0], gy: st.zs.grid[1], nav: st.nav, bake: st.bake, file: st.file };
+    const f = new URL(`data/vignettes/placements/${wid}.json`, ROOT);
+    if (!existsSync(f)) return null;
+    return { id: wid, gx: SHEET.zones[eid].grid[0], gy: SHEET.zones[eid].grid[1], nav: parseNav(readFileSync(new URL(`data/zones/${wid}/nav.bin`, ROOT))), bake: J(`data/zones/${wid}/placements.json`).placements, file: J(`data/vignettes/placements/${wid}.json`) };
+  }).filter(Boolean);
+  const reachable = gi => PCOMP.label[gi] === PCOMP.main;
+  const goal = BORING_LIMIT - 10, n = new Map(), dead = new Set();
+  for (let iter = 0; iter < 80; iter++) {
+    const r = boringWalk(all, { reachable });
+    const want = [];
+    for (const p of r.pockets) if (2 * (p.d - SIGHT) > goal) want.push({ zone: p.zone, x: p.x, z: p.z, road: false });
+    if (r.road.worst > goal && r.road.cut) want.push({ zone: r.road.at.zone, x: r.road.cut.x, z: r.road.cut.z, road: true });
+    let added = 0;
+    for (const w of want) {
+      const st = byWid.get(w.zone); if (!st) continue;
+      const key = `${w.zone}:${Math.round(w.x / 40)}:${Math.round(w.z / 40)}`; if (dead.has(key)) continue;
+      const k = n.get(w.zone) || 0;
+      const { ctx, rnd, zs, eid } = st;
+      // alternate wayside / camp; if the preferred kind finds no room, try the other before giving up on the spot
+      let camp = k % 2 === 1 && (zs.camps || []).length > 0, spot = null;
+      // the wayside kind is chosen first (its radius is the disc that is checked), by the biome of the pocket
+      const pb = ctx.terrain.biomes[ctx.terrain.biomeAt(w.x, w.z)].key;
+      const fits = WAYSIDE.filter(w2 => !w2.biomes.length || w2.biomes.includes(pb));
+      const pool = fits.length ? fits : WAYSIDE, wk = pool[Math.floor(rnd() * pool.length)];
+      for (const c of camp ? [true, false] : [false, (zs.camps || []).length > 0]) {
+        const R = c ? 10 : wk.radius, kind = c ? 'camp' : 'wayside';
+        for (const max of w.road ? [60, 120] : [80, 160]) {
+          spot = findSpot(ctx, rnd, kind, R, { near: { x: w.x, z: w.z, min: w.road ? R + 8 : 0, max }, tries: 1200, spread: 0, score: (x, z) => -Math.hypot(x - w.x, z - w.z) });
+          if (spot) break;
+        }
+        if (spot) { camp = c; break; }
+        if (c === false && !(zs.camps || []).length) break;
+      }
+      if (!spot) { dead.add(key); continue; }
+      n.set(w.zone, k + 1); added++;
+      if (camp) {
+        const c = zs.camps[Math.floor(k / 2) % zs.camps.length];
+        ctx.placed.push({ type: 'camp', id: `camp_${eid}_f${k}`, monster: c.type, with: c.with || null, level: c.level, count: [2, 3], x: spot.x, z: spot.z, yaw: 0, radius: 10, filler: true });
+      } else {
+        ctx.placed.push({ type: 'wayside', id: `${wk.id}_${eid}_${k}`, kind: wk.id, name: wk.name, x: spot.x, z: spot.z, yaw: +(rnd() * 6.28).toFixed(2), radius: wk.radius, filler: true });
+      }
+    }
+    if (!added) break;
   }
 }
 

@@ -39,6 +39,10 @@ circles (+ a per-kind gap), not steep (16–28° by kind), ≥ 60 m from the zon
 (vignettes ≥ 140 m apart), and clear of stream B's door/arenas by **B's own re-search rule** so a re-bake never moves them.
 Trees and rocks inside a disc do not count: B's re-bake keeps scatter off every placement. `features[]` holds hooks that
 ARE an existing feature (a ford, a city, a line across the zone) — not keep-clear discs.
+**Longest boring walk ≤ 250 m** (PLAN §16, `tools/boring-walk.mjs`): after everything else is placed, the placer drops
+fillers into the emptiest reachable pockets and the longest road stretches with nothing in sight (60 m) — a `wayside`
+dressing from `wayside.json` (a cairn, a milestone, a ribboned tree… props + a lore line, no encounter) or a camp from the
+zone's mix, alternating, tagged `filler: true` — until both the road and the cross-country measure pass.
 `placements/test.json` is the M0 fixture zone (vignettes only): `node tools/place-vignettes.mjs test`.
 
 Order after a change: B bakes → `assign-vignettes.mjs` (if recipes/quests changed) → `place-vignettes.mjs` → B re-bakes

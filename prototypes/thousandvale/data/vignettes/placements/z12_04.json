@@ -46,47 +46,53 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
    "slope": 10
   }
  },
- "mainWalkableShare": 0.805,
+ "mainWalkableShare": 0.787,
  "settlements": [
   {
    "name": "Coldwater",
    "kind": "town",
    "x": 1474,
    "z": 1846,
-   "r": 70,
-   "source": "ask",
-   "bakeId": null
+   "r": 90,
+   "source": "bake",
+   "bakeId": "coldwater"
   },
   {
    "name": "Netherby",
    "kind": "hamlet",
    "x": 711,
    "z": 732,
-   "r": 40,
-   "source": "ask",
-   "bakeId": null
+   "r": 46,
+   "source": "bake",
+   "bakeId": "netherby"
   }
  ],
  "checks": [
   {
    "id": "door_1",
    "kind": "dungeon_door",
-   "x": 1761,
-   "z": 1815,
+   "x": 1369,
+   "z": 1953,
    "reachable": true,
    "openShare": 1
   },
   {
    "id": "event_coldwater",
    "kind": "event_site",
-   "x": 736,
-   "z": 1301,
+   "x": 903,
+   "z": 1790,
    "reachable": true,
    "openShare": 1
   }
@@ -99,9 +105,9 @@
    "name": "Mere Tower",
    "template": "watchtower_garrison",
    "friendly": true,
-   "x": 271,
-   "z": 445,
-   "yaw": 0.79,
+   "x": 255,
+   "z": 440,
+   "yaw": 1.18,
    "radius": 16,
    "level": 5
   },
@@ -112,9 +118,9 @@
    "template": "arable",
    "flavour": null,
    "settlement": "Coldwater",
-   "x": 1527,
-   "z": 1741,
-   "yaw": -1.96,
+   "x": 1493,
+   "z": 1709,
+   "yaw": -0.39,
    "radius": 22,
    "level": 5
   },
@@ -126,8 +132,8 @@
    "flavour": null,
    "settlement": "Netherby",
    "x": 654,
-   "z": 929,
-   "yaw": -1.57,
+   "z": 914,
+   "yaw": 2.75,
    "radius": 22,
    "level": 5
   },
@@ -141,9 +147,25 @@
     "floors": 1,
     "level": 6
    },
-   "x": 84,
-   "z": 1675,
-   "yaw": -3.14,
+   "x": 172,
+   "z": 1515,
+   "yaw": 2.75,
+   "radius": 10,
+   "level": 6
+  },
+  {
+   "type": "cave",
+   "id": "cave_coldwater_1",
+   "name": "Smugglers' cave",
+   "template": "smugglers_cave",
+   "plan": {
+    "family": "flooded_cistern",
+    "floors": 1,
+    "level": 6
+   },
+   "x": 898,
+   "z": 1668,
+   "yaw": 1.96,
    "radius": 10,
    "level": 6
   },
@@ -152,82 +174,46 @@
    "id": "the_reflection_mere",
    "name": "The Mirror Mere",
    "kind": "compositional",
-   "x": 996,
-   "z": 1848,
+   "x": 1156,
+   "z": 1467,
    "yaw": 0,
    "radius": 20,
    "where": "best fit for: a still lake with a ruin on the far shore",
-   "needMet": false
+   "needMet": true
   },
   {
    "type": "vignette",
-   "id": "broken_aqueduct",
-   "name": "The Broken Aqueduct",
-   "x": 1695,
-   "z": 740,
-   "yaw": 5.24,
-   "radius": 14,
+   "id": "drowned_chapel",
+   "name": "The Drowned Chapel",
+   "x": 646,
+   "z": 1369,
+   "yaw": 2.08,
+   "radius": 13,
    "biome": "hills",
-   "biomeFits": true,
+   "biomeFits": false,
    "level": 1
   },
   {
    "type": "vignette",
-   "id": "dark_lighthouse",
-   "name": "The Dark Lighthouse",
-   "x": 1865,
-   "z": 73,
-   "yaw": 5.34,
-   "radius": 10,
-   "biome": "hills",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "drift_mine_entry",
-   "name": "The Drift Entry",
-   "x": 921,
-   "z": 231,
-   "yaw": 2.21,
-   "radius": 10,
-   "biome": "hills",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "ferry_landing",
-   "name": "The Stranded Ferry",
-   "x": 1357,
-   "z": 596,
-   "yaw": 1,
-   "radius": 12,
+   "id": "eel_traps",
+   "name": "The Eel Weir",
+   "x": 1320,
+   "z": 572,
+   "yaw": 4.87,
+   "radius": 11,
    "biome": "grassland",
    "biomeFits": true,
    "level": 1
   },
   {
    "type": "vignette",
-   "id": "ferryman_shrine",
-   "name": "The Ferryman's Coin",
-   "x": 1312,
-   "z": 1178,
-   "yaw": 6.24,
+   "id": "heron_island",
+   "name": "Heron Island",
+   "x": 1940,
+   "z": 115,
+   "yaw": 4.93,
    "radius": 10,
-   "biome": "mountains",
-   "biomeFits": false,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "flooded_mill",
-   "name": "The Flooded Mill",
-   "x": 583,
-   "z": 1505,
-   "yaw": 4.65,
-   "radius": 12,
-   "biome": "hills",
+   "biome": "shrubland",
    "biomeFits": false,
    "level": 1
   },
@@ -235,9 +221,9 @@
    "type": "vignette",
    "id": "roadside_shrine",
    "name": "The Wayside Saint",
-   "x": 1800,
-   "z": 1205,
-   "yaw": 0.78,
+   "x": 1826,
+   "z": 1207,
+   "yaw": 1.14,
    "radius": 8,
    "biome": "mountains",
    "biomeFits": true,
@@ -245,38 +231,74 @@
   },
   {
    "type": "vignette",
+   "id": "sinkhole_garden",
+   "name": "The Sinkhole Garden",
+   "x": 983,
+   "z": 63,
+   "yaw": 5.4,
+   "radius": 11,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
    "id": "smugglers_beacon",
    "name": "The False Beacon",
-   "x": 192,
-   "z": 1162,
-   "yaw": 3.95,
+   "x": 455,
+   "z": 1940,
+   "yaw": 3.3,
    "radius": 11,
    "biome": "mountains",
    "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "stilt_house",
+   "name": "The Empty Stilt House",
+   "x": 1141,
+   "z": 1853,
+   "yaw": 3.26,
+   "radius": 10,
+   "biome": "mountains",
+   "biomeFits": false,
    "level": 1
   },
   {
    "type": "vignette",
    "id": "toll_bridge_trolls",
    "name": "The Toll Bridge",
-   "x": 467,
-   "z": 1959,
-   "yaw": 5.05,
+   "x": 1796,
+   "z": 708,
+   "yaw": 2.59,
    "radius": 11,
-   "biome": "mountains",
+   "biome": "hills",
    "biomeFits": true,
    "level": 1
   },
   {
    "type": "vignette",
-   "id": "trapper_lines",
-   "name": "The Trapper's Line",
-   "x": 903,
-   "z": 1256,
-   "yaw": 2.8,
+   "id": "weavers_bridge_toll",
+   "name": "The Spider Bridge",
+   "x": 83,
+   "z": 69,
+   "yaw": 2.31,
    "radius": 12,
-   "biome": "mountains",
+   "biome": "hills",
    "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "will_o_lights",
+   "name": "The Lantern Path",
+   "x": 681,
+   "z": 1153,
+   "yaw": 5.41,
+   "radius": 14,
+   "biome": "hills",
+   "biomeFits": false,
    "level": 1
   },
   {
@@ -292,8 +314,8 @@
     2,
     4
    ],
-   "x": 1047,
-   "z": 894,
+   "x": 186,
+   "z": 1013,
    "yaw": 0,
    "radius": 10
   },
@@ -310,8 +332,8 @@
     2,
     4
    ],
-   "x": 82,
-   "z": 62,
+   "x": 1287,
+   "z": 1072,
    "yaw": 0,
    "radius": 10
   },
@@ -328,8 +350,8 @@
     2,
     4
    ],
-   "x": 778,
-   "z": 575,
+   "x": 760,
+   "z": 478,
    "yaw": 0,
    "radius": 10
   },
@@ -346,8 +368,8 @@
     2,
     4
    ],
-   "x": 376,
-   "z": 738,
+   "x": 1035,
+   "z": 884,
    "yaw": 0,
    "radius": 10
   },
@@ -364,8 +386,8 @@
     2,
     4
    ],
-   "x": 1610,
-   "z": 341,
+   "x": 588,
+   "z": 1297,
    "yaw": 0,
    "radius": 10
   },
@@ -382,8 +404,8 @@
     2,
     4
    ],
-   "x": 1274,
-   "z": 1518,
+   "x": 1045,
+   "z": 1506,
    "yaw": 0,
    "radius": 10
   },
@@ -400,8 +422,8 @@
     2,
     4
    ],
-   "x": 1935,
-   "z": 410,
+   "x": 1561,
+   "z": 269,
    "yaw": 0,
    "radius": 10
   },
@@ -418,8 +440,8 @@
     2,
     4
    ],
-   "x": 1853,
-   "z": 1696,
+   "x": 1862,
+   "z": 1752,
    "yaw": 0,
    "radius": 10
   },
@@ -436,8 +458,8 @@
     2,
     4
    ],
-   "x": 1291,
-   "z": 1984,
+   "x": 1298,
+   "z": 1570,
    "yaw": 0,
    "radius": 10
   },
@@ -454,8 +476,8 @@
     2,
     4
    ],
-   "x": 1646,
-   "z": 1506,
+   "x": 1240,
+   "z": 1511,
    "yaw": 0,
    "radius": 10
   },
@@ -472,7 +494,7 @@
     2,
     4
    ],
-   "x": 1284,
+   "x": 1267,
    "z": 1754,
    "yaw": 0,
    "radius": 10
@@ -490,8 +512,8 @@
     2,
     4
    ],
-   "x": 1685,
-   "z": 1894,
+   "x": 1319,
+   "z": 1681,
    "yaw": 0,
    "radius": 10
   },
@@ -500,30 +522,30 @@
    "id": "rare_old_coldmouth",
    "slot": 0,
    "name": "Old Coldmouth",
-   "x": 1063,
-   "z": 1564,
+   "x": 1716,
+   "z": 1524,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1124,
-     1525
+     1699,
+     1451
     ],
     [
-     1102,
-     1625
+     1789,
+     1481
     ],
     [
-     1023,
-     1663
+     1772,
+     1607
     ],
     [
-     987,
-     1516
+     1679,
+     1623
     ],
     [
-     1061,
-     1463
+     1631,
+     1491
     ]
    ],
    "respawnMin": [
@@ -537,30 +559,30 @@
    "id": "rare_mere_moth_queen",
    "slot": 1,
    "name": "The Mere Moth Queen",
-   "x": 1691,
-   "z": 1705,
+   "x": 991,
+   "z": 1899,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1607,
-     1669
+     971,
+     1817
     ],
     [
-     1704,
-     1632
+     1080,
+     1857
     ],
     [
-     1757,
-     1669
+     1062,
+     1941
     ],
     [
-     1740,
-     1757
+     973,
+     2004
     ],
     [
-     1639,
-     1752
+     887,
+     1906
     ]
    ],
    "respawnMin": [
@@ -573,8 +595,8 @@
    "type": "waystone",
    "id": "ws_z12_04_coldwater",
    "name": "Coldwater",
-   "x": 1380.8,
-   "z": 1810.5,
+   "x": 1546.4,
+   "z": 1779.9,
    "yaw": 0,
    "settlement": "Coldwater",
    "radius": 1
@@ -583,8 +605,8 @@
    "type": "waystone",
    "id": "ws_z12_04_netherby",
    "name": "Netherby",
-   "x": 641.3,
-   "z": 736.7,
+   "x": 761.6,
+   "z": 713.1,
    "yaw": 0,
    "settlement": "Netherby",
    "radius": 1
@@ -593,8 +615,8 @@
    "type": "waystone",
    "id": "ws_z12_04_door",
    "name": "Barrow entrance",
-   "x": 1765.3,
-   "z": 1856.8,
+   "x": 1405,
+   "z": 1931.2,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -605,9 +627,9 @@
    "name": "Warden Oswy",
    "role": "guard",
    "at": "Mere Tower",
-   "x": 272.6,
-   "z": 443.8,
-   "yaw": 1.4,
+   "x": 255,
+   "z": 442,
+   "yaw": 0.12,
    "radius": 1
   },
   {
@@ -616,9 +638,9 @@
    "name": "Elder Wenna",
    "role": "elder",
    "at": "Coldwater",
-   "x": 1476.3,
-   "z": 1848.1,
-   "yaw": 2.32,
+   "x": 1461.2,
+   "z": 1827.4,
+   "yaw": 0.83,
    "radius": 1
   },
   {
@@ -627,9 +649,9 @@
    "name": "Pike of Netherby",
    "role": "fisher",
    "at": "Netherby",
-   "x": 708.4,
-   "z": 733.5,
-   "yaw": 5.7,
+   "x": 720.5,
+   "z": 737.9,
+   "yaw": 2.98,
    "radius": 1
   },
   {
@@ -640,8 +662,8 @@
    "clue": "drunks_story",
    "how": null,
    "shimmer": null,
-   "x": 680.1,
-   "z": 765,
+   "x": 757,
+   "z": 709.4,
    "yaw": 0,
    "where": "edge of Netherby",
    "radius": 1
@@ -654,8 +676,8 @@
    "clue": "map_piece",
    "how": null,
    "shimmer": null,
-   "x": 269.1,
-   "z": 445.6,
+   "x": 253.7,
+   "z": 438.5,
    "yaw": 0,
    "where": "fort Mere Tower",
    "radius": 1
@@ -668,11 +690,843 @@
    "clue": null,
    "how": "dig",
    "shimmer": 15,
-   "x": 642.6,
-   "z": 651.9,
+   "x": 612.4,
+   "z": 758.8,
    "yaw": 0,
    "where": "near Netherby",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_0",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 509,
+   "z": 187,
+   "yaw": 4.81,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f1",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1185,
+   "z": 95,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_2",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 333,
+   "z": 605,
+   "yaw": 0.75,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f3",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1585,
+   "z": 905,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_4",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 24,
+   "z": 703,
+   "yaw": 3.59,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f5",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1910,
+   "z": 422,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_6",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 201,
+   "z": 1331,
+   "yaw": 6.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f7",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1528,
+   "z": 1292,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_8",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 452,
+   "z": 1616,
+   "yaw": 5.85,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f9",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 192,
+   "z": 1820,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_10",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 305,
+   "z": 1183,
+   "yaw": 0.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f11",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1034,
+   "z": 1202,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_12",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1015,
+   "z": 588,
+   "yaw": 4.97,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f13",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1587,
+   "z": 536,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_14",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1695,
+   "z": 61,
+   "yaw": 3.89,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f15",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 733,
+   "z": 262,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_16",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 700,
+   "z": 2008,
+   "yaw": 0.7,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f17",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 394,
+   "z": 858,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_18",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1849,
+   "z": 935,
+   "yaw": 0.11,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f19",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 656,
+   "z": 1759,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_20",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1744,
+   "z": 2005,
+   "yaw": 5.8,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f21",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1434,
+   "z": 777,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_coldwater_22",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 550,
+   "z": 409,
+   "yaw": 5.67,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_23",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 747,
+   "z": 36,
+   "yaw": 3.73,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_24",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 308,
+   "z": 795,
+   "yaw": 6.23,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f25",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 264,
+   "z": 166,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_26",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1357,
+   "z": 346,
+   "yaw": 4.3,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f27",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 121,
+   "z": 310,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_28",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1423,
+   "z": 91,
+   "yaw": 4.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f29",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 396,
+   "z": 1412,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_30",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 853,
+   "z": 1033,
+   "yaw": 2.21,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f31",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 87,
+   "z": 1988,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_32",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1649,
+   "z": 1138,
+   "yaw": 0.42,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f33",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 514,
+   "z": 1051,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_34",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1209,
+   "z": 738,
+   "yaw": 6.15,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f35",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1300,
+   "z": 1292,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_36",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1940,
+   "z": 1465,
+   "yaw": 4.9,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f37",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 720,
+   "z": 1565,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_coldwater_38",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1776,
+   "z": 252,
+   "yaw": 3.65,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f39",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1476,
+   "z": 1485,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_40",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 2018,
+   "z": 1130,
+   "yaw": 2.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f41",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 557,
+   "z": 579,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_42",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 281,
+   "z": 2008,
+   "yaw": 0.43,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f43",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 80,
+   "z": 1687,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_44",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 25,
+   "z": 554,
+   "yaw": 5.59,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f45",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 924,
+   "z": 240,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_46",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1466,
+   "z": 1104,
+   "yaw": 5.91,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f47",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 301,
+   "z": 978,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_48",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 372,
+   "z": 1776,
+   "yaw": 0.44,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f49",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 96,
+   "z": 1205,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_coldwater_50",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 936,
+   "z": 432,
+   "yaw": 0.04,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f51",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1151,
+   "z": 496,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_52",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1955,
+   "z": 792,
+   "yaw": 3.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f53",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1988,
+   "z": 272,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_54",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 132,
+   "z": 841,
+   "yaw": 4.52,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f55",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1624,
+   "z": 759,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
   }
  ],
  "features": []

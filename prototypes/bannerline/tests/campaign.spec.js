@@ -28,10 +28,13 @@ test('campaign: map + briefing, play mission 1 at 8x, victory debrief, progress 
   await page.evaluate(() => { const m = window.cmp.match; const f = m.sim.map.fields[0]; window.cmp.issue({ p: 0, type: 'amove', x: f.cx, z: 112 }); });
   await expect(page.locator('.cp-track-list li.done')).not.toHaveCount(0, { timeout: 30000 });
   await expect(page.locator('.cp-say.on')).toBeVisible({ timeout: 30000 });
-  // keep hiring as gold comes in
+  // keep hiring as gold comes in, and keep the hero fighting: after a death it respawns by the Keep with
+  // no orders, out of reach of the wave, and the Keep's guns (feel pass) take every kill. A real player
+  // sends the hero back out; so does this one (an attack-move every ~1.6 s).
   const hire = setInterval(() => page.locator('[data-send="levy"]').click({ timeout: 500 }).catch(() => {}), 400);
+  const fight = setInterval(() => page.evaluate(() => { const m = window.cmp.match; if (!m || m.sim.over) return; const f = m.sim.map.fields[0]; window.cmp.issue({ p: 0, type: 'amove', x: f.cx, z: 112 }); }).catch(() => {}), 1600);
   await expect(page.locator('.cp-debrief')).toBeVisible({ timeout: 150000 });
-  clearInterval(hire);
+  clearInterval(hire); clearInterval(fight);
   await expect(page.locator('.cp-debrief h1')).toHaveText('Victory');
   await expect(page.locator('.cp-debrief .cp-star.on')).not.toHaveCount(0);
   await page.screenshot({ path: 'test-results/bannerline-campaign-debrief.png' });

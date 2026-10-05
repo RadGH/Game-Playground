@@ -525,6 +525,6 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
   ping -> input delay, rejoin by token, `backToLobby()` (not yet called from HvF's results screen — H's call),
   and the empty-team / open-seat check before start. A host with NO seat now WATCHES (first farmer's view,
   `m.opts.watching`) and keeps pumping the lockstep. Specs: hvf-modes.spec.js (3 old + new "host with no seat").
-- [ ] (A -> B) `main.js` ignores the lockstep's `refused` event (bad rejoin token): the player waits 20 s and
+- [x] (A -> B, lead fixed: netEvent refused -> title + message) `main.js` ignores the lockstep's `refused` event (bad rejoin token): the player waits 20 s and
   then loses the seat silently. Please show "Could not rejoin: the match no longer has your seat" and return to
   the title. (With A's fix a valid token is never refused, even inside PeerJS's 8 s heartbeat.)

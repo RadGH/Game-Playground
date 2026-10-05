@@ -69,6 +69,7 @@ export function createRoom(opts) {
     event(ev) {
       if (ev.type === 'loot' && ev.items && hooks.loot) { hooks.loot(ev, room); return; }
       if (hooks.observe) { if (ev.x === undefined) fillXZ(ev); hooks.observe(ev, room); }
+      if (ev.type === 'fx' && ev.kind === 'form' && ev.id) barDirty.add(ev.id);   // a form/stance changed slots: resend you.bar after the tick
       room.emit(ev);
     },
     /** Emit without interception (the world's own loot events). */
@@ -108,6 +109,7 @@ export function createRoom(opts) {
   };
   room.host = host;
 
+  const barDirty = new Set();       // player entity ids whose skill bar must be resent (level-up, form, talent)
   const rules = createRules(host, { seed, roomId: id });
   room.rules = rules;
   function safe(fnName, ...args) {
@@ -164,6 +166,22 @@ export function createRoom(opts) {
     clients.set(e.id, client);
   };
   room.detach = function (e) { clients.delete(e.id); };
+  /**
+   * The skill bar the client draws (`you.bar`, PLAN/D's ask): C's `rules.bar(e)`, or undefined when the
+   * rules have none (the stand-in rules). It formats text, so it runs on `joined` and on a change only.
+   */
+  room.barFor = function (e) { const b = safe('bar', e); return Array.isArray(b) ? b : undefined; };
+  /** Something changed a player's slots (a talent pick, a form): send `you {bar}` after this tick. */
+  room.barChanged = function (e) { if (e) barDirty.add(e.id); };
+  function flushBars() {
+    for (const eid of barDirty) {
+      const e = entities.get(eid), c = clients.get(eid);
+      if (!e || e.kind !== 'player' || !c || !c.you) continue;
+      const bar = room.barFor(e);
+      if (bar) c.you({ bar });
+    }
+    barDirty.clear();
+  }
   room.removePlayer = function (e) { room.remove(e); };
 
   room.input = function (e, msg) {
@@ -206,6 +224,7 @@ export function createRoom(opts) {
     if (lv && lv > (ch.level || 1)) {
       ch.level = lv; e.setLevel(lv);
       safe('onLevel', e);
+      barDirty.add(e.id);
       room.event({ type: 'level', d: e.id, level: lv });
       urgent = true;
     }
@@ -277,6 +296,7 @@ export function createRoom(opts) {
       for (let i = despawns.length - 1; i >= 0; i--) if (despawns[i].at <= now) { room.remove(despawns[i].e); despawns.splice(i, 1); }
     }
     if (tick % 10 === 1) fillCamps(now);
+    if (barDirty.size) flushBars();
     // 4. snapshots + events
     send();
     events = [];

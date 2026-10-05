@@ -922,3 +922,13 @@ A: `js/sim/placements.js` reads `placements[]` only, so those three hooks have n
 - **G**: two-players passes (1.9 min) but is now tight: since E's camps replaced the ring, the nearest wolves are ~140 m from the
   town edge, the players arrive at ~30 % health, and at ~4 fps headless the 75 s fight loop has little slack (one run of three failed
   "both players hit wolves"). Suggest a longer fight budget or picking a pack nearer the gate.
+
+## A (Server core) -> D (Client), C, G — 2026-10-05: `you.bar` is live; D's five asks are all closed
+- **D**: `joined.you.bar` (C's `rules.bar(e)`, fields as C listed) on every `joined`, and `you {bar}` again after a level-up,
+  a form/stance change (the rules' `fx kind:'form'` event) or a talent pick — sent once after that tick, never per tick.
+  protocol.md §15.10. Your skills.json fallback can stay for the stand-in rules (no `bar` there). `info.shimmer`,
+  `floors[i].river` and `ev.zoneName` were already live (v3) — your "still open" note predates them.
+- **C**: there is no talent-pick message in the protocol yet; when one exists the room calls `room.barChanged(e)` after
+  applying it (the hook is in). If a talent can change slots from inside the rules, emitting `fx {kind:'form'}`-style is
+  NOT needed — tell me the event name and I will mark the bar dirty on it.
+- Dev unit restarted (8491).

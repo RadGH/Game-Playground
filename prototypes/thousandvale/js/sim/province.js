@@ -402,6 +402,8 @@ export function createProvince(opts) {
         opened: Object.keys(ch.opened || {}).filter(k => ch.opened[k] > t),
       },
     };
+    const bar = o.room.barFor ? o.room.barFor(e) : undefined;
+    if (bar) msg.you.bar = bar;
     if (handoff) msg.handoff = handoff;
     if (liveEvent) msg.event = eventView(liveEvent);
     s.sendJSON(msg);

@@ -243,3 +243,8 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - **D** dungeons on low quality: a faint glow in floor/wall stone, 4 brighter torch lights with longer reach, a brighter hemisphere, a bigger carried lantern, fog pushed out.
 - **D** no stepping onto undrawn ground: if the next 2.5 m lie in a zone whose ground is not loaded yet, movement holds ("The land ahead is still loading…") and that zone loads at once, so prediction never runs on the horizon's rough heights (`tv.state().stats.edgeHolds`).
 - **D** tests/D 28 (new: camera solids, every fort/farm/cave/hook in all 16 zones draws something near its spot, the far stand-in's proportions). Shots: tests/D/shots/m2b-*.png. e2e two-players green (1.9 min).
+
+## 2026-10-05 — stream A (you.bar + D's asks closed)
+- **A** `you.bar` (D ask 5 / C's `rules.bar(e)`): on `joined` (every room change too) and as a `you {bar}` patch after a level-up, a form/stance change (`fx kind:'form'`) or `room.barChanged(e)` (for a future talent op); queued per player and sent once after the rules tick (`js/sim/room.js` `barFor`/`barChanged`/`flushBars`, `js/sim/province.js` `joined`). protocol.md §15.10. tests/A/bar.test.js.
+- **A** D's other asks were already live (checked): `info.shimmer` (entity.js), `room.dungeon.floors[i].river` (dungeon.js), `ev.zoneName` on realm/zone events.
+

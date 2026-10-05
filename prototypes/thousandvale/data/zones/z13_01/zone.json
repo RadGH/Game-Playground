@@ -74,14 +74,16 @@
       "name": "Barrow entrance",
       "x": 1061,
       "z": 1066,
-      "yaw": -3.247
+      "yaw": -3.247,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_brackwater",
       "x": 1026,
       "z": 981,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -261,13 +263,13 @@
     ],
     "roads": 0,
     "bridges": 0,
-    "scatter": 6222,
+    "scatter": 6195,
     "scatterKinds": {
-      "rock_small": 904,
-      "bush": 2779,
-      "tree_broadleaf": 1250,
-      "reed": 1196,
-      "tree_dead": 91,
+      "rock_small": 900,
+      "bush": 2767,
+      "tree_broadleaf": 1252,
+      "reed": 1181,
+      "tree_dead": 93,
       "rock_large": 2
     },
     "sites": [
@@ -281,12 +283,12 @@
       "z": 878
     },
     "placements": 131,
-    "vignettesAvoided": 40
+    "vignettesAvoided": 96
   },
   "files": {
-    "terrain.bin": 474660,
-    "nav.bin": 8177,
-    "scatter.bin": 49860,
+    "terrain.bin": 474688,
+    "nav.bin": 8197,
+    "scatter.bin": 49644,
     "placements.json": 39215
   }
 }

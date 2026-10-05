@@ -112,14 +112,16 @@
       "name": "Barrow entrance",
       "x": 350,
       "z": 735,
-      "yaw": -2.692
+      "yaw": -2.692,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_saint_orrins_rise",
       "x": 327,
       "z": 872,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -175,16 +177,16 @@
     ],
     "roads": 10,
     "bridges": 1,
-    "scatter": 12059,
+    "scatter": 12034,
     "scatterKinds": {
-      "bush": 3372,
-      "tree_broadleaf": 3239,
-      "rock_small": 2076,
-      "rock_large": 1900,
-      "reed": 229,
-      "tree_dead": 20,
+      "bush": 3364,
+      "tree_broadleaf": 3242,
+      "rock_small": 2059,
+      "rock_large": 1898,
+      "reed": 227,
+      "tree_dead": 19,
       "boulder": 259,
-      "tree_conifer": 958,
+      "tree_conifer": 960,
       "tree_acacia": 6
     },
     "sites": [
@@ -200,12 +202,12 @@
       "z": 568
     },
     "placements": 185,
-    "vignettesAvoided": 40
+    "vignettesAvoided": 94
   },
   "files": {
-    "terrain.bin": 680751,
-    "nav.bin": 46521,
-    "scatter.bin": 96556,
+    "terrain.bin": 680779,
+    "nav.bin": 46519,
+    "scatter.bin": 96356,
     "placements.json": 101667
   }
 }

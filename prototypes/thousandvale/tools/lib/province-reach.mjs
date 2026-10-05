@@ -16,7 +16,7 @@ const ROOT = new URL('../../', import.meta.url);
 const BLOCKED = NAV.SOLID | NAV.BUILDING | NAV.DEEP;
 
 /** The targets a walker must reach in one zone: settlements, the front of each door, event/camp arenas, crossings, vignettes. */
-export function zoneTargets(t, sheetZone) {
+export function zoneTargets(t, worldZone) {
   const out = [];
   for (const s of t.meta.sites) {
     if (s.type === 'settlement') out.push({ what: `${s.kind} ${s.name}`, x: s.x, z: s.z, near: Math.min(30, (s.radius || 30) * 0.5) });
@@ -25,8 +25,11 @@ export function zoneTargets(t, sheetZone) {
     else if (s.type === 'crossing') out.push({ what: `${s.kind || 'crossing'} ${s.name}`, x: s.x, z: s.z, near: 30 });
   }
   if (t.meta.spawn) out.push({ what: 'spawn', x: t.meta.spawn.x, z: t.meta.spawn.z, near: 4 });
-  const vf = sheetZone && new URL(`data/vignettes/placements/${sheetZone}.json`, ROOT);
-  if (vf && existsSync(vf)) for (const p of JSON.parse(readFileSync(vf, 'utf8')).placements || []) out.push({ what: `vignette ${p.vignette || p.id}`, x: p.x, z: p.z, near: Math.max(4, (p.radius || 8) * 0.6) });
+  const vf = worldZone && new URL(`data/vignettes/placements/${worldZone}.json`, ROOT);   // E's files are named by WORLD zone
+  if (vf && existsSync(vf)) for (const p of JSON.parse(readFileSync(vf, 'utf8')).placements || []) {
+    if (!Number.isFinite(p.x) || !Number.isFinite(p.z)) continue;
+    out.push({ what: `${p.type || 'vignette'} ${p.id || p.vignette}`, x: p.x, z: p.z, near: Math.max(4, (p.radius || 8) * 0.6) });
+  }
   return out;
 }
 
@@ -80,7 +83,7 @@ export function provinceReach(sheet = 'torbor_downs') {
     const ox = z.zx * E, oy = z.zy * E;
     for (let j = 0; j < S; j++) for (let i = 0; i < S; i++) { const g = (oy + j) * G + ox + i; w += walk[g]; r += reached[g]; }
     perZone.push({ id: z.id, sheetZone: z.sheetZone, walkable: w / (S * S), reachedShare: w ? r / w : 0 });
-    for (const tg of zoneTargets(z.t, z.sheetZone)) {
+    for (const tg of zoneTargets(z.t, z.id)) {
       const g = gIdx(z, tg.x, tg.z);
       const gap = nearestReached(reached, G, g, Math.ceil(tg.near / step));
       targets.push({ zone: z.id, sheetZone: z.sheetZone, ...tg, ok: gap >= 0, gap: gap >= 0 ? gap * step : null });

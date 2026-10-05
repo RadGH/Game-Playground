@@ -81,21 +81,24 @@
       "name": "Barrow entrance",
       "x": 994,
       "z": 1171,
-      "yaw": -0.431
+      "yaw": -0.431,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "world_grimtallow",
       "x": 1161,
       "z": 1305,
-      "r": 100
+      "r": 100,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_blackthorn_scar",
       "x": 877,
       "z": 1098,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -145,13 +148,13 @@
     ],
     "roads": 2,
     "bridges": 0,
-    "scatter": 11995,
+    "scatter": 11965,
     "scatterKinds": {
-      "rock_large": 3348,
-      "rock_small": 4698,
-      "tree_conifer": 2021,
-      "bush": 846,
-      "boulder": 1080,
+      "rock_large": 3355,
+      "rock_small": 4675,
+      "tree_conifer": 2011,
+      "bush": 843,
+      "boulder": 1079,
       "tree_broadleaf": 2
     },
     "sites": [
@@ -167,12 +170,12 @@
       "z": 1309
     },
     "placements": 124,
-    "vignettesAvoided": 41
+    "vignettesAvoided": 90
   },
   "files": {
-    "terrain.bin": 636941,
-    "nav.bin": 50026,
-    "scatter.bin": 96044,
+    "terrain.bin": 636981,
+    "nav.bin": 49992,
+    "scatter.bin": 95804,
     "placements.json": 66035
   }
 }

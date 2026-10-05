@@ -33,7 +33,7 @@ import { encodeTerrain } from './bake-test-zone.mjs';
 import { decodeMacro, makeRefiner, heightRange, RIVER_WIDTH, RIVER_DEPTH } from './lib/world-core.mjs';
 import { addZoneSites, TOWN_RADIUS } from './lib/zone-sites.mjs';
 import { encodeScatter, encodeNav, sameLayerFile } from './lib/zone-layers.mjs';
-import { carveTheme, inFen, shoreDistance } from './lib/zone-theme.mjs';
+import { carveTheme, inFen, shoreDistance, cutCliff } from './lib/zone-theme.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const WORLD_DIR = join(HERE, '..', 'data', 'world');
@@ -81,6 +81,8 @@ function placesFor(id) {
   try { sheet = JSON.parse(readFileSync(join(HERE, '..', 'data', 'provinces', `${sid.sheet}.json`), 'utf8')).zones?.[sid.zone] || null; } catch { /* none */ }
   return { rename: places?.rename || {}, asks: places?.asks || [], town: sheet?.town || null };
 }
+let SITE_PINS = {};
+try { SITE_PINS = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'site-pins.json'), 'utf8')); } catch { /* none */ }
 let THEMES = {};
 try { THEMES = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'zone-themes.json'), 'utf8')); } catch { /* none */ }
 /** The E sheet zone id for a world zone, if any (written into meta so E can match on its own ids). */
@@ -245,7 +247,8 @@ export function bakeZone(id, opts = {}) {
   }
 
   // 4b. theme terrain (data/world/zone-themes.json): the water E's archetype needs, off towns and roads, inside the edges
-  const theme = THEMES[id] ? carveTheme({ id, theme: THEMES[id], G, STEP, ZM, ground, waterTop, waterKind, settlements: placed, roads, polyDist, hub: placed.find(s => s.hub) || placed[0] || null }) : null;
+  const cliff = THEMES[id]?.cliff ? cutCliff({ G, STEP, ZM, ground, roads, polyDist }, THEMES[id].cliff) : null;
+  const theme = THEMES[id]?.theme ? carveTheme({ id, theme: THEMES[id], G, STEP, ZM, ground, waterTop, waterKind, settlements: placed, roads, polyDist, hub: placed.find(s => s.hub) || placed[0] || null }) : null;
 
   // 5. level and plan each placed settlement (proctown — the one planner Farhold uses)
   const plans = [];
@@ -364,6 +367,7 @@ export function bakeZone(id, opts = {}) {
     biomes: [...BIOMES.map(b => [b.key, b.name, b.color]), ['road', 'Road', '#b39a6e']], waterKinds: ['none', 'sea', 'lake', 'river'],
     source: { tool: 'tools/bake-zone.mjs', world: { seed: W.seed, width: W.width, height: W.height, method: W.method, seaLevel: W.seaLevel, inputHash: W.inputHash }, zone: { zx: zone.zx, zy: zone.zy }, worldOrigin: { x: ox, z: oz }, zoneMetres: ZM },
     rivers: riversUsed, sites: metaSites, spawn: null,
+    ...(cliff ? { cliff } : {}),
     ...(theme ? { theme: { kind: THEMES[id].theme, lakes: theme.lakes.map(l => ({ name: l.name, kind: l.kind, x: l.x, z: l.z, r: l.r, level: l.level })), fen: theme.fen } } : {}),
   };
   meta.inputHash = (hashStr(JSON.stringify({ id, w: W.inputHash, ZONE_BAKE_VERSION, FORMAT_VERSION, hub: opts.hub || null })) >>> 0).toString(16).padStart(8, '0');
@@ -373,7 +377,7 @@ export function bakeZone(id, opts = {}) {
   let vignettes = [];
   try { vignettes = JSON.parse(readFileSync(join(HERE, '..', 'data', 'vignettes', 'placements', `${id}.json`), 'utf8')).placements || []; } catch { /* E has not placed this zone yet */ }
   const avoid = vignettes.map(v => ({ x: v.x, z: v.z, r: v.radius || 12 }));
-  addZoneSites(terrain, meta.sites, { asks: asksFor(id, meta.sites, W), avoid, doorName: 'Barrow entrance', town: meta.sites.find(s => s.hub) });
+  addZoneSites(terrain, meta.sites, { asks: asksFor(id, meta.sites, W), avoid, doorName: 'Barrow entrance', town: meta.sites.find(s => s.hub), pins: SITE_PINS[id] || {} });
   const hubSite = meta.sites.find(s => s.hub);
   meta.spawn = hubSite ? spawnNear(terrain, hubSite) : { x: 1024, z: 1024 };
 

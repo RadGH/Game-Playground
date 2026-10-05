@@ -127,3 +127,43 @@ export function inFen(fen, x, z, noise) {
   const d = Math.hypot(x - fen.x, z - fen.z) / fen.r;
   return d < 1 && d < 0.75 + (fbm(noise, x / 90, z / 90, { octaves: 2 }) - 0.5) * 0.7;
 }
+
+/**
+ * A cliff beside a road (stream E's hooks, e.g. the_long_stair in Hollin Pass). The face rises on one side of the road
+ * between two x positions: flat ground for `offset` m from the road centre, then `height` m (lo..hi, highest mid-way)
+ * over a 2.5 m run (≈ 80°, past MAX_WALK_SLOPE — nav marks it STEEP), then a plateau easing down over `back` m. Any
+ * `keep` disc (E's hook) is left as an alcove at the foot. The ends taper over 15 m, and nothing within 6 m of a zone
+ * edge is touched (neighbour edges stay bit-exact). spec: { road, x: [x0, x1], side: 'north'|'south', offset, height: [lo, hi],
+ * back, keep: [{x, z, r}] }. Returns { x0, x1, road, height } for meta.
+ */
+export function cutCliff(ctx, spec) {
+  const { G, STEP, ZM, ground } = ctx;
+  const road = ctx.roads.find(r => r.id === spec.road);
+  if (!road) throw new Error('cliff: no road ' + spec.road);
+  const [x0, x1] = spec.x, [lo, hi] = spec.height, off = spec.offset ?? 8, back = spec.back ?? 80, run = 2.5;
+  const north = (spec.side || 'north') === 'north';
+  const keep = spec.keep || [];
+  const reach = off + run + back;
+  let zMin = Infinity, zMax = -Infinity;
+  for (const p of road.pts) if (p[0] >= x0 - 20 && p[0] <= x1 + 20) { zMin = Math.min(zMin, p[1]); zMax = Math.max(zMax, p[1]); }
+  const i0 = Math.max(1, Math.floor((x0 - 20) / STEP) + 1), i1 = Math.min(G - 2, Math.ceil((x1 + 20) / STEP) + 1);
+  const j0 = Math.max(1, Math.floor((zMin - reach) / STEP) + 1), j1 = Math.min(G - 2, Math.ceil((zMax + reach) / STEP) + 1);
+  const edge = (x, z) => smoothstep(0, 1, Math.min(x, z, ZM - x, ZM - z) / 6 - 1);   // 0 within 6 m of an edge, 1 beyond 12 m
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+    const x = (i - 1) * STEP, z = (j - 1) * STEP;
+    const [d, k, t] = ctx.polyDist(road.pts, x, z);
+    if (d > reach) continue;
+    const a = road.pts[k], b = road.pts[k + 1], cx = a[0] + (b[0] - a[0]) * t, cz = a[1] + (b[1] - a[1]) * t;
+    if ((z < cz) !== north) continue;                                // the cliff side only
+    if (cx < x0 || cx > x1) continue;
+    const u = (cx - x0) / (x1 - x0);
+    const H = (lo + (hi - lo) * Math.sin(Math.PI * u)) * smoothstep(0, 1, Math.min(u, 1 - u) * (x1 - x0) / 15);
+    // metres past the foot: past the road offset AND past every kept disc (so a hook disc becomes an alcove in the face)
+    let e = d - off;
+    for (const q of keep) e = Math.min(e, Math.hypot(x - q.x, z - q.z) - q.r - 2);
+    if (e <= 0) continue;
+    const rise = smoothstep(0, 1, e / run), fall = 1 - 0.65 * smoothstep(0, 1, (d - off - run) / back);
+    ground[j * G + i] += H * rise * fall * edge(x, z);
+  }
+  return { road: spec.road, x: [x0, x1], height: [lo, hi], side: spec.side || 'north', offset: off };
+}

@@ -89,14 +89,16 @@
       "name": "Barrow entrance",
       "x": 1566,
       "z": 1434,
-      "yaw": -1.96
+      "yaw": -1.96,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_ashcombe",
       "x": 1216,
       "z": 1176,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -149,13 +151,13 @@
     ],
     "roads": 4,
     "bridges": 0,
-    "scatter": 10479,
+    "scatter": 10485,
     "scatterKinds": {
-      "bush": 2734,
-      "tree_conifer": 5027,
-      "tree_broadleaf": 1051,
-      "rock_small": 1214,
-      "rock_large": 419,
+      "bush": 2721,
+      "tree_conifer": 5053,
+      "tree_broadleaf": 1046,
+      "rock_small": 1211,
+      "rock_large": 420,
       "boulder": 34
     },
     "sites": [
@@ -170,12 +172,12 @@
       "z": 1336
     },
     "placements": 154,
-    "vignettesAvoided": 40
+    "vignettesAvoided": 94
   },
   "files": {
-    "terrain.bin": 548250,
-    "nav.bin": 27817,
-    "scatter.bin": 83916,
+    "terrain.bin": 548278,
+    "nav.bin": 27855,
+    "scatter.bin": 83964,
     "placements.json": 65838
   }
 }

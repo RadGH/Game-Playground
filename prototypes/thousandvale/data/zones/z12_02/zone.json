@@ -125,21 +125,24 @@
       "name": "Barrow entrance",
       "x": 354,
       "z": 1292,
-      "yaw": 1.185
+      "yaw": 1.185,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_grandmother_skein",
       "x": 357,
       "z": 1944,
-      "r": 40
+      "r": 40,
+      "pinned": true
     },
     {
       "type": "camp",
       "id": "elite_hobb_gallowsby",
       "x": 72,
       "z": 1879,
-      "r": 25
+      "r": 25,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -214,16 +217,16 @@
     ],
     "roads": 11,
     "bridges": 5,
-    "scatter": 13924,
+    "scatter": 13894,
     "scatterKinds": {
-      "rock_small": 1281,
+      "rock_small": 1277,
       "rock_large": 731,
-      "bush": 3975,
-      "tree_broadleaf": 7464,
+      "bush": 3965,
+      "tree_broadleaf": 7452,
       "boulder": 89,
       "tree_conifer": 145,
-      "reed": 224,
-      "tree_dead": 15
+      "reed": 221,
+      "tree_dead": 14
     },
     "sites": [
       "settlement(HUB) town Torborhold 592 1264 90",
@@ -240,12 +243,12 @@
       "z": 1264
     },
     "placements": 224,
-    "vignettesAvoided": 48
+    "vignettesAvoided": 102
   },
   "files": {
-    "terrain.bin": 595763,
-    "nav.bin": 37525,
-    "scatter.bin": 111476,
+    "terrain.bin": 595803,
+    "nav.bin": 37520,
+    "scatter.bin": 111236,
     "placements.json": 92436
   }
 }

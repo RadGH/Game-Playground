@@ -119,7 +119,7 @@ test('SAMENESS: no two settlements share a town plan', () => {
 test('THEMES: the ground matches E\'s watery archetypes (lead ruling) — fen, salt shore, meres; pools are wadeable', () => {
   const themes = JSON.parse(readFileSync(new URL('../../data/world/zone-themes.json', import.meta.url), 'utf8'));
   for (const [z, th] of Object.entries(themes)) {
-    if (z.startsWith('_')) continue;
+    if (z.startsWith('_') || !th.theme) continue;
     const t = parseTerrain(readFileSync(new URL(`../../data/zones/${z}/terrain.bin`, import.meta.url)));
     assert.equal(t.meta.theme?.kind, th.theme, `${z} carries its theme`);
     const lakes = t.meta.theme.lakes;
@@ -136,4 +136,28 @@ test('THEMES: the ground matches E\'s watery archetypes (lead ruling) — fen, s
     if (th.theme === 'shore') assert.ok(count('beach') > 300 && lakes[0].r >= 300, `${z}: a big lake with a beach`);
     if (th.theme === 'mere') assert.ok(lakes.filter(l => l.kind === 'mere').length >= 2, `${z}: meres`);
   }
+});
+
+test('THE LONG STAIR: a cliff 18-25 m high on the north side of road_138 in Hollin Pass, an alcove for E\'s hook at its foot', async () => {
+  const { NAV, parseNav } = await import('../../js/rules/terrain-read.js');
+  const t = parseTerrain(readFileSync(new URL('../../data/zones/z11_01/terrain.bin', import.meta.url)));
+  const nav = parseNav(readFileSync(new URL('../../data/zones/z11_01/nav.bin', import.meta.url)));
+  const road = JSON.parse(readFileSync(new URL('../../data/zones/z11_01/placements.json', import.meta.url), 'utf8')).placements.find(p => p.id === 'road_138').data.pts;
+  const roadZ = x => { for (let k = 0; k < road.length - 1; k++) { const a = road[k], b = road[k + 1]; if ((a[0] - x) * (b[0] - x) <= 0 && a[0] !== b[0]) return a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]); } return null; };
+  assert.equal(t.meta.cliff?.road, 'road_138');
+  let tall = 0, steep = 0;
+  for (let x = 1910; x <= 2010; x += 10) {
+    if (Math.abs(x - 1929) < 20) continue;                         // the alcove
+    const rz = roadZ(x), foot = t.heightAt(x, rz - 7), top = t.heightAt(x, rz - 16);
+    if (top - foot >= 15) tall++;
+    let s = 0; for (let d = 8; d <= 12; d += 0.5) s = Math.max(s, t.slopeAt(x, rz - d));
+    let navSteep = false; for (let d = 7; d <= 14; d += 1) if (nav.at(x, rz - d) & NAV.STEEP) navSteep = true;
+    if (s > 46 && navSteep) steep++;
+    assert.ok(top - foot <= 32, `x ${x}: cliff ${(top - foot).toFixed(1)} m — too tall`);
+    assert.ok(t.walkable(x, rz), `x ${x}: the road stays walkable`);
+  }
+  assert.ok(tall >= 6 && steep >= 6, `a real face along the road (tall ${tall}, steep in nav ${steep})`);
+  assert.ok(t.walkable(1929, 426) && t.slopeAt(1929, 426) < 20, 'the hook at the foot stands on open ground');
+  // the zone edge is untouched (the east neighbour still matches — the edge test checks bits; here: no rise near x 2048)
+  assert.ok(Math.abs(t.heightAt(2047, 390) - t.heightAt(2047, 450)) < 10);
 });

@@ -124,14 +124,16 @@
       "name": "Barrow entrance",
       "x": 1593,
       "z": 1344,
-      "yaw": 2.429
+      "yaw": 2.429,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_torbor_cross",
       "x": 1360,
       "z": 1104,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -225,12 +227,12 @@
     ],
     "roads": 15,
     "bridges": 5,
-    "scatter": 12935,
+    "scatter": 12903,
     "scatterKinds": {
-      "bush": 4029,
-      "tree_broadleaf": 7649,
-      "rock_small": 1000,
-      "rock_large": 126,
+      "bush": 4017,
+      "tree_broadleaf": 7627,
+      "rock_small": 1001,
+      "rock_large": 127,
       "reed": 120,
       "tree_dead": 11
     },
@@ -248,12 +250,12 @@
       "z": 1180
     },
     "placements": 294,
-    "vignettesAvoided": 42
+    "vignettesAvoided": 91
   },
   "files": {
-    "terrain.bin": 492428,
-    "nav.bin": 27004,
-    "scatter.bin": 103564,
+    "terrain.bin": 492456,
+    "nav.bin": 26991,
+    "scatter.bin": 103308,
     "placements.json": 125166
   }
 }

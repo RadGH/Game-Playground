@@ -100,14 +100,16 @@
       "name": "Barrow entrance",
       "x": 1364,
       "z": 1286,
-      "yaw": 1.664
+      "yaw": 1.664,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_gorse_march",
       "x": 1326,
       "z": 1155,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -157,15 +159,15 @@
     ],
     "roads": 0,
     "bridges": 0,
-    "scatter": 7422,
+    "scatter": 7397,
     "scatterKinds": {
-      "rock_small": 2728,
-      "bush": 1686,
-      "tree_acacia": 318,
+      "rock_small": 2727,
+      "bush": 1659,
+      "tree_acacia": 314,
       "tree_broadleaf": 19,
-      "rock_large": 1780,
-      "boulder": 458,
-      "tree_dead": 163,
+      "rock_large": 1784,
+      "boulder": 457,
+      "tree_dead": 167,
       "tree_conifer": 270
     },
     "sites": [
@@ -182,12 +184,12 @@
       "z": 1278
     },
     "placements": 138,
-    "vignettesAvoided": 41
+    "vignettesAvoided": 92
   },
   "files": {
-    "terrain.bin": 701063,
-    "nav.bin": 41425,
-    "scatter.bin": 59460,
+    "terrain.bin": 701091,
+    "nav.bin": 41456,
+    "scatter.bin": 59260,
     "placements.json": 40677
   }
 }

@@ -143,14 +143,16 @@
       "name": "Barrow entrance",
       "x": 1623,
       "z": 475,
-      "yaw": -2.777
+      "yaw": -2.777,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_gullwick",
       "x": 1272,
       "z": 688,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -244,14 +246,14 @@
     ],
     "roads": 11,
     "bridges": 3,
-    "scatter": 19807,
+    "scatter": 19747,
     "scatterKinds": {
-      "bush": 4472,
-      "tree_conifer": 1469,
-      "rock_small": 918,
-      "tree_broadleaf": 9344,
+      "bush": 4460,
+      "tree_conifer": 1468,
+      "rock_small": 916,
+      "tree_broadleaf": 9302,
       "rock_large": 186,
-      "reed": 3183,
+      "reed": 3180,
       "tree_dead": 234,
       "boulder": 1
     },
@@ -270,12 +272,12 @@
       "z": 352
     },
     "placements": 278,
-    "vignettesAvoided": 45
+    "vignettesAvoided": 95
   },
   "files": {
-    "terrain.bin": 508921,
-    "nav.bin": 36219,
-    "scatter.bin": 158540,
+    "terrain.bin": 508949,
+    "nav.bin": 36161,
+    "scatter.bin": 158060,
     "placements.json": 107383
   }
 }

@@ -147,14 +147,16 @@
       "name": "Barrow entrance",
       "x": 314,
       "z": 1641,
-      "yaw": 1.824
+      "yaw": 1.824,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_millbrook",
       "x": 784,
       "z": 1336,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -264,16 +266,16 @@
     ],
     "roads": 15,
     "bridges": 5,
-    "scatter": 13273,
+    "scatter": 13237,
     "scatterKinds": {
-      "bush": 4876,
-      "rock_small": 1059,
-      "tree_broadleaf": 6478,
+      "bush": 4878,
+      "rock_small": 1053,
+      "tree_broadleaf": 6445,
       "boulder": 27,
       "rock_large": 191,
       "reed": 499,
       "tree_dead": 45,
-      "tree_acacia": 98
+      "tree_acacia": 99
     },
     "sites": [
       "settlement(HUB) city Millbrook 544 1648 140",
@@ -291,12 +293,12 @@
       "z": 1656
     },
     "placements": 394,
-    "vignettesAvoided": 52
+    "vignettesAvoided": 90
   },
   "files": {
-    "terrain.bin": 540441,
-    "nav.bin": 27786,
-    "scatter.bin": 106268,
+    "terrain.bin": 540469,
+    "nav.bin": 27716,
+    "scatter.bin": 105980,
     "placements.json": 157127
   }
 }

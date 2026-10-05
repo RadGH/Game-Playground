@@ -95,14 +95,16 @@
       "name": "Barrow entrance",
       "x": 1369,
       "z": 1953,
-      "yaw": -2.755
+      "yaw": -2.755,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_coldwater",
       "x": 903,
       "z": 1790,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -174,13 +176,13 @@
     ],
     "roads": 2,
     "bridges": 0,
-    "scatter": 11566,
+    "scatter": 11522,
     "scatterKinds": {
-      "tree_conifer": 1890,
-      "rock_large": 3287,
-      "rock_small": 4282,
-      "bush": 1196,
-      "boulder": 893,
+      "tree_conifer": 1880,
+      "rock_large": 3275,
+      "rock_small": 4264,
+      "bush": 1193,
+      "boulder": 892,
       "tree_broadleaf": 12,
       "tree_acacia": 6
     },
@@ -198,12 +200,12 @@
       "z": 1854
     },
     "placements": 120,
-    "vignettesAvoided": 38
+    "vignettesAvoided": 95
   },
   "files": {
-    "terrain.bin": 699286,
-    "nav.bin": 57958,
-    "scatter.bin": 92612,
+    "terrain.bin": 699314,
+    "nav.bin": 57877,
+    "scatter.bin": 92260,
     "placements.json": 63079
   }
 }

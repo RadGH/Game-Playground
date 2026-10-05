@@ -83,14 +83,16 @@
       "name": "Barrow entrance",
       "x": 855,
       "z": 1804,
-      "yaw": 2.294
+      "yaw": 2.294,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_saltmouth",
       "x": 844,
       "z": 1372,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -157,12 +159,12 @@
     ],
     "roads": 1,
     "bridges": 0,
-    "scatter": 5223,
+    "scatter": 5220,
     "scatterKinds": {
-      "rock_small": 858,
-      "bush": 2696,
-      "tree_broadleaf": 1247,
-      "tree_conifer": 413,
+      "rock_small": 864,
+      "bush": 2688,
+      "tree_broadleaf": 1250,
+      "tree_conifer": 409,
       "rock_large": 9
     },
     "sites": [
@@ -176,12 +178,12 @@
       "z": 1620
     },
     "placements": 138,
-    "vignettesAvoided": 43
+    "vignettesAvoided": 96
   },
   "files": {
-    "terrain.bin": 462969,
-    "nav.bin": 9020,
-    "scatter.bin": 41868,
+    "terrain.bin": 462997,
+    "nav.bin": 9023,
+    "scatter.bin": 41844,
     "placements.json": 46790
   }
 }

@@ -123,14 +123,16 @@
       "name": "Barrow entrance",
       "x": 146,
       "z": 490,
-      "yaw": -3.593
+      "yaw": -3.593,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_delvers_hill",
       "x": 688,
       "z": 736,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -205,14 +207,14 @@
     ],
     "roads": 12,
     "bridges": 2,
-    "scatter": 19484,
+    "scatter": 19451,
     "scatterKinds": {
-      "tree_broadleaf": 8330,
+      "tree_broadleaf": 8306,
       "tree_conifer": 3426,
-      "bush": 4053,
-      "rock_large": 1187,
+      "bush": 4046,
+      "rock_large": 1186,
       "boulder": 73,
-      "rock_small": 1307,
+      "rock_small": 1306,
       "reed": 1046,
       "tree_dead": 62
     },
@@ -230,12 +232,12 @@
       "z": 444
     },
     "placements": 244,
-    "vignettesAvoided": 41
+    "vignettesAvoided": 90
   },
   "files": {
-    "terrain.bin": 621315,
-    "nav.bin": 48961,
-    "scatter.bin": 155956,
+    "terrain.bin": 621343,
+    "nav.bin": 48921,
+    "scatter.bin": 155692,
     "placements.json": 104672
   }
 }

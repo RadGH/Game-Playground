@@ -1,6 +1,50 @@
 {
- "_doc": "Stream B. Terrain added at bake time so a zone's ground matches stream E's archetype (lead ruling 2026-10-04: the bake adds the water rather than E renaming the theme). tools/lib/zone-theme.mjs carves it; keyed by world zone. theme: mere (lakes) | shore (a big lake with a beach, by the hub town) | marsh (a fen of shallow pools round a deeper mere, painted marsh).",
- "z13_01": { "sheetZone": "brackwater", "theme": "marsh", "name": "the Black Mere", "fen": 430, "pools": 14 },
- "z14_01": { "sheetZone": "saltmouth", "theme": "shore", "name": "the Salt Mere", "r": 320, "beach": 26 },
- "z12_04": { "sheetZone": "coldwater", "theme": "mere", "name": "Coldwater Mere", "r": 150, "name2": "the Reflection Mere", "r2": 75 }
+ "_doc": "Stream B. Terrain added at bake time so a zone's ground matches stream E's archetype (lead ruling 2026-10-04: the bake adds the water rather than E renaming the theme). tools/lib/zone-theme.mjs carves it; keyed by world zone. theme: mere (lakes) | shore (a big lake with a beach, by the hub town) | marsh (a fen of shallow pools round a deeper mere, painted marsh). cliff: a face beside a road (tools/lib/zone-theme.mjs cutCliff) \u2014 the_long_stair.",
+ "z13_01": {
+  "sheetZone": "brackwater",
+  "theme": "marsh",
+  "name": "the Black Mere",
+  "fen": 430,
+  "pools": 14
+ },
+ "z14_01": {
+  "sheetZone": "saltmouth",
+  "theme": "shore",
+  "name": "the Salt Mere",
+  "r": 320,
+  "beach": 26
+ },
+ "z12_04": {
+  "sheetZone": "coldwater",
+  "theme": "mere",
+  "name": "Coldwater Mere",
+  "r": 150,
+  "name2": "the Reflection Mere",
+  "r2": 75
+ },
+ "z11_01": {
+  "sheetZone": "hollin_pass",
+  "cliff": {
+   "road": "road_138",
+   "x": [
+    1890,
+    2030
+   ],
+   "side": "north",
+   "offset": 8,
+   "height": [
+    18,
+    25
+   ],
+   "back": 80,
+   "keep": [
+    {
+     "x": 1929,
+     "z": 426,
+     "r": 15
+    }
+   ],
+   "for": "the_long_stair (stream E hook at its foot)"
+  }
+ }
 }

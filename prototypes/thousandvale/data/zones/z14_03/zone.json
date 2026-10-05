@@ -156,14 +156,16 @@
       "name": "Barrow entrance",
       "x": 555,
       "z": 1018,
-      "yaw": -2.436
+      "yaw": -2.436,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_redcliff",
       "x": 693,
       "z": 955,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -276,16 +278,16 @@
     ],
     "roads": 14,
     "bridges": 6,
-    "scatter": 14745,
+    "scatter": 14719,
     "scatterKinds": {
-      "tree_broadleaf": 7885,
-      "bush": 4219,
-      "reed": 1262,
-      "rock_small": 909,
-      "rock_large": 149,
+      "tree_broadleaf": 7875,
+      "bush": 4209,
+      "reed": 1255,
+      "rock_small": 911,
+      "rock_large": 151,
       "tree_dead": 88,
       "boulder": 5,
-      "tree_acacia": 228
+      "tree_acacia": 225
     },
     "sites": [
       "settlement(HUB) town Redcliff 384 864 90",
@@ -303,12 +305,12 @@
       "z": 856
     },
     "placements": 390,
-    "vignettesAvoided": 48
+    "vignettesAvoided": 93
   },
   "files": {
-    "terrain.bin": 508153,
-    "nav.bin": 31942,
-    "scatter.bin": 118044,
+    "terrain.bin": 508181,
+    "nav.bin": 31869,
+    "scatter.bin": 117836,
     "placements.json": 144866
   }
 }

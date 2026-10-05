@@ -134,14 +134,16 @@
       "name": "Barrow entrance",
       "x": 873,
       "z": 718,
-      "yaw": 2.73
+      "yaw": 2.73,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_wychwood",
       "x": 1112,
       "z": 792,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -216,15 +218,15 @@
     ],
     "roads": 12,
     "bridges": 3,
-    "scatter": 11554,
+    "scatter": 11551,
     "scatterKinds": {
-      "bush": 3127,
-      "tree_broadleaf": 4646,
-      "rock_small": 1748,
-      "rock_large": 1324,
+      "bush": 3115,
+      "tree_broadleaf": 4660,
+      "rock_small": 1749,
+      "rock_large": 1321,
       "boulder": 250,
-      "tree_conifer": 446,
-      "tree_acacia": 13
+      "tree_conifer": 444,
+      "tree_acacia": 12
     },
     "sites": [
       "settlement(HUB) city Hermit's Rest 1104 560 140",
@@ -241,12 +243,12 @@
       "z": 560
     },
     "placements": 337,
-    "vignettesAvoided": 46
+    "vignettesAvoided": 92
   },
   "files": {
-    "terrain.bin": 685508,
-    "nav.bin": 46686,
-    "scatter.bin": 92516,
+    "terrain.bin": 685536,
+    "nav.bin": 46654,
+    "scatter.bin": 92492,
     "placements.json": 155574
   }
 }

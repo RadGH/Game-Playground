@@ -232,3 +232,6 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   bots100 (TV_PERF) spread phase p99 7.0 ms, worst tick 11.4 ms.
 - A monster removed without dying (dormant camps) can no longer be killed afterwards by a held reference (no death,
   no reward). tests/C/province-rules.
+- **B final round**: the_long_stair cliff (`cutCliff`, z11_01 road_138); door/event/camp sites pinned (`data/world/site-pins.json`)
+  so re-bakes cannot move what E placed around; province-reach reads E's world-zone files (1,603 targets reached); H: dev unit on
+  `--procs 1`. Full unit gate 390/393 pass, 3 perf skips.

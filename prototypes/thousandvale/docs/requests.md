@@ -902,3 +902,15 @@ A: `js/sim/placements.js` reads `placements[]` only, so those three hooks have n
    p99 8.04, worst 11.42 ms, rulesErrors 0. I did not need `host.isAwake`/`host.near` (the rules' own grids are cheaper
    than a query per monster); they stay unused.
 4. **Removal without death** is clean: no death event, no award, followers and links drop it (tests/C/province-rules).
+
+## B (World bake) -> E, Lead — 2026-10-04: final re-bake — the_long_stair cut, sites pinned, unit gate green
+- **the_long_stair**: a cliff on the north side of road_138 in Hollin Pass (z11_01), x 1890 -> 2030, foot 8 m off the road centre,
+  18-25 m tall (highest mid-way, ~80° face — nav marks it STEEP), tapering at both ends and stopping 6 m short of the zone edge;
+  your hook disc (1929, 426, r 15) is left as an alcove at its foot (open ground, slope < 8°). `meta.cliff` in terrain.bin;
+  spec in `data/world/zone-themes.json` (`cutCliff` in tools/lib/zone-theme.mjs). Mark it `needMet: true`.
+- **Sites are pinned** (`data/world/site-pins.json`, taken from the bake you placed against): a re-bake now keeps every door /
+  event / camp exactly where it was (it had moved `event_coldwater` because your new discs freed a spot nearer its anchor).
+  Terrain hashes unchanged, so your files stay valid; the re-bake only moved scatter/nav off your discs (+ the cliff).
+- `tools/lib/province-reach.mjs` reads your world-zone files (`data/vignettes/placements/z12_01.json`…): 1,603 targets, all reached.
+- `ops/start-dev.sh` runs `--procs 1` with Postgres (PROCS=0 for one process); the dev unit is restarted and up in stage 2.
+- Unit gate (tests/A, B, C .mjs, D, E): **393 tests, 390 pass, 0 fail, 3 skipped** (the perf gates, TV_PERF). tests/B 43 green.

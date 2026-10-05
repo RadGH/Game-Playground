@@ -108,6 +108,8 @@ LEAK=$(grep -rIl -E 'PGPASSWORD=[A-Za-z0-9]{8}|BEGIN (RSA|OPENSSH|EC|DSA) PRIVAT
 [[ -z "$LEAK" ]] || { echo "refusing: possible secret in $LEAK"; rm -rf "$REL"; exit 1; }
 for d in server ops tests docs tools; do [[ ! -e "$REL/public/prototypes/thousandvale/$d" ]] || { echo "refusing: public/ holds $d/"; rm -rf "$REL"; exit 1; }; done
 [[ -z "$(find "$REL/public" -name '.*' -o -name node_modules | head -1)" ]] || { echo "refusing: dotfiles or node_modules in public/"; rm -rf "$REL"; exit 1; }
+# extracted files keep the publisher's own group (not the setgid one), so hand the tree to the service group first
+chgrp -R thousandvale "$REL" 2>/dev/null || [[ -n "${TV_SRV:-}" ]] || { echo "refusing: cannot give the release to group thousandvale (log out and back in after setup-stable.sh added you to it)"; rm -rf "$REL"; exit 1; }
 chmod -R u=rwX,g=rX,o= "$REL"
 echo "   app $(du -sh "$REL/app" | cut -f1), public $(find "$REL/public" -type f | wc -l) files"
 

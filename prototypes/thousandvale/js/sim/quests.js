@@ -64,7 +64,10 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       const def = { ...d, zone: z.key, eid: z.eid, steps: (d.steps || []).map(st => normalize(st, z.key)) };
       defs.set(d.id, def);
       const from = npcAt(d.giver);
-      for (const st of def.steps) st.at = round1(stepAt(st, z.key, from));
+      // E's marks (data/quests/marks/<province>.json) win; our own lookup fills what they leave null
+      const mk = L.marks && L.marks[d.id];
+      def.steps.forEach((st, i) => { const m = mk && mk.steps && mk.steps[i]; st.at = round1(m && Number.isFinite(m.x) ? m : stepAt(st, z.key, from)); });
+      if (mk && mk.giver && Number.isFinite(mk.giver.x) && !npcPos.has(d.giver)) def.giverAt = round1({ ...mk.giver, name: (npcs.get(d.giver) || {}).name || null });
       if (d.next) { nextOf.set(d.id, d.next); (lockedBy.get(d.next) || lockedBy.set(d.next, new Set()).get(d.next)).add(d.id); }
     }
   }

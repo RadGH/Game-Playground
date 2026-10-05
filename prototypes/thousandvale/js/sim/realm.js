@@ -121,7 +121,7 @@ export function zoneEncounterCamps(terrain, ids, info = {}, zoneSheetId = null) 
     }
     if (terrain.walkable && !terrain.walkable(p.x, p.z)) p = walkableNear(terrain, p.x, p.z, 8, 0);
     const meta = info[id] || {};
-    const level = enc.level || meta.level || 5;
+    const level = meta.level || enc.level || 5;      // E's encounter file level wins (P26: Hobb Gallowsby 5 -> 4)
     out.push({ type: meta.body || 'wolf', level, x: p.x, z: p.z, count: 1, radius: 2, rank: enc.rank, encounter: id, name: meta.name || null, respawnMs: enc.respawnMs });
     for (const e of enc.escort || []) out.push({ type: e.type, level: Math.max(1, level - 2), x: p.x + 5, z: p.z + 3, count: e.count, radius: 7, respawnMs: enc.respawnMs });
   });
@@ -170,7 +170,7 @@ export function dedupeWaystones(waystones, doors = []) {
   return aliases;
 }
 
-export function buildLayout({ key, name = null, terrain, zones = [], encounterInfo = {}, copyCap = 300, vignetteContent = null, townRadius = null, starter = null, rares = null, jobs = null, schedules = null, horizon = null, travel = null }) {
+export function buildLayout({ key, name = null, terrain, zones = [], encounterInfo = {}, copyCap = 300, vignetteContent = null, townRadius = null, starter = null, rares = null, jobs = null, schedules = null, horizon = null, travel = null, marks = null }) {
   const allSites = terrain.reader?.meta?.sites || [];
   const multi = zones.length > 1 || allSites.some(s => s.zone);
   const zoneList = zones.length ? zones : [{ key, sheet: null }];
@@ -203,7 +203,8 @@ export function buildLayout({ key, name = null, terrain, zones = [], encounterIn
       camps.push(...placed.camps); objects.push(...placed.objects); doors.push(...placed.doors); placedWaystones.push(...placed.waystones); folk.push(...(placed.folk || []));
     }
     // the sheet's camp ring round the main settlement only where E placed no camps (the door guard stays)
-    if (z.sheet || !multi) { const ring0 = wildsCamps(zt, ring, door || ring, z.sheet && z.sheet.camps); camps.push(...(placed && placed.camped ? ring0.slice(-1) : ring0)); }
+    // ...and no door guard of ours where E placed one (`doorGuard`, at the ramp's level — P26)
+    if (z.sheet || !multi) { const ring0 = wildsCamps(zt, ring, door || ring, z.sheet && z.sheet.camps); camps.push(...(placed && placed.camped ? (placed.doorGuard ? [] : ring0.slice(-1)) : ring0)); }
     // named encounters from the sheet — minus rares E placed, and minus a zone event boss that a timed zone event runs
     const timed = new Set((z.events || []).map(e => e.boss).filter(Boolean));
     if (z.events && z.events.length && z.sheet && z.sheet.eventBoss) timed.add(z.sheet.eventBoss);
@@ -244,5 +245,5 @@ export function buildLayout({ key, name = null, terrain, zones = [], encounterIn
     if (!st) return null;
     return { kind: st.kind || t.kind, buildings: pl.buildings.filter(b => b.town === st.id), square: pl.squares.find(q => q.town === st.id) || null };
   });
-  return { key, name: name || main.name, terrain, towns, townPlans, schedules, horizon, doors, camps, objects: wildObjects, townObjects, waystones, waystoneAliases: aliases, zoneEvents, travel, folk, rares, jobs, sheet, copyCap, zoneOf, zones: zoneList, gate: townGate(terrain, main, doors.find(d => d.kind !== 'cave') || { x: main.x + 100, z: main.z }) };
+  return { key, name: name || main.name, terrain, towns, townPlans, schedules, horizon, doors, camps, objects: wildObjects, townObjects, waystones, waystoneAliases: aliases, zoneEvents, travel, folk, marks, rares, jobs, sheet, copyCap, zoneOf, zones: zoneList, gate: townGate(terrain, main, doors.find(d => d.kind !== 'cave') || { x: main.x + 100, z: main.z }) };
 }

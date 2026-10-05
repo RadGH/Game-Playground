@@ -133,3 +133,62 @@ test('P3/P27: the map — level bands from the start, places found by walking, e
   assert.ok(saved.seen.places.includes(df.key) && saved.seen.zones.length >= 1, 'discoveries are saved');
   await srv.stop();
 });
+
+test('P6 with stream C\'s real rules: a talent pick and a perk take round-trip, the bar is resent, the build is saved', async () => {
+  const { srv, clock, world, store } = await realServer();
+  const a = await joinReal(srv, clock, 'Realtalent', 'mage');
+  const o = rec(world, a);
+  if (!o.room.rules.talent) return;                               // C's build API not in this tree
+  o.entity.setLevel(10); o.char.level = 10; o.room.rules.onLevel(o.entity);
+  await run(clock, 200);
+  const view = o.room.rules.build(o.entity);
+  const sk = (view.talentTree || []).find(s => s.tiers && s.tiers.length) || null;
+  const tr = [], pr = [], you = [];
+  a.on('talentR', m => tr.push(m)); a.on('perkR', m => pr.push(m)); a.on('you', m => you.push(m));
+  if (sk) {
+    const tier = sk.tiers.find(t => (t.open ?? true) && (t.nodes || []).length);
+    if (tier) {
+      a.talent('pick', { skill: sk.skillId || sk.id, tier: tier.tier, node: tier.nodes[0].id });
+      await until(clock, () => tr.length, 2000);
+      assert.equal(tr[0].ok, true, JSON.stringify(tr[0]));
+      await run(clock, 200);
+      assert.ok(you.some(p => p.bar), 'the bar was resent after the pick');
+    }
+  }
+  const forest = o.room.rules.perkForest ? o.room.rules.perkForest() : null;
+  const first = forest && (forest.nodes || []).find(n => o.room.rules.perk && n.id !== 'start' && (forest.links || []).some(l => l.includes('start') && l.includes(n.id)));
+  if (first) {
+    a.perk('take', { id: first.id });
+    await until(clock, () => pr.length, 2000);
+    assert.equal(pr[0].ok, true, JSON.stringify(pr[0]));
+  }
+  const charId = a.joined.you.char;
+  a.close(); await run(clock, 3000);
+  const saved = loadAll(store).find(c => c.id === charId);
+  assert.ok(saved.build && saved.build.v === 1, 'char.build saved: ' + JSON.stringify(saved.build));
+  if (first) assert.ok(saved.build.perks.includes(first.id));
+  console.log('# real rules: talent ' + (tr[0] ? tr[0].ok : 'n/a') + ', perk ' + (pr[0] ? pr[0].ok : 'n/a'));
+  await srv.stop();
+});
+
+test('P6: taking a talent or perk back needs an Unbinder close by (picking is free anywhere)', async () => {
+  const clock = createVirtualClock();
+  const srv = makeServer({ clock, worldOpts: { createRules: rulesWithBuild } });
+  await srv.ready;
+  const a = await joinAs(srv, clock, 'Regretful');
+  const tr = [], pr = []; a.on('talentR', m => tr.push(m)); a.on('perkR', m => pr.push(m));
+  a.talent('pick', { skill: 'basic', tier: 1, node: 'cleaving' }); a.perk('take', { id: 'x' });
+  await until(clock, () => tr.length && pr.length, 2000);
+  a.talent('clear', { skill: 'basic', tier: 1 }); a.perk('refund', { id: 'x' });
+  await until(clock, () => tr.length >= 2 && pr.length >= 2, 2000);
+  assert.equal(tr[1].why, 'unbinder'); assert.equal(pr[1].why, 'unbinder');
+  // stand by the town's Unbinder: allowed
+  const W = srv.world, o = W.online.get(a.joined.you.char);
+  const ub = [...W.townRoom.objects.values()].find(x => x.data && x.data.npc && x.data.npc.role === 'unbinder');
+  assert.ok(ub, 'every town has an Unbinder');
+  W.transfer(o, W.townRoom, { x: ub.x + 1, z: ub.z }, 'test'); await run(clock, 200);
+  a.talent('clear', { skill: 'basic', tier: 1 });
+  await until(clock, () => tr.length >= 3, 2000);
+  assert.equal(tr[2].ok, true, JSON.stringify(tr[2]));
+  await srv.stop();
+});

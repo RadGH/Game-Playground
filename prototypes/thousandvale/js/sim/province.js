@@ -49,6 +49,7 @@ export const GROUP_R = 40;               // open groups: players hitting the sam
 // trace lifetimes and caps: stream E's data/names/traces.json (graves 60 min / 40 a copy, campfires 30 min / 20, banners 30 min)
 export const GRAVE_MS = 3600000, CAMPFIRE_MS = 30 * 60000, BANNER_MS = 30 * 60000, MAX_TRACES = { grave: 40, campfire: 20 };
 export const HEAT_CELL = 8;              // footprints: steps counted per 8 m cell per hour (traces.json footprints)
+export const UNBINDER_M = 8;               // P6: talents/perks are undone standing by an Unbinder
 export const TRAVEL_PRELOAD_MS = 1500;     // P10: waystone / event travel tells the client where first, moves this much later
 export const DISCOVER_PAD = 30;            // P3: a place is found within its radius + this many metres
 export const KIT_VERSION = 1;              // P22: the starting kit rule (class weapon + off-hand only)
@@ -448,7 +449,7 @@ export function createProvince(opts) {
     presence(o);
   }
   function makeClient(s) {
-    return { send: d => s.send(d), you: patch => { if (patch.bar) { const o = online.get(s.charId); if (o) o.bar = patch.bar; } s.sendJSON({ t: 'you', ...patch }); } };
+    return { send: d => s.send(d), you: patch => { const o = online.get(s.charId); if (o) { if (patch.bar) o.bar = patch.bar; if (patch.talents) o.build = null; } s.sendJSON({ t: 'you', ...patch }); } };
   }
 
   function joined(s, o, handoff = null) {
@@ -463,7 +464,6 @@ export function createProvince(opts) {
         bag: ch.bag || [], equipment: equipView(o), ignore: ch.ignore || [], waystones: ch.waystones || [], treasure: ch.treasure || {},
         quests: (provOf(o.room) || first).book.view(ch),
         seen: ch.seen || { zones: [], places: [] },
-        ...buildView(o),
         opened: Object.keys(ch.opened || {}).filter(k => ch.opened[k] > t),
       },
     };
@@ -471,6 +471,9 @@ export function createProvince(opts) {
     // change reuses the last one instead of formatting it again (a crowd crossing a town edge, a login storm)
     const bar = o.bar && handoff && handoff.via !== 'relocate' ? o.bar : (o.room.barFor ? o.room.barFor(e) : undefined);
     if (bar) { msg.you.bar = bar; o.bar = bar; }
+    // the build view formats every talent card (C's talentView, ~ms): kept like the bar and rebuilt only on a change
+    const build = o.build && handoff && handoff.via !== 'relocate' ? o.build : buildView(o);
+    o.build = build; Object.assign(msg.you, build);
     if (handoff) msg.handoff = handoff;
     if (liveEvent) msg.event = eventView(liveEvent);
     s.sendJSON(msg);
@@ -813,7 +816,7 @@ export function createProvince(opts) {
   let liveEvent = null, realmRun = null;
   const zoneRuns = new Map();     // `${room.id}|${zone}` -> { run, room, def }
   const zoneNext = new Map();     // same key -> room clock ms when the next may start
-  const eventView = ev => ({ id: ev.id, uid: ev.uid, name: ev.name, province: ev.province, x: ev.x, z: ev.z, r: ev.r || 50, level: ev.level, kind: ev.kind || 'boss', zoneName: ev.zoneName || null });
+  const eventView = ev => ({ id: ev.id, uid: ev.uid, name: ev.name, province: ev.province, x: ev.x, z: ev.z, r: ev.r || 50, level: ev.level, kind: ev.kind || 'boss', zoneName: ev.zoneName || null, where: ev.where || null, blurb: ev.blurb || null });
   /** The room holding a point: a hub town's room when it is inside one (a town attack), else the first copy. */
   function roomForPoint(pv, p) { const ti = pv.L.towns.findIndex(t => Math.hypot(p.x - t.x, p.z - t.z) < t.r); return ti >= 0 ? pv.towns[ti] : pv.copies[0]; }
   function onEvent(m) {
@@ -1225,11 +1228,22 @@ export function createProvince(opts) {
     return b && typeof b === 'object' ? b : {};
   }
   function buildChanged(o) {
+    o.build = null;
     if (o.room.rules.saveBuild) { const b = safeRules(o.room, 'saveBuild', o.entity); if (b !== undefined) { o.char.build = b; journal(o, 'set', { k: 'build', v: b }); } }
     o.dirty = true;
     o.room.barChanged(o.entity);                       // a talent can reshape a slot: `you {bar}` after this tick
     const e = o.entity;
-    if (o.conn) o.conn.sendJSON({ t: 'you', ...buildView(o), hpMax: e.hpMax, mpMax: e.mpMax });
+    o.build = buildView(o);
+    if (o.conn) o.conn.sendJSON({ t: 'you', ...o.build, hpMax: e.hpMax, mpMax: e.mpMax });
+  }
+  /** Undoing a pick costs gold (C's rules.retrainPrice, Farhold's Unbinder prices); picking is free. */
+  /** Respec only at an Unbinder (C: free re-picks would make every choice meaningless): one within UNBINDER_M. */
+  function nearUnbinder(o) { const e = o.entity; for (const x of o.room.objects.values()) if (x.data && x.data.npc && x.data.npc.role === 'unbinder' && Math.hypot(x.x - e.x, x.z - e.z) <= UNBINDER_M) return true; return false; }
+  function retrainCost(o, kind, scope) { const p = o.room.rules.retrainPrice ? safeRules(o.room, 'retrainPrice', o.entity, kind, scope) : 0; return Math.max(0, Math.round(+p || 0)); }
+  function payRetrain(o, price) {
+    if (!price) return;
+    o.char.gold -= price; journal(o, 'gold', { d: -price }); econ.add('sink', 'retrain', { gold: price }, o.char.level || 1);
+    if (o.conn) o.conn.sendJSON({ t: 'bag', add: [], remove: [], gold: o.char.gold });
   }
   function talentOp(o, m) {
     const s = o.conn;
@@ -1238,8 +1252,12 @@ export function createProvince(opts) {
     if (!o.room.rules.talent) return reply({ ok: false, why: 'notReady', msg: 'Talents are not open on this server yet.' });
     if (o.entity.dead) return reply({ ok: false, why: 'dead', msg: 'You are dead.' });
     if (o.entity.state & STATE.combat) return reply({ ok: false, why: 'combat', msg: 'Not while fighting.' });
+    if (m.op === 'clear' && !nearUnbinder(o)) return reply({ ok: false, why: 'unbinder', msg: 'Only an Unbinder can take a talent back. Find one in town.' });
+    const price = m.op === 'clear' ? retrainCost(o, 'talent', m.tier != null ? 'one' : 'all') : 0;
+    if (price > (o.char.gold || 0)) return reply({ ok: false, why: 'gold', cost: price, msg: 'Unlearning that costs ' + price + ' gold.' });
     const r = safeRules(o.room, 'talent', o.entity, m.op, { skill: m.skill, tier: m.tier, node: m.node }) || { ok: false, why: 'unknown' };
     if (!r.ok) return reply({ ok: false, why: r.why || 'unknown', msg: r.text || r.msg || 'You cannot pick that.' });
+    payRetrain(o, price);
     buildChanged(o);
     return reply({ ok: true, picks: r.picks || null, talents: r.talents || undefined });
   }
@@ -1250,8 +1268,12 @@ export function createProvince(opts) {
     if (!o.room.rules.perk) return reply({ ok: false, why: 'notReady', msg: 'The perk forest is not open on this server yet.' });
     if (o.entity.dead) return reply({ ok: false, why: 'dead', msg: 'You are dead.' });
     if (m.op !== 'take' && (o.entity.state & STATE.combat)) return reply({ ok: false, why: 'combat', msg: 'Not while fighting.' });
+    if (m.op !== 'take' && !nearUnbinder(o)) return reply({ ok: false, why: 'unbinder', msg: 'Only an Unbinder can give perks back. Find one in town.' });
+    const price = m.op === 'take' ? 0 : retrainCost(o, 'perk', m.op === 'reset' ? 'all' : 'one');
+    if (price > (o.char.gold || 0)) return reply({ ok: false, why: 'gold', cost: price, msg: 'Giving that back costs ' + price + ' gold.' });
     const r = safeRules(o.room, 'perk', o.entity, m.op, { id: m.id }) || { ok: false, why: 'unknown' };
     if (!r.ok) return reply({ ok: false, why: r.why || 'unknown', msg: r.text || r.msg || 'You cannot take that.' });
+    payRetrain(o, price);
     buildChanged(o);
     return reply({ ok: true, perks: r.perks || [], left: r.left ?? null });
   }

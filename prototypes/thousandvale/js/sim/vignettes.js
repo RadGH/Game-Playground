@@ -27,7 +27,7 @@ export function vignetteContent(placements, recipes, { band = [1, 6], respawnMs 
   const byId = new Map(recipes.map(r => [r.id, r]));
   const camps = [], objects = [];
   for (const pl of placements || []) {
-    const v = byId.get(pl.id);
+    const v = byId.get(pl.recipe || pl.id);      // a curio names its recipe (data/vignettes/curios.json)
     if (!v) continue;
     const key = 'vig:' + pl.id;
     objects.push({ type: 'vignette', name: v.name, x: pl.x, z: pl.z, key, r: v.radius || pl.radius || 10, lore: v.lore || null });
@@ -39,7 +39,7 @@ export function vignetteContent(placements, recipes, { band = [1, 6], respawnMs 
       else if (o.type === 'chest') {
         const after = o.after ? (v.objects || []).findIndex(x => x.name === o.after) : -1;
         objects.push({ type: 'chest', name: o.name, x: p.x, z: p.z, key: okey, hidden: !!o.hidden, hint: o.hint || null,
-          chest: { key: okey, tier: o.tier || 'common', level: band[0] + (pl.level || 1), after: after >= 0 ? `${key}:${after}` : null, afterName: o.after || null } });
+          chest: { key: okey, tier: o.tier || 'common', level: (pl.levelBase ?? band[0]) + (pl.level || 1), after: after >= 0 ? `${key}:${after}` : null, afterName: o.after || null } });
       } else if (o.type === 'use') objects.push({ type: 'use', name: o.name, x: p.x, z: p.z, key: okey, use: { text: o.text || '', gives: o.gives || null, cost: o.cost || null, buff: o.buff || null } });
     });
     // props a monster must not stand inside (P28: slimes spawned in the pump house's well and barrel — half
@@ -47,7 +47,8 @@ export function vignetteContent(placements, recipes, { band = [1, 6], respawnMs 
     const avoid = (v.props || []).filter(q => q.kind !== 'ground').map(q => ({ ...vignettePoint(pl, q.x || 0, q.z || 0), r: PROP_R[q.id] || PROP_R.default }));
     for (const m of v.monsters || []) {
       const p = vignettePoint(pl, m.x || 0, m.z || 0);
-      camps.push({ type: m.type, level: band[0] + (m.level || 0), x: p.x, z: p.z, count: m.count || 1, radius: m.radius || 5, respawnMs, vignette: pl.id, ...(avoid.length ? { avoid } : {}) });
+      // P26: the level of the SPOT (E's ramp from the capital: levelBase, capped at levelCap) and countCap near the start
+      camps.push({ type: m.type, level: Math.max(1, Math.min(pl.levelCap ?? 99, (pl.levelBase ?? band[0]) + (m.level || 0))), x: p.x, z: p.z, count: Math.min(m.count || 1, pl.countCap ?? 99), radius: m.radius || 5, respawnMs, vignette: pl.id, ...(avoid.length ? { avoid } : {}) });
     }
   }
   return { camps, objects };

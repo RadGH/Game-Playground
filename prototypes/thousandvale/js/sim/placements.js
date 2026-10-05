@@ -36,13 +36,13 @@ const roleName = r => ROLE_NAMES[r] || (r ? r[0].toUpperCase() + r.slice(1) : 'V
 export function placementContent(placements, { recipes = [], sites = null, hooks = [], treasure = [], wayside = {}, quests = null, band = [1, 6], zone = null, respawnMs = 30000, encounterInfo = {}, warband: sheetWarband = null, archetype = null } = {}) {
   const camps = [], objects = [], doors = [], waystones = [], rares = new Set(), folk = [];
   const list = placements || [];
-  const vig = vignetteContent(list.filter(p => !p.type || p.type === 'vignette'), recipes, { band });
+  const vig = vignetteContent(list.filter(p => !p.type || p.type === 'vignette' || p.type === 'curio'), recipes, { band });
   camps.push(...vig.camps); objects.push(...vig.objects);
   const hookById = new Map((hooks || []).map(h => [h.id, h]));
   const chains = new Map((treasure || []).map(c => [c.id, c]));
   const npcs = (quests && quests.npcs) || {};
   const questList = (quests && quests.quests) || [];
-  let camped = false;
+  let camped = false, doorGuard = false;
 
   for (const p of list) {
     const h = strHash(p.id || p.type + p.x + p.z);
@@ -51,7 +51,9 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
       case 'camp': {
         camped = true;
         const level = pickIn(p.level, h), count = pickIn(p.count, h >>> 3);
-        camps.push({ type: p.monster, level, x: p.x, z: p.z, count, radius: p.radius || 10, respawnMs, place: p.id, ...(p.filler ? { filler: true } : {}) });
+        camps.push({ type: p.monster, level, x: p.x, z: p.z, count, radius: p.radius || 10, respawnMs, place: p.id, ...(p.filler ? { filler: true } : {}),
+          ...(p.roam && Array.isArray(p.path) && p.path.length > 1 ? { path: p.path } : {}), ...(p.doorGuard ? { doorGuard: true } : {}) });   // roamers walk E's loop (C)
+        if (p.doorGuard) doorGuard = true;
         if (p.with) camps.push({ type: p.with, level, x: p.x + 4, z: p.z + 3, count: Math.max(1, count >> 1), radius: 6, respawnMs, place: p.id });
         break;
       }
@@ -100,7 +102,7 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
         const pests = t.pests || [];
         if (pests.length) {
           const a = (h % 628) / 100, d = (p.radius || 20) + 18;
-          camps.push({ type: pests[h % pests.length], level: p.level || band[0], x: p.x + Math.cos(a) * d, z: p.z + Math.sin(a) * d, count: 2 + (h % 2), radius: 6, respawnMs, place: p.id });
+          camps.push({ type: pests[h % pests.length], level: p.level || band[0], x: p.x + Math.cos(a) * d, z: p.z + Math.sin(a) * d, count: Math.min(2 + (h % 2), p.countCap ?? 99), radius: 6, respawnMs, place: p.id });   // countCap near the start (P26)
         }
         break;
       }
@@ -141,7 +143,7 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
       default: break;   // vignettes handled above; unknown kinds are left to the client
     }
   }
-  return { camps, objects, doors, waystones, rares, camped, folk };
+  return { camps, objects, doors, waystones, rares, camped, folk, doorGuard };
 }
 
 /** The warband leader for a camp of this level (Farhold data/warbands.json levels: Sootwick 1-16, Ashtusk 5-24, …). */

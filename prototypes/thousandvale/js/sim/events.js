@@ -98,7 +98,8 @@ export function createEventRunner({ room, ev, rng = Math.random, info = {}, now 
     view() {
       const c = centre();
       return { uid: ev.uid, id: ev.id, name: ev.name, kind: ev.kind || 'zone', zoneName: ev.zoneName || null, x: c.x, z: c.z, r: R, phase, wave: wave + 1, waves: (ev.waves || []).length,
-        boss: boss && !boss.removed ? boss.id : 0, hp: boss && !boss.removed ? boss.hp / Math.max(1, boss.hpMax) : 1, players: enrolled.size };
+        boss: boss && !boss.removed ? boss.id : 0, hp: boss && !boss.removed ? boss.hp / Math.max(1, boss.hpMax) : 1, players: enrolled.size,
+        ...(ev.where ? { where: ev.where } : {}), ...(ev.blurb ? { blurb: ev.blurb } : {}) };
     },
   };
 }

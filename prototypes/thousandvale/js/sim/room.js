@@ -69,7 +69,7 @@ export function createRoom(opts) {
     event(ev) {
       if (ev.type === 'loot' && ev.items && hooks.loot) { hooks.loot(ev, room); return; }
       if (hooks.observe) { if (ev.x === undefined) fillXZ(ev); hooks.observe(ev, room); }
-      if (ev.type === 'fx' && ev.kind === 'form' && ev.id) barDirty.add(ev.id);   // a form/stance changed slots: resend you.bar after the tick
+      if (ev.type === 'fx' && (ev.kind === 'form' || ev.kind === 'build') && ev.id) barDirty.add(ev.id);   // a form/stance/talent/perk changed slots   // a form/stance changed slots: resend you.bar after the tick
       room.emit(ev);
     },
     /** Emit without interception (the world's own loot events). */
@@ -173,6 +173,7 @@ export function createRoom(opts) {
   room.barFor = function (e) { const b = safe('bar', e); return Array.isArray(b) ? b : undefined; };
   /** Something changed a player's slots (a talent pick, a form): send `you {bar}` after this tick. */
   room.barChanged = function (e) { if (e) barDirty.add(e.id); };
+  host.barChanged = room.barChanged;          // C's rules call this after a talent / perk / level change (P6)
   function flushBars() {
     for (const eid of barDirty) {
       const e = entities.get(eid), c = clients.get(eid);

@@ -7,7 +7,7 @@
 // Used by createWorld({ zoneSheet: content.sheet, encounterInfo: content.encounterInfo }).
 
 export const PROVINCE_FILES = ['data/provinces/torbor_downs.json'];
-export const VIGNETTE_FILES = ['data/vignettes/m1.json', 'data/vignettes/m2.json', 'data/vignettes/m2b.json'];
+export const VIGNETTE_FILES = ['data/vignettes/m1.json', 'data/vignettes/m2.json', 'data/vignettes/m2b.json', 'data/vignettes/curios.json'];   // curios: P19 mini vignettes
 
 export async function loadZoneContent(readJson, zone = 'test') {
   const out = { sheet: null, encounterInfo: {}, vignettes: null };
@@ -29,7 +29,7 @@ export async function loadZoneContent(readJson, zone = 'test') {
   try {
     const idx = await readJson('data/encounters/index.json');
     for (const f of idx.files || []) {
-      try { const e = await readJson('data/encounters/' + f); if (e && e.id) out.encounterInfo[e.id] = { name: e.name || e.id, body: e.body || null }; } catch { /* skip */ }
+      try { const e = await readJson('data/encounters/' + f); if (e && e.id) out.encounterInfo[e.id] = { name: e.name || e.id, body: e.body || null, ...(Number.isFinite(e.level) ? { level: e.level } : {}) }; } catch { /* skip */ }
     }
   } catch { /* no encounters */ }
   return out;
@@ -107,7 +107,8 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
   // the living roads (P19, stream E): who travels, along which routes, and what they say (js/sim/travellers.js)
   const tv = await opt('data/provinces/travellers.json'), rt = await opt(`data/provinces/${provinceId}-routes.json`);
   const travel = tv && rt ? { kinds: tv.kinds || {}, rules: tv.rules || {}, folkKinds: tv.folk || {}, routes: rt.routes || [], chatter: (await opt('data/names/chatter.json')) || { pools: {}, rules: {} }, names: (await opt('data/names/torbor.json')) || {} } : null;
-  return { travel, key: provinceId, name: sheet ? sheet.name : provinceId, terrain, zones, encounterInfo, events, zoneEvents, directorRules: (evData && evData.director) || null, starter, starterProvince, rares, jobs, schedules, horizon };
+  const marks = ((await opt(`data/quests/marks/${provinceId}.json`)) || {}).quests || null;   // P17: E's map mark per quest
+  return { travel, marks, key: provinceId, name: sheet ? sheet.name : provinceId, terrain, zones, encounterInfo, events, zoneEvents, directorRules: (evData && evData.director) || null, starter, starterProvince, rares, jobs, schedules, horizon };
 }
 
 /**
@@ -130,7 +131,8 @@ export function provinceEvents(evData, { provinceId, map, terrain, sheet = null,
   const min = m => (m == null ? undefined : m * 60000);
   const common = (e, s) => ({ id: e.id, name: e.name || (encounterInfo[e.encounter || e.boss] || {}).name || e.id, kind: e.kind || 'boss', province: provinceId,
     x: s.x, z: s.z, r: Math.max(s.r || s.radius || 40, 30), level: e.level || 5, waves: e.waves || [], boss: e.boss || e.encounter || null, monster: e.monster || null,
-    durationMs: min(e.durationMinutes), announce: [].concat(e.announce || []), reward: e.reward || null, enrol: e.autoEnrolMetres || 60 });
+    durationMs: min(e.durationMinutes), announce: [].concat(e.announce || []), reward: e.reward || null, enrol: e.autoEnrolMetres || 60,
+    where: e.where || null, blurb: e.blurb || null });   // P27: where it is + what to do (E)
   if (evData) {
     for (const e of evData.realm || []) {
       const zs = e.zones || [e.zone];

@@ -1295,7 +1295,8 @@ below = A's convention (world zone z<zx>_<zy> at zx*2048, zy*2048). Tests: tests
       and the chest `(pl.levelBase ?? band[0]) + (pl.level || 1)`. Every vignette has `levelBase` + `levelCap` (ramp + 1),
       every curio `levelBase`.
       Near the start a vignette also has `countCap` (2 within 400 m of Torborhold, 3 within 900 m — stream C's starting-area
-      rule): please use `count: Math.min(m.count || 1, pl.countCap ?? 99)` (the dry well's 5 rats near town become 2).
+      rule): please use `count: Math.min(m.count || 1, pl.countCap ?? 99)` (the dry well's 5 rats near town become 2). Farms near the start carry the same `countCap`: please cap the farm
+      pest camp too (`count: Math.min(2 + (h % 2), p.countCap ?? 99)` in placements.js `farm`).
    b. the door guard: I place one (`type:'camp', doorGuard: true`, the zone's weakest type at the ramp's level). In buildLayout
       please drop your `ring0.slice(-1)` guard when a zone's placements have a `doorGuard` camp (yours is a fixed level 3).
    c. **Hobb Gallowsby** comes from your `ENCOUNTER_PLACES` at level 5 with L3 escort 805 m from Torborhold (the quest that sends
@@ -1368,9 +1369,9 @@ fine), `perks` = C's `rules.perks(e)` (`{ total, spent, left, taken }`) or a bar
 pick comes back `ok`, the windows stay in PREVIEW; a `why:'notReady'` answer also drops back to preview with a toast.
 
 ## C (Combat core) -> A (Server core), 2026-10-05 — play-test 1 (P4, P6, P8, P11, P12, P23)
-1. **Build save (P6)**: please save `rules.saveBuild(e)` (`{ v, talents, perks, bonusPerks, unlocks }`) as `char.build` on every change and on logout; `addEntity` restores it from `e.char.build`. A quest's perk point: add to `build.bonusPerks` (or ask me for a `rules.grantPerkPoint`).
-2. **Bar resend (P6)**: after a talent/perk change (and on level-up) the rules call `host.barChanged(e)` if the host has it, and emit `fx` with `kind: 'build'`. Please either add `host.barChanged = e => barDirty.add(e.id)` or treat `fx kind 'build'` like `kind 'form'` in room.event.
-3. **Messages (P6)**: `talents` (-> `rules.talents(e)`), `pickTalent {skill, tier, node}`, `unpickTalent {skill, tier}` / `resetTalents {skill?}` (at an Unbinder: charge `rules.retrainPrice(e, 'talent', 'one'|'all')` first), `perkForest` (static — send once, cacheable), `perks`, `takePerk {id}`, `refundPerk {id}` / `resetPerks` (Unbinder: `retrainPrice(e, 'perk', …)`). Each returns `{ ok, bar, build }` or `{ ok: false, text }`.
+1. **P6 — your §17.2 contract is in**: `rules.talent(e, op, {skill, tier, node})`, `rules.perk(e, op, {id})`, `rules.build(e)` (adds `talentTree` = the talent screen and `companion` = when the class companion comes) and `rules.saveBuild(e)` all exist now, so your `notReady` answers go away; `addEntity` restores `char.build`. `talent clear` with a `tier` empties only that tier. Your tests/A pt1-build-map/bar/m1-crules/room/pt1-slime/pt1-ground pass against the real rules (23/23).
+2. **Unbinder**: protocol §17.2 lets `clear`/`refund`/`reset` happen anywhere for free. The design (PLAN §6.5, Farhold R20) is the Unbinder in town for gold: `rules.retrainPrice(e, 'talent'|'perk', 'one'|'all')` gives Farhold's price. Your call where to gate it.
+3. The rules also call `host.barChanged(e)` if the host has one (after level-up companion grants); `room.barChanged` is on the room, not the host — harmless, you already resend after talent/perk ops.
 4. **Companions (P4)**: none at login any more. A quest reward that unlocks the class companion early: `rules.unlock(e, 'companion')` (second body `'companion2'`), saved in the build. `rules.companion(e)` -> when each comes (for the client).
 5. **P8**: the rules no longer move a dead player (a knock that kills, any correction while dead). "Did not stand up": please check the respawn path calls `rules.respawn(e)` AND `e.revive()` and clears the dead state on the client snapshot — the rules side resets hp/mp/statuses/threat.
 6. **P11 dungeons**: on a room with `terrain.kind === 'dungeon'` (or `kind: 'instance'`) the rules now treat unwalkable tiles as walls for monsters and followers (pathing, sight, no striking through). A gate opening is picked up within 3 s (cache refresh). If you hand the rules a `terrain.reader` for dungeons later, keep `walkable`.
@@ -1388,3 +1389,81 @@ Measured (tests/C/playtest1 P26, a level-2 character of 4 classes, no companion,
 - **First ring (400-900 m)**: levels **2-4**, pairs, an occasional trio of level <= 3.
 - **Second ring**: **4-6**; elites and 3-packs start here.
 - Your P26 ramp (level 1 at Torborhold's gate, +1 per ~550 m, nothing ordinary above 3 within 900 m, weaker types nearer town) matches this — keep it. Two asks on top: no crag hyena / frost stalker / brigand captain packs where the ramp is under 4, and keep the first 400 m solos and pairs (the gap rule makes +1..+3 winnable, but a level-1 character with one skill still loses a trio).
+
+## E (Content) -> B (World bake), 2026-10-05 (later) — your 13:27 bake: z13_01's dungeon door is not reachable
+Re-placed on your 13:27 bake. tests/E/placement.test.js 'REACHABLE' is red on ONE thing that is yours: **z13_01 `door_1`
+(Brackwater Fen's dungeon) is not in the hub's walkable component** on the stitched nav.bin (it was before). Probably the
+P2/P24 water/bridge changes cut it off (z13_01 also has no roads at all — see my earlier note). Please check; I re-run the
+placer after your next bake.
+
+## D-world -> D-UI (play-test P1, 2026-10-05)
+- **js/client/ui/item-icons.js blocks the main thread 3.3-4.1 s per icon on the test VM** (CPU profile: `toDataURL` inside `render()`,
+  pumped right after joining). `toDataURL` after drawing a WebGL canvas forces a synchronous GPU read-back; on a real GPU it is
+  still tens of ms a call, and the queue renders every bag/equipment icon back to back in the first seconds of play. Please
+  (a) render icons only while the bag/sheet is OPEN (or lazily per visible slot), (b) one per idle period with a long gap, and
+  (c) read back with `canvas.toBlob()` / `createImageBitmap()` + `URL.createObjectURL` (async) instead of `toDataURL`, or
+  `gl.readPixels` into an ImageData on a 2D canvas you then keep (no PNG encode). The freeze spec (tests/D/freeze.spec.js)
+  resets its counters after boot, so it does not catch this; the profile did.
+- Any light you add: use `LIGHTS.add({...})` from js/client/lightpool.js, never `new THREE.PointLight` / `light.visible = …`
+  (each changes the light count -> every lit material recompiles: the main walking freeze).
+
+## D-world -> A (play-test P9/P22/P25, 2026-10-05)
+- P8/P9/P22/P25 client side done on top of your server work: self dead flag synced on `joined`, grounded entities on
+  `heightAt` (decks included) unless STATE airborne/swimming, `info.gear` drawn (plain shorts+top where empty), the predictor's
+  terrain carries `waterAt` + `moveAt`. tests/D/m3-server.mjs gained two TEST-ONLY hook routes (`/teleport`, `/kill`).
+
+## D-UI (Client) -> A, B, E — 2026-10-05: play-test P3/P13/P17/P18/P27 client is in; small asks
+- **A**: the client now reads `mapData`, `discover`, quest step `at`/`where`, `turnIn`, `giverName`, `zoneName` (all used; thank you).
+  Two text asks: (1) server error strings still say "Callboard" (`callboard.js` refusals, e.g. "The Callboard opens at level 8") — the
+  owner wants the plain name **Group Finder** in the interface; the client rewrites the word for now, please change the strings at the
+  source. (2) Waystone travel needs you to stand at a waystone; the map offers Travel only there. If the owner wants travel from the map
+  anywhere (P3 "travel from the map"), a `travel {to, from:'map'}` that walks you to the nearest known stone first, or a small fare
+  surcharge, would let the map do it — tell D if you add it and the map button turns on everywhere.
+- **B**: optional — the map draws the world itself from `horizon.bin` (32 m) and each zone from its `terrain.bin` (4 m) in a worker
+  (js/client/ui/map-image-worker.js). If you ever bake a nicer picture, publish `data/world/map.json {file, metresPerPixel}` and the map
+  uses it with no code change.
+- **E**: `data/quests/marks/torbor_downs.json` is not read yet — the client resolves every step itself (139/140 exact) and A's `at`
+  wins; nothing needed.
+
+## B (World bake) -> E, A, D, C, Lead — 2026-10-05: play-test 1 RE-BAKE IS FINAL (P21 P24 P2/P25 P3 P19) — docs/world.md §9
+All 16 Torbor Downs zones, world.json, horizon and the new map are re-baked (ZONE_BAKE_VERSION 3, WORLD_BAKE_VERSION 2).
+tests/B all green except zone-reach's one E wayside (below). Unit suites A, C, D green against it.
+- **E — please re-run tools/place-vignettes.mjs now.** tests/E/placement.test.js is red (4) only because the ground moved
+  under old placements: new world **link trails** (graded roads `link_<name>`) now join every settlement you listed to the
+  net — Brackwater, Eelwick (via Brackwater's), Burnt Barns, Coldwater, Netherby, Deepdene, Gorsehold, Gull Steps, Last
+  Lantern, Lowmoor; every settlement in the 16 zones now has a road within r + 60 m. Bridges are new/moved (every road over
+  a river), river banks changed. z13_01's door is reached (province-reach: z13_01 100 %, 0 unreached B sites). zone-reach
+  flags one of yours: z12_04 wayside league_stone_coldwater_d163 (1001, 1786). The world bake now READS your
+  `*-places.json` asks — change an ask and world.json goes stale (tell me; I re-bake). New placement kind `path`
+  (footpaths from doors/arenas/your forts, farms, caves, waystones to the road net; painted, not graded, kept 2 m off
+  your discs) — your travellers/folk can use them; roads of kind `road` also carry `link_*` ids.
+- **A — swimming (P25) + bridges (P24).** Reader: `t.moveAt(x,z)` -> 'walk'|'wade'|'swim'|'steep'|'out', `t.passable`
+  (walk/wade/swim), groundAdapter `moveAt/passable/surfaceAt`. Streams are now wadeable (0.8 m) so the P2 wall is gone with
+  `walkable` as is; to let players swim rivers, move with `passable` instead of `walkable` (province-terrain.js
+  `reader.passable`), set STATE.swimming when `moveAt === 'swim'`, float at `waterAt().surface - ~1.2`, slow the speed.
+  `heightAt` is now the surface you stand on — a **bridge deck** where one spans (`meta.bridges`) — so walkers cross bridges
+  over swim-deep water with no code change; `groundAt` is bare ground.
+- **D — map (P3):** `data/world/map/map.json` + `world.png` (32 m/px) + `zones/<id>.png` (4 m/px, 512²); labels carry
+  `minZoom`, zone labels carry E's level `band` — format in world.md §9. **Bridges (P24):** placement `data.a`/`data.b`
+  are the abutments [x,z,h]; draw the deck from a to b (length `span`, width `data.width`, top at `deck`) — town-view
+  currently adds 6 m and sits 15 cm low; piers should use the reader's `groundAt` (heightAt returns the deck on a bridge);
+  a bendy bridge comes as pieces (`data.part`). **Water (P21):** no change needed — the sheet now ends inside the bank
+  everywhere; if the low-quality `ws = 2` water mesh shows gaps, use stride 1 near the camera. Paths (`path` kind) are
+  painted road surface already (biome `road`).
+- **C:** groundAdapter `heightAt` stands pets on bridge decks; `moveAt/passable` for swimmers if pets should swim.
+
+## A (Server core) -> C, E, D, Lead — 2026-10-05 (later): play-test 1 server side done; asks folded in
+- **C**: your §17.2 API is wired (`talent`/`perk` -> rules.talent/perk; `build`, `saveBuild` -> `char.build`; `host.barChanged` +
+  `fx kind:'build'` both resend the bar). Talent `clear` and perk `refund`/`reset` are refused unless an Unbinder (role `unbinder`)
+  is within 8 m, and cost `rules.retrainPrice` gold. Respawn path: `e.revive(1)` then `rules.respawn(e)` (wilds/town), room.respawn
+  revives then moves (instances) — confirmed. **Load (100-bot gate, spread phase red: p99 21–37 ms in-process and real, VM load ~11)**:
+  a profile of 70 spread players puts ~70% of the tick in `tickMonsters` (monster-ai.js:338 + index.js:148) over ~1,400 awake
+  monsters; travellers on/off makes no difference (A/B 21.3 vs 25.6 ms p99). Town and event phases pass. Please look at the
+  per-awake-monster cost; with E's tripled density the old margin is gone.
+- **E**: done — levelBase/levelCap/countCap (vignettes), farm pest countCap, encounter file `level` (Hobb), `doorGuard` replaces our
+  door guard, `roam` camps pass `path`, curios (curios.json in VIGNETTE_FILES, `recipe` lookup), `folk`, travellers + chatter,
+  quest marks (data/quests/marks win over our own lookup), event `where`/`blurb` in zoneEvent/mapData/realm views, m2 test key
+  fixed. tests/E/living.test.js P26 now passes — drop its `todo`. If density must come down for the gate, curio/wayside markers
+  are room objects (~3,400 in a copy) — a cap per zone near the hub would help.
+- **D**: see my earlier note (P8 onJoined one-liner; predictor terrain needs waterAt; gear on info; map/discover; quest markers).
+  New since: `zoneEvent.ev` / mapData events carry `where` + `blurb`; talentR/perkR may answer `why:'unbinder'` / `'gold'`.

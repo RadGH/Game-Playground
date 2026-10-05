@@ -80,7 +80,7 @@ test('waystones: discover, travel inside the province for a fare, and to another
   const used = [], tr = []; a.on('used', u => used.push(u)); a.on('travelR', m => tr.push(m));
   const ws0 = [...P0.townRoom.objects.values()].find(q => q.type === 'waystone');
   // travel before discovering anything: refused
-  a.travel('ws:torbor_downs:t1'); await run(clock, 200);
+  a.travel(TORBOR.waystones.find(w => w.town === 1).key); await run(clock, 200);
   assert.equal(tr.at(-1).why, 'undiscovered');
   // discover the town's waystone, then another town's (walk there = teleport in the test)
   P0.transfer(x, P0.townRoom, { x: ws0.x + 1, z: ws0.z }, 't'); await run(clock, 200);

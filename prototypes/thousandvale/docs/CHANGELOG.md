@@ -379,3 +379,83 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - **P28** Bog slime is damageable by every class (no immunity); its "no damage" was the level gap + client picking.
 - Also: `xpFind` was inert when the room awards experience (now applied in cast.js onKill).
 - Tests: tests/C/talents (7), perks (14), playtest1 (15).
+
+## 2026-10-05 — stream B (play-test 1: P21, P24, P2/P25, P3, P19) — details in docs/world.md §9
+- **B P21** rivers meet their banks: one continuous cross-section to the nearest river line (bank raised to surface + 0.4 where the land was low — it used to be lower than the water), the river owns its bed, an 8-connected skirt ring whose ground is raised to surface + 0.15 so the sheet's edge is always buried and the shoreline is the smooth channel edge (not 2 m steps); world lakes are a bicubic contour instead of 128 m square pits. Zone apron 1 → 6 samples. `tests/B/water-edge.test.js`.
+- **B P2/P25** `RIVER_DEPTH` [0, 0.5, 1.3, 2.6]: streams 0.8 m deep at the centre (wadeable; the invisible wall was 1.5 m > WADE_DEPTH), rivers swum in the middle. Reader: `moveAt` (walk/wade/swim/steep/out), `passable`, `groundAt`, `deckAt`, `DRY_FOOT_DEPTH`; groundAdapter `moveAt/passable/surfaceAt`.
+- **B P24** bridges: `crossingsOf` walks every road (world roads, spurs, link trails, town streets) at 1 m against river half-widths; flat decks at surface + clearance from abutment to abutment (chains of straight pieces through bends), road graded to exactly the deck height at both ends; decks in `terrain.bin` meta and the reader stands walkers on them (heightAt = max(ground, deck)); spurs now meet their road at its height (a 6 m step at junctions). `tests/B/bridges.test.js` (all 16 zones: no road point in water off a deck, every road/street walkable, deck = road ± 0.15 m at both ends, clearance 0.9–6.5 m, streams wadeable).
+- **B P3** `tools/bake-map.mjs` → `data/world/map/`: `world.png` (32 m/px, 1153×897), `zones/<id>.png` (4 m/px, 512²), `map.json` (zones with E names + level bands, provinces, labels with min zoom, roads, rivers), ~2 MB. `tests/B/map.test.js`. `tools/lib/png.mjs` (PNG writer).
+- **B P19** scatter in open country about doubled (forests unchanged); footpaths (`tools/lib/zone-paths.mjs`, placement kind `path`) from every door/arena/camp and E fort/farm/cave/waystone to the road net, painted not graded; world link trails (`link_<name>`) for E's settlements the World Forge net missed (Brackwater, Burnt Barns, Coldwater, Deepdene, Gorsehold, Gull Steps, Last Lantern, Lowmoor, Netherby). Fixed a Float32 rounding bug that stopped both Dijkstras after one ring.
+
+## 2026-10-05 — D-UI: map, minimap, markers, Journal, Party menu, tooltips, inventory (play-test P3/P5/P7/P13/P15/P16/P17/P18/P27)
+- **Map (M)** `js/client/ui/worldmap.js` + `map-render.js` + `map-data.js` (pure) + `map-load.js` + `map-image-worker.js`: the whole
+  world (12 provinces, the closed ones dimmed "not open yet"), Torbor Downs' 16 zones with names and LEVEL BANDS coloured for your
+  level, towns, roads, rivers, dungeons, caves, forts, farms, event arenas, live events, quest goals, waystones (Travel when you stand
+  at one), party, pins (right-click). World / Province / Region / Around me, drag, wheel, pinch, double-click. Terrain pictures
+  drawn in a worker from horizon.bin (32 m) and each zone's terrain.bin (4 m); town streets + buildings at close zoom. Fog of the map:
+  128 m cells you were near, saved per character, plus the server's `discover`. Hover card on every marker and every zone (band,
+  "hard for you", % explored, town, dungeon). In a dungeon it is the dungeon's map from the tiles, with its own fog.
+- **Minimap** `minimap.js`: top-right, north-up or turning with you, zoom, click for the map, rim arrows with distance for the tracked
+  quest, live events, party and pins; the dungeon floor inside a dungeon.
+- **Atlas** `atlas.js`: one source for map/minimap/journal — quests located (`locateQuest`, server `at` first), events, pins, fog.
+- **Journal (J)** + HUD tracker `journal.js`: goal, where (place, distance, direction), steps, rewards, giver, Track / Abandon, finished list.
+- **Party menu (P)** `party-hub.js`: Party / Friends / Guild / Mail / Group Finder tabs (the old windows docked inside); "Callboard" is
+  "Group Finder" in the interface; O / G open their tabs.
+- **Tooltips (P5)** `tips.js`: every native `title` replaced by the shared engine (opt-in `keepOnPress` added to shared/tooltip.js so
+  a tip stays while a button is held); a safety net converts any `title` set later; skill bar cards are rich.
+- **Inventory (P7/P15/P16)** (`bag.js`, `ui/inv-core.js`, `ui/item-card.js`, `ui/item-icons.js`, `css/inventory.css`): paper doll +
+  bag, filters, sort, search, compare cards, upgrade arrows, required level (red when too high; also on loot lines), icons rendered
+  once from the Chibi 2 models and cached.
+- Tests: `tests/D/ui-map.test.js` (12), `tests/D/ui-map.spec.js` (2, shots `tests/D/shots/ui-*.png`), inventory/talents tests + specs;
+  m3-social spec updated for the new keys (M = map, J = journal, mail + Group Finder in the Party menu).
+
+## 2026-10-05 — stream D-world (play-test 1: rendering, performance, actors, effects)
+- **D** P1 freezes, measured with a new frame watchdog `js/client/perf.js` (named spans, long-frame log, GL link counter,
+  `stalls()` = page work blocking the main thread; `tv.perf()`, `tv.state().stats.longFrames/worstFrameMs`). Root causes, worst first:
+  the water normal map was regenerated for every zone through a canvas read-back (**20.1 s** on the test VM when a neighbour
+  streamed in; now one `quickWaterNormals` DataTexture for the page, 16 ms); point lights added/removed/hidden by campfires,
+  objects, town lamps at night, dungeons and the lantern (every lit material recompiled) — replaced by `js/client/lightpool.js`,
+  a fixed set of always-visible lights handed to the nearest sources; the first sight of a creature family compiled its shaders
+  on its first draw (1.5-4 s) — `js/client/warmup.js` builds, compiles and keeps one body of every bestiary creature type and
+  humanoid look behind the title screen, and new bodies/zone pieces are compiled before they are shown (`compileBeforeShow`,
+  KHR_parallel_shader_compile where present); per-zone rebuilds of dungeon surfaces, site trees, decor props and glow/flame
+  textures are page caches now; zone streaming yields a frame between parse, ground, town, scatter and sites; every scatter kit
+  piece is pre-built in idle time (`prewarmScatter`). Spec `tests/D/freeze.spec.js`.
+- **D** P10 `js/client/transition.js`: travel veil over waystone / door / respawn / relocate jumps (not over walking out of town),
+  destination ground preloaded on `travelR`, shaders compiled before it lifts.
+- **D** P9 grounded entities stand on `heightAt` (decks included) unless STATE airborne/swimming; P8 self dead flag synced on
+  `joined`, corpses stay where they fell, standing up drops the corpse pose at once.
+- **D** P20 `js/client/spell-looks.js` (a distinct look for all 180 skills of the 30 classes) + `js/client/spells.js` (avatar-3d
+  SpellFx from the rules' cast / fx bolt-arrow-shot-burst-pool-place-arc-link-status-impact-orbs-wall / hit events; spell lights
+  through the pool). `tv.demoSpells()`.
+- **D** P21 `extendWaterSurface`: the water sheet runs up to where the bank rises out of it — smooth shoreline, no gap.
+- **D** P22 `js/client/gear-look.js`: in the world a character wears plain shorts + shirt plus exactly its gear (self:
+  `equip`/`joined.you.equipment`, others: `info.gear`); the class outfit only on the title preview.
+- **D** P25 swimming: predictor terrain carries `waterAt`/`moveAt`, the Chibi 2 swim clip, ripples, beasts float.
+- **D** P28 click volume = the body's real size (Box3 at build); P12 verified by test (telegraphs from cast start, fill timed to impact).
+- **D** tests: `tests/D/playtest1.test.js` (11 node), `tests/D/freeze.spec.js`, `tests/D/playtest1.spec.js`; m3-server test hook
+  `/teleport`, `/kill`.
+
+## 2026-10-05 — A (Server core): play-test 1 (protocol v5)
+- P2/P25 swimming: js/sim/movement.js `moveKind` (B's moveAt, or walkable+waterAt with the same thresholds) — deep water is swum
+  (2.7 m/s, floats at surface − 1.1 m, no jump), wading ×0.8; STATE.swimming + y on the wire; no attacks while swimming (castR
+  'swimming'); `rules.onSwim`. Province terrain forwards waterAt/moveAt/passable/deckAt/groundAt.
+- P9: mirror keeps y only for airborne/swimming entities (stale FULL-record y floated/sank monsters); heights = B's heightAt incl.
+  bridge decks. P8: a dead body never moves (Entity.moveTo), respawn revives first, revive clears combat. Root cause of "never
+  stands up" is D's onJoined (request filed).
+- P14: realm.js `dedupeWaystones` (60 m merge, aliases for discovered keys, door stones named after their dungeon), door-stone test 90 m.
+- P17: quest views carry step `at`/`where`/`kind` (E's marks file wins), `turnIn`, `giverName`, `zoneName`; kills/event wins/clears
+  of the last 15 min count on accept (`questR.credited`).
+- P22: new characters keep only the class weapon (+off-hand), `kitV`; player info carries `gear`; kit items get uids (unequippable).
+- P28: vignette camps avoid prop footprints (`avoid`); slimes verified hittable at level 2.
+- P6: `talent`/`perk` messages -> C's rules.talent/perk; build saved as `char.build`; bar/build resent; respec only by an Unbinder,
+  priced by rules.retrainPrice; build view cached across handoffs.
+- P3/P27: `map {op:'get'}` -> mapData (zones+bands, towns, found places, live events), `discover` pushes, `seen` saved; events carry
+  E's where/blurb.
+- P19: js/sim/travellers.js — groups on E's 85 routes, folk at work, chatter from data/names/chatter.json with deeds context; crews
+  exist only near players, sliced 1/4 per tick.
+- P10/P1: waystone/event travel preloads (travelR.at/delayMs, 1.5 s) — server room changes measured 0.1–1 ms, instances 5–25 ms;
+  stable/dev tick worst10m 3–8 ms (the freezes are client-side).
+- E's P26 reads: vignette levelBase/levelCap/countCap, farm pest countCap, encounter file level, doorGuard replaces our door guard,
+  roaming camp paths, curios (curios.json + recipe lookup), folk placements.
+- Tests: tests/A/pt1-*.test.js (+ pt1-helpers.js real-world harness), m2/protocol updated. tests/A 137 pass / 8 skip / 0 fail.

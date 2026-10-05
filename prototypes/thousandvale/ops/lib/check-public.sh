@@ -53,7 +53,7 @@ if [[ -d "$PUB" ]]; then
   for d in server ops tests docs tools; do nott "public/ has no prototypes/thousandvale/$d" test -e "$PUB/prototypes/thousandvale/$d"; done
   nott  "public/ has no dotfiles or node_modules"          sh -c "find '$PUB' \\( -name '.*' -o -name node_modules \\) | grep -q ."
   check "public/ holds the privacy note"                   test -s "$PUB/prototypes/thousandvale/public/privacy.html"
-  nott  "no secret-looking strings in the release"         sh -c "grep -rIl -E 'PGPASSWORD=[A-Za-z0-9]{8}|BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY|TV_TURNSTILE_SECRET=0x[0-9A-Za-z]{20}|TV_OFFSITE_SECRET=[A-Za-z0-9/+]{20}|AccountTag' '$CUR' 2>/dev/null | grep -v /node_modules/ | grep -q ."
+  nott  "no secret-looking strings in the release"         sh -c "grep -rIl -E 'PGPASSWORD=[A-Za-z0-9]{8}|BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY|TV_TURNSTILE_SECRET=0x[0-9A-Za-z]{20}|TV_OFFSITE_SECRET=[A-Za-z0-9/+]{20}|AccountTag' '$CUR' 2>/dev/null | grep -v -e /node_modules/ -e /ops/lib/check-public.sh | grep -q ."
 else bad "no published release at $CUR (tools/publish-thousandvale.sh)"; fi
 BUILD="$(cat "$CUR/BUILD" 2>/dev/null)"
 LIVE="$(curl -fsS --max-time 3 http://127.0.0.1:8490/status 2>/dev/null | "$NODE" -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const j=JSON.parse(s);console.log(j.build+" "+j.human+" "+j.env)}catch{console.log("")}})')"
@@ -71,7 +71,7 @@ if [[ "$MODE" == quick ]]; then
   UNITF="$UH/.config/systemd/user/thousandvale-quick-tunnel.service"
   check "quick tunnel unit installed (ops/tunnel/quick.sh --install)" test -f "$UNITF"
   if [[ -f "$UNITF" ]]; then
-    check "its only origin is http://127.0.0.1:8490"        sh -c "grep '^ExecStart=' '$UNITF' | grep -qE -- '--url http://127\\.0\\.0\\.1:8490\$' && [ \$(grep -o -- '--url' '$UNITF' | wc -l) = 1 ]"
+    check "its only origin is http://127.0.0.1:8490"        sh -c "grep '^ExecStart=' '$UNITF' | grep -qE -- '--url http://127\\.0\\.0\\.1:8490\$' && [ \$(grep '^ExecStart=' '$UNITF' | grep -o -- '--url' | wc -l) = 1 ]"
     nott  "it is not enabled at boot"                        test -e "$UH/.config/systemd/user/default.target.wants/thousandvale-quick-tunnel.service"
   fi
   for f in "$UH/.cloudflared/config.yml" "$UH/.cloudflared/config.yaml" /etc/cloudflared/config.yml /etc/cloudflared/config.yaml /usr/local/etc/cloudflared/config.yml; do

@@ -203,19 +203,19 @@
     ],
     "roads": 10,
     "bridges": 2,
-    "paths": 5,
-    "pathMetres": 335,
-    "scatter": 15687,
+    "paths": 7,
+    "pathMetres": 1798,
+    "scatter": 15632,
     "scatterKinds": {
-      "bush": 5204,
-      "tree_broadleaf": 3534,
-      "rock_small": 2825,
-      "rock_large": 2340,
-      "reed": 227,
-      "tree_dead": 20,
+      "bush": 5200,
+      "tree_broadleaf": 3508,
+      "rock_small": 2823,
+      "rock_large": 2341,
+      "reed": 225,
+      "tree_dead": 21,
       "boulder": 293,
-      "tree_conifer": 1219,
-      "tree_acacia": 25
+      "tree_conifer": 1198,
+      "tree_acacia": 23
     },
     "sites": [
       "settlement(HUB) town Orrinsford 336 576 90",
@@ -229,13 +229,13 @@
       "x": 340,
       "z": 580
     },
-    "placements": 191,
-    "vignettesAvoided": 674
+    "placements": 193,
+    "vignettesAvoided": 692
   },
   "files": {
-    "terrain.bin": 681354,
-    "nav.bin": 49592,
-    "scatter.bin": 125580,
-    "placements.json": 111752
+    "terrain.bin": 682193,
+    "nav.bin": 50480,
+    "scatter.bin": 125140,
+    "placements.json": 146925
   }
 }

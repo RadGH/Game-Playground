@@ -268,17 +268,17 @@
     ],
     "roads": 12,
     "bridges": 3,
-    "paths": 5,
-    "pathMetres": 288,
-    "scatter": 14465,
+    "paths": 6,
+    "pathMetres": 1752,
+    "scatter": 14405,
     "scatterKinds": {
-      "rock_small": 2327,
-      "bush": 4709,
-      "tree_broadleaf": 5016,
-      "rock_large": 1565,
-      "boulder": 260,
-      "tree_conifer": 565,
-      "tree_acacia": 23
+      "rock_small": 2330,
+      "bush": 4695,
+      "tree_broadleaf": 4976,
+      "rock_large": 1567,
+      "boulder": 259,
+      "tree_conifer": 556,
+      "tree_acacia": 22
     },
     "sites": [
       "settlement(HUB) city Hermit's Rest 1104 560 140",
@@ -294,13 +294,13 @@
       "x": 1100,
       "z": 560
     },
-    "placements": 342,
-    "vignettesAvoided": 574
+    "placements": 343,
+    "vignettesAvoided": 579
   },
   "files": {
-    "terrain.bin": 686785,
-    "nav.bin": 48741,
-    "scatter.bin": 115804,
-    "placements.json": 164625
+    "terrain.bin": 687532,
+    "nav.bin": 49302,
+    "scatter.bin": 115324,
+    "placements.json": 198619
   }
 }

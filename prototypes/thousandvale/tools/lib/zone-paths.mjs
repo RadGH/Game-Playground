@@ -18,7 +18,7 @@ export const PATH_WIDTH = 2.2;
 
 /** Binary-heap A*-free Dijkstra to the nearest goal cell (multi-target): returns the cell path or null. */
 function route(N, cost, goal, start, maxCost) {
-  const dist = new Float32Array(N * N).fill(Infinity), from = new Int32Array(N * N).fill(-1);
+  const dist = new Float64Array(N * N).fill(Infinity), from = new Int32Array(N * N).fill(-1);
   const heap = [], push = (k, d) => { heap.push([d, k]); let i = heap.length - 1; while (i > 0) { const p = (i - 1) >> 1; if (heap[p][0] <= heap[i][0]) break; [heap[p], heap[i]] = [heap[i], heap[p]]; i = p; } };
   const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === i) break; [heap[m], heap[i]] = [heap[i], heap[m]]; i = m; } } return top; };
   dist[start] = 0; push(start, 0);

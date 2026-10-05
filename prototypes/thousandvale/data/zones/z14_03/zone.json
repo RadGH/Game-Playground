@@ -300,8 +300,8 @@
         },
         "culture": "halfling",
         "plots": 26,
-        "streets": 68,
-        "links": 3,
+        "streets": 69,
+        "links": 4,
         "overlaps": 0
       },
       {
@@ -362,19 +362,19 @@
         "overlaps": 0
       }
     ],
-    "roads": 16,
+    "roads": 15,
     "bridges": 5,
     "paths": 10,
-    "pathMetres": 374,
-    "scatter": 17861,
+    "pathMetres": 315,
+    "scatter": 17934,
     "scatterKinds": {
-      "tree_broadleaf": 8304,
-      "bush": 5923,
-      "reed": 1228,
-      "rock_small": 1625,
-      "rock_large": 347,
-      "tree_dead": 87,
-      "tree_acacia": 341,
+      "tree_broadleaf": 8328,
+      "bush": 5945,
+      "reed": 1244,
+      "rock_small": 1628,
+      "rock_large": 353,
+      "tree_dead": 88,
+      "tree_acacia": 342,
       "boulder": 6
     },
     "sites": [
@@ -393,12 +393,12 @@
       "z": 864
     },
     "placements": 403,
-    "vignettesAvoided": 662
+    "vignettesAvoided": 674
   },
   "files": {
-    "terrain.bin": 509655,
-    "nav.bin": 34678,
-    "scatter.bin": 142972,
-    "placements.json": 167258
+    "terrain.bin": 507676,
+    "nav.bin": 34126,
+    "scatter.bin": 143556,
+    "placements.json": 159933
   }
 }

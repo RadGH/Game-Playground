@@ -340,18 +340,18 @@
     ],
     "roads": 16,
     "bridges": 5,
-    "paths": 11,
-    "pathMetres": 837,
-    "scatter": 17109,
+    "paths": 12,
+    "pathMetres": 732,
+    "scatter": 17135,
     "scatterKinds": {
-      "tree_broadleaf": 6903,
-      "bush": 7119,
-      "rock_large": 438,
-      "rock_small": 1969,
-      "reed": 492,
+      "tree_broadleaf": 6927,
+      "bush": 7124,
+      "rock_large": 439,
+      "rock_small": 1956,
+      "reed": 497,
       "tree_dead": 42,
       "boulder": 30,
-      "tree_acacia": 116
+      "tree_acacia": 120
     },
     "sites": [
       "settlement(HUB) city Millbrook 544 1648 140",
@@ -368,13 +368,13 @@
       "x": 540,
       "z": 1656
     },
-    "placements": 407,
-    "vignettesAvoided": 659
+    "placements": 408,
+    "vignettesAvoided": 638
   },
   "files": {
-    "terrain.bin": 540788,
-    "nav.bin": 29984,
-    "scatter.bin": 136956,
-    "placements.json": 186896
+    "terrain.bin": 541454,
+    "nav.bin": 30181,
+    "scatter.bin": 137164,
+    "placements.json": 183462
   }
 }

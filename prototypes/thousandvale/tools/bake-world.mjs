@@ -200,13 +200,13 @@ function linkTrails({ w, M, W, H, ref, roads, zoneCells }) {
   const cellOf = (x, z) => clamp(Math.floor(z / M), 0, H - 1) * W + clamp(Math.floor(x / M), 0, W - 1);
   for (const r of roads) for (const p of r.pts) { const c = cellOf(p[0], p[1]); roadCell[c] = 1; if (!roadPt.has(c)) roadPt.set(c, p); }
   const near = (x, z) => { let d = Infinity; for (const r of roads) { if (r.bbox[0] - 400 > x || r.bbox[2] + 400 < x || r.bbox[1] - 400 > z || r.bbox[3] + 400 < z) continue; for (const p of r.pts) d = Math.min(d, Math.hypot(p[0] - x, p[1] - z)); } return d; };
-  const cost = c => (w.water[c] ? Infinity : 1 + w.slope[c] * 40);
+  const cost = c => (w.water[c] ? Infinity : 1 + clamp(w.slope[c], 0, 1) * 40);   // macro.bin clamps slope to 0..1; the raw field does not
   const out = [];
   wants.sort((a, b) => a.name.localeCompare(b.name));
   for (const s of wants) {
     if (near(s.x, s.z) <= s.r + 60) continue;
     // Dijkstra over macro cells to the nearest road cell
-    const start = cellOf(s.x, s.z), dist = new Float32Array(N).fill(Infinity), from = new Int32Array(N).fill(-1), open = [[0, start]];
+    const start = cellOf(s.x, s.z), dist = new Float64Array(N).fill(Infinity), from = new Int32Array(N).fill(-1), open = [[0, start]];
     dist[start] = 0; let goal = -1;
     while (open.length) {
       let bi = 0; for (let q = 1; q < open.length; q++) if (open[q][0] < open[bi][0]) bi = q;

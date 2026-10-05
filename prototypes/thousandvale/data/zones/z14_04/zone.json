@@ -131,20 +131,7 @@
     "x": 1199,
     "z": 1026
   },
-  "bridges": [
-    {
-      "a": [
-        1902.4,
-        1263.6
-      ],
-      "b": [
-        1915.18,
-        1275.18
-      ],
-      "h": 68.956,
-      "w": 4.92
-    }
-  ],
+  "bridges": [],
   "summary": {
     "zone": "z14_04",
     "province": "Petbeck Basin",
@@ -181,24 +168,24 @@
         "movedFrom": null,
         "culture": "halfling",
         "plots": 9,
-        "streets": 21,
-        "links": 1,
+        "streets": 22,
+        "links": 2,
         "overlaps": 0
       }
     ],
-    "roads": 3,
-    "bridges": 1,
+    "roads": 2,
+    "bridges": 0,
     "paths": 7,
-    "pathMetres": 2070,
-    "scatter": 11289,
+    "pathMetres": 1715,
+    "scatter": 11346,
     "scatterKinds": {
-      "rock_large": 738,
-      "tree_acacia": 2441,
-      "bush": 5339,
-      "rock_small": 2285,
-      "tree_broadleaf": 172,
-      "boulder": 198,
-      "tree_dead": 116
+      "rock_large": 743,
+      "tree_acacia": 2443,
+      "bush": 5363,
+      "rock_small": 2301,
+      "tree_broadleaf": 182,
+      "boulder": 197,
+      "tree_dead": 117
     },
     "sites": [
       "landmark ancientwood The Elder Stondhealweast 1472 1728",
@@ -214,13 +201,13 @@
       "x": 1199,
       "z": 1026
     },
-    "placements": 145,
+    "placements": 144,
     "vignettesAvoided": 670
   },
   "files": {
-    "terrain.bin": 499975,
-    "nav.bin": 19990,
-    "scatter.bin": 90396,
-    "placements.json": 105943
+    "terrain.bin": 498754,
+    "nav.bin": 19559,
+    "scatter.bin": 90852,
+    "placements.json": 88431
   }
 }

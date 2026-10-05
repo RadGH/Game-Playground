@@ -121,7 +121,7 @@
         "x": 1101,
         "z": 1645,
         "r": 150,
-        "level": 1026.37
+        "level": 1032.62
       },
       {
         "name": "the Reflection Mere",
@@ -129,7 +129,7 @@
         "x": 684,
         "z": 1260,
         "r": 75,
-        "level": 1011.54
+        "level": 1008.01
       }
     ],
     "fen": null
@@ -170,22 +170,22 @@
         "movedFrom": null,
         "culture": "halfling",
         "plots": 9,
-        "streets": 30,
-        "links": 0,
+        "streets": 31,
+        "links": 1,
         "overlaps": 0
       }
     ],
-    "roads": 2,
+    "roads": 4,
     "bridges": 0,
     "paths": 7,
-    "pathMetres": 1471,
-    "scatter": 13198,
+    "pathMetres": 1128,
+    "scatter": 13164,
     "scatterKinds": {
-      "bush": 1947,
-      "tree_conifer": 2193,
-      "rock_small": 4586,
-      "rock_large": 3565,
-      "boulder": 881,
+      "bush": 1943,
+      "tree_conifer": 2182,
+      "rock_small": 4565,
+      "rock_large": 3560,
+      "boulder": 888,
       "tree_acacia": 9,
       "tree_broadleaf": 17
     },
@@ -202,13 +202,13 @@
       "x": 1462,
       "z": 1854
     },
-    "placements": 127,
-    "vignettesAvoided": 670
+    "placements": 130,
+    "vignettesAvoided": 685
   },
   "files": {
-    "terrain.bin": 700076,
-    "nav.bin": 60065,
-    "scatter.bin": 105668,
-    "placements.json": 100364
+    "terrain.bin": 705508,
+    "nav.bin": 60818,
+    "scatter.bin": 105396,
+    "placements.json": 99027
   }
 }

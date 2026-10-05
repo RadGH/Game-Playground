@@ -137,8 +137,8 @@
         "movedFrom": null,
         "culture": "desert",
         "plots": 24,
-        "streets": 44,
-        "links": 0,
+        "streets": 45,
+        "links": 1,
         "overlaps": 0
       },
       {
@@ -160,18 +160,18 @@
     ],
     "roads": 2,
     "bridges": 0,
-    "paths": 11,
-    "pathMetres": 1121,
-    "scatter": 10061,
+    "paths": 9,
+    "pathMetres": 1433,
+    "scatter": 10051,
     "scatterKinds": {
-      "bush": 2655,
-      "rock_small": 3498,
-      "tree_broadleaf": 38,
-      "tree_dead": 239,
-      "boulder": 547,
-      "rock_large": 2253,
-      "tree_acacia": 478,
-      "tree_conifer": 353
+      "bush": 2664,
+      "rock_small": 3480,
+      "tree_broadleaf": 35,
+      "tree_dead": 240,
+      "boulder": 545,
+      "rock_large": 2265,
+      "tree_acacia": 470,
+      "tree_conifer": 352
     },
     "sites": [
       "landmark volcano The Becktack Forge 960 1984",
@@ -186,13 +186,13 @@
       "x": 1560,
       "z": 1278
     },
-    "placements": 151,
-    "vignettesAvoided": 632
+    "placements": 150,
+    "vignettesAvoided": 618
   },
   "files": {
-    "terrain.bin": 705438,
-    "nav.bin": 46516,
-    "scatter.bin": 80572,
-    "placements.json": 78953
+    "terrain.bin": 703697,
+    "nav.bin": 46188,
+    "scatter.bin": 80492,
+    "placements.json": 85408
   }
 }

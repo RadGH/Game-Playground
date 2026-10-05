@@ -160,15 +160,15 @@
     ],
     "roads": 3,
     "bridges": 0,
-    "paths": 8,
-    "pathMetres": 3109,
-    "scatter": 9925,
+    "paths": 7,
+    "pathMetres": 1339,
+    "scatter": 9928,
     "scatterKinds": {
-      "bush": 5147,
-      "rock_small": 1908,
-      "tree_broadleaf": 2164,
-      "rock_large": 298,
-      "tree_conifer": 408
+      "bush": 5151,
+      "rock_small": 1905,
+      "tree_broadleaf": 2169,
+      "rock_large": 297,
+      "tree_conifer": 406
     },
     "sites": [
       "settlement(HUB) town Saltmouth 880 1616 90",
@@ -180,13 +180,13 @@
       "x": 872,
       "z": 1620
     },
-    "placements": 149,
-    "vignettesAvoided": 632
+    "placements": 148,
+    "vignettesAvoided": 625
   },
   "files": {
-    "terrain.bin": 467263,
-    "nav.bin": 15284,
-    "scatter.bin": 79484,
-    "placements.json": 125392
+    "terrain.bin": 466375,
+    "nav.bin": 14312,
+    "scatter.bin": 79508,
+    "placements.json": 82906
   }
 }

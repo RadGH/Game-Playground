@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thousandvale privacy</title>
+<link rel="stylesheet" href="privacy.css">
+</head>
+<body>
+<main>
+  <h1>Thousandvale — what we keep about you</h1>
+  <p class="lede">A small test game run by one person on one computer. This page says, in plain words, what is stored, for how long, and how to have it removed. Last changed 2026-10-05.</p>
+
+  <div class="box">
+    <p><strong>Short version:</strong> no email, no real name, no payment, no ads, no tracking. You get a random sign-in code that stays in your browser. We keep your characters and your progress, chat for 30 days (so reports can be checked), and backups for 14 days.</p>
+  </div>
+
+  <h2>What is stored</h2>
+  <table>
+    <tr><th>What</th><th>Why, and how long</th></tr>
+    <tr><td>A random sign-in code (guest token)</td><td>Kept in <em>your</em> browser's local storage so you are signed in next time. The server stores only a one-way fingerprint (hash) of it, never the code itself. Clearing your browser data loses the account unless you claimed it.</td></tr>
+    <tr><td>Username and password (only if you claim your account)</td><td>The password is stored only as a salted <em>scrypt</em> hash; nobody can read it back. Kept until the account is deleted.</td></tr>
+    <tr><td>Characters</td><td>Name, class, level, experience, gold, where you stood, gear, bag, quests and other progress. Kept until the account is deleted.</td></tr>
+    <tr><td>Save journal</td><td>Small records of item and gold changes, written every couple of seconds so a crash loses almost nothing. Cleared each time your character is fully saved (within minutes).</td></tr>
+    <tr><td>Account times</td><td>When the account was made and last signed in.</td></tr>
+    <tr><td>Chat</td><td>Messages are logged for <strong>30 days</strong> so a report can be checked, then deleted.</td></tr>
+    <tr><td>Friends, ignore list, guild, mail</td><td>What you set up in game. Kept until you change it or the account is deleted.</td></tr>
+    <tr><td>Reports and bans</td><td>If you report someone, the report and what it is about. A ban stores the account and a one-way hash of the internet address, not the address itself.</td></tr>
+    <tr><td>Game totals</td><td>Hourly totals of gold and items entering and leaving the game, by level band. Not tied to you.</td></tr>
+  </table>
+
+  <h2>Your internet address</h2>
+  <p>The server sees your internet address (IP) while you are connected and uses it to limit how many connections and new accounts one address can make. It is not written to the database. Server logs may contain it; the machine keeps logs for a limited time and they are never shared.</p>
+  <p>The link reaches this computer through <strong>Cloudflare</strong>, which therefore also sees your address and the pages you load, under <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare's privacy policy</a>. The game page loads its lettering from <strong>Google Fonts</strong>, so Google sees your address when the page opens. If a human check (Cloudflare Turnstile) is switched on, it runs Cloudflare's script on the sign-up screen.</p>
+
+  <h2>Backups</h2>
+  <p>The database is copied every hour (copies kept 48 hours) and once a day (copies kept 14 days). A nightly copy may also be stored with a cloud storage company (Amazon S3 or Cloudflare R2), encrypted, and deleted after 14 days. So anything deleted from the game is gone from every copy within <strong>14 days</strong>.</p>
+
+  <h2>What we never do</h2>
+  <ul>
+    <li>Sell or share your data.</li>
+    <li>Ask for an email, a real name, a phone number or payment.</li>
+    <li>Use cookies, ads, analytics or tracking pixels.</li>
+  </ul>
+
+  <h2>Deleting your account</h2>
+  <p>Ask the person who sent you the link, and say your character's name. The account, its characters, mail, friends and guild membership are deleted within 7 days; your chat lines go with them (or age out after 30 days); backups age out within 14 days.</p>
+
+  <h2>Children</h2>
+  <p>This test is not meant for children under 13. If you think a child has made an account, ask for it to be deleted as above.</p>
+
+  <p class="small">Thousandvale is an independent project by Radley Sustaire. This note will change if the game changes; the date at the top says when it last did.</p>
+</main>
+</body>
+</html>

@@ -91,10 +91,25 @@ prototypes/thousandvale/ops/drill-local.sh               # the same backup + dri
 node prototypes/thousandvale/tools/chaos-kill9.mjs --kills 500 --db pg --scratch    # kill -9 x500 on its own throw-away Postgres
 ```
 
+**Going public (M3, stream H) — scripted, NOT started.** Owner decision 2026-10-05: first a free trycloudflare **quick
+tunnel** for friends; a named tunnel on the owner's own hostname later. Full plan, order of switches and rollback:
+`prototypes/thousandvale/ops/tunnel/README.md`.
+
+```bash
+sudo prototypes/thousandvale/ops/lib/check-public.sh --mode quick    # PLAN §11 as a script + live probes; MUST pass first
+prototypes/thousandvale/ops/tunnel/quick.sh --install|--start|--url|--status|--stop   # user unit, only origin 127.0.0.1:8490
+sudo prototypes/thousandvale/ops/tunnel/rollback.sh                  # off the internet, back to LAN-only (safe twice)
+node prototypes/thousandvale/ops/lib/probe-public.mjs --base http://127.0.0.1:8490   # the live probes alone, no sudo
+```
+Kill switch: `ops/tunnel/quick.sh --stop` (quick) / `sudo systemctl stop thousandvale-tunnel` (named).
+The tunnel's only origin is **8490**. 8495 is the **load server** (`ops/load/load-server.sh`: the published release on a
+throw-away Postgres, LAN only, for the 300-bot run in `ops/load/README.md`) — never tunnelled, stop it after a run.
+Off-machine backups: `thousandvale-offsite.timer` (nightly, skips until the owner's bucket is in `/etc/thousandvale/offsite.env`).
+
 Give the owner `http://<LAN-IP>:8490/` for the stable build once it is published, and `http://<LAN-IP>:8491/` for work in progress.
 The rules that matter (full list: `prototypes/thousandvale/ops/SECURITY.md`):
 
-* **Never** put `tools/serve.py`, 8400 or 8401 behind a tunnel — serve.py accepts POSTs that write files.
+* **Never** put `tools/serve.py`, 8400 or 8401 (or 8491, 8492, 8495) behind a tunnel — serve.py accepts POSTs that write files.
 * The public server serves only its published folder, never the playground root.
 * **The dev unit does not reload code.** After stream A changes `server/` or `js/sim`/`js/net`, run
   `systemctl --user restart thousandvale-dev` — a protocol bump makes the old process refuse every new client

@@ -1,0 +1,23 @@
+# Thousandvale nightly OFF-MACHINE backup copy (stream H, PLAN §9.6). Run by thousandvale-offsite.timer.
+# Uploads the newest daily dump from /var/backups/thousandvale/daily to S3/R2 with a write-only key.
+# Does nothing harmful while unconfigured: ConditionPathExists skips it until /etc/thousandvale/offsite.env exists.
+[Unit]
+Description=Thousandvale off-machine backup (S3/R2)
+After=network-online.target thousandvale-backup.service
+Wants=network-online.target
+ConditionPathExists=/etc/thousandvale/offsite.env
+
+[Service]
+Type=oneshot
+User=thousandvale
+Group=thousandvale
+EnvironmentFile=/etc/thousandvale/offsite.env
+ExecStart=/opt/thousandvale/node/bin/node /usr/local/lib/thousandvale/offsite-upload.mjs --latest /var/backups/thousandvale/daily
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ReadOnlyPaths=/var/backups/thousandvale
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+UMask=0077

@@ -13,7 +13,7 @@
 #      drill scratch). The password is generated here and written ONLY to /etc/thousandvale/env (thousandvale, 0400);
 #      never printed. A re-run keeps it.
 #   5. systemd: thousandvale.service (8490) + its lan-only drop-in (kernel drops non-LAN packets), hourly backups,
-#      weekly restore drill
+#      weekly restore drill, nightly off-machine copy (skips itself until /etc/thousandvale/offsite.env exists)
 #   6. sudoers: you may start/stop/restart/status ONLY these units (so tools/publish-thousandvale.sh can restart it)
 #   7. ufw: if ufw is already active, allow 8490 from the LAN. Never turns ufw on.
 # It does not touch the dev server (8491), the dev database, the playground servers or anything in /home.
@@ -48,7 +48,7 @@ run install -d -o "$PUBLISHER" -g thousandvale -m 2750 /srv/thousandvale /srv/th
 run install -d -o thousandvale -g thousandvale -m 0700 /var/lib/thousandvale /var/backups/thousandvale
 run install -d -o root -g thousandvale -m 0750 /etc/thousandvale
 run install -d -m 0755 /usr/local/lib/thousandvale /etc/systemd/system/thousandvale.service.d
-for f in backup.sh restore-drill.sh conservation.sql; do put "$HERE/lib/$f" "/usr/local/lib/thousandvale/$f" 0755 root:root; done
+for f in backup.sh restore-drill.sh conservation.sql offsite-upload.mjs; do put "$HERE/lib/$f" "/usr/local/lib/thousandvale/$f" 0755 root:root; done
 
 say "4. postgres + /etc/thousandvale/env"
 ENV_FILE=/etc/thousandvale/env
@@ -84,10 +84,11 @@ SQL
 fi
 
 say "5. systemd"
-for u in thousandvale.service thousandvale-backup.service thousandvale-backup.timer thousandvale-drill.service thousandvale-drill.timer; do put "$HERE/$u" "/etc/systemd/system/$u" 0644 root:root; done
+for u in thousandvale.service thousandvale-backup.service thousandvale-backup.timer thousandvale-drill.service thousandvale-drill.timer thousandvale-offsite.service thousandvale-offsite.timer; do put "$HERE/$u" "/etc/systemd/system/$u" 0644 root:root; done
 put "$HERE/thousandvale-lan-only.conf" /etc/systemd/system/thousandvale.service.d/lan-only.conf 0644 root:root
 run systemctl daemon-reload
-run systemctl enable --now thousandvale-backup.timer thousandvale-drill.timer
+run systemctl enable --now thousandvale-backup.timer thousandvale-drill.timer thousandvale-offsite.timer
+[[ -f /etc/thousandvale/offsite.env ]] || echo "   off-machine copy: waiting for the owner's bucket (ops/offsite.env.template -> /etc/thousandvale/offsite.env); the timer skips until then"
 run systemctl enable thousandvale.service
 if [[ ! -e /srv/thousandvale/current/BUILD ]]; then echo "   no release yet — run tools/publish-thousandvale.sh as $PUBLISHER (it starts the game)"
 elif [[ $CHANGED == 1 ]]; then run systemctl restart thousandvale.service
@@ -95,8 +96,8 @@ else echo "   nothing changed — the running game is left alone"; fi
 
 say "6. sudoers (only these units)"
 S="$(command -v systemctl)"; TMPS="$(mktemp)"
-printf '# Thousandvale (ops/setup-stable.sh): the publisher may control the stable game units, nothing else\n%s ALL=(root) NOPASSWD: %s start thousandvale.service, %s stop thousandvale.service, %s restart thousandvale.service, %s status thousandvale.service, %s start thousandvale-backup.service, %s start thousandvale-drill.service\n' \
-  "$PUBLISHER" "$S" "$S" "$S" "$S" "$S" "$S" > "$TMPS"
+printf '# Thousandvale (ops/setup-stable.sh): the publisher may control the stable game units, nothing else\n%s ALL=(root) NOPASSWD: %s start thousandvale.service, %s stop thousandvale.service, %s restart thousandvale.service, %s status thousandvale.service, %s start thousandvale-backup.service, %s start thousandvale-drill.service, %s start thousandvale-offsite.service\n' \
+  "$PUBLISHER" "$S" "$S" "$S" "$S" "$S" "$S" "$S" > "$TMPS"
 [[ $DRY == 1 ]] || visudo -cf "$TMPS" >/dev/null || { echo "sudoers snippet failed visudo" >&2; rm -f "$TMPS"; exit 1; }
 put "$TMPS" /etc/sudoers.d/thousandvale-publish 0440 root:root; rm -f "$TMPS"
 
@@ -108,7 +109,7 @@ else echo "   ufw is not active — nothing changed (the unit's lan-only drop-in
 echo "Next (as $PUBLISHER, no sudo): ~/claude/playground/prototypes/thousandvale/tools/publish-thousandvale.sh  ->  http://<LAN-IP>:8490/"
 
 # UNDO (by hand, in this order — the DROP deletes every stable character, so pg_dump first):
-#   sudo systemctl disable --now thousandvale.service thousandvale-backup.timer thousandvale-drill.timer
+#   sudo systemctl disable --now thousandvale.service thousandvale-backup.timer thousandvale-drill.timer thousandvale-offsite.timer
 #   sudo rm -r /etc/systemd/system/thousandvale*.service /etc/systemd/system/thousandvale*.timer /etc/systemd/system/thousandvale.service.d /etc/sudoers.d/thousandvale-publish
 #   sudo systemctl daemon-reload
 #   sudo -u postgres psql -c 'DROP DATABASE thousandvale_drill_dev' -c 'DROP DATABASE thousandvale_stable' -c 'DROP ROLE thousandvale_stable'

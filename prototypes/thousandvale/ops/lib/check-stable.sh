@@ -25,6 +25,12 @@ check "the dev role cannot connect to thousandvale_stable" test "$(pgq "SELECT h
 nott  "postgres listens on localhost only"                sh -c "ss -ltnH | awk '{print \$4}' | grep -E ':5432\$' | grep -vqE '^(127\.0\.0\.1|\[::1\]):5432\$'"
 check "the unit is LAN-only (IPAddressDeny=any)"          sh -c "systemctl show thousandvale -p IPAddressDeny | grep -q 'IPAddressDeny=.\+'"
 check "backup + drill timers are active"                  systemctl is-active --quiet thousandvale-backup.timer thousandvale-drill.timer
+if [[ -f /etc/thousandvale/offsite.env ]]; then
+  check "offsite env is thousandvale 0400"                test "$(stat -c '%U %a' /etc/thousandvale/offsite.env)" = "thousandvale 400"
+  check "offsite timer is active"                         systemctl is-active --quiet thousandvale-offsite.timer
+else
+  echo "   --   off-machine backups not configured yet (owner's bucket; ops/offsite.env.template)"
+fi
 nott  "this machine has no public IPv4 address"           sh -c "hostname -I | tr ' ' '\n' | grep -E '^[0-9]+\.[0-9]+\.' | grep -vqE '^(10\.|127\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.|169\.254\.|100\.(6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])\.)'"
 if systemctl is-active --quiet thousandvale; then
   check "the game answers /healthz on 8490"               sh -c "curl -fsS http://127.0.0.1:8490/healthz"

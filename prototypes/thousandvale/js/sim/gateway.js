@@ -8,29 +8,42 @@
 //   gw.step()   (20 Hz: party frames, sweeps, director)  ; gw.status()
 //
 // BUS (gateway <-> province process), JSON messages with `k`:
-//   gw -> p : ticket {ticket, char, account, near, at?, exp} | party {char, party|null} | ignore {char, list}
+//   gw -> p : ticket {ticket, char, account, claimed, near, at?, exp} | party {char, party|null} | ignore {char, list}
 //             mute {char, until} | kick {char, code} | relocated {char, path, ticket} | event {op, ev}
-//   p -> gw : hello {proc, provinces} | presence {char, name, cls, level, room, province, online, ignore}
-//             gone {char} | frames {rows} | hint {key, chars, names} | relocate {char, province, at, via}
-//             status {status} | eventState {id, state, …}
+//             claimed {account} | charge {req, char, gold, reason} | callboard {char, province, door, party, members, backfill}
+//   p -> gw : hello {proc, provinces, doors} | presence {char, name, cls, level, room, province, zone, online, ignore}
+//             gone {char} | frames {rows} | hint {key, chars, names} | relocate {char, province, at, via, claimed}
+//             status {status} | eventState {id, state, …} | charged {req, ok} | mailed {to} | said {from, name, text, room}
+//             eventReward {uid, chars}
+// M3 services (js/sim/accounts.js, chat.js, friends.js, guilds.js, callboard.js) hang off this file; the admin page
+// (server/admin.mjs) drives `gw.admin`.
 
 import { PROTOCOL_VERSION, TICK_MS, CODES, cleanName, cleanCode, PARTY_OPS, CHAT_CHANNELS } from '../net/protocol.js';
 import { createSessionKit } from './session.js';
 import { createParties } from './party.js';
 import { randomHex } from './sha256.js';
 import { createDirector } from './director.js';
+import { createAccounts } from './accounts.js';
+import { createChat } from './chat.js';
+import { createFriends } from './friends.js';
+import { createGuilds } from './guilds.js';
+import { createCallboard } from './callboard.js';
+import { sha256Hex } from './sha256.js';
 
 const TICKET_MS = 30000;
 
 export function createGateway(opts) {
   const {
     store, build = 'dev', classes = null, now = () => Date.now(), wallNow = () => Date.now(), log = () => {},
-    verifyHuman = null, humanSiteKey = null, guestsPerIpPerHour = 20,
+    verifyHuman = null, humanSiteKey = null, guestsPerIpPerHour = 20, guestsPerHour = 0,   // 0 = no realm-wide cap
     unlimitedIps = ['127.0.0.1', '::1', '::ffff:127.0.0.1', 'worker'], filterText = t => t,
     starterProvince = null, events = null, clockDayMs = 2 * 3600000, directorOpts = {},
+    hasher = null, chatFilter = null, ipSalt = 'thousandvale', chatOpts = {}, guildOpts = {}, callboardOpts = {},
+    mailSweepMs = 60000, chargeTimeoutMs = 5000,
   } = opts;
+  const nameOk = n => !chatFilter || chatFilter.name(n);
   const classSet = classes ? new Set(classes) : null;
-  const counters = { msgsIn: 0, bytesIn: 0, bytesOut: 0, bad: 0, kicks: 0, logins: 0, humanFails: 0, relocations: 0 };
+  const counters = { msgsIn: 0, bytesIn: 0, bytesOut: 0, bad: 0, kicks: 0, logins: 0, humanFails: 0, relocations: 0, mailNotes: 0, charges: 0 };
   const kit = createSessionKit({ now, log, counters });
   const parties = createParties();
   const procs = new Map();         // proc id -> { bus, provinces: Set, status }
@@ -42,6 +55,7 @@ export function createGateway(opts) {
   const hints = new Map();         // key -> { chars, at }
   const waystones = new Map();     // every province's waystones, shared with every process (cross-province travel)
   const guestLog = new Map();
+  let guestsAll = [];             // wall ms of every guest made in the last hour (the realm-wide cap)
   let ticks = 0, lastSweep = now();
   const started = now();
   const epoch = wallNow();         // the realm clock (day/night) starts here; clients get it in `welcome`
@@ -67,21 +81,27 @@ export function createGateway(opts) {
       case 'hello': {
         for (const k of m.provinces || []) { p.provinces.add(k); provProc.set(k, p.id); }
         if (m.events) director.addEvents(m.events);
+        if (m.doors) callboard.addDungeons(m.doors);
         if (m.waystones) { for (const w of m.waystones) waystones.set(w.key, w); const list = [...waystones.values()]; for (const q of procs.values()) q.bus.send({ k: 'waystones', list }); }
         return;
       }
       case 'presence': {
         const was = presence.get(m.char);
-        presence.set(m.char, { ...m, proc: p.id });
+        presence.set(m.char, { ...m, proc: p.id, mutedUntil: Math.max(m.mutedUntil || 0, (was && was.mutedUntil) || 0) });
         names.set(m.char, { name: m.name, cls: m.cls, level: m.level });
-        if (!was || was.online !== m.online || was.level !== m.level) partyChanged([parties.of(m.char)]);
+        if (!was || was.online !== m.online || was.level !== m.level) { partyChanged([parties.of(m.char)]); guilds.changed(m.char); }
+        if (!was || was.online !== m.online || was.level !== m.level || was.zone !== m.zone) friends.changed(m.char);
+        if (was && was.online && !m.online) callboard.drop(m.char);
         return;
       }
       case 'gone': {
         const pr = presence.get(m.char);
-        if (pr && pr.proc === p.id) { presence.delete(m.char); frames.delete(m.char); partyChanged([parties.of(m.char)]); }
+        if (pr && pr.proc === p.id) { presence.delete(m.char); frames.delete(m.char); partyChanged([parties.of(m.char)]); friends.changed(m.char); guilds.changed(m.char); callboard.drop(m.char); }
         return;
       }
+      case 'charged': { const w = charges.get(m.req); if (w) { charges.delete(m.req); w(!!m.ok); } return; }
+      case 'mailed': return mailNote(m.to);
+      case 'said': return chat.logLine({ ch: 'say', from: m.from, name: m.name, to: m.room, text: m.text });
       case 'frames': for (const r of m.rows) frames.set(r[0], r); return;
       case 'hint': { hints.set(m.key, { chars: m.chars, at: now() }); for (const c of m.chars) { const g = gwByChar.get(c); if (g) g.sendJSON({ t: 'groupHint', key: m.key, with: m.chars.filter(x => x !== c).map(x => ({ char: x, name: names.get(x)?.name || '?' })) }); } return; }
       case 'relocate': return relocate(p, m);
@@ -94,7 +114,7 @@ export function createGateway(opts) {
     const to = provProc.get(m.province);
     if (to === undefined) { sendTo(from.id, { k: 'relocated', char: m.char, error: 'no such province' }); return; }
     const ticket = randomHex(16);
-    sendTo(to, { k: 'ticket', ticket, char: m.char, account: m.account, near: null, at: { province: m.province, x: m.at.x, z: m.at.z }, exp: now() + TICKET_MS });
+    sendTo(to, { k: 'ticket', ticket, char: m.char, account: m.account, claimed: !!m.claimed, near: null, at: { province: m.province, x: m.at.x, z: m.at.z, door: m.at.door ?? null, party: m.at.party ?? null }, exp: now() + TICKET_MS });
     counters.relocations++;
     sendTo(from.id, { k: 'relocated', char: m.char, path: '/p/' + to, ticket });
   }
@@ -105,16 +125,27 @@ export function createGateway(opts) {
     const s = kit.session('gw', conn, onClose);
     return { message(d) { if (!s.closed) kit.frame(s, d, onMessage); }, close() { s.handleClose(); } };
   }
-  function onClose(s) { if (s.charId && gwByChar.get(s.charId) === s) gwByChar.delete(s.charId); }
+  function onClose(s) {
+    if (s.charId && gwByChar.get(s.charId) === s) { gwByChar.delete(s.charId); friends.drop(s.charId); guilds.drop(s.charId); callboard.drop(s.charId); }
+  }
   const bad = kit.bad;
 
   function hello(s, m) {
     if (m.v !== PROTOCOL_VERSION) { s.sendJSON({ t: 'refuse', code: 'version', msg: CODES.version }); return s.closeSoon('version'); }
     if (m.build !== build) { s.sendJSON({ t: 'refuse', code: 'build', msg: CODES.build }); return s.closeSoon('build'); }
-    s.state = 'anon';
-    const w = { t: 'welcome', v: PROTOCOL_VERSION, build, server: 'thousandvale', tickMs: TICK_MS, time: ticks * TICK_MS, clock: { epoch, dayMs: clockDayMs, now: wallNow() } };
-    if (humanSiteKey) w.human = { provider: 'turnstile', siteKey: humanSiteKey };
-    s.sendJSON(w);
+    s.state = 'busy';
+    const go = () => {
+      if (s.closed) return;
+      s.state = 'anon';
+      const w = { t: 'welcome', v: PROTOCOL_VERSION, build, server: 'thousandvale', tickMs: TICK_MS, time: ticks * TICK_MS, clock: { epoch, dayMs: clockDayMs, now: wallNow() }, privacy: 'privacy.json', accounts: !!hasher };
+      if (humanSiteKey) w.human = { provider: 'turnstile', siteKey: humanSiteKey };
+      s.sendJSON(w);
+    };
+    if (!store.ipBanned || !s.ip || s.ip === 'worker') return go();
+    return store.ipBanned(ipHash(s.ip), wallNow()).then(b => {
+      if (b) { s.sendJSON({ t: 'refuse', code: 'banned', msg: CODES.banned }); return s.closeSoon('banned'); }
+      go();
+    }, () => go());
   }
 
   function onMessage(s, m) {
@@ -126,13 +157,17 @@ export function createGateway(opts) {
         const t = wallNow(), key = s.ip || '?';
         const recent = (guestLog.get(key) || []).filter(x => x > t - 3600000);
         if (recent.length >= guestsPerIpPerHour && !unlimitedIps.includes(key)) { guestLog.set(key, recent); return s.err('tooMany'); }
+        if (guestsPerHour > 0 && !unlimitedIps.includes(key)) {
+          guestsAll = guestsAll.filter(x => x > t - 3600000);
+          if (guestsAll.length >= guestsPerHour) return s.err('tooMany', 'Too many new accounts right now. Try again in a little while.');
+        }
         s.state = 'busy';
         const check = verifyHuman ? Promise.resolve(m.human ? verifyHuman(m.human, s.ip) : false).catch(err => { log('human check failed', err && err.message); return false; }) : Promise.resolve(true);
         return check.then(ok => {
           if (!ok) { s.state = 'anon'; counters.humanFails++; return s.err('human'); }
-          recent.push(t); guestLog.set(key, recent);
+          recent.push(t); guestLog.set(key, recent); guestsAll.push(t);
           return store.createGuest(m.name ? cleanName(m.name) : null).then(({ account, token }) => {
-            s.account = account; s.state = 'authed'; counters.logins++;
+            s.account = account; s.state = 'authed'; counters.logins++; s.token = token; s.claimed = false;
             s.sendJSON({ t: 'authed', account, token, claimed: false });
           });
         }).catch(err => { log('guest failed', err); s.state = 'anon'; s.err('auth'); });
@@ -142,8 +177,10 @@ export function createGateway(opts) {
         s.state = 'busy';
         return store.authToken(m.token).then(a => {
           if (!a) { s.state = 'anon'; return s.err('auth'); }
+          if ((a.banned || 0) > wallNow()) { s.sendJSON({ t: 'refuse', code: 'banned', msg: CODES.banned }); return s.closeSoon('banned'); }
           s.account = a.account; s.state = 'authed'; counters.logins++;
-          s.sendJSON({ t: 'authed', account: a.account, claimed: a.claimed });
+          s.token = m.token; s.claimed = !!a.claimed; s.username = a.username || null;
+          s.sendJSON({ t: 'authed', account: a.account, claimed: !!a.claimed, username: a.username || undefined });
         }, err => { log('auth failed', err); s.state = 'anon'; s.err('auth'); });
       case 'chars':
         if (s.state !== 'authed') return bad(s, 'order');
@@ -151,7 +188,7 @@ export function createGateway(opts) {
       case 'create': {
         if (s.state !== 'authed') return bad(s, 'order');
         const name = cleanName(m.name);
-        if (!name) return s.err('name');
+        if (!name || !nameOk(name)) return s.err('name');
         if (classSet ? !classSet.has(m.cls) : !/^[a-z][a-z0-9_]{1,31}$/.test(m.cls)) return s.err('cls');
         let look = null;
         if (m.look) { const j = JSON.stringify(m.look); if (j.length > 4096) return s.err('state', 'Look too big.'); look = JSON.parse(j); }
@@ -162,8 +199,16 @@ export function createGateway(opts) {
       }
       case 'play': return play(s, m);
       case 'party': return onParty(s, m);
-      case 'chat': return onChat(s, m);
+      case 'chat': { if (!CHAT_CHANNELS.includes(m.ch)) return bad(s, 'channel'); return chat.chat(s, m); }
       case 'ignore': return onIgnore(s, m);
+      case 'account': {
+        if (s.busyAccount) return s.err('busy');
+        return accounts.handle(s, m).then(why => { if (typeof why === 'string') bad(s, why); });
+      }
+      case 'friend': return friends.op(s, m).then(why => { if (typeof why === 'string') bad(s, why); });
+      case 'guild': return guilds.op(s, m).then(why => { if (typeof why === 'string') bad(s, why); });
+      case 'callboard': { const why = callboard.op(s, m); if (typeof why === 'string') bad(s, why); return; }
+      case 'report': return chat.report(s, m).catch(err => { log('report failed', err && err.message); s.err('state', 'That did not work.'); });
       case 'leave': return s.closeSoon('leave');
       default: return bad(s, 'socket');
     }
@@ -191,12 +236,14 @@ export function createGateway(opts) {
       // already in the world somewhere? go back to that process (it takes over the entity)
       const proc = presence.has(c.id) ? procOfChar(c.id) : near ? procOfChar(near) : procForRoom(c.room);
       const ticket = randomHex(16);
-      sendTo(proc, { k: 'ticket', ticket, char: c.id, account: s.account, near, exp: now() + TICKET_MS });
+      sendTo(proc, { k: 'ticket', ticket, char: c.id, account: s.account, claimed: !!s.claimed, near, exp: now() + TICKET_MS });
       const p = parties.of(c.id);
       if (p) sendTo(proc, { k: 'party', char: c.id, party: partyBrief(p) });
       // the province process gets the ticket over the bus first; a ticket that arrives later is waited for
       s.sendJSON({ t: 'ticket', path: '/p/' + proc, ticket, room: 'zone' });
       if (p) s.sendJSON({ t: 'partyState', party: partyView(p) });
+      friends.load(c.id); guilds.load(c.id);
+      if (store.mailUnread) store.mailUnread(c.id).then(n => { if (n && gwByChar.get(c.id) === s) s.sendJSON({ t: 'mailNew', unread: n }); }, () => {});
     });
   }
 
@@ -254,6 +301,10 @@ export function createGateway(opts) {
       case 'lead': r = parties.lead(me, m.char); break;
     }
     if (!r || !r.ok) return s.err(r ? r.why : 'party');
+    if (m.op !== 'code' && m.op !== 'invite' && m.op !== 'decline') {      // a queued party that changed shape leaves the Callboard
+      for (const q of r.changed || []) if (q) callboard.partyGone(q.id);
+      callboard.drop(me); if (m.op === 'kick' && m.char != null) callboard.drop(m.char);
+    }
     partyChanged(r.changed || []);
   }
   function sendPartyFrames() {
@@ -277,41 +328,70 @@ export function createGateway(opts) {
   // ---- chat + ignore ----
   const clean = text => filterText(String(text).replace(/[\u0000-\u001f\u007f]/g, '').replace(/\s+/g, ' ').trim()).slice(0, 200);
   const ignores = (pr, fromId) => !!(pr && pr.ignore && pr.ignore.some(i => i.id === fromId));
-  function onChat(s, m) {
-    const me = s.charId && presence.get(s.charId);
-    if (!me) return s.err('state', 'Enter the world first.');
-    if (!CHAT_CHANNELS.includes(m.ch)) return bad(s, 'channel');
-    if ((me.mutedUntil || 0) > wallNow()) return s.err('muted');
-    const text = clean(m.text);
-    if (!text) return;
-    const p = parties.of(s.charId);
-    if (!p) return s.err('party', 'You are not in a party.');
-    const msg = JSON.stringify({ t: 'chat', ch: 'party', from: s.charId, name: me.name, text });
-    for (const c of p.members) {
-      if (ignores(presence.get(c), s.charId)) continue;
-      const g = gwByChar.get(c); if (g) g.send(msg);
-    }
-  }
   function onIgnore(s, m) {
     const me = s.charId && presence.get(s.charId);
     if (!me) return s.err('state', 'Enter the world first.');
     let list = (me.ignore || []).slice();
-    if (m.on) {
-      const t = findByName(m.name);
-      if (!t) return s.err('notFound');
-      if (t.char !== s.charId && !list.some(i => i.id === t.char)) list.push({ id: t.char, name: t.name });
-    } else list = list.filter(i => i.name.toLowerCase() !== m.name.toLowerCase());
-    me.ignore = list;
-    sendTo(me.proc, { k: 'ignore', char: s.charId, list });
-    s.sendJSON({ t: 'ignored', list });
+    const done = () => { me.ignore = list; sendTo(me.proc, { k: 'ignore', char: s.charId, list }); s.sendJSON({ t: 'ignored', list }); };
+    if (!m.on) { list = list.filter(i => i.name.toLowerCase() !== m.name.toLowerCase()); return done(); }
+    if (list.length >= 100) return s.err('state', 'Your ignore list is full (100).');
+    const add = t => { if (!t) return s.err('notFound', 'Nobody by that name.'); const id = t.char ?? t.id; if (id !== s.charId && !list.some(i => i.id === id)) list.push({ id, name: t.name }); done(); };
+    const t = findByName(m.name);
+    if (t || !store.charByName) return add(t);
+    return store.charByName(String(m.name)).then(add, () => s.err('notFound'));     // offline names too (M3)
   }
   /** Admin hook: mute chat until `untilMs` (wall clock). */
-  function mute(charId, untilMs) {
+  function mute(charId, untilMs, by = 'admin') {
     const pr = presence.get(charId);
     if (!pr) return false;
     pr.mutedUntil = untilMs;
     sendTo(pr.proc, { k: 'mute', char: charId, until: untilMs });
+    const g = gwByChar.get(charId);
+    if (g) g.sendJSON({ t: 'muted', until: untilMs, by, msg: untilMs > wallNow() ? 'You are muted for ' + Math.max(1, Math.round((untilMs - wallNow()) / 60000)) + ' min.' : 'You can chat again.' });
+    log('mute', { char: charId, until: untilMs, by });
     return true;
+  }
+  const ipHash = ip => sha256Hex(ipSalt + ':' + String(ip || ''));
+  function kickChar(charId, code = 'restart') {
+    const proc = procOfChar(charId);
+    if (proc !== undefined) sendTo(proc, { k: 'kick', char: charId, code });
+    const g = gwByChar.get(charId);
+    if (g) g.kick(code);
+  }
+  const sendAll = msg => { for (const pid of procs.keys()) sendTo(pid, msg); };
+  /** Take gold from an online character through the province that holds them (guild fee). */
+  const charges = new Map();
+  let chargeN = 0;
+  function charge(charId, gold, reason) {
+    const proc = procOfChar(charId);
+    if (proc === undefined) return Promise.resolve(false);
+    const req = ++chargeN;
+    counters.charges++;
+    return new Promise(res => {
+      charges.set(req, res);
+      sendTo(proc, { k: 'charge', req, char: charId, gold, reason });
+      setTimeoutTicks(() => { if (charges.has(req)) { charges.delete(req); res(false); } }, Math.ceil(chargeTimeoutMs / TICK_MS));
+    });
+  }
+  const timers = [];
+  function setTimeoutTicks(fn, n) { timers.push({ at: ticks + n, fn }); }
+  function mailNote(to) {
+    const g = gwByChar.get(to);
+    if (!g || !store.mailUnread) return;
+    counters.mailNotes++;
+    store.mailUnread(to).then(n => g.sendJSON({ t: 'mailNew', unread: n }), () => {});
+  }
+
+  // ---- M3 services ----
+  const accounts = createAccounts({ store, hasher, verifyHuman, wallNow, log, filter: chatFilter, sendAll, kickChar, counters, trustIps: unlimitedIps });
+  const friends = createFriends({ store, presence, gwByChar, log });
+  const guilds = createGuilds({ store, presence, gwByChar, wallNow, filter: chatFilter, charge, log, counters, opts: guildOpts });
+  const chat = createChat({ store, presence, gwByChar, parties, guilds, friends, wallNow, filter: chatFilter, log, counters, mute, opts: chatOpts });
+  const callboard = createCallboard({ parties, presence, gwByChar, partyChanged: list => partyChanged(list), sendTo, procOf: c => procOfChar(c), now, log, opts: callboardOpts });
+  let lastMailSweep = now();
+  function sweepMail() {
+    if (!store.mailExpire) return;
+    store.mailExpire(wallNow()).then(list => { for (const x of list) mailNote(x.to); }, err => log('mail sweep failed', err && err.message));
   }
 
   // ---- the event director (js/sim/director.js) ----
@@ -322,6 +402,7 @@ export function createGateway(opts) {
     procOf: prov => provProc.get(prov),
     procList: () => [...procs.keys()],
     sendTo,
+    persist: store.getWorld ? { load: () => store.getWorld('director'), save: v => store.setWorld('director', v) } : null,
   });
 
   function step() {
@@ -329,15 +410,57 @@ export function createGateway(opts) {
     if (ticks % 10 === 0) sendPartyFrames();
     director.step();
     if (now() - lastSweep >= 30000) { lastSweep = now(); sweepParties(); }
+    if (timers.length) for (let i = timers.length - 1; i >= 0; i--) if (timers[i].at <= ticks) { const f = timers[i].fn; timers.splice(i, 1); f(); }
+    chat.step();
+    if (ticks % 20 === 3) callboard.step();
+    if (now() - lastMailSweep >= mailSweepMs) { lastMailSweep = now(); sweepMail(); }
   }
 
   function status() {
     return {
-      gateway: { uptime: Math.round((now() - started) / 1000), sessions: kit.sessions.size, presence: presence.size, parties: parties.byId.size, logins: counters.logins, relocations: counters.relocations, humanFails: counters.humanFails, bad: counters.bad, kicks: counters.kicks },
+      gateway: { uptime: Math.round((now() - started) / 1000), sessions: kit.sessions.size, presence: presence.size, parties: parties.byId.size, logins: counters.logins, relocations: counters.relocations, humanFails: counters.humanFails, bad: counters.bad, kicks: counters.kicks, chatLines: counters.chatLines || 0, reports: counters.reports || 0, guilds: guilds.size(), friendLists: friends.size() },
+      callboard: callboard.status(),
       procs: [...procs.values()].map(p => ({ id: p.id, provinces: [...p.provinces], status: p.status })),
       director: director.status(),
     };
   }
 
-  return { accept, attach, step, status, parties, presence, director, mute, counters, epoch, clockDayMs, partyChanged };
+  // ---- the admin page's handle (server/admin.mjs; 127.0.0.1 only) ----
+  const admin = {
+    online: () => [...presence.values()].map(pr => { const g = gwByChar.get(pr.char); return { char: pr.char, name: pr.name, cls: pr.cls, level: pr.level, room: pr.room, province: pr.province, zone: pr.zone || null, online: !!pr.online, account: pr.account ?? (g ? g.account : null), claimed: g ? !!g.claimed : null, mutedUntil: pr.mutedUntil || 0, party: (parties.of(pr.char) || {}).id || null, guild: guilds.idOf(pr.char) }; }),
+    kick: (charId, code = 'restart') => { if (!presence.has(charId) && !gwByChar.has(charId)) return false; kickChar(charId, code); log('admin kick', { char: charId }); return true; },
+    mute: (charId, untilMs) => mute(charId, untilMs, 'admin'),
+    /** ban an account (by character or account id) until a wall time; ip: also ban the address that character uses (stored hashed). */
+    async ban({ char = null, account = null, untilMs, reason = '', ip = false }) {
+      let acct = account;
+      const pr = char != null ? presence.get(char) : null;
+      const g = char != null ? gwByChar.get(char) : null;
+      if (acct == null && pr) acct = pr.account ?? (g && g.account);
+      if (acct == null && char != null) { const rows = await store.charsByIds([char]); if (rows.length) { const c = await store.charByName(rows[0].name); acct = c && c.account; } }
+      if (acct == null) return { ok: false, why: 'No such character or account.' };
+      await store.banAccount(acct, untilMs, reason);
+      let ipDone = false;
+      if (ip && g && g.ip) { await store.banIp(ipHash(g.ip), untilMs, reason); ipDone = true; }
+      for (const x of [...kit.sessions]) if (x.account === acct) { if (x.charId) kickChar(x.charId, 'banned'); x.kick('banned'); }
+      log('admin ban', { account: acct, until: untilMs, ip: ipDone });
+      return { ok: true, account: acct, ip: ipDone };
+    },
+    unban: async account => { await store.banAccount(account, 0, ''); return { ok: true }; },
+    rename: async (charId, name) => {
+      const n = cleanName(name);
+      if (!n) return { ok: false, why: 'That name is not allowed.' };
+      if (presence.get(charId)?.online) kickChar(charId, 'restart');
+      const r = await store.renameChar(charId, n, wallNow());
+      return r.ok ? { ok: true, name: n } : { ok: false, why: r.err === 'lease' ? 'They are still logged in; try again in a minute.' : r.err === 'name' ? 'That name is taken.' : 'No such character.' };
+    },
+    chat: (sinceMs = wallNow() - 3600000) => chat.recent(sinceMs),
+    resets: () => accounts.resets(),
+    reports: limit => store.listReports(limit),
+    handleReport: id => store.handleReport(id, wallNow()),
+    announce: text => { const t = String(text || '').slice(0, 300); if (!t) return false; const d = JSON.stringify({ t: 'chat', ch: 'system', from: 0, name: 'The Vale', text: t }); for (const g of gwByChar.values()) g.send(d); chat.logLine({ ch: 'system', name: 'admin', text: t }); return true; },
+    forceEvent: (id, announceMs = 60000) => director.force(id || null, { announce: announceMs }),
+    economy: hours => store.economyReport ? store.economyReport(wallNow() - (hours || 24) * 3600000) : Promise.resolve([]),
+  };
+
+  return { accept, attach, step, status, parties, presence, director, mute, counters, epoch, clockDayMs, partyChanged, admin, chat, friends, guilds, callboard, accounts, ipHash, kickChar };
 }

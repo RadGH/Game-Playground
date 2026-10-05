@@ -15,7 +15,7 @@ export function socketFactory(mode, opts = {}) {
   if (mode === 'worker') return workerFactory(opts);
   if (mode === 'loopback') {
     if (!opts.server) throw new Error("loopback sockets need opts.server (js/sim/loopback.js)");
-    return path => (typeof opts.server === 'function' ? opts.server() : opts.server).connect(path);   // a function lets a test swap in a restarted server
+    return path => (typeof opts.server === 'function' ? opts.server() : opts.server).connect(path, { ip: opts.ip || '127.0.0.1' });   // a function lets a test swap in a restarted server
   }
   throw new Error('unknown socket mode ' + mode);
 }

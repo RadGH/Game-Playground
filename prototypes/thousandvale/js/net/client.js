@@ -13,6 +13,11 @@
 //   net.use(id) ; net.item(op, uid, slot?) ; net.partyOp(op, {...}) ; net.partyChat(text) ; net.ignore(name, on) ; net.joinLink()
 //   net.input({ s, dt, mx, mz, yaw, b }) ; net.cast({ slot, aim, target, ct }) ; net.target(id)
 //   net.say(text) ; net.respawn() ; net.leave() ; net.close()
+//   M3 (docs/protocol.md §16): net.accountOp(op, {...}) -> accountR ; net.login(user, pass) ; net.claim(user, pass, email?)
+//     net.logout() ; net.chat(ch, text, to?) ; net.whisper(name, text) ; net.friend(op, name) ; net.guild(op, {...})
+//     net.callboard(op, {...}) ; net.report(name, why, text?) ; net.mail(op, {...})
+//     events accountR friends friendState guildState guildInvite guildR callboard reportR mailNew mailList mailOpen mailR
+//   connect({ login: {user, pass} }) signs in with a username instead of making a guest when there is no token.
 //   net.clock.serverNow() ; net.clock.rtt ; net.status ; net.joined ; net.you (local id)
 
 import { PROTOCOL_VERSION } from './protocol.js';
@@ -21,7 +26,7 @@ import { socketFactory, OPEN } from './sockets.js';
 import { realClock } from './clock.js';
 
 const BACKOFF = [500, 1000, 2000, 4000, 5000];
-const NO_RETRY = new Set(['version', 'build', 'elsewhere', 'banned', 'abuse']);
+const NO_RETRY = new Set(['version', 'build', 'elsewhere', 'banned', 'abuse', 'loggedOut']);
 
 export function connect(opts = {}) {
   const { mode = 'ws', build = 'dev', clock = realClock, guestName = null } = opts;
@@ -33,7 +38,7 @@ export function connect(opts = {}) {
   const emit = (ev, a) => { const l = handlers.get(ev); if (l) for (const f of [...l]) { try { f(a); } catch (err) { console.error('[net] handler for', ev, err); } } };
 
   let gw = null, game = null, closed = false, attempt = 0, retryTimer = 0, pingTimer = 0;
-  let wantChar = null, q = 0.125, origin = null;
+  let wantChar = null, q = 0.125, origin = null, loginTried = false;
   let readyResolve, playWaiter = null, createWaiter = null;
   const net = {
     status: 'idle', joined: null, you: 0, account: null, chars: [], lastKick: null,
@@ -60,13 +65,14 @@ export function connect(opts = {}) {
         if (m.clock) net.realmClock = { epoch: m.clock.epoch, dayMs: m.clock.dayMs, skew: Date.now() - m.clock.now };
         const tok = tokenStore.get();
         if (tok) sendJ(s, { t: 'auth', token: tok });
+        else if (opts.login && !loginTried) { loginTried = true; sendJ(s, { t: 'account', op: 'login', user: opts.login.user, pass: opts.login.pass }); }
         else sendGuest(s);
         return;
       }
       case 'refuse': net.lastKick = m; emit('kick', m); setStatus('refused'); stop(); return;
       case 'authed':
         if (m.token) tokenStore.set(m.token);
-        net.account = m.account; attempt = 0;
+        net.account = m.account; net.claimed = !!m.claimed; net.username = m.username || null; attempt = 0;
         sendJ(s, { t: 'chars' });
         return;
       case 'charList':
@@ -95,6 +101,11 @@ export function connect(opts = {}) {
       case 'ignored': if (net.joined) net.joined.you.ignore = m.list; emit('ignored', m.list); return;
       case 'groupHint': emit('groupHint', m); return;
       case 'realm': emit('realm', m); return;
+      case 'accountR':
+        if (m.ok && m.op === 'claim') { net.claimed = true; net.username = m.username; }
+        if (m.op === 'login' && !m.ok && net.status !== 'select' && net.status !== 'online') { emit('accountR', m); return; }
+        emit('accountR', m); return;
+      default: if (typeof m.t === 'string') emit(m.t, m);      // anything newer (friends, guildState, callboard, mailNew …)
     }
   }
 
@@ -282,6 +293,25 @@ export function connect(opts = {}) {
   net.say = text => sendJ(game, { t: 'say', text: String(text).slice(0, 200) });
   net.respawn = () => sendJ(game, { t: 'respawn' });
   net.leave = () => { sendJ(game, { t: 'leave' }); sendJ(gw, { t: 'leave' }); stop(); setStatus('left'); };
+  // ---- M3: accounts, channels, friends, guilds, the Callboard, reports, mail ----
+  const pick = (o, a, keys) => { for (const k of keys) if (a[k] !== undefined && a[k] !== null) o[k] = a[k]; return o; };
+  /** account('claim', {user, pass, email?, human?}) | ('login', {user, pass}) | ('logout') | ('password', {old, pass})
+   *  | ('resetAsk', {user}) | ('reset', {user, code, pass}) | ('info'). Answer: 'accountR' (login answers with 'authed'). */
+  net.accountOp = (op, a = {}) => sendJ(gw, pick({ t: 'account', op }, a, ['user', 'pass', 'old', 'email', 'code', 'human']));
+  net.claim = (user, pass, email) => net.accountOp('claim', { user, pass, email });
+  net.login = (user, pass) => net.accountOp('login', { user, pass });
+  /** Revoke this browser's token and stop (claimed accounts only; the server refuses a guest). */
+  net.logout = () => { sendJ(gw, { t: 'account', op: 'logout' }); tokenStore.set(null); };
+  net.chat = (ch, text, to) => sendJ(gw, to ? { t: 'chat', ch, text: String(text).slice(0, 200), to } : { t: 'chat', ch, text: String(text).slice(0, 200) });
+  net.whisper = (name, text) => net.chat('w', text, name);
+  net.friend = (op, name) => sendJ(gw, name ? { t: 'friend', op, name } : { t: 'friend', op });
+  /** guild('create', {name}) | ('invite', {name}) | ('accept'|'decline', {id}) | ('kick'|'promote'|'demote'|'lead', {char}) | ('motd', {text}) | ('leave'|'roster'|'disband') */
+  net.guild = (op, a = {}) => sendJ(gw, pick({ t: 'guild', op }, a, ['name', 'char', 'id', 'text']));
+  /** callboard('join', {dungeon:'<key>'|'any', role:'tank'|'healer'|'dps'}) | ('leave') | ('accept'|'decline', {id}) | ('list') */
+  net.callboard = (op, a = {}) => sendJ(gw, pick({ t: 'callboard', op }, a, ['dungeon', 'role', 'id']));
+  net.report = (name, why, text) => sendJ(gw, text ? { t: 'report', name, why, text } : { t: 'report', name, why });
+  /** mail('list') | ('read'|'take'|'return'|'delete', {id}) | ('send', {to, subject, body, items:[uids], gold}) — province socket */
+  net.mail = (op, a = {}) => sendJ(game, pick({ t: 'mail', op }, a, ['id', 'to', 'subject', 'body', 'items', 'gold']));
   net.close = () => { stop(); setStatus('closed'); };
   /** Raw access for tests (evil client): send any string/bytes on a socket. */
   net._raw = (which, data) => { const s = which === 'gw' ? gw : game; if (s && s.readyState === OPEN) s.send(data); };

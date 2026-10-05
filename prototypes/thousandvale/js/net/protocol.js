@@ -6,7 +6,7 @@
 //   parseFrame(str)    -> { msg } | { bad: reason }   (JSON text frame -> validated message)
 //   createBuckets()    -> per-socket rate limiter: take(t) -> true if allowed
 
-export const PROTOCOL_VERSION = 3;
+export const PROTOCOL_VERSION = 4;
 export const SNAP_VERSION = 1;
 export const TICK_MS = 50;
 export const MAX_FRAME = 16 * 1024;
@@ -66,6 +66,15 @@ export const CODES = Object.freeze({
   tradeFar: 'Too far apart to trade.',
   tradeFailed: 'The trade did not go through. Nothing changed hands.',
   busy: 'Busy, try again in a moment.',
+  loggedOut: 'You logged out.',
+  claimFirst: 'Claim this account first (pick a username and password), or you could never get back in.',
+  tooManyLogins: 'Too many tries. Wait a few minutes and try again.',
+  chatGate: 'Public channels open at level 5 on a claimed account.',
+  slow: 'Slow down: one message every few seconds on this channel.',
+  ignored: 'They are not listening to you.',
+  guild: 'Guild action not possible.',
+  mail: 'Mail action not possible.',
+  callboard: 'Callboard action not possible.',
 });
 
 // ---- field types -------------------------------------------------------------------------------
@@ -95,7 +104,7 @@ export const CLIENT_MSGS = Object.freeze({
   create:  { on: 'gw', fields: { name: 'str:24', cls: 'str:32', look: '?obj' }, rate: 1, burst: 3 },
   play:    { on: 'gw', fields: { char: 'int', join: '?str:8' }, rate: 1, burst: 3 },
   party:   { on: 'gw', fields: { op: 'str:8', name: '?str:24', code: '?str:64', char: '?int' }, rate: 2, burst: 10 },
-  chat:    { on: 'gw', fields: { ch: 'str:8', text: 'str:200' }, rate: 1, burst: 5 },
+  chat:    { on: 'gw', fields: { ch: 'str:8', text: 'str:200', to: '?str:24' }, rate: 1, burst: 5 },
   ignore:  { on: 'gw', fields: { name: 'str:24', on: 'bool' }, rate: 1, burst: 5 },
   ping:    { on: 'both', fields: { c: 'num' }, rate: 2, burst: 4 },
   enter:   { on: 'p', fields: { ticket: 'str:256' }, rate: 1, burst: 3 },
@@ -111,6 +120,13 @@ export const CLIENT_MSGS = Object.freeze({
   quest:   { on: 'p', fields: { op: 'str:8', id: 'str:120', npc: '?id' }, rate: 2, burst: 6 },
   trade:   { on: 'p', fields: { op: 'str:8', id: '?int', items: '?uids', gold: '?int' }, rate: 5, burst: 10 },
   leave:   { on: 'both', fields: {}, rate: 1, burst: 2 },
+  // M3 (protocol v4, docs/protocol.md §16)
+  account: { on: 'gw', fields: { op: 'str:8', user: '?str:24', pass: '?str:128', old: '?str:128', email: '?str:120', code: '?str:16', human: '?str:2048' }, rate: 0.5, burst: 4 },
+  friend:  { on: 'gw', fields: { op: 'str:8', name: '?str:24', char: '?int' }, rate: 1, burst: 5 },
+  guild:   { on: 'gw', fields: { op: 'str:8', name: '?str:24', char: '?int', id: '?int', text: '?str:200' }, rate: 1, burst: 5 },
+  callboard: { on: 'gw', fields: { op: 'str:8', dungeon: '?str:64', role: '?str:8', id: '?int' }, rate: 1, burst: 5 },
+  report:  { on: 'gw', fields: { name: 'str:24', why: 'str:16', text: '?str:200' }, rate: 0.1, burst: 3 },
+  mail:    { on: 'p', fields: { op: 'str:8', id: '?int', to: '?str:24', subject: '?str:60', body: '?str:500', items: '?uids', gold: '?int' }, rate: 2, burst: 8 },
 });
 
 /** Server -> client JSON messages (documentation + tests; the server is trusted, the client does not validate). */
@@ -148,6 +164,20 @@ export const SERVER_MSGS = Object.freeze({
   zone: ['zone', 'name', 'deeds'],
   travelR: ['ok', 'why', 'cost'],
   tradeState: ['trade', 'done', 'why'],
+  // M3
+  accountR: ['op', 'ok', 'why', 'msg', 'username', 'claimed'],
+  friends: ['list'],
+  friendState: ['char', 'name', 'cls', 'level', 'online', 'zone'],
+  guildState: ['guild'],
+  guildInvite: ['guild', 'name', 'from', 'ms'],
+  guildR: ['op', 'ok', 'why', 'msg'],
+  callboard: ['state'],
+  reportR: ['ok', 'msg'],
+  mailNew: ['unread'],
+  mailList: ['mail', 'unread'],
+  mailOpen: ['mail'],
+  mailR: ['op', 'ok', 'why', 'msg'],
+  muted: ['until', 'by', 'msg'],
 });
 
 /** Party ops (`party {op}`); docs/protocol.md §3.3. */
@@ -155,8 +185,11 @@ export const PARTY_OPS = Object.freeze(['invite', 'accept', 'decline', 'leave', 
 export const PARTY_MAX = 5;
 /** Item ops (`item {op}`). */
 export const ITEM_OPS = Object.freeze(['equip', 'unequip', 'destroy']);
-/** Chat channels a client may send on the gateway (`say` is local, on the province socket). */
-export const CHAT_CHANNELS = Object.freeze(['party']);
+/** Chat channels a client may send on the gateway (`say` is local, on the province socket; `w` = whisper, needs `to`).
+ *  The server also sends `system` lines (admin announcements). */
+export const CHAT_CHANNELS = Object.freeze(['party', 'guild', 'zone', 'trade', 'world', 'w']);
+/** Mail ops (`mail {op}`, province socket). */
+export const MAIL_OPS = Object.freeze(['list', 'read', 'send', 'take', 'return', 'delete']);
 /** Room kinds (`joined.room.kind`). */
 export const ROOM_KINDS = Object.freeze(['wilds', 'town', 'instance']);
 

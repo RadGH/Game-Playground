@@ -248,3 +248,65 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - **A** `you.bar` (D ask 5 / C's `rules.bar(e)`): on `joined` (every room change too) and as a `you {bar}` patch after a level-up, a form/stance change (`fx kind:'form'`) or `room.barChanged(e)` (for a future talent op); queued per player and sent once after the rules tick (`js/sim/room.js` `barFor`/`barChanged`/`flushBars`, `js/sim/province.js` `joined`). protocol.md §15.10. tests/A/bar.test.js.
 - **A** D's other asks were already live (checked): `info.shimmer` (entity.js), `room.dungeon.floors[i].river` (dungeon.js), `ev.zoneName` on realm/zone events.
 
+
+## 2026-10-05 — stream H (ops, M3 "Public play" — scripted, nothing started, nothing public)
+- **Going public plan** `ops/tunnel/README.md`. Owner decision: first a free trycloudflare **quick tunnel** for friends
+  (`ops/tunnel/quick.sh` + user unit `thousandvale-quick-tunnel`: one origin 127.0.0.1:8490, no `[Install]`, `--start` refuses
+  without a fresh check-public pass for the live build), Turnstile OFF for that test (random hostname cannot be pinned in a
+  widget; written down, check-public prints it as WARN) and the lan-only drop-in stays. The **named** path for later:
+  `ops/tunnel/named/` (config template validated by cloudflared, DynamicUser unit with LoadCredential, `go-named.sh` swaps
+  lan-only for `public-egress.conf` = LAN + Cloudflare ranges only, `TV_HOST=127.0.0.1`). `ops/tunnel/rollback.sh` back to LAN.
+- **Gate** `ops/lib/check-public.sh --mode quick|named` (PLAN §11 as a script) + `ops/lib/probe-public.mjs` live probes. Against
+  the live stable 8490 today: 25 server-side/dotfile/traversal paths 404, POST refused, `/status` clean, 20 KB frame -> 1009,
+  foreign Origin 403, 4 sockets per tunnel visitor, forged CF-Connecting-IP from the LAN ignored. Only red: the privacy page is
+  not in the published build yet.
+- **Offsite backups** `ops/lib/offsite-upload.mjs` (SigV4 PUT, no dependencies, optional openssl encryption; passes AWS's
+  published signing example) + `thousandvale-offsite.{service,timer}` (own env file the game never loads; skips until the
+  owner's bucket exists); `setup-stable.sh` installs them. **Privacy note** `public/privacy.html` (+ `ops/lib/delete-account.sh`).
+- **Load kit** `ops/load/` (load server 8495 on the published release + scratch Postgres, `run-300.mjs`, `pack-bots.sh` -> a 7-file
+  zip for the owner's PC). Same-VM rehearsal (server cpus 0-7, bots 8-11, other streams busy, load 3-9): **spread 300 PASSED**
+  (p99 19.3 ms, worst 42.3, 5.2 KB/s a client, 300/300 joined in 4 s); **town herd 300**: p99 16.5, worst 52.2 (gate < 50) and a
+  login storm of 300 in 4 s hit 124 ms — reported to A. tests/H: 10 green + 1 skipped until cloudflared is installed (it validates the named config).
+
+## 2026-10-05 — streams G + D (sturdy e2e, bots that fight, fine far horizon, server skill bar)
+- **G** `tests/e2e/two-players.spec.js` made sturdy without proving less (still: two players see each other move, are handed town -> wilds, land hits on the same pack and each sees the other's hit). It now waits on conditions, not clocks: the handoff (re-issuing the walk at ~4 fps headless), a LIVE monster in view from `tv.state()` (walking on outward in 40 m steps when none is), then both GATHER 28 m short of it and REST to 75% health (out-of-combat regen) before the fight, rising if killed; 150 s fight window, 8 min test cap. The town exit bearing had used world metres as zone metres. 5/5 green in a row.
+- **G** `tools/bot-client.mjs` fight mode HUNTS: with nothing in its 30 m reach it walks to the nearest monster it can see (`opts.hunt`, 260 m) — E's camps sit ~140 m out of town, so bots20 had been 5 casts / 0 hits. Unstick (sidestep after 2.5 s against a wall) now runs in every walking mode, and a bot stuck at a town wall picks another exit bearing every third try. `tests/load/bots20.test.js` walks the bots out first (waits for 80% in the wilds, up to 60 s) and now asserts >= 60% made it out and casts >= BOTS/2: 285 casts, 94 hits, 7 kills, p99 2.25 ms. `tools/first-hour-bot.mjs` had gone red for the same reason (2 kills in 90 s, red on HEAD too): its search ring now heads for the nearest monster in sight first — green, 150 s, 7 kills. tests/load: bots20, bots50, reconnect, first-hour green; herds' timing gate skips without TV_PERF=1.
+- **D** far horizon from B's `data/world/horizon.bin` (32 m, exact in baked zones) instead of macro.bin (128 m): `js/client/horizon-grid.js` (pure: prepare, chunk builder with skirts + cut-outs, LOD rings, budget helpers), `js/client/horizon-worker.js` (inflate + every chunk off the main thread), `js/client/horizon.js` (chunk streaming, `update(camera)` each frame, `stats()`). Chunks = one zone on high/medium (strides 1/2/4/8 by distance), four zones on low (strides 2/4/8/16). A chunk wholly under loaded zones is hidden; one partly under them is rebuilt with those cells left out — dropping the fragment discard is what made low as fast as the old macro mesh (software GL A/B: 11.4/8.1/17.7 fps vs 11.1/7.9/16.5). Falls back to the macro mesh if horizon.bin cannot be read, or with `?horizon=macro`. Shots: `tests/D/shots/horizon-{before,after}-{high,low}-{west,north,east}.png` (`tests/D/horizon-shot.mjs`). 7 new node tests (`tests/D/horizon-grid.test.js`: zone border vs horizon < 5 cm, counts, skirts, holes, LOD hysteresis, budget: high ~211k tris / low ~69k).
+- **D** skill bar reads the server's bar (`joined.you.bar`, refreshed on `you {bar}`, protocol §15.10) through `barFromServer()` — `ally` sends a friendly target or yourself, `empty` slots say why — and falls back to Farhold's data only when the field is absent.
+
+## 2026-10-05 — stream A: M3 "Public play" server (protocol v4)
+- **Accounts** (`js/sim/accounts.js`, `server/passwords.js`): claim a guest with a username + password (scrypt N=2^15, off the
+  tick thread; email optional, only for the reset stub), log in from any browser (fresh session token, only its hash kept),
+  log out (that browser's token deleted; guests cannot), change password / reset with a one-hour code shown ONLY on the admin
+  page (no email) — both end every other session. Limits: 5 bad passwords a username per 15 min, 10 an address per 10 min.
+  Bans by account and by salted address hash. Tokens moved to `account_tokens` (old guests are carried over on first use).
+- **Chat channels** (`js/sim/chat.js`, `chatfilter.js`): party, guild, zone, trade (5 s slow), world (10 s slow), whispers with
+  an echo; public channels and whispers to strangers need a claimed account at level 5 (a guest whispers its party, guild,
+  friends and answers whoever whispered it). Ignore works everywhere (offline names too), mute everywhere, a filter hook
+  masks a short word list and checks names, `report` files the player's last 20 lines; three claimed accounts in 10 min =
+  a 10-min auto-mute. Chat log 30 days (`chat_log`), a 5,000-line ring for the admin page.
+- **Friends** (`friends.js`): 100 per character, offline names, `friendState` pushes (online / level / zone).
+- **Guilds** (`guilds.js`): roster + 4 ranks + MOTD + guild chat, saved; founding costs 10 gold (taken by the province over the
+  bus — a sink); invite / accept / kick / promote / demote / lead / leave / disband with rank rules; ops on one guild run in turn.
+- **Mail** (`js/sim/mail.js`, province side): text + up to 6 items + gold, 1 gold postage; sending moves items and gold out of the
+  blob and into escrow (`items`, uid = primary key) in ONE transaction, taking does the reverse; town only for send/take; 30-day
+  expiry returns untaken letters (returned mail keeps); `return` / `delete`; `mailNew` on the gateway.
+- **The Callboard** (`callboard.js`): the group finder at level 8 — 1 tank + 1 healer + 3 damage per dungeon (or 'any'), pop +
+  30 s ready check, one party, everyone moved INTO the same instance (another province = a relocation that lands inside);
+  declines requeue the rest in place; after 5 min a queue pops with `backfill: n` (followers: `rules.backfill`, asked of C).
+- **Grimtallow as the realm event**: on-demand rule (E's prose parsed, or `schedule.onDemand`), the director's last runs kept in
+  `world_state` across restarts, roaming to a neighbouring arena (E's `roam`), credit by CONTRIBUTION (damage / healing / killing
+  blow; idle onlookers get nothing, fallen contributors still do), a World cache only contributors open, first kill of the day
+  rolls one extra reward (`char.daily`, new SAVE_FIELD).
+- **Admin page** (`server/admin.mjs` + `admin-page.js`): 127.0.0.1 ONLY (8492 stable / 8493 dev, `--admin-port`), token from
+  `TV_ADMIN_TOKEN` or `<STATE_DIRECTORY|.data>/admin-token` (0600, never logged), Host check, JSON-only POSTs: online players,
+  rooms, kick, timed mute, ban (+ address), unban, rename, last hour of chat, reports, reset codes, economy log, stats,
+  announce, start a realm event.
+- **Public mode** (`--public`): binds 127.0.0.1 unless `--host`, security headers, loopback peers NOT trusted (the tunnel arrives
+  over loopback; visitors count by CF-Connecting-IP, believed only from loopback and only when it looks like an address).
+  `/privacy.json` (`server/privacy.json`) lists what is stored. H's flags: `--guests-per-ip-hour`, `--guests-per-hour`
+  (default 200 on stable), `--unlimited-ip`.
+- **DB**: `schema-v3.sql` (account_tokens, ip_bans, friends, guilds, guild_members, mail, items, reports, chat_log, world_state,
+  account columns) and `schema-v4.sql` (deleting an account cascades through escrow and chat lines; reports keep, unlinked).
+- **Tests** (tests/A, all green): m3-accounts 5, m3-social 6, m3-mail 4 (incl. conservation over 200 random letters + a crash),
+  m3-callboard 3, m3-worldboss 3, m3-admin 2, m3-pg 2.

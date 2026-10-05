@@ -17,6 +17,10 @@
 // Bus to province processes: event {op:'live', ev} (all processes: travel target) / {op:'start', ev}
 // (the hosting one: run it) / {op:'stop', uid}.
 // `demo` (tests, `--event-first`): every event is eligible (no head counts, no cooldowns).
+// M3: a fixed-schedule event may ALSO run ON DEMAND (`schedule.onDemand: {minInBand, quietMinutes}`, or E's prose
+// "on demand when >= 12 characters in band are online and none ran in the last 90 minutes"); when it last ran is
+// kept in world_state (`persist`), so a restart neither forgets a cooldown nor replays a boss; an event with `roamTo`
+// (the world boss breaking out, E's `roam`) sometimes marches on another arena, and the announcement says where.
 
 export const DIRECTOR = Object.freeze({ gapMinutes: [40, 80], announceMs: 10 * 60000, reminders: [5, 1], durationMs: 20 * 60000, firstMs: 2 * 60000, inBandLevels: 3, retryMs: 60000 });
 
@@ -36,14 +40,26 @@ export function nextFixed(schedule, wallMs) {
   return t;
 }
 
+/** E's prose rule ("on demand when >= 12 characters in band are online and none ran in the last 90 minutes") or a
+ *  structured `schedule.onDemand` -> { minInBand, quietMs } | null. */
+export function onDemandOf(schedule) {
+  if (!schedule) return null;
+  if (schedule.onDemand) return { minInBand: schedule.onDemand.minInBand ?? 12, quietMs: (schedule.onDemand.quietMinutes ?? 90) * 60000 };
+  const m = /on demand when\s*>?=?\s*(\d+)[^.]*?last\s+(\d+)\s*minutes/i.exec(String(schedule.also || ''));
+  return m ? { minInBand: +m[1], quietMs: +m[2] * 60000 } : null;
+}
+
 export function createDirector({ now, wallNow = now, log = () => {}, events = null, online, broadcast, procOf, sendTo, procList = null,
-  rules = {}, demo = false, everyMs = null, announceMs = null, firstMs = null, rng = Math.random }) {
+  rules = {}, demo = false, everyMs = null, announceMs = null, firstMs = null, rng = Math.random, persist = null }) {
   const R = { ...DIRECTOR, ...rules };
   const ANNOUNCE = announceMs ?? (rules.announceMinutes != null ? rules.announceMinutes * 60000 : R.announceMs);
   const reminders = (rules.reminderMinutes || R.reminders).map(m => m * 60000).filter(m => m < ANNOUNCE);
   const gap = () => (everyMs != null ? everyMs : (R.gapMinutes[0] + rng() * (R.gapMinutes[1] - R.gapMinutes[0])) * 60000);
   const list = (events || []).slice();
-  const lastRun = new Map();
+  const lastRun = new Map();         // event id -> WALL ms it last started (persisted)
+  let loaded = !persist;
+  if (persist) Promise.resolve(persist.load()).then(v => { if (v && v.lastRun) for (const [k, t] of Object.entries(v.lastRun)) if (!lastRun.has(k) || lastRun.get(k) < t) lastRun.set(k, t); loaded = true; }, () => { loaded = true; });
+  const save = () => { if (persist) Promise.resolve(persist.save({ lastRun: Object.fromEntries(lastRun) })).catch(err => log('director save failed', err && err.message)); };
   let cur = null, next = now() + (firstMs ?? R.firstMs), n = 0;
   const allProcs = () => { if (procList) return procList(); const s = new Set(); for (const e of list) { const p = procOf(e.province); if (p !== undefined) s.add(p); } return s; };
   const inBand = (e, on) => on.filter(p => Math.abs((p.level || 1) - (e.level || 1)) <= R.inBandLevels).length;
@@ -60,12 +76,19 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
       hosted.forEach((e, i) => { const k = inBand(e, on) * 100 + ((i + n) % hosted.length === 0 ? 1 : 0); if (k > bestN) { bestN = k; best = e; } });
       return best ? { e: best, startIn: ANNOUNCE } : null;
     }
-    const cool = e => { const cd = (e.schedule && e.schedule.cooldownMinutes || 0) * 60000; const l = lastRun.get(e.id); return l == null || t - l >= cd; };
+    const cool = e => { const cd = (e.schedule && e.schedule.cooldownMinutes || 0) * 60000; const l = lastRun.get(e.id); return l == null || wall - l >= cd; };
     const ok = hosted.filter(e => on.length >= (e.minOnline ?? 1) && cool(e));
     // a fixed-schedule event due within the announce window wins
     let fixed = null, due = Infinity;
     for (const e of ok) if (e.schedule && e.schedule.type === 'fixed') { const at = nextFixed(e.schedule, wall) - wall; if (at <= ANNOUNCE && at < due) { due = at; fixed = e; } }
     if (fixed) return { e: fixed, startIn: Math.max(0, due) };
+    // ...or a fixed one on demand: enough players in its band and it has been quiet long enough
+    for (const e of ok) {
+      const od = e.schedule && e.schedule.type === 'fixed' && onDemandOf(e.schedule);
+      if (!od) continue;
+      const l = lastRun.get(e.id);
+      if ((l == null || wall - l >= od.quietMs) && inBand(e, on) >= od.minInBand) return { e, startIn: ANNOUNCE, onDemand: true };
+    }
     const pool = ok.filter(e => (!e.schedule || e.schedule.type !== 'fixed') && (e.weight ?? 1) > 0 && inBand(e, on) >= (e.minInBand ?? 1));
     const total = pool.reduce((a, e) => a + (e.weight ?? 1), 0);
     if (!total) return null;
@@ -76,15 +99,24 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
   function begin(e, startIn) {
     n++;
     const t = now();
-    cur = { ev: { ...e, uid: e.id + ':' + n }, state: 'soon', startAt: t + startIn, endAt: t + startIn + (e.durationMs || R.durationMs), reminded: new Set() };
-    broadcast({ t: 'realm', kind: 'eventSoon', ev: view(cur.ev), at: wallNow() + startIn, text: (e.announce || [])[0] || undefined });
+    let ev = { ...e, uid: e.id + ':' + n };
+    // the world boss breaks out of its arena now and then (E's `roam`): it marches on a neighbouring zone's arena
+    let roamText = null;
+    if (e.roamTo && e.roamTo.length && rng() < ((e.roam && e.roam.chance) ?? 0.25)) {
+      const to = e.roamTo[Math.floor(rng() * e.roamTo.length)];
+      ev = { ...ev, x: to.x, z: to.z, r: Math.max(to.r || 40, 30), zone: to.zone || ev.zone, zoneName: to.zoneName || ev.zoneName, roamed: true };
+      roamText = (ev.name || 'The beast') + ' has broken out' + (to.zoneName ? ' and marches on ' + to.zoneName : '') + '!';
+    }
+    cur = { ev, state: 'soon', startAt: t + startIn, endAt: t + startIn + (e.durationMs || R.durationMs), reminded: new Set() };
+    const first = (e.announce || [])[0];
+    broadcast({ t: 'realm', kind: 'eventSoon', ev: view(cur.ev), at: wallNow() + startIn, text: roamText ? (first ? first + ' ' : '') + roamText : first || undefined });
   }
 
   return {
     step() {
       const t = now();
       if (!cur) {
-        if (t < next) return;
+        if (t < next || !loaded) return;
         const c = choose();
         // nothing to run yet (no province process has said hello, nobody in band): look again soon
         if (!c) { next = t + (list.some(e => procOf(e.province) !== undefined) ? Math.min(R.retryMs, everyMs ?? R.retryMs) : 5000); return; }
@@ -100,7 +132,7 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
         const on = online();
         cur.ev.scale = eventScale(inBand(cur.ev, on), R.size);
         cur.state = 'live';
-        lastRun.set(cur.ev.id, t);
+        lastRun.set(cur.ev.id, wallNow()); save();
         sendTo(procOf(cur.ev.province), { k: 'event', op: 'start', ev: cur.ev });
         for (const p of allProcs()) sendTo(p, { k: 'event', op: 'live', ev: cur.ev });
         const ann = cur.ev.announce || [];
@@ -124,6 +156,7 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
       return true;
     },
     get current() { return cur; },
+    lastRun,
     addEvents(evs) { for (const e of evs) if (!list.some(x => x.id === e.id)) list.push(e); },
     get events() { return list; },
   };
@@ -135,5 +168,5 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
     log('event ended', ev.uid, why);
     cur = null; next = now() + gap();
   }
-  function view(e) { return { id: e.id, uid: e.uid, name: e.name, province: e.province, x: e.x, z: e.z, r: e.r || 50, level: e.level, kind: e.kind || 'boss', zoneName: e.zoneName || null }; }
+  function view(e) { return { id: e.id, uid: e.uid, name: e.name, province: e.province, x: e.x, z: e.z, r: e.r || 50, level: e.level, kind: e.kind || 'boss', zoneName: e.zoneName || null, roamed: !!e.roamed }; }
 }

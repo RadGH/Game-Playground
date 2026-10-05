@@ -140,7 +140,9 @@ export function provinceEvents(evData, { provinceId, map, terrain, sheet = null,
       }
       const s = siteOf(e.site, e.zone);
       if (!s) continue;
-      events.push({ ...common(e, s), zone: map[e.zone], zoneName: nameOf(e.zone), band: bandOf(e.zone), schedule: e.schedule, minOnline: e.minOnline, minInBand: e.minInBand, weight: e.weight });
+      // E's `roam`: now and then the boss marches on a neighbouring zone's event arena (the director picks; M3)
+      const roamTo = e.roam && Array.isArray(e.roam.toZones) ? e.roam.toZones.map(z => { const a = arenaOf(z); return a && map[z] ? { zone: map[z], zoneName: nameOf(z), x: a.x, z: a.z, r: Math.max(a.r || a.radius || 40, 30) } : null; }).filter(Boolean) : [];
+      events.push({ ...common(e, s), zone: map[e.zone], zoneName: nameOf(e.zone), band: bandOf(e.zone), schedule: e.schedule, minOnline: e.minOnline, minInBand: e.minInBand, weight: e.weight, ...(roamTo.length ? { roamTo, roam: { chance: e.roam.chance ?? 0.25 } } : {}) });
     }
     for (const e of evData.zone || []) {
       if (!map[e.zone]) continue;

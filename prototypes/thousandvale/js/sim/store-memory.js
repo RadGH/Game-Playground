@@ -14,10 +14,12 @@
 //   appendJournal(rows [{ char, seq, kind, payload, fence }]) -> rows kept (a row whose fence moved on is refused)
 //   tradeChars([{ ch, fence }, { ch, fence }]) -> true | false   both blobs in one all-or-nothing write
 //   logEconomy(rows) ; info() -> { kind, accounts, characters }
+//   + the M3 methods in js/sim/store-memory-m3.js (accounts, friends, guilds, mail, reports, chat log, world state)
 
 import { sha256Hex, randomHex } from './sha256.js';
 import { packChar, unpackChar } from './save-fields.js';
 import { applyJournal } from './journal.js';
+import { memoryM3 } from './store-memory-m3.js';
 
 export const MAX_CHARS_PER_ACCOUNT = 10;
 
@@ -28,7 +30,9 @@ export function createMemoryStore({ now = () => Date.now(), data = null, onChang
   const prune = (id, seq) => { if (d.journal[id]) d.journal[id] = d.journal[id].filter(j => j.seq > seq); };
   const brief = r => ({ id: r.id, name: r.cols.name, cls: r.cols.cls, level: r.cols.level, room: r.cols.room });
 
+  const m3 = memoryM3(d, { now, changed, sha256Hex, randomHex, packChar, prune, brief });
   return {
+    ...m3,
     kind: 'memory',
     data: d,
     async init() {},
@@ -36,14 +40,18 @@ export function createMemoryStore({ now = () => Date.now(), data = null, onChang
     async createGuest(name = null) {
       const token = randomHex(32);
       const id = d.nextAccount++;
-      d.accounts[id] = { id, tokenHash: sha256Hex(token), name: name || null, claimed: false, created: now() };
+      d.accounts[id] = { id, name: name || null, claimed: false, created: now() };
+      d.tokens[sha256Hex(token)] = { account: id, kind: 'guest', created: now() };
       changed();
       return { account: id, token };
     },
     async authToken(token) {
       const h = sha256Hex(String(token));
-      for (const a of Object.values(d.accounts)) if (a.tokenHash === h) return { account: a.id, claimed: !!a.claimed };
-      return null;
+      const t = d.tokens[h];
+      const a = t ? d.accounts[t.account] : Object.values(d.accounts).find(x => x.tokenHash === h);     // tokenHash: stores written before M3
+      if (!a) return null;
+      if (t) t.used = now();
+      return { account: a.id, claimed: !!a.claimed, username: a.username || null, banned: a.bannedUntil || 0, kind: t ? t.kind : 'guest' };
     },
     async listChars(account) {
       return Object.values(d.chars).filter(r => r.account === account).map(brief);

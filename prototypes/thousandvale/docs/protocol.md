@@ -1,6 +1,6 @@
 # Thousandvale — network protocol and room interface (stream A)
 
-**Status:** v3 for M2 (provinces, waystones, the realm event, open groups, traces, day/night, NPC schedules, gateway + province processes), 2026-10-04 (v2 = M1/M1.5: rooms, parties, loot, encounter events, journal, trade, human check; v1 = M0). Owner: stream A (`js/net/**` ★, `js/sim/**`, `server/**`).
+**Status:** v4 for M3 (claimed accounts, chat channels, friends, guilds, mail, the Callboard, reports — §16), 2026-10-05. v3 for M2 (provinces, waystones, the realm event, open groups, traces, day/night, NPC schedules, gateway + province processes), 2026-10-04 (v2 = M1/M1.5: rooms, parties, loot, encounter events, journal, trade, human check; v1 = M0). Owner: stream A (`js/net/**` ★, `js/sim/**`, `server/**`).
 The machine-readable copy of every table on this page is `js/net/protocol.js`; if this page and that file
 disagree, the file wins and this page is a bug. Changes go through stream A (`docs/requests.md`).
 
@@ -16,7 +16,7 @@ Readers:
 
 | Constant | Value | Where |
 |---|---|---|
-| `PROTOCOL_VERSION` | `3` | `js/net/protocol.js`. Bumped on any wire change. A client with another value is refused with `refuse {code:'version'}` → the client shows "A new version is out — reload". |
+| `PROTOCOL_VERSION` | `4` | `js/net/protocol.js`. Bumped on any wire change. A client with another value is refused with `refuse {code:'version'}` → the client shows "A new version is out — reload". |
 | `BUILD` | string | The server's build id (dev: `dev`; published copies: the git hash). A client whose `build` differs is refused with `code:'build'` → "reload". The client is always served by the same server as its socket (PLAN §10.1). |
 | `SNAP_VERSION` | `1` | First byte after the type byte of every binary snapshot. |
 | `TICK_MS` | `50` | Simulation 20 Hz (PLAN §8.3). |
@@ -103,8 +103,8 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `create` | gw | `name:str:24, cls:str:32, look?:obj` | 1 / 3 | New character (`cls` = a Farhold class id; `look` = Chibi 2 avatar JSON, ≤ 4 KB). Names: 2–16 letters/spaces/'-, unique per realm, banned-name filter. |
 | `play` | gw | `char:int, join?:str:8` | 1 / 3 | Ask for a ticket. `join` = a party code from a "join my party" link: you join that party and appear next to its leader (§11). A bad code answers `err {code:'noCode'}` and you enter normally. |
 | `party` | gw | `op:str:8, name?:str:24, code?:str:8, char?:int` | 2 / 10 | Party op (§11): `invite {name}`, `accept {char: partyId}`, `decline {char: partyId}`, `join {code}`, `code` (make a party if you have none; the answer `partyState` carries the code), `leave`, `kick {char}`, `lead {char}`. |
-| `chat` | gw | `ch:str:8, text:str:200` | 1 / 5 | Channel chat. M1: `ch:'party'`. Later `zone`, `guild`, … |
-| `ignore` | gw | `name:str:24, on:bool` | 1 / 5 | Ignore (on) / unignore (off) an online character by name; you stop seeing their say and party chat. Answer: `ignored`. Saved. |
+| `chat` | gw | `ch:str:8, text:str:200, to?:str:24` | 1 / 5 | Channel chat (§16.2): `party`, `guild`, `zone`, `trade`, `world`, or `w` = a whisper to the character named `to`. `zone`/`trade`/`world` and whispers to strangers need a claimed account at level 5+. |
+| `ignore` | gw | `name:str:24, on:bool` | 1 / 5 | Ignore (on) / unignore (off) a character by name (online or not, v4); you stop seeing them on every channel, and their whispers, guild invites and mail are refused. Answer: `ignored`. Saved, up to 100. |
 | `ping` | both | `c:num` | 2 / 4 | Clock sync, every 2 s. |
 | `enter` | p | `ticket:str:256` | 1 / 3 | Join the world. |
 | `in` | p | `s:int, dt:num, mx:num, mz:num, yaw:num, b:int` | 40 / 60 | One movement input. `s` = sequence (client counts up from 1), `dt` = ms of movement this input covers (0–100, clamped), `mx,mz` = world-space move direction, length ≤ 1 (longer is normalised), `yaw` = facing in radians, `b` = button bits (`IN_SPRINT` 1, `IN_JUMP` 2). Send one per client sim step (20 Hz). |
@@ -119,6 +119,12 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `quest` | p | `op:str:8, id:str:120, npc?:id` | 2 / 6 | Quests and jobs (§15.9): `accept {id, npc}` / `turnin {id, npc}` standing within 6 m of the giver (`npc` = its entity id), `abandon {id}`. Answer `questR`; the log comes as `quests`. |
 | `trade` | p | `op:str:8, id?:int, items?:uids, gold?:int` | 5 / 10 | The trade window (§13): `ask {id: entity}` (within 10 m) → they get `tradeAsk`; `accept {id: trade}`; `offer {id, items:[≤12 uids], gold}` (unlocks both); `lock {id}`; `confirm {id}` (both locked); `cancel`. Both confirmed → one all-or-nothing store write; `tradeState` throughout, `trade:null` + `done` at the end. |
 | `leave` | both | — | 1 / 2 | Log out cleanly (save now). |
+| `account` | gw | `op:str:8, user?:str:24, pass?:str:128, old?:str:128, email?:str:120, code?:str:16, human?:str:2048` | 0.5 / 4 | Accounts (§16.1): `claim {user, pass, email?, human?}`, `login {user, pass}` (instead of `guest`/`auth`), `logout`, `password {old, pass}`, `resetAsk {user}`, `reset {user, code, pass}`, `info`. Answer `accountR` (a good `login` answers `authed`). |
+| `friend` | gw | `op:str:8, name?:str:24, char?:int` | 1 / 5 | Friends (§16.3): `add {name}` (online or not), `remove {name}`, `list`. Answer `friends`. |
+| `guild` | gw | `op:str:8, name?:str:24, char?:int, id?:int, text?:str:200` | 1 / 5 | Guilds (§16.4): `create {name}`, `invite {name}`, `accept {id}`, `decline {id}`, `leave`, `kick {char}`, `promote {char}`, `demote {char}`, `lead {char}`, `motd {text}`, `roster`, `disband`. Answers `guildR` + `guildState`. |
+| `callboard` | gw | `op:str:8, dungeon?:str:64, role?:str:8, id?:int` | 1 / 5 | The Callboard (§16.6): `list`, `join {dungeon: key \| 'any', role: 'tank'\|'healer'\|'dps'}`, `leave`, `accept {id}`, `decline {id}`. Answers `callboard {state}`. |
+| `report` | gw | `name:str:24, why:str:16, text?:str:200` | 0.1 / 3 | Report a player (`why`: spam, abuse, cheat, name, other). Answer `reportR`. |
+| `mail` | p | `op:str:8, id?:int, to?:str:24, subject?:str:60, body?:str:500, items?:uids, gold?:int` | 2 / 8 | Mail (§16.5): `list`, `read {id}`, `send {to, subject, body, items, gold}`, `take {id}`, `return {id}`, `delete {id}`. Answers `mailR`, `mailList`, `mailOpen`. |
 
 ### 3.2 Server → client
 
@@ -157,7 +163,20 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `tradeAsk` | `trade, from, name` | Someone (entity `from`) wants to trade: answer `trade {op:'accept', id: trade}` or `cancel`. |
 | `tradeState` | `trade:{id, state, you:{char, name, id, items, gold, locked, confirmed}, them:{…}}\|null, done?, why?` | The trade window; `trade:null` = closed (`done:true` = it went through, else `why`: `cancelled`, `tradeFar`, `tradeFailed`, `bagFull`, `gone`). |
 | `err` | `code, msg` | Request failed (`auth`, `name`, `cls`, `full`, `ticket`, `state`, `party`, `partyFull`, `noCode`, `notFound`, `muted`, `item`, `bagFull`). `msg` is plain language. |
-| `kick` | `code, msg` | About to close: `elsewhere` (logged in from another tab), `abuse`, `restart`, `idle`. |
+| `kick` | `code, msg` | About to close: `elsewhere` (logged in from another tab), `abuse`, `restart`, `idle`, `banned`, `loggedOut` (v4). |
+| `accountR` | `op, ok, why?, msg?, username?, claimed?` | (gateway) Answer to `account` (§16.1). `why`: `user`, `pass`, `email`, `claimed`, `human`, `auth`, `tooManyLogins`, `claimFirst`, `state`. |
+| `friends` | `list:[{char, name, cls, level, online, zone}]` | (gateway) My whole friend list (on entering the world and after every change). |
+| `friendState` | `char, name, cls, level, online, zone` | (gateway) One friend came online, went offline, levelled or changed zone. |
+| `guildState` | `guild:{id, name, motd, ranks:[4 names], members:[{char, name, cls, level, rank, online, zone}]}\|null, joined?, left?, kicked?, disbanded?` | (gateway) My guild, whole, after any change; `null` = no guild. Rank 0 = leader … 3 = recruit. |
+| `guildInvite` | `guild, name, from, ms` | (gateway) An invitation (answer `guild {op:'accept'\|'decline', id: guild}` within `ms`). |
+| `guildR` | `op, ok, why?, msg?` | (gateway) Answer to a guild op. |
+| `callboard` | `state:'list'\|'queued'\|'pop'\|'ready'\|'formed'\|'left', …` | (gateway) The Callboard (§16.6). |
+| `reportR` | `ok, msg` | (gateway) The report was filed. |
+| `mailNew` | `unread` | (gateway) You have mail (on entering the world when there is unread mail, and when a letter arrives or comes back). |
+| `mailList` | `mail:[{id, from, fromChar, subject, kind, sentAt, expiresAt, read, taken, gold, items:[{uid, name, rarity, slot}]}], unread` | (game socket) Your letters, newest first (up to 50). |
+| `mailOpen` | `mail:{…as mailList…, body, items:[full items]}` | (game socket) One letter, read (it is now marked read). |
+| `mailR` | `op, ok, why?, msg?, id?, to?, cost?, items?, gold?` | (game socket) Answer to a mail op. `why`: `gate`, `town`, `busy`, `items`, `gold`, `item`, `trade`, `slow`, `notFound`, `self`, `ignored`, `failed`, `missing`, `empty`, `bagFull`, `holds`. |
+| `muted` | `until, by, msg` | (gateway) You were muted (or unmuted) until wall ms `until`; `by`: `admin` or `auto` (reports). |
 
 ---
 
@@ -668,3 +687,95 @@ that level (3 + level), an item of `reward.item.tier`. Saved per character (`que
 target (or yourself); `group: true` = reaches the party by itself. The whole bar comes again as `you {bar}` after a
 level-up, a form or stance change (the rules' `fx {kind:'form'}` event), or a talent pick (`room.barChanged(e)`), sent
 once after that tick — it formats text, so it is never built per tick. Absent when the rules have no `bar` (stand-in rules).
+
+---
+
+## 16. Public play (M3, PLAN §5.5, §9.1, §9.4, §11, §13) — protocol v4
+
+Everything here is ADDED; nothing in v3 changed shape except `chat {to?}`, `welcome {privacy, accounts}` and the
+new kick codes. Server files: `js/sim/accounts.js`, `chat.js`, `chatfilter.js`, `friends.js`, `guilds.js`,
+`callboard.js` (gateway), `js/sim/mail.js` (province), `server/passwords.js`, `server/admin.mjs`,
+`server/db/schema-v3.sql`, `server/db/pg-social.js`, `js/sim/store-memory-m3.js`. Client calls: `js/net/client.js`
+(§9 header lists them: `accountOp`, `login`, `claim`, `logout`, `chat`, `whisper`, `friend`, `guild`, `callboard`,
+`report`, `mail`; events arrive under their message type).
+
+### 16.1 Accounts
+- A guest is still made with no questions; its 256-bit token lives in the browser, only the SHA-256 on the server.
+- **Claim** (`account {op:'claim', user, pass, email?, human?}`): username 3–20 of `A-Z a-z 0-9 . _ -` (unique,
+  case-insensitive, passes the name filter), password 8–128, email optional (used only by the reset stub). The
+  password is hashed with **scrypt** (N=2^15, r=8, p=1, salted, `scrypt$N$r$p$salt$hash`) off the game thread. With
+  Turnstile on (`welcome.human`), send its token as `human`, like `guest`. Answer `accountR {op:'claim', ok, username}`.
+- **Login** from any browser: `connect({ login: {user, pass} })` (or `account {op:'login'}` before `guest`/`auth`). A
+  good login answers `authed {account, token, claimed:true, username}` with a NEW session token — store it like the
+  guest token. A wrong one answers `accountR {op:'login', ok:false, why:'auth'}` and makes no guest.
+- **Limits**: 5 wrong passwords on one username in 15 min, or 10 from one address in 10 min → `tooManyLogins` (the
+  right password waits too). The `account` message itself is 0.5/s, burst 4.
+- **Logout** (`account {op:'logout'}`, claimed accounts only — a guest gets `claimFirst`): that browser's token is
+  deleted; the character is kicked from the world (`kick {code:'loggedOut'}`); `net.logout()` clears the stored token.
+- **Password** `{op:'password', old, pass}` and **reset** `{op:'resetAsk', user}` → (the one-hour code shows on the
+  ADMIN page; no email is sent; the answer never says whether the username exists) → `{op:'reset', user, code, pass}`.
+  Both end every other session.
+- **Bans** (admin): a banned account gets `refuse {code:'banned'}` at `auth`/`login`; a banned address (stored as a
+  salted hash) is refused at `hello`.
+
+### 16.2 Chat channels
+| `ch` | Who hears it | Who may talk |
+|---|---|---|
+| `say` (province socket, `say {text}`) | within 40 m | anyone |
+| `party` | the party | members |
+| `guild` | guild members online | members (guests too) |
+| `zone` | everyone online in the same zone of the province (`chat.zone` = the zone key) | claimed + level 5 |
+| `trade` | everyone online (5 s slow mode) | claimed + level 5 |
+| `world` | everyone online (10 s slow mode) | claimed + level 5 |
+| `w` (needs `to`) | that one character; the sender gets a copy with `echo:true, to:<name>` | claimed + level 5, OR anyone to their party / guild / friends, OR answering someone who whispered them in the last 10 min |
+| `system` (server only) | everyone | the admin page's announcements |
+Refusals: `err {code:'chatGate'|'slow'|'muted'|'ignored'|'notFound'|'party'|'guild'}`. Every line passes the filter
+hook (masks a short word list; a server can pass its own) and is logged for 30 days. `report {name, why, text?}` files
+a report with the reported player's last 20 lines; three different claimed accounts reporting one player within 10
+minutes mute them for 10 minutes (`muted {until, by:'auto'}`).
+
+### 16.3 Friends
+Per character, up to 100, offline names allowed. `friends {list}` on entering the world and after a change;
+`friendState {char, online, level, zone, …}` when a friend comes online, goes offline, levels or changes zone.
+
+### 16.4 Guilds
+Saved. Ranks 0 Leader, 1 Officer, 2 Member, 3 Recruit (names in `guild.ranks`). Founding: claimed account, level 5,
+not in a guild, a name of 3–24 letters/spaces/'- that passes the filter, **10 gold** (taken by the province, a sink).
+Officers invite, kick lower ranks, set the MOTD and move ranks below their own; the leader names officers, hands on
+the lead (`lead {char}`) and disbands. The leader leaves only after handing on the lead (or disbands when alone).
+Invites last 2 minutes. `guildState` (whole) after every change; `guildState {guild:null, kicked|disbanded}` when you
+are out.
+
+### 16.5 Mail
+- On the province socket. **List / read anywhere; send / take in a town.** Letters carry text (subject 60, body
+  500), up to **6 items** and gold; **postage 1 gold** (a sink). Sending needs a claimed account at level 5; anyone
+  can receive. To any character by name — your own others too — unless they ignore you.
+- Sending moves the items and gold out of your pack and into escrow in ONE transaction with your saved character;
+  taking moves them into the receiver's pack in one transaction (an item keeps its uid; a uid can never be in two
+  letters). Not while trading; not with a full bag.
+- Untaken letters go back to the sender after **30 days** (`kind:'return'`, they never expire); `return {id}` sends
+  one back now. `delete` only once nothing is left in it. `mailNew {unread}` arrives on the gateway socket.
+
+### 16.6 The Callboard
+The in-world group finder (opens at level 8). `callboard {op:'list'}` → `{state:'list', minLevel, dungeons:[{key, name,
+level, band, province, fits, waiting}], queued}`. `join {dungeon: key | 'any', role}`; a party is queued by its leader,
+whole. A group = 1 tank, 1 healer, 3 damage able to do the same dungeon → `{state:'pop', id, dungeon, ms:30000,
+members:[{char, name, level, role}], backfill}`; everyone `accept {id}` (`{state:'ready', ready:[chars]}`) →
+`{state:'formed', party, dungeon}`: one party, and every member is moved INTO that dungeon's instance (a normal
+`joined` handoff, `via:'callboard'`). A decline/timeout: `{state:'left', why}` for the decliner, `{state:'queued',
+again:true}` for the rest (they keep their place). After 5 minutes a queue pops with whoever fits and `backfill:n`
+followers fill the seats (the instance asks the rules: `rules.backfill(entity, n)`, stream C).
+
+### 16.7 The world boss (realm event)
+Grimtallow (`world_grimtallow`, Blackthorn Scar) runs as the director's realm event (§15.3): every 3 h at :30, or on
+demand when 12+ characters in its band are online and it has been quiet 90 min (kept in `world_state`, so a restart
+does not replay it). Sometimes it breaks out to a neighbouring arena: `realm.ev.roamed = true` and the text says
+where. Credit is by contribution (damage to its monsters, healing someone in the fight, a killing blow); a fallen
+contributor is still paid, an idle onlooker is not. A **World cache** chest appears in the arena for 10 minutes that
+only contributors can open (once a day each); the first kill of the day rolls one extra reward (`char.daily`).
+
+### 16.8 Server side of the public link (PLAN §11)
+`/privacy.json` (what is stored and for how long). In `--public` mode: security headers on every answer, a loopback
+peer is NOT trusted (the tunnel arrives over loopback; each visitor counts by its `CF-Connecting-IP`, believed only
+from loopback), nobody skips the per-address limits. The admin page is `server/admin.mjs` on 127.0.0.1 only (8492
+stable / 8493 dev), token in `TV_ADMIN_TOKEN` or `<state>/admin-token`.

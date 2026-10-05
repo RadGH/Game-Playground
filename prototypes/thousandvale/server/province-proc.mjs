@@ -11,6 +11,7 @@ import { startTicker } from '../js/net/clock.js';
 import { MAX_FRAME } from '../js/net/protocol.js';
 import { log, loadRules, makeStore, loadLayouts } from './load.mjs';
 import { wireSocket, startPinger } from './ws-conn.mjs';
+import { createChatFilter } from '../js/sim/chatfilter.js';
 
 const cfg = JSON.parse(process.argv[2]);
 const now = () => performance.now();
@@ -22,7 +23,7 @@ const { createRules } = await loadRules(cfg.rules);
 const { layouts, events, encounterInfo, directorRules } = await loadLayouts(cfg.provinces);
 const province = createProvince({
   proc: cfg.n, layouts, store, bus, createRules, encounterInfo, build: cfg.build, now, log, eventSize: directorRules && directorRules.size,
-  lingerMs: cfg.linger, saveEveryMs: cfg.saveEvery, journalMs: cfg.journalMs, processName: cfg.process,
+  lingerMs: cfg.linger, saveEveryMs: cfg.saveEvery, journalMs: cfg.journalMs, processName: cfg.process, chatFilter: createChatFilter(),
 });
 await province.init();
 bus.send({ k: 'hello', proc: cfg.n, provinces: layouts.map(L => L.key), events });

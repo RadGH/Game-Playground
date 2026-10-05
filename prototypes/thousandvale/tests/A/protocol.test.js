@@ -8,6 +8,9 @@ const GOOD = {
   play: { char: 3, join: 'ABCDE' }, party: { op: 'group', code: 'test/wilds:1:42' }, chat: { ch: 'party', text: 'hi all' }, ignore: { name: 'Bren', on: true },
   use: { id: 12 }, travel: { to: 'ws:test:t0' }, trace: { kind: 'campfire' }, quest: { op: 'accept', id: 'wolves_at_the_fold', npc: 40 }, trade: { op: 'offer', id: 3, items: ['p0-ab12cd34-1f'], gold: 10 }, item: { op: 'equip', uid: 'p0-ab12cd34-1f', slot: 'head' }, ping: { c: 12.5 }, enter: { ticket: 'abc' }, in: { s: 1, dt: 50, mx: 0.5, mz: -0.5, yaw: 1.2, b: 1 },
   cast: { slot: 0, aim: { x: 1, z: 2 }, target: 7, ct: 1000, held: 1.5 }, target: { id: 4 }, say: { text: 'hi' }, respawn: {}, leave: {},
+  account: { op: 'claim', user: 'aldra', pass: 'longenough', email: 'a@b.cd', human: 'XXXX.DUMMY.TOKEN.XXXX' }, friend: { op: 'add', name: 'Bren' },
+  guild: { op: 'motd', text: 'Raid at eight' }, callboard: { op: 'join', dungeon: 'torbor_downs:2', role: 'tank' }, report: { name: 'Bren', why: 'spam', text: 'selling gold' },
+  mail: { op: 'send', to: 'Bren', subject: 'Hi', body: 'For you', items: ['p0-ab12cd34-1f'], gold: 5 },
 };
 
 test('every client message type has a valid example and the example passes', () => {

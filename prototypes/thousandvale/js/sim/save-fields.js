@@ -25,6 +25,7 @@ export const SAVE_FIELDS = Object.freeze([
   { k: 'waystones', def: [] },     // waystone keys this character has discovered (travel targets)
   { k: 'treasure', def: {} },      // treasure chains: chain id -> { found: [clue steps], done?: wall ms } (PLAN §3.7)
   { k: 'quests', def: { active: {}, done: {}, jobs: {} } },   // quest log, done quests, job boards (js/sim/quests.js)
+  { k: 'daily', def: {} },         // once-a-day things: key -> UTC day number (the world boss's first kill of the day)
   { k: 'jseq', col: 'journal_seq', def: 0 },   // last journal row this blob contains (js/sim/journal.js)
 ]);
 

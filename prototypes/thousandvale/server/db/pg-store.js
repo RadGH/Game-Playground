@@ -9,20 +9,21 @@ import { migrate } from './migrate.js';
 import { packChar, unpackChar } from '../../js/sim/save-fields.js';
 import { MAX_CHARS_PER_ACCOUNT } from '../../js/sim/store-memory.js';
 import { applyJournal } from '../../js/sim/journal.js';
+import { pgM3 } from './pg-social.js';
 
 // bigint columns (ids, xp, gold, fences) come back as JS numbers; they stay far below 2^53
 pg.types.setTypeParser(20, v => Number(v));
 
 const sha = t => createHash('sha256').update(String(t)).digest('hex');
 // one statement: write the blob (version + fence checked) and prune the journal rows it now contains
-const SAVE_SQL = `WITH u AS (
+export const SAVE_SQL = `WITH u AS (
     UPDATE characters SET name = $4, cls = $5, level = $6, xp = $7, gold = $8, room = $9, x = $10, z = $11, blob = $12,
       journal_seq = $13, version = version + 1, updated_at = now()
     WHERE id = $1 AND version = $2 AND lease_fence = $3 RETURNING id, version
   ), d AS (
     DELETE FROM char_journal WHERE char_id = $1 AND seq <= $13 AND EXISTS (SELECT 1 FROM u)
   ) SELECT version FROM u`;
-function saveParams(ch, fence) {
+export function saveParams(ch, fence) {
   const { cols, blob } = packChar(ch);
   return [ch.id, ch.version, fence, cols.name, cols.cls, cols.level, cols.xp, cols.gold, cols.room, cols.x, cols.z, blob, cols.journal_seq || 0];
 }
@@ -42,18 +43,29 @@ export function createPgStore({ connectionString = process.env.DATABASE_URL, rea
   }
 
   return {
+    ...pgM3({ pool, q, realm, SAVE_SQL, saveParams }),
     kind: 'pg',
     pool,
     async init() { const v = await migrate(pool); if (v.length) log('db: applied schema ' + v.join(', ')); },
     async close() { await pool.end(); },
     async createGuest(name = null) {
       const token = randomBytes(32).toString('hex');
-      const r = await q('INSERT INTO accounts (token_hash, name, last_login) VALUES ($1, $2, now()) RETURNING id', [sha(token), name]);
-      return { account: r.rows[0].id, token };
+      const r = await q(`WITH a AS (INSERT INTO accounts (name, last_login) VALUES ($2, now()) RETURNING id)
+        INSERT INTO account_tokens (token_hash, account_id, kind) SELECT $1, id, 'guest' FROM a RETURNING account_id`, [sha(token), name]);
+      return { account: r.rows[0].account_id, token };
     },
     async authToken(token) {
-      const r = await q('UPDATE accounts SET last_login = now() WHERE token_hash = $1 RETURNING id, claimed', [sha(token)]);
-      return r.rows.length ? { account: r.rows[0].id, claimed: r.rows[0].claimed } : null;
+      const r = await q(`WITH t AS (UPDATE account_tokens SET last_used = now() WHERE token_hash = $1 RETURNING account_id, kind)
+        UPDATE accounts a SET last_login = now() FROM t WHERE a.id = t.account_id RETURNING a.id, a.claimed, a.username, a.banned_until, t.kind`, [sha(token)]);
+      if (!r.rows.length) {
+        // a guest made by an older server (token in accounts.token_hash): move it over once
+        const old = await q(`WITH m AS (INSERT INTO account_tokens (token_hash, account_id, kind) SELECT token_hash, id, 'guest' FROM accounts WHERE token_hash = $1
+                             ON CONFLICT DO NOTHING RETURNING account_id) SELECT a.id, a.claimed, a.username, a.banned_until, 'guest' AS kind FROM accounts a JOIN m ON m.account_id = a.id`, [sha(token)]);
+        if (!old.rows.length) return null;
+        r.rows.push(old.rows[0]);
+      }
+      const x = r.rows[0];
+      return { account: x.id, claimed: x.claimed, username: x.username, banned: x.banned_until ? new Date(x.banned_until).getTime() : 0, kind: x.kind };
     },
     async listChars(account) {
       const r = await q('SELECT id, name, cls, level, room FROM characters WHERE account_id = $1 AND realm = $2 ORDER BY id', [account, realm]);

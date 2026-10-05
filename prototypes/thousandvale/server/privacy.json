@@ -1,0 +1,33 @@
+{
+  "_doc": "Thousandvale privacy note (stream A, PLAN §9.4). Served at /privacy.json; the client shows `summary` before the first public link and links the rest. Keep it TRUE: if the server starts storing something new, add it here in the same change. Plain words, no legalese.",
+  "version": 1,
+  "updated": "2026-10-05",
+  "title": "What Thousandvale keeps about you",
+  "summary": "Thousandvale needs no sign-up. Your browser keeps a random key that is your account; the server keeps only a scrambled copy of it, your characters and what they own. If you claim the account we also keep your username, a scrambled copy of your password and, only if you give one, an email address. Chat is logged for 30 days so reports can be checked. We do not sell or share any of it, show no ads and use no trackers.",
+  "stored": [
+    { "what": "Account key", "detail": "A random 256-bit key your browser keeps. The server stores only its SHA-256 hash, so a leaked database cannot be used to sign in.", "kept": "Until you log out on that browser (claimed accounts) or forever (guest accounts — that is how a guest gets back in)." },
+    { "what": "Username and password (claimed accounts only)", "detail": "The username you pick and a slow scrypt hash of your password. The password itself is never stored or logged.", "kept": "As long as the account exists." },
+    { "what": "Email (optional)", "detail": "Only if you type one when claiming. It is used for nothing except helping you get back in when you forget your password; the game sends no email by itself.", "kept": "As long as the account exists." },
+    { "what": "Characters", "detail": "Name, class, look, level, experience, gold, items, quests, position, friends, guild, ignore list, mail.", "kept": "As long as the account exists." },
+    { "what": "Chat", "detail": "Every line said on any channel (say, party, guild, zone, trade, world, whispers), with who said it and when.", "kept": "30 days, then deleted automatically." },
+    { "what": "Reports", "detail": "When someone reports a player: who reported whom, the reason, and the reported player's last few chat lines.", "kept": "Until the report is dealt with and cleared." },
+    { "what": "Network address", "detail": "Used while you are connected for limits (at most a few connections and new accounts per address) and kept in memory only. If an address is banned, only a salted hash of it is stored.", "kept": "Bans: for the length of the ban." },
+    { "what": "Game statistics", "detail": "Totals of gold and items gained and spent per hour and level band (no names).", "kept": "Indefinitely, for balancing." },
+    { "what": "Server logs", "detail": "Technical messages (start, stop, errors, logins counted, admin actions) without passwords, keys or chat text.", "kept": "A few weeks, by the operating system." }
+  ],
+  "notStored": [
+    "No real names, birthdays, phone numbers or payment details — the game never asks.",
+    "No advertising or tracking cookies, no analytics service, no third-party scripts except the optional Cloudflare \"are you human\" check on new accounts.",
+    "Your password in readable form, anywhere, ever."
+  ],
+  "thirdParties": [
+    { "who": "Cloudflare", "why": "Carries the connection to the server (the public link) and runs the \"are you human\" check when a new account is made. Cloudflare sees your network address like any website host would." }
+  ],
+  "yourChoices": [
+    "Play as a guest and nothing about you beyond the game itself is kept.",
+    "Claim with a username only — the email is optional.",
+    "Ask the game's keeper to delete your account and everything in it."
+  ],
+  "contact": "Ask in game (whisper the keeper) or through the page where you found the link.",
+  "keeper": "Radley Sustaire"
+}

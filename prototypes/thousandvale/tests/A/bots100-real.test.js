@@ -69,7 +69,7 @@ test('100 real-socket bots with herds: p99 <= 20 ms, worst < 50 ms, bandwidth in
     await stop(town70.slice(0, 60));
     const st = await getStatus(srv.url);
     assert.ok(st.director && st.director.state === 'live', 'the realm event is live: ' + JSON.stringify(st.director));
-    const fighters = await startBots(60, { url: srv.url, mode: 'fight', radius: 40, stagger: 30, seed: 19, joinTimeout: 30000 });
+    const fighters = await startBots(60, { url: srv.url, mode: 'fight', radius: 40, hunt: 0, stagger: 30, seed: 19, joinTimeout: 30000 });
     for (const b of fighters) {
       const go = () => b.net.travel('event');
       b.net.on('joined', j => {

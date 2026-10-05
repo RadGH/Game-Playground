@@ -34,6 +34,7 @@ import { createEventRunner, eventReward } from './events.js';
 import { eventScale } from './director.js';
 import { createQuestBook } from './quests.js';
 import { townFolk, blockAt } from './schedules.js';
+import { createMail } from './mail.js';
 
 const LEASE_MS = 30000, HEARTBEAT_MS = 10000, TICKET_WAIT_MS = 3000;
 export const BAG_MAX = 120;
@@ -57,6 +58,7 @@ export function createProvince(opts) {
     planDungeon = planTiers, filterText = t => t, chestResetMs = 30 * 60000,
     clock: realmClock = { epoch: wallNow(), dayMs: 2 * 3600000 }, travelFare = d => 2 + Math.round(d / 400),
     zoneEventFirstMs = null, zoneEventGapMs = null,        // tests: when the first / next zone event of a copy starts
+    mailOpts = {}, chatFilter = null,
   } = opts;
   const owner = processName + ':' + randomHex(4);
   const bootNonce = randomHex(4);
@@ -240,6 +242,9 @@ export function createProvince(opts) {
       case 'ignore': { const o = online.get(m.char); if (o) { o.char.ignore = m.list; journal(o, 'set', { k: 'ignore', v: m.list }); o.dirty = true; } return; }
       case 'mute': mute(m.char, m.until); return;
       case 'kick': { const o = online.get(m.char); if (o && o.conn) o.conn.kick(m.code || 'restart'); return; }
+      case 'claimed': { for (const o of online.values()) if (o.char.account === m.account) o.claimed = true; return; }
+      case 'charge': return chargeGold(m);
+      case 'callboard': return callboardEnter(m);
       case 'relocated': return relocated(m);
       case 'event': return onEvent(m);
       case 'waystones': remoteWaystones = m.list; return;
@@ -294,7 +299,7 @@ export function createProvince(opts) {
       case 'say': {
         if (muted(o.char)) return s.err('muted');
         const text = clean(m.text);
-        if (text) r.say(e, text, rc => !ignores(rc, o.char.id));
+        if (text) { r.say(e, text, rc => !ignores(rc, o.char.id)); send({ k: 'said', from: o.char.id, name: o.char.name, text, room: r.id }); }
         return;
       }
       case 'respawn': return respawn(o);
@@ -304,6 +309,7 @@ export function createProvince(opts) {
       case 'travel': return travel(o, m.to);
       case 'trace': return trace(o, m.kind);
       case 'quest': return questOp(o, m);
+      case 'mail': return mail.op(o, m).then(why => { if (typeof why === 'string') bad(s, why); });
       default: return bad(s, 'socket');
     }
   }
@@ -324,7 +330,7 @@ export function createProvince(opts) {
     if (tk.exp < now()) { s.err('ticket'); return s.closeSoon('ticket'); }
     s.state = 'busy'; s.account = tk.account; s.charId = tk.char;
     const existing = online.get(tk.char);
-    if (existing && !existing.relocating) { takeOver(existing, s); return; }
+    if (existing && !existing.relocating) { if (tk.claimed) existing.claimed = true; takeOver(existing, s); return; }
     return store.takeChar(tk.account, tk.char, owner, LEASE_MS).then(r => {
       if (s.closed) { if (!r.err) store.releaseChar(tk.char, owner); return; }
       if (r.err) { s.err('state', r.err === 'lease' ? 'That character is still logged in elsewhere. Try again in a few seconds.' : 'No such character.'); return s.closeSoon(r.err); }
@@ -333,7 +339,7 @@ export function createProvince(opts) {
       const ch = r.char;
       const place = placeFor(ch, tk);
       const client = makeClient(s);
-      const o = { char: ch, fence: r.fence, entity: null, room: place.room, conn: s, lingerUntil: 0, dirty: false, saving: false, savePending: false, lastSaveAt: now(), homeCopy: null, seq: ch.jseq || 0, savedSeq: ch.jseq || 0, lastPos: null, frozen: false, zone: null };
+      const o = { char: ch, fence: r.fence, entity: null, room: place.room, conn: s, lingerUntil: 0, dirty: false, saving: false, savePending: false, lastSaveAt: now(), homeCopy: null, seq: ch.jseq || 0, savedSeq: ch.jseq || 0, lastPos: null, frozen: false, zone: null, claimed: !!tk.claimed };
       online.set(ch.id, o);
       o.entity = place.room.addPlayer(ch, client, place.at);
       tagParty(o);
@@ -352,6 +358,12 @@ export function createProvince(opts) {
     }
     if (tk.at && P.has(tk.at.province)) {
       const pv = P.get(tk.at.province);
+      if (tk.at.door != null && pv.L.doors[tk.at.door]) {           // the Callboard sent this party straight into a dungeon
+        const inst = instanceFor(pv, tk.at.door, tk.at.party, ch.id, [ch.id]);
+        const d = pv.L.doors[tk.at.door];
+        ch.exit = { x: d.x + 3, z: d.z + 3 };
+        return { room: inst, at: inst.spawnPoint };
+      }
       return { room: roomAt(pv, tk.at, ch), at: { x: tk.at.x, z: tk.at.z } };
     }
     const rid = String(ch.room || '');
@@ -411,7 +423,7 @@ export function createProvince(opts) {
 
   // ---- presence for the gateway (parties, ignore, the director) ----
   function presence(o) {
-    send({ k: 'presence', char: o.char.id, name: o.char.name, cls: o.char.cls, level: o.char.level, room: o.room.id, province: provOf(o.room).L.key, online: !!o.conn, ignore: o.char.ignore || [], mutedUntil: o.char.mutedUntil || 0, account: o.char.account });
+    send({ k: 'presence', char: o.char.id, name: o.char.name, cls: o.char.cls, level: o.char.level, room: o.room.id, province: provOf(o.room).L.key, zone: o.zone || null, online: !!o.conn, ignore: o.char.ignore || [], mutedUntil: o.char.mutedUntil || 0, account: o.char.account });
   }
   function sendFrames() {
     const rows = [];
@@ -461,7 +473,7 @@ export function createProvince(opts) {
     const account = o.char.account;
     Promise.resolve(saveNow(o, true)).then(() => store.releaseChar(o.char.id, owner)).then(() => {
       send({ k: 'gone', char: o.char.id });
-      send({ k: 'relocate', char: o.char.id, account, province, at, via });
+      send({ k: 'relocate', char: o.char.id, account, province, at, via, claimed: !!o.claimed });
     });
     o.relocatingConn = o.conn;
   }
@@ -558,12 +570,47 @@ export function createProvince(opts) {
   function enterDungeon(o, doorObj) {
     const ch = o.char, p = partyOfChar(ch.id), pv = provOf(o.room);
     const doorIdx = doorObj.data.portal.door || 0;
-    const key = (p ? 'p' + p.id : 'c' + ch.id) + ':' + doorIdx;      // one instance per party PER DOOR (caves and dungeons)
-    let inst = pv.instances.get(key);
-    if (!inst) inst = makeInstance(pv, key, p ? p.id : null, p ? p.members : [ch.id], doorIdx);
-    inst.meta.allowed.add(ch.id);
+    const inst = instanceFor(pv, doorIdx, p ? p.id : null, ch.id, p ? p.members : [ch.id]);
     ch.exit = { x: doorObj.x + 3, z: doorObj.z + 3 };
     transfer(o, inst, inst.spawnPoint, 'portal');
+  }
+  /** One instance per party PER DOOR (caves and dungeons); made on first entry. */
+  function instanceFor(pv, doorIdx, partyId, charId, members) {
+    const key = (partyId ? 'p' + partyId : 'c' + charId) + ':' + doorIdx;
+    let inst = pv.instances.get(key);
+    if (!inst) inst = makeInstance(pv, key, partyId || null, members, doorIdx);
+    inst.meta.allowed.add(charId);
+    return inst;
+  }
+  /** The Callboard formed a group (js/sim/callboard.js): take this member into the party's instance of that door. */
+  function callboardEnter(m) {
+    const o = online.get(m.char);
+    if (!o || !o.entity || o.relocating) return;
+    if (m.party) partyOf.set(m.char, { id: m.party, leader: m.lead ?? m.members[0], members: m.members });
+    const pv = P.get(m.province);
+    if (!pv) return moveTo(o, m.province, { x: 0, z: 0, door: m.door, party: m.party }, 'callboard');   // another process: lands inside
+    const d = pv.L.doors[m.door];
+    if (!d) return;
+    if (o.entity.dead) { o.entity.revive(1); }
+    const inst = instanceFor(pv, m.door, m.party, o.char.id, m.members);
+    for (const c of m.members) inst.meta.allowed.add(c);
+    if (m.backfill && !inst.meta.backfill) inst.meta.backfill = m.backfill;
+    o.char.exit = { x: d.x + 3, z: d.z + 3 };
+    transfer(o, inst, inst.spawnPoint, 'callboard');
+    if (inst.meta.backfill && !inst.meta.backfilled && inst.rules && inst.rules.backfill) { inst.meta.backfilled = true; safeRules(inst, 'backfill', o.entity, inst.meta.backfill); }
+  }
+  /** The gateway takes gold for a service (a guild's founding fee): all or nothing, journaled, a sink. */
+  function chargeGold(m) {
+    const o = online.get(m.char);
+    const gold = Math.max(0, m.gold | 0);
+    if (!o || o.frozen || o.saving || (o.char.gold || 0) < gold) return send({ k: 'charged', req: m.req, ok: false });
+    o.char.gold -= gold;
+    journal(o, 'gold', { d: -gold });
+    econ.add('sink', m.reason || 'service', { gold }, o.char.level || 1);
+    if (o.conn) o.conn.sendJSON({ t: 'bag', add: [], remove: [], gold: o.char.gold });
+    o.dirty = true;
+    saveNow(o);
+    send({ k: 'charged', req: m.req, ok: true });
   }
   const objKey = (o, k) => (o.room.kind === 'instance' ? o.room.id : provOf(o.room).L.key) + ':' + k;
   function pruneOpened(ch, t) { ch.opened ||= {}; for (const k of Object.keys(ch.opened)) if (ch.opened[k] <= t) delete ch.opened[k]; }
@@ -611,13 +658,14 @@ export function createProvince(opts) {
     const key = o.room.kind === 'instance' ? o.room.id + ':' + c.key : objKey(o, c.key);
     const t = wallNow();
     pruneOpened(ch, t);
+    if (c.only && !c.only.includes(ch.id)) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'locked', msg: 'Only those who fought for it can open this.' });
     if ((ch.opened[key] || 0) > t) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'opened', msg: 'You already emptied this chest.' });
     if (c.after && !((ch.opened[objKey(o, c.after)] || 0) > t)) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'locked', msg: (c.afterName ? 'Try the ' + c.afterName.toLowerCase() + ' first.' : 'It will not open yet.') });
     const lvl = c.level || e.level;
     const items = (o.room.rules.rollLoot ? safeRules(o.room, 'rollLoot', e, { level: lvl, tier: c.tier }) : null) || [];
     const gold = Math.round(lvl * 4 + 5);
     ch.gold = (ch.gold || 0) + gold;
-    ch.opened[key] = t + (o.room.kind === 'instance' ? 24 * 3600000 : chestResetMs);
+    ch.opened[key] = t + (c.onceMs || (o.room.kind === 'instance' ? 24 * 3600000 : chestResetMs));
     journal(o, 'opened', { key, until: ch.opened[key] });
     s.sendJSON({ t: 'used', id: obj.id, ok: true, kind: 'chest' });
     o.room.emit({ type: 'open', to: e.id, d: obj.id, x: obj.x, z: obj.z });
@@ -681,16 +729,58 @@ export function createProvince(opts) {
       if (realmRun) realmRun.run.stop();
       const room = roomForPoint(pv, ev);
       realmRun = { room, run: createEventRunner({ room, ev: { ...ev, warnMs: 0 }, rng: () => room.host.random('event'), info: encounterInfo }) };
+      realmRun.run.contrib = new Map();
       realmRun.run.step();
     }
   }
+  /** Credit is by CONTRIBUTION (PLAN §5.2): damage to the event's monsters, healing someone in it, or a killing blow.
+   *  Enrolled but idle earns nothing; fallen but contributing still earns. Loot is personal. A realm WORLD BOSS also
+   *  leaves a cache only its contributors can open, and the first kill of the day rolls one extra reward each. */
   function rewardEvent(run, room) {
+    const paid = [];
     for (const c of run.enrolled) {
       const o = online.get(c);
-      if (!o || !o.entity || o.entity.dead) continue;
+      if (!o || !o.entity || o.room !== room) continue;
+      if (!((run.contrib && run.contrib.get(c)) > 0)) continue;
       questEvent(o, { kind: 'event', encounter: run.ev.boss || run.ev.id });
       const rw = eventReward(run.ev, o.room.rules, o.entity, () => room.host.random('event'));
+      const rwd = run.ev.reward || {};
+      if (rwd.firstKillDaily && rwd.firstKillDaily.item) {
+        const day = Math.floor(wallNow() / 86400000), key = 'wb:' + run.ev.id;
+        o.char.daily ||= {};
+        if (o.char.daily[key] !== day) {
+          o.char.daily[key] = day;
+          journal(o, 'set', { k: 'daily', v: o.char.daily });
+          const fk = rwd.firstKillDaily.item;
+          if (o.room.rules.rollLoot && room.host.random('event') < (fk.chance ?? 1)) rw.items = rw.items.concat(safeRules(o.room, 'rollLoot', o.entity, { level: run.ev.level, tier: fk.tier || 'legendary' }) || []);
+        }
+      }
       o.room.award(o.entity, { ...rw, reason: 'event' });
+      paid.push(c);
+    }
+    if (paid.length && run.ev.kind === 'worldboss' && run.ev.reward && run.ev.reward.chest) {
+      const v = run.view();
+      const chest = room.spawn({ kind: 'object', type: 'chest', name: 'World cache', x: v.x, z: v.z, team: 0,
+        data: { state: 'idle', chest: { key: 'wb:' + run.ev.uid, tier: (run.ev.reward.item && run.ev.reward.item.tier) || 'rare', level: run.ev.level || 10, only: paid, onceMs: 24 * 3600000 } } });
+      room.host.despawn(chest, 10 * 60000);
+    }
+    counters.eventPaid = (counters.eventPaid || 0) + paid.length;
+    send({ k: 'eventReward', uid: run.ev.uid, chars: paid });
+  }
+  function runByUid(uid) {
+    if (realmRun && realmRun.run.ev.uid === uid) return realmRun.run;
+    for (const z of zoneRuns.values()) if (z.run.ev.uid === uid) return z.run;
+    return null;
+  }
+  function contribute(ev, r) {
+    if (!realmRun && !zoneRuns.size) return;
+    const src = r.entities.get(ev.type === 'die' ? ev.by : ev.s), dst = r.entities.get(ev.d);
+    if (!src || !dst || src.kind !== 'player' || !src.char) return;
+    const add = (run, n) => { if (run && run.contrib) run.contrib.set(src.char.id, (run.contrib.get(src.char.id) || 0) + n); };
+    if (dst.kind === 'monster' && dst.data && dst.data.event) return add(runByUid(dst.data.event), ev.type === 'die' ? 1 : Math.max(1, ev.n || 1));
+    if (ev.type === 'hit' && ev.kind === 'heal' && dst.kind === 'player' && dst.char && (ev.n || 0) > 0) {
+      if (realmRun && realmRun.room === r && realmRun.run.enrolled.has(dst.char.id)) add(realmRun.run, ev.n * 0.5);
+      for (const z of zoneRuns.values()) if (z.room === r && z.run.enrolled.has(dst.char.id)) add(z.run, ev.n * 0.5);
     }
   }
   function frameTo(run, room) {
@@ -740,6 +830,7 @@ export function createProvince(opts) {
           if (t < zoneNext.get(key) || !here.length) continue;      // a zone event plays where somebody can see it
           const ev = { ...def, uid: def.id + ':' + room.id + ':' + t, scale: eventScale(here.length, opts.eventSize) };
           const run = createEventRunner({ room, ev, rng: () => room.host.random('event'), info: encounterInfo });
+          run.contrib = new Map();
           zoneRuns.set(key, { run, room, def });
           tellZone(here, { kind: def.warnMs ? 'soon' : 'start', ev: run.view(), text: def.announce[0] || undefined, at: def.warnMs ? wallNow() + def.warnMs : undefined });
           run.step();
@@ -761,6 +852,7 @@ export function createProvince(opts) {
     return d;
   }
   function observe(ev, r) {
+    if (ev.type === 'hit' || ev.type === 'die') contribute(ev, r);
     if (ev.type === 'hit' && ev.kind === 'dmg') {
       const src = r.entities.get(ev.s), dst = r.entities.get(ev.d);
       if (!src || !dst || src.kind !== 'player' || dst.kind !== 'monster' || !src.char) return;
@@ -838,7 +930,7 @@ export function createProvince(opts) {
       const moved = o.heatAt ? Math.round(Math.hypot(o.entity.x - o.heatAt.x, o.entity.z - o.heatAt.z) / 0.8) : 0;     // ~0.8 m a step
       o.heatAt = { x: o.entity.x, z: o.entity.z };
       if (moved) d.heat.set(cell, Math.min(65535, (d.heat.get(cell) || 0) + Math.min(moved, 20)));
-      if (o.zone !== z) { o.zone = z; o.conn.sendJSON(zoneMsg(pv, z)); }
+      if (o.zone !== z) { o.zone = z; o.conn.sendJSON(zoneMsg(pv, z)); presence(o); }
       if (pv.book.wantsPosition(o.char)) questEvent(o, { kind: 'visit', x: o.entity.x, z: o.entity.z });
     }
   }
@@ -1217,6 +1309,7 @@ export function createProvince(opts) {
   }
   const tickTimers = [];
   function setTimeoutTicks(fn, n) { tickTimers.push({ at: ticks + n, fn }); }
+  const mail = createMail({ store, online, journal, syncChar: o => syncChar(o), econ, trades, send, setTimeoutTicks, wallNow, filter: chatFilter, log, counters, BAG_MAX, saveNow: o => saveNow(o), opts: mailOpts });
 
   // ---- saving ----
   function syncChar(o) {
@@ -1325,7 +1418,22 @@ export function createProvince(opts) {
     await store.init();
     const n = await store.clearLeases(processName + ':');
     if (n) log(`cleared ${n} stale lease(s) from a previous run of ${processName}`);
-    send({ k: 'hello', proc, provinces: [...P.keys()], waystones: allWaystones().map(w => ({ key: w.key, name: w.name, x: w.x, z: w.z, province: w.province })) });
+    send({ k: 'hello', proc, provinces: [...P.keys()], waystones: allWaystones().map(w => ({ key: w.key, name: w.name, x: w.x, z: w.z, province: w.province })), doors: callboardDoors() });
+  }
+  /** Dungeon doors for the Callboard: real dungeons (not one-floor caves), with a name and a level band. */
+  function callboardDoors() {
+    const out = [];
+    for (const pv of P.values()) pv.L.doors.forEach((d, i) => {
+      if (d.kind === 'cave') return;
+      const ds = (d.sheet && d.sheet.dungeon) || {};
+      const lvl = ds.level || dungeonLevel;
+      const band = (d.sheet && d.sheet.band) || ds.band || [Math.max(1, lvl - 2), lvl + 3];
+      const fam = ds.family || (ds.families && ds.families[0]) || null;
+      const kind = fam ? fam.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : (d.name || 'Dungeon');
+      const where = d.sheet && d.sheet.name;
+      out.push({ key: pv.L.key + ':' + i, province: pv.L.key, door: i, zone: d.zone || null, name: where ? where + ': ' + kind : (ds.name || d.name || 'Dungeon'), level: lvl, band, floors: ds.floors || 2 });
+    });
+    return out;
   }
   async function shutdown(code = 'restart') {
     for (const s of [...kit.sessions]) s.kick(code);

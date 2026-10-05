@@ -198,3 +198,21 @@ test('Hunters vs Farmers on the same room: seats default to AI, a freed seat goe
   assert.equal(s.state.players[1].kind, 'human');
   assert.deepEqual(s.state.players.map(x => x.role), ['farmer', 'farmer', 'farmer', 'hunter']);
 });
+
+test('a guest whose transport only gets its id on join still owns its seat (PeerJS assigns ids late)', async () => {
+  const hub = createLoopbackHub({ seed: 3, latency: [20, 40] });
+  const th = hub.transport('host'), real = hub.transport('guest');
+  // Like PeerJS: no id until join() opens the peer.
+  let joined = false;
+  const tg = new Proxy(real, { get(t, k) { if (k === 'id') return joined ? t.id : null; if (k === 'join') return (c) => { joined = true; return t.join(c); }; const v = t[k]; return typeof v === 'function' ? v.bind(t) : v; } });
+  const host = await createRoom({ transport: th, name: 'Host', dataHash: data.hash, clock: hub.clock, code: 'LATEI'.replace('I', 'Z') });
+  const guest = await settle(hub, joinRoom({ transport: tg, code: 'LATEZ', name: 'Friend', dataHash: data.hash, clock: hub.clock }));
+  hub.advance(200);
+  assert.equal(guest.me, 'guest');
+  const key = guest.state.slots.find(s => s.kind === 'open').key;
+  guest.claim(key, { name: 'Friend' }); hub.advance(300);
+  const mine = guest.state.slots.find(s => s.key === key);
+  assert.equal(mine.owner, guest.me, 'the guest recognises its own seat');
+  guest.ready(key, true); hub.advance(300);
+  assert.equal(host.state.slots.find(s => s.key === key).ready, true);
+});

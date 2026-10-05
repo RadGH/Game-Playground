@@ -155,7 +155,7 @@ export async function createRoom({ transport, name = 'Host', dataHash, clock = r
   }, PING_MS);
 
   const room = {
-    code, isHost: true, me: transport.id, transport, get state() { return clone(state); }, on: ev.on,
+    code, isHost: true, get me() { return transport.id; }, transport, get state() { return clone(state); }, on: ev.on,
     configure({ mode: md, format: fm, map: mp } = {}) {
       if (state.phase !== 'lobby') return;
       if (md) state.mode = md;
@@ -250,7 +250,7 @@ export function joinRoom({ transport, code, name = 'Player', dataHash, clock = r
     transport.onPeer(e => { if (e.type === 'leave' && e.id === transport.hostId) { ev.emit('error', { code: 'host-left', message: NET_MESSAGES['host-left'] }); ev.emit('closed', {}); } });
     const req = msg => transport.send(transport.hostId, msg);
     const room = {
-      code, isHost: false, me: transport.id, transport, get state() { return state && clone(state); }, on: ev.on,
+      code, isHost: false, get me() { return transport.id; }, transport, get state() { return state && clone(state); }, on: ev.on,
       get rejoin() { return rejoinInfo; },
       claim(key, o = {}) { req({ t: 'l:claim', key, ...o }); },
       update(key, o = {}) { req({ t: 'l:update', key, ...o }); },

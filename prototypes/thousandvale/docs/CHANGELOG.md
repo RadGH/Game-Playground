@@ -464,3 +464,10 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 ## 2026-10-05 — C: perf pass for A's 100-bot gate
 - Profiled the spread phase: the spikes were a level-up's build view formatting ~70 talent cards (up to 38 ms/tick) and first-time pathfinding cells sampling the terrain (15 ms/tick). Talent card text is cached; first-time cells are paid from the pathfinder's per-tick budget (`PATH.EVAL_COST`) and take the slope/water test once per cell; idle monsters with nobody within 70 m think every 4th tick (rooms only, `field.lod`; parity unaffected).
 - tests/A/bots100 (TV_PERF, quiet VM): spread p99 22 -> 11.4-11.7 ms, worst 37.5 -> 18-21 ms; all three phases pass. bots100-real passes (spread p99 13.6). tests/C 165/165, tests/A 137/137.
+- **D-UI follow-up (same day)**: gear icons no longer freeze the game (D-world's profile: 3–4 s an icon from `toDataURL` just
+  after joining): icons render only while the character window is open, one per idle period, 96 px Lambert, read back with
+  `drawImage` + async `toBlob`, cached in IndexedDB (the localStorage data: URL cache is deleted); `tests/D/inventory.spec.js`
+  "no freeze" measures every synchronous icon step (≤ 100 ms even on this VM's software renderer). The "[object Object]" menu
+  badge was C's `perkPoints` object; badges are numbers only and the Skills/Perk windows read `talentTree` + `perkPoints.left`
+  (picks go to the server; refunds say "an Unbinder in town"). The m3-server test hook levels a character through real XP so
+  the rules' sheet levels too.

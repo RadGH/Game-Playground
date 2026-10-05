@@ -12,7 +12,7 @@
 // armour, jewellery, upgrades, other), a sort and a name search sit over the bag. DOM only.
 
 import { DOLL_LEFT, DOLL_RIGHT, DOLL_BOTTOM, DOLL_EXTRA, SLOT_NAME, FILTERS, SORTS, viewBag, slotOf, altSlotOf, levelCheck, isUpgrade, rarityOf } from './ui/inv-core.js';
-import { iconFor, onIcon, specFor } from './ui/item-icons.js';
+import { iconFor, onIcon, specFor, iconsActive } from './ui/item-icons.js';
 import { installItemCards, rememberItems, scoreOf, nameOf, farholdReady } from './ui/item-card.js';
 import { hideTip, installGameTips } from './ui/tips.js';
 import { confirmBox } from './ui-panel.js';
@@ -74,6 +74,7 @@ export function createBag({ net: getNet, hud, me = null }) {
 
   function toggle(open = root.hidden) {
     root.hidden = !open; btn?.classList.toggle('on', open);
+    iconsActive(open);                    // icons render only while this window is open (P1: no freezes in play)
     if (open) draw(); else hideTip();
     return open;
   }

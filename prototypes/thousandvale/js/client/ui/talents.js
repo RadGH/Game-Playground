@@ -180,7 +180,7 @@ export function createTalentsUi({ net: getNet, hud, me }) {
     graph.set(S.src.forest, st.state, { arms });
     const tot = perkTotals(S.src, S.perks);
     const lines = Object.entries(tot).map(([k, v]) => `${v > 0 ? '+' : ''}${Math.round(v * (k === 'spellPower' ? 100 : 1) * 10) / 10}${STAT_NAME[k] || ' ' + k}`);
-    perkBody.side.replaceChildren(h('p.pf-help', {}, 'Drag to look around, wheel or pinch to zoom. Click a ', h('b.g', {}, 'glowing'), ' node next to one you hold to take it; right-click (or hold) a taken one at the end of a path to hand it back.'),
+    perkBody.side.replaceChildren(h('p.pf-help', {}, 'Drag to look around, wheel or pinch to zoom. Click a ', h('b.g', {}, 'glowing'), ' node next to one you hold to take it; right-click (or hold) a taken one at the end of a path to hand it back', S.server.perks ? ' (an Unbinder in town does that, for a little gold).' : '.'),
       ...(lines.length ? [h('p.pf-totals', {}, h('b', {}, 'Your perks: '), lines.join(' · '))] : []));
   }
   function focusArm(a) {
@@ -223,8 +223,10 @@ export function createTalentsUi({ net: getNet, hud, me }) {
     const ladder = skillLadder(S.src, me()?.cls || 'warrior', level, bar());
     const w = talentPicksWaiting(S.src, ladder, S.talents, level);
     const left = S.serverLeft ?? forestState(S.src, S.perks, level, S.bonus).left;
-    document.getElementById('menu-skills')?.querySelector('b')?.replaceChildren(w ? String(w) : '');
-    document.getElementById('menu-perks')?.querySelector('b')?.replaceChildren(left ? String(left) : '');
+    // badges only ever show a positive whole number (the server's perkPoints is an object — it once printed "[object Object]")
+    const num = v => { const n = Number(typeof v === 'object' && v ? v.left : v); return Number.isFinite(n) && n > 0 ? String(Math.round(n)) : ''; };
+    document.getElementById('menu-skills')?.querySelector('b')?.replaceChildren(num(w));
+    document.getElementById('menu-perks')?.querySelector('b')?.replaceChildren(num(left));
   }
   function refresh() { drawSkills(); drawPerks(); badges(); }
   setInterval(() => { const l = lvl(); if (l !== lastLevel) { lastLevel = l; refresh(); } }, 1000);

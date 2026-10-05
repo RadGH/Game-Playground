@@ -1,6 +1,11 @@
 // Gear icons from the 3D models (play-test P16). Each distinct picture (inv-core.js iconSpec key) is rendered
-// ONCE on a small renderer of our own (never the game's), kept in memory and in localStorage (versioned; any
-// storage error is ignored), and handed to the UI as a data: URL.
+// ONCE on a small renderer of our own (never the game's), kept in memory as an object URL and in IndexedDB as a
+// PNG blob (versioned; any storage error is ignored).
+//
+// NO FREEZES (play-test P1, D-world's profile: 3.3–4.1 s a icon from toDataURL right after joining): icons render
+// only while the character window is OPEN (`iconsActive(true)`), ONE per idle period with a gap between them, at
+// 96 px, with a cheap Lambert material; the read-back is drawImage into a small 2D canvas and the PNG encode is the
+// async `toBlob`. Nothing is ever encoded with toDataURL. Boot reads the cache from IndexedDB asynchronously.
 //
 //   import { iconFor, onIcon } from './ui/item-icons.js';
 //   const url = iconFor(item);            // a data URL now if cached, else null (rendering starts in the background)
@@ -14,26 +19,46 @@ import * as THREE from 'three';
 import { buildHeld, buildOffhand } from '../../../../../avatar-3d/js/chibi2-gear.js';
 import { iconSpec } from './inv-core.js';
 
-const VERSION = 'v2';
-const SIZE = 96, SS = 2, PX = SIZE * SS;
-const STORE = 'tv.icons.' + VERSION;
-const mem = new Map();               // key -> data URL
+const VERSION = 'v3';
+const SIZE = 96, PX = SIZE;
+const DB = 'tv-icons', OS = 'icons';
+const mem = new Map();               // key -> object URL
 const waiting = new Set();           // keys queued or rendering
 const listeners = new Set();
 let looks = null;                    // Farhold's heldLookFor / offhandLookFor (loaded once)
 let lookLoad = null;
 
-// ---- storage (one JSON blob; dropped on a version bump) ----
-try {
-  const raw = localStorage.getItem(STORE);
-  if (raw) for (const [k, v] of Object.entries(JSON.parse(raw))) mem.set(k, v);
-  for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && k.startsWith('tv.icons.') && k !== STORE) localStorage.removeItem(k); }
-} catch { /* private window / blocked storage: memory only */ }
-let saveT = 0;
-function persist() {
-  clearTimeout(saveT);
-  saveT = setTimeout(() => { try { localStorage.setItem(STORE, JSON.stringify(Object.fromEntries(mem))); } catch { /* full or blocked */ } }, 800);
+// ---- storage: IndexedDB, blobs keyed by VERSION + icon key (async; a private window just keeps memory) ----
+// the old localStorage cache (big data: URLs parsed synchronously at boot) is removed once
+try { for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && k.startsWith('tv.icons.')) localStorage.removeItem(k); } } catch { /* blocked */ }
+let dbP = null;
+function db() {
+  if (dbP) return dbP;
+  dbP = new Promise(res => {
+    try {
+      const r = indexedDB.open(DB, 1);
+      r.onupgradeneeded = () => r.result.createObjectStore(OS);
+      r.onsuccess = () => res(r.result); r.onerror = () => res(null); r.onblocked = () => res(null);
+    } catch { res(null); }
+  });
+  return dbP;
 }
+const cacheReady = (async () => {
+  const d = await db(); if (!d) return;
+  await new Promise(res => {
+    try {
+      const tx = d.transaction(OS, 'readonly'), st = tx.objectStore(OS), req = st.openCursor();
+      req.onsuccess = () => { const c = req.result; if (!c) return res(); const k = String(c.key); if (k.startsWith(VERSION + ':') && c.value instanceof Blob) mem.set(k.slice(VERSION.length + 1), URL.createObjectURL(c.value)); c.continue(); };
+      req.onerror = () => res();
+    } catch { res(); }
+  });
+  if (mem.size) for (const fn of listeners) { try { fn(null); } catch {} }
+})();
+async function persist(key, blob) {
+  const d = await db(); if (!d || !blob) return;
+  try { d.transaction(OS, 'readwrite').objectStore(OS).put(blob, VERSION + ':' + key); } catch { /* quota / blocked */ }
+}
+const toBlobUrl = c => new Promise(res => c.toBlob(b => res(b ? { blob: b, url: URL.createObjectURL(b) } : null), 'image/png'));
 
 export function onIcon(fn) { listeners.add(fn); return () => listeners.delete(fn); }
 export function loadLooks() {
@@ -52,23 +77,38 @@ export function iconFor(item) {
   if (!waiting.has(spec.key)) { waiting.add(spec.key); queue.push(spec); pump(); }
   return null;
 }
-export const iconStats = () => ({ cached: mem.size, waiting: waiting.size });
+export const iconStats = () => ({ cached: mem.size, waiting: waiting.size, active, slowest: Math.round(slowest), maxSync: Math.round(maxSync), spans: spans.slice() });
+/** Render only while a window that shows icons is open (the bag). Off = the queue waits. */
+let active = false, slowest = 0, maxSync = 0;
+const spans = [];
+const syncSpan = (t0, what = '') => { const d = performance.now() - t0; if (d > maxSync) maxSync = d; spans.push(what + ':' + Math.round(d)); if (spans.length > 40) spans.shift(); return d; };
+export { syncSpan };
+export function iconsActive(on) { active = !!on; if (active) pump(); }
+export { cacheReady };
 
 // ---- the render queue (one at a time, between frames) ----
 const queue = [];
 let busy = false;
+const idle = () => new Promise(r => setTimeout(() => (typeof requestIdleCallback === 'function' ? requestIdleCallback(r, { timeout: 600 }) : r()), 180));
 async function pump() {
-  if (busy || !queue.length) return;
+  if (busy || !queue.length || !active) return;
   busy = true;
   try {
-    await loadLooks();
-    while (queue.length) {
+    await Promise.all([loadLooks(), cacheReady]);
+    while (queue.length && active) {
+      await idle();                                   // one icon per idle period, with a gap: the game keeps its frames
+      if (!active) break;
       const spec = queue.shift();
-      let url = null;
-      try { url = await render(spec); } catch (e) { console.warn('[icons]', spec.key, e.message); url = glyphUrl({ kind: 'glyph', id: 'bundle', color: '#a08060' }); }
-      mem.set(spec.key, url); waiting.delete(spec.key); persist();
+      if (mem.has(spec.key)) { waiting.delete(spec.key); continue; }
+      const t0 = performance.now();
+      let canvas = null;
+      try { canvas = await render(spec); } catch (e) { console.warn('[icons]', spec.key, e.message); canvas = glyphCanvas({ kind: 'glyph', id: 'bundle', color: '#a08060' }); }
+      slowest = Math.max(slowest, performance.now() - t0);
+      const out = await toBlobUrl(canvas);           // async PNG encode, off the frame
+      waiting.delete(spec.key);
+      if (!out) continue;
+      mem.set(spec.key, out.url); persist(spec.key, out.blob);
       for (const fn of listeners) { try { fn(spec.key); } catch {} }
-      await new Promise(r => (typeof requestIdleCallback === 'function' ? requestIdleCallback(r, { timeout: 120 }) : setTimeout(r, 16)));
     }
   } finally { busy = false; }
 }
@@ -78,7 +118,7 @@ let R = null;
 function stage() {
   if (R) return R;
   const canvas = document.createElement('canvas'); canvas.width = PX; canvas.height = PX;
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true, powerPreference: 'low-power' });
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, preserveDrawingBuffer: true, powerPreference: 'low-power' });
   renderer.setPixelRatio(1); renderer.setSize(PX, PX, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
   renderer.setClearColor(0x000000, 0);
@@ -119,7 +159,8 @@ function itemModel(spec) {
   for (const [list, opts] of [[cloth, { roughness: 0.7, metalness: 0.05 }], [metal, { roughness: 0.32, metalness: 0.75 }]]) {
     for (const [geo, color] of list) {
       if (!geo.attributes.normal) geo.computeVertexNormals();
-      group.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color, side: THREE.DoubleSide, ...opts })));
+      // Lambert: one cheap shader for every icon (compiled once); metal reads from a brighter emissive edge
+      group.add(new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide, emissive: new THREE.Color(color).multiplyScalar(opts.metalness > 0.5 ? 0.18 : 0.04) })));
     }
   }
   // weapons lie on the diagonal pointing up-right (hand space runs the blade along -y); a shield is built
@@ -149,7 +190,11 @@ async function armourShot(spec) {
   Object.assign(base, { hat: { id: 'none' }, cape: { id: 'none' }, decor: { id: 'none' }, held: { id: 'none' }, offhand: { id: 'none' },
     top: { id: 'tunic', color: '#4a4038' }, bottom: { id: 'pants', color: '#3a3028' }, shoes: { id: 'boots', color: '#3a2a1e' } });
   base[spec.slot] = { id: spec.id, color: spec.color, ...(spec.color2 ? { color2: spec.color2 } : {}) };
+  let t0 = performance.now();
   const actor = await create(base);
+  syncSpan(t0, 'body');                             // (the body build: measured as one span, awaits included)
+  await new Promise(r => setTimeout(r, 0));         // give the frame back between building and drawing
+  t0 = performance.now();
   const { scene, camera } = stage();
   scene.add(actor.group);
   actor.setAnim?.('idle', 0); for (let i = 0; i < 4; i++) actor.update?.(0.15);
@@ -160,16 +205,21 @@ async function armourShot(spec) {
   if (!n) { _box.setFromObject(actor.group); _box.getCenter(target); } else target.multiplyScalar(1 / n);
   target.y += H * F.lift;
   aim(camera, target, H * F.radius, F.yaw, F.pitch ?? 0.12);
+  syncSpan(t0, 'pose');
+  await new Promise(r => setTimeout(r, 0));         // and between posing and drawing
+  t0 = performance.now();
   const shot = shoot();
   scene.remove(actor.group); actor.dispose();
+  syncSpan(t0, 'armourShot');
   return shot;
 }
 
 async function render(spec) {
-  if (spec.kind === 'glyph') return glyphUrl(spec);
+  if (spec.kind === 'glyph') return glyphCanvas(spec);
   let shot;
   if (spec.kind === 'armour') shot = await armourShot(spec);
   else {
+    const t0 = performance.now();
     const { scene, camera } = stage();
     const obj = itemModel(spec);
     scene.add(obj); obj.updateMatrixWorld(true);
@@ -177,8 +227,9 @@ async function render(spec) {
     const c = _box.getCenter(new THREE.Vector3()), size = _box.getSize(new THREE.Vector3());
     aim(camera, c, Math.max(size.x, size.y, size.z) * (spec.kind === 'offhand' ? 0.55 : 0.5), 0.25, 0.1);
     shot = shoot(); scene.remove(obj); disposeTree(obj);
+    syncSpan(t0, spec.kind);
   }
-  return finish(shot).toDataURL('image/png');
+  return finish(shot);
 }
 
 /** Transparent square with a soft shadow; the slot behind it carries the rarity colour. */
@@ -189,8 +240,8 @@ function finish(subject) {
   return c;
 }
 
-/** 2D pictures for things with no model: ring, amulet, potion, focus, junk, a bundle. */
-export function glyphUrl(spec) {
+/** 2D pictures for things with no model: ring, amulet, potion, focus, junk, a bundle (a canvas). */
+export function glyphCanvas(spec) {
   const c = canvas2d(SIZE), g = c.getContext('2d'), s = SIZE / 128, col = spec.color || '#d0a040';
   g.save(); g.translate(SIZE / 2, SIZE / 2); g.scale(s, s); g.lineJoin = 'round'; g.lineCap = 'round';
   g.shadowColor = 'rgba(0,0,0,0.6)'; g.shadowBlur = 6; g.shadowOffsetY = 2;
@@ -219,5 +270,5 @@ export function glyphUrl(spec) {
     g.fillStyle = '#d9b477'; g.fillRect(-14, -30, 28, 9);
   }
   g.restore();
-  return c.toDataURL('image/png');
+  return c;
 }

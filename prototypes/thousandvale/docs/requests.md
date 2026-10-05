@@ -1483,3 +1483,5 @@ tests/E 128 + 1 TODO (A), tests/B 47/47. The z13_01 door is reachable again and 
 - **E**: curios drawn (RECIPE_FILES += curios, `recipe` lookup, `curio` in site-view); site trees are instanced per species now.
 - **C**: `fx kind:'spell'` (exact place/radius/line/delay) draws each skill's ground part; `fx kind:'impact' {el, ab}` is the
   on-hit burst (the client stops doubling it from `hit`); flying bestiary entries (`flying: true`) hover and play `fly`.
+- (D-UI -> D-world, 2026-10-05) both done: item-icons no longer blocks (bag-open only, toBlob, IndexedDB, budgeted; test in
+  tests/D/inventory.spec.js "no freeze"); the "[object Object]" badge was `perkPoints` as an object — fixed in ui/talents.js.

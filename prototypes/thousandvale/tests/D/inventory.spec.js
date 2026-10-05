@@ -44,6 +44,41 @@ async function join_(browser, name, viewport) {
 }
 const bag = page => page.evaluate(() => window.thousandvale.bag.state.bag.length);
 
+// P1 (D-world's profile): icon rendering froze the main thread 3–4 s an icon right after joining. Now icons render only
+// while the bag is open, one per idle period, no toDataURL. This watches every long task (> 100 ms) from 4 s after
+// joining through opening the bag and rendering every icon.
+test('no freeze: joining with a full bag and opening it has no main-thread task over 100 ms from the icons', async ({ browser }) => {
+  test.setTimeout(240000);
+  const P = await join_(browser, 'Calmhand', { width: 1280, height: 720 });
+  const { page } = P;
+  expect((await hook('/roll', { name: 'Calmhand', n: 18, level: 6 })).ok).toBe(true);
+  await expect.poll(() => bag(page), { timeout: 15000 }).toBeGreaterThanOrEqual(14);
+  await page.waitForTimeout(4000);                                   // let the world finish streaming in
+  await page.evaluate(() => {
+    window.__lt = [];
+    new PerformanceObserver(l => { for (const e of l.getEntries()) window.__lt.push({ t: Math.round(e.startTime), ms: Math.round(e.duration) }); }).observe({ type: 'longtask' });
+  });
+  // bag CLOSED for a while: nothing renders
+  await page.waitForTimeout(3000);
+  const closed = await page.evaluate(async () => (await import('./js/client/ui/item-icons.js')).iconStats());
+  expect(closed.active).toBe(false);
+  // open it and let every icon render
+  await page.keyboard.press('KeyB');
+  await expect.poll(() => page.locator('#bag-grid .islot.pending').count(), { timeout: 120000, message: 'icons rendered' }).toBe(0);
+  const stats = await page.evaluate(async () => (await import('./js/client/ui/item-icons.js')).iconStats());
+  const tasks = await page.evaluate(() => window.__lt);
+  console.log('icon stats', JSON.stringify(stats), 'long tasks', JSON.stringify(tasks));
+  // This VM draws with a SOFTWARE renderer (~4 fps), so every game frame is itself a "long task" of 150–300 ms and the
+  // raw long-task list cannot single the icons out. What the icons own is measured directly: every synchronous piece
+  // of icon work (build, pose, draw, read back) must stay under 100 ms even here (a few ms on a real GPU), and the old
+  // multi-second freezes must be gone from the long-task list.
+  expect(stats.maxSync, `slowest synchronous icon step ${stats.maxSync} ms: ${stats.spans.join(' ')}`).toBeLessThanOrEqual(100);
+  const worst = Math.max(0, ...tasks.map(t => t.ms));
+  expect(worst, `worst main-thread task ${worst} ms`).toBeLessThan(1000);
+  expect(P.errors).toEqual([]);
+  await P.ctx.close();
+});
+
 test('character window: doll + bag, icons, item card with required level, equip, filters', async ({ browser }) => {
   const P = await join_(browser, 'Invtest', { width: 1280, height: 720 });
   const { page } = P;

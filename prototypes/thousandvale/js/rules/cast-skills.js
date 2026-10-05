@@ -5,17 +5,20 @@
 // resources, cooldowns, costs); this file only carries it out.
 //
 // MMO changes (PLAN §6.2):
-//   * "the player" is the caster; "allies" are the caster's party in the room (+ their pets);
-//   * a heal, shield, buff or revive that names a friendly `target` goes to that ally
-//     (ally targeting); healing makes threat on whatever already fights the healed ally;
+//   * "the player" is the caster; "allies" are the caster's own followers plus the party (and their
+//     pets) within ALLY_RANGE (30 m) — a group effect never reaches across the room;
+//   * ally targeting (README "Ally targeting", audited for all 30 classes by tests/C/ally-audit):
+//     a heal, barrier, ward, cleanse, mend-over-time (regen), link or follower status that names a
+//     friendly `target` goes to that ally; "you and every follower" (`pets`) is you + party + followers;
+//     any other status or selfBuff is personal and stays on the caster;
+//   * healing makes threat on whatever already fights the healed ally;
 //   * a taunt is a threat-table taunt (js/rules/threat.js), so it holds after it runs out;
 //   * a link (Sworn Ward, Sworn Guard) binds to a party member, not only a follower;
 //   * every timer is the room clock (`combat.later`), never setTimeout.
 //
-// Not ported yet (refused or skipped with a reason, never silently): summons and forms (need the
-// follower system, M2), channels, rewind, afterimage, mimic, unique attack powers (`resolveAttack`),
-// clusters, corpse bursts. js/rules/README.md keeps the list; `PENDING_KEYS` below is what a plan is
-// checked against so a cast that carries one reports it in `result.pending`.
+// Everything a plan can carry is acted on (`PENDING_KEYS` is empty; summons and forms run through
+// js/rules/followers.js, unique powers through Farhold's own uniques.js). A cast in a room with no
+// follower system attached is refused with a reason rather than silently dropping its summon.
 
 import {
   applyStatus, controlFor, mechWorld, placeObject, tickPlaced, tickWalls, addWall, addCorpse, takeCorpses,
@@ -26,8 +29,8 @@ import { taunt as threatTaunt, threatFromHeal } from './threat.js';
 
 /** plan keys this file does not act on yet — reported, never silently dropped */
 export const PENDING_KEYS = [];   // everything a plan can carry is acted on (followers via js/rules/followers.js)
-/** kinds of plan the dispatcher refuses (no follower system yet) */
-const REFUSED_KINDS = { summon: 'summons arrive with followers (M2)', form: 'shape forms arrive with followers (M2)' };
+/** kinds of plan the dispatcher refuses in a room built without js/rules/followers.js (tests, tools) */
+const REFUSED_KINDS = { summon: 'This place has no room for followers.', form: 'Shapes and stances need the follower system, which this place lacks.' };
 
 export const BOLT_SPEED = 48;          // main.js
 const ALLY_RANGE = 30;                 // how far an ally-targeted heal/buff reaches
@@ -44,8 +47,13 @@ function runtimeOf(combat) {
   combat.skillRt = rt;
 
   // ---- allies: the caster's party (and their pets) standing in this room
-  const allies = ch => field.friends().filter(f => f === ch || (ch.partyId != null && (f.partyId === ch.partyId || f.owner?.partyId === ch.partyId)) || f.owner === ch);
+  // (your own followers wherever they are, as Farhold has it; other party members and their pets only
+  // within ALLY_RANGE — a group heal or a "you and every follower" buff never reaches across the room)
+  const allies = ch => field.friends().filter(f => f === ch || f.owner === ch
+    || (ch.partyId != null && (f.partyId === ch.partyId || f.owner?.partyId === ch.partyId) && Math.hypot(f.x - ch.x, f.z - ch.z) <= ALLY_RANGE));
   rt.allies = allies;
+  /** party PLAYERS (not the caster, not pets) a group effect reaches */
+  rt.partyPlayers = ch => allies(ch).filter(u => u !== ch && u.kind === 'player');
   const lift = ch => 1 + (ch.derived?.healingPct || 0);
   /** heal `u` by `amount`, credit the healer's threat; returns what was actually healed */
   function healUnit(healer, u, amount) {
@@ -809,8 +817,13 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
         out.healTarget = to.id;
       }
       if (plan.status && plan.statusSpec) {
-        applyStatus(to, plan.status, plan.statusSpec, 1);
+        // ally audit (M2): "you and every follower" (`pets`) is a GROUP buff — you, the party in range
+        // and your followers; a mend over time (regen) can be aimed at one ally (+ your followers, as
+        // Farhold mends them with you); any other status is personal and stays on the caster.
+        const on = plan.pets ? [ch, ...rt.partyPlayers(ch)] : plan.status === 'regen' ? [to] : [ch];
+        for (const u of on) applyStatus(u, plan.status, plan.statusSpec, 1);
         if (plan.pets || plan.status === 'regen') for (const u of rt.allies(ch)) if (u.owner === ch) applyStatus(u, plan.status, plan.statusSpec, 1);
+        out.statusOn = on.map(u => u.id);
       }
       if (plan.trail) ch.trail = { left: plan.trail.seconds, step: plan.trail.step || 1.4, radius: plan.trail.radius, burns: plan.trail.burns, power: plan.mult, element: plan.element, lastX: ch.x, lastZ: ch.z };
       if (plan.orbs) rt.startOrbs(ch, plan);
@@ -1151,10 +1164,14 @@ function afterCast(combat, rt, ch, plan, ctx) {
   if (plan.summon && typeof plan.summon === 'object' && Fo) rt.summonFrom(ch, plan, spot);
   if (plan.barrier && typeof plan.barrier === 'object') {
     const b = plan.barrier;
-    const to = allyTargetOf(rt, ch, ctx.intent);
+    // a named ally takes it (worth their own health); "you and every follower" (`pets`) is the caster,
+    // the party in range and the followers, each worth the CASTER's share (the card's wording)
+    const to = b.pets ? ch : allyTargetOf(rt, ch, ctx.intent);
     const worth = b.of === 'paid' ? (plan.hpPaid || 0) : Math.round(to.maxHp * (b.share ?? 0.2));
-    to.barrier = Math.max(to.barrier || 0, worth);
-    to.castBarrierFor = b.seconds ?? 6;
+    for (const u of b.pets ? [ch, ...rt.partyPlayers(ch)] : [to]) {
+      u.barrier = Math.max(u.barrier || 0, worth);
+      u.castBarrierFor = b.seconds ?? 6;
+    }
     if (b.pets) Fo?.barrierAll(ch, worth, b.seconds ?? 6);
   }
   if (plan.healPets) {
@@ -1224,8 +1241,10 @@ function afterCast(combat, rt, ch, plan, ctx) {
   if (plan.ward) {
     const w = plan.ward;
     const give = u => apply(u, `ward:${plan.skill?.id}`, { name: plan.skill?.name || 'Ward', kind: 'buff', element: plan.element, seconds: w.seconds ?? 10, ward: { charges: w.charges ?? 1, threshold: w.threshold ?? null, cap: w.cap ?? null } });
-    give(ch);
-    if (w.pets) for (const u of rt.allies(ch)) if (u.owner === ch) give(u);
+    // a ward is a shield: aimed at an ally it lands on them; "you and every follower" (`pets`) is the
+    // caster, the party in range and the followers
+    if (w.pets) { give(ch); for (const u of rt.allies(ch)) if (u !== ch) give(u); }
+    else give(allyTargetOf(rt, ch, ctx.intent));
   }
   if (plan.place && plan.kind !== 'ground' && !plan.dash) {
     const follow = plan.place.follow === 'self' ? 'self' : plan.place.follow === 'target' ? aimedEnemy(field, ch, ctx.intent, a, plan.range || 30) : null;
@@ -1266,7 +1285,8 @@ function afterCast(combat, rt, ch, plan, ctx) {
   if (plan.clusters && plan.kind === 'ground') clusterStrikes(combat, rt, ch, plan, spot);
   if (plan.allyStatus) {
     const as = plan.allyStatus;
-    const list = as.target === 'all' ? (Fo?.of(ch) || []).filter(x => x.dying == null) : [allyTargetOf(rt, ch, ctx.intent, plan.range || 30)].filter(u => u && u !== ch);
+    // 'all' = every follower and (MMO) every party member in range
+    const list = as.target === 'all' ? [...(Fo?.of(ch) || []).filter(x => x.dying == null), ...rt.partyPlayers(ch)] : [allyTargetOf(rt, ch, ctx.intent, plan.range || 30)].filter(u => u && u !== ch);
     const r = statusRef(as.status);
     for (const u of list) apply(u, r.id, { ...statusSpec(r.id), ...r, seconds: as.seconds ?? r.seconds ?? statusSpec(r.id)?.seconds ?? 4 });
     if (as.self) apply(ch, r.id, { ...statusSpec(r.id), ...r, seconds: as.seconds ?? 4 });

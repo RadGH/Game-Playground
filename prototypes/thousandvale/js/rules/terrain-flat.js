@@ -8,6 +8,8 @@
 //   waterAt(x, z) -> depth (0 = dry)  underwater(x, z) -> bool
 //   roadAt(x, z) -> 0..1              clampToWorld(x, z) -> [x, z]
 //   biomeIdAt(x, z) -> id (only the spawner reads it)
+//   blocked(x, z) -> bool   OPTIONAL: nav.bin's solid scatter/buildings/deep water (index.js adds it
+//                           from `host.terrain.nav`; monster-ai.js slides along it)
 
 export function flatTerrain({ height = 0, size = Infinity } = {}) {
   const half = size / 2;

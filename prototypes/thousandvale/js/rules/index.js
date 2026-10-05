@@ -62,7 +62,11 @@ function whyCode(text = '') {
 function terrainFrom(host) {
   // stream B's reader when the room hands it over (docs/world.md `groundAdapter`): real slopes and depths
   const reader = host.terrain?.reader || host.terrainReader || null;
-  if (reader) return groundAdapter(reader);
+  // B's nav.bin (`parseNav`) when the room hands it over: trees, rocks, buildings and deep water block
+  // a monster's step (monster-ai.js `blocked`); without it monsters read slopes and water only
+  const nav = host.terrain?.nav || host.nav || null;
+  const blocked = nav?.passable ? (x, z) => !nav.passable(x, z) : null;
+  if (reader) { const g = groundAdapter(reader); if (blocked) g.blocked = blocked; return g; }
   const h = (x, z) => host.groundAt(x, z);
   const S = 0.75;
   return {
@@ -79,6 +83,7 @@ function terrainFrom(host) {
     roadAt: () => 0,
     clampToWorld: (x, z) => [x, z],
     biomeIdAt: () => 0,
+    ...(blocked ? { blocked } : {}),
   };
 }
 

@@ -392,6 +392,8 @@ export function tickMonsters(field, dt, hooks = {}) {
         let [cx, cz] = clampW(field, nx, nz);
         if (!e.hover) [cx, cz] = unstick(field, cx, cz, (e.reach || 2) * 0.28, e.x, e.z);
         const t = T(field);
+        // Thousandvale: knocked back into a tree or a wall (nav.bin) stops there
+        if (!e.hover && t?.blocked && t.blocked(cx, cz) && !t.blocked(e.x, e.z)) { cx = e.x; cz = e.z; }
         if (!wet(field, cx, cz, e.y) && (e.hover || !t || climbable(t, cx, cz, e.x, e.z, 0, e.y))
           && Math.hypot(cx - e.x, cz - e.z) > step * 0.4) {
           e.x = cx; e.z = cz;
@@ -597,6 +599,13 @@ export function tickMonsters(field, dt, hooks = {}) {
       const t = T(field);
       if (!e.hover && t) [cx, cz] = cliffStep(t, e, cx, cz, dt, { feet: e.y }, [0, 0]);
       if (!e.hover) [cx, cz] = unstick(field, cx, cz, (e.reach || 2) * 0.28, e.x, e.z);
+      // Thousandvale: a baked zone's solid scatter and buildings (nav.bin) — slide along, never through.
+      // A body already standing on a blocked sample may walk off it. (No `blocked` = Farhold's rules.)
+      if (!e.hover && t?.blocked && t.blocked(cx, cz) && !t.blocked(e.x, e.z)) {
+        if (!t.blocked(cx, e.z)) cz = e.z;
+        else if (!t.blocked(e.x, cz)) cx = e.x;
+        else { cx = e.x; cz = e.z; }
+      }
       if (crossesWall(e.x, e.z, cx, cz)) { cx = e.x; cz = e.z; }
       if (!wet(field, cx, cz, e.y)) {
         if (Math.hypot(cx - e.x, cz - e.z) < speed * dt * 0.25) e.facing += (field.rng() - 0.5) * 1.6 + Math.PI * 0.5;

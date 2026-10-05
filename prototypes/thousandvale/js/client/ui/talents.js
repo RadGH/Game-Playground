@@ -237,7 +237,9 @@ export function createTalentsUi({ net: getNet, hud, me }) {
     }
     const pk = perksFromServer(y.perks);
     if (pk) { S.perks = pk.perks; if (pk.left != null) S.serverLeft = pk.left; S.server.perks = true; }
-    if (y.perkPoints != null) S.serverLeft = y.perkPoints;
+    // C's rules.build: perkPoints is { total, spent, left }; talentTree is the server's own tree view (node ids it accepts)
+    if (y.perkPoints != null) S.serverLeft = typeof y.perkPoints === 'object' ? (Number.isFinite(y.perkPoints.left) ? y.perkPoints.left : null) : y.perkPoints;
+    if (Array.isArray(y.talentTree) && y.talentTree.length) { const t = talentsFromServer(y.talentTree); S.trees = { ...S.trees, ...t.trees }; }
     if (y.bonusPerks != null) S.bonus = y.bonusPerks;
     // the server's laid-out forest (C's forestView: plain JSON) wins over the local one
     const fv = y.forest || y.perkForest;
@@ -255,7 +257,7 @@ export function createTalentsUi({ net: getNet, hud, me }) {
   }
   function wire(n) {
     n.on('joined', j => { S.server.talents = !!j.you?.talents; S.server.perks = !!perksFromServer(j.you?.perks); fromYou(j.you); loadPreview(); refresh(); });
-    n.on('you', p => { fromYou(p); if (p.level != null || p.bar || p.talents || p.perks || p.perkPoints != null) refresh(); });
+    n.on('you', p => { fromYou(p); if (p.level != null || p.bar || p.talents || p.talentTree || p.perks || p.perkPoints != null) refresh(); });
     n.on('talentR', r => {
       if (!r.ok) { if (!notReady('talents', r)) hud?.toast(r.msg || r.why || 'You cannot pick that.', 'warn'); return; }
       if (r.talents) { const t = talentsFromServer(r.talents); S.talents = t.picks; S.trees = { ...S.trees, ...t.trees }; }

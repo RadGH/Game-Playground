@@ -136,8 +136,15 @@ test('Perk Forest: pan/zoom graph, take along a path, refused far node, refund e
   await click(path[1], 'right');
   await expect(page.locator('.toast').last()).toContainText(/Give that one back first|through this one/);
   await click(path[2], 'right');
-  await expect.poll(() => page.evaluate(() => window.thousandvale.talents.state.perks.length)).toBe(2);
-  await click(path[2]);
+  const livePerks = await page.evaluate(() => !!window.thousandvale.talents.state.server.perks);
+  if (livePerks) {
+    // the server's rule: only an Unbinder in town gives a perk back (for gold) — the window says so and keeps the perk
+    await expect(page.locator('.toast').last()).toContainText(/Unbinder|gold/);
+    expect(await page.evaluate(() => window.thousandvale.talents.state.perks.length)).toBe(3);
+  } else {
+    await expect.poll(() => page.evaluate(() => window.thousandvale.talents.state.perks.length)).toBe(2);
+    await click(path[2]);
+  }
   // zoomed-out whole forest + a hover card on the next open node
   await win.locator('button', { hasText: 'Whole forest' }).click();
   await page.waitForTimeout(200);

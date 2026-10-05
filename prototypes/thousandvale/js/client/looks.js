@@ -70,7 +70,7 @@ export function loadMonsterLooks() {
     const out = {};
     try {
       const d = await (await fetch(new URL('../../../farhold/data/enemies.json', import.meta.url))).json();
-      for (const k of ['enemies', 'bosses', 'pets']) for (const e of d[k] || []) if (e.look) out[e.id] = e.look;
+      for (const k of ['enemies', 'bosses', 'pets']) for (const e of d[k] || []) if (e.look) out[e.id] = e.flying ? { ...e.look, flying: true } : e.look;   // flying: drawn hovering (C: the snapshot has no hover)
     } catch {}
     try { const r = await fetch(new URL('../../data/monster-looks.json', import.meta.url)); if (r.ok) Object.assign(out, await r.json()); } catch {}
     return out;

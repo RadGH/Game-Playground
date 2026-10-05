@@ -151,6 +151,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       if (a.kind === 'monster' || a.pet) {
         const looks = await loadMonsterLooks();
         const look = looks[a.creature?.type] || null;
+        a.flying = !!look?.flying;
         const big = a.rank === 'boss' ? 1.45 : a.rank === 'elite' || a.rank === 'champion' || a.rank === 'rare' ? 1.18 : 1;
         if (look?.avatar) {
           // A humanoid monster (brigand, cultist, knight): a Chibi 2 body, scaled up when it is an elite or boss.
@@ -180,9 +181,13 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       // P28: the click/hover volume is the body's real size (a squat bog slime, a long crocodile, a dragon), not one
       // fixed radius — and never thinner than 0.6 m so a rat is still easy to click
       try {
+        // the body's own space (it has no parent yet): geometry boxes in bind pose — a SkinnedMesh's own box reads its
+        // bones' world matrices, which are stale here (it measured 100 m tall: the terrain height)
         a.model.updateMatrixWorld(true);
-        const box = new THREE.Box3().setFromObject(a.model), size = box.getSize(new THREE.Vector3());
-        if (Number.isFinite(size.x) && size.y > 0.05) { a.pickR = Math.max(0.6, Math.min(4, Math.max(size.x, size.z) * 0.55)); a.pickTop = Math.max(0.6, size.y); if (a.kind === 'monster' || a.pet) a.height = Math.max(0.6, Math.min(a.height, size.y * 1.05)); }
+        const box = new THREE.Box3(), tmp = new THREE.Box3();
+        a.model.traverse(o => { if (!o.isMesh || !o.geometry?.attributes?.position) return; const g = o.geometry; if (!g.boundingBox) g.computeBoundingBox(); tmp.copy(g.boundingBox).applyMatrix4(o.matrixWorld); box.union(tmp); });
+        const size = box.getSize(new THREE.Vector3());
+        if (Number.isFinite(size.x) && size.y > 0.05 && size.y < 20) { a.pickR = Math.max(0.6, Math.min(4, Math.max(size.x, size.z) * 0.55)); a.pickTop = Math.max(0.6, size.y); if (a.kind === 'monster' || a.pet) a.height = Math.max(0.6, Math.min(a.height, size.y * 1.05)); }
       } catch { /* the default volume stands */ }
       if (a.dead) setAnim(a, 'dead');
     } catch (e) {
@@ -316,7 +321,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       // Hit recoil and punch decay.
       a.recoil.multiplyScalar(Math.exp(-dt * 10));
       a.punch *= Math.exp(-dt * 12);
-      a.group.position.set(a.pos.x + a.recoil.x, a.pos.y, a.pos.z + a.recoil.z);
+      a.group.position.set(a.pos.x + a.recoil.x, a.pos.y + (a.flying && !a.dead ? 1.3 + Math.sin(now / 420 + (typeof a.id === 'number' ? a.id : 0)) * 0.15 : 0), a.pos.z + a.recoil.z);
       if (a.model) { a.model.rotation.y = a.yaw; a.model.scale.setScalar(1 + a.punch * 0.12); }
       if (a.swim || a.ripples) ripple(a, now);
 
@@ -328,7 +333,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       else {
         a.oneShot = null;
         const sp = a.speed;
-        want = sp > 4.2 ? 'run' : sp > 0.4 ? 'walk' : (a.kind === 'player' && now - (a.lastCombat || 0) < 5000 ? 'ready' : 'idle');
+        want = a.flying && !a.humanoid ? 'fly' : sp > 4.2 ? 'run' : sp > 0.4 ? 'walk' : (a.kind === 'player' && now - (a.lastCombat || 0) < 5000 ? 'ready' : 'idle');
       }
       if (want !== a.anim) setAnim(a, want);
       if (a.body?.setRate) {

@@ -46,6 +46,15 @@ const hook = http.createServer(async (req, res) => {
     if (!o) return send(404, { ok: false, why: 'not online' });
     if (req.url === '/level') {
       const lv = Math.max(1, Math.min(50, b.level | 0));
+      // stream A's dev hook does the whole level-up (the rules' sheet too, so talent tiers open); fall back to the old way
+      // a REAL level-up when we can (XP through the room: the rules' sheet levels too, so talent tiers and perk points open)
+      if (o.room?.award && lv > (o.char.level || 1)) {
+        await prepareRules();
+        const { xpForLevel } = await import('../../js/rules/farhold.js');
+        o.room.award(o.entity, { xp: Math.max(1, xpForLevel(lv) - (o.char.xp || 0) + 1), reason: 'test' });
+        if ((o.char.level || 1) >= lv) return send(200, { ok: true, level: o.char.level });
+      }
+      if (typeof W.devSetLevel === 'function') { W.devSetLevel(o.char.id, lv); return send(200, { ok: true, level: lv }); }
       o.entity.setLevel(lv); o.char.level = lv;
       const pr = W.gateway.presence.get(o.char.id); if (pr) pr.level = lv;
       if (o.conn) o.conn.sendJSON({ t: 'you', level: lv });          // what a real level-up tells the client

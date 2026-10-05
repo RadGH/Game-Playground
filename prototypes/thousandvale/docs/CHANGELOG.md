@@ -460,3 +460,7 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   roaming camp paths, curios (curios.json + recipe lookup), folk placements.
 - Tests: tests/A/pt1-*.test.js (+ pt1-helpers.js real-world harness), m2/protocol updated. tests/A 137 pass / 8 skip / 0 fail.
 - **E** Re-placed on B's final bake (d562a44): `tools/place-vignettes.mjs --keep=z12_02` — every zone re-placed except the M1 zone, whose checked-in file is the input B's M1 bake was made from (tests/B "fresh bake" compares against it); it still feeds routes/events/marks. 94 traveller routes (219 km), no settlement without a road now. Assignment unchanged (minSet 42). tests/E 128 + 1 TODO (A), tests/B 47/47, tests/A placements/quests/m2/vignettes green. Road coverage check: >= 90% per zone (some zones hold only a few dozen road samples), >= 95% over the province.
+
+## 2026-10-05 — C: perf pass for A's 100-bot gate
+- Profiled the spread phase: the spikes were a level-up's build view formatting ~70 talent cards (up to 38 ms/tick) and first-time pathfinding cells sampling the terrain (15 ms/tick). Talent card text is cached; first-time cells are paid from the pathfinder's per-tick budget (`PATH.EVAL_COST`) and take the slope/water test once per cell; idle monsters with nobody within 70 m think every 4th tick (rooms only, `field.lod`; parity unaffected).
+- tests/A/bots100 (TV_PERF, quiet VM): spread p99 22 -> 11.4-11.7 ms, worst 37.5 -> 18-21 ms; all three phases pass. bots100-real passes (spread p99 13.6). tests/C 165/165, tests/A 137/137.

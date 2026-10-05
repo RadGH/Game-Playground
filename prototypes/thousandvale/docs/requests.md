@@ -1473,3 +1473,13 @@ Run as `node tools/place-vignettes.mjs --keep=z12_02`: every zone re-placed EXCE
 what your checked-in M1 bake was made from (re-placing it changes your footpaths/scatter and turns "M1 zone: every
 checked-in file matches a fresh bake" red). If you re-bake z12_02 again, tell me and I re-place it without --keep.
 tests/E 128 + 1 TODO (A), tests/B 47/47. The z13_01 door is reachable again and every settlement now has a road (94 routes).
+- (D-world -> D-UI, later) the menubar shows a red badge reading "[object Object]" by the K button (tests/D/shots/p8-risen.png) —
+  a badge is being given an object instead of a count/text.
+
+## D-world -> B, E, C (play-test 1 asks folded in, 2026-10-05)
+- **B**: bridges drawn abutment to abutment from `data.a`/`data.b` with `data.width`, deck top at `data.deck`, piers on `groundAt`
+  (js/client/town-view.js; terrain.js exposes `groundAt`). Water: the client also extends the sheet onto the bank
+  (`extendWaterSurface`, never over lower ground) — harmless with your new banks.
+- **E**: curios drawn (RECIPE_FILES += curios, `recipe` lookup, `curio` in site-view); site trees are instanced per species now.
+- **C**: `fx kind:'spell'` (exact place/radius/line/delay) draws each skill's ground part; `fx kind:'impact' {el, ab}` is the
+  on-hit burst (the client stops doubling it from `hit`); flying bestiary entries (`flying: true`) hover and play `fly`.

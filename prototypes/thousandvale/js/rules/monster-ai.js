@@ -17,14 +17,16 @@
 //   * Farhold's `hooks.onEnemyStrike` (main.js line ~9584) is `monsterStrike` here.
 //
 // Not yet ported (listed so nothing is silently dropped; js/rules/README.md keeps the list):
-//   building sieges (no building in Thousandvale v1), placed taunt objects (banners/posts — M1 with
-//   the knight), leader escorts/rout (warbands, M2), transmute scaling (client-side only).
+//   transmute scaling (client-side only). Leader escorts, auras, routs and sieges live in
+//   js/rules/warband.js (a siege needs the room's `structures` hook; no room has building yet).
 
 import {
   applyStatus, tickStatuses, slowOf, incomingFrom, outgoingFrom, groundAt, wetAt, cliffStep,
   climbable, crossesWall, COMBAT_FEEL,
 } from './farhold.js';
 import { pickTarget, notice as noticeThreat, clearThreat, threatFromDamage, taunt as threatTaunt } from './threat.js';
+import { pathfinderFor } from './pathfind.js';
+import { siegeOf } from './warband.js';
 
 export const AI = {
   LEASH_METRES: 40,
@@ -33,6 +35,8 @@ export const AI = {
   /** a body that has fallen is removed this long after (actors.js: 2.4 s) */
   CORPSE_SECONDS: 2.4,
   RETURN_SPEED: 1.6,
+  /** a leashed monster that has not made it home in this long (walled out) is put back there */
+  RETURN_SNAP: 12,
 };
 
 // --------------------------------------------------------------------------- spawning
@@ -287,6 +291,9 @@ function companionAim(e, playerDist, allies, field) {
 export function resetMonster(field, e) {
   clearThreat(e);
   e.state = 'return';
+  e.returnFor = 0;
+  e.path = null;
+  e.pathBest = null;
   e.statuses = {};
   e.hp = e.maxHp;
   e.damageBy = null;
@@ -317,6 +324,9 @@ export function tickMonsters(field, dt, hooks = {}) {
     if (band != null) awakeBands.add(band);
   }
   const lookup = id => field.get(id);
+  // the room's planner (js/rules/pathfind.js): null on a terrain that cannot block (Farhold, the parity fixtures)
+  const pf = pathfinderFor(field);
+  if (pf) pf.beginTick(field.clock);
 
   for (let i = list.length - 1; i >= 0; i--) {
     const e = list[i];
@@ -335,10 +345,24 @@ export function tickMonsters(field, dt, hooks = {}) {
     // ---- the leash (replaces Farhold's despawn ring)
     if (e.state === 'return') {
       const hx = e.home[0] - e.x, hz = e.home[1] - e.z, hd = Math.hypot(hx, hz);
-      if (hd < 1) { e.state = 'wander'; e.wanderTimer = 0; e.anim = 'idle'; continue; }
-      const step = Math.min(hd, e.speed * AI.RETURN_SPEED * dt);
-      e.facing = Math.atan2(hx, hz);
-      e.x += (hx / hd) * step; e.z += (hz / hd) * step;
+      e.returnFor = (e.returnFor || 0) + dt;
+      // home, or (walled out of a path home for too long) put back there: a leashed monster never stays lost
+      if (hd < 1 || e.returnFor > AI.RETURN_SNAP) {
+        if (hd >= 1) { e.x = e.home[0]; e.z = e.home[1]; field.emit({ t: 'move', id: e.id, x: e.x, z: e.z, why: 'home' }); }
+        e.state = 'wander'; e.wanderTimer = 0; e.anim = 'idle'; e.path = null; e.returnFor = 0;
+        e.y = ground(field, e.x, e.z, e.y);
+        continue;
+      }
+      const w = pf ? pf.steer(e, e.home[0], e.home[1]) : null;
+      const wx = w ? w.x - e.x : hx, wz = w ? w.z - e.z : hz, wd = Math.hypot(wx, wz) || 1;
+      const step = Math.min(w ? wd : hd, e.speed * AI.RETURN_SPEED * dt);
+      e.facing = Math.atan2(wx, wz);
+      let nx = e.x + (wx / wd) * step, nz = e.z + (wz / wd) * step;
+      const B = T(field)?.blocked;
+      if (B && B(nx, nz) && !B(e.x, e.z)) {
+        if (!B(nx, e.z)) nz = e.z; else if (!B(e.x, nz)) nx = e.x; else { nx = e.x; nz = e.z; }
+      }
+      e.x = nx; e.z = nz;
       e.y = ground(field, e.x, e.z, e.y);
       e.anim = 'run';
       continue;
@@ -346,7 +370,8 @@ export function tickMonsters(field, dt, hooks = {}) {
     if (e.state === 'chase' && !e.boss) {
       // dragged too far from home, or stuck unable to reach anybody (no hit dealt or taken) too long
       const fromHome = Math.hypot(e.x - e.home[0], e.z - e.home[1]);
-      const idle = field.clock - (Math.max(e.lastCombatAt ?? -Infinity, e.struckAt ?? -Infinity));
+      // (walking a planned path that reaches its target is not being stuck: pathfind.js)
+      const idle = field.clock - (Math.max(e.lastCombatAt ?? -Infinity, e.struckAt ?? -Infinity, e.pathingAt ?? -Infinity));
       const tgt = e.targetId != null ? field.get(e.targetId) : null;
       const close = tgt && Math.hypot(tgt.x - e.x, tgt.z - e.z) <= (e.reach || 2.4) + 1;
       if (fromHome > AI.LEASH_METRES || (idle > AI.LEASH_SECONDS && !close)) { resetMonster(field, e); continue; }
@@ -497,7 +522,7 @@ export function tickMonsters(field, dt, hooks = {}) {
     // who it is going for: the threat table (Farhold: aimOf). A companion's bite clock runs down every tick.
     e.threatFor = Math.max(0, (e.threatFor || 0) - dt);
     if (e.state !== 'chase' && !e.statuses?.turned) { e.threatOn = null; e.threatFor = 0; }
-    let target = null, foe = null;
+    let target = null, foe = null, siege = null;
     if (e.statuses?.turned) {
       e.state = 'chase';
       let bd = 16;
@@ -540,7 +565,14 @@ export function tickMonsters(field, dt, hooks = {}) {
       speed = e.speed * 1.15;
       if ((e.quarry || e.routed || e.feared) && near) e.facing = Math.atan2(e.x - near.x, e.z - near.z);
     } else if (e.state === 'chase') {
-      if (aimAt) e.facing = Math.atan2(adx, adz);
+      if (aimAt) {
+        // round a wall, a building or a cliff when the straight line is shut (pathfind.js); else straight at it
+        const w = pf && adist > (e.reach || 2.4) + 0.5 ? pf.steer(e, aimAt.x, aimAt.z) : null;
+        e.facing = w ? Math.atan2(w.x - e.x, w.z - e.z) : Math.atan2(adx, adz);
+        // following a path that reaches it counts as not stuck — but only while it keeps getting closer
+        if (w && e.path?.reached && (e.pathBest == null || e.path.left < e.pathBest - 0.5)) { e.pathBest = e.path.left; e.pathingAt = field.clock; }
+        if (adist <= (e.reach || 2.4) + 1) e.pathBest = null;
+      }
       if (standOff > 0 && target) {
         if (adist > standOff + 3) speed = e.speed;
         else if (adist < standOff * 0.55) { speed = e.speed * 0.8; e.facing += Math.PI; }
@@ -564,6 +596,18 @@ export function tickMonsters(field, dt, hooks = {}) {
         field.report(e, foe, res, 'bite');
         threatTaunt(foe, e, 3, { lift: false });   // actors.js: the side it hit answers it (a hard taunt, 3 s)
         if (res.dead) field.kill(foe);
+      } else if (field.structures && (siege = siegeOf(field, e, target, dt))) {
+        // actors.js R28 — A WALL IN THE WAY IS A WALL TO BREAK: walk up to the piece and swing at it
+        // (field.strikeStructure, the room's building hook). Ranged monsters shoot over it (branch above).
+        e.facing = Math.atan2(siege.x - e.x, siege.z - e.z);
+        if (siege.gap > e.reach * 0.8) speed = e.speed;
+        else if (e.swingTimer <= 0) {
+          e.swingTimer = e.attackEvery;
+          e.anim = 'attack';
+          const hit = field.strikeStructure?.(e, siege.id);
+          field.emit({ t: 'fx', kind: 'siege', id: e.id, structure: siege.id, destroyed: !!hit?.destroyed });
+          if (!hit || hit.destroyed || hit.ok === false) { e.siege = null; e.siegeCheck = 0; }
+        }
       } else if (adist > e.reach) {
         speed = e.speed;
       } else if (e.swingTimer <= 0) {
@@ -604,7 +648,7 @@ export function tickMonsters(field, dt, hooks = {}) {
       if (!e.hover && t?.blocked && t.blocked(cx, cz) && !t.blocked(e.x, e.z)) {
         if (!t.blocked(cx, e.z)) cz = e.z;
         else if (!t.blocked(e.x, cz)) cx = e.x;
-        else { cx = e.x; cz = e.z; }
+        else { cx = e.x; cz = e.z; e.stuckAt = field.clock; }    // pathfind.js plans round it next tick
       }
       if (crossesWall(e.x, e.z, cx, cz)) { cx = e.x; cz = e.z; }
       if (!wet(field, cx, cz, e.y)) {

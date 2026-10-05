@@ -94,3 +94,40 @@ test('Raise the Fallen stands a dead party member back up at half health; a stra
   assert.ok(!knight.dead && knight.hp >= Math.round(knight.maxHp * 0.5) - 1);
   assert.ok(stranger.dead);
 });
+
+test('a party call: Charge (empowerNext.pets) empowers a party member\'s next skill; a non-companion order reaches party followers', async () => {
+  const { engine, room, cleric, mage } = await party();
+  const { attachFollowers } = await import('../../js/rules/followers.js');
+  attachFollowers(room, { rng: makeRng(5) });
+  // Charge's row carries empowerNext { pets, mult 0.3 }: the party's next skill is empowered
+  const lead = createCharacter(engine, { id: 'lead', classId: 'tactician', level: 40, rng: makeRng(3), x: 1, z: -1 });
+  lead.roomRng = room.streams.get('bars'); lead.partyId = 'P1';
+  room.field.add(lead, 'player');
+  const slot = lead.skills.slots.findIndex(s => s.id === 'charge');
+  assert.ok(slot >= 0, 'the tactician has Charge');
+  {
+    room.run(() => spawnMonster(room.field, engine.enemyDef('moor_hound'), 40, 1, 6));
+    const r = room.run(() => room.combat.cast(lead, slot, { aim: { x: 1, z: 6 } }));
+    assert.ok(r.ok, r.why);
+    assert.equal(mage.mech?.empower?.from, 'ally:charge', 'the mage holds the rider');
+    assert.ok(Math.abs(mage.mech.empower.mult - 0.3) < 1e-9);
+    // the mage's next skill spends it (Farhold's own bar reads the slot)
+    const before = mage.skills.use;
+    let plan = null;
+    mage.skills.use = i => (plan = before(i));
+    room.run(() => room.combat.cast(mage, 0, { aim: { x: 1, z: 6 } }));
+    assert.ok(plan?.ok, 'the mage cast');
+    assert.equal(mage.mech.empower, null, 'spent on that skill');
+  }
+  // an order that is not petOnly reaches a party member's follower
+  room.run(() => room.followers.summonForClass(cleric, { id: 'hunting_cat', count: 1 }));
+  const pet = room.followers.of(cleric)[0];
+  assert.ok(pet, 'the cleric has a follower to order');
+  {
+    const hound = room.run(() => spawnMonster(room.field, engine.enemyDef('moor_hound'), 40, 4, 4));
+    const { castPlan } = await import('../../js/rules/cast-skills.js');
+    room.run(() => castPlan(room.combat, mage, { ok: true, kind: 'self', skill: { id: 'call' }, command: { order: 'focus', seconds: 5 }, mult: 0 }, { intent: { target: hound.id } }));
+    assert.equal(pet.order?.kind, 'focus', 'the cleric\'s wolf took the party call');
+    assert.equal(pet.order?.target, hound);
+  }
+});

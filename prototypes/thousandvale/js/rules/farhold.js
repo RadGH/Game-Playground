@@ -42,6 +42,7 @@ export { feel, tuneFeel, staggerFor, pushFor, COMBAT_FEEL, PUSH_RESIST } from '.
 export { installUniques, resolveAttack, afterKill as uniquesAfterKill, afterDamaged as uniquesAfterDamaged, tickAuras } from '../../../farhold/js/uniques.js';
 export { EFFECTS } from '../../../farhold/js/effects.js';
 export { installFoci } from '../../../farhold/js/foci.js';
+export { installWarbands, leaderModifier } from '../../../farhold/js/warbands.js';
 export { talentPlan, pickTalent, tiersOpen, treeFor } from '../../../farhold/js/skilltalents.js';
 export { groundAt, wetAt, cliffStep, climbable } from '../../../farhold/js/ground.js';
 export { makeRng, hashStr } from '../../../emberveil/js/rng.js';

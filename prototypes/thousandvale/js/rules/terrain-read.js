@@ -46,9 +46,21 @@
 //      u8 [size*size]  waterKind   0 none, 1 sea, 2 lake, 3 river
 //      u8 [size*size]  biome       index into meta.biomes
 // A file with the wrong magic or version is REFUSED (throws), never misread (PLAN §3.2.5).
+//
+// FILE VERSION 2 (what the bake writes since 2026-10-04 — ~10x smaller, same layers, same reader API):
+//   'TVZN' | u32 2 | u32 jsonBytes | json meta | pad to 4 | u32 packedBytes | raw DEFLATE (packedBytes) of
+//      u16[size*size] height RESIDUALS — each sample minus the planar guess left + up - upLeft (first row:
+//                     left, first column: up), mod 65536 — so a smooth slope is a run of near-zero numbers
+//      u16[size*size] waterTop, u8[size*size] waterKind, u8[size*size] biome   (as in version 1)
+//   Decoded by ./inflate.js (pure, synchronous). FORMAT_VERSION stays 1: it names the LAYERS (and feeds the bake
+//   hashes); FILE_VERSIONS lists the containers this reader opens.
+
+import { inflateRaw } from './inflate.js';
 
 export const FORMAT_MAGIC = 'TVZN';
 export const FORMAT_VERSION = 1;
+/** File container versions parseTerrain / parseNav open (1 = plain, 2 = deflated). */
+export const FILE_VERSIONS = Object.freeze([1, 2]);
 export const WATER_KINDS = ['none', 'sea', 'lake', 'river'];
 /** Steepest ground a walker climbs, in degrees. Server movement checks and monster steering use this. */
 export const MAX_WALK_SLOPE = 46;
@@ -56,6 +68,41 @@ export const MAX_WALK_SLOPE = 46;
 export const WADE_DEPTH = 1.1;
 
 const RAD = 180 / Math.PI;
+
+/** Undo the planar height predictor of file version 2 (in place, mod 65536). */
+export function unpredictHeights(h, size, rows = size) {
+  for (let j = 0; j < rows; j++) {
+    const row = j * size;
+    for (let i = 0; i < size; i++) {
+      const k = row + i;
+      const p = j === 0 ? (i === 0 ? 0 : h[k - 1]) : i === 0 ? h[k - size] : h[k - 1] + h[k - size] - h[k - size - 1];
+      h[k] = (h[k] + p) & 0xffff;
+    }
+  }
+  return h;
+}
+
+/** The planar height predictor (writer side; exported so the bake and the tests share one definition). */
+export function predictHeights(h, size, rows = size) {
+  const out = new Uint16Array(h.length);
+  for (let j = 0; j < rows; j++) {
+    const row = j * size;
+    for (let i = 0; i < size; i++) {
+      const k = row + i;
+      const p = j === 0 ? (i === 0 ? 0 : h[k - 1]) : i === 0 ? h[k - size] : h[k - 1] + h[k - size] - h[k - size - 1];
+      out[k] = (h[k] - p) & 0xffff;
+    }
+  }
+  return out;
+}
+
+/** Version-2 payload: u32 packedBytes then raw deflate; returns the decoded bytes (exactly `want` long). */
+function unpack(bytes, off, want, what) {
+  if (bytes.length < off + 4) throw new Error(`${what}: file too short`);
+  const n = new DataView(bytes.buffer, bytes.byteOffset + off, 4).getUint32(0, true);
+  if (bytes.length < off + 4 + n) throw new Error(`${what}: file is ${bytes.length} bytes, header says ${off + 4 + n}`);
+  return inflateRaw(bytes.subarray(off + 4, off + 4 + n), want);
+}
 
 function toBytes(buf) {
   if (buf instanceof Uint8Array) return buf;
@@ -88,11 +135,17 @@ export function parseTerrain(buffer) {
   if (magic !== FORMAT_MAGIC) throw new Error(`terrain: bad magic "${magic}" (expected ${FORMAT_MAGIC})`);
   const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const version = dv.getUint32(4, true);
-  if (version !== FORMAT_VERSION) throw new Error(`terrain: format version ${version}, this reader reads ${FORMAT_VERSION} — re-bake or update the reader`);
+  if (!FILE_VERSIONS.includes(version)) throw new Error(`terrain: file version ${version}, this reader reads ${FILE_VERSIONS.join('/')} — re-bake or update the reader`);
   const jsonBytes = dv.getUint32(8, true);
   const meta = JSON.parse(decodeUtf8(bytes.subarray(12, 12 + jsonBytes)));
   const N = meta.size * meta.size;
   let off = 12 + jsonBytes; off = (off + 3) & ~3;
+  if (version === 2) {
+    const raw = unpack(bytes, off, N * 6, 'terrain');
+    const height = unpredictHeights(readU16(raw, 0, N), meta.size);
+    const waterTop = readU16(raw, N * 2, N);
+    return createTerrain({ meta, height, waterTop, waterKind: raw.slice(N * 4, N * 5), biome: raw.slice(N * 5, N * 6) });
+  }
   const need = off + N * 2 * 2 + N * 2;
   if (bytes.length < need) throw new Error(`terrain: file is ${bytes.length} bytes, header says ${need}`);
   const height = readU16(bytes, off, N); off += N * 2;
@@ -286,10 +339,11 @@ function readHeader(bytes, magic, version, what) {
   if (m !== magic) throw new Error(`${what}: bad magic "${m}"`);
   const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const v = dv.getUint32(4, true);
-  if (v !== version) throw new Error(`${what}: version ${v}, reader reads ${version}`);
+  const ok = Array.isArray(version) ? version.includes(v) : v === version;
+  if (!ok) throw new Error(`${what}: version ${v}, reader reads ${[].concat(version).join('/')}`);
   const jl = dv.getUint32(8, true);
   const meta = JSON.parse(decodeUtf8(bytes.subarray(12, 12 + jl)));
-  return { meta, dv, off: (12 + jl + 3) & ~3 };
+  return { meta, dv, off: (12 + jl + 3) & ~3, version: v };
 }
 
 /**
@@ -314,14 +368,19 @@ export function parseScatter(buffer) {
 
 /**
  * nav.bin: 'TVNV' | u32 version | u32 jsonBytes | JSON {size, step, terrainHash} | pad4 | u8[size*size] bits (NAV).
+ *   Version 2: after pad4, u32 packedBytes + raw DEFLATE of the same u8 bits.
  * Returns { meta, size, step, bits, at(x,z) -> bits of the nearest sample, passable(x,z) -> WALK and not SOLID/BUILDING/DEEP }.
  */
 export function parseNav(buffer) {
   const bytes = toBytes(buffer);
-  const { meta, off } = readHeader(bytes, 'TVNV', NAV_VERSION, 'nav');
+  const { meta, off, version } = readHeader(bytes, 'TVNV', FILE_VERSIONS, 'nav');
   const size = meta.size, step = meta.step;
-  if (bytes.length < off + size * size) throw new Error('nav: file too short');
-  const bits = bytes.slice(off, off + size * size);
+  let bits;
+  if (version === 2) bits = unpack(bytes, off, size * size, 'nav');
+  else {
+    if (bytes.length < off + size * size) throw new Error('nav: file too short');
+    bits = bytes.slice(off, off + size * size);
+  }
   const at = (x, z) => {
     const i = Math.min(size - 1, Math.max(0, Math.round(x / step))), j = Math.min(size - 1, Math.max(0, Math.round(z / step)));
     return bits[j * size + i];

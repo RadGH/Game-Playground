@@ -1155,6 +1155,9 @@ function afterCast(combat, rt, ch, plan, ctx) {
     const cm = plan.command;
     const target = aimedEnemy(field, ch, ctx.intent, a, plan.range || 40) || field.nearestTo(ch.x, ch.z, 20);
     Fo.order(ch, cm.order || 'focus', target, { seconds: cm.seconds ?? 6, petOnly: !!cm.petOnly, from: { x: ch.x, z: ch.z } });
+    // MMO: an order that is not only for your own companion (`petOnly`) is heard by the party's followers
+    // within 30 m of you too — "focus the marked one" is a party call (players themselves are not ordered)
+    if (!cm.petOnly) for (const u of rt.partyPlayers(ch)) Fo.order(u, cm.order || 'focus', target, { seconds: cm.seconds ?? 6, from: { x: ch.x, z: ch.z } });
     for (const pet of Fo.of(ch)) {
       if (!pet.order) continue;
       if (cm.biteStatus) { pet.biteStatus = cm.biteStatus; combat.later(cm.seconds ?? 6, () => { if (pet.biteStatus === cm.biteStatus) pet.biteStatus = null; }); }
@@ -1297,7 +1300,19 @@ function afterCast(combat, rt, ch, plan, ctx) {
       combat.later(0.15, () => { if (pet.dying == null) echoFrom(combat, rt, ch, plan, a, { x: pet.x, z: pet.z, yaw: pet.facing || ch.yaw }, pet.mimic, ctx.intent); }, ch.id);
     }
   }
-  if (plan.empowerNext?.pets) for (const u of rt.allies(ch)) if (u.owner === ch) u.empowered = Math.max(u.empowered || 0, plan.empowerNext.mult ?? 0.5);
+  if (plan.empowerNext?.pets) {
+    for (const u of rt.allies(ch)) if (u.owner === ch) u.empowered = Math.max(u.empowered || 0, plan.empowerNext.mult ?? 0.5);
+    // MMO: "your followers' next attack" reaches the party — a party member's next skill carries the
+    // rider, through the same slot their own bar spends (skills.js `player.mech.empower`); one they
+    // already hold is never overwritten
+    const em = plan.empowerNext;
+    for (const u of rt.partyPlayers(ch)) {
+      if (u.mech?.empower) continue;
+      u.mech = u.mech || { res: {} };
+      u.mech.empower = { mult: em.mult ?? 0.5, count: 1, left: em.seconds ?? 8, from: `ally:${plan.skill?.id || 'skill'}` };
+      field.emit({ t: 'fx', kind: 'empower', id: u.id, by: ch.id });
+    }
+  }
   if (plan.resetOn && String(plan.resetOn.when || plan.resetOn).startsWith('crowd')) {
     const need = +String(plan.resetOn.when || plan.resetOn).split(':')[1] || 5;
     if (hitsN >= need) queueMech(ch, { reset: plan.skill?.id });

@@ -190,6 +190,8 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
     e.dying = 0;
     e.anim = 'dead';
     e.stagger = 0; e.push = null;
+    // warbands (js/rules/warband.js): a standard-bearer takes the leader's aura down; a leader, the nerve too
+    if (e.leads || (e.bearer && e.leader != null)) field.onLeaderFall?.(e);
     const earned = (e.playerDamage || 0) > 0 || e.boss || field.wild(e.x, e.z, 16);
     field.emit({ t: 'death', id: e.id, by: lastHitter(e), earned });
     if (!earned) return;

@@ -6,7 +6,7 @@
 // druid shape turns into, and every song's aura and finale — is cast by a level-40 caster standing in a
 // party, with the Tab target on a hurt, poisoned party member. What the cast's plan says it does for
 // friends (heal, group heal, barrier, ward, cleanse, a group buff, a mend over time, a link, a revive,
-// a status for a follower) must land on that ally; and nothing may ever land on
+// a status for a follower, an empowered next skill) must land on that ally; and nothing may ever land on
 //   * a stranger standing just as close (not in the party), or
 //   * a party member 120 m away (a group effect reaches ALLY_RANGE, 30 m).
 // A personal buff (a stance, War Cry's Might, a counter window) stays on the caster even with a friend
@@ -62,6 +62,7 @@ function promises(p, { form = null } = {}) {
   if (p.cleanse) out.add('cleanse');
   if (p.link && p.link.to !== 'enemy') out.add('link');
   if (p.revive) out.add('revive');
+  if (p.empowerNext?.pets) out.add('empower');
   if (p.place?.heal) out.add('heal');
   if (p.place?.buff || p.place?.deathPrevent) out.add('status');
   if (form?.aura?.heal) out.add('heal');
@@ -106,7 +107,7 @@ async function scene(classId, seed) {
   return { room, caster, ally, fallen, far, stranger, deadStranger };
 }
 
-const snap = u => ({ hp: u.hp, barrier: u.barrier || 0, keys: new Set(Object.keys(u.statuses || {})), dead: !!u.dead });
+const snap = u => ({ hp: u.hp, barrier: u.barrier || 0, keys: new Set(Object.keys(u.statuses || {})), dead: !!u.dead, empower: u.mech?.empower || null });
 /** What reached `u` since `before`: heal (an event), barrier, a new friendly status, a ward, a cleanse, a link, a revive. */
 function reached(s, u, before, events) {
   const got = new Set();
@@ -119,6 +120,7 @@ function reached(s, u, before, events) {
   if ((before.keys.has('poison') && !u.statuses?.poison) || (before.keys.has('bleed') && !u.statuses?.bleed)) got.add('cleanse');
   if ([...(s.room.combat.skillRt?.links?.values() || [])].some(l => l.to === u)) got.add('link');
   if (before.dead && !u.dead) got.add('revive');
+  if (u.mech?.empower && u.mech.empower !== before.empower && String(u.mech.empower.from).startsWith('ally:')) got.add('empower');
   return got;
 }
 

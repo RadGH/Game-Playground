@@ -634,6 +634,11 @@ line when you walk in), its `note` / `npc` / `chest` (per character; `hidden` + 
 the named object was used) / `use` objects, and its monsters as a camp. `js/sim/vignettes.js` `vignettePoint()` is
 the one rotation formula (props are the client's to draw from the same files).
 
+Also: `wayside` markers (E's roadside dressing, `info.lore` + `info.site.template` = the kind in
+`data/vignettes/wayside.json`; draw its props), hooks from the placement files' `features[]` (`info.site.feature`, and
+`info.site.pts` for a line such as the Thorn Wall, world metres), filler camps (ordinary camps). A hostile fort's garrison
+follows the zone's archetype (blight → the blight crew, ruinfield / holy ground → the dead, else its usual crew).
+
 ### 15.8 Processes (stage 2)
 `server/main.mjs --procs N --db pg`: this process is the **gateway** (static files, `/gw`, `/status`); it forks N
 province processes (`server/province-proc.mjs`, provinces dealt round-robin). A `/p/<n>` upgrade is accepted by

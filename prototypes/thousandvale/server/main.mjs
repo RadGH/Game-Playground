@@ -34,7 +34,7 @@ import { WebSocketServer } from 'ws';
 import { createWorld } from '../js/sim/world.js';
 import { createGateway } from '../js/sim/gateway.js';
 import { startTicker } from '../js/net/clock.js';
-import { MAX_FRAME } from '../js/net/protocol.js';
+import { MAX_FRAME, PROTOCOL_VERSION } from '../js/net/protocol.js';
 import { createStaticHandler } from './static.js';
 import { statusPage } from './status-page.js';
 import { turnstileFromEnv } from './turnstile.js';
@@ -141,7 +141,7 @@ export async function startServer(o) {
     const g = gateway.status();
     const kids = g.procs.map(p => p.status || {});
     const worst = kids.reduce((w, k) => (k.tick && k.tick.p99 > (w.p99 || 0) ? k.tick : w), {});
-    return { server: 'thousandvale', build: o.build, ...base, ccu: kids.reduce((a, k) => a + (k.ccu || 0), 0), tick: worst, rooms: kids.flatMap(k => k.rooms || []), bytesOutPerSec: kids.reduce((a, k) => a + (k.bytesOutPerSec || 0), 0), gateway: g.gateway, director: g.director, procs: g.procs.map(p => ({ id: p.id, provinces: p.provinces, ...(p.status || {}) })) };
+    return { server: 'thousandvale', build: o.build, protocol: PROTOCOL_VERSION, ...base, ccu: kids.reduce((a, k) => a + (k.ccu || 0), 0), tick: worst, rooms: kids.flatMap(k => k.rooms || []), bytesOutPerSec: kids.reduce((a, k) => a + (k.bytesOutPerSec || 0), 0), gateway: g.gateway, director: g.director, procs: g.procs.map(p => ({ id: p.id, provinces: p.provinces, ...(p.status || {}) })) };
   }
   const healthy = () => (world ? world.tickStats.summary().ticks > 0 : children.every(c => c.ready));
 

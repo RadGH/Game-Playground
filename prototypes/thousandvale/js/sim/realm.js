@@ -166,7 +166,7 @@ export function buildLayout({ key, name = null, terrain, zones = [], encounterIn
     // stream E's placements (vignettes, camps, rares, forts, farms, caves, waystones, NPCs, hooks, treasure): js/sim/placements.js
     let placed = null;
     if (z.vignettes && vignetteContent) {
-      placed = placementContent(z.vignettes.placements, { ...z.vignettes, band: (z.sheet && z.sheet.band) || [1, 6], zone: z.key, encounterInfo, warband: (z.sheet && z.sheet.warband) || null });
+      placed = placementContent(z.vignettes.placements, { ...z.vignettes, band: (z.sheet && z.sheet.band) || [1, 6], zone: z.key, encounterInfo, warband: (z.sheet && z.sheet.warband) || null, archetype: (z.sheet && z.sheet.archetype) || null });
       camps.push(...placed.camps); objects.push(...placed.objects); doors.push(...placed.doors); placedWaystones.push(...placed.waystones);
     }
     // the sheet's camp ring round the main settlement only where E placed no camps (the door guard stays)

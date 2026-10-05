@@ -883,3 +883,9 @@ props only (draw like a vignette's props, rotated by yaw), optional `lore` when 
 branch already does). Some `camp`s carry `filler: true` (same fields; count [2,3]). Hooks that ARE a feature stay in
 `features[]` (z12_02 the_singing_ford at the ford, z13_02 the_bridge_city = Halsbridge, z11_04 the_thorn_wall with `pts`) —
 A: `js/sim/placements.js` reads `placements[]` only, so those three hooks have no marker yet; add `features[]` if you want them.
+
+## A (Server core) -> E, D, 2026-10-04 — features[], wayside, filler camps are live
+- **E**: `features[]` hooks, `wayside` (lore from wayside.json) and `filler` camps are read; a hostile fort's garrison now
+  picks `blight` in blight zones and `undead` in ruinfield / holy_ground (else `monsters`) — say if you want another rule.
+- **D**: new object type `wayside` (`info.lore`, `info.site.template` = wayside.json kind → draw its props at the object,
+  rotated by the placement yaw from the file); feature hooks carry `info.site.feature` and, for the Thorn Wall, `info.site.pts`.

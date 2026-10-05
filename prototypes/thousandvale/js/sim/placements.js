@@ -17,7 +17,8 @@
 //   farm            {template, settlement} -> a marker, the farm folk, and a small camp of its pests close by
 //   cave            {template, plan:{family, floors, level}} -> a DOOR to a small instanced dungeon (the cave's packs
 //                   and boss replace the plan's monsters)
-//   hook            {id, kind} -> a marker with the hook's lore (data/hooks.json)
+//   hook            {id, kind, pts?} -> a marker with the hook's lore (data/hooks.json); `features[]` hooks too (site.feature)
+//   wayside         {kind, filler} -> a `wayside` marker with the kind's lore (data/vignettes/wayside.json); props are the client's
 //   treasure_clue   {chain, step} -> a clue object (use: read it; progress saved per character)
 //   treasure_cache  {chain, step} -> a hidden cache that opens once per character, after every clue of its chain
 // Props and buildings are the client's to draw from the same files (E's records + sites.json templates).
@@ -31,7 +32,7 @@ const ROLE_NAMES = { guard: 'Guard', sergeant: 'Sergeant', quartermaster: 'Quart
   farmer: 'Farmer', farmhand: 'Farmhand', shepherd: 'Shepherd', swineherd: 'Swineherd', orchardist: 'Orchard keeper', fisher: 'Fisher', miller: 'Miller' };
 const roleName = r => ROLE_NAMES[r] || (r ? r[0].toUpperCase() + r.slice(1) : 'Villager');
 
-export function placementContent(placements, { recipes = [], sites = null, hooks = [], treasure = [], quests = null, band = [1, 6], zone = null, respawnMs = 30000, encounterInfo = {}, warband: sheetWarband = null } = {}) {
+export function placementContent(placements, { recipes = [], sites = null, hooks = [], treasure = [], wayside = {}, quests = null, band = [1, 6], zone = null, respawnMs = 30000, encounterInfo = {}, warband: sheetWarband = null, archetype = null } = {}) {
   const camps = [], objects = [], doors = [], waystones = [], rares = new Set();
   const list = placements || [];
   const vig = vignetteContent(list.filter(p => !p.type || p.type === 'vignette'), recipes, { band });
@@ -49,7 +50,7 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
       case 'camp': {
         camped = true;
         const level = pickIn(p.level, h), count = pickIn(p.count, h >>> 3);
-        camps.push({ type: p.monster, level, x: p.x, z: p.z, count, radius: p.radius || 10, respawnMs, place: p.id });
+        camps.push({ type: p.monster, level, x: p.x, z: p.z, count, radius: p.radius || 10, respawnMs, place: p.id, ...(p.filler ? { filler: true } : {}) });
         if (p.with) camps.push({ type: p.with, level, x: p.x + 4, z: p.z + 3, count: Math.max(1, count >> 1), radius: 6, respawnMs, place: p.id });
         break;
       }
@@ -84,7 +85,9 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
           if (t.loot && t.loot.chest) objects.push({ type: 'chest', name: 'War chest', x: p.x + 2, z: p.z - 2, key: `chest:${p.id}`, chest: { key: `chest:${p.id}`, tier: t.loot.chest, level: lvl + 1 } });
         } else {
           camped = true;
-          for (const m of g.monsters || []) camps.push({ type: m.type, level: p.level || band[0] + 1, x: p.x, z: p.z, count: pickIn(m.count, h >>> 5), radius: Math.max(6, (p.radius || 20) * 0.6), rank: m.rank || undefined, respawnMs: 5 * 60000, place: p.id });
+          // the garrison variant by the zone's archetype: blight country holds the blight crew, ruins and holy ground the dead
+          const crew = (archetype === 'blight' && g.blight) || ((archetype === 'ruinfield' || archetype === 'holy_ground') && g.undead) || g.monsters || [];
+          for (const m of crew) camps.push({ type: m.type, level: p.level || band[0] + 1, x: p.x, z: p.z, count: pickIn(m.count, h >>> 5), radius: Math.max(6, (p.radius || 20) * 0.6), rank: m.rank || undefined, respawnMs: 5 * 60000, place: p.id });
           if (t.loot && t.loot.chest) objects.push({ type: 'chest', name: 'Armoury chest', x: p.x + 2, z: p.z - 2, key: `chest:${p.id}`, chest: { key: `chest:${p.id}`, tier: t.loot.chest, level: (p.level || band[0]) + 1 } });
         }
         break;
@@ -110,7 +113,12 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
       }
       case 'hook': {
         const hk = hookById.get(p.id) || {};
-        marker('hook', { lore: hk.lore || null, site: { kind: 'hook', template: hk.kind || p.kind || null, blurb: null } });
+        marker('hook', { lore: hk.lore || null, site: { kind: 'hook', template: hk.kind || p.kind || null, blurb: null, feature: !!p.feature, ...(p.pts ? { pts: p.pts } : {}) } });
+        break;
+      }
+      case 'wayside': {               // roadside dressing (data/vignettes/wayside.json): props for the client, a lore line on walk-in
+        const k = wayside[p.kind] || {};
+        marker('wayside', { r: p.radius || k.radius || 4, lore: p.lore || k.lore || null, site: { kind: 'wayside', template: p.kind || null, blurb: null } });
         break;
       }
       case 'treasure_clue':

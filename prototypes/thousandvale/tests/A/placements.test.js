@@ -27,12 +27,13 @@ const all = HAVE ? C.zones.flatMap(z => (z.vignettes ? z.vignettes.placements.ma
 
 test('every placement kind becomes room content; town-side things go to the town room', { skip: !HAVE && 'no placements yet' }, () => {
   const kinds = new Set(all.map(p => p.type));
-  for (const k of ['vignette', 'camp', 'rare', 'waystone', 'npc', 'fort', 'farm', 'cave', 'hook', 'treasure_clue', 'treasure_cache']) assert.ok(kinds.has(k), 'E placed some ' + k);
+  for (const k of ['vignette', 'camp', 'rare', 'waystone', 'npc', 'fort', 'farm', 'cave', 'hook', 'treasure_clue', 'treasure_cache', 'wayside']) assert.ok(kinds.has(k), 'E placed some ' + k);
   const objs = [...L.objects, ...L.townObjects.flat()];
   const has = (type, key) => objs.some(o => o.type === type && o.key === key);
   for (const p of all) {
     if (p.type === 'npc') assert.ok(has('npc', 'npc:' + p.id), 'npc ' + p.id);
     if (p.type === 'hook') assert.ok(has('hook', 'hook:' + p.id), 'hook ' + p.id);
+    if (p.type === 'wayside') assert.ok(objs.some(o => o.type === 'wayside' && o.key === 'wayside:' + p.id && o.lore), 'wayside with lore ' + p.id);
     if (p.type === 'fort') assert.ok(has('fort', 'fort:' + p.id), 'fort ' + p.id);
     if (p.type === 'farm') assert.ok(has('farm', 'farm:' + p.id), 'farm ' + p.id);
     if (p.type === 'treasure_clue') assert.ok(has('clue', `tr:${p.chain}:${p.step}`), 'clue ' + p.id);
@@ -42,6 +43,9 @@ test('every placement kind becomes room content; town-side things go to the town
     if (p.type === 'rare') { const c = L.camps.find(x => x.encounter === p.id && x.rank === 'rare'); assert.ok(c && c.path && c.path.length === p.path.length && Array.isArray(c.respawnMs), 'rare ' + p.id); }
     if (p.type === 'camp') assert.ok(L.camps.some(c => c.place === p.id && c.type === p.monster), 'camp ' + p.id);
   }
+  // the three hooks that are bake features (features[])
+  for (const id of ['the_singing_ford', 'the_bridge_city', 'the_thorn_wall']) assert.ok(objs.some(o => o.key === 'hook:' + id && o.site.feature), 'feature hook ' + id);
+  assert.ok(objs.find(o => o.key === 'hook:the_thorn_wall').site.pts.length > 5, 'the wall line in world metres');
   // a rare E placed is not placed a second time from the zone sheet
   for (const id of new Set(all.filter(p => p.type === 'rare').map(p => p.id))) assert.equal(L.camps.filter(c => c.encounter === id).length, all.filter(p => p.type === 'rare' && p.id === id).length, 'rare once: ' + id);
   // inside a hub town circle -> that town's room; the wilds list holds nothing inside a town
@@ -141,4 +145,14 @@ test('in the world: a quest NPC greets, a cave is a small instance of its own be
   assert.equal(again.ok, false); assert.equal(again.why, 'opened');
   assert.ok(me().char.treasure[chainId].done);
   a.close(); await srv.stop();
+});
+
+test('a hostile fort\'s garrison follows the zone: brigands in the heartland, the dead in ruins and on holy ground', async () => {
+  const { placementContent } = await import('../../js/sim/placements.js');
+  const sites = JSON.parse(readFileSync(new URL('data/provinces/sites.json', root), 'utf8'));
+  const p = [{ type: 'fort', id: 'f', template: 'ruined_fort', friendly: false, x: 0, z: 0, radius: 20, level: 5 }];
+  const types = a => placementContent(p, { sites, archetype: a }).camps.map(c => c.type);
+  assert.deepEqual(types('heartland'), sites.forts.ruined_fort.garrison.monsters.map(m => m.type));
+  assert.deepEqual(types('ruinfield'), sites.forts.ruined_fort.garrison.undead.map(m => m.type));
+  assert.deepEqual(types('holy_ground'), sites.forts.ruined_fort.garrison.undead.map(m => m.type));
 });

@@ -217,3 +217,7 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - `tools/boring-walk.mjs`: PLAN §16 "longest boring walk ≤ 250 m" (road: 235 m, cross-country: 240 m). The placer fills
   empty pockets with `wayside` dressing (new `data/vignettes/wayside.json`, 14 kinds) and extra camps (`filler: true`).
 - `torbor_downs-places.json`: rename keys follow B's `wfName`; baked asks stay listed. tests/E: 113 pass (placement 16).
+- **A** (follow-up to E's ad99280) placements' `features[]` hooks (Singing Ford, Bridge City, Thorn Wall with its `pts` line),
+  the new `wayside` dressing as objects with their lore (data/vignettes/wayside.json, 405 of them), filler camps (915 camps a
+  copy now — dormant camps keep only the near ones alive: empty tick 0.16 ms); hostile fort garrisons by zone archetype.
+  Gates with the fillers: in-process p99 7.0 / 4.6 / 5.4 ms (worst 9.1); G's real-socket herds p99 6.2 / 6.2 / 6.0 (worst 37).

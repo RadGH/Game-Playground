@@ -54,6 +54,7 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
   const sites = await opt('data/provinces/sites.json');
   const hooks = ((await opt('data/hooks.json')) || {}).hooks || [];
   const treasure = ((await opt('data/quests/treasure.json')) || {}).chains || [];
+  const wayside = Object.fromEntries((((await opt('data/vignettes/wayside.json')) || {}).kinds || []).map(k => [k.id, k]));   // roadside dressing kinds
   const zones = [], parts = [];
   for (const [eid, wid] of Object.entries(map.map)) {
     let reader;
@@ -69,8 +70,9 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
         if (pl.terrainHash && reader.meta.inputHash && pl.terrainHash !== reader.meta.inputHash) { log(`vignettes ${f}: made for another bake (${pl.terrainHash} vs ${reader.meta.inputHash}), skipped`); continue; }
         // placements are in zone metres: move them into world metres
         const ox = zx * 2048, oz = zy * 2048;
-        vignettes = { recipes, sites, hooks, treasure, quests: await opt(`data/quests/${eid}.json`),
-          placements: (pl.placements || []).map(p => ({ ...p, x: p.x + ox, z: p.z + oz, ...(Array.isArray(p.path) ? { path: p.path.map(([a, b]) => [a + ox, b + oz]) } : {}) })) };
+        // placements[] + features[] (hooks that ARE a bake feature: a ford, a settlement, a `pts` line)
+        vignettes = { recipes, sites, hooks, treasure, wayside, quests: await opt(`data/quests/${eid}.json`),
+          placements: [...(pl.placements || []), ...(pl.features || []).map(f => ({ ...f, feature: true }))].map(p => ({ ...p, x: p.x + ox, z: p.z + oz, ...(Array.isArray(p.path) ? { path: p.path.map(([a, b]) => [a + ox, b + oz]) } : {}), ...(Array.isArray(p.pts) ? { pts: p.pts.map(([a, b]) => [a + ox, b + oz]) } : {}) })) };
         break;
       } catch { /* none yet */ }
     }

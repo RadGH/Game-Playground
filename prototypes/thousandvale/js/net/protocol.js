@@ -6,7 +6,7 @@
 //   parseFrame(str)    -> { msg } | { bad: reason }   (JSON text frame -> validated message)
 //   createBuckets()    -> per-socket rate limiter: take(t) -> true if allowed
 
-export const PROTOCOL_VERSION = 2;
+export const PROTOCOL_VERSION = 3;
 export const SNAP_VERSION = 1;
 export const TICK_MS = 50;
 export const MAX_FRAME = 16 * 1024;
@@ -108,6 +108,7 @@ export const CLIENT_MSGS = Object.freeze({
   item:    { on: 'p', fields: { op: 'str:8', uid: 'str:40', slot: '?str:16' }, rate: 5, burst: 10 },
   travel:  { on: 'p', fields: { to: 'str:48' }, rate: 1, burst: 3 },
   trace:   { on: 'p', fields: { kind: 'str:16' }, rate: 1, burst: 2 },
+  quest:   { on: 'p', fields: { op: 'str:8', id: 'str:120', npc: '?id' }, rate: 2, burst: 6 },
   trade:   { on: 'p', fields: { op: 'str:8', id: '?int', items: '?uids', gold: '?int' }, rate: 5, burst: 10 },
   leave:   { on: 'both', fields: {}, rate: 1, burst: 2 },
 });
@@ -141,6 +142,9 @@ export const SERVER_MSGS = Object.freeze({
   relocate: ['path', 'ticket', 'province'],
   groupHint: ['key', 'with'],
   realm: ['kind', 'ev', 'at', 'won'],
+  zoneEvent: ['kind', 'ev'],
+  quests: ['active', 'done'],
+  questR: ['op', 'id', 'ok'],
   zone: ['zone', 'name', 'deeds'],
   travelR: ['ok', 'why', 'cost'],
   tradeState: ['trade', 'done', 'why'],

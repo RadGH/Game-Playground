@@ -144,6 +144,7 @@ export function describeDungeon(plan, terrain = null) {
       index: f.index, origin: f.origin, w: f.w, h: f.h, tiles: rleTiles(f.tiles),
       rooms: f.rooms.map(r => ({ i: r.i, j: r.j, w: r.w, h: r.h, kind: r.kind })),
       gate: f.gate ? { i: f.gate.i, j: f.gate.j, w: f.gate.w, h: f.gate.h, open: terrain ? terrain.gateOpen(f.index) : false } : undefined,
+      river: f.river || undefined,          // cave_river: a polyline in metres the client draws as water (stream E)
     })),
   };
 }

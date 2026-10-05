@@ -127,9 +127,9 @@ test('dungeon: a party shares one private instance, an outsider gets their own; 
   // b leaves by logging out; the instance closes once empty
   b.leave();
   await run(clock, 500);
-  assert.ok(W.instances.has('p' + a.party.id));
+  assert.ok(W.instances.has('p' + a.party.id + ':0'));     // one instance per party per door
   await run(clock, 4500);
-  assert.ok(!W.instances.has('p' + a.party.id), 'torn down when empty');
+  assert.ok(!W.instances.has('p' + a.party.id + ':0'), 'torn down when empty');
   assert.ok(W.instances.size === 1, 'the outsider\'s instance is still up');
   a.close(); c.close(); await srv.stop();
 });

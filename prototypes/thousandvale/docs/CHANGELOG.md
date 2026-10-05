@@ -205,3 +205,8 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   green; worst rejoin 1.55 s. (An earlier live-tree run died when a half-saved `js/sim/save-fields.js` stopped the restart; a second
   earlier run was clean for 266 kills, then one bot did not rejoin within 30 s — not reproduced in 500 more, and the tool now prints
   the bot's state + the server log tail if it happens again.)
+- **A** (later) B's 32 m horizon in `joined.room.horizon` (`bin, hash, step` from data/world/horizon.json); `floor.river` in
+  dungeon descriptions; `zoneName` on realm/zone event views; stage-2 `/status` lists every child's rooms + bytes out.
+  Event frames are serialised once per distinct set and shared by a crowd (room.js `send`).
+  G's tests/load/herds.test.js on a quiet VM (load ≤ 1.1): stage 1 p99 5.6 / 6.1 / 5.8 ms (worst 29), stage 2 (`--procs 2`,
+  pg) p99 5.2 / 6.5 / 6.4 ms (worst 30); bandwidth 1.9 / 10.0 / 9.9 KB/s per player.

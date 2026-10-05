@@ -6,6 +6,7 @@
 // Pure. createWorld (js/sim/world.js) builds the rooms from this.
 
 import { findWalkable } from './terrain.js';
+import { placementContent } from './placements.js';
 
 export const TOWN_RADIUS = { city: 140, town: 90, village: 65, hamlet: 40 };
 
@@ -134,15 +135,15 @@ export function zoneEncounterCamps(terrain, ids, info = {}, zoneSheetId = null) 
  * its reader's `meta.sites` are in the same metres and carry `zone`). Per zone: its hub/town settlements
  * become TOWN hub rooms, its dungeon site a door, its sheet's monster mix a ring of camps round its main
  * settlement, its named encounters (elite, rares, event boss) at their sites, its vignettes.
- * Returns { key, name, terrain, towns, doors, camps, objects, waystones, sheet, copyCap, zoneOf, zones, gate }.
+ * Returns { key, name, terrain, towns, doors, camps, objects (wilds), townObjects[i], waystones, sheet, copyCap, zoneOf, zones, gate }.
  */
-export function buildLayout({ key, name = null, terrain, zones = [], encounterInfo = {}, copyCap = 300, vignetteContent = null, townRadius = null, starter = null }) {
+export function buildLayout({ key, name = null, terrain, zones = [], encounterInfo = {}, copyCap = 300, vignetteContent = null, townRadius = null, starter = null, rares = null, jobs = null, schedules = null, horizon = null }) {
   const allSites = terrain.reader?.meta?.sites || [];
   const multi = zones.length > 1 || allSites.some(s => s.zone);
   const zoneList = zones.length ? zones : [{ key, sheet: null }];
   for (const z of zoneList) if (!z.bounds) z.bounds = multi ? (terrain.zones || []).find(q => q.key === z.key)?.bounds : terrain.bounds;
   const sitesOf = z => (multi ? allSites.filter(s => s.zone === z.key) : allSites);
-  const towns = [], doors = [], camps = [], objects = [];
+  const towns = [], doors = [], camps = [], objects = [], placedWaystones = [], zoneEvents = [];
   for (const z of zoneList) {
     const sites = sitesOf(z);
     const zt = { ...terrain, reader: { ...(terrain.reader || {}), meta: { ...(terrain.reader?.meta || {}), sites } }, spawn: z.bounds ? { x: (z.bounds.minX + z.bounds.maxX) / 2, z: (z.bounds.minZ + z.bounds.maxZ) / 2 } : terrain.spawn };
@@ -162,9 +163,19 @@ export function buildLayout({ key, name = null, terrain, zones = [], encounterIn
     const door = dsite ? { x: dsite.x, z: dsite.z, name: dsite.name || 'Dungeon entrance', yaw: dsite.yaw || 0, zone: z.key, sheet: z.sheet }
       : (!multi ? { ...findDoor(zt, ring), name: 'Barrow entrance', zone: z.key, sheet: z.sheet } : null);
     if (door) doors.push(door);
-    if (z.vignettes && vignetteContent) { const v = vignetteContent(z.vignettes.placements, z.vignettes.recipes, { band: (z.sheet && z.sheet.band) || [1, 6] }); camps.push(...v.camps); objects.push(...v.objects); }
-    if (z.sheet || !multi) camps.push(...wildsCamps(zt, ring, door || ring, z.sheet && z.sheet.camps));
-    if (terrain.reader && (z.sheet || !multi)) camps.push(...zoneEncounterCamps(zt, zoneEncounterIds(z.sheet), encounterInfo, z.sheet && z.sheet.id));
+    // stream E's placements (vignettes, camps, rares, forts, farms, caves, waystones, NPCs, hooks, treasure): js/sim/placements.js
+    let placed = null;
+    if (z.vignettes && vignetteContent) {
+      placed = placementContent(z.vignettes.placements, { ...z.vignettes, band: (z.sheet && z.sheet.band) || [1, 6], zone: z.key, encounterInfo, warband: (z.sheet && z.sheet.warband) || null });
+      camps.push(...placed.camps); objects.push(...placed.objects); doors.push(...placed.doors); placedWaystones.push(...placed.waystones);
+    }
+    // the sheet's camp ring round the main settlement only where E placed no camps (the door guard stays)
+    if (z.sheet || !multi) { const ring0 = wildsCamps(zt, ring, door || ring, z.sheet && z.sheet.camps); camps.push(...(placed && placed.camped ? ring0.slice(-1) : ring0)); }
+    // named encounters from the sheet — minus rares E placed, and minus a zone event boss that a timed zone event runs
+    const timed = new Set((z.events || []).map(e => e.boss).filter(Boolean));
+    if (z.events && z.events.length && z.sheet && z.sheet.eventBoss) timed.add(z.sheet.eventBoss);
+    if (terrain.reader && (z.sheet || !multi)) camps.push(...zoneEncounterCamps(zt, zoneEncounterIds(z.sheet).filter(id => !(placed && placed.rares.has(id)) && !timed.has(id)), encounterInfo, z.sheet && z.sheet.id));
+    zoneEvents.push(...(z.events || []));
   }
   // the starting zone's hub first (new characters and respawns default there), then other hubs
   const rank = t => (t.hub && t.zone === starter ? 0 : t.hub ? 1 : 2);
@@ -172,13 +183,30 @@ export function buildLayout({ key, name = null, terrain, zones = [], encounterIn
   towns.forEach((t, i) => { t.id = i; });
   const main = towns[0] || { ...terrain.spawn, r: 60, name: name || key };
   const sheet = zoneList[0].sheet || null;
-  // waystones: one in every town square, one by every dungeon door (PLAN §5.2, NB4: they need discovering)
+  // waystones (PLAN §5.2, NB4: they need discovering): the ones stream E placed (one per settlement), plus one in
+  // every town square and one by every dungeon door (not caves) that has none of E's close by. `town` = the hub
+  // town room a waystone stands in (else it is in the wilds copies).
   const waystones = [];
-  towns.forEach((t, i) => waystones.push({ key: `ws:${key}:t${i}`, name: t.name, x: t.x + 6, z: t.z + 6, town: i }));
-  doors.forEach((d, i) => { const p = walkableNear(terrain, d.x, d.z, 10, 2.2); waystones.push({ key: `ws:${key}:d${i}`, name: d.name, x: p.x, z: p.z, door: i }); });
+  const townAt = p => towns.findIndex(t => Math.hypot(p.x - t.x, p.z - t.z) < t.r - 2);
+  for (const w of placedWaystones) { const ti = townAt(w); waystones.push({ ...w, ...(ti >= 0 ? { town: ti } : {}) }); }
+  const near = (p, r) => waystones.some(w => Math.hypot(w.x - p.x, w.z - p.z) < r);
+  towns.forEach((t, i) => { if (!waystones.some(w => w.town === i)) waystones.push({ key: `ws:${key}:t${i}`, name: t.name, x: t.x + 6, z: t.z + 6, town: i }); });
+  doors.forEach((d, i) => { if (d.kind === 'cave' || near(d, 40)) return; const p = walkableNear(terrain, d.x, d.z, 10, 2.2); waystones.push({ key: `ws:${key}:d${i}`, name: d.name, x: p.x, z: p.z, door: i }); });
+  // objects that stand inside a hub town belong to that town's room (the wilds copies cannot be seen from inside)
+  const townObjects = towns.map(() => []);
+  const wildObjects = [];
+  for (const o of objects) { const ti = townAt(o); if (ti >= 0) townObjects[ti].push(o); else wildObjects.push(o); }
   const zoneOf = (x, zz) => {
     for (const q of zoneList) if (q.bounds && x >= q.bounds.minX && x < q.bounds.maxX && zz >= q.bounds.minZ && zz < q.bounds.maxZ) return q.key;
     return zoneList[0].key;
   };
-  return { key, name: name || main.name, terrain, towns, doors, camps, objects, waystones, sheet, copyCap, zoneOf, zones: zoneList, gate: townGate(terrain, main, doors[0] || { x: main.x + 100, z: main.z }) };
+  // each hub town's plan from B's bake (plots, square): the schedules' anchors
+  const townPlans = towns.map(t => {
+    const z = zoneList.find(q => q.key === t.zone), pl = z && z.plan;
+    if (!pl) return null;
+    const st = pl.settlements.find(x => x.name === t.name) || pl.settlements.find(x => Math.hypot(x.x - t.x, x.z - t.z) < 20);
+    if (!st) return null;
+    return { kind: st.kind || t.kind, buildings: pl.buildings.filter(b => b.town === st.id), square: pl.squares.find(q => q.town === st.id) || null };
+  });
+  return { key, name: name || main.name, terrain, towns, townPlans, schedules, horizon, doors, camps, objects: wildObjects, townObjects, waystones, zoneEvents, rares, jobs, sheet, copyCap, zoneOf, zones: zoneList, gate: townGate(terrain, main, doors.find(d => d.kind !== 'cave') || { x: main.x + 100, z: main.z }) };
 }

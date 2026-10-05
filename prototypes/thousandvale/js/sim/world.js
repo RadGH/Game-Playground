@@ -12,6 +12,7 @@
 // built from `terrain` (one zone bake or the stand-in field).
 
 import { createGateway } from './gateway.js';
+import { PROTOCOL_VERSION } from '../net/protocol.js';
 import { createProvince } from './province.js';
 import { createLocalBus } from './session.js';
 import { buildLayout } from './realm.js';
@@ -39,7 +40,7 @@ export function createWorld(opts) {
   function status() {
     const p = province.status(), g = gateway.status();
     return {
-      server: 'thousandvale', build: opts.build || 'dev', protocol: undefined, process: opts.processName || 'p0', ...p,
+      server: 'thousandvale', build: opts.build || 'dev', protocol: PROTOCOL_VERSION, process: opts.processName || 'p0', ...p,
       bad: p.bad + gateway.counters.bad, kicks: p.kicks + gateway.counters.kicks, logins: gateway.counters.logins,
       humanFails: gateway.counters.humanFails, parties: gateway.parties.byId.size, director: g.director, gateway: g.gateway,
     };

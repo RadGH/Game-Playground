@@ -2,9 +2,9 @@
 // Stitches stream B's per-zone bakes (zone-local metres 0..2048) into world metres (zone (zx, zy) covers
 // x in [zx*2048, zx*2048 + 2048]), so walking between zones is seamless. Pure.
 //
-//   const t = createProvinceTerrain({ key, zones: [{ key, zx, zy, reader }] })
+//   const t = createProvinceTerrain({ key, zones: [{ key, zx, zy, reader, nav? }] })
 //   t.heightAt / t.walkable / t.bounds / t.spawn / t.reader (a composite reader: heightAt, normalAt, slopeAt,
-//   waterAt, biomeAt, walkable, clamp, sample, meta.sites in world metres with `zone` set) / t.zones
+//   waterAt, biomeAt, walkable, clamp, sample, meta.sites in world metres with `zone` set) / t.zones / t.nav (stitched nav.bin)
 // Points in no listed zone (sea, another province) are not walkable; their height is the nearest zone edge.
 
 export const ZONE_METRES = 2048;
@@ -58,8 +58,10 @@ export function createProvinceTerrain({ key, zones, zoneMetres = ZONE_METRES, st
     clamp: (x, z) => [Math.min(maxX, Math.max(minX, Number.isFinite(x) ? x : minX)), Math.min(maxZ, Math.max(minZ, Number.isFinite(z) ? z : minZ))],
     zoneAt: (x, z) => { const q = zoneAt(x, z); return q ? q.key : null; },
   };
+  // nav.bin stitched the same way (stream C reads `terrain.nav.passable`); a zone without one is open ground
+  const nav = zones.some(q => q.nav) ? { passable: (x, z) => { const q = zoneAt(x, z); return !!q && (!q.nav || q.nav.passable(x - q.ox, z - q.oz)); } } : null;
   return {
-    key: null, kind: 'province', province: key, reader, heightAt, walkable, bounds,
+    key: null, kind: 'province', province: key, reader, heightAt, walkable, bounds, nav,
     size: Math.max(maxX - minX, maxZ - minZ), origin: { x: minX, z: minZ }, spawn,
     zones: zones.map(q => ({ key: q.key, zx: q.zx, zy: q.zy, bounds: q.bounds })),
   };

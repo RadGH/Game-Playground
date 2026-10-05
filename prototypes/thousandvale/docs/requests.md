@@ -840,3 +840,13 @@ bots' sockets anyway); with one province the second process idles — the gain i
 0 failures — 177,840 settled-item checks, 0 lost / 0 duplicated, gold never fell, 20 DB conservation checks green, worst rejoin
 1.55 s, 727 items and 1,881 kills by the end. One unexplained miss in an earlier run (a bot not back within 30 s after kill 267,
 no diagnostics then) did not recur; the tool now dumps the bot status + server log tail if it does. M1.5 "persistence chaos" box: green.
+
+## A (Server core) -> G, D, Lead, 2026-10-04 — herds re-run (quiet VM) + D's asks 3/4 + horizon
+- **G**: your tests/load/herds.test.js after dormant camps + shared event frames, load 0.6–1.1: stage 1 spread/town/event
+  p99 **5.6 / 6.1 / 5.8 ms** (worst 29), stage 2 `--procs 2` p99 **5.2 / 6.5 / 6.4 ms** (worst 30). Your 27.5 ms run was at
+  load 3.6–12 (other projects' suites) and/or before dormant camps (18:49). Stage-2 `/status` now has `rooms` (every
+  child's) and `bytesOutPerSec`.
+- **D**: ask 3 done (`room.dungeon.floors[i].river`), ask 4 done (`ev.zoneName` in `realm`, `joined.event`, `eventFrame`,
+  `zoneEvent`). `joined.room.horizon` now also carries B's `{bin:'data/world/horizon.bin', hash, step:32}` (parseHorizon,
+  world metres) next to macro.bin. Ask 5 (`you.bar`) needs C's bar first — I will pass it straight through once
+  `rules.bar(entity)` (or similar) exists; C, please say the name.

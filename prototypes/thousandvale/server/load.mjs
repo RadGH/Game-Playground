@@ -9,7 +9,7 @@ import { createMemoryStore } from '../js/sim/store-memory.js';
 import { loadZoneContent, loadProvinceContent } from '../js/sim/content.js';
 import { buildLayout } from '../js/sim/realm.js';
 import { vignetteContent } from '../js/sim/vignettes.js';
-import { parseTerrain } from '../js/rules/terrain-read.js';
+import { parseTerrain, parseNav } from '../js/rules/terrain-read.js';
 import { createProvinceTerrain } from '../js/sim/province-terrain.js';
 
 export const HERE = dirname(fileURLToPath(import.meta.url));
@@ -51,27 +51,32 @@ const readBytes = async f => readFileSync(join(GAME, f));
  * province (stream B's zone bakes stitched); any other key is ONE zone (`data/zones/<key>/terrain.bin`,
  * or the stand-in field for 'standin'). Returns { layouts, events, encounterInfo }.
  */
+export const STARTER_COPY_CAP = 150;          // PLAN §8.2: the starter province copies at ~150, the rest at ~300
 export async function loadLayouts(keys, { copyCap = 300 } = {}) {
   const layouts = [], events = [];
-  let encounterInfo = {};
+  let encounterInfo = {}, directorRules = null;
   let provinces = {};
   try { provinces = (await readJson('data/world/province-map.json')).provinces || {}; } catch { /* no world bake */ }
   for (const key of keys) {
     if (provinces[key]) {
-      const c = await loadProvinceContent(readJson, readBytes, key, { parseTerrain, createProvinceTerrain, log });
+      const c = await loadProvinceContent(readJson, readBytes, key, { parseTerrain, parseNav, createProvinceTerrain, log });
       encounterInfo = c.encounterInfo;
-      layouts.push(buildLayout({ key, name: c.name, terrain: c.terrain, zones: c.zones, encounterInfo, copyCap, vignetteContent, starter: c.starter }));
+      layouts.push(buildLayout({ key, name: c.name, terrain: c.terrain, zones: c.zones, encounterInfo, copyCap: c.starterProvince ? Math.min(copyCap, STARTER_COPY_CAP) : copyCap, vignetteContent, starter: c.starter, rares: c.rares, jobs: c.jobs, schedules: c.schedules, horizon: c.horizon }));
       events.push(...c.events);
+      directorRules ||= c.directorRules;
       continue;
     }
     const f = join(GAME, 'data/zones', key, 'terrain.bin');
     const terrain = key !== 'standin' && existsSync(f) ? loadZoneTerrain(readFileSync(f), key) : standInTerrain(1, 2048);
     if (key !== 'standin' && !existsSync(f)) log(`zone ${key} not baked (${f}); using the stand-in field`);
+    const nf = join(GAME, 'data/zones', key, 'nav.bin');
+    if (key !== 'standin' && existsSync(nf)) { try { terrain.nav = parseNav(readFileSync(nf)); } catch (err) { log(`zone ${key}: nav.bin unreadable: ${err.message}`); } }
     const content = await loadZoneContent(readJson, key);
     encounterInfo = { ...content.encounterInfo, ...encounterInfo };
     layouts.push(buildLayout({ key, name: (content.sheet && content.sheet.name) || key, terrain, zones: [{ key, sheet: content.sheet, vignettes: content.vignettes }], encounterInfo, copyCap, vignetteContent }));
   }
-  return { layouts, events, encounterInfo };
+  if (!directorRules) { try { directorRules = (await readJson('data/quests/events.json')).director || null; } catch { /* none */ } }
+  return { layouts, events, encounterInfo, directorRules };
 }
 
 /** The default world: the starter province when the world is baked, else the M0 test zone. */

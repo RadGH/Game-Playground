@@ -19,9 +19,9 @@ const bus = { send: m => { if (process.connected) process.send({ bus: m }); }, o
 
 const store = await makeStore(cfg);
 const { createRules } = await loadRules(cfg.rules);
-const { layouts, events, encounterInfo } = await loadLayouts(cfg.provinces);
+const { layouts, events, encounterInfo, directorRules } = await loadLayouts(cfg.provinces);
 const province = createProvince({
-  proc: cfg.n, layouts, store, bus, createRules, encounterInfo, build: cfg.build, now, log,
+  proc: cfg.n, layouts, store, bus, createRules, encounterInfo, build: cfg.build, now, log, eventSize: directorRules && directorRules.size,
   lingerMs: cfg.linger, saveEveryMs: cfg.saveEvery, journalMs: cfg.journalMs, processName: cfg.process,
 });
 await province.init();

@@ -12,6 +12,7 @@
 //                        [--province torbor_downs[,test]] [--terrain test|standin] [--procs 0|N]
 //                        [--build dev] [--rules auto|v0] [--linger 5000] [--max-per-ip 4]
 //                        [--save-every 60000] [--process p0] [--env dev|stable] [--public <dir>] [--journal-ms 2000]
+//                        [--event-first 120000] [--event-announce 600000] [--event-every 2700000]
 //
 // --province  provinces (keys of data/world/province-map.json = a whole province of stitched zone bakes) or
 //             single zones (data/zones/<key>); default: torbor_downs when the world is baked, else test.
@@ -41,7 +42,7 @@ import { GAME, PLAYGROUND, log, loadRules, makeStore, loadClasses, loadLayouts, 
 import { wireSocket, startPinger } from './ws-conn.mjs';
 
 function args(argv) {
-  const o = { port: 8491, host: '0.0.0.0', db: 'memory', dbFile: join(GAME, '.data/dev-store.json'), build: 'dev', rules: 'auto', terrain: 'test', linger: 5000, maxPerIp: 4, saveEvery: 60000, process: 'p0', env: null, publicDir: null, journalMs: 2000, provinces: null, procs: 0 };
+  const o = { port: 8491, host: '0.0.0.0', db: 'memory', dbFile: join(GAME, '.data/dev-store.json'), build: 'dev', rules: 'auto', terrain: 'test', linger: 5000, maxPerIp: 4, saveEvery: 60000, process: 'p0', env: null, publicDir: null, journalMs: 2000, provinces: null, procs: 0, director: {} };
   for (let i = 2; i < argv.length; i++) {
     const k = argv[i], v = argv[i + 1];
     const take = () => { i++; return v; };
@@ -61,7 +62,10 @@ function args(argv) {
     else if (k === '--env') o.env = take();
     else if (k === '--public') o.publicDir = resolve(take());
     else if (k === '--journal-ms') o.journalMs = +take();   // lease owner prefix: give a second server on the same DB its own name
-    else if (k === '--help') { console.log(readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1, 12).join('\n')); process.exit(0); }
+    else if (k === '--event-first') { o.director.firstMs = +take(); o.director.demo = true; }   // tests/demos: first event after N ms (any event, no head counts),
+    else if (k === '--event-announce') o.director.announceMs = +take(); // announced N ms ahead,
+    else if (k === '--event-every') o.director.everyMs = +take();       // and N ms between events
+    else if (k === '--help') { console.log(readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1, 25).join('\n')); process.exit(0); }
     else throw new Error('unknown flag ' + k);
   }
   return o;
@@ -91,19 +95,19 @@ export async function startServer(o) {
   const store = await makeStore(o);
   const { createRules, rules } = await loadRules(o.rules);
   const classes = loadClasses();
-  const common = { store, build: o.build, classes, now, log, verifyHuman, humanSiteKey };
+  const common = { store, build: o.build, classes, now, log, verifyHuman, humanSiteKey, directorOpts: o.director };
 
   // ---- stage 1: everything here; stage 2: the gateway here, provinces in children ----
   let world = null, gateway = null, children = [];
   if (o.procs > 0) {
     await store.init();
     const assign = provinces.map((p, i) => ({ province: p, proc: i % o.procs }));
-    const { events } = await loadLayouts([]);          // the director learns events from the children's hello
-    gateway = createGateway({ ...common, events, starterProvince: provinces[0] });
+    const { events, directorRules } = await loadLayouts([]);          // the director learns events from the children's hello
+    gateway = createGateway({ ...common, events, starterProvince: provinces[0], directorOpts: { ...o.director, rules: directorRules || {} } });
     for (let n = 0; n < o.procs; n++) children.push(spawnChild(n, assign.filter(a => a.proc === n).map(a => a.province)));
   } else {
-    const { layouts, events, encounterInfo } = await loadLayouts(provinces);
-    world = createWorld({ ...common, layouts, events, encounterInfo, createRules, lingerMs: o.linger, saveEveryMs: o.saveEvery, processName: o.process, journalMs: o.journalMs });
+    const { layouts, events, encounterInfo, directorRules } = await loadLayouts(provinces);
+    world = createWorld({ ...common, directorOpts: { ...o.director, rules: directorRules || {} }, eventSize: directorRules && directorRules.size, layouts, events, encounterInfo, createRules, lingerMs: o.linger, saveEveryMs: o.saveEvery, processName: o.process, journalMs: o.journalMs });
     await world.init();
   }
 
@@ -137,7 +141,7 @@ export async function startServer(o) {
     const g = gateway.status();
     const kids = g.procs.map(p => p.status || {});
     const worst = kids.reduce((w, k) => (k.tick && k.tick.p99 > (w.p99 || 0) ? k.tick : w), {});
-    return { server: 'thousandvale', build: o.build, ...base, ccu: kids.reduce((a, k) => a + (k.ccu || 0), 0), tick: worst, gateway: g.gateway, director: g.director, procs: g.procs.map(p => ({ id: p.id, provinces: p.provinces, ...(p.status || {}) })) };
+    return { server: 'thousandvale', build: o.build, ...base, ccu: kids.reduce((a, k) => a + (k.ccu || 0), 0), tick: worst, rooms: kids.flatMap(k => k.rooms || []), bytesOutPerSec: kids.reduce((a, k) => a + (k.bytesOutPerSec || 0), 0), gateway: g.gateway, director: g.director, procs: g.procs.map(p => ({ id: p.id, provinces: p.provinces, ...(p.status || {}) })) };
   }
   const healthy = () => (world ? world.tickStats.summary().ticks > 0 : children.every(c => c.ready));
 

@@ -124,6 +124,12 @@ export class Entity {
       if (d.r) o.r = d.r;
       if (d.state) o.state = d.state;
       if (d.rules) o.rules = 1;
+      if (d.banner) o.banner = d.banner;                       // a cleared dungeon's door: {by, party, at}
+      if (d.trace) o.trace = d.trace;                          // grave {who, level, by, at, until} / campfire {who, at, until}
+      if (d.waystone) o.waystone = d.waystone.key;
+      if (d.site) o.site = d.site;                             // fort / farm / hook marker: {kind, template, friendly, blurb}
+      if (d.treasure) o.treasure = { chain: d.treasure.chain, step: d.treasure.step, of: d.treasure.of, cache: d.treasure.cache || undefined };
+      if (d.shimmer) o.shimmer = d.shimmer;                    // a hidden cache glints within this many metres for someone who has every clue
     }
     return o;
   }

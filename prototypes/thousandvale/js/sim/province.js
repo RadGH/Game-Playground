@@ -29,6 +29,11 @@ import { dungeonTerrain, dungeonRoomSpec, describeDungeon } from './dungeon.js';
 import { JOURNAL_FLUSH_MS } from './journal.js';
 import { createTrades, TRADE_OPS, TRADE_RANGE } from './trade.js';
 import { planDungeon as planTiers } from '../rules/dungeon-tiers.js';     // stream E's generator (js/sim/dungeon.js keeps the stand-in)
+import { caveDungeon } from './placements.js';
+import { createEventRunner, eventReward } from './events.js';
+import { eventScale } from './director.js';
+import { createQuestBook } from './quests.js';
+import { townFolk, blockAt } from './schedules.js';
 
 const LEASE_MS = 30000, HEARTBEAT_MS = 10000, TICKET_WAIT_MS = 3000;
 export const BAG_MAX = 120;
@@ -37,7 +42,9 @@ export const TARGET_RANGE = 60;          // a Tab target must be this close
 export const EDGE_PER_TICK = 3;          // town-edge handoffs done per tick (a crowd crossing together is spread out)
 export const SAVES_PER_TICK = 4;         // periodic blob saves started per tick
 export const GROUP_R = 40;               // open groups: players hitting the same monster this close (PLAN §5.3)
-export const GRAVE_MS = 3600000, CAMPFIRE_MS = 10 * 60000, MAX_GRAVES = 200;
+// trace lifetimes and caps: stream E's data/names/traces.json (graves 60 min / 40 a copy, campfires 30 min / 20, banners 30 min)
+export const GRAVE_MS = 3600000, CAMPFIRE_MS = 30 * 60000, BANNER_MS = 30 * 60000, MAX_TRACES = { grave: 40, campfire: 20 };
+export const HEAT_CELL = 8;              // footprints: steps counted per 8 m cell per hour (traces.json footprints)
 export const ROLES = ['smith', 'merchant', 'elder', 'innkeeper', 'healer', 'unbinder', 'broker'];
 const RARE = new Set(['rare', 'unique', 'legendary', 'set']);
 
@@ -49,6 +56,7 @@ export function createProvince(opts) {
     copyIdleMs = 5 * 60000, instanceIdleMs = 30 * 60000, dungeonLevel = 3, encounterInfo = {},
     planDungeon = planTiers, filterText = t => t, chestResetMs = 30 * 60000,
     clock: realmClock = { epoch: wallNow(), dayMs: 2 * 3600000 }, travelFare = d => 2 + Math.round(d / 400),
+    zoneEventFirstMs = null, zoneEventGapMs = null,        // tests: when the first / next zone event of a copy starts
   } = opts;
   const owner = processName + ':' + randomHex(4);
   const bootNonce = randomHex(4);
@@ -104,6 +112,10 @@ export function createProvince(opts) {
     makeCopy(pv);
   }
   const first = P.values().next().value;
+  // the quest runtime per province (js/sim/quests.js over stream E's data/quests/**)
+  let qSeed = (seed * 2654435761) >>> 0;
+  const qRng = () => { qSeed = (qSeed + 0x6D2B79F5) >>> 0; let t = qSeed; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  for (const pv of P.values()) pv.book = createQuestBook({ layout: pv.L, zones: pv.L.zones || [], rares: pv.L.rares || {}, jobs: pv.L.jobs || null, rng: qRng, now: wallNow, isNight: () => isNight() });
   /** back-compat for single-zone tests: the first province's first town / copy */
   const townRoom = first.towns[0], copies = first.copies, instances = first.instances;
   const town = first.L.towns[0], door = first.L.doors[0], gate = first.L.gate;
@@ -114,7 +126,8 @@ export function createProvince(opts) {
       towns: L.towns.map(t => ({ x: t.x, z: t.z, r: t.r, name: t.name })),
       town: { x: L.towns[0].x, z: L.towns[0].z, r: L.towns[0].r, name: L.towns[0].name },
       waystones: L.waystones.map(w => ({ key: w.key, name: w.name, x: w.x, z: w.z })),
-      horizon: { world: 'data/world/world.json', macro: 'data/world/macro.bin', province: L.key },
+      // the far view: stream B's 32 m horizon (horizon-read.js parseHorizon, world metres) + the older macro.bin
+      horizon: { world: 'data/world/world.json', macro: 'data/world/macro.bin', province: L.key, ...(L.horizon ? { bin: L.horizon.file, hash: L.horizon.hash, step: L.horizon.step } : {}) },
       zones: L.zones.map(z => ({ key: z.key, bounds: z.bounds || null })),
       clock: realmClock,
     };
@@ -122,13 +135,20 @@ export function createProvince(opts) {
   function townObjects(L, t, i) {
     const out = [];
     for (const w of L.waystones) if (w.town === i) out.push({ type: 'waystone', name: 'Waystone', x: w.x, z: w.z, key: w.key, waystone: { key: w.key, name: w.name } });
-    // town folk with day and night places (PLAN §4.3): the roles stand round the square by day, at the inn by night
+    if (L.townObjects && L.townObjects[i]) out.push(...L.townObjects[i]);     // E's NPCs, notes… placed inside this town
+    // town folk with day and night places (PLAN §4.3): stream E's schedules over stream B's town plan when both are
+    // there (js/sim/schedules.js), else the roles round the square by day, at the inn by night
+    if (L.schedules) {
+      const quest = out.filter(o => o.type === 'npc' && o.npc && o.npc.id);
+      out.push(...townFolk(t, { plan: L.townPlans && L.townPlans[i], schedules: L.schedules, kind: (L.townPlans && L.townPlans[i] && L.townPlans[i].kind) || t.kind || 'town', key: L.key + ':' + i, questNpcs: quest }));
+      return out;
+    }
     const inn = { x: t.x - t.r * 0.35, z: t.z + t.r * 0.3 };
     ROLES.forEach((role, k) => {
       const a = k / ROLES.length * Math.PI * 2;
       const day = { x: t.x + Math.cos(a) * t.r * 0.45, z: t.z + Math.sin(a) * t.r * 0.45 };
       const night = role === 'innkeeper' || role === 'healer' || role === 'unbinder' ? day : { x: inn.x + Math.cos(a) * 3, z: inn.z + Math.sin(a) * 3 };
-      out.push({ type: 'npc', name: roleName(role), x: day.x, z: day.z, key: `npc:${L.key}:${i}:${role}`, npc: { role, says: [] }, schedule: { day, night } });
+      out.push({ type: 'npc', name: roleName(role), x: day.x, z: day.z, key: `npc:${L.key}:${i}:${role}`, npc: { role, says: [] }, schedule: { blocks: [{ from: 0.22, at: day, do: 'work' }, { from: 0.8, at: night, do: 'rest' }] } });
     });
     return out;
   }
@@ -137,11 +157,11 @@ export function createProvince(opts) {
     const n = pv.copies.length ? Math.max(...pv.copies.map(c => c.meta.n)) + 1 : 1;
     const r = createRoom({
       id: `${L.key}/wilds:${n}`, name: L.name, kind: 'wilds', terrain: L.terrain, seed, createRules, hooks: roomHooks, encounterInfo,
-      camps: L.camps, spawn: L.gate,
+      camps: L.camps, spawn: L.gate, dormantCamps: (L.zones || []).length > 1,   // a whole province: only camps near players exist
       safeZones: L.towns.map(t => ({ x: t.x, z: t.z, r: t.r })), meta: { n, emptySince: 0, province: L.key },
       objects: [
-        ...L.doors.map((d, i) => ({ type: 'portal', name: d.name, x: d.x, z: d.z, yaw: d.yaw, key: `door:${L.key}:${i}`, portal: { to: 'dungeon', door: i } })),
-        ...L.waystones.filter(w => w.door !== undefined).map(w => ({ type: 'waystone', name: 'Waystone', x: w.x, z: w.z, key: w.key, waystone: { key: w.key, name: w.name } })),
+        ...L.doors.map((d, i) => ({ type: d.kind === 'cave' ? 'cave' : 'portal', name: d.name, x: d.x, z: d.z, yaw: d.yaw, key: d.key || `door:${L.key}:${i}`, portal: { to: 'dungeon', door: i } })),
+        ...L.waystones.filter(w => w.town === undefined).map(w => ({ type: 'waystone', name: 'Waystone', x: w.x, z: w.z, key: w.key, waystone: { key: w.key, name: w.name } })),
         ...L.objects,
       ],
       describeExtra: describeFor(L),
@@ -183,7 +203,7 @@ export function createProvince(opts) {
     const fams = ds.families || (ds.family ? [ds.family] : null);
     const family = fams && fams.length ? fams[dseed % fams.length] : undefined;
     // no `arenas` option: the encounter engine (stream C) spawns arena objects at the pull (E's ask)
-    const plan = planDungeon(dseed, { floors: ds.floors || 2, level: ds.level || dungeonLevel, ...(family ? { family } : {}) });
+    const plan = caveDungeon(planDungeon(dseed, { floors: ds.floors || 2, level: ds.level || dungeonLevel, ...(family ? { family } : {}) }), d.cave || null);
     const dterr = dungeonTerrain(plan);
     const spec = dungeonRoomSpec(plan, { exitTo: { room: 'wilds', x: d.x + 3, z: d.z + 3 } });
     const r = createRoom({
@@ -283,6 +303,7 @@ export function createProvince(opts) {
       case 'trade': return tradeOp(o, m);
       case 'travel': return travel(o, m.to);
       case 'trace': return trace(o, m.kind);
+      case 'quest': return questOp(o, m);
       default: return bad(s, 'socket');
     }
   }
@@ -345,7 +366,8 @@ export function createProvince(opts) {
       ch.exit = null;
       return { room: pickCopy(ch, null, pv), at: { x: back.x, z: back.z } };
     }
-    if (rest.startsWith('wilds') && at && P.has(prov)) return { room: roomAt(pv, at, ch), at };
+    // a saved wilds spot that is no longer good ground (another bake, another world) wakes you in town instead
+    if (rest.startsWith('wilds') && at && P.has(prov) && (!pv.L.terrain.walkable || pv.L.terrain.walkable(at.x, at.z))) return { room: roomAt(pv, at, ch), at };
     return { room: pv.towns[0], at: null };
   }
   /** The room holding point p in a province: the town whose circle it is in, else a wilds copy. */
@@ -375,7 +397,8 @@ export function createProvince(opts) {
         id: e.id, char: ch.id, name: ch.name, cls: ch.cls, level: ch.level, xp: ch.xp || 0,
         xpNext: rules.xpFor ? rules.xpFor((ch.level || 1) + 1) : null, gold: ch.gold || 0,
         x: e.x, y: e.y, z: e.z, yaw: e.yaw, hp: e.hp, hpMax: e.hpMax, mp: Math.round(e.mp), mpMax: e.mpMax,
-        bag: ch.bag || [], equipment: equipView(o), ignore: ch.ignore || [], waystones: ch.waystones || [],
+        bag: ch.bag || [], equipment: equipView(o), ignore: ch.ignore || [], waystones: ch.waystones || [], treasure: ch.treasure || {},
+        quests: (provOf(o.room) || first).book.view(ch),
         opened: Object.keys(ch.opened || {}).filter(k => ch.opened[k] > t),
       },
     };
@@ -505,14 +528,16 @@ export function createProvince(opts) {
     const obj = r.o, d = obj.data || {};
     if (d.portal) {
       s.sendJSON({ t: 'used', id, ok: true, kind: obj.type });
-      if (d.portal.to === 'here') return transfer(o, o.room, { x: d.portal.x, z: d.portal.z }, 'stairs');
+      if (d.portal.to === 'here') { transfer(o, o.room, { x: d.portal.x, z: d.portal.z }, 'stairs'); return questFloor(o); }
       if (d.portal.to === 'wilds') { const back = { x: d.portal.x, z: d.portal.z }; o.char.exit = null; return transfer(o, pickCopy(o.char, o), back, 'exit'); }
       if (d.portal.to === 'dungeon') return enterDungeon(o, obj);
     }
     if (d.waystone) return discover(o, obj);
+    if (d.treasure) return treasureUse(o, obj);
+    if (d.note || d.npc || d.use || d.chest) questTouch(o, obj);          // talk / use steps, and what this one offers
     if (d.chest) return openChest(o, obj);
-    if (d.note) return s.sendJSON({ t: 'used', id, ok: true, kind: 'note', name: obj.name, text: d.note.text, quest: d.note.quest || undefined });
-    if (d.npc) return s.sendJSON({ t: 'used', id, ok: true, kind: 'npc', name: obj.name, says: d.npc.says, quest: d.npc.quest || undefined, role: d.npc.role || undefined });
+    if (d.note) return s.sendJSON({ t: 'used', id, ok: true, kind: 'note', name: obj.name, text: d.note.text, quest: d.note.quest || undefined, ...questOffer(o, obj) });
+    if (d.npc) return s.sendJSON({ t: 'used', id, ok: true, kind: 'npc', name: obj.name, says: d.npc.says, quest: d.npc.quest || undefined, role: d.npc.role || undefined, ...questOffer(o, obj) });
     if (d.use) return useThing(o, obj);
     if (d.trace) return s.sendJSON({ t: 'used', id, ok: true, kind: d.trace.kind, ...d.trace });
     if (d.lever) {
@@ -530,9 +555,10 @@ export function createProvince(opts) {
   }
   function enterDungeon(o, doorObj) {
     const ch = o.char, p = partyOfChar(ch.id), pv = provOf(o.room);
-    const key = p ? 'p' + p.id : 'c' + ch.id;
+    const doorIdx = doorObj.data.portal.door || 0;
+    const key = (p ? 'p' + p.id : 'c' + ch.id) + ':' + doorIdx;      // one instance per party PER DOOR (caves and dungeons)
     let inst = pv.instances.get(key);
-    if (!inst) inst = makeInstance(pv, key, p ? p.id : null, p ? p.members : [ch.id], doorObj.data.portal.door || 0);
+    if (!inst) inst = makeInstance(pv, key, p ? p.id : null, p ? p.members : [ch.id], doorIdx);
     inst.meta.allowed.add(ch.id);
     ch.exit = { x: doorObj.x + 3, z: doorObj.z + 3 };
     transfer(o, inst, inst.spawnPoint, 'portal');
@@ -554,6 +580,30 @@ export function createProvince(opts) {
     const gold = (u.gives && u.gives.gold) || 0;
     if (gold) grant(o, { items: [], gold, reason: 'vignette', from: obj });
   }
+  /** Treasure chains (PLAN §3.7): clues are read in any order and remembered; the cache opens once per character
+   *  when every clue of its chain is found. ch.treasure = { chain: { found: [steps], done: wall ms } }. */
+  function treasureUse(o, obj) {
+    const ch = o.char, s = o.conn, t = obj.data.treasure;
+    ch.treasure ||= {};
+    const rec = ch.treasure[t.chain] ||= { found: [] };
+    if (!t.cache) {
+      const fresh = !rec.found.includes(t.step);
+      if (fresh) { rec.found.push(t.step); rec.found.sort((a, b) => a - b); journal(o, 'set', { k: 'treasure', v: ch.treasure }); o.dirty = true; }
+      const left = t.of - rec.found.length;
+      return s.sendJSON({ t: 'used', id: obj.id, ok: true, kind: 'clue', name: obj.name, text: t.text, chain: t.chain, chainName: t.chainName, step: t.step, of: t.of, found: rec.found, fresh, hint: left === 0 ? (hintOf(o, t.chain) || undefined) : undefined });
+    }
+    if (rec.done) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'opened', msg: 'You already dug this up.' });
+    if (rec.found.length < t.step) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'locked', msg: 'Nothing here you can find yet. Follow the clues.', chain: t.chain, found: rec.found, of: t.step });
+    rec.done = wallNow();
+    journal(o, 'set', { k: 'treasure', v: ch.treasure }); o.dirty = true;
+    const lvl = t.level || o.entity.level;
+    const items = (o.room.rules.rollLoot ? safeRules(o.room, 'rollLoot', o.entity, { level: lvl, tier: t.tier }) : null) || [];
+    s.sendJSON({ t: 'used', id: obj.id, ok: true, kind: 'cache', chain: t.chain, chainName: t.chainName });
+    o.room.emit({ type: 'open', to: o.entity.id, d: obj.id, x: obj.x, z: obj.z });
+    grant(o, { items, gold: Math.round(lvl * 10 + 20), reason: 'treasure', goldAdded: false, from: obj });
+    saveNow(o);
+  }
+  function hintOf(o, chain) { for (const x of o.room.objects.values()) if (x.data && x.data.treasure && x.data.treasure.chain === chain && x.data.treasure.cache) return x.data.treasure.hint; return null; }
   function openChest(o, obj) {
     const ch = o.char, e = o.entity, c = obj.data.chest, s = o.conn;
     const key = o.room.kind === 'instance' ? o.room.id + ':' + c.key : objKey(o, c.key);
@@ -608,46 +658,95 @@ export function createProvince(opts) {
     moveTo(o, w.province, { x: w.x + 2, z: w.z + 2 }, 'waystone');
   }
 
-  // ---- the realm event (spawned here when the director picks this province) ----
-  let liveEvent = null, eventBoss = null, lastEventSend = 0;
-  const eventView = ev => ({ id: ev.id, uid: ev.uid, name: ev.name, province: ev.province, x: ev.x, z: ev.z, r: ev.r || 50, level: ev.level });
+  // ---- events: the realm event (the director starts it here) and every copy's own zone events (PLAN §5.2) ----
+  let liveEvent = null, realmRun = null;
+  const zoneRuns = new Map();     // `${room.id}|${zone}` -> { run, room, def }
+  const zoneNext = new Map();     // same key -> room clock ms when the next may start
+  const eventView = ev => ({ id: ev.id, uid: ev.uid, name: ev.name, province: ev.province, x: ev.x, z: ev.z, r: ev.r || 50, level: ev.level, kind: ev.kind || 'boss', zoneName: ev.zoneName || null });
+  /** The room holding a point: a hub town's room when it is inside one (a town attack), else the first copy. */
+  function roomForPoint(pv, p) { const ti = pv.L.towns.findIndex(t => Math.hypot(p.x - t.x, p.z - t.z) < t.r); return ti >= 0 ? pv.towns[ti] : pv.copies[0]; }
   function onEvent(m) {
     if (m.op === 'live') { liveEvent = m.ev; return; }
     if (m.op === 'stop') {
       if (liveEvent && liveEvent.uid === m.uid) liveEvent = null;
-      if (eventBoss && eventBoss.e.data.event === m.uid) { if (!eventBoss.e.removed && !eventBoss.e.dead) eventBoss.room.remove(eventBoss.e); for (const a of eventBoss.adds) if (!a.removed) eventBoss.room.remove(a); eventBoss = null; }
+      if (realmRun && realmRun.run.ev.uid === m.uid) { realmRun.run.stop(); realmRun = null; }
       return;
     }
     if (m.op === 'start') {
       const ev = m.ev, pv = P.get(ev.province);
       if (!pv) return;
       liveEvent = ev;
-      const room = pv.copies[0];
-      const scale = ev.scale || { hp: 1, adds: 0, players: 1 };
-      const e = room.spawn({ kind: 'monster', type: ev.body || 'wolf', level: ev.level || 5, x: ev.x, z: ev.z, rank: 'boss', state: STATE.elite, name: ev.name, data: { encounter: ev.encounter || null, event: ev.uid, scale: scale.hp } });
-      if (!e.r.unit) { e.setMax(e.hpMax * scale.hp); e.setHp(e.hpMax); }      // the stand-in rules: scale here (C reads data.scale)
-      const adds = [];
-      for (let i = 0; i < scale.adds; i++) { const a = i / Math.max(1, scale.adds) * Math.PI * 2; adds.push(room.spawn({ kind: 'monster', type: ev.addType || ev.body || 'wolf', level: Math.max(1, (ev.level || 5) - 2), x: ev.x + Math.cos(a) * 12, z: ev.z + Math.sin(a) * 12, data: { event: ev.uid } })); }
-      eventBoss = { e, room, adds, ev };
+      if (realmRun) realmRun.run.stop();
+      const room = roomForPoint(pv, ev);
+      realmRun = { room, run: createEventRunner({ room, ev: { ...ev, warnMs: 0 }, rng: () => room.host.random('event'), info: encounterInfo }) };
+      realmRun.run.step();
     }
+  }
+  function rewardEvent(run, room) {
+    for (const c of run.enrolled) {
+      const o = online.get(c);
+      if (!o || !o.entity || o.entity.dead) continue;
+      questEvent(o, { kind: 'event', encounter: run.ev.boss || run.ev.id });
+      const rw = eventReward(run.ev, o.room.rules, o.entity, () => room.host.random('event'));
+      o.room.award(o.entity, { ...rw, reason: 'event' });
+    }
+  }
+  function frameTo(run, room) {
+    const v = run.view();
+    const msg = JSON.stringify({ t: 'eventFrame', ...v });
+    for (const p of room.host.near(v.x, v.z, v.r * 2 + 30, x => x.kind === 'player')) { const c = room.clients.get(p.id); if (c) c.send(msg); }
+    return v;
   }
   function eventTick() {
-    if (!eventBoss) return;
-    const { e, room, ev } = eventBoss;
-    if (e.dead || e.removed) {
-      send({ k: 'eventState', uid: ev.uid, state: e.dead ? 'won' : 'lost' });
-      eventBoss = null;
-      return;
+    if (realmRun) {
+      const { run, room } = realmRun;
+      const res = run.step();
+      if (res !== 'live') {
+        if (res === 'won') rewardEvent(run, room);
+        send({ k: 'eventState', uid: run.ev.uid, state: res });
+        realmRun = null;
+      } else {
+        const v = frameTo(run, room);
+        send({ k: 'eventState', uid: run.ev.uid, state: 'live', hp: v.hp, players: v.players, phase: v.phase });
+      }
     }
-    if (now() - lastEventSend < 1000) return;
-    lastEventSend = now();
-    const near = room.host.near(ev.x, ev.z, (ev.r || 50) * 2, x => x.kind === 'player');
-    const hp = e.hp / Math.max(1, e.hpMax);
-    send({ k: 'eventState', uid: ev.uid, state: 'live', hp, players: near.length });
-    // the temporary event group (PLAN §5.3): everyone in the arena gets the event frame, no invite needed
-    const msg = JSON.stringify({ t: 'eventFrame', uid: ev.uid, name: ev.name, boss: e.id, hp, players: near.length });
-    for (const p of near) { const c = room.clients.get(p.id); if (c) c.send(msg); }
+    zoneEventsTick();
   }
+  function zoneEventsTick() {
+    for (const pv of P.values()) {
+      const defs = pv.L.zoneEvents || [];
+      if (!defs.length) continue;
+      for (const room of pv.copies) {
+        // who is in which zone of this copy
+        const inZone = new Map();
+        for (const c of room.clients.values()) { const z = pv.L.zoneOf(c.entity.x, c.entity.z); (inZone.get(z) || inZone.set(z, []).get(z)).push(c); }
+        const t = room.now();
+        for (const def of defs) {
+          const key = room.id + '|' + def.id;
+          const cur = zoneRuns.get(key);
+          const here = inZone.get(def.zone) || [];
+          if (cur) {
+            const res = cur.run.step();
+            if (res === 'live') { frameTo(cur.run, room); continue; }
+            if (res === 'won') rewardEvent(cur.run, room);
+            tellZone(here, { kind: 'end', ev: cur.run.view(), won: res === 'won' });
+            zoneRuns.delete(key);
+            zoneNext.set(key, t + gapOf(def, room));
+            continue;
+          }
+          if (!zoneNext.has(key)) { zoneNext.set(key, t + (zoneEventFirstMs ?? Math.round(5 * 60000 + room.host.random('event') * Math.max(0, def.everyMs[0] - 5 * 60000)))); continue; }
+          if (t < zoneNext.get(key) || !here.length) continue;      // a zone event plays where somebody can see it
+          const ev = { ...def, uid: def.id + ':' + room.id + ':' + t, scale: eventScale(here.length, opts.eventSize) };
+          const run = createEventRunner({ room, ev, rng: () => room.host.random('event'), info: encounterInfo });
+          zoneRuns.set(key, { run, room, def });
+          tellZone(here, { kind: def.warnMs ? 'soon' : 'start', ev: run.view(), text: def.announce[0] || undefined, at: def.warnMs ? wallNow() + def.warnMs : undefined });
+          run.step();
+        }
+      }
+    }
+  }
+  const gapOf = (def, room) => zoneEventGapMs ?? Math.round(def.everyMs[0] + room.host.random('event') * (def.everyMs[1] - def.everyMs[0]));
+  function tellZone(clients, msg) { const d = JSON.stringify({ t: 'zoneEvent', ...msg }); for (const c of clients) c.send(d); }
 
   // ---- watching the rooms: open groups, traces, deeds ----
   const attackers = new Map();   // `${room}:${monster}` -> Map(char -> wall ms)
@@ -680,6 +779,7 @@ export function createProvince(opts) {
     if (ev.type === 'die') {
       const d = r.entities.get(ev.d);
       if (!d) return;
+      if (d.kind === 'monster') questKill(r, d, ev);
       attackers.delete(r.id + ':' + d.id);
       const pv = provOf(r);
       if (d.kind === 'player') {
@@ -700,7 +800,9 @@ export function createProvince(opts) {
   function placeTrace(r, { kind, name, x, z, ms, info, owner: ownerChar = null }) {
     const list = r.meta.traces ||= [];
     if (ownerChar) for (const t of list.filter(t => t.owner === ownerChar && t.kind === kind)) { if (!t.e.removed) r.remove(t.e); }
-    while (list.length && (list[0].e.removed || list.length >= MAX_GRAVES)) { const t = list.shift(); if (!t.e.removed) r.remove(t.e); }
+    for (let i = list.length - 1; i >= 0; i--) if (list[i].e.removed) list.splice(i, 1);
+    const same = list.filter(t => t.kind === kind);
+    while (same.length >= (MAX_TRACES[kind] || 40)) { const t = same.shift(); list.splice(list.indexOf(t), 1); if (!t.e.removed) r.remove(t.e); }
     const e = r.spawn({ kind: 'object', type: kind, name, x, z, team: 0, data: { trace: { kind, ...info, until: wallNow() + ms }, state: 'idle' } });
     list.push({ e, kind, owner: ownerChar });
     r.host.despawn(e, ms);
@@ -719,7 +821,7 @@ export function createProvince(opts) {
     const pv = provOf(inst);
     const members = [...online.values()].filter(o => o.room === inst).map(o => o.char.name);
     const leader = members[0] || 'someone';
-    const banner = { by: leader, party: members.length, at: wallNow() };
+    const banner = { by: leader, party: members.length, at: wallNow(), until: wallNow() + BANNER_MS, place: inst.name };
     for (const c of pv.copies) for (const ob of c.objects.values()) if (ob.data && ob.data.portal && ob.data.portal.door === inst.meta.door) { ob.data = { ...ob.data, banner }; ob.infoVer++; }
   }
   function zoneTick() {
@@ -730,14 +832,17 @@ export function createProvince(opts) {
       const z = pv.L.zoneOf(o.entity.x, o.entity.z);
       const d = deedOf(z);
       d.visitors.add(o.char.id);
-      const cell = Math.floor(o.entity.x / 32) + ':' + Math.floor(o.entity.z / 32);
-      d.heat.set(cell, Math.min(255, (d.heat.get(cell) || 0) + 1));
+      const cell = Math.floor(o.entity.x / HEAT_CELL) + ':' + Math.floor(o.entity.z / HEAT_CELL);
+      const moved = o.heatAt ? Math.round(Math.hypot(o.entity.x - o.heatAt.x, o.entity.z - o.heatAt.z) / 0.8) : 0;     // ~0.8 m a step
+      o.heatAt = { x: o.entity.x, z: o.entity.z };
+      if (moved) d.heat.set(cell, Math.min(65535, (d.heat.get(cell) || 0) + Math.min(moved, 20)));
       if (o.zone !== z) { o.zone = z; o.conn.sendJSON(zoneMsg(pv, z)); }
+      if (pv.book.wantsPosition(o.char)) questEvent(o, { kind: 'visit', x: o.entity.x, z: o.entity.z });
     }
   }
   function zoneMsg(pv, z) {
     const d = deedOf(z);
-    const heat = [...d.heat.entries()].sort((a, b) => b[1] - a[1]).slice(0, 200).map(([k, v]) => { const [x, zz] = k.split(':').map(Number); return [x * 32 + 16, zz * 32 + 16, v]; });
+    const heat = [...d.heat.entries()].sort((a, b) => b[1] - a[1]).slice(0, 200).map(([k, v]) => { const [x, zz] = k.split(':').map(Number); return [x * HEAT_CELL + HEAT_CELL / 2, zz * HEAT_CELL + HEAT_CELL / 2, v]; });
     const zs = pv.L.zones.find(q => q.key === z);
     return { t: 'zone', zone: z, name: (zs && zs.sheet && zs.sheet.name) || pv.L.name, band: zs && zs.sheet ? zs.sheet.band : null, deeds: { rares: d.rares, bosses: d.bosses, elites: d.elites, deaths: d.deaths, visitors: d.visitors.size }, heat };
   }
@@ -745,19 +850,120 @@ export function createProvince(opts) {
   // ---- day/night + NPC schedules ----
   const timeOfDay = () => (((wallNow() - realmClock.epoch) % realmClock.dayMs) + realmClock.dayMs) % realmClock.dayMs / realmClock.dayMs;
   const isNight = () => { const t = timeOfDay(); return t < 0.22 || t > 0.8; };
+  const PHASES = { dawn: 0.2, day: 0.27, dusk: 0.75, night: 0.82, late: 0.95 };
+  const barkAt = new Map();
   function npcTick(dtMs) {
-    const night = isNight();
+    const t = timeOfDay(), night = isNight(), phases = (first.L.schedules && first.L.schedules.clock.phases) || PHASES;
     for (const pv of P.values()) for (const r of pv.towns) {
       for (const n of r.objects.values()) {
         const sc = n.kind === 'npc' && n.data && n.data.schedule;
-        if (!sc) continue;
-        const goal = night ? sc.night : sc.day;
+        if (!sc || !sc.blocks) continue;
+        const goal = blockAt(sc.blocks, t, phases).at;
         const dx = goal.x - n.x, dz = goal.z - n.z, d = Math.hypot(dx, dz);
-        if (d < 0.3) { n.loop('idle'); continue; }
+        if (d < 0.3) { n.loop('idle'); if (goal.yaw !== undefined) n.face(goal.yaw); barkNear(r, n, sc, night); continue; }
+        // nobody watching (no player within 80 m): just be there
+        if (d > 3 && !r.host.near(n.x, n.z, 80, x => x.kind === 'player').length) { n.moveTo(goal.x, goal.z); n.loop('idle'); continue; }
         const stepM = Math.min(d, 1.6 * dtMs / 1000);
         n.face(Math.atan2(dx, dz)); n.moveTo(n.x + dx / d * stepM, n.z + dz / d * stepM); n.loop('walk');
       }
     }
+  }
+  /** A short bark when a player walks within 6 m (one per NPC per 90 s; stream E's `says` pools by day/night). */
+  function barkNear(r, n, sc, night) {
+    const pool = sc.says && (night ? sc.says.night : sc.says.day);
+    if (!pool || !pool.length) return;
+    const t = now();
+    if (t - (barkAt.get(n) || -1e9) < 90000) return;
+    if (!r.host.near(n.x, n.z, 6, x => x.kind === 'player').length) return;
+    barkAt.set(n, t);
+    r.emit({ type: 'say', id: n.id, text: pool[Math.floor(r.host.random('bark') * pool.length)], style: 'bark' });
+  }
+
+
+  // ---- quests (js/sim/quests.js; stream E's data/quests/**) ----
+  const bookOf = o => (provOf(o.room) || first).book;
+  /** The object a player is talking to, as the quest book sees it. */
+  function giverOf(obj) {
+    const d = obj.data || {}, key = d.key || ('obj:' + obj.id);
+    const m = /^vig:([^:]+):\d+$/.exec(key);
+    return { key, npcId: (d.npc && d.npc.id) || null, name: obj.name, role: (d.npc && d.npc.role) || null, x: obj.x, z: obj.z, vignette: m ? m[1] : null, objectName: obj.name };
+  }
+  function sendQuests(o) { if (o.conn) o.conn.sendJSON({ t: 'quests', ...bookOf(o).view(o.char) }); }
+  function questSaved(o) { journal(o, 'set', { k: 'quests', v: o.char.quests }); o.dirty = true; }
+  function questEvent(o, ev) {
+    const moved = bookOf(o).progress(o.char, ev);
+    if (moved.length) { questSaved(o); sendQuests(o); }
+    return moved;
+  }
+  function questTouch(o, obj) {
+    const g = giverOf(obj);
+    if (g.npcId) questEvent(o, { kind: 'talk', npcId: g.npcId, x: obj.x, z: obj.z });
+    else if (obj.data && obj.data.npc) questEvent(o, { kind: 'talk', npcId: null, x: obj.x, z: obj.z });
+    if (g.vignette) questEvent(o, { kind: 'use', vignette: g.vignette, name: obj.name });
+  }
+  function questOffer(o, obj) {
+    const b = bookOf(o), g = giverOf(obj);
+    const offers = b.offers(o.char, g), ready = b.ready(o.char, g);
+    if (offers.length) o.dirty = true;                    // job boards remember what they offered
+    return offers.length || ready.length ? { offers, ready } : {};
+  }
+  /** Everyone who gets credit for a kill: the killer, whoever hurt it in the last 30 s, and their party members within 60 m. */
+  function creditOf(r, d, ev) {
+    const out = new Set();
+    const killer = ev.by ? r.entities.get(ev.by) : null;
+    if (killer && killer.char) out.add(killer.char.id);
+    const hits = attackers.get(r.id + ':' + d.id);
+    if (hits) { const t = now(); for (const [c, at] of hits) if (t - at < 30000) out.add(c); }
+    for (const c of [...out]) {
+      const p = partyOf.get(c);
+      if (p) for (const m of p.members) { const mo = online.get(m); if (mo && mo.room === r && Math.hypot(mo.entity.x - d.x, mo.entity.z - d.z) < 60) out.add(m); }
+    }
+    return [...out].map(c => online.get(c)).filter(o => o && o.room === r);
+  }
+  function questKill(r, d, ev) {
+    const who = creditOf(r, d, ev);
+    if (!who.length) return;
+    const night = isNight();
+    const kev = { kind: 'kill', type: d.type, encounter: (d.data && d.data.encounter) || null, rank: d.rank, x: d.x, z: d.z, night };
+    for (const o of who) questEvent(o, kev);
+    if (r.kind === 'instance' && d.rank === 'boss') {
+      const pv = provOf(r), door = pv.L.doors[r.meta.door] || {};
+      for (const o of [...online.values()].filter(x => x.room === r)) questEvent(o, { kind: 'clear', door: r.meta.door, zone: door.zone, boss: true, floor: 99 });
+    }
+  }
+  function questFloor(o) {
+    const r = o.room;
+    if (r.kind !== 'instance' || !r.meta.plan) return;
+    const fl = r.meta.plan.floors;
+    let i = 0; for (let k = 0; k < fl.length; k++) if (o.entity.x >= fl[k].origin.x) i = k;
+    const door = provOf(r).L.doors[r.meta.door] || {};
+    questEvent(o, { kind: 'clear', door: r.meta.door, zone: door.zone, boss: false, floor: i + 1 });
+  }
+  function questOp(o, m) {
+    const s = o.conn, b = bookOf(o), ch = o.char;
+    const reply = (x) => s.sendJSON({ t: 'questR', op: m.op, id: m.id, ...x });
+    if (m.op === 'abandon') { const r = b.abandon(ch, m.id); if (r.ok) { questSaved(o); sendQuests(o); } return reply(r); }
+    if (m.op !== 'accept' && m.op !== 'turnin') return bad(s, 'op');
+    const near = m.npc ? o.room.objectNear(o.entity, m.npc, 6) : { why: 'unknown' };
+    if (near.why) return reply({ ok: false, why: near.why, msg: near.why === 'far' ? 'Walk over to them first.' : 'Who?' });
+    const g = giverOf(near.o);
+    if (m.op === 'accept') {
+      const r = b.accept(ch, m.id, g);
+      if (r.ok) { questSaved(o); sendQuests(o); if (g.npcId) questEvent(o, { kind: 'talk', npcId: g.npcId, x: g.x, z: g.z }); }
+      return reply(r);
+    }
+    const r = b.turnIn(ch, m.id, g);
+    if (!r.ok) return reply(r);
+    questSaved(o);
+    const e = o.entity, rules = o.room.rules, lv = r.reward.level;
+    const span = rules.xpFor ? Math.max(1, (safeRules(o.room, 'xpFor', lv + 1) || 0) - (safeRules(o.room, 'xpFor', lv) || 0)) : 100;
+    const xp = Math.round(r.reward.xpShare * span);
+    const items = r.reward.item && rules.rollLoot ? (safeRules(o.room, 'rollLoot', e, { level: Math.max(lv, e.level || 1), tier: r.reward.item.tier || 'common' }) || []) : [];
+    reply({ ok: true, reward: { xp, gold: r.reward.gold, items: items.length }, next: r.next || undefined });
+    o.room.award(e, { xp, gold: r.reward.gold, items, reason: 'quest' });
+    econ.add('faucet', 'quest', { gold: r.reward.gold }, ch.level || 1);
+    sendQuests(o);
+    saveNow(o);
   }
 
   // ---- loot + bag ----
@@ -1063,7 +1269,7 @@ export function createProvince(opts) {
     if (edgeQueue.size) drainEdges();
     if (tickTimers.length) for (let i = tickTimers.length - 1; i >= 0; i--) if (tickTimers[i].at <= ticks) { const f = tickTimers[i].fn; tickTimers.splice(i, 1); f(); }
     if (ticks % 10 === 0) sendFrames();
-    if (ticks % 10 === 5) eventTick();
+    if (ticks % 20 === 5) eventTick();           // events (realm + zone) at 1 Hz
     if (ticks % 20 === 7) zoneTick();
     if (ticks % 4 === 1) npcTick(TICK_MS * 4);
     const t = now();
@@ -1089,7 +1295,7 @@ export function createProvince(opts) {
       const secs = (t - rateWin.at) / 1000;
       rateWin.perSec = { msgsIn: Math.round((counters.msgsIn - rateWin.msgsIn) / secs), bytesOut: Math.round((counters.bytesOut - rateWin.bytesOut) / secs) };
       rateWin.at = t; rateWin.msgsIn = counters.msgsIn; rateWin.bytesOut = counters.bytesOut;
-      if (ticks % 20 === 0) send({ k: 'status', status: brief() });
+      send({ k: 'status', status: brief() });          // once a second: the gateway's /status (stage 2)
     }
     const ms = perfNow() - t0;
     tickStats.add(ms);
@@ -1101,7 +1307,8 @@ export function createProvince(opts) {
       const pv = provOf(r);
       if (r.kind === 'wilds' && r === pv.copies[0]) continue;
       if (players(r) > 0) { r.meta.emptySince = 0; continue; }
-      if (eventBoss && eventBoss.room === r) continue;
+      if (realmRun && realmRun.room === r) continue;
+      if (r.kind === 'wilds') { let busy = false; for (const z of zoneRuns.values()) if (z.room === r) busy = true; if (busy) continue; }
       if (!r.meta.emptySince) r.meta.emptySince = t;
       const idle = r.kind === 'instance' ? instanceIdleMs : copyIdleMs;
       if (t - r.meta.emptySince >= idle) closeRoom(r);
@@ -1126,7 +1333,9 @@ export function createProvince(opts) {
     for (const s of [...kit.sessions]) s.closeSoon(code);
   }
   function brief() {
-    return { proc, ccu: [...online.values()].filter(o => o.conn).length, online: online.size, tick: tickStats.summary(), rooms: rooms.size };
+    const list = [];
+    for (const r of rooms.values()) { let monsters = 0; for (const e of r.entities.values()) if (e.kind === 'monster') monsters++; list.push({ id: r.id, kind: r.kind, players: r.clients.size, monsters }); }
+    return { proc, ccu: [...online.values()].filter(o => o.conn).length, online: online.size, tick: tickStats.summary(), rooms: list, bytesOutPerSec: rateWin.perSec.bytesOut, msgsInPerSec: rateWin.perSec.msgsIn };
   }
   function status() {
     let rulesErrors = 0;
@@ -1149,7 +1358,8 @@ export function createProvince(opts) {
       economy: econ.lastHour(),
       journal: { rows: counters.journalRows, flushes: counters.journalFlushes, lastMs: counters.journalMs, queue: jpend.length, refused: counters.journalRefused },
       trades: { open: trades.byId.size, done: counters.trades, failed: counters.tradeFails },
-      event: eventBoss ? { uid: eventBoss.ev.uid, hp: eventBoss.e.hp / Math.max(1, eventBoss.e.hpMax) } : liveEvent ? { uid: liveEvent.uid } : null,
+      event: realmRun ? realmRun.run.view() : liveEvent ? { uid: liveEvent.uid } : null,
+      zoneEvents: [...zoneRuns.values()].map(z => ({ room: z.room.id, ...z.run.view() })),
       timeOfDay: Math.round(timeOfDay() * 1000) / 1000,
       sessions: kit.sessions.size,
       db: store.kind,

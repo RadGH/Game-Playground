@@ -25,6 +25,7 @@ export const VIEW = Object.freeze({
   q: 0.125,                      // metres per snapshot position unit
 });
 const MAX_QUEUED_INPUTS = 30, MOVE_BUDGET_CAP = 500;
+export const DORMANT_MS = 30000;      // a camp nobody has been within awakeR of for this long (and calm) is parked
 
 export function createRoom(opts) {
   const { id, name = id, terrain, seed = 1, createRules, hooks = {}, tickMs = TICK_MS, camps = [], objects = [], kind = 'wilds', area = null, safeZones = [], meta = null } = opts;
@@ -40,10 +41,15 @@ export function createRoom(opts) {
   const despawns = [];             // { at, e }
   let tick = 0, nextId = 1, events = [], uidN = 0;
   const awake = new Uint32Array(grid.count);   // == awakeGen when awake this tick
-  let awakeGen = 0;
+  let awakeGen = 1;              // (the array starts at 0: nothing is awake before the first refresh)
   const stats = { rulesErrors: 0, lastRulesError: '', spawned: 0 };
   const writer = new ByteWriter(4096), snapWriter = new ByteWriter(2048);
-  const campState = camps.map(c => ({ ...c, live: new Set(), nextAt: 0 }));
+  // DORMANT CAMPS (opt-in, `dormantCamps`: a province copy of ~1,300 monsters): a camp with no player within awakeR
+  // is not spawned at all; one that has been out of reach for DORMANT_MS with every member calm (alive, full health,
+  // not fighting) is parked — removed, with its warband escort — and comes back as it was when someone walks near.
+  // Respawn timers keep running while parked. The rules (stream C) then only ever see monsters near players.
+  const dormant = !!opts.dormantCamps;
+  const campState = camps.map(c => ({ ...c, live: new Set(), nextAt: 0, parked: dormant ? (c.count || 1) : 0, idleSince: 0 }));
   const spawnPoint = opts.spawn ? { ...opts.spawn } : { ...terrain.spawn };
 
   const room = {
@@ -216,14 +222,35 @@ export function createRoom(opts) {
       const tx = c.x + Math.cos(a) * r, tz = c.z + Math.sin(a) * r;
       if (room.walkable(tx, tz)) { x = tx; z = tz; break; }
     }
-    const m = room.spawn({ kind: 'monster', type: c.type, level: c.level || 1, x, z, yaw: host.random('spawn') * 6.283, rank: c.rank || 'normal', state: c.rank && c.rank !== 'normal' ? STATE.elite : 0, name: c.name || (c.encounter && opts.encounterInfo && opts.encounterInfo[c.encounter] ? opts.encounterInfo[c.encounter].name : undefined), data: c.encounter ? { encounter: c.encounter } : null });
+    const m = room.spawn({ kind: 'monster', type: c.type, level: c.level || 1, x, z, yaw: host.random('spawn') * 6.283, rank: c.rank || 'normal', state: c.rank && c.rank !== 'normal' ? STATE.elite : 0, name: c.name || (c.encounter && opts.encounterInfo && opts.encounterInfo[c.encounter] ? opts.encounterInfo[c.encounter].name : undefined), data: c.encounter || c.path ? { ...(c.encounter ? { encounter: c.encounter } : {}), ...(c.path ? { path: c.path } : {}) } : null });
     c.live.add(m.id);
   }
   /** A camp's respawn delay: a number, or [min, max] picked on the room's 'spawn' stream (rares: 20-60 min). */
   function respawnOf(c) { const r = c.respawnMs ?? 30000; return Array.isArray(r) ? r[0] + host.random('spawn') * (r[1] - r[0]) : r; }
+  const campCalm = c => { for (const idd of c.live) { const m = entities.get(idd); if (!m || m.dead || (m.state & STATE.combat) || m.hp < m.hpMax) return false; } return true; };
+  function parkCamp(c) {
+    for (const idd of c.live) {
+      const m = entities.get(idd);
+      if (!m) continue;
+      for (const x of [...entities.values()]) if (x.kind === 'monster' && x.data && x.data.escortOf === m.id) room.remove(x);
+      room.remove(m);
+    }
+    c.parked += c.live.size; c.live.clear(); c.idleSince = 0;
+    stats.parked = (stats.parked || 0) + 1;
+  }
   function fillCamps(now, initial = false) {
     for (const c of campState) {
       for (const idd of c.live) { const m = entities.get(idd); if (!m || m.dead) c.live.delete(idd); }
+      if (dormant) {
+        if (awake[grid.cellOf(c.x, c.z)] !== awakeGen) {
+          // out of reach: count respawns on paper, park a calm camp after a while
+          if (c.live.size + c.parked < c.count) { if (!c.nextAt) c.nextAt = now + respawnOf(c); if (now >= c.nextAt) { c.parked++; c.nextAt = 0; } }
+          if (c.live.size) { c.idleSince ||= now || 1; if (now - c.idleSince >= DORMANT_MS && campCalm(c)) parkCamp(c); }
+          continue;
+        }
+        c.idleSince = 0;
+        while (c.parked > 0) { c.parked--; spawnInCamp(c); }
+      }
       if (initial) { while (c.live.size < c.count) spawnInCamp(c); continue; }
       if (c.live.size >= c.count) { c.nextAt = 0; continue; }
       if (!c.nextAt) c.nextAt = now + respawnOf(c);
@@ -318,8 +345,9 @@ export function createRoom(opts) {
     return { bytes: writer.out(), fulls };
   }
 
-  const viewTmp = [];
+  const viewTmp = [], evIdx = [], evCache = new Map();
   function send() {
+    evCache.clear();
     const due = [bandDue(0), bandDue(1), bandDue(2)];
     const anyDue = due[0] || due[1] || due[2];
     const deltaCache = new Map(), fullCache = new Map();
@@ -328,13 +356,24 @@ export function createRoom(opts) {
       const me = c.entity;
       // events near me (every tick)
       if (events.length) {
-        let out = null;
-        for (const ev of events) {
-          if (ev.to !== undefined ? ev.to === me.id : (Math.abs(ev.x - me.x) <= R && Math.abs(ev.z - me.z) <= R)) {
-            (out ||= []).push(ev.to !== undefined ? stripTo(ev) : ev);
-          }
+        // a crowd sees the same events: the frame is serialised once per distinct set (keyed by which events are in
+        // it) and shared; a client with a personal event (`to` = me) gets its own
+        let n = 0, personal = false, all = true;
+        for (let i = 0; i < events.length; i++) {
+          const ev = events[i];
+          const mine = ev.to !== undefined ? ev.to === me.id : (Math.abs(ev.x - me.x) <= R && Math.abs(ev.z - me.z) <= R);
+          if (mine) { evIdx[n++] = i; if (ev.to !== undefined) personal = true; } else all = false;
         }
-        if (out) c.send(JSON.stringify({ t: 'ev', k: tick, e: out }));
+        if (n) {
+          let str;
+          if (personal) { const out = []; for (let k = 0; k < n; k++) { const ev = events[evIdx[k]]; out.push(ev.to !== undefined ? stripTo(ev) : ev); } str = JSON.stringify({ t: 'ev', k: tick, e: out }); }
+          else {
+            let key = all ? '*' : ''; if (!all) for (let k = 0; k < n; k++) key += evIdx[k] + ',';
+            str = evCache.get(key);
+            if (!str) { const out = []; for (let k = 0; k < n; k++) out.push(events[evIdx[k]]); str = JSON.stringify({ t: 'ev', k: tick, e: out }); evCache.set(key, str); }
+          }
+          c.send(str);
+        }
       }
       if (!anyDue) continue;
       // my view: cells by distance from me to the cell centre, nearest first, capped
@@ -426,7 +465,8 @@ export function createRoom(opts) {
     const npc = o.type === 'npc';
     room.spawn({ kind: npc ? 'npc' : 'object', type: o.type, name: o.name || o.type, x: o.x, z: o.z, yaw: o.yaw || 0, team: npc ? 1 : 0, state: npc ? STATE.friendly : 0,
       data: { portal: o.portal || null, chest: o.chest || null, gate: o.gate || null, lever: o.lever || null, rules: !!o.rules, key: o.key || null, r: o.r || null, state: o.state || null, room: o.room ?? null,
-        note: o.note || null, use: o.use || null, npc: o.npc || null, hidden: !!o.hidden, hint: o.hint || null, lore: o.lore || null, waystone: o.waystone || null, schedule: o.schedule || null } });
+        note: o.note || null, use: o.use || null, npc: o.npc || null, hidden: !!o.hidden, hint: o.hint || null, lore: o.lore || null, waystone: o.waystone || null, schedule: o.schedule || null,
+        treasure: o.treasure || null, site: o.site || null, shimmer: o.shimmer || null } });
   }
   /** Change an object's state (lit, used, broken, open…): late joiners see it in `info`, everyone near gets `obj`. */
   room.objState = function (o, state, extra = {}) {

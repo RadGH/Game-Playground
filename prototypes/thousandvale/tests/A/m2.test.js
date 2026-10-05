@@ -20,7 +20,7 @@ const root = new URL('../../', import.meta.url);
 const readJson = async f => JSON.parse(readFileSync(new URL(f, root), 'utf8'));
 const readBytes = async f => readFileSync(new URL(f, root));
 const C = await loadProvinceContent(readJson, readBytes, 'torbor_downs', { parseTerrain, createProvinceTerrain });
-const TORBOR = buildLayout({ key: 'torbor_downs', name: C.name, terrain: C.terrain, zones: C.zones, encounterInfo: C.encounterInfo, vignetteContent, starter: C.starter });
+const TORBOR = buildLayout({ key: 'torbor_downs', name: C.name, terrain: C.terrain, zones: C.zones, encounterInfo: C.encounterInfo, vignetteContent, starter: C.starter, horizon: C.horizon });
 const OTHER = buildLayout({ key: 'vale', name: 'The Test Vale', terrain: standInTerrain(5, 1024), zones: [{ key: 'vale', sheet: null }] });
 
 function realmServer({ clock, store = null, opts = {} } = {}) {
@@ -45,6 +45,8 @@ test('the province: 16 zones in world metres, new characters in Torborhold, walk
   assert.equal(a.joined.room.id, 'torbor_downs/town:0');
   assert.equal(a.joined.room.name, 'Torborhold');
   assert.equal(a.joined.room.zones.length, 16);
+  const hz = a.joined.room.horizon;
+  assert.ok(hz.bin === 'data/world/horizon.bin' && hz.step === 32 && hz.hash, 'stream B\'s 32 m horizon in joined: ' + JSON.stringify(hz));
   assert.ok(a.joined.room.origin.x === 22528 && a.joined.room.q <= 0.13);
   const P0 = srv.world.procs[0];
   const r = P0.copies[0];
@@ -152,7 +154,11 @@ test('open groups: two strangers hitting one monster get "Group up"; one click e
   await srv.ready;
   const a = await joinRealm(srv, clock, 'Stranger A'), b = await joinRealm(srv, clock, 'Stranger B');
   const P0 = srv.world.procs[0], r = P0.copies[0];
-  const wolf = [...r.entities.values()].find(e => e.kind === 'monster' && e.rank === 'normal' && !e.dead);
+  // camps far from everyone are parked (dormant): walk to one first and let it wake
+  const camp = TORBOR.camps.find(c => !c.encounter && !c.rank && !c.warband && c.count >= 2);
+  P0.transfer(o(srv, a), r, { x: camp.x + 25, z: camp.z }, 't');
+  await run(clock, 1500);
+  const wolf = [...r.entities.values()].filter(e => e.kind === 'monster' && e.rank === 'normal' && !e.dead).sort((p, q) => Math.hypot(p.x - camp.x, p.z - camp.z) - Math.hypot(q.x - camp.x, q.z - camp.z))[0];
   P0.transfer(o(srv, a), r, { x: wolf.x + 1.5, z: wolf.z }, 't');
   P0.transfer(o(srv, b), r, { x: wolf.x - 1.5, z: wolf.z }, 't');
   await run(clock, 300);
@@ -213,15 +219,60 @@ test('day/night: the clock comes in welcome; NPCs go to work by day and to the i
   const P0 = srv.world.procs[0], tr = P0.townRoom;
   const npc = [...tr.objects.values()].find(q => q.kind === 'npc' && q.data.npc.role === 'merchant');
   assert.ok(npc && a.mirror.ents.has(npc.id) || true);
-  const day = npc.data.schedule.day, night = npc.data.schedule.night;
+  const { blockAt } = await import('../../js/sim/schedules.js');
+  const PH = { dawn: 0.2, day: 0.27, dusk: 0.75, night: 0.82, late: 0.95 };
+  const night = blockAt(npc.data.schedule.blocks, 0.9, PH).at, day = blockAt(npc.data.schedule.blocks, 0.5, PH).at;
   // pick a wall time that is night on the realm clock
   const epoch = srv.world.gateway.epoch;
-  wall = epoch + 2 * 3600000 * 0.95;
-  assert.ok(P0.timeOfDay() > 0.8);
+  wall = epoch + 2 * 3600000 * 0.9;
+  assert.ok(P0.timeOfDay() > 0.82 && P0.timeOfDay() < 0.95);
   await run(clock, 60000, 200);
   assert.ok(Math.hypot(npc.x - night.x, npc.z - night.z) < 1, 'at the inn by night');
   wall = epoch + 2 * 3600000 * 1.5;
   await run(clock, 60000, 200);
   assert.ok(Math.hypot(npc.x - day.x, npc.z - day.z) < 1, 'at work by day');
+  a.close(); await srv.stop();
+});
+
+test('town folk follow stream E\'s schedules over stream B\'s town plan: the smith at the forge by day, the inn at dusk, home late', async () => {
+  const { townFolk, blockAt } = await import('../../js/sim/schedules.js');
+  const S = await readJson('data/provinces/schedules.json');
+  const L = buildLayout({ key: 'torbor_downs', name: C.name, terrain: C.terrain, zones: C.zones, encounterInfo: C.encounterInfo, vignetteContent, starter: C.starter, schedules: S });
+  const plan = L.townPlans[0];
+  assert.ok(plan && plan.buildings.length > 10, 'Torborhold\'s plots');
+  const folk = townFolk(L.towns[0], { plan, schedules: S, kind: plan.kind, key: 't0' });
+  assert.equal(folk.filter(f => f.npc.role !== 'guard').length, S.perTown[plan.kind].length);
+  assert.equal(folk.filter(f => f.npc.role === 'guard').length, S.perTown.guards[plan.kind]);
+  const smith = folk.find(f => f.npc.role === 'smith');
+  const forge = plan.buildings.find(b => b.want === 'forge'), inn = plan.buildings.find(b => b.want === 'inn');
+  const P = S.clock.phases;
+  const at = t => blockAt(smith.schedule.blocks, t, P).at;
+  assert.ok(Math.hypot(at(0.5).x - forge.x, at(0.5).z - forge.z) < 10, 'at the forge by day');
+  assert.ok(Math.hypot(at(0.78).x - inn.x, at(0.78).z - inn.z) < 10, 'at the inn at dusk');
+  assert.ok(Math.hypot(at(0.97).x - inn.x, at(0.97).z - inn.z) > 2, 'home late');
+  for (const f of folk) for (const b of f.schedule.blocks) assert.ok(Math.hypot(b.at.x - L.towns[0].x, b.at.z - L.towns[0].z) < L.towns[0].r, f.npc.role + ' stays in town');
+});
+
+test('dormant camps: a province copy only holds the monsters near players; a camp left alone is parked and comes back whole', async () => {
+  const clock = createVirtualClock();
+  const srv = realmServer({ clock });
+  await srv.ready;
+  const P0 = srv.world.procs[0], r = P0.copies[0];
+  const count = () => [...r.entities.values()].filter(e => e.kind === 'monster').length;
+  assert.equal(count(), 0, 'nobody out: no monsters exist');
+  const a = await joinRealm(srv, clock, 'Sleepwalker');
+  const camp = TORBOR.camps.find(c => !c.encounter && !c.rank && !c.warband && c.count >= 2);
+  P0.transfer(o(srv, a), r, { x: camp.x + 30, z: camp.z }, 't');
+  await run(clock, 1500);
+  const near = () => [...r.entities.values()].filter(e => e.kind === 'monster' && Math.hypot(e.x - camp.x, e.z - camp.z) < (camp.radius || 10) + 3).length;
+  assert.ok(near() >= camp.count, 'the camp woke: ' + near());
+  assert.ok(count() < TORBOR.camps.length, 'only nearby camps: ' + count());
+  // walk 1 km away: after DORMANT_MS the camp is parked
+  P0.transfer(o(srv, a), r, { x: camp.x + 1200, z: camp.z }, 't');
+  await run(clock, 35000, 100);
+  assert.equal(near(), 0, 'parked');
+  P0.transfer(o(srv, a), r, { x: camp.x + 30, z: camp.z }, 't');
+  await run(clock, 1500);
+  assert.ok(near() >= camp.count, 'back whole');
   a.close(); await srv.stop();
 });

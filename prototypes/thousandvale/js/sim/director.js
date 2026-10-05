@@ -1,42 +1,83 @@
-// The realm EVENT DIRECTOR (stream A, PLAN §5.2), part of the gateway. Pure.
-// One big event at a time (a world boss, a town under attack, a warband siege): announced realm-wide
-// `announceMs` ahead (10 min in production), sized to the players online in its level band, with FREE
-// waystone travel to it while it runs (the province processes do the travel: `travel {to:'event'}`).
+// The realm EVENT DIRECTOR (stream A, PLAN §5.2; rules from stream E's data/quests/events.json `director`), part of
+// the gateway. Pure.
+// One big event at a time (a world boss, a town under attack, a warband siege, a drake flyover): announced
+// realm-wide `announceMs` ahead (10 min) with reminders (5 and 1 min), sized to the players who are online and in
+// its band, with FREE waystone travel to it while it runs (the province processes do the travel: `travel
+// {to:'event'}`). Picking (events.json): of the events whose `minOnline` is met and whose cooldown is over, a
+// FIXED-schedule one due within the announce window wins; otherwise one is drawn by `weight` among those with at
+// least `minInBand` characters within `inBandLevels` of its level. Between events: `gapMinutes` (40–80).
 //
-//   const d = createDirector({ now, wallNow, events, online, broadcast, procOf, sendTo, ... })
-//   d.step() ; d.onState(m) ; d.status()
+//   const d = createDirector({ now, wallNow, events, online, broadcast, procOf, sendTo, rules?, demo?, ... })
+//   d.step() ; d.onState(m) ; d.status() ; d.force(id, {announce}) ; d.addEvents(list)
 //
-// events = [{ id, name, province, x, z, r, encounter, body, level, band:[lo,hi], durationMs?, kind? }]
-// (stream E's realm events: data/provinces/*.json `realmEvents`, or the zone event sites as a fallback).
-// Messages to clients (gateway socket): realm {kind:'eventSoon'|'eventStart'|'eventEnd', ev, at?, won?}
+// events = [{ id, name, kind, province, x, z, r, level, band?, encounter|boss, waves?, monster?, arenas?, durationMs,
+//            schedule:{type:'fixed', everyHours, atMinute} | {type:'weighted', cooldownMinutes}, minOnline, minInBand,
+//            weight, announce:[soon, reminder, start], reward }]
+// Messages to clients (gateway socket): realm {kind:'eventSoon'|'eventStart'|'eventEnd', ev, at?, won?, text?}
 // Bus to province processes: event {op:'live', ev} (all processes: travel target) / {op:'start', ev}
-// (the hosting one: spawn it) / {op:'stop', id}.
+// (the hosting one: run it) / {op:'stop', uid}.
+// `demo` (tests, `--event-first`): every event is eligible (no head counts, no cooldowns).
 
-export const DIRECTOR = Object.freeze({ everyMs: 45 * 60000, announceMs: 10 * 60000, durationMs: 20 * 60000, firstMs: 2 * 60000 });
+export const DIRECTOR = Object.freeze({ gapMinutes: [40, 80], announceMs: 10 * 60000, reminders: [5, 1], durationMs: 20 * 60000, firstMs: 2 * 60000, inBandLevels: 3, retryMs: 60000 });
 
-/** Boss health and add count for `n` players in band: never weaker than one party's worth. */
-export function eventScale(n) {
-  const players = Math.max(1, n | 0);
-  return { players, hp: Math.max(1, 1 + 0.55 * (players - 1)), adds: Math.min(12, Math.floor(players / 8)) };
+/** Boss health and adds for `n` enrolled players (events.json `director.size`). */
+export function eventScale(n, size = {}) {
+  const per = size.healthPerPlayer ?? 0.12, addPer = size.addWavePerPlayers ?? 6, cap = size.capPlayers ?? 60;
+  const players = Math.max(size.minPlayers ?? 1, Math.min(cap, n | 0));
+  return { players, hp: 1 + per * (players - 1), adds: Math.floor(players / addPer) };
 }
 
-export function createDirector({ now, wallNow = now, log = () => {}, events = null, online, broadcast, procOf, sendTo, procList = null, everyMs = DIRECTOR.everyMs, announceMs = DIRECTOR.announceMs, firstMs = DIRECTOR.firstMs }) {
-  const list = (events || []).slice();
-  let cur = null, next = now() + firstMs, n = 0;
-  // every province process learns the live event (any of them may send a player to it)
-  const allProcs = () => { if (procList) return procList(); const s = new Set(); for (const e of list) { const p = procOf(e.province); if (p !== undefined) s.add(p); } return s; };
+/** The next wall time (ms) a fixed schedule fires: every `everyHours` hours at minute `atMinute`, from midnight UTC. */
+export function nextFixed(schedule, wallMs) {
+  const every = Math.max(1, schedule.everyHours || 3) * 3600000, at = (schedule.atMinute || 0) * 60000;
+  const day = Math.floor(wallMs / 86400000) * 86400000;
+  let t = day + at;
+  while (t < wallMs) t += every;
+  return t;
+}
 
-  function pick() {
-    if (!list.length) return null;
-    // the event whose band holds the most online players; ties rotate
+export function createDirector({ now, wallNow = now, log = () => {}, events = null, online, broadcast, procOf, sendTo, procList = null,
+  rules = {}, demo = false, everyMs = null, announceMs = null, firstMs = null, rng = Math.random }) {
+  const R = { ...DIRECTOR, ...rules };
+  const ANNOUNCE = announceMs ?? (rules.announceMinutes != null ? rules.announceMinutes * 60000 : R.announceMs);
+  const reminders = (rules.reminderMinutes || R.reminders).map(m => m * 60000).filter(m => m < ANNOUNCE);
+  const gap = () => (everyMs != null ? everyMs : (R.gapMinutes[0] + rng() * (R.gapMinutes[1] - R.gapMinutes[0])) * 60000);
+  const list = (events || []).slice();
+  const lastRun = new Map();
+  let cur = null, next = now() + (firstMs ?? R.firstMs), n = 0;
+  const allProcs = () => { if (procList) return procList(); const s = new Set(); for (const e of list) { const p = procOf(e.province); if (p !== undefined) s.add(p); } return s; };
+  const inBand = (e, on) => on.filter(p => Math.abs((p.level || 1) - (e.level || 1)) <= R.inBandLevels).length;
+
+  /** Choose the next event: { e, startIn } or null. */
+  function choose() {
     const on = online();
-    let best = null, bestN = -1;
-    list.forEach((e, i) => {
-      const [lo, hi] = e.band || [1, 50];
-      const k = on.filter(p => (p.level || 1) >= lo - 2 && (p.level || 1) <= hi + 2).length * 100 + ((i + n) % list.length === 0 ? 1 : 0);
-      if (k > bestN) { bestN = k; best = e; }
-    });
-    return best;
+    const t = now(), wall = wallNow();
+    const hosted = list.filter(e => procOf(e.province) !== undefined);
+    if (!hosted.length) return null;
+    if (demo) {
+      // the event whose band holds the most online players; ties rotate
+      let best = null, bestN = -1;
+      hosted.forEach((e, i) => { const k = inBand(e, on) * 100 + ((i + n) % hosted.length === 0 ? 1 : 0); if (k > bestN) { bestN = k; best = e; } });
+      return best ? { e: best, startIn: ANNOUNCE } : null;
+    }
+    const cool = e => { const cd = (e.schedule && e.schedule.cooldownMinutes || 0) * 60000; const l = lastRun.get(e.id); return l == null || t - l >= cd; };
+    const ok = hosted.filter(e => on.length >= (e.minOnline ?? 1) && cool(e));
+    // a fixed-schedule event due within the announce window wins
+    let fixed = null, due = Infinity;
+    for (const e of ok) if (e.schedule && e.schedule.type === 'fixed') { const at = nextFixed(e.schedule, wall) - wall; if (at <= ANNOUNCE && at < due) { due = at; fixed = e; } }
+    if (fixed) return { e: fixed, startIn: Math.max(0, due) };
+    const pool = ok.filter(e => (!e.schedule || e.schedule.type !== 'fixed') && (e.weight ?? 1) > 0 && inBand(e, on) >= (e.minInBand ?? 1));
+    const total = pool.reduce((a, e) => a + (e.weight ?? 1), 0);
+    if (!total) return null;
+    let r = rng() * total;
+    for (const e of pool) { r -= e.weight ?? 1; if (r <= 0) return { e, startIn: ANNOUNCE }; }
+    return { e: pool[pool.length - 1], startIn: ANNOUNCE };
+  }
+  function begin(e, startIn) {
+    n++;
+    const t = now();
+    cur = { ev: { ...e, uid: e.id + ':' + n }, state: 'soon', startAt: t + startIn, endAt: t + startIn + (e.durationMs || R.durationMs), reminded: new Set() };
+    broadcast({ t: 'realm', kind: 'eventSoon', ev: view(cur.ev), at: wallNow() + startIn, text: (e.announce || [])[0] || undefined });
   }
 
   return {
@@ -44,21 +85,26 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
       const t = now();
       if (!cur) {
         if (t < next) return;
-        const e = pick();
-        if (!e || procOf(e.province) === undefined) { next = t + everyMs; return; }
-        n++;
-        cur = { ev: { ...e, uid: e.id + ':' + n }, state: 'soon', startAt: t + announceMs, endAt: t + announceMs + (e.durationMs || DIRECTOR.durationMs) };
-        broadcast({ t: 'realm', kind: 'eventSoon', ev: view(cur.ev), at: wallNow() + announceMs });
+        const c = choose();
+        // nothing to run yet (no province process has said hello, nobody in band): look again soon
+        if (!c) { next = t + (list.some(e => procOf(e.province) !== undefined) ? Math.min(R.retryMs, everyMs ?? R.retryMs) : 5000); return; }
+        begin(c.e, c.startIn);
         return;
       }
-      if (cur.state === 'soon' && t >= cur.startAt) {
+      if (cur.state === 'soon') {
+        for (const m of reminders) if (!cur.reminded.has(m) && t >= cur.startAt - m && t < cur.startAt) {
+          cur.reminded.add(m);
+          broadcast({ t: 'realm', kind: 'eventSoon', ev: view(cur.ev), at: wallNow() + (cur.startAt - t), text: (cur.ev.announce || [])[1] || undefined });
+        }
+        if (t < cur.startAt) return;
         const on = online();
-        const [lo, hi] = cur.ev.band || [1, 50];
-        cur.ev.scale = eventScale(on.filter(p => (p.level || 1) >= lo - 2 && (p.level || 1) <= hi + 2).length);
+        cur.ev.scale = eventScale(inBand(cur.ev, on), R.size);
         cur.state = 'live';
+        lastRun.set(cur.ev.id, t);
         sendTo(procOf(cur.ev.province), { k: 'event', op: 'start', ev: cur.ev });
         for (const p of allProcs()) sendTo(p, { k: 'event', op: 'live', ev: cur.ev });
-        broadcast({ t: 'realm', kind: 'eventStart', ev: view(cur.ev) });
+        const ann = cur.ev.announce || [];
+        broadcast({ t: 'realm', kind: 'eventStart', ev: view(cur.ev), text: ann.length ? ann[ann.length - 1] : undefined });
         return;
       }
       if (cur.state === 'live' && t >= cur.endAt) end(false, 'time');
@@ -69,18 +115,17 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
       else cur.live = m;
     },
     status() { return cur ? { state: cur.state, ev: view(cur.ev), scale: cur.ev.scale || null, startsIn: Math.max(0, Math.round((cur.startAt - now()) / 1000)), live: cur.live || null } : { state: 'idle', nextIn: Math.max(0, Math.round((next - now()) / 1000)), events: list.length }; },
-    /** Tests/admin: start the next event now (skips the wait and the announcement delay). */
+    /** Tests/admin: start an event now (skips the wait; `announce` = ms of warning). */
     force(id = null, { announce = 0 } = {}) {
-      const e = id ? list.find(x => x.id === id) : pick();
+      const e = id ? list.find(x => x.id === id) : list[0];
       if (!e) return false;
       if (cur) end(false, 'replaced');
-      n++;
-      cur = { ev: { ...e, uid: e.id + ':' + n }, state: 'soon', startAt: now() + announce, endAt: now() + announce + (e.durationMs || DIRECTOR.durationMs) };
-      broadcast({ t: 'realm', kind: 'eventSoon', ev: view(cur.ev), at: wallNow() + announce });
+      begin(e, announce);
       return true;
     },
     get current() { return cur; },
     addEvents(evs) { for (const e of evs) if (!list.some(x => x.id === e.id)) list.push(e); },
+    get events() { return list; },
   };
 
   function end(won, why) {
@@ -88,7 +133,7 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
     for (const p of allProcs()) sendTo(p, { k: 'event', op: 'stop', uid: ev.uid });
     broadcast({ t: 'realm', kind: 'eventEnd', ev: view(ev), won: !!won, why });
     log('event ended', ev.uid, why);
-    cur = null; next = now() + everyMs;
+    cur = null; next = now() + gap();
   }
-  function view(e) { return { id: e.id, uid: e.uid, name: e.name, province: e.province, x: e.x, z: e.z, r: e.r || 50, level: e.level, kind: e.kind || 'boss' }; }
+  function view(e) { return { id: e.id, uid: e.uid, name: e.name, province: e.province, x: e.x, z: e.z, r: e.r || 50, level: e.level, kind: e.kind || 'boss', zoneName: e.zoneName || null }; }
 }

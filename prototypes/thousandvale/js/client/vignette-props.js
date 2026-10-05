@@ -10,11 +10,11 @@ import { buildGroundDetail } from '../../../../highdef-3d/js/kit/rocks.js';
 import { createDecor, foliageMaterials } from './decor.js';
 import { localToWorld } from './town-view.js';
 
-const RECIPE_FILES = ['m1', 'm2', 'm2b'];
+const RECIPE_FILES = ['m1', 'm2', 'm2b', 'curios'];   // curios (P19, E): same recipe shape, list key `curios`
 let recipes = null;
 export function loadVignetteRecipes() {
   if (!recipes) recipes = Promise.all(RECIPE_FILES.map(f => fetch(new URL(`../../data/vignettes/${f}.json`, import.meta.url)).then(r => (r.ok ? r.json() : { vignettes: [] })).catch(() => ({ vignettes: [] }))))
-    .then(list => new Map(list.flatMap(d => d.vignettes || []).map(v => [v.id, v])));
+    .then(list => new Map(list.flatMap(d => [...(d.vignettes || []), ...(d.curios || [])]).map(v => [v.id, v])));
   return recipes;
 }
 
@@ -22,7 +22,7 @@ export function loadVignetteRecipes() {
 export function vignettePropList(placements, byId, ox = 0, oz = 0) {
   const out = [];
   for (const pl of placements || []) {
-    const v = byId.get(pl.id); if (!v) continue;
+    const v = byId.get(pl.recipe || pl.id); if (!v) continue;
     const px = pl.x + ox, pz = pl.z + oz, yaw = pl.yaw || 0;
     for (const p of v.props || []) {
       const w = localToWorld(px, pz, yaw, p.x || 0, p.z || 0);

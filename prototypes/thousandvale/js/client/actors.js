@@ -115,11 +115,11 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     if (!w) { if (a.ripples) for (const r of a.ripples) r.visible = false; return; }
     // a beast floats with its back out of the water (the server holds every swimmer at surface - 1.1 m: a person's feet)
     if (!(a.kind === 'player' || a.humanoid || a.kind === 'npc')) a.group.position.y = Math.max(a.group.position.y, w.surface - a.height * 0.45);
-    if (!a.ripples) { a.ripples = [0, 1].map(() => { const m = new THREE.Mesh(rippleGeo, rippleMat); m.renderOrder = 2; scene.add(m); return m; }); }
+    if (!a.ripples) { a.ripples = [0, 1].map(() => { const m = new THREE.Mesh(rippleGeo, rippleMat.clone()); m.renderOrder = 2; scene.add(m); return m; }); }
     a.ripples.forEach((m, k) => {
       const ph = ((now / 1000) * (a.speed > 0.4 ? 1.1 : 0.55) + k * 0.5) % 1;
       m.visible = true; m.position.set(a.group.position.x, w.surface + 0.03, a.group.position.z);
-      m.scale.setScalar(0.6 + ph * 1.6); m.material.opacity = 0.45;   // shared material: fade by scale only
+      m.scale.setScalar(0.6 + ph * 1.6); m.material.opacity = 0.4 * (1 - ph);   // each ring fades as it spreads
     });
   }
 
@@ -200,7 +200,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
   function remove(id) {
     const a = actors.get(id); if (!a) return;
     scene.remove(a.group); a.body?.dispose?.(); a.plate?.root.remove();
-    if (a.ripples) for (const r of a.ripples) scene.remove(r);
+    if (a.ripples) for (const r of a.ripples) { scene.remove(r); r.material.dispose(); }
     a.group.clear();           // detaches any spell aura riding the body (SpellFx drops an aura whose group has no parent)
     actors.delete(id);
   }

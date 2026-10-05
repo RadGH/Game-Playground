@@ -202,7 +202,7 @@ controls.setBlocker((ax, ay, az, bx, by, bz) => (D.view ? 1 : SOLIDS.firstHit(ax
 const boss = createBossUi({ actors, serverNow: () => (S.net ? S.net.clock.serverNow() : 0), toast: hud });
 const menubar = createMenubar();
 const social = createSocial({ net: () => S.net, hud, actors, onTarget: id => setTarget(id), myChar: () => S.net?.joined?.you?.char ?? null });
-const bag = createBag({ net: () => S.net, hud });
+const bag = createBag({ net: () => S.net, hud, me: () => ({ level: S.self.level, cls: S.self.cls }) });   // P15: required level vs yours
 const worldUi = createWorldUi({ hud, net: () => S.net, me: () => S.predictor.pos, room: () => S.room, onFootprints: heat => footprints.set(heat) });
 
 // --- M3 social windows (chat channels, friends, guild, mail, the Callboard, account, help) ------------------
@@ -387,8 +387,9 @@ function wireNet(net) {
   net.on('travelR', r => {
     if (!r.ok || S.phase !== 'world') return;
     travel.cover('Travelling…');
-    const w = (S.room?.waystones || []).find(x => x.key === r.to);
-    if (w && WS.terrain.zoneAt(w.x, w.z)) WS.whenReady(w.x, w.z);
+    // A sends where (`at`, `province`) and moves us `delayMs` (1.5 s) later: stream that ground in behind the veil now
+    const w = r.at || (S.room?.waystones || []).find(x => x.key === r.to);
+    if (w && (!r.province || r.province === S.room?.province) && WS.terrain.zoneAt(w.x, w.z)) WS.whenReady(w.x, w.z);
   });
   net.on('used', u => {
     if (u.ok && u.kind === 'cache') objects.markOpened(u.id);
@@ -604,7 +605,7 @@ function onEvent(ev) {
     case 'loot':
       if (ev.d === me || ev.to === me) {
         if (ev.gold) hud.chat(`You pick up ${ev.gold} gold.`, 'loot');
-        for (const it of ev.items || []) { hud.chat(`You loot: ${it.name}`, 'loot rarity-' + (it.rarity || 'common')); hud.toast(it.name, 'loot rarity-' + (it.rarity || 'common')); }
+        for (const it of ev.items || []) { const need = (it.levelReq || 0) > S.self.level ? ` (needs level ${it.levelReq})` : ''; hud.chat(`You loot: ${it.name}${need}`, 'loot rarity-' + (it.rarity || 'common')); hud.toast(it.name + need, 'loot rarity-' + (it.rarity || 'common')); }   // P15
       }
       break;
     case 'open': objects.markOpened(ev.d); break;

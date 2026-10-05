@@ -95,6 +95,22 @@ node prototypes/thousandvale/tools/chaos-kill9.mjs --kills 500 --db pg --scratch
 tunnel** for friends; a named tunnel on the owner's own hostname later. Full plan, order of switches and rollback:
 `prototypes/thousandvale/ops/tunnel/README.md`.
 
+### Thousandvale on a VPS (P29/P30 — the owner's own server + domain, no Cloudflare)
+
+`prototypes/thousandvale/docs/HOSTING.md` is the owner-facing plan. Kit in `prototypes/thousandvale/ops/vps/`,
+all run from this VM as radgh (target in `ops/vps/target.env`, git-ignored, from `target.env.template`):
+
+```
+ops/vps/install.sh --print-key   # the SSH key the owner pastes into the VPS provider
+ops/vps/install.sh --dry-run     # bundle + bootstrap dry run, nothing remote
+ops/vps/install.sh               # set up a fresh Ubuntu 24.04 VPS as root (firewall 22/80/443, node 22, Postgres 18, Caddy, units, backups)
+ops/vps/deploy.sh [--ref <commit>|--release <dir>]   # ship (default: the LAN stable release), restart, verify, auto-rollback
+ops/vps/rollback.sh [--list|<name>]                  # previous release / a named one
+```
+On the VPS: Caddy :443 -> game on 127.0.0.1:8490 (Caddy sets `CF-Connecting-IP` to the real peer, the header the game
+already trusts from loopback), unit `ops/vps/thousandvale.service` + `localhost-only.conf`, `sudo /usr/local/lib/thousandvale/check-vps.sh`.
+The VPS is production once friends play there: deploy only with the owner's OK.
+
 ```bash
 sudo prototypes/thousandvale/ops/lib/check-public.sh --mode quick    # PLAN §11 as a script + live probes; MUST pass first
 prototypes/thousandvale/ops/tunnel/quick.sh --install|--start|--url|--status|--stop   # user unit, only origin 127.0.0.1:8490

@@ -35,6 +35,7 @@ export const PATH = {
   CACHE_TTL: 2,          // seconds a cached path is shared
   CLIFF_GRADE: Math.tan(63 * Math.PI / 180),   // Farhold ground.js CLIFF.deg
   DEEP: 1.1,             // metres of water a walker will not plan through (terrain-read `underwater`)
+  EVAL_COST: 1,          // budget units a first-time cell costs (it samples the terrain), next to 1 per expansion
 };
 
 const OFF = 32768;
@@ -58,6 +59,12 @@ export function plannerBlocked(terrain) {
       if (terrain.waterAt && terrain.waterAt(x, z) > PATH.DEEP) return true;
       return false;
     };
+    const ground = (x, z) => {
+      if (!terrain.pathing) return false;
+      if (terrain.slopeAt && terrain.slopeAt(x, z, 1) > PATH.CLIFF_GRADE) return true;
+      if (terrain.waterAt && terrain.waterAt(x, z) > PATH.DEEP) return true;
+      return false;
+    };
     // cells in 64 x 64 chunks (0 unknown, 1 free, 2 blocked), the last chunk remembered: a line or a
     // search walks the same chunk over and over
     const chunks = new Map();
@@ -66,6 +73,8 @@ export function plannerBlocked(terrain) {
       /** forget every cached cell (a terrain whose walls move — a dungeon gate — sets `blockTtl`) */
       clear() { chunks.clear(); lcx = NaN; lcz = NaN; lch = null; },
       ttl: terrain.blockTtl || 0, since: 0,
+      /** how many cells have been worked out from the terrain (each costs ~5 terrain samples) */
+      evals: 0,
       cell(ix, iz) {
         const cx = ix >> 6, cz = iz >> 6;
         if (cx !== lcx || cz !== lcz) {
@@ -77,10 +86,15 @@ export function plannerBlocked(terrain) {
         const i = ((iz & 63) << 6) | (ix & 63);
         let v = lch[i];
         if (v === 0) {
+          c.evals++;
           // blocked if the middle or any corner is (a wall that only clips a cell still shuts it; on nav.bin
           // all five points fall in the same sample, so it is exact there)
           const x = mid(ix), z = mid(iz);
-          v = raw(x, z) || raw(x - EDGE, z - EDGE) || raw(x + EDGE, z - EDGE) || raw(x - EDGE, z + EDGE) || raw(x + EDGE, z + EDGE) ? 2 : 1;
+          // (perf) the obstacle test at all five points — nav.bin is a cheap lookup — but the slope and the
+          // water once, at the middle: a 1 m slope sample spans the cell, and the walk itself still refuses
+          // a wet or a cliff step (monster-ai.js / followers.js); five slope reads a cell were most of a search
+          const B = terrain.blocked;
+          v = (B && (B(x, z) || B(x - EDGE, z - EDGE) || B(x + EDGE, z - EDGE) || B(x - EDGE, z + EDGE) || B(x + EDGE, z + EDGE))) || ground(x, z) ? 2 : 1;
           lch[i] = v;
         }
         return v === 2;
@@ -200,7 +214,12 @@ export function findPath(blk, sx, sz, gx, gz, { maxNodes = PATH.MAX_NODES, budge
   push(s, h(lx(six), lz(siz)));
   let best = s, bestH = h(lx(six), lz(siz)), used = 0, reached = false;
   const cap = Math.min(maxNodes, budget);
-  while (hn && used < cap && hn < HK.length - 8) {
+  // a cell worked out from the terrain for the first time (~5 terrain samples) costs about as much as
+  // an expansion, so it is paid for out of the same budget (perf: a search into fresh ground cost 15 ms
+  // in one tick for 2,500 expansions; now it is spread over the ticks — the cells it reads are cached)
+  const ev0 = blk.evals || 0;
+  const spent = () => used + ((blk.evals || 0) - ev0) * PATH.EVAL_COST;
+  while (hn && spent() < cap && hn < HK.length - 8) {
     const k = pop();
     if (DONE[k] === stamp) continue;
     DONE[k] = stamp;
@@ -223,6 +242,7 @@ export function findPath(blk, sx, sz, gx, gz, { maxNodes = PATH.MAX_NODES, budge
       if (SEEN[nk] !== stamp || ng < G[nk]) { SEEN[nk] = stamp; G[nk] = ng; FROM[nk] = k; push(nk, ng + HEUR_W * h(nx, nz)); }
     }
   }
+  used = spent();
   if (!reached && used >= budget && budget < maxNodes) return { pts: null, reached: false, used, outOfBudget: true };
   if (best === s) return { pts: [], reached, used };
   const cells = [];

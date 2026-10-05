@@ -22,6 +22,7 @@ export function createPerf({ longMs = 100, keepSpans = 400, keepLong = 40 } = {}
   const totals = new Map();     // name -> { n, ms, max }
   let links = 0, linksAtReset = 0, frameStart = 0, maxBusy = 0, busyLong = 0;
   const busyList = [];
+  const frameSpans = [];        // [start, end] of each frame callback: a long task holding one is a frame (GPU wait included)
   let last = 0, frames = 0, longFrames = 0, worstMs = 0, warmUntil = 0, programs = 0, programsAtWarm = 0;
 
   function record(name, t0, ms) {
@@ -60,13 +61,14 @@ export function createPerf({ longMs = 100, keepSpans = 400, keepLong = 40 } = {}
     /** Call last thing in the frame loop: how long the frame's own JS kept the main thread (excludes waiting on the GPU). */
     frameEnd(t = now()) {
       const busy = t - frameStart;
+      frameSpans.push([frameStart, t]); if (frameSpans.length > 600) frameSpans.shift();
       if (busy > maxBusy) maxBusy = busy;
       if (busy > longMs && t > warmUntil) { busyLong++; busyList.push({ at: Math.round(t), ms: Math.round(busy), spans: spans.filter(s => s.t0 >= frameStart - 1).sort((a, b) => b.ms - a.ms).slice(0, 8).map(s => [s.name, Math.round(s.ms)]) }); if (busyList.length > keepLong) busyList.shift(); }
     },
     /** Ignore long frames for `ms` from now (a loading screen is allowed to be slow). */
     quiet(ms) { warmUntil = Math.max(warmUntil, now() + ms); },
     /** Reset the counters (a test starts measuring from here). */
-    reset() { long.length = 0; longFrames = 0; worstMs = 0; frames = 0; totals.clear(); tasks.length = 0; maxBusy = 0; busyLong = 0; busyList.length = 0; programsAtWarm = programs; linksAtReset = links; },
+    reset() { long.length = 0; longFrames = 0; worstMs = 0; frames = 0; totals.clear(); tasks.length = 0; frameSpans.length = 0; maxBusy = 0; busyLong = 0; busyList.length = 0; programsAtWarm = programs; linksAtReset = links; },
     setPrograms(n) { programs = n; },
     /** Count shader links on a WebGL context (each one is a compile; a burst of them is a freeze). */
     hookGl(gl) {
@@ -77,7 +79,10 @@ export function createPerf({ longMs = 100, keepSpans = 400, keepLong = 40 } = {}
     },
     /** Main-thread stalls: frames whose own JS ran longer than longMs, plus long tasks outside the frame loop. */
     stalls() {
-      const outside = tasks.filter(x => x.t0 > warmUntil && x.ms > longMs);
+      // a long task that contains a frame callback is that frame: its own JS is busyLong above, and the rest is the
+      // browser waiting on the GPU (on a software rasteriser every frame is a "long task"). The ones that matter
+      // here are tasks with NO frame in them — page work that ran between frames (a zone build, a body, a read-back).
+      const outside = tasks.filter(x => x.t0 > warmUntil && x.ms > longMs && !frameSpans.some(([a, b]) => a >= x.t0 - 1 && b <= x.t0 + x.ms + 1));
       return { busyLong, maxBusyMs: Math.round(maxBusy), frames: busyList.slice(-12), longTasks: outside.length, maxTaskMs: Math.round(outside.reduce((a, x) => Math.max(a, x.ms), 0)) };
     },
     stats() {

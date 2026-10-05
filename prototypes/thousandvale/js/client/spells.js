@@ -33,6 +33,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
   const looks = new Map();
   const lookOf = id => { if (!id || id === 'basic' || id === 'dot') return null; if (!looks.has(id)) { const sk = skillOf(id); looks.set(id, sk ? skillLook(id, sk) : null); } return looks.get(id); };
   const lingering = new Map();     // placed obj id -> { until }
+  let seenSpellFx = false, seenImpacts = false;   // C's richer events, once seen, replace the client's own guesses
   const stats = { casts: 0, projectiles: 0, impacts: 0, areas: 0, statuses: 0, unknown: 0 };
 
   const actorAt = id => (id != null ? actors.get(id) : null);
@@ -132,7 +133,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
     if (L.travel?.kind === 'dash') {
       for (let i = 0; i < 5; i++) { const x = a.pos.x + Math.sin(yaw) * i * 1.4, z = a.pos.z + Math.cos(yaw) * i * 1.4; setTimeout(() => fx.footfall({ at: V(x, groundY(x, z), z), element: el, yaw }), i * 45); }
     }
-    if (L.area) {
+    if (L.area && !seenSpellFx) {
       if (L.shape === 'ground') area(L, aim, yaw);
       else if (L.shape === 'around' || L.shape === 'self') area(L, a.pos, yaw);
       else if (L.shape === 'melee') area(L, a.pos, yaw);
@@ -174,7 +175,31 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
         projectile(from, target(ev.to), ev.kind === 'arc' ? el : 'arcane', { body: 'bolt', ms: 90 });
         break;
       }
-      case 'impact': if (a) impactAt(chest(a), ev.element ? el : 'physical', { crit: !!ev.crit, scale: ev.killed ? 1.2 : 0.8 }); break;
+      case 'impact': {
+        if (!a) break;
+        if (ev.el || ev.ab) seenImpacts = true;           // C sends one per landed hit (with el/ab): onHit stops doubling it
+        const L = lookOf(ev.ab);
+        impactAt(chest(a), ev.el || ev.element ? elementOf(ev.el || ev.element) : L ? L.element : 'physical', { crit: !!ev.crit, scale: (ev.killed ? 1.2 : 0.8) * (L ? L.scale : 1) });
+        break;
+      }
+      case 'spell': {
+        // C's per-cast description (exact place, radius, line, delay): the ground part of the look is drawn from it
+        seenSpellFx = true;
+        const L0 = lookOf(ev.ab) || { element: elementOf(ev.el), area: null, shape: ev.shape };
+        const L = { ...L0, element: ev.el ? elementOf(ev.el) : L0.element };
+        if (!L.area && ['ground', 'around', 'melee'].includes(ev.shape)) L.area = { kind: ev.shape === 'melee' ? 'slash' : ev.shape === 'around' ? 'ring' : 'burst', r: ev.r || 3 };
+        if (!L.area) break;
+        const ar = { ...L.area, r: ev.r || ev.reach || L.area.r, arc: ev.arc || L.area.arc, len: ev.line?.len || L.area.len, repeats: ev.n || L.area.repeats };
+        const c = ev.to ? { x: ev.to.x, z: ev.to.z } : { x: ev.x ?? a?.pos.x, z: ev.z ?? a?.pos.z };
+        if (c.x == null) break;
+        const yaw = ev.yaw ?? (a ? Math.atan2(c.x - a.pos.x, c.z - a.pos.z) : 0);
+        const at = L.shape === 'melee' || L.shape === 'around' ? (a ? a.pos : c) : c;
+        if (ev.ms > 0) {                                   // a delayed blast: mark the spot, then go off
+          fx.cast({ at: V(at.x, g(at) + 0.2, at.z), element: L.element, ms: Math.min(3000, ev.ms), ground: g(at) });
+          setTimeout(() => area({ ...L, area: ar }, at, yaw), Math.min(4000, ev.ms));
+        } else area({ ...L, area: ar }, at, yaw);
+        break;
+      }
       case 'status': {
         if (!a) break;
         const s = statusLook(ev.status) || String(ev.status || '');
@@ -201,7 +226,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
     if (ev.kind !== 'dmg' && ev.kind !== undefined) return;
     const d = actorAt(ev.d); if (!d) return;
     if (ev.skill === 'dot') { for (const s of ['curse', 'burn', 'poison', 'bleed']) fx.pulseStatus(d.group, s); return; }
-    if (!ev.el) return;                 // physical swings already burst sparks (fx.js); elements get their own
+    if (!ev.el || seenImpacts) return;  // physical swings already burst sparks (fx.js); elements get their own (unless C's fx impact does)
     impactAt(chest(d), elementOf(ev.el), { scale: ev.crit ? 0.9 : 0.6, crit: !!ev.crit });
   }
 

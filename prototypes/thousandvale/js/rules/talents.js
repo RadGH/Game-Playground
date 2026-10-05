@@ -123,7 +123,16 @@ export function tierNodes(row, tier) {
 }
 
 /** The card line for a node on this row. */
+const TEXT = new Map();
+/** The card line for a node on this row — cached: a node's line depends only on its row (performance: a build view describes ~70 nodes). */
 export function nodeText(node, row, statuses = {}, skills = {}) {
+  const key = row && node?.id ? `${row.name}|${node.tier}|${node.id}|${node.bespoke ? 1 : 0}` : null;
+  if (key) { const hit = TEXT.get(key); if (hit && hit.row === row) return hit.text; }
+  const text = nodeTextRaw(node, row, statuses, skills);
+  if (key) TEXT.set(key, { row, text });
+  return text;
+}
+function nodeTextRaw(node, row, statuses = {}, skills = {}) {
   const heals = row?.shape === 'self' && !row?.mult;
   if (!node.bespoke) return heals ? describeMod(node.mod, { heals }) : (node.desc || describeMod(node.mod));
   // a resource rider names the skill's own resource (Farhold's card printed "Spends all your undefined")

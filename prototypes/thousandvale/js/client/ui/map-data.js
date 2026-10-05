@@ -198,6 +198,7 @@ export function locateQuest(q, model, me = null) {
   const zoneCircle = wk => { const b = zoneBoundsOf(wk); const Z = model.zones.get(wk); return b ? { x: b.minX + ZONE_M / 2, z: b.minZ + ZONE_M / 2, r: ZONE_M * 0.45, name: Z?.name || 'this region', zone: wk, exact: false } : null; };
   const at = (p, name, r = 30) => (p ? { x: p.x, z: p.z, r: p.r || r, name: name || p.name || '', zone: p.zone || zoneKeyAt(p.x, p.z), exact: true } : null);
   if (q.ready) {
+    if (q.turnIn && Number.isFinite(q.turnIn.x)) return at(q.turnIn, q.turnIn.name || q.giverName, q.turnIn.r || 6);
     if (q.giverAt) return at(q.giverAt, q.giverAt.name, 6);
     const npc = model.npcs.get(q.giver);
     return npc && Number.isFinite(npc.x) ? at(npc, npc.name, 6) : (q.zone ? zoneCircle(q.zone) : null);

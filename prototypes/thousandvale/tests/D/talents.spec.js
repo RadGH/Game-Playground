@@ -67,13 +67,16 @@ test('Skills window: ladder by level, next unlock, talent tiers, pick + hover ca
   await expect(win.locator('.tvt-skill')).toHaveCount(6);
   await expect(win.locator('.tvt-skill.locked')).toHaveCount(1);          // level 20: only the level-24 skill is shut
   await expect(win.locator('.tvt-next')).toContainText(/at level 24/);
-  await expect(win.locator('.tvt-preview')).toContainText('Preview');
+  // the server stores picks now (C's rules + A's talent op); the Preview banner only shows while it cannot
+  const live = await page.evaluate(() => !!window.thousandvale.S.net?.joined?.you?.talents);
+  if (!live) await expect(win.locator('.tvt-preview')).toContainText('Preview');
   // the selected skill shows four tiers; three are open at level 20
   await expect(win.locator('.tvt-tier')).toHaveCount(4);
   await expect(win.locator('.tvt-tier.closed')).toHaveCount(1);
   const node = win.locator('.tvt-node.open').first();
   await node.click();
   await expect(win.locator('.tvt-node.picked')).toHaveCount(1);
+  if (live) await expect.poll(() => page.evaluate(() => Object.keys(window.thousandvale.S.net.joined.you.talents || {}).length), { timeout: 10000, message: 'the pick reached the server' }).toBeGreaterThan(0);
   await expect(win.locator('.tvt-tier').first().locator('.tvt-node.other').first()).toBeVisible();
   // hover card through the shared tooltip, read while the mouse button is held down
   const n2 = win.locator('.tvt-tier').nth(1).locator('.tvt-node').first();

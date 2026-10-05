@@ -14,6 +14,7 @@
 // Also returns `solids` (towers, keeps, halls, mounds) for the camera.
 
 import * as THREE from 'three';
+import { nextFrame } from './perf.js';
 import { describeBuilding, partsFor, radiusOf } from '../../../../proctown/js/buildkit.js';
 import { buildBush } from '../../../../highdef-3d/js/kit/trees.js';
 import { createDecor, foliageMaterials } from './decor.js';
@@ -137,6 +138,7 @@ export function sitePlan(placements, features, data, ox = 0, oz = 0) {
   return { props, parts, buildings, bushes, solids };
 }
 
+const SITE_TREES = new Map();
 export async function createSiteView(T, file, { quality = 'high' } = {}) {
   const data = await loadSiteData();
   const recipes = await loadVignetteRecipes();
@@ -144,7 +146,7 @@ export async function createSiteView(T, file, { quality = 'high' } = {}) {
   const placements = file.placements || [], features = file.features || [];
   const plan = sitePlan(placements, features, data, ox, oz);
   // vignette props join the same prop pass
-  plan.props.push(...vignettePropList(placements.filter(p => !p.type || p.type === 'vignette'), recipes, ox, oz));
+  plan.props.push(...vignettePropList(placements.filter(p => !p.type || p.type === 'vignette' || p.type === 'curio'), recipes, ox, oz));
   if (!plan.props.length && !plan.parts.length && !plan.buildings.length && !plan.bushes.length) return null;
   const cheap = quality === 'low';
   const decor = await createDecor(T, { placements: plan.props.filter(p => p.kind === 'prop').map(p => ({ kind: 'prop', id: p.id, x: p.x, z: p.z, yaw: p.yaw, data: FIRE.has(p.id) ? { fire: true } : {} })), density: 0, cheap });
@@ -154,13 +156,22 @@ export async function createSiteView(T, file, { quality = 'high' } = {}) {
   // trees + ground details (shared with vignettes)
   const { buildTree } = await import('../../../../highdef-3d/js/kit/trees.js');
   const { buildGroundDetail } = await import('../../../../highdef-3d/js/kit/rocks.js');
-  const treeGeo = new Map();
-  for (const p of plan.props.filter(p => p.kind === 'tree')) {
-    const sp = p.dead ? 'dead_snag' : p.id;
-    if (!treeGeo.has(sp)) { try { treeGeo.set(sp, buildTree(sp, { seed: 3100 + sp.length, lod: cheap ? 1 : 0 })); } catch { treeGeo.set(sp, null); } }
-    const b = treeGeo.get(sp); if (!b) continue;
-    for (const [geo, mat] of [[b.bark, mats.bark], [b.foliage, mats.leaf]]) { if (!geo) continue; const m = new THREE.Mesh(geo, mat); m.position.set(p.x, T.heightAt(p.x, p.z) - 0.1, p.z); m.rotation.y = p.yaw; m.scale.setScalar(Math.min(1.6, p.scale * 0.62)); m.castShadow = !cheap; group.add(m); }
+  await nextFrame();                    // P1: the site pass is cut into frame-sized pieces
+  const treeGeo = SITE_TREES;           // one cache for the page: each zone used to rebuild its species from scratch
+  // trees are instanced per species (curios and vignettes bring hundreds; a Mesh each was a draw call each)
+  const bySpecies = new Map();
+  for (const p of plan.props.filter(p => p.kind === 'tree')) { const sp = p.dead ? 'dead_snag' : p.id; if (!bySpecies.has(sp)) bySpecies.set(sp, []); bySpecies.get(sp).push(p); }
+  for (const [sp, ps] of bySpecies) {
+    if (!treeGeo.has(sp + cheap)) { try { treeGeo.set(sp + cheap, buildTree(sp, { seed: 3100 + sp.length, lod: cheap ? 1 : 0 })); } catch { treeGeo.set(sp + cheap, null); } await nextFrame(); }
+    const b = treeGeo.get(sp + cheap); if (!b) continue;
+    for (const [geo, mat] of [[b.bark, mats.bark], [b.foliage, mats.leaf]]) {
+      if (!geo) continue;
+      const m = new THREE.InstancedMesh(geo, mat, ps.length);
+      ps.forEach((p, i) => { _q.setFromAxisAngle(up, p.yaw); m.setMatrixAt(i, _m.compose(_v.set(p.x, T.heightAt(p.x, p.z) - 0.1, p.z), _q, _s.setScalar(Math.min(1.6, p.scale * 0.62)))); });
+      m.castShadow = !cheap; m.computeBoundingSphere(); group.add(m);
+    }
   }
+  await nextFrame();
   const byGround = new Map();
   for (const p of plan.props.filter(p => p.kind === 'ground')) { if (!byGround.has(p.id)) byGround.set(p.id, []); byGround.get(p.id).push(p); }
   for (const [id, ps] of byGround) {
@@ -183,6 +194,7 @@ export async function createSiteView(T, file, { quality = 'high' } = {}) {
     for (const pt of partsFor(desc)) { top = Math.max(top, pt.y + pt.h); all.push({ mesh: pt.mesh, x: b.plot.x + pt.x * c + pt.z * s, y: g + pt.y, z: b.plot.z - pt.x * s + pt.z * c, yaw: desc.yaw + (pt.yaw || 0), w: pt.w, h: pt.h, d: pt.d, colour: pt.colour }); }
     solids.push({ x: b.plot.x, z: b.plot.z, r: radiusOf(desc) * 0.85, bottom: g - 1, top: g + top });
   }
+  await nextFrame();
   const byMesh = new Map();
   for (const p of all) { if (!byMesh.has(p.mesh)) byMesh.set(p.mesh, []); byMesh.get(p.mesh).push(p); }
   const col = new THREE.Color();
@@ -201,5 +213,5 @@ export async function createSiteView(T, file, { quality = 'high' } = {}) {
       m.castShadow = !cheap; group.add(m);
     }
   }
-  return { group, update: decor.update, solids, stats: { props: plan.props.length, parts: all.length, buildings: plan.buildings.length, bushes: plan.bushes.length }, dispose() { kitMat.dispose(); } };
+  return { group, update: decor.update, solids, stats: { props: plan.props.length, parts: all.length, buildings: plan.buildings.length, bushes: plan.bushes.length }, dispose() { kitMat.dispose(); decor.dispose?.(); } };
 }

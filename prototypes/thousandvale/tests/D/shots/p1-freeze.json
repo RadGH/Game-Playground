@@ -2,66 +2,60 @@
  "A": {
   "stalls": {
    "busyLong": 0,
-   "maxBusyMs": 24,
+   "maxBusyMs": 36,
    "frames": [],
-   "longTasks": 92,
-   "maxTaskMs": 1302
+   "longTasks": 0,
+   "maxTaskMs": 0
   },
   "links": 0,
   "top": [
    {
     "name": "zone:sites",
     "n": 1,
-    "ms": 7204,
-    "max": 7204
+    "ms": 8838,
+    "max": 8838
    },
    {
     "name": "zone:ground",
     "n": 1,
-    "ms": 59,
-    "max": 59
-   },
-   {
-    "name": "zone:parse",
-    "n": 1,
-    "ms": 53,
-    "max": 53
+    "ms": 72,
+    "max": 72
    },
    {
     "name": "terrain:water",
     "n": 1,
-    "ms": 28,
-    "max": 28
+    "ms": 48,
+    "max": 48
+   },
+   {
+    "name": "zone:parse",
+    "n": 1,
+    "ms": 46,
+    "max": 46
+   },
+   {
+    "name": "render",
+    "n": 82,
+    "ms": 455,
+    "max": 33
    },
    {
     "name": "terrain:chunks",
     "n": 1,
-    "ms": 26,
-    "max": 26
-   },
-   {
-    "name": "world:views",
-    "n": 92,
-    "ms": 202,
-    "max": 15
+    "ms": 20,
+    "max": 20
    },
    {
     "name": "zone:scatter",
     "n": 1,
-    "ms": 14,
-    "max": 14
+    "ms": 15,
+    "max": 15
    },
    {
-    "name": "render",
-    "n": 92,
-    "ms": 477,
-    "max": 10
-   },
-   {
-    "name": "terrain:chunk",
-    "n": 95,
-    "ms": 169,
-    "max": 9
+    "name": "world:views",
+    "n": 82,
+    "ms": 205,
+    "max": 12
    },
    {
     "name": "zone:town",
@@ -70,15 +64,21 @@
     "max": 7
    },
    {
-    "name": "terrain:grid",
-    "n": 1,
-    "ms": 4,
-    "max": 4
+    "name": "terrain:chunk",
+    "n": 84,
+    "ms": 167,
+    "max": 6
    },
    {
     "name": "scatter:relod",
-    "n": 32,
-    "ms": 24,
+    "n": 29,
+    "ms": 29,
+    "max": 5
+   },
+   {
+    "name": "terrain:grid",
+    "n": 1,
+    "ms": 4,
     "max": 4
    },
    {
@@ -90,59 +90,65 @@
   ]
  },
  "B": {
-  "walked": 586.2656535902923,
+  "walked": 512.8775166682482,
   "stalls": {
    "busyLong": 0,
-   "maxBusyMs": 23,
+   "maxBusyMs": 20,
    "frames": [],
-   "longTasks": 78,
-   "maxTaskMs": 1572
+   "longTasks": 0,
+   "maxTaskMs": 0
   },
-  "links": 3,
+  "links": 5,
   "top": [
    {
     "name": "zone:sites",
     "n": 1,
-    "ms": 8856,
-    "max": 8856
+    "ms": 11785,
+    "max": 11785
+   },
+   {
+    "name": "zone:scatter",
+    "n": 1,
+    "ms": 17,
+    "max": 17
    },
    {
     "name": "render",
-    "n": 90,
-    "ms": 637,
-    "max": 19
+    "n": 92,
+    "ms": 670,
+    "max": 14
    },
    {
     "name": "world:views",
-    "n": 90,
-    "ms": 101,
-    "max": 9
+    "n": 92,
+    "ms": 89,
+    "max": 10
    },
    {
     "name": "terrain:chunk",
-    "n": 69,
-    "ms": 72,
-    "max": 5
+    "n": 59,
+    "ms": 63,
+    "max": 6
    },
    {
     "name": "scatter:relod",
-    "n": 28,
-    "ms": 19,
-    "max": 2
+    "n": 29,
+    "ms": 17,
+    "max": 1
    },
    {
     "name": "actor:build",
-    "n": 22,
-    "ms": 1,
+    "n": 27,
+    "ms": 0,
     "max": 0
    },
    {
     "name": "gl:link",
-    "n": 3,
+    "n": 5,
     "ms": 0,
     "max": 0
    }
   ],
-  "monsters": 3
+  "monsters": 0
  }
 }

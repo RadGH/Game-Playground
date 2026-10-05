@@ -10,6 +10,7 @@
 //   POST http://127.0.0.1:<hook>/event {id, announceMs}  force a realm event (the admin page's button)
 //   POST http://127.0.0.1:<hook>/roll  {name, n, level, boost}  grant n REAL items rolled by Farhold's generator (inventory spec)
 //   GET  http://127.0.0.1:<hook>/who                    online characters [{char, name, level}]
+//   POST http://127.0.0.1:<hook>/kill {name}              the character dies where it stands (death/respawn spec)
 //   POST http://127.0.0.1:<hook>/teleport {name, x, z}  move a character within its room (the freeze spec starts walks
 //                                                        near a zone border instead of a 1.5 km stroll from town)
 // Prints "READY <port> <hook>" on stdout when both listen.
@@ -63,6 +64,7 @@ const hook = http.createServer(async (req, res) => {
       const c = o.room.clients.get(e.id); if (c) c.selfDirty = true;
       return send(200, { ok: true, x: e.x, z: e.z, room: o.room.kind });
     }
+    if (req.url === '/kill') { const e = o.entity; e.setHp(0); e.kill(null); return send(200, { ok: true, dead: !!e.dead }); }   // P8 spec
     if (req.url === '/give') {
       const items = Array.from({ length: Math.max(0, Math.min(12, b.items | 0)) }, (_, i) => ({ name: b.itemName || ['Hollin Shortsword', 'Weathered Cloak', 'Copper Ring', 'Ashwood Staff'][(itemN + i) % 4], rarity: ['common', 'magic', 'rare'][(itemN++ + i) % 3], slot: 'weapon', value: 4, level: 3 }));
       W.grant(o, { items, gold: Math.max(0, b.gold | 0), reason: 'test' });

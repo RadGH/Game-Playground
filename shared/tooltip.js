@@ -2,6 +2,7 @@
 //
 //   import { installTooltips } from '../../shared/tooltip.js';
 //   installTooltips();                       // watches the whole document
+//   installTooltips(document, { keepOnPress: true })   // opt-in: stays open while a button/key is held
 //   <b data-tip="Plain text">gold</b>
 //   <b data-tip-html="<b>Rich</b> markup">…</b>
 //   <b data-tip-render="item" data-item-id="7">…</b>   + registerTip('item', el => node)
@@ -112,14 +113,17 @@ function onOut(e) { const el = target(e.target); if (el && el === current && !el
  * Start watching a root (default: the document) for tooltip attributes. Safe to call more than once.
  * Returns a function that stops watching.
  */
-export function installTooltips(root = document) {
+export function installTooltips(root = document, { keepOnPress = false } = {}) {
   ensureBox();
   const host = root === document ? document : root;
   const over = e => onOver(e), move = e => onMove(e), out = e => onOut(e);
+  // keepOnPress (opt-in, Thousandvale): a press does not close the tooltip, so it can be read while a
+  // mouse button or a key is held (the native title bubble cannot). The default behaviour is unchanged.
+  const down = keepOnPress ? () => {} : hideTip;
   host.addEventListener('pointerover', over, true);
   host.addEventListener('pointermove', move, true);
   host.addEventListener('pointerout', out, true);
-  host.addEventListener('pointerdown', hideTip, true);
+  host.addEventListener('pointerdown', down, true);
   if (!installed) {
     installed = true;
     document.addEventListener('focusin', e => { const el = target(e.target); if (el) { current = el; show(el, 0, 0, el); } });
@@ -128,7 +132,7 @@ export function installTooltips(root = document) {
     addEventListener('scroll', hideTip, true);
     addEventListener('blur', hideTip);
   }
-  return () => { host.removeEventListener('pointerover', over, true); host.removeEventListener('pointermove', move, true); host.removeEventListener('pointerout', out, true); host.removeEventListener('pointerdown', hideTip, true); };
+  return () => { host.removeEventListener('pointerover', over, true); host.removeEventListener('pointermove', move, true); host.removeEventListener('pointerout', out, true); host.removeEventListener('pointerdown', down, true); };
 }
 
 /** Convenience: set plain-text tooltip on an element (also fills `title` off, so there is only one bubble). */

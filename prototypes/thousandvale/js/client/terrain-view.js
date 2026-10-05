@@ -48,31 +48,31 @@ const SAND = new Set(['beach', 'desert', 'savanna', 'coast']);
 const ROCK = new Set(['mountains', 'snowyPeaks', 'badlands', 'volcanic', 'ashPlain', 'glimmerwaste', 'tundra']);
 
 /**
- * The water surface extended onto the banks (P21). A dry sample within `reach` samples of water takes the mean
- * surface of the wet samples around it — but only where its ground is ABOVE that surface (a bank the water runs
+ * The water surface extended onto the banks (P21). A dry sample within `reach` samples of water takes the lowest
+ * surface of the nearest wet samples — but only where its ground is ABOVE that surface (a bank the water runs
  * into) or no more than `maxDrop` below it, so water never floats over land that falls away. Wet samples keep their
  * own surface. Pure (exported for tests): wg = water surface per sample (NaN = dry), grid = ground heights.
  */
 export function extendWaterSurface(wg, grid, res, { reach = 2, maxDrop = 0.12 } = {}) {
   const out = Float32Array.from(wg);
+  const best = new Float32Array(wg.length).fill(Infinity);    // squared distance to the nearest wet sample seen so far
+  // spread outward from the wet samples only (a zone is ~2% water: scanning every dry sample's neighbourhood cost 130 ms)
   for (let j = 0; j < res; j++) for (let i = 0; i < res; i++) {
-    const k = j * res + i;
-    if (!Number.isNaN(wg[k])) continue;
-    let sum = 0, n = 0, best = Infinity;
+    const v = wg[j * res + i];
+    if (Number.isNaN(v)) continue;
     for (let dj = -reach; dj <= reach; dj++) {
       const jj = j + dj; if (jj < 0 || jj >= res) continue;
       for (let di = -reach; di <= reach; di++) {
         const ii = i + di; if (ii < 0 || ii >= res) continue;
-        const v = wg[jj * res + ii];
-        if (Number.isNaN(v)) continue;
+        const k = jj * res + ii;
+        if (!Number.isNaN(wg[k])) continue;
         const d = di * di + dj * dj;
-        if (d < best) { best = d; sum = v; n = 1; } else if (d === best) { sum += v; n++; }
+        // the LOWEST of the nearest surfaces: never lifts water over a bank
+        if (d < best[k] || (d === best[k] && v < out[k])) { best[k] = d; out[k] = v; }
       }
     }
-    if (!n) continue;
-    const s = sum / n;
-    if (grid[k] >= s - maxDrop) out[k] = s;
   }
+  for (let k = 0; k < out.length; k++) if (best[k] !== Infinity && grid[k] < out[k] - maxDrop) out[k] = NaN;
   return out;
 }
 

@@ -68,9 +68,9 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
       q.loc = S.model ? locateQuest(q, S.model, p) : null;
       q.goal = goalOf(q);
       const def = S.model?.quests.get(q.id);
-      q.giverName = (S.model?.npcs.get(q.giver)?.name) || null;
-      q.where = def?.steps?.[q.step]?.where || null;
-      q.zoneName = S.model?.zones.get(q.zone)?.name || (q.zone ? titleCase(q.zone) : '');
+      q.giverName = q.giverName || (S.model?.npcs.get(q.giver)?.name) || null;
+      q.where = q.steps?.[q.step]?.where || def?.steps?.[q.step]?.where || null;
+      q.zoneName = q.zoneName || S.model?.zones.get(q.zone)?.name || (q.zone ? titleCase(q.zone) : '');
     }
   }
   function onQuests(m) {
@@ -122,6 +122,13 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
     return d.floors[0] || null;
   }
 
+  // ---- server places ----
+  S.placesSrv = new Map();
+  function learnPlace(p) {
+    if (!p || !Number.isFinite(p.x)) return;
+    S.placesSrv.set(p.key, p);
+    if ((p.discovered || p.kind === 'town') && S.fog && S.fog.reveal(p.x, p.z, Math.max(40, (p.r || 20) + 20))) S.fogDirty = true;
+  }
   // ---- party ----
   function onPartyFrames(list) { S.party = list || []; }
 
@@ -179,6 +186,10 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
       return list;
     }
     const list = collectMarkers({ model: S.model, room: room(), known, fog: S.fog, quests: S.quests, tracked: S.tracked, events: [...S.events.values()].filter(e => Number.isFinite(e.x)), party: partyMarkers(), pins: S.pins, me: withMe ? p : null, level: p?.level || 1 });
+    for (const sp of S.placesSrv.values()) {
+      if (!sp.discovered || !['vignette', 'hook'].includes(sp.kind)) continue;
+      list.push({ id: 'sp:' + sp.key, kind: 'landmark', x: sp.x, z: sp.z, name: sp.name || 'A place of note', sub: sp.kind === 'hook' ? 'Something worth a closer look' : 'Point of interest', priority: 1, size: 5 });
+    }
     const meM = list.find(m => m.kind === 'me'); if (meM && p) meM.yaw = p.yaw;
     return list;
   }
@@ -208,6 +219,10 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
     n.on('zoneEvent', onZoneEvent);
     n.on('partyFrames', onPartyFrames);
     n.on('explored', m => { if (S.fog && S.fog.merge(m.cells || [])) { S.fogDirty = true; changed(); } });
+    // protocol §17.3: the server's own discovery — places you found light up the map round them, live events get a pin
+    n.on('mapData', m => { S.server = m; for (const p of m.places || []) learnPlace(p); for (const e of m.events || []) if (Number.isFinite(e.x)) S.events.set(e.realm ? 'realm' : 'zone:' + (e.uid || e.id), { ...e, sub: e.realm ? 'Realm event — waystone travel there is free' : 'Zone event', free: !!e.realm }); changed(); });
+    n.on('discover', m => { for (const p of m.places || []) learnPlace(p); changed(); });
+    n.on('joined', () => { try { net()?.map?.(); } catch { /* old server */ } });
   }
 
   return {

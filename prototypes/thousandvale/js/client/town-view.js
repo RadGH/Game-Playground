@@ -173,16 +173,25 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
   // ---- bridges ------------------------------------------------------------------------------------
   for (const raw of placements) {
     if (raw.kind !== 'bridge') continue;
-    const p = W(raw), span = raw.data?.span || 10, deck = raw.data?.deck ?? T.heightAt(p.x, p.z), yaw = p.yaw || 0;
-    const width = 4.2, len = span + 6;
-    push('box', p.x, deck - 0.35, p.z, yaw, width, 0.4, len, '#7a6048');
+    // B's bridge (P24): the deck runs abutment to abutment (`data.a`/`data.b` = [x, z, h], zone-local), `data.width` wide,
+    // its TOP at `data.deck` (push() boxes stand on their y); piers stand on the bare ground (groundAt: heightAt is the deck here)
+    const d = raw.data || {}, p = W(raw);
+    const ox = T.ox || 0, oz = T.oz || 0;
+    const A = d.a ? { x: d.a[0] + ox, z: d.a[1] + oz } : localToWorld(p.x, p.z, p.yaw || 0, 0, -(d.span || 10) / 2);
+    const B = d.b ? { x: d.b[0] + ox, z: d.b[1] + oz } : localToWorld(p.x, p.z, p.yaw || 0, 0, (d.span || 10) / 2);
+    const len = Math.max(1, Math.hypot(B.x - A.x, B.z - A.z)), yaw = Math.atan2(B.x - A.x, B.z - A.z);
+    const cx = (A.x + B.x) / 2, cz = (A.z + B.z) / 2, deck = d.deck ?? T.heightAt(cx, cz), width = d.width || 4.2;
+    const bare = (x, z) => (T.groundAt ? T.groundAt(x, z) : T.heightAt(x, z));
+    push('box', cx, deck - 0.4, cz, yaw, width, 0.4, len, '#7a6048');
     for (const side of [-1, 1]) {
-      const r = localToWorld(p.x, p.z, yaw, side * (width / 2 - 0.12), 0);
-      push('box', r.x, deck + 0.05, r.z, yaw, 0.16, 0.9, len, '#5e4a37');
-      for (const end of [-1, 1]) {
-        const q = localToWorld(p.x, p.z, yaw, side * (width / 2 - 0.12), end * (span / 2 - 0.5));
-        const g = T.heightAt(q.x, q.z);
-        push('box', q.x, Math.min(g, deck) - 2.5, q.z, yaw, 0.7, deck - Math.min(g, deck) + 2.5, 0.7, '#6f6a62');
+      const r = localToWorld(cx, cz, yaw, side * (width / 2 - 0.12), 0);
+      push('box', r.x, deck, r.z, yaw, 0.16, 0.9, len, '#5e4a37');
+      const piers = Math.max(2, Math.round(len / 7) + 1);
+      for (let k = 0; k < piers; k++) {
+        const q = localToWorld(cx, cz, yaw, side * (width / 2 - 0.12), (k / (piers - 1) - 0.5) * (len - 1));
+        const g = Math.min(bare(q.x, q.z), deck - 0.4);
+        const h = deck - 0.4 - g + 1.5;                    // down to the river bed and a little into it
+        push('box', q.x, deck - 0.4 - h, q.z, yaw, 0.6, h, 0.6, '#6f6a62');
       }
     }
   }

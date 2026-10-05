@@ -28,7 +28,7 @@ async function loadZone(key) {
   const t = perf.span('zone:parse', () => parseTerrain(buf));
   return {
     key, name: t.meta.name || key, reader: t,
-    heightAt: t.heightAt, walkable: t.walkable,
+    heightAt: t.heightAt, walkable: t.walkable, groundAt: t.groundAt ? (x, z) => t.groundAt(x, z) : null,
     waterAt: (x, z) => t.waterAt(x, z), moveAt: t.moveAt ? (x, z) => t.moveAt(x, z) : null,
     slopeDeg: (x, z) => t.slopeAt(x, z),
     biomeKey: (x, z) => t.biomes[t.biomeAt(x, z)]?.key || 'grassland',
@@ -92,6 +92,7 @@ export function worldZone(T, ox, oz) {
   return {
     ...T, ox, oz,
     heightAt: (x, z) => T.heightAt(x - ox, z - oz),
+    groundAt: T.groundAt ? (x, z) => T.groundAt(x - ox, z - oz) : null,
     walkable: (x, z) => T.walkable(x - ox, z - oz),
     waterAt: (x, z) => T.waterAt(x - ox, z - oz),
     moveAt: T.moveAt ? (x, z) => T.moveAt(x - ox, z - oz) : null,

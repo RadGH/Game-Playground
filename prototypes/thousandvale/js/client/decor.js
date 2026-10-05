@@ -177,7 +177,7 @@ export async function createDecor(hf, { placements = [], paths = [], seed = 7, a
   // --- placed props -----------------------------------------------------------------------------
   const lights = [];   // flickering fires
   const flames = [];
-  const propCache = new Map();
+  const propCache = PROP_CACHE;          // shared by every zone (P1)
   const propGeo = id => { if (!propCache.has(id)) { try { propCache.set(id, buildProp(id, { seed: 5, lod: 0 }).geometry); } catch { try { propCache.set(id, buildRock(id, { seed: 5, lod: 0 }).geometry); } catch { propCache.set(id, null); } } } return propCache.get(id); };
   const flameMat = new THREE.SpriteMaterial({ map: makeFlameTexture(), color: 0xffc070, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true });
   // Props are batched by id into one InstancedMesh each (a palisade is 150 stakes, one draw).
@@ -227,6 +227,7 @@ export async function createDecor(hf, { placements = [], paths = [], seed = 7, a
   };
 }
 
+const PROP_CACHE = new Map();
 let FLAME = null;
 function makeFlameTexture() {
   if (FLAME) return FLAME;

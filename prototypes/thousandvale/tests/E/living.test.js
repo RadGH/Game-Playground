@@ -82,7 +82,7 @@ test('P26: round the start nothing ordinary is above level 3 within 900 m, nothi
 });
 
 // Hobb Gallowsby's camp level is stream A's ENCOUNTER_PLACES (5); E asked A to read the encounter file's `level` (4)
-test('P26: named fights and vignette monsters near the start stay near the ramp (the elite A places; vignette levelBase/levelCap A applies)', { todo: 'A: encounter `level` in zoneEncounterCamps + vignette levelBase/levelCap/countCap + farm pest countCap (docs/requests.md, E, play-test 1)' }, () => {
+test('P26: named fights and vignette monsters near the start stay near the ramp (the elite A places; vignette levelBase/levelCap A applies)', () => {
   const bad = [];
   for (const c of L.camps) {
     const d = Math.hypot(c.x - HUB.x, c.z - HUB.z);

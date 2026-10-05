@@ -177,3 +177,48 @@ test('P12: a telegraph is on the ground from the moment it arrives and fills to 
   const t8 = tele.live.get(8); tele.update(0);
   assert.ok(Math.abs(t8.mesh.material.uniforms.uProg.value - 0.1) < 0.01);
 });
+
+test('P21: water meets the bank — every shoreline cell is covered, and no water floats over land that falls away', async () => {
+  const { parseTerrain } = await import('../../js/rules/terrain-read.js');
+  const { extendWaterSurface } = await import('../../js/client/terrain-view.js');
+  for (const key of ['z12_02', 'z13_02']) {
+    const t = parseTerrain(readFileSync(new URL(`data/zones/${key}/terrain.bin`, G)));
+    const res = t.size, wg = t.waterGrid(), grid = t.heightGrid();
+    const surf = extendWaterSurface(wg, grid, res, { reach: 2 });
+    let shore = 0, gapsBefore = 0, gapsAfter = 0, floating = 0;
+    const has = (a, k) => !Number.isNaN(a[k]);
+    for (let j = 0; j < res - 1; j++) for (let i = 0; i < res - 1; i++) {
+      const c = [j * res + i, j * res + i + 1, (j + 1) * res + i, (j + 1) * res + i + 1];
+      const wet = c.filter(k => has(wg, k)).length;
+      if (wet === 0 || wet === 4) continue;
+      shore++;
+      if (c.some(k => !has(wg, k))) gapsBefore++;             // the old mesh needed all corners wet: every shore cell was open
+      if (c.some(k => !has(surf, k)) && c.every(k => has(wg, k) || grid[k] >= Math.max(...c.filter(q => has(wg, q)).map(q => wg[q])))) gapsAfter++;
+    }
+    for (let k = 0; k < surf.length; k++) if (!has(wg, k) && has(surf, k) && surf[k] - grid[k] > 0.13) floating++;
+    assert.ok(shore > 100, `${key}: has shoreline (${shore})`);
+    assert.equal(gapsBefore, shore, 'before: the water stopped short of every shore cell');
+    assert.equal(gapsAfter, 0, `${key}: no bank cell is left open`);
+    assert.equal(floating, 0, `${key}: no extended water hangs over lower ground`);
+  }
+});
+
+test("P20: C's fx 'spell' (exact place/radius/delay) and fx 'impact' {el, ab} are drawn, and replace the client's guesses", async () => {
+  const THREE = await import('three');
+  const { createSpells } = await import('../../js/client/spells.js');
+  const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera();
+  const body = (id, x) => ({ id, pos: new THREE.Vector3(x, 0, 0), height: 1.8, yaw: 0, group: new THREE.Group() });
+  const A = new Map([[1, body(1, 0)], [2, body(2, 6)]]);
+  for (const a of A.values()) scene.add(a.group);
+  const sp = createSpells(scene, { camera, actors: { get: id => A.get(id) }, skillOf: id => SK.skills[id] || null });
+  sp.onEvent({ type: 'fx', kind: 'spell', id: 1, ab: 'consecrate', el: 'holy', shape: 'ground', x: 3, z: 0, r: 5 });
+  sp.onEvent({ type: 'fx', kind: 'impact', id: 2, el: 'shadow', ab: 'gnawing_dark' });
+  const before = sp.stats.impacts;
+  sp.onEvent({ type: 'hit', s: 1, d: 2, n: 5, el: 'shadow', kind: 'dmg', ab: 'gnawing_dark' });
+  assert.equal(sp.stats.impacts, before, 'the hit does not burst a second time once C sends impacts');
+  assert.equal(sp.stats.areas, 1);
+  const a0 = sp.stats.areas;
+  sp.onEvent({ type: 'cast', s: 1, skill: 'consecrate', aim: { x: 3, z: 0 } });
+  assert.equal(sp.stats.areas, a0, 'the cast no longer guesses the area once fx spell is flowing');
+  for (let i = 0; i < 10; i++) sp.update(0.05);
+});

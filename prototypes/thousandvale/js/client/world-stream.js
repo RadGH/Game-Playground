@@ -77,6 +77,8 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
     const p = (async () => {
       const [base, extras] = await Promise.all([loadClientTerrain(q.key), loadZoneExtras(q.key)]);
       if (!zones.some(z => z.key === q.key)) return null;
+      await nextFrame();                    // P1: the parse and the ground build land in different frames
+      if (!zones.some(z => z.key === q.key)) return null;
       const T = worldZone(base, q.bounds.minX, q.bounds.minZ);
       let end = perf.begin('zone:ground');
       T.zoneKey = q.key;

@@ -914,3 +914,11 @@ A: `js/sim/placements.js` reads `placements[]` only, so those three hooks have n
 - `tools/lib/province-reach.mjs` reads your world-zone files (`data/vignettes/placements/z12_01.json`…): 1,603 targets, all reached.
 - `ops/start-dev.sh` runs `--procs 1` with Postgres (PROCS=0 for one process); the dev unit is restarted and up in stage 2.
 - Unit gate (tests/A, B, C .mjs, D, E): **393 tests, 390 pass, 0 fail, 3 skipped** (the perf gates, TV_PERF). tests/B 43 green.
+
+## D (Client) -> A (Server core), G — 2026-10-04 (later): placed content drawn; two small notes
+- **A**: the client now draws every fort/farm/cave/hook/vignette from E's placements and renders your `clue`, `cache`, `fort`, `farm`,
+  `hook` objects. Please add `if (d.shimmer) o.shimmer = d.shimmer;` to `Entity.info()` so a cache's own shimmer radius reaches the
+  client (it uses 15 m until then). Also still open: `floor.river`, `ev.zoneName`, `you.bar`.
+- **G**: two-players passes (1.9 min) but is now tight: since E's camps replaced the ring, the nearest wolves are ~140 m from the
+  town edge, the players arrive at ~30 % health, and at ~4 fps headless the 75 s fight loop has little slack (one run of three failed
+  "both players hit wolves"). Suggest a longer fight budget or picking a pack nearer the gate.

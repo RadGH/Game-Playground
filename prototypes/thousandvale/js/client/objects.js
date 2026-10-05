@@ -36,6 +36,12 @@ const KINDS = {
   campfire: { prop: 'campfire', glow: '#ffae5c', label: o => o.name || 'A campfire', use: true, fire: true },
   npc:     { prop: null, glow: null, label: o => `Talk to ${o.name || 'them'}`, use: true, invisible: true },
   vignette: { prop: null, glow: null, label: () => null, use: false, invisible: true },
+  // stream E's placed content (js/sim/placements.js): the place itself is drawn by site-view.js
+  fort:    { prop: null, glow: null, label: () => null, use: false, invisible: true },
+  farm:    { prop: null, glow: null, label: () => null, use: false, invisible: true },
+  hook:    { prop: null, glow: null, label: () => null, use: false, invisible: true },
+  clue:    { prop: o => (/carv|stone|mark/i.test(o.name || '') ? 'stone_marker' : 'crate'), glow: '#f3e3b0', label: o => `Examine: ${o.name || 'a clue'}`, use: true, scale: 0.7 },
+  cache:   { prop: 'crate', glow: '#ffd56a', label: o => (o.opened ? 'Dug up' : `Dig up ${o.name || 'the cache'}`), use: o => !o.opened, tint: '#7a5a2a', hiddenAlways: true },
 };
 
 export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null, labelLayer = null, camera = null } = {}) {
@@ -56,7 +62,7 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
     const root = new THREE.Group();
     const propId = typeof K.prop === 'function' ? K.prop(o) : K.prop;
     if (K.invisible) return root;
-    if (o.hidden) o.hiddenChest = true;
+    if (o.hidden || K.hiddenAlways) { o.hiddenChest = true; o.shimmerR = o.shimmer || 15; }
     const g = propId ? geo(propId, K.rock) : null;
     if (g) {
       const n = K.stack || 1;
@@ -140,13 +146,13 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
       if (o.hiddenChest && me) {
         // a hidden cache shimmers within 15 m (PLAN §3.7) and is invisible further away
         const d = Math.hypot(o.x - me.x, o.z - me.z);
-        o.revealed = d < 15;
+        o.revealed = d < (o.shimmerR || 15);
         o.root.visible = o.revealed;
         if (o.revealed && o.glow) o.glow.scale.setScalar(1.6 + Math.sin(o.t * 6) * 0.4);
       }
       if (o.flame2) o.flame2.material.rotation = Math.sin(o.t * 6) * 0.08;
       if (o.light) o.light.intensity = (KINDS[o.type]?.fire ? 16 : 8) * (0.88 + Math.sin(o.t * 11) * 0.08);
-      if (o.type === 'vignette' && me && o.lore && onNear) { if (Math.hypot(o.x - me.x, o.z - me.z) < (o.r || 10)) onNear(o); }
+      if ((o.type === 'vignette' || o.type === 'hook') && me && o.lore && onNear) { if (Math.hypot(o.x - me.x, o.z - me.z) < (o.r || 10)) onNear(o); }
       const K = KINDS[o.type] || {};
       const can = usable(o);
       if (o.ring) { o.ring.visible = can; o.ring.material.opacity = 0.32 + Math.sin(o.t * 3) * 0.16 + (o === focus ? 0.35 : 0); o.ring.rotation.y += dt * 0.4; }

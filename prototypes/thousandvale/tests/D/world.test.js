@@ -175,3 +175,54 @@ test('skill bar: all 30 classes get six named skills with Farhold\'s unlock leve
   const healers = classes.filter(c => ['cleric', 'druid', 'bard', 'paladin'].includes(c.id)).flatMap(c => barFromData(d, c.id, 50));
   assert.ok(healers.some(b => b.ally), 'some healer skill targets friends');
 });
+
+test('camera solids: a wall between focus and camera is found, an open line is clear, owners come and go', async () => {
+  const { createSolids } = await import('../../js/client/solids.js');
+  const S = createSolids();
+  S.add('z1', [{ x: 10, z: 0, r: 2, bottom: 0, top: 8 }]);
+  assert.ok(S.blockAt(10, 3, 1) && !S.blockAt(10, 9, 0) && !S.blockAt(14, 3, 0));
+  const t = S.firstHit(0, 2, 0, 20, 2, 0);
+  assert.ok(t > 0.35 && t < 0.42, `stops before the wall (t=${t})`);
+  assert.equal(S.firstHit(0, 2, 5, 20, 2, 5), 1, 'a parallel line misses');
+  assert.equal(S.firstHit(0, 12, 0, 20, 12, 0), 1, 'over the top is clear');
+  S.remove('z1');
+  assert.equal(S.firstHit(0, 2, 0, 20, 2, 0), 1);
+});
+
+test("E's placed content: every fort, farm, cave and hook in Torbor Downs gets something drawn, from real files", async () => {
+  const { sitePlan } = await import('../../js/client/site-view.js');
+  const { readdirSync } = await import('node:fs');
+  const sites = JSON.parse(read('data/provinces/sites.json'));
+  const hooks = new Map(JSON.parse(read('data/hooks.json')).hooks.map(h => [h.id, h]));
+  const files = readdirSync(new URL('data/vignettes/placements/', G)).filter(f => /^z\d+_\d+\.json$/.test(f));
+  assert.equal(files.length, 16);
+  const kinds = new Set();
+  let thorn = 0;
+  for (const f of files) {
+    const file = JSON.parse(read('data/vignettes/placements/' + f));
+    for (const p of [...file.placements, ...(file.features || [])].filter(p => ['fort', 'farm', 'cave', 'hook'].includes(p.type))) {
+      const plan = sitePlan([p], [], { sites, hooks });
+      const n = plan.props.length + plan.parts.length + plan.buildings.length + plan.bushes.length;
+      const bespokeOnly = p.type === 'hook' && !(hooks.get(p.id)?.parts || []).some(q => ['prop', 'tree', 'ground'].includes(q.kind)) && !p.pts;
+      if (!bespokeOnly) assert.ok(n > 0, `${f} ${p.type} ${p.template || p.id} draws something`);
+      kinds.add(p.type + ':' + (p.template || 'hook'));
+      if (p.pts) thorn += plan.bushes.length;
+      // everything lands near its placement (local offsets turned by yaw, not flung across the map)
+      for (const q of [...plan.props, ...plan.parts]) assert.ok(Math.hypot(q.x - p.x, q.z - p.z) < (p.radius || 30) + 25, `${p.id} piece within reach`);
+    }
+  }
+  for (const k of ['fort:watchtower_garrison', 'fort:palisade_fort', 'fort:stone_keep', 'fort:ruined_fort', 'farm:sheep', 'farm:arable', 'cave:beast_den', 'cave:barrow_mound']) assert.ok(kinds.has(k), k);
+  assert.ok(thorn > 100, 'the Thorn Wall is a line of brambles');
+});
+
+test('far stand-ins: a chibi silhouette (head ~ a third of the height) in two small coloured meshes', async () => {
+  const { farBodyGeometry, farHeadGeometry } = await import('../../js/client/actors.js');
+  const b = farBodyGeometry(), h = farHeadGeometry();
+  b.computeBoundingBox(); h.computeBoundingBox();
+  const top = h.boundingBox.max.y, headH = h.boundingBox.max.y - h.boundingBox.min.y;
+  assert.ok(top > 1.3 && top < 1.7, `about 1.5 m tall (${top.toFixed(2)})`);
+  assert.ok(headH / top > 0.3 && headH / top < 0.6, 'chibi: a big head');
+  assert.ok(b.boundingBox.min.y >= -0.01 && b.boundingBox.max.y <= h.boundingBox.min.y + 0.15, 'body under the head, feet on the ground');
+  assert.ok(b.attributes.color && h.attributes.color, 'vertex colours (class tint on the tunic, skin x hair on the head)');
+  assert.ok(b.attributes.position.count + h.attributes.position.count < 700, 'cheap enough for 400 instances');
+});

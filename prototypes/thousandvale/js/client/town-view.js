@@ -113,7 +113,7 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
       const wpt = localToWorld(p.x, p.z, yaw, side * fw * 0.28, fd / 2 + 0.04);
       windows.push({ x: wpt.x, y: ground + Math.min(1.5, (desc.storeyHeight || 2.4) * 0.55), z: wpt.z, yaw, w: Math.min(0.8, fw * 0.14) });
     }
-    solids.push({ x: p.x, z: p.z, r: radiusOf(desc), h: top });
+    solids.push({ x: p.x, z: p.z, r: radiusOf(desc) * 0.85, h: top, bottom: ground - 1, top: ground + top });
     buildings++;
   }
 

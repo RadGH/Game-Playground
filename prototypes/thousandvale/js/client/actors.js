@@ -43,27 +43,57 @@ export function chooseFull(list, { fullMax = 30, monsterRange = 120, selfId = nu
   for (const a of list) if (a.kind !== 'player' && a.kind !== 'npc' && a.d < monsterRange) full.add(a.id);
   return full;
 }
+const SKIN = { human: '#e8bf98', elf: '#f0d2b4', dwarf: '#d9a77a', halfling: '#e9c49c' };
+/** Pieces with a vertex colour, merged into one geometry. */
+function mergeColoured(pieces) {
+  let n = 0; for (const { g } of pieces) n += g.attributes.position.count;
+  const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), col = new Float32Array(n * 3), idx = [];
+  let o = 0;
+  for (const { g, c } of pieces) {
+    const cnt = g.attributes.position.count; const cc = new THREE.Color(c);
+    pos.set(g.attributes.position.array, o * 3); nor.set(g.attributes.normal.array, o * 3);
+    for (let i = 0; i < cnt; i++) { col[(o + i) * 3] = cc.r; col[(o + i) * 3 + 1] = cc.g; col[(o + i) * 3 + 2] = cc.b; }
+    if (g.index) for (const i of g.index.array) idx.push(i + o); else for (let i = 0; i < cnt; i++) idx.push(i + o);
+    o += cnt;
+  }
+  const out = new THREE.BufferGeometry();
+  out.setAttribute('position', new THREE.BufferAttribute(pos, 3)); out.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); out.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  out.setIndex(idx);
+  return out;
+}
+/** The far stand-in's body (~1.45 m chibi): tunic tinted by class, darker legs, arms, boots. */
+export function farBodyGeometry() {
+  const tunic = new THREE.CylinderGeometry(0.2, 0.3, 0.55, 8); tunic.translate(0, 0.62, 0);
+  const belt = new THREE.CylinderGeometry(0.29, 0.29, 0.06, 8); belt.translate(0, 0.42, 0);
+  const legL = new THREE.CylinderGeometry(0.075, 0.08, 0.38, 6); legL.translate(-0.11, 0.2, 0);
+  const legR = legL.clone(); legR.translate(0.22, 0, 0);
+  const armL = new THREE.CylinderGeometry(0.06, 0.055, 0.46, 6); armL.rotateZ(0.32); armL.translate(-0.3, 0.64, 0);
+  const armR = new THREE.CylinderGeometry(0.06, 0.055, 0.46, 6); armR.rotateZ(-0.32); armR.translate(0.3, 0.64, 0);
+  const boots = new THREE.BoxGeometry(0.42, 0.08, 0.2); boots.translate(0, 0.04, 0.03);
+  return mergeColoured([{ g: tunic, c: '#ffffff' }, { g: belt, c: '#4a3a2a' }, { g: legL, c: '#5a5560' }, { g: legR, c: '#5a5560' }, { g: armL, c: '#e6e6e6' }, { g: armR, c: '#e6e6e6' }, { g: boots, c: '#3a2e24' }]);
+}
+/** …and its head: a big skin sphere (tinted by people) with a hair cap and two dark eyes. */
+export function farHeadGeometry() {
+  const head = new THREE.SphereGeometry(0.34, 12, 9); head.translate(0, 1.14, 0);
+  const hair = new THREE.SphereGeometry(0.36, 12, 6, 0, Math.PI * 2, 0, Math.PI * 0.55); hair.translate(0, 1.16, -0.02);
+  const eyeL = new THREE.SphereGeometry(0.045, 6, 4); eyeL.translate(-0.11, 1.12, 0.31);
+  const eyeR = eyeL.clone(); eyeR.translate(0.22, 0, 0);
+  return mergeColoured([{ g: head, c: '#ffffff' }, { g: hair, c: '#4a3426' }, { g: eyeL, c: '#1a1410' }, { g: eyeR, c: '#1a1410' }]);
+}
 const CLASS_TINT = { warrior: '#b04a3a', knight: '#9aa4b4', paladin: '#e0c060', ranger: '#4f8a3a', rogue: '#3a3a44', cleric: '#e8e0c8', mage: '#4a6ad0', bard: '#c060a0', monk: '#d0902a', druid: '#6a9a4a', necromancer: '#5a3a6a', pyromancer: '#e0602a' };
 
 export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
   const actors = new Map();
   const queue = [];
   const FULL_MAX = quality === 'low' ? 12 : 30, PLATE_MAX = quality === 'low' ? 24 : 40, ANIM_NEAR = 25;
-  // the far crowd: one instanced figure (body + head), tinted per class
-  const farGeo = (() => {
-    const body = new THREE.CapsuleGeometry(0.32, 0.75, 3, 8); body.translate(0, 0.72, 0);
-    const head = new THREE.SphereGeometry(0.3, 10, 8); head.translate(0, 1.5, 0);
-    const pos = [...body.attributes.position.array, ...head.attributes.position.array];
-    const nor = [...body.attributes.normal.array, ...head.attributes.normal.array];
-    const idx = [...body.index.array, ...head.index.array.map(i => i + body.attributes.position.count)];
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); g.setIndex(idx);
-    return g;
-  })();
+  // the far crowd: a low-poly chibi (big head, short body) in two instanced meshes — the body tinted by
+  // class, the head by people (skin) with dark hair baked in — two draw calls for the whole crowd
   const FAR_CAP = 400;
-  const farMesh = new THREE.InstancedMesh(farGeo, new THREE.MeshLambertMaterial({ color: '#ffffff' }), FAR_CAP);
-  farMesh.count = 0; farMesh.frustumCulled = false; farMesh.name = 'far-crowd';
-  scene.add(farMesh);
+  const farMat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  const farBody = new THREE.InstancedMesh(farBodyGeometry(), farMat, FAR_CAP);
+  const farHead = new THREE.InstancedMesh(farHeadGeometry(), farMat, FAR_CAP);
+  for (const m of [farBody, farHead]) { m.count = 0; m.frustumCulled = false; m.castShadow = false; scene.add(m); }
+  farBody.name = 'far-crowd-body'; farHead.name = 'far-crowd-head';
   const _fm = new THREE.Matrix4(), _fq = new THREE.Quaternion(), _fs = new THREE.Vector3(1, 1, 1), _fp = new THREE.Vector3(), _fc = new THREE.Color(), _up = new THREE.Vector3(0, 1, 0);
   let lodAt = 0, fullSet = new Set();
   const lodStats = { full: 0, far: 0, plates: 0, built: 0 };
@@ -270,8 +300,11 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
         // far people are one instanced crowd; far beasts (past 120 m) are simply not drawn
         if ((a.kind === 'player' || a.kind === 'npc') && !a.pet && farN < FAR_CAP && a.fade > 0.05) {
           _fq.setFromAxisAngle(_up, a.yaw); _fs.setScalar(a.dead ? 0.0001 : 1);
-          farMesh.setMatrixAt(farN, _fm.compose(_fp.set(a.group.position.x, a.group.position.y, a.group.position.z), _fq, _fs));
-          farMesh.setColorAt(farN, _fc.set(CLASS_TINT[a.look?.cls] || '#9a8f80'));
+          const bob = a.speed > 0.4 ? Math.abs(Math.sin(now / 1000 * (a.speed > 4.2 ? 11 : 7) + (typeof a.id === 'number' ? a.id : a.id.length))) * 0.07 : 0;
+          _fm.compose(_fp.set(a.group.position.x, a.group.position.y + bob, a.group.position.z), _fq, _fs);
+          farBody.setMatrixAt(farN, _fm); farHead.setMatrixAt(farN, _fm);
+          farBody.setColorAt(farN, _fc.set(CLASS_TINT[a.look?.cls] || '#9a8f80'));
+          farHead.setColorAt(farN, _fc.set(SKIN[a.look?.race] || SKIN.human));
           farN++;
         }
         if (!a.body && !a.building && !queue.includes(a)) queue.push(a);     // build when it comes close
@@ -290,7 +323,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
         a.group.position.y -= (1 - a.fade) * 0.8;
       } else a.fade = 1;
     }
-    farMesh.count = farN; farMesh.instanceMatrix.needsUpdate = true; if (farMesh.instanceColor) farMesh.instanceColor.needsUpdate = true;
+    for (const m of [farBody, farHead]) { m.count = farN; m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
     lodStats.full = fullSet.size; lodStats.far = farN;
     // Rings.
     const ta = targetId != null ? actors.get(targetId) : null;

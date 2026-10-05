@@ -21,6 +21,7 @@ import { createHorizon } from './horizon.js';
 import { createWorldUi } from './world-ui.js';
 import { createFootprints } from './traces.js';
 import { nightness } from './daynight.js';
+import { createSolids } from './solids.js';
 import { createActors } from './actors.js';
 import { createFx } from './fx.js';
 import { createHud } from './hud.js';
@@ -93,7 +94,8 @@ const S = {
 
 // --- the outdoor world: zones streamed around you (world-stream.js), the far horizon beyond them ----------
 const STARTER_ZONE = q.get('zone') || 'z12_02';
-const WS = createWorldStream(scene, { quality, onZoneReady: L => { L.town?.setNight(S.night || 0); if (!D.view) objects.setGround(WS.terrain.heightAt); }, opts: {
+const SOLIDS = createSolids();
+const WS = createWorldStream(scene, { quality, solids: SOLIDS, onZoneReady: L => { L.town?.setNight(S.night || 0); if (!D.view) objects.setGround(WS.terrain.heightAt); }, opts: {
   // A zone with no baked scatter (the M0 test zone) gets the old random woods and the waystone camp.
   fallbackDecor: async T => {
     const camp = T.spawn;
@@ -123,7 +125,7 @@ function enterDungeon(room) {
     scene.add(D.view.group);
   }
   WS.setVisible(false); W.horizon?.setVisible(false); footprints.setVisible(false);
-  view.setMood('dungeon', { fog: D.view.fog });
+  view.setMood('dungeon', { fog: D.view.fog, bright: D.view.bright });
   S.predictor.terrain = { heightAt: () => 0, walkable: D.view.terrain.walkable, bounds: D.view.terrain.bounds };
   controls.setHeightAt(D.view.cameraHeight);
   tele.setGround(() => 0); objects.setGround(() => 0);
@@ -166,6 +168,9 @@ const controls = createControls({
   onRise: () => rise(),
   onSkill: n => castSkill(n),
 });
+
+// the camera stops short of buildings, fort walls and big rocks (dungeon walls come in through cameraHeight)
+controls.setBlocker((ax, ay, az, bx, by, bz) => (D.view ? 1 : SOLIDS.firstHit(ax, ay, az, bx, by, bz)));
 
 const boss = createBossUi({ actors, serverNow: () => (S.net ? S.net.clock.serverNow() : 0), toast: hud });
 const social = createSocial({ net: () => S.net, hud, actors, onTarget: id => setTarget(id), myChar: () => S.net?.joined?.you?.char ?? null });
@@ -291,6 +296,7 @@ function wireNet(net) {
   worldUi.wire(net);
   net.on('relocate', () => hud.toast('Crossing into another province…', 'info'));
   net.on('used', u => {
+    if (u.ok && u.kind === 'cache') objects.markOpened(u.id);
     if (worldUi.onUsed(u)) return;
     if (!u.ok) { hud.toast(u.msg || ({ far: 'Too far away.', opened: 'Already emptied.', dead: 'You are dead.', unknown: 'Nothing happens.' }[u.why]) || 'Nothing happens.', 'warn'); if (u.why === 'opened') objects.markOpened(u.id); return; }
     const o = objects.items.get(u.id);
@@ -351,7 +357,7 @@ function ensureActor(id) {
     const kind = info.kind || KIND_NAMES[e.kind] || 'monster';
     if (kind === 'object') {
       objects.upsert({ id, type: info.type, name: info.name, x: e.x, z: e.z, yaw: e.yaw || 0, r: info.r, state: info.state, source: 'room', opened: info.type === 'chest' && wasOpened(info.key),
-        hidden: !!info.hidden, hint: info.hint, lore: info.lore, key: info.key, banner: info.banner || null, trace: info.trace || null });
+        hidden: !!info.hidden, hint: info.hint, lore: info.lore, shimmer: info.shimmer, key: info.key, banner: info.banner || null, trace: info.trace || null });
       objectState(id, info);
       return null;
     }
@@ -708,6 +714,16 @@ function frame(now) {
       const t = S.target != null ? actors.get(S.target) : null;
       const chasing = controls.chasing != null && t && !t.dead ? t.pos : null;
       const it = controls.intent(S.predictor.pos, { targetPos: chasing, reach: Math.max(1.4, S.reach - 0.3), dead: S.self.dead });
+      // Never step onto ground that is not drawn yet: prediction would walk on the horizon's rough heights and the
+      // server would correct us. Hold still at the edge (a moment, usually) and load that zone now.
+      if (!D.view && (it.mx || it.mz)) {
+        const pp = S.predictor.pos, ahead = { x: pp.x + it.mx * 2.5, z: pp.z + it.mz * 2.5 };
+        if (!WS.ready(ahead.x, ahead.z) && WS.terrain.zoneAt(ahead.x, ahead.z)) {
+          it.mx = 0; it.mz = 0; S.stats.edgeHolds = (S.stats.edgeHolds || 0) + 1;
+          WS.whenReady(ahead.x, ahead.z);
+          if (!S.edgeToastAt || performance.now() - S.edgeToastAt > 4000) { S.edgeToastAt = performance.now(); hud.toast('The land ahead is still loading…', 'info'); }
+        }
+      }
       const inp = S.predictor.apply(it);
       S.net.input(inp);
       S.lastInput = it;
@@ -858,7 +874,7 @@ const tv = {
   hud(on = true) { $('hud').style.visibility = on ? '' : 'hidden'; $('plates').style.visibility = on ? '' : 'hidden'; },
   /** Hold the time of day (0 = midnight, 0.5 = noon); null goes back to the realm clock. */
   setTime(t) { S.todHold = t; todAt = 0; },
-  world: () => ({ ...WS.stats(), tod: S.tod, night: S.night, horizon: !!W.horizon }),
+  world: () => ({ ...WS.stats(), solids: SOLIDS.count(), tod: S.tod, night: S.night, horizon: !!W.horizon }),
   /**
    * Client-only crowd for the performance check (PLAN §12: a town of 100 players): n fake players wander
    * round you, drawn through the same LOD as real ones. tv.crowd(0) clears them. Returns the LOD counts.

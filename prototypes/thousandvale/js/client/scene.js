@@ -102,16 +102,16 @@ export function createScene(canvas, { quality = 'high' } = {}) {
   resize();
 
   /** 'outdoor' (sky, sun, long fog) or 'dungeon' (no sky, dim cold fill, close dark fog). */
-  function setMood(m, { fog = '#06050a' } = {}) {
+  function setMood(m, { fog = '#06050a', bright = false } = {}) {
     mood = m;
     const dark = mood === 'dungeon';
     sky.visible = clouds.visible = !dark;
     scene.background = dark ? new THREE.Color(fog) : SKY.horizon.clone();
     scene.fog.color.set(dark ? fog : SKY.horizon);
-    scene.fog.near = dark ? 10 : 140; scene.fog.far = dark ? 48 : 900;
-    hemi.intensity = dark ? 1.35 : 1.15; hemi.color.set(dark ? '#8f9cc0' : '#d6e6ff'); hemi.groundColor.set(dark ? '#2a2018' : '#6b5f48');
+    scene.fog.near = dark ? (bright ? 18 : 10) : 140; scene.fog.far = dark ? (bright ? 75 : 48) : 900;
+    hemi.intensity = dark ? (bright ? 2.2 : 1.35) : 1.15; hemi.color.set(dark ? '#8f9cc0' : '#d6e6ff'); hemi.groundColor.set(dark ? '#2a2018' : '#6b5f48');
     sun.intensity = dark ? 0.25 : 2.6;
-    lantern.visible = dark;
+    lantern.visible = dark; lantern.distance = bright ? 20 : 13; lantern.intensity = bright ? 16 : 9;
     stars.visible = moon.visible = false;
     if (!dark && lastSky) applySky(lastSky);
   }

@@ -54,8 +54,10 @@ export function createDungeonView(d, { quality = 'high' } = {}) {
   const tex = k => { if (cheap) return null; const s = makeSurface(k, { size: 256, seed: 5 }); s.map.wrapS = s.map.wrapT = THREE.RepeatWrapping; return s.map; };
   const lookKey = lookFor(d), LK = LOOKS[lookKey];
   const wallH = LK.wallH || WALL_H;
-  const floorMat = new (cheap ? THREE.MeshLambertMaterial : THREE.MeshStandardMaterial)({ map: tex(LK.floor), color: new THREE.Color(LK.fT).multiplyScalar(0.92), ...(cheap ? {} : { roughness: 0.92 }) });
-  const wallMat = new (cheap ? THREE.MeshLambertMaterial : THREE.MeshStandardMaterial)({ map: tex(LK.wall), color: new THREE.Color(LK.wT), ...(cheap ? {} : { roughness: 0.95 }) });
+  // Low quality has no textures and few lights: a faint glow in the stone itself keeps rooms readable
+  const glowF = cheap ? 0.2 : 0, glowW = cheap ? 0.12 : 0;
+  const floorMat = new (cheap ? THREE.MeshLambertMaterial : THREE.MeshStandardMaterial)({ map: tex(LK.floor), color: new THREE.Color(LK.fT).multiplyScalar(0.92), emissive: new THREE.Color(LK.fT).multiplyScalar(glowF), ...(cheap ? {} : { roughness: 0.92 }) });
+  const wallMat = new (cheap ? THREE.MeshLambertMaterial : THREE.MeshStandardMaterial)({ map: tex(LK.wall), color: new THREE.Color(LK.wT), emissive: new THREE.Color(LK.wT).multiplyScalar(glowW), ...(cheap ? {} : { roughness: 0.95 }) });
 
   // --- tiles ---------------------------------------------------------------------------------------
   const floorCells = [], wallCells = [];
@@ -163,7 +165,7 @@ export function createDungeonView(d, { quality = 'high' } = {}) {
   for (const gp of dress.glows) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: LK.glow, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.6 })); sp.position.set(gp.x, 0.35, gp.z); sp.scale.set(1.1, 0.8, 1); group.add(sp); glows.push(sp); }
 
   const lights = [];
-  for (let k = 0; k < (cheap ? 3 : 6); k++) { const l = new THREE.PointLight('#ffa552', 0, 14, 1.7); l.position.y = 2.6; group.add(l); lights.push(l); }
+  for (let k = 0; k < (cheap ? 4 : 6); k++) { const l = new THREE.PointLight('#ffa552', 0, cheap ? 20 : 14, cheap ? 1.2 : 1.7); l.position.y = 2.6; group.add(l); lights.push(l); }
   let relightAt = 0, t = 0;
 
   function update(dt, me) {
@@ -176,7 +178,7 @@ export function createDungeonView(d, { quality = 'high' } = {}) {
     lights.forEach((l, k) => {
       const n = near[k];
       if (!n || n.d > 40) { l.intensity = 0; l.userData.base = 0; return; }
-      l.position.set(n.tc.x, 2.6, n.tc.z); l.color.set(n.tc.color); l.userData.base = 14; l.intensity = 14;
+      l.position.set(n.tc.x, 2.6, n.tc.z); l.color.set(n.tc.color); l.userData.base = cheap ? 22 : 14; l.intensity = l.userData.base;
     });
   }
 
@@ -185,7 +187,7 @@ export function createDungeonView(d, { quality = 'high' } = {}) {
     floorAt: (x, z) => { for (const f of floors) if (x >= f.origin.x && z >= f.origin.z && x < f.origin.x + f.w * cell && z < f.origin.z + f.h * cell) return f.index; return -1; },
     ground: () => 0,
     cameraHeight: (x, z) => (tileAt(x, z) ? 0 : wallH),
-    look: lookKey, fog: LK.fog, dressing: { props: dress.props.length, tombs: dress.tombs.length, beams: dress.beams.length, pools: dress.pools.length, glows: dress.glows.length },
+    look: lookKey, fog: LK.fog, bright: cheap, dressing: { props: dress.props.length, tombs: dress.tombs.length, beams: dress.beams.length, pools: dress.pools.length, glows: dress.glows.length },
   };
 }
 

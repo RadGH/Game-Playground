@@ -122,6 +122,12 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
       case 'grave':
         show(`${u.who || 'Someone'}'s grave`, u.level ? `Level ${u.level}` : '', `<p>${u.by ? `Slain by <b>${esc(u.by)}</b>` : 'Fell here'}${u.at ? `, ${ago(u.at)}` : ''}.</p><p class="tiny">Graves fade after an hour.</p>`);
         return true;
+      case 'clue':
+        show(u.name || 'A clue', u.chainName ? `${u.chainName} — clue ${u.step + 1} of ${u.of}` : '', `<p class="note-text">${esc(u.text || '')}</p>${u.hint ? `<p class="quest">${esc(u.hint)}</p>` : ''}${u.fresh ? '<p class="tiny">Added to your treasure trail.</p>' : ''}`);
+        return true;
+      case 'cache':
+        hud.toast(`You dig up the ${u.chainName || 'cache'}!`, 'good'); hud.chat(`Treasure found: ${u.chainName || 'a buried cache'}.`, 'loot');
+        return true;
       case 'campfire':
         if (u.who) hud.toast(`${u.who}'s campfire — you warm your hands.`, 'info');
         else hud.toast('You make camp. The fire will burn for ten minutes.', 'good');

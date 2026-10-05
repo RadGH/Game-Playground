@@ -80,7 +80,7 @@ export async function loadZoneExtras(key) {
     const eid = map.byWorld[key];
     if (eid) vig = await json(new URL(`../../vignettes/placements/${encodeURIComponent(eid)}.json`, base));
   }
-  return { scatter, placements: placements ? placements.placements || [] : [], vignettes: vig ? vig.placements || [] : [], vignetteHash: vig ? vig.terrainHash || null : null };
+  return { scatter, placements: placements ? placements.placements || [] : [], vignettes: vig ? vig.placements || [] : [], vignetteFile: vig || null, vignetteHash: vig ? vig.terrainHash || null : null };
 }
 
 /** The same terrain shape, offset by (ox, oz) into world metres. */

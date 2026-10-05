@@ -19,7 +19,7 @@ import { loadClientTerrain, loadZoneExtras, worldZone, zonesWanted, rectDist, ZO
 import { createTerrainView } from './terrain-view.js';
 import { createScatterView } from './scatter-view.js';
 import { createTownView } from './town-view.js';
-import { createVignetteProps } from './vignette-props.js';
+import { createSiteView } from './site-view.js';
 
 /** Bounds for a zone key when the server sent none: `zXX_YY` in world metres, anything else zone-local. */
 export function zoneBounds(key, worldMetres = true) {
@@ -29,7 +29,7 @@ export function zoneBounds(key, worldMetres = true) {
   return { minX: x, minZ: z, maxX: x + ZONE_M, maxZ: z + ZONE_M };
 }
 
-export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null, onZoneReady = null, opts = {} } = {}) {
+export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null, onZoneReady = null, solids = null, opts = {} } = {}) {
   let horizon = hz0;
   let zones = [];                 // [{ key, bounds }]
   const loaded = new Map();       // key -> { key, T, views[], bounds, ready }
@@ -90,7 +90,8 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
         if (extras.scatter) { const sc = await createScatterView(T, extras.scatter, { quality, avoid: L.town ? L.town.clearings : [] }); if (loaded.get(q.key) !== L) { sc.dispose?.(); return L; } scene.add(sc.group); L.views.push(sc); L.scatter = sc; }
         else if (opts.fallbackDecor) { const d = await opts.fallbackDecor(T, L); if (d && loaded.get(q.key) === L) { scene.add(d.group); L.views.push(d); } }
         const vigOk = !extras.vignetteHash || !base.reader || extras.vignetteHash === base.reader.meta.inputHash;   // made for another bake: the server skips them too
-        if (vigOk && extras.vignettes && extras.vignettes.length) { const vp = await createVignetteProps(T, extras.vignettes, { quality }); if (vp && loaded.get(q.key) === L) { scene.add(vp.group); L.views.push(vp); L.vignettes = vp; } }
+        if (vigOk && extras.vignetteFile) { const sv = await createSiteView(T, extras.vignetteFile, { quality }); if (sv && loaded.get(q.key) === L) { scene.add(sv.group); L.views.push(sv); L.sites = sv; } }
+        if (solids && loaded.get(q.key) === L) solids.add(q.key, [...(L.town?.solids || []), ...(L.sites?.solids || []), ...(L.scatter?.solids || [])]);
       } catch (e) { console.warn('[world] zone extras failed', q.key, e); }
       L.ready = true;
       onZoneReady?.(L);
@@ -104,6 +105,7 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
   function unload(key) {
     const L = loaded.get(key); if (!L) return;
     for (const v of L.views) { scene.remove(v.group); v.dispose?.(); }
+    solids?.remove(key);
     loaded.delete(key);
     syncHorizon();
   }

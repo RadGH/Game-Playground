@@ -14,6 +14,7 @@
 export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCycleTarget, onClearTarget, onChat, onPickGround, getTarget, onRise, onSkill }) {
   const keys = new Set();
   const cam = { yaw: Math.PI, pitch: 0.38, dist: 9, distWant: 9, focus: { x: 0, y: 0, z: 0 }, ready: false };
+  let blocker = null;
   let drag = null, moveGoal = null, chase = null, typing = false, facing = Math.PI, jumpQueued = false;
 
   const isTyping = () => typing || (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName));
@@ -113,11 +114,18 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     const cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
     let d = cam.dist;
     let x = cam.focus.x - Math.sin(cam.yaw) * cp * d, z = cam.focus.z - Math.cos(cam.yaw) * cp * d, y = cam.focus.y + sp * d;
-    // Pull in if the ground is between us and the player; never below the ground at the camera's spot.
-    for (let i = 1; i <= 8; i++) {
-      const t = i / 8, sx = cam.focus.x + (x - cam.focus.x) * t, sz = cam.focus.z + (z - cam.focus.z) * t, sy = cam.focus.y + (y - cam.focus.y) * t;
-      if (heightAt(sx, sz) + 0.4 > sy) { d = Math.max(1.5, d * (t - 0.08)); x = cam.focus.x - Math.sin(cam.yaw) * cp * d; z = cam.focus.z - Math.cos(cam.yaw) * cp * d; y = cam.focus.y + sp * d; break; }
+    // Pull in if the ground — or a building, wall or big rock (setBlocker) — is between us and the player.
+    // In fast (never look through a wall), back out slowly (no popping when you walk past a corner).
+    let hitT = 1;
+    for (let i = 1; i <= 12; i++) {
+      const t = i / 12, sx = cam.focus.x + (x - cam.focus.x) * t, sz = cam.focus.z + (z - cam.focus.z) * t, sy = cam.focus.y + (y - cam.focus.y) * t;
+      if (heightAt(sx, sz) + 0.4 > sy) { hitT = t - 0.08; break; }
     }
+    if (blocker) hitT = Math.min(hitT, blocker(cam.focus.x, cam.focus.y, cam.focus.z, x, y, z) - 0.04);
+    const want = Math.max(1.2, d * Math.max(0, hitT));
+    cam.eff = cam.eff == null ? want : want < cam.eff ? want : cam.eff + (want - cam.eff) * (1 - Math.exp(-dt * 2.5));
+    d = Math.min(d, cam.eff);
+    x = cam.focus.x - Math.sin(cam.yaw) * cp * d; z = cam.focus.z - Math.cos(cam.yaw) * cp * d; y = cam.focus.y + sp * d;
     y = Math.max(y, heightAt(x, z) + 0.6);
     camera.position.set(x, y, z);
     camera.lookAt(cam.focus.x, cam.focus.y, cam.focus.z);
@@ -131,6 +139,8 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     walkTo(x, z) { moveGoal = { x, z }; chase = null; },
     stop() { moveGoal = null; chase = null; },
     setHeightAt(f) { heightAt = f; },
+    /** fn(ax, ay, az, bx, by, bz) -> 0..1, how far along focus->camera the first solid starts (solids.js firstHit). */
+    setBlocker(f) { blocker = f; },
     setFacing(y) { facing = y; },
     get chasing() { return chase; },
     get moveGoal() { return moveGoal; },

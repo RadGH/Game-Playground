@@ -14,6 +14,8 @@ import { buildRock } from '../../../../highdef-3d/js/kit/rocks.js';
 import { foliageMaterials, setWindTime } from './decor.js';
 
 const BUCKET = 128;
+/** Scatter kinds the camera cannot pass (index = SCATTER_KINDS): radius and height at scale 1. */
+const SCATTER_SOLID = { 6: { r: 1.2, h: 1.8 }, 7: { r: 2.1, h: 2.8 } };
 /** scatter kind (terrain-read SCATTER_KINDS order) -> the kit pieces it may be drawn as. */
 export const KIND_ART = [
   { key: 'tree_broadleaf', tree: ['oak', 'beech', 'birch'], scale: 0.62 },
@@ -101,6 +103,9 @@ export async function createScatterView(T, sc, { quality = 'high' } = {}) {
     });
   }
   const buckets = bucketScatter(sc, ox, oz);
+  // big rocks stop the camera (trees do not: a trunk in front of you every few steps would make it twitch)
+  const solids = [];
+  for (let i = 0; i < n; i++) { const k = SCATTER_SOLID[sc.kind[i]]; if (k) solids.push({ x: X[i], z: Z[i], r: k.r * S[i], bottom: Y[i] - 1, top: Y[i] + k.h * S[i] }); }
 
   const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _s = new THREE.Vector3(), _p = new THREE.Vector3(), _up = new THREE.Vector3(0, 1, 0);
   let lastCam = null;
@@ -135,7 +140,7 @@ export async function createScatterView(T, sc, { quality = 'high' } = {}) {
 
   let t = 0, at = 0;
   return {
-    group,
+    group, solids,
     stats: { trees: protos.reduce((a, p, i) => a + (p.type === 'tree' ? counts[i] : 0), 0), items: n, buckets: buckets.length, protos: protos.length },
     update(dt, cam) {
       t += dt; setWindTime(t);

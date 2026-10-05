@@ -30,6 +30,9 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
   const npcs = new Map();        // npc id -> { name, role, at, zone }
   const placeOf = new Map();     // vignette / placement id -> { x, z, r, name, zone }
   const zoneKeyOfE = new Map(zones.map(z => [z.eid, z.key]));
+  // where things stand, for the quest log's markers (play-test 1, P17: "the tracker lacks info to understand the goal")
+  const npcPos = new Map();
+  for (const o of [...(L.objects || []), ...((L.townObjects || []).flat())]) if (o && o.npc && o.npc.id && !npcPos.has(o.npc.id)) npcPos.set(o.npc.id, { x: o.x, z: o.z, r: 4, name: o.name });
   const zoneName = wid => { const z = zones.find(q => q.key === wid); return (z && z.sheet && z.sheet.name) || L.name; };
   for (const z of zones) {
     for (const p of z.placements || []) if (p.id) placeOf.set(p.id, { x: p.x, z: p.z, r: p.radius || 12, name: p.name || p.id, zone: z.key, type: p.type, template: p.template || null });
@@ -60,8 +63,56 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
     for (const d of q.quests || []) {
       const def = { ...d, zone: z.key, eid: z.eid, steps: (d.steps || []).map(st => normalize(st, z.key)) };
       defs.set(d.id, def);
+      const from = npcAt(d.giver);
+      for (const st of def.steps) st.at = round1(stepAt(st, z.key, from));
       if (d.next) { nextOf.set(d.id, d.next); (lockedBy.get(d.next) || lockedBy.set(d.next, new Set()).get(d.next)).add(d.id); }
     }
+  }
+
+  /** The nearest camp of a monster type (in the quest's zone first), or of an encounter id, as a marker. */
+  function campAt({ type = null, encounter = null }, zoneKey, from = null) {
+    let best = null, bd = Infinity;
+    for (const c of L.camps || []) {
+      if (encounter ? c.encounter !== encounter : c.type !== type) continue;
+      const inZone = !zoneKey || !L.zoneOf || L.zoneOf(c.x, c.z) === zoneKey;
+      const d = (inZone ? 0 : 1e7) + (from ? Math.hypot(c.x - from.x, c.z - from.z) : 0);
+      if (d < bd) { bd = d; best = c; }
+    }
+    if (best) return { x: best.x, z: best.z, r: (best.radius || 10) + 10 };
+    const ev = encounter && (L.zoneEvents || []).find(e => e.boss === encounter || e.id === encounter);
+    return ev && Number.isFinite(ev.x) ? { x: ev.x, z: ev.z, r: ev.r || 40, name: ev.name || null } : null;
+  }
+  /** Where step `st` of a quest in `zoneKey` happens: { x, z, r, name? } or null (a marker for the map/tracker). */
+  function stepAt(st, zoneKey, from = null) {
+    switch (st.kind) {
+      case 'kill': return st.nearAt ? { x: st.nearAt.x, z: st.nearAt.z, r: (st.nearAt.r || 12) + NEAR_M * 0.25, name: st.nearAt.name || null } : st.type ? campAt({ type: st.type }, zoneKey, from) : null;
+      case 'collect': return st.from ? campAt({ type: st.from }, zoneKey, from) : null;
+      case 'killOne': return st.encounter ? campAt({ encounter: st.encounter }, null) : null;
+      case 'killRare': return st.rare ? campAt({ encounter: st.rare }, null) : null;
+      case 'visit': case 'escort': case 'reach': return st.place && Number.isFinite(st.place.x) ? { x: st.place.x, z: st.place.z, r: st.place.r || 12, name: st.place.name || null } : null;
+      case 'use': { const p = placeOf.get(st.vignette); return p ? { x: p.x, z: p.z, r: p.r || 12, name: p.name } : null; }
+      case 'talk': case 'deliver': return npcAt(st.npc);
+      case 'clear': { const d = L.doors && L.doors[st.door]; return d ? { x: d.x, z: d.z, r: 8, name: d.name || null } : null; }
+      default: return null;
+    }
+  }
+  /** An NPC's spot: its placed object, else the place its quest file names (`at`: a settlement / site / placement). */
+  function npcAt(id) {
+    if (npcPos.has(id)) return npcPos.get(id);
+    const n = npcs.get(id);
+    if (!n || !n.at) return null;
+    const t = (L.towns || []).find(q => bare(q.name) === bare(n.at));
+    if (t) return { x: t.x, z: t.z, r: Math.min(40, t.r || 40), name: n.name };
+    const s = placeOf.get(n.at) || siteByName(n.at);
+    return s ? { x: s.x, z: s.z, r: 20, name: n.name } : null;
+  }
+  function round1(p) { return p ? { x: Math.round(p.x * 10) / 10, z: Math.round(p.z * 10) / 10, r: Math.round(p.r || 10), ...(p.name ? { name: p.name } : {}) } : null; }
+  /** Where a quest is taken back: its NPC, the vignette it starts from, or a job's board. */
+  function turnInAt(def) {
+    if (def.giverAt) return def.giverAt;
+    if (def.giver) { const p = npcAt(def.giver); if (p) return p; }
+    if (def.startsFrom && def.startsFrom.vignette) { const p = placeOf.get(def.startsFrom.vignette); if (p) return { x: p.x, z: p.z, r: 6, name: def.startsFrom.object || p.name }; }
+    return null;
   }
 
   const stateOf = ch => { ch.quests ||= { active: {}, done: {}, jobs: {} }; ch.quests.active ||= {}; ch.quests.done ||= {}; ch.quests.jobs ||= {}; return ch.quests; };
@@ -82,9 +133,15 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
   }
   const rewardView = (def) => ({ xp: def.reward?.xp || 0, gold: Math.round((def.reward?.gold || 0) * KILL_GOLD(def.level || 1)), item: def.reward?.item?.tier || null });
   function view(ch, def, a = null) {
-    const steps = def.steps.map((st, i) => ({ text: st.text || st.kind, of: st.count || 1, n: a ? (i < a.step ? st.count || 1 : i === a.step ? a.n : 0) : 0, done: !!a && i < a.step }));
-    return { id: def.id, name: def.name, level: def.level || 1, zone: def.zone, giver: def.giver || null, text: def.offer || def.text || '', done: def.done || null,
-      group: def.group || null, step: a ? a.step : 0, steps, ready: !!a && a.step >= def.steps.length, job: !!def.job, reward: rewardView(def), story: def.story || null };
+    // each step carries its marker (`at`: {x, z, r, name?} world metres) and E's `where` line when it has one (P17)
+    const steps = def.steps.map((st, i) => ({ text: st.text || st.kind, of: st.count || 1, n: a ? (i < a.step ? st.count || 1 : i === a.step ? a.n : 0) : 0, done: !!a && i < a.step,
+      kind: st.kind, ...(st.at ? { at: st.at } : {}), ...(st.where ? { where: st.where } : {}) }));
+    const ti = round1(turnInAt(def));
+    const npc = def.giver ? npcs.get(def.giver) : null;
+    return { id: def.id, name: def.name, level: def.level || 1, zone: def.zone, zoneName: zoneName(def.zone), giver: def.giver || null, giverName: (npc && npc.name) || (def.giverAt && def.giverAt.name) || null,
+      text: def.offer || def.text || '', done: def.done || null,
+      group: def.group || null, step: a ? a.step : 0, steps, ready: !!a && a.step >= def.steps.length, job: !!def.job, reward: rewardView(def), story: def.story || null,
+      ...(ti ? { turnIn: ti } : {}) };
   }
 
   // ---- radiant jobs: frames bound to what exists in the giver's zone right now ----
@@ -136,8 +193,10 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       else if (g.kind === 'visit' || g.kind === 'use' || g.kind === 'talk' || g.kind === 'deliver') Object.assign(step, { place: at, kind: g.kind === 'use' ? 'visit' : g.kind === 'deliver' || g.kind === 'talk' ? 'reach' : 'visit' });
       else if (g.kind === 'escort') { const to = bound[String(g.to || '').replace(/[{}]/g, '')]; Object.assign(step, { kind: 'visit', place: to }); }
       else if (g.kind === 'clear') Object.assign(step, { door: at ? at.door : -1, floor: g.floor || null, boss: !!g.boss, zone: zoneKey });
+      step.at = round1(stepAt(step, zoneKey, giver));
       const id = `job:${f.id}:${giver.key}:${Math.floor(t / 60000)}`;
-      list.push({ id, name: subst(f.title), text: subst(f.text), level: Math.round((band[0] + band[1]) / 2), job: true, frame: f.id, giverKey: giver.key, giver: giver.npcId || null, zone: zoneKey, steps: [step], reward: f.reward || {} });
+      list.push({ id, name: subst(f.title), text: subst(f.text), level: Math.round((band[0] + band[1]) / 2), job: true, frame: f.id, giverKey: giver.key, giver: giver.npcId || null, zone: zoneKey, steps: [step], reward: f.reward || {},
+        giverAt: round1({ x: giver.x, z: giver.z, r: 4, name: giver.name }) });
     }
     keep[giver.key] = { at: t, list };
     return list;
@@ -201,6 +260,23 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
         s.active[id] = { step: 0, n: 0, def };
       }
       return { ok: true, quest: view(ch, def, s.active[id]) };
+    },
+    /**
+     * P17: a fight already won counts. Replay `events` (the character's recent quest events — kills, event wins,
+     * clears, uses — newest last) through quest `id`'s steps, in order, as if they happened now. Returns true when it
+     * moved. (Accepting "Brigands at the cart" right after killing the three brigands used to read 0/3.)
+     */
+    credit(ch, id, events = []) {
+      const s = stateOf(ch), a = s.active[id], def = defOf(ch, id);
+      if (!a || !def || !events.length) return false;
+      let moved = false;
+      for (const ev of events) {
+        if (a.step >= def.steps.length) break;
+        const st = def.steps[a.step];
+        if (st.kind === 'collect') continue;            // a drop that was never rolled for this quest is not owed
+        if (matches(st, ev)) { bump(a, def, st.kind === 'clear' ? st.count || 1 : 1); moved = true; }
+      }
+      return moved;
     },
     abandon(ch, id) { const s = stateOf(ch); if (!s.active[id]) return { ok: false, why: 'unknown' }; delete s.active[id]; return { ok: true }; },
     progress(ch, ev) {

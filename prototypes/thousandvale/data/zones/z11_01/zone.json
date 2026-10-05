@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "740c92aa",
+  "bakeVersion": 3,
+  "inputHash": "da08735f",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 11,
@@ -135,6 +135,20 @@
     "x": 1732,
     "z": 560
   },
+  "bridges": [
+    {
+      "a": [
+        233.77,
+        918.23
+      ],
+      "b": [
+        251.18,
+        900.82
+      ],
+      "h": 30.788,
+      "w": 4.5
+    }
+  ],
   "cliff": {
     "road": "road_138",
     "x": [
@@ -151,10 +165,10 @@
   "summary": {
     "zone": "z11_01",
     "province": "Petbeck Basin",
-    "inputHash": "740c92aa",
+    "inputHash": "da08735f",
     "rivers": 3,
     "wetShare": 0.01,
-    "unwalkableShare": 0.044,
+    "unwalkableShare": 0.041,
     "towns": [
       {
         "name": "Hollin Toll",
@@ -216,14 +230,16 @@
     ],
     "roads": 10,
     "bridges": 1,
-    "scatter": 16358,
+    "paths": 8,
+    "pathMetres": 2242,
+    "scatter": 19166,
     "scatterKinds": {
-      "tree_conifer": 9918,
-      "rock_small": 1254,
-      "bush": 2879,
-      "tree_broadleaf": 1006,
-      "rock_large": 1269,
-      "boulder": 32
+      "tree_conifer": 9748,
+      "bush": 4451,
+      "rock_small": 1912,
+      "tree_broadleaf": 1548,
+      "rock_large": 1473,
+      "boulder": 34
     },
     "sites": [
       "settlement(HUB) town Hollin Toll 1728 560 90",
@@ -238,13 +254,13 @@
       "x": 1732,
       "z": 560
     },
-    "placements": 219,
-    "vignettesAvoided": 97
+    "placements": 227,
+    "vignettesAvoided": 678
   },
   "files": {
-    "terrain.bin": 575938,
-    "nav.bin": 40962,
-    "scatter.bin": 130948,
-    "placements.json": 99725
+    "terrain.bin": 578159,
+    "nav.bin": 43963,
+    "scatter.bin": 153412,
+    "placements.json": 154690
   }
 }

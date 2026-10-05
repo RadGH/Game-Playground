@@ -234,8 +234,8 @@ export const SHORTCUTS = [
   { group: 'Moving', keys: [['W A S D', 'Move'], ['Shift', 'Sprint'], ['Space', 'Jump'], ['Drag', 'Turn the camera'], ['Q · E (hold)', 'Turn the camera'], ['Click ground', 'Walk there']] },
   { group: 'Fighting', keys: [['Click', 'Select'], ['Right-click', 'Attack an enemy'], ['Tab', 'Next enemy'], ['F', 'Strike'], ['1 – 6', 'Skills'], ['Esc', 'Clear target / close a window'], ['R', 'Rise after falling']] },
   { group: 'World', keys: [['E', 'Use, talk, open'], ['C', 'Make camp (wilds)']] },
-  { group: 'Windows', keys: [['B', 'Bag'], ['P', 'Party'], ['O', 'Friends'], ['G', 'Guild'], ['M', 'Mail'], ['J', 'Callboard (group finder)'], ['F1 or ?', 'This help']] },
+  { group: 'Windows', keys: [['M', 'Map (wheel zooms, drag pans, right-click drops a pin)'], ['J', 'Journal (quests)'], ['B', 'Bag and gear'], ['K', 'Skills and talents'], ['N', 'Perk forest'], ['P', 'Party menu: party, friends, guild, mail, Group Finder'], ['O', 'Friends tab'], ['G', 'Guild tab'], ['F1 or ?', 'This help']] },
   { group: 'Chat', keys: [['Enter', 'Talk'], ['/', 'Start a command'], ['/w Name', 'Whisper'], ['/r', 'Answer the last whisper'], ['/help', 'All chat commands']] },
 ];
 /** Window hotkeys: KeyboardEvent.code -> panel id. */
-export const PANEL_KEYS = { KeyB: 'bag', KeyP: 'party', KeyO: 'friends', KeyG: 'guild', KeyM: 'mail', KeyJ: 'callboard' };
+export const PANEL_KEYS = { KeyB: 'bag', KeyP: 'party', KeyO: 'friends', KeyG: 'guild', KeyM: 'map', KeyJ: 'journal', KeyK: 'skills', KeyN: 'perks' };

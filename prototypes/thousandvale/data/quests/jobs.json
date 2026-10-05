@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E (M2). Radiant job frames (after Farhold data/job-frames.json). The job board fills each `needs` slot from what EXISTS right now in the zone copy (a frame whose slots cannot all bind is never offered, so nothing points at an empty field). Slot types: monster (a type from the zone's camps; `band: 'zone'` = level within the zone band; `family` filter), vignette, settlement (`same: 'giver'` = the giver's own), fort, farm (a farm placement; `from: 'farm.pests'` = one of that farm template's pests in data/provinces/sites.json), cave (a cave placement), rare (`alive` = currently spawned), dungeon. Text placeholders: {slot.name}, {slot.id}, {zone.name}, {giver.role}. Rewards follow the quest rule: xp = share of a level, gold = multiple of a kill's gold.",
+  "_doc": "Stream E (M2). Radiant job frames (after Farhold data/job-frames.json). The job board fills each `needs` slot from what EXISTS right now in the zone copy (a frame whose slots cannot all bind is never offered, so nothing points at an empty field). Slot types: monster (a type from the zone's camps; `band: 'zone'` = level within the zone band; `family` filter), vignette, settlement (`same: 'giver'` = the giver's own), fort, farm (a farm placement; `from: 'farm.pests'` = one of that farm template's pests in data/provinces/sites.json), cave (a cave placement), rare (`alive` = currently spawned), dungeon. Text placeholders: {slot.name}, {slot.id}, {zone.name}, {giver.role}. Rewards follow the quest rule: xp = share of a level, gold = multiple of a kill's gold. Each frame has a `where` template (same placeholders) for the tracker/journal location line.",
   "rules": {
     "preferUndiscovered": "A vignette/fort/settlement slot picks a place the character has NOT discovered with weight x4 over discovered ones (PLAN §3.4 'prefer undiscovered places').",
     "maxOffered": 4,
@@ -29,7 +29,8 @@
       "reward": {
         "xp": 0.25,
         "gold": 4
-      }
+      },
+      "where": "{beast.name} camps around {zone.name}"
     },
     {
       "id": "walk_it_over",
@@ -51,7 +52,8 @@
       "reward": {
         "xp": 0.25,
         "gold": 4
-      }
+      },
+      "where": "{there.name}"
     },
     {
       "id": "go_and_look",
@@ -73,7 +75,8 @@
       "reward": {
         "xp": 0.3,
         "gold": 3
-      }
+      },
+      "where": "{place.name}, in {zone.name}"
     },
     {
       "id": "road_watch",
@@ -102,7 +105,8 @@
       "reward": {
         "xp": 0.25,
         "gold": 4
-      }
+      },
+      "where": "the road near {there.name}"
     },
     {
       "id": "fort_needs_hands",
@@ -131,7 +135,8 @@
         "xp": 0.3,
         "gold": 5,
         "standing": 4
-      }
+      },
+      "where": "around {fort.name}"
     },
     {
       "id": "bounty_poster",
@@ -157,7 +162,8 @@
           "tier": "uncommon",
           "slot": "any"
         }
-      }
+      },
+      "where": "{rare.name} roams {zone.name}"
     },
     {
       "id": "bring_me_parts",
@@ -181,7 +187,8 @@
       "reward": {
         "xp": 0.25,
         "gold": 4
-      }
+      },
+      "where": "{beast.name} camps around {zone.name}"
     },
     {
       "id": "lost_thing",
@@ -203,7 +210,8 @@
       "reward": {
         "xp": 0.3,
         "gold": 4
-      }
+      },
+      "where": "{place.name}, in {zone.name}"
     },
     {
       "id": "checking_in",
@@ -229,7 +237,8 @@
       "reward": {
         "xp": 0.2,
         "gold": 3
-      }
+      },
+      "where": "{there.name}"
     },
     {
       "id": "down_the_door",
@@ -255,7 +264,8 @@
           "tier": "uncommon",
           "slot": "any"
         }
-      }
+      },
+      "where": "{dungeon.name}, the dungeon door in {zone.name}"
     },
     {
       "id": "escort_the_cart",
@@ -282,7 +292,8 @@
       "reward": {
         "xp": 0.35,
         "gold": 6
-      }
+      },
+      "where": "the road from {home.name} to {there.name}"
     },
     {
       "id": "night_watch",
@@ -295,7 +306,7 @@
           "band": "zone"
         }
       ],
-      "title": "Night watch",
+      "title": "Night watch: {beast.name}",
       "text": "{beast.name} come in after dark. Stand watch until dawn and see them off.",
       "goal": {
         "kind": "kill",
@@ -306,7 +317,8 @@
       "reward": {
         "xp": 0.25,
         "gold": 4
-      }
+      },
+      "where": "{beast.name} camps around {zone.name}, after dark"
     },
     {
       "id": "clear_the_camp",
@@ -331,7 +343,8 @@
       "reward": {
         "xp": 0.35,
         "gold": 6
-      }
+      },
+      "where": "a {foe.name} camp in {zone.name}"
     },
     {
       "id": "supply_the_fort",
@@ -354,7 +367,8 @@
         "xp": 0.25,
         "gold": 5,
         "standing": 3
-      }
+      },
+      "where": "{fort.name}"
     },
     {
       "id": "map_the_wild",
@@ -381,7 +395,8 @@
       "reward": {
         "xp": 0.35,
         "gold": 3
-      }
+      },
+      "where": "{place.name}, in {zone.name}"
     },
     {
       "id": "herb_run",
@@ -403,7 +418,8 @@
       "reward": {
         "xp": 0.25,
         "gold": 4
-      }
+      },
+      "where": "around {place.name}"
     },
     {
       "id": "cull_the_big_one",
@@ -431,7 +447,8 @@
           "tier": "common",
           "slot": "any"
         }
-      }
+      },
+      "where": "{beast.name} camps around {zone.name}"
     },
     {
       "id": "message_to_the_fort",
@@ -453,7 +470,8 @@
       "reward": {
         "xp": 0.2,
         "gold": 4
-      }
+      },
+      "where": "{fort.name}"
     },
     {
       "id": "pest_control",
@@ -481,7 +499,8 @@
       "reward": {
         "xp": 0.25,
         "gold": 4
-      }
+      },
+      "where": "around {there.name}"
     },
     {
       "id": "help_a_neighbour",
@@ -510,7 +529,8 @@
         "xp": 0.3,
         "gold": 5,
         "standing": 5
-      }
+      },
+      "where": "around {there.name}"
     },
     {
       "id": "pests_at_the_farm",
@@ -538,7 +558,8 @@
       "reward": {
         "xp": 0.3,
         "gold": 5
-      }
+      },
+      "where": "around {farm.name}"
     },
     {
       "id": "harvest_hands",
@@ -566,7 +587,8 @@
       "reward": {
         "xp": 0.3,
         "gold": 6
-      }
+      },
+      "where": "around {farm.name}"
     },
     {
       "id": "smoke_out_the_cave",
@@ -592,7 +614,8 @@
           "tier": "uncommon",
           "slot": "any"
         }
-      }
+      },
+      "where": "{cave.name}, in {zone.name}"
     }
   ]
 }

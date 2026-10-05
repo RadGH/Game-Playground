@@ -164,6 +164,7 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
     if (!e || !(amount > 0)) return;
     e.playerDamage = (e.playerDamage || 0) + amount;          // Farhold's own field, kept for `kill`
     if (by && by.id != null) {
+      e.lastHitBy = by.owner?.id ?? by.id;       // the killing blow's owner (perk-rules.js Momentum, Spoils)
       (e.damageBy || (e.damageBy = new Map())).set(by.id, (e.damageBy.get(by.id) || 0) + amount);
       threatFromDamage(e, by, amount);
     }
@@ -174,14 +175,17 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
    * actors.js `land` (line ~1493), server half. `by` is the attacking entity (for credit/threat).
    * Drawing (impact, sparks, recoil, hit-stop, shake) becomes `fx` events.
    */
-  field.land = (e, result, { strike = null, fromX = 0, fromZ = 0, element = 'physical', share = 1, by = null } = {}) => {
+  field.land = (e, result, { strike = null, fromX = 0, fromZ = 0, element = 'physical', share = 1, by = null, skill = null } = {}) => {
     credit(e, by, result.amount);
     e.struckAt = field.clock;
     if (e.state !== 'chase') e.state = 'chase';
     if (!(result.amount > 0) && !result.blocked && !result.noDamage) return;
     const dx = e.x - fromX, dz = e.z - fromZ;
     const len = Math.hypot(dx, dz) || 1;
-    if (!strike) return;
+    // play-test 1 P20: every landed hit has an impact the client can draw — Farhold drew the spark
+    // only for a strike with a shape, so a skill with no knock landed with nothing to see
+    const impact = { t: 'fx', kind: 'impact', id: e.id, crit: !!result.crit, killed: !!result.dead, strike: strike?.key || null, el: element !== 'physical' ? element : undefined, ab: typeof skill === 'string' ? skill : undefined };
+    if (!strike) { field.emit(impact); return; }
     const push = pushFor(e, (strike.push || 0) * share);
     if (push > 0.01) {
       const span = COMBAT_FEEL.knockbackSeconds;
@@ -196,7 +200,7 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
       e.anim = 'hit';
       if (stagger > 0.4) field.emit({ t: 'fx', kind: 'status', id: e.id, status: 'stun', on: true });
     }
-    field.emit({ t: 'fx', kind: 'impact', id: e.id, crit: !!result.crit, killed: !!result.dead, strike: strike.key || null });
+    field.emit(impact);
   };
 
   /** actors.js `sunder` */
@@ -215,9 +219,9 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
   };
 
   /** One reported hit, for the client's numbers and the log. */
-  function report(by, e, result, kind) {
+  function report(by, e, result, kind, skill = null) {
     field.emit({
-      t: 'hit', src: by?.id ?? null, dst: e.id, amt: result.amount, crit: !!result.crit,
+      t: 'hit', src: by?.id ?? null, dst: e.id, amt: result.amount, crit: !!result.crit, ab: typeof skill === 'string' ? skill : undefined,
       kind, element: result.element || 'physical', dodged: !!result.dodged, blocked: result.blocked || 0,
       absorbed: result.absorbed || 0, hp: Math.max(0, Math.round(e.hp)), dead: !!result.dead,
     });
@@ -303,10 +307,10 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
         multiplier: mult, element, skill, applyStatus: applyFn,
         hand: which, pen: shape?.pen || 0, rules, crowd, noDamage,
       });
-      field.land(e, result, { strike: knock || shape, fromX: from.x, fromZ: from.z, element, share: power, by: unit });
+      field.land(e, result, { strike: knock || shape, fromX: from.x, fromZ: from.z, element, share: power, by: unit, skill });
       if (traits.armourBreak && result.amount > 0) field.sunder(e, traits.armourBreak);
       if (result.amount > 0 && (behind || (traits.bleed && shape?.key === 'cleave'))) field.bleed(e, result.amount);
-      report(unit, e, result, kind);
+      report(unit, e, result, kind, skill);
       onHit?.(e, result);
       hits.push({ enemy: e, result });
       if (result.dead) field.kill(e);
@@ -330,8 +334,8 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
       const d = Math.hypot(e.x - x, e.z - z);
       const near = 1 - (1 - falloff) * Math.min(1, d / Math.max(0.001, radius));
       const result = field.rpg.strike(attacker, e, field.rng, { multiplier: near * mult, element, skill, applyStatus: applyFn, proc, rules, crowd, noDamage });
-      field.land(e, result, { strike: shape, fromX: from ? from.x : x, fromZ: from ? from.z : z, element, share: near, by: attacker });
-      report(attacker, e, result, kind);
+      field.land(e, result, { strike: shape, fromX: from ? from.x : x, fromZ: from ? from.z : z, element, share: near, by: attacker, skill });
+      report(attacker, e, result, kind, skill);
       onHit?.(e, result);
       hits.push({ enemy: e, result });
       if (result.dead) field.kill(e);
@@ -361,8 +365,8 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
         multiplier: (opts.power ?? 1) * share, element: opts.element || 'physical', skill: opts.skill || null,
         applyStatus: opts.applyStatus || null, rules: opts.rules || null, noDamage: !!opts.noDamage, proc: !!opts.proc, crowd,
       });
-      field.land(e, result, { strike: opts.knock || null, fromX: px, fromZ: pz, element: opts.element || 'physical', by: attacker });
-      report(attacker, e, result, opts.kind || 'line');
+      field.land(e, result, { strike: opts.knock || null, fromX: px, fromZ: pz, element: opts.element || 'physical', by: attacker, skill: opts.skill || null });
+      report(attacker, e, result, opts.kind || 'line', opts.skill || null);
       opts.onHit?.(e, result);
       hits.push({ enemy: e, result });
       if (result.dead) field.kill(e);

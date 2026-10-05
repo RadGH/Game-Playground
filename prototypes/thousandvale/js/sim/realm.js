@@ -137,13 +137,46 @@ export function zoneEncounterCamps(terrain, ids, info = {}, zoneSheetId = null) 
  * settlement, its named encounters (elite, rares, event boss) at their sites, its vignettes.
  * Returns { key, name, terrain, towns, doors, camps, objects (wilds), townObjects[i], waystones, sheet, copyCap, zoneOf, zones, gate }.
  */
-export function buildLayout({ key, name = null, terrain, zones = [], encounterInfo = {}, copyCap = 300, vignetteContent = null, townRadius = null, starter = null, rares = null, jobs = null, schedules = null, horizon = null }) {
+/** No door waystone of ours within this of one already standing (E's door stones sit ~42 m off the door). */
+export const WAYSTONE_DOOR_M = 90;
+/** Two waystones closer than this are one waystone (the first kept: E's placed, then towns, then doors). */
+export const WAYSTONE_DEDUPE_M = 60;
+const GENERIC_DOOR = /^(barrow|dungeon) entrance$/i;
+/**
+ * P14: collapse waystones standing within WAYSTONE_DEDUPE_M of each other (in place; the earlier one wins) and
+ * name a door's stone after its dungeon instead of sixteen identical "Barrow entrance" rows in the travel list.
+ * Returns { droppedKey: keptKey } so a character who discovered a dropped stone still knows the kept one.
+ */
+export function dedupeWaystones(waystones, doors = []) {
+  const aliases = {};
+  for (let i = 0; i < waystones.length; i++) {
+    const w = waystones[i];
+    for (let j = waystones.length - 1; j > i; j--) {
+      const v = waystones[j];
+      if (Math.hypot(v.x - w.x, v.z - w.z) >= WAYSTONE_DEDUPE_M) continue;
+      aliases[v.key] = w.key;
+      for (const [k, to] of Object.entries(aliases)) if (to === v.key) aliases[k] = w.key;
+      if (w.town === undefined && v.town !== undefined) w.town = v.town;
+      waystones.splice(j, 1);
+    }
+  }
+  for (const w of waystones) {
+    if (!GENERIC_DOOR.test(w.name || '')) continue;
+    const d = doors.filter(q => q.kind !== 'cave').sort((a, b) => Math.hypot(a.x - w.x, a.z - w.z) - Math.hypot(b.x - w.x, b.z - w.z))[0];
+    const dn = d && Math.hypot(d.x - w.x, d.z - w.z) < WAYSTONE_DOOR_M * 1.5 && d.sheet && d.sheet.dungeon && d.sheet.dungeon.name;
+    if (dn) w.name = dn;
+    else if (d && d.sheet && d.sheet.name) w.name = d.sheet.name + ' barrow';
+  }
+  return aliases;
+}
+
+export function buildLayout({ key, name = null, terrain, zones = [], encounterInfo = {}, copyCap = 300, vignetteContent = null, townRadius = null, starter = null, rares = null, jobs = null, schedules = null, horizon = null, travel = null }) {
   const allSites = terrain.reader?.meta?.sites || [];
   const multi = zones.length > 1 || allSites.some(s => s.zone);
   const zoneList = zones.length ? zones : [{ key, sheet: null }];
   for (const z of zoneList) if (!z.bounds) z.bounds = multi ? (terrain.zones || []).find(q => q.key === z.key)?.bounds : terrain.bounds;
   const sitesOf = z => (multi ? allSites.filter(s => s.zone === z.key) : allSites);
-  const towns = [], doors = [], camps = [], objects = [], placedWaystones = [], zoneEvents = [];
+  const towns = [], doors = [], camps = [], objects = [], placedWaystones = [], zoneEvents = [], folk = [];
   for (const z of zoneList) {
     const sites = sitesOf(z);
     const zt = { ...terrain, reader: { ...(terrain.reader || {}), meta: { ...(terrain.reader?.meta || {}), sites } }, spawn: z.bounds ? { x: (z.bounds.minX + z.bounds.maxX) / 2, z: (z.bounds.minZ + z.bounds.maxZ) / 2 } : terrain.spawn };
@@ -167,7 +200,7 @@ export function buildLayout({ key, name = null, terrain, zones = [], encounterIn
     let placed = null;
     if (z.vignettes && vignetteContent) {
       placed = placementContent(z.vignettes.placements, { ...z.vignettes, band: (z.sheet && z.sheet.band) || [1, 6], zone: z.key, encounterInfo, warband: (z.sheet && z.sheet.warband) || null, archetype: (z.sheet && z.sheet.archetype) || null });
-      camps.push(...placed.camps); objects.push(...placed.objects); doors.push(...placed.doors); placedWaystones.push(...placed.waystones);
+      camps.push(...placed.camps); objects.push(...placed.objects); doors.push(...placed.doors); placedWaystones.push(...placed.waystones); folk.push(...(placed.folk || []));
     }
     // the sheet's camp ring round the main settlement only where E placed no camps (the door guard stays)
     if (z.sheet || !multi) { const ring0 = wildsCamps(zt, ring, door || ring, z.sheet && z.sheet.camps); camps.push(...(placed && placed.camped ? ring0.slice(-1) : ring0)); }
@@ -191,7 +224,10 @@ export function buildLayout({ key, name = null, terrain, zones = [], encounterIn
   for (const w of placedWaystones) { const ti = townAt(w); waystones.push({ ...w, ...(ti >= 0 ? { town: ti } : {}) }); }
   const near = (p, r) => waystones.some(w => Math.hypot(w.x - p.x, w.z - p.z) < r);
   towns.forEach((t, i) => { if (!waystones.some(w => w.town === i)) waystones.push({ key: `ws:${key}:t${i}`, name: t.name, x: t.x + 6, z: t.z + 6, town: i }); });
-  doors.forEach((d, i) => { if (d.kind === 'cave' || near(d, 40)) return; const p = walkableNear(terrain, d.x, d.z, 10, 2.2); waystones.push({ key: `ws:${key}:d${i}`, name: d.name, x: p.x, z: p.z, door: i }); });
+  // a door's waystone only where none stands within WAYSTONE_DOOR_M (E places theirs ~42 m off the door: the old 40 m
+  // test missed it and every dungeon got two "Barrow entrance" stones a stone's throw apart — play-test 1, P14)
+  doors.forEach((d, i) => { if (d.kind === 'cave' || near(d, WAYSTONE_DOOR_M)) return; const p = walkableNear(terrain, d.x, d.z, 10, 2.2); waystones.push({ key: `ws:${key}:d${i}`, name: d.name, x: p.x, z: p.z, door: i }); });
+  const aliases = dedupeWaystones(waystones, doors);
   // objects that stand inside a hub town belong to that town's room (the wilds copies cannot be seen from inside)
   const townObjects = towns.map(() => []);
   const wildObjects = [];
@@ -208,5 +244,5 @@ export function buildLayout({ key, name = null, terrain, zones = [], encounterIn
     if (!st) return null;
     return { kind: st.kind || t.kind, buildings: pl.buildings.filter(b => b.town === st.id), square: pl.squares.find(q => q.town === st.id) || null };
   });
-  return { key, name: name || main.name, terrain, towns, townPlans, schedules, horizon, doors, camps, objects: wildObjects, townObjects, waystones, zoneEvents, rares, jobs, sheet, copyCap, zoneOf, zones: zoneList, gate: townGate(terrain, main, doors.find(d => d.kind !== 'cave') || { x: main.x + 100, z: main.z }) };
+  return { key, name: name || main.name, terrain, towns, townPlans, schedules, horizon, doors, camps, objects: wildObjects, townObjects, waystones, waystoneAliases: aliases, zoneEvents, travel, folk, rares, jobs, sheet, copyCap, zoneOf, zones: zoneList, gate: townGate(terrain, main, doors.find(d => d.kind !== 'cave') || { x: main.x + 100, z: main.z }) };
 }

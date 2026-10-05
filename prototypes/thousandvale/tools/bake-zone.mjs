@@ -30,17 +30,26 @@ import { hashStr, clamp, smoothstep, makeNoise2D, fbm, subSeed } from '../../../
 import { planTown, overlaps, footprintOf, cultureFor } from '../../../proctown/js/townplan.js';
 import { FORMAT_VERSION, createTerrain, SCATTER_KINDS, NAV } from '../js/rules/terrain-read.js';
 import { encodeTerrain } from './bake-test-zone.mjs';
-import { decodeMacro, makeRefiner, heightRange, RIVER_WIDTH, RIVER_DEPTH } from './lib/world-core.mjs';
+import { decodeMacro, makeRefiner, bicubic, heightRange, RIVER_WIDTH, RIVER_DEPTH, crossingsOf, bridgeFor, DECK_LAND } from './lib/world-core.mjs';
 import { addZoneSites, TOWN_RADIUS } from './lib/zone-sites.mjs';
 import { encodeScatter, encodeNav, sameLayerFile } from './lib/zone-layers.mjs';
 import { carveTheme, inFen, shoreDistance, cutCliff } from './lib/zone-theme.mjs';
+import { layPaths } from './lib/zone-paths.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const WORLD_DIR = join(HERE, '..', 'data', 'world');
 const ZONES_DIR = join(HERE, '..', 'data', 'zones');
-export const ZONE_BAKE_VERSION = 2;
+export const ZONE_BAKE_VERSION = 3;   // 3: play-test 1 (rivers, bridges, lakes, skirt, paths, scatter)
 export const M1_ZONE = 'z12_02';          // the starter zone (world.json `starter`; Torborhold, Petbeck Basin)
 const SIZE = 1025, STEP = 2, ZM = 2048;
+/**
+ * Apron: samples computed beyond each zone edge so neighbour work (the wet skirt's rings, rock on steep ground)
+ * sees what the neighbour sees (the skirt needs 1, the bridge grading reads world data only). Everything in the apron
+ * is world-pure; 6 keeps room for wider neighbour work.
+ */
+const AP = 6;
+/** The skirt ring's ground is raised to at least surface + this, so the water sheet's edge is always under ground (P21). */
+const SKIRT_BURY = 0.15;
 /** Proctown size by settlement kind. */
 const TOWN_SIZE = { hamlet: 1, village: 2, town: 3, city: 4, capital: 5 };
 const ROAD_SURFACE_ID = BIOMES.length;    // an extra entry appended to meta.biomes: painted road / street
@@ -133,9 +142,9 @@ export function bakeZone(id, opts = {}) {
   const zone = W.zones.find(z => z.id === id);
   if (!zone) throw new Error('no zone ' + id);
   const ox = zone.origin.x, oz = zone.origin.z, M = m.macroMetres;
-  const G = SIZE + 2, NG = G * G;                 // grid with a one-sample apron all round
-  const wxOf = gi => ox + (gi - 1) * STEP, wzOf = gj => oz + (gj - 1) * STEP;
-  const gIdx = (x, z) => (clamp(Math.round(z / STEP), -1, SIZE) + 1) * G + clamp(Math.round(x / STEP), -1, SIZE) + 1;   // zone metres → apron grid
+  const G = SIZE + 2 * AP, NG = G * G;            // grid with an AP-sample apron all round
+  const wxOf = gi => ox + (gi - AP) * STEP, wzOf = gj => oz + (gj - AP) * STEP;
+  const gIdx = (x, z) => (clamp(Math.round(z / STEP), -AP, SIZE - 1 + AP) + AP) * G + clamp(Math.round(x / STEP), -AP, SIZE - 1 + AP) + AP;   // zone metres → apron grid
   const province = W.provinces.find(p => p.id === zone.province) || null;
 
   // 1. base ground at world coordinates
@@ -145,11 +154,25 @@ export function bakeZone(id, opts = {}) {
   // 2. sea and lakes (levels from the world bake)
   const waterTop = new Float32Array(NG).fill(NaN), waterKind = new Uint8Array(NG);
   const lakeLevel = new Map(); for (const l of W.lakes) for (const c of l.cells) lakeLevel.set(c, l.level);
+  // a world lake is the 0.5 contour of a bicubic "lake-ness" field over its macro cells (it used to be the cells
+  // themselves: a one-cell lake was a 128 m square pit with vertical sides — P21's square water), carved as a bowl
+  const LAKE_NOISE = makeNoise2D(subSeed(W.seed, 'thousandvale-lake-shores'));
+  const lakeField = new Float32Array(m.width * m.height); for (let q = 0; q < lakeField.length; q++) lakeField[q] = m.water[q] === 2 ? 1 : 0;
   for (let j = 0; j < G; j++) for (let i = 0; i < G; i++) {
     const k = j * G + i, wx = wxOf(i), wz = wzOf(j);
     const mi = clamp(Math.round(wz / M), 0, m.height - 1) * m.width + clamp(Math.round(wx / M), 0, m.width - 1);
-    if (m.water[mi] === 1 || ground[k] < 0) { waterTop[k] = 0; waterKind[k] = 1; }
-    else if (m.water[mi] === 2) { const lv = lakeLevel.get(mi) ?? 0; waterTop[k] = lv; waterKind[k] = 2; ground[k] = Math.min(ground[k], lv - 2.5); }
+    if (m.water[mi] === 1 || ground[k] < 0) { waterTop[k] = 0; waterKind[k] = 1; continue; }
+    const cx = Math.round(wx / M), cz = Math.round(wz / M);
+    let near = -1, nd = Infinity;
+    for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) {
+      const x = cx + dx, z = cz + dz; if (x < 0 || z < 0 || x >= m.width || z >= m.height) continue;
+      const q = z * m.width + x; if (m.water[q] !== 2) continue;
+      const d = Math.hypot(x * M - wx, z * M - wz); if (d < nd) { nd = d; near = q; }
+    }
+    if (near < 0) continue;
+    const v = bicubic(m, lakeField, wx / M, wz / M) + (fbm(LAKE_NOISE, wx / 90, wz / 90, { octaves: 3 }) - 0.5) * 0.35, lv = lakeLevel.get(near) ?? 0;
+    if (v >= 0.5) { waterTop[k] = lv; waterKind[k] = 2; ground[k] = Math.min(ground[k], lv - 0.15 - 2.5 * smoothstep(0.5, 0.95, v)); }
+    else if (v > 0.3) { const lip = lv + 0.4 * smoothstep(0.5, 0.42, v); ground[k] = lip + (ground[k] - lip) * smoothstep(0.42, 0.3, v); }
   }
   const wetAt = (x, z) => !Number.isNaN(waterTop[gIdx(x, z)]);
 
@@ -224,6 +247,9 @@ export function bakeZone(id, opts = {}) {
     for (let q = 0; q <= n; q++) { const x = s.x + (best[0] - s.x) * q / n, z = s.z + (best[1] - s.z) * q / n; pts.push([x, z, 0]); }
     const g = pts.map(([x, z]) => ref.baseGround(ox + x, oz + z));
     pts.forEach((p, k) => { let sum = 0, c = 0; for (let q = Math.max(0, k - 3); q <= Math.min(pts.length - 1, k + 3); q++) { sum += g[q]; c++; } p[2] = sum / c; });
+    // meet the road at the road's own graded height (a spur ended up to 6 m off it, a step at the junction)
+    const miss = best[2] - pts[n][2];
+    pts.forEach((p, k) => { p[2] += miss * smoothstep(0, 1, k / n); });
     roads.push({ id: `spur_${slug(s.name)}`, cls: 'trail', width: 3.5, pts, spur: true });
   }
   // grade: ease the ground toward the road's height across its width + a shoulder (never inside a town)
@@ -232,10 +258,10 @@ export function bakeZone(id, opts = {}) {
   for (const r of roads) {
     const half = r.width / 2, shoulder = 4, reach = half + shoulder;
     const xs = r.pts.map(p => p[0]), zs = r.pts.map(p => p[1]);
-    const i0 = Math.max(0, Math.floor((Math.min(...xs) - reach) / STEP) + 1), i1 = Math.min(G - 1, Math.ceil((Math.max(...xs) + reach) / STEP) + 1);
-    const j0 = Math.max(0, Math.floor((Math.min(...zs) - reach) / STEP) + 1), j1 = Math.min(G - 1, Math.ceil((Math.max(...zs) + reach) / STEP) + 1);
+    const i0 = Math.max(0, Math.floor((Math.min(...xs) - reach) / STEP) + AP), i1 = Math.min(G - 1, Math.ceil((Math.max(...xs) + reach) / STEP) + AP);
+    const j0 = Math.max(0, Math.floor((Math.min(...zs) - reach) / STEP) + AP), j1 = Math.min(G - 1, Math.ceil((Math.max(...zs) + reach) / STEP) + AP);
     for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
-      const x = (i - 1) * STEP, z = (j - 1) * STEP;
+      const x = (i - AP) * STEP, z = (j - AP) * STEP;
       if (inTown(x, z, -2)) continue;
       const [d, k, t] = polyDist(r.pts, x, z);
       if (d > reach) continue;
@@ -247,8 +273,8 @@ export function bakeZone(id, opts = {}) {
   }
 
   // 4b. theme terrain (data/world/zone-themes.json): the water E's archetype needs, off towns and roads, inside the edges
-  const cliff = THEMES[id]?.cliff ? cutCliff({ G, STEP, ZM, ground, roads, polyDist }, THEMES[id].cliff) : null;
-  const theme = THEMES[id]?.theme ? carveTheme({ id, theme: THEMES[id], G, STEP, ZM, ground, waterTop, waterKind, settlements: placed, roads, polyDist, hub: placed.find(s => s.hub) || placed[0] || null }) : null;
+  const cliff = THEMES[id]?.cliff ? cutCliff({ G, AP, STEP, ZM, ground, roads, polyDist }, THEMES[id].cliff) : null;
+  const theme = THEMES[id]?.theme ? carveTheme({ id, theme: THEMES[id], G, AP, STEP, ZM, ground, waterTop, waterKind, settlements: placed, roads, polyDist, hub: placed.find(s => s.hub) || placed[0] || null }) : null;
 
   // 5. level and plan each placed settlement (proctown — the one planner Farhold uses)
   const plans = [];
@@ -256,8 +282,8 @@ export function bakeZone(id, opts = {}) {
     let sum = 0, n = 0;
     for (let dz = -s.radius; dz <= s.radius; dz += 4) for (let dx = -s.radius; dx <= s.radius; dx += 4) if (dx * dx + dz * dz <= s.radius ** 2) { sum += ground[gIdx(s.x + dx, s.z + dz)]; n++; }
     const mean = sum / n, R = s.radius;
-    for (let j = 1; j <= SIZE; j++) for (let i = 1; i <= SIZE; i++) {
-      const x = (i - 1) * STEP, z = (j - 1) * STEP, d = Math.hypot(x - s.x, z - s.z);
+    for (let j = AP; j < SIZE + AP; j++) for (let i = AP; i < SIZE + AP; i++) {
+      const x = (i - AP) * STEP, z = (j - AP) * STEP, d = Math.hypot(x - s.x, z - s.z);
       if (d > R + LEVEL_EASE) continue;
       const k = j * G + i, w = d <= R ? 0.85 : 0.85 * (1 - smoothstep(0, 1, (d - R) / LEVEL_EASE));
       if (Number.isNaN(waterTop[k])) ground[k] += (mean + (ground[k] - mean) * 0.15 - ground[k]) * w;
@@ -278,10 +304,19 @@ export function bakeZone(id, opts = {}) {
     plans.push(plan);
   }
 
-  // 6. rivers: the world bake's polylines (surfaces fixed there), carved where they come near
+  // 6. rivers: the world bake's polylines (surfaces fixed there), carved where they come near.
+  // Play-test 1 (P21): the cross-section is ONE continuous profile of the distance to the NEAREST river line, applied
+  // once per sample (it used to be applied per segment with min(), which only ever lowered ground, so a river running
+  // above its floodplain had banks lower than its own water and the sheet hung over dry ground):
+  //   d ≤ half        channel: surface − (depth + 0.3) · (1 − (d/half)²)  → exactly the surface at the edge (d = half)
+  //   half … +BANK    bank:    rises to surface + BANK_LIP (raised where the land was low, cut where it was high)
+  //   … reach         eases back to the land
+  // So the waterline is the curve d = half — the shoreline follows the river's smooth line, not the 2 m grid.
+  const BANK = 3, BANK_LIP = 0.4;
   const riversUsed = [];
+  const nOver = new Float32Array(NG).fill(Infinity), nD = new Float32Array(NG), nSurf = new Float32Array(NG), nCls = new Uint8Array(NG);
   for (const r of W.rivers) {
-    const rx0 = ox - STEP - 80, rz0 = oz - STEP - 80, rx1 = ox + ZM + STEP + 80, rz1 = oz + ZM + STEP + 80;
+    const rx0 = ox - AP * STEP - 80, rz0 = oz - AP * STEP - 80, rx1 = ox + ZM + AP * STEP + 80, rz1 = oz + ZM + AP * STEP + 80;
     if (r.bbox[2] < rx0 || r.bbox[0] > rx1 || r.bbox[3] < rz0 || r.bbox[1] > rz1) continue;
     const pts = r.pts; let used = false;
     for (let k = 0; k < pts.length - 1; k++) {
@@ -289,36 +324,127 @@ export function bakeZone(id, opts = {}) {
       if (Math.max(a[0], b[0]) < rx0 || Math.min(a[0], b[0]) > rx1 || Math.max(a[1], b[1]) < rz0 || Math.min(a[1], b[1]) > rz1) continue;
       used = true;
       const half = RIVER_WIDTH[cls] / 2, reach = half + 10 + cls * 6;
-      const i0 = Math.max(0, Math.floor((Math.min(a[0], b[0]) - reach - ox) / STEP) + 1), i1 = Math.min(G - 1, Math.ceil((Math.max(a[0], b[0]) + reach - ox) / STEP) + 1);
-      const j0 = Math.max(0, Math.floor((Math.min(a[1], b[1]) - reach - oz) / STEP) + 1), j1 = Math.min(G - 1, Math.ceil((Math.max(a[1], b[1]) + reach - oz) / STEP) + 1);
+      const i0 = Math.max(0, Math.floor((Math.min(a[0], b[0]) - reach - ox) / STEP) + AP), i1 = Math.min(G - 1, Math.ceil((Math.max(a[0], b[0]) + reach - ox) / STEP) + AP);
+      const j0 = Math.max(0, Math.floor((Math.min(a[1], b[1]) - reach - oz) / STEP) + AP), j1 = Math.min(G - 1, Math.ceil((Math.max(a[1], b[1]) + reach - oz) / STEP) + AP);
       const dx = b[0] - a[0], dz = b[1] - a[1], L2 = dx * dx + dz * dz || 1;
       for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
         const wx = wxOf(i), wz = wzOf(j);
         const t = clamp(((wx - a[0]) * dx + (wz - a[1]) * dz) / L2, 0, 1);
         const d = Math.hypot(wx - (a[0] + dx * t), wz - (a[1] + dz * t));
         if (d > reach) continue;
-        const k2 = j * G + i, surface = a[2] + (b[2] - a[2]) * t;
-        if (d <= half) {
-          const depth = RIVER_DEPTH[cls] * (1 - (d / half) ** 2) + 0.3;
-          ground[k2] = Math.min(ground[k2], surface - depth);
-          if (!(waterTop[k2] >= surface)) { waterTop[k2] = Number.isNaN(waterTop[k2]) ? surface : Math.max(waterTop[k2], surface); if (waterKind[k2] !== 1) waterKind[k2] = 3; }
-        } else {
-          const tt = smoothstep(0, 1, (d - half) / (reach - half)), lip = surface + 0.25;
-          ground[k2] = Math.min(ground[k2], lip + (Math.max(lip, ground[k2]) - lip) * tt);
-        }
+        const k2 = j * G + i, over = d - half;
+        if (over < nOver[k2]) { nOver[k2] = over; nD[k2] = d; nSurf[k2] = a[2] + (b[2] - a[2]) * t; nCls[k2] = cls; }
       }
     }
     if (used) riversUsed.push({ id: r.id, name: r.name });
   }
+  for (let k2 = 0; k2 < NG; k2++) {
+    if (nOver[k2] === Infinity) continue;
+    const cls = nCls[k2], half = RIVER_WIDTH[cls] / 2, reach = half + 10 + cls * 6, d = nD[k2], surface = nSurf[k2];
+    if (d <= half) {
+      const depth = (RIVER_DEPTH[cls] + 0.3) * (1 - (d / half) ** 2);
+      // the river owns its bed: a town levelled below the river's surface (or any hollow) no longer leaves a 1.7 m
+      // hole in a stream that should be wadeable; where a lake or the sea is already here, only ever deepen
+      ground[k2] = Number.isNaN(waterTop[k2]) ? surface - depth : Math.min(ground[k2], surface - depth);
+      if (!(waterTop[k2] >= surface)) { waterTop[k2] = Number.isNaN(waterTop[k2]) ? surface : Math.max(waterTop[k2], surface); if (waterKind[k2] !== 1) waterKind[k2] = 3; }
+    } else if (Number.isNaN(waterTop[k2]) || waterTop[k2] <= ground[k2]) {
+      const lip = surface + BANK_LIP * smoothstep(0, 1, (d - half) / BANK);
+      const tt = smoothstep(0, 1, (d - half - BANK) / (reach - half - BANK));
+      ground[k2] = lip + (ground[k2] - lip) * tt;
+    }
+  }
 
-  // 7. one dry ring outside every wet edge carries the surface (a sheet of wet triangles reaches the bank)
+  // 6b. bridges: every world bridge whose deck or approaches reach this zone (+ crossings on this zone's own spurs).
+  // The road is graded to EXACTLY the deck height at both abutments and eased back to the road over `ramp` metres,
+  // so the deck meets the road at both ends (play-test 1, P24: one deck floated metres above a road the river carve
+  // had cut down, and spurs crossed rivers with no bridge at all). World-pure for world bridges (edges still agree).
+  const bridgesHere = [];
   {
-    const copy = waterTop.slice(), kinds = waterKind.slice();
+    const lo = -AP * STEP - 4, hi = ZM + AP * STEP + 4;
+    // a world road is not drawn inside a town (the town's streets carry it), so neither is its bridge
+    const inPlaced = (x, z) => placed.some(s => Math.hypot(s.x - x, s.z - z) < s.radius + 4);
+    for (const wb of W.bridges) {
+      const road = roads.find(r => r.worldId === wb.road); if (!road) continue;
+      if (inPlaced(wb.x - ox, wb.z - oz)) continue;
+      const reach = wb.ramp + wb.width + 6;
+      const ax = wb.a[0] - ox, az = wb.a[1] - oz, bx = wb.b[0] - ox, bz = wb.b[1] - oz;
+      if (Math.max(ax, bx) + reach < lo || Math.min(ax, bx) - reach > hi || Math.max(az, bz) + reach < lo || Math.min(az, bz) - reach > hi) continue;
+      const loc = p => ({ ...p, x: p.x - ox, z: p.z - oz, a: [p.a[0] - ox, p.a[1] - oz], b: [p.b[0] - ox, p.b[1] - oz] });
+      bridgesHere.push({ ...wb, id: null, x: wb.x - ox, z: wb.z - oz, a: [ax, az], b: [bx, bz], pieces: wb.pieces?.map(loc), pts: road.pts, roadId: road.id });
+    }
+    const riversLocal = W.rivers.map(r => ({ id: r.id, bbox: [r.bbox[0] - ox, r.bbox[1] - oz, r.bbox[2] - ox, r.bbox[3] - oz], pts: r.pts.map(([x, z, h, c]) => [x - ox, z - oz, h, c]) }));
+    // zone-local lines (always well inside the zone): spur roads, and the streets of every town a river runs through
+    const local = [...roads.filter(r => r.spur).map(r => ({ id: r.id, pts: r.pts, width: r.width })),
+      ...plans.flatMap(pl => pl.streets.map((st, i) => ({ id: `${slug(pl.town.name)}_street_${i}`, street: true, width: st.width, pts: st.pts.map(([x, z]) => [pl.origin.x + x, pl.origin.z + z, 0]) })))];
+    for (const r of local) {
+      let len = 0; for (let k = 1; k < r.pts.length; k++) len += Math.hypot(r.pts[k][0] - r.pts[k - 1][0], r.pts[k][1] - r.pts[k - 1][1]);
+      for (const c of crossingsOf(r.pts, riversLocal)) {
+        // a street that runs INTO the water and stops gets no bridge to nowhere (class 1 is wadeable); a spur is not
+        // drawn inside a town, so a spur crossing inside one is the town streets' business
+        if (c.s0 - DECK_LAND < 0.5 || c.s1 + DECK_LAND > len - 0.5) continue;
+        const b = bridgeFor(r.pts, c, r.width);
+        if (!r.street && inPlaced(b.x, b.z)) continue;
+        // share a deck height with any bridge whose approaches overlap this one's (the world's wins: it is fixed)
+        for (const o of bridgesHere) {
+          const gap = Math.min(...[o.a, o.b].flatMap(e => [b.a, b.b].map(f => Math.hypot(e[0] - f[0], e[1] - f[1]))));
+          if (gap < o.ramp + b.ramp + 10) b.deck = o.deck;
+        }
+        if (bridgesHere.some(o => Math.hypot(o.x - b.x, o.z - b.z) < 14)) continue;
+        bridgesHere.push({ road: r.id, ...b, pts: r.pts, roadId: r.id, spur: true, ...(r.street ? { street: true } : {}) });
+      }
+    }
+    for (const br of bridgesHere) gradeBridge(br);
+  }
+  function gradeBridge(br) {
+    // the road polyline near the bridge, with arc lengths
+    const cum = [0]; for (let k = 1; k < br.pts.length; k++) cum.push(cum[k - 1] + Math.hypot(br.pts[k][0] - br.pts[k - 1][0], br.pts[k][1] - br.pts[k - 1][1]));
+    const sLo = br.s0 - br.ramp - 12, sHi = br.s1 + br.ramp + 12;
+    let k0 = 0; while (k0 < br.pts.length - 2 && cum[k0 + 1] < sLo) k0++;
+    let k1 = br.pts.length - 1; while (k1 > 1 && cum[k1 - 1] > sHi) k1--;
+    const pts = br.pts.slice(k0, k1 + 1), c0 = cum[k0];
+    const half = br.width / 2, shoulder = 4, reach = half + shoulder, flat = 1.5, IN_DECK = 2.5;
+    const xs = pts.map(p => p[0]), zs = pts.map(p => p[1]);
+    const i0 = Math.max(0, Math.floor((Math.min(...xs) - reach) / STEP) + AP), i1 = Math.min(G - 1, Math.ceil((Math.max(...xs) + reach) / STEP) + AP);
+    const j0 = Math.max(0, Math.floor((Math.min(...zs) - reach) / STEP) + AP), j1 = Math.min(G - 1, Math.ceil((Math.max(...zs) + reach) / STEP) + AP);
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+      const x = (i - AP) * STEP, z = (j - AP) * STEP, kk = j * G + i;
+      if (waterTop[kk] > ground[kk]) continue;                      // never dam the channel
+      const [d, k, t] = polyDist(pts, x, z);
+      if (d > reach) continue;
+      const s = cum[k0 + k] + t * (cum[k0 + k + 1] - cum[k0 + k]);
+      // out = metres outside the deck along the road (negative = under it). The abutment block runs IN_DECK metres in
+      // under the deck so the triangles at the abutment are all at deck height (no lip where the deck lands)
+      const out = s <= (br.s0 + br.s1) / 2 ? br.s0 - s : s - br.s1;
+      if (out < -IN_DECK || out > br.ramp) continue;                // under the deck middle: leave the banks alone
+      const wa = 1 - smoothstep(0, 1, Math.max(0, out - flat) / (br.ramp - flat));
+      const wl = d <= half ? 1 : 1 - smoothstep(0, 1, (d - half) / shoulder);
+      const target = out < 0 ? br.deck - 0.05 : br.deck;           // under the deck the block sits just below it
+      ground[kk] += (target - ground[kk]) * wa * wl;
+      if (d <= half) roadMask[kk] = 1;
+    }
+  }
+
+  // 7. the wet skirt (P21): one ring of water surface laid past every wet edge, 8-connected (the old 4-connected ring
+  // left the corner triangles out, so the sheet stopped in 2 m steps short of the bank), and the ground under every
+  // skirt sample raised to at least surface + SKIRT_BURY. The sheet's edge is then always under the ground, the
+  // visible shoreline is the bank meeting the flat water (the curve d = half of step 6), and the skirt itself never
+  // makes new visible water. waterAt() reads the same layer (dry where ground ≥ surface), so drawn = measured;
+  // tests/B/water-edge.test.js checks every sheet edge in every zone is buried.
+  {
+    const add = [];
     for (let j = 1; j < G - 1; j++) for (let i = 1; i < G - 1; i++) {
-      const k = j * G + i; if (!Number.isNaN(copy[k])) continue;
-      let s = 0, c = 0, kind = 0;
-      for (const o of [1, -1, G, -G]) { const v = copy[k + o]; if (!Number.isNaN(v)) { s += v; c++; kind = Math.max(kind, kinds[k + o]); } }
-      if (c) { waterTop[k] = s / c; waterKind[k] = kind; }
+      const k = j * G + i; if (!Number.isNaN(waterTop[k])) continue;
+      let sum = 0, c = 0, kind = 0;
+      for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+        const n = k + dj * G + di; if (n === k || Number.isNaN(waterTop[n])) continue;
+        sum += waterTop[n]; c++; if (waterKind[n] > kind) kind = waterKind[n];
+      }
+      if (c) add.push(k, sum / c, kind);
+    }
+    for (let q = 0; q < add.length; q += 3) {
+      const k = add[q], surface = add[q + 1];
+      waterTop[k] = surface; waterKind[k] = add[q + 2];
+      if (ground[k] < surface + SKIRT_BURY) ground[k] = surface + SKIRT_BURY;
     }
   }
 
@@ -327,7 +453,7 @@ export function bakeZone(id, opts = {}) {
   const BEACH = 4, MOUNTAINS = 17, LAKE = 3, COAST = 2, MARSH = 15;
   const FEN_NOISE = makeNoise2D(hashStr('fen:' + id));
   for (let j = 0; j < SIZE; j++) for (let i = 0; i < SIZE; i++) {
-    const gi = i + 1, gj = j + 1, k = gj * G + gi;
+    const gi = i + AP, gj = j + AP, k = gj * G + gi;
     let b = m.biome[ref.warpedIndex(wxOf(gi), wzOf(gj))];
     if (waterKind[k] && waterTop[k] > ground[k]) b = waterKind[k] === 1 ? COAST : LAKE;
     else if (b < 4 || b === 25) b = BEACH;
@@ -355,7 +481,7 @@ export function bakeZone(id, opts = {}) {
   const q = v => clamp(Math.round((v - hMin) / (hMax - hMin) * 65535), 1, 65535);
   const height = new Uint16Array(N), wTop = new Uint16Array(N), wKind = new Uint8Array(N);
   for (let j = 0; j < SIZE; j++) for (let i = 0; i < SIZE; i++) {
-    const k = (j + 1) * G + i + 1, o = j * SIZE + i;
+    const k = (j + AP) * G + i + AP, o = j * SIZE + i;
     height[o] = q(ground[k]); wTop[o] = Number.isNaN(waterTop[k]) ? 0 : q(waterTop[k]); wKind[o] = wTop[o] ? waterKind[k] : 0;
   }
 
@@ -367,6 +493,9 @@ export function bakeZone(id, opts = {}) {
     biomes: [...BIOMES.map(b => [b.key, b.name, b.color]), ['road', 'Road', '#b39a6e']], waterKinds: ['none', 'sea', 'lake', 'river'],
     source: { tool: 'tools/bake-zone.mjs', world: { seed: W.seed, width: W.width, height: W.height, method: W.method, seaLevel: W.seaLevel, inputHash: W.inputHash }, zone: { zx: zone.zx, zy: zone.zy }, worldOrigin: { x: ox, z: oz }, zoneMetres: ZM },
     rivers: riversUsed, sites: metaSites, spawn: null,
+    // decks the reader stands walkers on (terrain-read deckAt): every bridge whose deck touches this zone
+    bridges: bridgesHere.flatMap(b => (b.pieces || [b]).map(p => ({ a: [r2(p.a[0]), r2(p.a[1])], b: [r2(p.b[0]), r2(p.b[1])], h: b.deck, w: p.width })))
+      .filter(d => Math.max(d.a[0], d.b[0]) > -d.w && Math.min(d.a[0], d.b[0]) < ZM + d.w && Math.max(d.a[1], d.b[1]) > -d.w && Math.min(d.a[1], d.b[1]) < ZM + d.w),
     ...(cliff ? { cliff } : {}),
     ...(theme ? { theme: { kind: THEMES[id].theme, lakes: theme.lakes.map(l => ({ name: l.name, kind: l.kind, x: l.x, z: l.z, r: l.r, level: l.level })), fen: theme.fen } } : {}),
   };
@@ -382,8 +511,10 @@ export function bakeZone(id, opts = {}) {
   meta.spawn = hubSite ? spawnNear(terrain, hubSite) : { x: 1024, z: 1024 };
 
   // 11. bridges from the world bake (zone-local copies), placements, scatter, nav
-  const bridges = W.bridges.filter(b => b.x >= ox && b.x < ox + ZM && b.z >= oz && b.z < oz + ZM).map((b, i) => ({ ...b, x: b.x - ox, z: b.z - oz, id: `bridge_${b.road}_${b.river}_${i}` }));
-  const placements = placementsFor(meta, plans, roads, bridges);
+  const bridges = bridgesHere.filter(b => b.x >= 0 && b.x < ZM && b.z >= 0 && b.z < ZM).map((b, i) => ({ ...b, pts: undefined, id: `bridge_${String(b.road).replace(/^spur_/, 's_')}_${b.river}_${i}` }));
+  // footpaths (P19): every door, arena and E fort/farm/cave/waystone gets a trail to the road network — painted, not graded
+  const paths = layPaths({ t: terrain, biome, SIZE, STEP, ZM, roadId: ROAD_SURFACE_ID, sites: meta.sites, vignettes, plans });
+  const placements = placementsFor(meta, plans, roads, bridges, paths);
   const keepClear = [
     ...placed.map(s => ({ x: s.x, z: s.z, r: s.radius + 6 })),
     ...meta.sites.filter(s => s.type === 'dungeon').map(s => ({ x: s.x, z: s.z, r: 14 })),
@@ -392,29 +523,30 @@ export function bakeZone(id, opts = {}) {
   ];
   const scatter = scatterFor(W, zone, terrain, biome, keepClear);
   // decks for every world bridge whose span reaches into this zone (one on the edge is stamped by both zones)
-  const decks = W.bridges.filter(b => b.x >= ox - 60 && b.x < ox + ZM + 60 && b.z >= oz - 60 && b.z < oz + ZM + 60)
-    .map(b => ({ x: b.x - ox, z: b.z - oz, yaw: b.yaw, span: b.span, width: (W.roads.find(r => r.id === b.road) || {}).width || 6 }));
+  const decks = meta.bridges;
   const nav = navFor(terrain, biome, scatter, plans, decks);
-  return { meta, height, waterTop: wTop, waterKind: wKind, biome, terrain, plans, townPlan: plans.find(p => p.town.hub) || null, placements, roads, bridges, scatter, nav, vignettesUsed: vignettes.length };
+  return { meta, height, waterTop: wTop, waterKind: wKind, biome, terrain, plans, townPlan: plans.find(p => p.town.hub) || null, placements, roads, bridges, paths, scatter, nav, vignettesUsed: vignettes.length };
 }
 
 // ---------------------------------------------------------------------------------------------- scatter
 /** Per-biome density per 6 m cell (36 m²): [kind index, probability]. Trees clump by a grove noise. */
 const SCATTER_TABLE = {
-  grassland: [[0, 0.014], [4, 0.025], [5, 0.008]],
+  // P19 (play-test 1, "occasional rock/bush"): open country carries about twice the cover it did — copses (trees are
+  // still clumped by the grove noise), bushes, stones and the odd big rock — while forests stay as dense as they were
+  grassland: [[0, 0.024], [4, 0.05], [5, 0.018], [6, 0.003]],
   temperateForest: [[0, 0.30], [4, 0.08], [5, 0.012], [6, 0.004]],
   borealForest: [[1, 0.32], [4, 0.03], [5, 0.015], [6, 0.006]],
   rainforest: [[0, 0.36], [4, 0.16]],
-  savanna: [[2, 0.022], [4, 0.035], [5, 0.007]],
-  shrubland: [[4, 0.09], [5, 0.012], [2, 0.006]],
+  savanna: [[2, 0.032], [4, 0.06], [5, 0.016], [6, 0.003]],
+  shrubland: [[4, 0.13], [5, 0.022], [2, 0.01], [6, 0.003]],
   marsh: [[8, 0.16], [3, 0.012], [4, 0.02]],
-  hills: [[1, 0.05], [5, 0.03], [6, 0.015], [7, 0.004], [4, 0.03]],
+  hills: [[1, 0.065], [5, 0.04], [6, 0.02], [7, 0.005], [4, 0.05]],
   mountains: [[5, 0.05], [6, 0.03], [7, 0.012], [1, 0.02]],
   snowyPeaks: [[6, 0.02], [7, 0.01]],
-  tundra: [[5, 0.02], [4, 0.012], [6, 0.004]],
-  desert: [[5, 0.012], [6, 0.006], [3, 0.002]],
-  badlands: [[5, 0.03], [6, 0.015], [7, 0.006], [3, 0.004]],
-  beach: [[5, 0.01]],
+  tundra: [[5, 0.03], [4, 0.02], [6, 0.006]],
+  desert: [[5, 0.018], [6, 0.008], [3, 0.003]],
+  badlands: [[5, 0.04], [6, 0.02], [7, 0.008], [3, 0.006]],
+  beach: [[5, 0.015], [4, 0.008]],
   blighted: [[3, 0.12], [4, 0.03]], ashPlain: [[3, 0.03], [5, 0.02]], veiledHills: [[3, 0.05], [6, 0.02]],
   hallowed: [[0, 0.22], [4, 0.1]], glimmerwaste: [[5, 0.03], [6, 0.02]], volcanic: [[6, 0.03], [7, 0.01]],
 };
@@ -482,12 +614,14 @@ function navFor(t, biome, scatter, plans, decks = []) {
   // bridge decks: a road-wide strip along the road, long enough to land on both banks even when the road crosses
   // the channel at a slant (span x 1.6 + 2 x 10 m). Before this, every bridge read as DEEP water and a river cut
   // the province in two for anything that walks by nav (found by tests/B/zone-reach.test.js).
+  // (since play-test 1 the deck is exact: abutment a to abutment b, the reader's deckAt strip, + one sample)
   for (const d of decks) {
-    const ux = Math.sin(d.yaw), uz = Math.cos(d.yaw), half = d.span * 0.8 + 10, hw = d.width / 2 + 0.5, r = Math.hypot(half, hw);
-    for (let j = Math.max(0, Math.floor((d.z - r) / STEP)); j <= Math.min(SIZE - 1, Math.ceil((d.z + r) / STEP)); j++)
-      for (let i = Math.max(0, Math.floor((d.x - r) / STEP)); i <= Math.min(SIZE - 1, Math.ceil((d.x + r) / STEP)); i++) {
-        const dx = i * STEP - d.x, dz = j * STEP - d.z, along = dx * ux + dz * uz, across = -dx * uz + dz * ux;
-        if (Math.abs(along) <= half && Math.abs(across) <= hw) { const o = j * SIZE + i; bits[o] = (bits[o] & ~(NAV.DEEP | NAV.STEEP | NAV.SOLID)) | NAV.WALK | NAV.ROAD; }
+    const cx = (d.a[0] + d.b[0]) / 2, cz = (d.a[1] + d.b[1]) / 2, L = Math.hypot(d.b[0] - d.a[0], d.b[1] - d.a[1]) || 1;
+    const ux = (d.b[0] - d.a[0]) / L, uz = (d.b[1] - d.a[1]) / L, half = L / 2 + STEP, hw = d.w / 2 + STEP * 0.5, r = Math.hypot(half, hw);
+    for (let j = Math.max(0, Math.floor((cz - r) / STEP)); j <= Math.min(SIZE - 1, Math.ceil((cz + r) / STEP)); j++)
+      for (let i = Math.max(0, Math.floor((cx - r) / STEP)); i <= Math.min(SIZE - 1, Math.ceil((cx + r) / STEP)); i++) {
+        const dx = i * STEP - cx, dz = j * STEP - cz, along = dx * ux + dz * uz, across = dx * uz - dz * ux;
+        if (Math.abs(along) <= half && Math.abs(across) <= hw) { const o = j * SIZE + i; bits[o] = (bits[o] & ~(NAV.DEEP | NAV.SHALLOW | NAV.STEEP | NAV.SOLID)) | NAV.WALK | NAV.ROAD; }
       }
   }
   for (const plan of plans) {
@@ -524,7 +658,7 @@ const r2 = v => Math.round(v * 100) / 100;
 const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
 
 /** Typed placement records: {kind, id, x, z, yaw, data}. Every id is unique within the zone. */
-export function placementsFor(meta, plans, roads = [], bridges = []) {
+export function placementsFor(meta, plans, roads = [], bridges = [], paths = []) {
   const out = [];
   for (const s of meta.sites) {
     if (s.type === 'settlement') out.push({ kind: 'settlement', id: slug(s.name), x: r2(s.x), z: r2(s.z), yaw: 0, data: { kind: s.kind, name: s.name, radius: s.radius ?? TOWN_RADIUS[s.kind] ?? 40, hub: !!s.hub, planned: !s.unplanned, ...(s.wfName ? { wfName: s.wfName } : {}), ...(s.ask ? { ask: true } : {}) } });
@@ -572,7 +706,18 @@ export function placementsFor(meta, plans, roads = [], bridges = []) {
       out.push({ kind: 'road', id: all.length > 1 ? `${r.id}_${n}` : r.id, x: pts[0][0], z: pts[0][1], yaw: 0, data: { cls: r.cls, width: r.width, spur: !!r.spur, pts } });
     });
   }
-  for (const b of bridges) out.push({ kind: 'bridge', id: b.id, x: r2(b.x), z: r2(b.z), yaw: b.yaw, data: { span: b.span, deck: b.deck, road: `road_${b.road}` } });
+  // a bridge: a straight flat deck from abutment a to abutment b (both [x, z, h], h = deck), `width` wide, centred on
+  // (x, z), yaw = a→b; the road is graded to the deck height at a and b. terrain meta.bridges carries the same decks.
+  // a footpath (tools/lib/zone-paths.mjs): painted trail from a place to the road network; NOT graded (follows the ground)
+  for (const p of paths) out.push({ kind: 'path', id: p.id, x: p.pts[0][0], z: p.pts[0][1], yaw: 0, data: { from: p.from, to: p.to, width: p.width, pts: p.pts } });
+  // A bridge that bends is several straight pieces (data.part = [i, n]) sharing ends, all at the same deck height.
+  for (const b of bridges) {
+    const pieces = b.pieces || [b];
+    pieces.forEach((p, i) => out.push({ kind: 'bridge', id: pieces.length > 1 ? `${b.id}_p${i}` : b.id, x: r2(p.x), z: r2(p.z), yaw: p.yaw, data: {
+      span: r2(Math.hypot(p.b[0] - p.a[0], p.b[1] - p.a[1])), deck: b.deck, width: p.width, a: [r2(p.a[0]), r2(p.a[1]), b.deck], b: [r2(p.b[0]), r2(p.b[1]), b.deck],
+      road: b.spur ? b.road : `road_${b.road}`, ...(b.street ? { street: true } : {}), river: b.river, cls: b.cls, surface: b.surface, ramp: b.ramp, ...(pieces.length > 1 ? { part: [i, pieces.length], bridge: b.id } : {}),
+    } }));
+  }
   return out;
 }
 
@@ -605,7 +750,7 @@ export function summarise(b) {
   return {
     zone: b.meta.zone, province: b.meta.province?.name, inputHash: b.meta.inputHash, rivers: b.meta.rivers.length, wetShare: +(wet / n).toFixed(3), unwalkableShare: +(steep / n).toFixed(3),
     towns: b.plans.map(p => ({ name: p.town.name, kind: p.town.kind, hub: !!p.town.hub, at: [p.origin.x, p.origin.z], radius: p.town.radius, movedFrom: p.town.movedFrom || null, culture: p.culture, plots: p.plots.length, streets: p.streets.length, links: p.links || 0, overlaps: overlaps(p).length })),
-    roads: b.roads.length, bridges: b.bridges.length, scatter: b.scatter.length, scatterKinds: kinds,
+    roads: b.roads.length, bridges: b.bridges.length, paths: b.paths.length, pathMetres: Math.round(b.paths.reduce((s, p) => s + p.pts.reduce((a, q, k) => a + (k ? Math.hypot(q[0] - p.pts[k - 1][0], q[1] - p.pts[k - 1][1]) : 0), 0), 0)), scatter: b.scatter.length, scatterKinds: kinds,
     sites: b.meta.sites.map(s => [s.type + (s.hub ? '(HUB)' : ''), s.kind || s.id, s.name || '', Math.round(s.x), Math.round(s.z), s.radius ?? s.r ?? '', s.yaw ?? '', s.unplanned || ''].join(' ').trim()),
     spawn: b.meta.spawn, placements: b.placements.length, vignettesAvoided: b.vignettesUsed,
   };

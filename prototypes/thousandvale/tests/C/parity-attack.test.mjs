@@ -9,7 +9,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import * as O from './farhold-oracle.mjs';
-import { engineFor, roomFor } from './setup.mjs';
+import { parityEngineFor as engineFor, roomFor } from './setup.mjs';
 import { createCharacter } from '../../js/rules/character.js';
 import { spawnMonster } from '../../js/rules/monster-ai.js';
 import { makeRng } from '../../js/rules/rng.js';

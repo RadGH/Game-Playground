@@ -16,6 +16,7 @@
 // Every refusal returns { ok: false, why } — the client shows `why`, the evil-client suite checks
 // nothing happened.
 
+import { onKill as perkOnKill } from './perk-rules.js';
 import {
   weaponHands, OFFHAND_DAMAGE, strikeAt, withArea, isStaff, elementOf, statusOf,
   applyStatus, controlFor, feel, STATUS_POWER_SHARE, drawPower, chargeAt, chargedForm, staffSpell,
@@ -56,7 +57,9 @@ export function createCombat(room) {
     }
     const longer = rpg.fx.sum(caster, 'statusLonger', { type, spec });
     const strength = rpg.fx.product(caster, 'statusPower', { type });
-    const entry = applyStatus(target, type, spec, power, { longer, strength });
+    // the perk forest's `dotPct`: +% from your burns, poisons, bleeds and curses (a harmful status only)
+    const dot = target.side === 'foe' && caster?.derived?.dotPct;
+    const entry = applyStatus(target, type, spec, dot ? power * (1 + dot / 100) : power, { longer, strength });
     if (entry) entry.by = caster.id;          // who to credit (threat, tagging) for a DoT tick
     return entry;
   }
@@ -100,7 +103,12 @@ export function createCombat(room) {
         }
         rtk.afterKill(p, post, e);
       });
-      const award = rpg.killXpFor(p, e, xpCfg);
+      // the perk forest's own kill rules (js/rules/perk-rules.js): Momentum, Spoils, Contagion
+      perkOnKill(field, p, e, { statuses, lastHit: e.lastHitBy === p.id });
+      let award = rpg.killXpFor(p, e, xpCfg);
+      // `xpFind` (gear and perks): Farhold's gainXp applies it; when the ROOM awards the experience it
+      // never sees the sheet, so it is applied here (and only here)
+      if (combat.award && p.derived?.xpFind) award = Math.round(award * (1 + p.derived.xpFind / 100));
       const coin = foundGold(p, e.gold);
       const drops = rpg.rollDrops(e, { rng: lootRng, magicFind: p.derived.magicFind }) || [];
       for (const it of drops) it.uid = `${room.id}:${++uidN}`;

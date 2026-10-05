@@ -35,15 +35,15 @@
           "kind": "kill",
           "type": "cult_zealot",
           "count": 6,
-          "where": "the thorn roads",
-          "text": "Cult zealots"
+          "where": "the thorn roads of Blackthorn Scar",
+          "text": "Kill 6 cult zealots on the thorn roads"
         },
         {
           "kind": "kill",
           "type": "ossuary_crawler",
           "count": 4,
-          "where": "the bone pits",
-          "text": "Ossuary crawlers"
+          "where": "the bone pits of Blackthorn Scar",
+          "text": "Kill 4 ossuary crawlers in the bone pits"
         }
       ],
       "done": "The way is open. Gather everyone you can find. It wakes when the lantern dims.",
@@ -70,12 +70,13 @@
           "kind": "killOne",
           "encounter": "world_grimtallow",
           "credit": "event",
-          "text": "The province's world boss defeated (event credit counts)"
+          "text": "Defeat Grimtallow with the province",
+          "where": "Grimtallow's arena at the heart of the Scar (realm event)"
         }
       ],
       "done": "The Scar is quiet. The lantern burns. Torbor Downs is safe, for now. Thank you.",
       "reward": {
-        "xp": 2.0,
+        "xp": 2,
         "gold": 120,
         "item": {
           "tier": "rare",
@@ -96,7 +97,8 @@
           "count": 1,
           "from": "cult_zealot",
           "chance": 0.35,
-          "text": "Recipe book recovered"
+          "text": "Take back the recipe book from cult zealots",
+          "where": "cult zealots on the thorn roads of the Scar"
         }
       ],
       "done": "My scones! Truly the light returns to the world.",
@@ -120,8 +122,8 @@
           "kind": "kill",
           "type": "ossuary_crawler",
           "count": 6,
-          "where": "the bone pits",
-          "text": "Ossuary crawlers"
+          "where": "the bone pits of Blackthorn Scar",
+          "text": "Kill 6 ossuary crawlers"
         }
       ],
       "done": "Fewer crawlers. Fewer nightmares. Same number of arrows.",
@@ -141,14 +143,16 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the inner barrows",
-          "floor": 2
+          "text": "Reach the inner Blackthorn Warrens",
+          "floor": 2,
+          "where": "The Blackthorn Warrens, the dungeon door in the Scar"
         },
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Defeat the barrow's keeper",
-          "boss": true
+          "text": "Defeat the warrens' keeper",
+          "boss": true,
+          "where": "the bottom of the Blackthorn Warrens"
         }
       ],
       "done": "You came out. That's more than the warband expected.",
@@ -172,7 +176,8 @@
           "kind": "killRare",
           "zone": "blackthorn_scar",
           "slot": 0,
-          "text": "The Scar's rare slain"
+          "text": "Hunt down the Thornbound Crawler",
+          "where": "roams the edge of the lantern-light in Blackthorn Scar"
         }
       ],
       "done": "The edge of the light is a little further out tonight.",

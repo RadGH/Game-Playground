@@ -111,7 +111,8 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     scene.fog.near = dark ? (bright ? 18 : 10) : 140; scene.fog.far = dark ? (bright ? 75 : 48) : 900;
     hemi.intensity = dark ? (bright ? 2.2 : 1.35) : 1.15; hemi.color.set(dark ? '#8f9cc0' : '#d6e6ff'); hemi.groundColor.set(dark ? '#2a2018' : '#6b5f48');
     sun.intensity = dark ? 0.25 : 2.6;
-    lantern.visible = dark; lantern.distance = bright ? 20 : 13; lantern.intensity = bright ? 16 : 9;
+    // never toggle a light's visibility (every lit material would recompile: the P1/P10 freeze) — dim it instead
+    lantern.distance = bright ? 20 : 13; lantern.intensity = dark ? (bright ? 16 : 9) : 0;
     stars.visible = moon.visible = false;
     if (!dark && lastSky) applySky(lastSky);
   }
@@ -140,7 +141,7 @@ export function createScene(canvas, { quality = 'high' } = {}) {
   }
   // The light you carry underground: warm, close, follows you (placed in follow()).
   const lantern = new THREE.PointLight('#ffc98a', 9, 13, 1.6);
-  lantern.visible = false; scene.add(lantern);
+  lantern.intensity = 0; scene.add(lantern);
 
   return { renderer, scene, camera, sun, hemi, sunDir, follow, resize, setMood, setTimeOfDay, get sky() { return lastSky; }, render: () => renderer.render(scene, camera) };
 }

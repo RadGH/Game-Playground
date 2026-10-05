@@ -56,7 +56,7 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
 
   // ---- clock ----
   const clock = mk('tv-clock', '<i></i><span></span>');
-  clock.title = 'Time of day in the Vale';
+  clock.dataset.tip = 'Time of day in the Vale';
   let lastClock = '';
   function tick(t) {
     const txt = `${timeName(t)} · ${clockText(t)}`;
@@ -158,7 +158,7 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
   function onQuests(m) {
     tracked = m.active || [];
     for (const q of tracked) questNames.set(q.id, q.name);
-    tracker.hidden = !tracked.length;
+    tracker.hidden = true;            // play-test P17: the tracker is ui/journal.js now (goal, where, distance)
     tracker.querySelector('ol').innerHTML = tracked.slice(0, 6).map(q => {
       const st = q.steps[q.step] || null;
       return `<li class="${q.ready ? 'ready' : ''}"><b>${esc(q.name)}</b><span>${q.ready ? 'Ready to hand in' : st ? `${esc(st.text)}${st.of > 1 ? ` — ${st.n}/${st.of}` : ''}` : ''}</span></li>`;
@@ -292,6 +292,7 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
     n.on('zoneEvent', onZoneEvent);
   }
   return {
+    knownWaystones: () => [...known],
     wire, tick, onUsed, openTravel, onQuests, onQuestR, onZoneEvent, setKnown, lore, onRealm, onEventFrame, onGroupHint, onZone, show, callout,
     joined(j) { setKnown(j.you?.waystones); if (j.event) onRealm({ kind: 'eventStart', ev: j.event }); },
     get event() { return event; }, get dialogOpen() { return !dialog.hidden; }, closeDialog() { dialog.hidden = true; },

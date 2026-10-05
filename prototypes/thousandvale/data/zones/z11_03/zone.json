@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "af932954",
+  "bakeVersion": 3,
+  "inputHash": "1af97385",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 11,
@@ -150,13 +150,63 @@
     "x": 1100,
     "z": 560
   },
+  "bridges": [
+    {
+      "a": [
+        1344,
+        61.5
+      ],
+      "b": [
+        1344,
+        78.5
+      ],
+      "h": 220.413,
+      "w": 4.5
+    },
+    {
+      "a": [
+        1088,
+        700.5
+      ],
+      "b": [
+        1088,
+        721.5
+      ],
+      "h": 264.876,
+      "w": 4.5
+    },
+    {
+      "a": [
+        1920.13,
+        -0.13
+      ],
+      "b": [
+        1941.17,
+        -19.52
+      ],
+      "h": 227.851,
+      "w": 5.4
+    },
+    {
+      "a": [
+        1283.28,
+        231.99
+      ],
+      "b": [
+        1297.17,
+        230.29
+      ],
+      "h": 231.684,
+      "w": 4.31
+    }
+  ],
   "summary": {
     "zone": "z11_03",
     "province": "Petbeck Basin",
-    "inputHash": "af932954",
+    "inputHash": "1af97385",
     "rivers": 3,
-    "wetShare": 0.007,
-    "unwalkableShare": 0.186,
+    "wetShare": 0.006,
+    "unwalkableShare": 0.184,
     "towns": [
       {
         "name": "Hermit's Rest",
@@ -218,15 +268,17 @@
     ],
     "roads": 12,
     "bridges": 3,
-    "scatter": 11551,
+    "paths": 5,
+    "pathMetres": 288,
+    "scatter": 14465,
     "scatterKinds": {
-      "bush": 3115,
-      "tree_broadleaf": 4660,
-      "rock_small": 1749,
-      "rock_large": 1321,
-      "boulder": 250,
-      "tree_conifer": 444,
-      "tree_acacia": 12
+      "rock_small": 2327,
+      "bush": 4709,
+      "tree_broadleaf": 5016,
+      "rock_large": 1565,
+      "boulder": 260,
+      "tree_conifer": 565,
+      "tree_acacia": 23
     },
     "sites": [
       "settlement(HUB) city Hermit's Rest 1104 560 140",
@@ -242,13 +294,13 @@
       "x": 1100,
       "z": 560
     },
-    "placements": 337,
-    "vignettesAvoided": 92
+    "placements": 342,
+    "vignettesAvoided": 574
   },
   "files": {
-    "terrain.bin": 685536,
-    "nav.bin": 46654,
-    "scatter.bin": 92492,
-    "placements.json": 155574
+    "terrain.bin": 686785,
+    "nav.bin": 48741,
+    "scatter.bin": 115804,
+    "placements.json": 164625
   }
 }

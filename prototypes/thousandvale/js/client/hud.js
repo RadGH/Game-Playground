@@ -24,7 +24,7 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
     const b = document.createElement('button');
     b.className = 'slot' + (i ? ' empty' : '');
     b.innerHTML = `<span class="key">${i ? i : 'F'}</span>${i === 0 ? ICONS.sword : '<span class="face"></span>'}<span class="cd"></span>`;
-    b.title = i === 0 ? 'Strike — a basic weapon attack on your target (F, or right-click an enemy)' : 'Empty';
+    b.dataset.tip = i === 0 ? 'Strike — a basic weapon attack on your target (F, or right-click an enemy)' : 'Empty';
     b.addEventListener('click', () => onSlot?.(i));
     el.bar.appendChild(b);
     slots.push({ b, cd: b.querySelector('.cd'), face: b.querySelector('.face'), until: 0, len: 1 });
@@ -56,6 +56,13 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
   }
 
   const fmt = n => Math.max(0, Math.round(n)).toLocaleString();
+  const escH = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  /** The action-bar skill card (name, unlock, cost, cooldown, who it reaches, what it does). */
+  function skillTip(sk) {
+    const facts = [sk.mp ? `${fmt(sk.mp)} mana` : '', sk.cd ? `${(sk.cd / 1000).toFixed(sk.cd % 1000 ? 1 : 0)} s cooldown` : '', sk.element && sk.element !== 'physical' ? sk.element : '',
+      sk.ally ? (sk.group ? 'reaches your party' : 'on a friend or yourself') : ''].filter(Boolean).join(' · ');
+    return `<div class="tip-title">${escH(sk.name)}</div>${sk.locked ? `<div class="bad">Unlocks at level ${escH(sk.level)}</div>` : ''}${facts ? `<div class="tip-sub">${escH(facts)}</div>` : ''}${sk.desc ? `<hr><div>${escH(sk.desc)}</div>` : ''}`;
+  }
 
   return {
     show() { el.hud.hidden = false; },
@@ -63,7 +70,7 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
       if (name != null) { el.selfName.textContent = name; el.selfInitial.textContent = (name[0] || '?').toUpperCase(); }
       if (level != null) el.selfLevel.textContent = level;
       if (hp != null && hpMax) { const f = Math.max(0, Math.min(1, hp / hpMax)); el.selfHp.style.width = (f * 100) + '%'; el.selfHpText.textContent = `${fmt(hp)} / ${fmt(hpMax)}`; lag.selfTarget = f; }
-      if (xp != null && next) { el.selfXp.style.width = Math.min(100, xp / next * 100) + '%'; el.selfXpText.textContent = `${fmt(xp)} / ${fmt(next)} XP`; el.selfXp.parentElement.title = `Experience: ${fmt(xp)} / ${fmt(next)}`; }
+      if (xp != null && next) { el.selfXp.style.width = Math.min(100, xp / next * 100) + '%'; el.selfXpText.textContent = `${fmt(xp)} / ${fmt(next)} XP`; el.selfXp.parentElement.dataset.tip = `Experience: ${fmt(xp)} / ${fmt(next)}`; }
     },
     setTarget(a) {
       if (!a) { el.tFrame.hidden = true; lag.targetId = null; return; }
@@ -98,7 +105,9 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
         s.b.classList.toggle('locked', !!sk?.locked);
         s.b.classList.toggle('ally', !!sk?.ally);
         if (s.face) s.face.textContent = sk ? initials(sk.name) : '';
-        s.b.title = sk ? `${sk.name}${sk.locked ? ` (unlocks at level ${sk.level})` : ''}${sk.ally ? (sk.group ? ' — reaches your party' : ' — on a friend or yourself') : ''}\n${sk.desc}` : (found?.desc || 'Empty');
+        // P5: a rich skill card on the shared tooltip (readable while a key is held)
+        delete s.b.dataset.tip;
+        s.b.dataset.tipHtml = sk ? skillTip(sk) : `<div class="tip-sub">${escH(found?.desc || 'Empty')}</div>`;
       }
     },
     toast(text, tone = 'info') {

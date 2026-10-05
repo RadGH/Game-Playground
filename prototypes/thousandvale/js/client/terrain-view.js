@@ -9,19 +9,76 @@
 // Water is drawn from the reader's own water layer: a triangle is wet only when all three corners are.
 
 import * as THREE from 'three';
-import { makeSurface, makeWaterNormals } from '../../../../highdef-3d/js/kit/textures.js';
+import { makeSurface } from '../../../../highdef-3d/js/kit/textures.js';
+import { perf } from './perf.js';
 
 /** Surfaces are made once per page: every zone's ground shares the same five textures. */
 const TEX_CACHE = new Map();
+let WATER_N = null;
+/** The page's one water normal map (shared by every zone; scrolled by the wall clock so zones agree). */
+export function waterNormals() {
+  if (!WATER_N) { WATER_N = perf.span('terrain:waterNormals', () => quickWaterNormals(128)); WATER_N.wrapS = WATER_N.wrapT = THREE.RepeatWrapping; }
+  return WATER_N;
+}
+/**
+ * A tileable ripple normal map from a handful of integer-frequency waves, straight into a DataTexture (no canvas,
+ * no read-back): ~2 ms. The kit's makeWaterNormals adds fBm through a canvas and cost seconds on a slow machine.
+ */
+export function quickWaterNormals(size = 128) {
+  const waves = [[1, 2, 1, 0.3], [-2, 1, 0.8, 1.7], [3, -1, 0.5, 4.1], [-1, -3, 0.6, 2.2], [5, 7, 0.22, 0.9], [-7, 5, 0.18, 3.3], [9, -4, 0.14, 5.1], [-6, -11, 0.1, 1.2]];
+  const h = new Float32Array(size * size), TAU = Math.PI * 2;
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const u = x / size, v = y / size; let s = 0;
+    for (const [kx, ky, a, ph] of waves) s += a * Math.sin((kx * u + ky * v) * TAU + ph);
+    h[y * size + x] = s;
+  }
+  const out = new Uint8Array(size * size * 4), at = (x, y) => h[((y + size) % size) * size + ((x + size) % size)], k = 0.9;
+  for (let y = 0, i = 0; y < size; y++) for (let x = 0; x < size; x++, i += 4) {
+    const nx = -(at(x + 1, y) - at(x - 1, y)) * k, ny = (at(x, y + 1) - at(x, y - 1)) * k, l = Math.hypot(nx, ny, 1);
+    out[i] = (nx / l * 0.5 + 0.5) * 255; out[i + 1] = (ny / l * 0.5 + 0.5) * 255; out[i + 2] = (1 / l * 0.5 + 0.5) * 255; out[i + 3] = 255;
+  }
+  const t = new THREE.DataTexture(out, size, size, THREE.RGBAFormat);
+  t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter; t.needsUpdate = true;
+  return t;
+}
 const CHUNK = 64;
 const SKIRT = 3;
 const FOREST = new Set(['temperateForest', 'rainforest', 'borealForest', 'blighted', 'marsh', 'hallowed']);
 const SAND = new Set(['beach', 'desert', 'savanna', 'coast']);
 const ROCK = new Set(['mountains', 'snowyPeaks', 'badlands', 'volcanic', 'ashPlain', 'glimmerwaste', 'tundra']);
 
+/**
+ * The water surface extended onto the banks (P21). A dry sample within `reach` samples of water takes the mean
+ * surface of the wet samples around it — but only where its ground is ABOVE that surface (a bank the water runs
+ * into) or no more than `maxDrop` below it, so water never floats over land that falls away. Wet samples keep their
+ * own surface. Pure (exported for tests): wg = water surface per sample (NaN = dry), grid = ground heights.
+ */
+export function extendWaterSurface(wg, grid, res, { reach = 2, maxDrop = 0.12 } = {}) {
+  const out = Float32Array.from(wg);
+  for (let j = 0; j < res; j++) for (let i = 0; i < res; i++) {
+    const k = j * res + i;
+    if (!Number.isNaN(wg[k])) continue;
+    let sum = 0, n = 0, best = Infinity;
+    for (let dj = -reach; dj <= reach; dj++) {
+      const jj = j + dj; if (jj < 0 || jj >= res) continue;
+      for (let di = -reach; di <= reach; di++) {
+        const ii = i + di; if (ii < 0 || ii >= res) continue;
+        const v = wg[jj * res + ii];
+        if (Number.isNaN(v)) continue;
+        const d = di * di + dj * dj;
+        if (d < best) { best = d; sum = v; n = 1; } else if (d === best) { sum += v; n++; }
+      }
+    }
+    if (!n) continue;
+    const s = sum / n;
+    if (grid[k] >= s - maxDrop) out[k] = s;
+  }
+  return out;
+}
+
 export function createTerrainView(T, { textureSize = 512, quality = 'high', clearings = [], biomeColors = null } = {}) {
   const group = new THREE.Group(); group.name = 'terrain';
-  const grid = T.heightGrid();
+  const grid = perf.span('terrain:grid', () => T.heightGrid());
   const { res, step, origin } = T;
   const cells = res - 1;
   const per = Math.ceil(cells / CHUNK);
@@ -57,10 +114,12 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
     if (!TEX_CACHE.has(ck)) { const s = makeSurface(k, { size: textureSize, seed: 7 }); s.map.anisotropy = 8; s.map.wrapS = s.map.wrapT = THREE.RepeatWrapping; TEX_CACHE.set(ck, s.map); }
     return TEX_CACHE.get(ck);
   };
+  const endTex = perf.begin('terrain:tex');
   const tex = quality === 'low' ? null : { grass: surf('grass'), floor: surf('forest_floor'), rock: surf('rock'), sand: surf('sand'), path: surf('dirt') };
   // Low quality (software renderers, weak GPUs): one Lambert pass with the surfaces pre-mixed into the
   // vertex colour. The splat shader fills every ground pixel with five texture reads, which is what
   // costs a software renderer 90% of its frame.
+  endTex();
   const cheap = quality === 'low';
   const LOW = { grass: new THREE.Color('#5f7d3c'), floor: new THREE.Color('#4d4630'), rock: new THREE.Color('#7b766d'), sand: new THREE.Color('#b8a676'), path: new THREE.Color('#7a6446') };
   const material = cheap ? new THREE.MeshLambertMaterial({ vertexColors: true }) : new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0 });
@@ -150,6 +209,7 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
   }
 
   const chunks = [];
+  const endChunks = perf.begin('terrain:chunks');
   for (let cj = 0; cj < per; cj++) for (let ci = 0; ci < per; ci++) {
     const cx = origin.x + (ci + 0.5) * CHUNK * step, cz = origin.z + (cj + 0.5) * CHUNK * step;
     const mesh = new THREE.Mesh(buildChunk(ci, cj, strides[2]), material);
@@ -158,18 +218,25 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
     chunks.push({ ci, cj, cx, cz, mesh, level: 2, geos: [null, null, mesh.geometry] });
   }
 
+  endChunks();
+  const endWater = perf.begin('terrain:water');
   // --- water --------------------------------------------------------------------------------------
   let water = null, normals = null;
   const wg = T.waterGrid();
   if (wg) {
     const ws = quality === 'low' ? 2 : 1;
+    // P21: the sheet runs past the wet samples up to where the bank rises out of it (extendWaterSurface), so the
+    // shoreline is where the flat water meets the sloping ground — a smooth curve drawn by the depth test — instead
+    // of the staircase of 2 m cells the wet layer has (and no dry sliver between the water's edge and the bank)
+    const surf = extendWaterSurface(wg, grid, res, { reach: ws === 1 ? 2 : 3 });
     const map = new Int32Array(res * res).fill(-1);
     const wpos = [], widx = [];
-    const vert = (i, j) => { const k = j * res + i; if (map[k] < 0) { map[k] = wpos.length / 3; wpos.push(origin.x + i * step, wg[k], origin.z + j * step); } return map[k]; };
+    const vert = (i, j) => { const k = j * res + i; if (map[k] < 0) { map[k] = wpos.length / 3; wpos.push(origin.x + i * step, surf[k], origin.z + j * step); } return map[k]; };
+    const ok = k => !Number.isNaN(surf[k]), wet = k => !Number.isNaN(wg[k]);
     for (let j = 0; j + ws <= cells; j += ws) for (let i = 0; i + ws <= cells; i += ws) {
-      const a = wg[j * res + i], b = wg[j * res + i + ws], c = wg[(j + ws) * res + i], d = wg[(j + ws) * res + i + ws];
-      if (!Number.isNaN(a) && !Number.isNaN(b) && !Number.isNaN(c)) widx.push(vert(i, j), vert(i, j + ws), vert(i + ws, j));
-      if (!Number.isNaN(b) && !Number.isNaN(c) && !Number.isNaN(d)) widx.push(vert(i + ws, j), vert(i, j + ws), vert(i + ws, j + ws));
+      const a = j * res + i, b = a + ws, c = a + ws * res, d = c + ws;
+      if (ok(a) && ok(b) && ok(c) && (wet(a) || wet(b) || wet(c))) widx.push(vert(i, j), vert(i, j + ws), vert(i + ws, j));
+      if (ok(b) && ok(c) && ok(d) && (wet(b) || wet(c) || wet(d))) widx.push(vert(i + ws, j), vert(i, j + ws), vert(i + ws, j + ws));
     }
     if (widx.length) {
       const g = new THREE.BufferGeometry();
@@ -178,18 +245,21 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
       const uv = new Float32Array(wpos.length / 3 * 2);
       for (let k = 0; k < uv.length / 2; k++) { uv[k * 2] = wpos[k * 3] / 24; uv[k * 2 + 1] = wpos[k * 3 + 2] / 24; }
       g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
-      normals = makeWaterNormals(256, 7); normals.wrapS = normals.wrapT = THREE.RepeatWrapping;
+      // P1: ONE water normal map for the page. Built per zone it cost 20 s on the test VM (procedural noise
+      // read back through a canvas) — the multi-second freeze when a neighbouring zone streamed in.
+      normals = waterNormals();
       water = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: '#2c5b6e', roughness: 0.1, metalness: 0.15, transparent: true, opacity: 0.84, normalMap: normals, normalScale: new THREE.Vector2(0.4, 0.4), depthWrite: false }));
       water.position.y = 0.02; water.renderOrder = 1; water.name = 'water';
       group.add(water);
     }
   }
 
+  endWater();
   // --- per frame: re-level the chunks near the camera (two rebuilds a frame at most) --------------
   let lodAt = 0, t = 0;
   function update(dt, cam) {
     t += dt;
-    if (normals) normals.offset.set(t * 0.012, t * 0.007);
+    if (normals) { const w = performance.now() / 1000; normals.offset.set(w * 0.012, w * 0.007); }
     if (!cam || t < lodAt) return;
     lodAt = t + 0.25;
     let built = 0;
@@ -197,7 +267,7 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
     for (const { c, d } of order) {
       const want = d < dist[0] ? 0 : d < dist[1] ? 1 : 2;
       if (want === c.level) continue;
-      if (!c.geos[want]) { if (built >= 2) continue; c.geos[want] = buildChunk(c.ci, c.cj, strides[want]); built++; }
+      if (!c.geos[want]) { if (built >= 2) continue; c.geos[want] = perf.span('terrain:chunk', () => buildChunk(c.ci, c.cj, strides[want])); built++; }
       c.mesh.geometry = c.geos[want]; c.level = want;
     }
   }
@@ -205,7 +275,7 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
   function dispose() {
     for (const c of chunks) for (const g of c.geos) g?.dispose();
     material.dispose();
-    if (water) { water.geometry.dispose(); water.material.dispose(); normals?.dispose(); }
+    if (water) { water.geometry.dispose(); water.material.dispose(); }
   }
   return { group, material, water, update, dispose, ready: () => chunks.every(c => c.level !== 2 || true) };
 }

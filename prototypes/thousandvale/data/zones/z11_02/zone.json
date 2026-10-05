@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "e8887525",
+  "bakeVersion": 3,
+  "inputHash": "91f4bd84",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 11,
@@ -139,13 +139,39 @@
     "x": 348,
     "z": 444
   },
+  "bridges": [
+    {
+      "a": [
+        1204.37,
+        1844.37
+      ],
+      "b": [
+        1214.01,
+        1854.01
+      ],
+      "h": 225.419,
+      "w": 4.5
+    },
+    {
+      "a": [
+        1920.13,
+        2047.87
+      ],
+      "b": [
+        1941.17,
+        2028.48
+      ],
+      "h": 227.851,
+      "w": 5.4
+    }
+  ],
   "summary": {
     "zone": "z11_02",
     "province": "Petbeck Basin",
-    "inputHash": "e8887525",
+    "inputHash": "91f4bd84",
     "rivers": 4,
-    "wetShare": 0.011,
-    "unwalkableShare": 0.091,
+    "wetShare": 0.01,
+    "unwalkableShare": 0.087,
     "towns": [
       {
         "name": "Copperdell",
@@ -207,16 +233,18 @@
     ],
     "roads": 12,
     "bridges": 2,
-    "scatter": 19451,
+    "paths": 6,
+    "pathMetres": 2019,
+    "scatter": 21460,
     "scatterKinds": {
-      "tree_broadleaf": 8306,
-      "tree_conifer": 3426,
-      "bush": 4046,
-      "rock_large": 1186,
-      "boulder": 73,
-      "rock_small": 1306,
-      "reed": 1046,
-      "tree_dead": 62
+      "tree_broadleaf": 8526,
+      "tree_conifer": 3391,
+      "bush": 5269,
+      "rock_large": 1356,
+      "boulder": 80,
+      "rock_small": 1744,
+      "reed": 1033,
+      "tree_dead": 61
     },
     "sites": [
       "settlement(HUB) city Copperdell 352 448 140",
@@ -231,13 +259,13 @@
       "x": 348,
       "z": 444
     },
-    "placements": 244,
-    "vignettesAvoided": 90
+    "placements": 250,
+    "vignettesAvoided": 654
   },
   "files": {
-    "terrain.bin": 621343,
-    "nav.bin": 48921,
-    "scatter.bin": 155692,
-    "placements.json": 104672
+    "terrain.bin": 623089,
+    "nav.bin": 50953,
+    "scatter.bin": 171764,
+    "placements.json": 154501
   }
 }

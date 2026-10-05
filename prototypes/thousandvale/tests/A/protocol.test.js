@@ -11,6 +11,7 @@ const GOOD = {
   account: { op: 'claim', user: 'aldra', pass: 'longenough', email: 'a@b.cd', human: 'XXXX.DUMMY.TOKEN.XXXX' }, friend: { op: 'add', name: 'Bren' },
   guild: { op: 'motd', text: 'Raid at eight' }, callboard: { op: 'join', dungeon: 'torbor_downs:2', role: 'tank' }, report: { name: 'Bren', why: 'spam', text: 'selling gold' },
   mail: { op: 'send', to: 'Bren', subject: 'Hi', body: 'For you', items: ['p0-ab12cd34-1f'], gold: 5 },
+  talent: { op: 'pick', skill: 'firebolt', tier: 1, node: 'fan' }, perk: { op: 'take', id: 'early_bond' }, map: { op: 'get' },
 };
 
 test('every client message type has a valid example and the example passes', () => {

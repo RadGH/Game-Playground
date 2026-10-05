@@ -150,7 +150,7 @@ test('two players: claim, friends, whisper, guild invite + guild chat, mail an i
 
   // 5. mail: A writes to B with an item and 5 gold (both stand in the town hub); B takes it
   const before = (await social(A.page)).bag.length;
-  await A.page.keyboard.press('KeyM');
+  await A.page.evaluate(() => window.tv.panel('mail'));           // mail is a tab of the Party menu now (play-test P18)
   await A.page.click('#panel-mail button:has-text("Write a letter")');
   await A.page.fill('#panel-mail input[aria-label="To"]', 'Brem');
   await A.page.fill('#panel-mail input[aria-label="Subject"]', 'A charm for the road');
@@ -162,7 +162,7 @@ test('two players: claim, friends, whisper, guild invite + guild chat, mail an i
   await expect.poll(async () => (await social(A.page)).bag.length, { timeout: 15000 }).toBe(before - 1);
   await expect.poll(async () => (await social(B.page)).mail.unread, { timeout: 15000 }).toBeGreaterThan(0);
   await expect(B.page.locator('#menu-mail b')).toHaveText(/\d/);
-  await B.page.keyboard.press('KeyM');
+  await B.page.click('#party-btn'); await B.page.click('#menu-mail');
   await B.page.locator('#panel-mail .ml-row').first().click();
   await expect(B.page.locator('#panel-mail .ml-body')).toContainText('Found this in a ditch', { timeout: 15000 });
   await B.page.screenshot({ path: join(SHOTS, 'm3-mail-read.png') });
@@ -172,13 +172,14 @@ test('two players: claim, friends, whisper, guild invite + guild chat, mail an i
   expect((await social(B.page)).bag.length).toBe(bBag + 1);
   expect((await social(B.page)).gold).toBe(bGold + 5);
 
-  // 6. the Callboard (A is level 9) and the help overlay
-  await A.page.keyboard.press('KeyJ');
+  // 6. the Group Finder (the Callboard; A is level 9) and the help overlay
+  await A.page.keyboard.press('Escape');
+  await A.page.evaluate(() => window.tv.panel('callboard'));
   await expect(A.page.locator('#panel-callboard')).toContainText(/Your role/);
   await A.page.screenshot({ path: join(SHOTS, 'm3-callboard.png') });
   await A.page.keyboard.press('Escape');
   await A.page.keyboard.press('F1');
-  await expect(A.page.locator('#panel-help')).toContainText('Callboard');
+  await expect(A.page.locator('#panel-help')).toContainText('Group Finder');
   await A.page.screenshot({ path: join(SHOTS, 'm3-help.png') });
 
   // 7. log out (claimed accounts only) and log back in from the title screen with the username

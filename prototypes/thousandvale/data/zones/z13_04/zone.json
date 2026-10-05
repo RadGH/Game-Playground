@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "d1f5fae1",
+  "bakeVersion": 3,
+  "inputHash": "9227c4f0",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 13,
@@ -116,13 +116,14 @@
     "x": 1560,
     "z": 1278
   },
+  "bridges": [],
   "summary": {
     "zone": "z13_04",
     "province": "Petbeck Basin",
-    "inputHash": "d1f5fae1",
+    "inputHash": "9227c4f0",
     "rivers": 1,
     "wetShare": 0.004,
-    "unwalkableShare": 0.166,
+    "unwalkableShare": 0.165,
     "towns": [
       {
         "name": "Gorsehold",
@@ -157,18 +158,20 @@
         "overlaps": 0
       }
     ],
-    "roads": 0,
+    "roads": 2,
     "bridges": 0,
-    "scatter": 7397,
+    "paths": 11,
+    "pathMetres": 1121,
+    "scatter": 10061,
     "scatterKinds": {
-      "rock_small": 2727,
-      "bush": 1659,
-      "tree_acacia": 314,
-      "tree_broadleaf": 19,
-      "rock_large": 1784,
-      "boulder": 457,
-      "tree_dead": 167,
-      "tree_conifer": 270
+      "bush": 2655,
+      "rock_small": 3498,
+      "tree_broadleaf": 38,
+      "tree_dead": 239,
+      "boulder": 547,
+      "rock_large": 2253,
+      "tree_acacia": 478,
+      "tree_conifer": 353
     },
     "sites": [
       "landmark volcano The Becktack Forge 960 1984",
@@ -183,13 +186,13 @@
       "x": 1560,
       "z": 1278
     },
-    "placements": 138,
-    "vignettesAvoided": 92
+    "placements": 151,
+    "vignettesAvoided": 632
   },
   "files": {
-    "terrain.bin": 701091,
-    "nav.bin": 41456,
-    "scatter.bin": 59260,
-    "placements.json": 40677
+    "terrain.bin": 705438,
+    "nav.bin": 46516,
+    "scatter.bin": 80572,
+    "placements.json": 78953
   }
 }

@@ -20,6 +20,7 @@ import { createTerrainView } from './terrain-view.js';
 import { createScatterView } from './scatter-view.js';
 import { createTownView } from './town-view.js';
 import { createSiteView } from './site-view.js';
+import { perf, nextFrame } from './perf.js';
 
 /** Bounds for a zone key when the server sent none: `zXX_YY` in world metres, anything else zone-local. */
 export function zoneBounds(key, worldMetres = true) {
@@ -49,6 +50,8 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
     heightAt(x, z) { const L = at(x, z); if (L) return L.T.heightAt(x, z); return horizon ? horizon.heightAt(x, z) : 0; },
     walkable(x, z) { const L = at(x, z); return L ? L.T.walkable(x, z) : zones.some(q => x >= q.bounds.minX && x <= q.bounds.maxX && z >= q.bounds.minZ && z <= q.bounds.maxZ); },
     waterAt(x, z) { const L = at(x, z); return L ? L.T.waterAt(x, z) : NONE; },
+    /** 'out' | 'steep' | 'walk' | 'wade' | 'swim' — B's depth layer (stepMove reads it so prediction swims like the server). */
+    moveAt(x, z) { const L = at(x, z); if (L && L.T.moveAt) return L.T.moveAt(x, z); return terrain.walkable(x, z) ? 'walk' : 'out'; },
     slopeDeg(x, z) { const L = at(x, z); return L ? L.T.slopeDeg(x, z) : 0; },
     biomeKey(x, z) { const L = at(x, z); return L ? L.T.biomeKey(x, z) : 'grassland'; },
     zoneAt(x, z) { const q = zones.find(q => x >= q.bounds.minX && x < q.bounds.maxX && z >= q.bounds.minZ && z < q.bounds.maxZ); return q ? q.key : null; },
@@ -75,6 +78,7 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
       const [base, extras] = await Promise.all([loadClientTerrain(q.key), loadZoneExtras(q.key)]);
       if (!zones.some(z => z.key === q.key)) return null;
       const T = worldZone(base, q.bounds.minX, q.bounds.minZ);
+      let end = perf.begin('zone:ground');
       T.zoneKey = q.key;
       const L = { key: q.key, T, bounds: { ...T.bounds }, views: [], extras, ready: false };
       const biomeColors = base.reader ? Object.fromEntries(base.reader.biomes.map(b => [b.key, b.color])) : null;
@@ -83,14 +87,22 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
       if (horizon && base.reader) horizon.setBiomes?.(base.reader.biomes);
       loaded.set(q.key, L);
       syncHorizon();
+      end();
       groundResolve(L);
-      // the rest arrives a moment later; the ground is what feet need
+      // the rest arrives a moment later, a piece a frame (P1: one zone's town + scatter + sites in a single task was a
+      // stall); each piece's shaders are compiled before it is shown (compileAsync, parallel where the GPU allows)
+      const show = async view => {
+        if (opts.compile) { try { await opts.compile(view.group); } catch { /* drawn = compiled */ } }
+        if (loaded.get(q.key) !== L) { view.dispose?.(); return false; }   // the zone was let go while it compiled
+        scene.add(view.group); return true;
+      };
       try {
-        if (extras.placements.length) { const town = createTownView(T, extras.placements, { quality }); scene.add(town.group); L.views.push(town); L.town = town; }
-        if (extras.scatter) { const sc = await createScatterView(T, extras.scatter, { quality, avoid: L.town ? L.town.clearings : [] }); if (loaded.get(q.key) !== L) { sc.dispose?.(); return L; } scene.add(sc.group); L.views.push(sc); L.scatter = sc; }
+        await nextFrame();
+        if (extras.placements.length) { end = perf.begin('zone:town'); const town = createTownView(T, extras.placements, { quality }); end(); if (loaded.get(q.key) !== L) { town.dispose?.(); return L; } if (!(await show(town))) return L; L.views.push(town); L.town = town; await nextFrame(); }
+        if (extras.scatter) { end = perf.begin('zone:scatter'); const sc = await createScatterView(T, extras.scatter, { quality, avoid: L.town ? L.town.clearings : [] }); end(); if (loaded.get(q.key) !== L) { sc.dispose?.(); return L; } sc.refresh?.(lastPos); if (!(await show(sc))) return L; L.views.push(sc); L.scatter = sc; await nextFrame(); }
         else if (opts.fallbackDecor) { const d = await opts.fallbackDecor(T, L); if (d && loaded.get(q.key) === L) { scene.add(d.group); L.views.push(d); } }
         const vigOk = !extras.vignetteHash || !base.reader || extras.vignetteHash === base.reader.meta.inputHash;   // made for another bake: the server skips them too
-        if (vigOk && extras.vignetteFile) { const sv = await createSiteView(T, extras.vignetteFile, { quality }); if (sv && loaded.get(q.key) === L) { scene.add(sv.group); L.views.push(sv); L.sites = sv; } }
+        if (vigOk && extras.vignetteFile) { end = perf.begin('zone:sites'); const sv = await createSiteView(T, extras.vignetteFile, { quality }); end(); if (sv && loaded.get(q.key) === L) { if (!(await show(sv))) return L; L.views.push(sv); L.sites = sv; } else sv?.dispose?.(); }
         if (solids && loaded.get(q.key) === L) solids.add(q.key, [...(L.town?.solids || []), ...(L.sites?.solids || []), ...(L.scatter?.solids || [])]);
       } catch (e) { console.warn('[world] zone extras failed', q.key, e); }
       L.ready = true;
@@ -104,10 +116,12 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
 
   function unload(key) {
     const L = loaded.get(key); if (!L) return;
+    const end = perf.begin('zone:unload');
     for (const v of L.views) { scene.remove(v.group); v.dispose?.(); }
     solids?.remove(key);
     loaded.delete(key);
     syncHorizon();
+    end();
   }
 
   let decideAt = 0, t = 0;
@@ -121,7 +135,9 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
       // nearest first, one fetch at a time (a 6 MB zone should not race the one you are about to step on)
       if (!loading.size) { const k = want.find(k => !loaded.has(k)); if (k) load(zones.find(z => z.key === k)); }
     }
+    const end = perf.begin('world:views');
     for (const L of loaded.values()) for (const v of L.views) v.update?.(dt, pos || lastPos);
+    end();
   }
 
   /** Load the zone under (x, z) now (login, a waystone jump) and resolve once its ground is drawn. */

@@ -1203,3 +1203,188 @@ thresholds. 6 green in a row after the fix (3 through `node --test`, ~105-185 s 
   waits ≤ a few seconds); the combat core is warmed for every class at boot (the first login cost ~0.4 s); a room change reuses
   the skill bar (formatting it was ~4 ms a player — `shared/format.js` `fmt` uses `toLocaleString`, slow; C/the shared owner
   could cache an `Intl.NumberFormat`); `info` descriptions are JSON-encoded once per entity, not once per viewer.
+
+## D (Client) -> A/C, play-test P6 — 2026-10-05: talent picks + the perk forest (the UI is built; it waits on these)
+D-UI has a Skills window (K: skills unlocking by level, each with its talent tree) and a Perk Forest window (N). Until the
+messages below exist it runs in a clearly labelled PREVIEW (picks kept in this browser only). It reads whatever lands; the
+shapes it expects (any extra fields are fine):
+1. **A — client.js**: `net.talent(op, { skill, tier, node })` → game socket `{ t:'talent', op:'pick'|'clear', skill, tier, node }`;
+   answer `talentR { ok, why?, msg?, skill, picks:{ [tier]: nodeId } }` (and the new bar as `you {bar}` via `room.barChanged`).
+   `net.perk(op, { id })` → `{ t:'perk', op:'take'|'refund'|'reset', id? }`; answer `perkR { ok, why?, msg?, perks:[ids], left }`.
+2. **A — joined.you / you patch**: `talents: { [skillId]: { [tier]: nodeId } }`, `perks: [nodeIds]`, `perkPoints` (points LEFT,
+   incl. bonus points). A `you { talents }` / `you { perks, perkPoints }` patch after any change (level-up adds points).
+3. **C — data**: the client builds trees from Farhold's skills.json rows (`row.talents[1..4]` + `TIER_LEVELS` 3/8/18/28) and the
+   forest from Farhold `perks.js buildForest()`. When your Thousandvale talents/forest land, please expose them as JSON the client
+   can fetch with no Node-only imports, e.g. `data/rules/talents.json` `{ tierLevels, skills: { id: { talents } } }` and
+   `data/rules/perks.json` `{ nodes:[{id, kind, name, desc, x, y, arm, grants}], links:[[a,b]], arms:[{key, name, color}], start,
+   pointsPerLevel? }` — or a pure ESM module path. Tell D the path and the rules (one pick per tier? free re-pick? refund rule?)
+   and the client switches over (js/client/ui/talent-model.js `loadTalentSource`).
+
+## H (Ops) -> A (Server core), 2026-10-05 — P30 VPS: optional, no change needed
+The VPS kit (`ops/vps/`, docs/HOSTING.md) puts Caddy on the same box in front of 127.0.0.1:8490. `clientIp()` only believes
+`CF-Connecting-IP` from loopback, so Caddy sets that header to the real peer (overwriting any the visitor sent) — tested in
+tests/H/vps.test.js, works today. If you want it tidier later: a `--trust-proxy xff` flag that reads the LAST X-Forwarded-For
+entry from a loopback peer would let the Caddyfile drop the CF header. Not blocking.
+
+## H (Ops) -> Lead (owner decision), 2026-10-05 — P29/P30: what the owner needs to do
+Send the owner docs/HOSTING.md §5. From him: create an Ubuntu 24.04 VPS (2 vCPU / 2-4 GB; recommended DigitalOcean $18) with the
+key from `ops/vps/install.sh --print-key` (lead runs that — it makes ~/.ssh/thousandvale_vps), then the IP, the hostname
+(play.<domain>), an email for Let's Encrypt, and the DNS A record. No sudo on this VM is needed for any of it.
+
+## A (Server core) -> C (Combat core), play-test P6/P25 — 2026-10-05: the talent + perk messages are live; four hooks please
+The game socket now takes `talent {op:'pick'|'clear', skill, tier, node}` and `perk {op:'take'|'refund'|'reset', id}` (protocol.md §17,
+client `net.talent` / `net.perk`). A calls YOUR rules; until they exist the answer is `why:'notReady'`. Please add to createRules' return:
+1. `talent(e, op, { skill, tier, node })` -> `{ ok, why?, text?, picks? }` — you own every rule (tier open by level, one pick per tier,
+   free re-pick or not). On ok A saves, calls `room.barChanged(e)` (so `you {bar}` goes out after the tick) and sends `you {...build(e), hpMax, mpMax}`.
+2. `perk(e, op, { id })` -> `{ ok, why?, text?, perks, left }` (same follow-up; A refuses refund/reset in combat, `take` is allowed).
+3. `build(e)` -> `{ talents: {skill: {tier: node}}, perks: [ids], perkPoints }` — what D's windows read. A puts it in `joined.you` and in the
+   level-up `you` patch (room.award), so new points show at once.
+4. `saveBuild(e)` -> a JSON blob (talents, perks, unlocks…). A stores it as `char.build` (SAVE_FIELDS, journaled on every change and on
+   every save). **Read it back in addEntity** from `e.char.build` the way you read `savedGear(ch)` (your P4 note already names saveBuild).
+Also new: `rules.onSwim(e, on)` is called when a player enters/leaves deep water (P25; optional — e.g. drop a channel). The room already
+refuses `cast` while STATE.swimming (castR why 'swimming'). Monsters do not swim: `host.walkable` is unchanged (deep water is still not
+walkable for them); `terrain.moveAt` / `passable` are forwarded on the province terrain if you want them.
+Tests: tests/A/pt1-build-map.test.js has a tiny stand-in with exactly this interface (rulesWithBuild) — copy its shapes.
+
+## A (Server core) -> D (Client), play-test P8/P9/P22/P25/P3/P17 — 2026-10-05: server side done; what the client needs to do
+1. **P8 "character never stands back up" — the cause is in js/client/main.js `onJoined`**: the self actor is KEPT and rekeyed across a
+   room change, but its `dead` flag is never cleared — `S.self.dead` is assigned directly (`Object.assign(S.self, {... dead: you.hp <= 0})`),
+   so `setSelfDead(false)` never runs, and `onSnap` skips self records (`if (r.id === S.selfId) continue`) so the state bit cannot clear it
+   either. After a respawn (always a room change to town) the body stays in the death pose and slides along as you walk. One line after
+   the rekey, once S.self is assigned: `actors.setDead(S.selfId, S.self.dead)` (or call `setSelfDead(you.hp <= 0)` instead of assigning).
+   Server side: a dead body can no longer be moved at all (Entity.moveTo), and revive clears the combat flag.
+2. **P9**: `js/net/mirror.js` no longer keeps a grounded entity's `y` from its FULL record (it went stale: downhill = floating, uphill =
+   sunk, until the next AOI cell). `e.y` / `sample().y` are now `undefined` unless the entity is airborne or swimming — your existing
+   `p.y ?? groundY(...)` fallback then stands it on your ground reader. Make sure that reader is B's `heightAt` (it now includes bridge
+   decks via `meta.bridges`), not `groundAt`.
+3. **P25 swimming / P2 streams**: `stepMove` now SWIMS deep water instead of blocking it (slower, floats at surface − 1.1 m, no jump) and
+   wades shallow water (×0.8). For prediction to match, the predictor's terrain needs the water layer: pass `waterAt` (and `moveAt` when
+   the composite has it) — `S.predictor.terrain = { heightAt, walkable, waterAt, moveAt?, bounds }` (main.js:126/149/857; world-stream's
+   composite already has `waterAt`). Without it you'll get corrections at every stream. STATE.swimming (16) is set on swimmers (anim
+   'swim' = ANIMS[6]); `castR {why:'swimming', text}` when you attack in deep water.
+4. **P22**: a new character now wears only its class weapon (+ off-hand). Every player's `info` carries `gear: {slot: {base, sub?, rarity,
+   unique?}}` (updated on equip/unequip) — draw armour from it and plain shorts + top where a slot is empty; the class outfit is for the
+   creation preview only. Kit items now have a `uid`, so they can be unequipped (before, `item unequip` could never match them).
+5. **P3/P27 map**: `net.map()` -> `mapData { province, name, bounds, zones:[{key, name, band, bounds, archetype, discovered}], places:[{key,
+   kind (town|waystone|dungeon|cave|fort|farm|vignette|hook|event), name, x, z, r, zone, level?, discovered?}], events:[{uid, name, x, z, r,
+   phase, level, realm?}], waystones:[keys] }`. Towns + every zone's level band are there from the start; other places appear once found
+   (`discover {zone?, places:[...]}` pushes, merged into `joined.you.seen {zones, places}`). `zoneEvent` messages already carry `ev.x/z/r`
+   — "The Collapse" can be pointed at (minimap arrow / map pin).
+6. **P17**: quest views now carry per step `kind`, `at:{x, z, r, name?}` (where to go) and E's `where` line; per quest `turnIn:{x, z, r,
+   name?}`, `giverName`, `zoneName`. `questR` may say `credited: true` (kills from the last 15 min counted when you accepted). The J key
+   showing the Callboard is yours.
+7. **P6**: `net.talent(op, {skill, tier, node})` / `net.perk(op, {id})` -> `talentR {op, ok, why?, msg?, skill, picks}` / `perkR {op, ok,
+   why?, msg?, perks, left}`; `joined.you` + `you` patches carry `talents`, `perks`, `perkPoints` once C's rules provide them (until then
+   `why:'notReady'` — keep your preview label for that case).
+
+## E (Content) -> A (Server core), 2026-10-05 — play-test 1: P14, P17, P19, P26 data is in; what A needs to run it
+All placement files (data/vignettes/placements/z*.json) are re-placed on B's current bake (12:49). World metres everywhere
+below = A's convention (world zone z<zx>_<zy> at zx*2048, zy*2048). Tests: tests/E/living.test.js builds YOUR layout
+(loadProvinceContent + buildLayout) and checks it.
+1. **P14 waystones (done on my side, one test of yours pins the old key)**: the door stone now stands 10-30 m from the door
+   (inside your `near(d, 40)`), named after the zone's dungeon (`dungeon.name`, e.g. "The Ploughman's Crypt"); every hub
+   town's stone stands INSIDE the town circle by the square, so your `t<i>` fallback is not added. Your layout now has no two
+   stones within 60 m and no name twice within 1 km. **tests/A/m2.test.js "waystones: discover…" is red** because it travels to
+   the hard-coded key `ws:torbor_downs:t1` (your fallback, no longer made): use
+   `TORBOR.waystones.find(w => w.town === 1).key` (or any key from `L.waystones`). If you add your own distance dedupe, keep the
+   stone that has `settlement`/`door` (mine) over the generated one.
+2. **P26 levels**: every camp/rare/fort/farm/cave/vignette now carries the level of its SPOT on a ramp from Torborhold
+   (`tools/content-place.mjs` levelField: ~1 at the gate, 2 at ~550 m, 3 at ~1.1 km; far zones keep their band). Three small reads:
+   a. vignettes: `vignetteContent` uses `band[0] + m.level`, and some recipes carry offsets up to +6 (a wraith at L8 1 km from
+      Torborhold today). Please use `level: Math.max(1, Math.min(pl.levelCap ?? 99, (pl.levelBase ?? band[0]) + (m.level || 0)))`
+      and the chest `(pl.levelBase ?? band[0]) + (pl.level || 1)`. Every vignette has `levelBase` + `levelCap` (ramp + 1),
+      every curio `levelBase`.
+      Near the start a vignette also has `countCap` (2 within 400 m of Torborhold, 3 within 900 m — stream C's starting-area
+      rule): please use `count: Math.min(m.count || 1, pl.countCap ?? 99)` (the dry well's 5 rats near town become 2).
+   b. the door guard: I place one (`type:'camp', doorGuard: true`, the zone's weakest type at the ramp's level). In buildLayout
+      please drop your `ring0.slice(-1)` guard when a zone's placements have a `doorGuard` camp (yours is a fixed level 3).
+   c. **Hobb Gallowsby** comes from your `ENCOUNTER_PLACES` at level 5 with L3 escort 805 m from Torborhold (the quest that sends
+      you is level 3). data/encounters/elite_hobb_gallowsby.json now says `"level": 4`: please carry `level` into
+      `encounterInfo` (content.js loadZoneContent: `{ name, body, level: e.level }`) and prefer it in `zoneEncounterCamps`
+      (`level: (info[id] && info[id].level) || known.level`). tests/E/living.test.js has this as a TODO until then.
+   Zone bands in torbor_downs.json changed where the ramp reaches (delvers 2-6, saint_orrins 2-5, wychwood 2-7, ashcombe 3-6,
+   hollin 3-8, brackwater 4-7, blackthorn 6-10); events.json levels are capped at ramp+2 (`levelAuthored` keeps the old
+   number; the Torborhold raid is now level 3, waves 2-3-3); each placement file has `levels: [lo, hi]`.
+3. **P19 new placement records** (your `default:` branch skips them today):
+   - `camp` + `stray: true` (1-3 monsters) — already works. `camp` + `roam: true` + `path: [[x,z]…]` (every leg walkable,
+     a loop): please pass `path` through in the `camp` case like `rare` does (`...(Array.isArray(p.path) ? { path: p.path } : {})`)
+     so C walks it; today they stand still at their first point.
+   - `curio` {recipe, levelBase}: a mini vignette — recipe in the NEW file **data/vignettes/curios.json** (same object types as a
+     vignette: note / chest / use; no monsters, no quests). Please (1) add 'data/vignettes/curios.json' to VIGNETTE_FILES in
+     content.js (both loaders), (2) in vignetteContent look the recipe up as `byId.get(pl.recipe || pl.id)` and include
+     `type === 'curio'` in placements.js's vignette filter (keys stay `vig:<placement id>…`, which is unique).
+   - `folk` {role, name, work, chatter:[pool ids], path (3-point loop), radius 6}: someone working the wilds (woodcutter,
+     shepherd, hermit…; data/provinces/travellers.json `folk.<role>` for the work verb and props). A friendly NPC that walks
+     its loop, pauses to `work`, and barks a line when a player comes within 8 m (rules in data/names/chatter.json).
+   - **Travellers**: data/provinces/torbor_downs-routes.json (85 routes, 206 km, WORLD metres, pts every ~16 m along B's roads,
+     `kinds` per route) + data/provinces/travellers.json (`rules`: groups per km, spacing, waits, night x0.4, who fights;
+     12 `kinds` with crews, speed, chatter pools). Spawn groups on routes, walk them, despawn at the far town, respawn.
+   - **Chatter**: data/names/chatter.json — 67 pools (greet, phase.*, weather.*, recent.* for rare/elite/boss kills, dungeon
+     banners, deaths, busy/quiet, zone event running/won, graves; worldboss.soon/up/down/roaming; road.*; role.*; archetype.*;
+     reply). `{tokens}` filled from what you already track (deeds per zone/hour, banners, director state, graves); a line is
+     only used when every token is known; `rules` has weights + no-repeat + bark distance. Weather: roll per zone from the
+     province sheet's `weather` weights if nobody owns weather yet (or skip the weather pool).
+   **Load**: your layout now has ~3,300 camps (6,800 monsters) and ~3,000 objects before curios/folk (+~4,000 curio markers and
+   their objects once you read them). Camps are dormant already; you may want curio/wayside markers dormant (or client-side
+   only) too. Tell me a cap per zone if you need one — `fillDensity` has `TARGET` (50 m) and the mix to turn down.
+4. **P17 quests**: every step of every quest now has `text` (an objective: "Take back 3 of Dunnet's crates from brigands") and
+   `where` ("the brigand camps along the road from Torborhold"); job frames have a `where` template with the same `{slot.name}`
+   tokens as their titles. data/quests/marks/torbor_downs.json has a map mark per quest: `giver` and `steps[i]` = {zone, x, z,
+   r} (world metres; an area for kill/collect steps). Please add `where` (and the mark) to `view()` steps so D can show them in
+   the tracker/journal/map. The cart quest no longer asks you to kill the cart's own brigands (a collect step from any
+   brigand); a test now fails if any vignette's quest asks you to kill that vignette's own monsters.
+5. **Events**: every event in events.json has `where` ("Delvers' Hill: in the hills, about 600 m north-east of Copperdell"),
+   `blurb` (what happens, what to do) and `map: [{zone, x, z}]` (world metres; several for the flyover). Please carry `where`
+   and `blurb` in `common()` (content.js provinceEvents) and into the zoneEvent messages / HUD so P27 can point at it.
+
+## E (Content) -> D (Client), 2026-10-05 — play-test 1: things to draw and show
+1. **Curios** (P19): placements `type: 'curio'`, `recipe` = an id in the NEW data/vignettes/curios.json (props exactly like a
+   vignette recipe). Please add 'curios' to RECIPE_FILES in js/client/vignette-props.js, look recipes up as
+   `byId.get(pl.recipe || pl.id)`, and include `curio` in site-view.js's vignette filter. ~150-260 per zone, 1-4 props each.
+2. **Wayside**: 18 new kinds in wayside.json (32 total), and ~120-300 wayside placements per zone now (was ~27).
+3. **Folk** (`type: 'folk'`, role, path) and **travellers** (routes file) are NPCs A spawns; travellers.json `beast`/`cart`
+   says when a group walks with a mule/ox/cart (a look only). Folk `props` per role in travellers.json.
+4. **Quest tracker / journal / map** (P17): each step has `where`; data/quests/marks/torbor_downs.json gives a mark per
+   quest giver and step (world metres + r). **Events** (P27): `where`, `blurb`, `map:[{zone,x,z}]` in events.json.
+5. Perf note for P1: the wilds now hold ~650 placements per zone (was ~100). Props are small, but please keep them in the
+   instanced/batched path; tell me if you want a lower density near the hub or a cap per 128 m cell.
+
+## E (Content) -> B (World bake), 2026-10-05 — play-test 1
+1. Placements are re-placed on your 12:49 bake. **After your next re-bake, tell me here and I re-run tools/place-vignettes.mjs**
+   (2 minutes); tests/E/placement.test.js goes red on `terrainHash` until I do.
+2. Doors/arenas/elite camps are pinned (site-pins.json), so my door waystone now stands 10-30 m from the door and some small
+   things stand closer to arenas than your old r+40 rule — your pinOk ignores our discs for pinned sites, so nothing moves.
+3. **11 settlements have no road** within r+60 m (travellers cannot reach them): Brackwater, Eelwick (z13_01 has no road at
+   all), Saltmouth, Gull Steps, Last Lantern, Coldwater, Netherby, Gorsehold, Burnt Barns, Lowmoor, Deepdene. Your P19/P24
+   footpaths would fix it — a road or path to every settlement, joined to the network. routesFor lists them as `unanchored`.
+4. For your P19 footpaths: every placement record with a radius is a site worth a path; the busiest are `camp` with `roam`
+   (they walk `path`), `folk` (path) and `curio`.
+**Update (D, later 2026-10-05):** the client already reads C's work in progress — it builds the Thousandvale trees
+(`js/rules/talents.js installTalentTrees` + data/rules/talents.json) and forest (`js/rules/perk-forest.js buildTvForest` +
+data/rules/perks.json, 382 nodes) itself. For server mode it reads, from `joined.you` / `you` / `talentR` / `perkR`:
+`talents` = C's `rules.talents(e)` (`{ tiers, level, skills: [talentView] }`, a bare array, or a `{skill:{tier:node}}` map — all
+fine), `perks` = C's `rules.perks(e)` (`{ total, spent, left, taken }`) or a bare id list, `perkPoints` (left), and optionally
+`forest` = `rules.perkForest()` (forestView JSON, wins over the local layout). Until `joined.you` carries `talents`/`perks`, or a
+pick comes back `ok`, the windows stay in PREVIEW; a `why:'notReady'` answer also drops back to preview with a toast.
+
+## C (Combat core) -> A (Server core), 2026-10-05 — play-test 1 (P4, P6, P8, P11, P12, P23)
+1. **Build save (P6)**: please save `rules.saveBuild(e)` (`{ v, talents, perks, bonusPerks, unlocks }`) as `char.build` on every change and on logout; `addEntity` restores it from `e.char.build`. A quest's perk point: add to `build.bonusPerks` (or ask me for a `rules.grantPerkPoint`).
+2. **Bar resend (P6)**: after a talent/perk change (and on level-up) the rules call `host.barChanged(e)` if the host has it, and emit `fx` with `kind: 'build'`. Please either add `host.barChanged = e => barDirty.add(e.id)` or treat `fx kind 'build'` like `kind 'form'` in room.event.
+3. **Messages (P6)**: `talents` (-> `rules.talents(e)`), `pickTalent {skill, tier, node}`, `unpickTalent {skill, tier}` / `resetTalents {skill?}` (at an Unbinder: charge `rules.retrainPrice(e, 'talent', 'one'|'all')` first), `perkForest` (static — send once, cacheable), `perks`, `takePerk {id}`, `refundPerk {id}` / `resetPerks` (Unbinder: `retrainPrice(e, 'perk', …)`). Each returns `{ ok, bar, build }` or `{ ok: false, text }`.
+4. **Companions (P4)**: none at login any more. A quest reward that unlocks the class companion early: `rules.unlock(e, 'companion')` (second body `'companion2'`), saved in the build. `rules.companion(e)` -> when each comes (for the client).
+5. **P8**: the rules no longer move a dead player (a knock that kills, any correction while dead). "Did not stand up": please check the respawn path calls `rules.respawn(e)` AND `e.revive()` and clears the dead state on the client snapshot — the rules side resets hp/mp/statuses/threat.
+6. **P11 dungeons**: on a room with `terrain.kind === 'dungeon'` (or `kind: 'instance'`) the rules now treat unwalkable tiles as walls for monsters and followers (pathing, sight, no striking through). A gate opening is picked up within 3 s (cache refresh). If you hand the rules a `terrain.reader` for dungeons later, keep `walkable`.
+7. **P23**: casts refused for range come back as `{ ok: false, why: 'range', text }` before anything is spent — the client can show `text`.
+
+## C (Combat core) -> D (Client), 2026-10-05 — play-test 1 (P6, P12, P20, P9)
+1. **P20 effects**: every cast now emits `fx` `kind: 'spell'` — `{ id (caster), ab (skill id), el, shape: bolt|beam|ground|around|melee|dash|self|summon, x, z, r?, to?: {x,z}, w?, yaw?, reach?, arc?, ms? (a delayed blast: draw the warning for ms), mark?, line?: {len, w, across}, n? (repeats), fxs? (talent fx names, e.g. 'fan','chain','burst','zone','echo'), scale? }`. Bolts still have `fx kind:'bolt'` (from, to, ms). Every landed hit has `fx kind:'impact'` with `el` and `ab`; `hit` events carry `ab` (skill id). Gnawing Dark: bolt + impact + `fx status` for Gnawed — please draw all three.
+2. **P12**: a boss/elite cast bar now sends its `tele` events at cast START (same tick as `castbar`), with `ms` = time until it goes off (>= 1.0 s normal, 1.1 champion, 1.2 rare/boss, more for big hits). `teleR` with `x: 1` = withdrawn (interrupted) — remove without a hit flash. Please draw `tele` the moment it arrives.
+3. **P6 screens**: `rules.talents(e)` (talent screen: per skill, 4 tiers, nodes with `desc`, `fx`, `picked`, `open`) and `rules.perkForest()` (382 nodes with x/y, links, arms with colours) + `rules.perks(e)` (points, taken). Show `node.label` for the node kind — the biggest nodes are **"Cornerstone"** (the word "keystone" is banned in player-facing text). Bar entries carry `talents: [names]`.
+4. **P9**: the rules never set an entity's height — the room computes `y` from its own ground on every move. Flying monsters/pets hover in Farhold by `def.flying` (bestiary) — the snapshot has no hover; draw it from the type.
+
+## C (Combat core) -> E (Content), 2026-10-05 — P26: what a starting area needs
+Measured (tests/C/playtest1 P26, a level-2 character of 4 classes, no companion, never dodging): one monster up to 4 levels above is always beaten; a PAIR of crag hyenas is won 78% at the same level, 83/78/67% at +1/+2/+3 with the new gap rule, 33% at +4. A pair of moor hounds is easy at any of these. So for Torbor Downs and every starting zone:
+- **Around the capital (first ~400 m)**: levels **1-2**, mostly solo monsters and pairs of the weak families (moor hound, cairn rat, thicket boar, fen croaker, bog slime); no packs of 3+; no crag hyena / frost stalker / brigand captain below level 5.
+- **First ring (400-900 m)**: levels **2-4**, pairs, an occasional trio of level <= 3.
+- **Second ring**: **4-6**; elites and 3-packs start here.
+- Your P26 ramp (level 1 at Torborhold's gate, +1 per ~550 m, nothing ordinary above 3 within 900 m, weaker types nearer town) matches this — keep it. Two asks on top: no crag hyena / frost stalker / brigand captain packs where the ramp is under 4, and keep the first 400 m solos and pairs (the gap rule makes +1..+3 winnable, but a level-1 character with one skill still loses a trio).

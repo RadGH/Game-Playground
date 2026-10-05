@@ -57,8 +57,8 @@
           "kind": "kill",
           "type": "moor_hound",
           "count": 8,
-          "where": "around Torborhold",
-          "text": "Moor hounds killed"
+          "where": "the sheep folds around Torborhold",
+          "text": "Kill 8 moor hounds near the folds"
         }
       ],
       "done": "Eight? Good. The shepherds will sleep tonight, and so will I.",
@@ -83,8 +83,8 @@
           "kind": "kill",
           "type": "thicket_boar",
           "count": 5,
-          "where": "the fields toward Wamonhold",
-          "text": "Thicket boars driven off (permanently)"
+          "where": "the turnip fields toward Wamonhold",
+          "text": "Kill 5 thicket boars in the fields"
         }
       ],
       "done": "Lovely. Take a turnip. Take two, they've been bitten anyway.",
@@ -105,12 +105,14 @@
         {
           "kind": "visit",
           "vignette": "boar_wallow",
-          "text": "Find the boar wallow"
+          "text": "Find the Boar Wallow",
+          "where": "Boar Wallow, between Torborhold and Wamonhold"
         },
         {
           "kind": "killOne",
           "encounter": "rare_grisel_thornhide",
-          "text": "Grisel Thornhide slain"
+          "text": "Kill Grisel Thornhide",
+          "where": "Grisel Thornhide roams near Boar Wallow"
         }
       ],
       "done": "Gods. You actually did it. Here — my husband's knife. He'd want it used on something worth it.",
@@ -136,12 +138,13 @@
           "type": "road_brigand",
           "count": 6,
           "where": "the road to Fitockpi Ford",
-          "text": "Brigands dealt with"
+          "text": "Kill 6 brigands on the ford road"
         },
         {
           "kind": "killOne",
           "encounter": "elite_hobb_gallowsby",
-          "text": "Hobb Gallowsby stopped"
+          "text": "Stop Hobb Gallowsby at the ford",
+          "where": "Fitockpi Ford"
         }
       ],
       "done": "Gallowsby, done? The ford's free? I'll write that down as a joint effort.",
@@ -170,13 +173,15 @@
           "kind": "use",
           "vignette": "hanging_oak",
           "object": "Shepherd's satchel",
-          "text": "Read the satchel"
+          "text": "Read the note in the shepherd's satchel",
+          "where": "The Hanging Oak"
         },
         {
           "kind": "deliver",
           "item": "Shepherd's satchel",
           "npc": "old_pell",
-          "text": "Bring the satchel to Old Pell"
+          "text": "Bring the satchel to Old Pell",
+          "where": "Old Pell, in Wamonhold"
         }
       ],
       "done": "That's his hand. That's his... Thank you. I'd rather know. Take this — he'd not need it now.",
@@ -198,22 +203,25 @@
         "vignette": "overturned_cart",
         "object": "Dunnet the carter"
       },
-      "offer": "They'll be back for the rest. Chase off the ones by the cart, then tell the reeve in Torborhold the road isn't safe.",
+      "offer": "You saw off the ones at my cart, and bless you for it. But their friends ran off with my crates, three of them, toward their camps on the road. Fetch them back, then tell the reeve in Torborhold the road isn't safe.",
       "steps": [
         {
-          "kind": "kill",
-          "type": "road_brigand",
+          "kind": "collect",
+          "item": "Dunnet's crate",
           "count": 3,
-          "where": "the overturned cart",
-          "text": "Brigands at the cart"
+          "from": "road_brigand",
+          "chance": 0.5,
+          "text": "Take back 3 of Dunnet's crates from brigands",
+          "where": "the brigand camps along the road from Torborhold"
         },
         {
           "kind": "talk",
           "npc": "reeve_corwin",
-          "text": "Tell Reeve Corwin about the cart"
+          "text": "Tell Reeve Corwin about the cart",
+          "where": "Reeve Corwin, in Torborhold's square"
         }
       ],
-      "done": "Another cart? Right. That settles it. Here's the job I've been meaning to give someone.",
+      "done": "Crates back, and another cart turned over? Right. That settles it. Here's the job I've been meaning to give someone.",
       "reward": {
         "xp": 0.3,
         "gold": 5
@@ -232,7 +240,7 @@
           "type": "fen_croaker",
           "count": 6,
           "where": "the marsh south of Mawehaven",
-          "text": "Fen croakers"
+          "text": "Kill 6 fen croakers in the marsh"
         }
       ],
       "done": "Six! My nephew says thank you. He says it very quietly, he's still upset.",
@@ -253,7 +261,8 @@
         {
           "kind": "killOne",
           "encounter": "rare_sallowmaw",
-          "text": "Sallowmaw slain"
+          "text": "Kill Sallowmaw",
+          "where": "the deep reeds near Mawehaven"
         }
       ],
       "done": "You smell terrible. You're a hero. Both things are true.",
@@ -276,12 +285,14 @@
         {
           "kind": "visit",
           "site": "event_grandmother_skein",
-          "text": "Look at the sinkhole in Mawehaven's field"
+          "text": "Look at the sinkhole in the barley field",
+          "where": "the sinkhole in Mawehaven's barley field"
         },
         {
           "kind": "visit",
           "vignette": "hedge_witch_garden",
-          "text": "Ask the hedge-witch's garden for answers (read her notes)"
+          "text": "Read the notes at the hedge-witch's garden",
+          "where": "The Hedge-Witch's Garden"
         }
       ],
       "done": "So it's true. When she comes up, the whole village will need you. The whole field, more like.",
@@ -303,12 +314,13 @@
           "kind": "killOne",
           "encounter": "event_grandmother_skein",
           "credit": "event",
-          "text": "Grandmother Skein defeated (event credit counts)"
+          "text": "Defeat Grandmother Skein when she wakes",
+          "where": "the sinkhole in Mawehaven's barley field (zone event)"
         }
       ],
       "done": "Mawehaven owes you. We'll name a field after you. A small one.",
       "reward": {
-        "xp": 1.0,
+        "xp": 1,
         "gold": 40,
         "item": {
           "tier": "rare",
@@ -329,7 +341,8 @@
           "count": 6,
           "from": "barrow_hound",
           "chance": 0.6,
-          "text": "Clean knucklebones"
+          "text": "Collect 6 knucklebones from barrow hounds",
+          "where": "barrow hounds near the Ploughman's Crypt"
         }
       ],
       "done": "Lovely and clean. Hold out your arm — no, it's a gift, not a procedure.",
@@ -354,13 +367,15 @@
           "kind": "clear",
           "dungeon": "door",
           "floor": 1,
-          "text": "Reach the second floor"
+          "text": "Reach the second floor of the Crypt",
+          "where": "The Ploughman's Crypt, the dungeon door west of Torborhold"
         },
         {
           "kind": "clear",
           "dungeon": "door",
           "boss": true,
-          "text": "Defeat what waits at the bottom"
+          "text": "Defeat what waits at the bottom",
+          "where": "the bottom of the Ploughman's Crypt"
         }
       ],
       "done": "You came back. Both times I've said that this year, I've been surprised. Thank you.",

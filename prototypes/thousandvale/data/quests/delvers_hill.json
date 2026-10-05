@@ -40,8 +40,8 @@
           "kind": "kill",
           "type": "ironback_beetle",
           "count": 6,
-          "where": "the upper galleries",
-          "text": "Ironback beetles"
+          "where": "the upper galleries above Copperdell",
+          "text": "Kill 6 ironback beetles in the galleries"
         },
         {
           "kind": "collect",
@@ -49,7 +49,8 @@
           "count": 4,
           "from": "ironback_beetle",
           "chance": 0.5,
-          "text": "Copper the beetles swallowed"
+          "text": "Collect 4 copper nuggets from ironback beetles",
+          "where": "ironback beetles in the upper galleries"
         }
       ],
       "done": "Copper back, beetles gone. Head down to Brackwater, the reeve there sent for help.",
@@ -76,7 +77,8 @@
           "count": 5,
           "from": "ash_wisp",
           "chance": 0.6,
-          "text": "Wisp sparks"
+          "text": "Collect 5 wisp sparks from ash wisps",
+          "where": "ash wisps in the old workings of Delvers' Hill"
         }
       ],
       "done": "Lovely bright ones. Lamps for everybody. Mind your eyebrows.",
@@ -96,8 +98,8 @@
           "kind": "kill",
           "type": "cairn_rat",
           "count": 10,
-          "where": "the lift house",
-          "text": "Cairn rats"
+          "where": "the lift house by the Old Headframe Fort",
+          "text": "Kill 10 cairn rats at the lift house"
         }
       ],
       "done": "Right. New rope. New rats probably. But not today.",
@@ -116,14 +118,15 @@
         {
           "kind": "visit",
           "vignette": "dry_well",
-          "text": "Find the dry well"
+          "text": "Find the Dry Well",
+          "where": "The Dry Well, out on Delvers' Hill"
         },
         {
           "kind": "kill",
           "type": "cairn_rat",
           "count": 5,
-          "where": "the dry well",
-          "text": "Rats in the well"
+          "where": "The Dry Well",
+          "text": "Kill 5 rats in the well"
         }
       ],
       "done": "Grandad's pipe! And his teeth. Don't ask why he kept his teeth.",
@@ -147,14 +150,16 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the deep seam",
-          "floor": 1
+          "text": "Reach the deep seam of Old Copperdeep",
+          "floor": 1,
+          "where": "Old Copperdeep, the dungeon door on Delvers' Hill"
         },
         {
           "kind": "clear",
           "dungeon": "door",
           "text": "End the last shift",
-          "boss": true
+          "boss": true,
+          "where": "the bottom of Old Copperdeep"
         }
       ],
       "done": "Silence below. First quiet night in Copperdell in ten years.",
@@ -178,7 +183,8 @@
           "kind": "killRare",
           "zone": "delvers_hill",
           "slot": 0,
-          "text": "The hill's rare beast slain"
+          "text": "Hunt down Blind Gammer",
+          "where": "roams the spoil heaps of Delvers' Hill"
         }
       ],
       "done": "That's one fewer thing trying to eat my fort.",

@@ -16,7 +16,7 @@ Readers:
 
 | Constant | Value | Where |
 |---|---|---|
-| `PROTOCOL_VERSION` | `4` | `js/net/protocol.js`. Bumped on any wire change. A client with another value is refused with `refuse {code:'version'}` → the client shows "A new version is out — reload". |
+| `PROTOCOL_VERSION` | `5` | `js/net/protocol.js`. Bumped on any wire change. A client with another value is refused with `refuse {code:'version'}` → the client shows "A new version is out — reload". |
 | `BUILD` | string | The server's build id (dev: `dev`; published copies: the git hash). A client whose `build` differs is refused with `code:'build'` → "reload". The client is always served by the same server as its socket (PLAN §10.1). |
 | `SNAP_VERSION` | `1` | First byte after the type byte of every binary snapshot. |
 | `TICK_MS` | `50` | Simulation 20 Hz (PLAN §8.3). |
@@ -125,6 +125,9 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `callboard` | gw | `op:str:8, dungeon?:str:64, role?:str:8, id?:int` | 1 / 5 | The Callboard (§16.6): `list`, `join {dungeon: key \| 'any', role: 'tank'\|'healer'\|'dps'}`, `leave`, `accept {id}`, `decline {id}`. Answers `callboard {state}`. |
 | `report` | gw | `name:str:24, why:str:16, text?:str:200` | 0.1 / 3 | Report a player (`why`: spam, abuse, cheat, name, other). Answer `reportR`. |
 | `mail` | p | `op:str:8, id?:int, to?:str:24, subject?:str:60, body?:str:500, items?:uids, gold?:int` | 2 / 8 | Mail (§16.5): `list`, `read {id}`, `send {to, subject, body, items, gold}`, `take {id}`, `return {id}`, `delete {id}`. Answers `mailR`, `mailList`, `mailOpen`. |
+| `talent` | p | `op:str:8, skill?:str:48, tier?:int, node?:str:48` | 3 / 10 | Talents (§17.2): `pick {skill, tier, node}`, `clear {skill}`. Answer `talentR`; the bar comes as `you {bar}`, the build as `you {talents, perks, perkPoints}`. |
+| `perk` | p | `op:str:8, id?:str:64` | 3 / 10 | The perk forest (§17.2): `take {id}`, `refund {id}`, `reset`. Answer `perkR`. |
+| `map` | p | `op:str:8` | 1 / 3 | The world map (§17.3): `get` -> `mapData`. |
 
 ### 3.2 Server → client
 
@@ -177,6 +180,10 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `mailOpen` | `mail:{…as mailList…, body, items:[full items]}` | (game socket) One letter, read (it is now marked read). |
 | `mailR` | `op, ok, why?, msg?, id?, to?, cost?, items?, gold?` | (game socket) Answer to a mail op. `why`: `gate`, `town`, `busy`, `items`, `gold`, `item`, `trade`, `slow`, `notFound`, `self`, `ignored`, `failed`, `missing`, `empty`, `bagFull`, `holds`. |
 | `muted` | `until, by, msg` | (gateway) You were muted (or unmuted) until wall ms `until`; `by`: `admin` or `auto` (reports). |
+| `talentR` | `op, ok, why?, msg?, skill, picks?` | Answer to `talent` (`why`: `notReady` (the rules have no talents yet), `dead`, `combat`, or the rules' own). |
+| `perkR` | `op, ok, why?, msg?, id, perks?, left?` | Answer to `perk` (`why`: `notReady`, `dead`, `combat`, or the rules' own; `left` = perk points left). |
+| `mapData` | `province, name, bounds, zones, places, events, waystones, horizon` | (game socket) The map (§17.3): zones with name + level band, towns always, places you found, events now. |
+| `discover` | `zone?, places` | (game socket) You found a zone / places (§17.3); also merged into `joined.you.seen` by client.js. |
 
 ---
 
@@ -791,3 +798,67 @@ stable / 8493 dev), token in `TV_ADMIN_TOKEN` or `<state>/admin-token`.
 - `--dev-hooks <port>` (server/main.mjs, TEST ONLY; refused with `--env stable`, `--public` or `--procs`): 127.0.0.1 HTTP
   `GET /who`, `POST /level {name, level}`, `POST /give {name, gold, items}`, `POST /event {id, announceMs}`
   (`server/dev-hooks.mjs`).
+
+
+## 17. Play-test 1 (2026-10-05) — protocol v5
+
+### 17.1 Water, the ground, bodies (P2, P8, P9, P25)
+- **Swimming.** `stepMove` (js/sim/movement.js, shared with the client predictor) asks how a body moves at a point: stream B's
+  `terrain.moveAt` (`out | steep | walk | wade | swim`) or the same answer from `walkable` + `waterAt` (same thresholds:
+  `WADE_DEPTH` 1.1 m, `DRY_FOOT_DEPTH` 0.25 m). Deep water is swum, never a wall (the "invisible wall" in shallow streams was a
+  middle deeper than 1.1 m): `MOVE.swim` 2.7 m/s (3.6 with SPRINT), floating at surface − `MOVE.swimSink` (1.1 m), no jumping;
+  wading is `MOVE.wade` (×0.8) of a run. The server sets `STATE.swimming` (16; anim `swim`), sends `y` while it is set, refuses
+  `cast` with `castR {why:'swimming', text}`, and calls `rules.onSwim(e, on)` if the rules have it. **The predictor's terrain must
+  carry `waterAt` (and `moveAt` when it has one)** or prediction disagrees at every stream.
+- **Heights.** The server stands every body on `terrain.heightAt` — stream B's reader, which includes bridge decks
+  (`meta.bridges`) — and dungeon floors at 0. **The mirror keeps `y` only for airborne/swimming entities**; a grounded entity's
+  `y` is `undefined` and the client stands it on its own ground (the FULL record's `y` used to go stale until the next AOI cell:
+  monsters floated downhill and sank uphill).
+- **Bodies.** A dead entity cannot move (`Entity.moveTo` ignores it unless the server forces a teleport); a respawn revives first;
+  `revive` clears the combat flag.
+
+### 17.2 Talents and the perk forest (P6)
+`talent {op, skill, tier, node}` / `perk {op, id}` go to the rules: `rules.talent(e, op, {skill, tier, node})`, `rules.perk(e, op,
+{id})` -> `{ ok, why?, text?, picks? | perks?, left? }`. On ok the server saves `char.build = rules.saveBuild(e)` (SAVE_FIELDS
+`build`, journaled), refreshes the skill bar (`you {bar}` after the tick) and sends `you {talents, perks, perkPoints, hpMax,
+mpMax}` (`rules.build(e)`). `joined.you` and the level-up `you` patch carry the build view too. Talents and refund/reset are
+refused while fighting or dead; without the rules' functions the answer is `why:'notReady'`.
+
+### 17.3 The map and discovery (P3, P27)
+Every province lists its places (towns, waystones, dungeon doors, caves, forts, farms, vignettes, hooks, zone event sites). A
+character discovers a zone by entering it and a place by coming within its radius + 30 m (`DISCOVER_PAD`); discoveries are saved
+(`seen: {zones, places}`, SAVE_FIELDS) and pushed as `discover {zone?, places:[place]}`. `map {op:'get'}` -> `mapData`:
+`zones:[{key, name, band, bounds, archetype, discovered}]` (every zone and its level band from the start), `places:[{key, kind,
+name, x, z, r, zone, level?, hostile?, discovered?}]` (towns always, the rest once found), `events:[{uid, id, name, x, z, r, phase,
+level, zoneName, realm?}]` (the realm event, and zone events of your copy), `waystones` (keys you know), `horizon`. Using a waystone
+also discovers it. `zoneEvent.ev` already carries `x, z, r` for a marker.
+
+### 17.4 The living roads (P19)
+js/sim/travellers.js runs stream E's data/provinces/travellers.json + `<province>-routes.json` + data/names/chatter.json in every
+wilds copy: groups (caravans, patrols, pilgrims, couriers…) always advance along town-to-town routes; their crew exists as room
+entities only near a player (kind `npc`, team 1, friendly, talkable; `info.role` = the crew role, `data.traveller {kind, group,
+name, from, to, beast, cart}` server-side). E's `folk` placements (people working one spot) walk a small loop and work. Barks are
+ordinary `say` events (`style: 'bark'`) chosen by E's weights (recent deeds of the zone, a live zone event, the world boss, phase
+of day, role, road position, archetype) with every `{token}` filled — a line with a token nobody can fill is skipped. Not run yet
+(simplified on purpose): travellers do not fight (`fights` is ignored; monsters never target them — no combat unit), and the
+wayside stop is a random pause.
+
+### 17.5 Quests explain themselves (P17)
+Quest views gain per step `kind`, `at: {x, z, r, name?}` (where it happens: the camp, the place, the NPC, the door) and E's
+`where` line; per quest `turnIn: {x, z, r, name?}`, `giverName`, `zoneName`. Kills, event wins, clears and uses from the last
+15 minutes (`RECENT_Q_MS`) are replayed into a quest when you accept it — `questR {credited: true, quest}`.
+
+### 17.6 Starting kit and worn gear (P22)
+A new character keeps its class weapon (+ off-hand) and nothing else (`char.kitV` = 1 once applied; never re-applied). Every
+player's `info` carries `gear: {slot: {base, sub?, rarity, unique?}}`, refreshed on equip/unequip and room change — draw armour from
+it (plain clothes where a slot is empty). Worn items always have a `uid` (the rules' kit items had none and could not be taken off).
+
+### 17.7 Travel without the freeze (P10)
+Waystone and event travel answer `travelR {ok, cost, to, at: {x, z}, province, delayMs}` FIRST and move you `delayMs`
+(`TRAVEL_PRELOAD_MS`, 1500) later, so the client can stream the destination behind a fade. Interrupted (death, a fight, logging off)
+-> `travelR {ok:false, why:'interrupted'}` and the fare back. Server-side room changes measure 0.1–1 ms (instance creation 5–25 ms);
+a 2–3 s freeze is client-side loading.
+
+### 17.8 Waystones (P14)
+No generated door waystone within 90 m of one already standing; waystones closer than 60 m merge (the placed one wins; a character
+who found the merged one keeps the kept one — `waystoneAliases`); a door's stone is named after its dungeon.

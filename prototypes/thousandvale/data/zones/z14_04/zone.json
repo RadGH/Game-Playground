@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "32f7a264",
+  "bakeVersion": 3,
+  "inputHash": "e5a0c815",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 14,
@@ -131,13 +131,27 @@
     "x": 1199,
     "z": 1026
   },
+  "bridges": [
+    {
+      "a": [
+        1902.4,
+        1263.6
+      ],
+      "b": [
+        1915.18,
+        1275.18
+      ],
+      "h": 68.956,
+      "w": 4.92
+    }
+  ],
   "summary": {
     "zone": "z14_04",
     "province": "Petbeck Basin",
-    "inputHash": "32f7a264",
+    "inputHash": "e5a0c815",
     "rivers": 3,
-    "wetShare": 0.011,
-    "unwalkableShare": 0.007,
+    "wetShare": 0.01,
+    "unwalkableShare": 0.004,
     "towns": [
       {
         "name": "Lowmoor",
@@ -151,8 +165,8 @@
         "movedFrom": null,
         "culture": "halfling",
         "plots": 24,
-        "streets": 69,
-        "links": 0,
+        "streets": 70,
+        "links": 1,
         "overlaps": 0
       },
       {
@@ -167,22 +181,24 @@
         "movedFrom": null,
         "culture": "halfling",
         "plots": 9,
-        "streets": 20,
-        "links": 0,
+        "streets": 21,
+        "links": 1,
         "overlaps": 0
       }
     ],
-    "roads": 0,
-    "bridges": 0,
-    "scatter": 6919,
+    "roads": 3,
+    "bridges": 1,
+    "paths": 7,
+    "pathMetres": 2070,
+    "scatter": 11289,
     "scatterKinds": {
-      "rock_large": 339,
-      "tree_acacia": 1715,
-      "bush": 3165,
-      "rock_small": 1271,
-      "tree_dead": 86,
-      "boulder": 148,
-      "tree_broadleaf": 195
+      "rock_large": 738,
+      "tree_acacia": 2441,
+      "bush": 5339,
+      "rock_small": 2285,
+      "tree_broadleaf": 172,
+      "boulder": 198,
+      "tree_dead": 116
     },
     "sites": [
       "landmark ancientwood The Elder Stondhealweast 1472 1728",
@@ -198,13 +214,13 @@
       "x": 1199,
       "z": 1026
     },
-    "placements": 132,
-    "vignettesAvoided": 89
+    "placements": 145,
+    "vignettesAvoided": 670
   },
   "files": {
-    "terrain.bin": 497289,
-    "nav.bin": 14206,
-    "scatter.bin": 55436,
-    "placements.json": 41190
+    "terrain.bin": 499975,
+    "nav.bin": 19990,
+    "scatter.bin": 90396,
+    "placements.json": 105943
   }
 }

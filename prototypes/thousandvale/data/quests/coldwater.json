@@ -33,8 +33,8 @@
           "kind": "kill",
           "type": "bog_slime",
           "count": 6,
-          "where": "the peat cuttings",
-          "text": "Bog slimes"
+          "where": "the peat cuttings by Coldwater",
+          "text": "Kill 6 bog slimes in the peat cuttings"
         }
       ],
       "done": "Lunch is safe. Peat is cut. Hooray for lunch.",
@@ -58,8 +58,8 @@
           "kind": "kill",
           "type": "reed_serpent",
           "count": 7,
-          "where": "around Netherby",
-          "text": "Reed serpents"
+          "where": "the reeds around Netherby",
+          "text": "Kill 7 reed serpents"
         }
       ],
       "done": "Boots empty. Life good.",
@@ -79,8 +79,8 @@
           "kind": "kill",
           "type": "marsh_wisp",
           "count": 5,
-          "where": "along the mere shore",
-          "text": "Marsh wisps"
+          "where": "the mere shore below Mere Tower",
+          "text": "Kill 5 marsh wisps on the shore"
         }
       ],
       "done": "One true light again. Mine.",
@@ -101,8 +101,8 @@
           "kind": "kill",
           "type": "fen_croaker",
           "count": 6,
-          "where": "around the village well",
-          "text": "Fen croakers"
+          "where": "around Coldwater's village well",
+          "text": "Kill 6 fen croakers by the well"
         }
       ],
       "done": "Fresh water! Tastes of nothing! Wonderful!",
@@ -122,14 +122,16 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the lower halls",
-          "floor": 1
+          "text": "Reach the lower halls of the Mere-Sunk Sanctum",
+          "floor": 1,
+          "where": "The Mere-Sunk Sanctum, the dungeon door in Coldwater Mere"
         },
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Defeat the temple's keeper",
-          "boss": true
+          "text": "Defeat the sanctum's keeper",
+          "boss": true,
+          "where": "the bottom of the Mere-Sunk Sanctum"
         }
       ],
       "done": "The temple's quiet. The mere seems warmer. Slightly.",
@@ -153,7 +155,8 @@
           "kind": "killRare",
           "zone": "coldwater",
           "slot": 0,
-          "text": "The mere's rare slain"
+          "text": "Hunt down Old Coldmouth",
+          "where": "roams the deep mere of Coldwater"
         }
       ],
       "done": "It's not waiting any more. Neither am I — drinks are on Netherby.",

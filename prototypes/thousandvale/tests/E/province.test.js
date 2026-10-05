@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { FAMILIES } from '../../js/rules/dungeon-tiers.js';
 import { connectedSets, gridDist } from '../../tools/province-graph.mjs';
+import { levelField } from '../../tools/content-place.mjs';
 
 const root = new URL('../../', import.meta.url);
 const J = p => JSON.parse(readFileSync(new URL(p, root), 'utf8'));
@@ -23,9 +24,29 @@ test('16 zones on a 4x4 grid, one per cell, neighbours never share an archetype,
   assert.equal(new Set(ZONES.map(([, z]) => z.archetype)).size, 12);
 });
 
-test('bands rise from the start zone: a neighbour is never more than 3 levels above', () => {
-  for (const [a, za] of ZONES) for (const [b, zb] of ZONES) if (gridDist(za.grid, zb.grid) === 1) assert.ok(zb.band[0] - za.band[0] <= 3, `${a} -> ${b}`);
-  assert.equal(P.zones[P.grid.start].band[0], 1);
+test('bands rise from the start zone (P26): the level field never jumps more than 1 across a zone border within 2 km of the hub (2.5 beyond), bands hold what the ramp gives', () => {
+  // the hub of the start zone, as the placer uses it (tools/content-place.mjs levelField)
+  const st = P.zones[P.grid.start], wid = J('data/world/province-map.json').provinces.torbor_downs.map[P.grid.start];
+  const hubP = J(`data/zones/${wid}/placements.json`).placements.find(p => p.kind === 'settlement' && p.data.hub);
+  const LF = levelField({ sheet: P, hub: { x: st.grid[0] * 2048 + hubP.x, z: st.grid[1] * 2048 + hubP.z } });
+  assert.equal(st.band[0], 1);
+  const bad = [];
+  for (const [a, za] of ZONES) {
+    if (LF.span(a)[0] !== za.band[0]) bad.push(`${a}: band starts ${za.band[0]} but the ramp starts ${LF.span(a)[0]}`);
+    for (const [b, zb] of ZONES) {
+      if (gridDist(za.grid, zb.grid) !== 1) continue;
+      // walk the shared edge: a's side vs b's side, 1 m apart
+      for (let t = 16; t < 2048; t += 64) {
+        const dx = zb.grid[0] - za.grid[0], dz = zb.grid[1] - za.grid[1];
+        const ax = dx ? (dx > 0 ? 2047.5 : 0.5) : t, az = dz ? (dz > 0 ? 2047.5 : 0.5) : t;
+        const bx = dx ? (dx > 0 ? 0.5 : 2047.5) : t, bz = dz ? (dz > 0 ? 0.5 : 2047.5) : t;
+        const j = Math.abs(LF.at(a, ax, az) - LF.at(b, bx, bz));
+        const cap = LF.dist(a, ax, az) < 2000 ? 1 : 2.5;    // gentle near the start; a far border may step (blight country)
+        if (j > cap) { bad.push(`${a} -> ${b} at ${t}: ${j.toFixed(2)}`); break; }
+      }
+    }
+  }
+  assert.deepEqual(bad, []);
 });
 
 test('every zone resolves: ready archetype, ready dungeon family, 2 rares of its own, a hook, a quest file', () => {

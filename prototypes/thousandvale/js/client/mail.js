@@ -5,6 +5,18 @@
 
 import { composeCheck, expiresText, attachText, hasAttachments, sortMail, MAIL_LIMITS, MAIL_WHY } from './social-core.js';
 import { createPanel, h, confirmBox } from './ui-panel.js';
+import { rememberItems } from './ui/item-card.js';
+import { iconFor } from './ui/item-icons.js';
+
+/** An item square with its 3D icon and the shared item card on hover (P7/P15/P16). */
+let synthUid = 0;
+function itemSlot(it, cls = '', props = {}) {
+  if (it.uid == null) it.uid = 'mail:' + (++synthUid);
+  rememberItems([it]);
+  const url = iconFor(it);
+  return h('div.islot.r-' + (it.rarity || 'common') + cls, { ...props, dataset: { ...(props.dataset || {}), tipRender: 'item', tipItem: String(it.uid) } },
+    url ? h('img', { src: url, alt: '', draggable: false }) : h('span.glyph', {}, (it.name || '?')[0]));
+}
 
 const when = t => { if (!t) return ''; const d = new Date(t), now = new Date(); return d.toDateString() === now.toDateString() ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString([], { month: 'short', day: 'numeric' }); };
 
@@ -44,8 +56,7 @@ export function createMail({ net: getNet, hud, bag, me, inTown }) {
   function drawRead() {
     const m = S.open;
     panel.setTitle(m.subject || '(no subject)', m.from ? `from ${m.from}` : '');
-    const items = (m.items || []).map(it => h('div.islot.r-' + (it.rarity || 'common') + (m.taken ? '.taken' : ''), { title: `${it.name}${it.rarity ? ' (' + it.rarity + ')' : ''}`,
-      onpointermove: e => bag?.card(it, e), onpointerleave: () => bag?.hideCard() }, h('span.glyph', {}, (it.name || '?')[0])));
+    const items = (m.items || []).map(it => itemSlot(it, m.taken ? '.taken' : ''));
     const left = hasAttachments(m);
     panel.fill(
       h('div.ml-head', {}, h('span', {}, when(m.sentAt)), m.kind === 'return' ? h('span.ml-tag', {}, 'Returned to you') : null, left && m.kind !== 'return' ? h('span.ml-exp', {}, expiresText(m.expiresAt)) : null),
@@ -80,12 +91,11 @@ export function createMail({ net: getNet, hud, bag, me, inTown }) {
     function drawItems() {
       const bagItems = bag?.state?.bag || [];
       d.items = d.items.filter(u => bagItems.some(i => i.uid === u));
-      attached.replaceChildren(...d.items.map(u => { const it = bagItems.find(i => i.uid === u); return h('div.islot.r-' + (it.rarity || 'common'), { title: `${it.name} — click to take it out`, onclick: () => { d.items = d.items.filter(x => x !== u); drawItems(); check(); } }, h('span.glyph', {}, (it.name || '?')[0])); }),
+      attached.replaceChildren(...d.items.map(u => { const it = bagItems.find(i => i.uid === u); return itemSlot(it, '', { onclick: () => { d.items = d.items.filter(x => x !== u); drawItems(); check(); } }); }),
         ...Array.from({ length: Math.max(0, MAIL_LIMITS.items - d.items.length) }, () => h('div.islot.empty')));
-      pick.replaceChildren(...bagItems.filter(i => !d.items.includes(i.uid)).map(it => h('div.islot.r-' + (it.rarity || 'common'), {
-        title: `${it.name} — click to put it in the letter`, dataset: { uid: it.uid },
-        onclick: () => { if (d.items.length >= MAIL_LIMITS.items) { note.textContent = MAIL_WHY.items; return; } d.items.push(it.uid); drawItems(); check(); },
-        onpointermove: e => bag?.card(it, e), onpointerleave: () => bag?.hideCard() }, h('span.glyph', {}, (it.name || '?')[0]))));
+      pick.replaceChildren(...bagItems.filter(i => !d.items.includes(i.uid)).map(it => itemSlot(it, '', {
+        dataset: { uid: it.uid },
+        onclick: () => { if (d.items.length >= MAIL_LIMITS.items) { note.textContent = MAIL_WHY.items; return; } d.items.push(it.uid); drawItems(); check(); } })));
       if (!bagItems.length) pick.replaceChildren(h('p.empty', {}, 'Your bag is empty.'));
     }
     function check() {

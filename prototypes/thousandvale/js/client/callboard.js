@@ -10,7 +10,7 @@ import { createPanel, h } from './ui-panel.js';
 export function createCallboard({ net: getNet, hud, me }) {
   const net = () => getNet();
   const S = { dungeons: [], minLevel: CALLBOARD_LEVEL, queued: null, role: null, pick: 'any', pop: null };
-  const panel = createPanel({ id: 'callboard', title: 'The Callboard', width: 400, cls: 'cb-panel', onOpen: () => { net()?.callboard('list'); draw(); } });
+  const panel = createPanel({ id: 'callboard', title: 'Group Finder', width: 400, cls: 'cb-panel', onOpen: () => { net()?.callboard('list'); draw(); } });
   const popEl = h('div.cb-pop', { hidden: true, role: 'alertdialog', 'aria-label': 'Your group is ready' });
   (document.getElementById('hud') || document.body).appendChild(popEl);
 
@@ -20,9 +20,9 @@ export function createCallboard({ net: getNet, hud, me }) {
     pill?.classList.toggle('queued', !!S.queued);
     if (!panel.isOpen) return;
     const lv = me().level || 1;
-    panel.setTitle('The Callboard', S.queued ? 'In the queue' : 'Find a group');
+    panel.setTitle('Group Finder', S.queued ? 'In the queue' : 'Find a group for a dungeon');
     if (lv < S.minLevel) {
-      panel.fill(h('p', {}, 'The Callboard pins up groups for dungeons across the realm: a tank, a healer and three to deal the damage.'),
+      panel.fill(h('p', {}, 'The Group Finder puts together groups for dungeons across the realm: a tank, a healer and three to deal the damage.'),
         h('p.lock', {}, `It opens at level ${S.minLevel}. You are level ${lv}.`));
       return;
     }
@@ -48,7 +48,7 @@ export function createCallboard({ net: getNet, hud, me }) {
     S.pop = { ...p, until: performance.now() + (p.ms || 30000), answered: false, ready: [] };
     drawPop();
     hud.toast('Your group is ready!', 'good');
-    hud.chat(`The Callboard found a group for ${p.dungeon?.name || 'a dungeon'}. Accept within ${Math.round((p.ms || 30000) / 1000)} seconds.`, 'system');
+    hud.chat(`The Group Finder found a group for ${p.dungeon?.name || 'a dungeon'}. Accept within ${Math.round((p.ms || 30000) / 1000)} seconds.`, 'system');
   }
   function drawPop() {
     const p = S.pop; if (!p) { popEl.hidden = true; return; }
@@ -86,18 +86,18 @@ export function createCallboard({ net: getNet, hud, me }) {
         case 'list': S.dungeons = m.dungeons || []; S.minLevel = m.minLevel || S.minLevel; S.queued = m.queued ? { ...m.queued, localSince: S.queued?.localSince || Date.now() } : null; if (S.pick !== 'any' && !S.dungeons.some(d => d.key === S.pick && d.fits)) S.pick = 'any'; break;
         case 'queued': S.queued = { dungeon: m.dungeon, since: m.since, role: m.role, with: m.with, localSince: S.queued?.localSince || Date.now() };   // `since` is the server's sim clock, not wall time
           if (m.again) { S.pop = null; popEl.hidden = true; hud.toast('Someone declined — you keep your place in the queue.', 'info'); }
-          else hud.toast('You are in the Callboard queue.', 'good');
+          else hud.toast('You are in the Group Finder queue.', 'good');
           break;
         case 'pop': showPop(m); break;
         case 'ready': if (S.pop && S.pop.id === m.id) { S.pop.ready = m.ready || []; drawPop(); } break;
         case 'formed': S.queued = null; S.pop = null; popEl.hidden = true; hud.toast(`Group formed — into ${m.dungeon?.name || 'the dungeon'}!`, 'good'); panel.close(); break;
         case 'left': S.queued = null; S.pop = null; popEl.hidden = true;
-          hud.toast(m.why === 'declined' || m.why === 'decline' ? 'You left the queue.' : m.why === 'timeout' ? 'You did not answer in time — you left the queue.' : m.why === 'partner' ? 'Your party left the queue.' : 'You are out of the Callboard queue.', 'info');
+          hud.toast(m.why === 'declined' || m.why === 'decline' ? 'You left the queue.' : m.why === 'timeout' ? 'You did not answer in time — you left the queue.' : m.why === 'partner' ? 'Your party left the queue.' : 'You are out of the Group Finder queue.', 'info');
           break;
       }
       draw();
     });
-    n.on('err', e => { if (e.code === 'callboard') hud.toast(e.msg || 'The Callboard cannot do that.', 'warn'); });
+    n.on('err', e => { if (e.code === 'callboard') hud.toast(String(e.msg || 'The Group Finder cannot do that.').replace(/\bCallboard\b/g, 'Group Finder'), 'warn'); });
   }
 
   return { wire, panel, draw, get state() { return S; } };

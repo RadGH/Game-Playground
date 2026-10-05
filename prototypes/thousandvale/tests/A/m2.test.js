@@ -94,6 +94,8 @@ test('waystones: discover, travel inside the province for a fare, and to another
   const g0 = a.joined.you.gold;
   a.travel(ws0.data.waystone.key); await run(clock, 400);
   assert.ok(tr.at(-1).ok && tr.at(-1).cost > 0, JSON.stringify(tr.at(-1)));
+  assert.ok(tr.at(-1).at && tr.at(-1).delayMs > 0, 'P10: where you are going comes first, the move after a preload');
+  await until(clock, () => a.joined.room.id === 'torbor_downs/town:0', 4000);
   assert.equal(a.joined.you.gold, g0 - tr.at(-1).cost);
   assert.equal(a.joined.room.id, 'torbor_downs/town:0');
   void t1;

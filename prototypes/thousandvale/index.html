@@ -9,6 +9,11 @@
 <link rel="stylesheet" href="css/client.css">
 <link rel="stylesheet" href="css/world.css">
 <link rel="stylesheet" href="css/social.css">
+<link rel="stylesheet" href="css/inventory.css">
+<link rel="stylesheet" href="css/talents.css">
+<link rel="stylesheet" href="css/world-fx.css">
+<link rel="stylesheet" href="../../shared/tooltip.css">
+<link rel="stylesheet" href="css/map.css">
 <script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
 </head>
 <body>
@@ -24,7 +29,7 @@
     <div class="uf-body">
       <div class="uf-name" id="self-name">—</div>
       <div class="bar hp"><i id="self-hp-fill"></i><b id="self-hp-lag"></b><span id="self-hp-text">0 / 0</span></div>
-      <div class="bar xp" title="Experience"><i id="self-xp-fill"></i><span id="self-xp-text"></span></div>
+      <div class="bar xp" data-tip="Experience"><i id="self-xp-fill"></i><span id="self-xp-text"></span></div>
     </div>
   </section>
 
@@ -55,6 +60,7 @@
   </section>
   <div class="callout" id="callout" aria-live="assertive"></div>
   <div class="vignette" id="vignette"></div>
+  <div class="travel-veil" id="travel-veil" hidden><span class="tr-text">Travelling…</span></div>
   <div class="interact" id="interact" hidden><kbd>E</kbd><span></span></div>
 
   <aside class="bag" id="bag" hidden aria-label="Bag">
@@ -68,7 +74,7 @@
   <div class="zone-banner" id="zone-banner"><small>You enter</small><strong id="zone-name">Greyfang Vale</strong></div>
   <div class="toasts" id="toasts" aria-live="polite"></div>
 
-  <div class="conn" id="conn" title="Connection"><i class="dot"></i><span id="conn-text">Connecting…</span></div>
+  <div class="conn" id="conn" data-tip="Connection"><i class="dot"></i><span id="conn-text">Connecting…</span></div>
 
   <section class="chat" id="chat" aria-label="Chat">
     <div class="chat-log" id="chat-log" role="log" aria-live="polite"></div>
@@ -107,7 +113,7 @@
       <label for="name">Name</label>
       <div class="row">
         <input id="name" maxlength="16" placeholder="Your name" required>
-        <button type="button" class="ghost icon" id="reroll" title="New face">&#9861;</button>
+        <button type="button" class="ghost icon" id="reroll" data-tip="New face">&#9861;</button>
       </div>
     </div>
     <div class="field">

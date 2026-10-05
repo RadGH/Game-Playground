@@ -8,12 +8,16 @@
 //   POST http://127.0.0.1:<hook>/level {name, level}    set a character's level everywhere it is read
 //   POST http://127.0.0.1:<hook>/give  {name, gold, items}  grant gold and N plain test items (a bag message follows)
 //   POST http://127.0.0.1:<hook>/event {id, announceMs}  force a realm event (the admin page's button)
+//   POST http://127.0.0.1:<hook>/roll  {name, n, level, boost}  grant n REAL items rolled by Farhold's generator (inventory spec)
 //   GET  http://127.0.0.1:<hook>/who                    online characters [{char, name, level}]
+//   POST http://127.0.0.1:<hook>/teleport {name, x, z}  move a character within its room (the freeze spec starts walks
+//                                                        near a zone border instead of a 1.5 km stroll from town)
 // Prints "READY <port> <hook>" on stdout when both listen.
 import http from 'node:http';
 import { join } from 'node:path';
 import { startServer } from '../../server/main.mjs';
 import { GAME } from '../../server/load.mjs';
+import { prepareRules, rulesEngine } from '../../js/rules/index.js';
 
 const argv = process.argv.slice(2);
 const arg = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
@@ -45,6 +49,19 @@ const hook = http.createServer(async (req, res) => {
       const pr = W.gateway.presence.get(o.char.id); if (pr) pr.level = lv;
       if (o.conn) o.conn.sendJSON({ t: 'you', level: lv });          // what a real level-up tells the client
       return send(200, { ok: true, level: lv });
+    }
+    if (req.url === '/roll') {
+      await prepareRules();
+      const rpg = rulesEngine().rpg, items = [];
+      const want = Math.max(1, Math.min(40, b.n | 0));
+      for (let i = 0; i < want * 8 && items.length < want; i++) { const it = rpg.rollDrop({ level: Math.max(1, b.level | 0 || 5) + (i % 4) * 2, rarityBoost: b.boost ?? 2 }); if (it) items.push(it); }
+      W.grant(o, { items, gold: 0, reason: 'test' });
+      return send(200, { ok: true, items: items.length });
+    }
+    if (req.url === '/teleport') {
+      const e = o.entity; e.moveTo(+b.x, +b.z, undefined, true);
+      const c = o.room.clients.get(e.id); if (c) c.selfDirty = true;
+      return send(200, { ok: true, x: e.x, z: e.z, room: o.room.kind });
     }
     if (req.url === '/give') {
       const items = Array.from({ length: Math.max(0, Math.min(12, b.items | 0)) }, (_, i) => ({ name: b.itemName || ['Hollin Shortsword', 'Weathered Cloak', 'Copper Ring', 'Ashwood Staff'][(itemN + i) % 4], rarity: ['common', 'magic', 'rare'][(itemN++ + i) % 3], slot: 'weapon', value: 4, level: 3 }));

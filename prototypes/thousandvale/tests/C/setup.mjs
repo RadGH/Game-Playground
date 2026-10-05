@@ -15,6 +15,18 @@ export async function engineFor(seed = 1) {
   return createEngine(await loadData(), { seed });
 }
 
+/**
+ * An engine for the PARITY fixtures: Thousandvale's one deliberate divergence in the hit maths — the
+ * level-gap softening (js/rules/level-gap.js, play-test 1 P26) — is switched off, because Farhold has no
+ * such rule. Nothing else is excluded: perks and talents are empty on a parity character, and the
+ * range preflight (P23) never refuses a cast the fixtures make.
+ */
+export async function parityEngineFor(seed = 1) {
+  const e = await engineFor(seed);
+  e.levelGap = null;
+  return e;
+}
+
 /** A room with a field and a combat pipeline on flat ground. */
 export function roomFor(engine, { id = 'r1', seed = 1, rng = null, terrain = flatTerrain() } = {}) {
   const room = createRoomContext({ id, seed, engine, rng });

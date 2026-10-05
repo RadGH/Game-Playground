@@ -1,0 +1,83 @@
+/* Skills & Talents (K) and the Perk Forest (N) — play-test P6. js/client/ui/talents.js + perk-forest.js. */
+
+.tvt-preview { margin: 0 0 10px; padding: 7px 10px; border: 1px dashed var(--warn); border-radius: 8px; background: rgba(242, 195, 90, 0.08); color: var(--ink-dim); font-size: 13px; line-height: 1.35; }
+.tvt-preview b { color: var(--warn); }
+
+/* ---------------------------------------------------------------- Skills */
+.tvt-skills .tvp-body { max-height: min(78vh, 720px); }
+.tvt-next { margin: 0 0 10px; color: var(--gold-hi); font-family: var(--serif); font-size: 13px; letter-spacing: 0.04em; }
+.tvt-next.done { color: var(--good); }
+.tvt-cols { display: grid; grid-template-columns: 230px 1fr; gap: 14px; align-items: start; }
+.tvt-ladder { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; position: relative; }
+.tvt-ladder::before { content: ''; position: absolute; left: 17px; top: 14px; bottom: 14px; width: 2px; background: linear-gradient(var(--gold), rgba(217, 178, 106, 0.15)); }
+.tvt-skill { position: relative; width: 100%; display: flex; align-items: center; gap: 10px; padding: 6px 8px 6px 4px; cursor: pointer; text-align: left;
+  background: rgba(0, 0, 0, 0.32); border: 1px solid var(--edge); border-radius: 8px; color: var(--ink); }
+.tvt-skill:hover { border-color: var(--gold); }
+.tvt-skill.on { border-color: var(--gold-hi); background: linear-gradient(90deg, rgba(91, 66, 32, 0.75), rgba(40, 30, 18, 0.6)); }
+.tvt-lv { flex: none; z-index: 1; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--gold); background: var(--panel-solid);
+  font: 700 13px/1 var(--sans); color: var(--gold-hi); }
+.tvt-sname { flex: 1; min-width: 0; font-weight: 600; font-size: 14px; line-height: 1.2; }
+.tvt-sname small { display: block; font-weight: 400; font-size: 12px; color: var(--ink-faint); }
+.tvt-skill.locked { color: var(--ink-faint); }
+.tvt-skill.locked .tvt-lv { border-color: #5c5246; color: var(--ink-faint); }
+.tvt-skill.next { border-style: dashed; border-color: var(--warn); }
+.tvt-skill.next .tvt-lv { border-color: var(--warn); color: var(--warn); }
+.tvt-skill.next small { color: var(--warn); }
+.tvt-dot { flex: none; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: #2e7d3a; color: #eaffea; font: 700 12px/20px var(--sans); text-align: center; box-shadow: 0 0 8px rgba(127, 224, 138, 0.6); }
+
+.tvt-detail { min-width: 0; }
+.tvt-dhead { display: flex; align-items: baseline; gap: 10px; }
+.tvt-dhead h4 { margin: 0 !important; font-size: 17px !important; color: var(--gold-hi) !important; }
+.tvt-state { margin-left: auto; font-size: 12px; padding: 1px 8px; border-radius: 9px; border: 1px solid #5c5246; color: var(--ink-faint); white-space: nowrap; }
+.tvt-state.ok { border-color: rgba(127, 224, 138, 0.5); color: var(--good); }
+.tvt-facts { margin: 3px 0 0; font-size: 12.5px; color: var(--ink-dim); text-transform: capitalize; }
+.tvt-desc { margin: 6px 0 10px; font-size: 13.5px; color: var(--ink); }
+.tvt-th { margin: 10px 0 6px; font-family: var(--serif); font-size: 13px; color: var(--gold); letter-spacing: 0.06em; font-weight: 600; }
+.tvt-th small { font-family: var(--sans); letter-spacing: 0; color: var(--ink-faint); font-weight: 400; }
+.tvt-tier { margin: 0 0 8px; padding: 7px 8px 8px; border: 1px solid var(--edge); border-radius: 8px; background: rgba(0, 0, 0, 0.25); }
+.tvt-tier.closed { opacity: 0.62; }
+.tvt-tierhead { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12.5px; color: var(--ink-dim); }
+.tvt-tierhead b { font-family: var(--serif); color: var(--gold); letter-spacing: 0.05em; }
+.tvt-nodes { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px; }
+.tvt-node { position: relative; display: flex; flex-direction: column; gap: 3px; padding: 7px 8px; text-align: left; border-radius: 7px; cursor: pointer;
+  border: 1px solid var(--edge); background: rgba(20, 16, 12, 0.85); color: var(--ink); font-size: 12.5px; line-height: 1.3; }
+.tvt-node b { font-size: 13.5px; color: var(--gold-hi); }
+.tvt-node span { color: var(--ink-dim); }
+.tvt-node.open { border-color: rgba(127, 224, 138, 0.65); box-shadow: inset 0 0 0 1px rgba(127, 224, 138, 0.15); }
+.tvt-node.open:hover { background: rgba(40, 70, 40, 0.55); }
+.tvt-node.picked { border-color: var(--gold-hi); background: linear-gradient(180deg, rgba(110, 80, 34, 0.85), rgba(58, 42, 18, 0.85)); }
+.tvt-node.other, .tvt-node.locked { cursor: default; opacity: 0.55; }
+.tvt-node:disabled { pointer-events: auto; }
+.tvt-tick { position: absolute; right: 7px; top: 6px; font-style: normal; font-size: 11px; color: var(--good); }
+
+/* ---------------------------------------------------------------- Perk Forest */
+.tvt-perks { width: min(1120px, calc(100vw - 24px)) !important; }
+.tvt-perks .tvp-body { display: flex; flex-direction: column; height: min(78vh, 760px); overflow: hidden; padding-bottom: 8px; }
+.pf-top:empty { display: none; }
+.pf-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.pf-bar .grow { flex: 1; }
+.pf-points { padding: 3px 10px; border-radius: 12px; border: 1px solid var(--edge); font-size: 13px; color: var(--ink-dim); }
+.pf-points b { color: var(--ink); font-size: 15px; }
+.pf-points.has { border-color: rgba(127, 224, 138, 0.6); color: var(--good); }
+.pf-points.has b { color: var(--good); }
+.pf-arms { display: flex; flex-wrap: wrap; gap: 4px; }
+.pf-arm { cursor: pointer; padding: 2px 8px; border-radius: 10px; font-size: 12px; background: rgba(0, 0, 0, 0.35); color: var(--arm, var(--ink)); border: 1px solid var(--arm, var(--edge)); }
+.pf-arm:hover { background: rgba(255, 255, 255, 0.06); }
+.pf-host { flex: 1; min-height: 220px; position: relative; border: 1px solid var(--edge); border-radius: 8px; overflow: hidden;
+  background: radial-gradient(ellipse at center, #1d1912 0%, #0c0a08 75%); }
+.pf-wrap { position: absolute; inset: 0; }
+.pf-canvas { display: block; touch-action: none; cursor: grab; }
+.pf-foot { flex: none; }
+.pf-help { margin: 6px 0 0; font-size: 12px; color: var(--ink-faint); }
+.pf-help .g { color: var(--good); }
+.pf-totals { margin: 4px 0 0; font-size: 12.5px; color: var(--ink-dim); max-height: 3.2em; overflow-y: auto; }
+.pf-totals b { color: var(--gold); }
+
+@media (max-width: 640px) {
+  .tvt-cols { grid-template-columns: 1fr; }
+  .tvt-ladder { flex-direction: row; overflow-x: auto; padding-bottom: 4px; }
+  .tvt-ladder::before { display: none; }
+  .tvt-ladder li { flex: none; width: 150px; }
+  .tvt-perks .tvp-body { height: calc(100vh - 120px); }
+  .pf-arms { display: none; }
+}

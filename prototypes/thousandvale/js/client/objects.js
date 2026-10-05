@@ -11,6 +11,7 @@
 import * as THREE from 'three';
 import { buildProp, buildRock } from '../../../../highdef-3d/js/kit/rocks.js';
 import { makeGlowTexture } from './decor.js';
+import { LIGHTS } from './lightpool.js';
 
 const REACH = 4;
 const KINDS = {
@@ -53,7 +54,6 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
   const geoCache = new Map();
   const geo = (id, rock) => { const k = id + (rock ? '#r' : ''); if (!geoCache.has(k)) { try { geoCache.set(k, rock ? buildRock(id, { seed: 3, lod: 1, size: 2 }).geometry : buildProp(id, { seed: 3, lod: 0 }).geometry); } catch { geoCache.set(k, null); } } return geoCache.get(k); };
   let ground = heightAt;
-  let lightCount = 0;
   let focus = null;
   const prompt = document.getElementById('interact');
 
@@ -103,7 +103,7 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
     if (K.fire || K.light) {
       const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: K.fire ? '#ffb35a' : K.light, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
       fl.position.y = K.fire ? 0.7 : 1.6; fl.scale.set(K.fire ? 1.4 : 1.6, K.fire ? 2.0 : 2.6, 1); root.add(fl); o.flame2 = fl;
-      if (lightCount < 6) { const l = new THREE.PointLight(K.fire ? '#ffae5c' : K.light, K.fire ? 16 : 8, K.fire ? 14 : 9, 1.6); l.position.y = 1.2; root.add(l); o.light = l; lightCount++; }
+      o.light = LIGHTS.add({ x: 0, y: 1.2, z: 0, follow: root, color: K.fire ? '#ffae5c' : K.light, intensity: K.fire ? 16 : 8, distance: K.fire ? 14 : 9, decay: 1.6, flicker: K.fire ? 0.1 : 0 });
     }
     if (o.type === 'brazier') {
       const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: '#ffb35a', blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
@@ -128,7 +128,7 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
     if (cur.type === 'pillar') cur.root.visible = cur.state !== 'broken';
     return cur;
   }
-  function remove(id) { const o = items.get(id); if (!o) return; group.remove(o.root); if (o.light) lightCount--; if (o.labelEl) o.labelEl.remove(); items.delete(id); if (focus === o) focus = null; }
+  function remove(id) { const o = items.get(id); if (!o) return; group.remove(o.root); if (o.light) o.light.remove(); if (o.labelEl) o.labelEl.remove(); items.delete(id); if (focus === o) focus = null; }
   function clear() { for (const id of [...items.keys()]) remove(id); }
 
   /** `obj` event from an encounter. */
@@ -151,7 +151,6 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
         if (o.revealed && o.glow) o.glow.scale.setScalar(1.6 + Math.sin(o.t * 6) * 0.4);
       }
       if (o.flame2) o.flame2.material.rotation = Math.sin(o.t * 6) * 0.08;
-      if (o.light) o.light.intensity = (KINDS[o.type]?.fire ? 16 : 8) * (0.88 + Math.sin(o.t * 11) * 0.08);
       if ((o.type === 'vignette' || o.type === 'hook') && me && o.lore && onNear) { if (Math.hypot(o.x - me.x, o.z - me.z) < (o.r || 10)) onNear(o); }
       const K = KINDS[o.type] || {};
       const can = usable(o);

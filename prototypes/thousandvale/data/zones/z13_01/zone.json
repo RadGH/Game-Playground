@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "3c176bbc",
+  "bakeVersion": 3,
+  "inputHash": "78d7b37d",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 13,
@@ -90,6 +90,7 @@
     "x": 1136,
     "z": 878
   },
+  "bridges": [],
   "theme": {
     "kind": "marsh",
     "lakes": [
@@ -99,119 +100,119 @@
         "x": 1439,
         "z": 1151,
         "r": 90,
-        "level": 74.95
+        "level": 75.61
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1147,
-        "z": 1134,
-        "r": 20,
-        "level": 83.36
-      },
-      {
-        "name": null,
-        "kind": "pool",
-        "x": 1633,
-        "z": 878,
-        "r": 42,
-        "level": 73.39
-      },
-      {
-        "name": null,
-        "kind": "pool",
-        "x": 1461,
-        "z": 783,
+        "x": 1700,
+        "z": 1180,
         "r": 38,
-        "level": 68.74
+        "level": 84.43
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1620,
-        "z": 1288,
-        "r": 40,
-        "level": 83.66
+        "x": 1552,
+        "z": 977,
+        "r": 28,
+        "level": 75.49
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1452,
-        "z": 1385,
-        "r": 43,
-        "level": 80.67
+        "x": 1667,
+        "z": 843,
+        "r": 19,
+        "level": 72.51
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1271,
-        "z": 1004,
-        "r": 18,
-        "level": 77.21
-      },
-      {
-        "name": null,
-        "kind": "pool",
-        "x": 1410,
-        "z": 939,
+        "x": 1305,
+        "z": 1323,
         "r": 33,
-        "level": 77.95
-      },
-      {
-        "name": null,
-        "kind": "pool",
-        "x": 1797,
-        "z": 1195,
-        "r": 26,
-        "level": 85.8
-      },
-      {
-        "name": null,
-        "kind": "pool",
-        "x": 1180,
-        "z": 1304,
-        "r": 25,
-        "level": 83.9
-      },
-      {
-        "name": null,
-        "kind": "pool",
-        "x": 1678,
-        "z": 1094,
-        "r": 43,
-        "level": 77.91
+        "level": 80.47
       },
       {
         "name": null,
         "kind": "pool",
         "x": 1560,
-        "z": 1005,
-        "r": 20,
-        "level": 75.13
+        "z": 1530,
+        "r": 39,
+        "level": 85.36
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1792,
-        "z": 977,
-        "r": 38,
-        "level": 79.43
+        "x": 1504,
+        "z": 832,
+        "r": 28,
+        "level": 68.65
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1570,
-        "z": 1513,
-        "r": 33,
-        "level": 85.69
+        "x": 1342,
+        "z": 1480,
+        "r": 18,
+        "level": 87.26
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1250,
-        "z": 1507,
+        "x": 1058,
+        "z": 1069,
         "r": 42,
-        "level": 90.61
+        "level": 72.32
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1133,
+        "z": 1307,
+        "r": 24,
+        "level": 81.95
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1780,
+        "z": 1330,
+        "r": 38,
+        "level": 85.26
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1337,
+        "z": 805,
+        "r": 19,
+        "level": 72.38
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1622,
+        "z": 1365,
+        "r": 22,
+        "level": 82.61
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1806,
+        "z": 1049,
+        "r": 30,
+        "level": 81.48
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1186,
+        "z": 1163,
+        "r": 34,
+        "level": 83
       }
     ],
     "fen": {
@@ -223,9 +224,9 @@
   "summary": {
     "zone": "z13_01",
     "province": "Petbeck Basin",
-    "inputHash": "3c176bbc",
+    "inputHash": "78d7b37d",
     "rivers": 0,
-    "wetShare": 0.018,
+    "wetShare": 0.015,
     "unwalkableShare": 0.003,
     "towns": [
       {
@@ -256,21 +257,23 @@
         "movedFrom": null,
         "culture": "halfling",
         "plots": 9,
-        "streets": 24,
-        "links": 0,
+        "streets": 25,
+        "links": 1,
         "overlaps": 0
       }
     ],
-    "roads": 0,
+    "roads": 2,
     "bridges": 0,
-    "scatter": 6195,
+    "paths": 8,
+    "pathMetres": 2189,
+    "scatter": 10955,
     "scatterKinds": {
-      "rock_small": 900,
-      "bush": 2767,
-      "tree_broadleaf": 1252,
+      "bush": 5393,
+      "rock_small": 1860,
+      "tree_broadleaf": 2113,
+      "rock_large": 309,
       "reed": 1181,
-      "tree_dead": 93,
-      "rock_large": 2
+      "tree_dead": 99
     },
     "sites": [
       "settlement(HUB) town Brackwater 1136 870 90",
@@ -282,13 +285,13 @@
       "x": 1136,
       "z": 878
     },
-    "placements": 131,
-    "vignettesAvoided": 96
+    "placements": 142,
+    "vignettesAvoided": 667
   },
   "files": {
-    "terrain.bin": 474688,
-    "nav.bin": 8197,
-    "scatter.bin": 49644,
-    "placements.json": 39215
+    "terrain.bin": 480207,
+    "nav.bin": 14555,
+    "scatter.bin": 87724,
+    "placements.json": 100996
   }
 }

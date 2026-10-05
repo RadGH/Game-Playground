@@ -39,8 +39,8 @@
           "kind": "kill",
           "type": "frost_stalker",
           "count": 6,
-          "where": "the switchbacks",
-          "text": "Frost stalkers"
+          "where": "the switchbacks above Hollin Toll",
+          "text": "Kill 6 frost stalkers at the switchbacks"
         }
       ],
       "done": "The pass is open. The tolls are flowing. Everyone is happy except the stalkers.",
@@ -64,8 +64,8 @@
           "kind": "kill",
           "type": "crag_hyena",
           "count": 6,
-          "where": "the high pastures",
-          "text": "Crag hyenas"
+          "where": "the high pastures above Scree End",
+          "text": "Kill 6 crag hyenas"
         }
       ],
       "done": "The goats are safe. They don't thank you; they're goats.",
@@ -85,8 +85,8 @@
           "kind": "kill",
           "type": "ironback_beetle",
           "count": 5,
-          "where": "the toll road",
-          "text": "Ironback beetles"
+          "where": "the toll road below Hollin Toll Fort",
+          "text": "Kill 5 ironback beetles on the road"
         }
       ],
       "done": "Road's clear. If they were doing it on purpose, they'll stop now.",
@@ -107,15 +107,15 @@
           "kind": "kill",
           "type": "road_brigand",
           "count": 6,
-          "where": "the upper pass",
-          "text": "Brigands"
+          "where": "the upper pass, past Hollin Toll",
+          "text": "Kill 6 brigands at the false toll"
         },
         {
           "kind": "kill",
           "type": "brigand_archer",
           "count": 3,
-          "where": "the cliffs above",
-          "text": "Archers"
+          "where": "the cliffs above the upper pass",
+          "text": "Kill 3 brigand archers on the cliffs"
         }
       ],
       "done": "One toll on Hollin Pass, as it should be. Mine.",
@@ -139,14 +139,16 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the middle floors",
-          "floor": 1
+          "text": "Reach the middle floors of the Windlass Spire",
+          "floor": 1,
+          "where": "The Windlass Spire, the dungeon door in Hollin Pass"
         },
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the top",
-          "boss": true
+          "text": "Reach the top of the Windlass Spire",
+          "boss": true,
+          "where": "the top of the Windlass Spire"
         }
       ],
       "done": "So that's what was up there. I'll stick to climbing rocks.",
@@ -170,7 +172,8 @@
           "kind": "killRare",
           "zone": "hollin_pass",
           "slot": 0,
-          "text": "The pass's rare slain"
+          "text": "Hunt down Old Hookclaw",
+          "where": "roams the high pass of Hollin Pass"
         }
       ],
       "done": "The goats are going near it now. Mostly to sniff it.",

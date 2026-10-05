@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "078188c7",
+  "bakeVersion": 3,
+  "inputHash": "2488e09a",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 12,
@@ -105,13 +105,14 @@
     "x": 1412,
     "z": 1336
   },
+  "bridges": [],
   "summary": {
     "zone": "z12_01",
     "province": "Petbeck Basin",
-    "inputHash": "078188c7",
+    "inputHash": "2488e09a",
     "rivers": 1,
     "wetShare": 0.003,
-    "unwalkableShare": 0.037,
+    "unwalkableShare": 0.035,
     "towns": [
       {
         "name": "Ashcombe",
@@ -151,14 +152,16 @@
     ],
     "roads": 4,
     "bridges": 0,
-    "scatter": 10485,
+    "paths": 7,
+    "pathMetres": 1485,
+    "scatter": 14326,
     "scatterKinds": {
-      "bush": 2721,
-      "tree_conifer": 5053,
-      "tree_broadleaf": 1046,
-      "rock_small": 1211,
-      "rock_large": 420,
-      "boulder": 34
+      "rock_small": 1986,
+      "bush": 4846,
+      "tree_conifer": 4964,
+      "tree_broadleaf": 1762,
+      "rock_large": 736,
+      "boulder": 32
     },
     "sites": [
       "settlement(HUB) city Ashcombe 1408 1328 140",
@@ -171,13 +174,13 @@
       "x": 1412,
       "z": 1336
     },
-    "placements": 154,
-    "vignettesAvoided": 94
+    "placements": 161,
+    "vignettesAvoided": 655
   },
   "files": {
-    "terrain.bin": 548278,
-    "nav.bin": 27855,
-    "scatter.bin": 83964,
-    "placements.json": 65838
+    "terrain.bin": 548647,
+    "nav.bin": 31452,
+    "scatter.bin": 114692,
+    "placements.json": 102571
   }
 }

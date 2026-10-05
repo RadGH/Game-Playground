@@ -1,9 +1,9 @@
 {
- "_doc": "Stream E. Content placements for world zone z13_02 (E zone 'torbor_cross', Torbor Cross) — tools/place-vignettes.mjs against stream B's bake (terrain 224b638b). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "_doc": "Stream E. Content placements for world zone z13_02 (E zone 'torbor_cross', Torbor Cross) — tools/place-vignettes.mjs against stream B's bake (terrain 09d4dd3e). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
  "zone": "z13_02",
  "sheetZone": "torbor_cross",
  "province": "torbor_downs",
- "terrainHash": "224b638b",
+ "terrainHash": "09d4dd3e",
  "band": [
   3,
   5
@@ -56,6 +56,24 @@
    "townGap": 300,
    "gap": 60,
    "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
   }
  },
  "mainWalkableShare": 0.979,
@@ -123,24 +141,24 @@
    "name": "Halsbridge Gatehouse",
    "template": "stone_keep",
    "friendly": true,
-   "x": 1427,
-   "z": 1310,
-   "yaw": -1.18,
+   "x": 1286,
+   "z": 1857,
+   "yaw": 0,
    "radius": 28,
-   "level": 3
+   "level": 5
   },
   {
    "type": "farm",
    "id": "farm_torbor_cross_0",
-   "name": "Halsbridge Mill",
-   "template": "mill",
+   "name": "Halsbridge Orchard",
+   "template": "orchard",
    "flavour": null,
    "settlement": "Halsbridge",
-   "x": 1981,
-   "z": 1295,
-   "yaw": -1.96,
-   "radius": 20,
-   "level": 3
+   "x": 1795,
+   "z": 1017,
+   "yaw": -0.39,
+   "radius": 24,
+   "level": 4
   },
   {
    "type": "farm",
@@ -149,8 +167,8 @@
    "template": "mill",
    "flavour": null,
    "settlement": "Mill End",
-   "x": 292,
-   "z": 1347,
+   "x": 311,
+   "z": 1359,
    "yaw": -0.79,
    "radius": 20,
    "level": 3
@@ -158,36 +176,36 @@
   {
    "type": "farm",
    "id": "farm_torbor_cross_2",
-   "name": "Lower Mossgate Farm",
-   "template": "arable",
+   "name": "Lower Mossgate Sheepfold",
+   "template": "sheep",
    "flavour": null,
    "settlement": "Lower Mossgate",
-   "x": 778,
-   "z": 1613,
+   "x": 780,
+   "z": 1615,
    "yaw": 0,
-   "radius": 22,
+   "radius": 24,
    "level": 3
   },
   {
    "type": "farm",
    "id": "farm_torbor_cross_3",
-   "name": "Mirestead Sheepfold",
-   "template": "sheep",
+   "name": "Mirestead Mill",
+   "template": "mill",
    "flavour": null,
    "settlement": "Mirestead",
-   "x": 1086,
-   "z": 985,
-   "yaw": 0.39,
-   "radius": 24,
-   "level": 3
+   "x": 1236,
+   "z": 1149,
+   "yaw": -0.79,
+   "radius": 20,
+   "level": 4
   },
   {
    "type": "cave",
    "id": "cave_torbor_cross_0",
-   "name": "Smugglers' cave",
-   "template": "smugglers_cave",
+   "name": "Barrow mound",
+   "template": "barrow_mound",
    "plan": {
-    "family": "flooded_cistern",
+    "family": "barrow_maze",
     "floors": 1,
     "level": 4
    },
@@ -201,121 +219,141 @@
    "type": "vignette",
    "id": "broken_caravan_survivor",
    "name": "The Last Wagon",
-   "x": 427,
-   "z": 472,
-   "yaw": 2.3,
+   "x": 1724,
+   "z": 142,
+   "yaw": 3.07,
    "radius": 15,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 4,
+   "levelCap": 5
   },
   {
    "type": "vignette",
    "id": "chained_tree",
    "name": "The Chained Oak",
-   "x": 1684,
-   "z": 705,
-   "yaw": 1.74,
+   "x": 571,
+   "z": 658,
+   "yaw": 3.27,
    "radius": 11,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 3,
+   "levelCap": 4
   },
   {
    "type": "vignette",
    "id": "collapsed_mine_mouth",
    "name": "The Collapsed Adit",
-   "x": 1265,
-   "z": 255,
-   "yaw": 5.42,
+   "x": 1011,
+   "z": 200,
+   "yaw": 3.3,
    "radius": 11,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 4,
+   "levelCap": 5
   },
   {
    "type": "vignette",
    "id": "fishwife_stall",
    "name": "The Abandoned Fish Stall",
-   "x": 1551,
-   "z": 1947,
-   "yaw": 4.12,
+   "x": 79,
+   "z": 124,
+   "yaw": 1.5,
    "radius": 9,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 3,
+   "levelCap": 4
   },
   {
    "type": "vignette",
    "id": "flooded_mill",
    "name": "The Flooded Mill",
-   "x": 1924,
-   "z": 86,
-   "yaw": 5.1,
+   "x": 1921,
+   "z": 1977,
+   "yaw": 5.89,
    "radius": 12,
-   "biome": "grassland",
+   "biome": "temperateForest",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 4,
+   "levelCap": 5
   },
   {
    "type": "vignette",
    "id": "noble_folly",
    "name": "The Lord's Folly",
-   "x": 784,
-   "z": 89,
-   "yaw": 0.64,
+   "x": 1394,
+   "z": 617,
+   "yaw": 3.34,
    "radius": 11,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 4,
+   "levelCap": 5
   },
   {
    "type": "vignette",
    "id": "quarry_crane",
    "name": "The Quarry Crane",
-   "x": 103,
-   "z": 881,
-   "yaw": 0.52,
+   "x": 101,
+   "z": 884,
+   "yaw": 3.75,
    "radius": 12,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 3,
+   "levelCap": 4
   },
   {
    "type": "vignette",
    "id": "salt_cart_sunk",
    "name": "The Salt Cart",
-   "x": 70,
-   "z": 82,
-   "yaw": 2.83,
+   "x": 1672,
+   "z": 1505,
+   "yaw": 5.54,
    "radius": 12,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 4,
+   "levelCap": 5
   },
   {
    "type": "vignette",
    "id": "sewer_grate",
    "name": "The Rattling Grate",
-   "x": 577,
-   "z": 963,
-   "yaw": 4.77,
+   "x": 545,
+   "z": 123,
+   "yaw": 2.69,
    "radius": 9,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 3,
+   "levelCap": 4
   },
   {
    "type": "vignette",
    "id": "sunken_stair",
    "name": "The Stair to Nowhere",
-   "x": 1094,
-   "z": 1978,
-   "yaw": 4.7,
+   "x": 1951,
+   "z": 531,
+   "yaw": 1.19,
    "radius": 10,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 4,
+   "levelCap": 5
   },
   {
    "type": "camp",
@@ -323,15 +361,15 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    3,
+    4,
     5
    ],
    "count": [
     2,
     4
    ],
-   "x": 1714,
-   "z": 1526,
+   "x": 1976,
+   "z": 1279,
    "yaw": 0,
    "radius": 10
   },
@@ -341,15 +379,15 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    3,
+    4,
     5
    ],
    "count": [
     2,
     4
    ],
-   "x": 1447,
-   "z": 1523,
+   "x": 1413,
+   "z": 1176,
    "yaw": 0,
    "radius": 10
   },
@@ -359,15 +397,15 @@
    "monster": "moor_hound",
    "with": null,
    "level": [
-    4,
-    5
+    3,
+    4
    ],
    "count": [
     2,
     4
    ],
-   "x": 493,
-   "z": 1566,
+   "x": 491,
+   "z": 1750,
    "yaw": 0,
    "radius": 10
   },
@@ -377,15 +415,15 @@
    "monster": "moor_hound",
    "with": null,
    "level": [
-    4,
-    5
+    3,
+    4
    ],
    "count": [
     2,
     4
    ],
-   "x": 82,
-   "z": 1165,
+   "x": 555,
+   "z": 1240,
    "yaw": 0,
    "radius": 10
   },
@@ -396,14 +434,14 @@
    "with": null,
    "level": [
     3,
-    5
+    4
    ],
    "count": [
     2,
     4
    ],
-   "x": 568,
-   "z": 1977,
+   "x": 857,
+   "z": 1959,
    "yaw": 0,
    "radius": 10
   },
@@ -413,15 +451,15 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    3,
+    4,
     5
    ],
    "count": [
     2,
     4
    ],
-   "x": 684,
-   "z": 1269,
+   "x": 1383,
+   "z": 1536,
    "yaw": 0,
    "radius": 10
   },
@@ -431,15 +469,15 @@
    "monster": "cairn_rat",
    "with": null,
    "level": [
-    4,
-    5
+    3,
+    4
    ],
    "count": [
     2,
     4
    ],
-   "x": 911,
-   "z": 561,
+   "x": 980,
+   "z": 658,
    "yaw": 0,
    "radius": 10
   },
@@ -456,8 +494,8 @@
     2,
     4
    ],
-   "x": 1986,
-   "z": 1903,
+   "x": 1398,
+   "z": 112,
    "yaw": 0,
    "radius": 10
   },
@@ -468,14 +506,14 @@
    "with": null,
    "level": [
     3,
-    5
+    4
    ],
    "count": [
     2,
     4
    ],
-   "x": 1288,
-   "z": 664,
+   "x": 880,
+   "z": 1009,
    "yaw": 0,
    "radius": 10
   },
@@ -486,14 +524,14 @@
    "with": null,
    "level": [
     3,
-    5
+    4
    ],
    "count": [
     2,
     4
    ],
-   "x": 1083,
-   "z": 1420,
+   "x": 1070,
+   "z": 1419,
    "yaw": 0,
    "radius": 10
   },
@@ -510,8 +548,8 @@
     2,
     4
    ],
-   "x": 65,
-   "z": 449,
+   "x": 1629,
+   "z": 1830,
    "yaw": 0,
    "radius": 10
   },
@@ -528,8 +566,8 @@
     2,
     4
    ],
-   "x": 1984,
-   "z": 936,
+   "x": 1707,
+   "z": 714,
    "yaw": 0,
    "radius": 10
   },
@@ -538,30 +576,30 @@
    "id": "rare_tithe_collector",
    "slot": 0,
    "name": "Brother Tithe",
-   "x": 1750,
-   "z": 1751,
+   "x": 1447,
+   "z": 1368,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1825,
-     1774
+     1417,
+     1437
     ],
     [
-     1743,
-     1798
+     1365,
+     1359
     ],
     [
-     1692,
-     1754
+     1409,
+     1299
     ],
     [
-     1738,
-     1705
+     1507,
+     1308
     ],
     [
-     1806,
-     1718
+     1487,
+     1416
     ]
    ],
    "respawnMin": [
@@ -575,30 +613,30 @@
    "id": "rare_mother_soot",
    "slot": 1,
    "name": "Mother Soot",
-   "x": 1760,
-   "z": 1622,
+   "x": 1260,
+   "z": 855,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1831,
-     1633
+     1312,
+     897
     ],
     [
-     1793,
-     1686
+     1242,
+     904
     ],
     [
-     1699,
-     1680
+     1193,
+     854
     ],
     [
-     1694,
-     1585
+     1264,
+     780
     ],
     [
-     1816,
-     1536
+     1321,
+     840
     ]
    ],
    "respawnMin": [
@@ -611,8 +649,8 @@
    "type": "waystone",
    "id": "ws_z13_02_halsbridge",
    "name": "Halsbridge",
-   "x": 1653.8,
-   "z": 1334.9,
+   "x": 1691.6,
+   "z": 1183.8,
    "yaw": 0,
    "settlement": "Halsbridge",
    "radius": 1
@@ -621,8 +659,8 @@
    "type": "waystone",
    "id": "ws_z13_02_mill_end",
    "name": "Mill End",
-   "x": 196.2,
-   "z": 1563,
+   "x": 200.7,
+   "z": 1453.5,
    "yaw": 0,
    "settlement": "Mill End",
    "radius": 1
@@ -650,12 +688,31 @@
   {
    "type": "waystone",
    "id": "ws_z13_02_door",
-   "name": "Barrow entrance",
-   "x": 1621.6,
-   "z": 1374.8,
+   "name": "The Undercross Drains",
+   "x": 1595.4,
+   "z": 1334.2,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_door",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1597,
+   "z": 1383,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
   },
   {
    "type": "npc",
@@ -663,9 +720,9 @@
    "name": "Provost Isolde Hollis",
    "role": "elder",
    "at": "Halsbridge",
-   "x": 1699,
-   "z": 1185.1,
-   "yaw": 0.09,
+   "x": 1695.9,
+   "z": 1180.2,
+   "yaw": 6.19,
    "radius": 1
   },
   {
@@ -674,9 +731,9 @@
    "name": "Sergeant Wat",
    "role": "guard",
    "at": "Halsbridge Gatehouse",
-   "x": 1426.5,
-   "z": 1308.1,
-   "yaw": 4.65,
+   "x": 1286.6,
+   "z": 1858.9,
+   "yaw": 5.36,
    "radius": 1
   },
   {
@@ -685,9 +742,9 @@
    "name": "Emrys Millward",
    "role": "farmer",
    "at": "Mill End",
-   "x": 199.6,
-   "z": 1461.2,
-   "yaw": 0.25,
+   "x": 195.7,
+   "z": 1457.7,
+   "yaw": 4.31,
    "radius": 1
   },
   {
@@ -696,9 +753,9 @@
    "name": "Jory the ratcatcher",
    "role": "trader",
    "at": "Halsbridge",
-   "x": 1693.8,
-   "z": 1181.5,
-   "yaw": 2.74,
+   "x": 1698.4,
+   "z": 1185.7,
+   "yaw": 3.84,
    "radius": 1
   },
   {
@@ -709,8 +766,8 @@
    "clue": "drunks_story",
    "how": null,
    "shimmer": null,
-   "x": 1558.3,
-   "z": 1229.5,
+   "x": 1560.8,
+   "z": 1236.4,
    "yaw": 0,
    "where": "edge of Halsbridge",
    "radius": 1
@@ -723,8 +780,8 @@
    "clue": "map_piece",
    "how": null,
    "shimmer": null,
-   "x": 298.7,
-   "z": 1484.7,
+   "x": 299.1,
+   "z": 1429.2,
    "yaw": 0,
    "where": "edge of Mill End",
    "radius": 1
@@ -737,20 +794,20 @@
    "clue": null,
    "how": "chest",
    "shimmer": 15,
-   "x": 208.5,
-   "z": 1259.8,
+   "x": 418.5,
+   "z": 1469.4,
    "yaw": 0,
    "where": "near Mill End",
    "radius": 1
   },
   {
    "type": "wayside",
-   "id": "fallen_pillar_torbor_cross_0",
-   "kind": "fallen_pillar",
-   "name": "Fallen Pillar",
-   "x": 2012,
-   "z": 476,
-   "yaw": 3.12,
+   "id": "sheep_pen_torbor_cross_0",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 208,
+   "z": 501,
+   "yaw": 4.46,
    "radius": 5,
    "filler": true
   },
@@ -761,27 +818,27 @@
    "with": null,
    "level": [
     3,
-    5
+    4
    ],
    "count": [
     2,
     3
    ],
-   "x": 1564,
-   "z": 65,
+   "x": 424,
+   "z": 948,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cold_campfire_torbor_cross_2",
-   "kind": "cold_campfire",
-   "name": "Cold Campfire",
-   "x": 246,
-   "z": 2024,
-   "yaw": 5.72,
-   "radius": 4,
+   "id": "league_stone_torbor_cross_2",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 744,
+   "z": 384,
+   "yaw": 0.99,
+   "radius": 3,
    "filler": true
   },
   {
@@ -797,21 +854,21 @@
     2,
     3
    ],
-   "x": 1708,
-   "z": 360,
+   "x": 1967,
+   "z": 1611,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "dolmen_torbor_cross_4",
-   "kind": "dolmen",
-   "name": "Dolmen",
-   "x": 384,
-   "z": 147,
-   "yaw": 0.85,
-   "radius": 5,
+   "id": "league_stone_torbor_cross_4",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1636,
+   "z": 428,
+   "yaw": 3.65,
+   "radius": 3,
    "filler": true
   },
   {
@@ -820,27 +877,27 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    3,
+    4,
     5
    ],
    "count": [
     2,
     3
    ],
-   "x": 1196,
-   "z": 1697,
+   "x": 1260,
+   "z": 364,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "standing_stone_torbor_cross_6",
-   "kind": "standing_stone",
-   "name": "Standing Stone",
-   "x": 656,
-   "z": 688,
-   "yaw": 0.88,
+   "id": "broken_wheel_torbor_cross_6",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 456,
+   "z": 392,
+   "yaw": 2.74,
    "radius": 4,
    "filler": true
   },
@@ -850,28 +907,28 @@
    "monster": "cairn_rat",
    "with": null,
    "level": [
-    4,
-    5
+    3,
+    4
    ],
    "count": [
     2,
     3
    ],
-   "x": 360,
-   "z": 756,
+   "x": 804,
+   "z": 61,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "standing_stone_torbor_cross_8",
-   "kind": "standing_stone",
-   "name": "Standing Stone",
-   "x": 692,
-   "z": 360,
-   "yaw": 4.55,
-   "radius": 4,
+   "id": "dolmen_torbor_cross_8",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1036,
+   "z": 1724,
+   "yaw": 2.19,
+   "radius": 5,
    "filler": true
   },
   {
@@ -881,27 +938,27 @@
    "with": null,
    "level": [
     3,
-    5
+    4
    ],
    "count": [
     2,
     3
    ],
-   "x": 988,
-   "z": 300,
+   "x": 61,
+   "z": 1135,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "lost_signpost_torbor_cross_10",
-   "kind": "lost_signpost",
-   "name": "Lost Signpost",
-   "x": 848,
-   "z": 1884,
-   "yaw": 1.62,
-   "radius": 3,
+   "id": "fallen_tree_torbor_cross_10",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 853,
+   "z": 1271,
+   "yaw": 5.84,
+   "radius": 6,
    "filler": true
   },
   {
@@ -910,28 +967,28 @@
    "monster": "cult_zealot",
    "with": null,
    "level": [
-    4,
-    5
+    3,
+    4
    ],
    "count": [
     2,
     3
    ],
-   "x": 1464,
-   "z": 456,
+   "x": 61,
+   "z": 659,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "broken_wheel_torbor_cross_12",
-   "kind": "broken_wheel",
-   "name": "Broken Wheel",
-   "x": 324,
-   "z": 1036,
-   "yaw": 2.43,
-   "radius": 4,
+   "id": "fallen_tree_torbor_cross_12",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 313,
+   "z": 724,
+   "yaw": 3.09,
+   "radius": 6,
    "filler": true
   },
   {
@@ -941,33 +998,63 @@
    "with": null,
    "level": [
     3,
-    5
+    4
    ],
    "count": [
     2,
     3
    ],
-   "x": 828,
-   "z": 892,
+   "x": 664,
+   "z": 888,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "boundary_stake_torbor_cross_14",
-   "kind": "boundary_stake",
-   "name": "Boundary Stakes",
-   "x": 1252,
-   "z": 1964,
-   "yaw": 3.85,
-   "radius": 4,
+   "id": "banner_post_torbor_cross_14",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1944,
+   "z": 267,
+   "yaw": 4.4,
+   "radius": 3,
    "filler": true
   },
   {
    "type": "camp",
    "id": "camp_torbor_cross_f15",
    "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 312,
+   "z": 196,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_torbor_cross_16",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 276,
+   "z": 1924,
+   "yaw": 3.62,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_f17",
+   "monster": "brigand_archer",
    "with": null,
    "level": [
     4,
@@ -977,51 +1064,21 @@
     2,
     3
    ],
-   "x": 1064,
-   "z": 60,
+   "x": 1516,
+   "z": 864,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "dolmen_torbor_cross_16",
+   "id": "dolmen_torbor_cross_18",
    "kind": "dolmen",
    "name": "Dolmen",
-   "x": 2012,
-   "z": 1564,
-   "yaw": 0.17,
+   "x": 1923,
+   "z": 793,
+   "yaw": 0.7,
    "radius": 5,
-   "filler": true
-  },
-  {
-   "type": "camp",
-   "id": "camp_torbor_cross_f17",
-   "monster": "brigand_archer",
-   "with": null,
-   "level": [
-    3,
-    5
-   ],
-   "count": [
-    2,
-    3
-   ],
-   "x": 1476,
-   "z": 852,
-   "yaw": 0,
-   "radius": 10,
-   "filler": true
-  },
-  {
-   "type": "wayside",
-   "id": "cairn_torbor_cross_18",
-   "kind": "cairn",
-   "name": "Cairn",
-   "x": 408,
-   "z": 1788,
-   "yaw": 3.04,
-   "radius": 4,
    "filler": true
   },
   {
@@ -1037,20 +1094,20 @@
     2,
     3
    ],
-   "x": 1940,
-   "z": 696,
+   "x": 1044,
+   "z": 436,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "dolmen_torbor_cross_20",
-   "kind": "dolmen",
-   "name": "Dolmen",
-   "x": 1297,
-   "z": 25,
-   "yaw": 0.08,
+   "id": "sheep_pen_torbor_cross_20",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 1188,
+   "z": 43,
+   "yaw": 2.9,
    "radius": 5,
    "filler": true
   },
@@ -1060,28 +1117,28 @@
    "monster": "sky_cultist",
    "with": null,
    "level": [
-    3,
+    4,
     5
    ],
    "count": [
     2,
     3
    ],
-   "x": 1168,
-   "z": 464,
+   "x": 1985,
+   "z": 1053,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "fallen_pillar_torbor_cross_22",
-   "kind": "fallen_pillar",
-   "name": "Fallen Pillar",
-   "x": 1416,
-   "z": 1760,
-   "yaw": 3.95,
-   "radius": 5,
+   "id": "banner_post_torbor_cross_22",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 536,
+   "z": 1963,
+   "yaw": 5.43,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1097,21 +1154,21 @@
     2,
     3
    ],
-   "x": 1044,
-   "z": 747,
+   "x": 1714,
+   "z": 1944,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cold_campfire_torbor_cross_24",
-   "kind": "cold_campfire",
-   "name": "Cold Campfire",
-   "x": 163,
-   "z": 651,
-   "yaw": 4.76,
-   "radius": 4,
+   "id": "lonely_pier_torbor_cross_24",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 288,
+   "z": 1124,
+   "yaw": 1.28,
+   "radius": 5,
    "filler": true
   },
   {
@@ -1121,14 +1178,14 @@
    "with": null,
    "level": [
     3,
-    5
+    4
    ],
    "count": [
     2,
     3
    ],
-   "x": 915,
-   "z": 1250,
+   "x": 68,
+   "z": 1888,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1138,9 +1195,9 @@
    "id": "dolmen_torbor_cross_26",
    "kind": "dolmen",
    "name": "Dolmen",
-   "x": 200,
-   "z": 268,
-   "yaw": 3.43,
+   "x": 776,
+   "z": 591,
+   "yaw": 1.97,
    "radius": 5,
    "filler": true
   },
@@ -1157,20 +1214,20 @@
     2,
     3
    ],
-   "x": 1328,
-   "z": 1799,
+   "x": 1464,
+   "z": 311,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cold_campfire_torbor_cross_28",
-   "kind": "cold_campfire",
-   "name": "Cold Campfire",
-   "x": 496,
-   "z": 1164,
-   "yaw": 3.19,
+   "id": "broken_wheel_torbor_cross_28",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1180,
+   "z": 600,
+   "yaw": 3.55,
    "radius": 4,
    "filler": true
   },
@@ -1181,26 +1238,26 @@
    "with": null,
    "level": [
     3,
-    5
+    4
    ],
    "count": [
     2,
     3
    ],
-   "x": 976,
-   "z": 1716,
+   "x": 712,
+   "z": 1181,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cairn_torbor_cross_30",
-   "kind": "cairn",
-   "name": "Cairn",
-   "x": 592,
-   "z": 180,
-   "yaw": 5.44,
+   "id": "wayside_well_torbor_cross_30",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 690,
+   "z": 1827,
+   "yaw": 3.81,
    "radius": 4,
    "filler": true
   },
@@ -1217,21 +1274,21 @@
     2,
     3
    ],
-   "x": 786,
-   "z": 1112,
+   "x": 1835,
+   "z": 1776,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "milestone_torbor_cross_32",
-   "kind": "milestone",
-   "name": "Milestone",
-   "x": 1904,
-   "z": 301,
-   "yaw": 0.61,
-   "radius": 3,
+   "id": "broken_wheel_torbor_cross_32",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1037,
+   "z": 856,
+   "yaw": 3.8,
+   "radius": 4,
    "filler": true
   },
   {
@@ -1241,27 +1298,27 @@
    "with": null,
    "level": [
     3,
-    5
+    4
    ],
    "count": [
     2,
     3
    ],
-   "x": 72,
-   "z": 1936,
+   "x": 132,
+   "z": 320,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cold_campfire_torbor_cross_34",
-   "kind": "cold_campfire",
-   "name": "Cold Campfire",
-   "x": 1804,
-   "z": 536,
-   "yaw": 2.08,
-   "radius": 4,
+   "id": "shrine_niche_torbor_cross_34",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1076,
+   "z": 1920,
+   "yaw": 1.03,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1277,21 +1334,21 @@
     2,
     3
    ],
-   "x": 1492,
-   "z": 252,
+   "x": 1192,
+   "z": 1592,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "boundary_stake_torbor_cross_36",
-   "kind": "boundary_stake",
-   "name": "Boundary Stakes",
-   "x": 1269,
-   "z": 872,
-   "yaw": 4.69,
-   "radius": 4,
+   "id": "ribbon_tree_torbor_cross_36",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1464,
+   "z": 1716,
+   "yaw": 5.1,
+   "radius": 5,
    "filler": true
   },
   {
@@ -1301,27 +1358,27 @@
    "with": null,
    "level": [
     3,
-    5
+    4
    ],
    "count": [
     2,
     3
    ],
-   "x": 1740,
-   "z": 160,
+   "x": 846,
+   "z": 812,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cold_campfire_torbor_cross_38",
-   "kind": "cold_campfire",
-   "name": "Cold Campfire",
-   "x": 648,
-   "z": 1800,
-   "yaw": 0.9,
-   "radius": 4,
+   "id": "shrine_niche_torbor_cross_38",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1476,
+   "z": 1956,
+   "yaw": 2.68,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1330,28 +1387,28 @@
    "monster": "moor_hound",
    "with": null,
    "level": [
-    4,
-    5
+    3,
+    4
    ],
    "count": [
     2,
     3
    ],
-   "x": 1800,
-   "z": 872,
+   "x": 392,
+   "z": 560,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "broken_wheel_torbor_cross_40",
-   "kind": "broken_wheel",
-   "name": "Broken Wheel",
-   "x": 1496,
-   "z": 651,
-   "yaw": 1.96,
-   "radius": 4,
+   "id": "shrine_niche_torbor_cross_40",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1894,
+   "z": 1444,
+   "yaw": 0.11,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1360,28 +1417,28 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    3,
+    4,
     5
    ],
    "count": [
     2,
     3
    ],
-   "x": 1796,
-   "z": 1944,
+   "x": 1812,
+   "z": 400,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "ribbon_tree_torbor_cross_42",
-   "kind": "ribbon_tree",
-   "name": "Ribbon Tree",
-   "x": 1249,
-   "z": 1516,
-   "yaw": 3.66,
-   "radius": 5,
+   "id": "scarecrow_torbor_cross_42",
+   "kind": "scarecrow",
+   "name": "Scarecrow",
+   "x": 700,
+   "z": 216,
+   "yaw": 2.35,
+   "radius": 4,
    "filler": true
   },
   {
@@ -1390,27 +1447,27 @@
    "monster": "cairn_rat",
    "with": null,
    "level": [
-    4,
-    5
+    3,
+    4
    ],
    "count": [
     2,
     3
    ],
-   "x": 1577,
-   "z": 1676,
+   "x": 576,
+   "z": 1044,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "broken_wheel_torbor_cross_44",
-   "kind": "broken_wheel",
-   "name": "Broken Wheel",
-   "x": 895,
-   "z": 1443,
-   "yaw": 0.05,
+   "id": "boundary_stake_torbor_cross_44",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1715,
+   "z": 1755,
+   "yaw": 5.96,
    "radius": 4,
    "filler": true
   },
@@ -1421,32 +1478,1724 @@
    "with": null,
    "level": [
     3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 870,
+   "z": 1073,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_1",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 968,
+   "z": 41,
+   "yaw": 2.14,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
     5
    ],
    "count": [
     2,
     3
    ],
-   "x": 612,
-   "z": 516,
+   "x": 1560,
+   "z": 42,
    "yaw": 0,
-   "radius": 10,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_2",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1889,
+   "z": 38,
+   "yaw": 0.81,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_torbor_cross_d1",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 1177,
+   "z": 199,
+   "yaw": 0.09,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_3",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 40,
+   "z": 480,
+   "yaw": 0.29,
+   "radius": 7,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_1",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 264,
+   "z": 880,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     217,
+     850
+    ],
+    [
+     293,
+     834
+    ],
+    [
+     311,
+     916
+    ],
+    [
+     237,
+     950
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s2",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 904,
+   "z": 1432,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_4",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 2000,
+   "z": 1775,
+   "yaw": 2.18,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_1",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 849,
+   "z": 1792,
+   "yaw": 5.07,
+   "radius": 6,
+   "path": [
+    [
+     877,
+     1800
+    ],
+    [
+     825,
+     1813
+    ],
+    [
+     847,
+     1764
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_5",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 689,
+   "z": 1984,
+   "yaw": 4.12,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s3",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1560,
+   "z": 584,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_torbor_cross_d2",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1007,
+   "z": 1256,
+   "yaw": 0.81,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_6",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 600,
+   "z": 496,
+   "yaw": 0.98,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s4",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 898,
+   "z": 336,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_7",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1793,
+   "z": 560,
+   "yaw": 5.56,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_2",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 304,
+   "z": 360,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     256,
+     356
+    ],
+    [
+     308,
+     327
+    ],
+    [
+     336,
+     363
+    ],
+    [
+     296,
+     405
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_8",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 230,
+   "z": 40,
+   "yaw": 3.23,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_torbor_cross_d3",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 391,
+   "z": 41,
+   "yaw": 2.63,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s5",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1808,
+   "z": 1616,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_9",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1680,
+   "z": 874,
+   "yaw": 2.14,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_2",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 344,
+   "z": 1664,
+   "yaw": 0.98,
+   "radius": 6,
+   "path": [
+    [
+     297,
+     1653
+    ],
+    [
+     372,
+     1624
+    ],
+    [
+     354,
+     1718
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_10",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1000,
+   "z": 1568,
+   "yaw": 4.3,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s6",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 464,
+   "z": 784,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_torbor_cross_d4",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 42,
+   "z": 1632,
+   "yaw": 1.86,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_11",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1392,
+   "z": 456,
+   "yaw": 3.81,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_3",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1624,
+   "z": 271,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1629,
+     204
+    ],
+    [
+     1688,
+     271
+    ],
+    [
+     1622,
+     357
+    ],
+    [
+     1545,
+     263
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s7",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 560,
+   "z": 280,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_12",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 896,
+   "z": 496,
+   "yaw": 2.16,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_torbor_cross_d5",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1204,
+   "z": 2016,
+   "yaw": 2.53,
+   "radius": 3,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "mushroom_ring_torbor_cross_46",
-   "kind": "mushroom_ring",
-   "name": "Mushroom Ring",
-   "x": 1940,
-   "z": 1724,
-   "yaw": 5,
+   "id": "cottage_corner_torbor_cross_d6",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1233,
+   "z": 1440,
+   "yaw": 3.37,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_13",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 442,
+   "z": 1126,
+   "yaw": 4.43,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s8",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1600,
+   "z": 1648,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_14",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 711,
+   "z": 726,
+   "yaw": 3.91,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_15",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 2007,
+   "z": 127,
+   "yaw": 0.37,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s9",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 39,
+   "z": 1288,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_16",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1320,
+   "z": 1680,
+   "yaw": 4.68,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_torbor_cross_d7",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 520,
+   "z": 1591,
+   "yaw": 2.9,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_17",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 2007,
+   "z": 674,
+   "yaw": 0.67,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_4",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 400,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     353,
+     2044
+    ],
+    [
+     337,
+     1936
+    ],
+    [
+     473,
+     1958
+    ],
+    [
+     448,
+     2045
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s10",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 729,
+   "z": 1024,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_18",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1111,
+   "z": 728,
+   "yaw": 5.34,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_3",
+   "role": "charcoal_burner",
+   "name": "Charcoal burner",
+   "work": "watch",
+   "chatter": [
+    "role.charcoal_burner"
+   ],
+   "x": 184,
+   "z": 1224,
+   "yaw": 5.35,
+   "radius": 6,
+   "path": [
+    [
+     172,
+     1226
+    ],
+    [
+     188,
+     1215
+    ],
+    [
+     191,
+     1228
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_19",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 161,
+   "z": 2008,
+   "yaw": 0.22,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s11",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2005,
+   "z": 391,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_torbor_cross_d8",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 752,
+   "z": 1376,
+   "yaw": 3.11,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_20",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 848,
+   "z": 200,
+   "yaw": 4.52,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s12",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1176,
+   "z": 1736,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_21",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 2009,
+   "z": 906,
+   "yaw": 3.33,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_5",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1504,
+   "z": 720,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1491,
+     660
+    ],
+    [
+     1573,
+     665
+    ],
+    [
+     1549,
+     791
+    ],
+    [
+     1437,
+     754
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_22",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1344,
+   "z": 2009,
+   "yaw": 0.14,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_torbor_cross_d9",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1323,
+   "z": 229,
+   "yaw": 4.11,
    "radius": 4,
    "filler": true
   },
   {
    "type": "camp",
-   "id": "camp_torbor_cross_f47",
+   "id": "camp_torbor_cross_s13",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 663,
+   "z": 39,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_23",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 200,
+   "z": 640,
+   "yaw": 1.66,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_4",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1119,
+   "z": 318,
+   "yaw": 4.7,
+   "radius": 6,
+   "path": [
+    [
+     1105,
+     343
+    ],
+    [
+     1100,
+     285
+    ],
+    [
+     1161,
+     312
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_24",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1864,
+   "z": 673,
+   "yaw": 2.02,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s14",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 466,
+   "z": 1346,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_torbor_cross_d10",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 1496,
+   "z": 999,
+   "yaw": 5.07,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_25",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 984,
+   "z": 2008,
+   "yaw": 6.23,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_6",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1864,
+   "z": 168,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1830,
+     137
+    ],
+    [
+     1881,
+     140
+    ],
+    [
+     1895,
+     185
+    ],
+    [
+     1833,
+     213
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s15",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 544,
+   "z": 1464,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_26",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1592,
+   "z": 2009,
+   "yaw": 2.99,
+   "radius": 7,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_torbor_cross_d11",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1176,
+   "z": 473,
+   "yaw": 4.94,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_27",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1817,
+   "z": 864,
+   "yaw": 1.22,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s16",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 623,
+   "z": 1712,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_28",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1518,
+   "z": 1544,
+   "yaw": 0.07,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_29",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 432,
+   "z": 257,
+   "yaw": 5.46,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s17",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1288,
+   "z": 536,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_30",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 121,
+   "z": 1016,
+   "yaw": 5.31,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_torbor_cross_d12",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 40,
+   "z": 1760,
+   "yaw": 3.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_31",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 377,
+   "z": 1231,
+   "yaw": 5.26,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_7",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2008,
+   "z": 1489,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     2040,
+     1501
+    ],
+    [
+     1996,
+     1524
+    ],
+    [
+     1961,
+     1471
+    ],
+    [
+     2020,
+     1454
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s18",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1432,
+   "z": 1840,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_32",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1522,
+   "z": 464,
+   "yaw": 1.27,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_5",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 184,
+   "z": 200,
+   "yaw": 1.21,
+   "radius": 6,
+   "path": [
+    [
+     205,
+     238
+    ],
+    [
+     139,
+     201
+    ],
+    [
+     202,
+     168
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_33",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1127,
+   "z": 1304,
+   "yaw": 1.06,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s19",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 535,
+   "z": 889,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_torbor_cross_d13",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 927,
+   "z": 1664,
+   "yaw": 2.52,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_34",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1063,
+   "z": 560,
+   "yaw": 3.67,
+   "radius": 7,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s20",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 186,
+   "z": 1840,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_35",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 856,
+   "z": 680,
+   "yaw": 5.25,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_8",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 567,
+   "z": 1850,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     569,
+     1882
+    ],
+    [
+     525,
+     1859
+    ],
+    [
+     557,
+     1820
+    ],
+    [
+     603,
+     1838
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_36",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1001,
+   "z": 976,
+   "yaw": 5.85,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_torbor_cross_d14",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 142,
+   "z": 753,
+   "yaw": 0.79,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s21",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1080,
+   "z": 96,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_37",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 40,
+   "z": 2008,
+   "yaw": 4.24,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_6",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 994,
+   "z": 1841,
+   "yaw": 5.69,
+   "radius": 6,
+   "path": [
+    [
+     984,
+     1831
+    ],
+    [
+     1013,
+     1840
+    ],
+    [
+     983,
+     1855
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_38",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 400,
+   "z": 1832,
+   "yaw": 1.81,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s22",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1679,
+   "z": 591,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_torbor_cross_d15",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 600,
+   "z": 782,
+   "yaw": 5.4,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_39",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 969,
+   "z": 1145,
+   "yaw": 2.71,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_9",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 792,
+   "z": 920,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     866,
+     910
+    ],
+    [
+     818,
+     982
+    ],
+    [
+     739,
+     925
+    ],
+    [
+     790,
+     845
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s23",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 624,
+   "z": 384,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_40",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1824,
+   "z": 1896,
+   "yaw": 1.81,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_torbor_cross_d16",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1279,
+   "z": 655,
+   "yaw": 5.21,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_41",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1272,
+   "z": 128,
+   "yaw": 0.55,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s24",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 432,
+   "z": 672,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_42",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1792,
+   "z": 1494,
+   "yaw": 6.16,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_43",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 2009,
+   "z": 1888,
+   "yaw": 1.8,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s25",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 712,
+   "z": 496,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_44",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1511,
+   "z": 151,
+   "yaw": 6.22,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_torbor_cross_d17",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 960,
+   "z": 777,
+   "yaw": 0.51,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_45",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 432,
+   "z": 144,
+   "yaw": 0.41,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_10",
    "monster": "cult_zealot",
    "with": null,
    "level": [
@@ -1457,22 +3206,7555 @@
     2,
     3
    ],
-   "x": 548,
-   "z": 1741,
+   "x": 1600,
+   "z": 952,
    "yaw": 0,
-   "radius": 10,
+   "radius": 8,
+   "path": [
+    [
+     1554,
+     1029
+    ],
+    [
+     1516,
+     908
+    ],
+    [
+     1627,
+     865
+    ],
+    [
+     1663,
+     963
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s26",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1905,
+   "z": 945,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_46",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1944,
+   "z": 1168,
+   "yaw": 3.36,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_7",
+   "role": "beekeeper",
+   "name": "Beekeeper",
+   "work": "gather",
+   "chatter": [
+    "role.beekeeper"
+   ],
+   "x": 888,
+   "z": 1544,
+   "yaw": 3.93,
+   "radius": 6,
+   "path": [
+    [
+     885,
+     1553
+    ],
+    [
+     878,
+     1538
+    ],
+    [
+     897,
+     1542
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_47",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 488,
+   "z": 496,
+   "yaw": 4.45,
+   "radius": 7,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s27",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1806,
+   "z": 2007,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_torbor_cross_d18",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 368,
+   "z": 1048,
+   "yaw": 2.16,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_48",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 39,
+   "z": 258,
+   "yaw": 2.82,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s28",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1153,
+   "z": 1849,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_49",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 296,
+   "z": 1816,
+   "yaw": 3.6,
+   "radius": 7,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_11",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 784,
+   "z": 287,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     846,
+     262
+    ],
+    [
+     805,
+     352
+    ],
+    [
+     718,
+     326
+    ],
+    [
+     743,
+     218
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_50",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 120,
+   "z": 560,
+   "yaw": 5.6,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_torbor_cross_d19",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 184,
+   "z": 1104,
+   "yaw": 1.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s29",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1089,
+   "z": 1632,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_51",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 40,
+   "z": 785,
+   "yaw": 1.23,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_8",
+   "role": "poacher",
+   "name": "Poacher",
+   "work": "gather",
+   "chatter": [
+    "role.poacher"
+   ],
+   "x": 1256,
+   "z": 1336,
+   "yaw": 4.69,
+   "radius": 6,
+   "path": [
+    [
+     1271,
+     1284
+    ],
+    [
+     1283,
+     1377
+    ],
+    [
+     1215,
+     1340
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_52",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 671,
+   "z": 609,
+   "yaw": 5.22,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s30",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 760,
+   "z": 1904,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "scarecrow_torbor_cross_d20",
+   "kind": "scarecrow",
+   "name": "Scarecrow",
+   "x": 1112,
+   "z": 928,
+   "yaw": 0.82,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_53",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1672,
+   "z": 40,
+   "yaw": 4.13,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_54",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1784,
+   "z": 40,
+   "yaw": 3.03,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s31",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1728,
+   "z": 481,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_55",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1390,
+   "z": 969,
+   "yaw": 4.03,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_torbor_cross_d21",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 744,
+   "z": 1736,
+   "yaw": 3.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_56",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1880,
+   "z": 1336,
+   "yaw": 0.52,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s32",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 280,
+   "z": 577,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_57",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1111,
+   "z": 1518,
+   "yaw": 2.32,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_58",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1808,
+   "z": 760,
+   "yaw": 1.57,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s33",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 708,
+   "z": 1294,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_59",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1704,
+   "z": 1632,
+   "yaw": 5.61,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "scarecrow_torbor_cross_d22",
+   "kind": "scarecrow",
+   "name": "Scarecrow",
+   "x": 40,
+   "z": 376,
+   "yaw": 0.96,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_60",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 977,
+   "z": 1350,
+   "yaw": 3.93,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_12",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1919,
+   "z": 1713,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1971,
+     1708
+    ],
+    [
+     1914,
+     1750
+    ],
+    [
+     1879,
+     1705
+    ],
+    [
+     1936,
+     1664
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s34",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 920,
+   "z": 128,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_61",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1262,
+   "z": 1008,
+   "yaw": 3.74,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_9",
+   "role": "poacher",
+   "name": "Poacher",
+   "work": "gather",
+   "chatter": [
+    "role.poacher"
+   ],
+   "x": 1094,
+   "z": 1207,
+   "yaw": 1.8,
+   "radius": 6,
+   "path": [
+    [
+     1094,
+     1225
+    ],
+    [
+     1077,
+     1195
+    ],
+    [
+     1115,
+     1194
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_62",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 999,
+   "z": 311,
+   "yaw": 5.87,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s35",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 825,
+   "z": 1169,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_torbor_cross_d23",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 1360,
+   "z": 328,
+   "yaw": 3.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_63",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1528,
+   "z": 1800,
+   "yaw": 1.6,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s36",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 607,
+   "z": 1144,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_64",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 136,
+   "z": 432,
+   "yaw": 0.55,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_13",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1320,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1321,
+     82
+    ],
+    [
+     1274,
+     41
+    ],
+    [
+     1329,
+     3
+    ],
+    [
+     1365,
+     45
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_65",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1880,
+   "z": 1544,
+   "yaw": 0.79,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_torbor_cross_d24",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1912,
+   "z": 432,
+   "yaw": 3.67,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s37",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1280,
+   "z": 1528,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_66",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1426,
+   "z": 218,
+   "yaw": 5.36,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_10",
+   "role": "fisher",
+   "name": "Fisher",
+   "work": "fish",
+   "chatter": [
+    "role.fisher"
+   ],
+   "x": 1448,
+   "z": 1616,
+   "yaw": 2.39,
+   "radius": 6,
+   "path": [
+    [
+     1446,
+     1596
+    ],
+    [
+     1469,
+     1621
+    ],
+    [
+     1431,
+     1627
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_67",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 40,
+   "z": 1528,
+   "yaw": 2.49,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s38",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 808,
+   "z": 456,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_torbor_cross_d25",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 384,
+   "z": 456,
+   "yaw": 4.21,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_68",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1569,
+   "z": 1912,
+   "yaw": 0.32,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_torbor_cross_d26",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1719,
+   "z": 1841,
+   "yaw": 0.17,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_14",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 896,
+   "z": 592,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     889,
+     545
+    ],
+    [
+     938,
+     596
+    ],
+    [
+     895,
+     637
+    ],
+    [
+     854,
+     595
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s39",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 487,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_69",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1912,
+   "z": 1858,
+   "yaw": 2.14,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_torbor_cross_d27",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 720,
+   "z": 120,
+   "yaw": 5.57,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_70",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1454,
+   "z": 537,
+   "yaw": 5.37,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s40",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 807,
+   "z": 1458,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_71",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1414,
+   "z": 871,
+   "yaw": 4.75,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_72",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 39,
+   "z": 968,
+   "yaw": 5.93,
+   "radius": 7,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s41",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 312,
+   "z": 97,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_73",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1786,
+   "z": 301,
+   "yaw": 1.89,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_torbor_cross_d28",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 38,
+   "z": 1392,
+   "yaw": 0.58,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_74",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1376,
+   "z": 1760,
+   "yaw": 2.55,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_75",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1104,
+   "z": 2008,
+   "yaw": 4.53,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s42",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1199,
+   "z": 705,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_torbor_cross_d29",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 645,
+   "z": 1427,
+   "yaw": 5.99,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_76",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 488,
+   "z": 591,
+   "yaw": 5.12,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_11",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1344,
+   "z": 720,
+   "yaw": 2.19,
+   "radius": 6,
+   "path": [
+    [
+     1289,
+     726
+    ],
+    [
+     1360,
+     685
+    ],
+    [
+     1376,
+     761
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_77",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 392,
+   "z": 847,
+   "yaw": 1.91,
+   "radius": 7,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s43",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 128,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_torbor_cross_d30",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1464,
+   "z": 40,
+   "yaw": 5.71,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_78",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1722,
+   "z": 368,
+   "yaw": 2.8,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s44",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 472,
+   "z": 1041,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_79",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 288,
+   "z": 1248,
+   "yaw": 1.62,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_15",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1384,
+   "z": 1929,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1405,
+     1961
+    ],
+    [
+     1339,
+     1959
+    ],
+    [
+     1361,
+     1881
+    ],
+    [
+     1439,
+     1914
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_80",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1984,
+   "z": 40,
+   "yaw": 2.27,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_torbor_cross_d31",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1888,
+   "z": 336,
+   "yaw": 3.43,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s45",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1488,
+   "z": 1096,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_81",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1775,
+   "z": 648,
+   "yaw": 6.07,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_12",
+   "role": "fisher",
+   "name": "Fisher",
+   "work": "fish",
+   "chatter": [
+    "role.fisher"
+   ],
+   "x": 135,
+   "z": 1617,
+   "yaw": 2.78,
+   "radius": 6,
+   "path": [
+    [
+     125,
+     1630
+    ],
+    [
+     127,
+     1600
+    ],
+    [
+     157,
+     1622
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_82",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1576,
+   "z": 1472,
+   "yaw": 1.74,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s46",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 984,
+   "z": 512,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_torbor_cross_d32",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 609,
+   "z": 201,
+   "yaw": 5.36,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_83",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 984,
+   "z": 1480,
+   "yaw": 3.48,
+   "radius": 7,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_16",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 776,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     823,
+     1930
+    ],
+    [
+     833,
+     2038
+    ],
+    [
+     728,
+     2047
+    ],
+    [
+     725,
+     1937
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s47",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 281,
+   "z": 1031,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_84",
+   "recipe": "cu_heron_nest",
+   "name": "Heron Rookery",
+   "kind": "nest",
+   "x": 1957,
+   "z": 1375,
+   "yaw": 0.35,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_torbor_cross_d33",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1242,
+   "z": 263,
+   "yaw": 0.89,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_85",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 943,
+   "z": 416,
+   "yaw": 1.25,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s48",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 464,
+   "z": 1217,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_86",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 438,
+   "z": 1553,
+   "yaw": 5.97,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_87",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 839,
+   "z": 1360,
+   "yaw": 3.24,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s49",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2007,
+   "z": 768,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_88",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1199,
+   "z": 1929,
+   "yaw": 2.56,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_torbor_cross_d34",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1808,
+   "z": 1408,
+   "yaw": 0.82,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_89",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1615,
+   "z": 512,
+   "yaw": 1.39,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_17",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1625,
+   "z": 1737,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1685,
+     1720
+    ],
+    [
+     1628,
+     1823
+    ],
+    [
+     1541,
+     1736
+    ],
+    [
+     1617,
+     1668
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s50",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 504,
+   "z": 207,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_90",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 954,
+   "z": 880,
+   "yaw": 1.7,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_13",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1894,
+   "z": 1079,
+   "yaw": 5.61,
+   "radius": 6,
+   "path": [
+    [
+     1879,
+     1096
+    ],
+    [
+     1890,
+     1057
+    ],
+    [
+     1918,
+     1079
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_91",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 455,
+   "z": 1664,
+   "yaw": 1.6,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s51",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 232,
+   "z": 760,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_torbor_cross_d35",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1078,
+   "z": 648,
+   "yaw": 0.54,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_92",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 968,
+   "z": 1056,
+   "yaw": 6.01,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s52",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 254,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_93",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 648,
+   "z": 982,
+   "yaw": 0.38,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_18",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1839,
+   "z": 487,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1787,
+     456
+    ],
+    [
+     1894,
+     427
+    ],
+    [
+     1880,
+     529
+    ],
+    [
+     1812,
+     550
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_94",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 344,
+   "z": 640,
+   "yaw": 4.84,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_torbor_cross_d36",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 1616,
+   "z": 111,
+   "yaw": 2.06,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s53",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 126,
+   "z": 1302,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_95",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 543,
+   "z": 424,
+   "yaw": 0.42,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_14",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1305,
+   "z": 448,
+   "yaw": 2.93,
+   "radius": 6,
+   "path": [
+    [
+     1301,
+     473
+    ],
+    [
+     1285,
+     425
+    ],
+    [
+     1338,
+     436
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_96",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1640,
+   "z": 776,
+   "yaw": 4.42,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s54",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 928,
+   "z": 1223,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_torbor_cross_d37",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1528,
+   "z": 376,
+   "yaw": 1.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_97",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1936,
+   "z": 624,
+   "yaw": 5.1,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_19",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1112,
+   "z": 816,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1098,
+     877
+    ],
+    [
+     1046,
+     783
+    ],
+    [
+     1143,
+     746
+    ],
+    [
+     1164,
+     847
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s55",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 952,
+   "z": 1744,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_98",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1735,
+   "z": 807,
+   "yaw": 5.8,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_torbor_cross_d38",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 600,
+   "z": 1624,
+   "yaw": 6.05,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_99",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1335,
+   "z": 1226,
+   "yaw": 0.77,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s56",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1264,
+   "z": 1743,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_100",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 2008,
+   "z": 2008,
+   "yaw": 1.32,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_101",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 40,
+   "z": 39,
+   "yaw": 0.19,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s57",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 193,
+   "z": 1929,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_102",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 936,
+   "z": 255,
+   "yaw": 1.78,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_torbor_cross_d39",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 608,
+   "z": 2008,
+   "yaw": 5.78,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_103",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1752,
+   "z": 920,
+   "yaw": 3.44,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_20",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 945,
+   "z": 1937,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1005,
+     1991
+    ],
+    [
+     889,
+     1996
+    ],
+    [
+     906,
+     1899
+    ],
+    [
+     1009,
+     1891
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s58",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 311,
+   "z": 496,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_104",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 680,
+   "z": 1096,
+   "yaw": 3.58,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_15",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 576,
+   "z": 40,
+   "yaw": 4.06,
+   "radius": 6,
+   "path": [
+    [
+     546,
+     68
+    ],
+    [
+     571,
+     0
+    ],
+    [
+     625,
+     85
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_105",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 2008,
+   "z": 216,
+   "yaw": 2.85,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s59",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 265,
+   "z": 1744,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s60",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1600,
+   "z": 1561,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_torbor_cross_d40",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 120,
+   "z": 1784,
+   "yaw": 0.17,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_106",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1328,
+   "z": 1458,
+   "yaw": 4.16,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s61",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 768,
+   "z": 1104,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_107",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1096,
+   "z": 1785,
+   "yaw": 3.64,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_21",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1784,
+   "z": 1704,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1731,
+     1685
+    ],
+    [
+     1812,
+     1670
+    ],
+    [
+     1849,
+     1731
+    ],
+    [
+     1766,
+     1758
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_108",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 360,
+   "z": 1528,
+   "yaw": 2.36,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_torbor_cross_d41",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 656,
+   "z": 1920,
+   "yaw": 3.49,
+   "radius": 4,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cairn_torbor_cross_48",
-   "kind": "cairn",
-   "name": "Cairn",
-   "x": 240,
-   "z": 496,
-   "yaw": 4.86,
+   "id": "sheep_pen_torbor_cross_d42",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 520,
+   "z": 1152,
+   "yaw": 0.27,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s62",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 40,
+   "z": 568,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_109",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 775,
+   "z": 1240,
+   "yaw": 1.3,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_torbor_cross_d43",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1716,
+   "z": 1442,
+   "yaw": 2.34,
    "radius": 4,
    "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_16",
+   "role": "fisher",
+   "name": "Fisher",
+   "work": "fish",
+   "chatter": [
+    "role.fisher"
+   ],
+   "x": 537,
+   "z": 1671,
+   "yaw": 3.43,
+   "radius": 6,
+   "path": [
+    [
+     546,
+     1671
+    ],
+    [
+     532,
+     1679
+    ],
+    [
+     531,
+     1660
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_110",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 792,
+   "z": 745,
+   "yaw": 0.83,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s63",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 889,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_torbor_cross_d44",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1744,
+   "z": 1560,
+   "yaw": 2.41,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_111",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 703,
+   "z": 809,
+   "yaw": 3.96,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_22",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1936,
+   "z": 712,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1985,
+     730
+    ],
+    [
+     1927,
+     744
+    ],
+    [
+     1886,
+     704
+    ],
+    [
+     1948,
+     668
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s64",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 648,
+   "z": 280,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_112",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1161,
+   "z": 120,
+   "yaw": 0.15,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_torbor_cross_d45",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1095,
+   "z": 185,
+   "yaw": 2.43,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_torbor_cross_d46",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1900,
+   "z": 1242,
+   "yaw": 0.14,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_113",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1152,
+   "z": 1450,
+   "yaw": 5.3,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s65",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 92,
+   "z": 1218,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_114",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 640,
+   "z": 1230,
+   "yaw": 4.56,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_115",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 599,
+   "z": 576,
+   "yaw": 2.6,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s66",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1011,
+   "z": 1644,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_116",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1241,
+   "z": 1664,
+   "yaw": 2.56,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_torbor_cross_d47",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 535,
+   "z": 736,
+   "yaw": 1.03,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_117",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 368,
+   "z": 1153,
+   "yaw": 0.81,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_23",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1327,
+   "z": 1598,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1370,
+     1652
+    ],
+    [
+     1271,
+     1685
+    ],
+    [
+     1272,
+     1540
+    ],
+    [
+     1387,
+     1548
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s67",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 488,
+   "z": 321,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_118",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 392,
+   "z": 744,
+   "yaw": 1.19,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_17",
+   "role": "charcoal_burner",
+   "name": "Charcoal burner",
+   "work": "watch",
+   "chatter": [
+    "role.charcoal_burner"
+   ],
+   "x": 583,
+   "z": 1535,
+   "yaw": 2.69,
+   "radius": 6,
+   "path": [
+    [
+     586,
+     1547
+    ],
+    [
+     571,
+     1529
+    ],
+    [
+     594,
+     1529
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_119",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 512,
+   "z": 968,
+   "yaw": 5.2,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s68",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1440,
+   "z": 392,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_torbor_cross_d48",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1001,
+   "z": 111,
+   "yaw": 5.77,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_120",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 48,
+   "z": 1047,
+   "yaw": 3.11,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s69",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2007,
+   "z": 595,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_121",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 391,
+   "z": 1313,
+   "yaw": 5.96,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_24",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1176,
+   "z": 392,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1190,
+     328
+    ],
+    [
+     1258,
+     396
+    ],
+    [
+     1174,
+     463
+    ],
+    [
+     1115,
+     391
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_122",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 200,
+   "z": 1023,
+   "yaw": 6.09,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_torbor_cross_d49",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1056,
+   "z": 1336,
+   "yaw": 6.01,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s70",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1480,
+   "z": 1232,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_123",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1184,
+   "z": 959,
+   "yaw": 2.68,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_18",
+   "role": "scarecrow_maker",
+   "name": "Scarecrow maker",
+   "work": "gather",
+   "chatter": [
+    "role.scarecrow_maker"
+   ],
+   "x": 768,
+   "z": 671,
+   "yaw": 0.67,
+   "radius": 6,
+   "path": [
+    [
+     770,
+     683
+    ],
+    [
+     758,
+     667
+    ],
+    [
+     775,
+     667
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_124",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 403,
+   "z": 1387,
+   "yaw": 3.89,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s71",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2009,
+   "z": 471,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_torbor_cross_d50",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1367,
+   "z": 535,
+   "yaw": 3.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_125",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 793,
+   "z": 144,
+   "yaw": 2.68,
+   "radius": 7,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_25",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 530,
+   "z": 1378,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     451,
+     1396
+    ],
+    [
+     508,
+     1303
+    ],
+    [
+     601,
+     1378
+    ],
+    [
+     564,
+     1470
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s72",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 96,
+   "z": 1705,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_126",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1752,
+   "z": 224,
+   "yaw": 2.85,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_torbor_cross_d51",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 1936,
+   "z": 871,
+   "yaw": 3.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_127",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 2008,
+   "z": 312,
+   "yaw": 1.95,
+   "radius": 7,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s73",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 407,
+   "z": 330,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_128",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 216,
+   "z": 424,
+   "yaw": 3.49,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_129",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 631,
+   "z": 711,
+   "yaw": 1.43,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s74",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 847,
+   "z": 1679,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_130",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1136,
+   "z": 536,
+   "yaw": 6.23,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_torbor_cross_d52",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1192,
+   "z": 1512,
+   "yaw": 2.48,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_131",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 232,
+   "z": 1296,
+   "yaw": 0.58,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_26",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 416,
+   "z": 1904,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     380,
+     1875
+    ],
+    [
+     474,
+     1869
+    ],
+    [
+     457,
+     1938
+    ],
+    [
+     378,
+     1946
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s75",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1458,
+   "z": 1507,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_132",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1503,
+   "z": 1871,
+   "yaw": 5.16,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_19",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 160,
+   "z": 944,
+   "yaw": 5.46,
+   "radius": 6,
+   "path": [
+    [
+     192,
+     940
+    ],
+    [
+     152,
+     990
+    ],
+    [
+     142,
+     912
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_133",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1144,
+   "z": 1376,
+   "yaw": 0.17,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s76",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1266,
+   "z": 1976,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_torbor_cross_d53",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 352,
+   "z": 264,
+   "yaw": 2.71,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_134",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 921,
+   "z": 1304,
+   "yaw": 5.74,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s77",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 784,
+   "z": 1313,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_135",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 104,
+   "z": 1960,
+   "yaw": 0.96,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_136",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 2007,
+   "z": 1128,
+   "yaw": 2.08,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_137",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 2009,
+   "z": 1206,
+   "yaw": 1.61,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_torbor_cross_d54",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 272,
+   "z": 656,
+   "yaw": 3.54,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s78",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 584,
+   "z": 951,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_138",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 920,
+   "z": 712,
+   "yaw": 1.44,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_20",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1979,
+   "z": 976,
+   "yaw": 0.45,
+   "radius": 6,
+   "path": [
+    [
+     1973,
+     1002
+    ],
+    [
+     1957,
+     965
+    ],
+    [
+     2001,
+     966
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_139",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 872,
+   "z": 408,
+   "yaw": 2.4,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s79",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1640,
+   "z": 1920,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_torbor_cross_d55",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 136,
+   "z": 680,
+   "yaw": 0.07,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_140",
+   "recipe": "cu_pilgrims_rest",
+   "name": "Pilgrim's Rest",
+   "kind": "lore",
+   "x": 720,
+   "z": 1440,
+   "yaw": 3.7,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_27",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1648,
+   "z": 664,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1658,
+     750
+    ],
+    [
+     1582,
+     670
+    ],
+    [
+     1635,
+     592
+    ],
+    [
+     1705,
+     666
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s80",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 463,
+   "z": 865,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_141",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 231,
+   "z": 1616,
+   "yaw": 4.22,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_torbor_cross_d56",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1670,
+   "z": 2008,
+   "yaw": 2.61,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_142",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 184,
+   "z": 96,
+   "yaw": 3.34,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s81",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1208,
+   "z": 536,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_143",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 689,
+   "z": 424,
+   "yaw": 1.1,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_144",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1162,
+   "z": 1661,
+   "yaw": 5.76,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s82",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 414,
+   "z": 1762,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_145",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 896,
+   "z": 1144,
+   "yaw": 2.04,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_torbor_cross_d57",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 680,
+   "z": 1368,
+   "yaw": 2.55,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_146",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1337,
+   "z": 162,
+   "yaw": 1.52,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_28",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1104,
+   "z": 1704,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1161,
+     1698
+    ],
+    [
+     1108,
+     1763
+    ],
+    [
+     1066,
+     1716
+    ],
+    [
+     1089,
+     1642
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s83",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 936,
+   "z": 952,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_147",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 535,
+   "z": 807,
+   "yaw": 4.59,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_21",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1833,
+   "z": 937,
+   "yaw": 4.98,
+   "radius": 6,
+   "path": [
+    [
+     1833,
+     884
+    ],
+    [
+     1878,
+     978
+    ],
+    [
+     1784,
+     959
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_148",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1521,
+   "z": 2009,
+   "yaw": 0.8,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s84",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1528,
+   "z": 1664,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_torbor_cross_d58",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 312,
+   "z": 1577,
+   "yaw": 5.55,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_149",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 392,
+   "z": 199,
+   "yaw": 1.38,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s85",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 136,
+   "z": 1160,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_150",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1648,
+   "z": 1433,
+   "yaw": 6.12,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_29",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1039,
+   "z": 705,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1044,
+     791
+    ],
+    [
+     967,
+     689
+    ],
+    [
+     1066,
+     632
+    ],
+    [
+     1094,
+     721
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_151",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 352,
+   "z": 977,
+   "yaw": 0.23,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_torbor_cross_d59",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 813,
+   "z": 528,
+   "yaw": 4.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s86",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1864,
+   "z": 600,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_152",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1880,
+   "z": 1618,
+   "yaw": 1.55,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_22",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 656,
+   "z": 152,
+   "yaw": 3.63,
+   "radius": 6,
+   "path": [
+    [
+     712,
+     132
+    ],
+    [
+     644,
+     200
+    ],
+    [
+     625,
+     126
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_153",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 192,
+   "z": 568,
+   "yaw": 5.37,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s87",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 692,
+   "z": 1685,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_torbor_cross_d60",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 274,
+   "z": 266,
+   "yaw": 5.03,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_154",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 680,
+   "z": 1760,
+   "yaw": 0.21,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_30",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 496,
+   "z": 1521,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     486,
+     1468
+    ],
+    [
+     530,
+     1510
+    ],
+    [
+     508,
+     1566
+    ],
+    [
+     443,
+     1530
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s88",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1432,
+   "z": 1024,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_155",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1856,
+   "z": 808,
+   "yaw": 4.33,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_torbor_cross_d61",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 559,
+   "z": 350,
+   "yaw": 0.62,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_156",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1321,
+   "z": 600,
+   "yaw": 1.28,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s89",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1208,
+   "z": 1800,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_157",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1319,
+   "z": 968,
+   "yaw": 1.22,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_158",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1945,
+   "z": 105,
+   "yaw": 1,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s90",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 256,
+   "z": 1184,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_159",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1073,
+   "z": 986,
+   "yaw": 5.5,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_torbor_cross_d62",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1449,
+   "z": 935,
+   "yaw": 0.13,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_160",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1872,
+   "z": 272,
+   "yaw": 2.98,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_31",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1784,
+   "z": 1832,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1717,
+     1826
+    ],
+    [
+     1787,
+     1784
+    ],
+    [
+     1835,
+     1846
+    ],
+    [
+     1770,
+     1872
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s91",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1144,
+   "z": 656,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_161",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 39,
+   "z": 186,
+   "yaw": 4.46,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_23",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1249,
+   "z": 191,
+   "yaw": 2.71,
+   "radius": 6,
+   "path": [
+    [
+     1285,
+     224
+    ],
+    [
+     1207,
+     220
+    ],
+    [
+     1261,
+     154
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_162",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 592,
+   "z": 848,
+   "yaw": 0.98,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s92",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 151,
+   "z": 824,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_torbor_cross_d63",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 59,
+   "z": 1456,
+   "yaw": 5.32,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_163",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 120,
+   "z": 1088,
+   "yaw": 5.04,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s93",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 544,
+   "z": 536,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_164",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 112,
+   "z": 496,
+   "yaw": 4.95,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_32",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 936,
+   "z": 1601,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     952,
+     1551
+    ],
+    [
+     1002,
+     1619
+    ],
+    [
+     938,
+     1654
+    ],
+    [
+     889,
+     1590
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_165",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1048,
+   "z": 1506,
+   "yaw": 0.04,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_torbor_cross_d64",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 360,
+   "z": 1448,
+   "yaw": 3.83,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s94",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 735,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_166",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1032,
+   "z": 41,
+   "yaw": 0.23,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_24",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1000,
+   "z": 376,
+   "yaw": 5.73,
+   "radius": 6,
+   "path": [
+    [
+     991,
+     413
+    ],
+    [
+     975,
+     335
+    ],
+    [
+     1029,
+     375
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_167",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1560,
+   "z": 193,
+   "yaw": 5.8,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s95",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1081,
+   "z": 1857,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_torbor_cross_d65",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 79,
+   "z": 727,
+   "yaw": 1.59,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_168",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 753,
+   "z": 1808,
+   "yaw": 4.22,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_33",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1120,
+   "z": 41,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1121,
+     6
+    ],
+    [
+     1164,
+     43
+    ],
+    [
+     1111,
+     86
+    ],
+    [
+     1088,
+     29
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s96",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 656,
+   "z": 536,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_169",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1247,
+   "z": 592,
+   "yaw": 4.73,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_torbor_cross_d66",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 806,
+   "z": 1527,
+   "yaw": 0.6,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_170",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 2000,
+   "z": 840,
+   "yaw": 3.49,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s97",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1298,
+   "z": 296,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_171",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 367,
+   "z": 136,
+   "yaw": 0.73,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_172",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1041,
+   "z": 919,
+   "yaw": 4.18,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s98",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1522,
+   "z": 531,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_173",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1265,
+   "z": 1072,
+   "yaw": 4.38,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_torbor_cross_d67",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 568,
+   "z": 1752,
+   "yaw": 4.19,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_174",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1160,
+   "z": 1248,
+   "yaw": 5.42,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_34",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1064,
+   "z": 1568,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1152,
+     1568
+    ],
+    [
+     1033,
+     1643
+    ],
+    [
+     998,
+     1566
+    ],
+    [
+     1067,
+     1485
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s99",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1105,
+   "z": 471,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_175",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1456,
+   "z": 472,
+   "yaw": 3.95,
+   "radius": 7,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_25",
+   "role": "hunter_lone",
+   "name": "Hunter",
+   "work": "watch",
+   "chatter": [
+    "role.hunter"
+   ],
+   "x": 1040,
+   "z": 1137,
+   "yaw": 3.88,
+   "radius": 6,
+   "path": [
+    [
+     1065,
+     1172
+    ],
+    [
+     982,
+     1140
+    ],
+    [
+     1070,
+     1088
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_176",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1496,
+   "z": 216,
+   "yaw": 2.59,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s100",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 40,
+   "z": 1823,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_torbor_cross_d68",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1392,
+   "z": 272,
+   "yaw": 5.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_177",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1137,
+   "z": 1945,
+   "yaw": 3.15,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s101",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1488,
+   "z": 592,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_178",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1462,
+   "z": 817,
+   "yaw": 2.38,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_35",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 864,
+   "z": 744,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     845,
+     775
+    ],
+    [
+     824,
+     726
+    ],
+    [
+     882,
+     713
+    ],
+    [
+     888,
+     767
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_179",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 1816,
+   "z": 1344,
+   "yaw": 6.02,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_torbor_cross_d69",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 504,
+   "z": 680,
+   "yaw": 1.12,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s102",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 520,
+   "z": 1086,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_180",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1000,
+   "z": 1416,
+   "yaw": 1.59,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_26",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 40,
+   "z": 847,
+   "yaw": 4.51,
+   "radius": 6,
+   "path": [
+    [
+     45,
+     908
+    ],
+    [
+     0,
+     800
+    ],
+    [
+     86,
+     840
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_181",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1968,
+   "z": 1833,
+   "yaw": 3.36,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_torbor_cross_d70",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 621,
+   "z": 1286,
+   "yaw": 5.84,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s103",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 185,
+   "z": 367,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_torbor_cross_d71",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1671,
+   "z": 1575,
+   "yaw": 5.63,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_182",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1511,
+   "z": 89,
+   "yaw": 2.37,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_36",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 247,
+   "z": 120,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     180,
+     148
+    ],
+    [
+     229,
+     67
+    ],
+    [
+     303,
+     74
+    ],
+    [
+     292,
+     182
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s104",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 246,
+   "z": 1865,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_183",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1592,
+   "z": 736,
+   "yaw": 4.47,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_torbor_cross_d72",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 346,
+   "z": 785,
+   "yaw": 4.62,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_184",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1960,
+   "z": 168,
+   "yaw": 1.07,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s105",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1576,
+   "z": 416,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_185",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1336,
+   "z": 1296,
+   "yaw": 5.75,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_186",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 207,
+   "z": 304,
+   "yaw": 0.85,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s106",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1448,
+   "z": 160,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_187",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 135,
+   "z": 1890,
+   "yaw": 2.17,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_torbor_cross_d73",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 855,
+   "z": 112,
+   "yaw": 1.24,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_188",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 936,
+   "z": 192,
+   "yaw": 5.66,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_189",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1496,
+   "z": 1179,
+   "yaw": 4.22,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s107",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1544,
+   "z": 1600,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_190",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1944,
+   "z": 361,
+   "yaw": 4.37,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_27",
+   "role": "beekeeper",
+   "name": "Beekeeper",
+   "work": "gather",
+   "chatter": [
+    "role.beekeeper"
+   ],
+   "x": 912,
+   "z": 832,
+   "yaw": 3.39,
+   "radius": 6,
+   "path": [
+    [
+     908,
+     820
+    ],
+    [
+     923,
+     832
+    ],
+    [
+     904,
+     837
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_191",
+   "recipe": "cu_pilgrims_rest",
+   "name": "Pilgrim's Rest",
+   "kind": "lore",
+   "x": 1737,
+   "z": 2010,
+   "yaw": 6.02,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s108",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1859,
+   "z": 1952,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_torbor_cross_d74",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 200,
+   "z": 1777,
+   "yaw": 0.33,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_192",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 353,
+   "z": 1784,
+   "yaw": 3.59,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s109",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1784,
+   "z": 1944,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_193",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1434,
+   "z": 691,
+   "yaw": 1.37,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_37",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 81,
+   "z": 1338,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     19,
+     1353
+    ],
+    [
+     78,
+     1295
+    ],
+    [
+     138,
+     1323
+    ],
+    [
+     88,
+     1376
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_194",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 105,
+   "z": 256,
+   "yaw": 0.83,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_torbor_cross_d75",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1000,
+   "z": 576,
+   "yaw": 2.44,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s110",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1696,
+   "z": 424,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_195",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1447,
+   "z": 1776,
+   "yaw": 0.04,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_28",
+   "role": "hunter_lone",
+   "name": "Hunter",
+   "work": "watch",
+   "chatter": [
+    "role.hunter"
+   ],
+   "x": 1943,
+   "z": 1912,
+   "yaw": 3.49,
+   "radius": 6,
+   "path": [
+    [
+     1921,
+     1929
+    ],
+    [
+     1940,
+     1888
+    ],
+    [
+     1975,
+     1929
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_196",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 65,
+   "z": 319,
+   "yaw": 0.89,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s111",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 143,
+   "z": 616,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_torbor_cross_d76",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 600,
+   "z": 1945,
+   "yaw": 1.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_197",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 808,
+   "z": 1048,
+   "yaw": 5.2,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_198",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1025,
+   "z": 1031,
+   "yaw": 0.98,
+   "radius": 7,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s112",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 720,
+   "z": 560,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_199",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 200,
+   "z": 704,
+   "yaw": 2.29,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_torbor_cross_d77",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 320,
+   "z": 1192,
+   "yaw": 6.18,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_200",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 912,
+   "z": 1365,
+   "yaw": 0.27,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s113",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1816,
+   "z": 1552,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_201",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 480,
+   "z": 104,
+   "yaw": 1.71,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_202",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 682,
+   "z": 672,
+   "yaw": 3.41,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s114",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 447,
+   "z": 1280,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_203",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1200,
+   "z": 778,
+   "yaw": 6.18,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_torbor_cross_d78",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 240,
+   "z": 1080,
+   "yaw": 4.49,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_204",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1264,
+   "z": 1610,
+   "yaw": 1.25,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_38",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1447,
+   "z": 2009,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1487,
+     1963
+    ],
+    [
+     1471,
+     2040
+    ],
+    [
+     1412,
+     2041
+    ],
+    [
+     1416,
+     1983
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_torbor_cross_d79",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 843,
+   "z": 1874,
+   "yaw": 3.02,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s115",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1840,
+   "z": 70,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_torbor_cross_d80",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1173,
+   "z": 1158,
+   "yaw": 2.17,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_205",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1040,
+   "z": 264,
+   "yaw": 4.33,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_29",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 656,
+   "z": 1040,
+   "yaw": 3.84,
+   "radius": 6,
+   "path": [
+    [
+     665,
+     1026
+    ],
+    [
+     657,
+     1053
+    ],
+    [
+     636,
+     1036
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_206",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 336,
+   "z": 1288,
+   "yaw": 5.15,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s116",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1537,
+   "z": 1376,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_torbor_cross_d81",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 624,
+   "z": 1776,
+   "yaw": 1.1,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_207",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 1673,
+   "z": 528,
+   "yaw": 4.86,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s117",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1736,
+   "z": 544,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_208",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1857,
+   "z": 1487,
+   "yaw": 0.23,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_39",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1728,
+   "z": 72,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1763,
+     36
+    ],
+    [
+     1780,
+     110
+    ],
+    [
+     1703,
+     123
+    ],
+    [
+     1685,
+     46
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_209",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 391,
+   "z": 394,
+   "yaw": 3.16,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_torbor_cross_d82",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1561,
+   "z": 326,
+   "yaw": 4.99,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s118",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1775,
+   "z": 711,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_210",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 424,
+   "z": 506,
+   "yaw": 1.27,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_30",
+   "role": "beekeeper",
+   "name": "Beekeeper",
+   "work": "gather",
+   "chatter": [
+    "role.beekeeper"
+   ],
+   "x": 455,
+   "z": 1809,
+   "yaw": 1.58,
+   "radius": 6,
+   "path": [
+    [
+     456,
+     1824
+    ],
+    [
+     443,
+     1807
+    ],
+    [
+     464,
+     1800
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_211",
+   "recipe": "cu_pilgrims_rest",
+   "name": "Pilgrim's Rest",
+   "kind": "lore",
+   "x": 1696,
+   "z": 208,
+   "yaw": 3.49,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s119",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1375,
+   "z": 385,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_torbor_cross_d83",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 800,
+   "z": 1720,
+   "yaw": 2.86,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_212",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1216,
+   "z": 96,
+   "yaw": 4.95,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_40",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 727,
+   "z": 862,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     745,
+     914
+    ],
+    [
+     681,
+     891
+    ],
+    [
+     712,
+     797
+    ],
+    [
+     774,
+     848
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s120",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 657,
+   "z": 768,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_213",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 104,
+   "z": 384,
+   "yaw": 3.15,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_torbor_cross_d84",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 632,
+   "z": 448,
+   "yaw": 2.43,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_214",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1560,
+   "z": 1848,
+   "yaw": 2.88,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s121",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2008,
+   "z": 1365,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_215",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 440,
+   "z": 448,
+   "yaw": 0.44,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_216",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1720,
+   "z": 992,
+   "yaw": 0.47,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s122",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1240,
+   "z": 480,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_217",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1391,
+   "z": 1241,
+   "yaw": 4.05,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_torbor_cross_d85",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 416,
+   "z": 1017,
+   "yaw": 4.08,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_218",
+   "recipe": "cu_pilgrims_rest",
+   "name": "Pilgrim's Rest",
+   "kind": "lore",
+   "x": 1512,
+   "z": 1472,
+   "yaw": 5.83,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_219",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1864,
+   "z": 1393,
+   "yaw": 4.31,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_torbor_cross_d86",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 936,
+   "z": 1077,
+   "yaw": 3.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s123",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1006,
+   "z": 1105,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s124",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 240,
+   "z": 1680,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_220",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 544,
+   "z": 600,
+   "yaw": 1.34,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_torbor_cross_d87",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1356,
+   "z": 1806,
+   "yaw": 1.16,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_31",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1120,
+   "z": 599,
+   "yaw": 0.13,
+   "radius": 6,
+   "path": [
+    [
+     1131,
+     580
+    ],
+    [
+     1125,
+     622
+    ],
+    [
+     1102,
+     599
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_221",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 896,
+   "z": 1720,
+   "yaw": 5.57,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s125",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 312,
+   "z": 1880,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_torbor_cross_d88",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 992,
+   "z": 1200,
+   "yaw": 1.55,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_222",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 464,
+   "z": 1606,
+   "yaw": 1.1,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s126",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 40,
+   "z": 1944,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_223",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 424,
+   "z": 88,
+   "yaw": 4.27,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_41",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1745,
+   "z": 865,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1800,
+     913
+    ],
+    [
+     1692,
+     912
+    ],
+    [
+     1697,
+     820
+    ],
+    [
+     1798,
+     797
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_224",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1936,
+   "z": 1534,
+   "yaw": 5.48,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_torbor_cross_d89",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 1657,
+   "z": 1375,
+   "yaw": 2.44,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s127",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 432,
+   "z": 607,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_225",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1225,
+   "z": 650,
+   "yaw": 5.79,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_32",
+   "role": "charcoal_burner",
+   "name": "Charcoal burner",
+   "work": "watch",
+   "chatter": [
+    "role.charcoal_burner"
+   ],
+   "x": 96,
+   "z": 1544,
+   "yaw": 0.81,
+   "radius": 6,
+   "path": [
+    [
+     86,
+     1547
+    ],
+    [
+     100,
+     1536
+    ],
+    [
+     102,
+     1554
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_226",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1784,
+   "z": 176,
+   "yaw": 2.63,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s128",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1408,
+   "z": 1704,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_torbor_cross_d90",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 375,
+   "z": 903,
+   "yaw": 4.58,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_227",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 96,
+   "z": 952,
+   "yaw": 2.78,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_42",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 312,
+   "z": 1992,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     370,
+     2009
+    ],
+    [
+     288,
+     2047
+    ],
+    [
+     267,
+     1978
+    ],
+    [
+     338,
+     1943
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s129",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1740,
+   "z": 1495,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_228",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1039,
+   "z": 1784,
+   "yaw": 2.12,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_torbor_cross_d91",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1399,
+   "z": 816,
+   "yaw": 1.78,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_229",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1887,
+   "z": 1183,
+   "yaw": 4.71,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s130",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1129,
+   "z": 234,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_230",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1888,
+   "z": 1809,
+   "yaw": 2.35,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_231",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1375,
+   "z": 913,
+   "yaw": 2.88,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s131",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1832,
+   "z": 336,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_232",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1559,
+   "z": 120,
+   "yaw": 0.08,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_torbor_cross_d92",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 263,
+   "z": 456,
+   "yaw": 6.15,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_233",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1574,
+   "z": 896,
+   "yaw": 1.42,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_43",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 864,
+   "z": 1480,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     829,
+     1522
+    ],
+    [
+     821,
+     1467
+    ],
+    [
+     879,
+     1415
+    ],
+    [
+     913,
+     1490
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s132",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 400,
+   "z": 1680,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_234",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 631,
+   "z": 1478,
+   "yaw": 3,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_33",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1206,
+   "z": 1871,
+   "yaw": 5.59,
+   "radius": 6,
+   "path": [
+    [
+     1176,
+     1863
+    ],
+    [
+     1216,
+     1849
+    ],
+    [
+     1220,
+     1898
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_235",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 744,
+   "z": 440,
+   "yaw": 0.21,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s133",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 992,
+   "z": 824,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_torbor_cross_d93",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1309,
+   "z": 1180,
+   "yaw": 0.03,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_236",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1048,
+   "z": 504,
+   "yaw": 0.45,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s134",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2009,
+   "z": 1656,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_237",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 504,
+   "z": 2008,
+   "yaw": 5.45,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_44",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 704,
+   "z": 1880,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     693,
+     1834
+    ],
+    [
+     751,
+     1866
+    ],
+    [
+     722,
+     1919
+    ],
+    [
+     658,
+     1890
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_238",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1586,
+   "z": 1784,
+   "yaw": 2.41,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_torbor_cross_d94",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 920,
+   "z": 1840,
+   "yaw": 2.22,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s135",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 71,
+   "z": 432,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_239",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 335,
+   "z": 1098,
+   "yaw": 3.5,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_torbor_cross_34",
+   "role": "scarecrow_maker",
+   "name": "Scarecrow maker",
+   "work": "gather",
+   "chatter": [
+    "role.scarecrow_maker"
+   ],
+   "x": 392,
+   "z": 1104,
+   "yaw": 4.78,
+   "radius": 6,
+   "path": [
+    [
+     397,
+     1091
+    ],
+    [
+     398,
+     1116
+    ],
+    [
+     376,
+     1106
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_240",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 800,
+   "z": 1401,
+   "yaw": 0.19,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s136",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 416,
+   "z": 1184,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_torbor_cross_d95",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1312,
+   "z": 1776,
+   "yaw": 0.25,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_241",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 376,
+   "z": 688,
+   "yaw": 1.38,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_torbor_cross_45",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 448,
+   "z": 728,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     477,
+     702
+    ],
+    [
+     461,
+     771
+    ],
+    [
+     404,
+     762
+    ],
+    [
+     427,
+     676
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s137",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1544,
+   "z": 968,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_242",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1616,
+   "z": 1010,
+   "yaw": 4.69,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_torbor_cross_d96",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 288,
+   "z": 774,
+   "yaw": 4.05,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_243",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1456,
+   "z": 96,
+   "yaw": 6.17,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s138",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 1192,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_244",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 864,
+   "z": 1216,
+   "yaw": 1.38,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_245",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1392,
+   "z": 176,
+   "yaw": 0.17,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_s139",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 1688,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_torbor_cross_246",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1954,
+   "z": 1224,
+   "yaw": 3.51,
+   "radius": 3,
+   "levelBase": 4
   }
  ],
  "features": [
@@ -1487,5 +10769,22 @@
    "where": "the settlement itself",
    "needMet": true
   }
+ ],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 246,
+   "wayside": 96,
+   "stray": 139,
+   "roamer": 45,
+   "folk": 34
+  },
+  "openShareCovered": 1,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  3,
+  5
  ]
 }

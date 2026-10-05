@@ -1,0 +1,17 @@
+/* Stream D-world: the travel veil (js/client/transition.js) and other world-rendering overlays. */
+.travel-veil {
+  position: fixed; inset: 0; z-index: 40; pointer-events: none;
+  background: radial-gradient(ellipse at center, #10131a 0%, #05060a 75%);
+  opacity: 0; transition: opacity 0.18s ease-out;
+  display: flex; align-items: center; justify-content: center;
+}
+.travel-veil.on { opacity: 1; transition: opacity 0.16s ease-in; pointer-events: auto; }
+.travel-veil:not(.on) { transition-duration: 0.5s; }
+.travel-veil .tr-text {
+  font-family: 'Cinzel', serif; letter-spacing: 0.12em; color: #d9c79a; font-size: 18px;
+  text-shadow: 0 0 18px rgba(255, 200, 120, 0.35); opacity: 0.85;
+}
+.travel-veil .tr-text::after { content: ''; display: block; margin: 10px auto 0; width: 120px; height: 2px;
+  background: linear-gradient(90deg, transparent, #d9c79a, transparent); animation: tr-pulse 1.2s ease-in-out infinite; }
+@keyframes tr-pulse { 0%, 100% { opacity: 0.25; transform: scaleX(0.6); } 50% { opacity: 1; transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { .travel-veil, .travel-veil.on { transition: none; } .travel-veil .tr-text::after { animation: none; } }

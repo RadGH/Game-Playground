@@ -27,6 +27,7 @@ import {
 import { pickTarget, notice as noticeThreat, clearThreat, threatFromDamage, taunt as threatTaunt } from './threat.js';
 import { pathfinderFor } from './pathfind.js';
 import { siegeOf } from './warband.js';
+import { afterHurt as perkAfterHurt } from './perk-rules.js';
 
 export const AI = {
   LEASH_METRES: 40,
@@ -129,6 +130,7 @@ export function monsterStrike(field, e, victim, { element = 'physical', ranged =
   const hit = () => field.rpg.strike(e, victim, field.rng, { multiplier: mult * incomingFrom(victim) * outgoingFrom(e), element, ranged });
   const result = field.hooks?.asActor ? field.hooks.asActor(victim, hit) : hit();
   field.hooks?.onHurt?.(result, e, victim);                 // skill wards/counters (cast.js, M1)
+  if (victim.perkFlags) perkAfterHurt(field, victim, result, e, field.clock);   // the perk forest (Unbroken decides before the death)
   if (e.lifeSteal) e.hp = Math.min(e.maxHp, e.hp + Math.round(result.amount * e.lifeSteal));
   if (e.onHit?.length) statusOnHit(field, e, victim);
   e.lastCombatAt = field.clock;

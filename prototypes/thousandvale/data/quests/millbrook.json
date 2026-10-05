@@ -40,8 +40,8 @@
           "kind": "kill",
           "type": "thicket_boar",
           "count": 6,
-          "where": "the lanes between the mills",
-          "text": "Thicket boars"
+          "where": "the lanes between the mills of Millbrook",
+          "text": "Kill 6 thicket boars in the lanes"
         }
       ],
       "done": "The carts roll again. Off you go to Ashcombe, they've a ruin that needs looking at.",
@@ -67,7 +67,7 @@
           "type": "carrion_moth",
           "count": 6,
           "where": "the grain lofts of Three Wheels",
-          "text": "Carrion moths"
+          "text": "Kill 6 carrion moths in the lofts"
         }
       ],
       "done": "Lovely. Now I just have to find out what died.",
@@ -88,14 +88,15 @@
           "kind": "kill",
           "type": "road_brigand",
           "count": 4,
-          "where": "near the tinker's wagon",
-          "text": "Brigands"
+          "where": "near The Tinker's Wagon",
+          "text": "Kill 4 brigands near the wagon"
         },
         {
           "kind": "deliver",
           "item": "Tinker's tool roll",
           "npc": "tinker_cadoc",
-          "text": "Return the tools to Cadoc"
+          "text": "Return the tool roll to Cadoc",
+          "where": "Cadoc, at The Tinker's Wagon"
         }
       ],
       "done": "My good pliers! I'll mend anything you like. Within reason. Not your love life.",
@@ -120,7 +121,7 @@
           "type": "moor_hound",
           "count": 8,
           "where": "around Millbrook Keep",
-          "text": "Hounds around the keep"
+          "text": "Kill 8 moor hounds round the keep"
         }
       ],
       "done": "So they were real. I owe the sentries an apology. I won't give one.",
@@ -140,19 +141,21 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the lower workings",
-          "floor": 1
+          "text": "Reach the lower Millrace Workings",
+          "floor": 1,
+          "where": "The Millrace Workings, the dungeon door in Millbrook Vale"
         },
         {
           "kind": "clear",
           "dungeon": "door",
           "text": "Defeat what waits at the bottom",
-          "boss": true
+          "boss": true,
+          "where": "the bottom of the Millrace Workings"
         }
       ],
       "done": "The millrace is ours again. Mostly ours. A bit shared with the bats.",
       "reward": {
-        "xp": 1.0,
+        "xp": 1,
         "gold": 40,
         "item": {
           "tier": "rare",
@@ -171,7 +174,8 @@
           "kind": "killRare",
           "zone": "millbrook",
           "slot": 0,
-          "text": "The vale's rare beast slain"
+          "text": "Hunt down Laughing Hettie",
+          "where": "roams the farmland of Millbrook Vale"
         }
       ],
       "done": "We'll drink to you at harvest. We'll drink to anything at harvest, but mainly you.",

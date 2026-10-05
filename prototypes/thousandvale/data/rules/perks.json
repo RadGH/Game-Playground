@@ -1,0 +1,256 @@
+{
+  "_doc": "Thousandvale's PERK FOREST (stream C: js/rules/perk-forest.js builds it, js/rules/perk-rules.js reads its rules; owner guide docs/talents.md). Play-test 1 P6: 'a perk forest with several branches, much more expansive than Farhold' (Farhold js/perks.js: 8 arms, 169 nodes). Twelve arms, every one of them branching into 2-4 paths past ring 6, each path ending in a keystone; ~380 nodes. A stat entry is [derived key, value] and its card line is WRITTEN from the number (perk-forest.js STAT_TEXT), so a card can never disagree with what it does. `rules` are nodes that change a rule: `flag` (read by Farhold's code or by js/rules/perk-rules.js TV_FLAG_READERS), `power` (a Farhold js/effects.js keystone power), `grants` (stats, always on) and `when`/`whenGrants` (stats only in those hands). tests/C/perks.test.mjs fails if any key, flag or power has no reader. Node ids are `<arm>:<ring>:<i>`, `<arm>:path:<branch>:<step>` and `<arm>:key:<rule id>` — a save holds node ids, so moving a node to another arm or ring costs players their point; renaming one costs nothing.",
+  "rings": [
+    { "at": 1, "radius": 3, "kind": "minor", "per": 2 },
+    { "at": 2, "radius": 4, "kind": "minor", "per": 3 },
+    { "at": 3, "radius": 5, "kind": "major", "per": 2 },
+    { "at": 4, "radius": 6, "kind": "minor", "per": 3 },
+    { "at": 5, "radius": 7, "kind": "talent", "per": 2 },
+    { "at": 6, "radius": 8, "kind": "major", "per": 3 }
+  ],
+  "branchStart": 9.2,
+  "branchSpread": 0.2,
+  "arms": [
+    {
+      "key": "melee", "name": "The Close Ground", "color": "#e07a4a", "blurb": "Reach, weight and the willingness to be hit.",
+      "minor": [["str", 4], ["damageFlat", 3], ["armor", 6], ["maxHp", 22], ["critChance", 3]],
+      "major": [["damagePct", 8], ["str", 9], ["armorPct", 12], ["critDamage", 18], ["areaPct", 10]],
+      "talents": ["riposte", "sunder"],
+      "branches": [
+        { "key": "two_weights", "name": "Two Great Weights", "nodes": [["str", 5], ["areaPct", 10], "heavy_hands", ["damagePct", 8]], "keys": ["doubled_grasp"] },
+        { "key": "one_weight", "name": "The Single Weight", "nodes": [["critDamage", 12], ["str", 8], "iron_grip", ["damagePct", 8]], "keys": ["full_swing"] },
+        { "key": "twin_edges", "name": "Twin Edges", "nodes": [["haste", 5], ["critChance", 4], "quick_wrists", ["dex", 8]], "keys": ["flurry"] },
+        { "key": "sword_board", "name": "Sword and Board", "nodes": [["blockChance", 5], ["armorPct", 12], "braced_arm", ["maxHp", 40]], "keys": ["shield_wall"] }
+      ]
+    },
+    {
+      "key": "hunt", "name": "The Hunter's Eye", "color": "#d8a050", "blurb": "Pick the moment, and make the moment count.",
+      "minor": [["critChance", 3], ["damageFlat", 3], ["dex", 4], ["critDamage", 8]],
+      "major": [["critDamage", 20], ["critChance", 6], ["damagePct", 7]],
+      "talents": ["keen_eye", "steady_breath"],
+      "branches": [
+        { "key": "the_kill", "name": "The Kill", "nodes": [["critDamage", 12], ["damagePct", 6], "butchers_eye", ["critChance", 4]], "keys": ["finisher"] },
+        { "key": "fresh_start", "name": "The Fresh Start", "nodes": [["maxHp", 30], ["damageFlat", 4], "clean_strike", ["damagePct", 6]], "keys": ["vanguard"] },
+        { "key": "sixth_sense", "name": "The Sixth Sense", "nodes": [["critChance", 4], ["dodge", 4], "sharp_ears", ["critDamage", 16]], "keys": ["sixth_sense"] }
+      ]
+    },
+    {
+      "key": "ranged", "name": "The Long Shot", "color": "#6ab0ff", "blurb": "Distance, precision and the shot you only get once.",
+      "minor": [["dex", 4], ["critChance", 4], ["critDamage", 8], ["haste", 5], ["dodge", 3]],
+      "major": [["critDamage", 22], ["dex", 9], ["haste", 10], ["areaPct", 10]],
+      "talents": ["volley", "mark"],
+      "branches": [
+        { "key": "far_line", "name": "The Far Line", "nodes": [["dex", 5], ["critDamage", 14], "long_eye", ["critChance", 4]], "keys": ["far_shot"] },
+        { "key": "patience", "name": "Patience", "nodes": [["critChance", 3], ["damagePct", 6], "slow_breath", ["critDamage", 14]], "keys": ["stillness"] },
+        { "key": "first_blood", "name": "First Blood", "nodes": [["damageFlat", 4], ["dex", 6], "quick_draw", ["damagePct", 6]], "keys": ["opener"] }
+      ]
+    },
+    {
+      "key": "tempo", "name": "The Quick Hand", "color": "#7fd0ff", "blurb": "Skills that come back sooner, cost less, and chain into each other.",
+      "minor": [["cooldownReduction", 2], ["mpRegen", 0.5], ["maxMp", 14], ["haste", 4]],
+      "major": [["cooldownReduction", 5], ["skillCostPct", 0.06], ["echoChance", 0.05], ["maxMp", 36]],
+      "talents": ["echo", "light_purse"],
+      "branches": [
+        { "key": "weave", "name": "The Weave", "nodes": [["skillCostPct", 0.04], ["mpRegen", 0.8], "loom_hands", ["cooldownReduction", 4]], "keys": ["weave"] },
+        { "key": "momentum", "name": "Momentum", "nodes": [["haste", 5], ["cooldownReduction", 3], "rolling_start", ["damagePct", 6]], "keys": ["killHaste"] },
+        { "key": "mind_body", "name": "Mind over Body", "nodes": [["maxMp", 24], ["magicResist", 8], "still_mind", ["maxMp", 40]], "keys": ["mindWard"] }
+      ]
+    },
+    {
+      "key": "arcane", "name": "The Deep Study", "color": "#b090ff", "blurb": "Power that comes out of a book and goes back into one.",
+      "minor": [["int", 4], ["maxMp", 18], ["spellPower", 0.04], ["mpRegen", 0.6], ["magicResist", 6], ["cooldownReduction", 3]],
+      "major": [["spellPower", 0.1], ["int", 9], ["cooldownReduction", 7], ["maxMp", 45], ["areaPct", 12]],
+      "talents": ["cauterise", "inner_fire"],
+      "branches": [
+        { "key": "flame_frost", "name": "Flame and Frost", "nodes": [["spellPower", 0.05], ["int", 6], "hot_cold", ["critChance", 4]], "keys": ["pyre_heart", "shatter"] },
+        { "key": "storm_venom", "name": "Storm and Venom", "nodes": [["haste", 5], ["spellPower", 0.05], "quick_blood", ["cooldownReduction", 4]], "keys": ["storm_within", "plague_bearer"] },
+        { "key": "dusk_dawn", "name": "Dusk and Dawn", "nodes": [["magicResist", 10], ["spellPower", 0.05], "twilight", ["hpRegen", 1.5]], "keys": ["hollow_pact", "halo"] },
+        { "key": "inner_study", "name": "The Inner Study", "nodes": [["maxMp", 30], ["mpRegen", 0.8], "deep_well", ["spellPower", 0.06]], "keys": ["overflow", "blood_magic"] }
+      ]
+    },
+    {
+      "key": "hex", "name": "The Hexwork", "color": "#8a6ad0", "blurb": "Burns, poisons, bleeds and curses — the damage that keeps working after you look away.",
+      "minor": [["dotPct", 6], ["spellPower", 0.03], ["int", 4], ["magicResist", 5]],
+      "major": [["dotPct", 15], ["spellPower", 0.07], ["critChance", 5]],
+      "talents": ["festering", "bitter_cup"],
+      "branches": [
+        { "key": "scent", "name": "The Scent of Blood", "nodes": [["dotPct", 8], ["damagePct", 5], "open_wounds", ["dotPct", 10]], "keys": ["bloodScent"] },
+        { "key": "contagion", "name": "Contagion", "nodes": [["dotPct", 8], ["areaPct", 8], "spreading_rot", ["spellPower", 0.05]], "keys": ["contagion"] },
+        { "key": "rot", "name": "Deep Rot", "nodes": [["dotPct", 10], ["int", 6], "slow_poison", ["dotPct", 12]], "keys": ["deep_rot"] }
+      ]
+    },
+    {
+      "key": "wild", "name": "The Kept Company", "color": "#7ae06a", "blurb": "What follows you, and what keeps it standing.",
+      "minor": [["con", 4], ["hpRegen", 1.2], ["petDamagePct", 8], ["magicFind", 8], ["goldFind", 12]],
+      "major": [["petDamagePct", 18], ["con", 9], ["lifeSteal", 4], ["followerSlots", 1]],
+      "talents": ["pack", "shared_hide"],
+      "branches": [
+        { "key": "the_pack", "name": "The Pack", "nodes": [["petDamagePct", 10], ["con", 6], "den_mother", ["petDamagePct", 14]], "keys": ["the_pack"] },
+        { "key": "bond", "name": "The Early Bond", "nodes": [["petDamagePct", 8], ["hpRegen", 1.2], "kindred", ["maxHp", 30]], "keys": ["earlyBond"] },
+        { "key": "hunt_together", "name": "Hunting Together", "nodes": [["petDamagePct", 10], ["critChance", 3], "called_shot", ["petDamagePct", 12]], "keys": ["packTactics"] }
+      ]
+    },
+    {
+      "key": "ward", "name": "The Open Hand", "color": "#f0e090", "blurb": "Healing, shielding and standing beside the people you came with.",
+      "minor": [["healPower", 5], ["maxHp", 20], ["mpRegen", 0.5], ["resistAll", 2]],
+      "major": [["healPower", 12], ["resistAll", 4], ["maxMp", 36], ["hpRegen", 2.5]],
+      "talents": ["gentle_hands", "steady_heart"],
+      "branches": [
+        { "key": "cup", "name": "The Brimming Cup", "nodes": [["healPower", 6], ["maxMp", 24], "overflowing", ["healPower", 8]], "keys": ["brimming"] },
+        { "key": "banner", "name": "The Banner of the Road", "nodes": [["resistAll", 3], ["maxHp", 30], "road_song", ["damagePct", 5]], "keys": ["rally"] },
+        { "key": "oath", "name": "The Healer's Oath", "nodes": [["healPower", 8], ["mpRegen", 0.8], "quiet_vigil", ["healPower", 10]], "keys": ["healers_oath"] }
+      ]
+    },
+    {
+      "key": "guard", "name": "The Held Line", "color": "#c8d2dc", "blurb": "Armour, a shield, and the patience to be the one who does not move.",
+      "minor": [["armor", 8], ["maxHp", 26], ["magicResist", 7], ["blockChance", 4], ["blockPower", 6], ["con", 4]],
+      "major": [["armorPct", 14], ["resistAll", 4], ["blockPower", 14], ["maxHp", 60]],
+      "talents": ["bulwark", "spite"],
+      "branches": [
+        { "key": "held_ground", "name": "Held Ground", "nodes": [["armor", 10], ["armorPct", 10], "planted", ["resistAll", 4]], "keys": ["held_ground"] },
+        { "key": "presence", "name": "Iron Presence", "nodes": [["threatPct", 15], ["maxHp", 40], "loud_shield", ["armorPct", 12]], "keys": ["ironPresence"] },
+        { "key": "unbroken", "name": "Unbroken", "nodes": [["con", 6], ["resistAll", 3], "stubborn", ["maxHp", 50]], "keys": ["unbroken"] }
+      ]
+    },
+    {
+      "key": "mend", "name": "The Slow Mend", "color": "#ef6b8d", "blurb": "Nothing on this arm makes a hit hurt less. It gives back what the hit cost you.",
+      "minor": [["hpRegen", 1.4], ["lifeSteal", 3], ["manaSteal", 3], ["mpRegen", 0.8], ["hpOnKill", 6]],
+      "major": [["lifeSteal", 7], ["hpRegen", 3], ["hpOnKill", 18], ["manaOnKill", 12]],
+      "talents": ["long_breath", "red_harvest"],
+      "branches": [
+        { "key": "slow_blood", "name": "Slow Blood", "nodes": [["lifeSteal", 4], ["hpRegen", 1.5], "thick_blood", ["lifeSteal", 5]], "keys": ["slow_blood"] },
+        { "key": "second_wind", "name": "The Second Wind", "nodes": [["hpRegen", 2], ["maxHp", 30], "deep_lungs", ["hpRegen", 2.5]], "keys": ["secondWind"] },
+        { "key": "spoils", "name": "Spoils of the Fallen", "nodes": [["hpOnKill", 10], ["manaOnKill", 8], "carrion_luck", ["hpOnKill", 14]], "keys": ["killBarrier"] }
+      ]
+    },
+    {
+      "key": "rove", "name": "The Light Step", "color": "#3fd0c0", "blurb": "The hits that never land, and the fights you choose not to be noticed in.",
+      "minor": [["dodge", 4], ["stealth", 0.05], ["dex", 4], ["critChance", 3]],
+      "major": [["dodge", 9], ["stealth", 0.15], ["dex", 9]],
+      "talents": ["unseen", "light_feet"],
+      "branches": [
+        { "key": "wind_walk", "name": "The Wind Walk", "nodes": [["dodge", 4], ["dex", 5], "sidestep", ["dodge", 6]], "keys": ["wind_walk"] },
+        { "key": "soft_foot", "name": "Soft Footfall", "nodes": [["stealth", 0.06], ["threatPct", -10], "hushed", ["stealth", 0.1]], "keys": ["quietHand"] },
+        { "key": "the_wall", "name": "Back to the Wall", "nodes": [["dodge", 3], ["damagePct", 5], "cornered_cat", ["critDamage", 14]], "keys": ["cornered"] }
+      ]
+    },
+    {
+      "key": "fortune", "name": "The Long Odds", "color": "#f2c94c", "blurb": "What the dead leave behind, and how much of it you notice.",
+      "minor": [["magicFind", 10], ["xpFind", 6], ["goldFind", 10], ["magicFind", 14]],
+      "major": [["magicFind", 24], ["xpFind", 16], ["goldFind", 30]],
+      "talents": ["pickings", "coin_sense"],
+      "branches": [
+        { "key": "tithe", "name": "Fortune's Tithe", "nodes": [["magicFind", 12], ["goldFind", 14], "lucky_find", ["magicFind", 18]], "keys": ["fortunes_tithe"] },
+        { "key": "collector", "name": "The Collector", "nodes": [["xpFind", 8], ["goldFind", 16], "keen_trader", ["xpFind", 12]], "keys": ["collector"] }
+      ]
+    }
+  ],
+  "oddballs": [["thorns", 0.06], ["manaSteal", 4], ["dodge", 4], ["xpFind", 8], ["healPower", 6], ["resistAll", 5], ["dotPct", 8], ["areaPct", 6], ["threatPct", 10], ["petDamagePct", 10], ["cooldownReduction", 3], ["critChance", 3]],
+  "rules": {
+    "riposte": { "kind": "talent", "name": "Riposte", "flag": "riposte", "desc": "Block or dodge a hit and your next swing is a guaranteed critical — 100% critical chance on that one swing." },
+    "sunder": { "kind": "talent", "name": "Sunder", "flag": "sunder", "desc": "The last swing of every weapon pattern strips 8 armour off the target, permanently — that armour never comes back." },
+    "volley": { "kind": "talent", "name": "Volley", "flag": "volley", "grants": { "arrowsPerShot": 1 }, "desc": "+1 arrow on every shot." },
+    "mark": { "kind": "talent", "name": "Quarry", "flag": "mark", "desc": "Your first hit on a target marks it for 8s, and a marked target takes 15% more damage from every source." },
+    "cauterise": { "kind": "talent", "name": "Cauterise", "flag": "cauterise", "desc": "A critical hit also sets the target burning: 25% of that hit's damage again, as Burning damage over 4s." },
+    "echo": { "kind": "talent", "name": "Echo", "flag": "echo", "grants": { "echoChance": 0.1667 }, "desc": "17% chance (1 cast in 6) that a skill fires a second time and costs no mana." },
+    "pack": { "kind": "talent", "name": "Pack Sense", "flag": "pack", "desc": "Your companions heal you for 10% of the damage they deal." },
+    "bulwark": { "kind": "talent", "name": "Bulwark", "grants": { "blockChance": 12, "blockPower": 22 } },
+    "spite": { "kind": "talent", "name": "Spite", "grants": { "thorns": 0.12 } },
+    "pickings": { "kind": "talent", "name": "Rich Pickings", "grants": { "magicFind": 30, "xpFind": 15 } },
+    "long_breath": { "kind": "talent", "name": "Long Breath", "grants": { "hpRegen": 4, "mpRegen": 2 } },
+    "red_harvest": { "kind": "talent", "name": "Red Harvest", "grants": { "hpOnKill": 25, "manaOnKill": 15 } },
+    "unseen": { "kind": "talent", "name": "Unseen", "grants": { "stealth": 0.3 } },
+    "shared_hide": { "kind": "talent", "name": "Shared Hide", "flag": "sharedHide", "desc": "Your followers take 30% of every blow aimed at you, split between them (none of them is ever taken below 1 health by it)." },
+    "keen_eye": { "kind": "talent", "name": "Keen Eye", "grants": { "critChance": 6, "critDamage": 10 } },
+    "steady_breath": { "kind": "talent", "name": "Steady Breath", "grants": { "critDamage": 18, "dodge": 3 } },
+    "light_purse": { "kind": "talent", "name": "Light Purse", "grants": { "skillCostPct": 0.1, "mpRegen": 1 } },
+    "inner_fire": { "kind": "talent", "name": "Inner Fire", "grants": { "spellPower": 0.08, "maxMp": 25 } },
+    "festering": { "kind": "talent", "name": "Festering", "grants": { "dotPct": 20, "int": 4 } },
+    "bitter_cup": { "kind": "talent", "name": "Bitter Cup", "grants": { "dotPct": 12, "spellPower": 0.05 } },
+    "gentle_hands": { "kind": "talent", "name": "Gentle Hands", "grants": { "healPower": 15, "threatPct": -15 } },
+    "steady_heart": { "kind": "talent", "name": "Steady Heart", "grants": { "resistAll": 5, "hpRegen": 2 } },
+    "light_feet": { "kind": "talent", "name": "Light Feet", "grants": { "dodge": 6, "haste": 5 } },
+    "coin_sense": { "kind": "talent", "name": "Coin Sense", "grants": { "goldFind": 40, "magicFind": 10 } },
+
+    "heavy_hands": { "kind": "talent", "name": "Heavy Hands", "grants": { "str": 8, "critDamage": 10 } },
+    "iron_grip": { "kind": "talent", "name": "Iron Grip", "grants": { "damageFlat": 6, "str": 6 } },
+    "quick_wrists": { "kind": "talent", "name": "Quick Wrists", "grants": { "haste": 8, "critChance": 3 } },
+    "braced_arm": { "kind": "talent", "name": "Braced Arm", "grants": { "blockChance": 6, "blockPower": 10 } },
+    "butchers_eye": { "kind": "talent", "name": "Butcher's Eye", "grants": { "critDamage": 22 } },
+    "clean_strike": { "kind": "talent", "name": "Clean Strike", "grants": { "damagePct": 8, "maxHp": 20 } },
+    "sharp_ears": { "kind": "talent", "name": "Sharp Ears", "grants": { "dodge": 5, "critChance": 4 } },
+    "long_eye": { "kind": "talent", "name": "Long Eye", "grants": { "critDamage": 16, "dex": 5 } },
+    "slow_breath": { "kind": "talent", "name": "Slow Breath", "grants": { "critChance": 5, "critDamage": 10 } },
+    "quick_draw": { "kind": "talent", "name": "Quick Draw", "grants": { "haste": 8, "damageFlat": 3 } },
+    "loom_hands": { "kind": "talent", "name": "Loom Hands", "grants": { "skillCostPct": 0.08, "cooldownReduction": 3 } },
+    "rolling_start": { "kind": "talent", "name": "Rolling Start", "grants": { "haste": 6, "cooldownReduction": 4 } },
+    "still_mind": { "kind": "talent", "name": "Still Mind", "grants": { "maxMp": 40, "mpRegen": 1 } },
+    "hot_cold": { "kind": "talent", "name": "Hot and Cold", "grants": { "spellPower": 0.06, "dotPct": 10 } },
+    "quick_blood": { "kind": "talent", "name": "Quick Blood", "grants": { "haste": 6, "spellPower": 0.04 } },
+    "twilight": { "kind": "talent", "name": "Twilight", "grants": { "magicResist": 12, "spellPower": 0.05 } },
+    "deep_well": { "kind": "talent", "name": "Deep Well", "grants": { "maxMp": 50, "mpRegen": 0.8 } },
+    "open_wounds": { "kind": "talent", "name": "Open Wounds", "grants": { "dotPct": 15, "critChance": 3 } },
+    "spreading_rot": { "kind": "talent", "name": "Spreading Rot", "grants": { "dotPct": 12, "areaPct": 8 } },
+    "slow_poison": { "kind": "talent", "name": "Slow Poison", "grants": { "dotPct": 18 } },
+    "den_mother": { "kind": "talent", "name": "Den Mother", "grants": { "petDamagePct": 15, "hpRegen": 1.5 } },
+    "kindred": { "kind": "talent", "name": "Kindred", "grants": { "petDamagePct": 12, "con": 5 } },
+    "called_shot": { "kind": "talent", "name": "Called Shot", "grants": { "petDamagePct": 14, "critDamage": 8 } },
+    "overflowing": { "kind": "talent", "name": "Overflowing", "grants": { "healPower": 12, "mpRegen": 0.8 } },
+    "road_song": { "kind": "talent", "name": "Road Song", "grants": { "resistAll": 4, "hpRegen": 1.5 } },
+    "quiet_vigil": { "kind": "talent", "name": "Quiet Vigil", "grants": { "healPower": 10, "threatPct": -20 } },
+    "planted": { "kind": "talent", "name": "Planted", "grants": { "armorPct": 15, "blockPower": 10 } },
+    "loud_shield": { "kind": "talent", "name": "Loud Shield", "grants": { "threatPct": 25, "blockChance": 5 } },
+    "stubborn": { "kind": "talent", "name": "Stubborn", "grants": { "maxHp": 60, "hpRegen": 1 } },
+    "thick_blood": { "kind": "talent", "name": "Thick Blood", "grants": { "lifeSteal": 6, "maxHp": 20 } },
+    "deep_lungs": { "kind": "talent", "name": "Deep Lungs", "grants": { "hpRegen": 3, "maxHp": 25 } },
+    "carrion_luck": { "kind": "talent", "name": "Carrion Luck", "grants": { "hpOnKill": 15, "magicFind": 10 } },
+    "sidestep": { "kind": "talent", "name": "Sidestep", "grants": { "dodge": 7 } },
+    "hushed": { "kind": "talent", "name": "Hushed", "grants": { "stealth": 0.12, "threatPct": -10 } },
+    "cornered_cat": { "kind": "talent", "name": "Cornered Cat", "grants": { "dodge": 4, "critChance": 4 } },
+    "lucky_find": { "kind": "talent", "name": "Lucky Find", "grants": { "magicFind": 25 } },
+    "keen_trader": { "kind": "talent", "name": "Keen Trader", "grants": { "goldFind": 30, "xpFind": 6 } },
+
+    "doubled_grasp": { "kind": "keystone", "name": "Doubled Grasp", "flag": "doubleGrip", "desc": "Hold a two-handed weapon in each hand. +18% attack area.", "cost": "−20% attack speed.", "grants": { "haste": -20, "areaPct": 18 } },
+    "full_swing": { "kind": "keystone", "name": "Full Swing", "flag": "fullSwing", "power": "perk:full_swing", "when": "twoOne", "whenGrants": { "damagePct": 30, "haste": -12 }, "desc": "With a two-handed weapon and nothing in the other hand: +30% damage, and every 3rd swing lands as a slam that hits everything within 3.5 metres for 60% and throws it back.", "cost": "−12% attack speed with those hands." },
+    "flurry": { "kind": "keystone", "name": "Flurry", "flag": "flurry", "power": "perk:flurry", "when": "dualOne", "whenGrants": { "haste": 20, "armorPct": -25 }, "desc": "With a one-handed weapon in each hand: +20% attack speed, and every hit has a 25% chance to land again for 50%.", "cost": "−25% armour with those hands." },
+    "shield_wall": { "kind": "keystone", "name": "Shield Wall", "flag": "shieldWall", "power": "perk:shield_wall", "when": "swordBoard", "whenGrants": { "blockChance": 15, "blockPower": 30, "damagePct": -10 }, "desc": "With a one-handed weapon and a shield: +15% chance to block, a block stops 30 more damage, and every block answers with a shockwave that hits everything within 3.2 metres for 70%.", "cost": "−10% damage with those hands." },
+    "pyre_heart": { "kind": "keystone", "name": "Pyre Heart", "flag": "pyreHeart", "power": "perk:pyre_heart", "grants": { "spellPower": 0.06 }, "desc": "A Burning enemy that dies bursts, hitting everything within 4 metres for 80% as fire and setting it Burning — a crowd burns down in a chain. Your Burning lasts 3s longer. +6% spell damage.", "cost": "−20% damage of every kind but fire." },
+    "shatter": { "kind": "keystone", "name": "Shatter", "flag": "shatter", "power": "perk:shatter", "grants": { "spellPower": 0.06 }, "desc": "A Chilled enemy takes 30% more from you, and one that dies Chilled throws 3 shards at the nearest enemies within 7 metres for 70% each. +6% spell damage.", "cost": "−20% damage of every kind but ice." },
+    "storm_within": { "kind": "keystone", "name": "Storm Within", "flag": "stormWithin", "power": "perk:storm_within", "grants": { "spellPower": 0.06 }, "desc": "In a fight, lightning leaves you on its own every 1.5s and strikes the nearest enemy within 10 metres for 50%, Shocking it. +6% spell damage.", "cost": "−20% damage of every kind but lightning." },
+    "plague_bearer": { "kind": "keystone", "name": "Plague Bearer", "flag": "plagueBearer", "power": "perk:plague_bearer", "grants": { "spellPower": 0.06 }, "desc": "A Poisoned enemy that dies passes its poison to every enemy within 5 metres, 25% stronger each time it moves on. +6% spell damage.", "cost": "−20% damage of every kind but poison." },
+    "hollow_pact": { "kind": "keystone", "name": "Hollow Pact", "flag": "hollowPact", "power": "perk:hollow_pact", "grants": { "spellPower": 0.06 }, "desc": "A Cursed enemy that dies passes its curse to every enemy within 5 metres, and every hit of shadow damage you land heals you for 8% of it. +6% spell damage.", "cost": "−20% damage of every kind but shadow." },
+    "halo": { "kind": "keystone", "name": "Halo", "flag": "halo", "power": "perk:halo", "grants": { "spellPower": 0.06 }, "desc": "Every 2.5s in a fight a ring of light burns every enemy within 5 metres for 50% as holy and Weakens it, and every hit of holy damage you land heals you for 5% of it. +6% spell damage.", "cost": "−20% damage of every kind but holy." },
+    "overflow": { "kind": "keystone", "name": "Overflow", "flag": "overflow", "power": "perk:overflow", "grants": { "spellPower": 0.1 }, "desc": "Every 3rd skill you cast goes off a second time for 60%, free. +10% spell damage.", "cost": "Skills cost 25% more mana." },
+    "blood_magic": { "kind": "keystone", "name": "Blood Price", "flag": "bloodMagic", "grants": { "spellPower": 0.14 }, "desc": "Skills are paid for in health instead of mana, and never fail for want of mana. +14% spell damage.", "cost": "Your mana pool stops mattering, and a skill can leave you on 1 health." },
+    "far_shot": { "kind": "keystone", "name": "Far Shot", "flag": "farShot", "grants": { "critChance": 5 }, "desc": "An arrow or a bolt deals more damage the further it has flown: nothing extra at 4 m, up to +50% at 46 m. +5% critical chance.", "cost": "Anything within 4 m of you takes 25% less damage." },
+    "the_pack": { "kind": "keystone", "name": "The Pack", "flag": "thePack", "grants": { "followerSlots": 2, "petDamagePct": 20, "damagePct": -15 }, "desc": "+2 follower slots, +2 of each thing you summon, and +20% companion damage.", "cost": "−15% damage of your own." },
+    "held_ground": { "kind": "keystone", "name": "Held Ground", "flag": "heldGround", "grants": { "armorPct": 40, "resistAll": 10, "blockPower": 25, "damagePct": -15 }, "desc": "+40% armour, +10% resistance to all damage, and a block stops 25 more damage.", "cost": "−15% damage." },
+    "fortunes_tithe": { "kind": "keystone", "name": "Fortune's Tithe", "flag": "fortunesTithe", "grants": { "magicFind": 70, "goldFind": 30, "damagePct": -12 }, "desc": "+70% magic find and +30% gold found.", "cost": "−12% damage — your eye is on the ground rather than on the fight." },
+    "slow_blood": { "kind": "keystone", "name": "Slow Blood", "flag": "slowBlood", "grants": { "lifeSteal": 14, "hpRegen": 5, "maxHp": -70 }, "desc": "14% life steal, and +5 health a second on top.", "cost": "−70 maximum health. You live on what comes back, not on what you had." },
+    "wind_walk": { "kind": "keystone", "name": "Wind Walk", "flag": "windWalk", "grants": { "dodge": 15, "stealth": 0.25, "armorPct": -35 }, "desc": "+15% dodge chance and −25% enemy notice range.", "cost": "−35% armour — nothing that does land is softened." },
+
+    "finisher": { "kind": "keystone", "name": "Finishing Blow", "flag": "finisher", "grants": { "critDamage": 10 }, "desc": "Your skills deal 30% more to an enemy under 25% health. +10% critical damage.", "cost": "None but the walk." },
+    "vanguard": { "kind": "keystone", "name": "Fresh Blood", "flag": "vanguard", "grants": { "maxHp": 30 }, "desc": "While you are above 80% health every hit you land deals 12% more. +30 maximum health.", "cost": "Nothing extra once you are hurt." },
+    "sixth_sense": { "kind": "keystone", "name": "Sixth Sense", "grants": { "critChance": 8, "critDamage": 25, "maxHp": -40 }, "desc": "+8% critical chance and +25% critical damage.", "cost": "−40 maximum health." },
+    "stillness": { "kind": "keystone", "name": "Planted Feet", "flag": "stillness", "grants": { "dodge": -8 }, "desc": "After 1.5s standing still every hit you land deals 25% more, until you move.", "cost": "−8% dodge chance." },
+    "opener": { "kind": "keystone", "name": "First Blood", "flag": "opener", "grants": { "critDamage": -15 }, "desc": "A hit on an enemy that is still at full health deals 50% more.", "cost": "−15% critical damage." },
+    "weave": { "kind": "keystone", "name": "The Weave", "flag": "weave", "grants": { "cooldownReduction": -5 }, "desc": "Cast a different skill from your last one within 3s and it costs no mana.", "cost": "+5% skill cooldowns." },
+    "killHaste": { "kind": "keystone", "name": "Momentum", "flag": "killHaste", "grants": { "haste": 4 }, "desc": "Every killing blow you land takes 1s off every one of your cooldowns. +4% attack speed.", "cost": "Nothing on a long fight against one enemy." },
+    "mindWard": { "kind": "keystone", "name": "Mind over Body", "flag": "mindWard", "grants": { "maxMp": 40 }, "desc": "A quarter of every blow you take is paid from your mana instead of your health, while you have mana. +40 maximum mana.", "cost": "Your mana drains when you are hit." },
+    "bloodScent": { "kind": "keystone", "name": "Blood Scent", "flag": "bloodScent", "grants": { "dotPct": 10 }, "desc": "Every hit you land on an enemy suffering a burn, poison, bleed or curse deals 20% more. +10% damage from your burns, poisons, bleeds and curses.", "cost": "Nothing extra against an enemy that is clean." },
+    "contagion": { "kind": "keystone", "name": "Contagion", "flag": "contagion", "grants": { "dotPct": 10 }, "desc": "When an enemy carrying your burn, poison, bleed or curse dies, each of them jumps to the nearest enemy within 6 metres. +10% damage from them.", "cost": "None but the walk." },
+    "deep_rot": { "kind": "keystone", "name": "Deep Rot", "grants": { "dotPct": 40, "damagePct": -10 }, "desc": "+40% damage from your burns, poisons, bleeds and curses.", "cost": "−10% damage from every hit." },
+    "earlyBond": { "kind": "keystone", "name": "Early Bond", "flag": "earlyBond", "grants": { "petDamagePct": 10 }, "desc": "Your class companion comes to you now instead of at level 10, and its second body at level 12 instead of 20. +10% companion damage.", "cost": "Only a class that has a companion gains from it." },
+    "packTactics": { "kind": "keystone", "name": "Pack Tactics", "flag": "packTactics", "grants": { "armorPct": -10 }, "desc": "Your followers deal 25% more to whatever you hit last.", "cost": "−10% armour." },
+    "brimming": { "kind": "keystone", "name": "Brimming Cup", "flag": "brimming", "grants": { "healPower": 10 }, "desc": "Healing that would go past full health goes on to the most hurt member of your party within 30 metres. +10% healing you do.", "cost": "None but the walk." },
+    "rally": { "kind": "keystone", "name": "Banner of the Road", "flag": "rally", "grants": { "resistAll": 3 }, "desc": "You and every member of your party within 20 metres of you deal 6% more damage. +3% resistance to all damage.", "cost": "Two banners do not stack." },
+    "healers_oath": { "kind": "keystone", "name": "Healer's Oath", "grants": { "healPower": 30, "damagePct": -15 }, "desc": "+30% healing you do.", "cost": "−15% damage." },
+    "ironPresence": { "kind": "keystone", "name": "Iron Presence", "flag": "ironPresence", "grants": { "armorPct": 20, "damagePct": -10 }, "desc": "Your damage makes 60% more threat, and your taunts hold 2s longer. +20% armour.", "cost": "−10% damage." },
+    "unbroken": { "kind": "keystone", "name": "Unbroken", "flag": "unbroken", "grants": { "damagePct": -8 }, "desc": "A blow that would kill you leaves you on 1 health instead — once every 90 seconds.", "cost": "−8% damage." },
+    "secondWind": { "kind": "keystone", "name": "Second Wind", "flag": "secondWind", "grants": { "hpRegen": 1 }, "desc": "The first time a blow takes you under 35% health you heal 20% of your maximum health — once every 45 seconds. +1 health a second.", "cost": "None but the walk." },
+    "killBarrier": { "kind": "keystone", "name": "Spoils of the Fallen", "flag": "killBarrier", "grants": { "hpOnKill": 10 }, "desc": "Every killing blow you land gives you a barrier worth 8% of your maximum health for 6s. +10 health on every kill.", "cost": "None but the walk." },
+    "quietHand": { "kind": "keystone", "name": "Soft Footfall", "flag": "quietHand", "grants": { "stealth": 0.1 }, "desc": "Your damage makes 40% less threat. −10% enemy notice range.", "cost": "Hard to hold an enemy's eye when you need to." },
+    "cornered": { "kind": "keystone", "name": "Back to the Wall", "flag": "cornered", "grants": { "maxHp": -30 }, "desc": "While you are under 35% health every hit you land deals 25% more.", "cost": "−30 maximum health." },
+    "collector": { "kind": "keystone", "name": "The Collector", "grants": { "xpFind": 25, "goldFind": 40, "damagePct": -8 }, "desc": "+25% experience and +40% gold found.", "cost": "−8% damage." }
+  }
+}

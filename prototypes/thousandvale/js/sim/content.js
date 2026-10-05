@@ -104,7 +104,10 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
   const jobs = await opt('data/quests/jobs.json');
   const schedules = await opt('data/provinces/schedules.json');
   const horizon = await opt('data/world/horizon.json');      // stream B's 32 m world horizon manifest (joined.room.horizon)
-  return { key: provinceId, name: sheet ? sheet.name : provinceId, terrain, zones, encounterInfo, events, zoneEvents, directorRules: (evData && evData.director) || null, starter, starterProvince, rares, jobs, schedules, horizon };
+  // the living roads (P19, stream E): who travels, along which routes, and what they say (js/sim/travellers.js)
+  const tv = await opt('data/provinces/travellers.json'), rt = await opt(`data/provinces/${provinceId}-routes.json`);
+  const travel = tv && rt ? { kinds: tv.kinds || {}, rules: tv.rules || {}, folkKinds: tv.folk || {}, routes: rt.routes || [], chatter: (await opt('data/names/chatter.json')) || { pools: {}, rules: {} }, names: (await opt('data/names/torbor.json')) || {} } : null;
+  return { travel, key: provinceId, name: sheet ? sheet.name : provinceId, terrain, zones, encounterInfo, events, zoneEvents, directorRules: (evData && evData.director) || null, starter, starterProvince, rares, jobs, schedules, horizon };
 }
 
 /**

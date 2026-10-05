@@ -41,7 +41,7 @@
           "type": "road_brigand",
           "count": 6,
           "where": "the roads into Halsbridge",
-          "text": "Cutpurses discouraged"
+          "text": "Kill 6 cutpurses on the roads"
         }
       ],
       "done": "The guild of honest merchants thanks you. Both of them.",
@@ -68,7 +68,8 @@
           "count": 8,
           "from": "cairn_rat",
           "chance": 0.7,
-          "text": "Rat tails"
+          "text": "Collect 8 rat tails from cairn rats",
+          "where": "cairn rats around Halsbridge"
         }
       ],
       "done": "Eight! You've a gift. A horrible gift, but a gift.",
@@ -89,7 +90,7 @@
           "type": "moor_hound",
           "count": 6,
           "where": "around Mill End",
-          "text": "Moor hounds"
+          "text": "Kill 6 moor hounds near the mill"
         }
       ],
       "done": "Bless you. The wheel turns in peace.",
@@ -109,8 +110,8 @@
           "kind": "kill",
           "type": "brigand_archer",
           "count": 5,
-          "where": "the far bank below the bridge",
-          "text": "Brigand archers"
+          "where": "the far bank below the Halsbridge bridge",
+          "text": "Kill 5 brigand archers"
         }
       ],
       "done": "Right. I'll put that in the report as 'resolved by the watch'. Here's your share.",
@@ -134,19 +135,21 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the second cistern",
-          "floor": 1
+          "text": "Reach the second cistern of the Undercross Drains",
+          "floor": 1,
+          "where": "The Undercross Drains, the dungeon door in Torbor Cross"
         },
         {
           "kind": "clear",
           "dungeon": "door",
           "text": "Silence what lives at the bottom",
-          "boss": true
+          "boss": true,
+          "where": "the bottom of the Undercross Drains"
         }
       ],
       "done": "Silence. Glorious, municipal silence.",
       "reward": {
-        "xp": 1.0,
+        "xp": 1,
         "gold": 40,
         "item": {
           "tier": "rare",
@@ -165,7 +168,8 @@
           "kind": "killRare",
           "zone": "torbor_cross",
           "slot": 0,
-          "text": "The wanted beast slain"
+          "text": "Hunt down Brother Tithe",
+          "where": "roams Torbor Cross"
         }
       ],
       "done": "Lovely. I'll put up a poster of you. 'Do not anger.'",

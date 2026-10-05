@@ -37,7 +37,7 @@
       ],
       "monsters": [ { "type": "road_brigand", "count": 3, "level": 1, "x": -2, "z": 3, "radius": 5 } ],
       "objects": [
-        { "type": "npc", "name": "Dunnet the carter", "x": 0.5, "z": -0.5, "says": ["Are they gone? Gods. They work for Hobb, at the ford. Hobb Gallowsby. Everyone pays Hobb.", "Take what's left in the crates. Better you than them."], "quest": "toll_at_fitockpi" },
+        { "type": "npc", "name": "Dunnet the carter", "x": 0.5, "z": -0.5, "says": ["Are they gone? Gods, thank you. You saw them off. But their mates ran off with three of my crates.", "They work for Hobb, at the ford. Hobb Gallowsby. Everyone pays Hobb.", "Take what's left in the spilled crate. Better you than them."], "quest": "toll_at_fitockpi" },
         { "type": "chest", "name": "Spilled crate", "x": -1.5, "z": 1.5, "tier": "common" }
       ]
     },

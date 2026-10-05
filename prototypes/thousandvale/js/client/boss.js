@@ -33,7 +33,7 @@ export function createBossUi({ actors, serverNow, toast } = {}) {
     el.ticks.innerHTML = '';
     for (const p of B.phases) {
       if (!(p.at > 0 && p.at < 1)) continue;
-      const i = document.createElement('i'); i.style.left = (p.at * 100).toFixed(1) + '%'; i.title = p.name || ''; el.ticks.appendChild(i);
+      const i = document.createElement('i'); i.style.left = (p.at * 100).toFixed(1) + '%'; i.dataset.tip = p.name || ''; el.ticks.appendChild(i);
     }
     el.bars.innerHTML = '';
     if (B.bars > 1) for (let k = 1; k <= B.bars; k++) { const pip = document.createElement('b'); pip.className = k < B.bar ? 'done' : k === B.bar ? 'now' : ''; el.bars.appendChild(pip); }

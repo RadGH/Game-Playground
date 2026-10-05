@@ -1,11 +1,11 @@
 {
- "_doc": "Stream E. Content placements for world zone z11_04 (E zone 'blackthorn_scar', Blackthorn Scar) — tools/place-vignettes.mjs against stream B's bake (terrain bdad0477). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "_doc": "Stream E. Content placements for world zone z11_04 (E zone 'blackthorn_scar', Blackthorn Scar) — tools/place-vignettes.mjs against stream B's bake (terrain 33f39e0a). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
  "zone": "z11_04",
  "sheetZone": "blackthorn_scar",
  "province": "torbor_downs",
- "terrainHash": "bdad0477",
+ "terrainHash": "33f39e0a",
  "band": [
-  7,
+  6,
   10
  ],
  "archetype": "blight",
@@ -56,9 +56,27 @@
    "townGap": 300,
    "gap": 60,
    "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
   }
  },
- "mainWalkableShare": 0.843,
+ "mainWalkableShare": 0.842,
  "settlements": [
   {
    "name": "Last Lantern",
@@ -117,7 +135,7 @@
    "z": 1893,
    "yaw": 0.79,
    "radius": 26,
-   "level": 7
+   "level": 9
   },
   {
    "type": "farm",
@@ -128,9 +146,9 @@
    "settlement": "Last Lantern",
    "x": 922,
    "z": 1435,
-   "yaw": -3.14,
+   "yaw": -2.36,
    "radius": 18,
-   "level": 7
+   "level": 8
   },
   {
    "type": "farm",
@@ -143,7 +161,7 @@
    "z": 1926,
    "yaw": 1.96,
    "radius": 18,
-   "level": 7
+   "level": 8
   },
   {
    "type": "farm",
@@ -154,9 +172,9 @@
    "settlement": "Last Lantern",
    "x": 791,
    "z": 1188,
-   "yaw": 0.79,
+   "yaw": 0.39,
    "radius": 18,
-   "level": 7
+   "level": 8
   },
   {
    "type": "farm",
@@ -169,7 +187,7 @@
    "z": 1795,
    "yaw": 0,
    "radius": 18,
-   "level": 7
+   "level": 8
   },
   {
    "type": "farm",
@@ -180,161 +198,165 @@
    "settlement": "Last Lantern",
    "x": 763,
    "z": 1379,
-   "yaw": 1.96,
+   "yaw": 0,
    "radius": 18,
-   "level": 7
-  },
-  {
-   "type": "cave",
-   "id": "cave_blackthorn_scar_0",
-   "name": "Barrow mound",
-   "template": "barrow_mound",
-   "plan": {
-    "family": "barrow_maze",
-    "floors": 1,
-    "level": 8
-   },
-   "x": 1660,
-   "z": 90,
-   "yaw": 2.75,
-   "radius": 10,
    "level": 8
   },
   {
    "type": "cave",
-   "id": "cave_blackthorn_scar_1",
+   "id": "cave_blackthorn_scar_0",
    "name": "Spider hollow",
    "template": "spider_hollow",
    "plan": {
     "family": "cave_river",
     "floors": 1,
-    "level": 8
+    "level": 7
    },
-   "x": 472,
-   "z": 277,
-   "yaw": 1.18,
+   "x": 1660,
+   "z": 90,
+   "yaw": 2.75,
    "radius": 10,
-   "level": 8
+   "level": 7
   },
   {
    "type": "vignette",
    "id": "ash_wisp_crater",
    "name": "The Smoking Crater",
-   "x": 1488,
-   "z": 1218,
-   "yaw": 1.41,
+   "x": 161,
+   "z": 973,
+   "yaw": 2.08,
    "radius": 12,
    "biome": "mountains",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 8,
+   "levelCap": 9
   },
   {
    "type": "vignette",
    "id": "blighted_orchard",
    "name": "The Grey Orchard",
-   "x": 1975,
-   "z": 110,
-   "yaw": 3.07,
+   "x": 1980,
+   "z": 104,
+   "yaw": 1.17,
    "radius": 13,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
    "id": "bone_pit",
    "name": "The Bone Pit",
-   "x": 101,
-   "z": 1056,
-   "yaw": 2.12,
+   "x": 327,
+   "z": 1833,
+   "yaw": 5.59,
    "radius": 12,
    "biome": "mountains",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 9,
+   "levelCap": 10
   },
   {
    "type": "vignette",
    "id": "chained_tree",
    "name": "The Chained Oak",
-   "x": 143,
-   "z": 1779,
-   "yaw": 2.07,
+   "x": 733,
+   "z": 303,
+   "yaw": 4.84,
    "radius": 11,
-   "biome": "mountains",
+   "biome": "hills",
    "biomeFits": false,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
    "id": "cult_cellar",
    "name": "The Cloud-Shouters' Cellar",
-   "x": 683,
-   "z": 1977,
-   "yaw": 4.16,
+   "x": 1946,
+   "z": 959,
+   "yaw": 3.53,
    "radius": 13,
    "biome": "mountains",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
    "id": "drift_mine_entry",
    "name": "The Drift Entry",
-   "x": 1116,
-   "z": 482,
-   "yaw": 5.87,
+   "x": 73,
+   "z": 354,
+   "yaw": 3.85,
    "radius": 10,
    "biome": "mountains",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
    "id": "gallows_crossroads",
    "name": "Gallows Crossroads",
-   "x": 1777,
-   "z": 679,
-   "yaw": 2.42,
+   "x": 1369,
+   "z": 1066,
+   "yaw": 5.91,
    "radius": 10,
-   "biome": "hills",
+   "biome": "mountains",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
    "id": "heretic_stake",
    "name": "The Heretic's Stake",
-   "x": 1973,
-   "z": 1152,
-   "yaw": 1.56,
+   "x": 1051,
+   "z": 1984,
+   "yaw": 5.79,
    "radius": 10,
-   "biome": "mountains",
+   "biome": "hills",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 9,
+   "levelCap": 10
   },
   {
    "type": "vignette",
    "id": "hollow_dragon_skull",
    "name": "The Great Skull",
-   "x": 1184,
-   "z": 1931,
-   "yaw": 6.28,
+   "x": 68,
+   "z": 1438,
+   "yaw": 3.93,
    "radius": 13,
-   "biome": "hills",
+   "biome": "mountains",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 9,
+   "levelCap": 10
   },
   {
    "type": "vignette",
    "id": "siege_camp_leftovers",
    "name": "The Abandoned Siege Camp",
-   "x": 106,
-   "z": 572,
-   "yaw": 2.93,
+   "x": 1378,
+   "z": 1569,
+   "yaw": 3.54,
    "radius": 15,
    "biome": "mountains",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 8,
+   "levelCap": 9
   },
   {
    "type": "camp",
@@ -342,15 +364,15 @@
    "monster": "cult_zealot",
    "with": null,
    "level": [
-    7,
-    9
+    9,
+    10
    ],
    "count": [
     2,
     4
    ],
-   "x": 928,
-   "z": 87,
+   "x": 725,
+   "z": 1770,
    "yaw": 0,
    "radius": 10
   },
@@ -360,15 +382,15 @@
    "monster": "cult_zealot",
    "with": null,
    "level": [
-    7,
+    8,
     9
    ],
    "count": [
     2,
     4
    ],
-   "x": 1162,
-   "z": 957,
+   "x": 1772,
+   "z": 1374,
    "yaw": 0,
    "radius": 10
   },
@@ -379,14 +401,14 @@
    "with": null,
    "level": [
     8,
-    10
+    9
    ],
    "count": [
     2,
     4
    ],
-   "x": 402,
-   "z": 1184,
+   "x": 444,
+   "z": 1527,
    "yaw": 0,
    "radius": 10
   },
@@ -396,15 +418,15 @@
    "monster": "ossuary_crawler",
    "with": null,
    "level": [
-    8,
+    9,
     10
    ],
    "count": [
     2,
     4
    ],
-   "x": 103,
-   "z": 1383,
+   "x": 76,
+   "z": 1718,
    "yaw": 0,
    "radius": 10
   },
@@ -415,14 +437,14 @@
    "with": null,
    "level": [
     7,
-    9
+    8
    ],
    "count": [
     2,
     4
    ],
-   "x": 726,
-   "z": 684,
+   "x": 474,
+   "z": 733,
    "yaw": 0,
    "radius": 10
   },
@@ -433,14 +455,14 @@
    "with": null,
    "level": [
     7,
-    9
+    8
    ],
    "count": [
     2,
     4
    ],
-   "x": 1442,
-   "z": 1591,
+   "x": 1465,
+   "z": 638,
    "yaw": 0,
    "radius": 10
   },
@@ -451,14 +473,14 @@
    "with": null,
    "level": [
     8,
-    10
+    9
    ],
    "count": [
     2,
     4
    ],
-   "x": 428,
-   "z": 1541,
+   "x": 1299,
+   "z": 1843,
    "yaw": 0,
    "radius": 10
   },
@@ -469,14 +491,14 @@
    "with": null,
    "level": [
     8,
-    10
+    9
    ],
    "count": [
     2,
     4
    ],
-   "x": 1815,
-   "z": 1457,
+   "x": 460,
+   "z": 1105,
    "yaw": 0,
    "radius": 10
   },
@@ -487,14 +509,14 @@
    "with": null,
    "level": [
     7,
-    9
+    8
    ],
    "count": [
     2,
     4
    ],
-   "x": 1442,
-   "z": 674,
+   "x": 1026,
+   "z": 915,
    "yaw": 0,
    "radius": 10
   },
@@ -505,14 +527,14 @@
    "with": null,
    "level": [
     7,
-    9
+    8
    ],
    "count": [
     2,
     4
    ],
-   "x": 1249,
-   "z": 63,
+   "x": 1106,
+   "z": 419,
    "yaw": 0,
    "radius": 10
   },
@@ -523,14 +545,14 @@
    "with": null,
    "level": [
     8,
-    10
+    9
    ],
    "count": [
     2,
     4
    ],
-   "x": 852,
-   "z": 1735,
+   "x": 1056,
+   "z": 1711,
    "yaw": 0,
    "radius": 10
   },
@@ -541,14 +563,14 @@
    "with": null,
    "level": [
     8,
-    10
+    9
    ],
    "count": [
     2,
     4
    ],
-   "x": 388,
-   "z": 758,
+   "x": 284,
+   "z": 1351,
    "yaw": 0,
    "radius": 10
   },
@@ -557,81 +579,81 @@
    "id": "rare_thornbound_crawler",
    "slot": 0,
    "name": "The Thornbound Crawler",
-   "x": 1163,
-   "z": 1668,
+   "x": 1795,
+   "z": 586,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1259,
-     1623
+     1806,
+     650
     ],
     [
-     1186,
-     1743
+     1740,
+     609
     ],
     [
-     1072,
-     1722
+     1730,
+     554
     ],
     [
-     1096,
-     1629
+     1832,
+     527
     ],
     [
-     1161,
-     1567
+     1846,
+     572
     ]
    ],
    "respawnMin": [
     20,
     60
    ],
-   "level": 10
+   "level": 8
   },
   {
    "type": "rare",
    "id": "rare_scab",
    "slot": 1,
    "name": "Scab",
-   "x": 97,
-   "z": 326,
+   "x": 900,
+   "z": 76,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     31,
-     422
+     865,
+     189
     ],
     [
-     32,
-     275
+     828,
+     37
     ],
     [
-     124,
-     233
+     915,
+     2
     ],
     [
-     187,
-     302
+     978,
+     19
     ],
     [
-     156,
-     408
+     996,
+     154
     ]
    ],
    "respawnMin": [
     20,
     60
    ],
-   "level": 10
+   "level": 8
   },
   {
    "type": "waystone",
    "id": "ws_z11_04_last_lantern",
    "name": "Last Lantern",
-   "x": 816.2,
-   "z": 1240,
+   "x": 881.8,
+   "z": 1296,
    "yaw": 0,
    "settlement": "Last Lantern",
    "radius": 1
@@ -640,8 +662,8 @@
    "type": "waystone",
    "id": "ws_z11_04_thornwick",
    "name": "Thornwick",
-   "x": 1845.5,
-   "z": 1911.1,
+   "x": 1786.3,
+   "z": 1842.7,
    "yaw": 0,
    "settlement": "Thornwick",
    "radius": 1
@@ -649,19 +671,38 @@
   {
    "type": "waystone",
    "id": "ws_z11_04_door",
-   "name": "Barrow entrance",
-   "x": 1033.4,
-   "z": 1185.6,
+   "name": "The Blackthorn Warrens",
+   "x": 985.2,
+   "z": 1166.2,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
   },
   {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_door",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1028,
+   "z": 1153,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
+  },
+  {
    "type": "waystone",
    "id": "ws_z11_04_worldboss",
    "name": "Grimtallow's Hollow",
-   "x": 1209.3,
-   "z": 1417.2,
+   "x": 1262.9,
+   "z": 1241.2,
    "yaw": 0,
    "event": "world_grimtallow",
    "radius": 1
@@ -672,9 +713,9 @@
    "name": "Rosa of Last Lantern",
    "role": "elder",
    "at": "Last Lantern",
-   "x": 882.4,
-   "z": 1300.6,
-   "yaw": 5.92,
+   "x": 880.6,
+   "z": 1297.6,
+   "yaw": 4.63,
    "radius": 1
   },
   {
@@ -683,9 +724,9 @@
    "name": "Jory the penitent",
    "role": "pilgrim",
    "at": "Thornwick",
-   "x": 1768.1,
-   "z": 1896.9,
-   "yaw": 2.53,
+   "x": 1766.7,
+   "z": 1897.5,
+   "yaw": 4.34,
    "radius": 1
   },
   {
@@ -694,9 +735,9 @@
    "name": "Outrider Garrick",
    "role": "scout",
    "at": "the Warband Stockade",
-   "x": 1937.7,
-   "z": 1890.9,
-   "yaw": 4.35,
+   "x": 1938.7,
+   "z": 1894.9,
+   "yaw": 3.42,
    "radius": 1
   },
   {
@@ -707,8 +748,8 @@
    "clue": "drunks_story",
    "how": null,
    "shimmer": null,
-   "x": 1792.7,
-   "z": 1946.7,
+   "x": 1744.8,
+   "z": 1943.2,
    "yaw": 0,
    "where": "edge of Thornwick",
    "radius": 1
@@ -721,8 +762,8 @@
    "clue": "gravestone",
    "how": null,
    "shimmer": null,
-   "x": 846.8,
-   "z": 1220.3,
+   "x": 827.8,
+   "z": 1377,
    "yaw": 0,
    "where": "edge of Last Lantern",
    "radius": 1
@@ -735,21 +776,21 @@
    "clue": null,
    "how": "chest",
    "shimmer": 15,
-   "x": 754.8,
-   "z": 1422.4,
+   "x": 929.1,
+   "z": 1101.2,
    "yaw": 0,
    "where": "near Last Lantern",
    "radius": 1
   },
   {
    "type": "wayside",
-   "id": "cairn_blackthorn_scar_0",
-   "kind": "cairn",
-   "name": "Cairn",
-   "x": 784,
-   "z": 368,
-   "yaw": 4.2,
-   "radius": 4,
+   "id": "milestone_blackthorn_scar_0",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 392,
+   "z": 245,
+   "yaw": 3.58,
+   "radius": 3,
    "filler": true
   },
   {
@@ -759,26 +800,26 @@
    "with": null,
    "level": [
     7,
-    9
+    8
    ],
    "count": [
     2,
     3
    ],
-   "x": 1620,
-   "z": 343,
+   "x": 760,
+   "z": 640,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "boundary_stake_blackthorn_scar_2",
-   "kind": "boundary_stake",
-   "name": "Boundary Stakes",
-   "x": 43,
-   "z": 24,
-   "yaw": 0.22,
+   "id": "roadside_grave_blackthorn_scar_2",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 41,
+   "z": 680,
+   "yaw": 1.73,
    "radius": 4,
    "filler": true
   },
@@ -788,28 +829,28 @@
    "monster": "ossuary_crawler",
    "with": null,
    "level": [
-    8,
-    10
+    7,
+    8
    ],
    "count": [
     2,
     3
    ],
-   "x": 1672,
-   "z": 964,
+   "x": 1630,
+   "z": 939,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "boundary_stake_blackthorn_scar_4",
-   "kind": "boundary_stake",
-   "name": "Boundary Stakes",
-   "x": 1916,
-   "z": 412,
-   "yaw": 1.64,
-   "radius": 4,
+   "id": "lonely_pier_blackthorn_scar_4",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 1390,
+   "z": 229,
+   "yaw": 2.88,
+   "radius": 5,
    "filler": true
   },
   {
@@ -819,27 +860,27 @@
    "with": null,
    "level": [
     7,
-    9
+    8
    ],
    "count": [
     2,
     3
    ],
-   "x": 371,
-   "z": 1988,
+   "x": 1980,
+   "z": 1309,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "milestone_blackthorn_scar_6",
-   "kind": "milestone",
-   "name": "Milestone",
-   "x": 608,
-   "z": 946,
-   "yaw": 3.92,
-   "radius": 3,
+   "id": "roadside_grave_blackthorn_scar_6",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 566,
+   "z": 2008,
+   "yaw": 2.62,
+   "radius": 4,
    "filler": true
   },
   {
@@ -848,27 +889,27 @@
    "monster": "sky_cultist",
    "with": null,
    "level": [
-    8,
+    9,
     10
    ],
    "count": [
     2,
     3
    ],
-   "x": 493,
-   "z": 581,
+   "x": 64,
+   "z": 1980,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cairn_blackthorn_scar_8",
-   "kind": "cairn",
-   "name": "Cairn",
-   "x": 1920,
-   "z": 903,
-   "yaw": 2.79,
+   "id": "roadside_grave_blackthorn_scar_8",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1619,
+   "z": 351,
+   "yaw": 4.86,
    "radius": 4,
    "filler": true
   },
@@ -879,56 +920,48 @@
    "with": null,
    "level": [
     7,
-    9
+    8
    ],
    "count": [
     2,
     3
    ],
-   "x": 1294,
-   "z": 306,
+   "x": 499,
+   "z": 450,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cairn_blackthorn_scar_10",
-   "kind": "cairn",
-   "name": "Cairn",
-   "x": 38,
-   "z": 2010,
-   "yaw": 2.52,
-   "radius": 4,
-   "filler": true
-  },
-  {
-   "type": "camp",
-   "id": "camp_blackthorn_scar_f11",
-   "monster": "sporecap_walker",
-   "with": null,
-   "level": [
-    8,
-    10
-   ],
-   "count": [
-    2,
-    3
-   ],
-   "x": 580,
-   "z": 1748,
-   "yaw": 0,
-   "radius": 10,
-   "filler": true
-  },
-  {
-   "type": "wayside",
-   "id": "lost_signpost_blackthorn_scar_12",
+   "id": "lost_signpost_blackthorn_scar_10",
    "kind": "lost_signpost",
    "name": "Lost Signpost",
-   "x": 1424,
-   "z": 2008,
-   "yaw": 4.58,
+   "x": 1529,
+   "z": 1283,
+   "yaw": 0.67,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_11",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 2024,
+   "z": 550,
+   "yaw": 6.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_blackthorn_scar_12",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 193,
+   "z": 125,
+   "yaw": 4.83,
    "radius": 3,
    "filler": true
   },
@@ -939,26 +972,26 @@
    "with": null,
    "level": [
     7,
-    9
+    8
    ],
    "count": [
     2,
     3
    ],
-   "x": 61,
-   "z": 815,
+   "x": 472,
+   "z": 94,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cold_campfire_blackthorn_scar_14",
-   "kind": "cold_campfire",
-   "name": "Cold Campfire",
-   "x": 2004,
-   "z": 1640,
-   "yaw": 1.92,
+   "id": "boundary_stake_blackthorn_scar_14",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1884,
+   "z": 339,
+   "yaw": 1.6,
    "radius": 4,
    "filler": true
   },
@@ -969,27 +1002,27 @@
    "with": null,
    "level": [
     8,
-    10
+    9
    ],
    "count": [
     2,
     3
    ],
-   "x": 1740,
-   "z": 1218,
+   "x": 1941,
+   "z": 1577,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cairn_blackthorn_scar_16",
-   "kind": "cairn",
-   "name": "Cairn",
-   "x": 260,
-   "z": 132,
-   "yaw": 2.73,
-   "radius": 4,
+   "id": "shrine_niche_blackthorn_scar_16",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 271,
+   "z": 598,
+   "yaw": 2.85,
+   "radius": 3,
    "filler": true
   },
   {
@@ -999,27 +1032,27 @@
    "with": null,
    "level": [
     7,
-    9
+    8
    ],
    "count": [
     2,
     3
    ],
-   "x": 946,
-   "z": 698,
+   "x": 692,
+   "z": 902,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "dolmen_blackthorn_scar_18",
-   "kind": "dolmen",
-   "name": "Dolmen",
-   "x": 924,
-   "z": 2008,
-   "yaw": 5.11,
-   "radius": 5,
+   "id": "milestone_blackthorn_scar_18",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1644,
+   "z": 1584,
+   "yaw": 5.48,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1029,26 +1062,26 @@
    "with": null,
    "level": [
     8,
-    10
+    9
    ],
    "count": [
     2,
     3
    ],
-   "x": 1988,
-   "z": 1356,
+   "x": 61,
+   "z": 1184,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "boundary_stake_blackthorn_scar_20",
-   "kind": "boundary_stake",
-   "name": "Boundary Stakes",
-   "x": 316,
-   "z": 972,
-   "yaw": 1.13,
+   "id": "cold_campfire_blackthorn_scar_20",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 805,
+   "z": 1992,
+   "yaw": 2.6,
    "radius": 4,
    "filler": true
   },
@@ -1059,27 +1092,27 @@
    "with": null,
    "level": [
     7,
-    9
+    8
    ],
    "count": [
     2,
     3
    ],
-   "x": 1592,
-   "z": 1416,
+   "x": 1752,
+   "z": 1136,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "bone_heap_blackthorn_scar_22",
-   "kind": "bone_heap",
-   "name": "Old Bones",
-   "x": 723,
-   "z": 200,
-   "yaw": 2.15,
-   "radius": 4,
+   "id": "banner_post_blackthorn_scar_22",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 536,
+   "z": 1321,
+   "yaw": 1.3,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1088,28 +1121,28 @@
    "monster": "sporecap_walker",
    "with": null,
    "level": [
-    8,
+    9,
     10
    ],
    "count": [
     2,
     3
    ],
-   "x": 1372,
-   "z": 1801,
+   "x": 1473,
+   "z": 1988,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cold_campfire_blackthorn_scar_24",
-   "kind": "cold_campfire",
-   "name": "Cold Campfire",
-   "x": 974,
-   "z": 256,
-   "yaw": 4.97,
-   "radius": 4,
+   "id": "league_stone_blackthorn_scar_24",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1504,
+   "z": 1756,
+   "yaw": 3.02,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1118,28 +1151,28 @@
    "monster": "cult_zealot",
    "with": null,
    "level": [
-    7,
-    9
+    9,
+    10
    ],
    "count": [
     2,
     3
    ],
-   "x": 207,
-   "z": 1572,
+   "x": 516,
+   "z": 1729,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "standing_stone_blackthorn_scar_26",
-   "kind": "standing_stone",
-   "name": "Standing Stone",
-   "x": 1468,
-   "z": 176,
-   "yaw": 4.8,
-   "radius": 4,
+   "id": "lost_signpost_blackthorn_scar_26",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 368,
+   "z": 916,
+   "yaw": 1.59,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1148,28 +1181,28 @@
    "monster": "ossuary_crawler",
    "with": null,
    "level": [
-    8,
-    10
+    7,
+    8
    ],
    "count": [
     2,
     3
    ],
-   "x": 537,
-   "z": 1354,
+   "x": 1249,
+   "z": 752,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cold_campfire_blackthorn_scar_28",
-   "kind": "cold_campfire",
-   "name": "Cold Campfire",
-   "x": 356,
-   "z": 1740,
-   "yaw": 5.34,
-   "radius": 4,
+   "id": "league_stone_blackthorn_scar_28",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 251,
+   "z": 1604,
+   "yaw": 4.78,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1179,27 +1212,27 @@
    "with": null,
    "level": [
     7,
-    9
+    8
    ],
    "count": [
     2,
     3
    ],
-   "x": 475,
-   "z": 81,
+   "x": 1982,
+   "z": 837,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "boundary_stake_blackthorn_scar_30",
-   "kind": "boundary_stake",
-   "name": "Boundary Stakes",
-   "x": 1655,
-   "z": 1616,
-   "yaw": 2.48,
-   "radius": 4,
+   "id": "lost_signpost_blackthorn_scar_30",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1408,
+   "z": 440,
+   "yaw": 1.93,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1209,14 +1242,14 @@
    "with": null,
    "level": [
     8,
-    10
+    9
    ],
    "count": [
     2,
     3
    ],
-   "x": 820,
-   "z": 908,
+   "x": 660,
+   "z": 1568,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1226,9 +1259,9 @@
    "id": "lost_signpost_blackthorn_scar_32",
    "kind": "lost_signpost",
    "name": "Lost Signpost",
-   "x": 316,
-   "z": 1368,
-   "yaw": 4.97,
+   "x": 918,
+   "z": 509,
+   "yaw": 1.24,
    "radius": 3,
    "filler": true
   },
@@ -1238,28 +1271,28 @@
    "monster": "hollow_wraith",
    "with": null,
    "level": [
-    7,
+    8,
     9
    ],
    "count": [
     2,
     3
    ],
-   "x": 1828,
-   "z": 236,
+   "x": 245,
+   "z": 886,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "dolmen_blackthorn_scar_34",
-   "kind": "dolmen",
-   "name": "Dolmen",
-   "x": 1448,
-   "z": 460,
-   "yaw": 3.93,
-   "radius": 5,
+   "id": "cairn_blackthorn_scar_34",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 260,
+   "z": 1148,
+   "yaw": 0.64,
+   "radius": 4,
    "filler": true
   },
   {
@@ -1268,27 +1301,27 @@
    "monster": "sporecap_walker",
    "with": null,
    "level": [
-    8,
-    10
+    7,
+    8
    ],
    "count": [
     2,
     3
    ],
-   "x": 212,
-   "z": 462,
+   "x": 1786,
+   "z": 758,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "boundary_stake_blackthorn_scar_36",
-   "kind": "boundary_stake",
-   "name": "Boundary Stakes",
-   "x": 1575,
-   "z": 548,
-   "yaw": 2.28,
+   "id": "cold_campfire_blackthorn_scar_36",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 875,
+   "z": 820,
+   "yaw": 0.37,
    "radius": 4,
    "filler": true
   },
@@ -1299,26 +1332,26 @@
    "with": null,
    "level": [
     7,
-    9
+    8
    ],
    "count": [
     2,
     3
    ],
-   "x": 1604,
-   "z": 762,
+   "x": 209,
+   "z": 467,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cairn_blackthorn_scar_38",
-   "kind": "cairn",
-   "name": "Cairn",
-   "x": 592,
-   "z": 1140,
-   "yaw": 3.55,
+   "id": "boundary_stake_blackthorn_scar_38",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 917,
+   "z": 289,
+   "yaw": 5.79,
    "radius": 4,
    "filler": true
   },
@@ -1328,28 +1361,28 @@
    "monster": "ossuary_crawler",
    "with": null,
    "level": [
-    8,
+    9,
     10
    ],
    "count": [
     2,
     3
    ],
-   "x": 636,
-   "z": 1568,
+   "x": 259,
+   "z": 1988,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "dolmen_blackthorn_scar_40",
-   "kind": "dolmen",
-   "name": "Dolmen",
-   "x": 612,
-   "z": 428,
-   "yaw": 0.33,
-   "radius": 5,
+   "id": "cold_campfire_blackthorn_scar_40",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 2017,
+   "z": 1148,
+   "yaw": 4.85,
+   "radius": 4,
    "filler": true
   },
   {
@@ -1359,26 +1392,26 @@
    "with": null,
    "level": [
     7,
-    9
+    8
    ],
    "count": [
     2,
     3
    ],
-   "x": 200,
-   "z": 1220,
+   "x": 82,
+   "z": 181,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "lost_signpost_blackthorn_scar_42",
-   "kind": "lost_signpost",
-   "name": "Lost Signpost",
-   "x": 897,
-   "z": 510,
-   "yaw": 4.46,
+   "id": "banner_post_blackthorn_scar_42",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1552,
+   "z": 1104,
+   "yaw": 0.39,
    "radius": 3,
    "filler": true
   },
@@ -1388,28 +1421,28 @@
    "monster": "sky_cultist",
    "with": null,
    "level": [
-    8,
-    10
+    7,
+    8
    ],
    "count": [
     2,
     3
    ],
-   "x": 1742,
-   "z": 510,
+   "x": 1466,
+   "z": 765,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "lost_signpost_blackthorn_scar_44",
-   "kind": "lost_signpost",
-   "name": "Lost Signpost",
-   "x": 1557,
-   "z": 1769,
-   "yaw": 1.04,
-   "radius": 3,
+   "id": "cold_campfire_blackthorn_scar_44",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 659,
+   "z": 474,
+   "yaw": 3.85,
+   "radius": 4,
    "filler": true
   },
   {
@@ -1419,26 +1452,26 @@
    "with": null,
    "level": [
     7,
-    9
+    8
    ],
    "count": [
     2,
     3
    ],
-   "x": 1425,
-   "z": 601,
+   "x": 1739,
+   "z": 617,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "bone_heap_blackthorn_scar_46",
-   "kind": "bone_heap",
-   "name": "Old Bones",
-   "x": 1508,
-   "z": 1032,
-   "yaw": 0.55,
+   "id": "roadside_grave_blackthorn_scar_46",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1817,
+   "z": 180,
+   "yaw": 4.05,
    "radius": 4,
    "filler": true
   },
@@ -1449,16 +1482,8574 @@
    "with": null,
    "level": [
     8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 640,
+   "z": 1071,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_48",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 781,
+   "z": 1570,
+   "yaw": 4.42,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_1",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1241,
+   "z": 41,
+   "yaw": 5.55,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s1",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1388,
+   "z": 30,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d1",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 233,
+   "z": 296,
+   "yaw": 1.74,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d2",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 40,
+   "z": 512,
+   "yaw": 0.9,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_2",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 914,
+   "z": 654,
+   "yaw": 4.03,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s2",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1626,
+   "z": 766,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_3",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 497,
+   "z": 869,
+   "yaw": 3.19,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_1",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1184,
+   "z": 1042,
+   "yaw": 0.26,
+   "radius": 6,
+   "path": [
+    [
+     1207,
+     1087
+    ],
+    [
+     1125,
+     1043
+    ],
+    [
+     1235,
+     1002
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_4",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1216,
+   "z": 2008,
+   "yaw": 0.09,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s3",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1208,
+   "z": 1562,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d3",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1528,
+   "z": 1440,
+   "yaw": 4.05,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_5",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 39,
+   "z": 835,
+   "yaw": 3.29,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_6",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1556,
+   "z": 523,
+   "yaw": 1.4,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_7",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1554,
+   "z": 210,
+   "yaw": 0.73,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_8",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 626,
+   "z": 739,
+   "yaw": 5.22,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d4",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 2008,
+   "z": 1728,
+   "yaw": 4.14,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s4",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 327,
+   "z": 36,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d5",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 195,
+   "z": 746,
+   "yaw": 5.68,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_9",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1287,
+   "z": 341,
+   "yaw": 1.78,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_10",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 168,
+   "z": 1857,
+   "yaw": 2.87,
+   "radius": 5,
+   "levelBase": 9
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_blackthorn_scar_d6",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 547,
+   "z": 575,
+   "yaw": 2.26,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d7",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 420,
+   "z": 1971,
+   "yaw": 3.32,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_11",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1812,
+   "z": 1618,
+   "yaw": 6.19,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_1",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1400,
+   "z": 1360,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1419,
+     1296
+    ],
+    [
+     1451,
+     1372
+    ],
+    [
+     1408,
+     1426
+    ],
+    [
+     1330,
+     1358
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s5",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 400,
+   "z": 1248,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_12",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1266,
+   "z": 202,
+   "yaw": 1.24,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d8",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 601,
+   "z": 1864,
+   "yaw": 3.38,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_13",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1208,
+   "z": 1720,
+   "yaw": 2.61,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d9",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1947,
+   "z": 695,
+   "yaw": 5.14,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_14",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1995,
+   "z": 256,
+   "yaw": 1.26,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_15",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1056,
+   "z": 1528,
+   "yaw": 4.58,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_16",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 376,
+   "z": 1673,
+   "yaw": 4.1,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s6",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 610,
+   "z": 339,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_17",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1673,
+   "z": 1263,
+   "yaw": 3.71,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_2",
+   "role": "prospector",
+   "name": "Prospector",
+   "work": "dig",
+   "chatter": [
+    "role.prospector"
+   ],
+   "x": 847,
+   "z": 1856,
+   "yaw": 1.99,
+   "radius": 6,
+   "path": [
+    [
+     832,
+     1870
+    ],
+    [
+     842,
+     1838
+    ],
+    [
+     868,
+     1865
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_18",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1847,
+   "z": 51,
+   "yaw": 3.73,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_19",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1763,
+   "z": 398,
+   "yaw": 2.32,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d10",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 640,
+   "z": 1224,
+   "yaw": 0.86,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_20",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1648,
+   "z": 1728,
+   "yaw": 4.1,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_21",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 55,
+   "z": 32,
+   "yaw": 1.25,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_22",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1488,
+   "z": 976,
+   "yaw": 4.39,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_2",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 145,
+   "z": 1303,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     174,
+     1343
+    ],
+    [
+     100,
+     1342
+    ],
+    [
+     119,
+     1256
+    ],
+    [
+     179,
+     1262
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_23",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1326,
+   "z": 645,
+   "yaw": 4.72,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d11",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1848,
+   "z": 1250,
+   "yaw": 4.34,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s7",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 422,
+   "z": 554,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_24",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1903,
+   "z": 1432,
+   "yaw": 0.12,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_25",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 616,
+   "z": 1431,
+   "yaw": 2.44,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_26",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 360,
+   "z": 763,
+   "yaw": 5.58,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s8",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1152,
+   "z": 1849,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d12",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 111,
+   "z": 1577,
+   "yaw": 6.12,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_27",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1887,
+   "z": 1096,
+   "yaw": 3.84,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_28",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1505,
+   "z": 37,
+   "yaw": 4.73,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_blackthorn_scar_d13",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1694,
+   "z": 248,
+   "yaw": 5.03,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_29",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1368,
+   "z": 1720,
+   "yaw": 3.61,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_blackthorn_scar_d14",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1513,
+   "z": 1625,
+   "yaw": 1.4,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_30",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 224,
+   "z": 1736,
+   "yaw": 2.55,
+   "radius": 5,
+   "levelBase": 9
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s9",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 208,
+   "z": 1480,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d15",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1752,
+   "z": 1014,
+   "yaw": 5.7,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_31",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 415,
+   "z": 1392,
+   "yaw": 5.6,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s10",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 1047,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_32",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1666,
+   "z": 1457,
+   "yaw": 2.05,
+   "radius": 6,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_blackthorn_scar_d16",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 296,
+   "z": 1024,
+   "yaw": 4.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_33",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1184,
+   "z": 880,
+   "yaw": 1.76,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_34",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 132,
+   "z": 576,
+   "yaw": 3.27,
+   "radius": 6,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s11",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    9,
     10
    ],
    "count": [
     2,
     3
    ],
-   "x": 60,
-   "z": 1631,
+   "x": 39,
+   "z": 1846,
    "yaw": 0,
-   "radius": 10,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_35",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 473,
+   "z": 1855,
+   "yaw": 3.85,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_3",
+   "role": "prospector",
+   "name": "Prospector",
+   "work": "dig",
+   "chatter": [
+    "role.prospector"
+   ],
+   "x": 824,
+   "z": 942,
+   "yaw": 5.45,
+   "radius": 6,
+   "path": [
+    [
+     820,
+     952
+    ],
+    [
+     816,
+     927
+    ],
+    [
+     838,
+     944
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_36",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 786,
+   "z": 546,
+   "yaw": 2.9,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s12",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 533,
+   "z": 1013,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_blackthorn_scar_d17",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1432,
+   "z": 1864,
+   "yaw": 4.79,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_37",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1345,
+   "z": 1968,
+   "yaw": 3.28,
+   "radius": 6,
+   "levelBase": 9
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s13",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 381,
+   "z": 341,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_38",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 679,
+   "z": 1961,
+   "yaw": 0.36,
+   "radius": 5,
+   "levelBase": 9
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_39",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 749,
+   "z": 753,
+   "yaw": 0.69,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_40",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1448,
+   "z": 1168,
+   "yaw": 4.1,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d18",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1633,
+   "z": 656,
+   "yaw": 5.58,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_41",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 496,
+   "z": 250,
+   "yaw": 3.54,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s14",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1026,
+   "z": 746,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d19",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 929,
+   "z": 2008,
+   "yaw": 4.23,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_42",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1799,
+   "z": 1495,
+   "yaw": 0.76,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_3",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1552,
+   "z": 1864,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1578,
+     1928
+    ],
+    [
+     1483,
+     1891
+    ],
+    [
+     1525,
+     1819
+    ],
+    [
+     1594,
+     1849
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s15",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 298,
+   "z": 147,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_blackthorn_scar_d20",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1918,
+   "z": 461,
+   "yaw": 1.3,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d21",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 632,
+   "z": 1689,
+   "yaw": 5.6,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_43",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 544,
+   "z": 1608,
+   "yaw": 5.08,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s16",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 816,
+   "z": 1688,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_44",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 328,
+   "z": 1473,
+   "yaw": 0.78,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_45",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1020,
+   "z": 575,
+   "yaw": 4.25,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_46",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 804,
+   "z": 356,
+   "yaw": 0.83,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d22",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1888,
+   "z": 1712,
+   "yaw": 1.21,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_47",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 154,
+   "z": 1094,
+   "yaw": 1.02,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_48",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 991,
+   "z": 450,
+   "yaw": 3.85,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s17",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1295,
+   "z": 1472,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d23",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1531,
+   "z": 885,
+   "yaw": 3.04,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d24",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1644,
+   "z": 434,
+   "yaw": 6,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d25",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 722,
+   "z": 204,
+   "yaw": 3.83,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_blackthorn_scar_d26",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1508,
+   "z": 311,
+   "yaw": 2.36,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_blackthorn_scar_d27",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 520,
+   "z": 1208,
+   "yaw": 4.44,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_49",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 2008,
+   "z": 2007,
+   "yaw": 1.39,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s18",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2008,
+   "z": 1480,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_50",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1487,
+   "z": 169,
+   "yaw": 2.87,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_51",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1607,
+   "z": 1358,
+   "yaw": 3.4,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d28",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1368,
+   "z": 552,
+   "yaw": 1.3,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d29",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1013,
+   "z": 250,
+   "yaw": 0.82,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_52",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1662,
+   "z": 1066,
+   "yaw": 2.37,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_53",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1313,
+   "z": 882,
+   "yaw": 2.31,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_54",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1431,
+   "z": 888,
+   "yaw": 1.83,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_55",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1288,
+   "z": 1648,
+   "yaw": 5.67,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s19",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 376,
+   "z": 656,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d30",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1136,
+   "z": 765,
+   "yaw": 0.9,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_56",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1879,
+   "z": 2008,
+   "yaw": 3.39,
+   "radius": 6,
+   "levelBase": 9
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_57",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1802,
+   "z": 276,
+   "yaw": 3.87,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s20",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 745,
+   "z": 1034,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d31",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 148,
+   "z": 848,
+   "yaw": 0.12,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_blackthorn_scar_d32",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 655,
+   "z": 1328,
+   "yaw": 5.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_58",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1344,
+   "z": 1176,
+   "yaw": 6.23,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_59",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 618,
+   "z": 824,
+   "yaw": 5.22,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_60",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 396,
+   "z": 471,
+   "yaw": 3.86,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_61",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1342,
+   "z": 146,
+   "yaw": 2.24,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s21",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 513,
+   "z": 1439,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_62",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1113,
+   "z": 1616,
+   "yaw": 0.54,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_blackthorn_scar_d33",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1632,
+   "z": 1168,
+   "yaw": 3.09,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_63",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 57,
+   "z": 936,
+   "yaw": 3.9,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_64",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1191,
+   "z": 107,
+   "yaw": 2.89,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s22",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 410,
+   "z": 1013,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_4",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 414,
+   "z": 1768,
+   "yaw": 2.78,
+   "radius": 6,
+   "path": [
+    [
+     451,
+     1805
+    ],
+    [
+     370,
+     1786
+    ],
+    [
+     416,
+     1708
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_blackthorn_scar_d34",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 739,
+   "z": 1868,
+   "yaw": 5.91,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_65",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 360,
+   "z": 1144,
+   "yaw": 2.19,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s23",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1719,
+   "z": 1656,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d35",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 2006,
+   "z": 1047,
+   "yaw": 5.52,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_66",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 280,
+   "z": 696,
+   "yaw": 4.52,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s24",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1480,
+   "z": 1528,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_67",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1928,
+   "z": 1192,
+   "yaw": 3.8,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_68",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 297,
+   "z": 1240,
+   "yaw": 4.89,
+   "radius": 6,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_69",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1896,
+   "z": 241,
+   "yaw": 2.21,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d36",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 728,
+   "z": 1488,
+   "yaw": 5.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s25",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 351,
+   "z": 1579,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d37",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1896,
+   "z": 878,
+   "yaw": 4.76,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_70",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 136,
+   "z": 269,
+   "yaw": 2.16,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_71",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 593,
+   "z": 961,
+   "yaw": 5.64,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_72",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 556,
+   "z": 50,
+   "yaw": 5.92,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_73",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 798,
+   "z": 129,
+   "yaw": 2.74,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_74",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1479,
+   "z": 454,
+   "yaw": 3.75,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s26",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 168,
+   "z": 1657,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_75",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 861,
+   "z": 706,
+   "yaw": 0.62,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_blackthorn_scar_d38",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 1751,
+   "z": 41,
+   "yaw": 0.8,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d39",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1945,
+   "z": 601,
+   "yaw": 5.94,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s27",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 471,
+   "z": 353,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_76",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 72,
+   "z": 766,
+   "yaw": 2.7,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d40",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 577,
+   "z": 681,
+   "yaw": 1.69,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_77",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 720,
+   "z": 1649,
+   "yaw": 0.54,
+   "radius": 6,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d41",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 160,
+   "z": 1952,
+   "yaw": 4.21,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_78",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1554,
+   "z": 727,
+   "yaw": 1.79,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s28",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 112,
+   "z": 448,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_79",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1199,
+   "z": 596,
+   "yaw": 1.09,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_5",
+   "role": "prospector",
+   "name": "Prospector",
+   "work": "dig",
+   "chatter": [
+    "role.prospector"
+   ],
+   "x": 912,
+   "z": 870,
+   "yaw": 5.42,
+   "radius": 6,
+   "path": [
+    [
+     907,
+     882
+    ],
+    [
+     904,
+     856
+    ],
+    [
+     931,
+     866
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_80",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1576,
+   "z": 1522,
+   "yaw": 2.71,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s29",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1871,
+   "z": 1344,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_blackthorn_scar_d42",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 726,
+   "z": 393,
+   "yaw": 5.99,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_81",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 168,
+   "z": 360,
+   "yaw": 1.25,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s30",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 649,
+   "z": 262,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_82",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1224,
+   "z": 1913,
+   "yaw": 0.39,
+   "radius": 7,
+   "levelBase": 9
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_83",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1541,
+   "z": 107,
+   "yaw": 5.73,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d43",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 671,
+   "z": 657,
+   "yaw": 5.3,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s31",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1727,
+   "z": 160,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_84",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 569,
+   "z": 1520,
+   "yaw": 0.84,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_6",
+   "role": "prospector",
+   "name": "Prospector",
+   "work": "dig",
+   "chatter": [
+    "role.prospector"
+   ],
+   "x": 1737,
+   "z": 1534,
+   "yaw": 1.21,
+   "radius": 6,
+   "path": [
+    [
+     1749,
+     1530
+    ],
+    [
+     1732,
+     1542
+    ],
+    [
+     1731,
+     1523
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d44",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 152,
+   "z": 678,
+   "yaw": 0.89,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s32",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 289,
+   "z": 786,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d45",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1121,
+   "z": 944,
+   "yaw": 3.83,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_85",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1536,
+   "z": 1192,
+   "yaw": 5.12,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_4",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1031,
+   "z": 1438,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1072,
+     1449
+    ],
+    [
+     1027,
+     1478
+    ],
+    [
+     982,
+     1423
+    ],
+    [
+     1033,
+     1388
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d46",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1671,
+   "z": 845,
+   "yaw": 2.62,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_86",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 512,
+   "z": 1936,
+   "yaw": 4.36,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d47",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1759,
+   "z": 1232,
+   "yaw": 1.24,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_87",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1570,
+   "z": 1016,
+   "yaw": 1.39,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_88",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1494,
+   "z": 1037,
+   "yaw": 3.33,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_89",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 609,
+   "z": 1777,
+   "yaw": 4.98,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s33",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 458,
+   "z": 1623,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_90",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1025,
+   "z": 1615,
+   "yaw": 4.15,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d48",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 720,
+   "z": 1264,
+   "yaw": 2.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_91",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 472,
+   "z": 631,
+   "yaw": 4.98,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_blackthorn_scar_d49",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1384,
+   "z": 677,
+   "yaw": 0.17,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s34",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 226,
+   "z": 200,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_92",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1458,
+   "z": 560,
+   "yaw": 2.57,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d50",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 399,
+   "z": 137,
+   "yaw": 4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_93",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 344,
+   "z": 1928,
+   "yaw": 3.66,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_blackthorn_scar_d51",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1727,
+   "z": 694,
+   "yaw": 5.26,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d52",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 419,
+   "z": 831,
+   "yaw": 4.41,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_94",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 558,
+   "z": 1118,
+   "yaw": 5.95,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s35",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 696,
+   "z": 1153,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d53",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 250,
+   "z": 43,
+   "yaw": 2.45,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_5",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 40,
+   "z": 1632,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     79,
+     1617
+    ],
+    [
+     51,
+     1675
+    ],
+    [
+     9,
+     1645
+    ],
+    [
+     22,
+     1601
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d54",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 39,
+   "z": 263,
+   "yaw": 4.72,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s36",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1934,
+   "z": 1785,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_blackthorn_scar_d55",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1149,
+   "z": 278,
+   "yaw": 4.5,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_7",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 248,
+   "z": 1905,
+   "yaw": 5.08,
+   "radius": 6,
+   "path": [
+    [
+     251,
+     1911
+    ],
+    [
+     241,
+     1907
+    ],
+    [
+     252,
+     1897
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_95",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1144,
+   "z": 1960,
+   "yaw": 0.66,
+   "radius": 5,
+   "levelBase": 9
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s37",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 818,
+   "z": 279,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d56",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 937,
+   "z": 754,
+   "yaw": 0.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_96",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1448,
+   "z": 1688,
+   "yaw": 4.77,
+   "radius": 3,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_6",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1570,
+   "z": 1697,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1633,
+     1634
+    ],
+    [
+     1633,
+     1774
+    ],
+    [
+     1506,
+     1764
+    ],
+    [
+     1496,
+     1627
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_97",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1542,
+   "z": 610,
+   "yaw": 5.76,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_98",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1890,
+   "z": 128,
+   "yaw": 2.76,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_blackthorn_scar_d57",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 1632,
+   "z": 503,
+   "yaw": 2.16,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_99",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 2007,
+   "z": 1639,
+   "yaw": 4.58,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s38",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1135,
+   "z": 41,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_100",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1288,
+   "z": 1752,
+   "yaw": 2.12,
+   "radius": 3,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_101",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1705,
+   "z": 333,
+   "yaw": 3.36,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s39",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 869,
+   "z": 567,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_102",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1152,
+   "z": 1491,
+   "yaw": 3.02,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_blackthorn_scar_d58",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1627,
+   "z": 175,
+   "yaw": 2.81,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_103",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 286,
+   "z": 1681,
+   "yaw": 3.56,
+   "radius": 5,
+   "levelBase": 9
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_104",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1426,
+   "z": 114,
+   "yaw": 3.16,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d59",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 589,
+   "z": 499,
+   "yaw": 5.53,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_8",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1617,
+   "z": 2007,
+   "yaw": 0.32,
+   "radius": 6,
+   "path": [
+    [
+     1600,
+     2001
+    ],
+    [
+     1634,
+     1997
+    ],
+    [
+     1613,
+     2028
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_blackthorn_scar_d60",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 215,
+   "z": 377,
+   "yaw": 2.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s40",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 936,
+   "z": 1920,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d61",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1954,
+   "z": 323,
+   "yaw": 1.04,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_105",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 142,
+   "z": 1777,
+   "yaw": 3.79,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s41",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1079,
+   "z": 1801,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_106",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1822,
+   "z": 1048,
+   "yaw": 0.52,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d62",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 2010,
+   "z": 761,
+   "yaw": 3.95,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_107",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1428,
+   "z": 397,
+   "yaw": 4.73,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d63",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 168,
+   "z": 1176,
+   "yaw": 2.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s42",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 808,
+   "z": 1473,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d64",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 116,
+   "z": 54,
+   "yaw": 5.29,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_108",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1265,
+   "z": 1153,
+   "yaw": 5.83,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s43",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 988,
+   "z": 684,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d65",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1839,
+   "z": 1168,
+   "yaw": 4.82,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d66",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 486,
+   "z": 957,
+   "yaw": 4.61,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_7",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1879,
+   "z": 1513,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1903,
+     1562
+    ],
+    [
+     1826,
+     1545
+    ],
+    [
+     1864,
+     1450
+    ],
+    [
+     1932,
+     1484
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_blackthorn_scar_d67",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1807,
+   "z": 430,
+   "yaw": 1.38,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_109",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1336,
+   "z": 1272,
+   "yaw": 4.79,
+   "radius": 6,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d68",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1111,
+   "z": 1128,
+   "yaw": 0.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s44",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2006,
+   "z": 1370,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_110",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 47,
+   "z": 593,
+   "yaw": 3.18,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_111",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1688,
+   "z": 1345,
+   "yaw": 2.85,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d69",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 2008,
+   "z": 1810,
+   "yaw": 1.34,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s45",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 456,
+   "z": 1312,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_112",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 232,
+   "z": 1072,
+   "yaw": 1.35,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_blackthorn_scar_d70",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1861,
+   "z": 711,
+   "yaw": 5.23,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_113",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1224,
+   "z": 1799,
+   "yaw": 2.59,
+   "radius": 6,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_8",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1425,
+   "z": 1784,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1375,
+     1783
+    ],
+    [
+     1423,
+     1725
+    ],
+    [
+     1470,
+     1783
+    ],
+    [
+     1421,
+     1830
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s46",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 880,
+   "z": 1760,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_blackthorn_scar_d71",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1539,
+   "z": 787,
+   "yaw": 4.26,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_9",
+   "role": "prospector",
+   "name": "Prospector",
+   "work": "dig",
+   "chatter": [
+    "role.prospector"
+   ],
+   "x": 343,
+   "z": 2008,
+   "yaw": 0.56,
+   "radius": 6,
+   "path": [
+    [
+     336,
+     2022
+    ],
+    [
+     324,
+     1991
+    ],
+    [
+     361,
+     2003
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_114",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1621,
+   "z": 288,
+   "yaw": 0.16,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_blackthorn_scar_d72",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 913,
+   "z": 983,
+   "yaw": 1.36,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_115",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 369,
+   "z": 1327,
+   "yaw": 2.96,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s47",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1792,
+   "z": 1696,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_116",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 671,
+   "z": 992,
+   "yaw": 4.17,
+   "radius": 6,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d73",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1790,
+   "z": 829,
+   "yaw": 3.74,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d74",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1708,
+   "z": 468,
+   "yaw": 1.49,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d75",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1055,
+   "z": 495,
+   "yaw": 4.95,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s48",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 1280,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d76",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 682,
+   "z": 816,
+   "yaw": 3.89,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_10",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 1591,
+   "z": 41,
+   "yaw": 0.47,
+   "radius": 6,
+   "path": [
+    [
+     1601,
+     49
+    ],
+    [
+     1582,
+     42
+    ],
+    [
+     1591,
+     30
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_117",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1311,
+   "z": 257,
+   "yaw": 1.24,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s49",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 586,
+   "z": 414,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_blackthorn_scar_d77",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 2007,
+   "z": 647,
+   "yaw": 2.32,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_118",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 240,
+   "z": 1816,
+   "yaw": 1.58,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_119",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1998,
+   "z": 1223,
+   "yaw": 5.13,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d78",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 202,
+   "z": 543,
+   "yaw": 6.23,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_120",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 41,
+   "z": 1520,
+   "yaw": 3.65,
+   "radius": 5,
+   "levelBase": 9
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d79",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 408,
+   "z": 41,
+   "yaw": 2.11,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_121",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 347,
+   "z": 577,
+   "yaw": 1.27,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_122",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 946,
+   "z": 215,
+   "yaw": 1.55,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_123",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 96,
+   "z": 1904,
+   "yaw": 3.12,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s50",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1289,
+   "z": 1552,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_124",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1292,
+   "z": 1079,
+   "yaw": 3.74,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_blackthorn_scar_d80",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 271,
+   "z": 1529,
+   "yaw": 3.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_125",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 128,
+   "z": 1505,
+   "yaw": 0.34,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s51",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 185,
+   "z": 1559,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_126",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1320,
+   "z": 72,
+   "yaw": 3.02,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_11",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 1184,
+   "z": 1649,
+   "yaw": 4.77,
+   "radius": 6,
+   "path": [
+    [
+     1185,
+     1657
+    ],
+    [
+     1178,
+     1645
+    ],
+    [
+     1189,
+     1646
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_127",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1136,
+   "z": 1744,
+   "yaw": 4.25,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s52",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 489,
+   "z": 2007,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_blackthorn_scar_d81",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 1952,
+   "z": 184,
+   "yaw": 1.48,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_128",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 510,
+   "z": 819,
+   "yaw": 1.14,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s53",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 671,
+   "z": 1831,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d82",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1600,
+   "z": 1239,
+   "yaw": 5.09,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_9",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 544,
+   "z": 1816,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     501,
+     1783
+    ],
+    [
+     558,
+     1759
+    ],
+    [
+     603,
+     1849
+    ],
+    [
+     512,
+     1857
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d83",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1449,
+   "z": 240,
+   "yaw": 1.65,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d84",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1248,
+   "z": 840,
+   "yaw": 3.17,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d85",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 777,
+   "z": 1916,
+   "yaw": 0.54,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s54",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 152,
+   "z": 1425,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_blackthorn_scar_d86",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1416,
+   "z": 1000,
+   "yaw": 4.84,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_129",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1272,
+   "z": 134,
+   "yaw": 5.17,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_130",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1700,
+   "z": 968,
+   "yaw": 3.12,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_131",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 33,
+   "z": 131,
+   "yaw": 1.6,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_blackthorn_scar_d87",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1709,
+   "z": 2007,
+   "yaw": 1.82,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_132",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 400,
+   "z": 1871,
+   "yaw": 5.02,
+   "radius": 6,
+   "levelBase": 9
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d88",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 248,
+   "z": 968,
+   "yaw": 2.54,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_blackthorn_scar_d89",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1548,
+   "z": 377,
+   "yaw": 5.57,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_133",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1795,
+   "z": 134,
+   "yaw": 1.02,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d90",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1528,
+   "z": 1360,
+   "yaw": 3.75,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s55",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 448,
+   "z": 1184,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_134",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1921,
+   "z": 40,
+   "yaw": 2.97,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d91",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 352,
+   "z": 846,
+   "yaw": 5.82,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d92",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 539,
+   "z": 99,
+   "yaw": 2.67,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_135",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 593,
+   "z": 1937,
+   "yaw": 0.13,
+   "radius": 5,
+   "levelBase": 9
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d93",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 560,
+   "z": 881,
+   "yaw": 5.39,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_136",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1895,
+   "z": 968,
+   "yaw": 5.62,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_10",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1248,
+   "z": 920,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1251,
+     995
+    ],
+    [
+     1184,
+     909
+    ],
+    [
+     1261,
+     864
+    ],
+    [
+     1309,
+     924
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d94",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1290,
+   "z": 786,
+   "yaw": 5.82,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d95",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1602,
+   "z": 843,
+   "yaw": 1.45,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_137",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1937,
+   "z": 1664,
+   "yaw": 2.86,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d96",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1793,
+   "z": 1296,
+   "yaw": 6.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s56",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1720,
+   "z": 1736,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d97",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1472,
+   "z": 1240,
+   "yaw": 1.97,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d98",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1744,
+   "z": 1447,
+   "yaw": 1.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s57",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1665,
+   "z": 1834,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_138",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1966,
+   "z": 1101,
+   "yaw": 4.47,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d99",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1450,
+   "z": 1096,
+   "yaw": 1.09,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_139",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 840,
+   "z": 1616,
+   "yaw": 2.55,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d100",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 864,
+   "z": 1944,
+   "yaw": 4.68,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s58",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 577,
+   "z": 1255,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_140",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1368,
+   "z": 1896,
+   "yaw": 2.45,
+   "radius": 6,
+   "levelBase": 9
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_12",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 224,
+   "z": 1399,
+   "yaw": 5.37,
+   "radius": 6,
+   "path": [
+    [
+     218,
+     1395
+    ],
+    [
+     232,
+     1397
+    ],
+    [
+     221,
+     1407
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_141",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 344,
+   "z": 1400,
+   "yaw": 1.16,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s59",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 352,
+   "z": 1072,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d101",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 40,
+   "z": 425,
+   "yaw": 0.39,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_142",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 688,
+   "z": 1423,
+   "yaw": 3.16,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_11",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 297,
+   "z": 1760,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     298,
+     1828
+    ],
+    [
+     239,
+     1762
+    ],
+    [
+     305,
+     1696
+    ],
+    [
+     368,
+     1777
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d102",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1435,
+   "z": 813,
+   "yaw": 1.39,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_143",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 800,
+   "z": 201,
+   "yaw": 3.22,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_blackthorn_scar_d103",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 400,
+   "z": 1464,
+   "yaw": 4.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_144",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 736,
+   "z": 2008,
+   "yaw": 3.76,
+   "radius": 5,
+   "levelBase": 9
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s60",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 983,
+   "z": 1544,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_145",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1920,
+   "z": 387,
+   "yaw": 2.13,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_146",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1864,
+   "z": 1831,
+   "yaw": 0.88,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s61",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1399,
+   "z": 1223,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_147",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 249,
+   "z": 451,
+   "yaw": 2.16,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d104",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1056,
+   "z": 1082,
+   "yaw": 2.85,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_148",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1358,
+   "z": 1649,
+   "yaw": 4.06,
+   "radius": 6,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_149",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 744,
+   "z": 960,
+   "yaw": 2.74,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s62",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1367,
+   "z": 1486,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_blackthorn_scar_d105",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 229,
+   "z": 810,
+   "yaw": 5.19,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_13",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 769,
+   "z": 1104,
+   "yaw": 5.08,
+   "radius": 6,
+   "path": [
+    [
+     725,
+     1132
+    ],
+    [
+     770,
+     1056
+    ],
+    [
+     808,
+     1130
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_150",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 800,
+   "z": 1760,
+   "yaw": 5.08,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_blackthorn_scar_d106",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1801,
+   "z": 2007,
+   "yaw": 5.44,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_151",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1941,
+   "z": 1038,
+   "yaw": 3.86,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s63",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 490,
+   "z": 542,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_152",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 874,
+   "z": 650,
+   "yaw": 6.17,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_12",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 593,
+   "z": 1361,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     578,
+     1323
+    ],
+    [
+     648,
+     1347
+    ],
+    [
+     608,
+     1411
+    ],
+    [
+     551,
+     1385
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_153",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1823,
+   "z": 355,
+   "yaw": 0.37,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d107",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 601,
+   "z": 576,
+   "yaw": 1.7,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s64",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1919,
+   "z": 1266,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_blackthorn_scar_d108",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1912,
+   "z": 648,
+   "yaw": 4.58,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d109",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 955,
+   "z": 808,
+   "yaw": 0.93,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_154",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 2008,
+   "z": 911,
+   "yaw": 1.18,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s65",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1224,
+   "z": 1488,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_155",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 112,
+   "z": 1034,
+   "yaw": 0.08,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_13",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 655,
+   "z": 1488,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     675,
+     1538
+    ],
+    [
+     619,
+     1501
+    ],
+    [
+     638,
+     1455
+    ],
+    [
+     686,
+     1466
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s66",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1600,
+   "z": 1432,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_156",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 625,
+   "z": 1144,
+   "yaw": 2.19,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d110",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 79,
+   "z": 1112,
+   "yaw": 5.89,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_blackthorn_scar_d111",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1305,
+   "z": 706,
+   "yaw": 5.67,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s67",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1696,
+   "z": 1192,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_157",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 448,
+   "z": 408,
+   "yaw": 2.12,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_158",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1137,
+   "z": 832,
+   "yaw": 0.9,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_159",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 940,
+   "z": 625,
+   "yaw": 5.75,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_blackthorn_scar_d112",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 1103,
+   "z": 1904,
+   "yaw": 4.97,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_160",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 91,
+   "z": 637,
+   "yaw": 4.64,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_161",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1289,
+   "z": 2009,
+   "yaw": 2.97,
+   "radius": 6,
+   "levelBase": 9
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d113",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1090,
+   "z": 713,
+   "yaw": 0.57,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_162",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 656,
+   "z": 400,
+   "yaw": 5.22,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d114",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 334,
+   "z": 289,
+   "yaw": 1.42,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d115",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 435,
+   "z": 892,
+   "yaw": 3.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s68",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1945,
+   "z": 1983,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_blackthorn_scar_d116",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1047,
+   "z": 655,
+   "yaw": 0.06,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d117",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 315,
+   "z": 952,
+   "yaw": 1.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s69",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1574,
+   "z": 1592,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_14",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1296,
+   "z": 1920,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1230,
+     1920
+    ],
+    [
+     1304,
+     1860
+    ],
+    [
+     1361,
+     1908
+    ],
+    [
+     1303,
+     1969
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_163",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 248,
+   "z": 1288,
+   "yaw": 0.61,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d118",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 152,
+   "z": 200,
+   "yaw": 6.22,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s70",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1552,
+   "z": 949,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d119",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1186,
+   "z": 748,
+   "yaw": 5.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_14",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 569,
+   "z": 1672,
+   "yaw": 4.41,
+   "radius": 6,
+   "path": [
+    [
+     580,
+     1666
+    ],
+    [
+     569,
+     1685
+    ],
+    [
+     560,
+     1666
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_164",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 234,
+   "z": 1209,
+   "yaw": 3.77,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_165",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 109,
+   "z": 147,
+   "yaw": 0.08,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_blackthorn_scar_d120",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1399,
+   "z": 2009,
+   "yaw": 1.39,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_166",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1857,
+   "z": 1659,
+   "yaw": 5.33,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_167",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1072,
+   "z": 993,
+   "yaw": 0.34,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s71",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1439,
+   "z": 472,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_168",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 2008,
+   "z": 1552,
+   "yaw": 2.51,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d121",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 118,
+   "z": 912,
+   "yaw": 4.66,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_169",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 630,
+   "z": 2008,
+   "yaw": 3.14,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_170",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 440,
+   "z": 288,
+   "yaw": 0.05,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_171",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1784,
+   "z": 495,
+   "yaw": 0.38,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d122",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1662,
+   "z": 575,
+   "yaw": 1.1,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d123",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1936,
+   "z": 1367,
+   "yaw": 4.74,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d124",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 136,
+   "z": 791,
+   "yaw": 0.75,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_172",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 874,
+   "z": 301,
+   "yaw": 4.34,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_15",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 975,
+   "z": 89,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1024,
+     52
+    ],
+    [
+     1014,
+     141
+    ],
+    [
+     907,
+     149
+    ],
+    [
+     928,
+     17
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s72",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1424,
+   "z": 1936,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d125",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 693,
+   "z": 727,
+   "yaw": 0.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_173",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1762,
+   "z": 217,
+   "yaw": 3.29,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d126",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 247,
+   "z": 523,
+   "yaw": 3.73,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s73",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1128,
+   "z": 1552,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d127",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1400,
+   "z": 608,
+   "yaw": 1.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_174",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 511,
+   "z": 352,
+   "yaw": 5.52,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s74",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 511,
+   "z": 1554,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d128",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 481,
+   "z": 1377,
+   "yaw": 2.43,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_16",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 840,
+   "z": 1544,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     855,
+     1626
+    ],
+    [
+     765,
+     1551
+    ],
+    [
+     823,
+     1461
+    ],
+    [
+     887,
+     1520
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d129",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 792,
+   "z": 704,
+   "yaw": 2.84,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d130",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1640,
+   "z": 1521,
+   "yaw": 2.29,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s75",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 192,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_15",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 81,
+   "z": 1790,
+   "yaw": 1.87,
+   "radius": 6,
+   "path": [
+    [
+     88,
+     1793
+    ],
+    [
+     75,
+     1794
+    ],
+    [
+     80,
+     1783
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_175",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1120,
+   "z": 1679,
+   "yaw": 2.02,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d131",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1929,
+   "z": 825,
+   "yaw": 4.44,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d132",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 623,
+   "z": 889,
+   "yaw": 2.83,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d133",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1728,
+   "z": 1296,
+   "yaw": 4.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_blackthorn_scar_d134",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1677,
+   "z": 393,
+   "yaw": 0.43,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s76",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 142,
+   "z": 516,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d135",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1178,
+   "z": 516,
+   "yaw": 0.68,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d136",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 733,
+   "z": 598,
+   "yaw": 3.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d137",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 648,
+   "z": 1903,
+   "yaw": 5.11,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s77",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1631,
+   "z": 1009,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d138",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 874,
+   "z": 528,
+   "yaw": 3.96,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d139",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 995,
+   "z": 504,
+   "yaw": 6.04,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s78",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1732,
+   "z": 1079,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d140",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 953,
+   "z": 558,
+   "yaw": 6.01,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_176",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1570,
+   "z": 285,
+   "yaw": 0.3,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_17",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 920,
+   "z": 1824,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     929,
+     1771
+    ],
+    [
+     993,
+     1826
+    ],
+    [
+     923,
+     1874
+    ],
+    [
+     852,
+     1831
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_177",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1636,
+   "z": 715,
+   "yaw": 4.33,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d141",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1965,
+   "z": 1426,
+   "yaw": 1.35,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_16",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 2009,
+   "z": 1944,
+   "yaw": 1.43,
+   "radius": 6,
+   "path": [
+    [
+     1969,
+     1906
+    ],
+    [
+     2045,
+     1928
+    ],
+    [
+     1987,
+     1997
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d142",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1681,
+   "z": 1128,
+   "yaw": 1.66,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s79",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 472,
+   "z": 1249,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d143",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1464,
+   "z": 1464,
+   "yaw": 2.87,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_178",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1422,
+   "z": 1634,
+   "yaw": 6.15,
+   "radius": 6,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s80",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1863,
+   "z": 1767,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d144",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 752,
+   "z": 1704,
+   "yaw": 3.48,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d145",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1816,
+   "z": 1112,
+   "yaw": 2.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d146",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1396,
+   "z": 1137,
+   "yaw": 0.82,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_blackthorn_scar_d147",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1873,
+   "z": 1946,
+   "yaw": 4.82,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s81",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1474,
+   "z": 686,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_179",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 40,
+   "z": 1368,
+   "yaw": 5.11,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_17",
+   "role": "prospector",
+   "name": "Prospector",
+   "work": "dig",
+   "chatter": [
+    "role.prospector"
+   ],
+   "x": 1278,
+   "z": 1408,
+   "yaw": 4.62,
+   "radius": 6,
+   "path": [
+    [
+     1265,
+     1414
+    ],
+    [
+     1283,
+     1393
+    ],
+    [
+     1294,
+     1421
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_180",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1200,
+   "z": 1151,
+   "yaw": 1.28,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s82",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 408,
+   "z": 720,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d148",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1411,
+   "z": 774,
+   "yaw": 0.78,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_181",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 865,
+   "z": 2006,
+   "yaw": 6.21,
+   "radius": 3,
+   "levelBase": 9
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_182",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 450,
+   "z": 1914,
+   "yaw": 0.12,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_183",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1402,
+   "z": 155,
+   "yaw": 4.6,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_184",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 351,
+   "z": 93,
+   "yaw": 2.21,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d149",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 984,
+   "z": 1976,
+   "yaw": 0.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_185",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 576,
+   "z": 1184,
+   "yaw": 6.17,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s83",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 777,
+   "z": 1816,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_186",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1055,
+   "z": 426,
+   "yaw": 5.08,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_187",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 2008,
+   "z": 39,
+   "yaw": 2.99,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s84",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 270,
+   "z": 1448,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d150",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 687,
+   "z": 1711,
+   "yaw": 2.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_blackthorn_scar_d151",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1127,
+   "z": 112,
+   "yaw": 0.85,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d152",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1312,
+   "z": 1014,
+   "yaw": 1.03,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s85",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1177,
+   "z": 977,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_blackthorn_scar_d153",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 952,
+   "z": 926,
+   "yaw": 4.43,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_18",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1617,
+   "z": 1296,
+   "yaw": 1.03,
+   "radius": 6,
+   "path": [
+    [
+     1665,
+     1322
+    ],
+    [
+     1555,
+     1341
+    ],
+    [
+     1623,
+     1245
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_188",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 824,
+   "z": 1016,
+   "yaw": 0.99,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s86",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 471,
+   "z": 1041,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_blackthorn_scar_d154",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 1534,
+   "z": 2009,
+   "yaw": 6.12,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_189",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1447,
+   "z": 56,
+   "yaw": 2.45,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s87",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 378,
+   "z": 1522,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_190",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 91,
+   "z": 702,
+   "yaw": 5.88,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_191",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1193,
+   "z": 806,
+   "yaw": 3.73,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_192",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 263,
+   "z": 113,
+   "yaw": 2.24,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d155",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 311,
+   "z": 640,
+   "yaw": 2.31,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s88",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1033,
+   "z": 1214,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d156",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 607,
+   "z": 1608,
+   "yaw": 2.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_19",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 160,
+   "z": 1720,
+   "yaw": 4.26,
+   "radius": 6,
+   "path": [
+    [
+     165,
+     1723
+    ],
+    [
+     155,
+     1724
+    ],
+    [
+     159,
+     1714
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_193",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1799,
+   "z": 338,
+   "yaw": 2.43,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s89",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 498,
+   "z": 696,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d157",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1883,
+   "z": 1032,
+   "yaw": 3.33,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s90",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 880,
+   "z": 1697,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d158",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 288,
+   "z": 1096,
+   "yaw": 5.76,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_blackthorn_scar_d159",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 975,
+   "z": 273,
+   "yaw": 0.79,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d160",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1380,
+   "z": 884,
+   "yaw": 0.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s91",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 322,
+   "z": 892,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_194",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 513,
+   "z": 648,
+   "yaw": 5.48,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_195",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 671,
+   "z": 326,
+   "yaw": 2.76,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_blackthorn_scar_d161",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 173,
+   "z": 577,
+   "yaw": 0.58,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_196",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1874,
+   "z": 400,
+   "yaw": 4.98,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d162",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1603,
+   "z": 1054,
+   "yaw": 1.7,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_18",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1512,
+   "z": 1144,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1548,
+     1126
+    ],
+    [
+     1532,
+     1181
+    ],
+    [
+     1477,
+     1172
+    ],
+    [
+     1483,
+     1104
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s92",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 128,
+   "z": 1997,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_197",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1716,
+   "z": 102,
+   "yaw": 3.62,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d163",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 427,
+   "z": 949,
+   "yaw": 4.18,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d164",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 176,
+   "z": 904,
+   "yaw": 2.7,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s93",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1103,
+   "z": 887,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_blackthorn_scar_d165",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 810,
+   "z": 616,
+   "yaw": 2.53,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d166",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 353,
+   "z": 1208,
+   "yaw": 2.47,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d167",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1472,
+   "z": 508,
+   "yaw": 2.86,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_198",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1613,
+   "z": 121,
+   "yaw": 6.2,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_19",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 175,
+   "z": 1039,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     127,
+     1076
+    ],
+    [
+     156,
+     955
+    ],
+    [
+     233,
+     1029
+    ],
+    [
+     204,
+     1094
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_199",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 2008,
+   "z": 168,
+   "yaw": 5.45,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d168",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 241,
+   "z": 701,
+   "yaw": 3.95,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s94",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1616,
+   "z": 1113,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d169",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 502,
+   "z": 1153,
+   "yaw": 2.14,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_20",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 780,
+   "z": 1631,
+   "yaw": 0.91,
+   "radius": 6,
+   "path": [
+    [
+     788,
+     1624
+    ],
+    [
+     779,
+     1642
+    ],
+    [
+     770,
+     1628
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_200",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 39,
+   "z": 1919,
+   "yaw": 2.44,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_201",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1549,
+   "z": 652,
+   "yaw": 5.96,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_blackthorn_scar_d170",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 1567,
+   "z": 1761,
+   "yaw": 2.12,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d171",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1943,
+   "z": 747,
+   "yaw": 5.34,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_202",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 2006,
+   "z": 713,
+   "yaw": 4.89,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_blackthorn_scar_d172",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1262,
+   "z": 699,
+   "yaw": 2.04,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d173",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 320,
+   "z": 1296,
+   "yaw": 1.86,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_blackthorn_scar_d174",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1800,
+   "z": 1432,
+   "yaw": 5.47,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d175",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1481,
+   "z": 1314,
+   "yaw": 1.4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s95",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2000,
+   "z": 987,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_203",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 447,
+   "z": 497,
+   "yaw": 5.53,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_blackthorn_scar_d176",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 304,
+   "z": 1624,
+   "yaw": 4.59,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_blackthorn_scar_d177",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1404,
+   "z": 940,
+   "yaw": 1.58,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_blackthorn_scar_d178",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1504,
+   "z": 1696,
+   "yaw": 2.88,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_204",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 712,
+   "z": 1318,
+   "yaw": 4.32,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d179",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1577,
+   "z": 216,
+   "yaw": 6.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s96",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1752,
+   "z": 1600,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_21",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 1705,
+   "z": 1400,
+   "yaw": 3.59,
+   "radius": 6,
+   "path": [
+    [
+     1710,
+     1394
+    ],
+    [
+     1708,
+     1409
+    ],
+    [
+     1696,
+     1402
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d180",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1731,
+   "z": 283,
+   "yaw": 0.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d181",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1085,
+   "z": 595,
+   "yaw": 0.74,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s97",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 608,
+   "z": 1016,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_blackthorn_scar_d182",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 456,
+   "z": 1464,
+   "yaw": 4.29,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_20",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 72,
+   "z": 992,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     8,
+     1042
+    ],
+    [
+     20,
+     956
+    ],
+    [
+     123,
+     927
+    ],
+    [
+     112,
+     1049
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_205",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1952,
+   "z": 1720,
+   "yaw": 3.7,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_blackthorn_scar_d183",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 1110,
+   "z": 2010,
+   "yaw": 4.53,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s98",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1520,
+   "z": 239,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_206",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 46,
+   "z": 78,
+   "yaw": 1.99,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_22",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 94,
+   "z": 874,
+   "yaw": 0.37,
+   "radius": 6,
+   "path": [
+    [
+     99,
+     872
+    ],
+    [
+     95,
+     881
+    ],
+    [
+     88,
+     872
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d184",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 337,
+   "z": 705,
+   "yaw": 2.49,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s99",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1493,
+   "z": 914,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_blackthorn_scar_d185",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1246,
+   "z": 1609,
+   "yaw": 0.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d186",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 760,
+   "z": 908,
+   "yaw": 5.26,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_21",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 664,
+   "z": 1632,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     650,
+     1709
+    ],
+    [
+     574,
+     1620
+    ],
+    [
+     673,
+     1574
+    ],
+    [
+     724,
+     1662
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s100",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 178,
+   "z": 256,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_blackthorn_scar_d187",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 377,
+   "z": 535,
+   "yaw": 5.75,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d188",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 397,
+   "z": 212,
+   "yaw": 6.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d189",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 231,
+   "z": 1657,
+   "yaw": 2.15,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s101",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    9,
+    10
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1521,
+   "z": 1942,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_blackthorn_scar_d190",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1608,
+   "z": 411,
+   "yaw": 0.73,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d191",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 836,
+   "z": 874,
+   "yaw": 6.05,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s102",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 721,
+   "z": 1208,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d192",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 408,
+   "z": 389,
+   "yaw": 5.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d193",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 166,
+   "z": 417,
+   "yaw": 2.29,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d194",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 591,
+   "z": 785,
+   "yaw": 0.91,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_207",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1550,
+   "z": 494,
+   "yaw": 0.93,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s103",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1008,
+   "z": 1672,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_blackthorn_scar_d195",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1867,
+   "z": 1900,
+   "yaw": 2.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_208",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1423,
+   "z": 1503,
+   "yaw": 3.83,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_23",
+   "role": "prospector",
+   "name": "Prospector",
+   "work": "dig",
+   "chatter": [
+    "role.prospector"
+   ],
+   "x": 114,
+   "z": 1848,
+   "yaw": 5.8,
+   "radius": 6,
+   "path": [
+    [
+     99,
+     1840
+    ],
+    [
+     127,
+     1845
+    ],
+    [
+     114,
+     1861
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d196",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1336,
+   "z": 1120,
+   "yaw": 2.77,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_209",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1433,
+   "z": 706,
+   "yaw": 4.15,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_blackthorn_scar_d197",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 352,
+   "z": 992,
+   "yaw": 2.25,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_210",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 720,
+   "z": 1920,
+   "yaw": 3.08,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s104",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1721,
+   "z": 1786,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_blackthorn_scar_d198",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 557,
+   "z": 951,
+   "yaw": 2.44,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_211",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1371,
+   "z": 80,
+   "yaw": 0.97,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_212",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1874,
+   "z": 189,
+   "yaw": 5.12,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d199",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1583,
+   "z": 894,
+   "yaw": 3.49,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_213",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 637,
+   "z": 494,
+   "yaw": 2.31,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d200",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1674,
+   "z": 889,
+   "yaw": 1.66,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackthorn_scar_24",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 664,
+   "z": 1768,
+   "yaw": 0.15,
+   "radius": 6,
+   "path": [
+    [
+     643,
+     1813
+    ],
+    [
+     622,
+     1719
+    ],
+    [
+     726,
+     1761
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_blackthorn_scar_d201",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 567,
+   "z": 1465,
+   "yaw": 1.59,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s105",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1080,
+   "z": 1175,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d202",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 768,
+   "z": 248,
+   "yaw": 6.02,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d203",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 479,
+   "z": 1680,
+   "yaw": 5.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackthorn_scar_22",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1328,
+   "z": 200,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1295,
+     168
+    ],
+    [
+     1377,
+     148
+    ],
+    [
+     1376,
+     243
+    ],
+    [
+     1296,
+     254
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s106",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1864,
+   "z": 287,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_214",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 465,
+   "z": 788,
+   "yaw": 1.82,
+   "radius": 4,
+   "levelBase": 8
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d204",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1453,
+   "z": 1585,
+   "yaw": 5.15,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_215",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1840,
+   "z": 232,
+   "yaw": 3.26,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s107",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 120,
+   "z": 1152,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_216",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1265,
+   "z": 1703,
+   "yaw": 5.93,
+   "radius": 5,
+   "levelBase": 8
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s108",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1360,
+   "z": 1840,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_217",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1216,
+   "z": 1856,
+   "yaw": 1.81,
+   "radius": 4,
+   "levelBase": 9
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_blackthorn_scar_d205",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 977,
+   "z": 849,
+   "yaw": 0.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_blackthorn_scar_d206",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 408,
+   "z": 1591,
+   "yaw": 3.24,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_blackthorn_scar_d207",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 303,
+   "z": 1184,
+   "yaw": 6.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s109",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    8,
+    9
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1168,
+   "z": 1792,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_218",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 888,
+   "z": 234,
+   "yaw": 4.86,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackthorn_scar_219",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1952,
+   "z": 896,
+   "yaw": 0.75,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackthorn_scar_s110",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 511,
+   "z": 496,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_blackthorn_scar_d208",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 1811,
+   "z": 51,
+   "yaw": 5.57,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_blackthorn_scar_d209",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 885,
+   "z": 732,
+   "yaw": 5.15,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_blackthorn_scar_d210",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1691,
+   "z": 733,
+   "yaw": 0.6,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_blackthorn_scar_d211",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 735,
+   "z": 698,
+   "yaw": 5.34,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_blackthorn_scar_d212",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1133,
+   "z": 718,
+   "yaw": 3.71,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_blackthorn_scar_d213",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1696,
+   "z": 41,
+   "yaw": 4.03,
+   "radius": 3,
    "filler": true
   }
  ],
@@ -1468,133 +10059,158 @@
    "id": "the_thorn_wall",
    "name": "The Thorn Wall",
    "kind": "bespoke",
-   "x": 1114,
+   "x": 1017,
    "z": 1024,
    "yaw": 0,
    "pts": [
     [
-     1146,
+     1049,
      80
     ],
     [
-     1161,
+     1064,
      120
     ],
     [
-     1183,
-     760
+     1078,
+     160
     ],
     [
-     1169,
-     800
+     1129,
+     360
     ],
     [
-     1154,
+     1136,
+     440
+    ],
+    [
+     1137,
+     480
+    ],
+    [
+     1135,
+     520
+    ],
+    [
+     1132,
+     560
+    ],
+    [
+     1119,
+     640
+    ],
+    [
+     1057,
      840
     ],
     [
-     1139,
+     1042,
      880
     ],
     [
-     1123,
+     1026,
      920
     ],
     [
-     1107,
+     1010,
      960
     ],
     [
-     1091,
+     994,
      1000
     ],
     [
-     1076,
+     979,
      1040
     ],
     [
-     1061,
+     964,
      1080
     ],
     [
-     1047,
+     950,
      1120
     ],
     [
-     1034,
+     937,
      1160
     ],
     [
-     1023,
-     1200
-    ],
-    [
-     1014,
-     1240
-    ],
-    [
-     994,
-     1400
-    ],
-    [
-     994,
+     897,
      1440
     ],
     [
-     997,
+     900,
      1480
     ],
     [
-     1001,
+     904,
      1520
     ],
     [
-     1008,
+     911,
      1560
     ],
     [
-     1016,
+     919,
      1600
     ],
     [
-     1027,
+     930,
      1640
     ],
     [
-     1038,
+     941,
      1680
     ],
     [
-     1051,
+     954,
      1720
     ],
     [
-     1065,
+     968,
      1760
     ],
     [
-     1080,
+     983,
      1800
     ],
     [
-     1096,
+     999,
      1840
     ],
     [
-     1112,
+     1015,
      1880
     ],
     [
-     1128,
+     1031,
      1920
     ],
     [
-     1144,
+     1047,
      1960
     ]
    ],
    "where": "a line north to south; gaps where the ground or a road breaks it",
    "needMet": true
   }
+ ],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 219,
+   "wayside": 213,
+   "stray": 110,
+   "roamer": 22,
+   "folk": 24
+  },
+  "openShareCovered": 0.998,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  6,
+  10
  ]
 }

@@ -1,0 +1,835 @@
+{
+ "_doc": "Stream E (play-test 1, P19). Who walks the roads and who works the wilds — data for stream A to run. `kinds` = travelling groups that walk stream E's routes (data/provinces/torbor_downs-routes.json: town to town along B's roads). Each group is a crew of NPCs (`role` = a role id; its bark pool is chatter.json `role.<role>`), optionally with a pack animal or cart (a look only). `fights`: never = runs from danger (walks on, faster), defend = fights back only when hit, hunts = attacks monsters within 25 m of the road and helps players fighting near it. Display names: `{first}` = a given name from data/names/torbor.json `given` (f or m, seeded per traveller), `{family}` = a family name from the same file. `folk` = people who work one spot in the wilds: the placer (tools/place-vignettes.mjs) puts a `folk` placement {role, path} where `places`/`biomes`/`archetypes` fit; they walk a small loop of `loopM` metres, play the `work` animation at each stop, and bark from `chatter`. Pools: data/names/chatter.json. Speeds in metres a second (a player walks ~5).",
+ "rules": {
+  "perRouteKm": 0.6,
+  "maxPerZone": 10,
+  "minSpacingM": 120,
+  "speedMps": 1.4,
+  "waitAtTownMinutes": [
+   2,
+   6
+  ],
+  "night": "Fewer travellers at night: x0.4 of the day count, from kinds with night: true only. Patrols and couriers keep going.",
+  "despawn": "A group despawns at its destination town gate; after waitAtTownMinutes a group of a fitting kind spawns at a random route end. Nobody spawns or despawns within 80 m of a player.",
+  "fight": "never: walks on at x1.5 speed past a fight, cowers if cornered. defend: fights back only when hit, never chases more than 15 m off the road. hunts: attacks hostile monsters within 25 m of its route and joins any fight a player has within 25 m of it; it never leaves the road by more than 40 m. No traveller is attackable by players; monsters may attack anyone (a traveller that falls gets up after 60 s, nobody dies on the road for good).",
+  "pairs": "Two of a crew walking within 4 m may trade a line and a reply (chatter.json `reply`) when a player is within 12 m, at most once a minute per group.",
+  "stop": "A group pauses 5-20 s at a wayside, curio or crossing it passes (look about, sit, drink) — makes the road feel walked, not conveyed."
+ },
+ "kinds": {
+  "merchant_caravan": {
+   "name": "Merchant caravan",
+   "crew": [
+    {
+     "role": "merchant",
+     "count": [
+      1,
+      1
+     ],
+     "name": "{first} {family}, Trader",
+     "armed": false
+    },
+    {
+     "role": "caravan_guard",
+     "count": [
+      1,
+      2
+     ],
+     "name": "Caravan Guard",
+     "armed": true
+    },
+    {
+     "role": "porter",
+     "count": [
+      0,
+      1
+     ],
+     "name": "Porter",
+     "armed": false
+    }
+   ],
+   "beast": "mule",
+   "cart": true,
+   "speedMps": 1.2,
+   "weight": 4,
+   "minRouteM": 600,
+   "day": true,
+   "night": false,
+   "fights": "defend",
+   "chatter": [
+    "role.merchant",
+    "role.caravan_guard",
+    "road.onroute",
+    "road.danger"
+   ],
+   "blurb": "Wheels, mules and a man counting coins he hasn't made yet."
+  },
+  "guard_patrol": {
+   "name": "Road patrol",
+   "crew": [
+    {
+     "role": "guard_patrol",
+     "count": [
+      2,
+      3
+     ],
+     "name": "Patrol Warden",
+     "armed": true
+    }
+   ],
+   "beast": "none",
+   "cart": false,
+   "speedMps": 1.5,
+   "weight": 3,
+   "day": true,
+   "night": true,
+   "fights": "hunts",
+   "chatter": [
+    "role.guard_patrol",
+    "road.danger"
+   ],
+   "blurb": "Two or three of the watch, walking the road so it stays a road."
+  },
+  "pilgrims": {
+   "name": "Pilgrims",
+   "crew": [
+    {
+     "role": "pilgrim",
+     "count": [
+      2,
+      4
+     ],
+     "name": "Pilgrim",
+     "armed": false
+    }
+   ],
+   "beast": "none",
+   "cart": false,
+   "speedMps": 1.2,
+   "weight": 2,
+   "day": true,
+   "night": false,
+   "fights": "never",
+   "chatter": [
+    "role.pilgrim",
+    "road.onroute"
+   ],
+   "blurb": "Barefoot on purpose, which they will tell you about."
+  },
+  "hunters": {
+   "name": "Hunting party",
+   "crew": [
+    {
+     "role": "hunter",
+     "count": [
+      2,
+      3
+     ],
+     "name": "{first} the Hunter",
+     "armed": true
+    }
+   ],
+   "beast": "none",
+   "cart": false,
+   "speedMps": 1.5,
+   "weight": 2,
+   "day": true,
+   "night": true,
+   "fights": "hunts",
+   "chatter": [
+    "role.hunter",
+    "road.danger"
+   ],
+   "blurb": "Bows, snares and a strong opinion about boar."
+  },
+  "courier": {
+   "name": "Courier",
+   "crew": [
+    {
+     "role": "courier",
+     "count": [
+      1,
+      1
+     ],
+     "name": "{first}, Courier",
+     "armed": false
+    }
+   ],
+   "beast": "horse",
+   "cart": false,
+   "speedMps": 1.6,
+   "weight": 2,
+   "day": true,
+   "night": true,
+   "fights": "never",
+   "chatter": [
+    "role.courier",
+    "road.onroute"
+   ],
+   "blurb": "Late, and not stopping to discuss it."
+  },
+  "drover": {
+   "name": "Drover and cattle",
+   "crew": [
+    {
+     "role": "drover",
+     "count": [
+      1,
+      2
+     ],
+     "name": "Drover",
+     "armed": false
+    }
+   ],
+   "beast": "ox",
+   "cart": false,
+   "speedMps": 1.2,
+   "weight": 2,
+   "minRouteM": 800,
+   "day": true,
+   "night": false,
+   "fights": "never",
+   "chatter": [
+    "role.drover",
+    "road.onroute"
+   ],
+   "blurb": "A few head of cattle and someone shouting their names."
+  },
+  "minstrels": {
+   "name": "Travelling minstrels",
+   "crew": [
+    {
+     "role": "minstrel",
+     "count": [
+      2,
+      3
+     ],
+     "name": "{first} the Minstrel",
+     "armed": false
+    }
+   ],
+   "beast": "mule",
+   "cart": true,
+   "speedMps": 1.3,
+   "weight": 1,
+   "day": true,
+   "night": false,
+   "fights": "never",
+   "chatter": [
+    "role.minstrel",
+    "road.onroute"
+   ],
+   "blurb": "A painted cart, a drum, and songs about people who did not pay."
+  },
+  "tinker": {
+   "name": "Tinker",
+   "crew": [
+    {
+     "role": "tinker",
+     "count": [
+      1,
+      1
+     ],
+     "name": "{first} the Tinker",
+     "armed": false
+    }
+   ],
+   "beast": "mule",
+   "cart": false,
+   "speedMps": 1.2,
+   "weight": 2,
+   "day": true,
+   "night": false,
+   "fights": "never",
+   "chatter": [
+    "role.tinker",
+    "road.onroute"
+   ],
+   "blurb": "Pots, pans and a mule that bites."
+  },
+  "refugees": {
+   "name": "Refugees",
+   "crew": [
+    {
+     "role": "refugee",
+     "count": [
+      2,
+      4
+     ],
+     "name": "Refugee",
+     "armed": false
+    }
+   ],
+   "beast": "none",
+   "cart": true,
+   "speedMps": 1.2,
+   "weight": 1,
+   "day": true,
+   "night": true,
+   "fights": "never",
+   "chatter": [
+    "role.refugee",
+    "road.onroute",
+    "road.danger"
+   ],
+   "blurb": "Everything they own on one handcart. They are not going back."
+  },
+  "woodcart": {
+   "name": "Wood cart",
+   "crew": [
+    {
+     "role": "woodcarter",
+     "count": [
+      1,
+      2
+     ],
+     "name": "Woodcarter",
+     "armed": false
+    }
+   ],
+   "beast": "ox",
+   "cart": true,
+   "speedMps": 1.2,
+   "weight": 2,
+   "day": true,
+   "night": false,
+   "fights": "defend",
+   "chatter": [
+    "role.woodcarter",
+    "road.onroute"
+   ],
+   "blurb": "Logs to town, and a slow ox that knows the way better than the driver."
+  },
+  "tax_collector": {
+   "name": "Tax collector",
+   "crew": [
+    {
+     "role": "tax_collector",
+     "count": [
+      1,
+      1
+     ],
+     "name": "{first} {family}, Collector",
+     "armed": false
+    },
+    {
+     "role": "guard_patrol",
+     "count": [
+      2,
+      2
+     ],
+     "name": "Escort",
+     "armed": true
+    }
+   ],
+   "beast": "horse",
+   "cart": false,
+   "speedMps": 1.3,
+   "weight": 1,
+   "minRouteM": 700,
+   "day": true,
+   "night": false,
+   "fights": "defend",
+   "chatter": [
+    "role.tax_collector",
+    "role.guard_patrol"
+   ],
+   "blurb": "The only traveller the brigands and the farmers agree about."
+  },
+  "gravediggers": {
+   "name": "Gravedigger's cart",
+   "crew": [
+    {
+     "role": "gravedigger",
+     "count": [
+      1,
+      2
+     ],
+     "name": "Gravedigger",
+     "armed": false
+    }
+   ],
+   "beast": "mule",
+   "cart": true,
+   "speedMps": 1.2,
+   "weight": 1,
+   "day": true,
+   "night": true,
+   "fights": "never",
+   "chatter": [
+    "role.gravedigger",
+    "recent.grave",
+    "recent.deaths"
+   ],
+   "blurb": "Business is good. Don't ask how good."
+  }
+ },
+ "folk": {
+  "woodcutter": {
+   "name": "Woodcutter",
+   "places": "forest",
+   "biomes": [
+    "temperateForest",
+    "borealForest",
+    "rainforest"
+   ],
+   "archetypes": [],
+   "loopM": [
+    10,
+    25
+   ],
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "wood_pile",
+     "x": 2,
+     "z": 0,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "sawhorse",
+     "x": -2,
+     "z": 1,
+     "yaw": 1.2
+    }
+   ],
+   "weight": 3
+  },
+  "shepherd": {
+   "name": "Shepherd",
+   "places": "field",
+   "biomes": [
+    "grassland",
+    "hills",
+    "shrubland"
+   ],
+   "archetypes": [],
+   "loopM": [
+    30,
+    60
+   ],
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -3,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": -3,
+     "z": 1.5,
+     "yaw": 1.57
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -3,
+     "z": 3,
+     "yaw": 0
+    }
+   ],
+   "weight": 3
+  },
+  "herbalist": {
+   "name": "Herbalist",
+   "places": "any",
+   "biomes": [
+    "temperateForest",
+    "marsh",
+    "grassland",
+    "shrubland",
+    "hills"
+   ],
+   "archetypes": [],
+   "loopM": [
+    15,
+    40
+   ],
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "props": [
+    {
+     "kind": "ground",
+     "id": "mushroom_ring",
+     "x": 1,
+     "z": 1,
+     "yaw": 0
+    }
+   ],
+   "weight": 2
+  },
+  "prospector": {
+   "name": "Prospector",
+   "places": "steep",
+   "biomes": [
+    "hills",
+    "mountains",
+    "badlands"
+   ],
+   "archetypes": [],
+   "loopM": [
+    10,
+    30
+   ],
+   "work": "dig",
+   "chatter": [
+    "role.prospector"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 1.5,
+     "z": 0,
+     "yaw": 0.3
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": -1,
+     "z": 1,
+     "yaw": 0
+    }
+   ],
+   "weight": 2
+  },
+  "charcoal_burner": {
+   "name": "Charcoal burner",
+   "places": "forest",
+   "biomes": [
+    "temperateForest",
+    "borealForest"
+   ],
+   "archetypes": [],
+   "loopM": [
+    8,
+    18
+   ],
+   "work": "watch",
+   "chatter": [
+    "role.charcoal_burner"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "campfire",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 1,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "wood_pile",
+     "x": 3,
+     "z": -1,
+     "yaw": 0.9
+    }
+   ],
+   "weight": 2
+  },
+  "hermit": {
+   "name": "Hermit",
+   "places": "any",
+   "biomes": [],
+   "archetypes": [
+    "wilds",
+    "holy_ground",
+    "pass",
+    "marsh"
+   ],
+   "loopM": [
+    6,
+    15
+   ],
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "fire_ring",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "stone_marker",
+     "x": 2,
+     "z": 1,
+     "yaw": 0.2
+    }
+   ],
+   "weight": 1
+  },
+  "fisher": {
+   "name": "Fisher",
+   "places": "water",
+   "biomes": [
+    "lake",
+    "coast",
+    "beach",
+    "marsh",
+    "grassland"
+   ],
+   "archetypes": [],
+   "loopM": [
+    10,
+    30
+   ],
+   "work": "fish",
+   "chatter": [
+    "role.fisher"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": 1,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "drying_rack",
+     "x": -2,
+     "z": 0,
+     "yaw": 0.5
+    }
+   ],
+   "weight": 2
+  },
+  "hunter_lone": {
+   "name": "Hunter",
+   "places": "forest",
+   "biomes": [
+    "temperateForest",
+    "borealForest",
+    "hills",
+    "savanna",
+    "shrubland"
+   ],
+   "archetypes": [],
+   "loopM": [
+    30,
+    70
+   ],
+   "work": "watch",
+   "chatter": [
+    "role.hunter"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "drying_rack",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.3
+    }
+   ],
+   "weight": 2
+  },
+  "poacher": {
+   "name": "Poacher",
+   "places": "forest",
+   "biomes": [
+    "temperateForest",
+    "borealForest",
+    "shrubland"
+   ],
+   "archetypes": [],
+   "loopM": [
+    20,
+    50
+   ],
+   "work": "gather",
+   "chatter": [
+    "role.poacher"
+   ],
+   "weight": 1
+  },
+  "surveyor": {
+   "name": "Surveyor",
+   "places": "field",
+   "biomes": [],
+   "archetypes": [],
+   "loopM": [
+    30,
+    70
+   ],
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "stone_marker",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "palisade_stake",
+     "x": 3,
+     "z": 0,
+     "yaw": 0
+    }
+   ],
+   "weight": 1
+  },
+  "pilgrim_resting": {
+   "name": "Resting pilgrim",
+   "places": "shrine",
+   "biomes": [],
+   "archetypes": [],
+   "loopM": [
+    4,
+    10
+   ],
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "weight": 2
+  },
+  "scarecrow_maker": {
+   "name": "Scarecrow maker",
+   "places": "field",
+   "biomes": [
+    "grassland",
+    "shrubland",
+    "savanna"
+   ],
+   "archetypes": [
+    "heartland",
+    "frontier",
+    "crown_ring"
+   ],
+   "loopM": [
+    8,
+    20
+   ],
+   "work": "gather",
+   "chatter": [
+    "role.scarecrow_maker"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": 1.5,
+     "z": 0,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -1,
+     "z": 1,
+     "yaw": 0
+    }
+   ],
+   "weight": 1
+  },
+  "beekeeper": {
+   "name": "Beekeeper",
+   "places": "field",
+   "biomes": [
+    "grassland",
+    "shrubland",
+    "temperateForest"
+   ],
+   "archetypes": [],
+   "loopM": [
+    6,
+    15
+   ],
+   "work": "gather",
+   "chatter": [
+    "role.beekeeper"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 1,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 2.2,
+     "z": 0.4,
+     "yaw": 0.3
+    }
+   ],
+   "weight": 1
+  },
+  "gravedigger": {
+   "name": "Gravedigger",
+   "places": "any",
+   "biomes": [],
+   "archetypes": [
+    "ruinfield",
+    "holy_ground",
+    "blight"
+   ],
+   "loopM": [
+    6,
+    15
+   ],
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "stone_marker",
+     "x": 0,
+     "z": 2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "stone_marker",
+     "x": 2,
+     "z": 2,
+     "yaw": 0.1
+    },
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": 1,
+     "z": 0,
+     "yaw": 0
+    }
+   ],
+   "weight": 1
+  }
+ }
+}

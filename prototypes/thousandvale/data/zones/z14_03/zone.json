@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "8e298447",
+  "bakeVersion": 3,
+  "inputHash": "ab30dc1a",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 14,
@@ -169,16 +169,102 @@
     }
   ],
   "spawn": {
-    "x": 372,
-    "z": 856
+    "x": 388,
+    "z": 864
   },
+  "bridges": [
+    {
+      "a": [
+        326.88,
+        1066.34
+      ],
+      "b": [
+        333.57,
+        1083.13
+      ],
+      "h": 46.82,
+      "w": 5.07
+    },
+    {
+      "a": [
+        831.5,
+        1184
+      ],
+      "b": [
+        846.11,
+        1182.47
+      ],
+      "h": 51.376,
+      "w": 6.16
+    },
+    {
+      "a": [
+        846.11,
+        1182.47
+      ],
+      "b": [
+        860.11,
+        1177.95
+      ],
+      "h": 51.376,
+      "w": 5.85
+    },
+    {
+      "a": [
+        860.11,
+        1177.95
+      ],
+      "b": [
+        873.2,
+        1171.1
+      ],
+      "h": 51.376,
+      "w": 4.97
+    },
+    {
+      "a": [
+        376.5,
+        448
+      ],
+      "b": [
+        390.5,
+        448
+      ],
+      "h": 45.121,
+      "w": 4.5
+    },
+    {
+      "a": [
+        617.13,
+        405.01
+      ],
+      "b": [
+        635.18,
+        388.82
+      ],
+      "h": 40.369,
+      "w": 4.97
+    },
+    {
+      "a": [
+        408.54,
+        909.3
+      ],
+      "b": [
+        389.11,
+        863.22
+      ],
+      "h": 43.935,
+      "w": 6
+    }
+  ],
   "summary": {
     "zone": "z14_03",
     "province": "Petbeck Basin",
-    "inputHash": "8e298447",
+    "inputHash": "ab30dc1a",
     "rivers": 4,
-    "wetShare": 0.015,
-    "unwalkableShare": 0.009,
+    "wetShare": 0.014,
+    "unwalkableShare": 0.004,
     "towns": [
       {
         "name": "Redcliff",
@@ -276,18 +362,20 @@
         "overlaps": 0
       }
     ],
-    "roads": 14,
-    "bridges": 6,
-    "scatter": 14719,
+    "roads": 16,
+    "bridges": 5,
+    "paths": 10,
+    "pathMetres": 374,
+    "scatter": 17861,
     "scatterKinds": {
-      "tree_broadleaf": 7875,
-      "bush": 4209,
-      "reed": 1255,
-      "rock_small": 911,
-      "rock_large": 151,
-      "tree_dead": 88,
-      "boulder": 5,
-      "tree_acacia": 225
+      "tree_broadleaf": 8304,
+      "bush": 5923,
+      "reed": 1228,
+      "rock_small": 1625,
+      "rock_large": 347,
+      "tree_dead": 87,
+      "tree_acacia": 341,
+      "boulder": 6
     },
     "sites": [
       "settlement(HUB) town Redcliff 384 864 90",
@@ -301,16 +389,16 @@
       "event event_redcliff  693 955 40"
     ],
     "spawn": {
-      "x": 372,
-      "z": 856
+      "x": 388,
+      "z": 864
     },
-    "placements": 390,
-    "vignettesAvoided": 93
+    "placements": 403,
+    "vignettesAvoided": 662
   },
   "files": {
-    "terrain.bin": 508181,
-    "nav.bin": 31869,
-    "scatter.bin": 117836,
-    "placements.json": 144866
+    "terrain.bin": 509655,
+    "nav.bin": 34678,
+    "scatter.bin": 142972,
+    "placements.json": 167258
   }
 }

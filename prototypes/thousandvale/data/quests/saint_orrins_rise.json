@@ -40,8 +40,8 @@
           "kind": "kill",
           "type": "barrow_hound",
           "count": 6,
-          "where": "the old cloister garth",
-          "text": "Barrow hounds laid back down"
+          "where": "the old cloister garth by the Abbey Wall",
+          "text": "Lay 6 barrow hounds back down"
         }
       ],
       "done": "Thank you. Morning prayers are once again a living-only affair.",
@@ -66,8 +66,8 @@
           "kind": "kill",
           "type": "gallows_owl",
           "count": 5,
-          "where": "around the abbey",
-          "text": "Gallows owls driven off"
+          "where": "around the abbey on Saint Orrin's Rise",
+          "text": "Drive off 5 gallows owls"
         }
       ],
       "done": "The bell rings clean. My ears thank you; my head thanks you more.",
@@ -89,7 +89,8 @@
           "count": 6,
           "from": "cairn_rat",
           "chance": 0.6,
-          "text": "Candle stubs recovered"
+          "text": "Collect 6 candle stubs from cairn rats",
+          "where": "cairn rats around Pilgrim's Halt"
         }
       ],
       "done": "Slightly chewed. The saint won't mind. The saint has seen worse.",
@@ -108,12 +109,14 @@
         {
           "kind": "visit",
           "vignette": "drowned_shrine",
-          "text": "Search the drowned shrine"
+          "text": "Search the Drowned Shrine for the beads",
+          "where": "The Drowned Shrine, on Saint Orrin's Rise"
         },
         {
           "kind": "talk",
           "npc": "abbot_wendel",
-          "text": "Tell Prior Wendel that Nell lives"
+          "text": "Tell Prior Wendel that Nell lives",
+          "where": "Prior Wendel, in Orrinsford"
         }
       ],
       "done": "Not dead! Excellent. That saves a great deal of paperwork.",
@@ -133,19 +136,21 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the lower crypt",
-          "floor": 1
+          "text": "Reach the lower crypt of Saint Orrin's Ossuary",
+          "floor": 1,
+          "where": "Saint Orrin's Ossuary, the dungeon door on the Rise"
         },
         {
           "kind": "clear",
           "dungeon": "door",
           "text": "Defeat what waits at the bottom",
-          "boss": true
+          "boss": true,
+          "where": "the bottom of Saint Orrin's Ossuary"
         }
       ],
       "done": "The saint rests. And so, for the first time this month, do I.",
       "reward": {
-        "xp": 1.0,
+        "xp": 1,
         "gold": 40,
         "item": {
           "tier": "rare",
@@ -164,7 +169,8 @@
           "kind": "killRare",
           "zone": "saint_orrins_rise",
           "slot": 0,
-          "text": "The Rise's rare beast slain"
+          "text": "Hunt down Brother Penance",
+          "where": "roams Saint Orrin's Rise"
         }
       ],
       "done": "Ah, wonderful. Now they'll talk about you instead. Still not the saint.",

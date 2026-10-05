@@ -11,6 +11,7 @@
 import { parseTerrain } from '../rules/terrain-read.js';
 import { standInTerrain } from '../sim/terrain.js';
 import { parseScatter } from '../rules/terrain-read.js';
+import { perf } from './perf.js';
 
 const cache = new Map();
 
@@ -23,11 +24,12 @@ export function loadClientTerrain(key) {
 async function loadZone(key) {
   const res = await fetch(new URL(`../../data/zones/${encodeURIComponent(key)}/terrain.bin`, import.meta.url));
   if (!res.ok) throw new Error('HTTP ' + res.status);
-  const t = parseTerrain(await res.arrayBuffer());
+  const buf = await res.arrayBuffer();
+  const t = perf.span('zone:parse', () => parseTerrain(buf));
   return {
     key, name: t.meta.name || key, reader: t,
     heightAt: t.heightAt, walkable: t.walkable,
-    waterAt: (x, z) => t.waterAt(x, z),
+    waterAt: (x, z) => t.waterAt(x, z), moveAt: t.moveAt ? (x, z) => t.moveAt(x, z) : null,
     slopeDeg: (x, z) => t.slopeAt(x, z),
     biomeKey: (x, z) => t.biomes[t.biomeAt(x, z)]?.key || 'grassland',
     bounds: t.bounds, origin: t.origin, extent: t.extent, res: t.size, step: t.step,
@@ -92,6 +94,7 @@ export function worldZone(T, ox, oz) {
     heightAt: (x, z) => T.heightAt(x - ox, z - oz),
     walkable: (x, z) => T.walkable(x - ox, z - oz),
     waterAt: (x, z) => T.waterAt(x - ox, z - oz),
+    moveAt: T.moveAt ? (x, z) => T.moveAt(x - ox, z - oz) : null,
     slopeDeg: (x, z) => T.slopeDeg(x - ox, z - oz),
     biomeKey: (x, z) => T.biomeKey(x - ox, z - oz),
     bounds: { minX: b.minX + ox, minZ: b.minZ + oz, maxX: b.maxX + ox, maxZ: b.maxZ + oz },

@@ -40,8 +40,15 @@ export class Entity {
   }
   mark(bits) { const d = this.dirty; for (let b = 0; b < BANDS; b++) d[b] |= bits; }
 
-  moveTo(x, z, y) {
+  /**
+   * Move. A DEAD body does not move (play-test 1, P8: corpses — and a fallen player — were seen sliding along the
+   * ground while lying down): anything that pushes a corpse (a knock, a follower's leash, a chase step the rules
+   * left queued) is dropped here, at the one door every move goes through. `force` is for the server itself
+   * (a teleport of a body, e.g. into a graveyard); a respawn revives first and then moves.
+   */
+  moveTo(x, z, y, force = false) {
     if (!Number.isFinite(x) || !Number.isFinite(z)) return;
+    if (this.dead && !force) return;
     const bd = this.room.bounds;
     x = Math.min(bd.maxX, Math.max(bd.minX, x));
     z = Math.min(bd.maxZ, Math.max(bd.minZ, z));
@@ -102,6 +109,7 @@ export class Entity {
   revive(hpFrac = 1) {
     this.dead = false;
     this.setState(STATE.dead, false);
+    this.setState(STATE.combat, false);
     this.setHp(Math.max(1, Math.round(this.hpMax * hpFrac)));
     this.mp = this.mpMax;
     this.anim('idle');
@@ -115,7 +123,7 @@ export class Entity {
   /** The description clients get in `info`. */
   info() {
     const o = { id: this.id, kind: this.kind, name: this.name, level: this.level, hpMax: this.hpMax, team: this.team };
-    if (this.kind === 'player') { o.cls = this.cls; if (this.look) o.look = this.look; }
+    if (this.kind === 'player') { o.cls = this.cls; if (this.look) o.look = this.look; if (this.gear) o.gear = this.gear; }   // gear: what is worn, to draw (P22)
     else if (this.type) o.type = this.type;
     if (this.rank !== 'normal') o.rank = this.rank;
     if ((this.kind === 'object' || this.kind === 'npc') && this.data) {

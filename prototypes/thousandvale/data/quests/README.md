@@ -12,7 +12,8 @@ Torborhold. M2: one file for each of the other 15 zones of Torbor Downs, plus `p
                 "offer", "steps": [ … ], "done", "reward": { "xp", "gold", "item"?: { "tier", "slot" } }, "next"? } ] }
 ```
 
-**Steps** (each has player-facing `text`):
+**Steps** (each has player-facing `text` — an objective, verb first — and `where` — a location hint for the tracker,
+journal and map; P17):
 
 | kind | Fields | Done when |
 |---|---|---|
@@ -52,3 +53,11 @@ Frames fill slots from what exists in the zone copy: `monster`, `vignette`, `set
 Quest NPCs, quest vignettes and treasure steps get coordinates in `data/vignettes/placements/<world zone>.json`
 (`tools/place-vignettes.mjs`). A quest NPC whose `at` is a settlement name stands near that town's square; the names
 are the sheet's, imposed on stream B's settlements via `data/provinces/torbor_downs-places.json`.
+
+## Map marks (`marks/torbor_downs.json`)
+
+Made by `tools/place-vignettes.mjs` (P17): per story quest, `giver` and `steps[i]` = `{ zone, x, z, r }` in WORLD metres
+(an area for kill/collect steps: the nearest camp of that type to the giver). `missing` lists steps with no fixed place
+(kept empty by tests/E/living.test.js). Events (`events.json`) carry `blurb` (what happens), `where` (generated words:
+"Delvers' Hill: in the woods, about 200 m north of Ashhaven") and `map: [{zone, x, z}]`; a zone event's level is capped at
+the level ramp + 2 (`levelAuthored` keeps the written number).

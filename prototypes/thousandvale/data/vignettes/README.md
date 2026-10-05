@@ -45,6 +45,21 @@ dressing from `wayside.json` (a cairn, a milestone, a ribboned tree… props + a
 zone's mix, alternating, tagged `filler: true` — until both the road and the cross-country measure pass.
 `placements/test.json` is the M0 fixture zone (vignettes only): `node tools/place-vignettes.mjs test`.
 
+**The living world (owner play-test P19/P26, `tools/content-living.mjs`):** after the boring-walk fillers, `fillDensity`
+walks an 8 m grid of each zone's reachable open ground and keeps dropping things until no open sample is more than 50 m
+from the edge of something (45 m on roads) — about one thing every ~100 m. Per 32 drops in the open: 14 **curios**
+(`type: 'curio'`, `recipe` = an id in `curios.json`: mini vignettes with props and a note / chest / use, no monsters),
+8 **strays** (`camp` + `stray: true`, 1-3 of the zone's mix), 5 **wayside** dressings, 3 **roaming packs** (`camp` +
+`roam: true` + a walkable `path` loop) and 2 **folk** (`type: 'folk'`: a woodcutter, shepherd, hermit… from
+`data/provinces/travellers.json` with a small `path` and `chatter` pools from `data/names/chatter.json`); on roads mostly
+wayside and curios. No curio twice within 350 m. Every hostile thing takes the **level of its spot** from the level ramp
+(`tools/content-place.mjs` `levelField`: 1 by Torborhold's gate, +1 per ~550 m, never above the zone's band; weaker types
+are placed where the ramp is low). Each file reports `density` (share covered) and `levels` ([lo, hi] it holds).
+Waystones: never two within 60 m; a hub town's stone stands inside its circle, the door's 10-30 m from the door and named
+after the zone's dungeon (P14). Whole-province runs also write `data/provinces/torbor_downs-routes.json` (travellers'
+routes), the `where`/`map`/capped levels in `data/quests/events.json` and `data/quests/marks/torbor_downs.json` (quest map
+marks).
+
 Order after a change: B bakes → `assign-vignettes.mjs` (if recipes/quests changed) → `place-vignettes.mjs` → B re-bakes
 (scatter/nav only).
 
@@ -54,4 +69,7 @@ Order after a change: B bakes → `assign-vignettes.mjs` (if recipes/quests chan
 placements on real ground, banned names. `tests/E/placement.test.js`: every zone's file matches its bake, the floor
 counts, every disc passes the placer's rule AND an independent check against B's road polylines, bridges, plots and
 settlement circles, reachability from the hub, rare loops walkable, spacing, quest/treasure references placed, variety
-and sameness on the placed world, B's sites untouched.
+and sameness on the placed world, B's sites untouched. `tests/E/living.test.js` (play-test 1): builds stream A's real
+layout and checks no duplicate waystones (P14), the level ramp round the start (P26), density measured independently +
+curio/folk/route/chatter references (P19), quest `text`/`where`/marks and no vignette quest asking for its own fight (P17),
+event `where`/`blurb`/`map`.

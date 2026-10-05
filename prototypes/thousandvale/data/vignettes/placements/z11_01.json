@@ -1,11 +1,11 @@
 {
- "_doc": "Stream E. Content placements for world zone z11_01 (E zone 'hollin_pass', Hollin Pass) — tools/place-vignettes.mjs against stream B's bake (terrain 740c92aa). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "_doc": "Stream E. Content placements for world zone z11_01 (E zone 'hollin_pass', Hollin Pass) — tools/place-vignettes.mjs against stream B's bake (terrain da08735f). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
  "zone": "z11_01",
  "sheetZone": "hollin_pass",
  "province": "torbor_downs",
- "terrainHash": "740c92aa",
+ "terrainHash": "da08735f",
  "band": [
-  6,
+  3,
   8
  ],
  "archetype": "pass",
@@ -56,6 +56,24 @@
    "townGap": 300,
    "gap": 60,
    "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
   }
  },
  "mainWalkableShare": 0.927,
@@ -118,7 +136,7 @@
    "z": 521,
    "yaw": 1.96,
    "radius": 20,
-   "level": 6
+   "level": 7
   },
   {
    "type": "farm",
@@ -129,9 +147,9 @@
    "settlement": "Hollin Toll",
    "x": 1787,
    "z": 687,
-   "yaw": -2.75,
+   "yaw": -3.14,
    "radius": 24,
-   "level": 6
+   "level": 5
   },
   {
    "type": "farm",
@@ -144,7 +162,7 @@
    "z": 1513,
    "yaw": -1.96,
    "radius": 24,
-   "level": 6
+   "level": 5
   },
   {
    "type": "cave",
@@ -154,13 +172,29 @@
    "plan": {
     "family": "cave_river",
     "floors": 1,
-    "level": 7
+    "level": 4
    },
    "x": 1558,
    "z": 1961,
    "yaw": 2.75,
    "radius": 10,
-   "level": 7
+   "level": 4
+  },
+  {
+   "type": "cave",
+   "id": "cave_hollin_pass_1",
+   "name": "Beast den",
+   "template": "beast_den",
+   "plan": {
+    "family": "cave_river",
+    "floors": 1,
+    "level": 5
+   },
+   "x": 1591,
+   "z": 1425,
+   "yaw": -1.96,
+   "radius": 10,
+   "level": 5
   },
   {
    "type": "hook",
@@ -172,127 +206,147 @@
    "yaw": 0,
    "radius": 15,
    "where": "beside road_138 (the pass road): stream B cuts the cliff here",
-   "needMet": false
+   "needMet": true
   },
   {
    "type": "vignette",
    "id": "dark_lighthouse",
    "name": "The Dark Lighthouse",
-   "x": 1186,
-   "z": 1243,
-   "yaw": 5.88,
+   "x": 174,
+   "z": 361,
+   "yaw": 2.27,
    "radius": 10,
    "biome": "grassland",
    "biomeFits": false,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
    "id": "goblin_market_stones",
    "name": "The Moonlight Stones",
-   "x": 174,
-   "z": 361,
-   "yaw": 2.71,
+   "x": 777,
+   "z": 1164,
+   "yaw": 3.37,
    "radius": 10,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
   },
   {
    "type": "vignette",
    "id": "hanging_sign_inn",
    "name": "The Shut-Up Inn",
-   "x": 1879,
-   "z": 1287,
-   "yaw": 1.66,
+   "x": 719,
+   "z": 77,
+   "yaw": 0.51,
    "radius": 13,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
    "id": "old_battlefield",
    "name": "The Old Battlefield",
-   "x": 579,
-   "z": 850,
-   "yaw": 2.69,
+   "x": 1463,
+   "z": 60,
+   "yaw": 4.67,
    "radius": 15,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
    "id": "ore_cart_spill",
    "name": "The Runaway Cart",
-   "x": 713,
-   "z": 80,
-   "yaw": 0.09,
+   "x": 1071,
+   "z": 1610,
+   "yaw": 4.5,
    "radius": 10,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 4,
+   "levelCap": 5
   },
   {
    "type": "vignette",
    "id": "pilgrim_footbath",
    "name": "The Footbath of Saint Ida",
-   "x": 1490,
-   "z": 60,
-   "yaw": 2.73,
+   "x": 1272,
+   "z": 1004,
+   "yaw": 4.67,
    "radius": 11,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
   },
   {
    "type": "vignette",
    "id": "quarry_ledge",
    "name": "The Quarry Ledge",
-   "x": 706,
-   "z": 1374,
-   "yaw": 0.05,
+   "x": 583,
+   "z": 666,
+   "yaw": 3.4,
    "radius": 14,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
    "id": "smugglers_beacon",
    "name": "The False Beacon",
-   "x": 62,
-   "z": 1062,
-   "yaw": 1.68,
+   "x": 1964,
+   "z": 1131,
+   "yaw": 0.59,
    "radius": 11,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 4,
+   "levelCap": 5
   },
   {
    "type": "vignette",
    "id": "tinker_wagon",
    "name": "The Tinker's Wagon",
-   "x": 104,
-   "z": 1967,
-   "yaw": 4.25,
+   "x": 161,
+   "z": 1984,
+   "yaw": 2.98,
    "radius": 12,
    "biome": "temperateForest",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
   },
   {
    "type": "vignette",
    "id": "toll_bridge_trolls",
    "name": "The Toll Bridge",
-   "x": 1530,
-   "z": 1016,
-   "yaw": 5.52,
+   "x": 1477,
+   "z": 471,
+   "yaw": 6.11,
    "radius": 11,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
   },
   {
    "type": "camp",
@@ -301,14 +355,14 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1019,
-   "z": 1898,
+   "x": 194,
+   "z": 868,
    "yaw": 0,
    "radius": 10
   },
@@ -319,14 +373,14 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1949,
-   "z": 1688,
+   "x": 1106,
+   "z": 104,
    "yaw": 0,
    "radius": 10
   },
@@ -343,8 +397,8 @@
     2,
     4
    ],
-   "x": 1541,
-   "z": 1438,
+   "x": 383,
+   "z": 60,
    "yaw": 0,
    "radius": 10
   },
@@ -354,15 +408,15 @@
    "monster": "crag_hyena",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1251,
-   "z": 1611,
+   "x": 510,
+   "z": 369,
    "yaw": 0,
    "radius": 10
   },
@@ -373,14 +427,14 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1391,
-   "z": 429,
+   "x": 135,
+   "z": 1223,
    "yaw": 0,
    "radius": 10
   },
@@ -391,14 +445,14 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     4
    ],
-   "x": 792,
-   "z": 680,
+   "x": 108,
+   "z": 1020,
    "yaw": 0,
    "radius": 10
   },
@@ -408,15 +462,15 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    4,
+    5
    ],
    "count": [
     2,
     4
    ],
-   "x": 1618,
-   "z": 1671,
+   "x": 756,
+   "z": 1969,
    "yaw": 0,
    "radius": 10
   },
@@ -426,15 +480,15 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    3,
+    4
    ],
    "count": [
     2,
     4
    ],
-   "x": 551,
-   "z": 1903,
+   "x": 1959,
+   "z": 1692,
    "yaw": 0,
    "radius": 10
   },
@@ -445,14 +499,14 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1402,
-   "z": 1730,
+   "x": 1833,
+   "z": 77,
    "yaw": 0,
    "radius": 10
   },
@@ -462,15 +516,15 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    6,
+    7,
     8
    ],
    "count": [
     2,
     4
    ],
-   "x": 1273,
-   "z": 1444,
+   "x": 145,
+   "z": 616,
    "yaw": 0,
    "radius": 10
   },
@@ -487,8 +541,8 @@
     1,
     2
    ],
-   "x": 1817,
-   "z": 1491,
+   "x": 60,
+   "z": 82,
    "yaw": 0,
    "radius": 10
   },
@@ -498,15 +552,15 @@
    "monster": "ridge_griffin",
    "with": null,
    "level": [
-    7,
-    8
+    5,
+    6
    ],
    "count": [
     1,
     2
    ],
-   "x": 1253,
-   "z": 1764,
+   "x": 1955,
+   "z": 327,
    "yaw": 0,
    "radius": 10
   },
@@ -517,14 +571,14 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     1,
     2
    ],
-   "x": 1417,
-   "z": 1250,
+   "x": 794,
+   "z": 356,
    "yaw": 0,
    "radius": 10
   },
@@ -534,15 +588,15 @@
    "monster": "stone_sentinel",
    "with": null,
    "level": [
-    6,
-    8
+    4,
+    5
    ],
    "count": [
     1,
     2
    ],
-   "x": 1788,
-   "z": 1806,
+   "x": 1219,
+   "z": 1338,
    "yaw": 0,
    "radius": 10
   },
@@ -552,15 +606,15 @@
    "monster": "glacier_maw",
    "with": null,
    "level": [
-    7,
-    8
+    4,
+    5
    ],
    "count": [
     1,
     2
    ],
-   "x": 1112,
-   "z": 146,
+   "x": 1487,
+   "z": 1160,
    "yaw": 0,
    "radius": 10
   },
@@ -570,15 +624,15 @@
    "monster": "glacier_maw",
    "with": null,
    "level": [
-    7,
-    8
+    5,
+    6
    ],
    "count": [
     1,
     2
    ],
-   "x": 1484,
-   "z": 1157,
+   "x": 1882,
+   "z": 355,
    "yaw": 0,
    "radius": 10
   },
@@ -587,81 +641,81 @@
    "id": "rare_old_hookclaw",
    "slot": 0,
    "name": "Old Hookclaw",
-   "x": 1256,
-   "z": 480,
+   "x": 1542,
+   "z": 786,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1302,
-     421
+     1448,
+     774
     ],
     [
-     1361,
-     509
+     1534,
+     682
     ],
     [
-     1282,
-     561
+     1654,
+     746
     ],
     [
-     1193,
-     529
+     1629,
+     819
     ],
     [
-     1205,
-     414
+     1493,
+     903
     ]
    ],
    "respawnMin": [
     20,
     60
    ],
-   "level": 8
+   "level": 7
   },
   {
    "type": "rare",
    "id": "rare_scree_mother",
    "slot": 1,
    "name": "The Scree Mother",
-   "x": 250,
-   "z": 733,
+   "x": 536,
+   "z": 1681,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     291,
-     688
+     575,
+     1737
     ],
     [
-     303,
-     779
+     497,
+     1738
     ],
     [
-     234,
-     776
+     461,
+     1654
     ],
     [
-     184,
-     728
+     563,
+     1628
     ],
     [
-     235,
-     681
+     589,
+     1662
     ]
    ],
    "respawnMin": [
     20,
     60
    ],
-   "level": 8
+   "level": 7
   },
   {
    "type": "waystone",
    "id": "ws_z11_01_hollin_toll",
    "name": "Hollin Toll",
-   "x": 1733.4,
-   "z": 456.4,
+   "x": 1732.4,
+   "z": 559.3,
    "yaw": 0,
    "settlement": "Hollin Toll",
    "radius": 1
@@ -670,8 +724,8 @@
    "type": "waystone",
    "id": "ws_z11_01_scree_end",
    "name": "Scree End",
-   "x": 55.7,
-   "z": 1452,
+   "x": 169.2,
+   "z": 1505.7,
    "yaw": 0,
    "settlement": "Scree End",
    "radius": 1
@@ -680,8 +734,8 @@
    "type": "waystone",
    "id": "ws_z11_01_wolditford",
    "name": "Wolditford",
-   "x": 417.6,
-   "z": 824.6,
+   "x": 435.3,
+   "z": 823.1,
    "yaw": 0,
    "settlement": "Wolditford",
    "radius": 1
@@ -689,12 +743,31 @@
   {
    "type": "waystone",
    "id": "ws_z11_01_door",
-   "name": "Barrow entrance",
-   "x": 1916.7,
-   "z": 601.1,
+   "name": "The Windlass Spire",
+   "x": 1910.4,
+   "z": 550.2,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_door",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1939,
+   "z": 537,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
   },
   {
    "type": "npc",
@@ -702,9 +775,9 @@
    "name": "Tollkeeper Brann",
    "role": "elder",
    "at": "Hollin Toll",
-   "x": 1729.3,
-   "z": 564,
-   "yaw": 3.81,
+   "x": 1730.3,
+   "z": 563,
+   "yaw": 4.75,
    "radius": 1
   },
   {
@@ -713,9 +786,9 @@
    "name": "Isolde the goatherd",
    "role": "farmer",
    "at": "Scree End",
-   "x": 122.2,
-   "z": 1467.1,
-   "yaw": 4.77,
+   "x": 126.6,
+   "z": 1471.2,
+   "yaw": 4.88,
    "radius": 1
   },
   {
@@ -724,9 +797,9 @@
    "name": "Sergeant Kettle",
    "role": "guard",
    "at": "Hollin Toll Fort",
-   "x": 1103.5,
-   "z": 522.4,
-   "yaw": 4.42,
+   "x": 1101.3,
+   "z": 522.9,
+   "yaw": 2.77,
    "radius": 1
   },
   {
@@ -735,9 +808,9 @@
    "name": "Cadoc the climber",
    "role": "scout",
    "at": "Scree End",
-   "x": 123.4,
-   "z": 1471.3,
-   "yaw": 0.68,
+   "x": 122.7,
+   "z": 1466.5,
+   "yaw": 2.42,
    "radius": 1
   },
   {
@@ -748,8 +821,8 @@
    "clue": "carved_arrow",
    "how": null,
    "shimmer": null,
-   "x": 1101.6,
-   "z": 523,
+   "x": 1103.6,
+   "z": 522.2,
    "yaw": 0,
    "where": "fort Hollin Toll Fort",
    "radius": 1
@@ -762,8 +835,8 @@
    "clue": null,
    "how": "chest",
    "shimmer": 15,
-   "x": 1805.7,
-   "z": 449.4,
+   "x": 1940.4,
+   "z": 442.1,
    "yaw": 0,
    "where": "near Hollin Toll",
    "radius": 1
@@ -776,8 +849,8 @@
    "clue": "gravestone",
    "how": null,
    "shimmer": null,
-   "x": 110.2,
-   "z": 1523.1,
+   "x": 91.1,
+   "z": 1518.6,
    "yaw": 0,
    "where": "edge of Scree End",
    "radius": 1
@@ -790,8 +863,8 @@
    "clue": "carved_arrow",
    "how": null,
    "shimmer": null,
-   "x": 1103.9,
-   "z": 520.2,
+   "x": 1101.6,
+   "z": 523,
    "yaw": 0,
    "where": "fort Hollin Toll Fort",
    "radius": 1
@@ -804,21 +877,21 @@
    "clue": null,
    "how": "dig",
    "shimmer": 15,
-   "x": 1398,
-   "z": 1833,
+   "x": 1761,
+   "z": 1854,
    "yaw": 0,
    "where": "secluded",
    "radius": 1
   },
   {
    "type": "wayside",
-   "id": "cairn_hollin_pass_0",
-   "kind": "cairn",
-   "name": "Cairn",
-   "x": 340,
-   "z": 40,
-   "yaw": 4.07,
-   "radius": 4,
+   "id": "ribbon_tree_hollin_pass_0",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 920,
+   "z": 840,
+   "yaw": 4.82,
+   "radius": 5,
    "filler": true
   },
   {
@@ -827,28 +900,28 @@
    "monster": "frost_stalker",
    "with": null,
    "level": [
-    6,
-    8
+    5,
+    6
    ],
    "count": [
     2,
     3
    ],
-   "x": 548,
-   "z": 396,
+   "x": 472,
+   "z": 1280,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cold_campfire_hollin_pass_2",
-   "kind": "cold_campfire",
-   "name": "Cold Campfire",
-   "x": 1866,
-   "z": 43,
-   "yaw": 1.23,
-   "radius": 4,
+   "id": "league_stone_hollin_pass_2",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1243,
+   "z": 1885,
+   "yaw": 5.6,
+   "radius": 3,
    "filler": true
   },
   {
@@ -857,28 +930,28 @@
    "monster": "crag_hyena",
    "with": null,
    "level": [
-    7,
-    8
+    4,
+    5
    ],
    "count": [
     2,
     3
    ],
-   "x": 884,
-   "z": 1052,
+   "x": 1439,
+   "z": 1703,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "drying_rack_camp_hollin_pass_4",
-   "kind": "drying_rack_camp",
-   "name": "Hunter's Rack",
-   "x": 407,
-   "z": 1244,
-   "yaw": 0.59,
-   "radius": 4,
+   "id": "toll_stone_hollin_pass_4",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1896,
+   "z": 1412,
+   "yaw": 1.94,
+   "radius": 3,
    "filler": true
   },
   {
@@ -887,28 +960,28 @@
    "monster": "ironback_beetle",
    "with": null,
    "level": [
-    6,
-    8
+    5,
+    6
    ],
    "count": [
     2,
     3
    ],
-   "x": 1952,
-   "z": 976,
+   "x": 456,
+   "z": 1960,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "standing_stone_hollin_pass_6",
-   "kind": "standing_stone",
-   "name": "Standing Stone",
-   "x": 2023,
-   "z": 1992,
-   "yaw": 5.55,
-   "radius": 4,
+   "id": "league_stone_hollin_pass_6",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1720,
+   "z": 1012,
+   "yaw": 3.24,
+   "radius": 3,
    "filler": true
   },
   {
@@ -917,28 +990,28 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    5,
+    6
    ],
    "count": [
     2,
     3
    ],
-   "x": 60,
-   "z": 95,
+   "x": 953,
+   "z": 1371,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "lost_signpost_hollin_pass_8",
-   "kind": "lost_signpost",
-   "name": "Lost Signpost",
-   "x": 844,
-   "z": 344,
-   "yaw": 1.61,
-   "radius": 3,
+   "id": "roadside_grave_hollin_pass_8",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1024,
+   "z": 1084,
+   "yaw": 1.08,
+   "radius": 4,
    "filler": true
   },
   {
@@ -947,28 +1020,28 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    6,
-    8
+    4,
+    5
    ],
    "count": [
     2,
     3
    ],
-   "x": 496,
-   "z": 1608,
+   "x": 985,
+   "z": 1853,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "broken_wheel_hollin_pass_10",
-   "kind": "broken_wheel",
-   "name": "Broken Wheel",
-   "x": 1061,
-   "z": 819,
-   "yaw": 0.44,
-   "radius": 4,
+   "id": "shrine_niche_hollin_pass_10",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1983,
+   "z": 1975,
+   "yaw": 4.92,
+   "radius": 3,
    "filler": true
   },
   {
@@ -977,27 +1050,27 @@
    "monster": "ridge_griffin",
    "with": null,
    "level": [
-    7,
-    8
+    5,
+    6
    ],
    "count": [
     2,
     3
    ],
-   "x": 633,
-   "z": 1120,
+   "x": 60,
+   "z": 1761,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cold_campfire_hollin_pass_12",
-   "kind": "cold_campfire",
-   "name": "Cold Campfire",
-   "x": 316,
-   "z": 1808,
-   "yaw": 4.31,
+   "id": "cairn_hollin_pass_12",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1272,
+   "z": 309,
+   "yaw": 0.83,
    "radius": 4,
    "filler": true
   },
@@ -1008,27 +1081,27 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 767,
-   "z": 1982,
+   "x": 848,
+   "z": 604,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "milestone_hollin_pass_14",
-   "kind": "milestone",
-   "name": "Milestone",
-   "x": 975,
-   "z": 1393,
-   "yaw": 4.59,
-   "radius": 3,
+   "id": "roadside_grave_hollin_pass_14",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 692,
+   "z": 1396,
+   "yaw": 4.88,
+   "radius": 4,
    "filler": true
   },
   {
@@ -1037,58 +1110,58 @@
    "monster": "glacier_maw",
    "with": null,
    "level": [
-    7,
-    8
+    5,
+    6
    ],
    "count": [
     2,
     3
    ],
-   "x": 60,
-   "z": 572,
+   "x": 1988,
+   "z": 864,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "mushroom_ring_hollin_pass_16",
-   "kind": "mushroom_ring",
-   "name": "Mushroom Ring",
-   "x": 1684,
-   "z": 224,
-   "yaw": 2.38,
-   "radius": 4,
+   "id": "league_stone_hollin_pass_16",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1621,
+   "z": 260,
+   "yaw": 2.51,
+   "radius": 3,
    "filler": true
   },
   {
    "type": "camp",
    "id": "camp_hollin_pass_f17",
-   "monster": "frost_stalker",
+   "monster": "brigand_archer",
    "with": null,
    "level": [
-    6,
-    8
+    3,
+    4
    ],
    "count": [
     2,
     3
    ],
-   "x": 1237,
-   "z": 1007,
+   "x": 1663,
+   "z": 1649,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cold_campfire_hollin_pass_18",
-   "kind": "cold_campfire",
-   "name": "Cold Campfire",
-   "x": 40,
-   "z": 1740,
-   "yaw": 0.13,
-   "radius": 4,
+   "id": "banner_post_hollin_pass_18",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 312,
+   "z": 1764,
+   "yaw": 1.34,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1097,28 +1170,28 @@
    "monster": "crag_hyena",
    "with": null,
    "level": [
-    7,
-    8
+    5,
+    6
    ],
    "count": [
     2,
     3
    ],
-   "x": 1748,
-   "z": 1091,
+   "x": 712,
+   "z": 940,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "milestone_hollin_pass_20",
-   "kind": "milestone",
-   "name": "Milestone",
-   "x": 352,
-   "z": 524,
-   "yaw": 2.83,
-   "radius": 3,
+   "id": "roadside_grave_hollin_pass_20",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 372,
+   "z": 564,
+   "yaw": 1.91,
+   "radius": 4,
    "filler": true
   },
   {
@@ -1127,28 +1200,28 @@
    "monster": "ironback_beetle",
    "with": null,
    "level": [
-    6,
-    8
+    4,
+    5
    ],
    "count": [
     2,
     3
    ],
-   "x": 61,
-   "z": 823,
+   "x": 1760,
+   "z": 1232,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cairn_hollin_pass_22",
-   "kind": "cairn",
-   "name": "Cairn",
-   "x": 1315,
-   "z": 224,
-   "yaw": 2.32,
-   "radius": 4,
+   "id": "fallen_tree_hollin_pass_22",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1124,
+   "z": 764,
+   "yaw": 1.6,
+   "radius": 6,
    "filler": true
   },
   {
@@ -1157,28 +1230,28 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 368,
-   "z": 260,
+   "x": 1012,
+   "z": 304,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "lost_signpost_hollin_pass_24",
-   "kind": "lost_signpost",
-   "name": "Lost Signpost",
-   "x": 1040,
-   "z": 1669,
-   "yaw": 4.32,
-   "radius": 3,
+   "id": "drying_rack_camp_hollin_pass_24",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 324,
+   "z": 1108,
+   "yaw": 0.7,
+   "radius": 4,
    "filler": true
   },
   {
@@ -1187,28 +1260,28 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    6,
-    8
+    4,
+    5
    ],
    "count": [
     2,
     3
    ],
-   "x": 1988,
-   "z": 1474,
+   "x": 1386,
+   "z": 1492,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "standing_stone_hollin_pass_26",
-   "kind": "standing_stone",
-   "name": "Standing Stone",
-   "x": 535,
-   "z": 628,
-   "yaw": 5.23,
-   "radius": 4,
+   "id": "shrine_niche_hollin_pass_26",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 433,
+   "z": 1492,
+   "yaw": 0.68,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1217,28 +1290,28 @@
    "monster": "ridge_griffin",
    "with": null,
    "level": [
-    7,
-    8
+    5,
+    6
    ],
    "count": [
     2,
     3
    ],
-   "x": 926,
-   "z": 60,
+   "x": 568,
+   "z": 1100,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "lost_signpost_hollin_pass_28",
-   "kind": "lost_signpost",
-   "name": "Lost Signpost",
-   "x": 1984,
-   "z": 216,
-   "yaw": 1.14,
-   "radius": 3,
+   "id": "cold_campfire_hollin_pass_28",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 2023,
+   "z": 36,
+   "yaw": 3.01,
+   "radius": 4,
    "filler": true
   },
   {
@@ -1247,27 +1320,27 @@
    "monster": "stone_sentinel",
    "with": null,
    "level": [
-    6,
-    8
+    4,
+    5
    ],
    "count": [
     2,
     3
    ],
-   "x": 192,
-   "z": 1237,
+   "x": 724,
+   "z": 1768,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "lost_signpost_hollin_pass_30",
-   "kind": "lost_signpost",
-   "name": "Lost Signpost",
-   "x": 724,
-   "z": 1776,
-   "yaw": 3.05,
+   "id": "league_stone_hollin_pass_30",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 344,
+   "z": 255,
+   "yaw": 2.69,
    "radius": 3,
    "filler": true
   },
@@ -1277,28 +1350,28 @@
    "monster": "glacier_maw",
    "with": null,
    "level": [
-    7,
-    8
+    5,
+    6
    ],
    "count": [
     2,
     3
    ],
-   "x": 1700,
-   "z": 888,
+   "x": 1304,
+   "z": 572,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "fallen_pillar_hollin_pass_32",
-   "kind": "fallen_pillar",
-   "name": "Fallen Pillar",
-   "x": 1660,
-   "z": 1272,
-   "yaw": 2.54,
-   "radius": 5,
+   "id": "roadside_grave_hollin_pass_32",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 920,
+   "z": 40,
+   "yaw": 6,
+   "radius": 4,
    "filler": true
   },
   {
@@ -1307,28 +1380,28 @@
    "monster": "frost_stalker",
    "with": null,
    "level": [
-    6,
+    7,
     8
    ],
    "count": [
     2,
     3
    ],
-   "x": 716,
-   "z": 499,
+   "x": 548,
+   "z": 176,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "fallen_pillar_hollin_pass_34",
-   "kind": "fallen_pillar",
-   "name": "Fallen Pillar",
-   "x": 516,
-   "z": 112,
-   "yaw": 3.77,
-   "radius": 5,
+   "id": "boundary_stake_hollin_pass_34",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1251,
+   "z": 1680,
+   "yaw": 2.94,
+   "radius": 4,
    "filler": true
   },
   {
@@ -1337,28 +1410,28 @@
    "monster": "crag_hyena",
    "with": null,
    "level": [
-    7,
-    8
+    5,
+    6
    ],
    "count": [
     2,
     3
    ],
-   "x": 1040,
-   "z": 328,
+   "x": 296,
+   "z": 1335,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "ribbon_tree_hollin_pass_36",
-   "kind": "ribbon_tree",
-   "name": "Ribbon Tree",
-   "x": 780,
-   "z": 884,
-   "yaw": 6.09,
-   "radius": 5,
+   "id": "stone_trough_hollin_pass_36",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 668,
+   "z": 500,
+   "yaw": 1.07,
+   "radius": 4,
    "filler": true
   },
   {
@@ -1368,27 +1441,27 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 396,
-   "z": 1440,
+   "x": 624,
+   "z": 761,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "dolmen_hollin_pass_38",
-   "kind": "dolmen",
-   "name": "Dolmen",
-   "x": 1276,
-   "z": 40,
-   "yaw": 5.44,
-   "radius": 5,
+   "id": "banner_post_hollin_pass_38",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 40,
+   "z": 768,
+   "yaw": 2.98,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1397,28 +1470,28 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 1500,
-   "z": 268,
+   "x": 77,
+   "z": 1155,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "lost_signpost_hollin_pass_40",
-   "kind": "lost_signpost",
-   "name": "Lost Signpost",
-   "x": 324,
-   "z": 1081,
-   "yaw": 3.6,
-   "radius": 3,
+   "id": "stone_trough_hollin_pass_40",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 1496,
+   "z": 968,
+   "yaw": 4.96,
+   "radius": 4,
    "filler": true
   },
   {
@@ -1428,32 +1501,234 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 860,
-   "z": 1244,
+   "x": 1437,
+   "z": 252,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "boundary_stake_hollin_pass_42",
-   "kind": "boundary_stake",
-   "name": "Boundary Stakes",
-   "x": 1068,
-   "z": 1092,
-   "yaw": 4.26,
-   "radius": 4,
+   "id": "toll_stone_hollin_pass_42",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1292,
+   "z": 128,
+   "yaw": 3.66,
+   "radius": 3,
    "filler": true
   },
   {
    "type": "camp",
    "id": "camp_hollin_pass_f43",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1658,
+   "z": 64,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_hollin_pass_44",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1180,
+   "z": 1160,
+   "yaw": 2.89,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_f45",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1294,
+   "z": 464,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_hollin_pass_46",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 24,
+   "z": 1930,
+   "yaw": 5.17,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_1",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 224,
+   "z": 40,
+   "yaw": 3.14,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s1",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 336,
+   "z": 408,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_2",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1079,
+   "z": 918,
+   "yaw": 2.14,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_hollin_pass_d1",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 872,
+   "z": 1000,
+   "yaw": 2.87,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_3",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1384,
+   "z": 1320,
+   "yaw": 2.67,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_4",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1400,
+   "z": 1864,
+   "yaw": 5.6,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_5",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1097,
+   "z": 2010,
+   "yaw": 2.98,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_6",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1224,
+   "z": 1496,
+   "yaw": 5.08,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_1",
+   "role": "beekeeper",
+   "name": "Beekeeper",
+   "work": "gather",
+   "chatter": [
+    "role.beekeeper"
+   ],
+   "x": 1824,
+   "z": 864,
+   "yaw": 5.93,
+   "radius": 6,
+   "path": [
+    [
+     1834,
+     859
+    ],
+    [
+     1827,
+     874
+    ],
+    [
+     1814,
+     858
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_7",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 864,
+   "z": 192,
+   "yaw": 4.3,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s2",
    "monster": "ridge_griffin",
    "with": null,
    "level": [
@@ -1464,57 +1739,2468 @@
     2,
     3
    ],
-   "x": 131,
-   "z": 1255,
+   "x": 40,
+   "z": 240,
    "yaw": 0,
-   "radius": 10,
-   "filler": true
+   "radius": 8,
+   "stray": true
   },
   {
    "type": "wayside",
-   "id": "standing_stone_hollin_pass_44",
-   "kind": "standing_stone",
-   "name": "Standing Stone",
-   "x": 1964,
-   "z": 781,
-   "yaw": 2.87,
-   "radius": 4,
+   "id": "toll_stone_hollin_pass_d2",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 295,
+   "z": 719,
+   "yaw": 3.27,
+   "radius": 3,
    "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_8",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1831,
+   "z": 1533,
+   "yaw": 5.94,
+   "radius": 4,
+   "levelBase": 3
   },
   {
    "type": "camp",
-   "id": "camp_hollin_pass_f45",
-   "monster": "stone_sentinel",
+   "id": "camp_hollin_pass_s3",
+   "monster": "ridge_griffin",
    "with": null,
    "level": [
-    6,
-    8
+    5,
+    6
    ],
    "count": [
-    2,
-    3
+    1,
+    2
    ],
-   "x": 1988,
-   "z": 1153,
+   "x": 2009,
+   "z": 704,
    "yaw": 0,
-   "radius": 10,
-   "filler": true
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_9",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 40,
+   "z": 471,
+   "yaw": 0.98,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_10",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1590,
+   "z": 1801,
+   "yaw": 3.22,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_11",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 936,
+   "z": 457,
+   "yaw": 4.48,
+   "radius": 4,
+   "levelBase": 6
   },
   {
    "type": "wayside",
-   "id": "fallen_pillar_hollin_pass_46",
-   "kind": "fallen_pillar",
-   "name": "Fallen Pillar",
-   "x": 1185,
-   "z": 1957,
-   "yaw": 1.4,
+   "id": "beehive_row_hollin_pass_d3",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 2010,
+   "z": 1295,
+   "yaw": 4.33,
    "radius": 5,
    "filler": true
   },
   {
    "type": "camp",
-   "id": "camp_hollin_pass_f47",
-   "monster": "glacier_maw",
+   "id": "camp_hollin_pass_s4",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2011,
+   "z": 1525,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_12",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 919,
+   "z": 2004,
+   "yaw": 3.53,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_2",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 608,
+   "z": 1897,
+   "yaw": 5.16,
+   "radius": 6,
+   "path": [
+    [
+     616,
+     1910
+    ],
+    [
+     590,
+     1897
+    ],
+    [
+     616,
+     1889
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_13",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 201,
+   "z": 193,
+   "yaw": 3.98,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s5",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1000,
+   "z": 664,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_hollin_pass_d4",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 784,
+   "z": 760,
+   "yaw": 0.31,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_14",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1773,
+   "z": 233,
+   "yaw": 2.44,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_15",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1130,
+   "z": 1778,
+   "yaw": 4.82,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s6",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1048,
+   "z": 1241,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_16",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 632,
+   "z": 1248,
+   "yaw": 3.43,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_hollin_pass_d5",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 1335,
+   "z": 2024,
+   "yaw": 4.41,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_17",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1744,
+   "z": 1392,
+   "yaw": 2.04,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s7",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1533,
+   "z": 1558,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_18",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 648,
+   "z": 296,
+   "yaw": 3.68,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_19",
+   "recipe": "cu_pilgrims_rest",
+   "name": "Pilgrim's Rest",
+   "kind": "lore",
+   "x": 1327,
+   "z": 1175,
+   "yaw": 0.22,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s8",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1610,
+   "z": 1274,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_20",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 305,
+   "z": 1911,
+   "yaw": 3,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_hollin_pass_d6",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 944,
+   "z": 1704,
+   "yaw": 3.23,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_21",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 191,
+   "z": 1681,
+   "yaw": 1.09,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_22",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1081,
+   "z": 1457,
+   "yaw": 6.07,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s9",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 687,
+   "z": 1542,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_23",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 2008,
+   "z": 187,
+   "yaw": 2.92,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_24",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1797,
+   "z": 1709,
+   "yaw": 0.15,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_25",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 520,
+   "z": 522,
+   "yaw": 4.81,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s10",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 809,
+   "z": 1313,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_hollin_pass_d7",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 1864,
+   "z": 1016,
+   "yaw": 4.99,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_26",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1635,
+   "z": 1129,
+   "yaw": 0.07,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s11",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 552,
+   "z": 1416,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_27",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1144,
+   "z": 368,
+   "yaw": 2.56,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 951,
+   "z": 1521,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1026,
+     1533
+    ],
+    [
+     944,
+     1572
+    ],
+    [
+     871,
+     1504
+    ],
+    [
+     978,
+     1471
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_28",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 320,
+   "z": 1624,
+   "yaw": 0.69,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_hollin_pass_d8",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1223,
+   "z": 863,
+   "yaw": 3.72,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s12",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 192,
+   "z": 1833,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_29",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 432,
+   "z": 688,
+   "yaw": 2.78,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_3",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 225,
+   "z": 495,
+   "yaw": 3.46,
+   "radius": 6,
+   "path": [
+    [
+     209,
+     487
+    ],
+    [
+     239,
+     489
+    ],
+    [
+     224,
+     507
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_30",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 920,
+   "z": 1176,
+   "yaw": 5.86,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s13",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 841,
+   "z": 1846,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_hollin_pass_d9",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1160,
+   "z": 231,
+   "yaw": 4.78,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_31",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 576,
+   "z": 40,
+   "yaw": 5.51,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_2",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1240,
+   "z": 696,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1218,
+     642
+    ],
+    [
+     1295,
+     657
+    ],
+    [
+     1274,
+     741
+    ],
+    [
+     1197,
+     735
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s14",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2008,
+   "z": 1000,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_32",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1582,
+   "z": 384,
+   "yaw": 1.66,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_hollin_pass_d10",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1400,
+   "z": 1056,
+   "yaw": 2.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_33",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 48,
+   "z": 896,
+   "yaw": 0.7,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s15",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 720,
+   "z": 648,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_34",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1686,
+   "z": 1543,
+   "yaw": 0.55,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_35",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 441,
+   "z": 1056,
+   "yaw": 1.56,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s16",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1851,
+   "z": 2009,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_36",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 40,
+   "z": 1320,
+   "yaw": 0.09,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_hollin_pass_d11",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 1880,
+   "z": 1288,
+   "yaw": 6.13,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_37",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1143,
+   "z": 1040,
+   "yaw": 1.42,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_3",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 984,
+   "z": 160,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1023,
+     199
+    ],
+    [
+     946,
+     212
+    ],
+    [
+     936,
+     129
+    ],
+    [
+     1012,
+     120
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s17",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1432,
+   "z": 599,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_38",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1712,
+   "z": 344,
+   "yaw": 0.26,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_4",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 40,
+   "z": 1632,
+   "yaw": 1.68,
+   "radius": 6,
+   "path": [
+    [
+     20,
+     1624
+    ],
+    [
+     59,
+     1617
+    ],
+    [
+     41,
+     1651
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_39",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 745,
+   "z": 215,
+   "yaw": 1.34,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s18",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 409,
+   "z": 1840,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_hollin_pass_d12",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 792,
+   "z": 486,
+   "yaw": 1.9,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_40",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1560,
+   "z": 152,
+   "yaw": 5.16,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s19",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 200,
+   "z": 1112,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_41",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 160,
+   "z": 744,
+   "yaw": 4.72,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_4",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1616,
+   "z": 945,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1570,
+     988
+    ],
+    [
+     1541,
+     892
+    ],
+    [
+     1639,
+     892
+    ],
+    [
+     1656,
+     992
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_42",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1384,
+   "z": 369,
+   "yaw": 6.13,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_hollin_pass_d13",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1888,
+   "z": 192,
+   "yaw": 5.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s20",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 584,
+   "z": 968,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_43",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 688,
+   "z": 1064,
+   "yaw": 4.18,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_5",
+   "role": "charcoal_burner",
+   "name": "Charcoal burner",
+   "work": "watch",
+   "chatter": [
+    "role.charcoal_burner"
+   ],
+   "x": 359,
+   "z": 1224,
+   "yaw": 5.33,
+   "radius": 6,
+   "path": [
+    [
+     359,
+     1216
+    ],
+    [
+     366,
+     1224
+    ],
+    [
+     353,
+     1233
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_hollin_pass_d14",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1338,
+   "z": 1795,
+   "yaw": 0.7,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s21",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1510,
+   "z": 1322,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_hollin_pass_d15",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1792,
+   "z": 1113,
+   "yaw": 1.66,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_hollin_pass_d16",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1344,
+   "z": 1608,
+   "yaw": 5.75,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_44",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1213,
+   "z": 41,
+   "yaw": 2.99,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s22",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1375,
+   "z": 938,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_45",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1158,
+   "z": 1876,
+   "yaw": 1.64,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_hollin_pass_d17",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 336,
+   "z": 992,
+   "yaw": 4.66,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_46",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1905,
+   "z": 759,
+   "yaw": 2.64,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_hollin_pass_d18",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1541,
+   "z": 1673,
+   "yaw": 4.29,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s23",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 896,
+   "z": 720,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_47",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 424,
+   "z": 176,
+   "yaw": 1.42,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_hollin_pass_d19",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 1455,
+   "z": 1982,
+   "yaw": 2.71,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s24",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 322,
+   "z": 1456,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_48",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 831,
+   "z": 1720,
+   "yaw": 0.56,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_hollin_pass_d20",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 2008,
+   "z": 1406,
+   "yaw": 6.2,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_49",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 56,
+   "z": 360,
+   "yaw": 2.43,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_5",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 807,
+   "z": 873,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     830,
+     839
+    ],
+    [
+     855,
+     908
+    ],
+    [
+     767,
+     904
+    ],
+    [
+     768,
+     847
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s25",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 984,
+   "z": 977,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_50",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 416,
+   "z": 1384,
+   "yaw": 0.29,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_6",
+   "role": "charcoal_burner",
+   "name": "Charcoal burner",
+   "work": "watch",
+   "chatter": [
+    "role.charcoal_burner"
+   ],
+   "x": 1664,
+   "z": 1890,
+   "yaw": 6.13,
+   "radius": 6,
+   "path": [
+    [
+     1653,
+     1895
+    ],
+    [
+     1663,
+     1878
+    ],
+    [
+     1674,
+     1892
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_51",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 728,
+   "z": 1650,
+   "yaw": 3.56,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s26",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1097,
+   "z": 1344,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_hollin_pass_d21",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 304,
+   "z": 144,
+   "yaw": 5.6,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_52",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 263,
+   "z": 617,
+   "yaw": 5.07,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s27",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 176,
+   "z": 1336,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_53",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1016,
+   "z": 784,
+   "yaw": 2.18,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_6",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 352,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     361,
+     1968
+    ],
+    [
+     412,
+     2025
+    ],
+    [
+     352,
+     2047
+    ],
+    [
+     305,
+     2008
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_54",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 624,
+   "z": 401,
+   "yaw": 2.93,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_hollin_pass_d22",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 473,
+   "z": 1159,
+   "yaw": 3.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s28",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 656,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_55",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 984,
+   "z": 553,
+   "yaw": 1.68,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_7",
+   "role": "poacher",
+   "name": "Poacher",
+   "work": "gather",
+   "chatter": [
+    "role.poacher"
+   ],
+   "x": 1312,
+   "z": 1408,
+   "yaw": 5.52,
+   "radius": 6,
+   "path": [
+    [
+     1330,
+     1439
+    ],
+    [
+     1276,
+     1419
+    ],
+    [
+     1331,
+     1377
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_56",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1041,
+   "z": 416,
+   "yaw": 1.41,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s29",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 903,
+   "z": 336,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_hollin_pass_d23",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1480,
+   "z": 1431,
+   "yaw": 2.35,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_57",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 570,
+   "z": 2009,
+   "yaw": 1.95,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_7",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 312,
+   "z": 825,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     264,
+     851
+    ],
+    [
+     276,
+     771
+    ],
+    [
+     368,
+     804
+    ],
+    [
+     329,
+     874
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s30",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 424,
+   "z": 472,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_58",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1535,
+   "z": 571,
+   "yaw": 2.03,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_hollin_pass_d24",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1184,
+   "z": 1600,
+   "yaw": 2.02,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_59",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1944,
+   "z": 104,
+   "yaw": 2.28,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s31",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1494,
+   "z": 1833,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_60",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 792,
+   "z": 1424,
+   "yaw": 2.12,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_61",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1391,
+   "z": 152,
+   "yaw": 0.96,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s32",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1680,
+   "z": 176,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_62",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1343,
+   "z": 38,
+   "yaw": 1.65,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_hollin_pass_d25",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 480,
+   "z": 264,
+   "yaw": 3.12,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_63",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1112,
+   "z": 658,
+   "yaw": 0.33,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_64",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 575,
+   "z": 1520,
+   "yaw": 0.74,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s33",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1919,
+   "z": 1583,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_65",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 832,
+   "z": 96,
+   "yaw": 1.6,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_66",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1231,
+   "z": 1784,
+   "yaw": 0.87,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_67",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1032,
+   "z": 1751,
+   "yaw": 1.88,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s34",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 513,
+   "z": 753,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_hollin_pass_d26",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 236,
+   "z": 1247,
+   "yaw": 2.73,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_68",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 592,
+   "z": 864,
+   "yaw": 3.09,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_69",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1185,
+   "z": 1946,
+   "yaw": 3.06,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_70",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1153,
+   "z": 1254,
+   "yaw": 3.57,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_8",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1488,
+   "z": 353,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1425,
+     391
+    ],
+    [
+     1480,
+     284
+    ],
+    [
+     1548,
+     324
+    ],
+    [
+     1501,
+     435
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_71",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1874,
+   "z": 1184,
+   "yaw": 1.45,
+   "radius": 7,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_hollin_pass_d27",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 237,
+   "z": 1014,
+   "yaw": 2.17,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s35",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 488,
+   "z": 88,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_72",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 258,
+   "z": 296,
+   "yaw": 3.33,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_8",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 409,
+   "z": 336,
+   "yaw": 2.23,
+   "radius": 6,
+   "path": [
+    [
+     422,
+     376
+    ],
+    [
+     378,
+     324
+    ],
+    [
+     431,
+     318
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_73",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 658,
+   "z": 170,
+   "yaw": 5.83,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s36",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1320,
+   "z": 224,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_hollin_pass_d28",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 720,
+   "z": 1871,
+   "yaw": 5.77,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_74",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1248,
+   "z": 1232,
+   "yaw": 3.27,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_9",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 96,
+   "z": 1863,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     153,
+     1918
+    ],
+    [
+     66,
+     1934
+    ],
+    [
+     22,
+     1834
+    ],
+    [
+     117,
+     1806
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s37",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 793,
+   "z": 1054,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_75",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 902,
+   "z": 1278,
+   "yaw": 6.01,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_hollin_pass_d29",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1419,
+   "z": 1593,
+   "yaw": 1.89,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_76",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 1356,
+   "z": 1911,
+   "yaw": 1.6,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s38",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1185,
+   "z": 952,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_77",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1190,
+   "z": 456,
+   "yaw": 0.09,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s39",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1396,
+   "z": 1232,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_78",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 672,
+   "z": 1160,
+   "yaw": 5.45,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_hollin_pass_d30",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1738,
+   "z": 921,
+   "yaw": 1.45,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_79",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 727,
+   "z": 1256,
+   "yaw": 0.63,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_10",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1256,
+   "z": 1104,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1332,
+     1090
+    ],
+    [
+     1257,
+     1190
+    ],
+    [
+     1193,
+     1093
+    ],
+    [
+     1234,
+     1023
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s40",
+   "monster": "ridge_griffin",
    "with": null,
    "level": [
     7,
@@ -1524,53 +4210,6794 @@
     2,
     3
    ],
-   "x": 687,
-   "z": 263,
+   "x": 138,
+   "z": 266,
    "yaw": 0,
-   "radius": 10,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_80",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1384,
+   "z": 512,
+   "yaw": 0.41,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_9",
+   "role": "charcoal_burner",
+   "name": "Charcoal burner",
+   "work": "watch",
+   "chatter": [
+    "role.charcoal_burner"
+   ],
+   "x": 663,
+   "z": 2010,
+   "yaw": 1.72,
+   "radius": 6,
+   "path": [
+    [
+     673,
+     2012
+    ],
+    [
+     653,
+     2023
+    ],
+    [
+     661,
+     1996
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_81",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1199,
+   "z": 143,
+   "yaw": 4.22,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s41",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1928,
+   "z": 944,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_hollin_pass_d31",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1733,
+   "z": 1591,
+   "yaw": 4.17,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_82",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1088,
+   "z": 1152,
+   "yaw": 3.2,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s42",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 929,
+   "z": 1082,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_83",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 568,
+   "z": 1320,
+   "yaw": 3.1,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_hollin_pass_d32",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1034,
+   "z": 1979,
+   "yaw": 4.65,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_84",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1736,
+   "z": 800,
+   "yaw": 4.29,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_hollin_pass_d33",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1920,
+   "z": 665,
+   "yaw": 0.24,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s43",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 399,
+   "z": 1736,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_85",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1151,
+   "z": 1687,
+   "yaw": 2.52,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_10",
+   "role": "charcoal_burner",
+   "name": "Charcoal burner",
+   "work": "watch",
+   "chatter": [
+    "role.charcoal_burner"
+   ],
+   "x": 512,
+   "z": 1841,
+   "yaw": 2.19,
+   "radius": 6,
+   "path": [
+    [
+     514,
+     1849
+    ],
+    [
+     502,
+     1841
+    ],
+    [
+     516,
+     1833
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_86",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 63,
+   "z": 560,
+   "yaw": 5.63,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s44",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 720,
+   "z": 424,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_hollin_pass_d34",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 2009,
+   "z": 607,
+   "yaw": 4.82,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_87",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 467,
+   "z": 598,
+   "yaw": 4.51,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_11",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1512,
+   "z": 1064,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1498,
+     1133
+    ],
+    [
+     1454,
+     1030
+    ],
+    [
+     1552,
+     1006
+    ],
+    [
+     1584,
+     1088
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s45",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1792,
+   "z": 392,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_88",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 401,
+   "z": 1575,
+   "yaw": 1.95,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_hollin_pass_d35",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 1724,
+   "z": 1783,
+   "yaw": 6.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_89",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 153,
+   "z": 112,
+   "yaw": 1.21,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s46",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 608,
+   "z": 567,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_90",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 543,
+   "z": 1217,
+   "yaw": 0.1,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_91",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1695,
+   "z": 1312,
+   "yaw": 1.83,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s47",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1207,
+   "z": 542,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_92",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 775,
+   "z": 1512,
+   "yaw": 5.41,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_hollin_pass_d36",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 846,
+   "z": 1934,
+   "yaw": 3.5,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_93",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1158,
+   "z": 1414,
+   "yaw": 1.36,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_94",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1378,
+   "z": 1694,
+   "yaw": 2.44,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s48",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 488,
+   "z": 1560,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_95",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1560,
+   "z": 40,
+   "yaw": 1.12,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_11",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1000,
+   "z": 880,
+   "yaw": 5.2,
+   "radius": 6,
+   "path": [
+    [
+     993,
+     853
+    ],
+    [
+     1030,
+     886
+    ],
+    [
+     985,
+     902
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_96",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1137,
+   "z": 1528,
+   "yaw": 4.02,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s49",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1775,
+   "z": 1469,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_hollin_pass_d37",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1767,
+   "z": 146,
+   "yaw": 2.32,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_97",
+   "recipe": "cu_pilgrims_rest",
+   "name": "Pilgrim's Rest",
+   "kind": "lore",
+   "x": 743,
+   "z": 560,
+   "yaw": 0.22,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s50",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 233,
+   "z": 1409,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_98",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1634,
+   "z": 2007,
+   "yaw": 3.83,
+   "radius": 7,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_hollin_pass_d38",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1698,
+   "z": 1470,
+   "yaw": 0.05,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_99",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 912,
+   "z": 1784,
+   "yaw": 3.62,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_hollin_pass_d39",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 112,
+   "z": 824,
+   "yaw": 4.99,
+   "radius": 3,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cairn_hollin_pass_48",
-   "kind": "cairn",
-   "name": "Cairn",
-   "x": 900,
+   "id": "banner_post_hollin_pass_d40",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1089,
+   "z": 1887,
+   "yaw": 0.72,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_100",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 344,
+   "z": 648,
+   "yaw": 4.65,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_12",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 832,
+   "z": 272,
+   "yaw": 6.05,
+   "radius": 6,
+   "path": [
+    [
+     781,
+     265
+    ],
+    [
+     854,
+     236
+    ],
+    [
+     850,
+     315
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_101",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1792,
+   "z": 1326,
+   "yaw": 0.76,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s51",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 857,
+   "z": 424,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_hollin_pass_d41",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 128,
+   "z": 448,
+   "yaw": 3.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_102",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1960,
+   "z": 1224,
+   "yaw": 1.59,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_12",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1672,
+   "z": 1215,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1633,
+     1140
+    ],
+    [
+     1744,
+     1197
+    ],
+    [
+     1679,
+     1293
+    ],
+    [
+     1599,
+     1248
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s52",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 640,
+   "z": 1463,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_hollin_pass_d42",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 30,
+   "z": 1074,
+   "yaw": 3.42,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_103",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 568,
+   "z": 272,
+   "yaw": 1.06,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_hollin_pass_d43",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1263,
+   "z": 1577,
+   "yaw": 0.2,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_104",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 680,
+   "z": 830,
+   "yaw": 0.09,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s53",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1990,
+   "z": 1622,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_105",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 873,
+   "z": 511,
+   "yaw": 0.86,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_106",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 1136,
+   "z": 856,
+   "yaw": 2.22,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s54",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1848,
+   "z": 272,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_107",
+   "recipe": "cu_pilgrims_rest",
+   "name": "Pilgrim's Rest",
+   "kind": "lore",
+   "x": 1576,
+   "z": 480,
+   "yaw": 1.62,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_hollin_pass_d44",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 1927,
+   "z": 1494,
+   "yaw": 1.73,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_108",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1233,
+   "z": 384,
+   "yaw": 2.69,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_13",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1745,
+   "z": 38,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1709,
+     57
+    ],
+    [
+     1717,
+     15
+    ],
+    [
+     1767,
+     12
+    ],
+    [
+     1768,
+     63
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s55",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 127,
+   "z": 929,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_109",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1304,
+   "z": 888,
+   "yaw": 5.75,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_13",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 152,
+   "z": 1607,
+   "yaw": 5.39,
+   "radius": 6,
+   "path": [
+    [
+     142,
+     1618
+    ],
+    [
+     151,
+     1588
+    ],
+    [
+     164,
+     1614
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_hollin_pass_d45",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1622,
+   "z": 1521,
+   "yaw": 4.93,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s56",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2008,
+   "z": 488,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_hollin_pass_d46",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 88,
+   "z": 168,
+   "yaw": 6.21,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_110",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 864,
+   "z": 1384,
+   "yaw": 4.31,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s57",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 504,
+   "z": 1001,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_111",
+   "recipe": "cu_thin_ice",
+   "name": "Thin Ice",
+   "kind": "hazard",
+   "x": 930,
+   "z": 1892,
+   "yaw": 1.45,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_14",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 232,
+   "z": 1752,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     254,
+     1703
+    ],
+    [
+     271,
+     1767
+    ],
+    [
+     217,
+     1799
+    ],
+    [
+     196,
+     1728
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_112",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1063,
+   "z": 1008,
+   "yaw": 0.02,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_hollin_pass_d47",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 665,
+   "z": 1705,
+   "yaw": 2.06,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s58",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1481,
+   "z": 169,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_113",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 802,
+   "z": 681,
+   "yaw": 1.68,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_14",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 305,
+   "z": 1545,
+   "yaw": 2.7,
+   "radius": 6,
+   "path": [
+    [
+     297,
+     1566
+    ],
+    [
+     291,
+     1527
+    ],
+    [
+     325,
+     1544
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_114",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 48,
+   "z": 1240,
+   "yaw": 3.58,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s59",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1304,
+   "z": 1296,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_hollin_pass_d48",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1944,
+   "z": 1343,
+   "yaw": 3.57,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_115",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1520,
+   "z": 1752,
+   "yaw": 2.63,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_15",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 840,
+   "z": 1223,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     792,
+     1199
+    ],
+    [
+     867,
+     1176
+    ],
+    [
+     891,
+     1237
+    ],
+    [
+     815,
+     1260
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s60",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 328,
+   "z": 496,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_116",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 283,
+   "z": 1174,
+   "yaw": 5.02,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_hollin_pass_d49",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 632,
+   "z": 1799,
+   "yaw": 5.54,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_117",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1040,
+   "z": 41,
+   "yaw": 4.28,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s61",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1881,
+   "z": 1096,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_118",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1595,
+   "z": 1741,
+   "yaw": 3.15,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_119",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1101,
+   "z": 295,
+   "yaw": 4.59,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s62",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 208,
+   "z": 679,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_120",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1712,
+   "z": 1097,
+   "yaw": 4.56,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_hollin_pass_d50",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 136,
    "z": 528,
-   "yaw": 5.83,
+   "yaw": 3.44,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_121",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 648,
+   "z": 1328,
+   "yaw": 4.8,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_16",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 560,
+   "z": 448,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     524,
+     452
+    ],
+    [
+     555,
+     402
+    ],
+    [
+     586,
+     436
+    ],
+    [
+     571,
+     479
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s63",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1400,
+   "z": 1144,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_122",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1008,
+   "z": 1169,
+   "yaw": 3.56,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_15",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 256,
+   "z": 384,
+   "yaw": 3.47,
+   "radius": 6,
+   "path": [
+    [
+     264,
+     425
+    ],
+    [
+     205,
+     363
+    ],
+    [
+     295,
+     358
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_123",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1664,
+   "z": 408,
+   "yaw": 2.02,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s64",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 384,
+   "z": 1312,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_hollin_pass_d51",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 400,
+   "z": 1128,
+   "yaw": 3.86,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_124",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1449,
+   "z": 679,
+   "yaw": 1.34,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s65",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 992,
+   "z": 1640,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_125",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1543,
+   "z": 232,
+   "yaw": 2.63,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_126",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1415,
+   "z": 1783,
+   "yaw": 5.22,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_127",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1807,
+   "z": 961,
+   "yaw": 1.75,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_hollin_pass_d52",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 939,
+   "z": 618,
+   "yaw": 1.21,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s66",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1839,
+   "z": 433,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_hollin_pass_d53",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 1362,
+   "z": 295,
+   "yaw": 2.79,
    "radius": 4,
    "filler": true
   },
   {
    "type": "camp",
-   "id": "camp_hollin_pass_f49",
+   "id": "camp_hollin_pass_s67",
    "monster": "frost_stalker",
    "with": null,
    "level": [
     6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 704,
+   "z": 737,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_128",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1535,
+   "z": 1266,
+   "yaw": 3.91,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_16",
+   "role": "hermit",
+   "name": "Hermit",
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "x": 1191,
+   "z": 305,
+   "yaw": 0.77,
+   "radius": 6,
+   "path": [
+    [
+     1195,
+     301
+    ],
+    [
+     1191,
+     311
+    ],
+    [
+     1185,
+     303
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_129",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 112,
+   "z": 1696,
+   "yaw": 4.66,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s68",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
     8
    ],
    "count": [
     2,
     3
    ],
-   "x": 1200,
-   "z": 688,
+   "x": 632,
+   "z": 95,
    "yaw": 0,
-   "radius": 10,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_hollin_pass_d54",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1952,
+   "z": 240,
+   "yaw": 6.03,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_130",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 232,
+   "z": 1936,
+   "yaw": 4.24,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_17",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 967,
+   "z": 383,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     994,
+     346
+    ],
+    [
+     1032,
+     423
+    ],
+    [
+     946,
+     425
+    ],
+    [
+     915,
+     345
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_131",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1931,
+   "z": 1748,
+   "yaw": 2.25,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_132",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1408,
+   "z": 1409,
+   "yaw": 5.6,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_hollin_pass_d55",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 713,
+   "z": 336,
+   "yaw": 3.85,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_133",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1240,
+   "z": 216,
+   "yaw": 3.5,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s69",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1662,
+   "z": 1388,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_134",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1825,
+   "z": 775,
+   "yaw": 6.22,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_hollin_pass_d56",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 860,
+   "z": 2012,
+   "yaw": 1.71,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s70",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1792,
+   "z": 1802,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_135",
+   "recipe": "cu_thin_ice",
+   "name": "Thin Ice",
+   "kind": "hazard",
+   "x": 658,
+   "z": 1616,
+   "yaw": 4.35,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_hollin_pass_d57",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1695,
+   "z": 257,
+   "yaw": 4.36,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_136",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 2009,
+   "z": 784,
+   "yaw": 2.27,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_18",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1048,
+   "z": 600,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1047,
+     645
+    ],
+    [
+     998,
+     595
+    ],
+    [
+     1041,
+     541
+    ],
+    [
+     1108,
+     598
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s71",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 297,
+   "z": 64,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_137",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1033,
+   "z": 1391,
+   "yaw": 2.21,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_17",
+   "role": "hermit",
+   "name": "Hermit",
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "x": 976,
+   "z": 1288,
+   "yaw": 4.94,
+   "radius": 6,
+   "path": [
+    [
+     977,
+     1281
+    ],
+    [
+     981,
+     1291
+    ],
+    [
+     970,
+     1291
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_138",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1576,
+   "z": 1875,
+   "yaw": 5.89,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s72",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 488,
+   "z": 1360,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_hollin_pass_d58",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 1376,
+   "z": 656,
+   "yaw": 4.75,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_139",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1461,
+   "z": 1913,
+   "yaw": 1.56,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s73",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1944,
+   "z": 1048,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_140",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 40,
+   "z": 976,
+   "yaw": 3.46,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_19",
+   "monster": "glacier_maw",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 904,
+   "z": 1640,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     849,
+     1609
+    ],
+    [
+     941,
+     1593
+    ],
+    [
+     953,
+     1665
+    ],
+    [
+     882,
+     1675
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_141",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1466,
+   "z": 1521,
+   "yaw": 1.72,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_hollin_pass_d59",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 328,
+   "z": 1840,
+   "yaw": 2.76,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s74",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1312,
+   "z": 384,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_142",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 37,
+   "z": 2009,
+   "yaw": 4.77,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_18",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 800,
+   "z": 976,
+   "yaw": 5.79,
+   "radius": 6,
+   "path": [
+    [
+     851,
+     963
+    ],
+    [
+     788,
+     1027
+    ],
+    [
+     749,
+     923
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_143",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1908,
+   "z": 38,
+   "yaw": 1.77,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s75",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1823,
+   "z": 1401,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_hollin_pass_d60",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 127,
+   "z": 40,
+   "yaw": 0.28,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_144",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 232,
+   "z": 120,
+   "yaw": 5.25,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_20",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 280,
+   "z": 216,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     300,
+     171
+    ],
+    [
+     318,
+     219
+    ],
+    [
+     271,
+     257
+    ],
+    [
+     226,
+     201
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s76",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1600,
+   "z": 1608,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_145",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 775,
+   "z": 144,
+   "yaw": 6.22,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_hollin_pass_d61",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1414,
+   "z": 878,
+   "yaw": 4.66,
+   "radius": 3,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "mushroom_ring_hollin_pass_50",
-   "kind": "mushroom_ring",
-   "name": "Mushroom Ring",
-   "x": 1676,
-   "z": 40,
-   "yaw": 1.13,
+   "id": "beehive_row_hollin_pass_d62",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 1912,
+   "z": 840,
+   "yaw": 1.9,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_146",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1304,
+   "z": 1512,
+   "yaw": 4.69,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s77",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 112,
+   "z": 689,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_147",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 503,
+   "z": 1480,
+   "yaw": 1.86,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_hollin_pass_d63",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 2009,
+   "z": 429,
+   "yaw": 0.58,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_hollin_pass_d64",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1336,
+   "z": 1717,
+   "yaw": 3.27,
    "radius": 4,
    "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s78",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 240,
+   "z": 1623,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_148",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1792,
+   "z": 1032,
+   "yaw": 1.05,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_hollin_pass_d65",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 735,
+   "z": 1336,
+   "yaw": 2.35,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_149",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 1640,
+   "z": 336,
+   "yaw": 3.81,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_21",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1064,
+   "z": 719,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1085,
+     775
+    ],
+    [
+     1017,
+     751
+    ],
+    [
+     1029,
+     672
+    ],
+    [
+     1114,
+     679
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s79",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1499,
+   "z": 1612,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_150",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1616,
+   "z": 672,
+   "yaw": 5.48,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_hollin_pass_d66",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 200,
+   "z": 969,
+   "yaw": 5.65,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_hollin_pass_d67",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 109,
+   "z": 1097,
+   "yaw": 3.52,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_19",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 1071,
+   "z": 1690,
+   "yaw": 5.61,
+   "radius": 6,
+   "path": [
+    [
+     1053,
+     1705
+    ],
+    [
+     1059,
+     1666
+    ],
+    [
+     1087,
+     1695
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_151",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 369,
+   "z": 727,
+   "yaw": 1.13,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s80",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 720,
+   "z": 1463,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_hollin_pass_d68",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1536,
+   "z": 1479,
+   "yaw": 4.62,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_152",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1776,
+   "z": 313,
+   "yaw": 4.06,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s81",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 385,
+   "z": 1656,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_hollin_pass_d69",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1064,
+   "z": 1815,
+   "yaw": 0.43,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_153",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1280,
+   "z": 813,
+   "yaw": 3.28,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_hollin_pass_d70",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1366,
+   "z": 440,
+   "yaw": 5.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s82",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1102,
+   "z": 184,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_154",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 409,
+   "z": 991,
+   "yaw": 5.17,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_155",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 1559,
+   "z": 1150,
+   "yaw": 2.68,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_156",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 616,
+   "z": 1040,
+   "yaw": 3.37,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s83",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1584,
+   "z": 1344,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_hollin_pass_d71",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 102,
+   "z": 1296,
+   "yaw": 0.96,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_157",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 855,
+   "z": 1096,
+   "yaw": 2.82,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_22",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 801,
+   "z": 1784,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     768,
+     1842
+    ],
+    [
+     755,
+     1765
+    ],
+    [
+     820,
+     1736
+    ],
+    [
+     860,
+     1805
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s84",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 752,
+   "z": 1584,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_158",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 600,
+   "z": 1176,
+   "yaw": 0.23,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_hollin_pass_d72",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1112,
+   "z": 432,
+   "yaw": 3.25,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_159",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 504,
+   "z": 680,
+   "yaw": 5.44,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s85",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 528,
+   "z": 1933,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_160",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1453,
+   "z": 1260,
+   "yaw": 3.66,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_161",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 913,
+   "z": 1440,
+   "yaw": 5.34,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s86",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1351,
+   "z": 1008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_162",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 791,
+   "z": 41,
+   "yaw": 1.26,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_hollin_pass_d73",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 624,
+   "z": 233,
+   "yaw": 2.78,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_163",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 640,
+   "z": 920,
+   "yaw": 5.99,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_hollin_pass_d74",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1362,
+   "z": 2003,
+   "yaw": 3.85,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_164",
+   "recipe": "cu_thin_ice",
+   "name": "Thin Ice",
+   "kind": "hazard",
+   "x": 208,
+   "z": 1184,
+   "yaw": 0.83,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_20",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1144,
+   "z": 40,
+   "yaw": 5.76,
+   "radius": 6,
+   "path": [
+    [
+     1137,
+     60
+    ],
+    [
+     1130,
+     18
+    ],
+    [
+     1164,
+     44
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_165",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 592,
+   "z": 335,
+   "yaw": 6.02,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s87",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 369,
+   "z": 1056,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_hollin_pass_d75",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 985,
+   "z": 1918,
+   "yaw": 5.26,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_166",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 920,
+   "z": 944,
+   "yaw": 6.14,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s88",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 680,
+   "z": 584,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_167",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 945,
+   "z": 775,
+   "yaw": 3.22,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_23",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 624,
+   "z": 1393,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     645,
+     1340
+    ],
+    [
+     688,
+     1439
+    ],
+    [
+     591,
+     1456
+    ],
+    [
+     571,
+     1356
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_168",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 537,
+   "z": 594,
+   "yaw": 0.47,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_hollin_pass_d76",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 279,
+   "z": 552,
+   "yaw": 5.39,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s89",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 207,
+   "z": 793,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_169",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1872,
+   "z": 496,
+   "yaw": 6.2,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_21",
+   "role": "charcoal_burner",
+   "name": "Charcoal burner",
+   "work": "watch",
+   "chatter": [
+    "role.charcoal_burner"
+   ],
+   "x": 256,
+   "z": 1863,
+   "yaw": 2.66,
+   "radius": 6,
+   "path": [
+    [
+     261,
+     1869
+    ],
+    [
+     249,
+     1864
+    ],
+    [
+     258,
+     1854
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_170",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 232,
+   "z": 2008,
+   "yaw": 1.28,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_hollin_pass_d77",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 72,
+   "z": 1371,
+   "yaw": 2.78,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s90",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1184,
+   "z": 808,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_hollin_pass_d78",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 208,
+   "z": 577,
+   "yaw": 4.97,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_171",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1866,
+   "z": 1486,
+   "yaw": 5.24,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_hollin_pass_d79",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1631,
+   "z": 1795,
+   "yaw": 4.95,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s91",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1625,
+   "z": 131,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_172",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1833,
+   "z": 1241,
+   "yaw": 1.54,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_hollin_pass_d80",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1704,
+   "z": 864,
+   "yaw": 4.34,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_173",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 688,
+   "z": 1929,
+   "yaw": 2.3,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s92",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 442,
+   "z": 754,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_174",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 544,
+   "z": 816,
+   "yaw": 4.24,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_175",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 295,
+   "z": 1048,
+   "yaw": 5.75,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s93",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 496,
+   "z": 1096,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_176",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 1919,
+   "z": 1685,
+   "yaw": 2.09,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_hollin_pass_d81",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1862,
+   "z": 632,
+   "yaw": 1.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_177",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 2007,
+   "z": 116,
+   "yaw": 0.9,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_24",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 408,
+   "z": 240,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     441,
+     242
+    ],
+    [
+     405,
+     289
+    ],
+    [
+     375,
+     239
+    ],
+    [
+     416,
+     205
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_178",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1278,
+   "z": 1832,
+   "yaw": 5.97,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_179",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 330,
+   "z": 1697,
+   "yaw": 4.91,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_22",
+   "role": "hunter_lone",
+   "name": "Hunter",
+   "work": "watch",
+   "chatter": [
+    "role.hunter"
+   ],
+   "x": 439,
+   "z": 1216,
+   "yaw": 4.34,
+   "radius": 6,
+   "path": [
+    [
+     498,
+     1218
+    ],
+    [
+     428,
+     1256
+    ],
+    [
+     427,
+     1177
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_180",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 792,
+   "z": 1664,
+   "yaw": 3.3,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s94",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1831,
+   "z": 160,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_hollin_pass_d82",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 2008,
+   "z": 272,
+   "yaw": 2.18,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_181",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1439,
+   "z": 1351,
+   "yaw": 5.95,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s95",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1120,
+   "z": 976,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_182",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1281,
+   "z": 64,
+   "yaw": 1.35,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_25",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 672,
+   "z": 1000,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     737,
+     987
+    ],
+    [
+     664,
+     1067
+    ],
+    [
+     619,
+     995
+    ],
+    [
+     682,
+     937
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_183",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 176,
+   "z": 1040,
+   "yaw": 0.3,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_hollin_pass_d83",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1062,
+   "z": 352,
+   "yaw": 2.86,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s96",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 368,
+   "z": 1895,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_184",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1497,
+   "z": 623,
+   "yaw": 1.3,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_23",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 654,
+   "z": 686,
+   "yaw": 5.57,
+   "radius": 6,
+   "path": [
+    [
+     626,
+     657
+    ],
+    [
+     705,
+     680
+    ],
+    [
+     649,
+     734
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_185",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 40,
+   "z": 832,
+   "yaw": 3.86,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s97",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1871,
+   "z": 1352,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_hollin_pass_d84",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 351,
+   "z": 1393,
+   "yaw": 0.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_186",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 870,
+   "z": 782,
+   "yaw": 0.91,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_26",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1647,
+   "z": 1064,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1664,
+     1015
+    ],
+    [
+     1713,
+     1086
+    ],
+    [
+     1631,
+     1113
+    ],
+    [
+     1584,
+     1022
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s98",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2008,
+   "z": 1072,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_187",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1089,
+   "z": 1081,
+   "yaw": 4.62,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_hollin_pass_d85",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1122,
+   "z": 1948,
+   "yaw": 1.4,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_188",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 945,
+   "z": 281,
+   "yaw": 0.94,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s99",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 994,
+   "z": 490,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_189",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1472,
+   "z": 543,
+   "yaw": 3.23,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_190",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 562,
+   "z": 104,
+   "yaw": 1.16,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s100",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 38,
+   "z": 1573,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_191",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 368,
+   "z": 128,
+   "yaw": 2.58,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_hollin_pass_d86",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 976,
+   "z": 1784,
+   "yaw": 0.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_192",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1255,
+   "z": 927,
+   "yaw": 2.64,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_27",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1530,
+   "z": 96,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1578,
+     75
+    ],
+    [
+     1556,
+     140
+    ],
+    [
+     1484,
+     114
+    ],
+    [
+     1522,
+     44
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_193",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1143,
+   "z": 2011,
+   "yaw": 0.13,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_194",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 112,
+   "z": 328,
+   "yaw": 2.57,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_24",
+   "role": "hunter_lone",
+   "name": "Hunter",
+   "work": "watch",
+   "chatter": [
+    "role.hunter"
+   ],
+   "x": 447,
+   "z": 1785,
+   "yaw": 3.36,
+   "radius": 6,
+   "path": [
+    [
+     434,
+     1829
+    ],
+    [
+     413,
+     1767
+    ],
+    [
+     482,
+     1772
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_195",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 608,
+   "z": 1576,
+   "yaw": 2.8,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s101",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1392,
+   "z": 88,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_hollin_pass_d87",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1198,
+   "z": 1727,
+   "yaw": 4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_196",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1808,
+   "z": 1176,
+   "yaw": 1.59,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s102",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 688,
+   "z": 247,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_197",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 303,
+   "z": 935,
+   "yaw": 4.55,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_28",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1527,
+   "z": 1391,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1553,
+     1343
+    ],
+    [
+     1582,
+     1421
+    ],
+    [
+     1494,
+     1418
+    ],
+    [
+     1484,
+     1370
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_198",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 448,
+   "z": 536,
+   "yaw": 0.36,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_hollin_pass_d88",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 1721,
+   "z": 737,
+   "yaw": 1.69,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s103",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 912,
+   "z": 560,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_199",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1424,
+   "z": 320,
+   "yaw": 6.16,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_25",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1583,
+   "z": 616,
+   "yaw": 6.15,
+   "radius": 6,
+   "path": [
+    [
+     1624,
+     581
+    ],
+    [
+     1582,
+     656
+    ],
+    [
+     1533,
+     594
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_200",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 792,
+   "z": 1904,
+   "yaw": 3.24,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s104",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1600,
+   "z": 200,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_hollin_pass_d89",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 466,
+   "z": 1424,
+   "yaw": 2.12,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_201",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 745,
+   "z": 1104,
+   "yaw": 5.36,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_29",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 408,
+   "z": 623,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     344,
+     601
+    ],
+    [
+     409,
+     547
+    ],
+    [
+     467,
+     630
+    ],
+    [
+     389,
+     697
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s105",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1474,
+   "z": 841,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_202",
+   "recipe": "cu_thin_ice",
+   "name": "Thin Ice",
+   "kind": "hazard",
+   "x": 1268,
+   "z": 1747,
+   "yaw": 2.84,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_hollin_pass_d90",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 816,
+   "z": 544,
+   "yaw": 3.92,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_203",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1729,
+   "z": 409,
+   "yaw": 3.11,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s106",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1944,
+   "z": 169,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_hollin_pass_d91",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 877,
+   "z": 673,
+   "yaw": 0.64,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_204",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 2008,
+   "z": 1185,
+   "yaw": 5.52,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_205",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 504,
+   "z": 2008,
+   "yaw": 2.11,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s107",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1984,
+   "z": 1464,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_hollin_pass_d92",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1627,
+   "z": 437,
+   "yaw": 2.6,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_206",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1862,
+   "z": 929,
+   "yaw": 0.16,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_hollin_pass_d93",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 389,
+   "z": 1446,
+   "yaw": 0.39,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_207",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1870,
+   "z": 704,
+   "yaw": 6.18,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_30",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 143,
+   "z": 1152,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     174,
+     1133
+    ],
+    [
+     166,
+     1190
+    ],
+    [
+     108,
+     1160
+    ],
+    [
+     132,
+     1123
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s108",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2007,
+   "z": 927,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_208",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 2007,
+   "z": 368,
+   "yaw": 3.58,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_26",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 792,
+   "z": 424,
+   "yaw": 5.19,
+   "radius": 6,
+   "path": [
+    [
+     834,
+     396
+    ],
+    [
+     792,
+     461
+    ],
+    [
+     749,
+     410
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_209",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 856,
+   "z": 42,
+   "yaw": 1.33,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s109",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 976,
+   "z": 64,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_hollin_pass_d94",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1888,
+   "z": 128,
+   "yaw": 2.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_210",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1440,
+   "z": 944,
+   "yaw": 5.42,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s110",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 295,
+   "z": 1263,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_211",
+   "recipe": "cu_pilgrims_rest",
+   "name": "Pilgrim's Rest",
+   "kind": "lore",
+   "x": 1522,
+   "z": 1900,
+   "yaw": 0.1,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_31",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1580,
+   "z": 726,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1517,
+     690
+    ],
+    [
+     1614,
+     664
+    ],
+    [
+     1642,
+     750
+    ],
+    [
+     1574,
+     779
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_212",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 480,
+   "z": 152,
+   "yaw": 5.19,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_hollin_pass_d95",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 728,
+   "z": 488,
+   "yaw": 5.25,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s111",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 775,
+   "z": 615,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_213",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 552,
+   "z": 912,
+   "yaw": 1.22,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_27",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1128,
+   "z": 1200,
+   "yaw": 4.06,
+   "radius": 6,
+   "path": [
+    [
+     1136,
+     1185
+    ],
+    [
+     1133,
+     1215
+    ],
+    [
+     1107,
+     1196
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_214",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1276,
+   "z": 1619,
+   "yaw": 1.19,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s112",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1368,
+   "z": 592,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_hollin_pass_d96",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1393,
+   "z": 1943,
+   "yaw": 3.34,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_215",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 264,
+   "z": 1104,
+   "yaw": 0.66,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_32",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 440,
+   "z": 1895,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     357,
+     1853
+    ],
+    [
+     473,
+     1807
+    ],
+    [
+     505,
+     1919
+    ],
+    [
+     420,
+     1965
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_hollin_pass_d97",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1722,
+   "z": 1546,
+   "yaw": 3.04,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_hollin_pass_d98",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 1521,
+   "z": 2012,
+   "yaw": 2.24,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_hollin_pass_d99",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 202,
+   "z": 281,
+   "yaw": 6.17,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_216",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 969,
+   "z": 1215,
+   "yaw": 3.64,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s113",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1609,
+   "z": 1675,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_217",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 373,
+   "z": 1504,
+   "yaw": 1.46,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_218",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 424,
+   "z": 111,
+   "yaw": 4.19,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s114",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 112,
+   "z": 391,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_219",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 96,
+   "z": 752,
+   "yaw": 0.06,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_hollin_pass_d100",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1072,
+   "z": 240,
+   "yaw": 5.91,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_220",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1709,
+   "z": 120,
+   "yaw": 0.57,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_33",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 976,
+   "z": 1040,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     997,
+     1006
+    ],
+    [
+     1013,
+     1081
+    ],
+    [
+     956,
+     1071
+    ],
+    [
+     954,
+     1014
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s115",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1150,
+   "z": 1311,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_221",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1033,
+   "z": 1328,
+   "yaw": 1.64,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_28",
+   "role": "beekeeper",
+   "name": "Beekeeper",
+   "work": "gather",
+   "chatter": [
+    "role.beekeeper"
+   ],
+   "x": 1312,
+   "z": 1233,
+   "yaw": 5.99,
+   "radius": 6,
+   "path": [
+    [
+     1319,
+     1233
+    ],
+    [
+     1310,
+     1237
+    ],
+    [
+     1310,
+     1227
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_hollin_pass_d101",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 1168,
+   "z": 1472,
+   "yaw": 5.84,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s116",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 185,
+   "z": 1272,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_hollin_pass_d102",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 136,
+   "z": 200,
+   "yaw": 5.65,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_222",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 96,
+   "z": 2000,
+   "yaw": 3.98,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s117",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1312,
+   "z": 952,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_223",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 667,
+   "z": 1844,
+   "yaw": 1.16,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_224",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 448,
+   "z": 38,
+   "yaw": 2.47,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_225",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 464,
+   "z": 424,
+   "yaw": 5.18,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_hollin_pass_d103",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 961,
+   "z": 711,
+   "yaw": 5.45,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s118",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 192,
+   "z": 424,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_226",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 712,
+   "z": 144,
+   "yaw": 3.77,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_29",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 576,
+   "z": 1816,
+   "yaw": 2.57,
+   "radius": 6,
+   "path": [
+    [
+     589,
+     1820
+    ],
+    [
+     569,
+     1829
+    ],
+    [
+     571,
+     1802
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_227",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1072,
+   "z": 839,
+   "yaw": 5.86,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s119",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1944,
+   "z": 1280,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "scarecrow_hollin_pass_d104",
+   "kind": "scarecrow",
+   "name": "Scarecrow",
+   "x": 848,
+   "z": 1440,
+   "yaw": 5.84,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_hollin_pass_d105",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1359,
+   "z": 1547,
+   "yaw": 2.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_34",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1448,
+   "z": 1096,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1415,
+     1110
+    ],
+    [
+     1439,
+     1042
+    ],
+    [
+     1499,
+     1089
+    ],
+    [
+     1457,
+     1142
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s120",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1166,
+   "z": 1832,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_hollin_pass_d106",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 945,
+   "z": 1988,
+   "yaw": 2.11,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_hollin_pass_d107",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1384,
+   "z": 216,
+   "yaw": 2.33,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_228",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 240,
+   "z": 1304,
+   "yaw": 5.84,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s121",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1096,
+   "z": 1279,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_229",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1528,
+   "z": 511,
+   "yaw": 0.59,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_230",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 736,
+   "z": 792,
+   "yaw": 4.37,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s122",
+   "monster": "glacier_maw",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 356,
+   "z": 966,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_231",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 895,
+   "z": 1337,
+   "yaw": 2.36,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_hollin_pass_d108",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1911,
+   "z": 277,
+   "yaw": 3.4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_232",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 656,
+   "z": 352,
+   "yaw": 5.86,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_35",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 535,
+   "z": 1160,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     573,
+     1236
+    ],
+    [
+     479,
+     1197
+    ],
+    [
+     498,
+     1107
+    ],
+    [
+     598,
+     1102
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s123",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 664,
+   "z": 41,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_233",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 40,
+   "z": 304,
+   "yaw": 2.18,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_234",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 894,
+   "z": 1935,
+   "yaw": 3.59,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_235",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1264,
+   "z": 520,
+   "yaw": 1.91,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s124",
+   "monster": "glacier_maw",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1136,
+   "z": 1632,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_hollin_pass_d109",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 807,
+   "z": 192,
+   "yaw": 3.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_236",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1645,
+   "z": 1951,
+   "yaw": 3.44,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s125",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1952,
+   "z": 616,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s126",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1411,
+   "z": 432,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_hollin_pass_d110",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1311,
+   "z": 1665,
+   "yaw": 0.97,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_36",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 872,
+   "z": 136,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     830,
+     77
+    ],
+    [
+     918,
+     105
+    ],
+    [
+     934,
+     198
+    ],
+    [
+     809,
+     187
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_237",
+   "recipe": "cu_thin_ice",
+   "name": "Thin Ice",
+   "kind": "hazard",
+   "x": 561,
+   "z": 1031,
+   "yaw": 2.85,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_hollin_pass_d111",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1208,
+   "z": 1272,
+   "yaw": 0.8,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s127",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 752,
+   "z": 1704,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_238",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1168,
+   "z": 609,
+   "yaw": 6.16,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_30",
+   "role": "hermit",
+   "name": "Hermit",
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "x": 296,
+   "z": 1400,
+   "yaw": 4.52,
+   "radius": 6,
+   "path": [
+    [
+     299,
+     1396
+    ],
+    [
+     299,
+     1407
+    ],
+    [
+     288,
+     1401
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_239",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 722,
+   "z": 1199,
+   "yaw": 1.7,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_hollin_pass_d112",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1533,
+   "z": 1235,
+   "yaw": 0.35,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_hollin_pass_d113",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 785,
+   "z": 1370,
+   "yaw": 1.49,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_hollin_pass_d114",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1200,
+   "z": 1656,
+   "yaw": 5.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_37",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1336,
+   "z": 704,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1325,
+     654
+    ],
+    [
+     1382,
+     705
+    ],
+    [
+     1338,
+     755
+    ],
+    [
+     1272,
+     714
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s128",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1968,
+   "z": 48,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_240",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1584,
+   "z": 534,
+   "yaw": 1.37,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_hollin_pass_d115",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 1680,
+   "z": 935,
+   "yaw": 1,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_241",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1135,
+   "z": 1112,
+   "yaw": 3.05,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_hollin_pass_d116",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1190,
+   "z": 1376,
+   "yaw": 5.92,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_242",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1696,
+   "z": 1160,
+   "yaw": 3.82,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_243",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 264,
+   "z": 1471,
+   "yaw": 1.3,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s129",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 832,
+   "z": 725,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_hollin_pass_d117",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1674,
+   "z": 680,
+   "yaw": 3.55,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_244",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 520,
+   "z": 303,
+   "yaw": 4.1,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_hollin_pass_d118",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 47,
+   "z": 416,
+   "yaw": 5.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_245",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1952,
+   "z": 800,
+   "yaw": 2.12,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_38",
+   "monster": "glacier_maw",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 318,
+   "z": 305,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     405,
+     291
+    ],
+    [
+     333,
+     362
+    ],
+    [
+     235,
+     352
+    ],
+    [
+     279,
+     245
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s130",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1233,
+   "z": 95,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_246",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1360,
+   "z": 872,
+   "yaw": 3.6,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_31",
+   "role": "hunter_lone",
+   "name": "Hunter",
+   "work": "watch",
+   "chatter": [
+    "role.hunter"
+   ],
+   "x": 128,
+   "z": 1376,
+   "yaw": 2.82,
+   "radius": 6,
+   "path": [
+    [
+     89,
+     1367
+    ],
+    [
+     151,
+     1358
+    ],
+    [
+     142,
+     1398
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_247",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1952,
+   "z": 1400,
+   "yaw": 0.27,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s131",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1191,
+   "z": 1544,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_hollin_pass_d119",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1952,
+   "z": 720,
+   "yaw": 5.75,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_248",
+   "recipe": "cu_thin_ice",
+   "name": "Thin Ice",
+   "kind": "hazard",
+   "x": 224,
+   "z": 735,
+   "yaw": 2.99,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s132",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 496,
+   "z": 208,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_249",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1193,
+   "z": 1216,
+   "yaw": 2.88,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_39",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1136,
+   "z": 912,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1182,
+     874
+    ],
+    [
+     1171,
+     977
+    ],
+    [
+     1076,
+     956
+    ],
+    [
+     1119,
+     862
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_hollin_pass_d120",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1410,
+   "z": 1646,
+   "yaw": 5.19,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_hollin_pass_d121",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1408,
+   "z": 993,
+   "yaw": 2.85,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s133",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2001,
+   "z": 551,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_250",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 40,
+   "z": 144,
+   "yaw": 5.08,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_hollin_pass_d122",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 589,
+   "z": 795,
+   "yaw": 3.74,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_hollin_pass_32",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 361,
+   "z": 1794,
+   "yaw": 3.11,
+   "radius": 6,
+   "path": [
+    [
+     353,
+     1801
+    ],
+    [
+     360,
+     1784
+    ],
+    [
+     374,
+     1801
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_251",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1338,
+   "z": 161,
+   "yaw": 3.45,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_hollin_pass_d123",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1704,
+   "z": 1833,
+   "yaw": 6.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_hollin_pass_d124",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 608,
+   "z": 1968,
+   "yaw": 3.66,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_252",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 704,
+   "z": 881,
+   "yaw": 0.91,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_hollin_pass_40",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 600,
+   "z": 144,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     672,
+     176
+    ],
+    [
+     572,
+     221
+    ],
+    [
+     516,
+     124
+    ],
+    [
+     632,
+     83
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_hollin_pass_d125",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 789,
+   "z": 1994,
+   "yaw": 2.58,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_hollin_pass_d126",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1364,
+   "z": 1853,
+   "yaw": 4.99,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_hollin_pass_d127",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 968,
+   "z": 1128,
+   "yaw": 5.76,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_253",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1735,
+   "z": 192,
+   "yaw": 5.5,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s134",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 665,
+   "z": 440,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_hollin_pass_d128",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 56,
+   "z": 712,
+   "yaw": 1.15,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_hollin_pass_254",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 88,
+   "z": 497,
+   "yaw": 5.06,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_s135",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 913,
+   "z": 1840,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
   }
  ],
- "features": []
+ "features": [],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 254,
+   "wayside": 128,
+   "stray": 135,
+   "roamer": 40,
+   "folk": 32
+  },
+  "openShareCovered": 1,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  3,
+  8
+ ]
 }

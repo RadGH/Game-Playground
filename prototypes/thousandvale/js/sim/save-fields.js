@@ -25,7 +25,10 @@ export const SAVE_FIELDS = Object.freeze([
   { k: 'waystones', def: [] },     // waystone keys this character has discovered (travel targets)
   { k: 'treasure', def: {} },      // treasure chains: chain id -> { found: [clue steps], done?: wall ms } (PLAN §3.7)
   { k: 'quests', def: { active: {}, done: {}, jobs: {} } },   // quest log, done quests, job boards (js/sim/quests.js)
-  { k: 'daily', def: {} },         // once-a-day things: key -> UTC day number (the world boss's first kill of the day)
+  { k: 'daily', def: {} },
+  { k: 'kitV', def: 0 },
+  { k: 'build', def: null },       // the rules' build blob: talents, perks, unlocks (C's rules.saveBuild; P4/P6)
+  { k: 'seen', def: { zones: [], places: [] } },   // map discovery: zone keys entered, place keys found (P3/P27)           // starting-kit version applied (play-test 1 P22: 1 = class weapon only, plain clothes)         // once-a-day things: key -> UTC day number (the world boss's first kill of the day)
   { k: 'jseq', col: 'journal_seq', def: 0 },   // last journal row this blob contains (js/sim/journal.js)
 ]);
 

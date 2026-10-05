@@ -12,6 +12,7 @@ import * as THREE from 'three';
 import { buildTree, buildBush, buildFern } from '../../../../highdef-3d/js/kit/trees.js';
 import { buildRock } from '../../../../highdef-3d/js/kit/rocks.js';
 import { foliageMaterials, setWindTime } from './decor.js';
+import { perf } from './perf.js';
 
 const BUCKET = 128;
 /** Scatter kinds the camera cannot pass (index = SCATTER_KINDS): radius and height at scale 1. */
@@ -45,6 +46,23 @@ function geoFor(art, name, lod) {
     GEO.set(k, g);
   }
   return GEO.get(k);
+}
+
+/**
+ * Build every kit piece a zone might ask for, one per idle moment (P1): a forest of a species nobody had drawn yet
+ * used to build its three tree LODs in the middle of a walk. Resolves when all are cached.
+ */
+export async function prewarmScatter({ quality = 'high' } = {}) {
+  const todo = [];
+  for (const art of KIND_ART) {
+    const type = art.tree ? 'tree' : art.bush ? 'bush' : art.rock ? 'rock' : 'fern';
+    for (const name of art[type]) for (const lod of (type === 'tree' ? (quality === 'low' ? [1, 2] : [0, 1, 2]) : [1])) todo.push([type, name, lod]);
+  }
+  for (const [type, name, lod] of todo) {
+    await new Promise(r => (typeof requestIdleCallback === 'function' ? requestIdleCallback(() => r(), { timeout: 400 }) : setTimeout(r, 30)));
+    perf.span('scatter:prewarm', () => geoFor(type, name, lod));
+  }
+  return todo.length;
 }
 
 /** Bucket items by 128 m cell. Pure — exported for tests. */
@@ -148,7 +166,7 @@ export async function createScatterView(T, sc, { quality = 'high' } = {}) {
       at = t + 0.5;
       if (lastCam && Math.hypot(cam.x - lastCam.x, cam.z - lastCam.z) < 6) return;
       lastCam = { x: cam.x, z: cam.z };
-      relod(cam);
+      perf.span('scatter:relod', () => relod(cam));
     },
     /** Force a refill (the camera jumped). */
     refresh(cam) { lastCam = null; at = 0; if (cam) relod(cam); },

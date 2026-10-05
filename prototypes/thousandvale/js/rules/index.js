@@ -28,6 +28,11 @@ import { attachEncounters } from './encounter.js';
 import { attachFollowers } from './followers.js';
 import { attachWarbands, escortFor } from './warband.js';
 import { allyEffects, aimsAtAlly } from './ally.js';
+import { companionsDue, companionInfo, UNLOCK_KEYS } from './progression.js';
+import { tickPlayer as perkTick } from './perk-rules.js';
+import { talentView, pickTalent as pickTalentFor, unpickTalent as unpickTalentFor, resetTalents as resetTalentsFor, cleanTalents, tierNodes, TIER_LEVELS } from './talents.js';
+import { forestView } from './perk-forest.js';
+import { canTakePerk, allocatePerk, refundPerk as refundPerkFor, refundAllPerks, perkPointsFor, perkPointsLeft, perkSpent, retrainPriceOf } from './farhold.js';
 
 /** What an arena object is called on a nameplate. */
 const OBJECT_NAMES = { pillar: 'Stone pillar', rock: 'Fallen rock', brazier: 'Brazier', lever: 'Lever', pool: 'Pool', cracked_floor: 'Cracked floor' };
@@ -72,6 +77,11 @@ function terrainFrom(host) {
   if (reader) { const g = groundAdapter(reader); g.pathing = true; if (blocked) g.blocked = blocked; return g; }
   const h = (x, z) => host.groundAt(x, z);
   const S = 0.75;
+  // a dungeon (js/sim/dungeon.js): its walls are the tiles that are not walkable — they BLOCK (so
+  // monsters and followers path round them and never see or strike through them, play-test 1 P11);
+  // a gate opening changes them, so the planner forgets its cached cells every 3 s
+  const dungeon = host.terrain?.kind === 'dungeon' || host.kind === 'instance';
+  const wall = dungeon && host.walkable ? (x, z) => !host.walkable(x, z) : blocked;
   return {
     heightAt: h,
     slopeAt: (x, z, s = S) => Math.hypot(h(x + s, z) - h(x - s, z), h(x, z + s) - h(x, z - s)) / (2 * s),
@@ -86,7 +96,8 @@ function terrainFrom(host) {
     roadAt: () => 0,
     clampToWorld: (x, z) => [x, z],
     biomeIdAt: () => 0,
-    ...(blocked ? { blocked } : {}),
+    ...(wall ? { blocked: wall } : {}),
+    ...(dungeon ? { blockTtl: 3 } : {}),
   };
 }
 
@@ -231,8 +242,10 @@ export function createRules(host, opts = {}) {
             u._sentAnim = u.anim;
           }
           if (u.dying != null && !e.dead) { e.setHp(0); e.kill(u.owner ? null : entOf({ id: lastHitBy(u) })); if (!u.owner) host.despawn(e, 8000); continue; }
-        } else if (u.x !== e.x || u.z !== e.z) {
-          e.moveTo(u.x, u.z);                         // a dash or a knock moved a player
+        } else if ((u.x !== e.x || u.z !== e.z) && !(u.kind === 'player' && (u.dead || e.dead))) {
+          e.moveTo(u.x, u.z);                         // a dash or a knock moved a player (never a dead one: P8)
+        } else if (u.kind === 'player' && (u.dead || e.dead)) {
+          u.x = e.x; u.z = e.z;                       // the room's word on where a body lies
         }
         if (u.maxHp !== e.hpMax || (u.maxMp ?? 0) !== e.mpMax) e.setMax(u.maxHp, u.maxMp ?? 0);
         e.setHp(Math.round(u.hp));
@@ -251,7 +264,7 @@ export function createRules(host, opts = {}) {
       switch (ev.t) {
         case 'hit':
           if (ev.dodged) host.event({ type: 'miss', s: ev.src, d: ev.dst, why: 'dodge' });
-          else if (ev.amt > 0 || ev.absorbed > 0) host.event({ type: 'hit', s: ev.src, d: ev.dst, n: ev.amt, crit: ev.crit || undefined, el: ev.element !== 'physical' ? ev.element : undefined, kind: 'dmg', skill: ev.kind });
+          else if (ev.amt > 0 || ev.absorbed > 0) host.event({ type: 'hit', s: ev.src, d: ev.dst, n: ev.amt, crit: ev.crit || undefined, el: ev.element !== 'physical' ? ev.element : undefined, kind: 'dmg', skill: ev.kind, ab: ev.ab });
           else if (ev.blocked) host.event({ type: 'miss', s: ev.src, d: ev.dst, why: 'block' });
           if (ev.dead) { const v = field.get(ev.dst); if (v?.kind === 'player') v.killedBy = ev.src; }
           break;
@@ -341,6 +354,7 @@ export function createRules(host, opts = {}) {
             rng: makeRng(hashStr(`${ch.id ?? ch.name ?? e.name}:kit`)), x: e.x, z: e.z, y: e.y, yaw: e.yaw,
             gear: savedGear(ch),               // the saved equipment wins over the class kit
           });
+          restoreBuild(unit, ch.build);        // P6: saved talents, perks, unlocks
           if (ch.hp > 0) unit.hp = Math.min(ch.hp, unit.maxHp);
           builds++;
         }
@@ -348,10 +362,11 @@ export function createRules(host, opts = {}) {
         unit.partyId = e.data?.partyId ?? ch.partyId ?? null;
         field.add(unit, 'player');
         if (handed) room.followers.receive(unit);          // its followers came with it
-        else if (rulesOpts.companions !== false) {
-          // the class companion (classes.json `pet`), as Farhold's begin() hands it out
-          const classDef = engine.classById(unit.classId);
-          if (classDef?.pet) room.followers.summonForClass(unit, { ...classDef.pet });
+        else {
+          unit.unlocks = { ...(ch.unlocks || {}), ...(unit.unlocks || {}) };
+          // play-test 1 P4: the class companion is EARNED (level / quest / Early Bond), never handed
+          // out on the first frame as Farhold's begin() does (js/rules/progression.js)
+          grantCompanions(unit);
         }
         e.r.unit = unit;
         e.setMax(unit.maxHp, unit.maxMp ?? 0);
@@ -443,6 +458,7 @@ export function createRules(host, opts = {}) {
       if (second) for (const m of field.monsters) if (m.dying == null && m.targetId != null) fought.add(m.targetId);
       for (const p of field.players) {
         if (p.dead) continue;
+        perkTick(field, p, dt, second);    // perk forest: standing still, the Banner's aura
         if (!second) continue;
         const fighting = fought.has(p.id);
         const mending = fighting ? 0 : p.maxHp * (engine.balance.player?.outOfCombatRegen ?? 0.015);
@@ -474,6 +490,42 @@ export function createRules(host, opts = {}) {
       engine.rpg.refresh(u, { full: true });
       u.hp = u.maxHp; u.mp = u.maxMp;
       e.setLevel(u.level);
+      grantCompanions(u);                  // P4: a companion that comes at this level arrives now
+    });
+    host.barChanged?.(e);                  // a slot may have opened (Farhold's 1/3/6/12/18/24 ladder)
+  }
+
+  /**
+   * P4 — the class companion bodies this character has earned and does not have yet (each body is
+   * given once per sheet; a fallen one comes back through the follower brain, a handoff carries it).
+   * `rulesOpts.companions === false` turns class companions off altogether (tests, tools).
+   */
+  function grantCompanions(unit) {
+    if (rulesOpts.companions === false || !room.followers) return [];
+    const classDef = engine.classById(unit.classId);
+    const given = unit.companionsGiven || (unit.companionsGiven = {});
+    const out = [];
+    for (const due of companionsDue(unit, classDef, engine.progression.companions)) {
+      if (given[due.which]) continue;
+      given[due.which] = true;
+      const made = room.followers.summon(due.id, unit, { count: due.count, origin: 'companion' });
+      for (const p of made) out.push(p);
+      if (made.length) field.emit({ t: 'fx', kind: 'companion', id: unit.id, defId: due.id, which: due.which });
+    }
+    return out;
+  }
+
+  /**
+   * A quest (or anything A rewards) unlocks something early: 'companion' / 'companion2' (P4).
+   * Saved by A in the character's build (`saveBuild(e).unlocks`). Returns { ok, unlocks }.
+   */
+  function unlock(e, key) {
+    const u = e.r.unit;
+    if (!u || !UNLOCK_KEYS.includes(key)) return { ok: false, text: 'Nothing to unlock.' };
+    return run(() => {
+      u.unlocks = { ...(u.unlocks || {}), [key]: true };
+      grantCompanions(u);
+      return { ok: true, unlocks: { ...u.unlocks } };
     });
   }
 
@@ -562,6 +614,136 @@ export function createRules(host, opts = {}) {
 
   function onParty(e, id) { const u = e.r.unit; if (u) u.partyId = id ?? null; }
 
+  // ------------------------------------------------------------------ build: talents and perks (P6)
+
+  /**
+   * A saved build back on a sheet: `{ v, talents, perks, bonusPerks, unlocks }` (saveBuild's shape).
+   * Picks that no longer exist and perks that no longer connect to the middle are dropped, never kept
+   * as dead weight; a perk count past what the level pays is cut from the end.
+   */
+  function restoreBuild(u, build) {
+    if (!build || typeof build !== 'object') { u.perks = u.perks || []; return; }
+    u.skillTalents = build.talents && typeof build.talents === 'object' ? JSON.parse(JSON.stringify(build.talents)) : {};
+    cleanTalents(engine, u);
+    u.bonusPerks = Math.max(0, build.bonusPerks | 0);
+    u.unlocks = { ...(build.unlocks || {}), ...(u.unlocks || {}) };
+    const forest = engine.forest;
+    const want = Array.isArray(build.perks) ? build.perks.filter(id => typeof id === 'string' && forest.byId.has(id) && id !== 'start') : [];
+    u.perks = [];
+    // re-take in the saved order: anything that no longer connects, or past the points, falls away
+    let progress = true;
+    const left = new Set(want);
+    while (progress && left.size) {
+      progress = false;
+      for (const id of [...left]) if (canTakePerk(u, forest, id).ok) { allocatePerk(u, forest, id); left.delete(id); progress = true; }
+    }
+    engine.rpg.refresh(u, { full: true });
+  }
+  /** What A saves for the build (char.build). */
+  function saveBuild(e) {
+    const u = e.r.unit;
+    if (!u) return null;
+    return { v: 1, talents: JSON.parse(JSON.stringify(u.skillTalents || {})), perks: [...(u.perks || [])], bonusPerks: u.bonusPerks || 0, unlocks: { ...(u.unlocks || {}) } };
+  }
+  /** The build changed: the sheet is re-derived, a companion that is now due arrives, the bar is resent. */
+  function buildChanged(e, u) {
+    engine.rpg.refresh(u);
+    grantCompanions(u);
+    for (const sl of u.skills?.slots || []) sl.views = null;
+    field.emit({ t: 'fx', kind: 'build', id: u.id });
+    host.barChanged?.(e);
+  }
+  const ret = (e, res) => (res.ok ? { ...res, bar: bar(e), build: saveBuild(e) } : { ok: false, text: res.why || res.text || 'Not now.' });
+
+  /** The talent screen (D): every skill on the bar, every tier, every node, what is picked. */
+  function talents(e) {
+    const u = e.r.unit;
+    if (!u?.skills) return { tiers: TIER_LEVELS, skills: [] };
+    return { tiers: TIER_LEVELS, level: u.level, skills: room.run(() => talentView(engine, u)) };
+  }
+  function pickTalent(e, skillId, tier, nodeId) {
+    const u = e.r.unit;
+    if (!u) return { ok: false, text: 'Not here.' };
+    return ret(e, run(() => { const r = pickTalentFor(engine, u, skillId, tier, nodeId); if (r.ok) buildChanged(e, u); return r; }));
+  }
+  /** The Unbinder takes one talent off (A charges `retrainPrice(e, 'talent')` first). */
+  function unpickTalent(e, skillId, tier) {
+    const u = e.r.unit;
+    if (!u) return { ok: false, text: 'Not here.' };
+    return ret(e, run(() => { const r = unpickTalentFor(u, skillId, Number(tier)); if (r.ok) buildChanged(e, u); return r; }));
+  }
+  /** Every talent (or every talent of one skill) off (A charges `retrainPrice(e, 'talent', 'all')`). */
+  function resetTalents(e, skillId = null) {
+    const u = e.r.unit;
+    if (!u) return { ok: false, text: 'Not here.' };
+    return ret(e, run(() => { const n = resetTalentsFor(u, skillId); if (n) buildChanged(e, u); return n ? { ok: true, removed: n } : { ok: false, why: 'No talents to take off.' }; }));
+  }
+
+  let forestCache = null;
+  /** The forest's shape (static per process — the client may cache it): arms, nodes with cards, links. */
+  const perkForest = () => (forestCache ||= forestView(engine.forest));
+  /** This character's walk through the forest. */
+  function perks(e) {
+    const u = e.r.unit;
+    if (!u) return null;
+    return { total: perkPointsFor(u.level || 1) + (u.bonusPerks || 0), spent: perkSpent(u), left: perkPointsLeft(u), taken: [...(u.perks || [])], flags: Object.keys(u.perkFlags || {}).filter(k => u.perkFlags[k]) };
+  }
+  function takePerk(e, id) {
+    const u = e.r.unit;
+    if (!u) return { ok: false, text: 'Not here.' };
+    return ret(e, run(() => { const r = allocatePerk(u, engine.forest, id); if (r.ok) buildChanged(e, u); return r.ok ? { ok: true, node: { id, name: r.node?.name } } : r; }));
+  }
+  /** The Unbinder gives one perk back (only an end of a walk: Farhold's canRefund). A charges first. */
+  function refundPerk(e, id) {
+    const u = e.r.unit;
+    if (!u) return { ok: false, text: 'Not here.' };
+    return ret(e, run(() => { const r = refundPerkFor(u, engine.forest, id); if (r.ok) buildChanged(e, u); return r.ok ? { ok: true } : r; }));
+  }
+  function resetPerks(e) {
+    const u = e.r.unit;
+    if (!u) return { ok: false, text: 'Not here.' };
+    return ret(e, run(() => { const n = refundAllPerks(u); if (n) buildChanged(e, u); return n ? { ok: true, removed: n } : { ok: false, why: 'No perks to give back.' }; }));
+  }
+  // ---- A's contract (docs/protocol.md §17.2): one entry each for the `talent` and `perk` messages ----
+  const whyOf = t => (/level/i.test(t || '') ? 'level' : /already|Unbinder/i.test(t || '') ? 'taken' : /points/i.test(t || '') ? 'points'
+    : /connects/i.test(t || '') ? 'connect' : /not on your bar|not on this tier|No such/i.test(t || '') ? 'unknown' : /only reach|reach the middle/i.test(t || '') ? 'needed' : 'unknown');
+  const picksMap = u => JSON.parse(JSON.stringify(u.skillTalents || {}));
+  /** `talent {op: 'pick' | 'clear', skill, tier, node}` -> { ok, why?, text?, picks, talents }. `clear` with a tier empties that tier, without one the whole skill. */
+  function talent(e, op, { skill = null, tier = null, node = null } = {}) {
+    let r;
+    if (op === 'pick') r = pickTalent(e, skill, Number(tier), node);
+    else if (op === 'clear') r = tier != null ? unpickTalent(e, skill, Number(tier)) : resetTalents(e, skill || null);
+    else return { ok: false, why: 'op', text: 'No such talent action.' };
+    const u = e.r.unit;
+    if (!r.ok) return { ok: false, why: whyOf(r.text), text: r.text };
+    return { ok: true, picks: skill ? picksMap(u)[skill] || {} : null, talents: picksMap(u) };
+  }
+  /** `perk {op: 'take' | 'refund' | 'reset', id}` -> { ok, why?, text?, perks, left }. */
+  function perk(e, op, { id = null } = {}) {
+    let r;
+    if (op === 'take') r = takePerk(e, id);
+    else if (op === 'refund') r = refundPerk(e, id);
+    else if (op === 'reset') r = resetPerks(e);
+    else return { ok: false, why: 'op', text: 'No such perk action.' };
+    if (!r.ok) return { ok: false, why: whyOf(r.text), text: r.text };
+    const p = perks(e);
+    return { ok: true, perks: p.taken, left: p.left };
+  }
+  /**
+   * The build view A sends as `you {talents, perks, perkPoints, …}`: the picks, the walk, the points,
+   * and the talent screen's tree (`talentTree`, rules.talents) — the forest's own shape is static
+   * (`rules.perkForest()`, or js/rules/perk-forest.js `buildTvForest(data/rules/perks.json)` on the client).
+   */
+  function build(e) {
+    const u = e.r.unit;
+    if (!u) return {};
+    const p = perks(e);
+    return { talents: picksMap(u), perks: p.taken, perkPoints: { total: p.total, spent: p.spent, left: p.left }, talentTree: talents(e).skills, companion: companionInfo(u, engine.classById(u.classId), engine.progression.companions) };
+  }
+
+  /** What the Unbinder charges: `kind` 'talent' | 'perk', `scope` 'one' | 'all' (Farhold's balance.retrain). */
+  const retrainPrice = (e, kind = 'talent', scope = 'one') => retrainPriceOf(kind, scope, e?.r?.unit?.level || e?.level || 1, engine.balance.retrain || null);
+
   /**
    * The player's skill bar as the client draws it (A's `you.bar`, D's ask): Farhold's own bar, so a
    * talent, a form or a stance that changes a slot shows. `ally` = aim it at a friend (send the
@@ -579,12 +761,17 @@ export function createRules(host, opts = {}) {
         empty: !!s.empty, shape: s.shape || null, element: s.element || null,
         ally, group: !ally && !!row && allyEffects(row).size > 0,
         charges: s.charges?.max ?? null, form: s.form?.group || null,
+        // P6: the talents picked on this skill, by name (the card's second line)
+        talents: s.id && u.skillTalents?.[s.id] ? Object.entries(u.skillTalents[s.id]).filter(([, id]) => id).map(([t, id]) => tierNodes(engine.skillData.skills[s.id], Number(t)).find(nd => nd.id === id)?.name).filter(Boolean) : [],
       };
     }));
   }
 
   return {
-    equip, unequip, gear, saveGear, rollLoot, onParty, useObject, bar, backfill,
+    equip, unequip, gear, saveGear, rollLoot, onParty, useObject, bar, backfill, unlock,
+    talents, pickTalent, unpickTalent, resetTalents, perkForest, perks, takePerk, refundPerk, resetPerks, retrainPrice, saveBuild,
+    talent, perk, build,
+    companion: e => (e.r.unit ? companionInfo(e.r.unit, engine.classById(e.r.unit.classId), engine.progression.companions) : null),
     encounters: enc,
     stats: () => ({ builds, handoffs }),
     addEntity, removeEntity, intent, step, respawn, onLevel,

@@ -9,6 +9,7 @@
 // Placements use the shape stream B's bake will emit: { kind: 'prop' | 'ring', id, x, z, yaw, data }.
 
 import * as THREE from 'three';
+import { LIGHTS } from './lightpool.js';
 import { buildTree, buildBush, makeRng } from '../../../../highdef-3d/js/kit/trees.js';
 import { buildRock, buildProp } from '../../../../highdef-3d/js/kit/rocks.js';
 import { loadFoliageAtlas, makeSurface } from '../../../../highdef-3d/js/kit/textures.js';
@@ -192,12 +193,11 @@ export async function createDecor(hf, { placements = [], paths = [], seed = 7, a
       const fl = new THREE.Sprite(flameMat); fl.scale.set(id === 'torch_post' ? 0.6 : 1.3, id === 'torch_post' ? 0.9 : 1.7, 1);
       fl.position.set(x, y + top + (id === 'torch_post' ? 0.25 : 0.55), z); group.add(fl); flames.push(fl);
       if (id === 'campfire' || lights.length < 3) {
-        const l = new THREE.PointLight('#ffae5c', id === 'campfire' ? 22 : 8, id === 'campfire' ? 16 : 9, 1.6);
-        l.position.set(x, y + top + 0.6, z); group.add(l); lights.push(l);
+        lights.push(LIGHTS.add({ x, y: y + top + 0.6, z, color: '#ffae5c', intensity: id === 'campfire' ? 22 : 8, distance: id === 'campfire' ? 16 : 9, decay: 1.6, flicker: 0.14, owner: group }));
       }
     }
     if (data.glow) {
-      const l = new THREE.PointLight(data.glow, 10, 10, 1.8); l.position.set(x, y + 1.6, z); group.add(l);
+      lights.push(LIGHTS.add({ x, y: y + 1.6, z, color: data.glow, intensity: 10, distance: 10, decay: 1.8, owner: group }));
       const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeGlowTexture(), color: data.glow, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
       s.position.set(x, y + 1.3, z); s.scale.set(2.6, 3.2, 1); group.add(s); flames.push(s);
     }
@@ -218,26 +218,31 @@ export async function createDecor(hf, { placements = [], paths = [], seed = 7, a
   let relodAt = 0, t = 0;
   return {
     group, stats: { trees: trees.length, rocks: rocks.length, bushes: bushes.length },
+    dispose() { for (const h of lights) h.remove(); lights.length = 0; },
     update(dt, cam) {
       t += dt; windUniform.value = t;
       if (t >= relodAt) { relodAt = t + 0.5; relod(cam); }
-      for (let i = 0; i < lights.length; i++) lights[i].intensity = (i === 0 ? 22 : 8) * (0.85 + Math.sin(t * 11 + i * 3) * 0.08 + Math.sin(t * 23 + i) * 0.06);
       for (let i = 0; i < flames.length; i++) flames[i].material.rotation = Math.sin(t * 6 + i) * 0.08;
     },
   };
 }
 
+let FLAME = null;
 function makeFlameTexture() {
+  if (FLAME) return FLAME;
   const c = document.createElement('canvas'); c.width = 64; c.height = 128; const g = c.getContext('2d');
   const grd = g.createRadialGradient(32, 92, 2, 32, 80, 50);
   grd.addColorStop(0, 'rgba(255,250,220,1)'); grd.addColorStop(0.25, 'rgba(255,190,90,0.9)'); grd.addColorStop(0.6, 'rgba(230,90,30,0.45)'); grd.addColorStop(1, 'rgba(120,20,0,0)');
   g.fillStyle = grd; g.beginPath(); g.moveTo(32, 4); g.quadraticCurveTo(62, 70, 46, 118); g.lineTo(18, 118); g.quadraticCurveTo(2, 70, 32, 4); g.fill();
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; FLAME = t; return t;
 }
+let GLOW = null;
+/** A soft round glow (one texture for the whole page — made once, never disposed). */
 export function makeGlowTexture() {
+  if (GLOW) return GLOW;
   const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
   const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
   grd.addColorStop(0, 'rgba(255,255,255,0.9)'); grd.addColorStop(0.4, 'rgba(255,255,255,0.25)'); grd.addColorStop(1, 'rgba(255,255,255,0)');
   g.fillStyle = grd; g.fillRect(0, 0, 64, 64);
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; GLOW = t; return t;
 }

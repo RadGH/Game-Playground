@@ -23,8 +23,10 @@
 import {
   applyStatus, controlFor, mechWorld, placeObject, tickPlaced, tickWalls, addWall, addCorpse, takeCorpses,
   pushFor, queueMech, statusRef, gainResource, formOf, repeatsOf, statusStatsKey,
-  resolveAttack, uniquesAfterKill, uniquesAfterDamaged, tickAuras, tickStatuses,
+  resolveAttack, uniquesAfterKill, uniquesAfterDamaged, tickAuras, tickStatuses, meleeSpanOf, weaponHands,
 } from './farhold.js';
+import { allyEffects, aimsAtAlly } from './ally.js';
+import { healed as perkHealed, weaveRefund } from './perk-rules.js';
 import { taunt as threatTaunt, threatFromHeal } from './threat.js';
 
 /** plan keys this file does not act on yet — reported, never silently dropped */
@@ -56,8 +58,11 @@ function runtimeOf(combat) {
   rt.partyPlayers = ch => allies(ch).filter(u => u !== ch && u.kind === 'player');
   const lift = ch => 1 + (ch.derived?.healingPct || 0);
   /** heal `u` by `amount`, credit the healer's threat; returns what was actually healed */
-  function healUnit(healer, u, amount) {
+  function healUnit(healer, u, amount, spill = true) {
     if (!u || u.dead || !(amount > 0)) return 0;
+    // the perk forest's `healPower` (+% healing you do: data/rules/perks.json, js/rules/perk-rules.js)
+    const hp = healer?.derived?.healPower;
+    if (hp) amount = Math.round(amount * (1 + hp / 100));
     const before = u.hp;
     u.hp = Math.min(u.maxHp, u.hp + amount);
     const done = u.hp - before;
@@ -65,6 +70,8 @@ function runtimeOf(combat) {
       threatFromHeal(field.monsters, healer, u, done);
       field.emit({ t: 'heal', src: healer.id, dst: u.id, amt: Math.round(done), hp: Math.round(u.hp) });
     }
+    // Brimming Cup: what spilled over goes to the most hurt party member in reach (once, never chained)
+    if (spill && healer?.perkFlags?.brimming) perkHealed(field, healer, u, amount, done, (to, n) => healUnit(healer, to, n / (1 + (hp || 0) / 100), false));
     return done;
   }
   rt.healUnit = healUnit;
@@ -709,13 +716,66 @@ export function castSkillPlan(combat, ch, slot, intent = {}) {
   if (!pre.ok) return { ok: false, why: pre.why || 'not ready' };
   const row = ch.skills.rowFor(slot);
   const kind = row?.shape;
+  // play-test 1 P23: is there something to hit, in reach? asked BEFORE the bar spends mana or starts
+  // the cooldown (Farhold spends first, then flies a bolt at nothing). A recast or a channel's second
+  // press is never refused here.
+  if (!pre.recast && !pre.endChannel && combat.room.preflight !== false) {
+    const no = preflight(combat, ch, row, intent);
+    if (no) return { ok: false, why: no, refused: 'range' };
+  }
   const hasFollowers = !!combat.room.followers;
   if (!hasFollowers && row?.form) return { ok: false, why: REFUSED_KINDS.form };
   if (!hasFollowers && kind === 'summon' && !row.summon?.temporary) return { ok: false, why: REFUSED_KINDS.summon };
   const plan = ch.skills.use(slot);
   if (!plan.ok) return { ok: false, why: plan.why };
+  // the perk forest's Weave: a different skill than the last, inside the window, gives its mana back
+  const back = weaveRefund(ch, plan.skill?.id, plan.paidWith === 'mana' ? plan.spent : 0, combat.room.clock.now());
+  if (back > 0) ch.mp = Math.min(ch.maxMp, ch.mp + back);
   if (!hasFollowers && REFUSED_KINDS[plan.kind]) return { ok: false, why: REFUSED_KINDS[plan.kind] };
   return castPlan(combat, ch, plan, { intent, slot });
+}
+
+/** How far a skill reaches from the caster, by shape (P23). Null = no reach to check. */
+export function reachOf(ch, row) {
+  if (!row) return null;
+  switch (row.shape) {
+    case 'bolt': case 'beam': return row.range || 24;
+    case 'ground': return (row.range || 20) + (row.radius || 0);
+    case 'melee': {
+      // a melee skill reaches as far as the weapon swinging it (skills.js R26), plus a step
+      const span = meleeSpanOf(weaponHands(ch).main, ch.derived?.areaPct || 0);
+      return Math.max(row.reach ?? 3, span?.reach || 0) + 1.5;
+    }
+    default: return null;                  // self, around, dash, summon, forms: nothing to reach
+  }
+}
+
+/**
+ * P23 — refuse a cast that cannot land, before anything is spent. Returns the refusal sentence, or
+ * null to go ahead. Rules (every skill):
+ *   * a named ENEMY target that is dead, gone or out of the skill's reach -> refused;
+ *   * no named target, a damaging bolt / beam / melee skill with no live enemy anywhere in reach ->
+ *     refused (an aimed ground skill is clamped to its range and always lands somewhere);
+ *   * a skill that aims at an ally, does something for the group, or deals no damage is never refused
+ *     here (its own ally rules decide).
+ */
+export function preflight(combat, ch, row, intent = {}) {
+  if (!row || row.form) return null;
+  const reach = reachOf(ch, row);
+  if (reach == null) return null;
+  const field = combat.field;
+  const name = row.name || 'That skill';
+  const t = intent.target != null ? field.get(intent.target) : null;
+  if (t && t.side === 'foe') {
+    if (t.dying != null || t.removed || (t.hp ?? 1) <= 0) return `${name}: your target is dead.`;
+    const d = Math.hypot(t.x - ch.x, t.z - ch.z) - (t.bodyR || 0.5);
+    if (d > reach + 1) return `${name}: out of range (${Math.round(d)} m, reaches ${Math.round(reach)} m).`;
+    return null;
+  }
+  if (t || row.shape === 'ground' || !row.mult || aimsAtAlly(row) || allyEffects(row).size) return null;
+  let any = false;
+  field.eachMonsterNear(ch.x, ch.z, reach + 1, () => { any = true; return true; });
+  return any ? null : `${name}: nothing in range.`;
 }
 
 /** Carry out a plan (also used for echoes, delayed beams and a buff's `onEnd`). */
@@ -738,6 +798,8 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
     };
     const strikeOpts = decorate(rt, ch, plan, { power, element: plan.element, skill: plan.skill?.id, onHit, applyStatus: combat.hookFor(ch), kind: 'skill' });
     field.emit({ t: 'cast', id: ch.id, skill: plan.skill?.id, kind: plan.kind, element: plan.element, aim: { x: ch.x + a.dx * 10, z: ch.z + a.dz * 10 } });
+    // P20: what the spell LOOKS like, as geometry (the client draws one effect per shape and element)
+    const spell = extra => field.emit({ t: 'fx', kind: 'spell', id: ch.id, ab: plan.skill?.id, el: plan.element || 'physical', shape: plan.kind, fxs: plan.talentFx?.length ? plan.talentFx : undefined, scale: plan.fxScale && plan.fxScale !== 1 ? plan.fxScale : undefined, ...extra });
 
     if (plan.barrier > 0) {
       const gained = Math.max(1, Math.round((plan.damage || 0) * plan.barrier));
@@ -760,12 +822,14 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
     } else if (plan.kind === 'summon' && plan.howl && room.followers?.canAdmit(ch, plan.pet)?.ok === false) {
       rt.howl(ch, plan);
     } else if (plan.kind === 'summon') {
+      spell({ x: ch.x, z: ch.z, pet: plan.pet });
       const made = room.followers?.summon(plan.pet, ch, { count: plan.petCount, at: { x: ch.x, z: ch.z } }) || [];
       if (made.refused && !made.length) out.why = made.refused;
     } else if (plan.kind === 'beam' && plan.delay > 0 && !plan.beamFired) {
       const strikeOnly = { ...plan, beamFired: true, sub: true, frozenAim: { ...a }, place: null, pool: null, selfBuff: null, summon: null, taunt: null, command: null, barrier: null, ward: null, counter: null, imbue: null, link: null, burst: null, again: null, afterimage: null, empowerNext: null, empowerRepeat: null, wall: null, rewind: null, cleanse: null, revive: null, healPets: null, overflowBarrier: null, allyStatus: null, corpseBurst: null, clusters: null, dashWith: null, resetOn: null };
       combat.later(plan.delay, () => castPlan(combat, ch, strikeOnly, { echo: true, intent }), ch.id);
     } else if (plan.kind === 'beam') {
+      spell({ x: a.x, z: a.z, to: { x: a.x + a.dx * plan.range, z: a.z + a.dz * plan.range }, w: plan.width });
       let healed = 0;
       for (const e of [...field.monsters]) {
         if (e.dying != null) continue;
@@ -775,8 +839,8 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
         if (Math.hypot(ex - a.dx * along, ez - a.dz * along) > plan.width + (e.reach || 2) * 0.3) continue;
         const result = rpg.strike(ch, e, room.rng, { multiplier: power, element: plan.element, applyStatus: combat.hookFor(ch), skill: plan.skill?.id, rules: plan.rules, noDamage: !!plan.noDamage });
         if (e.state !== 'chase') e.state = 'chase';
-        field.land(e, result, { strike: strikeOpts.knock, fromX: ch.x, fromZ: ch.z, element: plan.element, by: ch });
-        field.report(ch, e, result, 'skill');
+        field.land(e, result, { strike: strikeOpts.knock, fromX: ch.x, fromZ: ch.z, element: plan.element, by: ch, skill: plan.skill?.id });
+        field.report(ch, e, result, 'skill', plan.skill?.id);
         strikeOpts.onHit(e, result);
         out.hits.push({ enemy: e, result });
         healed += Math.round(result.amount * (plan.healFrac || 0));
@@ -785,31 +849,38 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
       if (healed) rt.healUnit(ch, ch, healed);
     } else if (plan.kind === 'ground' && (plan.line || takesRepeats(plan))) {
       const spot = ground(plan.range);
+      spell({ x: spot.x, z: spot.z, r: plan.radius || (plan.line?.width ?? 2), line: plan.line ? { len: plan.line.length ?? 10, w: plan.line.width ?? 2, across: !!plan.line.across } : undefined, ms: Math.round((plan.delay || 0) * 1000) || undefined, n: plan.repeats > 1 ? plan.repeats : undefined });
       if (!line(combat, rt, ch, plan, spot, strikeOpts, collect)) repeats(combat, rt, ch, plan, spot, strikeOpts, collect);
     } else if (plan.kind === 'ground') {
       const spot = ground(plan.range);
       const pulse = () => {
         if (ch.dead) return;
+        spell({ x: spot.x, z: spot.z, r: plan.radius, pull: plan.pull || undefined });
         if (plan.pull) for (const e of field.monsters) {
           if (e.dying != null || Math.hypot(e.x - spot.x, e.z - spot.z) > plan.radius + 1) continue;
           rt.push(e, spot.x, spot.z, -plan.pull);
         }
         rt.withCaster(ch, () => collect(field.strikeArea(spot.x, spot.z, plan.radius, ch, { falloff: 0.55, ...strikeOpts })));
       };
-      if (plan.delay) combat.later(plan.delay, pulse, ch.id); else pulse();
+      // a delayed blast is marked on the ground when it is cast, with how long until it lands (P20)
+      if (plan.delay) { spell({ x: spot.x, z: spot.z, r: plan.radius, ms: Math.round(plan.delay * 1000), mark: 1 }); combat.later(plan.delay, pulse, ch.id); } else pulse();
       for (let k = 1; k < plan.repeats; k++) combat.later((plan.delay + k * (plan.repeatEvery || 0.5)), pulse, ch.id);
       if (plan.ground > 0) rt.dropPool(ch, { x: spot.x, z: spot.z, r: plan.groundRadius || plan.radius, seconds: plan.ground, element: plan.element, power: power * 0.35 });
     } else if (plan.kind === 'dash' && plan.dash && typeof plan.dash === 'object') {
+      const from = { x: ch.x, z: ch.z };
       dash(combat, rt, ch, plan, a, intent, strikeOpts, collect);
+      spell({ x: from.x, z: from.z, to: { x: ch.x, z: ch.z } });
     } else if (plan.kind === 'dash') {
       const spot = ground(plan.range);
       const dist = Math.min(plan.range, spot.dist);
       collect(field.strikeSegment(ch.x + a.dx, ch.z + a.dz, ch.x + a.dx * dist, ch.z + a.dz * dist, plan.splash, ch, { ...strikeOpts, falloff: 0.8 }));
+      spell({ x: ch.x, z: ch.z, to: { x: ch.x + a.dx * dist, z: ch.z + a.dz * dist } });
       ch.x += a.dx * dist; ch.z += a.dz * dist;
       field.emit({ t: 'move', id: ch.id, x: ch.x, z: ch.z, why: 'dash' });
     } else if (plan.kind === 'self') {
       // ally targeting: a heal or a buff on a `self` skill may be aimed at a party member
       const to = allyTargetOf(rt, ch, intent);
+      spell({ x: to.x, z: to.z, on: to.id, heal: plan.heal ? 1 : undefined, status: plan.status || undefined });
       if (plan.heal) {
         const share = plan.healFrac || (plan.heal / Math.max(1, ch.maxHp));
         const amount = to === ch ? plan.heal : Math.round(to.maxHp * share);
@@ -831,6 +902,7 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
     } else if (plan.kind === 'melee') {
       const cone = () => {
         if (ch.dead) return;
+        spell({ x: ch.x, z: ch.z, yaw: ch.yaw, reach: plan.reach, arc: plan.arc, r: plan.splash || undefined });
         rt.withCaster(ch, () => {
           // Farhold's field.strike borrows the LAST basic swing's shape (feel.swing.strike) when a skill
           // passes none: its weapon traits, armour pierce and — when the skill has no knock — its knock.
@@ -849,12 +921,15 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
       cone();
       for (let k = 1; k < plan.repeats; k++) combat.later(k * (plan.repeatEvery || 0.32), cone, ch.id);
     } else if (plan.kind === 'around' && takesRepeats(plan)) {
+      spell({ x: ch.x, z: ch.z, r: plan.radius, n: plan.repeats > 1 ? plan.repeats : undefined });
       repeats(combat, rt, ch, plan, { x: ch.x, z: ch.z }, strikeOpts, collect);
     } else if (plan.kind === 'around') {
+      spell({ x: ch.x, z: ch.z, r: plan.radius });
       collect(field.strikeArea(ch.x, ch.z, plan.radius, ch, { falloff: 0.6, ...strikeOpts }));
       for (let k = 1; k < plan.repeats; k++) {
         combat.later(k * (plan.repeatEvery || 0.32), () => {
           if (ch.dead) return;
+          spell({ x: ch.x, z: ch.z, r: plan.radius });
           rt.withCaster(ch, () => collect(field.strikeArea(ch.x, ch.z, plan.radius, ch, { falloff: 0.6, ...strikeOpts })));
         }, ch.id);
       }
@@ -1038,8 +1113,8 @@ function dash(combat, rt, ch, plan, a, intent, opts, collect) {
   const from = { x: ch.x, z: ch.z };
   const strikeOne = (e, mult, fx, fz) => {
     const res = rpg.strike(ch, e, combat.room.rng, { multiplier: mult, element: plan.element, skill: plan.skill?.id, applyStatus: combat.hookFor(ch), rules: plan.rules, noDamage: !!plan.noDamage });
-    field.land(e, res, { strike: knockShape(plan.knock), fromX: fx, fromZ: fz, element: plan.element, by: ch });
-    field.report(ch, e, res, 'skill');
+    field.land(e, res, { strike: knockShape(plan.knock), fromX: fx, fromZ: fz, element: plan.element, by: ch, skill: plan.skill?.id });
+    field.report(ch, e, res, 'skill', plan.skill?.id);
     opts.onHit?.(e, res);
     collect([{ enemy: e, result: res }]);
     if (res.dead) field.kill(e);

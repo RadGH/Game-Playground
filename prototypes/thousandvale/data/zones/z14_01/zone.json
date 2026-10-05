@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "4bce3b89",
+  "bakeVersion": 3,
+  "inputHash": "6084a708",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 14,
@@ -99,6 +99,7 @@
     "x": 872,
     "z": 1620
   },
+  "bridges": [],
   "theme": {
     "kind": "shore",
     "lakes": [
@@ -108,7 +109,7 @@
         "x": 1034,
         "z": 1066,
         "r": 320,
-        "level": 62.86
+        "level": 62.29
       }
     ],
     "fen": null
@@ -116,7 +117,7 @@
   "summary": {
     "zone": "z14_01",
     "province": "Petbeck Basin",
-    "inputHash": "4bce3b89",
+    "inputHash": "6084a708",
     "rivers": 1,
     "wetShare": 0.077,
     "unwalkableShare": 0.054,
@@ -136,8 +137,8 @@
         },
         "culture": "halfling",
         "plots": 21,
-        "streets": 50,
-        "links": 0,
+        "streets": 51,
+        "links": 1,
         "overlaps": 0
       },
       {
@@ -157,15 +158,17 @@
         "overlaps": 0
       }
     ],
-    "roads": 1,
+    "roads": 3,
     "bridges": 0,
-    "scatter": 5220,
+    "paths": 8,
+    "pathMetres": 3109,
+    "scatter": 9925,
     "scatterKinds": {
-      "rock_small": 864,
-      "bush": 2688,
-      "tree_broadleaf": 1250,
-      "tree_conifer": 409,
-      "rock_large": 9
+      "bush": 5147,
+      "rock_small": 1908,
+      "tree_broadleaf": 2164,
+      "rock_large": 298,
+      "tree_conifer": 408
     },
     "sites": [
       "settlement(HUB) town Saltmouth 880 1616 90",
@@ -177,13 +180,13 @@
       "x": 872,
       "z": 1620
     },
-    "placements": 138,
-    "vignettesAvoided": 96
+    "placements": 149,
+    "vignettesAvoided": 632
   },
   "files": {
-    "terrain.bin": 462997,
-    "nav.bin": 9023,
-    "scatter.bin": 41844,
-    "placements.json": 46790
+    "terrain.bin": 467263,
+    "nav.bin": 15284,
+    "scatter.bin": 79484,
+    "placements.json": 125392
   }
 }

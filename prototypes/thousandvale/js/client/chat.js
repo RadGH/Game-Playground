@@ -94,7 +94,7 @@ export function createChat({ net: getNet, hud, social, me, actions = {}, onTypin
       if (label) p.append(h('b.chl', {}, `[${label}] `));
       p.append(h('b', {}, '['), nameEl(m.name, m.ch === 'say' ? null : m.from), h('b', {}, ']: '), m.text);
     }
-    p.title = linePrefix(m);
+    p.dataset.tip = linePrefix(m);
     append(p, tab);
     return p;
   }

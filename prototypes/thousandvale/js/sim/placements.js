@@ -21,6 +21,7 @@
 //   wayside         {kind, filler} -> a `wayside` marker with the kind's lore (data/vignettes/wayside.json); props are the client's
 //   treasure_clue   {chain, step} -> a clue object (use: read it; progress saved per character)
 //   treasure_cache  {chain, step} -> a hidden cache that opens once per character, after every clue of its chain
+//   folk            {role, name, work, chatter, path} -> someone who works one spot (P19; js/sim/travellers.js)
 // Props and buildings are the client's to draw from the same files (E's records + sites.json templates).
 
 import { vignetteContent, vignettePoint } from './vignettes.js';
@@ -33,7 +34,7 @@ const ROLE_NAMES = { guard: 'Guard', sergeant: 'Sergeant', quartermaster: 'Quart
 const roleName = r => ROLE_NAMES[r] || (r ? r[0].toUpperCase() + r.slice(1) : 'Villager');
 
 export function placementContent(placements, { recipes = [], sites = null, hooks = [], treasure = [], wayside = {}, quests = null, band = [1, 6], zone = null, respawnMs = 30000, encounterInfo = {}, warband: sheetWarband = null, archetype = null } = {}) {
-  const camps = [], objects = [], doors = [], waystones = [], rares = new Set();
+  const camps = [], objects = [], doors = [], waystones = [], rares = new Set(), folk = [];
   const list = placements || [];
   const vig = vignetteContent(list.filter(p => !p.type || p.type === 'vignette'), recipes, { band });
   camps.push(...vig.camps); objects.push(...vig.objects);
@@ -134,10 +135,13 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
           treasure: { ...t, level: band[0] + 1 } });
         break;
       }
+      case 'folk':                    // P19: someone who works this spot (js/sim/travellers.js walks the loop and barks)
+        folk.push({ id: p.id, role: p.role || 'villager', name: p.name || roleName(p.role), work: p.work || null, chatter: p.chatter || null, x: p.x, z: p.z, path: Array.isArray(p.path) && p.path.length > 1 ? p.path : [[p.x, p.z], [p.x + 4, p.z + 2]] });
+        break;
       default: break;   // vignettes handled above; unknown kinds are left to the client
     }
   }
-  return { camps, objects, doors, waystones, rares, camped };
+  return { camps, objects, doors, waystones, rares, camped, folk };
 }
 
 /** The warband leader for a camp of this level (Farhold data/warbands.json levels: Sootwick 1-16, Ashtusk 5-24, …). */

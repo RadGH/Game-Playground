@@ -1,9 +1,9 @@
 {
- "_doc": "Stream E. Content placements for world zone z13_04 (E zone 'gorse_march', The Gorse March) — tools/place-vignettes.mjs against stream B's bake (terrain d1f5fae1). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "_doc": "Stream E. Content placements for world zone z13_04 (E zone 'gorse_march', The Gorse March) — tools/place-vignettes.mjs against stream B's bake (terrain 9227c4f0). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
  "zone": "z13_04",
  "sheetZone": "gorse_march",
  "province": "torbor_downs",
- "terrainHash": "d1f5fae1",
+ "terrainHash": "9227c4f0",
  "band": [
   6,
   8
@@ -56,9 +56,27 @@
    "townGap": 300,
    "gap": 60,
    "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
   }
  },
- "mainWalkableShare": 0.787,
+ "mainWalkableShare": 0.784,
  "settlements": [
   {
    "name": "Gorsehold",
@@ -105,36 +123,36 @@
    "name": "Gorsehold Redoubt",
    "template": "ruined_fort",
    "friendly": false,
-   "x": 1486,
-   "z": 274,
-   "yaw": 0.79,
+   "x": 1929,
+   "z": 542,
+   "yaw": -1.57,
    "radius": 22,
-   "level": 6
+   "level": 8
   },
   {
    "type": "fort",
    "id": "fort_gorse_march_1",
    "name": "Gorsehold Outpost",
-   "template": "ruined_fort",
-   "friendly": false,
-   "x": 1767,
-   "z": 1863,
-   "yaw": -2.75,
-   "radius": 22,
-   "level": 6
+   "template": "palisade_fort",
+   "friendly": true,
+   "x": 1757,
+   "z": 1197,
+   "yaw": -1.18,
+   "radius": 24,
+   "level": 8
   },
   {
    "type": "farm",
    "id": "farm_gorse_march_0",
-   "name": "Gorsehold Sheepfold",
-   "template": "sheep",
+   "name": "Gorsehold Farm",
+   "template": "arable",
    "flavour": null,
    "settlement": "Gorsehold",
-   "x": 1692,
-   "z": 1222,
-   "yaw": -1.18,
-   "radius": 24,
-   "level": 6
+   "x": 1503,
+   "z": 1419,
+   "yaw": 2.75,
+   "radius": 22,
+   "level": 7
   },
   {
    "type": "farm",
@@ -143,9 +161,9 @@
    "template": "arable",
    "flavour": null,
    "settlement": "Burnt Barns",
-   "x": 1697,
-   "z": 402,
-   "yaw": -1.96,
+   "x": 1501,
+   "z": 365,
+   "yaw": 1.57,
    "radius": 22,
    "level": 6
   },
@@ -156,32 +174,32 @@
    "template": "arable",
    "flavour": "burned",
    "settlement": "Gorsehold",
-   "x": 1516,
-   "z": 1429,
-   "yaw": 2.75,
+   "x": 1482,
+   "z": 1153,
+   "yaw": -0.39,
    "radius": 22,
-   "level": 6
+   "level": 7
   },
   {
    "type": "farm",
    "id": "farm_gorse_march_3",
-   "name": "Burned Burnt Barns Sheepfold",
-   "template": "sheep",
+   "name": "Burned Burnt Barns Farm",
+   "template": "arable",
    "flavour": "burned",
    "settlement": "Burnt Barns",
-   "x": 1544,
-   "z": 454,
-   "yaw": 2.75,
-   "radius": 24,
+   "x": 1695,
+   "z": 391,
+   "yaw": 0.39,
+   "radius": 22,
    "level": 6
   },
   {
    "type": "cave",
    "id": "cave_gorse_march_0",
-   "name": "Beast den",
-   "template": "beast_den",
+   "name": "Smugglers' cave",
+   "template": "smugglers_cave",
    "plan": {
-    "family": "cave_river",
+    "family": "flooded_cistern",
     "floors": 1,
     "level": 7
    },
@@ -196,8 +214,8 @@
    "id": "the_burning_fields",
    "name": "The Gorse That Will Not Burn Out",
    "kind": "compositional",
-   "x": 852,
-   "z": 329,
+   "x": 1969,
+   "z": 1913,
    "yaw": 0,
    "radius": 55,
    "where": "best fit for: open scrub 200 m",
@@ -209,11 +227,13 @@
    "name": "The Avalanche Shelter",
    "x": 306,
    "z": 1743,
-   "yaw": 1.73,
+   "yaw": 4.86,
    "radius": 10,
    "biome": "hills",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
@@ -221,107 +241,125 @@
    "name": "The Broken Aqueduct",
    "x": 928,
    "z": 1876,
-   "yaw": 5.6,
+   "yaw": 4.59,
    "radius": 14,
    "biome": "savanna",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
    "id": "collapsed_tithe_barn",
    "name": "The Tithe Barn",
-   "x": 1175,
-   "z": 906,
-   "yaw": 0.9,
+   "x": 732,
+   "z": 380,
+   "yaw": 4.24,
    "radius": 13,
-   "biome": "badlands",
+   "biome": "shrubland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
    "id": "dry_well",
    "name": "The Dry Well",
-   "x": 279,
-   "z": 75,
-   "yaw": 1.17,
+   "x": 911,
+   "z": 1353,
+   "yaw": 4.52,
    "radius": 10,
-   "biome": "shrubland",
+   "biome": "badlands",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
    "id": "ferry_landing",
    "name": "The Stranded Ferry",
-   "x": 1944,
-   "z": 1537,
-   "yaw": 1.29,
+   "x": 1433,
+   "z": 1926,
+   "yaw": 0.09,
    "radius": 12,
    "biome": "savanna",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
    "id": "giants_cookfire",
    "name": "The Giant's Cookfire",
-   "x": 1970,
-   "z": 796,
-   "yaw": 5.2,
+   "x": 105,
+   "z": 75,
+   "yaw": 3.02,
    "radius": 14,
-   "biome": "badlands",
+   "biome": "shrubland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
    "id": "guildhall_ruin",
    "name": "The Guildhall Shell",
-   "x": 913,
-   "z": 1354,
-   "yaw": 1.26,
+   "x": 1130,
+   "z": 688,
+   "yaw": 4.23,
    "radius": 13,
    "biome": "badlands",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
    "id": "lock_keeper_house",
    "name": "The Lock-Keeper's Cottage",
-   "x": 1345,
-   "z": 1888,
-   "yaw": 2.87,
+   "x": 1888,
+   "z": 1559,
+   "yaw": 5.15,
    "radius": 12,
    "biome": "savanna",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
    "id": "smugglers_cellar",
    "name": "The Smugglers' Cellar",
-   "x": 1952,
-   "z": 66,
-   "yaw": 1.59,
+   "x": 1107,
+   "z": 62,
+   "yaw": 2.36,
    "radius": 14,
    "biome": "badlands",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
    "id": "toppled_statue",
    "name": "The Toppled King",
-   "x": 514,
-   "z": 585,
-   "yaw": 5.98,
+   "x": 1955,
+   "z": 73,
+   "yaw": 2.57,
    "radius": 10,
-   "biome": "hills",
+   "biome": "badlands",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "camp",
@@ -329,15 +367,15 @@
    "monster": "cinder_imp",
    "with": null,
    "level": [
-    6,
+    7,
     8
    ],
    "count": [
     2,
     4
    ],
-   "x": 1255,
-   "z": 465,
+   "x": 1556,
+   "z": 707,
    "yaw": 0,
    "radius": 10
   },
@@ -348,14 +386,14 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1635,
-   "z": 721,
+   "x": 1647,
+   "z": 64,
    "yaw": 0,
    "radius": 10
   },
@@ -365,8 +403,8 @@
    "monster": "crag_hyena",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
@@ -390,8 +428,8 @@
     2,
     4
    ],
-   "x": 842,
-   "z": 802,
+   "x": 1966,
+   "z": 911,
    "yaw": 0,
    "radius": 10
   },
@@ -401,15 +439,15 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    6,
+    7,
     8
    ],
    "count": [
     2,
     4
    ],
-   "x": 1119,
-   "z": 79,
+   "x": 1126,
+   "z": 1060,
    "yaw": 0,
    "radius": 10
   },
@@ -420,14 +458,14 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1195,
-   "z": 1563,
+   "x": 825,
+   "z": 858,
    "yaw": 0,
    "radius": 10
   },
@@ -444,8 +482,8 @@
     2,
     4
    ],
-   "x": 1485,
-   "z": 988,
+   "x": 1219,
+   "z": 1644,
    "yaw": 0,
    "radius": 10
   },
@@ -455,8 +493,8 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
@@ -474,14 +512,14 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     1,
     2
    ],
-   "x": 1252,
-   "z": 1235,
+   "x": 526,
+   "z": 669,
    "yaw": 0,
    "radius": 10
   },
@@ -491,15 +529,15 @@
    "monster": "brigand_captain",
    "with": null,
    "level": [
-    6,
+    7,
     8
    ],
    "count": [
     1,
     2
    ],
-   "x": 1977,
-   "z": 502,
+   "x": 709,
+   "z": 1619,
    "yaw": 0,
    "radius": 10
   },
@@ -516,8 +554,8 @@
     2,
     4
    ],
-   "x": 1975,
-   "z": 1128,
+   "x": 1656,
+   "z": 1737,
    "yaw": 0,
    "radius": 10
   },
@@ -534,8 +572,8 @@
     2,
     4
    ],
-   "x": 713,
-   "z": 1625,
+   "x": 1190,
+   "z": 1355,
    "yaw": 0,
    "radius": 10
   },
@@ -544,30 +582,30 @@
    "id": "rare_deserter_gutch",
    "slot": 0,
    "name": "Sergeant Gutch",
-   "x": 1682,
-   "z": 80,
+   "x": 1150,
+   "z": 353,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1691,
-     4
+     1120,
+     291
     ],
     [
-     1751,
-     41
+     1170,
+     302
     ],
     [
-     1709,
-     143
+     1216,
+     380
     ],
     [
-     1643,
-     128
+     1156,
+     435
     ],
     [
-     1631,
-     65
+     1083,
+     383
     ]
    ],
    "respawnMin": [
@@ -581,30 +619,30 @@
    "id": "rare_burnt_barns_hound",
    "slot": 1,
    "name": "The Burnt Barns Hound",
-   "x": 1401,
-   "z": 767,
+   "x": 1400,
+   "z": 91,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1390,
-     682
+     1517,
+     72
     ],
     [
-     1485,
-     703
+     1416,
+     174
     ],
     [
-     1453,
-     835
+     1309,
+     158
     ],
     [
-     1338,
-     868
+     1332,
+     40
     ],
     [
-     1290,
-     733
+     1420,
+     17
     ]
    ],
    "respawnMin": [
@@ -617,8 +655,8 @@
    "type": "waystone",
    "id": "ws_z13_04_gorsehold",
    "name": "Gorsehold",
-   "x": 1564.9,
-   "z": 1384.6,
+   "x": 1560,
+   "z": 1282.8,
    "yaw": 0,
    "settlement": "Gorsehold",
    "radius": 1
@@ -627,8 +665,8 @@
    "type": "waystone",
    "id": "ws_z13_04_burnt_barns",
    "name": "Burnt Barns",
-   "x": 1557.1,
-   "z": 335.8,
+   "x": 1577,
+   "z": 422.2,
    "yaw": 0,
    "settlement": "Burnt Barns",
    "radius": 1
@@ -636,12 +674,31 @@
   {
    "type": "waystone",
    "id": "ws_z13_04_door",
-   "name": "Barrow entrance",
-   "x": 1394,
-   "z": 1256.6,
+   "name": "The Signal Stair",
+   "x": 1355.6,
+   "z": 1291.6,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_door",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1327,
+   "z": 1296,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
   },
   {
    "type": "npc",
@@ -649,9 +706,9 @@
    "name": "Captain Hollis Gorse",
    "role": "guard",
    "at": "Gorsehold Redoubt",
-   "x": 1484.1,
-   "z": 274.7,
-   "yaw": 0.37,
+   "x": 1928.5,
+   "z": 539.9,
+   "yaw": 1,
    "radius": 1
   },
   {
@@ -662,7 +719,7 @@
    "at": "Burnt Barns",
    "x": 1592.8,
    "z": 372.2,
-   "yaw": 5.39,
+   "yaw": 3.23,
    "radius": 1
   },
   {
@@ -673,7 +730,7 @@
    "at": "Gorsehold",
    "x": 1560.1,
    "z": 1289.6,
-   "yaw": 5.49,
+   "yaw": 1.56,
    "radius": 1
   },
   {
@@ -706,65 +763,65 @@
   },
   {
    "type": "wayside",
-   "id": "cold_campfire_gorse_march_0",
-   "kind": "cold_campfire",
-   "name": "Cold Campfire",
-   "x": 153,
-   "z": 385,
-   "yaw": 4.86,
+   "id": "boundary_stake_gorse_march_0",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 26,
+   "z": 1550,
+   "yaw": 2.48,
    "radius": 4,
    "filler": true
   },
   {
-   "type": "wayside",
-   "id": "milestone_gorse_march_1",
-   "kind": "milestone",
-   "name": "Milestone",
-   "x": 68,
-   "z": 1507,
-   "yaw": 5.98,
-   "radius": 3,
-   "filler": true
-  },
-  {
-   "type": "wayside",
-   "id": "milestone_gorse_march_2",
-   "kind": "milestone",
-   "name": "Milestone",
-   "x": 546,
-   "z": 198,
-   "yaw": 1.02,
-   "radius": 3,
-   "filler": true
-  },
-  {
    "type": "camp",
-   "id": "camp_gorse_march_f3",
-   "monster": "crag_hyena",
+   "id": "camp_gorse_march_f1",
+   "monster": "cinder_imp",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 787,
-   "z": 1908,
+   "x": 356,
+   "z": 414,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cold_campfire_gorse_march_4",
+   "id": "cold_campfire_gorse_march_2",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 936,
-   "z": 1060,
-   "yaw": 1.93,
+   "x": 677,
+   "z": 1939,
+   "yaw": 6.16,
    "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gorse_march_3",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 36,
+   "z": 1281,
+   "yaw": 0.2,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_4",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 476,
+   "z": 176,
+   "yaw": 1.96,
+   "radius": 3,
    "filler": true
   },
   {
@@ -774,48 +831,56 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 1409,
-   "z": 60,
+   "x": 787,
+   "z": 1148,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "lost_signpost_gorse_march_6",
-   "kind": "lost_signpost",
-   "name": "Lost Signpost",
-   "x": 1024,
-   "z": 592,
-   "yaw": 0.64,
-   "radius": 3,
-   "filler": true
-  },
-  {
-   "type": "wayside",
-   "id": "cold_campfire_gorse_march_7",
-   "kind": "cold_campfire",
-   "name": "Cold Campfire",
-   "x": 37,
-   "z": 1283,
-   "yaw": 3.86,
+   "id": "boundary_stake_gorse_march_6",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1680,
+   "z": 937,
+   "yaw": 3.82,
    "radius": 4,
    "filler": true
   },
   {
+   "type": "camp",
+   "id": "camp_gorse_march_f7",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 919,
+   "z": 581,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
    "type": "wayside",
-   "id": "milestone_gorse_march_8",
-   "kind": "milestone",
-   "name": "Milestone",
-   "x": 1752,
-   "z": 952,
-   "yaw": 4.19,
+   "id": "lost_signpost_gorse_march_8",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1237,
+   "z": 953,
+   "yaw": 2.15,
    "radius": 3,
    "filler": true
   },
@@ -825,34 +890,64 @@
    "monster": "brigand_captain",
    "with": null,
    "level": [
-    6,
+    7,
     8
    ],
    "count": [
     2,
     3
    ],
-   "x": 568,
-   "z": 1779,
+   "x": 1680,
+   "z": 1987,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "bone_heap_gorse_march_10",
-   "kind": "bone_heap",
-   "name": "Old Bones",
-   "x": 1548,
-   "z": 1704,
-   "yaw": 3.31,
-   "radius": 4,
+   "id": "shrine_niche_gorse_march_10",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 92,
+   "z": 438,
+   "yaw": 1.89,
+   "radius": 3,
    "filler": true
   },
   {
    "type": "camp",
    "id": "camp_gorse_march_f11",
    "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 886,
+   "z": 162,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gorse_march_12",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 961,
+   "z": 1613,
+   "yaw": 3.43,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_f13",
+   "monster": "cinder_imp",
    "with": null,
    "level": [
     7,
@@ -862,50 +957,20 @@
     2,
     3
    ],
-   "x": 768,
-   "z": 1223,
+   "x": 256,
+   "z": 1914,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cairn_gorse_march_12",
-   "kind": "cairn",
-   "name": "Cairn",
-   "x": 143,
-   "z": 1921,
-   "yaw": 5.07,
-   "radius": 4,
-   "filler": true
-  },
-  {
-   "type": "camp",
-   "id": "camp_gorse_march_f13",
-   "monster": "cinder_imp",
-   "with": null,
-   "level": [
-    6,
-    8
-   ],
-   "count": [
-    2,
-    3
-   ],
-   "x": 943,
-   "z": 64,
-   "yaw": 0,
-   "radius": 10,
-   "filler": true
-  },
-  {
-   "type": "wayside",
-   "id": "broken_wheel_gorse_march_14",
-   "kind": "broken_wheel",
-   "name": "Broken Wheel",
-   "x": 1556,
-   "z": 2008,
-   "yaw": 5.14,
+   "id": "roadside_grave_gorse_march_14",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1364,
+   "z": 829,
+   "yaw": 3.36,
    "radius": 4,
    "filler": true
   },
@@ -922,21 +987,21 @@
     2,
     3
    ],
-   "x": 1062,
-   "z": 1595,
+   "x": 1174,
+   "z": 1872,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "cairn_gorse_march_16",
-   "kind": "cairn",
-   "name": "Cairn",
-   "x": 397,
-   "z": 384,
-   "yaw": 0.04,
-   "radius": 4,
+   "id": "milestone_gorse_march_16",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 65,
+   "z": 1784,
+   "yaw": 4.97,
+   "radius": 3,
    "filler": true
   },
   {
@@ -945,27 +1010,27 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    6,
+    7,
     8
    ],
    "count": [
     2,
     3
    ],
-   "x": 196,
-   "z": 977,
+   "x": 1788,
+   "z": 744,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "bone_heap_gorse_march_18",
-   "kind": "bone_heap",
-   "name": "Old Bones",
-   "x": 250,
-   "z": 572,
-   "yaw": 1.17,
+   "id": "standing_stone_gorse_march_18",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 279,
+   "z": 966,
+   "yaw": 3.97,
    "radius": 4,
    "filler": true
   },
@@ -982,21 +1047,21 @@
     2,
     3
    ],
-   "x": 633,
-   "z": 802,
+   "x": 659,
+   "z": 1425,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "boundary_stake_gorse_march_20",
-   "kind": "boundary_stake",
-   "name": "Boundary Stakes",
-   "x": 483,
-   "z": 1534,
-   "yaw": 0.41,
-   "radius": 4,
+   "id": "banner_post_gorse_march_20",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 248,
+   "z": 570,
+   "yaw": 1.66,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1006,27 +1071,27 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 1949,
-   "z": 1986,
+   "x": 1311,
+   "z": 532,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "ribbon_tree_gorse_march_22",
-   "kind": "ribbon_tree",
-   "name": "Ribbon Tree",
-   "x": 1140,
-   "z": 1804,
-   "yaw": 2.06,
-   "radius": 5,
+   "id": "bone_heap_gorse_march_22",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1444,
+   "z": 1676,
+   "yaw": 0.85,
+   "radius": 4,
    "filler": true
   },
   {
@@ -1042,21 +1107,21 @@
     2,
     3
    ],
-   "x": 637,
-   "z": 639,
+   "x": 1541,
+   "z": 847,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "boundary_stake_gorse_march_24",
-   "kind": "boundary_stake",
-   "name": "Boundary Stakes",
-   "x": 384,
-   "z": 1156,
-   "yaw": 6.04,
-   "radius": 4,
+   "id": "lost_signpost_gorse_march_24",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 519,
+   "z": 1768,
+   "yaw": 3.32,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1065,15 +1130,15 @@
    "monster": "cinder_imp",
    "with": null,
    "level": [
-    6,
+    7,
     8
    ],
    "count": [
     2,
     3
    ],
-   "x": 1728,
-   "z": 1588,
+   "x": 1984,
+   "z": 1140,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1083,9 +1148,9 @@
    "id": "boundary_stake_gorse_march_26",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 661,
-   "z": 1411,
-   "yaw": 5.15,
+   "x": 1900,
+   "z": 284,
+   "yaw": 1.53,
    "radius": 4,
    "filler": true
   },
@@ -1102,20 +1167,20 @@
     2,
     3
    ],
-   "x": 136,
-   "z": 203,
+   "x": 409,
+   "z": 1527,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "lost_signpost_gorse_march_28",
-   "kind": "lost_signpost",
-   "name": "Lost Signpost",
-   "x": 1896,
-   "z": 1324,
-   "yaw": 6.2,
+   "id": "banner_post_gorse_march_28",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 377,
+   "z": 1158,
+   "yaw": 4.86,
    "radius": 3,
    "filler": true
   },
@@ -1126,27 +1191,27 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 1888,
-   "z": 272,
+   "x": 334,
+   "z": 236,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "milestone_gorse_march_30",
-   "kind": "milestone",
-   "name": "Milestone",
-   "x": 49,
-   "z": 1775,
-   "yaw": 4.99,
-   "radius": 3,
+   "id": "sheep_pen_gorse_march_30",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 676,
+   "z": 132,
+   "yaw": 1.78,
+   "radius": 5,
    "filler": true
   },
   {
@@ -1155,28 +1220,28 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 739,
-   "z": 97,
+   "x": 1040,
+   "z": 876,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "broken_wheel_gorse_march_32",
-   "kind": "broken_wheel",
-   "name": "Broken Wheel",
-   "x": 1208,
-   "z": 677,
-   "yaw": 2.81,
-   "radius": 4,
+   "id": "milestone_gorse_march_32",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1928,
+   "z": 1348,
+   "yaw": 2.36,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1186,26 +1251,26 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 647,
-   "z": 363,
+   "x": 643,
+   "z": 640,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "bone_heap_gorse_march_34",
-   "kind": "bone_heap",
-   "name": "Old Bones",
-   "x": 1112,
-   "z": 300,
-   "yaw": 1.69,
+   "id": "stone_trough_gorse_march_34",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 573,
+   "z": 463,
+   "yaw": 2.8,
    "radius": 4,
    "filler": true
   },
@@ -1215,28 +1280,28 @@
    "monster": "frost_stalker",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 1183,
-   "z": 1934,
+   "x": 936,
+   "z": 354,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "boundary_stake_gorse_march_36",
-   "kind": "boundary_stake",
-   "name": "Boundary Stakes",
-   "x": 1812,
-   "z": 624,
-   "yaw": 1,
-   "radius": 4,
+   "id": "milestone_gorse_march_36",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1684,
+   "z": 1539,
+   "yaw": 3.72,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1246,27 +1311,27 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 808,
-   "z": 946,
+   "x": 621,
+   "z": 1137,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "broken_wheel_gorse_march_38",
-   "kind": "broken_wheel",
-   "name": "Broken Wheel",
-   "x": 1284,
-   "z": 220,
-   "yaw": 0.5,
-   "radius": 4,
+   "id": "milestone_gorse_march_38",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1324,
+   "z": 272,
+   "yaw": 5.96,
+   "radius": 3,
    "filler": true
   },
   {
@@ -1282,20 +1347,20 @@
     2,
     3
    ],
-   "x": 922,
-   "z": 609,
+   "x": 1988,
+   "z": 729,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "broken_wheel_gorse_march_40",
-   "kind": "broken_wheel",
-   "name": "Broken Wheel",
-   "x": 1116,
-   "z": 1387,
-   "yaw": 0.03,
+   "id": "scarecrow_gorse_march_40",
+   "kind": "scarecrow",
+   "name": "Scarecrow",
+   "x": 631,
+   "z": 836,
+   "yaw": 0.5,
    "radius": 4,
    "filler": true
   },
@@ -1306,26 +1371,26 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 1376,
-   "z": 1632,
+   "x": 171,
+   "z": 208,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "bone_heap_gorse_march_42",
-   "kind": "bone_heap",
-   "name": "Old Bones",
-   "x": 1060,
-   "z": 1207,
-   "yaw": 0.85,
+   "id": "boundary_stake_gorse_march_42",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1706,
+   "z": 739,
+   "yaw": 2.24,
    "radius": 4,
    "filler": true
   },
@@ -1342,20 +1407,20 @@
     2,
     3
    ],
-   "x": 979,
-   "z": 1752,
+   "x": 1031,
+   "z": 1179,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "boundary_stake_gorse_march_44",
-   "kind": "boundary_stake",
-   "name": "Boundary Stakes",
-   "x": 880,
-   "z": 1544,
-   "yaw": 0.03,
+   "id": "drying_rack_camp_gorse_march_44",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 205,
+   "z": 1611,
+   "yaw": 2.83,
    "radius": 4,
    "filler": true
   },
@@ -1366,32 +1431,354 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 1928,
-   "z": 1732,
+   "x": 891,
+   "z": 1031,
    "yaw": 0,
    "radius": 10,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "dolmen_gorse_march_46",
-   "kind": "dolmen",
-   "name": "Dolmen",
-   "x": 367,
-   "z": 1913,
-   "yaw": 0.56,
+   "id": "lost_signpost_gorse_march_46",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1328,
+   "z": 1492,
+   "yaw": 1.78,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_1",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 272,
+   "z": 40,
+   "yaw": 0.46,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s1",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1729,
+   "z": 567,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_2",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1815,
+   "z": 1719,
+   "yaw": 6.22,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gorse_march_d1",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 2007,
+   "z": 1705,
+   "yaw": 1.14,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_3",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1744,
+   "z": 218,
+   "yaw": 4.67,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_1",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1057,
+   "z": 1473,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1003,
+     1511
+    ],
+    [
+     1021,
+     1422
+    ],
+    [
+     1125,
+     1436
+    ],
+    [
+     1113,
+     1533
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s2",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1831,
+   "z": 1023,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_4",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1279,
+   "z": 2007,
+   "yaw": 5.16,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_1",
+   "role": "scarecrow_maker",
+   "name": "Scarecrow maker",
+   "work": "gather",
+   "chatter": [
+    "role.scarecrow_maker"
+   ],
+   "x": 1320,
+   "z": 1784,
+   "yaw": 5.83,
+   "radius": 6,
+   "path": [
+    [
+     1315,
+     1777
+    ],
+    [
+     1327,
+     1781
+    ],
+    [
+     1319,
+     1792
+    ]
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s3",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1078,
+   "z": 1730,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_gorse_march_d2",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 1473,
+   "z": 544,
+   "yaw": 2.5,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_5",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 573,
+   "z": 282,
+   "yaw": 3.22,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gorse_march_d3",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 818,
+   "z": 1505,
+   "yaw": 2.02,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_6",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 856,
+   "z": 1734,
+   "yaw": 1.36,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_2",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1431,
+   "z": 975,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1459,
+     942
+    ],
+    [
+     1466,
+     998
+    ],
+    [
+     1399,
+     1012
+    ],
+    [
+     1387,
+     959
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_7",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1787,
+   "z": 1415,
+   "yaw": 1.36,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_gorse_march_d4",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 815,
+   "z": 705,
+   "yaw": 4.38,
    "radius": 5,
    "filler": true
   },
   {
+   "type": "wayside",
+   "id": "milestone_gorse_march_d5",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 161,
+   "z": 1062,
+   "yaw": 1.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_8",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 400,
+   "z": 568,
+   "yaw": 1.11,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_9",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 572,
+   "z": 32,
+   "yaw": 0.76,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
    "type": "camp",
-   "id": "camp_gorse_march_f47",
+   "id": "camp_gorse_march_s4",
    "monster": "frost_stalker",
    "with": null,
    "level": [
@@ -1402,56 +1789,3280 @@
     2,
     3
    ],
-   "x": 609,
-   "z": 1139,
+   "x": 760,
+   "z": 1304,
    "yaw": 0,
-   "radius": 10,
-   "filler": true
+   "radius": 8,
+   "stray": true
   },
   {
    "type": "wayside",
-   "id": "broken_wheel_gorse_march_48",
-   "kind": "broken_wheel",
-   "name": "Broken Wheel",
-   "x": 88,
-   "z": 28,
-   "yaw": 3.93,
+   "id": "cairn_gorse_march_d6",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 2009,
+   "z": 391,
+   "yaw": 3.73,
    "radius": 4,
    "filler": true
   },
   {
+   "type": "curio",
+   "id": "cu_gorse_march_10",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 968,
+   "z": 735,
+   "yaw": 4.11,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
    "type": "camp",
-   "id": "camp_gorse_march_f49",
-   "monster": "cinder_imp",
+   "id": "roam_gorse_march_3",
+   "monster": "brigand_archer",
    "with": null,
    "level": [
     6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1296,
+   "z": 688,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1316,
+     642
+    ],
+    [
+     1328,
+     693
+    ],
+    [
+     1292,
+     728
+    ],
+    [
+     1265,
+     684
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_d7",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 757,
+   "z": 504,
+   "yaw": 4.17,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_11",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1800,
+   "z": 40,
+   "yaw": 4.11,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "scarecrow_gorse_march_d8",
+   "kind": "scarecrow",
+   "name": "Scarecrow",
+   "x": 1777,
+   "z": 1862,
+   "yaw": 3.15,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_gorse_march_d9",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 30,
+   "z": 296,
+   "yaw": 3.47,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_12",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 792,
+   "z": 40,
+   "yaw": 3.01,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_13",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 424,
+   "z": 40,
+   "yaw": 4.4,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_14",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 581,
+   "z": 1533,
+   "yaw": 5.87,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_gorse_march_d10",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 1576,
+   "z": 1872,
+   "yaw": 5.93,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gorse_march_d11",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 757,
+   "z": 994,
+   "yaw": 4.36,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_15",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1113,
+   "z": 2018,
+   "yaw": 3.3,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_16",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1616,
+   "z": 1064,
+   "yaw": 4.1,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_2",
+   "role": "prospector",
+   "name": "Prospector",
+   "work": "dig",
+   "chatter": [
+    "role.prospector"
+   ],
+   "x": 1064,
+   "z": 552,
+   "yaw": 2.35,
+   "radius": 6,
+   "path": [
+    [
+     1084,
+     554
+    ],
+    [
+     1057,
+     570
+    ],
+    [
+     1058,
+     531
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_17",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1543,
+   "z": 1575,
+   "yaw": 1.62,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_d12",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 615,
+   "z": 1278,
+   "yaw": 4.04,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_d13",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 652,
+   "z": 1753,
+   "yaw": 2.71,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_18",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 2002,
+   "z": 1457,
+   "yaw": 1.39,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s5",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1184,
+   "z": 824,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_19",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 960,
+   "z": 40,
+   "yaw": 2.03,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_4",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 784,
+   "z": 263,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     819,
+     302
+    ],
+    [
+     761,
+     302
+    ],
+    [
+     737,
+     229
+    ],
+    [
+     816,
+     221
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_20",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 775,
+   "z": 1861,
+   "yaw": 2.53,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_gorse_march_d14",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1824,
+   "z": 880,
+   "yaw": 6,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s6",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1848,
+   "z": 407,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_21",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1033,
+   "z": 197,
+   "yaw": 3.84,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_3",
+   "role": "prospector",
+   "name": "Prospector",
+   "work": "dig",
+   "chatter": [
+    "role.prospector"
+   ],
+   "x": 1582,
+   "z": 195,
+   "yaw": 1.3,
+   "radius": 6,
+   "path": [
+    [
+     1583,
+     183
+    ],
+    [
+     1589,
+     202
+    ],
+    [
+     1572,
+     201
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_22",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 1169,
+   "z": 1216,
+   "yaw": 5.08,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_gorse_march_d15",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 132,
+   "z": 1933,
+   "yaw": 2.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_gorse_march_d16",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 205,
+   "z": 414,
+   "yaw": 0.72,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_23",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 2009,
+   "z": 208,
+   "yaw": 1.69,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_5",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1351,
+   "z": 400,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1393,
+     374
+    ],
+    [
+     1396,
+     437
+    ],
+    [
+     1308,
+     425
+    ],
+    [
+     1322,
+     375
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gorse_march_d17",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 502,
+   "z": 1672,
+   "yaw": 4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_gorse_march_d18",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 504,
+   "z": 1207,
+   "yaw": 4.63,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_gorse_march_d19",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 39,
+   "z": 560,
+   "yaw": 4.9,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s7",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1544,
+   "z": 2010,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_24",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1815,
+   "z": 2008,
+   "yaw": 0.49,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_25",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1600,
+   "z": 543,
+   "yaw": 4.43,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s8",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
     8
    ],
    "count": [
     2,
     3
    ],
-   "x": 1025,
-   "z": 777,
+   "x": 910,
+   "z": 1247,
    "yaw": 0,
-   "radius": 10,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_26",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 480,
+   "z": 387,
+   "yaw": 5.69,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_gorse_march_d20",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 74,
+   "z": 851,
+   "yaw": 1.5,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_27",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 1856,
+   "z": 160,
+   "yaw": 1.34,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_28",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 824,
+   "z": 1960,
+   "yaw": 0.12,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s9",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1477,
+   "z": 1796,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gorse_march_d21",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 143,
+   "z": 1525,
+   "yaw": 3.75,
+   "radius": 3,
    "filler": true
   },
   {
    "type": "wayside",
-   "id": "fallen_pillar_gorse_march_50",
+   "id": "boundary_stake_gorse_march_d22",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 99,
+   "z": 1657,
+   "yaw": 5.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_29",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1072,
+   "z": 1304,
+   "yaw": 1.62,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s10",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1184,
+   "z": 175,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_gorse_march_d23",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 1894,
+   "z": 1234,
+   "yaw": 2.2,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_30",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 877,
+   "z": 462,
+   "yaw": 2.25,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s11",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1020,
+   "z": 1008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_31",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 1345,
+   "z": 1608,
+   "yaw": 1.27,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_d24",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 364,
+   "z": 1287,
+   "yaw": 5.48,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_32",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 2008,
+   "z": 1264,
+   "yaw": 4.42,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_gorse_march_d25",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1057,
+   "z": 1903,
+   "yaw": 6.2,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_gorse_march_d26",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 472,
+   "z": 1078,
+   "yaw": 0.68,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_33",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 156,
+   "z": 684,
+   "yaw": 6.1,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_4",
+   "role": "prospector",
+   "name": "Prospector",
+   "work": "dig",
+   "chatter": [
+    "role.prospector"
+   ],
+   "x": 1200,
+   "z": 582,
+   "yaw": 1.17,
+   "radius": 6,
+   "path": [
+    [
+     1182,
+     574
+    ],
+    [
+     1215,
+     578
+    ],
+    [
+     1194,
+     601
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_34",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 304,
+   "z": 1625,
+   "yaw": 2.41,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s12",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2008,
+   "z": 1584,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_gorse_march_d27",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 706,
+   "z": 763,
+   "yaw": 0.65,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_35",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1832,
+   "z": 632,
+   "yaw": 6.19,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_36",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1775,
+   "z": 1607,
+   "yaw": 1.75,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s13",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 546,
+   "z": 1446,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_37",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 70,
+   "z": 191,
+   "yaw": 1.52,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gorse_march_d28",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 871,
+   "z": 1603,
+   "yaw": 3.91,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_38",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1432,
+   "z": 1537,
+   "yaw": 4.02,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s14",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2006,
+   "z": 1029,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_39",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 340,
+   "z": 1843,
+   "yaw": 3.49,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_40",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 928,
+   "z": 920,
+   "yaw": 4.94,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s15",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 969,
+   "z": 1767,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_41",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1200,
+   "z": 1759,
+   "yaw": 3.41,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_gorse_march_d29",
    "kind": "fallen_pillar",
    "name": "Fallen Pillar",
-   "x": 25,
-   "z": 523,
-   "yaw": 2.96,
+   "x": 130,
+   "z": 533,
+   "yaw": 0.62,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_42",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1554,
+   "z": 1690,
+   "yaw": 0.22,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_43",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 351,
+   "z": 123,
+   "yaw": 5.82,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s16",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1727,
+   "z": 1072,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_gorse_march_d30",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 544,
+   "z": 880,
+   "yaw": 1.87,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_5",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 523,
+   "z": 542,
+   "yaw": 2.33,
+   "radius": 6,
+   "path": [
+    [
+     519,
+     527
+    ],
+    [
+     543,
+     551
+    ],
+    [
+     510,
+     558
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_44",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1224,
+   "z": 1521,
+   "yaw": 0.75,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s17",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1312,
+   "z": 1904,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_gorse_march_d31",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1816,
+   "z": 1312,
+   "yaw": 3.71,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_45",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1874,
+   "z": 1130,
+   "yaw": 5.98,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s18",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1224,
+   "z": 64,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_46",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1896,
+   "z": 800,
+   "yaw": 4.89,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_6",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1577,
+   "z": 960,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1559,
+     910
+    ],
+    [
+     1621,
+     939
+    ],
+    [
+     1589,
+     1017
+    ],
+    [
+     1520,
+     980
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_47",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1657,
+   "z": 830,
+   "yaw": 5.43,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s19",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1792,
+   "z": 312,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_48",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 923,
+   "z": 1152,
+   "yaw": 2.17,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_49",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 172,
+   "z": 961,
+   "yaw": 0.67,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_50",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1128,
+   "z": 944,
+   "yaw": 3.04,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s20",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1647,
+   "z": 641,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "scarecrow_gorse_march_d32",
+   "kind": "scarecrow",
+   "name": "Scarecrow",
+   "x": 1912,
+   "z": 1769,
+   "yaw": 5.46,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_51",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1374,
+   "z": 1401,
+   "yaw": 4.35,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_52",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 737,
+   "z": 875,
+   "yaw": 3.28,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_53",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 421,
+   "z": 1746,
+   "yaw": 3.07,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_54",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 601,
+   "z": 1651,
+   "yaw": 3.79,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gorse_march_d33",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 773,
+   "z": 1723,
+   "yaw": 0.58,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_d34",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 823,
+   "z": 1376,
+   "yaw": 1.43,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s21",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1896,
+   "z": 1448,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_d35",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 706,
+   "z": 1186,
+   "yaw": 5.86,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_55",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 576,
+   "z": 160,
+   "yaw": 1.06,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s22",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 991,
+   "z": 448,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_d36",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1084,
+   "z": 774,
+   "yaw": 3.64,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_gorse_march_d37",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 451,
+   "z": 257,
+   "yaw": 4.34,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_56",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1633,
+   "z": 1623,
+   "yaw": 4.16,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_57",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 658,
+   "z": 1028,
+   "yaw": 4.38,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s23",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1689,
+   "z": 1433,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_58",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1232,
+   "z": 1056,
+   "yaw": 3.73,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_59",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 394,
+   "z": 1394,
+   "yaw": 0.82,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_60",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1912,
+   "z": 1664,
+   "yaw": 0.74,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s24",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 644,
+   "z": 361,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gorse_march_d38",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1680,
+   "z": 1840,
+   "yaw": 0.69,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_61",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1064,
+   "z": 1632,
+   "yaw": 3.71,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s25",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1600,
+   "z": 1489,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_62",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1815,
+   "z": 512,
+   "yaw": 0.99,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_gorse_march_d39",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 937,
+   "z": 1440,
+   "yaw": 0.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_63",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1736,
+   "z": 120,
+   "yaw": 3.89,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_gorse_march_d40",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 731,
+   "z": 1531,
+   "yaw": 1.49,
    "radius": 5,
    "filler": true
   },
   {
    "type": "camp",
-   "id": "camp_gorse_march_f51",
+   "id": "camp_gorse_march_s26",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 932,
+   "z": 254,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gorse_march_d41",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 656,
+   "z": 508,
+   "yaw": 4.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_6",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 928,
+   "z": 824,
+   "yaw": 4.98,
+   "radius": 6,
+   "path": [
+    [
+     927,
+     821
+    ],
+    [
+     932,
+     826
+    ],
+    [
+     925,
+     826
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_64",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 233,
+   "z": 116,
+   "yaw": 3.66,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s27",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2007,
+   "z": 624,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_gorse_march_d42",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 620,
+   "z": 946,
+   "yaw": 3.55,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_65",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1273,
+   "z": 1417,
+   "yaw": 5.01,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_7",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1432,
+   "z": 272,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1468,
+     243
+    ],
+    [
+     1462,
+     342
+    ],
+    [
+     1393,
+     313
+    ],
+    [
+     1411,
+     231
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_gorse_march_d43",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 250,
+   "z": 492,
+   "yaw": 2.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_66",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 132,
+   "z": 750,
+   "yaw": 4.91,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_gorse_march_d44",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1416,
+   "z": 624,
+   "yaw": 5.02,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_67",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 431,
+   "z": 479,
+   "yaw": 4.3,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s28",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1791,
+   "z": 1510,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_68",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 692,
+   "z": 33,
+   "yaw": 6.21,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_69",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1024,
+   "z": 303,
+   "yaw": 2.84,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s29",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1280,
+   "z": 873,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_70",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 995,
+   "z": 647,
+   "yaw": 5.37,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gorse_march_d45",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 2020,
+   "z": 309,
+   "yaw": 0.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gorse_march_d46",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1376,
+   "z": 2008,
+   "yaw": 3.2,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_gorse_march_d47",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 729,
+   "z": 591,
+   "yaw": 3.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_d48",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1755,
+   "z": 660,
+   "yaw": 5.83,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_8",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1889,
+   "z": 705,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1846,
+     682
+    ],
+    [
+     1901,
+     628
+    ],
+    [
+     1956,
+     731
+    ],
+    [
+     1864,
+     756
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s30",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1462,
+   "z": 802,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_71",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 763,
+   "z": 138,
+   "yaw": 0.26,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_72",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 2008,
+   "z": 824,
+   "yaw": 5.05,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s31",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1745,
+   "z": 1776,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_gorse_march_d49",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1537,
+   "z": 608,
+   "yaw": 2.35,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_73",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 640,
+   "z": 232,
+   "yaw": 3.17,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gorse_march_d50",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 529,
+   "z": 1853,
+   "yaw": 3.09,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_74",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1767,
+   "z": 952,
+   "yaw": 6.12,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_75",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 1664,
+   "z": 264,
+   "yaw": 1.06,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_gorse_march_d51",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 1241,
+   "z": 1272,
+   "yaw": 6.14,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gorse_march_d52",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 749,
+   "z": 1444,
+   "yaw": 3.15,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_76",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1568,
+   "z": 1776,
+   "yaw": 4.58,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gorse_march_d53",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 249,
+   "z": 262,
+   "yaw": 5.89,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_77",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 479,
+   "z": 71,
+   "yaw": 0.38,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s32",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 840,
+   "z": 951,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gorse_march_d54",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1728,
+   "z": 1344,
+   "yaw": 2.76,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gorse_march_d55",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 848,
+   "z": 644,
+   "yaw": 6.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_9",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1744,
+   "z": 840,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1764,
+     756
+    ],
+    [
+     1806,
+     849
+    ],
+    [
+     1726,
+     917
+    ],
+    [
+     1683,
+     811
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s33",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 975,
+   "z": 128,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_78",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 259,
+   "z": 1836,
+   "yaw": 6.22,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_gorse_march_d56",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1920,
+   "z": 993,
+   "yaw": 0.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_79",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1049,
+   "z": 1818,
+   "yaw": 2.99,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_d57",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 493,
+   "z": 1533,
+   "yaw": 5.83,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_80",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1663,
+   "z": 1145,
+   "yaw": 4.34,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s34",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1155,
+   "z": 1968,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_81",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1361,
+   "z": 1695,
+   "yaw": 0.16,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_d58",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 603,
+   "z": 1369,
+   "yaw": 4.29,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_82",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 398,
+   "z": 1686,
+   "yaw": 0.55,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_d59",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 897,
+   "z": 1530,
+   "yaw": 2.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gorse_march_d60",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 732,
+   "z": 1119,
+   "yaw": 1.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_83",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1672,
+   "z": 498,
+   "yaw": 3.04,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_7",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 984,
+   "z": 1296,
+   "yaw": 4.25,
+   "radius": 6,
+   "path": [
+    [
+     1007,
+     1355
+    ],
+    [
+     941,
+     1300
+    ],
+    [
+     999,
+     1234
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_84",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 521,
+   "z": 1286,
+   "yaw": 1.11,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s35",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1233,
+   "z": 488,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_gorse_march_d61",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1240,
+   "z": 248,
+   "yaw": 6.16,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_85",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1856,
+   "z": 1831,
+   "yaw": 2.31,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s36",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1936,
+   "z": 440,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_86",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 874,
+   "z": 84,
+   "yaw": 1.26,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_87",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1397,
+   "z": 1841,
+   "yaw": 4.01,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_88",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1735,
+   "z": 1687,
+   "yaw": 0.74,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gorse_march_d62",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 824,
+   "z": 392,
+   "yaw": 0.02,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s37",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1305,
+   "z": 1008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_89",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 2005,
+   "z": 1367,
+   "yaw": 2.21,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_8",
+   "role": "hunter_lone",
+   "name": "Hunter",
+   "work": "watch",
+   "chatter": [
+    "role.hunter"
+   ],
+   "x": 1760,
+   "z": 1944,
+   "yaw": 3.65,
+   "radius": 6,
+   "path": [
+    [
+     1735,
+     1893
+    ],
+    [
+     1810,
+     1949
+    ],
+    [
+     1734,
+     1979
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_90",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1184,
+   "z": 1128,
+   "yaw": 5.36,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s38",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 824,
+   "z": 1224,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_gorse_march_d63",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 497,
+   "z": 939,
+   "yaw": 1.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_91",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1671,
+   "z": 175,
+   "yaw": 0.32,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s39",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 845,
+   "z": 1824,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_92",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 684,
+   "z": 1349,
+   "yaw": 3.45,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gorse_march_d64",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 609,
+   "z": 767,
+   "yaw": 1.56,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_93",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 1392,
+   "z": 752,
+   "yaw": 3.91,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_94",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 364,
+   "z": 1911,
+   "yaw": 6.15,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_95",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1512,
+   "z": 469,
+   "yaw": 4.41,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_96",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 256,
+   "z": 1695,
+   "yaw": 1.8,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_97",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 76,
+   "z": 606,
+   "yaw": 3.39,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_98",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 983,
+   "z": 1697,
+   "yaw": 4.29,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_99",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 821,
+   "z": 1043,
+   "yaw": 2.47,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_10",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 887,
+   "z": 746,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     817,
+     744
+    ],
+    [
+     890,
+     691
+    ],
+    [
+     938,
+     741
+    ],
+    [
+     914,
+     810
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s40",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1935,
+   "z": 168,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_100",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1027,
+   "z": 1072,
+   "yaw": 5.48,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_9",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1992,
+   "z": 1784,
+   "yaw": 2.42,
+   "radius": 6,
+   "path": [
+    [
+     1991,
+     1747
+    ],
+    [
+     2012,
+     1804
+    ],
+    [
+     1959,
+     1805
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_101",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 384,
+   "z": 519,
+   "yaw": 4.35,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_d65",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 539,
+   "z": 1132,
+   "yaw": 0.08,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_102",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 33,
+   "z": 791,
+   "yaw": 1.71,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s41",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1129,
+   "z": 1801,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_103",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1928,
+   "z": 1072,
+   "yaw": 5.64,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_gorse_march_d66",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 456,
+   "z": 1264,
+   "yaw": 2.24,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_104",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1248,
+   "z": 1933,
+   "yaw": 3.63,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_gorse_march_d67",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1137,
+   "z": 1662,
+   "yaw": 1.46,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s42",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1105,
+   "z": 151,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_d68",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 282,
+   "z": 381,
+   "yaw": 1.52,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_10",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1823,
+   "z": 233,
+   "yaw": 2.35,
+   "radius": 6,
+   "path": [
+    [
+     1826,
+     294
+    ],
+    [
+     1779,
+     219
+    ],
+    [
+     1874,
+     195
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_105",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1518,
+   "z": 1061,
+   "yaw": 2.23,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s43",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1209,
+   "z": 746,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gorse_march_d69",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1496,
+   "z": 152,
+   "yaw": 3.65,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_d70",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 161,
+   "z": 637,
+   "yaw": 1.45,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_106",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 2008,
+   "z": 479,
+   "yaw": 1.88,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s44",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1520,
+   "z": 1927,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_107",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 210,
+   "z": 1028,
+   "yaw": 0.09,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_gorse_march_d71",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 1608,
+   "z": 1944,
+   "yaw": 0.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_108",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1921,
+   "z": 359,
+   "yaw": 5.46,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s45",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1249,
+   "z": 1831,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_109",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 192,
+   "z": 48,
+   "yaw": 1.84,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_110",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1873,
+   "z": 80,
+   "yaw": 5.25,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s46",
    "monster": "crag_hyena",
    "with": null,
    "level": [
@@ -1462,12 +5073,4226 @@
     2,
     3
    ],
-   "x": 426,
-   "z": 77,
+   "x": 564,
+   "z": 1787,
    "yaw": 0,
-   "radius": 10,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_111",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 484,
+   "z": 643,
+   "yaw": 4.2,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gorse_march_d72",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1111,
+   "z": 1160,
+   "yaw": 2.54,
+   "radius": 3,
    "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_112",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1457,
+   "z": 2007,
+   "yaw": 3.82,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s47",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1278,
+   "z": 1704,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_113",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1400,
+   "z": 521,
+   "yaw": 3.57,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_114",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 895,
+   "z": 1699,
+   "yaw": 1.3,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_115",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1857,
+   "z": 1377,
+   "yaw": 5.14,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gorse_march_d73",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1022,
+   "z": 1994,
+   "yaw": 2.49,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_gorse_march_d74",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 651,
+   "z": 1523,
+   "yaw": 3.76,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_116",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1009,
+   "z": 801,
+   "yaw": 3.84,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s48",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 424,
+   "z": 202,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_117",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 450,
+   "z": 1492,
+   "yaw": 4.4,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_11",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1601,
+   "z": 777,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1643,
+     807
+    ],
+    [
+     1571,
+     834
+    ],
+    [
+     1566,
+     751
+    ],
+    [
+     1638,
+     742
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_118",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 1800,
+   "z": 1104,
+   "yaw": 1.29,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_d75",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1040,
+   "z": 712,
+   "yaw": 4.12,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_gorse_march_d76",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 535,
+   "z": 1394,
+   "yaw": 0.74,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_119",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1778,
+   "z": 439,
+   "yaw": 1.61,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_120",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 780,
+   "z": 1918,
+   "yaw": 2.66,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_121",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1503,
+   "z": 1512,
+   "yaw": 4.82,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_122",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 272,
+   "z": 206,
+   "yaw": 0.08,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_gorse_march_d77",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1415,
+   "z": 1465,
+   "yaw": 4.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_123",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1473,
+   "z": 1600,
+   "yaw": 2.33,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_12",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1095,
+   "z": 1232,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1137,
+     1246
+    ],
+    [
+     1066,
+     1283
+    ],
+    [
+     1068,
+     1207
+    ],
+    [
+     1117,
+     1183
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s49",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1408,
+   "z": 1222,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_124",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1858,
+   "z": 944,
+   "yaw": 5.67,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_gorse_march_d78",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 94,
+   "z": 238,
+   "yaw": 1.84,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_125",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 597,
+   "z": 1175,
+   "yaw": 2.21,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s50",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1272,
+   "z": 1584,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_126",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 843,
+   "z": 1309,
+   "yaw": 4.89,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_127",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1960,
+   "z": 1520,
+   "yaw": 6.18,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s51",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1409,
+   "z": 1753,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_128",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1416,
+   "z": 1087,
+   "yaw": 4.42,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_gorse_march_d79",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1424,
+   "z": 872,
+   "yaw": 0.98,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_129",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1840,
+   "z": 1648,
+   "yaw": 1.97,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s52",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 821,
+   "z": 1555,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_130",
+   "recipe": "cu_charcoal_mound",
+   "name": "Charcoal Clamp",
+   "kind": "camp",
+   "x": 37,
+   "z": 484,
+   "yaw": 3.66,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_11",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 352,
+   "z": 47,
+   "yaw": 2.2,
+   "radius": 6,
+   "path": [
+    [
+     338,
+     78
+    ],
+    [
+     338,
+     23
+    ],
+    [
+     377,
+     54
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_131",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 445,
+   "z": 1144,
+   "yaw": 5.67,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s53",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1264,
+   "z": 320,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_gorse_march_d80",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 1672,
+   "z": 1016,
+   "yaw": 0.5,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_132",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1567,
+   "z": 1120,
+   "yaw": 2.98,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_133",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 697,
+   "z": 1691,
+   "yaw": 2.64,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_13",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1120,
+   "z": 872,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1073,
+     877
+    ],
+    [
+     1113,
+     835
+    ],
+    [
+     1150,
+     881
+    ],
+    [
+     1124,
+     906
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_134",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 937,
+   "z": 503,
+   "yaw": 5.86,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_gorse_march_d81",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 127,
+   "z": 902,
+   "yaw": 4.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_135",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 930,
+   "z": 1062,
+   "yaw": 5.67,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_136",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 520,
+   "z": 228,
+   "yaw": 2.95,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gorse_march_d82",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 188,
+   "z": 1656,
+   "yaw": 0.48,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_137",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1176,
+   "z": 1000,
+   "yaw": 1.09,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s54",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1888,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_d83",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1200,
+   "z": 1447,
+   "yaw": 6.24,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_138",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 899,
+   "z": 1995,
+   "yaw": 4.75,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_139",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 880,
+   "z": 1080,
+   "yaw": 5.09,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s55",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 702,
+   "z": 462,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_gorse_march_d84",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 602,
+   "z": 70,
+   "yaw": 4.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gorse_march_d85",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1162,
+   "z": 1592,
+   "yaw": 5.15,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_140",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1540,
+   "z": 269,
+   "yaw": 4.65,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s56",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 424,
+   "z": 119,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_141",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1898,
+   "z": 874,
+   "yaw": 4.39,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_142",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1272,
+   "z": 1344,
+   "yaw": 0.14,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s57",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1720,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_143",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 759,
+   "z": 810,
+   "yaw": 2.16,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gorse_march_d86",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1081,
+   "z": 1376,
+   "yaw": 4.46,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_144",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 1416,
+   "z": 1344,
+   "yaw": 2.91,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_14",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1264,
+   "z": 800,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1296,
+     751
+    ],
+    [
+     1310,
+     852
+    ],
+    [
+     1219,
+     854
+    ],
+    [
+     1210,
+     743
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_145",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 718,
+   "z": 1270,
+   "yaw": 4.68,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_146",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 131,
+   "z": 417,
+   "yaw": 0.91,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_147",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 583,
+   "z": 1711,
+   "yaw": 0.62,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_148",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 2009,
+   "z": 129,
+   "yaw": 0.47,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gorse_march_d87",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 67,
+   "z": 1507,
+   "yaw": 1.97,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_gorse_march_d88",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 691,
+   "z": 288,
+   "yaw": 5.18,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_149",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1072,
+   "z": 456,
+   "yaw": 5.38,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s58",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1023,
+   "z": 73,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_150",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1007,
+   "z": 374,
+   "yaw": 2.19,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_151",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 176,
+   "z": 480,
+   "yaw": 0.94,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_gorse_march_d89",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 41,
+   "z": 130,
+   "yaw": 1.88,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_gorse_march_d90",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 212,
+   "z": 1892,
+   "yaw": 0.23,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s59",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1144,
+   "z": 513,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_152",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1584,
+   "z": 103,
+   "yaw": 2.34,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_12",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 1699,
+   "z": 1613,
+   "yaw": 5.1,
+   "radius": 6,
+   "path": [
+    [
+     1697,
+     1610
+    ],
+    [
+     1703,
+     1614
+    ],
+    [
+     1697,
+     1616
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gorse_march_d91",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 480,
+   "z": 447,
+   "yaw": 0.15,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s60",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1719,
+   "z": 304,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_gorse_march_d92",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 679,
+   "z": 892,
+   "yaw": 0.03,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_153",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 146,
+   "z": 1022,
+   "yaw": 6.19,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_15",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 599,
+   "z": 1064,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     646,
+     1068
+    ],
+    [
+     595,
+     1118
+    ],
+    [
+     549,
+     1053
+    ],
+    [
+     615,
+     993
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s61",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 938,
+   "z": 982,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_154",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 752,
+   "z": 1376,
+   "yaw": 0.81,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_gorse_march_d93",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 848,
+   "z": 1896,
+   "yaw": 5.3,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s62",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1064,
+   "z": 648,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_155",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1807,
+   "z": 112,
+   "yaw": 0.49,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s63",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1607,
+   "z": 1559,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_156",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1960,
+   "z": 1216,
+   "yaw": 4.95,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_gorse_march_d94",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 360,
+   "z": 273,
+   "yaw": 4.86,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_157",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 994,
+   "z": 1915,
+   "yaw": 0.39,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_16",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1096,
+   "z": 225,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1157,
+     179
+    ],
+    [
+     1135,
+     276
+    ],
+    [
+     1036,
+     274
+    ],
+    [
+     1063,
+     185
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s64",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 155,
+   "z": 153,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_158",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 797,
+   "z": 434,
+   "yaw": 3.61,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_13",
+   "role": "prospector",
+   "name": "Prospector",
+   "work": "dig",
+   "chatter": [
+    "role.prospector"
+   ],
+   "x": 1048,
+   "z": 1568,
+   "yaw": 1.06,
+   "radius": 6,
+   "path": [
+    [
+     1032,
+     1585
+    ],
+    [
+     1039,
+     1545
+    ],
+    [
+     1073,
+     1571
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_159",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1663,
+   "z": 1903,
+   "yaw": 1.8,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s65",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1320,
+   "z": 936,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_160",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 652,
+   "z": 436,
+   "yaw": 4.57,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s66",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1497,
+   "z": 1727,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_161",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1967,
+   "z": 264,
+   "yaw": 0.23,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_17",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1000,
+   "z": 936,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     976,
+     980
+    ],
+    [
+     956,
+     891
+    ],
+    [
+     1030,
+     884
+    ],
+    [
+     1044,
+     957
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_gorse_march_d95",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 538,
+   "z": 100,
+   "yaw": 2.77,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_gorse_march_d96",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 805,
+   "z": 1673,
+   "yaw": 4.97,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "scarecrow_gorse_march_d97",
+   "kind": "scarecrow",
+   "name": "Scarecrow",
+   "x": 581,
+   "z": 585,
+   "yaw": 0.55,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_162",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1719,
+   "z": 1280,
+   "yaw": 4.25,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_14",
+   "role": "scarecrow_maker",
+   "name": "Scarecrow maker",
+   "work": "gather",
+   "chatter": [
+    "role.scarecrow_maker"
+   ],
+   "x": 1880,
+   "z": 1304,
+   "yaw": 4.5,
+   "radius": 6,
+   "path": [
+    [
+     1868,
+     1298
+    ],
+    [
+     1888,
+     1298
+    ],
+    [
+     1881,
+     1313
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_163",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1624,
+   "z": 1807,
+   "yaw": 2.15,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s67",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1360,
+   "z": 584,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_gorse_march_d98",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 568,
+   "z": 684,
+   "yaw": 0.2,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_164",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1872,
+   "z": 472,
+   "yaw": 5.71,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_gorse_march_d99",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 192,
+   "z": 567,
+   "yaw": 1.94,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s68",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 358,
+   "z": 1776,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_165",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 984,
+   "z": 552,
+   "yaw": 2.2,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_d100",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1232,
+   "z": 1192,
+   "yaw": 3.57,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_166",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1512,
+   "z": 1856,
+   "yaw": 1.65,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s69",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1978,
+   "z": 1647,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_167",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 795,
+   "z": 1808,
+   "yaw": 5.58,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_168",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 895,
+   "z": 519,
+   "yaw": 6.16,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s70",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1952,
+   "z": 1408,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gorse_march_d101",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 54,
+   "z": 399,
+   "yaw": 3.18,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_d102",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1799,
+   "z": 576,
+   "yaw": 5.4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_169",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1400,
+   "z": 688,
+   "yaw": 5.26,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_18",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1368,
+   "z": 1544,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1414,
+     1598
+    ],
+    [
+     1280,
+     1591
+    ],
+    [
+     1324,
+     1502
+    ],
+    [
+     1430,
+     1495
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s71",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1744,
+   "z": 496,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_170",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1239,
+   "z": 137,
+   "yaw": 2.71,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_171",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1168,
+   "z": 105,
+   "yaw": 0.73,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_172",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 424,
+   "z": 386,
+   "yaw": 1.35,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_d103",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 856,
+   "z": 1161,
+   "yaw": 0.64,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_173",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1841,
+   "z": 1182,
+   "yaw": 4.16,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s72",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 785,
+   "z": 919,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_174",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 41,
+   "z": 43,
+   "yaw": 0.24,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_175",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 776,
+   "z": 742,
+   "yaw": 3.62,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_gorse_march_d104",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 927,
+   "z": 424,
+   "yaw": 4.49,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s73",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1536,
+   "z": 536,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_176",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1856,
+   "z": 1897,
+   "yaw": 0.6,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_177",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 868,
+   "z": 1394,
+   "yaw": 1.19,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_178",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 587,
+   "z": 1447,
+   "yaw": 1.4,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_gorse_march_d105",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 903,
+   "z": 1816,
+   "yaw": 1.16,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gorse_march_d106",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1085,
+   "z": 1958,
+   "yaw": 1.07,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_179",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1447,
+   "z": 480,
+   "yaw": 2.93,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_19",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1128,
+   "z": 616,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1151,
+     569
+    ],
+    [
+     1161,
+     660
+    ],
+    [
+     1086,
+     674
+    ],
+    [
+     1083,
+     592
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_d107",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 485,
+   "z": 1463,
+   "yaw": 0.66,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_gorse_march_d108",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 696,
+   "z": 824,
+   "yaw": 2.27,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_180",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1728,
+   "z": 1488,
+   "yaw": 0.55,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s74",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 888,
+   "z": 304,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_181",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1824,
+   "z": 1250,
+   "yaw": 4.09,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_182",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1592,
+   "z": 479,
+   "yaw": 2.2,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s75",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1144,
+   "z": 760,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_183",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1227,
+   "z": 2011,
+   "yaw": 5.63,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gorse_march_d109",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 773,
+   "z": 1033,
+   "yaw": 4.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_20",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1144,
+   "z": 1729,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1135,
+     1774
+    ],
+    [
+     1075,
+     1727
+    ],
+    [
+     1148,
+     1672
+    ],
+    [
+     1209,
+     1745
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s76",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1135,
+   "z": 1313,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_184",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 736,
+   "z": 80,
+   "yaw": 1.5,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_185",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 550,
+   "z": 1214,
+   "yaw": 1.23,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_186",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1480,
+   "z": 632,
+   "yaw": 4.38,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s77",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 941,
+   "z": 213,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_gorse_march_d110",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1816,
+   "z": 1784,
+   "yaw": 5.54,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_187",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 2008,
+   "z": 552,
+   "yaw": 1.77,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_188",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1329,
+   "z": 1967,
+   "yaw": 3.99,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_21",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1656,
+   "z": 576,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1638,
+     608
+    ],
+    [
+     1619,
+     546
+    ],
+    [
+     1694,
+     535
+    ],
+    [
+     1690,
+     609
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_189",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 824,
+   "z": 120,
+   "yaw": 3.11,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_gorse_march_d111",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1520,
+   "z": 1640,
+   "yaw": 5.54,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s78",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1288,
+   "z": 96,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gorse_march_d112",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 130,
+   "z": 1629,
+   "yaw": 0.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_15",
+   "role": "scarecrow_maker",
+   "name": "Scarecrow maker",
+   "work": "gather",
+   "chatter": [
+    "role.scarecrow_maker"
+   ],
+   "x": 1616,
+   "z": 2008,
+   "yaw": 3.05,
+   "radius": 6,
+   "path": [
+    [
+     1628,
+     2002
+    ],
+    [
+     1615,
+     2017
+    ],
+    [
+     1604,
+     2000
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_190",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 984,
+   "z": 1833,
+   "yaw": 1.6,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s79",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1094,
+   "z": 1001,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gorse_march_d113",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1104,
+   "z": 1862,
+   "yaw": 6.15,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_191",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1776,
+   "z": 376,
+   "yaw": 3.81,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_192",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1760,
+   "z": 1015,
+   "yaw": 4.48,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s80",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 437,
+   "z": 597,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_193",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1952,
+   "z": 1289,
+   "yaw": 5.62,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_d114",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1360,
+   "z": 1063,
+   "yaw": 3.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_194",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1576,
+   "z": 40,
+   "yaw": 3.15,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s81",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 766,
+   "z": 1215,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_195",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1832,
+   "z": 1456,
+   "yaw": 3.61,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_196",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 1344,
+   "z": 216,
+   "yaw": 4.26,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_d115",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 277,
+   "z": 443,
+   "yaw": 4.37,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_197",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 686,
+   "z": 1478,
+   "yaw": 1.96,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_gorse_march_d116",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 501,
+   "z": 262,
+   "yaw": 0.5,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_198",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 316,
+   "z": 1691,
+   "yaw": 4.36,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_199",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1623,
+   "z": 1423,
+   "yaw": 0.89,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_16",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 1066,
+   "z": 1122,
+   "yaw": 5.27,
+   "radius": 6,
+   "path": [
+    [
+     1066,
+     1131
+    ],
+    [
+     1060,
+     1119
+    ],
+    [
+     1073,
+     1119
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_gorse_march_d117",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 294,
+   "z": 282,
+   "yaw": 4.55,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s82",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1920,
+   "z": 1168,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gorse_march_d118",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1615,
+   "z": 1679,
+   "yaw": 0.29,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_200",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1584,
+   "z": 648,
+   "yaw": 1.65,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_201",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1600,
+   "z": 272,
+   "yaw": 6.13,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_202",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1746,
+   "z": 1553,
+   "yaw": 6,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_203",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1865,
+   "z": 343,
+   "yaw": 4.66,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gorse_march_d119",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 627,
+   "z": 1184,
+   "yaw": 0.16,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s83",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1696,
+   "z": 680,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_204",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1856,
+   "z": 568,
+   "yaw": 3.71,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_205",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 632,
+   "z": 296,
+   "yaw": 0.32,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_206",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1952,
+   "z": 848,
+   "yaw": 4.71,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s84",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2008,
+   "z": 959,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_gorse_march_d120",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 601,
+   "z": 813,
+   "yaw": 0.31,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_d121",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 694,
+   "z": 1063,
+   "yaw": 4.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_22",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1880,
+   "z": 1720,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1901,
+     1681
+    ],
+    [
+     1943,
+     1732
+    ],
+    [
+     1868,
+     1774
+    ],
+    [
+     1832,
+     1707
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s85",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1368,
+   "z": 896,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_207",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 141,
+   "z": 264,
+   "yaw": 0.59,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_gorse_march_d122",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1951,
+   "z": 665,
+   "yaw": 0.44,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s86",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1168,
+   "z": 1497,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_208",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 315,
+   "z": 136,
+   "yaw": 2.96,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_209",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 936,
+   "z": 647,
+   "yaw": 3.8,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_gorse_march_d123",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 896,
+   "z": 1936,
+   "yaw": 3.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gorse_march_d124",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1688,
+   "z": 1234,
+   "yaw": 3.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_23",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1280,
+   "z": 593,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1251,
+     532
+    ],
+    [
+     1341,
+     564
+    ],
+    [
+     1282,
+     668
+    ],
+    [
+     1213,
+     594
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s87",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 880,
+   "z": 384,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_210",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1352,
+   "z": 480,
+   "yaw": 2.86,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_d125",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 657,
+   "z": 1587,
+   "yaw": 0.53,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_211",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 445,
+   "z": 533,
+   "yaw": 1.93,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s88",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 668,
+   "z": 212,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gorse_march_d126",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1673,
+   "z": 1672,
+   "yaw": 0.33,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_212",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1489,
+   "z": 888,
+   "yaw": 0.49,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_24",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1304,
+   "z": 1648,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1338,
+     1708
+    ],
+    [
+     1235,
+     1702
+    ],
+    [
+     1272,
+     1566
+    ],
+    [
+     1375,
+     1598
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gorse_march_d127",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 473,
+   "z": 1721,
+   "yaw": 5.71,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_d128",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1329,
+   "z": 1360,
+   "yaw": 1.89,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_213",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 265,
+   "z": 1759,
+   "yaw": 3.54,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_214",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1977,
+   "z": 343,
+   "yaw": 3.72,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_17",
+   "role": "scarecrow_maker",
+   "name": "Scarecrow maker",
+   "work": "gather",
+   "chatter": [
+    "role.scarecrow_maker"
+   ],
+   "x": 1576,
+   "z": 1624,
+   "yaw": 2.71,
+   "radius": 6,
+   "path": [
+    [
+     1587,
+     1608
+    ],
+    [
+     1587,
+     1645
+    ],
+    [
+     1552,
+     1628
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_215",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1875,
+   "z": 1072,
+   "yaw": 2.48,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s89",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1943,
+   "z": 1589,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gorse_march_d129",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 41,
+   "z": 913,
+   "yaw": 1.67,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_216",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 590,
+   "z": 912,
+   "yaw": 4.48,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_217",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1288,
+   "z": 1240,
+   "yaw": 5.82,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_gorse_march_d130",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 880,
+   "z": 888,
+   "yaw": 2.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_218",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1825,
+   "z": 1567,
+   "yaw": 5.15,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_gorse_march_d131",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 842,
+   "z": 1474,
+   "yaw": 5.96,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gorse_march_d132",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 700,
+   "z": 547,
+   "yaw": 4.56,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_219",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 582,
+   "z": 218,
+   "yaw": 0.74,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s90",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1185,
+   "z": 240,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_220",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1184,
+   "z": 937,
+   "yaw": 1.97,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gorse_march_d133",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1255,
+   "z": 191,
+   "yaw": 3.99,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_221",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 971,
+   "z": 1485,
+   "yaw": 5.53,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_222",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 2008,
+   "z": 40,
+   "yaw": 5.53,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_223",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1376,
+   "z": 1896,
+   "yaw": 2.71,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_224",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 848,
+   "z": 800,
+   "yaw": 2.52,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s91",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1648,
+   "z": 473,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_gorse_march_d134",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1455,
+   "z": 424,
+   "yaw": 4.96,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_225",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 876,
+   "z": 235,
+   "yaw": 5.91,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gorse_march_d135",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 605,
+   "z": 488,
+   "yaw": 2.94,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_226",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 1632,
+   "z": 880,
+   "yaw": 1.55,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_227",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1468,
+   "z": 1879,
+   "yaw": 2.55,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_228",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1665,
+   "z": 1488,
+   "yaw": 5.91,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gorse_march_d136",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1240,
+   "z": 1122,
+   "yaw": 4.74,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s92",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1256,
+   "z": 1475,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_229",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1431,
+   "z": 1398,
+   "yaw": 6.22,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gorse_march_d137",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 746,
+   "z": 920,
+   "yaw": 3.07,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s93",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1328,
+   "z": 1432,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_230",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1503,
+   "z": 760,
+   "yaw": 0.3,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_25",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1641,
+   "z": 128,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1576,
+     89
+    ],
+    [
+     1678,
+     59
+    ],
+    [
+     1731,
+     153
+    ],
+    [
+     1624,
+     194
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s94",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1288,
+   "z": 1073,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_231",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 621,
+   "z": 1704,
+   "yaw": 0.36,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gorse_march_d138",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1009,
+   "z": 1640,
+   "yaw": 1.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_232",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 926,
+   "z": 101,
+   "yaw": 5.45,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s95",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1784,
+   "z": 1360,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_233",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1920,
+   "z": 232,
+   "yaw": 6.06,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_s96",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1118,
+   "z": 1910,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_234",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1047,
+   "z": 128,
+   "yaw": 4.32,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gorse_march_d139",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 358,
+   "z": 474,
+   "yaw": 5.58,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_235",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1168,
+   "z": 40,
+   "yaw": 2.06,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gorse_march_d140",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 927,
+   "z": 1638,
+   "yaw": 2.19,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_236",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 669,
+   "z": 97,
+   "yaw": 1.16,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_237",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1680,
+   "z": 1369,
+   "yaw": 1.13,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gorse_march_d141",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 939,
+   "z": 1764,
+   "yaw": 1.45,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_gorse_march_d142",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 1958,
+   "z": 791,
+   "yaw": 5.24,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gorse_march_d143",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 84,
+   "z": 1534,
+   "yaw": 3.13,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_238",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1342,
+   "z": 1850,
+   "yaw": 1.83,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_239",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 669,
+   "z": 1619,
+   "yaw": 1.4,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gorse_march_d144",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 446,
+   "z": 363,
+   "yaw": 4.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_gorse_march_d145",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 1467,
+   "z": 101,
+   "yaw": 6.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gorse_march_d146",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 231,
+   "z": 1011,
+   "yaw": 0.08,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_gorse_march_d147",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 1784,
+   "z": 1664,
+   "yaw": 0.74,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_gorse_march_18",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1424,
+   "z": 1281,
+   "yaw": 0.22,
+   "radius": 6,
+   "path": [
+    [
+     1424,
+     1238
+    ],
+    [
+     1456,
+     1298
+    ],
+    [
+     1396,
+     1300
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_240",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 765,
+   "z": 1105,
+   "yaw": 0.23,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_241",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 414,
+   "z": 1326,
+   "yaw": 1.62,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_gorse_march_d148",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 501,
+   "z": 979,
+   "yaw": 5.88,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gorse_march_242",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 963,
+   "z": 1234,
+   "yaw": 4.09,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_gorse_march_26",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1183,
+   "z": 1278,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1154,
+     1335
+    ],
+    [
+     1151,
+     1254
+    ],
+    [
+     1219,
+     1228
+    ],
+    [
+     1221,
+     1300
+    ]
+   ],
+   "roam": true
   }
  ],
- "features": []
+ "features": [],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 242,
+   "wayside": 148,
+   "stray": 96,
+   "roamer": 26,
+   "folk": 18
+  },
+  "openShareCovered": 0.997,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  6,
+  8
+ ]
 }

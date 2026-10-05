@@ -21,6 +21,7 @@ import { createCreature, randomCreature } from '../../../../avatar-3d/js/creatur
 import { compactCreature } from '../../../../avatar-3d/js/mesh-merge.js';
 import { avatarFor, bodyTypeFor, loadMonsterLooks } from './looks.js';
 import { normalizeAvatar } from '../../../../avatar-2d/js/render.js';
+import { perf, compileBeforeShow } from './perf.js';
 
 /** A creature spec from what the server sent: `{ type, size?, seed, colors? }` — colour varied by seed within its family. */
 function creatureFor(spec) {
@@ -33,7 +34,7 @@ const TAU = Math.PI * 2;
 /** Shortest signed difference between two angles. */
 export function angleDelta(a, b) { let d = (b - a) % TAU; if (d > Math.PI) d -= TAU; if (d < -Math.PI) d += TAU; return d; }
 
-const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead'];
+const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim'];   // swim: P25
 
 /** Pure LOD choice — exported for tests. `list` = [{ id, kind, d }] -> Set of ids that get a full body. */
 export function chooseFull(list, { fullMax = 30, monsterRange = 120, selfId = null } = {}) {
@@ -82,7 +83,7 @@ export function farHeadGeometry() {
 }
 const CLASS_TINT = { warrior: '#b04a3a', knight: '#9aa4b4', paladin: '#e0c060', ranger: '#4f8a3a', rogue: '#3a3a44', cleric: '#e8e0c8', mage: '#4a6ad0', bard: '#c060a0', monk: '#d0902a', druid: '#6a9a4a', necromancer: '#5a3a6a', pyromancer: '#e0602a' };
 
-export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
+export function createActors(scene, { plateLayer, camera, quality = 'high', renderer = null, waterAt = null }) {
   const actors = new Map();
   const queue = [];
   const FULL_MAX = quality === 'low' ? 12 : 30, PLATE_MAX = quality === 'low' ? 24 : 40, ANIM_NEAR = 25;
@@ -104,6 +105,23 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
   const ringGeo = new THREE.RingGeometry(0.85, 1.0, 48); ringGeo.rotateX(-Math.PI / 2);
   const mkRing = (color, opacity) => { const m = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false, fog: false })); m.renderOrder = 2; m.visible = false; scene.add(m); return m; };
   const targetRing = mkRing('#ff4a3a', 0.9), hoverRing = mkRing('#ffffff', 0.35);
+  // P25: a swimmer pushes rings of ripples across the water surface
+  const rippleGeo = new THREE.RingGeometry(0.55, 0.75, 40); rippleGeo.rotateX(-Math.PI / 2);
+  const rippleMat = new THREE.MeshBasicMaterial({ color: '#e8f4ff', transparent: true, opacity: 0.45, depthWrite: false });
+  function ripple(a, now) {
+    const on = a.swim && waterAt && !a.dead && a.group.visible;
+    let w = null;
+    if (on) { w = waterAt(a.pos.x, a.pos.z); if (!(w && Number.isFinite(w.surface))) w = null; }
+    if (!w) { if (a.ripples) for (const r of a.ripples) r.visible = false; return; }
+    // a beast floats with its back out of the water (the server holds every swimmer at surface - 1.1 m: a person's feet)
+    if (!(a.kind === 'player' || a.humanoid || a.kind === 'npc')) a.group.position.y = Math.max(a.group.position.y, w.surface - a.height * 0.45);
+    if (!a.ripples) { a.ripples = [0, 1].map(() => { const m = new THREE.Mesh(rippleGeo, rippleMat); m.renderOrder = 2; scene.add(m); return m; }); }
+    a.ripples.forEach((m, k) => {
+      const ph = ((now / 1000) * (a.speed > 0.4 ? 1.1 : 0.55) + k * 0.5) % 1;
+      m.visible = true; m.position.set(a.group.position.x, w.surface + 0.03, a.group.position.z);
+      m.scale.setScalar(0.6 + ph * 1.6); m.material.opacity = 0.45;   // shared material: fade by scale only
+    });
+  }
 
   function add(info, { self = false } = {}) {
     let a = actors.get(info.id);
@@ -127,6 +145,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
 
   async function build(a) {
     a.building = true; lodStats.built++;
+    const t0 = performance.now();
     try {
       let body;
       if (a.kind === 'monster' || a.pet) {
@@ -147,11 +166,24 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
       } else {
         body = await createChibi2Character(await avatarFor(a.look), { anims: CHIBI_ANIMS });
       }
+      lodStats.buildMs = Math.max(lodStats.buildMs || 0, Math.round(performance.now() - t0));   // wall time, awaits included
+      if (!actors.has(a.id) || a.body) { body.dispose?.(); return; }
+      body.group.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
+      // P1: compile the body's shaders BEFORE it replaces the stand-in. A new monster family or outfit is a new
+      // program; compiled on its first draw it froze the frame for 1.5-3 s on the test VM. compileAsync uses
+      // KHR_parallel_shader_compile, so on a real GPU the stand-in simply stays up a few frames longer.
+      if (renderer) await compileBeforeShow(renderer, body.group, camera, scene);
       if (!actors.has(a.id) || a.body) { body.dispose?.(); return; }
       a.body = body; a.model = body.group;
-      a.model.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
       a.group.remove(a.standin); a.group.add(a.model);
       try { const m = body.metrics(); a.height = Math.max(0.8, m.height || m.totalHeight || a.height); } catch {}
+      // P28: the click/hover volume is the body's real size (a squat bog slime, a long crocodile, a dragon), not one
+      // fixed radius — and never thinner than 0.6 m so a rat is still easy to click
+      try {
+        a.model.updateMatrixWorld(true);
+        const box = new THREE.Box3().setFromObject(a.model), size = box.getSize(new THREE.Vector3());
+        if (Number.isFinite(size.x) && size.y > 0.05) { a.pickR = Math.max(0.6, Math.min(4, Math.max(size.x, size.z) * 0.55)); a.pickTop = Math.max(0.6, size.y); if (a.kind === 'monster' || a.pet) a.height = Math.max(0.6, Math.min(a.height, size.y * 1.05)); }
+      } catch { /* the default volume stands */ }
       if (a.dead) setAnim(a, 'dead');
     } catch (e) {
       console.warn('[actors] body failed for', a.id, e);
@@ -168,6 +200,8 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
   function remove(id) {
     const a = actors.get(id); if (!a) return;
     scene.remove(a.group); a.body?.dispose?.(); a.plate?.root.remove();
+    if (a.ripples) for (const r of a.ripples) scene.remove(r);
+    a.group.clear();           // detaches any spell aura riding the body (SpellFx drops an aura whose group has no parent)
     actors.delete(id);
   }
 
@@ -234,7 +268,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
   }
 
   // --- per frame --------------------------------------------------------------------------------
-  function update(dt, renderTime, { selfPos = null, selfYaw = 0, selfMoving = 0, targetId = null, hoverId = null, sample = null, speed = null } = {}) {
+  function update(dt, renderTime, { selfPos = null, selfYaw = 0, selfMoving = 0, selfSwim = false, targetId = null, hoverId = null, sample = null, speed = null } = {}) {
     const now = performance.now();
     // LOD: who gets a body (re-ranked four times a second)
     if (now >= lodAt) {
@@ -254,7 +288,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
       const cp = camera.position;
       let bi = -1, bd = Infinity;
       for (let i = 0; i < queue.length; i++) { const a = queue[i]; if (!actors.has(a.id)) { queue.splice(i--, 1); continue; } if (a.lod !== 'full') continue; const d = Math.hypot(a.pos.x - cp.x, a.pos.z - cp.z); if (d < bd) { bd = d; bi = i; } }
-      if (bi >= 0) { const a = queue.splice(bi, 1)[0]; build(a); }
+      if (bi >= 0) { const a = queue.splice(bi, 1)[0]; perf.span('actor:build', () => build(a)); }
     }
     let farN = 0;
     for (const a of actors.values()) {
@@ -262,10 +296,18 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
         a.pos.set(selfPos.x, selfPos.y, selfPos.z);
         a.yaw += angleDelta(a.yaw, selfYaw) * Math.min(1, dt * 16);
         a.speed = selfMoving;
+        a.swim = !!selfSwim;
       } else {
         const s = a.still || (sample ? sample(a.id, renderTime) : null);
-        if (s) {
+        if (s && a.dead && a.deadPos && Math.hypot(s.x - a.deadPos.x, s.z - a.deadPos.z) < 8) {
+          // P8: a corpse lies where it fell. A body the server still nudges (a knock-back landing, a follower
+          // parked on its owner) would otherwise slide along the ground on its back; a jump of 8 m+ is a
+          // respawn/relocate and moves it.
+          a.pos.set(a.deadPos.x, s.y, a.deadPos.z);
+        } else if (s) {
+          if (a.dead) a.deadPos = { x: s.x, z: s.z };
           a.pos.set(s.x, s.y, s.z);
+          a.swim = !!s.swim;
           // Turn smoothly toward the sampled facing (sample yaw already interpolates; this hides 3 Hz far updates).
           a.yaw += angleDelta(a.yaw, s.yaw) * Math.min(1, dt * 12);
         }
@@ -276,10 +318,12 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
       a.punch *= Math.exp(-dt * 12);
       a.group.position.set(a.pos.x + a.recoil.x, a.pos.y, a.pos.z + a.recoil.z);
       if (a.model) { a.model.rotation.y = a.yaw; a.model.scale.setScalar(1 + a.punch * 0.12); }
+      if (a.swim || a.ripples) ripple(a, now);
 
       // Animation.
       let want;
       if (a.dead) want = 'dead';
+      else if (a.swim && (a.kind === 'player' || a.humanoid || a.kind === 'npc')) want = 'swim';      // P25
       else if (a.oneShot && now < a.oneShotUntil) want = a.oneShot;
       else {
         a.oneShot = null;
@@ -290,7 +334,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
       if (a.body?.setRate) {
         if (a.kind === 'player' || a.humanoid) {
           const run = a.anim === 'run';
-          a.body.setRate(a.anim === 'run' || a.anim === 'walk' ? Math.max(0.5, a.speed * (run ? 0.65 : 1.05) / (run ? 3.4 : 2.0)) : 1);
+          a.body.setRate(a.anim === 'run' || a.anim === 'walk' ? Math.max(0.5, a.speed * (run ? 0.65 : 1.05) / (run ? 3.4 : 2.0)) : a.anim === 'swim' ? (a.speed > 0.4 ? 1.1 : 0.45) : 1);
         } else a.body.setRate(a.anim === 'run' ? Math.max(0.6, a.speed / 5.2) : a.anim === 'walk' ? Math.max(0.5, a.speed / 1.5) : 1);
       }
       // far: drawn by the instanced crowd, no mixer at all
@@ -328,10 +372,10 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
     // Rings.
     const ta = targetId != null ? actors.get(targetId) : null;
     targetRing.visible = !!ta && ta.fade > 0.1;
-    if (ta) { const r = ta.kind === 'monster' ? 1.0 * Math.max(0.9, (ta.creature?.size || 1)) : 0.75; targetRing.position.set(ta.group.position.x, ta.group.position.y + 0.06, ta.group.position.z); targetRing.scale.setScalar(r * (1 + Math.sin(now / 180) * 0.03)); targetRing.material.color.set(ta.hostile ? '#ff4a3a' : '#7fe08a'); }
+    if (ta) { const r = ta.kind === 'monster' ? Math.max(0.9, (ta.pickR || 0.9) * 1.05) : 0.75; targetRing.position.set(ta.group.position.x, ta.group.position.y + 0.06, ta.group.position.z); targetRing.scale.setScalar(r * (1 + Math.sin(now / 180) * 0.03)); targetRing.material.color.set(ta.hostile ? '#ff4a3a' : '#7fe08a'); }
     const ha = hoverId != null && hoverId !== targetId ? actors.get(hoverId) : null;
     hoverRing.visible = !!ha;
-    if (ha) { hoverRing.position.set(ha.group.position.x, ha.group.position.y + 0.05, ha.group.position.z); hoverRing.scale.setScalar(ha.kind === 'monster' ? 1 : 0.75); }
+    if (ha) { hoverRing.position.set(ha.group.position.x, ha.group.position.y + 0.05, ha.group.position.z); hoverRing.scale.setScalar(ha.kind === 'monster' ? Math.max(0.9, (ha.pickR || 0.9) * 1.05) : 0.75); }
     updatePlates(targetId, hoverId);
   }
 
@@ -357,7 +401,14 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
   }
   function setDead(id, dead) {
     const a = actors.get(id); if (!a) return;
-    a.dead = dead; if (dead) { a.hp = 0; a.deathAt = performance.now(); a.oneShot = null; } else { a.deathAt = 0; a.fade = 1; }
+    if (a.dead === dead && (dead ? a.deathAt : true)) { refreshPlate(a); return; }
+    a.dead = dead;
+    if (dead) { a.hp = 0; a.deathAt = performance.now(); a.oneShot = null; a.deadPos = { x: a.pos.x, z: a.pos.z }; }
+    else {
+      // standing back up: drop the corpse pose at once (a crossfade from 'dead' reads as being dragged upright)
+      a.deathAt = 0; a.fade = 1; a.deadPos = null; a.oneShot = null;
+      if (a.body) { a.anim = null; setAnim(a, 'idle'); }
+    }
     refreshPlate(a);
   }
   function setHp(id, hp, hpMax) { const a = actors.get(id); if (!a) return; if (hp != null) a.hp = hp; if (hpMax != null) a.hpMax = hpMax; refreshPlate(a); }
@@ -369,10 +420,11 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
     let best = null, bestT = Infinity;
     for (const a of actors.values()) {
       if (a.id === exclude || a.fade < 0.3) continue;
-      const r = a.kind === 'monster' ? 0.9 * (a.creature?.size || 1) : 0.6;
-      // Closest approach between the ray and the actor's vertical segment.
-      for (let k = 0; k <= 2; k++) {
-        _c.set(a.group.position.x, a.group.position.y + (a.height * (0.2 + k * 0.35)), a.group.position.z);
+      const r = a.pickR || (a.kind === 'monster' ? 0.9 : 0.6);
+      const top = a.pickTop || a.height;
+      // Closest approach between the ray and the actor's vertical segment (feet to head, four samples).
+      for (let k = 0; k <= 3; k++) {
+        _c.set(a.group.position.x, a.group.position.y + Math.max(0.25, top * (0.12 + k * 0.28)), a.group.position.z);
         const t = _p.subVectors(_c, _ray.ray.origin).dot(_ray.ray.direction);
         if (t < 0) continue;
         const d = _ray.ray.at(t, _p).distanceTo(_c);
@@ -380,6 +432,15 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
       }
     }
     return best;
+  }
+
+  /** P22: dress a player in a new look (gear changed). Keeps the body and its clips; swaps the parts. */
+  async function setLook(id, look) {
+    const a = actors.get(id); if (!a || a.kind === 'monster' || a.pet) return;
+    a.look = look;
+    if (!a.body || a.humanoid) return;              // a body still building picks the new look up on its own
+    const av = await avatarFor(look);
+    if (a.body && a.look === look) await a.body.setAvatar?.(av);
   }
 
   /** A room change gives the same body a new id: keep the model, move the key. */
@@ -398,5 +459,5 @@ export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
     p.root.classList.toggle('self-plate', !!a.self);
   }
 
-  return { actors, lodStats, add, remove, rekey, say, update, playAttack, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
+  return { actors, lodStats, add, remove, rekey, say, update, setLook, playAttack, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
 }

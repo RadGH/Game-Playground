@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "3b6a7e1e",
+  "bakeVersion": 3,
+  "inputHash": "fdc4a8a3",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 14,
@@ -159,13 +159,51 @@
     "x": 1512,
     "z": 352
   },
+  "bridges": [
+    {
+      "a": [
+        467.78,
+        839.55
+      ],
+      "b": [
+        454.21,
+        808.55
+      ],
+      "h": 41.11,
+      "w": 6.24
+    },
+    {
+      "a": [
+        1021.3,
+        1026.7
+      ],
+      "b": [
+        1043.52,
+        1002.83
+      ],
+      "h": 41.11,
+      "w": 5.57
+    },
+    {
+      "a": [
+        1441.5,
+        448
+      ],
+      "b": [
+        1459.5,
+        448
+      ],
+      "h": 40.34,
+      "w": 4.5
+    }
+  ],
   "summary": {
     "zone": "z14_02",
     "province": "Petbeck Basin",
-    "inputHash": "3b6a7e1e",
+    "inputHash": "fdc4a8a3",
     "rivers": 5,
     "wetShare": 0.023,
-    "unwalkableShare": 0.018,
+    "unwalkableShare": 0.013,
     "towns": [
       {
         "name": "Gullwick",
@@ -244,17 +282,19 @@
         "overlaps": 0
       }
     ],
-    "roads": 11,
+    "roads": 12,
     "bridges": 3,
-    "scatter": 19747,
+    "paths": 6,
+    "pathMetres": 628,
+    "scatter": 21924,
     "scatterKinds": {
-      "bush": 4460,
-      "tree_conifer": 1468,
-      "rock_small": 916,
-      "tree_broadleaf": 9302,
-      "rock_large": 186,
-      "reed": 3180,
-      "tree_dead": 234,
+      "rock_small": 1388,
+      "tree_broadleaf": 9664,
+      "bush": 5722,
+      "tree_conifer": 1443,
+      "rock_large": 335,
+      "tree_dead": 226,
+      "reed": 3145,
       "boulder": 1
     },
     "sites": [
@@ -271,13 +311,13 @@
       "x": 1512,
       "z": 352
     },
-    "placements": 278,
-    "vignettesAvoided": 95
+    "placements": 285,
+    "vignettesAvoided": 679
   },
   "files": {
-    "terrain.bin": 508949,
-    "nav.bin": 36161,
-    "scatter.bin": 158060,
-    "placements.json": 107383
+    "terrain.bin": 507026,
+    "nav.bin": 37712,
+    "scatter.bin": 175476,
+    "placements.json": 127688
   }
 }

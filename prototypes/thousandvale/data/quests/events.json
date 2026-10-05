@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E (M2). The event director's list (PLAN §5.2). `director` = the realm rules (ONE big event at a time, sized to who is online and in band, announced 10 minutes ahead, waystone travel to it free while it runs). `realm` = the big events, each on a schedule or a trigger; the province world boss Grimtallow is a fixed-time scheduled event. `zone` = the per-zone event bosses, each running on its own in every zone copy at stream B's event arena (`site` = the arena id in data/zones/<world zone>/placements.json): two waves from the zone's camp mix, then the boss (an encounter script id in data/encounters/). Everyone within autoEnrolMetres joins a temporary event group (PLAN §5.3). Times are real minutes; reward xp = share of a level's XP, gold = multiple of a kill's gold (data/quests/README.md).",
+  "_doc": "Stream E (M2). The event director's list (PLAN §5.2). `director` = the realm rules (ONE big event at a time, sized to who is online and in band, announced 10 minutes ahead, waystone travel to it free while it runs). `realm` = the big events, each on a schedule or a trigger; the province world boss Grimtallow is a fixed-time scheduled event. `zone` = the per-zone event bosses, each running on its own in every zone copy at stream B's event arena (`site` = the arena id in data/zones/<world zone>/placements.json): two waves from the zone's camp mix, then the boss (an encounter script id in data/encounters/). Everyone within autoEnrolMetres joins a temporary event group (PLAN §5.3). Times are real minutes; reward xp = share of a level's XP, gold = multiple of a kill's gold (data/quests/README.md). Every event carries a `blurb` (one or two sentences for the map and the event card: what happens and what to do).",
   "director": {
     "oneRealmEventAtATime": true,
     "announceMinutes": 10,
@@ -73,7 +73,16 @@
             "chance": 0.05
           }
         }
-      }
+      },
+      "blurb": "A siege-engine husk of thorn and bone wakes in its arena at the heart of Blackthorn Scar. The whole province is called to bring it down; stay out of the red.",
+      "where": "Blackthorn Scar: in the mountains, about 200 m east of Last Lantern",
+      "map": [
+        {
+          "zone": "z11_04",
+          "x": 23689,
+          "z": 9497
+        }
+      ]
     },
     {
       "id": "siege_torborhold",
@@ -90,7 +99,7 @@
       "minOnline": 4,
       "minInBand": 4,
       "durationMinutes": 12,
-      "level": 4,
+      "level": 3,
       "weight": 3,
       "waves": [
         {
@@ -99,7 +108,8 @@
             6,
             10
           ],
-          "level": 3
+          "level": 2,
+          "levelAuthored": 3
         },
         {
           "type": "brigand_archer",
@@ -107,7 +117,8 @@
             4,
             6
           ],
-          "level": 4
+          "level": 3,
+          "levelAuthored": 4
         },
         {
           "type": "brigand_captain",
@@ -115,8 +126,9 @@
             1,
             1
           ],
-          "level": 5,
-          "rank": "elite"
+          "level": 3,
+          "rank": "elite",
+          "levelAuthored": 5
         }
       ],
       "announce": [
@@ -131,7 +143,17 @@
           "slot": "any"
         }
       },
-      "note": "The first-hour scene (PLAN §5.6) is this event run privately in the starter copy; the realm version is bigger and public."
+      "note": "The first-hour scene (PLAN §5.6) is this event run privately in the starter copy; the realm version is bigger and public.",
+      "blurb": "Raiders storm Torborhold's gates. Hold the town against the waves, then break their captain.",
+      "where": "The Torbor Fields: at the edge of Torborhold",
+      "map": [
+        {
+          "zone": "z12_02",
+          "x": 25168,
+          "z": 5360
+        }
+      ],
+      "levelAuthored": 4
     },
     {
       "id": "siege_halsbridge",
@@ -157,7 +179,8 @@
             10,
             16
           ],
-          "level": 4
+          "level": 4,
+          "levelAuthored": 4
         },
         {
           "type": "sky_cultist",
@@ -165,7 +188,8 @@
             4,
             8
           ],
-          "level": 5
+          "level": 5,
+          "levelAuthored": 5
         },
         {
           "type": "cult_zealot",
@@ -173,7 +197,8 @@
             3,
             5
           ],
-          "level": 5
+          "level": 5,
+          "levelAuthored": 5
         }
       ],
       "boss": "boss_castellan_odrun",
@@ -189,7 +214,17 @@
           "slot": "any",
           "chance": 0.25
         }
-      }
+      },
+      "blurb": "A warband marches on Halsbridge. Man the walls, cut down the raiders and cultists, then face Castellan Odrun.",
+      "where": "Torbor Cross: at the edge of Halsbridge",
+      "map": [
+        {
+          "zone": "z13_02",
+          "x": 28320,
+          "z": 5280
+        }
+      ],
+      "levelAuthored": 5
     },
     {
       "id": "drake_flyover",
@@ -223,7 +258,31 @@
           "tier": "rare",
           "slot": "any"
         }
-      }
+      },
+      "blurb": "A mire drake flies its route across four zones. Follow it, and fight it where it lands.",
+      "where": "over Brackwater Fen, Torbor Cross, Millbrook Vale, The Redcliff Frontier",
+      "map": [
+        {
+          "zone": "z13_01",
+          "x": 27650,
+          "z": 3029
+        },
+        {
+          "zone": "z13_02",
+          "x": 27984,
+          "z": 5200
+        },
+        {
+          "zone": "z13_03",
+          "x": 27408,
+          "z": 7480
+        },
+        {
+          "zone": "z14_03",
+          "x": 29365,
+          "z": 7099
+        }
+      ]
     }
   ],
   "zone": [
@@ -242,7 +301,7 @@
       },
       "warnMinutes": 2,
       "durationMinutes": 10,
-      "level": 8,
+      "level": 7,
       "waves": [
         {
           "type": "frost_stalker",
@@ -250,8 +309,9 @@
             3,
             5
           ],
-          "level": 7,
-          "at": "arena edge"
+          "level": 6,
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "crag_hyena",
@@ -259,8 +319,9 @@
             4,
             6
           ],
-          "level": 8,
-          "at": "arena edge"
+          "level": 7,
+          "at": "arena edge",
+          "levelAuthored": 8
         },
         {
           "type": "ironback_beetle",
@@ -268,8 +329,9 @@
             5,
             7
           ],
-          "level": 8,
-          "at": "arena edge"
+          "level": 7,
+          "at": "arena edge",
+          "levelAuthored": 8
         }
       ],
       "boss": "mb_chained_saint",
@@ -282,7 +344,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "An avalanche above the pass has uncovered something chained in the snow. Fight off the stalkers, hyenas and beetles, then the thing itself.",
+      "where": "Hollin Pass: in the open grass, about 300 m south-west of Hollin Toll",
+      "map": [
+        {
+          "zone": "z11_01",
+          "x": 23915,
+          "z": 2829
+        }
+      ],
+      "levelAuthored": 8
     },
     {
       "id": "event_ashcombe",
@@ -308,7 +380,8 @@
             5
           ],
           "level": 5,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 5
         },
         {
           "type": "barrow_hound",
@@ -317,7 +390,8 @@
             6
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         },
         {
           "type": "sporecap_walker",
@@ -326,7 +400,8 @@
             7
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         }
       ],
       "boss": "barrow_warden",
@@ -339,7 +414,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "The Warden of the ruin walks the old counting-house wall again. Beat back the scavengers, hounds and walkers, then lay the Warden down.",
+      "where": "The Ashcombe Ruins: in the open grass, about 100 m north-west of Ashcombe",
+      "map": [
+        {
+          "zone": "z12_01",
+          "x": 25792,
+          "z": 3224
+        }
+      ],
+      "levelAuthored": 6
     },
     {
       "id": "event_brackwater",
@@ -365,7 +450,8 @@
             5
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         },
         {
           "type": "bog_slime",
@@ -374,7 +460,8 @@
             6
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "fen_croaker",
@@ -383,7 +470,8 @@
             7
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         }
       ],
       "boss": "mb_bell_ringer",
@@ -396,7 +484,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "A bell rings under the fen and the reeds lean toward it. Cut through the serpents, slimes and croakers, then stop the ringer.",
+      "where": "Brackwater Fen: in the open grass, about 50 m south-west of Brackwater",
+      "map": [
+        {
+          "zone": "z13_01",
+          "x": 27650,
+          "z": 3029
+        }
+      ],
+      "levelAuthored": 7
     },
     {
       "id": "event_saltmouth",
@@ -422,7 +520,8 @@
             5
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "dune_centipede",
@@ -431,7 +530,8 @@
             6
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         },
         {
           "type": "reed_serpent",
@@ -440,7 +540,8 @@
             7
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         }
       ],
       "boss": "mb_sergeant_wark",
@@ -453,7 +554,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "Wreckers light false lamps on the headland. Clear the wreckers and the beach crawlers, then take their sergeant.",
+      "where": "Saltmouth: in the open grass, about 150 m north of Saltmouth",
+      "map": [
+        {
+          "zone": "z14_01",
+          "x": 29516,
+          "z": 3420
+        }
+      ],
+      "levelAuthored": 8
     },
     {
       "id": "event_delvers_hill",
@@ -479,7 +590,8 @@
             5
           ],
           "level": 5,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 5
         },
         {
           "type": "cairn_rat",
@@ -488,7 +600,8 @@
             6
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         },
         {
           "type": "shale_warden",
@@ -497,7 +610,8 @@
             7
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         }
       ],
       "boss": "mb_rustjaw",
@@ -510,7 +624,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "The old workings have caved in and something big climbed out. Beat back the beetles and rats, then the thing itself.",
+      "where": "Delvers' Hill: in the woods, about 200 m north of Ashhaven",
+      "map": [
+        {
+          "zone": "z11_02",
+          "x": 23216,
+          "z": 4832
+        }
+      ],
+      "levelAuthored": 6
     },
     {
       "id": "event_grandmother_skein",
@@ -536,7 +660,8 @@
             5
           ],
           "level": 2,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 2
         },
         {
           "type": "thicket_boar",
@@ -545,7 +670,8 @@
             6
           ],
           "level": 3,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 3
         },
         {
           "type": "road_brigand",
@@ -554,7 +680,8 @@
             7
           ],
           "level": 4,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 4
         }
       ],
       "boss": "event_grandmother_skein",
@@ -567,7 +694,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "The great spider under Mawehaven's sinkhole is awake. Clear the beasts and brigands drawn to the field, burn her egg sacs, then kill her.",
+      "where": "The Torbor Fields: in the woods, about 50 m east of Mawehaven",
+      "map": [
+        {
+          "zone": "z12_02",
+          "x": 24933,
+          "z": 6040
+        }
+      ],
+      "levelAuthored": 4
     },
     {
       "id": "event_torbor_cross",
@@ -593,7 +730,8 @@
             5
           ],
           "level": 4,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 4
         },
         {
           "type": "moor_hound",
@@ -602,7 +740,8 @@
             6
           ],
           "level": 5,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 5
         },
         {
           "type": "brigand_archer",
@@ -611,7 +750,8 @@
             7
           ],
           "level": 5,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 5
         }
       ],
       "boss": "mb_drummer_ossa",
@@ -624,7 +764,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "A drummer is whipping the Halsbridge market into a mob. Put down the rioters and their dogs, then stop the drum.",
+      "where": "Torbor Cross: in the woods, about 200 m east of Mirestead",
+      "map": [
+        {
+          "zone": "z13_02",
+          "x": 27984,
+          "z": 5200
+        }
+      ],
+      "levelAuthored": 5
     },
     {
       "id": "event_gullwick",
@@ -650,7 +800,8 @@
             5
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         },
         {
           "type": "fen_croaker",
@@ -659,7 +810,8 @@
             6
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "dusk_flitter",
@@ -668,7 +820,8 @@
             7
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         }
       ],
       "boss": "mb_sluicegrip",
@@ -681,7 +834,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "Sluicegrip has surfaced for the ferry boats. Fight off the serpents, croakers and flitters, then the beast.",
+      "where": "The Gullwick Lakes: in the woods, about 350 m south-west of Gullwick",
+      "map": [
+        {
+          "zone": "z14_02",
+          "x": 29944,
+          "z": 4784
+        }
+      ],
+      "levelAuthored": 7
     },
     {
       "id": "event_wychwood",
@@ -698,7 +861,7 @@
       },
       "warnMinutes": 2,
       "durationMinutes": 10,
-      "level": 7,
+      "level": 6,
       "waves": [
         {
           "type": "veil_spider",
@@ -706,8 +869,9 @@
             3,
             5
           ],
-          "level": 6,
-          "at": "arena edge"
+          "level": 5,
+          "at": "arena edge",
+          "levelAuthored": 6
         },
         {
           "type": "gallows_owl",
@@ -715,8 +879,9 @@
             4,
             6
           ],
-          "level": 7,
-          "at": "arena edge"
+          "level": 6,
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "moor_hound",
@@ -724,8 +889,9 @@
             5,
             7
           ],
-          "level": 7,
-          "at": "arena edge"
+          "level": 6,
+          "at": "arena edge",
+          "levelAuthored": 7
         }
       ],
       "boss": "packleader",
@@ -738,7 +904,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "Something is hunting through Wychwood with a pack at its heels. Survive the spiders, owls and hounds, then face the pack leader.",
+      "where": "Wychwood: in the open grass, about 100 m south of Hermit's Rest",
+      "map": [
+        {
+          "zone": "z11_03",
+          "x": 23640,
+          "z": 6936
+        }
+      ],
+      "levelAuthored": 7
     },
     {
       "id": "event_saint_orrins_rise",
@@ -764,7 +940,8 @@
             5
           ],
           "level": 4,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 4
         },
         {
           "type": "gallows_owl",
@@ -773,7 +950,8 @@
             6
           ],
           "level": 5,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 5
         },
         {
           "type": "sky_cultist",
@@ -782,7 +960,8 @@
             7
           ],
           "level": 5,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 5
         }
       ],
       "boss": "mb_gallowmother",
@@ -795,7 +974,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "Something winged follows the pilgrims' procession. Guard the road from hounds, owls and cultists, then kill the Gallowmother.",
+      "where": "Saint Orrin's Rise: in the open grass, about 200 m south of Orrinsford",
+      "map": [
+        {
+          "zone": "z12_03",
+          "x": 24903,
+          "z": 7016
+        }
+      ],
+      "levelAuthored": 5
     },
     {
       "id": "event_millbrook",
@@ -821,7 +1010,8 @@
             5
           ],
           "level": 4,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 4
         },
         {
           "type": "carrion_moth",
@@ -830,7 +1020,8 @@
             6
           ],
           "level": 5,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 5
         },
         {
           "type": "road_brigand",
@@ -839,7 +1030,8 @@
             7
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         }
       ],
       "boss": "boss_hungry_cart",
@@ -852,7 +1044,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "A harvest cart with far too many teeth crashes the festival. Clear the boars, moths and brigands, then stop the cart.",
+      "where": "Millbrook Vale: in the open grass, about 250 m north-east of Millbrook",
+      "map": [
+        {
+          "zone": "z13_03",
+          "x": 27408,
+          "z": 7480
+        }
+      ],
+      "levelAuthored": 6
     },
     {
       "id": "event_redcliff",
@@ -878,7 +1080,8 @@
             5
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "road_brigand",
@@ -887,7 +1090,8 @@
             6
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         },
         {
           "type": "crag_hyena",
@@ -896,7 +1100,8 @@
             7
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         }
       ],
       "boss": "mb_spit_imp",
@@ -909,7 +1114,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "Raiders bring fire and ladders to Redcliff Fort. Throw back imps, raiders and hyenas, then kill the imp lighting the gate.",
+      "where": "The Redcliff Frontier: in the woods, about 250 m east of Redcliff",
+      "map": [
+        {
+          "zone": "z14_03",
+          "x": 29365,
+          "z": 7099
+        }
+      ],
+      "levelAuthored": 8
     },
     {
       "id": "event_blackthorn_scar",
@@ -935,7 +1150,8 @@
             5
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         },
         {
           "type": "ossuary_crawler",
@@ -944,7 +1160,8 @@
             6
           ],
           "level": 9,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 9
         },
         {
           "type": "cinder_imp",
@@ -953,7 +1170,8 @@
             7
           ],
           "level": 10,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 10
         }
       ],
       "boss": "briar_colossus",
@@ -966,7 +1184,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "A briar-giant walks through the thorn wall with a warband behind it. Break the raiders, then fell the colossus.",
+      "where": "Blackthorn Scar: in the mountains, about 100 m north of Last Lantern",
+      "map": [
+        {
+          "zone": "z11_04",
+          "x": 23405,
+          "z": 9290
+        }
+      ],
+      "levelAuthored": 10
     },
     {
       "id": "event_coldwater",
@@ -992,7 +1220,8 @@
             5
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         },
         {
           "type": "reed_serpent",
@@ -1001,7 +1230,8 @@
             6
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "marsh_wisp",
@@ -1010,7 +1240,8 @@
             7
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         }
       ],
       "boss": "mb_old_murkfin",
@@ -1023,7 +1254,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "Old Murkfin has come up out of the silt. Fight off the slimes, serpents and wisps, then the fish itself.",
+      "where": "Coldwater Mere: in the mountains, about 500 m west of Coldwater",
+      "map": [
+        {
+          "zone": "z12_04",
+          "x": 25479,
+          "z": 9982
+        }
+      ],
+      "levelAuthored": 7
     },
     {
       "id": "event_gorse_march",
@@ -1049,7 +1290,8 @@
             5
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "crag_hyena",
@@ -1058,7 +1300,8 @@
             6
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         },
         {
           "type": "brigand_archer",
@@ -1067,7 +1310,8 @@
             7
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         }
       ],
       "boss": "boss_warlord_hask",
@@ -1080,7 +1324,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "Warlord Hask leads the ladders against Gorsehold Redoubt. Hold the walls against imps, hyenas and archers, then face Hask.",
+      "where": "The Gorse March: in the badlands, about 200 m north-west of Gorsehold",
+      "map": [
+        {
+          "zone": "z13_04",
+          "x": 27950,
+          "z": 9347
+        }
+      ],
+      "levelAuthored": 8
     },
     {
       "id": "event_sunken_wolds",
@@ -1106,7 +1360,8 @@
             5
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         },
         {
           "type": "sporecap_walker",
@@ -1115,7 +1370,8 @@
             6
           ],
           "level": 9,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 9
         },
         {
           "type": "silt_lurker",
@@ -1124,7 +1380,8 @@
             7
           ],
           "level": 10,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 10
         }
       ],
       "boss": "mb_greycoat",
@@ -1137,7 +1394,17 @@
           "slot": "any"
         },
         "chest": "event_cache"
-      }
+      },
+      "blurb": "Something grey hunts the hunters of the Wolds. Survive the stalkers, walkers and lurkers, then track it down.",
+      "where": "The Sunken Wolds: in the dry grass, about 50 m west of Lowmoor",
+      "map": [
+        {
+          "zone": "z14_04",
+          "x": 29740,
+          "z": 9199
+        }
+      ],
+      "levelAuthored": 10
     }
   ]
 }

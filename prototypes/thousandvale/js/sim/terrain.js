@@ -12,7 +12,7 @@ export function loadZoneTerrain(bytes, key = 'test') {
   if (!t.walkable(spawn.x, spawn.z)) spawn = findWalkable(t, spawn) || spawn;
   return {
     key, reader: t,
-    heightAt: t.heightAt, walkable: t.walkable,
+    heightAt: t.heightAt, walkable: t.walkable, waterAt: t.waterAt, ...(t.moveAt ? { moveAt: t.moveAt } : {}),
     bounds: b, size: Math.max(b.maxX - b.minX, b.maxZ - b.minZ), origin: { x: b.minX, z: b.minZ },
     spawn,
   };

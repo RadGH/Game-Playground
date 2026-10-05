@@ -24,12 +24,19 @@ export const KIND_RULES = {
   hook: { townGap: 40, gap: 30, slope: 26 },
   wayside: { townGap: 20, gap: 12, slope: 34, edge: 24 },   // a cairn sits fine on a hillside and near a zone edge
   settlement: { townGap: 300, gap: 60, slope: 10 },
+  // P19 living-world pass (tools/content-living.mjs): small things, close together, right up to the zone edge
+  curio: { townGap: 30, gap: 10, slope: 26, edge: 30 },
+  stray: { townGap: 70, gap: 16, slope: 26, edge: 30 },      // 1-3 monsters (type 'camp' in the file; also roaming packs)
+  folk: { townGap: 30, gap: 12, slope: 24, edge: 30 },
 };
 export const ROAD_GAP = 4;          // metres between a disc's edge and the nearest painted road sample
 export const EDGE_MARGIN = 60;      // metres from the zone edge
 /** Point-like placements (radius 1, for stream B's scatter clearing): never part of the disc spacing rule. */
 export const POINT_TYPES = new Set(['npc', 'waystone', 'treasure_clue', 'treasure_cache']);
 export const BLOCK_BITS = NAV.ROAD | NAV.TOWN | NAV.BUILDING | NAV.STEEP | NAV.SHALLOW | NAV.DEEP;
+
+/** The KIND_RULES row a placed record answers to: strays, roaming packs and door guards are small camps ('stray'). */
+export const ruleKind = p => (p.type === 'camp' && (p.stray || p.roam || p.doorGuard) ? 'stray' : p.type);
 
 /** Mulberry-ish seeded rng from a string. */
 export function rngFor(str) {
@@ -131,7 +138,7 @@ export function provinceComponents(zones, start) {
  * Build the zone context. `bake` = { terrain (parsed), nav (parsed), placements (B's placements.json array), extent }.
  * `reserve` = extra discs (settlement asks) that nothing may sit on.
  */
-export function zoneContext({ terrain, nav, placements, start = null, reserve = [], province = null, cell = null }) {
+export function zoneContext({ terrain, nav, placements, start = null, reserve = [], province = null, cell = null, pinned = null }) {
   const { size, step, bits } = nav;
   const dRoad = distanceField(bits, size, step, b => (b & NAV.ROAD) !== 0);
   const dTown = distanceField(bits, size, step, b => (b & (NAV.TOWN | NAV.BUILDING)) !== 0);
@@ -156,7 +163,7 @@ export function zoneContext({ terrain, nav, placements, start = null, reserve = 
   const ctx = {
     terrain, nav, size, step, extent, dRoad, dTown, dWater, dSteep, comp, idx,
     settlements: [...settlements, ...reserve.map(r => ({ ...r, source: 'ask' }))],
-    siteDiscs, placed: [],
+    siteDiscs, placed: [], pinned: pinned || new Set(),
     roadDist: (x, z) => dRoad[idx(x, z)], townDist: (x, z) => dTown[idx(x, z)],
     waterDist: (x, z) => dWater[idx(x, z)], steepDist: (x, z) => dSteep[idx(x, z)],
     inMain: (x, z) => comp.label[idx(x, z)] === comp.main,
@@ -188,6 +195,7 @@ export function openPoint(ctx, x, z, { allowTown = false, allowRoad = false, all
  */
 export function clearOfBSites(ctx, x, z, r) {
   for (const s of ctx.siteDiscs) {
+    if (ctx.pinned && ctx.pinned.has(s.id)) continue;     // a pinned site (data/world/site-pins.json) never moves for us
     if (s.kind === 'dungeon_door' && Math.hypot(x - s.x, z - s.z) < r + 41) return false;
     if ((s.kind === 'event_site' || s.kind === 'camp_site') && Math.hypot(x - s.x, z - s.z) < r + s.r + 21) return false;
   }
@@ -223,7 +231,7 @@ export function discProblem(ctx, kind, x, z, R, { ignore = null, others = ctx.pl
   if (!clearOfBSites(ctx, x, z, R)) return 'B site rule';
   for (const o of others) {
     if (o === ignore || o.radius == null || POINT_TYPES.has(o.type)) continue;
-    const gap = Math.max(rule.gap, (KIND_RULES[o.type] || rule).gap);   // the bigger of the two kinds' gaps, so order does not matter
+    const gap = Math.max(rule.gap, (KIND_RULES[ruleKind(o)] || rule).gap);   // the bigger of the two kinds' gaps, so order does not matter
     const need = (kind === 'vignette' && o.type === 'vignette') ? Math.max(KIND_RULES.vignette.sameKindSpacing, R + o.radius + gap) : R + o.radius + gap;
     if (Math.hypot(x - o.x, z - o.z) < need) return 'near ' + o.id;
   }
@@ -318,3 +326,57 @@ export function fingerprint(file) {
     camps: pl.filter(p => p.type === 'camp').map(p => p.monster).sort(),
   };
 }
+
+// ---- the level gradient (owner play-test P26) -----------------------------------------------------------------
+/**
+ * "A fresh level 1-3 player needs plenty of level 1-3 creatures near the start, levels rising gently outward."
+ * Level at a point = max(1, min(zone ramp, distance ramp)):
+ *   distance ramp = 1 + (metres from the start hub) / metresPerLevel — so ~1 by the gate, 2 at ~550 m, 3 at ~1.1 km;
+ *   zone ramp     = the zone sheet's band, low edge on the side nearest the hub rising to the high edge on the far side.
+ * The distance ramp only ever LOWERS a level (a far zone keeps its own band); near the start it is what you meet.
+ */
+export const GRADIENT = { metresPerLevel: 550, startLevel: 1 };
+
+/**
+ * levelField({ sheet, hub: { x, z } (province metres = zone grid * ZM + zone metres), ZM })
+ * -> { at(eid, x, z) (zone metres) -> float level, dist(eid, x, z) -> metres from the hub, span(eid) -> [lo, hi] (whole levels the zone holds) }
+ */
+export function levelField({ sheet, hub, ZM = 2048, metresPerLevel = GRADIENT.metresPerLevel }) {
+  const zr = {};
+  for (const [eid, z] of Object.entries(sheet.zones)) {
+    const x0 = z.grid[0] * ZM, z0 = z.grid[1] * ZM, x1 = x0 + ZM, z1 = z0 + ZM;
+    const dx = Math.max(x0 - hub.x, 0, hub.x - x1), dz = Math.max(z0 - hub.z, 0, hub.z - z1);
+    const dMin = Math.hypot(dx, dz);
+    const dMax = Math.max(...[[x0, z0], [x1, z0], [x0, z1], [x1, z1]].map(([a, b]) => Math.hypot(a - hub.x, b - hub.z)));
+    zr[eid] = { x0, z0, dMin, dMax, band: z.band };
+  }
+  const dist = (eid, x, z) => Math.hypot(zr[eid].x0 + x - hub.x, zr[eid].z0 + z - hub.z);
+  const raw = (eid, d) => {
+    const r = zr[eid], t = Math.min(1, Math.max(0, (d - r.dMin) / Math.max(1, r.dMax - r.dMin)));
+    const zone = r.band[0] + (r.band[1] - r.band[0]) * t;
+    return Math.max(GRADIENT.startLevel, Math.min(zone, GRADIENT.startLevel + d / metresPerLevel));
+  };
+  return {
+    hub, metresPerLevel,
+    dist,
+    at: (eid, x, z) => raw(eid, dist(eid, x, z)),
+    span: eid => [Math.max(1, Math.floor(raw(eid, zr[eid].dMin))), zr[eid].band[1]],
+  };
+}
+
+/** A camp's [lo, hi] at a level: whole levels, lo = floor, hi = lo + 1, never above the zone's top. */
+export function campLevels(level, top) { const lo = Math.max(1, Math.min(top, Math.floor(level))); return [lo, Math.min(top, lo + 1)]; }
+
+/**
+ * Stream C's starting-area rules (docs/requests.md "C -> E, P26", measured with level-2 characters):
+ * the first ~400 m round the start hub holds solos and pairs only, 400-900 m at most trios; the heavy hitters
+ * (crag hyena, frost stalker, brigand captain) never stand where the ramp is under 4.
+ */
+export const HEAVY = new Set(['crag_hyena', 'frost_stalker', 'brigand_captain']);
+export const heavyOk = (type, level) => !HEAVY.has(type) || level >= 4;
+export function capCount(count, hubDist) {
+  const [lo, hi] = Array.isArray(count) ? count : [count || 1, count || 1];
+  const cap = hubDist < 400 ? 2 : hubDist < 900 ? 3 : 99;
+  return [Math.min(lo, cap), Math.min(hi, cap)];
+}
+export const countCapAt = hubDist => (hubDist < 400 ? 2 : hubDist < 900 ? 3 : null);

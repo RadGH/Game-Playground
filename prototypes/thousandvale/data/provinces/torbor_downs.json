@@ -50,7 +50,7 @@
       ],
       "archetype": "pass",
       "band": [
-        6,
+        3,
         8
       ],
       "biomes": [
@@ -182,7 +182,7 @@
       ],
       "archetype": "ruinfield",
       "band": [
-        4,
+        3,
         6
       ],
       "biomes": [
@@ -303,7 +303,7 @@
       ],
       "archetype": "marsh",
       "band": [
-        5,
+        4,
         7
       ],
       "biomes": [
@@ -543,7 +543,7 @@
       ],
       "archetype": "mine_country",
       "band": [
-        4,
+        2,
         6
       ],
       "biomes": [
@@ -641,6 +641,18 @@
             4
           ],
           "where": "the wilds of Delvers' Hill"
+        },
+        {
+          "type": "ash_wisp",
+          "level": [
+            4,
+            6
+          ],
+          "count": [
+            2,
+            3
+          ],
+          "where": "the old workings"
         }
       ]
     },
@@ -992,7 +1004,7 @@
       ],
       "archetype": "wilds",
       "band": [
-        5,
+        2,
         7
       ],
       "biomes": [
@@ -1123,7 +1135,7 @@
       ],
       "archetype": "holy_ground",
       "band": [
-        3,
+        2,
         5
       ],
       "biomes": [
@@ -1482,7 +1494,7 @@
       ],
       "archetype": "blight",
       "band": [
-        7,
+        6,
         10
       ],
       "biomes": [

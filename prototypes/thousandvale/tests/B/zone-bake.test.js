@@ -55,7 +55,7 @@ test('M1 zone: the hub town is planned, levelled, away from the edges; doors fac
   assert.ok(Math.min(hub.x, hub.z, 2048 - hub.x, 2048 - hub.z) >= hub.radius + 200, 'hub is well inside the zone');
   const P = b.placements, ids = new Set(P.map(p => p.id));
   assert.equal(ids.size, P.length, 'placement ids are unique');
-  const known = new Set(['lair', 'settlement', 'town_square', 'street', 'building', 'town_wall', 'road', 'bridge', 'dungeon_door', 'event_site', 'camp_site', 'landmark', 'dungeon', 'pass', 'crossing', 'port', 'lake', 'fen']);
+  const known = new Set(['lair', 'settlement', 'town_square', 'street', 'building', 'town_wall', 'road', 'bridge', 'dungeon_door', 'event_site', 'camp_site', 'landmark', 'dungeon', 'pass', 'crossing', 'port', 'lake', 'fen', 'path']);
   for (const p of P) { assert.ok(known.has(p.kind), p.kind); assert.ok(Number.isFinite(p.x) && Number.isFinite(p.z) && Number.isFinite(p.yaw), p.id); }
   const blds = P.filter(p => p.kind === 'building');
   assert.ok(blds.filter(p => p.data.town === 'torborhold').length >= 12, 'the hub has a real town');

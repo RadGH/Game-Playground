@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "64fa44ba",
+  "bakeVersion": 3,
+  "inputHash": "a498c16f",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 12,
@@ -111,6 +111,7 @@
     "x": 1462,
     "z": 1854
   },
+  "bridges": [],
   "theme": {
     "kind": "mere",
     "lakes": [
@@ -136,7 +137,7 @@
   "summary": {
     "zone": "z12_04",
     "province": "Petbeck Basin",
-    "inputHash": "64fa44ba",
+    "inputHash": "a498c16f",
     "rivers": 0,
     "wetShare": 0.021,
     "unwalkableShare": 0.171,
@@ -176,15 +177,17 @@
     ],
     "roads": 2,
     "bridges": 0,
-    "scatter": 11522,
+    "paths": 7,
+    "pathMetres": 1471,
+    "scatter": 13198,
     "scatterKinds": {
-      "tree_conifer": 1880,
-      "rock_large": 3275,
-      "rock_small": 4264,
-      "bush": 1193,
-      "boulder": 892,
-      "tree_broadleaf": 12,
-      "tree_acacia": 6
+      "bush": 1947,
+      "tree_conifer": 2193,
+      "rock_small": 4586,
+      "rock_large": 3565,
+      "boulder": 881,
+      "tree_acacia": 9,
+      "tree_broadleaf": 17
     },
     "sites": [
       "lair dungeon The Sunken Fawamack 1984 1984",
@@ -199,13 +202,13 @@
       "x": 1462,
       "z": 1854
     },
-    "placements": 120,
-    "vignettesAvoided": 95
+    "placements": 127,
+    "vignettesAvoided": 670
   },
   "files": {
-    "terrain.bin": 699314,
-    "nav.bin": 57877,
-    "scatter.bin": 92260,
-    "placements.json": 63079
+    "terrain.bin": 700076,
+    "nav.bin": 60065,
+    "scatter.bin": 105668,
+    "placements.json": 100364
   }
 }

@@ -11,7 +11,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { runUniques } from './parity-kit.mjs';
-import { engineFor } from './setup.mjs';
+import { parityEngineFor as engineFor } from './setup.mjs';
 
 const engine = await engineFor(1);
 const ALL = engine.items.uniques;

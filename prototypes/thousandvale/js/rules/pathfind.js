@@ -63,6 +63,9 @@ export function plannerBlocked(terrain) {
     const chunks = new Map();
     let lcx = NaN, lcz = NaN, lch = null;
     c = {
+      /** forget every cached cell (a terrain whose walls move — a dungeon gate — sets `blockTtl`) */
+      clear() { chunks.clear(); lcx = NaN; lcz = NaN; lch = null; },
+      ttl: terrain.blockTtl || 0, since: 0,
       cell(ix, iz) {
         const cx = ix >> 6, cz = iz >> 6;
         if (cx !== lcx || cz !== lcz) {
@@ -261,7 +264,9 @@ export function pathfinderFor(field) {
   const pf = {
     blk, stats,
     beginTick(now) {
+      if (now === clock && left < PATH.BUDGET) return;      // a second caller in the same tick (followers after monsters) shares the budget
       clock = now;
+      if (blk.ttl && now - blk.since > blk.ttl) { blk.clear(); blk.since = now; cache.clear(); }
       left = PATH.BUDGET;
       if (owed && clock - owedAt > 2) owed = null;
       if (cache.size > 256) for (const [k, v] of cache) if (clock - v.at > PATH.CACHE_TTL) cache.delete(k);

@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "c5264009",
+  "bakeVersion": 3,
+  "inputHash": "d9dcab88",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 12,
@@ -125,15 +125,41 @@
     }
   ],
   "spawn": {
-    "x": 352,
-    "z": 568
+    "x": 340,
+    "z": 580
   },
+  "bridges": [
+    {
+      "a": [
+        358.7,
+        412.4
+      ],
+      "b": [
+        338.43,
+        443.13
+      ],
+      "h": 247.356,
+      "w": 6.23
+    },
+    {
+      "a": [
+        340.15,
+        583.14
+      ],
+      "b": [
+        332.33,
+        594.75
+      ],
+      "h": 254.716,
+      "w": 6
+    }
+  ],
   "summary": {
     "zone": "z12_03",
     "province": "Petbeck Basin",
-    "inputHash": "c5264009",
+    "inputHash": "d9dcab88",
     "rivers": 3,
-    "wetShare": 0.002,
+    "wetShare": 0.001,
     "unwalkableShare": 0.114,
     "towns": [
       {
@@ -176,18 +202,20 @@
       }
     ],
     "roads": 10,
-    "bridges": 1,
-    "scatter": 12034,
+    "bridges": 2,
+    "paths": 5,
+    "pathMetres": 335,
+    "scatter": 15687,
     "scatterKinds": {
-      "bush": 3364,
-      "tree_broadleaf": 3242,
-      "rock_small": 2059,
-      "rock_large": 1898,
+      "bush": 5204,
+      "tree_broadleaf": 3534,
+      "rock_small": 2825,
+      "rock_large": 2340,
       "reed": 227,
-      "tree_dead": 19,
-      "boulder": 259,
-      "tree_conifer": 960,
-      "tree_acacia": 6
+      "tree_dead": 20,
+      "boulder": 293,
+      "tree_conifer": 1219,
+      "tree_acacia": 25
     },
     "sites": [
       "settlement(HUB) town Orrinsford 336 576 90",
@@ -198,16 +226,16 @@
       "event event_saint_orrins_rise  327 872 40"
     ],
     "spawn": {
-      "x": 352,
-      "z": 568
+      "x": 340,
+      "z": 580
     },
-    "placements": 185,
-    "vignettesAvoided": 94
+    "placements": 191,
+    "vignettesAvoided": 674
   },
   "files": {
-    "terrain.bin": 680779,
-    "nav.bin": 46519,
-    "scatter.bin": 96356,
-    "placements.json": 101667
+    "terrain.bin": 681354,
+    "nav.bin": 49592,
+    "scatter.bin": 125580,
+    "placements.json": 111752
   }
 }

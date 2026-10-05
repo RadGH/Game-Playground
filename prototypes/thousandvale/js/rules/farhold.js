@@ -43,7 +43,9 @@ export { installUniques, resolveAttack, afterKill as uniquesAfterKill, afterDama
 export { EFFECTS } from '../../../farhold/js/effects.js';
 export { installFoci } from '../../../farhold/js/foci.js';
 export { installWarbands, leaderModifier } from '../../../farhold/js/warbands.js';
-export { talentPlan, pickTalent, tiersOpen, treeFor } from '../../../farhold/js/skilltalents.js';
+export { talentPlan, pickTalent, tiersOpen, treeFor, TALENT_LIBRARY, describeNode, describeMod, nodeFor } from '../../../farhold/js/skilltalents.js';
+export { perkBonuses, canTake as canTakePerk, allocate as allocatePerk, refundOne as refundPerk, refundAll as refundAllPerks, pointsFor as perkPointsFor, pointsLeft as perkPointsLeft, spentBy as perkSpent, canRefund as canRefundPerk } from '../../../farhold/js/perks.js';
+export { priceOf as retrainPriceOf } from '../../../farhold/js/retrain.js';
 export { groundAt, wetAt, cliffStep, climbable } from '../../../farhold/js/ground.js';
 export { makeRng, hashStr } from '../../../emberveil/js/rng.js';
 export { scaleFollower, slotsForLevel, perTypeCapFor, admit as admitFollower, followerBonus } from '../../../farhold/js/followers.js';

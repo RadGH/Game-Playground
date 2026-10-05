@@ -40,7 +40,11 @@ t.slopeAt(x, z)      // degrees
 t.waterAt(x, z)      // { kind: 'none'|'sea'|'lake'|'river', surface, depth }
 t.biomeAt(x, z)      // biome id; t.biomes[id] = { id, key, name, color } (World Forge's table)
 t.sample(x, z)       // { height, slope, normal, water, biome, biomeKey }
-t.walkable(x, z)     // in bounds && slope ≤ MAX_WALK_SLOPE (46°) && water depth ≤ WADE_DEPTH (1.1 m)
+t.walkable(x, z)     // ON FOOT: in bounds && slope ≤ MAX_WALK_SLOPE (46°) && water depth ≤ WADE_DEPTH (1.1 m)
+t.moveAt(x, z)       // 'out' | 'steep' | 'walk' | 'wade' | 'swim'  (P25 depth/swim layer; a bridge deck is 'walk')
+t.passable(x, z)     // walk, wade OR swim — the movement check for a body that can swim
+t.groundAt(x, z)     // the bare ground (heightAt is the surface you stand on: a bridge deck where one spans)
+t.deckAt(x, z)       // bridge deck height, NaN off a deck;  t.bridges = meta.bridges [{a:[x,z], b:[x,z], h, w}]
 t.inBounds(x, z); t.clamp(x, z) -> [x, z]
 t.bounds             // { minX, minZ, maxX, maxZ }; t.extent = 2048; t.size = 1025; t.step = 2
 t.meta.spawn         // { x, z } a flat dry spot next to the zone's village — use as the respawn point
@@ -68,7 +72,8 @@ carries the surface too, so a sheet built from wet triangles reaches the bank. D
 triangles whose three corners are all non-NaN.
 
 **Server use (stream A):** `host.groundAt = t.heightAt`, `host.walkable = t.walkable`; clamp positions with
-`t.clamp`. Speed checks over slopes can use `t.slopeAt`. Swimming = `t.waterAt(x,z).depth > WADE_DEPTH`.
+`t.clamp`. Speed checks over slopes can use `t.slopeAt`. Swimming = `t.moveAt(x, z) === 'swim'` (depth > WADE_DEPTH);
+to let people swim, move with `t.passable` instead of `t.walkable` and float a swimmer at `waterAt().surface` (§9).
 
 ## 4. File format (`terrain.bin`, version 1, little-endian)
 
@@ -263,3 +268,82 @@ in any 5 neighbouring zones) is stream E's (`tests/E/province.test.js`); these a
   province (hashed on height differences, flat patches skipped); no two settlements share a town plan.
 - Not yet: PLAN §16's "longest boring walk ≤ 250 m" needs the vignette placements for all 16 zones (stream E has
   placed only the `test` zone so far); `zoneTargets()` already picks up `data/vignettes/placements/<zone>.json`.
+
+
+## 9. Play-test 1 fixes (2026-10-05): rivers, bridges, wading/swimming, map, paths
+
+Owner play-test 1 (`~/claude/agent/mmo/round-playtest1.md`), stream B items. All 16 Torbor Downs zones re-baked
+(`ZONE_BAKE_VERSION` 3, `WORLD_BAKE_VERSION` 2), horizon and map re-baked.
+
+**P21 — rivers meet their banks, no square edges.** Three causes, all fixed in `tools/bake-zone.mjs`:
+1. *The bank was often LOWER than the water.* The channel was carved per segment with `min()`, which only lowers, so a
+   river running above its floodplain (the surface is a running minimum along the centreline) had dry ground beside it
+   below its own water line, and the sheet hung over it. Now one continuous cross-section of the distance to the NEAREST
+   river line is applied once: channel `surface − (depth + 0.3)·(1 − (d/half)²)` (exactly the surface at the edge), a
+   bank rising to `surface + 0.4` over 3 m (raised where the land was low, cut where it was high), then easing back to the
+   land by the old reach. The river owns its bed (a town levelled below a stream no longer leaves a 1.7 m hole).
+2. *The sheet stopped in 2 m steps short of the bank.* The one-sample wet ring was 4-connected, so corner triangles were
+   missing. Now an 8-connected skirt ring carries the surface, and the ground under every skirt sample is raised to at
+   least `surface + 0.15` (`SKIRT_BURY`): the sheet's edge is always under the ground, the visible shoreline is the bank
+   meeting the flat water (the smooth curve d = half), and the skirt never makes new visible water. `waterAt()` still
+   reads the same layer, so drawn = measured. **D needs no change** — the existing "draw triangles whose 3 corners are
+   wet" mesh now ends inside the bank everywhere. (Optional for D: a shoreline foam could follow `depth → 0`.)
+3. *World lakes were their macro cells* — a one-cell lake was a 128 m square pit with vertical sides. Now a lake is the
+   0.5 contour of a bicubic lake-ness field over its cells with a noise wobble, carved as a bowl.
+
+The zone apron grew from 1 to 6 samples (`AP`) so neighbour work stays bit-exact across edges.
+Tests: `tests/B/water-edge.test.js` — every sheet-edge vertex in all 16 zones is buried; across every river the
+waterline is within 1.6 m of the channel edge.
+
+**P2 / P25 — wading and swimming.** `RIVER_DEPTH` (world-core) is now `[0, 0.5, 1.3, 2.6]`: a stream (class 1) is
+0.8 m at its centre — under `WADE_DEPTH` (1.1) — so the invisible wall down the middle of every small stream is gone
+(it was 1.5 m, past the wade limit, and `walkable()` refused it). Rivers (class 2, 1.6 m) and big rivers (2.9 m) are
+swum in the middle. The reader has the depth/swim layer: `moveAt(x, z)` → `'walk' | 'wade' | 'swim' | 'steep' | 'out'`
+(wade = deeper than `DRY_FOOT_DEPTH` 0.25 m), `passable()` = anything but steep/out; `groundAdapter` carries `moveAt`,
+`passable`, `surfaceAt`. nav.bin keeps SHALLOW (≤ 1.1 m) / DEEP bits. Stream A owns the swimming state and speed.
+
+**P24 — bridges.** The old world bake found bridges by segment intersection, missed slanted and tangential crossings and
+spurs, and set the deck at `max(road graded height, surface + 1.6)` — while the river carve had cut the road down into the
+valley, so decks floated up to 12 m over the road. Now:
+- `crossingsOf(roadPts, rivers)` (world-core) walks a road at 1 m against every river's half-width: a crossing is a run
+  within half-width + 2.5 m (dry bank under the abutments) that touches water. Every world road, every zone spur, every
+  link trail and every town street crossing a river gets one (`bridgeFor`); a street that runs INTO the water and stops gets
+  none (class-1 water is wadeable).
+- A deck is flat at `surface + clearance` (1.0 / 1.5 / 2.2 m by class, raised ≤ 2 m toward a high road), straight from
+  abutment `a` to abutment `b`; a road that bends through a long crossing gets a chain of straight `pieces` (each bending
+  ≤ 1.2 m), placements `data.part [i, n]` + `data.bridge`. Bridges whose approaches overlap share one deck height.
+- The zone bake grades the road to EXACTLY the deck height at both abutments (an abutment block runs 2.5 m in under the
+  deck, 5 cm below it) and eases back to the road over `ramp` metres (14–40). World-pure, so edges still agree.
+- `terrain.bin` meta carries the decks (`meta.bridges [{a, b, h, w}]`) and the reader stands walkers on them:
+  `heightAt` = max(ground, deck), flat normal, `walkable`/`moveAt` 'walk'. So the server, client prediction, pets and
+  monsters cross a bridge without knowing bridges exist, even over swim-deep water. nav.bin stamps the exact deck.
+- Placement `bridge`: `x, z` (middle), `yaw` (a→b), `data { span, deck, width, a:[x,z,h], b:[x,z,h], road, river, cls,
+  surface, ramp, part?, bridge?, street? }`. **D**: draw the deck from `a` to `b` (length `span`, width `data.width`), top at
+  `deck` — the current town-view adds 6 m and puts the top 15 cm under `deck`; piers should use `T.groundAt`.
+Tests: `tests/B/bridges.test.js` — world: every road crossing has a bridge; all 16 zones: no road point is deeper than
+a puddle off a deck, every road/street point walkable (never swum), and for every bridge the road height equals the deck
+at both ends (±0.15 m), the deck surface is the deck, the approach is ≤ 1 in 3, the deck clears the water by 0.9–6.5 m,
+the whole span is walkable deck; streams wadeable all the way across.
+
+**P3 — map data** (`tools/bake-map.mjs` → `data/world/map/`, ~2 MB; `tests/B/map.test.js`):
+- `world.png` 1153 × 897, 1 px = 32 m: the whole world in shaded relief + biome colours, water, rivers and roads as lines.
+- `zones/<id>.png` 512 × 512, 1 px = 4 m, per baked zone: relief, water by depth, roads/streets/paths, bridges, plots.
+  Four across = Torbor Downs at 4 m (2048 px); halve for 8 m.
+- `map.json` (world metres): `world`, `zoneImage`, `grid`, `zones[]` (origin, image, province, E's `sheetZone`, `name`,
+  level `band`, archetype, town, dungeon name), `provinces[]` (name, band, zones, bounds), `labels[]` (`kind` province |
+  zone | town | village | hamlet | dungeon | event | camp | ford | bridge | lake | river, `minZoom` 0 world / 1 province /
+  2 zone, `band` on zone labels, `id` on dungeon/event/camp), `roads[]`, `rivers[]` (simplified to ~2 m).
+- No text in the images: the client draws labels crisp at any zoom. Re-run after any zone bake (`--check` for CI).
+
+**P19 — fuller country and paths.**
+- Scatter: open country carries about twice the cover (grassland/savanna/shrubland/hills/tundra/badlands/desert/beach
+  tables; forests unchanged): copses (still grove-clumped), bushes, stones, the odd big rock. ~13k → ~17k items a zone.
+- Footpaths (`tools/lib/zone-paths.mjs`): every dungeon door, event arena, camp arena and every stream E fort / farm /
+  cave / waystone gets a trail to the nearest road, street, town or earlier trail — Dijkstra over a 4 m grid (slope cost,
+  wading ×4, swim water / >42° / E's discs / plots / the 16 m by an edge are walls), Chaikin-smoothed, painted as road
+  surface 2.2 m wide, ground NOT reshaped (E's placements stay valid). Placement kind `path` `{from, to, width,
+  pts [[x, z, h]]}` — routes for walkers (A) and something to follow on the map (D).
+- Link trails (world bake, `linkTrails`): every stream E settlement (`*-places.json` asks) the World Forge net does not
+  reach gets a graded trail road to the nearest road, across zone edges (`link_<name>`, class trail, `link: true`) —
+  Brackwater, Eelwick, Gull Steps, Last Lantern, Gorsehold, Burnt Barns, Lowmoor, Deepdene. The world bake now reads
+  `data/provinces/<sheet>-places.json`, so a change to E's asks makes `world.json` stale (re-run bake-world, then the zones).

@@ -177,7 +177,7 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     const b = $('menu-account'); if (!b) return;
     const n = net();
     b.classList.toggle('guest', !!n && !n.claimed);
-    b.title = n && n.claimed ? `Account: ${n.username}` : 'Account: you are a guest — claim it to keep it (free)';
+    b.dataset.tip = n && n.claimed ? `Account: ${n.username}` : 'Account: you are a guest — claim it to keep it (free)';
   }
 
   return { wire, panel, draw, showChars, tab, refreshPill };

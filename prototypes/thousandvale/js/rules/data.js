@@ -3,7 +3,7 @@
 // browser or Worker, `fs.readFileSync` under Node. Paths are relative to THIS file, so
 // `new URL(path, import.meta.url)` resolves them the same way in both.
 
-/** key -> path, relative to js/rules/. All of it is Farhold's or Emberveil's own data, unchanged. */
+/** key -> path, relative to js/rules/. Farhold's or Emberveil's own data, unchanged — plus data/rules/ (Thousandvale's). */
 export const RULES_DATA_FILES = {
   items: '../../../emberveil/data/items.json',
   balance: '../../../farhold/data/balance.json',
@@ -15,6 +15,10 @@ export const RULES_DATA_FILES = {
   tools: '../../../farhold/data/tools.json',
   mercenaries: '../../../farhold/data/mercenaries.json',
   warbands: '../../../farhold/data/warbands.json',
+  // Thousandvale's own rules data (stream C, data/rules/): progression (P4/P26), talents and the perk forest (P6)
+  progression: '../../data/rules/progression.json',
+  tvTalents: '../../data/rules/talents.json',
+  tvPerks: '../../data/rules/perks.json',
 };
 
 /** URL of one data file, resolved against this module. */

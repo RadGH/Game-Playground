@@ -17,6 +17,8 @@
 //     net.logout() ; net.chat(ch, text, to?) ; net.whisper(name, text) ; net.friend(op, name) ; net.guild(op, {...})
 //     net.callboard(op, {...}) ; net.report(name, why, text?) ; net.mail(op, {...})
 //     events accountR friends friendState guildState guildInvite guildR callboard reportR mailNew mailList mailOpen mailR
+//   play-test 1 (§17): net.talent(op, {skill, tier, node}) -> talentR ; net.perk(op, {id}) -> perkR ; net.map() -> mapData ;
+//     events discover (zone/places found; merged into joined.you.seen)
 //   connect({ login: {user, pass} }) signs in with a username instead of making a guest when there is no token.
 //   net.clock.serverNow() ; net.clock.rtt ; net.status ; net.joined ; net.you (local id)
 
@@ -150,6 +152,11 @@ export function connect(opts = {}) {
       case 'info': emit('info', m.ents); return;
       case 'ev': emit('ev', m); return;
       case 'you': { const p = { ...m }; delete p.t; if (net.joined) Object.assign(net.joined.you, p); emit('you', p); return; }
+      case 'discover': {             // P3: new zone / places found — kept in joined.you.seen as well
+        const seen = net.joined && (net.joined.you.seen ||= { zones: [], places: [] });
+        if (seen) { if (m.zone && !seen.zones.includes(m.zone)) seen.zones.push(m.zone); for (const p of m.places || []) if (!seen.places.includes(p.key)) seen.places.push(p.key); }
+        emit('discover', m); return;
+      }
       case 'chat': emit('chat', m); return;
       case 'castR': emit('castR', m); return;
       case 'targetR': emit('targetR', m); return;
@@ -286,6 +293,10 @@ export function connect(opts = {}) {
   };
   net.travel = to => sendJ(game, { t: 'travel', to: String(to) });       // a waystone key, or 'event' (free while a realm event runs)
   net.campfire = () => sendJ(game, { t: 'trace', kind: 'campfire' });
+  // play-test 1 (docs/protocol.md §17): talents + perk forest (P6), the world map (P3/P27)
+  net.talent = (op, { skill, tier, node } = {}) => sendJ(game, { t: 'talent', op, ...(skill ? { skill } : {}), ...(Number.isInteger(tier) ? { tier } : {}), ...(node ? { node } : {}) });   // pick|clear -> talentR
+  net.perk = (op, { id } = {}) => sendJ(game, { t: 'perk', op, ...(id ? { id } : {}) });   // take|refund|reset -> perkR
+  net.map = () => sendJ(game, { t: 'map', op: 'get' });                                     // -> mapData
   net.quest = (op, id, npc) => sendJ(game, { t: 'quest', op, id: String(id), ...(npc ? { npc } : {}) });   // accept|turnin (npc = the giver's entity id) | abandon
   /** Realm time of day 0..1 (0 = midnight, 0.5 = noon) from the gateway's clock. */
   net.timeOfDay = () => { const c = net.realmClock; if (!c) return 0.5; const t = Date.now() - (c.skew || 0) - c.epoch; return ((t % c.dayMs) + c.dayMs) % c.dayMs / c.dayMs; };

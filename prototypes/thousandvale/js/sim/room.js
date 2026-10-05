@@ -193,6 +193,8 @@ export function createRoom(opts) {
   };
   room.intent = function (e, msg) {
     if (e.dead) return { ok: false, why: 'dead' };
+    // no fighting while swimming (P25): attacks and skills are refused; picking a target is still fine
+    if ((e.state & STATE.swimming) && msg.t === 'cast') return { ok: false, why: 'swimming', text: 'You cannot fight while swimming.' };
     if (msg.target) { const t = entities.get(msg.target); if (!t) msg = { ...msg, target: undefined }; }
     return safe('intent', e, msg) || { ok: false, why: 'unknown' };
   };
@@ -206,8 +208,8 @@ export function createRoom(opts) {
   };
   room.respawn = function (e) {
     if (!e.dead) return false;
+    e.revive(1);                    // alive first: a dead body never moves (Entity.moveTo, P8)
     e.moveTo(spawnPoint.x, spawnPoint.z);
-    e.revive(1);
     safe('respawn', e);
     const c = clients.get(e.id); if (c) c.selfDirty = true;
     return true;
@@ -228,18 +230,22 @@ export function createRoom(opts) {
       room.event({ type: 'level', d: e.id, level: lv });
       urgent = true;
     }
-    if (c && c.you) c.you({ xp: ch.xp, level: ch.level, gold: ch.gold, xpNext: rules.xpFor ? safe('xpFor', (ch.level || 1) + 1) : undefined, hpMax: e.hpMax, mpMax: e.mpMax });
+    // a level-up may add talent tiers / perk points (P6): the rules' build view rides along on a level change
+    const build = urgent && rules.build ? safe('build', e) : null;
+    if (c && c.you) c.you({ xp: ch.xp, level: ch.level, gold: ch.gold, xpNext: rules.xpFor ? safe('xpFor', (ch.level || 1) + 1) : undefined, hpMax: e.hpMax, mpMax: e.mpMax, ...(build && typeof build === 'object' ? build : {}) });
     hooks.dirty && hooks.dirty(ch, urgent);
     if (hooks.award) hooks.award(e, { gold, xp, level: ch.level, items: items || [], reason, from });
   };
 
   // ---- camps (monster spawners) ----
+  /** Inside a camp's `avoid` circles (vignette props: a well, a barrel — P28), with half a metre for the body. */
+  const inProp = (c, x, z) => { if (c.avoid) for (const q of c.avoid) if ((x - q.x) ** 2 + (z - q.z) ** 2 < (q.r + 0.5) ** 2) return true; return false; };
   function spawnInCamp(c) {
     let x = c.x, z = c.z;
-    for (let k = 0; k < 8; k++) {
+    for (let k = 0; k < (c.avoid ? 16 : 8); k++) {
       const a = host.random('spawn') * Math.PI * 2, r = host.random('spawn') * (c.radius || 10);
       const tx = c.x + Math.cos(a) * r, tz = c.z + Math.sin(a) * r;
-      if (room.walkable(tx, tz)) { x = tx; z = tz; break; }
+      if (room.walkable(tx, tz) && !inProp(c, tx, tz)) { x = tx; z = tz; break; }
     }
     const m = room.spawn({ kind: 'monster', type: c.type, level: c.level || 1, x, z, yaw: host.random('spawn') * 6.283, rank: c.rank || 'normal', state: c.rank && c.rank !== 'normal' ? STATE.elite : 0, name: c.name || (c.encounter && opts.encounterInfo && opts.encounterInfo[c.encounter] ? opts.encounterInfo[c.encounter].name : undefined), data: c.encounter || c.path ? { ...(c.encounter ? { encounter: c.encounter } : {}), ...(c.path ? { path: c.path } : {}) } : null });
     c.live.add(m.id);
@@ -318,7 +324,7 @@ export function createRoom(opts) {
         stepMove(st, { mx: 0, mz: 0, b: 0 }, tickMs, terrain);
         commitMove(e, st, 0, 0, 0); c.selfDirty = true;
       }
-      if (!e.dead && !e.airborne && e.kind === 'player') e.loop('idle');
+      if (!e.dead && !e.airborne && e.kind === 'player') e.loop(e.state & STATE.swimming ? 'swim' : 'idle');
       return;
     }
     let moved = false, lastB = 0, mxs = 0, mzs = 0;
@@ -340,6 +346,7 @@ export function createRoom(opts) {
       const going = Math.hypot(mxs, mzs) > 0.05;
       e.setState(STATE.sprinting, going && !!(lastB & IN.SPRINT));
       if (e.airborne) e.loop(e.vy > 0 ? 'jump' : 'fall');
+      else if (e.state & STATE.swimming) e.loop('swim');
       else e.loop(going ? ((lastB & IN.SPRINT) ? 'sprint' : 'run') : 'idle');
     }
   }
@@ -347,7 +354,15 @@ export function createRoom(opts) {
     const wasAir = e.airborne;
     e.vy = st.vy; e.airborne = st.airborne;
     if (wasAir !== st.airborne) e.setState(STATE.airborne, st.airborne);
+    if (!!st.swim !== !!(e.state & STATE.swimming)) setSwim(e, !!st.swim);
     e.moveTo(st.x, st.z, st.y);
+  }
+  /** Into / out of deep water (P25): the state bit (clients draw the swim pose and get y while it is set), and
+   *  the rules hear about it (`rules.onSwim(e, on)` when they have it — e.g. to drop a cast). */
+  function setSwim(e, on) {
+    e.setState(STATE.swimming, on);
+    if (on) e.loop('swim');
+    safe('onSwim', e, on);
   }
 
   // ---- snapshots (docs/protocol.md §4) ----

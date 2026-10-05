@@ -40,13 +40,14 @@
           "kind": "kill",
           "type": "veil_spider",
           "count": 8,
-          "where": "the forest road",
-          "text": "Spiders"
+          "where": "the forest road through Wychwood",
+          "text": "Kill 8 spiders on the forest road"
         },
         {
           "kind": "visit",
           "site": "the Antler Stockade",
-          "text": "Reach the Antler Stockade"
+          "text": "Reach the Antler Stockade",
+          "where": "the Antler Stockade, in Wychwood"
         }
       ],
       "done": "The road's open. Next stop: Redcliff, where the trouble has a flag.",
@@ -71,8 +72,8 @@
           "kind": "kill",
           "type": "veil_spider",
           "count": 5,
-          "where": "the charcoal kilns",
-          "text": "Spiders at the kilns"
+          "where": "the charcoal kilns by Charcoal Burners",
+          "text": "Kill 5 spiders at the kilns"
         }
       ],
       "done": "Kilns clear! I'll sell you charcoal at a discount. A very small one.",
@@ -93,7 +94,7 @@
           "type": "gallows_owl",
           "count": 6,
           "where": "around Hermit's Rest",
-          "text": "Gallows owls"
+          "text": "Kill 6 gallows owls"
         }
       ],
       "done": "Silence. Thank you. Please leave. Kindly.",
@@ -112,14 +113,15 @@
         {
           "kind": "visit",
           "vignette": "hunters_hide",
-          "text": "Search the boar wallow"
+          "text": "Search the Hunter's Hide for the bow",
+          "where": "The Hunter's Hide, in Wychwood"
         },
         {
           "kind": "kill",
           "type": "moor_hound",
           "count": 5,
-          "where": "near the wallow",
-          "text": "Hounds (not Biscuit)"
+          "where": "near The Hunter's Hide",
+          "text": "Kill 5 moor hounds (not Biscuit)"
         }
       ],
       "done": "My bow! And there's Biscuit, he's been home all along. Embarrassing.",
@@ -143,14 +145,16 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the inner rings",
-          "floor": 1
+          "text": "Reach the inner Rootbound Barrows",
+          "floor": 1,
+          "where": "The Rootbound Barrows, the dungeon door in Wychwood"
         },
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Defeat the barrow's keeper",
-          "boss": true
+          "text": "Defeat the barrows' keeper",
+          "boss": true,
+          "where": "the bottom of the Rootbound Barrows"
         }
       ],
       "done": "The digging has stopped. Now I can hear my thoughts. They're quite boring.",
@@ -174,7 +178,8 @@
           "kind": "killRare",
           "zone": "wychwood",
           "slot": 0,
-          "text": "Wychwood's rare slain"
+          "text": "Hunt down the Antlered Shade",
+          "where": "roams the deep wood of Wychwood"
         }
       ],
       "done": "He's down. He's never going back up. Thank you.",

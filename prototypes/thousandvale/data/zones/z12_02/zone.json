@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "c9413658",
+  "bakeVersion": 3,
+  "inputHash": "4d731119",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 12,
@@ -149,13 +149,87 @@
     "x": 588,
     "z": 1264
   },
+  "bridges": [
+    {
+      "a": [
+        426.34,
+        1990.88
+      ],
+      "b": [
+        440.37,
+        1996.18
+      ],
+      "h": 217.951,
+      "w": 4.58
+    },
+    {
+      "a": [
+        590.45,
+        1614.45
+      ],
+      "b": [
+        580.11,
+        1604.11
+      ],
+      "h": 186.656,
+      "w": 4.5
+    },
+    {
+      "a": [
+        455.96,
+        1453.23
+      ],
+      "b": [
+        451.45,
+        1437.81
+      ],
+      "h": 185.977,
+      "w": 5.3
+    },
+    {
+      "a": [
+        1344,
+        1419.5
+      ],
+      "b": [
+        1344,
+        1433.5
+      ],
+      "h": 127.761,
+      "w": 4.5
+    },
+    {
+      "a": [
+        64,
+        1838.5
+      ],
+      "b": [
+        64,
+        1855.5
+      ],
+      "h": 222.432,
+      "w": 4.5
+    },
+    {
+      "a": [
+        196.33,
+        1755.03
+      ],
+      "b": [
+        190.55,
+        1739.04
+      ],
+      "h": 216.524,
+      "w": 4.5
+    }
+  ],
   "summary": {
     "zone": "z12_02",
     "province": "Petbeck Basin",
-    "inputHash": "c9413658",
+    "inputHash": "4d731119",
     "rivers": 2,
-    "wetShare": 0.006,
-    "unwalkableShare": 0.037,
+    "wetShare": 0.005,
+    "unwalkableShare": 0.034,
     "towns": [
       {
         "name": "Torborhold",
@@ -216,17 +290,19 @@
       }
     ],
     "roads": 11,
-    "bridges": 5,
-    "scatter": 13894,
+    "bridges": 6,
+    "paths": 13,
+    "pathMetres": 1530,
+    "scatter": 17401,
     "scatterKinds": {
-      "rock_small": 1277,
-      "rock_large": 731,
-      "bush": 3965,
-      "tree_broadleaf": 7452,
-      "boulder": 89,
-      "tree_conifer": 145,
+      "bush": 5914,
+      "rock_large": 1077,
+      "rock_small": 2005,
+      "tree_broadleaf": 7895,
+      "boulder": 96,
+      "tree_conifer": 177,
       "reed": 221,
-      "tree_dead": 14
+      "tree_dead": 16
     },
     "sites": [
       "settlement(HUB) town Torborhold 592 1264 90",
@@ -242,13 +318,13 @@
       "x": 588,
       "z": 1264
     },
-    "placements": 224,
-    "vignettesAvoided": 102
+    "placements": 238,
+    "vignettesAvoided": 683
   },
   "files": {
-    "terrain.bin": 595803,
-    "nav.bin": 37520,
-    "scatter.bin": 111236,
-    "placements.json": 92436
+    "terrain.bin": 598027,
+    "nav.bin": 40132,
+    "scatter.bin": 139292,
+    "placements.json": 133962
   }
 }

@@ -9,6 +9,9 @@
 import {
   Rpg, installUniques, installFoci, installWarbands, tuneFeel, tuneWeapons, setLevelCap, EFFECTS,
 } from './farhold.js';
+import { installLevelGap } from './level-gap.js';
+import { installTalentTrees } from './talents.js';
+import { buildTvForest } from './perk-forest.js';
 
 /** The same describe hook main.js passes, so a unique's power text matches Farhold's tooltip. */
 const EFFECTS_DESC = id => EFFECTS['legendary:' + id]?.desc?.() || null;
@@ -33,13 +36,19 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP } = 
   tuneWeapons(balance.player);
   setLevelCap(levelCap);
 
+  // P6 — Thousandvale's talent trees (data/rules/talents.json), in memory, before any bar is built
+  const talentReport = installTalentTrees(skills, data.tvTalents || {});
   const rpg = new Rpg(items, { ...balance, seed }, talents);
+  // P6 — Thousandvale's perk forest (data/rules/perks.json) replaces Farhold's in the engine's Rpg, so
+  // Farhold's own perkBonuses / rpg.derive put every node's grants, flags and powers on the sheet
+  const forest = data.tvPerks?.arms ? buildTvForest(data.tvPerks) : rpg.forest;
+  rpg.forest = forest;
   const classList = classes?.classes || [];
   const bestiary = enemies || { enemies: [], bosses: [], modifiers: [] };
   // main.js line ~307: the five warbands (members + warlords) into the bestiary, in memory
   if (data.warbands) { installWarbands(bestiary, data.warbands); bestiary.warbands = data.warbands; }
 
-  return {
+  const engine = {
     rpg, items, balance,
     skillData: skills,
     statuses: skills.statuses || {},
@@ -50,5 +59,11 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP } = 
     levelCap,
     mercenaries: data.mercenaries || null,
     encounters: data.encounters || { scripts: {}, specials: { families: {} }, defaults: {}, byType: {} },
+    progression: data.progression || {},
+    /** P26 — the level-gap softening (js/rules/level-gap.js); null turns it off (parity fixtures) */
+    levelGap: data.progression?.levelGap || null,
+    forest, talentReport,
   };
+  installLevelGap(engine);
+  return engine;
 }

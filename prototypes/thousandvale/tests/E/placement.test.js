@@ -9,7 +9,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { parseTerrain, parseNav } from '../../js/rules/terrain-read.js';
-import { zoneContext, provinceComponents, discProblem, walkLine, fingerprint } from '../../tools/content-place.mjs';
+import { zoneContext, provinceComponents, discProblem, walkLine, fingerprint, ruleKind } from '../../tools/content-place.mjs';
 import { pinnedVignettes } from '../../tools/content-lib.mjs';
 import { boringWalk, LIMIT } from '../../tools/boring-walk.mjs';
 import { connectedSets, gridDist } from '../../tools/province-graph.mjs';
@@ -28,6 +28,7 @@ const VIGS = new Map(['m1', 'm2', 'm2b'].flatMap(f => J(`data/vignettes/${f}.jso
 const SITES = J('data/provinces/sites.json');
 const ENCOUNTERS = new Set(J('data/encounters/index.json').files.map(f => f.replace(/\.json$/, '')));
 const EIDS = Object.keys(MAP);
+const PINS = existsSync(new URL('data/world/site-pins.json', root)) ? J('data/world/site-pins.json') : {};
 
 const Z = {};
 for (const eid of EIDS) {
@@ -44,10 +45,12 @@ for (const eid of EIDS) {
 const se = SHEET.grid.start, hub = Z[se].bake.find(p => p.kind === 'settlement' && p.data.hub);
 const PCOMP = provinceComponents(EIDS.map(e => ({ gx: Z[e].sheet.grid[0], gy: Z[e].sheet.grid[1], nav: Z[e].nav })), { gx: Z[se].sheet.grid[0], gy: Z[se].sheet.grid[1], x: hub.x, z: hub.z });
 for (const z of Object.values(Z)) {
-  z.ctx = zoneContext({ terrain: z.terrain, nav: z.nav, placements: z.bake, reserve: PLACES.zones[z.eid].asks, province: PCOMP, cell: { gx: z.sheet.grid[0], gy: z.sheet.grid[1] } });
+  z.ctx = zoneContext({ terrain: z.terrain, nav: z.nav, placements: z.bake, reserve: PLACES.zones[z.eid].asks, province: PCOMP, cell: { gx: z.sheet.grid[0], gy: z.sheet.grid[1] }, pinned: new Set(Object.keys(PINS[z.wid] || {})) });
   z.pl = z.file.placements;
 }
-const DISC = ['vignette', 'fort', 'farm', 'cave', 'camp', 'rare', 'hook', 'wayside'];
+const DISC = ['vignette', 'fort', 'farm', 'cave', 'camp', 'rare', 'hook', 'wayside', 'curio', 'folk'];
+/** the placer's rule for a record: strays, roaming packs and the door guard are small camps (KIND_RULES.stray) */
+const ruleOf = ruleKind;
 const WAYSIDE = new Set(J('data/vignettes/wayside.json').kinds.map(k => k.id));
 
 test('every Torbor Downs zone has a placement file made for the bake it sits on', () => {
@@ -84,7 +87,7 @@ test('ON LAND, OPEN, OFF ROADS/PLOTS/SETTLEMENTS, NOT STEEP, SPACED: every disc 
   for (const z of Object.values(Z)) {
     const others = z.pl;
     for (const p of z.pl.filter(p => DISC.includes(p.type) && p.radius != null)) {
-      const why = discProblem(z.ctx, p.type, p.x, p.z, p.radius, { ignore: p, others });
+      const why = discProblem(z.ctx, ruleOf(p), p.x, p.z, p.radius, { ignore: p, others });
       if (why) bad.push(`${z.wid} ${p.type} ${p.id}: ${why}`);
     }
   }
@@ -128,21 +131,23 @@ test('REACHABLE: everything stands in the walkable component of the province hub
   for (const z of Object.values(Z)) for (const c of z.file.checks) assert.ok(c.reachable, `${z.wid} B site ${c.id} is not reachable from the hub`);
 });
 
-test('rares roam: every leg of every loop is a walkable corridor in the main component, away from towns', () => {
-  for (const z of Object.values(Z)) for (const r of z.pl.filter(p => p.type === 'rare')) {
-    assert.ok(r.path.length >= 4, `${r.id} path`);
+test('rares, roaming packs and folk walk: every leg of every loop is a walkable corridor in the main component', () => {
+  for (const z of Object.values(Z)) for (const r of z.pl.filter(p => p.type === 'rare' || p.roam || p.type === 'folk')) {
+    assert.ok(r.path.length >= (r.type === 'folk' ? 3 : 4), `${r.id} path`);
     const pts = r.path.map(([x, zz]) => ({ x, z: zz }));
     for (let i = 0; i < pts.length; i++) assert.ok(walkLine(z.ctx, pts[i], pts[(i + 1) % pts.length]), `${z.wid} ${r.id} leg ${i}`);
     assert.ok(walkLine(z.ctx, r, pts[0]), `${z.wid} ${r.id} spawn -> loop`);
   }
 });
 
-test('stream B keeps its sites: every placement clears B\'s door (r + 40) and arenas (r + arena + 20) by B\'s own rule', () => {
-  // tools/lib/zone-sites.mjs re-searches the door and arenas each bake with our placements as avoid discs (radius || 12)
+test('stream B keeps its sites: every placement clears B\'s door (r + 40) and arenas (r + arena + 20) by B\'s own rule — unless the site is pinned', () => {
+  // tools/lib/zone-sites.mjs re-searches the door and arenas each bake with our placements as avoid discs (radius || 12);
+  // a PINNED site (data/world/site-pins.json) never moves, so our things may stand close to it
   const bad = [];
   for (const z of Object.values(Z)) for (const p of z.pl) {
     const r = p.radius || 12;
     for (const s of z.bake) {
+      if (PINS[z.wid] && PINS[z.wid][s.id]) continue;
       if (s.kind === 'dungeon_door' && Math.hypot(p.x - s.x, p.z - s.z) < r + 40) bad.push(`${z.wid} ${p.id} vs ${s.id}`);
       if ((s.kind === 'event_site' || s.kind === 'camp_site') && Math.hypot(p.x - s.x, p.z - s.z) < r + s.data.r + 20) bad.push(`${z.wid} ${p.id} vs ${s.id}`);
     }
@@ -162,12 +167,12 @@ test('LONGEST BORING WALK <= 250 m (PLAN §16): on every road, and cross-country
   }
 });
 
-test('minimum spacing: vignettes >= 140 m apart, NPCs >= 3 m apart, waystones >= 20 m apart', () => {
+test('minimum spacing: vignettes >= 140 m apart, NPCs >= 3 m apart, waystones >= 60 m apart (P14)', () => {
   for (const z of Object.values(Z)) {
     const near = (list, d) => { for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) if (Math.hypot(list[i].x - list[j].x, list[i].z - list[j].z) < d) return `${list[i].id} / ${list[j].id}`; return null; };
     assert.equal(near(z.pl.filter(p => p.type === 'vignette'), 140), null, z.wid);
     assert.equal(near(z.pl.filter(p => p.type === 'npc'), 3), null, z.wid);
-    assert.equal(near(z.pl.filter(p => p.type === 'waystone'), 20), null, z.wid);
+    assert.equal(near(z.pl.filter(p => p.type === 'waystone'), 60), null, z.wid);
   }
 });
 

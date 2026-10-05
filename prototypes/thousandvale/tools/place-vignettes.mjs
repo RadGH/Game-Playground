@@ -13,7 +13,8 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { parseTerrain, parseNav } from '../js/rules/terrain-read.js';
 import { boringWalk, SIGHT, LIMIT as BORING_LIMIT } from './boring-walk.mjs';
 import { J, ROOT, allVignettes, questFiles, provinceMap } from './content-lib.mjs';
-import { POINT_TYPES, zoneContext, provinceComponents, discProblem, findSpot, findPoint, openPoint, walkLine, hintFrom, hintScore, rngFor, KIND_RULES, settlementEdge } from './content-place.mjs';
+import { POINT_TYPES, zoneContext, provinceComponents, discProblem, findSpot, findPoint, openPoint, walkLine, hintFrom, hintScore, rngFor, KIND_RULES, settlementEdge, levelField, campLevels, heavyOk, capCount, countCapAt } from './content-place.mjs';
+import { fillDensity, routesFor, placeWords } from './content-living.mjs';
 
 const PROV = 'torbor_downs';
 const arg = process.argv[2] || null;
@@ -34,6 +35,15 @@ const WAYSIDE = J('data/vignettes/wayside.json').kinds;
 const IMPOSE_EXTRA = { test: { mipider_ford: 'Fitockpi Ford' } };
 /** hooks pinned beside a named stream B road (the cliff is cut there by B's bake on request): hook id -> road id */
 const HOOK_ROAD = { the_long_stair: 'road_138' };
+/** stream B's pinned sites (doors, event arenas, named camps): B never moves them for our placements */
+const PINS = existsSync(new URL('data/world/site-pins.json', ROOT)) ? J('data/world/site-pins.json') : {};
+/** P26: the level field — levels rise gently from the start hub (tools/content-place.mjs levelField) */
+const HUBW = (() => {
+  const se = SHEET.grid.start, hub = J(`data/zones/${MAP[se]}/placements.json`).placements.find(p => p.kind === 'settlement' && p.data.hub);
+  return { x: SHEET.zones[se].grid[0] * 2048 + hub.x, z: SHEET.zones[se].grid[1] * 2048 + hub.z };
+})();
+const LF = levelField({ sheet: SHEET, hub: HUBW });
+const typeMid = c => Array.isArray(c.level) ? (c.level[0] + c.level[1]) / 2 : (c.level || 1);
 
 // reachability is judged from the province hub over every baked zone stitched together
 const PCOMP = (() => {
@@ -49,6 +59,9 @@ const places = existsSync(placesFile) ? JSON.parse(readFileSync(placesFile, 'utf
 let bad = 0;
 const states = zones.map(([eid, wid]) => placeZone(eid, wid)).filter(st => st && typeof st === 'object');
 fillBoring(states);
+for (const st of states) fillDensity(st, { LF, typeMid });         // P19: something to see or do every ~100 m (tools/content-living.mjs)
+for (const st of states) st.file.levels = LF.span(st.eid);
+if (!arg) livingFiles(states);                                      // routes, event places, quest marks (whole province only)
 for (const st of states) {
   const { file, wid, eid } = st;
   writeFileSync(new URL(`data/vignettes/placements/${wid}.json`, ROOT), JSON.stringify(file, null, 1) + '\n');
@@ -89,7 +102,8 @@ function placeZone(eid, wid) {
   const prevAsks = ((places.zones[eid] || {}).asks || []);
   const asks = want.filter(w => w.at && w.at.data.ask).map(w => prevAsks.find(a => a.name === w.name) || { name: w.name, kind: w.kind, x: w.at.x, z: w.at.z, r: w.r });
   const cell = { gx: zs.grid[0], gy: zs.grid[1] };
-  let ctx = zoneContext({ terrain, nav, placements: bake, start, province: PCOMP, cell });
+  const pinned = new Set(Object.keys(PINS[wid] || {}));
+  let ctx = zoneContext({ terrain, nav, placements: bake, start, province: PCOMP, cell, pinned });
   for (const w of want.filter(w => !w.at)) {
     // stream B's rule: a hub keeps r + 200 m from every edge, any other settlement r + 70 m. Flattest ground first,
     // then a little steeper (B levels a settlement's circle when it plans it).
@@ -111,11 +125,13 @@ function placeZone(eid, wid) {
   }
   // rebuild once so the main component is the one the (first) town sits in
   const town0 = want[0].at ? { x: want[0].at.x, z: want[0].at.z } : asks[0] || start;
-  ctx = zoneContext({ terrain, nav, placements: bake, start: town0, reserve: asks.filter(a => !want.some(w => w.at && w.name === a.name)).map(a => ({ ...a })), province: PCOMP, cell });
+  ctx = zoneContext({ terrain, nav, placements: bake, start: town0, reserve: asks.filter(a => !want.some(w => w.at && w.name === a.name)).map(a => ({ ...a })), province: PCOMP, cell, pinned });
   for (const s of ctx.settlements) { const k = slug(s.wfName || s.name); if (rename[k]) s.name = rename[k]; }
   places.zones[eid] = { world: wid, rename, asks };
 
   const P = ctx.placed, features = [];
+  const lvl = (x, z) => LF.at(eid, x, z), top = zs.band[1];
+  const lvlFloor = (x, z) => Math.max(1, Math.min(top, Math.floor(lvl(x, z))));
   // point-like things get radius 1 so stream B's bake keeps scatter off them (B reads `radius || 12`)
   const push = rec => { if (POINT_TYPES.has(rec.type)) rec.radius = 1; P.push(rec); return rec; };
   const named = () => [
@@ -138,7 +154,7 @@ function placeZone(eid, wid) {
     const roadPref = (x, z) => { const d = ctx.roadDist(x, z); return d < 140 ? 140 - d : 0; };
     const spot = findSpot(ctx, rnd, 'fort', T.radius, { score: roadPref, spread: 1 });
     if (!spot) { problems.push(`fort ${name}`); continue; }
-    push({ type: 'fort', id: `fort_${eid}_${i}`, name, template: tpl, friendly: !!T.friendly, x: spot.x, z: spot.z, yaw: faceRoad(spot), radius: T.radius, level: lo });
+    push({ type: 'fort', id: `fort_${eid}_${i}`, name, template: tpl, friendly: !!T.friendly, x: spot.x, z: spot.z, yaw: faceRoad(spot), radius: T.radius, level: Math.min(top, lvlFloor(spot.x, spot.z) + 1) });
   }
   // ---- farms ---------------------------------------------------------------------------------------------
   const farmBase = Math.max(2, count(extras.farms) || 2), farmBurned = count(extras.burnedFarms), farmCorrupt = count(extras.corruptedFarms);
@@ -157,7 +173,7 @@ function placeZone(eid, wid) {
       } });
       if (spot) {
         const flavour = farmFlavour(i);
-        push({ type: 'farm', id: `farm_${eid}_${i}`, name: farmName(tpl, home, flavour), template: tpl, flavour, settlement: home ? home.name : null, x: spot.x, z: spot.z, yaw: faceRoad(spot), radius: T.radius, level: lo });
+        push({ type: 'farm', id: `farm_${eid}_${i}`, name: farmName(tpl, home, flavour), template: tpl, flavour, settlement: home ? home.name : null, x: spot.x, z: spot.z, yaw: faceRoad(spot), radius: T.radius, level: lvlFloor(spot.x, spot.z) });
         break;
       }
       tpl = tryTpl === 0 ? (byArch.farms.sheep ? 'sheep' : 'arable') : 'pig';   // no water / no room: a dry-land farm instead
@@ -171,7 +187,8 @@ function placeZone(eid, wid) {
     const T = SITES.caves[tpl];
     const spot = findSpot(ctx, rnd, 'cave', 10, { spread: 1, score: (x, z) => { const d = ctx.steepDist(x, z); return d < 120 ? 200 - d * 1.5 : 0; } });
     if (!spot) { problems.push(`cave ${tpl}`); continue; }
-    push({ type: 'cave', id: `cave_${eid}_${i}`, name: T.name, template: tpl, plan: { ...T.plan, level: lo + 1 }, x: spot.x, z: spot.z, yaw: faceDownhill(spot), radius: 10, level: lo + 1 });
+    const cl = Math.min(top, lvlFloor(spot.x, spot.z) + 1);
+    push({ type: 'cave', id: `cave_${eid}_${i}`, name: T.name, template: tpl, plan: { ...T.plan, level: cl }, x: spot.x, z: spot.z, yaw: faceDownhill(spot), radius: 10, level: cl });
   }
   // ---- the zone hook -------------------------------------------------------------------------------------
   const hook = HOOKS.find(h => h.id === zs.hook);
@@ -184,16 +201,19 @@ function placeZone(eid, wid) {
     const biomeOk = (x, z) => v.tags.biomes.includes(terrain.biomes[terrain.biomeAt(x, z)].key);
     const spot = findSpot(ctx, rnd, 'vignette', v.radius, { tries: 3000, spread: 1.2, score: (x, z) => (biomeOk(x, z) ? 120 : 0) + (wantsWater ? Math.max(0, 140 - ctx.waterDist(x, z)) : 0) });
     if (!spot) { problems.push(`vignette ${id}`); continue; }
-    push({ type: 'vignette', id, name: v.name, x: spot.x, z: spot.z, yaw: +(rnd() * Math.PI * 2).toFixed(2), radius: v.radius, biome: terrain.biomes[terrain.biomeAt(spot.x, spot.z)].key, biomeFits: biomeOk(spot.x, spot.z), level: 1 });
+    push({ type: 'vignette', id, name: v.name, x: spot.x, z: spot.z, yaw: +(rnd() * Math.PI * 2).toFixed(2), radius: v.radius, biome: terrain.biomes[terrain.biomeAt(spot.x, spot.z)].key, biomeFits: biomeOk(spot.x, spot.z), level: 1, levelBase: lvlFloor(spot.x, spot.z), levelCap: Math.min(top, lvlFloor(spot.x, spot.z) + 1), ...(countCapAt(LF.dist(eid, spot.x, spot.z)) ? { countCap: countCapAt(LF.dist(eid, spot.x, spot.z)) } : {}) });
   }
   // ---- wilds camps (the sheet's camp mix, each twice) ----------------------------------------------------
   (zs.camps || []).forEach((c, ci) => {
     for (let n = 0; n < 2; n++) {
       const hint = hintFrom(c.where, named());
       const near = nearOf(hint, 60, 320);
-      const spot = findSpot(ctx, rnd, 'camp', 10, { near, tries: 1500, spread: 1, score: hintScore(ctx, hint) }) || (near ? findSpot(ctx, rnd, 'camp', 10, { spread: 1, score: hintScore(ctx, hint) }) : null);
+      // P26: a weaker type goes where the ramp is low, a stronger one further out
+      const hs = hintScore(ctx, hint), want = Math.min(top, Math.max(LF.span(eid)[0], typeMid(c)));
+      const sc = (x, z) => (heavyOk(c.type, lvl(x, z)) ? hs(x, z) - 30 * Math.abs(lvl(x, z) - want) : -Infinity);
+      const spot = findSpot(ctx, rnd, 'camp', 10, { near, tries: 1500, spread: 1, score: sc }) || (near ? findSpot(ctx, rnd, 'camp', 10, { spread: 1, score: sc }) : null);
       if (!spot) { problems.push(`camp ${c.type}`); continue; }
-      push({ type: 'camp', id: `camp_${eid}_${ci}_${n}`, monster: c.type, with: c.with || null, level: c.level, count: c.count, x: spot.x, z: spot.z, yaw: 0, radius: 10 });
+      push({ type: 'camp', id: `camp_${eid}_${ci}_${n}`, monster: c.type, with: LF.dist(eid, spot.x, spot.z) < 900 ? null : (c.with || null), level: campLevels(lvl(spot.x, spot.z), top), count: capCount(c.count, LF.dist(eid, spot.x, spot.z)), x: spot.x, z: spot.z, yaw: 0, radius: 10 });
     }
   });
   // ---- rares: spawn + a walkable roaming loop ------------------------------------------------------------
@@ -207,22 +227,45 @@ function placeZone(eid, wid) {
       if (!spot) continue;
       const path = roamLoop(spot);
       if (!path) continue;
-      push({ type: 'rare', id: rid, slot, name: enc.name || rid, x: spot.x, z: spot.z, yaw: 0, radius: 15, path, respawnMin: [20, 60], level: zs.band[1] });
+      push({ type: 'rare', id: rid, slot, name: enc.name || rid, x: spot.x, z: spot.z, yaw: 0, radius: 15, path, respawnMin: [20, 60], level: Math.min(top, lvlFloor(spot.x, spot.z) + 2) });
       return;
     }
     problems.push(`rare ${rid}`);
   });
-  // ---- waystones -----------------------------------------------------------------------------------------
+  // ---- waystones (P14: one per place, never two within 60 m) ---------------------------------------------
+  // A hub town (stream A's town room: a hub, town or city) gets its stone INSIDE its circle by the square, else
+  // stream A adds a second one in the square; a dungeon door gets its stone 10-30 m away, inside A's 40 m rule,
+  // else A adds a second one by the door. The door is pinned (data/world/site-pins.json), so standing close never
+  // moves it. Named after the zone's dungeon (the sheet's `dungeon.name`), not B's generic "Barrow entrance".
   const ws = [];
+  const WS_SEP = 60;
+  const wsPush = rec => { if (ws.some(w => Math.hypot(w.x - rec.x, w.z - rec.z) < WS_SEP)) { problems.push(`waystone ${rec.name} within ${WS_SEP} m of another`); return; } ws.push(push(rec)); };
+  const townRoom = s => s.hub || ['town', 'city', 'capital'].includes(s.kind);
   for (const s of ctx.settlements) {
-    const p = findPoint(ctx, rnd, { x: s.x, z: s.z, min: s.r + 8, max: s.r + 30 }, { clearance: 2, keepFrom: ws, minSep: 20, prefer: (x, z) => -Math.abs(ctx.roadDist(x, z) - 8) });
-    if (p) ws.push(push({ type: 'waystone', id: `ws_${wid}_${slug(s.name)}`, name: s.name, x: p.x, z: p.z, yaw: 0, settlement: s.name }));
+    let p = null;
+    if (townRoom(s)) {
+      const sq = bake.find(b => b.kind === 'town_square' && b.data.town === s.id), c = sq ? { x: sq.x, z: sq.z } : s;
+      p = findPoint(ctx, rnd, { x: c.x, z: c.z, min: 5, max: Math.max(12, s.r * 0.5) }, { allowTown: true, avoidRoad: false, clearance: 2, keepFrom: ws, minSep: WS_SEP, prefer: (x, z) => -Math.hypot(x - c.x, z - c.z) });
+    }
+    if (!p) p = findPoint(ctx, rnd, { x: s.x, z: s.z, min: s.r + 8, max: s.r + 30 }, { clearance: 2, keepFrom: ws, minSep: WS_SEP, prefer: (x, z) => -Math.abs(ctx.roadDist(x, z) - 8) });
+    if (p) wsPush({ type: 'waystone', id: `ws_${wid}_${slug(s.name)}`, name: s.name, x: p.x, z: p.z, yaw: 0, settlement: s.name });
     else problems.push(`waystone ${s.name}`);
   }
   const door = bake.find(p => p.kind === 'dungeon_door');
-  if (door) { const p = findPoint(ctx, rnd, { x: door.x, z: door.z, min: 42, max: 60 }, { clearance: 2 }) || findPoint(ctx, rnd, { x: door.x, z: door.z, min: 42, max: 90 }, { clearance: 1, avoidRoad: false }); if (p) push({ type: 'waystone', id: `ws_${wid}_door`, name: door.data?.name || 'Dungeon entrance', x: p.x, z: p.z, yaw: 0, door: door.id }); else problems.push('waystone door'); }
+  const doorName = (zs.dungeon && zs.dungeon.name) || door?.data?.name || 'Dungeon entrance';
+  if (door) {
+    const p = findPoint(ctx, rnd, { x: door.x, z: door.z, min: 10, max: 30 }, { clearance: 2, avoidRoad: false, keepFrom: ws, minSep: WS_SEP })
+      || findPoint(ctx, rnd, { x: door.x, z: door.z, min: 6, max: 36 }, { clearance: 1, avoidRoad: false, keepFrom: ws, minSep: WS_SEP });
+    if (p) wsPush({ type: 'waystone', id: `ws_${wid}_door`, name: doorName, x: p.x, z: p.z, yaw: 0, door: door.id });
+    else problems.push('waystone door');
+    // the door guard (P26): a pack of the zone's weakest type at the ramp's level, instead of stream A's fixed level-3 one
+    const weakest = (zs.camps || []).slice().sort((a, b) => typeMid(a) - typeMid(b))[0];
+    const g = weakest && findSpot(ctx, rnd, 'stray', 6, { near: { x: door.x, z: door.z, min: 38, max: 70 }, tries: 1500, spread: 0, score: (x, z) => -Math.hypot(x - door.x, z - door.z) });
+    if (weakest && !g) problems.push('door guard');
+    if (g) push({ type: 'camp', id: `camp_${eid}_door`, monster: weakest.type, with: null, level: campLevels(lvl(g.x, g.z), top), count: capCount([2, 2], LF.dist(eid, g.x, g.z)), x: g.x, z: g.z, yaw: 0, radius: 6, doorGuard: true });
+  }
   const wb = SHEET.worldBoss && SHEET.worldBoss.zone === eid ? bake.find(p => p.id === SHEET.worldBoss.id) : null;
-  if (wb) { const p = findPoint(ctx, rnd, { x: wb.x, z: wb.z, min: (wb.data?.r || 100) + 20, max: (wb.data?.r || 100) + 60 }, { clearance: 2 }); if (p) push({ type: 'waystone', id: `ws_${wid}_worldboss`, name: 'Grimtallow\'s Hollow', x: p.x, z: p.z, yaw: 0, event: wb.id }); else problems.push('waystone world boss'); }
+  if (wb) { const p = findPoint(ctx, rnd, { x: wb.x, z: wb.z, min: (wb.data?.r || 100) + 20, max: (wb.data?.r || 100) + 60 }, { clearance: 2, keepFrom: ws, minSep: WS_SEP }); if (p) wsPush({ type: 'waystone', id: `ws_${wid}_worldboss`, name: 'Grimtallow\'s Hollow', x: p.x, z: p.z, yaw: 0, event: wb.id }); else problems.push('waystone world boss'); }
   // ---- quest NPCs ----------------------------------------------------------------------------------------
   const q = QUESTS[eid];
   const npcKeep = new Map();
@@ -415,14 +458,110 @@ function fillBoring(states) {
       if (!spot) { dead.add(key); continue; }
       n.set(w.zone, k + 1); added++;
       if (camp) {
-        const c = zs.camps[Math.floor(k / 2) % zs.camps.length];
-        ctx.placed.push({ type: 'camp', id: `camp_${eid}_f${k}`, monster: c.type, with: c.with || null, level: c.level, count: [2, 3], x: spot.x, z: spot.z, yaw: 0, radius: 10, filler: true });
+        const fl = LF.at(eid, spot.x, spot.z), fd = LF.dist(eid, spot.x, spot.z);
+        const ok = zs.camps.filter(c2 => heavyOk(c2.type, fl));
+        const c = (ok.length ? ok : zs.camps)[Math.floor(k / 2) % (ok.length || zs.camps.length)];
+        ctx.placed.push({ type: 'camp', id: `camp_${eid}_f${k}`, monster: c.type, with: fd < 900 ? null : (c.with || null), level: campLevels(fl, zs.band[1]), count: capCount([2, 3], fd), x: spot.x, z: spot.z, yaw: 0, radius: 10, filler: true });
       } else {
         ctx.placed.push({ type: 'wayside', id: `${wk.id}_${eid}_${k}`, kind: wk.id, name: wk.name, x: spot.x, z: spot.z, yaw: +(rnd() * 6.28).toFixed(2), radius: wk.radius, filler: true });
       }
     }
     if (!added) break;
   }
+}
+
+/**
+ * The province-wide files the living world needs (whole-province runs only):
+ *   data/provinces/<prov>-routes.json  the travellers' routes (tools/content-living.mjs routesFor)
+ *   data/quests/events.json            every event's `where` (words for the map/tracker) and its level capped by the ramp
+ *   data/quests/marks/<prov>.json      a map mark for every quest's giver and every step (world metres)
+ */
+function livingFiles(states) {
+  // WORLD metres, as stream A uses them (js/sim/content.js): world zone z<zx>_<zy> starts at zx*2048, zy*2048
+  const ZM = 2048, byE = new Map(states.map(st => [st.eid, st]));
+  const org = st => { const m = /^z(\d+)_(\d+)$/.exec(st.wid); return [+m[1] * ZM, +m[2] * ZM]; };
+  const W = (st, x, z) => ({ x: Math.round(org(st)[0] + x), z: Math.round(org(st)[1] + z) });
+  // ---- routes --------------------------------------------------------------------------------------------------
+  const R = routesFor(states.map(st => ({ eid: st.eid, wid: st.wid, gx: org(st)[0] / ZM, gy: org(st)[1] / ZM, bake: st.bake })));
+  writeFileSync(new URL(`data/provinces/${PROV}-routes.json`, ROOT), JSON.stringify({
+    _doc: `Stream E (P19). Travellers' routes for ${SHEET.name}, WORLD metres as stream A uses them (world zone z<zx>_<zy> starts at zx*2048, zy*2048): stream B's roads stitched across the province, one route per pair of settlements joined by road with no third settlement on the way. pts every ~16 m along the road. kinds = data/provinces/travellers.json kinds whose minRouteM the route meets. Stream A walks traveller groups along these (travellers.json rules) and has them talk (data/names/chatter.json). Made by tools/place-vignettes.mjs; re-run after a re-bake.`,
+    province: PROV, hub: (() => { const st = byE.get(SHEET.grid.start); return W(st, HUBW.x - st.zs.grid[0] * ZM, HUBW.z - st.zs.grid[1] * ZM); })(), towns: R.towns, unanchored: R.unanchored, routes: R.routes }, null, 1) + '\n');
+  console.log(`routes: ${R.routes.length} (${Math.round(R.routes.reduce((a, r) => a + r.length, 0) / 1000)} km), unanchored towns: ${R.unanchored.join(', ') || 'none'}`);
+  // ---- events: where + level -------------------------------------------------------------------------------------
+  const evFile = new URL('data/quests/events.json', ROOT), evTxt = readFileSync(evFile, 'utf8'), EV = JSON.parse(evTxt);
+  const siteOf = (st, e) => {
+    if (typeof e.site === 'string') return st.bake.find(b => b.id === e.site) || st.bake.find(b => b.id === 'event_' + e.zone);
+    if (e.site && e.site.settlement) { const t = st.ctx.settlements.find(q => q.name === e.site.settlement); return t ? { x: t.x, z: t.z } : null; }
+    return st.bake.find(b => b.id === 'event_' + e.zone);
+  };
+  for (const e of [...EV.realm, ...EV.zone]) {
+    const zonesOf = e.zones || [e.zone], spots = [];
+    for (const z of zonesOf) { const st = byE.get(z); const s = st && siteOf(st, { ...e, zone: z }); if (s) spots.push({ st, s }); }
+    if (!spots.length) { console.error(`event ${e.id}: no site`); continue; }
+    const { st, s } = spots[0];
+    const words = placeWords(st.ctx, s.x, s.z);
+    e.where = spots.length > 1 ? `over ${spots.map(q => q.st.zs.name).join(', ')}` : `${st.zs.name}: ${words}`;
+    e.map = spots.map(q => ({ zone: q.st.wid, ...W(q.st, q.s.x, q.s.z) }));
+    if (e.kind === 'worldboss' || e.kind === 'flyover') continue;
+    // P26: never more than 2 levels over what the ground around it holds (the first-hour raid on Torborhold was 4-5)
+    e.levelAuthored ??= e.level;
+    const lv = Math.min(e.levelAuthored, Math.max(1, Math.floor(LF.at(st.eid, s.x, s.z))) + 2);
+    e.level = Math.max(lv, LF.span(st.eid)[0]);
+    for (const w of e.waves || []) { w.levelAuthored ??= w.level; w.level = Math.max(1, Math.min(e.level, w.levelAuthored, w.levelAuthored - e.levelAuthored + e.level)); }
+  }
+  const ind = (evTxt.match(/\n( +)"/) || [, '  '])[1].length;
+  writeFileSync(evFile, JSON.stringify(EV, null, ind) + '\n');
+  // ---- quest marks ---------------------------------------------------------------------------------------------------
+  const marks = {};
+  const allP = states.flatMap(st => st.file.placements.map(p => ({ p, st })));
+  const at = (st, x, z, r) => ({ zone: st.wid, ...W(st, x, z), r: Math.round(r) });
+  for (const st of states) {
+    const q = QUESTS[st.eid]; if (!q) continue;
+    const npcAt = id => { const h = allP.find(({ p }) => p.type === 'npc' && p.id === id); return h ? at(h.st, h.p.x, h.p.z, 6) : null; };
+    const vigAt = id => { const h = allP.find(({ p }) => p.type === 'vignette' && p.id === id); return h ? at(h.st, h.p.x, h.p.z, h.p.radius || 12) : null; };
+    const siteAt = name => {
+      for (const s2 of [st, ...states]) {
+        const b = s2.bake.find(x => x.id === name || (x.data && x.data.name === name)) || s2.ctx.settlements.find(x => x.name === name);
+        if (b) return at(s2, b.x, b.z, (b.data && b.data.r) || b.r || 30);
+        const pl = s2.file.placements.find(x => x.name === name && x.radius != null);
+        if (pl) return at(s2, pl.x, pl.z, pl.radius);
+      }
+      return null;
+    };
+    for (const qq of q.quests || []) {
+      const giver = (qq.giver && npcAt(qq.giver)) || (qq.startsFrom && vigAt(qq.startsFrom.vignette)) || null;
+      const ref = giver ? { x: giver.x, z: giver.z } : W(st, 1024, 1024);
+      const steps = (qq.steps || []).map(sp => {
+        switch (sp.kind) {
+          case 'kill': case 'collect': {
+            const type = sp.type || sp.from;
+            const near = sp.near ? (vigAt(sp.near) || siteAt(sp.near)) : null;
+            if (near) return { ...near, r: Math.max(near.r, 120) };
+            const c = allP.filter(({ p }) => p.type === 'camp' && (p.monster === type || p.with === type)).map(h => { const w = W(h.st, h.p.x, h.p.z); return { h, d: Math.hypot(w.x - ref.x, w.z - ref.z), home: h.st === st }; })
+              .sort((a, b) => (b.home - a.home) || (a.d - b.d))[0];
+            return c ? at(c.h.st, c.h.p.x, c.h.p.z, 150) : null;
+          }
+          case 'killOne': case 'killRare': {
+            const id2 = sp.encounter || sp.rare || (RARES[sp.zone] || [])[sp.slot ?? 0];
+            const h = allP.find(({ p }) => p.type === 'rare' && p.id === id2);
+            if (h) return at(h.st, h.p.x, h.p.z, 120);
+            return siteAt(id2) || siteAt('event_' + st.eid);
+          }
+          case 'visit': case 'use': return (sp.vignette && vigAt(sp.vignette)) || (sp.site && siteAt(sp.site)) || null;
+          case 'talk': case 'deliver': return (sp.npc && npcAt(sp.npc)) || null;
+          case 'clear': { const d = st.bake.find(b => b.kind === 'dungeon_door'); return d ? at(st, d.x, d.z, 20) : null; }
+          case 'escort': case 'reach': return (typeof sp.to === 'string' && (vigAt(sp.to) || siteAt(sp.to))) || null;
+          default: return null;
+        }
+      });
+      marks[qq.id] = { zone: st.wid, giver, steps };
+    }
+  }
+  const missing = Object.entries(marks).flatMap(([id, m]) => m.steps.map((s2, i) => (s2 ? null : `${id}#${i}`)).filter(Boolean));
+  writeFileSync(new URL(`data/quests/marks/${PROV}.json`, ROOT), JSON.stringify({
+    _doc: 'Stream E (P17). A map mark for every story quest: the giver and each step, WORLD metres + the world zone id + a radius (an area for kill/collect steps: the nearest camp of that type to the giver). Shown by the tracker, the journal and the map next to each step\'s `where` text (data/quests/<zone>.json). null = nowhere fixed. Made by tools/place-vignettes.mjs from the placements; re-run after a re-bake.',
+    missing, quests: marks }, null, 1) + '\n');
+  if (missing.length) console.log(`quest marks: ${missing.length} step(s) with no fixed place: ${missing.join(', ')}`);
 }
 
 /** The sheet names its fort ("Torbor Watchtower", "the Abbey Wall"): the name picks the template it promises. */

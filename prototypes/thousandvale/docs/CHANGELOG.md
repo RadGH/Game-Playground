@@ -333,3 +333,49 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   (test servers only), `net.accountsOn`/`net.privacy`, Callboard wall-clock `since` + `waitedMs`, `rules.backfill(e, n, {roles})`
   with a fresh fill when the owner leaves, E's `dungeon.name` on the Callboard/door/instance, privacy.json + Save journal /
   Account times / Friends-guild-mail / backups.
+
+## 2026-10-05 — H: VPS hosting kit (P29/P30)
+- `docs/HOSTING.md` (owner, plain language): which VPS (DigitalOcean / Vultr / Hetzner, rough prices), why classic Cloudways
+  does not fit (Velocity noted, untested), DNS A record steps + check, HTTPS through Caddy + Let's Encrypt, who does what.
+- `ops/vps/`: `install.sh` (VM -> VPS as root, uploads + runs `bootstrap.sh`), `bootstrap.sh` (fresh Ubuntu 24.04: ufw 22/80/443,
+  users thousandvale + tvdeploy, node 22 checksum-verified, Postgres 18 PGDG + small-box tuning, Caddy, units, backups/drill/offsite,
+  key-only SSH, `--dry-run`), `deploy.sh` (ships a published release by rsync, content-compared so unchanged files are hard-linked,
+  resumable, verify + automatic switch-back), `rollback.sh`, `check-vps.sh`, `Caddyfile.template`, `thousandvale.service`
+  (127.0.0.1, `--max-per-ip 4 --guests-per-ip-hour 6 --guests-per-hour 30`), `thousandvale-localhost-only.conf`, `postgres-small.conf`.
+  Caddy overwrites `CF-Connecting-IP` with the real peer, so the per-address limits work behind it with no server change.
+- `tests/H/vps.test.js` (6): templates, bootstrap dry run, real Caddy proxy (forged header replaced, WebSocket, /admin 404),
+  deploy/rollback against a fake VPS. The real 179 MB release shipped to a fake VPS folder and booted.
+
+## 2026-10-05 — D-UI: Skills & Talents window + Perk Forest (play-test P6)
+- `js/client/ui/talents.js` `createTalentsUi({ net, hud, me })`: **Skills & Talents** (K) — the class's six skills in unlock order
+  (level badge, what you have, the NEXT one dashed with its level, locked ones greyed "unlocks at N", a green count of talent picks
+  waiting), each skill's tree: four tiers (levels 3/8/18/28), 2–3 nodes that change how the skill works, one pick per tier, spent
+  tiers stay spent (Unbinder rule), hover cards on the shared tooltip. **Perk Forest** (N) — `js/client/ui/perk-forest.js`, a canvas
+  graph: drag/wheel/pinch, arm buttons that fly to an arm, "Whole forest", click a glowing node next to your path, right-click / hold
+  the end of a path to hand it back (a node in the middle of a path is refused with the names it would cut off), points left, totals.
+- `js/client/ui/talent-model.js` (pure): the adapter — C's `data/rules/talents.json` / `perks.json` when they hold content
+  (placeholders are ignored), else Farhold's skills.json rows + `perks.js buildForest()`; ladder, tier gating, path rule, refunds.
+- PREVIEW until A adds `net.talent` / `net.perk` + `you.talents/perks/perkPoints` (requests.md "D (Client) -> A/C, play-test P6"):
+  picks are kept in this browser and a banner says so; the windows switch to the server by themselves when those exist.
+- Tests: `tests/D/talents.test.js` (7), `tests/D/talents.spec.js` (3, shots `tests/D/shots/p6-*.png`). `css/talents.css`.
+
+## 2026-10-05 — stream E (owner play-test 1: P14, P17, P19, P26)
+- **E** P26 level ramp (`tools/content-place.mjs` `levelField`/`campLevels`): every camp, stray, roaming pack, rare, fort, farm, cave and vignette takes the level of its SPOT — 1 by Torborhold's gate, +1 per ~550 m, never above its zone's band; weaker types are placed nearer town. Zone bands in `torbor_downs.json` lowered where the ramp reaches (delvers 2-6, saint_orrins 2-5, wychwood 2-7, ashcombe 3-6, hollin 3-8, brackwater 4-7, blackthorn 6-10); event levels capped at ramp + 2 (the Torborhold raid 4 → 3). Within 900 m of Torborhold: nothing ordinary above 3, 60+ groups at level 1-2. Hobb Gallowsby's encounter file says level 4 (A reads it on request). Stream C's starting-area rules applied: solos/pairs within 400 m of the start hub, trios at most to 900 m (no escorts), no crag hyena / frost stalker / brigand captain where the ramp is under 4; vignettes carry `levelBase`, `levelCap` (ramp + 1) and `countCap` near the start for A to apply.
+- **E** P19 living world (`tools/content-living.mjs`): `fillDensity` keeps placing until open ground is within 50 m of something (roads 45 m) — ~650 things per zone (was ~100): curios (NEW `data/vignettes/curios.json`, 61 mini vignettes with a use/chest/note), 18 new wayside kinds, strays and roaming packs from the zone's mix, folk at work in the wilds. `routesFor`: 85 traveller routes (206 km) on B's roads → `data/provinces/torbor_downs-routes.json`; NEW `data/provinces/travellers.json` (12 kinds, 14 folk roles) and `data/names/chatter.json` (67 line pools: the day, weather, recent kills/banners/deaths/events, the world boss, the road, roles, archetypes).
+- **E** P14: door waystone 10-30 m from the door (inside A's 40 m rule), named after the zone's dungeon; hub-town stones inside the town circle; never two stones within 60 m (A's layout: 61 stones, no duplicates).
+- **E** P17: "The Carter's Crates" asks for Dunnet's crates back from any brigand instead of the 3 you already killed at his cart; every quest step has `text` + `where`; job frames a `where` template; `data/quests/marks/torbor_downs.json` gives a map mark for every giver and step; `ash_wisp` added to Delvers' Hill (its lamp-oil quest had no wisps anywhere). Events: `blurb` + generated `where` + `map` for all 20.
+- **E** Pinned B sites (site-pins.json) no longer push our things away. tests/E: NEW `living.test.js` (13: A's real layout — waystones, level ramp, density measured independently, routes/chatter/curio/folk references, quest marks, events); province/quests/placement tests updated for ramps, pinned sites, strays. tests/E 127 pass + 1 TODO (A: encounter `level`).
+
+## 2026-10-05 — C: owner play-test 1 (P4, P6, P8, P11, P12, P20, P23, P26, P28)
+- **P4** No companion at level 1: a class companion comes at level 10 (second body at 20), sooner by quest (`rules.unlock`) or the Early Bond keystone (js/rules/progression.js, data/rules/progression.json).
+- **P6 talents**: every one of the 180 skills has 4 tiers (3/8/18/28) of 2-3 rule nodes; no node is a plain number or inert on its shape (333 plain/inert shared nodes dropped, 293 working ones substituted, 59 number-only bespoke nodes rewritten). Pick/Unbinder API, saved as `char.build` (js/rules/talents.js, data/rules/talents.json).
+- **P6 perk forest**: 12 arms, every arm branching into 2-4 paths ending in keystones ("Cornerstones" in game), 382 nodes (Farhold 169), 41 keystones, 20 new rules with readers (js/rules/perk-forest.js, perk-rules.js, data/rules/perks.json). Owner guide docs/talents.md.
+- **P8** A knock never slides a body the hit killed; the rules never move a dead player.
+- **P11** Followers: sight + reach for targets, path round walls (dungeon walls now block), regroup by path, teleport only when stuck far away.
+- **P12** Telegraph wind floors by rank (1.0/1.1/1.2 s, +0.5 big hits, +0.6 mechanics); a cast-bar ability's zone appears at cast START; an interrupt withdraws it.
+- **P20** Every cast emits `fx spell` geometry; every landed hit an `fx impact` with element + skill id (Farhold drew none for a skill without a knock); `hit` events carry `ab`.
+- **P23** Range/target refused before mana or cooldown is spent, every skill (code `range`).
+- **P26** Level-gap softening for monsters 1-3 levels above you (js/rules/level-gap.js); the only parity exclusion (tests/C/setup.mjs parityEngineFor). Two crag hyenas +2 levels: 17% -> 78% wins at level 2.
+- **P28** Bog slime is damageable by every class (no immunity); its "no damage" was the level gap + client picking.
+- Also: `xpFind` was inert when the room awards experience (now applied in cast.js onKill).
+- Tests: tests/C/talents (7), perks (14), playtest1 (15).

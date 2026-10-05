@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "224b638b",
+  "bakeVersion": 3,
+  "inputHash": "09d4dd3e",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 13,
@@ -140,13 +140,75 @@
     "x": 1696,
     "z": 1180
   },
+  "bridges": [
+    {
+      "a": [
+        608.48,
+        1353.93
+      ],
+      "b": [
+        608,
+        1336.5
+      ],
+      "h": 64.724,
+      "w": 5.36
+    },
+    {
+      "a": [
+        1221.08,
+        1221.08
+      ],
+      "b": [
+        1230.72,
+        1230.72
+      ],
+      "h": 54.619,
+      "w": 4.5
+    },
+    {
+      "a": [
+        1699.5,
+        1344
+      ],
+      "b": [
+        1726.5,
+        1344
+      ],
+      "h": 53.137,
+      "w": 4.5
+    },
+    {
+      "a": [
+        1728,
+        1374.5
+      ],
+      "b": [
+        1728,
+        1345.5
+      ],
+      "h": 53.137,
+      "w": 4.5
+    },
+    {
+      "a": [
+        1697.62,
+        1313.5
+      ],
+      "b": [
+        1697.98,
+        1342.5
+      ],
+      "h": 53.137,
+      "w": 4.5
+    }
+  ],
   "summary": {
     "zone": "z13_02",
     "province": "Petbeck Basin",
-    "inputHash": "224b638b",
+    "inputHash": "09d4dd3e",
     "rivers": 2,
-    "wetShare": 0.007,
-    "unwalkableShare": 0.004,
+    "wetShare": 0.006,
+    "unwalkableShare": 0.001,
     "towns": [
       {
         "name": "Halsbridge",
@@ -227,13 +289,15 @@
     ],
     "roads": 15,
     "bridges": 5,
-    "scatter": 12903,
+    "paths": 6,
+    "pathMetres": 1584,
+    "scatter": 16781,
     "scatterKinds": {
-      "bush": 4017,
-      "tree_broadleaf": 7627,
-      "rock_small": 1001,
-      "rock_large": 127,
-      "reed": 120,
+      "tree_broadleaf": 8284,
+      "rock_large": 362,
+      "rock_small": 1813,
+      "bush": 6187,
+      "reed": 124,
       "tree_dead": 11
     },
     "sites": [
@@ -249,13 +313,13 @@
       "x": 1696,
       "z": 1180
     },
-    "placements": 294,
-    "vignettesAvoided": 91
+    "placements": 300,
+    "vignettesAvoided": 654
   },
   "files": {
-    "terrain.bin": 492456,
-    "nav.bin": 26991,
-    "scatter.bin": 103308,
-    "placements.json": 125166
+    "terrain.bin": 492891,
+    "nav.bin": 30500,
+    "scatter.bin": 134332,
+    "placements.json": 164579
   }
 }

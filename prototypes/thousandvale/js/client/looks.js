@@ -8,16 +8,19 @@ import { partIds } from '../../../../avatar-2d/js/parts/index.js';
 import { randomChibi2, CHIBI2_RACES } from '../../../../avatar-3d/js/chibi2-races.js';
 import { loadClassOutfits, dressAs } from '../../../../avatar-3d/js/class-outfits.js';
 import { CREATURE_TYPES } from '../../../../avatar-3d/js/creature-types.js';
+import { gearLook, gearKey } from './gear-look.js';
 
 export const PLAYABLE_RACES = ['human', 'elf', 'dwarf', 'halfling'];
 export const RACE_NAMES = Object.fromEntries(PLAYABLE_RACES.map(r => [r, CHIBI2_RACES[r]?.name?.replace(/^Chibi 2 /, '') || r]));
 
-let presets = null, outfits = null;
+let presets = null, outfits = null, bases = null;
 export async function loadLookData() {
   if (!presets) presets = fetch(new URL('../../../../avatar-2d/data/presets.json', import.meta.url)).then(r => r.json());
   if (!outfits) outfits = loadClassOutfits();
-  const [p, o] = await Promise.all([presets, outfits]);
-  return { presets: p, outfits: o };
+  // item bases (emberveil items.json, the table Farhold's loot reads): an armour base's tier, a weapon's subtype
+  if (!bases) bases = fetch(new URL('../../../emberveil/data/items.json', import.meta.url)).then(r => (r.ok ? r.json() : {})).then(d => ({ ...(d.weaponBases || {}), ...(d.armorBases || {}) })).catch(() => ({}));
+  const [p, o, b] = await Promise.all([presets, outfits, bases]);
+  return { presets: p, outfits: o, bases: b };
 }
 
 /** The avatar JSON for a player look. Cached by key: a crowd of the same class+seed builds once. */
@@ -29,12 +32,17 @@ export async function avatarFor(look) {
   const race = PLAYABLE_RACES.includes(look?.race) ? look.race : 'human';
   const cls = look?.cls || 'warrior';
   const seed = (look?.seed >>> 0) || 1;
-  const key = `${race}|${cls}|${seed}`;
+  // P22: in the world a character wears plain clothes plus exactly its gear (`look.gear`, slot -> item); with no
+  // `gear` field at all (the title preview, town folk) it is dressed in its class outfit as before
+  const worn = look && look.gear !== undefined && look.gear !== null;
+  const key = `${race}|${cls}|${seed}${worn ? '|g:' + gearKey(look.gear) : ''}`;
   if (cache.has(key)) return cache.get(key);
-  const { presets: data, outfits: o } = await loadLookData();
+  const { presets: data, outfits: o, bases: B } = await loadLookData();
   const base = randomChibi2(randomAvatar, data, { race, seed, makeRng, known: (slot, id) => partIds(slot).includes(id) });
-  const outfit = o[cls] || o.warrior;
-  const a = outfit ? dressAs(base, outfit) : base;
+  let a;
+  if (worn) a = { ...base, ...gearLook(look.gear, { baseOf: k => B?.[k] || null }) };
+  else { const outfit = o[cls] || o.warrior; a = outfit ? dressAs(base, outfit) : base; }
+  if (cache.size > 300) cache.delete(cache.keys().next().value);
   cache.set(key, a);
   return a;
 }

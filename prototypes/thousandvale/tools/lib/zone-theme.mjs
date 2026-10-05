@@ -21,10 +21,10 @@ function rng(seed) { let a = seed >>> 0; return () => { a += 0x6D2B79F5; let t =
  * roads, polyDist, hub }. Returns { lakes: [{name, x, z, r, level, kind}], fen: {x, z, r} | null, beach: [{x, z, r}] }.
  */
 export function carveTheme(ctx) {
-  const { id, theme, G, STEP, ZM, ground, waterTop, waterKind } = ctx;
+  const { id, theme, G, STEP, ZM, ground, waterTop, waterKind } = ctx, AP = ctx.AP ?? 1;   // AP = apron samples
   const R = rng(hashStr('theme:' + id));
   const noise = makeNoise2D(hashStr('theme-shape:' + id));
-  const at = (x, z) => ground[(Math.round(z / STEP) + 1) * G + Math.round(x / STEP) + 1];
+  const at = (x, z) => ground[(Math.round(z / STEP) + AP) * G + Math.round(x / STEP) + AP];
   const out = { lakes: [], fen: null, beach: [] };
   const roadNear = (x, z, d) => ctx.roads.some(r => ctx.polyDist(r.pts, x, z)[0] < d);
   const clearOf = (x, z, r, extra) => ctx.settlements.every(s => Math.hypot(s.x - x, s.z - z) > s.radius + r + extra)
@@ -54,10 +54,10 @@ export function carveTheme(ctx) {
     for (let k = 0; k < 96; k++) { const a = k / 96 * 6.283, rr = radiusAt(l, a); lo = Math.min(lo, at(l.x + Math.cos(a) * rr, l.z + Math.sin(a) * rr)); }
     l.level = +(lo - 0.3).toFixed(2);
     const reach = l.r * 1.3 + bank;
-    const i0 = Math.max(1, Math.floor((l.x - reach) / STEP) + 1), i1 = Math.min(G - 2, Math.ceil((l.x + reach) / STEP) + 1);
-    const j0 = Math.max(1, Math.floor((l.z - reach) / STEP) + 1), j1 = Math.min(G - 2, Math.ceil((l.z + reach) / STEP) + 1);
+    const i0 = Math.max(AP, Math.floor((l.x - reach) / STEP) + AP), i1 = Math.min(G - 1 - AP, Math.ceil((l.x + reach) / STEP) + AP);
+    const j0 = Math.max(AP, Math.floor((l.z - reach) / STEP) + AP), j1 = Math.min(G - 1 - AP, Math.ceil((l.z + reach) / STEP) + AP);
     for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
-      const x = (i - 1) * STEP, z = (j - 1) * STEP, dx = x - l.x, dz = z - l.z, d = Math.hypot(dx, dz);
+      const x = (i - AP) * STEP, z = (j - AP) * STEP, dx = x - l.x, dz = z - l.z, d = Math.hypot(dx, dz);
       const rr = radiusAt(l, Math.atan2(dz, dx)), k = j * G + i;
       if (d <= rr) {
         const f = smoothstep(0, 1, 1 - d / rr);                       // 0 at the shore, 1 in the middle
@@ -137,7 +137,7 @@ export function inFen(fen, x, z, noise) {
  * back, keep: [{x, z, r}] }. Returns { x0, x1, road, height } for meta.
  */
 export function cutCliff(ctx, spec) {
-  const { G, STEP, ZM, ground } = ctx;
+  const { G, STEP, ZM, ground } = ctx, AP = ctx.AP ?? 1;
   const road = ctx.roads.find(r => r.id === spec.road);
   if (!road) throw new Error('cliff: no road ' + spec.road);
   const [x0, x1] = spec.x, [lo, hi] = spec.height, off = spec.offset ?? 8, back = spec.back ?? 80, run = 2.5;
@@ -146,11 +146,11 @@ export function cutCliff(ctx, spec) {
   const reach = off + run + back;
   let zMin = Infinity, zMax = -Infinity;
   for (const p of road.pts) if (p[0] >= x0 - 20 && p[0] <= x1 + 20) { zMin = Math.min(zMin, p[1]); zMax = Math.max(zMax, p[1]); }
-  const i0 = Math.max(1, Math.floor((x0 - 20) / STEP) + 1), i1 = Math.min(G - 2, Math.ceil((x1 + 20) / STEP) + 1);
-  const j0 = Math.max(1, Math.floor((zMin - reach) / STEP) + 1), j1 = Math.min(G - 2, Math.ceil((zMax + reach) / STEP) + 1);
+  const i0 = Math.max(AP, Math.floor((x0 - 20) / STEP) + AP), i1 = Math.min(G - 1 - AP, Math.ceil((x1 + 20) / STEP) + AP);
+  const j0 = Math.max(AP, Math.floor((zMin - reach) / STEP) + AP), j1 = Math.min(G - 1 - AP, Math.ceil((zMax + reach) / STEP) + AP);
   const edge = (x, z) => smoothstep(0, 1, Math.min(x, z, ZM - x, ZM - z) / 6 - 1);   // 0 within 6 m of an edge, 1 beyond 12 m
   for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
-    const x = (i - 1) * STEP, z = (j - 1) * STEP;
+    const x = (i - AP) * STEP, z = (j - AP) * STEP;
     const [d, k, t] = ctx.polyDist(road.pts, x, z);
     if (d > reach) continue;
     const a = road.pts[k], b = road.pts[k + 1], cx = a[0] + (b[0] - a[0]) * t, cz = a[1] + (b[1] - a[1]) * t;

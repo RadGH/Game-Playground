@@ -11,6 +11,7 @@
 // is at local +z); proctown's frontage angle is `facing`, so facing = PI/2 - yaw.
 
 import * as THREE from 'three';
+import { LIGHTS } from './lightpool.js';
 import { describeBuilding, partsFor, radiusOf, MESHES, describeStall, stallParts, wallKitParts, CULTURE_KIT } from '../../../../proctown/js/buildkit.js';
 import { makeGlowTexture } from './decor.js';
 
@@ -220,28 +221,25 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
   // lamp glows (sprites, cheap); a few real lights hop to the lamps nearest the camera at night
   const glowTex = makeGlowTexture();
   const lampSprites = lamps.map(l => { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: '#ffc36e', blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0, fog: true })); s.position.set(l.x, l.y + 2.75, l.z); s.scale.set(2.2, 2.2, 1); s.visible = false; group.add(s); return s; });
-  const lampLights = [];
-  for (let k = 0; k < (cheap ? 2 : 6); k++) { const pl = new THREE.PointLight('#ffb862', 0, 18, 1.6); pl.visible = false; group.add(pl); lampLights.push(pl); }
+  // every lamp is a light SOURCE in the page's fixed pool (lightpool.js): no light is ever added or hidden, so
+  // nightfall and walking past lamps never recompile a shader
+  const lampLights = lamps.map(l => LIGHTS.add({ x: l.x, y: l.y + 2.7, z: l.z, color: '#ffb862', intensity: 0, distance: 18, decay: 1.6, flicker: 0.05, owner: group }));
 
   let night = 0, relightAt = 0, t = 0;
   function setNight(n) {
     night = n;
     winMat.emissiveIntensity = 1.6 * n;
     for (const s of lampSprites) { s.visible = n > 0.05; s.material.opacity = 0.85 * n; }
+    for (const h of lampLights) h.intensity = n > 0.05 ? 14 * n : 0;
   }
   function update(dt, cam) {
     t += dt;
-    if (night < 0.05 || !cam) { for (const l of lampLights) l.visible = false; return; }
-    if (t < relightAt) { for (const [k, l] of lampLights.entries()) if (l.visible) l.intensity = 14 * night * (0.92 + Math.sin(t * 7 + k) * 0.06); return; }
-    relightAt = t + 0.6;
-    const near = lamps.map(l => ({ l, d: Math.hypot(l.x - cam.x, l.z - cam.z) })).filter(o => o.d < 70).sort((a, b) => a.d - b.d);
-    lampLights.forEach((pl, k) => { const n = near[k]; pl.visible = !!n; if (n) { pl.position.set(n.l.x, n.l.y + 2.7, n.l.z); pl.intensity = 14 * night; } });
   }
 
   return {
     group, update, setNight, clearings, solids, lamps,
     towns: [...towns.values()],
     stats: { buildings, lamps: lamps.length, windows: windows.length, parts: Object.fromEntries(Object.entries(parts).map(([k, v]) => [k, v.length])) },
-    dispose() { for (const m of meshes) m.dispose(); kitMat.dispose(); winMat.dispose(); for (const s of lampSprites) s.material.dispose(); },
+    dispose() { for (const m of meshes) m.dispose(); kitMat.dispose(); winMat.dispose(); for (const s of lampSprites) s.material.dispose(); for (const h of lampLights) h.remove(); },
   };
 }

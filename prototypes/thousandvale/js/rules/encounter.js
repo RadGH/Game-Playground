@@ -28,6 +28,22 @@ export const RANK_SCALE = {
   rare: { dmg: 1.6, size: 1.35, wind: 0.9, extra: 2, cd: 0.75 },
   boss: { dmg: 1, size: 1, wind: 1, extra: 0, cd: 1 },
 };
+/**
+ * Play-test 1 P12 — "red zones give no time to react". The least time, in seconds, between a
+ * telegraph appearing on the client (`tele` event) and its damage, by the caster's rank; a BIG hit
+ * (damage x2 or more, or 7 m+ across) and a group mechanic (stack / soak / safe spot) get
+ * `MIN_WIND.big` / `MIN_WIND.mechanic` on top. The data's own wind is kept where it is longer.
+ */
+export const MIN_WIND = { normal: 1.0, champion: 1.1, rare: 1.2, boss: 1.2, big: 0.5, mechanic: 0.6 };
+export function minWindFor(e, spec = {}) {
+  const rank = e?.boss ? 'boss' : (e?.rank in MIN_WIND ? e.rank : 'normal');
+  let w = MIN_WIND[rank] ?? MIN_WIND.normal;
+  const size = Math.max(spec.r ?? 0, (spec.len ?? 0) / 2);
+  if ((spec.damage ?? 1) >= 2 || size >= 7) w += MIN_WIND.big;
+  if (spec.kind === 'stack' || spec.kind === 'soak' || spec.kind === 'safe') w += MIN_WIND.mechanic;
+  return w;
+}
+
 export const ENCOUNTER = {
   /** seconds with nobody alive in the arena before a boss resets */
   WIPE_SECONDS: 4,
@@ -170,7 +186,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     if (st.cast) {
       if (st.cast.ab.interrupt && (e.lastInterruptAt ?? -1) >= st.cast.start) { cancelCast(st, 'interrupt'); return false; }
       if (held) return false;
-      if (now() + 1e-9 >= st.cast.end) { const c = st.cast; st.cast = null; fire(st, c.ab, c.target); return false; }
+      if (now() + 1e-9 >= st.cast.end) { const c = st.cast; st.cast = null; fire(st, c.ab, c.target, { placed: true }); return false; }
       if (st.cast.target && !st.cast.ab.lock) e.facing = Math.atan2(st.cast.target.x - e.x, st.cast.target.z - e.z);
       e.anim = 'cast';
       return !st.cast.ab.move;
@@ -185,8 +201,12 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       const castS = (ab.cast ?? 0) * (st.script ? 1 : st.scale.wind);
       say(st, ab.say, target);
       if (castS > 0) {
-        st.cast = { ab, start: now(), end: now() + castS, target };
+        st.cast = { ab, start: now(), end: now() + castS, target, tele: [], gone: false };
         emit({ t: 'castbar', id: e.id, ab: ab.id, name: ab.name || ab.id, ms: Math.round(castS * 1000), int: ab.interrupt ? 1 : undefined });
+        // play-test 1 P12: the ground is marked when the cast STARTS, not when it ends — the red zone
+        // is on the client for the whole cast bar plus the wind-up, and goes off at the same moment
+        // it always did (cast end + wind)
+        placeAll(st, ab, target, castS, st.cast);
         e.anim = 'cast';
         return !ab.move;
       }
@@ -199,25 +219,37 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
   function cancelCast(st, why) {
     if (!st.cast) return;
     emit({ t: 'castX', id: st.e.id, ab: st.cast.ab.id, why });
+    // the zones marked at cast start go away with the cast (and the ones still waiting to be placed)
+    st.cast.gone = true;
+    for (const t of st.cast.tele) if (!t.dead) { t.dead = true; emit({ t: 'teleR', id: t.id, x: 1 }); }
     if (why === 'interrupt') runActions(st, st.cast.ab.onInterrupt || []);
     st.cast = null;
   }
 
   // ================================================================== firing: placing the telegraphs
 
-  /** An ability goes off: each telegraph spec, expanded by count/pattern, placed on its timer. */
-  function fire(st, ab, target) {
+  /**
+   * Every telegraph of an ability, expanded by count/pattern, each placed on its timer. `lead` = the
+   * seconds of cast bar still to run (P12: zones are placed at cast START and go off `lead` later
+   * than they would have at cast end); `cast` collects them so an interrupt can take them away.
+   */
+  function placeAll(st, ab, target, lead = 0, cast = null) {
     const gid = ++teleN;
-    st.counters[ab.id] = (st.counters[ab.id] || 0) + 1;
     for (const spec of ab.telegraphs || []) {
       const n = (spec.count ?? 1) + (spec.rankExtra === false ? 0 : st.scale.extra * (spec.extraPerRank ?? 0));
       const anchors = anchorsFor(st, spec, target, n);
       anchors.forEach((a, i) => {
-        const place = () => placeTele(st, ab, spec, a, i, gid, target);
+        const place = () => { const t = placeTele(st, ab, spec, a, i, gid, target, lead); if (t && cast) cast.tele.push(t); };
         const delay = (spec.delay ?? 0) * i + (spec.after ?? 0);
-        if (delay > 0) combat.later(delay, () => { if (st.e.dying == null || spec.afterDeath) place(); }); else place();
+        if (delay > 0) combat.later(delay, () => { if (cast?.gone) return; if (st.e.dying == null || spec.afterDeath) place(); }); else place();
       });
     }
+  }
+
+  /** An ability goes off (its telegraphs were placed at cast start when it had a cast bar). */
+  function fire(st, ab, target, { placed = false } = {}) {
+    st.counters[ab.id] = (st.counters[ab.id] || 0) + 1;
+    if (!placed) placeAll(st, ab, target);
     if (ab.melee) monsterStrike(field, st.e, target, { mult: (ab.melee.damage ?? 1) * st.dmgScale * st.scale.dmg, kind: ab.id });
     if (ab.stackOn && target) stackDebuff(st, ab, target);
     runActions(st, ab.actions || [], target);
@@ -246,8 +278,8 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     return out;
   }
 
-  function placeTele(st, ab, spec, anchor, i, gid, target) {
-    if (tele.length >= ENCOUNTER.MAX_LIVE) return;
+  function placeTele(st, ab, spec, anchor, i, gid, target, lead = 0) {
+    if (tele.length >= ENCOUNTER.MAX_LIVE) return null;
     const e = st.e, sc = st.script ? 1 : st.scale.size;
     let x, z;
     const at = spec.at || 'target';
@@ -261,7 +293,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       x = st.homeX + Math.cos(ang) * d; z = st.homeZ + Math.sin(ang) * d;
     } else {
       const u = anchor.unit || target;
-      if (!u) return;
+      if (!u) return null;
       x = u.x; z = u.z;
       if (spec.lead) { x += (u.x - (u.lastX ?? u.x)) * spec.lead; z += (u.z - (u.lastZ ?? u.z)) * spec.lead; }
     }
@@ -282,7 +314,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       r: spec.r != null ? spec.r * sc * grow : undefined, r2: spec.r2 != null ? spec.r2 * sc * grow : undefined,
       arc: spec.arc, len: spec.len != null ? spec.len * sc * grow : undefined, w: spec.w,
       follow: spec.follow && anchor.unit ? anchor.unit : null,
-      placed: now(), at: now() + (spec.wind ?? 1.5) * (st.script ? 1 : st.scale.wind), dead: false,
+      placed: now(), at: now() + lead + windFor(st, spec, lead), dead: false,
     };
     if (t.shape === 'line' && t.len == null) t.len = 20;
     if (t.shape === 'line' && t.w == null) t.w = 3;
@@ -291,6 +323,16 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     tele.push(t);
     enc.stats.placed++;
     emit({ t: 'tele', id: t.id, s: e.id, ab: ab.id, k: t.kind, ms: Math.round((t.at - t.placed) * 1000), el: spec.element || undefined, follow: t.follow?.id, ...wireShape(t) });
+    return t;
+  }
+
+  /**
+   * P12 — the wind-up a telegraph gets: the data's (scaled by rank for ordinary specials), but never
+   * less than `minWindFor` once the cast bar still to run (`lead`) is counted in.
+   */
+  function windFor(st, spec, lead = 0) {
+    const data = (spec.wind ?? 1.5) * (st.script ? 1 : st.scale.wind);
+    return Math.max(data, minWindFor(st.e, spec) - lead);
   }
 
   // ================================================================== resolving
@@ -395,7 +437,9 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       const base = field.statusData?.[r.id] || {};
       applyStatus(f, r.id, { ...base, ...r }, Math.max(1, res.amount * (spec.statusPower ?? 0.3)));
     }
-    if (spec.knock) {
+    // play-test 1 P8: a knock never moves a body that the hit just killed (a dead player was being
+    // slid along the ground by the correction the room sends for a knock)
+    if (spec.knock && !res.dead && !f.dead && f.dying == null && (f.hp ?? 1) > 0) {
       const dx = f.x - t.x, dz = f.z - t.z, len = Math.hypot(dx, dz) || 1;
       const k = spec.knock;
       // a knock moves a player (the room carries the new position to the client as a correction)

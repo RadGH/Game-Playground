@@ -1,0 +1,148 @@
+{
+ "A": {
+  "stalls": {
+   "busyLong": 0,
+   "maxBusyMs": 24,
+   "frames": [],
+   "longTasks": 92,
+   "maxTaskMs": 1302
+  },
+  "links": 0,
+  "top": [
+   {
+    "name": "zone:sites",
+    "n": 1,
+    "ms": 7204,
+    "max": 7204
+   },
+   {
+    "name": "zone:ground",
+    "n": 1,
+    "ms": 59,
+    "max": 59
+   },
+   {
+    "name": "zone:parse",
+    "n": 1,
+    "ms": 53,
+    "max": 53
+   },
+   {
+    "name": "terrain:water",
+    "n": 1,
+    "ms": 28,
+    "max": 28
+   },
+   {
+    "name": "terrain:chunks",
+    "n": 1,
+    "ms": 26,
+    "max": 26
+   },
+   {
+    "name": "world:views",
+    "n": 92,
+    "ms": 202,
+    "max": 15
+   },
+   {
+    "name": "zone:scatter",
+    "n": 1,
+    "ms": 14,
+    "max": 14
+   },
+   {
+    "name": "render",
+    "n": 92,
+    "ms": 477,
+    "max": 10
+   },
+   {
+    "name": "terrain:chunk",
+    "n": 95,
+    "ms": 169,
+    "max": 9
+   },
+   {
+    "name": "zone:town",
+    "n": 1,
+    "ms": 7,
+    "max": 7
+   },
+   {
+    "name": "terrain:grid",
+    "n": 1,
+    "ms": 4,
+    "max": 4
+   },
+   {
+    "name": "scatter:relod",
+    "n": 32,
+    "ms": 24,
+    "max": 4
+   },
+   {
+    "name": "terrain:tex",
+    "n": 1,
+    "ms": 0,
+    "max": 0
+   }
+  ]
+ },
+ "B": {
+  "walked": 586.2656535902923,
+  "stalls": {
+   "busyLong": 0,
+   "maxBusyMs": 23,
+   "frames": [],
+   "longTasks": 78,
+   "maxTaskMs": 1572
+  },
+  "links": 3,
+  "top": [
+   {
+    "name": "zone:sites",
+    "n": 1,
+    "ms": 8856,
+    "max": 8856
+   },
+   {
+    "name": "render",
+    "n": 90,
+    "ms": 637,
+    "max": 19
+   },
+   {
+    "name": "world:views",
+    "n": 90,
+    "ms": 101,
+    "max": 9
+   },
+   {
+    "name": "terrain:chunk",
+    "n": 69,
+    "ms": 72,
+    "max": 5
+   },
+   {
+    "name": "scatter:relod",
+    "n": 28,
+    "ms": 19,
+    "max": 2
+   },
+   {
+    "name": "actor:build",
+    "n": 22,
+    "ms": 1,
+    "max": 0
+   },
+   {
+    "name": "gl:link",
+    "n": 3,
+    "ms": 0,
+    "max": 0
+   }
+  ],
+  "monsters": 3
+ }
+}

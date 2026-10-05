@@ -51,7 +51,7 @@ try {
   const post = (path, body) => fetch(`http://127.0.0.1:${hook}${path}`, { method: 'POST', body: JSON.stringify(body) });
   for (const n of ['Wren', ...bots.map(b => b.name)]) await post('/level', { name: n, level: 9 });
   await page.waitForTimeout(800);
-  await page.keyboard.press('KeyJ');
+  await page.evaluate(() => window.tv.panel('callboard'));   // a Party-menu tab since play-test P18
   await page.waitForSelector('#panel-callboard .cb-row');
   await page.click('#panel-callboard .cb-roles .chip:has-text("Damage")');
   await page.click('#panel-callboard button:has-text("Join the queue")');

@@ -1,0 +1,24 @@
+{
+  "_doc": "Thousandvale progression rules owned by stream C (js/rules/progression.js). Play-test 1 P4: nothing follows you at level 1 \u2014 a class companion (classes.json `pet`) comes at `companions.main`, its second body (`pet.extra`) at `companions.extra`; a quest can grant either earlier (rules.unlock(e, 'companion' | 'companion2')), and so can the perk-forest notable Early Bond (flag earlyBond: main at level 1... once the point is spent). Summoning SKILLS keep Farhold's slot ladder (data/skills.json unlockAt 1/3/6/12/18/24), so a level-1 bar has one skill. `levelGap` is P26: see js/rules/level-gap.js.",
+  "companions": {
+    "main": 10,
+    "extra": 20,
+    "earlyBondMain": 1,
+    "earlyBondExtra": 12
+  },
+  "levelGap": {
+    "_doc": "P26 (js/rules/level-gap.js): a monster 1-3 levels ABOVE the player hits it softer and takes more from it. `monsterDamage[g]` multiplies a monster's hit on a player (or follower) g levels lower; `playerDamage[g]` multiplies a player's (or follower's) hit on a monster g levels higher. Index 0 = same level; a gap past the end uses the LAST entry (no cliff at 4 \u2014 the monster's own level curve keeps making 4+ hard). A monster BELOW you: Farhold's numbers, unchanged.",
+    "monsterDamage": [
+      1,
+      0.88,
+      0.8,
+      0.74
+    ],
+    "playerDamage": [
+      1,
+      1.12,
+      1.22,
+      1.3
+    ]
+  }
+}

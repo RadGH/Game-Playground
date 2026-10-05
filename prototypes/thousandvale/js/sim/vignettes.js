@@ -15,6 +15,9 @@
 // local +z axis points along (sin yaw, cos yaw)) and moved to the placement's (x, z). vignettePoint() is
 // the one formula; the client must use the same.
 
+/** Footprint radius (m) of a vignette prop, for keeping monsters out of it. */
+export const PROP_R = { default: 1.3, well: 1.6, ruined_wall: 2.2, wall: 2.2, cart: 2, wagon: 2.4, tent: 2.4, hut: 3, shack: 3, barrel: 0.9, crate: 0.9 };
+
 export function vignettePoint(pl, lx, lz) {
   const c = Math.cos(pl.yaw || 0), s = Math.sin(pl.yaw || 0);
   return { x: pl.x + lx * c + lz * s, z: pl.z - lx * s + lz * c };
@@ -39,9 +42,12 @@ export function vignetteContent(placements, recipes, { band = [1, 6], respawnMs 
           chest: { key: okey, tier: o.tier || 'common', level: band[0] + (pl.level || 1), after: after >= 0 ? `${key}:${after}` : null, afterName: o.after || null } });
       } else if (o.type === 'use') objects.push({ type: 'use', name: o.name, x: p.x, z: p.z, key: okey, use: { text: o.text || '', gives: o.gives || null, cost: o.cost || null, buff: o.buff || null } });
     });
+    // props a monster must not stand inside (P28: slimes spawned in the pump house's well and barrel — half
+    // buried in a model, unclickable behind it). Ground decals (kind 'ground') are walked on.
+    const avoid = (v.props || []).filter(q => q.kind !== 'ground').map(q => ({ ...vignettePoint(pl, q.x || 0, q.z || 0), r: PROP_R[q.id] || PROP_R.default }));
     for (const m of v.monsters || []) {
       const p = vignettePoint(pl, m.x || 0, m.z || 0);
-      camps.push({ type: m.type, level: band[0] + (m.level || 0), x: p.x, z: p.z, count: m.count || 1, radius: m.radius || 5, respawnMs, vignette: pl.id });
+      camps.push({ type: m.type, level: band[0] + (m.level || 0), x: p.x, z: p.z, count: m.count || 1, radius: m.radius || 5, respawnMs, vignette: pl.id, ...(avoid.length ? { avoid } : {}) });
     }
   }
   return { camps, objects };

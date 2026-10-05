@@ -39,8 +39,8 @@
           "kind": "kill",
           "type": "reed_serpent",
           "count": 6,
-          "where": "the ferry crossings",
-          "text": "Reed serpents"
+          "where": "the ferry crossings by Ferry Hythe",
+          "text": "Kill 6 reed serpents at the ferry"
         }
       ],
       "done": "Free ferry for you. Once. Don't tell anyone.",
@@ -65,8 +65,8 @@
           "kind": "kill",
           "type": "fen_croaker",
           "count": 8,
-          "where": "the lake shallows",
-          "text": "Fen croakers"
+          "where": "the lake shallows round Gullwick",
+          "text": "Kill 8 fen croakers"
         }
       ],
       "done": "I can hear myself think! It's mostly about fish.",
@@ -86,8 +86,8 @@
           "kind": "kill",
           "type": "dusk_flitter",
           "count": 8,
-          "where": "under the stilt fort",
-          "text": "Dusk flitters"
+          "where": "under the Stilt Fort",
+          "text": "Kill 8 dusk flitters under the fort"
         }
       ],
       "done": "Steady at last. I can eat supper and keep it.",
@@ -106,14 +106,15 @@
         {
           "kind": "visit",
           "vignette": "drowned_shrine",
-          "text": "Visit the drowned shrine"
+          "text": "Visit the Drowned Shrine",
+          "where": "The Drowned Shrine, on the lake shore"
         },
         {
           "kind": "kill",
           "type": "marsh_wisp",
           "count": 4,
-          "where": "by the drowned shrine",
-          "text": "Marsh wisps"
+          "where": "The Drowned Shrine",
+          "text": "Kill 4 marsh wisps at the shrine"
         }
       ],
       "done": "Peace and pike. What more could a man want?",
@@ -133,14 +134,16 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Follow the river down",
-          "floor": 1
+          "text": "Follow the river down the Gullwick Throat",
+          "floor": 1,
+          "where": "The Gullwick Throat, the dungeon door in the Gullwick Lakes"
         },
         {
           "kind": "clear",
           "dungeon": "door",
           "text": "Defeat what lives at the source",
-          "boss": true
+          "boss": true,
+          "where": "the bottom of the Gullwick Throat"
         }
       ],
       "done": "The water runs clean again. Mostly.",
@@ -164,7 +167,8 @@
           "kind": "killRare",
           "zone": "gullwick",
           "slot": 0,
-          "text": "The lake's rare slain"
+          "text": "Hunt down Ferryman Odo",
+          "where": "roams the deep water of the Gullwick Lakes"
         }
       ],
       "done": "Grandmother's grudge, settled. She'd be glad.",

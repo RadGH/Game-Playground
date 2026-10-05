@@ -15,7 +15,7 @@ export function createPanel({ id, title, cls = '', width = 340, parent = null, o
   root.setAttribute('aria-label', title);
   root.style.width = width + 'px';
   root.hidden = true;
-  root.innerHTML = `<header class="tvp-head"><h3></h3><span class="tvp-sub"></span>${closable ? '<button class="ghost tvp-x" aria-label="Close" title="Close (Esc)">×</button>' : ''}</header><div class="tvp-body"></div>`;
+  root.innerHTML = `<header class="tvp-head"><h3></h3><span class="tvp-sub"></span>${closable ? '<button class="ghost tvp-x" aria-label="Close" data-tip="Close (Esc)">×</button>' : ''}</header><div class="tvp-body"></div>`;
   root.querySelector('h3').textContent = title;
   (parent || document.getElementById('hud') || document.body).appendChild(root);
   const head = root.querySelector('.tvp-head'), body = root.querySelector('.tvp-body');
@@ -96,6 +96,7 @@ export function h(tag, props = {}, ...kids) {
     if (v == null || v === false) continue;
     if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
     else if (k === 'dataset') Object.assign(e.dataset, v);
+    else if (k === 'title') e.dataset.tip = v;            // P5: the shared tooltip, never a native title bubble
     else if (k === 'style') e.style.cssText = v;
     else if (k in e && k !== 'list') e[k] = v;
     else e.setAttribute(k, v === true ? '' : v);

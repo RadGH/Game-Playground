@@ -79,7 +79,7 @@ test('quests string zones together: cross-zone `next` links exist and every zone
   for (const z of Object.keys(ZONES)) assert.ok(linked.has(z), `${z} is not strung to any other zone`);
 });
 
-test('province story chain: 8-10 steps, >= 8 zones, bands never fall, quests exist in their zones, ends at the world boss', () => {
+test('province story chain: 8-10 steps, >= 8 zones, quest levels never fall, quests exist in their zones, ends at the world boss', () => {
   const st = PCHAIN.steps;
   assert.ok(st.length >= 8 && st.length <= 10, `${st.length} steps`);
   assert.ok(new Set(st.map(s => s.zone)).size >= 8);
@@ -89,8 +89,9 @@ test('province story chain: 8-10 steps, >= 8 zones, bands never fall, quests exi
     const q = QBY.get(s.quest);
     assert.ok(q && q.zone === s.zone, `${s.quest} in ${s.zone}`);
     if (s.then) assert.ok(QBY.get(s.then)?.zone === s.zone, `${s.then}`);
-    assert.ok(ZONES[s.zone].band[0] >= band, `${s.zone} band falls`);
-    band = ZONES[s.zone].band[0];
+    // the zone bands are ramps from the start hub now (P26): the chain's own quest levels never fall
+    assert.ok((q.level || 1) >= band, `${s.quest} (level ${q.level}) falls below ${band}`);
+    band = q.level || 1;
   }
   const last = st[st.length - 1];
   assert.equal(last.zone, PROV.grid.worldBossZone);

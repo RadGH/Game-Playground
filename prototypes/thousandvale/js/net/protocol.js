@@ -6,7 +6,7 @@
 //   parseFrame(str)    -> { msg } | { bad: reason }   (JSON text frame -> validated message)
 //   createBuckets()    -> per-socket rate limiter: take(t) -> true if allowed
 
-export const PROTOCOL_VERSION = 4;
+export const PROTOCOL_VERSION = 5;      // v5: play-test 1 (talent, perk, map; mapData, discover, talentR, perkR; swim state)
 export const SNAP_VERSION = 1;
 export const TICK_MS = 50;
 export const MAX_FRAME = 16 * 1024;
@@ -127,6 +127,10 @@ export const CLIENT_MSGS = Object.freeze({
   callboard: { on: 'gw', fields: { op: 'str:8', dungeon: '?str:64', role: '?str:8', id: '?int' }, rate: 1, burst: 5 },
   report:  { on: 'gw', fields: { name: 'str:24', why: 'str:16', text: '?str:200' }, rate: 0.1, burst: 3 },
   mail:    { on: 'p', fields: { op: 'str:8', id: '?int', to: '?str:24', subject: '?str:60', body: '?str:500', items: '?uids', gold: '?int' }, rate: 2, burst: 8 },
+  // play-test 1 (docs/protocol.md §17): talents + the perk forest (P6), the world map (P3/P27)
+  talent:  { on: 'p', fields: { op: 'str:8', skill: '?str:48', tier: '?int', node: '?str:48' }, rate: 3, burst: 10 },
+  perk:    { on: 'p', fields: { op: 'str:8', id: '?str:64' }, rate: 3, burst: 10 },
+  map:     { on: 'p', fields: { op: 'str:8' }, rate: 1, burst: 3 },
 });
 
 /** Server -> client JSON messages (documentation + tests; the server is trusted, the client does not validate). */
@@ -178,7 +182,15 @@ export const SERVER_MSGS = Object.freeze({
   mailOpen: ['mail'],
   mailR: ['op', 'ok', 'why', 'msg'],
   muted: ['until', 'by', 'msg'],
+  // play-test 1
+  talentR: ['op', 'ok'],
+  perkR: ['op', 'ok'],
+  mapData: ['province', 'zones', 'places', 'events'],
+  discover: ['places'],
 });
+/** Talent ops (`talent {op}`) and perk ops (`perk {op}`), province socket (P6). */
+export const TALENT_OPS = Object.freeze(['pick', 'clear']);
+export const PERK_OPS = Object.freeze(['take', 'refund', 'reset']);
 
 /** Party ops (`party {op}`); docs/protocol.md §3.3. */
 export const PARTY_OPS = Object.freeze(['invite', 'accept', 'decline', 'leave', 'kick', 'lead', 'join', 'code', 'group']);

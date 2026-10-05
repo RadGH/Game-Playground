@@ -3,7 +3,7 @@
 //
 // Floors are one instanced flagstone tile per walkable cell; walls are instanced blocks on every wall cell
 // that touches a floor (the solid rock beyond is never drawn). Torches stand on walls next to room
-// centres; six real lights hop to the torches nearest you, the rest are glow sprites.
+// centres; each torch is a source in the page's fixed light pool (lightpool.js), which lights the nearest few.
 // Also returns the two terrain functions the client needs: `ground` (always 0 — dungeon floors are flat,
 // the same as the server's js/sim/dungeon.js dungeonTerrain) and `cameraHeight` (wall tops count as high
 // ground, so the third-person camera pulls in instead of looking through rock).
@@ -12,6 +12,9 @@ import * as THREE from 'three';
 import { makeSurface } from '../../../../highdef-3d/js/kit/textures.js';
 import { unrleTiles, dungeonTerrain } from '../sim/dungeon.js';
 import { makeGlowTexture } from './decor.js';
+import { LIGHTS } from './lightpool.js';
+import { perf } from './perf.js';
+const DTEX = new Map();
 
 import { buildProp, buildGroundDetail } from '../../../../highdef-3d/js/kit/rocks.js';
 
@@ -51,7 +54,8 @@ export function createDungeonView(d, { quality = 'high' } = {}) {
 
   // --- materials -----------------------------------------------------------------------------------
   const cheap = quality === 'low';
-  const tex = k => { if (cheap) return null; const s = makeSurface(k, { size: 256, seed: 5 }); s.map.wrapS = s.map.wrapT = THREE.RepeatWrapping; return s.map; };
+  // P10: surfaces are cached for the page (built per dungeon they froze every dungeon entrance)
+  const tex = k => { if (cheap) return null; if (!DTEX.has(k)) { const s = makeSurface(k, { size: 256, seed: 5 }); s.map.wrapS = s.map.wrapT = THREE.RepeatWrapping; DTEX.set(k, s.map); } return DTEX.get(k); };
   const lookKey = lookFor(d), LK = LOOKS[lookKey];
   const wallH = LK.wallH || WALL_H;
   // Low quality has no textures and few lights: a faint glow in the stone itself keeps rooms readable
@@ -165,25 +169,19 @@ export function createDungeonView(d, { quality = 'high' } = {}) {
   for (const gp of dress.glows) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: LK.glow, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.6 })); sp.position.set(gp.x, 0.35, gp.z); sp.scale.set(1.1, 0.8, 1); group.add(sp); glows.push(sp); }
 
   const lights = [];
-  for (let k = 0; k < (cheap ? 4 : 6); k++) { const l = new THREE.PointLight('#ffa552', 0, cheap ? 20 : 14, cheap ? 1.2 : 1.7); l.position.y = 2.6; group.add(l); lights.push(l); }
-  let relightAt = 0, t = 0;
+  // torches borrow lights from the page's fixed pool (lightpool.js): entering a dungeon adds no light, so no shader recompiles
+  for (const tc of torches) lights.push(LIGHTS.add({ x: tc.x, y: 2.6, z: tc.z, color: tc.color, intensity: cheap ? 22 : 14, distance: cheap ? 20 : 14, decay: cheap ? 1.2 : 1.7, flicker: 0.12, owner: group }));
+  let t = 0;
 
   function update(dt, me) {
     t += dt;
     for (const [k, tc] of torches.entries()) tc.s.material.opacity = 0.75 + Math.sin(t * 9 + k) * 0.12;
     for (const [k, g] of glows.entries()) g.material.opacity = 0.45 + Math.sin(t * 1.3 + k) * 0.15;
-    if (!me || t < relightAt) { for (const [k, l] of lights.entries()) if (l.userData.base) l.intensity = l.userData.base * (0.88 + Math.sin(t * 11 + k * 2) * 0.12); return; }
-    relightAt = t + 0.5;
-    const near = torches.map(tc => ({ tc, d: Math.hypot(tc.x - me.x, tc.z - me.z) })).sort((a, b) => a.d - b.d);
-    lights.forEach((l, k) => {
-      const n = near[k];
-      if (!n || n.d > 40) { l.intensity = 0; l.userData.base = 0; return; }
-      l.position.set(n.tc.x, 2.6, n.tc.z); l.color.set(n.tc.color); l.userData.base = cheap ? 22 : 14; l.intensity = l.userData.base;
-    });
   }
 
   return {
     group, terrain, update, tileAt, openGate,
+    dispose() { for (const h of lights) h.remove(); lights.length = 0; },
     floorAt: (x, z) => { for (const f of floors) if (x >= f.origin.x && z >= f.origin.z && x < f.origin.x + f.w * cell && z < f.origin.z + f.h * cell) return f.index; return -1; },
     ground: () => 0,
     cameraHeight: (x, z) => (tileAt(x, z) ? 0 : wallH),

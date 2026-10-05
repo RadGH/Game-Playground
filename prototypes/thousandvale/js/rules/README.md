@@ -15,7 +15,7 @@ It runs the same under Node (server), in a Web Worker (offline play) and on the 
 |---|---|---|
 | `index.js` | **`createRules(host, opts)`**, the room interface (docs/protocol.md §7). It syncs room entities ↔ combat units and turns field events into protocol events. Loads the data with a top-level await. | — |
 | `farhold.js` | The **only** import door into Farhold/Emberveil (rpg, skills, skillmech, weapons, effects, uniques, foci, talents, ground, combat-feel, rng). | shared, unchanged |
-| `boot.js` / `data.js` | Which data files we read (Farhold + Emberveil JSON, untouched) and how (fetch or fs). | — |
+| `boot.js` / `data.js` | Which data files we read (Farhold + Emberveil JSON, untouched; plus Thousandvale's own `data/rules/` — progression, talents, perks — owned by stream C) and how (fetch or fs). | — |
 | `engine.js` | `createEngine(data, {seed, levelCap})`: Farhold's `Rpg` booted as `main.js` boots it (uniques + foci added in memory, combat/weapon tuning, an explicit level cap). One engine per process. | main.js ~299, ~439, ~785 |
 | `rng.js` | Named seeded streams (`streams.get('combat'|'loot'|'spawn'|'bars')`) and the room clock. | Emberveil mulberry32 |
 | `room.js` | The **room context**. `room.run(fn)` swaps the room's own skillmech `world` (traps, posts, walls, corpses), skillmech `ENV` and the skills.js status hooks into Farhold's module slots, then swaps them back out. | skillmech.js / skills.js globals |
@@ -34,6 +34,11 @@ It runs the same under Node (server), in a Web Worker (offline play) and on the 
 | `telegraph.js` | Telegraph geometry: circle, ring/donut, cone, line, cross; line-of-sight test. | new |
 | `targeting.js` | Tab targeting: `tabOrder`, `nextTarget`, `validTarget` (hostile or friendly lists). | new |
 | `terrain-flat.js` | The terrain interface every walker reads, as a flat stand-in for tests. | — |
+| `progression.js` | **What is earned, not handed out** (play-test 1 P4): a class companion comes at level 10, its second body at 20; a quest unlock (`rules.unlock(e, 'companion' \| 'companion2')`) or the Early Bond keystone brings them sooner. Numbers in `data/rules/progression.json`. | new (Farhold hands them out in `begin()`) |
+| `level-gap.js` | **The level gap** (P26): one wrapper round the engine's `rpg.strike` — a monster 1-3 levels above you hits you softer and takes more from you; it also applies the perk forest's hit rules. Off in the parity fixtures. | new (Farhold has no gap rule) |
+| `talents.js` | **Per-skill talent trees** (P6): Farhold's trees rewritten at load so every node changes HOW the skill works (no plain-number nodes, nothing inert on its shape), plus the pick / Unbinder API and the talent screen's data. Policy in `data/rules/talents.json`. | skilltalents.js trees, reshaped |
+| `perk-forest.js` | **The perk forest** (P6): 12 arms, every arm branching into 2-4 paths that end in keystones, 382 nodes; built in Farhold's forest shape, so Farhold's `perkBonuses`/`canTake`/`allocate`/`rpg.derive` run it. Cards written from the numbers (`STAT_TEXT`). Data in `data/rules/perks.json`. | perks.js shape, new tree |
+| `perk-rules.js` | **The readers for the forest's 20 Thousandvale rules** (Momentum, Unbroken, Weave, Brimming Cup, Banner of the Road, …) and its 4 new stats (healPower, dotPct, threatPct, xpFind). `TV_FLAG_READERS` / `TV_STAT_READERS` name every reader; the perk audit fails on a flag with none. | new |
 
 `terrain-read.js` belongs to stream B and `dungeon-tiers.js` to stream E. The purity rule applies to both, but the import rule doesn't.
 
@@ -62,6 +67,30 @@ room.run(() => room.combat.attack(ch, { yaw }));      // ALWAYS inside room.run
 - **Skill bar for the client**: `rules.bar(e)` → `[{slot 1..6, id, name, desc, cd (ms), mp, level, locked, empty, shape, element, ally, group, charges, form}]` — Farhold's live bar, so talents/forms/stances show.
 - **Party calls**: a non-companion `command` (focus/pounce/return) is also heard by party members' followers within 30 m; `empowerNext.pets` puts the rider on each party member's own next skill (`mech.empower`, the slot their bar spends).
 - **Rewards**: everyone who did damage gets XP, gold and their own loot roll. In a room these go to `host.award` and a `loot` event.
+
+## Play-test 1 (owner, 2026-10-05) — what changed in the rules
+
+| # | What | Where |
+|---|---|---|
+| P4 | Nothing follows a new character. A class companion comes at level 10 (its second body at 20), sooner through a quest (`rules.unlock`) or the Early Bond keystone; `rules.companion(e)` tells the client when. A level-1 bar holds one skill (Farhold's 1/3/6/12/18/24 ladder). | `progression.js`, `index.js grantCompanions` |
+| P6 | Per-skill talents (4 tiers at 3/8/18/28, one pick a tier, 2-3 nodes each, every one a rule) and a 382-node perk forest. See "Build: talents and perks" below and `docs/talents.md`. | `talents.js`, `perk-forest.js`, `perk-rules.js` |
+| P8 | A knock never slides a body the hit killed, and the rules never move a dead player. | `encounter.js hitOne`, `index.js syncOut` |
+| P11 | Followers on a terrain that blocks (nav.bin, a dungeon's walls — `terrainFrom` now makes a dungeon's unwalkable tiles block): only targets they or their owner can SEE and can REACH (one they cannot reach is skipped 5 s), walk round walls on the monsters' planner, slide along walls, never snap to the owner over a wet step, and teleport only as a last resort — further than 45 m with no progress along the path for 6 s, or further than 220 m. A flat terrain keeps Farhold's brain exactly. | `followers.js FOLLOW_PATH`, `pathfind.js` (`blockTtl` for dungeon gates) |
+| P12 | Every telegraph gives real warning: at least 1.0 s (normal), 1.1 (champion), 1.2 (rare, boss), +0.5 for a big hit (x2 damage or 7 m+), +0.6 for a stack/soak/safe mechanic. A cast-bar ability marks the ground when the cast STARTS (the `tele` event goes out with the `castbar`); an interrupt withdraws the mark (`teleR` with `x: 1`). | `encounter.js MIN_WIND`, `placeAll` |
+| P20 | Every cast emits `fx kind:'spell'` with its geometry (shape, element, at, r, to, yaw/reach/arc, ms for a delayed blast, talent fx); every landed hit emits `fx kind:'impact'` with `el` and `ab` (skill id) — Farhold drew a spark only for a strike with a knock shape; `hit` events carry `ab`. All 180 skills checked. | `cast-skills.js castPlan`, `field.js land/report` |
+| P23 | A skill that cannot land is refused BEFORE mana or cooldown is spent: a named enemy out of reach (bolt/beam: range; ground: range + radius; melee: weapon reach + 1.5 m) or dead; a damaging bolt/beam/melee with no enemy in reach at all. Self, around, summon, form and ally skills are never refused here. Code `range`. | `cast-skills.js preflight` |
+| P26 | Level gap: a monster 1-3 levels above you deals x0.88/0.80/0.74 to you and takes x1.12/1.22/1.30 from you (4+ holds the last step). Two crag hyenas two levels up: won 17% -> 78% by a level-2 character. | `level-gap.js`, `data/rules/progression.json` |
+| P28 | The bog slime has no immunity and takes damage from every class (tested at L2 vs L6); "barely injure" was the level gap (P26). Clicking it / it clipping into the ground is the client's (D). | tests/C/playtest1 |
+
+### Build: talents and perks (the room's API, A and D)
+
+- `rules.talents(e)` -> `{ tiers: [3,8,18,28], level, skills: [{ slot, skillId, name, shape, element, open, unlockAt, tiers: [{ tier, level, open, picked, nodes: [{ id, name, desc, fx, bespoke, requires, picked }] }] }] }` — the talent screen.
+- `rules.pickTalent(e, skillId, tier, nodeId)` / `rules.unpickTalent(e, skillId, tier)` / `rules.resetTalents(e, skillId?)` -> `{ ok, bar, build }` or `{ ok: false, text }`. A pick into an empty tier is free; emptying one is the Unbinder's (A charges `rules.retrainPrice(e, 'talent', 'one'|'all')` first — Farhold's `balance.retrain`).
+- `rules.perkForest()` -> `{ arms, nodes: [{ id, kind, label (show this: 'Cornerstone' for a keystone — the word keystone is banned in player-facing text), arm, ring, branch, x, y, name, desc, cost, when, oddball, rule }], links, start }` — static per process (cache it). `rules.perks(e)` -> `{ total, spent, left, taken, flags }`.
+- `rules.takePerk(e, id)` / `rules.refundPerk(e, id)` (an END of a walk only) / `rules.resetPerks(e)` -> `{ ok, bar, build }`; A charges `retrainPrice(e, 'perk', …)` for a refund.
+- `rules.saveBuild(e)` -> `{ v: 1, talents, perks, bonusPerks, unlocks }`: A saves it as `char.build`; `addEntity` restores it (picks that no longer exist and perks that no longer connect are dropped). `bonusPerks` is where a quest's perk point goes.
+- After any change the rules call `host.barChanged(e)` (if the room has it) and emit `fx kind:'build'` — the bar's slots, costs, cooldowns and `talents` (picked names) may have moved, and the sheet was re-derived.
+- `bar(e)` entries gained `talents: [names]`.
 
 ## Ally targeting (PLAN §6.2; audited for all 30 classes)
 
@@ -102,6 +131,8 @@ member 120 m away, and checks each promise against what actually landed. `ALLY_A
 | `parity-classes` | **All 30 classes, all 180 skills**, two seeds each, with the follower system running on both sides (class companions from the first frame, summons, temporary summons, decoys, druid shapes, songs, stances, tempers), channels, echoes, afterimages and delayed strikes; every follower's health, place and statuses compared too. |
 | `parity-uniques` | **Every unique (233, foci included)**: attack powers (`resolveAttack`: chain, ricochet, split, slam, cleave, burning ground, twin bolts, volleys), kill powers, on-hurt powers and auras, worn into a pack that bites back. |
 | `parity-ranged` | Staff tap and every charge length (fire/ice/shadow), wand, shortbow draws, crossbow. |
+
+**Deliberate divergences** (the parity harness excludes exactly these): the level gap (P26) — `tests/C/setup.mjs parityEngineFor` sets `engine.levelGap = null`. Everything else Thousandvale adds is inert for a parity character (no perks, no talents picked; the range preflight never refuses a fixture's cast; the follower path brain needs a terrain that blocks; class companions are summoned explicitly by the fixtures).
 
 `drift.test.mjs` hashes every Farhold block that is copied out (17 blocks). When Farhold edits one, the test goes red and names the Thousandvale file to update.
 

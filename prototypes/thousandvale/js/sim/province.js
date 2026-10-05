@@ -18,7 +18,7 @@
 // the same thing get a "Group up" hint), player traces (graves, campfires, door banners, zone deeds,
 // footprint heat), the day/night clock, NPC schedules (town folk at work by day, at the inn by night).
 
-import { PROTOCOL_VERSION, TICK_MS, CODES, ITEM_OPS, STATE } from '../net/protocol.js';
+import { PROTOCOL_VERSION, TICK_MS, CODES, ITEM_OPS, STATE, TALENT_OPS, PERK_OPS } from '../net/protocol.js';
 import { createRoom } from './room.js';
 import { createRules as rulesV0 } from './rules-v0.js';
 import { createTickStats } from './tickstats.js';
@@ -35,6 +35,7 @@ import { eventScale } from './director.js';
 import { createQuestBook } from './quests.js';
 import { townFolk, blockAt } from './schedules.js';
 import { createMail } from './mail.js';
+import { createTravellers } from './travellers.js';
 
 const LEASE_MS = 30000, HEARTBEAT_MS = 10000, TICKET_WAIT_MS = 3000;
 export const BAG_MAX = 120;
@@ -48,6 +49,12 @@ export const GROUP_R = 40;               // open groups: players hitting the sam
 // trace lifetimes and caps: stream E's data/names/traces.json (graves 60 min / 40 a copy, campfires 30 min / 20, banners 30 min)
 export const GRAVE_MS = 3600000, CAMPFIRE_MS = 30 * 60000, BANNER_MS = 30 * 60000, MAX_TRACES = { grave: 40, campfire: 20 };
 export const HEAT_CELL = 8;              // footprints: steps counted per 8 m cell per hour (traces.json footprints)
+export const TRAVEL_PRELOAD_MS = 1500;     // P10: waystone / event travel tells the client where first, moves this much later
+export const DISCOVER_PAD = 30;            // P3: a place is found within its radius + this many metres
+export const KIT_VERSION = 1;              // P22: the starting kit rule (class weapon + off-hand only)
+export const KIT_KEEP = new Set(['weapon', 'offhand', 'mainhand', 'offHand']);
+export const RECENT_Q_MS = 15 * 60000;    // P17: kills / event wins / clears this recent count toward a quest you accept now
+export const RECENT_Q_MAX = 60;
 export const ROLES = ['smith', 'merchant', 'elder', 'innkeeper', 'healer', 'unbinder', 'broker'];
 const RARE = new Set(['rare', 'unique', 'legendary', 'set']);
 
@@ -171,7 +178,17 @@ export function createProvince(opts) {
       describeExtra: describeFor(L),
     });
     rooms.set(r.id, r); pv.copies.push(r); counters.copiesMade++;
+    // the living roads (P19): travellers walking E's routes between towns, folk at work, chatter about the day
+    // (made on the copy's first NPC tick: the clock helpers it reads are declared further down this file)
+    if (opts.travellers !== false && (L.travel || (L.folk && L.folk.length))) r.meta.roads = { pv, n };
     return r;
+  }
+  function roadsFor(r) {
+    const { pv, n } = r.meta.roads; r.meta.roads = null;
+    let ts = (seed * 2246822519 + n * 3266489917) >>> 0;
+    const trng = () => { ts = (ts + 0x6D2B79F5) >>> 0; let x = ts; x = Math.imul(x ^ (x >>> 15), x | 1); x ^= x + Math.imul(x ^ (x >>> 7), x | 61); return ((x ^ (x >>> 14)) >>> 0) / 4294967296; };
+    try { r.travellers = createTravellers({ room: r, travel: pv.L.travel, folk: pv.L.folk || [], rng: trng, context: (x, z) => chatterContext(pv, r, x, z), isNight: () => isNight(), phase: () => dayPhase(), log }); }
+    catch (err) { log('travellers failed', err && err.stack); }
   }
 
   const players = r => r.clients.size + countLingering(r);
@@ -225,6 +242,7 @@ export function createProvince(opts) {
     if (r.kind === 'instance') { pv.instances.delete(r.meta.key); counters.instancesClosed++; }
     if (r.kind === 'wilds') pv.copies.splice(pv.copies.indexOf(r), 1);
     try { r.rules.dispose && r.rules.dispose(); } catch (err) { log('dispose failed', err && err.message); }
+    if (r.travellers) { try { r.travellers.dispose(); } catch { /* gone */ } r.travellers = null; }
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -312,6 +330,9 @@ export function createProvince(opts) {
       case 'trace': return trace(o, m.kind);
       case 'quest': return questOp(o, m);
       case 'mail': return mail.op(o, m).then(why => { if (typeof why === 'string') bad(s, why); });
+      case 'talent': return talentOp(o, m);
+      case 'perk': return perkOp(o, m);
+      case 'map': return m.op === 'get' ? s.sendJSON(mapData(o)) : bad(s, 'op');
       default: return bad(s, 'socket');
     }
   }
@@ -352,11 +373,14 @@ export function createProvince(opts) {
     const again = online.get(tk.char);
     if (again && !again.relocating) { takeOver(again, s); return; }
     const ch = r.char;
+    aliasWaystones(ch);
     const place = placeFor(ch, tk);
     const client = makeClient(s);
     const o = { char: ch, fence: r.fence, entity: null, room: place.room, conn: s, lingerUntil: 0, dirty: false, saving: false, savePending: false, lastSaveAt: now(), homeCopy: null, seq: ch.jseq || 0, savedSeq: ch.jseq || 0, lastPos: null, frozen: false, zone: null, claimed: !!tk.claimed };
     online.set(ch.id, o);
     o.entity = place.room.addPlayer(ch, client, place.at);
+    startingKit(o);
+    gearLook(o);
     tagParty(o);
     if (place.room.kind === 'wilds') o.homeCopy = place.room;
     s.state = 'in'; s.client = client;
@@ -438,6 +462,8 @@ export function createProvince(opts) {
         x: e.x, y: e.y, z: e.z, yaw: e.yaw, hp: e.hp, hpMax: e.hpMax, mp: Math.round(e.mp), mpMax: e.mpMax,
         bag: ch.bag || [], equipment: equipView(o), ignore: ch.ignore || [], waystones: ch.waystones || [], treasure: ch.treasure || {},
         quests: (provOf(o.room) || first).book.view(ch),
+        seen: ch.seen || { zones: [], places: [] },
+        ...buildView(o),
         opened: Object.keys(ch.opened || {}).filter(k => ch.opened[k] > t),
       },
     };
@@ -469,7 +495,7 @@ export function createProvince(opts) {
   function transfer(o, to, at, via) {
     const from = o.room, old = o.entity;
     if (to === from) {
-      old.moveTo(at.x, at.z);
+      old.moveTo(at.x, at.z, undefined, true);           // a server teleport moves even a body
       const c = from.clients.get(old.id); if (c) c.selfDirty = true;
       return;
     }
@@ -479,6 +505,7 @@ export function createProvince(opts) {
     from.remove(old);
     o.room = to;
     o.entity = to.addPlayer(o.char, client || null, { x: at.x, z: at.z, carry });
+    gearLook(o);
     if (!client) to.detach(o.entity);
     tagParty(o);
     if (to.kind === 'wilds') o.homeCopy = to;
@@ -713,25 +740,42 @@ export function createProvince(opts) {
 
   // ---- waystones + travel (PLAN §5.2; NB4: discovered first, fares, free to a live realm event) ----
   let remoteWaystones = [];       // every process's waystones (the gateway shares them)
+  /** A stone merged into a neighbour (realm.js dedupeWaystones, P14): a character who found it knows the kept one. */
+  function aliasWaystones(ch) {
+    if (!ch.waystones || !ch.waystones.length) return;
+    let changed = false;
+    const out = [];
+    for (const k of ch.waystones) {
+      let to = k;
+      for (const pv of P.values()) if (pv.L.waystoneAliases && pv.L.waystoneAliases[k]) to = pv.L.waystoneAliases[k];
+      if (to !== k) changed = true;
+      if (!out.includes(to)) out.push(to); else changed = true;
+    }
+    if (changed) ch.waystones = out;
+  }
   function allWaystones() { const out = []; for (const pv of P.values()) for (const w of pv.L.waystones) out.push({ ...w, province: pv.L.key }); return out; }
   function discover(o, obj) {
     const ch = o.char, w = obj.data.waystone;
     ch.waystones ||= [];
     const fresh = !ch.waystones.includes(w.key);
     if (fresh) { ch.waystones.push(w.key); journal(o, 'set', { k: 'waystones', v: ch.waystones }); o.dirty = true; }
+    const seen = seenOf(ch);
+    if (!seen.places.includes(w.key)) { seen.places.push(w.key); if (o.seenSet) o.seenSet.add(w.key); journal(o, 'set', { k: 'seen', v: seen }); }
     o.conn.sendJSON({ t: 'used', id: obj.id, ok: true, kind: 'waystone', key: w.key, name: w.name, fresh, known: ch.waystones });
   }
   function travel(o, to) {
     const s = o.conn, e = o.entity, ch = o.char;
     if (e.dead) return s.sendJSON({ t: 'travelR', ok: false, why: 'dead' });
+    if (o.travelling) return s.sendJSON({ t: 'travelR', ok: false, why: 'busy', msg: 'You are already on your way.' });
     if (e.state & STATE.combat) return s.sendJSON({ t: 'travelR', ok: false, why: 'combat', msg: 'Not while fighting.' });
     if (o.room.kind === 'instance') return s.sendJSON({ t: 'travelR', ok: false, why: 'instance', msg: 'Leave the dungeon first.' });
     if (to === 'event') {
       if (!liveEvent) return s.sendJSON({ t: 'travelR', ok: false, why: 'noEvent', msg: 'Nothing is happening right now.' });
       counters.travels++;
-      s.sendJSON({ t: 'travelR', ok: true, cost: 0, to: 'event' });
       const a = (ch.id % 12) / 12 * Math.PI * 2;
-      return moveTo(o, liveEvent.province, { x: liveEvent.x + Math.cos(a) * (liveEvent.r || 50) * 0.8, z: liveEvent.z + Math.sin(a) * (liveEvent.r || 50) * 0.8 }, 'event');
+      const at = { x: liveEvent.x + Math.cos(a) * (liveEvent.r || 50) * 0.8, z: liveEvent.z + Math.sin(a) * (liveEvent.r || 50) * 0.8 };
+      s.sendJSON({ t: 'travelR', ok: true, cost: 0, to: 'event', at, province: liveEvent.province, delayMs: TRAVEL_PRELOAD_MS });
+      return afterPreload(o, () => moveTo(o, liveEvent ? liveEvent.province : provOf(o.room).L.key, at, 'event'));
     }
     const w = allWaystones().find(x => x.key === to) || remoteWaystones.find(x => x.key === to);
     if (!w) return s.sendJSON({ t: 'travelR', ok: false, why: 'unknown' });
@@ -743,8 +787,26 @@ export function createProvince(opts) {
     ch.gold -= cost; journal(o, 'gold', { d: -cost }); econ.add('sink', 'fare', { gold: cost }, ch.level);
     s.sendJSON({ t: 'bag', add: [], remove: [], gold: ch.gold });
     counters.travels++;
-    s.sendJSON({ t: 'travelR', ok: true, cost, to });
-    moveTo(o, w.province, { x: w.x + 2, z: w.z + 2 }, 'waystone');
+    const at = { x: w.x + 2, z: w.z + 2 };
+    s.sendJSON({ t: 'travelR', ok: true, cost, to, at, province: w.province, delayMs: TRAVEL_PRELOAD_MS });
+    afterPreload(o, () => moveTo(o, w.province, at, 'waystone'), () => {     // cancelled (a fight started, death): the fare back
+      ch.gold += cost; journal(o, 'gold', { d: cost }); econ.add('faucet', 'fareRefund', { gold: cost }, ch.level);
+      if (o.conn) o.conn.sendJSON({ t: 'bag', add: [], remove: [], gold: ch.gold });
+    });
+  }
+  /**
+   * P10 "travelling freezes for a few seconds": the client is told WHERE it is going first (`travelR.at`, `province`,
+   * `delayMs`) and the move happens TRAVEL_PRELOAD_MS later, so it can stream the destination's ground behind a fade
+   * instead of loading it after the `joined` lands. Cancelled if you die, start a fight or log off meanwhile.
+   */
+  function afterPreload(o, go, cancel = null) {
+    o.travelling = true;
+    setTimeoutTicks(() => {
+      o.travelling = false;
+      const ok = online.get(o.char.id) === o && o.conn && !o.entity.dead && !(o.entity.state & STATE.combat) && !o.relocating;
+      if (ok) go();
+      else { if (cancel) cancel(); if (o.conn) o.conn.sendJSON({ t: 'travelR', ok: false, why: 'interrupted', msg: 'Your journey was interrupted.' }); }
+    }, Math.max(1, Math.round(TRAVEL_PRELOAD_MS / TICK_MS)));
   }
 
   // ---- events: the realm event (the director starts it here) and every copy's own zone events (PLAN §5.2) ----
@@ -859,7 +921,7 @@ export function createProvince(opts) {
           if (cur) {
             const res = cur.run.step();
             if (res === 'live') { frameTo(cur.run, room); continue; }
-            if (res === 'won') rewardEvent(cur.run, room);
+            if (res === 'won') { rewardEvent(cur.run, room); deedOf(def.zone).last.eventWon = def.name; }
             tellZone(here, { kind: 'end', ev: cur.run.view(), won: res === 'won' });
             zoneRuns.delete(key);
             zoneNext.set(key, t + gapOf(def, room));
@@ -887,7 +949,7 @@ export function createProvince(opts) {
   function deedOf(zone) {
     const hour = Math.floor(wallNow() / 3600000);
     let d = deeds.get(zone);
-    if (!d || d.hour !== hour) { d = { hour, rares: 0, bosses: 0, elites: 0, deaths: 0, visitors: new Set(), heat: new Map() }; deeds.set(zone, d); }
+    if (!d || d.hour !== hour) { d = { hour, rares: 0, bosses: 0, elites: 0, deaths: 0, visitors: new Set(), heat: new Map(), last: {} }; deeds.set(zone, d); }
     return d;
   }
   function observe(ev, r) {
@@ -924,9 +986,14 @@ export function createProvince(opts) {
         return;
       }
       if (d.kind === 'monster' && pv) {
-        const dz = deedOf(pv.L.zoneOf(d.x, d.z));
-        if (d.rank === 'rare') dz.rares++; else if (d.rank === 'boss') dz.bosses++; else if (d.rank === 'elite') dz.elites++;
-        if (r.kind === 'instance' && d.rank === 'boss') bannerDoor(r);
+        const by = ev.by ? r.entities.get(ev.by) : null, byName = by && by.kind === 'player' ? by.name : null;
+        const where = r.kind === 'instance' ? (pv.L.doors[r.meta.door] || {}) : d;
+        const dz = deedOf(pv.L.zoneOf(where.x, where.z));
+        const nm = d.name && d.name !== d.type ? d.name : String(d.type || 'something').replace(/_/g, ' ');
+        if (d.rank === 'rare') { dz.rares++; dz.last.rare = { name: nm, by: byName }; }
+        else if (d.rank === 'boss') { dz.bosses++; dz.last.boss = { name: nm, by: byName }; }
+        else if (d.rank === 'elite') { dz.elites++; dz.last.elite = { name: nm, by: byName }; }
+        if (r.kind === 'instance' && d.rank === 'boss') { bannerDoor(r); const members = [...online.values()].filter(x => x.room === r); dz.last.clear = { place: r.name, by: members[0] ? members[0].char.name : byName, party: members.length || 1 }; }
       }
     }
   }
@@ -970,6 +1037,7 @@ export function createProvince(opts) {
       o.heatAt = { x: o.entity.x, z: o.entity.z };
       if (moved) d.heat.set(cell, Math.min(65535, (d.heat.get(cell) || 0) + Math.min(moved, 20)));
       if (o.zone !== z) { o.zone = z; o.conn.sendJSON(zoneMsg(pv, z)); presence(o); }
+      discoverNear(o, pv, z);
       if (pv.book.wantsPosition(o.char)) questEvent(o, { kind: 'visit', x: o.entity.x, z: o.entity.z });
     }
   }
@@ -985,6 +1053,41 @@ export function createProvince(opts) {
   const isNight = () => { const t = timeOfDay(); return t < 0.22 || t > 0.8; };
   const PHASES = { dawn: 0.2, day: 0.27, dusk: 0.75, night: 0.82, late: 0.95 };
   const barkAt = new Map();
+  /** dawn | day | dusk | night | late — the schedules' clock phases (chatter `phase.*`). */
+  function dayPhase() {
+    const t = timeOfDay(), ph = (first.L.schedules && first.L.schedules.clock && first.L.schedules.clock.phases) || PHASES;
+    let cur = 'night';
+    for (const [k, v] of Object.entries(ph).sort((a, b) => a[1] - b[1])) if (t >= v) cur = k;
+    return t < (ph.dawn ?? 0.2) ? 'night' : cur;
+  }
+  /** What a speaker at (x, z) in copy `r` can talk about (data/names/chatter.json tokens + which recent.* pools fit). */
+  function chatterContext(pv, r, x, z) {
+    const L = pv.L, zone = L.zoneOf(x, z), zs = (L.zones || []).find(q => q.key === zone);
+    const d = deedOf(zone);
+    let town = null, bd = Infinity;
+    for (const t of L.towns) { const dd = Math.hypot(t.x - x, t.z - z); if (dd < bd) { bd = dd; town = t.name; } }
+    const recent = [];
+    const ctx = { zone: (zs && zs.sheet && zs.sheet.name) || L.name, town, archetype: (zs && zs.sheet && zs.sheet.archetype) || null, weather: null, recent };
+    for (const z2 of zoneRuns.values()) if (z2.room === r && z2.def.zone === zone) { ctx.event = z2.def.name; recent.push('recent.zone_event'); break; }
+    if (liveEvent && liveEvent.province === L.key && liveEvent.kind === 'worldboss') { ctx.worldboss = liveEvent.name; recent.push('worldboss.up'); }
+    if (d.last.boss) { ctx.boss = d.last.boss.name; ctx.player ||= d.last.boss.by; recent.push('recent.boss_killed'); }
+    if (d.last.rare) { ctx.rare = d.last.rare.name; ctx.player ||= d.last.rare.by; recent.push('recent.rare_killed'); }
+    if (d.last.elite) { ctx.boss ||= d.last.elite.name; recent.push('recent.elite_killed'); }
+    if (d.last.clear) { ctx.place = d.last.clear.place; ctx.player ||= d.last.clear.by; ctx.party = d.last.clear.party; recent.push('recent.dungeon_cleared'); }
+    if (d.last.eventWon) { ctx.event ||= d.last.eventWon; recent.push('recent.zone_event_won'); }
+    if (d.deaths >= 3) { ctx.count = d.deaths; recent.push('recent.deaths'); }
+    else if (d.visitors.size >= 5) { ctx.count = d.visitors.size; recent.push('recent.busy'); }
+    else if (d.visitors.size <= 1) recent.push('recent.quiet');
+    ctx.danger = r.host.near(x, z, 60, e => e.kind === 'monster' && !e.dead).length > 0;
+    return ctx;
+  }
+  /** The living roads (P19): every tick, each copy's travellers move a quarter of their groups (travellers.js SLICES). */
+  function roadsTick() {
+    for (const pv of P.values()) for (const r of pv.copies) {
+      if (r.meta.roads) roadsFor(r);
+      if (r.travellers) { try { r.travellers.step(TICK_MS); } catch (err) { log('travellers step', err && err.message); } }
+    }
+  }
   function npcTick(dtMs) {
     const t = timeOfDay(), night = isNight(), phases = (first.L.schedules && first.L.schedules.clock.phases) || PHASES;
     for (const pv of P.values()) for (const r of pv.towns) {
@@ -1024,6 +1127,12 @@ export function createProvince(opts) {
   function sendQuests(o) { if (o.conn) o.conn.sendJSON({ t: 'quests', ...bookOf(o).view(o.char) }); }
   function questSaved(o) { journal(o, 'set', { k: 'quests', v: o.char.quests }); o.dirty = true; }
   function questEvent(o, ev) {
+    // remember what this character did lately (P17): a quest accepted just after the fight it asks for counts it
+    if (ev.kind === 'kill' || ev.kind === 'event' || ev.kind === 'clear' || ev.kind === 'use') {
+      const t = wallNow(), list = o.recentQ ||= [];
+      list.push({ ...ev, at: t });
+      while (list.length > RECENT_Q_MAX || (list.length && t - list[0].at > RECENT_Q_MS)) list.shift();
+    }
     const moved = bookOf(o).progress(o.char, ev);
     if (moved.length) { questSaved(o); sendQuests(o); }
     return moved;
@@ -1082,7 +1191,14 @@ export function createProvince(opts) {
     const g = giverOf(near.o);
     if (m.op === 'accept') {
       const r = b.accept(ch, m.id, g);
-      if (r.ok) { questSaved(o); sendQuests(o); if (g.npcId) questEvent(o, { kind: 'talk', npcId: g.npcId, x: g.x, z: g.z }); }
+      if (r.ok) {
+        const t = wallNow(), recent = (o.recentQ || []).filter(ev => t - ev.at <= RECENT_Q_MS);
+        if (recent.length && b.credit(ch, m.id, recent)) {
+          r.credited = true; counters.questCredits = (counters.questCredits || 0) + 1;
+          r.quest = b.view(ch).active.find(q => q.id === m.id) || r.quest;
+        }
+        questSaved(o); sendQuests(o); if (g.npcId) questEvent(o, { kind: 'talk', npcId: g.npcId, x: g.x, z: g.z });
+      }
       return reply(r);
     }
     const r = b.turnIn(ch, m.id, g);
@@ -1097,6 +1213,100 @@ export function createProvince(opts) {
     econ.add('faucet', 'quest', { gold: r.reward.gold }, ch.level || 1);
     sendQuests(o);
     saveNow(o);
+  }
+
+  // ---- talents + the perk forest (play-test 1, P6; stream C owns the rules, A the messages and the save) ----
+  // Contract with stream C (docs/protocol.md §17, requests.md): rules.talent(e, op, {skill, tier, node}) and
+  // rules.perk(e, op, {id}) -> { ok, why?, text?, ... }; rules.build(e) -> { talents, perks, perkPoints } for the client;
+  // rules.saveBuild(e) -> the blob A saves as `char.build` (C's addEntity reads it back). Until C's rules have them, the
+  // ops answer `why: 'notReady'`.
+  function buildView(o) {
+    const b = o.room.rules.build ? safeRules(o.room, 'build', o.entity) : null;
+    return b && typeof b === 'object' ? b : {};
+  }
+  function buildChanged(o) {
+    if (o.room.rules.saveBuild) { const b = safeRules(o.room, 'saveBuild', o.entity); if (b !== undefined) { o.char.build = b; journal(o, 'set', { k: 'build', v: b }); } }
+    o.dirty = true;
+    o.room.barChanged(o.entity);                       // a talent can reshape a slot: `you {bar}` after this tick
+    const e = o.entity;
+    if (o.conn) o.conn.sendJSON({ t: 'you', ...buildView(o), hpMax: e.hpMax, mpMax: e.mpMax });
+  }
+  function talentOp(o, m) {
+    const s = o.conn;
+    if (!TALENT_OPS.includes(m.op)) return bad(s, 'op');
+    const reply = x => s.sendJSON({ t: 'talentR', op: m.op, skill: m.skill || null, ...x });
+    if (!o.room.rules.talent) return reply({ ok: false, why: 'notReady', msg: 'Talents are not open on this server yet.' });
+    if (o.entity.dead) return reply({ ok: false, why: 'dead', msg: 'You are dead.' });
+    if (o.entity.state & STATE.combat) return reply({ ok: false, why: 'combat', msg: 'Not while fighting.' });
+    const r = safeRules(o.room, 'talent', o.entity, m.op, { skill: m.skill, tier: m.tier, node: m.node }) || { ok: false, why: 'unknown' };
+    if (!r.ok) return reply({ ok: false, why: r.why || 'unknown', msg: r.text || r.msg || 'You cannot pick that.' });
+    buildChanged(o);
+    return reply({ ok: true, picks: r.picks || null, talents: r.talents || undefined });
+  }
+  function perkOp(o, m) {
+    const s = o.conn;
+    if (!PERK_OPS.includes(m.op)) return bad(s, 'op');
+    const reply = x => s.sendJSON({ t: 'perkR', op: m.op, id: m.id || null, ...x });
+    if (!o.room.rules.perk) return reply({ ok: false, why: 'notReady', msg: 'The perk forest is not open on this server yet.' });
+    if (o.entity.dead) return reply({ ok: false, why: 'dead', msg: 'You are dead.' });
+    if (m.op !== 'take' && (o.entity.state & STATE.combat)) return reply({ ok: false, why: 'combat', msg: 'Not while fighting.' });
+    const r = safeRules(o.room, 'perk', o.entity, m.op, { id: m.id }) || { ok: false, why: 'unknown' };
+    if (!r.ok) return reply({ ok: false, why: r.why || 'unknown', msg: r.text || r.msg || 'You cannot take that.' });
+    buildChanged(o);
+    return reply({ ok: true, perks: r.perks || [], left: r.left ?? null });
+  }
+
+  // ---- the map: discovery + what it shows (play-test 1, P3/P27) ----
+  // Every province knows its PLACES (towns, waystones, dungeon doors and caves, forts, farms, vignettes, hooks, zone
+  // event sites). A character discovers a zone by entering it and a place by coming within its radius + DISCOVER_PAD;
+  // discoveries are saved (`seen`) and pushed as `discover`. `map {op:'get'}` answers `mapData`: every zone with its
+  // name and level band (the map shows level zones from the start), every town, the places this character has found,
+  // and where events are happening now.
+  for (const pv of P.values()) pv.places = placesOf(pv.L);
+  function placesOf(L) {
+    const out = [];
+    const zoneOf = (x, z) => (L.zoneOf ? L.zoneOf(x, z) : null);
+    const add = (key, kind, name, x, z, r, extra = {}) => { if (Number.isFinite(x) && Number.isFinite(z)) out.push({ key, kind, name: name || kind, x: Math.round(x * 10) / 10, z: Math.round(z * 10) / 10, r: Math.round(r || 20), zone: zoneOf(x, z), ...extra }); };
+    L.towns.forEach((t, i) => add(`town:${L.key}:${i}`, 'town', t.name, t.x, t.z, t.r, { always: true, size: t.kind || null }));
+    for (const w of L.waystones) add(w.key, 'waystone', w.name, w.x, w.z, 12);
+    L.doors.forEach((d, i) => {
+      const ds = (d.sheet && d.sheet.dungeon) || {};
+      add(d.key || `door:${L.key}:${i}`, d.kind === 'cave' ? 'cave' : 'dungeon', (d.kind !== 'cave' && ds.name) || d.name, d.x, d.z, 20, { level: ds.level || null, door: i });
+    });
+    for (const o of L.objects || []) {
+      if (o.type === 'fort' || o.type === 'farm' || o.type === 'vignette' || o.type === 'hook') add(o.key, o.type, o.name, o.x, o.z, Math.max(15, o.r || 15), o.site && o.site.friendly === false ? { hostile: true } : {});
+    }
+    for (const ev of L.zoneEvents || []) if (Number.isFinite(ev.x)) add('event:' + ev.id, 'event', ev.name, ev.x, ev.z, ev.r || 40, { level: ev.level || null });
+    return out;
+  }
+  function seenOf(ch) { ch.seen ||= { zones: [], places: [] }; ch.seen.zones ||= []; ch.seen.places ||= []; return ch.seen; }
+  /** Walking about: new zones and places within reach become known (1 Hz, from zoneTick). */
+  function discoverNear(o, pv, zone) {
+    const seen = seenOf(o.char), e = o.entity;
+    const fresh = [];
+    let zoneNew = false;
+    if (zone && !seen.zones.includes(zone)) { seen.zones.push(zone); zoneNew = true; }
+    const have = o.seenSet || (o.seenSet = new Set(seen.places));
+    for (const p of pv.places) {
+      if (have.has(p.key) || (p.zone !== zone && Math.abs(p.x - e.x) > 400)) continue;
+      if (Math.hypot(p.x - e.x, p.z - e.z) <= p.r + DISCOVER_PAD) { have.add(p.key); seen.places.push(p.key); fresh.push(p); }
+    }
+    if (!fresh.length && !zoneNew) return;
+    journal(o, 'set', { k: 'seen', v: seen });
+    o.dirty = true;
+    if (o.conn) o.conn.sendJSON({ t: 'discover', zone: zoneNew ? zone : undefined, places: fresh.map(placeView) });
+  }
+  const placeView = p => { const { always, ...v } = p; void always; return v; };
+  function mapData(o) {
+    const pv = provOf(o.room) || first, L = pv.L, seen = seenOf(o.char);
+    const known = new Set(seen.places);
+    const zones = (L.zones || []).map(z => ({ key: z.key, name: (z.sheet && z.sheet.name) || L.name, band: (z.sheet && z.sheet.band) || null, bounds: z.bounds || null,
+      archetype: (z.sheet && z.sheet.archetype) || null, discovered: seen.zones.includes(z.key) }));
+    const places = pv.places.filter(p => p.always || known.has(p.key)).map(p => ({ ...placeView(p), discovered: known.has(p.key) || undefined }));
+    const events = [];
+    if (liveEvent && liveEvent.province === L.key) events.push({ ...eventView(liveEvent), realm: true });
+    for (const z of zoneRuns.values()) if (provOf(z.room) === pv && (z.room === o.room || o.room.kind === 'town')) { const v = z.run.view(); events.push({ uid: v.uid, id: v.id, name: v.name, x: v.x, z: v.z, r: v.r, phase: v.phase, zoneName: v.zoneName || null, level: z.def.level || null }); }
+    return { t: 'mapData', province: L.key, name: L.name, bounds: L.terrain.bounds, zones, places, events, waystones: o.char.waystones || [], horizon: L.horizon ? { bin: L.horizon.file, step: L.horizon.step } : null };
   }
 
   // ---- loot + bag ----
@@ -1133,6 +1343,37 @@ export function createProvince(opts) {
     if (o.conn) o.conn.sendJSON({ t: 'bag', add: added, remove: [], gold: ch.gold });
     if (added.length || gold) o.room.emit({ type: 'loot', to: o.entity.id, d: from ? from.id : o.entity.id, items: added.map(i => ({ uid: i.uid, name: i.name, rarity: i.rarity })), gold: gold || undefined });
     if (urgent) saveNow(o);
+  }
+  /**
+   * P22 "start with basic gear": a new character keeps its class WEAPON (and an off-hand weapon or shield) and
+   * nothing else — no plate on day one; the client draws plain shorts and a top until armour is found. Once per
+   * character (`kitV`); a character from before this rule keeps what it wears.
+   */
+  function startingKit(o) {
+    const ch = o.char, e = o.entity;
+    if ((ch.kitV || 0) >= KIT_VERSION) return;
+    const fresh = (ch.level || 1) <= 1 && !(ch.xp > 0) && !(ch.bag && ch.bag.length);
+    if (fresh && o.room.rules.unequip && o.room.rules.gear) {
+      const g = safeRules(o.room, 'gear', e) || {};
+      for (const slot of Object.keys(g)) if (!KIT_KEEP.has(slot) && g[slot]) safeRules(o.room, 'unequip', e, slot);   // dropped, never bagged
+      journalGear(o);
+      o.bar = null;                                   // the bar may read gear: format it again
+    }
+    ch.kitV = KIT_VERSION;
+    journal(o, 'set', { k: 'kitV', v: KIT_VERSION });
+    o.dirty = true;
+  }
+  /** What a player wears, compact, on its entity's `info` (`gear: {slot: {base, sub?, rarity}}`) so others draw it. */
+  function gearLook(o) {
+    const eq = equipView(o) || {};
+    // worn items the rules made (a class kit) carry no server uid, so the client could never take them off: give one
+    let named = false;
+    for (const it of Object.values(eq)) if (it && typeof it === 'object' && !it.uid) { it.uid = newUid(); named = true; }
+    if (named && o.char) journalGear(o);
+    const out = {};
+    for (const [slot, it] of Object.entries(eq)) if (it && typeof it === 'object') out[slot] = { base: it.baseKey || it.base || it.name || slot, ...(it.subtype ? { sub: it.subtype } : {}), rarity: it.rarity || 'normal', ...(it.uniqueId ? { unique: it.uniqueId } : {}) };
+    const before = JSON.stringify(o.entity.gear || null), after = JSON.stringify(out);
+    if (before !== after) { o.entity.gear = out; o.entity.infoVer++; }
   }
   function equipView(o) {
     const g = o.room.rules.gear ? safeRules(o.room, 'gear', o.entity) : null;
@@ -1176,6 +1417,7 @@ export function createProvince(opts) {
       for (const it of removed) journal(o, 'bagAdd', { item: it });
       o.dirty = true;
       s.sendJSON({ t: 'bag', add: removed, remove: [item.uid], gold: ch.gold });
+      gearLook(o);
       return s.sendJSON({ t: 'equip', slot, item, equipment: equipView(o) });
     }
     if (m.op === 'unequip') {
@@ -1191,6 +1433,7 @@ export function createProvince(opts) {
       journal(o, 'bagAdd', { item });
       o.dirty = true;
       s.sendJSON({ t: 'bag', add: [item], remove: [], gold: ch.gold });
+      gearLook(o);
       return s.sendJSON({ t: 'equip', slot, item: null, equipment: equipView(o) });
     }
   }
@@ -1357,6 +1600,7 @@ export function createProvince(opts) {
     ch.level = e.level; ch.room = o.room.id;
     ch.jseq = o.seq;
     if (o.room.rules.saveGear) { const g = safeRules(o.room, 'saveGear', e); if (g !== undefined) ch.equipment = g; }
+    if (o.room.rules.saveBuild) { const b = safeRules(o.room, 'saveBuild', e); if (b !== undefined) ch.build = b; }
   }
   function sig(o) { const e = o.entity, ch = o.char; return [Math.round(e.x * 4), Math.round(e.z * 4), e.hp, ch.xp, ch.gold, ch.level, o.room.id, (ch.bag || []).length].join(','); }
   /** Save the blob. `keepRoom`: the caller already set ch.room/x/z (a relocation) — don't overwrite them. */
@@ -1407,6 +1651,7 @@ export function createProvince(opts) {
     if (ticks % 20 === 5) eventTick();           // events (realm + zone) at 1 Hz
     if (ticks % 20 === 7) zoneTick();
     if (ticks % 4 === 1) npcTick(TICK_MS * 4);
+    roadsTick();
     const t = now();
     let started = 0;
     for (const o of online.values()) {
@@ -1539,6 +1784,8 @@ export function createProvince(opts) {
       zoneEvents: [...zoneRuns.values()].map(z => ({ room: z.room.id, ...z.run.view() })),
       timeOfDay: Math.round(timeOfDay() * 1000) / 1000,
       sessions: kit.sessions.size, joinQueue: joining.size, warmMs: counters.warmMs || 0,
+      travellers: [...rooms.values()].filter(r => r.travellers).map(r => ({ room: r.id, ...r.travellers.stats() })),
+      transferMs: { last: counters.transferMs || 0, max: counters.transferMaxMs || 0 },
       db: store.kind,
     };
   }
@@ -1547,6 +1794,7 @@ export function createProvince(opts) {
     accept, step, init, shutdown, status, rooms, P, online, partyOf, econ, tickStats, owner, counters, trades,
     room: copies[0], townRoom, copies, instances, town, door, gate,
     saveNow, logout, transfer, moveTo, grant, mute, flushEconomy, newUid, flushJournal, timeOfDay, devSetLevel,
+    chatterContext: (r, x, z) => chatterContext(provOf(r), r, x, z),
     get liveEvent() { return liveEvent; },
   };
 }

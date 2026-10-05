@@ -202,16 +202,19 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
       eventEl.hidden = false; eventEl.className = 'tv-event soon';
       eventEl.querySelector('.ev-kind').textContent = ev.kind === 'worldboss' ? 'World boss' : 'Realm event';
       eventEl.querySelector('.ev-name').textContent = ev.name || 'Something stirs';
-      eventEl.querySelector('.ev-sub').textContent = `Gathering in ${where(ev)}. Waystone travel to it will be free while it runs.`;
+      eventEl.querySelector('.ev-sub').textContent = `${ev.roamed ? 'It has broken out to ' : 'Gathering in '}${where(ev)}. Waystone travel to it will be free while it runs.`;
+      eventEl.classList.toggle('roamed', !!ev.roamed);
+      if (m.text) hud.chat(m.text, 'event');        // the event's own announcement (and where it broke out to, M3)
       hud.chat(`Realm event: ${ev.name} will rise in ${where(ev)} in ${mmss(event.at - Date.now())}.`, 'event');
-      callout(`${ev.name} stirs in ${where(ev)}`, 'phase');
+      callout(ev.roamed ? `${ev.name} has broken out — to ${where(ev)}!` : `${ev.name} stirs in ${where(ev)}`, 'phase');
     } else if (m.kind === 'eventStart') {
       event.live = ev; event.at = 0;
       eventEl.hidden = false; eventEl.className = 'tv-event live';
       eventEl.querySelector('.ev-kind').textContent = 'Happening now';
       eventEl.querySelector('.ev-time').textContent = '';
       eventEl.querySelector('.ev-name').textContent = ev.name || 'A realm event';
-      eventEl.querySelector('.ev-sub').textContent = `${where(ev)} — everyone who joins shares the credit; loot is your own.`;
+      eventEl.querySelector('.ev-sub').textContent = `${where(ev)} — everyone who joins shares the credit; loot is your own.${ev.kind === 'worldboss' ? ' Fighters get a share of the World cache.' : ''}`;
+      if (m.text) hud.chat(m.text, 'event');
       hud.chat(`${ev.name} has begun in ${where(ev)}! Waystone travel there is free.`, 'event');
       callout(`${ev.name} has begun!`, 'enrage');
     } else if (m.kind === 'eventEnd') {

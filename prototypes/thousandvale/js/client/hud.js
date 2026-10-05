@@ -14,7 +14,7 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
     selfHp: $('self-hp-fill'), selfLag: $('self-hp-lag'), selfHpText: $('self-hp-text'), selfXp: $('self-xp-fill'), selfXpText: $('self-xp-text'),
     tFrame: $('target-frame'), tName: $('target-name'), tLevel: $('target-level'), tInitial: $('target-initial'), tHp: $('target-hp-fill'), tLag: $('target-hp-lag'), tHpText: $('target-hp-text'), tSub: $('target-sub'),
     toasts: $('toasts'), conn: $('conn'), connText: $('conn-text'), chatLog: $('chat-log'), chatForm: $('chat-form'), chatInput: $('chat-input'),
-    bar: $('actionbar'), death: $('death'), deathTimer: $('death-timer'), deathWait: $('death-wait'), rise: $('rise'), banner: $('zone-banner'), zoneName: $('zone-name'), help: $('help'),
+    bar: $('actionbar'), death: $('death'), deathTimer: $('death-timer'), deathWait: $('death-wait'), rise: $('rise'), banner: $('zone-banner'), zoneName: $('zone-name'),
   };
   const lag = { self: 1, target: 1, targetId: null };
 
@@ -42,10 +42,7 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
   el.chatInput.addEventListener('focus', () => onChatFocus?.(true));
   el.chatInput.addEventListener('blur', () => onChatFocus?.(false));
   el.chatInput.addEventListener('keydown', e => { if (e.key === 'Escape') { el.chatInput.value = ''; el.chatInput.blur(); } e.stopPropagation(); });
-
-  // --- help (remembered collapsed) ---
-  try { if (localStorage.getItem('tv.help') === '0') el.help.classList.add('collapsed'); } catch {}
-  $('help-toggle').addEventListener('click', () => { const c = el.help.classList.toggle('collapsed'); try { localStorage.setItem('tv.help', c ? '0' : '1'); } catch {} });
+  // (chat.js takes over hud.chat and adds channel tabs; this plain version is what runs before it is wired)
 
   function chat(text, cls = 'system', from = null) {
     const p = document.createElement('p');

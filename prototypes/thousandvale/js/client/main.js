@@ -40,6 +40,18 @@ import { createDungeonView } from './dungeon-view.js';
 import { createSocial } from './social.js';
 import { createBag } from './bag.js';
 import { loadSkillData, barFromData, barFromServer, initials } from './skillbar.js';
+import { createMenubar } from './menubar.js';
+import { createChat } from './chat.js';
+import { createFriends } from './friends.js';
+import { createGuild } from './guild.js';
+import { createMail } from './mail.js';
+import { createCallboard } from './callboard.js';
+import { createAccount } from './account.js';
+import { createHelp } from './help.js';
+import { closeTop, getPanel } from './ui-panel.js';
+import { PANEL_KEYS } from './social-core.js';
+import { loadZoneNames, learnZone } from './names.js';
+import { humanFn } from './turnstile.js';
 
 const q = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
@@ -146,7 +158,7 @@ async function useRoom(room, at) {
 
 const hud = createHud({
   onSlot: i => (i ? castSkill(i) : tryStrike(true)),
-  onChatSubmit: text => social.command(text),
+  onChatSubmit: text => chat.submit(text),
   onChatFocus: on => controls.setTyping(on),
   onRise: () => rise(),
 });
@@ -173,16 +185,44 @@ const controls = createControls({
 controls.setBlocker((ax, ay, az, bx, by, bz) => (D.view ? 1 : SOLIDS.firstHit(ax, ay, az, bx, by, bz)));
 
 const boss = createBossUi({ actors, serverNow: () => (S.net ? S.net.clock.serverNow() : 0), toast: hud });
+const menubar = createMenubar();
 const social = createSocial({ net: () => S.net, hud, actors, onTarget: id => setTarget(id), myChar: () => S.net?.joined?.you?.char ?? null });
 const bag = createBag({ net: () => S.net, hud });
 const worldUi = createWorldUi({ hud, net: () => S.net, me: () => S.predictor.pos, room: () => S.room, onFootprints: heat => footprints.set(heat) });
+
+// --- M3 social windows (chat channels, friends, guild, mail, the Callboard, account, help) ------------------
+const me = () => ({ name: S.self.name, level: S.self.level, cls: S.self.cls, char: S.net?.joined?.you?.char ?? null, inGuild: !!guild?.guild });
+const chat = createChat({ net: () => S.net, hud, social, me, onTyping: on => controls.setTyping(on), actions: {
+  openAccount: () => account.panel.open(), openFriends: () => friends.panel.open(),
+  friendAdd: n => friends.add(n), friendRemove: n => friends.remove(n), isFriend: n => friends.isFriend(n),
+  guildInvite: n => guild.invite(n), canGuildInvite: () => guild.canInvite(),
+} });
+hud.chat = chat.line;                 // every system/combat/loot line lands in the chat window's All tab
+hud.focusChat = prefill => chat.focus(prefill);
+const friends = createFriends({ net: () => S.net, hud, chat, social });
+const guild = createGuild({ net: () => S.net, hud, chat, me });
+const mail = createMail({ net: () => S.net, hud, bag, me, inTown: () => S.room?.kind === 'town' });
+const callboard = createCallboard({ net: () => S.net, hud, me });
+const account = createAccount({ net: () => S.net, hud, me, netOpts: () => ({ mode: netMode(), url: q.get('server') || undefined, build: q.get('build') || 'dev' }),
+  onLogin: (user, pass) => loginFromTitle(user, pass), onPick: ch => enterWorld(ch), onLoggedOut: () => backToTitle() });
+const help = createHelp();
+loadZoneNames();
+const PANELS = { party: { toggle: () => social.toggleMenu() }, bag: { toggle: () => bag.toggle() }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help };
+for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());
 window.addEventListener('keydown', e => {
-  if (S.phase !== 'world' || (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName))) return;
+  if (S.phase !== 'world' || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) return;
   if (e.code === 'KeyE' && objects.useFocus()) { e.preventDefault(); e.stopImmediatePropagation(); }
-  else if (e.code === 'KeyB') bag.toggle();
-  else if (e.code === 'KeyP') social.toggleMenu();
+  else if (PANEL_KEYS[e.code] && !e.ctrlKey && !e.metaKey && !e.altKey) PANELS[PANEL_KEYS[e.code]].toggle();
+  else if (e.code === 'F1' || (e.key === '?' && !e.ctrlKey)) { e.preventDefault(); help.toggle(); }
+  else if (e.key === '/' && !e.ctrlKey) { e.preventDefault(); e.stopImmediatePropagation(); chat.focus('/'); }
   else if (e.code === 'KeyC') { if (S.room?.kind === 'wilds') S.net?.campfire(); else hud.toast('You can only make camp out in the wilds.', 'warn'); }
-  else if (e.code === 'Escape' && worldUi.dialogOpen) worldUi.closeDialog();
+  else if (e.code === 'Escape') {
+    // close the top window first; only then does Esc clear the target (controls.js)
+    if (worldUi.dialogOpen) { worldUi.closeDialog(); e.stopImmediatePropagation(); }
+    else if (closeTop()) e.stopImmediatePropagation();
+    else if (!document.getElementById('party-menu').hidden) { social.toggleMenu(false); e.stopImmediatePropagation(); }
+    else if (bag.isOpen) { bag.toggle(false); e.stopImmediatePropagation(); }
+  }
 }, true);
 
 // --- title screen -------------------------------------------------------------------------------------
@@ -193,6 +233,7 @@ async function loadClasses() {
 }
 function initTitle() {
   $('name').value = q.get('name') || store.get('name', '') || '';
+  if (q.get('tab') === 'login') account.tab('login');
   if (PLAYABLE_RACES.includes(q.get('race'))) S.look.race = q.get('race');
   for (const r of PLAYABLE_RACES) {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.role = 'radio'; b.dataset.race = r; b.textContent = RACE_NAMES[r];
@@ -234,23 +275,50 @@ function rebuildPreview() {
 
 // --- connecting -----------------------------------------------------------------------------------------
 const netMode = () => (q.has('offline') && q.get('offline') !== '0' ? 'worker' : 'ws');
-async function enterWorld() {
-  const name = cleanName($('name').value);
+const tokenKey = () => 'thousandvale.token.' + (netMode() === 'ws' ? (q.get('server') || location.host) : 'offline');
+const TOKENS = () => localTokenStore(tokenKey());
+/** The connection (one per page): a guest (made on first use, named after the title's name field) or a login. */
+function startNet({ login = null, guestName = null } = {}) {
+  if (S.net) return S.net;
+  const mode = netMode();
+  const net = connect({ mode, url: q.get('server') || undefined, build: q.get('build') || 'dev', guestName, login, tokenStore: TOKENS(), human: humanFn($('human-check')) });
+  S.net = net;
+  wireNet(net);
+  return net;
+}
+function dropNet() { if (S.net) { S.net.close(); S.net = null; } }
+/** Title "Log in": a fresh connection signed in with a username (this browser's guest key is set aside, not lost). */
+async function loginFromTitle(user, pass) {
+  const toks = TOKENS(), old = toks.get();
+  if (S.net && S.net.claimed && S.net.username && S.net.username.toLowerCase() === user.toLowerCase()) return S.net.chars;
+  if (old && !(S.net && S.net.claimed)) { try { localStorage.setItem(tokenKey() + '.guest', old); } catch {} }
+  dropNet(); toks.set(null);
+  const net = startNet({ login: { user, pass } });
+  return new Promise((res, rej) => {
+    const off = net.on('accountR', r => { if (r.op === 'login' && !r.ok) { off(); dropNet(); if (old) toks.set(old); rej(Object.assign(new Error(r.msg || 'Wrong username or password.'), { why: r.why })); } });
+    const t = setTimeout(() => { off(); rej(new Error('The server did not answer.')); }, 15000);
+    net.ready.then(n => { clearTimeout(t); off(); res(n.chars); });
+  });
+}
+/** Logged out (or the account was): back to a clean title screen. */
+function backToTitle() { try { S.net?.close(); } catch {} location.href = location.pathname; }
+
+async function enterWorld(pick = null) {
+  const name = pick ? pick.name : cleanName($('name').value);
   if (!name || name.length < 2) { $('login-note').textContent = 'Pick a name of 2–16 letters.'; return; }
   $('login-note').textContent = '';
-  store.set('name', name); store.set('look', S.look); store.set('cls', S.cls);
+  if (!pick) { store.set('name', name); store.set('look', S.look); store.set('cls', S.cls); }
   S.self.name = name;
   const btn = $('enter'); btn.disabled = true; btn.textContent = 'Entering…';
   const mode = netMode();
-  const net = connect({ mode, url: q.get('server') || undefined, build: q.get('build') || 'dev', guestName: name,
-    tokenStore: localTokenStore('thousandvale.token.' + (mode === 'ws' ? (q.get('server') || location.host) : 'offline')) });
-  S.net = net; S.phase = 'joining';
-  wireNet(net);
-  const fail = text => { $('login-note').textContent = text; btn.disabled = false; btn.textContent = 'Enter the world'; S.phase = 'title'; net.close(); S.net = null; };
+  const fresh = !S.net;
+  const net = startNet({ guestName: name });
+  S.phase = 'joining';
+  const fail = text => { $('login-note').textContent = text; btn.disabled = false; btn.textContent = 'Enter the world'; S.phase = 'title'; if (fresh && !net.claimed) dropNet(); };
   const timer = setTimeout(() => { if (S.phase === 'joining' && net.status !== 'online') fail(mode === 'ws' ? 'Cannot reach the game server. Add ?offline=1 to play against an in-browser server.' : 'The in-browser server did not start.'); }, 20000);
   try {
     await net.ready;
-    let ch = net.chars.find(c => c.name.toLowerCase() === name.toLowerCase());
+    let ch = pick || net.chars.find(c => c.name.toLowerCase() === name.toLowerCase());
     if (!ch) ch = await net.createChar({ name, cls: S.cls, look: { race: S.look.race, seed: S.look.seed, v: 1 } });
     const join = (q.get('join') || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 8) || null;
     await net.play(ch.id, join ? { join } : {});
@@ -272,6 +340,7 @@ function wireNet(net) {
     const text = k.code === 'elsewhere' ? 'You logged in from another tab.' : k.code === 'version' || k.code === 'build' ? 'A new version is out — reload the page.' : k.msg || 'Disconnected.';
     hud.toast(text, 'bad'); hud.chat(text, 'bad');
     if (S.phase !== 'world') $('login-note').textContent = text;
+    if (k.code === 'loggedOut') backToTitle();
   });
   net.on('joined', onJoined);
   net.on('info', ents => { S.mirror.info(ents); for (const i of ents) refreshFromInfo(i.id); });
@@ -288,11 +357,10 @@ function wireNet(net) {
     if (Array.isArray(patch.bar)) refreshBar();   // §15.10: level-up, form/stance, talent pick (client.js merged it into joined.you)
     if (levelled) levelFlash(S.selfId);
   });
-  net.on('chat', m => {
-    hud.chat(m.text, m.ch === 'say' ? 'say' : m.ch === 'party' ? 'party' : 'system', m.ch === 'say' || m.ch === 'party' ? (m.ch === 'party' ? `Party] [${m.name}` : m.name) : null);
-    if (m.ch === 'say' && m.from != null) actors.say(m.from, m.text);
-  });
+  net.on('chat', m => { if (m.ch === 'say' && m.from != null) actors.say(m.from, m.text); });   // the line itself: chat.js
+  net.on('zone', z => learnZone(z.zone, z.name));
   social.wire(net);
+  chat.wire(net); friends.wire(net); guild.wire(net); mail.wire(net); callboard.wire(net); account.wire(net);
   bag.wire(net);
   worldUi.wire(net);
   net.on('relocate', () => hud.toast('Crossing into another province…', 'info'));
@@ -511,7 +579,7 @@ function onEvent(ev) {
       }
       break;
     }
-    case 'boss': case 'phase': case 'castbar': case 'castX': case 'enrage': case 'say': boss.onEvent(ev); break;
+    case 'boss': case 'phase': case 'castbar': case 'castX': case 'enrage': case 'say': case 'fx': boss.onEvent(ev); break;
     case 'obj': objects.onObj(ev); break;
     case 'aggro':
       if (ev.d === me) { const a = actors.get(ev.s); if (a) fx.number({ x: a.pos.x, y: a.pos.y + a.height + 0.3, z: a.pos.z }, '!', 'in'); }
@@ -535,6 +603,8 @@ function startWorld(j) {
   setTimeout(() => { $('title').hidden = true; }, 650);
   hud.show();
   hud.setSelf(S.self);
+  account.refreshPill();
+  if (!S.net?.claimed) hud.chat('You are playing as a guest. Open Account (the person button, right) to claim it — free — and keep this character.', 'system');
   const zone = j.room.name || 'The Vale';
   hud.zone(zone);
   hud.chat(`Welcome to ${zone}.`, 'system');
@@ -789,6 +859,11 @@ async function titleWorld() {
 // Autoplay (tests, bots, a quick second tab) connects straight away; the title scene loads alongside.
 const AUTO = (q.get('autoplay') === '1' || q.get('auto') === '1') && q.get('name');
 if (AUTO) Promise.all([loadLookData(), loadMonsterLooks()]).then(() => enterWorld());
+// A browser that already has an account: connect now and list its characters on the title screen (M3).
+else if (TOKENS().get() && q.get('fresh') !== '1') {
+  const net = startNet();
+  net.ready.then(n => { if (S.phase === 'title') account.showChars(n.chars, n.claimed ? n.username : null); }).catch(() => {});
+}
 Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
   rebuildPreview();
   $('loading').classList.add('done');
@@ -872,6 +947,45 @@ const tv = {
   },
   /** Open the dialog a server answer would open: tv.demoUsed({ kind: 'npc', name: 'Smith', role: 'smith' }). */
   demoUsed(u) { return worldUi.onUsed({ ok: true, ...u }); },
+  /**
+   * Client-only look at the province world boss (Grimtallow, protocol §16.7) through the real handlers: the realm
+   * announcement (broken out to another arena), the boss frame with its four phases and new bars, the shield phase
+   * ("light the signal fires"), and its four telegraph shapes. Nothing is sent to the server. tv.demoWorldBoss()
+   */
+  demoWorldBoss() {
+    const p = S.predictor.pos, me = S.selfId;
+    const mons = [...actors.actors.values()].filter(a => a.kind === 'monster' && !a.dead);
+    const b = mons.sort((x, y) => Math.hypot(x.pos.x - p.x, x.pos.z - p.z) - Math.hypot(y.pos.x - p.x, y.pos.z - p.z))[0];
+    const id = b ? b.id : me;
+    const fire = evs => { S.evTick = Math.round(S.net.clock.serverNow() / TICK_MS); for (const ev of evs) onEvent(ev); };
+    const ev = { id: 'world_grimtallow', uid: 'demo', name: 'Grimtallow, the Siege-Husk', province: 'torbor_downs', zoneName: 'The Ashcombe Ruins', kind: 'worldboss', roamed: true, level: 10 };
+    worldUi.onRealm({ kind: 'eventStart', ev, text: 'Grimtallow has torn free of Blackthorn Scar and marches on the Ashcombe Ruins!' });
+    fire([{ type: 'boss', id, name: 'Grimtallow', title: 'the Siege-Husk', bars: 3, enrageMs: 540000,
+      phases: [{ n: 0, name: 'The March', at: 1 }, { n: 1, name: 'The Warband', at: 0.65 }, { n: 2, name: 'Uprooted', at: 0.5 }, { n: 3, name: 'Death Throes', at: 0.3 }] }]);
+    let n = 9100;
+    const at = (dx, dz) => ({ x: p.x + dx, z: p.z + dz });
+    setTimeout(() => fire([{ type: 'phase', id, n: 1, name: 'The Warband' }, { type: 'fx', kind: 'shield', id, on: true },
+      { type: 'say', id, text: 'Grimtallow plants itself behind a wall of blight. Light all four signal fires to call the catapults!', style: 'warn' }]), 700);
+    setTimeout(() => fire([{ type: 'castbar', id, ab: 'blight_rain', name: 'Blight Rain', ms: 3200 },
+      { type: 'tele', id: ++n, s: id, ab: 'stomp', k: 'harm', ms: 2600, shape: 'circle', ...at(-6, 3), r: 5, el: 'poison' },
+      { type: 'tele', id: ++n, s: id, ab: 'siege_volley', k: 'harm', ms: 3000, shape: 'cone', ...at(0, 0), yaw: controls.cam.yaw + Math.PI, r: 16, arc: 0.9 },
+      { type: 'tele', id: ++n, s: id, ab: 'charge', k: 'harm', ms: 2800, shape: 'line', ...at(5, -5), yaw: 0.7, len: 18, w: 3 },
+      { type: 'tele', id: ++n, s: id, ab: 'blight_nova', k: 'harm', ms: 3200, shape: 'donut', ...at(0, 0), r: 12, r2: 6, el: 'poison' }]), 1500);
+    return { boss: id };
+  },
+  /** M3 social state for tests: account, friends, guild, mail, the Callboard, chat lines (text) and open windows. */
+  social() {
+    const n = S.net;
+    return {
+      claimed: !!n?.claimed, username: n?.username || null, friends: friends.list.map(f => ({ name: f.name, online: !!f.online })),
+      guild: guild.guild ? { name: guild.guild.name, motd: guild.guild.motd, members: guild.guild.members.map(m => ({ name: m.name, rank: m.rank, online: !!m.online })) } : null,
+      mail: { unread: mail.state.unread, list: mail.state.list.map(m => ({ id: m.id, from: m.from, subject: m.subject, read: !!m.read, taken: !!m.taken, items: (m.items || []).length, gold: m.gold || 0 })), view: mail.state.view },
+      callboard: { queued: callboard.state.queued, pop: !!callboard.state.pop, dungeons: callboard.state.dungeons.length },
+      chat: [...document.querySelectorAll('#chat-log p')].slice(-40).map(p => ({ tab: p.dataset.tab, text: p.textContent })),
+      gold: bag.state.gold, bag: bag.state.bag.map(i => ({ uid: i.uid, name: i.name })), room: S.room?.kind || null,
+    };
+  },
+  panel(id, open = true) { const P = { friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help }[id]; P?.toggle(open); return !!P?.isOpen; },
   /** Hide or show the HUD (clean screenshots). */
   hud(on = true) { $('hud').style.visibility = on ? '' : 'hidden'; $('plates').style.visibility = on ? '' : 'hidden'; },
   /** Hold the time of day (0 = midnight, 0.5 = noon); null goes back to the realm clock. */
@@ -924,4 +1038,4 @@ const tv = {
   },
 };
 window.tv = tv;
-window.thousandvale = { S, W, D, WS, view, actors, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints };
+window.thousandvale = { S, W, D, WS, view, actors, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account };

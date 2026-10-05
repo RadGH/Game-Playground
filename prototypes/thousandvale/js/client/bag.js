@@ -10,12 +10,12 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 const title = s => String(s || '').replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\b\w/g, c => c.toUpperCase());
 
 export function createBag({ net: getNet, hud }) {
-  const el = { root: $('bag'), grid: $('bag-grid'), doll: $('paperdoll'), gold: $('bag-gold'), close: $('bag-close'), btn: $('bag-btn'), count: $('bag-count'), card: $('itemcard') };
+  const el = { root: $('bag'), grid: $('bag-grid'), doll: $('paperdoll'), gold: $('bag-gold'), close: $('bag-close'), btn: $('bag-btn'), count: $('bag-btn')?.querySelector('b') || $('bag-count'), card: $('itemcard') };
   const S = { bag: [], equipment: {}, gold: 0, fresh: new Set() };
   el.close.onclick = () => toggle(false);
   el.btn.onclick = () => toggle();
 
-  function toggle(open = el.root.hidden) { el.root.hidden = !open; if (open) draw(); else hideCard(); }
+  function toggle(open = el.root.hidden) { el.root.hidden = !open; el.btn?.classList.toggle('on', open); if (open) draw(); else hideCard(); }
 
   function card(item, ev) {
     if (!item) return hideCard();
@@ -50,7 +50,7 @@ export function createBag({ net: getNet, hud }) {
 
   function draw() {
     el.gold.textContent = `${S.gold.toLocaleString()} gold`;
-    el.count.textContent = S.bag.length ? S.bag.length : '';
+    if (el.count) el.count.textContent = S.bag.length ? S.bag.length : '';
     if (el.root.hidden) return;
     el.doll.innerHTML = '';
     const worn = S.equipment || {};
@@ -88,5 +88,5 @@ export function createBag({ net: getNet, hud }) {
     n.on('err', e => { if (e.code === 'item' || e.code === 'bagFull') hud.toast(e.msg || 'You cannot do that.', 'warn'); });
   }
 
-  return { wire, toggle, state: S, draw };
+  return { wire, toggle, state: S, draw, card, hideCard, get isOpen() { return !el.root.hidden; } };
 }

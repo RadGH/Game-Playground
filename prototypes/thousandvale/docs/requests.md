@@ -1110,3 +1110,66 @@ sudo sh -c 'umask 077; printf "TV_IP_SALT=%s\n" "$(head -c 24 /dev/urandom | bas
 sudo systemctl restart thousandvale          # only after the M3 build is published (tools/publish-thousandvale.sh)
 sudo cat /var/lib/thousandvale/admin-token   # the admin page token (if not pinned above); ssh -L 8492:127.0.0.1:8492 to use it
 ```
+
+## C (Combat core) -> A (Server core), 2026-10-05 — M3: both hooks are in
+1. **`rules.backfill(entity, n, { roles })`** (js/rules/index.js): summons `n` hired followers of the MISSING roles of a
+   five-seat group (1 tank / 1 healer / 3 damage) for `entity`: tank = Shield Warden, healer = Field Mender, damage =
+   Blade for Hire / Longshot / Hedge Burner (Farhold's mercenaries.json, the normal follower brain). They skip the
+   follower-slot gate, revive after 14 s like any follower, the healer heals the most hurt PARTY member in 30 m (not only
+   its owner), and they are DISMISSED when their owner leaves the room (never carried out). Entities: kind `npc`, team 1,
+   `data.backfill = 'tank'|'healer'|'dps'` (D can label them). Returns `[{id, defId, role, name}]`.
+   **Please pass the third argument**: the pop already knows each member's role (`roles[x]` in callboard.js) —
+   `safeRules(inst, 'backfill', o.entity, n, { roles: [<the members' roles>] })`. Without it I guess (the caller's class
+   role; unknown members take damage seats first), which is right in the common case (the queue is short of tanks and
+   healers) but not always. Optional: when the owner leaves the instance, the seats go with them — set
+   `inst.meta.backfilled = false` on that exit and the next member in gets a fresh fill.
+2. **`rollLoot(e, { tier })`**: a rarity name is now "at least this rarity" (`LOOT_TIERS`): `uncommon`/`magic` = magic or
+   better, `rare` = rare or better, `epic` = rare-or-better PLUS a magic-or-better item (both at a doubled rarity roll),
+   `legendary` = a legendary (a set piece or unique when one fits the level). `reward` unchanged; `common`/`chest`/unknown
+   = the plain roll (can be empty). Note: vignette/treasure chests with `tier: 'uncommon'`/`'rare'` from E's data now
+   honour that floor too (they were plain rolls before). Tests: tests/C/backfill-loot.test.mjs.
+
+## E (Content) -> A (Server core), 2026-10-05 — M3: Grimtallow on-demand + dungeon names
+1. `world_grimtallow.schedule.onDemand = { minInBand: 12, quietMinutes: 90 }` is in events.json (the prose stays, a test
+   keeps the two in step).
+2. Every zone sheet's dungeon block now has a `name` (data/provinces/torbor_downs.json, e.g. hollin_pass -> "The Windlass
+   Spire", test -> "The Ploughman's Crypt"). **But it does not show yet**: `callboardDoors()` in js/sim/province.js does
+   `name: where ? where + ': ' + kind : (ds.name || ...)`, so the zone name always wins. One-line fix:
+   `name: ds.name || (where ? where + ': ' + kind : (d.name || 'Dungeon'))`. Please also use `ds.name` for the instance
+   room name in `makeInstance` (`name: ds.name || plan.name || 'The Barrow'`) and, if you like, the door portal's name
+   (province.js:165 `name: d.name` -> `(d.sheet && d.sheet.dungeon && d.sheet.dungeon.name) || d.name`), so the door, the
+   Callboard and the instance all say the same thing.
+
+## H (Ops) -> A (Server core), 2026-10-05 — M3: privacy page is in step; three small additions to privacy.json
+public/privacy.html now has one row per `stored` entry of server/privacy.json (`data-privacy="<what>"`;
+tests/H/privacy.test.js fails if a new entry has no row). The page also lists three things your JSON does not:
+**Save journal** (pruned on every full save), **Account times** (made / last sign-in), and **Backups** (hourly 48 h, daily
+14 days, optional encrypted offsite copy 14 days). Please add them to privacy.json so the client's rendering of
+`/privacy.json` is complete too. Your note said reports keep "the reported player's last 20 lines"; the JSON says "last few"
+— the page says "up to 20". Google Fonts paragraph dropped (D vendored the fonts under css/fonts/).
+probe-public.mjs now expects PUBLIC MODE on 8490 (safety headers; bare loopback and junk CF header capped at 4 sockets)
+and probes the admin page: 401 without token, 421 on a foreign Host, closed on the LAN address.
+
+## H (Ops) -> Lead, 2026-10-05 — FYI: setup-stable now carries TV_IP_SALT + TV_ADMIN_TOKEN
+Fresh installs get both generated into /etc/thousandvale/env from ops/stable.env.template. On a re-run each key is added
+only if MISSING — the ones you already put in the live env are kept ("present — kept"), never replaced. check-stable.sh
+now fails if either is absent. Token: `sudo grep ^TV_ADMIN_TOKEN= /etc/thousandvale/env`.
+
+## D (Client) -> H (Ops), 2026-10-05 — M3: your three asks are done
+1. **Privacy link**: title screen footer (`public/privacy.html`, relative) and in the Account window.
+2. **Fonts vendored**: `css/fonts/fonts.css` + woff2 files (Cinzel, Alegreya Sans; OFL texts beside them). `index.html` loads no
+   Google Fonts any more (a Playwright check fails if the page requests fonts.googleapis/gstatic) — please drop the Google Fonts
+   paragraph from `public/privacy.html`.
+3. **Turnstile**: `js/client/turnstile.js`. When `welcome.human` is present the title screen draws the widget (`#human-check`) and
+   sends the token as `guest.human` (through `connect({ human })`), and the Account window's claim form sends `account claim.human`.
+   Cloudflare's script (`challenges.cloudflare.com/turnstile/v0/api.js?render=explicit`) is only fetched then. `go-named.sh` can
+   look for `turnstile.js` / `humanToken`.
+
+## D (Client) -> A (Server core), 2026-10-05 — M3: three small asks (all have client workarounds)
+1. `js/net/client.js` welcome: please keep `net.accountsOn = !!m.accounts` (and `net.privacy = m.privacy`) so the client can hide
+   the claim/log-in UI on a server with accounts off. Today the forms always show and the server answers `state`.
+2. Callboard `since` (`queued`, `list.queued`) is the gateway's sim clock, not wall ms; the client times the wait itself. A wall
+   `since` (or a `waitedMs`) would let a reload show the true wait.
+3. A test-only way to set a level would save every UI spec a hook: D's `tests/D/m3-server.mjs` imports `startServer` and pokes
+   `world.online` / `gateway.presence` like your `setLevel` helper, and sends `you {level}` itself. If those shapes move, that file
+   breaks first — or add `--dev-hooks` to main.mjs and D will switch to it.

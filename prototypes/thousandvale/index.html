@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Thousandvale</title>
 <meta name="description" content="Thousandvale — a shared open world. Click the link, make a character, and you are standing next to your friends.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap">
+<link rel="stylesheet" href="css/fonts/fonts.css">
 <link rel="stylesheet" href="css/client.css">
 <link rel="stylesheet" href="css/world.css">
+<link rel="stylesheet" href="css/social.css">
 <script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
 </head>
 <body>
@@ -38,10 +38,6 @@
   </section>
 
   <section class="partyframes" id="party" aria-label="Party" hidden></section>
-  <div class="party-tools">
-    <button class="pill-btn" id="party-btn" title="Party: invite, copy the join link (P)">Party</button>
-    <button class="pill-btn" id="bag-btn" title="Bag and gear (B)">Bag <b id="bag-count"></b></button>
-  </div>
   <div class="party-menu" id="party-menu" hidden>
     <h3>Party</h3>
     <p class="party-help" id="party-help">Anyone who opens your join link lands in your party, right next to you.</p>
@@ -84,24 +80,6 @@
 
   <nav class="actionbar" id="actionbar" aria-label="Action bar"></nav>
 
-  <aside class="help" id="help">
-    <button class="help-toggle" id="help-toggle" title="Controls">?</button>
-    <dl>
-      <dt>WASD</dt><dd>Move</dd>
-      <dt>Shift</dt><dd>Sprint</dd>
-      <dt>Space</dt><dd>Jump</dd>
-      <dt>Drag</dt><dd>Turn the camera</dd>
-      <dt>Click</dt><dd>Select / walk there</dd>
-      <dt>Right-click</dt><dd>Attack an enemy</dd>
-      <dt>Tab</dt><dd>Next enemy</dd>
-      <dt>F</dt><dd>Strike</dd>
-      <dt>1 – 6</dt><dd>Skills</dd>
-      <dt>E</dt><dd>Use / open</dd>
-      <dt>B · P</dt><dd>Bag · Party</dd>
-      <dt>C</dt><dd>Make camp (wilds)</dd>
-      <dt>Enter</dt><dd>Chat (/p party)</dd>
-    </dl>
-  </aside>
 
   <div class="death" id="death" hidden>
     <h2>You have fallen</h2>
@@ -116,7 +94,15 @@
     <h1>Thousandvale</h1>
     <p>A thousand valleys. One world. Everyone in it.</p>
   </header>
+  <div class="card-tabs" role="tablist" aria-label="How to play">
+    <button type="button" role="tab" id="tab-new" aria-selected="true">New adventurer</button>
+    <button type="button" role="tab" id="tab-login" aria-selected="false">Log in</button>
+  </div>
   <form id="login" class="card" autocomplete="off">
+    <div class="field mychars" id="mychars" hidden>
+      <span class="label">Your characters</span>
+      <div class="chips" id="char-chips"></div>
+    </div>
     <div class="field">
       <label for="name">Name</label>
       <div class="row">
@@ -133,10 +119,27 @@
       <div class="chips classes" id="classes" role="radiogroup" aria-label="Calling"></div>
       <select id="class-more" aria-label="More callings"></select>
     </div>
+    <div class="human-check" id="human-check" hidden></div>
     <p class="note" id="login-note"></p>
     <button type="submit" class="primary" id="enter">Enter the world</button>
-    <p class="tiny" id="build-tag"></p>
+    <p class="tiny">No sign-up: you play as a guest. Claim the account later to keep it.</p>
   </form>
+  <form id="signin" class="card" autocomplete="on" hidden>
+    <p class="signed" id="signin-who"></p>
+    <div class="field">
+      <label for="signin-user">Username</label>
+      <input id="signin-user" class="text" maxlength="20" autocomplete="username" required>
+    </div>
+    <div class="field">
+      <label for="signin-pass">Password</label>
+      <input id="signin-pass" class="text" type="password" maxlength="128" autocomplete="current-password" required>
+    </div>
+    <p class="note" id="signin-note"></p>
+    <button type="submit" class="primary" id="signin-go">Log in</button>
+    <p class="tiny"><button type="button" class="linkish" id="signin-forgot">Forgot your password?</button></p>
+    <div class="reset" id="reset" hidden></div>
+  </form>
+  <nav class="title-foot"><a href="public/privacy.html" target="_blank" rel="noopener">Privacy</a><span id="build-tag"></span></nav>
   <div class="loading" id="loading"><i></i><span id="loading-text">Waking the valley…</span></div>
 </main>
 

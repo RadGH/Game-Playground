@@ -1,9 +1,6 @@
-// Party frames, the party menu (invite by name, copy the join link, leave), invite pop-ups, and the chat
-// commands. Everything goes through stream A's client (`net.partyOp`, `net.partyChat`, `net.ignore`,
-// `net.joinLink()`; protocol §11). DOM only.
-//
-// Chat commands:  /p text  party chat      /s text  say (the default)     /invite Name     /leave
-//                 /ignore Name   /unignore Name     /link  copy the join link     /help
+// Party frames, the party menu (invite by name, copy the join link, leave) and invite pop-ups. Everything goes
+// through stream A's client (`net.partyOp`, `net.joinLink()`; protocol §11). DOM only. Chat channels and the
+// slash commands moved to chat.js at M3 (it calls invite / copyLink here).
 
 const $ = id => document.getElementById(id);
 const CLASS_NAME = id => String(id || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -12,7 +9,6 @@ export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
   const el = {
     frames: $('party'), btn: $('party-btn'), menu: $('party-menu'), name: $('invite-name'), go: $('invite-go'), link: $('join-link'), copy: $('join-copy'),
     leave: $('party-leave'), close: $('party-close'), help: $('party-help'), pop: $('invite-pop'), popText: $('invite-text'), yes: $('invite-yes'), no: $('invite-no'),
-    chatCh: $('chat-ch'),
   };
   let party = null, frames = new Map(), pendingInvite = null, wantLink = false;
   const net = () => getNet();
@@ -20,6 +16,7 @@ export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
   // --- party menu ---------------------------------------------------------------------------------
   function toggleMenu(open = el.menu.hidden) {
     el.menu.hidden = !open;
+    el.btn.classList.toggle('on', open);
     if (open) { refreshLink(); el.name.focus(); }
   }
   el.btn.onclick = () => toggleMenu();
@@ -64,7 +61,7 @@ export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
     const me = myChar();
     const others = party ? party.members.filter(m => m.char !== me) : [];
     el.frames.hidden = !others.length;
-    el.btn.textContent = party ? `Party (${party.members.length})` : 'Party';
+    const badge = el.btn.querySelector('b'); if (badge) badge.textContent = party && party.members.length > 1 ? String(party.members.length) : '';
     const keep = new Set();
     for (const m of others) {
       keep.add(m.char);
@@ -121,32 +118,8 @@ export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
     });
     n.on('partyFrames', onFrames);
     n.on('ignored', list => hud.chat(list.length ? `Ignoring: ${list.map(i => i.name).join(', ')}` : 'Your ignore list is empty.', 'system'));
-    n.on('err', e => { if (['party', 'partyFull', 'noCode', 'notFound', 'muted'].includes(e.code)) hud.toast(e.msg || e.code, 'warn'); });
+    n.on('err', e => { if (['party', 'partyFull', 'noCode'].includes(e.code)) hud.toast(e.msg || e.code, 'warn'); });
   }
 
-  /** A line typed into the chat box. Returns true when it was handled. */
-  function command(text) {
-    const n = net(); if (!n) return false;
-    const m = /^\/(\w+)\s*(.*)$/.exec(text);
-    if (!m) { if (channel === 'party') n.partyChat(text); else n.say(text); return true; }
-    const [, cmd, rest] = m;
-    switch (cmd.toLowerCase()) {
-      case 'p': case 'party': if (rest) n.partyChat(rest); else setChannel('party'); return true;
-      case 's': case 'say': if (rest) n.say(rest); else setChannel('say'); return true;
-      case 'invite': case 'inv': invite(rest); return true;
-      case 'leave': n.partyOp('leave'); return true;
-      case 'kick': { const mm = party?.members.find(x => x.name.toLowerCase() === rest.toLowerCase()); if (mm) n.partyOp('kick', { char: mm.char }); return true; }
-      case 'lead': { const mm = party?.members.find(x => x.name.toLowerCase() === rest.toLowerCase()); if (mm) n.partyOp('lead', { char: mm.char }); return true; }
-      case 'ignore': if (rest) n.ignore(rest, true); return true;
-      case 'unignore': if (rest) n.ignore(rest, false); return true;
-      case 'link': copyLink(); return true;
-      case 'help': hud.chat('/p party chat · /s say · /invite Name · /leave · /kick Name · /lead Name · /ignore Name · /unignore Name · /link', 'system'); return true;
-    }
-    hud.chat(`Unknown command /${cmd}. Type /help.`, 'system');
-    return true;
-  }
-  let channel = 'say';
-  function setChannel(ch) { channel = ch; el.chatCh.textContent = ch === 'party' ? 'Party' : 'Say'; el.chatCh.classList.toggle('party', ch === 'party'); }
-
-  return { wire, command, toggleMenu, render, get party() { return party; } };
+  return { wire, invite, copyLink, toggleMenu, render, get party() { return party; } };
 }

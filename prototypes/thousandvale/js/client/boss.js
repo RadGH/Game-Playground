@@ -98,11 +98,32 @@ export function createBossUi({ actors, serverNow, toast } = {}) {
         if (ev.hard) { B.enraged = true; el.root.classList.add('enraged'); callout(`${ev.id === B.id ? B.name : actors.get(ev.id)?.name || B.name} is enraged!`, 'enrage'); setAura(ev.id); }
         else if (ev.soft) { B.soft = ev.soft; el.enrage.dataset.soft = ev.soft; }
         break;
+      case 'fx':      // encounter fx (C's encounter.js): a boss shield phase (Grimtallow's "wall of blight")
+        if (ev.kind === 'shield') shield(ev.id, !!ev.on);
+        break;
       case 'say': {
         const who = ev.id === B.id ? B.name : actors.get(ev.id)?.name;
         callout(ev.text, ev.style || 'yell', who);
         break;
       }
+    }
+  }
+
+  // --- shield phases: the bar turns to a barrier and says how to break it; a blue shell on the boss --------
+  let shell = null;
+  function shield(id, on) {
+    if (B.id !== id && !actors.get(id)) return;
+    if (B.id !== id) { const a = actors.get(id); B.name = a.name; el.name.textContent = a.name; el.title.textContent = ''; B.phases = []; show(id); }
+    B.shielded = on;
+    el.root.classList.toggle('shielded', on);
+    if (on) callout(`${B.name} is shielded — the barrier must fall first`, 'warn');
+    else callout(`${B.name}'s shield breaks!`, 'phase');
+    if (shell) { shell.parent?.remove(shell); shell.geometry.dispose(); shell.material.dispose(); shell = null; }
+    const a = actors.get(id);
+    if (on && a) {
+      shell = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16), new THREE.MeshBasicMaterial({ color: 0x7fd0ff, transparent: true, opacity: 0.18, depthWrite: false, blending: THREE.AdditiveBlending }));
+      shell.scale.setScalar(Math.max(1.2, a.height * 0.75)); shell.position.y = a.height * 0.5;
+      a.group.add(shell);
     }
   }
 
@@ -186,7 +207,9 @@ export function createBossUi({ actors, serverNow, toast } = {}) {
       if (done) { if (c.bar) c.bar.hidden = true; if (id === B.id) el.cast.hidden = true; casts.delete(id); }
     }
     if (aura) aura.material.opacity = 0.65 + Math.sin(wall / 120) * 0.3;
+    if (shell) shell.material.opacity = 0.14 + Math.sin(wall / 300) * 0.06;
+    if (B.shielded && B.id != null) el.pct.textContent = 'Shielded';
   }
 
-  return { onEvent, update, callout, castOf: id => casts.get(id), get bossId() { return B.id; }, clear() { casts.clear(); el.root.hidden = true; B.id = null; setAura(null); } };
+  return { onEvent, update, callout, castOf: id => casts.get(id), get bossId() { return B.id; }, clear() { casts.clear(); el.root.hidden = true; B.id = null; setAura(null); if (shell) { shell.parent?.remove(shell); shell.geometry.dispose(); shell.material.dispose(); shell = null; } B.shielded = false; el.root.classList.remove('shielded'); }, shield };
 }

@@ -144,6 +144,7 @@ export function createRules(host, opts = {}) {
   const engine = shared;
   const room = createRoomContext({ id: String(opts.roomId ?? host.roomId ?? 'room'), seed: opts.seed ?? 1, engine });
   const field = attachField(room, { terrain: terrainFrom(host), safeZones: host.safeZones || [] });
+  field.lod = opts.lod !== false;          // perf: idle far-off monsters think every few ticks (monster-ai.js AI.LOD_*)
   const combat = createCombat(room);
   room.combat = combat;
   combat.tickMonsters = dt => tickMonsters(field, dt);

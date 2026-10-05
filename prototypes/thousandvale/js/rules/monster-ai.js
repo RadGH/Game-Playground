@@ -38,7 +38,11 @@ export const AI = {
   RETURN_SPEED: 1.6,
   /** a leashed monster that has not made it home in this long (walled out) is put back there */
   RETURN_SNAP: 12,
+  /** LOD (rooms only, `field.lod`): an idle wanderer with nobody this close thinks once every LOD_EVERY ticks */
+  LOD_RADIUS: 70,
+  LOD_EVERY: 4,
 };
+const hashPhase = id => { const t = String(id); let h = 7; for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0; return h; };
 
 // --------------------------------------------------------------------------- spawning
 
@@ -235,7 +239,7 @@ function spread(field) {
   const CELL = 4;
   const grid = new Map();
   for (const e of list) {
-    if (e.removed || e.dying != null || e.hover || e.asleep) continue;   // (asleep: nobody near, nobody moving)
+    if (e.removed || e.dying != null || e.hover || e.asleep || e.lodIdle) continue;   // (asleep / resting this tick: nobody near)
     const gx = Math.floor(e.x / CELL), gz = Math.floor(e.z / CELL);
     const key = gx * 1e6 + gz;
     let bucket = grid.get(key);
@@ -336,7 +340,8 @@ export function resetMonster(field, e) {
  *   onBossPhase(e, phase)
  *   onStrike(e, victim)         override the melee swing (default: monsterStrike)
  */
-export function tickMonsters(field, dt, hooks = {}) {
+export function tickMonsters(field, dtAll, hooks = {}) {
+  const tickN = (field.tickN = (field.tickN || 0) + 1);
   // who a monster NOTICES is a player (actors.js measures everything from the player); companions
   // draw it by biting it or by standing in its way (aimOf rules 1 and 2, below)
   // (an untargetable player is still THERE: it is noticed and keeps the brain awake, it just is not swung at)
@@ -361,6 +366,7 @@ export function tickMonsters(field, dt, hooks = {}) {
   for (let i = list.length - 1; i >= 0; i--) {
     const e = list[i];
     if (e.removed) continue;
+    let dt = dtAll;
     const { friend: near, dist } = nearestOf(e);
 
     if (e.dying != null) {
@@ -372,6 +378,19 @@ export function tickMonsters(field, dt, hooks = {}) {
     // asleep by distance (PLAN §8.5): nothing near enough to matter, so it does not think at all
     if (dist > AI.THINK_RADIUS && e.state !== 'return' && !e.boss) { e.anim = 'idle'; e.asleep = true; continue; }
     e.asleep = false;
+
+    // LOD (perf, a room only — `field.lod`, never the parity fixtures): a monster just milling about with
+    // nobody within LOD_RADIUS (well past any notice range), nothing on it and no awake band thinks once
+    // every LOD_EVERY ticks, on its own phase, with the time it skipped — so its stroll covers the same
+    // ground, and a body walking towards it is noticed within LOD_EVERY ticks of crossing LOD_RADIUS
+    if (field.lod && e.state === 'wander' && dist > AI.LOD_RADIUS && !e.boss && !e.push && !(e.stagger > 0) && !e.patrol
+      && !(e.statuses && Object.keys(e.statuses).length) && !awakeBands.has(e.leader ?? (e.leads ? e.id : null))) {
+      e.lodDt = (e.lodDt || 0) + dtAll;
+      const phase = typeof e.id === 'number' ? e.id : (e.lodPhase ??= hashPhase(e.id));
+      if ((tickN + phase) % AI.LOD_EVERY !== 0) { e.lodIdle = true; continue; }
+      dt = e.lodDt;
+    }
+    e.lodDt = 0; e.lodIdle = false;
 
     // ---- the leash (replaces Farhold's despawn ring)
     if (e.state === 'return') {
@@ -704,6 +723,6 @@ export function tickMonsters(field, dt, hooks = {}) {
     }
   }
 
-  tickShots(field, dt);
+  tickShots(field, dtAll);
   spread(field);
 }

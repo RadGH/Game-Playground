@@ -1,0 +1,141 @@
+{
+  "id": "rare_tithe_collector",
+  "name": "Brother Tithe",
+  "tier": "rare",
+  "zone": "torbor_cross",
+  "body": "cult_zealot",
+  "place": "walks the roads around Halsbridge collecting \"tithes\" for a church that does not exist",
+  "_doc": "Stream E (M2). A fake friar with a real mace. He marks someone for the tithe (a soak: someone must step in or everyone pays), blesses himself with an interruptible prayer that heals, and at half health throws holy-water flasks in a scatter.",
+  "party": {
+    "solo": "Solo: you are always the farthest, so you always soak — fine.",
+    "small": "Easy.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.7,
+  "arena": {
+    "radius": 22
+  },
+  "say": {
+    "pull": [
+      "\"Blessings, traveller! The tithe is one purse. Or two. Faith is expensive.\"",
+      "Brother Tithe rattles his collection box menacingly."
+    ],
+    "death": "Brother Tithe drops his box. It is full of buttons.",
+    "reset": "Brother Tithe goes looking for more generous travellers."
+  },
+  "abilities": {
+    "mace": {
+      "id": "mace",
+      "name": "Collection Mace",
+      "every": [
+        6,
+        8
+      ],
+      "range": 4.5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.2,
+          "arc": 1.6,
+          "wind": 1.0,
+          "damage": 1.6
+        }
+      ]
+    },
+    "tithe": {
+      "id": "tithe",
+      "name": "Tithe Due",
+      "every": [
+        18,
+        22
+      ],
+      "first": 5,
+      "cast": 1,
+      "say": "\"The tithe falls due!\" — somebody stand in the circle!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "farthest",
+          "r": 2.8,
+          "kind": "soak",
+          "need": 1,
+          "fail": 1.8,
+          "failSay": "Nobody paid the tithe — the whole road is fined!",
+          "wind": 4.5,
+          "damage": 0.8
+        }
+      ]
+    },
+    "prayer": {
+      "id": "prayer",
+      "name": "Pious Prayer",
+      "every": [
+        20,
+        24
+      ],
+      "first": 9,
+      "cast": 2.5,
+      "interrupt": true,
+      "below": 0.9,
+      "say": "Brother Tithe kneels to pray for his own health — stop him!",
+      "onInterrupt": [
+        {
+          "say": "\"Amen— OW.\"",
+          "style": "emote"
+        }
+      ],
+      "actions": [
+        {
+          "heal": 0.1
+        }
+      ]
+    },
+    "flasks": {
+      "id": "flasks",
+      "name": "Holy Water",
+      "every": [
+        12,
+        15
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "He flings flasks of \"holy\" water!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3,
+          "spread": 10,
+          "count": 4,
+          "delay": 0.3,
+          "element": "holy",
+          "wind": 1.5,
+          "damage": 1.3
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Collecting",
+      "abilities": [
+        "mace",
+        "tithe",
+        "prayer"
+      ]
+    },
+    {
+      "name": "Fire and Brimstone",
+      "at": 0.5,
+      "say": "\"Repent! And pay!\"",
+      "abilities": [
+        "mace",
+        "flasks",
+        "tithe",
+        "prayer"
+      ]
+    }
+  ]
+}

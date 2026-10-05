@@ -1,0 +1,517 @@
+{
+  "id": "boss_drowned_reeve",
+  "name": "The Drowned Reeve",
+  "tier": "boss",
+  "body": "ossuary_crawler",
+  "place": "dungeon flooded_cistern set A: the end boss in the great cistern hall (28 m)",
+  "_doc": "Stream E (M2). The town reeve who drowned closing the cistern gates during the great flood, still on duty. P1 \"Gate Duty\": a mace for the tank, chains thrown at random players, and FLOODWATER that rises in rings — the four sluice levers each drain one quarter of the room (repeatable). P2 at 60% \"Roll Call\": a ward of black water; he reads the names of the drowned (interruptible) and each name raises a drowned townsman; light the three signal lamps to break the ward. P3 new bar \"High Tide\": the whole floor floods except the raised plinths (safe circles), a three-player stack, a sweeping torrent, and the reeve's bell he rings for an enrage you must interrupt. Hard enrage 5.5 min.",
+  "party": "Solo: very hard (levers + adds + interrupts); intended with a follower. 2-3: one tank, one lever/lamp runner. 5: as designed. M5: scale health x1.8 at 5, roll-call adds +1 per player, keep plinth count = party size + 1.",
+  "hpMult": 4,
+  "arena": {
+    "radius": 16,
+    "objects": [
+      {
+        "id": "sluice_n",
+        "type": "lever",
+        "name": "Sluice lever",
+        "x": 0,
+        "z": -11,
+        "repeat": true,
+        "onUse": [
+          {
+            "remove": "flood"
+          },
+          {
+            "say": "A sluice grinds open — the water drains away!",
+            "style": "warn"
+          }
+        ]
+      },
+      {
+        "id": "sluice_s",
+        "type": "lever",
+        "name": "Sluice lever",
+        "x": 0,
+        "z": 11,
+        "repeat": true,
+        "onUse": [
+          {
+            "remove": "flood"
+          },
+          {
+            "say": "A sluice grinds open — the water drains away!",
+            "style": "warn"
+          }
+        ]
+      },
+      {
+        "id": "lamp_e",
+        "type": "brazier",
+        "name": "Signal lamp",
+        "x": 11,
+        "z": 0
+      },
+      {
+        "id": "lamp_w",
+        "type": "brazier",
+        "name": "Signal lamp",
+        "x": -11,
+        "z": 0
+      },
+      {
+        "id": "lamp_ne",
+        "type": "brazier",
+        "name": "Signal lamp",
+        "x": 8,
+        "z": -8
+      },
+      {
+        "id": "pillar_a",
+        "type": "pillar",
+        "name": "Cistern pillar",
+        "x": -6,
+        "z": -6,
+        "r": 1.3,
+        "hp": 2
+      },
+      {
+        "id": "pillar_b",
+        "type": "pillar",
+        "name": "Cistern pillar",
+        "x": 6,
+        "z": 6,
+        "r": 1.3,
+        "hp": 2
+      },
+      {
+        "id": "pillar_c",
+        "type": "pillar",
+        "name": "Cistern pillar",
+        "x": -6,
+        "z": 6,
+        "r": 1.3,
+        "hp": 2
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "HALT. The gates are CLOSED by order of the reeve.",
+      "State your name for the roll. The drowned are owed a count.",
+      "You are trespassing in the town cistern. The penalty is... the water."
+    ],
+    "death": "The Drowned Reeve lowers his mace. \"Gates... closed,\" he gurgles, and is still.",
+    "reset": "The Reeve squelches back to his post by the gates."
+  },
+  "enrage": {
+    "seconds": 330,
+    "damage": 3,
+    "say": "THE GATES WILL NOT HOLD. NONE OF YOU WILL LEAVE."
+  },
+  "abilities": {
+    "mace": {
+      "id": "mace",
+      "name": "Reeve's Mace",
+      "every": [
+        7,
+        9
+      ],
+      "range": 6,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 1.6,
+          "wind": 1.1,
+          "damage": 1.9
+        }
+      ]
+    },
+    "chains": {
+      "id": "chains",
+      "name": "Gate Chains",
+      "every": [
+        13,
+        16
+      ],
+      "first": 5,
+      "cast": 0.6,
+      "say": "He hurls the gate chains!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 16,
+          "w": 2,
+          "count": 2,
+          "rotate": 0.6,
+          "status": "root",
+          "wind": 1.3,
+          "damage": 1.4
+        }
+      ]
+    },
+    "floodwater": {
+      "id": "floodwater",
+      "name": "Floodwater",
+      "every": [
+        20,
+        24
+      ],
+      "first": 8,
+      "cast": 1.2,
+      "say": "The floodwater rises — get close to the Reeve, or pull a sluice!",
+      "actions": [
+        {
+          "object": {
+            "id": "flood",
+            "type": "pool",
+            "name": "Floodwater",
+            "x": -10,
+            "z": -3,
+            "r": 3.5,
+            "every": 1,
+            "seconds": 60,
+            "damage": 0.3,
+            "status": "chill"
+          }
+        },
+        {
+          "object": {
+            "id": "flood",
+            "type": "pool",
+            "name": "Floodwater",
+            "x": 10,
+            "z": 3,
+            "r": 3.5,
+            "every": 1,
+            "seconds": 60,
+            "damage": 0.3,
+            "status": "chill"
+          }
+        }
+      ],
+      "telegraphs": [
+        {
+          "shape": "ring",
+          "at": "self",
+          "r": 15,
+          "r2": 8,
+          "element": "ice",
+          "status": "chill",
+          "wind": 2.0,
+          "damage": 1.3
+        }
+      ]
+    },
+    "undertow": {
+      "id": "undertow",
+      "name": "Undertow",
+      "every": [
+        16,
+        19
+      ],
+      "first": 11,
+      "cast": 0.6,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "count": 3,
+          "delay": 0.3,
+          "knock": 3,
+          "pull": true,
+          "wind": 1.5,
+          "damage": 1.3
+        }
+      ]
+    },
+    "roll_call": {
+      "id": "roll_call",
+      "name": "Roll of the Drowned",
+      "every": [
+        16,
+        19
+      ],
+      "first": 5,
+      "cast": 3.5,
+      "interrupt": true,
+      "say": "He opens the roll and starts reading names — interrupt him!",
+      "onInterrupt": [
+        {
+          "say": "The roll slips from his fingers into the water.",
+          "style": "emote"
+        }
+      ],
+      "actions": [
+        {
+          "adds": {
+            "type": "barrow_hound",
+            "count": 2,
+            "radius": 8,
+            "at": "home"
+          }
+        },
+        {
+          "say": "\"Edda Fenwick. Aled Coombe.\" The drowned answer the roll!",
+          "style": "warn"
+        }
+      ]
+    },
+    "surge": {
+      "id": "surge",
+      "name": "Surge",
+      "every": [
+        11,
+        13
+      ],
+      "first": 3,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 2.8,
+          "count": 4,
+          "delay": 0.25,
+          "spread": 12,
+          "wind": 1.5,
+          "damage": 1.2
+        }
+      ]
+    },
+    "high_tide": {
+      "id": "high_tide",
+      "name": "High Tide",
+      "every": [
+        26,
+        30
+      ],
+      "first": 14,
+      "cast": 1.5,
+      "say": "HIGH TIDE. — Climb onto a raised plinth before the water hits!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "home",
+          "offset": [
+            8,
+            -8
+          ],
+          "r": 3,
+          "kind": "safe",
+          "wind": 3.5,
+          "damage": 2.6
+        },
+        {
+          "shape": "circle",
+          "at": "home",
+          "offset": [
+            -8,
+            -8
+          ],
+          "r": 3,
+          "kind": "safe",
+          "wind": 3.5,
+          "damage": 2.6
+        },
+        {
+          "shape": "circle",
+          "at": "home",
+          "offset": [
+            8,
+            8
+          ],
+          "r": 3,
+          "kind": "safe",
+          "wind": 3.5,
+          "damage": 2.6
+        },
+        {
+          "shape": "circle",
+          "at": "home",
+          "offset": [
+            -8,
+            8
+          ],
+          "r": 3,
+          "kind": "safe",
+          "wind": 3.5,
+          "damage": 2.6
+        }
+      ]
+    },
+    "hold_stack": {
+      "id": "hold_stack",
+      "name": "Hold the Line",
+      "every": [
+        20,
+        24
+      ],
+      "first": 6,
+      "cast": 1,
+      "say": "{target} is called to hold the gate — three of you, stand together!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "kind": "stack",
+          "need": 3,
+          "follow": true,
+          "wind": 4,
+          "damage": 3.2
+        }
+      ]
+    },
+    "torrent": {
+      "id": "torrent",
+      "name": "Torrent",
+      "every": [
+        15,
+        18
+      ],
+      "first": 9,
+      "cast": 0.8,
+      "say": "Water bursts from every pipe at once!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 16,
+          "w": 3,
+          "count": 6,
+          "rotate": 1.047,
+          "delay": 0.3,
+          "yaw": "random",
+          "element": "ice",
+          "wind": 1.3,
+          "damage": 1.8
+        }
+      ]
+    },
+    "bell": {
+      "id": "bell",
+      "name": "The Reeve's Bell",
+      "every": [
+        30,
+        34
+      ],
+      "first": 20,
+      "cast": 4,
+      "interrupt": true,
+      "say": "He reaches for the flood bell — stop him or he goes berserk!",
+      "onInterrupt": [
+        {
+          "say": "The bell rope snaps.",
+          "style": "emote"
+        }
+      ],
+      "actions": [
+        {
+          "modifier": {
+            "id": "flood_bell",
+            "dmg": 1.3,
+            "attackEvery": 0.8,
+            "exact": true
+          }
+        },
+        {
+          "say": "The flood bell tolls. The Reeve thrashes, furious!",
+          "style": "warn"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Gate Duty",
+      "abilities": [
+        "mace",
+        "chains",
+        "floodwater",
+        "undertow"
+      ]
+    },
+    {
+      "name": "Roll Call",
+      "at": 0.6,
+      "say": "You will be counted among the drowned.",
+      "abilities": [
+        "roll_call",
+        "surge",
+        "mace"
+      ],
+      "onEnter": [
+        {
+          "shield": true
+        },
+        {
+          "adds": {
+            "type": "barrow_hound",
+            "count": 2,
+            "radius": 8,
+            "at": "home"
+          }
+        },
+        {
+          "say": "A ward of black water closes around the Reeve. Light all three signal lamps!",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "name": "High Tide",
+      "newBar": {
+        "hp": 0.55
+      },
+      "say": "Then let the tide decide.",
+      "abilities": [
+        "mace",
+        "high_tide",
+        "hold_stack",
+        "torrent",
+        "bell"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 3,
+        "phase": 1
+      },
+      "do": [
+        {
+          "shield": false
+        },
+        {
+          "stun": 3
+        },
+        {
+          "vuln": {
+            "takeMore": 0.4,
+            "seconds": 10,
+            "name": "Ward Broken"
+          }
+        },
+        {
+          "say": "Three lamps burn! The black water falls away from the Reeve!",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "when": {
+        "broken": 3
+      },
+      "do": [
+        {
+          "say": "The last pillar cracks. The roof drips. Hurry.",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

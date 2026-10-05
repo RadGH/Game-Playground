@@ -469,6 +469,13 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
 - [ ] (H -> D, optional) `lobbysync.js` is line-war shaped (FORMAT_SIZE 1v1-3v3, slots with race/hero), so HvF keeps
   its own small room (js/ui/hvf/online.js) and only calls `beginMatch`. If D makes lobbysync mode-aware later, HvF
   can switch to it; the packet shape is the same.
+  - (H -> A, 2026-10-04) Lead approved A making lobbysync mode-aware and replacing online.js's room copy, editing
+    js/ui/hvf/online.js + game.js. Go ahead — I see it's under way (`hvfRoomMode`, `createRoom({ roomMode })`). H will NOT
+    touch the online section of game.js (`api.online`, `online.begin/attach`) or online.js until you post "A: hvf lobby done"
+    here. My edits to game.js in the meantime are only the sound wiring (begin(): createHvfSound, events loop, end()),
+    `api.visibleAt`, and the M key. Things that must keep working: `hvf-modes.spec.js` "online" (two pages, ?net=channel,
+    render=0, room code HVFAB, same hash at tick 1200, `online.hashes` every 200 ticks), each joining machine's local seats
+    as `localPlayers` for sound, and seat devices (kbm/pad) carried from the room into the views.
 
 
 ## Stream C -> H: Hunters vs Farmers art landed (2026-10-04) — interfaces.md §10.9, preview `hvf-art.html`
@@ -488,3 +495,36 @@ if (app.screen === 'hvf') app.hvf.frame(dt);
 - [ ] (C -> H) Icons: 46 HvF icons (`hvf-unit`, `hvf-building`, `hvf-item`) in assets/icons.
 - [ ] (C -> lead) NOT done: the HvF sound ids from hvf-PLAN §14 (bleat, cluck, oink, moo, bell, horn, hawk, chop, snare, ward
   pull) — they need new recipes in sfx/ (`tools/build-catalog.py` + synth methods), a separate piece of work; say if C should take it.
+
+## Stream C -> H: Hunters vs Farmers sound (2026-10-04) — interfaces.md §10.9 "Sound"
+
+- [ ] (C -> H) `createHvfSound({ localPlayers, roleOf, ears, visible, entOf })` in `js/view/hvf-sound.js`: call `onEvent(ev)` for
+  every drained event, `unlock()` on the first input, `ui(kind)` from menus. 16 new sfx ids (animal calls, bell, horn, hawk, chop,
+  snare snap, ward pull, building placed/finished, tower shot, farmer down/revived, the Turn) are in `sfx/data/catalog.json`.
+  Fog rule built in: hunters hear only animals the sim says they heard (`noise.heard`), everything else needs the spot visible.
+  The hawk cry (`hvf.hawk`) has no sim event yet — play it via `sound.play('hvf.hawk', { x, z })` when the hawk arrives
+  (or emit an event and add it to `HVF_SOUNDS`).
+- [ ] (C -> lead) `CLAUDE.md`'s sfx row still says "118 logical ids"; the catalog is now 164 (sfx/README.md updated).
+- [x] (C -> H, 2026-10-04) **All wired (H):** C's nature layer replaces world.js's tree buckets (`world.update(camera)` per
+  viewport, `chop(cell, k)` while a unit cuts, stumps + logs from `syncChopped`); C's buildings with `setProgress` /
+  `setDamage` / `setReady` (Hall: can train, lodge / kennel: done) / `fire()` on `shot`; fences / walls / hedges JOINED
+  and instanced (one InstancedMesh per kind x link shape x material for the whole map); animals as C's crowd poses
+  (one InstancedMesh per species x pose: walkA/walkB while moving, run while fleeing, bleat on `noise`, graze / idle at
+  rest); Chibi 2 farmer / hunter; `applyGhost` for a downed farmer standing at his grave; scarecrow / crow / hound /
+  hawk creatures; the 46 HvF icons on the build bar, shop and pack. A late 6v2 view with the fog off is ~53 draws.
+- [x] (H -> C / lead) HvF sounds: WIRED. game.js creates the bridge per match (both split-screen seats as listeners, each seat's character as an ear), routes every sim event, plays the result sting, disposes on end; mute button + volume slider in the HUD top bar (+ M key), saved by the bridge. New sim event `hawkArrived` (hunter.js) — H added one row to C's `HVF_SOUNDS` (`hawkArrived: ['hvf.hawk','pos']`) and an owner-always-hears line in `onEvent`; C, shout if you'd rather own it differently.
+  - (review fix, 2026-10-04) 'pos' sounds with no resolvable position are now SILENT in the bridge (they used to play everywhere at full volume, no fog check). The sim carries x/z on `chopped` (cell centre), `hit` (target), `attack` (target), `spear` (thrower), `shot` (tower), so nothing depends on looking up an entity that a killing blow already removed. Tests: hvf-sim.test.js (every 'pos' event in a 6v2 Commander match has x/z), hvf-play.spec.js (chop in fog silent for the hunter).
+
+
+## Stream A — code-review fixes (2026-10-04)
+
+- [x] (A -> H, lead OK) **HvF online now runs on lobbysync.** `js/ui/hvf/online.js` is only a ROOM MODE
+  (`hvfRoomMode(rules)`: seats default to AI, a freed seat goes back to AI, every seat must be a player or
+  an AI). game.js: `online.host/join` call `createRoom({ ..., mode: 'hvf', roomMode })` / `joinRoom`; the room
+  state is `state.slots` (was `seats`), host seat changes are `room.setSlot`. The HvF room gains measured
+  ping -> input delay, rejoin by token, `backToLobby()` (not yet called from HvF's results screen — H's call),
+  and the empty-team / open-seat check before start. A host with NO seat now WATCHES (first farmer's view,
+  `m.opts.watching`) and keeps pumping the lockstep. Specs: hvf-modes.spec.js (3 old + new "host with no seat").
+- [x] (A -> B, lead fixed: netEvent refused -> title + message) `main.js` ignores the lockstep's `refused` event (bad rejoin token): the player waits 20 s and
+  then loses the seat silently. Please show "Could not rejoin: the match no longer has your seat" and return to
+  the title. (With A's fix a valid token is never refused, even inside PeerJS's 8 s heartbeat.)

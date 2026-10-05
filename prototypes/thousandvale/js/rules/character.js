@@ -78,7 +78,7 @@ function barData(engine) {
   return v;
 }
 export function buildSkillBar(engine, ch, rpgView) {
-  const bar = createSkillBar({ data: barData(engine), player: ch, rpg: rpgView });
+  const bar = createSkillBar({ data: barData(engine), player: ch, rpg: rpgView, canSummon: (petId, sl) => ch.canSummon?.(petId, sl) ?? { ok: true } });
   fillSlots(engine, bar, engine.skillData.classes?.[ch.classId] || engine.skillData.classes?.ranger || []);
   bar.relearn = (ids = null) => { fillSlots(engine, bar, ids || engine.skillData.classes?.[ch.classId] || []); return bar.slots.map(sl => sl.id); };
   return bar;

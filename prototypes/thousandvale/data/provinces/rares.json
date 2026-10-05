@@ -1,0 +1,67 @@
+{
+  "_doc": "Stream E (M2). The two named rares of every zone in Torbor Downs (data/provinces/torbor_downs.json). Each id is a script in data/encounters/<id>.json with tier \"rare\". PLAN \u00a73.4: 20-60 min respawn per copy, roaming paths, called out in zone chat.",
+  "test": [
+    "rare_grisel_thornhide",
+    "rare_sallowmaw"
+  ],
+  "hollin_pass": [
+    "rare_old_hookclaw",
+    "rare_scree_mother"
+  ],
+  "ashcombe": [
+    "rare_gravel_jack",
+    "rare_sir_hollowell"
+  ],
+  "brackwater": [
+    "rare_reedmother_ysolt",
+    "rare_lantern_drowner"
+  ],
+  "saltmouth": [
+    "rare_saltjaw",
+    "rare_captain_wrackley"
+  ],
+  "delvers_hill": [
+    "rare_blind_gammer",
+    "rare_copperback"
+  ],
+  "torbor_cross": [
+    "rare_tithe_collector",
+    "rare_mother_soot"
+  ],
+  "gullwick": [
+    "rare_ferryman_odo",
+    "rare_waterstrider_tolla"
+  ],
+  "wychwood": [
+    "rare_antlered_shade",
+    "rare_charcoal_tom"
+  ],
+  "saint_orrins_rise": [
+    "rare_brother_penance",
+    "rare_vesper_bell_owl"
+  ],
+  "millbrook": [
+    "rare_laughing_hettie",
+    "rare_old_mould"
+  ],
+  "redcliff": [
+    "rare_redfang",
+    "rare_wynn_two_strings"
+  ],
+  "blackthorn_scar": [
+    "rare_thornbound_crawler",
+    "rare_scab"
+  ],
+  "coldwater": [
+    "rare_old_coldmouth",
+    "rare_mere_moth_queen"
+  ],
+  "gorse_march": [
+    "rare_deserter_gutch",
+    "rare_burnt_barns_hound"
+  ],
+  "sunken_wolds": [
+    "rare_green_shard",
+    "rare_nightjar"
+  ]
+}

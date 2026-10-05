@@ -1,0 +1,103 @@
+{
+  "name": "z13_01",
+  "zone": "z13_01",
+  "sheet": {
+    "sheet": "torbor_downs",
+    "zone": "brackwater"
+  },
+  "province": {
+    "id": 10,
+    "name": "Petbeck Basin"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 2,
+  "inputHash": "3c176bbc",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9803699e"
+    },
+    "zone": {
+      "zx": 13,
+      "zy": 1
+    },
+    "worldOrigin": {
+      "x": 26624,
+      "z": 2048
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [],
+  "sites": [
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 946,
+      "z": 1186,
+      "yaw": -2.398
+    },
+    {
+      "type": "event",
+      "id": "event_brackwater",
+      "x": 1024,
+      "z": 1024,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 1024,
+    "z": 1024
+  },
+  "summary": {
+    "zone": "z13_01",
+    "province": "Petbeck Basin",
+    "inputHash": "3c176bbc",
+    "rivers": 0,
+    "wetShare": 0,
+    "unwalkableShare": 0,
+    "towns": [],
+    "roads": 0,
+    "bridges": 0,
+    "scatter": 5273,
+    "scatterKinds": {
+      "rock_small": 987,
+      "bush": 2912,
+      "tree_broadleaf": 1374
+    },
+    "sites": [
+      "dungeon door_1 Barrow entrance 946 1186  -2.398",
+      "event event_brackwater  1024 1024 40"
+    ],
+    "spawn": {
+      "x": 1024,
+      "z": 1024
+    },
+    "placements": 2,
+    "vignettesAvoided": 0
+  },
+  "files": {
+    "terrain.bin": 6305426,
+    "nav.bin": 1050717,
+    "scatter.bin": 42268,
+    "placements.json": 944
+  }
+}

@@ -36,6 +36,38 @@
     </div>
   </section>
 
+  <section class="partyframes" id="party" aria-label="Party" hidden></section>
+  <div class="party-tools">
+    <button class="pill-btn" id="party-btn" title="Party: invite, copy the join link (P)">Party</button>
+    <button class="pill-btn" id="bag-btn" title="Bag and gear (B)">Bag <b id="bag-count"></b></button>
+  </div>
+  <div class="party-menu" id="party-menu" hidden>
+    <h3>Party</h3>
+    <p class="party-help" id="party-help">Anyone who opens your join link lands in your party, right next to you.</p>
+    <div class="row"><input id="invite-name" maxlength="16" placeholder="Player name"><button class="ghost" id="invite-go">Invite</button></div>
+    <div class="row"><input id="join-link" readonly placeholder="Make a link…"><button class="ghost" id="join-copy">Copy link</button></div>
+    <div class="row"><button class="ghost" id="party-leave" hidden>Leave party</button><span class="grow"></span><button class="ghost" id="party-close">Close</button></div>
+  </div>
+  <div class="invite-pop" id="invite-pop" hidden><span id="invite-text"></span><button class="primary" id="invite-yes">Join</button><button class="ghost" id="invite-no">No thanks</button></div>
+
+  <section class="boss" id="boss" hidden aria-label="Boss">
+    <div class="boss-head"><strong id="boss-name"></strong><em id="boss-title"></em><span class="boss-enrage" id="boss-enrage" hidden></span></div>
+    <div class="boss-bar"><b id="boss-lag"></b><i id="boss-fill"></i><span class="boss-ticks" id="boss-ticks"></span><span class="boss-pct" id="boss-pct"></span></div>
+    <div class="boss-sub"><span class="boss-bars" id="boss-bars"></span><span class="boss-phase" id="boss-phase"></span></div>
+    <div class="boss-cast" id="boss-cast" hidden><i id="boss-cast-fill"></i><span id="boss-cast-name"></span><em id="boss-cast-time"></em></div>
+  </section>
+  <div class="callout" id="callout" aria-live="assertive"></div>
+  <div class="vignette" id="vignette"></div>
+  <div class="interact" id="interact" hidden><kbd>E</kbd><span></span></div>
+
+  <aside class="bag" id="bag" hidden aria-label="Bag">
+    <header><h3>Bag</h3><span class="gold" id="bag-gold">0 gold</span><button class="ghost" id="bag-close">×</button></header>
+    <div class="paperdoll" id="paperdoll"></div>
+    <div class="bag-grid" id="bag-grid"></div>
+    <p class="bag-hint">Click an item to wear it. Right-click to throw it away.</p>
+  </aside>
+  <div class="itemcard" id="itemcard" hidden></div>
+
   <div class="zone-banner" id="zone-banner"><small>You enter</small><strong id="zone-name">Greyfang Vale</strong></div>
   <div class="toasts" id="toasts" aria-live="polite"></div>
 
@@ -44,7 +76,7 @@
   <section class="chat" id="chat" aria-label="Chat">
     <div class="chat-log" id="chat-log" role="log" aria-live="polite"></div>
     <form class="chat-entry" id="chat-form" autocomplete="off">
-      <label for="chat-input" class="chat-ch">Say</label>
+      <label for="chat-input" class="chat-ch" id="chat-ch">Say</label>
       <input id="chat-input" maxlength="240" placeholder="Press Enter to talk" />
     </form>
   </section>
@@ -62,7 +94,9 @@
       <dt>Right-click</dt><dd>Attack an enemy</dd>
       <dt>Tab</dt><dd>Next enemy</dd>
       <dt>1 / F</dt><dd>Strike</dd>
-      <dt>Enter</dt><dd>Chat</dd>
+      <dt>E</dt><dd>Use / open</dd>
+      <dt>B · P</dt><dd>Bag · Party</dd>
+      <dt>Enter</dt><dd>Chat (/p party)</dd>
     </dl>
   </aside>
 

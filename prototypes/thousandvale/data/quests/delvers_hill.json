@@ -1,0 +1,195 @@
+{
+  "_doc": "Stream E (M2). Quests for zone 'delvers_hill' (Delvers' Hill). Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/province.json).",
+  "zone": "delvers_hill",
+  "npcs": {
+    "foreman_hollis": {
+      "name": "Foreman Hollis",
+      "role": "elder",
+      "at": "Copperdell",
+      "greeting": "Mine's open, seams are rich, and everyone's terrified. Normal week."
+    },
+    "lampwoman_gwen": {
+      "name": "Gwen Lampwright",
+      "role": "trader",
+      "at": "Pickaxe Row",
+      "greeting": "Lamps! Oil! Candles! Everything you need to see what's eating you."
+    },
+    "sergeant_cadoc": {
+      "name": "Sergeant Brask",
+      "role": "guard",
+      "at": "the Old Headframe Fort",
+      "greeting": "Headframe fort. Holds the hill. Also holds the lift, which is broken."
+    },
+    "old_miner_pike": {
+      "name": "Old Pike",
+      "role": "miner",
+      "at": "dry_well",
+      "greeting": "Down the well's quicker than the shaft, if you don't mind the rats."
+    }
+  },
+  "quests": [
+    {
+      "id": "copper_and_candles",
+      "name": "Copper and Candles",
+      "level": 4,
+      "giver": "foreman_hollis",
+      "story": 6,
+      "offer": "Orla in Ashcombe vouched for you. My seam's full of beetles that eat copper and then try to eat miners. Clear the upper galleries.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "ironback_beetle",
+          "count": 6,
+          "where": "the upper galleries",
+          "text": "Ironback beetles"
+        },
+        {
+          "kind": "collect",
+          "item": "Copper nugget",
+          "count": 4,
+          "from": "ironback_beetle",
+          "chance": 0.5,
+          "text": "Copper the beetles swallowed"
+        }
+      ],
+      "done": "Copper back, beetles gone. Head down to Brackwater, the reeve there sent for help.",
+      "reward": {
+        "xp": 0.5,
+        "gold": 10,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      },
+      "next": "eels_and_omens"
+    },
+    {
+      "id": "lamp_oil",
+      "name": "Lamp Oil",
+      "level": 4,
+      "giver": "lampwoman_gwen",
+      "offer": "Ash wisps keep stealing the flame out of my lamps. I need their sparks for new wicks. Don't ask how. Wick-making is a dark art.",
+      "steps": [
+        {
+          "kind": "collect",
+          "item": "Wisp spark",
+          "count": 5,
+          "from": "ash_wisp",
+          "chance": 0.6,
+          "text": "Wisp sparks"
+        }
+      ],
+      "done": "Lovely bright ones. Lamps for everybody. Mind your eyebrows.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 6
+      }
+    },
+    {
+      "id": "rats_in_the_lift",
+      "name": "Rats in the Lift",
+      "level": 4,
+      "giver": "sergeant_cadoc",
+      "offer": "The lift's broken because rats chewed the rope. The rope's broken because rats. Everything's broken because rats.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "cairn_rat",
+          "count": 10,
+          "where": "the lift house",
+          "text": "Cairn rats"
+        }
+      ],
+      "done": "Right. New rope. New rats probably. But not today.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 5
+      }
+    },
+    {
+      "id": "down_the_well",
+      "name": "Down the Well",
+      "level": 5,
+      "giver": "old_miner_pike",
+      "offer": "Old cache down the dry well, put there by my grandad. Rats are sat on it. Go fetch it, keep a coin for yourself.",
+      "steps": [
+        {
+          "kind": "visit",
+          "vignette": "dry_well",
+          "text": "Find the dry well"
+        },
+        {
+          "kind": "kill",
+          "type": "cairn_rat",
+          "count": 5,
+          "where": "the dry well",
+          "text": "Rats in the well"
+        }
+      ],
+      "done": "Grandad's pipe! And his teeth. Don't ask why he kept his teeth.",
+      "reward": {
+        "xp": 0.3,
+        "gold": 6,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "the_deep_seam",
+      "name": "The Deep Seam",
+      "level": 6,
+      "giver": "foreman_hollis",
+      "group": "a party of 3-5",
+      "offer": "The deep seam has a shift that never clocks off. Something down there is still working. Go and give it notice.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Reach the deep seam",
+          "floor": 1
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "End the last shift",
+          "boss": true
+        }
+      ],
+      "done": "Silence below. First quiet night in Copperdell in ten years.",
+      "reward": {
+        "xp": 1.1,
+        "gold": 45,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "delvers_rare",
+      "name": "The Hill's Bad Neighbour",
+      "level": 5,
+      "giver": "sergeant_cadoc",
+      "offer": "Big one roaming the spoil heaps. Kill it before it decides the fort looks tasty.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "delvers_hill",
+          "slot": 0,
+          "text": "The hill's rare beast slain"
+        }
+      ],
+      "done": "That's one fewer thing trying to eat my fort.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 22,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

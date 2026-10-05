@@ -35,7 +35,8 @@ const HUNTER_SKILL_TEXT = {
   E: 'Send your hawk to a point: it circles for 12 s and sees 12 m.', R: 'Every animal within 40 m bolts home and shows for 5 s (from level 6).',
 };
 
-export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinimap, getCamBox, keyLabel = (k) => k }) {
+export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinimap, getCamBox, keyLabel = (k) => k, iconUrl = () => null }) {
+  const ic = (kind, id) => { const u = iconUrl(kind, id); return u ? `<img class="ic" src="${u}" alt="">` : ''; };
   const data = sim.data, map = sim.map;
   const me = () => sim.state.players[player];
   const role = me().role;
@@ -54,6 +55,7 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
       <div class="hv-clock"><b data-k="clock">0:00</b><small data-k="clocksub"></small></div>
       <div class="hv-turn" data-tip-render="hvf-turn"><span class="moon"><i data-k="moon"></i></span><small data-k="turn">Hunters' night</small></div>
       <div class="hv-sides" data-k="sides"></div>
+      <div class="hv-sound" data-k="soundw" hidden><button class="hv-mute" data-act="mute" data-k="mute" data-tip="Sound on / off (M)">🔊</button><input type="range" min="0" max="100" data-k="vol" data-tip="Volume"></div>
     </header>
     <div class="hv-alerts" data-k="alerts"></div>
     <div class="hv-ghost" data-k="ghost" hidden></div>
@@ -75,7 +77,7 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
     K.main.innerHTML = `
       <div class="hv-group"><h4>Build <small>each copy costs 15% more</small></h4><div class="hv-build" data-k="build">${B.order.map((kind, i) => {
         const d = B.kinds[kind], key = '1234567890-='.charAt(i) || '';
-        return `<button class="hv-bt" data-build="${kind}" data-tip-render="hvf-build" data-tip-kind="${kind}"><span class="nm">${esc(d.name)}</span><span class="cost" data-cost></span><span class="tell t${d.tell}">${'●'.repeat(d.tell) || '○'}</span>${key ? `<kbd>${key}</kbd>` : ''}</button>`;
+        return `<button class="hv-bt${iconUrl('hvf-building', kind) ? ' has-ic' : ''}" data-build="${kind}" data-tip-render="hvf-build" data-tip-kind="${kind}">${ic('hvf-building', kind)}<span class="nm">${esc(d.name)}</span><span class="cost" data-cost></span><span class="tell t${d.tell}">${'●'.repeat(d.tell) || '○'}</span>${key ? `<kbd>${key}</kbd>` : ''}</button>`;
       }).join('')}</div></div>
       <div class="hv-group"><h4>Farm</h4><div class="hv-ups" data-k="ups">${B.upgrades.order.map((id) => `<button class="hv-bt up" data-up="${id}" data-tip-render="hvf-up" data-tip-up="${id}"><span class="nm">${esc(B.upgrades[id].name)}</span><span class="cost" data-cost></span></button>`).join('')}</div>
         <div class="hv-skills" data-k="skills">${SKILL_KEYS.farmer.map((k) => { const a = U.farmer.abilities[k]; return `<button class="hv-sk" data-skill="${k}" data-tip="${esc(a.name)} — ${esc(FARMER_ABILITY_TEXT[k])}"><b>${esc(a.name)}</b><kbd>${keyLabel(k)}</kbd><i class="cd" data-cd></i></button>`; }).join('')}</div>
@@ -126,8 +128,12 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
   });
 
   // ── clicks ──
+  let sound = null;
+  K.vol.addEventListener('input', () => { sound?.setVolume(K.vol.value / 100); });
   el.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.act === 'mute') { if (sound) { sound.setMuted(!sound.settings.muted); paintSound(); } return; }
+    sound?.ui('click');
     if (b.dataset.build) onPlace(b.dataset.build);
     else if (b.dataset.up) onCmd({ type: 'upgrade', id: b.dataset.up });
     else if (b.dataset.skill) onAim({ skill: b.dataset.skill });
@@ -157,7 +163,7 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
     K.shop.hidden = !v;
     if (v) {
       K.shop.innerHTML = `<header><b>Hunters' shop</b><small>Stand at a lodge. Every copy counts; right-click a pack slot to sell for half.</small><button class="x" data-act="closeshop" data-tip="Close (B)">×</button></header>
-        <div class="hv-shopgrid">${Object.keys(HI.items).map((id) => `<button class="hv-item" data-buy="${id}" data-tip-render="hvf-shopitem" data-tip-item="${id}"><b>${esc(HI.items[id].name)}</b><span class="cost">${HI.items[id].price}</span></button>`).join('')}</div>`;
+        <div class="hv-shopgrid">${Object.keys(HI.items).map((id) => `<button class="hv-item" data-buy="${id}" data-tip-render="hvf-shopitem" data-tip-item="${id}">${ic('hvf-item', id)}<b>${esc(HI.items[id].name)}</b><span class="cost">${HI.items[id].price}</span></button>`).join('')}</div>`;
     }
   }
 
@@ -291,7 +297,7 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
       }
       hi.inv.forEach((it, i) => {
         const b = K.slots.querySelector(`[data-slot="${i}"]`);
-        setH(b, it ? `<b>${esc(it.name)}</b>${it.charges ? `<i class="ch">${it.charges}</i>` : ''}<kbd>${i + 1}</kbd>` : `<kbd>${i + 1}</kbd>`);
+        setH(b, it ? `${ic('hvf-item', it.id)}<b>${esc(it.name)}</b>${it.charges ? `<i class="ch">${it.charges}</i>` : ''}<kbd>${i + 1}</kbd>` : `<kbd>${i + 1}</kbd>`);
         b.classList.toggle('empty', !it);
       });
       const g = hi.gear;
@@ -317,7 +323,7 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
       case 'released': alert(role === 'hunter' ? 'The kennel opens — go hunting!' : 'The hunters are loose!', role === 'hunter' ? 'good' : 'bad', 4000); break;
       case 'animalKilled': if (ev.owner === player) alert(`A ${ev.kind} was taken near ${near(ev.x, ev.z)}`, 'bad'); break;
       case 'farmerDown': alert(ev.player === player ? 'You are down!' : `${s.players[ev.player].name} is down near ${near(ev.grave.x, ev.grave.z)}`, ev.player === player || role === 'farmer' ? 'bad' : 'good'); break;
-      case 'farmerRevived': alert(`${s.players[ev.player].name} is back on their feet`, role === 'farmer' ? 'good' : 'bad'); break;
+      case 'farmerRevived': alert(ev.player === player ? 'You are back on your feet' : `${s.players[ev.player].name} is back on their feet`, role === 'farmer' ? 'good' : 'bad'); break;
       case 'hunterDown': alert(ev.player === player ? 'You fell — back at a lodge soon' : 'A hunter is down', role === 'farmer' ? 'good' : 'bad'); break;
       case 'hunterOut': alert(`${s.players[ev.player].name} is out of the hunt`, role === 'farmer' ? 'good' : 'bad', 4500); break;
       case 'lost': if (ev.owner === player) alert(`Your ${(B.kinds[ev.kind] || { name: ev.kind }).name} was destroyed`, 'bad'); break;
@@ -331,6 +337,13 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
       case 'built': if (ev.player === player) alert(`${(B.kinds[ev.kind] || { name: 'Lodge' }).name} built`, 'good', 1400); break;
       default: break;
     }
+  }
+
+  function paintSound() {
+    if (!sound) return;
+    const st = sound.settings;
+    K.mute.textContent = st.muted ? '🔇' : '🔊';
+    K.vol.value = Math.round(st.volume * 100);
   }
 
   function showResult(result, { onAgain, onBack }) {
@@ -347,6 +360,8 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
   return {
     el, update, onEvent, alert, showResult, useSlot, toggleShop,
     get shopOpen() { return shopOpen; },
+    /** The sound bridge arrived: show mute + volume (saved per browser by the bridge). */
+    setSound(snd) { sound = snd; K.soundw.hidden = !snd; paintSound(); },
     setWaiting(text) { K.wait.hidden = !text; setT(K.wait, text || ''); },
     setPlaceHint(html) { K.placehint.hidden = !html; if (html) setH(K.placehint, html); },
     destroy() { el.remove(); },

@@ -1,0 +1,151 @@
+{
+  "id": "rare_gravel_jack",
+  "name": "Gravel Jack",
+  "tier": "rare",
+  "zone": "ashcombe",
+  "body": "hoard_mimic",
+  "place": "sits in the ruined counting house of Ashcombe pretending to be a strongbox",
+  "_doc": "Stream E (M2). A strongbox with teeth. It spits coins in a cone, lunges at the player furthest away (sidestep the line), and at half health throws a ring of coins — only the gaps between the gold are safe.",
+  "party": {
+    "solo": "Solo-able; the safe circles are generous.",
+    "small": "Easy.",
+    "full": "Very fast; the rats are the only extra.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.8,
+  "arena": {
+    "radius": 22
+  },
+  "say": {
+    "pull": [
+      "The strongbox yawns. It has a great many teeth.",
+      "Gravel Jack rattles: \"Finders keepers!\""
+    ],
+    "death": "Gravel Jack sighs open. It really was full of coins, after all.",
+    "reset": "The strongbox closes and pretends very hard to be a strongbox."
+  },
+  "abilities": {
+    "chomp": {
+      "id": "chomp",
+      "name": "Lid Chomp",
+      "every": [
+        6,
+        8
+      ],
+      "range": 4.5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4,
+          "arc": 1.4,
+          "wind": 0.9,
+          "damage": 1.7
+        }
+      ]
+    },
+    "coin_spit": {
+      "id": "coin_spit",
+      "name": "Coin Spit",
+      "every": [
+        11,
+        14
+      ],
+      "first": 4,
+      "range": 10,
+      "cast": 0.5,
+      "say": "{boss} spits a stream of coins!",
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 9,
+          "arc": 0.8,
+          "count": 3,
+          "rotate": 0.5,
+          "delay": 0.25,
+          "wind": 1.2,
+          "damage": 1.4
+        }
+      ]
+    },
+    "lunge": {
+      "id": "lunge",
+      "name": "Greedy Lunge",
+      "every": [
+        13,
+        16
+      ],
+      "first": 8,
+      "cast": 0.6,
+      "say": "{boss} hops toward {target}, lid wide open!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 14,
+          "w": 3,
+          "knock": 3,
+          "wind": 1.4,
+          "damage": 1.8
+        }
+      ]
+    },
+    "jackpot": {
+      "id": "jackpot",
+      "name": "Jackpot",
+      "every": [
+        18,
+        21
+      ],
+      "first": 4,
+      "cast": 1,
+      "say": "Coins spray everywhere — stand where the floor is clear!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3,
+          "spread": 7,
+          "count": 3,
+          "kind": "safe",
+          "wind": 2.5,
+          "damage": 2.2
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Hoarding",
+      "abilities": [
+        "chomp",
+        "coin_spit",
+        "lunge"
+      ]
+    },
+    {
+      "name": "Jackpot",
+      "at": 0.5,
+      "say": "Gravel Jack flips over and empties itself at you!",
+      "abilities": [
+        "chomp",
+        "jackpot",
+        "lunge"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "cairn_rat",
+            "count": 3,
+            "radius": 6
+          }
+        },
+        {
+          "say": "Rats that were living in it pour out too.",
+          "style": "emote"
+        }
+      ]
+    }
+  ]
+}

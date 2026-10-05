@@ -1,0 +1,181 @@
+{
+  "_doc": "Stream E (M2). Quests for zone 'saint_orrins_rise' (Saint Orrin's Rise). Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/province.json).",
+  "zone": "saint_orrins_rise",
+  "npcs": {
+    "abbot_wendel": {
+      "name": "Prior Wendel",
+      "role": "elder",
+      "at": "Orrinsford",
+      "greeting": "Welcome, pilgrim. Please wipe your feet. Not on the saint."
+    },
+    "sister_hild": {
+      "name": "Sister Hild",
+      "role": "healer",
+      "at": "Pilgrim's Halt",
+      "greeting": "You look like someone who walks into graveyards on purpose."
+    },
+    "brother_tobin": {
+      "name": "Brother Tobin",
+      "role": "guard",
+      "at": "the Abbey Wall",
+      "greeting": "I am the abbey's entire guard. I also do the bread."
+    },
+    "pilgrim_nell": {
+      "name": "Nell the pilgrim",
+      "role": "pilgrim",
+      "at": "drowned_shrine",
+      "greeting": "I came to pray. The shrine had other plans and also frogs."
+    }
+  },
+  "quests": [
+    {
+      "id": "the_restless_cloister",
+      "name": "The Restless Cloister",
+      "level": 3,
+      "giver": "abbot_wendel",
+      "story": 2,
+      "offer": "The dead in our cloister have started getting up for morning prayers. They are not invited. Settle them.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "barrow_hound",
+          "count": 6,
+          "where": "the old cloister garth",
+          "text": "Barrow hounds laid back down"
+        }
+      ],
+      "done": "Thank you. Morning prayers are once again a living-only affair.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 6,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      },
+      "next": "bells_for_halsbridge"
+    },
+    {
+      "id": "owls_in_the_belfry",
+      "name": "Owls in the Belfry",
+      "level": 3,
+      "giver": "brother_tobin",
+      "offer": "Gallows owls have taken the belfry. Every time I ring the bell, they ring me.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "gallows_owl",
+          "count": 5,
+          "where": "around the abbey",
+          "text": "Gallows owls driven off"
+        }
+      ],
+      "done": "The bell rings clean. My ears thank you; my head thanks you more.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 5
+      }
+    },
+    {
+      "id": "candles_for_the_crypt",
+      "name": "Candles for the Crypt",
+      "level": 4,
+      "giver": "sister_hild",
+      "offer": "Fetch the wax from the cairn rats — they've been eating our candles, so in a sense the candles are already inside them.",
+      "steps": [
+        {
+          "kind": "collect",
+          "item": "Stolen candle stub",
+          "count": 6,
+          "from": "cairn_rat",
+          "chance": 0.6,
+          "text": "Candle stubs recovered"
+        }
+      ],
+      "done": "Slightly chewed. The saint won't mind. The saint has seen worse.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 6
+      }
+    },
+    {
+      "id": "a_pilgrim_lost",
+      "name": "A Pilgrim Lost",
+      "level": 3,
+      "giver": "pilgrim_nell",
+      "offer": "I left my prayer beads at the drowned shrine when the wisps chased me. Fetch them and tell the Prior I'm not dead.",
+      "steps": [
+        {
+          "kind": "visit",
+          "vignette": "drowned_shrine",
+          "text": "Search the drowned shrine"
+        },
+        {
+          "kind": "talk",
+          "npc": "abbot_wendel",
+          "text": "Tell Prior Wendel that Nell lives"
+        }
+      ],
+      "done": "Not dead! Excellent. That saves a great deal of paperwork.",
+      "reward": {
+        "xp": 0.3,
+        "gold": 4
+      }
+    },
+    {
+      "id": "the_saints_bones",
+      "name": "The Saint's Bones",
+      "level": 5,
+      "giver": "abbot_wendel",
+      "group": "a party of 3-5",
+      "offer": "Something below the Rise is moving the saint's bones about. Go down and see what has taken an interest.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Reach the lower crypt",
+          "floor": 1
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Defeat what waits at the bottom",
+          "boss": true
+        }
+      ],
+      "done": "The saint rests. And so, for the first time this month, do I.",
+      "reward": {
+        "xp": 1.0,
+        "gold": 40,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "the_rises_rare_one",
+      "name": "Something on the Rise",
+      "level": 4,
+      "giver": "brother_tobin",
+      "offer": "There's a beast out on the Rise the pilgrims won't stop talking about. Kill it so they talk about the saint again.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "saint_orrins_rise",
+          "slot": 0,
+          "text": "The Rise's rare beast slain"
+        }
+      ],
+      "done": "Ah, wonderful. Now they'll talk about you instead. Still not the saint.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 20,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

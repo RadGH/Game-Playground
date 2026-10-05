@@ -1,0 +1,242 @@
+{
+  "name": "Wehackkeep (z11_03)",
+  "zone": "z11_03",
+  "sheet": {
+    "sheet": "torbor_downs",
+    "zone": "wychwood"
+  },
+  "province": {
+    "id": 10,
+    "name": "Petbeck Basin"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 2,
+  "inputHash": "af932954",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9803699e"
+    },
+    "zone": {
+      "zx": 11,
+      "zy": 3
+    },
+    "worldOrigin": {
+      "x": 22528,
+      "z": 6144
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [
+    {
+      "id": 9,
+      "name": "The Fackfalpot"
+    },
+    {
+      "id": 21,
+      "name": "Tackmonflow"
+    },
+    {
+      "id": 87,
+      "name": null
+    }
+  ],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "city",
+      "name": "Wehackkeep",
+      "x": 1104,
+      "z": 560,
+      "hub": true,
+      "radius": 140,
+      "movedFrom": {
+        "x": 1088,
+        "z": 832
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "village",
+      "name": "Weephaven",
+      "x": 256,
+      "z": 224,
+      "radius": 65,
+      "movedFrom": {
+        "x": 192,
+        "z": 192
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Wildhaven",
+      "x": 1280,
+      "z": 224,
+      "radius": 46,
+      "movedFrom": {
+        "x": 1344,
+        "z": 192
+      }
+    },
+    {
+      "type": "lair",
+      "kind": "dungeon",
+      "name": "The Fifar Undercroft",
+      "x": 192,
+      "z": 1344
+    },
+    {
+      "type": "crossing",
+      "kind": "ford",
+      "name": "Wiwat Ford",
+      "x": 1344,
+      "z": 192
+    },
+    {
+      "type": "crossing",
+      "kind": "ford",
+      "name": "Fahibeck Ford",
+      "x": 1088,
+      "z": 832
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 873,
+      "z": 718,
+      "yaw": 2.73
+    },
+    {
+      "type": "event",
+      "id": "event_wychwood",
+      "x": 1112,
+      "z": 792,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 1100,
+    "z": 560
+  },
+  "summary": {
+    "zone": "z11_03",
+    "province": "Petbeck Basin",
+    "inputHash": "af932954",
+    "rivers": 3,
+    "wetShare": 0.007,
+    "unwalkableShare": 0.186,
+    "towns": [
+      {
+        "name": "Wehackkeep",
+        "kind": "city",
+        "hub": true,
+        "at": [
+          1104,
+          560
+        ],
+        "radius": 140,
+        "movedFrom": {
+          "x": 1088,
+          "z": 832
+        },
+        "culture": "halfling",
+        "plots": 41,
+        "streets": 113,
+        "links": 3,
+        "overlaps": 0
+      },
+      {
+        "name": "Weephaven",
+        "kind": "village",
+        "hub": false,
+        "at": [
+          256,
+          224
+        ],
+        "radius": 65,
+        "movedFrom": {
+          "x": 192,
+          "z": 192
+        },
+        "culture": "halfling",
+        "plots": 27,
+        "streets": 74,
+        "links": 3,
+        "overlaps": 0
+      },
+      {
+        "name": "Wildhaven",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          1280,
+          224
+        ],
+        "radius": 46,
+        "movedFrom": {
+          "x": 1344,
+          "z": 192
+        },
+        "culture": "halfling",
+        "plots": 10,
+        "streets": 41,
+        "links": 2,
+        "overlaps": 0
+      }
+    ],
+    "roads": 12,
+    "bridges": 3,
+    "scatter": 11701,
+    "scatterKinds": {
+      "bush": 3155,
+      "tree_broadleaf": 4753,
+      "rock_small": 1756,
+      "rock_large": 1328,
+      "boulder": 250,
+      "tree_conifer": 446,
+      "tree_acacia": 13
+    },
+    "sites": [
+      "settlement(HUB) city Wehackkeep 1104 560 140",
+      "settlement village Weephaven 256 224 65",
+      "settlement hamlet Wildhaven 1280 224 46",
+      "lair dungeon The Fifar Undercroft 192 1344",
+      "crossing ford Wiwat Ford 1344 192",
+      "crossing ford Fahibeck Ford 1088 832",
+      "dungeon door_1 Barrow entrance 873 718  2.73",
+      "event event_wychwood  1112 792 40"
+    ],
+    "spawn": {
+      "x": 1100,
+      "z": 560
+    },
+    "placements": 337,
+    "vignettesAvoided": 0
+  },
+  "files": {
+    "terrain.bin": 6306098,
+    "nav.bin": 1050717,
+    "scatter.bin": 93692,
+    "placements.json": 153125
+  }
+}

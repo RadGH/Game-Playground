@@ -1,0 +1,410 @@
+{
+  "id": "boss_castellan_odrun",
+  "name": "Castellan Odrun the Oathbroken",
+  "tier": "boss",
+  "body": "cult_zealot",
+  "place": "dungeon fortress_keep set A: the end boss in the great hall (28 m)",
+  "_doc": "Stream E (M2). The keep's commander, who opened the gates to the cult. P1 \"Hold the Hall\": a halberd for the tank, a sweeping arc, and the BALLISTA on the gallery firing lines across the hall (it fires at whoever he points at — a line from the far wall). Barricades are cover from his War Cry. P2 at 60% \"The Gate\": he raises a ward of oaths and calls his guard; the PORTCULLIS LEVER drops the gate on the guard (hurts the boss too), and the three BURNING-OIL braziers break the ward. P3 new bar \"Oathbroken\": rings of fire from spilled oil, a three-player stack, the ballista now fires a cross, and he tries to raise the banner (interrupt) for an enrage.",
+  "party": "Solo: needs a follower. 2-3: tank + runner for braziers/lever. 5: as designed. M5: guard count +1 per player, health x1.8 at 5, ballista shots +1 for 4+.",
+  "hpMult": 4,
+  "arena": {
+    "radius": 16,
+    "objects": [
+      {
+        "id": "barricade_n",
+        "type": "pillar",
+        "name": "Barricade",
+        "x": 0,
+        "z": -7,
+        "r": 1.6,
+        "hp": 2
+      },
+      {
+        "id": "barricade_e",
+        "type": "pillar",
+        "name": "Barricade",
+        "x": 7,
+        "z": 3,
+        "r": 1.6,
+        "hp": 2
+      },
+      {
+        "id": "barricade_w",
+        "type": "pillar",
+        "name": "Barricade",
+        "x": -7,
+        "z": 3,
+        "r": 1.6,
+        "hp": 2
+      },
+      {
+        "id": "oil_a",
+        "type": "brazier",
+        "name": "Burning oil cauldron",
+        "x": 11,
+        "z": -6
+      },
+      {
+        "id": "oil_b",
+        "type": "brazier",
+        "name": "Burning oil cauldron",
+        "x": -11,
+        "z": -6
+      },
+      {
+        "id": "oil_c",
+        "type": "brazier",
+        "name": "Burning oil cauldron",
+        "x": 0,
+        "z": 11
+      },
+      {
+        "id": "portcullis",
+        "type": "lever",
+        "name": "Portcullis lever",
+        "x": -10,
+        "z": 9,
+        "onUse": [
+          {
+            "hurt": 0.06
+          },
+          {
+            "stun": 3
+          },
+          {
+            "say": "The portcullis crashes down — right on the Castellan's guard and the Castellan!",
+            "style": "warn"
+          }
+        ]
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "\"I swore to hold this keep. I never said for whom.\"",
+      "\"Guards! We have guests in the hall.\"",
+      "\"Kneel, or be knelt.\""
+    ],
+    "death": "Castellan Odrun drops his halberd. \"I... was keeping it... safe,\" he lies, and dies.",
+    "reset": "\"Close the gates. Again.\""
+  },
+  "enrage": {
+    "seconds": 330,
+    "damage": 3,
+    "say": "\"NO QUARTER! BURN THE HALL!\""
+  },
+  "abilities": {
+    "halberd": {
+      "id": "halberd",
+      "name": "Halberd Chop",
+      "every": [
+        7,
+        9
+      ],
+      "range": 6,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 1.3,
+          "wind": 1.1,
+          "damage": 1.9
+        }
+      ]
+    },
+    "sweep": {
+      "id": "sweep",
+      "name": "Sweeping Arc",
+      "every": [
+        12,
+        15
+      ],
+      "first": 5,
+      "range": 7,
+      "cast": 0.5,
+      "say": "He swings the halberd in a huge arc — get behind him!",
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 7,
+          "arc": 3.2,
+          "wind": 1.3,
+          "damage": 1.6
+        }
+      ]
+    },
+    "ballista": {
+      "id": "ballista",
+      "name": "Ballista!",
+      "every": [
+        14,
+        17
+      ],
+      "first": 8,
+      "cast": 0.8,
+      "say": "\"BALLISTA! THERE!\" — get off the line!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "home",
+          "offset": [
+            0,
+            -15
+          ],
+          "len": 30,
+          "w": 2.4,
+          "count": 2,
+          "delay": 0.8,
+          "yaw": 0,
+          "wind": 1.6,
+          "damage": 2.2
+        }
+      ]
+    },
+    "war_cry": {
+      "id": "war_cry",
+      "name": "War Cry",
+      "every": [
+        24,
+        28
+      ],
+      "first": 13,
+      "cast": 3,
+      "say": "He fills his lungs for a war cry — get behind a barricade!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 16,
+          "los": true,
+          "wind": 0.6,
+          "damage": 2.6
+        }
+      ]
+    },
+    "guard": {
+      "id": "guard",
+      "name": "Call the Guard",
+      "every": [
+        22,
+        26
+      ],
+      "first": 8,
+      "cast": 1,
+      "say": "\"GUARD!\"",
+      "actions": [
+        {
+          "adds": {
+            "type": "road_brigand",
+            "count": 2,
+            "radius": 9,
+            "at": "home"
+          }
+        }
+      ]
+    },
+    "oil_rings": {
+      "id": "oil_rings",
+      "name": "Spilled Oil",
+      "every": [
+        16,
+        19
+      ],
+      "first": 4,
+      "cast": 0.8,
+      "say": "Oil spills and catches — mind the rings of fire!",
+      "telegraphs": [
+        {
+          "shape": "ring",
+          "at": "self",
+          "r": 6,
+          "r2": 3,
+          "element": "fire",
+          "status": "burn",
+          "wind": 1.5,
+          "damage": 1.6
+        },
+        {
+          "shape": "ring",
+          "at": "self",
+          "r": 13,
+          "r2": 9,
+          "element": "fire",
+          "status": "burn",
+          "after": 1.4,
+          "wind": 1.5,
+          "damage": 1.6
+        }
+      ]
+    },
+    "oath_stack": {
+      "id": "oath_stack",
+      "name": "Oath of Pain",
+      "every": [
+        20,
+        24
+      ],
+      "first": 7,
+      "cast": 1,
+      "say": "{target} bears the broken oath — three of you, share the pain!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "kind": "stack",
+          "need": 3,
+          "follow": true,
+          "wind": 4,
+          "damage": 3.2
+        }
+      ]
+    },
+    "ballista_cross": {
+      "id": "ballista_cross",
+      "name": "Crossfire",
+      "every": [
+        17,
+        20
+      ],
+      "first": 12,
+      "cast": 0.8,
+      "say": "\"BOTH BALLISTAE!\" — the hall is crossed with bolts!",
+      "telegraphs": [
+        {
+          "shape": "cross",
+          "at": "self",
+          "r": 16,
+          "w": 2.4,
+          "yaw": "random",
+          "wind": 1.6,
+          "damage": 2.0
+        }
+      ]
+    },
+    "banner": {
+      "id": "banner",
+      "name": "Raise the Banner",
+      "every": [
+        30,
+        34
+      ],
+      "first": 18,
+      "cast": 4,
+      "interrupt": true,
+      "say": "He is raising the cult banner — STOP HIM!",
+      "onInterrupt": [
+        {
+          "say": "The banner pole snaps in half.",
+          "style": "emote"
+        }
+      ],
+      "actions": [
+        {
+          "modifier": {
+            "id": "banner_raised",
+            "dmg": 1.3,
+            "attackEvery": 0.85,
+            "exact": true
+          }
+        },
+        {
+          "say": "The banner is raised! The Castellan fights like a man possessed!",
+          "style": "warn"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Hold the Hall",
+      "abilities": [
+        "halberd",
+        "sweep",
+        "ballista",
+        "war_cry"
+      ]
+    },
+    {
+      "name": "The Gate",
+      "at": 0.6,
+      "say": "\"Gate guard, to me! Seal the oaths!\"",
+      "abilities": [
+        "guard",
+        "ballista",
+        "halberd"
+      ],
+      "onEnter": [
+        {
+          "shield": true
+        },
+        {
+          "adds": {
+            "type": "road_brigand",
+            "count": 3,
+            "radius": 9,
+            "at": "home"
+          }
+        },
+        {
+          "say": "A ward of sworn oaths surrounds the Castellan. Tip all three burning-oil cauldrons!",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "name": "Oathbroken",
+      "newBar": {
+        "hp": 0.55
+      },
+      "say": "\"Then I break every oath I ever made!\"",
+      "abilities": [
+        "halberd",
+        "oil_rings",
+        "oath_stack",
+        "ballista_cross",
+        "banner"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 3,
+        "phase": 1
+      },
+      "do": [
+        {
+          "shield": false
+        },
+        {
+          "stun": 3
+        },
+        {
+          "vuln": {
+            "takeMore": 0.4,
+            "seconds": 10,
+            "name": "Oaths Burned"
+          }
+        },
+        {
+          "say": "Burning oil floods the floor — the oath-ward burns away!",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "when": {
+        "broken": 3
+      },
+      "do": [
+        {
+          "say": "The last barricade is splinters!",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

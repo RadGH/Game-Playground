@@ -1,0 +1,821 @@
+{
+  "_doc": "Stream E. Zone archetypes (PLAN §3.3): a content mix layered ON TOP of the floor every zone has (§3.4: a town + hamlets, 2+ farms, a fort, a dungeon door, 1-2 caves, 8-12 vignettes, a hook, a zone event boss, 2 rares, a treasure chain). Weights are relative odds the bake uses when it picks vignettes, monster families and extras; `extras` are what this archetype adds above the floor. All 12 are filled in (M2). `vignetteWeights` is generated from the vignette library's tags (3 = the vignette's first archetype, 1 = also fits). Rule: neighbouring zones never share an archetype.",
+  "floor": {
+    "towns": 1,
+    "hamlets": [
+      1,
+      2
+    ],
+    "farms": 2,
+    "forts": 1,
+    "dungeonDoors": 1,
+    "caves": [
+      1,
+      2
+    ],
+    "vignettes": [
+      8,
+      12
+    ],
+    "hooks": 1,
+    "eventBoss": 1,
+    "rares": 2,
+    "treasureChains": 1
+  },
+  "archetypes": {
+    "heartland": {
+      "name": "Heartland",
+      "status": "ready",
+      "feel": "Rolling farmland and mills; the safe-looking country that brigands and beasts prey on.",
+      "biomes": [
+        "grassland",
+        "shrubland",
+        "temperateForest",
+        "savanna"
+      ],
+      "extras": {
+        "villages": 2,
+        "farms": [
+          4,
+          7
+        ],
+        "mill": 1,
+        "banditCamps": [
+          1,
+          2
+        ]
+      },
+      "event": "harvest_festival",
+      "families": {
+        "beast": 3,
+        "humanoid": 3,
+        "aberration": 1,
+        "undead": 0.5
+      },
+      "monsters": [
+        "moor_hound",
+        "thicket_boar",
+        "road_brigand",
+        "brigand_archer",
+        "brigand_captain",
+        "cairn_rat",
+        "gallows_owl",
+        "carrion_moth"
+      ],
+      "vignetteWeights": {
+        "hanging_oak": 3,
+        "overturned_cart": 3,
+        "dry_well": 3,
+        "boar_wallow": 3,
+        "smugglers_cellar": 3,
+        "duel_stones": 3,
+        "hedge_witch_garden": 1,
+        "stone_circle_hum": 1,
+        "toppled_statue": 1,
+        "broken_caravan_survivor": 3,
+        "witch_stump": 1,
+        "burned_farmstead": 1,
+        "gallows_crossroads": 3,
+        "flooded_mill": 3,
+        "beekeeper_hives": 3,
+        "fairy_ring": 1,
+        "ore_cart_spill": 1,
+        "toll_bridge_trolls": 1,
+        "eel_traps": 1,
+        "market_cross": 1,
+        "hanging_sign_inn": 1,
+        "noble_folly": 1,
+        "blighted_orchard": 1,
+        "pilgrim_camp": 1,
+        "roadside_shrine": 1,
+        "peat_cutters": 1,
+        "charcoal_clamps": 1,
+        "woodcutter_axe": 1
+      },
+      "dungeonFamilies": [
+        "crypt_spiral",
+        "barrow_maze",
+        "mine_descent"
+      ],
+      "music": "heartland_day",
+      "weather": {
+        "clear": 5,
+        "cloud": 3,
+        "rain": 2,
+        "fog": 1
+      }
+    },
+    "marsh": {
+      "name": "Marsh",
+      "status": "ready",
+      "feel": "Fen and mist, stilt hamlets, drowned chapels; lights in the reeds that are not lanterns.",
+      "biomes": [
+        "marsh",
+        "lake",
+        "temperateForest"
+      ],
+      "extras": {
+        "stiltHamlets": 1,
+        "sunkenChapel": 1,
+        "wispLights": true,
+        "fogNights": true
+      },
+      "event": "drowning_bell",
+      "families": {
+        "aberration": 3,
+        "beast": 2,
+        "elemental": 1.5,
+        "undead": 1
+      },
+      "monsters": [
+        "bog_slime",
+        "fen_croaker",
+        "marsh_wisp",
+        "carrion_moth",
+        "veil_spider",
+        "reed_serpent"
+      ],
+      "vignetteWeights": {
+        "drowned_shrine": 3,
+        "hedge_witch_garden": 3,
+        "drowned_chapel": 1,
+        "witch_stump": 1,
+        "flooded_mill": 1,
+        "fairy_ring": 1,
+        "stilt_house": 3,
+        "eel_traps": 1,
+        "ferry_landing": 1,
+        "heron_island": 1,
+        "lone_archer_post": 3,
+        "peat_cutters": 3,
+        "will_o_lights": 3
+      },
+      "dungeonFamilies": [
+        "sunken_temple",
+        "flooded_cistern",
+        "mine_descent"
+      ],
+      "music": "marsh_mist",
+      "weather": {
+        "fog": 4,
+        "rain": 3,
+        "cloud": 2,
+        "clear": 1
+      }
+    },
+    "crown_ring": {
+      "name": "Crown ring",
+      "status": "ready",
+      "feel": "A walled city and its suburbs; the province capital, market, Callboard and trainers.",
+      "biomes": [
+        "grassland",
+        "shrubland",
+        "temperateForest"
+      ],
+      "extras": {
+        "city": 1,
+        "hamlets": [
+          2,
+          3
+        ],
+        "citySewers": 1,
+        "farms": [
+          2,
+          4
+        ]
+      },
+      "event": "riot_in_the_market",
+      "families": {
+        "humanoid": 3,
+        "beast": 1.5,
+        "aberration": 1
+      },
+      "monsters": [
+        "road_brigand",
+        "brigand_archer",
+        "cairn_rat",
+        "sky_cultist",
+        "cult_zealot",
+        "moor_hound"
+      ],
+      "dungeonFamilies": [
+        "flooded_cistern",
+        "crypt_spiral"
+      ],
+      "music": "city_bells",
+      "weather": {
+        "clear": 4,
+        "cloud": 3,
+        "rain": 2,
+        "fog": 1
+      },
+      "vignetteWeights": {
+        "toppled_statue": 1,
+        "broken_caravan_survivor": 1,
+        "burned_farmstead": 1,
+        "gallows_crossroads": 1,
+        "flooded_mill": 1,
+        "quarry_ledge": 1,
+        "ferry_landing": 1,
+        "market_cross": 3,
+        "sewer_grate": 3,
+        "hanging_sign_inn": 3,
+        "noble_folly": 3,
+        "pilgrim_camp": 1,
+        "roadside_shrine": 1,
+        "ruined_bell_tower": 1,
+        "sunken_stair": 1
+      }
+    },
+    "frontier": {
+      "name": "Frontier",
+      "status": "ready",
+      "feel": "Contested border country: a second fort, siege camps, burned farmsteads, patrols.",
+      "biomes": [
+        "grassland",
+        "shrubland",
+        "hills"
+      ],
+      "extras": {
+        "forts": 2,
+        "siegeCamps": [
+          1,
+          2
+        ],
+        "burnedFarms": [
+          2,
+          3
+        ],
+        "patrols": true
+      },
+      "event": "siege_at_the_fort",
+      "families": {
+        "humanoid": 4,
+        "beast": 1.5,
+        "fiend": 0.5
+      },
+      "monsters": [
+        "road_brigand",
+        "brigand_archer",
+        "brigand_captain",
+        "crag_hyena",
+        "frost_stalker",
+        "cinder_imp"
+      ],
+      "dungeonFamilies": [
+        "fortress_keep",
+        "tower_climb"
+      ],
+      "music": "frontier_drums",
+      "weather": {
+        "clear": 3,
+        "cloud": 4,
+        "rain": 2,
+        "fog": 1
+      },
+      "vignetteWeights": {
+        "hanging_oak": 1,
+        "overturned_cart": 1,
+        "smugglers_cellar": 1,
+        "giants_cookfire": 1,
+        "toppled_statue": 1,
+        "broken_caravan_survivor": 1,
+        "burned_farmstead": 3,
+        "smugglers_cove": 1,
+        "gallows_crossroads": 1,
+        "watchtower_ruin": 3,
+        "siege_camp_leftovers": 3,
+        "bone_pit": 1,
+        "avalanche_shelter": 1,
+        "toll_bridge_trolls": 1,
+        "hanging_sign_inn": 1,
+        "blighted_orchard": 1,
+        "warband_totem": 1,
+        "ash_wisp_crater": 1,
+        "old_battlefield": 1,
+        "charcoal_clamps": 1,
+        "woodcutter_axe": 1,
+        "trapper_lines": 1
+      }
+    },
+    "wilds": {
+      "name": "Wilds",
+      "status": "ready",
+      "feel": "Few people and the best treasure: beast dens, lairs, a hermit hamlet.",
+      "biomes": [
+        "temperateForest",
+        "borealForest",
+        "hills",
+        "marsh"
+      ],
+      "extras": {
+        "lairs": [
+          2,
+          3
+        ],
+        "beastDens": [
+          2,
+          3
+        ],
+        "treasureChains": 2,
+        "hermitHamlet": 1
+      },
+      "event": "the_great_hunt",
+      "families": {
+        "beast": 4,
+        "aberration": 1.5,
+        "elemental": 1
+      },
+      "monsters": [
+        "moor_hound",
+        "thicket_boar",
+        "frost_stalker",
+        "crag_hyena",
+        "dread_stag",
+        "veil_spider",
+        "ridge_griffin"
+      ],
+      "dungeonFamilies": [
+        "barrow_maze",
+        "cave_river"
+      ],
+      "music": "wild_woods",
+      "weather": {
+        "fog": 3,
+        "cloud": 3,
+        "rain": 3,
+        "clear": 2
+      },
+      "vignetteWeights": {
+        "hanging_oak": 1,
+        "dry_well": 1,
+        "boar_wallow": 1,
+        "duel_stones": 1,
+        "hedge_witch_garden": 1,
+        "collapsed_mine_mouth": 1,
+        "giants_cookfire": 3,
+        "stone_circle_hum": 1,
+        "broken_caravan_survivor": 1,
+        "witch_stump": 3,
+        "beekeeper_hives": 1,
+        "hermits_hollow": 3,
+        "fairy_ring": 3,
+        "cultist_altar": 1,
+        "frozen_tarn": 1,
+        "heron_island": 1,
+        "blighted_orchard": 1,
+        "warband_totem": 1,
+        "ash_wisp_crater": 1,
+        "chained_tree": 1,
+        "sunken_stair": 1,
+        "lone_archer_post": 1,
+        "will_o_lights": 1,
+        "charcoal_clamps": 3,
+        "woodcutter_axe": 3,
+        "antlered_skull": 3,
+        "trapper_lines": 3,
+        "goblin_market_stones": 3
+      }
+    },
+    "ruinfield": {
+      "name": "Ruinfield",
+      "status": "ready",
+      "feel": "One huge old ruin with extra dungeon doors, scavenger camps and cursed corners.",
+      "biomes": [
+        "grassland",
+        "shrubland",
+        "hills"
+      ],
+      "extras": {
+        "ruinComplex": 1,
+        "extraDungeonDoors": 2,
+        "scavengerCamps": [
+          1,
+          2
+        ]
+      },
+      "event": "the_ruin_wakes",
+      "families": {
+        "undead": 3,
+        "construct": 2,
+        "humanoid": 2
+      },
+      "monsters": [
+        "barrow_hound",
+        "ossuary_crawler",
+        "shale_warden",
+        "road_brigand",
+        "carrion_moth",
+        "cursed_knight"
+      ],
+      "dungeonFamilies": [
+        "fortress_keep",
+        "crypt_spiral",
+        "tower_climb"
+      ],
+      "music": "ruin_echoes",
+      "weather": {
+        "cloud": 4,
+        "clear": 3,
+        "fog": 2,
+        "rain": 1
+      },
+      "vignetteWeights": {
+        "duel_stones": 1,
+        "collapsed_mine_mouth": 1,
+        "stone_circle_hum": 1,
+        "toppled_statue": 3,
+        "watchtower_ruin": 1,
+        "siege_camp_leftovers": 1,
+        "bone_pit": 1,
+        "quarry_ledge": 1,
+        "sewer_grate": 1,
+        "noble_folly": 1,
+        "ash_wisp_crater": 1,
+        "chained_tree": 1,
+        "ruined_bell_tower": 1,
+        "old_battlefield": 3,
+        "sunken_stair": 3,
+        "goblin_market_stones": 1
+      }
+    },
+    "lakeland": {
+      "name": "Lakeland",
+      "status": "ready",
+      "feel": "Lakes and ferries, stilt villages and fishing hamlets, a lake serpent in the deep water.",
+      "biomes": [
+        "lake",
+        "grassland",
+        "temperateForest",
+        "marsh"
+      ],
+      "extras": {
+        "stiltVillages": 1,
+        "ferries": [
+          1,
+          2
+        ],
+        "drownedSites": [
+          1,
+          2
+        ],
+        "fishingHamlets": [
+          1,
+          2
+        ]
+      },
+      "event": "the_serpent_surfaces",
+      "families": {
+        "beast": 3,
+        "aberration": 2,
+        "elemental": 1
+      },
+      "monsters": [
+        "fen_croaker",
+        "reed_serpent",
+        "silt_lurker",
+        "bog_slime",
+        "marsh_wisp",
+        "carrion_moth"
+      ],
+      "dungeonFamilies": [
+        "cave_river",
+        "sunken_temple",
+        "flooded_cistern"
+      ],
+      "music": "lake_mist",
+      "weather": {
+        "fog": 3,
+        "clear": 3,
+        "rain": 3,
+        "cloud": 2
+      },
+      "vignetteWeights": {
+        "drowned_shrine": 1,
+        "drowned_chapel": 3,
+        "smugglers_cove": 1,
+        "wreck_on_the_rocks": 1,
+        "dark_lighthouse": 1,
+        "flooded_mill": 1,
+        "beekeeper_hives": 1,
+        "toll_bridge_trolls": 1,
+        "stilt_house": 1,
+        "eel_traps": 3,
+        "ferry_landing": 3,
+        "heron_island": 3,
+        "market_cross": 1,
+        "roadside_shrine": 1,
+        "lone_archer_post": 1,
+        "will_o_lights": 1
+      }
+    },
+    "pass": {
+      "name": "Pass",
+      "status": "ready",
+      "feel": "A mountain road: toll fort, cliffs, switchbacks, falling rock.",
+      "biomes": [
+        "hills",
+        "mountains",
+        "borealForest"
+      ],
+      "extras": {
+        "tollFort": 1,
+        "switchbacks": true,
+        "cliffs": true
+      },
+      "event": "avalanche",
+      "families": {
+        "beast": 3,
+        "humanoid": 2,
+        "construct": 1.5,
+        "elemental": 1
+      },
+      "monsters": [
+        "ridge_griffin",
+        "crag_hyena",
+        "frost_stalker",
+        "stone_sentinel",
+        "road_brigand",
+        "glacier_maw"
+      ],
+      "dungeonFamilies": [
+        "tower_climb",
+        "mine_descent"
+      ],
+      "music": "high_pass",
+      "weather": {
+        "clear": 3,
+        "cloud": 3,
+        "fog": 2,
+        "rain": 2
+      },
+      "vignetteWeights": {
+        "overturned_cart": 1,
+        "duel_stones": 1,
+        "collapsed_mine_mouth": 1,
+        "giants_cookfire": 1,
+        "broken_caravan_survivor": 1,
+        "dark_lighthouse": 1,
+        "gallows_crossroads": 1,
+        "hermits_hollow": 1,
+        "watchtower_ruin": 1,
+        "siege_camp_leftovers": 1,
+        "cultist_altar": 1,
+        "quarry_ledge": 1,
+        "ore_cart_spill": 1,
+        "miners_shrine": 1,
+        "frozen_tarn": 3,
+        "avalanche_shelter": 3,
+        "toll_bridge_trolls": 3,
+        "hanging_sign_inn": 1,
+        "pilgrim_camp": 1,
+        "roadside_shrine": 1,
+        "old_battlefield": 1,
+        "antlered_skull": 1,
+        "trapper_lines": 1,
+        "goblin_market_stones": 1
+      }
+    },
+    "blight": {
+      "name": "Blight",
+      "status": "ready",
+      "feel": "Corrupted ground held by a warband: the stockade, poisoned farms, the war front.",
+      "biomes": [
+        "blighted",
+        "hills",
+        "temperateForest"
+      ],
+      "extras": {
+        "warbandStronghold": 1,
+        "corruptedFarms": [
+          2,
+          3
+        ],
+        "warGripFront": true
+      },
+      "event": "warband_raid",
+      "families": {
+        "fiend": 2.5,
+        "undead": 2.5,
+        "humanoid": 2,
+        "aberration": 1
+      },
+      "monsters": [
+        "cinder_imp",
+        "cult_zealot",
+        "sky_cultist",
+        "ossuary_crawler",
+        "hollow_wraith",
+        "sporecap_walker"
+      ],
+      "dungeonFamilies": [
+        "barrow_maze",
+        "fortress_keep"
+      ],
+      "music": "blight_drone",
+      "weather": {
+        "cloud": 4,
+        "fog": 3,
+        "rain": 2,
+        "clear": 1
+      },
+      "vignetteWeights": {
+        "burned_farmstead": 1,
+        "gallows_crossroads": 1,
+        "watchtower_ruin": 1,
+        "siege_camp_leftovers": 1,
+        "bone_pit": 3,
+        "cultist_altar": 3,
+        "hanging_sign_inn": 1,
+        "blighted_orchard": 3,
+        "warband_totem": 3,
+        "ash_wisp_crater": 3,
+        "chained_tree": 3,
+        "old_battlefield": 1,
+        "trapper_lines": 1
+      }
+    },
+    "holy_ground": {
+      "name": "Holy ground",
+      "status": "ready",
+      "feel": "Shrines and pilgrims, a monastery on the hill, a relic treasure chain.",
+      "biomes": [
+        "grassland",
+        "hills",
+        "shrubland"
+      ],
+      "extras": {
+        "monastery": 1,
+        "shrines": [
+          2,
+          4
+        ],
+        "pilgrimRoad": true,
+        "relicChain": 1
+      },
+      "event": "the_procession",
+      "families": {
+        "undead": 2.5,
+        "humanoid": 2,
+        "beast": 1.5
+      },
+      "monsters": [
+        "gallows_owl",
+        "barrow_hound",
+        "sky_cultist",
+        "hollow_wraith",
+        "moor_hound",
+        "carrion_moth"
+      ],
+      "dungeonFamilies": [
+        "crypt_spiral",
+        "sunken_temple"
+      ],
+      "music": "chant_and_wind",
+      "weather": {
+        "clear": 4,
+        "cloud": 3,
+        "fog": 2,
+        "rain": 1
+      },
+      "vignetteWeights": {
+        "drowned_shrine": 1,
+        "stone_circle_hum": 3,
+        "drowned_chapel": 1,
+        "witch_stump": 1,
+        "beekeeper_hives": 1,
+        "hermits_hollow": 1,
+        "fairy_ring": 1,
+        "bone_pit": 1,
+        "cultist_altar": 1,
+        "miners_shrine": 1,
+        "chained_tree": 1,
+        "pilgrim_camp": 3,
+        "roadside_shrine": 3,
+        "ruined_bell_tower": 3,
+        "sunken_stair": 1,
+        "antlered_skull": 1,
+        "goblin_market_stones": 1
+      }
+    },
+    "mine_country": {
+      "name": "Mine country",
+      "status": "ready",
+      "feel": "Hills and shafts, a mining town, ore-rich ground, the odd collapse.",
+      "biomes": [
+        "hills",
+        "grassland",
+        "temperateForest"
+      ],
+      "extras": {
+        "miningTown": 1,
+        "smallShafts": [
+          2,
+          3
+        ],
+        "oreRich": true
+      },
+      "event": "the_collapse",
+      "families": {
+        "beast": 2.5,
+        "construct": 2,
+        "humanoid": 1.5,
+        "aberration": 1
+      },
+      "monsters": [
+        "cairn_rat",
+        "ironback_beetle",
+        "shale_warden",
+        "sporecap_walker",
+        "road_brigand",
+        "crag_hyena"
+      ],
+      "dungeonFamilies": [
+        "mine_descent",
+        "cave_river"
+      ],
+      "music": "pick_and_lamp",
+      "weather": {
+        "cloud": 4,
+        "clear": 3,
+        "rain": 2,
+        "fog": 1
+      },
+      "vignetteWeights": {
+        "dry_well": 1,
+        "collapsed_mine_mouth": 3,
+        "giants_cookfire": 1,
+        "hermits_hollow": 1,
+        "quarry_ledge": 3,
+        "ore_cart_spill": 3,
+        "miners_shrine": 3,
+        "frozen_tarn": 1,
+        "avalanche_shelter": 1,
+        "peat_cutters": 1,
+        "charcoal_clamps": 1,
+        "woodcutter_axe": 1
+      }
+    },
+    "coast": {
+      "name": "Coast",
+      "status": "ready",
+      "feel": "Cliffs and harbours, smugglers' coves, wrecks on the rocks, a sea-cave.",
+      "biomes": [
+        "beach",
+        "coast",
+        "grassland"
+      ],
+      "extras": {
+        "portTown": 1,
+        "smugglersCoves": [
+          1,
+          2
+        ],
+        "wrecks": [
+          1,
+          3
+        ],
+        "seaCave": 1
+      },
+      "event": "the_wreckers_night",
+      "families": {
+        "beast": 2.5,
+        "humanoid": 2.5,
+        "aberration": 1
+      },
+      "monsters": [
+        "silt_lurker",
+        "reed_serpent",
+        "brigand_archer",
+        "brigand_captain",
+        "fen_croaker",
+        "carrion_moth"
+      ],
+      "dungeonFamilies": [
+        "flooded_cistern",
+        "cave_river"
+      ],
+      "music": "gulls_and_surf",
+      "weather": {
+        "clear": 3,
+        "cloud": 3,
+        "rain": 3,
+        "fog": 2
+      },
+      "vignetteWeights": {
+        "smugglers_cellar": 1,
+        "stone_circle_hum": 1,
+        "drowned_chapel": 1,
+        "smugglers_cove": 3,
+        "wreck_on_the_rocks": 3,
+        "dark_lighthouse": 3,
+        "stilt_house": 1,
+        "ferry_landing": 1,
+        "market_cross": 1,
+        "sewer_grate": 1,
+        "hanging_sign_inn": 1,
+        "old_battlefield": 1
+      }
+    }
+  }
+}

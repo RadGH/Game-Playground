@@ -10,6 +10,7 @@ import { createWorld } from './world.js';
 import { createMemoryStore } from './store-memory.js';
 import { loadZoneTerrain, standInTerrain } from './terrain.js';
 import { startTicker, realClock } from '../net/clock.js';
+import { loadZoneContent } from './content.js';
 
 const conns = new Map();   // id -> handler
 let world = null;
@@ -34,7 +35,8 @@ async function boot() {
     try { createRules = (await import('../rules/index.js')).createRules; } catch { /* stream C not landed yet */ }
   }
   if (typeof createRules !== 'function') createRules = (await import('./rules-v0.js')).createRules;
-  const w = createWorld({ store: createMemoryStore(), terrain, createRules, classes, now: realClock.now, log: (...a) => console.log('[sim]', ...a), lingerMs: 3000 });
+  const content = await loadZoneContent(async f => (await fetch(new URL('../../' + f, import.meta.url))).json(), zone);
+  const w = createWorld({ store: createMemoryStore(), terrain, createRules, classes, zoneSheet: content.sheet, encounterInfo: content.encounterInfo, vignettes: content.vignettes, now: realClock.now, log: (...a) => console.log('[sim]', ...a), lingerMs: 3000 });
   await w.init();
   startTicker(() => w.step(), { ms: 50, clock: realClock, onSkip: k => w.tickStats.skip(k) });
   world = w;

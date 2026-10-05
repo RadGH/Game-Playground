@@ -1,0 +1,48 @@
+{
+  "id": "mb_gallowmother",
+  "name": "The Gallowmother",
+  "tier": "miniboss",
+  "body": "gallows_owl",
+  "place": "dungeon crypt_spiral: floor 2's mini-boss (the last ring room, 24 m square)",
+  "_doc": "Stream E. A huge owl nesting in the burial ring. P1: dives on whoever she fancies (the circle leads the target — keep moving), a feather storm you dodge by getting under her, and an interruptible hoot that fears the whole room. P2 at 45% 'The Roost': she takes to her perch behind a ward of feathers while owlets mob you; kill them to bring her down. Two gibbet posts give cover from her hoot if it gets off. Soft enrage from 3 minutes.",
+  "party": "Solo: hard in the Roost (3 owlet adds) — bring a follower. 2-3: intended. 5: the dive/feather storm are easy; two gibbet posts are too little cover for five if the hoot lands. M5 scaling: owlets 3 -> 2 solo / 4 at five; add a third post at five.",
+  "hpMult": 2,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      { "id": "gibbet_a", "type": "pillar", "name": "Gibbet post", "x": -6, "z": 5, "r": 1, "hp": 2 },
+      { "id": "gibbet_b", "type": "pillar", "name": "Gibbet post", "x": 6, "z": -5, "r": 1, "hp": 2 }
+    ]
+  },
+  "say": {
+    "pull": ["A pair of lamp-yellow eyes opens in the dark above you.", "Something enormous shifts its feathers. Bones rattle down from the rafters."],
+    "death": "The Gallowmother tumbles from the dark in a storm of grey feathers.",
+    "reset": "Feathers settle. The eyes close again."
+  },
+  "enrage": { "seconds": 300, "damage": 2.5, "say": "The Gallowmother shrieks and tears at everything in reach!", "soft": { "from": 180, "every": 15, "add": 0.08, "say": "She is getting angrier." } },
+  "abilities": {
+    "talons": { "id": "talons", "name": "Raking Talons", "every": [6, 8], "range": 5,
+      "telegraphs": [ { "shape": "cone", "at": "self", "r": 4.5, "arc": 1.5, "wind": 0.9, "damage": 1.5, "status": "bleed" } ] },
+    "dive": { "id": "dive", "name": "Silent Dive", "every": [11, 14], "first": 4, "cast": 0.6,
+      "say": "She drifts up into the dark... {target}, keep moving!",
+      "telegraphs": [ { "shape": "circle", "at": "random", "r": 3, "wind": 1.4, "lead": 8, "damage": 1.9, "knock": 2 } ] },
+    "feather_storm": { "id": "feather_storm", "name": "Feather Storm", "every": [15, 18], "first": 9, "cast": 0.8,
+      "say": "Her wings spread wide — get underneath her!",
+      "telegraphs": [ { "shape": "donut", "at": "self", "r": 12, "r2": 3, "wind": 1.8, "damage": 2 } ] },
+    "hoot": { "id": "hoot", "name": "Dreadful Hoot", "every": [24, 28], "first": 14, "cast": 2.5, "interrupt": true,
+      "say": "The Gallowmother puffs up to hoot — interrupt her or hide behind a post!",
+      "onInterrupt": [ { "say": "Her hoot cracks into a squawk.", "style": "emote" } ],
+      "telegraphs": [ { "shape": "circle", "at": "self", "r": 12, "wind": 0.5, "damage": 0.8, "los": true, "status": "fear", "element": "shadow" } ] },
+    "owlet_swoop": { "id": "owlet_swoop", "name": "Owlets Swoop", "every": [7, 9], "first": 2,
+      "telegraphs": [ { "shape": "circle", "at": "random", "r": 2.4, "count": 2, "delay": 0.4, "wind": 1.3, "damage": 1 } ] }
+  },
+  "phases": [
+    { "name": "Hunting", "abilities": ["talons", "dive", "feather_storm", "hoot"] },
+    { "name": "The Roost", "at": 0.45, "say": "The Gallowmother flaps up to her roost. Her owlets answer!",
+      "shieldWhileAdds": true, "shieldDown": "The last owlet falls — the Gallowmother drops from her perch, furious!",
+      "abilities": ["owlet_swoop", "hoot"],
+      "onEnter": [ { "shield": true }, { "adds": { "type": "gallows_owl", "count": 3, "radius": 7 } } ] },
+    { "name": "Grounded", "at": 0.3, "say": "Feathers everywhere. She will not fly again.", "abilities": ["talons", "dive", "feather_storm", "hoot"],
+      "onEnter": [ { "modifier": { "id": "grounded_fury", "dmg": 1.2, "exact": true } } ] }
+  ]
+}

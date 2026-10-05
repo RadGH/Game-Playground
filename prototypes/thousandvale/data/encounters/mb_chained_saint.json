@@ -1,0 +1,51 @@
+{
+  "id": "mb_chained_saint",
+  "name": "The Chained Saint",
+  "tier": "miniboss",
+  "body": "stone_sentinel",
+  "place": "dungeon crypt_spiral SET B: floor 2's mini-boss (the last ring room, 24 m square)",
+  "_doc": "Stream E (M2). A statue of a saint the monks chained down — for good reason. Four chain posts hold it; they also give cover from its Gaze (line of sight). Its Shackle Pull drags the farthest player in. P2 'Grave Flood' at 45%: grave-water rises in pools that STAY (chill + damage), so the room shrinks; when the floor floods it calls 'climb the plinths' — two safe circles at the old plinths.",
+  "party": "Solo: fine with care — the Gaze is the killer, keep a post between you. 2-3: spread around posts so the pull only drags one. 5: posts crowd; plinth safe spots fit ~3 each. M5 scaling: more posts or wider plinths at five; fewer flood pools solo.",
+  "hpMult": 2.3,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      { "id": "post_nw", "type": "pillar", "name": "Chain post", "x": -6, "z": -6, "r": 1, "hp": 2 },
+      { "id": "post_ne", "type": "pillar", "name": "Chain post", "x": 6, "z": -6, "r": 1, "hp": 2 },
+      { "id": "post_sw", "type": "pillar", "name": "Chain post", "x": -6, "z": 6, "r": 1, "hp": 2 },
+      { "id": "post_se", "type": "pillar", "name": "Chain post", "x": 6, "z": 6, "r": 1, "hp": 2 }
+    ]
+  },
+  "say": {
+    "pull": ["Stone grinds. The chained statue turns its head toward you.", "The chains go taut. The Saint has noticed you."],
+    "death": "The Saint cracks from crown to plinth and the chains finally go slack.",
+    "reset": "The Saint settles, stone-still, chains clinking."
+  },
+  "enrage": { "seconds": 300, "damage": 2.5, "say": "The Saint tears its chains free of the floor!", "soft": { "from": 180, "every": 15, "add": 0.08, "say": "The water is still rising." } },
+  "abilities": {
+    "chain_lash": { "id": "chain_lash", "name": "Chain Lash", "every": [6, 8], "range": 5,
+      "telegraphs": [ { "shape": "cone", "at": "self", "r": 5, "arc": 1.5, "wind": 1.0, "damage": 1.7 } ] },
+    "shackle_pull": { "id": "shackle_pull", "name": "Shackle Pull", "every": [12, 15], "first": 4, "cast": 0.6,
+      "say": "A chain whips out toward {target}!",
+      "telegraphs": [ { "shape": "line", "at": "self", "len": 13, "w": 2, "wind": 1.2, "damage": 0.9, "knock": 5, "pull": true, "status": "root" } ] },
+    "gaze": { "id": "gaze", "name": "Saint's Gaze", "every": [22, 26], "first": 10, "cast": 2.5,
+      "say": "The Saint's eyes kindle — get behind a chain post!",
+      "telegraphs": [ { "shape": "circle", "at": "self", "r": 12, "wind": 0.6, "damage": 2.5, "los": true, "element": "holy" } ] },
+    "flood": { "id": "flood", "name": "Grave Water Rises", "every": [12, 15], "first": 2, "cast": 0.6,
+      "say": "Black water wells up through the flagstones.",
+      "telegraphs": [ { "shape": "circle", "at": "scatter", "spread": 8, "r": 2.2, "count": 2, "delay": 0.4, "wind": 1.5, "damage": 0.9, "status": "chill", "element": "ice",
+        "leave": { "type": "pool", "name": "Grave water", "r": 2, "every": 1, "seconds": 9999, "damage": 0.25, "status": "chill", "element": "ice" } } ] },
+    "plinths": { "id": "plinths", "name": "The Flood", "every": [26, 30], "first": 14, "cast": 1.5,
+      "say": "The whole floor floods — climb onto the plinths!",
+      "telegraphs": [
+        { "shape": "circle", "at": "home", "offset": [-8, 0], "r": 2.6, "wind": 3.5, "kind": "safe", "damage": 2.2 },
+        { "shape": "circle", "at": "home", "offset": [8, 0], "r": 2.6, "wind": 3.5, "kind": "safe", "damage": 2.2 } ] }
+  },
+  "phases": [
+    { "name": "Bound", "abilities": ["chain_lash", "shackle_pull", "gaze"] },
+    { "name": "Grave Flood", "at": 0.45, "say": "Water pours from the Saint's stone eyes.", "abilities": ["chain_lash", "flood", "plinths", "shackle_pull"] }
+  ],
+  "triggers": [
+    { "when": { "broken": 4 }, "do": [ { "say": "Every chain post is down. Nothing stands between you and its gaze.", "style": "warn" } ] }
+  ]
+}

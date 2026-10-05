@@ -1,0 +1,137 @@
+{
+  "name": "z13_04",
+  "zone": "z13_04",
+  "sheet": {
+    "sheet": "torbor_downs",
+    "zone": "gorse_march"
+  },
+  "province": {
+    "id": 10,
+    "name": "Petbeck Basin"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 2,
+  "inputHash": "d1f5fae1",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9803699e"
+    },
+    "zone": {
+      "zx": 13,
+      "zy": 4
+    },
+    "worldOrigin": {
+      "x": 26624,
+      "z": 8192
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [
+    {
+      "id": 5,
+      "name": "The Pimamouth"
+    }
+  ],
+  "sites": [
+    {
+      "type": "landmark",
+      "kind": "volcano",
+      "name": "The Becktack Forge",
+      "x": 960,
+      "z": 1984
+    },
+    {
+      "type": "lair",
+      "kind": "dungeon",
+      "name": "The Fitfe Undercroft",
+      "x": 1472,
+      "z": 704
+    },
+    {
+      "type": "lair",
+      "kind": "lair",
+      "name": "The Hitindack Lair",
+      "x": 64,
+      "z": 960
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 1357,
+      "z": 579,
+      "yaw": 1.016
+    },
+    {
+      "type": "event",
+      "id": "event_gorse_march",
+      "x": 1218,
+      "z": 1071,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 1024,
+    "z": 1024
+  },
+  "summary": {
+    "zone": "z13_04",
+    "province": "Petbeck Basin",
+    "inputHash": "d1f5fae1",
+    "rivers": 1,
+    "wetShare": 0.004,
+    "unwalkableShare": 0.166,
+    "towns": [],
+    "roads": 0,
+    "bridges": 0,
+    "scatter": 7536,
+    "scatterKinds": {
+      "rock_small": 2789,
+      "bush": 1698,
+      "tree_acacia": 321,
+      "tree_broadleaf": 19,
+      "rock_large": 1809,
+      "boulder": 458,
+      "tree_dead": 170,
+      "tree_conifer": 272
+    },
+    "sites": [
+      "landmark volcano The Becktack Forge 960 1984",
+      "lair dungeon The Fitfe Undercroft 1472 704",
+      "lair lair The Hitindack Lair 64 960",
+      "dungeon door_1 Barrow entrance 1357 579  1.016",
+      "event event_gorse_march  1218 1071 40"
+    ],
+    "spawn": {
+      "x": 1024,
+      "z": 1024
+    },
+    "placements": 5,
+    "vignettesAvoided": 0
+  },
+  "files": {
+    "terrain.bin": 6305690,
+    "nav.bin": 1050717,
+    "scatter.bin": 60372,
+    "placements.json": 1466
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "id": "rare_ferryman_odo",
+  "name": "Ferryman Odo",
+  "tier": "rare",
+  "zone": "gullwick",
+  "body": "hollow_wraith",
+  "place": "poles a boat nobody else can see between Gullwick and Ferry Hythe, and wants his fare",
+  "_doc": "Stream E (M2). A drowned ferryman. He asks a fare of everyone together — a STACK: all of you in one circle splits the cost. His pole sweeps a wide cone, and at half health the lake rises: safe circles of dry ground, everything else is cold water.",
+  "party": {
+    "solo": "Solo: the fare is heavy alone (need 3) — save a defensive skill for it.",
+    "small": "Workable at 2-3; the fare still hits hard at 2.",
+    "full": "Easy — this is a fight that wants a crowd.",
+    "m5": "M5 lowers the fare's `need` to the party size (minimum 1)."
+  },
+  "hpMult": 1.9,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "\"Fare, please.\" The voice comes up out of the water.",
+      "A pole taps the shore. \"Crossing? It's one coin. Each. Forever.\""
+    ],
+    "death": "Ferryman Odo sinks into the lake, finally off duty.",
+    "reset": "Odo poles away into the mist."
+  },
+  "abilities": {
+    "pole": {
+      "id": "pole",
+      "name": "Pole Slam",
+      "every": [
+        7,
+        9
+      ],
+      "range": 20,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 3,
+          "knock": 2,
+          "wind": 1.2,
+          "damage": 1.6
+        }
+      ]
+    },
+    "fare": {
+      "id": "fare",
+      "name": "Everyone's Fare",
+      "every": [
+        18,
+        22
+      ],
+      "first": 5,
+      "cast": 1,
+      "say": "\"Fare's due!\" — huddle with {target}, all of you!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.2,
+          "kind": "stack",
+          "need": 3,
+          "follow": true,
+          "element": "ice",
+          "wind": 4,
+          "damage": 3
+        }
+      ]
+    },
+    "chill": {
+      "id": "chill",
+      "name": "Lake Chill",
+      "every": [
+        12,
+        15
+      ],
+      "first": 8,
+      "cast": 0.4,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 3,
+          "element": "ice",
+          "status": "chill",
+          "wind": 1.3,
+          "damage": 1.2
+        }
+      ]
+    },
+    "flood": {
+      "id": "flood",
+      "name": "Rising Water",
+      "every": [
+        20,
+        24
+      ],
+      "first": 3,
+      "cast": 1.2,
+      "say": "The lake rises — get onto dry ground!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3.5,
+          "spread": 10,
+          "count": 3,
+          "kind": "safe",
+          "wind": 3,
+          "damage": 2.4
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Fares",
+      "abilities": [
+        "pole",
+        "fare",
+        "chill"
+      ]
+    },
+    {
+      "name": "High Water",
+      "at": 0.5,
+      "say": "\"No fare, no crossing. No crossing... no land.\"",
+      "abilities": [
+        "pole",
+        "flood",
+        "fare",
+        "chill"
+      ]
+    }
+  ]
+}

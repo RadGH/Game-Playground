@@ -31,13 +31,15 @@ export function createRoom(opts) {
   const bounds = terrain.bounds;
   const size = Math.max(bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ);
   const q = Math.max(VIEW.q, size / 65535);
-  const grid = createGrid(size, { x: bounds.minX, z: bounds.minZ });
+  // a town room only ever holds its own circle: its grid covers that, not the whole province
+  const ga = opts.gridArea;
+  const grid = ga ? createGrid(2 * ga.r, { x: ga.x - ga.r, z: ga.z - ga.r }) : createGrid(size, { x: bounds.minX, z: bounds.minZ });
   const entities = new Map();
   const clients = new Map();       // entity id -> client
   const streams = new Map();
   const despawns = [];             // { at, e }
   let tick = 0, nextId = 1, events = [], uidN = 0;
-  const awake = new Uint32Array(grid.cells.length);   // == awakeGen when awake this tick
+  const awake = new Uint32Array(grid.count);   // == awakeGen when awake this tick
   let awakeGen = 0;
   const stats = { rulesErrors: 0, lastRulesError: '', spawned: 0 };
   const writer = new ByteWriter(4096), snapWriter = new ByteWriter(2048);
@@ -60,17 +62,19 @@ export function createRoom(opts) {
     /** Emit an event to clients (§6); the rules' `loot` events are turned into grants (hooks.loot). */
     event(ev) {
       if (ev.type === 'loot' && ev.items && hooks.loot) { hooks.loot(ev, room); return; }
+      if (hooks.observe) { if (ev.x === undefined) fillXZ(ev); hooks.observe(ev, room); }
       room.emit(ev);
     },
     /** Emit without interception (the world's own loot events). */
     emit(ev) {
-      if (ev.x === undefined) {
-        const ref = entities.get(ev.d) || entities.get(ev.s) || entities.get(ev.to);
-        if (ref) { ev.x = ref.x; ev.z = ref.z; }
-      }
+      if (ev.x === undefined) fillXZ(ev);
       events.push(ev);
     },
   };
+  function fillXZ(ev) {
+    const ref = entities.get(ev.d) || entities.get(ev.s) || entities.get(ev.id) || entities.get(ev.to);
+    if (ref) { ev.x = ref.x; ev.z = ref.z; }
+  }
 
   // ---- the host the rules module sees (docs/protocol.md §7.1) ----
   const host = {
@@ -90,6 +94,7 @@ export function createRoom(opts) {
     despawn(e, delayMs = 0) { if (delayMs > 0) despawns.push({ at: room.now() + delayMs, e }); else room.remove(e); },
     award: (e, a) => room.award(e, a),
     newUid: () => (hooks.newUid ? hooks.newUid() : id + ':' + (++uidN)),
+    terrain,                       // the room's terrain; `terrain.reader` = B's reader for a baked zone (groundAdapter)
     safeZones,
     inSafeZone(x, z) { for (const c of safeZones) if ((x - c.x) ** 2 + (z - c.z) ** 2 <= c.r * c.r) return true; return false; },
     kind,
@@ -118,15 +123,18 @@ export function createRoom(opts) {
     entities.set(e.id, e);
     grid.add(e);
     stats.spawned++;
+    if (e.kind === 'object' || (e.kind === 'npc' && e.data)) room.objects.set(e.id, e);      // also rules-spawned arena objects; NPCs you can talk to
     safe('addEntity', e);
     return e;
   };
+  room.objects = new Map();
   room.remove = function (e) {
     if (e.removed) return;
     e.removed = true;
     safe('removeEntity', e);
     grid.remove(e);
     entities.delete(e.id);
+    room.objects.delete(e.id);
     clients.delete(e.id);
   };
 
@@ -197,7 +205,7 @@ export function createRoom(opts) {
     }
     if (c && c.you) c.you({ xp: ch.xp, level: ch.level, gold: ch.gold, xpNext: rules.xpFor ? safe('xpFor', (ch.level || 1) + 1) : undefined, hpMax: e.hpMax, mpMax: e.mpMax });
     hooks.dirty && hooks.dirty(ch, urgent);
-    if (hooks.award) hooks.award(e, { gold, items: items || [], reason, from });
+    if (hooks.award) hooks.award(e, { gold, xp, level: ch.level, items: items || [], reason, from });
   };
 
   // ---- camps (monster spawners) ----
@@ -208,16 +216,18 @@ export function createRoom(opts) {
       const tx = c.x + Math.cos(a) * r, tz = c.z + Math.sin(a) * r;
       if (room.walkable(tx, tz)) { x = tx; z = tz; break; }
     }
-    const m = room.spawn({ kind: 'monster', type: c.type, level: c.level || 1, x, z, yaw: host.random('spawn') * 6.283, rank: c.rank || 'normal', state: c.rank && c.rank !== 'normal' ? STATE.elite : 0 });
+    const m = room.spawn({ kind: 'monster', type: c.type, level: c.level || 1, x, z, yaw: host.random('spawn') * 6.283, rank: c.rank || 'normal', state: c.rank && c.rank !== 'normal' ? STATE.elite : 0, name: c.name || (c.encounter && opts.encounterInfo && opts.encounterInfo[c.encounter] ? opts.encounterInfo[c.encounter].name : undefined), data: c.encounter ? { encounter: c.encounter } : null });
     c.live.add(m.id);
   }
+  /** A camp's respawn delay: a number, or [min, max] picked on the room's 'spawn' stream (rares: 20-60 min). */
+  function respawnOf(c) { const r = c.respawnMs ?? 30000; return Array.isArray(r) ? r[0] + host.random('spawn') * (r[1] - r[0]) : r; }
   function fillCamps(now, initial = false) {
     for (const c of campState) {
       for (const idd of c.live) { const m = entities.get(idd); if (!m || m.dead) c.live.delete(idd); }
       if (initial) { while (c.live.size < c.count) spawnInCamp(c); continue; }
       if (c.live.size >= c.count) { c.nextAt = 0; continue; }
-      if (!c.nextAt) c.nextAt = now + (c.respawnMs ?? 30000);
-      if (now >= c.nextAt) { spawnInCamp(c); c.nextAt = c.live.size < c.count ? now + (c.respawnMs ?? 30000) : 0; }
+      if (!c.nextAt) c.nextAt = now + respawnOf(c);
+      if (now >= c.nextAt) { spawnInCamp(c); c.nextAt = c.live.size < c.count ? now + respawnOf(c) : 0; }
     }
   }
   room.camps = campState;
@@ -298,12 +308,12 @@ export function createRoom(opts) {
   function encodeCell(cell, band, full) {
     writer.reset();
     const fulls = full ? null : new Set();
-    for (const e of grid.cells[cell]) {
-      if (full) { encodeRecord(writer, e, F.FULL, q); continue; }
+    for (const e of grid.at(cell)) {
+      if (full) { encodeRecord(writer, e, F.FULL, q, bounds.minX, bounds.minZ); continue; }
       const d = e.dirty[band];
       if (!d) continue;
       if (d & F.FULL) fulls.add(e.id);
-      encodeRecord(writer, e, d, q);
+      encodeRecord(writer, e, d, q, bounds.minX, bounds.minZ);
     }
     return { bytes: writer.out(), fulls };
   }
@@ -341,7 +351,7 @@ export function createRoom(opts) {
             const ci = cz * cols + cx;
             const dx = ox + (cx + 0.5) * cell - me.x, d2 = dx * dx + dz2;
             if (d2 > R2 && ci !== myCell) continue;
-            if (!grid.cells[ci].size && !c.cellBand.has(ci)) continue;
+            if (!grid.at(ci).size && !c.cellBand.has(ci)) continue;
             let v = viewTmp[nv];
             if (!v) v = viewTmp[nv] = { ci: 0, d: 0, band: 0 };
             v.ci = ci; v.d = d2; v.band = d2 <= b0 ? 0 : d2 <= b1 ? 1 : 2;
@@ -354,7 +364,7 @@ export function createRoom(opts) {
       const inView = new Map();
       let count = 0;
       for (const v of viewTmp) {
-        const n = grid.cells[v.ci].size;
+        const n = grid.at(v.ci).size;
         if (count + n > VIEW.cap && inView.size) break;
         count += n; inView.set(v.ci, v.band);
       }
@@ -375,15 +385,15 @@ export function createRoom(opts) {
           if (dc.bytes.length) chunks.push(dc.bytes);
           fulls = dc.fulls;
         }
-        for (const e of grid.cells[ci]) {
+        for (const e of grid.at(ci)) {
           const k = c.known.get(e.id);
           if (!k) {
-            if (!fullSent && !fulls.has(e.id)) { extra ||= new ByteWriter(64); encodeRecord(extra, e, F.FULL, q); }
+            if (!fullSent && !fulls.has(e.id)) { extra ||= new ByteWriter(64); encodeRecord(extra, e, F.FULL, q, bounds.minX, bounds.minZ); }
             c.known.set(e.id, { e, ver: e.infoVer });
             newInfo.push(e.info());
           } else if (k.e !== e) {   // id reused after a despawn: treat as new
             c.known.set(e.id, { e, ver: e.infoVer }); newInfo.push(e.info());
-            if (!fullSent && !fulls.has(e.id)) { extra ||= new ByteWriter(64); encodeRecord(extra, e, F.FULL, q); }
+            if (!fullSent && !fulls.has(e.id)) { extra ||= new ByteWriter(64); encodeRecord(extra, e, F.FULL, q, bounds.minX, bounds.minZ); }
           } else if (k.ver !== e.infoVer) { k.ver = e.infoVer; newInfo.push(e.info()); }
         }
       }
@@ -406,17 +416,25 @@ export function createRoom(opts) {
       if (c.bytesOut !== undefined) c.bytesOut += frame.length;
     }
     // clear the dirty bits that were just encoded for each band
-    for (const dc of deltaCache.values()) for (const e of grid.cells[dc.ci]) e.dirty[dc.band] = 0;
+    for (const dc of deltaCache.values()) for (const e of grid.at(dc.ci)) e.dirty[dc.band] = 0;
     // bands nobody looked at keep accumulating; a FULL record goes out when someone starts looking
   }
   function stripTo(ev) { const o = { ...ev }; delete o.to; return o; }
 
-  // objects: portals, stairs, exits, chests (team 0: nobody fights them)
-  room.objects = new Map();
+  // objects: portals, stairs, exits, chests, gates, levers, arena props (team 0: nobody fights them)
   for (const o of objects) {
-    const e = room.spawn({ kind: 'object', type: o.type, name: o.name || o.type, x: o.x, z: o.z, yaw: o.yaw || 0, team: 0, data: { portal: o.portal || null, chest: o.chest || null } });
-    room.objects.set(e.id, e);
+    const npc = o.type === 'npc';
+    room.spawn({ kind: npc ? 'npc' : 'object', type: o.type, name: o.name || o.type, x: o.x, z: o.z, yaw: o.yaw || 0, team: npc ? 1 : 0, state: npc ? STATE.friendly : 0,
+      data: { portal: o.portal || null, chest: o.chest || null, gate: o.gate || null, lever: o.lever || null, rules: !!o.rules, key: o.key || null, r: o.r || null, state: o.state || null, room: o.room ?? null,
+        note: o.note || null, use: o.use || null, npc: o.npc || null, hidden: !!o.hidden, hint: o.hint || null, lore: o.lore || null, waystone: o.waystone || null, schedule: o.schedule || null } });
   }
+  /** Change an object's state (lit, used, broken, open…): late joiners see it in `info`, everyone near gets `obj`. */
+  room.objState = function (o, state, extra = {}) {
+    o.data = { ...(o.data || {}), state };
+    o.infoVer++;
+    room.emit({ type: 'obj', id: o.id, state, x: o.x, z: o.z, ...extra });
+  };
+  host.objState = room.objState;
   /** The object `objId` if `e` stands within reach of it. */
   room.objectNear = function (e, objId, reach = 4) {
     const o = room.objects.get(objId);

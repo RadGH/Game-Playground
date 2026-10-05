@@ -8,6 +8,7 @@
 
 import * as THREE from 'three';
 import { KIND } from '../../sim/modes/hvf/mapgen.js';
+import { createNatureLayer, natureMaterial } from '../hvf-nature.js';
 
 export const PLATEAU_H = 3.2;   // metres a plateau stands above the ground
 const WATER_Y = -0.12;
@@ -42,7 +43,9 @@ export function groundY(map, x, z) {
   return Math.max(0, cellHeight(map, i));
 }
 
-export function createHvfWorld(scene, map) {
+/** opts.nature (default true): stream C's chunked forest (js/view/hvf-nature.js: 3 tree looks, near/far detail,
+ *  chop shake + stumps, reeds, ford stones, cliff boulders) instead of the built-in instanced buckets. */
+export function createHvfWorld(scene, map, { nature = true } = {}) {
   const group = new THREE.Group();
   group.name = 'hvf-world';
   scene.add(group);
@@ -176,7 +179,14 @@ export function createHvfWorld(scene, map) {
 
   const isTree = (x, z) => x < 0 || z < 0 || x >= cols || z >= rows || map.cells[z * cols + x] === KIND.tree;
   const buckets = { edge: [], inner: [], broad: [], rock: [], briar: [], tuft: [] };
-  for (let z = 0; z < rows; z++) for (let x = 0; x < cols; x++) {
+  let layer = null;
+  if (nature) {
+    try {
+      const nm = fogify(natureMaterial()); nm.needsUpdate = true;
+      layer = createNatureLayer(scene, map, { KIND, groundY, material: nm });
+    } catch (err) { console.warn('hvf nature layer unavailable, using the built-in trees', err); layer = null; }
+  }
+  for (let z = 0; z < rows && !layer; z++) for (let x = 0; x < cols; x++) {
     const i = z * cols + x, k = map.cells[i];
     if (k === KIND.tree) {
       const inner = isTree(x + 1, z) && isTree(x - 1, z) && isTree(x, z + 1) && isTree(x, z - 1) && isTree(x + 1, z + 1) && isTree(x - 1, z - 1);
@@ -232,6 +242,7 @@ export function createHvfWorld(scene, map) {
   const zero = new THREE.Matrix4().makeScale(0, 0, 0);
   /** Hide trees / briar cut since the last call (state.hvf.chopped is sorted, so compare by set). */
   function syncChopped(list) {
+    if (layer) { if (list.length !== choppedSeen) { choppedSeen = list.length; layer.syncChopped(list); } return; }
     if (list.length === choppedSeen) return;
     choppedSeen = list.length;
     const touched = new Set();
@@ -246,12 +257,16 @@ export function createHvfWorld(scene, map) {
   }
 
   return {
-    group, fogify, setFog, syncChopped, meshes,
+    group, fogify, setFog, syncChopped, meshes, nature: layer,
+    /** Per viewport, before it draws: the forest's near/far detail and culling for this camera. */
+    update(camera, dt = 0) { layer?.update(camera, dt); },
+    /** A tree being cut: 0..1 (it shakes and leans), 1 = gone (stump + log). */
+    chop(cell, k) { layer?.chop(cell, k); },
     /** Draw with this team's fog (call before rendering a viewport). */
     useTeam(team) { fogUniforms.uFogTex.value = fogTexes[team]; },
     get fogOn() { return fogOn; },
     setFogOn(v) { fogOn = !!v; fogUniforms.uFogOn.value = fogOn ? 1 : 0; },
     bounds: { x0: 0, x1: cols * cell, z0: 0, z1: rows * cell },
-    dispose() { scene.remove(group); for (const d of disposables) d.dispose(); for (const m of Object.values(meshes)) m.dispose(); for (const t of fogTexes) t.dispose(); },
+    dispose() { scene.remove(group); for (const d of disposables) d.dispose(); for (const m of Object.values(meshes)) m.dispose(); for (const t of fogTexes) t.dispose(); layer?.dispose(); },
   };
 }

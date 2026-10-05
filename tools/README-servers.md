@@ -81,6 +81,9 @@ The rules that matter (full list: `prototypes/thousandvale/ops/SECURITY.md`):
 
 * **Never** put `tools/serve.py`, 8400 or 8401 behind a tunnel — serve.py accepts POSTs that write files.
 * The public server serves only its published folder, never the playground root.
+* **The dev unit does not reload code.** After stream A changes `server/` or `js/sim`/`js/net`, run
+  `systemctl --user restart thousandvale-dev` — a protocol bump makes the old process refuse every new client
+  ("refused" in the page). The tests start their own server on a free port, so they never hit a stale one.
 * Bots and Playwright run against **8491**, like the playground suite runs against 8401.
 * The terrain viewer and other `tools/` pages of Thousandvale are dev pages: open them on 8401
   (`/prototypes/thousandvale/tools/terrain-viewer.html`); the game server does not serve `tools/`.

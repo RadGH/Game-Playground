@@ -24,7 +24,7 @@ import {
   applyStatus, tickStatuses, slowOf, incomingFrom, outgoingFrom, groundAt, wetAt, cliffStep,
   climbable, crossesWall, COMBAT_FEEL,
 } from './farhold.js';
-import { pickTarget, notice as noticeThreat, clearThreat, threatFromDamage } from './threat.js';
+import { pickTarget, notice as noticeThreat, clearThreat, threatFromDamage, taunt as threatTaunt } from './threat.js';
 
 export const AI = {
   LEASH_METRES: 40,
@@ -106,7 +106,15 @@ export function statusOnHit(field, e, target) {
  * A monster's melee swing lands on `victim` (main.js `onEnemyStrike`, line ~9584): Farhold's
  * `rpg.strike` with the buffs both sides carry, life steal, the bite's status. Returns the result.
  */
-export function monsterStrike(field, e, victim, { element = 'physical', ranged = false } = {}) {
+export function monsterStrike(field, e, victim, { element = 'physical', ranged = false, mult = 1, kind = null } = {}) {
+  if (victim?.side === 'foe') {
+    // a monster swinging at another monster (it was hard-taunted by a turned one): actors.js strikes
+    // the body plainly, `rpg.strike(e, object, rng, {})`, and kills it if it drops
+    const res = field.rpg.strike(e, victim, field.rng, {});
+    field.report(e, victim, res, 'bite');
+    if (res.dead) field.kill(victim);
+    return res;
+  }
   if (victim?.kind === 'object') {
     // a taunting post, banner or wall takes the swing (actors.js onEnemyStrikeObject)
     field.hooks?.onObjectStruck?.(e, victim);
@@ -114,13 +122,13 @@ export function monsterStrike(field, e, victim, { element = 'physical', ranged =
     return null;
   }
   // the victim's own skill statuses (wards, counters, "every N hits" bursts) act as the victim
-  const hit = () => field.rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e), element, ranged });
+  const hit = () => field.rpg.strike(e, victim, field.rng, { multiplier: mult * incomingFrom(victim) * outgoingFrom(e), element, ranged });
   const result = field.hooks?.asActor ? field.hooks.asActor(victim, hit) : hit();
   field.hooks?.onHurt?.(result, e, victim);                 // skill wards/counters (cast.js, M1)
   if (e.lifeSteal) e.hp = Math.min(e.maxHp, e.hp + Math.round(result.amount * e.lifeSteal));
   if (e.onHit?.length) statusOnHit(field, e, victim);
   e.lastCombatAt = field.clock;
-  field.report(e, victim, result, ranged ? 'shot' : 'bite');
+  field.report(e, victim, result, kind || (ranged ? 'shot' : 'bite'));
   if (result.dead && victim.hp <= 0) {
     if (victim.kind === 'player') {
       victim.dead = true;
@@ -251,6 +259,30 @@ function nearestFriend(field, e, friends) {
   return { friend: best, dist: bd };
 }
 
+/**
+ * actors.js `aimOf` rules 1 and 2, for companions: whatever bit it in the last few seconds and is
+ * still within THREAT_LEASH holds it; failing that, a companion standing in its way — inside its
+ * reach + THREAT_BLOCK and closer than the player — is what it swings at.
+ */
+export const THREAT_LEASH = 16, THREAT_BLOCK = 1.6;
+function companionAim(e, playerDist, allies, field) {
+  if (!allies.length) return null;
+  const usable = p => p && p.dying == null && !p.removed && (p.hp ?? 1) > 0;
+  if (e.threatFor > 0 && e.threatOn != null) {
+    const held = allies.find(p => p.id === e.threatOn);
+    if (usable(held) && Math.hypot(held.x - e.x, held.z - e.z) <= THREAT_LEASH) return held;
+    e.threatOn = null; e.threatFor = 0;
+  }
+  let best = null, bestD = Math.min(playerDist, (e.reach || 2.4) + THREAT_BLOCK);
+  for (const p of allies) {
+    if (!usable(p)) continue;
+    const d = Math.hypot(p.x - e.x, p.z - e.z);
+    if (d < bestD) { bestD = d; best = p; }
+  }
+  void field;
+  return best;
+}
+
 /** Give up: walk home, heal, forget everybody (the leash). */
 export function resetMonster(field, e) {
   clearThreat(e);
@@ -272,7 +304,11 @@ export function resetMonster(field, e) {
  *   onStrike(e, victim)         override the melee swing (default: monsterStrike)
  */
 export function tickMonsters(field, dt, hooks = {}) {
-  const friends = field.friends().filter(field.usable);
+  // who a monster NOTICES is a player (actors.js measures everything from the player); companions
+  // draw it by biting it or by standing in its way (aimOf rules 1 and 2, below)
+  // (an untargetable player is still THERE: it is noticed and keeps the brain awake, it just is not swung at)
+  const friends = field.players.filter(p => !p.dead && !p.removed && (p.hp ?? 1) > 0);
+  const allies = field.allies;
   const list = [...field.monsters];
   const awakeBands = new Set();
   for (const e of list) {
@@ -356,6 +392,8 @@ export function tickMonsters(field, dt, hooks = {}) {
         let [cx, cz] = clampW(field, nx, nz);
         if (!e.hover) [cx, cz] = unstick(field, cx, cz, (e.reach || 2) * 0.28, e.x, e.z);
         const t = T(field);
+        // Thousandvale: knocked back into a tree or a wall (nav.bin) stops there
+        if (!e.hover && t?.blocked && t.blocked(cx, cz) && !t.blocked(e.x, e.z)) { cx = e.x; cz = e.z; }
         if (!wet(field, cx, cz, e.y) && (e.hover || !t || climbable(t, cx, cz, e.x, e.z, 0, e.y))
           && Math.hypot(cx - e.x, cz - e.z) > step * 0.4) {
           e.x = cx; e.z = cz;
@@ -456,7 +494,9 @@ export function tickMonsters(field, dt, hooks = {}) {
       clearThreat(e);
     }
 
-    // who it is going for: the threat table (Farhold: aimOf)
+    // who it is going for: the threat table (Farhold: aimOf). A companion's bite clock runs down every tick.
+    e.threatFor = Math.max(0, (e.threatFor || 0) - dt);
+    if (e.state !== 'chase' && !e.statuses?.turned) { e.threatOn = null; e.threatFor = 0; }
     let target = null, foe = null;
     if (e.statuses?.turned) {
       e.state = 'chase';
@@ -467,14 +507,25 @@ export function tickMonsters(field, dt, hooks = {}) {
         if (d < bd) { bd = d; foe = o; }
       }
     } else if (e.state === 'chase') {
-      target = pickTarget(e, lookup, field.usable, dt);
+      target = (e.tauntFor > 0 ? null : companionAim(e, dist, allies, field)) || pickTarget(e, lookup, field.usable, dt);
       // woken (pack, band, hit by a DoT) with nothing on the table yet: the nearest friend
-      if (!target && near) { noticeThreat(e, near); target = near; }
+      if (!target && near && field.usable(near)) { noticeThreat(e, near); target = near; }
+    } else if (e.feared && !e.statuses?.fear && e.state === 'flee') {
+      // a fear that runs out THIS tick turns the body back to the chase with something to chase
+      // (Farhold's aimOf answers "the player" for a fleeing body, so its aim is ready either way)
+      target = pickTarget(e, lookup, field.usable, 0) || (field.usable(near) ? near : null);
+      if (target && !e.threat?.has(target.id)) noticeThreat(e, target);
     }
     const aimAt = foe || target || (e.statuses?.turned?.follow ? near : null);
     const adx = aimAt ? aimAt.x - e.x : 0, adz = aimAt ? aimAt.z - e.z : 0;
     const adist = Math.hypot(adx, adz);
     e.aimingAt = target && target.kind !== 'player' ? target : null;
+
+    // an encounter's special or boss ability (js/rules/encounter.js): while it casts, it holds still
+    if (field.hooks?.think && e.state === 'chase' && !e.statuses?.turned && field.hooks.think(e, target, adist, dt)) {
+      e.y = ground(field, e.x, e.z, e.y);
+      continue;
+    }
 
     const standOff = e.ranged && !e.statuses?.silence && !e.statuses?.turned ? Math.min(e.ranged.range * 0.65, e.ranged.range - 6) : 0;
     let speed = 0;
@@ -511,14 +562,22 @@ export function tickMonsters(field, dt, hooks = {}) {
         e.turnedHits = (e.turnedHits || 0) + 1;
         field.land(foe, res, { fromX: e.x, fromZ: e.z, by: null });
         field.report(e, foe, res, 'bite');
-        threatFromDamage(foe, e, res.amount);
+        threatTaunt(foe, e, 3, { lift: false });   // actors.js: the side it hit answers it (a hard taunt, 3 s)
         if (res.dead) field.kill(foe);
       } else if (adist > e.reach) {
         speed = e.speed;
       } else if (e.swingTimer <= 0) {
         e.swingTimer = e.attackEvery;
         e.anim = 'attack';
-        if (hooks.onStrike) hooks.onStrike(e, target); else monsterStrike(field, e, target);
+        // main.js onEnemyStrike: it hits the companion it walked up to; with none, a companion standing
+        // within reach takes the hit 55% of the time
+        let victim = target;
+        if (target?.kind === 'player' && field.allies.length) {
+          let pet = null, bd = (e.reach || 2.4) + 0.6;
+          for (const p of field.allies) { if (p.dying != null) continue; const d = Math.hypot(p.x - e.x, p.z - e.z); if (d < bd) { bd = d; pet = p; } }
+          if (pet && field.rng() < 0.55) victim = pet;
+        }
+        if (hooks.onStrike) hooks.onStrike(e, victim); else monsterStrike(field, e, victim);
       }
     } else {
       e.wanderTimer -= dt;
@@ -540,6 +599,13 @@ export function tickMonsters(field, dt, hooks = {}) {
       const t = T(field);
       if (!e.hover && t) [cx, cz] = cliffStep(t, e, cx, cz, dt, { feet: e.y }, [0, 0]);
       if (!e.hover) [cx, cz] = unstick(field, cx, cz, (e.reach || 2) * 0.28, e.x, e.z);
+      // Thousandvale: a baked zone's solid scatter and buildings (nav.bin) — slide along, never through.
+      // A body already standing on a blocked sample may walk off it. (No `blocked` = Farhold's rules.)
+      if (!e.hover && t?.blocked && t.blocked(cx, cz) && !t.blocked(e.x, e.z)) {
+        if (!t.blocked(cx, e.z)) cz = e.z;
+        else if (!t.blocked(e.x, cz)) cx = e.x;
+        else { cx = e.x; cz = e.z; }
+      }
       if (crossesWall(e.x, e.z, cx, cz)) { cx = e.x; cz = e.z; }
       if (!wet(field, cx, cz, e.y)) {
         if (Math.hypot(cx - e.x, cz - e.z) < speed * dt * 0.25) e.facing += (field.rng() - 0.5) * 1.6 + Math.PI * 0.5;

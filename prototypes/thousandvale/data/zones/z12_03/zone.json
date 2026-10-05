@@ -1,0 +1,204 @@
+{
+  "name": "Wolfkeep (z12_03)",
+  "zone": "z12_03",
+  "sheet": {
+    "sheet": "torbor_downs",
+    "zone": "saint_orrins_rise"
+  },
+  "province": {
+    "id": 10,
+    "name": "Petbeck Basin"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 2,
+  "inputHash": "c5264009",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9803699e"
+    },
+    "zone": {
+      "zx": 12,
+      "zy": 3
+    },
+    "worldOrigin": {
+      "x": 24576,
+      "z": 6144
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [
+    {
+      "id": 9,
+      "name": "The Fackfalpot"
+    },
+    {
+      "id": 64,
+      "name": "The Detbemon"
+    },
+    {
+      "id": 83,
+      "name": null
+    }
+  ],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "village",
+      "name": "Wolfkeep",
+      "x": 336,
+      "z": 576,
+      "hub": true,
+      "radius": 65,
+      "movedFrom": {
+        "x": 320,
+        "z": 576
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Duskhaven",
+      "x": 672,
+      "z": 240,
+      "radius": 46,
+      "movedFrom": {
+        "x": 704,
+        "z": 64
+      }
+    },
+    {
+      "type": "landmark",
+      "kind": "ancientwood",
+      "name": "The Heme Heartwood",
+      "x": 448,
+      "z": 1472
+    },
+    {
+      "type": "crossing",
+      "kind": "ford",
+      "name": "Tethen Ford",
+      "x": 320,
+      "z": 576
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 350,
+      "z": 735,
+      "yaw": -2.692
+    },
+    {
+      "type": "event",
+      "id": "event_saint_orrins_rise",
+      "x": 327,
+      "z": 872,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 352,
+    "z": 572
+  },
+  "summary": {
+    "zone": "z12_03",
+    "province": "Petbeck Basin",
+    "inputHash": "c5264009",
+    "rivers": 3,
+    "wetShare": 0.002,
+    "unwalkableShare": 0.114,
+    "towns": [
+      {
+        "name": "Wolfkeep",
+        "kind": "village",
+        "hub": true,
+        "at": [
+          336,
+          576
+        ],
+        "radius": 65,
+        "movedFrom": {
+          "x": 320,
+          "z": 576
+        },
+        "culture": "halfling",
+        "plots": 15,
+        "streets": 48,
+        "links": 1,
+        "overlaps": 0
+      },
+      {
+        "name": "Duskhaven",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          672,
+          240
+        ],
+        "radius": 46,
+        "movedFrom": {
+          "x": 704,
+          "z": 64
+        },
+        "culture": "halfling",
+        "plots": 12,
+        "streets": 39,
+        "links": 1,
+        "overlaps": 0
+      }
+    ],
+    "roads": 10,
+    "bridges": 1,
+    "scatter": 12279,
+    "scatterKinds": {
+      "bush": 3412,
+      "tree_broadleaf": 3395,
+      "rock_small": 2084,
+      "rock_large": 1903,
+      "reed": 231,
+      "tree_dead": 21,
+      "boulder": 259,
+      "tree_conifer": 968,
+      "tree_acacia": 6
+    },
+    "sites": [
+      "settlement(HUB) village Wolfkeep 336 576 65",
+      "settlement hamlet Duskhaven 672 240 46",
+      "landmark ancientwood The Heme Heartwood 448 1472",
+      "crossing ford Tethen Ford 320 576",
+      "dungeon door_1 Barrow entrance 350 735  -2.692",
+      "event event_saint_orrins_rise  327 872 40"
+    ],
+    "spawn": {
+      "x": 352,
+      "z": 572
+    },
+    "placements": 133,
+    "vignettesAvoided": 0
+  },
+  "files": {
+    "terrain.bin": 6305926,
+    "nav.bin": 1050717,
+    "scatter.bin": 98316,
+    "placements.json": 84269
+  }
+}

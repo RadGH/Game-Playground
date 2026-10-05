@@ -1,0 +1,81 @@
+{
+  "id": "boss_deep_foreman",
+  "name": "Old Ninth, the Deep Foreman",
+  "tier": "boss",
+  "body": "shale_warden",
+  "place": "dungeon mine_descent: the boss cavern of the last floor (28 m square)",
+  "_doc": "Stream E. A stone-and-iron overseer built to keep the ninth shift working; it never stopped. P1 'Shift Start': pick swings for the tank, ore tossed at random players (each lump stays as cover), three drill lines, and a Shift Whistle you hide from behind the four timber props. P2 at 60% 'Blasting': it locks down in an iron shell and the shift rats pour in; light the three blasting fuses to crack the shell (it tries to stamp them out — interrupt it). P3 is a new health bar 'Overtime': the cracked floor caves into pits, the props must be HELD (stand on the soak circles at each standing prop or the roof falls on everyone), a three-player stack, a grinding spiral. Hard enrage at 5.5 minutes. The winch lever drops the ore bucket on it once.",
+  "party": "Solo: hold-the-props soaks (one per standing prop) cannot be covered — survivable fails only. 2-3: playable, some fails. 5: intended. M5 scaling: soaks = min(standing props, party); shift bell stack need = min(3, party); shift rats by party.",
+  "hpMult": 4,
+  "arena": {
+    "radius": 15,
+    "objects": [
+      { "id": "prop_ne", "type": "pillar", "name": "Timber prop", "x": 8, "z": -8, "r": 1.1, "hp": 2 },
+      { "id": "prop_nw", "type": "pillar", "name": "Timber prop", "x": -8, "z": -8, "r": 1.1, "hp": 2 },
+      { "id": "prop_se", "type": "pillar", "name": "Timber prop", "x": 8, "z": 8, "r": 1.1, "hp": 2 },
+      { "id": "prop_sw", "type": "pillar", "name": "Timber prop", "x": -8, "z": 8, "r": 1.1, "hp": 2 },
+      { "id": "fuse_a", "type": "brazier", "name": "Blasting fuse", "x": 11, "z": 0 },
+      { "id": "fuse_b", "type": "brazier", "name": "Blasting fuse", "x": -11, "z": 0 },
+      { "id": "fuse_c", "type": "brazier", "name": "Blasting fuse", "x": 0, "z": -11 },
+      { "id": "winch", "type": "lever", "name": "Bucket winch", "x": 0, "z": 11, "onUse": [ { "say": "The ore bucket drops — straight onto Old Ninth!", "style": "warn" }, { "hurt": 0.06 }, { "stun": 3 } ] },
+      { "id": "crack_a", "type": "cracked_floor", "name": "Cracked rock", "x": -4, "z": 4, "r": 2.6, "blocks": false },
+      { "id": "crack_b", "type": "cracked_floor", "name": "Cracked rock", "x": 5, "z": -2, "r": 2.6, "blocks": false },
+      { "id": "crack_c", "type": "cracked_floor", "name": "Cracked rock", "x": -3, "z": -6, "r": 2.6, "blocks": false }
+    ]
+  },
+  "say": {
+    "pull": ["SHIFT NINE. YOU ARE LATE.", "NEW HANDS. GOOD. THE SEAM DOES NOT DIG ITSELF.", "WHISTLE HAS BLOWN. TO WORK."],
+    "death": "Old Ninth grinds to a halt. Somewhere deep inside it, a bell rings once for the end of the shift.",
+    "reset": "OLD NINTH RETURNS TO THE FACE. QUOTA UNMET."
+  },
+  "enrage": { "seconds": 330, "damage": 3, "say": "QUOTA FAILED. ALL HANDS WILL BE BURIED." },
+  "abilities": {
+    "pick": { "id": "pick", "name": "Pick Swing", "every": [7, 9], "range": 6,
+      "telegraphs": [ { "shape": "cone", "at": "self", "r": 6, "arc": 1.5, "wind": 1.1, "damage": 2 } ] },
+    "ore_toss": { "id": "ore_toss", "name": "Ore Toss", "every": [14, 17], "first": 4, "cast": 0.8,
+      "say": "Old Ninth hurls lumps of ore!",
+      "telegraphs": [ { "shape": "circle", "at": "random", "r": 2.8, "count": 2, "delay": 0.4, "wind": 1.6, "damage": 1.6,
+        "leave": { "type": "rock", "name": "Ore lump", "r": 1.2, "hp": 2 } } ] },
+    "drill_lines": { "id": "drill_lines", "name": "Drill Lines", "every": [15, 18], "first": 8, "cast": 0.6,
+      "telegraphs": [ { "shape": "line", "at": "self", "len": 15, "w": 2.8, "count": 3, "rotate": 2.094, "wind": 1.5, "damage": 1.9, "yaw": "random" } ] },
+    "whistle": { "id": "whistle", "name": "Shift Whistle", "every": [26, 30], "first": 12, "cast": 3,
+      "say": "THE WHISTLE BLOWS. — Get behind a prop or an ore lump!",
+      "telegraphs": [ { "shape": "circle", "at": "self", "r": 15, "wind": 0.6, "damage": 2.6, "los": true } ] },
+    "stamp_fuses": { "id": "stamp_fuses", "name": "Stamp Out", "every": [15, 17], "first": 8, "cast": 3.5, "interrupt": true,
+      "say": "NO BLASTING ON MY SHIFT. — It is stamping out the fuses, stop it!",
+      "onInterrupt": [ { "say": "Old Ninth stumbles mid-stride.", "style": "emote" } ],
+      "actions": [ { "reset": "brazier" }, { "say": "The fuses are out. Light them again!", "style": "warn" } ] },
+    "shift_rats": { "id": "shift_rats", "name": "Shift Change", "every": [25, 30], "first": 12,
+      "say": "MORE HANDS TO THE FACE.",
+      "actions": [ { "adds": { "type": "cairn_rat", "count": 3, "radius": 9, "at": "home" } } ] },
+    "cave_in": { "id": "cave_in", "name": "Floor Collapse", "every": [99, 99], "cast": 0.5,
+      "say": "The cracked rock gives way!",
+      "telegraphs": [ { "shape": "circle", "at": "object", "object": "cracked_floor", "r": 3, "wind": 2.2, "damage": 2.2,
+        "leave": { "type": "pool", "name": "Open shaft", "r": 2.6, "every": 1, "seconds": 9999, "damage": 0.4 } } ],
+      "actions": [ { "remove": "cracked_floor" } ] },
+    "hold_props": { "id": "hold_props", "name": "Hold the Props", "every": [24, 28], "first": 10, "cast": 1,
+      "say": "The roof groans — someone hold every prop that still stands!",
+      "telegraphs": [ { "shape": "circle", "at": "object", "object": "pillar", "r": 2.6, "wind": 6, "kind": "soak", "need": 1, "damage": 0.6, "fail": 1.0, "failSay": "A prop slips — rock rains down on everyone!" } ] },
+    "shift_bell": { "id": "shift_bell", "name": "Shift Bell", "every": [20, 24], "first": 5, "cast": 1,
+      "say": "{target} is ringing the bell — share the load, three of you!",
+      "telegraphs": [ { "shape": "circle", "at": "random", "r": 3, "kind": "stack", "need": 3, "wind": 4, "damage": 3.2, "follow": true } ] },
+    "grinding_wheel": { "id": "grinding_wheel", "name": "Grinding Wheel", "every": [17, 20], "first": 15, "cast": 0.8,
+      "say": "Old Ninth spins up its grinding wheel!",
+      "telegraphs": [ { "shape": "line", "at": "self", "len": 15, "w": 2.6, "count": 8, "rotate": 0.785, "delay": 0.3, "wind": 1.2, "damage": 1.7, "yaw": "random" } ] }
+  },
+  "phases": [
+    { "name": "Shift Start", "abilities": ["pick", "ore_toss", "drill_lines", "whistle"] },
+    { "name": "Blasting", "at": 0.6, "say": "BLASTING IN PROGRESS. CLEAR THE FACE.",
+      "abilities": ["stamp_fuses", "shift_rats", "ore_toss"],
+      "onEnter": [ { "shield": true }, { "adds": { "type": "cairn_rat", "count": 4, "radius": 8, "at": "home" } },
+        { "say": "Old Ninth locks into an iron shell. Light all three blasting fuses!", "style": "warn" } ] },
+    { "name": "Overtime", "newBar": { "hp": 0.5 }, "say": "OVERTIME. NOBODY LEAVES UNTIL THE SEAM IS CLEARED.",
+      "abilities": ["pick", "hold_props", "shift_bell", "grinding_wheel"],
+      "onEnter": [ { "ability": "cave_in" } ] }
+  ],
+  "triggers": [
+    { "when": { "lit": 3, "phase": 1 }, "do": [ { "shield": false }, { "hurt": 0.08 }, { "stun": 4 }, { "vuln": { "takeMore": 0.4, "seconds": 10, "name": "Shell Cracked" } },
+      { "say": "BOOM! The charges crack Old Ninth's shell wide open!", "style": "warn" } ] },
+    { "when": { "broken": 4, "of": "pillar" }, "do": [ { "say": "Every prop is down. Only the ore lumps are left to hide behind!", "style": "warn" } ] }
+  ]
+}

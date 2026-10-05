@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly Thousandvale restore drill
+
+[Timer]
+OnCalendar=Sun 04:30
+RandomizedDelaySec=600
+Persistent=true
+
+[Install]
+WantedBy=timers.target

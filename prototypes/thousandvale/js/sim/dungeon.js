@@ -88,16 +88,21 @@ export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt' } = 
   return out;
 }
 
-/** The plan as a terrain object: flat floors at y = 0; walls are not walkable. */
+/**
+ * The plan as a terrain object: flat floors at y = 0; walls are not walkable. A floor's `gate` tiles
+ * (E's dungeon-tiers.js) start CLOSED and block until `openGate(floorIndex)` (its lever) is called.
+ */
 export function dungeonTerrain(plan) {
   const cell = plan.cell || CELL;
   const fl = plan.floors;
   const minX = Math.min(...fl.map(f => f.origin.x)), minZ = Math.min(...fl.map(f => f.origin.z));
   const maxX = Math.max(...fl.map(f => f.origin.x + f.w * cell)), maxZ = Math.max(...fl.map(f => f.origin.z + f.h * cell));
+  const closed = new Set();                 // `${floor}:${i}:${j}` tiles shut by a gate
+  for (const f of fl) if (f.gate) for (let j = f.gate.j; j < f.gate.j + f.gate.h; j++) for (let i = f.gate.i; i < f.gate.i + f.gate.w; i++) closed.add(f.index + ':' + i + ':' + j);
   function tileAt(x, z) {
     for (const f of fl) {
       const i = Math.floor((x - f.origin.x) / cell), j = Math.floor((z - f.origin.z) / cell);
-      if (i >= 0 && j >= 0 && i < f.w && j < f.h) return f.tiles[j * f.w + i];
+      if (i >= 0 && j >= 0 && i < f.w && j < f.h) return f.tiles[j * f.w + i] && !(closed.size && closed.has(f.index + ':' + i + ':' + j)) ? 1 : 0;
     }
     return 0;
   }
@@ -108,6 +113,13 @@ export function dungeonTerrain(plan) {
     bounds: { minX, minZ, maxX, maxZ },
     size: Math.max(maxX - minX, maxZ - minZ), origin: { x: minX, z: minZ },
     spawn: { ...fl[0].entry },
+    /** Open floor `index`'s gate (its lever was pulled). Returns true when something opened. */
+    openGate(index) {
+      let n = 0;
+      for (const k of [...closed]) if (k.startsWith(index + ':')) { closed.delete(k); n++; }
+      return n > 0;
+    },
+    gateOpen: index => ![...closed].some(k => k.startsWith(index + ':')),
   };
 }
 
@@ -125,10 +137,14 @@ export function unrleTiles(rle, size) {
 }
 
 /** What the client needs to draw the dungeon (sent in joined.room.dungeon). */
-export function describeDungeon(plan) {
+export function describeDungeon(plan, terrain = null) {
   return {
-    family: plan.family, level: plan.level, cell: plan.cell || CELL, standIn: !!plan.standIn,
-    floors: plan.floors.map(f => ({ index: f.index, origin: f.origin, w: f.w, h: f.h, tiles: rleTiles(f.tiles), rooms: f.rooms.map(r => ({ i: r.i, j: r.j, w: r.w, h: r.h, kind: r.kind })) })),
+    family: plan.family, name: plan.name || null, look: plan.look || null, level: plan.level, cell: plan.cell || CELL, standIn: !!plan.standIn,
+    floors: plan.floors.map(f => ({
+      index: f.index, origin: f.origin, w: f.w, h: f.h, tiles: rleTiles(f.tiles),
+      rooms: f.rooms.map(r => ({ i: r.i, j: r.j, w: r.w, h: r.h, kind: r.kind })),
+      gate: f.gate ? { i: f.gate.i, j: f.gate.j, w: f.gate.w, h: f.gate.h, open: terrain ? terrain.gateOpen(f.index) : false } : undefined,
+    })),
   };
 }
 
@@ -139,11 +155,16 @@ export function describeDungeon(plan) {
 export function dungeonRoomSpec(plan, { exitTo, type = 'wolf' } = {}) {
   const camps = [], objects = [];
   for (const f of plan.floors) {
-    for (const p of f.packs) camps.push({ type, level: p.level, x: p.x, z: p.z, count: p.count, radius: p.radius || 4, respawnMs: Infinity, rank: p.rank });
+    for (const p of f.packs) camps.push({ type: p.type || type, level: p.level, x: p.x, z: p.z, count: p.count, radius: p.radius || 4, respawnMs: Infinity, rank: p.rank, encounter: p.encounter || null });
     if (f.stairsDown) objects.push({ type: 'stairs', name: 'Stairs down', x: f.stairsDown.x, z: f.stairsDown.z, portal: { to: 'here', x: plan.floors[f.index + 1].entry.x, z: plan.floors[f.index + 1].entry.z } });
     if (f.stairsUp) objects.push({ type: 'stairs', name: 'Stairs up', x: f.stairsUp.x, z: f.stairsUp.z, portal: { to: 'here', x: plan.floors[f.index - 1].stairsDown.x - 3, z: plan.floors[f.index - 1].stairsDown.z } });
+    if (f.shortcutUp) objects.push({ type: 'stairs', name: 'Shortcut up', x: f.shortcutUp.x, z: f.shortcutUp.z, portal: { to: 'here', x: f.shortcutUp.to.x + 2, z: f.shortcutUp.to.z + 2 } });
     if (f.exit) objects.push({ type: 'exit', name: 'Way out', x: f.exit.x, z: f.exit.z, portal: { to: exitTo.room, x: exitTo.x, z: exitTo.z } });
     if (f.chest) objects.push({ type: 'chest', name: 'Reward chest', x: f.chest.x, z: f.chest.z, chest: { tier: 'reward', level: plan.level + 2 * f.index + 2, key: 'reward' } });
+    if (f.gate) objects.push({ type: 'gate', name: 'Iron gate', x: f.gate.x, z: f.gate.z, key: 'f' + f.index + '-gate', state: 'closed', gate: { floor: f.index } });
+    if (f.lever) objects.push({ type: 'lever', name: 'Lever', x: f.lever.x, z: f.lever.z, key: 'f' + f.index + '-lever', state: 'idle', lever: { floor: f.index } });
+    // arena props (`f.props`) are NOT spawned here: the encounter engine (stream C) spawns the real arena
+    // objects when the fight starts; E's props are for the viewer and the client's dressing.
   }
   return { camps, objects };
 }

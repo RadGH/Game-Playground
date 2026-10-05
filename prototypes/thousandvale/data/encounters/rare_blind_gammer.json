@@ -1,0 +1,161 @@
+{
+  "id": "rare_blind_gammer",
+  "name": "Blind Gammer",
+  "tier": "rare",
+  "zone": "delvers_hill",
+  "body": "cairn_rat",
+  "place": "the queen of the rats in the spoil heaps around Copperdell; miners leave cheese at the old adit",
+  "_doc": "Stream E (M2). A rat the size of a pony who cannot see. She finds you by sound: her Shriek is a cone, she calls the swarm (an interruptible squeak), and at half health she sits on a heap and the swarm comes in waves while she gnaws a stack mark — share it.",
+  "party": {
+    "solo": "Solo is rough: the stack mark wants a partner (it still lands, just harder).",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.8,
+  "arena": {
+    "radius": 22
+  },
+  "say": {
+    "pull": [
+      "Something big sniffs the air. \"Who's that? I can HEAR you.\"",
+      "The spoil heap squeaks. All of it."
+    ],
+    "death": "Blind Gammer squeals once and rolls over. The swarm scatters into the dark.",
+    "reset": "Gammer shuffles back into her heap."
+  },
+  "abilities": {
+    "gnaw": {
+      "id": "gnaw",
+      "name": "Gnaw",
+      "every": [
+        6,
+        8
+      ],
+      "range": 4,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 3.8,
+          "arc": 1.5,
+          "status": "poison",
+          "element": "poison",
+          "wind": 0.9,
+          "damage": 1.5
+        }
+      ]
+    },
+    "shriek": {
+      "id": "shriek",
+      "name": "Blind Shriek",
+      "every": [
+        12,
+        15
+      ],
+      "first": 5,
+      "range": 10,
+      "cast": 0.6,
+      "say": "Gammer turns her head toward the sound of {target}!",
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 10,
+          "arc": 1.0,
+          "status": "silence",
+          "wind": 1.3,
+          "damage": 1.2
+        }
+      ]
+    },
+    "squeak": {
+      "id": "squeak",
+      "name": "Call the Swarm",
+      "every": [
+        20,
+        24
+      ],
+      "first": 8,
+      "cast": 2,
+      "interrupt": true,
+      "say": "Gammer squeaks for her children — interrupt her!",
+      "onInterrupt": [
+        {
+          "say": "Her squeak becomes a sneeze.",
+          "style": "emote"
+        }
+      ],
+      "actions": [
+        {
+          "adds": {
+            "type": "cairn_rat",
+            "count": 3,
+            "radius": 6
+          }
+        }
+      ],
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 4,
+          "wind": 1.2,
+          "damage": 0.8
+        }
+      ]
+    },
+    "mark": {
+      "id": "mark",
+      "name": "Gnawing Mark",
+      "every": [
+        18,
+        22
+      ],
+      "first": 4,
+      "cast": 1,
+      "say": "Gammer has a taste for {target} — stand with them!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "kind": "stack",
+          "need": 2,
+          "follow": true,
+          "wind": 4,
+          "damage": 2.6
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Sniffing",
+      "abilities": [
+        "gnaw",
+        "shriek",
+        "squeak"
+      ]
+    },
+    {
+      "name": "The Swarm",
+      "at": 0.5,
+      "say": "Gammer climbs her heap and the whole hill squeaks!",
+      "abilities": [
+        "gnaw",
+        "mark",
+        "squeak"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "cairn_rat",
+            "count": 4,
+            "radius": 8
+          }
+        }
+      ]
+    }
+  ]
+}

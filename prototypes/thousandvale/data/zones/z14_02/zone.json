@@ -1,0 +1,275 @@
+{
+  "name": "Tideford (z14_02)",
+  "zone": "z14_02",
+  "sheet": {
+    "sheet": "torbor_downs",
+    "zone": "gullwick"
+  },
+  "province": {
+    "id": 10,
+    "name": "Petbeck Basin"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 2,
+  "inputHash": "3b6a7e1e",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9803699e"
+    },
+    "zone": {
+      "zx": 14,
+      "zy": 2
+    },
+    "worldOrigin": {
+      "x": 28672,
+      "z": 4096
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [
+    {
+      "id": 9,
+      "name": "The Fackfalpot"
+    },
+    {
+      "id": 12,
+      "name": "The Batpate Run"
+    },
+    {
+      "id": 31,
+      "name": "The Dewil"
+    },
+    {
+      "id": 40,
+      "name": "The Hefeck Run"
+    },
+    {
+      "id": 73,
+      "name": "Depockflow"
+    }
+  ],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "town",
+      "name": "Tideford",
+      "x": 1520,
+      "z": 352,
+      "hub": true,
+      "radius": 90,
+      "movedFrom": {
+        "x": 1472,
+        "z": 448
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "village",
+      "name": "Glimrow",
+      "x": 416,
+      "z": 560,
+      "radius": 65,
+      "movedFrom": {
+        "x": 448,
+        "z": 704
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "village",
+      "name": "Wyrmrow",
+      "x": 848,
+      "z": 1872,
+      "radius": 65,
+      "movedFrom": {
+        "x": 832,
+        "z": 1856
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Mirekeep",
+      "x": 1008,
+      "z": 1264,
+      "radius": 46,
+      "movedFrom": {
+        "x": 960,
+        "z": 1216
+      }
+    },
+    {
+      "type": "landmark",
+      "kind": "ancientwood",
+      "name": "Old Docktockwood",
+      "x": 1984,
+      "z": 1088
+    },
+    {
+      "type": "crossing",
+      "kind": "ford",
+      "name": "Wihot Ford",
+      "x": 1472,
+      "z": 448
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 1623,
+      "z": 475,
+      "yaw": -2.777
+    },
+    {
+      "type": "event",
+      "id": "event_gullwick",
+      "x": 1272,
+      "z": 688,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 1512,
+    "z": 352
+  },
+  "summary": {
+    "zone": "z14_02",
+    "province": "Petbeck Basin",
+    "inputHash": "3b6a7e1e",
+    "rivers": 5,
+    "wetShare": 0.023,
+    "unwalkableShare": 0.018,
+    "towns": [
+      {
+        "name": "Tideford",
+        "kind": "town",
+        "hub": true,
+        "at": [
+          1520,
+          352
+        ],
+        "radius": 90,
+        "movedFrom": {
+          "x": 1472,
+          "z": 448
+        },
+        "culture": "halfling",
+        "plots": 25,
+        "streets": 72,
+        "links": 3,
+        "overlaps": 0
+      },
+      {
+        "name": "Glimrow",
+        "kind": "village",
+        "hub": false,
+        "at": [
+          416,
+          560
+        ],
+        "radius": 65,
+        "movedFrom": {
+          "x": 448,
+          "z": 704
+        },
+        "culture": "halfling",
+        "plots": 14,
+        "streets": 48,
+        "links": 0,
+        "overlaps": 0
+      },
+      {
+        "name": "Wyrmrow",
+        "kind": "village",
+        "hub": false,
+        "at": [
+          848,
+          1872
+        ],
+        "radius": 65,
+        "movedFrom": {
+          "x": 832,
+          "z": 1856
+        },
+        "culture": "halfling",
+        "plots": 16,
+        "streets": 46,
+        "links": 2,
+        "overlaps": 0
+      },
+      {
+        "name": "Mirekeep",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          1008,
+          1264
+        ],
+        "radius": 46,
+        "movedFrom": {
+          "x": 960,
+          "z": 1216
+        },
+        "culture": "halfling",
+        "plots": 9,
+        "streets": 21,
+        "links": 1,
+        "overlaps": 0
+      }
+    ],
+    "roads": 11,
+    "bridges": 3,
+    "scatter": 20012,
+    "scatterKinds": {
+      "bush": 4513,
+      "tree_conifer": 1493,
+      "rock_small": 924,
+      "tree_broadleaf": 9453,
+      "rock_large": 189,
+      "reed": 3205,
+      "tree_dead": 234,
+      "boulder": 1
+    },
+    "sites": [
+      "settlement(HUB) town Tideford 1520 352 90",
+      "settlement village Glimrow 416 560 65",
+      "settlement village Wyrmrow 848 1872 65",
+      "settlement hamlet Mirekeep 1008 1264 46",
+      "landmark ancientwood Old Docktockwood 1984 1088",
+      "crossing ford Wihot Ford 1472 448",
+      "dungeon door_1 Barrow entrance 1623 475  -2.777",
+      "event event_gullwick  1272 688 40"
+    ],
+    "spawn": {
+      "x": 1512,
+      "z": 352
+    },
+    "placements": 278,
+    "vignettesAvoided": 0
+  },
+  "files": {
+    "terrain.bin": 6306218,
+    "nav.bin": 1050717,
+    "scatter.bin": 160180,
+    "placements.json": 106816
+  }
+}

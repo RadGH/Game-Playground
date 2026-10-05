@@ -1,0 +1,67 @@
+{
+  "id": "boss_lantern_bishop",
+  "name": "The Lantern Bishop",
+  "tier": "boss",
+  "body": "sky_cultist",
+  "place": "dungeon crypt_spiral SET B: the central vault of the last floor (30-34 m square)",
+  "_doc": "Stream E (M2). End boss of crypt set B: a bishop who hoards light. Four tall mirrors stand in the vault — they block his Glare (line of sight) and in P3 his beams BOUNCE OFF THEM (lines fired from each standing mirror). P1 'Benediction': a cone, a rotating cross of light, the Glare. P2 at 60% 'Darkened Nave': he puts out the three lanterns and hides in a shield of stolen light while hounds come; light the lanterns again to break it — and he keeps reaching for their light (a soak at every lantern: stand on it or take the hit together). P3 is a new health bar 'Last Rites': mirror beams, a three-player stack, a pull-in-and-out ring, and grave-water safe spots.",
+  "party": "Solo: very hard (the lantern soaks need a body each) — bring a follower and accept soak failures. 2-3: the intended size; one lights lanterns while one tanks. 5: easy soaks, crowded mirrors. M5 scaling: lantern soak count = min(party, 3); adds 2 -> 1 solo.",
+  "hpMult": 4,
+  "arena": {
+    "radius": 17,
+    "objects": [
+      { "id": "mirror_ne", "type": "pillar", "name": "Tall mirror", "x": 8, "z": -8, "r": 1.2, "hp": 3 },
+      { "id": "mirror_nw", "type": "pillar", "name": "Tall mirror", "x": -8, "z": -8, "r": 1.2, "hp": 3 },
+      { "id": "mirror_se", "type": "pillar", "name": "Tall mirror", "x": 8, "z": 8, "r": 1.2, "hp": 3 },
+      { "id": "mirror_sw", "type": "pillar", "name": "Tall mirror", "x": -8, "z": 8, "r": 1.2, "hp": 3 },
+      { "id": "lantern_e", "type": "brazier", "name": "Hanging lantern", "x": 11, "z": 0 },
+      { "id": "lantern_w", "type": "brazier", "name": "Hanging lantern", "x": -11, "z": 0 },
+      { "id": "lantern_n", "type": "brazier", "name": "Hanging lantern", "x": 0, "z": -11 }
+    ]
+  },
+  "say": {
+    "pull": ["Come into the light, children. All of it. Every last drop.", "You brought a torch? How generous. I'll take it."],
+    "death": "The Bishop's robes collapse in a heap of ash and very bright dust. Somewhere, a candle relights itself.",
+    "reset": "The Bishop turns back to his mirrors, admiring the glow."
+  },
+  "enrage": { "seconds": 330, "damage": 3, "say": "THEN I WILL TAKE THE LIGHT FROM YOUR EYES." },
+  "abilities": {
+    "censure": { "id": "censure", "name": "Censure", "every": [7, 9], "range": 6,
+      "telegraphs": [ { "shape": "cone", "at": "self", "r": 6, "arc": 1.6, "wind": 1.1, "damage": 1.9, "element": "holy" } ] },
+    "cross_of_light": { "id": "cross_of_light", "name": "Cross of Light", "every": [15, 18], "first": 5, "cast": 0.8,
+      "say": "Light splits the vault into four!",
+      "telegraphs": [ { "shape": "cross", "at": "self", "r": 17, "w": 3, "count": 2, "rotate": 0.785, "delay": 1.2, "wind": 1.4, "damage": 2, "yaw": "random", "element": "holy" } ] },
+    "glare": { "id": "glare", "name": "Lantern Glare", "every": [24, 28], "first": 11, "cast": 2.8,
+      "say": "The Bishop lifts his lantern high — get behind a mirror!",
+      "telegraphs": [ { "shape": "circle", "at": "self", "r": 17, "wind": 0.6, "damage": 2.7, "los": true, "element": "holy" } ] },
+    "steal_light": { "id": "steal_light", "name": "Steal the Light", "every": [20, 24], "first": 9, "cast": 1,
+      "say": "He reaches for the lanterns' light — stand under every lantern!",
+      "telegraphs": [ { "shape": "circle", "at": "object", "object": "brazier", "r": 2.4, "wind": 5, "kind": "soak", "need": 1, "damage": 0.5, "fail": 1, "failSay": "A lantern's light pours into the Bishop and burns everyone!", "element": "holy" } ] },
+    "procession": { "id": "procession", "name": "Night Procession", "every": [24, 28], "first": 12,
+      "say": "Hounds pad out of the dark aisles.",
+      "actions": [ { "adds": { "type": "barrow_hound", "count": 2, "radius": 9, "at": "home" } } ] },
+    "mirror_beams": { "id": "mirror_beams", "name": "Mirror Beams", "every": [14, 17], "first": 4, "cast": 0.8,
+      "say": "Light bounces off every mirror!",
+      "telegraphs": [ { "shape": "line", "at": "object", "object": "pillar", "len": 18, "w": 2.2, "wind": 1.5, "damage": 1.8, "yaw": "random", "element": "holy" } ] },
+    "last_rites": { "id": "last_rites", "name": "Last Rites", "every": [20, 24], "first": 8, "cast": 1,
+      "say": "{target} is chosen for the last rites — three of you, stand together!",
+      "telegraphs": [ { "shape": "circle", "at": "random", "r": 3, "kind": "stack", "need": 3, "wind": 4, "damage": 3.2, "follow": true, "element": "holy" } ] },
+    "halo": { "id": "halo", "name": "Burning Halo", "every": [16, 19], "first": 13, "cast": 1,
+      "say": "A halo of fire spreads out from him — get in close!",
+      "telegraphs": [ { "shape": "donut", "at": "self", "r": 16, "r2": 3.5, "wind": 1.8, "damage": 2.2, "element": "fire", "status": "burn" } ] }
+  },
+  "phases": [
+    { "name": "Benediction", "abilities": ["censure", "cross_of_light", "glare"] },
+    { "name": "Darkened Nave", "at": 0.6, "say": "Darkness, my children. Let me hold the light for you.",
+      "abilities": ["censure", "steal_light", "procession"],
+      "onEnter": [ { "shield": true }, { "reset": "brazier" }, { "adds": { "type": "barrow_hound", "count": 2, "radius": 8, "at": "home" } },
+        { "say": "The lanterns go dark and a shell of stolen light closes around the Bishop. Light all three lanterns!", "style": "warn" } ] },
+    { "name": "Last Rites", "newBar": { "hp": 0.55 }, "say": "You gave it back to them? Then burn in it.",
+      "abilities": ["censure", "mirror_beams", "last_rites", "halo"] }
+  ],
+  "triggers": [
+    { "when": { "lit": 3, "phase": 1 }, "do": [ { "shield": false }, { "stun": 3 }, { "vuln": { "takeMore": 0.4, "seconds": 10, "name": "Light Stolen Back" } },
+      { "say": "Three lanterns blaze! The shell of light cracks and the Bishop reels!", "style": "warn" } ] },
+    { "when": { "broken": 4 }, "do": [ { "say": "Every mirror lies in pieces. Nowhere left to hide from the light!", "style": "warn" } ] }
+  ]
+}

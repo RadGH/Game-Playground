@@ -87,7 +87,7 @@ export function hurt(ctx, src, dst, amount) {
   if (dst.kind === 'hunter') amount *= 1 - gear(data, state.players[dst.owner]).armorPct;
   if (dst.kind === 'building' && src && src.torchUntil > state.tick) amount *= 2;
   dst.hp -= amount;
-  ctx.emit('hit', { src: src ? src.id : -1, dst: dst.id, amount: Math.round(amount * 10) / 10 });
+  ctx.emit('hit', { src: src ? src.id : -1, dst: dst.id, amount: Math.round(amount * 10) / 10, x: dst.x, z: dst.z });
   if (dst.hp > 0) return;
   const U = data.hvf.units, killer = src && src.owner >= 0 ? state.players[src.owner] : null;
   const pay = g => { if (killer && killer.role === 'hunter') { killer.gold += g; killer.stats.earned += g; ctx.emit('gold', { player: killer.id, amount: g, why: 'bounty' }); } };
@@ -214,7 +214,7 @@ export function unitTick(ctx) {
         if (k === KIND.tree || k === KIND.briar) {
           chopCell(ctx, o.cell);
           p.gold += U[e.kind].chopGold; p.stats.chopped++;
-          ctx.emit('chopped', { player: p.id, cell: o.cell, gold: U[e.kind].chopGold });
+          ctx.emit('chopped', { player: p.id, cell: o.cell, gold: U[e.kind].chopGold, x: cellX(ctx.map, o.cell), z: cellZ(ctx.map, o.cell) });
         }
         e.ord = { k: 'idle' };
         break;
@@ -242,7 +242,7 @@ export function unitTick(ctx) {
           e.face = faceOf(t.x - e.x, t.z - e.z);
           if (state.tick >= (e._atkAt || 0)) {
             e._atkAt = state.tick + secToTicks(U.hunter.attackEvery / (inMud(ctx, e.x, e.z) ? data.hvf.buildings.kinds.mud.mud.attackMult : 1));
-            ctx.emit('attack', { src: e.id, dst: t.id });
+            ctx.emit('attack', { src: e.id, dst: t.id, x: t.x, z: t.z });
             hurt(ctx, e, t, hunterDamage(ctx, e));
           }
           break;
@@ -251,7 +251,7 @@ export function unitTick(ctx) {
         const SP = data.hvf.hunter.spear;
         if (seen && d2 <= (SP.range + t.r) * (SP.range + t.r) && state.tick >= (e._spearAt || 0)) {
           e._spearAt = state.tick + secToTicks(SP.cooldown);
-          ctx.emit('spear', { src: e.id, dst: t.id });
+          ctx.emit('spear', { src: e.id, dst: t.id, x: e.x, z: e.z });
           hurt(ctx, e, t, hunterDamage(ctx, e) * SP.damageMult);
           if (!t.alive || t._gone) { e.ord = { k: 'idle' }; break; }
         }

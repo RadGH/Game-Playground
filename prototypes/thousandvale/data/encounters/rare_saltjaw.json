@@ -1,0 +1,142 @@
+{
+  "id": "rare_saltjaw",
+  "name": "Saltjaw",
+  "tier": "rare",
+  "zone": "saltmouth",
+  "body": "silt_lurker",
+  "place": "burrows in the sand flats north of Saltmouth at low tide",
+  "_doc": "Stream E (M2). Something under the sand. It erupts beneath each player in turn (a circle that rides you, then bursts), drags its jaws in a long furrow, and at half health hides under the sand and only its sand spouts show — every spout is a hazard.",
+  "party": {
+    "solo": "Hard solo at level 6: quicksand slows you into the eruptions.",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 2.0,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "The sand bulges. Then it opens.",
+      "Gulls scatter. The beach starts to move."
+    ],
+    "death": "Saltjaw sinks back into the sand and does not come up again.",
+    "reset": "The sand smooths over."
+  },
+  "abilities": {
+    "bite": {
+      "id": "bite",
+      "name": "Sand Bite",
+      "every": [
+        7,
+        9
+      ],
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.6,
+          "arc": 1.4,
+          "wind": 1.0,
+          "damage": 1.8
+        }
+      ]
+    },
+    "erupt": {
+      "id": "erupt",
+      "name": "Erupting Burrow",
+      "every": [
+        15,
+        18
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "The sand churns under everyone — keep moving!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 2.8,
+          "follow": true,
+          "knock": 2,
+          "wind": 2.2,
+          "damage": 1.6
+        }
+      ]
+    },
+    "furrow": {
+      "id": "furrow",
+      "name": "Furrow",
+      "every": [
+        12,
+        15
+      ],
+      "first": 8,
+      "cast": 0.6,
+      "say": "{boss} dives and ploughs toward {target}!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 18,
+          "w": 3.4,
+          "knock": 3,
+          "wind": 1.4,
+          "damage": 1.9
+        }
+      ]
+    },
+    "spouts": {
+      "id": "spouts",
+      "name": "Sand Spouts",
+      "every": [
+        10,
+        13
+      ],
+      "first": 2,
+      "cast": 0.4,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3,
+          "spread": 14,
+          "count": 5,
+          "delay": 0.25,
+          "leave": {
+            "type": "pool",
+            "name": "Quicksand",
+            "r": 2.4,
+            "every": 1,
+            "seconds": 14,
+            "status": "web"
+          },
+          "wind": 1.6,
+          "damage": 1.4
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Surfacing",
+      "abilities": [
+        "bite",
+        "erupt",
+        "furrow"
+      ]
+    },
+    {
+      "name": "Under the Sand",
+      "at": 0.5,
+      "say": "Saltjaw vanishes under the sand!",
+      "abilities": [
+        "bite",
+        "spouts",
+        "erupt"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "id": "rare_laughing_hettie",
+  "name": "Laughing Hettie",
+  "tier": "rare",
+  "zone": "millbrook",
+  "body": "crag_hyena",
+  "place": "leads a pack in the gorse above Three Wheels and steals lambs, laughing",
+  "_doc": "Stream E (M2). A hyena matriarch whose laugh calls the pack. She snaps at the weakest (a circle on the farthest player), her laugh is an interruptible cast that brings two more hyenas, and at half health she circles: a ring that closes in, then a pounce.",
+  "party": {
+    "solo": "Solo-able if you interrupt the laugh.",
+    "small": "Easy.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.7,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "A cackle from the gorse. Then another. Then lots.",
+      "Hettie grins. It is not a nice grin."
+    ],
+    "death": "Laughing Hettie stops laughing.",
+    "reset": "Hettie slinks away, giggling."
+  },
+  "abilities": {
+    "snap": {
+      "id": "snap",
+      "name": "Snap",
+      "every": [
+        6,
+        8
+      ],
+      "range": 4.5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4,
+          "arc": 1.4,
+          "status": "bleed",
+          "wind": 0.9,
+          "damage": 1.5
+        }
+      ]
+    },
+    "pick_off": {
+      "id": "pick_off",
+      "name": "Pick Off",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "cast": 0.5,
+      "say": "Hettie eyes the straggler, {target}!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "farthest",
+          "r": 3,
+          "wind": 1.4,
+          "damage": 1.6
+        }
+      ]
+    },
+    "laugh": {
+      "id": "laugh",
+      "name": "Pack Laugh",
+      "every": [
+        20,
+        24
+      ],
+      "first": 7,
+      "cast": 2,
+      "interrupt": true,
+      "say": "Hettie throws back her head to laugh — interrupt her!",
+      "onInterrupt": [
+        {
+          "say": "Her laugh turns into hiccups.",
+          "style": "emote"
+        }
+      ],
+      "actions": [
+        {
+          "adds": {
+            "type": "crag_hyena",
+            "count": 2,
+            "radius": 8,
+            "level": 3
+          }
+        }
+      ],
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 4,
+          "wind": 1.2,
+          "damage": 0.6
+        }
+      ]
+    },
+    "circle": {
+      "id": "circle",
+      "name": "Circling",
+      "every": [
+        16,
+        19
+      ],
+      "first": 3,
+      "cast": 0.8,
+      "say": "The pack circles in — then Hettie pounces!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 12,
+          "r2": 6,
+          "wind": 1.6,
+          "damage": 1.4
+        },
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 3,
+          "after": 1.6,
+          "wind": 1.2,
+          "damage": 1.8
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Stalking",
+      "abilities": [
+        "snap",
+        "pick_off",
+        "laugh"
+      ]
+    },
+    {
+      "name": "Circling",
+      "at": 0.5,
+      "say": "Hettie's laugh goes high and wild!",
+      "abilities": [
+        "snap",
+        "circle",
+        "laugh",
+        "pick_off"
+      ]
+    }
+  ]
+}

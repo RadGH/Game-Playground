@@ -1,0 +1,137 @@
+{
+  "id": "rare_old_hookclaw",
+  "name": "Old Hookclaw",
+  "tier": "rare",
+  "zone": "hollin_pass",
+  "body": "ridge_griffin",
+  "place": "circles the switchbacks below Hollin Toll and lands on whoever is alone on the road",
+  "_doc": "Stream E (M2). A grey griffin with one hooked talon. Dives on a random player (the circle leads them), a wing gust shoves everyone off the ledge-side of a cone, and at half health it takes to the air: three dives in a row, each re-aimed.",
+  "party": {
+    "solo": "Fine for a careful solo player at level 7: the dives are the only real damage.",
+    "small": "Comfortable; the gust can knock a healer away, stand behind it.",
+    "full": "Quick — it dies before the second dive set.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.9,
+  "arena": {
+    "radius": 26
+  },
+  "say": {
+    "pull": [
+      "A shriek echoes off the cliff. Something big blots out the sun.",
+      "{boss} folds its wings and drops."
+    ],
+    "death": "Old Hookclaw tumbles down the scree, feathers everywhere.",
+    "reset": "Old Hookclaw climbs back into the thermals."
+  },
+  "abilities": {
+    "raking_claws": {
+      "id": "raking_claws",
+      "name": "Hooked Talon",
+      "every": [
+        6,
+        8
+      ],
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.6,
+          "arc": 1.5,
+          "status": "bleed",
+          "wind": 1.0,
+          "damage": 1.6
+        }
+      ]
+    },
+    "dive": {
+      "id": "dive",
+      "name": "Stooping Dive",
+      "every": [
+        11,
+        14
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "{boss} climbs high over {target} — keep moving!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.2,
+          "lead": 7,
+          "knock": 2,
+          "wind": 1.4,
+          "damage": 1.9
+        }
+      ]
+    },
+    "gust": {
+      "id": "gust",
+      "name": "Wing Gust",
+      "every": [
+        14,
+        17
+      ],
+      "first": 8,
+      "range": 10,
+      "cast": 0.6,
+      "say": "Its wings spread — do not stand in front of it!",
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 10,
+          "arc": 1.2,
+          "knock": 5,
+          "wind": 1.4,
+          "damage": 1.1
+        }
+      ]
+    },
+    "triple_dive": {
+      "id": "triple_dive",
+      "name": "Triple Stoop",
+      "every": [
+        20,
+        24
+      ],
+      "first": 3,
+      "cast": 1,
+      "say": "{boss} screams and stoops again, and again, and again!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "count": 3,
+          "delay": 1.2,
+          "lead": 6,
+          "wind": 1.3,
+          "damage": 1.7
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Hunting",
+      "abilities": [
+        "raking_claws",
+        "dive",
+        "gust"
+      ]
+    },
+    {
+      "name": "On the Wing",
+      "at": 0.5,
+      "say": "Old Hookclaw takes to the sky!",
+      "abilities": [
+        "raking_claws",
+        "triple_dive",
+        "gust"
+      ]
+    }
+  ]
+}

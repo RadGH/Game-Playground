@@ -1,0 +1,63 @@
+# Thousandvale STABLE game server (port 8490) — a hardened SYSTEM unit (stream H, PLAN §11.1).
+# Installed by ops/setup-stable.sh into /etc/systemd/system/thousandvale.service. Do not edit the copy there;
+# edit this file and re-run the setup script.
+#
+# What it runs: the PUBLISHED release at /srv/thousandvale/current (tools/publish-thousandvale.sh builds it from a
+# tested commit), never the playground working tree. The server serves ONLY current/public (A's --public flag).
+# Who it runs as: the system user `thousandvale` — no login shell, no sudo, cannot read /home (ProtectHome), so
+# ~/claude/secrets is out of reach. Its only secrets are in /etc/thousandvale/env (owner thousandvale, 0400).
+
+[Unit]
+Description=Thousandvale stable game server (8490)
+After=network-online.target postgresql.service
+Wants=network-online.target
+Requires=postgresql.service
+ConditionPathExists=/srv/thousandvale/current/app/prototypes/thousandvale/server/main.mjs
+
+[Service]
+Type=simple
+User=thousandvale
+Group=thousandvale
+EnvironmentFile=/etc/thousandvale/env
+Environment=NODE_ENV=production TV_ENV=stable
+WorkingDirectory=/srv/thousandvale/current/app/prototypes/thousandvale
+# BUILD holds the published commit hash; the client is stamped with the same one, so a stale tab is told to reload.
+# ($$ is systemd's escape for a literal $, so the shell — not systemd — expands these)
+ExecStart=/bin/sh -c 'exec /opt/thousandvale/node/bin/node server/main.mjs --port 8490 --host "$${TV_HOST:-0.0.0.0}" --env stable --db pg --process stable --terrain "$${TV_TERRAIN:-z12_02}" --public /srv/thousandvale/current/public --build "$$(cat /srv/thousandvale/current/BUILD)"'
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=75
+KillSignal=SIGTERM
+
+# --- hardening (systemd-analyze security thousandvale) ---
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=no
+# (V8's JIT needs writable+executable memory, so MemoryDenyWriteExecute must stay off for node)
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @mount @swap @reboot @debug @obsolete @cpu-emulation
+UMask=0077
+ReadOnlyPaths=/srv/thousandvale /opt/thousandvale
+StateDirectory=thousandvale
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

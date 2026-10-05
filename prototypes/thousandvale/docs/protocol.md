@@ -1,6 +1,6 @@
 # Thousandvale — network protocol and room interface (stream A)
 
-**Status:** v2 for M1 (rooms, parties, loot), 2026-10-04 (v1 = M0). Owner: stream A (`js/net/**` ★, `js/sim/**`, `server/**`).
+**Status:** v2 for M1.5 (rooms, parties, loot, encounter events, journal, trade, human check), 2026-10-04 (v1 = M0). Owner: stream A (`js/net/**` ★, `js/sim/**`, `server/**`).
 The machine-readable copy of every table on this page is `js/net/protocol.js`; if this page and that file
 disagree, the file wins and this page is a bug. Changes go through stream A (`docs/requests.md`).
 
@@ -97,7 +97,7 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `t` | Socket | Fields | Rate / burst | Meaning |
 |---|---|---|---|---|
 | `hello` | both | `v:int, build:str:64` | 2 / 2 | Must be first. |
-| `guest` | gw | `name?:str:24` | 1 / 3 | Make a guest account. |
+| `guest` | gw | `name?:str:24, human?:str:2048` | 1 / 3 | Make a guest account. `human` = the Turnstile token when `welcome.human` asked for one (§14); 20 new accounts per network per hour. |
 | `auth` | gw | `token:str:64` | 1 / 3 | Log into an account. |
 | `chars` | gw | — | 2 / 4 | List my characters. |
 | `create` | gw | `name:str:24, cls:str:32, look?:obj` | 1 / 3 | New character (`cls` = a Farhold class id; `look` = Chibi 2 avatar JSON, ≤ 4 KB). Names: 2–16 letters/spaces/'-, unique per realm, banned-name filter. |
@@ -114,13 +114,16 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `respawn` | p | — | 1 / 2 | Get up after dying: in the wilds or town you wake in the town (a `joined` handoff, `via:'respawn'`); in a dungeon, at its entrance. |
 | `use` | p | `id:id` | 4 / 8 | Use an object within 4 m: a portal/door (dungeon entrance), stairs, an exit, a chest. Answer `used {id, ok, why?, kind?}`; a move arrives as a `joined` handoff. |
 | `item` | p | `op:str:8, uid:str:40, slot?:str:16` | 5 / 10 | `equip {uid, slot?}` (slot defaults to the item's own), `unequip {uid, slot?}`, `destroy {uid}`. The uid must be in YOUR bag (or worn, for unequip). Answers `bag` + `equip`, or `err {code:'item'|'bagFull'}`. |
+| `travel` | p | `to:str:48` | 1 / 3 | Travel: a waystone `key` you have discovered (stand at any waystone; a gold fare by distance; not in combat or a dungeon), or `'event'` = free travel to the live realm event (§16). Answer `travelR`; the move is a `joined` handoff (or a `relocate` to another process). |
+| `trace` | p | `kind:str:16` | 1 / 2 | Leave a trace: `campfire` (10 min, one per player, wilds only). Graves appear by themselves where a player dies (1 h). |
+| `trade` | p | `op:str:8, id?:int, items?:uids, gold?:int` | 5 / 10 | The trade window (§13): `ask {id: entity}` (within 10 m) → they get `tradeAsk`; `accept {id: trade}`; `offer {id, items:[≤12 uids], gold}` (unlocks both); `lock {id}`; `confirm {id}` (both locked); `cancel`. Both confirmed → one all-or-nothing store write; `tradeState` throughout, `trade:null` + `done` at the end. |
 | `leave` | both | — | 1 / 2 | Log out cleanly (save now). |
 
 ### 3.2 Server → client
 
 | `t` | Fields | Meaning |
 |---|---|---|
-| `welcome` | `v, build, server, tickMs, time` | Handshake OK. |
+| `welcome` | `v, build, server, tickMs, time, human?:{provider:'turnstile', siteKey}` | Handshake OK. With `human`, show the Turnstile widget (that site key) and send its token in `guest {human}`. |
 | `refuse` | `code, msg` | Handshake refused (`version`, `build`, `full`, `banned`); socket closes. |
 | `authed` | `account:int, token?:str, claimed:bool` | `token` only on `guest` (store it). |
 | `charList` | `chars:[{id, name, cls, level, room}]` | |
@@ -141,6 +144,14 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `partyInvite` | `from, name, party` | (gateway) Someone invited me; answer `party {op:'accept'\|'decline', char: party}`. |
 | `partyFrames` | `m:[[char, hp, hpMax, room, x, z, dead, online, id]…]` | (gateway) Party frames, 2 Hz, every member (`id` = local entity id in `room`). |
 | `ignored` | `list:[{id, name}]` | (gateway) My ignore list. |
+| `relocate` | `path, ticket` | (game socket) You are moving to a province another process holds: open `path`, send `enter {ticket}`; the old socket closes. client.js does it (`joined` follows with `handoff.via:'relocate'`). |
+| `groupHint` | `key, with:[{char, name}]` | (gateway) You and others are fighting the same monster: "Group up?" — `party {op:'group', code: key}` (the first click makes the party, the rest join it). |
+| `realm` | `kind:'eventSoon'\|'eventStart'\|'eventEnd', ev:{id, uid, name, province, x, z, r, level, kind}, at?, won?` | (gateway, everyone) The realm event: announced ahead (`at` = wall ms it starts), started (free travel: `travel {to:'event'}`), ended. |
+| `eventFrame` | `uid, name, boss, hp, players` | (game socket, 1 Hz) You are in the realm event's arena: the temporary event group's frame (no invite needed). |
+| `zone` | `zone, name, band, deeds:{rares, bosses, elites, deaths, visitors}, heat:[[x, z, n]…]` | You walked into a zone: what happened here this hour, and where people walk (footprints). |
+| `travelR` | `ok, why?, msg?, cost?, to?` | Answer to `travel` (`why`: `undiscovered`, `far`, `gold`, `combat`, `instance`, `noEvent`, `dead`, `unknown`). |
+| `tradeAsk` | `trade, from, name` | Someone (entity `from`) wants to trade: answer `trade {op:'accept', id: trade}` or `cancel`. |
+| `tradeState` | `trade:{id, state, you:{char, name, id, items, gold, locked, confirmed}, them:{…}}\|null, done?, why?` | The trade window; `trade:null` = closed (`done:true` = it went through, else `why`: `cancelled`, `tradeFar`, `tradeFailed`, `bagFull`, `gone`). |
 | `err` | `code, msg` | Request failed (`auth`, `name`, `cls`, `full`, `ticket`, `state`, `party`, `partyFull`, `noCode`, `notFound`, `muted`, `item`, `bagFull`). `msg` is plain language. |
 | `kick` | `code, msg` | About to close: `elsewhere` (logged in from another tab), `abuse`, `restart`, `idle`. |
 
@@ -233,6 +244,23 @@ room routes it to clients whose view covers `(x, z)`, or only to `to` (a local i
 | `level` | `d, level` | Everyone near sees the flash. |
 | `loot` | `d, items:[{uid, name, rarity}], gold?` | Personal: to the looter only (the items themselves arrive in `bag`). |
 | `open` | `d` | I opened chest `d` (to me only). |
+| `tele` | `id, s, ab, k, ms, shape, x, z, yaw?, r?, r2?, arc?, len?, w?, el?, follow?` | A telegraph (encounters.md §7): `id` = telegraph id, `s` = caster entity, `ab` = ability, `k` = kind (harm/safe/stack/soak), lands at `k_batch * tickMs + ms` on the room clock; shapes `circle ring donut cone line cross` (`yaw` 0 = +z); `follow` = the entity id it rides. |
+| `teleR` | `id, hits?:[entity ids], x?` | The telegraph resolved (flash + remove); `x:1` = cancelled (fade, no burst). |
+| `castbar` | `id, ab, name, ms, int?` | Monster `id` started a cast (`int:1` = interruptible). |
+| `castX` | `id, ab, why` | The cast broke (`interrupt`, `stun`, `phase`, `reset`). |
+| `phase` | `id, n, name?, bar, hpMax?, reset?` | A boss phase turned; `hpMax` = a new health bar. |
+| `enrage` | `id, soft?, hard?` | Soft enrage stack count, or the hard enrage. |
+| `say` | `id, text, style` | A monster call-out (`yell`, `emote`, `warn` = centre screen). Not chat. |
+| `obj` | `id, state?, otype?, r?, key?, hp?, gone?` | An object changed: `state` from `OBJ_STATES` (`idle lit used broken open closed`); `gone:1` = removed. The object's current state is also in its `info.state`, so late arrivals see it. |
+| `boss` | `id, name?, title?, bars?, phases?:[{n, name, at}], enrageMs?, arena?:{x, z, r}` / `id, end:1, won?` | A scripted fight engaged (draw the boss bar with its phase ticks; `at` = hp fraction a phase starts at; `enrageMs` from now to hard enrage), or ended (`won` = it died). Sent by the rules (stream C); until then the client shows a bar for any `rank:'boss'` monster. |
+
+Encounter events ride the normal batch (key `type`, local entity ids). The field lists are machine-readable
+in `js/net/protocol.js` `EVENT_FIELDS`. Monster `info` carries `rank` (`elite`, `boss`; later `champion`, `rare`).
+
+**Room objects** (`kind:'object'`, `info.type`): `portal stairs exit chest gate lever` are the server's own
+(handled by `use`); `pillar rock brazier pool cracked_floor sarcophagus support_beam ore_cart` are arena
+props the encounter scripts own (`info.rules:1`; `use` on them goes to `rules.useObject`). Every object's
+`info` may carry `key` (a stable id from the plan or script, e.g. `f1-pillar-3`), `r` (radius) and `state`.
 | `aggro` | `s, d` | A monster picked a target (red flash on the nameplate). |
 | `fx` | `id, x, z, …` | Any one-off visual (telegraphs: `shape`, `r`, `ms`). |
 
@@ -278,6 +306,8 @@ tests in tests/A use the stand-in unless they say otherwise (`tests/A/m1-crules.
   (your unit, cooldowns, statuses). Reuse what is there instead of building a fresh sheet — it keeps the
   state, and building a Farhold unit is the most expensive thing a tick does.
 - Monsters carry `e.rank` (`normal` / `elite` / `boss`; elite and boss also have `STATE.elite`).
+- A camp or dungeon pack with `encounter: '<script id>'` gives its monsters `e.data.encounter` (E's plans name a script per mini-boss / boss room).
+- Arena objects are spawned by the encounter engine itself when a fight starts (`host.spawn({kind:'object', …, data:{rules:true, key}})`); the dungeon plan's `props` are NOT spawned by the room (they are for E's viewer and the client's dressing). Levers and gates are the server's (a lever opens its floor's gate: `obj` `used` + `open`).
 - Players carry `e.data.partyId` (null when alone), updated on every party change (+ `onParty`).
 - **Loot**: pass items in `host.award(e, {xp, gold, items, from})` (or emit `{type:'loot', to, items}` —
   the room turns that into the same grant and swallows the event). Every item gets a server-wide `uid`
@@ -307,6 +337,9 @@ tests in tests/A use the stand-in unless they say otherwise (`tests/A/m1-crules.
 | `host.award(e, {xp, gold, items?, from?, reason?})` | Credit a player; the room saves it, applies `levelFor`, sends `you` + `xp`/`level` events, puts items in the bag (§12) and logs the faucets. |
 | `host.newUid()` | A server-wide unique item id. |
 | `host.kind` | Room kind: `town` / `wilds` / `instance`. |
+| `host.terrain` | The room's terrain; `host.terrain.reader` = stream B's reader for a baked zone (use `groundAdapter(host.terrain.reader)`); dungeon instances have no reader (flat floors, `walkable` honours closed gates). |
+| `host.objState(e, state, extra?)` | Set an object's state (`OBJ_STATES`): updates its `info.state` for late arrivals and emits `obj {id, state, …extra}`. |
+| `host.spawn({kind:'object', type, name, x, z, data:{rules:true, key, r, state}})` | An arena object the rules own; `use` on it calls `rules.useObject(e, obj) -> {ok, why?, text?}`. |
 | `host.safeZones`, `host.inSafeZone(x, z)` | Circles monsters must not chase into (the town, seen from the wilds). |
 | `host.log(...args)` | Debug log (dropped in production). |
 
@@ -348,7 +381,11 @@ Teams: players `team = 1`, hostile monsters `team = 2`, friendly NPCs `team = 1`
 
 ### 8.1 Processes and ports
 `node server/main.mjs` (dev, port **8491**, LAN): static client (allow-listed directories only, §8.5), `/gw`,
-`/p/0`, `/status`. Options: `--port`, `--db` (`pg` | `json` | `memory`), `--host`. Stage 1 = one process.
+`/p/0`, `/status`, `/status.html`, `/healthz`. Options (header of main.mjs): `--port`, `--host`, `--db pg|json|memory`,
+`--db-file`, `--env dev|stable` (a pg database must end in `_<env>`: dev and stable never share one), `--public <dir>`
+(serve only a published copy, stream H), `--process <name>` (lease owner prefix), `--save-every`, `--journal-ms`,
+`--linger`, `--terrain <zone>`, `--rules auto|v0`, `--build`. Environment (an env file outside the repo,
+`server/env.example`): `PG*`/`DATABASE_URL`, `TV_TURNSTILE_SECRET`, `TV_TURNSTILE_SITEKEY`, `TV_ENV`. Stage 1 = one process.
 
 ### 8.2 Tick
 Fixed 20 Hz loop with drift correction (each tick is scheduled for `start + k*50 ms`; late ticks run
@@ -360,13 +397,22 @@ spawns/despawns → AOI refresh → snapshots and events → flush sockets.
 `tick:{p50, p95, p99, max, worst10m, overruns, skipped}` (ms, last minute), `msgsIn/s`, `bytesOut/s`,
 `bad`, `rulesErrors`, `saves:{queue, lastMs, failed}`, `heap`, `uptime`, `build`, `db`. Read-only numbers.
 
-### 8.4 Saves and crashes (M0)
-Characters live in Postgres (`thousandvale_dev`, schema `server/db/schema.sql`), or a JSON file / memory in
-tests and the Worker. A character is saved every 10 s while it changed, on level-up and on logout. Position,
-level, XP, gold and HP are columns + a JSON blob (`SAVE_FIELDS`, `js/sim/save-fields.js`). Each save is
-`UPDATE … WHERE version=$v AND lease_fence=$f`. At boot the process clears leases held by its own name
-(`p0:*`), so after a `kill -9` + restart clients reconnect straight away and resume from the last save
-(≤ 10 s of walking lost; the journal of M1.5 cuts this to ≤ 2 s).
+### 8.4 Saves, the journal and crashes (M1.5, PLAN §9.2)
+- Every change that matters becomes a **journal row** (`js/sim/journal.js`: `gold {d}`, `xp {d, level}`, `bagAdd {item}`,
+  `bagDel {uid}`, `equip {equipment}`, `opened`, `pos`, `set`) — deltas and add/removes, so they stay right on top of
+  any later blob. Rows are **group-committed every 2 s** (`--journal-ms`) in one statement that keeps only rows whose
+  character still holds the writer's lease fence (`char_journal`, schema v2).
+- The full **blob** is saved every 60 s if anything changed (`--save-every`), on logout, on a rare-or-better drop and
+  on a level-up; it records the last journal seq it contains (`journal_seq`) and the rows up to it are pruned in the
+  same statement. Every write sends a snapshot copy (the live character keeps changing while the write is in flight).
+- **Load** = blob + the journal rows after its seq, in order. **Worst-case loss on a crash: ≤ 2 s.**
+- **One writer**: lease + fence (`lease_fence` bumps on every take); blob saves are `… WHERE version=$v AND
+  lease_fence=$f`; a frozen old process that wakes cannot write a blob or a journal row. At boot a process clears
+  leases under its own name (`--process`, default `p0`), so after a `kill -9` + restart clients come straight back.
+- **Trades** write both blobs in ONE transaction (`store.tradeChars`, versions + fences checked): everything moves or
+  nothing does. Proven by tests/A/chaos.test.js: 500 crashes at random moments (writes landing 5–60 ms late, so crashes
+  cut through saves, journal commits and trades) with four players trading/equipping/walking — every item held exactly
+  once and the gold total unchanged after every restart.
 
 ### 8.5 Static files (dev)
 Served from the playground root so the client's relative imports into Farhold/avatar-3d/shared resolve:
@@ -429,13 +475,14 @@ Also for the client:
 ### 10.1 One zone as rooms
 | Room | id | Rule |
 |---|---|---|
-| **Town** (hub) | `town` | A circle on the zone terrain (`room.area`), shared by every wilds copy, **never copied**. No monsters; wilds monsters stop at its edge (`safeZones`). New characters and respawns start here. |
+| **Town** (hub) | `town` | A circle on the zone terrain (`room.area`; centre and radius from the bake's best settlement site, `sites[].radius` when B provides it, else by kind: village 65 m), shared by every wilds copy, **never copied**. No monsters; wilds monsters stop at its edge (`safeZones`). New characters and respawns start here. |
 | **Wilds** | `wilds:<n>` | The open zone. One copy at first; a new copy opens when every copy holds `copyCap` (300) players; empty extra copies close after 5 min. You go to your party leader's copy, else the copy you were in, else the fullest under the cap. |
 | **Dungeon instance** | `i:<n>` | Private per party (or per solo player): made when the first member uses the door, joined by any member while it lives, closed 30 min after the last one leaves (`instanceIdleMs`). 2 floors (stairs both ways), mini-bosses, a boss, a reward chest (once per character per run), an exit at the entrance and a loop-back exit after the reward room, both to the door outside. |
 
 ### 10.2 Handoffs
 - Walking into the town circle (more than 2 m inside) moves you to the town room; walking out (more than
-  2 m outside) moves you to your wilds copy. Same coordinates, same terrain.
+  2 m outside) moves you to your wilds copy. Same coordinates, same terrain. Edge crossings are queued and done
+  3 a tick, so a crowd walking out together is spread over a few ticks (it may take up to ~0.3 s longer).
 - `use` on a portal/stairs/exit moves you (stairs stay in the room: just a teleport, no handoff).
 - A handoff keeps hp, mana, the rules' state (`e.r`), bag and party; the client gets a fresh `joined` with
   `handoff: {from, via}` (`via`: `gate`, `portal`, `exit`, `respawn`, `stairs`) on the same game socket,
@@ -444,7 +491,7 @@ Also for the client:
   instance you left if it still lives and you may enter; a gone instance puts you at the door outside.
 
 ### 10.3 Dungeon plan shape (stream E's `js/rules/dungeon-tiers.js` must return this)
-`js/sim/dungeon.js` carries a STAND-IN generator with exactly this output (`planDungeon(seed, {floors, level, family})`):
+The world uses stream E's `js/rules/dungeon-tiers.js` `planDungeon` (families `crypt_spiral`, `mine_descent`); `js/sim/dungeon.js` keeps a stand-in with the same shape. Extra fields the server honours: `gate` (tiles shut until the floor's `lever` is used), `lever`, `shortcutUp` (stairs to floor 0), `packs[].type` / `.encounter`, `name` (`props` are ignored: C spawns arena objects). Shape:
 ```js
 { family, level, seed, cell: 2,
   floors: [ { index, origin: {x, z}, w, h,             // w×h tiles of `cell` metres; floors laid side by side
@@ -453,8 +500,8 @@ Also for the client:
               entry: {x, z}, stairsDown?, stairsUp?, exit?, chest?,      // metres
               packs: [ { x, z, count, rank, level, radius } ] } ] }
 ```
-Sent to the client as `joined.room.dungeon` = `{ family, level, cell, standIn, floors: [{ index, origin, w, h,
-tiles: <run lengths: 0s, 1s, 0s, …>, rooms }] }`. Objects (stairs, exits, the chest) are ordinary
+Sent to the client as `joined.room.dungeon` = `{ family, name, look, level, cell, standIn, floors: [{ index, origin, w, h,
+tiles: <run lengths: 0s, 1s, 0s, …>, rooms, gate?: {i, j, w, h, open} }] }` (gate tiles are 1 in `tiles`; draw them as a closed gate until `open`). Objects (stairs, exits, the chest) are ordinary
 `kind:'object'` entities with `info.type` = `stairs` / `exit` / `chest` / `portal`.
 
 ## 11. Parties (M1, PLAN §5.3, §5.5)
@@ -477,3 +524,19 @@ tiles: <run lengths: 0s, 1s, 0s, …>, rooms }] }`. Objects (stairs, exits, the 
 - **Faucet/sink log** (PLAN §13): every gold/item gain or loss is logged with a reason (`kill`, `chest`,
   `overflow`; sinks `destroy`) and the level band (`floor((level-1)/5)`); hourly rows are upserted into
   `economy_log` (schema v1) every minute; `/status.economy` shows the last hour.
+
+## 13. Trades (M1.5)
+`trade {op}` on the province socket (§3.1): ask (within 10 m, both alive, not ignoring) → accept → offers (≤ 12 uids
+from the bag + gold; any change unlocks both) → both lock → both confirm → one all-or-nothing store write. While a trade
+is open its offered items cannot be equipped/destroyed or offered elsewhere; a character is in one trade at a time;
+walking apart, dying, leaving or logging out cancels. While the write is in flight both characters' new loot waits
+(a couple of ticks). `tradeState` keeps both windows current; `trade:null` closes them (`done` or `why`).
+Options: `tradeMinLevel` (PLAN §5.5 wants claimed accounts at level 5+ for trades from M3; default 1 until claims exist).
+
+## 14. Human check on new guests (M1.5, PLAN §9.4)
+When `TV_TURNSTILE_SECRET` is set, `welcome.human = {provider:'turnstile', siteKey}` and `guest` must carry
+`human: <Turnstile token>`; the server checks it with Cloudflare (`server/turnstile.js`) and answers `err {code:'human'}`
+if it fails. New accounts are limited to 20 per network per hour (`err {code:'tooMany'}`; loopback/worker exempt).
+`js/net/client.js` takes `connect({ human })` = a token or `async ({siteKey}) => token` (the client renders the widget).
+Cloudflare's public test keys are in `server/env.example` (site key `1x00000000000000000000AA` passes, token
+`XXXX.DUMMY.TOKEN.XXXX`); the real pair lives only in the env file outside the repo.

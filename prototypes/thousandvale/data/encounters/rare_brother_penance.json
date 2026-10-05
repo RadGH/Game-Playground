@@ -1,0 +1,141 @@
+{
+  "id": "rare_brother_penance",
+  "name": "Brother Penance",
+  "tier": "rare",
+  "zone": "saint_orrins_rise",
+  "body": "sky_cultist",
+  "place": "whips himself along the pilgrim road to the abbey and insists everyone else join in",
+  "_doc": "Stream E (M2). A pilgrim who took it too far. He lashes in a cone, his Penitent Chant must be interrupted or every player is cursed, and at half health he marks a player with a circle of guilt that follows them — then a second, then a third.",
+  "party": {
+    "solo": "Solo: an interrupt skill makes it easy; without one, the curse stacks up.",
+    "small": "Easy.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.7,
+  "arena": {
+    "radius": 22
+  },
+  "say": {
+    "pull": [
+      "\"Have you suffered today? No? Let me help.\"",
+      "Brother Penance raises his scourge and smiles kindly."
+    ],
+    "death": "\"At last... enough.\" Brother Penance lies down in the road.",
+    "reset": "Brother Penance limps on toward the abbey."
+  },
+  "abilities": {
+    "scourge": {
+      "id": "scourge",
+      "name": "Scourge Lash",
+      "every": [
+        6,
+        8
+      ],
+      "range": 18,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 2.6,
+          "status": "bleed",
+          "wind": 1.1,
+          "damage": 1.5
+        }
+      ]
+    },
+    "chant": {
+      "id": "chant",
+      "name": "Penitent Chant",
+      "every": [
+        18,
+        22
+      ],
+      "first": 6,
+      "cast": 3,
+      "interrupt": true,
+      "say": "Brother Penance begins to chant — interrupt him!",
+      "onInterrupt": [
+        {
+          "say": "He loses his place in the verse.",
+          "style": "emote"
+        }
+      ],
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 22,
+          "status": "curse",
+          "element": "shadow",
+          "wind": 0.6,
+          "damage": 0.6
+        }
+      ]
+    },
+    "smite": {
+      "id": "smite",
+      "name": "Smite",
+      "every": [
+        11,
+        14
+      ],
+      "first": 3,
+      "cast": 0.4,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 2.8,
+          "element": "holy",
+          "wind": 1.3,
+          "damage": 1.6
+        }
+      ]
+    },
+    "guilt": {
+      "id": "guilt",
+      "name": "Circle of Guilt",
+      "every": [
+        17,
+        20
+      ],
+      "first": 3,
+      "cast": 0.8,
+      "say": "\"Who among you is guilty?\" — the marked must stand apart!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.2,
+          "count": 3,
+          "delay": 1.4,
+          "follow": true,
+          "element": "holy",
+          "wind": 2.6,
+          "damage": 1.3
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Pilgrimage",
+      "abilities": [
+        "scourge",
+        "chant",
+        "smite"
+      ]
+    },
+    {
+      "name": "Judgement",
+      "at": 0.5,
+      "say": "\"All of you! Guilty!\"",
+      "abilities": [
+        "scourge",
+        "guilt",
+        "chant"
+      ]
+    }
+  ]
+}

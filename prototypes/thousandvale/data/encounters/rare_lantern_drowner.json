@@ -1,0 +1,144 @@
+{
+  "id": "rare_lantern_drowner",
+  "name": "The Lantern Drowner",
+  "tier": "rare",
+  "zone": "brackwater",
+  "body": "marsh_wisp",
+  "place": "a light that bobs over the deepest pool of Brackwater Fen at dusk, pretending to be a lost traveller's lamp",
+  "_doc": "Stream E (M2). A wisp that lures. Its Lantern Light puts a gold SAFE circle under it and darkens everything else — come close to be spared. It sends sparks after everyone (spread), and at half health splits off three little lights.",
+  "party": {
+    "solo": "Solo is fine as long as you walk INTO the light.",
+    "small": "Easy.",
+    "full": "Easy; spread for the sparks.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.7,
+  "arena": {
+    "radius": 22
+  },
+  "say": {
+    "pull": [
+      "\"Over here! I have lost my way!\" The voice comes from the light.",
+      "The lamp bobs closer. There is nobody holding it."
+    ],
+    "death": "The Lantern Drowner gutters out with a sound like a sigh.",
+    "reset": "The light drifts back over the deep water."
+  },
+  "abilities": {
+    "spark": {
+      "id": "spark",
+      "name": "Cold Spark",
+      "every": [
+        5,
+        7
+      ],
+      "range": 20,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 2.4,
+          "element": "lightning",
+          "status": "shock",
+          "wind": 1.0,
+          "damage": 1.4
+        }
+      ]
+    },
+    "lure": {
+      "id": "lure",
+      "name": "Lantern Light",
+      "every": [
+        18,
+        22
+      ],
+      "first": 6,
+      "cast": 1,
+      "say": "The marsh goes black — come into the lantern light!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 4,
+          "kind": "safe",
+          "wind": 3,
+          "damage": 2.4
+        }
+      ]
+    },
+    "wisplets": {
+      "id": "wisplets",
+      "name": "Scattering Sparks",
+      "every": [
+        14,
+        17
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "Sparks cling to each of you — spread out!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 3,
+          "follow": true,
+          "element": "lightning",
+          "wind": 2.8,
+          "damage": 1.2
+        }
+      ]
+    },
+    "drown": {
+      "id": "drown",
+      "name": "Drowning Pull",
+      "every": [
+        16,
+        20
+      ],
+      "first": 10,
+      "cast": 0.8,
+      "say": "The water tugs at your legs!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 14,
+          "r2": 4,
+          "knock": 4,
+          "pull": true,
+          "wind": 1.6,
+          "damage": 1.5
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Luring",
+      "abilities": [
+        "spark",
+        "lure",
+        "drown"
+      ]
+    },
+    {
+      "name": "Scattering",
+      "at": 0.5,
+      "say": "The light splits into many!",
+      "abilities": [
+        "spark",
+        "wisplets",
+        "lure"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "marsh_wisp",
+            "count": 3,
+            "radius": 7
+          }
+        }
+      ]
+    }
+  ]
+}

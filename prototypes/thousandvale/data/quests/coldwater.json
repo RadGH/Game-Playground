@@ -1,0 +1,170 @@
+{
+  "_doc": "Stream E (M2). Quests for zone 'coldwater' (Coldwater Mere). Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/province.json).",
+  "zone": "coldwater",
+  "npcs": {
+    "mere_warden": {
+      "name": "Warden Oswy",
+      "role": "guard",
+      "at": "Mere Tower",
+      "greeting": "Coldwater by name. Coldwater by nature. Coldwater down your boots."
+    },
+    "elder_wenna": {
+      "name": "Elder Wenna",
+      "role": "elder",
+      "at": "Coldwater",
+      "greeting": "Come in, warm up. Not too warm; the house is made of reeds."
+    },
+    "netherby_fisher": {
+      "name": "Pike of Netherby",
+      "role": "fisher",
+      "at": "Netherby",
+      "greeting": "Netherby's the last village before the mere gets deep. And odd."
+    }
+  },
+  "quests": [
+    {
+      "id": "cold_slimes",
+      "name": "Cold Slimes",
+      "level": 5,
+      "giver": "elder_wenna",
+      "offer": "Bog slimes in the peat cuttings. They slow the cutters and eat the lunches.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "bog_slime",
+          "count": 6,
+          "where": "the peat cuttings",
+          "text": "Bog slimes"
+        }
+      ],
+      "done": "Lunch is safe. Peat is cut. Hooray for lunch.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 7,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "serpent_season",
+      "name": "Serpent Season",
+      "level": 6,
+      "giver": "netherby_fisher",
+      "offer": "Serpents in the reeds, serpents in the nets, serpents in my boot this morning. Thin them out.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "reed_serpent",
+          "count": 7,
+          "where": "around Netherby",
+          "text": "Reed serpents"
+        }
+      ],
+      "done": "Boots empty. Life good.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 7
+      }
+    },
+    {
+      "id": "tower_lights",
+      "name": "Tower Lights",
+      "level": 6,
+      "giver": "mere_warden",
+      "offer": "Wisps keep pretending to be the tower lamp. Boats follow the wrong light into the mere.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "marsh_wisp",
+          "count": 5,
+          "where": "along the mere shore",
+          "text": "Marsh wisps"
+        }
+      ],
+      "done": "One true light again. Mine.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 7
+      },
+      "next": "shrine_fishing"
+    },
+    {
+      "id": "frogs_in_the_well",
+      "name": "Frogs in the Well",
+      "level": 5,
+      "giver": "elder_wenna",
+      "offer": "The village well is full of croakers. The water tastes of frog. Don't ask how I know.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "fen_croaker",
+          "count": 6,
+          "where": "around the village well",
+          "text": "Fen croakers"
+        }
+      ],
+      "done": "Fresh water! Tastes of nothing! Wonderful!",
+      "reward": {
+        "xp": 0.35,
+        "gold": 6
+      }
+    },
+    {
+      "id": "the_drowned_temple",
+      "name": "The Drowned Temple",
+      "level": 7,
+      "giver": "mere_warden",
+      "group": "a party of 3-5",
+      "offer": "There's a temple at the bottom of the mere. When the water's low you can walk in. Something there doesn't want visitors.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Reach the lower halls",
+          "floor": 1
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Defeat the temple's keeper",
+          "boss": true
+        }
+      ],
+      "done": "The temple's quiet. The mere seems warmer. Slightly.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 50,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "coldwater_rare",
+      "name": "The Mere's Patient One",
+      "level": 6,
+      "giver": "netherby_fisher",
+      "offer": "There's something in the deep mere that just waits. Waits for you to fall in. Go to it instead.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "coldwater",
+          "slot": 0,
+          "text": "The mere's rare slain"
+        }
+      ],
+      "done": "It's not waiting any more. Neither am I — drinks are on Netherby.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 24,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

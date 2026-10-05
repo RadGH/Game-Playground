@@ -1,0 +1,43 @@
+{
+  "id": "mb_seep_mother",
+  "name": "The Seep Mother",
+  "tier": "miniboss",
+  "body": "bog_slime",
+  "place": "dungeon mine_descent: floor 2's mini-boss (a 24 m gallery)",
+  "_doc": "Stream E. A slime that grew in the mine's flooded sump. Two seep pools HEAL her while she sits in them: the tank drags her out. Her caustic spit leaves burning puddles. A swelling bloat lands on the farthest player: someone must stand in it or it bursts over the whole party. At 66% and 33% she sheds a brood of small slimes.",
+  "party": "Solo: the bloat soak always needs you — doable but you must leave the tank spot. 2-3: intended. 5: easy. M5 scaling: shed adds 2/3 -> 1/2 solo, 3/4 at five.",
+  "hpMult": 2.4,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      { "id": "seep_w", "type": "pool", "name": "Seep pool", "x": -6, "z": 0, "r": 3, "every": 1, "seconds": 9999, "boss": [ { "heal": 0.02 } ] },
+      { "id": "seep_e", "type": "pool", "name": "Seep pool", "x": 6, "z": 3, "r": 3, "every": 1, "seconds": 9999, "boss": [ { "heal": 0.02 } ] }
+    ]
+  },
+  "say": {
+    "pull": ["The sump water heaves itself up into a shape. It has far too many mouths.", "Something in the seep has noticed you."],
+    "death": "The Seep Mother slumps into a spreading, harmless puddle.",
+    "reset": "The Seep Mother sinks back into the sump."
+  },
+  "enrage": { "seconds": 300, "damage": 2.5, "say": "The Seep Mother boils over!", "soft": { "from": 200, "every": 15, "add": 0.08, "say": "The air stings. She is getting stronger." } },
+  "abilities": {
+    "slam": { "id": "slam", "name": "Sump Slam", "every": [7, 9], "range": 5,
+      "telegraphs": [ { "shape": "circle", "at": "target", "r": 2.6, "wind": 1.1, "damage": 1.6 } ] },
+    "spit": { "id": "spit", "name": "Caustic Spit", "every": [10, 13], "first": 4, "cast": 0.6,
+      "telegraphs": [ { "shape": "circle", "at": "random", "r": 2.5, "count": 2, "delay": 0.5, "wind": 1.4, "damage": 1.2, "element": "poison", "status": "poison",
+        "leave": { "type": "pool", "name": "Caustic puddle", "r": 2.2, "every": 1, "seconds": 14, "damage": 0.3, "element": "poison" } } ] },
+    "bloat": { "id": "bloat", "name": "Swelling Bloat", "every": [24, 28], "first": 12, "cast": 1,
+      "say": "A bloated blister lands near {target} — someone stand in it before it bursts!",
+      "telegraphs": [ { "shape": "circle", "at": "farthest", "r": 2.8, "wind": 5, "kind": "soak", "need": 1, "damage": 0.9, "fail": 2.2, "failSay": "Nobody held the blister — it bursts across the gallery!", "element": "poison" } ] },
+    "ripple": { "id": "ripple", "name": "Acid Ripple", "every": [15, 18], "first": 8, "cast": 0.8,
+      "say": "A ripple runs out from her — step through it close in!",
+      "telegraphs": [ { "shape": "donut", "at": "self", "r": 11, "r2": 3.5, "wind": 1.7, "damage": 1.7, "element": "poison" } ] }
+  },
+  "phases": [
+    { "name": "Seeping", "abilities": ["slam", "spit", "bloat"] },
+    { "name": "Shedding", "at": 0.66, "say": "She splits, and the pieces crawl toward you!", "abilities": ["slam", "spit", "bloat", "ripple"],
+      "onEnter": [ { "adds": { "type": "bog_slime", "count": 2, "radius": 5 } } ] },
+    { "name": "Boiling", "at": 0.33, "say": "The Seep Mother sheds again — she is getting smaller and angrier!", "abilities": ["slam", "spit", "ripple", "bloat"],
+      "onEnter": [ { "adds": { "type": "bog_slime", "count": 3, "radius": 5 } }, { "modifier": { "id": "boiling", "dmg": 1.15, "attackEvery": 0.85, "exact": true } } ] }
+  ]
+}

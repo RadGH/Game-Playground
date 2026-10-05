@@ -1,0 +1,153 @@
+{
+  "name": "Tifeckgate (z12_01)",
+  "zone": "z12_01",
+  "sheet": {
+    "sheet": "torbor_downs",
+    "zone": "ashcombe"
+  },
+  "province": {
+    "id": 10,
+    "name": "Petbeck Basin"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 2,
+  "inputHash": "078188c7",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9803699e"
+    },
+    "zone": {
+      "zx": 12,
+      "zy": 1
+    },
+    "worldOrigin": {
+      "x": 24576,
+      "z": 2048
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [
+    {
+      "id": 53,
+      "name": "Diheflow"
+    }
+  ],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "city",
+      "name": "Tifeckgate",
+      "x": 1408,
+      "z": 1328,
+      "hub": true,
+      "radius": 140,
+      "movedFrom": {
+        "x": 1472,
+        "z": 1216
+      }
+    },
+    {
+      "type": "landmark",
+      "kind": "ancientwood",
+      "name": "The Elder Fibafer",
+      "x": 704,
+      "z": 192
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 1566,
+      "z": 1434,
+      "yaw": -1.96
+    },
+    {
+      "type": "event",
+      "id": "event_ashcombe",
+      "x": 1216,
+      "z": 1176,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 1412,
+    "z": 1336
+  },
+  "summary": {
+    "zone": "z12_01",
+    "province": "Petbeck Basin",
+    "inputHash": "078188c7",
+    "rivers": 1,
+    "wetShare": 0.003,
+    "unwalkableShare": 0.037,
+    "towns": [
+      {
+        "name": "Tifeckgate",
+        "kind": "city",
+        "hub": true,
+        "at": [
+          1408,
+          1328
+        ],
+        "radius": 140,
+        "movedFrom": {
+          "x": 1472,
+          "z": 1216
+        },
+        "culture": "halfling",
+        "plots": 29,
+        "streets": 65,
+        "links": 1,
+        "overlaps": 0
+      }
+    ],
+    "roads": 4,
+    "bridges": 0,
+    "scatter": 10563,
+    "scatterKinds": {
+      "bush": 2758,
+      "tree_conifer": 5069,
+      "tree_broadleaf": 1057,
+      "rock_small": 1224,
+      "rock_large": 421,
+      "boulder": 34
+    },
+    "sites": [
+      "settlement(HUB) city Tifeckgate 1408 1328 140",
+      "landmark ancientwood The Elder Fibafer 704 192",
+      "dungeon door_1 Barrow entrance 1566 1434  -1.96",
+      "event event_ashcombe  1216 1176 40"
+    ],
+    "spawn": {
+      "x": 1412,
+      "z": 1336
+    },
+    "placements": 104,
+    "vignettesAvoided": 0
+  },
+  "files": {
+    "terrain.bin": 6305674,
+    "nav.bin": 1050717,
+    "scatter.bin": 84588,
+    "placements.json": 50313
+  }
+}

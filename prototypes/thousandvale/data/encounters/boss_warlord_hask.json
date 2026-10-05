@@ -1,0 +1,481 @@
+{
+  "id": "boss_warlord_hask",
+  "name": "Warlord Hask of the Red Banner",
+  "tier": "boss",
+  "body": "brigand_captain",
+  "place": "dungeon fortress_keep set B: the end boss on the keep's top floor, the war room (28 m)",
+  "_doc": "Stream E (M2). The brigand warlord who took the keep and calls himself its lord. A loud, clever fighter. P1 \"Command\": a cleaver for the tank, a shield charge, and BANNERS — he plants red banners that buff him while he stands near one (pools with boss actions); break them by luring his charge (charge breaks objects). P2 at 60% \"Siege\": he holes up behind a shield wall with his lieutenants; the war-room has three SIGNAL FIRES (braziers) — light them and the keep's old garrison bell knocks his shield wall down. P3 new bar \"The Red Banner Falls\": a burning floor, ballista volleys at random players, a soak on the war table, his bodyguard returns, and a hard interrupt on his \"Rally\" heal.",
+  "party": "Solo: very hard; with a follower OK. 2-3: one handles signal fires + soak. 5: as designed. M5: lieutenants +1 per player, soak need 2 at 5 players, health x1.8.",
+  "hpMult": 4,
+  "arena": {
+    "radius": 16,
+    "objects": [
+      {
+        "id": "fire_a",
+        "type": "brazier",
+        "name": "Signal fire",
+        "x": 11,
+        "z": 0
+      },
+      {
+        "id": "fire_b",
+        "type": "brazier",
+        "name": "Signal fire",
+        "x": -11,
+        "z": 0
+      },
+      {
+        "id": "fire_c",
+        "type": "brazier",
+        "name": "Signal fire",
+        "x": 0,
+        "z": -11
+      },
+      {
+        "id": "banner_a",
+        "type": "pillar",
+        "name": "Red banner",
+        "x": -6,
+        "z": 6,
+        "r": 1,
+        "hp": 1,
+        "onBreak": [
+          {
+            "say": "A red banner goes down!",
+            "style": "warn"
+          }
+        ]
+      },
+      {
+        "id": "banner_b",
+        "type": "pillar",
+        "name": "Red banner",
+        "x": 6,
+        "z": 6,
+        "r": 1,
+        "hp": 1,
+        "onBreak": [
+          {
+            "say": "A red banner goes down!",
+            "style": "warn"
+          }
+        ]
+      },
+      {
+        "id": "banner_aura_a",
+        "type": "pool",
+        "name": "Banner's rally ground",
+        "x": -6,
+        "z": 6,
+        "r": 3,
+        "every": 2,
+        "seconds": 9999,
+        "boss": [
+          {
+            "heal": 0.01
+          }
+        ]
+      },
+      {
+        "id": "banner_aura_b",
+        "type": "pool",
+        "name": "Banner's rally ground",
+        "x": 6,
+        "z": 6,
+        "r": 3,
+        "every": 2,
+        "seconds": 9999,
+        "boss": [
+          {
+            "heal": 0.01
+          }
+        ]
+      },
+      {
+        "id": "war_table",
+        "type": "cracked_floor",
+        "name": "War table",
+        "x": 0,
+        "z": 8,
+        "r": 2.6,
+        "blocks": false
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "\"Lord Hask will see you now. Lord Hask is going to kill you now.\"",
+      "\"You walked all the way up here? Brave. Stupid, but brave.\"",
+      "\"Red Banner! On your feet!\""
+    ],
+    "death": "Warlord Hask falls across his own war table. The red banner slips off its pole and covers him.",
+    "reset": "\"Get them out of my keep.\""
+  },
+  "enrage": {
+    "seconds": 330,
+    "damage": 3,
+    "say": "\"EVERYONE DIES TODAY!\""
+  },
+  "abilities": {
+    "cleaver": {
+      "id": "cleaver",
+      "name": "Warlord's Cleaver",
+      "every": [
+        7,
+        9
+      ],
+      "range": 6,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 1.5,
+          "status": "bleed",
+          "wind": 1.1,
+          "damage": 1.9
+        }
+      ]
+    },
+    "shield_charge": {
+      "id": "shield_charge",
+      "name": "Shield Charge",
+      "every": [
+        12,
+        15
+      ],
+      "first": 6,
+      "range": 20,
+      "cast": 0.8,
+      "say": "Hask lowers his shield at {target} — lead him into a banner!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 16,
+          "w": 3,
+          "knock": 3.5,
+          "breaks": true,
+          "wind": 1.4,
+          "damage": 1.9
+        }
+      ]
+    },
+    "plant": {
+      "id": "plant",
+      "name": "Plant the Banner",
+      "every": [
+        22,
+        26
+      ],
+      "first": 10,
+      "cast": 1,
+      "say": "\"Red Banner, stand!\" He plants another banner!",
+      "actions": [
+        {
+          "object": {
+            "id": "banner_new",
+            "type": "pillar",
+            "name": "Red banner",
+            "x": 0,
+            "z": -6,
+            "r": 1,
+            "hp": 1
+          }
+        },
+        {
+          "object": {
+            "id": "banner_new_aura",
+            "type": "pool",
+            "name": "Banner's rally ground",
+            "x": 0,
+            "z": -6,
+            "r": 3,
+            "every": 2,
+            "seconds": 9999,
+            "boss": [
+              {
+                "heal": 0.01
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "throw_axe": {
+      "id": "throw_axe",
+      "name": "Throwing Axes",
+      "every": [
+        11,
+        14
+      ],
+      "first": 4,
+      "cast": 0.5,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 2.4,
+          "count": 2,
+          "delay": 0.4,
+          "wind": 1.3,
+          "damage": 1.2
+        }
+      ]
+    },
+    "lieutenants": {
+      "id": "lieutenants",
+      "name": "Lieutenants!",
+      "every": [
+        22,
+        26
+      ],
+      "first": 8,
+      "say": "\"Lieutenants! Hold the wall!\"",
+      "actions": [
+        {
+          "adds": {
+            "type": "brigand_archer",
+            "count": 2,
+            "radius": 9,
+            "at": "home"
+          }
+        }
+      ]
+    },
+    "volley": {
+      "id": "volley",
+      "name": "Ballista Volley",
+      "every": [
+        14,
+        17
+      ],
+      "first": 5,
+      "cast": 1,
+      "say": "\"VOLLEY!\"",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "count": 3,
+          "delay": 0.3,
+          "wind": 1.5,
+          "damage": 1.6
+        }
+      ]
+    },
+    "burning_floor": {
+      "id": "burning_floor",
+      "name": "Torch the Room",
+      "every": [
+        18,
+        22
+      ],
+      "first": 3,
+      "cast": 0.8,
+      "say": "He kicks a torch into the rushes!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3,
+          "count": 4,
+          "delay": 0.25,
+          "spread": 12,
+          "element": "fire",
+          "leave": {
+            "type": "pool",
+            "name": "Burning rushes",
+            "r": 2.6,
+            "every": 1,
+            "seconds": 30,
+            "damage": 0.3,
+            "status": "burn"
+          },
+          "wind": 1.6,
+          "damage": 1.3
+        }
+      ]
+    },
+    "table_soak": {
+      "id": "table_soak",
+      "name": "Seize the Map",
+      "every": [
+        24,
+        28
+      ],
+      "first": 10,
+      "cast": 1,
+      "say": "\"The map! Get me the map!\" — someone stand at the war table!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "object",
+          "object": "cracked_floor",
+          "r": 2.8,
+          "kind": "soak",
+          "need": 1,
+          "fail": 2.0,
+          "failSay": "Hask grabs the war map and rallies the whole keep against you!",
+          "wind": 5,
+          "damage": 0.6
+        }
+      ]
+    },
+    "rally": {
+      "id": "rally",
+      "name": "Rally",
+      "every": [
+        22,
+        26
+      ],
+      "first": 14,
+      "cast": 3,
+      "interrupt": true,
+      "below": 0.9,
+      "say": "He shouts a rally — interrupt him before he heals!",
+      "onInterrupt": [
+        {
+          "say": "\"Rally! RAL—\" He chokes on it.",
+          "style": "emote"
+        }
+      ],
+      "actions": [
+        {
+          "heal": 0.1
+        }
+      ]
+    },
+    "last_cross": {
+      "id": "last_cross",
+      "name": "Red Banner Sweep",
+      "every": [
+        16,
+        19
+      ],
+      "first": 8,
+      "cast": 0.8,
+      "say": "He sweeps the banner pole round — dodge the cross, then the next!",
+      "telegraphs": [
+        {
+          "shape": "cross",
+          "at": "self",
+          "r": 14,
+          "w": 2.6,
+          "yaw": "facing",
+          "wind": 1.6,
+          "damage": 1.9
+        },
+        {
+          "shape": "cross",
+          "at": "self",
+          "r": 14,
+          "w": 2.6,
+          "yaw": "facing",
+          "rotate": 0.785,
+          "after": 1.4,
+          "wind": 1.6,
+          "damage": 1.9
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Command",
+      "abilities": [
+        "cleaver",
+        "shield_charge",
+        "plant",
+        "throw_axe"
+      ]
+    },
+    {
+      "name": "Siege",
+      "at": 0.6,
+      "say": "\"Shield wall! NOBODY touches me!\"",
+      "abilities": [
+        "lieutenants",
+        "volley",
+        "throw_axe",
+        "cleaver"
+      ],
+      "onEnter": [
+        {
+          "shield": true
+        },
+        {
+          "adds": {
+            "type": "road_brigand",
+            "count": 2,
+            "radius": 8,
+            "at": "home"
+          }
+        },
+        {
+          "say": "Hask hides behind a shield wall! Light all three signal fires to ring the garrison bell!",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "name": "The Red Banner Falls",
+      "newBar": {
+        "hp": 0.55
+      },
+      "say": "\"You want my keep? Come and TAKE IT.\"",
+      "abilities": [
+        "cleaver",
+        "burning_floor",
+        "table_soak",
+        "rally",
+        "last_cross"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 3,
+        "phase": 1
+      },
+      "do": [
+        {
+          "shield": false
+        },
+        {
+          "stun": 4
+        },
+        {
+          "vuln": {
+            "takeMore": 0.4,
+            "seconds": 10,
+            "name": "Wall Broken"
+          }
+        },
+        {
+          "say": "The old garrison bell booms — the shield wall scatters!",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "when": {
+        "broken": 2
+      },
+      "do": [
+        {
+          "remove": "banner_aura_a"
+        },
+        {
+          "remove": "banner_aura_b"
+        },
+        {
+          "say": "Both red banners are down! Hask has nowhere to rally!",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

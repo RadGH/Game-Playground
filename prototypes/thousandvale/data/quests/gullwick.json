@@ -1,0 +1,181 @@
+{
+  "_doc": "Stream E (M2). Quests for zone 'gullwick' (The Gullwick Lakes). Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/province.json).",
+  "zone": "gullwick",
+  "npcs": {
+    "ferrywoman_nell": {
+      "name": "Ferrywoman Nell",
+      "role": "trader",
+      "at": "Ferry Hythe",
+      "greeting": "Ferry's a copper. Swimming's free. The serpents are also free."
+    },
+    "elder_hollis": {
+      "name": "Elder Hollis",
+      "role": "elder",
+      "at": "Gullwick",
+      "greeting": "The lakes feed us. The lakes also try to eat us. Fair trade."
+    },
+    "stilt_guard": {
+      "name": "Stilt-guard Emrys",
+      "role": "guard",
+      "at": "Stilt Fort",
+      "greeting": "Fort's on stilts. Very defensible. Very wobbly."
+    },
+    "angler_tobin": {
+      "name": "Tobin the angler",
+      "role": "fisher",
+      "at": "drowned_shrine",
+      "greeting": "Best fishing's by the old shrine. Worst wisps, too."
+    }
+  },
+  "quests": [
+    {
+      "id": "serpents_at_the_ferry",
+      "name": "Serpents at the Ferry",
+      "level": 5,
+      "giver": "ferrywoman_nell",
+      "offer": "Reed serpents keep climbing aboard. They don't pay. Make them stop riding.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "reed_serpent",
+          "count": 6,
+          "where": "the ferry crossings",
+          "text": "Reed serpents"
+        }
+      ],
+      "done": "Free ferry for you. Once. Don't tell anyone.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 7,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      },
+      "next": "gull_steps"
+    },
+    {
+      "id": "croaking_at_dawn",
+      "name": "Croaking at Dawn",
+      "level": 5,
+      "giver": "elder_hollis",
+      "offer": "The croakers are breeding. Gullwick cannot hear itself think.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "fen_croaker",
+          "count": 8,
+          "where": "the lake shallows",
+          "text": "Fen croakers"
+        }
+      ],
+      "done": "I can hear myself think! It's mostly about fish.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 6
+      }
+    },
+    {
+      "id": "wobbly_fort",
+      "name": "The Wobbly Fort",
+      "level": 6,
+      "giver": "stilt_guard",
+      "offer": "Flitters nest under the stilt fort. Every night they shake it. Every night I am sick.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "dusk_flitter",
+          "count": 8,
+          "where": "under the stilt fort",
+          "text": "Dusk flitters"
+        }
+      ],
+      "done": "Steady at last. I can eat supper and keep it.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 7
+      }
+    },
+    {
+      "id": "shrine_fishing",
+      "name": "Fishing at the Shrine",
+      "level": 6,
+      "giver": "angler_tobin",
+      "offer": "Clear the wisps off the old shrine so I can fish in peace. Leave a coin in the bowl while you're there, for luck.",
+      "steps": [
+        {
+          "kind": "visit",
+          "vignette": "drowned_shrine",
+          "text": "Visit the drowned shrine"
+        },
+        {
+          "kind": "kill",
+          "type": "marsh_wisp",
+          "count": 4,
+          "where": "by the drowned shrine",
+          "text": "Marsh wisps"
+        }
+      ],
+      "done": "Peace and pike. What more could a man want?",
+      "reward": {
+        "xp": 0.35,
+        "gold": 6
+      }
+    },
+    {
+      "id": "the_underground_river",
+      "name": "The Underground River",
+      "level": 7,
+      "giver": "elder_hollis",
+      "group": "a party of 3-5",
+      "offer": "The lakes drain into caves under the hills. Something big lives where the water goes. Follow the river.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Follow the river down",
+          "floor": 1
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Defeat what lives at the source",
+          "boss": true
+        }
+      ],
+      "done": "The water runs clean again. Mostly.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 50,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "gullwick_rare",
+      "name": "The Lake's Old Grudge",
+      "level": 6,
+      "giver": "ferrywoman_nell",
+      "offer": "There's one in the deep water that's been holding a grudge since my grandmother's day. End it.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "gullwick",
+          "slot": 0,
+          "text": "The lake's rare slain"
+        }
+      ],
+      "done": "Grandmother's grudge, settled. She'd be glad.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 24,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

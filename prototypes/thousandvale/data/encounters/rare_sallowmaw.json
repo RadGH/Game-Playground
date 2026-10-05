@@ -1,0 +1,142 @@
+{
+  "id": "rare_sallowmaw",
+  "name": "Sallowmaw",
+  "tier": "rare",
+  "body": "fen_croaker",
+  "place": "wilds: the marsh south of Mawehaven; 20-60 min respawn per copy, called out in zone chat",
+  "_doc": "Stream E. A RARE: a frog the size of a cart. Its tongue PULLS the farthest player into its mouth range (line + pull), it belly-slams where you stand, and burps a poison cone. At 50% it calls three ordinary croakers out of the reeds.",
+  "party": "Open world rare. Solo: doable; the tongue pulls you into the chomp. 2-3: intended. M5 scaling: health by players tagged; croaker adds 3 -> 2 solo, 4 at five.",
+  "hpMult": 1.8,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "The reeds part. Sallowmaw blinks at you, slowly, with eyes like lanterns.",
+      "A croak like a door slamming rolls across the marsh."
+    ],
+    "death": "Sallowmaw deflates with a long, mournful croak.",
+    "reset": "Sallowmaw sinks back under the green water."
+  },
+  "abilities": {
+    "chomp": {
+      "id": "chomp",
+      "name": "Chomp",
+      "every": [
+        6,
+        8
+      ],
+      "range": 4.5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.4,
+          "arc": 1.4,
+          "wind": 0.9,
+          "damage": 1.5
+        }
+      ]
+    },
+    "tongue": {
+      "id": "tongue",
+      "name": "Tongue Snare",
+      "every": [
+        12,
+        15
+      ],
+      "first": 5,
+      "range": 18,
+      "cast": 0.6,
+      "say": "Sallowmaw's throat bulges — anyone behind {target} gets reeled in!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 18,
+          "w": 2,
+          "wind": 1.2,
+          "damage": 0.9,
+          "knock": 6,
+          "pull": true
+        }
+      ]
+    },
+    "belly_slam": {
+      "id": "belly_slam",
+      "name": "Belly Slam",
+      "every": [
+        13,
+        16
+      ],
+      "first": 8,
+      "range": 20,
+      "cast": 0.6,
+      "say": "Sallowmaw leaps!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 4,
+          "wind": 1.4,
+          "damage": 1.8,
+          "knock": 3
+        }
+      ]
+    },
+    "burp": {
+      "id": "burp",
+      "name": "Bog Burp",
+      "every": [
+        15,
+        18
+      ],
+      "first": 11,
+      "range": 8,
+      "cast": 0.5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 8,
+          "arc": 1.2,
+          "wind": 1.2,
+          "damage": 1.3,
+          "element": "poison",
+          "status": "poison"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Lurking",
+      "abilities": [
+        "chomp",
+        "tongue",
+        "belly_slam",
+        "burp"
+      ]
+    },
+    {
+      "name": "Spawning",
+      "at": 0.5,
+      "say": "Sallowmaw croaks, and the reeds croak back!",
+      "abilities": [
+        "chomp",
+        "tongue",
+        "belly_slam",
+        "burp"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "fen_croaker",
+            "count": 3,
+            "radius": 8
+          }
+        }
+      ]
+    }
+  ]
+}

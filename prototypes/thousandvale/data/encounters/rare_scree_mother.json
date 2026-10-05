@@ -1,0 +1,143 @@
+{
+  "id": "rare_scree_mother",
+  "name": "The Scree Mother",
+  "tier": "rare",
+  "zone": "hollin_pass",
+  "body": "stone_sentinel",
+  "place": "stands like a cairn beside the high pass and wakes when people stop to rest",
+  "_doc": "Stream E (M2). A walking heap of loose rock. It rains stones that STAY as rocks, then sings a rumble you dodge by putting a fallen rock between you and it (line of sight). At half health it shakes itself and the scree slides down in long lines.",
+  "party": {
+    "solo": "Solo works if you hide well; the rumble hurts if you are caught in the open.",
+    "small": "Easy with one person keeping stones near the group.",
+    "full": "Trivial; spread out so stones fall where you want cover.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 2.1,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "The cairn stands up.",
+      "Pebbles rattle uphill toward you. That is not how pebbles work."
+    ],
+    "death": "The Scree Mother slumps into an ordinary heap of stones.",
+    "reset": "The stones settle back into a cairn."
+  },
+  "abilities": {
+    "slam": {
+      "id": "slam",
+      "name": "Boulder Slam",
+      "every": [
+        7,
+        9
+      ],
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 2.8,
+          "wind": 1.2,
+          "damage": 1.7
+        }
+      ]
+    },
+    "stonefall": {
+      "id": "stonefall",
+      "name": "Stonefall",
+      "every": [
+        16,
+        19
+      ],
+      "first": 2,
+      "cast": 0.8,
+      "say": "Stones come loose from the slope!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 2.6,
+          "spread": 12,
+          "count": 4,
+          "delay": 0.3,
+          "leave": {
+            "type": "rock",
+            "name": "Fallen stone",
+            "r": 1.1,
+            "hp": 2
+          },
+          "wind": 1.6,
+          "damage": 1.4
+        }
+      ]
+    },
+    "rumble": {
+      "id": "rumble",
+      "name": "Deep Rumble",
+      "every": [
+        22,
+        26
+      ],
+      "first": 9,
+      "cast": 2.5,
+      "say": "The Scree Mother groans from deep inside — put a fallen stone between you!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 24,
+          "los": true,
+          "wind": 0.6,
+          "damage": 2.4
+        }
+      ]
+    },
+    "slide": {
+      "id": "slide",
+      "name": "Scree Slide",
+      "every": [
+        14,
+        17
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "The slope gives way!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 22,
+          "w": 3,
+          "count": 3,
+          "rotate": 0.4,
+          "yaw": "random",
+          "knock": 2,
+          "wind": 1.5,
+          "damage": 1.8
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Waking",
+      "abilities": [
+        "slam",
+        "stonefall",
+        "rumble"
+      ]
+    },
+    {
+      "name": "Landslide",
+      "at": 0.5,
+      "say": "The whole heap shudders and slides!",
+      "abilities": [
+        "slam",
+        "slide",
+        "stonefall",
+        "rumble"
+      ]
+    }
+  ]
+}

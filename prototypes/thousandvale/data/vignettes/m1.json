@@ -1,0 +1,164 @@
+{
+  "_doc": "Stream E. Vignettes: small hand-designed sites (PLAN §3.5). Each is a recipe placed by the bake (or tools/place-vignettes.mjs for the M1 zone). Coordinates inside a vignette are metres RELATIVE to its centre (+x east, +z south); the placement file gives the centre. Format: data/vignettes/README.md. `props[].kind`: 'prop' = highdef-3d/js/kit/rocks.js PROP_BUILDERS id, 'ground' = its GROUND_BUILDERS id, 'tree' = js/client/decor.js species (pine/fir/oak/birch, `dead: true` = leafless). `monsters` become a camp (type = Farhold bestiary id, `level` is added to the zone band's low end). `objects` become room objects (chest/note/npc/use). `lore` is the line shown when you first walk in (player-facing, plain language).",
+  "vignettes": [
+    {
+      "id": "hanging_oak",
+      "name": "The Hanging Oak",
+      "blurb": "A lone dead oak with a frayed rope and a shepherd's satchel under it; owls roost in it at night. Starts the 'A Rope for Old Pell' quest.",
+      "lore": "Somebody cut the rope down, but not before the crows had their turn. A satchel lies in the grass beneath.",
+      "tags": { "biomes": ["grassland", "shrubland"], "archetypes": ["heartland", "frontier", "wilds"], "band": [1, 12], "cultures": ["any"] },
+      "radius": 12,
+      "props": [
+        { "kind": "tree", "id": "oak", "dead": true, "x": 0, "z": 0, "yaw": 0.4, "scale": 1.4 },
+        { "kind": "ground", "id": "bone_scatter", "x": 1.5, "z": 1, "yaw": 0 },
+        { "kind": "prop", "id": "stone_marker", "x": -3, "z": 2.5, "yaw": 1.1 },
+        { "kind": "ground", "id": "lichen_patch", "x": -2, "z": -2, "yaw": 0 }
+      ],
+      "monsters": [ { "type": "gallows_owl", "count": 2, "level": 1, "x": 0, "z": -2, "radius": 6 } ],
+      "objects": [
+        { "type": "note", "name": "Shepherd's satchel", "x": 1, "z": 1.5, "text": "Pell — the toll men at the ford took the flock money. I told them it was all we had. Tell my sister in Wamonhold I tried. — Aled", "quest": "rope_for_old_pell" }
+      ]
+    },
+    {
+      "id": "overturned_cart",
+      "name": "The Overturned Cart",
+      "blurb": "A trader's cart tipped in a ditch; brigands are picking it over. A wounded carter hides under it and points you at the ford.",
+      "lore": "Turnips everywhere, a broken axle, and three men arguing over a barrel. Someone under the cart is trying very hard not to breathe.",
+      "tags": { "biomes": ["grassland", "temperateForest", "shrubland"], "archetypes": ["heartland", "frontier", "pass"], "band": [1, 14], "cultures": ["any"] },
+      "radius": 14,
+      "props": [
+        { "kind": "prop", "id": "cart_wheel", "x": 0, "z": 0, "yaw": 1.4 },
+        { "kind": "prop", "id": "cart_wheel", "x": 2.2, "z": 0.6, "yaw": 0.2 },
+        { "kind": "prop", "id": "crate", "x": -1.5, "z": 1.5, "yaw": 0.5 },
+        { "kind": "prop", "id": "crate", "x": 1, "z": 2.5, "yaw": 2.1 },
+        { "kind": "prop", "id": "barrel", "x": -2.5, "z": -1, "yaw": 0 },
+        { "kind": "prop", "id": "barrel", "x": 3, "z": -2, "yaw": 0 },
+        { "kind": "prop", "id": "fire_ring", "x": -6, "z": 4, "yaw": 0 }
+      ],
+      "monsters": [ { "type": "road_brigand", "count": 3, "level": 1, "x": -2, "z": 3, "radius": 5 } ],
+      "objects": [
+        { "type": "npc", "name": "Dunnet the carter", "x": 0.5, "z": -0.5, "says": ["Are they gone? Gods. They work for Hobb, at the ford. Hobb Gallowsby. Everyone pays Hobb.", "Take what's left in the crates. Better you than them."], "quest": "toll_at_fitockpi" },
+        { "type": "chest", "name": "Spilled crate", "x": -1.5, "z": 1.5, "tier": "common" }
+      ]
+    },
+    {
+      "id": "dry_well",
+      "name": "The Dry Well",
+      "blurb": "An abandoned farm well that rats have turned into a nest; a hidden cache sits on a ledge halfway down.",
+      "lore": "The bucket rope has been chewed through. Something down there is squeaking, a lot.",
+      "tags": { "biomes": ["grassland", "shrubland", "savanna"], "archetypes": ["heartland", "mine_country", "wilds"], "band": [1, 10], "cultures": ["human", "halfling", "dwarf"] },
+      "radius": 10,
+      "props": [
+        { "kind": "prop", "id": "well", "x": 0, "z": 0, "yaw": 0 },
+        { "kind": "prop", "id": "stone_step", "x": 2, "z": 0, "yaw": 1.57 },
+        { "kind": "prop", "id": "fence_post", "x": -4, "z": -3, "yaw": 0 },
+        { "kind": "prop", "id": "fence_rail", "x": -4, "z": -1, "yaw": 1.57 },
+        { "kind": "prop", "id": "fence_post", "x": -4, "z": 1, "yaw": 0 }
+      ],
+      "monsters": [ { "type": "cairn_rat", "count": 5, "level": 0, "x": 0, "z": 2, "radius": 5 } ],
+      "objects": [
+        { "type": "chest", "name": "Cache on the well ledge", "x": 0, "z": 0.6, "tier": "uncommon", "hidden": true, "hint": "A loose stone in the well wall, about an arm's length down." }
+      ]
+    },
+    {
+      "id": "boar_wallow",
+      "name": "Boar Wallow",
+      "blurb": "A churned-up mud hollow under the trees where a sounder of boars beds down; truffles in the roots. Grisel Thornhide's favourite spot.",
+      "lore": "The ground here is torn to black mud and smells strongly of pig. Something has been digging for truffles.",
+      "tags": { "biomes": ["temperateForest", "grassland"], "archetypes": ["heartland", "wilds"], "band": [1, 10], "cultures": ["any"] },
+      "radius": 13,
+      "props": [
+        { "kind": "ground", "id": "puddle_ring", "x": 0, "z": 0, "yaw": 0 },
+        { "kind": "ground", "id": "root_mat", "x": 3, "z": -2, "yaw": 0.6 },
+        { "kind": "ground", "id": "mushroom_ring", "x": -3, "z": 3, "yaw": 0 },
+        { "kind": "tree", "id": "oak", "x": 5, "z": 4, "yaw": 2 },
+        { "kind": "tree", "id": "birch", "x": -6, "z": -3, "yaw": 0.3 }
+      ],
+      "monsters": [ { "type": "thicket_boar", "count": 3, "level": 1, "x": 0, "z": 0, "radius": 6 } ],
+      "objects": [
+        { "type": "use", "name": "Truffle patch", "x": -3, "z": 3, "gives": { "gold": 6 }, "text": "You dig out a fist-sized black truffle. Somebody in Torborhold will pay for that." }
+      ]
+    },
+    {
+      "id": "smugglers_cellar",
+      "name": "The Smugglers' Cellar",
+      "blurb": "A burned-out farmstead whose hay hides a trapdoor; two brigand archers watch it. The cellar holds the ford gang's stash.",
+      "lore": "The farmhouse burned years ago, but the hay bales are fresh. Nobody keeps fresh hay at a burned farm.",
+      "tags": { "biomes": ["grassland", "shrubland"], "archetypes": ["heartland", "coast", "frontier"], "band": [2, 16], "cultures": ["any"] },
+      "radius": 14,
+      "props": [
+        { "kind": "prop", "id": "ruined_wall", "x": -4, "z": -3, "yaw": 0 },
+        { "kind": "prop", "id": "ruined_wall", "x": 3, "z": -4, "yaw": 1.57 },
+        { "kind": "prop", "id": "hay_bale", "x": 0, "z": 0, "yaw": 0.3 },
+        { "kind": "prop", "id": "hay_bale", "x": 1.4, "z": 0.8, "yaw": 1.2 },
+        { "kind": "prop", "id": "crate", "x": -1.5, "z": 2, "yaw": 0 },
+        { "kind": "ground", "id": "ash_patch", "x": -2, "z": -2, "yaw": 0 }
+      ],
+      "monsters": [ { "type": "brigand_archer", "count": 2, "level": 2, "x": 4, "z": 4, "radius": 4 } ],
+      "objects": [
+        { "type": "use", "name": "Trapdoor under the hay", "x": 0.7, "z": 0.4, "text": "Under the hay: a trapdoor, and under that a cellar full of other people's things." },
+        { "type": "chest", "name": "Smugglers' stash", "x": 0.7, "z": 0.4, "tier": "uncommon", "after": "Trapdoor under the hay" }
+      ]
+    },
+    {
+      "id": "drowned_shrine",
+      "name": "The Drowned Shrine",
+      "blurb": "Two pillars and a carved stone half-sunk in the marsh; wisps gather at dusk. Leave a coin in the bowl for a short blessing.",
+      "lore": "The water has swallowed the shrine up to its knees. Someone still leaves coins in the offering bowl.",
+      "tags": { "biomes": ["marsh", "lake"], "archetypes": ["marsh", "lakeland", "holy_ground"], "band": [1, 20], "cultures": ["any"] },
+      "radius": 11,
+      "props": [
+        { "kind": "prop", "id": "ruined_pillar", "x": -2.5, "z": 0, "yaw": 0 },
+        { "kind": "prop", "id": "ruined_pillar", "x": 2.5, "z": 0, "yaw": 0.2 },
+        { "kind": "prop", "id": "rune_stone", "x": 0, "z": -2, "yaw": 0 },
+        { "kind": "ground", "id": "puddle_ring", "x": 0, "z": 1.5, "yaw": 0 },
+        { "kind": "ground", "id": "lichen_patch", "x": 3, "z": 3, "yaw": 0 }
+      ],
+      "monsters": [ { "type": "marsh_wisp", "count": 2, "level": 2, "x": 0, "z": 3, "radius": 5 } ],
+      "objects": [
+        { "type": "use", "name": "Offering bowl", "x": 0, "z": -1, "cost": { "gold": 1 }, "buff": { "status": "regen", "seconds": 300 }, "text": "The coin sinks without a sound. You feel the marsh cold lift from your bones." }
+      ]
+    },
+    {
+      "id": "duel_stones",
+      "name": "The Duelling Stones",
+      "blurb": "A dolmen on a rise with two dead men in front of it and one fine sword between them; moths are at the bodies. Free weapon, small mystery.",
+      "lore": "Two men, two wounds, one sword. Whatever they were fighting over, neither of them won it.",
+      "tags": { "biomes": ["grassland", "hills", "shrubland"], "archetypes": ["heartland", "pass", "ruinfield", "wilds"], "band": [1, 20], "cultures": ["any"] },
+      "radius": 10,
+      "props": [
+        { "kind": "prop", "id": "dolmen", "x": 0, "z": -3, "yaw": 0 },
+        { "kind": "ground", "id": "bone_scatter", "x": -1.5, "z": 1, "yaw": 0.5 },
+        { "kind": "ground", "id": "bone_scatter", "x": 1.8, "z": 1.4, "yaw": 2.4 },
+        { "kind": "prop", "id": "stone_marker", "x": 4, "z": 2, "yaw": 0.8 }
+      ],
+      "monsters": [ { "type": "carrion_moth", "count": 3, "level": 0, "x": 0, "z": 1, "radius": 4 } ],
+      "objects": [
+        { "type": "chest", "name": "The sword between them", "x": 0, "z": 1.2, "tier": "uncommon", "only": "weapon" },
+        { "type": "note", "name": "Crumpled letter", "x": -1.5, "z": 1.2, "text": "Meet me at the stones at dawn and we will settle whose it is. Bring no one. — R." }
+      ]
+    },
+    {
+      "id": "hedge_witch_garden",
+      "name": "The Hedge-Witch's Garden",
+      "blurb": "A fenced herb garden with drying racks and a skull on a pole; her experiments (slimes) have got out of their pots. Her recipe note and herbs.",
+      "lore": "Neat rows of herbs, a drying rack, a skull on a stick. The skull has a little hat on. Something green and wobbling is eating the cabbages.",
+      "tags": { "biomes": ["marsh", "temperateForest", "grassland"], "archetypes": ["marsh", "heartland", "wilds"], "band": [1, 14], "cultures": ["any"] },
+      "radius": 12,
+      "props": [
+        { "kind": "prop", "id": "drying_rack", "x": -2, "z": -2, "yaw": 0.3 },
+        { "kind": "prop", "id": "skull_totem", "x": 3, "z": -3, "yaw": 0 },
+        { "kind": "prop", "id": "fence_post", "x": -5, "z": 4, "yaw": 0 },
+        { "kind": "prop", "id": "fence_rail", "x": -3, "z": 4, "yaw": 0 },
+        { "kind": "prop", "id": "fence_post", "x": -1, "z": 4, "yaw": 0 },
+        { "kind": "prop", "id": "campfire", "x": 1, "z": 0, "yaw": 0 },
+        { "kind": "ground", "id": "mushroom_ring", "x": 3, "z": 3, "yaw": 0 }
+      ],
+      "monsters": [ { "type": "bog_slime", "count": 2, "level": 1, "x": 0, "z": 3, "radius": 4 } ],
+      "objects": [
+        { "type": "note", "name": "Recipe, in a spidery hand", "x": -2, "z": -1.5, "text": "For a cough: three nettle tops, a pinch of bog-salt, and DO NOT leave the lid off the slime jar again, Mabry." },
+        { "type": "chest", "name": "Herb basket", "x": 1.5, "z": -1, "tier": "common" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "id": "rare_burnt_barns_hound",
+  "name": "The Burnt Barns Hound",
+  "tier": "rare",
+  "zone": "gorse_march",
+  "body": "barrow_hound",
+  "place": "howls in the ash of the burnt barns on nights the wind comes from the north; the farmers say it guards the dead",
+  "_doc": "Stream E (M2). A dead hound that will not leave the ruin where it died. It lunges, howls a ring of cold, and leaves ghost-prints that freeze anyone who steps in them. At half health it splits into three hounds (adds) and only the real one leaves prints.",
+  "party": {
+    "solo": "Solo-able, carefully.",
+    "small": "Easy.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.8,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "A howl rises from the ash. There is no dog. Then there is.",
+      "Cold paw-prints appear in the soot, walking toward you."
+    ],
+    "death": "The Burnt Barns Hound lies down in the ash and fades. Its prints stay a little longer.",
+    "reset": "The Hound sits down among the ruins, watching."
+  },
+  "abilities": {
+    "bite": {
+      "id": "bite",
+      "name": "Grave Bite",
+      "every": [
+        6,
+        8
+      ],
+      "range": 4.5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.2,
+          "arc": 1.3,
+          "element": "ice",
+          "wind": 0.9,
+          "damage": 1.6
+        }
+      ]
+    },
+    "lunge": {
+      "id": "lunge",
+      "name": "Lunge",
+      "every": [
+        10,
+        13
+      ],
+      "first": 4,
+      "cast": 0.4,
+      "say": "The Hound bunches to spring at {target}!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 12,
+          "w": 2.6,
+          "knock": 2,
+          "wind": 1.0,
+          "damage": 1.7
+        }
+      ]
+    },
+    "howl": {
+      "id": "howl",
+      "name": "Cold Howl",
+      "every": [
+        15,
+        18
+      ],
+      "first": 8,
+      "cast": 0.8,
+      "say": "The Hound howls — get in close or stay well back!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 10,
+          "r2": 3,
+          "element": "ice",
+          "status": "chill",
+          "wind": 1.5,
+          "damage": 1.6
+        }
+      ]
+    },
+    "prints": {
+      "id": "prints",
+      "name": "Ghost Prints",
+      "every": [
+        9,
+        11
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 2.6,
+          "element": "ice",
+          "leave": {
+            "type": "pool",
+            "name": "Ghost prints",
+            "r": 2.4,
+            "every": 1,
+            "seconds": 15,
+            "damage": 0.2,
+            "status": "chill"
+          },
+          "wind": 1.0,
+          "damage": 0.8
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Guarding",
+      "abilities": [
+        "bite",
+        "lunge",
+        "howl"
+      ]
+    },
+    {
+      "name": "Pack of Ghosts",
+      "at": 0.5,
+      "say": "The Hound splits into three!",
+      "abilities": [
+        "bite",
+        "prints",
+        "howl",
+        "lunge"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "barrow_hound",
+            "count": 2,
+            "radius": 6,
+            "level": 6
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,191 @@
+{
+  "_doc": "Stream E (M2). Quests for zone 'wychwood' (Wychwood). Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/province.json).",
+  "zone": "wychwood",
+  "npcs": {
+    "hermit_aled": {
+      "name": "The Hermit of Wychwood",
+      "role": "hermit",
+      "at": "Hermit's Rest",
+      "greeting": "I came here to be alone. Then everyone else came here too."
+    },
+    "collier_nan": {
+      "name": "Collier Nan",
+      "role": "trader",
+      "at": "Charcoal Burners",
+      "greeting": "Charcoal, kindling, and spiders. The spiders are free."
+    },
+    "warden_emrys": {
+      "name": "Warden Emrys",
+      "role": "guard",
+      "at": "the Antler Stockade",
+      "greeting": "The stockade's antlers are decorative. The arrows are not."
+    },
+    "lost_hunter": {
+      "name": "Hob the hunter",
+      "role": "hunter",
+      "at": "boar_wallow",
+      "greeting": "Lost my bow, lost my dog, lost my way. Found a lot of boar."
+    }
+  },
+  "quests": [
+    {
+      "id": "the_antler_stockade",
+      "name": "The Antler Stockade",
+      "level": 5,
+      "giver": "warden_emrys",
+      "story": 8,
+      "offer": "Brackwater's omens sent you? Fair enough. Spiders have strung the forest road shut. Cut it open.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "veil_spider",
+          "count": 8,
+          "where": "the forest road",
+          "text": "Spiders"
+        },
+        {
+          "kind": "visit",
+          "site": "the Antler Stockade",
+          "text": "Reach the Antler Stockade"
+        }
+      ],
+      "done": "The road's open. Next stop: Redcliff, where the trouble has a flag.",
+      "reward": {
+        "xp": 0.5,
+        "gold": 10,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      },
+      "next": "flags_over_redcliff"
+    },
+    {
+      "id": "charcoal_and_cobwebs",
+      "name": "Charcoal and Cobwebs",
+      "level": 5,
+      "giver": "collier_nan",
+      "offer": "Spiders keep webbing my kilns shut. I can't burn charcoal if I can't get to it, and I can't get to it because spiders.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "veil_spider",
+          "count": 5,
+          "where": "the charcoal kilns",
+          "text": "Spiders at the kilns"
+        }
+      ],
+      "done": "Kilns clear! I'll sell you charcoal at a discount. A very small one.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 6
+      }
+    },
+    {
+      "id": "the_hermits_peace",
+      "name": "The Hermit's Peace",
+      "level": 6,
+      "giver": "hermit_aled",
+      "offer": "Owls. All night. Who, who, who. I KNOW who. Make them stop asking.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "gallows_owl",
+          "count": 6,
+          "where": "around Hermit's Rest",
+          "text": "Gallows owls"
+        }
+      ],
+      "done": "Silence. Thank you. Please leave. Kindly.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 6
+      }
+    },
+    {
+      "id": "lost_and_hound",
+      "name": "Lost and Hound",
+      "level": 5,
+      "giver": "lost_hunter",
+      "offer": "My bow's in the wallow and my dog ran off with the hounds. Get the bow, and if you see Biscuit, he answers to 'Biscuit'.",
+      "steps": [
+        {
+          "kind": "visit",
+          "vignette": "boar_wallow",
+          "text": "Search the boar wallow"
+        },
+        {
+          "kind": "kill",
+          "type": "moor_hound",
+          "count": 5,
+          "where": "near the wallow",
+          "text": "Hounds (not Biscuit)"
+        }
+      ],
+      "done": "My bow! And there's Biscuit, he's been home all along. Embarrassing.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 6,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "the_barrow_rings",
+      "name": "The Barrow Rings",
+      "level": 7,
+      "giver": "hermit_aled",
+      "group": "a party of 3-5",
+      "offer": "The barrows in the deep wood are open. I can hear digging from inside. Go and stop it, then I can be alone with my thoughts.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Reach the inner rings",
+          "floor": 1
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Defeat the barrow's keeper",
+          "boss": true
+        }
+      ],
+      "done": "The digging has stopped. Now I can hear my thoughts. They're quite boring.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 50,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "wychwood_rare",
+      "name": "The Wood's Oldest Hunter",
+      "level": 6,
+      "giver": "warden_emrys",
+      "offer": "There's a beast in Wychwood that hunts hunters. My best tracker is still up a tree. Kill it so he can come down.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "wychwood",
+          "slot": 0,
+          "text": "Wychwood's rare slain"
+        }
+      ],
+      "done": "He's down. He's never going back up. Thank you.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 24,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

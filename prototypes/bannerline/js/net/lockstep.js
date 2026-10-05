@@ -188,14 +188,19 @@ export function createLockstep(o) {
   }
 
   function rejoin(newId, token) {
-    const m = machines.find(x => x.token === token && !x.live);
+    // a valid token wins even while the old record is still live: a guest that reloads inside the
+    // transport's heartbeat timeout (PeerJS: 8 s) comes back before its old connection is declared gone.
+    // Its players were never taken over then, and the old connection's late 'leave' no longer matches.
+    const m = token != null && token !== 'host' ? machines.find(x => x.token === token && x.id !== me) : null;
     if (!m) { send(newId, { t: 'refused', reason: 'no-seat' }); return; }
-    const old = m.id;
+    const old = m.id, wasLive = m.live;
     m.id = newId; m.live = true; m.hidden = false;
     m.fromTick = nextAssemble + delay + 2;
-    const list = sysAt.get(m.fromTick) || [];
-    for (const p of m.players) list.push({ sys: true, type: 'release', player: p });
-    sysAt.set(m.fromTick, list);
+    if (!wasLive) {   // the AI took the seat over: hand it back (a still-live seat was never taken)
+      const list = sysAt.get(m.fromTick) || [];
+      for (const p of m.players) list.push({ sys: true, type: 'release', player: p });
+      sysAt.set(m.fromTick, list);
+    }
     resync(newId, { rejoin: { fromTick: m.fromTick, oldId: old, age: lastNow == null ? 0 : lastNow - startAt, machines: machines.map(x => ({ id: x.id, name: x.name, players: x.players, token: x.token })) } });
     const notice = { t: 'notice', kind: 'rejoin', machine: newId, name: m.name, players: m.players, atTick: m.fromTick };
     broadcast(notice);

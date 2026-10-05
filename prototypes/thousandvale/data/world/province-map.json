@@ -1,0 +1,35 @@
+{
+ "_doc": "Stream B. Which world zones each of stream E's province sheets uses (data/provinces/<id>.json `zones.<id>.grid`). block = the world zone (zx, zy) of E's grid [0,0]; map = E zone id -> world zone id. tools/bake-zone.mjs reads it for per-zone sites (an event arena per zone; the world boss arena in the sheet's worldBossZone). Re-run E's tools/assign-vignettes.mjs + place-vignettes.mjs after any change here.",
+ "provinces": {
+  "torbor_downs": {
+   "worldProvince": 10,
+   "worldProvinceName": "Petbeck Basin",
+   "block": [
+    11,
+    1
+   ],
+   "size": [
+    4,
+    4
+   ],
+   "map": {
+    "hollin_pass": "z11_01",
+    "ashcombe": "z12_01",
+    "brackwater": "z13_01",
+    "saltmouth": "z14_01",
+    "delvers_hill": "z11_02",
+    "test": "z12_02",
+    "torbor_cross": "z13_02",
+    "gullwick": "z14_02",
+    "wychwood": "z11_03",
+    "saint_orrins_rise": "z12_03",
+    "millbrook": "z13_03",
+    "redcliff": "z14_03",
+    "blackthorn_scar": "z11_04",
+    "coldwater": "z12_04",
+    "gorse_march": "z13_04",
+    "sunken_wolds": "z14_04"
+   }
+  }
+ }
+}

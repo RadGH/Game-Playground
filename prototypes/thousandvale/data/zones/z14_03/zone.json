@@ -1,0 +1,303 @@
+{
+  "name": "Hollowcross (z14_03)",
+  "zone": "z14_03",
+  "sheet": {
+    "sheet": "torbor_downs",
+    "zone": "redcliff"
+  },
+  "province": {
+    "id": 10,
+    "name": "Petbeck Basin"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 2,
+  "inputHash": "8e298447",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9803699e"
+    },
+    "zone": {
+      "zx": 14,
+      "zy": 3
+    },
+    "worldOrigin": {
+      "x": 28672,
+      "z": 6144
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [
+    {
+      "id": 5,
+      "name": "The Pimamouth"
+    },
+    {
+      "id": 31,
+      "name": "The Dewil"
+    },
+    {
+      "id": 40,
+      "name": "The Hefeck Run"
+    },
+    {
+      "id": 73,
+      "name": "Depockflow"
+    }
+  ],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "village",
+      "name": "Hollowcross",
+      "x": 416,
+      "z": 880,
+      "hub": true,
+      "radius": 65,
+      "movedFrom": {
+        "x": 448,
+        "z": 832
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "village",
+      "name": "Bolwathold",
+      "x": 1216,
+      "z": 1712,
+      "radius": 65,
+      "movedFrom": {
+        "x": 1216,
+        "z": 1728
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Ravenhaven",
+      "x": 112,
+      "z": 224,
+      "radius": 46,
+      "movedFrom": {
+        "x": 64,
+        "z": 192
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Minfenrow",
+      "x": 1104,
+      "z": 1088,
+      "radius": 46,
+      "movedFrom": {
+        "x": 1088,
+        "z": 1088
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Bipetwatch",
+      "x": 320,
+      "z": 1424,
+      "radius": 46,
+      "movedFrom": {
+        "x": 320,
+        "z": 1472
+      }
+    },
+    {
+      "type": "crossing",
+      "kind": "ford",
+      "name": "Mafil Ford",
+      "x": 448,
+      "z": 832
+    },
+    {
+      "type": "crossing",
+      "kind": "ford",
+      "name": "Hafe Ford",
+      "x": 448,
+      "z": 448
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 556,
+      "z": 1008,
+      "yaw": -2.153
+    },
+    {
+      "type": "event",
+      "id": "event_redcliff",
+      "x": 693,
+      "z": 969,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 420,
+    "z": 868
+  },
+  "summary": {
+    "zone": "z14_03",
+    "province": "Petbeck Basin",
+    "inputHash": "8e298447",
+    "rivers": 4,
+    "wetShare": 0.015,
+    "unwalkableShare": 0.009,
+    "towns": [
+      {
+        "name": "Hollowcross",
+        "kind": "village",
+        "hub": true,
+        "at": [
+          416,
+          880
+        ],
+        "radius": 65,
+        "movedFrom": {
+          "x": 448,
+          "z": 832
+        },
+        "culture": "halfling",
+        "plots": 15,
+        "streets": 49,
+        "links": 2,
+        "overlaps": 0
+      },
+      {
+        "name": "Bolwathold",
+        "kind": "village",
+        "hub": false,
+        "at": [
+          1216,
+          1712
+        ],
+        "radius": 65,
+        "movedFrom": {
+          "x": 1216,
+          "z": 1728
+        },
+        "culture": "halfling",
+        "plots": 26,
+        "streets": 68,
+        "links": 3,
+        "overlaps": 0
+      },
+      {
+        "name": "Ravenhaven",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          112,
+          224
+        ],
+        "radius": 46,
+        "movedFrom": {
+          "x": 64,
+          "z": 192
+        },
+        "culture": "halfling",
+        "plots": 14,
+        "streets": 44,
+        "links": 2,
+        "overlaps": 0
+      },
+      {
+        "name": "Minfenrow",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          1104,
+          1088
+        ],
+        "radius": 46,
+        "movedFrom": {
+          "x": 1088,
+          "z": 1088
+        },
+        "culture": "halfling",
+        "plots": 11,
+        "streets": 33,
+        "links": 2,
+        "overlaps": 0
+      },
+      {
+        "name": "Bipetwatch",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          320,
+          1424
+        ],
+        "radius": 46,
+        "movedFrom": {
+          "x": 320,
+          "z": 1472
+        },
+        "culture": "halfling",
+        "plots": 12,
+        "streets": 45,
+        "links": 2,
+        "overlaps": 0
+      }
+    ],
+    "roads": 14,
+    "bridges": 6,
+    "scatter": 14982,
+    "scatterKinds": {
+      "tree_broadleaf": 8036,
+      "bush": 4273,
+      "reed": 1270,
+      "rock_small": 925,
+      "rock_large": 157,
+      "tree_dead": 88,
+      "boulder": 5,
+      "tree_acacia": 228
+    },
+    "sites": [
+      "settlement(HUB) village Hollowcross 416 880 65",
+      "settlement village Bolwathold 1216 1712 65",
+      "settlement hamlet Ravenhaven 112 224 46",
+      "settlement hamlet Minfenrow 1104 1088 46",
+      "settlement hamlet Bipetwatch 320 1424 46",
+      "crossing ford Mafil Ford 448 832",
+      "crossing ford Hafe Ford 448 448",
+      "dungeon door_1 Barrow entrance 556 1008  -2.153",
+      "event event_redcliff  693 969 40"
+    ],
+    "spawn": {
+      "x": 420,
+      "z": 868
+    },
+    "placements": 352,
+    "vignettesAvoided": 0
+  },
+  "files": {
+    "terrain.bin": 6306294,
+    "nav.bin": 1050717,
+    "scatter.bin": 119940,
+    "placements.json": 133193
+  }
+}

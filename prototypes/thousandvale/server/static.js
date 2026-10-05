@@ -30,7 +30,7 @@ const MIME = {
 const GZIP = new Set(['.html', '.js', '.mjs', '.css', '.json', '.svg', '.bin', '.u16', '.u8', '.txt', '.md', '.gltf']);
 
 /** Map a URL path to a file under root, or null when refused. */
-export function resolveStatic(root, urlPath) {
+export function resolveStatic(root, urlPath, allowAll = false) {
   let p;
   try { p = decodeURIComponent(urlPath.split('?')[0]); } catch { return null; }
   if (p.includes('\0')) return null;
@@ -38,20 +38,21 @@ export function resolveStatic(root, urlPath) {
   const parts = rel.split('/');
   if (parts.some(s => s.startsWith('.') || s === 'node_modules')) return null;
   const clean = parts.filter(Boolean).join('/');
-  if (!ALLOW.some(a => clean === a || clean.startsWith(a + '/'))) return null;
+  if (!allowAll && !ALLOW.some(a => clean === a || clean.startsWith(a + '/'))) return null;
   if (DENY.some(d => clean === d || clean.startsWith(d + '/'))) return null;
   const abs = resolve(root, clean);
   if (abs !== root && !abs.startsWith(root + sep)) return null;
   return abs;
 }
 
-export function createStaticHandler(root) {
+/** allowAll: serve everything under root (a published copy that holds only approved files). */
+export function createStaticHandler(root, { allowAll = false } = {}) {
   root = resolve(root);
   const gzCache = new Map();   // abs -> { mtime, buf }
   return function serve(req, res) {
     let urlPath = req.url.split('?')[0];
     if (urlPath === '/' || urlPath === '') { res.writeHead(302, { Location: '/prototypes/thousandvale/' }); res.end(); return true; }
-    let abs = resolveStatic(root, urlPath);
+    let abs = resolveStatic(root, urlPath, allowAll);
     if (!abs) return false;
     let st;
     try { st = statSync(abs); } catch { return false; }

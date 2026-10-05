@@ -1,0 +1,264 @@
+{
+  "id": "mb_drummer_ossa",
+  "name": "Drummer Ossa",
+  "tier": "miniboss",
+  "body": "sky_cultist",
+  "place": "dungeon fortress_keep set A: floor 2 mini-boss (24 m chapel of the bell)",
+  "_doc": "Stream E (M2). A cult drummer who took the keep's chapel. Everything she does is to the BEAT: her drums (three war drums, use to smash) each power one attack pattern — while drum 1 stands she casts the shockwave rings, drum 2 the falling sparks, drum 3 the trance. Her Trance Rhythm is a long interruptible cast that puts the room to sleep. Smashing all three drums breaks her trance ward in phase 2. Enrage 5 min.",
+  "party": "Solo: interrupts are the key; doable with a ranged class. 2-3: one interrupts, one smashes. 5: easy; M5: drums regrow if smashed early for small parties? (no) — just health x1.5 and a second shockwave ring for 4+.",
+  "hpMult": 2.1,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "drum_a",
+        "type": "brazier",
+        "name": "War drum (use to smash)",
+        "x": -8,
+        "z": -3
+      },
+      {
+        "id": "drum_b",
+        "type": "brazier",
+        "name": "War drum (use to smash)",
+        "x": 8,
+        "z": -3
+      },
+      {
+        "id": "drum_c",
+        "type": "brazier",
+        "name": "War drum (use to smash)",
+        "x": 0,
+        "z": 8
+      },
+      {
+        "id": "pew_a",
+        "type": "pillar",
+        "name": "Toppled pew",
+        "x": -4,
+        "z": 4,
+        "r": 1.3,
+        "hp": 2
+      },
+      {
+        "id": "pew_b",
+        "type": "pillar",
+        "name": "Toppled pew",
+        "x": 4,
+        "z": 4,
+        "r": 1.3,
+        "hp": 2
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "Boom. Boom. Boom-boom. \"You're off the beat,\" says Drummer Ossa, and smiles.",
+      "\"Dance for me!\""
+    ],
+    "death": "Drummer Ossa's sticks clatter to the floor. The silence is enormous.",
+    "reset": "The drumming starts again, slow and patient."
+  },
+  "enrage": {
+    "seconds": 300,
+    "damage": 2.5,
+    "say": "The drumming becomes a roar!",
+    "soft": {
+      "from": 180,
+      "every": 15,
+      "add": 0.08,
+      "say": "The beat quickens."
+    }
+  },
+  "abilities": {
+    "sticks": {
+      "id": "sticks",
+      "name": "Drumstick Jab",
+      "every": [
+        6,
+        8
+      ],
+      "range": 16,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 4.5,
+          "wind": 1.0,
+          "damage": 1.5
+        }
+      ]
+    },
+    "shockwave": {
+      "id": "shockwave",
+      "name": "Shockwave Beat",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "BOOM — BOOM — BOOM: rings roll out with the beat! Step through them!",
+      "telegraphs": [
+        {
+          "shape": "ring",
+          "at": "self",
+          "r": 5,
+          "r2": 2,
+          "count": 3,
+          "grow": 0.8,
+          "delay": 0.6,
+          "wind": 1.2,
+          "damage": 1.4
+        }
+      ]
+    },
+    "sparks": {
+      "id": "sparks",
+      "name": "Drum Sparks",
+      "every": [
+        11,
+        14
+      ],
+      "first": 7,
+      "cast": 0.5,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 2.5,
+          "count": 3,
+          "delay": 0.35,
+          "element": "fire",
+          "wind": 1.3,
+          "damage": 1.2
+        }
+      ]
+    },
+    "trance": {
+      "id": "trance",
+      "name": "Trance Rhythm",
+      "every": [
+        24,
+        28
+      ],
+      "first": 10,
+      "cast": 3.5,
+      "interrupt": true,
+      "say": "The rhythm slows... sleepy... INTERRUPT HER or hide behind a pew!",
+      "onInterrupt": [
+        {
+          "say": "A stick snaps. The rhythm breaks.",
+          "style": "emote"
+        }
+      ],
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 12,
+          "status": "sleep",
+          "los": true,
+          "wind": 0.5,
+          "damage": 0.4
+        }
+      ]
+    },
+    "cultists": {
+      "id": "cultists",
+      "name": "Call the Faithful",
+      "every": [
+        20,
+        24
+      ],
+      "first": 3,
+      "say": "\"Brothers! Keep the beat!\"",
+      "actions": [
+        {
+          "adds": {
+            "type": "sky_cultist",
+            "count": 2,
+            "radius": 8
+          }
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "The Beat",
+      "abilities": [
+        "sticks",
+        "shockwave",
+        "sparks",
+        "trance"
+      ]
+    },
+    {
+      "name": "Trance Ward",
+      "at": 0.55,
+      "say": "\"You cannot touch me while the drums play!\"",
+      "abilities": [
+        "cultists",
+        "shockwave",
+        "sparks",
+        "sticks"
+      ],
+      "onEnter": [
+        {
+          "shield": true
+        },
+        {
+          "adds": {
+            "type": "sky_cultist",
+            "count": 2,
+            "radius": 8
+          }
+        },
+        {
+          "say": "A ward hums around Ossa in time with the drums. Smash all three war drums!",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "name": "Off the Beat",
+      "at": 0.25,
+      "say": "\"No! NO! You've ruined the SONG!\"",
+      "abilities": [
+        "sticks",
+        "shockwave",
+        "trance"
+      ],
+      "onEnter": [
+        {
+          "modifier": {
+            "id": "offbeat",
+            "dmg": 1.2,
+            "exact": true
+          }
+        }
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 3,
+        "phase": 1
+      },
+      "do": [
+        {
+          "shield": false
+        },
+        {
+          "stun": 3
+        },
+        {
+          "say": "The last drum bursts! Ossa's ward fizzles out!",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

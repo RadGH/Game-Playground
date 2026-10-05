@@ -13,7 +13,8 @@ import * as THREE from 'three';
 import { createChibi2Character } from '../../../../avatar-3d/js/chibi2.js';
 import { createCreature, randomCreature } from '../../../../avatar-3d/js/creatures.js';
 import { compactCreature } from '../../../../avatar-3d/js/mesh-merge.js';
-import { avatarFor, bodyTypeFor } from './looks.js';
+import { avatarFor, bodyTypeFor, loadMonsterLooks } from './looks.js';
+import { normalizeAvatar } from '../../../../avatar-2d/js/render.js';
 
 /** A creature spec from what the server sent: `{ type, size?, seed, colors? }` — colour varied by seed within its family. */
 function creatureFor(spec) {
@@ -57,13 +58,24 @@ export function createActors(scene, { plateLayer, camera }) {
     queue.push(a);
     return a;
   }
-  function pick(i) { return { name: i.name, level: i.level, hp: i.hp, hpMax: i.hpMax, hostile: !!i.hostile, look: i.look, creature: i.creature, family: i.family }; }
+  function pick(i) { return { name: i.name, level: i.level, hp: i.hp, hpMax: i.hpMax, hostile: !!i.hostile, look: i.look, creature: i.creature, family: i.family, rank: i.rank || null }; }
 
   async function build(a) {
     try {
       let body;
       if (a.kind === 'monster') {
-        body = await createCreature(creatureFor(a.creature || { type: 'wolf' }), { detail: 0.8 });
+        const looks = await loadMonsterLooks();
+        const look = looks[a.creature?.type] || null;
+        const big = a.rank === 'boss' ? 1.45 : a.rank === 'elite' || a.rank === 'champion' || a.rank === 'rare' ? 1.18 : 1;
+        if (look?.avatar) {
+          // A humanoid monster (brigand, cultist, knight): a Chibi 2 body, scaled up when it is an elite or boss.
+          body = await createChibi2Character(normalizeAvatar(look.avatar), { anims: CHIBI_ANIMS });
+          a.humanoid = true;
+          body.group.scale.setScalar(big);
+        } else {
+          const spec = look?.creature ? { ...look.creature, seed: a.creature?.seed, size: (look.creature.size || 1) * big } : { ...(a.creature || { type: 'wolf' }), size: big };
+          body = await createCreature(look?.creature ? spec : creatureFor(spec), { detail: a.rank === 'boss' ? 1 : 0.8 });
+        }
         // One draw call per moving part instead of one per eye and toe (Farhold R27 M8).
         try { compactCreature(body); } catch (e) { console.warn('[actors] compact failed', e); }
       } else {
@@ -82,7 +94,7 @@ export function createActors(scene, { plateLayer, camera }) {
 
   function setAnim(a, name) {
     if (!a.body) { a.anim = name; return; }
-    if (a.kind === 'monster') { if (a.anim !== name) a.body.setAnim(name); }
+    if (a.kind === 'monster' && !a.humanoid) { if (a.anim !== name) a.body.setAnim(name); }
     else a.body.setAnim(name, 0.14, name === 'attack' || name === 'hit');
     a.anim = name;
   }
@@ -97,7 +109,7 @@ export function createActors(scene, { plateLayer, camera }) {
   function makePlate(a) {
     if (!plateLayer) return null;
     const root = document.createElement('div');
-    root.className = `plate ${a.kind} ${a.hostile ? 'hostile' : 'friendly'}${a.self ? ' self' : ''}`;
+    root.className = `plate ${a.kind} ${a.hostile ? 'hostile' : 'friendly'}${a.self ? ' self' : ''}${a.rank && a.rank !== 'normal' ? ' rank-' + a.rank : ''}`;
     root.innerHTML = `<div class="plate-bubble"></div><div class="plate-name"><span class="plate-lvl"></span><span class="plate-n"></span></div><div class="plate-bar"><i></i><b></b></div>`;
     plateLayer.appendChild(root);
     const p = { root, bubble: root.querySelector('.plate-bubble'), bubbleUntil: 0, name: root.querySelector('.plate-n'), lvl: root.querySelector('.plate-lvl'), bar: root.querySelector('.plate-bar i'), lag: root.querySelector('.plate-bar b'), lagW: 1 };
@@ -177,7 +189,7 @@ export function createActors(scene, { plateLayer, camera }) {
       }
       if (want !== a.anim) setAnim(a, want);
       if (a.body?.setRate) {
-        if (a.kind === 'player') {
+        if (a.kind === 'player' || a.humanoid) {
           const run = a.anim === 'run';
           a.body.setRate(a.anim === 'run' || a.anim === 'walk' ? Math.max(0.5, a.speed * (run ? 0.65 : 1.05) / (run ? 3.4 : 2.0)) : 1);
         } else a.body.setRate(a.anim === 'run' ? Math.max(0.6, a.speed / 5.2) : a.anim === 'walk' ? Math.max(0.5, a.speed / 1.5) : 1);

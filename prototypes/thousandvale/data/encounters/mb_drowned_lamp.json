@@ -1,0 +1,243 @@
+{
+  "id": "mb_drowned_lamp",
+  "name": "The Drowned Lamp",
+  "tier": "miniboss",
+  "body": "ash_wisp",
+  "place": "dungeon flooded_cistern set B: floor 1 mini-boss (24 m pump room)",
+  "_doc": "Stream E (M2). A lamp-spirit that lit the cistern for the workers and went wrong in the dark. It is fast and fragile and hard to pin: it teleports between three WALL LAMPS (it can only blink to a lit one). Light gives it power — snuff the lamps by using them (they count as \"lit\" when you put them OUT; once all three are dark, it is stranded and exposed). P1: sparks, a flare cone, a lantern-beam line. P2 at 50%: it splits into wisps (adds) behind a glow ward that drops when they die.",
+  "party": "Solo: fine (the lamps are the fight). 2-3: one snuffs while the others hit. 5: the snuffing is over in seconds; M5 should add a fourth lamp per 2 extra players and raise health x1.5.",
+  "hpMult": 2,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "lamp_a",
+        "type": "brazier",
+        "name": "Wall lamp (use to snuff)",
+        "x": -8,
+        "z": -4
+      },
+      {
+        "id": "lamp_b",
+        "type": "brazier",
+        "name": "Wall lamp (use to snuff)",
+        "x": 8,
+        "z": -4
+      },
+      {
+        "id": "lamp_c",
+        "type": "brazier",
+        "name": "Wall lamp (use to snuff)",
+        "x": 0,
+        "z": 8
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "A little light bobs out of the dark. \"Mind the step,\" it whispers. Then it burns.",
+      "\"Shift's over,\" says the lamp. \"Everybody out. EVERYBODY.\""
+    ],
+    "death": "The Drowned Lamp gutters, flickers, and goes out with a sigh.",
+    "reset": "The light drifts back to its hook and dims."
+  },
+  "enrage": {
+    "seconds": 300,
+    "damage": 2.5,
+    "say": "The Lamp flares white-hot!",
+    "soft": {
+      "from": 180,
+      "every": 15,
+      "add": 0.08,
+      "say": "The light is getting hotter."
+    }
+  },
+  "abilities": {
+    "flare": {
+      "id": "flare",
+      "name": "Flare",
+      "every": [
+        6,
+        8
+      ],
+      "range": 6,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5,
+          "arc": 1.2,
+          "element": "fire",
+          "status": "burn",
+          "wind": 1.0,
+          "damage": 1.5
+        }
+      ]
+    },
+    "sparks": {
+      "id": "sparks",
+      "name": "Sparks",
+      "every": [
+        11,
+        14
+      ],
+      "first": 4,
+      "cast": 0.5,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 2.4,
+          "count": 3,
+          "delay": 0.3,
+          "element": "fire",
+          "status": "burn",
+          "wind": 1.3,
+          "damage": 1.1
+        }
+      ]
+    },
+    "beam": {
+      "id": "beam",
+      "name": "Lantern Beam",
+      "every": [
+        14,
+        17
+      ],
+      "first": 8,
+      "cast": 0.8,
+      "say": "Twin beams of lamplight sweep the room!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 16,
+          "w": 2.2,
+          "element": "fire",
+          "yaw": "random",
+          "count": 2,
+          "rotate": 3.1416,
+          "wind": 1.4,
+          "damage": 1.8
+        }
+      ]
+    },
+    "flare_flash": {
+      "id": "flare_flash",
+      "name": "Blinding Flash",
+      "every": [
+        20,
+        24
+      ],
+      "first": 12,
+      "cast": 2.5,
+      "say": "The Lamp swells up bright — look away! Get behind something!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 12,
+          "los": true,
+          "status": "weaken",
+          "wind": 0.6,
+          "damage": 0.9
+        }
+      ]
+    },
+    "wisp_burst": {
+      "id": "wisp_burst",
+      "name": "Wisp Burst",
+      "every": [
+        9,
+        11
+      ],
+      "range": 12,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 3,
+          "element": "fire",
+          "wind": 1.2,
+          "damage": 1.4
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Lamplight",
+      "abilities": [
+        "flare",
+        "sparks",
+        "beam",
+        "flare_flash"
+      ]
+    },
+    {
+      "name": "Scattered Light",
+      "at": 0.5,
+      "say": "The Lamp breaks into a dozen little lights!",
+      "shieldWhileAdds": true,
+      "shieldDown": "The little lights go out — the Lamp is alone and dim!",
+      "abilities": [
+        "wisp_burst",
+        "sparks"
+      ],
+      "onEnter": [
+        {
+          "shield": true
+        },
+        {
+          "adds": {
+            "type": "marsh_wisp",
+            "count": 3,
+            "radius": 7
+          }
+        }
+      ]
+    },
+    {
+      "name": "Last Flicker",
+      "at": 0.25,
+      "say": "\"Shift's... not... over...\"",
+      "abilities": [
+        "flare",
+        "beam",
+        "sparks"
+      ],
+      "onEnter": [
+        {
+          "modifier": {
+            "id": "last_flicker",
+            "dmg": 1.2,
+            "exact": true
+          }
+        }
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 3
+      },
+      "do": [
+        {
+          "stun": 4
+        },
+        {
+          "vuln": {
+            "takeMore": 0.5,
+            "seconds": 12,
+            "name": "Stranded in the Dark"
+          }
+        },
+        {
+          "say": "Every lamp is out! The Drowned Lamp has nowhere to go!",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

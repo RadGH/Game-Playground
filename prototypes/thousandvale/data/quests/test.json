@@ -1,0 +1,378 @@
+{
+  "_doc": "Stream E. Quests for zone 'test' (The Torbor Fields, around Torborhold), M1. Simple, quick, and each one walks you somewhere new. Format: data/quests/README.md. Step kinds: kill {type, count, where?} · killOne {encounter} (a named rare/elite/boss) · collect {item, count, from: monster type, chance} · visit {vignette | site | point} · talk {npc} · use {vignette, object} · clear {dungeon: 'door'|floor} · deliver {item, npc}. `giver.at` is a settlement name or a vignette id. Rewards: xp and gold are fractions of a level's XP / a kill's gold at the quest level (the server prices them — PLAN §6.5, never fixed numbers here); `item.tier` rolls at YOUR level.",
+  "zone": "test",
+  "npcs": {
+    "elder_maud": {
+      "name": "Elder Maud Torbor",
+      "role": "elder",
+      "at": "Torborhold",
+      "greeting": "You've a sword and two good legs. That makes you the most useful person in Torborhold this week."
+    },
+    "reeve_corwin": {
+      "name": "Reeve Corwin Ashby",
+      "role": "guard",
+      "at": "Torborhold",
+      "greeting": "Half the watch is down with the cough and the other half is scared of a man called Hobb."
+    },
+    "bryn_bonesetter": {
+      "name": "Bryn the Bonesetter",
+      "role": "healer",
+      "at": "Torborhold",
+      "greeting": "Sit. No, not there, that's where I keep the leeches."
+    },
+    "goody_harl": {
+      "name": "Goody Harl",
+      "role": "farmer",
+      "at": "Wamonhold",
+      "greeting": "If you're here about the pig, you're too late, she ate the last fellow's boots."
+    },
+    "old_pell": {
+      "name": "Old Pell",
+      "role": "shepherd",
+      "at": "Wamonhold",
+      "greeting": "Have you seen my brother Aled? He went to the ford with the flock money."
+    },
+    "tamsin_reed": {
+      "name": "Tamsin Reed",
+      "role": "fisher",
+      "at": "Mawehaven",
+      "greeting": "Mind the frogs. No, I mean it. MIND the frogs."
+    },
+    "dunnet": {
+      "name": "Dunnet the carter",
+      "role": "trader",
+      "at": "overturned_cart",
+      "greeting": "Are they gone?"
+    }
+  },
+  "quests": [
+    {
+      "id": "wolves_at_the_fold",
+      "name": "Wolves at the Fold",
+      "level": 1,
+      "giver": "elder_maud",
+      "offer": "Moor hounds have been at the sheep folds every night this week. Thin them out before they get brave enough to come into the lanes.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "moor_hound",
+          "count": 8,
+          "where": "around Torborhold",
+          "text": "Moor hounds killed"
+        }
+      ],
+      "done": "Eight? Good. The shepherds will sleep tonight, and so will I.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 6,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      },
+      "next": "toll_at_fitockpi"
+    },
+    {
+      "id": "tusks_in_the_turnips",
+      "name": "Tusks in the Turnips",
+      "level": 2,
+      "giver": "goody_harl",
+      "offer": "Boars. In my turnips. Again. Five of them, I counted. Make it none.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "thicket_boar",
+          "count": 5,
+          "where": "the fields toward Wamonhold",
+          "text": "Thicket boars driven off (permanently)"
+        }
+      ],
+      "done": "Lovely. Take a turnip. Take two, they've been bitten anyway.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 6
+      },
+      "next": "the_old_sow"
+    },
+    {
+      "id": "the_old_sow",
+      "name": "The Old Sow",
+      "level": 4,
+      "giver": "goody_harl",
+      "group": "2-3 players, or a careful solo",
+      "offer": "The boars are her litter. Grisel Thornhide — big as a cart, brambles growing out of her back. Find her wallow and finish it.",
+      "steps": [
+        {
+          "kind": "visit",
+          "vignette": "boar_wallow",
+          "text": "Find the boar wallow"
+        },
+        {
+          "kind": "killOne",
+          "encounter": "rare_grisel_thornhide",
+          "text": "Grisel Thornhide slain"
+        }
+      ],
+      "done": "Gods. You actually did it. Here — my husband's knife. He'd want it used on something worth it.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 20,
+        "item": {
+          "tier": "uncommon",
+          "slot": "weapon"
+        }
+      }
+    },
+    {
+      "id": "toll_at_fitockpi",
+      "name": "The Toll at Fitockpi",
+      "level": 3,
+      "giver": "reeve_corwin",
+      "group": "the captain is an elite: bring a friend",
+      "offer": "Brigands hold Fitockpi Ford and take a 'toll' off everyone who crosses. Their captain is Hobb Gallowsby. I'd go myself but I'm very busy being in charge.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "road_brigand",
+          "count": 6,
+          "where": "the road to Fitockpi Ford",
+          "text": "Brigands dealt with"
+        },
+        {
+          "kind": "killOne",
+          "encounter": "elite_hobb_gallowsby",
+          "text": "Hobb Gallowsby stopped"
+        }
+      ],
+      "done": "Gallowsby, done? The ford's free? I'll write that down as a joint effort.",
+      "reward": {
+        "xp": 0.7,
+        "gold": 25,
+        "item": {
+          "tier": "uncommon",
+          "slot": "armor"
+        }
+      },
+      "next": "webs_in_the_barley"
+    },
+    {
+      "id": "rope_for_old_pell",
+      "name": "A Rope for Old Pell",
+      "level": 2,
+      "giver": "old_pell",
+      "startsFrom": {
+        "vignette": "hanging_oak",
+        "object": "Shepherd's satchel"
+      },
+      "offer": "Read the satchel's note, then take it to Old Pell in Wamonhold.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "hanging_oak",
+          "object": "Shepherd's satchel",
+          "text": "Read the satchel"
+        },
+        {
+          "kind": "deliver",
+          "item": "Shepherd's satchel",
+          "npc": "old_pell",
+          "text": "Bring the satchel to Old Pell"
+        }
+      ],
+      "done": "That's his hand. That's his... Thank you. I'd rather know. Take this — he'd not need it now.",
+      "reward": {
+        "xp": 0.3,
+        "gold": 4,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "the_carter_s_crates",
+      "name": "The Carter's Crates",
+      "level": 2,
+      "giver": "dunnet",
+      "startsFrom": {
+        "vignette": "overturned_cart",
+        "object": "Dunnet the carter"
+      },
+      "offer": "They'll be back for the rest. Chase off the ones by the cart, then tell the reeve in Torborhold the road isn't safe.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "road_brigand",
+          "count": 3,
+          "where": "the overturned cart",
+          "text": "Brigands at the cart"
+        },
+        {
+          "kind": "talk",
+          "npc": "reeve_corwin",
+          "text": "Tell Reeve Corwin about the cart"
+        }
+      ],
+      "done": "Another cart? Right. That settles it. Here's the job I've been meaning to give someone.",
+      "reward": {
+        "xp": 0.3,
+        "gold": 5
+      },
+      "next": "toll_at_fitockpi"
+    },
+    {
+      "id": "frogs_are_not_food",
+      "name": "Frogs Are Not Food",
+      "level": 3,
+      "giver": "tamsin_reed",
+      "offer": "The croakers have eaten my nets, my bait and my nephew's hat. With the nephew still in it, very nearly. Six of them, please.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "fen_croaker",
+          "count": 6,
+          "where": "the marsh south of Mawehaven",
+          "text": "Fen croakers"
+        }
+      ],
+      "done": "Six! My nephew says thank you. He says it very quietly, he's still upset.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 6
+      },
+      "next": "the_big_one"
+    },
+    {
+      "id": "the_big_one",
+      "name": "The Big One",
+      "level": 5,
+      "giver": "tamsin_reed",
+      "group": "2-3 players",
+      "offer": "There's one in the deep reeds the size of a cart. We call it Sallowmaw. It pulls people in with its tongue. Mind that.",
+      "steps": [
+        {
+          "kind": "killOne",
+          "encounter": "rare_sallowmaw",
+          "text": "Sallowmaw slain"
+        }
+      ],
+      "done": "You smell terrible. You're a hero. Both things are true.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 20,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "webs_in_the_barley",
+      "name": "Webs in the Barley",
+      "level": 4,
+      "giver": "tamsin_reed",
+      "offer": "There's silk all over Mawehaven's barley field, thick as rope. My gran used to say something lived under the old sinkhole. My gran said a lot of things.",
+      "steps": [
+        {
+          "kind": "visit",
+          "site": "event_grandmother_skein",
+          "text": "Look at the sinkhole in Mawehaven's field"
+        },
+        {
+          "kind": "visit",
+          "vignette": "hedge_witch_garden",
+          "text": "Ask the hedge-witch's garden for answers (read her notes)"
+        }
+      ],
+      "done": "So it's true. When she comes up, the whole village will need you. The whole field, more like.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 8
+      },
+      "next": "grandmother_wakes"
+    },
+    {
+      "id": "grandmother_wakes",
+      "name": "Grandmother Wakes",
+      "level": 5,
+      "giver": "tamsin_reed",
+      "group": "zone event — everyone nearby joins",
+      "offer": "When the ground shakes in the barley field, go. Burn her egg sacs. Don't let her sing.",
+      "steps": [
+        {
+          "kind": "killOne",
+          "encounter": "event_grandmother_skein",
+          "credit": "event",
+          "text": "Grandmother Skein defeated (event credit counts)"
+        }
+      ],
+      "done": "Mawehaven owes you. We'll name a field after you. A small one.",
+      "reward": {
+        "xp": 1.0,
+        "gold": 40,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "bones_for_bryn",
+      "name": "Bones for Bryn",
+      "level": 4,
+      "giver": "bryn_bonesetter",
+      "offer": "The hounds below the hill have good clean knucklebones. For splints. Don't make that face, they're dead already.",
+      "steps": [
+        {
+          "kind": "collect",
+          "item": "Clean knucklebone",
+          "count": 6,
+          "from": "barrow_hound",
+          "chance": 0.6,
+          "text": "Clean knucklebones"
+        }
+      ],
+      "done": "Lovely and clean. Hold out your arm — no, it's a gift, not a procedure.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 8,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "what_lies_below",
+      "name": "What Lies Below",
+      "level": 5,
+      "giver": "elder_maud",
+      "group": "a party of 3-5, or a follower",
+      "offer": "There is a door in the hill that my grandfather bricked up and somebody has unbricked. Go down. Find out what is at the bottom. Come back, please; I'm running out of heroes.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "floor": 1,
+          "text": "Reach the second floor"
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "boss": true,
+          "text": "Defeat what waits at the bottom"
+        }
+      ],
+      "done": "You came back. Both times I've said that this year, I've been surprised. Thank you.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 50,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      },
+      "next": "the_restless_cloister"
+    }
+  ]
+}

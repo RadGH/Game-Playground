@@ -1,0 +1,155 @@
+{
+  "id": "rare_scab",
+  "name": "Scab",
+  "tier": "rare",
+  "zone": "blackthorn_scar",
+  "body": "cinder_imp",
+  "place": "a warband's pet imp that got loose and now burns the camps of anyone it dislikes, which is everyone",
+  "_doc": "Stream E (M2). A giggling imp. It blinks to the farthest player (a circle at them), throws fireballs that split, and at half health summons its friends and puts a ring of fire around the whole fight — only the centre is safe.",
+  "party": {
+    "solo": "Hard solo once the friends arrive.",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.7,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "\"Ooh! New toys!\"",
+      "Scab bounces on the spot, cackling, hands full of fire."
+    ],
+    "death": "\"Not... FAIR!\" Scab pops like a coal in a fire.",
+    "reset": "Scab skips away, bored."
+  },
+  "abilities": {
+    "claw": {
+      "id": "claw",
+      "name": "Hot Claws",
+      "every": [
+        6,
+        8
+      ],
+      "range": 4,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 3.8,
+          "arc": 1.5,
+          "element": "fire",
+          "status": "burn",
+          "wind": 0.9,
+          "damage": 1.5
+        }
+      ]
+    },
+    "hop": {
+      "id": "hop",
+      "name": "Hop!",
+      "every": [
+        11,
+        14
+      ],
+      "first": 4,
+      "cast": 0.5,
+      "say": "\"Peekaboo, {target}!\"",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "farthest",
+          "r": 3,
+          "element": "fire",
+          "wind": 1.2,
+          "damage": 1.6
+        }
+      ]
+    },
+    "fireball": {
+      "id": "fireball",
+      "name": "Splitting Fireball",
+      "every": [
+        12,
+        15
+      ],
+      "first": 7,
+      "cast": 0.6,
+      "say": "Scab throws a fireball — and it splits!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 3,
+          "element": "fire",
+          "wind": 1.3,
+          "damage": 1.5
+        },
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 2.4,
+          "after": 1.0,
+          "count": 3,
+          "jitter": 4,
+          "element": "fire",
+          "status": "burn",
+          "wind": 1.3,
+          "damage": 1.1
+        }
+      ]
+    },
+    "fire_ring": {
+      "id": "fire_ring",
+      "name": "Ring of Fire",
+      "every": [
+        18,
+        22
+      ],
+      "first": 3,
+      "cast": 1,
+      "say": "\"Hee hee! Fire everywhere!\" — get to the middle!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "home",
+          "r": 6,
+          "kind": "safe",
+          "wind": 3,
+          "damage": 2.4
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Playing",
+      "abilities": [
+        "claw",
+        "hop",
+        "fireball"
+      ]
+    },
+    {
+      "name": "Party Time",
+      "at": 0.5,
+      "say": "\"Friends! Come play!\"",
+      "abilities": [
+        "claw",
+        "fire_ring",
+        "fireball"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "cinder_imp",
+            "count": 2,
+            "radius": 8,
+            "level": 7
+          }
+        }
+      ]
+    }
+  ]
+}

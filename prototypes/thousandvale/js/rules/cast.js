@@ -86,6 +86,20 @@ export function createCombat(room) {
       if (post.gold) p.gold += foundGold(p, post.gold);
       if (post.cooldownCut) p.skills.refresh(post.cooldownCut);
       if (post.rally) applyStatus(p, 'rally', statuses.rally, 1);
+      if (post.petHeal) room.followers?.heal(p, post.petHeal);
+      const rtk = runtimeFor(combat);
+      rtk.withCaster(p, () => {
+        if (post.breath) {
+          for (const other of field.near(e.x, e.z, post.breath.radius, e)) {
+            field.strikeArea(other.x, other.z, 1.5, p, { element: post.breath.element, power: 0.6, kind: 'unique' });
+            applyStatus(other, post.breath.status, statuses[post.breath.status], 6);
+          }
+        }
+        if (post.spreadStatuses && e.statuses) {
+          for (const other of field.near(e.x, e.z, post.spreadStatuses, e)) for (const [type, st] of Object.entries(e.statuses)) applyStatus(other, type, statuses[type], st.power);
+        }
+        rtk.afterKill(p, post, e);
+      });
       const award = rpg.killXpFor(p, e, xpCfg);
       const coin = foundGold(p, e.gold);
       const drops = rpg.rollDrops(e, { rng: lootRng, magicFind: p.derived.magicFind }) || [];
@@ -125,6 +139,9 @@ export function createCombat(room) {
     // ---- a held weapon (a drawn bow, a charged staff): the release is the attack. The client says
     // how long it held; the server never believes more than the time since the weapon was ready.
     if (hand === 'main' && (plan?.hold === 'draw' || plan?.hold === 'charge')) {
+      // the pattern step walks on every release, as the controller's mainStep does (it picks the shape)
+      if (t - (clock.lastAt ?? -Infinity) > CAST.COMBO_RESET + (clock.lastEvery || 0)) { clock.mainStep = 0; ch.combo = 0; }
+      const hstep = clock.mainStep++;
       const h = Math.max(0, Math.min(Number.isFinite(held) ? held : 0, t - (clock.readySince ?? clock[readyKey] ?? 0), 5));
       if (plan.hold === 'draw') {
         const d = drawPower(plan.draw, h);
@@ -133,7 +150,7 @@ export function createCombat(room) {
         clock.readySince = clock[readyKey];
         clock.lastAt = t; clock.lastEvery = plan.afterShot ?? 0.12;
         field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'shoot', wind: 0, every: plan.afterShot ?? 0.12 });
-        resolveArrow(ch, weapon, d.power);
+        resolveArrow(ch, weapon, d.power, hstep);
         return { ok: true, hand, kind, power: d.power };
       }
       // the staff's channel drinks mana while held: hold no longer than you can pay for
@@ -144,7 +161,7 @@ export function createCombat(room) {
       clock.readySince = clock[readyKey];
       clock.lastAt = t; clock.lastEvery = plan.afterCast ?? 0.28;
       field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'castStaff', wind: 0, every: plan.afterCast ?? 0.28 });
-      resolveStaff(ch, weapon, hh, c);
+      resolveStaff(ch, weapon, hh, c, hstep);
       return { ok: true, hand, kind, held: hh };
     }
 
@@ -171,7 +188,7 @@ export function createCombat(room) {
 
     const fire = kind === 'melee' ? () => resolveSwing(ch, hand, step, weapon)
       : kind === 'bolt' ? () => resolveWand(ch, weapon, step)
-        : () => resolveArrow(ch, weapon, plan?.power ?? 1);
+        : () => resolveArrow(ch, weapon, plan?.power ?? 1, step);
     if (wind <= 0) fire(); else pending.push({ at: t + wind, fn: fire, who: ch.id });
     field.emit({ t: 'swing', id: ch.id, hand, step, clip: stepRow?.clip || 'attack', wind, every });
     return { ok: true, hand, kind, step, wind, every };
@@ -190,8 +207,12 @@ export function createCombat(room) {
    * where it was aimed — on the first body along the shot, or at full range — after its flight,
    * and strikes everything within the arrow splash at the draw's power.
    */
-  function resolveArrow(ch, weapon, power) {
+  function resolveArrow(ch, weapon, power, step = 0) {
+    if (runtimeFor(combat).formBasic(ch, 'main')) return;
     const mods = rpg.attackMods(ch, 'arrow', { weapon, hand: 'main' });
+    // swingWith posts the weapon's strike shape for every kind of attack; a melee skill borrows it
+    feel.swing.charge = null;
+    ch.lastStrike = { ...withArea(strikeAt(weapon, step), ch.derived.areaPct || 0) };
     const element = mods.element || elementOf(weapon);
     const leaves = mods.element ? ELEMENT_LEAVES[mods.element] || null : statusOf(weapon);
     const plan = ch.derived.swing?.main;
@@ -220,6 +241,7 @@ export function createCombat(room) {
         if (ch.removed) return;
         const hits = field.strikeArea(at.x, at.z, balance.player?.arrowSplash ?? 2.6, ch, { element, applyStatus: hookFor(ch), power, kind: 'arrow' });   // main.js onArrowLand: the draw's power and nothing else
         for (const { enemy, result } of hits) brand(enemy, result);
+        runtimeFor(combat).resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: { x: at.x, z: at.z }, element });
       }, ch.id);
     }
   }
@@ -237,6 +259,7 @@ export function createCombat(room) {
 
   /** A WAND (main.js `swingWith` wand branch): its behaviour row decides the bolt. */
   function resolveWand(ch, weapon, step) {
+    if (runtimeFor(combat).formBasic(ch, 'main')) return;
     const mods = rpg.attackMods(ch, 'bolt', { weapon, hand: 'main' });
     const share = mods.power || 1;
     feel.swing.charge = null;
@@ -255,19 +278,23 @@ export function createCombat(room) {
     const opts = { element, onHit: brandFor(ch, leaves), applyStatus: hookFor(ch), power: (how.mult || 1) * share * shape.damage, kind: 'bolt' };
     // main.js passes `{ ...meleeOpts, power: how.mult * share }`, so the strike shape's own share is NOT in a wand bolt
     opts.power = (how.mult || 1) * share;
+    plan.mods = mods;
     throwBolt(combat, ch, plan, a, a.dx, a.dz, opts);
+    // Twin Bolt: a second bolt a beat behind the first, at a share of its damage
+    if (mods.twin) combat.later(mods.twin.ms / 1000, () => throwBolt(combat, ch, { ...plan, mods: null }, aimOfCh(ch), Math.sin(ch.yaw), Math.cos(ch.yaw), { ...opts, power: (how.mult || 1) * share * mods.twin.power }), ch.id);
   }
 
   /**
    * A STAFF (main.js `swingWith` staff branch): a close-range spell by element, free to cast. A tap
    * is the ordinary spell; a real charge is its charged form (jet, dome, wall, mortar, storm).
    */
-  function resolveStaff(ch, weapon, held, c) {
+  function resolveStaff(ch, weapon, held, c, step = 0) {
+    if (runtimeFor(combat).formBasic(ch, 'main')) return;
     const mods = rpg.attackMods(ch, 'staff', { weapon, hand: 'main' });
     const share = mods.power || 1;
     const charge = chargeAt(held, c);                       // posts the charge for withArea to fold in
     if (charge.mana > 0) ch.mp = Math.max(0, (ch.mp || 0) - charge.mana);
-    const shape = { ...withArea(strikeAt(weapon, 0), ch.derived.areaPct || 0) };
+    const shape = { ...withArea(strikeAt(weapon, step), ch.derived.areaPct || 0) };
     if (mods.scale && mods.scale !== 1) shape.scale = (shape.scale || 1) * mods.scale;
     ch.lastStrike = shape;
     const element = mods.element || elementOf(weapon);
@@ -296,7 +323,9 @@ export function createCombat(room) {
       return;
     }
     if (charged?.shape === 'dome') {
-      for (const { enemy, result } of field.strikeArea(ch.x, ch.z, radius, ch, { falloff: 0.2, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1), kind: 'staff' })) {
+      const domeHits = field.strikeArea(ch.x, ch.z, radius, ch, { falloff: 0.2, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1), kind: 'staff' });
+      rt.resolveAttack(ch, mods, domeHits, { x: ch.x, z: ch.z, at: null, element });
+      for (const { enemy, result } of domeHits) {
         brand(enemy, result); statusOn(enemy, 0.6);
         rt.push(enemy, ch.x, ch.z, charged.push || 2.4);
       }
@@ -308,11 +337,15 @@ export function createCombat(room) {
       return;
     }
     if (spell.shape === 'nova') {
-      for (const { enemy, result } of field.strikeArea(ch.x, ch.z, radius, ch, { falloff: 0.35, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1), kind: 'staff' })) { brand(enemy, result); statusOn(enemy, 0.6); }
+      const novaHits = field.strikeArea(ch.x, ch.z, radius, ch, { falloff: 0.35, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1), kind: 'staff' });
+      for (const { enemy, result } of novaHits) { brand(enemy, result); statusOn(enemy, 0.6); }
+      rt.resolveAttack(ch, mods, novaHits, { x: ch.x, z: ch.z, at: null, element });
     } else if (spell.shape === 'cone' || spell.shape === 'wave') {
       const range = (spell.range || 9) * shape.scale;
       const wide = spell.shape === 'cone' ? (spell.arc || 0.9) * shape.scale : 0.45;
-      for (const { enemy } of field.strike(ch, ch, { reach: range, arc: wide, ...coneOpts })) statusOn(enemy, 0.6);
+      const coneHits = field.strike(ch, ch, { reach: range, arc: wide, ...coneOpts });
+      for (const { enemy } of coneHits) statusOn(enemy, 0.6);
+      rt.resolveAttack(ch, mods, coneHits, { x: ch.x, z: ch.z, at: null, element });
     } else {
       const plan = talentPlan(ch, 'staff:' + spell.key, {
         element, range: (spell.range || 12) * shape.scale, splash: radius, projectiles: 1, spread: 0,
@@ -325,6 +358,7 @@ export function createCombat(room) {
         plan.kind = 'ground'; plan.radius = radius * 1.4; plan.groundRadius = radius * 1.4; plan.ground = Math.max(plan.ground || 0, 3);
       }
       if (charged?.shape === 'storm') plan.chains = charged.chains || 5;
+      plan.mods = mods;
       throwBolt(combat, ch, plan, a, a.dx, a.dz, { ...opts, power: (spell.mult || 1) * (shape.charge?.power || 1) * (mods.power || 1) });
     }
   }
@@ -332,6 +366,8 @@ export function createCombat(room) {
   /** The damage half of a swing — exactly `swingWith`'s melee branch, at the moment it lands. */
   function resolveSwing(ch, hand, step, weapon) {
     if (ch.dead || ch.removed) return [];
+    // main.js swingWith's first line: in a shape form the basic attack is the form's own
+    if (runtimeFor(combat).formBasic(ch, hand)) return [];
     const kind = 'melee';
     const mods = rpg.attackMods(ch, kind, { weapon, hand });
     const share = (hand === 'off' ? OFFHAND_DAMAGE : 1) * (mods.power || 1);
@@ -348,6 +384,7 @@ export function createCombat(room) {
     };
     const opts = { element, onHit: brandHit, applyStatus: hookFor(ch), power: share * shape.damage, strike: shape, kind: 'swing' };
     const hits = field.strike(ch, ch, { reach, arc, ...opts });
+    runtimeFor(combat).resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: null, element });   // unique powers
     if (ch.perkFlags?.sunder && shape.last) for (const h of hits) h.enemy.armor = Math.max(0, (h.enemy.armor || 0) - 8);
     const swung = { self: ch, mana: 0 };
     rpg.fx.onSwing(swung);
@@ -363,6 +400,8 @@ export function createCombat(room) {
     return hits;
   }
   combat.resolveSwing = resolveSwing;
+  combat.resolveWand = (ch, w, step = 0) => resolveWand(ch, w, step);
+  combat.resolveArrow = (ch, w, power = 1, step = 0) => resolveArrow(ch, w, power, step);
 
   // ------------------------------------------------------------------ skills
 
@@ -379,12 +418,19 @@ export function createCombat(room) {
 
   /** Fire every pending wind-up / delayed strike that is due, then tick the skill bars. */
   combat.tick = (dt) => {
+    // due timers fire in the order they fall due (as setTimeout does), ties in the order they were set;
+    // something a timer schedules for "now" fires in this same pass
     const t = now();
-    for (let i = 0; i < pending.length;) {
-      if (pending[i].at <= t + 1e-9) { const p = pending.splice(i, 1)[0]; p.fn(); } else i++;
+    for (;;) {
+      let best = -1;
+      for (let i = 0; i < pending.length; i++) if (pending[i].at <= t + 1e-9 && (best < 0 || pending[i].at < pending[best].at - 1e-12)) best = i;
+      if (best < 0) break;
+      pending.splice(best, 1)[0].fn();
     }
     // main.js frame order: timers (above), the field (monsters), the skill bars, the skill runtime, pools
     combat.tickMonsters?.(dt);
+    // main.js frame order: the field, then the companions, then the skill bars
+    room.followers?.tick(dt, runtimeFor(combat).petHooks);
     for (const p of field.players) if (!p.dead) p.skills.update(dt, { fighting: true });
     combat.tickExtra?.(dt);
   };

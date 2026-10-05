@@ -1,0 +1,145 @@
+{
+  "id": "rare_vesper_bell_owl",
+  "name": "Vesper",
+  "tier": "rare",
+  "zone": "saint_orrins_rise",
+  "body": "gallows_owl",
+  "place": "nests in the abbey bell tower and swoops on anyone climbing the Rise at evening",
+  "_doc": "Stream E (M2). A white owl that roosts in the bell. Each time it rings the bell, a ring of sound rolls out — be inside it or far away. It swoops down lines, and at half health the bell cracks: the sound comes in a cross and the owlets come down.",
+  "party": {
+    "solo": "Solo-able.",
+    "small": "Easy.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.7,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "BONG. The bell rings by itself, and a white owl drops from the tower.",
+      "Two pale eyes in the belfry. Then, a bell."
+    ],
+    "death": "Vesper flutters down into the bell tower and is still. The bell rings once, softly.",
+    "reset": "Vesper glides back to the tower."
+  },
+  "abilities": {
+    "talon": {
+      "id": "talon",
+      "name": "Talon",
+      "every": [
+        6,
+        8
+      ],
+      "range": 4.5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.2,
+          "arc": 1.4,
+          "wind": 0.9,
+          "damage": 1.5
+        }
+      ]
+    },
+    "toll": {
+      "id": "toll",
+      "name": "Evening Toll",
+      "every": [
+        14,
+        17
+      ],
+      "first": 5,
+      "cast": 0.8,
+      "say": "The bell swings — come close to the owl or get well away!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 14,
+          "r2": 4,
+          "element": "holy",
+          "wind": 1.6,
+          "damage": 1.7
+        }
+      ]
+    },
+    "swoop": {
+      "id": "swoop",
+      "name": "Swoop",
+      "every": [
+        11,
+        14
+      ],
+      "first": 8,
+      "cast": 0.4,
+      "say": "Vesper swoops at {target}!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 18,
+          "w": 2.6,
+          "wind": 1.3,
+          "damage": 1.6
+        }
+      ]
+    },
+    "cracked": {
+      "id": "cracked",
+      "name": "Cracked Bell",
+      "every": [
+        15,
+        18
+      ],
+      "first": 3,
+      "cast": 0.8,
+      "say": "The cracked bell screams in four directions!",
+      "telegraphs": [
+        {
+          "shape": "cross",
+          "at": "self",
+          "r": 16,
+          "w": 2.8,
+          "yaw": "random",
+          "element": "holy",
+          "status": "silence",
+          "wind": 1.6,
+          "damage": 1.9
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Vespers",
+      "abilities": [
+        "talon",
+        "toll",
+        "swoop"
+      ]
+    },
+    {
+      "name": "Cracked Bell",
+      "at": 0.5,
+      "say": "The bell cracks with a shriek!",
+      "abilities": [
+        "talon",
+        "cracked",
+        "toll"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "gallows_owl",
+            "count": 2,
+            "radius": 7,
+            "level": 3
+          }
+        }
+      ]
+    }
+  ]
+}

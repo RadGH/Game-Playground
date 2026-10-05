@@ -1,0 +1,187 @@
+{
+  "_doc": "Stream E (M2). Quests for zone 'saltmouth' (Saltmouth). Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/province.json).",
+  "zone": "saltmouth",
+  "npcs": {
+    "harbourmaster_orla": {
+      "name": "Harbourmaster Orla Pike",
+      "role": "elder",
+      "at": "Saltmouth",
+      "greeting": "Ships in, ships out, smugglers in between."
+    },
+    "net_mender": {
+      "name": "Old Netty",
+      "role": "fisher",
+      "at": "Gull Steps",
+      "greeting": "Nets mended. Gulls insulted. Both for free."
+    },
+    "gunner_wat": {
+      "name": "Gunner Wat",
+      "role": "guard",
+      "at": "Saltmouth Battery",
+      "greeting": "The battery's guns face the sea. The trouble keeps coming from land."
+    },
+    "smuggler_jory": {
+      "name": "Jory Coombe",
+      "role": "smuggler",
+      "at": "smugglers_cellar",
+      "greeting": "I'm a respectable importer. Of things. Don't look in the barrel."
+    }
+  },
+  "quests": [
+    {
+      "id": "crabs_and_cutthroats",
+      "name": "Crabs and Cutthroats",
+      "level": 6,
+      "giver": "harbourmaster_orla",
+      "offer": "Smugglers are landing cargo on the beach at night, and the centipedes are landing on the smugglers. It's chaos. Tidy it.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "road_brigand",
+          "count": 6,
+          "where": "the night beaches",
+          "text": "Smugglers"
+        },
+        {
+          "kind": "kill",
+          "type": "dune_centipede",
+          "count": 4,
+          "where": "the dunes",
+          "text": "Dune centipedes"
+        }
+      ],
+      "done": "Tidier. Not tidy, but tidier.",
+      "reward": {
+        "xp": 0.5,
+        "gold": 10,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "gull_steps",
+      "name": "Gull Steps",
+      "level": 6,
+      "giver": "net_mender",
+      "offer": "Serpents in the rock pools bite the children. The children bite back, but they're losing.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "reed_serpent",
+          "count": 6,
+          "where": "the rock pools",
+          "text": "Serpents"
+        }
+      ],
+      "done": "The children win. Hurrah for the children.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 7
+      }
+    },
+    {
+      "id": "the_respectable_importer",
+      "name": "A Respectable Importer",
+      "level": 6,
+      "giver": "smuggler_jory",
+      "offer": "My competitors are shooting at my boats. Persuade their archers to stop. Permanently-ish.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "brigand_archer",
+          "count": 5,
+          "where": "the cliffs above the cove",
+          "text": "Rival archers"
+        }
+      ],
+      "done": "Business is good again. You saw nothing. Here's nothing, in coin.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 9,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      },
+      "next": "cellar_cultists"
+    },
+    {
+      "id": "battery_moths",
+      "name": "Moths in the Powder",
+      "level": 7,
+      "giver": "gunner_wat",
+      "offer": "Carrion moths got into the powder store. Don't ask what they were eating. Kill them before someone lights a pipe.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "carrion_moth",
+          "count": 6,
+          "where": "the battery stores",
+          "text": "Carrion moths"
+        }
+      ],
+      "done": "Nobody blew up. That's a good day at the battery.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 8
+      }
+    },
+    {
+      "id": "the_flooded_vaults",
+      "name": "The Flooded Vaults",
+      "level": 8,
+      "giver": "harbourmaster_orla",
+      "group": "a party of 3-5",
+      "offer": "The old harbour vaults flooded when the sea wall cracked. Something big moved in with the tide.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Reach the lower vaults",
+          "floor": 1
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Drain the problem",
+          "boss": true
+        }
+      ],
+      "done": "The tide's back where it belongs: outside.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 55,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "saltmouth_rare",
+      "name": "Something in the Surf",
+      "level": 7,
+      "giver": "gunner_wat",
+      "offer": "There's a thing in the surf the fishermen won't name. I'll name it: target.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "saltmouth",
+          "slot": 0,
+          "text": "Saltmouth's rare slain"
+        }
+      ],
+      "done": "Target hit. That's why they pay me.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 26,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

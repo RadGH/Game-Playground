@@ -26,10 +26,20 @@ import { generateWorld } from '../../../worldgen/js/world.js';
 import { BIOMES } from '../../../worldgen/js/biomes.js';
 import { makeNoise2D, fbm, ridged, subSeed, hashStr, clamp, smoothstep } from '../../../worldgen/js/noise.js';
 import { FORMAT_MAGIC, FORMAT_VERSION, createTerrain } from '../js/rules/terrain-read.js';
+import { addZoneSites } from './lib/zone-sites.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(HERE, '..', 'data', 'zones', 'test');
-export const BAKE_VERSION = 1;
+export const BAKE_VERSION = 1;          // the LAYERS recipe (heights, water, biomes) — part of inputHash
+export const SITES_VERSION = 2;         // the site list (radius, door, event/camp sites) — not in inputHash, so
+                                        // stream E's placements keyed to the terrain hash stay valid
+
+/** Sites other streams ask for by name (docs/requests.md "E -> B"). */
+export const SITE_ASKS = [
+  { type: 'event', id: 'event_grandmother_skein', nearSite: 'Mawehaven', r: 40 },   // zone event boss arena
+  { type: 'camp', id: 'elite_hobb_gallowsby', nearSite: 'Fitockpi Ford', r: 25 },   // the elite's camp by the ford
+];
+const VIGNETTES = join(HERE, '..', 'data', 'vignettes', 'placements', 'test.json');
 
 export const TEST_ZONE = {
   name: 'Test Vale',
@@ -277,6 +287,11 @@ export function bakeTestZone(cfg = TEST_ZONE) {
   };
   meta.inputHash = (hashStr(JSON.stringify({ cfg, BAKE_VERSION, FORMAT_VERSION })) >>> 0).toString(16).padStart(8, '0');
   const terrain = createTerrain({ meta, height, waterTop: wTop, waterKind, biome });
+  // stream E's vignettes stay clear of every new site (they were placed first, against this same terrain)
+  let avoid = [];
+  try { avoid = JSON.parse(readFileSync(VIGNETTES, 'utf8')).placements.map(p => ({ x: p.x, z: p.z, r: p.radius || 12 })); } catch { /* none yet */ }
+  addZoneSites(terrain, meta.sites, { asks: cfg.asks || SITE_ASKS, avoid, doorName: 'Barrow entrance' });
+  meta.sitesVersion = SITES_VERSION;
   meta.spawn = findSpawn(terrain, sites.find(s => s.type === 'settlement') || { x: 1024, z: 1024 });
   return { meta, height, waterTop: wTop, waterKind, biome, terrain, world };
 }
@@ -331,7 +346,7 @@ function summary(b) {
     slope: { median: +slopes[slopes.length >> 1].toFixed(1), p95: +slopes[Math.floor(slopes.length * 0.95)].toFixed(1), max: +slopes[slopes.length - 1].toFixed(1), unwalkableShare: +(steep / slopes.length).toFixed(3) },
     wetShare: +(wet / slopes.length).toFixed(3),
     biomes: Object.fromEntries(Object.entries(counts).sort((a, c) => c[1] - a[1]).map(([k, v]) => [k, +(v / N).toFixed(3)])),
-    rivers: b.meta.rivers.length, sites: b.meta.sites.map(s => `${s.kind} ${s.name}`), spawn: b.meta.spawn, inputHash: b.meta.inputHash,
+    rivers: b.meta.rivers.length, sites: b.meta.sites.map(s => [s.type, s.kind || s.id, s.name || '', s.x, s.z, s.radius ?? s.r ?? '', s.yaw ?? ''].join(' ')), spawn: b.meta.spawn, inputHash: b.meta.inputHash,
   };
 }
 

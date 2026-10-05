@@ -156,9 +156,19 @@ export function aiCommands(ctx, p) {
 
   // ── Toll of Iron ──
   const team = state.teams[p.team];
+  // One bell per wave: the charges are the team's, so a seat does not ring while a teammate's toll
+  // (or anyone's) still has the wave stunned — it counts only bodies near the Keep that are NOT stunned,
+  // and leaves the bell alone for the stun's length after any teammate rang it.
   if (K.hero.tier >= 1 && team.toll.charges > 0) {
     const need = K.hero.tier >= 2 ? 6 : 8;
-    if (S.threat.near >= need && (K.hero.tier < 2 || S.threat.danger >= 4)) cmd('toll');
+    const stunTicks = Math.round(data['items-bl'].toll.stun * 20);
+    const mateRang = team.players.some(pid => { const q = state.players[pid]; return q.ai && q.ai.tollAt != null && state.tick - q.ai.tollAt < stunTicks; });
+    let free = 0;
+    if (!mateRang && S.threat.near >= need) {
+      const f = ctx.map.fields[team.field];
+      for (const e of state.ents) if (e.alive && !e._gone && e.field === f.id && e.team !== p.team && (e.kind === 'unit' || e.kind === 'tide') && e.z > f.leakZ - 30 && !e.statuses.some(st => st.id === 'stun')) free++;
+    }
+    if (!mateRang && free >= need && (K.hero.tier < 2 || S.threat.danger >= 4)) { cmd('toll'); m.tollAt = state.tick; }
   }
 
   // ── hero ──

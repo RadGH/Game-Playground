@@ -9,16 +9,20 @@
 <body>
   <header>
     <h1>Thousandvale · terrain viewer</h1>
-    <label>Zone <select id="zone"><option value="test">test</option></select></label>
+    <label>Zone <select id="zone"><option value="z11_01">z11_01 (hollin_pass)</option><option value="z11_02">z11_02 (delvers_hill)</option><option value="z11_03">z11_03 (wychwood)</option><option value="z11_04">z11_04 (blackthorn_scar)</option><option value="z12_01">z12_01 (ashcombe)</option><option value="z12_02" selected>z12_02 (test, start)</option><option value="z12_03">z12_03 (saint_orrins_rise)</option><option value="z12_04">z12_04 (coldwater)</option><option value="z13_01">z13_01 (brackwater)</option><option value="z13_02">z13_02 (torbor_cross)</option><option value="z13_03">z13_03 (millbrook)</option><option value="z13_04">z13_04 (gorse_march)</option><option value="z14_01">z14_01 (saltmouth)</option><option value="z14_02">z14_02 (gullwick)</option><option value="z14_03">z14_03 (redcliff)</option><option value="z14_04">z14_04 (sunken_wolds)</option><option value="test">test (M0 fixture)</option></select></label>
     <label>Layer
       <select id="layer">
         <option value="biome">biome + shade</option>
         <option value="height">height</option>
         <option value="slope">slope</option>
         <option value="water">water depth</option>
+        <option value="nav">nav (movement)</option>
       </select>
     </label>
     <label><input type="checkbox" id="sites" checked> sites</label>
+    <label><input type="checkbox" id="plan" checked> towns + roads</label>
+    <label><input type="checkbox" id="scatter" checked> trees + rocks</label>
+    <label>Zoom <select id="zoom"><option value="1">whole zone</option><option value="town">town</option></select></label>
     <span id="status" class="status">loading…</span>
   </header>
   <main>

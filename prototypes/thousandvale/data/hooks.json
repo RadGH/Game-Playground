@@ -1,0 +1,588 @@
+{
+  "_doc": "Stream E. Zone hooks (PLAN §3.5): ONE memorable thing per zone, never twice in a province, never within 6 zones of itself. `kind`: compositional (built from kit parts + parameters) or bespoke (needs a model, stream F). M1 has one; the ~85 arrive M2-M4.",
+  "hooks": [
+    {
+      "id": "the_singing_ford",
+      "name": "The Singing Ford",
+      "kind": "compositional",
+      "zone": "test",
+      "at": {
+        "site": "Fitockpi Ford"
+      },
+      "what": "The stepping stones of Fitockpi Ford are hollow; when the river runs fast (after rain) they hum a low chord you can hear 300 m away. Locals cross only in the dry. The brigands chose it because nobody hears them coming over the noise.",
+      "parts": [
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "count": 9,
+          "line": "across the river at the ford",
+          "spacing": 1.6
+        },
+        {
+          "kind": "prop",
+          "id": "rune_stone",
+          "count": 1,
+          "note": "a worn carving of a mouth on the far bank"
+        }
+      ],
+      "sound": {
+        "id": "ambience.ford_hum",
+        "when": "weather in [rain] or the hour after",
+        "radius": 300
+      },
+      "lore": "The stones are humming. It is not a tune, exactly. It is closer to the river clearing its throat.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "temperateForest"
+        ],
+        "needs": "a ford"
+      }
+    },
+    {
+      "id": "the_long_stair",
+      "name": "The Long Stair",
+      "kind": "compositional",
+      "zone": "hollin_pass",
+      "at": {
+        "site": "the pass road above Hollin Toll"
+      },
+      "what": "A thousand stone steps cut straight up the cliff beside the switchbacks by an impatient abbot; quicker than the road, and every hundredth step has a rest bench and a joke carved into it.",
+      "parts": [
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "count": 60,
+          "line": "straight up the cliff face",
+          "spacing": 1.2
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "count": 10,
+          "note": "rest benches with jokes"
+        }
+      ],
+      "lore": "Step four hundred. The carving says: NOT EVEN HALFWAY. KEEP GOING. OR DON'T. I'M A STEP.",
+      "tags": {
+        "biomes": [
+          "hills",
+          "mountains"
+        ],
+        "needs": "a cliff beside a road"
+      }
+    },
+    {
+      "id": "the_ashcombe_colossus",
+      "name": "The Sleeping Colossus",
+      "kind": "bespoke",
+      "zone": "ashcombe",
+      "at": {
+        "site": "the middle of the ruinfield"
+      },
+      "what": "A stone giant forty metres long lies face-down across the ruins, half buried, the old city built in and around its body. Its hand still holds a broken sword the size of a tower.",
+      "model": "A huge prone stone giant (~40 m long, low poly, mossy, cracked), head turned to one side, one arm outstretched holding a snapped tower-sized sword; ruins built against it. Collision for walking along its back.",
+      "lore": "The hill has fingers. Very large fingers, each one with a house built on the knuckle.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "hills"
+        ],
+        "needs": "open ruin ground 120 m"
+      }
+    },
+    {
+      "id": "the_drowned_bells",
+      "name": "The Drowned Bells",
+      "kind": "compositional",
+      "zone": "brackwater",
+      "at": {
+        "site": "the deepest part of the fen"
+      },
+      "what": "A whole bell tower has sunk into the fen so only its top arch shows; on still nights the bells ring under the water and the wisps gather to listen.",
+      "parts": [
+        {
+          "kind": "prop",
+          "id": "ruined_arch",
+          "count": 1,
+          "note": "the bell tower top, waist-deep"
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_pillar",
+          "count": 4,
+          "note": "half-sunk columns in a line"
+        }
+      ],
+      "sound": {
+        "id": "ambience.drowned_bells",
+        "when": "night, no wind",
+        "radius": 250
+      },
+      "lore": "You hear bells. They are coming from under the water. The frogs have stopped croaking to listen.",
+      "tags": {
+        "biomes": [
+          "marsh",
+          "lake"
+        ],
+        "needs": "deep water"
+      }
+    },
+    {
+      "id": "the_whale_bones",
+      "name": "The Whale Arch",
+      "kind": "bespoke",
+      "zone": "saltmouth",
+      "at": {
+        "site": "the beach below Saltmouth"
+      },
+      "what": "The ribs of an enormous sea creature stand on the beach as an arch the road passes through; the town hangs lanterns from it on feast days.",
+      "model": "Giant whale-like skeleton ribcage (~25 m) half sunk in sand, ribs forming an arch over a road; bleached bone, barnacles near the base; lantern hooks.",
+      "lore": "The road goes through the ribs. Nobody in Saltmouth thinks this is strange. Nobody in Saltmouth has been anywhere else.",
+      "tags": {
+        "biomes": [
+          "beach",
+          "coast"
+        ],
+        "needs": "a beach road"
+      }
+    },
+    {
+      "id": "the_singing_seam",
+      "name": "The Glimmer Seam",
+      "kind": "compositional",
+      "zone": "delvers_hill",
+      "at": {
+        "site": "an exposed cliff above Copperdell"
+      },
+      "what": "A seam of copper ore runs across a whole cliff face in a bright green-gold stripe, and at sunset it lights up like a rope of fire; miners climb it on ropes.",
+      "parts": [
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "count": 6,
+          "note": "scaffold platforms"
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "count": 8,
+          "line": "along the seam"
+        }
+      ],
+      "lore": "The cliff has a stripe of green and gold running right across it, like somebody drew a line under the hill.",
+      "tags": {
+        "biomes": [
+          "hills"
+        ],
+        "needs": "a cliff"
+      }
+    },
+    {
+      "id": "the_bridge_city",
+      "name": "Halsbridge on the Bridge",
+      "kind": "compositional",
+      "zone": "torbor_cross",
+      "at": {
+        "site": "Halsbridge"
+      },
+      "what": "The province capital is built on and around a huge old stone bridge over the river; the market fills its span and houses hang off both sides.",
+      "parts": [
+        {
+          "kind": "prop",
+          "id": "ruined_arch",
+          "count": 5,
+          "line": "the bridge piers"
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "count": 12,
+          "line": "along the span"
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "count": 20,
+          "note": "market stalls on the span"
+        }
+      ],
+      "lore": "A whole street on a bridge. Shops on both sides, and if you drop a coin, the river keeps it.",
+      "tags": {
+        "biomes": [
+          "grassland"
+        ],
+        "needs": "a river through the city"
+      }
+    },
+    {
+      "id": "the_floating_isle",
+      "name": "The Drifting Isle",
+      "kind": "compositional",
+      "zone": "gullwick",
+      "at": {
+        "site": "the largest of the Gullwick lakes"
+      },
+      "what": "A small wooded island that drifts around the lake on a raft of roots, never in the same place two mornings running; the fishers navigate by it.",
+      "parts": [
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "count": 1,
+          "note": "a tiny shrine on the isle"
+        },
+        {
+          "kind": "tree",
+          "id": "birch",
+          "count": 7
+        }
+      ],
+      "lore": "The island was by the north shore yesterday. Today it is by the south shore. The ducks on it look smug.",
+      "tags": {
+        "biomes": [
+          "lake"
+        ],
+        "needs": "a lake over 300 m"
+      }
+    },
+    {
+      "id": "the_great_hollow_oak",
+      "name": "The Hollow Oak of Wychwood",
+      "kind": "bespoke",
+      "zone": "wychwood",
+      "at": {
+        "site": "deep in Wychwood"
+      },
+      "what": "An oak so old and so vast that a hermit hamlet lives inside its hollow trunk, with ladders and windows cut into the bark.",
+      "model": "A colossal oak (~30 m tall, trunk ~10 m across) with a hollow trunk containing a small hamlet: cut windows, doors, ladders and rope walkways inside the canopy; walkable interior floor.",
+      "lore": "There are windows in the tree. There is smoke coming out of the tree. Someone in the tree is cooking sausages.",
+      "tags": {
+        "biomes": [
+          "temperateForest"
+        ],
+        "needs": "a forest clearing"
+      }
+    },
+    {
+      "id": "the_thousand_candles",
+      "name": "The Thousand Candles",
+      "kind": "compositional",
+      "zone": "saint_orrins_rise",
+      "at": {
+        "site": "the hillside below the abbey"
+      },
+      "what": "Pilgrims leave a candle in the grass for every prayer; the whole hillside flickers at night with thousands of small lights.",
+      "parts": [
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "count": 40,
+          "note": "scatter of candle clusters (small, emissive)"
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "count": 6
+        }
+      ],
+      "lore": "A hill covered in candles. Some are new, some are stubs, and one is in a boot for reasons nobody can explain.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "hills"
+        ],
+        "needs": "a slope facing a road"
+      }
+    },
+    {
+      "id": "the_three_wheels",
+      "name": "Three Mills, One River",
+      "kind": "compositional",
+      "zone": "millbrook",
+      "at": {
+        "site": "Three Wheels hamlet"
+      },
+      "what": "Three watermills stand one above the other on a steep stream, each feeding the next, their wheels turning in a chain you can hear across the vale.",
+      "parts": [
+        {
+          "kind": "prop",
+          "id": "cart_wheel",
+          "count": 3,
+          "scale": 2.2,
+          "line": "down the stream"
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "count": 6
+        },
+        {
+          "kind": "prop",
+          "id": "hay_bale",
+          "count": 8
+        }
+      ],
+      "sound": {
+        "id": "ambience.mill_wheels",
+        "radius": 200
+      },
+      "lore": "Clack, clack, clack. Clack, clack, clack. Three wheels, one rhythm. The miller says it keeps him calm. It does not keep anyone else calm.",
+      "tags": {
+        "biomes": [
+          "grassland"
+        ],
+        "needs": "a stream on a slope"
+      }
+    },
+    {
+      "id": "the_red_cliff_face",
+      "name": "The Carved Cliff",
+      "kind": "compositional",
+      "zone": "redcliff",
+      "at": {
+        "site": "the red cliff above the frontier road"
+      },
+      "what": "Every regiment that held Redcliff carved its badge into the red cliff face; hundreds of badges, the oldest worn smooth, the newest still sharp.",
+      "parts": [
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "count": 6,
+          "line": "at the cliff foot"
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "count": 12,
+          "note": "carved badges set into the cliff"
+        }
+      ],
+      "lore": "A cliff covered in carved badges: a stag, a boot, a wheel, a very rude drawing of a goose.",
+      "tags": {
+        "biomes": [
+          "hills"
+        ],
+        "needs": "a cliff beside a road"
+      }
+    },
+    {
+      "id": "the_thorn_wall",
+      "name": "The Thorn Wall",
+      "kind": "bespoke",
+      "zone": "blackthorn_scar",
+      "at": {
+        "site": "the border of the warband ground"
+      },
+      "what": "A wall of black thorn bushes ten metres high, grown on purpose by the warband, runs for a kilometre across the zone; the only gaps are guarded.",
+      "model": "A modular segment of a giant black thorn hedge (~10 m tall, 20 m long, tileable), thick twisting branches with huge thorns, a gap variant with a crude gate; collision blocks movement.",
+      "lore": "A hedge as tall as a house, every thorn as long as your hand. It is not a natural hedge. It is a statement.",
+      "tags": {
+        "biomes": [
+          "blighted",
+          "hills"
+        ],
+        "needs": "a line across the zone"
+      }
+    },
+    {
+      "id": "the_reflection_mere",
+      "name": "The Mirror Mere",
+      "kind": "compositional",
+      "zone": "coldwater",
+      "at": {
+        "site": "Coldwater Mere"
+      },
+      "what": "The mere is so still that the far shore's ruined tower appears twice; in the reflection the tower is whole, and lit.",
+      "parts": [
+        {
+          "kind": "prop",
+          "id": "ruined_pillar",
+          "count": 1,
+          "scale": 2.4,
+          "note": "the broken tower on the far shore"
+        },
+        {
+          "kind": "prop",
+          "id": "stone_step",
+          "count": 5,
+          "line": "down to the water"
+        }
+      ],
+      "lore": "Look at the tower. Now look at its reflection. The reflection has a light in the window. The tower does not.",
+      "tags": {
+        "biomes": [
+          "lake"
+        ],
+        "needs": "a still lake with a ruin on the far shore"
+      }
+    },
+    {
+      "id": "the_burning_fields",
+      "name": "The Gorse That Will Not Burn Out",
+      "kind": "compositional",
+      "zone": "gorse_march",
+      "at": {
+        "site": "the middle of the Gorse March"
+      },
+      "what": "A stretch of gorse set alight in a border war years ago that still smoulders under the turf; flames lick up at dusk and nobody can put it out.",
+      "parts": [
+        {
+          "kind": "ground",
+          "id": "ash_patch",
+          "count": 30
+        },
+        {
+          "kind": "prop",
+          "id": "fire_ring",
+          "count": 6,
+          "note": "low flames, emissive, no damage"
+        }
+      ],
+      "lore": "The ground is warm. Little flames wink in the gorse, and the smell of smoke never quite goes away.",
+      "tags": {
+        "biomes": [
+          "shrubland"
+        ],
+        "needs": "open scrub 200 m"
+      }
+    },
+    {
+      "id": "the_sunken_road",
+      "name": "The Sunken Road",
+      "kind": "bespoke",
+      "zone": "sunken_wolds",
+      "at": {
+        "site": "across the Sunken Wolds"
+      },
+      "what": "An old paved road sinks deeper and deeper into the earth until it runs through a canyon of its own making, roots knitting a roof overhead.",
+      "model": "A modular hollow-way: a paved road in a deep earth cutting (~6 m deep), root-roofed sections with hanging roots, mossy retaining stones; straight, curve and fork pieces.",
+      "lore": "The road goes down. And down. Soon the hedges are above your head and the roots make a roof.",
+      "tags": {
+        "biomes": [
+          "temperateForest",
+          "hills"
+        ],
+        "needs": "a road through woodland"
+      }
+    },
+    {
+      "id": "the_hanged_tree_spare",
+      "name": "The Bell Tree",
+      "kind": "compositional",
+      "zone": null,
+      "at": {
+        "site": "any crossroads"
+      },
+      "what": "A single tree hung with hundreds of small bells, one for every traveller who passed safely; the sound changes with the wind.",
+      "parts": [
+        {
+          "kind": "tree",
+          "id": "oak",
+          "count": 1
+        },
+        {
+          "kind": "prop",
+          "id": "signpost",
+          "count": 1
+        }
+      ],
+      "lore": "A tree full of little bells. When the wind gets up, it sounds like the tree is laughing.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland"
+        ],
+        "needs": "a crossroads"
+      }
+    },
+    {
+      "id": "the_stone_army_spare",
+      "name": "The Kneeling Army",
+      "kind": "bespoke",
+      "zone": null,
+      "at": {
+        "site": "a valley floor"
+      },
+      "what": "Two hundred stone soldiers kneel in ranks facing a cliff, as if waiting for an order; no one knows who carved them or why they kneel.",
+      "model": "A kneeling stone soldier statue (~2 m) in 4 pose variants, weathered and mossy, built for instancing in ranks of 200.",
+      "lore": "Rows and rows of stone soldiers, kneeling. Every one of them has a face. Some of them look worried.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "hills"
+        ],
+        "needs": "a flat valley 150 m"
+      }
+    },
+    {
+      "id": "the_salt_flats_spare",
+      "name": "The White Flat",
+      "kind": "compositional",
+      "zone": null,
+      "at": {
+        "site": "a dry lakebed"
+      },
+      "what": "A dried-up lake whose bed is pure white salt, with old boats stranded across it in a line where the water left them.",
+      "parts": [
+        {
+          "kind": "ground",
+          "id": "sand_ripple",
+          "count": 20
+        },
+        {
+          "kind": "prop",
+          "id": "cart_wheel",
+          "count": 6,
+          "note": "boat hull stand-ins until boats exist"
+        }
+      ],
+      "lore": "Boats in the middle of a white field, all pointing the same way, as if they are waiting for the water to come back.",
+      "tags": {
+        "biomes": [
+          "lake",
+          "savanna",
+          "beach"
+        ],
+        "needs": "a dry lakebed"
+      }
+    },
+    {
+      "id": "the_crow_parliament_spare",
+      "name": "The Crow Court",
+      "kind": "compositional",
+      "zone": null,
+      "at": {
+        "site": "a lone hill"
+      },
+      "what": "Hundreds of crows meet on a ring of posts on a hilltop every evening and hold what sounds like a very heated argument.",
+      "parts": [
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "count": 24,
+          "line": "in a ring"
+        },
+        {
+          "kind": "prop",
+          "id": "stone_marker",
+          "count": 1,
+          "note": "the judge's stone"
+        }
+      ],
+      "sound": {
+        "id": "ambience.crows",
+        "when": "dusk",
+        "radius": 200
+      },
+      "lore": "The crows are arguing again. One of them seems to be in charge. One of them seems to disagree.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "hills",
+          "shrubland"
+        ],
+        "needs": "a hilltop"
+      }
+    }
+  ]
+}

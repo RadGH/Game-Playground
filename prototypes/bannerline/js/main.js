@@ -269,6 +269,13 @@ function netEvent(type, e = {}) {
   if (type === 'takeover') say(`${e.name || 'A player'} left — an AI takes their seat`, 'warn');
   else if (type === 'rejoin') say(`${e.name || 'A player'} is back`, 'good');
   else if (type === 'hostLeft') { say('Host left — match ended', 'bad', 4000); setTimeout(() => showTitle(), 2500); }
+  else if (type === 'refused') {
+    // The host has no seat for our rejoin token (the match moved on): stop waiting and go home.
+    saveRejoin(null);
+    app.pendingNet = null;
+    showTitle();   // leaves the room and detaches the room screen
+    alertBoot('The match no longer has your seat.', 'Could not rejoin');
+  }
 }
 
 // Rejoin after a reload: the room code + this machine's token live in sessionStorage during a match.

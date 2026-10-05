@@ -1,0 +1,159 @@
+{
+  "id": "rare_sir_hollowell",
+  "name": "Sir Hollowell",
+  "tier": "rare",
+  "zone": "ashcombe",
+  "body": "cursed_knight",
+  "place": "patrols the broken keep wall at Ashcombe, still on guard for a lord dead two hundred years",
+  "_doc": "Stream E (M2). A knight who does not know he is dead. He issues a challenge (a marked player must stay inside a circle that follows them, away from friends), swings a cross of steel, and at half health raises his old garrison — two bone hounds — and starts swinging every other breath.",
+  "party": {
+    "solo": "Hard solo: the challenge circle plus hounds hurts at level 5.",
+    "small": "Right for 2-3.",
+    "full": "Easy; interrupt the rally every time.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 2.0,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "Halt! Who goes there? State your name and business with Lord Ashcombe!",
+      "You are not on the list. Nobody is on the list."
+    ],
+    "death": "Sir Hollowell kneels. \"Relieved... of duty.\" The armour falls in a heap.",
+    "reset": "Sir Hollowell resumes his patrol along the wall."
+  },
+  "abilities": {
+    "cleave": {
+      "id": "cleave",
+      "name": "Guard Cleave",
+      "every": [
+        7,
+        9
+      ],
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5,
+          "arc": 1.8,
+          "wind": 1.1,
+          "damage": 1.8
+        }
+      ]
+    },
+    "challenge": {
+      "id": "challenge",
+      "name": "Formal Challenge",
+      "every": [
+        16,
+        19
+      ],
+      "first": 5,
+      "cast": 0.8,
+      "say": "\"{target}! I challenge you!\" — stand apart from the others!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.5,
+          "follow": true,
+          "status": "marked",
+          "wind": 3,
+          "damage": 1.4
+        }
+      ]
+    },
+    "steel_cross": {
+      "id": "steel_cross",
+      "name": "Cross of Steel",
+      "every": [
+        14,
+        17
+      ],
+      "first": 9,
+      "cast": 0.6,
+      "say": "Sir Hollowell plants his blade and turns.",
+      "telegraphs": [
+        {
+          "shape": "cross",
+          "at": "self",
+          "r": 11,
+          "w": 2.6,
+          "yaw": "facing",
+          "wind": 1.5,
+          "damage": 1.9
+        }
+      ]
+    },
+    "rally": {
+      "id": "rally",
+      "name": "Rally the Wall",
+      "every": [
+        22,
+        26
+      ],
+      "first": 2,
+      "cast": 2,
+      "interrupt": true,
+      "say": "Sir Hollowell calls for the garrison — interrupt him!",
+      "onInterrupt": [
+        {
+          "say": "His call ends in a dusty cough.",
+          "style": "emote"
+        }
+      ],
+      "actions": [
+        {
+          "adds": {
+            "type": "barrow_hound",
+            "count": 1,
+            "radius": 6
+          }
+        }
+      ],
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 6,
+          "knock": 3,
+          "wind": 1.5,
+          "damage": 1.1
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "On Guard",
+      "abilities": [
+        "cleave",
+        "challenge",
+        "steel_cross"
+      ]
+    },
+    {
+      "name": "Last of the Garrison",
+      "at": 0.5,
+      "say": "To me, Ashcombe! To me!",
+      "abilities": [
+        "cleave",
+        "rally",
+        "steel_cross",
+        "challenge"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "barrow_hound",
+            "count": 2,
+            "radius": 7
+          }
+        }
+      ]
+    }
+  ]
+}

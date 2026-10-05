@@ -1,0 +1,173 @@
+{
+  "_doc": "Stream E (M2). Quests for zone 'sunken_wolds' (The Sunken Wolds). Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/province.json).",
+  "zone": "sunken_wolds",
+  "npcs": {
+    "lowmoor_elder": {
+      "name": "Elder Coombe",
+      "role": "elder",
+      "at": "Lowmoor",
+      "greeting": "The wolds sank, the village didn't. Yet."
+    },
+    "bastion_keeper": {
+      "name": "Keeper Isolde",
+      "role": "guard",
+      "at": "the Mossy Bastion",
+      "greeting": "The bastion's covered in moss. So is the keeper, some mornings."
+    },
+    "deepdene_digger": {
+      "name": "Digger Wat",
+      "role": "miner",
+      "at": "Deepdene",
+      "greeting": "There's caves under everything here. And things in the caves. And under the things, more caves."
+    }
+  },
+  "quests": [
+    {
+      "id": "stalkers_in_the_moss",
+      "name": "Stalkers in the Moss",
+      "level": 7,
+      "giver": "bastion_keeper",
+      "offer": "Frost stalkers den in the mossy hollows. They take the sheep first and the shepherds second.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "frost_stalker",
+          "count": 6,
+          "where": "the mossy hollows",
+          "text": "Frost stalkers"
+        }
+      ],
+      "done": "Sheep safe. Shepherds safe. Moss unbothered.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 9,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "mushroom_men",
+      "name": "Mushroom Men",
+      "level": 7,
+      "giver": "lowmoor_elder",
+      "offer": "The sporecap walkers are walking into the village. They're slow, but they're persistent.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "sporecap_walker",
+          "count": 6,
+          "where": "around Lowmoor",
+          "text": "Sporecap walkers"
+        }
+      ],
+      "done": "Lowmoor smells of mushroom less. Thank you.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 8
+      }
+    },
+    {
+      "id": "the_lurker_below",
+      "name": "The Lurker Below",
+      "level": 8,
+      "giver": "deepdene_digger",
+      "offer": "Something in the sinkholes grabs ankles. Silt lurkers. I'm fond of my ankles.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "silt_lurker",
+          "count": 5,
+          "where": "the sinkholes",
+          "text": "Silt lurkers"
+        }
+      ],
+      "done": "Ankles intact. Digging resumes.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 9
+      }
+    },
+    {
+      "id": "not_a_chest",
+      "name": "That's Not a Chest",
+      "level": 8,
+      "giver": "deepdene_digger",
+      "offer": "Diggers found a chest in a cave. The chest found them back. Hoard mimics. Kill them and bring me whatever they swallowed.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "hoard_mimic",
+          "count": 3,
+          "where": "the caves of Deepdene",
+          "text": "Hoard mimics"
+        }
+      ],
+      "done": "Gold! And a boot! And a digger I lost last year — no, wait, that's just the boot.",
+      "reward": {
+        "xp": 0.5,
+        "gold": 12,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "the_wold_caves",
+      "name": "The Wold Caves",
+      "level": 9,
+      "giver": "lowmoor_elder",
+      "group": "a party of 3-5",
+      "offer": "The river runs into the wold caves and comes out warmer. Something down there is very large and very warm.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Follow the river down",
+          "floor": 2
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Defeat what lives at the bottom",
+          "boss": true
+        }
+      ],
+      "done": "The river runs cold again. And so do my nerves, finally.",
+      "reward": {
+        "xp": 1.3,
+        "gold": 60,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "wolds_rare",
+      "name": "The Wolds' Old Hunter",
+      "level": 8,
+      "giver": "bastion_keeper",
+      "offer": "There's one thing in the wolds that even the stalkers fear. It's my turn to be brave by sending you.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "sunken_wolds",
+          "slot": 0,
+          "text": "The wolds' rare slain"
+        }
+      ],
+      "done": "Brave of me. And of you, a bit.",
+      "reward": {
+        "xp": 0.7,
+        "gold": 30,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

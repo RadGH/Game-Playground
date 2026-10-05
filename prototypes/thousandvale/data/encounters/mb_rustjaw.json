@@ -1,0 +1,273 @@
+{
+  "id": "mb_rustjaw",
+  "name": "Rustjaw",
+  "tier": "miniboss",
+  "body": "ironback_beetle",
+  "place": "dungeon mine_descent: floor 1's mini-boss (a 24 m gallery)",
+  "_doc": "Stream E. An ore beetle grown huge on the seam. Its charge BREAKS whatever timber prop it hits: bait the charge into one of the three props and the roof drops on its back (stunned and exposed for 8 s) — but every broken prop is one less, and when all three are gone the gallery starts caving in. The ore cart's brake is a one-shot: release it when Rustjaw stands on the rails. P2 at 40% it burrows and erupts under each of you in turn.",
+  "party": "Solo: good — bait charges into props yourself. 2-3: intended. 5: everyone in the burrow circles at once is busy but fine. M5 scaling: props 3 -> 4 at five; burrow circles already per player.",
+  "hpMult": 2.2,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "prop_a",
+        "type": "pillar",
+        "name": "Timber prop",
+        "x": -7,
+        "z": -6,
+        "r": 1,
+        "hp": 1,
+        "onBreak": [
+          {
+            "stun": 3
+          },
+          {
+            "vuln": {
+              "takeMore": 0.35,
+              "seconds": 8,
+              "name": "Pinned"
+            }
+          },
+          {
+            "say": "The prop gives — the roof comes down on Rustjaw's back!",
+            "style": "warn"
+          }
+        ]
+      },
+      {
+        "id": "prop_b",
+        "type": "pillar",
+        "name": "Timber prop",
+        "x": 7,
+        "z": -6,
+        "r": 1,
+        "hp": 1,
+        "onBreak": [
+          {
+            "stun": 3
+          },
+          {
+            "vuln": {
+              "takeMore": 0.35,
+              "seconds": 8,
+              "name": "Pinned"
+            }
+          },
+          {
+            "say": "The prop gives — the roof comes down on Rustjaw's back!",
+            "style": "warn"
+          }
+        ]
+      },
+      {
+        "id": "prop_c",
+        "type": "pillar",
+        "name": "Timber prop",
+        "x": 0,
+        "z": 8,
+        "r": 1,
+        "hp": 1,
+        "onBreak": [
+          {
+            "stun": 3
+          },
+          {
+            "vuln": {
+              "takeMore": 0.35,
+              "seconds": 8,
+              "name": "Pinned"
+            }
+          },
+          {
+            "say": "The prop gives — the roof comes down on Rustjaw's back!",
+            "style": "warn"
+          }
+        ]
+      },
+      {
+        "id": "cart_brake",
+        "type": "lever",
+        "name": "Ore cart brake",
+        "x": -9,
+        "z": 6,
+        "onUse": [
+          {
+            "say": "A loaded ore cart thunders down the rails into Rustjaw!",
+            "style": "warn"
+          },
+          {
+            "hurt": 0.07
+          },
+          {
+            "stun": 2
+          }
+        ]
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "Something big scrapes its shell along the rock. Rust-red mandibles click open.",
+      "The seam moves. It is not a seam."
+    ],
+    "death": "Rustjaw's legs fold. Its shell is still flecked with copper.",
+    "reset": "Rustjaw goes back to grinding at the rock face."
+  },
+  "enrage": {
+    "seconds": 300,
+    "damage": 2.5,
+    "say": "Rustjaw goes into a grinding frenzy!"
+  },
+  "abilities": {
+    "mandibles": {
+      "id": "mandibles",
+      "name": "Rusted Mandibles",
+      "every": [
+        6,
+        8
+      ],
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.6,
+          "arc": 1.4,
+          "wind": 1.0,
+          "damage": 1.7
+        }
+      ]
+    },
+    "charge": {
+      "id": "charge",
+      "name": "Carapace Charge",
+      "every": [
+        12,
+        15
+      ],
+      "first": 5,
+      "range": 20,
+      "cast": 1,
+      "say": "Rustjaw lowers its head at {target} — stand so a timber prop is behind you!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 16,
+          "w": 3.2,
+          "wind": 1.4,
+          "damage": 2.1,
+          "knock": 3.5,
+          "breaks": true
+        }
+      ]
+    },
+    "grind": {
+      "id": "grind",
+      "name": "Ore Grind",
+      "every": [
+        16,
+        19
+      ],
+      "first": 9,
+      "cast": 0.6,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 5,
+          "wind": 1.5,
+          "damage": 1.6,
+          "knock": 3
+        }
+      ]
+    },
+    "burrow": {
+      "id": "burrow",
+      "name": "Burrow",
+      "every": [
+        18,
+        22
+      ],
+      "first": 2,
+      "cast": 1,
+      "say": "Rustjaw digs down — watch the ground under your feet!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 2.8,
+          "delay": 0.8,
+          "wind": 1.5,
+          "damage": 1.8,
+          "knock": 2
+        }
+      ]
+    },
+    "cave_in": {
+      "id": "cave_in",
+      "name": "Cave-in",
+      "every": [
+        10,
+        12
+      ],
+      "first": 1,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "spread": 10,
+          "r": 2.5,
+          "count": 3,
+          "delay": 0.3,
+          "wind": 1.6,
+          "damage": 1.4,
+          "leave": {
+            "type": "rock",
+            "name": "Fallen rock",
+            "r": 1.1,
+            "hp": 2
+          }
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Grinding",
+      "abilities": [
+        "mandibles",
+        "charge",
+        "grind"
+      ]
+    },
+    {
+      "name": "Burrowing",
+      "at": 0.4,
+      "say": "Rustjaw tears into the floor!",
+      "abilities": [
+        "mandibles",
+        "charge",
+        "burrow"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "broken": 3,
+        "of": "pillar"
+      },
+      "do": [
+        {
+          "say": "No props left. The gallery is coming down!",
+          "style": "warn"
+        },
+        {
+          "ability": "cave_in"
+        }
+      ]
+    }
+  ]
+}

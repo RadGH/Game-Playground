@@ -1,0 +1,604 @@
+{
+  "_doc": "Stream E (M2). Hidden treasure chains (PLAN §3.7): one STARTING in every zone of Torbor Downs (16), about 1 in 4 crossing 2-3 zones. Every step is a physical clue you find in the world (`clue`: note, map_piece, gravestone, carved_arrow, drunks_story) at a place (`at`: a vignette id, {site: settlement/fort name}, or {landmark: description B's bake turns into a point}), and each clue's text points to the next. The cache shimmers within `shimmer` metres; `how`: dig (needs a tool) or chest (hidden chest). Per-character, server-checked reach (PLAN §11.3).",
+  "province": "torbor_downs",
+  "chains": [
+    {
+      "id": "pells_flock_money",
+      "name": "Aled's Flock Money",
+      "zone": "test",
+      "zones": [
+        "test"
+      ],
+      "steps": [
+        {
+          "zone": "test",
+          "clue": "note",
+          "at": "hanging_oak",
+          "text": "Aled's note mentions he 'buried the rest under the stone that looks like a sleeping dog'."
+        },
+        {
+          "zone": "test",
+          "clue": "carved_arrow",
+          "at": {
+            "site": "Fitockpi Ford"
+          },
+          "text": "On the far bank of the ford an arrow is cut into a stone, pointing upstream."
+        }
+      ],
+      "cache": {
+        "zone": "test",
+        "at": {
+          "landmark": "the dog-shaped stone upstream of Fitockpi Ford"
+        },
+        "how": "dig",
+        "shimmer": 15,
+        "tier": "uncommon",
+        "hint": "Upstream of the ford, a boulder like a curled-up dog."
+      }
+    },
+    {
+      "id": "the_abbots_tithe",
+      "name": "The Abbot's Tithe",
+      "zone": "saint_orrins_rise",
+      "zones": [
+        "saint_orrins_rise"
+      ],
+      "steps": [
+        {
+          "zone": "saint_orrins_rise",
+          "clue": "gravestone",
+          "at": {
+            "site": "Orrinsford"
+          },
+          "text": "A gravestone in Orrinsford's yard reads: 'Here lies Brother Cole, who counted the coins. He counts them still, twelve paces east of the bell.'"
+        },
+        {
+          "zone": "saint_orrins_rise",
+          "clue": "carved_arrow",
+          "at": {
+            "site": "the Abbey Wall"
+          },
+          "text": "Twelve paces east of the bell: an arrow scratched in the abbey wall, pointing down."
+        }
+      ],
+      "cache": {
+        "zone": "saint_orrins_rise",
+        "at": {
+          "landmark": "under the abbey wall, below the scratched arrow"
+        },
+        "how": "dig",
+        "shimmer": 15,
+        "tier": "uncommon",
+        "hint": "Below the arrow on the abbey wall."
+      }
+    },
+    {
+      "id": "the_provosts_purse",
+      "name": "The Provost's Lost Purse",
+      "zone": "torbor_cross",
+      "zones": [
+        "torbor_cross"
+      ],
+      "steps": [
+        {
+          "zone": "torbor_cross",
+          "clue": "drunks_story",
+          "at": {
+            "site": "Halsbridge"
+          },
+          "text": "In a Halsbridge tavern, a drunk swears the old provost hid his purse 'in the miller's second-best wheel'."
+        },
+        {
+          "zone": "torbor_cross",
+          "clue": "map_piece",
+          "at": {
+            "site": "Mill End"
+          },
+          "text": "Behind the second wheel at Mill End: a torn map piece showing the ford below the mill."
+        }
+      ],
+      "cache": {
+        "zone": "torbor_cross",
+        "at": {
+          "landmark": "the stepping stones below Mill End"
+        },
+        "how": "chest",
+        "shimmer": 15,
+        "tier": "uncommon",
+        "hint": "A loose stepping stone below the mill."
+      }
+    },
+    {
+      "id": "three_wheels_hoard",
+      "name": "The Three Wheels Hoard",
+      "zone": "millbrook",
+      "zones": [
+        "millbrook"
+      ],
+      "steps": [
+        {
+          "zone": "millbrook",
+          "clue": "map_piece",
+          "at": {
+            "site": "Three Wheels"
+          },
+          "text": "A torn map piece nailed inside the oldest mill: three circles and an X by a crooked oak."
+        },
+        {
+          "zone": "millbrook",
+          "clue": "carved_arrow",
+          "at": {
+            "site": "Millbrook Keep"
+          },
+          "text": "An arrow carved on Millbrook Keep's gate post points along the north lane."
+        }
+      ],
+      "cache": {
+        "zone": "millbrook",
+        "at": {
+          "landmark": "the crooked oak at the end of the north lane"
+        },
+        "how": "dig",
+        "shimmer": 15,
+        "tier": "uncommon",
+        "hint": "Roots of the crooked oak."
+      }
+    },
+    {
+      "id": "ashcombe_reliquary",
+      "name": "The Ashcombe Reliquary",
+      "zone": "ashcombe",
+      "zones": [
+        "ashcombe",
+        "hollin_pass"
+      ],
+      "steps": [
+        {
+          "zone": "ashcombe",
+          "clue": "gravestone",
+          "at": "duel_stones",
+          "text": "A worn epitaph by the duelling stones: 'Where the keep's shadow falls at noon, my blade sleeps.'"
+        },
+        {
+          "zone": "ashcombe",
+          "clue": "note",
+          "at": {
+            "site": "the Broken Keep"
+          },
+          "text": "In the Broken Keep's chapel, a monk's note: 'The reliquary went north, up the pass, for safe keeping.'"
+        },
+        {
+          "zone": "hollin_pass",
+          "clue": "carved_arrow",
+          "at": {
+            "site": "Hollin Toll Fort"
+          },
+          "text": "On the toll fort's oldest stone, the same monk's sign — a little cross and an arrow up the scree."
+        }
+      ],
+      "cache": {
+        "zone": "hollin_pass",
+        "at": {
+          "landmark": "a hermit's niche in the scree above Hollin Toll Fort"
+        },
+        "how": "chest",
+        "shimmer": 15,
+        "tier": "rare",
+        "hint": "A niche in the scree above the fort."
+      }
+    },
+    {
+      "id": "grandads_teeth",
+      "name": "Grandad's Other Cache",
+      "zone": "delvers_hill",
+      "zones": [
+        "delvers_hill"
+      ],
+      "steps": [
+        {
+          "zone": "delvers_hill",
+          "clue": "drunks_story",
+          "at": {
+            "site": "Copperdell"
+          },
+          "text": "Old Pike, three ales in, says his grandad hid 'the good stuff' down the dry well and 'the better stuff' where the lamps are lit last."
+        },
+        {
+          "zone": "delvers_hill",
+          "clue": "map_piece",
+          "at": "dry_well",
+          "text": "On the dry well's ledge: a map piece showing Pickaxe Row's last lamp post."
+        }
+      ],
+      "cache": {
+        "zone": "delvers_hill",
+        "at": {
+          "landmark": "beneath the last lamp post on Pickaxe Row"
+        },
+        "how": "dig",
+        "shimmer": 15,
+        "tier": "uncommon",
+        "hint": "Under the last lamp post."
+      }
+    },
+    {
+      "id": "the_eel_queens_crown",
+      "name": "The Eel Queen's Crown",
+      "zone": "brackwater",
+      "zones": [
+        "brackwater"
+      ],
+      "steps": [
+        {
+          "zone": "brackwater",
+          "clue": "drunks_story",
+          "at": {
+            "site": "Eelwick"
+          },
+          "text": "Wenna's uncle tells of an 'eel queen' who wore a tin crown and hid it from the taxman in the witch's garden."
+        },
+        {
+          "zone": "brackwater",
+          "clue": "note",
+          "at": "hedge_witch_garden",
+          "text": "A note under a jar in the witch's garden: 'Crown's in the tower, top step, the creaky one. — M.'"
+        }
+      ],
+      "cache": {
+        "zone": "brackwater",
+        "at": {
+          "site": "Reedwall Tower"
+        },
+        "how": "chest",
+        "shimmer": 15,
+        "tier": "uncommon",
+        "hint": "The creaky top step of Reedwall Tower."
+      }
+    },
+    {
+      "id": "smugglers_ledger",
+      "name": "The Smugglers' Ledger",
+      "zone": "saltmouth",
+      "zones": [
+        "saltmouth",
+        "gullwick"
+      ],
+      "steps": [
+        {
+          "zone": "saltmouth",
+          "clue": "map_piece",
+          "at": {
+            "site": "Gull Steps"
+          },
+          "text": "Pinned under a rock on Gull Steps: half a map with a cove and a cross."
+        },
+        {
+          "zone": "saltmouth",
+          "clue": "note",
+          "at": "smugglers_cellar",
+          "text": "In the smugglers' cellar, a ledger page: 'Rest of the take went to the lakes, to the stilt fort, under the third stilt.'"
+        },
+        {
+          "zone": "gullwick",
+          "clue": "carved_arrow",
+          "at": {
+            "site": "Stilt Fort"
+          },
+          "text": "The third stilt of the Stilt Fort bears a carved anchor."
+        }
+      ],
+      "cache": {
+        "zone": "gullwick",
+        "at": {
+          "landmark": "in the mud beneath the third stilt of the Stilt Fort"
+        },
+        "how": "dig",
+        "shimmer": 15,
+        "tier": "rare",
+        "hint": "Mud under the third stilt."
+      }
+    },
+    {
+      "id": "the_ferrymans_fee",
+      "name": "The Ferryman's Fee",
+      "zone": "gullwick",
+      "zones": [
+        "gullwick"
+      ],
+      "steps": [
+        {
+          "zone": "gullwick",
+          "clue": "drunks_story",
+          "at": {
+            "site": "Ferry Hythe"
+          },
+          "text": "The old ferryman never spent a copper in his life, Nell says. 'He kept 'em by the shrine, for luck.'"
+        },
+        {
+          "zone": "gullwick",
+          "clue": "carved_arrow",
+          "at": "drowned_shrine",
+          "text": "Behind the drowned shrine's pillar, a little carved boat points across the water."
+        }
+      ],
+      "cache": {
+        "zone": "gullwick",
+        "at": {
+          "landmark": "the islet across from the drowned shrine"
+        },
+        "how": "dig",
+        "shimmer": 15,
+        "tier": "uncommon",
+        "hint": "On the islet across the water."
+      }
+    },
+    {
+      "id": "the_hermits_secret",
+      "name": "The Hermit's Secret",
+      "zone": "wychwood",
+      "zones": [
+        "wychwood"
+      ],
+      "steps": [
+        {
+          "zone": "wychwood",
+          "clue": "note",
+          "at": {
+            "site": "Hermit's Rest"
+          },
+          "text": "The hermit's diary, left open: 'Buried my past by the boars, where nobody sane goes.'"
+        },
+        {
+          "zone": "wychwood",
+          "clue": "carved_arrow",
+          "at": "boar_wallow",
+          "text": "At the boar wallow, an arrow carved into an oak root."
+        }
+      ],
+      "cache": {
+        "zone": "wychwood",
+        "at": {
+          "landmark": "under the marked oak root by the boar wallow"
+        },
+        "how": "dig",
+        "shimmer": 15,
+        "tier": "uncommon",
+        "hint": "Beneath the marked root."
+      }
+    },
+    {
+      "id": "the_widows_dowry",
+      "name": "The Widow's Dowry",
+      "zone": "gorse_march",
+      "zones": [
+        "gorse_march",
+        "sunken_wolds"
+      ],
+      "steps": [
+        {
+          "zone": "gorse_march",
+          "clue": "drunks_story",
+          "at": {
+            "site": "Gorsehold"
+          },
+          "text": "Garrick the pedlar, after a jug, says Widow Edda's dowry was sent north 'to the wolds, to be safe from raiders' and never came back."
+        },
+        {
+          "zone": "gorse_march",
+          "clue": "note",
+          "at": {
+            "site": "Burnt Barns"
+          },
+          "text": "In the ash of the first barn, a scorched receipt: 'One chest, carried to Lowmoor, left with the bastion keeper.'"
+        },
+        {
+          "zone": "sunken_wolds",
+          "clue": "carved_arrow",
+          "at": {
+            "site": "the Mossy Bastion"
+          },
+          "text": "A carved heart-and-arrow on the bastion's postern points down the bank to the river."
+        }
+      ],
+      "cache": {
+        "zone": "sunken_wolds",
+        "at": {
+          "landmark": "the river bank below the Mossy Bastion"
+        },
+        "how": "dig",
+        "shimmer": 15,
+        "tier": "rare",
+        "hint": "The bank below the bastion's postern."
+      }
+    },
+    {
+      "id": "the_red_paymaster",
+      "name": "The Red Paymaster",
+      "zone": "redcliff",
+      "zones": [
+        "redcliff",
+        "millbrook"
+      ],
+      "steps": [
+        {
+          "zone": "redcliff",
+          "clue": "note",
+          "at": {
+            "site": "Redcliff Fort"
+          },
+          "text": "A captured raider's orders: 'Pay chest stays at the burned farm until the vale road clears.'"
+        },
+        {
+          "zone": "redcliff",
+          "clue": "carved_arrow",
+          "at": {
+            "site": "Cinder Farm"
+          },
+          "text": "A raider's mark burned into Cinder Farm's gatepost, pointing west toward Millbrook Vale."
+        },
+        {
+          "zone": "millbrook",
+          "clue": "map_piece",
+          "at": {
+            "site": "Millbrook Keep"
+          },
+          "text": "Tucked in a crack of Millbrook Keep's gate: a raider's map piece, an X in the gorse behind the keep."
+        }
+      ],
+      "cache": {
+        "zone": "millbrook",
+        "at": {
+          "landmark": "in the gorse behind Millbrook Keep"
+        },
+        "how": "dig",
+        "shimmer": 15,
+        "tier": "rare",
+        "hint": "In the gorse behind the keep."
+      }
+    },
+    {
+      "id": "lantern_oil",
+      "name": "The Last Lantern's Oil",
+      "zone": "blackthorn_scar",
+      "zones": [
+        "blackthorn_scar"
+      ],
+      "steps": [
+        {
+          "zone": "blackthorn_scar",
+          "clue": "drunks_story",
+          "at": {
+            "site": "Thornwick"
+          },
+          "text": "Jory the penitent swears the cult keeps its offerings 'where the thorns grow in a ring'."
+        },
+        {
+          "zone": "blackthorn_scar",
+          "clue": "gravestone",
+          "at": {
+            "site": "Last Lantern"
+          },
+          "text": "A lantern-keeper's stone: 'I lit the ring of thorns once. It did not like it.'"
+        }
+      ],
+      "cache": {
+        "zone": "blackthorn_scar",
+        "at": {
+          "landmark": "inside the ring of thorns north of Last Lantern"
+        },
+        "how": "chest",
+        "shimmer": 15,
+        "tier": "rare",
+        "hint": "Inside the ring of thorns."
+      }
+    },
+    {
+      "id": "hollin_toll_box",
+      "name": "The Old Toll Box",
+      "zone": "hollin_pass",
+      "zones": [
+        "hollin_pass"
+      ],
+      "steps": [
+        {
+          "zone": "hollin_pass",
+          "clue": "gravestone",
+          "at": {
+            "site": "Scree End"
+          },
+          "text": "A tollkeeper's grave: 'Honest to the last. Mostly. Look where the goats won't go.'"
+        },
+        {
+          "zone": "hollin_pass",
+          "clue": "carved_arrow",
+          "at": {
+            "site": "Hollin Toll Fort"
+          },
+          "text": "An arrow on the fort's outer wall points up the scree."
+        }
+      ],
+      "cache": {
+        "zone": "hollin_pass",
+        "at": {
+          "landmark": "the ledge up the scree where the goats won't go"
+        },
+        "how": "dig",
+        "shimmer": 15,
+        "tier": "uncommon",
+        "hint": "The goatless ledge."
+      }
+    },
+    {
+      "id": "mere_bottom",
+      "name": "What the Mere Keeps",
+      "zone": "coldwater",
+      "zones": [
+        "coldwater"
+      ],
+      "steps": [
+        {
+          "zone": "coldwater",
+          "clue": "drunks_story",
+          "at": {
+            "site": "Netherby"
+          },
+          "text": "Pike of Netherby says his father dropped 'a fortune in a sack' off the jetty and could never find it."
+        },
+        {
+          "zone": "coldwater",
+          "clue": "map_piece",
+          "at": {
+            "site": "Mere Tower"
+          },
+          "text": "The tower's old chart marks the jetty with a little sack."
+        }
+      ],
+      "cache": {
+        "zone": "coldwater",
+        "at": {
+          "landmark": "off the end of Netherby jetty, at low water"
+        },
+        "how": "dig",
+        "shimmer": 15,
+        "tier": "uncommon",
+        "hint": "Off the end of the jetty when the water's low."
+      }
+    },
+    {
+      "id": "the_mossy_bastion_vault",
+      "name": "The Mossy Vault",
+      "zone": "sunken_wolds",
+      "zones": [
+        "sunken_wolds"
+      ],
+      "steps": [
+        {
+          "zone": "sunken_wolds",
+          "clue": "note",
+          "at": {
+            "site": "the Mossy Bastion"
+          },
+          "text": "Under moss on the bastion wall: 'Vault key with the lurkers. Vault with the mushrooms.'"
+        },
+        {
+          "zone": "sunken_wolds",
+          "clue": "carved_arrow",
+          "at": {
+            "site": "Deepdene"
+          },
+          "text": "A digger's arrow at Deepdene points into the mushroom hollows."
+        }
+      ],
+      "cache": {
+        "zone": "sunken_wolds",
+        "at": {
+          "landmark": "in the mushroom hollow east of Lowmoor"
+        },
+        "how": "chest",
+        "shimmer": 15,
+        "tier": "rare",
+        "hint": "Among the giant mushrooms."
+      }
+    }
+  ]
+}

@@ -8,6 +8,8 @@
 //   await net.createChar({ name, cls, look }) -> { id, name, cls, level, room }
 //   await net.play(charId, { join }) -> joined payload  ('joined' fires again after every reconnect AND every room
 //                                        change — `joined.handoff` set: same socket, new room, clear your entity mirror)
+//   net.travel(to) ; net.campfire() ; net.timeOfDay() ; events relocate zone travelR eventFrame realm groupHint
+//   net.tradeOp(op, {...}) -> 'tradeAsk' / 'trade' events ; opts.human = token or async fn for Turnstile
 //   net.use(id) ; net.item(op, uid, slot?) ; net.partyOp(op, {...}) ; net.partyChat(text) ; net.ignore(name, on) ; net.joinLink()
 //   net.input({ s, dt, mx, mz, yaw, b }) ; net.cast({ slot, aim, target, ct }) ; net.target(id)
 //   net.say(text) ; net.respawn() ; net.leave() ; net.close()
@@ -23,13 +25,15 @@ const NO_RETRY = new Set(['version', 'build', 'elsewhere', 'banned', 'abuse']);
 
 export function connect(opts = {}) {
   const { mode = 'ws', build = 'dev', clock = realClock, guestName = null } = opts;
+  // the "are you human" token for a new guest: a string, or async ({siteKey}) => token (the client shows Turnstile)
+  const human = opts.human || null;
   const tokenStore = opts.tokenStore || memoryTokenStore();
   const open = opts.socketFactory || socketFactory(mode, opts);
   const handlers = new Map();
   const emit = (ev, a) => { const l = handlers.get(ev); if (l) for (const f of [...l]) { try { f(a); } catch (err) { console.error('[net] handler for', ev, err); } } };
 
   let gw = null, game = null, closed = false, attempt = 0, retryTimer = 0, pingTimer = 0;
-  let wantChar = null, q = 0.125;
+  let wantChar = null, q = 0.125, origin = null;
   let readyResolve, playWaiter = null, createWaiter = null;
   const net = {
     status: 'idle', joined: null, you: 0, account: null, chars: [], lastKick: null,
@@ -52,9 +56,11 @@ export function connect(opts = {}) {
   function onGateway(s, m) {
     switch (m.t) {
       case 'welcome': {
+        net.humanCheck = m.human || null;
+        if (m.clock) net.realmClock = { epoch: m.clock.epoch, dayMs: m.clock.dayMs, skew: Date.now() - m.clock.now };
         const tok = tokenStore.get();
         if (tok) sendJ(s, { t: 'auth', token: tok });
-        else sendJ(s, guestName ? { t: 'guest', name: guestName } : { t: 'guest' });
+        else sendGuest(s);
         return;
       }
       case 'refuse': net.lastKick = m; emit('kick', m); setStatus('refused'); stop(); return;
@@ -75,7 +81,7 @@ export function connect(opts = {}) {
         return;
       case 'ticket': openGame(m.path, m.ticket); return;
       case 'err':
-        if (m.code === 'auth') { tokenStore.set(null); sendJ(s, guestName ? { t: 'guest', name: guestName } : { t: 'guest' }); return; }
+        if (m.code === 'auth') { tokenStore.set(null); sendGuest(s); return; }
         emit('err', m);
         if (createWaiter) { createWaiter.reject(Object.assign(new Error(m.msg), { code: m.code })); createWaiter = null; }
         else if (playWaiter && m.code === 'state') { playWaiter.reject(Object.assign(new Error(m.msg), { code: m.code })); playWaiter = null; }
@@ -87,7 +93,18 @@ export function connect(opts = {}) {
       case 'partyFrames': emit('partyFrames', m.m.map(r => ({ char: r[0], hp: r[1], hpMax: r[2], room: r[3], x: r[4], z: r[5], dead: !!r[6], online: !!r[7], id: r[8] }))); return;
       case 'chat': emit('chat', m); return;
       case 'ignored': if (net.joined) net.joined.you.ignore = m.list; emit('ignored', m.list); return;
+      case 'groupHint': emit('groupHint', m); return;
+      case 'realm': emit('realm', m); return;
     }
+  }
+
+  async function sendGuest(s) {
+    const o = { t: 'guest' };
+    if (guestName) o.name = guestName;
+    if (net.humanCheck && human) {
+      try { o.human = typeof human === 'function' ? await human(net.humanCheck) : human; } catch (err) { emit('err', { code: 'human', msg: String(err && err.message) }); return; }
+    }
+    sendJ(s, o);
   }
 
   // ---- game socket ----
@@ -101,7 +118,7 @@ export function connect(opts = {}) {
       if (typeof ev.data === 'string') onGame(s, JSON.parse(ev.data), ticket);
       else if (net.joined) {
         let snap;
-        try { snap = decodeSnap(ev.data, q); snap.bytes = ev.data.byteLength; } catch (err) { console.error('[net] bad snapshot', err); return; }
+        try { snap = decodeSnap(ev.data, q, origin); snap.bytes = ev.data.byteLength; } catch (err) { console.error('[net] bad snapshot', err); return; }
         emit('snap', snap);
       }
     };
@@ -111,7 +128,7 @@ export function connect(opts = {}) {
     switch (m.t) {
       case 'welcome': sendJ(s, { t: 'enter', ticket }); return;
       case 'joined':
-        q = m.room.q; net.joined = m; net.you = m.you.id; attempt = 0;
+        q = m.room.q; origin = m.room.origin || null; net.joined = m; net.you = m.you.id; attempt = 0;
         setStatus('online');
         emit('joined', m);
         if (playWaiter) { playWaiter.resolve(m); playWaiter = null; }
@@ -134,6 +151,19 @@ export function connect(opts = {}) {
         emit('bag', m); return;
       }
       case 'equip': if (net.joined) net.joined.you.equipment = m.equipment; emit('equip', m); return;
+      case 'tradeAsk': emit('tradeAsk', m); return;
+      case 'relocate': {           // moving to a province another process holds: new socket, same flow as a ticket
+        const old = game; game = null;
+        if (old) { old.onclose = null; old.close(); }
+        setStatus('entering');
+        emit('relocate', m);
+        openGame(m.path, m.ticket);
+        return;
+      }
+      case 'zone': emit('zone', m); return;
+      case 'travelR': emit('travelR', m); return;
+      case 'eventFrame': emit('eventFrame', m); return;
+      case 'tradeState': net.trade = m.trade; emit('trade', m); return;
       case 'pong': onPong(m); return;
       case 'err': emit('err', m); if (m.code === 'state' && playWaiter) { playWaiter.reject(Object.assign(new Error(m.msg), { code: m.code })); playWaiter = null; } return;
       case 'refuse': net.lastKick = m; emit('kick', m); setStatus('refused'); stop(); return;
@@ -230,6 +260,19 @@ export function connect(opts = {}) {
   net.party = null;
   /** The "join my party" link for the current party (needs a party: partyOp('code') makes one). */
   net.joinLink = (base = globalThis.location ? location.origin + location.pathname : '') => (net.party ? `${base}?join=${net.party.code}` : null);
+  net.trade = null;
+  /** trade('ask', {id: entityId}) | ('accept', {id: tradeId}) | ('offer', {id, items:[uids], gold}) | ('lock'|'confirm', {id}) | ('cancel') */
+  net.tradeOp = (op, a = {}) => {
+    const o = { t: 'trade', op };
+    if (a.id != null) o.id = a.id;
+    if (a.items) o.items = a.items;
+    if (a.gold != null) o.gold = a.gold;
+    sendJ(game, o);
+  };
+  net.travel = to => sendJ(game, { t: 'travel', to: String(to) });       // a waystone key, or 'event' (free while a realm event runs)
+  net.campfire = () => sendJ(game, { t: 'trace', kind: 'campfire' });
+  /** Realm time of day 0..1 (0 = midnight, 0.5 = noon) from the gateway's clock. */
+  net.timeOfDay = () => { const c = net.realmClock; if (!c) return 0.5; const t = Date.now() - (c.skew || 0) - c.epoch; return ((t % c.dayMs) + c.dayMs) % c.dayMs / c.dayMs; };
   net.partyChat = text => sendJ(gw, { t: 'chat', ch: 'party', text: String(text).slice(0, 200) });
   net.ignore = (name, on = true) => sendJ(gw, { t: 'ignore', name, on });
   net.say = text => sendJ(game, { t: 'say', text: String(text).slice(0, 200) });

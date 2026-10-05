@@ -1,0 +1,240 @@
+{
+  "name": "Torborhold (z12_02)",
+  "zone": "z12_02",
+  "sheet": {
+    "sheet": "torbor_downs",
+    "zone": "test"
+  },
+  "province": {
+    "id": 10,
+    "name": "Petbeck Basin"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 2,
+  "inputHash": "c9413658",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9803699e"
+    },
+    "zone": {
+      "zx": 12,
+      "zy": 2
+    },
+    "worldOrigin": {
+      "x": 24576,
+      "z": 4096
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [
+    {
+      "id": 9,
+      "name": "The Fackfalpot"
+    },
+    {
+      "id": 83,
+      "name": null
+    }
+  ],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "town",
+      "name": "Torborhold",
+      "x": 592,
+      "z": 1264,
+      "starter": true,
+      "hub": true,
+      "radius": 90,
+      "movedFrom": {
+        "x": 576,
+        "z": 1216
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Pohelrow",
+      "x": 256,
+      "z": 1920,
+      "radius": 40,
+      "movedFrom": {
+        "x": 64,
+        "z": 1984
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Ashford",
+      "x": 1344,
+      "z": 1568,
+      "radius": 46,
+      "movedFrom": {
+        "x": 1344,
+        "z": 1472
+      }
+    },
+    {
+      "type": "crossing",
+      "kind": "ford",
+      "name": "Mipider Ford",
+      "x": 64,
+      "z": 1984
+    },
+    {
+      "type": "crossing",
+      "kind": "ford",
+      "name": "Milhot Ford",
+      "x": 1344,
+      "z": 1472
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 354,
+      "z": 1292,
+      "yaw": 1.185
+    },
+    {
+      "type": "event",
+      "id": "event_grandmother_skein",
+      "x": 357,
+      "z": 1944,
+      "r": 40
+    },
+    {
+      "type": "camp",
+      "id": "elite_hobb_gallowsby",
+      "x": 75,
+      "z": 1973,
+      "r": 25
+    }
+  ],
+  "spawn": {
+    "x": 588,
+    "z": 1264
+  },
+  "summary": {
+    "zone": "z12_02",
+    "province": "Petbeck Basin",
+    "inputHash": "c9413658",
+    "rivers": 2,
+    "wetShare": 0.006,
+    "unwalkableShare": 0.037,
+    "towns": [
+      {
+        "name": "Torborhold",
+        "kind": "town",
+        "hub": true,
+        "at": [
+          592,
+          1264
+        ],
+        "radius": 90,
+        "movedFrom": {
+          "x": 576,
+          "z": 1216
+        },
+        "culture": "halfling",
+        "plots": 28,
+        "streets": 79,
+        "links": 3,
+        "overlaps": 0
+      },
+      {
+        "name": "Pohelrow",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          256,
+          1920
+        ],
+        "radius": 40,
+        "movedFrom": {
+          "x": 64,
+          "z": 1984
+        },
+        "culture": "halfling",
+        "plots": 8,
+        "streets": 29,
+        "links": 0,
+        "overlaps": 0
+      },
+      {
+        "name": "Ashford",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          1344,
+          1568
+        ],
+        "radius": 46,
+        "movedFrom": {
+          "x": 1344,
+          "z": 1472
+        },
+        "culture": "halfling",
+        "plots": 9,
+        "streets": 44,
+        "links": 1,
+        "overlaps": 0
+      }
+    ],
+    "roads": 11,
+    "bridges": 5,
+    "scatter": 14019,
+    "scatterKinds": {
+      "rock_small": 1288,
+      "rock_large": 732,
+      "bush": 4001,
+      "tree_broadleaf": 7523,
+      "boulder": 89,
+      "tree_conifer": 146,
+      "reed": 225,
+      "tree_dead": 15
+    },
+    "sites": [
+      "settlement(HUB) town Torborhold 592 1264 90",
+      "settlement hamlet Pohelrow 256 1920 40",
+      "settlement hamlet Ashford 1344 1568 46",
+      "crossing ford Mipider Ford 64 1984",
+      "crossing ford Milhot Ford 1344 1472",
+      "dungeon door_1 Barrow entrance 354 1292  1.185",
+      "event event_grandmother_skein  357 1944 40",
+      "camp elite_hobb_gallowsby  75 1973 25"
+    ],
+    "spawn": {
+      "x": 588,
+      "z": 1264
+    },
+    "placements": 224,
+    "vignettesAvoided": 0
+  },
+  "files": {
+    "terrain.bin": 6306074,
+    "nav.bin": 1050717,
+    "scatter.bin": 112236,
+    "placements.json": 92082
+  }
+}

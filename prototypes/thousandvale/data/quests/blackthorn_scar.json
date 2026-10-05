@@ -1,0 +1,189 @@
+{
+  "_doc": "Stream E (M2). Quests for zone 'blackthorn_scar' (Blackthorn Scar). Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/province.json).",
+  "zone": "blackthorn_scar",
+  "npcs": {
+    "lantern_keeper_rosa": {
+      "name": "Rosa of Last Lantern",
+      "role": "elder",
+      "at": "Last Lantern",
+      "greeting": "As long as the lantern burns, the Scar doesn't take the village. It's very important you don't sneeze on it."
+    },
+    "penitent_jory": {
+      "name": "Jory the penitent",
+      "role": "pilgrim",
+      "at": "Thornwick",
+      "greeting": "I joined the cult by mistake. I thought it was a baking club."
+    },
+    "outrider_garrick": {
+      "name": "Outrider Garrick",
+      "role": "scout",
+      "at": "the Warband Stockade",
+      "greeting": "Their stockade. My vantage. Their arrows. My problem."
+    }
+  },
+  "quests": [
+    {
+      "id": "into_the_scar",
+      "name": "Into the Scar",
+      "level": 7,
+      "giver": "lantern_keeper_rosa",
+      "group": "2-3 players",
+      "story": 10,
+      "offer": "Redcliff sent you. The warband that burns the frontier answers to something that lives at the heart of the Scar. Clear the way to it.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "cult_zealot",
+          "count": 6,
+          "where": "the thorn roads",
+          "text": "Cult zealots"
+        },
+        {
+          "kind": "kill",
+          "type": "ossuary_crawler",
+          "count": 4,
+          "where": "the bone pits",
+          "text": "Ossuary crawlers"
+        }
+      ],
+      "done": "The way is open. Gather everyone you can find. It wakes when the lantern dims.",
+      "reward": {
+        "xp": 0.7,
+        "gold": 14,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      },
+      "next": "the_heart_of_the_scar"
+    },
+    {
+      "id": "the_heart_of_the_scar",
+      "name": "The Heart of the Scar",
+      "level": 9,
+      "giver": "lantern_keeper_rosa",
+      "group": "world boss — everyone in the province is called",
+      "story": 10,
+      "offer": "Every soul in the province should be here when it rises. Stand with them. Do not stand in the red.",
+      "steps": [
+        {
+          "kind": "killOne",
+          "encounter": "world_grimtallow",
+          "credit": "event",
+          "text": "The province's world boss defeated (event credit counts)"
+        }
+      ],
+      "done": "The Scar is quiet. The lantern burns. Torbor Downs is safe, for now. Thank you.",
+      "reward": {
+        "xp": 2.0,
+        "gold": 120,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "baking_club",
+      "name": "Not a Baking Club",
+      "level": 8,
+      "giver": "penitent_jory",
+      "offer": "The cult took my recipe book. Grandmother's scones. Get it back from the zealots, and maybe burn their real book while you're there.",
+      "steps": [
+        {
+          "kind": "collect",
+          "item": "Grandmother's recipe book",
+          "count": 1,
+          "from": "cult_zealot",
+          "chance": 0.35,
+          "text": "Recipe book recovered"
+        }
+      ],
+      "done": "My scones! Truly the light returns to the world.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 9,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "crawlers_in_the_pits",
+      "name": "Crawlers in the Pits",
+      "level": 8,
+      "giver": "outrider_garrick",
+      "offer": "Ossuary crawlers in the bone pits. Kill them before the warband teaches them tricks.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "ossuary_crawler",
+          "count": 6,
+          "where": "the bone pits",
+          "text": "Ossuary crawlers"
+        }
+      ],
+      "done": "Fewer crawlers. Fewer nightmares. Same number of arrows.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 9
+      }
+    },
+    {
+      "id": "the_barrows_of_the_scar",
+      "name": "Barrows of the Scar",
+      "level": 9,
+      "giver": "outrider_garrick",
+      "group": "a party of 3-5",
+      "offer": "The warband stores its loot in the old barrow maze. It's guarded by worse things than the warband.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Reach the inner barrows",
+          "floor": 2
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Defeat the barrow's keeper",
+          "boss": true
+        }
+      ],
+      "done": "You came out. That's more than the warband expected.",
+      "reward": {
+        "xp": 1.3,
+        "gold": 60,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "scar_rare",
+      "name": "The Thorn-Stalker",
+      "level": 9,
+      "giver": "lantern_keeper_rosa",
+      "offer": "Something stalks the edge of the lantern-light. It is patient. Be less patient.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "blackthorn_scar",
+          "slot": 0,
+          "text": "The Scar's rare slain"
+        }
+      ],
+      "done": "The edge of the light is a little further out tonight.",
+      "reward": {
+        "xp": 0.7,
+        "gold": 30,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

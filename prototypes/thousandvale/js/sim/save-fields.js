@@ -22,6 +22,8 @@ export const SAVE_FIELDS = Object.freeze([
   { k: 'ignore', def: [] },        // [{ id, name }] whose chat this character does not see
   { k: 'exit', def: null },        // { x, z } in the wilds: where leaving an instance (or losing it) puts you
   { k: 'mutedUntil', def: 0 },     // wall ms; chat refused until then (admin hook)
+  { k: 'waystones', def: [] },     // waystone keys this character has discovered (travel targets)
+  { k: 'jseq', col: 'journal_seq', def: 0 },   // last journal row this blob contains (js/sim/journal.js)
 ]);
 
 /** Runtime-only keys on a live character (never saved). */
@@ -44,8 +46,8 @@ export function unpackChar(row) {
   const blob = row.blob || {};
   for (const f of SAVE_FIELDS) {
     let v = f.col ? row.cols?.[f.col] : blob[f.k];
-    if (v === undefined || v === null) v = f.def === null || typeof f.def !== 'object' ? f.def : JSON.parse(JSON.stringify(f.def));
-    ch[f.k] = v;
+    if (v === undefined || v === null) v = f.def;
+    ch[f.k] = v !== null && typeof v === 'object' ? JSON.parse(JSON.stringify(v)) : v;   // never share objects with the stored row
   }
   return ch;
 }

@@ -59,6 +59,13 @@ export const CODES = Object.freeze({
   item: 'You do not have that item.',
   far: 'Too far away.',
   bagFull: 'Your bag is full.',
+  human: 'Please finish the "are you human" check.',
+  tooMany: 'Too many new accounts from your network. Try again later.',
+  trade: 'Trade not possible.',
+  tradeBusy: 'One of you is already trading.',
+  tradeFar: 'Too far apart to trade.',
+  tradeFailed: 'The trade did not go through. Nothing changed hands.',
+  busy: 'Busy, try again in a moment.',
 });
 
 // ---- field types -------------------------------------------------------------------------------
@@ -71,6 +78,7 @@ function check(type, v) {
   if (type === 'id') return isInt(v) && v >= 0 && v <= 0xFFFF;
   if (type === 'vec2') return v !== null && typeof v === 'object' && !Array.isArray(v) && isNum(v.x) && isNum(v.z) && Object.keys(v).length === 2;
   if (type === 'obj') return v !== null && typeof v === 'object' && !Array.isArray(v);
+  if (type === 'uids') return Array.isArray(v) && v.length <= 12 && v.every(u => typeof u === 'string' && u.length <= 40);
   if (type.startsWith('str:')) return typeof v === 'string' && v.length <= +type.slice(4);
   return false;
 }
@@ -81,12 +89,12 @@ function check(type, v) {
  */
 export const CLIENT_MSGS = Object.freeze({
   hello:   { on: 'both', fields: { v: 'int', build: 'str:64' }, rate: 2, burst: 2 },
-  guest:   { on: 'gw', fields: { name: '?str:24' }, rate: 1, burst: 3 },
+  guest:   { on: 'gw', fields: { name: '?str:24', human: '?str:2048' }, rate: 1, burst: 3 },
   auth:    { on: 'gw', fields: { token: 'str:64' }, rate: 1, burst: 3 },
   chars:   { on: 'gw', fields: {}, rate: 2, burst: 4 },
   create:  { on: 'gw', fields: { name: 'str:24', cls: 'str:32', look: '?obj' }, rate: 1, burst: 3 },
   play:    { on: 'gw', fields: { char: 'int', join: '?str:8' }, rate: 1, burst: 3 },
-  party:   { on: 'gw', fields: { op: 'str:8', name: '?str:24', code: '?str:8', char: '?int' }, rate: 2, burst: 10 },
+  party:   { on: 'gw', fields: { op: 'str:8', name: '?str:24', code: '?str:64', char: '?int' }, rate: 2, burst: 10 },
   chat:    { on: 'gw', fields: { ch: 'str:8', text: 'str:200' }, rate: 1, burst: 5 },
   ignore:  { on: 'gw', fields: { name: 'str:24', on: 'bool' }, rate: 1, burst: 5 },
   ping:    { on: 'both', fields: { c: 'num' }, rate: 2, burst: 4 },
@@ -98,6 +106,9 @@ export const CLIENT_MSGS = Object.freeze({
   respawn: { on: 'p', fields: {}, rate: 1, burst: 2 },
   use:     { on: 'p', fields: { id: 'id' }, rate: 4, burst: 8 },
   item:    { on: 'p', fields: { op: 'str:8', uid: 'str:40', slot: '?str:16' }, rate: 5, burst: 10 },
+  travel:  { on: 'p', fields: { to: 'str:48' }, rate: 1, burst: 3 },
+  trace:   { on: 'p', fields: { kind: 'str:16' }, rate: 1, burst: 2 },
+  trade:   { on: 'p', fields: { op: 'str:8', id: '?int', items: '?uids', gold: '?int' }, rate: 5, burst: 10 },
   leave:   { on: 'both', fields: {}, rate: 1, burst: 2 },
 });
 
@@ -126,10 +137,17 @@ export const SERVER_MSGS = Object.freeze({
   partyFrames: ['m'],
   targetR: ['id', 'ok', 'why'],
   ignored: ['list'],
+  tradeAsk: ['trade', 'from', 'name'],
+  relocate: ['path', 'ticket', 'province'],
+  groupHint: ['key', 'with'],
+  realm: ['kind', 'ev', 'at', 'won'],
+  zone: ['zone', 'name', 'deeds'],
+  travelR: ['ok', 'why', 'cost'],
+  tradeState: ['trade', 'done', 'why'],
 });
 
 /** Party ops (`party {op}`); docs/protocol.md §3.3. */
-export const PARTY_OPS = Object.freeze(['invite', 'accept', 'decline', 'leave', 'kick', 'lead', 'join', 'code']);
+export const PARTY_OPS = Object.freeze(['invite', 'accept', 'decline', 'leave', 'kick', 'lead', 'join', 'code', 'group']);
 export const PARTY_MAX = 5;
 /** Item ops (`item {op}`). */
 export const ITEM_OPS = Object.freeze(['equip', 'unequip', 'destroy']);
@@ -138,7 +156,38 @@ export const CHAT_CHANNELS = Object.freeze(['party']);
 /** Room kinds (`joined.room.kind`). */
 export const ROOM_KINDS = Object.freeze(['wilds', 'town', 'instance']);
 
-export const EVENT_TYPES = Object.freeze(['cast', 'hit', 'miss', 'die', 'xp', 'level', 'loot', 'aggro', 'fx', 'open']);
+export const EVENT_TYPES = Object.freeze(['cast', 'hit', 'miss', 'die', 'xp', 'level', 'loot', 'aggro', 'fx', 'open',
+  'tele', 'teleR', 'castbar', 'castX', 'phase', 'enrage', 'say', 'obj', 'boss']);
+
+/**
+ * Event fields (docs/protocol.md §6, encounter rows from docs/encounters.md §7). Every event also has
+ * `type`, and `x, z` (the room fills them in). Ids are local room entity ids. `?` = optional.
+ */
+export const EVENT_FIELDS = Object.freeze({
+  cast: ['s', 'slot?', 'skill', 'aim?', 'target?'],
+  hit: ['s', 'd', 'n', 'crit?', 'el?', 'kind', 'skill?'],
+  miss: ['s', 'd', 'why'],
+  die: ['d', 'by?'],
+  xp: ['n', 'total'],
+  level: ['d', 'level'],
+  loot: ['d', 'items', 'gold?'],
+  aggro: ['s', 'd'],
+  fx: ['id', 'kind'],
+  open: ['d'],
+  tele: ['id', 's', 'ab', 'k', 'ms', 'shape', 'yaw?', 'r?', 'r2?', 'arc?', 'len?', 'w?', 'el?', 'follow?'],
+  teleR: ['id', 'hits?', 'x?'],
+  castbar: ['id', 'ab', 'name', 'ms', 'int?'],
+  castX: ['id', 'ab', 'why'],
+  phase: ['id', 'n', 'name?', 'bar', 'hpMax?', 'reset?'],
+  enrage: ['id', 'soft?', 'hard?'],
+  say: ['id', 'text', 'style'],
+  obj: ['id', 'state?', 'otype?', 'r?', 'key?', 'hp?', 'gone?'],
+  boss: ['id', 'name?', 'title?', 'bars?', 'phases?', 'enrageMs?', 'arena?', 'end?', 'won?'],
+});
+/** Telegraph shapes (`tele.shape`) and object states (`obj.state`, `info.state`). */
+export const TELE_SHAPES = Object.freeze(['circle', 'ring', 'donut', 'cone', 'line', 'cross']);
+export const OBJ_STATES = Object.freeze(['idle', 'lit', 'used', 'broken', 'open', 'closed']);
+export const OBJ_TYPES = Object.freeze(['portal', 'stairs', 'exit', 'chest', 'gate', 'lever', 'pillar', 'rock', 'brazier', 'pool', 'cracked_floor', 'sarcophagus', 'support_beam', 'ore_cart']);
 
 /** Validate a decoded client message. Returns null when fine, else a reason. */
 export function validate(msg, socketKind = null) {

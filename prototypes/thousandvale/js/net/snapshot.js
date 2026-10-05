@@ -39,12 +39,12 @@ export const qHp = (hp, max) => (max > 0 ? clamp(Math.round(hp / max * 65535), 0
  * Write one entity record. `mask` = F bits to include (F.FULL forces all fields).
  * The entity must expose: id, kind (name), x, y, z, yaw, hp, hpMax, animId, animSeq, state, target.
  */
-export function encodeRecord(w, e, mask, q) {
+export function encodeRecord(w, e, mask, q, ox = 0, oz = 0) {
   if (mask & F.FULL) mask = 0xFF;
   w.u16(e.id);
   w.u8(mask);
   if (mask & F.FULL) w.u8(KIND[e.kind] || 0);
-  if (mask & F.POS) { w.u16(qPos(e.x, q)); w.u16(qPos(e.z, q)); }
+  if (mask & F.POS) { w.u16(qPos(e.x - ox, q)); w.u16(qPos(e.z - oz, q)); }
   if (mask & F.Y) w.i16(qY(e.y));
   if (mask & F.YAW) w.u8(qYaw(e.yaw));
   if (mask & F.HP) w.u16(qHp(e.hp, e.hpMax));
@@ -74,8 +74,9 @@ export function encodeClientSnap({ tick, ack = 0, self = null, vitals = null, de
 const KIND_BY_ID = Object.fromEntries(Object.entries(KIND).map(([k, v]) => [v, k]));
 const ANIM_BY_ID = Object.fromEntries(Object.entries(ANIM_ID).map(([k, v]) => [v, k]));
 
-/** Decode a snapshot frame. q = joined.room.q. Throws on a malformed frame. */
-export function decodeSnap(bytes, q) {
+/** Decode a snapshot frame. q = joined.room.q, origin = joined.room.origin (positions are sent relative to it). Throws on a malformed frame. */
+export function decodeSnap(bytes, q, origin = null) {
+  const ox = origin ? origin.x : 0, oz = origin ? origin.z : 0;
   const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
   const dv = new DataView(b.buffer, b.byteOffset, b.byteLength);
   let o = 0;
@@ -99,7 +100,7 @@ export function decodeSnap(bytes, q) {
     const r = { id: u16(), full: false };
     const m = u8();
     if (m & F.FULL) { r.full = true; r.kind = KIND_BY_ID[u8()] || 'object'; }
-    if (m & F.POS) { r.x = u16() * q; r.z = u16() * q; }
+    if (m & F.POS) { r.x = ox + u16() * q; r.z = oz + u16() * q; }
     if (m & F.Y) r.y = i16() / 16;
     if (m & F.YAW) r.yaw = u8() / 256 * TAU;
     if (m & F.HP) r.hp = u16() / 65535;

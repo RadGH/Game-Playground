@@ -1,0 +1,59 @@
+{
+  "_doc": "Telegraphed specials for ORDINARY monsters, by 'family/role', then family, then role, then 'any'. Rank scales them (js/rules/encounter.js RANK_SCALE: champion/rare get bigger shapes, shorter wind-ups, more damage and +extraPerRank copies). Format: docs/encounters.md.",
+  "families": {
+    "beast/skirmisher": [
+      { "id": "pounce", "name": "Pounce", "every": [9, 13], "range": 14, "minRange": 4, "cast": 0.4,
+        "telegraphs": [ { "shape": "line", "at": "self", "len": 9, "w": 2.2, "wind": 0.9, "damage": 1.4, "knock": 2 } ] },
+      { "id": "savage_bite", "name": "Savage Bite", "every": [11, 16], "range": 4,
+        "telegraphs": [ { "shape": "cone", "at": "self", "r": 4.2, "arc": 1.6, "wind": 1.0, "damage": 1.6, "status": "bleed" } ] }
+    ],
+    "beast/brute": [
+      { "id": "trample", "name": "Trample", "every": [12, 16], "range": 16, "minRange": 5, "cast": 0.6,
+        "telegraphs": [ { "shape": "line", "at": "self", "len": 14, "w": 3, "wind": 1.2, "damage": 1.8, "knock": 4 } ] },
+      { "id": "stomp", "name": "Stomp", "every": [14, 18], "range": 5,
+        "telegraphs": [ { "shape": "circle", "at": "self", "r": 4.5, "wind": 1.3, "damage": 1.5, "status": "off_balance" } ] }
+    ],
+    "aberration": [
+      { "id": "burst", "name": "Spore Burst", "every": [12, 16], "range": 6,
+        "telegraphs": [ { "shape": "circle", "at": "self", "r": 5, "wind": 1.4, "damage": 1.3, "status": "poison", "element": "poison" } ] },
+      { "id": "lash", "name": "Lash Ring", "every": [16, 20], "range": 10, "cast": 0.8,
+        "telegraphs": [ { "shape": "ring", "at": "self", "r": 9, "r2": 4, "wind": 1.4, "damage": 1.6 } ] }
+    ],
+    "elemental": [
+      { "id": "hail", "name": "Falling Sparks", "every": [10, 14], "range": 24, "cast": 0.8,
+        "telegraphs": [ { "shape": "circle", "at": "target", "r": 3, "wind": 1.3, "count": 3, "delay": 0.45, "jitter": 1.5, "extraPerRank": 1, "damage": 1.1, "element": "fire", "status": "burn" } ] }
+    ],
+    "humanoid/skirmisher": [
+      { "id": "leap", "name": "Leaping Strike", "every": [11, 15], "range": 12, "minRange": 3, "cast": 0.5,
+        "telegraphs": [ { "shape": "circle", "at": "target", "r": 2.6, "wind": 1.1, "damage": 1.5 } ] }
+    ],
+    "humanoid/archer": [
+      { "id": "volley", "name": "Volley", "every": [10, 14], "range": 30, "cast": 1.0,
+        "telegraphs": [ { "shape": "circle", "at": "target", "r": 4, "wind": 1.2, "damage": 1.2 } ] }
+    ],
+    "humanoid": [
+      { "id": "sweep", "name": "Sweep", "every": [12, 16], "range": 4,
+        "telegraphs": [ { "shape": "cone", "at": "self", "r": 4, "arc": 2.4, "wind": 1.1, "damage": 1.4 } ] }
+    ],
+    "undead": [
+      { "id": "grasp", "name": "Grave Grasp", "every": [11, 15], "range": 20, "cast": 0.7,
+        "telegraphs": [ { "shape": "circle", "at": "target", "r": 2.8, "wind": 1.3, "damage": 0.9, "status": "root", "element": "shadow" } ] }
+    ],
+    "construct": [
+      { "id": "quake", "name": "Quake Cross", "every": [14, 18], "range": 6, "cast": 0.6,
+        "telegraphs": [ { "shape": "cross", "at": "self", "r": 10, "w": 2.6, "wind": 1.5, "damage": 1.7, "yaw": "facing" } ] }
+    ],
+    "dragonkin": [
+      { "id": "breath", "name": "Searing Breath", "every": [12, 16], "range": 10, "cast": 0.8,
+        "telegraphs": [ { "shape": "cone", "at": "self", "r": 10, "arc": 1.1, "wind": 1.2, "damage": 1.8, "element": "fire", "status": "burn" } ] }
+    ],
+    "fiend": [
+      { "id": "hellring", "name": "Brand Ring", "every": [13, 17], "range": 8,
+        "telegraphs": [ { "shape": "donut", "at": "self", "r": 8, "r2": 3, "wind": 1.3, "damage": 1.5, "element": "shadow" } ] }
+    ],
+    "any": [
+      { "id": "heavy", "name": "Heavy Blow", "every": [12, 16], "range": 4,
+        "telegraphs": [ { "shape": "circle", "at": "target", "r": 2.4, "wind": 1.2, "damage": 1.5 } ] }
+    ]
+  }
+}

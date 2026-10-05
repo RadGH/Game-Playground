@@ -71,6 +71,7 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     sun.target.position.set(cx, p.y, cz);
     sun.position.set(cx + sunDir.x * 140, p.y + sunDir.y * 140, cz + sunDir.z * 140);
     sky.position.set(p.x, 0, p.z);
+    lantern.position.set(p.x, p.y + 2.4, p.z);
     clouds.position.set(p.x * 0.9, 0, p.z * 0.9);
   }
 
@@ -82,7 +83,22 @@ export function createScene(canvas, { quality = 'high' } = {}) {
   window.addEventListener('resize', resize);
   resize();
 
-  return { renderer, scene, camera, sun, hemi, sunDir, follow, resize, render: () => renderer.render(scene, camera) };
+  /** 'outdoor' (sky, sun, long fog) or 'dungeon' (no sky, dim cold fill, close dark fog). */
+  function setMood(mood) {
+    const dark = mood === 'dungeon';
+    sky.visible = clouds.visible = !dark;
+    scene.background = dark ? new THREE.Color('#06050a') : SKY.horizon.clone();
+    scene.fog.color.set(dark ? '#06050a' : SKY.horizon);
+    scene.fog.near = dark ? 10 : 140; scene.fog.far = dark ? 48 : 900;
+    hemi.intensity = dark ? 0.62 : 1.15; hemi.color.set(dark ? '#8f9cc0' : '#d6e6ff'); hemi.groundColor.set(dark ? '#2a2018' : '#6b5f48');
+    sun.intensity = dark ? 0.25 : 2.6;
+    lantern.visible = dark;
+  }
+  // The light you carry underground: warm, close, follows you (placed in follow()).
+  const lantern = new THREE.PointLight('#ffc98a', 9, 13, 1.6);
+  lantern.visible = false; scene.add(lantern);
+
+  return { renderer, scene, camera, sun, hemi, sunDir, follow, resize, setMood, render: () => renderer.render(scene, camera) };
 }
 
 function makeCloudSprite() {

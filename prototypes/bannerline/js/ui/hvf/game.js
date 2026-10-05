@@ -33,12 +33,14 @@ import { createSim, restoreSim, TICK_MS } from '../../sim/sim.js';
 import { createHvfWorld, groundY } from '../../view/hvf/world.js';
 import { createHvfActors } from '../../view/hvf/actors.js';
 import { loadHvfModels } from '../../view/hvf/models.js';
+import { createIconLibrary } from '../../view/icons.js';
+import { createHvfSound } from '../../view/hvf-sound.js';
 import { createHvfHud, REASONS } from './hud.js';
 import { createMenuNav } from '../menunav.js';
 import * as Q from '../../sim/modes/hvf/query.js';
 import { KIND } from '../../sim/modes/hvf/mapgen.js';
 import { cellOf, liveGrid } from '../../sim/modes/hvf/grid.js';
-import { hostHvfRoom, joinHvfRoom } from './online.js';
+import { hvfRoomMode } from './online.js';
 
 const BUILD_KEYS = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal'];
 const AI_LEVELS = [['recruit', 'Recruit'], ['veteran', 'Veteran'], ['commander', 'Commander']];
@@ -51,7 +53,11 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
   let m = null;                  // the running match
   let setup = null;              // the setup card { el, nav, seats }
   let models = null;             // stream C's art (js/view/hvf/models.js), loaded in the background; stand-ins until then
-  const ready = params.get('models') !== '0' ? loadHvfModels().then((x) => { models = x; }) : Promise.resolve();
+  let icons = null;   // stream C's baked icons (assets/icons/hvf-*), shown on the build bar, shop and pack
+  const ready = Promise.all([
+    params.get('models') !== '0' ? loadHvfModels().then((x) => { models = x; }) : null,
+    createIconLibrary().then((x) => { icons = x; }).catch(() => {}),
+  ]);
   const choice = { format: rules.defaultFormat, ai: 'veteran', speed: 1, seed: null, seats: [{ role: 'farmer', device: null }] };
   const devLabel = (id) => (!id ? 'press A / Enter to join' : id === 'kbm' ? 'Keyboard + mouse' : (devices?.get(id)?.label || 'Controller'));
 
@@ -112,7 +118,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     if (!st) return '<p class="info">Connecting…</p>';
     const mine = (s) => s.kind === 'human' && s.owner === o.room.me;
     return `<h3>Room <b class="code">${st.code}</b> <small>${o.room.isHost ? 'you host' : 'joined'} · ${st.machines.length} machine(s)</small></h3>
-      <div class="seats">${st.seats.map((s) => `<div class="seat ${mine(s) ? 'me' : ''}"><b>${s.role === 'farmer' ? '🌾' : '🏹'} ${s.role} ${s.index + 1}</b>
+      <div class="seats">${st.slots.map((s) => `<div class="seat ${mine(s) ? 'me' : ''}"><b>${s.role === 'farmer' ? '🌾' : '🏹'} ${s.role} ${s.index + 1}</b>
         <span class="dev">${s.kind === 'human' ? `${s.name}${s.ready ? ' ✓ ready' : ''}` : s.kind === 'ai' ? `AI (${s.difficulty})` : 'open'}</span>
         ${mine(s) ? `<button class="mini" data-act="ready" data-key="${s.key}">${s.ready ? 'Not ready' : 'Ready'}</button><button class="mini" data-act="release" data-key="${s.key}">Leave seat</button>` : s.kind !== 'human' ? `<button class="mini" data-act="claim" data-key="${s.key}">Take</button>` : ''}</div>`).join('')}</div>
       ${o.error ? `<p class="warn">${o.error}</p>` : ''}
@@ -126,7 +132,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       else if (act === 'join') await api.online.join(setup.el.querySelector('[data-k="code"]').value);
       else if (act === 'claim') api.online.claim(el.dataset.key);
       else if (act === 'release') o.room.release(el.dataset.key);
-      else if (act === 'ready') { const s = o.room.state.seats.find((x) => x.key === el.dataset.key); o.room.ready(el.dataset.key, !s.ready); }
+      else if (act === 'ready') { const s = o.room.state.slots.find((x) => x.key === el.dataset.key); o.room.ready(el.dataset.key, !s.ready); }
       else if (act === 'netstart') api.online.start({ seed: choice.seed });
     } catch (err) { o.error = err.message || String(err); }
     drawSetup();
@@ -223,6 +229,18 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       v.hud.alert(v.role === 'farmer' ? `Find a hidden spot before the hunters are loose (${f.headStart} s). Hollows are off the trails behind briar or a single tree.` : `You wait in your kennel for ${f.headStart} s while the farmers hide. Listen for their animals.`, 'info', 7000);
     }
     bindKbm();
+    // sound (stream C's bridge, js/view/hvf-sound.js): one listener per screen — the nearest local character
+    // (or camera) is the ear, and a spot counts as seen if either half's team sees it
+    const mm = m;
+    createHvfSound({
+      localPlayers: m.views.map((v) => v.player),
+      roleOf: (pid) => mm.sim.state.players[pid].role,
+      ears: () => mm.views.map((v) => { const e = charOf(v); return e && e.alive ? { x: e.x, z: e.z } : { x: v.camera.target.x, z: v.camera.target.z }; }),
+      visible: (x, z) => mm.views.some((v) => Q.visibleAt(mm.sim, v.team, x, z)),
+      entOf: (id) => mm.sim.state.ents.find((e) => e.id === id) || null,
+    }).then((snd) => { if (m === mm) { mm.sound = snd; for (const v of mm.views) v.hud.setSound?.(snd); } else snd.dispose(); }).catch((err) => console.warn('hvf sound unavailable', err));
+    m.unlock = () => { mm.sound?.unlock(); };
+    host.addEventListener('pointerdown', m.unlock); window.addEventListener('keydown', m.unlock);
     window.hvf = api;
     return m;
   }
@@ -249,6 +267,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     v.hud = createHvfHud({
       root: v.root, sim, player,
       keyLabel: (k) => (isPad ? PAD_KEYS[k] || k : k),
+      iconUrl: (kind, id) => icons?.url(kind, id) || null,
       onCmd: (c) => issue(v, c),
       onPlace: (kind) => { setPlacing(v, kind); closeMenu(v); },
       onAim: (spec) => { setAim(v, spec); if (spec.skill || spec.lodge || spec.army || spec.use) closeMenu(v); },
@@ -316,7 +335,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     issue(v, { type: 'move', x, z }); marker(v, x, z, 'move');
   }
   function placeOrFire(v, x, z, keep = false) {
-    if (v.placing) { issue(v, { type: 'build', kind: v.placing, x, z }); if (!keep) setPlacing(v, null); return true; }
+    if (v.placing) { issue(v, { type: 'build', kind: v.placing, x, z }); m.sound?.ui('build'); if (!keep) setPlacing(v, null); return true; }
     if (v.aim) { fireAim(v, x, z); return true; }
     return false;
   }
@@ -367,6 +386,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       if (!down || e.repeat || !m || m.over || !v) return;
       if (e.code === 'Escape') { if (v.placing || v.aim) cancel(v); else if (v.hud.shopOpen) v.hud.toggleShop(false); else togglePause(v); return; }
       if (e.code === 'Space') { e.preventDefault(); v.camera.centre(); return; }
+      if (e.code === 'KeyM') { if (m.sound) { m.sound.setMuted(!m.sound.settings.muted); for (const w of m.views) w.hud.setSound?.(m.sound); } return; }
       if (['KeyQ', 'KeyW', 'KeyE', 'KeyR'].includes(e.code)) { e.preventDefault(); setAim(v, { skill: e.code.slice(3) }); return; }
       const i = BUILD_KEYS.indexOf(e.code);
       if (v.role === 'farmer') {
@@ -411,6 +431,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
   // ── gamepad (B's device frames) ────────────────────────────────────────────────────────────────
   function padFrame(v, f, dt) {
     const p = f.pressed;
+    if (p.size) m.sound?.unlock();
     if (p.has('pause')) { togglePause(v); return; }
     if (m.paused) return;
     // right stick moves the aim ring around your character (screen right = +x, screen down = +z)
@@ -485,7 +506,11 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
 
     // sim
     const events = m.clock.frame(dt * 1000, () => { const q = m.queue; m.queue = []; return q; });
-    for (const ev of events) for (const v of m.views) v.hud.onEvent(ev);
+    for (const ev of events) {
+      m.actors.onEvent(ev);
+      for (const v of m.views) v.hud.onEvent(ev);
+      m.sound?.onEvent(ev);
+    }
     if (m.net) for (const v of m.views) { const w = m.clock.waitingFor || []; v.hud.setWaiting?.(w.length ? `Waiting for ${w.map((x) => x.name + (x.hidden ? ' (tab hidden)' : '')).join(', ')}` : ''); }
 
     if (s.tick !== m.lastFogTick) {
@@ -493,6 +518,18 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       for (const team of new Set(m.views.map((v) => v.team))) m.world.setFog(s.hvf.vision[team], s.hvf.explored[team], team);
     }
     m.world.syncChopped(s.hvf.chopped);
+    // trees being cut shake and lean as the chop goes on
+    // (the start tick lives in a view-side map: the view never writes to the sim's state, which is hashed)
+    if (m.world.nature) {
+      const chopping = m.chopping || (m.chopping = new Map());
+      for (const e of s.ents) {
+        const o = e.ord;
+        if (!o || o.k !== 'chop' || !(o.until > 0)) { chopping.delete(e.id); continue; }
+        let c = chopping.get(e.id);
+        if (!c || c.cell !== o.cell) { c = { cell: o.cell, from: s.tick }; chopping.set(e.id, c); }
+        m.world.chop(o.cell, Math.min(0.95, (s.tick - c.from) / Math.max(1, o.until - c.from)));
+      }
+    }
     m.frameDt = m.paused ? 0 : dt;
 
     for (const v of m.views) {
@@ -523,6 +560,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       m.overT -= dt;
       if (m.overT <= 0) {
         m.over = true;
+        m.sound?.result(m.views.some((v) => v.team === s.result.winner));
         for (const v of m.views) {
           cancel(v); closeMenu(v);
           v.hud.showResult(s.result, { onAgain: () => (m.net ? (end(), openSetup()) : start({ ...m.opts, seed: null })), onBack: () => { end(); openSetup(); } });
@@ -538,7 +576,8 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     if (!m) return;
     const sim = m.sim;
     m.world.useTeam(v.team);
-    m.actors.setTeam?.(v.team);
+    m.world.update(v.camera.camera, m.frameDt);
+    m.actors.setTeam(v.team);
     m.actors.sync(sim.state, m.clock.alpha, m.frameDt, (e) => Q.visibleEnt(sim, v.team, e), v.team === 1 ? Q.seenBuildings(sim, 1) : []);
     m.frameDt = 0;   // animate once per frame, not once per viewport
     for (const w of m.views) if (w.ghost) w.ghost.visible = w === v && !!w.ground;
@@ -567,6 +606,8 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
   function end() {
     if (!m) return;
     unbindKbm();
+    if (m.unlock) { host.removeEventListener('pointerdown', m.unlock); window.removeEventListener('keydown', m.unlock); }
+    m.sound?.dispose();
     m.net?.match.lockstep.close?.();
     m.net?.detach?.();
     try { m.net?.room.leave(); } catch { /* closed */ }
@@ -579,7 +620,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     if (window.hvf === api) delete window.hvf;
   }
 
-  // ── online (stream D's transport + lockstep; HvF's own room: online.js) ────────────────────────
+  // ── online (stream D's room + transport + lockstep: js/net/lobbysync.js with HvF's room mode, online.js) ──
   const online = {
     room: null, hashes: {},
     async transport() { const { createTransport } = await import('../../net/transport.js'); return createTransport(transportKind || params.get('net') || 'peerjs'); },
@@ -592,12 +633,14 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       room.on('closed', () => { if (m?.net) for (const v of m.views) v.hud.alert('Host left — match ended', 'bad', 4000); });
     },
     async host(code, { format = choice.format, name = 'Host' } = {}) {
-      const room = await hostHvfRoom({ transport: await online.transport(), code, name, dataHash: data.hash, rules, format });
+      const { createRoom } = await import('../../net/lobbysync.js');
+      const room = await createRoom({ transport: await online.transport(), code, name, dataHash: data.hash, mode: 'hvf', format, roomMode: hvfRoomMode(rules) });
       online.attach(room); return room.code;
     },
     async join(code, { name = 'Guest' } = {}) {
       const { cleanRoomCode } = await import('../../net/transport.js');
-      const room = await joinHvfRoom({ transport: await online.transport(), code: cleanRoomCode(code), name, dataHash: data.hash });
+      const { joinRoom } = await import('../../net/lobbysync.js');
+      const room = await joinRoom({ transport: await online.transport(), code: cleanRoomCode(code), name, dataHash: data.hash });
       online.attach(room); return true;
     },
     claim(key, o = {}) { const dev = choice.seats[0].device || 'kbm'; return online.room.claim(key, { local: 0, device: dev, name: o.name || (online.room.isHost ? 'Host' : 'Guest'), ...o }); },
@@ -615,9 +658,14 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       });
       const clock = createNetClock({ lockstep: match.lockstep, tickMs: packet.tickMs });
       const detach = clock.attachVisibility?.(document);
-      const local = match.localPlayers.map((lp, i) => ({ player: lp.pid, device: lp.device || 'kbm', slot: i }));
-      if (!local.length) { console.warn('online: no local seat'); return; }
-      begin({ sim: match.sim, clock, local, opts: { format: packet.config.format, online: true }, net: { match, clock, room: online.room, detach } });
+      let local = match.localPlayers.map((lp, i) => ({ player: lp.pid, device: lp.device || 'kbm', slot: i }));
+      // A machine with no seat (a host who left every seat to guests and AI) still has to run: the host
+      // assembles every turn, so if it never pumps its clock everyone waits forever. It WATCHES from
+      // the first farmer's side; anything it issues is dropped by the lockstep (it owns no players).
+      const watching = !local.length;
+      if (watching) local = [{ player: 0, device: 'kbm', slot: 0 }];
+      begin({ sim: match.sim, clock, local, opts: { format: packet.config.format, online: true, watching }, net: { match, clock, room: online.room, detach } });
+      if (watching) for (const v of m.views) v.hud.alert('You have no seat in this match: watching from the farmers\' side.', 'info', 6000);
     },
   };
 
@@ -628,6 +676,8 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     ready,
     get active() { return !!m || !!setup; },
     get match() { return m; },
+    /** Is this spot in sight for any seat at this screen (tests; the sound bridge uses the same rule). */
+    visibleAt(x, z) { return !!m && m.views.some((v) => Q.visibleAt(m.sim, v.team, x, z)); },
     get choice() { return choice; },
     state: () => m?.sim.state,
     issue: (c, seat = 0) => m && issue(m.views[seat], c),

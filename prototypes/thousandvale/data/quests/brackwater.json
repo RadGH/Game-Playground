@@ -1,0 +1,192 @@
+{
+  "_doc": "Stream E (M2). Quests for zone 'brackwater' (Brackwater Fen). Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/province.json).",
+  "zone": "brackwater",
+  "npcs": {
+    "reeve_mabry": {
+      "name": "Reeve Mabry Fenwick",
+      "role": "elder",
+      "at": "Brackwater",
+      "greeting": "Mind the planks. Mind the water. Mind everything, really."
+    },
+    "eel_woman_wenna": {
+      "name": "Wenna Eelwife",
+      "role": "fisher",
+      "at": "Eelwick",
+      "greeting": "Eels. Want some? No? More for me."
+    },
+    "tower_keeper_hob": {
+      "name": "Keeper Haskel",
+      "role": "guard",
+      "at": "Reedwall Tower",
+      "greeting": "Reedwall Tower: the only dry spot for a mile, and it's damp."
+    },
+    "witch_mabry": {
+      "name": "Old Mabry",
+      "role": "hedge-witch",
+      "at": "hedge_witch_garden",
+      "greeting": "My jars are open and my slimes are loose. Help a poor old woman, dear, it's slightly your fault for existing."
+    }
+  },
+  "quests": [
+    {
+      "id": "eels_and_omens",
+      "name": "Eels and Omens",
+      "level": 5,
+      "giver": "reeve_mabry",
+      "story": 7,
+      "offer": "Copperdell's foreman says you're handy. Serpents in the reeds have been taking our nets and our nerve. Take theirs instead.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "reed_serpent",
+          "count": 6,
+          "where": "the reed beds",
+          "text": "Reed serpents"
+        },
+        {
+          "kind": "talk",
+          "npc": "tower_keeper_hob",
+          "text": "Report at Reedwall Tower"
+        }
+      ],
+      "done": "Keeper Haskel says the omens point west, to Wychwood. Omens always point somewhere damp.",
+      "reward": {
+        "xp": 0.5,
+        "gold": 10,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      },
+      "next": "the_antler_stockade"
+    },
+    {
+      "id": "slime_jars",
+      "name": "Back in the Jar",
+      "level": 5,
+      "giver": "witch_mabry",
+      "offer": "My slimes have escaped, dear. Squash them. Gently, they're expensive. No — squash them hard, they bite.",
+      "steps": [
+        {
+          "kind": "visit",
+          "vignette": "hedge_witch_garden",
+          "text": "Visit the hedge-witch's garden"
+        },
+        {
+          "kind": "kill",
+          "type": "bog_slime",
+          "count": 5,
+          "where": "around the garden",
+          "text": "Escaped bog slimes"
+        }
+      ],
+      "done": "Lovely. I'll keep the lid on next time. I said that last time too.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 7,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "frog_chorus",
+      "name": "The Frog Chorus",
+      "level": 5,
+      "giver": "eel_woman_wenna",
+      "offer": "The croakers sing all night and eat the eels all day. I'd like one of those things to stop.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "fen_croaker",
+          "count": 8,
+          "where": "around Eelwick",
+          "text": "Fen croakers"
+        }
+      ],
+      "done": "Quiet! I can hear the eels thinking now.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 6
+      }
+    },
+    {
+      "id": "lights_in_the_fen",
+      "name": "Lights in the Fen",
+      "level": 6,
+      "giver": "tower_keeper_hob",
+      "offer": "Wisps lure folk off the planks. Bring me their glow and I'll put it in the tower lamp where it can't hurt anyone.",
+      "steps": [
+        {
+          "kind": "collect",
+          "item": "Bottled wisp-light",
+          "count": 4,
+          "from": "marsh_wisp",
+          "chance": 0.6,
+          "text": "Wisp-light bottled"
+        }
+      ],
+      "done": "There. Brightest lamp in the fen. Mildly haunted.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 7
+      }
+    },
+    {
+      "id": "the_drowned_steps",
+      "name": "The Drowned Steps",
+      "level": 7,
+      "giver": "reeve_mabry",
+      "group": "a party of 3-5",
+      "offer": "There's a temple under the fen. The steps come up at low water. Something down there rings a bell when the tide's out.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Reach the lower sanctum",
+          "floor": 1
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "text": "Silence the bell",
+          "boss": true
+        }
+      ],
+      "done": "No bell. No omens. Just eels. Bliss.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 50,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "brackwater_rare",
+      "name": "The Fen's Old Terror",
+      "level": 6,
+      "giver": "eel_woman_wenna",
+      "offer": "There's one in the fen my gran warned me about. My gran was usually right. Kill it before she's right again.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "brackwater",
+          "slot": 0,
+          "text": "The fen's rare slain"
+        }
+      ],
+      "done": "Gran would be proud. Gran would also say 'about time'.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 24,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

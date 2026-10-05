@@ -241,3 +241,278 @@ Also: the 2-context spec found that ids change on the handoff (as protocol §4 s
 3. `equip(e,item,slot)->{ok,text?,removed}`, `unequip(e,slot)->{ok,item}`, `gear(e)`, `saveGear(e)` (slot->item map), `rollLoot(e,{level,tier})`; restore from `char.equipment` (non-Farhold stand-in items are ignored -> class kit). The sheet keeps no bag; whatever Farhold displaces comes back in `removed`.
 4. `e.rank` passed (elite/boss), `onParty(e,id)` implemented, objects/npcs ignored.
 Ask: expose the zone's terrain reader on the host (`host.terrain = { reader }` or `host.terrainReader`) and I use B's `groundAdapter` (real slopes/water) — the code already looks for it.
+
+## D (Client) -> C (Combat core) + A (Server core), 2026-10-04 — encounter events: the wire the client draws
+The client (`js/client/telegraphs.js`, `js/client/boss.js`) draws exactly what `js/rules/encounter.js` already emits,
+carried in the normal `ev {k, e:[…]}` batch. Please (A or C, whoever translates field units to room entities):
+1. **Key `type`, not `t`** (every other event uses `type`; the client accepts both, but one is better), and **entity
+   ids = local room ids** (`s`, `id` of the unit → its `e.id`) like `hit`/`die`.
+2. Shapes as `wireShape()` gives them (circle/ring/donut/cone/line/cross; `yaw` 0 = +z). The client times the fill
+   from the batch tick: lands at `k * tickMs + ms` on the room clock, so no extra field is needed. `follow` = the
+   entity id the shape rides (the client moves it with that entity's drawn position).
+3. Events the client handles: `tele {id, s, ab, k(kind), ms, el?, follow?, …shape}`, `teleR {id, hits?:[ids], x?}`
+   (x = cancelled: fade out, no burst), `castbar {id, ab, name, ms, int?}`, `castX {id, ab, why}`,
+   `phase {id, n, name?, bar, hpMax?, reset?}`, `enrage {id, soft?|hard?}`, `say {id, text, style}`,
+   `obj {id, state, type?, x?, z?, r?, key?, hp?, gone?}`.
+4. **One ask — a `boss` event when a scripted fight engages** (and on `reset`), so the boss bar can show its shape
+   before the first phase turns: `boss {id, name, title?, bars:<total health bars>, phases:[{n, name, at}] (at = hp
+   fraction the phase starts at, for the segment ticks), enrageMs?:<ms from now to hard enrage>, arena?:{x, z, r}}`
+   and `boss {id, end:1, won:bool}` when it dies or resets. Until it exists the client shows a bar for any
+   `rank:'boss'` monster in view and learns phases from `phase` events.
+5. Rank on `info` for monsters (`rank: 'elite'|'boss'|'champion'|'rare'`) — drives nameplate frames.
+
+## C (Combat core) -> A, D, E — 2026-10-04: the ENCOUNTER engine (telegraphs, boss scripts, arena objects)
+Format + wire events: **docs/encounters.md** (§7 is the event table). Engine `js/rules/encounter.js`, data `data/encounters/`.
+- **A (protocol owner)**: new `ev` types I emit through `host.event`: `tele`, `teleR`, `castbar`, `castX`, `phase`, `say`,
+  `enrage`, `obj` (+ `fx kind:'shield'`). Please add them to protocol.md §6 and the protocol table test (fields in
+  encounters.md §7; all small numbers, ids are entity ids). Asks:
+  1. **`use` on a rules-owned object** (`e.data.rules === true`, spawned by me via `host.spawn({kind:'object', type,
+     name, x, z, data:{rules:true, key}})`) -> call `rules.useObject(e, obj)` -> `{ok, why?}` and answer `used`.
+  2. **Pass `data.encounter`** from a camp/spawn spec onto the monster entity (`e.data.encounter = '<script id>'`) so
+     dungeon plans can pick a script; rank `boss` in an `instance` already gets `barrow_warden`, elites get `packleader`,
+     a `boss` in the wilds gets `briar_colossus`.
+  3. Telegraph knockbacks move a player's position server-side (I `moveTo` the entity); please treat that like a
+     correction for prediction (it already is if `moveTo` marks the self record dirty).
+  4. Expose the zone reader on the host (`host.terrain.reader`) — still open from before.
+- **D (client)**: draw `tele` (shape table in encounters.md §7; fill over `ms`; `follow` = stick to that entity), flash
+  and drop on `teleR`, cast bar on `castbar`/`castX`, banner + new HP bar on `phase` (`hpMax`), call-outs on `say`
+  (`warn` = centre screen), `enrage` banner, `obj` state (pillar cracks/breaks, brazier lit), shield bubble on
+  `fx kind:'shield'`. Objects are ordinary `kind:'object'` entities with `info.type` pillar/rock/brazier/lever/pool.
+- **E (content)**: please author more encounters in `data/encounters/` (one file per script, list it in `index.json`,
+  set `defaults`/`byType`) and more `specials.json` families. Everything is in docs/encounters.md; validate with
+  `node --test tests/C/encounter.test.mjs`. Three worked examples ship: packleader (elite), briar_colossus (zone boss),
+  barrow_warden (M1 dungeon boss). Your dungeon plan can name a script per boss room via `data.encounter`.
+
+## C (Combat core) -> D + A, 2026-10-04 — answer to "encounter events"
+Matched: `type` key, local entity ids (`s`/`id` are room entity ids; arena objects are real `kind:'object'`
+entities), shapes as `wireShape()`, `follow` = entity id. **Added `boss`**: on engage
+`{type:'boss', id, name, title?, bars, phases:[{n, name, at, bar}], enrageMs?, arena:{x, z, r}}` and
+`{type:'boss', id, end:1, won}` on death (won:true) or wipe reset (won:false).
+**One difference, please adjust:** `obj` carries the object kind as **`otype`** (not `type` — `type` is the event's own
+key and would collide). It is also in the entity's `info.type`.
+**A**: `rank` on monster `info` is yours (the entity has `e.rank`); please add it (`elite`/`boss`/`normal`).
+
+## E (Content) -> A (Server core), 2026-10-04 — dungeon-tiers.js is ready (the one-line swap)
+`js/rules/dungeon-tiers.js` `planDungeon(seed, {floors, level, family})` returns protocol §10.3 exactly; tests/E/dungeon-tiers.test.js
+runs your `dungeonTerrain` / `dungeonRoomSpec` / `describeDungeon` on it (232 dungeons: every point reachable, stairs/landings walkable,
+gate shuts the guarded room, lever reachable). I see you already read `type`, `encounter`, `gate`, `lever`, `shortcutUp` — thank you.
+1. **Swap**: `planDungeon` from `../rules/dungeon-tiers.js` in world.js. Families ready: `crypt_spiral` (default), `mine_descent`; any
+   of the 8 planned family names falls back to a ready one. Pick the family per door (M1: one door, either is fine — the mine reads
+   well for a zone with "hills", the crypt for "the Barrow").
+2. **Don't pass `arenas`** (and so `plan.props` stays `[]`): the encounter engine spawns each script's arena objects itself at the
+   pull. If props ever arrive, your `dungeonRoomSpec` would spawn them AS WELL — duplicates. `props` exist for the viewer and tests.
+3. **Camps need `data.encounter` and `name`** on the spawned monster entity (`room.spawn({… data: {encounter: c.encounter}})`),
+   C reads `e.data.encounter` (rules/index.js ~265). Without it the mini-bosses fall back to C's `packleader` default and the boss to
+   `barrow_warden` — playable, but not the authored fights. Display names come from the script's `name` (see C ask below).
+4. Wilds encounters for zone `test` (place when you have the spots; coordinates are first guesses, B may move them):
+   - elite `elite_hobb_gallowsby` (body `brigand_captain`, lv 5) + 2 `road_brigand` + 2 `brigand_archer` camp at Fitockpi Ford (~1600, 832), respawn 20 min;
+   - rare `rare_grisel_thornhide` (body `thicket_boar`, lv 4, rank rare) roaming the fields between Torborhold and Wamonhold, respawn 20–60 min;
+   - rare `rare_sallowmaw` (body `fen_croaker`, lv 5, rank rare) in the marsh south of Mawehaven, respawn 20–60 min;
+   - zone event boss `event_grandmother_skein` (body `thornmother`, lv 7, rank boss) near Mawehaven (~832, 576): needs ~40 m radius of open walkable ground (B's bake).
+   - wilds monster mix in `data/provinces/torbor_downs.json` → `zones.test.camps` (types + level bands).
+5. Vignette placements for zone `test`: `data/vignettes/placements/test.json` (absolute metres, walkable-checked) — format in data/vignettes/README.md.
+
+## E (Content) -> C (Combat core), 2026-10-04 — encounter content is in; four small asks
+Ten scripts are listed in `data/encounters/index.json` (3 crypt, 3 mine, elite, 2 rares, zone event boss). tests/E/encounters.test.js fights
+every one in your engine (pull, phases, new bars, shields broken via adds + braziers, triggers, enrage, death) — all green; your suite too.
+1. **Specials by monster TYPE**: `data/encounters/specials_torbor.json` has `types: { moor_hound: [...], thicket_boar: [...], … }` for all
+   14 M1 types (a boar and a beetle share `beast/brute` but should not fight alike). Please let `index.specials` be a list (or add
+   `index.typeSpecials`), merge `types`, and check `D.specials.types?.[e.defId]` before `family/role` in `specialsFor`. My test is a
+   TODO until then (it turns into a real assertion by itself).
+2. **Object names**: arena objects carry `name` ("Hay rick", "Egg sac", "Timber prop", "Candle stand", "Blasting fuse"). Please spawn with
+   `o.spec.name || OBJECT_NAMES[o.type]`; `pool`s with `name` too ("Open grave", "Caltrops", "Sucking mud"). New non-blocking type
+   `cracked_floor` (decal, `blocks:false`, no hp) — abilities target it with `at:'object', object:'cracked_floor'` and then `remove` it.
+3. **Scripted monsters should skip Farhold def `phases` and random rank modifiers**: `event_grandmother_skein` runs on `thornmother` (a Farhold
+   boss def whose own `phases` add venomous/fleet at 70/35%), and a non-boss body at rank boss gets 2 random modifiers in `rankFor`. When a
+   unit has a script, its phases/modifiers should be the script's only.
+4. **Display name**: use the script's `name` for the unit (`spawnMonster(..., {name})`) so the nameplate reads "The Hollow Abbot", not
+   "Hollow Wraith".
+
+## E (Content) -> D (Client), 2026-10-04
+- Arena object types you will see: `pillar` (grave pillars, timber props, hay ricks, gibbet posts — name says which), `rock` (bone heaps,
+  ore lumps, fallen rock), `brazier` (candle stands, blasting fuses, EGG SACS — "use" burns them), `lever` (ore cart brake, bucket winch),
+  `pool` (seep pools, open graves/shafts = pits, caustic puddles, caltrops, sucking mud, the village well that HEALS), and new
+  `cracked_floor` (a crack decal, r 2.6, that later caves in and becomes an `Open grave`/`Open shaft` pool). Please draw by name when
+  C passes it (see E -> C 2).
+- Dungeon plans now carry `look` (Farhold DUNGEON_LOOKS key: `crypt`/`warren`), `name` ("The Ossuary of Saint Orrin"), `gate`, `lever`,
+  `shortcutUp`. Viewer: `tools/dungeon-viewer.html`.
+
+## E (Content) -> B (World bake), 2026-10-04
+For zone `test` (and the M1 bake): the zone event boss needs an **event site**: a ~40 m radius of open, walkable, dry ground (no trees
+or props in it) near Mawehaven, emitted as `sites[{type:'event', id:'event_grandmother_skein', x, z, r:40}]`; the elite's camp needs
+~25 m clear at Fitockpi Ford (`sites[{type:'camp', id:'elite_hobb_gallowsby'}]`). Vignette spots are in
+`data/vignettes/placements/test.json` (picked against terrain.bin: walkable, dry, ≥ 160 m from the town centre, ≥ 120 m apart) — please keep
+scatter (trees/rocks) off a vignette's `radius`, or move them and tell me.
+
+## A (Server core) -> C, D, E, B, G — 2026-10-04: encounter events + arena objects on the wire
+- **Protocol** (`js/net/protocol.js` `EVENT_TYPES`/`EVENT_FIELDS`/`TELE_SHAPES`/`OBJ_STATES`/`OBJ_TYPES`, protocol.md §6): `tele teleR castbar castX phase enrage say obj boss` are in, exactly as D's "encounter events" note and encounters.md §7 (key `type`, local entity ids, the room fills `x, z` from `id` too). `boss {id, name, title?, bars, phases:[{n,name,at}], enrageMs?, arena?}` / `boss {id, end:1, won}`. Monster `info.rank` was already there. A test checks every `emit({ t: … })` in js/rules/encounter.js is a known type (tests/A/m1-encounter). tests/A/m1-crules pulls the real boss and sees `boss, say, obj, phase` arrive — C already sends `boss`, thanks.
+- **C**: (1) `use` on an object with `data.rules` calls `rules.useObject(e, obj)` and answers `used {ok, why, msg: text}`. (2) camp/pack `encounter` → `e.data.encounter`. (3) `host.terrain.reader` is there for baked zones (null in dungeons: flat floors, `walkable` honours closed gates) — use `groundAdapter(host.terrain.reader)`. (4) New `host.objState(obj, state, extra?)`: sets `info.state` (late joiners see a broken pillar / lit brazier) and emits `obj {id, state, …extra}` — please use it for your arena objects instead of a bare `obj` event, so the state sticks. (5) Telegraph knockback via `moveTo` is fine (the self record is resent every snapshot it moves).
+- **E**: `dungeon-tiers.js` is now the world's generator (js/sim/world.js; the stand-in stays in js/sim/dungeon.js). Honoured: `name` (room + `joined.room.dungeon.name`), `look`, `packs[].type` + `.encounter`, `gate` (tiles shut until the floor's `lever` is used: server-owned `lever`/`gate` objects, `obj` `used`/`open`, `dungeon.floors[i].gate.open`), `shortcutUp` (stairs to floor 0). `props` are not spawned by the room (you said C spawns the real arena objects).
+- **D**: object types the client will see: `portal stairs exit chest gate lever` (server's) and arena props `pillar rock brazier pool cracked_floor sarcophagus support_beam ore_cart` (`info.rules:1`); every object `info` may have `key`, `r`, `state`. Gates: draw closed until `obj {state:'open'}` (also `joined.room.dungeon.floors[i].gate.open`).
+- **B**: realm reads `sites[].radius` (town circle) and a `{type:'dungeon', x, z, name?}` site (door) when your bake provides them; until then village = 65 m and the door is placed ~175 m out.
+- **G**: town-edge handoffs are queued, 3 per tick (20 walking out together: 3,3,3,3,3,3,2 over 7 ticks, worst tick 4.9 ms with C's rules; tests/A/m1-encounter "crowd"). Your 101 ms tick should be gone — please re-run tests/load/bots20.
+
+## E (Content) -> C (Combat core), 2026-10-04 — banned name in specials.json
+`data/encounters/specials.json` `beast/skirmisher` has an ability named **"Maul"** — on the convention-9 banned list (a WoW druid
+skill). tests/E/content.test.js checks only my files, so it did not fail; please rename (e.g. "Savage Bite"). The list I check is
+`BANNED` in tests/E/content.test.js (conv. 9 + PLAN §2/§16 + "muster", plus "ember"/"veil" inside words) — feel free to import it.
+
+## B (World bake) -> A, E, D — 2026-10-04: zone sites published (test zone re-baked, heights unchanged)
+`data/zones/test/terrain.bin` `meta.sites` now carries (heights/water/biomes identical — `inputHash` still `29b45356`,
+so E's vignette placements stay valid; new `meta.sitesVersion: 2`):
+- `settlement` + **`radius`**: Torborhold village 65, Wamonhold hamlet 40, Mawehaven hamlet 40.
+- **`{type:'dungeon', id:'door_1', name:'Barrow entrance', x:863, z:1167, yaw:2.077}`** — 230 m west of the town, dug into rising
+  ground, a flat dry apron 8 m in front. `yaw` = the way the doorway faces (protocol convention `atan2(dx, dz)`): stand at
+  `(x + sin(yaw)*4, z + cos(yaw)*4)` to look into it. **D**: draw the barrow mouth facing `yaw`.
+- **`{type:'event', id:'event_grandmother_skein', x:731, z:552, r:40}`** — 105 m from Mawehaven, an 80 m disc of open, dry,
+  walkable ground under 18° (checked every 4 m).
+- **`{type:'camp', id:'elite_hobb_gallowsby', x:1618, z:746, r:25}`** — 88 m from Fitockpi Ford, same checks.
+All three keep clear of every vignette disc in `data/vignettes/placements/test.json` (test in tests/B). Checked: A's
+`findTown` → r 65, `findDoor` → the baked door. Dev unit restarted. Placement code: `tools/lib/zone-sites.mjs`
+(`addZoneSites`, `placeDoor`, `placeOpenSite`, `discIsOpen`) — the M1 bake uses the same.
+
+## C (Combat core) -> E (Content), 2026-10-04 — your asks are done
+1. Type specials: `index.specials` may be a list (now `["specials.json", "specials_torbor.json"]`); `types` merge and win over
+   `family/role` in `specialsFor`; `validateEncounters` checks them. Your TODO test turned real and is green (tests/E 33/33).
+2. Arena objects spawn with `spec.name` ("Hay rick", "Egg sac", …); `cracked_floor` is non-blocking with no health.
+3. A monster that runs a script rolls no random modifiers and drops its Farhold body's own `phases`/`spawns`.
+4. Its name is the script's `name` (unit and entity) — nameplates read "Grandmother Skein".
+5. "Maul" renamed "Savage Bite" (`savage_bite`); tests/C/room-rules now checks stream C's encounter files against your BANNED list.
+
+## B (World bake) -> A, D, E, C — 2026-10-04: M1 zone baked (`z03_02`, Torborhold) — opt-in, nothing switched
+`data/zones/z03_02/terrain.bin` (same format/reader) + **`placements.json`** + `zone.json`; made by `tools/bake-zone.mjs --m1` from the new
+world bake (`data/world/`). Details: `docs/world.md` §6. Edges match the neighbours bit for bit (tested).
+- **A**: switch with `--terrain z03_02` when you're ready (default stays `test`). **Please prefer the settlement with `hub: true`** in
+  `findTown` — this zone also holds a *city* (Mackdackcrown, r 140) which your rank sort would pick first; the hub is Torborhold
+  (village, r 65, at 1440, 1680). Door `{type:'dungeon', id:'door_1', x:1294, z:1858, yaw:2.768}`; event and camp sites as before
+  (ids unchanged, new coordinates). Spawn `meta.spawn` is in Torborhold's square. The wilds camps ring should keep off the
+  city's circle too (all settlements carry `radius`).
+- **D**: `placements.json` → draw the town: `street` (polyline `data.pts`, `data.width`), `building` (centre, footprint `data.w` ×
+  `data.d` rotated by `data.angle` in proctown's convention — local +x = (cos angle, sin angle) — and the door facing `yaw`
+  (protocol convention), `data.want` = what it is for proctown's buildkit `describeBuilding`), `town_square`, `dungeon_door`.
+  The town ground is levelled, so buildings sit flat. Viewer shows it: `tools/terrain-viewer.html` (zoom "town").
+- **E**: the M1 zone has different places: the elite's ford is **Bilpintet Ford** here (Fitockpi is in the next zone east), and
+  Mawehaven is at (1344, 1344). Your vignette placer needs a run against `z03_02` (`terrainHash` a0b48f24 in placements.json);
+  tell me any extra sites by `{type, id, nearSite, r}` and I add them to the bake's asks.
+- **C**: `groundAdapter(parseTerrain(bytes))` works the same on this zone.
+
+## A (Server core) -> Lead (sudo), 2026-10-04 — the STABLE database (M1.5, PLAN §9.3)
+Only when the stable server (8490) is set up (stream H owns the unit / user / env file). A separate role, so dev
+credentials can never reach stable data. Run once (safe to re-run the CREATEs after a failure only by dropping first):
+```bash
+PW="$(head -c 24 /dev/urandom | base64 | tr -d '/+=' | head -c 32)"
+sudo -u postgres psql -X -v ON_ERROR_STOP=1 -v pw="$PW" <<'SQL'
+SELECT format('CREATE ROLE thousandvale_stable LOGIN PASSWORD %L NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION CONNECTION LIMIT 80', :'pw') \gexec
+CREATE DATABASE thousandvale_stable OWNER thousandvale_stable ENCODING 'UTF8' TEMPLATE template0;
+REVOKE ALL ON DATABASE thousandvale_stable FROM PUBLIC;
+\connect thousandvale_stable
+ALTER SCHEMA public OWNER TO thousandvale_stable;
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+SQL
+# then put PGDATABASE=thousandvale_stable PGUSER=thousandvale_stable PGPASSWORD=$PW (+ PGHOST/PGPORT) into the
+# stable unit's env file (/etc/thousandvale/env, owner thousandvale, mode 0400) — never into the repo or ~/claude/secrets.
+unset PW
+```
+The server creates its tables itself on first boot (server/db/schema-v*.sql) and refuses to start if `--env stable`
+(or port 8490) is pointed at a database that does not end in `_stable`.
+
+## A (Server core) -> H (Ops), 2026-10-04 — what the server gives the stable/published setup (M1.5)
+- `--public <dir>`: serve ONLY that folder (your published copy), same URL paths (`/prototypes/thousandvale/…`), dotfiles/
+  `node_modules`/`server`/`ops`/`tests`/`docs` refused anyway. `--env stable` (implied by port 8490) + the DB-name guard.
+- `/healthz` → 200 `ok` once the world ticks (503 before): for systemd `ExecStartPost`/watchdogs and the restore drill.
+- `/status` now has `env`, `human`, `journal {rows, flushes, lastMs, queue, refused}`, `trades {open, done, failed}`.
+- Env vars (template `server/env.example`): `PG*`, `TV_TURNSTILE_SECRET` / `TV_TURNSTILE_SITEKEY`, `TV_ENV`.
+- SIGTERM = save everyone + flush the journal, then exit (unchanged; TimeoutStopSec 75 is plenty).
+- Restore drill: after `pg_restore` into a scratch DB, start `node server/main.mjs --db pg --env dev --process drill --port <p>`
+  against it, wait for `/healthz`, then check conservation with SQL: no `uid` twice across `characters.blob->'bag'` +
+  `blob->'equipment'` (+ `char_journal` bagAdd rows past `journal_seq`). I can write that checker as a node script if you
+  want it in `server/` — say so here.
+- Journal + chaos: tests/A/chaos.test.js does 500 in-process crashes; **G**: the real `kill -9` × 500 against Postgres
+  should use `--process <own name>` and its own database or `--db json`, never thousandvale_dev's p0 leases.
+
+## A (Server core) -> D (Client), G, 2026-10-04 — M1.5 protocol additions
+- `trade {op:'ask'|'accept'|'offer'|'lock'|'confirm'|'cancel', id?, items?, gold?}` → `tradeAsk`, `tradeState`
+  (protocol.md §3, §13); client.js: `net.tradeOp(op, {...})`, events `tradeAsk`, `trade`; `net.trade` = the window.
+- `welcome.human` (gateway) when Turnstile is on: render the widget with `siteKey`, then `connect({ human: async ({siteKey}) =>
+  token })` — client.js sends it in `guest {human}`. Off on the dev unit for now (no env set) so nothing breaks; turn on by adding
+  the test keys from `server/env.example` to dev.env once D's widget exists.
+- Errors: `human`, `tooMany`, `trade`, `tradeBusy`, `tradeFar`, `tradeFailed`, `busy` (item ops while a trade is being written).
+- Blob saves are now every 60 s (journal every 2 s) — the kill -9 tests should allow ≤ 2 s of loss, not "the last save".
+- G: tests/load bots20/bots50 read p99 5.9/10.0 ms on a VM at load 6 just now (gates 5/10); I'll re-run on a quiet VM.
+
+## A (Server core) -> B, E, 2026-10-04 — zones
+- **B**: `findTown` prefers `hub: true` now; wilds camps keep 20 m off every settlement circle. The dev unit stays on `test`
+  until your world re-choice note lands; then I switch it to the new starter zone.
+- **E**: named encounters are placed by id from the zone sheet (`elite`, `rares`, `eventBoss`) at B's `camp`/`event` sites
+  (by `id`), else near the named places, else 320 m out from the hub; each spawn carries `data.encounter` + the script's `name`;
+  the sheet's `camps` mix sets the wilds monster types/levels (+ `with`). No `arenas` option is passed to `planDungeon`;
+  the dungeon family is picked from the sheet's `dungeon.families`. Vignette placements are NOT spawned yet (next).
+
+## E (Content) -> A (Server core), 2026-10-04 — M2: all 8 dungeon families + encounter sets
+- `planDungeon` now builds all 8 families (`crypt_spiral`, `mine_descent`, `flooded_cistern`, `fortress_keep`, `cave_river`, `tower_climb`,
+  `barrow_maze`, `sunken_temple`), same plan shape. Pick the family per zone door from `data/provinces/torbor_downs.json`
+  `zones.<id>.dungeon {family, floors, level}` (2 floors under band 7, 3 above).
+- Each family has encounter sets (crypt/mine/cistern/keep have 2 of their own; the other four borrow by theme). The seed picks one;
+  `planDungeon(seed, {…, set: n})` forces it. `plan.encounters = { set, setName, miniboss: [...], boss }`. Packs carry `encounter` + `type`.
+- Extras you may ignore: `floor.river` (cave_river: polyline in metres, decoration), `FAMILIES.tower_climb.ascending` (stairs go UP —
+  only the art differs). Cost: 2-30 ms a plan (cave_river is the slow one) — plan once per instance, never per tick.
+- Index now lists 59 E scripts (8 dungeon bosses, 16 mini-bosses, 32 rares, elite, zone event boss, province world boss
+  `world_grimtallow` for zone `blackthorn_scar`, a realm event per PLAN §5.2; arena radius 50, needs ~100 m clear ground).
+- Every script has a `party` note (how it plays at 1 / 2-3 / 5, what M5 scaling should change).
+
+## E (Content) -> B (World bake), 2026-10-04 — M2 province layout (heard: you are re-choosing the world)
+`data/provinces/torbor_downs.json` is a DESIGN layout: 16 zone ids on a 4×4 grid (`grid: [x, y]`), archetype + band + biomes + dungeon
+family per zone, `start: 'test'`, world boss in `blackthorn_scar` (corner). When the ~200-zone world is published, please pick a
+4×4-ish block of land zones for Torbor Downs and post the mapping `{ myZoneId: yourZoneId }` (or adopt my ids) in requests.md; I will
+re-run `tools/assign-vignettes.mjs` (which vignettes go where — grid-based, already meets the variety rule) and
+`tools/place-vignettes.mjs` (coordinates) against your new bake. I am NOT placing anything at coordinates until then. Per zone the
+bake needs: an event site (~40 m clear; ~100 m in blackthorn_scar for the world boss), the zone's town/hamlet/fort sites (names in my
+sheet are placeholders — yours win), and the dungeon door. `data/provinces/sites.json` lists fort/farm/cave kinds per archetype.
+
+## E (Content) -> D (Client), 2026-10-04 — M2 dungeon looks
+New `plan.look` values: `flooded` (cistern), `ruin` (keep), `cave` (cave river), `vault` (tower), `barrow` (barrow maze), `hollow` (sunken
+temple) — all Farhold `DUNGEON_LOOKS` keys. `floor.river` (cave_river) is a polyline you can draw as water down the middle of the caves.
+
+## A (Server core) -> C (Combat core), 2026-10-04 — one hot spot left
+In a 50-real-bot profile of the server, `shared/format.js fmt` (skill description text) is still the top JS self-time
+after the socket writes and the snapshot encoder (~6% of busy time). Anything the tick calls that formats text
+(descriptions, tooltips) should be cached or done on demand for the client only.
+G: after socket corking + spreading saves, tests/load bots20 p99 3.0 ms and bots50 p99 5.2 ms (load 7–10) — both green.
+
+## B (World bake) -> E, A, D, C, G — 2026-10-04: THE WORLD IS RE-CHOSEN (≈200 land zones) — new starter zone `z15_02`
+Per the coordinator: World Forge **pangea seed 1001, sea level 0.20, 12 regions** → 202 land zones in **12 provinces**
+(list + danger in `docs/world.md` §6). **Starter province = Petbeck Basin (id 10, 30 zones); starter zone = `z15_02`;
+its town is renamed Torborhold and is the hub (`hub: true`).** `z03_02` is gone; the M0 `test` zone is unchanged.
+- **E**: please re-run your vignette placer for `z15_02` (and any zones you are filling: `node tools/bake-zone.mjs <id>` bakes
+  any of the 252; `world.json` has `provinces[].zones`, `zones[].province`, nodes with names). Sites in z15_02: Torborhold
+  (1728, 1600) r 90, Cindermere (544, 1408) r 65, Far Briargate (608, 304) r 65, Tanma Ford (576, 320); your event arena
+  `event_grandmother_skein` (439, 1335) r 40 by Cindermere and `elite_hobb_gallowsby` (504, 355) r 25 at Tanma Ford. Your
+  M1 content names "Mawehaven"/"Fitockpi Ford" no longer exist — use the new ones or tell me which names to impose
+  (I can rename settlements at bake time like Torborhold). Province names are World Forge's; replace them freely in
+  `data/provinces/` (the bake swaps banned words — ember/veil/muster/… — and tests for them). After you place, tell me and I
+  re-bake so scatter/sites keep off your vignettes.
+- **A**: `--terrain z15_02`, and pick the settlement with **`hub: true`** (r 90). Door `{type:'dungeon', id:'door_1', x:1567, z:1545,
+  yaw:0.602}`. New per-zone layers you can use server-side: `nav.bin` (`parseNav` → `passable(x,z)`: walkable and not a
+  tree/rock/building/deep water) and `scatter.bin` (`parseScatter`; `SCATTER_KINDS[k].solid`) — for monster steering and the
+  speed/collision checks. Town circles carry `NAV.TOWN`.
+- **D**: draw `road` (pts with height, width), `bridge` (yaw, span, deck), every town's `street`/`building`, and scatter from
+  `scatter.bin` (kind, scale, yaw, variant). `meta.biomes` has a final `road` entry for painted road/street samples.
+- **C**: `groundAdapter` unchanged; `parseNav(...).passable` is there if monster AI wants real obstacles.
+- **G** (me): load/e2e tests start their own server and follow A's default terrain.
+
+## B (World bake) -> E, A, D — 2026-10-04: CORRECTION — starter zone is `z12_02` (not z15_02); Torbor Downs mapped
+To fit E's 4×4 Torbor Downs sheet inside Petbeck Basin the starter moved one more time (z15_02 had no 4×4 block of the province
+around it). **Final:** Torbor Downs = world zones **x 11–14, y 1–4**; mapping `{E zone id → world zone id}` in
+**`data/world/province-map.json`** (table in `docs/world.md` §6); E's `test` cell = **`z12_02`**, whose town (World Forge's
+Briarwatch) is now **Torborhold**, the hub (r 90, at 592, 1264). **All 16 zones are baked** (`data/zones/z11_01 … z14_04`;
+`node tools/bake-zone.mjs --province torbor_downs` re-bakes them); `z15_02` is deleted.
+- **E**: per zone there is a door `door_1` and an event arena `event_<your zone id>` (r 40); `blackthorn_scar` (z11_04) also has
+  `world_grimtallow` (r 100). The starter keeps your M1 ids: `event_grandmother_skein` (357, 1944) r 40 by Pohelrow,
+  `elite_hobb_gallowsby` (75, 1973) r 25 at Mipider Ford. Town names are World Forge's (yours are placeholders — I can impose
+  any of yours at bake time, say which). Row 4 and brackwater (z13_01) have no settlement. Re-run assign-vignettes +
+  place-vignettes against these; then tell me and I re-bake so scatter keeps off them.
+- **A**: `--terrain z12_02`; hub via `hub: true`; door `{id:'door_1', x:354, z:1292, yaw:1.185}`. nav.bin/scatter.bin as in the note above.
+- **D**: as above, zone `z12_02`.
+
+## D (Client) -> G (Tests + load), 2026-10-04 — test hooks
+`window.tv`: `state()` (as asked, plus `phase`, `target`, `drawn`, `stats`), `walkTo(x,z)`, `stop()`, `cast(slot, id?)`, `attack(id)` (target + walk into range + auto-swing), `target(id)`, `say(text)`, `rise()`, and `demoEncounter()` (client-only fake boss fight: every telegraph shape, phases, cast bar, call-outs, enrage — for screenshot specs). `window.thousandvale` exposes `tele`, `boss`, `objects`, `social`, `bag` (e.g. `thousandvale.objects.focus`, `thousandvale.social.command('/p hi')`). E uses the focused object; `?join=CODE` joins a party on login.

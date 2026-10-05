@@ -13,6 +13,7 @@ export const RULES_DATA_FILES = {
   talents: '../../../farhold/data/talents.json',
   uniques: '../../../farhold/data/uniques.json',
   tools: '../../../farhold/data/tools.json',
+  mercenaries: '../../../farhold/data/mercenaries.json',
 };
 
 /** URL of one data file, resolved against this module. */
@@ -30,5 +31,23 @@ export function rulesDataUrl(key) {
 export async function loadRulesData(readJson) {
   const out = {};
   for (const key of Object.keys(RULES_DATA_FILES)) out[key] = await readJson(rulesDataUrl(key));
+  out.encounters = await loadEncounters(readJson);
   return out;
+}
+
+/** Thousandvale's own encounter scripts (data/encounters/, format docs/encounters.md). */
+export const ENCOUNTER_DIR = '../../data/encounters/';
+export async function loadEncounters(readJson) {
+  const dir = new URL(ENCOUNTER_DIR, import.meta.url);
+  const index = await readJson(new URL('index.json', dir));
+  const scripts = {};
+  for (const f of index.files || []) { const s = await readJson(new URL(f, dir)); scripts[s.id] = s; }
+  // `specials` may be one file or a list; each may hold `families` (family/role) and `types` (monster type id)
+  const specials = { families: {}, types: {} };
+  for (const f of [].concat(index.specials || [], index.typeSpecials || [])) {
+    const d = await readJson(new URL(f, dir));
+    Object.assign(specials.families, d.families || {});
+    Object.assign(specials.types, d.types || {});
+  }
+  return { scripts, specials, defaults: index.defaults || {}, byType: index.byType || {} };
 }

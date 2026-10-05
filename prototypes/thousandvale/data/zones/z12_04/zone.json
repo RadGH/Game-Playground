@@ -1,0 +1,131 @@
+{
+  "name": "z12_04",
+  "zone": "z12_04",
+  "sheet": {
+    "sheet": "torbor_downs",
+    "zone": "coldwater"
+  },
+  "province": {
+    "id": 10,
+    "name": "Petbeck Basin"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 2,
+  "inputHash": "64fa44ba",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9803699e"
+    },
+    "zone": {
+      "zx": 12,
+      "zy": 4
+    },
+    "worldOrigin": {
+      "x": 24576,
+      "z": 8192
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [],
+  "sites": [
+    {
+      "type": "lair",
+      "kind": "dungeon",
+      "name": "The Sunken Fawamack",
+      "x": 1984,
+      "z": 1984
+    },
+    {
+      "type": "lair",
+      "kind": "dungeon",
+      "name": "The Lost Moben",
+      "x": 1088,
+      "z": 320
+    },
+    {
+      "type": "lair",
+      "kind": "lair",
+      "name": "The Wondomol Nest",
+      "x": 960,
+      "z": 1472
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 1761,
+      "z": 1815,
+      "yaw": 0.198
+    },
+    {
+      "type": "event",
+      "id": "event_coldwater",
+      "x": 736,
+      "z": 1301,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 1024,
+    "z": 1024
+  },
+  "summary": {
+    "zone": "z12_04",
+    "province": "Petbeck Basin",
+    "inputHash": "64fa44ba",
+    "rivers": 0,
+    "wetShare": 0,
+    "unwalkableShare": 0.152,
+    "towns": [],
+    "roads": 2,
+    "bridges": 0,
+    "scatter": 12067,
+    "scatterKinds": {
+      "tree_conifer": 2023,
+      "rock_large": 3399,
+      "rock_small": 4449,
+      "bush": 1243,
+      "boulder": 935,
+      "tree_broadleaf": 12,
+      "tree_acacia": 6
+    },
+    "sites": [
+      "lair dungeon The Sunken Fawamack 1984 1984",
+      "lair dungeon The Lost Moben 1088 320",
+      "lair lair The Wondomol Nest 960 1472",
+      "dungeon door_1 Barrow entrance 1761 1815  0.198",
+      "event event_coldwater  736 1301 40"
+    ],
+    "spawn": {
+      "x": 1024,
+      "z": 1024
+    },
+    "placements": 7,
+    "vignettesAvoided": 0
+  },
+  "files": {
+    "terrain.bin": 6305650,
+    "nav.bin": 1050717,
+    "scatter.bin": 96620,
+    "placements.json": 27902
+  }
+}

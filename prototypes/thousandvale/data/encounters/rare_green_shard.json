@@ -1,0 +1,148 @@
+{
+  "id": "rare_green_shard",
+  "name": "The Green Shard",
+  "tier": "rare",
+  "zone": "sunken_wolds",
+  "body": "glass_shard",
+  "place": "hangs over a sinkhole in the Sunken Wolds, humming; plants grow strangely in its light",
+  "_doc": "Stream E (M2). A floating green crystal. It fires beams that turn (lines that rotate one after another), drops shards that stay as cover, and at half health it refracts: a beam toward every player at once — stand behind a shard.",
+  "party": {
+    "solo": "Solo-able if you keep cover near.",
+    "small": "Easy.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.9,
+  "arena": {
+    "radius": 26
+  },
+  "say": {
+    "pull": [
+      "The humming gets louder. The crystal turns to face you.",
+      "Green light falls across you. The grass at your feet stands up."
+    ],
+    "death": "The Green Shard cracks down the middle and falls into the sinkhole.",
+    "reset": "The Shard goes back to humming over the sinkhole."
+  },
+  "abilities": {
+    "pulse": {
+      "id": "pulse",
+      "name": "Pulse",
+      "every": [
+        7,
+        9
+      ],
+      "range": 20,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 2.8,
+          "element": "arcane",
+          "wind": 1.2,
+          "damage": 1.6
+        }
+      ]
+    },
+    "sweep": {
+      "id": "sweep",
+      "name": "Turning Beam",
+      "every": [
+        13,
+        16
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "The beam begins to turn!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 22,
+          "w": 2.4,
+          "count": 5,
+          "rotate": 0.5,
+          "delay": 0.3,
+          "element": "arcane",
+          "wind": 1.2,
+          "damage": 1.7
+        }
+      ]
+    },
+    "shatter": {
+      "id": "shatter",
+      "name": "Shed Shards",
+      "every": [
+        18,
+        21
+      ],
+      "first": 2,
+      "cast": 0.5,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 2.2,
+          "spread": 10,
+          "count": 3,
+          "leave": {
+            "type": "rock",
+            "name": "Green shard",
+            "r": 1.1,
+            "hp": 2
+          },
+          "wind": 1.4,
+          "damage": 1
+        }
+      ]
+    },
+    "refract": {
+      "id": "refract",
+      "name": "Refraction",
+      "every": [
+        20,
+        24
+      ],
+      "first": 7,
+      "cast": 2.5,
+      "say": "Light builds inside the Shard — get behind a fallen shard!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 26,
+          "los": true,
+          "element": "arcane",
+          "wind": 0.6,
+          "damage": 2.5
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Humming",
+      "abilities": [
+        "pulse",
+        "sweep",
+        "shatter"
+      ]
+    },
+    {
+      "name": "Refracting",
+      "at": 0.5,
+      "say": "The Shard flares blinding green!",
+      "abilities": [
+        "pulse",
+        "refract",
+        "shatter",
+        "sweep"
+      ]
+    }
+  ],
+  "enrage": {
+    "seconds": 300,
+    "damage": 2.5,
+    "say": "The Shard overloads!"
+  }
+}

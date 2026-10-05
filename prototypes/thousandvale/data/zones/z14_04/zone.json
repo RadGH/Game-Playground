@@ -1,0 +1,152 @@
+{
+  "name": "z14_04",
+  "zone": "z14_04",
+  "sheet": {
+    "sheet": "torbor_downs",
+    "zone": "sunken_wolds"
+  },
+  "province": {
+    "id": 10,
+    "name": "Petbeck Basin"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 2,
+  "inputHash": "32f7a264",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9803699e"
+    },
+    "zone": {
+      "zx": 14,
+      "zy": 4
+    },
+    "worldOrigin": {
+      "x": 28672,
+      "z": 8192
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [
+    {
+      "id": 5,
+      "name": "The Pimamouth"
+    },
+    {
+      "id": 13,
+      "name": "The Laibranhon"
+    },
+    {
+      "id": 40,
+      "name": "The Hefeck Run"
+    }
+  ],
+  "sites": [
+    {
+      "type": "landmark",
+      "kind": "ancientwood",
+      "name": "The Elder Stondhealweast",
+      "x": 1472,
+      "z": 1728
+    },
+    {
+      "type": "lair",
+      "kind": "lair",
+      "name": "Tadaden",
+      "x": 448,
+      "z": 704
+    },
+    {
+      "type": "lair",
+      "kind": "lair",
+      "name": "The Lamnund Lair",
+      "x": 448,
+      "z": 1856
+    },
+    {
+      "type": "lair",
+      "kind": "lair",
+      "name": "Tifilden",
+      "x": 1600,
+      "z": 704
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 560,
+      "z": 870,
+      "yaw": -1.424
+    },
+    {
+      "type": "event",
+      "id": "event_sunken_wolds",
+      "x": 1024,
+      "z": 1024,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 1024,
+    "z": 1024
+  },
+  "summary": {
+    "zone": "z14_04",
+    "province": "Petbeck Basin",
+    "inputHash": "32f7a264",
+    "rivers": 3,
+    "wetShare": 0.011,
+    "unwalkableShare": 0.007,
+    "towns": [],
+    "roads": 0,
+    "bridges": 0,
+    "scatter": 7037,
+    "scatterKinds": {
+      "rock_large": 343,
+      "tree_acacia": 1750,
+      "bush": 3232,
+      "rock_small": 1280,
+      "tree_dead": 86,
+      "boulder": 148,
+      "tree_broadleaf": 198
+    },
+    "sites": [
+      "landmark ancientwood The Elder Stondhealweast 1472 1728",
+      "lair lair Tadaden 448 704",
+      "lair lair The Lamnund Lair 448 1856",
+      "lair lair Tifilden 1600 704",
+      "dungeon door_1 Barrow entrance 560 870  -1.424",
+      "event event_sunken_wolds  1024 1024 40"
+    ],
+    "spawn": {
+      "x": 1024,
+      "z": 1024
+    },
+    "placements": 6,
+    "vignettesAvoided": 0
+  },
+  "files": {
+    "terrain.bin": 6305822,
+    "nav.bin": 1050717,
+    "scatter.bin": 56380,
+    "placements.json": 1602
+  }
+}

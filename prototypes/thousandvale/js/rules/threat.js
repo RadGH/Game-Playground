@@ -61,12 +61,16 @@ export function notice(m, who) {
 }
 
 /** Force `m` onto `who` for `seconds`, and lift `who` to the top of the table. */
-export function taunt(m, who, seconds = THREAT.TAUNT_SECONDS) {
+export function taunt(m, who, seconds = THREAT.TAUNT_SECONDS, { lift = true } = {}) {
   if (!m || !who || m.dying != null || m.removed) return;
-  const t = table(m);
-  let top = 0;
-  for (const v of t.values()) if (v > top) top = v;
-  t.set(who.id, Math.max(t.get(who.id) || 0, top * THREAT.TAUNT_LIFT, THREAT.NOTICE));
+  // `lift: false` — a hard taunt that holds only while it lasts (a turned monster drawing its own side):
+  // nothing is written into the table, so the monster goes back to whoever it was fighting
+  if (lift) {
+    const t = table(m);
+    let top = 0;
+    for (const v of t.values()) if (v > top) top = v;
+    t.set(who.id, Math.max(t.get(who.id) || 0, top * THREAT.TAUNT_LIFT, THREAT.NOTICE));
+  }
   m.tauntBy = who.id;
   m.tauntFor = Math.max(m.tauntFor || 0, seconds);
   m.targetId = who.id;
@@ -94,8 +98,9 @@ export function clearThreat(m) {
  * Returns the entity or null (nobody on the table it can hit).
  */
 export function pickTarget(m, lookup, usable, dt = 0) {
-  if (m.tauntFor > 0) m.tauntFor = Math.max(0, m.tauntFor - dt);
+  // Farhold's order (actors.js aimOf): a taunt with time left holds THIS tick, then its clock runs down
   if (m.tauntFor > 0) {
+    m.tauntFor -= dt;
     const by = m.tauntBy != null ? lookup(m.tauntBy) : null;
     if (by && usable(by)) { m.targetId = by.id; return by; }
     m.tauntFor = 0; m.tauntBy = null;

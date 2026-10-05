@@ -1,0 +1,516 @@
+{
+  "_doc": "Stream E (M2). Radiant job frames (after Farhold data/job-frames.json). The job board fills each `needs` slot from what EXISTS right now in the zone copy (a frame whose slots cannot all bind is never offered, so nothing points at an empty field). Slot types: monster (a type from the zone's camps; `band: 'zone'` = level within the zone band; `family` filter), vignette, settlement (`same: 'giver'` = the giver's own), fort, rare (`alive` = currently spawned), dungeon. Text placeholders: {slot.name}, {slot.id}, {zone.name}, {giver.role}. Rewards follow the quest rule: xp = share of a level, gold = multiple of a kill's gold.",
+  "rules": {
+    "preferUndiscovered": "A vignette/fort/settlement slot picks a place the character has NOT discovered with weight x4 over discovered ones (PLAN §3.4 'prefer undiscovered places').",
+    "maxOffered": 4,
+    "refreshMinutes": 20,
+    "repeatGapMinutes": 60,
+    "perCharacter": true
+  },
+  "frames": [
+    {
+      "id": "thin_the_pack",
+      "scope": "zone",
+      "weight": 6,
+      "needs": [
+        {
+          "slot": "beast",
+          "type": "monster",
+          "band": "zone"
+        }
+      ],
+      "title": "Too many {beast.name}",
+      "text": "There are more {beast.name} around {zone.name} than anyone can remember. Thin them out.",
+      "goal": {
+        "kind": "kill",
+        "target": "{beast.id}",
+        "count": 8
+      },
+      "reward": {
+        "xp": 0.25,
+        "gold": 4
+      }
+    },
+    {
+      "id": "walk_it_over",
+      "scope": "zone",
+      "weight": 5,
+      "needs": [
+        {
+          "slot": "there",
+          "type": "settlement"
+        }
+      ],
+      "title": "Carry this to {there.name}",
+      "text": "A sealed parcel and a walk to {there.name}. Nobody will thank you, but somebody will pay you.",
+      "goal": {
+        "kind": "deliver",
+        "at": "{there}",
+        "count": 1
+      },
+      "reward": {
+        "xp": 0.25,
+        "gold": 4
+      }
+    },
+    {
+      "id": "go_and_look",
+      "scope": "zone",
+      "weight": 6,
+      "needs": [
+        {
+          "slot": "place",
+          "type": "vignette",
+          "prefer": "undiscovered"
+        }
+      ],
+      "title": "What's at {place.name}?",
+      "text": "Folk keep talking about {place.name} and nobody's been. Go and see, and come back with a story.",
+      "goal": {
+        "kind": "visit",
+        "at": "{place}"
+      },
+      "reward": {
+        "xp": 0.3,
+        "gold": 3
+      }
+    },
+    {
+      "id": "road_watch",
+      "scope": "zone",
+      "weight": 4,
+      "needs": [
+        {
+          "slot": "foe",
+          "type": "monster",
+          "band": "zone",
+          "family": "humanoid"
+        },
+        {
+          "slot": "there",
+          "type": "settlement"
+        }
+      ],
+      "title": "Trouble on the road to {there.name}",
+      "text": "{foe.name} are stopping carts on the way to {there.name}. Make the road boring again.",
+      "goal": {
+        "kind": "kill",
+        "target": "{foe.id}",
+        "count": 6,
+        "near": "{there}"
+      },
+      "reward": {
+        "xp": 0.25,
+        "gold": 4
+      }
+    },
+    {
+      "id": "fort_needs_hands",
+      "scope": "zone",
+      "weight": 4,
+      "needs": [
+        {
+          "slot": "fort",
+          "type": "fort"
+        },
+        {
+          "slot": "beast",
+          "type": "monster",
+          "band": "zone"
+        }
+      ],
+      "title": "{fort.name} needs hands",
+      "text": "The garrison at {fort.name} is stretched thin and {beast.name} know it. Help hold the walls.",
+      "goal": {
+        "kind": "kill",
+        "target": "{beast.id}",
+        "count": 6,
+        "near": "{fort}"
+      },
+      "reward": {
+        "xp": 0.3,
+        "gold": 5,
+        "standing": 4
+      }
+    },
+    {
+      "id": "bounty_poster",
+      "scope": "zone",
+      "weight": 3,
+      "needs": [
+        {
+          "slot": "rare",
+          "type": "rare",
+          "alive": true
+        }
+      ],
+      "title": "Bounty: {rare.name}",
+      "text": "A poster with a crude drawing of {rare.name}. Under it someone has written 'PLEASE'.",
+      "goal": {
+        "kind": "killRare",
+        "target": "{rare}"
+      },
+      "reward": {
+        "xp": 0.5,
+        "gold": 15,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "bring_me_parts",
+      "scope": "zone",
+      "weight": 5,
+      "needs": [
+        {
+          "slot": "beast",
+          "type": "monster",
+          "band": "zone"
+        }
+      ],
+      "title": "Bits of {beast.name}",
+      "text": "The {giver.role} wants pieces of {beast.name} for something they won't explain. Bring back five.",
+      "goal": {
+        "kind": "collect",
+        "from": "{beast.id}",
+        "count": 5,
+        "chance": 0.5
+      },
+      "reward": {
+        "xp": 0.25,
+        "gold": 4
+      }
+    },
+    {
+      "id": "lost_thing",
+      "scope": "zone",
+      "weight": 3,
+      "needs": [
+        {
+          "slot": "place",
+          "type": "vignette",
+          "prefer": "undiscovered"
+        }
+      ],
+      "title": "Lost at {place.name}",
+      "text": "Someone dropped a keepsake near {place.name} and ran. Find it before something nests in it.",
+      "goal": {
+        "kind": "use",
+        "at": "{place}"
+      },
+      "reward": {
+        "xp": 0.3,
+        "gold": 4
+      }
+    },
+    {
+      "id": "checking_in",
+      "scope": "zone",
+      "weight": 3,
+      "needs": [
+        {
+          "slot": "there",
+          "type": "settlement"
+        },
+        {
+          "slot": "home",
+          "type": "settlement",
+          "same": "giver"
+        }
+      ],
+      "title": "Word to {there.name}",
+      "text": "{home.name} hasn't heard from {there.name} in a week. Walk over and ask if everyone's still alive.",
+      "goal": {
+        "kind": "talk",
+        "at": "{there}"
+      },
+      "reward": {
+        "xp": 0.2,
+        "gold": 3
+      }
+    },
+    {
+      "id": "down_the_door",
+      "scope": "zone",
+      "weight": 3,
+      "needs": [
+        {
+          "slot": "dungeon",
+          "type": "dungeon"
+        }
+      ],
+      "title": "Into {dungeon.name}",
+      "text": "Something keeps coming up out of {dungeon.name}. Go down one floor and push it back.",
+      "goal": {
+        "kind": "clear",
+        "at": "{dungeon}",
+        "floor": 1
+      },
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "escort_the_cart",
+      "scope": "zone",
+      "weight": 3,
+      "needs": [
+        {
+          "slot": "there",
+          "type": "settlement"
+        },
+        {
+          "slot": "home",
+          "type": "settlement",
+          "same": "giver"
+        }
+      ],
+      "title": "See the cart to {there.name}",
+      "text": "A carter is heading from {home.name} to {there.name} and would like to arrive with all his limbs.",
+      "goal": {
+        "kind": "escort",
+        "from": "{home}",
+        "to": "{there}"
+      },
+      "reward": {
+        "xp": 0.35,
+        "gold": 6
+      }
+    },
+    {
+      "id": "night_watch",
+      "scope": "zone",
+      "weight": 3,
+      "needs": [
+        {
+          "slot": "beast",
+          "type": "monster",
+          "band": "zone"
+        }
+      ],
+      "title": "Night watch",
+      "text": "{beast.name} come in after dark. Stand watch until dawn and see them off.",
+      "goal": {
+        "kind": "kill",
+        "target": "{beast.id}",
+        "count": 5,
+        "when": "night"
+      },
+      "reward": {
+        "xp": 0.25,
+        "gold": 4
+      }
+    },
+    {
+      "id": "clear_the_camp",
+      "scope": "zone",
+      "weight": 4,
+      "needs": [
+        {
+          "slot": "foe",
+          "type": "monster",
+          "band": "zone",
+          "family": "humanoid"
+        }
+      ],
+      "title": "Clear the {foe.name} camp",
+      "text": "A camp of {foe.name} has dug in where the farm track bends. Break it up.",
+      "goal": {
+        "kind": "kill",
+        "target": "{foe.id}",
+        "count": 8,
+        "camp": true
+      },
+      "reward": {
+        "xp": 0.35,
+        "gold": 6
+      }
+    },
+    {
+      "id": "supply_the_fort",
+      "scope": "zone",
+      "weight": 3,
+      "needs": [
+        {
+          "slot": "fort",
+          "type": "fort"
+        }
+      ],
+      "title": "Supplies for {fort.name}",
+      "text": "{fort.name} is short of arrows and patience. Bring a crate of the first.",
+      "goal": {
+        "kind": "deliver",
+        "at": "{fort}",
+        "count": 1
+      },
+      "reward": {
+        "xp": 0.25,
+        "gold": 5,
+        "standing": 3
+      }
+    },
+    {
+      "id": "map_the_wild",
+      "scope": "zone",
+      "weight": 4,
+      "needs": [
+        {
+          "slot": "place",
+          "type": "vignette",
+          "prefer": "undiscovered"
+        },
+        {
+          "slot": "place",
+          "type": "vignette",
+          "prefer": "undiscovered"
+        }
+      ],
+      "title": "Mark {place.name} on the map",
+      "text": "The reeve's map has a blank where {place.name} should be. Go there, and make a mark.",
+      "goal": {
+        "kind": "visit",
+        "at": "{place}"
+      },
+      "reward": {
+        "xp": 0.35,
+        "gold": 3
+      }
+    },
+    {
+      "id": "herb_run",
+      "scope": "zone",
+      "weight": 4,
+      "needs": [
+        {
+          "slot": "place",
+          "type": "vignette",
+          "prefer": "undiscovered"
+        }
+      ],
+      "title": "Herbs near {place.name}",
+      "text": "The healer needs herbs that only grow near {place.name}. They're the green ones. Most are green.",
+      "goal": {
+        "kind": "use",
+        "at": "{place}"
+      },
+      "reward": {
+        "xp": 0.25,
+        "gold": 4
+      }
+    },
+    {
+      "id": "cull_the_big_one",
+      "scope": "zone",
+      "weight": 3,
+      "needs": [
+        {
+          "slot": "beast",
+          "type": "monster",
+          "band": "zone"
+        }
+      ],
+      "title": "The big {beast.name}",
+      "text": "There's one {beast.name} bigger than the rest, and it's teaching the others bad habits.",
+      "goal": {
+        "kind": "kill",
+        "target": "{beast.id}",
+        "count": 1,
+        "rank": "champion"
+      },
+      "reward": {
+        "xp": 0.4,
+        "gold": 8,
+        "item": {
+          "tier": "common",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "message_to_the_fort",
+      "scope": "zone",
+      "weight": 3,
+      "needs": [
+        {
+          "slot": "fort",
+          "type": "fort"
+        }
+      ],
+      "title": "A letter for {fort.name}",
+      "text": "A sealed letter for the commander at {fort.name}. Don't read it. (Everyone reads it.)",
+      "goal": {
+        "kind": "deliver",
+        "at": "{fort}",
+        "count": 1
+      },
+      "reward": {
+        "xp": 0.2,
+        "gold": 4
+      }
+    },
+    {
+      "id": "pest_control",
+      "scope": "zone",
+      "weight": 5,
+      "needs": [
+        {
+          "slot": "beast",
+          "type": "monster",
+          "band": "zone"
+        },
+        {
+          "slot": "there",
+          "type": "settlement"
+        }
+      ],
+      "title": "Pests at {there.name}",
+      "text": "{beast.name} have got into the stores at {there.name}. The stores would like them out.",
+      "goal": {
+        "kind": "kill",
+        "target": "{beast.id}",
+        "count": 6,
+        "near": "{there}"
+      },
+      "reward": {
+        "xp": 0.25,
+        "gold": 4
+      }
+    },
+    {
+      "id": "help_a_neighbour",
+      "scope": "zone",
+      "weight": 3,
+      "needs": [
+        {
+          "slot": "there",
+          "type": "settlement"
+        },
+        {
+          "slot": "beast",
+          "type": "monster",
+          "band": "zone"
+        }
+      ],
+      "title": "A favour for {there.name}",
+      "text": "{there.name} helped us at harvest. Now {beast.name} are at their door. Return the favour.",
+      "goal": {
+        "kind": "kill",
+        "target": "{beast.id}",
+        "count": 6,
+        "near": "{there}"
+      },
+      "reward": {
+        "xp": 0.3,
+        "gold": 5,
+        "standing": 5
+      }
+    }
+  ]
+}

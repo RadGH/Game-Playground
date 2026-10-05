@@ -1,0 +1,239 @@
+{
+  "name": "Fengate (z11_02)",
+  "zone": "z11_02",
+  "sheet": {
+    "sheet": "torbor_downs",
+    "zone": "delvers_hill"
+  },
+  "province": {
+    "id": 10,
+    "name": "Petbeck Basin"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 2,
+  "inputHash": "e8887525",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9803699e"
+    },
+    "zone": {
+      "zx": 11,
+      "zy": 2
+    },
+    "worldOrigin": {
+      "x": 22528,
+      "z": 4096
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [
+    {
+      "id": 9,
+      "name": "The Fackfalpot"
+    },
+    {
+      "id": 21,
+      "name": "Tackmonflow"
+    },
+    {
+      "id": 57,
+      "name": "The Walmanmouth"
+    },
+    {
+      "id": 87,
+      "name": null
+    }
+  ],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "city",
+      "name": "Fengate",
+      "x": 352,
+      "z": 448,
+      "hub": true,
+      "radius": 140,
+      "movedFrom": {
+        "x": 64,
+        "z": 192
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "village",
+      "name": "Miminhold",
+      "x": 1008,
+      "z": 1664,
+      "radius": 65,
+      "movedFrom": {
+        "x": 1088,
+        "z": 1600
+      }
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Ashhaven",
+      "x": 768,
+      "z": 944,
+      "radius": 46,
+      "movedFrom": {
+        "x": 704,
+        "z": 1088
+      }
+    },
+    {
+      "type": "landmark",
+      "kind": "ancientwood",
+      "name": "Old Bitbilwood",
+      "x": 1856,
+      "z": 1088
+    },
+    {
+      "type": "landmark",
+      "kind": "ancientwood",
+      "name": "Old Medewood",
+      "x": 832,
+      "z": 320
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Barrow entrance",
+      "x": 146,
+      "z": 490,
+      "yaw": -3.593
+    },
+    {
+      "type": "event",
+      "id": "event_delvers_hill",
+      "x": 688,
+      "z": 736,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 348,
+    "z": 444
+  },
+  "summary": {
+    "zone": "z11_02",
+    "province": "Petbeck Basin",
+    "inputHash": "e8887525",
+    "rivers": 4,
+    "wetShare": 0.011,
+    "unwalkableShare": 0.091,
+    "towns": [
+      {
+        "name": "Fengate",
+        "kind": "city",
+        "hub": true,
+        "at": [
+          352,
+          448
+        ],
+        "radius": 140,
+        "movedFrom": {
+          "x": 64,
+          "z": 192
+        },
+        "culture": "halfling",
+        "plots": 31,
+        "streets": 71,
+        "links": 1,
+        "overlaps": 0
+      },
+      {
+        "name": "Miminhold",
+        "kind": "village",
+        "hub": false,
+        "at": [
+          1008,
+          1664
+        ],
+        "radius": 65,
+        "movedFrom": {
+          "x": 1088,
+          "z": 1600
+        },
+        "culture": "halfling",
+        "plots": 14,
+        "streets": 55,
+        "links": 1,
+        "overlaps": 0
+      },
+      {
+        "name": "Ashhaven",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          768,
+          944
+        ],
+        "radius": 46,
+        "movedFrom": {
+          "x": 704,
+          "z": 1088
+        },
+        "culture": "halfling",
+        "plots": 11,
+        "streets": 36,
+        "links": 1,
+        "overlaps": 0
+      }
+    ],
+    "roads": 12,
+    "bridges": 2,
+    "scatter": 19577,
+    "scatterKinds": {
+      "tree_broadleaf": 8359,
+      "tree_conifer": 3468,
+      "bush": 4069,
+      "rock_large": 1188,
+      "boulder": 73,
+      "rock_small": 1310,
+      "reed": 1048,
+      "tree_dead": 62
+    },
+    "sites": [
+      "settlement(HUB) city Fengate 352 448 140",
+      "settlement village Miminhold 1008 1664 65",
+      "settlement hamlet Ashhaven 768 944 46",
+      "landmark ancientwood Old Bitbilwood 1856 1088",
+      "landmark ancientwood Old Medewood 832 320",
+      "dungeon door_1 Barrow entrance 146 490  -3.593",
+      "event event_delvers_hill  688 736 40"
+    ],
+    "spawn": {
+      "x": 348,
+      "z": 444
+    },
+    "placements": 244,
+    "vignettesAvoided": 0
+  },
+  "files": {
+    "terrain.bin": 6306074,
+    "nav.bin": 1050717,
+    "scatter.bin": 156700,
+    "placements.json": 103701
+  }
+}

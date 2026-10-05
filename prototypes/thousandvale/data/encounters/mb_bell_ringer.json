@@ -1,0 +1,48 @@
+{
+  "id": "mb_bell_ringer",
+  "name": "Sexton Halloway, the Bell-Ringer",
+  "tier": "miniboss",
+  "body": "cult_zealot",
+  "place": "dungeon crypt_spiral SET B: floor 1's mini-boss (central vault, 30-34 m) — written to fit a 24 m room",
+  "_doc": "Stream E (M2). A sexton who still rings for the dead, and the dead still come. Three sarcophagi stand open: every 'Wake the Dead' cast (interruptible) pulls hounds out of them. SEAL all three (use them like a brazier) and the rite is broken for good — the fight jumps to 'Sealed'. The bell rope by the north wall rings his own bell back at him once (stun). P2 'Sealed' at 50% (or as soon as the third seal goes on): a ring-shaped toll you dodge by standing close, and spread knells.",
+  "party": "Solo: interrupt Wake the Dead and seal between casts — doable with a follower holding hounds. 2-3: one player seals while the others hold him. 5: trivial seals; the knell spread is the danger in a small room. M5 scaling: adds per Wake 2 -> 1 solo / 3 at five; knell radius down solo.",
+  "hpMult": 2.2,
+  "arena": {
+    "radius": 13,
+    "objects": [
+      { "id": "seal_w", "type": "brazier", "name": "Sarcophagus seal", "x": -7, "z": -5 },
+      { "id": "seal_e", "type": "brazier", "name": "Sarcophagus seal", "x": 7, "z": -5 },
+      { "id": "seal_s", "type": "brazier", "name": "Sarcophagus seal", "x": 0, "z": 8 },
+      { "id": "bell_rope", "type": "lever", "name": "Bell rope", "x": 0, "z": -8, "onUse": [ { "say": "The great bell booms right over Halloway's head!", "style": "warn" }, { "stun": 3 }, { "hurt": 0.04 } ] }
+    ]
+  },
+  "say": {
+    "pull": ["Quiet, please. The service is for the departed.", "Ah. Mourners. Or are you the departed? I lose track."],
+    "death": "Halloway sits down on the steps, rope still in his hand. 'Who will ring for me?'",
+    "reset": "Halloway goes back to polishing his bell."
+  },
+  "enrage": { "seconds": 300, "damage": 2.5, "say": "ALL OF YOU, TO YOUR GRAVES. NOW." },
+  "abilities": {
+    "censer": { "id": "censer", "name": "Censer Swing", "every": [6, 8], "range": 5,
+      "telegraphs": [ { "shape": "cone", "at": "self", "r": 5, "arc": 1.8, "wind": 1.0, "damage": 1.5, "status": "burn", "element": "fire" } ] },
+    "knell": { "id": "knell", "name": "Knell", "every": [15, 18], "first": 5, "cast": 0.8,
+      "say": "The knell sounds for each of you — stand apart!",
+      "telegraphs": [ { "shape": "circle", "at": "each", "r": 3, "follow": true, "wind": 3, "damage": 1.3, "element": "shadow" } ] },
+    "wake": { "id": "wake", "name": "Wake the Dead", "every": [18, 22], "first": 4, "cast": 2.2, "interrupt": true,
+      "say": "Halloway raises his hands over the coffins — stop him, or seal them!",
+      "onInterrupt": [ { "say": "'Rude,' says Halloway, losing his place in the rite.", "style": "emote" } ],
+      "actions": [ { "adds": { "type": "barrow_hound", "count": 2, "radius": 7, "at": "home" } }, { "say": "Something climbs out of an open sarcophagus!", "style": "warn" } ] },
+    "grave_toll": { "id": "grave_toll", "name": "Grave Toll", "every": [13, 16], "first": 3, "cast": 1,
+      "say": "The toll rolls outward — step in close to him!",
+      "telegraphs": [ { "shape": "donut", "at": "self", "r": 12, "r2": 3, "wind": 1.7, "damage": 2 } ] },
+    "funeral_march": { "id": "funeral_march", "name": "Funeral March", "every": [16, 19], "first": 9,
+      "telegraphs": [ { "shape": "line", "at": "self", "len": 12, "w": 2.4, "count": 4, "rotate": 1.5708, "wind": 1.4, "damage": 1.6, "yaw": "random" } ] }
+  },
+  "phases": [
+    { "name": "The Rite", "abilities": ["censer", "knell", "wake"] },
+    { "name": "Sealed", "at": 0.5, "say": "My congregation! You have shut them in!", "abilities": ["censer", "grave_toll", "funeral_march", "knell"] }
+  ],
+  "triggers": [
+    { "when": { "lit": 3 }, "do": [ { "say": "All three seals are on. The dead stay put — and Halloway is furious.", "style": "warn" }, { "phase": 1 } ] }
+  ]
+}

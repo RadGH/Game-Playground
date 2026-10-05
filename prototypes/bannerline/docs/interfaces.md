@@ -534,6 +534,20 @@ layer.update(camera, dt)        // 64 m chunks: frustum culled, near/far swap at
 layer.chop(cell, 0.5)           // being cut: shakes and leans;  layer.chop(cell, 1) -> stump + fallen log
 layer.syncChopped(state.hvf.chopped)
 ```
+**Sound** (`js/view/hvf-sound.js`, ids in `sfx/data/catalog.json`):
+```js
+const sound = await createHvfSound({ localPlayers, roleOf: pid => state.players[pid].role, ears: () => localHeroes.map(e => ({ x: e.x, z: e.z })),
+  visible: (x, z) => Q.visibleAt(q, localTeam, x, z), entOf: id => entById(id) });
+sound.unlock();                         // first click / key / pad press
+for (const ev of events) sound.onEvent(ev);
+sound.ui('click' | 'build' | 'error' | ...); sound.result(won); sound.setVolume(v); sound.setMuted(b)
+```
+A hunter hears an animal only if `noise.heard` includes him (through fog, panned toward it); a farmer hears his flock near
+him; other events are positional (full within 12 m of the nearest ear, silent past 60 m, dropped in fog); the Turn, a farmer
+down/revived, release and a hunter out are global; gold/items/upgrades/rejects only for the local player. `hawkArrived` is heard by the hawk's owner wherever it lands. A positional event with no x/z (and no live entity) is silent — `hit`/`attack` carry the target's x/z, `spear`/`shot` the shooter's, `chopped` the cell centre.
+Wired in `js/ui/hvf/game.js`: one bridge per match, `localPlayers` = every seat at this screen, `ears` = each seat's character
+(its camera target while down), `visible` = either seat's team sees the spot; mute/volume in the HUD top bar and on M.
+
 **Icons**: `hvf-unit/<farmer|hunter|ghost|sheep|hen|pig|cow|scarecrow|crow|hound|hawk>`, `hvf-building/<kind>` (22),
 `hvf-item/<data/hvf/hunter-items.json id>` (13) — `icons.url(kind, id)` as in §10.3.
 
@@ -630,7 +644,17 @@ for Radley (tab hidden)". Lockstep events through `onEvent`: `takeover` / `rejoi
 (debug), `status`. Speed and pause are fixed online. Sim events `takeover` / `release` (`{ player }`) mark a
 seat changing hands. Rejoin: `joinRoom({ ..., rejoinToken })` then `beginMatch(room, room.rejoin.packet,
 { ..., rejoin: room.rejoin })`; keep `{ code, token }` (`packet.machines[].token` of this machine) in
-sessionStorage so a reload can rejoin.
+sessionStorage so a reload can rejoin. A valid token takes its seat back even while the old connection
+still looks live (a reload inside the transport's heartbeat timeout); a bad token gets the lockstep event
+`refused { reason: 'no-seat' }` — show it and go back to the title.
+
+**Room modes (2026-10-04).** `createRoom({ ..., roomMode })` takes the mode's seat rules (header of
+`js/net/lobbysync.js`); default `LINE_WAR_ROOM`, Hunters vs Farmers passes `hvfRoomMode(rules)` from
+`js/ui/hvf/online.js`. `room.start()` throws `NetError('bad', reason)` and stays in the lobby when the room
+mode's `check` fails (line war: a team with nobody; HvF: an open or closed seat). A machine with no seat
+still runs `beginMatch` and pumps the clock (`localPlayers` is empty): the host assembles every turn.
+**Big messages:** `peerjs.js` splits any message over 16,000 JSON characters into frames on the reliable
+channel (`js/net/chunks.js`) — late-match snapshots are 100-600 KB; a failed reliable send drops that peer.
 
 ## 13. Campaign (stream F, PLAN §13) — "Banners of the Vale"
 
@@ -668,10 +692,10 @@ mode exactly like `js/sim/sim.js` does.
   (hunter, at a lodge), `ward {x,z}`, `lodge {x,z}`, `surrender`. Refusals: `bad, role, dead, kennel, reach,
   blocked, gold, onePer, needs, cap, max, cooldown, level, unseen, notAtShop, uniqueEquipped, group, full,
   notUsable, none, over`.
-- **Events**: `built, buildStart, lost, animalBorn, animalKilled, flee, noise {x,z,kind,heard:[pid]}, chopped,
+- **Events**: `built, buildStart, lost, animalBorn, animalKilled, flee, noise {x,z,kind,heard:[pid]}, chopped {player, cell, gold, x, z},
   hit, attack, spear, shot, farmerDown {grave}, reviveStart, farmerRevived, respawn, hunterDown, hunterOut,
   released, gold, upgrade, item, sell, use, cast, bell, lyingLow, pounce, snareSet, snared, snarePulled,
-  wardPlanted, wardPulled, flare, horn, levelUp, spawn, despawn, turn {value, reason}, reject, result`.
+  wardPlanted, wardPulled, flare, horn, hawkArrived {player, id, x, z} (the hawk reached its spot — the view plays its cry), levelUp, spawn, despawn, turn {value, reason}, reject, result`.
 - **Queries** (`js/sim/modes/hvf/query.js`, `q` = a sim or `{state, data, map}`): `clock`, `farmerInfo`,
   `buildMenu` (cost, income, payback s, tell 0-3), `buildCheck` (placement ghost), `farmUpgrades`, `armyInfo`,
   `hunterInfo` (skills + cooldowns, snares, wards, items, tracking), `hunterShop`, `sideInfo`, `turnInfo`,

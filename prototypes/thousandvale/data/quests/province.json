@@ -1,0 +1,109 @@
+{
+  "_doc": "Stream E (M2). The province story chain 'The Ford and the Fields' for Torbor Downs: 10 steps through 10 zones in rising band order, ending at the province world boss in Blackthorn Scar. Each step names its zone and quest id; the quest bodies live in data/quests/<zone>.json (and each story quest's `next` points to the next step's quest, so the chain also works quest-to-quest). Step 1 is M1's toll_at_fitockpi in zone `test`; its zone file continues to what_lies_below, whose `next` is the_restless_cloister. The final step is the province world boss, world_grimtallow (Grimtallow, the Siege-Husk).",
+  "province": "torbor_downs",
+  "name": "The Ford and the Fields",
+  "steps": [
+    {
+      "n": 1,
+      "zone": "test",
+      "quest": "toll_at_fitockpi",
+      "beat": "Free Fitockpi Ford from Hobb Gallowsby's toll gang."
+    },
+    {
+      "n": 2,
+      "zone": "saint_orrins_rise",
+      "quest": "the_restless_cloister",
+      "beat": "The dead at Saint Orrin's abbey are getting up. Someone is stirring the province's graves."
+    },
+    {
+      "n": 3,
+      "zone": "torbor_cross",
+      "quest": "bells_for_halsbridge",
+      "beat": "The capital, Halsbridge: the roads in are full of cutpurses paid by someone further off."
+    },
+    {
+      "n": 4,
+      "zone": "millbrook",
+      "quest": "millbrook_wheels",
+      "beat": "Millbrook's lanes are blocked; the reeve points you to the old keep at Ashcombe."
+    },
+    {
+      "n": 5,
+      "zone": "ashcombe",
+      "quest": "the_broken_keep",
+      "beat": "Scavengers in the Broken Keep carry warband coin."
+    },
+    {
+      "n": 6,
+      "zone": "delvers_hill",
+      "quest": "copper_and_candles",
+      "beat": "The warband buys copper from Delvers' Hill by the cartload. For what?"
+    },
+    {
+      "n": 7,
+      "zone": "brackwater",
+      "quest": "eels_and_omens",
+      "beat": "Omens in the fen point west, toward Wychwood."
+    },
+    {
+      "n": 8,
+      "zone": "wychwood",
+      "quest": "the_antler_stockade",
+      "beat": "The forest road is cut; open it to reach the frontier."
+    },
+    {
+      "n": 9,
+      "zone": "redcliff",
+      "quest": "flags_over_redcliff",
+      "beat": "Warband raiders burn the frontier. They come from Blackthorn Scar."
+    },
+    {
+      "n": 10,
+      "zone": "blackthorn_scar",
+      "quest": "into_the_scar",
+      "then": "the_heart_of_the_scar",
+      "kind": "killOne",
+      "encounter": "world_grimtallow",
+      "beat": "Clear the thorn roads, then stand with the whole province against what wakes at the heart of the Scar."
+    }
+  ],
+  "crossZone": [
+    {
+      "from": "test:what_lies_below",
+      "to": "saint_orrins_rise:the_restless_cloister",
+      "note": "to be set in test.json"
+    },
+    {
+      "from": "saint_orrins_rise:the_restless_cloister",
+      "to": "torbor_cross:bells_for_halsbridge"
+    },
+    {
+      "from": "torbor_cross:bells_for_halsbridge",
+      "to": "millbrook:millbrook_wheels"
+    },
+    {
+      "from": "millbrook:millbrook_wheels",
+      "to": "ashcombe:the_broken_keep"
+    },
+    {
+      "from": "ashcombe:the_broken_keep",
+      "to": "delvers_hill:copper_and_candles"
+    },
+    {
+      "from": "delvers_hill:copper_and_candles",
+      "to": "brackwater:eels_and_omens"
+    },
+    {
+      "from": "brackwater:eels_and_omens",
+      "to": "wychwood:the_antler_stockade"
+    },
+    {
+      "from": "wychwood:the_antler_stockade",
+      "to": "redcliff:flags_over_redcliff"
+    },
+    {
+      "from": "redcliff:flags_over_redcliff",
+      "to": "blackthorn_scar:into_the_scar"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "elite_hobb_gallowsby",
+  "name": "Hobb Gallowsby, Toll-Captain",
+  "tier": "elite",
+  "body": "brigand_captain",
+  "place": "wilds: holds Fitockpi Ford with a brigand camp (zone 'test', ~1600, 832); respawn 20 min per copy",
+  "_doc": "Stream E. The wilds ELITE. A talker. He demands a toll from the farthest player (a circle that follows them — run it away from the group), scatters caltrops that stay, and whistles for archers on the bank (three circles on random players). At 60% he calls two brigands; at 35% he stops talking and spins his cleaver (a get-in-close ring). He binds his own wounds with an interruptible bandage.",
+  "party": "Open world elite. Solo: tough at level — kite the toll circle, interrupt the bandage. 2-3: intended. 5+: quick. M5 scaling: health by players tagged; adds 2 -> 3 at five; archer circles +1 per extra player.",
+  "hpMult": 1.6,
+  "arena": { "radius": 24 },
+  "say": {
+    "pull": ["Ho there! This ford's got a toll on it. Everything you're carrying ought to cover it.", "Toll's gone up. On account of your faces.", "Nobody crosses Fitockpi without paying Hobb."],
+    "death": "Hobb Gallowsby sits down hard in the shallows. 'Keep... the change,' he wheezes.",
+    "reset": "Hobb wanders back to his toll stool, counting coins that aren't there."
+  },
+  "abilities": {
+    "cleave": { "id": "cleave", "name": "Toll Cleaver", "every": [6, 8], "range": 5,
+      "telegraphs": [ { "shape": "cone", "at": "self", "r": 4.5, "arc": 1.9, "wind": 1.0, "damage": 1.5 } ] },
+    "toll_due": { "id": "toll_due", "name": "Toll Due", "every": [16, 19], "first": 5, "cast": 0.8,
+      "say": ["Your toll's due, {target}!", "Pay up, {target}, or pay in blood!"],
+      "telegraphs": [ { "shape": "circle", "at": "farthest", "r": 3.5, "follow": true, "wind": 3, "damage": 1.6, "status": "marked" } ] },
+    "caltrops": { "id": "caltrops", "name": "Caltrops", "every": [14, 17], "first": 8,
+      "say": "Hobb flings a fistful of caltrops.",
+      "telegraphs": [ { "shape": "circle", "at": "scatter", "spread": 10, "r": 2, "count": 3, "wind": 1.2, "damage": 0.8, "status": "bleed",
+        "leave": { "type": "pool", "name": "Caltrops", "r": 1.8, "every": 1, "seconds": 20, "damage": 0.25, "status": "bleed" } } ] },
+    "archers": { "id": "archers", "name": "Archers, Loose!", "every": [18, 22], "first": 11, "cast": 1,
+      "say": "Archers! Loose!",
+      "telegraphs": [ { "shape": "circle", "at": "random", "r": 3, "count": 3, "delay": 0.3, "wind": 1.5, "damage": 1.2 } ] },
+    "bandage": { "id": "bandage", "name": "Bind Wounds", "every": [22, 26], "first": 10, "cast": 3, "interrupt": true, "below": 0.8,
+      "say": "Hobb ducks back to bind his wounds — stop him!",
+      "onInterrupt": [ { "say": "Hobb drops his bandage in the mud. 'Oh, come ON.'", "style": "emote" } ],
+      "actions": [ { "heal": 0.12 } ] },
+    "whirl": { "id": "whirl", "name": "Whirling Cleaver", "every": [12, 15], "first": 2, "cast": 1,
+      "say": "Hobb starts spinning — get in close!",
+      "telegraphs": [ { "shape": "donut", "at": "self", "r": 9, "r2": 2.8, "wind": 1.6, "damage": 2 } ] }
+  },
+  "phases": [
+    { "name": "Talking", "abilities": ["cleave", "toll_due", "caltrops", "bandage"] },
+    { "name": "Lads!", "at": 0.6, "say": "Lads! LADS! Get over here!", "abilities": ["cleave", "toll_due", "archers", "bandage"],
+      "onEnter": [ { "adds": { "type": "road_brigand", "count": 2, "radius": 8 } } ] },
+    { "name": "No More Talk", "at": 0.35, "say": "Right. No more talking.", "abilities": ["cleave", "whirl", "archers", "caltrops"],
+      "onEnter": [ { "modifier": { "id": "no_more_talk", "dmg": 1.2, "attackEvery": 0.85, "exact": true } } ] }
+  ]
+}

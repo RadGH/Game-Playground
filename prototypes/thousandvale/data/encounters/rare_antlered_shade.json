@@ -1,0 +1,148 @@
+{
+  "id": "rare_antlered_shade",
+  "name": "The Antlered Shade",
+  "tier": "rare",
+  "zone": "wychwood",
+  "body": "dread_stag",
+  "place": "is seen between the oldest trees of Wychwood on misty mornings, never twice in the same glade",
+  "_doc": "Stream E (M2). A stag made of shadow and moss. It charges through the trees (long line), its bellow fears anyone in front, and at half health it splits the herd: two lesser stags and safe circles of sunlight in the dark wood.",
+  "party": {
+    "solo": "Hard solo: the extra stags are tough at level 6.",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 2.0,
+  "arena": {
+    "radius": 26
+  },
+  "say": {
+    "pull": [
+      "The mist parts. A stag is watching you. Its eyes are holes.",
+      "Every bird in Wychwood goes quiet at once."
+    ],
+    "death": "The Antlered Shade dissolves into mist and moss.",
+    "reset": "The Shade steps back between the trees and is gone."
+  },
+  "abilities": {
+    "gore": {
+      "id": "gore",
+      "name": "Antler Gore",
+      "every": [
+        7,
+        9
+      ],
+      "range": 5.5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5,
+          "arc": 1.4,
+          "status": "bleed",
+          "wind": 1.0,
+          "damage": 1.8
+        }
+      ]
+    },
+    "charge": {
+      "id": "charge",
+      "name": "Through the Trees",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "The Shade lowers its antlers at {target}!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 22,
+          "w": 3.2,
+          "knock": 4,
+          "wind": 1.4,
+          "damage": 2.0
+        }
+      ]
+    },
+    "bellow": {
+      "id": "bellow",
+      "name": "Hollow Bellow",
+      "every": [
+        16,
+        19
+      ],
+      "first": 8,
+      "range": 12,
+      "cast": 0.8,
+      "say": "The Shade throws back its head — do not stand in front of it!",
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 12,
+          "arc": 1.0,
+          "status": "fear",
+          "element": "shadow",
+          "wind": 1.4,
+          "damage": 0.9
+        }
+      ]
+    },
+    "sunlight": {
+      "id": "sunlight",
+      "name": "Shafts of Sun",
+      "every": [
+        20,
+        24
+      ],
+      "first": 3,
+      "cast": 1.2,
+      "say": "The wood goes dark — stand in the shafts of sunlight!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3.5,
+          "spread": 12,
+          "count": 3,
+          "kind": "safe",
+          "wind": 3,
+          "damage": 2.3
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Watching",
+      "abilities": [
+        "gore",
+        "charge",
+        "bellow"
+      ]
+    },
+    {
+      "name": "The Herd",
+      "at": 0.5,
+      "say": "Two more shapes step out of the mist.",
+      "abilities": [
+        "gore",
+        "sunlight",
+        "charge"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "dread_stag",
+            "count": 2,
+            "radius": 10,
+            "level": 5
+          }
+        }
+      ]
+    }
+  ]
+}

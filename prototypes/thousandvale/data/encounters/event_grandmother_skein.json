@@ -1,0 +1,68 @@
+{
+  "id": "event_grandmother_skein",
+  "name": "Grandmother Skein",
+  "tier": "event",
+  "body": "thornmother",
+  "place": "wilds: the zone event boss. Rises from the old sinkhole in Mawehaven's barley field (~832, 576); needs ~40 m of open, walkable ground. Rotates with the zone's other events; every player nearby is enrolled.",
+  "_doc": "Stream E. The ZONE EVENT BOSS for Torborhold's zone (many players). A spider older than the village, who speaks like everyone's grandmother. P1 'Hush, Now': a spinneret lash for the front, webs flung at random players, and a LULLABY that puts the whole field to sleep unless someone interrupts it — or you stand behind a hay rick (line of sight). P2 at 60% 'The Brood': she climbs into the old barn behind a silk ward; her three egg sacs hatch spiders until you BURN them (use them like a brazier). Burning all three drops the ward. P3 is a new health bar 'Grandmother's Embrace': cocoon stacks, threads in six directions, a get-under-her ring, and the well's clean water heals anyone standing at it. Soft enrage from 4 minutes, hard at 7.",
+  "party": "Zone event, everyone nearby joins. Solo: not intended (cocoon stack needs 3, three egg sacs to burn under adds). 3-5: playable. 10+: intended. M5 scaling: health and spider adds by players enrolled; cocoon need = clamp(players/4, 2, 5); egg sacs 3 -> 5 at 15+.",
+  "hpMult": 3,
+  "arena": {
+    "radius": 40,
+    "objects": [
+      { "id": "rick_a", "type": "pillar", "name": "Hay rick", "x": -12, "z": -10, "r": 1.8, "hp": 2 },
+      { "id": "rick_b", "type": "pillar", "name": "Hay rick", "x": 12, "z": -10, "r": 1.8, "hp": 2 },
+      { "id": "rick_c", "type": "pillar", "name": "Hay rick", "x": -12, "z": 10, "r": 1.8, "hp": 2 },
+      { "id": "rick_d", "type": "pillar", "name": "Hay rick", "x": 12, "z": 10, "r": 1.8, "hp": 2 },
+      { "id": "egg_n", "type": "brazier", "name": "Egg sac", "x": 0, "z": 18 },
+      { "id": "egg_w", "type": "brazier", "name": "Egg sac", "x": -17, "z": -7 },
+      { "id": "egg_e", "type": "brazier", "name": "Egg sac", "x": 17, "z": -7 },
+      { "id": "well", "type": "pool", "name": "Village well", "x": 0, "z": -20, "r": 3, "every": 1, "seconds": 9999, "heal": 0.03 }
+    ]
+  },
+  "say": {
+    "pull": ["Hush now, little ones. Grandmother is awake.", "Oh, visitors! And nobody told me. Come closer, dears, my eyes aren't what they were.", "So many of you. Grandmother will need a bigger pantry."],
+    "death": "Grandmother Skein curls up like a dead leaf. 'Such... rude... children...'",
+    "reset": "Grandmother Skein sinks back into the earth, humming."
+  },
+  "enrage": { "seconds": 420, "damage": 3, "say": "Grandmother is DONE being patient!", "soft": { "from": 240, "every": 15, "add": 0.08, "say": "The web over the field thickens." } },
+  "abilities": {
+    "lash": { "id": "lash", "name": "Spinneret Lash", "every": [7, 9], "range": 8,
+      "telegraphs": [ { "shape": "cone", "at": "self", "r": 8, "arc": 1.3, "wind": 1.2, "damage": 1.9, "status": "poison", "element": "poison" } ] },
+    "web_volley": { "id": "web_volley", "name": "Web Volley", "every": [13, 16], "first": 5, "cast": 0.8,
+      "say": "Grandmother flings silk across the field!",
+      "telegraphs": [ { "shape": "circle", "at": "random", "r": 3.5, "count": 4, "delay": 0.25, "wind": 1.5, "damage": 1, "status": "web", "element": "nature" } ] },
+    "lullaby": { "id": "lullaby", "name": "Grandmother's Lullaby", "every": [28, 32], "first": 14, "cast": 3.5, "interrupt": true,
+      "say": ["Shh, shh. Go to sleep, my little ones...", "Grandmother starts to sing — interrupt her, or get behind a hay rick!"],
+      "onInterrupt": [ { "say": "'Manners!' Grandmother snaps, her song broken.", "style": "emote" } ],
+      "telegraphs": [ { "shape": "circle", "at": "self", "r": 40, "wind": 0.5, "damage": 0.4, "los": true, "status": "sleep", "element": "arcane" } ] },
+    "brood_call": { "id": "brood_call", "name": "Brood Call", "every": [20, 24], "first": 4,
+      "say": "The egg sacs split. Grandmother's babies are hungry!",
+      "actions": [ { "adds": { "type": "veil_spider", "count": 2, "radius": 14, "at": "home" } } ] },
+    "silk_rain": { "id": "silk_rain", "name": "Silk Rain", "every": [10, 12], "first": 2,
+      "telegraphs": [ { "shape": "circle", "at": "scatter", "spread": 26, "r": 3, "count": 5, "delay": 0.2, "wind": 1.6, "damage": 1.1, "status": "web" } ] },
+    "cocoon": { "id": "cocoon", "name": "Silk Cocoon", "every": [20, 24], "first": 6, "cast": 1,
+      "say": "Grandmother is wrapping {target} for later — stand with them, three of you!",
+      "telegraphs": [ { "shape": "circle", "at": "random", "r": 3.2, "kind": "stack", "need": 3, "wind": 4, "damage": 3, "follow": true } ] },
+    "threads": { "id": "threads", "name": "Thread the Needle", "every": [15, 18], "first": 10, "cast": 0.6,
+      "say": "Six threads snap taut across the field!",
+      "telegraphs": [ { "shape": "line", "at": "self", "len": 34, "w": 3, "count": 6, "rotate": 1.047, "wind": 1.6, "damage": 2, "yaw": "random" } ] },
+    "embrace": { "id": "embrace", "name": "Grandmother's Embrace", "every": [17, 20], "first": 15, "cast": 1,
+      "say": "Her legs spread wide — come give Grandmother a hug! (Get under her!)",
+      "telegraphs": [ { "shape": "donut", "at": "self", "r": 20, "r2": 4, "wind": 2, "damage": 2.4 } ] }
+  },
+  "phases": [
+    { "name": "Hush, Now", "abilities": ["lash", "web_volley", "lullaby"] },
+    { "name": "The Brood", "at": 0.6, "say": "You've upset the babies. Grandmother needs a little lie-down.",
+      "abilities": ["brood_call", "silk_rain"],
+      "onEnter": [ { "shield": true }, { "adds": { "type": "veil_spider", "count": 3, "radius": 12, "at": "home" } },
+        { "say": "A ward of silk closes over Grandmother Skein. Burn all three egg sacs!", "style": "warn" } ] },
+    { "name": "Grandmother's Embrace", "newBar": { "hp": 0.5 }, "say": "My babies! My BABIES! Oh, you will pay for that, dears.",
+      "abilities": ["lash", "cocoon", "threads", "embrace", "web_volley"] }
+  ],
+  "triggers": [
+    { "when": { "lit": 3, "phase": 1 }, "do": [ { "shield": false }, { "stun": 4 }, { "vuln": { "takeMore": 0.4, "seconds": 12, "name": "Grief-stricken" } },
+      { "say": "The last egg sac shrivels in the flames. Grandmother shrieks and drops from the barn!", "style": "warn" } ] },
+    { "when": { "broken": 4 }, "do": [ { "say": "Every hay rick is torn apart — nothing left to hide behind!", "style": "warn" } ] }
+  ]
+}

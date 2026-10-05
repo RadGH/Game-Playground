@@ -1,0 +1,154 @@
+{
+  "id": "rare_wynn_two_strings",
+  "name": "Wynn Two-Strings",
+  "tier": "rare",
+  "zone": "redcliff",
+  "body": "brigand_archer",
+  "place": "a deserter from Redcliff Fort who shoots two arrows at once from the cliff tops",
+  "_doc": "Stream E (M2). An archer who keeps her distance. Pinning shots in pairs (two lines at once), an arrow rain that marches toward you, and at half health she whistles up her deserter friends and lays caltrops that stay.",
+  "party": {
+    "solo": "Solo-able for ranged classes; melee have to chase.",
+    "small": "Easy.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.7,
+  "arena": {
+    "radius": 28
+  },
+  "say": {
+    "pull": [
+      "An arrow thunks into the ground at your feet. Then another, right next to it.",
+      "\"Two strings, two arrows, two holes in you.\""
+    ],
+    "death": "Wynn Two-Strings drops her bow. Both strings snap.",
+    "reset": "Wynn climbs back up to her ledge."
+  },
+  "abilities": {
+    "double": {
+      "id": "double",
+      "name": "Double Shot",
+      "every": [
+        8,
+        10
+      ],
+      "range": 26,
+      "cast": 0.4,
+      "say": "Wynn draws two arrows at {target}!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 24,
+          "w": 1.6,
+          "count": 2,
+          "rotate": 0.12,
+          "wind": 1.2,
+          "damage": 1.4
+        }
+      ]
+    },
+    "kick": {
+      "id": "kick",
+      "name": "Snap Shot",
+      "every": [
+        9,
+        12
+      ],
+      "range": 28,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 2.4,
+          "knock": 2,
+          "wind": 1.0,
+          "damage": 1.3
+        }
+      ]
+    },
+    "march": {
+      "id": "march",
+      "name": "Marching Rain",
+      "every": [
+        14,
+        17
+      ],
+      "first": 5,
+      "cast": 0.6,
+      "say": "Arrows walk across the ground toward {target}!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 3,
+          "count": 4,
+          "delay": 0.5,
+          "grow": 0.15,
+          "wind": 1.2,
+          "damage": 1.2
+        }
+      ]
+    },
+    "caltrops": {
+      "id": "caltrops",
+      "name": "Caltrops",
+      "every": [
+        16,
+        19
+      ],
+      "first": 3,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 2,
+          "spread": 10,
+          "count": 4,
+          "status": "bleed",
+          "leave": {
+            "type": "pool",
+            "name": "Caltrops",
+            "r": 1.8,
+            "every": 1,
+            "seconds": 18,
+            "damage": 0.25,
+            "status": "bleed"
+          },
+          "wind": 1.2,
+          "damage": 0.8
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Sniping",
+      "abilities": [
+        "double",
+        "kick",
+        "march"
+      ]
+    },
+    {
+      "name": "Deserters",
+      "at": 0.5,
+      "say": "Wynn whistles. Boots crunch on the scree.",
+      "abilities": [
+        "double",
+        "caltrops",
+        "march",
+        "kick"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "road_brigand",
+            "count": 2,
+            "radius": 9
+          }
+        }
+      ]
+    }
+  ]
+}

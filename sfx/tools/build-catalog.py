@@ -275,6 +275,10 @@ LIBRARY = {
     'ui.close': series('interface', 'close_', 1, 4),
     'ui.error': series('interface', 'error_', 1, 4),
 
+    # Hunters vs Farmers (Bannerline, 2026-10-04): real wood, plank and metal hits where the pack has them
+    'wood.chop':   f('rpg', 'chop.ogg') + series('impact', 'impactWood_heavy_', 0, 4),
+    'build.place': series('impact', 'impactPlank_medium_', 0, 4),
+    'trap.snap':   series('impact', 'impactMetal_light_', 0, 4) + f('rpg', 'metalLatch.ogg'),
     'travel.step': f('rpg', *['footstep0%d.ogg' % i for i in range(10)]) + series('impact', 'footstep_grass_', 0, 4),
 }
 
@@ -588,6 +592,80 @@ def world_sounds():
     W.append(entry('pearl.pickup', 'loot', 'Pearl pickup', 0.60, [
         chord(0.55, [1318.5, 1975.5], 'sine', gain=0.45, stagger=0.06),
         tone(0.20, 2637, 2637, 'sine', gain=0.15, delay=0.1)], trim=-2.0))
+    # ---- Hunters vs Farmers (Bannerline, docs/hvf-PLAN.md §14) -----------------------------------
+    # Farm animals are the mode's main tell: each call has to be recognisable through the trees and
+    # quiet enough to repeat every few seconds without wearing on the ear. No sawtooth anywhere
+    # (2026-09-24 rule: it reads as grinding metal); voices are triangle/sine with vibrato + a formant band.
+    W.append(entry('animal.sheep.bleat', 'world', 'Sheep bleat', 0.85, [
+        tone(0.75, 470, 380, 'triangle', gain=0.55, a=0.05, vib=(7.5, 0.06)),
+        tone(0.70, 940, 760, 'sine', gain=0.18, a=0.06, vib=(7.5, 0.06)),
+        noise(0.70, 1100, 900, 3.0, color='pink', gain=0.25, a=0.06)]))
+    W.append(entry('animal.hen.cluck', 'world', 'Hen cluck', 0.55, [
+        fm(0.07, 620, 480, ratio=1.5, index=420, gain=0.5, a=0.004),
+        fm(0.07, 640, 470, ratio=1.5, index=420, gain=0.45, a=0.004, delay=0.12),
+        fm(0.12, 700, 520, ratio=1.5, index=500, gain=0.5, a=0.004, delay=0.26),
+        noise(0.05, 2200, 1600, 2.0, gain=0.25, delay=0.26)], trim=-2.0))
+    W.append(entry('animal.pig.oink', 'world', 'Pig oink', 0.65, [
+        fm(0.20, 150, 115, ratio=1.48, index=320, index1=120, gain=0.6, a=0.01),
+        noise(0.18, 520, 380, 3.0, color='pink', gain=0.5, a=0.01),
+        fm(0.22, 170, 120, ratio=1.48, index=320, index1=120, gain=0.55, a=0.01, delay=0.28),
+        noise(0.20, 560, 380, 3.0, color='pink', gain=0.45, a=0.01, delay=0.28)]))
+    W.append(entry('animal.cow.moo', 'world', 'Cow moo', 1.60, [
+        tone(1.50, 135, 108, 'triangle', gain=0.6, a=0.18, vib=(4.2, 0.03)),
+        tone(1.40, 270, 216, 'sine', gain=0.25, a=0.2, vib=(4.2, 0.03)),
+        noise(1.40, 520, 420, 2.4, color='brown', gain=0.3, a=0.25, curve='lin')]))
+    W.append(entry('hvf.bell', 'sting', 'Farm bell (call the flock home)', 1.60, [
+        tone(1.50, 880, 880, 'sine', gain=0.5, a=0.002),
+        tone(1.10, 2347, 2347, 'sine', gain=0.22, a=0.002),
+        tone(0.70, 3960, 3960, 'sine', gain=0.12, a=0.002),
+        tone(1.40, 880, 880, 'sine', gain=0.4, a=0.002, delay=0.28),
+        noise(0.04, 4200, 2500, 1.5, gain=0.4)], trim=-2.0))
+    W.append(entry('hvf.horn', 'sting', 'Hunting horn', 2.00, [
+        tone(1.80, 196, 208, 'triangle', gain=0.55, a=0.12, vib=(5.0, 0.012)),
+        tone(1.70, 294, 311, 'triangle', gain=0.35, a=0.15, vib=(5.0, 0.012)),
+        tone(1.60, 392, 415, 'sine', gain=0.2, a=0.18),
+        noise(1.60, 700, 900, 2.0, color='pink', gain=0.15, a=0.2, curve='lin')]))
+    W.append(entry('hvf.hawk', 'world', 'Hawk cry', 1.10, [
+        tone(0.45, 2400, 1500, 'sine', gain=0.5, a=0.02, vib=(28, 0.025)),
+        tone(0.40, 2300, 1400, 'sine', gain=0.42, a=0.02, vib=(28, 0.025), delay=0.55),
+        noise(0.40, 3200, 2200, 4.0, gain=0.15, a=0.02)]))
+    W.append(entry('wood.chop', 'impact', 'Axe into a tree', 0.55, [
+        noise(0.10, 2600, 900, 1.2, gain=0.8, a=0.001),
+        tone(0.30, 190, 85, 'sine', gain=0.7),
+        noise(0.40, 700, 200, 1.0, ftype='lowpass', color='brown', gain=0.5),
+        grain(0.35, 8, 900, 2600, 0.006, 0.02, gain=0.3, noisy=True, delay=0.02)]))
+    W.append(entry('trap.snap', 'impact', 'Snare snaps shut', 0.40, [
+        noise(0.03, 5200, 2600, 1.5, gain=0.9, a=0.001),
+        tone(0.20, 1800, 700, 'triangle', gain=0.4),
+        noise(0.30, 1400, 500, 2.0, gain=0.35, delay=0.02)]))
+    W.append(entry('ward.pull', 'world', 'Watchstone pulled up', 1.00, [
+        noise(0.60, 260, 520, 2.0, color='brown', gain=0.7, a=0.05, curve='lin'),
+        fm(0.70, 900, 260, ratio=3.5, index=500, index1=40, gain=0.4, delay=0.25),
+        grain(0.50, 10, 300, 1200, 0.02, 0.06, gain=0.3, noisy=True)]))
+    W.append(entry('build.place', 'world', 'Building placed', 0.50, [
+        tone(0.20, 160, 90, 'sine', gain=0.7),
+        noise(0.25, 900, 300, 1.2, color='brown', gain=0.6, a=0.002),
+        noise(0.12, 2000, 1200, 1.5, gain=0.3, delay=0.12)]))
+    W.append(entry('build.done', 'sting', 'Building finished', 1.00, [
+        noise(0.06, 2200, 1200, 1.5, gain=0.5, a=0.001), noise(0.06, 2200, 1200, 1.5, gain=0.5, a=0.001, delay=0.16),
+        tone(0.10, 260, 150, 'sine', gain=0.4), tone(0.10, 260, 150, 'sine', gain=0.4, delay=0.16),
+        chord(0.70, [392, 523.25, 659.25], 'sine', gain=0.4, stagger=0.06, delay=0.3)]))
+    W.append(entry('tower.shot', 'melee', 'Arrow tower shot', 0.45, [
+        pluck(0.35, 196, 0.6, gain=0.6),
+        noise(0.25, 2500, 5200, 1.2, ftype='highpass', gain=0.35, a=0.01, delay=0.03)], trim=-2.0))
+    W.append(entry('hvf.down', 'sting', 'Farmer downed', 1.40, [
+        tone(1.20, 330, 165, 'triangle', gain=0.5, a=0.02),
+        tone(1.10, 392, 196, 'sine', gain=0.3, a=0.02, delay=0.08),
+        tone(0.40, 90, 45, 'sine', gain=0.6),
+        noise(0.30, 700, 200, 1.0, ftype='lowpass', color='brown', gain=0.4)]))
+    W.append(entry('hvf.revive', 'sting', 'Farmer back on his feet', 1.20, [
+        chord(1.10, [293.66, 369.99, 440, 587.33], 'sine', gain=0.5, stagger=0.09, a=0.02),
+        noise(0.80, 2500, 6000, 1.0, ftype='highpass', gain=0.2, a=0.3, curve='lin')]))
+    W.append(entry('hvf.turn', 'sting', 'The Turn: the hunt changes hands', 2.60, [
+        tone(0.60, 70, 45, 'sine', gain=0.8), tone(0.60, 70, 45, 'sine', gain=0.7, delay=0.45),
+        chord(2.00, [220, 261.63, 329.63], 'triangle', gain=0.35, stagger=0.04, delay=0.1),
+        chord(1.60, [246.94, 311.13, 369.99], 'triangle', gain=0.35, stagger=0.04, delay=0.9),
+        noise(2.00, 300, 1200, 0.8, color='pink', gain=0.2, a=0.6, curve='lin')]))
     return W
 
 

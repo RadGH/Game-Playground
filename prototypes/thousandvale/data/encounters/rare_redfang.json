@@ -1,0 +1,133 @@
+{
+  "id": "rare_redfang",
+  "name": "Redfang",
+  "tier": "rare",
+  "zone": "redcliff",
+  "body": "frost_stalker",
+  "place": "stalks the scrub below Redcliff Fort and takes sentries off the wall",
+  "_doc": "Stream E (M2). A great cat with a rust-red mane. It pounces from range (circle that leads its target), rakes in a wide cone, and at half health it stalks: the safe ground is the circle around a marked player — everyone else is pounced.",
+  "party": {
+    "solo": "Solo-able (the safe circle is around you).",
+    "small": "Easy if you stay together for the stalk.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 1.9,
+  "arena": {
+    "radius": 26
+  },
+  "say": {
+    "pull": [
+      "Something red moves in the scrub, low and fast.",
+      "A growl, very close, from nowhere you can see."
+    ],
+    "death": "Redfang stretches out in the dust as if it were only sleeping.",
+    "reset": "Redfang melts back into the scrub."
+  },
+  "abilities": {
+    "raking_claws": {
+      "id": "raking_claws",
+      "name": "Raking Claws",
+      "every": [
+        6,
+        8
+      ],
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.8,
+          "arc": 1.9,
+          "status": "bleed",
+          "wind": 1.0,
+          "damage": 1.6
+        }
+      ]
+    },
+    "pounce": {
+      "id": "pounce",
+      "name": "Pounce",
+      "every": [
+        11,
+        14
+      ],
+      "first": 4,
+      "cast": 0.5,
+      "say": "Redfang crouches, tail lashing — {target}, move!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "lead": 7,
+          "knock": 2,
+          "wind": 1.3,
+          "damage": 1.9
+        }
+      ]
+    },
+    "maw": {
+      "id": "maw",
+      "name": "Throat Bite",
+      "every": [
+        14,
+        17
+      ],
+      "first": 8,
+      "cast": 0.3,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 2.4,
+          "status": "bleed",
+          "wind": 1.1,
+          "damage": 2.0
+        }
+      ]
+    },
+    "stalk": {
+      "id": "stalk",
+      "name": "Stalking",
+      "every": [
+        20,
+        24
+      ],
+      "first": 3,
+      "cast": 1,
+      "say": "Redfang circles the group — stay close to {target}, it fears the light around them!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 4,
+          "kind": "safe",
+          "follow": true,
+          "wind": 3.2,
+          "damage": 2.4
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Hunting",
+      "abilities": [
+        "raking_claws",
+        "pounce",
+        "maw"
+      ]
+    },
+    {
+      "name": "Stalking",
+      "at": 0.5,
+      "say": "Redfang slips into cover...",
+      "abilities": [
+        "raking_claws",
+        "stalk",
+        "pounce"
+      ]
+    }
+  ]
+}

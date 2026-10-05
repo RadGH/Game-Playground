@@ -1,0 +1,267 @@
+{
+  "id": "mb_sergeant_wark",
+  "name": "Sergeant Wark",
+  "tier": "miniboss",
+  "body": "road_brigand",
+  "place": "dungeon fortress_keep set A: floor 1 mini-boss (24 m drill yard)",
+  "_doc": "Stream E (M2). The keep's drill sergeant, who never stopped drilling the recruits. A shouter. P1: he barks ORDERS that tell you what is coming (\"Shields!\" = a frontal cone, \"Spears!\" = lines across the yard) and throws training dummies that become cover. His WAR DRUM (a brazier you \"use\" to smash) speeds his recruits; smash it. At 50% he calls the recruits; kill them and he drops his guard. Enrage 5 min.",
+  "party": "Solo: readable and forgiving. 2-3: the recruits are the test. 5: easy; M5: +1 recruit per player, health x1.5.",
+  "hpMult": 2,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "barricade_a",
+        "type": "pillar",
+        "name": "Training barricade",
+        "x": -6,
+        "z": -4,
+        "r": 1.4,
+        "hp": 2
+      },
+      {
+        "id": "barricade_b",
+        "type": "pillar",
+        "name": "Training barricade",
+        "x": 6,
+        "z": -4,
+        "r": 1.4,
+        "hp": 2
+      },
+      {
+        "id": "drum",
+        "type": "brazier",
+        "name": "War drum (use to smash)",
+        "x": 0,
+        "z": 9
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "\"FALL IN! You call that a stance? My nan stands better than that, and she's been dead nine years!\"",
+      "\"Recruits! On me! We have VISITORS.\""
+    ],
+    "death": "Sergeant Wark drops to one knee. \"Dis... missed,\" he croaks.",
+    "reset": "\"Back in line, the lot of you!\""
+  },
+  "enrage": {
+    "seconds": 300,
+    "damage": 2.5,
+    "say": "\"DOUBLE TIME! DOUBLE TIME!\""
+  },
+  "abilities": {
+    "shields": {
+      "id": "shields",
+      "name": "\"Shields!\"",
+      "every": [
+        7,
+        9
+      ],
+      "range": 6,
+      "say": "\"SHIELDS!\"",
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5,
+          "arc": 1.6,
+          "knock": 2,
+          "wind": 1.0,
+          "damage": 1.6
+        }
+      ]
+    },
+    "spears": {
+      "id": "spears",
+      "name": "\"Spears!\"",
+      "every": [
+        14,
+        17
+      ],
+      "first": 5,
+      "cast": 0.8,
+      "say": "\"SPEARS, LEFT TO RIGHT!\" — get off the lines!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "home",
+          "offset": [
+            -11,
+            -4
+          ],
+          "len": 22,
+          "w": 2.4,
+          "yaw": 1.5708,
+          "wind": 1.6,
+          "damage": 1.7
+        },
+        {
+          "shape": "line",
+          "at": "home",
+          "offset": [
+            -11,
+            4
+          ],
+          "len": 22,
+          "w": 2.4,
+          "yaw": 1.5708,
+          "after": 1.0,
+          "wind": 1.6,
+          "damage": 1.7
+        }
+      ]
+    },
+    "dummy": {
+      "id": "dummy",
+      "name": "Throw Dummy",
+      "every": [
+        16,
+        20
+      ],
+      "first": 8,
+      "cast": 0.6,
+      "say": "He hurls a straw dummy!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 2.4,
+          "count": 2,
+          "delay": 0.4,
+          "leave": {
+            "type": "rock",
+            "name": "Training dummy",
+            "r": 1,
+            "hp": 1
+          },
+          "wind": 1.4,
+          "damage": 1.2
+        }
+      ]
+    },
+    "bellow": {
+      "id": "bellow",
+      "name": "Parade-Ground Bellow",
+      "every": [
+        22,
+        26
+      ],
+      "first": 12,
+      "cast": 2.5,
+      "say": "He fills his lungs to BELLOW — duck behind a barricade or a dummy!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 12,
+          "los": true,
+          "status": "fear",
+          "wind": 0.6,
+          "damage": 1.0
+        }
+      ]
+    },
+    "charge": {
+      "id": "charge",
+      "name": "\"Charge!\"",
+      "every": [
+        12,
+        15
+      ],
+      "range": 16,
+      "cast": 0.5,
+      "say": "\"CHARGE!\" — get out from behind {target}!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 14,
+          "w": 2.6,
+          "knock": 3,
+          "wind": 1.2,
+          "damage": 1.7
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Drill",
+      "abilities": [
+        "shields",
+        "spears",
+        "dummy",
+        "bellow"
+      ]
+    },
+    {
+      "name": "Fall In",
+      "at": 0.5,
+      "say": "\"RECRUITS! FALL IN!\"",
+      "shieldWhileAdds": true,
+      "shieldDown": "\"Useless, the lot of you!\" Wark drops his guard!",
+      "abilities": [
+        "shields",
+        "charge"
+      ],
+      "onEnter": [
+        {
+          "shield": true
+        },
+        {
+          "adds": {
+            "type": "road_brigand",
+            "count": 3,
+            "radius": 8
+          }
+        }
+      ]
+    },
+    {
+      "name": "Personal Attention",
+      "at": 0.3,
+      "say": "\"Fine. I'll do it MYSELF.\"",
+      "abilities": [
+        "shields",
+        "charge",
+        "spears",
+        "bellow"
+      ],
+      "onEnter": [
+        {
+          "modifier": {
+            "id": "personal",
+            "dmg": 1.2,
+            "attackEvery": 0.85,
+            "exact": true
+          }
+        }
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 1,
+        "of": "drum"
+      },
+      "do": [
+        {
+          "stun": 2
+        },
+        {
+          "vuln": {
+            "takeMore": 0.25,
+            "seconds": 8,
+            "name": "Out of Step"
+          }
+        },
+        {
+          "say": "The war drum splits! Wark loses the beat!",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

@@ -32,7 +32,6 @@ Open cross-stream items are also tracked in `docs/requests.md` (unchecked `- [ ]
 | Generator taste | Metrics can't tell a fun forest from a dull one; owner play-tests are the check. Forest share runs 45-68% (plan said 35-55%; a 50% map read as a park) | hvf-PLAN §3.4, §21 risk 1; `data/hvf/mapgen.json` `_doc` |
 | AI farmers that hide well | Hard; feel tests are the bar and Recruit farmers hiding badly is accepted | hvf-PLAN §21 risk 2 |
 | Mode title | Owner chose "Hunters vs Farmers"; "Fold & Fang" is not used anywhere | hvf-PLAN header |
-| HvF online room is its own small room, not `lobbysync.js` | `lobbysync` is line-war shaped (1v1-3v3, race/hero slots); the packet shape is the same, so HvF can switch if lobbysync becomes mode-aware | `docs/requests.md` "(H -> D, optional)"; `js/ui/hvf/online.js` |
 
 ## Online
 

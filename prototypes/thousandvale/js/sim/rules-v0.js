@@ -13,8 +13,8 @@ export const MONSTER_TYPES = {
   wolf: { name: 'Grey wolf', hp: l => 40 + 14 * l, dmg: l => [3 + 2 * l, 5 + 2 * l], xp: l => 20 + 6 * l },
 };
 
-const RANK_HP = { normal: 1, elite: 3, boss: 6 };
-const RANK_XP = { normal: 1, elite: 3, boss: 8 };
+const RANK_HP = { normal: 1, elite: 3, rare: 2.5, champion: 2, boss: 6 };
+const RANK_XP = { normal: 1, elite: 3, rare: 3, champion: 2, boss: 8 };
 
 /** STAND-IN loot (C's rules roll Farhold drops). Items get their uid from the server. */
 const JUNK = [['wolf_pelt', 'Wolf pelt', 3], ['wolf_fang', 'Wolf fang', 2], ['torn_cloth', 'Torn cloth', 1]];

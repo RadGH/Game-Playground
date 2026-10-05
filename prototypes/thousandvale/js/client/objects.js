@@ -23,9 +23,22 @@ const KINDS = {
   pillar:  { prop: 'ruined_pillar', glow: null, label: () => null, use: false },
   rock:    { prop: 'boulder', rock: true, glow: null, label: () => null, use: false },
   pool:    { prop: null, glow: '#7ee04a', label: () => null, use: false },
+  cracked_floor: { prop: null, glow: null, label: () => null, use: false, decal: '#2a2420' },
+  sarcophagus: { prop: 'stone_step', glow: null, label: () => null, use: false, scale: 1.4, tint: '#8f8a82' },
+  support_beam: { prop: 'fence_post', glow: null, label: () => null, use: false, scale: 2.2 },
+  ore_cart: { prop: 'cart_wheel', glow: null, label: () => null, use: false, scale: 1.3 },
+  gate:    { prop: null, glow: null, label: () => null, use: false },
+  // M2: the living world
+  waystone: { prop: 'rune_stone', glow: '#7fd7ff', label: () => 'Touch the waystone', use: true, scale: 1.35, light: '#7fd7ff' },
+  note:    { prop: 'stone_marker', glow: '#f3e3b0', label: o => `Read: ${o.name || 'a note'}`, use: true, scale: 0.8 },
+  use:     { prop: o => (/well/i.test(o.name || '') ? 'well' : /shrine|altar|statue|idol|stone|cairn/i.test(o.name || '') ? 'rune_stone' : /fire|hearth|brazier/i.test(o.name || '') ? 'fire_ring' : 'stone_step'), glow: '#c9a8ff', label: o => o.name || 'Use', use: true },
+  grave:   { prop: 'stone_marker', glow: null, label: o => `${o.name || 'A grave'}`, use: true, tint: '#8a8780', mound: true },
+  campfire: { prop: 'campfire', glow: '#ffae5c', label: o => o.name || 'A campfire', use: true, fire: true },
+  npc:     { prop: null, glow: null, label: o => `Talk to ${o.name || 'them'}`, use: true, invisible: true },
+  vignette: { prop: null, glow: null, label: () => null, use: false, invisible: true },
 };
 
-export function createObjects(scene, { heightAt = () => 0, onUse } = {}) {
+export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null, labelLayer = null, camera = null } = {}) {
   const items = new Map();       // id -> object
   const group = new THREE.Group(); group.name = 'objects'; scene.add(group);
   const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85 });
@@ -34,13 +47,17 @@ export function createObjects(scene, { heightAt = () => 0, onUse } = {}) {
   const geoCache = new Map();
   const geo = (id, rock) => { const k = id + (rock ? '#r' : ''); if (!geoCache.has(k)) { try { geoCache.set(k, rock ? buildRock(id, { seed: 3, lod: 1, size: 2 }).geometry : buildProp(id, { seed: 3, lod: 0 }).geometry); } catch { geoCache.set(k, null); } } return geoCache.get(k); };
   let ground = heightAt;
+  let lightCount = 0;
   let focus = null;
   const prompt = document.getElementById('interact');
 
   function model(o) {
     const K = KINDS[o.type] || {};
     const root = new THREE.Group();
-    const g = K.prop ? geo(K.prop, K.rock) : null;
+    const propId = typeof K.prop === 'function' ? K.prop(o) : K.prop;
+    if (K.invisible) return root;
+    if (o.hidden) o.hiddenChest = true;
+    const g = propId ? geo(propId, K.rock) : null;
     if (g) {
       const n = K.stack || 1;
       for (let i = 0; i < n; i++) {
@@ -69,6 +86,19 @@ export function createObjects(scene, { heightAt = () => 0, onUse } = {}) {
       const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: K.glow || '#ffd38a', transparent: true, opacity: 0.5, depthWrite: false }));
       ring.position.y = 0.07; ring.scale.setScalar(Math.max(1.1, (o.r || 1) + 0.6)); ring.renderOrder = 2; root.add(ring); o.ring = ring;
     }
+    if (K.mound) {
+      const m = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#4a3d2e', roughness: 1 }));
+      m.scale.set(0.8, 0.28, 1.5); m.position.set(0, 0, 1.2); root.add(m);
+    }
+    if (K.decal) {
+      const d = new THREE.Mesh(new THREE.CircleGeometry(o.r || 2.6, 24), new THREE.MeshBasicMaterial({ color: K.decal, transparent: true, opacity: 0.7, depthWrite: false }));
+      d.rotation.x = -Math.PI / 2; d.position.y = 0.05; root.add(d);
+    }
+    if (K.fire || K.light) {
+      const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: K.fire ? '#ffb35a' : K.light, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
+      fl.position.y = K.fire ? 0.7 : 1.6; fl.scale.set(K.fire ? 1.4 : 1.6, K.fire ? 2.0 : 2.6, 1); root.add(fl); o.flame2 = fl;
+      if (lightCount < 6) { const l = new THREE.PointLight(K.fire ? '#ffae5c' : K.light, K.fire ? 16 : 8, K.fire ? 14 : 9, 1.6); l.position.y = 1.2; root.add(l); o.light = l; lightCount++; }
+    }
     if (o.type === 'brazier') {
       const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: '#ffb35a', blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
       fl.position.y = 0.8; fl.scale.set(1.2, 1.8, 1); root.add(fl); o.flame = fl;
@@ -92,7 +122,7 @@ export function createObjects(scene, { heightAt = () => 0, onUse } = {}) {
     if (cur.type === 'pillar') cur.root.visible = cur.state !== 'broken';
     return cur;
   }
-  function remove(id) { const o = items.get(id); if (!o) return; group.remove(o.root); items.delete(id); if (focus === o) focus = null; }
+  function remove(id) { const o = items.get(id); if (!o) return; group.remove(o.root); if (o.light) lightCount--; if (o.labelEl) o.labelEl.remove(); items.delete(id); if (focus === o) focus = null; }
   function clear() { for (const id of [...items.keys()]) remove(id); }
 
   /** `obj` event from an encounter. */
@@ -101,12 +131,22 @@ export function createObjects(scene, { heightAt = () => 0, onUse } = {}) {
     upsert({ id: ev.id, type: ev.type, x: ev.x, z: ev.z, r: ev.r, state: ev.state, hp: ev.hp, key: ev.key, source: 'arena' });
   }
 
-  function usable(o) { const K = KINDS[o.type]; if (!K) return false; return typeof K.use === 'function' ? K.use(o) : !!K.use; }
+  function usable(o) { const K = KINDS[o.type]; if (!K) return false; if (o.hiddenChest && !o.revealed) return false; return typeof K.use === 'function' ? K.use(o) : !!K.use; }
 
   function update(dt, me) {
     let best = null, bd = Infinity;
     for (const o of items.values()) {
       o.t += dt;
+      if (o.hiddenChest && me) {
+        // a hidden cache shimmers within 15 m (PLAN §3.7) and is invisible further away
+        const d = Math.hypot(o.x - me.x, o.z - me.z);
+        o.revealed = d < 15;
+        o.root.visible = o.revealed;
+        if (o.revealed && o.glow) o.glow.scale.setScalar(1.6 + Math.sin(o.t * 6) * 0.4);
+      }
+      if (o.flame2) o.flame2.material.rotation = Math.sin(o.t * 6) * 0.08;
+      if (o.light) o.light.intensity = (KINDS[o.type]?.fire ? 16 : 8) * (0.88 + Math.sin(o.t * 11) * 0.08);
+      if (o.type === 'vignette' && me && o.lore && onNear) { if (Math.hypot(o.x - me.x, o.z - me.z) < (o.r || 10)) onNear(o); }
       const K = KINDS[o.type] || {};
       const can = usable(o);
       if (o.ring) { o.ring.visible = can; o.ring.material.opacity = 0.32 + Math.sin(o.t * 3) * 0.16 + (o === focus ? 0.35 : 0); o.ring.rotation.y += dt * 0.4; }
@@ -116,12 +156,33 @@ export function createObjects(scene, { heightAt = () => 0, onUse } = {}) {
       if (me && can) { const d = Math.hypot(o.x - me.x, o.z - me.z) - (o.r || 1) * 0.5; if (d < REACH && d < bd) { bd = d; best = o; } }
     }
     focus = best;
+    if (labelLayer && camera) drawLabels();
     if (prompt) {
       const text = best ? (KINDS[best.type]?.label(best) || '') : '';
       prompt.hidden = !text;
       if (text) prompt.querySelector('span').textContent = text;
     }
   }
+
+  // floating labels for objects that carry a story: "Cleared by Aldra's party, 4 minutes ago" on a door
+  const _v = new THREE.Vector3();
+  function drawLabels() {
+    const w = labelLayer.clientWidth, h = labelLayer.clientHeight;
+    for (const o of items.values()) {
+      const text = o.banner ? `Cleared by ${o.banner.by}${o.banner.party > 1 ? "'s party" : ''}, ${agoText(o.banner.at)}` : null;
+      if (!text) { if (o.labelEl) { o.labelEl.remove(); o.labelEl = null; } continue; }
+      if (!o.labelEl) { o.labelEl = document.createElement('div'); o.labelEl.className = 'obj-label'; labelLayer.appendChild(o.labelEl); }
+      _v.set(o.x, o.root.position.y + 4.6, o.z);
+      const dist = camera.position.distanceTo(_v);
+      _v.project(camera);
+      const show = _v.z < 1 && dist < 60 && Math.abs(_v.x) < 1.1 && Math.abs(_v.y) < 1.1;
+      o.labelEl.style.display = show ? '' : 'none';
+      if (!show) continue;
+      o.labelEl.textContent = text;
+      o.labelEl.style.transform = `translate(${((_v.x * 0.5 + 0.5) * w).toFixed(0)}px, ${((-_v.y * 0.5 + 0.5) * h).toFixed(0)}px) translate(-50%, -100%)`;
+    }
+  }
+  const agoText = at => { const m = Math.round((Date.now() - at) / 60000); return m < 1 ? 'just now' : m === 1 ? 'a minute ago' : m < 60 ? `${m} minutes ago` : `${Math.round(m / 60)} hours ago`; };
 
   /** E pressed: use the focused object. */
   function useFocus() { if (focus && usable(focus)) { onUse?.(focus.id, focus); return true; } return false; }

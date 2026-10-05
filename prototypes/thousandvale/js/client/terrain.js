@@ -10,6 +10,7 @@
 
 import { parseTerrain } from '../rules/terrain-read.js';
 import { standInTerrain } from '../sim/terrain.js';
+import { parseScatter } from '../rules/terrain-read.js';
 
 const cache = new Map();
 
@@ -55,4 +56,77 @@ function standin() {
     bounds: s.bounds, origin: s.origin, extent: s.size, res, step,
     heightGrid, waterGrid: () => null, spawn: s.spawn, sites: [],
   };
+}
+
+// ---------------------------------------------------------------------------------------------------
+// M2: a province is many zones stitched edge to edge in WORLD metres (js/sim/province-terrain.js: zone
+// (zx, zy) covers x in [zx*2048, zx*2048 + 2048]). Each zone's files are zone-local; `worldZone` moves one
+// into world metres without copying a sample, so its mesh, scatter and placements all land where the
+// server's composite reader says they are.
+
+/** A zone's side layers: scatter.bin and placements.json (both optional — the M0 test zone has neither). */
+export async function loadZoneExtras(key) {
+  const base = new URL(`../../data/zones/${encodeURIComponent(key)}/`, import.meta.url);
+  const json = u => fetch(u).then(r => (r.ok ? r.json() : null)).catch(() => null);
+  const [scatter, placements, vigW] = await Promise.all([
+    fetch(new URL('scatter.bin', base)).then(r => (r.ok ? r.arrayBuffer() : null)).then(b => (b ? parseScatter(b) : null)).catch(() => null),
+    json(new URL('placements.json', base)),
+    json(new URL(`../../vignettes/placements/${encodeURIComponent(key)}.json`, base)),
+  ]);
+  // vignette placements may be filed under stream E's zone id (data/world/province-map.json)
+  let vig = vigW;
+  if (!vig) {
+    const map = await provinceMap();
+    const eid = map.byWorld[key];
+    if (eid) vig = await json(new URL(`../../vignettes/placements/${encodeURIComponent(eid)}.json`, base));
+  }
+  return { scatter, placements: placements ? placements.placements || [] : [], vignettes: vig ? vig.placements || [] : [], vignetteHash: vig ? vig.terrainHash || null : null };
+}
+
+/** The same terrain shape, offset by (ox, oz) into world metres. */
+export function worldZone(T, ox, oz) {
+  if (!ox && !oz) return { ...T, ox: 0, oz: 0 };
+  const b = T.bounds;
+  return {
+    ...T, ox, oz,
+    heightAt: (x, z) => T.heightAt(x - ox, z - oz),
+    walkable: (x, z) => T.walkable(x - ox, z - oz),
+    waterAt: (x, z) => T.waterAt(x - ox, z - oz),
+    slopeDeg: (x, z) => T.slopeDeg(x - ox, z - oz),
+    biomeKey: (x, z) => T.biomeKey(x - ox, z - oz),
+    bounds: { minX: b.minX + ox, minZ: b.minZ + oz, maxX: b.maxX + ox, maxZ: b.maxZ + oz },
+    origin: { x: T.origin.x + ox, z: T.origin.z + oz },
+    spawn: { x: T.spawn.x + ox, z: T.spawn.z + oz },
+    sites: (T.sites || []).map(s => ({ ...s, x: s.x + ox, z: s.z + oz })),
+  };
+}
+
+/** Which zone cell a world point is in (the province's own rule). */
+export const ZONE_M = 2048;
+export const zoneCell = (x, z) => [Math.floor(x / ZONE_M), Math.floor(z / ZONE_M)];
+/** Distance from a point to a rectangle (0 inside). */
+export function rectDist(b, x, z) {
+  const dx = Math.max(b.minX - x, 0, x - b.maxX), dz = Math.max(b.minZ - z, 0, z - b.maxZ);
+  return Math.hypot(dx, dz);
+}
+/**
+ * Which zones to have loaded for a point: the one you stand in plus any whose edge is within `near`
+ * metres; anything already loaded stays until it is `far` away (no flapping at a border).
+ */
+export function zonesWanted(zones, x, z, loaded = new Set(), { near = 450, far = 900, max = 4 } = {}) {
+  const ranked = zones.map(q => ({ key: q.key, d: rectDist(q.bounds, x, z) })).sort((a, b) => a.d - b.d);
+  const out = [];
+  for (const r of ranked) {
+    if (out.length >= max) break;
+    if (r.d === 0 || r.d < near || (loaded.has(r.key) && r.d < far)) out.push(r.key);
+  }
+  return out;
+}
+
+/** data/world/province-map.json as { provinces, byWorld: { worldZone: eZone } } (cached). */
+let pmap = null;
+export function provinceMap() {
+  if (!pmap) pmap = fetch(new URL('../../data/world/province-map.json', import.meta.url)).then(r => (r.ok ? r.json() : { provinces: {} })).catch(() => ({ provinces: {} }))
+    .then(m => { const byWorld = {}; for (const p of Object.values(m.provinces || {})) for (const [e, w] of Object.entries(p.map || {})) byWorld[w] = e; return { ...m, byWorld }; });
+  return pmap;
 }

@@ -5,6 +5,12 @@
 // players walking into view do not freeze a frame; until a body is ready a soft stand-in shows where
 // it is. Identical looks share one template (chibi2.js caches by avatar JSON).
 //
+// LEVEL OF DETAIL (a town of 100 players on a desktop GPU, PLAN §12): only the nearest FULL_MAX players
+// (and monsters within reach) get a real body; everyone further is a one-draw-call instanced stand-in
+// tinted by class, with a small plate. Full bodies past ANIM_NEAR metres animate at 10 Hz. Nameplates
+// are capped to the PLATE_MAX nearest and skip DOM writes when nothing moved. A body that has been far
+// for a while is thrown away (bodies share templates, so building one again is cheap).
+//
 // Animation is picked from what the entity is DOING — its interpolated speed for locomotion, plus
 // one-shots (attack, hit) layered on top by events — so the server never has to send animation names
 // for movement.
@@ -29,9 +35,38 @@ export function angleDelta(a, b) { let d = (b - a) % TAU; if (d > Math.PI) d -= 
 
 const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead'];
 
-export function createActors(scene, { plateLayer, camera }) {
+/** Pure LOD choice — exported for tests. `list` = [{ id, kind, d }] -> Set of ids that get a full body. */
+export function chooseFull(list, { fullMax = 30, monsterRange = 120, selfId = null } = {}) {
+  const full = new Set();
+  const players = list.filter(a => a.kind === 'player' || a.kind === 'npc').sort((a, b) => a.d - b.d);
+  for (const a of players) { if (a.id === selfId || full.size < fullMax) full.add(a.id); }
+  for (const a of list) if (a.kind !== 'player' && a.kind !== 'npc' && a.d < monsterRange) full.add(a.id);
+  return full;
+}
+const CLASS_TINT = { warrior: '#b04a3a', knight: '#9aa4b4', paladin: '#e0c060', ranger: '#4f8a3a', rogue: '#3a3a44', cleric: '#e8e0c8', mage: '#4a6ad0', bard: '#c060a0', monk: '#d0902a', druid: '#6a9a4a', necromancer: '#5a3a6a', pyromancer: '#e0602a' };
+
+export function createActors(scene, { plateLayer, camera, quality = 'high' }) {
   const actors = new Map();
   const queue = [];
+  const FULL_MAX = quality === 'low' ? 12 : 30, PLATE_MAX = quality === 'low' ? 24 : 40, ANIM_NEAR = 25;
+  // the far crowd: one instanced figure (body + head), tinted per class
+  const farGeo = (() => {
+    const body = new THREE.CapsuleGeometry(0.32, 0.75, 3, 8); body.translate(0, 0.72, 0);
+    const head = new THREE.SphereGeometry(0.3, 10, 8); head.translate(0, 1.5, 0);
+    const pos = [...body.attributes.position.array, ...head.attributes.position.array];
+    const nor = [...body.attributes.normal.array, ...head.attributes.normal.array];
+    const idx = [...body.index.array, ...head.index.array.map(i => i + body.attributes.position.count)];
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); g.setIndex(idx);
+    return g;
+  })();
+  const FAR_CAP = 400;
+  const farMesh = new THREE.InstancedMesh(farGeo, new THREE.MeshLambertMaterial({ color: '#ffffff' }), FAR_CAP);
+  farMesh.count = 0; farMesh.frustumCulled = false; farMesh.name = 'far-crowd';
+  scene.add(farMesh);
+  const _fm = new THREE.Matrix4(), _fq = new THREE.Quaternion(), _fs = new THREE.Vector3(1, 1, 1), _fp = new THREE.Vector3(), _fc = new THREE.Color(), _up = new THREE.Vector3(0, 1, 0);
+  let lodAt = 0, fullSet = new Set();
+  const lodStats = { full: 0, far: 0, plates: 0, built: 0 };
   const standinGeo = new THREE.CapsuleGeometry(0.35, 0.9, 4, 10);
   const standinMat = new THREE.MeshStandardMaterial({ color: '#8b8f99', transparent: true, opacity: 0.35, roughness: 1 });
 
@@ -46,7 +81,7 @@ export function createActors(scene, { plateLayer, camera }) {
     a = {
       id: info.id, kind: info.kind, self, ...pick(info), still: null,
       group: new THREE.Group(), model: null, body: null, anim: 'idle', oneShot: null, oneShotUntil: 0,
-      recoil: new THREE.Vector3(), punch: 0, dead: info.hp <= 0, speed: 0, yaw: info.yaw || 0, height: info.kind === 'monster' ? 1.2 : 1.9,
+      recoil: new THREE.Vector3(), punch: 0, dead: info.hp <= 0, speed: 0, yaw: info.yaw || 0, height: info.kind === 'monster' || info.pet ? 1.2 : 1.9,
       pos: new THREE.Vector3(info.x, info.y, info.z), plate: null, lastSeen: performance.now(), deathAt: 0, fade: 1,
     };
     a.group.position.copy(a.pos);
@@ -58,12 +93,13 @@ export function createActors(scene, { plateLayer, camera }) {
     queue.push(a);
     return a;
   }
-  function pick(i) { return { name: i.name, level: i.level, hp: i.hp, hpMax: i.hpMax, hostile: !!i.hostile, look: i.look, creature: i.creature, family: i.family, rank: i.rank || null }; }
+  function pick(i) { return { name: i.name, level: i.level, hp: i.hp, hpMax: i.hpMax, hostile: !!i.hostile, look: i.look, creature: i.creature, family: i.family, rank: i.rank || null, pet: !!i.pet, role: i.role || null }; }
 
   async function build(a) {
+    a.building = true; lodStats.built++;
     try {
       let body;
-      if (a.kind === 'monster') {
+      if (a.kind === 'monster' || a.pet) {
         const looks = await loadMonsterLooks();
         const look = looks[a.creature?.type] || null;
         const big = a.rank === 'boss' ? 1.45 : a.rank === 'elite' || a.rank === 'champion' || a.rank === 'rare' ? 1.18 : 1;
@@ -81,7 +117,7 @@ export function createActors(scene, { plateLayer, camera }) {
       } else {
         body = await createChibi2Character(await avatarFor(a.look), { anims: CHIBI_ANIMS });
       }
-      if (!actors.has(a.id)) { body.dispose?.(); return; }
+      if (!actors.has(a.id) || a.body) { body.dispose?.(); return; }
       a.body = body; a.model = body.group;
       a.model.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
       a.group.remove(a.standin); a.group.add(a.model);
@@ -94,7 +130,7 @@ export function createActors(scene, { plateLayer, camera }) {
 
   function setAnim(a, name) {
     if (!a.body) { a.anim = name; return; }
-    if (a.kind === 'monster' && !a.humanoid) { if (a.anim !== name) a.body.setAnim(name); }
+    if ((a.kind === 'monster' || a.pet) && !a.humanoid) { if (a.anim !== name) a.body.setAnim(name); }
     else a.body.setAnim(name, 0.14, name === 'attack' || name === 'hit');
     a.anim = name;
   }
@@ -129,8 +165,13 @@ export function createActors(scene, { plateLayer, camera }) {
   function updatePlates(targetId, hoverId) {
     if (!plateLayer) return;
     const w = plateLayer.clientWidth, h = plateLayer.clientHeight;
-    for (const a of actors.values()) {
-      const p = a.plate; if (!p) continue;
+    // the PLATE_MAX nearest get a plate (plus whoever you target or hover); the rest stay hidden
+    const order = [];
+    for (const a of actors.values()) if (a.plate) order.push([camera.position.distanceToSquared(a.group.position), a]);
+    order.sort((p, q) => p[0] - q[0]);
+    let shown = 0;
+    for (const [, a] of order) {
+      const p = a.plate;
       _v.set(a.group.position.x, a.group.position.y + a.height + 0.35, a.group.position.z);
       const dist = camera.position.distanceTo(_v);
       // Behind the camera a projected point can still land inside the screen (mirrored): test camera space first.
@@ -138,26 +179,54 @@ export function createActors(scene, { plateLayer, camera }) {
       _v.project(camera);
       const bubbling = p.bubbleUntil > performance.now();
       if (p.bubble && !bubbling && p.bubble.style.display !== 'none') p.bubble.style.display = 'none';
-      const show = front && _v.z < 1 && a.fade > 0.05 && (bubbling ? dist < 60 : !a.noPlate && dist < (a.self ? 0 : 70));
+      const special = a.id === targetId || a.id === hoverId;
+      let show = front && _v.z < 1 && a.fade > 0.05 && (bubbling ? dist < 60 : !a.noPlate && dist < (a.self ? 0 : 70));
+      if (show && !special && shown >= PLATE_MAX) show = false;
       if (!show) { if (p.shown !== false) { p.root.style.display = 'none'; p.shown = false; } continue; }
+      shown++;
       if (p.shown !== true) { p.root.style.display = ''; p.shown = true; }
       const x = (_v.x * 0.5 + 0.5) * w, y = (-_v.y * 0.5 + 0.5) * h;
       const s = Math.max(0.62, Math.min(1, 14 / dist));
-      p.root.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -100%) scale(${s.toFixed(3)})`;
-      p.root.style.opacity = (Math.min(1, (70 - dist) / 12) * a.fade).toFixed(2);
-      p.root.classList.toggle('targeted', a.id === targetId);
-      p.root.classList.toggle('hovered', a.id === hoverId && a.id !== targetId);
+      const tf = `translate(${x.toFixed(0)}px, ${y.toFixed(0)}px) translate(-50%, -100%) scale(${s.toFixed(2)})`;
+      if (tf !== p.tf) { p.root.style.transform = tf; p.tf = tf; }
+      const op = (Math.min(1, (70 - dist) / 12) * a.fade).toFixed(2);
+      if (op !== p.op) { p.root.style.opacity = op; p.op = op; }
+      const far = a.lod === 'far';
+      if (far !== p.far) { p.root.classList.toggle('far', far); p.far = far; }
+      if (p.tgt !== (a.id === targetId)) { p.tgt = a.id === targetId; p.root.classList.toggle('targeted', p.tgt); }
+      const hv = a.id === hoverId && a.id !== targetId;
+      if (p.hv !== hv) { p.hv = hv; p.root.classList.toggle('hovered', hv); }
       // The trailing "damage taken" bar catches up after a beat (reads as a chunk being knocked off).
       const f = Math.max(0, a.hp / (a.hpMax || 1));
-      p.lagW += (f - p.lagW) * (f < p.lagW ? 0.04 : 1);
-      p.lag.style.width = (p.lagW * 100).toFixed(1) + '%';
+      if (Math.abs(f - p.lagW) > 0.001) { p.lagW += (f - p.lagW) * (f < p.lagW ? 0.04 : 1); p.lag.style.width = (p.lagW * 100).toFixed(1) + '%'; }
     }
+    lodStats.plates = shown;
   }
 
   // --- per frame --------------------------------------------------------------------------------
   function update(dt, renderTime, { selfPos = null, selfYaw = 0, selfMoving = 0, targetId = null, hoverId = null, sample = null, speed = null } = {}) {
-    if (queue.length) { const a = queue.shift(); if (actors.has(a.id)) build(a); }
     const now = performance.now();
+    // LOD: who gets a body (re-ranked four times a second)
+    if (now >= lodAt) {
+      lodAt = now + 250;
+      const cp = camera.position;
+      const list = [...actors.values()].map(a => ({ id: a.id, kind: a.pet ? 'monster' : a.kind, d: Math.hypot(a.pos.x - cp.x, a.pos.z - cp.z) }));
+      fullSet = chooseFull(list, { fullMax: FULL_MAX, selfId: [...actors.values()].find(a => a.self)?.id });
+      for (const a of actors.values()) {
+        const full = fullSet.has(a.id) || a.id === 'preview';
+        if (a.lod === undefined || full !== (a.lod === 'full')) { a.lod = full ? 'full' : 'far'; a.lodSince = now; }
+        // a body far away for half a minute is let go
+        if (a.lod === 'far' && a.body && now - a.lodSince > 30000) { a.group.remove(a.model); a.body.dispose?.(); a.body = null; a.model = null; a.building = false; a.group.add(a.standin); }
+      }
+    }
+    // build the nearest full actor still waiting for a body (one a frame)
+    if (queue.length) {
+      const cp = camera.position;
+      let bi = -1, bd = Infinity;
+      for (let i = 0; i < queue.length; i++) { const a = queue[i]; if (!actors.has(a.id)) { queue.splice(i--, 1); continue; } if (a.lod !== 'full') continue; const d = Math.hypot(a.pos.x - cp.x, a.pos.z - cp.z); if (d < bd) { bd = d; bi = i; } }
+      if (bi >= 0) { const a = queue.splice(bi, 1)[0]; build(a); }
+    }
+    let farN = 0;
     for (const a of actors.values()) {
       if (a.self && selfPos) {
         a.pos.set(selfPos.x, selfPos.y, selfPos.z);
@@ -170,7 +239,7 @@ export function createActors(scene, { plateLayer, camera }) {
           // Turn smoothly toward the sampled facing (sample yaw already interpolates; this hides 3 Hz far updates).
           a.yaw += angleDelta(a.yaw, s.yaw) * Math.min(1, dt * 12);
         }
-        a.speed = a.still ? 0 : speed ? speed(a.id, renderTime) : 0;
+        a.speed = a.still ? (a.still.speed || 0) : speed ? speed(a.id, renderTime) : 0;
       }
       // Hit recoil and punch decay.
       a.recoil.multiplyScalar(Math.exp(-dt * 10));
@@ -194,7 +263,26 @@ export function createActors(scene, { plateLayer, camera }) {
           a.body.setRate(a.anim === 'run' || a.anim === 'walk' ? Math.max(0.5, a.speed * (run ? 0.65 : 1.05) / (run ? 3.4 : 2.0)) : 1);
         } else a.body.setRate(a.anim === 'run' ? Math.max(0.6, a.speed / 5.2) : a.anim === 'walk' ? Math.max(0.5, a.speed / 1.5) : 1);
       }
-      a.body?.update(dt, now / 1000);
+      // far: drawn by the instanced crowd, no mixer at all
+      const far = a.lod === 'far' && !a.self && a.id !== 'preview';
+      a.group.visible = !far;
+      if (far) {
+        // far people are one instanced crowd; far beasts (past 120 m) are simply not drawn
+        if ((a.kind === 'player' || a.kind === 'npc') && !a.pet && farN < FAR_CAP && a.fade > 0.05) {
+          _fq.setFromAxisAngle(_up, a.yaw); _fs.setScalar(a.dead ? 0.0001 : 1);
+          farMesh.setMatrixAt(farN, _fm.compose(_fp.set(a.group.position.x, a.group.position.y, a.group.position.z), _fq, _fs));
+          farMesh.setColorAt(farN, _fc.set(CLASS_TINT[a.look?.cls] || '#9a8f80'));
+          farN++;
+        }
+        if (!a.body && !a.building && !queue.includes(a)) queue.push(a);     // build when it comes close
+        continue;
+      }
+      if (!a.body && !a.building && !queue.includes(a)) queue.push(a);
+      if (a.body) {
+        const dCam = Math.hypot(a.pos.x - camera.position.x, a.pos.z - camera.position.z);
+        if (dCam > ANIM_NEAR && !a.self) { a.animAcc = (a.animAcc || 0) + dt; if (a.animAcc >= 0.1) { a.body.update(a.animAcc, now / 1000); a.animAcc = 0; } }
+        else a.body.update(dt, now / 1000);
+      }
 
       // Corpses fade and sink after a while (monsters only; players stand back up on respawn).
       if (a.dead && a.kind === 'monster' && a.deathAt && now - a.deathAt > 9000) {
@@ -202,6 +290,8 @@ export function createActors(scene, { plateLayer, camera }) {
         a.group.position.y -= (1 - a.fade) * 0.8;
       } else a.fade = 1;
     }
+    farMesh.count = farN; farMesh.instanceMatrix.needsUpdate = true; if (farMesh.instanceColor) farMesh.instanceColor.needsUpdate = true;
+    lodStats.full = fullSet.size; lodStats.far = farN;
     // Rings.
     const ta = targetId != null ? actors.get(targetId) : null;
     targetRing.visible = !!ta && ta.fade > 0.1;
@@ -275,5 +365,5 @@ export function createActors(scene, { plateLayer, camera }) {
     p.root.classList.toggle('self-plate', !!a.self);
   }
 
-  return { actors, add, remove, rekey, say, update, playAttack, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
+  return { actors, lodStats, add, remove, rekey, say, update, playAttack, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
 }

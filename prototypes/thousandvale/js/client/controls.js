@@ -11,7 +11,7 @@
 // Pure-ish: no three.js import; it is handed a camera and a heightAt. The step function `intent()` is
 // what the game loop samples once per sim step to build an input message.
 
-export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCycleTarget, onClearTarget, onChat, onPickGround, getTarget, onRise }) {
+export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCycleTarget, onClearTarget, onChat, onPickGround, getTarget, onRise, onSkill }) {
   const keys = new Set();
   const cam = { yaw: Math.PI, pitch: 0.38, dist: 9, distWant: 9, focus: { x: 0, y: 0, z: 0 }, ready: false };
   let drag = null, moveGoal = null, chase = null, typing = false, facing = Math.PI, jumpQueued = false;
@@ -26,7 +26,8 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     if (k === 'Escape') { moveGoal = null; chase = null; onClearTarget?.(); return; }
     if (k === 'Space') { e.preventDefault(); if (!e.repeat) jumpQueued = true; return; }
     if (k === 'KeyR') { onRise?.(); return; }
-    if (k === 'Digit1' || k === 'KeyF') { e.preventDefault(); const t = getTarget?.(); if (t != null) { chase = t; onAttack?.(t); } return; }
+    if (k === 'KeyF') { e.preventDefault(); const t = getTarget?.(); if (t != null) { chase = t; onAttack?.(t); } return; }
+    if (/^Digit[1-6]$/.test(k)) { e.preventDefault(); onSkill?.(+k.slice(5)); return; }
     if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(k)) { moveGoal = null; chase = null; }
     keys.add(k);
   });

@@ -11,6 +11,8 @@
 import * as THREE from 'three';
 import { makeSurface, makeWaterNormals } from '../../../../highdef-3d/js/kit/textures.js';
 
+/** Surfaces are made once per page: every zone's ground shares the same five textures. */
+const TEX_CACHE = new Map();
 const CHUNK = 64;
 const SKIRT = 3;
 const FOREST = new Set(['temperateForest', 'rainforest', 'borealForest', 'blighted', 'marsh', 'hallowed']);
@@ -35,7 +37,8 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
     let sand = SAND.has(b) ? 0.8 : 0;
     const w = T.waterAt(x, z);
     if (w.depth > 0) sand = Math.max(sand, 0.7);
-    let path = 0;
+    let path = b === 'road' ? 0.92 : 0;
+    if (path) { forest = 0; sand = 0; rock = Math.min(rock, 0.15); }
     for (const c of clearings) { const d = Math.hypot(x - c.x, z - c.z) / c.r; forest *= smooth(0.7, 1.2, d); path = Math.max(path, (1 - smooth(0.12, 0.6, d)) * 0.7); }
     forest *= 1 - rock; path *= 1 - rock;
     let s = forest + rock + sand + path;
@@ -49,7 +52,11 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
   }
 
   // --- material --------------------------------------------------------------------------------
-  const surf = k => { const s = makeSurface(k, { size: textureSize, seed: 7 }); s.map.anisotropy = 8; s.map.wrapS = s.map.wrapT = THREE.RepeatWrapping; return s.map; };
+  const surf = k => {
+    const ck = k + '@' + textureSize;
+    if (!TEX_CACHE.has(ck)) { const s = makeSurface(k, { size: textureSize, seed: 7 }); s.map.anisotropy = 8; s.map.wrapS = s.map.wrapT = THREE.RepeatWrapping; TEX_CACHE.set(ck, s.map); }
+    return TEX_CACHE.get(ck);
+  };
   const tex = quality === 'low' ? null : { grass: surf('grass'), floor: surf('forest_floor'), rock: surf('rock'), sand: surf('sand'), path: surf('dirt') };
   // Low quality (software renderers, weak GPUs): one Lambert pass with the surfaces pre-mixed into the
   // vertex colour. The splat shader fills every ground pixel with five texture reads, which is what
@@ -195,5 +202,10 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
     }
   }
 
-  return { group, material, water, update, ready: () => chunks.every(c => c.level !== 2 || true) };
+  function dispose() {
+    for (const c of chunks) for (const g of c.geos) g?.dispose();
+    material.dispose();
+    if (water) { water.geometry.dispose(); water.material.dispose(); normals?.dispose(); }
+  }
+  return { group, material, water, update, dispose, ready: () => chunks.every(c => c.level !== 2 || true) };
 }

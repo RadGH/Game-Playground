@@ -37,28 +37,40 @@ function addWind(material, amount) {
   return material;
 }
 
+/** One set of foliage materials per page (bark, leaves with wind, rock, props) — every view shares them. */
+const MAT_CACHE = new Map();
+export function foliageMaterials(cheap = false) {
+  const k = cheap ? 'cheap' : 'full';
+  if (!MAT_CACHE.has(k)) MAT_CACHE.set(k, (async () => {
+    const atlas = await loadFoliageAtlas();
+    const bark = makeSurface('bark_pine', { size: 256, seed: 3 });
+    bark.map.wrapS = bark.map.wrapT = THREE.RepeatWrapping;
+    // Cheap mode (software renderers): Lambert, no wind, so a leaf pixel costs one texture read.
+    return cheap ? {
+      bark: new THREE.MeshLambertMaterial({ map: bark.map, vertexColors: true }),
+      leaf: new THREE.MeshLambertMaterial({ map: atlas.texture, alphaTest: 0.35, side: THREE.DoubleSide, vertexColors: true, emissive: '#1c2a12', emissiveMap: atlas.texture, emissiveIntensity: 0.5 }),
+      rock: new THREE.MeshLambertMaterial({ vertexColors: true, color: '#a29d94' }),
+      prop: new THREE.MeshLambertMaterial({ vertexColors: true }),
+    } : {
+      bark: addWind(new THREE.MeshStandardMaterial({ map: bark.map, vertexColors: true, roughness: 0.95 }), 0.25),
+      leaf: addWind(new THREE.MeshStandardMaterial({ map: atlas.texture, alphaTest: 0.3, side: THREE.DoubleSide, vertexColors: true, roughness: 0.85, emissive: '#1c2a12', emissiveMap: atlas.texture, emissiveIntensity: 0.55 }), 0.5),
+      rock: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, color: '#a29d94' }),
+      prop: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85 }),
+    };
+  })());
+  return MAT_CACHE.get(k);
+}
+/** Advance the shared wind clock (leaves of every view sway together). */
+export function setWindTime(t) { windUniform.value = t; }
+
 export async function createDecor(hf, { placements = [], paths = [], seed = 7, avoid = [], density = 1, lodFar = [70, 220], cheap = false } = {}) {
   const LOD_FAR = lodFar;   // metres: lod0 inside [0], lod1 inside [1], billboard beyond
   const group = new THREE.Group(); group.name = 'decor';
   const rng = makeRng(seed * 101 + 9);
   const nForest = makeNoise2D(seed * 13 + 5);   // breaks woods into groves
 
-  // --- materials --------------------------------------------------------------------------------
-  const atlas = await loadFoliageAtlas();
-  const bark = makeSurface('bark_pine', { size: 256, seed: 3 });
-  bark.map.wrapS = bark.map.wrapT = THREE.RepeatWrapping;
-  // Cheap mode (software renderers): Lambert, no wind, so a leaf pixel costs one texture read.
-  const mats = cheap ? {
-    bark: new THREE.MeshLambertMaterial({ map: bark.map, vertexColors: true }),
-    leaf: new THREE.MeshLambertMaterial({ map: atlas.texture, alphaTest: 0.35, side: THREE.DoubleSide, vertexColors: true, emissive: '#1c2a12', emissiveMap: atlas.texture, emissiveIntensity: 0.5 }),
-    rock: new THREE.MeshLambertMaterial({ vertexColors: true, color: '#a29d94' }),
-    prop: new THREE.MeshLambertMaterial({ vertexColors: true }),
-  } : {
-    bark: addWind(new THREE.MeshStandardMaterial({ map: bark.map, vertexColors: true, roughness: 0.95 }), 0.25),
-    leaf: addWind(new THREE.MeshStandardMaterial({ map: atlas.texture, alphaTest: 0.3, side: THREE.DoubleSide, vertexColors: true, roughness: 0.85, emissive: '#1c2a12', emissiveMap: atlas.texture, emissiveIntensity: 0.55 }), 0.5),
-    rock: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, color: '#a29d94' }),
-    prop: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85 }),
-  };
+  // --- materials (shared by every zone and the scatter views) ----------------------------------
+  const mats = await foliageMaterials(cheap);
 
   // --- where trees grow -------------------------------------------------------------------------
   const segDist = (x, z) => {

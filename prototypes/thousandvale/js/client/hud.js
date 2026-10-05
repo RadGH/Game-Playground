@@ -18,16 +18,16 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
   };
   const lag = { self: 1, target: 1, targetId: null };
 
-  // --- action bar: slot 1 is the basic strike; the rest are shown locked until classes port (M1) ---
+  // --- action bar: F = the basic strike, 1–6 = the class's skills (skillbar.js fills them) ---
   const slots = [];
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 7; i++) {
     const b = document.createElement('button');
     b.className = 'slot' + (i ? ' empty' : '');
-    b.innerHTML = `<span class="key">${i + 1}</span>${i === 0 ? ICONS.sword : ''}<span class="cd"></span>`;
-    b.title = i === 0 ? 'Strike — a basic weapon attack on your target (1 or F)' : 'Empty';
-    b.addEventListener('click', () => { if (!i) onSlot?.(i); });
+    b.innerHTML = `<span class="key">${i ? i : 'F'}</span>${i === 0 ? ICONS.sword : '<span class="face"></span>'}<span class="cd"></span>`;
+    b.title = i === 0 ? 'Strike — a basic weapon attack on your target (F, or right-click an enemy)' : 'Empty';
+    b.addEventListener('click', () => onSlot?.(i));
     el.bar.appendChild(b);
-    slots.push({ b, cd: b.querySelector('.cd'), until: 0, len: 1 });
+    slots.push({ b, cd: b.querySelector('.cd'), face: b.querySelector('.face'), until: 0, len: 1 });
   }
 
   el.rise.addEventListener('click', () => onRise?.());
@@ -93,6 +93,17 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
     cooldown(i, ms) { const s = slots[i]; if (!s) return; s.until = performance.now() + ms; s.len = ms; },
     press(i) { const s = slots[i]; if (!s) return; s.b.classList.add('pressed'); setTimeout(() => s.b.classList.remove('pressed'), 110); },
     usable(i, ok) { slots[i]?.b.classList.toggle('unusable', !ok); },
+    /** Label slots 1..6 from a bar [{ slot, name, desc, level, locked, ally }]. */
+    setBar(bar, initials) {
+      for (let i = 1; i < slots.length; i++) {
+        const sk = bar.find(x => x.slot === i), s = slots[i];
+        s.b.classList.toggle('empty', !sk);
+        s.b.classList.toggle('locked', !!sk?.locked);
+        s.b.classList.toggle('ally', !!sk?.ally);
+        if (s.face) s.face.textContent = sk ? initials(sk.name) : '';
+        s.b.title = sk ? `${sk.name}${sk.locked ? ` (unlocks at level ${sk.level})` : ''}\n${sk.desc}` : 'Empty';
+      }
+    },
     toast(text, tone = 'info') {
       const d = document.createElement('div'); d.className = `toast ${tone}`; d.textContent = text;
       el.toasts.appendChild(d); setTimeout(() => d.remove(), 2300);

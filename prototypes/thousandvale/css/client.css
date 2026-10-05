@@ -227,7 +227,7 @@ button.icon { font-size: 20px; line-height: 1; }
 .invite-pop .ghost { padding: 7px 12px; }
 
 /* ---------------------------------------------------------------- boss frame */
-.boss { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: min(620px, 56vw); text-align: center; transition: opacity 1s; }
+.boss { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: min(600px, 50vw); text-align: center; transition: opacity 1s; }
 .boss.leaving { opacity: 0; }
 .boss-head { display: flex; align-items: baseline; justify-content: center; gap: 10px; text-shadow: 0 2px 6px #000; }
 .boss-head strong { font-family: var(--serif); font-size: 21px; color: #ffcfb8; letter-spacing: 0.06em; }

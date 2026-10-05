@@ -17,7 +17,10 @@ import { POINT_TYPES, zoneContext, provinceComponents, discProblem, findSpot, fi
 import { fillDensity, routesFor, placeWords } from './content-living.mjs';
 
 const PROV = 'torbor_downs';
-const arg = process.argv[2] || null;
+const arg = process.argv.slice(2).find(a => !a.startsWith('--')) || null;
+// --keep=z12_02,…: keep these zones' placement files as they are (stream B's checked-in bake of the M1 zone is made FROM
+// our file, so changing it breaks B's fresh-bake test); they still feed the routes, event places and quest marks
+const KEEP = new Set((process.argv.find(a => a.startsWith('--keep=')) || '--keep=').slice(7).split(',').filter(Boolean));
 if (arg === 'test') { await legacyTest(); process.exit(); }
 
 const SHEET = J(`data/provinces/${PROV}.json`);
@@ -58,12 +61,17 @@ const placesFile = new URL(`data/provinces/${PROV}-places.json`, ROOT);
 const places = existsSync(placesFile) ? JSON.parse(readFileSync(placesFile, 'utf8')) : { zones: {} };
 let bad = 0;
 const states = zones.map(([eid, wid]) => placeZone(eid, wid)).filter(st => st && typeof st === 'object');
-fillBoring(states);
-for (const st of states) fillDensity(st, { LF, typeMid });         // P19: something to see or do every ~100 m (tools/content-living.mjs)
+for (const st of states) if (KEEP.has(st.wid)) {
+  const kept = J(`data/vignettes/placements/${st.wid}.json`);
+  st.kept = true; st.file = kept; st.ctx.placed.length = 0; st.ctx.placed.push(...kept.placements); kept.placements = st.ctx.placed;
+}
+fillBoring(states.filter(st => !st.kept));
+for (const st of states) if (!st.kept) fillDensity(st, { LF, typeMid });         // P19: something to see or do every ~100 m (tools/content-living.mjs)
 for (const st of states) st.file.levels = LF.span(st.eid);
 if (!arg) livingFiles(states);                                      // routes, event places, quest marks (whole province only)
 for (const st of states) {
   const { file, wid, eid } = st;
+  if (st.kept) { console.log(`${wid} kept as it is`); continue; }
   writeFileSync(new URL(`data/vignettes/placements/${wid}.json`, ROOT), JSON.stringify(file, null, 1) + '\n');
   const counts = {}; file.placements.forEach(p => counts[p.type] = (counts[p.type] || 0) + 1);
   console.log(`${wid} ${eid.padEnd(18)} ${JSON.stringify(counts)} asks ${places.zones[eid].asks.length}${file.problems.length ? ' PROBLEMS ' + file.problems.join('; ') : ''}`);

@@ -459,3 +459,4 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - E's P26 reads: vignette levelBase/levelCap/countCap, farm pest countCap, encounter file level, doorGuard replaces our door guard,
   roaming camp paths, curios (curios.json + recipe lookup), folk placements.
 - Tests: tests/A/pt1-*.test.js (+ pt1-helpers.js real-world harness), m2/protocol updated. tests/A 137 pass / 8 skip / 0 fail.
+- **E** Re-placed on B's final bake (d562a44): `tools/place-vignettes.mjs --keep=z12_02` — every zone re-placed except the M1 zone, whose checked-in file is the input B's M1 bake was made from (tests/B "fresh bake" compares against it); it still feeds routes/events/marks. 94 traveller routes (219 km), no settlement without a road now. Assignment unchanged (minSet 42). tests/E 128 + 1 TODO (A), tests/B 47/47, tests/A placements/quests/m2/vignettes green. Road coverage check: >= 90% per zone (some zones hold only a few dozen road samples), >= 95% over the province.

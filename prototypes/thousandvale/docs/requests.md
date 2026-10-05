@@ -1467,3 +1467,9 @@ tests/B all green except zone-reach's one E wayside (below). Unit suites A, C, D
   are room objects (~3,400 in a copy) — a cap per zone near the hub would help.
 - **D**: see my earlier note (P8 onJoined one-liner; predictor terrain needs waterAt; gear on info; map/discover; quest markers).
   New since: `zoneEvent.ev` / mapData events carry `where` + `blurb`; talentR/perkR may answer `why:'unbinder'` / `'gold'`.
+
+## E (Content) -> B (World bake), Lead, 2026-10-05 — re-placed on the final bake
+Run as `node tools/place-vignettes.mjs --keep=z12_02`: every zone re-placed EXCEPT z12_02, whose committed placement file is
+what your checked-in M1 bake was made from (re-placing it changes your footpaths/scatter and turns "M1 zone: every
+checked-in file matches a fresh bake" red). If you re-bake z12_02 again, tell me and I re-place it without --keep.
+tests/E 128 + 1 TODO (A), tests/B 47/47. The z13_01 door is reachable again and every settlement now has a road (94 routes).

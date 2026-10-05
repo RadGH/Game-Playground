@@ -1,0 +1,209 @@
+{
+  "zones": {
+    "test": {
+      "world": "z12_02",
+      "rename": {
+        "mipider_ford": "Fitockpi Ford",
+        "ashford": "Wamonhold",
+        "pohelrow": "Mawehaven"
+      },
+      "asks": []
+    },
+    "hollin_pass": {
+      "world": "z11_01",
+      "rename": {
+        "fiderow": "Hollin Toll",
+        "old_mosshearth": "Scree End"
+      },
+      "asks": []
+    },
+    "ashcombe": {
+      "world": "z12_01",
+      "rename": {
+        "tifeckgate": "Ashcombe"
+      },
+      "asks": [
+        {
+          "name": "Kettle Cross",
+          "kind": "hamlet",
+          "x": 933,
+          "z": 773,
+          "r": 40
+        }
+      ]
+    },
+    "brackwater": {
+      "world": "z13_01",
+      "rename": {},
+      "asks": [
+        {
+          "name": "Brackwater",
+          "kind": "town",
+          "x": 1136,
+          "z": 870,
+          "r": 70
+        },
+        {
+          "name": "Eelwick",
+          "kind": "hamlet",
+          "x": 1164,
+          "z": 427,
+          "r": 40
+        }
+      ]
+    },
+    "saltmouth": {
+      "world": "z14_01",
+      "rename": {
+        "hollowwick": "Saltmouth"
+      },
+      "asks": [
+        {
+          "name": "Gull Steps",
+          "kind": "hamlet",
+          "x": 282,
+          "z": 1266,
+          "r": 40
+        }
+      ]
+    },
+    "delvers_hill": {
+      "world": "z11_02",
+      "rename": {
+        "fengate": "Copperdell",
+        "miminhold": "Pickaxe Row"
+      },
+      "asks": []
+    },
+    "torbor_cross": {
+      "world": "z13_02",
+      "rename": {
+        "sablegate": "Halsbridge",
+        "tetatcross": "Mill End"
+      },
+      "asks": []
+    },
+    "gullwick": {
+      "world": "z14_02",
+      "rename": {
+        "tideford": "Gullwick",
+        "glimrow": "Ferry Hythe"
+      },
+      "asks": []
+    },
+    "wychwood": {
+      "world": "z11_03",
+      "rename": {
+        "wehackkeep": "Hermit's Rest",
+        "weephaven": "Charcoal Burners"
+      },
+      "asks": []
+    },
+    "saint_orrins_rise": {
+      "world": "z12_03",
+      "rename": {
+        "wolfkeep": "Orrinsford",
+        "duskhaven": "Pilgrim's Halt"
+      },
+      "asks": []
+    },
+    "millbrook": {
+      "world": "z13_03",
+      "rename": {
+        "wedanhold": "Millbrook",
+        "ironwatch": "Three Wheels"
+      },
+      "asks": []
+    },
+    "redcliff": {
+      "world": "z14_03",
+      "rename": {
+        "hollowcross": "Redcliff",
+        "bolwathold": "Cinder Farm"
+      },
+      "asks": []
+    },
+    "blackthorn_scar": {
+      "world": "z11_04",
+      "rename": {},
+      "asks": [
+        {
+          "name": "Last Lantern",
+          "kind": "town",
+          "x": 890,
+          "z": 1305,
+          "r": 70
+        },
+        {
+          "name": "Thornwick",
+          "kind": "hamlet",
+          "x": 1772,
+          "z": 1900,
+          "r": 40
+        }
+      ]
+    },
+    "coldwater": {
+      "world": "z12_04",
+      "rename": {},
+      "asks": [
+        {
+          "name": "Coldwater",
+          "kind": "town",
+          "x": 1474,
+          "z": 1846,
+          "r": 70
+        },
+        {
+          "name": "Netherby",
+          "kind": "hamlet",
+          "x": 711,
+          "z": 732,
+          "r": 40
+        }
+      ]
+    },
+    "gorse_march": {
+      "world": "z13_04",
+      "rename": {},
+      "asks": [
+        {
+          "name": "Gorsehold",
+          "kind": "town",
+          "x": 1564,
+          "z": 1286,
+          "r": 70
+        },
+        {
+          "name": "Burnt Barns",
+          "kind": "hamlet",
+          "x": 1594,
+          "z": 367,
+          "r": 40
+        }
+      ]
+    },
+    "sunken_wolds": {
+      "world": "z14_04",
+      "rename": {},
+      "asks": [
+        {
+          "name": "Lowmoor",
+          "kind": "town",
+          "x": 1219,
+          "z": 1026,
+          "r": 70
+        },
+        {
+          "name": "Deepdene",
+          "kind": "hamlet",
+          "x": 1347,
+          "z": 289,
+          "r": 40
+        }
+      ]
+    }
+  },
+  "_doc": "Stream E. Settlement names for Torbor Downs on stream B's bake (tools/place-vignettes.mjs). Per E zone: `world` zone id; `rename` = B settlement/crossing id -> the name the sheet and quests use (B: impose at bake time, like Torborhold); `asks` = a settlement the sheet needs where the world has none (B: place a planned settlement of that kind and radius at x, z — zone metres — with that name; E's placements already keep clear of the circle). After B re-bakes, E re-runs the placer and asks that now exist drop out.",
+  "province": "torbor_downs"
+}

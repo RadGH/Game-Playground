@@ -23,7 +23,7 @@
     "witch_mabry": {
       "name": "Old Mabry",
       "role": "hedge-witch",
-      "at": "hedge_witch_garden",
+      "at": "fen_witch_hut",
       "greeting": "My jars are open and my slimes are loose. Help a poor old woman, dear, it's slightly your fault for existing."
     }
   },
@@ -69,14 +69,14 @@
       "steps": [
         {
           "kind": "visit",
-          "vignette": "hedge_witch_garden",
-          "text": "Visit the hedge-witch's garden"
+          "vignette": "fen_witch_hut",
+          "text": "Visit the hedge-witch's stilt hut"
         },
         {
           "kind": "kill",
           "type": "bog_slime",
           "count": 5,
-          "where": "around the garden",
+          "where": "around the stilt hut",
           "text": "Escaped bog slimes"
         }
       ],

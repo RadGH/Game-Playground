@@ -1,0 +1,792 @@
+{
+ "_doc": "Stream E. Content placements for world zone z14_02 (E zone 'gullwick', The Gullwick Lakes) — tools/place-vignettes.mjs against stream B's bake (terrain 3b6a7e1e). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z14_02",
+ "sheetZone": "gullwick",
+ "province": "torbor_downs",
+ "terrainHash": "3b6a7e1e",
+ "band": [
+  5,
+  7
+ ],
+ "archetype": "lakeland",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  }
+ },
+ "mainWalkableShare": 0.959,
+ "settlements": [
+  {
+   "name": "Gullwick",
+   "kind": "town",
+   "x": 1520,
+   "z": 352,
+   "r": 90,
+   "source": "bake",
+   "bakeId": "tideford"
+  },
+  {
+   "name": "Ferry Hythe",
+   "kind": "village",
+   "x": 416,
+   "z": 560,
+   "r": 65,
+   "source": "bake",
+   "bakeId": "glimrow"
+  },
+  {
+   "name": "Wyrmrow",
+   "kind": "village",
+   "x": 848,
+   "z": 1872,
+   "r": 65,
+   "source": "bake",
+   "bakeId": "wyrmrow"
+  },
+  {
+   "name": "Mirekeep",
+   "kind": "hamlet",
+   "x": 1008,
+   "z": 1264,
+   "r": 46,
+   "source": "bake",
+   "bakeId": "mirekeep"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 1623,
+   "z": 475,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_gullwick",
+   "kind": "event_site",
+   "x": 1272,
+   "z": 688,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_gullwick_0",
+   "name": "Stilt Fort",
+   "template": "palisade_fort",
+   "friendly": true,
+   "x": 1110,
+   "z": 641,
+   "yaw": 0,
+   "radius": 24,
+   "level": 5
+  },
+  {
+   "type": "farm",
+   "id": "farm_gullwick_0",
+   "name": "Gullwick Fishing Plot",
+   "template": "fishing_plot",
+   "flavour": null,
+   "settlement": "Gullwick",
+   "x": 1535,
+   "z": 496,
+   "yaw": -2.75,
+   "radius": 16,
+   "level": 5
+  },
+  {
+   "type": "farm",
+   "id": "farm_gullwick_1",
+   "name": "Ferry Hythe Orchard",
+   "template": "orchard",
+   "flavour": null,
+   "settlement": "Ferry Hythe",
+   "x": 480,
+   "z": 463,
+   "yaw": -0.79,
+   "radius": 24,
+   "level": 5
+  },
+  {
+   "type": "cave",
+   "id": "cave_gullwick_0",
+   "name": "Sump grotto",
+   "template": "sump_grotto",
+   "plan": {
+    "family": "sunken_temple",
+    "floors": 1,
+    "level": 6
+   },
+   "x": 423,
+   "z": 1320,
+   "yaw": -1.57,
+   "radius": 10,
+   "level": 6
+  },
+  {
+   "type": "hook",
+   "id": "the_floating_isle",
+   "name": "The Drifting Isle",
+   "kind": "compositional",
+   "x": 1115,
+   "z": 299,
+   "yaw": 0,
+   "radius": 55,
+   "where": "best fit for: a lake over 300 m",
+   "needMet": true
+  },
+  {
+   "type": "vignette",
+   "id": "broken_aqueduct",
+   "name": "The Broken Aqueduct",
+   "x": 1221,
+   "z": 1563,
+   "yaw": 1.59,
+   "radius": 14,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "drowned_chapel",
+   "name": "The Drowned Chapel",
+   "x": 357,
+   "z": 1913,
+   "yaw": 5.69,
+   "radius": 13,
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "drowned_shrine",
+   "name": "The Drowned Shrine",
+   "x": 1899,
+   "z": 960,
+   "yaw": 3.16,
+   "radius": 11,
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "heron_island",
+   "name": "Heron Island",
+   "x": 1452,
+   "z": 877,
+   "yaw": 4.77,
+   "radius": 10,
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "mudlark_flats",
+   "name": "The Mudlark Flats",
+   "x": 1101,
+   "z": 1058,
+   "yaw": 2.38,
+   "radius": 13,
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "stilt_house",
+   "name": "The Empty Stilt House",
+   "x": 86,
+   "z": 1169,
+   "yaw": 6.19,
+   "radius": 10,
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "tide_bell_post",
+   "name": "The Tide Post",
+   "x": 371,
+   "z": 836,
+   "yaw": 4.03,
+   "radius": 10,
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "toll_bridge_trolls",
+   "name": "The Toll Bridge",
+   "x": 1919,
+   "z": 1678,
+   "yaw": 1.91,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "will_o_lights",
+   "name": "The Lantern Path",
+   "x": 685,
+   "z": 744,
+   "yaw": 2.85,
+   "radius": 14,
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "wreck_on_the_rocks",
+   "name": "The Wreck of the Patience",
+   "x": 858,
+   "z": 81,
+   "yaw": 5.69,
+   "radius": 14,
+   "biome": "borealForest",
+   "biomeFits": false,
+   "level": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_0_0",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 464,
+   "z": 884,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_0_1",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1945,
+   "z": 385,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_1_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1549,
+   "z": 699,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_1_1",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 409,
+   "z": 1687,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_2_0",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 830,
+   "z": 471,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_2_1",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 909,
+   "z": 879,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_3_0",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1686,
+   "z": 1209,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_3_1",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1978,
+   "z": 1242,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_4_0",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1302,
+   "z": 255,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_4_1",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1565,
+   "z": 593,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_5_0",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1216,
+   "z": 247,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_5_1",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1523,
+   "z": 644,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_6_0",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1301,
+   "z": 301,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_6_1",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1512,
+   "z": 748,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_ferryman_odo",
+   "slot": 0,
+   "name": "Ferryman Odo",
+   "x": 1267,
+   "z": 190,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1325,
+     183
+    ],
+    [
+     1273,
+     245
+    ],
+    [
+     1197,
+     238
+    ],
+    [
+     1184,
+     156
+    ],
+    [
+     1274,
+     114
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 7
+  },
+  {
+   "type": "rare",
+   "id": "rare_waterstrider_tolla",
+   "slot": 1,
+   "name": "Tolla Longlegs",
+   "x": 1453,
+   "z": 672,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1397,
+     688
+    ],
+    [
+     1419,
+     641
+    ],
+    [
+     1485,
+     608
+    ],
+    [
+     1514,
+     695
+    ],
+    [
+     1477,
+     742
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 7
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z14_02_gullwick",
+   "name": "Gullwick",
+   "x": 1451,
+   "z": 438.7,
+   "yaw": 0,
+   "settlement": "Gullwick",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z14_02_ferry_hythe",
+   "name": "Ferry Hythe",
+   "x": 425,
+   "z": 643.8,
+   "yaw": 0,
+   "settlement": "Ferry Hythe",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z14_02_wyrmrow",
+   "name": "Wyrmrow",
+   "x": 883.7,
+   "z": 1792.6,
+   "yaw": 0,
+   "settlement": "Wyrmrow",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z14_02_mirekeep",
+   "name": "Mirekeep",
+   "x": 967,
+   "z": 1216.4,
+   "yaw": 0,
+   "settlement": "Mirekeep",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z14_02_door",
+   "name": "Barrow entrance",
+   "x": 1584.5,
+   "z": 458.1,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "ferrywoman_nell",
+   "name": "Ferrywoman Nell",
+   "role": "trader",
+   "at": "Ferry Hythe",
+   "x": 413.7,
+   "z": 570.4,
+   "yaw": 4.44,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "elder_hollis",
+   "name": "Elder Hollis",
+   "role": "elder",
+   "at": "Gullwick",
+   "x": 1518.2,
+   "z": 363.7,
+   "yaw": 5.27,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "stilt_guard",
+   "name": "Stilt-guard Emrys",
+   "role": "guard",
+   "at": "Stilt Fort",
+   "x": 1112,
+   "z": 640.6,
+   "yaw": 5.48,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "angler_tobin",
+   "name": "Tobin the angler",
+   "role": "fisher",
+   "at": "drowned_shrine",
+   "x": 1898.8,
+   "z": 962.6,
+   "yaw": 3.88,
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "smugglers_ledger_2",
+   "chain": "smugglers_ledger",
+   "step": 2,
+   "clue": "carved_arrow",
+   "how": null,
+   "shimmer": null,
+   "x": 1111.3,
+   "z": 639.4,
+   "yaw": 0,
+   "where": "fort Stilt Fort",
+   "radius": 1
+  },
+  {
+   "type": "treasure_cache",
+   "id": "smugglers_ledger_3",
+   "chain": "smugglers_ledger",
+   "step": 3,
+   "clue": null,
+   "how": "dig",
+   "shimmer": 15,
+   "x": 1041.4,
+   "z": 644.5,
+   "yaw": 0,
+   "where": "near Stilt Fort",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "the_ferrymans_fee_0",
+   "chain": "the_ferrymans_fee",
+   "step": 0,
+   "clue": "drunks_story",
+   "how": null,
+   "shimmer": null,
+   "x": 475.2,
+   "z": 522.5,
+   "yaw": 0,
+   "where": "edge of Ferry Hythe",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "the_ferrymans_fee_1",
+   "chain": "the_ferrymans_fee",
+   "step": 1,
+   "clue": "carved_arrow",
+   "how": null,
+   "shimmer": null,
+   "x": 1898.8,
+   "z": 957,
+   "yaw": 0,
+   "where": "vignette drowned_shrine",
+   "radius": 1
+  },
+  {
+   "type": "treasure_cache",
+   "id": "the_ferrymans_fee_2",
+   "chain": "the_ferrymans_fee",
+   "step": 2,
+   "clue": null,
+   "how": "dig",
+   "shimmer": 15,
+   "x": 1913.3,
+   "z": 821.3,
+   "yaw": 0,
+   "where": "near The Drowned Shrine",
+   "radius": 1
+  }
+ ],
+ "features": []
+}

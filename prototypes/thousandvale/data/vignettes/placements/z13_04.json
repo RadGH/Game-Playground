@@ -1,0 +1,719 @@
+{
+ "_doc": "Stream E. Content placements for world zone z13_04 (E zone 'gorse_march', The Gorse March) — tools/place-vignettes.mjs against stream B's bake (terrain d1f5fae1). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z13_04",
+ "sheetZone": "gorse_march",
+ "province": "torbor_downs",
+ "terrainHash": "d1f5fae1",
+ "band": [
+  6,
+  8
+ ],
+ "archetype": "frontier",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  }
+ },
+ "mainWalkableShare": 0.788,
+ "settlements": [
+  {
+   "name": "Gorsehold",
+   "kind": "town",
+   "x": 1564,
+   "z": 1286,
+   "r": 70,
+   "source": "ask",
+   "bakeId": null
+  },
+  {
+   "name": "Burnt Barns",
+   "kind": "hamlet",
+   "x": 1594,
+   "z": 367,
+   "r": 40,
+   "source": "ask",
+   "bakeId": null
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 1357,
+   "z": 579,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_gorse_march",
+   "kind": "event_site",
+   "x": 1218,
+   "z": 1071,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_gorse_march_0",
+   "name": "Gorsehold Redoubt",
+   "template": "ruined_fort",
+   "friendly": false,
+   "x": 1361,
+   "z": 335,
+   "yaw": 1.57,
+   "radius": 22,
+   "level": 6
+  },
+  {
+   "type": "fort",
+   "id": "fort_gorse_march_1",
+   "name": "Gorsehold Outpost",
+   "template": "warband_stockade",
+   "friendly": false,
+   "x": 1598,
+   "z": 1679,
+   "yaw": 1.57,
+   "radius": 26,
+   "level": 6
+  },
+  {
+   "type": "farm",
+   "id": "farm_gorse_march_0",
+   "name": "Gorsehold Farm",
+   "template": "arable",
+   "flavour": null,
+   "settlement": "Gorsehold",
+   "x": 1590,
+   "z": 1167,
+   "yaw": 1.57,
+   "radius": 22,
+   "level": 6
+  },
+  {
+   "type": "farm",
+   "id": "farm_gorse_march_1",
+   "name": "Burnt Barns Sheepfold",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Burnt Barns",
+   "x": 1682,
+   "z": 351,
+   "yaw": 1.57,
+   "radius": 24,
+   "level": 6
+  },
+  {
+   "type": "farm",
+   "id": "farm_gorse_march_2",
+   "name": "Burned Gorsehold Sheepfold",
+   "template": "sheep",
+   "flavour": "burned",
+   "settlement": "Gorsehold",
+   "x": 1516,
+   "z": 1413,
+   "yaw": 1.57,
+   "radius": 24,
+   "level": 6
+  },
+  {
+   "type": "farm",
+   "id": "farm_gorse_march_3",
+   "name": "Burned Burnt Barns Farm",
+   "template": "arable",
+   "flavour": "burned",
+   "settlement": "Burnt Barns",
+   "x": 1518,
+   "z": 411,
+   "yaw": 1.57,
+   "radius": 22,
+   "level": 6
+  },
+  {
+   "type": "cave",
+   "id": "cave_gorse_march_0",
+   "name": "Smugglers' cave",
+   "template": "smugglers_cave",
+   "plan": {
+    "family": "flooded_cistern",
+    "floors": 1,
+    "level": 7
+   },
+   "x": 134,
+   "z": 708,
+   "yaw": 1.57,
+   "radius": 10,
+   "level": 7
+  },
+  {
+   "type": "cave",
+   "id": "cave_gorse_march_1",
+   "name": "Beast den",
+   "template": "beast_den",
+   "plan": {
+    "family": "cave_river",
+    "floors": 1,
+    "level": 7
+   },
+   "x": 628,
+   "z": 1747,
+   "yaw": 1.57,
+   "radius": 10,
+   "level": 7
+  },
+  {
+   "type": "hook",
+   "id": "the_burning_fields",
+   "name": "The Gorse That Will Not Burn Out",
+   "kind": "compositional",
+   "x": 894,
+   "z": 877,
+   "yaw": 0,
+   "radius": 55,
+   "where": "best fit for: open scrub 200 m",
+   "needMet": true
+  },
+  {
+   "type": "vignette",
+   "id": "avalanche_shelter",
+   "name": "The Avalanche Shelter",
+   "x": 1012,
+   "z": 1390,
+   "yaw": 4.89,
+   "radius": 10,
+   "biome": "badlands",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "guildhall_ruin",
+   "name": "The Guildhall Shell",
+   "x": 326,
+   "z": 71,
+   "yaw": 5.78,
+   "radius": 13,
+   "biome": "shrubland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "hunters_hide",
+   "name": "The Hunter's Hide",
+   "x": 1967,
+   "z": 805,
+   "yaw": 2.4,
+   "radius": 13,
+   "biome": "badlands",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "noble_folly",
+   "name": "The Lord's Folly",
+   "x": 807,
+   "z": 362,
+   "yaw": 3.97,
+   "radius": 11,
+   "biome": "shrubland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "peat_cutters",
+   "name": "The Peat Cutters' Camp",
+   "x": 1986,
+   "z": 1979,
+   "yaw": 5.91,
+   "radius": 12,
+   "biome": "badlands",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "salt_cart_sunk",
+   "name": "The Salt Cart",
+   "x": 1988,
+   "z": 1415,
+   "yaw": 3.29,
+   "radius": 12,
+   "biome": "savanna",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "slag_heap_shrine",
+   "name": "The Slag Saint",
+   "x": 1079,
+   "z": 1918,
+   "yaw": 0.03,
+   "radius": 10,
+   "biome": "savanna",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "smugglers_cellar",
+   "name": "The Smugglers' Cellar",
+   "x": 1397,
+   "z": 785,
+   "yaw": 0.74,
+   "radius": 14,
+   "biome": "badlands",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "toppled_statue",
+   "name": "The Toppled King",
+   "x": 543,
+   "z": 652,
+   "yaw": 4.55,
+   "radius": 10,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "watchtower_ruin",
+   "name": "The Abandoned Watchtower",
+   "x": 1972,
+   "z": 62,
+   "yaw": 5.57,
+   "radius": 12,
+   "biome": "badlands",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_0_0",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1540,
+   "z": 60,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_0_1",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1707,
+   "z": 639,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_1_0",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1074,
+   "z": 86,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_1_1",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 547,
+   "z": 1006,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_2_0",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1257,
+   "z": 1171,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_2_1",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 255,
+   "z": 1897,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_3_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1117,
+   "z": 585,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_3_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 460,
+   "z": 1340,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_4_0",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1271,
+   "z": 1659,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_4_1",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1474,
+   "z": 1945,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_5_0",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1899,
+   "z": 1113,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_gorse_march_5_1",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1962,
+   "z": 407,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_deserter_gutch",
+   "slot": 0,
+   "name": "Sergeant Gutch",
+   "x": 1302,
+   "z": 85,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1379,
+     5
+    ],
+    [
+     1383,
+     148
+    ],
+    [
+     1284,
+     186
+    ],
+    [
+     1237,
+     71
+    ],
+    [
+     1285,
+     16
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 8
+  },
+  {
+   "type": "rare",
+   "id": "rare_burnt_barns_hound",
+   "slot": 1,
+   "name": "The Burnt Barns Hound",
+   "x": 1117,
+   "z": 361,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1100,
+     293
+    ],
+    [
+     1221,
+     324
+    ],
+    [
+     1185,
+     420
+    ],
+    [
+     1087,
+     435
+    ],
+    [
+     1048,
+     344
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 8
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_04_gorsehold",
+   "name": "Gorsehold",
+   "x": 1484.1,
+   "z": 1259.1,
+   "yaw": 0,
+   "settlement": "Gorsehold",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_04_burnt_barns",
+   "name": "Burnt Barns",
+   "x": 1661.2,
+   "z": 353.7,
+   "yaw": 0,
+   "settlement": "Burnt Barns",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_04_door",
+   "name": "Barrow entrance",
+   "x": 1315.9,
+   "z": 570,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "redoubt_captain",
+   "name": "Captain Hollis Gorse",
+   "role": "guard",
+   "at": "Gorsehold Redoubt",
+   "x": 1360.1,
+   "z": 333.2,
+   "yaw": 1.85,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "barn_widow",
+   "name": "Widow Edda",
+   "role": "farmer",
+   "at": "Burnt Barns",
+   "x": 1591.5,
+   "z": 368.7,
+   "yaw": 4.92,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "march_trader",
+   "name": "Garrick the pedlar",
+   "role": "trader",
+   "at": "Gorsehold",
+   "x": 1563.9,
+   "z": 1282.9,
+   "yaw": 4.63,
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "the_widows_dowry_0",
+   "chain": "the_widows_dowry",
+   "step": 0,
+   "clue": "drunks_story",
+   "how": null,
+   "shimmer": null,
+   "x": 1616.7,
+   "z": 1339.4,
+   "yaw": 0,
+   "where": "edge of Gorsehold",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "the_widows_dowry_1",
+   "chain": "the_widows_dowry",
+   "step": 1,
+   "clue": "note",
+   "how": null,
+   "shimmer": null,
+   "x": 1632.8,
+   "z": 344.1,
+   "yaw": 0,
+   "where": "edge of Burnt Barns",
+   "radius": 1
+  }
+ ],
+ "features": []
+}

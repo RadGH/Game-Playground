@@ -23,7 +23,7 @@
     "tinker_cadoc": {
       "name": "Cadoc the tinker",
       "role": "trader",
-      "at": "overturned_cart",
+      "at": "tinker_wagon",
       "greeting": "Pots mended, knives sharpened, carts un-overturned. Usually."
     }
   },
@@ -88,7 +88,7 @@
           "kind": "kill",
           "type": "road_brigand",
           "count": 4,
-          "where": "near the overturned cart",
+          "where": "near the tinker's wagon",
           "text": "Brigands"
         },
         {

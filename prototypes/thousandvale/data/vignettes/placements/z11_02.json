@@ -1,0 +1,725 @@
+{
+ "_doc": "Stream E. Content placements for world zone z11_02 (E zone 'delvers_hill', Delvers' Hill) — tools/place-vignettes.mjs against stream B's bake (terrain e8887525). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z11_02",
+ "sheetZone": "delvers_hill",
+ "province": "torbor_downs",
+ "terrainHash": "e8887525",
+ "band": [
+  4,
+  6
+ ],
+ "archetype": "mine_country",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  }
+ },
+ "mainWalkableShare": 0.875,
+ "settlements": [
+  {
+   "name": "Copperdell",
+   "kind": "city",
+   "x": 352,
+   "z": 448,
+   "r": 140,
+   "source": "bake",
+   "bakeId": "fengate"
+  },
+  {
+   "name": "Pickaxe Row",
+   "kind": "village",
+   "x": 1008,
+   "z": 1664,
+   "r": 65,
+   "source": "bake",
+   "bakeId": "miminhold"
+  },
+  {
+   "name": "Ashhaven",
+   "kind": "hamlet",
+   "x": 768,
+   "z": 944,
+   "r": 46,
+   "source": "bake",
+   "bakeId": "ashhaven"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 146,
+   "z": 490,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_delvers_hill",
+   "kind": "event_site",
+   "x": 688,
+   "z": 736,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_delvers_hill_0",
+   "name": "the Old Headframe Fort",
+   "template": "ruined_fort",
+   "friendly": false,
+   "x": 895,
+   "z": 1366,
+   "yaw": 0.39,
+   "radius": 22,
+   "level": 4
+  },
+  {
+   "type": "farm",
+   "id": "farm_delvers_hill_0",
+   "name": "Copperdell Piggery",
+   "template": "pig",
+   "flavour": null,
+   "settlement": "Copperdell",
+   "x": 474,
+   "z": 308,
+   "yaw": -0.79,
+   "radius": 18,
+   "level": 4
+  },
+  {
+   "type": "farm",
+   "id": "farm_delvers_hill_1",
+   "name": "Pickaxe Row Sheepfold",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Pickaxe Row",
+   "x": 1053,
+   "z": 1786,
+   "yaw": 2.36,
+   "radius": 24,
+   "level": 4
+  },
+  {
+   "type": "cave",
+   "id": "cave_delvers_hill_0",
+   "name": "Beast den",
+   "template": "beast_den",
+   "plan": {
+    "family": "cave_river",
+    "floors": 1,
+    "level": 5
+   },
+   "x": 1554,
+   "z": 164,
+   "yaw": 2.36,
+   "radius": 10,
+   "level": 5
+  },
+  {
+   "type": "cave",
+   "id": "cave_delvers_hill_1",
+   "name": "Old mine shaft",
+   "template": "old_shaft",
+   "plan": {
+    "family": "mine_descent",
+    "floors": 1,
+    "level": 5
+   },
+   "x": 1841,
+   "z": 840,
+   "yaw": 0,
+   "radius": 10,
+   "level": 5
+  },
+  {
+   "type": "hook",
+   "id": "the_singing_seam",
+   "name": "The Glimmer Seam",
+   "kind": "compositional",
+   "x": 850,
+   "z": 211,
+   "yaw": 0,
+   "radius": 20,
+   "where": "best fit for: a cliff",
+   "needMet": true
+  },
+  {
+   "type": "vignette",
+   "id": "avalanche_shelter",
+   "name": "The Avalanche Shelter",
+   "x": 1202,
+   "z": 856,
+   "yaw": 0.33,
+   "radius": 10,
+   "biome": "borealForest",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "dry_well",
+   "name": "The Dry Well",
+   "x": 1964,
+   "z": 1596,
+   "yaw": 0.21,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "frozen_tarn",
+   "name": "The Frozen Tarn",
+   "x": 1036,
+   "z": 534,
+   "yaw": 1.17,
+   "radius": 13,
+   "biome": "borealForest",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "guildhall_ruin",
+   "name": "The Guildhall Shell",
+   "x": 162,
+   "z": 1492,
+   "yaw": 3.81,
+   "radius": 13,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "peat_cutters",
+   "name": "The Peat Cutters' Camp",
+   "x": 495,
+   "z": 909,
+   "yaw": 5.17,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "quarry_ledge",
+   "name": "The Quarry Ledge",
+   "x": 538,
+   "z": 1980,
+   "yaw": 2.39,
+   "radius": 14,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "salt_cart_sunk",
+   "name": "The Salt Cart",
+   "x": 1465,
+   "z": 1343,
+   "yaw": 1.78,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "tide_bell_post",
+   "name": "The Tide Post",
+   "x": 1479,
+   "z": 1758,
+   "yaw": 5.48,
+   "radius": 10,
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "wardens_cairn",
+   "name": "The Warden's Cairn",
+   "x": 64,
+   "z": 639,
+   "yaw": 0.13,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "woodcutter_axe",
+   "name": "The Axe in the Stump",
+   "x": 70,
+   "z": 1064,
+   "yaw": 0.8,
+   "radius": 9,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_0_0",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 75,
+   "z": 1945,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_0_1",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 108,
+   "z": 73,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_1_0",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1888,
+   "z": 1214,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_1_1",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1909,
+   "z": 1974,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_2_0",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1794,
+   "z": 534,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_2_1",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 782,
+   "z": 1843,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_3_0",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1176,
+   "z": 1505,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_3_1",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1734,
+   "z": 260,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_4_0",
+   "monster": "road_brigand",
+   "with": "brigand_archer",
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1567,
+   "z": 367,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_4_1",
+   "monster": "road_brigand",
+   "with": "brigand_archer",
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1107,
+   "z": 130,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_5_0",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1410,
+   "z": 676,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_delvers_hill_5_1",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 673,
+   "z": 1098,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_blind_gammer",
+   "slot": 0,
+   "name": "Blind Gammer",
+   "x": 688,
+   "z": 607,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     633,
+     621
+    ],
+    [
+     665,
+     565
+    ],
+    [
+     720,
+     556
+    ],
+    [
+     739,
+     632
+    ],
+    [
+     703,
+     674
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 6
+  },
+  {
+   "type": "rare",
+   "id": "rare_copperback",
+   "slot": 1,
+   "name": "Copperback",
+   "x": 782,
+   "z": 1336,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     678,
+     1281
+    ],
+    [
+     769,
+     1266
+    ],
+    [
+     850,
+     1292
+    ],
+    [
+     853,
+     1423
+    ],
+    [
+     745,
+     1413
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 6
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_02_copperdell",
+   "name": "Copperdell",
+   "x": 229.8,
+   "z": 539.5,
+   "yaw": 0,
+   "settlement": "Copperdell",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_02_pickaxe_row",
+   "name": "Pickaxe Row",
+   "x": 1097,
+   "z": 1680.1,
+   "yaw": 0,
+   "settlement": "Pickaxe Row",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_02_ashhaven",
+   "name": "Ashhaven",
+   "x": 711.4,
+   "z": 983.3,
+   "yaw": 0,
+   "settlement": "Ashhaven",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_02_door",
+   "name": "Barrow entrance",
+   "x": 121.2,
+   "z": 456.1,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "foreman_hollis",
+   "name": "Foreman Hollis",
+   "role": "elder",
+   "at": "Copperdell",
+   "x": 350.8,
+   "z": 434.8,
+   "yaw": 4.11,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "lampwoman_gwen",
+   "name": "Gwen Lampwright",
+   "role": "trader",
+   "at": "Pickaxe Row",
+   "x": 1013.9,
+   "z": 1665.8,
+   "yaw": 4.02,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "sergeant_cadoc",
+   "name": "Sergeant Brask",
+   "role": "guard",
+   "at": "the Old Headframe Fort",
+   "x": 893.2,
+   "z": 1365.1,
+   "yaw": 1.2,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "old_miner_pike",
+   "name": "Old Pike",
+   "role": "miner",
+   "at": "dry_well",
+   "x": 1961.5,
+   "z": 1596.1,
+   "yaw": 1.69,
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "grandads_teeth_0",
+   "chain": "grandads_teeth",
+   "step": 0,
+   "clue": "drunks_story",
+   "how": null,
+   "shimmer": null,
+   "x": 473.4,
+   "z": 527.8,
+   "yaw": 0,
+   "where": "edge of Copperdell",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "grandads_teeth_1",
+   "chain": "grandads_teeth",
+   "step": 1,
+   "clue": "map_piece",
+   "how": null,
+   "shimmer": null,
+   "x": 1966.6,
+   "z": 1597.6,
+   "yaw": 0,
+   "where": "vignette dry_well",
+   "radius": 1
+  },
+  {
+   "type": "treasure_cache",
+   "id": "grandads_teeth_2",
+   "chain": "grandads_teeth",
+   "step": 2,
+   "clue": null,
+   "how": "dig",
+   "shimmer": 15,
+   "x": 908.4,
+   "z": 1824.1,
+   "yaw": 0,
+   "where": "near Pickaxe Row",
+   "radius": 1
+  }
+ ],
+ "features": []
+}

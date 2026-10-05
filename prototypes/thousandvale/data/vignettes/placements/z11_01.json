@@ -1,0 +1,809 @@
+{
+ "_doc": "Stream E. Content placements for world zone z11_01 (E zone 'hollin_pass', Hollin Pass) — tools/place-vignettes.mjs against stream B's bake (terrain 740c92aa). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z11_01",
+ "sheetZone": "hollin_pass",
+ "province": "torbor_downs",
+ "terrainHash": "740c92aa",
+ "band": [
+  6,
+  8
+ ],
+ "archetype": "pass",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  }
+ },
+ "mainWalkableShare": 0.927,
+ "settlements": [
+  {
+   "name": "Hollin Toll",
+   "kind": "town",
+   "x": 1728,
+   "z": 560,
+   "r": 90,
+   "source": "bake",
+   "bakeId": "fiderow"
+  },
+  {
+   "name": "Scree End",
+   "kind": "hamlet",
+   "x": 112,
+   "z": 1472,
+   "r": 46,
+   "source": "bake",
+   "bakeId": "old_mosshearth"
+  },
+  {
+   "name": "Wolditford",
+   "kind": "hamlet",
+   "x": 448,
+   "z": 880,
+   "r": 46,
+   "source": "bake",
+   "bakeId": "wolditford"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 1908,
+   "z": 560,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_hollin_pass",
+   "kind": "event_site",
+   "x": 1387,
+   "z": 781,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_hollin_pass_0",
+   "name": "Hollin Toll Fort",
+   "template": "toll_fort",
+   "friendly": true,
+   "x": 1102,
+   "z": 521,
+   "yaw": 1.96,
+   "radius": 20,
+   "level": 6
+  },
+  {
+   "type": "farm",
+   "id": "farm_hollin_pass_0",
+   "name": "Hollin Toll Sheepfold",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Hollin Toll",
+   "x": 1787,
+   "z": 687,
+   "yaw": -2.75,
+   "radius": 24,
+   "level": 6
+  },
+  {
+   "type": "farm",
+   "id": "farm_hollin_pass_1",
+   "name": "Scree End Sheepfold",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Scree End",
+   "x": 200,
+   "z": 1513,
+   "yaw": -1.96,
+   "radius": 24,
+   "level": 6
+  },
+  {
+   "type": "cave",
+   "id": "cave_hollin_pass_0",
+   "name": "Beast den",
+   "template": "beast_den",
+   "plan": {
+    "family": "cave_river",
+    "floors": 1,
+    "level": 7
+   },
+   "x": 1558,
+   "z": 1961,
+   "yaw": 2.75,
+   "radius": 10,
+   "level": 7
+  },
+  {
+   "type": "hook",
+   "id": "the_long_stair",
+   "name": "The Long Stair",
+   "kind": "compositional",
+   "x": 1831,
+   "z": 1518,
+   "yaw": 0,
+   "radius": 20,
+   "where": "best fit for: a cliff beside a road",
+   "needMet": true
+  },
+  {
+   "type": "vignette",
+   "id": "drift_mine_entry",
+   "name": "The Drift Entry",
+   "x": 268,
+   "z": 770,
+   "yaw": 1.51,
+   "radius": 10,
+   "biome": "borealForest",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "hanging_sign_inn",
+   "name": "The Shut-Up Inn",
+   "x": 1147,
+   "z": 1215,
+   "yaw": 2.49,
+   "radius": 13,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "miners_shrine",
+   "name": "The Miners' Lamp Shrine",
+   "x": 138,
+   "z": 141,
+   "yaw": 0.53,
+   "radius": 8,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "pilgrim_camp",
+   "name": "The Pilgrims' Rest",
+   "x": 1545,
+   "z": 103,
+   "yaw": 3.47,
+   "radius": 13,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "quarry_crane",
+   "name": "The Quarry Crane",
+   "x": 767,
+   "z": 68,
+   "yaw": 5.25,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "roadside_shrine",
+   "name": "The Wayside Saint",
+   "x": 651,
+   "z": 1256,
+   "yaw": 6.14,
+   "radius": 8,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "smugglers_beacon",
+   "name": "The False Beacon",
+   "x": 1605,
+   "z": 1101,
+   "yaw": 0.33,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "tinker_wagon",
+   "name": "The Tinker's Wagon",
+   "x": 240,
+   "z": 1986,
+   "yaw": 1.51,
+   "radius": 12,
+   "biome": "temperateForest",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "toll_bridge_trolls",
+   "name": "The Toll Bridge",
+   "x": 650,
+   "z": 503,
+   "yaw": 2.15,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "trapper_lines",
+   "name": "The Trapper's Line",
+   "x": 825,
+   "z": 1811,
+   "yaw": 3.63,
+   "radius": 12,
+   "biome": "borealForest",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_0_0",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1258,
+   "z": 1741,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_0_1",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1557,
+   "z": 1435,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_1_0",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1010,
+   "z": 1888,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_1_1",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 842,
+   "z": 871,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_2_0",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1526,
+   "z": 433,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_2_1",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 77,
+   "z": 1168,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_3_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1618,
+   "z": 1671,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_3_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1781,
+   "z": 1738,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_4_0",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1291,
+   "z": 1456,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_4_1",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1405,
+   "z": 1727,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_5_0",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1940,
+   "z": 274,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_5_1",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1691,
+   "z": 1393,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_6_0",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1958,
+   "z": 1674,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_6_1",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1163,
+   "z": 86,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_7_0",
+   "monster": "glacier_maw",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1152,
+   "z": 1408,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_hollin_pass_7_1",
+   "monster": "glacier_maw",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1484,
+   "z": 1157,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_old_hookclaw",
+   "slot": 0,
+   "name": "Old Hookclaw",
+   "x": 1366,
+   "z": 427,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1372,
+     498
+    ],
+    [
+     1293,
+     460
+    ],
+    [
+     1311,
+     330
+    ],
+    [
+     1396,
+     354
+    ],
+    [
+     1469,
+     423
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 8
+  },
+  {
+   "type": "rare",
+   "id": "rare_scree_mother",
+   "slot": 1,
+   "name": "The Scree Mother",
+   "x": 1972,
+   "z": 1175,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1965,
+     1255
+    ],
+    [
+     1914,
+     1174
+    ],
+    [
+     1950,
+     1121
+    ],
+    [
+     2023,
+     1131
+    ],
+    [
+     2027,
+     1206
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 8
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_01_hollin_toll",
+   "name": "Hollin Toll",
+   "x": 1768.6,
+   "z": 455.3,
+   "yaw": 0,
+   "settlement": "Hollin Toll",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_01_scree_end",
+   "name": "Scree End",
+   "x": 55.1,
+   "z": 1447.7,
+   "yaw": 0,
+   "settlement": "Scree End",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_01_wolditford",
+   "name": "Wolditford",
+   "x": 432.1,
+   "z": 824.8,
+   "yaw": 0,
+   "settlement": "Wolditford",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_01_door",
+   "name": "Barrow entrance",
+   "x": 1916.7,
+   "z": 601.1,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "tollkeeper_brann",
+   "name": "Tollkeeper Brann",
+   "role": "elder",
+   "at": "Hollin Toll",
+   "x": 1729.9,
+   "z": 563.9,
+   "yaw": 3.48,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "goatherd_isolde",
+   "name": "Isolde the goatherd",
+   "role": "farmer",
+   "at": "Scree End",
+   "x": 125.1,
+   "z": 1465.6,
+   "yaw": 5.58,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "fort_sergeant",
+   "name": "Sergeant Kettle",
+   "role": "guard",
+   "at": "Hollin Toll Fort",
+   "x": 1103.4,
+   "z": 522.5,
+   "yaw": 3.36,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "climber_cadoc",
+   "name": "Cadoc the climber",
+   "role": "scout",
+   "at": "Scree End",
+   "x": 126.6,
+   "z": 1471.2,
+   "yaw": 2.41,
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "ashcombe_reliquary_2",
+   "chain": "ashcombe_reliquary",
+   "step": 2,
+   "clue": "carved_arrow",
+   "how": null,
+   "shimmer": null,
+   "x": 1100.9,
+   "z": 519.3,
+   "yaw": 0,
+   "where": "fort Hollin Toll Fort",
+   "radius": 1
+  },
+  {
+   "type": "treasure_cache",
+   "id": "ashcombe_reliquary_3",
+   "chain": "ashcombe_reliquary",
+   "step": 3,
+   "clue": null,
+   "how": "chest",
+   "shimmer": 15,
+   "x": 1934.6,
+   "z": 444.4,
+   "yaw": 0,
+   "where": "near Hollin Toll",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "hollin_toll_box_0",
+   "chain": "hollin_toll_box",
+   "step": 0,
+   "clue": "gravestone",
+   "how": null,
+   "shimmer": null,
+   "x": 88.6,
+   "z": 1517.4,
+   "yaw": 0,
+   "where": "edge of Scree End",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "hollin_toll_box_1",
+   "chain": "hollin_toll_box",
+   "step": 1,
+   "clue": "carved_arrow",
+   "how": null,
+   "shimmer": null,
+   "x": 1100.7,
+   "z": 522.7,
+   "yaw": 0,
+   "where": "fort Hollin Toll Fort",
+   "radius": 1
+  },
+  {
+   "type": "treasure_cache",
+   "id": "hollin_toll_box_2",
+   "chain": "hollin_toll_box",
+   "step": 2,
+   "clue": null,
+   "how": "dig",
+   "shimmer": 15,
+   "x": 1965,
+   "z": 1499,
+   "yaw": 0,
+   "where": "secluded",
+   "radius": 1
+  }
+ ],
+ "features": []
+}

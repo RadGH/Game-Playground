@@ -1,0 +1,754 @@
+{
+ "_doc": "Stream E. Content placements for world zone z13_02 (E zone 'torbor_cross', Torbor Cross) — tools/place-vignettes.mjs against stream B's bake (terrain 224b638b). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z13_02",
+ "sheetZone": "torbor_cross",
+ "province": "torbor_downs",
+ "terrainHash": "224b638b",
+ "band": [
+  3,
+  5
+ ],
+ "archetype": "crown_ring",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  }
+ },
+ "mainWalkableShare": 0.979,
+ "settlements": [
+  {
+   "name": "Halsbridge",
+   "kind": "city",
+   "x": 1696,
+   "z": 1184,
+   "r": 140,
+   "source": "bake",
+   "bakeId": "sablegate"
+  },
+  {
+   "name": "Mill End",
+   "kind": "town",
+   "x": 208,
+   "z": 1456,
+   "r": 90,
+   "source": "bake",
+   "bakeId": "tetatcross"
+  },
+  {
+   "name": "Lower Mossgate",
+   "kind": "hamlet",
+   "x": 704,
+   "z": 1552,
+   "r": 46,
+   "source": "bake",
+   "bakeId": "lower_mossgate"
+  },
+  {
+   "name": "Mirestead",
+   "kind": "hamlet",
+   "x": 1136,
+   "z": 1072,
+   "r": 46,
+   "source": "bake",
+   "bakeId": "mirestead"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 1593,
+   "z": 1344,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_torbor_cross",
+   "kind": "event_site",
+   "x": 1360,
+   "z": 1104,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_torbor_cross_0",
+   "name": "Halsbridge Gatehouse",
+   "template": "stone_keep",
+   "friendly": true,
+   "x": 1427,
+   "z": 1310,
+   "yaw": -1.18,
+   "radius": 28,
+   "level": 3
+  },
+  {
+   "type": "farm",
+   "id": "farm_torbor_cross_0",
+   "name": "Halsbridge Mill",
+   "template": "mill",
+   "flavour": null,
+   "settlement": "Halsbridge",
+   "x": 1981,
+   "z": 1295,
+   "yaw": -1.96,
+   "radius": 20,
+   "level": 3
+  },
+  {
+   "type": "farm",
+   "id": "farm_torbor_cross_1",
+   "name": "Mill End Mill",
+   "template": "mill",
+   "flavour": null,
+   "settlement": "Mill End",
+   "x": 292,
+   "z": 1347,
+   "yaw": -0.79,
+   "radius": 20,
+   "level": 3
+  },
+  {
+   "type": "farm",
+   "id": "farm_torbor_cross_2",
+   "name": "Lower Mossgate Farm",
+   "template": "arable",
+   "flavour": null,
+   "settlement": "Lower Mossgate",
+   "x": 778,
+   "z": 1613,
+   "yaw": 0,
+   "radius": 22,
+   "level": 3
+  },
+  {
+   "type": "farm",
+   "id": "farm_torbor_cross_3",
+   "name": "Mirestead Sheepfold",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Mirestead",
+   "x": 1086,
+   "z": 985,
+   "yaw": 0.39,
+   "radius": 24,
+   "level": 3
+  },
+  {
+   "type": "cave",
+   "id": "cave_torbor_cross_0",
+   "name": "Smugglers' cave",
+   "template": "smugglers_cave",
+   "plan": {
+    "family": "flooded_cistern",
+    "floors": 1,
+    "level": 4
+   },
+   "x": 183,
+   "z": 1707,
+   "yaw": 2.75,
+   "radius": 10,
+   "level": 4
+  },
+  {
+   "type": "vignette",
+   "id": "ash_wisp_crater",
+   "name": "The Smoking Crater",
+   "x": 1916,
+   "z": 632,
+   "yaw": 4.51,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "bone_orchard",
+   "name": "The Bone Orchard",
+   "x": 571,
+   "z": 658,
+   "yaw": 5.01,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "gallows_crossroads",
+   "name": "Gallows Crossroads",
+   "x": 1358,
+   "z": 349,
+   "yaw": 1.4,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "lock_keeper_house",
+   "name": "The Lock-Keeper's Cottage",
+   "x": 1830,
+   "z": 1928,
+   "yaw": 2.1,
+   "radius": 12,
+   "biome": "temperateForest",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "quarry_crane",
+   "name": "The Quarry Crane",
+   "x": 80,
+   "z": 205,
+   "yaw": 2.78,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "roadside_shrine",
+   "name": "The Wayside Saint",
+   "x": 699,
+   "z": 83,
+   "yaw": 1.13,
+   "radius": 8,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "rotting_gibbet_cage",
+   "name": "The Crow Cage",
+   "x": 1260,
+   "z": 1857,
+   "yaw": 5.36,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "sewer_grate",
+   "name": "The Rattling Grate",
+   "x": 1893,
+   "z": 65,
+   "yaw": 4.1,
+   "radius": 9,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "siege_camp_leftovers",
+   "name": "The Abandoned Siege Camp",
+   "x": 85,
+   "z": 809,
+   "yaw": 3.83,
+   "radius": 15,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "sunken_stair",
+   "name": "The Stair to Nowhere",
+   "x": 1507,
+   "z": 838,
+   "yaw": 1.49,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_0_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1714,
+   "z": 1526,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_0_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1447,
+   "z": 1523,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_1_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 101,
+   "z": 1114,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_1_1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 468,
+   "z": 1581,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_2_0",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 568,
+   "z": 1977,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_2_1",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 688,
+   "z": 1205,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_3_0",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 909,
+   "z": 414,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_3_1",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1084,
+   "z": 100,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_4_0",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1053,
+   "z": 1368,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_4_1",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 292,
+   "z": 469,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_5_0",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 392,
+   "z": 942,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_torbor_cross_5_1",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1869,
+   "z": 972,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_tithe_collector",
+   "slot": 0,
+   "name": "Brother Tithe",
+   "x": 1707,
+   "z": 1749,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1766,
+     1648
+    ],
+    [
+     1815,
+     1777
+    ],
+    [
+     1692,
+     1843
+    ],
+    [
+     1587,
+     1765
+    ],
+    [
+     1672,
+     1667
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 5
+  },
+  {
+   "type": "rare",
+   "id": "rare_mother_soot",
+   "slot": 1,
+   "name": "Mother Soot",
+   "x": 1296,
+   "z": 1263,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1233,
+     1242
+    ],
+    [
+     1283,
+     1202
+    ],
+    [
+     1360,
+     1255
+    ],
+    [
+     1326,
+     1322
+    ],
+    [
+     1278,
+     1329
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 5
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_02_halsbridge",
+   "name": "Halsbridge",
+   "x": 1653.8,
+   "z": 1334.9,
+   "yaw": 0,
+   "settlement": "Halsbridge",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_02_mill_end",
+   "name": "Mill End",
+   "x": 196.2,
+   "z": 1563,
+   "yaw": 0,
+   "settlement": "Mill End",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_02_lower_mossgate",
+   "name": "Lower Mossgate",
+   "x": 711.7,
+   "z": 1626.6,
+   "yaw": 0,
+   "settlement": "Lower Mossgate",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_02_mirestead",
+   "name": "Mirestead",
+   "x": 1063.1,
+   "z": 1079.6,
+   "yaw": 0,
+   "settlement": "Mirestead",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_02_door",
+   "name": "Barrow entrance",
+   "x": 1605.6,
+   "z": 1384.1,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "provost_isolde",
+   "name": "Provost Isolde Hollis",
+   "role": "elder",
+   "at": "Halsbridge",
+   "x": 1694.5,
+   "z": 1185.3,
+   "yaw": 2.19,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "watch_sergeant_wat",
+   "name": "Sergeant Wat",
+   "role": "guard",
+   "at": "Halsbridge Gatehouse",
+   "x": 1425,
+   "z": 1310.2,
+   "yaw": 2.86,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "miller_emrys",
+   "name": "Emrys Millward",
+   "role": "farmer",
+   "at": "Mill End",
+   "x": 199.6,
+   "z": 1461.2,
+   "yaw": 0.87,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "ratcatcher_jory",
+   "name": "Jory the ratcatcher",
+   "role": "trader",
+   "at": "Halsbridge",
+   "x": 1699.5,
+   "z": 1183.9,
+   "yaw": 3.31,
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "the_provosts_purse_0",
+   "chain": "the_provosts_purse",
+   "step": 0,
+   "clue": "drunks_story",
+   "how": null,
+   "shimmer": null,
+   "x": 1775.4,
+   "z": 1305.5,
+   "yaw": 0,
+   "where": "edge of Halsbridge",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "the_provosts_purse_1",
+   "chain": "the_provosts_purse",
+   "step": 1,
+   "clue": "map_piece",
+   "how": null,
+   "shimmer": null,
+   "x": 298.7,
+   "z": 1484.7,
+   "yaw": 0,
+   "where": "edge of Mill End",
+   "radius": 1
+  },
+  {
+   "type": "treasure_cache",
+   "id": "the_provosts_purse_2",
+   "chain": "the_provosts_purse",
+   "step": 2,
+   "clue": null,
+   "how": "chest",
+   "shimmer": 15,
+   "x": 208.5,
+   "z": 1259.8,
+   "yaw": 0,
+   "where": "near Mill End",
+   "radius": 1
+  }
+ ],
+ "features": [
+  {
+   "type": "hook",
+   "id": "the_bridge_city",
+   "name": "Halsbridge on the Bridge",
+   "kind": "compositional",
+   "x": 1696,
+   "z": 1184,
+   "yaw": 0,
+   "where": "the settlement itself",
+   "needMet": true
+  }
+ ]
+}

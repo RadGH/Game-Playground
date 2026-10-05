@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E (M2). Radiant job frames (after Farhold data/job-frames.json). The job board fills each `needs` slot from what EXISTS right now in the zone copy (a frame whose slots cannot all bind is never offered, so nothing points at an empty field). Slot types: monster (a type from the zone's camps; `band: 'zone'` = level within the zone band; `family` filter), vignette, settlement (`same: 'giver'` = the giver's own), fort, rare (`alive` = currently spawned), dungeon. Text placeholders: {slot.name}, {slot.id}, {zone.name}, {giver.role}. Rewards follow the quest rule: xp = share of a level, gold = multiple of a kill's gold.",
+  "_doc": "Stream E (M2). Radiant job frames (after Farhold data/job-frames.json). The job board fills each `needs` slot from what EXISTS right now in the zone copy (a frame whose slots cannot all bind is never offered, so nothing points at an empty field). Slot types: monster (a type from the zone's camps; `band: 'zone'` = level within the zone band; `family` filter), vignette, settlement (`same: 'giver'` = the giver's own), fort, farm (a farm placement; `from: 'farm.pests'` = one of that farm template's pests in data/provinces/sites.json), cave (a cave placement), rare (`alive` = currently spawned), dungeon. Text placeholders: {slot.name}, {slot.id}, {zone.name}, {giver.role}. Rewards follow the quest rule: xp = share of a level, gold = multiple of a kill's gold.",
   "rules": {
     "preferUndiscovered": "A vignette/fort/settlement slot picks a place the character has NOT discovered with weight x4 over discovered ones (PLAN §3.4 'prefer undiscovered places').",
     "maxOffered": 4,
@@ -20,7 +20,7 @@
         }
       ],
       "title": "Too many {beast.name}",
-      "text": "There are more {beast.name} around {zone.name} than anyone can remember. Thin them out.",
+      "text": "There are more {beast.name} around {zone.name} than anyone has ever seen. Thin them out.",
       "goal": {
         "kind": "kill",
         "target": "{beast.id}",
@@ -510,6 +510,88 @@
         "xp": 0.3,
         "gold": 5,
         "standing": 5
+      }
+    },
+    {
+      "id": "pests_at_the_farm",
+      "scope": "zone",
+      "weight": 5,
+      "needs": [
+        {
+          "slot": "farm",
+          "type": "farm"
+        },
+        {
+          "slot": "pest",
+          "type": "monster",
+          "from": "farm.pests"
+        }
+      ],
+      "title": "Trouble at {farm.name}",
+      "text": "{pest.name} have got into {farm.name} and the farmer is losing more than sleep. Clear them out.",
+      "goal": {
+        "kind": "kill",
+        "target": "{pest.id}",
+        "count": 6,
+        "near": "{farm}"
+      },
+      "reward": {
+        "xp": 0.3,
+        "gold": 5
+      }
+    },
+    {
+      "id": "harvest_hands",
+      "scope": "zone",
+      "weight": 3,
+      "needs": [
+        {
+          "slot": "farm",
+          "type": "farm"
+        },
+        {
+          "slot": "beast",
+          "type": "monster",
+          "band": "zone"
+        }
+      ],
+      "title": "Hands for the harvest at {farm.name}",
+      "text": "{farm.name} cannot bring the harvest in with {beast.name} prowling the edges. Keep them off while the carts load.",
+      "goal": {
+        "kind": "kill",
+        "target": "{beast.id}",
+        "count": 5,
+        "near": "{farm}"
+      },
+      "reward": {
+        "xp": 0.3,
+        "gold": 6
+      }
+    },
+    {
+      "id": "smoke_out_the_cave",
+      "scope": "zone",
+      "weight": 3,
+      "needs": [
+        {
+          "slot": "cave",
+          "type": "cave"
+        }
+      ],
+      "title": "Smoke out {cave.name}",
+      "text": "Whatever lives in {cave.name} has started coming out at dusk. Go in and put an end to whatever leads it.",
+      "goal": {
+        "kind": "clear",
+        "at": "{cave}",
+        "boss": true
+      },
+      "reward": {
+        "xp": 0.5,
+        "gold": 10,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
       }
     }
   ]

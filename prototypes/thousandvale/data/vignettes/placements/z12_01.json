@@ -1,0 +1,712 @@
+{
+ "_doc": "Stream E. Content placements for world zone z12_01 (E zone 'ashcombe', The Ashcombe Ruins) — tools/place-vignettes.mjs against stream B's bake (terrain 078188c7). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z12_01",
+ "sheetZone": "ashcombe",
+ "province": "torbor_downs",
+ "terrainHash": "078188c7",
+ "band": [
+  4,
+  6
+ ],
+ "archetype": "ruinfield",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  }
+ },
+ "mainWalkableShare": 0.948,
+ "settlements": [
+  {
+   "name": "Ashcombe",
+   "kind": "city",
+   "x": 1408,
+   "z": 1328,
+   "r": 140,
+   "source": "bake",
+   "bakeId": "tifeckgate"
+  },
+  {
+   "name": "Kettle Cross",
+   "kind": "hamlet",
+   "x": 933,
+   "z": 773,
+   "r": 40,
+   "source": "ask",
+   "bakeId": null
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 1566,
+   "z": 1434,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_ashcombe",
+   "kind": "event_site",
+   "x": 1216,
+   "z": 1176,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_ashcombe_0",
+   "name": "the Broken Keep",
+   "template": "ruined_fort",
+   "friendly": false,
+   "x": 833,
+   "z": 627,
+   "yaw": -2.36,
+   "radius": 22,
+   "level": 4
+  },
+  {
+   "type": "farm",
+   "id": "farm_ashcombe_0",
+   "name": "Ashcombe Sheepfold",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Ashcombe",
+   "x": 1502,
+   "z": 1495,
+   "yaw": -2.75,
+   "radius": 24,
+   "level": 4
+  },
+  {
+   "type": "farm",
+   "id": "farm_ashcombe_1",
+   "name": "Kettle Cross Farm",
+   "template": "arable",
+   "flavour": null,
+   "settlement": "Kettle Cross",
+   "x": 1309,
+   "z": 995,
+   "yaw": -0.79,
+   "radius": 22,
+   "level": 4
+  },
+  {
+   "type": "cave",
+   "id": "cave_ashcombe_0",
+   "name": "Barrow mound",
+   "template": "barrow_mound",
+   "plan": {
+    "family": "barrow_maze",
+    "floors": 1,
+    "level": 5
+   },
+   "x": 174,
+   "z": 1401,
+   "yaw": 1.96,
+   "radius": 10,
+   "level": 5
+  },
+  {
+   "type": "hook",
+   "id": "the_ashcombe_colossus",
+   "name": "The Sleeping Colossus",
+   "kind": "bespoke",
+   "x": 79,
+   "z": 697,
+   "yaw": 0,
+   "radius": 55,
+   "where": "best fit for: open ruin ground 120 m",
+   "needMet": true
+  },
+  {
+   "type": "vignette",
+   "id": "ash_choir_stones",
+   "name": "The Burnt Choir",
+   "x": 1418,
+   "z": 229,
+   "yaw": 0.68,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "bone_pit",
+   "name": "The Bone Pit",
+   "x": 1949,
+   "z": 666,
+   "yaw": 0.2,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "collapsed_mine_mouth",
+   "name": "The Collapsed Adit",
+   "x": 395,
+   "z": 124,
+   "yaw": 5.37,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "cult_cellar",
+   "name": "The Cloud-Shouters' Cellar",
+   "x": 825,
+   "z": 1380,
+   "yaw": 0.5,
+   "radius": 13,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "duel_stones",
+   "name": "The Duelling Stones",
+   "x": 1922,
+   "z": 1971,
+   "yaw": 4.73,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "goblin_market_stones",
+   "name": "The Moonlight Stones",
+   "x": 1125,
+   "z": 1983,
+   "yaw": 6,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "heretic_stake",
+   "name": "The Heretic's Stake",
+   "x": 451,
+   "z": 1980,
+   "yaw": 2.97,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "noble_folly",
+   "name": "The Lord's Folly",
+   "x": 1948,
+   "z": 100,
+   "yaw": 4.27,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "toppled_statue",
+   "name": "The Toppled King",
+   "x": 1951,
+   "z": 1210,
+   "yaw": 0.64,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "watchtower_ruin",
+   "name": "The Abandoned Watchtower",
+   "x": 488,
+   "z": 1022,
+   "yaw": 2.8,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashcombe_0_0",
+   "monster": "road_brigand",
+   "with": "brigand_archer",
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 841,
+   "z": 292,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashcombe_0_1",
+   "monster": "road_brigand",
+   "with": "brigand_archer",
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 929,
+   "z": 952,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashcombe_1_0",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1502,
+   "z": 1988,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashcombe_1_1",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1466,
+   "z": 621,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashcombe_2_0",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 443,
+   "z": 518,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashcombe_2_1",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1891,
+   "z": 1571,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashcombe_3_0",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1682,
+   "z": 1763,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashcombe_3_1",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1969,
+   "z": 1777,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashcombe_4_0",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1133,
+   "z": 1602,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashcombe_4_1",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1662,
+   "z": 1008,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashcombe_5_0",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1131,
+   "z": 1279,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashcombe_5_1",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1692,
+   "z": 1303,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashcombe_6_0",
+   "monster": "cursed_knight",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1407,
+   "z": 1751,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashcombe_6_1",
+   "monster": "cursed_knight",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1122,
+   "z": 1076,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_gravel_jack",
+   "slot": 0,
+   "name": "Gravel Jack",
+   "x": 1451,
+   "z": 832,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1413,
+     761
+    ],
+    [
+     1473,
+     760
+    ],
+    [
+     1515,
+     835
+    ],
+    [
+     1461,
+     890
+    ],
+    [
+     1384,
+     880
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 6
+  },
+  {
+   "type": "rare",
+   "id": "rare_sir_hollowell",
+   "slot": 1,
+   "name": "Sir Hollowell",
+   "x": 1151,
+   "z": 803,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1067,
+     719
+    ],
+    [
+     1160,
+     729
+    ],
+    [
+     1232,
+     811
+    ],
+    [
+     1185,
+     915
+    ],
+    [
+     1105,
+     878
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 6
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z12_01_ashcombe",
+   "name": "Ashcombe",
+   "x": 1331.7,
+   "z": 1182.3,
+   "yaw": 0,
+   "settlement": "Ashcombe",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z12_01_kettle_cross",
+   "name": "Kettle Cross",
+   "x": 996.1,
+   "z": 754.1,
+   "yaw": 0,
+   "settlement": "Kettle Cross",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z12_01_door",
+   "name": "Barrow entrance",
+   "x": 1606.9,
+   "z": 1443.8,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "scholar_orla",
+   "name": "Orla Coombe",
+   "role": "scholar",
+   "at": "Ashcombe",
+   "x": 1404.6,
+   "z": 1335.2,
+   "yaw": 0.92,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "digger_tobin",
+   "name": "Old Tobin the digger",
+   "role": "trader",
+   "at": "Kettle Cross",
+   "x": 932.9,
+   "z": 776,
+   "yaw": 6.08,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "captain_rosamund",
+   "name": "Captain Rosamund",
+   "role": "guard",
+   "at": "the Broken Keep",
+   "x": 834.9,
+   "z": 627.7,
+   "yaw": 5.78,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "scav_jory",
+   "name": "Mudfoot",
+   "role": "scavenger",
+   "at": "duel_stones",
+   "x": 1924.5,
+   "z": 1971.4,
+   "yaw": 1.93,
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "ashcombe_reliquary_0",
+   "chain": "ashcombe_reliquary",
+   "step": 0,
+   "clue": "gravestone",
+   "how": null,
+   "shimmer": null,
+   "x": 1924.4,
+   "z": 1969.1,
+   "yaw": 0,
+   "where": "vignette duel_stones",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "ashcombe_reliquary_1",
+   "chain": "ashcombe_reliquary",
+   "step": 1,
+   "clue": "note",
+   "how": null,
+   "shimmer": null,
+   "x": 831.7,
+   "z": 625.4,
+   "yaw": 0,
+   "where": "fort the Broken Keep",
+   "radius": 1
+  }
+ ],
+ "features": []
+}

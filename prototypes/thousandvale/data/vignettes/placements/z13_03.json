@@ -1,0 +1,899 @@
+{
+ "_doc": "Stream E. Content placements for world zone z13_03 (E zone 'millbrook', Millbrook Vale) — tools/place-vignettes.mjs against stream B's bake (terrain 28ec37b2). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z13_03",
+ "sheetZone": "millbrook",
+ "province": "torbor_downs",
+ "terrainHash": "28ec37b2",
+ "band": [
+  3,
+  6
+ ],
+ "archetype": "heartland",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  }
+ },
+ "mainWalkableShare": 0.98,
+ "settlements": [
+  {
+   "name": "Millbrook",
+   "kind": "city",
+   "x": 544,
+   "z": 1648,
+   "r": 140,
+   "source": "bake",
+   "bakeId": "wedanhold"
+  },
+  {
+   "name": "Three Wheels",
+   "kind": "town",
+   "x": 1664,
+   "z": 1248,
+   "r": 90,
+   "source": "bake",
+   "bakeId": "ironwatch"
+  },
+  {
+   "name": "Stormrow",
+   "kind": "village",
+   "x": 1072,
+   "z": 144,
+   "r": 65,
+   "source": "bake",
+   "bakeId": "stormrow"
+  },
+  {
+   "name": "Ravencross",
+   "kind": "hamlet",
+   "x": 448,
+   "z": 432,
+   "r": 46,
+   "source": "bake",
+   "bakeId": "ravencross"
+  },
+  {
+   "name": "Wildmere",
+   "kind": "hamlet",
+   "x": 1600,
+   "z": 576,
+   "r": 46,
+   "source": "bake",
+   "bakeId": "wildmere"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 314,
+   "z": 1641,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_millbrook",
+   "kind": "event_site",
+   "x": 784,
+   "z": 1336,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_millbrook_0",
+   "name": "Millbrook Keep",
+   "template": "stone_keep",
+   "friendly": true,
+   "x": 1767,
+   "z": 488,
+   "yaw": -0.39,
+   "radius": 28,
+   "level": 3
+  },
+  {
+   "type": "farm",
+   "id": "farm_millbrook_0",
+   "name": "Millbrook Farm",
+   "template": "arable",
+   "flavour": null,
+   "settlement": "Millbrook",
+   "x": 485,
+   "z": 1470,
+   "yaw": -0.79,
+   "radius": 22,
+   "level": 3
+  },
+  {
+   "type": "farm",
+   "id": "farm_millbrook_1",
+   "name": "Three Wheels Piggery",
+   "template": "pig",
+   "flavour": null,
+   "settlement": "Three Wheels",
+   "x": 1775,
+   "z": 1172,
+   "yaw": -0.79,
+   "radius": 18,
+   "level": 3
+  },
+  {
+   "type": "farm",
+   "id": "farm_millbrook_2",
+   "name": "Stormrow Farm",
+   "template": "arable",
+   "flavour": null,
+   "settlement": "Stormrow",
+   "x": 1185,
+   "z": 173,
+   "yaw": -1.96,
+   "radius": 22,
+   "level": 3
+  },
+  {
+   "type": "farm",
+   "id": "farm_millbrook_3",
+   "name": "Ravencross Sheepfold",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Ravencross",
+   "x": 363,
+   "z": 382,
+   "yaw": 1.18,
+   "radius": 24,
+   "level": 3
+  },
+  {
+   "type": "farm",
+   "id": "farm_millbrook_4",
+   "name": "Wildmere Piggery",
+   "template": "pig",
+   "flavour": null,
+   "settlement": "Wildmere",
+   "x": 1530,
+   "z": 642,
+   "yaw": 1.96,
+   "radius": 18,
+   "level": 3
+  },
+  {
+   "type": "farm",
+   "id": "farm_millbrook_5",
+   "name": "Millbrook Sheepfold",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Millbrook",
+   "x": 715,
+   "z": 1849,
+   "yaw": -2.75,
+   "radius": 24,
+   "level": 3
+  },
+  {
+   "type": "cave",
+   "id": "cave_millbrook_0",
+   "name": "Beast den",
+   "template": "beast_den",
+   "plan": {
+    "family": "cave_river",
+    "floors": 1,
+    "level": 4
+   },
+   "x": 191,
+   "z": 904,
+   "yaw": -1.57,
+   "radius": 10,
+   "level": 4
+  },
+  {
+   "type": "hook",
+   "id": "the_three_wheels",
+   "name": "Three Mills, One River",
+   "kind": "compositional",
+   "x": 1649,
+   "z": 1417,
+   "yaw": 0,
+   "radius": 20,
+   "where": "best fit for: a stream on a slope",
+   "needMet": true
+  },
+  {
+   "type": "vignette",
+   "id": "burned_farmstead",
+   "name": "The Burned Farmstead",
+   "x": 1011,
+   "z": 1055,
+   "yaw": 3.83,
+   "radius": 13,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "dry_well",
+   "name": "The Dry Well",
+   "x": 1972,
+   "z": 1970,
+   "yaw": 5.93,
+   "radius": 10,
+   "biome": "badlands",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "fairy_ring",
+   "name": "The Toadstool Ring",
+   "x": 1347,
+   "z": 1934,
+   "yaw": 4.03,
+   "radius": 9,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "hanging_sign_inn",
+   "name": "The Shut-Up Inn",
+   "x": 80,
+   "z": 1813,
+   "yaw": 4.86,
+   "radius": 13,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "ore_cart_spill",
+   "name": "The Runaway Cart",
+   "x": 821,
+   "z": 597,
+   "yaw": 4.5,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "pump_house",
+   "name": "The Old Pump House",
+   "x": 715,
+   "z": 107,
+   "yaw": 3.62,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "quarry_ledge",
+   "name": "The Quarry Ledge",
+   "x": 72,
+   "z": 1362,
+   "yaw": 0.25,
+   "radius": 14,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "sinkhole_garden",
+   "name": "The Sinkhole Garden",
+   "x": 1926,
+   "z": 60,
+   "yaw": 2.9,
+   "radius": 11,
+   "biome": "temperateForest",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "tinker_wagon",
+   "name": "The Tinker's Wagon",
+   "x": 1156,
+   "z": 1494,
+   "yaw": 4.88,
+   "radius": 12,
+   "biome": "shrubland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "woodcutter_axe",
+   "name": "The Axe in the Stump",
+   "x": 62,
+   "z": 75,
+   "yaw": 2.38,
+   "radius": 9,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_0_0",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1502,
+   "z": 166,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_0_1",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 471,
+   "z": 1104,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_1_0",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1958,
+   "z": 1311,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_1_1",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1816,
+   "z": 1410,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_2_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 831,
+   "z": 1528,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_2_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1060,
+   "z": 1809,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_3_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 387,
+   "z": 1942,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_3_1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 716,
+   "z": 1265,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_4_0",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 237,
+   "z": 1610,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_4_1",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 305,
+   "z": 1286,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_5_0",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 893,
+   "z": 1947,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_5_1",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 870,
+   "z": 1725,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_6_0",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 573,
+   "z": 1978,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_6_1",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 270,
+   "z": 1787,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_7_0",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 894,
+   "z": 1354,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_millbrook_7_1",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    6
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 490,
+   "z": 1281,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_laughing_hettie",
+   "slot": 0,
+   "name": "Laughing Hettie",
+   "x": 1880,
+   "z": 1419,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1808,
+     1416
+    ],
+    [
+     1854,
+     1369
+    ],
+    [
+     1946,
+     1373
+    ],
+    [
+     1937,
+     1427
+    ],
+    [
+     1861,
+     1493
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 6
+  },
+  {
+   "type": "rare",
+   "id": "rare_old_mould",
+   "slot": 1,
+   "name": "Old Mould",
+   "x": 701,
+   "z": 1087,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     768,
+     1077
+    ],
+    [
+     728,
+     1143
+    ],
+    [
+     656,
+     1147
+    ],
+    [
+     659,
+     1065
+    ],
+    [
+     723,
+     1020
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 6
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_03_millbrook",
+   "name": "Millbrook",
+   "x": 437.3,
+   "z": 1529.9,
+   "yaw": 0,
+   "settlement": "Millbrook",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_03_three_wheels",
+   "name": "Three Wheels",
+   "x": 1735.6,
+   "z": 1325.2,
+   "yaw": 0,
+   "settlement": "Three Wheels",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_03_stormrow",
+   "name": "Stormrow",
+   "x": 1062,
+   "z": 71.7,
+   "yaw": 0,
+   "settlement": "Stormrow",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_03_ravencross",
+   "name": "Ravencross",
+   "x": 439.1,
+   "z": 502.9,
+   "yaw": 0,
+   "settlement": "Ravencross",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_03_wildmere",
+   "name": "Wildmere",
+   "x": 1653.5,
+   "z": 567.5,
+   "yaw": 0,
+   "settlement": "Wildmere",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_03_door",
+   "name": "Barrow entrance",
+   "x": 335.2,
+   "z": 1604.7,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "reeve_garrick",
+   "name": "Reeve Garrick Pike",
+   "role": "elder",
+   "at": "Millbrook",
+   "x": 553.3,
+   "z": 1633.6,
+   "yaw": 1.65,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "goodwife_edda",
+   "name": "Goodwife Edda",
+   "role": "farmer",
+   "at": "Three Wheels",
+   "x": 1658.6,
+   "z": 1235.6,
+   "yaw": 5.54,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "castellan_oswy",
+   "name": "Castellan Oswy",
+   "role": "guard",
+   "at": "Millbrook Keep",
+   "x": 1766.9,
+   "z": 490.1,
+   "yaw": 2.48,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "tinker_cadoc",
+   "name": "Cadoc the tinker",
+   "role": "trader",
+   "at": "tinker_wagon",
+   "x": 1154.4,
+   "z": 1495.9,
+   "yaw": 3.58,
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "three_wheels_hoard_0",
+   "chain": "three_wheels_hoard",
+   "step": 0,
+   "clue": "map_piece",
+   "how": null,
+   "shimmer": null,
+   "x": 1577.9,
+   "z": 1207.3,
+   "yaw": 0,
+   "where": "edge of Three Wheels",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "three_wheels_hoard_1",
+   "chain": "three_wheels_hoard",
+   "step": 1,
+   "clue": "carved_arrow",
+   "how": null,
+   "shimmer": null,
+   "x": 1767.7,
+   "z": 489.9,
+   "yaw": 0,
+   "where": "fort Millbrook Keep",
+   "radius": 1
+  },
+  {
+   "type": "treasure_cache",
+   "id": "three_wheels_hoard_2",
+   "chain": "three_wheels_hoard",
+   "step": 2,
+   "clue": null,
+   "how": "dig",
+   "shimmer": 15,
+   "x": 1667,
+   "z": 237,
+   "yaw": 0,
+   "where": "secluded",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "the_red_paymaster_2",
+   "chain": "the_red_paymaster",
+   "step": 2,
+   "clue": "map_piece",
+   "how": null,
+   "shimmer": null,
+   "x": 1769,
+   "z": 487.5,
+   "yaw": 0,
+   "where": "fort Millbrook Keep",
+   "radius": 1
+  },
+  {
+   "type": "treasure_cache",
+   "id": "the_red_paymaster_3",
+   "chain": "the_red_paymaster",
+   "step": 3,
+   "clue": null,
+   "how": "dig",
+   "shimmer": 15,
+   "x": 322,
+   "z": 1566.8,
+   "yaw": 0,
+   "where": "near Millbrook",
+   "radius": 1
+  }
+ ],
+ "features": []
+}

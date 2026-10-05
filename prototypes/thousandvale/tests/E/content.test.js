@@ -56,7 +56,11 @@ const bannedIn = (text) => {
 
 test('banned names: no player-facing string in stream E data or dungeon names uses one', () => {
   const bad = [];
-  const sources = { archetypes: ARCH, province: PROV, vignettes: VIG, quests: QUESTS, hooks: HOOKS, names: NAMES };
+  const sources = { archetypes: ARCH, province: PROV, vignettes: VIG, quests: QUESTS, hooks: HOOKS, names: NAMES,
+    events: J('data/quests/events.json'), schedules: J('data/provinces/schedules.json'), traces: J('data/names/traces.json'), places: J('data/provinces/torbor_downs-places.json'),
+    jobs: J('data/quests/jobs.json') };
+  // every name the placer wrote into the world (farm/fort/waystone names built from settlement names)
+  for (const f of readdirSync(new URL('data/vignettes/placements/', root)).filter(f => f.endsWith('.json'))) sources['placements/' + f] = J('data/vignettes/placements/' + f).placements.map(p => p.name || '');
   for (const [f, d] of Object.entries(ENC)) if (d.tier || d.types) sources[f] = d;
   for (const [src, d] of Object.entries(sources)) for (const [p, s] of strings(d)) for (const h of bannedIn(s)) bad.push(`${src} ${p}: "${h}" in "${s.slice(0, 60)}"`);
   for (const fam of Object.keys(FAMILIES).filter(k => FAMILIES[k].ready)) for (let s = 0; s < 200; s++) { const n = planDungeon(s, { family: fam, floors: 1 }).name; for (const h of bannedIn(n)) bad.push(`dungeon name "${n}": ${h}`); }

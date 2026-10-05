@@ -1,0 +1,813 @@
+{
+ "_doc": "Stream E. Content placements for world zone z11_03 (E zone 'wychwood', Wychwood) — tools/place-vignettes.mjs against stream B's bake (terrain af932954). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z11_03",
+ "sheetZone": "wychwood",
+ "province": "torbor_downs",
+ "terrainHash": "af932954",
+ "band": [
+  5,
+  7
+ ],
+ "archetype": "wilds",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  }
+ },
+ "mainWalkableShare": 0.766,
+ "settlements": [
+  {
+   "name": "Hermit's Rest",
+   "kind": "city",
+   "x": 1104,
+   "z": 560,
+   "r": 140,
+   "source": "bake",
+   "bakeId": "wehackkeep"
+  },
+  {
+   "name": "Charcoal Burners",
+   "kind": "village",
+   "x": 256,
+   "z": 224,
+   "r": 65,
+   "source": "bake",
+   "bakeId": "weephaven"
+  },
+  {
+   "name": "Wildhaven",
+   "kind": "hamlet",
+   "x": 1280,
+   "z": 224,
+   "r": 46,
+   "source": "bake",
+   "bakeId": "wildhaven"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 873,
+   "z": 718,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_wychwood",
+   "kind": "event_site",
+   "x": 1112,
+   "z": 792,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_wychwood_0",
+   "name": "the Antler Stockade",
+   "template": "palisade_fort",
+   "friendly": true,
+   "x": 1585,
+   "z": 221,
+   "yaw": -1.96,
+   "radius": 24,
+   "level": 5
+  },
+  {
+   "type": "farm",
+   "id": "farm_wychwood_0",
+   "name": "Hermit's Rest Sheepfold",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Hermit's Rest",
+   "x": 1213,
+   "z": 719,
+   "yaw": -1.57,
+   "radius": 24,
+   "level": 5
+  },
+  {
+   "type": "farm",
+   "id": "farm_wychwood_1",
+   "name": "Charcoal Burners Sheepfold",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Charcoal Burners",
+   "x": 273,
+   "z": 358,
+   "yaw": -2.75,
+   "radius": 24,
+   "level": 5
+  },
+  {
+   "type": "cave",
+   "id": "cave_wychwood_0",
+   "name": "Spider hollow",
+   "template": "spider_hollow",
+   "plan": {
+    "family": "cave_river",
+    "floors": 1,
+    "level": 6
+   },
+   "x": 990,
+   "z": 1793,
+   "yaw": -3.14,
+   "radius": 10,
+   "level": 6
+  },
+  {
+   "type": "cave",
+   "id": "cave_wychwood_1",
+   "name": "Beast den",
+   "template": "beast_den",
+   "plan": {
+    "family": "cave_river",
+    "floors": 1,
+    "level": 6
+   },
+   "x": 1629,
+   "z": 1223,
+   "yaw": 1.96,
+   "radius": 10,
+   "level": 6
+  },
+  {
+   "type": "cave",
+   "id": "cave_wychwood_2",
+   "name": "Beast den",
+   "template": "beast_den",
+   "plan": {
+    "family": "cave_river",
+    "floors": 1,
+    "level": 6
+   },
+   "x": 699,
+   "z": 1276,
+   "yaw": 2.75,
+   "radius": 10,
+   "level": 6
+  },
+  {
+   "type": "hook",
+   "id": "the_great_hollow_oak",
+   "name": "The Hollow Oak of Wychwood",
+   "kind": "bespoke",
+   "x": 939,
+   "z": 101,
+   "yaw": 0,
+   "radius": 20,
+   "where": "best fit for: a forest clearing",
+   "needMet": true
+  },
+  {
+   "type": "vignette",
+   "id": "beekeeper_hives",
+   "name": "The Angry Hives",
+   "x": 1903,
+   "z": 1762,
+   "yaw": 6.09,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "broken_caravan_survivor",
+   "name": "The Last Wagon",
+   "x": 1986,
+   "z": 662,
+   "yaw": 2.75,
+   "radius": 15,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "drowned_belfry",
+   "name": "The Drowned Belfry",
+   "x": 763,
+   "z": 532,
+   "yaw": 5.93,
+   "radius": 11,
+   "biome": "temperateForest",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "fen_witch_hut",
+   "name": "Old Mabry's Stilt Hut",
+   "x": 1445,
+   "z": 1817,
+   "yaw": 2.63,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "giants_cookfire",
+   "name": "The Giant's Cookfire",
+   "x": 299,
+   "z": 1935,
+   "yaw": 0.05,
+   "radius": 14,
+   "biome": "mountains",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "goblin_market_stones",
+   "name": "The Moonlight Stones",
+   "x": 1195,
+   "z": 1194,
+   "yaw": 1.05,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "hunters_hide",
+   "name": "The Hunter's Hide",
+   "x": 1979,
+   "z": 261,
+   "yaw": 5.58,
+   "radius": 13,
+   "biome": "temperateForest",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "lone_archer_post",
+   "name": "The Reed Hide",
+   "x": 1251,
+   "z": 345,
+   "yaw": 0.67,
+   "radius": 9,
+   "biome": "temperateForest",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "warband_totem",
+   "name": "The Warband Totem",
+   "x": 1594,
+   "z": 816,
+   "yaw": 5.08,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "witch_stump",
+   "name": "The Wishing Stump",
+   "x": 1969,
+   "z": 1352,
+   "yaw": 6.19,
+   "radius": 10,
+   "biome": "shrubland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_0_0",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1881,
+   "z": 70,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_0_1",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 490,
+   "z": 170,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_1_0",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 902,
+   "z": 959,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_1_1",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1507,
+   "z": 524,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_2_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1911,
+   "z": 980,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_2_1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 83,
+   "z": 72,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_3_0",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 738,
+   "z": 268,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_3_1",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 502,
+   "z": 613,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_4_0",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1419,
+   "z": 71,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_4_1",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 531,
+   "z": 381,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_5_0",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1171,
+   "z": 79,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_5_1",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 743,
+   "z": 74,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_6_0",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1712,
+   "z": 93,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_6_1",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1433,
+   "z": 334,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_7_0",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1083,
+   "z": 265,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_7_1",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 363,
+   "z": 492,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_antlered_shade",
+   "slot": 0,
+   "name": "The Antlered Shade",
+   "x": 706,
+   "z": 415,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     624,
+     370
+    ],
+    [
+     737,
+     353
+    ],
+    [
+     783,
+     402
+    ],
+    [
+     748,
+     475
+    ],
+    [
+     634,
+     465
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 7
+  },
+  {
+   "type": "rare",
+   "id": "rare_charcoal_tom",
+   "slot": 1,
+   "name": "Charcoal Tom",
+   "x": 607,
+   "z": 503,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     585,
+     423
+    ],
+    [
+     668,
+     446
+    ],
+    [
+     687,
+     596
+    ],
+    [
+     569,
+     580
+    ],
+    [
+     480,
+     479
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 7
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_03_hermit_s_rest",
+   "name": "Hermit's Rest",
+   "x": 1096.7,
+   "z": 406.5,
+   "yaw": 0,
+   "settlement": "Hermit's Rest",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_03_charcoal_burners",
+   "name": "Charcoal Burners",
+   "x": 335.6,
+   "z": 182.7,
+   "yaw": 0,
+   "settlement": "Charcoal Burners",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_03_wildhaven",
+   "name": "Wildhaven",
+   "x": 1336.4,
+   "z": 181.4,
+   "yaw": 0,
+   "settlement": "Wildhaven",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_03_door",
+   "name": "Barrow entrance",
+   "x": 832.1,
+   "z": 728,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "hermit_aled",
+   "name": "The Hermit of Wychwood",
+   "role": "hermit",
+   "at": "Hermit's Rest",
+   "x": 1102.2,
+   "z": 551,
+   "yaw": 5.04,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "collier_nan",
+   "name": "Collier Nan",
+   "role": "trader",
+   "at": "Charcoal Burners",
+   "x": 251.2,
+   "z": 226.1,
+   "yaw": 5.92,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "warden_emrys",
+   "name": "Warden Emrys",
+   "role": "guard",
+   "at": "the Antler Stockade",
+   "x": 1587,
+   "z": 221.6,
+   "yaw": 2.15,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "lost_hunter",
+   "name": "Hob the hunter",
+   "role": "hunter",
+   "at": "hunters_hide",
+   "x": 1977.2,
+   "z": 259.1,
+   "yaw": 0.92,
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "the_hermits_secret_0",
+   "chain": "the_hermits_secret",
+   "step": 0,
+   "clue": "note",
+   "how": null,
+   "shimmer": null,
+   "x": 1212.7,
+   "z": 656.1,
+   "yaw": 0,
+   "where": "edge of Hermit's Rest",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "the_hermits_secret_1",
+   "chain": "the_hermits_secret",
+   "step": 1,
+   "clue": "carved_arrow",
+   "how": null,
+   "shimmer": null,
+   "x": 1982,
+   "z": 261.8,
+   "yaw": 0,
+   "where": "vignette hunters_hide",
+   "radius": 1
+  },
+  {
+   "type": "treasure_cache",
+   "id": "the_hermits_secret_2",
+   "chain": "the_hermits_secret",
+   "step": 2,
+   "clue": null,
+   "how": "dig",
+   "shimmer": 15,
+   "x": 1797,
+   "z": 174,
+   "yaw": 0,
+   "where": "secluded",
+   "radius": 1
+  }
+ ],
+ "features": []
+}

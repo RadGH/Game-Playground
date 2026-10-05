@@ -1,0 +1,706 @@
+{
+ "_doc": "Stream E. Content placements for world zone z13_01 (E zone 'brackwater', Brackwater Fen) — tools/place-vignettes.mjs against stream B's bake (terrain 3c176bbc). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z13_01",
+ "sheetZone": "brackwater",
+ "province": "torbor_downs",
+ "terrainHash": "3c176bbc",
+ "band": [
+  5,
+  7
+ ],
+ "archetype": "marsh",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  }
+ },
+ "mainWalkableShare": 0.997,
+ "settlements": [
+  {
+   "name": "Brackwater",
+   "kind": "town",
+   "x": 1136,
+   "z": 870,
+   "r": 70,
+   "source": "ask",
+   "bakeId": null
+  },
+  {
+   "name": "Eelwick",
+   "kind": "hamlet",
+   "x": 1164,
+   "z": 427,
+   "r": 40,
+   "source": "ask",
+   "bakeId": null
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 946,
+   "z": 1186,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_brackwater",
+   "kind": "event_site",
+   "x": 1024,
+   "z": 1024,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_brackwater_0",
+   "name": "Reedwall Tower",
+   "template": "watchtower_garrison",
+   "friendly": true,
+   "x": 1055,
+   "z": 1195,
+   "yaw": 1.57,
+   "radius": 16,
+   "level": 5
+  },
+  {
+   "type": "farm",
+   "id": "farm_brackwater_0",
+   "name": "Brackwater Piggery",
+   "template": "pig",
+   "flavour": null,
+   "settlement": "Brackwater",
+   "x": 1141,
+   "z": 509,
+   "yaw": 1.57,
+   "radius": 18,
+   "level": 5
+  },
+  {
+   "type": "farm",
+   "id": "farm_brackwater_1",
+   "name": "Eelwick Farm",
+   "template": "arable",
+   "flavour": null,
+   "settlement": "Eelwick",
+   "x": 993,
+   "z": 840,
+   "yaw": 1.57,
+   "radius": 22,
+   "level": 5
+  },
+  {
+   "type": "cave",
+   "id": "cave_brackwater_0",
+   "name": "Spider hollow",
+   "template": "spider_hollow",
+   "plan": {
+    "family": "cave_river",
+    "floors": 1,
+    "level": 6
+   },
+   "x": 407,
+   "z": 649,
+   "yaw": -0.39,
+   "radius": 10,
+   "level": 6
+  },
+  {
+   "type": "cave",
+   "id": "cave_brackwater_1",
+   "name": "Sump grotto",
+   "template": "sump_grotto",
+   "plan": {
+    "family": "sunken_temple",
+    "floors": 1,
+    "level": 6
+   },
+   "x": 1753,
+   "z": 1767,
+   "yaw": 2.75,
+   "radius": 10,
+   "level": 6
+  },
+  {
+   "type": "hook",
+   "id": "the_drowned_bells",
+   "name": "The Drowned Bells",
+   "kind": "compositional",
+   "x": 152,
+   "z": 1565,
+   "yaw": 0,
+   "radius": 20,
+   "where": "best fit for: deep water",
+   "needMet": false
+  },
+  {
+   "type": "vignette",
+   "id": "beekeeper_hives",
+   "name": "The Angry Hives",
+   "x": 747,
+   "z": 1713,
+   "yaw": 4.79,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "drowned_belfry",
+   "name": "The Drowned Belfry",
+   "x": 1577,
+   "z": 92,
+   "yaw": 0.38,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": false,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "eel_traps",
+   "name": "The Eel Weir",
+   "x": 1816,
+   "z": 993,
+   "yaw": 4.91,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "fen_witch_hut",
+   "name": "Old Mabry's Stilt Hut",
+   "x": 616,
+   "z": 64,
+   "yaw": 0.69,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "ferryman_shrine",
+   "name": "The Ferryman's Coin",
+   "x": 524,
+   "z": 1184,
+   "yaw": 0.34,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": false,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "flooded_mill",
+   "name": "The Flooded Mill",
+   "x": 64,
+   "z": 109,
+   "yaw": 5.6,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "lone_archer_post",
+   "name": "The Reed Hide",
+   "x": 1986,
+   "z": 474,
+   "yaw": 0.32,
+   "radius": 9,
+   "biome": "grassland",
+   "biomeFits": false,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "tar_pits",
+   "name": "The Tar Seep",
+   "x": 1226,
+   "z": 1920,
+   "yaw": 4.26,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": false,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "weavers_bridge_toll",
+   "name": "The Spider Bridge",
+   "x": 1501,
+   "z": 1338,
+   "yaw": 4.22,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": false,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "witch_stump",
+   "name": "The Wishing Stump",
+   "x": 70,
+   "z": 981,
+   "yaw": 3.42,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": false,
+   "level": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_0_0",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 363,
+   "z": 1969,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_0_1",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1144,
+   "z": 71,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_1_0",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1555,
+   "z": 568,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_1_1",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1975,
+   "z": 1403,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_2_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 818,
+   "z": 367,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_2_1",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1355,
+   "z": 293,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_3_0",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1380,
+   "z": 944,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_3_1",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 815,
+   "z": 1053,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_4_0",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 857,
+   "z": 621,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_4_1",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1335,
+   "z": 674,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_5_0",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1302,
+   "z": 1189,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_5_1",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 760,
+   "z": 841,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_reedmother_ysolt",
+   "slot": 0,
+   "name": "Reedmother Ysolt",
+   "x": 1611,
+   "z": 811,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1620,
+     747
+    ],
+    [
+     1663,
+     782
+    ],
+    [
+     1639,
+     900
+    ],
+    [
+     1558,
+     872
+    ],
+    [
+     1564,
+     776
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 7
+  },
+  {
+   "type": "rare",
+   "id": "rare_lantern_drowner",
+   "slot": 1,
+   "name": "The Lantern Drowner",
+   "x": 1539,
+   "z": 1102,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1642,
+     1075
+    ],
+    [
+     1557,
+     1187
+    ],
+    [
+     1484,
+     1175
+    ],
+    [
+     1479,
+     1067
+    ],
+    [
+     1572,
+     1033
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 7
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_01_brackwater",
+   "name": "Brackwater",
+   "x": 1114.6,
+   "z": 782.8,
+   "yaw": 0,
+   "settlement": "Brackwater",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_01_eelwick",
+   "name": "Eelwick",
+   "x": 1131.8,
+   "z": 367.6,
+   "yaw": 0,
+   "settlement": "Eelwick",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_01_door",
+   "name": "Barrow entrance",
+   "x": 918.9,
+   "z": 1218.1,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "reeve_mabry",
+   "name": "Reeve Mabry Fenwick",
+   "role": "elder",
+   "at": "Brackwater",
+   "x": 1133.5,
+   "z": 871.8,
+   "yaw": 5,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "eel_woman_wenna",
+   "name": "Wenna Eelwife",
+   "role": "fisher",
+   "at": "Eelwick",
+   "x": 1162.9,
+   "z": 424,
+   "yaw": 4.43,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "tower_keeper_hob",
+   "name": "Keeper Haskel",
+   "role": "guard",
+   "at": "Reedwall Tower",
+   "x": 1055.8,
+   "z": 1193.1,
+   "yaw": 2.95,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "witch_mabry",
+   "name": "Old Mabry",
+   "role": "hedge-witch",
+   "at": "fen_witch_hut",
+   "x": 613.4,
+   "z": 64.2,
+   "yaw": 1.1,
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "the_eel_queens_crown_0",
+   "chain": "the_eel_queens_crown",
+   "step": 0,
+   "clue": "drunks_story",
+   "how": null,
+   "shimmer": null,
+   "x": 1155.3,
+   "z": 471.3,
+   "yaw": 0,
+   "where": "edge of Eelwick",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "the_eel_queens_crown_1",
+   "chain": "the_eel_queens_crown",
+   "step": 1,
+   "clue": "note",
+   "how": null,
+   "shimmer": null,
+   "x": 618.1,
+   "z": 61.7,
+   "yaw": 0,
+   "where": "vignette fen_witch_hut",
+   "radius": 1
+  },
+  {
+   "type": "treasure_cache",
+   "id": "the_eel_queens_crown_2",
+   "chain": "the_eel_queens_crown",
+   "step": 2,
+   "clue": null,
+   "how": "chest",
+   "shimmer": 15,
+   "x": 1055,
+   "z": 1197,
+   "yaw": 0,
+   "where": "fort Reedwall Tower",
+   "radius": 1
+  }
+ ],
+ "features": []
+}

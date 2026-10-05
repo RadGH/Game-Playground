@@ -9,7 +9,7 @@ const root = new URL('../../', import.meta.url);
 const J = p => JSON.parse(readFileSync(new URL(p, root), 'utf8'));
 const PROV = J('data/provinces/torbor_downs.json');
 const ZONES = PROV.zones;
-const VIG = new Set(J('data/vignettes/m1.json').vignettes.map(v => v.id));
+const VIG = new Set(['m1', 'm2', 'm2b'].flatMap(f => J(`data/vignettes/${f}.json`).vignettes.map(v => v.id)));
 const ARCH = J('data/provinces/archetypes.json').archetypes;
 const enemies = J('../farhold/data/enemies.json');
 const BESTIARY = new Set([...enemies.enemies, ...enemies.bosses].map(e => e.id));
@@ -102,7 +102,7 @@ test('province story chain: 8-10 steps, >= 8 zones, bands never fall, quests exi
 });
 
 test('radiant jobs: ~20 frames, slots typed, every {placeholder} is a declared slot, undiscovered places preferred', () => {
-  const TYPES = ['monster', 'vignette', 'settlement', 'fort', 'rare', 'dungeon'];
+  const TYPES = ['monster', 'vignette', 'settlement', 'fort', 'rare', 'dungeon', 'farm', 'cave'];
   assert.ok(JOBS.frames.length >= 18);
   assert.ok(JOBS.rules.preferUndiscovered);
   const ids = new Set();
@@ -117,7 +117,7 @@ test('radiant jobs: ~20 frames, slots typed, every {placeholder} is a declared s
     }
     assert.ok(f.reward.xp > 0 && f.reward.xp <= 1);
   }
-  for (const t of ['monster', 'vignette', 'settlement', 'fort', 'rare']) assert.ok(JOBS.frames.some(f => f.needs.some(n => n.type === t)), `no frame uses ${t}`);
+  for (const t of ['monster', 'vignette', 'settlement', 'fort', 'rare', 'farm', 'cave']) assert.ok(JOBS.frames.some(f => f.needs.some(n => n.type === t)), `no frame uses ${t}`);
 });
 
 test('treasure: one chain starts in every zone, ~1 in 4 crosses 2-3 adjacent zones, clues resolve, caches shimmer', () => {

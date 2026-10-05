@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E (M2b). 26 broadly tagged vignettes (5-7 archetypes, 4+ biomes each) added so tools/assign-vignettes.mjs can meet the variety rule (any 5 connected zones >= 40 distinct). Same format as m1.json.",
+  "_doc": "Stream E (M2b). Broadly tagged vignettes (5-7 archetypes, 4+ biomes each) added so tools/assign-vignettes.mjs can meet the variety rule (any 5 connected zones >= 40 distinct), plus 4 quest-specific ones (fen_witch_hut, tinker_wagon, hunters_hide, cult_cellar) that keep M2 quests off the M1 starter vignettes (no vignette twice within 2 zones). Same format as m1.json.",
   "vignettes": [
     {
       "id": "salt_cart_sunk",
@@ -12,7 +12,8 @@
           "coast",
           "marsh",
           "lake",
-          "grassland"
+          "grassland",
+          "savanna"
         ],
         "archetypes": [
           "coast",
@@ -105,7 +106,10 @@
           "grassland",
           "shrubland",
           "blighted",
-          "hills"
+          "hills",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "blight",
@@ -279,7 +283,10 @@
           "grassland",
           "shrubland",
           "temperateForest",
-          "hills"
+          "hills",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "holy_ground",
@@ -366,7 +373,9 @@
           "mountains",
           "grassland",
           "shrubland",
-          "blighted"
+          "blighted",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "mine_country",
@@ -541,7 +550,9 @@
           "borealForest",
           "hills",
           "marsh",
-          "lake"
+          "lake",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "wilds",
@@ -628,7 +639,9 @@
           "hills",
           "grassland",
           "shrubland",
-          "mountains"
+          "mountains",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "blight",
@@ -725,7 +738,10 @@
           "shrubland",
           "temperateForest",
           "hills",
-          "coast"
+          "coast",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "crown_ring",
@@ -826,7 +842,10 @@
           "marsh",
           "grassland",
           "hills",
-          "lake"
+          "lake",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "wilds",
@@ -922,7 +941,10 @@
           "hills",
           "grassland",
           "shrubland",
-          "blighted"
+          "blighted",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "holy_ground",
@@ -1015,7 +1037,10 @@
           "lake",
           "grassland",
           "coast",
-          "hills"
+          "hills",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "marsh",
@@ -1109,7 +1134,10 @@
           "beach",
           "hills",
           "shrubland",
-          "grassland"
+          "grassland",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "coast",
@@ -1201,7 +1229,9 @@
           "grassland",
           "temperateForest",
           "blighted",
-          "shrubland"
+          "shrubland",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "holy_ground",
@@ -1298,7 +1328,8 @@
           "lake",
           "marsh",
           "grassland",
-          "temperateForest"
+          "temperateForest",
+          "savanna"
         ],
         "archetypes": [
           "lakeland",
@@ -1391,7 +1422,9 @@
           "mountains",
           "temperateForest",
           "borealForest",
-          "shrubland"
+          "shrubland",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "mine_country",
@@ -1485,7 +1518,9 @@
           "shrubland",
           "grassland",
           "mountains",
-          "borealForest"
+          "borealForest",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "frontier",
@@ -1668,7 +1703,10 @@
           "grassland",
           "shrubland",
           "hills",
-          "lake"
+          "lake",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "ruinfield",
@@ -1766,7 +1804,10 @@
           "shrubland",
           "temperateForest",
           "hills",
-          "borealForest"
+          "borealForest",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "frontier",
@@ -1846,7 +1887,9 @@
           "blighted",
           "hills",
           "shrubland",
-          "savanna"
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "blight",
@@ -1931,7 +1974,8 @@
           "grassland",
           "coast",
           "beach",
-          "lake"
+          "lake",
+          "savanna"
         ],
         "archetypes": [
           "crown_ring",
@@ -2020,7 +2064,10 @@
           "hills",
           "lake",
           "shrubland",
-          "marsh"
+          "marsh",
+          "savanna",
+          "badlands",
+          "mountains"
         ],
         "archetypes": [
           "holy_ground",
@@ -2110,7 +2157,9 @@
           "hills",
           "mountains",
           "lake",
-          "grassland"
+          "grassland",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "mine_country",
@@ -2203,7 +2252,9 @@
           "mountains",
           "grassland",
           "shrubland",
-          "blighted"
+          "blighted",
+          "savanna",
+          "badlands"
         ],
         "archetypes": [
           "wilds",
@@ -2371,6 +2422,440 @@
             "seconds": 300
           },
           "text": "You leave a coin. A cold hand pats yours, approvingly."
+        }
+      ]
+    },
+    {
+      "id": "fen_witch_hut",
+      "name": "Old Mabry's Stilt Hut",
+      "blurb": "Brackwater's hedge-witch lives in a hut on stilts at the edge of the reeds; her slime jars have tipped over and the slimes are loose in the shallows. Quest NPC Old Mabry stands here (brackwater).",
+      "lore": "A hut on four crooked legs, a ladder, a shelf of jars. Several of the jars are empty and wobbling away.",
+      "tags": {
+        "biomes": [
+          "marsh",
+          "lake",
+          "grassland",
+          "temperateForest",
+          "savanna"
+        ],
+        "archetypes": [
+          "marsh",
+          "lakeland",
+          "wilds",
+          "heartland"
+        ],
+        "band": [
+          2,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 12,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "drying_rack",
+          "x": -3,
+          "z": -2,
+          "yaw": 0.4
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -2,
+          "z": -4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": 2,
+          "z": -4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": -2,
+          "z": -1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "fence_post",
+          "x": 2,
+          "z": -1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": 3,
+          "z": 1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "skull_totem",
+          "x": -4,
+          "z": 2,
+          "yaw": 0.6
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": 1,
+          "z": 4,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "mushroom_ring",
+          "x": -3,
+          "z": 4,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "bog_slime",
+          "count": 3,
+          "level": 1,
+          "x": 1,
+          "z": 5,
+          "radius": 5
+        }
+      ],
+      "objects": [
+        {
+          "type": "note",
+          "name": "Label on an empty jar",
+          "x": 2.5,
+          "z": 0.5,
+          "text": "SLIME (GREEN). DO NOT OPEN. Mabry, this means you."
+        },
+        {
+          "type": "chest",
+          "name": "Jar shelf",
+          "x": 0,
+          "z": -2.5,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "tinker_wagon",
+      "name": "The Tinker's Wagon",
+      "blurb": "A tinker's painted wagon pulled off the road with a broken axle; rats have got into the stock. Quest NPC Cadoc the tinker stands here (millbrook).",
+      "lore": "Pots hang from every hook of a painted wagon. One wheel is off. So, judging by the squeaking, is the lid of the cheese box.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland",
+          "temperateForest",
+          "savanna",
+          "badlands"
+        ],
+        "archetypes": [
+          "heartland",
+          "crown_ring",
+          "frontier",
+          "lakeland",
+          "pass"
+        ],
+        "band": [
+          1,
+          10
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 12,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "cart_wheel",
+          "x": -2,
+          "z": 1,
+          "yaw": 1.1
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": 2,
+          "z": -1,
+          "yaw": 0.2
+        },
+        {
+          "kind": "prop",
+          "id": "crate",
+          "x": 2.6,
+          "z": 0.4,
+          "yaw": 0.9
+        },
+        {
+          "kind": "prop",
+          "id": "barrel",
+          "x": -3,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "sawhorse",
+          "x": 0,
+          "z": 2.5,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "campfire",
+          "x": 4,
+          "z": 3,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "cairn_rat",
+          "count": 4,
+          "level": 0,
+          "x": -1,
+          "z": 4,
+          "radius": 4
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Grindstone",
+          "x": 1,
+          "z": 2.5,
+          "buff": {
+            "status": "might",
+            "seconds": 300
+          },
+          "text": "You give your blade a turn on the tinker's grindstone. It comes away sharper and so do you."
+        },
+        {
+          "type": "chest",
+          "name": "Spare-parts box",
+          "x": 2.3,
+          "z": -0.2,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "hunters_hide",
+      "name": "The Hunter's Hide",
+      "blurb": "A brushwood hide above a churned boar wallow; the hunter lost his bow in the mud and his dog to the hounds. Quest NPC Hob the hunter waits here (wychwood).",
+      "lore": "A screen of cut branches, a stool, and below it a wallow churned to soup. A bowstring sticks up out of the mud like a question.",
+      "tags": {
+        "biomes": [
+          "temperateForest",
+          "borealForest",
+          "hills",
+          "grassland",
+          "savanna",
+          "badlands",
+          "mountains"
+        ],
+        "archetypes": [
+          "wilds",
+          "frontier",
+          "pass",
+          "mine_country"
+        ],
+        "band": [
+          3,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 13,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "wood_pile",
+          "x": -3,
+          "z": -3,
+          "yaw": 0.2
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": -1,
+          "z": -4,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "palisade_stake",
+          "x": 1,
+          "z": -4,
+          "yaw": 0.1
+        },
+        {
+          "kind": "prop",
+          "id": "drying_rack",
+          "x": 3,
+          "z": -3,
+          "yaw": 1.2
+        },
+        {
+          "kind": "ground",
+          "id": "puddle_ring",
+          "x": 0,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "ground",
+          "id": "root_mat",
+          "x": -3,
+          "z": 3,
+          "yaw": 0.5
+        },
+        {
+          "kind": "tree",
+          "id": "oak",
+          "x": 5,
+          "z": -1,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "thicket_boar",
+          "count": 3,
+          "level": 2,
+          "x": 0,
+          "z": 4,
+          "radius": 5
+        }
+      ],
+      "objects": [
+        {
+          "type": "chest",
+          "name": "Bow in the mud",
+          "x": 0.5,
+          "z": 2.5,
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "cult_cellar",
+      "name": "The Cloud-Shouters' Cellar",
+      "blurb": "A burned frontier farm with a cellar where sky cultists meet to shout at the weather. Quest NPC Scout Tamsin watches it (redcliff).",
+      "lore": "The farmhouse is ash. The cellar door is new, and from under it comes a voice telling the clouds exactly what it thinks of them.",
+      "tags": {
+        "biomes": [
+          "grassland",
+          "shrubland",
+          "savanna",
+          "hills",
+          "badlands",
+          "mountains"
+        ],
+        "archetypes": [
+          "frontier",
+          "blight",
+          "heartland",
+          "ruinfield"
+        ],
+        "band": [
+          4,
+          12
+        ],
+        "cultures": [
+          "any"
+        ]
+      },
+      "radius": 13,
+      "props": [
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": -4,
+          "z": -2,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "ruined_wall",
+          "x": 3,
+          "z": -3,
+          "yaw": 1.57
+        },
+        {
+          "kind": "ground",
+          "id": "ash_patch",
+          "x": 0,
+          "z": -1,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "banner_pole",
+          "x": -2,
+          "z": 3,
+          "yaw": 0
+        },
+        {
+          "kind": "prop",
+          "id": "rune_stone",
+          "x": 2,
+          "z": 2,
+          "yaw": 0.7
+        },
+        {
+          "kind": "prop",
+          "id": "torch_post",
+          "x": -1,
+          "z": 1,
+          "yaw": 0
+        }
+      ],
+      "monsters": [
+        {
+          "type": "sky_cultist",
+          "count": 2,
+          "level": 2,
+          "x": 2,
+          "z": 4,
+          "radius": 4
+        },
+        {
+          "type": "cult_zealot",
+          "count": 1,
+          "level": 3,
+          "x": -2,
+          "z": 4,
+          "radius": 3
+        }
+      ],
+      "objects": [
+        {
+          "type": "use",
+          "name": "Cellar door",
+          "x": 0,
+          "z": 0,
+          "text": "Behind the door: candles, a chalk circle and a list of grievances against the sky."
+        },
+        {
+          "type": "chest",
+          "name": "Offering box",
+          "x": 0.5,
+          "z": -0.5,
+          "tier": "uncommon",
+          "after": "Cellar door"
         }
       ]
     }

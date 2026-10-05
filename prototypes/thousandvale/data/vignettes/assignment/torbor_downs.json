@@ -1,189 +1,246 @@
 {
   "_doc": "Stream E. Which vignettes each zone of Torbor Downs gets (tools/assign-vignettes.mjs). Coordinates are NOT here: tools/place-vignettes.mjs places them on the baked zone once stream B publishes it. Hard rule: no repeats within 2 zones; soft: within 3. Variety: every connected set of 5 zones holds >= 40 distinct vignettes.",
   "province": "torbor_downs",
-  "perZone": 9,
+  "perZone": 10,
   "check": {
     "hard": 0,
-    "soft": 8,
-    "minSet": 40,
-    "cost": -19.65573770491803
+    "soft": 17,
+    "minSet": 42,
+    "cost": 3.278688524590166
+  },
+  "pinned": {
+    "hollin_pass": [],
+    "ashcombe": [
+      "duel_stones"
+    ],
+    "brackwater": [
+      "fen_witch_hut"
+    ],
+    "saltmouth": [
+      "smugglers_cellar"
+    ],
+    "delvers_hill": [
+      "dry_well"
+    ],
+    "test": [
+      "overturned_cart",
+      "boar_wallow",
+      "hanging_oak",
+      "hedge_witch_garden"
+    ],
+    "torbor_cross": [],
+    "gullwick": [
+      "drowned_shrine"
+    ],
+    "wychwood": [
+      "hunters_hide"
+    ],
+    "saint_orrins_rise": [
+      "drowned_shrine"
+    ],
+    "millbrook": [
+      "tinker_wagon"
+    ],
+    "redcliff": [
+      "cult_cellar"
+    ],
+    "blackthorn_scar": [],
+    "coldwater": [],
+    "gorse_march": [],
+    "sunken_wolds": []
   },
   "zones": {
     "hollin_pass": [
-      "antlered_skull",
-      "goblin_market_stones",
-      "overturned_cart",
-      "pilgrim_footbath",
-      "rotting_gibbet_cage",
+      "drift_mine_entry",
+      "hanging_sign_inn",
+      "miners_shrine",
+      "pilgrim_camp",
+      "quarry_crane",
+      "roadside_shrine",
       "smugglers_beacon",
+      "tinker_wagon",
       "toll_bridge_trolls",
-      "wardens_cairn",
-      "watchtower_ruin"
+      "trapper_lines"
     ],
     "ashcombe": [
+      "ash_choir_stones",
       "bone_pit",
-      "drift_mine_entry",
+      "collapsed_mine_mouth",
+      "cult_cellar",
       "duel_stones",
-      "hollow_dragon_skull",
-      "old_battlefield",
-      "plague_pit_cairn",
-      "quarry_ledge",
-      "siege_camp_leftovers",
-      "sinkhole_garden"
+      "goblin_market_stones",
+      "heretic_stake",
+      "noble_folly",
+      "toppled_statue",
+      "watchtower_ruin"
     ],
     "brackwater": [
+      "beekeeper_hives",
+      "drowned_belfry",
       "eel_traps",
+      "fen_witch_hut",
+      "ferryman_shrine",
       "flooded_mill",
-      "hedge_witch_garden",
-      "lock_keeper_house",
       "lone_archer_post",
-      "peat_cutters",
-      "quarry_crane",
       "tar_pits",
-      "weavers_bridge_toll"
+      "weavers_bridge_toll",
+      "witch_stump"
     ],
     "saltmouth": [
+      "chained_tree",
       "dark_lighthouse",
-      "drowned_belfry",
-      "drowned_chapel",
-      "dry_well",
-      "fishwife_stall",
-      "mudlark_flats",
-      "ore_cart_spill",
-      "pump_house",
-      "wreck_on_the_rocks"
+      "ferry_landing",
+      "guildhall_ruin",
+      "hunters_hide",
+      "market_cross",
+      "salt_cart_sunk",
+      "slag_heap_shrine",
+      "smugglers_cellar",
+      "stone_circle_hum"
     ],
     "delvers_hill": [
       "avalanche_shelter",
-      "charcoal_clamps",
-      "collapsed_mine_mouth",
-      "collapsed_tithe_barn",
       "dry_well",
+      "frozen_tarn",
       "guildhall_ruin",
-      "miners_shrine",
-      "pump_house",
-      "slag_heap_shrine"
+      "peat_cutters",
+      "quarry_ledge",
+      "salt_cart_sunk",
+      "tide_bell_post",
+      "wardens_cairn",
+      "woodcutter_axe"
     ],
     "test": [
-      "ash_choir_stones",
-      "beekeeper_hives",
       "blighted_orchard",
-      "burned_farmstead",
-      "gallows_crossroads",
-      "noble_folly",
-      "smugglers_cellar",
-      "tide_bell_post",
-      "woodcutter_axe"
+      "boar_wallow",
+      "charcoal_clamps",
+      "fishwife_stall",
+      "hanging_oak",
+      "hedge_witch_garden",
+      "market_cross",
+      "overturned_cart",
+      "plague_pit_cairn",
+      "slag_heap_shrine"
     ],
     "torbor_cross": [
       "ash_wisp_crater",
       "bone_orchard",
-      "ferry_landing",
-      "giants_cookfire",
-      "hanging_sign_inn",
-      "pilgrim_footbath",
+      "gallows_crossroads",
+      "lock_keeper_house",
+      "quarry_crane",
       "roadside_shrine",
+      "rotting_gibbet_cage",
       "sewer_grate",
+      "siege_camp_leftovers",
       "sunken_stair"
     ],
     "gullwick": [
-      "ferryman_shrine",
-      "hanging_oak",
+      "broken_aqueduct",
+      "drowned_chapel",
+      "drowned_shrine",
       "heron_island",
-      "market_cross",
-      "salt_cart_sunk",
-      "smugglers_cove",
+      "mudlark_flats",
       "stilt_house",
+      "tide_bell_post",
       "toll_bridge_trolls",
-      "will_o_lights"
+      "will_o_lights",
+      "wreck_on_the_rocks"
     ],
     "wychwood": [
+      "beekeeper_hives",
+      "broken_caravan_survivor",
       "drowned_belfry",
+      "fen_witch_hut",
+      "giants_cookfire",
+      "goblin_market_stones",
+      "hunters_hide",
+      "lone_archer_post",
+      "warband_totem",
+      "witch_stump"
+    ],
+    "saint_orrins_rise": [
+      "antlered_skull",
+      "chained_tree",
+      "collapsed_tithe_barn",
+      "drowned_shrine",
+      "hermits_hollow",
+      "hollow_dragon_skull",
+      "pilgrim_camp",
+      "pilgrim_footbath",
+      "ruined_bell_tower",
+      "stone_circle_hum"
+    ],
+    "millbrook": [
+      "burned_farmstead",
+      "dry_well",
+      "fairy_ring",
+      "hanging_sign_inn",
+      "ore_cart_spill",
+      "pump_house",
+      "quarry_ledge",
+      "sinkhole_garden",
+      "tinker_wagon",
+      "woodcutter_axe"
+    ],
+    "redcliff": [
+      "blighted_orchard",
+      "bone_pit",
+      "cult_cellar",
+      "cultist_altar",
+      "heretic_stake",
+      "miners_shrine",
+      "old_battlefield",
+      "smugglers_beacon",
+      "smugglers_cove",
+      "wardens_cairn"
+    ],
+    "blackthorn_scar": [
+      "ash_choir_stones",
+      "bone_orchard",
+      "burned_farmstead",
+      "cult_cellar",
+      "cultist_altar",
+      "gallows_crossroads",
+      "heretic_stake",
+      "old_battlefield",
+      "rotting_gibbet_cage",
+      "siege_camp_leftovers"
+    ],
+    "coldwater": [
+      "broken_aqueduct",
+      "dark_lighthouse",
+      "drift_mine_entry",
+      "ferry_landing",
+      "ferryman_shrine",
+      "flooded_mill",
+      "roadside_shrine",
+      "smugglers_beacon",
+      "toll_bridge_trolls",
+      "trapper_lines"
+    ],
+    "gorse_march": [
+      "avalanche_shelter",
+      "guildhall_ruin",
+      "hunters_hide",
+      "noble_folly",
+      "peat_cutters",
+      "salt_cart_sunk",
+      "slag_heap_shrine",
+      "smugglers_cellar",
+      "toppled_statue",
+      "watchtower_ruin"
+    ],
+    "sunken_wolds": [
+      "beekeeper_hives",
+      "charcoal_clamps",
+      "duel_stones",
       "frozen_tarn",
+      "giants_cookfire",
       "hanging_oak",
       "hedge_witch_garden",
       "lone_archer_post",
       "tar_pits",
-      "trapper_lines",
-      "warband_totem",
-      "will_o_lights"
-    ],
-    "saint_orrins_rise": [
-      "cultist_altar",
-      "drowned_chapel",
-      "drowned_shrine",
-      "goblin_market_stones",
-      "heretic_stake",
-      "hermits_hollow",
-      "pilgrim_camp",
-      "ruined_bell_tower",
-      "witch_stump"
-    ],
-    "millbrook": [
-      "boar_wallow",
-      "broken_aqueduct",
-      "broken_caravan_survivor",
-      "chained_tree",
-      "charcoal_clamps",
-      "fairy_ring",
-      "fishwife_stall",
-      "rotting_gibbet_cage",
-      "stone_circle_hum"
-    ],
-    "redcliff": [
-      "avalanche_shelter",
-      "bone_pit",
-      "drift_mine_entry",
-      "guildhall_ruin",
-      "old_battlefield",
-      "plague_pit_cairn",
-      "smugglers_beacon",
-      "toppled_statue",
-      "trapper_lines"
-    ],
-    "blackthorn_scar": [
-      "ash_wisp_crater",
-      "bone_pit",
-      "chained_tree",
-      "dark_lighthouse",
-      "drift_mine_entry",
-      "hanging_sign_inn",
-      "old_battlefield",
-      "roadside_shrine",
       "weavers_bridge_toll"
-    ],
-    "coldwater": [
-      "eel_traps",
-      "ferryman_shrine",
-      "lock_keeper_house",
-      "market_cross",
-      "mudlark_flats",
-      "quarry_crane",
-      "salt_cart_sunk",
-      "stilt_house",
-      "wreck_on_the_rocks"
-    ],
-    "gorse_march": [
-      "collapsed_tithe_barn",
-      "hollow_dragon_skull",
-      "overturned_cart",
-      "quarry_ledge",
-      "siege_camp_leftovers",
-      "slag_heap_shrine",
-      "toll_bridge_trolls",
-      "wardens_cairn",
-      "watchtower_ruin"
-    ],
-    "sunken_wolds": [
-      "ash_choir_stones",
-      "beekeeper_hives",
-      "collapsed_mine_mouth",
-      "duel_stones",
-      "frozen_tarn",
-      "hedge_witch_garden",
-      "hermits_hollow",
-      "lone_archer_post",
-      "sinkhole_garden"
     ]
   }
 }

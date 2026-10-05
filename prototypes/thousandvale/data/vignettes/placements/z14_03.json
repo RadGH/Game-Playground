@@ -1,0 +1,836 @@
+{
+ "_doc": "Stream E. Content placements for world zone z14_03 (E zone 'redcliff', The Redcliff Frontier) — tools/place-vignettes.mjs against stream B's bake (terrain 8e298447). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z14_03",
+ "sheetZone": "redcliff",
+ "province": "torbor_downs",
+ "terrainHash": "8e298447",
+ "band": [
+  6,
+  8
+ ],
+ "archetype": "frontier",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  }
+ },
+ "mainWalkableShare": 0.973,
+ "settlements": [
+  {
+   "name": "Redcliff",
+   "kind": "village",
+   "x": 416,
+   "z": 880,
+   "r": 65,
+   "source": "bake",
+   "bakeId": "hollowcross"
+  },
+  {
+   "name": "Cinder Farm",
+   "kind": "village",
+   "x": 1216,
+   "z": 1712,
+   "r": 65,
+   "source": "bake",
+   "bakeId": "bolwathold"
+  },
+  {
+   "name": "Ravenhaven",
+   "kind": "hamlet",
+   "x": 112,
+   "z": 224,
+   "r": 46,
+   "source": "bake",
+   "bakeId": "ravenhaven"
+  },
+  {
+   "name": "Minfenrow",
+   "kind": "hamlet",
+   "x": 1104,
+   "z": 1088,
+   "r": 46,
+   "source": "bake",
+   "bakeId": "minfenrow"
+  },
+  {
+   "name": "Bipetwatch",
+   "kind": "hamlet",
+   "x": 320,
+   "z": 1424,
+   "r": 46,
+   "source": "bake",
+   "bakeId": "bipetwatch"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 556,
+   "z": 1008,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_redcliff",
+   "kind": "event_site",
+   "x": 693,
+   "z": 969,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_redcliff_0",
+   "name": "Redcliff Fort",
+   "template": "palisade_fort",
+   "friendly": true,
+   "x": 1464,
+   "z": 1527,
+   "yaw": -1.57,
+   "radius": 24,
+   "level": 6
+  },
+  {
+   "type": "fort",
+   "id": "fort_redcliff_1",
+   "name": "Redcliff Outpost",
+   "template": "palisade_fort",
+   "friendly": true,
+   "x": 257,
+   "z": 724,
+   "yaw": -1.96,
+   "radius": 24,
+   "level": 6
+  },
+  {
+   "type": "farm",
+   "id": "farm_redcliff_0",
+   "name": "Redcliff Farm",
+   "template": "arable",
+   "flavour": null,
+   "settlement": "Redcliff",
+   "x": 275,
+   "z": 1325,
+   "yaw": 0.39,
+   "radius": 22,
+   "level": 6
+  },
+  {
+   "type": "farm",
+   "id": "farm_redcliff_1",
+   "name": "Cinder Farm Sheepfold",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Cinder Farm",
+   "x": 1122,
+   "z": 1789,
+   "yaw": 2.36,
+   "radius": 24,
+   "level": 6
+  },
+  {
+   "type": "farm",
+   "id": "farm_redcliff_2",
+   "name": "Burned Ravenhaven Sheepfold",
+   "template": "sheep",
+   "flavour": "burned",
+   "settlement": "Ravenhaven",
+   "x": 82,
+   "z": 133,
+   "yaw": -0.39,
+   "radius": 24,
+   "level": 6
+  },
+  {
+   "type": "farm",
+   "id": "farm_redcliff_3",
+   "name": "Burned Minfenrow Farm",
+   "template": "arable",
+   "flavour": "burned",
+   "settlement": "Minfenrow",
+   "x": 1155,
+   "z": 1008,
+   "yaw": -0.39,
+   "radius": 22,
+   "level": 6
+  },
+  {
+   "type": "farm",
+   "id": "farm_redcliff_4",
+   "name": "Burned Bipetwatch Farm",
+   "template": "arable",
+   "flavour": "burned",
+   "settlement": "Bipetwatch",
+   "x": 477,
+   "z": 985,
+   "yaw": -2.75,
+   "radius": 22,
+   "level": 6
+  },
+  {
+   "type": "cave",
+   "id": "cave_redcliff_0",
+   "name": "Beast den",
+   "template": "beast_den",
+   "plan": {
+    "family": "cave_river",
+    "floors": 1,
+    "level": 7
+   },
+   "x": 642,
+   "z": 301,
+   "yaw": -1.57,
+   "radius": 10,
+   "level": 7
+  },
+  {
+   "type": "cave",
+   "id": "cave_redcliff_1",
+   "name": "Smugglers' cave",
+   "template": "smugglers_cave",
+   "plan": {
+    "family": "flooded_cistern",
+    "floors": 1,
+    "level": 7
+   },
+   "x": 551,
+   "z": 228,
+   "yaw": -1.57,
+   "radius": 10,
+   "level": 7
+  },
+  {
+   "type": "hook",
+   "id": "the_red_cliff_face",
+   "name": "The Carved Cliff",
+   "kind": "compositional",
+   "x": 559,
+   "z": 408,
+   "yaw": 0,
+   "radius": 20,
+   "where": "best fit for: a cliff beside a road",
+   "needMet": true
+  },
+  {
+   "type": "vignette",
+   "id": "blighted_orchard",
+   "name": "The Grey Orchard",
+   "x": 1478,
+   "z": 238,
+   "yaw": 2.26,
+   "radius": 13,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "bone_pit",
+   "name": "The Bone Pit",
+   "x": 240,
+   "z": 1946,
+   "yaw": 0.84,
+   "radius": 12,
+   "biome": "savanna",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "cult_cellar",
+   "name": "The Cloud-Shouters' Cellar",
+   "x": 1940,
+   "z": 1110,
+   "yaw": 4.85,
+   "radius": 13,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "cultist_altar",
+   "name": "The Sky Altar",
+   "x": 1963,
+   "z": 1874,
+   "yaw": 3.35,
+   "radius": 13,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "heretic_stake",
+   "name": "The Heretic's Stake",
+   "x": 1968,
+   "z": 504,
+   "yaw": 5.02,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "miners_shrine",
+   "name": "The Miners' Lamp Shrine",
+   "x": 1530,
+   "z": 727,
+   "yaw": 5.01,
+   "radius": 8,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "old_battlefield",
+   "name": "The Old Battlefield",
+   "x": 1064,
+   "z": 508,
+   "yaw": 0.74,
+   "radius": 15,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "smugglers_beacon",
+   "name": "The False Beacon",
+   "x": 631,
+   "z": 1669,
+   "yaw": 5.39,
+   "radius": 11,
+   "biome": "savanna",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "smugglers_cove",
+   "name": "Smugglers' Cove",
+   "x": 814,
+   "z": 1253,
+   "yaw": 2.12,
+   "radius": 12,
+   "biome": "temperateForest",
+   "biomeFits": false,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "wardens_cairn",
+   "name": "The Warden's Cairn",
+   "x": 1070,
+   "z": 66,
+   "yaw": 0.77,
+   "radius": 10,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_0_0",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1891,
+   "z": 100,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_0_1",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1560,
+   "z": 1977,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_1_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1919,
+   "z": 1487,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_1_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1528,
+   "z": 1099,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_2_0",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1143,
+   "z": 1393,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_2_1",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 923,
+   "z": 1566,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_3_0",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 830,
+   "z": 1985,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_3_1",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 746,
+   "z": 706,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_4_0",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 351,
+   "z": 678,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_4_1",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 63,
+   "z": 1023,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_5_0",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 402,
+   "z": 679,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_5_1",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 789,
+   "z": 964,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_6_0",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 546,
+   "z": 1221,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_6_1",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    8
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 285,
+   "z": 1086,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_redfang",
+   "slot": 0,
+   "name": "Redfang",
+   "x": 142,
+   "z": 447,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     84,
+     499
+    ],
+    [
+     50,
+     417
+    ],
+    [
+     163,
+     377
+    ],
+    [
+     214,
+     401
+    ],
+    [
+     198,
+     537
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 8
+  },
+  {
+   "type": "rare",
+   "id": "rare_wynn_two_strings",
+   "slot": 1,
+   "name": "Wynn Two-Strings",
+   "x": 702,
+   "z": 456,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     718,
+     364
+    ],
+    [
+     787,
+     468
+    ],
+    [
+     739,
+     550
+    ],
+    [
+     647,
+     492
+    ],
+    [
+     663,
+     396
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 8
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z14_03_redcliff",
+   "name": "Redcliff",
+   "x": 505.2,
+   "z": 877.3,
+   "yaw": 0,
+   "settlement": "Redcliff",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z14_03_cinder_farm",
+   "name": "Cinder Farm",
+   "x": 1207,
+   "z": 1620.5,
+   "yaw": 0,
+   "settlement": "Cinder Farm",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z14_03_ravenhaven",
+   "name": "Ravenhaven",
+   "x": 56.5,
+   "z": 224.8,
+   "yaw": 0,
+   "settlement": "Ravenhaven",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z14_03_minfenrow",
+   "name": "Minfenrow",
+   "x": 1036.5,
+   "z": 1080.4,
+   "yaw": 0,
+   "settlement": "Minfenrow",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z14_03_bipetwatch",
+   "name": "Bipetwatch",
+   "x": 276.5,
+   "z": 1479.5,
+   "yaw": 0,
+   "settlement": "Bipetwatch",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z14_03_door",
+   "name": "Barrow entrance",
+   "x": 590.7,
+   "z": 984.2,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "commander_hild",
+   "name": "Commander Hild Barrowman",
+   "role": "guard",
+   "at": "Redcliff Fort",
+   "x": 1466.1,
+   "z": 1526.5,
+   "yaw": 4.81,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "farmer_wat",
+   "name": "Wat of Cinder Farm",
+   "role": "farmer",
+   "at": "Cinder Farm",
+   "x": 1214.3,
+   "z": 1708.3,
+   "yaw": 4.83,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "quartermaster_pike",
+   "name": "Quartermaster Pike",
+   "role": "trader",
+   "at": "Redcliff",
+   "x": 409.1,
+   "z": 890.6,
+   "yaw": 6.09,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "scout_orla",
+   "name": "Scout Tamsin",
+   "role": "scout",
+   "at": "cult_cellar",
+   "x": 1942.1,
+   "z": 1111.4,
+   "yaw": 2.69,
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "the_red_paymaster_0",
+   "chain": "the_red_paymaster",
+   "step": 0,
+   "clue": "note",
+   "how": null,
+   "shimmer": null,
+   "x": 1465.4,
+   "z": 1525.5,
+   "yaw": 0,
+   "where": "fort Redcliff Fort",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "the_red_paymaster_1",
+   "chain": "the_red_paymaster",
+   "step": 1,
+   "clue": "carved_arrow",
+   "how": null,
+   "shimmer": null,
+   "x": 1158.3,
+   "z": 1672,
+   "yaw": 0,
+   "where": "edge of Cinder Farm",
+   "radius": 1
+  }
+ ],
+ "features": []
+}

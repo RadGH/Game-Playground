@@ -1,0 +1,706 @@
+{
+ "_doc": "Stream E. Content placements for world zone z12_03 (E zone 'saint_orrins_rise', Saint Orrin's Rise) — tools/place-vignettes.mjs against stream B's bake (terrain c5264009). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z12_03",
+ "sheetZone": "saint_orrins_rise",
+ "province": "torbor_downs",
+ "terrainHash": "c5264009",
+ "band": [
+  3,
+  5
+ ],
+ "archetype": "holy_ground",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  }
+ },
+ "mainWalkableShare": 0.858,
+ "settlements": [
+  {
+   "name": "Orrinsford",
+   "kind": "village",
+   "x": 336,
+   "z": 576,
+   "r": 65,
+   "source": "bake",
+   "bakeId": "wolfkeep"
+  },
+  {
+   "name": "Pilgrim's Halt",
+   "kind": "hamlet",
+   "x": 672,
+   "z": 240,
+   "r": 46,
+   "source": "bake",
+   "bakeId": "duskhaven"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 350,
+   "z": 735,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_saint_orrins_rise",
+   "kind": "event_site",
+   "x": 327,
+   "z": 872,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_saint_orrins_rise_0",
+   "name": "the Abbey Wall",
+   "template": "stone_keep",
+   "friendly": true,
+   "x": 108,
+   "z": 1282,
+   "yaw": -0.79,
+   "radius": 28,
+   "level": 3
+  },
+  {
+   "type": "farm",
+   "id": "farm_saint_orrins_rise_0",
+   "name": "Orrinsford Sheepfold",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Orrinsford",
+   "x": 287,
+   "z": 689,
+   "yaw": 2.75,
+   "radius": 24,
+   "level": 3
+  },
+  {
+   "type": "farm",
+   "id": "farm_saint_orrins_rise_1",
+   "name": "Pilgrim's Halt Orchard",
+   "template": "orchard",
+   "flavour": null,
+   "settlement": "Pilgrim's Halt",
+   "x": 753,
+   "z": 146,
+   "yaw": -0.39,
+   "radius": 24,
+   "level": 3
+  },
+  {
+   "type": "cave",
+   "id": "cave_saint_orrins_rise_0",
+   "name": "Barrow mound",
+   "template": "barrow_mound",
+   "plan": {
+    "family": "barrow_maze",
+    "floors": 1,
+    "level": 4
+   },
+   "x": 1241,
+   "z": 1541,
+   "yaw": 0,
+   "radius": 10,
+   "level": 4
+  },
+  {
+   "type": "cave",
+   "id": "cave_saint_orrins_rise_1",
+   "name": "Barrow mound",
+   "template": "barrow_mound",
+   "plan": {
+    "family": "barrow_maze",
+    "floors": 1,
+    "level": 4
+   },
+   "x": 1734,
+   "z": 1127,
+   "yaw": 0.79,
+   "radius": 10,
+   "level": 4
+  },
+  {
+   "type": "hook",
+   "id": "the_thousand_candles",
+   "name": "The Thousand Candles",
+   "kind": "compositional",
+   "x": 491,
+   "z": 106,
+   "yaw": 0,
+   "radius": 20,
+   "where": "best fit for: a slope facing a road",
+   "needMet": true
+  },
+  {
+   "type": "vignette",
+   "id": "antlered_skull",
+   "name": "The Stag Shrine",
+   "x": 1172,
+   "z": 913,
+   "yaw": 2.1,
+   "radius": 10,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "chained_tree",
+   "name": "The Chained Oak",
+   "x": 1532,
+   "z": 391,
+   "yaw": 4.75,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "collapsed_tithe_barn",
+   "name": "The Tithe Barn",
+   "x": 1982,
+   "z": 1986,
+   "yaw": 6.15,
+   "radius": 13,
+   "biome": "shrubland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "drowned_shrine",
+   "name": "The Drowned Shrine",
+   "x": 319,
+   "z": 353,
+   "yaw": 5.66,
+   "radius": 11,
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "hermits_hollow",
+   "name": "The Hermit's Hollow",
+   "x": 333,
+   "z": 1867,
+   "yaw": 2.28,
+   "radius": 9,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "hollow_dragon_skull",
+   "name": "The Great Skull",
+   "x": 1988,
+   "z": 93,
+   "yaw": 5.93,
+   "radius": 13,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "pilgrim_camp",
+   "name": "The Pilgrims' Rest",
+   "x": 996,
+   "z": 1961,
+   "yaw": 3.46,
+   "radius": 13,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "pilgrim_footbath",
+   "name": "The Footbath of Saint Ida",
+   "x": 791,
+   "z": 1292,
+   "yaw": 5.35,
+   "radius": 11,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "ruined_bell_tower",
+   "name": "The Fallen Bell",
+   "x": 1974,
+   "z": 604,
+   "yaw": 2.69,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "stone_circle_hum",
+   "name": "The Humming Stones",
+   "x": 1071,
+   "z": 459,
+   "yaw": 2.97,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_0_0",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1473,
+   "z": 1921,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_0_1",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1246,
+   "z": 84,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_1_0",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 689,
+   "z": 608,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_1_1",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1841,
+   "z": 1553,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_2_0",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1583,
+   "z": 777,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_2_1",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 475,
+   "z": 1041,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_3_0",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 518,
+   "z": 1499,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_3_1",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 112,
+   "z": 1619,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_4_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 125,
+   "z": 69,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_4_1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 789,
+   "z": 929,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_5_0",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 931,
+   "z": 1590,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_saint_orrins_rise_5_1",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 100,
+   "z": 957,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_brother_penance",
+   "slot": 0,
+   "name": "Brother Penance",
+   "x": 93,
+   "z": 750,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     87,
+     822
+    ],
+    [
+     23,
+     736
+    ],
+    [
+     49,
+     675
+    ],
+    [
+     152,
+     686
+    ],
+    [
+     144,
+     803
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 5
+  },
+  {
+   "type": "rare",
+   "id": "rare_vesper_bell_owl",
+   "slot": 1,
+   "name": "Vesper",
+   "x": 1643,
+   "z": 155,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1591,
+     117
+    ],
+    [
+     1648,
+     87
+    ],
+    [
+     1705,
+     164
+    ],
+    [
+     1670,
+     200
+    ],
+    [
+     1595,
+     210
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 5
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z12_03_orrinsford",
+   "name": "Orrinsford",
+   "x": 259.2,
+   "z": 566.4,
+   "yaw": 0,
+   "settlement": "Orrinsford",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z12_03_pilgrim_s_halt",
+   "name": "Pilgrim's Halt",
+   "x": 623.9,
+   "z": 214.7,
+   "yaw": 0,
+   "settlement": "Pilgrim's Halt",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z12_03_door",
+   "name": "Barrow entrance",
+   "x": 349.6,
+   "z": 777.2,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "abbot_wendel",
+   "name": "Prior Wendel",
+   "role": "elder",
+   "at": "Orrinsford",
+   "x": 329.3,
+   "z": 565.5,
+   "yaw": 3.76,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "sister_hild",
+   "name": "Sister Hild",
+   "role": "healer",
+   "at": "Pilgrim's Halt",
+   "x": 672,
+   "z": 247.9,
+   "yaw": 4.12,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "brother_tobin",
+   "name": "Brother Tobin",
+   "role": "guard",
+   "at": "the Abbey Wall",
+   "x": 109.4,
+   "z": 1280.5,
+   "yaw": 3.39,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "pilgrim_nell",
+   "name": "Nell the pilgrim",
+   "role": "pilgrim",
+   "at": "drowned_shrine",
+   "x": 316.9,
+   "z": 354.4,
+   "yaw": 2.66,
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "the_abbots_tithe_0",
+   "chain": "the_abbots_tithe",
+   "step": 0,
+   "clue": "gravestone",
+   "how": null,
+   "shimmer": null,
+   "x": 324,
+   "z": 645,
+   "yaw": 0,
+   "where": "edge of Orrinsford",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "the_abbots_tithe_1",
+   "chain": "the_abbots_tithe",
+   "step": 1,
+   "clue": "carved_arrow",
+   "how": null,
+   "shimmer": null,
+   "x": 109.4,
+   "z": 1283.5,
+   "yaw": 0,
+   "where": "fort the Abbey Wall",
+   "radius": 1
+  },
+  {
+   "type": "treasure_cache",
+   "id": "the_abbots_tithe_2",
+   "chain": "the_abbots_tithe",
+   "step": 2,
+   "clue": null,
+   "how": "dig",
+   "shimmer": 15,
+   "x": 125.5,
+   "z": 1396.4,
+   "yaw": 0,
+   "where": "near the Abbey Wall",
+   "radius": 1
+  }
+ ],
+ "features": []
+}

@@ -235,13 +235,13 @@
           "at": {
             "site": "Eelwick"
           },
-          "text": "Wenna's uncle tells of an 'eel queen' who wore a tin crown and hid it from the taxman in the witch's garden."
+          "text": "Wenna's uncle tells of an 'eel queen' who wore a tin crown and hid it from the taxman in the witch's hut."
         },
         {
           "zone": "brackwater",
           "clue": "note",
-          "at": "hedge_witch_garden",
-          "text": "A note under a jar in the witch's garden: 'Crown's in the tower, top step, the creaky one. — M.'"
+          "at": "fen_witch_hut",
+          "text": "A note under a jar in the witch's hut: 'Crown's in the tower, top step, the creaky one. — M.'"
         }
       ],
       "cache": {
@@ -351,8 +351,8 @@
         {
           "zone": "wychwood",
           "clue": "carved_arrow",
-          "at": "boar_wallow",
-          "text": "At the boar wallow, an arrow carved into an oak root."
+          "at": "hunters_hide",
+          "text": "At the boar wallow below the hunter's hide, an arrow carved into an oak root."
         }
       ],
       "cache": {

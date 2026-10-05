@@ -1,0 +1,679 @@
+{
+ "_doc": "Stream E. Content placements for world zone z12_04 (E zone 'coldwater', Coldwater Mere) — tools/place-vignettes.mjs against stream B's bake (terrain 64fa44ba). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z12_04",
+ "sheetZone": "coldwater",
+ "province": "torbor_downs",
+ "terrainHash": "64fa44ba",
+ "band": [
+  5,
+  7
+ ],
+ "archetype": "lakeland",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  }
+ },
+ "mainWalkableShare": 0.805,
+ "settlements": [
+  {
+   "name": "Coldwater",
+   "kind": "town",
+   "x": 1474,
+   "z": 1846,
+   "r": 70,
+   "source": "ask",
+   "bakeId": null
+  },
+  {
+   "name": "Netherby",
+   "kind": "hamlet",
+   "x": 711,
+   "z": 732,
+   "r": 40,
+   "source": "ask",
+   "bakeId": null
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 1761,
+   "z": 1815,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_coldwater",
+   "kind": "event_site",
+   "x": 736,
+   "z": 1301,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_coldwater_0",
+   "name": "Mere Tower",
+   "template": "watchtower_garrison",
+   "friendly": true,
+   "x": 271,
+   "z": 445,
+   "yaw": 0.79,
+   "radius": 16,
+   "level": 5
+  },
+  {
+   "type": "farm",
+   "id": "farm_coldwater_0",
+   "name": "Coldwater Farm",
+   "template": "arable",
+   "flavour": null,
+   "settlement": "Coldwater",
+   "x": 1527,
+   "z": 1741,
+   "yaw": -1.96,
+   "radius": 22,
+   "level": 5
+  },
+  {
+   "type": "farm",
+   "id": "farm_coldwater_1",
+   "name": "Netherby Farm",
+   "template": "arable",
+   "flavour": null,
+   "settlement": "Netherby",
+   "x": 654,
+   "z": 929,
+   "yaw": -1.57,
+   "radius": 22,
+   "level": 5
+  },
+  {
+   "type": "cave",
+   "id": "cave_coldwater_0",
+   "name": "Sump grotto",
+   "template": "sump_grotto",
+   "plan": {
+    "family": "sunken_temple",
+    "floors": 1,
+    "level": 6
+   },
+   "x": 84,
+   "z": 1675,
+   "yaw": -3.14,
+   "radius": 10,
+   "level": 6
+  },
+  {
+   "type": "hook",
+   "id": "the_reflection_mere",
+   "name": "The Mirror Mere",
+   "kind": "compositional",
+   "x": 996,
+   "z": 1848,
+   "yaw": 0,
+   "radius": 20,
+   "where": "best fit for: a still lake with a ruin on the far shore",
+   "needMet": false
+  },
+  {
+   "type": "vignette",
+   "id": "broken_aqueduct",
+   "name": "The Broken Aqueduct",
+   "x": 1695,
+   "z": 740,
+   "yaw": 5.24,
+   "radius": 14,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "dark_lighthouse",
+   "name": "The Dark Lighthouse",
+   "x": 1865,
+   "z": 73,
+   "yaw": 5.34,
+   "radius": 10,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "drift_mine_entry",
+   "name": "The Drift Entry",
+   "x": 921,
+   "z": 231,
+   "yaw": 2.21,
+   "radius": 10,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "ferry_landing",
+   "name": "The Stranded Ferry",
+   "x": 1357,
+   "z": 596,
+   "yaw": 1,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "ferryman_shrine",
+   "name": "The Ferryman's Coin",
+   "x": 1312,
+   "z": 1178,
+   "yaw": 6.24,
+   "radius": 10,
+   "biome": "mountains",
+   "biomeFits": false,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "flooded_mill",
+   "name": "The Flooded Mill",
+   "x": 583,
+   "z": 1505,
+   "yaw": 4.65,
+   "radius": 12,
+   "biome": "hills",
+   "biomeFits": false,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "roadside_shrine",
+   "name": "The Wayside Saint",
+   "x": 1800,
+   "z": 1205,
+   "yaw": 0.78,
+   "radius": 8,
+   "biome": "mountains",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "smugglers_beacon",
+   "name": "The False Beacon",
+   "x": 192,
+   "z": 1162,
+   "yaw": 3.95,
+   "radius": 11,
+   "biome": "mountains",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "toll_bridge_trolls",
+   "name": "The Toll Bridge",
+   "x": 467,
+   "z": 1959,
+   "yaw": 5.05,
+   "radius": 11,
+   "biome": "mountains",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "vignette",
+   "id": "trapper_lines",
+   "name": "The Trapper's Line",
+   "x": 903,
+   "z": 1256,
+   "yaw": 2.8,
+   "radius": 12,
+   "biome": "mountains",
+   "biomeFits": true,
+   "level": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_0_0",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1047,
+   "z": 894,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_0_1",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 82,
+   "z": 62,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_1_0",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 778,
+   "z": 575,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_1_1",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 376,
+   "z": 738,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_2_0",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1610,
+   "z": 341,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_2_1",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1274,
+   "z": 1518,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_3_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1935,
+   "z": 410,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_3_1",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1853,
+   "z": 1696,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_4_0",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1291,
+   "z": 1984,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_4_1",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1646,
+   "z": 1506,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_5_0",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1284,
+   "z": 1754,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_5_1",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1685,
+   "z": 1894,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_old_coldmouth",
+   "slot": 0,
+   "name": "Old Coldmouth",
+   "x": 1063,
+   "z": 1564,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1124,
+     1525
+    ],
+    [
+     1102,
+     1625
+    ],
+    [
+     1023,
+     1663
+    ],
+    [
+     987,
+     1516
+    ],
+    [
+     1061,
+     1463
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 7
+  },
+  {
+   "type": "rare",
+   "id": "rare_mere_moth_queen",
+   "slot": 1,
+   "name": "The Mere Moth Queen",
+   "x": 1691,
+   "z": 1705,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1607,
+     1669
+    ],
+    [
+     1704,
+     1632
+    ],
+    [
+     1757,
+     1669
+    ],
+    [
+     1740,
+     1757
+    ],
+    [
+     1639,
+     1752
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 7
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z12_04_coldwater",
+   "name": "Coldwater",
+   "x": 1380.8,
+   "z": 1810.5,
+   "yaw": 0,
+   "settlement": "Coldwater",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z12_04_netherby",
+   "name": "Netherby",
+   "x": 641.3,
+   "z": 736.7,
+   "yaw": 0,
+   "settlement": "Netherby",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z12_04_door",
+   "name": "Barrow entrance",
+   "x": 1765.3,
+   "z": 1856.8,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "mere_warden",
+   "name": "Warden Oswy",
+   "role": "guard",
+   "at": "Mere Tower",
+   "x": 272.6,
+   "z": 443.8,
+   "yaw": 1.4,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "elder_wenna",
+   "name": "Elder Wenna",
+   "role": "elder",
+   "at": "Coldwater",
+   "x": 1476.3,
+   "z": 1848.1,
+   "yaw": 2.32,
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "netherby_fisher",
+   "name": "Pike of Netherby",
+   "role": "fisher",
+   "at": "Netherby",
+   "x": 708.4,
+   "z": 733.5,
+   "yaw": 5.7,
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "mere_bottom_0",
+   "chain": "mere_bottom",
+   "step": 0,
+   "clue": "drunks_story",
+   "how": null,
+   "shimmer": null,
+   "x": 680.1,
+   "z": 765,
+   "yaw": 0,
+   "where": "edge of Netherby",
+   "radius": 1
+  },
+  {
+   "type": "treasure_clue",
+   "id": "mere_bottom_1",
+   "chain": "mere_bottom",
+   "step": 1,
+   "clue": "map_piece",
+   "how": null,
+   "shimmer": null,
+   "x": 269.1,
+   "z": 445.6,
+   "yaw": 0,
+   "where": "fort Mere Tower",
+   "radius": 1
+  },
+  {
+   "type": "treasure_cache",
+   "id": "mere_bottom_2",
+   "chain": "mere_bottom",
+   "step": 2,
+   "clue": null,
+   "how": "dig",
+   "shimmer": 15,
+   "x": 642.6,
+   "z": 651.9,
+   "yaw": 0,
+   "where": "near Netherby",
+   "radius": 1
+  }
+ ],
+ "features": []
+}

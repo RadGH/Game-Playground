@@ -1,0 +1,1139 @@
+{
+  "_doc": "Stream E (M2). The event director's list (PLAN §5.2). `director` = the realm rules (ONE big event at a time, sized to who is online and in band, announced 10 minutes ahead, waystone travel to it free while it runs). `realm` = the big events, each on a schedule or a trigger; the province world boss Grimtallow is a fixed-time scheduled event. `zone` = the per-zone event bosses, each running on its own in every zone copy at stream B's event arena (`site` = the arena id in data/zones/<world zone>/placements.json): two waves from the zone's camp mix, then the boss (an encounter script id in data/encounters/). Everyone within autoEnrolMetres joins a temporary event group (PLAN §5.3). Times are real minutes; reward xp = share of a level's XP, gold = multiple of a kill's gold (data/quests/README.md).",
+  "director": {
+    "oneRealmEventAtATime": true,
+    "announceMinutes": 10,
+    "reminderMinutes": [
+      5,
+      1
+    ],
+    "freeWaystoneTravel": true,
+    "gapMinutes": [
+      40,
+      80
+    ],
+    "inBandLevels": 3,
+    "size": {
+      "healthPerPlayer": 0.12,
+      "addWavePerPlayers": 6,
+      "minPlayers": 1,
+      "capPlayers": 60,
+      "note": "Boss health x (1 + healthPerPlayer x (enrolled - 1)), one extra add per addWavePerPlayers enrolled; soak/stack needs come from the encounter script's own `party` note."
+    },
+    "pick": "Of the events whose minOnline is met and whose cooldown is over, the scheduled one due soonest wins; otherwise weighted by `weight`. An event whose zone has fewer than minInBand characters in band is skipped.",
+    "credit": "By contribution (damage, healing, soaks); loot is personal."
+  },
+  "realm": [
+    {
+      "id": "world_grimtallow",
+      "kind": "worldboss",
+      "name": "Grimtallow, the Siege-Husk",
+      "zone": "blackthorn_scar",
+      "site": "world_grimtallow",
+      "encounter": "world_grimtallow",
+      "schedule": {
+        "type": "fixed",
+        "everyHours": 3,
+        "atMinute": 30,
+        "also": "on demand when >= 12 characters in band are online and none ran in the last 90 minutes"
+      },
+      "minOnline": 1,
+      "minInBand": 8,
+      "durationMinutes": 20,
+      "level": 10,
+      "weight": 0,
+      "announce": [
+        "Grimtallow, the Siege-Husk, is stirring in the Blackthorn Scar. Waystones to the Scar are free.",
+        "The ground shakes in the Blackthorn Scar. Grimtallow walks in five minutes.",
+        "Grimtallow has risen! The Scar needs every blade."
+      ],
+      "roam": {
+        "chance": 0.25,
+        "toZones": [
+          "coldwater",
+          "wychwood"
+        ],
+        "note": "Now and then Grimtallow breaks out of its arena and marches on a neighbouring zone's event arena (PLAN §3.4); the director announces where."
+      },
+      "reward": {
+        "xp": 1.2,
+        "gold": 40,
+        "item": {
+          "tier": "epic",
+          "slot": "any"
+        },
+        "chest": "world_cache",
+        "firstKillDaily": {
+          "item": {
+            "tier": "legendary",
+            "chance": 0.05
+          }
+        }
+      }
+    },
+    {
+      "id": "siege_torborhold",
+      "kind": "town_attack",
+      "name": "Raiders at Torborhold",
+      "zone": "test",
+      "site": {
+        "settlement": "Torborhold"
+      },
+      "schedule": {
+        "type": "weighted",
+        "cooldownMinutes": 120
+      },
+      "minOnline": 4,
+      "minInBand": 4,
+      "durationMinutes": 12,
+      "level": 4,
+      "weight": 3,
+      "waves": [
+        {
+          "type": "road_brigand",
+          "count": [
+            6,
+            10
+          ],
+          "level": 3
+        },
+        {
+          "type": "brigand_archer",
+          "count": [
+            4,
+            6
+          ],
+          "level": 4
+        },
+        {
+          "type": "brigand_captain",
+          "count": [
+            1,
+            1
+          ],
+          "level": 5,
+          "rank": "elite"
+        }
+      ],
+      "announce": [
+        "Smoke over Torborhold! Raiders are at the gates.",
+        "The guards of Torborhold are falling back to the square."
+      ],
+      "reward": {
+        "xp": 0.8,
+        "gold": 20,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      },
+      "note": "The first-hour scene (PLAN §5.6) is this event run privately in the starter copy; the realm version is bigger and public."
+    },
+    {
+      "id": "siege_halsbridge",
+      "kind": "warband_siege",
+      "name": "The Red Banner at Halsbridge",
+      "zone": "torbor_cross",
+      "site": {
+        "settlement": "Halsbridge"
+      },
+      "schedule": {
+        "type": "weighted",
+        "cooldownMinutes": 180
+      },
+      "minOnline": 10,
+      "minInBand": 6,
+      "durationMinutes": 18,
+      "level": 5,
+      "weight": 2,
+      "waves": [
+        {
+          "type": "road_brigand",
+          "count": [
+            10,
+            16
+          ],
+          "level": 4
+        },
+        {
+          "type": "sky_cultist",
+          "count": [
+            4,
+            8
+          ],
+          "level": 5
+        },
+        {
+          "type": "cult_zealot",
+          "count": [
+            3,
+            5
+          ],
+          "level": 5
+        }
+      ],
+      "boss": "boss_castellan_odrun",
+      "announce": [
+        "A warband is marching on Halsbridge. The city gates close in ten minutes.",
+        "Ladders on the walls of Halsbridge!"
+      ],
+      "reward": {
+        "xp": 1,
+        "gold": 30,
+        "item": {
+          "tier": "epic",
+          "slot": "any",
+          "chance": 0.25
+        }
+      }
+    },
+    {
+      "id": "drake_flyover",
+      "kind": "flyover",
+      "name": "Drake on the Wing",
+      "zones": [
+        "brackwater",
+        "torbor_cross",
+        "millbrook",
+        "redcliff"
+      ],
+      "monster": "mire_drake",
+      "schedule": {
+        "type": "weighted",
+        "cooldownMinutes": 150
+      },
+      "minOnline": 6,
+      "minInBand": 4,
+      "durationMinutes": 15,
+      "level": 8,
+      "weight": 2,
+      "path": "Flies a line across the listed zones, landing at each zone's event arena for 3 minutes to feed; it lifts off at 50% health and lands at the next. Killing it on any landing ends the event.",
+      "announce": [
+        "A mire drake has been seen over Brackwater, flying south.",
+        "The drake has landed!"
+      ],
+      "reward": {
+        "xp": 1,
+        "gold": 25,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    }
+  ],
+  "zone": [
+    {
+      "id": "event_hollin_pass",
+      "zone": "hollin_pass",
+      "name": "The Stone in the Snow",
+      "kind": "avalanche",
+      "site": "event_hollin_pass",
+      "announce": "An avalanche has torn open the hillside above the pass, and the thing it uncovered is getting up.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 8,
+      "waves": [
+        {
+          "type": "frost_stalker",
+          "count": [
+            3,
+            5
+          ],
+          "level": 7,
+          "at": "arena edge"
+        },
+        {
+          "type": "crag_hyena",
+          "count": [
+            4,
+            6
+          ],
+          "level": 8,
+          "at": "arena edge"
+        },
+        {
+          "type": "ironback_beetle",
+          "count": [
+            5,
+            7
+          ],
+          "level": 8,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "mb_chained_saint",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    },
+    {
+      "id": "event_ashcombe",
+      "zone": "ashcombe",
+      "name": "The Ruin Wakes",
+      "kind": "the_ruin_wakes",
+      "site": "event_ashcombe",
+      "announce": "Lights in the old counting house, at noon. The Warden of the ruin is walking its wall again.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 6,
+      "waves": [
+        {
+          "type": "road_brigand",
+          "count": [
+            3,
+            5
+          ],
+          "level": 5,
+          "at": "arena edge"
+        },
+        {
+          "type": "barrow_hound",
+          "count": [
+            4,
+            6
+          ],
+          "level": 6,
+          "at": "arena edge"
+        },
+        {
+          "type": "sporecap_walker",
+          "count": [
+            5,
+            7
+          ],
+          "level": 6,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "barrow_warden",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    },
+    {
+      "id": "event_brackwater",
+      "zone": "brackwater",
+      "name": "The Drowning Bell",
+      "kind": "drowning_bell",
+      "site": "event_brackwater",
+      "announce": "A bell rings under the fen, and the reeds lean toward it. Somebody has to stop the ringer.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 7,
+      "waves": [
+        {
+          "type": "reed_serpent",
+          "count": [
+            3,
+            5
+          ],
+          "level": 6,
+          "at": "arena edge"
+        },
+        {
+          "type": "bog_slime",
+          "count": [
+            4,
+            6
+          ],
+          "level": 7,
+          "at": "arena edge"
+        },
+        {
+          "type": "fen_croaker",
+          "count": [
+            5,
+            7
+          ],
+          "level": 7,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "mb_bell_ringer",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    },
+    {
+      "id": "event_saltmouth",
+      "zone": "saltmouth",
+      "name": "The Wreckers' Night",
+      "kind": "the_wreckers_night",
+      "site": "event_saltmouth",
+      "announce": "False lights on the headland. The wreckers are out, and their sergeant is counting the take.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 8,
+      "waves": [
+        {
+          "type": "road_brigand",
+          "count": [
+            3,
+            5
+          ],
+          "level": 7,
+          "at": "arena edge"
+        },
+        {
+          "type": "dune_centipede",
+          "count": [
+            4,
+            6
+          ],
+          "level": 8,
+          "at": "arena edge"
+        },
+        {
+          "type": "reed_serpent",
+          "count": [
+            5,
+            7
+          ],
+          "level": 8,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "mb_sergeant_wark",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    },
+    {
+      "id": "event_delvers_hill",
+      "zone": "delvers_hill",
+      "name": "The Collapse",
+      "kind": "the_collapse",
+      "site": "event_delvers_hill",
+      "announce": "The old workings have fallen in, and something big came up through the hole with the dust.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 6,
+      "waves": [
+        {
+          "type": "ironback_beetle",
+          "count": [
+            3,
+            5
+          ],
+          "level": 5,
+          "at": "arena edge"
+        },
+        {
+          "type": "cairn_rat",
+          "count": [
+            4,
+            6
+          ],
+          "level": 6,
+          "at": "arena edge"
+        },
+        {
+          "type": "shale_warden",
+          "count": [
+            5,
+            7
+          ],
+          "level": 6,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "mb_rustjaw",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    },
+    {
+      "id": "event_grandmother_skein",
+      "zone": "test",
+      "name": "Grandmother Skein",
+      "kind": "harvest_festival",
+      "site": "event_grandmother_skein",
+      "announce": "Silk over the barley, thick as rope. The thing under the old sinkhole is awake.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 4,
+      "waves": [
+        {
+          "type": "moor_hound",
+          "count": [
+            3,
+            5
+          ],
+          "level": 2,
+          "at": "arena edge"
+        },
+        {
+          "type": "thicket_boar",
+          "count": [
+            4,
+            6
+          ],
+          "level": 3,
+          "at": "arena edge"
+        },
+        {
+          "type": "road_brigand",
+          "count": [
+            5,
+            7
+          ],
+          "level": 4,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "event_grandmother_skein",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    },
+    {
+      "id": "event_torbor_cross",
+      "zone": "torbor_cross",
+      "name": "Riot in the Market",
+      "kind": "riot_in_the_market",
+      "site": "event_torbor_cross",
+      "announce": "A drummer in a sky-blue hood is whipping the market crowd into a mob. Stop the drum, stop the riot.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 5,
+      "waves": [
+        {
+          "type": "road_brigand",
+          "count": [
+            3,
+            5
+          ],
+          "level": 4,
+          "at": "arena edge"
+        },
+        {
+          "type": "moor_hound",
+          "count": [
+            4,
+            6
+          ],
+          "level": 5,
+          "at": "arena edge"
+        },
+        {
+          "type": "brigand_archer",
+          "count": [
+            5,
+            7
+          ],
+          "level": 5,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "mb_drummer_ossa",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    },
+    {
+      "id": "event_gullwick",
+      "zone": "gullwick",
+      "name": "The Serpent Surfaces",
+      "kind": "the_serpent_surfaces",
+      "site": "event_gullwick",
+      "announce": "The lake goes still, then very not still. Sluicegrip has come up for the ferry boats.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 7,
+      "waves": [
+        {
+          "type": "reed_serpent",
+          "count": [
+            3,
+            5
+          ],
+          "level": 6,
+          "at": "arena edge"
+        },
+        {
+          "type": "fen_croaker",
+          "count": [
+            4,
+            6
+          ],
+          "level": 7,
+          "at": "arena edge"
+        },
+        {
+          "type": "dusk_flitter",
+          "count": [
+            5,
+            7
+          ],
+          "level": 7,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "mb_sluicegrip",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    },
+    {
+      "id": "event_wychwood",
+      "zone": "wychwood",
+      "name": "The Great Hunt",
+      "kind": "the_great_hunt",
+      "site": "event_wychwood",
+      "announce": "Horns in the forest — but nobody in Wychwood owns a horn. The pack is hunting, and its leader wants company.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 7,
+      "waves": [
+        {
+          "type": "veil_spider",
+          "count": [
+            3,
+            5
+          ],
+          "level": 6,
+          "at": "arena edge"
+        },
+        {
+          "type": "gallows_owl",
+          "count": [
+            4,
+            6
+          ],
+          "level": 7,
+          "at": "arena edge"
+        },
+        {
+          "type": "moor_hound",
+          "count": [
+            5,
+            7
+          ],
+          "level": 7,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "packleader",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    },
+    {
+      "id": "event_saint_orrins_rise",
+      "zone": "saint_orrins_rise",
+      "name": "The Procession",
+      "kind": "the_procession",
+      "site": "event_saint_orrins_rise",
+      "announce": "The pilgrims' procession is on the road, and something with wings is following it.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 5,
+      "waves": [
+        {
+          "type": "barrow_hound",
+          "count": [
+            3,
+            5
+          ],
+          "level": 4,
+          "at": "arena edge"
+        },
+        {
+          "type": "gallows_owl",
+          "count": [
+            4,
+            6
+          ],
+          "level": 5,
+          "at": "arena edge"
+        },
+        {
+          "type": "sky_cultist",
+          "count": [
+            5,
+            7
+          ],
+          "level": 5,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "mb_gallowmother",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    },
+    {
+      "id": "event_millbrook",
+      "zone": "millbrook",
+      "name": "Harvest Festival",
+      "kind": "harvest_festival",
+      "site": "event_millbrook",
+      "announce": "Bunting, cider, pies — and a harvest cart with far too many teeth.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 6,
+      "waves": [
+        {
+          "type": "thicket_boar",
+          "count": [
+            3,
+            5
+          ],
+          "level": 4,
+          "at": "arena edge"
+        },
+        {
+          "type": "carrion_moth",
+          "count": [
+            4,
+            6
+          ],
+          "level": 5,
+          "at": "arena edge"
+        },
+        {
+          "type": "road_brigand",
+          "count": [
+            5,
+            7
+          ],
+          "level": 6,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "boss_hungry_cart",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    },
+    {
+      "id": "event_redcliff",
+      "zone": "redcliff",
+      "name": "Siege at the Fort",
+      "kind": "siege_at_the_fort",
+      "site": "event_redcliff",
+      "announce": "Raiders are at Redcliff Fort with fire and ladders, and a spitting imp to light the gate.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 8,
+      "waves": [
+        {
+          "type": "cinder_imp",
+          "count": [
+            3,
+            5
+          ],
+          "level": 7,
+          "at": "arena edge"
+        },
+        {
+          "type": "road_brigand",
+          "count": [
+            4,
+            6
+          ],
+          "level": 8,
+          "at": "arena edge"
+        },
+        {
+          "type": "crag_hyena",
+          "count": [
+            5,
+            7
+          ],
+          "level": 8,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "mb_spit_imp",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    },
+    {
+      "id": "event_blackthorn_scar",
+      "zone": "blackthorn_scar",
+      "name": "Warband Raid",
+      "kind": "warband_raid",
+      "site": "event_blackthorn_scar",
+      "announce": "The thorn wall moves. A warband's briar-giant is walking through it, and the raiders walk behind.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 10,
+      "waves": [
+        {
+          "type": "cult_zealot",
+          "count": [
+            3,
+            5
+          ],
+          "level": 8,
+          "at": "arena edge"
+        },
+        {
+          "type": "ossuary_crawler",
+          "count": [
+            4,
+            6
+          ],
+          "level": 9,
+          "at": "arena edge"
+        },
+        {
+          "type": "cinder_imp",
+          "count": [
+            5,
+            7
+          ],
+          "level": 10,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "briar_colossus",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    },
+    {
+      "id": "event_coldwater",
+      "zone": "coldwater",
+      "name": "The Serpent Surfaces",
+      "kind": "the_serpent_surfaces",
+      "site": "event_coldwater",
+      "announce": "Coldwater Mere churns. Old Murkfin has come up out of the silt, hungry.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 7,
+      "waves": [
+        {
+          "type": "bog_slime",
+          "count": [
+            3,
+            5
+          ],
+          "level": 6,
+          "at": "arena edge"
+        },
+        {
+          "type": "reed_serpent",
+          "count": [
+            4,
+            6
+          ],
+          "level": 7,
+          "at": "arena edge"
+        },
+        {
+          "type": "marsh_wisp",
+          "count": [
+            5,
+            7
+          ],
+          "level": 7,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "mb_old_murkfin",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    },
+    {
+      "id": "event_gorse_march",
+      "zone": "gorse_march",
+      "name": "Siege at the Fort",
+      "kind": "siege_at_the_fort",
+      "site": "event_gorse_march",
+      "announce": "The Red Banner has come for Gorsehold Redoubt. Hask himself is leading the ladders.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 8,
+      "waves": [
+        {
+          "type": "cinder_imp",
+          "count": [
+            3,
+            5
+          ],
+          "level": 7,
+          "at": "arena edge"
+        },
+        {
+          "type": "crag_hyena",
+          "count": [
+            4,
+            6
+          ],
+          "level": 8,
+          "at": "arena edge"
+        },
+        {
+          "type": "brigand_archer",
+          "count": [
+            5,
+            7
+          ],
+          "level": 8,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "boss_warlord_hask",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    },
+    {
+      "id": "event_sunken_wolds",
+      "zone": "sunken_wolds",
+      "name": "The Great Hunt",
+      "kind": "the_great_hunt",
+      "site": "event_sunken_wolds",
+      "announce": "Something grey is hunting the hunters of the Wolds. It leaves the boots.",
+      "every": {
+        "minutes": [
+          35,
+          55
+        ]
+      },
+      "warnMinutes": 2,
+      "durationMinutes": 10,
+      "level": 10,
+      "waves": [
+        {
+          "type": "frost_stalker",
+          "count": [
+            3,
+            5
+          ],
+          "level": 8,
+          "at": "arena edge"
+        },
+        {
+          "type": "sporecap_walker",
+          "count": [
+            4,
+            6
+          ],
+          "level": 9,
+          "at": "arena edge"
+        },
+        {
+          "type": "silt_lurker",
+          "count": [
+            5,
+            7
+          ],
+          "level": 10,
+          "at": "arena edge"
+        }
+      ],
+      "boss": "mb_greycoat",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      }
+    }
+  ]
+}

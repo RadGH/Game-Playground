@@ -62,6 +62,7 @@ export function connect(opts = {}) {
     switch (m.t) {
       case 'welcome': {
         net.humanCheck = m.human || null;
+        net.accountsOn = !!m.accounts; net.privacy = m.privacy || null;
         if (m.clock) net.realmClock = { epoch: m.clock.epoch, dayMs: m.clock.dayMs, skew: Date.now() - m.clock.now };
         const tok = tokenStore.get();
         if (tok) sendJ(s, { t: 'auth', token: tok });

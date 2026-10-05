@@ -121,3 +121,19 @@ test('public mode: privacy.json, security headers, loopback not trusted, CF-Conn
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('--dev-hooks: refused on stable / public / stage 2; on a test server level, give, who, event work', async () => {
+  const base = { port: 0, host: '127.0.0.1', hostGiven: true, adminPort: 0, db: 'memory', build: 'dev', rules: 'v0', provinces: ['standin'], linger: 0, maxPerIp: 16, saveEvery: 60000, process: 'hooktest', journalMs: 2000, procs: 0, director: {}, publicDir: null };
+  await assert.rejects(startServer({ ...base, env: 'stable', devHooks: 0 }), /test servers only/);
+  await assert.rejects(startServer({ ...base, env: 'dev', publicDir: '/tmp', devHooks: 0 }), /test servers only/);
+  const s = await startServer({ ...base, env: 'dev', devHooks: 0 });
+  try {
+    const hp = s.devHooks.port;
+    assert.equal(s.devHooks.server.address().address, '127.0.0.1');
+    const W = s.world;
+    assert.deepEqual((await req(hp, '/who')).json(), []);
+    assert.equal((await req(hp, '/level', { method: 'POST', body: { name: 'Nobody', level: 9 } })).status, 404);
+    assert.equal((await req(hp, '/event', { method: 'POST', body: { announceMs: 1000 } })).status, 200);
+    assert.equal(typeof W.devSetLevel, 'function');
+  } finally { await s.stop(); }
+});

@@ -387,7 +387,7 @@ export function createGateway(opts) {
   const friends = createFriends({ store, presence, gwByChar, log });
   const guilds = createGuilds({ store, presence, gwByChar, wallNow, filter: chatFilter, charge, log, counters, opts: guildOpts });
   const chat = createChat({ store, presence, gwByChar, parties, guilds, friends, wallNow, filter: chatFilter, log, counters, mute, opts: chatOpts });
-  const callboard = createCallboard({ parties, presence, gwByChar, partyChanged: list => partyChanged(list), sendTo, procOf: c => procOfChar(c), now, log, opts: callboardOpts });
+  const callboard = createCallboard({ parties, presence, gwByChar, partyChanged: list => partyChanged(list), sendTo, procOf: c => procOfChar(c), now, wallNow, log, opts: callboardOpts });
   let lastMailSweep = now();
   function sweepMail() {
     if (!store.mailExpire) return;

@@ -449,11 +449,11 @@ export function createRoom(opts) {
           if (!k) {
             if (!fullSent && !fulls.has(e.id)) { extra ||= new ByteWriter(64); encodeRecord(extra, e, F.FULL, q, bounds.minX, bounds.minZ); }
             c.known.set(e.id, { e, ver: e.infoVer });
-            newInfo.push(e.info());
+            newInfo.push(e.infoJSON());
           } else if (k.e !== e) {   // id reused after a despawn: treat as new
-            c.known.set(e.id, { e, ver: e.infoVer }); newInfo.push(e.info());
+            c.known.set(e.id, { e, ver: e.infoVer }); newInfo.push(e.infoJSON());
             if (!fullSent && !fulls.has(e.id)) { extra ||= new ByteWriter(64); encodeRecord(extra, e, F.FULL, q, bounds.minX, bounds.minZ); }
-          } else if (k.ver !== e.infoVer) { k.ver = e.infoVer; newInfo.push(e.info()); }
+          } else if (k.ver !== e.infoVer) { k.ver = e.infoVer; newInfo.push(e.infoJSON()); }
         }
       }
       if (extra) chunks.push(extra.out());
@@ -461,7 +461,7 @@ export function createRoom(opts) {
       for (const [eid, k] of c.known) {
         if (k.e.removed || k.e.cell < 0 || !inView.has(k.e.cell)) { left.push(eid); c.known.delete(eid); }
       }
-      if (newInfo.length) c.send(JSON.stringify({ t: 'info', ents: newInfo }));
+      if (newInfo.length) c.send('{"t":"info","ents":[' + newInfo.join(',') + ']}');
       // self block
       let self = null, vitals = null;
       if (c.selfDirty || !c.lastSelf) { self = { x: me.x, y: me.y, z: me.z, vy: me.vy }; c.selfDirty = false; c.lastSelf = self; }

@@ -1182,3 +1182,24 @@ a straight line at monsters in the next room and stuck on the wall. tools/bot-cl
 tools/first-hour-bot.mjs now use the skill bar, heal each other, assist one target, skip elites/bosses/4+ levels up, rest
 between pulls (rest is not counted against the 90 s of fighting), and chase along the dungeon floor route. Same proof and
 thresholds. 6 green in a row after the fix (3 through `node --test`, ~105-185 s each). Nothing for you to do.
+
+## A (Server core) -> D, C, E, H, Lead — 2026-10-05 (later): M3 follow-ups done
+- **D**: (1) `net.accountsOn` / `net.privacy` from `welcome`. (2) Callboard `queued` / `list.queued` now carry `since` = WALL ms
+  and `waitedMs`. (3) `--dev-hooks <port>` on server/main.mjs (server/dev-hooks.mjs): `GET /who`, `POST /level {name, level}`,
+  `POST /give {name, gold, items, itemName?}`, `POST /event {id, announceMs}` on 127.0.0.1 — the same routes your
+  tests/D/m3-server.mjs has, so you can swap it for `startServer({ ..., devHooks: <port> })` (or the flag) and drop the internals.
+  Refused with `--env stable`, `--public` and `--procs`. protocol.md §16.9.
+- **C**: `rules.backfill(entity, n, { roles })` now gets the members' queued roles (`'tank'|'healer'|'dps'|'any'` — a party
+  member queued by the leader is `'any'`). When the member who brought them leaves, `meta.backfilled` resets and the next
+  member in (portal or Callboard) brings a fresh set.
+- **E**: `dungeon.name` wins on the Callboard, the dungeon door (not caves) and the instance room name.
+- **H**: privacy.json gained "Save journal", "Account times" and "Friends, ignore list, guild, mail" (your rows exist; tests/H/
+  privacy.test.js green), reports say "up to 20". **Backups** went in as a top-level `backups` object, NOT in `stored`, so no
+  new row is needed; if you would rather it be a `stored` row, add `data-privacy="Backups"` and tell me.
+- **Lead / H — the 300-bot misses are fixed** (same-VM rehearsal, working tree, pg scratch, `ops/load/run-300.mjs --rehearsal`):
+  town 300: worst tick **25.9 ms** (was 52.2), p99 14.1, 13.4 KB/s; spread 300: worst **28.6** (gate < 50), p99 15.1, 4.1 KB/s;
+  login phase worst **18.7 / 20.4 ms** (was 124). What changed: arrivals queue and are placed by the tick within a budget
+  (4 a tick max, only while the tick is under 8 ms — 300 logins now take ~12 s to all be placed instead of 4, each player
+  waits ≤ a few seconds); the combat core is warmed for every class at boot (the first login cost ~0.4 s); a room change reuses
+  the skill bar (formatting it was ~4 ms a player — `shared/format.js` `fmt` uses `toLocaleString`, slow; C/the shared owner
+  could cache an `Intl.NumberFormat`); `info` descriptions are JSON-encoded once per entity, not once per viewer.

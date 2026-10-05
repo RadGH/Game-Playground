@@ -4,6 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { m3Server, setLevel, joinAs, run, until } from './m3-helpers.js';
+import { createRules as rulesV0 } from '../../js/sim/rules-v0.js';
 
 const boards = c => { const l = []; c.on('callboard', m => l.push(m)); return l; };
 async function crew(srv, clock, names, level = 8) {
@@ -94,7 +95,9 @@ test('gate + evil: under level 8 refused; a party member cannot queue the party;
 });
 
 test('backfill: a lonely queue pops after the wait with followers filling the empty seats; offline drops you', async () => {
-  const { srv, clock } = m3Server({ worldOpts: { callboardOpts: { backfillMs: 20000 } } });
+  const calls = [];
+  const createRules = (...a) => { const r = rulesV0(...a); r.backfill = (e, n, o) => { calls.push({ char: e.char && e.char.id, n, roles: o && o.roles }); return []; }; return r; };
+  const { srv, clock } = m3Server({ worldOpts: { callboardOpts: { backfillMs: 20000 }, createRules } });
   await srv.ready;
   const W = srv.world;
   const [solo, gone] = await crew(srv, clock, ['Lonewolf', 'Leaver']);
@@ -113,6 +116,13 @@ test('backfill: a lonely queue pops after the wait with followers filling the em
   const o = W.online.get(solo.joined.you.char);
   assert.equal(o.room.kind, 'instance');
   assert.equal(o.room.meta.backfill, 4, 'the instance knows how many followers to bring (rules.backfill — stream C)');
+  assert.deepEqual(calls, [{ char: solo.joined.you.char, n: 4, roles: ['tank'] }], 'rules.backfill called once with the members\' roles');
+  // the owner leaves: the seats go with them; coming back brings a fresh set
+  const W2 = srv.world, inst = o.room;
+  W2.transfer(o, W2.copies[0], { x: W2.gate.x + 20, z: W2.gate.z }, 'test');
+  assert.equal(inst.meta.backfilled, false);
+  W2.transfer(o, inst, inst.spawnPoint, 'portal');
+  assert.equal(calls.length, 2);
   // a pop nobody answers times out
   solo.close(); await srv.stop();
 });

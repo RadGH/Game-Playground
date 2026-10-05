@@ -26,6 +26,8 @@
 // --admin-port the admin page (server/admin.mjs), 127.0.0.1 ONLY: default 8492 for stable, 8493 for dev; 0 = off.
 //             Token: TV_ADMIN_TOKEN, else <STATE_DIRECTORY or .data>/admin-token (made at first boot, mode 0600).
 // Endpoints:  /status (JSON), /status.html, /healthz (200 "ok" once the world ticks), /privacy.json (what is stored).
+// --dev-hooks <port> TEST ONLY (server/dev-hooks.mjs): level / give / event / who on 127.0.0.1; refused with --env
+//             stable, --public or --procs > 0.
 // --guests-per-ip-hour / --guests-per-hour: new guest accounts per address / for everyone together per hour (0 = no
 //             realm-wide cap; default 200 on stable). --unlimited-ip (repeatable): an address (a LAN load machine) that
 //             skips the guest caps and the per-address socket cap.
@@ -53,18 +55,20 @@ import { wireSocket, startPinger } from './ws-conn.mjs';
 import { hashPassword, verifyPassword } from './passwords.js';
 import { createChatFilter } from '../js/sim/chatfilter.js';
 import { startAdmin, adminToken } from './admin.mjs';
+import { startDevHooks } from './dev-hooks.mjs';
 
 const PRIVACY = readFileSync(join(GAME, 'server/privacy.json'));
 /** Answer headers in public mode (PLAN §11): no sniffing, no framing, no referrer leaks. */
 const PUBLIC_HEADERS = { 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'no-referrer', 'Cross-Origin-Opener-Policy': 'same-origin', 'Permissions-Policy': 'camera=(), microphone=(), geolocation=()' };
 function args(argv) {
-  const o = { port: 8491, host: '0.0.0.0', hostGiven: false, adminPort: null, guestsPerIpHour: null, guestsPerHour: null, unlimitedIp: [], db: 'memory', dbFile: join(GAME, '.data/dev-store.json'), build: 'dev', rules: 'auto', terrain: 'test', linger: 5000, maxPerIp: 4, saveEvery: 60000, process: 'p0', env: null, publicDir: null, journalMs: 2000, provinces: null, procs: 0, director: {} };
+  const o = { port: 8491, host: '0.0.0.0', hostGiven: false, adminPort: null, devHooks: null, guestsPerIpHour: null, guestsPerHour: null, unlimitedIp: [], db: 'memory', dbFile: join(GAME, '.data/dev-store.json'), build: 'dev', rules: 'auto', terrain: 'test', linger: 5000, maxPerIp: 4, saveEvery: 60000, process: 'p0', env: null, publicDir: null, journalMs: 2000, provinces: null, procs: 0, director: {} };
   for (let i = 2; i < argv.length; i++) {
     const k = argv[i], v = argv[i + 1];
     const take = () => { i++; return v; };
     if (k === '--port') o.port = +take();
     else if (k === '--host') { o.host = take(); o.hostGiven = true; }
     else if (k === '--admin-port') o.adminPort = +take();
+    else if (k === '--dev-hooks') o.devHooks = +take();
     else if (k === '--guests-per-ip-hour') o.guestsPerIpHour = +take();
     else if (k === '--guests-per-hour') o.guestsPerHour = +take();
     else if (k === '--unlimited-ip') o.unlimitedIp.push(take());
@@ -112,6 +116,7 @@ export async function startServer(o) {
     if (!dbName.endsWith('_' + env)) throw new Error(`refusing to start: env ${env} but database "${dbName}" (expected *_${env}); dev and stable never share a database`);
   }
   if (o.procs > 0 && o.db !== 'pg') throw new Error('--procs needs --db pg (every process shares one database)');
+  if (o.devHooks != null && (env === 'stable' || o.publicDir || o.procs > 0)) throw new Error('--dev-hooks is for test servers only (refused with --env stable, --public or --procs)');
   const provinces = o.provinces || defaultProvinces();
   const verifyHuman = turnstileFromEnv(process.env, { log });
   const humanSiteKey = verifyHuman ? process.env.TV_TURNSTILE_SITEKEY || null : null;
@@ -238,6 +243,9 @@ export async function startServer(o) {
     } catch (err) { log('admin page not started', { port: adminPort, err: err.message }); }
   }
 
+  let devHooks = null;
+  if (o.devHooks != null) devHooks = await startDevHooks({ port: o.devHooks, world, log });
+
   let stopping = null;
   async function stop(code = 'restart') {
     if (stopping) return stopping;
@@ -245,6 +253,7 @@ export async function startServer(o) {
       log('stopping: saving everyone');
       ticker.stop(); clearInterval(pinger);
       if (admin) await admin.close();
+      if (devHooks) await devHooks.close();
       if (world) await world.shutdown(code);
       await Promise.all(children.map(c => new Promise(r => { if (!c.proc || c.proc.exitCode !== null) return r(); c.proc.once('exit', r); c.proc.send({ stop: code }); setTimeout(() => { try { c.proc.kill('SIGKILL'); } catch { /* gone */ } r(); }, 65000).unref(); })));
       for (const ws of wss.clients) ws.terminate();
@@ -254,7 +263,7 @@ export async function startServer(o) {
     })();
     return stopping;
   }
-  return { server, world, gateway, children, store, stop, get admin() { return admin; } };
+  return { server, world, gateway, children, store, stop, get admin() { return admin; }, get devHooks() { return devHooks; } };
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {

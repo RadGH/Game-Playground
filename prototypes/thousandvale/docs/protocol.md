@@ -759,12 +759,14 @@ are out.
 ### 16.6 The Callboard
 The in-world group finder (opens at level 8). `callboard {op:'list'}` → `{state:'list', minLevel, dungeons:[{key, name,
 level, band, province, fits, waiting}], queued}`. `join {dungeon: key | 'any', role}`; a party is queued by its leader,
-whole. A group = 1 tank, 1 healer, 3 damage able to do the same dungeon → `{state:'pop', id, dungeon, ms:30000,
+whole (`queued`/`list.queued` carry `since` = WALL ms you joined and `waitedMs`). A group = 1 tank, 1 healer, 3 damage able to do the same dungeon → `{state:'pop', id, dungeon, ms:30000,
 members:[{char, name, level, role}], backfill}`; everyone `accept {id}` (`{state:'ready', ready:[chars]}`) →
 `{state:'formed', party, dungeon}`: one party, and every member is moved INTO that dungeon's instance (a normal
 `joined` handoff, `via:'callboard'`). A decline/timeout: `{state:'left', why}` for the decliner, `{state:'queued',
 again:true}` for the rest (they keep their place). After 5 minutes a queue pops with whoever fits and `backfill:n`
-followers fill the seats (the instance asks the rules: `rules.backfill(entity, n)`, stream C).
+followers fill the seats (the instance asks the rules: `rules.backfill(entity, n, {roles})` with the members' queued
+roles, stream C; when that member leaves the instance the seats go with them and the next member in brings a fresh set).
+Dungeon names come from E's sheets (`dungeon.name`) — the Callboard, the door and the instance say the same thing.
 
 ### 16.7 The world boss (realm event)
 Grimtallow (`world_grimtallow`, Blackthorn Scar) runs as the director's realm event (§15.3): every 3 h at :30, or on
@@ -779,3 +781,13 @@ only contributors can open (once a day each); the first kill of the day rolls on
 peer is NOT trusted (the tunnel arrives over loopback; each visitor counts by its `CF-Connecting-IP`, believed only
 from loopback), nobody skips the per-address limits. The admin page is `server/admin.mjs` on 127.0.0.1 only (8492
 stable / 8493 dev), token in `TV_ADMIN_TOKEN` or `<state>/admin-token`.
+
+### 16.9 Arrivals under load, test hooks
+- A login storm queues: a loaded character is placed by the tick (`JOINS_MAX_PER_TICK` 4, and only while that tick has
+  used < `JOIN_BUDGET_MS` 8 ms; one always goes), so 300 logins in 4 s cost a few ms a tick instead of one long stall.
+  `/status` → `joinQueue`. The combat core is warmed at boot for every class (`warmMs`). A room change reuses the last
+  `you.bar` (it only changes on level-up / form / talent, which arrive as `you {bar}`); a relocation recomputes it.
+- `js/net/client.js`: `net.accountsOn` (= `welcome.accounts`), `net.privacy` (= `welcome.privacy`).
+- `--dev-hooks <port>` (server/main.mjs, TEST ONLY; refused with `--env stable`, `--public` or `--procs`): 127.0.0.1 HTTP
+  `GET /who`, `POST /level {name, level}`, `POST /give {name, gold, items}`, `POST /event {id, announceMs}`
+  (`server/dev-hooks.mjs`).

@@ -107,6 +107,11 @@ export class Entity {
     this.anim('idle');
     this.mark(F.FULL);
   }
+  /** `info()` as a JSON string, cached until the description changes (infoVer): a crowd gets the same text. */
+  infoJSON() {
+    if (this._infoStr === undefined || this._infoStrVer !== this.infoVer) { this._infoStr = JSON.stringify(this.info()); this._infoStrVer = this.infoVer; }
+    return this._infoStr;
+  }
   /** The description clients get in `info`. */
   info() {
     const o = { id: this.id, kind: this.kind, name: this.name, level: this.level, hpMax: this.hpMax, team: this.team };

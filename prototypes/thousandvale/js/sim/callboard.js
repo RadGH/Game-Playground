@@ -20,7 +20,7 @@ export const CALLBOARD = Object.freeze({ minLevel: 8, popMs: 30000, backfillMs: 
 export const ROLES = Object.freeze(['tank', 'healer', 'dps']);
 export const CALLBOARD_OPS = Object.freeze(['join', 'leave', 'accept', 'decline', 'list']);
 
-export function createCallboard({ parties, presence, gwByChar, partyChanged = () => {}, sendTo = () => {}, procOf = () => undefined, now, log = () => {}, opts = {} }) {
+export function createCallboard({ parties, presence, gwByChar, partyChanged = () => {}, sendTo = () => {}, procOf = () => undefined, now, wallNow = () => Date.now(), log = () => {}, opts = {} }) {
   const R = { ...CALLBOARD, ...opts, slots: { ...CALLBOARD.slots, ...(opts.slots || {}) } };
   const dungeons = new Map();       // key -> { key, province, door, name, level, band: [lo, hi] }
   const queue = [];                 // entries { id, chars, roles: Map(char -> role|'any'), party, dungeon, at }
@@ -47,7 +47,7 @@ export function createCallboard({ parties, presence, gwByChar, partyChanged = ()
     const counts = {};
     for (const e of queue) for (const d of choices(e)) { const k = counts[d.key] ||= { tank: 0, healer: 0, dps: 0, any: 0 }; for (const r of e.roles.values()) k[r] = (k[r] || 0) + 1; }
     const e = entryOf(s.charId);
-    tell(s.charId, { state: 'list', minLevel: R.minLevel, dungeons: [...dungeons.values()].map(d => ({ ...dView(d), fits: fits(d, lv), waiting: counts[d.key] || null })), queued: e ? { dungeon: e.dungeon, since: e.at, role: e.roles.get(s.charId) } : null });
+    tell(s.charId, { state: 'list', minLevel: R.minLevel, dungeons: [...dungeons.values()].map(d => ({ ...dView(d), fits: fits(d, lv), waiting: counts[d.key] || null })), queued: e ? { dungeon: e.dungeon, since: e.since, waitedMs: Math.round(now() - e.at), role: e.roles.get(s.charId) } : null });
   }
 
   function op(s, m) {
@@ -67,11 +67,11 @@ export function createCallboard({ parties, presence, gwByChar, partyChanged = ()
         if (chars.some(c => entryOf(c) || popOf(c))) return s.err('callboard', 'Someone in your party is already on the Callboard.');
         const role = ROLES.includes(m.role) ? m.role : 'dps';
         const dungeon = m.dungeon && m.dungeon !== 'any' ? String(m.dungeon) : 'any';
-        const e = { id: nextId++, chars, roles: new Map(chars.map(c => [c, c === me ? role : 'any'])), party: p ? p.id : null, dungeon, at: now() };
+        const e = { id: nextId++, chars, roles: new Map(chars.map(c => [c, c === me ? role : 'any'])), party: p ? p.id : null, dungeon, at: now(), since: wallNow() };
         if (dungeon !== 'any' && !dungeons.has(dungeon)) return s.err('callboard', 'No such dungeon.');
         if (!choices(e).length) return s.err('callboard', 'No dungeon on the board fits your level' + (p ? 's' : '') + ' yet.');
         queue.push(e);
-        for (const c of chars) tell(c, { state: 'queued', dungeon, since: e.at, role: e.roles.get(c), with: chars.length });
+        for (const c of chars) tell(c, { state: 'queued', dungeon, since: e.since, waitedMs: Math.round(now() - e.at), role: e.roles.get(c), with: chars.length });
         lastMatch = 0;
         return;
       }
@@ -145,10 +145,10 @@ export function createCallboard({ parties, presence, gwByChar, partyChanged = ()
   }
   function pop(g, d) {
     for (const e of g.entries) { const i = queue.indexOf(e); if (i >= 0) queue.splice(i, 1); }
-    const p = { id: nextId++, entries: g.entries, dungeon: d, members: g.entries.flatMap(e => e.chars), ready: new Set(), at: now(), backfill: g.backfill };
+    const roles = {}; for (const e of g.entries) for (const [c, r] of e.roles) roles[c] = r;
+    const p = { id: nextId++, entries: g.entries, dungeon: d, members: g.entries.flatMap(e => e.chars), ready: new Set(), at: now(), backfill: g.backfill, roles };
     pops.set(p.id, p);
     counters.pops++;
-    const roles = {}; for (const e of g.entries) for (const [c, r] of e.roles) roles[c] = r;
     for (const c of p.members) tell(c, { state: 'pop', id: p.id, dungeon: dView(d), ms: R.popMs, members: p.members.map(x => ({ char: x, name: presence.get(x)?.name || '?', level: levelOf(x), role: roles[x] })), backfill: g.backfill });
   }
   function breakPop(p, out, why) {
@@ -159,7 +159,7 @@ export function createCallboard({ parties, presence, gwByChar, partyChanged = ()
     for (const e of p.entries) {
       if (e.chars.some(c => out.includes(c))) { for (const c of e.chars) if (!out.includes(c)) tell(c, { state: 'left', why: 'partner' }); continue; }
       queue.push(e);
-      for (const c of e.chars) tell(c, { state: 'queued', dungeon: e.dungeon, since: e.at, role: e.roles.get(c), with: e.chars.length, again: true });
+      for (const c of e.chars) tell(c, { state: 'queued', dungeon: e.dungeon, since: e.since, waitedMs: Math.round(now() - e.at), role: e.roles.get(c), with: e.chars.length, again: true });
     }
     queue.sort((a, b) => a.at - b.at);
   }
@@ -190,7 +190,7 @@ export function createCallboard({ parties, presence, gwByChar, partyChanged = ()
     for (const c of p.members) {
       tell(c, { state: 'formed', id: p.id, dungeon: dView(d), party: party.id, backfill: p.backfill });
       const proc = procOf(c);
-      if (proc !== undefined) sendTo(proc, { k: 'callboard', char: c, province: d.province, door: d.door, party: party.id, members: [...party.members], backfill: p.backfill, lead: party.leader });
+      if (proc !== undefined) sendTo(proc, { k: 'callboard', char: c, province: d.province, door: d.door, party: party.id, members: [...party.members], backfill: p.backfill, lead: party.leader, roles: p.roles });
     }
   }
 

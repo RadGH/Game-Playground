@@ -42,6 +42,8 @@ export const TOWN_EDGE = 2;              // metres of hysteresis at the town edg
 export const TARGET_RANGE = 60;          // a Tab target must be this close
 export const EDGE_PER_TICK = 3;          // town-edge handoffs done per tick (a crowd crossing together is spread out)
 export const SAVES_PER_TICK = 4;         // periodic blob saves started per tick
+export const JOINS_MAX_PER_TICK = 4;     // arrivals placed per tick at most (a login storm queues, PLAN §16 "1,000 logging in")
+export const JOIN_BUDGET_MS = 8;         // ...and only while this tick has used less than this (one always goes)
 export const GROUP_R = 40;               // open groups: players hitting the same monster this close (PLAN §5.3)
 // trace lifetimes and caps: stream E's data/names/traces.json (graves 60 min / 40 a copy, campfires 30 min / 20, banners 30 min)
 export const GRAVE_MS = 3600000, CAMPFIRE_MS = 30 * 60000, BANNER_MS = 30 * 60000, MAX_TRACES = { grave: 40, campfire: 20 };
@@ -162,7 +164,7 @@ export function createProvince(opts) {
       camps: L.camps, spawn: L.gate, dormantCamps: (L.zones || []).length > 1,   // a whole province: only camps near players exist
       safeZones: L.towns.map(t => ({ x: t.x, z: t.z, r: t.r })), meta: { n, emptySince: 0, province: L.key },
       objects: [
-        ...L.doors.map((d, i) => ({ type: d.kind === 'cave' ? 'cave' : 'portal', name: d.name, x: d.x, z: d.z, yaw: d.yaw, key: d.key || `door:${L.key}:${i}`, portal: { to: 'dungeon', door: i } })),
+        ...L.doors.map((d, i) => ({ type: d.kind === 'cave' ? 'cave' : 'portal', name: (d.kind !== 'cave' && d.sheet && d.sheet.dungeon && d.sheet.dungeon.name) || d.name, x: d.x, z: d.z, yaw: d.yaw, key: d.key || `door:${L.key}:${i}`, portal: { to: 'dungeon', door: i } })),
         ...L.waystones.filter(w => w.town === undefined).map(w => ({ type: 'waystone', name: 'Waystone', x: w.x, z: w.z, key: w.key, waystone: { key: w.key, name: w.name } })),
         ...L.objects,
       ],
@@ -209,7 +211,7 @@ export function createProvince(opts) {
     const dterr = dungeonTerrain(plan);
     const spec = dungeonRoomSpec(plan, { exitTo: { room: 'wilds', x: d.x + 3, z: d.z + 3 } });
     const r = createRoom({
-      id: `${pv.L.key}/i:${n}`, name: plan.name || 'The Barrow', kind: 'instance', terrain: dterr, seed: dseed, createRules, hooks: roomHooks, encounterInfo,
+      id: `${pv.L.key}/i:${n}`, name: (d.kind !== 'cave' && ds.name) || plan.name || 'The Barrow', kind: 'instance', terrain: dterr, seed: dseed, createRules, hooks: roomHooks, encounterInfo,
       camps: spec.camps, objects: spec.objects, spawn: plan.floors[0].entry,
       meta: { key, party: partyId, allowed: new Set(allowed), emptySince: 0, plan, made: now(), province: pv.L.key, door: doorIdx },
       describeExtra: { get dungeon() { return describeDungeon(plan, dterr); }, clock: realmClock },
@@ -336,18 +338,41 @@ export function createProvince(opts) {
       if (r.err) { s.err('state', r.err === 'lease' ? 'That character is still logged in elsewhere. Try again in a few seconds.' : 'No such character.'); return s.closeSoon(r.err); }
       const again = online.get(tk.char);
       if (again && !again.relocating) { takeOver(again, s); return; }
-      const ch = r.char;
-      const place = placeFor(ch, tk);
-      const client = makeClient(s);
-      const o = { char: ch, fence: r.fence, entity: null, room: place.room, conn: s, lingerUntil: 0, dirty: false, saving: false, savePending: false, lastSaveAt: now(), homeCopy: null, seq: ch.jseq || 0, savedSeq: ch.jseq || 0, lastPos: null, frozen: false, zone: null, claimed: !!tk.claimed };
-      online.set(ch.id, o);
-      o.entity = place.room.addPlayer(ch, client, place.at);
-      tagParty(o);
-      if (place.room.kind === 'wilds') o.homeCopy = place.room;
-      s.state = 'in'; s.client = client;
-      joined(s, o, tk.at ? { from: null, via: 'relocate' } : null);
-      presence(o);
+      // a login storm: placing a character (the rules build its sheet, the skill bar is formatted) costs a few ms, so
+      // arrivals wait in a queue that the tick drains within a time budget (JOIN_BUDGET_MS) instead of all at once
+      const prev = joining.get(tk.char);
+      if (prev && prev.s !== s) { prev.s.charId = null; prev.s.kick('elsewhere'); }
+      joining.set(tk.char, { s, tk, r });
     }, err => { log('takeChar failed', err); s.err('state', 'Could not load the character.'); s.closeSoon('load'); });
+  }
+  const joining = new Map();     // char id -> { s, tk, r } loaded, waiting for a tick to place them (login storms)
+  function placeJoin(j) {
+    const { s, tk, r } = j;
+    if (s.closed) { store.releaseChar(tk.char, owner); return; }
+    const again = online.get(tk.char);
+    if (again && !again.relocating) { takeOver(again, s); return; }
+    const ch = r.char;
+    const place = placeFor(ch, tk);
+    const client = makeClient(s);
+    const o = { char: ch, fence: r.fence, entity: null, room: place.room, conn: s, lingerUntil: 0, dirty: false, saving: false, savePending: false, lastSaveAt: now(), homeCopy: null, seq: ch.jseq || 0, savedSeq: ch.jseq || 0, lastPos: null, frozen: false, zone: null, claimed: !!tk.claimed };
+    online.set(ch.id, o);
+    o.entity = place.room.addPlayer(ch, client, place.at);
+    tagParty(o);
+    if (place.room.kind === 'wilds') o.homeCopy = place.room;
+    s.state = 'in'; s.client = client;
+    joined(s, o, tk.at ? { from: null, via: 'relocate' } : null);
+    presence(o);
+  }
+  /** Place queued arrivals: at least one a tick, more while the tick is under budget. */
+  function drainJoins(t0) {
+    let n = 0;
+    for (const [c, j] of joining) {
+      if (n >= JOINS_MAX_PER_TICK || (n > 0 && perfNow() - t0 > JOIN_BUDGET_MS)) break;
+      joining.delete(c);
+      try { placeJoin(j); } catch (err) { log('join failed', err && err.stack); try { j.s.err('state', 'Could not enter the world.'); j.s.closeSoon('load'); } catch { /* gone */ } }
+      n++;
+    }
+    counters.joinQueue = joining.size;
   }
 
   /** Where a character appears: next to the party leader (join link), a relocation target, its saved room, or town. */
@@ -398,7 +423,9 @@ export function createProvince(opts) {
     joined(s, o);
     presence(o);
   }
-  function makeClient(s) { return { send: d => s.send(d), you: patch => s.sendJSON({ t: 'you', ...patch }) }; }
+  function makeClient(s) {
+    return { send: d => s.send(d), you: patch => { if (patch.bar) { const o = online.get(s.charId); if (o) o.bar = patch.bar; } s.sendJSON({ t: 'you', ...patch }); } };
+  }
 
   function joined(s, o, handoff = null) {
     const e = o.entity, ch = o.char, rules = o.room.rules;
@@ -414,8 +441,10 @@ export function createProvince(opts) {
         opened: Object.keys(ch.opened || {}).filter(k => ch.opened[k] > t),
       },
     };
-    const bar = o.room.barFor ? o.room.barFor(e) : undefined;
-    if (bar) msg.you.bar = bar;
+    // the skill bar only changes on a level-up / form / talent (those arrive as `you {bar}` and refresh o.bar): a room
+    // change reuses the last one instead of formatting it again (a crowd crossing a town edge, a login storm)
+    const bar = o.bar && handoff && handoff.via !== 'relocate' ? o.bar : (o.room.barFor ? o.room.barFor(e) : undefined);
+    if (bar) { msg.you.bar = bar; o.bar = bar; }
     if (handoff) msg.handoff = handoff;
     if (liveEvent) msg.event = eventView(liveEvent);
     s.sendJSON(msg);
@@ -457,6 +486,8 @@ export function createProvince(opts) {
     counters.transfers++;
     if (o.conn && client) { o.conn.client = client; joined(o.conn, o, { from: from.id, via }); }
     presence(o);
+    if (from.kind === 'instance' && from.meta.backfillOwner === o.char.id) from.meta.backfilled = false;
+    if (to.kind === 'instance' && to.meta.backfill && via !== 'callboard') backfillIn(to, o);
   }
   /** Move to a point in a province: here (a handoff) or in another process (save, release, relocate). */
   function moveTo(o, province, at, via) {
@@ -597,7 +628,15 @@ export function createProvince(opts) {
     if (m.backfill && !inst.meta.backfill) inst.meta.backfill = m.backfill;
     o.char.exit = { x: d.x + 3, z: d.z + 3 };
     transfer(o, inst, inst.spawnPoint, 'callboard');
-    if (inst.meta.backfill && !inst.meta.backfilled && inst.rules && inst.rules.backfill) { inst.meta.backfilled = true; safeRules(inst, 'backfill', o.entity, inst.meta.backfill); }
+    if (m.roles) inst.meta.roles = m.roles;
+    backfillIn(inst, o);
+  }
+  /** Callboard followers (C's rules.backfill): the first member in brings them; when that member leaves, the seats go
+   *  with them and the next member in brings a fresh set. */
+  function backfillIn(inst, o) {
+    if (inst.kind !== 'instance' || !inst.meta.backfill || inst.meta.backfilled || !inst.rules || !inst.rules.backfill || o.room !== inst) return;
+    inst.meta.backfilled = true; inst.meta.backfillOwner = o.char.id;
+    safeRules(inst, 'backfill', o.entity, inst.meta.backfill, { roles: Object.values(inst.meta.roles || {}) });
   }
   /** The gateway takes gold for a service (a guild's founding fee): all or nothing, journaled, a sink. */
   function chargeGold(m) {
@@ -1362,6 +1401,7 @@ export function createProvince(opts) {
     for (const r of rooms.values()) r.step();
     if (ticks % 5 === 0) checkEdges();
     if (edgeQueue.size) drainEdges();
+    if (joining.size) drainJoins(t0);
     if (tickTimers.length) for (let i = tickTimers.length - 1; i >= 0; i--) if (tickTimers[i].at <= ticks) { const f = tickTimers[i].fn; tickTimers.splice(i, 1); f(); }
     if (ticks % 10 === 0) sendFrames();
     if (ticks % 20 === 5) eventTick();           // events (realm + zone) at 1 Hz
@@ -1414,11 +1454,38 @@ export function createProvince(opts) {
     if (rows.length && store.logEconomy) store.logEconomy(rows).catch(err => log('economy flush failed', err && err.message));
   }
 
+  /** Warm the combat core before anyone arrives: the first character ever placed costs ~0.4 s (engine warm-up) and each
+   *  class's first ~5 ms — paid at boot instead of inside the first ticks of a login storm. */
+  function warmRules() {
+    const r = first && first.towns[0];
+    if (!r) return;
+    const t0 = perfNow();
+    const list = (opts.classes && opts.classes.length ? opts.classes : ['warrior']).slice(0, 64);
+    list.forEach((cls, i) => {
+      try {
+        const e = r.addPlayer({ id: -1 - i, account: 0, name: 'Warmup', cls, level: 1, xp: 0, gold: 0, bag: [], equipment: {}, opened: {}, ignore: [], waystones: [], treasure: {}, quests: { active: {}, done: {}, jobs: {} }, daily: {} }, null, null);
+        if (r.barFor) r.barFor(e);
+        r.remove(e);
+      } catch (err) { log('warm-up failed for ' + cls, err && err.message); }
+    });
+    counters.warmMs = Math.round(perfNow() - t0);
+  }
   async function init() {
     await store.init();
+    if (opts.warm !== false) warmRules();
     const n = await store.clearLeases(processName + ':');
     if (n) log(`cleared ${n} stale lease(s) from a previous run of ${processName}`);
     send({ k: 'hello', proc, provinces: [...P.keys()], waystones: allWaystones().map(w => ({ key: w.key, name: w.name, x: w.x, z: w.z, province: w.province })), doors: callboardDoors() });
+  }
+  /** TEST-ONLY (server/dev-hooks.mjs, `--dev-hooks`): set a character's level everywhere it is read. */
+  function devSetLevel(charId, level) {
+    const o = online.get(charId);
+    if (!o) return false;
+    const lv = Math.max(1, Math.min(50, level | 0));
+    o.entity.setLevel(lv); o.char.level = lv; o.dirty = true;
+    presence(o);
+    if (o.conn) o.conn.sendJSON({ t: 'you', level: lv });
+    return lv;
   }
   /** Dungeon doors for the Callboard: real dungeons (not one-floor caves), with a name and a level band. */
   function callboardDoors() {
@@ -1431,7 +1498,7 @@ export function createProvince(opts) {
       const fam = ds.family || (ds.families && ds.families[0]) || null;
       const kind = fam ? fam.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : (d.name || 'Dungeon');
       const where = d.sheet && d.sheet.name;
-      out.push({ key: pv.L.key + ':' + i, province: pv.L.key, door: i, zone: d.zone || null, name: where ? where + ': ' + kind : (ds.name || d.name || 'Dungeon'), level: lvl, band, floors: ds.floors || 2 });
+      out.push({ key: pv.L.key + ':' + i, province: pv.L.key, door: i, zone: d.zone || null, name: ds.name || (where ? where + ': ' + kind : (d.name || 'Dungeon')), level: lvl, band, floors: ds.floors || 2 });
     });
     return out;
   }
@@ -1471,7 +1538,7 @@ export function createProvince(opts) {
       event: realmRun ? realmRun.run.view() : liveEvent ? { uid: liveEvent.uid } : null,
       zoneEvents: [...zoneRuns.values()].map(z => ({ room: z.room.id, ...z.run.view() })),
       timeOfDay: Math.round(timeOfDay() * 1000) / 1000,
-      sessions: kit.sessions.size,
+      sessions: kit.sessions.size, joinQueue: joining.size, warmMs: counters.warmMs || 0,
       db: store.kind,
     };
   }
@@ -1479,7 +1546,7 @@ export function createProvince(opts) {
   return {
     accept, step, init, shutdown, status, rooms, P, online, partyOf, econ, tickStats, owner, counters, trades,
     room: copies[0], townRoom, copies, instances, town, door, gate,
-    saveNow, logout, transfer, moveTo, grant, mute, flushEconomy, newUid, flushJournal, timeOfDay,
+    saveNow, logout, transfer, moveTo, grant, mute, flushEconomy, newUid, flushJournal, timeOfDay, devSetLevel,
     get liveEvent() { return liveEvent; },
   };
 }

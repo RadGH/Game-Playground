@@ -11,7 +11,9 @@ import { seedStream, next, range } from '../../js/sim/rng.js';
 let createRules;
 try { ({ createRules } = await import('../../js/rules/index.js')); } catch { createRules = undefined; }
 
-test('50 bots (30 in the town): tick p99 < 10 ms, bandwidth in budget', { timeout: 240000 }, async () => {
+// Timing gate: runs alone (`npm run test:perf`, TV_PERF=1); skipped in the parallel suite.
+const PERF = !!process.env.TV_PERF;
+test('50 bots (30 in the town): tick p99 < 10 ms, bandwidth in budget', { timeout: 240000, skip: !PERF && 'timing gate: npm run test:perf' }, async () => {
   const clock = createVirtualClock();
   const srv = makeServer({ clock, worldOpts: { perfNow: () => performance.now(), ...(createRules ? { createRules } : {}) } });
   await srv.ready;

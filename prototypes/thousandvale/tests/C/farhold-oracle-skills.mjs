@@ -19,6 +19,8 @@ const W = await import(new URL('weapons.js', FJS));
 const { talentPlan } = await import(new URL('skilltalents.js', FJS));
 const { elementOf, statusOf } = await import(new URL('rpg.js', FJS));
 const { createPets } = await import(new URL('pets.js', FJS));
+const U = await import(new URL('uniques.js', FJS));
+const { tickStatuses } = await import(new URL('skills.js', FJS));
 const { createFollowers } = await import(new URL('followers.js', FJS));
 import { readFileSync } from 'node:fs';
 const MERC = JSON.parse(readFileSync(new URL('../../../farhold/data/mercenaries.json', import.meta.url), 'utf8'));
@@ -63,7 +65,22 @@ export function farholdSkills(F, field, player, control, barRng, { followers = f
     }
     return { x: control.x + Math.sin(control.yaw) * range, y: 0, z: control.z + Math.cos(control.yaw) * range, dist: range };
   };
+  /** main.js `uniqueEnv` (line ~1281), transcribed with its effects left out */
   const uniqueEnv = {
+    get player() { return player; },
+    at: () => ({ x: control.x, z: control.z }),
+    rng: () => field.rng(),
+    near: (x, z, r, except) => field.near(x, z, r, except),
+    strikeOne(e, { power = 1, element = 'physical' } = {}) {
+      if (!e || e.dying != null || e.removed) return null;
+      const result = F.rpg.strike(player, e, field.rng, { multiplier: power, element, proc: true, applyStatus: statusHook });
+      field.land(e, result, { fromX: control.x, fromZ: control.z, element, share: power });
+      if (result.dead) field.kill(e);
+      return result;
+    },
+    strikeArea(x, z, r, { power = 1, element = 'physical', falloff = 0.5 } = {}) {
+      return field.strikeArea(x, z, r, player, { power, element, falloff, proc: true, applyStatus: statusHook });
+    },
     push(e, fromX, fromZ, metres) {
       const dx = e.x - fromX, dz = e.z - fromZ;
       const len = Math.hypot(dx, dz) || 1;
@@ -72,8 +89,15 @@ export function farholdSkills(F, field, player, control, barRng, { followers = f
       const m = pushFor(e, want);
       if (m > 0.01) e.push = { dx: sign * dx / len, dz: sign * dz / len, metres: m, t: 0.18, span: 0.18, done: 0 };
     },
-    arc() {},
+    dropPool: spec => dropPool(spec),
+    later: (ms, fn) => setTimeout(fn, ms),
+    applyStatus: (t, type, spec, power = 1) => { if (t && spec) landStatus(type, spec, t, power); },
+    applySelf: (type, spec) => applyStatus(player, type, spec, 1),
+    statusSpec: type => statuses[type] || null,
+    kill: e => field.kill(e),
+    burstFx() {}, arc() {},
   };
+
   // the REAL companion system when the fixture wants followers (main.js line ~2928: createPets, then
   // createFollowers installs the slot gate, then the class companion); summons are async there (a mesh
   // is built), so every summon promise is kept in `inflight` for the fixture to await
@@ -101,6 +125,7 @@ export function farholdSkills(F, field, player, control, barRng, { followers = f
     rpgApply: (u, id, spec) => applyStatus(u, id, spec, 1), gathering: () => false, building: () => false,
   });
   setMechEnv(mech.mechEnv);
+  field.uniqueEnv = uniqueEnv;
   // Farhold keeps traps, walls and corpses in ONE module-level world (the very thing js/rules/room.js
   // exists to split); a previous fixture's Rampart would otherwise still be standing here
   mech.reset();
@@ -146,6 +171,7 @@ export function farholdSkills(F, field, player, control, barRng, { followers = f
       const at = chase && chase.dying == null ? { x: chase.x, z: chase.z } : to;
       const splash = plan.splash * (F.rpg.fx.sum(player, 'boltSplash') || 1);
       const hits = field.strikeArea(at.x, at.z, splash, player, { falloff: 0.5, ...strikeOpts });
+      if (plan.mods && !hop) U.resolveAttack(uniqueEnv, plan.mods, hits, { x: control.x, z: control.z, at: { x: at.x, z: at.z }, element: plan.element });
       if (!hop && plan.skill) mech.afterBolt(plan, { ...at, y: 1 }, hits, strikeOpts, hop);
       const left = (plan.chains || 0) - hop;
       if (left > 0) {
@@ -244,6 +270,7 @@ export function farholdSkills(F, field, player, control, barRng, { followers = f
         if (plan.pets || plan.status === 'regen') for (const pet of pets.pets) if (pet.dying == null) applyStatus(pet, plan.status, plan.statusSpec, 1);
       }
       if (plan.trail) player.trail = { left: plan.trail.seconds, step: plan.trail.step || 1.4, radius: plan.trail.radius, burns: plan.trail.burns, power: plan.mult, element: plan.element, lastX: control.x, lastZ: control.z };
+      if (plan.orbs) startOrbs(plan);
     } else if (plan.kind === 'melee') {
       const cone = () => {
         if (player.hp <= 0) return;
@@ -317,7 +344,9 @@ export function farholdSkills(F, field, player, control, barRng, { followers = f
         return;
       }
       if (charged && charged.shape === 'dome') {
-        for (const { enemy, result } of field.strikeArea(control.x, control.z, radius, player, { falloff: 0.2, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1) })) {
+        const domeHits = field.strikeArea(control.x, control.z, radius, player, { falloff: 0.2, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1) });
+        U.resolveAttack(uniqueEnv, mods, domeHits, { x: control.x, z: control.z, at: null, element });
+        for (const { enemy, result } of domeHits) {
           brandHit(enemy, result);
           if (spell.status) landStatus(spell.status, statuses[spell.status], enemy, Math.max(1, base * 0.6));
           const dx = enemy.x - control.x, dz = enemy.z - control.z, len = Math.hypot(dx, dz) || 1;
@@ -332,18 +361,23 @@ export function farholdSkills(F, field, player, control, barRng, { followers = f
         return;
       }
       if (spell.shape === 'nova') {
-        for (const { enemy, result } of field.strikeArea(control.x, control.z, radius, player, { falloff: 0.35, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1) })) {
+        const novaHits = field.strikeArea(control.x, control.z, radius, player, { falloff: 0.35, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1) });
+        for (const { enemy, result } of novaHits) {
           brandHit(enemy, result);
           if (spell.status) landStatus(spell.status, statuses[spell.status], enemy, Math.max(1, base * 0.6));
         }
+        U.resolveAttack(uniqueEnv, mods, novaHits, { x: control.x, z: control.z, at: null, element });
       } else if (spell.shape === 'cone' || spell.shape === 'wave') {
         const range = (spell.range || 9) * shape.scale;
         const wide = spell.shape === 'cone' ? (spell.arc || 0.9) * shape.scale : 0.45;
-        for (const { enemy } of field.strike(control, player, { reach: range, arc: wide, ...meleeOpts })) if (spell.status) landStatus(spell.status, statuses[spell.status], enemy, Math.max(1, base * 0.6));
+        const coneHits = field.strike(control, player, { reach: range, arc: wide, ...meleeOpts });
+        for (const { enemy } of coneHits) if (spell.status) landStatus(spell.status, statuses[spell.status], enemy, Math.max(1, base * 0.6));
+        U.resolveAttack(uniqueEnv, mods, coneHits, { x: control.x, z: control.z, at: null, element });
       } else {
         const plan = talentPlan(player, 'staff:' + spell.key, { element, range: (spell.range || 12) * shape.scale, splash: radius, projectiles: 1, spread: 0, status: spell.status || leaves, statusSpec: (spell.status || leaves) ? statuses[spell.status || leaves] : null });
         if (charged?.shape === 'mortar') { plan.kind = 'ground'; plan.radius = radius * 1.4; plan.groundRadius = radius * 1.4; plan.ground = Math.max(plan.ground || 0, 3); }
         else if (charged?.shape === 'storm') plan.chains = charged.chains || 5;
+        plan.mods = mods;
         fireBolt(plan, a, a.dx, a.dy, a.dz, { ...meleeOpts, power: (spell.mult || 1) * (shape.charge?.power || 1) * (mods.power || 1) });
       }
       return;
@@ -351,31 +385,86 @@ export function farholdSkills(F, field, player, control, barRng, { followers = f
     if (kind === 'bolt') {
       const how = W.wandBehaviour(weapon);
       const plan = { element, range: (weapon.castRange ?? 34) * (how.slow ? 0.85 : 1), splash: (how.splash ?? 2.2) * shape.scale, projectiles: how.projectiles || 1, spread: how.spread || 0, chains: how.chains || 0, homing: how.homing || 0, status: leaves, statusSpec: leaves ? statuses[leaves] : null };
+      plan.mods = mods;
       fireBolt(plan, a, a.dx, a.dy, a.dz, { ...meleeOpts, power: (how.mult || 1) * share });
+      if (mods.twin) setTimeout(() => { const again = aim(); fireBolt({ ...plan, mods: null }, again, again.dx, again.dy, again.dz, { ...meleeOpts, power: (how.mult || 1) * share * mods.twin.power }); }, mods.twin.ms);
       return;
     }
     if (kind === 'arrow') {
-      // the arrow's landing (onArrowLand) at the first body along the shot, at the draw's power
+      // main.js swingWith bow branch (shots, spread, homing, burst) + onArrowLand, at the draw's power
       const plan = player.derived.swing?.main;
       const range = plan?.range ?? F.balance.player?.arrowRange ?? 46;
       const power = plan?.hold === 'draw' ? W.drawPower(plan.draw, held).power : (plan?.power ?? 1);
-      const target = field.hitScan(control.x, 0.9, control.z, a.dx, 0, a.dz, { range, width: 1.1 + (player.derived.arrowHoming || 0) * 2.6 });
-      const dist = target ? target.distance : range;
-      const at = { x: control.x + a.dx * dist, z: control.z + a.dz * dist };
-      setTimeout(() => {
-        const hits = field.strikeArea(at.x, at.z, F.balance.player?.arrowSplash ?? 2.6, player, { element, applyStatus: statusHook, power });
-        for (const { enemy, result } of hits) if (leaves && statuses[leaves] && result.amount > 0) landStatus(leaves, statuses[leaves], enemy, Math.max(1, result.amount * 0.7));
-      }, dist / (F.balance.player?.arrowSpeed ?? 42) * 1000);
+      const shots = Math.max(1, Math.round(player.derived.arrowsPerShot || 1), mods.shots || 1);
+      const spread = shots > 1 ? 0.08 : 0;
+      for (let i = 0; i < shots; i++) {
+        const t = shots === 1 ? 0 : (i / (shots - 1) - 0.5) * 2;
+        const yaw = Math.atan2(a.dx, a.dz) + t * spread;
+        const dx = Math.sin(yaw), dz = Math.cos(yaw);
+        const homing = player.derived.arrowHoming || 0;
+        const target = field.hitScan(control.x, 0.9, control.z, dx, 0, dz, { range, width: 1.1 + homing * 2.6 });
+        const dist = target ? target.distance : range;
+        const at = { x: control.x + dx * dist, z: control.z + dz * dist };
+        const burst = player.derived.arrowBurst || 0;
+        if (target && burst > 0) {
+          const c = target.enemy;
+          for (const { enemy, result } of field.strikeArea(c.x, c.z, burst, player, { falloff: 0.4, power: 0.55 })) if (enemy !== c) brandHit(enemy, result);
+        }
+        setTimeout(() => {
+          const hits = field.strikeArea(at.x, at.z, F.balance.player?.arrowSplash ?? 2.6, player, { element, applyStatus: statusHook, power });
+          for (const { enemy, result } of hits) if (leaves && statuses[leaves] && result.amount > 0) landStatus(leaves, statuses[leaves], enemy, Math.max(1, result.amount * 0.7));
+          if (mods) U.resolveAttack(uniqueEnv, mods, hits, { x: control.x, z: control.z, at: { x: at.x, z: at.z }, element });
+        }, dist / (F.balance.player?.arrowSpeed ?? 42) * 1000);
+      }
     }
   }
 
+  /** main.js startOrbs / tickSkillLeftovers (line ~5238), effects left out */
+  function startOrbs(plan) {
+    const o = plan.orbs;
+    const clock = F.rpg.fx.rt(player).auraClock || (F.rpg.fx.rt(player).auraClock = {});
+    player.skillAuras = [];
+    for (let k = 0; k < o.count; k++) {
+      const id = `storm_orb_${k}`;
+      clock[id] = -k * (o.every / o.count);
+      player.skillAuras.push({ id, left: o.seconds, every: o.every, radius: o.radius, power: plan.mult, element: plan.element, nearestOnly: true, status: o.status || null, always: true });
+    }
+  }
+  function tickSkillLeftovers(dt) {
+    if (player.skillAuras?.length) { for (const a of player.skillAuras) a.left -= dt; if (player.skillAuras.every(a => a.left <= 0)) player.skillAuras = []; }
+    const tr = player.trail;
+    if (tr) {
+      tr.left -= dt;
+      if (tr.left <= 0 || player.hp <= 0) { player.trail = null; return; }
+      if (Math.hypot(control.x - tr.lastX, control.z - tr.lastZ) >= tr.step) {
+        tr.lastX = control.x; tr.lastZ = control.z;
+        dropPool({ x: control.x, z: control.z, r: tr.radius, seconds: tr.burns, element: tr.element, power: tr.power });
+      }
+    }
+  }
+  let fighting = false;
+
   return {
+    uniqueEnv,
     bar, mech, rangedAttack,
     cast(slot, aimPoint = null) { aimAt = aimPoint; return castSkill(slot); },
     /** one frame: the skill bar's clocks, the runtime's tick (placed objects, walls, links), the pools */
     tick(dt) {
       if (followers) pets.update(dt, control, player, { ...mech.petHooks });
-      bar.update(dt, { fighting: true }); mech.tick(dt, { fighting: true }); tickPools(dt);
+      // main.js line ~9737: a fight starting, the bar, the runtime, auras + leftovers, the player's statuses,
+      // the cast barrier, then (much later in the frame) the pools
+      const was = fighting;
+      fighting = field.engaged;
+      if (fighting && !was) {
+        const start = F.rpg.fx.combatStart({ self: player });
+        if (start.strip) { const big = field.enemies.find(e => e.dying == null && e.rank !== 'normal'); if (big?.modifiers?.length) big.modifiers.pop(); }
+      }
+      bar.update(dt, { fighting: true }); mech.tick(dt, { fighting: true });
+      U.tickAuras(uniqueEnv, F.rpg, player, dt, { fighting });
+      tickSkillLeftovers(dt);
+      tickStatuses(player, dt, { resist: F.rpg.fx.product(player, 'statusIn') });
+      if (player.castBarrierFor > 0) { player.castBarrierFor -= dt; if (player.castBarrierFor <= 0) { player.castBarrierFor = 0; player.barrier = 0; } }
+      tickPools(dt);
     },
     pets, inflight,
     /** wait for every async summon (a mesh build in Farhold) to land */

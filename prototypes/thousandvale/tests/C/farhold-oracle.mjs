@@ -22,6 +22,7 @@ const { applyStatus, incomingFrom, outgoingFrom, STATUS_POWER_SHARE } = await im
 const { controlFor } = await import(new URL('skillmech.js', FJS));
 const { handsOf, OFFHAND_DAMAGE, strikeAt, withArea } = await import(new URL('weapons.js', FJS));
 const { makeRng } = await import(new URL('../../emberveil/js/rng.js', FJS));
+const U = await import(new URL('uniques.js', FJS));
 const { groundAt } = await import(new URL('ground.js', FJS));
 export { makeRng, EnemyField, incomingFrom, outgoingFrom, applyStatus, STATUS_POWER_SHARE };
 
@@ -136,6 +137,13 @@ export function farholdField(F, seed) {
     const p = field.oraclePlayer;
     if (!p) return;
     F.rpg.onKillRestore(p);
+    // main.js onEnemyKilled: the kill powers (fx.onKill) and the unique kill powers, then the experience
+    const post = F.rpg.fx.onKill({ self: p, target: e, applyStatus: (t, type, spec) => applyStatus(t, type, spec) });
+    if (post.heal) p.hp = Math.min(p.maxHp, p.hp + post.heal);
+    if (post.rally) applyStatus(p, 'rally', F.skills.statuses.rally, 1);
+    if (post.breath) for (const other of field.near(e.x, e.z, post.breath.radius, e)) { field.strikeArea(other.x, other.z, 1.5, p, { element: post.breath.element, power: 0.6 }); applyStatus(other, post.breath.status, F.skills.statuses[post.breath.status], 6); }
+    if (post.spreadStatuses && e.statuses) for (const other of field.near(e.x, e.z, post.spreadStatuses, e)) for (const [type, st] of Object.entries(e.statuses)) applyStatus(other, type, F.skills.statuses[type], st.power);
+    if (field.uniqueEnv) U.afterKill(field.uniqueEnv, post, e);
     F.rpg.gainXp(p, F.rpg.killXpFor(p, e, F.balance.xp || {}));
     field.drops.push(...(F.rpg.rollDrops(e, { rng: field.rng, magicFind: p.derived.magicFind }) || []));
   };
@@ -187,7 +195,7 @@ export function farholdLandStatus(F, player, type, spec, enemy, power = 1) {
  * sound and effects calls left out and `resolveHits` (unique powers) left out — the fixtures use
  * characters without uniques. `control` = { x, z, yaw }.
  */
-export function farholdSwing(F, field, control, player, hand = 'main', stepIndex = 0) {
+export function farholdSwing(F, field, control, player, hand = 'main', stepIndex = 0, uniqueEnv = null) {
   const statusForElement = el => CAST_ELEMENTS.find(e => e.element === el)?.status || null;
   const hands = handsOf(player);
   const weapon = hand === 'off' ? hands.off : hands.main;
@@ -206,6 +214,7 @@ export function farholdSwing(F, field, control, player, hand = 'main', stepIndex
   };
   const meleeOpts = { element, onHit: brandHit, applyStatus: statusHook, power: share * shape.damage };
   const hits = field.strike(control, player, { reach, arc, ...meleeOpts });
+  if (uniqueEnv) U.resolveAttack(uniqueEnv, mods, hits, { x: control.x, z: control.z, at: null, element });
   if (player.perkFlags?.sunder && shape.last) for (const h of hits) h.enemy.armor = Math.max(0, (h.enemy.armor || 0) - 8);
   const swung = { self: player, mana: 0 };
   F.rpg.fx.onSwing(swung);
@@ -222,7 +231,7 @@ export function farholdSwing(F, field, control, player, hand = 'main', stepIndex
 }
 
 /** main.js `onEnemyStrike` (line ~9584) with no companions: the enemy hits the player. */
-export function farholdEnemyStrike(F, field, player, e, mech = null, pets = null) {
+export function farholdEnemyStrike(F, field, player, e, mech = null, pets = null, uniqueEnv = null) {
   // main.js onEnemyStrike: the companion it walked up to, else a nearby one 55% of the time, else you
   let victim = player;
   if (pets) {
@@ -232,6 +241,7 @@ export function farholdEnemyStrike(F, field, player, e, mech = null, pets = null
   const result = F.rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e) });
   mech?.onHurt(result, e, victim);
   if (e.lifeSteal) e.hp = Math.min(e.maxHp, e.hp + Math.round(result.amount * e.lifeSteal));
+  if (victim === player && uniqueEnv) U.afterDamaged(uniqueEnv, result, e);
   if (e.onHit?.length) field.statusOnHit(e, victim, F.skills.statuses);
   if (victim !== player && result.dead) pets.fall(victim);
   return result;

@@ -22,6 +22,7 @@ export const SAVE_FIELDS = Object.freeze([
   { k: 'ignore', def: [] },        // [{ id, name }] whose chat this character does not see
   { k: 'exit', def: null },        // { x, z } in the wilds: where leaving an instance (or losing it) puts you
   { k: 'mutedUntil', def: 0 },     // wall ms; chat refused until then (admin hook)
+  { k: 'waystones', def: [] },     // waystone keys this character has discovered (travel targets)
   { k: 'jseq', col: 'journal_seq', def: 0 },   // last journal row this blob contains (js/sim/journal.js)
 ]);
 

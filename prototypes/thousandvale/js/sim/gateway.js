@@ -40,6 +40,7 @@ export function createGateway(opts) {
   const names = new Map();         // char id -> { name, cls, level }
   const frames = new Map();        // char id -> latest frame row
   const hints = new Map();         // key -> { chars, at }
+  const waystones = new Map();     // every province's waystones, shared with every process (cross-province travel)
   const guestLog = new Map();
   let ticks = 0, lastSweep = now();
   const started = now();
@@ -63,7 +64,12 @@ export function createGateway(opts) {
   }
   function onBus(p, m) {
     switch (m.k) {
-      case 'hello': for (const k of m.provinces || []) { p.provinces.add(k); provProc.set(k, p.id); } return;
+      case 'hello': {
+        for (const k of m.provinces || []) { p.provinces.add(k); provProc.set(k, p.id); }
+        if (m.events) director.addEvents(m.events);
+        if (m.waystones) { for (const w of m.waystones) waystones.set(w.key, w); const list = [...waystones.values()]; for (const q of procs.values()) q.bus.send({ k: 'waystones', list }); }
+        return;
+      }
       case 'presence': {
         const was = presence.get(m.char);
         presence.set(m.char, { ...m, proc: p.id });
@@ -314,6 +320,7 @@ export function createGateway(opts) {
     online: () => [...presence.values()].filter(p => p.online),
     broadcast: msg => { const d = JSON.stringify(msg); for (const g of gwByChar.values()) g.send(d); },
     procOf: prov => provProc.get(prov),
+    procList: () => [...procs.keys()],
     sendTo,
   });
 

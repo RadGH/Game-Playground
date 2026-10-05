@@ -90,6 +90,7 @@ export async function startBot(opts = {}) {
     name, mode, charId: null, you: null, room: null, myId: null,
     pos: null, home: null, waypoint: null, target: null,
     ents: new Map(),
+    ledger: [],
     stats: { joins: 0, snaps: 0, bytes: 0, inputs: 0, casts: 0, hitsDealt: 0, hitsTaken: 0, kills: 0, deaths: 0, refusals: 0, errors: 0, kicks: 0, lastSnapAt: 0, firstPos: null },
     get token() { return token; },
     net: null,
@@ -123,6 +124,8 @@ export async function startBot(opts = {}) {
   });
   net.on('joined', j => {
     bot.stats.joins++;
+    // the server's truth after every (re)join: the ledger restarts from it (tools/chaos-kill9.mjs reads the ledger)
+    bot.ledger.push({ t: Date.now(), type: 'reset', bag: (j.you.bag || []).map(i => i.uid), gold: j.you.gold || 0 });
     bot.room = j.room; bot.you = j.you; bot.myId = j.you.id;
     bot.pos = { x: j.you.x, y: j.you.y, z: j.you.z };
     if (!bot.stats.firstPos) bot.stats.firstPos = { ...bot.pos };
@@ -185,6 +188,32 @@ export async function startBot(opts = {}) {
     }
   });
   net.on('castR', () => { bot.stats.refusals++; });
+  net.on('bag', m => {
+    const t = Date.now();
+    for (const uid of m.remove || []) bot.ledger.push({ t, type: 'remove', uid });
+    for (const it of m.add || []) bot.ledger.push({ t, type: 'add', uid: it.uid });
+    if (Number.isFinite(m.gold)) bot.ledger.push({ t, type: 'gold', gold: m.gold });
+  });
+  net.on('you', p => { if (Number.isFinite(p.gold)) bot.ledger.push({ t: Date.now(), type: 'gold', gold: p.gold }); });
+
+  // ---- trading pair (opts.trade = { partner: name, lead: bool }): the lead asks, both offer once, lock, confirm ----
+  const T = { offered: new Set(), lastAsk: 0 };
+  net.on('tradeAsk', m => { if (opts.trade) net.tradeOp('accept', { id: m.trade }); });
+  net.on('trade', m => {
+    if (!opts.trade) return;
+    const tr = m.trade;
+    if (!tr) { if (m.done) bot.stats.trades = (bot.stats.trades || 0) + 1; else bot.stats.tradeFails = (bot.stats.tradeFails || 0) + 1; return; }
+    const me = tr.you, them = tr.them;
+    if (!T.offered.has(tr.id)) {
+      T.offered.add(tr.id);
+      const bag = net.joined?.you.bag || [];
+      const items = bag.slice(0, Math.min(2, bag.length)).map(i => i.uid);
+      net.tradeOp('offer', { id: tr.id, items, gold: Math.min(3, net.joined?.you.gold || 0) });
+      return;
+    }
+    if (!me.locked && T.offered.has(tr.id)) { net.tradeOp('lock', { id: tr.id }); return; }
+    if (me.locked && them.locked && !me.confirmed) net.tradeOp('confirm', { id: tr.id });
+  });
   net.on('kick', () => { bot.stats.kicks++; });
 
   // ---- behaviour: one input per 50 ms, a swing whenever a wolf is in reach ---------------------
@@ -211,7 +240,15 @@ export async function startBot(opts = {}) {
       }
     }
     if (!goal && bot.exit && mode !== 'idle') goal = bot.exit;
-    if (!goal && mode !== 'idle' && !(mode === 'fight' && bot.target != null)) {
+    // a follower keeps near its partner when it has nothing to fight (so a trading pair stays in reach)
+    const partnerName = opts.follow || opts.trade?.partner;
+    const partner = partnerName ? [...bot.ents.values()].find(e => e.name === partnerName && e.x != null) : null;
+    if (!goal && opts.follow && partner && Math.hypot(partner.x - bot.pos.x, partner.z - bot.pos.z) > 4) goal = partner;
+    if (opts.trade?.lead && partner && !net.trade && Date.now() - T.lastAsk > 4000 && Math.hypot(partner.x - bot.pos.x, partner.z - bot.pos.z) < 8) {
+      T.lastAsk = Date.now(); net.tradeOp('ask', { id: partner.id });
+    }
+    if (opts.trade && net.trade) goal = null;     // stand still while the window is open (walking apart cancels it)
+    if (!goal && !(opts.follow && partner) && !(opts.trade && net.trade) && mode !== 'idle' && !(mode === 'fight' && bot.target != null)) {
       if (!bot.waypoint || Math.hypot(bot.waypoint.x - bot.pos.x, bot.waypoint.z - bot.pos.z) < 3) {
         const lim = mode === 'town' && bot.town ? Math.min(radius, bot.town.r - 8) : radius;
         const a = rnd() * Math.PI * 2, r = lim * Math.sqrt(rnd());

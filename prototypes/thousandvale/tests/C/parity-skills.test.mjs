@@ -49,7 +49,7 @@ async function pair({ classId, level, seed, pack }) {
 /** one frame on both sides, in main.js's order: timers, field, skill bar, skill runtime, pools */
 function frame(s) {
   mock.timers.tick(DT * 1000);
-  s.ff.update(DT, s.control, s.fp, { onEnemyStrike: e => O.farholdEnemyStrike(s.F, s.ff, s.fp, e, s.fs.mech) });
+  s.ff.update(DT, s.control, s.fp, { onEnemyStrike: e => O.farholdEnemyStrike(s.F, s.ff, s.fp, e, s.fs.mech, null, s.fs.uniqueEnv) });
   s.fs.tick(DT);
   s.room.run(() => { s.room.clock.advance(DT); s.room.combat.tick(DT); });
 }
@@ -96,7 +96,7 @@ for (const { classId, role } of CLASSES) {
             s.tp.swing.mainReady = 0;
             s.room.run(() => s.room.combat.attack(s.tp, { held: 0 }));
           } else {
-            O.farholdSwing(s.F, s.ff, s.control, s.fp, 'main', slot);
+            O.farholdSwing(s.F, s.ff, s.control, s.fp, 'main', slot, s.fs.uniqueEnv);
             s.room.run(() => s.room.combat.resolveSwing(s.tp, 'main', slot, s.tp.equipment.weapon));
           }
           compare(s, `${id} after the basic attack`);

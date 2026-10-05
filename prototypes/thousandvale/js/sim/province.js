@@ -222,6 +222,7 @@ export function createProvince(opts) {
       case 'kick': { const o = online.get(m.char); if (o && o.conn) o.conn.kick(m.code || 'restart'); return; }
       case 'relocated': return relocated(m);
       case 'event': return onEvent(m);
+      case 'waystones': remoteWaystones = m.list; return;
     }
   });
 
@@ -572,6 +573,7 @@ export function createProvince(opts) {
   }
 
   // ---- waystones + travel (PLAN §5.2; NB4: discovered first, fares, free to a live realm event) ----
+  let remoteWaystones = [];       // every process's waystones (the gateway shares them)
   function allWaystones() { const out = []; for (const pv of P.values()) for (const w of pv.L.waystones) out.push({ ...w, province: pv.L.key }); return out; }
   function discover(o, obj) {
     const ch = o.char, w = obj.data.waystone;
@@ -592,7 +594,7 @@ export function createProvince(opts) {
       const a = (ch.id % 12) / 12 * Math.PI * 2;
       return moveTo(o, liveEvent.province, { x: liveEvent.x + Math.cos(a) * (liveEvent.r || 50) * 0.8, z: liveEvent.z + Math.sin(a) * (liveEvent.r || 50) * 0.8 }, 'event');
     }
-    const w = (opts.waystones || allWaystones()).find(x => x.key === to);
+    const w = allWaystones().find(x => x.key === to) || remoteWaystones.find(x => x.key === to);
     if (!w) return s.sendJSON({ t: 'travelR', ok: false, why: 'unknown' });
     if (!(ch.waystones || []).includes(to)) return s.sendJSON({ t: 'travelR', ok: false, why: 'undiscovered', msg: 'You have not found that waystone yet.' });
     const near = (ch.waystones || []).length && [...o.room.objects.values()].some(x => x.data && x.data.waystone && Math.hypot(x.x - e.x, x.z - e.z) < 6);
@@ -1114,7 +1116,7 @@ export function createProvince(opts) {
     await store.init();
     const n = await store.clearLeases(processName + ':');
     if (n) log(`cleared ${n} stale lease(s) from a previous run of ${processName}`);
-    send({ k: 'hello', proc, provinces: [...P.keys()] });
+    send({ k: 'hello', proc, provinces: [...P.keys()], waystones: allWaystones().map(w => ({ key: w.key, name: w.name, x: w.x, z: w.z, province: w.province })) });
   }
   async function shutdown(code = 'restart') {
     for (const s of [...kit.sessions]) s.kick(code);

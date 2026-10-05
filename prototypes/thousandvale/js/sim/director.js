@@ -20,10 +20,11 @@ export function eventScale(n) {
   return { players, hp: Math.max(1, 1 + 0.55 * (players - 1)), adds: Math.min(12, Math.floor(players / 8)) };
 }
 
-export function createDirector({ now, wallNow = now, log = () => {}, events = null, online, broadcast, procOf, sendTo, everyMs = DIRECTOR.everyMs, announceMs = DIRECTOR.announceMs, firstMs = DIRECTOR.firstMs }) {
-  const list = events || [];
+export function createDirector({ now, wallNow = now, log = () => {}, events = null, online, broadcast, procOf, sendTo, procList = null, everyMs = DIRECTOR.everyMs, announceMs = DIRECTOR.announceMs, firstMs = DIRECTOR.firstMs }) {
+  const list = (events || []).slice();
   let cur = null, next = now() + firstMs, n = 0;
-  const allProcs = () => { const s = new Set(); for (const e of list) { const p = procOf(e.province); if (p !== undefined) s.add(p); } return s; };
+  // every province process learns the live event (any of them may send a player to it)
+  const allProcs = () => { if (procList) return procList(); const s = new Set(); for (const e of list) { const p = procOf(e.province); if (p !== undefined) s.add(p); } return s; };
 
   function pick() {
     if (!list.length) return null;
@@ -79,6 +80,7 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
       return true;
     },
     get current() { return cur; },
+    addEvents(evs) { for (const e of evs) if (!list.some(x => x.id === e.id)) list.push(e); },
   };
 
   function end(won, why) {

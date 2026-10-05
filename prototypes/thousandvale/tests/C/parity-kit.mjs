@@ -55,7 +55,7 @@ export function fakePerformance(on) { fakeMs = 0; performance.now = on ? () => f
 export function frame(s) {
   fakeMs += DT * 1000;
   mock.timers.tick(DT * 1000);
-  s.ff.update(DT, s.control, s.fp, { onEnemyStrike: e => O.farholdEnemyStrike(s.F, s.ff, s.fp, e, s.fs.mech, s.followers ? s.fs.pets : null) });
+  s.ff.update(DT, s.control, s.fp, { onEnemyStrike: e => O.farholdEnemyStrike(s.F, s.ff, s.fp, e, s.fs.mech, s.followers ? s.fs.pets : null, s.fs.uniqueEnv) });
   s.fs.tick(DT);
   s.room.run(() => { s.room.clock.advance(DT); s.room.combat.tick(DT); });
 }
@@ -110,7 +110,7 @@ export function basic(s, step) {
     } else if (w.castElement && w.ranged) s.room.run(() => s.room.combat.resolveWand(s.tp, w, step));
     else s.room.run(() => s.room.combat.resolveArrow(s.tp, w, plan?.power ?? 1, step));
   } else {
-    O.farholdSwing(s.F, s.ff, s.control, s.fp, 'main', step);
+    O.farholdSwing(s.F, s.ff, s.control, s.fp, 'main', step, s.fs.uniqueEnv);
     s.room.run(() => s.room.combat.resolveSwing(s.tp, 'main', step, s.tp.equipment.weapon));
   }
 }
@@ -160,4 +160,50 @@ export async function runBar({ classId, seed = 4, level = 30, frames = 50, skip 
     fakePerformance(false);
   }
   return { problems, casts, dealt };
+}
+
+/**
+ * Unique gear on both sides, then `rounds` basic attacks into a pack (two of them mortal, so kills
+ * happen) with the monsters biting back — unique attack powers, kill powers, on-hurt powers and
+ * auras all get their turn. Returns problems like runBar.
+ */
+export async function runUniques({ classId, uniqueIds, seed = 4, level = 30, rounds = 12, frames = 14 }) {
+  mock.timers.enable({ apis: ['setTimeout'], now: 0 });
+  fakePerformance(true);
+  const problems = [];
+  let dealt = 0;
+  try {
+    const s = await pair({ classId, level, seed });
+    for (const id of uniqueIds) {
+      const a = s.F.rpg.uniqueItem(id, { level, rng: O.makeRng(seed + 77) });
+      const b = s.room.engine.rpg.uniqueItem(id, { level, rng: makeRng(seed + 77) });
+      if (!a || !b) { problems.push(`${id}: no item`); continue; }
+      s.F.rpg.equip(s.fp, a, { force: true }); s.F.rpg.refresh(s.fp, { full: true });
+      s.room.engine.rpg.equip(s.tp, b, { force: true }); s.room.engine.rpg.refresh(s.tp, { full: true });
+    }
+    s.fp.hp = s.fp.maxHp; s.tp.hp = s.tp.maxHp;
+    // two hounds back to mortal health so kills (and kill powers) happen
+    for (const i of [0, 1]) { s.fmobs[i].hp = s.fmobs[i].maxHp = Math.round(s.fmobs[i].maxHp / 40); s.tmobs[i].hp = s.tmobs[i].maxHp = Math.round(s.tmobs[i].maxHp / 40); }
+    let d = diff(s);
+    if (d) problems.push(`${classId} after equipping: ${d}`);
+    for (let r = 0; r < rounds && !problems.length; r++) {
+      const before = s.fmobs.reduce((n, m) => n + m.hp, 0);
+      basic(s, r);
+      await s.fs.settle();
+      d = diff(s);
+      if (d) { problems.push(`${classId} round ${r} basic: ${d}`); break; }
+      for (let k = 0; k < frames; k++) {
+        frame(s);
+        await s.fs.settle();
+        d = diff(s);
+        if (d) { problems.push(`${classId} round ${r} +${k}: ${d}`); break; }
+      }
+      dealt += before - s.fmobs.reduce((n, m) => n + m.hp, 0);
+    }
+    if (!problems.length && s.room.rng() !== s.ff.rng()) problems.push(`${classId}: fight rngs out of step`);
+  } finally {
+    mock.timers.reset();
+    fakePerformance(false);
+  }
+  return { problems, dealt };
 }

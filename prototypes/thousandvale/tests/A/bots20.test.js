@@ -8,7 +8,10 @@ import { makeServer, makeClient, run, until, waitP } from './helpers.js';
 import { ent as entOf_, roomOf as roomOf_ } from './helpers.js';
 import { seedStream, next, range } from '../../js/sim/rng.js';
 
-test('20 bots walking and fighting for 60 s: tick p99 < 5 ms', async () => {
+// Timing gate: runs alone (`npm run test:perf`, TV_PERF=1). In the parallel suite other test files share the
+// CPU and the numbers mean nothing, so it is skipped there.
+const PERF = !!process.env.TV_PERF;
+test('20 bots walking and fighting for 60 s: tick p99 < 5 ms', { skip: !PERF && 'timing gate: npm run test:perf' }, async () => {
   const clock = createVirtualClock();
   const srv = makeServer({ clock, worldOpts: { perfNow: () => performance.now() } });
   await srv.ready;

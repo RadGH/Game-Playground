@@ -33,7 +33,7 @@ export function makeClient(server, clock, opts = {}) {
   const evs = [];
   net.on('joined', () => mirror.reset());
   net.on('info', e => mirror.info(e));
-  net.on('snap', s => { mirror.snap(s); net.lastSnap = s; });
+  net.on('snap', s => { mirror.snap(s); net.lastSnap = s; if (s.self) net.lastSelf = s.self; });
   net.on('ev', m => evs.push(...m.e));
   net.mirror = mirror; net.evs = evs;
   return net;

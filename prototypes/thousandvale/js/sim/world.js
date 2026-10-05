@@ -58,3 +58,32 @@ export function layoutEvents(layouts) {
   }
   return out;
 }
+
+/**
+ * STAGE 2 in one JS context (tests, and the shape server/main.mjs builds across processes): one gateway and
+ * several province processes, each with its own bus and its own layouts, sharing one store.
+ *   const realm = createRealm({ procs: [[layoutA], [layoutB]], store, ... })
+ *   realm.accept('/gw' | '/p/<n>', conn) ; realm.step() ; realm.procs[n] (each a createProvince)
+ */
+export function createRealm(opts) {
+  const { procs: sets, now = () => Date.now(), wallNow = () => Date.now() } = opts;
+  const all = sets.flat();
+  const gateway = createGateway({ ...opts, now, wallNow, events: opts.events || layoutEvents(all), starterProvince: all[0].key });
+  const procs = sets.map((layouts, n) => {
+    const [gwBus, pBus] = createLocalBus();
+    const p = createProvince({ ...opts, proc: n, layouts, bus: pBus, processName: (opts.processName || 'p') + '.' + n, clock: { epoch: gateway.epoch, dayMs: gateway.clockDayMs }, now, wallNow });
+    gateway.attach(n, gwBus, { provinces: layouts.map(L => L.key) });
+    return p;
+  });
+  const tickStats = procs[0].tickStats;
+  return {
+    gateway, procs, tickStats, parties: gateway.parties, director: gateway.director,
+    accept(path, conn) { if (path === '/gw') return gateway.accept(path, conn); const m = /^\/p\/(\d+)$/.exec(path); const p = m && procs[+m[1]]; if (!p) { conn.close(4404, 'no such path'); return { message() {}, close() {} }; } return p.accept(path, conn); },
+    step() { gateway.step(); let ms = 0; for (const p of procs) ms = Math.max(ms, p.step()); return ms; },
+    async init() { for (const p of procs) await p.init(); },
+    async shutdown(code) { for (const p of procs) await p.shutdown(code); },
+    status() { return { gateway: gateway.status(), procs: procs.map(p => p.status()) }; },
+    /** The province process holding character `c` right now (or null). */
+    procOf(c) { return procs.find(p => p.online.has(c)) || null; },
+  };
+}

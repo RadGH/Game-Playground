@@ -111,7 +111,7 @@ export async function startServer(o) {
     const c = { n, provs, proc: null, restarts: 0, bus: null, handlers: [], status: null };
     c.bus = { send: m => { if (c.proc && c.proc.connected) c.proc.send({ bus: m }); }, on: fn => c.handlers.push(fn) };
     const start = () => {
-      const argv = [JSON.stringify({ n, provinces: provs, db: o.db, build: o.build, rules: o.rules, linger: o.linger, saveEvery: o.saveEvery, journalMs: o.journalMs, process: `p${n}`, env })];
+      const argv = [JSON.stringify({ n, provinces: provs, db: o.db, build: o.build, rules: o.rules, linger: o.linger, saveEvery: o.saveEvery, journalMs: o.journalMs, process: `${o.process}.${n}`, env })];
       c.proc = fork(join(GAME, 'server/province-proc.mjs'), argv, { stdio: ['ignore', 'inherit', 'inherit', 'ipc'] });
       c.proc.on('message', m => { if (m && m.bus) for (const h of c.handlers) h(m.bus); else if (m && m.ready) c.ready = true; });
       c.proc.on('exit', (code, sig) => {

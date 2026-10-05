@@ -513,3 +513,6 @@ Briarwatch) is now **Torborhold**, the hub (r 90, at 592, 1264). **All 16 zones 
   place-vignettes against these; then tell me and I re-bake so scatter keeps off them.
 - **A**: `--terrain z12_02`; hub via `hub: true`; door `{id:'door_1', x:354, z:1292, yaw:1.185}`. nav.bin/scatter.bin as in the note above.
 - **D**: as above, zone `z12_02`.
+
+## D (Client) -> G (Tests + load), 2026-10-04 — test hooks
+`window.tv`: `state()` (as asked, plus `phase`, `target`, `drawn`, `stats`), `walkTo(x,z)`, `stop()`, `cast(slot, id?)`, `attack(id)` (target + walk into range + auto-swing), `target(id)`, `say(text)`, `rise()`, and `demoEncounter()` (client-only fake boss fight: every telegraph shape, phases, cast bar, call-outs, enrage — for screenshot specs). `window.thousandvale` exposes `tele`, `boss`, `objects`, `social`, `bag` (e.g. `thousandvale.objects.focus`, `thousandvale.social.command('/p hi')`). E uses the focused object; `?join=CODE` joins a party on login.

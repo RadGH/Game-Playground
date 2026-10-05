@@ -96,12 +96,12 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
     /** Label slots 1..6 from a bar [{ slot, name, desc, level, locked, ally }]. */
     setBar(bar, initials) {
       for (let i = 1; i < slots.length; i++) {
-        const sk = bar.find(x => x.slot === i), s = slots[i];
+        const found = bar.find(x => x.slot === i), sk = found && !found.empty ? found : null, s = slots[i];
         s.b.classList.toggle('empty', !sk);
         s.b.classList.toggle('locked', !!sk?.locked);
         s.b.classList.toggle('ally', !!sk?.ally);
         if (s.face) s.face.textContent = sk ? initials(sk.name) : '';
-        s.b.title = sk ? `${sk.name}${sk.locked ? ` (unlocks at level ${sk.level})` : ''}\n${sk.desc}` : 'Empty';
+        s.b.title = sk ? `${sk.name}${sk.locked ? ` (unlocks at level ${sk.level})` : ''}${sk.ally ? (sk.group ? ' — reaches your party' : ' — on a friend or yourself') : ''}\n${sk.desc}` : (found?.desc || 'Empty');
       }
     },
     toast(text, tone = 'info') {

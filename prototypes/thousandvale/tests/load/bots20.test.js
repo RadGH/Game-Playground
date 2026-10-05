@@ -19,13 +19,19 @@ const SECONDS = +(process.env.TV_LOAD_SECONDS || 70);
 const BOTS = +(process.env.TV_LOAD_BOTS || 20);
 const TICK_BUDGET_MS = 5;
 
-test(`${BOTS} bots for ${SECONDS}s: tick p99 < ${TICK_BUDGET_MS} ms, everyone joins, moves and fights`, { skip: !process.env.TV_LOAD_URL && !serverExists() && 'server/main.mjs not built yet (stream A)', timeout: (SECONDS + 60) * 1000 }, async () => {
+test(`${BOTS} bots for ${SECONDS}s: tick p99 < ${TICK_BUDGET_MS} ms, everyone joins, moves and fights`, { skip: !process.env.TV_LOAD_URL && !serverExists() && 'server/main.mjs not built yet (stream A)', timeout: (SECONDS + 120) * 1000 }, async () => {
   const { startBots, report, getStatus } = await import('../../tools/bot-client.mjs');
   const srv = process.env.TV_LOAD_URL ? { url: process.env.TV_LOAD_URL, kill: async () => {}, log: () => '' } : await startServer({ db: 'memory' });
   let bots = [];
   try {
     bots = await startBots(BOTS, { url: srv.url, mode: 'fight', radius: 50, stagger: 50 });
     assert.equal(bots.length, BOTS, 'every bot joined');
+    // characters start in the town hub (no monsters) and E's camps sit ~140 m out: walk the bots out first
+    // (fight mode leaves town, then hunts the nearest monster it can see) so the measured window has fights in it
+    const outBy = Date.now() + 60000;
+    while (Date.now() < outBy && bots.filter(b => b.roomKind === 'wilds').length < BOTS * 0.8) await new Promise(r => setTimeout(r, 500));
+    const outside = bots.filter(b => b.roomKind === 'wilds').length;
+    console.log(`# ${outside}/${BOTS} bots out in the wilds before the measured window`);
     // warm up 5 s (JIT, first spawns), then measure the rest
     await new Promise(r => setTimeout(r, 5000));
     const samples = [];
@@ -48,6 +54,8 @@ test(`${BOTS} bots for ${SECONDS}s: tick p99 < ${TICK_BUDGET_MS} ms, everyone jo
     assert.ok(Math.max(...maxes) < 50, `no tick overran 50 ms (worst ${Math.max(...maxes)})`);
     assert.ok(r.moved >= BOTS * 0.9, `${r.moved}/${BOTS} bots moved`);
     assert.ok(r.snaps > BOTS * SECONDS * 5, `snapshots flowing (${r.snaps})`);
+    assert.ok(outside >= BOTS * 0.6, `${outside}/${BOTS} bots made it out of town`);
+    assert.ok(r.casts >= BOTS / 2, `bots swing at monsters (${r.casts} casts)`);
     assert.ok(r.hitsDealt > 0, 'bots hit monsters');
     assert.equal(r.kicks, 0, 'no bot was kicked (abuse / rate limits)');
   } finally {

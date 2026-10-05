@@ -7,7 +7,8 @@
 //
 // CLI:
 //   node prototypes/thousandvale/tools/bot-client.mjs --url ws://127.0.0.1:8491 --bots 20 --seconds 60
-//     --mode fight|walk|idle|town   fight (default): leave the town, wander, chase wolves within 30 m and swing
+//     --mode fight|walk|idle|town   fight (default): leave the town, wander, chase wolves within 30 m and swing;
+//                              with none in reach it hunts the nearest monster it can see (opts.hunt, 260 m)
 //                              walk: leave the town and wander; town: wander inside the town hub; idle: stand
 //                              script (library only): walk to bot.goal, swing at monsters within bot.fightRadius —
 //                              a driver (tools/first-hour-bot.mjs) sets the goals
@@ -239,13 +240,18 @@ export async function startBot(opts = {}) {
     if (bot.stopped || !bot.pos || bot.myId == null || bot.wasDead) return;
     let goal = null;
     if (mode === 'fight' || (mode === 'script' && bot.fightRadius > 0)) {
-      let best = null, bestD = mode === 'script' ? bot.fightRadius : 30;
+      let best = null, bestD = mode === 'script' ? bot.fightRadius : 30, far = null, farD = Infinity;
       for (const e of bot.ents.values()) {
         if (e.dead || e.x == null || !isMonster(e)) continue;
         const d = Math.hypot(e.x - bot.pos.x, e.z - bot.pos.z);
         if (d < bestD) { bestD = d; best = e; }
+        if (d < farD) { farD = d; far = e; }
       }
       bot.target = best ? best.id : null;
+      // fight mode hunts: camps sit ~140 m out of town, further than the 30 m chase reach, so a fighter
+      // with nothing in reach walks toward the nearest monster it can see (opts.hunt metres, 0 = off)
+      const hunt = opts.hunt ?? 260;
+      bot.hunt = (mode === 'fight' && !best && far && farD < hunt && !bot.town) ? far : null;
       if (best) {
         goal = best;
         const now = Date.now();
@@ -258,20 +264,9 @@ export async function startBot(opts = {}) {
     }
     if (mode === 'script') {
       if (!goal && bot.goal && Math.hypot(bot.goal.x - bot.pos.x, bot.goal.z - bot.pos.z) > 1.2) goal = bot.goal;
-      // unstick: walking at a wall (a house, a fence, a cliff) for 2.5 s without getting anywhere -> sidestep for 1.5 s
-      const now = Date.now();
-      if (!bot.stuck || !goal) bot.stuck = { at: now, x: bot.pos.x, z: bot.pos.z, detour: null, until: 0 };
-      if (goal && now - bot.stuck.at > 2500) {
-        if (Math.hypot(bot.pos.x - bot.stuck.x, bot.pos.z - bot.stuck.z) < 0.8 && now > bot.stuck.until) {
-          const a = Math.atan2(goal.x - bot.pos.x, goal.z - bot.pos.z) + (rnd() < 0.5 ? 1.6 : -1.6);
-          bot.stuck.detour = { x: bot.pos.x + Math.sin(a) * 8, z: bot.pos.z + Math.cos(a) * 8 }; bot.stuck.until = now + 1500;
-          bot.stats.unstuck = (bot.stats.unstuck || 0) + 1;
-        }
-        bot.stuck.at = now; bot.stuck.x = bot.pos.x; bot.stuck.z = bot.pos.z;
-      }
-      if (bot.stuck.detour && now < bot.stuck.until) goal = bot.stuck.detour;
     }
     else if (!goal && bot.exit && mode !== 'idle') goal = bot.exit;
+    if (!goal && bot.hunt) goal = bot.hunt;
     // a follower keeps near its partner when it has nothing to fight (so a trading pair stays in reach)
     const partnerName = opts.follow || opts.trade?.partner;
     const partner = partnerName ? [...bot.ents.values()].find(e => e.name === partnerName && e.x != null) : null;
@@ -289,6 +284,20 @@ export async function startBot(opts = {}) {
       }
       goal = bot.waypoint;
     }
+    // unstick (every walking mode): walking at a wall (a house, a fence, a cliff) for 2.5 s without getting anywhere -> sidestep for 1.5 s
+    const now = Date.now();
+    if (!bot.stuck || !goal) bot.stuck = { at: now, x: bot.pos.x, z: bot.pos.z, detour: null, until: 0 };
+    if (goal && now - bot.stuck.at > 2500) {
+      if (Math.hypot(bot.pos.x - bot.stuck.x, bot.pos.z - bot.stuck.z) < 0.8 && now > bot.stuck.until) {
+        const a = Math.atan2(goal.x - bot.pos.x, goal.z - bot.pos.z) + (rnd() < 0.5 ? 1.6 : -1.6);
+        bot.stuck.detour = { x: bot.pos.x + Math.sin(a) * 8, z: bot.pos.z + Math.cos(a) * 8 }; bot.stuck.until = now + 1500;
+        bot.stats.unstuck = (bot.stats.unstuck || 0) + 1;
+        // a town exit behind a wall: after a few tries pick another bearing out
+        if (bot.town && bot.exit && bot.stats.unstuck % 3 === 0) { const ea = rnd() * Math.PI * 2, er = bot.town.r + 30; bot.exit = { x: bot.town.x + Math.cos(ea) * er, z: bot.town.z + Math.sin(ea) * er }; }
+      }
+      bot.stuck.at = now; bot.stuck.x = bot.pos.x; bot.stuck.z = bot.pos.z;
+    }
+    if (bot.stuck.detour && now < bot.stuck.until) goal = bot.stuck.detour;
     let mx = 0, mz = 0, yaw = 0;
     if (goal) {
       const dx = goal.x - bot.pos.x, dz = goal.z - bot.pos.z, d = Math.hypot(dx, dz) || 1;

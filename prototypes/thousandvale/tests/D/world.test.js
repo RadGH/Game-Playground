@@ -10,7 +10,7 @@ import { parseTerrain, parseScatter, SCATTER_KINDS } from '../../js/rules/terrai
 import { worldZone, zonesWanted, rectDist, ZONE_M } from '../../js/client/terrain.js';
 import { nightness, skyAt, sunDirection, timeName } from '../../js/client/daynight.js';
 import { estimateFare, ago, deedLines } from '../../js/client/world-ui.js';
-import { barFromData, isAllySkill } from '../../js/client/skillbar.js';
+import { barFromData, barFromServer, isAllySkill } from '../../js/client/skillbar.js';
 import { vignettePoint } from '../../js/sim/vignettes.js';
 
 register('../../../../avatar-3d/tests/three-loader.mjs', import.meta.url);
@@ -174,6 +174,21 @@ test('skill bar: all 30 classes get six named skills with Farhold\'s unlock leve
   assert.equal(isAllySkill(d.skills.cleave), false);
   const healers = classes.filter(c => ['cleric', 'druid', 'bard', 'paladin'].includes(c.id)).flatMap(c => barFromData(d, c.id, 50));
   assert.ok(healers.some(b => b.ally), 'some healer skill targets friends');
+});
+
+test('skill bar: the server bar (protocol §15.10) is used as sent — ally flag, empty slots, locked from level when missing', () => {
+  const bar = barFromServer([
+    { slot: 1, id: 'cleave', name: 'Cleave', cd: 6000, level: 1, locked: false, ally: false },
+    { slot: 2, id: 'mend', name: 'Mend', level: 3, ally: true },
+    { slot: 3, id: 'rally', name: 'Rally', level: 1, ally: true, group: true },
+    { slot: 4, empty: true, desc: 'Slot 4 opens at level 12', level: 12 },
+  ], 2);
+  assert.equal(bar.length, 4);
+  assert.equal(bar[0].ally, false); assert.equal(bar[0].cd, 6000);
+  assert.ok(bar[1].ally && bar[1].locked, 'level 2 < 3: locked worked out from the level');
+  assert.ok(bar[2].ally && bar[2].group && !bar[2].locked);
+  assert.ok(bar[3].empty && bar[3].desc.includes('level 12'));
+  assert.deepEqual(barFromServer(null), []);
 });
 
 test('camera solids: a wall between focus and camera is found, an open line is clear, owners come and go', async () => {

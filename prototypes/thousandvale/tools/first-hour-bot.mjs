@@ -123,8 +123,11 @@ export async function firstHour({ url, log = () => {}, stepMs = {}, fightSeconds
       let ring = 0;
       while ((kills() < 3 || A.loot.length + B.loot.length < 1) && Date.now() - t0 < fightSeconds * 1000) {
         ring++;
+        // a live monster in sight (E's camps sit ~140 m apart, further than the 28 m reach): go to it; else widen the ring
+        const seen = [...A.ents.values()].filter(e => !e.dead && e.x != null && (e.kind === 'monster' || e.kindId === 2))
+          .map(e => ({ e, d: Math.hypot(e.x - A.pos.x, e.z - A.pos.z) })).filter(o => o.d < 260).sort((p, q) => p.d - q.d)[0];
         const a = ring * 1.3, r = 25 + ring * 12;
-        const g = { x: door.x + Math.cos(a) * r, z: door.z + Math.sin(a) * r };
+        const g = seen ? { x: seen.e.x, z: seen.e.z } : { x: door.x + Math.cos(a) * r, z: door.z + Math.sin(a) * r };
         A.goal = g; B.goal = { x: g.x + 2, z: g.z + 2 };
         const tw = Date.now();
         await until(() => near(A, g, 4) || Date.now() - tw > 15000, 200);

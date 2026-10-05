@@ -39,7 +39,7 @@ import { createObjects } from './objects.js';
 import { createDungeonView } from './dungeon-view.js';
 import { createSocial } from './social.js';
 import { createBag } from './bag.js';
-import { loadSkillData, barFromData, initials } from './skillbar.js';
+import { loadSkillData, barFromData, barFromServer, initials } from './skillbar.js';
 
 const q = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
@@ -285,6 +285,7 @@ function wireNet(net) {
     if (patch.hpMax != null) S.self.hpMax = patch.hpMax;
     if (patch.hp != null) S.self.hp = patch.hp;
     hud.setSelf(S.self);
+    if (Array.isArray(patch.bar)) refreshBar();   // §15.10: level-up, form/stance, talent pick (client.js merged it into joined.you)
     if (levelled) levelFlash(S.selfId);
   });
   net.on('chat', m => {
@@ -567,16 +568,16 @@ function cycleTarget() {
 // --- the skill bar (skillbar.js): the server's `you.bar` when it sends one, else Farhold's own data -------
 S.bar = [];
 async function refreshBar() {
-  const server = S.net?.joined?.you?.bar;
-  if (Array.isArray(server) && server.length) S.bar = server.map((b, i) => ({ slot: b.slot ?? i + 1, ...b, locked: b.locked ?? (S.self.level < (b.level || 1)) }));
-  else S.bar = barFromData(await loadSkillData(), S.self.cls, S.self.level);
+  const server = S.net?.joined?.you?.bar;   // protocol §15.10, kept current by `you {bar}`
+  if (Array.isArray(server)) S.bar = barFromServer(server, S.self.level);
+  else S.bar = barFromData(await loadSkillData(), S.self.cls, S.self.level);   // stand-in rules: no `bar` field
   hud.setBar(S.bar, initials);
 }
 /** Keys 1–6: cast that slot. Friendly skills go to a friendly target (or yourself); the rest at your enemy or ahead. */
 function castSkill(n) {
   if (S.phase !== 'world' || S.self.dead || !S.net) return false;
   const sk = S.bar.find(b => b.slot === n);
-  if (!sk) { hud.toast('Nothing on that key yet.', 'warn'); return false; }
+  if (!sk || sk.empty) { hud.toast(sk?.desc || 'Nothing on that key yet.', 'warn'); return false; }
   if (sk.locked) { hud.toast(`${sk.name} unlocks at level ${sk.level}.`, 'warn'); return false; }
   const now = performance.now();
   if ((S.cds?.[n] || 0) > now) { hud.toast(`${sk.name} is not ready.`, 'warn'); return false; }
@@ -769,6 +770,7 @@ function frame(now) {
   }
   fx.update(dt);
   hud.tick(dt);
+  W.horizon?.update(camera.position);       // far-horizon chunk LOD (built in a worker; cheap when nothing changes)
   view.render();
 }
 
@@ -874,7 +876,7 @@ const tv = {
   hud(on = true) { $('hud').style.visibility = on ? '' : 'hidden'; $('plates').style.visibility = on ? '' : 'hidden'; },
   /** Hold the time of day (0 = midnight, 0.5 = noon); null goes back to the realm clock. */
   setTime(t) { S.todHold = t; todAt = 0; },
-  world: () => ({ ...WS.stats(), solids: SOLIDS.count(), tod: S.tod, night: S.night, horizon: !!W.horizon }),
+  world: () => ({ ...WS.stats(), solids: SOLIDS.count(), tod: S.tod, night: S.night, horizon: !!W.horizon, horizonStats: W.horizon?.stats?.() || null }),
   /**
    * Client-only crowd for the performance check (PLAN §12: a town of 100 players): n fake players wander
    * round you, drawn through the same LOD as real ones. tv.crowd(0) clears them. Returns the LOD counts.

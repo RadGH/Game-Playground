@@ -1,15 +1,23 @@
-// The far horizon: the whole world from stream B's macro bake (data/world/macro.bin — 288 × 224 samples,
-// one every 128 m, the field every zone was refined from), drawn as one low mesh in WORLD metres, so the
-// hills and mountains several zones away are on the skyline and you can walk to them ("see it, walk to
-// it", PLAN §12). Inside the zones that are loaded in full the horizon is cut away (a fragment discard
-// against their rectangles), and its vertices on those zones' borders take the zone's own edge height, so
-// the two meet instead of one poking through the other. Settlements from world.json become clusters of
-// warm lights at night.
+// The far horizon: the whole world drawn beyond the zones that are loaded in full, in WORLD metres, so the hills and
+// mountains several zones away are on the skyline and you can walk to them ("see it, walk to it", PLAN §12).
+//
+// Source (2026-10-05): stream B's data/world/horizon.bin — the whole world at 32 m, EXACT in baked zones — cut into
+// chunks with distance LOD (horizon-grid.js: fine rings near the camera, coarser rings far away, skirts so strides
+// meet without cracks). The file is inflated and every chunk is built in a worker (horizon-worker.js), so the main
+// thread only hands finished arrays to the GPU; without workers the same code runs on the main thread, one chunk a
+// frame. Low quality uses bigger chunks and coarser strides (64 m at best). If horizon.bin cannot be read — or with
+// ?horizon=macro — the old single mesh from macro.bin (128 m, below) is drawn instead.
+//
+// Inside the zones loaded in full the horizon is hidden: a chunk wholly under loaded zones is not drawn, and a chunk
+// partly under them is rebuilt with those cells left out (so nothing is rasterised beneath the real ground). The
+// macro fallback still cuts them with a fragment discard. Settlements from world.json are warm lights at night.
 //
 //   const hz = await createHorizon(scene, { quality })
-//   hz.heightAt(x, z)  hz.setLoaded([bounds…], heightAt)  hz.setNight(0..1)  hz.setBiomes(reader.biomes)
+//   hz.update(cameraPosition)   (every frame)   hz.heightAt(x, z)  hz.setLoaded([bounds…])  hz.setNight(0..1)
+//   hz.setBiomes(reader.biomes) (macro only)    hz.setVisible(bool)  hz.stats()
 
 import * as THREE from 'three';
+import { CHUNK, prepareGrid, buildChunk, gridHeightAt, chunkCounts, chunkRect, rectDistance, coveredBy, touchedBy, lodFor } from './horizon-grid.js';
 
 const MAGIC = 'TVWM';
 
@@ -52,7 +60,193 @@ export function macroHeightAt(m, H, x, z) {
 const BIOME_FALLBACK = ['#0b1d33', '#123a5e', '#1d5a86', '#2a6fa8', '#d3c592', '#6f9f52', '#9fa04e', '#87984f', '#3f7a45', '#1e6b39', '#356052', '#8d9a8f', '#e2ecf2', '#dac68d', '#a5714a', '#4a6b52', '#7c8a55', '#7f786d', '#d8dce0', '#4b3730', '#4a3a56', '#57504c', '#68597a', '#8fd0a0', '#a99ada', '#cfe2ec'];
 const MAX_HOLES = 8;
 
-export async function createHorizon(scene, { quality = 'high', base = new URL('../../data/world/', import.meta.url) } = {}) {
+/** The fine horizon (horizon.bin) unless it cannot be read or ?horizon=macro asks for the old one. */
+export async function createHorizon(scene, { quality = 'high', base = new URL('../../data/world/', import.meta.url), source = null } = {}) {
+  const want = source || (typeof location !== 'undefined' ? new URLSearchParams(location.search).get('horizon') : null) || 'fine';
+  if (want !== 'macro') {
+    try { return await createFineHorizon(scene, { quality, base }); }
+    catch (e) { console.warn('[horizon] horizon.bin not used, drawing macro.bin instead:', e.message); }
+  }
+  return createMacroHorizon(scene, { quality, base });
+}
+
+/** The hole cut (zones loaded in full) as a material patch shared by both horizons. */
+function holeMaterial(holes) {
+  const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  mat.onBeforeCompile = shader => {
+    shader.uniforms.uHoles = { value: holes };
+    shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 vHW;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvHW = (modelMatrix * vec4(transformed, 1.0)).xz;');
+    shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `#include <common>\nvarying vec2 vHW;\nuniform vec4 uHoles[${MAX_HOLES}];`)
+      .replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>
+        for (int i = 0; i < ${MAX_HOLES}; i++) { vec4 hb = uHoles[i]; if (vHW.x > hb.x && vHW.x < hb.z && vHW.y > hb.y && vHW.y < hb.w) discard; }`);
+  };
+  return mat;
+}
+
+/** Warm points where people live (world.json settlements), lit at night. */
+function settlementLights(world, heightAt) {
+  const lights = [];
+  for (const n of world?.nodes || []) if (n.type === 'settlement') {
+    const count = { capital: 18, city: 14, town: 9, village: 6, hamlet: 3, port: 7 }[n.kind] || 3;
+    let s = (n.id * 2654435761) >>> 0;
+    const rnd = () => ((s = Math.imul(s ^ (s >>> 15), 2246822507) >>> 0) / 4294967296);
+    for (let k = 0; k < count; k++) {
+      const x = n.x + (rnd() - 0.5) * count * 9, z = n.z + (rnd() - 0.5) * count * 9;
+      lights.push(x, Math.max(0, heightAt(x, z)) + 6, z);
+    }
+  }
+  const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(lights, 3));
+  const lmat = new THREE.PointsMaterial({ color: '#ffc070', size: 5, sizeAttenuation: false, transparent: true, opacity: 0, depthWrite: false, fog: false });
+  const points = new THREE.Points(lg, lmat); points.visible = false; points.frustumCulled = false; points.name = 'horizon-lights';
+  return { points, lmat };
+}
+
+/**
+ * Chunk source: a module worker when the browser has one (inflate + every chunk off the main thread), else the same
+ * functions here. `ready` resolves with { meta, W, H, step, drawn, wet }; `chunk(ci, cj, chunk, stride)` -> arrays.
+ */
+async function chunkSource(url) {
+  if (typeof Worker !== 'undefined') {
+    let w;
+    try {
+      w = new Worker(new URL('./horizon-worker.js', import.meta.url), { type: 'module' });
+      const waiting = new Map(); let nextId = 1;
+      const info = await new Promise((resolve, reject) => {
+        const t = setTimeout(() => reject(new Error('worker timed out')), 30000);
+        w.onerror = e => { clearTimeout(t); reject(new Error(e.message || 'worker failed')); };
+        w.onmessage = ({ data }) => {
+          if (data.type === 'ready') { clearTimeout(t); resolve(data); }
+          else if (data.type === 'error' && data.id == null) { clearTimeout(t); reject(new Error(data.message)); }
+          else if (data.type === 'chunk' || data.type === 'error') { const p = waiting.get(data.id); waiting.delete(data.id); if (p) (data.type === 'chunk' ? p.resolve(data) : p.reject(new Error(data.message))); }
+        };
+        w.postMessage({ type: 'load', url: String(url) });
+      });
+      return {
+        info, worker: true, maxInFlight: 8,
+        chunk: (ci, cj, chunk, stride, holes) => new Promise((resolve, reject) => { const id = nextId++; waiting.set(id, { resolve, reject }); w.postMessage({ type: 'chunk', id, ci, cj, chunk, stride, holes }); }),
+        dispose: () => w.terminate(),
+      };
+    } catch (e) {
+      try { w?.terminate(); } catch { /* gone */ }
+      console.warn('[horizon] no worker, building on the main thread:', e.message);
+    }
+  }
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('horizon.bin ' + r.status);
+  const g = prepareGrid(await r.arrayBuffer());
+  return { info: g, worker: false, maxInFlight: 1, chunk: async (ci, cj, chunk, stride, holes) => buildChunk(g, ci, cj, chunk, stride, holes), dispose() {} };
+}
+
+async function createFineHorizon(scene, { quality, base }) {
+  const [src, world] = await Promise.all([
+    chunkSource(new URL('horizon.bin', base)),
+    fetch(new URL('world.json', base)).then(r => (r.ok ? r.json() : null)).catch(() => null),
+  ]);
+  const g = src.info;                                   // { meta, W, H, step, drawn, wet } (drawn = what the mesh shows)
+  const size = CHUNK[quality] || CHUNK.high;
+  const { cx, cz } = chunkCounts(g, size);
+  // no fragment discard here: cells under loaded zones are left out of the chunk itself (rebuilt when that set changes)
+  const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  const group = new THREE.Group(); group.name = 'horizon';
+  scene.add(group);
+  const heightAt = (x, z) => gridHeightAt(g, x, z);
+  const { points, lmat } = settlementLights(world, heightAt);
+  scene.add(points);
+
+  const chunks = [];
+  for (let cj = 0; cj < cz; cj++) for (let ci = 0; ci < cx; ci++) chunks.push({ ci, cj, rect: chunkRect(g, ci, cj, size), mesh: null, stride: 0, want: 0, pending: 0, covered: false, dist: 0, tris: 0, holesVer: 0, needVer: 0 });
+  let loadedRects = [], visible = true, inFlight = 0, coverDirty = true, built = 0, holesVer = 0;
+
+  function apply(ch, c) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(c.pos, 3));
+    geo.setAttribute('normal', new THREE.BufferAttribute(c.nor, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(c.col, 3));
+    geo.setIndex(new THREE.BufferAttribute(c.idx, 1));
+    geo.computeBoundingSphere();
+    if (ch.mesh) { ch.mesh.geometry.dispose(); ch.mesh.geometry = geo; }
+    else {
+      ch.mesh = new THREE.Mesh(geo, mat);
+      ch.mesh.name = `horizon-${ch.ci}-${ch.cj}`; ch.mesh.castShadow = false; ch.mesh.receiveShadow = false;
+      ch.mesh.renderOrder = -1; ch.mesh.matrixAutoUpdate = false;
+      group.add(ch.mesh);
+    }
+    ch.mesh.visible = !ch.covered;
+    ch.stride = c.stride; ch.tris = c.tris; built++;
+    ch.want = lodFor(ch.dist, quality, ch.stride);
+  }
+
+  function request(ch, stride) {
+    ch.pending = stride; inFlight++;
+    const ver = ch.needVer, cut = ver ? loadedRects.filter(r => touchedBy(ch.rect, [r])) : null;
+    src.chunk(ch.ci, ch.cj, size, stride, cut).then(c => { apply(ch, c); ch.holesVer = ver; })
+      .catch(e => console.warn('[horizon] chunk failed', ch.ci, ch.cj, e.message))
+      .finally(() => { ch.pending = 0; inFlight--; if (src.worker) pump(); });   // keep the worker fed at any frame rate
+  }
+
+  /** Every frame: pick each chunk's stride from the camera distance, then ask for the most urgent rebuilds. */
+  function update(cam) {
+    if (!cam) return;
+    if (coverDirty) {
+      for (const ch of chunks) {
+        ch.covered = coveredBy(ch.rect, loadedRects);
+        if (ch.mesh) ch.mesh.visible = !ch.covered;
+        // partly under loaded zones: rebuild with those cells cut out (and rebuild whole once they unload)
+        const touched = !ch.covered && touchedBy(ch.rect, loadedRects);
+        ch.needVer = touched ? holesVer : 0;
+      }
+      coverDirty = false;
+    }
+    lastCam.x = cam.x; lastCam.z = cam.z;
+    if (Math.hypot(cam.x - lodAt.x, cam.z - lodAt.z) > 32 || lodDirty) {
+      lodAt.x = cam.x; lodAt.z = cam.z; lodDirty = false;
+      for (const ch of chunks) { ch.dist = rectDistance(ch.rect, cam.x, cam.z); ch.want = lodFor(ch.dist, quality, ch.stride); }
+    }
+    pump();
+  }
+  const lastCam = { x: NaN, z: NaN }, lodAt = { x: Infinity, z: Infinity };
+  let lodDirty = true;
+  /** Ask for the most urgent rebuilds until the source is busy: nothing drawn yet first (coarse, so the whole world
+   *  appears at once), then nearest first. One per frame without a worker (built here, on the main thread). */
+  function pump() {
+    while (inFlight < src.maxInFlight && Number.isFinite(lastCam.x)) {
+      let best = null, bestScore = Infinity;
+      for (const ch of chunks) {
+        if (ch.pending || ch.covered || (ch.want === ch.stride && ch.holesVer === ch.needVer)) continue;
+        const score = (ch.mesh ? 1e6 : 0) + ch.dist;
+        if (score < bestScore) { bestScore = score; best = ch; }
+      }
+      if (!best) return;
+      request(best, best.mesh ? best.want : Math.max(best.want, best.dist > 4000 ? 8 : best.want));
+      if (!src.worker) return;
+    }
+  }
+
+  function setLoaded(rects) {
+    const key = rects.map(r => `${r.minX},${r.minZ},${r.maxX},${r.maxZ}`).sort().join('|');
+    if (key === setLoaded.key) return;
+    setLoaded.key = key;
+    loadedRects = rects.slice(); holesVer++; coverDirty = true;
+  }
+
+  return {
+    source: 'horizon.bin', group, points, world, update, heightAt, setLoaded,
+    setBiomes() { /* horizon.bin carries its own biome palette */ },
+    setNight(n) { points.visible = visible && n > 0.05; lmat.opacity = Math.min(1, n * 1.2); },
+    setVisible(v) { visible = v; group.visible = v; points.visible = v && lmat.opacity > 0.05; },
+    get holes() { return loadedRects; },
+    stats() {
+      const lods = {}; let tris = 0, drawn = 0;
+      for (const ch of chunks) if (ch.mesh && !ch.covered) { drawn++; tris += ch.tris; lods[ch.stride] = (lods[ch.stride] || 0) + 1; }
+      return { source: 'horizon.bin', worker: src.worker, chunks: chunks.length, drawn, tris, lods, pending: inFlight, built, cut: chunks.filter(c => c.needVer).length };
+    },
+    dispose() { src.dispose(); for (const ch of chunks) ch.mesh?.geometry.dispose(); mat.dispose(); scene.remove(group); scene.remove(points); },
+  };
+}
+
+/** The old horizon: one mesh over macro.bin (128 m). Low quality's fallback when horizon.bin cannot be read. */
+async function createMacroHorizon(scene, { quality = 'high', base = new URL('../../data/world/', import.meta.url) } = {}) {
   const [macroBuf, world] = await Promise.all([
     fetch(new URL('macro.bin', base)).then(r => { if (!r.ok) throw new Error('macro.bin ' + r.status); return r.arrayBuffer(); }),
     fetch(new URL('world.json', base)).then(r => (r.ok ? r.json() : null)).catch(() => null),
@@ -101,34 +295,13 @@ export async function createHorizon(scene, { quality = 'high', base = new URL('.
   geo.computeVertexNormals();
   geo.computeBoundingSphere();
   const holes = Array.from({ length: MAX_HOLES }, () => new THREE.Vector4(1, 1, 0, 0));   // min > max = empty
-  const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
-  mat.onBeforeCompile = shader => {
-    shader.uniforms.uHoles = { value: holes };
-    shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 vHW;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvHW = (modelMatrix * vec4(transformed, 1.0)).xz;');
-    shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `#include <common>\nvarying vec2 vHW;\nuniform vec4 uHoles[${MAX_HOLES}];`)
-      .replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>
-        for (int i = 0; i < ${MAX_HOLES}; i++) { vec4 hb = uHoles[i]; if (vHW.x > hb.x && vHW.x < hb.z && vHW.y > hb.y && vHW.y < hb.w) discard; }`);
-  };
+  const mat = holeMaterial(holes);
   const mesh = new THREE.Mesh(geo, mat);
   mesh.name = 'horizon'; mesh.receiveShadow = false; mesh.castShadow = false; mesh.frustumCulled = false;
   mesh.renderOrder = -1;
   scene.add(mesh);
 
-  // ---- night lights where people live ----
-  const lights = [];
-  for (const n of world?.nodes || []) if (n.type === 'settlement') {
-    const count = { capital: 18, city: 14, town: 9, village: 6, hamlet: 3, port: 7 }[n.kind] || 3;
-    let s = (n.id * 2654435761) >>> 0;
-    const rnd = () => ((s = Math.imul(s ^ (s >>> 15), 2246822507) >>> 0) / 4294967296);
-    for (let k = 0; k < count; k++) {
-      const x = n.x + (rnd() - 0.5) * count * 9, z = n.z + (rnd() - 0.5) * count * 9;
-      lights.push(x, Math.max(0, macroHeightAt(m, drawnH, x, z)) + 6, z);
-    }
-  }
-  const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(lights, 3));
-  const lmat = new THREE.PointsMaterial({ color: '#ffc070', size: 5, sizeAttenuation: false, transparent: true, opacity: 0, depthWrite: false, fog: false });
-  const points = new THREE.Points(lg, lmat); points.visible = false; points.frustumCulled = false; points.name = 'horizon-lights';
+  const { points, lmat } = settlementLights(world, (x, z) => macroHeightAt(m, drawnH, x, z));
   scene.add(points);
   let loadedRects = [];
 
@@ -155,7 +328,9 @@ export async function createHorizon(scene, { quality = 'high', base = new URL('.
   }
 
   return {
-    mesh, points, macro: m, world,
+    source: 'macro.bin', mesh, points, macro: m, world,
+    update() { /* one mesh: nothing to stream */ },
+    stats: () => ({ source: 'macro.bin', chunks: 1, drawn: mesh.visible ? 1 : 0, tris: idx.length / 3 }),
     heightAt: (x, z) => macroHeightAt(m, drawnH, x, z),
     setLoaded,
     setBiomes(biomes) { if (!biomes || palette !== BIOME_FALLBACK) return; palette = biomes.map(b => b.color); paint(); geo.attributes.color.needsUpdate = true; },

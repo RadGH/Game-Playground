@@ -157,7 +157,8 @@
    "z": 1118,
    "yaw": 0,
    "radius": 24,
-   "level": 1
+   "level": 1,
+   "countCap": 2
   },
   {
    "type": "farm",
@@ -170,7 +171,8 @@
    "z": 1827,
    "yaw": 1.96,
    "radius": 20,
-   "level": 2
+   "level": 2,
+   "countCap": 3
   },
   {
    "type": "farm",
@@ -183,7 +185,8 @@
    "z": 1502,
    "yaw": 0,
    "radius": 24,
-   "level": 2
+   "level": 2,
+   "countCap": 3
   },
   {
    "type": "farm",
@@ -196,7 +199,8 @@
    "z": 1415,
    "yaw": -3.14,
    "radius": 24,
-   "level": 1
+   "level": 1,
+   "countCap": 2
   },
   {
    "type": "cave",

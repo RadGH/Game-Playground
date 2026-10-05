@@ -212,7 +212,7 @@ function linkTrails({ w, M, W, H, ref, roads, zoneCells }) {
       let bi = 0; for (let q = 1; q < open.length; q++) if (open[q][0] < open[bi][0]) bi = q;
       const [d, c] = open.splice(bi, 1)[0]; if (d > dist[c]) continue;
       if (roadCell[c] && c !== start) { goal = c; break; }
-      if (d > 60) break;                                              // ~40 cells of easy ground: give up
+      if (d > 400) break;                                             // far too far over hard ground: give up
       const x = c % W, y = (c / W) | 0;
       for (const [dx, dy, m] of [[1, 0, 1], [-1, 0, 1], [0, 1, 1], [0, -1, 1], [1, 1, 1.41], [1, -1, 1.41], [-1, 1, 1.41], [-1, -1, 1.41]]) {
         const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;

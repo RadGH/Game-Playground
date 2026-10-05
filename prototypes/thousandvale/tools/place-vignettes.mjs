@@ -173,7 +173,7 @@ function placeZone(eid, wid) {
       } });
       if (spot) {
         const flavour = farmFlavour(i);
-        push({ type: 'farm', id: `farm_${eid}_${i}`, name: farmName(tpl, home, flavour), template: tpl, flavour, settlement: home ? home.name : null, x: spot.x, z: spot.z, yaw: faceRoad(spot), radius: T.radius, level: lvlFloor(spot.x, spot.z) });
+        push({ type: 'farm', id: `farm_${eid}_${i}`, name: farmName(tpl, home, flavour), template: tpl, flavour, settlement: home ? home.name : null, x: spot.x, z: spot.z, yaw: faceRoad(spot), radius: T.radius, level: lvlFloor(spot.x, spot.z), ...(countCapAt(LF.dist(eid, spot.x, spot.z)) ? { countCap: countCapAt(LF.dist(eid, spot.x, spot.z)) } : {}) });
         break;
       }
       tpl = tryTpl === 0 ? (byArch.farms.sheep ? 'sheep' : 'arable') : 'pig';   // no water / no room: a dry-land farm instead

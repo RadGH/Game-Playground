@@ -82,10 +82,11 @@ test('P26: round the start nothing ordinary is above level 3 within 900 m, nothi
 });
 
 // Hobb Gallowsby's camp level is stream A's ENCOUNTER_PLACES (5); E asked A to read the encounter file's `level` (4)
-test('P26: named fights and vignette monsters near the start stay near the ramp (the elite A places; vignette levelBase/levelCap A applies)', { todo: 'A: encounter `level` in zoneEncounterCamps + vignette levelBase/levelCap (docs/requests.md, E, play-test 1)' }, () => {
+test('P26: named fights and vignette monsters near the start stay near the ramp (the elite A places; vignette levelBase/levelCap A applies)', { todo: 'A: encounter `level` in zoneEncounterCamps + vignette levelBase/levelCap/countCap + farm pest countCap (docs/requests.md, E, play-test 1)' }, () => {
   const bad = [];
   for (const c of L.camps) {
     const d = Math.hypot(c.x - HUB.x, c.z - HUB.z);
+    if (c.place && /^farm_/.test(c.place) && !c.rank && ((d < 400 && c.count > 2) || (d < 900 && c.count > 3))) bad.push(`${c.type} x${c.count} at ${d.toFixed(0)} m (pests of ${c.place})`);
     if (c.vignette && !c.place) { if ((d < 900 && c.level > 3) || (d < 1500 && c.level > 4)) bad.push(`${c.type} L${c.level} at ${d.toFixed(0)} m (vignette ${c.vignette})`); continue; }
     if (!(c.rank === 'rare' || c.rank === 'elite' || c.rank === 'boss' || c.encounter)) continue;
     if (d < 900 && c.level > Math.floor(1 + d / 550) + 2) bad.push(`${c.name || c.type} L${c.level} at ${d.toFixed(0)} m`);
@@ -96,7 +97,7 @@ test('P26: named fights and vignette monsters near the start stay near the ramp 
 test('P26 (stream C\'s starting-area rules): solos and pairs within 400 m of the start, trios at most to 900 m, no crag hyena / frost stalker / brigand captain where the ramp is under 4', () => {
   const HEAVY = new Set(['crag_hyena', 'frost_stalker', 'brigand_captain']), bad = [];
   for (const c of L.camps) {
-    if (!c.place || c.rank) continue;
+    if (!c.place || c.rank || /^farm_/.test(c.place)) continue;   // farm pests: A applies the farm's countCap (next-but-one test)
     const d = Math.hypot(c.x - HUB.x, c.z - HUB.z);
     if (d < 400 && c.count > 2) bad.push(`${c.type} x${c.count} at ${d.toFixed(0)} m (${c.place})`);
     if (d < 900 && c.count > 3) bad.push(`${c.type} x${c.count} at ${d.toFixed(0)} m (${c.place})`);

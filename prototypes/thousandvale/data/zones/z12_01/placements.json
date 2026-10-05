@@ -5,16 +5,17 @@
  "placements": [
   {
    "kind": "settlement",
-   "id": "tifeckgate",
+   "id": "ashcombe",
    "x": 1408,
    "z": 1328,
    "yaw": 0,
    "data": {
     "kind": "city",
-    "name": "Tifeckgate",
+    "name": "Ashcombe",
     "radius": 140,
     "hub": true,
-    "planned": true
+    "planned": true,
+    "wfName": "Tifeckgate"
    }
   },
   {
@@ -26,6 +27,21 @@
    "data": {
     "kind": "ancientwood",
     "name": "The Elder Fibafer"
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "kettle_cross",
+   "x": 933,
+   "z": 773,
+   "yaw": 0,
+   "data": {
+    "kind": "hamlet",
+    "name": "Kettle Cross",
+    "radius": 46,
+    "hub": false,
+    "planned": true,
+    "ask": true
    }
   },
   {
@@ -50,24 +66,24 @@
   },
   {
    "kind": "town_square",
-   "id": "tifeckgate_square",
+   "id": "ashcombe_square",
    "x": 1402.89,
    "z": 1337.66,
    "yaw": 0,
    "data": {
     "r": 4.52,
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "culture": "halfling"
    }
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_0",
+   "id": "ashcombe_street_0",
    "x": 1343.39,
    "z": 1277.51,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -88,12 +104,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_1",
+   "id": "ashcombe_street_1",
    "x": 1368.07,
    "z": 1375.65,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -114,12 +130,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_2",
+   "id": "ashcombe_street_2",
    "x": 1345.28,
    "z": 1342.16,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -140,12 +156,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_3",
+   "id": "ashcombe_street_3",
    "x": 1351.52,
    "z": 1362.81,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -166,12 +182,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_4",
+   "id": "ashcombe_street_4",
    "x": 1344.1,
    "z": 1356.48,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -192,12 +208,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_5",
+   "id": "ashcombe_street_5",
    "x": 1353.55,
    "z": 1356.08,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -218,12 +234,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_6",
+   "id": "ashcombe_street_6",
    "x": 1361.29,
    "z": 1364.02,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -244,12 +260,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_7",
+   "id": "ashcombe_street_7",
    "x": 1364.45,
    "z": 1356.22,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -270,12 +286,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_8",
+   "id": "ashcombe_street_8",
    "x": 1358.78,
    "z": 1342.24,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -296,12 +312,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_9",
+   "id": "ashcombe_street_9",
    "x": 1351.42,
    "z": 1324.39,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -322,12 +338,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_10",
+   "id": "ashcombe_street_10",
    "x": 1362.42,
    "z": 1336.72,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -348,12 +364,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_11",
+   "id": "ashcombe_street_11",
    "x": 1405.75,
    "z": 1388.68,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -374,12 +390,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_12",
+   "id": "ashcombe_street_12",
    "x": 1385.77,
    "z": 1348.79,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -400,12 +416,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_13",
+   "id": "ashcombe_street_13",
    "x": 1392.12,
    "z": 1379.38,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -426,12 +442,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_14",
+   "id": "ashcombe_street_14",
    "x": 1380.9,
    "z": 1362.01,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -452,12 +468,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_15",
+   "id": "ashcombe_street_15",
    "x": 1385.72,
    "z": 1377.01,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -478,12 +494,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_16",
+   "id": "ashcombe_street_16",
    "x": 1391.42,
    "z": 1364.64,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -504,12 +520,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_17",
+   "id": "ashcombe_street_17",
    "x": 1396.57,
    "z": 1371.84,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -530,12 +546,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_18",
+   "id": "ashcombe_street_18",
    "x": 1400.35,
    "z": 1361.58,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -556,12 +572,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_19",
+   "id": "ashcombe_street_19",
    "x": 1403.21,
    "z": 1353.31,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -582,12 +598,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_20",
+   "id": "ashcombe_street_20",
    "x": 1389.37,
    "z": 1339.02,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -608,12 +624,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_21",
+   "id": "ashcombe_street_21",
    "x": 1396.03,
    "z": 1350.67,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -634,12 +650,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_22",
+   "id": "ashcombe_street_22",
    "x": 1396.47,
    "z": 1340.11,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -660,12 +676,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_23",
+   "id": "ashcombe_street_23",
    "x": 1407.95,
    "z": 1345.22,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -686,12 +702,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_24",
+   "id": "ashcombe_street_24",
    "x": 1418.73,
    "z": 1368.68,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -712,12 +728,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_25",
+   "id": "ashcombe_street_25",
    "x": 1420.16,
    "z": 1388.4,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -738,12 +754,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_26",
+   "id": "ashcombe_street_26",
    "x": 1413,
    "z": 1377.57,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -764,12 +780,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_27",
+   "id": "ashcombe_street_27",
    "x": 1425.35,
    "z": 1383.15,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -790,12 +806,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_28",
+   "id": "ashcombe_street_28",
    "x": 1424.36,
    "z": 1359.96,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -816,12 +832,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_29",
+   "id": "ashcombe_street_29",
    "x": 1423.61,
    "z": 1370.49,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -842,12 +858,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_30",
+   "id": "ashcombe_street_30",
    "x": 1431.78,
    "z": 1363.36,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -868,12 +884,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_31",
+   "id": "ashcombe_street_31",
    "x": 1396.6,
    "z": 1299.75,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -894,12 +910,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_32",
+   "id": "ashcombe_street_32",
    "x": 1379.74,
    "z": 1257.97,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -920,12 +936,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_33",
+   "id": "ashcombe_street_33",
    "x": 1381.65,
    "z": 1286.49,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -946,12 +962,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_34",
+   "id": "ashcombe_street_34",
    "x": 1372.64,
    "z": 1275.35,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -972,12 +988,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_35",
+   "id": "ashcombe_street_35",
    "x": 1387.27,
    "z": 1277.1,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -998,12 +1014,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_36",
+   "id": "ashcombe_street_36",
    "x": 1387.09,
    "z": 1288.94,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1024,12 +1040,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_37",
+   "id": "ashcombe_street_37",
    "x": 1395.06,
    "z": 1279.2,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1050,12 +1066,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_38",
+   "id": "ashcombe_street_38",
    "x": 1397.49,
    "z": 1266.5,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1076,12 +1092,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_39",
+   "id": "ashcombe_street_39",
    "x": 1391.82,
    "z": 1247.61,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1102,12 +1118,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_40",
+   "id": "ashcombe_street_40",
    "x": 1389.92,
    "z": 1260.83,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1128,12 +1144,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_41",
+   "id": "ashcombe_street_41",
    "x": 1396.01,
    "z": 1248.9,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1154,12 +1170,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_42",
+   "id": "ashcombe_street_42",
    "x": 1402.69,
    "z": 1262.12,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1180,12 +1196,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_43",
+   "id": "ashcombe_street_43",
    "x": 1428.92,
    "z": 1312.84,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1206,12 +1222,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_44",
+   "id": "ashcombe_street_44",
    "x": 1420.56,
    "z": 1289.85,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1232,12 +1248,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_45",
+   "id": "ashcombe_street_45",
    "x": 1424.48,
    "z": 1303.49,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1258,12 +1274,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_46",
+   "id": "ashcombe_street_46",
    "x": 1428.35,
    "z": 1279.4,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1284,12 +1300,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_47",
+   "id": "ashcombe_street_47",
    "x": 1429.6,
    "z": 1295.1,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1310,12 +1326,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_48",
+   "id": "ashcombe_street_48",
    "x": 1434.47,
    "z": 1282.24,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1336,12 +1352,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_49",
+   "id": "ashcombe_street_49",
    "x": 1446.38,
    "z": 1299.96,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1362,12 +1378,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_50",
+   "id": "ashcombe_street_50",
    "x": 1445,
    "z": 1326.91,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1388,12 +1404,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_51",
+   "id": "ashcombe_street_51",
    "x": 1439.24,
    "z": 1320.22,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1414,12 +1430,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_52",
+   "id": "ashcombe_street_52",
    "x": 1438.82,
    "z": 1306.46,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1440,12 +1456,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_53",
+   "id": "ashcombe_street_53",
    "x": 1445.38,
    "z": 1316.52,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1466,12 +1482,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_54",
+   "id": "ashcombe_street_54",
    "x": 1451.05,
    "z": 1323.5,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1492,12 +1508,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_55",
+   "id": "ashcombe_street_55",
    "x": 1463,
    "z": 1316.72,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1518,12 +1534,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_56",
+   "id": "ashcombe_street_56",
    "x": 1455.75,
    "z": 1308.28,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1544,12 +1560,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_57",
+   "id": "ashcombe_street_57",
    "x": 1368.73,
    "z": 1256.01,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -1566,12 +1582,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_58",
+   "id": "ashcombe_street_58",
    "x": 1376.83,
    "z": 1348.88,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1588,12 +1604,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_59",
+   "id": "ashcombe_street_59",
    "x": 1372.18,
    "z": 1347.89,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1610,12 +1626,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_60",
+   "id": "ashcombe_street_60",
    "x": 1358.78,
    "z": 1342.24,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1632,12 +1648,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_61",
+   "id": "ashcombe_street_61",
    "x": 1414.25,
    "z": 1317.69,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1654,12 +1670,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_62",
+   "id": "ashcombe_street_62",
    "x": 1445,
    "z": 1326.91,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1676,12 +1692,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_63",
+   "id": "ashcombe_street_63",
    "x": 1441.36,
    "z": 1299.1,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1698,12 +1714,12 @@
   },
   {
    "kind": "street",
-   "id": "tifeckgate_street_64",
+   "id": "ashcombe_street_64",
    "x": 1396.6,
    "z": 1299.75,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1720,12 +1736,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_0",
+   "id": "ashcombe_plot_0",
    "x": 1358.94,
    "z": 1351.42,
    "yaw": -0.1232,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 6.97,
@@ -1737,12 +1753,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_1",
+   "id": "ashcombe_plot_1",
    "x": 1354.13,
    "z": 1333.7,
    "yaw": 1.2276,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "forge",
     "district": "residential",
     "w": 11.75,
@@ -1754,12 +1770,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_2",
+   "id": "ashcombe_plot_2",
    "x": 1369.64,
    "z": 1330.78,
    "yaw": -0.3432,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "inn",
     "district": "craft",
     "w": 12.42,
@@ -1771,12 +1787,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_3",
+   "id": "ashcombe_plot_3",
    "x": 1382.57,
    "z": 1369.87,
    "yaw": 1.2176,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "warehouse",
     "district": "craft",
     "w": 10.03,
@@ -1788,12 +1804,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_4",
+   "id": "ashcombe_plot_4",
    "x": 1387.74,
    "z": 1357.36,
    "yaw": 1.2176,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "granary",
     "district": "craft",
     "w": 9.92,
@@ -1805,12 +1821,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_5",
+   "id": "ashcombe_plot_5",
    "x": 1398.34,
    "z": 1377.68,
    "yaw": 2.7884,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "hut",
     "district": "craft",
     "w": 6.28,
@@ -1822,12 +1838,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_6",
+   "id": "ashcombe_plot_6",
    "x": 1404.13,
    "z": 1379.82,
    "yaw": 2.7884,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 6.28,
@@ -1839,12 +1855,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_7",
+   "id": "ashcombe_plot_7",
    "x": 1404.74,
    "z": 1369.24,
    "yaw": 2.7884,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "market",
     "district": "craft",
     "w": 7.08,
@@ -1856,12 +1872,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_8",
+   "id": "ashcombe_plot_8",
    "x": 1391.9,
    "z": 1345.32,
    "yaw": 1.2176,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "hut",
     "district": "civic",
     "w": 5.98,
@@ -1873,12 +1889,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_9",
+   "id": "ashcombe_plot_9",
    "x": 1411.8,
    "z": 1352.23,
    "yaw": 2.7884,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "barracks",
     "district": "civic",
     "w": 6.78,
@@ -1890,12 +1906,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_10",
+   "id": "ashcombe_plot_10",
    "x": 1415.53,
    "z": 1342.09,
    "yaw": -0.3532,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "stable",
     "district": "civic",
     "w": 7.42,
@@ -1907,12 +1923,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_11",
+   "id": "ashcombe_plot_11",
    "x": 1420.26,
    "z": 1375.89,
    "yaw": 2.5684,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "hut",
     "district": "craft",
     "w": 7.01,
@@ -1924,12 +1940,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_12",
+   "id": "ashcombe_plot_12",
    "x": 1431.09,
    "z": 1370.5,
    "yaw": -0.5732,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 6.9,
@@ -1941,12 +1957,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_13",
+   "id": "ashcombe_plot_13",
    "x": 1431.11,
    "z": 1355.68,
    "yaw": 0.9976,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "hut",
     "district": "craft",
     "w": 10.99,
@@ -1958,12 +1974,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_14",
+   "id": "ashcombe_plot_14",
    "x": 1439.16,
    "z": 1360.88,
    "yaw": -0.5732,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 10.99,
@@ -1975,12 +1991,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_15",
+   "id": "ashcombe_plot_15",
    "x": 1394.03,
    "z": 1286.79,
    "yaw": -1.993,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 8.4,
@@ -1992,12 +2008,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_16",
+   "id": "ashcombe_plot_16",
    "x": 1392.52,
    "z": 1273.7,
    "yaw": -0.4222,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 6.76,
@@ -2009,12 +2025,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_17",
+   "id": "ashcombe_plot_17",
    "x": 1421.67,
    "z": 1296.79,
    "yaw": 0.9303,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 6.2,
@@ -2026,12 +2042,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_18",
+   "id": "ashcombe_plot_18",
    "x": 1430.36,
    "z": 1303.26,
    "yaw": 2.5011,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 6.2,
@@ -2043,12 +2059,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_19",
+   "id": "ashcombe_plot_19",
    "x": 1428.03,
    "z": 1287.41,
    "yaw": 0.9303,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 9.25,
@@ -2060,12 +2076,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_20",
+   "id": "ashcombe_plot_20",
    "x": 1436.8,
    "z": 1293.95,
    "yaw": -0.6404,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 9.25,
@@ -2077,12 +2093,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_21",
+   "id": "ashcombe_plot_21",
    "x": 1442.28,
    "z": 1283.28,
    "yaw": -2.2112,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 6.47,
@@ -2094,12 +2110,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_22",
+   "id": "ashcombe_plot_22",
    "x": 1438.12,
    "z": 1313.34,
    "yaw": 0.7103,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 6.08,
@@ -2111,12 +2127,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_23",
+   "id": "ashcombe_plot_23",
    "x": 1445.59,
    "z": 1306.91,
    "yaw": -0.8604,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 5.72,
@@ -2128,12 +2144,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_24",
+   "id": "ashcombe_plot_24",
    "x": 1451.63,
    "z": 1315.28,
    "yaw": -0.8604,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 7.47,
@@ -2145,12 +2161,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_25",
+   "id": "ashcombe_plot_25",
    "x": 1459.41,
    "z": 1324.36,
    "yaw": -0.8604,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "chapel",
     "district": "residential",
     "w": 7.52,
@@ -2162,12 +2178,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_26",
+   "id": "ashcombe_plot_26",
    "x": 1456.52,
    "z": 1298.52,
    "yaw": 0.7103,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "hall",
     "district": "residential",
     "w": 12.71,
@@ -2179,12 +2195,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_27",
+   "id": "ashcombe_plot_27",
    "x": 1462.27,
    "z": 1310.07,
    "yaw": 0.7103,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 6.36,
@@ -2196,12 +2212,12 @@
   },
   {
    "kind": "building",
-   "id": "tifeckgate_plot_28",
+   "id": "ashcombe_plot_28",
    "x": 1467.09,
    "z": 1305.93,
    "yaw": 0.7103,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "want": "house",
     "district": "residential",
     "w": 6.36,
@@ -2213,12 +2229,12 @@
   },
   {
    "kind": "town_wall",
-   "id": "tifeckgate_wall",
+   "id": "ashcombe_wall",
    "x": 1408,
    "z": 1328,
    "yaw": 0,
    "data": {
-    "town": "tifeckgate",
+    "town": "ashcombe",
     "radius": 82,
     "gates": [
      {
@@ -2234,6 +2250,1111 @@
       "z": 0.4135428852684821
      }
     ]
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "kettle_cross_square",
+   "x": 926.93,
+   "z": 771.8,
+   "yaw": 0,
+   "data": {
+    "r": 4.84,
+    "town": "kettle_cross",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_0",
+   "x": 934.88,
+   "z": 810.65,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      934.88,
+      810.65
+     ],
+     [
+      941.87,
+      774.7
+     ],
+     [
+      948.64,
+      738.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_1",
+   "x": 967.45,
+   "z": 769.33,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      967.45,
+      769.33
+     ],
+     [
+      957.76,
+      768.61
+     ],
+     [
+      948.07,
+      768.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_2",
+   "x": 964.76,
+   "z": 789.47,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      964.76,
+      789.47
+     ],
+     [
+      956.56,
+      789.48
+     ],
+     [
+      948.39,
+      790.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_3",
+   "x": 958.11,
+   "z": 801.12,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      958.11,
+      801.12
+     ],
+     [
+      957.11,
+      796.96
+     ],
+     [
+      956.33,
+      792.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_4",
+   "x": 955.94,
+   "z": 787.93,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      955.94,
+      787.93
+     ],
+     [
+      956.35,
+      780.75
+     ],
+     [
+      956.24,
+      773.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_5",
+   "x": 963.9,
+   "z": 781.31,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      963.9,
+      781.31
+     ],
+     [
+      960.67,
+      781.35
+     ],
+     [
+      957.44,
+      781.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_6",
+   "x": 954.68,
+   "z": 783.23,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      954.68,
+      783.23
+     ],
+     [
+      951.57,
+      783.31
+     ],
+     [
+      948.46,
+      783.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_7",
+   "x": 958.48,
+   "z": 766.23,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      958.48,
+      766.23
+     ],
+     [
+      959.38,
+      758.53
+     ],
+     [
+      961.24,
+      751.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_8",
+   "x": 967.32,
+   "z": 757.41,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      967.32,
+      757.41
+     ],
+     [
+      964.68,
+      756.78
+     ],
+     [
+      961.94,
+      756.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_9",
+   "x": 957.55,
+   "z": 758.51,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      957.55,
+      758.51
+     ],
+     [
+      954.07,
+      758.21
+     ],
+     [
+      950.58,
+      758.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_10",
+   "x": 932.71,
+   "z": 785.88,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      932.71,
+      785.88
+     ],
+     [
+      914.61,
+      780.18
+     ],
+     [
+      896.31,
+      775.21
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_11",
+   "x": 904,
+   "z": 797.09,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      904,
+      797.09
+     ],
+     [
+      905.25,
+      790.57
+     ],
+     [
+      907.22,
+      782.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_12",
+   "x": 914.06,
+   "z": 800.9,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      914.06,
+      800.9
+     ],
+     [
+      915.29,
+      792.79
+     ],
+     [
+      916.88,
+      784.75
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_13",
+   "x": 926.93,
+   "z": 795.6,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      926.93,
+      795.6
+     ],
+     [
+      921.74,
+      794.86
+     ],
+     [
+      916.61,
+      793.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_14",
+   "x": 919.22,
+   "z": 801.8,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      919.22,
+      801.8
+     ],
+     [
+      919.7,
+      798.75
+     ],
+     [
+      920.28,
+      795.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_15",
+   "x": 920.35,
+   "z": 793.18,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      920.35,
+      793.18
+     ],
+     [
+      921.08,
+      789.39
+     ],
+     [
+      921.68,
+      785.59
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_16",
+   "x": 914.63,
+   "z": 790.15,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      914.63,
+      790.15
+     ],
+     [
+      911.09,
+      789.37
+     ],
+     [
+      907.5,
+      788.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_17",
+   "x": 903.08,
+   "z": 790.26,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      903.08,
+      790.26
+     ],
+     [
+      899.75,
+      788.87
+     ],
+     [
+      898.58,
+      788.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_18",
+   "x": 939.16,
+   "z": 758.59,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      939.16,
+      758.59
+     ],
+     [
+      924.38,
+      751.18
+     ],
+     [
+      909.14,
+      744.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_19",
+   "x": 912.1,
+   "z": 772.8,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      912.1,
+      772.8
+     ],
+     [
+      914.63,
+      763.14
+     ],
+     [
+      917.33,
+      753.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_20",
+   "x": 931.83,
+   "z": 766.76,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      931.83,
+      766.76
+     ],
+     [
+      923.92,
+      764.83
+     ],
+     [
+      916.13,
+      762.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_21",
+   "x": 921.23,
+   "z": 775.27,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      921.23,
+      775.27
+     ],
+     [
+      922.42,
+      770.58
+     ],
+     [
+      923.77,
+      765.93
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_22",
+   "x": 927.08,
+   "z": 764.11,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      927.08,
+      764.11
+     ],
+     [
+      928.06,
+      760.41
+     ],
+     [
+      929.08,
+      756.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_23",
+   "x": 923.06,
+   "z": 763.02,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      923.06,
+      763.02
+     ],
+     [
+      924.23,
+      759.38
+     ],
+     [
+      925.06,
+      755.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_24",
+   "x": 913.8,
+   "z": 761.98,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      913.8,
+      761.98
+     ],
+     [
+      909.66,
+      760.82
+     ],
+     [
+      905.49,
+      759.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_25",
+   "x": 920.25,
+   "z": 746.94,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      920.25,
+      746.94
+     ],
+     [
+      921.74,
+      743.69
+     ],
+     [
+      923.58,
+      740.62
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_26",
+   "x": 925.55,
+   "z": 749.73,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      925.55,
+      749.73
+     ],
+     [
+      927.07,
+      746.5
+     ],
+     [
+      928.88,
+      743.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_27",
+   "x": 930.37,
+   "z": 752.28,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      930.37,
+      752.28
+     ],
+     [
+      932.07,
+      749.13
+     ],
+     [
+      933.71,
+      745.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_28",
+   "x": 924.38,
+   "z": 751.18,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      924.38,
+      751.18
+     ],
+     [
+      925.06,
+      755.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_29",
+   "x": 914.61,
+   "z": 780.18,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      914.61,
+      780.18
+     ],
+     [
+      912.1,
+      772.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_30",
+   "x": 941.87,
+   "z": 774.7,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      941.87,
+      774.7
+     ],
+     [
+      931.83,
+      766.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_31",
+   "x": 948.07,
+   "z": 768.06,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      948.07,
+      768.06
+     ],
+     [
+      943.28,
+      767.16
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "kettle_cross_street_32",
+   "x": 956.24,
+   "z": 773.56,
+   "yaw": 0,
+   "data": {
+    "town": "kettle_cross",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      956.24,
+      773.56
+     ],
+     [
+      956.53,
+      768.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "kettle_cross_plot_0",
+   "x": 953.13,
+   "z": 797.76,
+   "yaw": 1.7696,
+   "data": {
+    "town": "kettle_cross",
+    "want": "house",
+    "district": "residential",
+    "w": 4.71,
+    "d": 8.38,
+    "angle": 2.9428,
+    "front": 6.0844,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "kettle_cross_plot_1",
+   "x": 960.58,
+   "z": 785.24,
+   "yaw": 3.1204,
+   "data": {
+    "town": "kettle_cross",
+    "want": "house",
+    "district": "residential",
+    "w": 5.26,
+    "d": 4.37,
+    "angle": 3.1628,
+    "front": 4.7336,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "kettle_cross_plot_2",
+   "x": 960.76,
+   "z": 776.84,
+   "yaw": -1.592,
+   "data": {
+    "town": "kettle_cross",
+    "want": "house",
+    "district": "residential",
+    "w": 5.26,
+    "d": 5.17,
+    "angle": 3.1628,
+    "front": 3.1628,
+    "streetGap": -0.26
+   }
+  },
+  {
+   "kind": "building",
+   "id": "kettle_cross_plot_3",
+   "x": 951.69,
+   "z": 777.7,
+   "yaw": -0.0212,
+   "data": {
+    "town": "kettle_cross",
+    "want": "house",
+    "district": "residential",
+    "w": 5.02,
+    "d": 7.26,
+    "angle": 3.1628,
+    "front": 7.8752,
+    "streetGap": -0.12
+   }
+  },
+  {
+   "kind": "building",
+   "id": "kettle_cross_plot_4",
+   "x": 963.61,
+   "z": 762.49,
+   "yaw": 2.9552,
+   "data": {
+    "town": "kettle_cross",
+    "want": "house",
+    "district": "residential",
+    "w": 4.32,
+    "d": 7.71,
+    "angle": 3.328,
+    "front": 4.8988,
+    "streetGap": -0.15
+   }
+  },
+  {
+   "kind": "building",
+   "id": "kettle_cross_plot_5",
+   "x": 954.29,
+   "z": 754.18,
+   "yaw": -0.0533,
+   "data": {
+    "town": "kettle_cross",
+    "want": "house",
+    "district": "residential",
+    "w": 5.78,
+    "d": 4.67,
+    "angle": 3.1949,
+    "front": 7.9073,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "kettle_cross_plot_6",
+   "x": 923.53,
+   "z": 799.42,
+   "yaw": 2.9688,
+   "data": {
+    "town": "kettle_cross",
+    "want": "house",
+    "district": "residential",
+    "w": 4.18,
+    "d": 4.97,
+    "angle": 3.3144,
+    "front": 4.8852,
+    "streetGap": -0.32
+   }
+  },
+  {
+   "kind": "building",
+   "id": "kettle_cross_plot_7",
+   "x": 924.98,
+   "z": 790.08,
+   "yaw": -1.7436,
+   "data": {
+    "town": "kettle_cross",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.53,
+    "d": 6.51,
+    "angle": 3.3144,
+    "front": 3.3144,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "kettle_cross_plot_8",
+   "x": 910.04,
+   "z": 795.41,
+   "yaw": 1.398,
+   "data": {
+    "town": "kettle_cross",
+    "want": "house",
+    "district": "residential",
+    "w": 6.04,
+    "d": 8.23,
+    "angle": 3.3144,
+    "front": 6.456,
+    "streetGap": -0.32
+   }
+  },
+  {
+   "kind": "building",
+   "id": "kettle_cross_plot_9",
+   "x": 917.39,
+   "z": 771.41,
+   "yaw": 1.3057,
+   "data": {
+    "town": "kettle_cross",
+    "want": "hut",
+    "district": "civic",
+    "w": 5.89,
+    "d": 4.24,
+    "angle": 3.4066,
+    "front": 6.5482,
+    "streetGap": -0.37
+   }
+  },
+  {
+   "kind": "building",
+   "id": "kettle_cross_plot_10",
+   "x": 918.5,
+   "z": 767.32,
+   "yaw": 1.3057,
+   "data": {
+    "town": "kettle_cross",
+    "want": "hut",
+    "district": "civic",
+    "w": 5.89,
+    "d": 4.24,
+    "angle": 3.4066,
+    "front": 6.5482,
+    "streetGap": -0.37
+   }
+  },
+  {
+   "kind": "building",
+   "id": "kettle_cross_plot_11",
+   "x": 920.15,
+   "z": 758.27,
+   "yaw": -1.8358,
+   "data": {
+    "town": "kettle_cross",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.34,
+    "d": 6.45,
+    "angle": 3.4066,
+    "front": 3.4066,
+    "streetGap": -0.27
+   }
+  },
+  {
+   "kind": "building",
+   "id": "kettle_cross_plot_12",
+   "x": 908.07,
+   "z": 766.66,
+   "yaw": 1.3057,
+   "data": {
+    "town": "kettle_cross",
+    "want": "granary",
+    "district": "craft",
+    "w": 7.42,
+    "d": 8.54,
+    "angle": 3.4066,
+    "front": 6.5482,
+    "streetGap": -0.35
+   }
+  },
+  {
+   "kind": "building",
+   "id": "kettle_cross_plot_13",
+   "x": 910.98,
+   "z": 755.93,
+   "yaw": -0.2651,
+   "data": {
+    "town": "kettle_cross",
+    "want": "shrine",
+    "district": "craft",
+    "w": 7.42,
+    "d": 6.73,
+    "angle": 3.4066,
+    "front": 8.119,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "kettle_cross_plot_14",
+   "x": 935.9,
+   "z": 751.15,
+   "yaw": -2.0558,
+   "data": {
+    "town": "kettle_cross",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.27,
+    "d": 5.95,
+    "angle": 3.6266,
+    "front": 3.6266,
+    "streetGap": -0.4
    }
   },
   {
@@ -4010,7 +5131,7 @@
   },
   {
    "kind": "road",
-   "id": "spur_tifeckgate",
+   "id": "spur_ashcombe",
    "x": 1340.96,
    "z": 1205.09,
    "yaw": 0,

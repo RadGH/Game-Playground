@@ -1,5 +1,5 @@
 {
-  "name": "z13_01",
+  "name": "Brackwater (z13_01)",
   "zone": "z13_01",
   "sheet": {
     "sheet": "torbor_downs",
@@ -48,56 +48,245 @@
   "rivers": [],
   "sites": [
     {
+      "type": "settlement",
+      "kind": "town",
+      "name": "Brackwater",
+      "x": 1136,
+      "z": 870,
+      "ask": true,
+      "askR": 70,
+      "hub": true,
+      "radius": 90
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Eelwick",
+      "x": 1164,
+      "z": 427,
+      "ask": true,
+      "askR": 40,
+      "radius": 40
+    },
+    {
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 946,
-      "z": 1186,
-      "yaw": -2.398
+      "x": 1061,
+      "z": 1066,
+      "yaw": -3.247
     },
     {
       "type": "event",
       "id": "event_brackwater",
-      "x": 1024,
-      "z": 1024,
+      "x": 1026,
+      "z": 981,
       "r": 40
     }
   ],
   "spawn": {
-    "x": 1024,
-    "z": 1024
+    "x": 1136,
+    "z": 878
+  },
+  "theme": {
+    "kind": "marsh",
+    "lakes": [
+      {
+        "name": "the Black Mere",
+        "kind": "mere",
+        "x": 1439,
+        "z": 1151,
+        "r": 90,
+        "level": 74.95
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1147,
+        "z": 1134,
+        "r": 20,
+        "level": 83.36
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1633,
+        "z": 878,
+        "r": 42,
+        "level": 73.39
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1461,
+        "z": 783,
+        "r": 38,
+        "level": 68.74
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1620,
+        "z": 1288,
+        "r": 40,
+        "level": 83.66
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1452,
+        "z": 1385,
+        "r": 43,
+        "level": 80.67
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1271,
+        "z": 1004,
+        "r": 18,
+        "level": 77.21
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1410,
+        "z": 939,
+        "r": 33,
+        "level": 77.95
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1797,
+        "z": 1195,
+        "r": 26,
+        "level": 85.8
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1180,
+        "z": 1304,
+        "r": 25,
+        "level": 83.9
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1678,
+        "z": 1094,
+        "r": 43,
+        "level": 77.91
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1560,
+        "z": 1005,
+        "r": 20,
+        "level": 75.13
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1792,
+        "z": 977,
+        "r": 38,
+        "level": 79.43
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1570,
+        "z": 1513,
+        "r": 33,
+        "level": 85.69
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1250,
+        "z": 1507,
+        "r": 42,
+        "level": 90.61
+      }
+    ],
+    "fen": {
+      "x": 1439,
+      "z": 1151,
+      "r": 430
+    }
   },
   "summary": {
     "zone": "z13_01",
     "province": "Petbeck Basin",
     "inputHash": "3c176bbc",
     "rivers": 0,
-    "wetShare": 0,
-    "unwalkableShare": 0,
-    "towns": [],
+    "wetShare": 0.018,
+    "unwalkableShare": 0.003,
+    "towns": [
+      {
+        "name": "Brackwater",
+        "kind": "town",
+        "hub": true,
+        "at": [
+          1136,
+          870
+        ],
+        "radius": 90,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 21,
+        "streets": 55,
+        "links": 0,
+        "overlaps": 0
+      },
+      {
+        "name": "Eelwick",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          1164,
+          427
+        ],
+        "radius": 40,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 9,
+        "streets": 24,
+        "links": 0,
+        "overlaps": 0
+      }
+    ],
     "roads": 0,
     "bridges": 0,
-    "scatter": 5273,
+    "scatter": 6222,
     "scatterKinds": {
-      "rock_small": 987,
-      "bush": 2912,
-      "tree_broadleaf": 1374
+      "rock_small": 904,
+      "bush": 2779,
+      "tree_broadleaf": 1250,
+      "reed": 1196,
+      "tree_dead": 91,
+      "rock_large": 2
     },
     "sites": [
-      "dungeon door_1 Barrow entrance 946 1186  -2.398",
-      "event event_brackwater  1024 1024 40"
+      "settlement(HUB) town Brackwater 1136 870 90",
+      "settlement hamlet Eelwick 1164 427 40",
+      "dungeon door_1 Barrow entrance 1061 1066  -3.247",
+      "event event_brackwater  1026 981 40"
     ],
     "spawn": {
-      "x": 1024,
-      "z": 1024
+      "x": 1136,
+      "z": 878
     },
-    "placements": 2,
-    "vignettesAvoided": 0
+    "placements": 131,
+    "vignettesAvoided": 40
   },
   "files": {
-    "terrain.bin": 6305426,
-    "nav.bin": 1050717,
-    "scatter.bin": 42268,
-    "placements.json": 944
+    "terrain.bin": 474660,
+    "nav.bin": 8177,
+    "scatter.bin": 49860,
+    "placements.json": 39215
   }
 }

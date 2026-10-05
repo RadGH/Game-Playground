@@ -1,5 +1,5 @@
 {
-  "name": "Sablegate (z13_02)",
+  "name": "Halsbridge (z13_02)",
   "zone": "z13_02",
   "sheet": {
     "sheet": "torbor_downs",
@@ -59,9 +59,10 @@
     {
       "type": "settlement",
       "kind": "city",
-      "name": "Sablegate",
+      "name": "Halsbridge",
       "x": 1696,
       "z": 1184,
+      "wfName": "Sablegate",
       "hub": true,
       "radius": 140,
       "movedFrom": {
@@ -72,9 +73,10 @@
     {
       "type": "settlement",
       "kind": "town",
-      "name": "Tetatcross",
+      "name": "Mill End",
       "x": 208,
       "z": 1456,
+      "wfName": "Tetatcross",
       "radius": 90,
       "movedFrom": {
         "x": 64,
@@ -109,8 +111,12 @@
       "type": "crossing",
       "kind": "bridge",
       "name": "Mobon Bridge",
-      "x": 1728,
-      "z": 1344
+      "x": 1715,
+      "z": 1346,
+      "snappedFrom": {
+        "x": 1728,
+        "z": 1344
+      }
     },
     {
       "type": "dungeon",
@@ -141,7 +147,7 @@
     "unwalkableShare": 0.004,
     "towns": [
       {
-        "name": "Sablegate",
+        "name": "Halsbridge",
         "kind": "city",
         "hub": true,
         "at": [
@@ -160,7 +166,7 @@
         "overlaps": 0
       },
       {
-        "name": "Tetatcross",
+        "name": "Mill End",
         "kind": "town",
         "hub": false,
         "at": [
@@ -219,21 +225,21 @@
     ],
     "roads": 15,
     "bridges": 5,
-    "scatter": 13003,
+    "scatter": 12935,
     "scatterKinds": {
-      "bush": 4048,
-      "tree_broadleaf": 7687,
-      "rock_small": 1005,
-      "rock_large": 127,
-      "reed": 125,
+      "bush": 4029,
+      "tree_broadleaf": 7649,
+      "rock_small": 1000,
+      "rock_large": 126,
+      "reed": 120,
       "tree_dead": 11
     },
     "sites": [
-      "settlement(HUB) city Sablegate 1696 1184 140",
-      "settlement town Tetatcross 208 1456 90",
+      "settlement(HUB) city Halsbridge 1696 1184 140",
+      "settlement town Mill End 208 1456 90",
       "settlement hamlet Lower Mossgate 704 1552 46",
       "settlement hamlet Mirestead 1136 1072 46",
-      "crossing bridge Mobon Bridge 1728 1344",
+      "crossing bridge Mobon Bridge 1715 1346",
       "dungeon door_1 Barrow entrance 1593 1344  2.429",
       "event event_torbor_cross  1360 1104 40"
     ],
@@ -242,12 +248,12 @@
       "z": 1180
     },
     "placements": 294,
-    "vignettesAvoided": 0
+    "vignettesAvoided": 42
   },
   "files": {
-    "terrain.bin": 6306062,
-    "nav.bin": 1050717,
-    "scatter.bin": 104108,
-    "placements.json": 125160
+    "terrain.bin": 492428,
+    "nav.bin": 27004,
+    "scatter.bin": 103564,
+    "placements.json": 125166
   }
 }

@@ -5,30 +5,32 @@
  "placements": [
   {
    "kind": "settlement",
-   "id": "fengate",
+   "id": "copperdell",
    "x": 352,
    "z": 448,
    "yaw": 0,
    "data": {
     "kind": "city",
-    "name": "Fengate",
+    "name": "Copperdell",
     "radius": 140,
     "hub": true,
-    "planned": true
+    "planned": true,
+    "wfName": "Fengate"
    }
   },
   {
    "kind": "settlement",
-   "id": "miminhold",
+   "id": "pickaxe_row",
    "x": 1008,
    "z": 1664,
    "yaw": 0,
    "data": {
     "kind": "village",
-    "name": "Miminhold",
+    "name": "Pickaxe Row",
     "radius": 65,
     "hub": false,
-    "planned": true
+    "planned": true,
+    "wfName": "Miminhold"
    }
   },
   {
@@ -89,24 +91,24 @@
   },
   {
    "kind": "town_square",
-   "id": "fengate_square",
+   "id": "copperdell_square",
    "x": 353.94,
    "z": 434.47,
    "yaw": 0,
    "data": {
     "r": 6.13,
-    "town": "fengate",
+    "town": "copperdell",
     "culture": "halfling"
    }
   },
   {
    "kind": "street",
-   "id": "fengate_street_0",
+   "id": "copperdell_street_0",
    "x": 433.54,
    "z": 439.36,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -127,12 +129,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_1",
+   "id": "copperdell_street_1",
    "x": 351.19,
    "z": 383.47,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -153,12 +155,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_2",
+   "id": "copperdell_street_2",
    "x": 387.05,
    "z": 397.01,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -179,12 +181,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_3",
+   "id": "copperdell_street_3",
    "x": 378.83,
    "z": 387.4,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -205,12 +207,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_4",
+   "id": "copperdell_street_4",
    "x": 363.32,
    "z": 387.55,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -231,12 +233,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_5",
+   "id": "copperdell_street_5",
    "x": 373.14,
    "z": 394.9,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -257,12 +259,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_6",
+   "id": "copperdell_street_6",
    "x": 377.1,
    "z": 406.41,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -283,12 +285,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_7",
+   "id": "copperdell_street_7",
    "x": 391.7,
    "z": 404.99,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -309,12 +311,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_8",
+   "id": "copperdell_street_8",
    "x": 379.4,
    "z": 413,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -335,12 +337,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_9",
+   "id": "copperdell_street_9",
    "x": 324.5,
    "z": 399.05,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -361,12 +363,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_10",
+   "id": "copperdell_street_10",
    "x": 363.66,
    "z": 421.48,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -387,12 +389,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_11",
+   "id": "copperdell_street_11",
    "x": 354.51,
    "z": 401.22,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -413,12 +415,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_12",
+   "id": "copperdell_street_12",
    "x": 335.43,
    "z": 395.9,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -439,12 +441,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_13",
+   "id": "copperdell_street_13",
    "x": 340.82,
    "z": 393.47,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -465,12 +467,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_14",
+   "id": "copperdell_street_14",
    "x": 341.68,
    "z": 408.58,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -491,12 +493,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_15",
+   "id": "copperdell_street_15",
    "x": 359.11,
    "z": 411.42,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -517,12 +519,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_16",
+   "id": "copperdell_street_16",
    "x": 344.84,
    "z": 419.69,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -543,12 +545,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_17",
+   "id": "copperdell_street_17",
    "x": 356.22,
    "z": 426.71,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -569,12 +571,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_18",
+   "id": "copperdell_street_18",
    "x": 346.52,
    "z": 431.09,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -595,12 +597,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_19",
+   "id": "copperdell_street_19",
    "x": 332.04,
    "z": 434.63,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -621,12 +623,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_20",
+   "id": "copperdell_street_20",
    "x": 317.8,
    "z": 409.1,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -647,12 +649,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_21",
+   "id": "copperdell_street_21",
    "x": 328.1,
    "z": 415.6,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -673,12 +675,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_22",
+   "id": "copperdell_street_22",
    "x": 330.68,
    "z": 428.06,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -699,12 +701,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_23",
+   "id": "copperdell_street_23",
    "x": 318.67,
    "z": 420.75,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -725,12 +727,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_24",
+   "id": "copperdell_street_24",
    "x": 307.23,
    "z": 411.29,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -751,12 +753,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_25",
+   "id": "copperdell_street_25",
    "x": 309.97,
    "z": 424.07,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -777,12 +779,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_26",
+   "id": "copperdell_street_26",
    "x": 311.31,
    "z": 440.42,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -803,12 +805,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_27",
+   "id": "copperdell_street_27",
    "x": 320.58,
    "z": 438.5,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -829,12 +831,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_28",
+   "id": "copperdell_street_28",
    "x": 349.68,
    "z": 470.13,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -855,12 +857,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_29",
+   "id": "copperdell_street_29",
    "x": 392.67,
    "z": 460.62,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -881,12 +883,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_30",
+   "id": "copperdell_street_30",
    "x": 417.69,
    "z": 466.18,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -907,12 +909,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_31",
+   "id": "copperdell_street_31",
    "x": 405.27,
    "z": 460.45,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -933,12 +935,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_32",
+   "id": "copperdell_street_32",
    "x": 421.88,
    "z": 477.23,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -959,12 +961,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_33",
+   "id": "copperdell_street_33",
    "x": 406.49,
    "z": 472.03,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -985,12 +987,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_34",
+   "id": "copperdell_street_34",
    "x": 409.13,
    "z": 483.57,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1011,12 +1013,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_35",
+   "id": "copperdell_street_35",
    "x": 395.05,
    "z": 486.78,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1037,12 +1039,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_36",
+   "id": "copperdell_street_36",
    "x": 382.65,
    "z": 467.11,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1063,12 +1065,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_37",
+   "id": "copperdell_street_37",
    "x": 394.04,
    "z": 479.75,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1089,12 +1091,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_38",
+   "id": "copperdell_street_38",
    "x": 375.17,
    "z": 468.18,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1115,12 +1117,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_39",
+   "id": "copperdell_street_39",
    "x": 382.13,
    "z": 472.88,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1141,12 +1143,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_40",
+   "id": "copperdell_street_40",
    "x": 375.6,
    "z": 481.22,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1167,12 +1169,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_41",
+   "id": "copperdell_street_41",
    "x": 365.78,
    "z": 469.53,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1193,12 +1195,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_42",
+   "id": "copperdell_street_42",
    "x": 367.62,
    "z": 483.88,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1219,12 +1221,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_43",
+   "id": "copperdell_street_43",
    "x": 370.4,
    "z": 492.06,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1245,12 +1247,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_44",
+   "id": "copperdell_street_44",
    "x": 387.45,
    "z": 489.61,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1271,12 +1273,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_45",
+   "id": "copperdell_street_45",
    "x": 396.62,
    "z": 497.69,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1297,12 +1299,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_46",
+   "id": "copperdell_street_46",
    "x": 387.01,
    "z": 494.76,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1323,12 +1325,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_47",
+   "id": "copperdell_street_47",
    "x": 378,
    "z": 490.97,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1349,12 +1351,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_48",
+   "id": "copperdell_street_48",
    "x": 383.05,
    "z": 496.66,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1375,12 +1377,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_49",
+   "id": "copperdell_street_49",
    "x": 370.6,
    "z": 503.24,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1401,12 +1403,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_50",
+   "id": "copperdell_street_50",
    "x": 333.58,
    "z": 479.48,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1427,12 +1429,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_51",
+   "id": "copperdell_street_51",
    "x": 348.19,
    "z": 497.93,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1453,12 +1455,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_52",
+   "id": "copperdell_street_52",
    "x": 348.45,
    "z": 486.22,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1479,12 +1481,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_53",
+   "id": "copperdell_street_53",
    "x": 348.02,
    "z": 505.87,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1505,12 +1507,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_54",
+   "id": "copperdell_street_54",
    "x": 329.66,
    "z": 490.34,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1531,12 +1533,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_55",
+   "id": "copperdell_street_55",
    "x": 319.89,
    "z": 482.89,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1557,12 +1559,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_56",
+   "id": "copperdell_street_56",
    "x": 318.71,
    "z": 494.05,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1583,12 +1585,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_57",
+   "id": "copperdell_street_57",
    "x": 331.09,
    "z": 497.47,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1609,12 +1611,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_58",
+   "id": "copperdell_street_58",
    "x": 318.27,
    "z": 500.49,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1635,12 +1637,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_59",
+   "id": "copperdell_street_59",
    "x": 283.77,
    "z": 493.49,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -1657,12 +1659,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_60",
+   "id": "copperdell_street_60",
    "x": 328.1,
    "z": 415.6,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1679,12 +1681,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_61",
+   "id": "copperdell_street_61",
    "x": 363.81,
    "z": 408.01,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1701,12 +1703,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_62",
+   "id": "copperdell_street_62",
    "x": 365.37,
    "z": 399.87,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1723,12 +1725,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_63",
+   "id": "copperdell_street_63",
    "x": 354.1,
    "z": 455.69,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1745,12 +1747,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_64",
+   "id": "copperdell_street_64",
    "x": 349.68,
    "z": 470.13,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1767,12 +1769,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_65",
+   "id": "copperdell_street_65",
    "x": 362.77,
    "z": 504.37,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1789,12 +1791,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_66",
+   "id": "copperdell_street_66",
    "x": 348.19,
    "z": 497.93,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1811,12 +1813,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_67",
+   "id": "copperdell_street_67",
    "x": 397.53,
    "z": 481.59,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1833,12 +1835,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_68",
+   "id": "copperdell_street_68",
    "x": 336.93,
    "z": 485.97,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1855,12 +1857,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_69",
+   "id": "copperdell_street_69",
    "x": 331.09,
    "z": 497.47,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1877,12 +1879,12 @@
   },
   {
    "kind": "street",
-   "id": "fengate_street_70",
+   "id": "copperdell_street_70",
    "x": 399.14,
    "z": 473.22,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1899,12 +1901,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_0",
+   "id": "copperdell_plot_0",
    "x": 379.39,
    "z": 393.98,
    "yaw": -0.8235,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "house",
     "district": "residential",
     "w": 5.93,
@@ -1916,12 +1918,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_1",
+   "id": "copperdell_plot_1",
    "x": 371.82,
    "z": 400.99,
    "yaw": 2.3181,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "hut",
     "district": "craft",
     "w": 5.93,
@@ -1933,12 +1935,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_2",
+   "id": "copperdell_plot_2",
    "x": 389.35,
    "z": 412.88,
    "yaw": -2.6143,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "barracks",
     "district": "craft",
     "w": 7.1,
@@ -1950,12 +1952,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_3",
+   "id": "copperdell_plot_3",
    "x": 348.03,
    "z": 396.39,
    "yaw": -1.1467,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "hut",
     "district": "craft",
     "w": 10.06,
@@ -1967,12 +1969,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_4",
+   "id": "copperdell_plot_4",
    "x": 332.74,
    "z": 403.29,
    "yaw": 1.9949,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "mill",
     "district": "craft",
     "w": 10.06,
@@ -1984,12 +1986,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_5",
+   "id": "copperdell_plot_5",
    "x": 350.89,
    "z": 409.04,
    "yaw": -2.7175,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "inn",
     "district": "craft",
     "w": 7.22,
@@ -2001,12 +2003,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_6",
+   "id": "copperdell_plot_6",
    "x": 355.37,
    "z": 418.96,
    "yaw": -2.7175,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "stable",
     "district": "civic",
     "w": 6.79,
@@ -2018,12 +2020,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_7",
+   "id": "copperdell_plot_7",
    "x": 338.29,
    "z": 415.65,
    "yaw": 0.4241,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "hut",
     "district": "craft",
     "w": 8.89,
@@ -2035,12 +2037,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_8",
+   "id": "copperdell_plot_8",
    "x": 342.77,
    "z": 425.57,
    "yaw": 1.9949,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "hut",
     "district": "civic",
     "w": 5.12,
@@ -2052,12 +2054,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_9",
+   "id": "copperdell_plot_9",
    "x": 363.36,
    "z": 430.21,
    "yaw": -1.1467,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "hut",
     "district": "civic",
     "w": 11.07,
@@ -2069,12 +2071,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_10",
+   "id": "copperdell_plot_10",
    "x": 323.57,
    "z": 411.64,
    "yaw": 0.2041,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "hut",
     "district": "craft",
     "w": 6.12,
@@ -2086,12 +2088,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_11",
+   "id": "copperdell_plot_11",
    "x": 325.82,
    "z": 422.49,
    "yaw": -2.9375,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "hut",
     "district": "craft",
     "w": 9.09,
@@ -2103,12 +2105,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_12",
+   "id": "copperdell_plot_12",
    "x": 313.47,
    "z": 415.15,
    "yaw": -1.3667,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "house",
     "district": "residential",
     "w": 8.9,
@@ -2120,12 +2122,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_13",
+   "id": "copperdell_plot_13",
    "x": 302.81,
    "z": 417.36,
    "yaw": 1.7749,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "house",
     "district": "residential",
     "w": 8.9,
@@ -2137,12 +2139,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_14",
+   "id": "copperdell_plot_14",
    "x": 316.5,
    "z": 429.54,
    "yaw": -2.9375,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "chapel",
     "district": "craft",
     "w": 12.15,
@@ -2154,12 +2156,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_15",
+   "id": "copperdell_plot_15",
    "x": 305.83,
    "z": 431.75,
    "yaw": 1.7749,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "forge",
     "district": "residential",
     "w": 12.15,
@@ -2171,12 +2173,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_16",
+   "id": "copperdell_plot_16",
    "x": 328.34,
    "z": 442.89,
    "yaw": -2.9375,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "hall",
     "district": "craft",
     "w": 10.54,
@@ -2188,12 +2190,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_17",
+   "id": "copperdell_plot_17",
    "x": 317.11,
    "z": 445.21,
    "yaw": 1.7749,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "hut",
     "district": "craft",
     "w": 10.54,
@@ -2205,12 +2207,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_18",
+   "id": "copperdell_plot_18",
    "x": 308,
    "z": 447.1,
    "yaw": 1.7749,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "house",
     "district": "residential",
     "w": 10.54,
@@ -2222,12 +2224,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_19",
+   "id": "copperdell_plot_19",
    "x": 411.79,
    "z": 462.4,
    "yaw": -1.2082,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "house",
     "district": "residential",
     "w": 7.07,
@@ -2239,12 +2241,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_20",
+   "id": "copperdell_plot_20",
    "x": 401.36,
    "z": 466.35,
    "yaw": 1.9334,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "house",
     "district": "residential",
     "w": 7.07,
@@ -2256,12 +2258,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_21",
+   "id": "copperdell_plot_21",
    "x": 388.92,
    "z": 472.77,
    "yaw": 0.1426,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "market",
     "district": "residential",
     "w": 11.79,
@@ -2273,12 +2275,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_22",
+   "id": "copperdell_plot_22",
    "x": 371.19,
    "z": 474.54,
    "yaw": 1.7134,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "house",
     "district": "residential",
     "w": 10.25,
@@ -2290,12 +2292,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_23",
+   "id": "copperdell_plot_23",
    "x": 362.06,
    "z": 475.85,
    "yaw": 1.7134,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "house",
     "district": "residential",
     "w": 10.25,
@@ -2307,12 +2309,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_24",
+   "id": "copperdell_plot_24",
    "x": 392.52,
    "z": 492.93,
    "yaw": 0.1426,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "house",
     "district": "residential",
     "w": 6.82,
@@ -2324,12 +2326,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_25",
+   "id": "copperdell_plot_25",
    "x": 377.88,
    "z": 501.82,
    "yaw": -2.999,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "house",
     "district": "residential",
     "w": 7.56,
@@ -2341,12 +2343,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_26",
+   "id": "copperdell_plot_26",
    "x": 365.81,
    "z": 497.74,
    "yaw": 0.1426,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "house",
     "district": "residential",
     "w": 8.75,
@@ -2358,12 +2360,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_27",
+   "id": "copperdell_plot_27",
    "x": 342.56,
    "z": 491.88,
    "yaw": -0.0218,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "warehouse",
     "district": "residential",
     "w": 7.76,
@@ -2375,12 +2377,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_28",
+   "id": "copperdell_plot_28",
    "x": 342.16,
    "z": 510.42,
    "yaw": 3.1198,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "house",
     "district": "residential",
     "w": 5.5,
@@ -2392,12 +2394,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_29",
+   "id": "copperdell_plot_29",
    "x": 325.22,
    "z": 485.77,
    "yaw": -1.3726,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "house",
     "district": "residential",
     "w": 6.56,
@@ -2409,12 +2411,12 @@
   },
   {
    "kind": "building",
-   "id": "fengate_plot_30",
+   "id": "copperdell_plot_30",
    "x": 312.78,
    "z": 488.27,
    "yaw": 1.769,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "want": "granary",
     "district": "residential",
     "w": 6.56,
@@ -2426,12 +2428,12 @@
   },
   {
    "kind": "town_wall",
-   "id": "fengate_wall",
+   "id": "copperdell_wall",
    "x": 352,
    "z": 448,
    "yaw": 0,
    "data": {
-    "town": "fengate",
+    "town": "copperdell",
     "radius": 82,
     "gates": [
      {
@@ -2451,24 +2453,24 @@
   },
   {
    "kind": "town_square",
-   "id": "miminhold_square",
+   "id": "pickaxe_row_square",
    "x": 1014.54,
    "z": 1662.75,
    "yaw": 0,
    "data": {
     "r": 2.79,
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "culture": "halfling"
    }
   },
   {
    "kind": "street",
-   "id": "miminhold_street_0",
+   "id": "pickaxe_row_street_0",
    "x": 1029.57,
    "z": 1627.96,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -2489,12 +2491,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_1",
+   "id": "pickaxe_row_street_1",
    "x": 980.67,
    "z": 1636.41,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -2515,12 +2517,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_2",
+   "id": "pickaxe_row_street_2",
    "x": 988.65,
    "z": 1631.62,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2541,12 +2543,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_3",
+   "id": "pickaxe_row_street_3",
    "x": 1010.53,
    "z": 1626.02,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2567,12 +2569,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_4",
+   "id": "pickaxe_row_street_4",
    "x": 996.75,
    "z": 1623.74,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2593,12 +2595,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_5",
+   "id": "pickaxe_row_street_5",
    "x": 1005.52,
    "z": 1622.07,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2619,12 +2621,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_6",
+   "id": "pickaxe_row_street_6",
    "x": 1000.83,
    "z": 1629.56,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2645,12 +2647,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_7",
+   "id": "pickaxe_row_street_7",
    "x": 1006.99,
    "z": 1631.87,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2671,12 +2673,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_8",
+   "id": "pickaxe_row_street_8",
    "x": 998.52,
    "z": 1641.59,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2697,12 +2699,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_9",
+   "id": "pickaxe_row_street_9",
    "x": 967.84,
    "z": 1651.71,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2723,12 +2725,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_10",
+   "id": "pickaxe_row_street_10",
    "x": 991.36,
    "z": 1653.35,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2749,12 +2751,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_11",
+   "id": "pickaxe_row_street_11",
    "x": 984.42,
    "z": 1645.69,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2775,12 +2777,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_12",
+   "id": "pickaxe_row_street_12",
    "x": 972.91,
    "z": 1648.13,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2801,12 +2803,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_13",
+   "id": "pickaxe_row_street_13",
    "x": 979.06,
    "z": 1652.29,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2827,12 +2829,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_14",
+   "id": "pickaxe_row_street_14",
    "x": 984.07,
    "z": 1661.57,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2853,12 +2855,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_15",
+   "id": "pickaxe_row_street_15",
    "x": 972.89,
    "z": 1661.4,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2879,12 +2881,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_16",
+   "id": "pickaxe_row_street_16",
    "x": 969.4,
    "z": 1665.26,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2905,12 +2907,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_17",
+   "id": "pickaxe_row_street_17",
    "x": 976.07,
    "z": 1666.3,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2931,12 +2933,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_18",
+   "id": "pickaxe_row_street_18",
    "x": 970.43,
    "z": 1669.29,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2957,12 +2959,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_19",
+   "id": "pickaxe_row_street_19",
    "x": 998.89,
    "z": 1676.62,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -2983,12 +2985,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_20",
+   "id": "pickaxe_row_street_20",
    "x": 1015.78,
    "z": 1655.61,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3009,12 +3011,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_21",
+   "id": "pickaxe_row_street_21",
    "x": 1040.32,
    "z": 1647.34,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3035,12 +3037,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_22",
+   "id": "pickaxe_row_street_22",
    "x": 1029.57,
    "z": 1645.69,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3061,12 +3063,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_23",
+   "id": "pickaxe_row_street_23",
    "x": 1048.72,
    "z": 1657.28,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3087,12 +3089,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_24",
+   "id": "pickaxe_row_street_24",
    "x": 1034.25,
    "z": 1654.34,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3113,12 +3115,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_25",
+   "id": "pickaxe_row_street_25",
    "x": 1043.56,
    "z": 1651.17,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3139,12 +3141,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_26",
+   "id": "pickaxe_row_street_26",
    "x": 1036.71,
    "z": 1659.17,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3165,12 +3167,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_27",
+   "id": "pickaxe_row_street_27",
    "x": 1040.61,
    "z": 1665.67,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3191,12 +3193,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_28",
+   "id": "pickaxe_row_street_28",
    "x": 1045.85,
    "z": 1661.24,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3217,12 +3219,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_29",
+   "id": "pickaxe_row_street_29",
    "x": 1030.35,
    "z": 1671.25,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3243,12 +3245,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_30",
+   "id": "pickaxe_row_street_30",
    "x": 1025.24,
    "z": 1667.37,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3269,12 +3271,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_31",
+   "id": "pickaxe_row_street_31",
    "x": 1007.35,
    "z": 1668.46,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3295,12 +3297,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_32",
+   "id": "pickaxe_row_street_32",
    "x": 1018.99,
    "z": 1662.63,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3321,12 +3323,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_33",
+   "id": "pickaxe_row_street_33",
    "x": 1010.29,
    "z": 1664.58,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3347,12 +3349,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_34",
+   "id": "pickaxe_row_street_34",
    "x": 1015.4,
    "z": 1669.34,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3373,12 +3375,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_35",
+   "id": "pickaxe_row_street_35",
    "x": 1011.13,
    "z": 1673.2,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3399,12 +3401,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_36",
+   "id": "pickaxe_row_street_36",
    "x": 1020.79,
    "z": 1675.07,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3425,12 +3427,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_37",
+   "id": "pickaxe_row_street_37",
    "x": 1026.69,
    "z": 1678.33,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3451,12 +3453,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_38",
+   "id": "pickaxe_row_street_38",
    "x": 1036.34,
    "z": 1675.8,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3477,12 +3479,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_39",
+   "id": "pickaxe_row_street_39",
    "x": 1030.96,
    "z": 1683.39,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3503,12 +3505,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_40",
+   "id": "pickaxe_row_street_40",
    "x": 1015.99,
    "z": 1693.57,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3529,12 +3531,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_41",
+   "id": "pickaxe_row_street_41",
    "x": 1008.14,
    "z": 1689.9,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3555,12 +3557,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_42",
+   "id": "pickaxe_row_street_42",
    "x": 995.25,
    "z": 1689.05,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3581,12 +3583,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_43",
+   "id": "pickaxe_row_street_43",
    "x": 999.86,
    "z": 1686.21,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3607,12 +3609,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_44",
+   "id": "pickaxe_row_street_44",
    "x": 1001.2,
    "z": 1693.02,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3633,12 +3635,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_45",
+   "id": "pickaxe_row_street_45",
    "x": 1005.34,
    "z": 1699.43,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3659,12 +3661,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_46",
+   "id": "pickaxe_row_street_46",
    "x": 1014.75,
    "z": 1701.33,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3685,12 +3687,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_47",
+   "id": "pickaxe_row_street_47",
    "x": 974.25,
    "z": 1689,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -3707,12 +3709,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_48",
+   "id": "pickaxe_row_street_48",
    "x": 1015.83,
    "z": 1686.91,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3729,12 +3731,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_49",
+   "id": "pickaxe_row_street_49",
    "x": 1003.03,
    "z": 1659.98,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3751,12 +3753,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_50",
+   "id": "pickaxe_row_street_50",
    "x": 1015.99,
    "z": 1693.57,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3773,12 +3775,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_51",
+   "id": "pickaxe_row_street_51",
    "x": 1007.76,
    "z": 1646.05,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3795,12 +3797,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_52",
+   "id": "pickaxe_row_street_52",
    "x": 1000,
    "z": 1655.22,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3817,12 +3819,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_53",
+   "id": "pickaxe_row_street_53",
    "x": 1014.75,
    "z": 1701.33,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3839,12 +3841,12 @@
   },
   {
    "kind": "street",
-   "id": "miminhold_street_54",
+   "id": "pickaxe_row_street_54",
    "x": 984.42,
    "z": 1645.69,
    "yaw": 0,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3861,12 +3863,12 @@
   },
   {
    "kind": "building",
-   "id": "miminhold_plot_0",
+   "id": "pickaxe_row_plot_0",
    "x": 995.82,
    "z": 1628.79,
    "yaw": 0.7975,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "want": "house",
     "district": "residential",
     "w": 4.53,
@@ -3878,12 +3880,12 @@
   },
   {
    "kind": "building",
-   "id": "miminhold_plot_1",
+   "id": "pickaxe_row_plot_1",
    "x": 1012.43,
    "z": 1631.72,
    "yaw": -0.7733,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "want": "house",
     "district": "residential",
     "w": 6.39,
@@ -3895,12 +3897,12 @@
   },
   {
    "kind": "building",
-   "id": "miminhold_plot_2",
+   "id": "pickaxe_row_plot_2",
    "x": 1006.31,
    "z": 1637.99,
    "yaw": 2.3683,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "want": "market",
     "district": "residential",
     "w": 6.39,
@@ -3912,12 +3914,12 @@
   },
   {
    "kind": "building",
-   "id": "miminhold_plot_3",
+   "id": "pickaxe_row_plot_3",
    "x": 985.26,
    "z": 1651.97,
    "yaw": -0.8342,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "want": "inn",
     "district": "residential",
     "w": 6.66,
@@ -3929,12 +3931,12 @@
   },
   {
    "kind": "building",
-   "id": "miminhold_plot_4",
+   "id": "pickaxe_row_plot_4",
    "x": 978.83,
    "z": 1657.8,
    "yaw": -2.405,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "want": "house",
     "district": "residential",
     "w": 6.66,
@@ -3946,12 +3948,12 @@
   },
   {
    "kind": "building",
-   "id": "miminhold_plot_5",
+   "id": "pickaxe_row_plot_5",
    "x": 990.43,
    "z": 1659.51,
    "yaw": -0.8342,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "want": "hut",
     "district": "craft",
     "w": 4.3,
@@ -3963,12 +3965,12 @@
   },
   {
    "kind": "building",
-   "id": "miminhold_plot_6",
+   "id": "pickaxe_row_plot_6",
    "x": 1034.94,
    "z": 1645.59,
    "yaw": -0.8695,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "want": "house",
     "district": "residential",
     "w": 5.58,
@@ -3980,12 +3982,12 @@
   },
   {
    "kind": "building",
-   "id": "miminhold_plot_7",
+   "id": "pickaxe_row_plot_7",
    "x": 1027.47,
    "z": 1651.89,
    "yaw": 2.2721,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "want": "forge",
     "district": "craft",
     "w": 5.58,
@@ -3997,12 +3999,12 @@
   },
   {
    "kind": "building",
-   "id": "miminhold_plot_8",
+   "id": "pickaxe_row_plot_8",
    "x": 1043.11,
    "z": 1656.77,
    "yaw": -2.4402,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "want": "house",
     "district": "residential",
     "w": 4.45,
@@ -4014,12 +4016,12 @@
   },
   {
    "kind": "building",
-   "id": "miminhold_plot_9",
+   "id": "pickaxe_row_plot_9",
    "x": 1020.22,
    "z": 1667.57,
    "yaw": -0.6495,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "want": "hut",
     "district": "civic",
     "w": 4.34,
@@ -4031,12 +4033,12 @@
   },
   {
    "kind": "building",
-   "id": "miminhold_plot_10",
+   "id": "pickaxe_row_plot_10",
    "x": 1031.51,
    "z": 1676.15,
    "yaw": 0.9213,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "want": "hut",
     "district": "craft",
     "w": 3.86,
@@ -4048,12 +4050,12 @@
   },
   {
    "kind": "building",
-   "id": "miminhold_plot_11",
+   "id": "pickaxe_row_plot_11",
    "x": 1025.8,
    "z": 1683.93,
    "yaw": 0.9213,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "want": "hut",
     "district": "craft",
     "w": 4.16,
@@ -4065,12 +4067,12 @@
   },
   {
    "kind": "building",
-   "id": "miminhold_plot_12",
+   "id": "pickaxe_row_plot_12",
    "x": 995.46,
    "z": 1695.63,
    "yaw": 1.152,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "want": "granary",
     "district": "residential",
     "w": 4.52,
@@ -4082,12 +4084,12 @@
   },
   {
    "kind": "building",
-   "id": "miminhold_plot_13",
+   "id": "pickaxe_row_plot_13",
    "x": 1009.75,
    "z": 1695.33,
    "yaw": -1.9896,
    "data": {
-    "town": "miminhold",
+    "town": "pickaxe_row",
     "want": "house",
     "district": "residential",
     "w": 3.52,
@@ -8106,7 +8108,7 @@
   },
   {
    "kind": "road",
-   "id": "spur_fengate",
+   "id": "spur_copperdell",
    "x": 235.51,
    "z": 525.66,
    "yaw": 0,
@@ -8150,7 +8152,7 @@
   },
   {
    "kind": "road",
-   "id": "spur_miminhold",
+   "id": "spur_pickaxe_row",
    "x": 955.77,
    "z": 1702.69,
    "yaw": 0,

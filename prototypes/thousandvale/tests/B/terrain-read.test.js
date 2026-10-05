@@ -19,8 +19,12 @@ function plane(a, b, c, extra = {}) {
 }
 
 test('js/rules purity: no three, DOM, window, storage, fetch or Math.random', () => {
-  const src = readFileSync(SRC, 'utf8').replace(/\/\/.*$/gm, '');
-  for (const bad of [/\bimport\b/, /\bwindow\b/, /\bdocument\b/, /localStorage|sessionStorage|indexedDB/, /\bfetch\s*\(/, /Math\.random/, /\bTHREE\b/]) assert.doesNotMatch(src, bad);
+  for (const f of [SRC, new URL('../../js/rules/inflate.js', import.meta.url)]) {
+  const src = readFileSync(f, 'utf8').replace(/\/\/.*$/gm, '');
+  // the only import allowed is a sibling pure module (./inflate.js)
+  for (const m of src.matchAll(/\bimport\b[^;]*?from\s*'([^']+)'/g)) assert.match(m[1], /^\.\/[a-z-]+\.js$/, 'import ' + m[1]);
+  for (const bad of [/\bimport\s*\(/, /\bwindow\b/, /\bdocument\b/, /localStorage|sessionStorage|indexedDB/, /\bfetch\s*\(/, /Math\.random/, /\bTHREE\b/, /node:/]) assert.doesNotMatch(src, bad);
+  }
 });
 
 test('round trip: encode → parse gives the same layers and meta', () => {
@@ -35,9 +39,24 @@ test('a wrong magic or version is refused, never misread', () => {
   const bytes = encodeTerrain(plane(0, 0, 0));
   const bad = bytes.slice(); bad[0] = 88;
   assert.throws(() => parseTerrain(bad), /bad magic/);
-  const v2 = bytes.slice(); new DataView(v2.buffer).setUint32(4, FORMAT_VERSION + 1, true);
-  assert.throws(() => parseTerrain(v2), /format version/);
-  assert.throws(() => parseTerrain(bytes.slice(0, 200)), /bytes/);
+  const v9 = bytes.slice(); new DataView(v9.buffer).setUint32(4, 99, true);
+  assert.throws(() => parseTerrain(v9), /file version 99/);
+  assert.throws(() => parseTerrain(bytes.slice(0, bytes.length - 3)), /inflate|bytes|short/);
+  const plain = encodeTerrain(plane(0, 0, 0), { plain: true });
+  assert.throws(() => parseTerrain(plain.slice(0, 200)), /bytes/);
+});
+
+test('file versions 1 (plain) and 2 (deflated) read back identically; v2 is much smaller on a real zone', () => {
+  const p = plane(0.31, -0.17, 3, { name: 'pk' });
+  p.waterTop[7] = 33000; p.waterKind[7] = 2; p.biome[12] = 0;
+  const a = parseTerrain(encodeTerrain(p, { plain: true })), b = parseTerrain(encodeTerrain(p));
+  for (const k of ['height', 'waterTop', 'waterKind', 'biome']) assert.deepEqual([...b.layers[k]], [...a.layers[k]], k);
+  assert.equal(new DataView(encodeTerrain(p).buffer).getUint32(4, true), 2);
+  const real = parseTerrain(readFileSync(BIN));
+  const v1 = encodeTerrain(real.layers.meta ? real.layers : { meta: real.meta, ...real.layers }, { plain: true });
+  const t1 = parseTerrain(v1);
+  assert.equal(t1.heightAt(777.7, 1234.5), real.heightAt(777.7, 1234.5));
+  assert.ok(readFileSync(BIN).length * 4 < v1.length, `packed ${readFileSync(BIN).length} vs plain ${v1.length}`);
 });
 
 test('heightAt, slopeAt, normalAt on a known plane', () => {
@@ -120,8 +139,8 @@ test('the baked test zone loads and is a sane place to stand', () => {
 
 test('bake is deterministic and the checked-in terrain.bin is not stale', async () => {
   const { bakeTestZone } = await import('../../tools/bake-test-zone.mjs');
-  const fresh = Buffer.from(encodeTerrain(bakeTestZone()));
-  assert.equal(Buffer.compare(fresh, readFileSync(BIN)), 0, 'terrain.bin differs from a fresh bake — run tools/bake-test-zone.mjs');
+  const { sameLayerFile } = await import('../../tools/lib/zone-layers.mjs');
+  assert.ok(sameLayerFile('terrain.bin', encodeTerrain(bakeTestZone()), readFileSync(BIN)), 'terrain.bin differs from a fresh bake — run tools/bake-test-zone.mjs');
 });
 
 test('heightGrid / waterGrid match the per-sample readers', () => {

@@ -81,6 +81,16 @@ Heights are `heightMin + v / 65535 * (heightMax - heightMin)` (2.4 cm steps on t
 source{tool, world, macroWindow, worldOrigin, landMetres, seaMetres}, rivers, sites, spawn`.
 A file with the wrong magic or version throws (PLAN §3.2.5).
 
+**File version 2 (the bake writes it since 2026-10-04; readers open 1 and 2, nothing to change on your side).**
+Same header and meta, then `u32 packedBytes` + raw DEFLATE of the same layers, with the heights stored as
+residuals of a planar guess (left + up − up-left, mod 65536) so a smooth slope becomes a run of near-zero
+numbers. `nav.bin` v2 is the same idea (deflated bits). Decoded synchronously by `js/rules/inflate.js` (pure,
+~40 ms for a zone; no `node:zlib`, no DecompressionStream, no library). `FORMAT_VERSION` stays 1 — it names the
+layers and feeds the bake hashes, which did not change; `FILE_VERSIONS = [1, 2]` lists the containers. A zone went
+from 7.5 MB to ~0.85 MB (terrain.bin 6.3 MB → 0.6 MB, nav.bin 1 MB → 38 KB); all 17 checked-in zones 122 MB → 14 MB.
+The bake tests compare checked-in files DECODED (`sameLayerFile` in `tools/lib/zone-layers.mjs`), so a zlib
+upgrade that changes the compressed bytes but not the layers is not "stale".
+
 ## 5. How the test zone was made (the recipe M1 generalises)
 
 1. World Forge 288 × 224, seed 1000, `plates` (≈1 s). 16 macro samples per zone edge = 128 m each.
@@ -189,10 +199,67 @@ street, none on a road; scatter plausible and clear; sites open.
 keep off them (the terrain heights do not change when only scatter/sites move, but `terrainHash` is per bake —
 match on zone id).
 
-**Size:** a baked zone is ~7.5 MB (terrain.bin 6.3 MB of it), so the 16 Torbor Downs zones are 122 MB in git and the whole
-world would be ~1.5 GB. Options for the lead: keep only the starter province in git and bake the rest at publish/boot
-(3–4 s a zone, deterministic), or store `terrain.bin` gzip'd (~3×). Not changed yet.
+**Size:** a baked zone is ~0.85 MB (file version 2, §4), so the 16 Torbor Downs zones are ~13 MB and the whole
+world (~200 land zones) would be ~170 MB. Keeping only the provinces in play in git and baking the rest on demand
+(3–4 s a zone, deterministic) is still the plan for later provinces. (Git history still holds the 122 MB of v1 files
+if they were ever committed.)
+
+**nav.bin and bridges (fixed 2026-10-04).** Every bridge used to read as DEEP water in `nav.bin`, so a river cut the
+province in two for anything that walks by nav (the reachability test found the whole east column of Torbor Downs —
+gullwick, redcliff, sunken_wolds — 28–55 % reachable). The bake now stamps each deck as a road-wide WALK|ROAD strip
+along the road, long enough to land on both banks at a slant (`span × 1.6 + 20 m`), in every zone the deck reaches.
 
 Known gaps: no scatter/nav for the M0 test zone (fixture only); buildings are footprints (the client builds
 them with proctown's buildkit); roads have no lamps/signposts yet; only zones that are baked have files —
 `node tools/bake-zone.mjs <id>` for any of the 252.
+
+
+**E's names, asks and theme terrain (2026-10-04, lead ruling).** `data/provinces/torbor_downs-places.json` is read at bake
+time: `rename` (keyed by the slug of World Forge's name) is imposed on settlements and fords (`wfName` keeps the old one,
+and seeds the town plan so a rename never reshuffles a town); `asks` are placed exactly where E put them (radius at least
+the kind's); the hub is the settlement named like the sheet's `town`, grown to a town if World Forge made it smaller.
+Fords snap onto the nearest river point. `data/world/zone-themes.json` gives three zones the water their archetype needs
+(`tools/lib/zone-theme.mjs`, carved after the roads, off towns and roads, ≥ reach + 120 m inside the edges so neighbours
+still match bit for bit): **marsh** = a fen painted `marsh` with one deeper mere and wadeable pools (≤ 0.85 m);
+**shore** = a big lake with a sand band by the hub; **mere** = two lakes in the lowest-rimmed valleys. Each lake's level is
+just under the lowest point of its outline and the bank eases down to it. `meta.theme` and placements `lake` / `fen` carry them.
+
+## 7. The far horizon (`data/world/horizon.bin`, M2)
+
+The whole world at **32 m** (1,153 × 897 samples), made by `node tools/bake-horizon.mjs` (2–3 s; re-run after any
+zone bake — `tests/B/horizon.test.js` fails when it is stale). **In a baked zone each sample IS the zone's own
+sample** (every 16th of its 2 m grid: height, water surface, biome), so a far mesh meets the loaded zone exactly on
+its rim; elsewhere it is the zone bake's own first steps (base ground + sea + lake levels + warped macro biome), which
+the test measures at a median 0.01 m from what an actual bake makes away from towns and rivers. 4× finer than
+`macro.bin` (128 m). 1.5 MB (deflated like terrain.bin v2).
+
+```js
+import { parseHorizon, horizonRef } from './js/rules/horizon-read.js';   // pure, sync
+const h = parseHorizon(await (await fetch('data/world/horizon.bin')).arrayBuffer());
+h.heightAt(wx, wz)          // WORLD metres, same triangle split as terrain-read.js; never NaN (clamps)
+h.waterAt(wx, wz)           // { surface, depth } | null      h.biomeAt(wx, wz) -> index into h.biomes
+h.heightGrid(), h.waterGrid()   // Float32Array width*height for a mesh (gridIndices(width, …) needs a square — build rows yourself)
+h.baked                     // Set of zone ids where the horizon is exact
+horizonRef(manifest, 'z12_02')  // -> { file, hash, step, zone: { id, origin: {x, z} } }  — for the server's `joined`
+```
+`data/world/horizon.json` is the manifest (`file, bytes, hash, step, width, height, baked`); `hash` is over the
+decoded layers, so a client can cache on it.
+
+## 8. The M2 world gate: reachability + sameness (`tests/B/zone-reach.test.js`)
+
+PLAN §15 M2: "variety + reachability + sameness tests green for every zone". Content variety (≥ 40 distinct vignettes
+in any 5 neighbouring zones) is stream E's (`tests/E/province.test.js`); these are the bake's:
+
+- **Reachability** (`tools/lib/province-reach.mjs`, also a CLI: `node tools/lib/province-reach.mjs torbor_downs`):
+  the 16 zones' `nav.bin` stitched into one 4,097² walk grid (edges share samples), flooded 4-connected from
+  Torborhold. Every settlement, the front of every dungeon door, every event/camp arena, ford, spawn and placed
+  vignette must be reached (103 targets today, all reached); ≥ 95 % of all walkable ground is one piece (98.6 %), and
+  ≥ 85 % of each zone's (lowest: sunken_wolds 88 % — its far bank of the big river has no bridge); every bridge deck walkable.
+- **Sameness** (`tools/lib/zone-fingerprint.mjs`, CLI prints the table): a fingerprint per zone — biome shares,
+  relief (p5–p95), median slope, steep and wet shares, rivers, scatter per km² by kind, settlements, buildings, roads,
+  plus E's archetype / hook / dungeon family. Every pair of neighbours must differ in ≥ 3 noticeable ways and by a
+  measured distance ≥ 1 (closest today: brackwater / saltmouth, d 1.26, differing in water, settlements, archetype,
+  hook, dungeon); no two zones share a fingerprint; **no 128 m patch of ground shape repeats** anywhere in the
+  province (hashed on height differences, flat patches skipped); no two settlements share a town plan.
+- Not yet: PLAN §16's "longest boring walk ≤ 250 m" needs the vignette placements for all 16 zones (stream E has
+  placed only the `test` zone so far); `zoneTargets()` already picks up `data/vignettes/placements/<zone>.json`.

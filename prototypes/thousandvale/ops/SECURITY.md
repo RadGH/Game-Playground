@@ -12,7 +12,8 @@ Legend: `[ ]` not done · `[~]` designed / partly in place · `[x]` verified (wr
 
 ## 1. Separate Linux user and a locked-down service (PLAN §11.1)
 
-- [ ] Linux user `thousandvale` exists, no login shell, no sudo, home `/srv/thousandvale`.
+- [~] Linux user `thousandvale` exists, no login shell, no sudo, home `/srv/thousandvale`. Script ready (`ops/setup-stable.sh`,
+      verified by `ops/lib/check-stable.sh`); waiting for the lead's sudo run (requests.md "H -> Lead (sudo)" 2026-10-04).
 - [ ] Stable server runs from a **system** unit with `User=thousandvale`, `ProtectHome=yes`,
       `NoNewPrivileges=yes`, `ProtectSystem=strict`, `ReadOnlyPaths=/srv/thousandvale`, `PrivateTmp=yes`
       (plus `ReadWritePaths=` only for its log/state dir if needed). `systemd-analyze security thousandvale`
@@ -27,9 +28,11 @@ Legend: `[ ]` not done · `[~]` designed / partly in place · `[x]` verified (wr
 
 ## 2. Serve only an approved copy (PLAN §11.2)
 
-- [ ] `tools/publish-thousandvale.sh` builds an **allow-listed** folder into `/srv/thousandvale/public`: the
+- [~] `tools/publish-thousandvale.sh` builds an **allow-listed** folder into `/srv/thousandvale/public`: the
       client, its imports from Farhold/Emberveil/avatar-3d/shared, data, baked zones. Nothing else.
-- [ ] The stable server serves **only** that folder. Tested and recorded: `..` traversal (raw and
+- [~] (2026-10-04, a `--build-only` release served by its own server on a scratch port: `/`, the client and terrain.bin 200;
+      `server/main.mjs`, `ops/`, `docs/`, `tests/`, `node_modules/pg`, `/.git/config`, `../../CLAUDE.md` raw and `%2f`-encoded all 404 —
+      re-check on /srv after the first real publish.) The stable server serves **only** that folder. Tested and recorded: `..` traversal (raw and
       URL-encoded), dotfiles, `.git`, `server/`, `tools/`, `docs/`, `node_modules/`, `ops/` all return 404.
 - [ ] Never pointed at the playground root. **Never** put `tools/serve.py` (8400/8401) behind the tunnel —
       it accepts POSTs that write files (`/api/library/sync`, `/api/inbox/*`).
@@ -47,7 +50,9 @@ Legend: `[ ]` not done · `[~]` designed / partly in place · `[x]` verified (wr
 
 - [x] Postgres listens on `127.0.0.1` only (`listen_addresses` default `localhost`) — 2026-10-04,
       `ss -ltn` shows `127.0.0.1:5432` only. Re-check after any Postgres config change.
-- [ ] Stable game server (8490) binds `127.0.0.1`; the LAN reaches it through `ufw` only if wanted.
+- [~] Stable game server (8490) binds `0.0.0.0` for the LAN, and the systemd drop-in `lan-only.conf` (`IPAddressDeny=any`,
+      allow localhost + 10/8, 172.16/12, 192.168/16, link-local, fc00::/7) makes the kernel drop every other peer. At M3 the tunnel
+      arrives over localhost; the drop-in goes when Turnstile is switched on (it must reach Cloudflare).
 - [ ] Admin (8492) binds `127.0.0.1`, reached by SSH tunnel (or Cloudflare Access). Never in tunnel ingress.
 - [ ] `ufw` enabled with: default deny incoming; allow SSH from the LAN; allow 8491 (and 8490 if used on the
       LAN) from `192.168.1.0/24` only. Rules pasted here.

@@ -37,11 +37,41 @@
    }
   },
   {
+   "kind": "settlement",
+   "id": "gorsehold",
+   "x": 1564,
+   "z": 1286,
+   "yaw": 0,
+   "data": {
+    "kind": "town",
+    "name": "Gorsehold",
+    "radius": 90,
+    "hub": true,
+    "planned": true,
+    "ask": true
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "burnt_barns",
+   "x": 1594,
+   "z": 367,
+   "yaw": 0,
+   "data": {
+    "kind": "hamlet",
+    "name": "Burnt Barns",
+    "radius": 40,
+    "hub": false,
+    "planned": true,
+    "ask": true
+   }
+  },
+  {
    "kind": "dungeon_door",
    "id": "door_1",
-   "x": 1357,
-   "z": 579,
-   "yaw": 1.016,
+   "x": 1364,
+   "z": 1286,
+   "yaw": 1.664,
    "data": {
     "name": "Barrow entrance"
    }
@@ -49,11 +79,2663 @@
   {
    "kind": "event_site",
    "id": "event_gorse_march",
-   "x": 1218,
-   "z": 1071,
+   "x": 1326,
+   "z": 1155,
    "yaw": 0,
    "data": {
     "r": 40
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "gorsehold_square",
+   "x": 1562.24,
+   "z": 1287.28,
+   "yaw": 0,
+   "data": {
+    "r": 6.08,
+    "town": "gorsehold",
+    "culture": "desert"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_0",
+   "x": 1565.44,
+   "z": 1340.98,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1565.44,
+      1340.98
+     ],
+     [
+      1574.17,
+      1231.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_1",
+   "x": 1618.19,
+   "z": 1295.42,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1618.19,
+      1295.42
+     ],
+     [
+      1571.89,
+      1291.71
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_2",
+   "x": 1608.35,
+   "z": 1318.52,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1608.35,
+      1318.52
+     ],
+     [
+      1569.99,
+      1315.45
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_3",
+   "x": 1589.3,
+   "z": 1334.83,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1589.3,
+      1334.83
+     ],
+     [
+      1590.63,
+      1318.21
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_4",
+   "x": 1595.55,
+   "z": 1331.05,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1595.55,
+      1331.05
+     ],
+     [
+      1590.74,
+      1330.67
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_5",
+   "x": 1601.81,
+   "z": 1325.94,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1601.81,
+      1325.94
+     ],
+     [
+      1602.36,
+      1319.15
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_6",
+   "x": 1588.57,
+   "z": 1330.14,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1588.57,
+      1330.14
+     ],
+     [
+      1568.94,
+      1328.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_7",
+   "x": 1590.19,
+   "z": 1315.96,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1590.19,
+      1315.96
+     ],
+     [
+      1591.88,
+      1294.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_8",
+   "x": 1604.53,
+   "z": 1317.11,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1604.53,
+      1317.11
+     ],
+     [
+      1606.22,
+      1296.07
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_9",
+   "x": 1615.85,
+   "z": 1267.64,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1615.85,
+      1267.64
+     ],
+     [
+      1574.09,
+      1264.3
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_10",
+   "x": 1592.77,
+   "z": 1291.78,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1592.77,
+      1291.78
+     ],
+     [
+      1594.75,
+      1267.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_11",
+   "x": 1618.78,
+   "z": 1281.05,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1618.78,
+      1281.05
+     ],
+     [
+      1594.88,
+      1279.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_12",
+   "x": 1606.59,
+   "z": 1292.89,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1606.59,
+      1292.89
+     ],
+     [
+      1607.52,
+      1281.25
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_13",
+   "x": 1608.73,
+   "z": 1279.14,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1608.73,
+      1279.14
+     ],
+     [
+      1609.6,
+      1268.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_14",
+   "x": 1592.75,
+   "z": 1278.16,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1592.75,
+      1278.16
+     ],
+     [
+      1573.1,
+      1276.58
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_15",
+   "x": 1593.9,
+   "z": 1264.78,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1593.9,
+      1264.78
+     ],
+     [
+      1595.8,
+      1241.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_16",
+   "x": 1606.26,
+   "z": 1250.8,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1606.26,
+      1250.8
+     ],
+     [
+      1596.19,
+      1249.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_17",
+   "x": 1609.14,
+   "z": 1266,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1609.14,
+      1266
+     ],
+     [
+      1609.96,
+      1255.79
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_18",
+   "x": 1594.2,
+   "z": 1247.3,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1594.2,
+      1247.3
+     ],
+     [
+      1575.57,
+      1245.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_19",
+   "x": 1567.81,
+   "z": 1280.02,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1567.81,
+      1280.02
+     ],
+     [
+      1510.03,
+      1275.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_20",
+   "x": 1565.49,
+   "z": 1308.95,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1565.49,
+      1308.95
+     ],
+     [
+      1512.27,
+      1304.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_21",
+   "x": 1534.41,
+   "z": 1332.36,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1534.41,
+      1332.36
+     ],
+     [
+      1536.38,
+      1307.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_22",
+   "x": 1564.1,
+   "z": 1326.36,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1564.1,
+      1326.36
+     ],
+     [
+      1536.17,
+      1324.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_23",
+   "x": 1547.82,
+   "z": 1338.57,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1547.82,
+      1338.57
+     ],
+     [
+      1548.81,
+      1326.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_24",
+   "x": 1550.21,
+   "z": 1324.14,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1550.21,
+      1324.14
+     ],
+     [
+      1551.42,
+      1308.93
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_25",
+   "x": 1534.11,
+   "z": 1322.36,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1534.11,
+      1322.36
+     ],
+     [
+      1521.89,
+      1321.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_26",
+   "x": 1519.85,
+   "z": 1318.8,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1519.85,
+      1318.8
+     ],
+     [
+      1520.84,
+      1306.48
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_27",
+   "x": 1541.03,
+   "z": 1305.89,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1541.03,
+      1305.89
+     ],
+     [
+      1543.13,
+      1279.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_28",
+   "x": 1566.62,
+   "z": 1294.84,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1566.62,
+      1294.84
+     ],
+     [
+      1543.17,
+      1292.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_29",
+   "x": 1554.91,
+   "z": 1307,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1554.91,
+      1307
+     ],
+     [
+      1555.86,
+      1295.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_30",
+   "x": 1555.7,
+   "z": 1292.86,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1555.7,
+      1292.86
+     ],
+     [
+      1556.67,
+      1280.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_31",
+   "x": 1523.75,
+   "z": 1304.51,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1523.75,
+      1304.51
+     ],
+     [
+      1525.86,
+      1278.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_32",
+   "x": 1541.05,
+   "z": 1291.92,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1541.05,
+      1291.92
+     ],
+     [
+      1525.96,
+      1290.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_33",
+   "x": 1523.83,
+   "z": 1289.79,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1523.83,
+      1289.79
+     ],
+     [
+      1509.06,
+      1288.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_34",
+   "x": 1537.24,
+   "z": 1275.96,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1537.24,
+      1275.96
+     ],
+     [
+      1540.42,
+      1236.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_35",
+   "x": 1569.54,
+   "z": 1258.45,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1569.54,
+      1258.45
+     ],
+     [
+      1539.94,
+      1256.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_36",
+   "x": 1554.34,
+   "z": 1277.33,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1554.34,
+      1277.33
+     ],
+     [
+      1555.86,
+      1258.45
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_37",
+   "x": 1552.75,
+   "z": 1256,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1552.75,
+      1256
+     ],
+     [
+      1554.68,
+      1231.79
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_38",
+   "x": 1570.82,
+   "z": 1242.38,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1570.82,
+      1242.38
+     ],
+     [
+      1555.04,
+      1241.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_39",
+   "x": 1552.77,
+   "z": 1241.9,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1552.77,
+      1241.9
+     ],
+     [
+      1541.15,
+      1240.97
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_40",
+   "x": 1537.89,
+   "z": 1254.06,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1537.89,
+      1254.06
+     ],
+     [
+      1520.26,
+      1252.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_41",
+   "x": 1524.65,
+   "z": 1274.95,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1524.65,
+      1274.95
+     ],
+     [
+      1526.3,
+      1254.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_42",
+   "x": 1525.45,
+   "z": 1251.96,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1525.45,
+      1251.96
+     ],
+     [
+      1525.9,
+      1246.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gorsehold_street_43",
+   "x": 1539.08,
+   "z": 1239.22,
+   "yaw": 0,
+   "data": {
+    "town": "gorsehold",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1539.08,
+      1239.22
+     ],
+     [
+      1535.55,
+      1238.93
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_0",
+   "x": 1579.28,
+   "z": 1322.79,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "warehouse",
+    "district": "residential",
+    "w": 18.5,
+    "d": 9.76,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_1",
+   "x": 1598.21,
+   "z": 1306.02,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "market",
+    "district": "residential",
+    "w": 10.99,
+    "d": 19.91,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_2",
+   "x": 1580.43,
+   "z": 1304.59,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "hall",
+    "district": "craft",
+    "w": 17.88,
+    "d": 19.91,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_3",
+   "x": 1613.58,
+   "z": 1287.59,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "house",
+    "district": "residential",
+    "w": 9.7,
+    "d": 10.48,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_4",
+   "x": 1600.14,
+   "z": 1286.52,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "house",
+    "district": "residential",
+    "w": 10.47,
+    "d": 10.48,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_5",
+   "x": 1601.74,
+   "z": 1273.1,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "house",
+    "district": "residential",
+    "w": 11.5,
+    "d": 9.73,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_6",
+   "x": 1582.34,
+   "z": 1284.69,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "granary",
+    "district": "craft",
+    "w": 18.52,
+    "d": 11.28,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_7",
+   "x": 1583.42,
+   "z": 1271.23,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "hut",
+    "district": "craft",
+    "w": 18.52,
+    "d": 8.92,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_8",
+   "x": 1584.14,
+   "z": 1255.8,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "forge",
+    "district": "residential",
+    "w": 17.49,
+    "d": 15.15,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_9",
+   "x": 1558.35,
+   "z": 1317.14,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "hut",
+    "district": "craft",
+    "w": 11.73,
+    "d": 14.06,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_10",
+   "x": 1543.29,
+   "z": 1315.93,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "house",
+    "district": "residential",
+    "w": 11.69,
+    "d": 14.06,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_11",
+   "x": 1528.06,
+   "z": 1313.92,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "house",
+    "district": "residential",
+    "w": 12.2,
+    "d": 12.47,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_12",
+   "x": 1561.27,
+   "z": 1301.51,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "hut",
+    "district": "civic",
+    "w": 8.41,
+    "d": 10.76,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_13",
+   "x": 1548.45,
+   "z": 1300.48,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "hut",
+    "district": "craft",
+    "w": 10.52,
+    "d": 10.76,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_14",
+   "x": 1549.42,
+   "z": 1286.25,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "hut",
+    "district": "civic",
+    "w": 10.18,
+    "d": 10.97,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_15",
+   "x": 1532.91,
+   "z": 1298.81,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "hut",
+    "district": "craft",
+    "w": 13.93,
+    "d": 11.62,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_16",
+   "x": 1534.04,
+   "z": 1284.59,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "hut",
+    "district": "craft",
+    "w": 13.93,
+    "d": 10.11,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_17",
+   "x": 1516.73,
+   "z": 1282.83,
+   "yaw": 3.0617,
+   "data": {
+    "town": "gorsehold",
+    "want": "house",
+    "district": "residential",
+    "w": 14.06,
+    "d": 9.36,
+    "angle": 3.2215,
+    "front": 4.7923,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_18",
+   "x": 1562.45,
+   "z": 1268.48,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "chapel",
+    "district": "craft",
+    "w": 11.34,
+    "d": 17.74,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_19",
+   "x": 1546.55,
+   "z": 1267.21,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "inn",
+    "district": "craft",
+    "w": 13.76,
+    "d": 17.74,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_20",
+   "x": 1562.29,
+   "z": 1249.78,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "stable",
+    "district": "residential",
+    "w": 14.63,
+    "d": 12.71,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_21",
+   "x": 1546.36,
+   "z": 1248.99,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "house",
+    "district": "residential",
+    "w": 10.46,
+    "d": 11.76,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_22",
+   "x": 1531.38,
+   "z": 1269.98,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "house",
+    "district": "residential",
+    "w": 9.24,
+    "d": 9.79,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gorsehold_plot_23",
+   "x": 1532.16,
+   "z": 1260.22,
+   "yaw": -1.6507,
+   "data": {
+    "town": "gorsehold",
+    "want": "house",
+    "district": "residential",
+    "w": 9.24,
+    "d": 9.79,
+    "angle": 3.2215,
+    "front": 3.2215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "burnt_barns_square",
+   "x": 1591.2,
+   "z": 369.55,
+   "yaw": 0,
+   "data": {
+    "r": 3.99,
+    "town": "burnt_barns",
+    "culture": "desert"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_0",
+   "x": 1619.79,
+   "z": 380.27,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1619.79,
+      380.27
+     ],
+     [
+      1570.28,
+      350.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_1",
+   "x": 1606.1,
+   "z": 340.65,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1606.1,
+      340.65
+     ],
+     [
+      1593.51,
+      361.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_2",
+   "x": 1618.69,
+   "z": 351.78,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1618.69,
+      351.78
+     ],
+     [
+      1607.66,
+      370.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_3",
+   "x": 1622.81,
+   "z": 363.67,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1622.81,
+      363.67
+     ],
+     [
+      1615.47,
+      359.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_4",
+   "x": 1622.51,
+   "z": 361.67,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1622.51,
+      361.67
+     ],
+     [
+      1622.27,
+      362.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_5",
+   "x": 1621.52,
+   "z": 364.17,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1621.52,
+      364.17
+     ],
+     [
+      1615.22,
+      374.58
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_6",
+   "x": 1622.4,
+   "z": 372.85,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1622.4,
+      372.85
+     ],
+     [
+      1618.85,
+      370.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_7",
+   "x": 1617.77,
+   "z": 368.23,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1617.77,
+      368.23
+     ],
+     [
+      1612.1,
+      364.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_8",
+   "x": 1613.42,
+   "z": 358.37,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1613.42,
+      358.37
+     ],
+     [
+      1601.58,
+      351.21
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_9",
+   "x": 1613.76,
+   "z": 345.78,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1613.76,
+      345.78
+     ],
+     [
+      1608.67,
+      354.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_10",
+   "x": 1606.63,
+   "z": 355.54,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1606.63,
+      355.54
+     ],
+     [
+      1600.5,
+      365.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_11",
+   "x": 1610.09,
+   "z": 363.87,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1610.09,
+      363.87
+     ],
+     [
+      1604.81,
+      360.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_12",
+   "x": 1602.35,
+   "z": 360.49,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1602.35,
+      360.49
+     ],
+     [
+      1597.68,
+      357.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_13",
+   "x": 1599.2,
+   "z": 348.96,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1599.2,
+      348.96
+     ],
+     [
+      1584.02,
+      339.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_14",
+   "x": 1593.71,
+   "z": 338,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1593.71,
+      338
+     ],
+     [
+      1590.9,
+      342.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_15",
+   "x": 1587.06,
+   "z": 342.9,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1587.06,
+      342.9
+     ],
+     [
+      1580.57,
+      353.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_16",
+   "x": 1594.92,
+   "z": 356.04,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1594.92,
+      356.04
+     ],
+     [
+      1584.29,
+      349.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_17",
+   "x": 1594.08,
+   "z": 347.14,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1594.08,
+      347.14
+     ],
+     [
+      1590.93,
+      352.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_18",
+   "x": 1589.33,
+   "z": 353.94,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1589.33,
+      353.94
+     ],
+     [
+      1587.12,
+      357.59
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_19",
+   "x": 1582.81,
+   "z": 347.8,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1582.81,
+      347.8
+     ],
+     [
+      1576.42,
+      343.93
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_20",
+   "x": 1597.6,
+   "z": 369.77,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1597.6,
+      369.77
+     ],
+     [
+      1583.04,
+      393.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_21",
+   "x": 1607.31,
+   "z": 392.77,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1607.31,
+      392.77
+     ],
+     [
+      1591.39,
+      383.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_22",
+   "x": 1607.3,
+   "z": 375.64,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1607.3,
+      375.64
+     ],
+     [
+      1600.29,
+      387.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_23",
+   "x": 1614.2,
+   "z": 387.8,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1614.2,
+      387.8
+     ],
+     [
+      1604.7,
+      382.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_24",
+   "x": 1614.09,
+   "z": 379.74,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1614.09,
+      379.74
+     ],
+     [
+      1611.12,
+      384.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_25",
+   "x": 1609.12,
+   "z": 386.02,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1609.12,
+      386.02
+     ],
+     [
+      1606.22,
+      390.82
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_26",
+   "x": 1602.38,
+   "z": 381.64,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1602.38,
+      381.64
+     ],
+     [
+      1595,
+      377.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_27",
+   "x": 1600.52,
+   "z": 389.95,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1600.52,
+      389.95
+     ],
+     [
+      1596.95,
+      395.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_28",
+   "x": 1595.88,
+   "z": 395.49,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1595.88,
+      395.49
+     ],
+     [
+      1587.12,
+      390.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_29",
+   "x": 1580.78,
+   "z": 359.6,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1580.78,
+      359.6
+     ],
+     [
+      1568.24,
+      380.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_30",
+   "x": 1587.94,
+   "z": 382.66,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1587.94,
+      382.66
+     ],
+     [
+      1573.43,
+      373.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_31",
+   "x": 1588.46,
+   "z": 364.24,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1588.46,
+      364.24
+     ],
+     [
+      1580.74,
+      377.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_32",
+   "x": 1592.44,
+   "z": 375.23,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1592.44,
+      375.23
+     ],
+     [
+      1585.61,
+      371.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_33",
+   "x": 1583.39,
+   "z": 370.51,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1583.39,
+      370.51
+     ],
+     [
+      1577.59,
+      367
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_34",
+   "x": 1580.02,
+   "z": 379.16,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1580.02,
+      379.16
+     ],
+     [
+      1574.43,
+      388.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_35",
+   "x": 1584.48,
+   "z": 388.38,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1584.48,
+      388.38
+     ],
+     [
+      1578.07,
+      384.51
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_36",
+   "x": 1576.09,
+   "z": 383.53,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1576.09,
+      383.53
+     ],
+     [
+      1569.87,
+      379.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_37",
+   "x": 1572.94,
+   "z": 370.45,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1572.94,
+      370.45
+     ],
+     [
+      1565.03,
+      365.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_38",
+   "x": 1574.18,
+   "z": 355.61,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1574.18,
+      355.61
+     ],
+     [
+      1567.85,
+      366.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_39",
+   "x": 1576.58,
+   "z": 364.43,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1576.58,
+      364.43
+     ],
+     [
+      1571.86,
+      361.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_40",
+   "x": 1570.04,
+   "z": 360.33,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1570.04,
+      360.33
+     ],
+     [
+      1566.39,
+      358.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_41",
+   "x": 1568.8,
+   "z": 377.28,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1568.8,
+      377.28
+     ],
+     [
+      1566.37,
+      375.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "burnt_barns_street_42",
+   "x": 1567.22,
+   "z": 368.27,
+   "yaw": 0,
+   "data": {
+    "town": "burnt_barns",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1567.22,
+      368.27
+     ],
+     [
+      1565.33,
+      371.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_0",
+   "x": 1612.9,
+   "z": 369.88,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "house",
+    "district": "residential",
+    "w": 4.46,
+    "d": 5.43,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_1",
+   "x": 1607.65,
+   "z": 347.47,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "granary",
+    "district": "residential",
+    "w": 9.26,
+    "d": 5.31,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_2",
+   "x": 1605.48,
+   "z": 365.53,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.21,
+    "d": 4.97,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_3",
+   "x": 1601.97,
+   "z": 355.85,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.15,
+    "d": 4.26,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_4",
+   "x": 1589,
+   "z": 347.62,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "house",
+    "district": "residential",
+    "w": 4.88,
+    "d": 4.8,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_5",
+   "x": 1609.21,
+   "z": 380.15,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "house",
+    "district": "residential",
+    "w": 4.54,
+    "d": 4.53,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_6",
+   "x": 1604.7,
+   "z": 386.63,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "house",
+    "district": "residential",
+    "w": 4.42,
+    "d": 3.53,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_7",
+   "x": 1600.96,
+   "z": 375.65,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "shrine",
+    "district": "craft",
+    "w": 5.39,
+    "d": 7.43,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_8",
+   "x": 1596.89,
+   "z": 382.39,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.57,
+    "d": 7.43,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_9",
+   "x": 1595.57,
+   "z": 390.49,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "house",
+    "district": "residential",
+    "w": 4.85,
+    "d": 4.52,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_10",
+   "x": 1591.7,
+   "z": 388.15,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "house",
+    "district": "residential",
+    "w": 4.85,
+    "d": 4.52,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_11",
+   "x": 1586.77,
+   "z": 376.88,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "hut",
+    "district": "civic",
+    "w": 5.29,
+    "d": 6.78,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_12",
+   "x": 1582.84,
+   "z": 364.87,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "hut",
+    "district": "civic",
+    "w": 5.68,
+    "d": 5.58,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_13",
+   "x": 1578.41,
+   "z": 372.2,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.65,
+    "d": 5.58,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_14",
+   "x": 1576.13,
+   "z": 359.83,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.01,
+    "d": 4.31,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_15",
+   "x": 1572.4,
+   "z": 366.01,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "house",
+    "district": "residential",
+    "w": 3.63,
+    "d": 4.31,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_16",
+   "x": 1569.77,
+   "z": 355.91,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "house",
+    "district": "residential",
+    "w": 3.88,
+    "d": 3.85,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "burnt_barns_plot_17",
+   "x": 1568.77,
+   "z": 372.59,
+   "yaw": -0.544,
+   "data": {
+    "town": "burnt_barns",
+    "want": "house",
+    "district": "residential",
+    "w": 4.58,
+    "d": 3.71,
+    "angle": 2.1148,
+    "front": 2.1148,
+    "streetGap": -0.4
    }
   }
  ]

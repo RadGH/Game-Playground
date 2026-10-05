@@ -1,5 +1,5 @@
 {
-  "name": "Hollowcross (z14_03)",
+  "name": "Redcliff (z14_03)",
   "zone": "z14_03",
   "sheet": {
     "sheet": "torbor_downs",
@@ -66,12 +66,14 @@
   "sites": [
     {
       "type": "settlement",
-      "kind": "village",
-      "name": "Hollowcross",
-      "x": 416,
-      "z": 880,
+      "kind": "town",
+      "name": "Redcliff",
+      "x": 384,
+      "z": 864,
+      "wfName": "Hollowcross",
+      "grownFrom": "village",
       "hub": true,
-      "radius": 65,
+      "radius": 90,
       "movedFrom": {
         "x": 448,
         "z": 832
@@ -80,9 +82,10 @@
     {
       "type": "settlement",
       "kind": "village",
-      "name": "Bolwathold",
+      "name": "Cinder Farm",
       "x": 1216,
       "z": 1712,
+      "wfName": "Bolwathold",
       "radius": 65,
       "movedFrom": {
         "x": 1216,
@@ -129,35 +132,43 @@
       "type": "crossing",
       "kind": "ford",
       "name": "Mafil Ford",
-      "x": 448,
-      "z": 832
+      "x": 392,
+      "z": 826,
+      "snappedFrom": {
+        "x": 448,
+        "z": 832
+      }
     },
     {
       "type": "crossing",
       "kind": "ford",
       "name": "Hafe Ford",
-      "x": 448,
-      "z": 448
+      "x": 384,
+      "z": 444,
+      "snappedFrom": {
+        "x": 448,
+        "z": 448
+      }
     },
     {
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 556,
-      "z": 1008,
-      "yaw": -2.153
+      "x": 555,
+      "z": 1018,
+      "yaw": -2.436
     },
     {
       "type": "event",
       "id": "event_redcliff",
       "x": 693,
-      "z": 969,
+      "z": 955,
       "r": 40
     }
   ],
   "spawn": {
-    "x": 420,
-    "z": 868
+    "x": 372,
+    "z": 856
   },
   "summary": {
     "zone": "z14_03",
@@ -168,26 +179,26 @@
     "unwalkableShare": 0.009,
     "towns": [
       {
-        "name": "Hollowcross",
-        "kind": "village",
+        "name": "Redcliff",
+        "kind": "town",
         "hub": true,
         "at": [
-          416,
-          880
+          384,
+          864
         ],
-        "radius": 65,
+        "radius": 90,
         "movedFrom": {
           "x": 448,
           "z": 832
         },
         "culture": "halfling",
-        "plots": 15,
-        "streets": 49,
-        "links": 2,
+        "plots": 23,
+        "streets": 79,
+        "links": 5,
         "overlaps": 0
       },
       {
-        "name": "Bolwathold",
+        "name": "Cinder Farm",
         "kind": "village",
         "hub": false,
         "at": [
@@ -265,39 +276,39 @@
     ],
     "roads": 14,
     "bridges": 6,
-    "scatter": 14982,
+    "scatter": 14745,
     "scatterKinds": {
-      "tree_broadleaf": 8036,
-      "bush": 4273,
-      "reed": 1270,
-      "rock_small": 925,
-      "rock_large": 157,
+      "tree_broadleaf": 7885,
+      "bush": 4219,
+      "reed": 1262,
+      "rock_small": 909,
+      "rock_large": 149,
       "tree_dead": 88,
       "boulder": 5,
       "tree_acacia": 228
     },
     "sites": [
-      "settlement(HUB) village Hollowcross 416 880 65",
-      "settlement village Bolwathold 1216 1712 65",
+      "settlement(HUB) town Redcliff 384 864 90",
+      "settlement village Cinder Farm 1216 1712 65",
       "settlement hamlet Ravenhaven 112 224 46",
       "settlement hamlet Minfenrow 1104 1088 46",
       "settlement hamlet Bipetwatch 320 1424 46",
-      "crossing ford Mafil Ford 448 832",
-      "crossing ford Hafe Ford 448 448",
-      "dungeon door_1 Barrow entrance 556 1008  -2.153",
-      "event event_redcliff  693 969 40"
+      "crossing ford Mafil Ford 392 826",
+      "crossing ford Hafe Ford 384 444",
+      "dungeon door_1 Barrow entrance 555 1018  -2.436",
+      "event event_redcliff  693 955 40"
     ],
     "spawn": {
-      "x": 420,
-      "z": 868
+      "x": 372,
+      "z": 856
     },
-    "placements": 352,
-    "vignettesAvoided": 0
+    "placements": 390,
+    "vignettesAvoided": 48
   },
   "files": {
-    "terrain.bin": 6306294,
-    "nav.bin": 1050717,
-    "scatter.bin": 119940,
-    "placements.json": 133193
+    "terrain.bin": 508153,
+    "nav.bin": 31942,
+    "scatter.bin": 118044,
+    "placements.json": 144866
   }
 }

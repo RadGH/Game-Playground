@@ -1,5 +1,5 @@
 {
-  "name": "Fiderow (z11_01)",
+  "name": "Hollin Toll (z11_01)",
   "zone": "z11_01",
   "sheet": {
     "sheet": "torbor_downs",
@@ -63,9 +63,10 @@
     {
       "type": "settlement",
       "kind": "town",
-      "name": "Fiderow",
+      "name": "Hollin Toll",
       "x": 1728,
       "z": 560,
+      "wfName": "Fiderow",
       "hub": true,
       "radius": 90,
       "movedFrom": {
@@ -76,9 +77,10 @@
     {
       "type": "settlement",
       "kind": "hamlet",
-      "name": "Old Mosshearth",
+      "name": "Scree End",
       "x": 112,
       "z": 1472,
+      "wfName": "Old Mosshearth",
       "radius": 46,
       "movedFrom": {
         "x": 64,
@@ -140,7 +142,7 @@
     "unwalkableShare": 0.044,
     "towns": [
       {
-        "name": "Fiderow",
+        "name": "Hollin Toll",
         "kind": "town",
         "hub": true,
         "at": [
@@ -159,7 +161,7 @@
         "overlaps": 0
       },
       {
-        "name": "Old Mosshearth",
+        "name": "Scree End",
         "kind": "hamlet",
         "hub": false,
         "at": [
@@ -199,18 +201,18 @@
     ],
     "roads": 10,
     "bridges": 1,
-    "scatter": 16443,
+    "scatter": 16399,
     "scatterKinds": {
-      "tree_conifer": 9963,
-      "rock_small": 1261,
-      "bush": 2902,
-      "tree_broadleaf": 1015,
-      "rock_large": 1270,
+      "tree_conifer": 9939,
+      "rock_small": 1256,
+      "bush": 2890,
+      "tree_broadleaf": 1013,
+      "rock_large": 1269,
       "boulder": 32
     },
     "sites": [
-      "settlement(HUB) town Fiderow 1728 560 90",
-      "settlement hamlet Old Mosshearth 112 1472 46",
+      "settlement(HUB) town Hollin Toll 1728 560 90",
+      "settlement hamlet Scree End 112 1472 46",
       "settlement hamlet Wolditford 448 880 46",
       "landmark ancientwood The Mihackmo Heartwood 1728 1984",
       "landmark ancientwood The Petmato Heartwood 832 1600",
@@ -222,12 +224,12 @@
       "z": 560
     },
     "placements": 219,
-    "vignettesAvoided": 0
+    "vignettesAvoided": 46
   },
   "files": {
-    "terrain.bin": 6306062,
-    "nav.bin": 1050717,
-    "scatter.bin": 131628,
-    "placements.json": 99355
+    "terrain.bin": 573682,
+    "nav.bin": 40767,
+    "scatter.bin": 131276,
+    "placements.json": 99725
   }
 }

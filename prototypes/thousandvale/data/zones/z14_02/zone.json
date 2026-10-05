@@ -1,5 +1,5 @@
 {
-  "name": "Tideford (z14_02)",
+  "name": "Gullwick (z14_02)",
   "zone": "z14_02",
   "sheet": {
     "sheet": "torbor_downs",
@@ -71,9 +71,10 @@
     {
       "type": "settlement",
       "kind": "town",
-      "name": "Tideford",
+      "name": "Gullwick",
       "x": 1520,
       "z": 352,
+      "wfName": "Tideford",
       "hub": true,
       "radius": 90,
       "movedFrom": {
@@ -84,9 +85,10 @@
     {
       "type": "settlement",
       "kind": "village",
-      "name": "Glimrow",
+      "name": "Ferry Hythe",
       "x": 416,
       "z": 560,
+      "wfName": "Glimrow",
       "radius": 65,
       "movedFrom": {
         "x": 448,
@@ -128,8 +130,12 @@
       "type": "crossing",
       "kind": "ford",
       "name": "Wihot Ford",
-      "x": 1472,
-      "z": 448
+      "x": 1465,
+      "z": 464,
+      "snappedFrom": {
+        "x": 1472,
+        "z": 448
+      }
     },
     {
       "type": "dungeon",
@@ -160,7 +166,7 @@
     "unwalkableShare": 0.018,
     "towns": [
       {
-        "name": "Tideford",
+        "name": "Gullwick",
         "kind": "town",
         "hub": true,
         "at": [
@@ -179,7 +185,7 @@
         "overlaps": 0
       },
       {
-        "name": "Glimrow",
+        "name": "Ferry Hythe",
         "kind": "village",
         "hub": false,
         "at": [
@@ -238,24 +244,24 @@
     ],
     "roads": 11,
     "bridges": 3,
-    "scatter": 20012,
+    "scatter": 19807,
     "scatterKinds": {
-      "bush": 4513,
-      "tree_conifer": 1493,
-      "rock_small": 924,
-      "tree_broadleaf": 9453,
-      "rock_large": 189,
-      "reed": 3205,
+      "bush": 4472,
+      "tree_conifer": 1469,
+      "rock_small": 918,
+      "tree_broadleaf": 9344,
+      "rock_large": 186,
+      "reed": 3183,
       "tree_dead": 234,
       "boulder": 1
     },
     "sites": [
-      "settlement(HUB) town Tideford 1520 352 90",
-      "settlement village Glimrow 416 560 65",
+      "settlement(HUB) town Gullwick 1520 352 90",
+      "settlement village Ferry Hythe 416 560 65",
       "settlement village Wyrmrow 848 1872 65",
       "settlement hamlet Mirekeep 1008 1264 46",
       "landmark ancientwood Old Docktockwood 1984 1088",
-      "crossing ford Wihot Ford 1472 448",
+      "crossing ford Wihot Ford 1465 464",
       "dungeon door_1 Barrow entrance 1623 475  -2.777",
       "event event_gullwick  1272 688 40"
     ],
@@ -264,12 +270,12 @@
       "z": 352
     },
     "placements": 278,
-    "vignettesAvoided": 0
+    "vignettesAvoided": 45
   },
   "files": {
-    "terrain.bin": 6306218,
-    "nav.bin": 1050717,
-    "scatter.bin": 160180,
-    "placements.json": 106816
+    "terrain.bin": 508921,
+    "nav.bin": 36219,
+    "scatter.bin": 158540,
+    "placements.json": 107383
   }
 }

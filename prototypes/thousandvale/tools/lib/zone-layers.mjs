@@ -1,5 +1,6 @@
 // Thousandvale — encoders for the zone side layers (stream B). Decoders: js/rules/terrain-read.js.
-import { SCATTER_VERSION, NAV_VERSION } from '../../js/rules/terrain-read.js';
+import { SCATTER_VERSION, parseTerrain, parseNav } from '../../js/rules/terrain-read.js';
+import { deflateRawSync } from 'node:zlib';
 
 function header(magic, version, meta, payload) {
   const json = new TextEncoder().encode(JSON.stringify(meta));
@@ -25,8 +26,32 @@ export function encodeScatter(items, meta) {
   return out;
 }
 
+/** nav.bin, file version 2: the NAV bits deflated (decoder: parseNav). */
 export function encodeNav(bits, meta) {
-  const { out, off } = header('TVNV', NAV_VERSION, meta, bits.length);
-  out.set(bits, off);
+  const body = deflateRawSync(bits, { level: 9 });
+  const { out, dv, off } = header('TVNV', 2, meta, 4 + body.length);
+  dv.setUint32(off, body.length, true); out.set(body, off + 4);
   return out;
+}
+
+/**
+ * Is a checked-in layer file the same as a fresh bake? terrain.bin / nav.bin are deflated, and deflate's exact
+ * bytes may change with the zlib version even when the layers do not — so those two compare DECODED (meta +
+ * every layer); anything else compares bytes.
+ */
+export function sameLayerFile(name, a, b) {
+  const A = Buffer.from(a), B = Buffer.from(b);
+  if (Buffer.compare(A, B) === 0) return true;
+  try {
+    if (name.endsWith('terrain.bin')) {
+      const x = parseTerrain(A), y = parseTerrain(B);
+      if (JSON.stringify(x.meta) !== JSON.stringify(y.meta)) return false;
+      return ['height', 'waterTop', 'waterKind', 'biome'].every(k => Buffer.compare(Buffer.from(x.layers[k].buffer, x.layers[k].byteOffset, x.layers[k].byteLength), Buffer.from(y.layers[k].buffer, y.layers[k].byteOffset, y.layers[k].byteLength)) === 0);
+    }
+    if (name.endsWith('nav.bin')) {
+      const x = parseNav(A), y = parseNav(B);
+      return JSON.stringify(x.meta) === JSON.stringify(y.meta) && Buffer.compare(Buffer.from(x.bits), Buffer.from(y.bits)) === 0;
+    }
+  } catch { return false; }
+  return false;
 }

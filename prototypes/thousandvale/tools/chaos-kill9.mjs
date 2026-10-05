@@ -3,6 +3,10 @@
 //
 //   node prototypes/thousandvale/tools/chaos-kill9.mjs --kills 500 --db pg      # against thousandvale_dev
 //   node prototypes/thousandvale/tools/chaos-kill9.mjs --kills 20 --db json     # quick, temp file
+//   node prototypes/thousandvale/tools/chaos-kill9.mjs --kills 500 --db pg --scratch   # its OWN throw-away Postgres
+//        cluster (ops/scratch-pg.sh: unix socket only), database thousandvale_chaos_dev — never touches the dev DB
+//   TV_GAME_DIR=<release>/app/prototypes/thousandvale runs a frozen copy (publish-thousandvale.sh --build-only) — use it for
+//   long runs, so an edit in the live tree cannot break a restart halfway through
 //   options: --bots 8 (incl. one trading pair)  --min 2500 --max 6000 (ms between kills)  --process chaos
 //            --out <file.json> (report)  --grace 2600 (ms of loss the journal allows: 2 s commit + a tick)
 //
@@ -32,7 +36,18 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // --- database environment: the dev database only (never stable) ---
 const env = {};
-if (DB === 'pg') {
+const SCRATCH = process.argv.includes('--scratch') && DB === 'pg';
+let scratchDir = null;
+if (SCRATCH) {
+  // a private cluster for this run: start it, make the database, point the server + psql at it
+  const { execFileSync } = await import('node:child_process');
+  scratchDir = mkdtempSync(join(tmpdir(), 'tv-chaos-pg-'));
+  const out = execFileSync(join(HERE, '..', 'ops', 'scratch-pg.sh'), ['start', join(scratchDir, 'pg'), arg('pg-port', '55434')], { encoding: 'utf8' });
+  for (const line of out.split('\n')) { const m = line.match(/^([A-Z_]+)=(.*)$/); if (m) env[m[1]] = m[2]; }
+  execFileSync('createdb', ['thousandvale_chaos_dev'], { env: { ...process.env, ...env } });
+  Object.assign(env, { PGDATABASE: 'thousandvale_chaos_dev', PGPASSWORD: '', DATABASE_URL: '' });
+  process.on('exit', () => { try { execFileSync(join(HERE, '..', 'ops', 'scratch-pg.sh'), ['stop', join(scratchDir, 'pg')]); rmSync(scratchDir, { recursive: true, force: true }); } catch { /* best effort */ } });
+} else if (DB === 'pg') {
   const f = join(homedir(), '.config', 'thousandvale', 'dev.env');
   for (const line of readFileSync(f, 'utf8').split('\n')) { const m = line.match(/^([A-Z_]+)=(.*)$/); if (m) env[m[1]] = m[2]; }
   if (!String(env.PGDATABASE).endsWith('_dev')) throw new Error('chaos runs against a *_dev database only');
@@ -81,7 +96,7 @@ const bots = [];
 const names = Array.from({ length: BOTS }, (_, i) => nm(i));
 for (let i = 0; i < BOTS; i++) {
   const pair = i >= BOTS - 2;   // the last two trade with each other, the second follows the first
-  const o = { url: srv.url, name: names[i], mode: 'fight', radius: 40, seed: 9000 + i, joinTimeout: 30000 };
+  const o = { url: srv.url, name: names[i], mode: 'fight', radius: +arg('radius', 300), seed: 9000 + i, joinTimeout: 30000 };
   if (pair) o.trade = { partner: names[i === BOTS - 2 ? BOTS - 1 : BOTS - 2], lead: i === BOTS - 2 };
   if (pair && i === BOTS - 1) o.follow = names[BOTS - 2];
   bots.push(await startBot(o));
@@ -99,7 +114,14 @@ for (let k = 1; k <= KILLS; k++) {
   const t0 = Date.now();
   try {
     await Promise.all(bots.map((b, i) => b.waitFor(x => x.stats.joins > before[i].joins && x.net.joined, 30000)));
-  } catch (e) { fail(k, 'bots did not all come back: ' + e.message); break; }
+  } catch (e) {
+    fail(k, 'bots did not all come back: ' + e.message);
+    // what the missing bot and the server were doing — a stuck lease, a refusal, a crash loop
+    for (const [i, b] of bots.entries()) if (!(b.stats.joins > before[i].joins && b.net.joined)) console.log(`   ${b.name}: status ${b.net.status}, joins ${b.stats.joins}, kicks ${b.stats.kicks}, lastKick ${JSON.stringify(b.net.lastKick)}, errors ${b.stats.errors}`);
+    console.log('   server log tail:\n' + srv.log().split('\n').slice(-25).map(l => '   | ' + l.slice(0, 300)).join('\n'));
+    report.serverLogTail = srv.log().split('\n').slice(-80);
+    break;
+  }
   const rejoin = Date.now() - t0; maxRejoin = Math.max(maxRejoin, rejoin);
   // the restored truth = each bot's newest reset entry
   const restored = bots.map(b => { const r = [...b.ledger].reverse().find(e => e.type === 'reset'); return { bag: new Set(r.bag), gold: r.gold }; });

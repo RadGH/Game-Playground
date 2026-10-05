@@ -5,30 +5,32 @@
  "placements": [
   {
    "kind": "settlement",
-   "id": "wehackkeep",
+   "id": "hermit_s_rest",
    "x": 1104,
    "z": 560,
    "yaw": 0,
    "data": {
     "kind": "city",
-    "name": "Wehackkeep",
+    "name": "Hermit's Rest",
     "radius": 140,
     "hub": true,
-    "planned": true
+    "planned": true,
+    "wfName": "Wehackkeep"
    }
   },
   {
    "kind": "settlement",
-   "id": "weephaven",
+   "id": "charcoal_burners",
    "x": 256,
    "z": 224,
    "yaw": 0,
    "data": {
     "kind": "village",
-    "name": "Weephaven",
+    "name": "Charcoal Burners",
     "radius": 65,
     "hub": false,
-    "planned": true
+    "planned": true,
+    "wfName": "Weephaven"
    }
   },
   {
@@ -59,8 +61,8 @@
   {
    "kind": "crossing",
    "id": "wiwat_ford",
-   "x": 1344,
-   "z": 192,
+   "x": 1286,
+   "z": 218,
    "yaw": 0,
    "data": {
     "kind": "ford",
@@ -70,8 +72,8 @@
   {
    "kind": "crossing",
    "id": "fahibeck_ford",
-   "x": 1088,
-   "z": 832,
+   "x": 1042,
+   "z": 772,
    "yaw": 0,
    "data": {
     "kind": "ford",
@@ -100,24 +102,24 @@
   },
   {
    "kind": "town_square",
-   "id": "wehackkeep_square",
+   "id": "hermit_s_rest_square",
    "x": 1103.85,
    "z": 553.51,
    "yaw": 0,
    "data": {
     "r": 3.4,
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "culture": "halfling"
    }
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_0",
+   "id": "hermit_s_rest_street_0",
    "x": 1054.89,
    "z": 494.33,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -138,12 +140,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_1",
+   "id": "hermit_s_rest_street_1",
    "x": 1048.49,
    "z": 588.06,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -164,12 +166,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_2",
+   "id": "hermit_s_rest_street_2",
    "x": 1040.69,
    "z": 570.93,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -190,12 +192,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_3",
+   "id": "hermit_s_rest_street_3",
    "x": 1033.2,
    "z": 556.2,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -216,12 +218,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_4",
+   "id": "hermit_s_rest_street_4",
    "x": 1032.77,
    "z": 539.49,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -242,12 +244,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_5",
+   "id": "hermit_s_rest_street_5",
    "x": 1030.01,
    "z": 551.59,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -268,12 +270,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_6",
+   "id": "hermit_s_rest_street_6",
    "x": 1038.1,
    "z": 535.81,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -294,12 +296,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_7",
+   "id": "hermit_s_rest_street_7",
    "x": 1036.86,
    "z": 543.09,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -320,12 +322,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_8",
+   "id": "hermit_s_rest_street_8",
    "x": 1043.9,
    "z": 541.82,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -346,12 +348,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_9",
+   "id": "hermit_s_rest_street_9",
    "x": 1047.9,
    "z": 547.48,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -372,12 +374,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_10",
+   "id": "hermit_s_rest_street_10",
    "x": 1039.38,
    "z": 553.37,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -398,12 +400,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_11",
+   "id": "hermit_s_rest_street_11",
    "x": 1038.86,
    "z": 564.39,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -424,12 +426,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_12",
+   "id": "hermit_s_rest_street_12",
    "x": 1044.19,
    "z": 557.91,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -450,12 +452,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_13",
+   "id": "hermit_s_rest_street_13",
    "x": 1052.72,
    "z": 552.16,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -476,12 +478,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_14",
+   "id": "hermit_s_rest_street_14",
    "x": 1050.53,
    "z": 567.41,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -502,12 +504,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_15",
+   "id": "hermit_s_rest_street_15",
    "x": 1044.33,
    "z": 575.15,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -528,12 +530,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_16",
+   "id": "hermit_s_rest_street_16",
    "x": 1056.51,
    "z": 564.16,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -554,12 +556,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_17",
+   "id": "hermit_s_rest_street_17",
    "x": 1055.77,
    "z": 573.87,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -580,12 +582,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_18",
+   "id": "hermit_s_rest_street_18",
    "x": 1061.28,
    "z": 569.93,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -606,12 +608,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_19",
+   "id": "hermit_s_rest_street_19",
    "x": 1061.11,
    "z": 604.2,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -632,12 +634,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_20",
+   "id": "hermit_s_rest_street_20",
    "x": 1068.99,
    "z": 585.62,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -658,12 +660,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_21",
+   "id": "hermit_s_rest_street_21",
    "x": 1061.36,
    "z": 597.88,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -684,12 +686,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_22",
+   "id": "hermit_s_rest_street_22",
    "x": 1065.05,
    "z": 587.44,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -710,12 +712,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_23",
+   "id": "hermit_s_rest_street_23",
    "x": 1066.97,
    "z": 596.6,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -736,12 +738,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_24",
+   "id": "hermit_s_rest_street_24",
    "x": 1071.57,
    "z": 588.3,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -762,12 +764,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_25",
+   "id": "hermit_s_rest_street_25",
    "x": 1069.56,
    "z": 603.67,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -788,12 +790,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_26",
+   "id": "hermit_s_rest_street_26",
    "x": 1066.09,
    "z": 616.2,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -814,12 +816,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_27",
+   "id": "hermit_s_rest_street_27",
    "x": 1064.47,
    "z": 608.71,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -840,12 +842,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_28",
+   "id": "hermit_s_rest_street_28",
    "x": 1072.17,
    "z": 610.15,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -866,12 +868,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_29",
+   "id": "hermit_s_rest_street_29",
    "x": 1078.79,
    "z": 601.67,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -892,12 +894,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_30",
+   "id": "hermit_s_rest_street_30",
    "x": 1076.97,
    "z": 610.7,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -918,12 +920,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_31",
+   "id": "hermit_s_rest_street_31",
    "x": 1096.41,
    "z": 571.63,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -944,12 +946,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_32",
+   "id": "hermit_s_rest_street_32",
    "x": 1096.36,
    "z": 502.34,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -970,12 +972,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_33",
+   "id": "hermit_s_rest_street_33",
    "x": 1094.36,
    "z": 542.16,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -996,12 +998,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_34",
+   "id": "hermit_s_rest_street_34",
    "x": 1087.94,
    "z": 529.36,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1022,12 +1024,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_35",
+   "id": "hermit_s_rest_street_35",
    "x": 1087.62,
    "z": 516.37,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1048,12 +1050,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_36",
+   "id": "hermit_s_rest_street_36",
    "x": 1086.1,
    "z": 525.69,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1074,12 +1076,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_37",
+   "id": "hermit_s_rest_street_37",
    "x": 1091.51,
    "z": 521.4,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1100,12 +1102,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_38",
+   "id": "hermit_s_rest_street_38",
    "x": 1091.67,
    "z": 536.8,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1126,12 +1128,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_39",
+   "id": "hermit_s_rest_street_39",
    "x": 1094.69,
    "z": 527.3,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1152,12 +1154,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_40",
+   "id": "hermit_s_rest_street_40",
    "x": 1096.57,
    "z": 535.96,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1178,12 +1180,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_41",
+   "id": "hermit_s_rest_street_41",
    "x": 1098.86,
    "z": 551.15,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1204,12 +1206,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_42",
+   "id": "hermit_s_rest_street_42",
    "x": 1098.19,
    "z": 541.64,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1230,12 +1232,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_43",
+   "id": "hermit_s_rest_street_43",
    "x": 1106.54,
    "z": 548.69,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1256,12 +1258,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_44",
+   "id": "hermit_s_rest_street_44",
    "x": 1108.59,
    "z": 517.99,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1282,12 +1284,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_45",
+   "id": "hermit_s_rest_street_45",
    "x": 1127.84,
    "z": 495.5,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1308,12 +1310,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_46",
+   "id": "hermit_s_rest_street_46",
    "x": 1110.65,
    "z": 499.79,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1334,12 +1336,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_47",
+   "id": "hermit_s_rest_street_47",
    "x": 1106.84,
    "z": 510.97,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1360,12 +1362,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_48",
+   "id": "hermit_s_rest_street_48",
    "x": 1113.9,
    "z": 506.21,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1386,12 +1388,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_49",
+   "id": "hermit_s_rest_street_49",
    "x": 1118.9,
    "z": 497.73,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1412,12 +1414,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_50",
+   "id": "hermit_s_rest_street_50",
    "x": 1119.13,
    "z": 506.36,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1438,12 +1440,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_51",
+   "id": "hermit_s_rest_street_51",
    "x": 1131.43,
    "z": 503.84,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1464,12 +1466,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_52",
+   "id": "hermit_s_rest_street_52",
    "x": 1137.64,
    "z": 493.06,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1490,12 +1492,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_53",
+   "id": "hermit_s_rest_street_53",
    "x": 1142.79,
    "z": 502.57,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1516,12 +1518,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_54",
+   "id": "hermit_s_rest_street_54",
    "x": 1138.03,
    "z": 503.76,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1542,12 +1544,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_55",
+   "id": "hermit_s_rest_street_55",
    "x": 1135.31,
    "z": 512.89,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1568,12 +1570,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_56",
+   "id": "hermit_s_rest_street_56",
    "x": 1112.28,
    "z": 532.76,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1594,12 +1596,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_57",
+   "id": "hermit_s_rest_street_57",
    "x": 1120.84,
    "z": 516.5,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1620,12 +1622,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_58",
+   "id": "hermit_s_rest_street_58",
    "x": 1109.9,
    "z": 523.22,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1646,12 +1648,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_59",
+   "id": "hermit_s_rest_street_59",
    "x": 1115.86,
    "z": 517.74,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1672,12 +1674,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_60",
+   "id": "hermit_s_rest_street_60",
    "x": 1116.86,
    "z": 522.73,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1698,12 +1700,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_61",
+   "id": "hermit_s_rest_street_61",
    "x": 1123.17,
    "z": 520.57,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1724,12 +1726,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_62",
+   "id": "hermit_s_rest_street_62",
    "x": 1125.92,
    "z": 515.23,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1750,12 +1752,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_63",
+   "id": "hermit_s_rest_street_63",
    "x": 1127.47,
    "z": 520.82,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1776,12 +1778,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_64",
+   "id": "hermit_s_rest_street_64",
    "x": 1121.2,
    "z": 532.14,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1802,12 +1804,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_65",
+   "id": "hermit_s_rest_street_65",
    "x": 1114.55,
    "z": 541.87,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1828,12 +1830,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_66",
+   "id": "hermit_s_rest_street_66",
    "x": 1117.04,
    "z": 551.84,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1854,12 +1856,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_67",
+   "id": "hermit_s_rest_street_67",
    "x": 1124.63,
    "z": 539.76,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1880,12 +1882,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_68",
+   "id": "hermit_s_rest_street_68",
    "x": 1129.75,
    "z": 530.01,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1906,12 +1908,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_69",
+   "id": "hermit_s_rest_street_69",
    "x": 1134.3,
    "z": 538.76,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1932,12 +1934,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_70",
+   "id": "hermit_s_rest_street_70",
    "x": 1126.63,
    "z": 547.8,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1958,12 +1960,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_71",
+   "id": "hermit_s_rest_street_71",
    "x": 1137.37,
    "z": 545.89,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1984,12 +1986,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_72",
+   "id": "hermit_s_rest_street_72",
    "x": 1143.62,
    "z": 538.99,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2010,12 +2012,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_73",
+   "id": "hermit_s_rest_street_73",
    "x": 1141.31,
    "z": 529.71,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2036,12 +2038,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_74",
+   "id": "hermit_s_rest_street_74",
    "x": 1138.92,
    "z": 520.16,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2062,12 +2064,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_75",
+   "id": "hermit_s_rest_street_75",
    "x": 1141.07,
    "z": 511.45,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2088,12 +2090,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_76",
+   "id": "hermit_s_rest_street_76",
    "x": 1145.94,
    "z": 519.86,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2114,12 +2116,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_77",
+   "id": "hermit_s_rest_street_77",
    "x": 1147.8,
    "z": 529.52,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2140,12 +2142,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_78",
+   "id": "hermit_s_rest_street_78",
    "x": 1152.06,
    "z": 538.17,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2166,12 +2168,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_79",
+   "id": "hermit_s_rest_street_79",
    "x": 1136.61,
    "z": 566.93,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2192,12 +2194,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_80",
+   "id": "hermit_s_rest_street_80",
    "x": 1109.12,
    "z": 587.17,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2218,12 +2220,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_81",
+   "id": "hermit_s_rest_street_81",
    "x": 1115.69,
    "z": 570.87,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2244,12 +2246,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_82",
+   "id": "hermit_s_rest_street_82",
    "x": 1107.93,
    "z": 580.48,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2270,12 +2272,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_83",
+   "id": "hermit_s_rest_street_83",
    "x": 1125.1,
    "z": 569.2,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2296,12 +2298,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_84",
+   "id": "hermit_s_rest_street_84",
    "x": 1117.77,
    "z": 574.08,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2322,12 +2324,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_85",
+   "id": "hermit_s_rest_street_85",
    "x": 1127.29,
    "z": 574.34,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2348,12 +2350,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_86",
+   "id": "hermit_s_rest_street_86",
    "x": 1124.4,
    "z": 586.03,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2374,12 +2376,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_87",
+   "id": "hermit_s_rest_street_87",
    "x": 1110.98,
    "z": 597.68,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2400,12 +2402,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_88",
+   "id": "hermit_s_rest_street_88",
    "x": 1115.22,
    "z": 587.66,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2426,12 +2428,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_89",
+   "id": "hermit_s_rest_street_89",
    "x": 1118.3,
    "z": 597.85,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2452,12 +2454,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_90",
+   "id": "hermit_s_rest_street_90",
    "x": 1127.64,
    "z": 595.51,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2478,12 +2480,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_91",
+   "id": "hermit_s_rest_street_91",
    "x": 1130.59,
    "z": 584.93,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2504,12 +2506,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_92",
+   "id": "hermit_s_rest_street_92",
    "x": 1132.51,
    "z": 595.95,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2530,12 +2532,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_93",
+   "id": "hermit_s_rest_street_93",
    "x": 1142.94,
    "z": 581.79,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2556,12 +2558,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_94",
+   "id": "hermit_s_rest_street_94",
    "x": 1157.92,
    "z": 568.32,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2582,12 +2584,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_95",
+   "id": "hermit_s_rest_street_95",
    "x": 1147.75,
    "z": 567.86,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2608,12 +2610,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_96",
+   "id": "hermit_s_rest_street_96",
    "x": 1143.33,
    "z": 573,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2634,12 +2636,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_97",
+   "id": "hermit_s_rest_street_97",
    "x": 1148.71,
    "z": 571.68,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2660,12 +2662,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_98",
+   "id": "hermit_s_rest_street_98",
    "x": 1158.77,
    "z": 575.78,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2686,12 +2688,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_99",
+   "id": "hermit_s_rest_street_99",
    "x": 1150.15,
    "z": 583.3,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2712,12 +2714,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_100",
+   "id": "hermit_s_rest_street_100",
    "x": 1142.57,
    "z": 590.15,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2738,12 +2740,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_101",
+   "id": "hermit_s_rest_street_101",
    "x": 1151.27,
    "z": 587.4,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2764,12 +2766,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_102",
+   "id": "hermit_s_rest_street_102",
    "x": 1155.94,
    "z": 583.56,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2790,12 +2792,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_103",
+   "id": "hermit_s_rest_street_103",
    "x": 1159.59,
    "z": 589.24,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2816,12 +2818,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_104",
+   "id": "hermit_s_rest_street_104",
    "x": 1088,
    "z": 479.58,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -2838,12 +2840,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_105",
+   "id": "hermit_s_rest_street_105",
    "x": 1088,
    "z": 640.42,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -2860,12 +2862,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_106",
+   "id": "hermit_s_rest_street_106",
    "x": 1095.42,
    "z": 478.45,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -2882,12 +2884,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_107",
+   "id": "hermit_s_rest_street_107",
    "x": 1108.26,
    "z": 531.94,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2904,12 +2906,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_108",
+   "id": "hermit_s_rest_street_108",
    "x": 1115.69,
    "z": 570.87,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2926,12 +2928,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_109",
+   "id": "hermit_s_rest_street_109",
    "x": 1081.23,
    "z": 569.11,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2948,12 +2950,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_110",
+   "id": "hermit_s_rest_street_110",
    "x": 1069.13,
    "z": 565.67,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2970,12 +2972,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_111",
+   "id": "hermit_s_rest_street_111",
    "x": 1061.7,
    "z": 581.02,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2992,12 +2994,12 @@
   },
   {
    "kind": "street",
-   "id": "wehackkeep_street_112",
+   "id": "hermit_s_rest_street_112",
    "x": 1065.05,
    "z": 587.44,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3014,12 +3016,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_0",
+   "id": "hermit_s_rest_plot_0",
    "x": 1045.16,
    "z": 552.55,
    "yaw": 2.1761,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 6.5,
@@ -3031,12 +3033,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_1",
+   "id": "hermit_s_rest_plot_1",
    "x": 1049.71,
    "z": 559.12,
    "yaw": -2.5363,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 6.5,
@@ -3048,12 +3050,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_2",
+   "id": "hermit_s_rest_plot_2",
    "x": 1053.66,
    "z": 546.73,
    "yaw": 0.6053,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 6.52,
@@ -3065,12 +3067,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_3",
+   "id": "hermit_s_rest_plot_3",
    "x": 1058.22,
    "z": 553.32,
    "yaw": -0.9655,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 6.52,
@@ -3082,12 +3084,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_4",
+   "id": "hermit_s_rest_plot_4",
    "x": 1050.26,
    "z": 578.07,
    "yaw": -2.6443,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "forge",
     "district": "residential",
     "w": 6.43,
@@ -3099,12 +3101,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_5",
+   "id": "hermit_s_rest_plot_5",
    "x": 1063.17,
    "z": 564.05,
    "yaw": 0.4973,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "barracks",
     "district": "craft",
     "w": 7.73,
@@ -3116,12 +3118,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_6",
+   "id": "hermit_s_rest_plot_6",
    "x": 1066.96,
    "z": 571.02,
    "yaw": -2.6443,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "hut",
     "district": "craft",
     "w": 7.73,
@@ -3133,12 +3135,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_7",
+   "id": "hermit_s_rest_plot_7",
    "x": 1062.4,
    "z": 592.37,
    "yaw": 2.0038,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 5.31,
@@ -3150,12 +3152,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_8",
+   "id": "hermit_s_rest_plot_8",
    "x": 1076.8,
    "z": 591.45,
    "yaw": -1.1378,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "watchpost",
     "district": "residential",
     "w": 5.66,
@@ -3167,12 +3169,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_9",
+   "id": "hermit_s_rest_plot_9",
    "x": 1067.66,
    "z": 611.95,
    "yaw": -2.9286,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 3.66,
@@ -3184,12 +3186,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_10",
+   "id": "hermit_s_rest_plot_10",
    "x": 1074.74,
    "z": 605.28,
    "yaw": -1.3578,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 5.87,
@@ -3201,12 +3203,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_11",
+   "id": "hermit_s_rest_plot_11",
    "x": 1082.9,
    "z": 613.1,
    "yaw": -1.3578,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "chapel",
     "district": "residential",
     "w": 7.05,
@@ -3218,12 +3220,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_12",
+   "id": "hermit_s_rest_plot_12",
    "x": 1092.31,
    "z": 531.68,
    "yaw": 2.0354,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "hut",
     "district": "craft",
     "w": 4.54,
@@ -3235,12 +3237,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_13",
+   "id": "hermit_s_rest_plot_13",
    "x": 1103.75,
    "z": 543.08,
    "yaw": -1.1062,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "hut",
     "district": "civic",
     "w": 4.92,
@@ -3252,12 +3254,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_14",
+   "id": "hermit_s_rest_plot_14",
    "x": 1107.82,
    "z": 504.97,
    "yaw": 0.2446,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 3.61,
@@ -3269,12 +3271,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_15",
+   "id": "hermit_s_rest_plot_15",
    "x": 1115.69,
    "z": 501.42,
    "yaw": 1.8154,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 4.6,
@@ -3286,12 +3288,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_16",
+   "id": "hermit_s_rest_plot_16",
    "x": 1123.87,
    "z": 499.38,
    "yaw": -1.3262,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 5.44,
@@ -3303,12 +3305,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_17",
+   "id": "hermit_s_rest_plot_17",
    "x": 1125.31,
    "z": 508.53,
    "yaw": -2.897,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "granary",
     "district": "residential",
     "w": 7.09,
@@ -3320,12 +3322,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_18",
+   "id": "hermit_s_rest_plot_18",
    "x": 1134.94,
    "z": 507.19,
    "yaw": 1.8154,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 4.01,
@@ -3337,12 +3339,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_19",
+   "id": "hermit_s_rest_plot_19",
    "x": 1113.78,
    "z": 527.14,
    "yaw": -2.897,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "hut",
     "district": "craft",
     "w": 4.44,
@@ -3354,12 +3356,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_20",
+   "id": "hermit_s_rest_plot_20",
    "x": 1132.58,
    "z": 522.81,
    "yaw": -1.3262,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "hut",
     "district": "craft",
     "w": 5.41,
@@ -3371,12 +3373,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_21",
+   "id": "hermit_s_rest_plot_21",
    "x": 1117.01,
    "z": 536.6,
    "yaw": 0.2446,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "hut",
     "district": "civic",
     "w": 6.13,
@@ -3388,12 +3390,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_22",
+   "id": "hermit_s_rest_plot_22",
    "x": 1119.35,
    "z": 545.94,
    "yaw": -2.897,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "warehouse",
     "district": "civic",
     "w": 6.13,
@@ -3405,12 +3407,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_23",
+   "id": "hermit_s_rest_plot_23",
    "x": 1126.43,
    "z": 534.37,
    "yaw": 1.8154,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "hut",
     "district": "craft",
     "w": 4.91,
@@ -3422,12 +3424,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_24",
+   "id": "hermit_s_rest_plot_24",
    "x": 1134.95,
    "z": 532.24,
    "yaw": 1.8154,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "hut",
     "district": "craft",
     "w": 5.36,
@@ -3439,12 +3441,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_25",
+   "id": "hermit_s_rest_plot_25",
    "x": 1129.72,
    "z": 542.86,
    "yaw": 1.8154,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "hut",
     "district": "craft",
     "w": 7.17,
@@ -3456,12 +3458,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_26",
+   "id": "hermit_s_rest_plot_26",
    "x": 1146.41,
    "z": 513.48,
    "yaw": -1.3262,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 5.62,
@@ -3473,12 +3475,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_27",
+   "id": "hermit_s_rest_plot_27",
    "x": 1142.9,
    "z": 524.25,
    "yaw": 1.8154,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 4.53,
@@ -3490,12 +3492,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_28",
+   "id": "hermit_s_rest_plot_28",
    "x": 1144.93,
    "z": 533.81,
    "yaw": 1.8154,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 3.84,
@@ -3507,12 +3509,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_29",
+   "id": "hermit_s_rest_plot_29",
    "x": 1148.46,
    "z": 543.73,
    "yaw": 1.8154,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "inn",
     "district": "residential",
     "w": 5.89,
@@ -3524,12 +3526,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_30",
+   "id": "hermit_s_rest_plot_30",
    "x": 1110.97,
    "z": 575.16,
    "yaw": 0.1755,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "mill",
     "district": "civic",
     "w": 6.63,
@@ -3541,12 +3543,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_31",
+   "id": "hermit_s_rest_plot_31",
    "x": 1122.08,
    "z": 578.87,
    "yaw": -2.9661,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "stable",
     "district": "craft",
     "w": 5.61,
@@ -3558,12 +3560,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_32",
+   "id": "hermit_s_rest_plot_32",
    "x": 1131.5,
    "z": 578.19,
    "yaw": -2.9661,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "hut",
     "district": "craft",
     "w": 5.76,
@@ -3575,12 +3577,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_33",
+   "id": "hermit_s_rest_plot_33",
    "x": 1120.37,
    "z": 590.65,
    "yaw": -2.9661,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "shrine",
     "district": "craft",
     "w": 5.27,
@@ -3592,12 +3594,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_34",
+   "id": "hermit_s_rest_plot_34",
    "x": 1114.81,
    "z": 602.09,
    "yaw": 1.7463,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 4.8,
@@ -3609,12 +3611,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_35",
+   "id": "hermit_s_rest_plot_35",
    "x": 1122.72,
    "z": 600.68,
    "yaw": -1.3953,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 4.15,
@@ -3626,12 +3628,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_36",
+   "id": "hermit_s_rest_plot_36",
    "x": 1152.41,
    "z": 577.09,
    "yaw": -1.6153,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "market",
     "district": "residential",
     "w": 6.67,
@@ -3643,12 +3645,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_37",
+   "id": "hermit_s_rest_plot_37",
    "x": 1162.06,
    "z": 571.64,
    "yaw": -0.0445,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 5.01,
@@ -3660,12 +3662,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_38",
+   "id": "hermit_s_rest_plot_38",
    "x": 1145.74,
    "z": 586.06,
    "yaw": 3.0971,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 4.77,
@@ -3677,12 +3679,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_39",
+   "id": "hermit_s_rest_plot_39",
    "x": 1145.36,
    "z": 594.57,
    "yaw": 3.0971,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "house",
     "district": "residential",
     "w": 4.77,
@@ -3694,12 +3696,12 @@
   },
   {
    "kind": "building",
-   "id": "wehackkeep_plot_40",
+   "id": "hermit_s_rest_plot_40",
    "x": 1154.63,
    "z": 593.52,
    "yaw": 1.5263,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "want": "hall",
     "district": "residential",
     "w": 6.06,
@@ -3711,12 +3713,12 @@
   },
   {
    "kind": "town_wall",
-   "id": "wehackkeep_wall",
+   "id": "hermit_s_rest_wall",
    "x": 1104,
    "z": 560,
    "yaw": 0,
    "data": {
-    "town": "wehackkeep",
+    "town": "hermit_s_rest",
     "radius": 82,
     "gates": [
      {
@@ -3736,24 +3738,24 @@
   },
   {
    "kind": "town_square",
-   "id": "weephaven_square",
+   "id": "charcoal_burners_square",
    "x": 251.76,
    "z": 223.1,
    "yaw": 0,
    "data": {
     "r": 3.16,
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "culture": "halfling"
    }
   },
   {
    "kind": "street",
-   "id": "weephaven_street_0",
+   "id": "charcoal_burners_street_0",
    "x": 269.03,
    "z": 170.98,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -3774,12 +3776,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_1",
+   "id": "charcoal_burners_street_1",
    "x": 205.83,
    "z": 209.01,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -3800,12 +3802,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_2",
+   "id": "charcoal_burners_street_2",
    "x": 233.43,
    "z": 182.89,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3826,12 +3828,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_3",
+   "id": "charcoal_burners_street_3",
    "x": 219.04,
    "z": 186.28,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3852,12 +3854,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_4",
+   "id": "charcoal_burners_street_4",
    "x": 210.57,
    "z": 197.44,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3878,12 +3880,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_5",
+   "id": "charcoal_burners_street_5",
    "x": 222.68,
    "z": 192.8,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3904,12 +3906,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_6",
+   "id": "charcoal_burners_street_6",
    "x": 247.68,
    "z": 181.78,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3930,12 +3932,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_7",
+   "id": "charcoal_burners_street_7",
    "x": 237.04,
    "z": 192.75,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3956,12 +3958,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_8",
+   "id": "charcoal_burners_street_8",
    "x": 243.82,
    "z": 182.03,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3982,12 +3984,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_9",
+   "id": "charcoal_burners_street_9",
    "x": 241.03,
    "z": 193.72,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4008,12 +4010,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_10",
+   "id": "charcoal_burners_street_10",
    "x": 249.27,
    "z": 188.07,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4034,12 +4036,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_11",
+   "id": "charcoal_burners_street_11",
    "x": 252.92,
    "z": 181.43,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4060,12 +4062,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_12",
+   "id": "charcoal_burners_street_12",
    "x": 254.39,
    "z": 188.88,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4086,12 +4088,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_13",
+   "id": "charcoal_burners_street_13",
    "x": 249.7,
    "z": 194.52,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4112,12 +4114,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_14",
+   "id": "charcoal_burners_street_14",
    "x": 255.86,
    "z": 192.07,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4138,12 +4140,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_15",
+   "id": "charcoal_burners_street_15",
    "x": 211.97,
    "z": 248.14,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4164,12 +4166,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_16",
+   "id": "charcoal_burners_street_16",
    "x": 246.74,
    "z": 216.55,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4190,12 +4192,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_17",
+   "id": "charcoal_burners_street_17",
    "x": 218.85,
    "z": 227.33,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4216,12 +4218,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_18",
+   "id": "charcoal_burners_street_18",
    "x": 227.13,
    "z": 218.47,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4242,12 +4244,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_19",
+   "id": "charcoal_burners_street_19",
    "x": 233.82,
    "z": 217.81,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4268,12 +4270,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_20",
+   "id": "charcoal_burners_street_20",
    "x": 241.65,
    "z": 217.05,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4294,12 +4296,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_21",
+   "id": "charcoal_burners_street_21",
    "x": 235.67,
    "z": 227.53,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4320,12 +4322,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_22",
+   "id": "charcoal_burners_street_22",
    "x": 220.13,
    "z": 240.5,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4346,12 +4348,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_23",
+   "id": "charcoal_burners_street_23",
    "x": 224.31,
    "z": 228.63,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4372,12 +4374,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_24",
+   "id": "charcoal_burners_street_24",
    "x": 219.41,
    "z": 233.12,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4398,12 +4400,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_25",
+   "id": "charcoal_burners_street_25",
    "x": 225.93,
    "z": 231.37,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4424,12 +4426,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_26",
+   "id": "charcoal_burners_street_26",
    "x": 230.25,
    "z": 241.11,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4450,12 +4452,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_27",
+   "id": "charcoal_burners_street_27",
    "x": 237.79,
    "z": 235.2,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4476,12 +4478,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_28",
+   "id": "charcoal_burners_street_28",
    "x": 249.02,
    "z": 227.59,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4502,12 +4504,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_29",
+   "id": "charcoal_burners_street_29",
    "x": 255.35,
    "z": 215.72,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4528,12 +4530,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_30",
+   "id": "charcoal_burners_street_30",
    "x": 248.22,
    "z": 219.32,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4554,12 +4556,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_31",
+   "id": "charcoal_burners_street_31",
    "x": 257.14,
    "z": 222.29,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4580,12 +4582,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_32",
+   "id": "charcoal_burners_street_32",
    "x": 249.7,
    "z": 234.54,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4606,12 +4608,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_33",
+   "id": "charcoal_burners_street_33",
    "x": 252.99,
    "z": 228.59,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4632,12 +4634,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_34",
+   "id": "charcoal_burners_street_34",
    "x": 254.39,
    "z": 235.4,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4658,12 +4660,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_35",
+   "id": "charcoal_burners_street_35",
    "x": 230.52,
    "z": 251.79,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4684,12 +4686,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_36",
+   "id": "charcoal_burners_street_36",
    "x": 213.03,
    "z": 257.47,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4710,12 +4712,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_37",
+   "id": "charcoal_burners_street_37",
    "x": 223.53,
    "z": 250.93,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4736,12 +4738,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_38",
+   "id": "charcoal_burners_street_38",
    "x": 223.79,
    "z": 260.29,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4762,12 +4764,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_39",
+   "id": "charcoal_burners_street_39",
    "x": 216.58,
    "z": 259.4,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4784,12 +4786,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_40",
+   "id": "charcoal_burners_street_40",
    "x": 241.4,
    "z": 253.14,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4810,12 +4812,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_41",
+   "id": "charcoal_burners_street_41",
    "x": 230.66,
    "z": 261.59,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4836,12 +4838,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_42",
+   "id": "charcoal_burners_street_42",
    "x": 249.72,
    "z": 254.16,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4862,12 +4864,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_43",
+   "id": "charcoal_burners_street_43",
    "x": 241.69,
    "z": 262.72,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4888,12 +4890,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_44",
+   "id": "charcoal_burners_street_44",
    "x": 250.36,
    "z": 261.47,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4914,12 +4916,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_45",
+   "id": "charcoal_burners_street_45",
    "x": 257.53,
    "z": 255.13,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4940,12 +4942,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_46",
+   "id": "charcoal_burners_street_46",
    "x": 255.74,
    "z": 263.36,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4966,12 +4968,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_47",
+   "id": "charcoal_burners_street_47",
    "x": 284.89,
    "z": 211.58,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -4992,12 +4994,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_48",
+   "id": "charcoal_burners_street_48",
    "x": 279.67,
    "z": 188.41,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5018,12 +5020,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_49",
+   "id": "charcoal_burners_street_49",
    "x": 285.02,
    "z": 179.99,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5044,12 +5046,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_50",
+   "id": "charcoal_burners_street_50",
    "x": 282.77,
    "z": 196,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5070,12 +5072,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_51",
+   "id": "charcoal_burners_street_51",
    "x": 289.9,
    "z": 189.31,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5096,12 +5098,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_52",
+   "id": "charcoal_burners_street_52",
    "x": 289.43,
    "z": 197.43,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5122,12 +5124,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_53",
+   "id": "charcoal_burners_street_53",
    "x": 294.8,
    "z": 242.56,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5148,12 +5150,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_54",
+   "id": "charcoal_burners_street_54",
    "x": 292.55,
    "z": 227.37,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5174,12 +5176,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_55",
+   "id": "charcoal_burners_street_55",
    "x": 292.91,
    "z": 216.6,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5200,12 +5202,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_56",
+   "id": "charcoal_burners_street_56",
    "x": 296.87,
    "z": 226.63,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5226,12 +5228,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_57",
+   "id": "charcoal_burners_street_57",
    "x": 294.26,
    "z": 231.05,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5252,12 +5254,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_58",
+   "id": "charcoal_burners_street_58",
    "x": 300.24,
    "z": 230.53,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5278,12 +5280,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_59",
+   "id": "charcoal_burners_street_59",
    "x": 305.93,
    "z": 241.78,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5300,12 +5302,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_60",
+   "id": "charcoal_burners_street_60",
    "x": 296.69,
    "z": 247.08,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5326,12 +5328,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_61",
+   "id": "charcoal_burners_street_61",
    "x": 300.24,
    "z": 192,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -5348,12 +5350,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_62",
+   "id": "charcoal_burners_street_62",
    "x": 211.76,
    "z": 192,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -5370,12 +5372,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_63",
+   "id": "charcoal_burners_street_63",
    "x": 208.19,
    "z": 197.62,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -5392,12 +5394,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_64",
+   "id": "charcoal_burners_street_64",
    "x": 238.43,
    "z": 251.04,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5414,12 +5416,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_65",
+   "id": "charcoal_burners_street_65",
    "x": 236.81,
    "z": 207.28,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5436,12 +5438,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_66",
+   "id": "charcoal_burners_street_66",
    "x": 235.94,
    "z": 203.27,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5458,12 +5460,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_67",
+   "id": "charcoal_burners_street_67",
    "x": 230.55,
    "z": 190.49,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5480,12 +5482,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_68",
+   "id": "charcoal_burners_street_68",
    "x": 269.03,
    "z": 170.98,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5502,12 +5504,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_69",
+   "id": "charcoal_burners_street_69",
    "x": 284.89,
    "z": 211.58,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5524,12 +5526,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_70",
+   "id": "charcoal_burners_street_70",
    "x": 292.91,
    "z": 216.6,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5546,12 +5548,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_71",
+   "id": "charcoal_burners_street_71",
    "x": 289.55,
    "z": 204.14,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5568,12 +5570,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_72",
+   "id": "charcoal_burners_street_72",
    "x": 303.33,
    "z": 239.72,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5590,12 +5592,12 @@
   },
   {
    "kind": "street",
-   "id": "weephaven_street_73",
+   "id": "charcoal_burners_street_73",
    "x": 287.95,
    "z": 186.22,
    "yaw": 0,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -5612,12 +5614,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_0",
+   "id": "charcoal_burners_plot_0",
    "x": 216.65,
    "z": 201.08,
    "yaw": -2.8555,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "inn",
     "district": "residential",
     "w": 8.42,
@@ -5629,12 +5631,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_1",
+   "id": "charcoal_burners_plot_1",
    "x": 225.41,
    "z": 187.56,
    "yaw": 0.2861,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "house",
     "district": "residential",
     "w": 7,
@@ -5646,12 +5648,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_2",
+   "id": "charcoal_burners_plot_2",
    "x": 228.21,
    "z": 197.05,
    "yaw": -2.8555,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "market",
     "district": "residential",
     "w": 7,
@@ -5663,12 +5665,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_3",
+   "id": "charcoal_burners_plot_3",
    "x": 239.84,
    "z": 186.82,
    "yaw": 1.6369,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "shrine",
     "district": "residential",
     "w": 5.17,
@@ -5680,12 +5682,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_4",
+   "id": "charcoal_burners_plot_4",
    "x": 245.06,
    "z": 197.29,
    "yaw": 1.6369,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "hut",
     "district": "craft",
     "w": 3.71,
@@ -5697,12 +5699,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_5",
+   "id": "charcoal_burners_plot_5",
    "x": 258.06,
    "z": 183.72,
    "yaw": 0.0661,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "house",
     "district": "residential",
     "w": 6.24,
@@ -5714,12 +5716,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_6",
+   "id": "charcoal_burners_plot_6",
    "x": 259.4,
    "z": 196.58,
    "yaw": -3.0755,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "hut",
     "district": "craft",
     "w": 5.27,
@@ -5731,12 +5733,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_7",
+   "id": "charcoal_burners_plot_7",
    "x": 222.29,
    "z": 222.05,
    "yaw": 1.6679,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "hut",
     "district": "craft",
     "w": 6.67,
@@ -5748,12 +5750,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_8",
+   "id": "charcoal_burners_plot_8",
    "x": 238.03,
    "z": 220.52,
    "yaw": -1.4737,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "hut",
     "district": "civic",
     "w": 4.33,
@@ -5765,12 +5767,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_9",
+   "id": "charcoal_burners_plot_9",
    "x": 230.66,
    "z": 235.01,
    "yaw": 1.6679,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "hut",
     "district": "craft",
     "w": 7.51,
@@ -5782,12 +5784,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_10",
+   "id": "charcoal_burners_plot_10",
    "x": 224.93,
    "z": 244.41,
    "yaw": -3.0445,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "house",
     "district": "residential",
     "w": 7.61,
@@ -5799,12 +5801,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_11",
+   "id": "charcoal_burners_plot_11",
    "x": 242.09,
    "z": 230.27,
    "yaw": 0.0971,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "mill",
     "district": "civic",
     "w": 8.32,
@@ -5816,12 +5818,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_12",
+   "id": "charcoal_burners_plot_12",
    "x": 243.1,
    "z": 240.62,
    "yaw": -3.0445,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "forge",
     "district": "craft",
     "w": 8.32,
@@ -5833,12 +5835,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_13",
+   "id": "charcoal_burners_plot_13",
    "x": 259.18,
    "z": 239.39,
    "yaw": -3.0445,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "hut",
     "district": "civic",
     "w": 4.86,
@@ -5850,12 +5852,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_14",
+   "id": "charcoal_burners_plot_14",
    "x": 217.77,
    "z": 253.39,
    "yaw": 1.4479,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "house",
     "district": "residential",
     "w": 7.22,
@@ -5867,12 +5869,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_15",
+   "id": "charcoal_burners_plot_15",
    "x": 235.39,
    "z": 256.6,
    "yaw": -1.6937,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "stable",
     "district": "residential",
     "w": 6.97,
@@ -5884,12 +5886,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_16",
+   "id": "charcoal_burners_plot_16",
    "x": 234.25,
    "z": 265.79,
    "yaw": 3.0187,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "house",
     "district": "residential",
     "w": 6.97,
@@ -5901,12 +5903,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_17",
+   "id": "charcoal_burners_plot_17",
    "x": 245.01,
    "z": 257.74,
    "yaw": -0.1229,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "house",
     "district": "residential",
     "w": 4.18,
@@ -5918,12 +5920,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_18",
+   "id": "charcoal_burners_plot_18",
    "x": 243.89,
    "z": 266.8,
    "yaw": -1.6937,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "house",
     "district": "residential",
     "w": 4.18,
@@ -5935,12 +5937,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_19",
+   "id": "charcoal_burners_plot_19",
    "x": 253.42,
    "z": 257.62,
    "yaw": -0.1229,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "house",
     "district": "residential",
     "w": 3.92,
@@ -5952,12 +5954,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_20",
+   "id": "charcoal_burners_plot_20",
    "x": 259,
    "z": 267.5,
    "yaw": 3.0187,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "house",
     "district": "residential",
     "w": 3.77,
@@ -5969,12 +5971,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_21",
+   "id": "charcoal_burners_plot_21",
    "x": 282.02,
    "z": 183.48,
    "yaw": 1.8094,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "house",
     "district": "residential",
     "w": 3.79,
@@ -5986,12 +5988,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_22",
+   "id": "charcoal_burners_plot_22",
    "x": 285.74,
    "z": 191.89,
    "yaw": 1.5894,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "house",
     "district": "residential",
     "w": 4.88,
@@ -6003,12 +6005,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_23",
+   "id": "charcoal_burners_plot_23",
    "x": 285.55,
    "z": 200.85,
    "yaw": -3.123,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "house",
     "district": "residential",
     "w": 4.16,
@@ -6020,12 +6022,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_24",
+   "id": "charcoal_burners_plot_24",
    "x": 294.13,
    "z": 200.69,
    "yaw": -1.5522,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "house",
     "district": "residential",
     "w": 5.55,
@@ -6037,12 +6039,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_25",
+   "id": "charcoal_burners_plot_25",
    "x": 299.5,
    "z": 218.2,
    "yaw": -1.1351,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "granary",
     "district": "residential",
     "w": 7.12,
@@ -6054,12 +6056,12 @@
   },
   {
    "kind": "building",
-   "id": "weephaven_plot_26",
+   "id": "charcoal_burners_plot_26",
    "x": 305.69,
    "z": 231.94,
    "yaw": -2.7059,
    "data": {
-    "town": "weephaven",
+    "town": "charcoal_burners",
     "want": "house",
     "district": "residential",
     "w": 7.49,
@@ -12109,7 +12111,7 @@
   },
   {
    "kind": "road",
-   "id": "spur_wehackkeep",
+   "id": "spur_hermit_s_rest",
    "x": 1089.34,
    "z": 420.77,
    "yaw": 0,
@@ -12133,7 +12135,7 @@
   },
   {
    "kind": "road",
-   "id": "spur_weephaven",
+   "id": "spur_charcoal_burners",
    "x": 199.09,
    "z": 192.6,
    "yaw": 0,

@@ -1,5 +1,5 @@
 {
-  "name": "Hollowwick (z14_01)",
+  "name": "Saltmouth (z14_01)",
   "zone": "z14_01",
   "sheet": {
     "sheet": "torbor_downs",
@@ -54,91 +54,134 @@
   "sites": [
     {
       "type": "settlement",
-      "kind": "hamlet",
-      "name": "Hollowwick",
-      "x": 1120,
-      "z": 1808,
+      "kind": "town",
+      "name": "Saltmouth",
+      "x": 880,
+      "z": 1616,
+      "wfName": "Hollowwick",
+      "grownFrom": "hamlet",
       "hub": true,
-      "radius": 46,
+      "radius": 90,
       "movedFrom": {
         "x": 960,
         "z": 1984
       }
     },
     {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Gull Steps",
+      "x": 282,
+      "z": 1266,
+      "ask": true,
+      "askR": 40,
+      "radius": 46
+    },
+    {
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 1005,
-      "z": 1683,
-      "yaw": 1.245
+      "x": 855,
+      "z": 1804,
+      "yaw": 2.294
     },
     {
       "type": "event",
       "id": "event_saltmouth",
-      "x": 1072,
-      "z": 1416,
+      "x": 844,
+      "z": 1372,
       "r": 40
     }
   ],
   "spawn": {
-    "x": 1120,
-    "z": 1804
+    "x": 872,
+    "z": 1620
+  },
+  "theme": {
+    "kind": "shore",
+    "lakes": [
+      {
+        "name": "the Salt Mere",
+        "kind": "shore",
+        "x": 1034,
+        "z": 1066,
+        "r": 320,
+        "level": 62.86
+      }
+    ],
+    "fen": null
   },
   "summary": {
     "zone": "z14_01",
     "province": "Petbeck Basin",
     "inputHash": "4bce3b89",
     "rivers": 1,
-    "wetShare": 0,
-    "unwalkableShare": 0,
+    "wetShare": 0.077,
+    "unwalkableShare": 0.054,
     "towns": [
       {
-        "name": "Hollowwick",
-        "kind": "hamlet",
+        "name": "Saltmouth",
+        "kind": "town",
         "hub": true,
         "at": [
-          1120,
-          1808
+          880,
+          1616
         ],
-        "radius": 46,
+        "radius": 90,
         "movedFrom": {
           "x": 960,
           "z": 1984
         },
         "culture": "halfling",
-        "plots": 8,
-        "streets": 27,
+        "plots": 21,
+        "streets": 50,
+        "links": 0,
+        "overlaps": 0
+      },
+      {
+        "name": "Gull Steps",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          282,
+          1266
+        ],
+        "radius": 46,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 12,
+        "streets": 47,
         "links": 0,
         "overlaps": 0
       }
     ],
     "roads": 1,
     "bridges": 0,
-    "scatter": 5755,
+    "scatter": 5223,
     "scatterKinds": {
-      "rock_small": 942,
-      "bush": 2971,
-      "tree_broadleaf": 1420,
-      "tree_conifer": 414,
-      "rock_large": 8
+      "rock_small": 858,
+      "bush": 2696,
+      "tree_broadleaf": 1247,
+      "tree_conifer": 413,
+      "rock_large": 9
     },
     "sites": [
-      "settlement(HUB) hamlet Hollowwick 1120 1808 46",
-      "dungeon door_1 Barrow entrance 1005 1683  1.245",
-      "event event_saltmouth  1072 1416 40"
+      "settlement(HUB) town Saltmouth 880 1616 90",
+      "settlement hamlet Gull Steps 282 1266 46",
+      "dungeon door_1 Barrow entrance 855 1804  2.294",
+      "event event_saltmouth  844 1372 40"
     ],
     "spawn": {
-      "x": 1120,
-      "z": 1804
+      "x": 872,
+      "z": 1620
     },
-    "placements": 40,
-    "vignettesAvoided": 0
+    "placements": 138,
+    "vignettesAvoided": 43
   },
   "files": {
-    "terrain.bin": 6305598,
-    "nav.bin": 1050717,
-    "scatter.bin": 46124,
-    "placements.json": 15773
+    "terrain.bin": 462969,
+    "nav.bin": 9020,
+    "scatter.bin": 41868,
+    "placements.json": 46790
   }
 }

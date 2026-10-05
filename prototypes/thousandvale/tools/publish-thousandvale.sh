@@ -59,7 +59,7 @@ if [[ "${TV_SKIP_TESTS:-0}" == 1 ]]; then
   [[ $BUILD_ONLY == 1 ]] || { echo "TV_SKIP_TESTS is only for --build-only (testing this script)"; exit 2; }
   echo "   SKIPPED (TV_SKIP_TESTS=1, --build-only)"; TESTS=""
 else
-TESTS=$(cd "$TMP/prototypes/thousandvale" && ls tests/*/*.test.js 2>/dev/null | grep -v -E '^tests/load/|/bots[0-9]+\.test\.js$' || true)
+TESTS=$(cd "$TMP/prototypes/thousandvale" && ls tests/*/*.test.js tests/*/*.test.mjs 2>/dev/null | grep -v -E '^tests/(load|e2e)/|/bots[0-9]+\.test\.js$' || true)
 if [[ -n "$TESTS" ]]; then
   (cd "$TMP/prototypes/thousandvale" && node --test --test-concurrency=4 $TESTS > "$TMP/test.log" 2>&1) \
     || { grep -E '^not ok|# (pass|fail)' "$TMP/test.log" | head -20; echo "refusing: unit tests fail at $SHORT (full log: rerun them)"; exit 1; }

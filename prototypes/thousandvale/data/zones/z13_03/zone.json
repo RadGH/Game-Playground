@@ -1,5 +1,5 @@
 {
-  "name": "Wedanhold (z13_03)",
+  "name": "Millbrook (z13_03)",
   "zone": "z13_03",
   "sheet": {
     "sheet": "torbor_downs",
@@ -63,9 +63,10 @@
     {
       "type": "settlement",
       "kind": "city",
-      "name": "Wedanhold",
+      "name": "Millbrook",
       "x": 544,
       "z": 1648,
+      "wfName": "Wedanhold",
       "hub": true,
       "radius": 140,
       "movedFrom": {
@@ -76,9 +77,10 @@
     {
       "type": "settlement",
       "kind": "town",
-      "name": "Ironwatch",
+      "name": "Three Wheels",
       "x": 1664,
       "z": 1248,
+      "wfName": "Ironwatch",
       "radius": 90,
       "movedFrom": {
         "x": 1728,
@@ -121,15 +123,23 @@
       "type": "crossing",
       "kind": "ford",
       "name": "Temack Ford",
-      "x": 1728,
-      "z": 1472
+      "x": 1731,
+      "z": 1388,
+      "snappedFrom": {
+        "x": 1728,
+        "z": 1472
+      }
     },
     {
       "type": "crossing",
       "kind": "ford",
       "name": "Totfowe Ford",
-      "x": 64,
-      "z": 1472
+      "x": 41,
+      "z": 1365,
+      "snappedFrom": {
+        "x": 64,
+        "z": 1472
+      }
     },
     {
       "type": "dungeon",
@@ -160,7 +170,7 @@
     "unwalkableShare": 0.004,
     "towns": [
       {
-        "name": "Wedanhold",
+        "name": "Millbrook",
         "kind": "city",
         "hub": true,
         "at": [
@@ -179,7 +189,7 @@
         "overlaps": 0
       },
       {
-        "name": "Ironwatch",
+        "name": "Three Wheels",
         "kind": "town",
         "hub": false,
         "at": [
@@ -254,25 +264,25 @@
     ],
     "roads": 15,
     "bridges": 5,
-    "scatter": 13358,
+    "scatter": 13273,
     "scatterKinds": {
-      "bush": 4913,
-      "rock_small": 1064,
-      "tree_broadleaf": 6520,
+      "bush": 4876,
+      "rock_small": 1059,
+      "tree_broadleaf": 6478,
       "boulder": 27,
       "rock_large": 191,
       "reed": 499,
       "tree_dead": 45,
-      "tree_acacia": 99
+      "tree_acacia": 98
     },
     "sites": [
-      "settlement(HUB) city Wedanhold 544 1648 140",
-      "settlement town Ironwatch 1664 1248 90",
+      "settlement(HUB) city Millbrook 544 1648 140",
+      "settlement town Three Wheels 1664 1248 90",
       "settlement village Stormrow 1072 144 65",
       "settlement hamlet Ravencross 448 432 46",
       "settlement hamlet Wildmere 1600 576 46",
-      "crossing ford Temack Ford 1728 1472",
-      "crossing ford Totfowe Ford 64 1472",
+      "crossing ford Temack Ford 1731 1388",
+      "crossing ford Totfowe Ford 41 1365",
       "dungeon door_1 Barrow entrance 314 1641  1.824",
       "event event_millbrook  784 1336 40"
     ],
@@ -281,12 +291,12 @@
       "z": 1656
     },
     "placements": 394,
-    "vignettesAvoided": 0
+    "vignettesAvoided": 52
   },
   "files": {
-    "terrain.bin": 6306226,
-    "nav.bin": 1050717,
-    "scatter.bin": 106948,
-    "placements.json": 156452
+    "terrain.bin": 540441,
+    "nav.bin": 27786,
+    "scatter.bin": 106268,
+    "placements.json": 157127
   }
 }

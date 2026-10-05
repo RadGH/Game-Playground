@@ -5,30 +5,32 @@
  "placements": [
   {
    "kind": "settlement",
-   "id": "hollowcross",
-   "x": 416,
-   "z": 880,
+   "id": "redcliff",
+   "x": 384,
+   "z": 864,
    "yaw": 0,
    "data": {
-    "kind": "village",
-    "name": "Hollowcross",
-    "radius": 65,
+    "kind": "town",
+    "name": "Redcliff",
+    "radius": 90,
     "hub": true,
-    "planned": true
+    "planned": true,
+    "wfName": "Hollowcross"
    }
   },
   {
    "kind": "settlement",
-   "id": "bolwathold",
+   "id": "cinder_farm",
    "x": 1216,
    "z": 1712,
    "yaw": 0,
    "data": {
     "kind": "village",
-    "name": "Bolwathold",
+    "name": "Cinder Farm",
     "radius": 65,
     "hub": false,
-    "planned": true
+    "planned": true,
+    "wfName": "Bolwathold"
    }
   },
   {
@@ -76,8 +78,8 @@
   {
    "kind": "crossing",
    "id": "mafil_ford",
-   "x": 448,
-   "z": 832,
+   "x": 392,
+   "z": 826,
    "yaw": 0,
    "data": {
     "kind": "ford",
@@ -87,8 +89,8 @@
   {
    "kind": "crossing",
    "id": "hafe_ford",
-   "x": 448,
-   "z": 448,
+   "x": 384,
+   "z": 444,
    "yaw": 0,
    "data": {
     "kind": "ford",
@@ -98,9 +100,9 @@
   {
    "kind": "dungeon_door",
    "id": "door_1",
-   "x": 556,
-   "z": 1008,
-   "yaw": -2.153,
+   "x": 555,
+   "z": 1018,
+   "yaw": -2.436,
    "data": {
     "name": "Barrow entrance"
    }
@@ -109,7 +111,7 @@
    "kind": "event_site",
    "id": "event_redcliff",
    "x": 693,
-   "z": 969,
+   "z": 955,
    "yaw": 0,
    "data": {
     "r": 40
@@ -117,969 +119,1697 @@
   },
   {
    "kind": "town_square",
-   "id": "hollowcross_square",
-   "x": 409.63,
-   "z": 893.66,
+   "id": "redcliff_square",
+   "x": 379.52,
+   "z": 870.53,
    "yaw": 0,
    "data": {
-    "r": 3.35,
-    "town": "hollowcross",
+    "r": 4.46,
+    "town": "redcliff",
     "culture": "halfling"
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_0",
-   "x": 435.78,
-   "z": 917.05,
+   "id": "redcliff_street_0",
+   "x": 409.9,
+   "z": 912.52,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "main",
     "width": 5,
     "pts": [
      [
-      435.78,
-      917.05
+      409.9,
+      912.52
      ],
      [
-      419.58,
-      878.64
+      388.69,
+      862.23
      ],
      [
-      406.29,
-      839.14
+      371.29,
+      810.49
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_1",
-   "x": 457.99,
-   "z": 878.91,
+   "id": "redcliff_street_1",
+   "x": 437.1,
+   "z": 867.77,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "lane",
     "width": 3.2,
     "pts": [
      [
-      457.99,
-      878.91
+      437.1,
+      867.77
      ],
      [
-      447.49,
-      885.23
+      420.7,
+      873.25
      ],
      [
-      435.94,
-      890.3
+      403.74,
+      876.57
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_2",
-   "x": 452.46,
-   "z": 899.81,
+   "id": "redcliff_street_2",
+   "x": 422.88,
+   "z": 893.82,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      452.46,
-      899.81
+      422.88,
+      893.82
      ],
      [
-      448.77,
-      895.38
+      419.23,
+      886.7
      ],
      [
-      445.48,
-      890.63
+      416.22,
+      879.3
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_3",
-   "x": 456.11,
-   "z": 892.46,
+   "id": "redcliff_street_3",
+   "x": 431.38,
+   "z": 889.23,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      456.11,
-      892.46
+      431.38,
+      889.23
      ],
      [
-      454.94,
-      890.7
+      428.73,
+      882.37
      ],
      [
-      452.22,
-      886.14
+      426.43,
+      875.39
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_4",
-   "x": 457.1,
-   "z": 888.65,
+   "id": "redcliff_street_4",
+   "x": 435.36,
+   "z": 879.1,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      457.1,
-      888.65
+      435.36,
+      879.1
      ],
      [
-      455.77,
-      889.45
+      432.61,
+      880.14
+     ],
+     [
+      429.83,
+      881.08
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_5",
-   "x": 453.39,
-   "z": 890.3,
+   "id": "redcliff_street_5",
+   "x": 427.15,
+   "z": 881.22,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      453.39,
-      890.3
+      427.15,
+      881.22
      ],
      [
-      451.52,
-      891.62
+      423.97,
+      882.54
      ],
      [
-      449.52,
-      892.74
+      420.68,
+      883.53
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_6",
-   "x": 447.93,
-   "z": 861.32,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      447.93,
-      861.32
-     ],
-     [
-      437.6,
-      866.64
-     ],
-     [
-      426.83,
-      871
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_7",
-   "x": 443.41,
-   "z": 880.22,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      443.41,
-      880.22
-     ],
-     [
-      439.96,
-      875.26
-     ],
-     [
-      436.66,
-      870.2
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_8",
-   "x": 448.85,
-   "z": 869.04,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      448.85,
-      869.04
-     ],
-     [
-      444.74,
-      871.49
-     ],
-     [
-      440.92,
-      874.38
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_9",
-   "x": 440.27,
-   "z": 877.7,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      440.27,
-      877.7
-     ],
-     [
-      437.47,
-      879.63
-     ],
-     [
-      434.63,
-      881.5
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_10",
-   "x": 443.01,
-   "z": 852.54,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      443.01,
-      852.54
-     ],
-     [
-      432.53,
-      855.89
-     ],
-     [
-      422.56,
-      860.54
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_11",
-   "x": 431.74,
-   "z": 865.95,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      431.74,
-      865.95
-     ],
-     [
-      430.46,
-      862.91
-     ],
-     [
-      429.34,
-      859.82
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_12",
-   "x": 437.4,
-   "z": 863.74,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      437.4,
-      863.74
-     ],
-     [
-      436.13,
-      860.7
-     ],
-     [
-      435,
-      857.6
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_13",
-   "x": 427.59,
-   "z": 856.64,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      427.59,
-      856.64
-     ],
-     [
-      425.18,
-      851.03
-     ],
-     [
-      423.15,
-      845.27
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_14",
-   "x": 433.77,
-   "z": 854.22,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      433.77,
-      854.22
-     ],
-     [
-      431.67,
-      848.49
-     ],
-     [
-      429.33,
-      842.86
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_15",
-   "x": 437.74,
-   "z": 844.06,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      437.74,
-      844.06
-     ],
-     [
-      435.73,
-      844.89
-     ],
-     [
-      431.98,
-      846.27
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_16",
-   "x": 431.3,
-   "z": 851.27,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      431.3,
-      851.27
-     ],
-     [
-      429.42,
-      852.09
-     ],
-     [
-      427.48,
-      852.76
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_17",
-   "x": 423.93,
-   "z": 850.85,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      423.93,
-      850.85
-     ],
-     [
-      421.72,
-      851.81
-     ],
-     [
-      419.45,
-      852.6
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_18",
-   "x": 411.12,
-   "z": 869.75,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "lane",
-    "width": 3.2,
-    "pts": [
-     [
-      411.12,
-      869.75
-     ],
-     [
-      393.75,
-      874.96
-     ],
-     [
-      376.08,
-      878.99
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_19",
-   "x": 410.15,
-   "z": 885.27,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      410.15,
-      885.27
-     ],
-     [
-      396.33,
-      890.94
-     ],
-     [
-      383.16,
-      897.99
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_20",
-   "x": 404.61,
-   "z": 916.1,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      404.61,
-      916.1
-     ],
-     [
-      401.06,
-      905.3
-     ],
-     [
-      396.85,
-      894.74
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_21",
-   "x": 414.27,
-   "z": 896.71,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      414.27,
-      896.71
-     ],
-     [
-      407.57,
-      899.14
-     ],
-     [
-      400.88,
-      901.58
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_22",
-   "x": 411.53,
-   "z": 913.59,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      411.53,
-      913.59
-     ],
-     [
-      408.89,
-      907.2
-     ],
-     [
-      406.81,
-      900.6
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_23",
+   "id": "redcliff_street_6",
    "x": 418.01,
-   "z": 907.01,
+   "z": 888.26,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
       418.01,
-      907.01
+      888.26
      ],
      [
-      414.69,
-      908.02
+      415.59,
+      889.93
      ],
      [
-      411.49,
-      909.37
+      413.04,
+      891.4
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_24",
-   "x": 407.75,
-   "z": 907.27,
+   "id": "redcliff_street_7",
+   "x": 429.44,
+   "z": 845.85,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      407.75,
-      907.27
+      429.44,
+      845.85
      ],
      [
-      405.66,
-      908.14
+      413.83,
+      848.93
      ],
      [
-      403.5,
-      908.81
+      398.31,
+      852.5
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_25",
-   "x": 406.53,
-   "z": 898.35,
+   "id": "redcliff_street_8",
+   "x": 417.76,
+   "z": 866.41,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      406.53,
-      898.35
+      417.76,
+      866.41
      ],
      [
-      405.47,
-      895.17
+      415.16,
+      859.27
      ],
      [
-      404.25,
-      892.06
+      413.36,
+      851.89
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_26",
-   "x": 397.7,
-   "z": 901.34,
+   "id": "redcliff_street_9",
+   "x": 430.03,
+   "z": 857.64,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      397.7,
-      901.34
+      430.03,
+      857.64
      ],
      [
-      392.97,
-      902.73
+      423.94,
+      859.56
+     ],
+     [
+      417.81,
+      861.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_10",
+   "x": 426.85,
+   "z": 863.65,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      426.85,
+      863.65
+     ],
+     [
+      426.21,
+      861.93
+     ],
+     [
+      425.79,
+      860.15
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_11",
+   "x": 421.13,
+   "z": 859.12,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      421.13,
+      859.12
+     ],
+     [
+      419.69,
+      854.77
+     ],
+     [
+      418.47,
+      850.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_12",
+   "x": 413.42,
+   "z": 857.33,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      413.42,
+      857.33
+     ],
+     [
+      407.69,
+      858.93
+     ],
+     [
+      402.05,
+      860.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_13",
+   "x": 408.1,
+   "z": 869.34,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      408.1,
+      869.34
+     ],
+     [
+      406.69,
+      865.21
+     ],
+     [
+      405.57,
+      861
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_14",
+   "x": 405.86,
+   "z": 858.34,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      405.86,
+      858.34
+     ],
+     [
+      405.32,
+      856.42
+     ],
+     [
+      404.7,
+      854.52
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_15",
+   "x": 421.63,
+   "z": 823.89,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      421.63,
+      823.89
+     ],
+     [
+      409.4,
+      825.04
+     ],
+     [
+      395.54,
+      825.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_16",
+   "x": 416.5,
+   "z": 845.44,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      416.5,
+      845.44
+     ],
+     [
+      416.16,
+      835.55
+     ],
+     [
+      415.03,
+      825.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_17",
+   "x": 423.97,
+   "z": 833.95,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      423.97,
+      833.95
+     ],
+     [
+      420.59,
+      834.33
+     ],
+     [
+      417.19,
+      834.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_18",
+   "x": 413.99,
+   "z": 831.97,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      413.99,
+      831.97
+     ],
+     [
+      405.08,
+      833.13
+     ],
+     [
+      396.1,
+      833.3
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_19",
+   "x": 408.26,
+   "z": 846.05,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      408.26,
+      846.05
+     ],
+     [
+      407.48,
+      840.08
+     ],
+     [
+      407.37,
+      834.07
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_20",
+   "x": 414.6,
+   "z": 840.16,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      414.6,
+      840.16
+     ],
+     [
+      411.94,
+      840.22
+     ],
+     [
+      409.3,
+      840.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_21",
+   "x": 406.31,
+   "z": 839.19,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      406.31,
+      839.19
+     ],
+     [
+      401.46,
+      839.7
+     ],
+     [
+      396.59,
+      839.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_22",
+   "x": 402.12,
+   "z": 831.25,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      402.12,
+      831.25
+     ],
+     [
+      401.95,
+      828.98
+     ],
+     [
+      401.78,
+      826.71
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_23",
+   "x": 407.64,
+   "z": 830.84,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      407.64,
+      830.84
+     ],
+     [
+      407.37,
+      828.58
+     ],
+     [
+      407.3,
+      826.3
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_24",
+   "x": 415.15,
+   "z": 822.96,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      415.15,
+      822.96
+     ],
+     [
+      414.55,
+      818.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_25",
+   "x": 404.19,
+   "z": 823.78,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      404.19,
+      823.78
+     ],
+     [
+      404.07,
+      819.02
+     ],
+     [
+      403.48,
+      814.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_26",
+   "x": 378.41,
+   "z": 858.41,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      378.41,
+      858.41
+     ],
+     [
+      356.76,
+      868.08
+     ],
+     [
+      336.37,
+      880.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_27",
+   "x": 368.78,
+   "z": 916.68,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      368.78,
+      916.68
+     ],
+     [
+      360.29,
+      896.63
+     ],
+     [
+      351.77,
+      876.59
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_28",
+   "x": 388.02,
+   "z": 882.64,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      388.02,
+      882.64
+     ],
+     [
+      374.86,
+      888.72
+     ],
+     [
+      361.91,
+      895.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_29",
+   "x": 378.52,
+   "z": 911.37,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      378.52,
+      911.37
+     ],
+     [
+      374.27,
+      902.1
+     ],
+     [
+      369.65,
+      893
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_30",
+   "x": 390.96,
+   "z": 888.73,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      390.96,
+      888.73
+     ],
+     [
+      381.82,
+      892.5
+     ],
+     [
+      373.18,
+      897.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_31",
+   "x": 384.66,
+   "z": 908.41,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      384.66,
+      908.41
+     ],
+     [
+      381.65,
+      902.48
+     ],
+     [
+      378.88,
+      896.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_32",
+   "x": 394.07,
+   "z": 895.16,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      394.07,
+      895.16
+     ],
+     [
+      388.22,
+      898
+     ],
+     [
+      382.37,
+      900.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_33",
+   "x": 391.3,
+   "z": 905.2,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      391.3,
+      905.2
+     ],
+     [
+      389.8,
+      902.19
+     ],
+     [
+      388.38,
+      899.15
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_34",
+   "x": 389.39,
+   "z": 896.18,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      389.39,
+      896.18
      ],
      [
       388.45,
-      904.7
+      894.22
+     ],
+     [
+      387.5,
+      892.26
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_27",
-   "x": 399.83,
-   "z": 907.21,
+   "id": "redcliff_street_35",
+   "x": 381.29,
+   "z": 904.26,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      399.83,
-      907.21
+      381.29,
+      904.26
      ],
      [
-      395.21,
-      908.9
+      379.31,
+      905.08
      ],
      [
-      390.59,
-      910.57
+      377.43,
+      906.12
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_28",
-   "x": 398.18,
-   "z": 918.03,
+   "id": "redcliff_street_36",
+   "x": 385.11,
+   "z": 889.69,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      398.18,
-      918.03
+      385.11,
+      889.69
      ],
      [
-      396.73,
-      914.24
+      384.37,
+      887.97
      ],
      [
-      395.28,
-      910.04
+      383.48,
+      886.32
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_29",
-   "x": 392.74,
-   "z": 908.61,
+   "id": "redcliff_street_37",
+   "x": 378.96,
+   "z": 892.66,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      392.74,
-      908.61
+      378.96,
+      892.66
      ],
      [
-      392.14,
-      906.84
+      378.18,
+      890.96
      ],
      [
-      391.47,
-      905.1
+      377.33,
+      889.29
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_30",
-   "x": 390.43,
-   "z": 902.49,
+   "id": "redcliff_street_38",
+   "x": 373.5,
+   "z": 903.95,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      390.43,
-      902.49
+      373.5,
+      903.95
      ],
      [
-      389.42,
-      900.15
+      370.47,
+      905.33
      ],
      [
-      388.69,
-      897.71
+      367.51,
+      906.85
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_31",
-   "x": 391.72,
-   "z": 891.07,
+   "id": "redcliff_street_39",
+   "x": 370.11,
+   "z": 896.95,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      391.72,
-      891.07
+      370.11,
+      896.95
      ],
      [
-      389.9,
-      888.35
+      367.11,
+      898.38
      ],
      [
-      388.2,
-      885.56
+      364.13,
+      899.84
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_32",
-   "x": 397.59,
-   "z": 887.32,
+   "id": "redcliff_street_40",
+   "x": 372.85,
+   "z": 888.47,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      397.59,
-      887.32
+      372.85,
+      888.47
      ],
      [
-      395.84,
-      884.56
+      368.79,
+      880.59
      ],
      [
-      394.07,
-      881.81
+      365.15,
+      872.52
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_33",
-   "x": 391.62,
-   "z": 871.92,
+   "id": "redcliff_street_41",
+   "x": 384.24,
+   "z": 874.81,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      391.62,
-      871.92
+      384.24,
+      874.81
      ],
      [
-      389.96,
-      862.86
+      377.7,
+      878.37
      ],
      [
-      387.6,
-      853.96
+      370.85,
+      881.28
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_34",
-   "x": 406.3,
-   "z": 860.31,
+   "id": "redcliff_street_42",
+   "x": 382.22,
+   "z": 883.95,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      406.3,
-      860.31
+      382.22,
+      883.95
      ],
      [
-      399.09,
-      861.2
+      381.03,
+      881.25
      ],
      [
-      391.85,
-      861.67
+      379.65,
+      878.64
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_35",
-   "x": 396.76,
-   "z": 869.2,
+   "id": "redcliff_street_43",
+   "x": 378.07,
+   "z": 876.18,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      396.76,
-      869.2
+      378.07,
+      876.18
      ],
      [
-      396.64,
-      865.87
+      376.38,
+      872.05
      ],
      [
-      396.14,
-      862.59
+      374.19,
+      868.16
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_36",
-   "x": 401.34,
-   "z": 859.46,
+   "id": "redcliff_street_44",
+   "x": 369.26,
+   "z": 884.08,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      401.34,
-      859.46
+      369.26,
+      884.08
      ],
      [
-      401.07,
-      855.98
+      364.2,
+      886.79
      ],
      [
-      400.69,
+      358.93,
+      889.07
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_45",
+   "x": 368.52,
+   "z": 890.56,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      368.52,
+      890.56
+     ],
+     [
+      367.72,
+      888.63
+     ],
+     [
+      366.7,
+      886.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_46",
+   "x": 365.86,
+   "z": 884.24,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      365.86,
+      884.24
+     ],
+     [
+      363.21,
+      879.49
+     ],
+     [
+      361.14,
+      874.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_47",
+   "x": 366.11,
+   "z": 877.57,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      366.11,
+      877.57
+     ],
+     [
+      365.33,
+      877.91
+     ],
+     [
+      364.58,
+      878.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_48",
+   "x": 362.54,
+   "z": 880.62,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      362.54,
+      880.62
+     ],
+     [
+      359.49,
+      882.28
+     ],
+     [
+      356.3,
+      883.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_49",
+   "x": 358.65,
+   "z": 903.75,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      358.65,
+      903.75
+     ],
+     [
+      355.5,
+      904.57
+     ],
+     [
+      352.31,
+      905.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_50",
+   "x": 356.32,
+   "z": 893.77,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      356.32,
+      893.77
+     ],
+     [
+      353.12,
+      894.42
+     ],
+     [
+      349.97,
+      895.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_51",
+   "x": 356.89,
+   "z": 862.91,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      356.89,
+      862.91
+     ],
+     [
+      347.12,
+      850.02
+     ],
+     [
+      338.07,
+      836.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_52",
+   "x": 363.18,
+   "z": 839.25,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      363.18,
+      839.25
+     ],
+     [
+      356.45,
+      843.77
+     ],
+     [
+      349.26,
+      847.53
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_53",
+   "x": 363.46,
+   "z": 855.64,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      363.46,
+      855.64
+     ],
+     [
+      359.93,
+      850.36
+     ],
+     [
+      356.97,
+      844.74
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_54",
+   "x": 367.98,
+   "z": 847.32,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      367.98,
+      847.32
+     ],
+     [
+      365.13,
+      849.08
+     ],
+     [
+      362.22,
+      850.75
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_55",
+   "x": 359.62,
+   "z": 852,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      359.62,
+      852
+     ],
+     [
+      356.79,
+      853.71
+     ],
+     [
+      353.93,
+      855.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_56",
+   "x": 357.86,
+   "z": 840.63,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      357.86,
+      840.63
+     ],
+     [
+      354.73,
+      835.21
+     ],
+     [
+      351.47,
+      829.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_57",
+   "x": 360.31,
+   "z": 834.43,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      360.31,
+      834.43
+     ],
+     [
+      358.6,
+      835.56
+     ],
+     [
+      356.79,
+      836.53
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_58",
+   "x": 353.28,
+   "z": 835.22,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      353.28,
+      835.22
+     ],
+     [
+      349.14,
+      837.8
+     ],
+     [
+      344.9,
+      840.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_59",
+   "x": 344.36,
+   "z": 851.06,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      344.36,
+      851.06
+     ],
+     [
+      338.43,
+      856.05
+     ],
+     [
+      333.11,
+      861.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_60",
+   "x": 349.32,
+   "z": 864.18,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      349.32,
+      864.18
+     ],
+     [
+      345.58,
+      859.87
+     ],
+     [
+      341.49,
+      855.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_61",
+   "x": 348.06,
+   "z": 854.98,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      348.06,
+      854.98
+     ],
+     [
+      346.6,
+      856.39
+     ],
+     [
+      345.1,
+      857.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_62",
+   "x": 343.2,
+   "z": 859.63,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      343.2,
+      859.63
+     ],
+     [
+      339.88,
+      862.48
+     ],
+     [
+      336.84,
+      865.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_63",
+   "x": 335.97,
+   "z": 856.86,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      335.97,
+      856.86
+     ],
+     [
+      331.62,
+      852.73
+     ],
+     [
+      330.47,
+      851.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_64",
+   "x": 340.12,
+   "z": 846.58,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      340.12,
+      846.58
+     ],
+     [
+      336.87,
+      849.43
+     ],
+     [
+      333.84,
       852.51
      ]
     ]
@@ -1087,25 +1817,135 @@
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_37",
-   "x": 387.66,
-   "z": 863.91,
+   "id": "redcliff_street_65",
+   "x": 331.51,
+   "z": 854.22,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      387.66,
-      863.91
+      331.51,
+      854.22
      ],
      [
-      381.47,
-      866.04
+      330.04,
+      855.54
      ],
      [
-      375.82,
+      329.59,
+      855.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_66",
+   "x": 344.19,
+   "z": 826.05,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      344.19,
+      826.05
+     ],
+     [
+      351.47,
+      829.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_67",
+   "x": 428.73,
+   "z": 832,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      428.73,
+      832
+     ],
+     [
+      423.97,
+      833.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_68",
+   "x": 435.45,
+   "z": 844.55,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      435.45,
+      844.55
+     ],
+     [
+      429.44,
+      845.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_69",
+   "x": 365.64,
+   "z": 915.84,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      365.64,
+      915.84
+     ],
+     [
+      368,
+      914.84
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "redcliff_street_70",
+   "x": 438.99,
+   "z": 862.83,
+   "yaw": 0,
+   "data": {
+    "town": "redcliff",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      438.99,
+      862.83
+     ],
+     [
+      437.1,
       867.77
      ]
     ]
@@ -1113,529 +1953,591 @@
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_38",
-   "x": 382.62,
-   "z": 873.04,
+   "id": "redcliff_street_71",
+   "x": 358.65,
+   "z": 903.75,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      382.62,
-      873.04
+      358.65,
+      903.75
      ],
      [
-      381.6,
-      870.26
-     ],
-     [
-      380.79,
-      867.42
+      362.6,
+      902.08
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_39",
-   "x": 380.84,
-   "z": 864.85,
+   "id": "redcliff_street_72",
+   "x": 356.76,
+   "z": 868.08,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      380.84,
-      864.85
+      356.76,
+      868.08
      ],
      [
-      379.51,
-      860.98
-     ],
-     [
-      379.16,
-      859.83
+      361.14,
+      874.46
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_40",
-   "x": 379.4,
-   "z": 900.6,
+   "id": "redcliff_street_73",
+   "x": 356.89,
+   "z": 862.91,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
-    "cls": "main",
-    "width": 5,
-    "pts": [
-     [
-      379.4,
-      900.6
-     ],
-     [
-      383.16,
-      897.99
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_41",
-   "x": 382.25,
-   "z": 905,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "main",
-    "width": 5,
-    "pts": [
-     [
-      382.25,
-      905
-     ],
-     [
-      379.4,
-      900.6
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_42",
-   "x": 397.59,
-   "z": 887.32,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      397.59,
-      887.32
+      356.89,
+      862.91
      ],
      [
-      398.68,
-      889.98
+      358.79,
+      867.17
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_43",
-   "x": 419.58,
-   "z": 878.64,
+   "id": "redcliff_street_74",
+   "x": 388.69,
+   "z": 862.23,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      419.58,
-      878.64
+      388.69,
+      862.23
      ],
      [
-      410.15,
-      885.27
+      378.41,
+      858.41
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_44",
-   "x": 411.12,
-   "z": 869.75,
+   "id": "redcliff_street_75",
+   "x": 403.74,
+   "z": 876.57,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      411.12,
-      869.75
+      403.74,
+      876.57
      ],
      [
-      416.03,
-      868.1
+      396.1,
+      879.79
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_45",
-   "x": 391.62,
-   "z": 871.92,
+   "id": "redcliff_street_76",
+   "x": 426.43,
+   "z": 875.39,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      391.62,
-      871.92
+      426.43,
+      875.39
      ],
      [
-      392.39,
-      875.27
+      425.21,
+      871.74
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_46",
-   "x": 419.45,
-   "z": 852.6,
+   "id": "redcliff_street_77",
+   "x": 408.1,
+   "z": 869.34,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      419.45,
-      852.6
+      408.1,
+      869.34
      ],
      [
-      411.7,
-      855.21
+      409.3,
+      875.48
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowcross_street_47",
-   "x": 435.94,
-   "z": 890.3,
+   "id": "redcliff_street_78",
+   "x": 416.5,
+   "z": 845.44,
    "yaw": 0,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      435.94,
-      890.3
+      416.5,
+      845.44
      ],
      [
-      426.22,
-      894.4
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "hollowcross_street_48",
-   "x": 436.66,
-   "z": 870.2,
-   "yaw": 0,
-   "data": {
-    "town": "hollowcross",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      436.66,
-      870.2
-     ],
-     [
-      435.56,
-      867.47
+      417.06,
+      848.29
      ]
     ]
    }
   },
   {
    "kind": "building",
-   "id": "hollowcross_plot_0",
-   "x": 447.01,
-   "z": 874.86,
-   "yaw": -0.9779,
+   "id": "redcliff_plot_0",
+   "x": 431.31,
+   "z": 876.49,
+   "yaw": 0.3431,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "want": "house",
     "district": "residential",
-    "w": 8.36,
-    "d": 3.67,
-    "angle": 2.5487,
-    "front": 2.5487,
-    "streetGap": -0.27
+    "w": 4.67,
+    "d": 4.14,
+    "angle": 2.7985,
+    "front": 7.5109,
+    "streetGap": -0.29
    }
   },
   {
    "kind": "building",
-   "id": "hollowcross_plot_1",
-   "x": 434.83,
-   "z": 875.71,
-   "yaw": 2.1637,
+   "id": "redcliff_plot_1",
+   "x": 425.64,
+   "z": 887.2,
+   "yaw": -2.7985,
    "data": {
-    "town": "hollowcross",
-    "want": "stable",
+    "town": "redcliff",
+    "want": "house",
+    "district": "residential",
+    "w": 5.67,
+    "d": 6.49,
+    "angle": 2.7985,
+    "front": 4.3693,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_2",
+   "x": 413.18,
+   "z": 886.11,
+   "yaw": 0.5631,
+   "data": {
+    "town": "redcliff",
+    "want": "house",
+    "district": "residential",
+    "w": 4.68,
+    "d": 5.16,
+    "angle": 2.5785,
+    "front": 7.2909,
+    "streetGap": -0.16
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_3",
+   "x": 424.67,
+   "z": 853.26,
+   "yaw": 0.2943,
+   "data": {
+    "town": "redcliff",
+    "want": "hall",
+    "district": "residential",
+    "w": 6.53,
+    "d": 7.97,
+    "angle": 2.8473,
+    "front": 7.5596,
+    "streetGap": -0.29
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_4",
+   "x": 411.53,
+   "z": 863.74,
+   "yaw": 1.8651,
+   "data": {
+    "town": "redcliff",
+    "want": "market",
+    "district": "craft",
+    "w": 6.13,
+    "d": 7.52,
+    "angle": 2.8473,
+    "front": 5.9888,
+    "streetGap": -0.22
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_5",
+   "x": 421.19,
+   "z": 842.36,
+   "yaw": -1.4965,
+   "data": {
+    "town": "redcliff",
+    "want": "house",
     "district": "residential",
     "w": 5.6,
-    "d": 5.9,
-    "angle": 2.5487,
-    "front": 5.6903,
-    "streetGap": -0.36
+    "d": 4.24,
+    "angle": 3.0673,
+    "front": 3.0673,
+    "streetGap": -0.11
    }
   },
   {
    "kind": "building",
-   "id": "hollowcross_plot_2",
-   "x": 441.08,
-   "z": 858.76,
-   "yaw": -1.1979,
+   "id": "redcliff_plot_6",
+   "x": 420.87,
+   "z": 838.14,
+   "yaw": -3.0673,
    "data": {
-    "town": "hollowcross",
-    "want": "granary",
-    "district": "residential",
-    "w": 6.94,
-    "d": 5.39,
-    "angle": 2.7687,
-    "front": 2.7687,
-    "streetGap": -0.26
-   }
-  },
-  {
-   "kind": "building",
-   "id": "hollowcross_plot_3",
-   "x": 426.93,
-   "z": 864.3,
-   "yaw": 1.9437,
-   "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "want": "house",
     "district": "residential",
-    "w": 4.19,
-    "d": 5.39,
-    "angle": 2.7687,
-    "front": 5.9103,
+    "w": 5.6,
+    "d": 4.24,
+    "angle": 3.0673,
+    "front": 4.638,
     "streetGap": -0.4
    }
   },
   {
    "kind": "building",
-   "id": "hollowcross_plot_4",
-   "x": 437.39,
-   "z": 849.12,
-   "yaw": -2.7687,
+   "id": "redcliff_plot_7",
+   "x": 411.66,
+   "z": 836.44,
+   "yaw": 0.0743,
    "data": {
-    "town": "hollowcross",
-    "want": "market",
-    "district": "residential",
-    "w": 6.79,
-    "d": 5.68,
-    "angle": 2.7687,
-    "front": 4.3395,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
-   "id": "hollowcross_plot_5",
-   "x": 423.13,
-   "z": 855.41,
-   "yaw": -2.7687,
-   "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
     "want": "house",
     "district": "residential",
-    "w": 3.6,
-    "d": 4.34,
-    "angle": 2.7687,
-    "front": 4.3395,
+    "w": 4.12,
+    "d": 4.18,
+    "angle": 3.0673,
+    "front": 7.7796,
     "streetGap": -0.4
    }
   },
   {
    "kind": "building",
-   "id": "hollowcross_plot_6",
-   "x": 412.85,
-   "z": 902.96,
-   "yaw": 0.3484,
+   "id": "redcliff_plot_8",
+   "x": 401.76,
+   "z": 843.66,
+   "yaw": -3.0673,
    "data": {
-    "town": "hollowcross",
+    "town": "redcliff",
+    "want": "chapel",
+    "district": "residential",
+    "w": 8.54,
+    "d": 4.54,
+    "angle": 3.0673,
+    "front": 4.638,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_9",
+   "x": 398.79,
+   "z": 819.41,
+   "yaw": 0.0743,
+   "data": {
+    "town": "redcliff",
     "want": "forge",
+    "district": "residential",
+    "w": 6.23,
+    "d": 8.32,
+    "angle": 3.0673,
+    "front": 7.7796,
+    "streetGap": -0.05
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_10",
+   "x": 393.44,
+   "z": 900.44,
+   "yaw": -2.6917,
+   "data": {
+    "town": "redcliff",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.51,
+    "d": 5.52,
+    "angle": 2.6917,
+    "front": 4.2625,
+    "streetGap": -0.39
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_11",
+   "x": 386.56,
+   "z": 903.76,
+   "yaw": 2.0207,
+   "data": {
+    "town": "redcliff",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.8,
+    "d": 5.52,
+    "angle": 2.6917,
+    "front": 5.8333,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_12",
+   "x": 372.69,
+   "z": 909.92,
+   "yaw": -2.6917,
+   "data": {
+    "town": "redcliff",
+    "want": "house",
+    "district": "residential",
+    "w": 5.45,
+    "d": 6.49,
+    "angle": 2.6917,
+    "front": 4.2625,
+    "streetGap": -0.25
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_13",
+   "x": 368.8,
+   "z": 901.87,
+   "yaw": 0.4499,
+   "data": {
+    "town": "redcliff",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.45,
+    "d": 4.29,
+    "angle": 2.6917,
+    "front": 7.4041,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_14",
+   "x": 376.31,
+   "z": 883.53,
+   "yaw": 0.4499,
+   "data": {
+    "town": "redcliff",
+    "want": "hut",
     "district": "civic",
-    "w": 5.73,
-    "d": 7.36,
-    "angle": 2.7932,
-    "front": 7.5056,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
-   "id": "hollowcross_plot_7",
-   "x": 401.82,
-   "z": 896.5,
-   "yaw": 0.3484,
-   "data": {
-    "town": "hollowcross",
-    "want": "hut",
-    "district": "civic",
-    "w": 4.03,
-    "d": 5.49,
-    "angle": 2.7932,
-    "front": 7.5056,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
-   "id": "hollowcross_plot_8",
-   "x": 393.54,
-   "z": 898.65,
-   "yaw": 0.3484,
-   "data": {
-    "town": "hollowcross",
-    "want": "hut",
-    "district": "craft",
-    "w": 4.78,
-    "d": 3.89,
-    "angle": 2.7932,
-    "front": 7.5056,
-    "streetGap": -0.28
-   }
-  },
-  {
-   "kind": "building",
-   "id": "hollowcross_plot_9",
-   "x": 399.8,
-   "z": 882.02,
-   "yaw": -1.0024,
-   "data": {
-    "town": "hollowcross",
-    "want": "hut",
-    "district": "craft",
-    "w": 6.01,
-    "d": 5.33,
-    "angle": 2.5732,
-    "front": 2.5732,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
-   "id": "hollowcross_plot_10",
-   "x": 386.97,
-   "z": 890.22,
-   "yaw": 2.1392,
-   "data": {
-    "town": "hollowcross",
-    "want": "hut",
-    "district": "craft",
-    "w": 3.56,
-    "d": 5.33,
-    "angle": 2.5732,
-    "front": 5.7148,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
-   "id": "hollowcross_plot_11",
-   "x": 404.18,
-   "z": 865.16,
-   "yaw": -3.0476,
-   "data": {
-    "town": "hollowcross",
-    "want": "house",
-    "district": "residential",
-    "w": 3.92,
-    "d": 5.44,
-    "angle": 3.0476,
-    "front": 4.6184,
-    "streetGap": -0.26
-   }
-  },
-  {
-   "kind": "building",
-   "id": "hollowcross_plot_12",
-   "x": 400.28,
-   "z": 865.53,
-   "yaw": -1.4768,
-   "data": {
-    "town": "hollowcross",
-    "want": "house",
-    "district": "residential",
-    "w": 3.92,
-    "d": 5.44,
-    "angle": 3.0476,
-    "front": 3.0476,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
-   "id": "hollowcross_plot_13",
-   "x": 395.63,
-   "z": 856.49,
-   "yaw": 1.6648,
-   "data": {
-    "town": "hollowcross",
-    "want": "inn",
-    "district": "residential",
-    "w": 7.3,
-    "d": 5.77,
-    "angle": 3.0476,
-    "front": 6.1892,
-    "streetGap": -0.28
-   }
-  },
-  {
-   "kind": "building",
-   "id": "hollowcross_plot_14",
-   "x": 385.9,
-   "z": 868.87,
-   "yaw": -2.8276,
-   "data": {
-    "town": "hollowcross",
-    "want": "house",
-    "district": "residential",
-    "w": 5.2,
-    "d": 4.71,
-    "angle": 2.8276,
-    "front": 4.3984,
+    "w": 6.68,
+    "d": 4.69,
+    "angle": 2.6917,
+    "front": 7.4041,
     "streetGap": -0.34
    }
   },
   {
+   "kind": "building",
+   "id": "redcliff_plot_15",
+   "x": 371.58,
+   "z": 874.36,
+   "yaw": -1.1209,
+   "data": {
+    "town": "redcliff",
+    "want": "inn",
+    "district": "civic",
+    "w": 6.14,
+    "d": 7.71,
+    "angle": 2.6917,
+    "front": 2.6917,
+    "streetGap": -0.06
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_16",
+   "x": 357.81,
+   "z": 878.78,
+   "yaw": -1.1209,
+   "data": {
+    "town": "redcliff",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.73,
+    "d": 3.69,
+    "angle": 2.6917,
+    "front": 2.6917,
+    "streetGap": -0.26
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_17",
+   "x": 354.32,
+   "z": 899.51,
+   "yaw": 0.2299,
+   "data": {
+    "town": "redcliff",
+    "want": "house",
+    "district": "residential",
+    "w": 5.31,
+    "d": 6.66,
+    "angle": 2.9117,
+    "front": 7.6241,
+    "streetGap": -0.24
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_18",
+   "x": 352.07,
+   "z": 889.92,
+   "yaw": 0.2299,
+   "data": {
+    "town": "redcliff",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.31,
+    "d": 5.84,
+    "angle": 2.9117,
+    "front": 7.6241,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_19",
+   "x": 362.8,
+   "z": 845.17,
+   "yaw": 0.5367,
+   "data": {
+    "town": "redcliff",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.5,
+    "d": 5.5,
+    "angle": 2.6049,
+    "front": 7.3173,
+    "streetGap": -0.3
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_20",
+   "x": 354.55,
+   "z": 849.94,
+   "yaw": 0.5367,
+   "data": {
+    "town": "redcliff",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.42,
+    "d": 5.27,
+    "angle": 2.6049,
+    "front": 7.3173,
+    "streetGap": -0.34
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_21",
+   "x": 351.19,
+   "z": 841.23,
+   "yaw": -2.6049,
+   "data": {
+    "town": "redcliff",
+    "want": "granary",
+    "district": "residential",
+    "w": 8.55,
+    "d": 4.59,
+    "angle": 2.6049,
+    "front": 4.1757,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "redcliff_plot_22",
+   "x": 343.05,
+   "z": 865.84,
+   "yaw": 2.3275,
+   "data": {
+    "town": "redcliff",
+    "want": "stable",
+    "district": "residential",
+    "w": 7.54,
+    "d": 5.01,
+    "angle": 2.3849,
+    "front": 5.5265,
+    "streetGap": -0.04
+   }
+  },
+  {
    "kind": "town_square",
-   "id": "bolwathold_square",
+   "id": "cinder_farm_square",
    "x": 1217.2,
    "z": 1709.37,
    "yaw": 0,
    "data": {
     "r": 4.23,
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "culture": "halfling"
    }
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_0",
+   "id": "cinder_farm_street_0",
    "x": 1263.73,
    "z": 1685.49,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -1656,12 +2558,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_1",
+   "id": "cinder_farm_street_1",
    "x": 1165.25,
    "z": 1702.26,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -1682,12 +2584,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_2",
+   "id": "cinder_farm_street_2",
    "x": 1181.94,
    "z": 1681.95,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1708,12 +2610,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_3",
+   "id": "cinder_farm_street_3",
    "x": 1226.86,
    "z": 1666.59,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1734,12 +2636,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_4",
+   "id": "cinder_farm_street_4",
    "x": 1216.4,
    "z": 1662.89,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1760,12 +2662,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_5",
+   "id": "cinder_farm_street_5",
    "x": 1190.72,
    "z": 1669.46,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1786,12 +2688,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_6",
+   "id": "cinder_farm_street_6",
    "x": 1206.39,
    "z": 1659.35,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1812,12 +2714,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_7",
+   "id": "cinder_farm_street_7",
    "x": 1192.64,
    "z": 1664.03,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1838,12 +2740,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_8",
+   "id": "cinder_farm_street_8",
    "x": 1200.12,
    "z": 1659.76,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1864,12 +2766,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_9",
+   "id": "cinder_farm_street_9",
    "x": 1196.18,
    "z": 1666.77,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1890,12 +2792,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_10",
+   "id": "cinder_farm_street_10",
    "x": 1206.17,
    "z": 1663.52,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1916,12 +2818,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_11",
+   "id": "cinder_farm_street_11",
    "x": 1202.09,
    "z": 1674.97,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1942,12 +2844,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_12",
+   "id": "cinder_farm_street_12",
    "x": 1196.88,
    "z": 1673.12,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1968,12 +2870,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_13",
+   "id": "cinder_farm_street_13",
    "x": 1189.01,
    "z": 1674.29,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1994,12 +2896,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_14",
+   "id": "cinder_farm_street_14",
    "x": 1196.93,
    "z": 1676.5,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2020,12 +2922,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_15",
+   "id": "cinder_farm_street_15",
    "x": 1201.06,
    "z": 1681.69,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2046,12 +2948,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_16",
+   "id": "cinder_farm_street_16",
    "x": 1213.97,
    "z": 1674.82,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2072,12 +2974,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_17",
+   "id": "cinder_farm_street_17",
    "x": 1216.21,
    "z": 1668.49,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2098,12 +3000,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_18",
+   "id": "cinder_farm_street_18",
    "x": 1211.23,
    "z": 1682.55,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2124,12 +3026,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_19",
+   "id": "cinder_farm_street_19",
    "x": 1224.72,
    "z": 1678.44,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2150,12 +3052,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_20",
+   "id": "cinder_farm_street_20",
    "x": 1233.93,
    "z": 1669.1,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2176,12 +3078,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_21",
+   "id": "cinder_farm_street_21",
    "x": 1226.37,
    "z": 1673.77,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2202,12 +3104,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_22",
+   "id": "cinder_farm_street_22",
    "x": 1234.06,
    "z": 1672.97,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2228,12 +3130,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_23",
+   "id": "cinder_farm_street_23",
    "x": 1221.1,
    "z": 1688.65,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2254,12 +3156,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_24",
+   "id": "cinder_farm_street_24",
    "x": 1230.51,
    "z": 1681.68,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2280,12 +3182,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_25",
+   "id": "cinder_farm_street_25",
    "x": 1225.72,
    "z": 1691.83,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2306,12 +3208,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_26",
+   "id": "cinder_farm_street_26",
    "x": 1206.72,
    "z": 1699.05,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2332,12 +3234,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_27",
+   "id": "cinder_farm_street_27",
    "x": 1196.01,
    "z": 1692.34,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2358,12 +3260,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_28",
+   "id": "cinder_farm_street_28",
    "x": 1186.73,
    "z": 1691.74,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2384,12 +3286,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_29",
+   "id": "cinder_farm_street_29",
    "x": 1191.68,
    "z": 1701.37,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2410,12 +3312,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_30",
+   "id": "cinder_farm_street_30",
    "x": 1202.47,
    "z": 1696.39,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2436,12 +3338,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_31",
+   "id": "cinder_farm_street_31",
    "x": 1193.39,
    "z": 1704.11,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2462,12 +3364,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_32",
+   "id": "cinder_farm_street_32",
    "x": 1214.05,
    "z": 1703.65,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2488,12 +3390,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_33",
+   "id": "cinder_farm_street_33",
    "x": 1204.26,
    "z": 1705.9,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2514,12 +3416,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_34",
+   "id": "cinder_farm_street_34",
    "x": 1211.24,
    "z": 1710.91,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2540,12 +3442,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_35",
+   "id": "cinder_farm_street_35",
    "x": 1182.38,
    "z": 1716.92,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2566,12 +3468,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_36",
+   "id": "cinder_farm_street_36",
    "x": 1164.97,
    "z": 1715.4,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2592,12 +3494,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_37",
+   "id": "cinder_farm_street_37",
    "x": 1174.04,
    "z": 1711.4,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2618,12 +3520,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_38",
+   "id": "cinder_farm_street_38",
    "x": 1169.55,
    "z": 1719.92,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2644,12 +3546,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_39",
+   "id": "cinder_farm_street_39",
    "x": 1197.81,
    "z": 1731.49,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2670,12 +3572,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_40",
+   "id": "cinder_farm_street_40",
    "x": 1183.3,
    "z": 1725.3,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2696,12 +3598,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_41",
+   "id": "cinder_farm_street_41",
    "x": 1192.69,
    "z": 1726.03,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2722,12 +3624,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_42",
+   "id": "cinder_farm_street_42",
    "x": 1185.59,
    "z": 1729.69,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2748,12 +3650,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_43",
+   "id": "cinder_farm_street_43",
    "x": 1192.06,
    "z": 1738.71,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2774,12 +3676,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_44",
+   "id": "cinder_farm_street_44",
    "x": 1226.61,
    "z": 1741.29,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -2800,12 +3702,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_45",
+   "id": "cinder_farm_street_45",
    "x": 1248.51,
    "z": 1721.03,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2826,12 +3728,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_46",
+   "id": "cinder_farm_street_46",
    "x": 1259.69,
    "z": 1712.79,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2852,12 +3754,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_47",
+   "id": "cinder_farm_street_47",
    "x": 1270.57,
    "z": 1713.85,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2878,12 +3780,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_48",
+   "id": "cinder_farm_street_48",
    "x": 1262.63,
    "z": 1719.83,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2904,12 +3806,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_49",
+   "id": "cinder_farm_street_49",
    "x": 1241.13,
    "z": 1728.46,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2930,12 +3832,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_50",
+   "id": "cinder_farm_street_50",
    "x": 1251.53,
    "z": 1728.44,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2956,12 +3858,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_51",
+   "id": "cinder_farm_street_51",
    "x": 1244.1,
    "z": 1732.89,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2982,12 +3884,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_52",
+   "id": "cinder_farm_street_52",
    "x": 1249.33,
    "z": 1737.73,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3008,12 +3910,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_53",
+   "id": "cinder_farm_street_53",
    "x": 1232.01,
    "z": 1750.98,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3034,12 +3936,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_54",
+   "id": "cinder_farm_street_54",
    "x": 1217.38,
    "z": 1753.77,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3060,12 +3962,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_55",
+   "id": "cinder_farm_street_55",
    "x": 1229.64,
    "z": 1758.21,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3086,12 +3988,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_56",
+   "id": "cinder_farm_street_56",
    "x": 1216,
    "z": 1657.4,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -3108,12 +4010,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_57",
+   "id": "cinder_farm_street_57",
    "x": 1261.77,
    "z": 1682.23,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -3130,12 +4032,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_58",
+   "id": "cinder_farm_street_58",
    "x": 1260.43,
    "z": 1680.26,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -3152,12 +4054,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_59",
+   "id": "cinder_farm_street_59",
    "x": 1206.36,
    "z": 1694.28,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3174,12 +4076,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_60",
+   "id": "cinder_farm_street_60",
    "x": 1193.25,
    "z": 1683.37,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3196,12 +4098,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_61",
+   "id": "cinder_farm_street_61",
    "x": 1191.17,
    "z": 1718.53,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3218,12 +4120,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_62",
+   "id": "cinder_farm_street_62",
    "x": 1183.3,
    "z": 1725.3,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3240,12 +4142,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_63",
+   "id": "cinder_farm_street_63",
    "x": 1233.17,
    "z": 1725.44,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3262,12 +4164,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_64",
+   "id": "cinder_farm_street_64",
    "x": 1241.13,
    "z": 1728.46,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3284,12 +4186,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_65",
+   "id": "cinder_farm_street_65",
    "x": 1226.61,
    "z": 1741.29,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3306,12 +4208,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_66",
+   "id": "cinder_farm_street_66",
    "x": 1232.01,
    "z": 1750.98,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3328,12 +4230,12 @@
   },
   {
    "kind": "street",
-   "id": "bolwathold_street_67",
+   "id": "cinder_farm_street_67",
    "x": 1255.66,
    "z": 1724.64,
    "yaw": 0,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3350,12 +4252,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_0",
+   "id": "cinder_farm_plot_0",
    "x": 1208.04,
    "z": 1669.81,
    "yaw": -1.911,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "stable",
     "district": "residential",
     "w": 6.54,
@@ -3367,12 +4269,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_1",
+   "id": "cinder_farm_plot_1",
    "x": 1190.36,
    "z": 1679.24,
    "yaw": 2.8014,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "house",
     "district": "residential",
     "w": 4.65,
@@ -3384,12 +4286,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_2",
+   "id": "cinder_farm_plot_2",
    "x": 1205.44,
    "z": 1679.05,
    "yaw": -1.911,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "hut",
     "district": "craft",
     "w": 5.29,
@@ -3401,12 +4303,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_3",
+   "id": "cinder_farm_plot_3",
    "x": 1216.14,
    "z": 1679.9,
    "yaw": -0.3402,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "hut",
     "district": "craft",
     "w": 6.28,
@@ -3418,12 +4320,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_4",
+   "id": "cinder_farm_plot_4",
    "x": 1213.4,
    "z": 1687.62,
    "yaw": 2.8014,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "hut",
     "district": "craft",
     "w": 6.28,
@@ -3435,12 +4337,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_5",
+   "id": "cinder_farm_plot_5",
    "x": 1235.83,
    "z": 1677.99,
    "yaw": 2.8014,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "house",
     "district": "residential",
     "w": 5.5,
@@ -3452,12 +4354,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_6",
+   "id": "cinder_farm_plot_6",
    "x": 1225.42,
    "z": 1684.26,
    "yaw": 2.8014,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "hut",
     "district": "craft",
     "w": 4.02,
@@ -3469,12 +4371,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_7",
+   "id": "cinder_farm_plot_7",
    "x": 1233.13,
    "z": 1686.98,
    "yaw": -1.911,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "hut",
     "district": "craft",
     "w": 4.6,
@@ -3486,12 +4388,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_8",
+   "id": "cinder_farm_plot_8",
    "x": 1186.57,
    "z": 1698.63,
    "yaw": 1.0106,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "granary",
     "district": "craft",
     "w": 5.84,
@@ -3503,12 +4405,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_9",
+   "id": "cinder_farm_plot_9",
    "x": 1196.89,
    "z": 1697.94,
    "yaw": -2.131,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "hut",
     "district": "craft",
     "w": 3.97,
@@ -3520,12 +4422,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_10",
+   "id": "cinder_farm_plot_10",
    "x": 1208.84,
    "z": 1703.89,
    "yaw": -0.5602,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "hut",
     "district": "civic",
     "w": 4.42,
@@ -3537,12 +4439,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_11",
+   "id": "cinder_farm_plot_11",
    "x": 1204.24,
    "z": 1711.22,
    "yaw": 2.5814,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "hut",
     "district": "civic",
     "w": 4.42,
@@ -3554,12 +4456,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_12",
+   "id": "cinder_farm_plot_12",
    "x": 1212.54,
    "z": 1716.81,
    "yaw": 2.5814,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "shrine",
     "district": "civic",
     "w": 7.27,
@@ -3571,12 +4473,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_13",
+   "id": "cinder_farm_plot_13",
    "x": 1175.82,
    "z": 1717,
    "yaw": -0.5974,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "house",
     "district": "residential",
     "w": 5.39,
@@ -3588,12 +4490,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_14",
+   "id": "cinder_farm_plot_14",
    "x": 1170.42,
    "z": 1725.77,
    "yaw": -2.1682,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "house",
     "district": "residential",
     "w": 4.46,
@@ -3605,12 +4507,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_15",
+   "id": "cinder_farm_plot_15",
    "x": 1188.09,
    "z": 1724.8,
    "yaw": 0.7534,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "hut",
     "district": "craft",
     "w": 4.63,
@@ -3622,12 +4524,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_16",
+   "id": "cinder_farm_plot_16",
    "x": 1193.34,
    "z": 1730.4,
    "yaw": -2.3882,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "hut",
     "district": "craft",
     "w": 3.83,
@@ -3639,12 +4541,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_17",
+   "id": "cinder_farm_plot_17",
    "x": 1186.3,
    "z": 1735.53,
    "yaw": -2.3882,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "house",
     "district": "residential",
     "w": 5.98,
@@ -3656,12 +4558,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_18",
+   "id": "cinder_farm_plot_18",
    "x": 1199,
    "z": 1738.46,
    "yaw": -2.3882,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "inn",
     "district": "residential",
     "w": 7.94,
@@ -3673,12 +4575,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_19",
+   "id": "cinder_farm_plot_19",
    "x": 1256.71,
    "z": 1718.7,
    "yaw": 0.6041,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "mill",
     "district": "residential",
     "w": 5.14,
@@ -3690,12 +4592,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_20",
+   "id": "cinder_farm_plot_20",
    "x": 1261.98,
    "z": 1726.34,
    "yaw": -2.5375,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "market",
     "district": "residential",
     "w": 6.51,
@@ -3707,12 +4609,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_21",
+   "id": "cinder_farm_plot_21",
    "x": 1246.31,
    "z": 1727.59,
    "yaw": 0.8241,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "house",
     "district": "residential",
     "w": 5.22,
@@ -3724,12 +4626,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_22",
+   "id": "cinder_farm_plot_22",
    "x": 1253.32,
    "z": 1734.08,
    "yaw": -0.7467,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "house",
     "district": "residential",
     "w": 6.68,
@@ -3741,12 +4643,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_23",
+   "id": "cinder_farm_plot_23",
    "x": 1243.54,
    "z": 1738.66,
    "yaw": -2.3175,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "house",
     "district": "residential",
     "w": 3.61,
@@ -3758,12 +4660,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_24",
+   "id": "cinder_farm_plot_24",
    "x": 1224.03,
    "z": 1751.89,
    "yaw": -0.6839,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "forge",
     "district": "residential",
     "w": 6.74,
@@ -3775,12 +4677,12 @@
   },
   {
    "kind": "building",
-   "id": "bolwathold_plot_25",
+   "id": "cinder_farm_plot_25",
    "x": 1217.75,
    "z": 1759.6,
    "yaw": 2.4577,
    "data": {
-    "town": "bolwathold",
+    "town": "cinder_farm",
     "want": "house",
     "district": "residential",
     "w": 6.74,
@@ -7952,29 +8854,9 @@
       48.91
      ],
      [
-      312,
-      812,
-      48.57
-     ],
-     [
-      328,
-      820,
-      48.36
-     ],
-     [
-      344,
-      826,
-      48.36
-     ],
-     [
-      360,
-      830,
-      48.63
-     ],
-     [
-      372.64,
-      831.58,
-      48.85
+      310.99,
+      811.37,
+      48.59
      ]
     ]
    }
@@ -7982,8 +8864,8 @@
   {
    "kind": "road",
    "id": "road_111_0",
-   "x": 363.48,
-   "z": 918.3,
+   "x": 344.47,
+   "z": 944.85,
    "yaw": 0,
    "data": {
     "cls": "trail",
@@ -7991,19 +8873,9 @@
     "spur": false,
     "pts": [
      [
-      363.48,
-      918.3,
-      49.22
-     ],
-     [
-      362,
-      920,
-      49.18
-     ],
-     [
-      350,
-      936,
-      48.74
+      344.47,
+      944.85,
+      48.47
      ],
      [
       340,
@@ -8489,8 +9361,8 @@
   {
    "kind": "road",
    "id": "road_113",
-   "x": 478.64,
-   "z": 862.64,
+   "x": 473.79,
+   "z": 857.79,
    "yaw": 0,
    "data": {
     "cls": "trail",
@@ -8498,9 +9370,14 @@
     "spur": false,
     "pts": [
      [
-      478.64,
-      862.64,
-      48.1
+      473.79,
+      857.79,
+      48.33
+     ],
+     [
+      478,
+      862,
+      48.13
      ],
      [
       490,
@@ -10057,9 +10934,9 @@
   },
   {
    "kind": "road",
-   "id": "spur_hollowcross",
-   "x": 363.77,
-   "z": 918.69,
+   "id": "spur_redcliff",
+   "x": 473.98,
+   "z": 862.09,
    "yaw": 0,
    "data": {
     "cls": "trail",
@@ -10067,21 +10944,21 @@
     "spur": true,
     "pts": [
      [
-      363.77,
-      918.69,
-      49.65
+      473.98,
+      862.09,
+      49.99
      ],
      [
-      362,
-      920,
-      49.62
+      478,
+      862,
+      49.94
      ]
     ]
    }
   },
   {
    "kind": "road",
-   "id": "spur_bolwathold",
+   "id": "spur_cinder_farm",
    "x": 1268.89,
    "z": 1674.22,
    "yaw": 0,

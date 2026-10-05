@@ -8,7 +8,10 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 export const GAME = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-export const MAIN = join(GAME, 'server', 'main.mjs');
+// TV_GAME_DIR runs a FROZEN copy instead of the working tree (e.g. a release built by tools/publish-thousandvale.sh
+// --build-only): an hour-long chaos run must not die because someone saved a half-written file in the live tree
+export const SERVER_GAME = process.env.TV_GAME_DIR || GAME;
+export const MAIN = join(SERVER_GAME, 'server', 'main.mjs');
 export const serverExists = () => existsSync(MAIN);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -24,7 +27,7 @@ export function freePort() {
 export async function startServer(opts = {}) {
   const port = opts.port || await freePort();
   const args = [MAIN, '--port', String(port), '--host', '127.0.0.1', '--db', opts.db || 'memory', ...(opts.args || [])];
-  const child = spawn(process.execPath, args, { cwd: GAME, env: { ...process.env, ...(opts.env || {}) }, stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn(process.execPath, args, { cwd: SERVER_GAME, env: { ...process.env, ...(opts.env || {}) }, stdio: ['ignore', 'pipe', 'pipe'] });
   const lines = [];
   const keep = d => { for (const l of String(d).split('\n')) if (l) { lines.push(l); if (lines.length > 400) lines.shift(); } };
   child.stdout.on('data', keep); child.stderr.on('data', keep);

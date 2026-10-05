@@ -63,7 +63,7 @@ pattern (PLAN §10.1, ops notes in `prototypes/thousandvale/ops/`):
 
 | port | what | where | bound to |
 |---|---|---|---|
-| **8490** | **STABLE** game server (later, M1.5): client + `/gw` + `/p/<n>` + `/status` | a published allow-listed copy in `/srv/thousandvale`, run as Linux user `thousandvale`, database `thousandvale_stable` | `127.0.0.1` (the LAN reaches it through ufw; the public link, M3, through a Cloudflare named tunnel) |
+| **8490** | **STABLE** game server (M1.5): client + `/gw` + `/p/<n>` + `/status` + `/healthz` | a published allow-listed copy in `/srv/thousandvale/current` (built by `tools/publish-thousandvale.sh` from a tested commit), system unit `thousandvale.service` run as Linux user `thousandvale`, database `thousandvale_stable` | `0.0.0.0`, but a systemd drop-in (`lan-only.conf`: `IPAddressDeny=any` + LAN/localhost allowed) makes the kernel drop anything that is not this machine or the private LAN. M3's public link comes through a Cloudflare named tunnel over localhost |
 | **8491** | **DEV** game server | the live working tree, database `thousandvale_dev` | `0.0.0.0`, LAN only — never tunnelled |
 | 8492 | admin page (stable) | | `127.0.0.1` only, reached by SSH tunnel |
 
@@ -76,7 +76,22 @@ DB=memory PORT=8495 prototypes/thousandvale/ops/start-dev.sh   # a throwaway ser
 curl -s http://127.0.0.1:8491/status               # tick times, players, rooms (read-only numbers)
 ```
 
-Give the owner `http://<LAN-IP>:8491/` while it is in development (there is no 8490 until M1.5).
+**Stable (8490), once the lead has run the sudo setup** (`ops/setup-stable.sh`, read it first; it is safe to run again):
+
+```bash
+prototypes/thousandvale/ops/setup-stable.sh --dry-run    # what the sudo run would do (no sudo needed)
+sudo prototypes/thousandvale/ops/setup-stable.sh         # user, node copy, folders, DB role + env, units, timers, sudoers
+sudo prototypes/thousandvale/ops/lib/check-stable.sh     # re-verify any time (read-only)
+prototypes/thousandvale/tools/publish-thousandvale.sh    # as radgh: publish HEAD (refuses unparsable code / red unit tests),
+                                                         # switch current, restart, wait for /healthz, roll back if it fails
+prototypes/thousandvale/tools/publish-thousandvale.sh --build-only   # build a release without switching (TV_SRV=dir to try it anywhere)
+sudo systemctl start thousandvale-backup.service         # a backup now (hourly timer: 48 h hourly + 14 days daily, /var/backups/thousandvale)
+sudo systemctl start thousandvale-drill.service          # restore drill now (weekly timer): restore newest dump -> boot -> conservation
+prototypes/thousandvale/ops/drill-local.sh               # the same backup + drill scripts, no sudo: dev DB -> throw-away cluster
+node prototypes/thousandvale/tools/chaos-kill9.mjs --kills 500 --db pg --scratch    # kill -9 x500 on its own throw-away Postgres
+```
+
+Give the owner `http://<LAN-IP>:8490/` for the stable build once it is published, and `http://<LAN-IP>:8491/` for work in progress.
 The rules that matter (full list: `prototypes/thousandvale/ops/SECURITY.md`):
 
 * **Never** put `tools/serve.py`, 8400 or 8401 behind a tunnel — serve.py accepts POSTs that write files.

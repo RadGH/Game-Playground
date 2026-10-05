@@ -73,9 +73,10 @@
     {
       "type": "settlement",
       "kind": "hamlet",
-      "name": "Pohelrow",
+      "name": "Mawehaven",
       "x": 256,
       "z": 1920,
+      "wfName": "Pohelrow",
       "radius": 40,
       "movedFrom": {
         "x": 64,
@@ -85,9 +86,10 @@
     {
       "type": "settlement",
       "kind": "hamlet",
-      "name": "Ashford",
+      "name": "Wamonhold",
       "x": 1344,
       "z": 1568,
+      "wfName": "Ashford",
       "radius": 46,
       "movedFrom": {
         "x": 1344,
@@ -97,16 +99,25 @@
     {
       "type": "crossing",
       "kind": "ford",
-      "name": "Mipider Ford",
-      "x": 64,
-      "z": 1984
+      "name": "Fitockpi Ford",
+      "x": 48,
+      "z": 1857,
+      "wfName": "Mipider Ford",
+      "snappedFrom": {
+        "x": 64,
+        "z": 1984
+      }
     },
     {
       "type": "crossing",
       "kind": "ford",
       "name": "Milhot Ford",
-      "x": 1344,
-      "z": 1472
+      "x": 1334,
+      "z": 1427,
+      "snappedFrom": {
+        "x": 1344,
+        "z": 1472
+      }
     },
     {
       "type": "dungeon",
@@ -126,8 +137,8 @@
     {
       "type": "camp",
       "id": "elite_hobb_gallowsby",
-      "x": 75,
-      "z": 1973,
+      "x": 72,
+      "z": 1879,
       "r": 25
     }
   ],
@@ -163,7 +174,7 @@
         "overlaps": 0
       },
       {
-        "name": "Pohelrow",
+        "name": "Mawehaven",
         "kind": "hamlet",
         "hub": false,
         "at": [
@@ -182,7 +193,7 @@
         "overlaps": 0
       },
       {
-        "name": "Ashford",
+        "name": "Wamonhold",
         "kind": "hamlet",
         "hub": false,
         "at": [
@@ -203,38 +214,38 @@
     ],
     "roads": 11,
     "bridges": 5,
-    "scatter": 14019,
+    "scatter": 13924,
     "scatterKinds": {
-      "rock_small": 1288,
-      "rock_large": 732,
-      "bush": 4001,
-      "tree_broadleaf": 7523,
+      "rock_small": 1281,
+      "rock_large": 731,
+      "bush": 3975,
+      "tree_broadleaf": 7464,
       "boulder": 89,
-      "tree_conifer": 146,
-      "reed": 225,
+      "tree_conifer": 145,
+      "reed": 224,
       "tree_dead": 15
     },
     "sites": [
       "settlement(HUB) town Torborhold 592 1264 90",
-      "settlement hamlet Pohelrow 256 1920 40",
-      "settlement hamlet Ashford 1344 1568 46",
-      "crossing ford Mipider Ford 64 1984",
-      "crossing ford Milhot Ford 1344 1472",
+      "settlement hamlet Mawehaven 256 1920 40",
+      "settlement hamlet Wamonhold 1344 1568 46",
+      "crossing ford Fitockpi Ford 48 1857",
+      "crossing ford Milhot Ford 1334 1427",
       "dungeon door_1 Barrow entrance 354 1292  1.185",
       "event event_grandmother_skein  357 1944 40",
-      "camp elite_hobb_gallowsby  75 1973 25"
+      "camp elite_hobb_gallowsby  72 1879 25"
     ],
     "spawn": {
       "x": 588,
       "z": 1264
     },
     "placements": 224,
-    "vignettesAvoided": 0
+    "vignettesAvoided": 48
   },
   "files": {
-    "terrain.bin": 6306074,
-    "nav.bin": 1050717,
-    "scatter.bin": 112236,
-    "placements.json": 92082
+    "terrain.bin": 595763,
+    "nav.bin": 37525,
+    "scatter.bin": 111476,
+    "placements.json": 92436
   }
 }

@@ -48,11 +48,41 @@
    }
   },
   {
+   "kind": "settlement",
+   "id": "lowmoor",
+   "x": 1219,
+   "z": 1026,
+   "yaw": 0,
+   "data": {
+    "kind": "town",
+    "name": "Lowmoor",
+    "radius": 90,
+    "hub": true,
+    "planned": true,
+    "ask": true
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "deepdene",
+   "x": 1347,
+   "z": 289,
+   "yaw": 0,
+   "data": {
+    "kind": "hamlet",
+    "name": "Deepdene",
+    "radius": 40,
+    "hub": false,
+    "planned": true,
+    "ask": true
+   }
+  },
+  {
    "kind": "dungeon_door",
    "id": "door_1",
-   "x": 560,
-   "z": 870,
-   "yaw": -1.424,
+   "x": 1401,
+   "z": 1081,
+   "yaw": -1.622,
    "data": {
     "name": "Barrow entrance"
    }
@@ -60,11 +90,2850 @@
   {
    "kind": "event_site",
    "id": "event_sunken_wolds",
-   "x": 1024,
-   "z": 1024,
+   "x": 1068,
+   "z": 1007,
    "yaw": 0,
    "data": {
     "r": 40
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "lowmoor_square",
+   "x": 1220.49,
+   "z": 1009.57,
+   "yaw": 0,
+   "data": {
+    "r": 3.89,
+    "town": "lowmoor",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_0",
+   "x": 1273.96,
+   "z": 1028.2,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1273.96,
+      1028.2
+     ],
+     [
+      1218.92,
+      1028.7
+     ],
+     [
+      1164.01,
+      1025.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_1",
+   "x": 1204.59,
+   "z": 973.66,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1204.59,
+      973.66
+     ],
+     [
+      1201.49,
+      993.73
+     ],
+     [
+      1198.45,
+      1013.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_2",
+   "x": 1235.92,
+   "z": 982.45,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1235.92,
+      982.45
+     ],
+     [
+      1236.62,
+      998.42
+     ],
+     [
+      1237.3,
+      1014.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_3",
+   "x": 1255.24,
+   "z": 996.87,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1255.24,
+      996.87
+     ],
+     [
+      1247.45,
+      998.52
+     ],
+     [
+      1239.56,
+      999.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_4",
+   "x": 1242.28,
+   "z": 985.43,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1242.28,
+      985.43
+     ],
+     [
+      1243.28,
+      991.42
+     ],
+     [
+      1244.39,
+      997.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_5",
+   "x": 1254.33,
+   "z": 991.78,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1254.33,
+      991.78
+     ],
+     [
+      1249.62,
+      992.7
+     ],
+     [
+      1244.87,
+      993.45
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_6",
+   "x": 1242.21,
+   "z": 991.65,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1242.21,
+      991.65
+     ],
+     [
+      1240.23,
+      991.94
+     ],
+     [
+      1238.27,
+      992.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_7",
+   "x": 1249.47,
+   "z": 999.28,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1249.47,
+      999.28
+     ],
+     [
+      1250.31,
+      1004.99
+     ],
+     [
+      1251.49,
+      1010.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_8",
+   "x": 1256.12,
+   "z": 1001.87,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1256.12,
+      1001.87
+     ],
+     [
+      1253.74,
+      1002.27
+     ],
+     [
+      1251.37,
+      1002.71
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_9",
+   "x": 1248.98,
+   "z": 1003.8,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1248.98,
+      1003.8
+     ],
+     [
+      1244.73,
+      1004.33
+     ],
+     [
+      1240.56,
+      1005.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_10",
+   "x": 1234.05,
+   "z": 1004.56,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1234.05,
+      1004.56
+     ],
+     [
+      1222.13,
+      1004.65
+     ],
+     [
+      1210.26,
+      1003.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_11",
+   "x": 1226.93,
+   "z": 984.73,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1226.93,
+      984.73
+     ],
+     [
+      1227.01,
+      993.62
+     ],
+     [
+      1226.13,
+      1002.47
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_12",
+   "x": 1234.67,
+   "z": 990.64,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1234.67,
+      990.64
+     ],
+     [
+      1231.47,
+      990.3
+     ],
+     [
+      1228.26,
+      990.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_13",
+   "x": 1234.48,
+   "z": 994.85,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1234.48,
+      994.85
+     ],
+     [
+      1231.28,
+      994.57
+     ],
+     [
+      1228.07,
+      994.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_14",
+   "x": 1224.87,
+   "z": 995.34,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1224.87,
+      995.34
+     ],
+     [
+      1217.78,
+      994.58
+     ],
+     [
+      1210.66,
+      994.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_15",
+   "x": 1217.08,
+   "z": 984.28,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1217.08,
+      984.28
+     ],
+     [
+      1217.1,
+      988.87
+     ],
+     [
+      1216.67,
+      993.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_16",
+   "x": 1220.56,
+   "z": 996.69,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1220.56,
+      996.69
+     ],
+     [
+      1220.34,
+      999.44
+     ],
+     [
+      1220.32,
+      1002.21
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_17",
+   "x": 1225.37,
+   "z": 1005.9,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1225.37,
+      1005.9
+     ],
+     [
+      1225.18,
+      1009.78
+     ],
+     [
+      1225.02,
+      1013.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_18",
+   "x": 1215.79,
+   "z": 1005.47,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1215.79,
+      1005.47
+     ],
+     [
+      1215.79,
+      1009.36
+     ],
+     [
+      1215.44,
+      1013.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_19",
+   "x": 1198.12,
+   "z": 1000.73,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1198.12,
+      1000.73
+     ],
+     [
+      1187.02,
+      998.57
+     ],
+     [
+      1175.86,
+      996.75
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_20",
+   "x": 1198.86,
+   "z": 990.17,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1198.86,
+      990.17
+     ],
+     [
+      1188.65,
+      988.05
+     ],
+     [
+      1181.49,
+      985.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_21",
+   "x": 1195.98,
+   "z": 976.05,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1195.98,
+      976.05
+     ],
+     [
+      1194.58,
+      980.83
+     ],
+     [
+      1193.16,
+      986.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_22",
+   "x": 1200.99,
+   "z": 982.05,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1200.99,
+      982.05
+     ],
+     [
+      1198.54,
+      981.46
+     ],
+     [
+      1196.11,
+      980.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_23",
+   "x": 1184.99,
+   "z": 982.78,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1184.99,
+      982.78
+     ],
+     [
+      1184.46,
+      984.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_24",
+   "x": 1193.49,
+   "z": 980.66,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1193.49,
+      980.66
+     ],
+     [
+      1190.32,
+      979.83
+     ],
+     [
+      1189.46,
+      979.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_25",
+   "x": 1190.94,
+   "z": 989.79,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1190.94,
+      989.79
+     ],
+     [
+      1189.85,
+      993.34
+     ],
+     [
+      1189.06,
+      996.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_26",
+   "x": 1182.71,
+   "z": 987.63,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1182.71,
+      987.63
+     ],
+     [
+      1181.55,
+      991.17
+     ],
+     [
+      1180.83,
+      994.82
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_27",
+   "x": 1189.75,
+   "z": 1001.25,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1189.75,
+      1001.25
+     ],
+     [
+      1189.5,
+      1005.57
+     ],
+     [
+      1189.43,
+      1009.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_28",
+   "x": 1183.79,
+   "z": 1001.03,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1183.79,
+      1001.03
+     ],
+     [
+      1183.88,
+      1005.36
+     ],
+     [
+      1183.48,
+      1009.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_29",
+   "x": 1220.78,
+   "z": 1035.26,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1220.78,
+      1035.26
+     ],
+     [
+      1223.44,
+      1055.72
+     ],
+     [
+      1223.59,
+      1076.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_30",
+   "x": 1260.81,
+   "z": 1061.74,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1260.81,
+      1061.74
+     ],
+     [
+      1244.36,
+      1062.28
+     ],
+     [
+      1226.17,
+      1062.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_31",
+   "x": 1241.79,
+   "z": 1036,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1241.79,
+      1036
+     ],
+     [
+      1241.57,
+      1047.41
+     ],
+     [
+      1240.09,
+      1058.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_32",
+   "x": 1260.5,
+   "z": 1048.1,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1260.5,
+      1048.1
+     ],
+     [
+      1251.6,
+      1047.6
+     ],
+     [
+      1242.73,
+      1046.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_33",
+   "x": 1255.3,
+   "z": 1037.01,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1255.3,
+      1037.01
+     ],
+     [
+      1254.7,
+      1041.69
+     ],
+     [
+      1254.6,
+      1046.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_34",
+   "x": 1246.63,
+   "z": 1036.36,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1246.63,
+      1036.36
+     ],
+     [
+      1245.98,
+      1041.03
+     ],
+     [
+      1245.93,
+      1045.75
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_35",
+   "x": 1249.61,
+   "z": 1048.55,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1249.61,
+      1048.55
+     ],
+     [
+      1249.48,
+      1053.99
+     ],
+     [
+      1248.8,
+      1059.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_36",
+   "x": 1260.2,
+   "z": 1052.2,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1260.2,
+      1052.2
+     ],
+     [
+      1255.5,
+      1051.58
+     ],
+     [
+      1250.77,
+      1051.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_37",
+   "x": 1247.87,
+   "z": 1053.43,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1247.87,
+      1053.43
+     ],
+     [
+      1245.07,
+      1053.17
+     ],
+     [
+      1242.26,
+      1053.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_38",
+   "x": 1238.82,
+   "z": 1052.31,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1238.82,
+      1052.31
+     ],
+     [
+      1233.2,
+      1052.02
+     ],
+     [
+      1227.6,
+      1051.47
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_39",
+   "x": 1239.41,
+   "z": 1044.43,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1239.41,
+      1044.43
+     ],
+     [
+      1233.79,
+      1044.16
+     ],
+     [
+      1228.19,
+      1043.58
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_40",
+   "x": 1236.81,
+   "z": 1035.63,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1236.81,
+      1035.63
+     ],
+     [
+      1236.53,
+      1039.28
+     ],
+     [
+      1236.27,
+      1042.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_41",
+   "x": 1234,
+   "z": 1045.28,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1234,
+      1045.28
+     ],
+     [
+      1233.73,
+      1047.98
+     ],
+     [
+      1233.59,
+      1050.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_42",
+   "x": 1233.38,
+   "z": 1053.14,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1233.38,
+      1053.14
+     ],
+     [
+      1233.34,
+      1055.68
+     ],
+     [
+      1233,
+      1058.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_43",
+   "x": 1245.04,
+   "z": 1064.89,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1245.04,
+      1064.89
+     ],
+     [
+      1245.49,
+      1068.39
+     ],
+     [
+      1246.07,
+      1071.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_44",
+   "x": 1252.95,
+   "z": 1063.73,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1252.95,
+      1063.73
+     ],
+     [
+      1253.66,
+      1067.2
+     ],
+     [
+      1253.78,
+      1068.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_45",
+   "x": 1240.69,
+   "z": 1065.53,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1240.69,
+      1065.53
+     ],
+     [
+      1241.42,
+      1068.99
+     ],
+     [
+      1241.71,
+      1072.52
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_46",
+   "x": 1188.8,
+   "z": 1041.2,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1188.8,
+      1041.2
+     ],
+     [
+      1193.59,
+      1058.17
+     ],
+     [
+      1196.84,
+      1075.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_47",
+   "x": 1211.64,
+   "z": 1047.84,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1211.64,
+      1047.84
+     ],
+     [
+      1203.55,
+      1051.45
+     ],
+     [
+      1195.09,
+      1054.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_48",
+   "x": 1202.76,
+   "z": 1040.76,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1202.76,
+      1040.76
+     ],
+     [
+      1204.13,
+      1044.59
+     ],
+     [
+      1205.64,
+      1048.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_49",
+   "x": 1195.52,
+   "z": 1043.5,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1195.52,
+      1043.5
+     ],
+     [
+      1196.73,
+      1047.39
+     ],
+     [
+      1198.4,
+      1051.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_50",
+   "x": 1215.71,
+   "z": 1058.6,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1215.71,
+      1058.6
+     ],
+     [
+      1207.41,
+      1061.66
+     ],
+     [
+      1199.16,
+      1064.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_51",
+   "x": 1207.49,
+   "z": 1051.14,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1207.49,
+      1051.14
+     ],
+     [
+      1209.18,
+      1055.16
+     ],
+     [
+      1210.57,
+      1059.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_52",
+   "x": 1199.32,
+   "z": 1054.23,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1199.32,
+      1054.23
+     ],
+     [
+      1200.69,
+      1058.37
+     ],
+     [
+      1202.41,
+      1062.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_53",
+   "x": 1204.32,
+   "z": 1064.16,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1204.32,
+      1064.16
+     ],
+     [
+      1205.5,
+      1067.32
+     ],
+     [
+      1206.7,
+      1070.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_54",
+   "x": 1212.4,
+   "z": 1061.11,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1212.4,
+      1061.11
+     ],
+     [
+      1213.42,
+      1064.32
+     ],
+     [
+      1214.78,
+      1067.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_55",
+   "x": 1189.23,
+   "z": 1055.33,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1189.23,
+      1055.33
+     ],
+     [
+      1183.18,
+      1056.18
+     ],
+     [
+      1177.13,
+      1057.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_56",
+   "x": 1179.36,
+   "z": 1046.36,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1179.36,
+      1046.36
+     ],
+     [
+      1180.18,
+      1050.87
+     ],
+     [
+      1180.66,
+      1055.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_57",
+   "x": 1191.2,
+   "z": 1069.13,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1191.2,
+      1069.13
+     ],
+     [
+      1185.76,
+      1069.82
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_58",
+   "x": 1180.7,
+   "z": 1057.66,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1180.7,
+      1057.66
+     ],
+     [
+      1181.52,
+      1063.42
+     ],
+     [
+      1181.98,
+      1066.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_59",
+   "x": 1190.36,
+   "z": 1063.23,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1190.36,
+      1063.23
+     ],
+     [
+      1186.58,
+      1063.93
+     ],
+     [
+      1182.76,
+      1064.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_60",
+   "x": 1180.6,
+   "z": 1064.8,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1180.6,
+      1064.8
+     ],
+     [
+      1180.09,
+      1064.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_61",
+   "x": 1201.49,
+   "z": 993.73,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1201.49,
+      993.73
+     ],
+     [
+      1210.66,
+      994.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_62",
+   "x": 1218.92,
+   "z": 1028.7,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1218.92,
+      1028.7
+     ],
+     [
+      1215.44,
+      1013.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_63",
+   "x": 1220.78,
+   "z": 1035.26,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1220.78,
+      1035.26
+     ],
+     [
+      1220.72,
+      1028.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_64",
+   "x": 1183.79,
+   "z": 1001.03,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1183.79,
+      1001.03
+     ],
+     [
+      1184.27,
+      998.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_65",
+   "x": 1215.71,
+   "z": 1058.6,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1215.71,
+      1058.6
+     ],
+     [
+      1223.46,
+      1058.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_66",
+   "x": 1189.23,
+   "z": 1055.33,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1189.23,
+      1055.33
+     ],
+     [
+      1192.53,
+      1054.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_67",
+   "x": 1240.69,
+   "z": 1065.53,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1240.69,
+      1065.53
+     ],
+     [
+      1240.73,
+      1062.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "lowmoor_street_68",
+   "x": 1191.2,
+   "z": 1069.13,
+   "yaw": 0,
+   "data": {
+    "town": "lowmoor",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1191.2,
+      1069.13
+     ],
+     [
+      1195.49,
+      1068.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_0",
+   "x": 1250.84,
+   "z": 987.55,
+   "yaw": 0.1753,
+   "data": {
+    "town": "lowmoor",
+    "want": "house",
+    "district": "residential",
+    "w": 5.96,
+    "d": 4.21,
+    "angle": 1.3955,
+    "front": 1.3955,
+    "streetGap": -0.26
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_1",
+   "x": 1246.7,
+   "z": 988.29,
+   "yaw": -1.3955,
+   "data": {
+    "town": "lowmoor",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.96,
+    "d": 4.21,
+    "angle": 1.3955,
+    "front": 2.9663,
+    "streetGap": -0.32
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_2",
+   "x": 1254.53,
+   "z": 1006.7,
+   "yaw": -2.9663,
+   "data": {
+    "town": "lowmoor",
+    "want": "house",
+    "district": "residential",
+    "w": 5.5,
+    "d": 3.62,
+    "angle": 1.3955,
+    "front": 4.5371,
+    "streetGap": -0.35
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_3",
+   "x": 1245.51,
+   "z": 1008.73,
+   "yaw": 1.7461,
+   "data": {
+    "town": "lowmoor",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.65,
+    "d": 7.35,
+    "angle": 1.3955,
+    "front": 6.1079,
+    "streetGap": -0.32
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_4",
+   "x": 1231.07,
+   "z": 999.32,
+   "yaw": 3.0969,
+   "data": {
+    "town": "lowmoor",
+    "want": "hut",
+    "district": "civic",
+    "w": 5.55,
+    "d": 5.22,
+    "angle": 1.6155,
+    "front": 4.7571,
+    "streetGap": -0.12
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_5",
+   "x": 1221.67,
+   "z": 989.07,
+   "yaw": -1.6155,
+   "data": {
+    "town": "lowmoor",
+    "want": "forge",
+    "district": "craft",
+    "w": 7.96,
+    "d": 5.76,
+    "angle": 1.6155,
+    "front": 3.1863,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_6",
+   "x": 1214.85,
+   "z": 999.2,
+   "yaw": 1.5261,
+   "data": {
+    "town": "lowmoor",
+    "want": "hut",
+    "district": "civic",
+    "w": 4.33,
+    "d": 7.58,
+    "angle": 1.6155,
+    "front": 6.3279,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_7",
+   "x": 1230.05,
+   "z": 1010,
+   "yaw": -1.6155,
+   "data": {
+    "town": "lowmoor",
+    "want": "market",
+    "district": "civic",
+    "w": 6.57,
+    "d": 6.3,
+    "angle": 1.6155,
+    "front": 3.1863,
+    "streetGap": -0.38
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_8",
+   "x": 1199.44,
+   "z": 978.02,
+   "yaw": -0.2564,
+   "data": {
+    "town": "lowmoor",
+    "want": "house",
+    "district": "residential",
+    "w": 3.53,
+    "d": 3.84,
+    "angle": 1.8272,
+    "front": 1.8272,
+    "streetGap": -0.31
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_9",
+   "x": 1197.55,
+   "z": 985.23,
+   "yaw": 2.8852,
+   "data": {
+    "town": "lowmoor",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.4,
+    "d": 3.84,
+    "angle": 1.8272,
+    "front": 4.9687,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_10",
+   "x": 1194.36,
+   "z": 994.52,
+   "yaw": -1.8272,
+   "data": {
+    "town": "lowmoor",
+    "want": "hut",
+    "district": "craft",
+    "w": 6.23,
+    "d": 5.31,
+    "angle": 1.8272,
+    "front": 3.398,
+    "streetGap": -0.1
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_11",
+   "x": 1185.92,
+   "z": 992.31,
+   "yaw": 1.3144,
+   "data": {
+    "town": "lowmoor",
+    "want": "house",
+    "district": "residential",
+    "w": 6.23,
+    "d": 4.73,
+    "angle": 1.8272,
+    "front": 6.5395,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_12",
+   "x": 1179.62,
+   "z": 1005.21,
+   "yaw": 1.5344,
+   "data": {
+    "town": "lowmoor",
+    "want": "house",
+    "district": "residential",
+    "w": 7.46,
+    "d": 4.15,
+    "angle": 1.6072,
+    "front": 6.3195,
+    "streetGap": 0.09
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_13",
+   "x": 1250.64,
+   "z": 1041.38,
+   "yaw": 1.496,
+   "data": {
+    "town": "lowmoor",
+    "want": "chapel",
+    "district": "residential",
+    "w": 8.21,
+    "d": 4.74,
+    "angle": 1.6456,
+    "front": 6.358,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_14",
+   "x": 1255.13,
+   "z": 1056.52,
+   "yaw": -1.6456,
+   "data": {
+    "town": "lowmoor",
+    "want": "inn",
+    "district": "residential",
+    "w": 5.45,
+    "d": 8.25,
+    "angle": 1.6456,
+    "front": 3.2164,
+    "streetGap": -0.3
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_15",
+   "x": 1244.8,
+   "z": 1056.72,
+   "yaw": 3.0668,
+   "data": {
+    "town": "lowmoor",
+    "want": "house",
+    "district": "residential",
+    "w": 3.51,
+    "d": 4.43,
+    "angle": 1.6456,
+    "front": 4.7872,
+    "streetGap": -0.29
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_16",
+   "x": 1231.99,
+   "z": 1038.94,
+   "yaw": 1.496,
+   "data": {
+    "town": "lowmoor",
+    "want": "warehouse",
+    "district": "craft",
+    "w": 6.12,
+    "d": 5.69,
+    "angle": 1.6456,
+    "front": 6.358,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_17",
+   "x": 1230.26,
+   "z": 1047.72,
+   "yaw": 1.496,
+   "data": {
+    "town": "lowmoor",
+    "want": "house",
+    "district": "residential",
+    "w": 4.22,
+    "d": 3.55,
+    "angle": 1.6456,
+    "front": 6.358,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_18",
+   "x": 1236.01,
+   "z": 1069.78,
+   "yaw": 1.716,
+   "data": {
+    "town": "lowmoor",
+    "want": "granary",
+    "district": "residential",
+    "w": 5.86,
+    "d": 6.64,
+    "angle": 1.4256,
+    "front": 6.138,
+    "streetGap": 0.04
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_19",
+   "x": 1200.66,
+   "z": 1045.91,
+   "yaw": 1.9324,
+   "data": {
+    "town": "lowmoor",
+    "want": "house",
+    "district": "residential",
+    "w": 6.94,
+    "d": 4.02,
+    "angle": 1.2092,
+    "front": 5.9215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_20",
+   "x": 1204.95,
+   "z": 1056.76,
+   "yaw": 0.3616,
+   "data": {
+    "town": "lowmoor",
+    "want": "stable",
+    "district": "residential",
+    "w": 7.51,
+    "d": 4.97,
+    "angle": 1.2092,
+    "front": 1.2092,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_21",
+   "x": 1209.47,
+   "z": 1065.81,
+   "yaw": 1.9324,
+   "data": {
+    "town": "lowmoor",
+    "want": "house",
+    "district": "residential",
+    "w": 5.53,
+    "d": 5.05,
+    "angle": 1.2092,
+    "front": 5.9215,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_22",
+   "x": 1184.85,
+   "z": 1050.2,
+   "yaw": -1.4292,
+   "data": {
+    "town": "lowmoor",
+    "want": "hall",
+    "district": "residential",
+    "w": 7.97,
+    "d": 6.03,
+    "angle": 1.4292,
+    "front": 3,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "lowmoor_plot_23",
+   "x": 1185.99,
+   "z": 1059.75,
+   "yaw": -1.4292,
+   "data": {
+    "town": "lowmoor",
+    "want": "house",
+    "district": "residential",
+    "w": 4.42,
+    "d": 6.47,
+    "angle": 1.4292,
+    "front": 3,
+    "streetGap": -0.39
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "deepdene_square",
+   "x": 1344.07,
+   "z": 284.94,
+   "yaw": 0,
+   "data": {
+    "r": 4.28,
+    "town": "deepdene",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_0",
+   "x": 1343.21,
+   "z": 317.75,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1343.21,
+      317.75
+     ],
+     [
+      1334.83,
+      293.15
+     ],
+     [
+      1326.44,
+      268.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_1",
+   "x": 1373.57,
+   "z": 292.46,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1373.57,
+      292.46
+     ],
+     [
+      1357.38,
+      294.55
+     ],
+     [
+      1341.48,
+      298.3
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_2",
+   "x": 1361.27,
+   "z": 307.28,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1361.27,
+      307.28
+     ],
+     [
+      1359.76,
+      303.44
+     ],
+     [
+      1358.39,
+      299.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_3",
+   "x": 1356.39,
+   "z": 308.96,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1356.39,
+      308.96
+     ],
+     [
+      1355.3,
+      305.18
+     ],
+     [
+      1353.92,
+      301.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_4",
+   "x": 1349.93,
+   "z": 293.32,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1349.93,
+      293.32
+     ],
+     [
+      1347.4,
+      278.62
+     ],
+     [
+      1345.85,
+      263.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_5",
+   "x": 1369.31,
+   "z": 279.27,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1369.31,
+      279.27
+     ],
+     [
+      1359.86,
+      279.79
+     ],
+     [
+      1350.44,
+      280.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_6",
+   "x": 1363.88,
+   "z": 290.41,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1363.88,
+      290.41
+     ],
+     [
+      1363.79,
+      285.73
+     ],
+     [
+      1363.14,
+      281.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_7",
+   "x": 1355.38,
+   "z": 291.09,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1355.38,
+      291.09
+     ],
+     [
+      1355.01,
+      286.43
+     ],
+     [
+      1354.64,
+      281.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_8",
+   "x": 1359.78,
+   "z": 278.69,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1359.78,
+      278.69
+     ],
+     [
+      1359.66,
+      270.91
+     ],
+     [
+      1358.55,
+      263.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_9",
+   "x": 1368.32,
+   "z": 269.35,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1368.32,
+      269.35
+     ],
+     [
+      1364.59,
+      269.4
+     ],
+     [
+      1360.69,
+      269.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_10",
+   "x": 1357.37,
+   "z": 268.4,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1357.37,
+      268.4
+     ],
+     [
+      1353.45,
+      268.91
+     ],
+     [
+      1349.5,
+      269.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_11",
+   "x": 1345.16,
+   "z": 279.03,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1345.16,
+      279.03
+     ],
+     [
+      1342.69,
+      279.74
+     ],
+     [
+      1340.2,
+      280.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_12",
+   "x": 1333.76,
+   "z": 301.05,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1333.76,
+      301.05
+     ],
+     [
+      1329.04,
+      303.34
+     ],
+     [
+      1324.11,
+      305.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_13",
+   "x": 1336.28,
+   "z": 308.35,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1336.28,
+      308.35
+     ],
+     [
+      1331.86,
+      309.67
+     ],
+     [
+      1327.9,
+      310.82
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_14",
+   "x": 1326.52,
+   "z": 286.8,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1326.52,
+      286.8
+     ],
+     [
+      1322.94,
+      288.81
+     ],
+     [
+      1319.33,
+      290.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_15",
+   "x": 1323.56,
+   "z": 281.57,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1323.56,
+      281.57
+     ],
+     [
+      1319.93,
+      283.38
+     ],
+     [
+      1318.37,
+      284.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_16",
+   "x": 1358.39,
+   "z": 299.55,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1358.39,
+      299.55
+     ],
+     [
+      1357.73,
+      294.51
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_17",
+   "x": 1326.52,
+   "z": 286.8,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1326.52,
+      286.8
+     ],
+     [
+      1332.02,
+      284.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_18",
+   "x": 1355.3,
+   "z": 305.18,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1355.3,
+      305.18
+     ],
+     [
+      1359.76,
+      303.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "deepdene_street_19",
+   "x": 1323.56,
+   "z": 281.57,
+   "yaw": 0,
+   "data": {
+    "town": "deepdene",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1323.56,
+      281.57
+     ],
+     [
+      1326.51,
+      286.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "deepdene_plot_0",
+   "x": 1365.22,
+   "z": 301.41,
+   "yaw": -1.0304,
+   "data": {
+    "town": "deepdene",
+    "want": "house",
+    "district": "residential",
+    "w": 6.51,
+    "d": 5.76,
+    "angle": 2.6012,
+    "front": 2.6012,
+    "streetGap": 0.53
+   }
+  },
+  {
+   "kind": "building",
+   "id": "deepdene_plot_1",
+   "x": 1351.36,
+   "z": 306.48,
+   "yaw": 1.8912,
+   "data": {
+    "town": "deepdene",
+    "want": "house",
+    "district": "residential",
+    "w": 4.29,
+    "d": 6.67,
+    "angle": 2.8212,
+    "front": 5.9628,
+    "streetGap": -0.1
+   }
+  },
+  {
+   "kind": "building",
+   "id": "deepdene_plot_2",
+   "x": 1367.33,
+   "z": 285.45,
+   "yaw": -1.4916,
+   "data": {
+    "town": "deepdene",
+    "want": "house",
+    "district": "residential",
+    "w": 3.72,
+    "d": 8.15,
+    "angle": 3.0624,
+    "front": 3.0624,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "deepdene_plot_3",
+   "x": 1359.13,
+   "z": 286.1,
+   "yaw": -1.4916,
+   "data": {
+    "town": "deepdene",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.86,
+    "d": 8.15,
+    "angle": 3.0624,
+    "front": 3.0624,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "deepdene_plot_4",
+   "x": 1365,
+   "z": 274.63,
+   "yaw": 0.0792,
+   "data": {
+    "town": "deepdene",
+    "want": "house",
+    "district": "residential",
+    "w": 6.66,
+    "d": 6.07,
+    "angle": 3.0624,
+    "front": 7.7747,
+    "streetGap": -0.26
+   }
+  },
+  {
+   "kind": "building",
+   "id": "deepdene_plot_5",
+   "x": 1353.9,
+   "z": 274.57,
+   "yaw": -3.0624,
+   "data": {
+    "town": "deepdene",
+    "want": "granary",
+    "district": "craft",
+    "w": 6.69,
+    "d": 7.95,
+    "angle": 3.0624,
+    "front": 4.6332,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "deepdene_plot_6",
+   "x": 1341.7,
+   "z": 276.01,
+   "yaw": 0.259,
+   "data": {
+    "town": "deepdene",
+    "want": "hut",
+    "district": "civic",
+    "w": 3.93,
+    "d": 4.09,
+    "angle": 2.8826,
+    "front": 7.595,
+    "streetGap": -0.29
+   }
+  },
+  {
+   "kind": "building",
+   "id": "deepdene_plot_7",
+   "x": 1340.65,
+   "z": 272.05,
+   "yaw": 1.8298,
+   "data": {
+    "town": "deepdene",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.93,
+    "d": 4.09,
+    "angle": 2.8826,
+    "front": 6.0242,
+    "streetGap": 2
+   }
+  },
+  {
+   "kind": "building",
+   "id": "deepdene_plot_8",
+   "x": 1325.77,
+   "z": 293.93,
+   "yaw": -2.709,
+   "data": {
+    "town": "deepdene",
+    "want": "shrine",
+    "district": "residential",
+    "w": 6.39,
+    "d": 7.58,
+    "angle": 2.709,
+    "front": 4.2798,
+    "streetGap": -0.03
    }
   }
  ]

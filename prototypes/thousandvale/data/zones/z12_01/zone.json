@@ -1,5 +1,5 @@
 {
-  "name": "Tifeckgate (z12_01)",
+  "name": "Ashcombe (z12_01)",
   "zone": "z12_01",
   "sheet": {
     "sheet": "torbor_downs",
@@ -55,9 +55,10 @@
     {
       "type": "settlement",
       "kind": "city",
-      "name": "Tifeckgate",
+      "name": "Ashcombe",
       "x": 1408,
       "z": 1328,
+      "wfName": "Tifeckgate",
       "hub": true,
       "radius": 140,
       "movedFrom": {
@@ -71,6 +72,16 @@
       "name": "The Elder Fibafer",
       "x": 704,
       "z": 192
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Kettle Cross",
+      "x": 933,
+      "z": 773,
+      "ask": true,
+      "askR": 40,
+      "radius": 46
     },
     {
       "type": "dungeon",
@@ -101,7 +112,7 @@
     "unwalkableShare": 0.037,
     "towns": [
       {
-        "name": "Tifeckgate",
+        "name": "Ashcombe",
         "kind": "city",
         "hub": true,
         "at": [
@@ -118,22 +129,39 @@
         "streets": 65,
         "links": 1,
         "overlaps": 0
+      },
+      {
+        "name": "Kettle Cross",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          933,
+          773
+        ],
+        "radius": 46,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 15,
+        "streets": 33,
+        "links": 0,
+        "overlaps": 0
       }
     ],
     "roads": 4,
     "bridges": 0,
-    "scatter": 10563,
+    "scatter": 10479,
     "scatterKinds": {
-      "bush": 2758,
-      "tree_conifer": 5069,
-      "tree_broadleaf": 1057,
-      "rock_small": 1224,
-      "rock_large": 421,
+      "bush": 2734,
+      "tree_conifer": 5027,
+      "tree_broadleaf": 1051,
+      "rock_small": 1214,
+      "rock_large": 419,
       "boulder": 34
     },
     "sites": [
-      "settlement(HUB) city Tifeckgate 1408 1328 140",
+      "settlement(HUB) city Ashcombe 1408 1328 140",
       "landmark ancientwood The Elder Fibafer 704 192",
+      "settlement hamlet Kettle Cross 933 773 46",
       "dungeon door_1 Barrow entrance 1566 1434  -1.96",
       "event event_ashcombe  1216 1176 40"
     ],
@@ -141,13 +169,13 @@
       "x": 1412,
       "z": 1336
     },
-    "placements": 104,
-    "vignettesAvoided": 0
+    "placements": 154,
+    "vignettesAvoided": 40
   },
   "files": {
-    "terrain.bin": 6305674,
-    "nav.bin": 1050717,
-    "scatter.bin": 84588,
-    "placements.json": 50313
+    "terrain.bin": 548250,
+    "nav.bin": 27817,
+    "scatter.bin": 83916,
+    "placements.json": 65838
   }
 }

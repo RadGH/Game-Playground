@@ -5,24 +5,40 @@
  "placements": [
   {
    "kind": "settlement",
-   "id": "hollowwick",
-   "x": 1120,
-   "z": 1808,
+   "id": "saltmouth",
+   "x": 880,
+   "z": 1616,
+   "yaw": 0,
+   "data": {
+    "kind": "town",
+    "name": "Saltmouth",
+    "radius": 90,
+    "hub": true,
+    "planned": true,
+    "wfName": "Hollowwick"
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "gull_steps",
+   "x": 282,
+   "z": 1266,
    "yaw": 0,
    "data": {
     "kind": "hamlet",
-    "name": "Hollowwick",
+    "name": "Gull Steps",
     "radius": 46,
-    "hub": true,
-    "planned": true
+    "hub": false,
+    "planned": true,
+    "ask": true
    }
   },
   {
    "kind": "dungeon_door",
    "id": "door_1",
-   "x": 1005,
-   "z": 1683,
-   "yaw": 1.245,
+   "x": 855,
+   "z": 1804,
+   "yaw": 2.294,
    "data": {
     "name": "Barrow entrance"
    }
@@ -30,840 +46,3062 @@
   {
    "kind": "event_site",
    "id": "event_saltmouth",
-   "x": 1072,
-   "z": 1416,
+   "x": 844,
+   "z": 1372,
    "yaw": 0,
    "data": {
     "r": 40
    }
   },
   {
-   "kind": "town_square",
-   "id": "hollowwick_square",
-   "x": 1121.9,
-   "z": 1820.26,
+   "kind": "lake",
+   "id": "the_salt_mere",
+   "x": 1034,
+   "z": 1066,
    "yaw": 0,
    "data": {
-    "r": 4.53,
-    "town": "hollowwick",
+    "r": 320,
+    "level": 62.86,
+    "kind": "shore",
+    "name": "the Salt Mere"
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "saltmouth_square",
+   "x": 888.95,
+   "z": 1603.95,
+   "yaw": 0,
+   "data": {
+    "r": 6.62,
+    "town": "saltmouth",
     "culture": "halfling"
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_0",
-   "x": 1154.42,
-   "z": 1823.38,
+   "id": "saltmouth_street_0",
+   "x": 930.22,
+   "z": 1638.44,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "main",
     "width": 5,
     "pts": [
      [
-      1154.42,
-      1823.38
+      930.22,
+      1638.44
      ],
      [
-      1119.2,
-      1810.11
+      878.83,
+      1619.08
      ],
      [
-      1084.04,
-      1796.67
+      827.54,
+      1599.47
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_1",
-   "x": 1141.69,
-   "z": 1782.69,
+   "id": "saltmouth_street_1",
+   "x": 912.96,
+   "z": 1571.97,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "lane",
     "width": 3.2,
     "pts": [
      [
-      1141.69,
-      1782.69
+      912.96,
+      1571.97
      ],
      [
-      1134.55,
-      1794.77
+      905.05,
+      1595.66
      ],
      [
-      1127.43,
-      1806.87
+      896.94,
+      1620.05
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_2",
-   "x": 1146.97,
-   "z": 1807.52,
+   "id": "saltmouth_street_2",
+   "x": 931.44,
+   "z": 1613.55,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1146.97,
-      1807.52
+      931.44,
+      1613.55
      ],
      [
-      1141.46,
-      1802.74
+      919.49,
+      1606.97
      ],
      [
-      1135.6,
-      1798.4
+      907.07,
+      1601.32
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_3",
-   "x": 1151.07,
-   "z": 1791.6,
+   "id": "saltmouth_street_3",
+   "x": 929.11,
+   "z": 1591.24,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1151.07,
-      1791.6
+      929.11,
+      1591.24
      ],
      [
-      1146.91,
-      1796.81
+      926.66,
+      1594.73
      ],
      [
-      1143.11,
-      1802.29
+      920.53,
+      1604.88
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_4",
-   "x": 1128.08,
-   "z": 1775.65,
+   "id": "saltmouth_street_4",
+   "x": 933.56,
+   "z": 1603.48,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1128.08,
-      1775.65
+      933.56,
+      1603.48
      ],
      [
-      1122.67,
-      1787.28
+      930.34,
+      1601.24
      ],
      [
-      1116.78,
-      1798.67
+      926.31,
+      1598.78
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_5",
-   "x": 1133.16,
-   "z": 1789.38,
+   "id": "saltmouth_street_5",
+   "x": 927.65,
+   "z": 1588.54,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1133.16,
-      1789.38
+      927.65,
+      1588.54
      ],
      [
-      1129.21,
-      1787.31
+      923.93,
+      1585.82
      ],
      [
-      1125.02,
-      1785.76
+      918.68,
+      1582.78
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_6",
-   "x": 1121.23,
-   "z": 1783.8,
+   "id": "saltmouth_street_6",
+   "x": 922.92,
+   "z": 1598.46,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1121.23,
-      1783.8
+      922.92,
+      1598.46
      ],
      [
-      1114.43,
-      1778.99
+      918.02,
+      1594.88
      ],
      [
-      1107.86,
-      1773.87
+      912.77,
+      1591.84
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_7",
-   "x": 1121.03,
-   "z": 1775.56,
+   "id": "saltmouth_street_7",
+   "x": 921.96,
+   "z": 1611.38,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1121.03,
-      1775.56
+      921.96,
+      1611.38
      ],
      [
-      1119.6,
-      1777.74
+      919.98,
+      1616.24
      ],
      [
-      1117.92,
-      1779.74
+      918.28,
+      1621.2
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_8",
-   "x": 1112.39,
-   "z": 1778.84,
+   "id": "saltmouth_street_8",
+   "x": 911.65,
+   "z": 1607.52,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1112.39,
-      1778.84
+      911.65,
+      1607.52
      ],
      [
-      1108.17,
-      1784.01
+      909.76,
+      1612.42
      ],
      [
-      1104.43,
-      1789.54
+      907.98,
+      1617.35
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_9",
-   "x": 1115.05,
-   "z": 1812.51,
+   "id": "saltmouth_street_9",
+   "x": 877.15,
+   "z": 1561.77,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      877.15,
+      1561.77
+     ],
+     [
+      872.59,
+      1584.84
+     ],
+     [
+      865.75,
+      1607.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_10",
+   "x": 900.07,
+   "z": 1591.16,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      900.07,
+      1591.16
+     ],
+     [
+      888.18,
+      1586.82
+     ],
+     [
+      876.11,
+      1582.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_11",
+   "x": 890.71,
+   "z": 1567.76,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      890.71,
+      1567.76
+     ],
+     [
+      888.28,
+      1576.31
+     ],
+     [
+      884.98,
+      1584.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_12",
+   "x": 902.87,
+   "z": 1582.96,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      902.87,
+      1582.96
+     ],
+     [
+      895.84,
+      1580.57
+     ],
+     [
+      888.81,
+      1578.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_13",
+   "x": 899.69,
+   "z": 1570.82,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      899.69,
+      1570.82
+     ],
+     [
+      898.4,
+      1575.33
+     ],
+     [
+      896.67,
+      1579.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_14",
+   "x": 898.03,
+   "z": 1582.47,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      898.03,
+      1582.47
+     ],
+     [
+      897.2,
+      1585.46
+     ],
+     [
+      896.03,
+      1588.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_15",
+   "x": 886.38,
+   "z": 1575.58,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      886.38,
+      1575.58
+     ],
+     [
+      882.93,
+      1574.33
+     ],
+     [
+      879.44,
+      1573.21
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_16",
+   "x": 886.13,
+   "z": 1587.85,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      886.13,
+      1587.85
+     ],
+     [
+      883.09,
+      1597.88
+     ],
+     [
+      879.37,
+      1607.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_17",
+   "x": 897.61,
+   "z": 1598.38,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      897.61,
+      1598.38
+     ],
+     [
+      891.44,
+      1596.65
+     ],
+     [
+      885.49,
+      1594.25
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_18",
+   "x": 881.79,
+   "z": 1596.09,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      881.79,
+      1596.09
+     ],
+     [
+      877.29,
+      1594.4
+     ],
+     [
+      872.7,
+      1592.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_19",
+   "x": 866.29,
+   "z": 1589.14,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      866.29,
+      1589.14
+     ],
+     [
+      855.57,
+      1587.73
+     ],
+     [
+      844.79,
+      1586.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_20",
+   "x": 867.56,
+   "z": 1577.52,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      867.56,
+      1577.52
+     ],
+     [
+      856.83,
+      1576.11
+     ],
+     [
+      846.06,
+      1575.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_21",
+   "x": 861.52,
+   "z": 1564.2,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      861.52,
+      1564.2
+     ],
+     [
+      861.26,
+      1568.8
+     ],
+     [
+      860.2,
+      1575.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_22",
+   "x": 857.26,
+   "z": 1577.74,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      857.26,
+      1577.74
+     ],
+     [
+      857.03,
+      1582.25
+     ],
+     [
+      856.28,
+      1586.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_23",
+   "x": 858.2,
+   "z": 1589.61,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      858.2,
+      1589.61
+     ],
+     [
+      857.66,
+      1594.82
+     ],
+     [
+      857.07,
+      1600.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_24",
+   "x": 866.45,
+   "z": 1621.98,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
     "cls": "lane",
     "width": 3.2,
     "pts": [
      [
-      1115.05,
-      1812.51
+      866.45,
+      1621.98
      ],
      [
-      1110.37,
-      1827.13
+      856.48,
+      1636.76
      ],
      [
-      1105.09,
-      1841.54
+      848.09,
+      1652.49
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_10",
-   "x": 1139.16,
-   "z": 1821.18,
+   "id": "saltmouth_street_25",
+   "x": 883.21,
+   "z": 1632.9,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1139.16,
-      1821.18
+      883.21,
+      1632.9
      ],
      [
-      1135.17,
-      1835.39
+      874.22,
+      1646.95
      ],
      [
-      1132.5,
-      1843.57
+      864.67,
+      1660.63
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_11",
-   "x": 1139.95,
-   "z": 1839.99,
+   "id": "saltmouth_street_26",
+   "x": 898.91,
+   "z": 1667.44,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1139.95,
-      1839.99
+      898.91,
+      1667.44
      ],
      [
-      1136.82,
-      1839.62
+      886.27,
+      1659.65
+     ],
+     [
+      873.3,
+      1652.44
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_12",
-   "x": 1131.14,
-   "z": 1837.59,
+   "id": "saltmouth_street_27",
+   "x": 900.57,
+   "z": 1645.33,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1131.14,
-      1837.59
+      900.57,
+      1645.33
      ],
      [
-      1122.04,
-      1833.84
+      895.46,
+      1653.05
      ],
      [
-      1112.95,
-      1830.09
+      891.22,
+      1661.27
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_13",
-   "x": 1128.56,
-   "z": 1819.79,
+   "id": "saltmouth_street_28",
+   "x": 903.71,
+   "z": 1659.25,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1128.56,
-      1819.79
+      903.71,
+      1659.25
      ],
      [
-      1126.14,
-      1826.57
+      900.23,
+      1657.14
      ],
      [
-      1123.08,
-      1833.08
+      896.68,
+      1655.12
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_14",
-   "x": 1135.29,
-   "z": 1827.53,
+   "id": "saltmouth_street_29",
+   "x": 894.61,
+   "z": 1652.32,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1135.29,
-      1827.53
+      894.61,
+      1652.32
      ],
      [
-      1131.81,
-      1825.85
+      886.67,
+      1647.75
      ],
      [
-      1128.15,
-      1824.58
+      878.8,
+      1643.05
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_15",
-   "x": 1124.5,
-   "z": 1825.82,
+   "id": "saltmouth_street_30",
+   "x": 889.62,
+   "z": 1638.91,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1124.5,
-      1825.82
+      889.62,
+      1638.91
      ],
      [
-      1120.35,
-      1824.02
+      887.85,
+      1642.44
      ],
      [
-      1116.13,
-      1822.37
+      885.64,
+      1645.71
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_16",
-   "x": 1120.48,
-   "z": 1834.38,
+   "id": "saltmouth_street_31",
+   "x": 884.28,
+   "z": 1647.63,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1120.48,
-      1834.38
+      884.28,
+      1647.63
      ],
      [
-      1118.78,
-      1838.92
+      882.37,
+      1651.3
      ],
      [
-      1116.79,
-      1843.33
+      880.1,
+      1654.76
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_17",
-   "x": 1109.55,
-   "z": 1821.36,
+   "id": "saltmouth_street_32",
+   "x": 880.32,
+   "z": 1658.22,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1109.55,
-      1821.36
+      880.32,
+      1658.22
      ],
      [
-      1096.02,
-      1815.72
+      877.55,
+      1662.44
      ],
      [
-      1082.39,
-      1810.57
+      875.23,
+      1666.92
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_18",
-   "x": 1100.6,
-   "z": 1810.43,
+   "id": "saltmouth_street_33",
+   "x": 891.87,
+   "z": 1664.98,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1100.6,
-      1810.43
+      891.87,
+      1664.98
      ],
      [
-      1099.34,
-      1812.22
+      889.4,
+      1669.38
      ],
      [
-      1098.28,
-      1814.14
+      888.85,
+      1670.28
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_19",
-   "x": 1097.04,
-   "z": 1818.31,
+   "id": "saltmouth_street_34",
+   "x": 874.19,
+   "z": 1641.8,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1097.04,
-      1818.31
+      874.19,
+      1641.8
      ],
      [
-      1093.82,
-      1826.81
+      870.57,
+      1638.45
      ],
      [
-      1091.79,
-      1833
+      866.97,
+      1635.08
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_20",
-   "x": 1105.44,
-   "z": 1829.38,
+   "id": "saltmouth_street_35",
+   "x": 867.69,
+   "z": 1648.77,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1105.44,
-      1829.38
+      867.69,
+      1648.77
      ],
      [
-      1100.66,
-      1827.46
+      863.96,
+      1645.55
      ],
      [
-      1095.73,
-      1825.95
+      860.47,
+      1642.05
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_21",
-   "x": 1093.95,
-   "z": 1823.12,
+   "id": "saltmouth_street_36",
+   "x": 853.51,
+   "z": 1634.15,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1093.95,
-      1823.12
+      853.51,
+      1634.15
      ],
      [
-      1086.99,
-      1820.6
+      844.68,
+      1631.03
      ],
      [
-      1084.13,
-      1819.61
+      836.05,
+      1627.39
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_22",
-   "x": 1091.81,
-   "z": 1816.46,
+   "id": "saltmouth_street_37",
+   "x": 851.69,
+   "z": 1618.73,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1091.81,
-      1816.46
+      851.69,
+      1618.73
      ],
      [
-      1091.15,
-      1818.57
+      848.77,
+      1623.63
      ],
      [
-      1090.34,
-      1820.62
+      845.87,
+      1628.55
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_23",
-   "x": 1086.81,
-   "z": 1821.82,
+   "id": "saltmouth_street_38",
+   "x": 842.39,
+   "z": 1631.91,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1086.81,
-      1821.82
+      842.39,
+      1631.91
      ],
      [
-      1085.9,
-      1824.07
+      840.61,
+      1637.15
+     ],
+     [
+      838.96,
+      1642.44
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_24",
-   "x": 1136.82,
-   "z": 1839.62,
+   "id": "saltmouth_street_39",
+   "x": 866.29,
+   "z": 1589.14,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1136.82,
-      1839.62
+      866.29,
+      1589.14
      ],
      [
-      1134.08,
-      1838.72
+      870.86,
+      1590.53
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_25",
-   "x": 1127.43,
-   "z": 1806.87,
+   "id": "saltmouth_street_40",
+   "x": 905.05,
+   "z": 1595.66,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1127.43,
-      1806.87
+      905.05,
+      1595.66
      ],
      [
-      1125.34,
-      1812.42
+      900.07,
+      1591.16
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "hollowwick_street_26",
-   "x": 1133.16,
-   "z": 1789.38,
+   "id": "saltmouth_street_41",
+   "x": 907.07,
+   "z": 1601.32,
    "yaw": 0,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1133.16,
-      1789.38
+      907.07,
+      1601.32
      ],
      [
-      1136.55,
-      1791.39
+      903.56,
+      1600.15
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_42",
+   "x": 878.83,
+   "z": 1619.08,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      878.83,
+      1619.08
+     ],
+     [
+      879.37,
+      1607.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_43",
+   "x": 866.45,
+   "z": 1621.98,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      866.45,
+      1621.98
+     ],
+     [
+      869,
+      1615.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_44",
+   "x": 927.65,
+   "z": 1588.54,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      927.65,
+      1588.54
+     ],
+     [
+      929.11,
+      1591.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_45",
+   "x": 911.65,
+   "z": 1607.52,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      911.65,
+      1607.52
+     ],
+     [
+      913.2,
+      1604.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_46",
+   "x": 853.51,
+   "z": 1634.15,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      853.51,
+      1634.15
+     ],
+     [
+      856.77,
+      1636.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_47",
+   "x": 883.21,
+   "z": 1632.9,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      883.21,
+      1632.9
+     ],
+     [
+      887.23,
+      1622.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_48",
+   "x": 874.19,
+   "z": 1641.8,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      874.19,
+      1641.8
+     ],
+     [
+      876.55,
+      1643.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "saltmouth_street_49",
+   "x": 867.69,
+   "z": 1648.77,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      867.69,
+      1648.77
+     ],
+     [
+      871.23,
+      1651.24
      ]
     ]
    }
   },
   {
    "kind": "building",
-   "id": "hollowwick_plot_0",
-   "x": 1145.25,
-   "z": 1791.79,
-   "yaw": 0.9305,
+   "id": "saltmouth_plot_0",
+   "x": 927.66,
+   "z": 1605.34,
+   "yaw": 2.5639,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "want": "house",
     "district": "residential",
-    "w": 6.07,
-    "d": 5.26,
-    "angle": 2.2111,
-    "front": 6.9235,
-    "streetGap": -0.3
+    "w": 5.82,
+    "d": 8.24,
+    "angle": 2.1484,
+    "front": 5.29,
+    "streetGap": -0.12
    }
   },
   {
    "kind": "building",
-   "id": "hollowwick_plot_1",
-   "x": 1141.62,
-   "z": 1796.66,
-   "yaw": 0.9305,
+   "id": "saltmouth_plot_1",
+   "x": 920.8,
+   "z": 1590.62,
+   "yaw": -0.5776,
    "data": {
-    "town": "hollowwick",
-    "want": "house",
+    "town": "saltmouth",
+    "want": "market",
     "district": "residential",
-    "w": 6.07,
-    "d": 5.26,
-    "angle": 2.2111,
-    "front": 6.9235,
-    "streetGap": -0.3
-   }
-  },
-  {
-   "kind": "building",
-   "id": "hollowwick_plot_2",
-   "x": 1131.23,
-   "z": 1782.77,
-   "yaw": -0.4189,
-   "data": {
-    "town": "hollowwick",
-    "want": "house",
-    "district": "residential",
-    "w": 6.53,
-    "d": 7.71,
-    "angle": 1.9897,
-    "front": 1.9897,
+    "w": 6.78,
+    "d": 10.91,
+    "angle": 2.1484,
+    "front": 2.1484,
     "streetGap": -0.4
    }
   },
   {
    "kind": "building",
-   "id": "hollowwick_plot_3",
-   "x": 1125.91,
-   "z": 1794.72,
-   "yaw": 2.7227,
+   "id": "saltmouth_plot_2",
+   "x": 914.92,
+   "z": 1614.35,
+   "yaw": 1.2131,
    "data": {
-    "town": "hollowwick",
-    "want": "shrine",
-    "district": "residential",
-    "w": 11.66,
-    "d": 7.71,
-    "angle": 1.9897,
-    "front": 5.1313,
-    "streetGap": 0.17
+    "town": "saltmouth",
+    "want": "chapel",
+    "district": "craft",
+    "w": 9.29,
+    "d": 7.41,
+    "angle": 1.9284,
+    "front": 6.6408,
+    "streetGap": -0.4
    }
   },
   {
    "kind": "building",
-   "id": "hollowwick_plot_4",
-   "x": 1113.01,
-   "z": 1787.61,
-   "yaw": 2.5027,
+   "id": "saltmouth_plot_3",
+   "x": 893.8,
+   "z": 1573.76,
+   "yaw": -0.3286,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
+    "want": "hut",
+    "district": "craft",
+    "w": 8.17,
+    "d": 5.4,
+    "angle": 1.8994,
+    "front": 1.8994,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "saltmouth_plot_4",
+   "x": 884.52,
+   "z": 1569.68,
+   "yaw": -0.3286,
+   "data": {
+    "town": "saltmouth",
+    "want": "house",
+    "district": "residential",
+    "w": 6.43,
+    "d": 6.14,
+    "angle": 1.8994,
+    "front": 1.8994,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "saltmouth_plot_5",
+   "x": 881.28,
+   "z": 1579.19,
+   "yaw": 2.813,
+   "data": {
+    "town": "saltmouth",
+    "want": "hut",
+    "district": "craft",
+    "w": 6.59,
+    "d": 6.14,
+    "angle": 1.8994,
+    "front": 5.0409,
+    "streetGap": -0.27
+   }
+  },
+  {
+   "kind": "building",
+   "id": "saltmouth_plot_6",
+   "x": 878.93,
+   "z": 1589.6,
+   "yaw": -0.3286,
+   "data": {
+    "town": "saltmouth",
+    "want": "hut",
+    "district": "civic",
+    "w": 6.75,
+    "d": 8.41,
+    "angle": 1.8994,
+    "front": 1.8994,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "saltmouth_plot_7",
+   "x": 875.15,
+   "z": 1600.69,
+   "yaw": 2.813,
+   "data": {
+    "town": "saltmouth",
+    "want": "forge",
+    "district": "civic",
+    "w": 9.3,
+    "d": 8.41,
+    "angle": 1.8994,
+    "front": 5.0409,
+    "streetGap": -0.11
+   }
+  },
+  {
+   "kind": "building",
+   "id": "saltmouth_plot_8",
+   "x": 862.53,
+   "z": 1582.85,
+   "yaw": -1.6794,
+   "data": {
+    "town": "saltmouth",
+    "want": "hut",
+    "district": "craft",
+    "w": 7.82,
+    "d": 7.66,
+    "angle": 1.6794,
+    "front": 3.2502,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "saltmouth_plot_9",
+   "x": 850.42,
+   "z": 1581.53,
+   "yaw": -0.1086,
+   "data": {
+    "town": "saltmouth",
     "want": "granary",
     "district": "residential",
-    "w": 12.14,
-    "d": 7.46,
-    "angle": 2.2097,
-    "front": 5.3513,
-    "streetGap": -0.31
+    "w": 7.82,
+    "d": 8.85,
+    "angle": 1.6794,
+    "front": 1.6794,
+    "streetGap": -0.27
    }
   },
   {
    "kind": "building",
-   "id": "hollowwick_plot_5",
-   "x": 1129.61,
-   "z": 1831.19,
-   "yaw": -0.3913,
+   "id": "saltmouth_plot_10",
+   "x": 862.17,
+   "z": 1595.31,
+   "yaw": -1.6794,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
     "want": "hut",
     "district": "craft",
-    "w": 7.26,
-    "d": 6.53,
-    "angle": 1.9621,
-    "front": 1.9621,
+    "w": 9.29,
+    "d": 5.67,
+    "angle": 1.6794,
+    "front": 3.2502,
     "streetGap": -0.4
    }
   },
   {
    "kind": "building",
-   "id": "hollowwick_plot_6",
-   "x": 1114.07,
-   "z": 1836.97,
-   "yaw": 2.7503,
+   "id": "saltmouth_plot_11",
+   "x": 850.3,
+   "z": 1594.02,
+   "yaw": 1.4622,
    "data": {
-    "town": "hollowwick",
-    "want": "hut",
-    "district": "craft",
-    "w": 8.48,
-    "d": 6.14,
-    "angle": 1.9621,
-    "front": 5.1036,
+    "town": "saltmouth",
+    "want": "hall",
+    "district": "residential",
+    "w": 9.29,
+    "d": 11.32,
+    "angle": 1.6794,
+    "front": 6.3917,
+    "streetGap": -0.35
+   }
+  },
+  {
+   "kind": "building",
+   "id": "saltmouth_plot_12",
+   "x": 903.12,
+   "z": 1652.19,
+   "yaw": -0.5301,
+   "data": {
+    "town": "saltmouth",
+    "want": "house",
+    "district": "residential",
+    "w": 8.06,
+    "d": 6.95,
+    "angle": 2.1009,
+    "front": 2.1009,
     "streetGap": -0.4
    }
   },
   {
    "kind": "building",
-   "id": "hollowwick_plot_7",
-   "x": 1102.08,
-   "z": 1823.45,
-   "yaw": -0.3399,
+   "id": "saltmouth_plot_13",
+   "x": 897.87,
+   "z": 1661.16,
+   "yaw": 2.6115,
    "data": {
-    "town": "hollowwick",
+    "town": "saltmouth",
+    "want": "house",
+    "district": "residential",
+    "w": 5.71,
+    "d": 6.95,
+    "angle": 2.1009,
+    "front": 5.2425,
+    "streetGap": -0.29
+   }
+  },
+  {
+   "kind": "building",
+   "id": "saltmouth_plot_14",
+   "x": 893,
+   "z": 1645.45,
+   "yaw": -2.1009,
+   "data": {
+    "town": "saltmouth",
+    "want": "house",
+    "district": "residential",
+    "w": 6.67,
+    "d": 8.53,
+    "angle": 2.1009,
+    "front": 3.6717,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "saltmouth_plot_15",
+   "x": 887.63,
+   "z": 1654.38,
+   "yaw": -2.1009,
+   "data": {
+    "town": "saltmouth",
+    "want": "house",
+    "district": "residential",
+    "w": 7.07,
+    "d": 8.77,
+    "angle": 2.1009,
+    "front": 3.6717,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "saltmouth_plot_16",
+   "x": 873.31,
+   "z": 1659.95,
+   "yaw": 1.0407,
+   "data": {
+    "town": "saltmouth",
+    "want": "house",
+    "district": "residential",
+    "w": 8.88,
+    "d": 6.42,
+    "angle": 2.1009,
+    "front": 6.8133,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "saltmouth_plot_17",
+   "x": 867.39,
+   "z": 1641.87,
+   "yaw": 2.3915,
+   "data": {
+    "town": "saltmouth",
+    "want": "house",
+    "district": "residential",
+    "w": 5.93,
+    "d": 8.67,
+    "angle": 2.3209,
+    "front": 5.4625,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "saltmouth_plot_18",
+   "x": 861.03,
+   "z": 1648.69,
+   "yaw": 2.3915,
+   "data": {
+    "town": "saltmouth",
+    "want": "house",
+    "district": "residential",
+    "w": 5.2,
+    "d": 8.67,
+    "angle": 2.3209,
+    "front": 5.4625,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "saltmouth_plot_19",
+   "x": 844.47,
+   "z": 1621.08,
+   "yaw": 1.0355,
+   "data": {
+    "town": "saltmouth",
+    "want": "stable",
+    "district": "residential",
+    "w": 10.22,
+    "d": 6.59,
+    "angle": 2.1061,
+    "front": 6.8185,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "saltmouth_plot_20",
+   "x": 846.06,
+   "z": 1638.93,
+   "yaw": -1.8861,
+   "data": {
+    "town": "saltmouth",
+    "want": "inn",
+    "district": "residential",
+    "w": 9.87,
+    "d": 7.8,
+    "angle": 1.8861,
+    "front": 3.4569,
+    "streetGap": -0.26
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "gull_steps_square",
+   "x": 288.1,
+   "z": 1270.67,
+   "yaw": 0,
+   "data": {
+    "r": 4.82,
+    "town": "gull_steps",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_0",
+   "x": 291.68,
+   "z": 1302.43,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      291.68,
+      1302.43
+     ],
+     [
+      275.48,
+      1269.57
+     ],
+     [
+      256.55,
+      1238.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_1",
+   "x": 309.86,
+   "z": 1240.6,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      309.86,
+      1240.6
+     ],
+     [
+      292.35,
+      1250.75
+     ],
+     [
+      273.41,
+      1260.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_2",
+   "x": 319.66,
+   "z": 1264.19,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      319.66,
+      1264.19
+     ],
+     [
+      305.7,
+      1274.34
+     ],
+     [
+      290.44,
+      1285.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_3",
+   "x": 312.46,
+   "z": 1288.22,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      312.46,
+      1288.22
+     ],
+     [
+      308.97,
+      1282.71
+     ],
+     [
+      304.7,
+      1276.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_4",
+   "x": 317.64,
+   "z": 1278.29,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      317.64,
+      1278.29
+     ],
+     [
+      316.87,
+      1277.28
+     ],
+     [
+      313.13,
+      1271.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_5",
+   "x": 316.97,
+   "z": 1280.08,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      316.97,
+      1280.08
+     ],
+     [
+      314.28,
+      1281.98
+     ],
+     [
+      311.2,
+      1284.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_6",
+   "x": 306.18,
+   "z": 1281.52,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      306.18,
+      1281.52
+     ],
+     [
+      300.43,
+      1285.3
+     ],
+     [
+      294.83,
+      1289.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_7",
+   "x": 305.94,
+   "z": 1293.46,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      305.94,
+      1293.46
+     ],
+     [
+      303.46,
+      1290.03
+     ],
+     [
+      301.15,
+      1286.47
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_8",
+   "x": 300.65,
+   "z": 1283.82,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      300.65,
+      1283.82
+     ],
+     [
+      299.74,
+      1282.4
+     ],
+     [
+      298.74,
+      1281.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_9",
+   "x": 309.38,
+   "z": 1265.28,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      309.38,
+      1265.28
+     ],
+     [
+      303.41,
+      1259.42
+     ],
+     [
+      297.14,
+      1253.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_10",
+   "x": 306.35,
+   "z": 1252.12,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      306.35,
+      1252.12
+     ],
+     [
+      304.22,
+      1254.41
+     ],
+     [
+      302.1,
+      1256.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_11",
+   "x": 311.59,
+   "z": 1257,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      311.59,
+      1257
+     ],
+     [
+      309.57,
+      1259.39
+     ],
+     [
+      307.33,
+      1261.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_12",
+   "x": 299.81,
+   "z": 1275.56,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      299.81,
+      1275.56
+     ],
+     [
+      294.05,
+      1269.48
+     ],
+     [
+      287.57,
+      1264.16
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_13",
+   "x": 302.91,
+   "z": 1261.06,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      302.91,
+      1261.06
+     ],
+     [
+      299.38,
+      1265.35
+     ],
+     [
+      295.34,
+      1269.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_14",
+   "x": 306.28,
+   "z": 1268.61,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      306.28,
+      1268.61
+     ],
+     [
+      304,
+      1266.53
+     ],
+     [
+      301.76,
+      1264.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_15",
+   "x": 297.86,
+   "z": 1264.35,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      297.86,
+      1264.35
+     ],
+     [
+      295.18,
+      1261.61
+     ],
+     [
+      292.25,
+      1259.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_16",
+   "x": 294.36,
+   "z": 1272.69,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      294.36,
+      1272.69
+     ],
+     [
+      292.43,
+      1274.71
+     ],
+     [
+      290.56,
+      1276.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_17",
+   "x": 283.19,
+   "z": 1250.05,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      283.19,
+      1250.05
+     ],
+     [
+      278.42,
+      1239.46
+     ],
+     [
+      274.12,
+      1229.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_18",
+   "x": 297.15,
+   "z": 1243.11,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      297.15,
+      1243.11
+     ],
+     [
+      293.97,
+      1233.13
+     ],
+     [
+      293.03,
+      1229.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_19",
+   "x": 301.95,
+   "z": 1234.01,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      301.95,
+      1234.01
+     ],
+     [
+      299.09,
+      1234.73
+     ],
+     [
+      296.18,
+      1235.79
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_20",
+   "x": 293.46,
+   "z": 1235.24,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      293.46,
+      1235.24
+     ],
+     [
+      287.13,
+      1236.9
+     ],
+     [
+      280.95,
+      1239.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_21",
+   "x": 292.63,
+   "z": 1244.5,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      292.63,
+      1244.5
+     ],
+     [
+      291.53,
+      1241.06
+     ],
+     [
+      290.5,
+      1237.59
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_22",
+   "x": 283.83,
+   "z": 1236.76,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      283.83,
+      1236.76
+     ],
+     [
+      282.24,
+      1231.51
+     ],
+     [
+      281.24,
+      1228.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_23",
+   "x": 292.22,
+   "z": 1231.19,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      292.22,
+      1231.19
+     ],
+     [
+      288.17,
+      1232.54
+     ],
+     [
+      284.06,
+      1233.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_24",
+   "x": 281.17,
+   "z": 1231.88,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      281.17,
+      1231.88
+     ],
+     [
+      280.06,
+      1232.25
+     ],
+     [
+      278.94,
+      1232.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_25",
+   "x": 274.15,
+   "z": 1236.14,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      274.15,
+      1236.14
+     ],
+     [
+      270.44,
+      1238.4
+     ],
+     [
+      266.61,
+      1240.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_26",
+   "x": 277.75,
+   "z": 1242.46,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      277.75,
+      1242.46
+     ],
+     [
+      273.88,
+      1244.43
+     ],
+     [
+      270.21,
+      1246.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_27",
+   "x": 272.05,
+   "z": 1275.93,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      272.05,
+      1275.93
+     ],
+     [
+      261.18,
+      1280.96
+     ],
+     [
+      250.97,
+      1287.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_28",
+   "x": 277.98,
+   "z": 1287.57,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      277.98,
+      1287.57
+     ],
+     [
+      267.53,
+      1292.53
+     ],
+     [
+      259.91,
+      1296.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_29",
+   "x": 271.97,
+   "z": 1302.34,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      271.97,
+      1302.34
+     ],
+     [
+      271.95,
+      1302.25
+     ],
+     [
+      268.98,
+      1294.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_30",
+   "x": 280.7,
+   "z": 1295.79,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      280.7,
+      1295.79
+     ],
+     [
+      276.27,
+      1297.16
+     ],
+     [
+      271.93,
+      1298.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_31",
+   "x": 270.08,
+   "z": 1288.77,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      270.08,
+      1288.77
+     ],
+     [
+      268.09,
+      1285.88
+     ],
+     [
+      266.41,
+      1282.79
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_32",
+   "x": 261.9,
+   "z": 1293.79,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      261.9,
+      1293.79
+     ],
+     [
+      259.89,
+      1290.91
+     ],
+     [
+      258.23,
+      1287.82
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_33",
+   "x": 259.76,
+   "z": 1258.17,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      259.76,
+      1258.17
+     ],
+     [
+      252.41,
+      1263.95
+     ],
+     [
+      245.19,
+      1269.89
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_34",
+   "x": 256.85,
+   "z": 1275.71,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      256.85,
+      1275.71
+     ],
+     [
+      254.16,
+      1271.41
+     ],
+     [
+      251.54,
+      1267.07
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_35",
+   "x": 263.34,
+   "z": 1264.92,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      263.34,
+      1264.92
+     ],
+     [
+      259.11,
+      1267.62
+     ],
+     [
+      254.79,
+      1270.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_36",
+   "x": 262.55,
+   "z": 1272.2,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      262.55,
+      1272.2
+     ],
+     [
+      261.4,
+      1270.21
+     ],
+     [
+      260.13,
+      1268.28
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_37",
+   "x": 258.09,
+   "z": 1266.76,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      258.09,
+      1266.76
+     ],
+     [
+      257.28,
+      1265.4
+     ],
+     [
+      256.43,
+      1264.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_38",
+   "x": 253.74,
+   "z": 1272.82,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      253.74,
+      1272.82
+     ],
+     [
+      252.3,
+      1273.77
+     ],
+     [
+      250.81,
+      1274.62
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_39",
+   "x": 252.94,
+   "z": 1260.89,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      252.94,
+      1260.89
+     ],
+     [
+      247.78,
+      1256.19
+     ],
+     [
+      246.16,
+      1254.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_40",
+   "x": 252.01,
+   "z": 1250.26,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      252.01,
+      1250.26
+     ],
+     [
+      250.15,
+      1252.09
+     ],
+     [
+      248.27,
+      1253.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_41",
+   "x": 292.35,
+   "z": 1250.75,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      292.35,
+      1250.75
+     ],
+     [
+      297.14,
+      1253.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_42",
+   "x": 297.15,
+   "z": 1243.11,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      297.15,
+      1243.11
+     ],
+     [
+      299.27,
+      1246.74
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_43",
+   "x": 277.98,
+   "z": 1287.57,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      277.98,
+      1287.57
+     ],
+     [
+      283.11,
+      1285.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_44",
+   "x": 268.98,
+   "z": 1294.95,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      268.98,
+      1294.95
+     ],
+     [
+      267.78,
+      1292.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_45",
+   "x": 261.18,
+   "z": 1280.96,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      261.18,
+      1280.96
+     ],
+     [
+      266.41,
+      1282.79
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "gull_steps_street_46",
+   "x": 256.85,
+   "z": 1275.71,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      256.85,
+      1275.71
+     ],
+     [
+      260.38,
+      1281.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gull_steps_plot_0",
+   "x": 311.24,
+   "z": 1277.54,
+   "yaw": 0.6011,
+   "data": {
+    "town": "gull_steps",
+    "want": "granary",
+    "district": "residential",
+    "w": 6.19,
+    "d": 7.16,
+    "angle": 2.5405,
+    "front": 7.2529,
+    "streetGap": -0.3
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gull_steps_plot_1",
+   "x": 306.91,
+   "z": 1287.66,
+   "yaw": -2.5405,
+   "data": {
+    "town": "gull_steps",
+    "want": "house",
+    "district": "residential",
+    "w": 4.54,
+    "d": 7.27,
+    "angle": 2.5405,
+    "front": 4.1113,
+    "streetGap": -0.2
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gull_steps_plot_2",
+   "x": 300.24,
+   "z": 1292.24,
+   "yaw": 2.1719,
+   "data": {
+    "town": "gull_steps",
+    "want": "house",
+    "district": "residential",
+    "w": 4.4,
+    "d": 7.27,
+    "angle": 2.5405,
+    "front": 5.6821,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gull_steps_plot_3",
+   "x": 306.78,
+   "z": 1256.79,
+   "yaw": -2.3205,
+   "data": {
+    "town": "gull_steps",
     "want": "hut",
     "district": "craft",
-    "w": 5.12,
-    "d": 9.09,
-    "angle": 1.9107,
-    "front": 1.9107,
+    "w": 5.05,
+    "d": 3.59,
+    "angle": 2.3205,
+    "front": 3.8913,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gull_steps_plot_4",
+   "x": 300.95,
+   "z": 1269.8,
+   "yaw": 2.3919,
+   "data": {
+    "town": "gull_steps",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.53,
+    "d": 4.97,
+    "angle": 2.3205,
+    "front": 5.4621,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gull_steps_plot_5",
+   "x": 295.05,
+   "z": 1277.15,
+   "yaw": -2.3205,
+   "data": {
+    "town": "gull_steps",
+    "want": "hut",
+    "district": "civic",
+    "w": 4.38,
+    "d": 3.6,
+    "angle": 2.3205,
+    "front": 3.8913,
+    "streetGap": -0.32
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gull_steps_plot_6",
+   "x": 300.39,
+   "z": 1238.96,
+   "yaw": -1.2724,
+   "data": {
+    "town": "gull_steps",
+    "want": "house",
+    "district": "residential",
+    "w": 4.99,
+    "d": 4.81,
+    "angle": 2.8432,
+    "front": 2.8432,
+    "streetGap": -0.25
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gull_steps_plot_7",
+   "x": 286.45,
+   "z": 1242.62,
+   "yaw": 1.8692,
+   "data": {
+    "town": "gull_steps",
+    "want": "shrine",
+    "district": "residential",
+    "w": 7.23,
+    "d": 6.03,
+    "angle": 2.8432,
+    "front": 5.9848,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gull_steps_plot_8",
+   "x": 275.9,
+   "z": 1247.98,
+   "yaw": 2.0892,
+   "data": {
+    "town": "gull_steps",
+    "want": "house",
+    "district": "residential",
+    "w": 7.48,
+    "d": 3.94,
+    "angle": 2.6232,
+    "front": 5.7648,
+    "streetGap": -0.03
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gull_steps_plot_9",
+   "x": 272.16,
+   "z": 1241.42,
+   "yaw": -2.6232,
+   "data": {
+    "town": "gull_steps",
+    "want": "house",
+    "district": "residential",
+    "w": 7.48,
+    "d": 3.54,
+    "angle": 2.6232,
+    "front": 4.194,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gull_steps_plot_10",
+   "x": 264.16,
+   "z": 1288.29,
+   "yaw": 2.1212,
+   "data": {
+    "town": "gull_steps",
+    "want": "house",
+    "district": "residential",
+    "w": 5.81,
+    "d": 5.81,
+    "angle": 2.5912,
+    "front": 5.7328,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "gull_steps_plot_11",
+   "x": 253.41,
+   "z": 1255.44,
+   "yaw": -2.3698,
+   "data": {
+    "town": "gull_steps",
+    "want": "house",
+    "district": "residential",
+    "w": 4.02,
+    "d": 5.95,
+    "angle": 2.3698,
+    "front": 3.9406,
     "streetGap": -0.4
    }
   },

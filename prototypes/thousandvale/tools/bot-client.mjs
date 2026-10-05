@@ -9,6 +9,8 @@
 //   node prototypes/thousandvale/tools/bot-client.mjs --url ws://127.0.0.1:8491 --bots 20 --seconds 60
 //     --mode fight|walk|idle|town   fight (default): leave the town, wander, chase wolves within 30 m and swing
 //                              walk: leave the town and wander; town: wander inside the town hub; idle: stand
+//                              script (library only): walk to bot.goal, swing at monsters within bot.fightRadius —
+//                              a driver (tools/first-hour-bot.mjs) sets the goals
 //     --radius 60              wander radius around the spawn, metres
 //     --cls warrior            Farhold class id for new characters
 //     --stagger 100            ms between bot logins
@@ -22,6 +24,8 @@
 //   bot.charId, bot.you, bot.ents (Map id -> { id, kind, type, name, x, z, hp, dead })
 //   bot.stop() -> closes the sockets (leave)
 //   bot.waitFor(pred, ms) -> resolves when pred(bot) is true
+//   script mode: bot.goal = {x, z} | null, bot.fightRadius = metres (0 = never swing); bot.party (partyState),
+//   bot.used (last `used` answer), bot.loot ([{items, gold}] from `loot` events), bot.zone (last `zone` message)
 
 import { connect } from '../js/net/client.js';
 import { IN } from '../js/net/protocol.js';
@@ -51,7 +55,7 @@ function rngFor(seed) {
  * (found by the kill -9 test). Here an error before open counts as a close. Reported to stream A
  * (docs/requests.md); once js/net/sockets.js does the same, this can go.
  */
-export function nodeSafeWsFactory(base) {
+export function nodeSafeWsFactory(base, stats = null) {
   return path => {
     const ws = new WebSocket(base.replace(/\/$/, '') + path);
     ws.binaryType = 'arraybuffer';
@@ -64,7 +68,10 @@ export function nodeSafeWsFactory(base) {
     };
     const fireClose = (code, reason) => { if (closedOnce) return; closedOnce = true; s.onclose && s.onclose({ code, reason }); };
     ws.onopen = () => s.onopen && s.onopen();
-    ws.onmessage = ev => s.onmessage && s.onmessage({ data: ev.data });
+    ws.onmessage = ev => {
+      if (stats) stats.wireBytes = (stats.wireBytes || 0) + (typeof ev.data === 'string' ? ev.data.length : ev.data.byteLength);
+      s.onmessage && s.onmessage({ data: ev.data });
+    };
     ws.onclose = ev => fireClose(ev.code, ev.reason);
     ws.onerror = () => { if (ws.readyState !== 1) { fireClose(1006, 'error'); try { ws.close(); } catch { /* ignore */ } } };
     return s;
@@ -94,13 +101,15 @@ export async function startBot(opts = {}) {
     stats: { joins: 0, snaps: 0, bytes: 0, inputs: 0, casts: 0, hitsDealt: 0, hitsTaken: 0, kills: 0, deaths: 0, refusals: 0, errors: 0, kicks: 0, lastSnapAt: 0, firstPos: null },
     get token() { return token; },
     net: null,
+    goal: null, fightRadius: 0, party: null, used: null, loot: [], zone: null, rooms: [],
     stopped: false,
   };
 
   const net = connect({
     mode: 'ws', url,
     // stream A's ws shim now reports Node's refused connection as a close; opts.nodeSafe keeps our own copy for A/B checks
-    ...(opts.nodeSafe ? { socketFactory: nodeSafeWsFactory(url) } : {}),
+    // (it also counts every byte received, JSON + binary, into bot.stats.wireBytes — the load tests' bandwidth number)
+    ...(opts.nodeSafe ? { socketFactory: nodeSafeWsFactory(url, bot.stats) } : {}),
     tokenStore: { get: () => token, set: t => { token = t; } },
     build: opts.build || 'dev',
   });
@@ -152,6 +161,7 @@ export async function startBot(opts = {}) {
       }
     }
     bot.roomKind = j.room.kind || 'wilds';
+    bot.rooms.push({ t: Date.now(), id: j.room.id, kind: bot.roomKind, via: j.handoff?.via || null });
     bot.ents.clear(); bot.target = null; bot.waypoint = null;
   });
   net.on('info', ents => {
@@ -179,6 +189,8 @@ export async function startBot(opts = {}) {
       if (ev.type === 'hit' && ev.kind === 'dmg') {
         if (ev.s === bot.myId) bot.stats.hitsDealt++;
         if (ev.d === bot.myId) bot.stats.hitsTaken++;
+      } else if (ev.type === 'loot' && (ev.to == null || ev.to === bot.myId || ev.d === bot.myId)) {
+        bot.loot.push({ t: Date.now(), items: ev.items || [], gold: ev.gold || 0 }); bot.stats.loots = (bot.stats.loots || 0) + 1;
       } else if (ev.type === 'die') {
         const ent = bot.ents.get(ev.d);
         if (ent) ent.dead = true;
@@ -215,14 +227,19 @@ export async function startBot(opts = {}) {
     if (me.locked && them.locked && !me.confirmed) net.tradeOp('confirm', { id: tr.id });
   });
   net.on('kick', () => { bot.stats.kicks++; });
+  net.on('party', p => { bot.party = p; });
+  net.on('used', m => { bot.used = { t: Date.now(), ...m }; });
+  net.on('zone', m => { bot.zone = m; });
+  net.on('realm', m => { bot.realm = m; });
+  net.on('travelR', m => { bot.travelR = { t: Date.now(), ...m }; });
 
   // ---- behaviour: one input per 50 ms, a swing whenever a wolf is in reach ---------------------
   let seq = 0, lastCast = 0;
   const tickTimer = setInterval(() => {
     if (bot.stopped || !bot.pos || bot.myId == null || bot.wasDead) return;
     let goal = null;
-    if (mode === 'fight') {
-      let best = null, bestD = 30;
+    if (mode === 'fight' || (mode === 'script' && bot.fightRadius > 0)) {
+      let best = null, bestD = mode === 'script' ? bot.fightRadius : 30;
       for (const e of bot.ents.values()) {
         if (e.dead || e.x == null || !isMonster(e)) continue;
         const d = Math.hypot(e.x - bot.pos.x, e.z - bot.pos.z);
@@ -239,7 +256,22 @@ export async function startBot(opts = {}) {
         if (bestD < 2.0) goal = null;   // close enough: stand and swing
       }
     }
-    if (!goal && bot.exit && mode !== 'idle') goal = bot.exit;
+    if (mode === 'script') {
+      if (!goal && bot.goal && Math.hypot(bot.goal.x - bot.pos.x, bot.goal.z - bot.pos.z) > 1.2) goal = bot.goal;
+      // unstick: walking at a wall (a house, a fence, a cliff) for 2.5 s without getting anywhere -> sidestep for 1.5 s
+      const now = Date.now();
+      if (!bot.stuck || !goal) bot.stuck = { at: now, x: bot.pos.x, z: bot.pos.z, detour: null, until: 0 };
+      if (goal && now - bot.stuck.at > 2500) {
+        if (Math.hypot(bot.pos.x - bot.stuck.x, bot.pos.z - bot.stuck.z) < 0.8 && now > bot.stuck.until) {
+          const a = Math.atan2(goal.x - bot.pos.x, goal.z - bot.pos.z) + (rnd() < 0.5 ? 1.6 : -1.6);
+          bot.stuck.detour = { x: bot.pos.x + Math.sin(a) * 8, z: bot.pos.z + Math.cos(a) * 8 }; bot.stuck.until = now + 1500;
+          bot.stats.unstuck = (bot.stats.unstuck || 0) + 1;
+        }
+        bot.stuck.at = now; bot.stuck.x = bot.pos.x; bot.stuck.z = bot.pos.z;
+      }
+      if (bot.stuck.detour && now < bot.stuck.until) goal = bot.stuck.detour;
+    }
+    else if (!goal && bot.exit && mode !== 'idle') goal = bot.exit;
     // a follower keeps near its partner when it has nothing to fight (so a trading pair stays in reach)
     const partnerName = opts.follow || opts.trade?.partner;
     const partner = partnerName ? [...bot.ents.values()].find(e => e.name === partnerName && e.x != null) : null;
@@ -248,7 +280,7 @@ export async function startBot(opts = {}) {
       T.lastAsk = Date.now(); net.tradeOp('ask', { id: partner.id });
     }
     if (opts.trade && net.trade) goal = null;     // stand still while the window is open (walking apart cancels it)
-    if (!goal && !(opts.follow && partner) && !(opts.trade && net.trade) && mode !== 'idle' && !(mode === 'fight' && bot.target != null)) {
+    if (!goal && mode !== 'script' && !(opts.follow && partner) && !(opts.trade && net.trade) && mode !== 'idle' && !(mode === 'fight' && bot.target != null)) {
       if (!bot.waypoint || Math.hypot(bot.waypoint.x - bot.pos.x, bot.waypoint.z - bot.pos.z) < 3) {
         const lim = mode === 'town' && bot.town ? Math.min(radius, bot.town.r - 8) : radius;
         const a = rnd() * Math.PI * 2, r = lim * Math.sqrt(rnd());

@@ -32,7 +32,8 @@ import { FORMAT_VERSION, createTerrain, SCATTER_KINDS, NAV } from '../js/rules/t
 import { encodeTerrain } from './bake-test-zone.mjs';
 import { decodeMacro, makeRefiner, heightRange, RIVER_WIDTH, RIVER_DEPTH } from './lib/world-core.mjs';
 import { addZoneSites, TOWN_RADIUS } from './lib/zone-sites.mjs';
-import { encodeScatter, encodeNav } from './lib/zone-layers.mjs';
+import { encodeScatter, encodeNav, sameLayerFile } from './lib/zone-layers.mjs';
+import { carveTheme, inFen, shoreDistance } from './lib/zone-theme.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const WORLD_DIR = join(HERE, '..', 'data', 'world');
@@ -72,6 +73,16 @@ function asksFor(id, sites, W) {
 }
 let PROVINCE_MAP = {};
 try { PROVINCE_MAP = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'province-map.json'), 'utf8')); } catch { /* none yet */ }
+/** Stream E's names + settlement asks per world zone (data/provinces/<sheet>-places.json) and the sheet row. */
+function placesFor(id) {
+  const sid = sheetIdFor(id); if (!sid) return null;
+  let places = null, sheet = null;
+  try { places = JSON.parse(readFileSync(join(HERE, '..', 'data', 'provinces', `${sid.sheet}-places.json`), 'utf8')).zones?.[sid.zone] || null; } catch { /* none */ }
+  try { sheet = JSON.parse(readFileSync(join(HERE, '..', 'data', 'provinces', `${sid.sheet}.json`), 'utf8')).zones?.[sid.zone] || null; } catch { /* none */ }
+  return { rename: places?.rename || {}, asks: places?.asks || [], town: sheet?.town || null };
+}
+let THEMES = {};
+try { THEMES = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'zone-themes.json'), 'utf8')); } catch { /* none */ }
 /** The E sheet zone id for a world zone, if any (written into meta so E can match on its own ids). */
 function sheetIdFor(id) {
   for (const [sheetId, pm] of Object.entries(PROVINCE_MAP.provinces || {})) { const e = Object.entries(pm.map || {}).find(([, z]) => z === id); if (e) return { sheet: sheetId, zone: e[0] }; }
@@ -145,8 +156,25 @@ export function bakeZone(id, opts = {}) {
   // World Forge's own `dungeon` nodes (kind dungeon/lair) become `lair` marks: `type:'dungeon'` is reserved for the
   // door record the server reads ({id, x, z, yaw}); a lair mark anchors the door in a zone with no town
   const sites = W.nodes.filter(n => n.zone === id).map(n => ({ nodeId: n.id, type: n.type === 'dungeon' ? 'lair' : n.type, kind: n.kind, name: n.name, size: n.size, x: n.x - ox, z: n.z - oz, ...(n.starter ? { starter: true } : {}) }));
+  // stream E's names (impose like Torborhold), the settlements E's sheet needs where World Forge put none, and the
+  // zone's sheet town grown to a town if World Forge made it smaller
+  const PL = placesFor(id);
+  if (PL) {
+    for (const s of sites) { const nn = PL.rename[slug(s.name)]; if (nn) { s.wfName = s.name; s.name = nn; } }
+    for (const a of PL.asks) sites.push({ type: 'settlement', kind: a.kind, name: a.name, x: a.x, z: a.z, ask: true, askR: a.r });
+    for (const s of sites) if (s.type === 'settlement' && PL.town && s.name === PL.town && (rank[s.kind] ?? 9) > rank.town) { s.grownFrom = s.kind; s.kind = 'town'; }
+  }
+  // a ford marks where a road meets the river: snap it onto the nearest river point (World Forge's node is a cell centre)
+  for (const s of sites.filter(s => s.type === 'crossing')) {
+    let best = null, bestD = 300;
+    for (const r of W.rivers) for (const p of r.pts) {
+      const x = p[0] - ox, z = p[1] - oz; if (x < 40 || z < 40 || x > ZM - 40 || z > ZM - 40) continue;
+      const d = Math.hypot(x - s.x, z - s.z); if (d < bestD) { bestD = d; best = [x, z]; }
+    }
+    if (best && bestD > 4) { s.snappedFrom = { x: s.x, z: s.z }; s.x = Math.round(best[0]); s.z = Math.round(best[1]); }
+  }
   const settlements = sites.filter(s => s.type === 'settlement');
-  const hub = settlements.find(s => (opts.hub ? s.name === opts.hub : s.starter)) || settlements.slice().sort((a, b) => (rank[a.kind] ?? 9) - (rank[b.kind] ?? 9) || (b.size || 0) - (a.size || 0))[0];
+  const hub = settlements.find(s => (opts.hub ? s.name === opts.hub : s.starter)) || (PL?.town && settlements.find(s => s.name === PL.town)) || settlements.slice().sort((a, b) => (rank[a.kind] ?? 9) - (rank[b.kind] ?? 9) || (b.size || 0) - (a.size || 0))[0];
   if (hub) hub.hub = true;
   settlements.sort((a, b) => (b.hub ? 1 : 0) - (a.hub ? 1 : 0) || (rank[a.kind] ?? 9) - (rank[b.kind] ?? 9));
   const roughness = (x, z, r) => {
@@ -156,12 +184,13 @@ export function bakeZone(id, opts = {}) {
   };
   const placed = [];
   for (const s of settlements) {
-    s.radius = TOWN_RADIUS[s.kind] || 50;
-    const keepOff = s.hub ? s.radius + 200 : s.radius + LEVEL_EASE + 30;
+    s.radius = s.ask ? Math.max(s.askR || 0, TOWN_RADIUS[s.kind] || 50) : TOWN_RADIUS[s.kind] || 50;
+    // E's asks are spots E chose (flat, off roads, >= r + 70 from edges): keep them where asked, nudging at most 48 m
+    const keepOff = s.hub && !s.ask ? s.radius + 200 : s.radius + LEVEL_EASE + 30;
     const ok = (x, z) => x >= keepOff && z >= keepOff && x <= ZM - keepOff && z <= ZM - keepOff
       && placed.every(p => Math.hypot(p.x - x, p.z - z) >= p.radius + s.radius + LEVEL_EASE * 2);
     let best = null, bestS = Infinity;
-    const reach = s.hub ? 480 : 320;
+    const reach = s.ask ? (ok(s.x, s.z) ? 0 : 48) : s.hub ? 480 : 320;
     for (let dz = -reach; dz <= reach; dz += 16) for (let dx = -reach; dx <= reach; dx += 16) {
       const x = s.x + dx, z = s.z + dz;
       if (!ok(x, z)) continue;
@@ -215,6 +244,9 @@ export function bakeZone(id, opts = {}) {
     }
   }
 
+  // 4b. theme terrain (data/world/zone-themes.json): the water E's archetype needs, off towns and roads, inside the edges
+  const theme = THEMES[id] ? carveTheme({ id, theme: THEMES[id], G, STEP, ZM, ground, waterTop, waterKind, settlements: placed, roads, polyDist, hub: placed.find(s => s.hub) || placed[0] || null }) : null;
+
   // 5. level and plan each placed settlement (proctown — the one planner Farhold uses)
   const plans = [];
   for (const s of placed) {
@@ -231,7 +263,7 @@ export function bakeZone(id, opts = {}) {
     const culture = cultureFor({ race: province?.race || 'human', biome: zone.biomes ? Object.keys(zone.biomes)[0] : '' });
     const linksAt = radius => roads.filter(r => !r.spur || r.id === `spur_${slug(s.name)}`).flatMap(r => ringCrossings(r.pts, tx, tz, radius)).map(([x, z]) => [x, z]);
     const plan = planTown({
-      seed: (hashStr(id + ':' + s.name) >>> 0) % 100000, size, culture,
+      seed: (hashStr(id + ':' + (s.wfName || s.name)) >>> 0) % 100000, size, culture,   // a renamed town keeps its plan
       heightAt: (x, z) => ground[gIdx(tx + x, tz + z)],
       buildable: (x, z) => !wetAt(tx + x, tz + z),
       linksAt,
@@ -289,12 +321,15 @@ export function bakeZone(id, opts = {}) {
 
   // 8. surface: warped macro biome, water and rock overrides, then roads and town streets painted on
   const N = SIZE * SIZE, biome = new Uint8Array(N);
-  const BEACH = 4, MOUNTAINS = 17, LAKE = 3, COAST = 2;
+  const BEACH = 4, MOUNTAINS = 17, LAKE = 3, COAST = 2, MARSH = 15;
+  const FEN_NOISE = makeNoise2D(hashStr('fen:' + id));
   for (let j = 0; j < SIZE; j++) for (let i = 0; i < SIZE; i++) {
     const gi = i + 1, gj = j + 1, k = gj * G + gi;
     let b = m.biome[ref.warpedIndex(wxOf(gi), wzOf(gj))];
     if (waterKind[k] && waterTop[k] > ground[k]) b = waterKind[k] === 1 ? COAST : LAKE;
     else if (b < 4 || b === 25) b = BEACH;
+    else if (theme && !roadMask[k] && theme.beach.some(bb => shoreDistance(bb.lake, i * STEP, j * STEP) < bb.band)) b = BEACH;
+    else if (theme?.fen && !roadMask[k] && inFen(theme.fen, i * STEP, j * STEP, FEN_NOISE)) b = MARSH;
     else if (roadMask[k]) b = ROAD_SURFACE_ID;
     else { const s = Math.hypot(ground[k + 1] - ground[k - 1], ground[k + G] - ground[k - G]) / (2 * STEP); if (s > 0.9 && b !== 18) b = MOUNTAINS; }
     biome[j * SIZE + i] = b;
@@ -329,6 +364,7 @@ export function bakeZone(id, opts = {}) {
     biomes: [...BIOMES.map(b => [b.key, b.name, b.color]), ['road', 'Road', '#b39a6e']], waterKinds: ['none', 'sea', 'lake', 'river'],
     source: { tool: 'tools/bake-zone.mjs', world: { seed: W.seed, width: W.width, height: W.height, method: W.method, seaLevel: W.seaLevel, inputHash: W.inputHash }, zone: { zx: zone.zx, zy: zone.zy }, worldOrigin: { x: ox, z: oz }, zoneMetres: ZM },
     rivers: riversUsed, sites: metaSites, spawn: null,
+    ...(theme ? { theme: { kind: THEMES[id].theme, lakes: theme.lakes.map(l => ({ name: l.name, kind: l.kind, x: l.x, z: l.z, r: l.r, level: l.level })), fen: theme.fen } } : {}),
   };
   meta.inputHash = (hashStr(JSON.stringify({ id, w: W.inputHash, ZONE_BAKE_VERSION, FORMAT_VERSION, hub: opts.hub || null })) >>> 0).toString(16).padStart(8, '0');
   const terrain = createTerrain({ meta, height, waterTop: wTop, waterKind: wKind, biome });
@@ -351,7 +387,10 @@ export function bakeZone(id, opts = {}) {
     ...avoid,
   ];
   const scatter = scatterFor(W, zone, terrain, biome, keepClear);
-  const nav = navFor(terrain, biome, scatter, plans);
+  // decks for every world bridge whose span reaches into this zone (one on the edge is stamped by both zones)
+  const decks = W.bridges.filter(b => b.x >= ox - 60 && b.x < ox + ZM + 60 && b.z >= oz - 60 && b.z < oz + ZM + 60)
+    .map(b => ({ x: b.x - ox, z: b.z - oz, yaw: b.yaw, span: b.span, width: (W.roads.find(r => r.id === b.road) || {}).width || 6 }));
+  const nav = navFor(terrain, biome, scatter, plans, decks);
   return { meta, height, waterTop: wTop, waterKind: wKind, biome, terrain, plans, townPlan: plans.find(p => p.town.hub) || null, placements, roads, bridges, scatter, nav, vignettesUsed: vignettes.length };
 }
 
@@ -418,7 +457,7 @@ function scatterFor(W, zone, t, biome, keepClear) {
 }
 
 // ---------------------------------------------------------------------------------------------- nav
-function navFor(t, biome, scatter, plans) {
+function navFor(t, biome, scatter, plans, decks = []) {
   const bits = new Uint8Array(SIZE * SIZE), roadId = t.biomes.length - 1;
   for (let j = 0; j < SIZE; j++) for (let i = 0; i < SIZE; i++) {
     const x = i * STEP, z = j * STEP, o = j * SIZE + i;
@@ -436,6 +475,17 @@ function navFor(t, biome, scatter, plans) {
         if (Math.hypot(i * STEP - cx, j * STEP - cz) <= r + STEP * 0.5) bits[j * SIZE + i] |= bit;
   };
   for (const it of scatter) if (SCATTER_KINDS[it.kind].solid) stamp(it.x, it.z, SCATTER_KINDS[it.kind].r * it.scale, NAV.SOLID);
+  // bridge decks: a road-wide strip along the road, long enough to land on both banks even when the road crosses
+  // the channel at a slant (span x 1.6 + 2 x 10 m). Before this, every bridge read as DEEP water and a river cut
+  // the province in two for anything that walks by nav (found by tests/B/zone-reach.test.js).
+  for (const d of decks) {
+    const ux = Math.sin(d.yaw), uz = Math.cos(d.yaw), half = d.span * 0.8 + 10, hw = d.width / 2 + 0.5, r = Math.hypot(half, hw);
+    for (let j = Math.max(0, Math.floor((d.z - r) / STEP)); j <= Math.min(SIZE - 1, Math.ceil((d.z + r) / STEP)); j++)
+      for (let i = Math.max(0, Math.floor((d.x - r) / STEP)); i <= Math.min(SIZE - 1, Math.ceil((d.x + r) / STEP)); i++) {
+        const dx = i * STEP - d.x, dz = j * STEP - d.z, along = dx * ux + dz * uz, across = -dx * uz + dz * ux;
+        if (Math.abs(along) <= half && Math.abs(across) <= hw) { const o = j * SIZE + i; bits[o] = (bits[o] & ~(NAV.DEEP | NAV.STEEP | NAV.SOLID)) | NAV.WALK | NAV.ROAD; }
+      }
+  }
   for (const plan of plans) {
     const { x: tx, z: tz } = plan.origin;
     stamp(tx, tz, plan.town.radius, NAV.TOWN);
@@ -473,11 +523,13 @@ const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^
 export function placementsFor(meta, plans, roads = [], bridges = []) {
   const out = [];
   for (const s of meta.sites) {
-    if (s.type === 'settlement') out.push({ kind: 'settlement', id: slug(s.name), x: r2(s.x), z: r2(s.z), yaw: 0, data: { kind: s.kind, name: s.name, radius: s.radius ?? TOWN_RADIUS[s.kind] ?? 40, hub: !!s.hub, planned: !s.unplanned } });
+    if (s.type === 'settlement') out.push({ kind: 'settlement', id: slug(s.name), x: r2(s.x), z: r2(s.z), yaw: 0, data: { kind: s.kind, name: s.name, radius: s.radius ?? TOWN_RADIUS[s.kind] ?? 40, hub: !!s.hub, planned: !s.unplanned, ...(s.wfName ? { wfName: s.wfName } : {}), ...(s.ask ? { ask: true } : {}) } });
     else if (s.type === 'dungeon') out.push({ kind: 'dungeon_door', id: s.id, x: s.x, z: s.z, yaw: s.yaw, data: { name: s.name } });
     else if (s.type === 'event' || s.type === 'camp') out.push({ kind: s.type + '_site', id: s.id, x: s.x, z: s.z, yaw: 0, data: { r: s.r } });
     else out.push({ kind: s.type, id: slug(s.name || s.kind), x: r2(s.x), z: r2(s.z), yaw: 0, data: { kind: s.kind, name: s.name } });
   }
+  (meta.theme?.lakes || []).forEach((l, i) => out.push({ kind: 'lake', id: l.name ? slug(l.name) : `pool_${i}`, x: l.x, z: l.z, yaw: 0, data: { r: l.r, level: l.level, kind: l.kind, name: l.name } }));
+  if (meta.theme?.fen) out.push({ kind: 'fen', id: 'fen', x: meta.theme.fen.x, z: meta.theme.fen.z, yaw: 0, data: { r: meta.theme.fen.r } });
   for (const plan of plans) {
     const { x: tx, z: tz } = plan.origin, town = slug(plan.town.name);
     out.push({ kind: 'town_square', id: `${town}_square`, x: r2(tx + plan.square.cx), z: r2(tz + plan.square.cz), yaw: 0, data: { r: r2(plan.square.r), town, culture: plan.culture } });
@@ -584,7 +636,7 @@ if (isMain) {
   const b = bakeZone(id);
   const files = zoneFiles(b), dir = join(ZONES_DIR, id);
   if (process.argv.includes('--check')) {
-    const stale = Object.entries(files).filter(([f, v]) => !existsSync(join(dir, f)) || Buffer.compare(readFileSync(join(dir, f)), Buffer.from(v)) !== 0).map(([f]) => f);
+    const stale = Object.entries(files).filter(([f, v]) => !existsSync(join(dir, f)) || !sameLayerFile(f, readFileSync(join(dir, f)), v)).map(([f]) => f);
     console.log(stale.length ? `${id} is STALE: ${stale.join(', ')}` : `${id} is up to date`); if (stale.length) staleAny = true; continue;
   }
   mkdirSync(dir, { recursive: true });

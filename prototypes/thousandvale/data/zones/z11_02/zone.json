@@ -1,5 +1,5 @@
 {
-  "name": "Fengate (z11_02)",
+  "name": "Copperdell (z11_02)",
   "zone": "z11_02",
   "sheet": {
     "sheet": "torbor_downs",
@@ -67,9 +67,10 @@
     {
       "type": "settlement",
       "kind": "city",
-      "name": "Fengate",
+      "name": "Copperdell",
       "x": 352,
       "z": 448,
+      "wfName": "Fengate",
       "hub": true,
       "radius": 140,
       "movedFrom": {
@@ -80,9 +81,10 @@
     {
       "type": "settlement",
       "kind": "village",
-      "name": "Miminhold",
+      "name": "Pickaxe Row",
       "x": 1008,
       "z": 1664,
+      "wfName": "Miminhold",
       "radius": 65,
       "movedFrom": {
         "x": 1088,
@@ -144,7 +146,7 @@
     "unwalkableShare": 0.091,
     "towns": [
       {
-        "name": "Fengate",
+        "name": "Copperdell",
         "kind": "city",
         "hub": true,
         "at": [
@@ -163,7 +165,7 @@
         "overlaps": 0
       },
       {
-        "name": "Miminhold",
+        "name": "Pickaxe Row",
         "kind": "village",
         "hub": false,
         "at": [
@@ -203,20 +205,20 @@
     ],
     "roads": 12,
     "bridges": 2,
-    "scatter": 19577,
+    "scatter": 19484,
     "scatterKinds": {
-      "tree_broadleaf": 8359,
-      "tree_conifer": 3468,
-      "bush": 4069,
-      "rock_large": 1188,
+      "tree_broadleaf": 8330,
+      "tree_conifer": 3426,
+      "bush": 4053,
+      "rock_large": 1187,
       "boulder": 73,
-      "rock_small": 1310,
-      "reed": 1048,
+      "rock_small": 1307,
+      "reed": 1046,
       "tree_dead": 62
     },
     "sites": [
-      "settlement(HUB) city Fengate 352 448 140",
-      "settlement village Miminhold 1008 1664 65",
+      "settlement(HUB) city Copperdell 352 448 140",
+      "settlement village Pickaxe Row 1008 1664 65",
       "settlement hamlet Ashhaven 768 944 46",
       "landmark ancientwood Old Bitbilwood 1856 1088",
       "landmark ancientwood Old Medewood 832 320",
@@ -228,12 +230,12 @@
       "z": 444
     },
     "placements": 244,
-    "vignettesAvoided": 0
+    "vignettesAvoided": 41
   },
   "files": {
-    "terrain.bin": 6306074,
-    "nav.bin": 1050717,
-    "scatter.bin": 156700,
-    "placements.json": 103701
+    "terrain.bin": 621315,
+    "nav.bin": 48961,
+    "scatter.bin": 155956,
+    "placements.json": 104672
   }
 }

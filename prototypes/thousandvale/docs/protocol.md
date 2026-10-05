@@ -1,6 +1,6 @@
 # Thousandvale — network protocol and room interface (stream A)
 
-**Status:** v2 for M1.5 (rooms, parties, loot, encounter events, journal, trade, human check), 2026-10-04 (v1 = M0). Owner: stream A (`js/net/**` ★, `js/sim/**`, `server/**`).
+**Status:** v3 for M2 (provinces, waystones, the realm event, open groups, traces, day/night, NPC schedules, gateway + province processes), 2026-10-04 (v2 = M1/M1.5: rooms, parties, loot, encounter events, journal, trade, human check; v1 = M0). Owner: stream A (`js/net/**` ★, `js/sim/**`, `server/**`).
 The machine-readable copy of every table on this page is `js/net/protocol.js`; if this page and that file
 disagree, the file wins and this page is a bug. Changes go through stream A (`docs/requests.md`).
 
@@ -16,7 +16,7 @@ Readers:
 
 | Constant | Value | Where |
 |---|---|---|
-| `PROTOCOL_VERSION` | `2` | `js/net/protocol.js`. Bumped on any wire change. A client with another value is refused with `refuse {code:'version'}` → the client shows "A new version is out — reload". |
+| `PROTOCOL_VERSION` | `3` | `js/net/protocol.js`. Bumped on any wire change. A client with another value is refused with `refuse {code:'version'}` → the client shows "A new version is out — reload". |
 | `BUILD` | string | The server's build id (dev: `dev`; published copies: the git hash). A client whose `build` differs is refused with `code:'build'` → "reload". The client is always served by the same server as its socket (PLAN §10.1). |
 | `SNAP_VERSION` | `1` | First byte after the type byte of every binary snapshot. |
 | `TICK_MS` | `50` | Simulation 20 Hz (PLAN §8.3). |
@@ -116,6 +116,7 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `item` | p | `op:str:8, uid:str:40, slot?:str:16` | 5 / 10 | `equip {uid, slot?}` (slot defaults to the item's own), `unequip {uid, slot?}`, `destroy {uid}`. The uid must be in YOUR bag (or worn, for unequip). Answers `bag` + `equip`, or `err {code:'item'|'bagFull'}`. |
 | `travel` | p | `to:str:48` | 1 / 3 | Travel: a waystone `key` you have discovered (stand at any waystone; a gold fare by distance; not in combat or a dungeon), or `'event'` = free travel to the live realm event (§16). Answer `travelR`; the move is a `joined` handoff (or a `relocate` to another process). |
 | `trace` | p | `kind:str:16` | 1 / 2 | Leave a trace: `campfire` (10 min, one per player, wilds only). Graves appear by themselves where a player dies (1 h). |
+| `quest` | p | `op:str:8, id:str:120, npc?:id` | 2 / 6 | Quests and jobs (§15.9): `accept {id, npc}` / `turnin {id, npc}` standing within 6 m of the giver (`npc` = its entity id), `abandon {id}`. Answer `questR`; the log comes as `quests`. |
 | `trade` | p | `op:str:8, id?:int, items?:uids, gold?:int` | 5 / 10 | The trade window (§13): `ask {id: entity}` (within 10 m) → they get `tradeAsk`; `accept {id: trade}`; `offer {id, items:[≤12 uids], gold}` (unlocks both); `lock {id}`; `confirm {id}` (both locked); `cancel`. Both confirmed → one all-or-nothing store write; `tradeState` throughout, `trade:null` + `done` at the end. |
 | `leave` | both | — | 1 / 2 | Log out cleanly (save now). |
 
@@ -123,21 +124,21 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 
 | `t` | Fields | Meaning |
 |---|---|---|
-| `welcome` | `v, build, server, tickMs, time, human?:{provider:'turnstile', siteKey}` | Handshake OK. With `human`, show the Turnstile widget (that site key) and send its token in `guest {human}`. |
+| `welcome` | `v, build, server, tickMs, time, clock:{epoch, dayMs, now}, human?:{provider:'turnstile', siteKey}` | Handshake OK. `clock` = the realm day/night clock (§15.6). With `human`, show the Turnstile widget (that site key) and send its token in `guest {human}`. |
 | `refuse` | `code, msg` | Handshake refused (`version`, `build`, `full`, `banned`); socket closes. |
 | `authed` | `account:int, token?:str, claimed:bool` | `token` only on `guest` (store it). |
 | `charList` | `chars:[{id, name, cls, level, room}]` | |
 | `created` | `char:{id, name, cls, level, room}` | |
 | `ticket` | `path, ticket, room` | Open `path` and send `enter {ticket}`. |
 | `pong` | `c, s, k` | `c` echoed, `s` = server room clock ms, `k` = tick. |
-| `joined` | `room:{id, name, kind, size, q, origin:{x,z}, terrain, spawn:{x,z}, area?, town?, dungeon?}, you:{id, char, name, cls, level, xp, xpNext, gold, x, y, z, yaw, hp, hpMax, mp, mpMax, bag, equipment, ignore, opened}, tickMs, tick, time, handoff?:{from, via}` | In the world — and again on every room change (`handoff` set; same socket; clear the entity mirror, keep the ground mesh when `terrain` is unchanged; §10). `kind`: `town` / `wilds` / `instance`. `area` (town) and `town` (wilds) = the town circle `{x, z, r, name}`. `dungeon` = the layout to draw (§10.3). `opened` = chest keys this character already emptied. `you.id` = my local entity id. `q` = metres per snapshot position unit (§4). `terrain` = the zone key for `data/zones/<terrain>/terrain.bin` (stream B), or `null` for the stand-in field (`js/sim/terrain.js` `standInTerrain(seed)`). |
+| `joined` | `room:{id, name, kind, size, q, origin:{x,z}, terrain, spawn:{x,z}, area?, town?, dungeon?}, you:{id, char, name, cls, level, xp, xpNext, gold, x, y, z, yaw, hp, hpMax, mp, mpMax, bag, equipment, ignore, opened}, tickMs, tick, time, handoff?:{from, via}` | In the world — and again on every room change (`handoff` set; same socket; clear the entity mirror, keep the ground mesh when `terrain` is unchanged; §10). `kind`: `town` / `wilds` / `instance`. `area` (town) and `town` (wilds) = the town circle `{x, z, r, name}`. `dungeon` = the layout to draw (§10.3). `opened` = chest keys this character already emptied. `you.id` = my local entity id. `q` = metres per snapshot position unit (§4). `terrain` = the zone key for `data/zones/<terrain>/terrain.bin` (stream B), or `null` for the stand-in field (`js/sim/terrain.js` `standInTerrain(seed)`) — **or `null` with `room.zones` set: a whole province (§15.1), draw each zone's bake at its world offset**. v3 adds `room.province, zones, towns, waystones, horizon, clock` and `you.waystones`, plus `event` (the live realm event, if any) — §15. |
 | `info` | `ents:[{id, kind, name, level, hpMax, team, cls?, look?, type?}]` | Descriptions for ids that are about to appear (sent before the first snapshot that mentions them) or whose description changed (level-up, gear look). `kind`: `player`/`monster`/`npc`/`object`. Players carry `cls` + `look`; monsters carry `type` (monster type id, e.g. `wolf`). |
 | `ev` | `k:int, e:[event…]` | This tick's events near me (§6). |
 | `you` | any subset of `joined.you` | My own sheet changed (xp, level, gold, maxima). |
 | `chat` | `ch, from, name, text` | `ch`: `say` (province socket; `from` = local entity id) or `party` (gateway socket; `from` = char id). |
 | `castR` | `slot, ok:false, why, text?` | A cast was refused: `cooldown`, `range`, `mana`, `dead`, `target`, `unknown`; `text` = the rules' sentence to show ("Slot 6 opens at level 18"). |
 | `targetR` | `id, ok:false, why` | A `target` was refused (`target`: gone or not targetable; `range`). |
-| `used` | `id, ok, why?, msg?, kind?` | Answer to `use` (`why`: `far`, `unknown`, `opened`, `dead`). |
+| `used` | `id, ok, why?, msg?, kind?, offers?, ready?` | Answer to `use` (`why`: `far`, `unknown`, `opened`, `dead`, `locked`, `gold`). Using an NPC or a vignette object also carries `offers` (quest views it gives you, same shape as `quests.active`) and `ready` (quest ids you can turn in here). Kinds and extras: `npc {says, role}`, `note {text}`, `use {text, buff}`, `waystone {key, name, fresh, known}`, `clue {text, chain, chainName, step, of, found, fresh, hint?}`, `cache {chain}`, `campfire`/`grave` {trace}. |
 | `bag` | `add:[item…], remove:[uid…], gold` | My bag changed (loot, chest, equip swap, destroy); `gold` = new total. |
 | `equip` | `slot, item\|null, equipment` | Worn gear changed; `equipment` = the whole worn set. |
 | `partyState` | `party:{id, leader, code, members:[{char, name, cls, level, online}]}\|null` | (gateway) My party changed; `null` = no party. `code` → the join link `?join=CODE`. |
@@ -146,10 +147,13 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `ignored` | `list:[{id, name}]` | (gateway) My ignore list. |
 | `relocate` | `path, ticket` | (game socket) You are moving to a province another process holds: open `path`, send `enter {ticket}`; the old socket closes. client.js does it (`joined` follows with `handoff.via:'relocate'`). |
 | `groupHint` | `key, with:[{char, name}]` | (gateway) You and others are fighting the same monster: "Group up?" — `party {op:'group', code: key}` (the first click makes the party, the rest join it). |
-| `realm` | `kind:'eventSoon'\|'eventStart'\|'eventEnd', ev:{id, uid, name, province, x, z, r, level, kind}, at?, won?` | (gateway, everyone) The realm event: announced ahead (`at` = wall ms it starts), started (free travel: `travel {to:'event'}`), ended. |
-| `eventFrame` | `uid, name, boss, hp, players` | (game socket, 1 Hz) You are in the realm event's arena: the temporary event group's frame (no invite needed). |
+| `realm` | `kind:'eventSoon'\|'eventStart'\|'eventEnd', ev:{id, uid, name, province, x, z, r, level, kind}, at?, won?, text?` | (gateway, everyone) The realm event: announced ahead (`at` = wall ms it starts; `eventSoon` comes again as a reminder at 5 and 1 min), started (free travel: `travel {to:'event'}`), ended. `text` = the announcement line to show (stream E's words). |
+| `eventFrame` | `uid, id, name, kind, x, z, r, phase, wave, waves, boss, hp, players` | (game socket, 1 Hz) You are near an event's arena (the realm event or your copy's zone event): the temporary event group's frame, no invite needed. `phase`: `warn`/`waves`/`boss`; `wave` of `waves`; `boss` = its entity id once it is up (0 before), `hp` 0..1; `players` = enrolled. |
+| `zoneEvent` | `kind:'soon'\|'start'\|'end', ev:{uid, id, name, kind, x, z, r, …}, text?, at?, won?` | (game socket) Your zone's own event (every copy runs its own, PLAN §5.2): announced to everyone in the zone (`soon` with `at` = wall ms it starts, or straight to `start`), and `end` (`won`). Walk within ~60 m of the arena to join. |
 | `zone` | `zone, name, band, deeds:{rares, bosses, elites, deaths, visitors}, heat:[[x, z, n]…]` | You walked into a zone: what happened here this hour, and where people walk (footprints). |
 | `travelR` | `ok, why?, msg?, cost?, to?` | Answer to `travel` (`why`: `undiscovered`, `far`, `gold`, `combat`, `instance`, `noEvent`, `dead`, `unknown`). |
+| `quests` | `active:[{id, name, level, zone, giver, text, done, group, step, steps:[{text, n, of, done}], ready, job, reward:{xp, gold, item}, story}], done:[ids]` | (game socket) My quest log, whole, whenever it changes (also in `joined.you.quests`). `ready` = every step done: take it back to the giver. `reward.xp` = share of a level. |
+| `questR` | `op, id, ok, why?, msg?, reward?:{xp, gold, items}, next?` | Answer to `quest` (`why`: `far`, `unknown`, `giver`, `locked`, `done`, `have`, `full`, `notDone`). `next` = the quest this one unlocks (story chain). |
 | `tradeAsk` | `trade, from, name` | Someone (entity `from`) wants to trade: answer `trade {op:'accept', id: trade}` or `cancel`. |
 | `tradeState` | `trade:{id, state, you:{char, name, id, items, gold, locked, confirmed}, them:{…}}\|null, done?, why?` | The trade window; `trade:null` = closed (`done:true` = it went through, else `why`: `cancelled`, `tradeFar`, `tradeFailed`, `bagFull`, `gone`). |
 | `err` | `code, msg` | Request failed (`auth`, `name`, `cls`, `full`, `ticket`, `state`, `party`, `partyFull`, `noCode`, `notFound`, `muted`, `item`, `bagFull`). `msg` is plain language. |
@@ -384,8 +388,8 @@ Teams: players `team = 1`, hostile monsters `team = 2`, friendly NPCs `team = 1`
 `/p/0`, `/status`, `/status.html`, `/healthz`. Options (header of main.mjs): `--port`, `--host`, `--db pg|json|memory`,
 `--db-file`, `--env dev|stable` (a pg database must end in `_<env>`: dev and stable never share one), `--public <dir>`
 (serve only a published copy, stream H), `--process <name>` (lease owner prefix), `--save-every`, `--journal-ms`,
-`--linger`, `--terrain <zone>`, `--rules auto|v0`, `--build`. Environment (an env file outside the repo,
-`server/env.example`): `PG*`/`DATABASE_URL`, `TV_TURNSTILE_SECRET`, `TV_TURNSTILE_SITEKEY`, `TV_ENV`. Stage 1 = one process.
+`--linger`, `--province <keys>` (default `torbor_downs`; a single zone key works too), `--terrain <zone>`, `--procs N` (stage 2, §15.8), `--event-first/-announce/-every <ms>`, `--rules auto|v0`, `--build`. Environment (an env file outside the repo,
+`server/env.example`): `PG*`/`DATABASE_URL`, `TV_TURNSTILE_SECRET`, `TV_TURNSTILE_SITEKEY`, `TV_ENV`. Stage 1 = one process; stage 2 = gateway + N province processes (§15.8).
 
 ### 8.2 Tick
 Fixed 20 Hz loop with drift correction (each tick is scheduled for `start + k*50 ms`; late ticks run
@@ -540,3 +544,115 @@ if it fails. New accounts are limited to 20 per network per hour (`err {code:'to
 `js/net/client.js` takes `connect({ human })` = a token or `async ({siteKey}) => token` (the client renders the widget).
 Cloudflare's public test keys are in `server/env.example` (site key `1x00000000000000000000AA` passes, token
 `XXXX.DUMMY.TOKEN.XXXX`); the real pair lives only in the env file outside the repo.
+
+
+## 15. One province (M2, PLAN §5, §8.1–8.2) — protocol v3
+
+### 15.1 A province is one room over many zones
+A province copy (`<province>/wilds:<n>`) is ONE room over all its zones (Torbor Downs: 16 zones, world zones
+x 11–14, y 1–4, each 2,048 m). Coordinates are **world metres**: zone `zXX_YY` covers x ∈ [XX·2048, XX·2048 + 2048],
+z ∈ [YY·2048, …]. Walking between zones is seamless (no handoff, no mirroring); the AOI grid is sparse, so the
+8 × 8 km room costs only the cells somebody stands in. `joined.room` for a province room:
+
+| Field | Meaning |
+|---|---|
+| `terrain` | `null` (there is no single bake) |
+| `province` | province key (`torbor_downs`) |
+| `zones` | `[{key, bounds:{minX, minZ, maxX, maxZ}}]` — load `data/zones/<key>/terrain.bin` (zone-local metres) and draw it at `(bounds.minX, bounds.minZ)`; `js/sim/province-terrain.js` `createProvinceTerrain({key, zones:[{key, zx, zy, reader}]})` stitches readers the way the server does (heights, walkable, water, biome, sites in world metres) — use it for prediction so client and server agree. |
+| `towns` | every hub town circle `[{x, z, r, name}]` (each is its own room) ; `town` = the starter hub |
+| `waystones` | `[{key, name, x, z}]` this province's waystones (§15.2) |
+| `horizon` | `{world:'data/world/world.json', macro:'data/world/macro.bin', province}` — stream B's world bake for the far horizon (mountains/sea beyond the province) |
+| `clock` | `{epoch, dayMs}` (§15.6) |
+
+**Dormant camps:** a province copy has ~1,300 monsters on paper; only camps with a player within 200 m exist. A camp
+out of reach for 30 s whose members are calm (alive, full health, not fighting) is parked — removed with its warband
+escort — and spawns again as it was when someone comes near (respawn timers keep running meanwhile). The client just
+sees monsters appear at the edge of view as always.
+
+Rooms: towns `<province>/town:<i>` (one per hub settlement, **never copied**, shared by every copy; the starter
+zone's hub — Torborhold — is `town:0`, where new characters and respawns begin; you wake in the nearest town),
+copies `<province>/wilds:<n>` (a new copy opens at `copyCap`: **150 in a starter province** (band starting at 1),
+300 elsewhere), instances `<province>/i:<n>`. The `zone` message (§3.2) arrives whenever you cross into another
+zone: its name, level band, this hour's deeds and the footprint heat (§15.5).
+
+### 15.2 Waystones and travel
+One waystone in every town square and one beside every dungeon door (objects `type:'waystone'`, `info.waystone`
+= its key). **Use** one (`use {id}`, within 4 m) to discover it: `used {kind:'waystone', key, name, fresh, known:[keys]}`
+(saved; `joined.you.waystones` lists what you know). **Travel** (`travel {to: key}`) only while standing at a
+waystone, not in combat or a dungeon, to a waystone you have discovered, for a gold fare
+`2 + round(metres / 400)` (+4,000 m' worth across provinces) → `travelR {ok, cost}` then a `joined` handoff
+(`via:'waystone'`), or a `relocate` when the target province lives in another process.
+
+### 15.3 The realm event (PLAN §5.2)
+The gateway's director runs one big event at a time (the province's world boss — Grimtallow at Blackthorn Scar —
+or zone event sites), picked by how many online players sit in its band, sized to them
+(`hp ×(1 + 0.55·(n−1))`, `floor(n/8)` adds, ≤ 12), announced realm-wide `announceMs` ahead (10 min):
+`realm {kind:'eventSoon', ev, at}` → `realm {kind:'eventStart', ev}` → `realm {kind:'eventEnd', ev, won, why}`
+(gateway socket, everyone). While it runs, `travel {to:'event'}` is **free from anywhere** (not in combat or a
+dungeon) and drops you on the arena's edge. Anyone in the arena gets `eventFrame` (1 Hz, game socket) — the
+temporary event group, no invite. `joined.event` = the live event when you (re)join. Server flags for demos
+and tests: `--event-first <ms> --event-announce <ms> --event-every <ms>`. Credit by contribution and loot stay
+the rules' (stream C, `data.event` + `data.scale` on the boss).
+
+**Picking and sizing** come from stream E's `data/quests/events.json` `director`: an event needs `minOnline` players online
+and its cooldown over; a fixed-schedule one (Grimtallow: every 3 h at :30) wins when due within the announce window;
+otherwise one is drawn by `weight` among events with ≥ `minInBand` characters within 3 levels of it; 40–80 min between
+events. Size: boss health × (1 + 0.12·(n−1)), one extra add per 6 players. Kinds: `worldboss` (the boss at its arena),
+`town_attack` / `warband_siege` (waves from the edge of the town or settlement, then a boss if named — a hub town's own
+room hosts it), `flyover` (the drake lands at each listed zone's arena for 3 min; killed on any landing = won).
+**Zone events** (`events.json` `zone`, one per zone): every copy runs its own, every 35–55 min, only while somebody is
+in that zone: `zoneEvent soon/start` to the zone → 2–3 waves from the arena edge → the scripted boss → `zoneEvent end`.
+The zone's `eventBoss` is no longer a camp that stands there all the time. Rewards (both kinds, everyone enrolled who
+is alive at the end): xp = `reward.xp` × one level's worth at the event's level, `reward.gold`, an item of
+`reward.item.tier` (rolled by the rules, `chance` if given) — through the normal `bag`/`you`/`ev xp` messages.
+
+### 15.4 Open groups (PLAN §5.3)
+Two or more players (not already in one party) damaging the same monster within 40 m of it in 10 s each get
+`groupHint {key, with:[{char, name}]}` once (gateway socket). One click = `party {op:'group', code: key}`: the first
+click makes a party, the next ones join it (`partyState` as usual; `err {code:'party'}` if the hint has expired, 60 s).
+
+### 15.5 Traces (PLAN §5.4)
+Objects other players can see and `use` (answer `used {kind, ...trace}`; `info.trace` carries the same data):
+- **grave** `{who, level, by, at, until}` where a player died outside a dungeon; fades after 1 h (≤ 200 per room);
+- **campfire** `{who, at, until}` — `trace {kind:'campfire'}` in the wilds lights one beside you (10 min, one per player);
+- **door banner** — a dungeon door whose instance boss died carries `info.banner = {by, party, at}` in every copy
+  ("cleared by Aldra's party, 4 minutes ago");
+- **zone deeds + footprints** — `zone {deeds:{rares, bosses, elites, deaths, visitors}, heat:[[x, z, n]…]}`
+  (this hour; heat = 32 m cells people walked, top 200).
+
+### 15.6 Day and night, NPC schedules
+`welcome.clock` / `joined.room.clock` = `{epoch, dayMs, now?}`: time of day = `((wallNow − epoch) mod dayMs) / dayMs`
+(0 = midnight, 0.5 = noon; a day is 2 real hours). Night is `t < 0.22 or t > 0.8`. `js/net/client.js`
+`net.timeOfDay()` does the sum with the server's clock skew. Town folk (`npc` objects with `info.role`: smith,
+merchant, elder, innkeeper, healer, unbinder, broker) walk to their stalls by day and to the inn by night (they
+move in the snapshot like anyone else; innkeeper, healer and unbinder stay put).
+
+### 15.7 Vignettes as room content
+Stream E's vignettes (`data/vignettes/*.json` recipes + `data/vignettes/placements/<zone>.json`, zone metres, moved
+to world metres by the server) become: a `vignette` marker object (`info.key`, `info.r`, `info.lore` — show the lore
+line when you walk in), its `note` / `npc` / `chest` (per character; `hidden` + `hint`; `after` = opens only once
+the named object was used) / `use` objects, and its monsters as a camp. `js/sim/vignettes.js` `vignettePoint()` is
+the one rotation formula (props are the client's to draw from the same files).
+
+### 15.8 Processes (stage 2)
+`server/main.mjs --procs N --db pg`: this process is the **gateway** (static files, `/gw`, `/status`); it forks N
+province processes (`server/province-proc.mjs`, provinces dealt round-robin). A `/p/<n>` upgrade is accepted by
+the gateway and the raw socket handed to child n (fd passing), which does the WebSocket handshake and owns the
+socket — no game traffic goes through the gateway. Gateway ↔ children talk over the IPC channel (the bus messages
+listed in `js/sim/gateway.js`). The ticket names the path (`ticket {path:'/p/<n>'}`); crossing to a province in
+another process is `relocate {path, ticket}` (save, release the lease, new ticket, new socket — client.js does
+it). A child that dies is restarted (its players reconnect by themselves). `--procs 0` (default) = stage 1, one
+process, same code (`js/sim/world.js` `createWorld`); tests build stage 2 in one context with `createRealm`.
+
+### 15.9 Quests and radiant jobs
+`js/sim/quests.js` runs stream E's `data/quests/<zone>.json` (story and zone quests, 90 in Torbor Downs),
+`province.json` (the story chain, through each quest's `next`) and `jobs.json` (radiant job frames). Givers: quest NPCs
+(E's `npc` placements, `info.role`), vignette objects for quests that `startsFrom` one, and job boards — any NPC whose
+role is elder, sergeant, captain, quartermaster, tollkeeper, broker or innkeeper offers up to 4 jobs bound to what is
+in its zone right now (refreshed every 20 min; a frame waits 60 min after you finish it). `use` an NPC → `used.offers`
+/ `used.ready`; `quest {op:'accept'|'turnin', id, npc}` within 6 m. Steps run in order: kill (shared credit: the killer,
+anyone who hit it in the last 30 s, and their party within 60 m), killOne / killRare (an encounter id; realm and zone
+event credit counts), collect (a quest-only count, not a bag item), visit / escort (walk into the place), use (a vignette
+object), talk / deliver (an NPC), clear (reach floor N of the zone's dungeon, or kill its boss; a cave's boss).
+Rewards on turn-in: xp = `reward.xp` × one level's worth at the quest's level, gold = `reward.gold` × one kill's gold at
+that level (3 + level), an item of `reward.item.tier`. Saved per character (`quests` in SAVE_FIELDS).

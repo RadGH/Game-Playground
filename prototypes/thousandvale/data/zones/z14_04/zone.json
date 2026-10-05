@@ -1,5 +1,5 @@
 {
-  "name": "z14_04",
+  "name": "Lowmoor (z14_04)",
   "zone": "z14_04",
   "sheet": {
     "sheet": "torbor_downs",
@@ -89,24 +89,45 @@
       "z": 704
     },
     {
+      "type": "settlement",
+      "kind": "town",
+      "name": "Lowmoor",
+      "x": 1219,
+      "z": 1026,
+      "ask": true,
+      "askR": 70,
+      "hub": true,
+      "radius": 90
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Deepdene",
+      "x": 1347,
+      "z": 289,
+      "ask": true,
+      "askR": 40,
+      "radius": 40
+    },
+    {
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 560,
-      "z": 870,
-      "yaw": -1.424
+      "x": 1401,
+      "z": 1081,
+      "yaw": -1.622
     },
     {
       "type": "event",
       "id": "event_sunken_wolds",
-      "x": 1024,
-      "z": 1024,
+      "x": 1068,
+      "z": 1007,
       "r": 40
     }
   ],
   "spawn": {
-    "x": 1024,
-    "z": 1024
+    "x": 1199,
+    "z": 1026
   },
   "summary": {
     "zone": "z14_04",
@@ -115,38 +136,73 @@
     "rivers": 3,
     "wetShare": 0.011,
     "unwalkableShare": 0.007,
-    "towns": [],
+    "towns": [
+      {
+        "name": "Lowmoor",
+        "kind": "town",
+        "hub": true,
+        "at": [
+          1219,
+          1026
+        ],
+        "radius": 90,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 24,
+        "streets": 69,
+        "links": 0,
+        "overlaps": 0
+      },
+      {
+        "name": "Deepdene",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          1347,
+          289
+        ],
+        "radius": 40,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 9,
+        "streets": 20,
+        "links": 0,
+        "overlaps": 0
+      }
+    ],
     "roads": 0,
     "bridges": 0,
-    "scatter": 7037,
+    "scatter": 6912,
     "scatterKinds": {
-      "rock_large": 343,
-      "tree_acacia": 1750,
-      "bush": 3232,
-      "rock_small": 1280,
+      "rock_large": 341,
+      "tree_acacia": 1719,
+      "bush": 3171,
+      "rock_small": 1270,
       "tree_dead": 86,
       "boulder": 148,
-      "tree_broadleaf": 198
+      "tree_broadleaf": 177
     },
     "sites": [
       "landmark ancientwood The Elder Stondhealweast 1472 1728",
       "lair lair Tadaden 448 704",
       "lair lair The Lamnund Lair 448 1856",
       "lair lair Tifilden 1600 704",
-      "dungeon door_1 Barrow entrance 560 870  -1.424",
-      "event event_sunken_wolds  1024 1024 40"
+      "settlement(HUB) town Lowmoor 1219 1026 90",
+      "settlement hamlet Deepdene 1347 289 40",
+      "dungeon door_1 Barrow entrance 1401 1081  -1.622",
+      "event event_sunken_wolds  1068 1007 40"
     ],
     "spawn": {
-      "x": 1024,
-      "z": 1024
+      "x": 1199,
+      "z": 1026
     },
-    "placements": 6,
-    "vignettesAvoided": 0
+    "placements": 132,
+    "vignettesAvoided": 50
   },
   "files": {
-    "terrain.bin": 6305822,
-    "nav.bin": 1050717,
-    "scatter.bin": 56380,
-    "placements.json": 1602
+    "terrain.bin": 497261,
+    "nav.bin": 14182,
+    "scatter.bin": 55380,
+    "placements.json": 41190
   }
 }

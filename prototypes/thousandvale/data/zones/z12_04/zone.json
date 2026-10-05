@@ -1,5 +1,5 @@
 {
-  "name": "z12_04",
+  "name": "Coldwater (z12_04)",
   "zone": "z12_04",
   "sheet": {
     "sheet": "torbor_downs",
@@ -69,42 +69,118 @@
       "z": 1472
     },
     {
+      "type": "settlement",
+      "kind": "town",
+      "name": "Coldwater",
+      "x": 1474,
+      "z": 1846,
+      "ask": true,
+      "askR": 70,
+      "hub": true,
+      "radius": 90
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Netherby",
+      "x": 711,
+      "z": 732,
+      "ask": true,
+      "askR": 40,
+      "radius": 46
+    },
+    {
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 1761,
-      "z": 1815,
-      "yaw": 0.198
+      "x": 1369,
+      "z": 1953,
+      "yaw": -2.755
     },
     {
       "type": "event",
       "id": "event_coldwater",
-      "x": 736,
-      "z": 1301,
+      "x": 903,
+      "z": 1790,
       "r": 40
     }
   ],
   "spawn": {
-    "x": 1024,
-    "z": 1024
+    "x": 1462,
+    "z": 1854
+  },
+  "theme": {
+    "kind": "mere",
+    "lakes": [
+      {
+        "name": "Coldwater Mere",
+        "kind": "mere",
+        "x": 1101,
+        "z": 1645,
+        "r": 150,
+        "level": 1026.37
+      },
+      {
+        "name": "the Reflection Mere",
+        "kind": "mere",
+        "x": 684,
+        "z": 1260,
+        "r": 75,
+        "level": 1011.54
+      }
+    ],
+    "fen": null
   },
   "summary": {
     "zone": "z12_04",
     "province": "Petbeck Basin",
     "inputHash": "64fa44ba",
     "rivers": 0,
-    "wetShare": 0,
-    "unwalkableShare": 0.152,
-    "towns": [],
+    "wetShare": 0.021,
+    "unwalkableShare": 0.171,
+    "towns": [
+      {
+        "name": "Coldwater",
+        "kind": "town",
+        "hub": true,
+        "at": [
+          1474,
+          1846
+        ],
+        "radius": 90,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 21,
+        "streets": 47,
+        "links": 0,
+        "overlaps": 0
+      },
+      {
+        "name": "Netherby",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          711,
+          732
+        ],
+        "radius": 46,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 9,
+        "streets": 30,
+        "links": 0,
+        "overlaps": 0
+      }
+    ],
     "roads": 2,
     "bridges": 0,
-    "scatter": 12067,
+    "scatter": 11566,
     "scatterKinds": {
-      "tree_conifer": 2023,
-      "rock_large": 3399,
-      "rock_small": 4449,
-      "bush": 1243,
-      "boulder": 935,
+      "tree_conifer": 1890,
+      "rock_large": 3287,
+      "rock_small": 4282,
+      "bush": 1196,
+      "boulder": 893,
       "tree_broadleaf": 12,
       "tree_acacia": 6
     },
@@ -112,20 +188,22 @@
       "lair dungeon The Sunken Fawamack 1984 1984",
       "lair dungeon The Lost Moben 1088 320",
       "lair lair The Wondomol Nest 960 1472",
-      "dungeon door_1 Barrow entrance 1761 1815  0.198",
-      "event event_coldwater  736 1301 40"
+      "settlement(HUB) town Coldwater 1474 1846 90",
+      "settlement hamlet Netherby 711 732 46",
+      "dungeon door_1 Barrow entrance 1369 1953  -2.755",
+      "event event_coldwater  903 1790 40"
     ],
     "spawn": {
-      "x": 1024,
-      "z": 1024
+      "x": 1462,
+      "z": 1854
     },
-    "placements": 7,
-    "vignettesAvoided": 0
+    "placements": 120,
+    "vignettesAvoided": 38
   },
   "files": {
-    "terrain.bin": 6305650,
-    "nav.bin": 1050717,
-    "scatter.bin": 96620,
-    "placements.json": 27902
+    "terrain.bin": 699286,
+    "nav.bin": 57958,
+    "scatter.bin": 92612,
+    "placements.json": 63079
   }
 }

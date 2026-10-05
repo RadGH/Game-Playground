@@ -19,48 +19,50 @@
   },
   {
    "kind": "settlement",
-   "id": "pohelrow",
+   "id": "mawehaven",
    "x": 256,
    "z": 1920,
    "yaw": 0,
    "data": {
     "kind": "hamlet",
-    "name": "Pohelrow",
+    "name": "Mawehaven",
     "radius": 40,
     "hub": false,
-    "planned": true
+    "planned": true,
+    "wfName": "Pohelrow"
    }
   },
   {
    "kind": "settlement",
-   "id": "ashford",
+   "id": "wamonhold",
    "x": 1344,
    "z": 1568,
    "yaw": 0,
    "data": {
     "kind": "hamlet",
-    "name": "Ashford",
+    "name": "Wamonhold",
     "radius": 46,
     "hub": false,
-    "planned": true
+    "planned": true,
+    "wfName": "Ashford"
    }
   },
   {
    "kind": "crossing",
-   "id": "mipider_ford",
-   "x": 64,
-   "z": 1984,
+   "id": "fitockpi_ford",
+   "x": 48,
+   "z": 1857,
    "yaw": 0,
    "data": {
     "kind": "ford",
-    "name": "Mipider Ford"
+    "name": "Fitockpi Ford"
    }
   },
   {
    "kind": "crossing",
    "id": "milhot_ford",
-   "x": 1344,
-   "z": 1472,
+   "x": 1334,
+   "z": 1427,
    "yaw": 0,
    "data": {
     "kind": "ford",
@@ -90,8 +92,8 @@
   {
    "kind": "camp_site",
    "id": "elite_hobb_gallowsby",
-   "x": 75,
-   "z": 1973,
+   "x": 72,
+   "z": 1879,
    "yaw": 0,
    "data": {
     "r": 25
@@ -2589,24 +2591,24 @@
   },
   {
    "kind": "town_square",
-   "id": "pohelrow_square",
+   "id": "mawehaven_square",
    "x": 253.2,
    "z": 1923.47,
    "yaw": 0,
    "data": {
     "r": 3.1,
-    "town": "pohelrow",
+    "town": "mawehaven",
     "culture": "halfling"
    }
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_0",
+   "id": "mawehaven_street_0",
    "x": 255.8,
    "z": 1949,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -2627,12 +2629,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_1",
+   "id": "mawehaven_street_1",
    "x": 282.27,
    "z": 1932.28,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -2653,12 +2655,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_2",
+   "id": "mawehaven_street_2",
    "x": 273.52,
    "z": 1943.11,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2679,12 +2681,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_3",
+   "id": "mawehaven_street_3",
    "x": 270.43,
    "z": 1945.16,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2701,12 +2703,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_4",
+   "id": "mawehaven_street_4",
    "x": 271.1,
    "z": 1941.29,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2727,12 +2729,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_5",
+   "id": "mawehaven_street_5",
    "x": 284.99,
    "z": 1919.09,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2753,12 +2755,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_6",
+   "id": "mawehaven_street_6",
    "x": 274.74,
    "z": 1925.12,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2779,12 +2781,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_7",
+   "id": "mawehaven_street_7",
    "x": 282.76,
    "z": 1908.83,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2805,12 +2807,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_8",
+   "id": "mawehaven_street_8",
    "x": 276.87,
    "z": 1914.4,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2831,12 +2833,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_9",
+   "id": "mawehaven_street_9",
    "x": 256.5,
    "z": 1933.94,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -2857,12 +2859,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_10",
+   "id": "mawehaven_street_10",
    "x": 238.17,
    "z": 1942.75,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2883,12 +2885,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_11",
+   "id": "mawehaven_street_11",
    "x": 232.56,
    "z": 1937.07,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2909,12 +2911,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_12",
+   "id": "mawehaven_street_12",
    "x": 260.32,
    "z": 1919.78,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2935,12 +2937,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_13",
+   "id": "mawehaven_street_13",
    "x": 239.18,
    "z": 1924.39,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2961,12 +2963,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_14",
+   "id": "mawehaven_street_14",
    "x": 249.52,
    "z": 1926.03,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2987,12 +2989,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_15",
+   "id": "mawehaven_street_15",
    "x": 238.88,
    "z": 1909.66,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3013,12 +3015,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_16",
+   "id": "mawehaven_street_16",
    "x": 260.73,
    "z": 1908.19,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3039,12 +3041,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_17",
+   "id": "mawehaven_street_17",
    "x": 252.29,
    "z": 1914.96,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3065,12 +3067,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_18",
+   "id": "mawehaven_street_18",
    "x": 245.93,
    "z": 1912.45,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3091,12 +3093,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_19",
+   "id": "mawehaven_street_19",
    "x": 252.6,
    "z": 1903.48,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3117,12 +3119,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_20",
+   "id": "mawehaven_street_20",
    "x": 262.98,
    "z": 1902.49,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3143,12 +3145,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_21",
+   "id": "mawehaven_street_21",
    "x": 254.27,
    "z": 1895.83,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3169,12 +3171,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_22",
+   "id": "mawehaven_street_22",
    "x": 240.99,
    "z": 1901.01,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3195,12 +3197,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_23",
+   "id": "mawehaven_street_23",
    "x": 242.99,
    "z": 1895.96,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3217,12 +3219,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_24",
+   "id": "mawehaven_street_24",
    "x": 252.29,
    "z": 1914.96,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3239,12 +3241,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_25",
+   "id": "mawehaven_street_25",
    "x": 240.69,
    "z": 1928.44,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3261,12 +3263,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_26",
+   "id": "mawehaven_street_26",
    "x": 236.02,
    "z": 1931.34,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3283,12 +3285,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_27",
+   "id": "mawehaven_street_27",
    "x": 242.49,
    "z": 1934.14,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3305,12 +3307,12 @@
   },
   {
    "kind": "street",
-   "id": "pohelrow_street_28",
+   "id": "mawehaven_street_28",
    "x": 272.66,
    "z": 1933.38,
    "yaw": 0,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3327,12 +3329,12 @@
   },
   {
    "kind": "building",
-   "id": "pohelrow_plot_0",
+   "id": "mawehaven_plot_0",
    "x": 267.8,
    "z": 1936.53,
    "yaw": 1.3763,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "want": "house",
     "district": "residential",
     "w": 4.51,
@@ -3344,12 +3346,12 @@
   },
   {
    "kind": "building",
-   "id": "pohelrow_plot_1",
+   "id": "mawehaven_plot_1",
    "x": 273.69,
    "z": 1920.13,
    "yaw": 1.0138,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "want": "house",
     "district": "residential",
     "w": 3.66,
@@ -3361,12 +3363,12 @@
   },
   {
    "kind": "building",
-   "id": "pohelrow_plot_2",
+   "id": "mawehaven_plot_2",
    "x": 245.05,
    "z": 1940.81,
    "yaw": -1.8736,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "want": "granary",
     "district": "residential",
     "w": 5.78,
@@ -3378,12 +3380,12 @@
   },
   {
    "kind": "building",
-   "id": "pohelrow_plot_3",
+   "id": "mawehaven_plot_3",
    "x": 244.89,
    "z": 1922.15,
    "yaw": 1.414,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "want": "hut",
     "district": "civic",
     "w": 6.88,
@@ -3395,12 +3397,12 @@
   },
   {
    "kind": "building",
-   "id": "pohelrow_plot_4",
+   "id": "mawehaven_plot_4",
    "x": 235.25,
    "z": 1920.63,
    "yaw": 1.414,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "want": "house",
     "district": "residential",
     "w": 5.25,
@@ -3412,12 +3414,12 @@
   },
   {
    "kind": "building",
-   "id": "pohelrow_plot_5",
+   "id": "mawehaven_plot_5",
    "x": 243.85,
    "z": 1907.31,
    "yaw": -1.9476,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "want": "house",
     "district": "residential",
     "w": 3.86,
@@ -3429,12 +3431,12 @@
   },
   {
    "kind": "building",
-   "id": "pohelrow_plot_6",
+   "id": "mawehaven_plot_6",
    "x": 248.9,
    "z": 1898.53,
    "yaw": -1.9476,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "want": "shrine",
     "district": "residential",
     "w": 6.79,
@@ -3446,12 +3448,12 @@
   },
   {
    "kind": "building",
-   "id": "pohelrow_plot_7",
+   "id": "mawehaven_plot_7",
    "x": 236.35,
    "z": 1904.57,
    "yaw": 1.194,
    "data": {
-    "town": "pohelrow",
+    "town": "mawehaven",
     "want": "house",
     "district": "residential",
     "w": 4.82,
@@ -3463,24 +3465,24 @@
   },
   {
    "kind": "town_square",
-   "id": "ashford_square",
+   "id": "wamonhold_square",
    "x": 1343.94,
    "z": 1567.14,
    "yaw": 0,
    "data": {
     "r": 4.62,
-    "town": "ashford",
+    "town": "wamonhold",
     "culture": "halfling"
    }
   },
   {
    "kind": "street",
-   "id": "ashford_street_0",
+   "id": "wamonhold_street_0",
    "x": 1376.26,
    "z": 1587.5,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -3501,12 +3503,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_1",
+   "id": "wamonhold_street_1",
    "x": 1370.33,
    "z": 1547.15,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -3527,12 +3529,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_2",
+   "id": "wamonhold_street_2",
    "x": 1376.54,
    "z": 1554.53,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3553,12 +3555,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_3",
+   "id": "wamonhold_street_3",
    "x": 1360.9,
    "z": 1538.31,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3579,12 +3581,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_4",
+   "id": "wamonhold_street_4",
    "x": 1357.45,
    "z": 1569.03,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -3605,12 +3607,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_5",
+   "id": "wamonhold_street_5",
    "x": 1351.55,
    "z": 1604.46,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3631,12 +3633,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_6",
+   "id": "wamonhold_street_6",
    "x": 1362.41,
    "z": 1582.93,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3657,12 +3659,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_7",
+   "id": "wamonhold_street_7",
    "x": 1363.71,
    "z": 1594.31,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3683,12 +3685,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_8",
+   "id": "wamonhold_street_8",
    "x": 1356.59,
    "z": 1600.34,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3709,12 +3711,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_9",
+   "id": "wamonhold_street_9",
    "x": 1351.6,
    "z": 1590.39,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3735,12 +3737,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_10",
+   "id": "wamonhold_street_10",
    "x": 1357.48,
    "z": 1585.41,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3761,12 +3763,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_11",
+   "id": "wamonhold_street_11",
    "x": 1359.79,
    "z": 1579.83,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3787,12 +3789,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_12",
+   "id": "wamonhold_street_12",
    "x": 1354.3,
    "z": 1583.77,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3813,12 +3815,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_13",
+   "id": "wamonhold_street_13",
    "x": 1346.47,
    "z": 1586.36,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3839,12 +3841,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_14",
+   "id": "wamonhold_street_14",
    "x": 1345.2,
    "z": 1601.61,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3861,12 +3863,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_15",
+   "id": "wamonhold_street_15",
    "x": 1342.29,
    "z": 1605.66,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3883,12 +3885,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_16",
+   "id": "wamonhold_street_16",
    "x": 1340.43,
    "z": 1602.51,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3909,12 +3911,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_17",
+   "id": "wamonhold_street_17",
    "x": 1340.54,
    "z": 1592.71,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3935,12 +3937,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_18",
+   "id": "wamonhold_street_18",
    "x": 1337.59,
    "z": 1600.24,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3961,12 +3963,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_19",
+   "id": "wamonhold_street_19",
    "x": 1332.96,
    "z": 1601.23,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3987,12 +3989,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_20",
+   "id": "wamonhold_street_20",
    "x": 1326.54,
    "z": 1579.94,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4013,12 +4015,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_21",
+   "id": "wamonhold_street_21",
    "x": 1341.07,
    "z": 1551.22,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4039,12 +4041,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_22",
+   "id": "wamonhold_street_22",
    "x": 1339.87,
    "z": 1572.66,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4065,12 +4067,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_23",
+   "id": "wamonhold_street_23",
    "x": 1346.15,
    "z": 1561.28,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4091,12 +4093,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_24",
+   "id": "wamonhold_street_24",
    "x": 1336.53,
    "z": 1569.36,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4117,12 +4119,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_25",
+   "id": "wamonhold_street_25",
    "x": 1332.92,
    "z": 1576.17,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4143,12 +4145,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_26",
+   "id": "wamonhold_street_26",
    "x": 1333.38,
    "z": 1563.1,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4169,12 +4171,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_27",
+   "id": "wamonhold_street_27",
    "x": 1330.4,
    "z": 1571.19,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4195,12 +4197,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_28",
+   "id": "wamonhold_street_28",
    "x": 1328.85,
    "z": 1563.81,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4221,12 +4223,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_29",
+   "id": "wamonhold_street_29",
    "x": 1334.68,
    "z": 1552.62,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4247,12 +4249,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_30",
+   "id": "wamonhold_street_30",
    "x": 1338.33,
    "z": 1545.8,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4273,12 +4275,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_31",
+   "id": "wamonhold_street_31",
    "x": 1329.64,
    "z": 1555.17,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4299,12 +4301,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_32",
+   "id": "wamonhold_street_32",
    "x": 1331.08,
    "z": 1548.42,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4325,12 +4327,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_33",
+   "id": "wamonhold_street_33",
    "x": 1326.27,
    "z": 1551.22,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4351,12 +4353,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_34",
+   "id": "wamonhold_street_34",
    "x": 1316.95,
    "z": 1565.15,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4377,12 +4379,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_35",
+   "id": "wamonhold_street_35",
    "x": 1319.43,
    "z": 1574.98,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4403,12 +4405,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_36",
+   "id": "wamonhold_street_36",
    "x": 1315.02,
    "z": 1557.54,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4429,12 +4431,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_37",
+   "id": "wamonhold_street_37",
    "x": 1367.15,
    "z": 1538.24,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -4451,12 +4453,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_38",
+   "id": "wamonhold_street_38",
    "x": 1316.95,
    "z": 1565.15,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4473,12 +4475,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_39",
+   "id": "wamonhold_street_39",
    "x": 1319.43,
    "z": 1574.98,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4495,12 +4497,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_40",
+   "id": "wamonhold_street_40",
    "x": 1338.19,
    "z": 1582.71,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4517,12 +4519,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_41",
+   "id": "wamonhold_street_41",
    "x": 1354.26,
    "z": 1545.53,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4539,12 +4541,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_42",
+   "id": "wamonhold_street_42",
    "x": 1362.75,
    "z": 1554.63,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4561,12 +4563,12 @@
   },
   {
    "kind": "street",
-   "id": "ashford_street_43",
+   "id": "wamonhold_street_43",
    "x": 1369.98,
    "z": 1559.1,
    "yaw": 0,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -4583,12 +4585,12 @@
   },
   {
    "kind": "building",
-   "id": "ashford_plot_0",
+   "id": "wamonhold_plot_0",
    "x": 1376.97,
    "z": 1562.15,
    "yaw": -2.7214,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "want": "house",
     "district": "residential",
     "w": 5.31,
@@ -4600,12 +4602,12 @@
   },
   {
    "kind": "building",
-   "id": "ashford_plot_1",
+   "id": "wamonhold_plot_1",
    "x": 1354.59,
    "z": 1539.17,
    "yaw": 0.7118,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "want": "house",
     "district": "residential",
     "w": 7.06,
@@ -4617,12 +4619,12 @@
   },
   {
    "kind": "building",
-   "id": "ashford_plot_2",
+   "id": "wamonhold_plot_2",
    "x": 1363.98,
    "z": 1588.68,
    "yaw": -0.8685,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "want": "house",
     "district": "residential",
     "w": 3.82,
@@ -4634,12 +4636,12 @@
   },
   {
    "kind": "building",
-   "id": "ashford_plot_3",
+   "id": "wamonhold_plot_3",
    "x": 1357.41,
    "z": 1594.24,
    "yaw": -2.4393,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "want": "house",
     "district": "residential",
     "w": 5.64,
@@ -4651,12 +4653,12 @@
   },
   {
    "kind": "building",
-   "id": "ashford_plot_4",
+   "id": "wamonhold_plot_4",
    "x": 1349.87,
    "z": 1582.43,
    "yaw": 0.7023,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "want": "hut",
     "district": "craft",
     "w": 3.83,
@@ -4668,12 +4670,12 @@
   },
   {
    "kind": "building",
-   "id": "ashford_plot_5",
+   "id": "wamonhold_plot_5",
    "x": 1339.59,
    "z": 1558.54,
    "yaw": 0.4675,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "want": "granary",
     "district": "civic",
     "w": 8.04,
@@ -4685,12 +4687,12 @@
   },
   {
    "kind": "building",
-   "id": "ashford_plot_6",
+   "id": "wamonhold_plot_6",
    "x": 1334.36,
    "z": 1543.49,
    "yaw": 0.4675,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "want": "house",
     "district": "residential",
     "w": 3.81,
@@ -4702,12 +4704,12 @@
   },
   {
    "kind": "building",
-   "id": "ashford_plot_7",
+   "id": "wamonhold_plot_7",
    "x": 1313.68,
    "z": 1571.26,
    "yaw": 0.2475,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "want": "shrine",
     "district": "residential",
     "w": 8.12,
@@ -4719,12 +4721,12 @@
   },
   {
    "kind": "building",
-   "id": "ashford_plot_8",
+   "id": "wamonhold_plot_8",
    "x": 1311.44,
    "z": 1562.37,
    "yaw": 0.2475,
    "data": {
-    "town": "ashford",
+    "town": "wamonhold",
     "want": "house",
     "district": "residential",
     "w": 8.12,
@@ -6997,7 +6999,7 @@
   },
   {
    "kind": "road",
-   "id": "spur_pohelrow",
+   "id": "spur_mawehaven",
    "x": 242.39,
    "z": 1882.38,
    "yaw": 0,
@@ -7131,7 +7133,7 @@
   },
   {
    "kind": "road",
-   "id": "spur_ashford",
+   "id": "spur_wamonhold",
    "x": 1372.24,
    "z": 1531.69,
    "yaw": 0,

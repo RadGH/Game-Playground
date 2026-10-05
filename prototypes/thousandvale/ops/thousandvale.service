@@ -23,7 +23,7 @@ Environment=NODE_ENV=production TV_ENV=stable
 WorkingDirectory=/srv/thousandvale/current/app/prototypes/thousandvale
 # BUILD holds the published commit hash; the client is stamped with the same one, so a stale tab is told to reload.
 # ($$ is systemd's escape for a literal $, so the shell — not systemd — expands these)
-ExecStart=/bin/sh -c 'exec /opt/thousandvale/node/bin/node server/main.mjs --port 8490 --host "$${TV_HOST:-0.0.0.0}" --env stable --db pg --process stable --terrain "$${TV_TERRAIN:-z12_02}" --public /srv/thousandvale/current/public --build "$$(cat /srv/thousandvale/current/BUILD)"'
+ExecStart=/bin/sh -c 'exec /opt/thousandvale/node/bin/node server/main.mjs --port 8490 --host "$${TV_HOST:-0.0.0.0}" --env stable --db pg --process stable --public /srv/thousandvale/current/public --build "$$(cat /srv/thousandvale/current/BUILD)"'
 Restart=on-failure
 RestartSec=3
 TimeoutStopSec=75

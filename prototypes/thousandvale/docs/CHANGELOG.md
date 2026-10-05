@@ -83,3 +83,125 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - **D** OWNER REQUEST — telegraphs (`js/client/telegraphs.js`, geometry in `telegraph-shape.js`): circle / ring / donut / cone / line / cross hugging the terrain, tinted floor + glowing rim + fill sweeping from where the blow starts and arriving exactly when it lands (timed from the event tick), marching stripes, a "now" pulse, landing flash + burst, cancel fade, element colours, follow-the-caster; red screen-edge warning while you stand in one, a hit flash when it lands on you. Test: every drawn vertex is inside the server's `inside()`.
 - **D** OWNER REQUEST — boss UI (`js/client/boss.js`): boss bar with phase ticks, a NEW bar per phase (pips "bar 2 of 3", refill animation), phase name flash, cast bar (gold when interruptible, "Interrupted!"), enrage clock (pulses under 30 s) and enraged look (red bar glow + an aura on the boss), call-out banners (`say`), works from C's events and falls back to any rank:boss monster in a fight. `tv.demoEncounter()` plays a fake fight through the real handlers for screenshots/the owner.
 - **D** tests/D: 14 node tests (prediction vs the real server sim, telegraph drawn = measured ×6 shapes, terrain mesh split, looks, camp). e2e two-players green.
+
+## 2026-10-04 — stream C (combat core, M2)
+- **All 30 classes, all 180 skills in parity** with Farhold every frame (tests/C/parity-classes), with the follower
+  system (js/rules/followers.js: companions, summons, temporary summons, decoys, hirelings, druid shapes, songs, stances,
+  tempers) running on both sides; channels, rewind, afterimages, echoes, `again`, imbue, ricochet/split/returns, clusters,
+  corpse bursts all ported — `PENDING_KEYS` is empty.
+- **Every unique (233) in parity** (tests/C/parity-uniques): unique attack powers through Farhold's own `resolveAttack`,
+  kill powers, on-hurt powers, auras.
+- **Ally-targeting audit for all 30 classes** (tests/C/ally-audit, list in js/rules/ally-audit.md): 2,301 casts (every
+  skill, every talent node, every druid-shape skill, every song finale) at a hurt, poisoned party member. Fixed what it
+  found: group effects reached party members anywhere in the room (now 30 m); Foresight/Warding Spirits wards, Martyr's
+  Vow barriers, Quicken/Rally statuses and `allyStatus: all` reached only your own followers, never the party; a ward
+  could not be aimed at an ally; War Cry's Might (and any personal status) moved to whichever friend was targeted.
+- Monsters slide along nav.bin obstacles when the room hands over `terrain.nav` (tests/C/nav-block; waiting on A to load it).
+
+## 2026-10-04 — Stream E: Torbor Downs placed on the baked world (M2)
+- `tools/place-vignettes.mjs` now places a whole zone's content on stream B's bake: 10 vignettes, forts (template from the
+  fort's name), farms near settlements (burned/blighted in frontier/blight zones), caves by steep ground, the sheet's
+  camps (each twice, where their `where` text points), 2 rares with walkable roaming loops, waystones (every settlement,
+  the dungeon door, Grimtallow's arena), quest NPCs (town square / fort / vignette), treasure clues and caches, the zone
+  hook — for all 16 zones (`data/vignettes/placements/z11_01 … z14_04.json`). Rules in `tools/content-place.mjs`
+  (distance fields on nav.bin; reachability from the hub over all 16 nav grids stitched; stream B's own site rule so a
+  re-bake never moves a door or arena). `data/provinces/torbor_downs-places.json`: sheet names on B's settlements + 8
+  settlement asks for B.
+- `tools/assign-vignettes.mjs`: pinned vignettes (quest/NPC/treasure references), measured biomes, no wet-only vignette in
+  a dry zone, 10 per zone; variety worst 5-zone set 42 (≥ 40).
+- 4 new vignettes (fen_witch_hut, tinker_wagon, hunters_hide, cult_cellar) so M2 quests no longer reuse the starter
+  zone's vignettes within 2 zones; vignette biome tags widened to savanna/badlands/mountains (B's world has them).
+- New data: `data/quests/events.json` (event director: Grimtallow fixed-time world boss, 3 more realm events, one zone
+  event per zone), `data/provinces/schedules.json` (NPC day/night), `data/names/traces.json` (player traces), `camps` on
+  every zone sheet, `farm`/`cave` job frames.
+- `tests/E/placement.test.js` (15 tests): on land, reachable, off roads/plots/settlements (also checked independently
+  against B's polylines and footprints), spacing, variety + sameness on the placed world, B's sites untouched, events,
+  schedules, traces.
+
+## 2026-10-04 — stream C (combat core, M2 follow-up)
+- **Monster pathfinding** (js/rules/pathfind.js): weighted A* on a 2 m grid aligned to nav.bin samples, over
+  nav obstacles, cliffs past 63° and deep water; only when the straight line is shut; per-room budget of 4,000
+  expansions a tick; packs share paths; leashed monsters walk home round walls (snap home after 12 s); a
+  monster following a path that reaches its target is not "stuck" for the leash while it gets closer.
+  tests/C/pathfind: round a 50 m wall, round a cliff band, home round the wall, an unreachable target gives up,
+  100 hounds in a maze (planner ~0.2 ms mean a tick, 100/100 reach their players). On the real z12_02 nav:
+  0.36 ms per 30-80 m query cold. Flat terrains (Farhold parity) get no planner.
+- **Warbands** (js/rules/warband.js, warbands.json installed into the bestiary): a leader spawns 2 of each escort
+  type + its standard-bearer as room entities; the leader aura (×1.15, folded in once); the bearer's death ends
+  it; the leader's death ends it and routs the escort (≥1 runs 6 s, comes back); sieges through a room's
+  `structures`/`strikeStructure` hook (none provides it yet). tests/C/warband.
+- **Party calls**: non-companion `command` orders reach party followers within 30 m; `empowerNext.pets` puts the
+  rider on party members' next skill. Added to the ally audit.
+
+## 2026-10-04 — streams B / G / H (world bake M2, tests + load, ops M1.5)
+- **B bake size**: terrain.bin / nav.bin file version 2 — deflated, heights as planar-predictor residuals; new pure
+  `js/rules/inflate.js` (sync RFC 1951 decoder, ~40 ms a zone). Readers open v1 and v2, API unchanged, bake hashes unchanged.
+  17 zones 122 MB -> 14 MB. Bake tests compare checked-in files decoded (`sameLayerFile`).
+- **B nav fix**: bridge decks were DEEP water in nav.bin, cutting the east column of Torbor Downs off (28–55 % reachable); decks
+  are now stamped walkable in every zone they reach.
+- **B E's places**: settlement/ford renames imposed at bake time (`wfName` kept), the 8 asked settlements placed exactly, the hub
+  = the sheet's town, Saltmouth grown to a town; fords snap onto their river (Fitockpi Ford); a renamed town keeps its plan.
+- **B theme terrain** (lead ruling): `data/world/zone-themes.json` + `tools/lib/zone-theme.mjs` — Brackwater fen (Black Mere +
+  14 wadeable pools, marsh biome), Saltmouth's Salt Mere with a beach, Coldwater + Reflection meres; new placement kinds `lake`, `fen`.
+- **B far horizon**: `tools/bake-horizon.mjs` -> `data/world/horizon.{bin,json}` (world at 32 m, exact in baked zones),
+  `js/rules/horizon-read.js` (`parseHorizon`, `horizonRef`).
+- **B M2 gate tests**: `tests/B/zone-reach.test.js` (reachability of 115 targets over the stitched province nav; sameness
+  fingerprints, no repeated ground patch, no twin town plans; bridge decks walkable), `tests/B/horizon.test.js`;
+  `tools/lib/province-reach.mjs`, `tools/lib/zone-fingerprint.mjs` (both CLIs). tests/B 34 green.
+- **G**: first-hour bot v1 (`tools/first-hour-bot.mjs`, `tests/load/first-hour.test.js`): town -> party -> wilds -> fight + loot ->
+  dungeon together -> fight inside, green. `tests/load/herds.test.js`: 100 real-socket bots, spread / town herd 100 / event herd 60.
+  bot-client: `script` mode (goals from a driver, unstick sidestep), socket byte counting, party/used/loot/zone/realm/travelR.
+  Harness: `TV_GAME_DIR` runs a frozen copy.
+- **H**: `ops/setup-stable.sh` rewritten short + re-runnable (installs only what differs, restarts only on change, `--dry-run`
+  without sudo), `ops/lib/check-stable.sh`, `ops/thousandvale-lan-only.conf` (kernel IP filter), `ops/stable.env.template`
+  (Turnstile off until the client widget), unit no longer pins a single zone; backup/drill scripts path-overridable;
+  `ops/scratch-pg.sh` (throw-away cluster, unix socket only); `ops/drill-local.sh` (backup -> restore -> boot -> conservation ->
+  row counts, no sudo: PASSED); `tools/chaos-kill9.mjs --scratch`; publish gate now also runs `*.test.mjs` (stream C's tests).
+
+## 2026-10-04 — stream A (M2 server: one province)
+- **A** protocol **v3** (docs/protocol.md §15): province rooms (`room.zones/province/towns/waystones/horizon/clock`),
+  waystones + `travel`, realm `text` + reminders, `zoneEvent`, richer `eventFrame`, `quest`/`quests`/`questR`, object
+  `info.site/trace/banner/treasure/shimmer/waystone`, `you.waystones/treasure/quests`. client.js: `net.quest`,
+  `net.gamePath`, unknown message types emitted under their own name.
+- **A** stage 2 for real: `server/main.mjs --procs N` = gateway + N province processes owning their sockets (fd passing),
+  restart on exit; `tests/A/stage2.test.js` (pg): relocate /p/0 → /p/1 by free event travel, kill -9 a child → the client
+  comes back. Province status every second (was skipped at random).
+- **A** the province: Torbor Downs as one room over 16 stitched zones (world metres, sparse AOI), 13 hub towns, starter
+  copy cap 150; B's `nav.bin` stitched into `terrain.nav` for stream C. Dev unit switched to it (`torbor_downs` default).
+- **A** stream E's placements as content (`js/sim/placements.js`): vignettes, camps (replace the ring guesses), rares with
+  roaming paths, friendly/hostile forts (garrison NPCs or camps + chest), warband stockades as one leader row, farms +
+  pests, caves as doors to 1-floor instances of the cave's beasts (instances now keyed per door), waystones, quest NPCs,
+  hooks, treasure clues + caches (saved per character). Anything inside a hub town goes to that town's room.
+- **A** events (`js/sim/events.js`, director rewrite): events.json picking (fixed schedule, minOnline, minInBand, weights,
+  cooldowns, 5/1-min reminders, sizing 1 + 0.12·(n−1)), runner with waves → boss, flyover landings, enrolment and personal
+  rewards; zone events in every copy (only while someone is in the zone); a town attack runs in the hub town's room.
+- **A** quests + radiant jobs (`js/sim/quests.js`): E's 90 zone quests, the story chain, 23 job frames bound to what is in
+  the giver's zone; kill credit shared (killer + 30 s of hitters + party in 60 m), visit by position, clear floors/bosses,
+  rewards by level share; saved (`quests` in SAVE_FIELDS).
+- **A** town folk from E's schedules.json over B's plots (forge/market/inn/home; guards at gates), barks within 6 m;
+  traces.json lifetimes (graves 60 min/40, campfires 30 min/20, banners 30 min), footprints in 8 m cells by steps.
+- **A** tests/A: 89 node tests (new placements, events, quests, stage2, bots100-real; m2 schedules). Gates: in-process
+  100 bots p99 7.7–10 ms / worst 11–18 ms, real sockets p99 5.0–11.6 ms / worst 23 ms, bandwidth 2.3 KB/s spread, 8.0 town
+  herd, 3.8 event herd — measured before C's 378fbbb, which took the spread phase to p50 14 / p99 23 ms (C's per-monster
+  loops over ~1,300 monsters). Fixed on the server side with **dormant camps** (room.js `dormantCamps`, on for province
+  copies): only camps within 200 m of a player exist; a calm camp left alone 30 s is parked with its escort and comes back
+  whole. After: in-process p50 3.6 / p99 9.2 / worst 18.6 ms; real sockets (stage 1) p99 11.5 / 13.0 / 8.2, worst 30.6 ms.
+
+## 2026-10-04 — stream D (client, M2: the province, the living world)
+- **D** the province in world metres: `js/client/world-stream.js` streams the zone you stand in + any neighbour within 450 m (kept to 900 m, max 4), each with its own ground (terrain-view, shared textures, road paint from the bake's `road` biome), trees/rocks/bushes/reeds from `scatter.bin` (`scatter-view.js`: 128 m buckets, 3 tree LODs, ~700 m), the town from `placements.json` (`town-view.js`: proctown `describeBuilding/partsFor` in 8 instanced unit meshes, lit windows, lamp posts along main streets, the square's well + stalls, bridges, the barrow mouth at the door) and vignette props (`vignette-props.js`, the server's vignettePoint formula). Seams are bit-exact (tested), zone loads resolve on the ground so you never wait for trees.
+- **D** far horizon (`horizon.js`): the whole world from `macro.bin` (288 × 224, 128 m) as one mesh, cut away under loaded zones with its border vertices pulled to the zone's edge height; settlement lights from world.json at night. Camera far 22 km, fog by time of day.
+- **D** day/night (`daynight.js` + scene.js): the realm clock (`net.timeOfDay()`), 9 sky keyframes, sun by day, a moon + stars by night, nights blue and readable (hemisphere floor ≥ 0.72), leaves stop glowing at night, windows and lamps light up, the HUD clock. `?tod=` / `tv.setTime()` hold a time.
+- **D** living world UI (`world-ui.js`, `css/world.css`): town folk (kind `npc`, Chibi 2 dressed by role) with E to talk; waystones (discover toast, travel panel with fares like the server's, travelR); realm event announcement with countdown, "Travel there free", the event frame; "Group up" from `groupHint`; zone deed feed + footprints from `zone.heat` (`traces.js`); graves/campfires (`C` makes camp); vignette lore on walk-in, notes, `use` objects, hidden caches that shimmer within 15 m; "Cleared by …" labels on doors (waits for A to put `banner` in `info`). Companions (non-folk `npc`) are drawn as their creature.
+- **D** dungeon looks (`dungeon-view.js LOOKS`): all 8 families (crypt, warren, flooded, ruin, cave, vault, barrow, hollow) — surfaces, light colour, fog, wall height, props along the walls, tombs, mine beams, pools, glowing growths; `floor.river` drawn when sent. `tv.demoDungeon(family)`.
+- **D** performance (100-player town): only the 30 nearest players get a Chibi 2 body (12 on low), the rest are one instanced draw call tinted by class; bodies far for 30 s are freed; mixers past 25 m tick at 10 Hz; nameplates capped (40/24) with no DOM writes when nothing moved. `tv.crowd(100)`: 100 wanderers in Torborhold = ~180 draw calls on low.
+- **D** skill bar: keys 1–6 cast slots 1–6 (F = strike), from `you.bar` when the server sends it, else Farhold's skills.json (all 30 classes, unlock 1/3/6/12/18/24); friendly skills target your friendly target or yourself.
+- **D** input clock keeps real time down to 4 fps (slow machines used to walk at a third of the speed); autoplay connects while the title scene loads; title screen in Torborhold's square (z12_02).
+- **D** demo hooks: `tv.demoLiving()`, `tv.demoUsed({...})`, `tv.demoDungeon(f)`, `tv.crowd(n)`, `tv.fly(...)` (inspect camera), `tv.view()`, `tv.setTime()`, `tv.hud(false)`, `tv.world()`; `tv.state().stats` has `fps` + `lod`.
+- **D** tests/D: 25 node tests (new world.test.js: zone choice + hysteresis, seam heights across a border, horizon vs zone means, every baked building faces its street and fits its plot, scatter art + bucketing, day/night vs the server's night window, fares, dungeon looks + dressing beside walls, crowd LOD, footprints, skill bars for all 30 classes).
+- **D** (same day, after A's protocol v3 landed) quests: NPC/note `used.offers/ready` -> Accept / Hand in in the dialog (`net.quest`), a quest tracker from `quests {active}`, `questR` toasts; `zoneEvent` soon/start/end call-outs + the event frame. A's `info.banner` / `info.trace` are read (door labels, grave cards). Verified live on the restarted dev unit (8491, torbor_downs): Elder offers three jobs, accept -> tracker. e2e two-players green (1.4 min). Screenshots: tests/D/shots/.
+- **H/G chaos x500 vs Postgres PASSED** (2026-10-04, `tools/chaos-kill9.mjs --kills 500 --db pg --scratch`, run inside a frozen
+  `--build-only` release so live-tree edits cannot break a restart): 500 real `kill -9`s, 8 bots incl. a trading pair, 1,881 monster
+  kills, 727 items at the end, 177,840 settled-item checks — 0 lost, 0 duplicated, gold never fell; 20 database conservation checks
+  green; worst rejoin 1.55 s. (An earlier live-tree run died when a half-saved `js/sim/save-fields.js` stopped the restart; a second
+  earlier run was clean for 266 kills, then one bot did not rejoin within 30 s — not reproduced in 500 more, and the tool now prints
+  the bot's state + the server log tail if it happens again.)

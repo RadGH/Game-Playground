@@ -1,5 +1,5 @@
 {
-  "name": "z11_04",
+  "name": "Last Lantern (z11_04)",
   "zone": "z11_04",
   "sheet": {
     "sheet": "torbor_downs",
@@ -55,12 +55,33 @@
       "z": 960
     },
     {
+      "type": "settlement",
+      "kind": "town",
+      "name": "Last Lantern",
+      "x": 890,
+      "z": 1305,
+      "ask": true,
+      "askR": 70,
+      "hub": true,
+      "radius": 90
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Thornwick",
+      "x": 1772,
+      "z": 1900,
+      "ask": true,
+      "askR": 40,
+      "radius": 46
+    },
+    {
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 1164,
-      "z": 898,
-      "yaw": 1.481
+      "x": 994,
+      "z": 1171,
+      "yaw": -0.431
     },
     {
       "type": "event",
@@ -72,14 +93,14 @@
     {
       "type": "event",
       "id": "event_blackthorn_scar",
-      "x": 871,
-      "z": 1071,
+      "x": 877,
+      "z": 1098,
       "r": 40
     }
   ],
   "spawn": {
-    "x": 1024,
-    "z": 1024
+    "x": 890,
+    "z": 1309
   },
   "summary": {
     "zone": "z11_04",
@@ -88,35 +109,70 @@
     "rivers": 0,
     "wetShare": 0,
     "unwalkableShare": 0.113,
-    "towns": [],
+    "towns": [
+      {
+        "name": "Last Lantern",
+        "kind": "town",
+        "hub": true,
+        "at": [
+          890,
+          1305
+        ],
+        "radius": 90,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 21,
+        "streets": 44,
+        "links": 0,
+        "overlaps": 0
+      },
+      {
+        "name": "Thornwick",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          1772,
+          1900
+        ],
+        "radius": 46,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 8,
+        "streets": 41,
+        "links": 0,
+        "overlaps": 0
+      }
+    ],
     "roads": 2,
     "bridges": 0,
-    "scatter": 12184,
+    "scatter": 11995,
     "scatterKinds": {
-      "rock_large": 3393,
-      "rock_small": 4773,
-      "tree_conifer": 2062,
-      "bush": 863,
-      "boulder": 1091,
+      "rock_large": 3348,
+      "rock_small": 4698,
+      "tree_conifer": 2021,
+      "bush": 846,
+      "boulder": 1080,
       "tree_broadleaf": 2
     },
     "sites": [
       "lair dungeon The Black Filfit 1344 960",
-      "dungeon door_1 Barrow entrance 1164 898  1.481",
+      "settlement(HUB) town Last Lantern 890 1305 90",
+      "settlement hamlet Thornwick 1772 1900 46",
+      "dungeon door_1 Barrow entrance 994 1171  -0.431",
       "event world_grimtallow  1161 1305 100",
-      "event event_blackthorn_scar  871 1071 40"
+      "event event_blackthorn_scar  877 1098 40"
     ],
     "spawn": {
-      "x": 1024,
-      "z": 1024
+      "x": 890,
+      "z": 1309
     },
-    "placements": 6,
-    "vignettesAvoided": 0
+    "placements": 124,
+    "vignettesAvoided": 41
   },
   "files": {
-    "terrain.bin": 6305574,
-    "nav.bin": 1050717,
-    "scatter.bin": 97556,
-    "placements.json": 28228
+    "terrain.bin": 636941,
+    "nav.bin": 50026,
+    "scatter.bin": 96044,
+    "placements.json": 66035
   }
 }

@@ -15,11 +15,41 @@
    }
   },
   {
+   "kind": "settlement",
+   "id": "last_lantern",
+   "x": 890,
+   "z": 1305,
+   "yaw": 0,
+   "data": {
+    "kind": "town",
+    "name": "Last Lantern",
+    "radius": 90,
+    "hub": true,
+    "planned": true,
+    "ask": true
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "thornwick",
+   "x": 1772,
+   "z": 1900,
+   "yaw": 0,
+   "data": {
+    "kind": "hamlet",
+    "name": "Thornwick",
+    "radius": 46,
+    "hub": false,
+    "planned": true,
+    "ask": true
+   }
+  },
+  {
    "kind": "dungeon_door",
    "id": "door_1",
-   "x": 1164,
-   "z": 898,
-   "yaw": 1.481,
+   "x": 994,
+   "z": 1171,
+   "yaw": -0.431,
    "data": {
     "name": "Barrow entrance"
    }
@@ -37,11 +67,2670 @@
   {
    "kind": "event_site",
    "id": "event_blackthorn_scar",
-   "x": 871,
-   "z": 1071,
+   "x": 877,
+   "z": 1098,
    "yaw": 0,
    "data": {
     "r": 40
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "last_lantern_square",
+   "x": 879.19,
+   "z": 1300.36,
+   "yaw": 0,
+   "data": {
+    "r": 6.96,
+    "town": "last_lantern",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_0",
+   "x": 942.6,
+   "z": 1288.93,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      942.6,
+      1288.93
+     ],
+     [
+      894.65,
+      1280.54
+     ],
+     [
+      846.96,
+      1270.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_1",
+   "x": 911.38,
+   "z": 1254.51,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      911.38,
+      1254.51
+     ],
+     [
+      910.18,
+      1265.57
+     ],
+     [
+      908.11,
+      1276.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_2",
+   "x": 926.53,
+   "z": 1263.88,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      926.53,
+      1263.88
+     ],
+     [
+      925.43,
+      1267.5
+     ],
+     [
+      923.14,
+      1276.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_3",
+   "x": 934.28,
+   "z": 1272.38,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      934.28,
+      1272.38
+     ],
+     [
+      933.35,
+      1271.91
+     ],
+     [
+      927.54,
+      1269.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_4",
+   "x": 924.94,
+   "z": 1262.83,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      924.94,
+      1262.83
+     ],
+     [
+      920.29,
+      1262.07
+     ],
+     [
+      915.77,
+      1260.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_5",
+   "x": 882.26,
+   "z": 1252.23,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      882.26,
+      1252.23
+     ],
+     [
+      881.49,
+      1261.11
+     ],
+     [
+      881.38,
+      1270.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_6",
+   "x": 892.15,
+   "z": 1254.05,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      892.15,
+      1254.05
+     ],
+     [
+      892.58,
+      1261.7
+     ],
+     [
+      893.98,
+      1269.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_7",
+   "x": 901.25,
+   "z": 1263.22,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      901.25,
+      1263.22
+     ],
+     [
+      898.11,
+      1263.67
+     ],
+     [
+      894.96,
+      1263.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_8",
+   "x": 891.8,
+   "z": 1264.49,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      891.8,
+      1264.49
+     ],
+     [
+      888.4,
+      1264.94
+     ],
+     [
+      884.98,
+      1265.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_9",
+   "x": 873.1,
+   "z": 1252.66,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      873.1,
+      1252.66
+     ],
+     [
+      872.3,
+      1260.85
+     ],
+     [
+      871.44,
+      1269.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_10",
+   "x": 879.78,
+   "z": 1259.85,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      879.78,
+      1259.85
+     ],
+     [
+      876.67,
+      1259.56
+     ],
+     [
+      873.57,
+      1259.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_11",
+   "x": 871.12,
+   "z": 1261.17,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      871.12,
+      1261.17
+     ],
+     [
+      864.24,
+      1260.87
+     ],
+     [
+      858.44,
+      1259.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_12",
+   "x": 897.24,
+   "z": 1291.48,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      897.24,
+      1291.48
+     ],
+     [
+      887.44,
+      1321.2
+     ],
+     [
+      874.78,
+      1349.82
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_13",
+   "x": 924.01,
+   "z": 1341.53,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      924.01,
+      1341.53
+     ],
+     [
+      906.59,
+      1338.41
+     ],
+     [
+      889.56,
+      1333.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_14",
+   "x": 921.35,
+   "z": 1309.28,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      921.35,
+      1309.28
+     ],
+     [
+      915.96,
+      1321.96
+     ],
+     [
+      910.38,
+      1334.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_15",
+   "x": 926.6,
+   "z": 1321.24,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      926.6,
+      1321.24
+     ],
+     [
+      922.67,
+      1319.77
+     ],
+     [
+      918.91,
+      1317.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_16",
+   "x": 921.38,
+   "z": 1333.25,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      921.38,
+      1333.25
+     ],
+     [
+      917.62,
+      1331.41
+     ],
+     [
+      913.7,
+      1329.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_17",
+   "x": 914.59,
+   "z": 1321.88,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      914.59,
+      1321.88
+     ],
+     [
+      905.54,
+      1318.62
+     ],
+     [
+      896.97,
+      1314.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_18",
+   "x": 909.28,
+   "z": 1304.04,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      909.28,
+      1304.04
+     ],
+     [
+      906.93,
+      1309.86
+     ],
+     [
+      904.29,
+      1315.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_19",
+   "x": 904.35,
+   "z": 1319.3,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      904.35,
+      1319.3
+     ],
+     [
+      902.1,
+      1324.65
+     ],
+     [
+      899.73,
+      1329.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_20",
+   "x": 908.53,
+   "z": 1340.52,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      908.53,
+      1340.52
+     ],
+     [
+      906.95,
+      1347.61
+     ],
+     [
+      905.8,
+      1354.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_21",
+   "x": 918.74,
+   "z": 1351.9,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      918.74,
+      1351.9
+     ],
+     [
+      914.12,
+      1351.17
+     ],
+     [
+      908.11,
+      1349.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_22",
+   "x": 900.43,
+   "z": 1338.97,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      900.43,
+      1338.97
+     ],
+     [
+      899.24,
+      1346.14
+     ],
+     [
+      897.7,
+      1353.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_23",
+   "x": 905.5,
+   "z": 1349.33,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      905.5,
+      1349.33
+     ],
+     [
+      902.72,
+      1348.82
+     ],
+     [
+      899.96,
+      1348.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_24",
+   "x": 898.14,
+   "z": 1344.16,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      898.14,
+      1344.16
+     ],
+     [
+      893.49,
+      1343.38
+     ],
+     [
+      888.89,
+      1342.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_25",
+   "x": 884.01,
+   "z": 1312.74,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      884.01,
+      1312.74
+     ],
+     [
+      867.71,
+      1305.17
+     ],
+     [
+      851.6,
+      1297.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_26",
+   "x": 877.9,
+   "z": 1290.86,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      877.9,
+      1290.86
+     ],
+     [
+      873.57,
+      1296.32
+     ],
+     [
+      869.78,
+      1302.16
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_27",
+   "x": 859.25,
+   "z": 1303.54,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      859.25,
+      1303.54
+     ],
+     [
+      851.96,
+      1318.48
+     ],
+     [
+      846.21,
+      1334.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_28",
+   "x": 877.53,
+   "z": 1323.92,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      877.53,
+      1323.92
+     ],
+     [
+      867.14,
+      1319.13
+     ],
+     [
+      856.49,
+      1314.94
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_29",
+   "x": 874.96,
+   "z": 1310.24,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      874.96,
+      1310.24
+     ],
+     [
+      872.79,
+      1314.83
+     ],
+     [
+      870.98,
+      1319.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_30",
+   "x": 866.55,
+   "z": 1320.78,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      866.55,
+      1320.78
+     ],
+     [
+      863,
+      1330.26
+     ],
+     [
+      858.61,
+      1339.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_31",
+   "x": 873.53,
+   "z": 1333.29,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      873.53,
+      1333.29
+     ],
+     [
+      869.1,
+      1331.22
+     ],
+     [
+      864.54,
+      1329.45
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_32",
+   "x": 859.59,
+   "z": 1333.15,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      859.59,
+      1333.15
+     ],
+     [
+      854.96,
+      1331.26
+     ],
+     [
+      850.39,
+      1329.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_33",
+   "x": 848.37,
+   "z": 1324.1,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      848.37,
+      1324.1
+     ],
+     [
+      844.88,
+      1322.51
+     ],
+     [
+      841.32,
+      1321.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_34",
+   "x": 851.59,
+   "z": 1316.56,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      851.59,
+      1316.56
+     ],
+     [
+      847.98,
+      1315.26
+     ],
+     [
+      844.54,
+      1313.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_35",
+   "x": 867.71,
+   "z": 1305.17,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      867.71,
+      1305.17
+     ],
+     [
+      869.78,
+      1302.16
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_36",
+   "x": 887.44,
+   "z": 1321.2,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      887.44,
+      1321.2
+     ],
+     [
+      884.01,
+      1312.74
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_37",
+   "x": 894.65,
+   "z": 1280.54,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      894.65,
+      1280.54
+     ],
+     [
+      897.24,
+      1291.48
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_38",
+   "x": 871.44,
+   "z": 1269.17,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      871.44,
+      1269.17
+     ],
+     [
+      870.14,
+      1275.51
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_39",
+   "x": 884.98,
+   "z": 1265.31,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      884.98,
+      1265.31
+     ],
+     [
+      881.44,
+      1265.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_40",
+   "x": 896.97,
+   "z": 1314.24,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      896.97,
+      1314.24
+     ],
+     [
+      890.45,
+      1312.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_41",
+   "x": 908.11,
+   "z": 1276.5,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      908.11,
+      1276.5
+     ],
+     [
+      907.02,
+      1282.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_42",
+   "x": 906.59,
+   "z": 1338.41,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      906.59,
+      1338.41
+     ],
+     [
+      910.38,
+      1334.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_43",
+   "x": 915.77,
+   "z": 1260.77,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      915.77,
+      1260.77
+     ],
+     [
+      910.76,
+      1260.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_0",
+   "x": 918.79,
+   "z": 1268.75,
+   "yaw": 2.9204,
+   "data": {
+    "town": "last_lantern",
+    "want": "granary",
+    "district": "residential",
+    "w": 10.29,
+    "d": 8.2,
+    "angle": 1.792,
+    "front": 4.9335,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_1",
+   "x": 897.43,
+   "z": 1257.96,
+   "yaw": 0.1199,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 7.83,
+    "d": 5.14,
+    "angle": 1.4509,
+    "front": 1.4509,
+    "streetGap": -0.27
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_2",
+   "x": 887.71,
+   "z": 1259.21,
+   "yaw": 0.1199,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 7.99,
+    "d": 5.67,
+    "angle": 1.4509,
+    "front": 1.4509,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_3",
+   "x": 876.11,
+   "z": 1265.12,
+   "yaw": 3.0415,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 7.78,
+    "d": 5.04,
+    "angle": 1.6709,
+    "front": 4.8125,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_4",
+   "x": 866.93,
+   "z": 1265.48,
+   "yaw": 1.4707,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 5.24,
+    "d": 6.28,
+    "angle": 1.6709,
+    "front": 6.3833,
+    "streetGap": -0.37
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_5",
+   "x": 860.68,
+   "z": 1264.85,
+   "yaw": 3.0415,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 5.24,
+    "d": 6.28,
+    "angle": 1.6709,
+    "front": 4.8125,
+    "streetGap": -0.22
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_6",
+   "x": 924.78,
+   "z": 1314.89,
+   "yaw": -1.98,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 6.37,
+    "d": 7.17,
+    "angle": 1.98,
+    "front": 3.5508,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_7",
+   "x": 920.14,
+   "z": 1325.59,
+   "yaw": -0.4092,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 9.29,
+    "d": 7.17,
+    "angle": 1.98,
+    "front": 1.98,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_8",
+   "x": 912.85,
+   "z": 1312.43,
+   "yaw": -1.98,
+   "data": {
+    "town": "last_lantern",
+    "want": "inn",
+    "district": "residential",
+    "w": 11.35,
+    "d": 9.51,
+    "angle": 1.98,
+    "front": 3.5508,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_9",
+   "x": 907.35,
+   "z": 1326.93,
+   "yaw": -1.98,
+   "data": {
+    "town": "last_lantern",
+    "want": "chapel",
+    "district": "residential",
+    "w": 10.41,
+    "d": 8.06,
+    "angle": 1.98,
+    "front": 3.5508,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_10",
+   "x": 897.48,
+   "z": 1322.65,
+   "yaw": 1.1616,
+   "data": {
+    "town": "last_lantern",
+    "want": "hut",
+    "district": "craft",
+    "w": 10.41,
+    "d": 6.43,
+    "angle": 1.98,
+    "front": 6.6924,
+    "streetGap": -0.29
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_11",
+   "x": 915.14,
+   "z": 1345.81,
+   "yaw": -1.76,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 6.7,
+    "d": 11.12,
+    "angle": 1.76,
+    "front": 3.3308,
+    "streetGap": -0.05
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_12",
+   "x": 892.55,
+   "z": 1348.28,
+   "yaw": 2.9524,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 6.59,
+    "d": 8.22,
+    "angle": 1.76,
+    "front": 4.9016,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_13",
+   "x": 867.02,
+   "z": 1291.61,
+   "yaw": 0.9474,
+   "data": {
+    "town": "last_lantern",
+    "want": "hall",
+    "district": "civic",
+    "w": 12.71,
+    "d": 12.74,
+    "angle": 2.1942,
+    "front": 6.9066,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_14",
+   "x": 877.12,
+   "z": 1316.68,
+   "yaw": -0.4034,
+   "data": {
+    "town": "last_lantern",
+    "want": "hut",
+    "district": "civic",
+    "w": 8.94,
+    "d": 5.25,
+    "angle": 1.9742,
+    "front": 1.9742,
+    "streetGap": -0.17
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_15",
+   "x": 865.41,
+   "z": 1311.68,
+   "yaw": 1.1674,
+   "data": {
+    "town": "last_lantern",
+    "want": "forge",
+    "district": "civic",
+    "w": 8.94,
+    "d": 12.66,
+    "angle": 1.9742,
+    "front": 6.6866,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_16",
+   "x": 871,
+   "z": 1326.76,
+   "yaw": -0.4034,
+   "data": {
+    "town": "last_lantern",
+    "want": "hut",
+    "district": "craft",
+    "w": 6.3,
+    "d": 8.58,
+    "angle": 1.9742,
+    "front": 1.9742,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_17",
+   "x": 866.54,
+   "z": 1337.22,
+   "yaw": -1.9742,
+   "data": {
+    "town": "last_lantern",
+    "want": "stable",
+    "district": "residential",
+    "w": 9,
+    "d": 8.58,
+    "angle": 1.9742,
+    "front": 3.545,
+    "streetGap": -0.18
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_18",
+   "x": 857.99,
+   "z": 1324.16,
+   "yaw": -0.4034,
+   "data": {
+    "town": "last_lantern",
+    "want": "market",
+    "district": "craft",
+    "w": 11.73,
+    "d": 8.8,
+    "angle": 1.9742,
+    "front": 1.9742,
+    "streetGap": -0.24
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_19",
+   "x": 852.49,
+   "z": 1304.69,
+   "yaw": 1.1674,
+   "data": {
+    "town": "last_lantern",
+    "want": "hut",
+    "district": "craft",
+    "w": 6.24,
+    "d": 6.46,
+    "angle": 1.9742,
+    "front": 6.6866,
+    "streetGap": 0.25
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_20",
+   "x": 850.04,
+   "z": 1310.43,
+   "yaw": 1.1674,
+   "data": {
+    "town": "last_lantern",
+    "want": "hut",
+    "district": "craft",
+    "w": 6.24,
+    "d": 6.46,
+    "angle": 1.9742,
+    "front": 6.6866,
+    "streetGap": -0.07
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "thornwick_square",
+   "x": 1768.49,
+   "z": 1899.95,
+   "yaw": 0,
+   "data": {
+    "r": 4.13,
+    "town": "thornwick",
+    "culture": "halfling"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_0",
+   "x": 1746.53,
+   "z": 1927.8,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1746.53,
+      1927.8
+     ],
+     [
+      1778.59,
+      1911.77
+     ],
+     [
+      1809.01,
+      1892.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_1",
+   "x": 1790.08,
+   "z": 1928.84,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1790.08,
+      1928.84
+     ],
+     [
+      1787.94,
+      1922.46
+     ],
+     [
+      1785.74,
+      1916.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_2",
+   "x": 1778.88,
+   "z": 1931.9,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1778.88,
+      1931.9
+     ],
+     [
+      1776.94,
+      1926.07
+     ],
+     [
+      1774.32,
+      1920.51
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_3",
+   "x": 1765.85,
+   "z": 1932.56,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1765.85,
+      1932.56
+     ],
+     [
+      1770.44,
+      1930.14
+     ],
+     [
+      1774.77,
+      1927.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_4",
+   "x": 1773.1,
+   "z": 1933.2,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1773.1,
+      1933.2
+     ],
+     [
+      1772.35,
+      1931.96
+     ],
+     [
+      1771.64,
+      1930.71
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_5",
+   "x": 1769.14,
+   "z": 1929.07,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1769.14,
+      1929.07
+     ],
+     [
+      1767.77,
+      1926.88
+     ],
+     [
+      1766.52,
+      1924.62
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_6",
+   "x": 1778.13,
+   "z": 1925.01,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1778.13,
+      1925.01
+     ],
+     [
+      1781.51,
+      1924.08
+     ],
+     [
+      1784.78,
+      1922.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_7",
+   "x": 1801.71,
+   "z": 1923.21,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1801.71,
+      1923.21
+     ],
+     [
+      1801.17,
+      1918.47
+     ],
+     [
+      1800.03,
+      1913.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_8",
+   "x": 1791.03,
+   "z": 1919.95,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1791.03,
+      1919.95
+     ],
+     [
+      1795.1,
+      1919.23
+     ],
+     [
+      1799.06,
+      1918.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_9",
+   "x": 1764.2,
+   "z": 1911.96,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1764.2,
+      1911.96
+     ],
+     [
+      1754.17,
+      1893.17
+     ],
+     [
+      1742.58,
+      1876.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_10",
+   "x": 1734.31,
+   "z": 1900.73,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1734.31,
+      1900.73
+     ],
+     [
+      1739.39,
+      1896.73
+     ],
+     [
+      1744.44,
+      1891.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_11",
+   "x": 1743.19,
+   "z": 1910.5,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1743.19,
+      1910.5
+     ],
+     [
+      1748.25,
+      1907.82
+     ],
+     [
+      1753.02,
+      1904.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_12",
+   "x": 1751.05,
+   "z": 1911.11,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1751.05,
+      1911.11
+     ],
+     [
+      1750.25,
+      1909.74
+     ],
+     [
+      1749.43,
+      1908.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_13",
+   "x": 1748.01,
+   "z": 1906.04,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1748.01,
+      1906.04
+     ],
+     [
+      1745.67,
+      1901.81
+     ],
+     [
+      1743.08,
+      1897.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_14",
+   "x": 1739.75,
+   "z": 1893.53,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1739.75,
+      1893.53
+     ],
+     [
+      1736.7,
+      1890.54
+     ],
+     [
+      1735.79,
+      1889.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_15",
+   "x": 1784.59,
+   "z": 1898.26,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1784.59,
+      1898.26
+     ],
+     [
+      1774.04,
+      1880.97
+     ],
+     [
+      1765.26,
+      1862.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_16",
+   "x": 1758.69,
+   "z": 1892.55,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1758.69,
+      1892.55
+     ],
+     [
+      1765.59,
+      1887.81
+     ],
+     [
+      1772.68,
+      1883.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_17",
+   "x": 1775.16,
+   "z": 1899.96,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1775.16,
+      1899.96
+     ],
+     [
+      1771.04,
+      1894.31
+     ],
+     [
+      1767.48,
+      1888.28
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_18",
+   "x": 1762.32,
+   "z": 1898.07,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1762.32,
+      1898.07
+     ],
+     [
+      1765.87,
+      1895.96
+     ],
+     [
+      1769.22,
+      1893.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_19",
+   "x": 1773.89,
+   "z": 1895.41,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1773.89,
+      1895.41
+     ],
+     [
+      1776.31,
+      1893.98
+     ],
+     [
+      1778.58,
+      1892.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_20",
+   "x": 1754.53,
+   "z": 1886.22,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1754.53,
+      1886.22
+     ],
+     [
+      1761.64,
+      1881.8
+     ],
+     [
+      1768.52,
+      1877.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_21",
+   "x": 1766.05,
+   "z": 1886.19,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1766.05,
+      1886.19
+     ],
+     [
+      1764.75,
+      1884.06
+     ],
+     [
+      1763.31,
+      1882.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_22",
+   "x": 1760.06,
+   "z": 1881.01,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1760.06,
+      1881.01
+     ],
+     [
+      1757.07,
+      1876.63
+     ],
+     [
+      1754.23,
+      1872.15
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_23",
+   "x": 1751.19,
+   "z": 1881.15,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1751.19,
+      1881.15
+     ],
+     [
+      1753.8,
+      1879.38
+     ],
+     [
+      1756.45,
+      1877.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_24",
+   "x": 1757.07,
+   "z": 1874.29,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1757.07,
+      1874.29
+     ],
+     [
+      1760.49,
+      1872.15
+     ],
+     [
+      1763.81,
+      1869.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_25",
+   "x": 1777.36,
+   "z": 1875.52,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1777.36,
+      1875.52
+     ],
+     [
+      1785,
+      1873.07
+     ],
+     [
+      1792.35,
+      1869.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_26",
+   "x": 1782.02,
+   "z": 1887.85,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1782.02,
+      1887.85
+     ],
+     [
+      1789.6,
+      1885.24
+     ],
+     [
+      1797.01,
+      1882.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_27",
+   "x": 1789.21,
+   "z": 1890.37,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1789.21,
+      1890.37
+     ],
+     [
+      1788.62,
+      1888.69
+     ],
+     [
+      1787.95,
+      1887.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_28",
+   "x": 1790.31,
+   "z": 1883.29,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1790.31,
+      1883.29
+     ],
+     [
+      1788.28,
+      1878.53
+     ],
+     [
+      1786.65,
+      1873.62
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_29",
+   "x": 1780.17,
+   "z": 1882.95,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1780.17,
+      1882.95
+     ],
+     [
+      1783.94,
+      1881.54
+     ],
+     [
+      1787.69,
+      1880.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_30",
+   "x": 1790.51,
+   "z": 1880.08,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1790.51,
+      1880.08
+     ],
+     [
+      1792.95,
+      1878.99
+     ],
+     [
+      1795.5,
+      1878.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_31",
+   "x": 1783.39,
+   "z": 1871.63,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1783.39,
+      1871.63
+     ],
+     [
+      1780.96,
+      1865.94
+     ],
+     [
+      1780.04,
+      1863.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_32",
+   "x": 1774.89,
+   "z": 1868.98,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1774.89,
+      1868.98
+     ],
+     [
+      1777.54,
+      1867.99
+     ],
+     [
+      1780.18,
+      1866.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_33",
+   "x": 1782.87,
+   "z": 1866.41,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1782.87,
+      1866.41
+     ],
+     [
+      1786.35,
+      1865.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_34",
+   "x": 1782.02,
+   "z": 1887.85,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1782.02,
+      1887.85
+     ],
+     [
+      1779.27,
+      1889.53
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_35",
+   "x": 1754.17,
+   "z": 1893.17,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1754.17,
+      1893.17
+     ],
+     [
+      1758.69,
+      1892.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_36",
+   "x": 1753.02,
+   "z": 1904.66,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1753.02,
+      1904.66
+     ],
+     [
+      1758.69,
+      1901.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_37",
+   "x": 1739.39,
+   "z": 1896.73,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1739.39,
+      1896.73
+     ],
+     [
+      1743.08,
+      1897.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_38",
+   "x": 1778.59,
+   "z": 1911.77,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1778.59,
+      1911.77
+     ],
+     [
+      1775.16,
+      1899.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_39",
+   "x": 1774.32,
+   "z": 1920.51,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1774.32,
+      1920.51
+     ],
+     [
+      1771.68,
+      1915.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_40",
+   "x": 1791.03,
+   "z": 1919.95,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1791.03,
+      1919.95
+     ],
+     [
+      1787.49,
+      1921.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_0",
+   "x": 1742.25,
+   "z": 1903.84,
+   "yaw": 2.1061,
+   "data": {
+    "town": "thornwick",
+    "want": "granary",
+    "district": "residential",
+    "w": 8.47,
+    "d": 3.97,
+    "angle": 4.177,
+    "front": 5.7478,
+    "streetGap": -0.11
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_1",
+   "x": 1773.29,
+   "z": 1889.39,
+   "yaw": -2.5601,
+   "data": {
+    "town": "thornwick",
+    "want": "hut",
+    "district": "civic",
+    "w": 7.04,
+    "d": 4.42,
+    "angle": 4.1309,
+    "front": 4.1309,
+    "streetGap": -0.18
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_2",
+   "x": 1760.15,
+   "z": 1887.08,
+   "yaw": 0.5815,
+   "data": {
+    "town": "thornwick",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.8,
+    "d": 7.25,
+    "angle": 4.1309,
+    "front": 7.2725,
+    "streetGap": -0.32
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_3",
+   "x": 1768.14,
+   "z": 1881.83,
+   "yaw": -0.9893,
+   "data": {
+    "town": "thornwick",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.8,
+    "d": 4.71,
+    "angle": 4.1309,
+    "front": 8.8433,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_4",
+   "x": 1751.9,
+   "z": 1876.5,
+   "yaw": 0.5815,
+   "data": {
+    "town": "thornwick",
+    "want": "house",
+    "district": "residential",
+    "w": 3.5,
+    "d": 5.09,
+    "angle": 4.1309,
+    "front": 7.2725,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_5",
+   "x": 1762.76,
+   "z": 1875.6,
+   "yaw": -2.5601,
+   "data": {
+    "town": "thornwick",
+    "want": "shrine",
+    "district": "residential",
+    "w": 4.87,
+    "d": 6.87,
+    "angle": 4.1309,
+    "front": 4.1309,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_6",
+   "x": 1782.6,
+   "z": 1878,
+   "yaw": 0.3615,
+   "data": {
+    "town": "thornwick",
+    "want": "house",
+    "district": "residential",
+    "w": 4.12,
+    "d": 6.84,
+    "angle": 4.3509,
+    "front": 7.4925,
+    "streetGap": -0.38
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_7",
+   "x": 1791.47,
+   "z": 1875.09,
+   "yaw": 0.3615,
+   "data": {
+    "town": "thornwick",
+    "want": "house",
+    "district": "residential",
+    "w": 4.95,
+    "d": 4.14,
+    "angle": 4.3509,
+    "front": 7.4925,
+    "streetGap": -0.4
    }
   },
   {

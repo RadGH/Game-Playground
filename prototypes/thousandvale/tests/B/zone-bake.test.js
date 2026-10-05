@@ -9,6 +9,7 @@ import { bakeZone, zoneFiles, M1_ZONE } from '../../tools/bake-zone.mjs';
 import { parseScatter, parseNav, NAV, SCATTER_KINDS } from '../../js/rules/terrain-read.js';
 import { encodeTerrain } from '../../tools/bake-test-zone.mjs';
 import { discIsOpen } from '../../tools/lib/zone-sites.mjs';
+import { sameLayerFile } from '../../tools/lib/zone-layers.mjs';
 
 const zoneFile = (id, f) => new URL(`../../data/zones/${id}/${f}`, import.meta.url);
 const cache = new Map();
@@ -24,7 +25,7 @@ test('world bake: deterministic, checked-in files are current', () => {
 
 test('M1 zone: every checked-in file matches a fresh bake', () => {
   const files = zoneFiles(baked(M1_ZONE));
-  for (const [f, v] of Object.entries(files)) assert.equal(Buffer.compare(Buffer.from(v), readFileSync(zoneFile(M1_ZONE, f))), 0, `${f} stale — run tools/bake-zone.mjs --m1`);
+  for (const [f, v] of Object.entries(files)) assert.ok(sameLayerFile(f, v, readFileSync(zoneFile(M1_ZONE, f))), `${f} stale — run tools/bake-zone.mjs --m1`);
 });
 
 test('zone edges agree bit for bit with the east and south neighbours (height, water, biome)', () => {
@@ -54,7 +55,7 @@ test('M1 zone: the hub town is planned, levelled, away from the edges; doors fac
   assert.ok(Math.min(hub.x, hub.z, 2048 - hub.x, 2048 - hub.z) >= hub.radius + 200, 'hub is well inside the zone');
   const P = b.placements, ids = new Set(P.map(p => p.id));
   assert.equal(ids.size, P.length, 'placement ids are unique');
-  const known = new Set(['lair', 'settlement', 'town_square', 'street', 'building', 'town_wall', 'road', 'bridge', 'dungeon_door', 'event_site', 'camp_site', 'landmark', 'dungeon', 'pass', 'crossing', 'port']);
+  const known = new Set(['lair', 'settlement', 'town_square', 'street', 'building', 'town_wall', 'road', 'bridge', 'dungeon_door', 'event_site', 'camp_site', 'landmark', 'dungeon', 'pass', 'crossing', 'port', 'lake', 'fen']);
   for (const p of P) { assert.ok(known.has(p.kind), p.kind); assert.ok(Number.isFinite(p.x) && Number.isFinite(p.z) && Number.isFinite(p.yaw), p.id); }
   const blds = P.filter(p => p.kind === 'building');
   assert.ok(blds.filter(p => p.data.town === 'torborhold').length >= 12, 'the hub has a real town');

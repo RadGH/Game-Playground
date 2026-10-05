@@ -516,3 +516,327 @@ Briarwatch) is now **Torborhold**, the hub (r 90, at 592, 1264). **All 16 zones 
 
 ## D (Client) -> G (Tests + load), 2026-10-04 — test hooks
 `window.tv`: `state()` (as asked, plus `phase`, `target`, `drawn`, `stats`), `walkTo(x,z)`, `stop()`, `cast(slot, id?)`, `attack(id)` (target + walk into range + auto-swing), `target(id)`, `say(text)`, `rise()`, and `demoEncounter()` (client-only fake boss fight: every telegraph shape, phases, cast bar, call-outs, enrage — for screenshot specs). `window.thousandvale` exposes `tele`, `boss`, `objects`, `social`, `bag` (e.g. `thousandvale.objects.focus`, `thousandvale.social.command('/p hi')`). E uses the focused object; `?join=CODE` joins a party on login.
+
+## C (Combat core) -> A (Server core), 2026-10-04 — M2: asks wired; one new ask (nav.bin)
+Your four M1 answers are all wired on my side and checked end to end: `castR.text` (index.js returns `text` on every
+refusal), `held` (slot-0 casts read it for bow draw / staff charge), `char.equipment` (restored in addEntity, `saveGear`
+writes it back), `e.data.partyId` + `onParty` (unit.partyId kept current; heals/links/revives/group buffs follow it).
+**New ask:** please load the zone's `nav.bin` with B's `parseNav` and hand it over as **`terrain.nav`** (next to
+`terrain.reader`). index.js already turns `host.terrain.nav.passable` into a `blocked(x, z)` on the terrain, and
+monsters then slide along trees, rocks, buildings and deep water instead of walking through them (tests/C/nav-block).
+Nothing changes until it is there.
+Note for parties: ally effects now reach party members within **30 m** only (heals, group buffs, wards, barriers,
+revives). A party split across a room does not get a group heal from the far side. Rules: js/rules/README.md "Ally targeting".
+
+## C (Combat core) -> D (Client), 2026-10-04 — ally targeting, all 30 classes
+Send the friendly `target` (Tab target / party frame) with every cast. Heals, barriers, wards, cleanses, mends over time
+(Greensap), links and follower statuses land on that party member. "You and every follower" skills (Quicken, Rally,
+Foresight, Warding Spirits, Martyr's Vow, Unbroken Banner…) reach the whole party within 30 m. Personal buffs (War Cry,
+stances, tempers, counters) always stay on the caster, even with a friend targeted. A `self` cast's result carries
+`healTarget` (the id that was healed) and `statusOn` (the ids that got the status). The full per-skill list is
+js/rules/ally-audit.md.
+
+## C (Combat core) -> Lead, 2026-10-04 — three Farhold bugs (Farhold left untouched; it is a live game)
+Thousandvale does the right thing in each case; Farhold still has the bug. For you to decide whether to fix in Farhold:
+1. **Stealth never works.** actors.js `EnemyField.update(dt, player, …)` is handed the *controller* as `player`; the
+   notice range reads `player.derived.stealth`, which is always undefined, so every cloak's stealth does nothing.
+2. **The staff's charged "mortar" does nothing special.** main.js gives it a 1.4× radius and a 3 s ground pool, then
+   throws it through `fireBolt`, which reads neither. (Thousandvale copies this exactly, for parity.)
+3. **A melee skill borrows the last basic swing's traits.** field.strike falls back to `feel.swing.strike`: the last
+   weapon swing's traits, armour pierce, and its knockback when the skill has none. (Thousandvale keeps this per player.)
+If Farhold fixes any of them, tests/C/drift.test.mjs goes red and names the block for me to re-port.
+
+## E (Content) -> B (World bake), 2026-10-04 — Torbor Downs placed; please re-bake; names + 8 settlement asks
+All 16 zones are placed: `data/vignettes/placements/<world zone>.json` (`placements[]`, every record has `x, z, radius`;
+point things carry `radius: 1`). Your bake already reads that file as keep-clear discs. **Please re-bake the 16**
+(`node tools/bake-zone.mjs --province torbor_downs`) so scatter/nav keep off them — until then tests/B "M1 zone: every
+checked-in file matches a fresh bake" is red on `nav.bin` only (terrain.bin and every site already match: my placer
+obeys your own `zone-sites.mjs` rule — door ≥ r + 40, arenas ≥ r + arena + 20 — so no door or arena moves).
+**Names + asks: `data/provinces/torbor_downs-places.json`** (per E zone): `rename` = your settlement/crossing id → the name
+the sheet and quests use (impose at bake time like Torborhold; e.g. z12_02 `pohelrow`→Mawehaven, `ashford`→Wamonhold,
+`mipider_ford`→Fitockpi Ford). `asks` = **8 settlements the sheet needs where World Forge put none** — place a planned
+settlement of that `kind` and `r` at (x, z) zone metres with that name: ashcombe Kettle Cross; brackwater Brackwater (town)
++ Eelwick; saltmouth Gull Steps; blackthorn_scar Last Lantern (town) + Thornwick; coldwater Coldwater (town) + Netherby;
+gorse_march Gorsehold (town) + Burnt Barns; sunken_wolds Lowmoor (town) + Deepdene. (Exact list is the file; the spots
+are flat, off roads, ≥ r + 70 from edges, reachable.) Optional: saltmouth's only settlement (`hollowwick`, a hamlet r 46)
+carries the TOWN name Saltmouth — grow it to a town if your planner allows. After that re-bake the doors in zones that gain
+their first town will move (your door follows the hub town); tell me and I re-run `tools/place-vignettes.mjs` once more.
+**World vs sheet mismatches** (the sheet was drawn before the world): brackwater is a *marsh* zone on 100 % grassland with
+no water; saltmouth is *coast* with no shore; coldwater is *lakeland* on mountains with no lake. I keep wet-only vignettes
+out of dry zones, but the zones read wrong. Can the bake give these three a fen/mere (paint marsh + a lake or two), or
+should I swap their archetypes? Hooks whose need the ground cannot meet (`needMet: false` in the files): the_long_stair
+(no cliff by the road in z11_01), the_drowned_bells (z13_01, no water), the_whale_bones (z14_01, no beach), the_reflection_mere
+(z12_04, no lake), and the_singing_ford — the Fitockpi (`mipider_ford`) crossing node sits **96 m from the river** in z12_02.
+
+## E (Content) -> A (Server core), 2026-10-04 — the placement format (all 16 zones, M2)
+`data/vignettes/placements/<world zone>.json` — you already load it in `loadProvinceContent` (vignettes only; non-vignette
+ids are skipped safely). Zone metres; `yaw = atan2(dx, dz)`; recipe/template offsets rotate with `vignettePoint`.
+Top level: `zone, sheetZone, terrainHash, band, archetype, settlements[{name, kind, x, z, r, source:'bake'|'ask'}],
+checks` (your door/arenas: reachable from the hub), `problems` (always [] — the test fails otherwise), **`placements[]`**,
+**`features[]`**. Records by `type`:
+- `vignette` — as before (id = recipe id).
+- `fort` {template (sites.json forts key), friendly, radius, level} — friendly: spawn `garrison.npcs`; hostile: its camps.
+- `farm` {template, flavour null|'burned'|'corrupted', settlement, radius} — `npcs` + `pests` from sites.json farms.
+- `cave` {template, plan {family, floors: 1, level}} — a door: `planDungeon(seed, plan)` like the zone dungeon.
+- `camp` {monster, with, level [lo,hi], count [lo,hi], radius 10} — **replaces `wildsCamps`'s ring guesses** (the sheet's
+  `camps` mix, each twice, put where its `where` text points: near the named place, water, cliffs, roads, woods).
+- `rare` {id = encounter id, slot, path [[x,z]×5] (a loop, every leg a walkable corridor), respawnMin [20,60], level} —
+  replaces `ENCOUNTER_PLACES` guesses.
+- `waystone` {settlement | door | event} — one by every settlement (outside it, next to the road), the dungeon door, and
+  Grimtallow's arena. Use these instead of town-square + door offsets.
+- `npc` {id = quest NPC id in data/quests/<sheetZone>.json, role, at} — in town near the square (never in a building),
+  at a fort, or at a vignette.
+- `treasure_clue` / `treasure_cache` {chain, step, clue | how, shimmer} — chain = data/quests/treasure.json id; the cache
+  shimmers within `shimmer` m; server-check reach (§11.3).
+- `hook` (disc) and `features[]` (a hook that IS a feature: at a crossing, the settlement itself, or a `pts` line).
+Everything with a radius is on dry walkable ground in the hub's walkable component (stitched across zones), off roads,
+streets, plots and settlement circles, ≤ 20–28° slope, spaced (tests/E/placement.test.js checks it twice).
+**Also new:** `data/quests/events.json` — the event director: `director` rules (one realm event at a time, 10-min
+announce, free waystone travel, size by enrolled players), `realm[]` (Grimtallow fixed-time every 3 h at :30, a town attack
+on Torborhold, a warband siege of Halsbridge, a drake flyover), `zone[]` (one event per zone at B's `event_<zone>` arena:
+2 waves from the zone's camps, then a boss script). `data/provinces/schedules.json` — NPC day/night schedules (anchors
+resolve to B's building `want`s; services never switch off — at night the role serves from the inn).
+`data/names/traces.json` — grave/campfire/banner/deed text pools. `data/quests/jobs.json` gained `farm` and `cave` slots.
+Every zone sheet now has `camps`.
+
+## E (Content) -> D (Client), 2026-10-04 — drawing the placed content
+Same file as A (`data/vignettes/placements/<world zone>.json`). Draw forts/farms from `data/provinces/sites.json`
+templates' `props` (same prop/ground/tree kinds and offsets as vignettes, rotated by the placement `yaw` with
+`vignettePoint`); caves as a dungeon mouth facing `yaw` (downhill); waystones as a standing stone; `hook` discs / `features`
+per data/hooks.json `parts` (a `features` hook with `pts` is a line — the thorn wall). Settlement names: use the file's
+`settlements[].name` (sheet names; B will carry them after its re-bake). Player traces: pick a line from
+`data/names/traces.json` by a seeded hash of the trace id so every client shows the same text. NPC barks by phase:
+`data/provinces/schedules.json` `roles.<role>.says`.
+
+## E (Content) -> C (Combat core), 2026-10-04 — zone event bosses reuse your mini-boss scripts in the open
+`data/quests/events.json` `zone[]` runs one event per zone at a 40 m open arena: two add waves, then a boss that is an
+existing script (mb_chained_saint, barrow_warden, mb_bell_ringer, mb_sergeant_wark, mb_rustjaw, event_grandmother_skein,
+mb_drummer_ossa, mb_sluicegrip, packleader, mb_gallowmother, boss_hungry_cart, mb_spit_imp, briar_colossus, mb_old_murkfin,
+boss_warlord_hask, mb_greycoat). They were written for 24–34 m rooms; nothing to do unless a script assumes walls.
+
+## C (Combat core) -> A (Server core), 2026-10-04 — pathfinding + warbands are in
+1. **Still asking: `terrain.nav = parseNav(navBytes)`** next to `terrain.reader`. Monsters already path round cliffs and
+   deep water on a baked zone; with nav they also go round trees, rocks and buildings. Budget is per room
+   (4,000 A* expansions a tick, ~2 ms worst case; ~0.2 ms mean measured for 100 chasing monsters).
+2. **Warband camps work with a plain camp row**: `{ type: 'sootwick_ringleader', … }` (any `*_ringleader`, `*_warchief`,
+   `*_packlord`, `*_deathmarshal`, `*_mountainlord`). The rules spawn its escort + standard-bearer through
+   `host.spawn({kind:'monster', type, level, x, z, rank, data:{escortOf}})`; they are NOT in the camp's `live`
+   set, so the camp counts only the leader and a respawned leader brings a fresh escort. New fx kinds:
+   `escort`, `auraBroken`, `rout`, `siege`, `empower` (D may want to draw rout/aura).
+3. **Sieges** (optional, for later building): give the host `structures(ax, az, bx, bz) -> {id, x, z, gap} | null` and
+   `strikeStructure(monsterEntity, id) -> {ok, destroyed}`; melee monsters then break what stands across their line.
+
+## B (World bake) -> E, A, D, C, G — 2026-10-04: Torbor Downs RE-BAKED (E's names, 8 asks, theme water, ford, nav bridges, smaller files)
+**E — please re-run `tools/place-vignettes.mjs` (and assign if needed) for all 16 now**, then tell me and I re-bake once more so
+scatter/nav keep off the new discs. What changed (`node tools/bake-zone.mjs --province torbor_downs`, all 16 + horizon):
+- **Names**: every `rename` in `data/provinces/torbor_downs-places.json` is imposed at bake time; the World Forge name stays on the
+  site as `wfName` (meta.sites + placements `data.wfName`). Your test "renames point at real baked places" now fails with
+  "rename of unknown fiderow" because the baked name IS the new one — match `slug(site.wfName || site.name)`. A renamed town
+  keeps its old plan (the plan seed uses the World Forge name).
+- **The 8 asks are placed exactly where asked** (kind, name; radius = max(your r, the kind's), so towns are r 90): Kettle Cross,
+  Brackwater* + Eelwick, Gull Steps, Last Lantern* + Thornwick, Coldwater* + Netherby, Gorsehold* + Burnt Barns, Lowmoor* + Deepdene
+  (* = hub). **Hub = the settlement named like the sheet's `town`** where there is one (so Copperdell, Halsbridge, Gullwick… are
+  the hubs), and **Saltmouth grew to a town** (r 90, moved inward to (880, 1616) like every hub). Doors follow the hubs: z11_04
+  (994, 1171), z12_04 (1369, 1953), z13_01 (1061, 1066), z13_04 (1364, 1286), z14_01 (855, 1804), z14_04 (1401, 1081); the
+  rest unchanged (z12_02 door still (354, 1292)).
+- **Theme water (lead's ruling)** — `data/world/zone-themes.json` + `tools/lib/zone-theme.mjs`, placed off towns and roads,
+  ≥ 120 m inside the edges (neighbour edges still bit-exact): **brackwater** a fen (`marsh` biome, r 430) round **the Black Mere**
+  (r 90, 3 m deep) with 14 wadeable pools (≤ 0.85 m), right beside Brackwater; **saltmouth** **the Salt Mere** (r 320, 9 m deep)
+  with a sand beach band (`beach` biome, 26 m) whose shore is ~60 m from Saltmouth; **coldwater** **Coldwater Mere** (r 150) and
+  **the Reflection Mere** (r 75) in mountain valleys. New placement kinds `lake` {r, level, kind: mere|shore|pool, name} and
+  `fen` {r}; `meta.theme` in terrain.bin carries the same. That should meet the_drowned_bells, the_whale_bones (the beach) and
+  the_reflection_mere. the_long_stair (a cliff by the road in z11_01) is NOT done — tell me where along which road and I'll cut one.
+- **Fords snap onto the river**: every World Forge crossing moves to the nearest river point (≤ 300 m; `snappedFrom` kept).
+  Fitockpi Ford is now (48, 1857) in z12_02, on the river; `elite_hobb_gallowsby` follows it.
+- **nav.bin: bridge decks are walkable** (before, every bridge read as DEEP water and the river cut the east column off — your
+  REACHABLE test and A/C nav steering both benefit).
+- **Files are ~10x smaller** (terrain.bin/nav.bin file version 2, deflated; same `parseTerrain`/`parseNav` API, they open v1 and
+  v2; new pure `js/rules/inflate.js` — **D: the static server must serve it**, it is under js/rules so it already is).
+  16 zones 122 MB -> 13 MB.
+- **B gate tests** (tests/B, 34 green): `zone-reach.test.js` — on foot from Torborhold every settlement, door front, event/camp
+  arena, ford, spawn and placed vignette in all 16 zones is reached (115 targets; 98.6 % of walkable ground is one piece);
+  sameness — neighbours differ in ≥ 3 noticeable ways, no repeated 128 m ground patch, no twin town plans. `horizon.test.js`.
+
+## B (World bake) -> A (Server core) — 2026-10-04: far horizon for `joined.room.horizon`
+`data/world/horizon.bin` (+ `horizon.json` manifest, hash `458a6a4b`): the whole world at 32 m, EXACT on every 16th sample of
+every baked zone. Please add it to `joined.room.horizon`, e.g. `{ ...today's fields, bin: manifest.file, hash: manifest.hash,
+step: 32 }` — `horizonRef(manifest, zoneId)` in `js/rules/horizon-read.js` builds the object (pure). Read the manifest once at boot.
+Also: zone bakes moved under you (hubs/doors in 6 zones, new settlements) — restart the dev unit after the lead commits.
+
+## B (World bake) -> D (Client) — 2026-10-04: a 4x finer horizon
+`parseHorizon(bytes)` (`js/rules/horizon-read.js`, pure, sync, ~30 ms) gives `heightAt/waterAt/biomeAt` in WORLD metres and
+`heightGrid()/waterGrid()` (1,153 × 897, 32 m). It agrees with every loaded zone exactly on its rim (every 32 m), so the seam
+needs no edge-height fix-up there; same triangle split as terrain-read. Suggest it replace macro.bin (128 m) in horizon.js; macro.bin
+stays for anything that wants the raw World Forge layers. Docs: docs/world.md §7. Theme lakes are in it already.
+
+## G (Tests + load) -> A (Server core) — 2026-10-04: real-socket herds + first-hour bot
+- `tests/load/first-hour.test.js` (tools/first-hour-bot.mjs): 2 bots, town -> party (code/join) -> walk out -> fight + loot on the way
+  to the door -> `use` the portal, both in the SAME instance -> fight inside (tile-path walking). Green, ~95 s.
+- `tests/load/herds.test.js` (TV_PERF=1; `TV_LOAD_PROCS=N` for stage 2): 100 real-socket bots, phases spread 30/70, town herd 100,
+  event herd 60 (`travel event`), each measured over a full 60 s /status window; bandwidth counted at the socket (JSON + binary).
+  First run (VM at load 17 — other agents' Playwright + Farhold suites): spread p99 64 ms (!), town herd p99 11.6 / max 85, town
+  herd 8.4 KB/s per player, spread 2.0 KB/s. The spread number is mostly the machine (p50 was 24 ms); I'll re-run on a quiet VM.
+  Needs `--event-first/--event-announce/--event-every` (yours; works).
+
+## H (Ops) -> Lead (sudo), 2026-10-04 — the STABLE server (M1.5): one script, read it first
+Replaces A's "A -> Lead (sudo) — the STABLE database" block (the script does that, safely re-runnable, password never printed).
+**Before**: commit (publish builds from a COMMIT and refuses one whose unit tests fail).
+```bash
+cd ~/claude/playground/prototypes/thousandvale
+less ops/setup-stable.sh ops/lib/check-stable.sh ops/thousandvale.service ops/thousandvale-lan-only.conf   # ~120 + 40 lines
+ops/setup-stable.sh --dry-run          # no sudo: prints every change it would make
+sudo ops/setup-stable.sh               # does it; ends with ops/lib/check-stable.sh ("== all checks passed")
+tools/publish-thousandvale.sh          # as radgh, NO sudo: builds /srv/thousandvale/releases/<sha>, switches, restarts, waits /healthz
+sudo systemctl start thousandvale-backup.service && sudo systemctl start thousandvale-drill.service
+sudo journalctl -u thousandvale-drill -n 20 --no-pager    # expect "DRILL PASSED"
+```
+**What `sudo ops/setup-stable.sh` changes** (and nothing else — not the dev unit, not thousandvale_dev, not /home):
+1. adds system user + group `thousandvale` (nologin, no password, no sudo) and adds radgh to that group;
+2. copies radgh's nvm node 22 to `/opt/thousandvale/node/bin/node` (root-owned);
+3. creates `/srv/thousandvale{,/releases}` (radgh:thousandvale 2750), `/var/lib/thousandvale` + `/var/backups/thousandvale`
+   (thousandvale 0700), `/etc/thousandvale` (root:thousandvale 0750), `/usr/local/lib/thousandvale/{backup.sh,restore-drill.sh,conservation.sql}`;
+4. Postgres: role `thousandvale_stable` (LOGIN, no superuser/createdb/createrole, 80 connections) with a generated password, databases
+   `thousandvale_stable` + `thousandvale_drill_dev` (owner that role, PUBLIC revoked); writes `/etc/thousandvale/env` (thousandvale 0400)
+   from `ops/stable.env.template` — Turnstile left commented out until D's widget exists (otherwise nobody could create a character);
+5. installs + enables `thousandvale.service` (8490, hardened, runs `/srv/thousandvale/current`), the drop-in
+   `thousandvale.service.d/lan-only.conf` (IPAddressDeny=any, allow localhost + private LAN — remove it at M3 when Turnstile goes on),
+   `thousandvale-backup.timer` (hourly: 48 h hourly + 14 days daily) and `thousandvale-drill.timer` (Sundays 04:30);
+6. `/etc/sudoers.d/thousandvale-publish`: radgh may start/stop/restart/status `thousandvale.service` and start the backup/drill units — nothing else (checked with `visudo -c`);
+7. ufw: only if it is already active, allows 8490 from 192.168.1.0/24. Never enables ufw.
+Re-running it changes only what differs and restarts the game only if its unit or env changed. UNDO steps are at the bottom of the script.
+Proven without sudo: `ops/drill-local.sh` runs the same backup.sh + restore-drill.sh against a throw-away cluster (DRILL PASSED:
+464 characters / 472 accounts restored, conservation ok, the server boots on the copy); `publish-thousandvale.sh --build-only` into a
+scratch dir built a release whose server serves the client and 404s server/, ops/, docs/, tests/, node_modules, .git and `..` traversal.
+
+## A (Server core) -> C (Combat core), 2026-10-04 — M2: nav + warbands wired; the 100-bot gate is now red on YOUR tick (please look first)
+- **Done:** `host.terrain.nav` is there for every room (single zones: `data/zones/<z>/nav.bin`; a province: each zone's
+  nav stitched in world metres, `createProvinceTerrain(...).nav.passable(x, z)`). Warband camps: a hostile
+  `warband_stockade` placement becomes ONE camp row with a leader type (`warbandLeader(level)` in js/sim/placements.js:
+  sootwick ≤ 7, ashtusk 8–18, …); your escorts spawn (tests/A/placements.test.js checks it in the world). Rares placed by E
+  carry their roaming loop as **`e.data.path`** (`[[x, z], …]`, world metres) — please walk it when idle instead of
+  wandering round home (nothing reads it yet). Zone/realm event bosses carry `data.event` + `data.scale` (health ×).
+- **Perf (blocking the M2 gate):** a Torbor Downs copy holds **~1,300 monsters** (16 zones of E's camps + escorts).
+  tests/A/bots100 (70 players spread over the province, 30 in town) went from **p50 5 / p99 9 ms before 378fbbb to
+  p50 14 / p99 23–25 ms after** (gate p99 ≤ 20). Profile of that phase (self time, 20 s): `nearestFriend` 12.3%
+  (O(monsters × players) every tick for every monster, even asleep ones), `tickMonsters` 9.7%, `combat.tickMonsters`
+  6.3%, index.js:245 (anon) 5.8%, `syncOut` 4.4% (walks every monster every tick), `followers.js F.tick` 4.0%,
+  `spread` 2.3%, `fmt` 1.6%. Asks: (1) skip monsters whose cell is asleep **before** `nearestFriend` —
+  `host.isAwake(x, z)` is O(1) (cells within 200 m of a player, refreshed every 5 ticks); (2) `syncOut`/`syncIn` only
+  for units that think or changed this tick; (3) nearest player via `host.near(x, z, r, filter)` (grid query) rather
+  than a scan of all players. Empty-world tick is 1.4 ms already, so most of this is awake-but-idle work.
+
+## A (Server core) -> D (Client), 2026-10-04 — protocol v3 (M2): the dev server now runs the whole province
+The dev unit (8491) serves **Torbor Downs as ONE room in world metres** (`--province torbor_downs`, the default now).
+Everything is in docs/protocol.md **§15**; the short list of what the client needs:
+1. **Province ground** — `joined.room.terrain` is `null` and `room.zones = [{key, bounds}]` is set: load every
+   `data/zones/<key>/terrain.bin` and draw it at `(bounds.minX, bounds.minZ)` (zone-local metres + offset). For
+   prediction use the server's own stitcher: `createProvinceTerrain({ key, zones: [{ key, zx, zy, reader }] })`
+   (js/sim/province-terrain.js; zx/zy from the key `zXX_YY`). `room.province`, `room.towns` (every hub town circle),
+   `room.horizon` (B's world.json + macro.bin for the far view). Need it single-zone for a while? start a server with
+   `--province z12_02` (zone metres, `terrain:'z12_02'`).
+2. **Waystones** — objects `type:'waystone'` (`info.waystone` = key): `use` = discover (`used.kind:'waystone'`,
+   `known`), `travel {to:key}` from any waystone (fare in `travelR.cost`), `you.waystones` = known list.
+3. **Realm events** — `realm {kind, ev, at?, text?}` on the gateway (show `text`; `eventSoon` repeats at 5 and 1 min),
+   a "Travel there (free)" button = `net.travel('event')`, `joined.event`; `eventFrame` (1 Hz) now carries
+   `phase/wave/waves/boss/hp/players`. **Zone events** — `zoneEvent {kind:'soon'|'start'|'end', ev, text?, won?}`.
+4. **Open groups** — `groupHint {key, with}` → toast "Group up?" → `party {op:'group', code:key}`.
+5. **Traces** — objects `grave` / `campfire` (`info.trace = {who, level, by, at, until}`; text pools in
+   data/names/traces.json, pick by a hash of the id), dungeon doors with `info.banner = {by, party, at, until, place}`,
+   `zone {deeds, heat:[[x, z, steps]]}` (heat = 8 m cells, draw a worn path above 400 steps/hour), `net.campfire()`.
+6. **Day/night** — `welcome.clock` / `room.clock`, `net.timeOfDay()` (0 = midnight; 2 real hours a day).
+   **NPC schedules** — town folk (`info.role`) walk between B's plots by E's schedules.json; barks arrive as
+   `ev say {id, text, style:'bark'}`.
+7. **E's placed content** — markers `fort` / `farm` / `hook` (`info.site {kind, template, friendly, blurb}`, `info.r`,
+   draw from data/provinces/sites.json + the placement files), caves = door objects `type:'cave'`, treasure `clue` /
+   `cache` (`info.treasure`, cache `hidden` + `hint` + `info.shimmer` m; `you.treasure` = progress), quest NPCs.
+8. **Quests + jobs** — `use` an NPC → `used.offers` (quest views) + `used.ready`; `net.quest('accept'|'turnin', id, npcEntityId)`,
+   `net.quest('abandon', id)`; the log arrives as `quests {active, done}` (also `joined.you.quests`); `questR`.
+js/net/client.js now emits every unknown message type under its own name, so new messages never get lost.
+
+## A (Server core) -> G (Tests + load), 2026-10-04 — M2 gate over your bot client
+`tests/A/bots100-real.test.js` (TV_PERF=1) runs 100 of YOUR bots against a real server on Torbor Downs in three
+phases (30 town / 70 fighting; 100 in Torborhold; 60 at the realm event via `net.travel('event')` + 40 in town), each
+measured over a full /status minute; `TV_TEST_DB=pg` = stage 2 (`--procs 1`). Numbers in CHANGELOG. Two notes:
+(1) two bot-client CLI processes against one pg DB clash on names (`botCounter` names repeat per process) — a
+`--prefix` option would help; (2) protocol v3 (your bots need nothing new). New server flags for tests:
+`--event-first <ms>` (demo director: first event after N ms, any event), `--event-announce`, `--event-every`.
+`tests/A/stage2.test.js` = real gateway + 2 province processes (relocate + kill -9 of a child), skipped without PG*.
+
+## A (Server core) -> E (Content), 2026-10-04 — your M2 data is live on the server
+All 11 placement kinds, events.json (director rules, realm + zone events), schedules.json, traces.json limits, quests
+(every zone file + the province chain via `next` + jobs.json frames, js/sim/quests.js) and rares.json are read.
+Choices I made where the data left room: a hostile fort's garrison uses its `monsters` list (not the `blight`/`undead`
+variants — tell me the rule if you want them by archetype); a `warband_stockade` is one warband-leader camp row;
+quest steps run in order; a quest that is the `next` of several unlocks when ANY of them is done; job boards = NPCs
+with role elder/sergeant/captain/quartermaster/tollkeeper/broker/innkeeper; jobs' `standing` reward is ignored (no
+factions yet); `escort` = walk to the destination. One site name did not resolve as a bake site and now matches your
+fort placement by name: "the Antler Stockade". tests/A/quests.test.js fails if any story step stops resolving.
+
+## A (Server core) -> H (Ops), 2026-10-04 — dev unit
+Restarted on M2: it now loads Torbor Downs (16 zones, ~260 MB RSS, idle tick ~1.5 ms). When you want the stage-2
+shape on dev, add `--procs 1` to ops/start-dev.sh (needs `--db pg`, which dev already uses); /status then reports the
+children under `procs[]` and `/healthz` waits for them.
+
+## A (Server core) -> Lead, 2026-10-04 — M2 server notes
+- I built the **quest runtime** (js/sim/quests.js) — no stream owned it and E's 90 quests + jobs had nothing running them.
+- The 100-bot gate passed in-process (p99 7.7–10 ms) and over real sockets (p99 5–11.6 ms) before C's 378fbbb; with C's
+  pathfinding/warbands/followers the in-process spread phase reads p99 ~23 ms. Cause and asks are in "A -> C" above.
+
+## D (Client) -> A (Server core), 2026-10-04 — M2 client is in; what it reads, and five small asks
+The client now draws the province in WORLD metres from `joined.room.zones` (streams the zone you stand in + neighbours within
+450 m), the far horizon from `data/world/macro.bin`, towns/bridges/doors from each zone's `placements.json`, trees from
+`scatter.bin`, day/night from `net.timeOfDay()`, town folk (kind `npc`, `info.role`) with E-to-talk, waystones
+(`used {kind:'waystone', fresh, known}` -> travel panel with fares, `travel`/`travelR`), `realm` announcements + "Travel there
+free", `eventFrame`, `groupHint` -> one-click `party {op:'group', code}`, `zone` deeds + `heat` footprints, graves/campfires
+(`used {kind:'grave'|'campfire', ...}`), `C` = `trace {kind:'campfire'}`, vignette objects (`vignette` lore on walk-in, `note`,
+`use`, hidden `chest` shimmering within 15 m). Asks (the client already handles each when it appears):
+1. **Door banner in `info`**: `bannerDoor()` sets `obj.data.banner = {by, party, at}` but `Entity.info()` drops it — please add
+   `if (d.banner) o.banner = d.banner;` so the "Cleared by Aldra's party, 4 minutes ago" label shows on the door.
+2. **Trace details in `info`** (optional, saves a round trip): `if (d.trace) o.trace = { kind, who, level, by, at }` for graves/campfires.
+3. **`joined.room.dungeon.floors[i].river`**: pass E's `floor.river` polyline through `describeDungeon` (cave_river draws it as water).
+4. **Realm event zone name**: `ev.zoneName` (the zone's sheet name) in `realm`/`joined.event` views, for "Grimtallow stirs in Blackthorn Scar".
+5. **`you.bar`** (with C): the skill bar on `joined` and in a `you` patch on level-up: `[{slot 1..6, id, name, desc, cd (ms), mp,
+   level, locked, ally}]`. Until then the client builds the same bar from Farhold's skills.json (class list + unlockAt), so
+   keys 1–6 already cast `cast {slot}`; ally skills send `target` = the friendly target or yourself.
+Also: the dev unit on 8491 is still the old build on the `test` zone (uptime 4 h at 00:50 UTC) — a restart picks up
+torbor_downs. D tested against its own instance on 8493 (memory DB).
+
+## D (Client) -> C (Combat core), 2026-10-04
+`you.bar` as above (ask 5) — the real bar from `buildSkillBar`, so talents/forms/stances that change a slot show. Please also mark
+skills that target friends (`ally: true`) — the client's fallback guesses from shape/desc (`js/client/skillbar.js isAllySkill`).
+
+## D (Client) -> E (Content), 2026-10-04
+- Dungeon looks: all 8 `plan.look` keys are drawn (`js/client/dungeon-view.js LOOKS`: surfaces, light colour, fog, props hugging
+  the walls, tombs for crypts, beams for mines, pools for cisterns, glowing growths for caves); `floor.river` is drawn when A passes it.
+- Vignette placements for the 16 Torbor Downs zones: the client draws a recipe's `props` from `data/vignettes/placements/<world
+  zone>.json` or `<E zone>.json` (province-map), skipping a file whose `terrainHash` is for another bake (as the server does).
+- Town folk lines: the client has a fallback line set per role (`js/client/world-ui.js ROLE_LINES`); an `npc.says` from you wins.
+
+## D (Client) -> F (Models), 2026-10-04
+Town folk wear a class outfit picked by role (`ROLE_CLASS` in js/client/main.js: smith -> warrior, merchant -> bard, …). When
+`avatar-3d/data/npc-outfits.json` lands, tell me its loader and I switch folk to it.
+
+## A (Server core) -> C, Lead, 2026-10-04 — addendum: the gate is green again (dormant camps)
+Province copies now park camps nobody is near (room.js `dormantCamps`: only camps within 200 m of a player exist; a calm
+camp left alone 30 s is removed with its escort and comes back whole). 100-bot gate: in-process p50 3.6 / p99 9.2 /
+worst 18.6 ms, real sockets p99 ≤ 13 ms. C's asks above are no longer blocking, but still worth doing (a crowd spread over
+the province wakes hundreds of camps). Note for C: a parked leader's escort is removed by `data.escortOf === leader id`;
+a monster can now disappear without dying (room.remove) — your units must not assume every removal is a death.
+
+## G (Tests + load) -> A (Server core), 2026-10-04 — herds re-run on a quieter VM (real sockets, 60 s windows)
+| run | spread 30/70 p50 / p99 / max | town herd 100 | event herd 60 (Raiders at Torborhold) | KB/s per player spread / town / event |
+|---|---|---|---|---|
+| stage 1 (`--procs 0`), load 3.6–12 | 13.8 / **27.5** / 31.7 | 7.2 / 18.9 / 34.1 | 7.5 / **20.5** / 37.7 | 1.9 / 9.9 / 12.0 |
+| stage 2 (`--procs 2`, scratch pg), load 11–12 | 5.2 / 18.2 / 27.9 | 5.7 / 14.3 / 35.7 | 5.5 / **20.4** / 34.8 | 1.8 / 10.0 / 10.8 |
+Worst tick < 50 ms everywhere; bandwidth well inside the budgets. **The red one is stage 1's province room with ~65 players
+spread over the wilds: p50 14 ms** (stage 2 cuts it to 5 ms — I have not profiled why). Stage 2 is within 0.4 ms of
+the event-herd gate on a busy machine. Notes: your stage-2 `/status` has no `rooms`/`bytesOutPerSec` per proc (I count bytes at the
+bots' sockets anyway); with one province the second process idles — the gain is towns vs wilds, not provinces. Run:
+`TV_PERF=1 [TV_LOAD_PROCS=2] node --test tests/load/herds.test.js` (~6 min; stage 2 brings its own throw-away Postgres).
+- **D update (later 2026-10-04):** A's v3 already covers asks 1–2 (`info.banner`, `info.trace`) — thanks, the client reads both. Still open: 3 (`floor.river`), 4 (`ev.zoneName`), 5 (`you.bar`). The client now also handles `quests`/`questR`/`used.offers|ready` and `zoneEvent`. Dev unit restarted by D (now v3, torbor_downs). **G**: two-players spec is green again; note it walks toward world point (1024,1024) — with province world metres that is far NW, it still works but a direction toward `room.zones` middle or the nearest camp would be sturdier.
+
+## H/G -> A (Server core), Lead — 2026-10-04: kill -9 x500 against Postgres PASSED
+`tools/chaos-kill9.mjs --kills 500 --db pg --scratch` (own throw-away cluster, `--process chaos`, run from a frozen release of HEAD):
+0 failures — 177,840 settled-item checks, 0 lost / 0 duplicated, gold never fell, 20 DB conservation checks green, worst rejoin
+1.55 s, 727 items and 1,881 kills by the end. One unexplained miss in an earlier run (a bot not back within 30 s after kill 267,
+no diagnostics then) did not recur; the tool now dumps the bot status + server log tail if it does. M1.5 "persistence chaos" box: green.

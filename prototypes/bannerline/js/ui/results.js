@@ -17,12 +17,12 @@ export function showResults({ card, sim, players, onLobby, onRematch, onTitle, o
   const myTeam = localTeams[0];
   let word, cls;
   if (r.winner === -1) { word = 'Draw'; cls = 'draw'; }
-  else if (localTeams.length > 1) { word = `${TEAM_WORDS[r.winner] || 'A side'} wins`; cls = 'win'; }
+  else if (localTeams.length !== 1) { word = `${TEAM_WORDS[r.winner] || 'A side'} wins`; cls = 'win'; }   // split screen on both sides, or a spectator (no seat)
   else { word = r.winner === myTeam ? 'Victory' : 'Defeat'; cls = r.winner === myTeam ? 'win' : 'lose'; }
   const tickHz = data.econ?.clock?.tickHz || 20;
   const teams = s.teams.map((t) => {
     const ps = s.players.filter((p) => p.team === t.id);
-    const label = localTeams.length > 1 ? TEAM_WORDS[t.id] : t.id === myTeam ? 'Your side' : 'Rival side';
+    const label = localTeams.length !== 1 ? TEAM_WORDS[t.id] : t.id === myTeam ? 'Your side' : 'Rival side';
     return `<div class="result-team t${t.id}">
       <h3><span>${label}</span><span class="ban">${Math.max(0, Math.ceil(t.banners))} / ${t.bannersMax} banners</span></h3>
       ${ps.map((p) => `<dl class="stat-list">

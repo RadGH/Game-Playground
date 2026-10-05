@@ -35,11 +35,14 @@ const HUNTER_SKILL_TEXT = {
   E: 'Send your hawk to a point: it circles for 12 s and sees 12 m.', R: 'Every animal within 40 m bolts home and shows for 5 s (from level 6).',
 };
 
-export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinimap, getCamBox, keyLabel = (k) => k, iconUrl = () => null }) {
+// spectate: { fog: () => 'farmers' | 'hunters' | 'both' | 'off' } turns this into the spectator's HUD: the
+// clock, the Turn and the sides strip stay, the role bar goes (js/ui/spectator.js draws the side panels),
+// the minimap shows everyone with the chosen side's fog, and alerts / results are told neutrally.
+export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinimap, getCamBox, keyLabel = (k) => k, iconUrl = () => null, spectate = null }) {
   const ic = (kind, id) => { const u = iconUrl(kind, id); return u ? `<img class="ic" src="${u}" alt="">` : ''; };
   const data = sim.data, map = sim.map;
   const me = () => sim.state.players[player];
-  const role = me().role;
+  const role = spectate ? 'spectator' : me().role;
   const el = document.createElement('div');
   el.className = 'hvf-hud ' + role;
   root.append(el);
@@ -82,7 +85,7 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
       <div class="hv-group"><h4>Farm</h4><div class="hv-ups" data-k="ups">${B.upgrades.order.map((id) => `<button class="hv-bt up" data-up="${id}" data-tip-render="hvf-up" data-tip-up="${id}"><span class="nm">${esc(B.upgrades[id].name)}</span><span class="cost" data-cost></span></button>`).join('')}</div>
         <div class="hv-skills" data-k="skills">${SKILL_KEYS.farmer.map((k) => { const a = U.farmer.abilities[k]; return `<button class="hv-sk" data-skill="${k}" data-tip="${esc(a.name)} — ${esc(FARMER_ABILITY_TEXT[k])}"><b>${esc(a.name)}</b><kbd>${keyLabel(k)}</kbd><i class="cd" data-cd></i></button>`; }).join('')}</div>
         <div class="hv-army" data-k="army" hidden></div></div>`;
-  } else {
+  } else if (role === 'hunter') {
     K.main.innerHTML = `
       <div class="hv-group"><h4>Skills</h4><div class="hv-skills" data-k="skills">${SKILL_KEYS.hunter.map((k) => { const s = HJ.skills[k]; return `<button class="hv-sk" data-skill="${k}" data-tip="${esc(s.name)} — ${esc(HUNTER_SKILL_TEXT[k])}${s.level > 1 ? ` (level ${s.level})` : ''}"><b>${esc(s.name)}</b><kbd>${keyLabel(k)}</kbd><i class="cd" data-cd></i></button>`; }).join('')}</div>
         <div class="hv-row"><button class="hv-bt" data-act="lodge" data-tip="Build a lodge (${HJ.lodge.cost} gold, ${HJ.lodge.seconds} s): a shop, a respawn point and 10 m of sight. At most ${HJ.lodge.max} including your kennel. A hunter who dies with no lodge standing is out."><span class="nm">Lodge</span><span class="cost">${HJ.lodge.cost}</span><kbd>L</kbd></button>
@@ -196,12 +199,20 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
   });
   mini.addEventListener('contextmenu', (e) => e.preventDefault());
   function drawMini(dt, visibleEnt, remembered) {
-    const s = sim.state, team = me().team;
+    const s = sim.state, team = spectate ? -1 : me().team;
     fogT -= dt;
     if (fogT <= 0) {
       fogT = 0.2;
-      const vis = s.hvf.vision[team], ex = s.hvf.explored[team];
-      for (let i = 0; i < map.cols * map.rows; i++) fimg.data[i * 4 + 3] = hasBit(vis, i) ? 0 : hasBit(ex, i) ? 130 : 225;
+      if (spectate) {
+        // the spectator's minimap: the chosen side's fog, light enough to see through (like the 3D view)
+        const mode = spectate.fog(), V = s.hvf.vision, E = s.hvf.explored;
+        const seen = (i) => (mode === 'farmers' ? hasBit(V[0], i) : mode === 'hunters' ? hasBit(V[1], i) : hasBit(V[0], i) || hasBit(V[1], i));
+        const known = (i) => (mode === 'farmers' ? hasBit(E[0], i) : mode === 'hunters' ? hasBit(E[1], i) : hasBit(E[0], i) || hasBit(E[1], i));
+        for (let i = 0; i < map.cols * map.rows; i++) fimg.data[i * 4 + 3] = mode === 'off' || seen(i) ? 0 : known(i) ? 45 : 95;
+      } else {
+        const vis = s.hvf.vision[team], ex = s.hvf.explored[team];
+        for (let i = 0; i < map.cols * map.rows; i++) fimg.data[i * 4 + 3] = hasBit(vis, i) ? 0 : hasBit(ex, i) ? 130 : 225;
+      }
       fctx.putImageData(fimg, 0, 0);
     }
     const W = mini.width, k = W / map.size;
@@ -215,7 +226,7 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
       if (e.kind === 'farmer') { c = FARMER_COLOURS[s.players[e.owner].colour % FARMER_COLOURS.length]; r = 3; }
       else if (e.kind === 'hunter') { c = '#ff4a3a'; r = 3; }
       else if (e.kind === 'animal') { c = '#f5f2e8'; r = 1.2; }
-      else if (e.kind === 'building') { c = e.team === team ? '#ffe08a' : '#d06a50'; r = 2.5; }
+      else if (e.kind === 'building') { c = team < 0 ? (e.team === 1 ? '#d06a50' : '#ffe08a') : e.team === team ? '#ffe08a' : '#d06a50'; r = 2.5; }
       else if (e.kind === 'army') { c = '#e8c070'; r = 2; }
       else if (e.kind === 'ward' || e.kind === 'hawk') { c = '#9fe0ff'; r = 2; }
       if (!c) continue;
@@ -236,6 +247,18 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
   // ── per-frame refresh ──
   function update(dt, { visibleEnt, remembered, placing }) {
     const s = sim.state, p = me(), c = Q.clock(sim);
+    if (spectate) {
+      setT(K.clock, mmss(c.left));
+      setT(K.clocksub, c.released ? 'until the farmers hold out' : `hunters released in ${Math.ceil(c.releaseIn)} s`);
+      const t = s.hvf.turn;
+      K.moon.style.setProperty('--full', Math.round((t + 1) * 50) + '%');
+      setT(K.turn, t < -0.6 ? "Hunters' night" : t < 0 ? 'Waxing' : t < 0.6 ? 'Turning' : "Farmers' moon");
+      const si = Q.sideInfo(sim);
+      setH(K.sides, `<span class="f" data-tip="Farmers up / down">🌾 ${si.farmers.alive}${si.farmers.ghost ? ` <i>· ${si.farmers.ghost} down</i>` : ''}</span><span class="h" data-tip="Hunters up / out">🏹 ${si.hunters.alive}${si.hunters.down ? ` <i>· ${si.hunters.down} down</i>` : ''}${si.hunters.out ? ` <i>· ${si.hunters.out} out</i>` : ''}</span>`);
+      K.ghost.hidden = true;
+      drawMini(dt, visibleEnt, remembered);
+      return;
+    }
     setT(K.gold, Math.floor(p.gold));
     setT(K.clock, mmss(c.left));
     setT(K.clocksub, c.released ? 'until the farmers hold out' : `hunters released in ${Math.ceil(c.releaseIn)} s`);
@@ -319,6 +342,7 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
   function onEvent(ev) {
     const s = sim.state, p = me();
     const near = (x, z) => nearName(map, x, z);
+    if (spectate) { spectatorEvent(ev, near); return; }
     switch (ev.type) {
       case 'released': alert(role === 'hunter' ? 'The kennel opens — go hunting!' : 'The hunters are loose!', role === 'hunter' ? 'good' : 'bad', 4000); break;
       case 'animalKilled': if (ev.owner === player) alert(`A ${ev.kind} was taken near ${near(ev.x, ev.z)}`, 'bad'); break;
@@ -339,6 +363,24 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
     }
   }
 
+  /** The same news, told to someone with no side. */
+  function spectatorEvent(ev, near) {
+    const s = sim.state, who = (pid) => s.players[pid]?.name || 'Someone';
+    switch (ev.type) {
+      case 'released': alert('The kennel opens: the hunters are loose', 'warn', 4000); break;
+      case 'farmerDown': alert(`${who(ev.player)} is down near ${near(ev.grave.x, ev.grave.z)}`, 'bad'); break;
+      case 'farmerRevived': alert(`${who(ev.player)} is back on their feet`, 'good'); break;
+      case 'hunterDown': alert(`${who(ev.player)} is down`, 'good'); break;
+      case 'hunterOut': alert(`${who(ev.player)} is out of the hunt`, 'good', 4500); break;
+      case 'lost': alert(`${who(ev.owner)} lost a ${(B.kinds[ev.kind] || { name: ev.kind }).name}`, 'warn', 2200); break;
+      case 'wardPulled': alert('A watchstone was pulled up', 'info', 2000); break;
+      case 'snared': alert(`${who(ev.owner)} is snared`, 'warn', 2000); break;
+      case 'levelUp': alert(`${who(ev.player)} reached level ${ev.level}`, 'info', 2000); break;
+      case 'turn': alert(ev.value > 0 ? 'The Turn: the farmers now outweigh the hunt' : 'The Turn swings back to the hunters', 'warn', 4500); break;
+      default: break;
+    }
+  }
+
   function paintSound() {
     if (!sound) return;
     const st = sound.settings;
@@ -347,10 +389,11 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
   }
 
   function showResult(result, { onAgain, onBack }) {
-    const won = (result.winner === me().team);
+    const won = spectate ? true : (result.winner === me().team);
     const why = { caught: 'Every farmer was caught.', hunted: 'Every hunter was put out.', clock: 'The farmers held out until the clock ran down.', surrender: 'A side surrendered.' }[result.reason] || '';
     K.result.hidden = false;
-    K.result.innerHTML = `<div class="card ${won ? 'win' : 'lose'}"><h2>${won ? 'Victory' : 'Defeat'}</h2><p>${result.winner === 0 ? 'The farmers win.' : 'The hunters win.'} ${why}</p>
+    const head = spectate ? (result.winner === 0 ? 'Farmers win' : 'Hunters win') : won ? 'Victory' : 'Defeat';
+    K.result.innerHTML = `<div class="card ${won ? 'win' : 'lose'}"><h2>${head}</h2><p>${result.winner === 0 ? 'The farmers win.' : 'The hunters win.'} ${why}</p>
       <div class="stats">${sim.state.players.map((q) => `<div><b style="color:${q.role === 'farmer' ? FARMER_COLOURS[q.colour % 9] : '#ff7a6a'}">${esc(q.name)}</b> ${q.role} · earned ${Math.round(q.stats.earned)} g${q.role === 'farmer' ? ` · animals lost ${q.stats.animalsLost}` : ` · kills ${q.stats.kills} · level ${q.level}`}</div>`).join('')}</div>
       <div class="btns"><button class="hv-bt big" data-res="again">Play again</button><button class="hv-bt big" data-res="back">Back</button></div></div>`;
     K.result.querySelector('[data-res="again"]').onclick = onAgain;

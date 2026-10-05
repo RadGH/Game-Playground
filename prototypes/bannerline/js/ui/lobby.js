@@ -10,6 +10,11 @@
 //
 // The session (mode, slots, devices, speed) lives in `session` and survives the match, so
 // "Back to lobby" returns with the same slots and devices (ready flags cleared).
+//
+// SPECTATE ("Watch AI match", session.spectate): nobody takes a seat. Every seat becomes AI (any
+// difficulty, picked per seat), and ANY device drives one shared cursor over mode, speed, each seat's
+// AI level / hero / army and the Watch button; pressing join / confirm on Watch starts the countdown.
+// main.js then starts the match with no local seat and opens the spectator view (js/ui/spectator.js).
 
 import { h } from './dom.js';
 import { icon } from './icons.js';
@@ -28,7 +33,7 @@ const ARM = { light: 'Light', heavy: 'Heavy', spectral: 'Spectral', hide: 'Hide'
 const COUNTDOWN = 3;
 
 export function defaultSession(data) {
-  const s = { game: 'linewar', gameName: 'Line War', mode: '1v1', speed: 1, map: 'vale', slots: [], last: null };
+  const s = { game: 'linewar', gameName: 'Line War', mode: '1v1', speed: 1, map: 'vale', slots: [], last: null, spectate: false };
   resizeSlots(s, data);
   return s;
 }
@@ -91,6 +96,30 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
   let active = false;
   let justJoined = new Set();
   let flash = '';
+  // spectate: one shared cursor (any device) and the "go" flag that starts the countdown
+  let specCursor = 'go', specGo = false;
+  function specFields() {
+    const f = ['mode', 'speed', 'watch'];
+    for (const s of session.slots) f.push('slot:' + s.key, 'hero:' + s.key, 'race:' + s.key);
+    f.push('go');
+    return f;
+  }
+  /** Watch on: every seat becomes AI (locals keep their hero / army); off: the first blue seat opens again. */
+  function setWatch(on) {
+    session.spectate = !!on;
+    specGo = false;
+    if (on) {
+      for (const s of session.slots) {
+        if (s.kind === 'local') devices.release(s.key);
+        if (s.kind === 'local' || s.kind === 'open' || s.kind === 'hold') Object.assign(s, { kind: 'ai', ai: aiLevels.includes('veteran') ? 'veteran' : aiLevels[0], device: null, lost: false, ready: false });
+      }
+      specCursor = 'go';
+    } else {
+      const first = session.slots.find((s) => s.team === 0 && s.index === 0);
+      if (first && first.kind !== 'local') Object.assign(first, { kind: 'open', ready: false });
+    }
+    flash = '';
+  }
 
   screen.replaceChildren();
   const root = h('div', 'lobby');
@@ -103,7 +132,7 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
   function fieldsFor(slot) {
     const f = [];
     if (isHost(slot)) {
-      f.push('mode', 'speed');
+      f.push('watch', 'mode', 'speed');
       for (const s of session.slots) if (s.kind !== 'local') f.push('slot:' + s.key);
     }
     f.push('hero', 'race', 'team', 'ready');
@@ -126,7 +155,7 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
 
   // ---------- joining ----------
   function join(dev) {
-    if (!active || slotOfDevice(dev.id)) return;
+    if (!active || slotOfDevice(dev.id) || session.spectate) return;   // spectating: a join press is "confirm" (frame)
     if (locals().filter((s) => !s.lost).length >= 2 && !session.slots.some((s) => s.kind === 'local' && s.lost)) {
       flash = 'Two players per screen. Online seats arrive later.'; render(); return;
     }
@@ -158,12 +187,22 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
 
   // ---------- field changes ----------
   function change(slot, field, d) {
-    if (field === 'mode') { session.mode = cycle(MODES, session.mode, d); resizeSlots(session, data); for (const s of session.slots) s.ready = false; }
+    if (field === 'mode') {
+      session.mode = cycle(MODES, session.mode, d); resizeSlots(session, data); for (const s of session.slots) s.ready = false;
+      if (session.spectate) for (const s of session.slots) if (s.kind === 'open') Object.assign(s, { kind: 'ai', ai: aiLevels[1] || aiLevels[0] });
+    }
     else if (field === 'speed') { const vs = SPEEDS.map((x) => x.v); session.speed = cycle(vs, session.speed, d); }
+    else if (field === 'watch') { setWatch(!session.spectate); }
     else if (field.startsWith('slot:')) {
       const s = session.slots.find((x) => x.key === field.slice(5));
-      if (s && s.kind !== 'local') setKind(s, cycle(KIND_CYCLE.filter((k) => !k.startsWith('ai:') || aiLevels.includes(k.slice(3))), kindKey(s), d));
-    } else if (field === 'hero') { slot.hero = cycle(heroes, slot.hero, d); slot.ready = false; }
+      // spectating there is nobody to fill an open seat: AI levels and closed only
+      const kinds = KIND_CYCLE.filter((k) => (!k.startsWith('ai:') || aiLevels.includes(k.slice(3))) && !(session.spectate && k === 'open'));
+      if (s && s.kind !== 'local') setKind(s, cycle(kinds, kindKey(s), d));
+    } else if (field.startsWith('hero:') || field.startsWith('race:')) {
+      const s = session.slots.find((x) => x.key === field.slice(5));
+      if (s && s.kind === 'ai') { if (field[0] === 'h') s.hero = cycle(heroes, s.hero, d); else s.race = cycle(races, s.race, d); }
+    } else if (field === 'go') { specGo = !specGo; }
+    else if (field === 'hero') { slot.hero = cycle(heroes, slot.hero, d); slot.ready = false; }
     else if (field === 'race') { slot.race = cycle(races, slot.race, d); slot.ready = false; }
     else if (field === 'team') moveTeam(slot);
     else if (field === 'ready') slot.ready = !slot.ready;
@@ -183,8 +222,44 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
   }
 
   // ---------- per-frame input ----------
+  /** Spectate: every device drives the one shared cursor; join / confirm on Watch starts the countdown. */
+  function spectateFrame(frames) {
+    let changed = false;
+    for (const [, f] of frames) {
+      const fields = specFields();
+      let i = Math.max(0, fields.indexOf(specCursor));
+      if (f.pressed.has('navUp')) { i = Math.max(0, i - 1); changed = true; }
+      if (f.pressed.has('navDown')) { i = Math.min(fields.length - 1, i + 1); changed = true; }
+      specCursor = fields[i];
+      if (f.pressed.has('navLeft') && specCursor !== 'go') { change(null, specCursor, -1); changed = false; }
+      if (f.pressed.has('navRight') && specCursor !== 'go') { change(null, specCursor, 1); changed = false; }
+      if (!session.spectate) return;   // Watch was switched off from the keys: back to the seat lobby
+      if (f.pressed.has('join') || f.pressed.has('confirm') || f.pressed.has('ready')) {
+        if (specCursor === 'watch') setWatch(false); else specGo = !specGo;
+        changed = true;
+        if (!session.spectate) { render(); return; }
+      }
+      if (f.pressed.has('back') || f.pressed.has('leave')) {
+        if (specGo) specGo = false; else setWatch(false);
+        changed = true;
+        if (!session.spectate) { render(); return; }
+      }
+    }
+    const go = specGo && teamsValid();
+    if (go && countdown < 0) { countdown = COUNTDOWN; countFrom = performance.now(); changed = true; }
+    if (!go && countdown >= 0) { countdown = -1; changed = true; }
+    if (countdown >= 0) {
+      const before = Math.ceil(countdown);
+      countdown = COUNTDOWN - (performance.now() - countFrom) / 1000;
+      if (Math.ceil(countdown) !== before) changed = true;
+      if (countdown <= 0) { countdown = -1; active = false; onStart(session); return; }
+    }
+    if (changed) render();
+  }
+
   function frame(frames, dt) {
     if (!active) return;
+    if (session.spectate) { spectateFrame(frames); return; }
     // Pads that vanished leave their slot waiting for "Player N, press A".
     for (const s of locals()) {
       const dev = devices.get(s.device);
@@ -238,11 +313,13 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
     const act = b.dataset.act, key = b.dataset.slot;
     const slot = key ? session.slots.find((s) => s.key === key) : null;
     const d = Number(b.dataset.d || 1);
-    if (act === 'mode') { session.mode = b.dataset.v; resizeSlots(session, data); for (const s of session.slots) s.ready = false; render(); }
+    if (act === 'mode') { session.mode = b.dataset.v; resizeSlots(session, data); if (session.spectate) for (const s of session.slots) if (s.kind === 'open') Object.assign(s, { kind: 'ai', ai: aiLevels[1] || aiLevels[0] }); for (const s of session.slots) s.ready = false; render(); }
+    else if (act === 'watch') { setWatch(!session.spectate); render(); }
+    else if (act === 'watch-go') { specGo = !specGo; render(); }
     else if (act === 'speed') { session.speed = Number(b.dataset.v); render(); }
     else if (act === 'kind' && slot) { change(slot, 'slot:' + key, d); }
-    else if (act === 'hero' && slot) change(slot, 'hero', d);
-    else if (act === 'race' && slot) change(slot, 'race', d);
+    else if (act === 'hero' && slot) change(slot, slot.kind === 'local' ? 'hero' : 'hero:' + slot.key, d);
+    else if (act === 'race' && slot) change(slot, slot.kind === 'local' ? 'race' : 'race:' + slot.key, d);
     else if (act === 'team' && slot) { moveTeam(slot); render(); }
     else if (act === 'ready' && slot) change(slot, 'ready', 1);
     else if (act === 'leave' && slot) leave(slot);
@@ -261,6 +338,10 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
 
   // ---------- render ----------
   function focusClass(field, ownerKey) {
+    if (session.spectate) {
+      const f = ownerKey != null && (field === 'hero' || field === 'race') ? field + ':' + ownerKey : field;
+      return specCursor === f ? ' pfocus pf1" data-pf="Watch' : '';
+    }
     const owners = [];
     for (const s of locals()) {
       if (s.lost) continue;
@@ -339,7 +420,8 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
     const httpsUrl = `https://${location.hostname}:8441${location.pathname}`;
     const last = session.last;
     const readyCount = ls.filter((s) => s.ready).length;
-    const status = countdown >= 0 ? `<span class="lb-count">Marching in <b>${Math.ceil(countdown)}</b></span>`
+    const status = countdown >= 0 ? `<span class="lb-count">${session.spectate ? 'Watching' : 'Marching'} in <b>${Math.ceil(countdown)}</b></span>`
+      : session.spectate ? (!teamsValid() ? 'Each side needs at least one AI' : 'Spectator match: every seat is AI. Set each seat, then press <kbd>Enter</kbd> / <kbd class="pad">A</kbd> on <b>Watch the battle</b>')
       : !ls.length ? 'Press <kbd>Enter</kbd> / <kbd>Space</kbd> on the keyboard or <kbd class="pad">A</kbd> / <kbd class="pad">Start</kbd> on a controller to join'
       : !teamsValid() ? 'Each side needs at least one player or AI'
       : `${readyCount} of ${ls.length} ready — press your join key again when ready`;
@@ -349,6 +431,7 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
         <div class="lb-title"><h1>${session.gameName || 'Line War'}</h1><span>War council · Vale · ${session.mode}</span></div>
         <div class="lb-modes${focusClass('mode')}">${MODES.map((m) => `<button class="lb-mode${session.mode === m ? ' on' : ''}" data-act="mode" data-v="${m}">${m}</button>`).join('')}</div>
         <div class="lb-speed${focusClass('speed')}"><span>Speed</span>${SPEEDS.map((sp) => `<button class="chip${session.speed === sp.v ? ' on' : ''}" data-act="speed" data-v="${sp.v}">${sp.label}</button>`).join('')}</div>
+        <button class="lb-btn lb-watch${session.spectate ? ' on' : ''}${focusClass('watch')}" data-act="watch" data-tip="Take no seat: every seat is AI and you watch the battle with a free camera (F jumps between heroes)">👁 ${session.spectate ? 'Spectating' : 'Watch AI match'}</button>
       </header>
       ${last ? `<div class="lb-last ${last.cls}">${last.text}</div>` : ''}
       <div class="lb-teams n${n}">
@@ -359,7 +442,8 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
       </div>
       <footer class="lb-foot">
         <div class="lb-status">${status}</div>
-        <div class="lb-help">${ls.length ? '<kbd>↑</kbd><kbd>↓</kbd> field · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Esc</kbd>/<kbd class="pad">B</kbd> unready / leave' : ''}</div>
+        ${session.spectate ? `<button class="lb-btn lb-go${specGo ? ' on' : ''}${focusClass('go')}" data-act="watch-go">${specGo ? 'Starting — cancel' : 'Watch the battle'}</button>` : ''}
+        <div class="lb-help">${session.spectate ? '<kbd>↑</kbd><kbd>↓</kbd> field · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Esc</kbd>/<kbd class="pad">B</kbd> stop watching' : ls.length ? '<kbd>↑</kbd><kbd>↓</kbd> field · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Esc</kbd>/<kbd class="pad">B</kbd> unready / leave' : ''}</div>
         ${padsOk ? '' : `<div class="lb-notice">${icon('gamepad')} Controllers only work on the secure page: <a href="${httpsUrl}">${httpsUrl}</a></div>`}
         ${flash ? `<div class="lb-flash">${flash}</div>` : ''}
       </footer>
@@ -367,7 +451,7 @@ export function createLobby({ screen, data, devices, session, onStart, onBack })
   }
 
   return {
-    show() { applyMode(); active = true; screen.hidden = false; countdown = -1; for (const s of session.slots) s.ready = false; justJoined = new Set(); render(); },
+    show() { applyMode(); active = true; screen.hidden = false; countdown = -1; specGo = false; for (const s of session.slots) s.ready = false; justJoined = new Set(); render(); },
     hide() { active = false; screen.hidden = true; },
     get active() { return active; },
     frame,

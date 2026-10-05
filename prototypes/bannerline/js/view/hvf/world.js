@@ -12,6 +12,8 @@ import { createNatureLayer, natureMaterial } from '../hvf-nature.js';
 
 export const PLATEAU_H = 3.2;   // metres a plateau stands above the ground
 const WATER_Y = -0.12;
+/** How dark the spectator's fog makes ground a side cannot see (0.3 = 30% darker). */
+export const SPECTATOR_FOG = 0.3;
 
 // ground colours per kind (linear-ish sRGB picks; lit by the scene lights)
 const COL = {
@@ -53,15 +55,19 @@ export function createHvfWorld(scene, map, { nature = true } = {}) {
   const disposables = [];
 
   // ── fog of war texture + shader patch ──
-  // one texture per team: split screen with a farmer and a hunter draws each half with its own fog
-  const fogTexes = [0, 1].map(() => {
+  // one texture per team: split screen with a farmer and a hunter draws each half with its own fog;
+  // a third (index 2) holds the union of both sides for the spectator's "Both" view
+  const fogTexes = [0, 1, 2].map(() => {
     const t = new THREE.DataTexture(new Uint8Array(cols * rows * 4), cols, rows, THREE.RGBAFormat);
     t.magFilter = THREE.LinearFilter; t.minFilter = THREE.LinearFilter; t.needsUpdate = true;
     return t;
   });
   const fogTex = fogTexes[0];
-  const fogUniforms = { uFogTex: { value: fogTex }, uFogSize: { value: new THREE.Vector2(cols * cell, rows * cell) }, uFogOn: { value: 1 } };
-  function fogify(mat) {
+  // uFogSoft: 0 = a player's fog (hidden ground near black, remembered ground grey); > 0 = the
+  // spectator's fog, which only darkens unseen ground by that much (0.3) so the units in it still read.
+  // Actor materials (fogify(mat, { actor: true })) are not darkened at all under the soft fog.
+  const fogUniforms = { uFogTex: { value: fogTex }, uFogSize: { value: new THREE.Vector2(cols * cell, rows * cell) }, uFogOn: { value: 1 }, uFogSoft: { value: 0 } };
+  function fogify(mat, { actor = false } = {}) {
     mat.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, fogUniforms);
       sh.vertexShader = 'varying vec3 vFogWorld;\n' + sh.vertexShader.replace('#include <project_vertex>', `#include <project_vertex>
@@ -70,14 +76,21 @@ export function createHvfWorld(scene, map, { nature = true } = {}) {
           fwp = instanceMatrix * fwp;
         #endif
         vFogWorld = (modelMatrix * fwp).xyz;`);
-      sh.fragmentShader = 'uniform sampler2D uFogTex;\nuniform vec2 uFogSize;\nuniform float uFogOn;\nvarying vec3 vFogWorld;\n' + sh.fragmentShader.replace('#include <dithering_fragment>', `#include <dithering_fragment>
+      sh.fragmentShader = 'uniform sampler2D uFogTex;\nuniform vec2 uFogSize;\nuniform float uFogOn;\nuniform float uFogSoft;\nvarying vec3 vFogWorld;\n' + sh.fragmentShader.replace('#include <dithering_fragment>', `#include <dithering_fragment>
         float fv = texture2D(uFogTex, vFogWorld.xz / uFogSize).r;
         fv = mix(1.0, fv, uFogOn);
+        ${actor ? 'if (uFogSoft > 0.0) fv = 1.0;' : ''}
         vec3 grey = vec3(dot(gl_FragColor.rgb, vec3(0.3, 0.59, 0.11)));
-        vec3 remembered = mix(grey, gl_FragColor.rgb, 0.35) * 0.55;
-        gl_FragColor.rgb = fv < 0.5 ? mix(gl_FragColor.rgb * 0.13, remembered, smoothstep(0.05, 0.5, fv)) : mix(remembered, gl_FragColor.rgb, smoothstep(0.5, 0.95, fv));`);
+        if (uFogSoft > 0.0) {
+          float lit = smoothstep(0.05, 0.95, fv);
+          vec3 dim = mix(grey, gl_FragColor.rgb, 0.55) * (1.0 - uFogSoft);
+          gl_FragColor.rgb = mix(dim, gl_FragColor.rgb, lit);
+        } else {
+          vec3 remembered = mix(grey, gl_FragColor.rgb, 0.35) * 0.55;
+          gl_FragColor.rgb = fv < 0.5 ? mix(gl_FragColor.rgb * 0.13, remembered, smoothstep(0.05, 0.5, fv)) : mix(remembered, gl_FragColor.rgb, smoothstep(0.5, 0.95, fv));
+        }`);
     };
-    mat.customProgramCacheKey = () => 'hvf-fog';
+    mat.customProgramCacheKey = () => (actor ? 'hvf-fog-actor' : 'hvf-fog');
     return mat;
   }
 
@@ -263,7 +276,15 @@ export function createHvfWorld(scene, map, { nature = true } = {}) {
     /** A tree being cut: 0..1 (it shakes and leans), 1 = gone (stump + log). */
     chop(cell, k) { layer?.chop(cell, k); },
     /** Draw with this team's fog (call before rendering a viewport). */
-    useTeam(team) { fogUniforms.uFogTex.value = fogTexes[team]; },
+    useTeam(team) { fogUniforms.uFogTex.value = fogTexes[team]; fogUniforms.uFogSoft.value = 0; fogUniforms.uFogOn.value = fogOn ? 1 : 0; },
+    /** The spectator's fog: 'farmers' | 'hunters' | 'both' (what neither side sees) | 'off', darkened by `soft` (0.3). */
+    useSpectator(mode, soft = SPECTATOR_FOG) {
+      fogUniforms.uFogTex.value = fogTexes[mode === 'hunters' ? 1 : mode === 'both' ? 2 : 0];
+      fogUniforms.uFogSoft.value = soft;
+      fogUniforms.uFogOn.value = mode === 'off' || !fogOn ? 0 : 1;
+    },
+    /** Read back the current fog settings (tests). */
+    fogState() { return { soft: fogUniforms.uFogSoft.value, on: fogUniforms.uFogOn.value, tex: fogTexes.indexOf(fogUniforms.uFogTex.value) }; },
     get fogOn() { return fogOn; },
     setFogOn(v) { fogOn = !!v; fogUniforms.uFogOn.value = fogOn ? 1 : 0; },
     bounds: { x0: 0, x1: cols * cell, z0: 0, z1: rows * cell },

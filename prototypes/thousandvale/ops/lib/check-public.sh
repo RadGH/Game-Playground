@@ -61,7 +61,7 @@ read -r LBUILD LHUMAN LENV <<<"$LIVE"
 check "8490 is up and runs the published build ($BUILD)"   test -n "$BUILD" -a "$LBUILD" = "$BUILD"
 check "8490 reports env stable"                            test "$LENV" = stable
 
-echo "-- live probes (ops/lib/probe-public.mjs: 404s, traversal, payload cap, Origin, per-IP cap, CF header trust)"
+echo "-- live probes (ops/lib/probe-public.mjs: 404s, traversal, public-mode headers, payload cap, Origin, per-IP cap incl. bare loopback, CF header trust, admin page 127.0.0.1 only)"
 if [[ -n "$NODE" ]] && "$NODE" "$HERE/probe-public.mjs" --base http://127.0.0.1:8490 --lan "http://$LANIP:8490"; then ok "all live probes passed"; else bad "a live probe failed (above)"; fi
 
 echo "-- §11.3 tunnel: one origin, nothing else"

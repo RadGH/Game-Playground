@@ -28,6 +28,7 @@ cd /                                                    # postgres cannot enter 
 run() { if [[ $DRY == 1 ]]; then echo "   [dry-run] $*"; else "$@"; fi; }
 say() { echo "== $*"; }
 CHANGED=0                                               # restart the game only if its unit or env changed
+rnd() { head -c "$1" /dev/urandom | base64 | tr -d '/+=\n'; }   # a random token; printed into a variable, never argv
 put() {                                                 # put <src> <dest> <mode> [owner:group] — install only when different
   if [[ -f "$2" ]] && cmp -s "$1" "$2"; then return 0; fi
   run install -o "${4%%:*}" -g "${4##*:}" -m "$3" "$1" "$2"; CHANGED=1
@@ -53,7 +54,7 @@ for f in backup.sh restore-drill.sh conservation.sql offsite-upload.mjs; do put 
 say "4. postgres + /etc/thousandvale/env"
 ENV_FILE=/etc/thousandvale/env
 if [[ $DRY == 1 ]]; then
-  echo "   [dry-run] role thousandvale_stable (generated password, kept on re-run), databases thousandvale_stable + thousandvale_drill_dev, $ENV_FILE"
+  echo "   [dry-run] role thousandvale_stable (generated password, kept on re-run), TV_IP_SALT + TV_ADMIN_TOKEN (added only if missing), databases thousandvale_stable + thousandvale_drill_dev, $ENV_FILE"
 else
   if [[ ! -f "$ENV_FILE" || "$(sudo -u postgres psql -XAtq -c "SELECT 1 FROM pg_roles WHERE rolname='thousandvale_stable'")" != 1 ]]; then
     PW="$(head -c 32 /dev/urandom | base64 | tr -d '/+=\n' | head -c 40)"
@@ -63,12 +64,20 @@ SELECT format('CREATE ROLE thousandvale_stable LOGIN NOSUPERUSER NOCREATEDB NOCR
 SELECT format('ALTER ROLE thousandvale_stable WITH PASSWORD %L', :'pw') \gexec
 SQL
     TMP="$(umask 077; mktemp /etc/thousandvale/.env.XXXXXX)"
-    TPL="$(<"$HERE/stable.env.template")"; printf '%s\n' "${TPL//@PASSWORD@/$PW}" > "$TMP"; unset PW TPL   # no sed: keeps PW out of argv
+    SALT="$(rnd 24)"; ATOK="$(rnd 24)"
+    TPL="$(<"$HERE/stable.env.template")"; TPL="${TPL//@PASSWORD@/$PW}"; TPL="${TPL//@IP_SALT@/$SALT}"; TPL="${TPL//@ADMIN_TOKEN@/$ATOK}"
+    printf '%s\n' "$TPL" > "$TMP"; unset PW TPL SALT ATOK   # no sed: keeps the secrets out of argv
     chown thousandvale:thousandvale "$TMP"; chmod 0400 "$TMP"; mv -f "$TMP" "$ENV_FILE"; CHANGED=1
     echo "   new password generated into $ENV_FILE"
   else
     echo "   role and env file exist — password kept"
   fi
+  # M3 secrets (A): an env file written before M3 lacks them — add each one that is MISSING; never replace one that exists
+  # (a new TV_IP_SALT would orphan every address ban; a new TV_ADMIN_TOKEN would lock out whoever holds the old one)
+  for KEY in TV_IP_SALT TV_ADMIN_TOKEN; do
+    if grep -q "^$KEY=." "$ENV_FILE"; then echo "   $KEY present — kept"
+    else VAL="$(rnd 24)"; printf '%s=%s\n' "$KEY" "$VAL" >> "$ENV_FILE"; unset VAL; CHANGED=1; echo "   $KEY generated into $ENV_FILE"; fi
+  done
   sudo -u postgres psql -X -q -v ON_ERROR_STOP=1 <<'SQL'
 SELECT 'CREATE DATABASE thousandvale_stable OWNER thousandvale_stable ENCODING ''UTF8'' TEMPLATE template0' WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'thousandvale_stable') \gexec
 SELECT 'CREATE DATABASE thousandvale_drill_dev OWNER thousandvale_stable ENCODING ''UTF8'' TEMPLATE template0' WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'thousandvale_drill_dev') \gexec

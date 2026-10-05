@@ -90,6 +90,42 @@ function terrainFrom(host) {
   };
 }
 
+/** Callboard seat-fillers by role (Farhold's mercenaries.json hirelings). */
+export const BACKFILL = Object.freeze({ tank: 'shield_warden', healer: 'field_mender', dps: Object.freeze(['blade_for_hire', 'longshot', 'hedge_burner']) });
+const GROUP = Object.freeze({ tank: 1, healer: 1, dps: 3 });
+/** A class row's group role from its `role` line ("Frontline Tank", "Primary Healer", ...). */
+export function roleOfClass(cls) {
+  const t = String(cls?.role || '');
+  if (/tank|bulwark/i.test(t)) return 'tank';
+  if (/heal/i.test(t)) return 'healer';
+  return 'dps';
+}
+/**
+ * The roles of the `n` empty seats of a five-seat group (1 tank, 1 healer, 3 damage). `known` = the
+ * roles in the group that we know; members we do not know (5 - n - known) take damage seats first.
+ * Order: tank, healer, then damage.
+ */
+export function missingRoles(known, n) {
+  const open = { ...GROUP };
+  for (const r of known) { const k = r === 'tank' || r === 'healer' ? r : 'dps'; if (open[k] > 0) open[k]--; else if (open.dps > 0) open.dps--; }
+  let unknown = Math.max(0, 5 - n - known.length);
+  for (const k of ['dps', 'healer', 'tank']) { const t = Math.min(unknown, open[k]); open[k] -= t; unknown -= t; }
+  const out = [];
+  for (const k of ['tank', 'healer', 'dps']) for (let i = 0; i < open[k]; i++) out.push(k);
+  while (out.length < n) out.push('dps');
+  return out.slice(0, n);
+}
+
+/** rollLoot tiers (see rollLoot): one entry per guaranteed roll. Farhold's rarity ladder is normal/magic/rare/legendary. */
+export const LOOT_TIERS = Object.freeze({
+  reward: { rolls: [{ chance: 1, rarityBoost: 2, floor: null }] },
+  uncommon: { rolls: [{ chance: 1, rarityBoost: 1, floor: 'magic' }] },
+  magic: { rolls: [{ chance: 1, rarityBoost: 1, floor: 'magic' }] },
+  rare: { rolls: [{ chance: 1, rarityBoost: 1, floor: 'rare' }] },
+  epic: { rolls: [{ chance: 1, rarityBoost: 2, floor: 'rare' }, { chance: 1, rarityBoost: 2, floor: 'magic' }] },
+  legendary: { rolls: [{ chance: 1, rarityBoost: 2, floor: 'legendary' }] },
+});
+
 const ONE_SHOT_ANIMS = new Set(['attack', 'hit', 'bite', 'cast']);
 
 export function createRules(host, opts = {}) {
@@ -107,7 +143,7 @@ export function createRules(host, opts = {}) {
     spawnEntity: p => {
       adopting = p;
       try {
-        const ent = host.spawn({ kind: 'npc', type: p.defId, name: p.name, level: p.level, x: p.x, z: p.z, yaw: p.facing || 0, team: 1, state: 128, data: { pet: true, owner: p.owner?.id ?? null, temporary: !!p.temporary } });
+        const ent = host.spawn({ kind: 'npc', type: p.defId, name: p.name, level: p.level, x: p.x, z: p.z, yaw: p.facing || 0, team: 1, state: 128, data: { pet: true, owner: p.owner?.id ?? null, temporary: !!p.temporary, ...(p.backfill ? { backfill: p.backfill.role } : {}) } });
         return ent?.id ?? null;
       } finally { adopting = null; }
     },
@@ -470,14 +506,26 @@ export function createRules(host, opts = {}) {
   }
   const gear = e => ({ ...(e.r.unit?.equipment || {}) });
   const saveGear = e => (e.r.unit ? serializeGear(e.r.unit).equipment : {});
-  /** A chest's roll for `e` (tier 'reward' = a guaranteed item one rarity up). */
+  /**
+   * A chest's roll for `e`. `tier` is either a chest kind or a RARITY NAME, read as "at least this
+   * rarity" (A's M3 ask; E's data uses common/uncommon/rare/epic/legendary). Farhold's ladder is
+   * normal < magic < rare < legendary, so: uncommon = magic or better, rare = rare or better,
+   * epic = rare or better at a doubled rarity roll PLUS a second magic-or-better item, legendary =
+   * a legendary (a set piece or a unique when one fits the level). 'reward' = a guaranteed item one
+   * rarity up (unchanged); anything else ('normal', 'chest', 'common', unknown) = the plain roll.
+   */
   function rollLoot(e, { level = null, tier = 'normal' } = {}) {
     const u = e.r.unit;
     const lvl = level || u?.level || e.level || 1;
     const items = [];
     const rng = room.streams.get('loot');
-    const one = engine.rpg.rollDrop({ level: lvl, rng, magicFind: u?.derived?.magicFind || 0, chance: tier === 'reward' ? 1 : null, rarityBoost: tier === 'reward' ? 2 : 1 });
-    if (one) items.push(one);
+    const magicFind = u?.derived?.magicFind || 0;
+    const spec = LOOT_TIERS[tier] || null;
+    const rolls = spec ? spec.rolls : [{ chance: null, rarityBoost: 1, floor: null }];
+    for (const r of rolls) {
+      const one = engine.rpg.rollDrop({ level: lvl, rng, magicFind, chance: r.chance, rarityBoost: r.rarityBoost, floor: r.floor });
+      if (one) items.push(one);
+    }
     return items;
   }
   /** A player used a rules-owned object (an arena brazier or lever): the room routes `use` here. */
@@ -486,6 +534,32 @@ export function createRules(host, opts = {}) {
     if (!u || !obj) return { ok: false, why: 'gone' };
     return run(() => enc.use(u, obj.id));
   }
+  /**
+   * The Callboard popped a short group (A's M3 hook): fill `n` empty seats with hired followers of the
+   * MISSING roles, owned by `e` (the first member in), so they fight, tank and heal with the normal
+   * follower brain. `roles` (optional) = the roles already in the group (e.g. the pop's); without it
+   * the roles are guessed — `e`'s own class role, and the other members fill damage seats first
+   * (tanks and healers are the scarce queue, which is why a pop goes short). Seat-fillers sit outside
+   * the follower-slot gate, revive like any follower, heal the whole party, and are dismissed when
+   * their owner leaves the room. Returns [{ id, defId, role, name }].
+   */
+  function backfill(e, n, { roles = null } = {}) {
+    const u = e?.r?.unit;
+    const seats = Math.max(0, Math.min(4, n | 0));
+    if (!u || !seats) return [];
+    return run(() => {
+      const missing = missingRoles(roles || [roleOfClass(engine.classById(u.classId))], seats);
+      const out = [];
+      let dps = 0;
+      for (const role of missing) {
+        const defId = role === 'dps' ? BACKFILL.dps[(dps++) % BACKFILL.dps.length] : BACKFILL[role];
+        const made = room.followers.summon(defId, u, { origin: 'hireling', gate: false, backfill: { role } });
+        for (const p of made) out.push({ id: p.id, defId: p.defId, role, name: p.name });
+      }
+      return out;
+    });
+  }
+
   function onParty(e, id) { const u = e.r.unit; if (u) u.partyId = id ?? null; }
 
   /**
@@ -510,7 +584,7 @@ export function createRules(host, opts = {}) {
   }
 
   return {
-    equip, unequip, gear, saveGear, rollLoot, onParty, useObject, bar,
+    equip, unequip, gear, saveGear, rollLoot, onParty, useObject, bar, backfill,
     encounters: enc,
     stats: () => ({ builds, handoffs }),
     addEntity, removeEntity, intent, step, respawn, onLevel,

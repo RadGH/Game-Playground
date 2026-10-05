@@ -61,7 +61,7 @@ export function dungeonRoute(dungeon, from, to) {
   return path.reverse();
 }
 
-export async function firstHour({ url, log = () => {}, stepMs = {}, fightSeconds = 90, dungeonSeconds = 45, tag = '' } = {}) {
+export async function firstHour({ url, log = () => {}, stepMs = {}, fightSeconds = 90, dungeonSeconds = 45, tag = '', trace = false } = {}) {
   const T0 = Date.now();
   const steps = [], seen = { monsterTypes: new Set(), vignettes: new Set(), objects: new Set() };
   let failed = null;
@@ -89,6 +89,24 @@ export async function firstHour({ url, log = () => {}, stepMs = {}, fightSeconds
   const door = starterDoor();
   const near = (b, p, r) => b.pos && Math.hypot(b.pos.x - p.x, b.pos.z - p.z) <= r;
   const portalNear = b => { let best = null, bd = 60; for (const e of b.ents.values()) if (e.kind === 'object' && e.type === 'portal' && e.x != null) { const d = Math.hypot(e.x - b.pos.x, e.z - b.pos.z); if (d < bd) { bd = d; best = e; } } return best; };
+  // play it like a new player: leave elites, bosses and anything 4+ levels up alone (they still get fought if they
+  // start it), and get your health back between pulls instead of walking into the next fight at a third
+  const myLevel = b => b.net.joined?.you.level ?? b.you?.level ?? 1;
+  const tooHard = (b, e) => (e.rank && e.rank !== 'normal') || (e.level || 1) > myLevel(b) + 3;
+  const hpShare = b => (b.vitals && b.vitals.hpMax ? b.vitals.hp / b.vitals.hpMax : 1);
+  const visible = (b, max) => [...b.ents.values()].filter(e => !e.dead && e.x != null && (e.kind === 'monster' || e.kindId === 2) && !tooHard(b, e))
+    .map(e => ({ e, d: Math.hypot(e.x - b.pos.x, e.z - b.pos.z) })).filter(o => o.d < max).sort((p, q) => p.d - q.d);
+  const fighting = () => A.target != null || B.target != null;
+  /** Stand still (still fighting back) until both are at `to` of their health, or `ms` passes. Counts the time rested. */
+  const rest = async (deadline, to = 0.85, ms = 25000) => {
+    if (Math.min(hpShare(A), hpShare(B)) >= 0.55) return 0;
+    const t = Date.now();
+    for (const b of [A, B]) b.goal = null;
+    while (Date.now() - t < ms && Date.now() < deadline && !(hpShare(A) >= to && hpShare(B) >= to)) await sleep(250);
+    restedMs += Date.now() - t;
+    return Date.now() - t;
+  };
+  let restedMs = 0;
   const timers = [];
   let A, B;
   try {
@@ -98,6 +116,14 @@ export async function firstHour({ url, log = () => {}, stepMs = {}, fightSeconds
       A = await startBot({ url, mode: 'script', name: `Hour A${sfx}`.slice(0, 16), cls: 'warrior', seed: 11 });
       B = await startBot({ url, mode: 'script', name: `Hour B${sfx}`.slice(0, 16), cls: 'cleric', seed: 12 });
       bots.push(A, B); timers.push(watch(A), watch(B));
+      // trace: every 2 s, where each bot is, its health and what it is fighting (diagnosing a red run)
+      if (trace) timers.push(setInterval(() => {
+        for (const b of [A, B]) {
+          const t = b.target != null ? b.ents.get(b.target) : null;
+          const near3 = [...b.ents.values()].filter(e => !e.dead && e.x != null && (e.kind === 'monster' || e.kindId === 2)).map(e => ({ e, d: Math.hypot(e.x - b.pos.x, e.z - b.pos.z) })).sort((p, q) => p.d - q.d).slice(0, 3);
+          log(`  [${b.name.slice(5, 6)}] ${b.roomKind} (${Math.round(b.pos?.x)},${Math.round(b.pos?.z)}) hp ${b.vitals ? b.vitals.hp + '/' + b.vitals.hpMax : '?'} lv ${b.net.joined?.you.level} tgt ${t ? `${t.type || t.name} L${t.level} ${t.rank || ''}` : '-'} near ${near3.map(o => `${o.e.type || o.e.name}L${o.e.level}${o.e.rank ? '/' + o.e.rank : ''}@${Math.round(o.d)}`).join(' ')} k${b.stats.kills} d${b.stats.deaths} hit${b.stats.hitsDealt}/${b.stats.hitsTaken}`);
+        }
+      }, 2000));
       if (A.roomKind !== 'town' || B.roomKind !== 'town') throw new Error(`new characters start in ${A.roomKind}/${B.roomKind}, not the town`);
       return { room: A.room?.name || A.room?.id };
     });
@@ -114,30 +140,37 @@ export async function firstHour({ url, log = () => {}, stepMs = {}, fightSeconds
       await until(() => A.roomKind !== 'town' && B.roomKind !== 'town');
       return { room: A.room?.id };
     });
-    await step('fight and loot on the way to the dungeon', fightSeconds * 1000 + 60000, async () => {
-      for (const b of [A, B]) b.fightRadius = 28;
+    await step('fight and loot on the way to the dungeon', fightSeconds * 1000 + 150000, async () => {
+      // like a pair of new players: use the skill bar, heal each other, and kill one thing at a time (B assists A)
+      for (const b of [A, B]) { b.fightRadius = 28; b.avoid = e => tooHard(b, e); b.skills = true; }
+      A.healTarget = () => B.myId; B.healTarget = () => A.myId;
+      B.focus = () => A.target;
       const kills = () => A.stats.kills + B.stats.kills;
       const t0 = Date.now();
-      // walk to the door, fighting what comes; then hunt in widening circles round it until both have loot
-      await until(() => (near(A, door, 12) && near(B, door, 12)) || Date.now() - t0 > 120000, 200);
+      // head for the door, fighting what comes; as soon as something worth fighting is in sight, hunt it — then hunt in
+      // widening circles round the door until both have loot. The clock is FIGHTING time: time spent resting to full
+      // between pulls is not counted against it (a level-1 pair that never rests just dies and walks back from town).
+      const fightLeft = () => fightSeconds * 1000 + restedMs - (Date.now() - t0);
+      await until(() => (near(A, door, 12) && near(B, door, 12)) || visible(A, 260).length > 0 || fightLeft() <= 0, 200);
       let ring = 0;
-      while ((kills() < 3 || A.loot.length + B.loot.length < 1) && Date.now() - t0 < fightSeconds * 1000) {
+      while ((kills() < 3 || A.loot.length + B.loot.length < 1) && fightLeft() > 0) {
+        await rest(t0 + fightSeconds * 1000 + 90000);
         ring++;
         // a live monster in sight (E's camps sit ~140 m apart, further than the 28 m reach): go to it; else widen the ring
-        const seen = [...A.ents.values()].filter(e => !e.dead && e.x != null && (e.kind === 'monster' || e.kindId === 2))
-          .map(e => ({ e, d: Math.hypot(e.x - A.pos.x, e.z - A.pos.z) })).filter(o => o.d < 260).sort((p, q) => p.d - q.d)[0];
+        const seen = visible(A, 260)[0];
         const a = ring * 1.3, r = 25 + ring * 12;
         const g = seen ? { x: seen.e.x, z: seen.e.z } : { x: door.x + Math.cos(a) * r, z: door.z + Math.sin(a) * r };
         A.goal = g; B.goal = { x: g.x + 2, z: g.z + 2 };
         const tw = Date.now();
-        await until(() => near(A, g, 4) || Date.now() - tw > 15000, 200);
-        while ((A.target != null || B.target != null) && Date.now() - t0 < fightSeconds * 1000) await sleep(250);
+        await until(() => near(A, g, 4) || fighting() || Date.now() - tw > 15000, 200);
+        while (fighting() && fightLeft() > 0) await sleep(250);
       }
-      if (kills() < 3) throw new Error(`only ${kills()} kills in ${fightSeconds} s (hits dealt ${A.stats.hitsDealt + B.stats.hitsDealt}, deaths ${A.stats.deaths + B.stats.deaths})`);
+      if (kills() < 3) throw new Error(`only ${kills()} kills in ${fightSeconds} s of fighting (+${Math.round(restedMs / 1000)} s rested; hits dealt ${A.stats.hitsDealt + B.stats.hitsDealt}, deaths ${A.stats.deaths + B.stats.deaths})`);
       if (A.loot.length + B.loot.length < 1) throw new Error(`${kills()} kills but no loot`);
-      return { kills: kills(), loot: A.loot.length + B.loot.length, items: [...A.loot, ...B.loot].reduce((n, l) => n + l.items.length, 0), deaths: A.stats.deaths + B.stats.deaths };
+      return { kills: kills(), loot: A.loot.length + B.loot.length, items: [...A.loot, ...B.loot].reduce((n, l) => n + l.items.length, 0), deaths: A.stats.deaths + B.stats.deaths, restedSeconds: Math.round(restedMs / 1000) };
     });
     await step('enter the dungeon together', 90000, async () => {
+      await rest(Date.now() + 25000);
       for (const b of [A, B]) { b.fightRadius = 10; b.goal = { x: door.x, z: door.z }; }
       for (const b of [A, B]) {
         await until(() => portalNear(b) && near(b, portalNear(b), 3.2), 150);
@@ -153,10 +186,11 @@ export async function firstHour({ url, log = () => {}, stepMs = {}, fightSeconds
     });
     await step('fight inside the dungeon', dungeonSeconds * 1000 + 30000, async () => {
       const k0 = A.stats.kills + B.stats.kills, h0 = A.stats.hitsDealt + B.stats.hitsDealt;
-      for (const b of [A, B]) b.fightRadius = 40;
+      const dg = A.room.dungeon;
+      // a chase walks the floor route, not a straight line through the wall at a monster in the next room
+      for (const b of [A, B]) { b.fightRadius = 40; b.avoid = null; b.route = dg ? (from, to) => { const r = dungeonRoute(dg, from, to); return r && r.length ? r[Math.min(2, r.length - 1)] : null; } : null; }
       const t0 = Date.now();
       // walk the floor tiles (walls are real) toward any monster in sight, else toward the next fight room
-      const dg = A.room.dungeon;
       const fightRooms = (dg?.floors?.[0]?.rooms || []).filter(r => r.kind === 'fight' || r.kind === 'miniboss').map(r => ({ x: dg.floors[0].origin.x + (r.i + r.w / 2) * (dg.cell || 2), z: dg.floors[0].origin.z + (r.j + r.h / 2) * (dg.cell || 2) }));
       let roomGoal = 0;
       while (Date.now() - t0 < dungeonSeconds * 1000) {

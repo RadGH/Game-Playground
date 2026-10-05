@@ -26,7 +26,13 @@
 //   bot.stop() -> closes the sockets (leave)
 //   bot.waitFor(pred, ms) -> resolves when pred(bot) is true
 //   script mode: bot.goal = {x, z} | null, bot.fightRadius = metres (0 = never swing); bot.party (partyState),
-//   bot.used (last `used` answer), bot.loot ([{items, gold}] from `loot` events), bot.zone (last `zone` message)
+//   bot.used (last `used` answer), bot.loot ([{items, gold}] from `loot` events), bot.zone (last `zone` message),
+//   bot.vitals ({hp, hpMax, mp, mpMax} from the snapshot), bot.route = (from, to) => waypoint | null (optional: how a
+//   script bot walks to the monster it chases — e.g. a dungeon floor route, so it does not walk into a wall at a
+//   monster in the next room), bot.avoid = e => true for monsters a script bot must not pick (e.g. elites),
+//   bot.focus = () => entity id | null (assist: hit this one when it is in reach, e.g. the partner's target),
+//   bot.skills = true (use the skill bar from `you.bar` like a player: unlocked damage skills on the target in reach,
+//   a heal/ally skill on whoever of me and bot.healTarget() is lower when one of us is under 55%)
 
 import { connect } from '../js/net/client.js';
 import { IN } from '../js/net/protocol.js';
@@ -102,7 +108,7 @@ export async function startBot(opts = {}) {
     stats: { joins: 0, snaps: 0, bytes: 0, inputs: 0, casts: 0, hitsDealt: 0, hitsTaken: 0, kills: 0, deaths: 0, refusals: 0, errors: 0, kicks: 0, lastSnapAt: 0, firstPos: null },
     get token() { return token; },
     net: null,
-    goal: null, fightRadius: 0, party: null, used: null, loot: [], zone: null, rooms: [],
+    goal: null, fightRadius: 0, party: null, used: null, loot: [], zone: null, rooms: [], vitals: null, route: null, avoid: null, focus: null, skills: false, healTarget: null, skillCasts: 0,
     stopped: false,
   };
 
@@ -172,6 +178,7 @@ export async function startBot(opts = {}) {
     bot.stats.snaps++; bot.stats.lastSnapAt = Date.now();
     if (snap.bytes) bot.stats.bytes += snap.bytes;
     if (snap.self) bot.pos = { x: snap.self.x, y: snap.self.y, z: snap.self.z };
+    if (snap.vitals) bot.vitals = { ...snap.vitals };
     for (const id of snap.left || []) bot.ents.delete(id);
     for (const r of snap.ents || []) {
       const e = bot.ents.get(r.id) || { id: r.id };
@@ -189,7 +196,7 @@ export async function startBot(opts = {}) {
     for (const ev of e || []) {
       if (ev.type === 'hit' && ev.kind === 'dmg') {
         if (ev.s === bot.myId) bot.stats.hitsDealt++;
-        if (ev.d === bot.myId) bot.stats.hitsTaken++;
+        if (ev.d === bot.myId) { bot.stats.hitsTaken++; bot.lastHitBy = ev.s; }
       } else if (ev.type === 'loot' && (ev.to == null || ev.to === bot.myId || ev.d === bot.myId)) {
         bot.loot.push({ t: Date.now(), items: ev.items || [], gold: ev.gold || 0 }); bot.stats.loots = (bot.stats.loots || 0) + 1;
       } else if (ev.type === 'die') {
@@ -243,9 +250,16 @@ export async function startBot(opts = {}) {
       let best = null, bestD = mode === 'script' ? bot.fightRadius : 30, far = null, farD = Infinity;
       for (const e of bot.ents.values()) {
         if (e.dead || e.x == null || !isMonster(e)) continue;
+        // a script bot leaves alone what the driver says to (it still fights back: whatever hits it is fair game)
+        if (mode === 'script' && bot.avoid && bot.avoid(e) && bot.lastHitBy !== e.id) continue;
         const d = Math.hypot(e.x - bot.pos.x, e.z - bot.pos.z);
         if (d < bestD) { bestD = d; best = e; }
         if (d < farD) { farD = d; far = e; }
+      }
+      // assist: the driver's focus target wins when it is alive and in reach (a pair kills one thing at a time)
+      if (mode === 'script' && bot.focus) {
+        const fid = bot.focus(), f = fid != null ? bot.ents.get(fid) : null;
+        if (f && !f.dead && f.x != null) { const d = Math.hypot(f.x - bot.pos.x, f.z - bot.pos.z); if (d < (bot.fightRadius || 30)) { best = f; bestD = d; } }
       }
       bot.target = best ? best.id : null;
       // fight mode hunts: camps sit ~140 m out of town, further than the 30 m chase reach, so a fighter
@@ -259,7 +273,21 @@ export async function startBot(opts = {}) {
           lastCast = now; bot.stats.casts++;
           net.cast({ slot: 0, aim: { x: best.x, z: best.z }, target: best.id });
         }
+        if (bot.skills && bestD < 3.0) useSkill(now, s => !s.ally && s.shape !== 'self', { aim: { x: best.x, z: best.z }, target: best.id });
         if (bestD < 2.0) goal = null;   // close enough: stand and swing
+        // a script bot with a route walks the route to it (dungeon walls are real; a straight line can pin it to a wall)
+        else if (mode === 'script' && bot.route && bestD > 4) goal = bot.route(bot.pos, best) || best;
+      }
+    }
+    if (bot.skills) {
+      // heal whoever of the two is lower, when one of us is under 55%
+      const mine = bot.vitals && bot.vitals.hpMax ? bot.vitals.hp / bot.vitals.hpMax : 1;
+      const pid = bot.healTarget ? bot.healTarget() : null, pe = pid != null ? bot.ents.get(pid) : null;
+      const theirs = pe && pe.hp != null ? pe.hp : 1;          // snapshot hp is a share (0..1)
+      const pd = pe && pe.x != null ? Math.hypot(pe.x - bot.pos.x, pe.z - bot.pos.z) : Infinity;
+      if (Math.min(mine, pd < 20 ? theirs : 1) < 0.55) {
+        const who = pd < 20 && theirs < mine ? pe : null;
+        useSkill(Date.now(), s => s.ally || (s.shape === 'self' && /heal/i.test(s.desc || '')), who ? { target: who.id, aim: { x: who.x, z: who.z } } : { target: bot.myId, aim: { x: bot.pos.x, z: bot.pos.z } });
       }
     }
     if (mode === 'script') {
@@ -306,6 +334,24 @@ export async function startBot(opts = {}) {
     net.input({ s: ++seq, dt: 50, mx, mz, yaw, b: 0 });
     bot.stats.inputs++;
   }, 50);
+
+  // the skill bar (A's you.bar): one cast a second at most, local cooldowns, mana from the snapshot vitals
+  const skillReady = new Map();
+  let lastSkill = 0;
+  function useSkill(now, pick, aimTarget) {
+    if (now - lastSkill < 1000) return false;
+    const bar = net.joined?.you?.bar || bot.you?.bar || [];
+    const mp = bot.vitals ? bot.vitals.mp : Infinity;
+    for (const s of bar) {
+      if (!s || s.locked || s.empty || !s.id || !pick(s)) continue;
+      if ((skillReady.get(s.slot) || 0) > now || (s.mp || 0) > mp) continue;
+      skillReady.set(s.slot, now + (s.cd || 1000) + 150);
+      lastSkill = now; bot.skillCasts++; bot.stats.casts++;
+      net.cast({ slot: s.slot, ...aimTarget });
+      return true;
+    }
+    return false;
+  }
 
   bot.stop = async () => {
     bot.stopped = true; clearInterval(tickTimer);

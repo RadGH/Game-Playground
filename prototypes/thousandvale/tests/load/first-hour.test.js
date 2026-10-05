@@ -1,12 +1,12 @@
 // Stream G — FIRST-HOUR BOT v1 (PLAN §15 M1.5): two real-socket bots play the opening of the game on a fresh
 // server — arrive in Torborhold, form a party, walk out of town, fight and loot on the way to the dungeon,
 // enter the dungeon together (same instance), fight inside. Driver: tools/first-hour-bot.mjs.
-//   node --test prototypes/thousandvale/tests/load/first-hour.test.js        (~2 min)
+//   node --test prototypes/thousandvale/tests/load/first-hour.test.js        (~3-5 min)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { startServer, serverExists } from './server-harness.mjs';
 
-test('first-hour bot: town -> party -> wilds -> fight + loot -> dungeon together -> fight inside', { skip: !serverExists() && 'server/main.mjs not built yet', timeout: 420000 }, async () => {
+test('first-hour bot: town -> party -> wilds -> fight + loot -> dungeon together -> fight inside', { skip: !serverExists() && 'server/main.mjs not built yet', timeout: 600000 }, async () => {
   const { firstHour } = await import('../../tools/first-hour-bot.mjs');
   const srv = await startServer({ db: 'memory' });
   try {

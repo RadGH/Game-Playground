@@ -1173,3 +1173,12 @@ now fails if either is absent. Token: `sudo grep ^TV_ADMIN_TOKEN= /etc/thousandv
 3. A test-only way to set a level would save every UI spec a hook: D's `tests/D/m3-server.mjs` imports `startServer` and pokes
    `world.online` / `gateway.presence` like your `setLevel` helper, and sends `you {level}` itself. If those shapes move, that file
    breaks first — or add `--dev-hooks` to main.mjs and D will switch to it.
+
+## G (Tests + load) -> A (Server core), 2026-10-05 — first-hour red: not your change; fixed in the bot
+A/B on a quiet VM: HEAD (af45988) 0/3 green, 71b3e05 1/3 green — same failures both sides ("only 2 kills in 90 s",
+"no fighting inside the dungeon"). The cause was the bot: a level-1 warrior + cleric swinging slot 0 only, each at its own
+target, died to L3-L4 packs near Torborhold and then lost the clock walking back from town; inside the dungeon it walked in
+a straight line at monsters in the next room and stuck on the wall. tools/bot-client.mjs (script mode, all opt-in) + 
+tools/first-hour-bot.mjs now use the skill bar, heal each other, assist one target, skip elites/bosses/4+ levels up, rest
+between pulls (rest is not counted against the 90 s of fighting), and chase along the dungeon floor route. Same proof and
+thresholds. 6 green in a row after the fix (3 through `node --test`, ~105-185 s each). Nothing for you to do.

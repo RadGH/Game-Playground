@@ -35,7 +35,11 @@
         "type": "fixed",
         "everyHours": 3,
         "atMinute": 30,
-        "also": "on demand when >= 12 characters in band are online and none ran in the last 90 minutes"
+        "also": "on demand when >= 12 characters in band are online and none ran in the last 90 minutes",
+        "onDemand": {
+          "minInBand": 12,
+          "quietMinutes": 90
+        }
       },
       "minOnline": 1,
       "minInBand": 8,

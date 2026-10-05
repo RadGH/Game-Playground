@@ -19,6 +19,7 @@ nott  "thousandvale cannot list ~/claude/secrets"         sudo -u thousandvale l
 check "thousandvale has no login shell"                   test "$(getent passwd thousandvale | cut -d: -f7)" = /usr/sbin/nologin
 nott  "thousandvale has no sudo"                          sh -c "sudo -l -U thousandvale | grep -q 'may run'"
 check "env file is thousandvale 0400"                     test "$(stat -c '%U %a' "$ENV_FILE")" = "thousandvale 400"
+check "env file holds TV_IP_SALT and TV_ADMIN_TOKEN (M3)"    sh -c "grep -q '^TV_IP_SALT=.' $ENV_FILE && grep -q '^TV_ADMIN_TOKEN=.' $ENV_FILE"
 check "stable role: no superuser/createdb/createrole"     test "$(pgq "SELECT rolsuper::int + rolcreatedb::int + rolcreaterole::int FROM pg_roles WHERE rolname='thousandvale_stable'")" = 0
 check "the service user can log into thousandvale_stable" sh -c "sudo -u thousandvale sh -c 'set -a; . $ENV_FILE; psql -XAtq -c \"select 1\"' | grep -qx 1"
 check "the dev role cannot connect to thousandvale_stable" test "$(pgq "SELECT has_database_privilege('thousandvale','thousandvale_stable','CONNECT')")" = f

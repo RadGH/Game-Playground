@@ -64,6 +64,7 @@
       ],
       "fort": "Hollin Toll Fort",
       "dungeon": {
+        "name": "The Windlass Spire",
         "family": "tower_climb",
         "floors": 3,
         "level": 6
@@ -195,6 +196,7 @@
       ],
       "fort": "the Broken Keep",
       "dungeon": {
+        "name": "Harrowgate Keep",
         "family": "fortress_keep",
         "floors": 2,
         "level": 4
@@ -315,6 +317,7 @@
       ],
       "fort": "Reedwall Tower",
       "dungeon": {
+        "name": "The Drowned Chancel",
         "family": "sunken_temple",
         "floors": 3,
         "level": 5
@@ -422,6 +425,7 @@
       ],
       "fort": "Saltmouth Battery",
       "dungeon": {
+        "name": "The Brine Cisterns",
         "family": "flooded_cistern",
         "floors": 3,
         "level": 6
@@ -553,6 +557,7 @@
       ],
       "fort": "the Old Headframe Fort",
       "dungeon": {
+        "name": "Old Copperdeep",
         "family": "mine_descent",
         "floors": 2,
         "level": 4
@@ -653,6 +658,7 @@
       ],
       "hook": "the_singing_ford",
       "dungeon": {
+        "name": "The Ploughman's Crypt",
         "family": "crypt_spiral",
         "floors": 2,
         "level": 3
@@ -772,6 +778,7 @@
       ],
       "fort": "Halsbridge Gatehouse",
       "dungeon": {
+        "name": "The Undercross Drains",
         "family": "flooded_cistern",
         "floors": 2,
         "level": 3
@@ -879,6 +886,7 @@
       ],
       "fort": "Stilt Fort",
       "dungeon": {
+        "name": "The Gullwick Throat",
         "family": "cave_river",
         "floors": 3,
         "level": 5
@@ -997,6 +1005,7 @@
       ],
       "fort": "the Antler Stockade",
       "dungeon": {
+        "name": "The Rootbound Barrows",
         "family": "barrow_maze",
         "floors": 3,
         "level": 5
@@ -1127,6 +1136,7 @@
       ],
       "fort": "the Abbey Wall",
       "dungeon": {
+        "name": "Saint Orrin's Ossuary",
         "family": "crypt_spiral",
         "floors": 2,
         "level": 3
@@ -1234,6 +1244,7 @@
       ],
       "fort": "Millbrook Keep",
       "dungeon": {
+        "name": "The Millrace Workings",
         "family": "mine_descent",
         "floors": 2,
         "level": 3
@@ -1365,6 +1376,7 @@
       ],
       "fort": "Redcliff Fort",
       "dungeon": {
+        "name": "Redcliff Bastion",
         "family": "fortress_keep",
         "floors": 3,
         "level": 6
@@ -1484,6 +1496,7 @@
       ],
       "fort": "the Warband Stockade",
       "dungeon": {
+        "name": "The Blackthorn Warrens",
         "family": "barrow_maze",
         "floors": 3,
         "level": 7
@@ -1591,6 +1604,7 @@
       ],
       "fort": "Mere Tower",
       "dungeon": {
+        "name": "The Mere-Sunk Sanctum",
         "family": "sunken_temple",
         "floors": 3,
         "level": 5
@@ -1698,6 +1712,7 @@
       ],
       "fort": "Gorsehold Redoubt",
       "dungeon": {
+        "name": "The Signal Stair",
         "family": "tower_climb",
         "floors": 3,
         "level": 6
@@ -1805,6 +1820,7 @@
       ],
       "fort": "the Mossy Bastion",
       "dungeon": {
+        "name": "The Weeping Caverns",
         "family": "cave_river",
         "floors": 3,
         "level": 7

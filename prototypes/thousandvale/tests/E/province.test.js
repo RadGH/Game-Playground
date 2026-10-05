@@ -67,3 +67,24 @@ test('VARIETY: any 5 connected zones hold >= 40 distinct vignettes; no vignette 
     for (const [b, zb] of ZONES) if (a < b && gridDist(za.grid, zb.grid) <= 2) assert.deepEqual(A[a].filter(v => A[b].includes(v)), [], `${a}/${b}`);
   }
 });
+
+test('M3: every zone dungeon has its own name — not "<zone>: <family>", not a family label, never twice', () => {
+  const names = ZONES.map(([k, z]) => [k, z.dungeon && z.dungeon.name]);
+  for (const [k, n] of names) {
+    assert.ok(typeof n === 'string' && n.length >= 6 && n.length <= 28, `${k}: dungeon.name "${n}"`);
+    assert.ok(!n.includes(':'), `${k}: "${n}" reads like "<zone>: <family>"`);
+    const fam = P.zones[k].dungeon.family.replace(/_/g, ' ');
+    assert.ok(!n.toLowerCase().includes(fam), `${k}: "${n}" is just the family label (${fam})`);
+    assert.ok(!/ember|veil|muster/i.test(n), `${k}: "${n}" uses a word the owner vetoed`);
+  }
+  assert.equal(new Set(names.map(([, n]) => n.toLowerCase())).size, names.length, 'no two dungeons share a name');
+});
+
+test('M3: Grimtallow carries the structured on-demand rule A reads (schedule.onDemand)', () => {
+  const ev = J('data/quests/events.json').realm.find(e => e.id === 'world_grimtallow');
+  assert.ok(ev, 'world_grimtallow exists');
+  assert.equal(ev.schedule.type, 'fixed');
+  assert.deepEqual(ev.schedule.onDemand, { minInBand: 12, quietMinutes: 90 });
+  // the prose says the same thing as the numbers
+  assert.match(ev.schedule.also, new RegExp(`>= ${ev.schedule.onDemand.minInBand}\\b.*${ev.schedule.onDemand.quietMinutes} minutes`));
+});

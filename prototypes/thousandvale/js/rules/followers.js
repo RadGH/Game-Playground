@@ -135,7 +135,7 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
   F.adopt = admitUnit;
 
   /** pets.js `summon`, synchronous. */
-  F.summon = (defId, owner, { count = 1, at = null, origin = 'summon', name = null, temporary = false, lifetime = 0, decoy = null, burstOnExpire = null, hpShare = null, look = null, heal = null, taunt = 0 } = {}) => {
+  F.summon = (defId, owner, { count = 1, at = null, origin = 'summon', name = null, temporary = false, lifetime = 0, decoy = null, burstOnExpire = null, hpShare = null, look = null, heal = null, taunt = 0, gate = true, backfill = null } = {}) => {
     const def = byId[defId];
     const made = [];
     made.refused = null;
@@ -143,7 +143,7 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
     for (let i = 0; i < count; i++) {
       if (temporary) {
         if (listOf(owner).filter(p => p.temporary).length >= TEMP_CAP) { made.refused = 'Too many summoned things at once.'; break; }
-      } else {
+      } else if (gate) {
         const allow = admitted(owner, defId, { origin, name: name || def.name });
         if (!allow.ok) { made.refused = allow.why; break; }
       }
@@ -171,6 +171,8 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
       unit.hover = def.flying ? 1.3 + rngPets() * 0.5 : 0;
       unit.bob = rngPets() * Math.PI * 2;
       unit.slot = listOf(owner).length;
+      // a Callboard seat-filler (index.js backfill): outside the follower-slot gate, stays in its room
+      if (backfill) unit.backfill = { ...backfill };
       admitUnit(unit);
       made.push(unit);
     }
@@ -211,7 +213,7 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
         if (book.fallen[i].left > 0) continue;
         const back = book.fallen.splice(i, 1)[0];
         if (owner.dead) { book.fallen.push({ ...back, left: 1 }); continue; }
-        const made = F.summon(back.defId, owner, { count: 1, at, origin: back.origin, name: back.name });
+        const made = F.summon(back.defId, owner, { count: 1, at, origin: back.origin, name: back.name, gate: !back.backfill, backfill: back.backfill || null });
         if (made[0]) hooks.onReturned?.(made[0]);
       }
       const pets = book.list;
@@ -221,7 +223,7 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
           p.dying += dt;
           if (p.dying > 2.2) {
             dropUnit(p);
-            if (!p.temporary) book.fallen.push({ defId: p.defId, left: cfg.reviveSeconds ?? 14, origin: p.origin || 'summon', name: p.name || null });
+            if (!p.temporary) book.fallen.push({ defId: p.defId, left: cfg.reviveSeconds ?? 14, origin: p.origin || 'summon', name: p.name || null, backfill: p.backfill || null });
             hooks.onFallen?.(p);
           }
           continue;
@@ -349,6 +351,21 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
     if (spec) applyStatus(target, type, spec, Math.max(1, (p.dmg[1] || 4) * 0.5));
   }
 
+  /** The party member (player) in 30 m with the lowest health share; the owner when nobody is hurt. */
+  function partyPatient(p) {
+    const owner = p.owner;
+    const party = owner?.partyId ?? null;
+    let best = owner, bestK = owner && owner.maxHp ? owner.hp / owner.maxHp : 1;
+    if (party == null) return owner;
+    for (const pl of field.players) {
+      if (pl === owner || pl.dead || pl.partyId !== party || !(pl.maxHp > 0)) continue;
+      if (Math.hypot(pl.x - p.x, pl.z - p.z) > 30) continue;
+      const k = pl.hp / pl.maxHp;
+      if (k < bestK) { bestK = k; best = pl; }
+    }
+    return best;
+  }
+
   /** pets.js `castAbility` — one spell a frame */
   function castAbility(p, target, hooks = {}) {
     for (const ab of p.abilities) {
@@ -356,7 +373,8 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
       const pureHeal = isPureHeal(ab);
       if (!pureHeal && !target) continue;
       if (pureHeal) {
-        const owner = p.owner;
+        // a Callboard healer looks after the whole party (the most hurt member in 30 m), not only its owner
+        const owner = p.backfill ? partyPatient(p) : p.owner;
         if (!owner || owner.hp == null) continue;
         if (!(owner.hp < (owner.maxHp || 0) * 0.92)) continue;
         const amount = Math.max(1, Math.round((owner.maxHp || 0) * (ab.heal || 0.1)));
@@ -444,7 +462,14 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
     return k;
   };
   /** Take an owner's followers out of this room (handoff / logout); they keep their sheets. */
-  F.release = owner => { for (const p of [...listOf(owner)]) { field.detach(p); despawnEntity?.(p); } return listOf(owner); };
+  F.release = owner => {
+    const book = bookOf(owner);
+    // Callboard seat-fillers belong to the dungeon: they are dismissed, never carried out
+    for (const p of [...book.list]) if (p.backfill) dropUnit(p);
+    book.fallen = book.fallen.filter(f => !f.backfill);
+    for (const p of [...book.list]) { field.detach(p); despawnEntity?.(p); }
+    return book.list;
+  };
   /** Bring an owner's followers into this room (after a handoff). */
   F.receive = owner => {
     const book = bookOf(owner);

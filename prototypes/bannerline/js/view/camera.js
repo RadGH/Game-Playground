@@ -10,7 +10,9 @@ import * as THREE from 'three';
 
 const ZOOMS = [28, 38, 58];          // middle zoom closer + pitch 50 (stream C bench: Chibi 2 bodies read as hats at 56 deg / 50 m)          // distance from target, metres
 
-export function createRtsCamera({ fov = 38, pitchDeg = 50 } = {}) {
+/** opts.zooms: distance steps (spectators get a far step to see a whole field or forest). */
+export function createRtsCamera({ fov = 38, pitchDeg = 50, zooms = ZOOMS } = {}) {
+  const ZS = zooms;
   const camera = new THREE.PerspectiveCamera(fov, 1, 0.5, 600);
   const target = new THREE.Vector3();          // smoothed look-at point on the ground
   const goal = new THREE.Vector3();            // where target is heading
@@ -18,7 +20,7 @@ export function createRtsCamera({ fov = 38, pitchDeg = 50 } = {}) {
   const up = new THREE.Vector2(0, -1);         // screen-up on the ground (x, z)
   const bounds = { x0: -1e9, x1: 1e9, z0: -1e9, z1: 1e9 };
   let zoomIndex = 1;
-  let dist = ZOOMS[zoomIndex];
+  let dist = ZS[zoomIndex];
   let mode = 'follow';
   let pitch = THREE.MathUtils.degToRad(pitchDeg);
   let shake = 0;
@@ -56,7 +58,7 @@ export function createRtsCamera({ fov = 38, pitchDeg = 50 } = {}) {
     /** Look at a point and stop following (minimap click). */
     lookAt(x, z) { mode = 'free'; goal.set(x, 0, z); clampGoal(); },
     zoomBy(step) {
-      zoomIndex = Math.max(0, Math.min(ZOOMS.length - 1, zoomIndex + step));
+      zoomIndex = Math.max(0, Math.min(ZS.length - 1, zoomIndex + step));
     },
     /**
      * Per-frame update.
@@ -95,7 +97,7 @@ export function createRtsCamera({ fov = 38, pitchDeg = 50 } = {}) {
       clampGoal();
       const k = 1 - Math.exp(-dt * (mode === 'follow' ? 6 : 12));
       target.lerp(goal, k);
-      dist += (ZOOMS[zoomIndex] - dist) * (1 - Math.exp(-dt * 8));
+      dist += (ZS[zoomIndex] - dist) * (1 - Math.exp(-dt * 8));
       shake = Math.max(0, shake - dt * 3);
       place();
     },

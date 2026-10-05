@@ -110,7 +110,9 @@ function miscModel(kind) {
 
 // ── the actor set ─────────────────────────────────────────────────────────────────────────────────
 
-export function createHvfActors({ scene, map, data, fogify, localTeam, models = null }) {
+export function createHvfActors({ scene, map, data, fogify: fogifyWorld, localTeam, models = null }) {
+  // actors keep their full colour under the spectator's soft fog (the ground shows the fog instead)
+  const fogify = (m) => fogifyWorld(m, { actor: true });
   const group = new THREE.Group();
   group.name = 'hvf-actors';
   scene.add(group);
@@ -220,6 +222,7 @@ export function createHvfActors({ scene, map, data, fogify, localTeam, models = 
   function dropItem(id, it) { group.remove(it.mesh); it.obj?.dispose(); it.body?.dispose(); items.delete(id); }
   function sync(state, alpha, dt, visible, remembered) {
     t += dt;
+    const allTeams = localTeam < 0;   // the spectator (team -1) sees every side's buildings live
     if (models) { linkMap = new Map(); for (const e of state.ents) if (e.kind === 'building' && LINKED[e.type] && e.alive && !e._gone && e.cells) linkMap.set(e.cells[0], e.type); }
     const seen = new Set();
     const counts = {};
@@ -264,14 +267,14 @@ export function createHvfActors({ scene, map, data, fogify, localTeam, models = 
         continue;
       }
       if (e.kind === 'farmer') { const it1 = items.get(e.id); if (it1 && it1.ghost) { it1.ghost(); it1.ghost = null; } }
-      if (models && e.kind === 'building' && LINKED[e.type] && e.team === localTeam && e.alive && e.cells) {
+      if (models && e.kind === 'building' && LINKED[e.type] && (allTeams || e.team === localTeam) && e.alive && e.cells) {
         if (!visible(e)) continue;
         const key = e.type + ':' + maskOf(e);
         if (!links.has(key)) links.set(key, []);
         links.get(key).push(e);
         continue;
       }
-      if (e.kind === 'building' && e.team !== localTeam) continue;   // drawn from memory below
+      if (e.kind === 'building' && !allTeams && e.team !== localTeam) continue;   // drawn from memory below
       if (!visible(e)) continue;
       seen.add(e.id);
       let it = items.get(e.id);
@@ -374,7 +377,7 @@ export function createHvfActors({ scene, map, data, fogify, localTeam, models = 
       if (bleatUntil.size > 2000) bleatUntil.clear();
       if (ev.type === 'shot') { const it = items.get(ev.src); it?.obj?.fire?.(); }
     },
-    /** Whose eyes the next sync draws with (split screen: each half sets its own team). */
+    /** Whose eyes the next sync draws with (split screen: each half sets its own team; -1 = the spectator, every side). */
     setTeam(team) { localTeam = team; },
     stats() { let calls = 0, tris = 0; group.traverse((o) => { if (o.isMesh && o.visible && (o.count == null || o.count > 0)) { calls++; tris += ((o.geometry.index?.count || o.geometry.attributes.position.count) / 3) * (o.isInstancedMesh ? o.count : 1); } }); return { calls, tris }; },
     /** A free-standing model for the placement ghost. */

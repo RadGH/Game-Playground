@@ -5,6 +5,11 @@
 //   ?speed=8        sim speed multiplier (overrides the lobby's Speed)
 //   ?autostart=1    skip title + lobby: keyboard player vs a Recruit AI (also ?hero= ?race= ?ai= ?mode=)
 //   ?seed=123       match seed (default: random per match)
+//   ?watch=1        with ?autostart: an AI-vs-AI match in the spectator view (also ?ai= ?mode=)
+//
+// SPECTATOR: a match with no local seat (the lobby's "Watch AI match", or an online machine that holds
+// no seat) opens one full-screen spectator view instead of player views: free camera, every side
+// visible, F / Shift+F / 1-9 follow a hero, speed and pause (js/ui/spectator.js, makeSpectatorView).
 //
 // window.bannerline exposes { match, views, devices, session, lobby, start(), state(),
 // fastForward(ticks), probe() } for Playwright.
@@ -53,6 +58,8 @@ import { createJoinScreen, createNetLobby } from './ui/netlobby.js';
 import { loadCampaign, campaignProgress, campaignSession, createCampaignScreen, createCampaignOverlay, showDebrief } from './ui/campaign.js';
 import { createMenuNav } from './ui/menunav.js';
 import { createHvfGame } from './ui/hvf/game.js';
+import { createSpectator } from './ui/spectator.js';
+import { linewarChars, linewarTeams, nextChar } from './ui/spectate-model.js';
 import { loadData } from './sim/data.js';
 import { buildMap } from './sim/map.js';
 import * as Q from './sim/query.js';
@@ -149,7 +156,7 @@ async function boot() {
   };
   requestAnimationFrame(loop);
 
-  if (params.get('autostart')) app.start({});
+  if (params.get('autostart')) { if (params.get('watch')) app.watch({}); else app.start({}); }
   else {
     showTitle();
     const rj = loadRejoin();
@@ -353,7 +360,7 @@ function startMatch(session, net = null, campaignConfig = null) {
   if (params.get('mute') !== '1') {
     createSound({ localPlayers: local.map((l) => l.player), heroes: data.heroes, tickHz,
       entOf: (id) => m.sim.state.ents.find((e) => e.id === id),
-      panOf: (x, z) => { const v = m.views[0]; if (!v) return null; const p = v.project(x, 1, z); return p.visible ? Math.max(-1, Math.min(1, (p.x / v.vp.rect.w) * 2 - 1)) : null; } })
+      panOf: (x, z) => { const v = m.views[0] || m.spec; if (!v) return null; const p = v.project(x, 1, z); return p.visible ? Math.max(-1, Math.min(1, (p.x / v.vp.rect.w) * 2 - 1)) : null; } })
       .then((snd) => { if (app.match === m) { m.sound = snd; snd.unlock?.(); } })
       .catch((err) => console.warn('sound unavailable', err));
   }
@@ -362,6 +369,8 @@ function startMatch(session, net = null, campaignConfig = null) {
   const host = $('screen-match');
   host.replaceChildren();
   seats.forEach((l, i) => m.views.push(makeView(m, i, seats.length, l, host)));
+  // Nobody local holds a seat (Watch AI match, or an online watcher): the spectator view instead.
+  if (!seats.length && !campaignConfig) m.spec = makeSpectatorView(m, host);
 
   setScreen('match');
   app.title.hide(); app.lobby.hide();
@@ -370,6 +379,65 @@ function startMatch(session, net = null, campaignConfig = null) {
     const w = document.createElement('div'); w.className = 'net-wait'; w.hidden = true; v.hudRoot.append(w); v.netWait = w;
   }
   for (const v of m.views) v.hud.alert(v.isPad ? 'Hold your field. D-pad down opens the Barracks.' : 'Hold your field. B opens the Barracks to hire units.', 'info', 3600);
+}
+
+// ---------- spectator (no seat) ----------
+function makeSpectatorView(m, host) {
+  const { sim } = m;
+  const camera = createRtsCamera({ zooms: [28, 38, 58, 90] });
+  const vp = { id: 'spec', camera: camera.camera, rect: { x: 0, y: 0, w: 1, h: 1 }, layout(size) { this.rect = { x: 0, y: 0, w: size.w, h: size.h }; } };
+  app.gfx.addViewport(vp);
+  const root = document.createElement('div');
+  root.className = 'view-root spectating kbm-view';
+  const overlay = document.createElement('div'); overlay.className = 'overlay';
+  const hudRoot = document.createElement('div'); hudRoot.className = 'hud';
+  root.append(overlay, hudRoot);
+  host.append(root);
+  const mb = app.layout.bounds;
+  camera.setBounds({ x0: mb.x0 + 4, x1: mb.x1 - 4, z0: mb.z0 + 6, z1: mb.z1 - 8 });
+  const v = { spectator: true, camera, vp, root, overlay, hudRoot, follow: null, paused: false };
+  v.project = (x, y, z) => { const p = camera.project(x, y, z, vp.rect); p.x -= vp.rect.x; p.y -= vp.rect.y; return p; };
+  v.numbers = createNumbers(overlay);
+  v.spec = createSpectator({
+    root: hudRoot, mode: 'linewar', fog: false, teamColours: ['#5d9cf5', '#ee6a58'],
+    onSpeed: (n) => { if (m.net) { v.spec.alert('An online match runs at one speed', 'info', 1600); return; } m.clock.setSpeed(n); specPause(m, false); },
+    onPause: (p) => specPause(m, p),
+    onPick: (id) => specFollow(m, id),
+  });
+  const first = linewarChars(sim.state, sim.data)[0];
+  const e = first && sim.state.ents.find((x) => x.id === first.id);
+  const f0 = sim.map.fields[0];
+  camera.snapTo(e ? e.x : (f0.x0 + f0.x1) / 2, e ? e.z : (f0.z0 + f0.z1) / 2);
+  if (first) { v.follow = first.id; camera.centre(); }
+  v.spec.alert('Watching the AI: F jumps between heroes, WASD or drag to look around', 'info', 6000);
+  return v;
+}
+function specPause(m, p) {
+  if (m.net) { m.spec?.spec.alert('Online matches do not pause', 'info', 1400); return; }
+  m.spec.paused = !!p; m.clock.setPaused(!!p);
+}
+function specFollow(m, id, say = true) {
+  const v = m.spec; if (!v) return;
+  v.follow = id; v.camera.centre();
+  const c = linewarChars(m.sim.state, m.sim.data).find((x) => x.id === id);
+  if (say && c) v.spec.alert(`Following ${c.name}`, 'info', 1200);
+}
+function spectatorFrame(m, frames, dt) {
+  const v = m.spec, s = m.sim.state;
+  const inp = v.spec.input(frames, { isDown: (k) => app.devices.kbm.isDown(k), rect: v.vp.rect });
+  const chars = linewarChars(s, m.sim.data);
+  if (inp.next) specFollow(m, nextChar(chars, v.follow ?? v.lastFollow, inp.next));
+  if (inp.pick >= 0 && chars[inp.pick]) specFollow(m, chars[inp.pick].id);
+  if (inp.centre) { const back = v.follow ?? v.lastFollow ?? chars[0]?.id; if (back != null) specFollow(m, back, false); }
+  if (inp.zoom) v.camera.zoomBy(inp.zoom);
+  const a = v.follow != null ? m.actors.get(v.follow) : null;
+  const ent = v.follow != null ? s.ents.find((x) => x.id === v.follow) : null;
+  const pos = a ? { x: a.x, z: a.z } : ent ? { x: ent.x, z: ent.z } : null;
+  v.camera.update(dt, { follow: pos, pan: inp.pan, drag: inp.drag, viewportH: v.vp.rect.h });
+  if (v.camera.mode === 'free' && v.follow != null) { v.lastFollow = v.follow; v.follow = null; }   // panned or dragged: free camera until F / Space
+  v.spec.update({ teams: linewarTeams(s, m.sim.data), chars, followId: v.follow, speed: m.clock.speed || 1, paused: !!v.paused });
+  const r = v.vp.rect, key = `${r.x},${r.y},${r.w},${r.h}`;
+  if (v.root._r !== key) { v.root._r = key; Object.assign(v.root.style, { left: r.x + 'px', top: r.y + 'px', width: r.w + 'px', height: r.h + 'px' }); }
 }
 
 /** A read-only stand-in for the sim that always points at the current sim object. */
@@ -667,6 +735,8 @@ function handleEvents(events, quiet = false) {
           v.numbers.spawn(a.x, a.height + 0.6, a.z, ev.amount, kind);
           if (ev.dst === myHero && ev.amount > 0.08 * (a.ent.hpMax || 1)) v.camera.kick(0.25);
         }
+        // the spectator sees the heroes' fights: hits by or on a hero
+        if (m.spec && (a.ent.kind === 'hero' || src?.kind === 'hero')) m.spec.numbers.spawn(a.x, a.height + 0.6, a.z, ev.amount, ev.crit ? 'crit' : 'dmg');
         break;
       }
       case 'heal': {
@@ -701,7 +771,7 @@ function handleEvents(events, quiet = false) {
       case 'levelUp': {
         const pl = s.players[ev.player];
         const a = m.actors.get(pl?.heroEnt);
-        if (a) { for (const v of m.views) v.numbers.spawn(a.x, a.height + 1.4, a.z, `Level ${ev.level}`, 'text'); m.fx.flare(a.x, a.z, 0xffe08a, 2.4); }
+        if (a) { for (const v of [...m.views, ...(m.spec ? [m.spec] : [])]) v.numbers.spawn(a.x, a.height + 1.4, a.z, `Level ${ev.level}`, 'text'); m.fx.flare(a.x, a.z, 0xffe08a, 2.4); }
         break;
       }
       case 'queued': case 'sent': {
@@ -724,6 +794,7 @@ function endMatch() {
     app.gfx.removeViewport(v.vp);
     v.root.remove();
   }
+  if (m.spec) { m.spec.spec.destroy(); m.spec.numbers.clear(); app.gfx.removeViewport(m.spec.vp); m.spec.root.remove(); m.spec = null; }
   m.spells?.dispose?.(); m.sound?.stopAll?.(); m.actors.dispose(); m.fx.dispose(); m.aim.dispose(); m.overlay?.destroy();
   app.match = null; app.results = null;
   $('screen-match').replaceChildren();
@@ -823,10 +894,11 @@ function matchFrame(dt, frames) {
       pan: intents.pan, drag: intents.drag, viewportH: v.vp.rect.h,
     });
   }
+  if (m.spec) spectatorFrame(m, frames, dt);
   document.body.classList.toggle('over-pad', overPad);
   if (overPad && kbmFrame) { const c = dimCursor(); c.style.transform = `translate(${kbmFrame.pointer.x}px, ${kbmFrame.pointer.y}px)`; }
 
-  const paused = !!m.pausedBy && !m.net;
+  const paused = (!!m.pausedBy || !!m.spec?.paused) && !m.net;
   const waiting = m.clock.waitingFor || [];
   const waitText = waiting.length ? `Waiting for ${waiting.map((w) => w.name + (w.hidden ? ' (tab hidden)' : '')).join(', ')}` : '';
   if (waiting.length) m.waitSince = m.waitSince || performance.now(); else m.waitSince = 0;
@@ -873,13 +945,14 @@ function matchFrame(dt, frames) {
     } else if (v.downEl) { v.downEl.remove(); v.downEl = null; }
     v.numbers.update(dt, v.project);
   }
+  if (m.spec) m.spec.numbers.update(dt, m.spec.project);
   m.overlay?.update(m.sim);
   if (m.sim.over && !m.shown) {
     // The result word shows at once over the field; the results card follows after a beat (wall clock).
     if (!m.overAt) {
       m.overAt = performance.now();
       const r = s.result, localTeams = [...new Set(m.views.map((v) => v.myTeam))];
-      const word = r.winner === -1 ? 'Draw' : localTeams.length > 1 ? `${['Blue', 'Red'][r.winner]} banner wins` : r.winner === localTeams[0] ? 'Victory' : 'Defeat';
+      const word = r.winner === -1 ? 'Draw' : localTeams.length !== 1 ? `${['Blue', 'Red'][r.winner]} banner wins` : r.winner === localTeams[0] ? 'Victory' : 'Defeat';
       m.sound?.result?.(word !== 'Defeat');
       for (const v of m.views) {
         v.hud.hideTransient?.(); v.onboarding.close(); for (const p of Object.values(v.panels)) p.setOpen(false); endAim(v);
@@ -889,6 +962,7 @@ function matchFrame(dt, frames) {
         el.textContent = word;
         v.hudRoot.append(el);
       }
+      if (m.spec) { const el = document.createElement('div'); el.className = 'end-word win'; el.textContent = word; m.spec.hudRoot.append(el); }
     }
     if (performance.now() - m.overAt > 2200) {
       m.shown = true;
@@ -897,7 +971,7 @@ function matchFrame(dt, frames) {
       const r = s.result;
       const localTeams = [...new Set(m.views.map((v) => v.myTeam))];
       app.session.last = r.winner === -1 ? { cls: 'draw', text: 'Last battle: a draw' }
-        : localTeams.length > 1 ? { cls: 'win', text: `Last battle: the ${['Blue', 'Red'][r.winner]} banner won` }
+        : localTeams.length !== 1 ? { cls: 'win', text: `Last battle${m.spec ? ' (watched)' : ''}: the ${['Blue', 'Red'][r.winner]} banner won` }
         : { cls: r.winner === localTeams[0] ? 'win' : 'lose', text: r.winner === localTeams[0] ? 'Last battle: Victory' : 'Last battle: Defeat' };
       if (m.net) saveRejoin(null);
       if (m.session.campaign) {
@@ -979,7 +1053,7 @@ function alertBoot(msg, title = 'Could not start the match') {
 app.start = (choice = {}) => {
   const data = app.data;
   const s = app.session;
-  s.game = 'linewar'; s.gameName = 'Line War'; s.heroes = null; s.races = null;
+  s.game = 'linewar'; s.gameName = 'Line War'; s.heroes = null; s.races = null; s.spectate = false;
   s.mode = choice.mode || params.get('mode') || '1v1';
   s.speed = Number(choice.speed || params.get('speed')) || 1;
   s.slots = [];
@@ -994,6 +1068,27 @@ app.start = (choice = {}) => {
     hero: choice.hero || params.get('hero') || me.hero, race: choice.race || params.get('race') || me.race });
   app.devices.claim('kbm', me.key);
   startMatch(s);
+};
+/** An AI-vs-AI match in the spectator view (tests; ?autostart=1&watch=1). choice: { mode, ai, speed }. */
+app.watch = (choice = {}) => {
+  const data = app.data;
+  const s = app.session;
+  s.game = 'linewar'; s.gameName = 'Line War'; s.heroes = null; s.races = null; s.spectate = true;
+  s.mode = choice.mode || params.get('mode') || '1v1';
+  s.speed = Number(choice.speed || params.get('speed')) || 1;
+  s.slots = [];
+  const n = Number(s.mode[0]);
+  const heroes = Object.keys(data.heroes.heroes), races = Object.keys(data.races.races);
+  for (let team = 0; team < 2; team++) for (let i = 0; i < n; i++) {
+    s.slots.push({ key: `t${team}s${i}`, team, index: i, kind: 'ai', ai: choice.ai || params.get('ai') || 'veteran', device: null, lost: false, ready: false,
+      hero: heroes[(team + i) % heroes.length], race: races[(team + i) % races.length], player: 0 });
+  }
+  startMatch(s);
+};
+/** The spectator view's state (tests): { follow, paused, speed } plus next(dir). */
+app.spectator = () => {
+  const m = app.match; const v = m?.spec; if (!v) return null;
+  return { follow: v.follow, paused: v.paused, speed: m.clock.speed, mode: v.camera.mode, next: (d = 1) => specFollow(m, nextChar(linewarChars(m.sim.state, m.sim.data), v.follow, d)) };
 };
 app.state = () => app.match?.sim.state;
 app.views = () => app.match?.views || [];

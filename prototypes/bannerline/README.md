@@ -73,6 +73,45 @@ d-pad or stick moves, A confirms (hold A in the Barracks to keep hiring), B goes
 self-signed certificate once. `tools/serve-both.sh` starts all four servers (8400/8401 http,
 8442/8441 https); the certificate comes from `tools/make-dev-cert.sh`. GitHub Pages is https already.
 
+### Spectator mode (watch the AI play)
+Both modes can be **watched with no seat**: every seat is AI (any difficulty, set per seat in Line War,
+per side in Hunters vs Farmers) and the camera belongs to you.
+
+- **Line War:** in the lobby press **Watch AI match** (or move to it and press left/right). Seats turn
+  into AI; any device moves one shared cursor over mode, speed, each seat's AI level / hero / army, and
+  **Watch the battle** (Enter / A) starts the countdown. Esc / B stops watching.
+- **Hunters vs Farmers:** on the setup card press **Watch the AI play**, pick the farmer AI and hunter AI,
+  then **Watch the hunt**.
+- **Online:** a machine that holds no seat (a host who gave every seat away, or a guest who joined and
+  took none) gets the same spectator view instead of a player's.
+
+What you see: **both sides** — every unit, building, animal, snare and watchstone. In Hunters vs
+Farmers the fog of war is drawn **light (30% darker)** instead of hiding things, so you can still see
+everyone inside it but can tell what a side cannot see. Pick **whose fog**: Farmers (default — where the
+farmers cannot see), Hunters, Both (ground neither side sees) or Off. Units and buildings stay at full
+colour; only the ground and trees show the fog. The minimap shows the same choice.
+
+| Spectator keys | Keyboard + mouse | Gamepad |
+|---|---|---|
+| Next / previous character (alternates sides) | F / Shift+F | RB (or R3, d-pad right) / LB (d-pad left) |
+| Follow a given character | 1–9, or click a name in the side panels | — |
+| Pan (lets go of the follow) | WASD, arrows, screen edge, left- or middle-drag | left stick |
+| Follow again | Space | A or L3 |
+| Zoom (4 steps, the last one wide) | wheel, + / − | LT / RT |
+| Match speed 1x / 2x / 4x, pause | [ ] or , . / P or Esc (or the buttons) | X cycles / Menu |
+| Whose fog (HvF) | V (or the buttons) | Y |
+| Hide the side panels | Tab | View |
+
+The side panels show each side's key numbers — Line War: banners, gold, income, army, units waiting at
+the gate, and each hero's level / gold / income; Hunters vs Farmers: how many farmers are **hidden**
+(not seen by any hunter right now), gold, income, animals and strays, buildings, army, and for the
+hunters: farm buildings found, kills, animals taken, level, watchstones, lodges. Speed and pause work in
+local matches only (an online match runs at one speed). Code: `js/ui/spectator.js` (input + panels,
+shared), `js/ui/spectate-model.js` (the numbers and the F order — reads the sim, never writes it),
+`makeSpectatorView` in `js/main.js` and `js/ui/hvf/game.js`, `useSpectator()` in `js/view/hvf/world.js`.
+Test hooks: `bannerline.watch()` / `bannerline.spectator()`, `hvf.start({ spectate: true })` / `hvf.spectator`,
+`?autostart=1&watch=1`.
+
 ---
 
 ## Architecture
@@ -155,10 +194,10 @@ node --test prototypes/bannerline/tests/*.test.js          # ~270 node tests (si
 flock /tmp/claude-1000/farhold-pw.lock npx playwright test prototypes/bannerline/tests/   # browser specs on dev 8401
 ```
 
-Node tests cover determinism, snapshots, purity, the economy bounds, every system, the AI ladders,
+Node tests cover determinism (incl. `spectate.test.js`: an AI match watched every tick ends in the same state as one nobody watched), snapshots, purity, the economy bounds, every system, the AI ladders,
 lockstep under latency/drops/rejoin, the campaign and HvF. Specs cover the full UI loop, gamepad
 mocks (3 pad layouts), split screen, pad-only walks, online two-page matches (incl. rejoin after a
-reload), cross-engine replay, art and the campaign.
+reload), cross-engine replay, art, the campaign and spectator mode in both modes (`spectator.spec.js`, incl. the 30% fog measured against no fog and a player's fog).
 
 ## Tools (`tools/`, run with node from this folder unless noted)
 

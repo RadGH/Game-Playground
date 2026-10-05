@@ -41,6 +41,8 @@ import * as Q from '../../sim/modes/hvf/query.js';
 import { KIND } from '../../sim/modes/hvf/mapgen.js';
 import { cellOf, liveGrid } from '../../sim/modes/hvf/grid.js';
 import { hvfRoomMode } from './online.js';
+import { createSpectator } from '../spectator.js';
+import { hvfChars, hvfTeams, nextChar, unionBits } from '../spectate-model.js';
 
 const BUILD_KEYS = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal'];
 const AI_LEVELS = [['recruit', 'Recruit'], ['veteran', 'Veteran'], ['commander', 'Commander']];
@@ -58,7 +60,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     params.get('models') !== '0' ? loadHvfModels().then((x) => { models = x; }) : null,
     createIconLibrary().then((x) => { icons = x; }).catch(() => {}),
   ]);
-  const choice = { format: rules.defaultFormat, ai: 'veteran', speed: 1, seed: null, seats: [{ role: 'farmer', device: null }] };
+  const choice = { format: rules.defaultFormat, ai: 'veteran', aiHunter: 'veteran', spectate: false, speed: 1, seed: null, seats: [{ role: 'farmer', device: null }] };
   const devLabel = (id) => (!id ? 'press A / Enter to join' : id === 'kbm' ? 'Keyboard + mouse' : (devices?.get(id)?.label || 'Controller'));
 
   // ── setup card ─────────────────────────────────────────────────────────────────────────────────
@@ -91,17 +93,18 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       ${setup.tab === 'local' ? `
       <div class="roles-help"><span><b>🌾 Farmer</b> — slip away, find a hidden hollow, raise animals for gold, wall the door, later send scarecrows. Cannot attack.</span>
         <span><b>🏹 Hunter</b> — wait out the head start, then track the farmers by their animals: listen, follow strays, plant watchstones, build lodges.</span></div>
-      <h3>Players</h3>
-      <div class="seats">${choice.seats.map(seatRow).join('')}
+      <h3>Players <button class="mini spectate ${choice.spectate ? 'on' : ''}" data-act="spectate" data-tip="Take no seat: every farmer and hunter is AI and you watch with a free camera, both sides visible">👁 Watch the AI play</button></h3>
+      ${choice.spectate ? `<div class="seats"><div class="seat spec"><b>Spectating</b><span class="dev">every seat is AI · free camera · F jumps between characters · fog shown light so you see what each side cannot</span></div></div>` : `<div class="seats">${choice.seats.map(seatRow).join('')}
         ${choice.seats.length < 2 ? '<div class="seat add"><b>Player 2</b><span class="dev">press A on a second controller (or Enter) to join · split screen</span></div>' : ''}</div>
       ${roles.size > 1 ? '<p class="peek">Both screens are visible — no peeking!</p>' : ''}
-      ${['farmer', 'hunter'].some(tooMany) ? `<p class="warn">${choice.format} has room for ${f.farmers} farmer(s) and ${f.hunters} hunter(s).</p>` : ''}` : onlineHtml()}
+      ${['farmer', 'hunter'].some(tooMany) ? `<p class="warn">${choice.format} has room for ${f.farmers} farmer(s) and ${f.hunters} hunter(s).</p>` : ''}`}` : onlineHtml()}
       <div class="row"><label>Format <select data-k="format">${Object.keys(rules.formats).map((k) => `<option value="${k}" ${k === choice.format ? 'selected' : ''}>${k} — ${rules.formats[k].farmers} farmers v ${rules.formats[k].hunters} hunter${rules.formats[k].hunters > 1 ? 's' : ''}</option>`).join('')}</select></label>
-        <label>AI <select data-k="ai">${AI_LEVELS.map(([v, n]) => `<option value="${v}" ${v === choice.ai ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+        <label>${choice.spectate && setup.tab === 'local' ? 'Farmer AI' : 'AI'} <select data-k="ai">${AI_LEVELS.map(([v, n]) => `<option value="${v}" ${v === choice.ai ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+        ${choice.spectate && setup.tab === 'local' ? `<label>Hunter AI <select data-k="aiHunter">${AI_LEVELS.map(([v, n]) => `<option value="${v}" ${v === choice.aiHunter ? 'selected' : ''}>${n}</option>`).join('')}</select></label>` : ''}
         ${setup.tab === 'local' ? `<label>Speed <select data-k="speed">${[[1, 'Normal'], [2, 'Fast ×2'], [4, 'Faster ×4']].map(([v, n]) => `<option value="${v}" ${v === choice.speed ? 'selected' : ''}>${n}</option>`).join('')}</select></label>` : ''}
         <label>Seed <input data-k="seed" type="number" placeholder="random" value="${choice.seed ?? ''}"></label></div>
       <p class="info">${f.size} m forest · head start ${f.headStart} s · ${Math.round(f.clock / 60)} min clock · empty seats are AI. <a href="hvf-map.html?format=${choice.format}" target="_blank">Preview forests</a></p>
-      ${setup.tab === 'local' ? `<button class="start" data-act="start" ${['farmer', 'hunter'].some(tooMany) ? 'disabled' : ''}>Start the hunt</button>` : ''}
+      ${setup.tab === 'local' ? `<button class="start" data-act="start" ${!choice.spectate && ['farmer', 'hunter'].some(tooMany) ? 'disabled' : ''}>${choice.spectate ? 'Watch the hunt' : 'Start the hunt'}</button>` : ''}
       <p class="hint"><kbd>Enter</kbd> / <kbd class="pad">A</kbd> joins and chooses · d-pad / arrows move · <kbd>Esc</kbd> / <kbd class="pad">B</kbd> back</p>
     </div>`;
     setup.nav?.destroy();
@@ -144,6 +147,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     if (t.dataset.role) { choice.seats[Number(t.dataset.seat)].role = t.dataset.role; drawSetup(); return; }
     const act = t.dataset.act;
     if (act === 'back') { closeSetup(); onExit(); }
+    else if (act === 'spectate') { choice.spectate = !choice.spectate; drawSetup(); }
     else if (act === 'drop') { const s = choice.seats.splice(Number(t.dataset.seat), 1)[0]; if (s?.device) devices?.release?.('hvf' + t.dataset.seat); drawSetup(); }
     else if (act === 'start') { readInputs(); if (!choice.seats[0].device) choice.seats[0].device = 'kbm'; const o = { ...choice, seats: choice.seats.map((s) => ({ ...s })) }; closeSetup(); start(o); }
     else if (act) onlineAct(act, t);
@@ -156,6 +160,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     const k = e.target.dataset?.k; if (!k || k === 'code' || k === 'seed') return;
     if (k === 'format') { choice.format = e.target.value; setup.online?.room?.isHost && setup.online.room.configure({ format: choice.format }); }
     if (k === 'ai') choice.ai = e.target.value;
+    if (k === 'aiHunter') choice.aiHunter = e.target.value;
     if (k === 'speed') choice.speed = Number(e.target.value);
     drawSetup();
   }
@@ -166,7 +171,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     // a device pressing its join action takes the next seat (seat 1 first, then a second player)
     for (const [id, f] of frames) {
       if (!f.pressed.has('join') || choice.seats.some((s) => s.device === id)) continue;
-      if (setup.tab !== 'local') continue;
+      if (setup.tab !== 'local' || choice.spectate) continue;
       if (!choice.seats[0].device) { choice.seats[0].device = id; setup.skip = true; drawSetup(); }
       else if (choice.seats.length < 2 && id !== 'kbm' || (choice.seats.length < 2 && id === 'kbm' && choice.seats[0].device !== 'kbm')) {
         const used = choice.seats[0].role;
@@ -188,10 +193,13 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     const f = rules.formats[o.format];
     const seed = o.seed != null ? o.seed >>> 0 : (Number(params.get('seed')) >>> 0) || ((Math.random() * 0xffffffff) >>> 0);
     const players = [];
+    // spectating: every seat is AI (farmers at o.ai, hunters at o.aiHunter) and nobody local holds one
+    const spectate = !!o.spectate;
+    const hunterAi = spectate ? (o.aiHunter || o.ai) : o.ai;
     for (let i = 0; i < f.farmers; i++) players.push({ role: 'farmer', kind: 'ai', ai: { difficulty: o.ai }, name: `Farmer ${i + 1}`, colour: i });
-    for (let i = 0; i < f.hunters; i++) players.push({ role: 'hunter', kind: 'ai', ai: { difficulty: o.ai }, name: `Hunter ${i + 1}` });
+    for (let i = 0; i < f.hunters; i++) players.push({ role: 'hunter', kind: 'ai', ai: { difficulty: hunterAi }, name: `Hunter ${i + 1}` });
     const local = [];
-    o.seats.slice(0, 2).forEach((s, i) => {
+    if (!spectate) o.seats.slice(0, 2).forEach((s, i) => {
       const pid = players.findIndex((p, k) => p.role === s.role && p.kind === 'ai' && !local.some((l) => l.player === k));
       if (pid < 0) return;
       Object.assign(players[pid], { kind: 'human', name: o.seats.length > 1 ? `Player ${i + 1}` : 'You' });
@@ -215,15 +223,19 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     for (const v of vpsWas) gfx.removeViewport(v);
     const simNow = () => (net ? net.clock.sim || sim : sim);
     const world = createHvfWorld(scene, sim.map);
-    const actors = createHvfActors({ scene, map: sim.map, data, fogify: world.fogify, localTeam: sim.state.players[local[0].player].team, models });
+    const spectating = !local.length;
+    const actors = createHvfActors({ scene, map: sim.map, data, fogify: world.fogify, localTeam: spectating ? -1 : sim.state.players[local[0].player].team, models });
     host.hidden = false;
     m = { get sim() { return simNow(); }, map: sim.map, net, clock, world, actors, views: [], opts, hidden, sceneWas, vpsWas, queue: [], over: false, overT: 1.5, paused: false, frameDt: 0, lastFogTick: -1 };
     const n = local.length;
+    m.spectating = spectating;
+    if (spectating) m.views.push(makeSpectatorView());
     for (const l of local) m.views.push(makeView(l, n));
     // seat 0 shortcuts (tests, tools)
     m.me = m.views[0].player; m.camera = m.views[0].camera; m.vp = m.views[0].vp;
     if (n > 1 && new Set(m.views.map((v) => v.team)).size > 1) for (const v of m.views) v.hud.alert('Both screens are visible — no peeking!', 'warn', 5000);
     for (const v of m.views) {
+      if (v.spectator) { v.spec.alert('Watching the AI: F jumps between characters, V changes whose fog you see', 'info', 6000); continue; }
       devices?.claim?.(v.device, 'hvf' + v.i);
       const f = rules.formats[sim.state.format];
       v.hud.alert(v.role === 'farmer' ? `Find a hidden spot before the hunters are loose (${f.headStart} s). Hollows are off the trails behind briar or a single tree.` : `You wait in your kennel for ${f.headStart} s while the farmers hide. Listen for their animals.`, 'info', 7000);
@@ -235,8 +247,8 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     createHvfSound({
       localPlayers: m.views.map((v) => v.player),
       roleOf: (pid) => mm.sim.state.players[pid].role,
-      ears: () => mm.views.map((v) => { const e = charOf(v); return e && e.alive ? { x: e.x, z: e.z } : { x: v.camera.target.x, z: v.camera.target.z }; }),
-      visible: (x, z) => mm.views.some((v) => Q.visibleAt(mm.sim, v.team, x, z)),
+      ears: () => mm.views.map((v) => { const e = v.spectator ? null : charOf(v); return e && e.alive ? { x: e.x, z: e.z } : { x: v.camera.target.x, z: v.camera.target.z }; }),
+      visible: (x, z) => mm.views.some((v) => v.spectator || Q.visibleAt(mm.sim, v.team, x, z)),
       entOf: (id) => mm.sim.state.ents.find((e) => e.id === id) || null,
     }).then((snd) => { if (m === mm) { mm.sound = snd; for (const v of mm.views) v.hud.setSound?.(snd); } else snd.dispose(); }).catch((err) => console.warn('hvf sound unavailable', err));
     m.unlock = () => { mm.sound?.unlock(); };
@@ -287,6 +299,62 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     const e = charOf(v);
     camera.snapTo(e.x, e.z);
     return v;
+  }
+  /** The spectator's one full-screen view: no seat, both sides visible, the fog drawn light. */
+  function makeSpectatorView() {
+    const sim = m.sim;
+    const camera = createRtsCamera({ zooms: [28, 38, 58, 90] });
+    camera.setBounds({ x0: 4, x1: sim.map.size - 4, z0: 4, z1: sim.map.size - 4 });
+    const v = { spectator: true, i: 0, player: 0, device: null, isPad: false, role: 'spectator', team: -1, camera, placing: null, aim: null, ghost: null, ground: null, bars: new Map(), menuOpen: false, follow: null, fog: 'farmers' };
+    v.vp = { id: 'hvf-spec', camera: camera.camera, rect: { x: 0, y: 0, w: 1, h: 1 }, layout(size) { this.rect = { x: 0, y: 0, w: size.w, h: size.h }; }, beforeRender: () => drawFor(v) };
+    gfx.addViewport(v.vp);
+    v.root = document.createElement('div');
+    v.root.className = 'hvf-root spectating';
+    host.append(v.root);
+    v.overlay = document.createElement('div'); v.overlay.className = 'hvf-overlay'; v.root.append(v.overlay);
+    v.hud = createHvfHud({
+      root: v.root, sim, player: 0, spectate: { fog: () => v.fog },
+      iconUrl: (kind, id) => icons?.url(kind, id) || null,
+      onCmd: () => {}, onPlace: () => {}, onAim: () => {},
+      onMinimap: ({ x, z }) => { camera.lookAt(x, z); v.follow = null; },
+      getCamBox: () => cameraBox(v),
+    });
+    v.spec = createSpectator({
+      root: v.root, mode: 'hvf', fog: true, teamColours: ['#e8c34a', '#e0503e'],
+      onSpeed: (n) => { if (m.net) { v.spec.alert('An online match runs at one speed', 'info', 1600); return; } m.clock.setSpeed(n); if (m.paused) setSpecPause(false); },
+      onPause: (p) => setSpecPause(p),
+      onFog: (id) => { v.fog = id; },
+      onPick: (id) => specFollow(v, id),
+    });
+    const first = hvfChars(sim)[0];
+    if (first) specFollow(v, first.id, false);
+    const e = first && sim.state.ents.find((x) => x.id === first.id);
+    camera.snapTo(e ? e.x : sim.map.size / 2, e ? e.z : sim.map.size / 2);
+    return v;
+  }
+  function setSpecPause(p) {
+    if (m.net) { for (const w of m.views) w.spec?.alert('Online matches do not pause', 'info', 1400); return; }
+    m.paused = !!p; m.clock.setPaused(m.paused);
+  }
+  function specFollow(v, id, say = true) {
+    v.follow = id;
+    v.camera.centre();
+    const c = hvfChars(m.sim).find((x) => x.id === id);
+    if (say && c) v.spec.alert(`Following ${c.name}`, 'info', 1200);
+  }
+  /** One frame of the spectator: camera input from every device, follow-cam, the side panels. */
+  function spectatorFrame(v, frames, dt) {
+    const sim = m.sim, s = sim.state;
+    const inp = v.spec.input(frames, { isDown: (k) => devices?.kbm?.isDown?.(k) || false, rect: v.vp.rect });
+    const chars = hvfChars(sim);
+    if (inp.next) specFollow(v, nextChar(chars, v.follow ?? v.lastFollow, inp.next));
+    if (inp.pick >= 0 && chars[inp.pick]) specFollow(v, chars[inp.pick].id);
+    if (inp.centre) { const back = v.follow ?? v.lastFollow ?? chars[0]?.id; if (back != null) specFollow(v, back, false); }
+    if (inp.zoom) v.camera.zoomBy(inp.zoom);
+    const e = v.follow != null ? s.ents.find((x) => x.id === v.follow) : null;
+    v.camera.update(dt, { follow: e ? { x: e.x, z: e.z } : null, pan: inp.pan, drag: inp.drag, viewportH: v.vp.rect.h });
+    if (v.camera.mode === 'free' && v.follow != null) { v.lastFollow = v.follow; v.follow = null; }   // panned, dragged, clicked the minimap: free camera until F / Space
+    v.spec.update({ teams: hvfTeams(sim), chars, followId: v.follow, speed: m.clock.speed || 1, paused: !!m.paused, fog: v.fog });
   }
   const charOf = (v) => m.sim.state.ents.find((e) => e.id === m.sim.state.players[v.player].ent);
   function issue(v, c) { if (m && !m.over) m.queue.push({ p: v.player, ...c }); }
@@ -485,6 +553,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     if (!frames && devices) frames = devices.poll();
     const sim = m.sim, s = sim.state;
     for (const v of m.views) {
+      if (v.spectator) { spectatorFrame(v, frames, dt); continue; }
       // camera pan: arrows + screen edges (keyboard view), right-stick ring keeps the pad camera on the character
       let px = 0, py = 0;
       if (v.device === 'kbm') {
@@ -515,7 +584,12 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
 
     if (s.tick !== m.lastFogTick) {
       m.lastFogTick = s.tick;
-      for (const team of new Set(m.views.map((v) => v.team))) m.world.setFog(s.hvf.vision[team], s.hvf.explored[team], team);
+      if (m.spectating) {
+        // the spectator may show either side's fog, or the union of both ("what neither side sees")
+        for (const team of [0, 1]) m.world.setFog(s.hvf.vision[team], s.hvf.explored[team], team);
+        m.world.setFog(unionBits(s.hvf.vision[0], s.hvf.vision[1]), unionBits(s.hvf.explored[0], s.hvf.explored[1]), 2);
+      }
+      for (const team of new Set(m.views.filter((v) => !v.spectator).map((v) => v.team))) m.world.setFog(s.hvf.vision[team], s.hvf.explored[team], team);
     }
     m.world.syncChopped(s.hvf.chopped);
     // trees being cut shake and lean as the chop goes on
@@ -533,7 +607,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     m.frameDt = m.paused ? 0 : dt;
 
     for (const v of m.views) {
-      const visible = (e) => Q.visibleEnt(sim, v.team, e);
+      const visible = v.spectator ? () => true : (e) => Q.visibleEnt(sim, v.team, e);
       // placement ghost (positioned here, shown only in its own viewport by drawFor)
       if (v.ghost && v.ground) {
         const def = data.hvf.buildings.kinds[v.placing], cell = m.map.cell;
@@ -560,21 +634,29 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       m.overT -= dt;
       if (m.overT <= 0) {
         m.over = true;
-        m.sound?.result(m.views.some((v) => v.team === s.result.winner));
+        m.sound?.result(m.spectating || m.views.some((v) => v.team === s.result.winner));
         for (const v of m.views) {
           cancel(v); closeMenu(v);
           v.hud.showResult(s.result, { onAgain: () => (m.net ? (end(), openSetup()) : start({ ...m.opts, seed: null })), onBack: () => { end(); openSetup(); } });
-          if (v.isPad) { v.resNav = createMenuNav(v.hud.el.querySelector('.hv-result'), { selector: 'button' }); }
+          if (v.isPad || v.spectator) { v.resNav = createMenuNav(v.hud.el.querySelector('.hv-result'), { selector: 'button' }); }
         }
       }
     }
-    if (m?.over) for (const v of m.views) if (v.resNav) v.resNav.handle(frames?.get(v.device));
+    if (m?.over) for (const v of m.views) if (v.resNav) { if (v.spectator) { for (const f of frames?.values?.() || []) if (v.resNav.handle(f)) break; } else v.resNav.handle(frames?.get(v.device)); }
   }
 
   /** Before each viewport renders: its team's fog, what its team may see, its own placement ghost. */
   function drawFor(v) {
     if (!m) return;
     const sim = m.sim;
+    if (v.spectator) {
+      m.world.useSpectator(v.fog);
+      m.world.update(v.camera.camera, m.frameDt);
+      m.actors.setTeam(-1);
+      m.actors.sync(sim.state, m.clock.alpha, m.frameDt, () => true, []);
+      m.frameDt = 0;
+      return;
+    }
     m.world.useTeam(v.team);
     m.world.update(v.camera.camera, m.frameDt);
     m.actors.setTeam(v.team);
@@ -596,7 +678,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       if (!p.visible) continue;
       seen.add(e.id);
       let b = v.bars.get(e.id);
-      if (!b) { b = document.createElement('div'); b.className = 'hv-hp ' + (e.team === v.team ? 'mine' : 'foe') + (e.id === s.players[v.player].ent ? ' me' : ''); b.innerHTML = '<i></i>'; v.overlay.append(b); v.bars.set(e.id, b); }
+      if (!b) { b = document.createElement('div'); b.className = 'hv-hp ' + ((v.spectator ? e.team === 0 : e.team === v.team) ? 'mine' : 'foe') + (!v.spectator && e.id === s.players[v.player].ent ? ' me' : '') + (v.spectator && e.id === v.follow ? ' me' : ''); b.innerHTML = '<i></i>'; v.overlay.append(b); v.bars.set(e.id, b); }
       b.style.transform = `translate(${p.x.toFixed(0)}px, ${p.y.toFixed(0)}px)`;
       b.firstChild.style.width = Math.max(0, Math.min(100, e.hp / e.hpMax * 100)).toFixed(0) + '%';
     }
@@ -612,7 +694,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     m.net?.detach?.();
     try { m.net?.room.leave(); } catch { /* closed */ }
     m.world.dispose(); m.actors.dispose();
-    for (const v of m.views) { gfx.removeViewport(v.vp); v.hud.destroy(); v.nav?.destroy(); v.root.remove(); devices?.release?.('hvf' + v.i); }
+    for (const v of m.views) { gfx.removeViewport(v.vp); v.hud.destroy(); v.spec?.destroy(); v.nav?.destroy(); v.root.remove(); if (!v.spectator) devices?.release?.('hvf' + v.i); }
     for (const v of m.vpsWas) gfx.addViewport(v);
     for (const c of m.hidden) c.visible = true;
     gfx.scene.background = m.sceneWas.background; gfx.scene.fog = m.sceneWas.fog;
@@ -659,13 +741,13 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       const clock = createNetClock({ lockstep: match.lockstep, tickMs: packet.tickMs });
       const detach = clock.attachVisibility?.(document);
       let local = match.localPlayers.map((lp, i) => ({ player: lp.pid, device: lp.device || 'kbm', slot: i }));
-      // A machine with no seat (a host who left every seat to guests and AI) still has to run: the host
-      // assembles every turn, so if it never pumps its clock everyone waits forever. It WATCHES from
-      // the first farmer's side; anything it issues is dropped by the lockstep (it owns no players).
+      // A machine with no seat (a host who left every seat to guests and AI, or a guest who joined to
+      // watch) still has to run: the host assembles every turn, so if it never pumps its clock everyone
+      // waits forever. It gets the SPECTATOR view (both sides visible, light fog, F between characters);
+      // it owns no players, so it issues nothing.
       const watching = !local.length;
-      if (watching) local = [{ player: 0, device: 'kbm', slot: 0 }];
       begin({ sim: match.sim, clock, local, opts: { format: packet.config.format, online: true, watching }, net: { match, clock, room: online.room, detach } });
-      if (watching) for (const v of m.views) v.hud.alert('You have no seat in this match: watching from the farmers\' side.', 'info', 6000);
+      if (watching) for (const v of m.views) v.spec?.alert('You have no seat in this match: spectating both sides.', 'info', 6000);
     },
   };
 
@@ -677,7 +759,9 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     get active() { return !!m || !!setup; },
     get match() { return m; },
     /** Is this spot in sight for any seat at this screen (tests; the sound bridge uses the same rule). */
-    visibleAt(x, z) { return !!m && m.views.some((v) => Q.visibleAt(m.sim, v.team, x, z)); },
+    visibleAt(x, z) { return !!m && m.views.some((v) => v.spectator || Q.visibleAt(m.sim, v.team, x, z)); },
+    /** The spectator view (null when someone holds a seat): { follow, fog, camera } plus helpers for tests. */
+    get spectator() { const v = m?.views.find((x) => x.spectator); return v ? { follow: v.follow, fog: v.fog, camera: v.camera, setFog: (id) => { v.fog = id; }, next: (d = 1) => specFollow(v, nextChar(hvfChars(m.sim), v.follow, d)), fogState: () => m.world.fogState() } : null; },
     get choice() { return choice; },
     state: () => m?.sim.state,
     issue: (c, seat = 0) => m && issue(m.views[seat], c),

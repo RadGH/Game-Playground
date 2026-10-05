@@ -91,6 +91,7 @@ room.run(() => room.combat.attack(ch, { yaw }));      // ALWAYS inside room.run
 - `rules.saveBuild(e)` -> `{ v: 1, talents, perks, bonusPerks, unlocks }`: A saves it as `char.build`; `addEntity` restores it (picks that no longer exist and perks that no longer connect are dropped). `bonusPerks` is where a quest's perk point goes.
 - After any change the rules call `host.barChanged(e)` (if the room has it) and emit `fx kind:'build'` — the bar's slots, costs, cooldowns and `talents` (picked names) may have moved, and the sheet was re-derived.
 - `bar(e)` entries gained `talents: [names]`.
+- **A's message contract** (docs/protocol.md §17.2), wired to the above: `rules.talent(e, 'pick'|'clear', { skill, tier, node })` -> `{ ok, why?, text?, picks, talents }` (`clear` with a tier empties that tier, without one the whole skill); `rules.perk(e, 'take'|'refund'|'reset', { id })` -> `{ ok, why?, text?, perks, left }`; `rules.build(e)` -> `{ talents, perks, perkPoints: {total, spent, left}, talentTree, companion }`. `why` codes: level, taken, points, connect, needed, unknown.
 
 ## Ally targeting (PLAN §6.2; audited for all 30 classes)
 

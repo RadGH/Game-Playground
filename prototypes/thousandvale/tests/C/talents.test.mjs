@@ -156,3 +156,18 @@ test('a saved build comes back on login; picks that no longer exist are dropped'
   const me = room.addPlayer({ id: 6, name: 'L', cls: 'warlock', level: 12, room: 'tal2', x: terrain.spawn.x, z: terrain.spawn.z, build }, null);
   assert.deepEqual(room.rules.saveBuild(me).talents, { gnawing_dark: { 1: 'splatter' } });
 });
+
+test('A\'s contract (protocol §17.2): rules.talent / rules.perk / rules.build', () => {
+  const { me, R } = setup('warlock', 9);
+  assert.deepEqual(R.talent(me, 'pick', { skill: 'gnawing_dark', tier: 1, node: 'splatter' }).picks, { 1: 'splatter' });
+  assert.equal(R.talent(me, 'pick', { skill: 'gnawing_dark', tier: 1, node: 'seeking' }).why, 'taken');
+  assert.equal(R.talent(me, 'pick', { skill: 'gnawing_dark', tier: 3, node: 'soul_feed' }).why, 'level');
+  assert.equal(R.talent(me, 'clear', { skill: 'gnawing_dark' }).ok, true);
+  const first = R.perkForest().links.filter(l => l[0] === 'start').map(l => l[1])[0];
+  assert.deepEqual(R.perk(me, 'take', { id: first }).perks, [first]);
+  assert.equal(R.perk(me, 'take', { id: 'melee:6:0' }).why, 'connect');
+  const b = R.build(me);
+  assert.deepEqual(b.perks, [first]);
+  assert.ok(b.perkPoints.total === 9 && b.talentTree.length >= 1 && b.companion.main.level === 10);
+  assert.equal(R.perk(me, 'reset', {}).ok, true);
+});

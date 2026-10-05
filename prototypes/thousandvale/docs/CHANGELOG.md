@@ -221,3 +221,14 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   the new `wayside` dressing as objects with their lore (data/vignettes/wayside.json, 405 of them), filler camps (915 camps a
   copy now — dormant camps keep only the near ones alive: empty tick 0.16 ms); hostile fort garrisons by zone archetype.
   Gates with the fillers: in-process p99 7.0 / 4.6 / 5.4 ms (worst 9.1); G's real-socket herds p99 6.2 / 6.2 / 6.0 (worst 37).
+
+## 2026-10-04 — stream C (combat core, A's M2 province asks)
+- `rules.bar(e)` for `you.bar`: Farhold's live skill bar with `ally` (aim at a friend) and `group` (reaches the party)
+  flags from js/rules/ally.js — the same reading the ally audit checks.
+- Rares walk their placement loop (`data.path`) when not fighting; event bosses take `data.scale` as a health multiplier.
+- Province perf: sleeping monsters skipped by the push-apart and by syncOut; nearest player from a bucket grid; a
+  per-tick monster index (`field.eachMonsterNear`) for players' fighting flags and followers' prey search; one
+  "who is being fought" pass a second instead of one per player. 1,300 monsters + 70 players: 1.6 ms a rules step;
+  bots100 (TV_PERF) spread phase p99 7.0 ms, worst tick 11.4 ms.
+- A monster removed without dying (dormant camps) can no longer be killed afterwards by a held reference (no death,
+  no reward). tests/C/province-rules.

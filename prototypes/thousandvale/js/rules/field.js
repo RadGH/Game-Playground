@@ -89,6 +89,52 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
     if (ent.homeField === field) ent.homeField = null;
   };
   field.get = id => field.byId.get(id) || null;
+
+  // --------------------------------------------------------------- the monster index (M2 perf)
+  // A province copy holds ~1,300 monsters. Whatever asks "which monsters are near this point" every
+  // tick (a player's fighting flag, a follower looking for something to bite) reads this bucket grid,
+  // rebuilt once a tick by monster-ai.js; it answers with live positions, so a monster that moved half
+  // a metre since the rebuild is still measured where it is. Strikes keep walking the list in order
+  // (their rolls depend on the order). No index yet (a test that never ticks monsters): the whole list.
+  const MCELL = 24, PAD = 2;
+  const buckets = new Map();
+  let indexed = false;
+  const bkey = (cx, cz) => (cx + 32768) * 65536 + (cz + 32768);
+  field.indexMonsters = () => {
+    buckets.clear();
+    for (const m of field.monsters) {
+      if (m.dying != null || m.removed) continue;
+      const k = bkey(Math.floor(m.x / MCELL), Math.floor(m.z / MCELL));
+      let b = buckets.get(k);
+      if (!b) { b = []; buckets.set(k, b); }
+      b.push(m);
+    }
+    indexed = true;
+  };
+  /** live monsters within `r` of (x, z) (dying/removed skipped) — calls `fn(m, d)`; return true from fn to stop */
+  field.eachMonsterNear = (x, z, r, fn) => {
+    if (!indexed) {
+      for (const m of field.monsters) {
+        if (m.dying != null || m.removed) continue;
+        const d = Math.hypot(m.x - x, m.z - z);
+        if (d <= r && fn(m, d)) return true;
+      }
+      return false;
+    }
+    const R = r + PAD;
+    const c0x = Math.floor((x - R) / MCELL), c1x = Math.floor((x + R) / MCELL);
+    const c0z = Math.floor((z - R) / MCELL), c1z = Math.floor((z + R) / MCELL);
+    for (let cx = c0x; cx <= c1x; cx++) for (let cz = c0z; cz <= c1z; cz++) {
+      const b = buckets.get(bkey(cx, cz));
+      if (!b) continue;
+      for (const m of b) {
+        if (m.dying != null || m.removed) continue;
+        const d = Math.hypot(m.x - x, m.z - z);
+        if (d <= r && fn(m, d)) return true;
+      }
+    }
+    return false;
+  };
   field.emit = ev => { field.out.push(ev); return ev; };
   field.drain = () => { const o = field.out; field.out = []; return o; };
 
@@ -184,7 +230,9 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
    * (`onKill`), reached through `field.onKill`.
    */
   field.kill = (e) => {
-    if (e.dying != null) return;
+    // (a body the room took away without a death — a parked camp — is never killed after the fact by a
+    // delayed strike or a DoT holding a reference to it: no death event, no reward, no corpse)
+    if (e.dying != null || e.removed) return;
     // an encounter may refuse a death: a boss with another health bar to go (js/rules/encounter.js)
     if (field.hooks?.beforeKill?.(e)) return;
     e.dying = 0;

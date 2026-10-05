@@ -24,51 +24,16 @@ import { createCharacter } from '../../js/rules/character.js';
 import { spawnMonster } from '../../js/rules/monster-ai.js';
 import { makeRng } from '../../js/rules/rng.js';
 import { applyStatus } from '../../js/rules/farhold.js';
+import { allyEffects, groupEffects } from '../../js/rules/ally.js';
 
 const FH = new URL('../../../farhold/data/', import.meta.url);
 const CLASSES = JSON.parse(readFileSync(new URL('classes.json', FH), 'utf8')).classes.map(c => c.id);
 const SKILLS = JSON.parse(readFileSync(new URL('skills.json', FH), 'utf8'));
 const DT = 0.05;
 
-/**
- * A form's onEnter / finale is cast with no target (skillrun.js castSub), so only its GROUP effects are
- * for friends; a stance's own barrier or ward on entering (Scaled Hide, Guarded Turn) is personal.
- */
-function groupPromises(p) {
-  const out = promises(p);
-  if (!p?.barrier?.pets) out.delete('barrier');
-  if (!p?.ward?.pets) out.delete('ward');
-  if (!p?.cleanse?.pets) out.delete('cleanse');
-  out.delete('link');
-  if ((p?.kind ?? p?.shape) === 'self' && p?.status === 'regen' && !p?.pets) out.delete('status');
-  return out;
-}
-
-/** What a plan (or a form's sub-spec) promises a FRIEND, by key. */
-function promises(p, { form = null } = {}) {
-  const out = new Set();
-  if (!p) return out;
-  const kind = p.kind ?? p.shape;
-  if (kind === 'self' && p.heal) out.add('heal');
-  if (p.healPets) out.add('heal');
-  if (p.burst?.heal && !p.burst?.mult && (p.burst.radius ?? 6) >= 5) out.add('heal');
-  if (p.healAllies) out.add('heal');
-  if (kind === 'self' && p.status && (p.pets || p.status === 'regen')) out.add('status');
-  if (p.selfBuff?.pets || p.selfBuff?.petsOnly) out.add('status');
-  if (p.allyStatus && p.allyStatus.target !== 'all') out.add('status');
-  if (p.barrier && typeof p.barrier === 'object' && p.barrier.of !== 'paid') out.add('barrier');
-  if (p.barrier && typeof p.barrier === 'object' && p.barrier.of === 'paid' && p.barrier.pets) out.add('barrier');
-  if (p.ward) out.add('ward');
-  if (p.cleanse) out.add('cleanse');
-  if (p.link && p.link.to !== 'enemy') out.add('link');
-  if (p.revive) out.add('revive');
-  if (p.empowerNext?.pets) out.add('empower');
-  if (p.place?.heal) out.add('heal');
-  if (p.place?.buff || p.place?.deathPrevent) out.add('status');
-  if (form?.aura?.heal) out.add('heal');
-  if (form?.aura?.buff) out.add('status');
-  return out;
-}
+// what a plan promises friends: js/rules/ally.js (the same reading the client's skill bar gets)
+const promises = (p, opts) => allyEffects(p, opts);
+const groupPromises = groupEffects;
 
 const pick = (row, tier, id) => ({ [row]: { [tier]: id } });
 

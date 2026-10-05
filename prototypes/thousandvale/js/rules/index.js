@@ -27,6 +27,7 @@ import { makeRng } from './rng.js';
 import { attachEncounters } from './encounter.js';
 import { attachFollowers } from './followers.js';
 import { attachWarbands, escortFor } from './warband.js';
+import { allyEffects, aimsAtAlly } from './ally.js';
 
 /** What an arena object is called on a nameplate. */
 const OBJECT_NAMES = { pillar: 'Stone pillar', rock: 'Fallen rock', brazier: 'Brazier', lever: 'Lever', pool: 'Pool', cracked_floor: 'Cracked floor' };
@@ -171,8 +172,13 @@ export function createRules(host, opts = {}) {
     for (const list of [field.players, field.monsters, field.allies]) {
       const monsters = list !== field.players;
       for (const u of list) {
-        const e = entOf(u);
+        // M2 perf: a monster asleep (nobody within THINK_RADIUS) changes nothing — sync it once as it
+        // falls asleep, then skip it (a province copy holds ~1,300 of them)
+        if (u.asleep && u._sentAsleep) continue;
+        let e = u._ent;
+        if (!e || e.removed || e.id !== u.id) { e = entOf(u); u._ent = e; }
         if (!e || e.removed) continue;
+        u._sentAsleep = !!u.asleep;
         if (monsters) {
           if (u.x !== e.x || u.z !== e.z) e.moveTo(u.x, u.z);
           if (Number.isFinite(u.facing)) e.face(u.facing);
@@ -329,6 +335,19 @@ export function createRules(host, opts = {}) {
           // the room has not described this entity to anyone yet (info goes out with the next snapshot)
           e.name = script.name || e.name;
         }
+        // an event boss is scaled up for the crowd (A: `data.scale` = health x)
+        const scale = Number(e.data?.scale);
+        if (scale > 0 && scale !== 1) { unit.maxHp = Math.round(unit.maxHp * scale); unit.hp = unit.maxHp; }
+        // a rare placed by E walks its loop when it is not fighting (monster-ai.js `patrol`)
+        const path = e.data?.path;
+        if (Array.isArray(path) && path.length >= 2) {
+          const pts = path.filter(p => Array.isArray(p) && Number.isFinite(p[0]) && Number.isFinite(p[1])).map(([x, z]) => ({ x, z }));
+          if (pts.length >= 2) {
+            let i = 0, bd = Infinity;
+            pts.forEach((p, k) => { const d = Math.hypot(p.x - unit.x, p.z - unit.z); if (d < bd) { bd = d; i = k; } });
+            unit.patrol = { pts, i };
+          }
+        }
         e.r.unit = unit;
         e.setMax(unit.maxHp, 0);
         e.setHp(unit.hp);
@@ -383,10 +402,13 @@ export function createRules(host, opts = {}) {
       regenClock += dt;
       const second = regenClock >= 1;
       if (second) regenClock -= 1;
+      // who is being fought: one pass over the monsters a second, not one per player
+      const fought = second ? new Set() : null;
+      if (second) for (const m of field.monsters) if (m.dying == null && m.targetId != null) fought.add(m.targetId);
       for (const p of field.players) {
         if (p.dead) continue;
         if (!second) continue;
-        const fighting = field.monsters.some(m => m.dying == null && m.targetId === p.id);
+        const fighting = fought.has(p.id);
         const mending = fighting ? 0 : p.maxHp * (engine.balance.player?.outOfCombatRegen ?? 0.015);
         p.hp = Math.min(p.maxHp, p.hp + (p.derived.hpRegen || 0) + mending);
         if (!Object.values(p.statuses || {}).some(st => st.noManaRegen)) p.mp = Math.min(p.maxMp, p.mp + (p.derived.mpRegen || 0) + (fighting ? 0 : p.maxMp * 0.02));
@@ -466,8 +488,29 @@ export function createRules(host, opts = {}) {
   }
   function onParty(e, id) { const u = e.r.unit; if (u) u.partyId = id ?? null; }
 
+  /**
+   * The player's skill bar as the client draws it (A's `you.bar`, D's ask): Farhold's own bar, so a
+   * talent, a form or a stance that changes a slot shows. `ally` = aim it at a friend (send the
+   * friendly `target`); `group` = it reaches the party by itself. Text only here — never in the tick.
+   */
+  function bar(e) {
+    const u = e.r.unit;
+    if (!u?.skills) return [];
+    return room.run(() => u.skills.state().map((s, i) => {
+      const row = s.empty ? null : u.skills.rowFor(i);
+      const ally = aimsAtAlly(row);
+      return {
+        slot: i + 1, id: s.id || null, name: s.name, desc: s.descShort || s.desc || '',
+        cd: Math.round((s.cooldown || 0) * 1000), mp: Math.round(s.mp || 0), level: s.unlockAt, locked: !!s.locked,
+        empty: !!s.empty, shape: s.shape || null, element: s.element || null,
+        ally, group: !ally && !!row && allyEffects(row).size > 0,
+        charges: s.charges?.max ?? null, form: s.form?.group || null,
+      };
+    }));
+  }
+
   return {
-    equip, unequip, gear, saveGear, rollLoot, onParty, useObject,
+    equip, unequip, gear, saveGear, rollLoot, onParty, useObject, bar,
     encounters: enc,
     stats: () => ({ builds, handoffs }),
     addEntity, removeEntity, intent, step, respawn, onLevel,

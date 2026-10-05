@@ -262,11 +262,8 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
         if (selfHurt || ownerHurt || !target) {
           const fromX = selfHurt ? p.x : at.x, fromZ = selfHurt ? p.z : at.z;
           let best = null, bestD = selfHurt || ownerHurt ? Math.max(engageAt, leash) : engageAt;
-          for (const e of field.monsters) {
-            if (e.dying != null || e.removed) continue;
-            const d = Math.hypot(e.x - fromX, e.z - fromZ);
-            if (d < bestD) { bestD = d; best = e; }
-          }
+          // (the field's monster index: a province holds ~1,300 monsters)
+          field.eachMonsterNear(fromX, fromZ, bestD, (e, d) => { if (d < bestD) { bestD = d; best = e; } });
           if (best || !target) target = best;
         }
         if (p.order) {

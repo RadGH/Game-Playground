@@ -521,11 +521,12 @@ function runtimeOf(combat) {
     for (const p of field.players) {
       if (p.dead || p.removed) continue;
       const wasFighting = !!p.fighting;
-      p.fighting = field.monsters.some(m => m.dying == null && m.state === 'chase' && Math.hypot(m.x - p.x, m.z - p.z) < 60);
+      p.fighting = field.eachMonsterNear(p.x, p.z, 60, m => m.state === 'chase');
       if (p.fighting && !wasFighting) {
         const start = rpg.fx.combatStart({ self: p });
         if (start.strip) {
-          const big = field.monsters.find(e => e.dying == null && e.rank !== 'normal' && Math.hypot(e.x - p.x, e.z - p.z) < 60);
+          let big = null;
+          field.eachMonsterNear(p.x, p.z, 60, e => (e.rank !== 'normal' && !big ? (big = e, true) : false));
           if (big?.modifiers?.length) big.modifiers.pop();
         }
       }

@@ -233,7 +233,7 @@ function spread(field) {
   const CELL = 4;
   const grid = new Map();
   for (const e of list) {
-    if (e.removed || e.dying != null || e.hover) continue;
+    if (e.removed || e.dying != null || e.hover || e.asleep) continue;   // (asleep: nobody near, nobody moving)
     const gx = Math.floor(e.x / CELL), gz = Math.floor(e.z / CELL);
     const key = gx * 1e6 + gz;
     let bucket = grid.get(key);
@@ -251,6 +251,30 @@ function spread(field) {
       }
     }
   }
+}
+
+/** Players bucketed by THINK_RADIUS cells; returns e => { friend, dist } (dist Infinity past THINK_RADIUS). */
+function playerBuckets(friends) {
+  const C = AI.THINK_RADIUS;
+  if (friends.length <= 8) return e => nearestFriend(null, e, friends);      // a handful: the scan is cheaper
+  const map = new Map();
+  for (const f of friends) {
+    const k = (Math.floor(f.x / C) + 32768) * 65536 + (Math.floor(f.z / C) + 32768);
+    let b = map.get(k);
+    if (!b) { b = []; map.set(k, b); }
+    b.push(f);
+  }
+  const NONE = { friend: null, dist: Infinity };
+  return e => {
+    const cx = Math.floor(e.x / C), cz = Math.floor(e.z / C);
+    let best = null, bd = Infinity;
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) {
+      const b = map.get((cx + dx + 32768) * 65536 + (cz + dz + 32768));
+      if (!b) continue;
+      for (const f of b) { const d = Math.hypot(f.x - e.x, f.z - e.z); if (d < bd) { bd = d; best = f; } }
+    }
+    return best ? { friend: best, dist: bd } : NONE;
+  };
 }
 
 /** The nearest usable friend to a point, and how far. */
@@ -324,6 +348,10 @@ export function tickMonsters(field, dt, hooks = {}) {
     if (band != null) awakeBands.add(band);
   }
   const lookup = id => field.get(id);
+  field.indexMonsters?.();
+  // M2 perf: the nearest player through a bucket grid of THINK_RADIUS cells (a 3 x 3 look finds every
+  // player within THINK_RADIUS — exactly what the scan found inside it; beyond it nobody thinks anyway)
+  const nearestOf = playerBuckets(friends);
   // the room's planner (js/rules/pathfind.js): null on a terrain that cannot block (Farhold, the parity fixtures)
   const pf = pathfinderFor(field);
   if (pf) pf.beginTick(field.clock);
@@ -331,7 +359,7 @@ export function tickMonsters(field, dt, hooks = {}) {
   for (let i = list.length - 1; i >= 0; i--) {
     const e = list[i];
     if (e.removed) continue;
-    const { friend: near, dist } = nearestFriend(field, e, friends);
+    const { friend: near, dist } = nearestOf(e);
 
     if (e.dying != null) {
       e.dying += dt;
@@ -340,7 +368,8 @@ export function tickMonsters(field, dt, hooks = {}) {
     }
 
     // asleep by distance (PLAN §8.5): nothing near enough to matter, so it does not think at all
-    if (dist > AI.THINK_RADIUS && e.state !== 'return' && !e.boss) { e.anim = 'idle'; continue; }
+    if (dist > AI.THINK_RADIUS && e.state !== 'return' && !e.boss) { e.anim = 'idle'; e.asleep = true; continue; }
+    e.asleep = false;
 
     // ---- the leash (replaces Farhold's despawn ring)
     if (e.state === 'return') {
@@ -623,6 +652,16 @@ export function tickMonsters(field, dt, hooks = {}) {
         }
         if (hooks.onStrike) hooks.onStrike(e, victim); else monsterStrike(field, e, victim);
       }
+    } else if (e.patrol && e.state !== 'flee') {
+      // a rare walking its placement loop (A: `data.path`): waypoint to waypoint at a stroll, round
+      // walls when it must; its home rides along, so a leash measures from where it was pulled
+      const P = e.patrol;
+      let w = P.pts[P.i];
+      if (Math.hypot(w.x - e.x, w.z - e.z) < 2) { P.i = (P.i + 1) % P.pts.length; w = P.pts[P.i]; }
+      const s = pf ? pf.steer(e, w.x, w.z) : null;
+      e.facing = Math.atan2((s || w).x - e.x, (s || w).z - e.z);
+      speed = e.speed * 0.45;
+      e.home[0] = e.x; e.home[1] = e.z;
     } else {
       e.wanderTimer -= dt;
       if (e.wanderTimer <= 0) {

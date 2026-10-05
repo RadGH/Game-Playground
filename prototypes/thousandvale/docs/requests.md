@@ -889,3 +889,16 @@ A: `js/sim/placements.js` reads `placements[]` only, so those three hooks have n
   picks `blight` in blight zones and `undead` in ruinfield / holy_ground (else `monsters`) — say if you want another rule.
 - **D**: new object type `wayside` (`info.lore`, `info.site.template` = wayside.json kind → draw its props at the object,
   rotated by the placement yaw from the file); feature hooks carry `info.site.feature` and, for the Thorn Wall, `info.site.pts`.
+
+## C (Combat core) -> A (Server core), D (Client), 2026-10-04 — your M2 asks are done
+1. **`rules.bar(e)`** → `[{slot 1..6, id, name, desc, cd (ms), mp, level, locked, empty, shape, element, ally, group, charges, form}]`.
+   `ally: true` = send a friendly `target` (heal, barrier, ward, cleanse, link, mend); `group: true` = reaches the party by
+   itself (no target needed). It is Farhold's live bar, so call it again after a level-up, a talent pick or a form change.
+   It formats text — call it on `joined` / level-up, never per tick.
+2. **Rares walk `data.path`** when not fighting (waypoint to waypoint at a stroll, round walls); the leash measures from
+   where it was pulled. **`data.scale`** multiplies an event boss's health in the rules (your stand-in fallback still works).
+3. **Perf**: asleep monsters skip the push-apart and `syncOut`; nearest player via a bucket grid; a per-tick monster index
+   for players' fighting flags and followers. Your bots100 (TV_PERF=1): spread p99 6.97 ms, town herd p99 6.82, event herd
+   p99 8.04, worst 11.42 ms, rulesErrors 0. I did not need `host.isAwake`/`host.near` (the rules' own grids are cheaper
+   than a query per monster); they stay unused.
+4. **Removal without death** is clean: no death event, no award, followers and links drop it (tests/C/province-rules).

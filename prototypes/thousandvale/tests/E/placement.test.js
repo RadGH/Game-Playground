@@ -68,9 +68,10 @@ test('the floor (PLAN §3.4) in every zone: fort, 2+ farms, 1-4 caves, 8-12 vign
     assert.ok(n('fort') >= 1, `${z.eid} forts`);
     assert.ok(n('farm') >= 2, `${z.eid} farms`);
     assert.ok(n('cave') >= 1 && n('cave') <= 4, `${z.eid} caves ${n('cave')}`);
-    assert.ok(n('vignette') >= 8 && n('vignette') <= 12, `${z.eid} vignettes ${n('vignette')}`);
+    const nv = z.pl.filter(p => p.type === 'vignette' && !p.setpiece).length;      // set pieces (play-test 2) come on top
+    assert.ok(nv >= 8 && nv <= 12, `${z.eid} vignettes ${nv}`);
     assert.equal(n('hook') + z.file.features.filter(f => f.type === 'hook').length, 1, `${z.eid} hook`);
-    assert.deepEqual(z.pl.filter(p => p.type === 'rare').map(p => p.id).sort(), [...RARES[z.eid]].sort(), `${z.eid} rares`);
+    assert.deepEqual(z.pl.filter(p => p.type === 'rare' && !p.questBoss).map(p => p.id).sort(), [...RARES[z.eid]].sort(), `${z.eid} rares`);
     assert.ok(n('camp') >= 2 * (z.sheet.camps || []).length, `${z.eid} camps`);
     assert.ok(n('waystone') >= z.file.settlements.length, `${z.eid} a waystone per settlement`);
     assert.ok(z.pl.some(p => p.type === 'waystone' && p.door), `${z.eid} a waystone by the dungeon door`);
@@ -86,7 +87,7 @@ test('ON LAND, OPEN, OFF ROADS/PLOTS/SETTLEMENTS, NOT STEEP, SPACED: every disc 
   const bad = [];
   for (const z of Object.values(Z)) {
     const others = z.pl;
-    for (const p of z.pl.filter(p => DISC.includes(p.type) && p.radius != null)) {
+    for (const p of z.pl.filter(p => DISC.includes(p.type) && p.radius != null && !p.bound)) {    // bound = on stream B's own set piece (B's ground rules)
       const why = discProblem(z.ctx, ruleOf(p), p.x, p.z, p.radius, { ignore: p, others });
       if (why) bad.push(`${z.wid} ${p.type} ${p.id}: ${why}`);
     }
@@ -101,7 +102,7 @@ test('independent check against stream B geometry: no disc touches a road polyli
     const roads = z.bake.filter(p => p.kind === 'road' || p.kind === 'street');
     const plots = z.bake.filter(p => p.kind === 'building');
     const circles = [...z.bake.filter(p => p.kind === 'settlement').map(p => ({ x: p.x, z: p.z, r: p.data.radius })), ...PLACES.zones[z.eid].asks];
-    for (const p of z.pl.filter(p => DISC.includes(p.type) && p.radius != null)) {
+    for (const p of z.pl.filter(p => DISC.includes(p.type) && p.radius != null && !p.bound)) {    // bound set pieces stand on B's own piece
       for (const r of roads) for (let i = 1; i < r.data.pts.length; i++) {
         const d = segDist(p.x, p.z, r.data.pts[i - 1], r.data.pts[i]);
         if (d < p.radius + r.data.width / 2) { bad.push(`${z.wid} ${p.id}: on ${r.kind} ${r.id} (${d.toFixed(1)} m)`); break; }
@@ -122,7 +123,7 @@ test('REACHABLE: everything stands in the walkable component of the province hub
   for (const z of Object.values(Z)) for (const p of [...z.pl, ...z.file.features]) {
     const pts = p.pts ? p.pts.map(([x, zz]) => ({ x, z: zz })) : [p];
     // a feature AT a ford stands on the river: it counts when the bank within 30 m is reached (B's zone-reach rule)
-    const near = p.where === 'at the crossing' ? 30 : 0;
+    const near = p.where === 'at the crossing' ? 30 : p.bound ? 12 : 0;      // a set piece on B's ground: its centre may be a stone or a wall
     const ok = q => { if (z.ctx.inMainLoose(q.x, q.z)) return true; for (let r = 2; r <= near; r += 2) for (let a = 0; a < 16; a++) if (z.ctx.inMain(q.x + Math.cos(a * 0.3927) * r, q.z + Math.sin(a * 0.3927) * r)) return true; return false; };
     for (const q of pts) if (!ok(q)) bad.push(`${z.wid} ${p.type} ${p.id} at ${q.x},${q.z}`);
   }
@@ -132,7 +133,7 @@ test('REACHABLE: everything stands in the walkable component of the province hub
 });
 
 test('rares, roaming packs and folk walk: every leg of every loop is a walkable corridor in the main component', () => {
-  for (const z of Object.values(Z)) for (const r of z.pl.filter(p => p.type === 'rare' || p.roam || p.type === 'folk')) {
+  for (const z of Object.values(Z)) for (const r of z.pl.filter(p => (p.type === 'rare' && !p.questBoss) || p.roam || p.type === 'folk')) {
     assert.ok(r.path.length >= (r.type === 'folk' ? 3 : 4), `${r.id} path`);
     const pts = r.path.map(([x, zz]) => ({ x, z: zz }));
     for (let i = 0; i < pts.length; i++) assert.ok(walkLine(z.ctx, pts[i], pts[(i + 1) % pts.length]), `${z.wid} ${r.id} leg ${i}`);
@@ -170,7 +171,7 @@ test('LONGEST BORING WALK <= 250 m (PLAN §16): on every road, and cross-country
 test('minimum spacing: vignettes >= 140 m apart, NPCs >= 3 m apart, waystones >= 60 m apart (P14)', () => {
   for (const z of Object.values(Z)) {
     const near = (list, d) => { for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) if (Math.hypot(list[i].x - list[j].x, list[i].z - list[j].z) < d) return `${list[i].id} / ${list[j].id}`; return null; };
-    assert.equal(near(z.pl.filter(p => p.type === 'vignette'), 140), null, z.wid);
+    assert.equal(near(z.pl.filter(p => p.type === 'vignette' && !p.setpiece), 140), null, z.wid);   // set pieces keep the disc gap instead
     assert.equal(near(z.pl.filter(p => p.type === 'npc'), 3), null, z.wid);
     assert.equal(near(z.pl.filter(p => p.type === 'waystone'), 60), null, z.wid);
   }
@@ -279,7 +280,8 @@ test('NPC schedules: every block names a phase and an anchor that resolves; ever
   for (const [id, r] of Object.entries(SCHED.roles)) check(id, r.blocks);
   check('guard', SCHED.guard.blocks); check('questNpc', SCHED.questNpc.blocks);
   for (const [id, a] of Object.entries(SCHED.anchors)) {
-    for (const w of a.want || []) assert.ok(wants.has(w), `anchor ${id}: want ${w} never baked`);
+    // stream B's town plans change their building kinds (play-test 2: chapel -> temple): an anchor needs ONE of its wants baked
+    if ((a.want || []).length) assert.ok(a.want.some(w => wants.has(w)), `anchor ${id}: none of ${a.want} is ever baked`);
     for (const f of a.fallback || []) assert.ok(SCHED.anchors[f], `anchor ${id}: fallback ${f}`);
   }
   for (const list of [SCHED.perTown.town, SCHED.perTown.city, SCHED.perTown.hamlet]) for (const r of list) assert.ok(SCHED.roles[r], r);

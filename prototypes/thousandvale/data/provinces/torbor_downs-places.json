@@ -7,7 +7,125 @@
         "ashford": "Wamonhold",
         "pohelrow": "Mawehaven"
       },
-      "asks": []
+      "asks": [],
+      "setPieces": [
+        {
+          "id": "hobbins_farm",
+          "kind": "farm",
+          "name": "Brannock Fields",
+          "near": [
+            790,
+            880
+          ],
+          "fields": 7,
+          "eSetpiece": "sp_brannock_fields"
+        },
+        {
+          "id": "torbor_mill_pond",
+          "kind": "mill_pond",
+          "name": "Turnwater Mill",
+          "near": [
+            880,
+            1300
+          ],
+          "r": 18,
+          "eSetpiece": "sp_turnwater_mill"
+        },
+        {
+          "id": "hollow_chapel",
+          "kind": "graveyard",
+          "name": "Saint Hulda's Yard",
+          "near": [
+            350,
+            1060
+          ],
+          "size": [
+            30,
+            22
+          ],
+          "chapel": true,
+          "eSetpiece": "sp_saint_hulda_yard"
+        },
+        {
+          "id": "hunters_clearing",
+          "kind": "clearing",
+          "name": "Greyfletch Camp",
+          "near": [
+            1650,
+            1330
+          ],
+          "r": 20,
+          "for": "camp",
+          "eSetpiece": "sp_greyfletch_camp"
+        },
+        {
+          "id": "grey_maidens",
+          "kind": "stone_circle",
+          "name": "The Nine Maidens",
+          "near": [
+            1500,
+            520
+          ],
+          "r": 11,
+          "eSetpiece": "sp_nine_maidens"
+        },
+        {
+          "id": "charcoal_clearing",
+          "kind": "clearing",
+          "name": "Ashby's Lumber Camp",
+          "near": [
+            1040,
+            1300
+          ],
+          "r": 22,
+          "for": "camp",
+          "eSetpiece": "sp_ashby_lumber_camp"
+        }
+      ],
+      "lanes": [
+        {
+          "id": "lane_torbor_east",
+          "name": "Wether Lane",
+          "to": [
+            "Saint Hulda's Yard",
+            "Wamonhold Road"
+          ],
+          "pts": [
+            [
+              330,
+              1040
+            ],
+            [
+              450,
+              1012
+            ],
+            [
+              600,
+              1010
+            ],
+            [
+              760,
+              1000
+            ],
+            [
+              920,
+              1022
+            ],
+            [
+              1060,
+              1080
+            ],
+            [
+              1140,
+              1150
+            ],
+            [
+              1172,
+              1214
+            ]
+          ]
+        }
+      ]
     },
     "hollin_pass": {
       "world": "z11_01",

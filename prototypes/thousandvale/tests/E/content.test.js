@@ -138,9 +138,12 @@ test('quests: unique ids, every reference resolves, chains point at real quests,
   assert.equal(ids.size, Q.length);
   assert.ok(Q.length >= 8);
   const bad = [];
-  const vig = id => VIG.some(v => v.id === id);
+  // play-test 2: set pieces (data/vignettes/setpieces.json) are vignettes too, and a step may talk to an NPC of another zone's file
+  const SETP = new Set(J('data/vignettes/setpieces.json').vignettes.map(v => v.id));
+  const vig = id => VIG.some(v => v.id === id) || SETP.has(id);
+  const ALL_NPCS = Object.assign({}, ...readdirSync(new URL('data/quests/', root)).filter(f => f.endsWith('.json')).map(f => J('data/quests/' + f).npcs || {}));
   for (const q of Q) {
-    if (!QUESTS.npcs[q.giver]) bad.push(`${q.id}: giver ${q.giver}`);
+    if (!ALL_NPCS[q.giver]) bad.push(`${q.id}: giver ${q.giver}`);
     if (q.next && !ids.has(q.next) && !ALL_QUEST_IDS.has(q.next)) bad.push(`${q.id}: next ${q.next}`);
     if (!q.offer || !q.done || !q.steps.length) bad.push(`${q.id}: text/steps`);
     if (!(q.reward.xp > 0 && q.reward.xp <= 2)) bad.push(`${q.id}: xp should be a share of a level (0..2)`);
@@ -151,7 +154,7 @@ test('quests: unique ids, every reference resolves, chains point at real quests,
       if (s.kind === 'killOne' && !SCRIPTS[s.encounter]) bad.push(`${q.id}: encounter ${s.encounter}`);
       if ((s.kind === 'visit' || s.kind === 'use') && s.vignette && !vig(s.vignette)) bad.push(`${q.id}: vignette ${s.vignette}`);
       if (s.kind === 'visit' && s.site && !SCRIPTS[s.site] && !terrain.meta.sites.some(x => x.name === s.site)) bad.push(`${q.id}: site ${s.site}`);
-      if ((s.kind === 'talk' || s.kind === 'deliver') && !QUESTS.npcs[s.npc]) bad.push(`${q.id}: npc ${s.npc}`);
+      if ((s.kind === 'talk' || s.kind === 'deliver') && !ALL_NPCS[s.npc]) bad.push(`${q.id}: npc ${s.npc}`);
       if (!['kill', 'killOne', 'collect', 'visit', 'talk', 'use', 'clear', 'deliver'].includes(s.kind)) bad.push(`${q.id}: kind ${s.kind}`);
     }
   }

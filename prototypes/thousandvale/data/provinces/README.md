@@ -16,3 +16,22 @@ The world zones each sheet zone uses: stream B's `data/world/province-map.json`.
 
 Tests: `tests/E/province.test.js` (grid, bands, archetypes, variety), `tests/E/placement.test.js` (coordinates,
 schedules), `tests/E/quests.test.js` (sites).
+
+## Play-test 2 (2026-10-05): shops, offices, barber
+
+- **`shops.json`** (Q9/Q11/Q16/Q20) — `kinds` (authored): per trader kind its `role`, `sign`, `light`, gear `categories`
+  (emberveil items.json / Farhold foci bases, `count`, `rarity` weights — rolled at the buyer's level), fixed `goods`
+  (`source` potion | gear (Farhold js/gear.js GEAR_BASES: mounts, lights, quivers) | good (described in `goodsCatalog` with a
+  `use` block), `price`, `minLevel`) and `services` (barber `appearance` price list with the first change free, inn `bind`,
+  smith `salvage`, broker `followers`, unbinder `retrain`, healer `cure`, stable `stable`). `pricing` = sell factor, buyback,
+  restock, per-item-level price step. `towns` = per hub town `levelCap`, `priceMult`, `stock` overrides, and `shops` (written
+  from stream B's bake by tools/content-offices.mjs). `roles` = MADE by `tools/content-shops.mjs` from `kinds` in stream A's
+  shape (js/sim/shops.js) — never edit it by hand. The stable sells the Trail Horse from level 1 (60 g; the owner wants to
+  try a mount), then pony 240 (5), courser 900 (10), dray elk 1600 (15).
+- **`offices.json`** (Q10) — MADE by `tools/content-offices.mjs` (also run by place-vignettes): every working NPC of every hub
+  town gets ONE building plot of B's town plan (B's `data.role` tag first, then ROLE_WANT), a `door` to stand at (>= 2.5 m from
+  any other), a `sign` and `light` (shops lit, offices not), and `npc` when a quest NPC is that office's keeper (one body).
+  Quest NPCs standing in a town without a trade get a `home`. `setpieces` lists the NPCs whose office is a set piece.
+- **`schedules.json`** — anchor `office` (the NPC's own plot) and the new roles (armourer, bowyer, apothecary, provisioner,
+  trader, tailor, jeweller, barber, reeve, trainer), named as stream B's data/world/town-offices.json.
+- **`travellers.json`** — folk roles with `setpiece: true` work only at set pieces / B's slots (never picked by the filler).

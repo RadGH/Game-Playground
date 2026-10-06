@@ -1,5 +1,5 @@
 {
- "_doc": "Stream E (play-test 1, P19). Who walks the roads and who works the wilds — data for stream A to run. `kinds` = travelling groups that walk stream E's routes (data/provinces/torbor_downs-routes.json: town to town along B's roads). Each group is a crew of NPCs (`role` = a role id; its bark pool is chatter.json `role.<role>`), optionally with a pack animal or cart (a look only). `fights`: never = runs from danger (walks on, faster), defend = fights back only when hit, hunts = attacks monsters within 25 m of the road and helps players fighting near it. Display names: `{first}` = a given name from data/names/torbor.json `given` (f or m, seeded per traveller), `{family}` = a family name from the same file. `folk` = people who work one spot in the wilds: the placer (tools/place-vignettes.mjs) puts a `folk` placement {role, path} where `places`/`biomes`/`archetypes` fit; they walk a small loop of `loopM` metres, play the `work` animation at each stop, and bark from `chatter`. Pools: data/names/chatter.json. Speeds in metres a second (a player walks ~5).",
+ "_doc": "Stream E (play-test 1, P19). Who walks the roads and who works the wilds — data for stream A to run. `kinds` = travelling groups that walk stream E's routes (data/provinces/torbor_downs-routes.json: town to town along B's roads). Each group is a crew of NPCs (`role` = a role id; its bark pool is chatter.json `role.<role>`), optionally with a pack animal or cart (a look only). `fights`: never = runs from danger (walks on, faster), defend = fights back only when hit, hunts = attacks monsters within 25 m of the road and helps players fighting near it. Display names: `{first}` = a given name from data/names/torbor.json `given` (f or m, seeded per traveller), `{family}` = a family name from the same file. `folk` = people who work one spot in the wilds: the placer (tools/place-vignettes.mjs) puts a `folk` placement {role, path} where `places`/`biomes`/`archetypes` fit; they walk a small loop of `loopM` metres, play the `work` animation at each stop, and bark from `chatter`. Pools: data/names/chatter.json. Speeds in metres a second (a player walks ~5). Play-test 2: folk roles with `setpiece: true` (farmer, orchard_keeper, sexton, hunter, foreman, stablehand) only work at set pieces (data/vignettes/setpieces.json `folk`) — the living-world filler never picks them.",
  "rules": {
   "perRouteKm": 0.6,
   "maxPerZone": 10,
@@ -830,6 +830,191 @@
     }
    ],
    "weight": 1
+  },
+  "farmer": {
+   "name": "Farmer",
+   "setpiece": true,
+   "places": "setpiece",
+   "biomes": [],
+   "archetypes": [],
+   "loopM": [
+    4,
+    12
+   ],
+   "work": "farm",
+   "chatter": [
+    "role.farmer"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": 2,
+     "z": 0,
+     "yaw": 0.3
+    }
+   ],
+   "weight": 0
+  },
+  "orchard_keeper": {
+   "name": "Orchard keeper",
+   "setpiece": true,
+   "places": "setpiece",
+   "biomes": [],
+   "archetypes": [],
+   "loopM": [
+    4,
+    12
+   ],
+   "work": "tend",
+   "chatter": [
+    "role.orchard_keeper"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 1.5,
+     "z": 0.5,
+     "yaw": 0.2
+    }
+   ],
+   "weight": 0
+  },
+  "sexton": {
+   "name": "Sexton",
+   "setpiece": true,
+   "places": "setpiece",
+   "biomes": [],
+   "archetypes": [],
+   "loopM": [
+    4,
+    12
+   ],
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "props": [],
+   "weight": 0
+  },
+  "hunter": {
+   "name": "Hunter",
+   "setpiece": true,
+   "places": "setpiece",
+   "biomes": [],
+   "archetypes": [],
+   "loopM": [
+    4,
+    12
+   ],
+   "work": "tend",
+   "chatter": [
+    "role.hunter"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "drying_rack",
+     "x": 2,
+     "z": 0,
+     "yaw": 0.5
+    }
+   ],
+   "weight": 0
+  },
+  "foreman": {
+   "name": "Foreman",
+   "setpiece": true,
+   "places": "setpiece",
+   "biomes": [],
+   "archetypes": [],
+   "loopM": [
+    4,
+    12
+   ],
+   "work": "tend",
+   "chatter": [
+    "role.foreman"
+   ],
+   "props": [],
+   "weight": 0
+  },
+  "stablehand": {
+   "name": "Stablehand",
+   "setpiece": true,
+   "places": "setpiece",
+   "biomes": [],
+   "archetypes": [],
+   "loopM": [
+    4,
+    12
+   ],
+   "work": "tend",
+   "chatter": [
+    "role.stablehand"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": 1.5,
+     "z": 1,
+     "yaw": 0
+    }
+   ],
+   "weight": 0
+  },
+  "innkeeper": {
+   "name": "Innkeeper",
+   "setpiece": true,
+   "places": "setpiece",
+   "biomes": [],
+   "archetypes": [],
+   "loopM": [
+    4,
+    12
+   ],
+   "work": "tend",
+   "chatter": [
+    "role.innkeeper"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": 1.5,
+     "z": 0.5,
+     "yaw": 0
+    }
+   ],
+   "weight": 0
+  },
+  "miller": {
+   "name": "Miller",
+   "setpiece": true,
+   "places": "setpiece",
+   "biomes": [],
+   "archetypes": [],
+   "loopM": [
+    4,
+    12
+   ],
+   "work": "tend",
+   "chatter": [
+    "role.miller"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 1.5,
+     "z": 0.5,
+     "yaw": 0
+    }
+   ],
+   "weight": 0
   }
  }
 }

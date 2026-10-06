@@ -1,0 +1,1646 @@
+{
+  "_doc": "Stream E (play-test 2, Q28). A low-level class quest for each of the 30 classes, merged into zone 'test' (the Torbor Fields) via test.json `include`. `npcs` are the class trainers (role 'trainer', `trains` = class ids; `at` = a set piece id from data/vignettes/setpieces.json, or Torborhold with an `office` kind resolved by data/provinces/offices.json). A quest with `classes` is offered only to those classes. Rewards: `item` {tier, slot, base (items.json base key), name (bespoke)}; `unlock: 'companion'` (rules.unlock: the class companion now instead of level 10) for the 13 companion classes; `perks: 1` (one extra perk-forest point) for the other 17. `rewardText` = the player-facing summary.",
+  "zone": "test",
+  "part": "classes",
+  "npcs": {
+    "trainer_arms": {
+      "name": "Sergeant-at-Arms Brede Holloway",
+      "role": "trainer",
+      "trains": [
+        "warrior",
+        "fighter",
+        "knight",
+        "swashbuckler",
+        "dragon_knight",
+        "tactician"
+      ],
+      "at": "sp_drill_field",
+      "greeting": "Feet apart. No, YOUR feet. Good. Now we can talk.",
+      "says": [
+        "Again! Like you mean it this time.",
+        "The dummy has won four bouts this week. Don't make it five.",
+        "Sweat is free. Blood costs extra."
+      ]
+    },
+    "trainer_holy": {
+      "name": "Mother Ansel",
+      "role": "trainer",
+      "trains": [
+        "cleric",
+        "priest",
+        "paladin"
+      ],
+      "at": "Torborhold",
+      "office": "shrine",
+      "greeting": "The light finds everyone eventually. It finds some of us with a stick.",
+      "says": [
+        "Kneel if you like. The floor is cleaner than it looks.",
+        "Prayer, then porridge. That is the order of things.",
+        "Mind the candles. They have opinions."
+      ]
+    },
+    "trainer_arcane": {
+      "name": "Magister Pellam Voss",
+      "role": "trainer",
+      "trains": [
+        "mage",
+        "sorcerer",
+        "chronomancer",
+        "enchanter",
+        "stormcaller",
+        "pyromancer"
+      ],
+      "at": "Torborhold",
+      "office": "house",
+      "greeting": "Don't touch that. Or that. Especially not that one, it bites.",
+      "says": [
+        "The scorch marks are load-bearing, leave them.",
+        "Magic is just arithmetic that shouts.",
+        "If my eyebrows grow back, I'll have won."
+      ]
+    },
+    "trainer_shadow": {
+      "name": "Sly Mabry",
+      "role": "trainer",
+      "trains": [
+        "rogue",
+        "shadow_dancer",
+        "scavenger"
+      ],
+      "at": "Torborhold",
+      "office": "hut",
+      "greeting": "You didn't see me. Good. Practise that on other people.",
+      "says": [
+        "Pockets are just boxes people forget to lock.",
+        "Walk soft. The floorboards are on the reeve's side.",
+        "Everything has a price. Mine is reasonable."
+      ]
+    },
+    "trainer_runes": {
+      "name": "Garrick Stonehand",
+      "role": "trainer",
+      "trains": [
+        "runesmith"
+      ],
+      "at": "Torborhold",
+      "office": "hut",
+      "greeting": "A rune is a promise you hit into iron. Break it and the iron keeps it.",
+      "says": [
+        "Tap, tap, listen. The metal tells you where.",
+        "Don't sneeze near wet ink.",
+        "My hammer's older than the town."
+      ]
+    },
+    "trainer_hunt": {
+      "name": "Oswy Greyfletch",
+      "role": "trainer",
+      "trains": [
+        "ranger",
+        "witch_hunter",
+        "demon_hunter"
+      ],
+      "at": "sp_greyfletch_camp",
+      "greeting": "Quiet. You're upwind and you smell like town.",
+      "says": [
+        "Tracks don't lie. People do.",
+        "Every arrow you lose is a lesson you paid for.",
+        "The wood's watching. So am I."
+      ]
+    },
+    "trainer_wilds": {
+      "name": "Wenna of the Stones",
+      "role": "trainer",
+      "trains": [
+        "druid",
+        "shaman"
+      ],
+      "at": "sp_nine_maidens",
+      "greeting": "The stones counted you coming up the hill. You're one more than they expected.",
+      "says": [
+        "Nine maidens, one fiddler, and a very long dance.",
+        "Bare feet on the grass. It listens better that way.",
+        "The spirits are chatty today. Mostly about you."
+      ]
+    },
+    "trainer_grave": {
+      "name": "Old Mother Quell",
+      "role": "trainer",
+      "trains": [
+        "necromancer"
+      ],
+      "at": "sp_saint_hulda_yard",
+      "greeting": "Forty years I've dug these holes. Some of them have started digging back.",
+      "says": [
+        "Mind the soft patch. That's Gaffer Wat.",
+        "Everyone ends up here. Some of us just visit early.",
+        "A spade is a very honest tool."
+      ]
+    },
+    "trainer_pact": {
+      "name": "Ysolde Coldharrow",
+      "role": "trainer",
+      "trains": [
+        "warlock"
+      ],
+      "at": "sp_coldharrow_ruins",
+      "greeting": "My family burned this house down with a bargain. I kept the bargain.",
+      "says": [
+        "Everything costs. I just read the price first.",
+        "The ash still whispers, if you lean close.",
+        "Bleed a little. It clears the head."
+      ]
+    },
+    "trainer_mind": {
+      "name": "Brother Cadoc",
+      "role": "trainer",
+      "trains": [
+        "monk",
+        "oracle"
+      ],
+      "at": "sp_kind_mother_shrine",
+      "greeting": "You were going to say hello. I saved you the trouble.",
+      "says": [
+        "Stand on one leg. Now the other. Now neither.",
+        "The road south is long. So is patience.",
+        "I dreamed you'd come. You were taller."
+      ]
+    },
+    "trainer_tinker": {
+      "name": "Jory Millward",
+      "role": "trainer",
+      "trains": [
+        "tinker"
+      ],
+      "at": "sp_turnwater_mill",
+      "greeting": "Gears, cogs, springs, a little swearing. That's how the mill turns.",
+      "says": [
+        "If it squeaks, oil it. If it explodes, write it down.",
+        "The wheel never stops. I wish I could say the same.",
+        "Hand me that. No, the other that."
+      ]
+    },
+    "trainer_bard": {
+      "name": "Lute-master Emrys Fenwick",
+      "role": "trainer",
+      "trains": [
+        "bard"
+      ],
+      "at": "sp_pail_and_plough",
+      "greeting": "Sit, sit. Every road ends in a song, if you wait long enough.",
+      "says": [
+        "This next one's about a goat. They're all about a goat.",
+        "Tune your strings and your temper.",
+        "Applause is accepted in coin."
+      ]
+    }
+  },
+  "quests": [
+    {
+      "id": "class_warrior",
+      "name": "The Dummy Wins Again",
+      "level": 2,
+      "giver": "trainer_arms",
+      "offer": "That straw dummy has knocked three recruits flat this week. I don't know how. Nobody knows how. Beat it, then go and beat something that bites back — warriors get stronger the more there are around them.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_drill_field",
+          "object": "Straw dummy",
+          "text": "Strike the straw dummy at the Drill Field",
+          "where": "Torbor Drill Field, just outside Torborhold's gate"
+        },
+        {
+          "kind": "kill",
+          "type": "moor_hound",
+          "count": 6,
+          "text": "Kill 6 moor hounds out in the open grass",
+          "where": "the sheep folds and open grass around Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_drill_field",
+          "object": "Weapon rack",
+          "text": "Hang your blade on the weapon rack to show you came back",
+          "where": "Torbor Drill Field, just outside Torborhold's gate"
+        }
+      ],
+      "done": "Six at once? No? Well, it'll be six at once soon. The rack's yours to use, and so's this. Take a perk point while you're at it — you've earned the knack of standing in a crowd.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "longsword",
+          "name": "Holloway's Second-Best Longsword"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare longsword, Holloway's Second-Best Longsword, and one extra perk-forest point.",
+      "classes": [
+        "warrior"
+      ]
+    },
+    {
+      "id": "class_fighter",
+      "name": "Stance and Answer",
+      "level": 3,
+      "giver": "trainer_arms",
+      "offer": "Fighters don't flail. Fighters answer. Go to the sand pit and hold your guard. Then find the brigands on the road and answer every swing they throw — a counter for every blow.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_drill_field",
+          "object": "Sand pit",
+          "text": "Hold your stance in the sand pit",
+          "where": "Torbor Drill Field, just outside Torborhold's gate"
+        },
+        {
+          "kind": "kill",
+          "type": "road_brigand",
+          "count": 5,
+          "text": "Defeat 5 road brigands",
+          "where": "along the roads out of Torborhold"
+        },
+        {
+          "kind": "collect",
+          "item": "Notched brigand blade",
+          "count": 3,
+          "from": "road_brigand",
+          "chance": 0.6,
+          "text": "Take 3 notched blades as proof",
+          "where": "along the roads out of Torborhold"
+        }
+      ],
+      "done": "Notched on the edge, clean on the flat. You let them hit the blade, not you. That's the whole trade. Here — a proper two-hander, and a perk point for the lesson.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "sword2h",
+          "name": "The Patient Answer"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare two-handed sword, The Patient Answer, and one extra perk-forest point.",
+      "classes": [
+        "fighter"
+      ]
+    },
+    {
+      "id": "class_knight",
+      "name": "The Oath at the Bell",
+      "level": 3,
+      "giver": "trainer_arms",
+      "offer": "A knight stands between the weak and whatever wants them. Old Mother Quell at Saint Hulda's says the dead hounds come for the mourners. Ring her bell, stand your ground, and take the hits so nobody else has to.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_saint_hulda_yard",
+          "object": "Sexton's bell",
+          "text": "Ring the sexton's bell at Saint Hulda's Yard",
+          "where": "Saint Hulda's Yard, the graveyard outside Torborhold"
+        },
+        {
+          "kind": "kill",
+          "type": "barrow_hound",
+          "count": 5,
+          "near": "sp_saint_hulda_yard",
+          "text": "Hold the yard against 5 barrow hounds",
+          "where": "Saint Hulda's Yard, the graveyard outside Torborhold"
+        },
+        {
+          "kind": "talk",
+          "npc": "trainer_grave",
+          "text": "Tell Old Mother Quell the mourners are safe",
+          "where": "Saint Hulda's Yard, the graveyard outside Torborhold"
+        }
+      ],
+      "done": "Quell says you stood like a gatepost. That's the highest praise she gives anything alive. A shield fit for the oath, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "offhand",
+          "base": "kite_shield",
+          "name": "Gatepost Shield"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare kite shield, Gatepost Shield, and one extra perk-forest point.",
+      "classes": [
+        "knight"
+      ]
+    },
+    {
+      "id": "class_swashbuckler",
+      "name": "Flair for the Dramatic",
+      "level": 2,
+      "giver": "trainer_arms",
+      "offer": "Anyone can win a fight. A swashbuckler wins it with style, a different trick each time. Go to the Pail and Plough, climb on the hearth and tell them you're the finest blade in the downs. Then prove it on the boars at Brannock Fields. With FLOURISH.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_pail_and_plough",
+          "object": "Hearth",
+          "text": "Boast from the hearth at the Pail and Plough",
+          "where": "The Pail and Plough, the crossroads inn on the Orrinsford road"
+        },
+        {
+          "kind": "kill",
+          "type": "thicket_boar",
+          "count": 5,
+          "near": "sp_brannock_fields",
+          "text": "Defeat 5 thicket boars at Brannock Fields — stylishly",
+          "where": "Brannock Fields, the farmland near Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_brannock_fields",
+          "object": "Scarecrow",
+          "text": "Bow to the scarecrow, your only audience",
+          "where": "Brannock Fields, the farmland near Torborhold"
+        }
+      ],
+      "done": "The scarecrow clapped. Well, it flapped. Close enough. A rapier with a little bit of swagger in the blade, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "rapier",
+          "name": "Scarecrow's Applause"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare rapier, Scarecrow's Applause, and one extra perk-forest point.",
+      "classes": [
+        "swashbuckler"
+      ]
+    },
+    {
+      "id": "class_dragon_knight",
+      "name": "Temper the Scale",
+      "level": 4,
+      "giver": "trainer_arms",
+      "offer": "A dragon knight picks a temper — fire, frost or storm — and the wyrm's heart answers. You'll need heat to wake yours. The mill's grindstone sparks, the lumber camp's grindstone sparks more. Put an edge on your blade at both, then blood it on the flitters in the woods.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_turnwater_mill",
+          "object": "Millstone",
+          "text": "Grind your edge on the millstone at Turnwater Mill",
+          "where": "Turnwater Mill, on the stream near Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_ashby_lumber_camp",
+          "object": "Grindstone",
+          "text": "Spark the grindstone at Ashby's Lumber Camp",
+          "where": "Ashby's Lumber Camp, at the edge of the woods"
+        },
+        {
+          "kind": "kill",
+          "type": "dusk_flitter",
+          "count": 6,
+          "near": "sp_ashby_lumber_camp",
+          "text": "Kill 6 dusk flitters around the lumber camp",
+          "where": "Ashby's Lumber Camp, at the edge of the woods"
+        }
+      ],
+      "done": "Feel that? Warm, like a coal in your chest. That's the wyrm, stirring. A greatsword that likes the heat, and a perk point for waking it.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "greatsword",
+          "name": "Wyrmwaker"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare greatsword, Wyrmwaker, and one extra perk-forest point.",
+      "classes": [
+        "dragon_knight"
+      ]
+    },
+    {
+      "id": "class_tactician",
+      "name": "Orders for the Boars",
+      "level": 3,
+      "giver": "trainer_arms",
+      "offer": "A tactician wins the fight before it starts. Study the planting tally at Brannock Fields — the boars come by the same path every dusk. Give the order: thin the herd, then report to Goody Harl so she knows her turnips have a general.",
+      "steps": [
+        {
+          "kind": "visit",
+          "vignette": "sp_brannock_fields",
+          "text": "Survey Brannock Fields",
+          "where": "Brannock Fields, the farmland near Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_brannock_fields",
+          "object": "Beehives",
+          "text": "Move the beehives across the boars' path",
+          "where": "Brannock Fields, the farmland near Torborhold"
+        },
+        {
+          "kind": "kill",
+          "type": "thicket_boar",
+          "count": 4,
+          "near": "sp_brannock_fields",
+          "text": "Defeat 4 thicket boars as they blunder into the bees",
+          "where": "Brannock Fields, the farmland near Torborhold"
+        },
+        {
+          "kind": "talk",
+          "npc": "goody_harl",
+          "text": "Report to Goody Harl",
+          "where": "Wamonhold, east of Torborhold"
+        }
+      ],
+      "done": "Bees. You used BEES. That's not in any manual I own, which means I'm writing one. A sword for the field commander, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "sword",
+          "name": "The Beekeeper's Order"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare sword, The Beekeeper's Order, and one extra perk-forest point.",
+      "classes": [
+        "tactician"
+      ]
+    },
+    {
+      "id": "class_cleric",
+      "name": "Bandages for the Living",
+      "level": 2,
+      "giver": "trainer_holy",
+      "offer": "A cleric's heal doesn't stop at full — it overflows into a shield. Practise on someone who needs it. Bryn the Bonesetter is out of clean linen and patience. Take her what the fen frogs have been hoarding, and pray at the Kind Mother on the way back.",
+      "steps": [
+        {
+          "kind": "talk",
+          "npc": "bryn_bonesetter",
+          "text": "Ask Bryn the Bonesetter what she needs",
+          "where": "Torborhold"
+        },
+        {
+          "kind": "collect",
+          "item": "Clean river reed",
+          "count": 5,
+          "from": "fen_croaker",
+          "chance": 0.6,
+          "text": "Gather 5 bundles of river reed from fen croakers",
+          "where": "the marsh and riverbanks south of Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_kind_mother_shrine",
+          "object": "Prayer stones",
+          "text": "Pray at the Shrine of the Kind Mother",
+          "where": "Shrine of the Kind Mother, beside the south road"
+        }
+      ],
+      "done": "Reed splints and a prayer. That's half of medicine, and the other half is shouting at people to sit still. A scepter blessed at the shrine, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "scepter",
+          "name": "Bryn's Steady Hand"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare scepter, Bryn's Steady Hand, and one extra perk-forest point.",
+      "classes": [
+        "cleric"
+      ]
+    },
+    {
+      "id": "class_priest",
+      "name": "A Debt to the Dead",
+      "level": 3,
+      "giver": "trainer_holy",
+      "offer": "Priests pay for revivals in advance and collect from killers afterwards. Saint Hulda's ossuary door has been forced — someone robbed the dead. Find the brigands with the grave rings, and mark every one of them.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_saint_hulda_yard",
+          "object": "Ossuary door",
+          "text": "Inspect the forced ossuary door at Saint Hulda's Yard",
+          "where": "Saint Hulda's Yard, the graveyard outside Torborhold"
+        },
+        {
+          "kind": "collect",
+          "item": "Stolen grave ring",
+          "count": 4,
+          "from": "road_brigand",
+          "chance": 0.55,
+          "text": "Take back 4 stolen grave rings from road brigands",
+          "where": "along the roads out of Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_saint_hulda_yard",
+          "object": "Open grave",
+          "text": "Return the rings to the open grave",
+          "where": "Saint Hulda's Yard, the graveyard outside Torborhold"
+        }
+      ],
+      "done": "The dead are paid back, and the robbers paid up. That is the whole of my faith in one afternoon. A mace that never forgets who it struck — and a spirit bear walks with you from today.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "iron_mace",
+          "name": "Ledger of the Unquiet"
+        },
+        "unlock": "companion"
+      },
+      "rewardText": "A rare mace, Ledger of the Unquiet, and your companion comes to you now instead of at level 10.",
+      "classes": [
+        "priest"
+      ]
+    },
+    {
+      "id": "class_paladin",
+      "name": "Strike and Heal",
+      "level": 3,
+      "giver": "trainer_holy",
+      "offer": "A paladin heals by hitting. Strange, but it works. The shrine on the south road is defiled by brigands camped in the Coldharrow ruins. Drive them out — every blow you land is a prayer — then cleanse the Mother's statue.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "road_brigand",
+          "count": 6,
+          "near": "sp_coldharrow_ruins",
+          "text": "Drive out 6 road brigands from Coldharrow Ruins",
+          "where": "Coldharrow Ruins, the burnt manor in the fields"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_coldharrow_ruins",
+          "object": "Cracked sigil",
+          "text": "Smash the brigands' cracked sigil",
+          "where": "Coldharrow Ruins, the burnt manor in the fields"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_kind_mother_shrine",
+          "object": "Mother's statue",
+          "text": "Wash the Mother's statue clean",
+          "where": "Shrine of the Kind Mother, beside the south road"
+        }
+      ],
+      "done": "The Mother is smiling again. Statues can't smile, so I'm told. This one can. A sword with a little light in it, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "sword",
+          "name": "Kind Mother's Edge"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare sword, Kind Mother's Edge, and one extra perk-forest point.",
+      "classes": [
+        "paladin"
+      ]
+    },
+    {
+      "id": "class_mage",
+      "name": "Frost Then Shatter",
+      "level": 3,
+      "giver": "trainer_arcane",
+      "offer": "Frost slows, and a slowed thing shatters. Lesson one. Lesson two: never practise indoors, my ceiling has suffered. Chill the water at Tench Pool, then shatter the frogs that come to complain.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_tench_pool",
+          "object": "Old jetty",
+          "text": "Freeze the shallows from the old jetty at Tench Pool",
+          "where": "Tench Pool, the fishing spot near Torborhold"
+        },
+        {
+          "kind": "kill",
+          "type": "fen_croaker",
+          "count": 6,
+          "near": "sp_tench_pool",
+          "text": "Shatter 6 fen croakers around Tench Pool",
+          "where": "Tench Pool, the fishing spot near Torborhold"
+        },
+        {
+          "kind": "collect",
+          "item": "Frost-cracked frog stone",
+          "count": 3,
+          "from": "fen_croaker",
+          "chance": 0.5,
+          "text": "Collect 3 frost-cracked frog stones",
+          "where": "Tench Pool, the fishing spot near Torborhold"
+        }
+      ],
+      "done": "Lovely little cracks. You can see the cold went right through. A staff, still cold at the tip, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "staff",
+          "name": "Voss's Icebound Rod"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare staff, Voss's Icebound Rod, and one extra perk-forest point.",
+      "classes": [
+        "mage"
+      ]
+    },
+    {
+      "id": "class_sorcerer",
+      "name": "Wild Results",
+      "level": 3,
+      "giver": "trainer_arcane",
+      "offer": "Sorcery is chance with a loud voice. Your bolts will roll their own element. Fine. Go to the Nine Maidens and let the stones decide what you are today, then test whatever comes out on the boars.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_nine_maidens",
+          "object": "Altar stone",
+          "text": "Lay your hand on the altar stone at the Nine Maidens",
+          "where": "The Nine Maidens, a ring of standing stones on the hill"
+        },
+        {
+          "kind": "kill",
+          "type": "thicket_boar",
+          "count": 5,
+          "near": "sp_brannock_fields",
+          "text": "Test your wild bolts on 5 thicket boars",
+          "where": "Brannock Fields, the farmland near Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_nine_maidens",
+          "object": "Heel stone",
+          "text": "Tell the heel stone how it went",
+          "where": "The Nine Maidens, a ring of standing stones on the hill"
+        }
+      ],
+      "done": "Fire, then frost, then something purple? Excellent. Nobody, including you, knows what's next. A wand to steer it, a little — and a storm familiar now answers your call.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "wand",
+          "name": "The Coin-Toss Wand"
+        },
+        "unlock": "companion"
+      },
+      "rewardText": "A rare wand, The Coin-Toss Wand, and your companion comes to you now instead of at level 10.",
+      "classes": [
+        "sorcerer"
+      ]
+    },
+    {
+      "id": "class_chronomancer",
+      "name": "The Mill Runs Backwards",
+      "level": 4,
+      "giver": "trainer_arcane",
+      "offer": "Jory at the mill swears the wheel turned backwards for a whole minute last night. It did. I did it. By accident. Go and wind the gears forward again, then catch the rats that got stuck in yesterday.",
+      "steps": [
+        {
+          "kind": "talk",
+          "npc": "trainer_tinker",
+          "text": "Ask Jory Millward about the backwards wheel",
+          "where": "Turnwater Mill, on the stream near Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_turnwater_mill",
+          "object": "Gear housing",
+          "text": "Wind the gear housing forward",
+          "where": "Turnwater Mill, on the stream near Torborhold"
+        },
+        {
+          "kind": "kill",
+          "type": "cairn_rat",
+          "count": 6,
+          "near": "sp_turnwater_mill",
+          "text": "Clear 6 cairn rats stuck in yesterday",
+          "where": "Turnwater Mill, on the stream near Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_turnwater_mill",
+          "object": "Sluice lever",
+          "text": "Pull the sluice lever at exactly the right moment",
+          "where": "Turnwater Mill, on the stream near Torborhold"
+        }
+      ],
+      "done": "The wheel's turning the right way, and the rats are gone from all three of their days. Don't tell Jory. A staff that ticks if you hold it close, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "staff",
+          "name": "Yesterday's Staff"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare staff, Yesterday's Staff, and one extra perk-forest point.",
+      "classes": [
+        "chronomancer"
+      ]
+    },
+    {
+      "id": "class_enchanter",
+      "name": "Sleep, Little Hounds",
+      "level": 2,
+      "giver": "trainer_arcane",
+      "offer": "An enchanter picks her fights by putting the others to sleep. The sheep folds are plagued by hounds. Lull them, then deal with the ones that won't nap. And ask Goody Harl if her pig is still awake — I'm curious.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "moor_hound",
+          "count": 5,
+          "text": "Deal with 5 moor hounds that will not sleep",
+          "where": "the sheep folds and open grass around Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_brannock_fields",
+          "object": "Beehives",
+          "text": "Hum the bees to sleep at Brannock Fields",
+          "where": "Brannock Fields, the farmland near Torborhold"
+        },
+        {
+          "kind": "talk",
+          "npc": "goody_harl",
+          "text": "Ask Goody Harl about her pig",
+          "where": "Wamonhold, east of Torborhold"
+        }
+      ],
+      "done": "The pig is asleep. The pig has never been asleep. You're better than you think. Robes that hum softly, and a bound imp now does as you ask.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "chest",
+          "base": "cloth_chest",
+          "name": "Lullaby Robes"
+        },
+        "unlock": "companion"
+      },
+      "rewardText": "A rare robe, Lullaby Robes, and your companion comes to you now instead of at level 10.",
+      "classes": [
+        "enchanter"
+      ]
+    },
+    {
+      "id": "class_stormcaller",
+      "name": "Conductors",
+      "level": 3,
+      "giver": "trainer_arcane",
+      "offer": "Lightning jumps between conductors. Wet things conduct. Tench Pool is wet, the frogs are wet, and the old jetty is very, very wet. Do the arithmetic.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_tench_pool",
+          "object": "Fish traps",
+          "text": "Sink the iron fish traps at Tench Pool as conductors",
+          "where": "Tench Pool, the fishing spot near Torborhold"
+        },
+        {
+          "kind": "kill",
+          "type": "fen_croaker",
+          "count": 7,
+          "near": "sp_tench_pool",
+          "text": "Chain lightning through 7 fen croakers",
+          "where": "Tench Pool, the fishing spot near Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_tench_pool",
+          "object": "Rod rack",
+          "text": "Ground yourself on the rod rack before you light up",
+          "where": "Tench Pool, the fishing spot near Torborhold"
+        }
+      ],
+      "done": "Seven frogs in one bolt? I counted four. Either way. A wand that crackles in the rain — and a storm familiar is yours from today.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "wand",
+          "name": "Pondstrike Wand"
+        },
+        "unlock": "companion"
+      },
+      "rewardText": "A rare wand, Pondstrike Wand, and your companion comes to you now instead of at level 10.",
+      "classes": [
+        "stormcaller"
+      ]
+    },
+    {
+      "id": "class_pyromancer",
+      "name": "Kindling",
+      "level": 3,
+      "giver": "trainer_arcane",
+      "offer": "Burns stack. Two is worse than one, three is worse than that. Ashby's lumber camp has a dusk flitter problem and a great deal of dry wood. Please burn the flitters. Please do not burn the wood.",
+      "steps": [
+        {
+          "kind": "visit",
+          "vignette": "sp_ashby_lumber_camp",
+          "text": "Go to Ashby's Lumber Camp",
+          "where": "Ashby's Lumber Camp, at the edge of the woods"
+        },
+        {
+          "kind": "kill",
+          "type": "dusk_flitter",
+          "count": 6,
+          "near": "sp_ashby_lumber_camp",
+          "text": "Stack burns on 6 dusk flitters",
+          "where": "Ashby's Lumber Camp, at the edge of the woods"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_ashby_lumber_camp",
+          "object": "Log pile",
+          "text": "Check the log pile is NOT on fire",
+          "where": "Ashby's Lumber Camp, at the edge of the woods"
+        }
+      ],
+      "done": "Not on fire! Remarkable restraint. A scepter that's always a little warm — and a small fire familiar wakes for you now.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "scepter",
+          "name": "Restraint of Ashby"
+        },
+        "unlock": "companion"
+      },
+      "rewardText": "A rare scepter, Restraint of Ashby, and your companion comes to you now instead of at level 10.",
+      "classes": [
+        "pyromancer"
+      ]
+    },
+    {
+      "id": "class_rogue",
+      "name": "Set Up, Cash In",
+      "level": 2,
+      "giver": "trainer_shadow",
+      "offer": "Rogues set up the hit, then cash it in. Easy. Somebody has a strongbox hidden in Coldharrow Ruins — I'd like to know what's in it before they do. Poison the brigands guarding it, then take a peek.",
+      "steps": [
+        {
+          "kind": "visit",
+          "vignette": "sp_coldharrow_ruins",
+          "text": "Scout Coldharrow Ruins without being seen",
+          "where": "Coldharrow Ruins, the burnt manor in the fields"
+        },
+        {
+          "kind": "kill",
+          "type": "road_brigand",
+          "count": 5,
+          "near": "sp_coldharrow_ruins",
+          "text": "Take down 5 road brigands at Coldharrow",
+          "where": "Coldharrow Ruins, the burnt manor in the fields"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_coldharrow_ruins",
+          "object": "Collapsed stair",
+          "text": "Search under the collapsed stair",
+          "where": "Coldharrow Ruins, the burnt manor in the fields"
+        }
+      ],
+      "done": "Empty! Somebody beat us to it. That's fine. You found the stair, they'll come back to it, and we'll be waiting. A dagger that's never been seen in daylight, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "dagger",
+          "name": "Mabry's Quiet Thanks"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare dagger, Mabry's Quiet Thanks, and one extra perk-forest point.",
+      "classes": [
+        "rogue"
+      ]
+    },
+    {
+      "id": "class_shadow_dancer",
+      "name": "Afterimages",
+      "level": 3,
+      "giver": "trainer_shadow",
+      "offer": "A shadow dancer leaves a copy of herself behind and is somewhere else. Practise on Old Mother Quell: slip into her ossuary without being seen, cut down the hounds in the yard, then ring her own bell behind her back and be gone before she turns round.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_saint_hulda_yard",
+          "object": "Ossuary door",
+          "text": "Slip through the ossuary door unseen",
+          "where": "Saint Hulda's Yard, the graveyard outside Torborhold"
+        },
+        {
+          "kind": "kill",
+          "type": "barrow_hound",
+          "count": 5,
+          "near": "sp_saint_hulda_yard",
+          "text": "Cut down 5 barrow hounds without being caught",
+          "where": "Saint Hulda's Yard, the graveyard outside Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_saint_hulda_yard",
+          "object": "Sexton's bell",
+          "text": "Ring the sexton's bell behind Quell's back, then vanish",
+          "where": "Saint Hulda's Yard, the graveyard outside Torborhold"
+        }
+      ],
+      "done": "Quell says she's been haunted all afternoon. Perfect. A dagger with no shine at all, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "dagger",
+          "name": "Quell's Missing Hour"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare dagger, Quell's Missing Hour, and one extra perk-forest point.",
+      "classes": [
+        "shadow_dancer"
+      ]
+    },
+    {
+      "id": "class_scavenger",
+      "name": "Lucky Finds",
+      "level": 2,
+      "giver": "trainer_shadow",
+      "offer": "Scavengers live on luck. Luck is mostly looking where other people don't. Rummage the lumber camp, the jetty and the inn's notice post. Something good is always lying about.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_ashby_lumber_camp",
+          "object": "Saw pit",
+          "text": "Rummage in the saw pit at Ashby's Lumber Camp",
+          "where": "Ashby's Lumber Camp, at the edge of the woods"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_tench_pool",
+          "object": "Old jetty",
+          "text": "Poke under the old jetty at Tench Pool",
+          "where": "Tench Pool, the fishing spot near Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_pail_and_plough",
+          "object": "Notice post",
+          "text": "Read every scrap on the inn's notice post",
+          "where": "The Pail and Plough, the crossroads inn on the Orrinsford road"
+        },
+        {
+          "kind": "collect",
+          "item": "Lucky trinket",
+          "count": 3,
+          "from": "cairn_rat",
+          "chance": 0.5,
+          "text": "Find 3 lucky trinkets in the nests of cairn rats",
+          "where": "Turnwater Mill, on the stream near Torborhold"
+        }
+      ],
+      "done": "A button, a tooth and a very old coin. Lucky trinkets, every one. Keep the coin. A javelin I found the same way, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "javelin",
+          "name": "Finders-Keepers"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare javelin, Finders-Keepers, and one extra perk-forest point.",
+      "classes": [
+        "scavenger"
+      ]
+    },
+    {
+      "id": "class_runesmith",
+      "name": "A Rune That Holds",
+      "level": 3,
+      "giver": "trainer_runes",
+      "offer": "A rune is struck, not drawn. You need a stone that's heard a lot and said nothing. The heel stone at the Nine Maidens has been listening for a thousand years. Take a rubbing, temper it at the mill, then test it on hide.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_nine_maidens",
+          "object": "Heel stone",
+          "text": "Take a rubbing from the heel stone at the Nine Maidens",
+          "where": "The Nine Maidens, a ring of standing stones on the hill"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_turnwater_mill",
+          "object": "Millstone",
+          "text": "Temper your rune on the turning millstone",
+          "where": "Turnwater Mill, on the stream near Torborhold"
+        },
+        {
+          "kind": "kill",
+          "type": "thicket_boar",
+          "count": 5,
+          "near": "sp_brannock_fields",
+          "text": "Test your rune hammer on 5 thicket boars",
+          "where": "Brannock Fields, the farmland near Torborhold"
+        }
+      ],
+      "done": "It held. Five boars and not a crack. You're a runesmith now, heaven help the anvils. A hammer with my mark under yours, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "warhammer",
+          "name": "Stonehand's Pupil"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare warhammer, Stonehand's Pupil, and one extra perk-forest point.",
+      "classes": [
+        "runesmith"
+      ]
+    },
+    {
+      "id": "class_ranger",
+      "name": "The Hunt",
+      "level": 2,
+      "giver": "trainer_hunt",
+      "offer": "A ranger's whole life is the hunt. Hit the butts at the drill field so I know you can shoot, then bring me hides from the hounds around the folds. Do it well and I'll whistle up the cat.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_drill_field",
+          "object": "Archery butts",
+          "text": "Put three arrows in the archery butts at the Drill Field",
+          "where": "Torbor Drill Field, just outside Torborhold's gate"
+        },
+        {
+          "kind": "collect",
+          "item": "Moor hound hide",
+          "count": 5,
+          "from": "moor_hound",
+          "chance": 0.6,
+          "text": "Bring 5 moor hound hides",
+          "where": "the sheep folds and open grass around Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_greyfletch_camp",
+          "object": "Skinning frame",
+          "text": "Stretch the hides on the skinning frame at Greyfletch Camp",
+          "where": "Greyfletch Camp, the hunters' camp at the wood's edge"
+        }
+      ],
+      "done": "Clean hides, clean shots. You'll do. Here's a bow from my own rack — and hear that rustle? Your hunting cat's found you.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "shortbow",
+          "name": "Greyfletch's Promise"
+        },
+        "unlock": "companion"
+      },
+      "rewardText": "A rare shortbow, Greyfletch's Promise, and your companion comes to you now instead of at level 10.",
+      "classes": [
+        "ranger"
+      ]
+    },
+    {
+      "id": "class_witch_hunter",
+      "name": "Silver and Salt",
+      "level": 3,
+      "giver": "trainer_hunt",
+      "offer": "Something at the Nine Maidens is souring the milk for three villages. A witch hunter strips magic off whatever wears it. Silver your edge on the tally board's old nails, then go and see what dances in the mushroom ring.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_greyfletch_camp",
+          "object": "Tally board",
+          "text": "Pull silvered nails from the tally board at Greyfletch Camp",
+          "where": "Greyfletch Camp, the hunters' camp at the wood's edge"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_nine_maidens",
+          "object": "Ring of mushrooms",
+          "text": "Break the ring of mushrooms at the Nine Maidens",
+          "where": "The Nine Maidens, a ring of standing stones on the hill"
+        },
+        {
+          "kind": "kill",
+          "type": "bog_slime",
+          "count": 4,
+          "text": "Purge 4 bog slimes that crawl out of the soured ground",
+          "where": "the marsh and riverbanks south of Torborhold"
+        }
+      ],
+      "done": "Slime. It was SLIME. Magic slime, granted. The milk's sweet again. A crossbow with a silver-tipped bolt in the groove, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "crossbow",
+          "name": "Milk-Sweetener"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare crossbow, Milk-Sweetener, and one extra perk-forest point.",
+      "classes": [
+        "witch_hunter"
+      ]
+    },
+    {
+      "id": "class_demon_hunter",
+      "name": "Hold a Grudge",
+      "level": 4,
+      "giver": "trainer_hunt",
+      "offer": "A demon hunter's strength is a grudge, carried and fed. Gristle's hollow killed my brother's dog. I want that grudge carried by someone with younger knees. Feed it on the hounds, then hang their teeth on the trophy post.",
+      "steps": [
+        {
+          "kind": "visit",
+          "vignette": "sp_gristles_hollow",
+          "text": "Find Gristle's Hollow",
+          "where": "Gristle's Hollow, a hound den past Greyfletch Camp"
+        },
+        {
+          "kind": "kill",
+          "type": "moor_hound",
+          "count": 6,
+          "near": "sp_gristles_hollow",
+          "text": "Kill 6 moor hounds around Gristle's Hollow",
+          "where": "Gristle's Hollow, a hound den past Greyfletch Camp"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_gristles_hollow",
+          "object": "Bone heap",
+          "text": "Find the old dog's collar in the bone heap",
+          "where": "Gristle's Hollow, a hound den past Greyfletch Camp"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_greyfletch_camp",
+          "object": "Trophy post",
+          "text": "Hang the teeth on the trophy post at Greyfletch Camp",
+          "where": "Greyfletch Camp, the hunters' camp at the wood's edge"
+        }
+      ],
+      "done": "My brother will cry, and then he'll buy you a drink. A crossbow for the long grudge — and your dire hound comes to heel today.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "crossbow",
+          "name": "Brother's Grudge"
+        },
+        "unlock": "companion"
+      },
+      "rewardText": "A rare crossbow, Brother's Grudge, and your companion comes to you now instead of at level 10.",
+      "classes": [
+        "demon_hunter"
+      ]
+    },
+    {
+      "id": "class_druid",
+      "name": "Wearing Another Shape",
+      "level": 3,
+      "giver": "trainer_wilds",
+      "offer": "A druid borrows shapes. To borrow, you must first understand. Sit with the bees at Brannock, listen to the stones, then run with the boars — not after them, WITH them, until you've learned how they think. Then thin them a little.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_brannock_fields",
+          "object": "Beehives",
+          "text": "Sit with the beehives at Brannock Fields",
+          "where": "Brannock Fields, the farmland near Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_nine_maidens",
+          "object": "Ring of mushrooms",
+          "text": "Sleep one breath inside the ring of mushrooms",
+          "where": "The Nine Maidens, a ring of standing stones on the hill"
+        },
+        {
+          "kind": "kill",
+          "type": "thicket_boar",
+          "count": 4,
+          "near": "sp_brannock_fields",
+          "text": "Run with the boars, then thin the herd by 4",
+          "where": "Brannock Fields, the farmland near Torborhold"
+        }
+      ],
+      "done": "You came back smelling of honey and pig. That's the right smell. A staff grown, not cut — and two grove wolves have decided you're theirs.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "quarterstaff",
+          "name": "Rootgrown Staff"
+        },
+        "unlock": "companion"
+      },
+      "rewardText": "A rare quarterstaff, Rootgrown Staff, and your companion comes to you now instead of at level 10.",
+      "classes": [
+        "druid"
+      ]
+    },
+    {
+      "id": "class_shaman",
+      "name": "Posts for the Spirits",
+      "level": 3,
+      "giver": "trainer_wilds",
+      "offer": "Shamans plant posts and the spirits gather to them. The lumber camp has posts, the jetty has posts, the inn has a post. Ask the spirits at each, then drive off the frogs that keep knocking the jetty's over.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_ashby_lumber_camp",
+          "object": "Log pile",
+          "text": "Choose a post-log from the pile at Ashby's Lumber Camp",
+          "where": "Ashby's Lumber Camp, at the edge of the woods"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_tench_pool",
+          "object": "Old jetty",
+          "text": "Plant a spirit post on the old jetty",
+          "where": "Tench Pool, the fishing spot near Torborhold"
+        },
+        {
+          "kind": "kill",
+          "type": "fen_croaker",
+          "count": 5,
+          "near": "sp_tench_pool",
+          "text": "Drive off 5 fen croakers from the jetty",
+          "where": "Tench Pool, the fishing spot near Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_pail_and_plough",
+          "object": "Notice post",
+          "text": "Carve a spirit mark on the inn's notice post",
+          "where": "The Pail and Plough, the crossroads inn on the Orrinsford road"
+        }
+      ],
+      "done": "Three posts and three happy spirits. One of them is a bear. The bear is coming with you. A scepter carved from the post-log, and the spirit bear walks at your side now.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "scepter",
+          "name": "The Bear's Post"
+        },
+        "unlock": "companion"
+      },
+      "rewardText": "A rare scepter, The Bear's Post, and your companion comes to you now instead of at level 10.",
+      "classes": [
+        "shaman"
+      ]
+    },
+    {
+      "id": "class_necromancer",
+      "name": "Good Bones",
+      "level": 3,
+      "giver": "trainer_grave",
+      "offer": "You want corpses that get back up. I want corpses that stay down. We can help each other. The barrow hounds dig up my yard — kill them, collect their grave dust, and wake one of them in the open grave so I can see how it's done.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "barrow_hound",
+          "count": 5,
+          "near": "sp_saint_hulda_yard",
+          "text": "Kill 5 barrow hounds digging in Saint Hulda's Yard",
+          "where": "Saint Hulda's Yard, the graveyard outside Torborhold"
+        },
+        {
+          "kind": "collect",
+          "item": "Grave dust",
+          "count": 4,
+          "from": "barrow_hound",
+          "chance": 0.6,
+          "text": "Gather 4 pinches of grave dust",
+          "where": "Saint Hulda's Yard, the graveyard outside Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_saint_hulda_yard",
+          "object": "Open grave",
+          "text": "Sprinkle the dust in the open grave",
+          "where": "Saint Hulda's Yard, the graveyard outside Torborhold"
+        }
+      ],
+      "done": "It sat up, said something rude, and lay down again. Promising. A staff with a knuckle-bone on top — and two bone thralls have climbed out to follow you.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "staff",
+          "name": "Quell's Good Spade"
+        },
+        "unlock": "companion"
+      },
+      "rewardText": "A rare staff, Quell's Good Spade, and your companion comes to you now instead of at level 10.",
+      "classes": [
+        "necromancer"
+      ]
+    },
+    {
+      "id": "class_warlock",
+      "name": "Health as Fuel",
+      "level": 3,
+      "giver": "trainer_pact",
+      "offer": "Warlocks burn their own health to feed the dark. It's cheaper than it sounds. My grandfather sealed a bargain in that cracked sigil. Bleed on it, then finish what he started on the brigands who squat in his hall.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_coldharrow_ruins",
+          "object": "Cracked sigil",
+          "text": "Bleed on the cracked sigil at Coldharrow Ruins",
+          "where": "Coldharrow Ruins, the burnt manor in the fields"
+        },
+        {
+          "kind": "kill",
+          "type": "road_brigand",
+          "count": 6,
+          "near": "sp_coldharrow_ruins",
+          "text": "Burn out 6 road brigands from Coldharrow",
+          "where": "Coldharrow Ruins, the burnt manor in the fields"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_coldharrow_ruins",
+          "object": "Collapsed stair",
+          "text": "Leave an offering under the collapsed stair",
+          "where": "Coldharrow Ruins, the burnt manor in the fields"
+        }
+      ],
+      "done": "Something under the stair said thank you. Don't answer it. A wand that drinks a little — and a bound imp has signed itself over to you.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "wand",
+          "name": "Coldharrow's Bargain"
+        },
+        "unlock": "companion"
+      },
+      "rewardText": "A rare wand, Coldharrow's Bargain, and your companion comes to you now instead of at level 10.",
+      "classes": [
+        "warlock"
+      ]
+    },
+    {
+      "id": "class_monk",
+      "name": "Poise",
+      "level": 2,
+      "giver": "trainer_mind",
+      "offer": "A monk is poise. Stand on the prayer stones until the road stops wobbling. Then go out among the hounds and keep that stillness while everything around you snaps and howls.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_kind_mother_shrine",
+          "object": "Prayer stones",
+          "text": "Balance on the prayer stones at the Shrine of the Kind Mother",
+          "where": "Shrine of the Kind Mother, beside the south road"
+        },
+        {
+          "kind": "kill",
+          "type": "moor_hound",
+          "count": 6,
+          "text": "Keep your poise against 6 moor hounds",
+          "where": "the sheep folds and open grass around Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_kind_mother_shrine",
+          "object": "Offering bowl",
+          "text": "Leave your empty hands in the offering bowl",
+          "where": "Shrine of the Kind Mother, beside the south road"
+        }
+      ],
+      "done": "Empty hands, full heart, very muddy knees. That's monkhood. A staff to lean on, never to rely on, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "quarterstaff",
+          "name": "Stillwater Staff"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare quarterstaff, Stillwater Staff, and one extra perk-forest point.",
+      "classes": [
+        "monk"
+      ]
+    },
+    {
+      "id": "class_oracle",
+      "name": "Foresight",
+      "level": 3,
+      "giver": "trainer_mind",
+      "offer": "I saw you in a dream, killing frogs by a pool. It must happen now or my dream was a liar. First read the omens at the well and the hearth of the Pail and Plough. Then go and make my dream honest.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_pail_and_plough",
+          "object": "Well",
+          "text": "Read the omen in the well at the Pail and Plough",
+          "where": "The Pail and Plough, the crossroads inn on the Orrinsford road"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_pail_and_plough",
+          "object": "Hearth",
+          "text": "Read the ashes in the inn's hearth",
+          "where": "The Pail and Plough, the crossroads inn on the Orrinsford road"
+        },
+        {
+          "kind": "kill",
+          "type": "fen_croaker",
+          "count": 5,
+          "near": "sp_tench_pool",
+          "text": "Fulfil the dream: kill 5 fen croakers at Tench Pool",
+          "where": "Tench Pool, the fishing spot near Torborhold"
+        }
+      ],
+      "done": "Exactly as dreamed. Except the hat. You weren't wearing a hat in my dream. A scepter for seeing a little further — and a small bright familiar wakes at your shoulder.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "scepter",
+          "name": "The Honest Dream"
+        },
+        "unlock": "companion"
+      },
+      "rewardText": "A rare scepter, The Honest Dream, and your companion comes to you now instead of at level 10.",
+      "classes": [
+        "oracle"
+      ]
+    },
+    {
+      "id": "class_tinker",
+      "name": "Gadgets",
+      "level": 3,
+      "giver": "trainer_tinker",
+      "offer": "Gadgets! The mill's full of spare parts and rats who steal them. Fetch back my springs from the rat nests, fit them in the gear housing, and we'll wind up a little friend for you.",
+      "steps": [
+        {
+          "kind": "collect",
+          "item": "Stolen spring",
+          "count": 5,
+          "from": "cairn_rat",
+          "chance": 0.6,
+          "text": "Recover 5 stolen springs from cairn rats",
+          "where": "Turnwater Mill, on the stream near Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_turnwater_mill",
+          "object": "Gear housing",
+          "text": "Fit the springs into the gear housing",
+          "where": "Turnwater Mill, on the stream near Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_turnwater_mill",
+          "object": "Sluice lever",
+          "text": "Pull the sluice lever to test it",
+          "where": "Turnwater Mill, on the stream near Torborhold"
+        }
+      ],
+      "done": "It ticks! It walks! It shot the miller's hat! A crossbow with a crank on the side — and your clockwork sentry is wound and ready.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "crossbow",
+          "name": "Millward's Crank-Bow"
+        },
+        "unlock": "companion"
+      },
+      "rewardText": "A rare crossbow, Millward's Crank-Bow, and your companion comes to you now instead of at level 10.",
+      "classes": [
+        "tinker"
+      ]
+    },
+    {
+      "id": "class_bard",
+      "name": "A Song for the Pail",
+      "level": 2,
+      "giver": "trainer_bard",
+      "offer": "A bard's songs make the party better and the enemy worse. But first, a song needs a story. The Pail and Plough has no song of its own. Go and find one: sweet water from the well, a hound's howl, a farmer's grumble. Then sing it by the hearth.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_pail_and_plough",
+          "object": "Well",
+          "text": "Taste the water from the inn's well",
+          "where": "The Pail and Plough, the crossroads inn on the Orrinsford road"
+        },
+        {
+          "kind": "kill",
+          "type": "moor_hound",
+          "count": 4,
+          "text": "Make 4 moor hounds howl their last verse",
+          "where": "along the roads out of Torborhold"
+        },
+        {
+          "kind": "talk",
+          "npc": "goody_harl",
+          "text": "Hear Goody Harl's grumbling for the chorus",
+          "where": "Wamonhold, east of Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_pail_and_plough",
+          "object": "Hearth",
+          "text": "Sing the new song at the hearth",
+          "where": "The Pail and Plough, the crossroads inn on the Orrinsford road"
+        }
+      ],
+      "done": "Nobody threw anything! A triumph. A dagger for when the song ends badly, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "dagger",
+          "name": "Pail and Plough Ballad"
+        },
+        "perks": 1
+      },
+      "rewardText": "A rare dagger, Pail and Plough Ballad, and one extra perk-forest point.",
+      "classes": [
+        "bard"
+      ]
+    }
+  ]
+}

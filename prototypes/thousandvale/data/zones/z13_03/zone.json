@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 3,
-  "inputHash": "044d9f17",
+  "bakeVersion": 4,
+  "inputHash": "13703724",
   "waterKinds": [
     "none",
     "sea",
@@ -240,7 +240,7 @@
   "summary": {
     "zone": "z13_03",
     "province": "Petbeck Basin",
-    "inputHash": "044d9f17",
+    "inputHash": "13703724",
     "rivers": 3,
     "wetShare": 0.007,
     "unwalkableShare": 0.001,
@@ -340,18 +340,21 @@
     ],
     "roads": 16,
     "bridges": 5,
-    "paths": 12,
-    "pathMetres": 732,
-    "scatter": 17135,
+    "paths": 23,
+    "pathMetres": 1907,
+    "scatter": 18854,
     "scatterKinds": {
-      "tree_broadleaf": 6927,
-      "bush": 7124,
-      "rock_large": 439,
-      "rock_small": 1956,
-      "reed": 497,
-      "tree_dead": 42,
-      "boulder": 30,
-      "tree_acacia": 120
+      "tree_broadleaf": 6848,
+      "bush": 6961,
+      "rock_large": 428,
+      "rock_small": 1937,
+      "reed": 563,
+      "tree_dead": 44,
+      "boulder": 42,
+      "tree_acacia": 115,
+      "tree_conifer": 14,
+      "hedge": 1867,
+      "tree_fruit": 35
     },
     "sites": [
       "settlement(HUB) city Millbrook 544 1648 140",
@@ -368,13 +371,13 @@
       "x": 540,
       "z": 1656
     },
-    "placements": 408,
-    "vignettesAvoided": 638
+    "placements": 522,
+    "vignettesAvoided": 616
   },
   "files": {
-    "terrain.bin": 541454,
-    "nav.bin": 30181,
-    "scatter.bin": 137164,
-    "placements.json": 183462
+    "terrain.bin": 546178,
+    "nav.bin": 31102,
+    "scatter.bin": 150916,
+    "placements.json": 300477
   }
 }

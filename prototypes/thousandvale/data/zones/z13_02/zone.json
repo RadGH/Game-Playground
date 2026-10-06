@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 3,
-  "inputHash": "09d4dd3e",
+  "bakeVersion": 4,
+  "inputHash": "b3a20e5d",
   "waterKinds": [
     "none",
     "sea",
@@ -205,7 +205,7 @@
   "summary": {
     "zone": "z13_02",
     "province": "Petbeck Basin",
-    "inputHash": "09d4dd3e",
+    "inputHash": "b3a20e5d",
     "rivers": 2,
     "wetShare": 0.006,
     "unwalkableShare": 0.001,
@@ -289,16 +289,20 @@
     ],
     "roads": 15,
     "bridges": 5,
-    "paths": 7,
-    "pathMetres": 269,
-    "scatter": 16750,
+    "paths": 17,
+    "pathMetres": 1814,
+    "scatter": 18242,
     "scatterKinds": {
-      "tree_broadleaf": 8255,
-      "rock_large": 366,
-      "rock_small": 1813,
-      "bush": 6181,
-      "reed": 124,
-      "tree_dead": 11
+      "tree_broadleaf": 8075,
+      "rock_large": 359,
+      "rock_small": 1782,
+      "bush": 6053,
+      "reed": 208,
+      "tree_dead": 11,
+      "tree_conifer": 11,
+      "hedge": 1662,
+      "tree_fruit": 72,
+      "boulder": 9
     },
     "sites": [
       "settlement(HUB) city Halsbridge 1696 1184 140",
@@ -313,13 +317,13 @@
       "x": 1696,
       "z": 1180
     },
-    "placements": 301,
-    "vignettesAvoided": 649
+    "placements": 430,
+    "vignettesAvoided": 610
   },
   "files": {
-    "terrain.bin": 492148,
-    "nav.bin": 29568,
-    "scatter.bin": 134084,
-    "placements.json": 134857
+    "terrain.bin": 496617,
+    "nav.bin": 30559,
+    "scatter.bin": 146020,
+    "placements.json": 262937
   }
 }

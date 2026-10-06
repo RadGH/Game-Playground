@@ -73,3 +73,16 @@ and sameness on the placed world, B's sites untouched. `tests/E/living.test.js` 
 layout and checks no duplicate waystones (P14), the level ramp round the start (P26), density measured independently +
 curio/folk/route/chatter references (P19), quest `text`/`where`/marks and no vignette quest asking for its own fight (P17),
 event `where`/`blurb`/`map`.
+
+## Set pieces (play-test 2, Q18) — `setpieces.json`
+
+Twelve hand-designed places near Torborhold (graveyard, farmland with orchard, watermill, hunters' camp, beast den, standing
+stones, roadside shrine, burned manor, lumber camp, fishing pool, drill field, crossroads inn). A recipe is a vignette recipe
+(props, monsters, objects) plus `setpiece`, `kind`, `pin` (where: near a town or another set piece, dist / fromEdge, water,
+road, route, biome, high, awayFromRoad), `ground` (B: level/paint), `parts` / `models` / `buildings` / `fields` (drawn by
+stream D; `models` = the top-level catalog with a description and a primitive fallback for each), `folk` (workers with a
+loop), `boss` (Gristle's Hollow: `mb_old_gristle`) and `bind` ({zone, piece, name}: put the content ON one of stream B's baked
+ground pieces). Placed FIRST by `tools/content-setpieces.mjs` (from place-vignettes): bound ones at B's piece (`bound`,
+`scale` = B's radius / ours — stream A/D multiply offsets by it; B's piece takes our name through places.json `setPieces` /
+`lanes`), the rest by their pin as discs (rule `setpiece` in content-place.mjs). B's other pieces get a worker at each of
+their slots (`slotFolk`). B's set pieces, fields and set buildings are keep-clear discs for everything we place.

@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 3,
-  "inputHash": "33f39e0a",
+  "bakeVersion": 4,
+  "inputHash": "454aaea1",
   "waterKinds": [
     "none",
     "sea",
@@ -109,7 +109,7 @@
   "summary": {
     "zone": "z11_04",
     "province": "Petbeck Basin",
-    "inputHash": "33f39e0a",
+    "inputHash": "454aaea1",
     "rivers": 0,
     "wetShare": 0,
     "unwalkableShare": 0.113,
@@ -149,16 +149,17 @@
     ],
     "roads": 3,
     "bridges": 0,
-    "paths": 10,
-    "pathMetres": 648,
-    "scatter": 13033,
+    "paths": 15,
+    "pathMetres": 2019,
+    "scatter": 13776,
     "scatterKinds": {
-      "rock_large": 3502,
-      "rock_small": 4922,
-      "tree_conifer": 2244,
-      "boulder": 1091,
-      "bush": 1271,
-      "tree_broadleaf": 3
+      "rock_large": 3482,
+      "rock_small": 4897,
+      "tree_conifer": 2235,
+      "boulder": 1086,
+      "bush": 1262,
+      "tree_broadleaf": 34,
+      "hedge": 780
     },
     "sites": [
       "lair dungeon The Black Filfit 1344 960",
@@ -172,13 +173,13 @@
       "x": 890,
       "z": 1309
     },
-    "placements": 136,
-    "vignettesAvoided": 679
+    "placements": 176,
+    "vignettesAvoided": 676
   },
   "files": {
-    "terrain.bin": 639027,
-    "nav.bin": 51867,
-    "scatter.bin": 104348,
-    "placements.json": 90449
+    "terrain.bin": 641141,
+    "nav.bin": 52551,
+    "scatter.bin": 110292,
+    "placements.json": 156048
   }
 }

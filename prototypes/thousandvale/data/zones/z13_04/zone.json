@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 3,
-  "inputHash": "9227c4f0",
+  "bakeVersion": 4,
+  "inputHash": "e8ce72cb",
   "waterKinds": [
     "none",
     "sea",
@@ -120,7 +120,7 @@
   "summary": {
     "zone": "z13_04",
     "province": "Petbeck Basin",
-    "inputHash": "9227c4f0",
+    "inputHash": "e8ce72cb",
     "rivers": 1,
     "wetShare": 0.004,
     "unwalkableShare": 0.165,
@@ -160,18 +160,19 @@
     ],
     "roads": 2,
     "bridges": 0,
-    "paths": 9,
-    "pathMetres": 1433,
-    "scatter": 10051,
+    "paths": 11,
+    "pathMetres": 2310,
+    "scatter": 10819,
     "scatterKinds": {
-      "bush": 2664,
-      "rock_small": 3480,
-      "tree_broadleaf": 35,
-      "tree_dead": 240,
-      "boulder": 545,
-      "rock_large": 2265,
-      "tree_acacia": 470,
-      "tree_conifer": 352
+      "bush": 2640,
+      "rock_small": 3444,
+      "tree_broadleaf": 65,
+      "tree_dead": 230,
+      "boulder": 536,
+      "rock_large": 2239,
+      "tree_acacia": 457,
+      "tree_conifer": 350,
+      "hedge": 858
     },
     "sites": [
       "landmark volcano The Becktack Forge 960 1984",
@@ -186,13 +187,13 @@
       "x": 1560,
       "z": 1278
     },
-    "placements": 150,
-    "vignettesAvoided": 618
+    "placements": 187,
+    "vignettesAvoided": 626
   },
   "files": {
-    "terrain.bin": 703697,
-    "nav.bin": 46188,
-    "scatter.bin": 80492,
-    "placements.json": 85408
+    "terrain.bin": 705231,
+    "nav.bin": 46447,
+    "scatter.bin": 86636,
+    "placements.json": 139118
   }
 }

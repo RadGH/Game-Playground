@@ -61,3 +61,22 @@ Made by `tools/place-vignettes.mjs` (P17): per story quest, `giver` and `steps[i
 (kept empty by tests/E/living.test.js). Events (`events.json`) carry `blurb` (what happens), `where` (generated words:
 "Delvers' Hill: in the woods, about 200 m north of Ashhaven") and `map: [{zone, x, z}]`; a zone event's level is capped at
 the level ramp + 2 (`levelAuthored` keeps the written number).
+
+## Play-test 2 (2026-10-05): the starting chain, class quests, set-piece quests
+
+Three part files that `test.json` pulls in with `include` (stream A's js/sim/content.js and tools/content-lib.mjs merge them):
+- **`start.json`** (Q27) — "The South Road", the one chain every new character gets. `start_two_good_legs` has `auto: true` (in the
+  log from the first login). Elder Maud -> the south road -> Marra at the Pail and Plough (set piece `sp_pail_and_plough`, on
+  the Torborhold-Orrinsford road) -> two branches at once, either order: **A** `start_road_to_orrinsford` (brigands on the road,
+  the letter to Prior Wendel in Orrinsford, the next town) -> `start_the_priors_favour` (Saint Hulda's Yard); **B**
+  `start_signs_of_the_beast` (Greyfletch Camp) -> `start_old_gristle` (the mini boss, `mb_old_gristle`, level 4, at Gristle's
+  Hollow). `start_home_with_news` **`requires`** both ends, then leads on to the province story (`next: toll_at_fitockpi`).
+  Levels 1 -> 4 over ~1.7 km; the chain's purses (~550 g) buy the first horse three times over.
+- **`classes.json`** (Q28) — one quest per class (`classes: [id]`), levels 2-4, from 12 trainers (`role: 'trainer'`, `trains: [classes]`): four
+  keep a house in Torborhold (`office`), eight stand at set pieces. Rewards: a named rare (`item: {tier: 'rare', slot, base,
+  name}`) plus `unlock: 'companion'` (the 13 companion classes: the companion comes now, not at 10) or `perks: 1` (the other
+  17: one extra perk-forest point). `rewardText` = one line for the window.
+- **`setpieces.json`** (Q18) — 16 quests from 12 NPCs who live at the set pieces (data/vignettes/setpieces.json).
+
+New fields: zone file `include`; quest `auto`, `classes` (A also reads `cls`), **`requires: [ids]`** (offered only when every one is done), `rewardText`;
+reward `unlock` / `perks` / `item.base` + `item.name`. Tests: `tests/E/playtest2.test.js`.

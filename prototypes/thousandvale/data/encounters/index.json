@@ -62,7 +62,8 @@
     "rare_vesper_bell_owl.json",
     "rare_waterstrider_tolla.json",
     "rare_wynn_two_strings.json",
-    "world_grimtallow.json"
+    "world_grimtallow.json",
+    "mb_old_gristle.json"
   ],
   "specials": [
     "specials.json",

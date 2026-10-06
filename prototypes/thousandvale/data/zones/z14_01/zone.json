@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 3,
-  "inputHash": "6084a708",
+  "bakeVersion": 4,
+  "inputHash": "2d4e6443",
   "waterKinds": [
     "none",
     "sea",
@@ -117,7 +117,7 @@
   "summary": {
     "zone": "z14_01",
     "province": "Petbeck Basin",
-    "inputHash": "6084a708",
+    "inputHash": "2d4e6443",
     "rivers": 1,
     "wetShare": 0.077,
     "unwalkableShare": 0.054,
@@ -160,15 +160,16 @@
     ],
     "roads": 3,
     "bridges": 0,
-    "paths": 7,
-    "pathMetres": 1339,
-    "scatter": 9928,
+    "paths": 8,
+    "pathMetres": 1607,
+    "scatter": 10419,
     "scatterKinds": {
-      "bush": 5151,
-      "rock_small": 1905,
-      "tree_broadleaf": 2169,
-      "rock_large": 297,
-      "tree_conifer": 406
+      "bush": 5115,
+      "rock_small": 1888,
+      "tree_broadleaf": 2164,
+      "rock_large": 302,
+      "tree_conifer": 404,
+      "hedge": 546
     },
     "sites": [
       "settlement(HUB) town Saltmouth 880 1616 90",
@@ -180,13 +181,13 @@
       "x": 872,
       "z": 1620
     },
-    "placements": 148,
-    "vignettesAvoided": 625
+    "placements": 184,
+    "vignettesAvoided": 629
   },
   "files": {
-    "terrain.bin": 466375,
-    "nav.bin": 14312,
-    "scatter.bin": 79508,
-    "placements.json": 82906
+    "terrain.bin": 467893,
+    "nav.bin": 14475,
+    "scatter.bin": 83436,
+    "placements.json": 119523
   }
 }

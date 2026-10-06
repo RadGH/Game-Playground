@@ -35,11 +35,12 @@ import { addZoneSites, TOWN_RADIUS } from './lib/zone-sites.mjs';
 import { encodeScatter, encodeNav, sameLayerFile } from './lib/zone-layers.mjs';
 import { carveTheme, inFen, shoreDistance, cutCliff } from './lib/zone-theme.mjs';
 import { layPaths } from './lib/zone-paths.mjs';
+import { SET_SURFACES, specsFor, layLanes, resolveSetPieces, prepareEPieces, carvePonds, paintSetPieces, setPieceScatter, setPieceKeepOff, setPiecePlacements, setPieceNav } from './lib/zone-setpieces.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const WORLD_DIR = join(HERE, '..', 'data', 'world');
 const ZONES_DIR = join(HERE, '..', 'data', 'zones');
-export const ZONE_BAKE_VERSION = 3;   // 3: play-test 1 (rivers, bridges, lakes, skirt, paths, scatter)
+export const ZONE_BAKE_VERSION = 4;   // 3: play-test 1 (rivers, bridges, lakes, skirt, paths, scatter); 4: play-test 2 (set pieces, lanes, town offices)
 export const M1_ZONE = 'z12_02';          // the starter zone (world.json `starter`; Torborhold, Petbeck Basin)
 const SIZE = 1025, STEP = 2, ZM = 2048;
 /**
@@ -52,7 +53,7 @@ const AP = 6;
 const SKIRT_BURY = 0.15;
 /** Proctown size by settlement kind. */
 const TOWN_SIZE = { hamlet: 1, village: 2, town: 3, city: 4, capital: 5 };
-const ROAD_SURFACE_ID = BIOMES.length;    // an extra entry appended to meta.biomes: painted road / street
+const ROAD_SURFACE_ID = BIOMES.length + SET_SURFACES.length;    // meta.biomes = World Forge's + the set-piece surfaces + painted road / street (road stays LAST)
 const LEVEL_EASE = 40;                    // metres a levelled town eases back into the land
 const SPUR_EDGE = 120;                    // a spur road never comes nearer a zone edge than this
 
@@ -88,10 +89,17 @@ function placesFor(id) {
   let places = null, sheet = null;
   try { places = JSON.parse(readFileSync(join(HERE, '..', 'data', 'provinces', `${sid.sheet}-places.json`), 'utf8')).zones?.[sid.zone] || null; } catch { /* none */ }
   try { sheet = JSON.parse(readFileSync(join(HERE, '..', 'data', 'provinces', `${sid.sheet}.json`), 'utf8')).zones?.[sid.zone] || null; } catch { /* none */ }
-  return { rename: places?.rename || {}, asks: places?.asks || [], town: sheet?.town || null };
+  return { rename: places?.rename || {}, asks: places?.asks || [], town: sheet?.town || null, setPieces: places?.setPieces || [], lanes: places?.lanes || [] };
 }
 let SITE_PINS = {};
 try { SITE_PINS = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'site-pins.json'), 'utf8')); } catch { /* none */ }
+let SET_PIECES = {};
+try { SET_PIECES = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'set-pieces.json'), 'utf8')); } catch { /* none */ }
+let OFFICES = null;
+try { OFFICES = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'town-offices.json'), 'utf8')); } catch { /* none: proctown's own trade list */ }
+const OFFICE_ROLE = OFFICES ? Object.fromEntries(Object.entries(OFFICES.roles).map(([role, want]) => [want, role]).reverse()) : {};
+let E_SETPIECES = [];
+try { E_SETPIECES = JSON.parse(readFileSync(join(HERE, '..', 'data', 'vignettes', 'setpieces.json'), 'utf8')).vignettes || []; } catch { /* none */ }
 let THEMES = {};
 try { THEMES = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'zone-themes.json'), 'utf8')); } catch { /* none */ }
 /** The E sheet zone id for a world zone, if any (written into meta so E can match on its own ids). */
@@ -252,6 +260,11 @@ export function bakeZone(id, opts = {}) {
     pts.forEach((p, k) => { p[2] += miss * smoothstep(0, 1, k / n); });
     roads.push({ id: `spur_${slug(s.name)}`, cls: 'trail', width: 3.5, pts, spur: true });
   }
+  // 4a. set-piece lanes (play-test 2, Q18): authored farm lanes, graded like a spur, so a crossroads (and the inn at it)
+  // and the farm gates have real roads. A lane that `joins` a town starts in it and becomes one of its high streets.
+  const SPECS = specsFor(id, { authored: SET_PIECES, places: PL ? { setPieces: PL.setPieces, lanes: PL.lanes } : null });
+  const lanes = SPECS.lanes.length ? layLanes({ lanes: SPECS.lanes, roads, ground, gIdx, ZM, edge: SPUR_EDGE }) : [];
+  roads.push(...lanes);
   // grade: ease the ground toward the road's height across its width + a shoulder (never inside a town)
   const inTown = (x, z, extra = 0) => placed.some(s => Math.hypot(s.x - x, s.z - z) < s.radius + extra);
   const roadMask = new Uint8Array(NG);
@@ -290,12 +303,14 @@ export function bakeZone(id, opts = {}) {
     }
     const size = TOWN_SIZE[s.kind] || 2, tx = s.x, tz = s.z;
     const culture = cultureFor({ race: province?.race || 'human', biome: zone.biomes ? Object.keys(zone.biomes)[0] : '' });
-    const linksAt = radius => roads.filter(r => !r.spur || r.id === `spur_${slug(s.name)}`).flatMap(r => ringCrossings(r.pts, tx, tz, radius)).map(([x, z]) => [x, z]);
+    const linksAt = radius => roads.filter(r => !r.spur || r.id === `spur_${slug(s.name)}` || r.joins === s.name).flatMap(r => ringCrossings(r.pts, tx, tz, radius)).map(([x, z]) => [x, z]);
     const plan = planTown({
       seed: (hashStr(id + ':' + (s.wfName || s.name)) >>> 0) % 100000, size, culture,   // a renamed town keeps its plan
       heightAt: (x, z) => ground[gIdx(tx + x, tz + z)],
       buildable: (x, z) => !wetAt(tx + x, tz + z),
       linksAt,
+      // play-test 2 (Q10): every townsperson who serves gets their own building, round the square (opt-in proctown option)
+      ...(OFFICES?.byKind?.[s.kind] ? { trades: { list: OFFICES.byKind[s.kind], share: OFFICES.share?.[s.kind] ?? 0.5, pick: 'square' } } : {}),
     });
     plan.origin = { x: tx, z: tz }; plan.town = s; plan.culture = culture;
     // the town circle must hold the plan: grow the radius to the plan's own wall/ring + a margin
@@ -303,6 +318,18 @@ export function bakeZone(id, opts = {}) {
     if (need > s.radius) s.radius = Math.ceil(need);
     plans.push(plan);
   }
+
+  // 5b. set pieces (play-test 2, Q18): fitted to the ground and the ground prepared, BEFORE the rivers are carved (a river
+  // still owns its bed). tools/lib/zone-setpieces.mjs; data/world/set-pieces.json + stream E's places `setPieces`.
+  const riversNear = W.rivers.filter(r => !(r.bbox[2] < ox - 200 || r.bbox[0] > ox + ZM + 200 || r.bbox[3] < oz - 200 || r.bbox[1] > oz + ZM + 200)).map(r => ({ id: r.id, pts: r.pts.map(([x, z, h, c]) => [x - ox, z - oz, h, c]) }));
+  const pinDiscs = Object.entries(SITE_PINS[id] || {}).map(([k, p]) => ({ x: p.x, z: p.z, r: k.startsWith('door') ? 30 : k === 'world_grimtallow' ? 110 : 50 }));
+  const SP = resolveSetPieces({ id, ZM, STEP, G, AP, ground, gIdx, waterTop, roadMask, rivers: riversNear, roads, plans, specs: SPECS, pins: pinDiscs,
+    riverReach: cls => RIVER_WIDTH[cls] / 2 + 10 + cls * 6 + 4 });
+  const pieces = SP.pieces;
+  // stream E's own set pieces (data/vignettes/setpieces.json, placed in data/vignettes/placements/<zone>.json): level + paint
+  let vignettes = [];
+  try { vignettes = JSON.parse(readFileSync(join(HERE, '..', 'data', 'vignettes', 'placements', `${id}.json`), 'utf8')).placements || []; } catch { /* E has not placed this zone yet */ }
+  const ePieces = prepareEPieces({ ground, gIdx, waterTop, roadMask, ZM }, vignettes, E_SETPIECES, pieces, SP.log);
 
   // 6. rivers: the world bake's polylines (surfaces fixed there), carved where they come near.
   // Play-test 1 (P21): the cross-section is ONE continuous profile of the distance to the NEAREST river line, applied
@@ -424,6 +451,9 @@ export function bakeZone(id, opts = {}) {
     }
   }
 
+  // 6c. mill ponds (set pieces): small lakes dug after the rivers and bridges, before the skirt buries their edges
+  carvePonds({ ground, waterTop, waterKind, gIdx, roadMask }, pieces);
+
   // 7. the wet skirt (P21): one ring of water surface laid past every wet edge, 8-connected (the old 4-connected ring
   // left the corner triangles out, so the sheet stopped in 2 m steps short of the bank), and the ground under every
   // skirt sample raised to at least surface + SKIRT_BURY. The sheet's edge is then always under the ground, the
@@ -463,6 +493,7 @@ export function bakeZone(id, opts = {}) {
     else { const s = Math.hypot(ground[k + 1] - ground[k - 1], ground[k + G] - ground[k - G]) / (2 * STEP); if (s > 0.9 && b !== 18) b = MOUNTAINS; }
     biome[j * SIZE + i] = b;
   }
+  paintSetPieces({ biome, SIZE, STEP, surfaceId: key => BIOMES.length + SET_SURFACES.findIndex(s => s[0] === key), isProtected: o => biome[o] === LAKE || biome[o] === COAST || biome[o] === ROAD_SURFACE_ID }, pieces, ePieces);
   for (const plan of plans) {
     const { x: tx, z: tz } = plan.origin;
     for (const st of plan.streets) {
@@ -490,7 +521,7 @@ export function bakeZone(id, opts = {}) {
     name: hub ? `${hub.name} (${id})` : id, zone: id, sheet: sheetIdFor(id), province: province ? { id: province.id, name: province.name } : null,
     size: SIZE, step: STEP, origin: { x: 0, z: 0 }, heightMin: hMin, heightMax: hMax,
     bakeVersion: ZONE_BAKE_VERSION, inputHash: null,
-    biomes: [...BIOMES.map(b => [b.key, b.name, b.color]), ['road', 'Road', '#b39a6e']], waterKinds: ['none', 'sea', 'lake', 'river'],
+    biomes: [...BIOMES.map(b => [b.key, b.name, b.color]), ...SET_SURFACES, ['road', 'Road', '#b39a6e']], waterKinds: ['none', 'sea', 'lake', 'river'],
     source: { tool: 'tools/bake-zone.mjs', world: { seed: W.seed, width: W.width, height: W.height, method: W.method, seaLevel: W.seaLevel, inputHash: W.inputHash }, zone: { zx: zone.zx, zy: zone.zy }, worldOrigin: { x: ox, z: oz }, zoneMetres: ZM },
     rivers: riversUsed, sites: metaSites, spawn: null,
     // decks the reader stands walkers on (terrain-read deckAt): every bridge whose deck touches this zone
@@ -503,29 +534,33 @@ export function bakeZone(id, opts = {}) {
   const terrain = createTerrain({ meta, height, waterTop: wTop, waterKind: wKind, biome });
 
   // 10. sites other streams use (door, event/camp arenas) — clear of towns, roads and E's vignettes
-  let vignettes = [];
-  try { vignettes = JSON.parse(readFileSync(join(HERE, '..', 'data', 'vignettes', 'placements', `${id}.json`), 'utf8')).placements || []; } catch { /* E has not placed this zone yet */ }
   const avoid = vignettes.map(v => ({ x: v.x, z: v.z, r: v.radius || 12 }));
-  addZoneSites(terrain, meta.sites, { asks: asksFor(id, meta.sites, W), avoid, doorName: 'Barrow entrance', town: meta.sites.find(s => s.hub), pins: SITE_PINS[id] || {} });
+  const pieceDiscs = pieces.filter(p => p.kind !== 'belt').map(p => ({ x: p.x, z: p.z, r: p.r + 6 })).concat(pieces.flatMap(p => (p.kind === 'belt' ? p.fields : []).map(f => ({ x: f.R.cx, z: f.R.cz, r: Math.hypot(f.R.w, f.R.d) / 2 + 4 }))));
+  addZoneSites(terrain, meta.sites, { asks: asksFor(id, meta.sites, W), avoid: [...avoid, ...pieceDiscs], doorName: 'Barrow entrance', town: meta.sites.find(s => s.hub), pins: SITE_PINS[id] || {} });
   const hubSite = meta.sites.find(s => s.hub);
   meta.spawn = hubSite ? spawnNear(terrain, hubSite) : { x: 1024, z: 1024 };
 
   // 11. bridges from the world bake (zone-local copies), placements, scatter, nav
   const bridges = bridgesHere.filter(b => b.x >= 0 && b.x < ZM && b.z >= 0 && b.z < ZM).map((b, i) => ({ ...b, pts: undefined, id: `bridge_${String(b.road).replace(/^spur_/, 's_')}_${b.river}_${i}` }));
   // footpaths (P19): every door, arena and E fort/farm/cave/waystone gets a trail to the road network — painted, not graded
-  const paths = layPaths({ t: terrain, biome, SIZE, STEP, ZM, roadId: ROAD_SURFACE_ID, sites: meta.sites, vignettes, plans });
-  const placements = placementsFor(meta, plans, roads, bridges, paths);
+  const keepOff = setPieceKeepOff(pieces);
+  const paths = layPaths({ t: terrain, biome, SIZE, STEP, ZM, roadId: ROAD_SURFACE_ID, sites: meta.sites, vignettes, plans,
+    blocked: keepOff, extraStarts: pieces.filter(p => p.pathFrom).map(p => ({ id: p.id, x: p.pathFrom.x, z: p.pathFrom.z, r: p.pathFrom.r || 0 })) });
+  const placements = [...placementsFor(meta, plans, roads, bridges, paths), ...setPiecePlacements(pieces, { groundAt: terrain.groundAt, culture: plans[0]?.culture || 'human' })];
   const keepClear = [
     ...placed.map(s => ({ x: s.x, z: s.z, r: s.radius + 6 })),
     ...meta.sites.filter(s => s.type === 'dungeon').map(s => ({ x: s.x, z: s.z, r: 14 })),
     ...meta.sites.filter(s => s.type === 'event' || s.type === 'camp').map(s => ({ x: s.x, z: s.z, r: s.r })),
     ...avoid,
   ];
-  const scatter = scatterFor(W, zone, terrain, biome, keepClear);
+  const scatter = scatterFor(W, zone, terrain, biome, keepClear, keepOff);
+  const roadAtSample = (x, z) => biome[clamp(Math.round(z / STEP), 0, SIZE - 1) * SIZE + clamp(Math.round(x / STEP), 0, SIZE - 1)] === ROAD_SURFACE_ID;
+  scatter.push(...setPieceScatter(pieces, { isWet: (x, z) => terrain.waterAt(x, z).kind !== 'none', onRoad: roadAtSample }));
   // decks for every world bridge whose span reaches into this zone (one on the edge is stamped by both zones)
   const decks = meta.bridges;
-  const nav = navFor(terrain, biome, scatter, plans, decks);
-  return { meta, height, waterTop: wTop, waterKind: wKind, biome, terrain, plans, townPlan: plans.find(p => p.town.hub) || null, placements, roads, bridges, paths, scatter, nav, vignettesUsed: vignettes.length };
+  const pieceNav = setPieceNav(pieces); pieceNav.buildings.push(...ePieces.flatMap(e => e.buildings));
+  const nav = navFor(terrain, biome, scatter, plans, decks, pieceNav);
+  return { meta, height, waterTop: wTop, waterKind: wKind, biome, terrain, plans, townPlan: plans.find(p => p.town.hub) || null, placements, roads, bridges, paths, scatter, nav, vignettesUsed: vignettes.length, pieces, ePieces, pieceLog: SP.log };
 }
 
 // ---------------------------------------------------------------------------------------------- scatter
@@ -560,7 +595,7 @@ function h01(cx, cz, salt) {
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 }
 
-function scatterFor(W, zone, t, biome, keepClear) {
+function scatterFor(W, zone, t, biome, keepClear, keepOff = () => false) {
   const ox = zone.origin.x, oz = zone.origin.z;
   const grove = makeNoise2D(subSeed(W.seed, 'thousandvale-groves'));
   const keys = t.biomes.map(b => b.key);
@@ -582,7 +617,7 @@ function scatterFor(W, zone, t, biome, keepClear) {
     const slope = t.slopeAt(x, z);
     if (TREE_KINDS.has(kind) && slope > 32) kind = 6;              // too steep for a tree: a rock instead
     if (slope > 50) continue;
-    if (keepClear.some(c => Math.hypot(c.x - x, c.z - z) < c.r)) continue;
+    if (keepClear.some(c => Math.hypot(c.x - x, c.z - z) < c.r) || keepOff(x, z)) continue;
     // keep a clear verge beside roads/streets (2 m round the trunk)
     let verge = false;
     for (const [dx, dz] of [[2, 0], [-2, 0], [0, 2], [0, -2]]) { const ii = clamp(i + dx / 2, 0, SIZE - 1), jj = clamp(j + dz / 2, 0, SIZE - 1); if (biome[jj * SIZE + ii] === t.biomes.length - 1) verge = true; }
@@ -593,7 +628,7 @@ function scatterFor(W, zone, t, biome, keepClear) {
 }
 
 // ---------------------------------------------------------------------------------------------- nav
-function navFor(t, biome, scatter, plans, decks = []) {
+function navFor(t, biome, scatter, plans, decks = [], extra = { buildings: [], walls: [] }) {
   const bits = new Uint8Array(SIZE * SIZE), roadId = t.biomes.length - 1;
   for (let j = 0; j < SIZE; j++) for (let i = 0; i < SIZE; i++) {
     const x = i * STEP, z = j * STEP, o = j * SIZE + i;
@@ -623,6 +658,25 @@ function navFor(t, biome, scatter, plans, decks = []) {
         const dx = i * STEP - cx, dz = j * STEP - cz, along = dx * ux + dz * uz, across = dx * uz - dz * ux;
         if (Math.abs(along) <= half && Math.abs(across) <= hw) { const o = j * SIZE + i; bits[o] = (bits[o] & ~(NAV.DEEP | NAV.SHALLOW | NAV.STEEP | NAV.SOLID)) | NAV.WALK | NAV.ROAD; }
       }
+  }
+  // set pieces: buildings (BUILDING over the rotated footprint) and stone walls (SOLID, one sample wide, gates left open)
+  for (const R of extra.buildings) {
+    const c = Math.cos(R.a), s = Math.sin(R.a), r = Math.hypot(R.w, R.d) / 2;
+    for (let j = Math.max(0, Math.floor((R.cz - r) / STEP)); j <= Math.min(SIZE - 1, Math.ceil((R.cz + r) / STEP)); j++)
+      for (let i = Math.max(0, Math.floor((R.cx - r) / STEP)); i <= Math.min(SIZE - 1, Math.ceil((R.cx + r) / STEP)); i++) {
+        const dx = i * STEP - R.cx, dz = j * STEP - R.cz, lx = dx * c + dz * s, lz = -dx * s + dz * c;
+        if (Math.abs(lx) <= R.w / 2 && Math.abs(lz) <= R.d / 2) bits[j * SIZE + i] |= NAV.BUILDING;
+      }
+  }
+  for (const pts of extra.walls) for (let q = 0; q < pts.length - 1; q++) {
+    const a = pts[q], b = pts[q + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const e0 = pts[0], e1 = pts[pts.length - 1];
+    for (let u = 0; u <= L; u += 0.5) {
+      const x = a[0] + (b[0] - a[0]) * u / L, z = a[1] + (b[1] - a[1]) * u / L, i = Math.round(x / STEP), j = Math.round(z / STEP);
+      // the two gate posts are the line's ends: leave the sample nearest each post open so the gate stays a gate in nav
+      if (Math.min(Math.hypot(i * STEP - e0[0], j * STEP - e0[1]), Math.hypot(i * STEP - e1[0], j * STEP - e1[1])) < 1.5) continue;
+      if (i >= 0 && j >= 0 && i < SIZE && j < SIZE) bits[j * SIZE + i] |= NAV.SOLID;
+    }
   }
   for (const plan of plans) {
     const { x: tx, z: tz } = plan.origin;
@@ -692,7 +746,8 @@ export function placementsFor(meta, plans, roads = [], bridges = [], paths = [])
       }
       out.push({
         kind: 'building', id: `${town}_plot_${i}`, x: r2(tx + p.cx), z: r2(tz + p.cz), yaw: yawOf(face),
-        data: { town, want: p.want, district: p.district, w: r2(p.w), d: r2(p.d), angle: +p.angle.toFixed(4), front: +face.toFixed(4), streetGap: r2(gap) },
+        data: { town, want: p.want, district: p.district, w: r2(p.w), d: r2(p.d), angle: +p.angle.toFixed(4), front: +face.toFixed(4), streetGap: r2(gap),
+          ...(p.office ? { office: p.want, role: OFFICE_ROLE[p.want] || null, lit: !!OFFICES?.offices?.[p.want]?.lit, label: OFFICES?.offices?.[p.want]?.label || null } : {}) },
       });
     });
     if (plan.wall) out.push({ kind: 'town_wall', id: `${town}_wall`, x: r2(tx), z: r2(tz), yaw: 0, data: { town, radius: plan.wallRadius, gates: plan.wall.gates } });
@@ -703,7 +758,7 @@ export function placementsFor(meta, plans, roads = [], bridges = [], paths = [])
     clipOutside(r.pts, circles).forEach((piece, n, all) => {
       const pts = piece.map(([x, z, h]) => [r2(x), r2(z), r2(h)]);
       if (pts.length < 2) return;
-      out.push({ kind: 'road', id: all.length > 1 ? `${r.id}_${n}` : r.id, x: pts[0][0], z: pts[0][1], yaw: 0, data: { cls: r.cls, width: r.width, spur: !!r.spur, pts } });
+      out.push({ kind: 'road', id: all.length > 1 ? `${r.id}_${n}` : r.id, x: pts[0][0], z: pts[0][1], yaw: 0, data: { cls: r.cls, width: r.width, spur: !!r.spur, ...(r.lane ? { lane: true, name: r.name || null, to: r.to || null } : {}), pts } });
     });
   }
   // a bridge: a straight flat deck from abutment a to abutment b (both [x, z, h], h = deck), `width` wide, centred on

@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 3,
-  "inputHash": "91f4bd84",
+  "bakeVersion": 4,
+  "inputHash": "36526177",
   "waterKinds": [
     "none",
     "sea",
@@ -168,10 +168,10 @@
   "summary": {
     "zone": "z11_02",
     "province": "Petbeck Basin",
-    "inputHash": "91f4bd84",
+    "inputHash": "36526177",
     "rivers": 4,
     "wetShare": 0.01,
-    "unwalkableShare": 0.087,
+    "unwalkableShare": 0.088,
     "towns": [
       {
         "name": "Copperdell",
@@ -233,18 +233,20 @@
     ],
     "roads": 12,
     "bridges": 2,
-    "paths": 8,
-    "pathMetres": 2709,
-    "scatter": 21464,
+    "paths": 14,
+    "pathMetres": 2922,
+    "scatter": 22525,
     "scatterKinds": {
-      "tree_broadleaf": 8536,
-      "tree_conifer": 3399,
-      "bush": 5263,
-      "rock_large": 1359,
-      "boulder": 80,
-      "rock_small": 1749,
-      "reed": 1017,
-      "tree_dead": 61
+      "tree_broadleaf": 8437,
+      "tree_conifer": 3401,
+      "bush": 5140,
+      "rock_large": 1356,
+      "boulder": 92,
+      "rock_small": 1721,
+      "reed": 1077,
+      "tree_dead": 62,
+      "hedge": 1204,
+      "tree_fruit": 35
     },
     "sites": [
       "settlement(HUB) city Copperdell 352 448 140",
@@ -259,13 +261,13 @@
       "x": 348,
       "z": 444
     },
-    "placements": 252,
-    "vignettesAvoided": 637
+    "placements": 345,
+    "vignettesAvoided": 619
   },
   "files": {
-    "terrain.bin": 622974,
-    "nav.bin": 50993,
-    "scatter.bin": 171796,
-    "placements.json": 173992
+    "terrain.bin": 626053,
+    "nav.bin": 50967,
+    "scatter.bin": 180284,
+    "placements.json": 247193
   }
 }

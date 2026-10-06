@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 3,
-  "inputHash": "ab30dc1a",
+  "bakeVersion": 4,
+  "inputHash": "106d6a71",
   "waterKinds": [
     "none",
     "sea",
@@ -261,7 +261,7 @@
   "summary": {
     "zone": "z14_03",
     "province": "Petbeck Basin",
-    "inputHash": "ab30dc1a",
+    "inputHash": "106d6a71",
     "rivers": 4,
     "wetShare": 0.014,
     "unwalkableShare": 0.004,
@@ -364,18 +364,20 @@
     ],
     "roads": 15,
     "bridges": 5,
-    "paths": 10,
-    "pathMetres": 315,
-    "scatter": 17934,
+    "paths": 14,
+    "pathMetres": 688,
+    "scatter": 18878,
     "scatterKinds": {
-      "tree_broadleaf": 8328,
-      "bush": 5945,
-      "reed": 1244,
-      "rock_small": 1628,
-      "rock_large": 353,
+      "tree_broadleaf": 8214,
+      "bush": 5867,
+      "reed": 1235,
+      "rock_small": 1605,
+      "rock_large": 338,
       "tree_dead": 88,
-      "tree_acacia": 342,
-      "boulder": 6
+      "tree_acacia": 341,
+      "boulder": 5,
+      "tree_conifer": 15,
+      "hedge": 1170
     },
     "sites": [
       "settlement(HUB) town Redcliff 384 864 90",
@@ -392,13 +394,13 @@
       "x": 388,
       "z": 864
     },
-    "placements": 403,
-    "vignettesAvoided": 674
+    "placements": 478,
+    "vignettesAvoided": 641
   },
   "files": {
-    "terrain.bin": 507676,
-    "nav.bin": 34126,
-    "scatter.bin": 143556,
-    "placements.json": 159933
+    "terrain.bin": 510374,
+    "nav.bin": 34159,
+    "scatter.bin": 151108,
+    "placements.json": 229402
   }
 }

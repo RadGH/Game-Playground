@@ -44,7 +44,7 @@ function route(N, cost, goal, start, maxCost) {
  *        vignettes (stream E placements), plans (proctown plans, zone origin on plan.origin) }
  */
 export function layPaths(ctx) {
-  const { t, biome, SIZE, STEP, ZM, roadId, sites, vignettes, plans } = ctx;
+  const { t, biome, SIZE, STEP, ZM, roadId, sites, vignettes, plans, blocked = null, extraStarts = [] } = ctx;
   const N = ZM / CELL;
   const cost = new Float32Array(N * N), goal = new Uint8Array(N * N);
   const discs = vignettes.filter(v => v.radius > 0).map(v => ({ x: v.x, z: v.z, r: v.radius + 2 }));
@@ -55,7 +55,7 @@ export function layPaths(ctx) {
     const mv = t.moveAt(x, z);
     if (mv === 'steep' || (mv === 'swim' && Number.isNaN(t.deckAt(x, z)))) { cost[k] = Infinity; continue; }
     const s = t.slopeAt(x, z);
-    if (s > 42) { cost[k] = Infinity; continue; }
+    if (s > 42 || (blocked && blocked(x, z))) { cost[k] = Infinity; continue; }
     cost[k] = (1 + (s / 18) ** 2) * (mv === 'wade' ? 4 : 1);
     if (biome[Math.round(z / STEP) * SIZE + Math.round(x / STEP)] === roadId) goal[k] = 1;
     if (towns.some(tw => Math.hypot(tw.x - x, tw.z - z) < tw.radius)) goal[k] = 1;
@@ -74,6 +74,8 @@ export function layPaths(ctx) {
     if (s.type === 'dungeon') starts.push({ id: s.id, x: s.x + Math.sin(s.yaw) * 7, z: s.z + Math.cos(s.yaw) * 7, r: 0 });
     else if (s.type === 'event' || s.type === 'camp') starts.push({ id: s.id, x: s.x, z: s.z, r: s.r });
   }
+  // set pieces (play-test 2): a farmyard's rim, a graveyard / orchard gate, a clearing's middle (blocked cells are skipped)
+  for (const e of extraStarts) starts.push({ id: e.id, x: e.x, z: e.z, r: e.r || 0, ...(e.r ? { disc: true } : {}) });
   for (const v of vignettes) if (['fort', 'farm', 'cave', 'waystone'].includes(v.type)) starts.push({ id: v.id, x: v.x, z: v.z, r: (v.radius || 0) + 2 + CELL * 1.25, disc: v.radius > 0 });
   const cellOf = (x, z) => Math.min(N - 1, Math.max(0, Math.floor(z / CELL))) * N + Math.min(N - 1, Math.max(0, Math.floor(x / CELL)));
   const paths = [];

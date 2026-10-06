@@ -21,7 +21,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { NAV } from '../js/rules/terrain-read.js';
 import { J, ROOT } from './content-lib.mjs';
-import { findSpot, openPoint, walkLine, settlementEdge, campLevels, POINT_TYPES, heavyOk, capCount } from './content-place.mjs';
+import { findSpot, openPoint, walkLine, settlementEdge, campLevels, POINT_TYPES, heavyOk, capCount, groundPieces } from './content-place.mjs';
 
 export const TARGET = 50;          // metres: no reachable open sample further than this from the edge of something (≈ one thing every ~100 m)
 export const ROAD_TARGET = 45;     // metres, for road samples (travellers walk the roads as well: routesFor)
@@ -69,6 +69,7 @@ export function fillDensity(st, { LF, typeMid, target = TARGET, roadTarget = ROA
     if (['dungeon_door', 'crossing', 'landmark', 'lair', 'bridge', 'pass', 'dungeon'].includes(b.kind)) stamp(b.x, b.z, 8);
     else if (b.kind === 'event_site' || b.kind === 'camp_site') stamp(b.x, b.z, b.data.r || 20);
   }
+  for (const g of groundPieces(bake)) stamp(g.x, g.z, g.r);      // stream B's farms, fields, graveyards, orchards… (play-test 2) are things to see
 
   const counts = { curio: 0, wayside: 0, stray: 0, roamer: 0, folk: 0 };
   const recipeAt = new Map();             // recipe id -> [{x,z}] (no two of one curio within 350 m)
@@ -176,7 +177,7 @@ export function fillDensity(st, { LF, typeMid, target = TARGET, roadTarget = ROA
     const roles = Object.entries(TRAV.folk || {});
     if (!roles.length) return null;
     const bm = biomeAt(x, z);
-    const cands = roles.filter(([, f]) => (!f.biomes || !f.biomes.length || f.biomes.includes(bm)) && (!f.archetypes || !f.archetypes.length || f.archetypes.includes(zs.archetype)));
+    const cands = roles.filter(([, f]) => !f.setpiece && (!f.biomes || !f.biomes.length || f.biomes.includes(bm)) && (!f.archetypes || !f.archetypes.length || f.archetypes.includes(zs.archetype)));
     if (!cands.length) return null;
     const [role, f] = pick(cands, cands.map(([, ff]) => (ff.weight || 1) * (nearOk(ff.places, x, z) ? 3 : 0.3)));
     const s = spotNear('folk', 6, x, z, onRoad2);

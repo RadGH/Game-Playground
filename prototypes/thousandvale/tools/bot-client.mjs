@@ -208,6 +208,12 @@ export async function startBot(opts = {}) {
     }
   });
   net.on('castR', () => { bot.stats.refusals++; });
+  // play-test 2 (stream A, Q3): kill loot waits on the corpse — a bot loots everything it is offered (retrying while it walks
+  // up: a refusal 'far' tries again for a few seconds), and passes on every party roll with Greed
+  const lootTry = (id, n = 0) => { if (bot.stopped || n > 8) return; bot.lootPending ||= new Map(); bot.lootPending.set(id, n); net.loot('all', { id }); };
+  net.on('lootable', m => { if (m.on) lootTry(m.id); else if (bot.lootPending) bot.lootPending.delete(m.id); });
+  net.on('lootR', m => { if (m.why === 'far' && bot.lootPending) for (const [id, n] of bot.lootPending) setTimeout(() => lootTry(id, n + 1), 600); });
+  net.on('lootRoll', m => net.loot('roll', { roll: m.roll, choice: 'greed' }));
   net.on('bag', m => {
     const t = Date.now();
     for (const uid of m.remove || []) bot.ledger.push({ t, type: 'remove', uid });

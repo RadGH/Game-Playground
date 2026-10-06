@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 3,
-  "inputHash": "d9dcab88",
+  "bakeVersion": 4,
+  "inputHash": "a6a668c3",
   "waterKinds": [
     "none",
     "sea",
@@ -157,7 +157,7 @@
   "summary": {
     "zone": "z12_03",
     "province": "Petbeck Basin",
-    "inputHash": "d9dcab88",
+    "inputHash": "a6a668c3",
     "rivers": 3,
     "wetShare": 0.001,
     "unwalkableShare": 0.114,
@@ -203,19 +203,21 @@
     ],
     "roads": 10,
     "bridges": 2,
-    "paths": 7,
-    "pathMetres": 1798,
-    "scatter": 15632,
+    "paths": 11,
+    "pathMetres": 1825,
+    "scatter": 16405,
     "scatterKinds": {
-      "bush": 5200,
-      "tree_broadleaf": 3508,
-      "rock_small": 2823,
-      "rock_large": 2341,
-      "reed": 225,
-      "tree_dead": 21,
-      "boulder": 293,
-      "tree_conifer": 1198,
-      "tree_acacia": 23
+      "bush": 5140,
+      "tree_broadleaf": 3601,
+      "rock_small": 2808,
+      "rock_large": 2338,
+      "reed": 219,
+      "tree_dead": 20,
+      "boulder": 299,
+      "tree_conifer": 1187,
+      "tree_acacia": 24,
+      "hedge": 732,
+      "tree_fruit": 37
     },
     "sites": [
       "settlement(HUB) town Orrinsford 336 576 90",
@@ -229,13 +231,13 @@
       "x": 340,
       "z": 580
     },
-    "placements": 193,
-    "vignettesAvoided": 692
+    "placements": 241,
+    "vignettesAvoided": 662
   },
   "files": {
-    "terrain.bin": 682193,
-    "nav.bin": 50480,
-    "scatter.bin": 125140,
-    "placements.json": 146925
+    "terrain.bin": 684203,
+    "nav.bin": 50496,
+    "scatter.bin": 131324,
+    "placements.json": 192214
   }
 }

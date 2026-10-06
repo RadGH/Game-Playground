@@ -1,0 +1,247 @@
+{
+  "_doc": "Stream E (play-test 2, Q27). THE STARTING CHAIN every new character gets, whatever the class: 'The South Road'. Merged into zone 'test' (The Torbor Fields) by test.json `include`. Elder Maud in Torborhold -> the south road -> the Pail and Plough (a crossroads inn, set piece sp_pail_and_plough) -> TWO branches the innkeeper hands out together, done in either order: (A) on to Orrinsford, the next town (Prior Wendel, zone saint_orrins_rise) and his small favour at Saint Hulda's Yard; (B) Greyfletch Camp's huntmaster, the beast's signs, then the mini boss Old Gristle at Gristle's Hollow (data/encounters/mb_old_gristle.json, level 4). Both done -> 'Home with News' back to Maud, which leads into the province story (toll_at_fitockpi). Levels 1 -> 5 over ~1.7 km of road, with fights on the way so a new character levels into the boss. NEW FIELDS for stream A (docs/requests.md, E -> A play-test 2): `auto: true` = granted to every new character (and to any character that has neither done nor holds it) — it starts in the quest log; `requires: [ids]` = offered only when EVERY listed quest is done (on top of the `next` rule). `rewardText` = one player-facing line summing up the reward.",
+  "zone": "test",
+  "part": "start",
+  "npcs": {
+    "innkeeper_marra": {
+      "name": "Marra Thatcher",
+      "role": "innkeeper",
+      "at": "sp_pail_and_plough",
+      "greeting": "Sit down before you fall down. Stew's a copper. Trouble's free, and I've plenty of it."
+    }
+  },
+  "quests": [
+    {
+      "id": "start_two_good_legs",
+      "name": "Two Good Legs",
+      "level": 1,
+      "auto": true,
+      "giver": "elder_maud",
+      "offer": "You've a weapon and two good legs, which makes you the most useful person in Torborhold this week. Before I send you anywhere far, prove the legs work: the moor hounds are at the sheep folds again. Then go out to the Drill Field by the gate and find whoever teaches your sort of trouble.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "moor_hound",
+          "count": 3,
+          "text": "Kill 3 moor hounds near the sheep folds",
+          "where": "the sheep folds and open grass just outside Torborhold"
+        },
+        {
+          "kind": "visit",
+          "vignette": "sp_drill_field",
+          "text": "Visit the Torbor Drill Field",
+          "where": "Torbor Drill Field, just outside Torborhold's gate"
+        }
+      ],
+      "done": "Good. You came back, and with all your fingers. That's more than the last three. Now, a real errand.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 8
+      },
+      "rewardText": "A purse of coin, and the Elder's next errand: the south road.",
+      "next": "start_letters_south"
+    },
+    {
+      "id": "start_letters_south",
+      "name": "Letters for the South Road",
+      "level": 2,
+      "giver": "elder_maud",
+      "offer": "Prior Wendel in Orrinsford has asked Torborhold for help, and Marra at the Pail and Plough says the south road's gone bad. Take this letter south. Clear what's sniffing along the road, and stop at the Pail and Plough on the way. Marra will feed you and tell you the rest, at length.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "moor_hound",
+          "count": 5,
+          "text": "Kill 5 moor hounds along the south road",
+          "where": "the south road out of Torborhold, toward the Pail and Plough"
+        },
+        {
+          "kind": "talk",
+          "npc": "innkeeper_marra",
+          "text": "Talk to Marra at the Pail and Plough",
+          "where": "the Pail and Plough, the crossroads inn halfway to Orrinsford"
+        }
+      ],
+      "done": "A letter for the Prior and a sword that's been used? Sit. Eat. Then I've two jobs and you can do them in whatever order your legs like.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 8
+      },
+      "rewardText": "Coin, a bowl of stew, and two new jobs from Marra (do them in either order).",
+      "next": "start_road_to_orrinsford"
+    },
+    {
+      "id": "start_road_to_orrinsford",
+      "name": "The Road to Orrinsford",
+      "level": 3,
+      "giver": "innkeeper_marra",
+      "offer": "The Elder's letter won't walk itself to Orrinsford. Read the notice post on your way out — the toll men have been stopping carts south of here, and two of my regulars came back without their boots. Deal with them, then take the letter to Prior Wendel.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_pail_and_plough",
+          "object": "Notice post",
+          "text": "Read the notice post at the Pail and Plough",
+          "where": "the notice post by the Pail and Plough's door"
+        },
+        {
+          "kind": "kill",
+          "type": "road_brigand",
+          "count": 4,
+          "text": "Kill 4 road brigands holding up the carts",
+          "where": "the road south of the Pail and Plough, toward Orrinsford"
+        },
+        {
+          "kind": "talk",
+          "npc": "abbot_wendel",
+          "text": "Give the Elder's letter to Prior Wendel in Orrinsford",
+          "where": "Orrinsford, the next town south (Saint Orrin's Rise)"
+        }
+      ],
+      "done": "Maud's hand, and Maud's temper. Yes, we will send what help we can. But first, a small favour of my own, if your boots are still on.",
+      "reward": {
+        "xp": 0.55,
+        "gold": 10
+      },
+      "rewardText": "Coin, and you have reached Orrinsford — the Prior has a favour to ask.",
+      "next": "start_the_priors_favour"
+    },
+    {
+      "id": "start_the_priors_favour",
+      "name": "The Prior's Favour",
+      "level": 4,
+      "giver": "abbot_wendel",
+      "offer": "Our pilgrims bury their dead at Saint Hulda's Yard, on the way back to Torborhold. Something has been digging there. Barrow hounds — grave dogs. Drive them off, and ring the sexton's bell so the dead know they are left in peace. Then tell Maud we will stand with her.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "barrow_hound",
+          "count": 4,
+          "near": "sp_saint_hulda_yard",
+          "text": "Kill 4 barrow hounds at Saint Hulda's Yard",
+          "where": "Saint Hulda's Yard, the old graveyard between Torborhold and the south road"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_saint_hulda_yard",
+          "object": "Sexton's bell",
+          "text": "Ring the sexton's bell at Saint Hulda's Yard",
+          "where": "the bell by the lychgate of Saint Hulda's Yard"
+        }
+      ],
+      "done": "The bell carries all the way here, you know. Thank you. Go home with my answer: Orrinsford stands with Torborhold.",
+      "reward": {
+        "xp": 0.5,
+        "gold": 10,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      },
+      "rewardText": "Coin, a piece of gear, and the Prior's answer to carry home."
+    },
+    {
+      "id": "start_signs_of_the_beast",
+      "name": "Signs of the Beast",
+      "level": 3,
+      "giver": "innkeeper_marra",
+      "requires": [
+        "start_letters_south"
+      ],
+      "offer": "Something big has been taking drovers' dogs off the road at night. Not a wolf — a wolf doesn't leave tracks like dinner plates. Oswy Greyfletch keeps a hunters' camp in the trees west of here. Ask him what it is, and help him find out where it sleeps.",
+      "steps": [
+        {
+          "kind": "talk",
+          "npc": "trainer_hunt",
+          "text": "Ask Oswy Greyfletch about the beast",
+          "where": "Greyfletch Camp, the hunters' camp at the edge of the woods"
+        },
+        {
+          "kind": "collect",
+          "item": "Matted grey tuft",
+          "count": 4,
+          "from": "moor_hound",
+          "chance": 0.55,
+          "text": "Collect 4 matted grey tufts from moor hounds",
+          "where": "moor hound packs around Greyfletch Camp and the south road"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_greyfletch_camp",
+          "object": "Tally board",
+          "text": "Mark the tufts on Greyfletch's tally board",
+          "where": "the tally board at Greyfletch Camp"
+        }
+      ],
+      "done": "Grey, coarse, and every tuft from a different dog. They're all his pack. Old Gristle. I thought he was dead. I hoped he was dead.",
+      "reward": {
+        "xp": 0.5,
+        "gold": 10
+      },
+      "rewardText": "Coin, and the hunters know the beast's name and where it sleeps.",
+      "next": "start_old_gristle"
+    },
+    {
+      "id": "start_old_gristle",
+      "name": "Old Gristle",
+      "level": 4,
+      "giver": "trainer_hunt",
+      "group": "a careful solo at level 4, or 2-3 players",
+      "offer": "Nine winters he's led the packs into the folds, and he's grown the size of a pony on Torborhold's sheep. He dens in a hollow full of bones, out past the camp. When he howls, the pack comes — kill the hounds he calls, and stay out of the line when he crouches. He pounces long.",
+      "steps": [
+        {
+          "kind": "visit",
+          "vignette": "sp_gristles_hollow",
+          "text": "Find Gristle's Hollow",
+          "where": "Gristle's Hollow, a bone-strewn den a few hundred metres past Greyfletch Camp"
+        },
+        {
+          "kind": "killOne",
+          "encounter": "mb_old_gristle",
+          "text": "Kill Old Gristle, the Fold-Breaker",
+          "where": "the bottom of Gristle's Hollow"
+        }
+      ],
+      "done": "You did it. You actually did it. Take this — I made it for the day somebody did. Go and tell Marra she can let the dogs out again.",
+      "reward": {
+        "xp": 0.7,
+        "gold": 18,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      },
+      "rewardText": "A rare piece of gear and a fat purse — and Torborhold's folds are safe."
+    },
+    {
+      "id": "start_home_with_news",
+      "name": "Home with News",
+      "level": 4,
+      "giver": "elder_maud",
+      "requires": [
+        "start_the_priors_favour",
+        "start_old_gristle"
+      ],
+      "offer": "Orrinsford stands with us and Old Gristle is dead? You've done in a week what my reeve couldn't do in a year. Tell Corwin yourself — I want to see his face — and then come back. There's worse than hounds at Fitockpi Ford.",
+      "steps": [
+        {
+          "kind": "talk",
+          "npc": "reeve_corwin",
+          "text": "Tell Reeve Corwin the south road is safe",
+          "where": "Torborhold, by the town square"
+        }
+      ],
+      "done": "Corwin's face, I'm told, was a picture. Here. You've earned something better than stew. Now — about that ford.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 25,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon"
+        }
+      },
+      "rewardText": "A rare weapon, the Elder's thanks, and the province story begins: Hobb's toll gang at Fitockpi Ford.",
+      "next": "toll_at_fitockpi"
+    }
+  ]
+}

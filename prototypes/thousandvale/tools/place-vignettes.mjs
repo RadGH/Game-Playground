@@ -10,11 +10,14 @@
 // at bake time). Re-run after any re-bake, after tools/assign-vignettes.mjs, and after editing quests/treasure.
 // Same inputs -> same files (seeded per zone). See tools/content-place.mjs for the rules every spot obeys.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { parseTerrain, parseNav } from '../js/rules/terrain-read.js';
+import { parseTerrain, parseNav, NAV } from '../js/rules/terrain-read.js';
 import { boringWalk, SIGHT, LIMIT as BORING_LIMIT } from './boring-walk.mjs';
 import { J, ROOT, allVignettes, questFiles, provinceMap } from './content-lib.mjs';
-import { POINT_TYPES, zoneContext, provinceComponents, discProblem, findSpot, findPoint, openPoint, walkLine, hintFrom, hintScore, rngFor, KIND_RULES, settlementEdge, levelField, campLevels, heavyOk, capCount, countCapAt } from './content-place.mjs';
+import { POINT_TYPES, zoneContext, provinceComponents, discProblem, findSpot, findPoint, openPoint, walkLine, hintFrom, hintScore, rngFor, KIND_RULES, settlementEdge, levelField, campLevels, heavyOk, capCount, countCapAt, groundPieces } from './content-place.mjs';
 import { fillDensity, routesFor, placeWords } from './content-living.mjs';
+import { placeSetpieces, slotFolk } from './content-setpieces.mjs';
+import { buildOffices } from './content-offices.mjs';
+import { writeShops } from './content-shops.mjs';
 
 const PROV = 'torbor_downs';
 const arg = process.argv.slice(2).find(a => !a.startsWith('--')) || null;
@@ -33,6 +36,17 @@ const HOOKS = J('data/hooks.json').hooks;
 const VIG = new Map(allVignettes().map(v => [v.id, v]));
 const QUESTS = Object.fromEntries(questFiles().map(q => [q.zone, q]));
 const ARCH = J('data/provinces/archetypes.json');
+/** play-test 2 (Q18): hand-designed set pieces pinned near the start (tools/content-setpieces.mjs) */
+const SETPIECES = J('data/vignettes/setpieces.json').vignettes;
+const TRAVELLERS = J('data/provinces/travellers.json');
+/** where each free-standing set piece stood last run (kept while still fair — tools/content-setpieces.mjs) */
+const SP_PINS_FILE = new URL('data/provinces/setpiece-pins.json', ROOT);
+const SP_PINS = existsSync(SP_PINS_FILE) ? JSON.parse(readFileSync(SP_PINS_FILE, 'utf8')) : { _doc: '', pins: {} };
+/** play-test 2 (Q10): every town NPC's office (tools/content-offices.mjs) — quest NPCs with an office stand at its door */
+const OFFICES = buildOffices(PROV_ID());
+const OFFICE_OF = new Map(Object.values(OFFICES.towns).flatMap(t => t.offices.filter(o => o.npc).map(o => [o.npc, { ...o, town: t.name }])));
+const ROUTES = existsSync(new URL(`data/provinces/${PROV_ID()}-routes.json`, ROOT)) ? J(`data/provinces/${PROV_ID()}-routes.json`) : null;
+function PROV_ID() { return 'torbor_downs'; }
 /** names imposed on stream B's World Forge places that the M1 content already uses */
 const WAYSIDE = J('data/vignettes/wayside.json').kinds;
 const IMPOSE_EXTRA = { test: { mipider_ford: 'Fitockpi Ford' } };
@@ -67,8 +81,15 @@ for (const st of states) if (KEEP.has(st.wid)) {
 }
 fillBoring(states.filter(st => !st.kept));
 for (const st of states) if (!st.kept) fillDensity(st, { LF, typeMid });         // P19: something to see or do every ~100 m (tools/content-living.mjs)
+for (const st of states) if (!st.kept) patchRoads(st);                // the same measure tests/E/living.test.js uses, as a last pass
 for (const st of states) st.file.levels = LF.span(st.eid);
 if (!arg) livingFiles(states);                                      // routes, event places, quest marks (whole province only)
+{ // keep the free set pieces where they are next run (B levels the ground under them; they must not wander off it)
+  for (const st of states) for (const p of st.file.placements) if (p.setpiece && !p.bound) SP_PINS.pins[p.id] = { zone: st.wid, x: p.x, z: p.z, yaw: p.yaw };
+  SP_PINS._doc = 'Stream E. Where each free-standing set piece (data/vignettes/setpieces.json, not bound to a stream B piece) was placed, zone metres. tools/place-vignettes.mjs keeps a set piece on its old spot while that spot is still fair, so a B re-bake (which levels and clears the ground under our discs) never makes it move. Delete an entry to let the placer choose again.';
+  writeFileSync(SP_PINS_FILE, JSON.stringify(SP_PINS, null, 1) + '\n');
+}
+if (!arg) { writeShops(OFFICES.townShops); writeFileSync(new URL('data/provinces/offices.json', ROOT), JSON.stringify(OFFICES, null, 1) + '\n'); console.log(`offices: ${Object.values(OFFICES.towns).reduce((a, t) => a + t.offices.length, 0)} in ${Object.keys(OFFICES.towns).length} towns${OFFICES.problems.length ? ' PROBLEMS ' + OFFICES.problems.join('; ') : ''}`); }
 for (const st of states) {
   const { file, wid, eid } = st;
   if (st.kept) { console.log(`${wid} kept as it is`); continue; }
@@ -135,7 +156,7 @@ function placeZone(eid, wid) {
   const town0 = want[0].at ? { x: want[0].at.x, z: want[0].at.z } : asks[0] || start;
   ctx = zoneContext({ terrain, nav, placements: bake, start: town0, reserve: asks.filter(a => !want.some(w => w.at && w.name === a.name)).map(a => ({ ...a })), province: PCOMP, cell, pinned });
   for (const s of ctx.settlements) { const k = slug(s.wfName || s.name); if (rename[k]) s.name = rename[k]; }
-  places.zones[eid] = { world: wid, rename, asks };
+  places.zones[eid] = { world: wid, rename, asks, ...nameAsks(eid, wid) };
 
   const P = ctx.placed, features = [];
   const lvl = (x, z) => LF.at(eid, x, z), top = zs.band[1];
@@ -153,6 +174,15 @@ function placeZone(eid, wid) {
   const extras = ARCH.archetypes[zs.archetype].extras || {};
   const count = v => Array.isArray(v) ? v[0] + Math.floor(rnd() * (v[1] - v[0] + 1)) : (v || 0);
 
+  // ---- set pieces (play-test 2, Q18) — first, so they get the best ground near the start -----------------
+  {
+    const [gx, gy] = zs.grid, m = /^z(\d+)_(\d+)$/.exec(wid);
+    const spPlaced = placeSetpieces({ list: SETPIECES, eid, ctx, rnd, push, problems, terrain, lvlFloor, top, faceRoad, bake, pins: SP_PINS.pins,
+      hubAt: (x, z) => Math.hypot(gx * 2048 + x - HUBW.x, gy * 2048 + z - HUBW.z), routes: ROUTES, org: m ? [+m[1] * 2048, +m[2] * 2048] : [0, 0] });
+    // stream B's other set pieces: a worker at each marked slot (gravedigger, farmer, picker, innkeeper…)
+    const TF = TRAVELLERS.folk;
+    slotFolk({ bake, eid, push, ctx, walkLine, taken: new Set([...spPlaced.values()].map(r => r.bound).filter(Boolean)), chatterFor: role => (TF[role] && TF[role].chatter) || null });
+  }
   // ---- forts ---------------------------------------------------------------------------------------------
   const fortN = Math.max(1, extras.forts || 1);
   for (let i = 0; i < fortN; i++) {
@@ -278,9 +308,10 @@ function placeZone(eid, wid) {
   const q = QUESTS[eid];
   const npcKeep = new Map();
   for (const [nid, n] of Object.entries((q && q.npcs) || {})) {
-    const p = npcSpot(n.at, npcKeep);
+    const p = npcSpot(n.at, npcKeep, nid);
     if (!p) { problems.push(`npc ${nid} at ${n.at}`); continue; }
-    push({ type: 'npc', id: nid, name: n.name, role: n.role, at: n.at, x: p.x, z: p.z, yaw: +(rnd() * 6.28).toFixed(2) });
+    push({ type: 'npc', id: nid, name: n.name, role: n.role, at: n.at, x: p.x, z: p.z, yaw: p.yaw ?? +(rnd() * 6.28).toFixed(2),
+      ...(p.office ? { office: p.office } : {}), ...(n.trains ? { trains: n.trains } : {}) });
   }
   // ---- treasure clues + caches ---------------------------------------------------------------------------
   for (const c of TREASURE) {
@@ -340,7 +371,13 @@ function placeZone(eid, wid) {
     }
     return null;
   }
-  function npcSpot(at, keep) {
+  function npcSpot(at, keep, nid = null) {
+    const off = nid && OFFICE_OF.get(nid);
+    if (off && off.town === at && off.door) {          // Q10: a town NPC with an office stands at its own door
+      const k = keep.get(at) || []; keep.set(at, k);
+      const p = findPoint(ctx, rnd, { x: off.door.x, z: off.door.z, min: 0, max: 4 }, { allowTown: true, avoidRoad: false, clearance: 0.8, keepFrom: k, minSep: 3, prefer: (x, z) => -Math.hypot(x - off.door.x, z - off.door.z) });
+      if (p) { k.push(p); return { ...p, office: off.plot, yaw: off.door.yaw }; }
+    }
     const pl = placeOf(at); if (!pl) return null;
     const k = keep.get(at) || []; keep.set(at, k);
     let p;
@@ -475,6 +512,35 @@ function fillBoring(states) {
       }
     }
     if (!added) break;
+  }
+}
+
+/**
+ * A last pass over the roads with the INDEPENDENT measure tests/E/living.test.js uses (every 16 m road sample within
+ * 50 m of a placement edge, a path point, a settlement or a B site): fillDensity's own grid can call a stretch covered
+ * that this measure does not (play-test 2 re-place: 6 samples on one road in z11_04). Drops a wayside dressing by each
+ * uncovered stretch until none is left (or no spot can be found).
+ */
+function patchRoads(st) {
+  const { file, nav, bake, ctx, rnd, eid } = st, ZM = 2048, dead = new Set();
+  for (let iter = 0; iter < 40; iter++) {
+    const pois = [...groundPieces(bake), ...file.placements.map(p => ({ x: p.x, z: p.z, r: p.radius || 2 })), ...file.placements.flatMap(p => (p.path || []).map(([x, z]) => ({ x, z, r: 8 }))),
+      ...file.settlements.map(s => ({ x: s.x, z: s.z, r: s.r })), ...bake.filter(b => b.kind === 'event_site' || b.kind === 'camp_site').map(b => ({ x: b.x, z: b.z, r: b.data.r || 20 })),
+      ...bake.filter(b => ['dungeon_door', 'crossing', 'bridge', 'landmark'].includes(b.kind)).map(b => ({ x: b.x, z: b.z, r: 8 }))];
+    let worst = null;
+    for (let z = 48; z < ZM - 48; z += 16) for (let x = 48; x < ZM - 48; x += 16) {
+      const k = Math.round(z / nav.step) * nav.size + Math.round(x / nav.step), b = nav.bits[k];
+      if (!(b & NAV.WALK) || !(b & NAV.ROAD) || (b & (NAV.DEEP | NAV.STEEP | NAV.BUILDING | NAV.TOWN | NAV.SHALLOW | NAV.SOLID))) continue;
+      if (dead.has(k)) continue;
+      if (file.settlements.some(s => Math.hypot(s.x - x, s.z - z) < s.r)) continue;
+      let d = Infinity; for (const p of pois) { const q = Math.hypot(p.x - x, p.z - z) - p.r; if (q < d) d = q; if (d <= 50) break; }
+      if (d > 50 && (!worst || d > worst.d)) worst = { x, z, d, k };
+    }
+    if (!worst) return;
+    const wk = WAYSIDE[Math.floor(rnd() * WAYSIDE.length)];
+    const spot = findSpot(ctx, rnd, 'wayside', wk.radius, { near: { x: worst.x, z: worst.z, min: wk.radius + 6, max: 45 }, tries: 1500, spread: 0, score: (x, z) => -Math.hypot(x - worst.x, z - worst.z) });
+    if (!spot) { dead.add(worst.k); continue; }
+    ctx.placed.push({ type: 'wayside', id: `${wk.id}_${eid}_rp${iter}`, kind: wk.id, name: wk.name, x: spot.x, z: spot.z, yaw: +(rnd() * 6.28).toFixed(2), radius: wk.radius, filler: true });
   }
 }
 
@@ -622,4 +688,25 @@ async function legacyTest() {
   const file = { _doc: `Stream E. Vignette placements for zone 'test' (absolute metres, zone coordinates). Made by tools/place-vignettes.mjs test from data/vignettes/m1.json against data/zones/test/terrain.bin (input ${t.meta.inputHash}); re-run after a re-bake. The recipe's relative coordinates are rotated by yaw around (x, z).`, zone: 'test', terrainHash: t.meta.inputHash, town: { x: town.x, z: town.z, r: town.r }, rules: RULES, placements: out };
   writeFileSync(new URL('data/vignettes/placements/test.json', ROOT), JSON.stringify(file, null, 2) + '\n');
   console.log(out.map(o => `${o.id} ${o.x},${o.z} ${o.biome}`).join('\n'));
+}
+
+/**
+ * Play-test 2: a set piece of ours BOUND to one of stream B's ground pieces gives that piece our name (B's
+ * data/world/set-pieces.json says "stream E may add or override pieces/lanes per zone with `setPieces` / `lanes` in
+ * data/provinces/<sheet>-places.json (same id = E's wins)"): B's authored entry, renamed, and every lane whose signpost
+ * names the old name. -> { setPieces?, lanes? }
+ */
+function nameAsks(eid, wid) {
+  const W = existsSync(new URL('data/world/set-pieces.json', ROOT)) ? J('data/world/set-pieces.json') : { zones: {} };
+  const zw = W.zones[wid]; if (!zw) return {};
+  const setPieces = [], lanes = [], ren = new Map();
+  for (const v of SETPIECES) {
+    if (!v.bind || v.bind.zone !== eid || !v.bind.name) continue;
+    const a = (zw.pieces || []).find(p => p.id === v.bind.piece);
+    if (!a || a.name === v.name) continue;
+    setPieces.push({ ...a, name: v.name, eSetpiece: v.id });      // (not `for`: B's clearings use that key)
+    ren.set(a.name, v.name);
+  }
+  for (const l of zw.lanes || []) if ((l.to || []).some(t => ren.has(t))) lanes.push({ ...l, to: l.to.map(t => ren.get(t) || t) });
+  return { ...(setPieces.length ? { setPieces } : {}), ...(lanes.length ? { lanes } : {}) };
 }

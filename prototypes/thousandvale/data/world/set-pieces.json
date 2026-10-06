@@ -1,0 +1,876 @@
+{
+ "_doc": "Stream B (play-test 2, Q18). Bespoke areas baked into the ground by tools/bake-zone.mjs (tools/lib/zone-setpieces.mjs). Per world zone: `lanes` (graded farm lanes: pts [[x, z]] zone metres, `joins` = a town the lane starts in (becomes one of its high streets), `to` = [name at the first end, name at the last end] for signposts) and `pieces` ({id, kind, name, near [x, z] = search hint (the bake fits the piece to the ground within `reach` m), ...}). Kinds: farm {fields, fieldSize [w, d]}, graveyard {size [w, d], chapel, town}, orchard {size, fruit, spacing, boundary}, mill_pond {r}, clearing {r, for}, inn {at [roadA, roadB], size}. Every planned settlement also gets an automatic field belt and (unless one is authored for it) a graveyard; `auto: false` on a zone turns those off. Stream E may add or override pieces/lanes per zone with `setPieces` / `lanes` in data/provinces/<sheet>-places.json (same id = E's wins). The placements (set_piece, field, hedge, fence, wall, set_building, signpost) are listed in docs/world.md \u00a710. Change this file -> re-bake the zone, then E re-places.",
+ "zones": {
+  "z12_02": {
+   "lanes": [
+    {
+     "id": "lane_torbor_north",
+     "name": "Barrow Lane",
+     "joins": "Torborhold",
+     "to": [
+      "Torborhold",
+      "Barrow Hill"
+     ],
+     "pts": [
+      [
+       592,
+       1264
+      ],
+      [
+       596,
+       1150
+      ],
+      [
+       600,
+       1010
+      ],
+      [
+       608,
+       880
+      ],
+      [
+       650,
+       770
+      ],
+      [
+       740,
+       700
+      ]
+     ]
+    },
+    {
+     "id": "lane_torbor_east",
+     "name": "Wether Lane",
+     "to": [
+      "Hollow Chapel",
+      "Wamonhold Road"
+     ],
+     "pts": [
+      [
+       330,
+       1040
+      ],
+      [
+       450,
+       1012
+      ],
+      [
+       600,
+       1010
+      ],
+      [
+       760,
+       1000
+      ],
+      [
+       920,
+       1022
+      ],
+      [
+       1060,
+       1080
+      ],
+      [
+       1140,
+       1150
+      ],
+      [
+       1172,
+       1214
+      ]
+     ]
+    }
+   ],
+   "pieces": [
+    {
+     "id": "wheel_and_wether",
+     "kind": "inn",
+     "name": "The Wheel and Wether",
+     "at": [
+      "lane_torbor_north",
+      "lane_torbor_east"
+     ]
+    },
+    {
+     "id": "torborhold_graveyard",
+     "kind": "graveyard",
+     "name": "Torborhold Graveyard",
+     "town": "Torborhold",
+     "near": [
+      470,
+      1150
+     ],
+     "size": [
+      36,
+      26
+     ],
+     "chapel": true
+    },
+    {
+     "id": "hollow_chapel",
+     "kind": "graveyard",
+     "name": "Hollow Chapel",
+     "near": [
+      350,
+      1060
+     ],
+     "size": [
+      30,
+      22
+     ],
+     "chapel": true
+    },
+    {
+     "id": "hobbins_farm",
+     "kind": "farm",
+     "name": "Hobbin's Farm",
+     "near": [
+      790,
+      880
+     ],
+     "fields": 7
+    },
+    {
+     "id": "bracken_end_farm",
+     "kind": "farm",
+     "name": "Bracken End Farm",
+     "near": [
+      450,
+      900
+     ],
+     "fields": 6
+    },
+    {
+     "id": "stonegate_farm",
+     "kind": "farm",
+     "name": "Stonegate Farm",
+     "near": [
+      1300,
+      900
+     ],
+     "fields": 8
+    },
+    {
+     "id": "fallowmead_farm",
+     "kind": "farm",
+     "name": "Fallowmead Farm",
+     "near": [
+      1620,
+      1720
+     ],
+     "fields": 7
+    },
+    {
+     "id": "torbor_orchard",
+     "kind": "orchard",
+     "name": "Torbor Orchard",
+     "near": [
+      720,
+      1110
+     ],
+     "fruit": "apple"
+    },
+    {
+     "id": "wether_pear_orchard",
+     "kind": "orchard",
+     "name": "Wether Pear Orchard",
+     "near": [
+      930,
+      1110
+     ],
+     "fruit": "pear",
+     "size": [
+      48,
+      36
+     ]
+    },
+    {
+     "id": "torbor_mill_pond",
+     "kind": "mill_pond",
+     "name": "Torbor Mill Pond",
+     "near": [
+      880,
+      1300
+     ],
+     "r": 18
+    },
+    {
+     "id": "charcoal_clearing",
+     "kind": "clearing",
+     "name": "Charcoal Burners' Clearing",
+     "near": [
+      1040,
+      1300
+     ],
+     "r": 22,
+     "for": "camp"
+    },
+    {
+     "id": "hunters_clearing",
+     "kind": "clearing",
+     "name": "Hunters' Clearing",
+     "near": [
+      1650,
+      1330
+     ],
+     "r": 20,
+     "for": "camp"
+    },
+    {
+     "id": "grey_maidens",
+     "kind": "stone_circle",
+     "name": "The Grey Maidens",
+     "near": [
+      1500,
+      520
+     ],
+     "r": 11
+    },
+    {
+     "id": "stonegate_fold",
+     "kind": "sheepfold",
+     "name": "Stonegate Fold",
+     "near": [
+      1700,
+      960
+     ]
+    },
+    {
+     "id": "rookwood_copse",
+     "kind": "copse",
+     "name": "Rookwood Copse",
+     "near": [
+      1450,
+      760
+     ],
+     "r": 34
+    },
+    {
+     "id": "barrow_copse",
+     "kind": "copse",
+     "name": "Barrow Copse",
+     "near": [
+      980,
+      620
+     ],
+     "r": 26
+    },
+    {
+     "id": "downs_fold",
+     "kind": "sheepfold",
+     "name": "Downs Fold",
+     "near": [
+      1120,
+      460
+     ]
+    }
+   ]
+  },
+  "z12_01": {
+   "lanes": [
+    {
+     "id": "lane_ashcombe_home",
+     "name": "Home Farm Lane",
+     "joins": "Ashcombe",
+     "to": [
+      "Ashcombe",
+      "Home Farm"
+     ],
+     "pts": [
+      [
+       1408,
+       1328
+      ],
+      [
+       1580,
+       1420
+      ],
+      [
+       1690,
+       1520
+      ],
+      [
+       1740,
+       1640
+      ]
+     ]
+    }
+   ],
+   "pieces": [
+    {
+     "id": "ashcombe_home_farm",
+     "kind": "farm",
+     "name": "Ashcombe Home Farm",
+     "near": [
+      1720,
+      1680
+     ],
+     "fields": 8
+    },
+    {
+     "id": "kettle_farm",
+     "kind": "farm",
+     "name": "Kettle Farm",
+     "near": [
+      700,
+      950
+     ],
+     "fields": 6
+    },
+    {
+     "id": "long_furrow_farm",
+     "kind": "farm",
+     "name": "Long Furrow Farm",
+     "near": [
+      1100,
+      1760
+     ],
+     "fields": 7
+    },
+    {
+     "id": "ashcombe_orchard",
+     "kind": "orchard",
+     "name": "Ashcombe Cherry Orchard",
+     "near": [
+      1150,
+      1560
+     ],
+     "fruit": "cherry"
+    },
+    {
+     "id": "kettle_fold",
+     "kind": "sheepfold",
+     "name": "Kettle Fold",
+     "near": [
+      420,
+      1250
+     ]
+    },
+    {
+     "id": "weeping_stones",
+     "kind": "stone_circle",
+     "name": "The Weeping Stones",
+     "near": [
+      520,
+      1640
+     ],
+     "r": 9
+    },
+    {
+     "id": "ashcombe_copse",
+     "kind": "copse",
+     "name": "Hollins Copse",
+     "near": [
+      1750,
+      900
+     ],
+     "r": 30
+    },
+    {
+     "id": "kettle_mill_pond",
+     "kind": "mill_pond",
+     "name": "Kettle Mill Pond",
+     "near": [
+      1000,
+      620
+     ],
+     "r": 17,
+     "reach": 200
+    },
+    {
+     "id": "woodward_clearing",
+     "kind": "clearing",
+     "name": "Woodward's Clearing",
+     "near": [
+      800,
+      320
+     ],
+     "r": 20,
+     "for": "camp",
+     "reach": 180
+    }
+   ]
+  },
+  "z11_02": {
+   "pieces": [
+    {
+     "id": "copperdell_fields",
+     "kind": "farm",
+     "name": "Copperdell Fields",
+     "near": [
+      660,
+      660
+     ],
+     "fields": 6,
+     "reach": 200
+    },
+    {
+     "id": "tinkers_farm",
+     "kind": "farm",
+     "name": "Tinker's Farm",
+     "near": [
+      1250,
+      1450
+     ],
+     "fields": 7,
+     "reach": 200
+    },
+    {
+     "id": "ashhaven_orchard",
+     "kind": "orchard",
+     "name": "Ashhaven Orchard",
+     "near": [
+      900,
+      1150
+     ],
+     "fruit": "plum",
+     "reach": 200
+    },
+    {
+     "id": "pickaxe_mill_pond",
+     "kind": "mill_pond",
+     "name": "Pickaxe Mill Pond",
+     "near": [
+      1120,
+      1300
+     ],
+     "r": 16,
+     "reach": 220
+    },
+    {
+     "id": "leaning_stones",
+     "kind": "stone_circle",
+     "name": "The Leaning Stones",
+     "near": [
+      1500,
+      700
+     ],
+     "r": 9,
+     "reach": 220
+    },
+    {
+     "id": "delvers_fold",
+     "kind": "sheepfold",
+     "name": "Delvers' Fold",
+     "near": [
+      1400,
+      1050
+     ],
+     "reach": 200
+    },
+    {
+     "id": "copperdell_clearing",
+     "kind": "clearing",
+     "name": "Prospectors' Clearing",
+     "near": [
+      1700,
+      1500
+     ],
+     "r": 20,
+     "for": "camp",
+     "reach": 220
+    },
+    {
+     "id": "ashhaven_copse",
+     "kind": "copse",
+     "name": "Ashhaven Copse",
+     "near": [
+      500,
+      1300
+     ],
+     "r": 28,
+     "reach": 220
+    }
+   ]
+  },
+  "z13_02": {
+   "pieces": [
+    {
+     "id": "mossgate_farm",
+     "kind": "farm",
+     "name": "Mossgate Farm",
+     "near": [
+      500,
+      1760
+     ],
+     "fields": 6,
+     "reach": 200
+    },
+    {
+     "id": "highfield_farm",
+     "kind": "farm",
+     "name": "Highfield Farm",
+     "near": [
+      1000,
+      500
+     ],
+     "fields": 8,
+     "reach": 200
+    },
+    {
+     "id": "halsbridge_farm",
+     "kind": "farm",
+     "name": "Halsbridge Farm",
+     "near": [
+      1500,
+      800
+     ],
+     "fields": 7,
+     "reach": 200
+    },
+    {
+     "id": "mill_end_orchard",
+     "kind": "orchard",
+     "name": "Mill End Orchard",
+     "near": [
+      420,
+      1200
+     ],
+     "fruit": "apple",
+     "reach": 200
+    },
+    {
+     "id": "halsbridge_orchard",
+     "kind": "orchard",
+     "name": "Halsbridge Orchard",
+     "near": [
+      1420,
+      1520
+     ],
+     "fruit": "pear",
+     "reach": 200
+    },
+    {
+     "id": "mill_end_pond",
+     "kind": "mill_pond",
+     "name": "Mill End Pond",
+     "near": [
+      420,
+      1340
+     ],
+     "r": 18,
+     "reach": 220
+    },
+    {
+     "id": "wardens_ring",
+     "kind": "stone_circle",
+     "name": "Warden's Ring",
+     "near": [
+      700,
+      400
+     ],
+     "r": 10,
+     "reach": 220
+    },
+    {
+     "id": "mirestead_fold",
+     "kind": "sheepfold",
+     "name": "Mirestead Fold",
+     "near": [
+      300,
+      700
+     ],
+     "reach": 200
+    },
+    {
+     "id": "cross_copse",
+     "kind": "copse",
+     "name": "Crosswood Copse",
+     "near": [
+      1300,
+      300
+     ],
+     "r": 32,
+     "reach": 220
+    },
+    {
+     "id": "mossgate_clearing",
+     "kind": "clearing",
+     "name": "Eel-trappers' Clearing",
+     "near": [
+      900,
+      1400
+     ],
+     "r": 20,
+     "for": "camp",
+     "reach": 220
+    }
+   ]
+  },
+  "z12_03": {
+   "pieces": [
+    {
+     "id": "saint_orrins_yard",
+     "kind": "graveyard",
+     "name": "Saint Orrin's Yard",
+     "town": "Orrinsford",
+     "near": [
+      520,
+      720
+     ],
+     "size": [
+      42,
+      30
+     ],
+     "chapel": true
+    },
+    {
+     "id": "orrinsford_farm",
+     "kind": "farm",
+     "name": "Orrinsford Farm",
+     "near": [
+      620,
+      920
+     ],
+     "fields": 7,
+     "reach": 200
+    },
+    {
+     "id": "pilgrim_orchard",
+     "kind": "orchard",
+     "name": "Pilgrims' Orchard",
+     "near": [
+      230,
+      960
+     ],
+     "fruit": "apple",
+     "reach": 200
+    },
+    {
+     "id": "pilgrims_ring",
+     "kind": "stone_circle",
+     "name": "The Pilgrims' Ring",
+     "near": [
+      1100,
+      500
+     ],
+     "r": 11,
+     "reach": 220
+    },
+    {
+     "id": "rise_fold",
+     "kind": "sheepfold",
+     "name": "Rise Fold",
+     "near": [
+      900,
+      1300
+     ],
+     "reach": 220
+    },
+    {
+     "id": "orrin_clearing",
+     "kind": "clearing",
+     "name": "Penitents' Clearing",
+     "near": [
+      400,
+      1400
+     ],
+     "r": 22,
+     "for": "camp",
+     "reach": 220
+    },
+    {
+     "id": "rise_copse",
+     "kind": "copse",
+     "name": "Thorn Copse",
+     "near": [
+      700,
+      1700
+     ],
+     "r": 28,
+     "reach": 220
+    }
+   ]
+  },
+  "z11_01": {
+   "pieces": [
+    {
+     "id": "hollin_farm",
+     "kind": "farm",
+     "name": "Hollin Farm",
+     "near": [
+      1500,
+      800
+     ],
+     "reach": 260,
+     "fields": 6
+    },
+    {
+     "id": "wold_fold",
+     "kind": "sheepfold",
+     "name": "Wold Fold",
+     "near": [
+      700,
+      1100
+     ],
+     "reach": 260
+    },
+    {
+     "id": "scree_stones",
+     "kind": "stone_circle",
+     "name": "The Scree Stones",
+     "near": [
+      400,
+      1200
+     ],
+     "reach": 260
+    },
+    {
+     "id": "hollin_copse",
+     "kind": "copse",
+     "name": "Tollwood Copse",
+     "near": [
+      1100,
+      1500
+     ],
+     "reach": 260
+    }
+   ]
+  },
+  "z13_01": {
+   "pieces": [
+    {
+     "id": "brack_farm",
+     "kind": "farm",
+     "name": "Brackwater Farm",
+     "near": [
+      900,
+      1200
+     ],
+     "reach": 260,
+     "fields": 6
+    },
+    {
+     "id": "eel_orchard",
+     "kind": "orchard",
+     "name": "Eelwick Orchard",
+     "near": [
+      1400,
+      500
+     ],
+     "reach": 260
+    },
+    {
+     "id": "brack_fold",
+     "kind": "sheepfold",
+     "name": "Marsh Fold",
+     "near": [
+      700,
+      700
+     ],
+     "reach": 260
+    },
+    {
+     "id": "brack_copse",
+     "kind": "copse",
+     "name": "Withy Copse",
+     "near": [
+      1500,
+      1500
+     ],
+     "reach": 260
+    }
+   ]
+  },
+  "z11_03": {
+   "pieces": [
+    {
+     "id": "hermits_farm",
+     "kind": "farm",
+     "name": "Hermit's Farm",
+     "near": [
+      900,
+      900
+     ],
+     "reach": 260,
+     "fields": 6
+    },
+    {
+     "id": "wild_fold",
+     "kind": "sheepfold",
+     "name": "Wildhaven Fold",
+     "near": [
+      1500,
+      500
+     ],
+     "reach": 260
+    },
+    {
+     "id": "hermit_stones",
+     "kind": "stone_circle",
+     "name": "The Hermit's Stones",
+     "near": [
+      600,
+      1300
+     ],
+     "reach": 260
+    },
+    {
+     "id": "charcoal_copse",
+     "kind": "copse",
+     "name": "Burner's Copse",
+     "near": [
+      400,
+      700
+     ],
+     "reach": 260
+    }
+   ]
+  },
+  "z13_03": {
+   "pieces": [
+    {
+     "id": "three_wheels_farm",
+     "kind": "farm",
+     "name": "Three Wheels Farm",
+     "near": [
+      1500,
+      1000
+     ],
+     "reach": 260,
+     "fields": 6
+    },
+    {
+     "id": "millbrook_orchard",
+     "kind": "orchard",
+     "name": "Millbrook Orchard",
+     "near": [
+      800,
+      1500
+     ],
+     "reach": 260
+    },
+    {
+     "id": "raven_fold",
+     "kind": "sheepfold",
+     "name": "Raven Fold",
+     "near": [
+      600,
+      700
+     ],
+     "reach": 260
+    },
+    {
+     "id": "stormrow_stones",
+     "kind": "stone_circle",
+     "name": "Stormrow Stones",
+     "near": [
+      1200,
+      500
+     ],
+     "reach": 260
+    },
+    {
+     "id": "wildmere_pond",
+     "kind": "mill_pond",
+     "name": "Wildmere Mill Pond",
+     "near": [
+      1500,
+      700
+     ],
+     "reach": 260
+    }
+   ]
+  }
+ }
+}

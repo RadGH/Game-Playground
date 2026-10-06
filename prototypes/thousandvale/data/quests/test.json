@@ -1,6 +1,11 @@
 {
   "_doc": "Stream E. Quests for zone 'test' (The Torbor Fields, around Torborhold), M1. Simple, quick, and each one walks you somewhere new. Format: data/quests/README.md. Step kinds: kill {type, count, where?} · killOne {encounter} (a named rare/elite/boss) · collect {item, count, from: monster type, chance} · visit {vignette | site | point} · talk {npc} · use {vignette, object} · clear {dungeon: 'door'|floor} · deliver {item, npc}. `giver.at` is a settlement name or a vignette id. Rewards: xp and gold are fractions of a level's XP / a kill's gold at the quest level (the server prices them — PLAN §6.5, never fixed numbers here); `item.tier` rolls at YOUR level.",
   "zone": "test",
+  "include": [
+    "start.json",
+    "classes.json",
+    "setpieces.json"
+  ],
   "npcs": {
     "elder_maud": {
       "name": "Elder Maud Torbor",

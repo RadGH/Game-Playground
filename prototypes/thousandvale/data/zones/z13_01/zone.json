@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 3,
-  "inputHash": "78d7b37d",
+  "bakeVersion": 4,
+  "inputHash": "f3d4195e",
   "waterKinds": [
     "none",
     "sea",
@@ -224,7 +224,7 @@
   "summary": {
     "zone": "z13_01",
     "province": "Petbeck Basin",
-    "inputHash": "78d7b37d",
+    "inputHash": "f3d4195e",
     "rivers": 0,
     "wetShare": 0.014,
     "unwalkableShare": 0.003,
@@ -264,16 +264,19 @@
     ],
     "roads": 1,
     "bridges": 0,
-    "paths": 8,
-    "pathMetres": 1360,
-    "scatter": 11008,
+    "paths": 12,
+    "pathMetres": 2081,
+    "scatter": 11897,
     "scatterKinds": {
-      "bush": 5391,
-      "rock_small": 1871,
-      "tree_broadleaf": 2122,
-      "rock_large": 306,
-      "reed": 1214,
-      "tree_dead": 104
+      "bush": 5352,
+      "rock_small": 1836,
+      "tree_broadleaf": 2236,
+      "rock_large": 302,
+      "reed": 1213,
+      "tree_dead": 100,
+      "tree_conifer": 5,
+      "hedge": 816,
+      "tree_fruit": 37
     },
     "sites": [
       "settlement(HUB) town Brackwater 1136 870 90",
@@ -285,13 +288,13 @@
       "x": 1136,
       "z": 878
     },
-    "placements": 141,
-    "vignettesAvoided": 666
+    "placements": 197,
+    "vignettesAvoided": 661
   },
   "files": {
-    "terrain.bin": 477169,
-    "nav.bin": 13391,
-    "scatter.bin": 88148,
-    "placements.json": 75294
+    "terrain.bin": 479184,
+    "nav.bin": 13762,
+    "scatter.bin": 95260,
+    "placements.json": 137465
   }
 }

@@ -14,7 +14,7 @@ import { parseTerrain, parseNav, NAV } from '../../js/rules/terrain-read.js';
 import { createProvinceTerrain } from '../../js/sim/province-terrain.js';
 import { buildLayout } from '../../js/sim/realm.js';
 import { vignetteContent } from '../../js/sim/vignettes.js';
-import { levelField } from '../../tools/content-place.mjs';
+import { levelField, groundPieces } from '../../tools/content-place.mjs';
 import { questFiles } from '../../tools/content-lib.mjs';
 
 const root = new URL('../../', import.meta.url);
@@ -146,7 +146,8 @@ test('P19: open ground and roads are covered — measured independently: >= 95% 
     const f = FILES[e], nav = parseNav(readFileSync(new URL(`data/zones/${MAP[e]}/nav.bin`, root)));
     const pois = [...f.placements.map(p => ({ x: p.x, z: p.z, r: p.radius || 2 })), ...f.placements.flatMap(p => (p.path || []).map(([x, z]) => ({ x, z, r: 8 }))),
       ...f.settlements.map(s => ({ x: s.x, z: s.z, r: s.r })), ...BAKE[e].filter(b => b.kind === 'event_site' || b.kind === 'camp_site').map(b => ({ x: b.x, z: b.z, r: b.data.r || 20 })),
-      ...BAKE[e].filter(b => ['dungeon_door', 'crossing', 'bridge', 'landmark'].includes(b.kind)).map(b => ({ x: b.x, z: b.z, r: 8 }))];
+      ...BAKE[e].filter(b => ['dungeon_door', 'crossing', 'bridge', 'landmark'].includes(b.kind)).map(b => ({ x: b.x, z: b.z, r: 8 })),
+      ...groundPieces(BAKE[e])];      // stream B's farms, fields, graveyards (play-test 2) are things to see too
     const grid = new Map(), G = 64;
     for (const p of pois) { const k = `${Math.floor(p.x / G)},${Math.floor(p.z / G)}`; (grid.get(k) || grid.set(k, []).get(k)).push(p); }
     const nearest = (x, z) => { let b = Infinity; for (let j = Math.floor(z / G) - 2; j <= Math.floor(z / G) + 2; j++) for (let i = Math.floor(x / G) - 2; i <= Math.floor(x / G) + 2; i++) for (const p of grid.get(`${i},${j}`) || []) b = Math.min(b, Math.hypot(p.x - x, p.z - z) - p.r); return b; };

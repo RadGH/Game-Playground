@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 3,
-  "inputHash": "1af97385",
+  "bakeVersion": 4,
+  "inputHash": "a23813e6",
   "waterKinds": [
     "none",
     "sea",
@@ -203,7 +203,7 @@
   "summary": {
     "zone": "z11_03",
     "province": "Petbeck Basin",
-    "inputHash": "1af97385",
+    "inputHash": "a23813e6",
     "rivers": 3,
     "wetShare": 0.006,
     "unwalkableShare": 0.184,
@@ -268,17 +268,18 @@
     ],
     "roads": 12,
     "bridges": 3,
-    "paths": 6,
-    "pathMetres": 1752,
-    "scatter": 14405,
+    "paths": 11,
+    "pathMetres": 995,
+    "scatter": 15407,
     "scatterKinds": {
-      "rock_small": 2330,
-      "bush": 4695,
-      "tree_broadleaf": 4976,
-      "rock_large": 1567,
-      "boulder": 259,
-      "tree_conifer": 556,
-      "tree_acacia": 22
+      "rock_small": 2301,
+      "bush": 4674,
+      "tree_broadleaf": 4961,
+      "rock_large": 1562,
+      "boulder": 270,
+      "tree_conifer": 566,
+      "tree_acacia": 23,
+      "hedge": 1050
     },
     "sites": [
       "settlement(HUB) city Hermit's Rest 1104 560 140",
@@ -294,13 +295,13 @@
       "x": 1100,
       "z": 560
     },
-    "placements": 343,
-    "vignettesAvoided": 579
+    "placements": 406,
+    "vignettesAvoided": 562
   },
   "files": {
-    "terrain.bin": 687532,
-    "nav.bin": 49302,
-    "scatter.bin": 115324,
-    "placements.json": 198619
+    "terrain.bin": 689706,
+    "nav.bin": 48963,
+    "scatter.bin": 123340,
+    "placements.json": 234135
   }
 }

@@ -28,6 +28,8 @@ export const KIND_RULES = {
   curio: { townGap: 30, gap: 10, slope: 26, edge: 30 },
   stray: { townGap: 70, gap: 16, slope: 26, edge: 30 },      // 1-3 monsters (type 'camp' in the file; also roaming packs)
   folk: { townGap: 30, gap: 12, slope: 24, edge: 30 },
+  // play-test 2 (Q18): hand-designed set pieces near the start (tools/content-setpieces.mjs adjusts slope per piece)
+  setpiece: { townGap: 20, gap: 25, slope: 20 },
 };
 export const ROAD_GAP = 4;          // metres between a disc's edge and the nearest painted road sample
 export const EDGE_MARGIN = 60;      // metres from the zone edge
@@ -36,7 +38,7 @@ export const POINT_TYPES = new Set(['npc', 'waystone', 'treasure_clue', 'treasur
 export const BLOCK_BITS = NAV.ROAD | NAV.TOWN | NAV.BUILDING | NAV.STEEP | NAV.SHALLOW | NAV.DEEP;
 
 /** The KIND_RULES row a placed record answers to: strays, roaming packs and door guards are small camps ('stray'). */
-export const ruleKind = p => (p.type === 'camp' && (p.stray || p.roam || p.doorGuard) ? 'stray' : p.type);
+export const ruleKind = p => (p.type === 'camp' && (p.stray || p.roam || p.doorGuard) ? 'stray' : p.type === 'vignette' && p.setpiece ? 'setpiece' : p.type);
 
 /** Mulberry-ish seeded rng from a string. */
 export function rngFor(str) {
@@ -159,7 +161,8 @@ export function zoneContext({ terrain, nav, placements, start = null, reserve = 
   };
   const settlements = placements.filter(p => p.kind === 'settlement').map(p => ({ id: p.id, name: p.data.name, kind: p.data.kind, x: p.x, z: p.z, r: p.data.radius, hub: !!p.data.hub, wfName: p.data.wfName || null, source: 'bake' }));
   const SITE_R = { dungeon_door: 16, event_site: null, camp_site: null, landmark: 20, lair: 20, crossing: 15, pass: 15, dungeon: 20, bridge: null };
-  const siteDiscs = placements.filter(p => p.kind in SITE_R).map(p => ({ kind: p.kind, id: p.id, x: p.x, z: p.z, r: SITE_R[p.kind] ?? (p.data?.r || (p.data?.span ? p.data.span / 2 + 4 : 20)) }));
+  const siteDiscs = [...placements.filter(p => p.kind in SITE_R).map(p => ({ kind: p.kind, id: p.id, x: p.x, z: p.z, r: SITE_R[p.kind] ?? (p.data?.r || (p.data?.span ? p.data.span / 2 + 4 : 20)) })),
+    ...groundPieces(placements)];
   const ctx = {
     terrain, nav, size, step, extent, dRoad, dTown, dWater, dSteep, comp, idx,
     settlements: [...settlements, ...reserve.map(r => ({ ...r, source: 'ask' }))],
@@ -173,6 +176,22 @@ export function zoneContext({ terrain, nav, placements, start = null, reserve = 
     mainShare: comp.sizes[comp.main] / (size * size),
   };
   return ctx;
+}
+
+/**
+ * Stream B's bespoke ground (play-test 2, Q18: tools/lib/zone-setpieces.mjs) as keep-clear discs: every set piece but the
+ * automatic field belts round towns (r ~200 m — their FIELDS count instead), each field, and each set-piece building.
+ * `piece` = the set piece a disc belongs to (a set piece of ours BOUND to that piece ignores its discs).
+ */
+export function groundPieces(placements) {
+  const out = [];
+  for (const p of placements) {
+    const d = p.data || {};
+    if (p.kind === 'set_piece' && d.piece !== 'belt') out.push({ kind: 'set_piece', id: p.id, piece: p.id, x: p.x, z: p.z, r: d.r || 15 });
+    else if (p.kind === 'field') out.push({ kind: 'field', id: p.id, piece: d.setPiece || null, x: p.x, z: p.z, r: 0.5 * Math.hypot(d.w || 20, d.d || 20) });
+    else if (p.kind === 'set_building') out.push({ kind: 'set_building', id: p.id, piece: d.setPiece || null, x: p.x, z: p.z, r: 0.5 * Math.hypot(d.w || 8, d.d || 8) + 1 });
+  }
+  return out;
 }
 
 /** One sample is open ground: walkable, in the main component, none of the blocking bits, dry. */
@@ -227,12 +246,17 @@ export function discProblem(ctx, kind, x, z, R, { ignore = null, others = ctx.pl
   if (ctx.roadDist(x, z) < R + ROAD_GAP) return 'road';
   if (settlementEdge(ctx, x, z) < R + rule.townGap) return 'settlement';
   if (ctx.townDist(x, z) < R + Math.min(rule.townGap, 40)) return 'town ground';
-  for (const s of ctx.siteDiscs) if (Math.hypot(x - s.x, z - s.z) < R + s.r + rule.gap) return 'site ' + s.id;
+  for (const s of ctx.siteDiscs) {
+    if (ignore && ignore.bound && s.piece === ignore.bound) continue;          // our set piece bound onto B's piece (play-test 2)
+    const gap = (s.kind === 'field' || s.kind === 'set_piece' || s.kind === 'set_building') ? Math.min(rule.gap, 12) : rule.gap;
+    if (Math.hypot(x - s.x, z - s.z) < R + s.r + gap) return 'site ' + s.id;
+  }
   if (!clearOfBSites(ctx, x, z, R)) return 'B site rule';
   for (const o of others) {
     if (o === ignore || o.radius == null || POINT_TYPES.has(o.type)) continue;
+    if (ignore && (o.in === ignore.id || ignore.in === o.id)) continue;      // a set piece's own boss / folk sit inside it (play-test 2)
     const gap = Math.max(rule.gap, (KIND_RULES[ruleKind(o)] || rule).gap);   // the bigger of the two kinds' gaps, so order does not matter
-    const need = (kind === 'vignette' && o.type === 'vignette') ? Math.max(KIND_RULES.vignette.sameKindSpacing, R + o.radius + gap) : R + o.radius + gap;
+    const need = (kind === 'vignette' && o.type === 'vignette' && !o.setpiece) ? Math.max(KIND_RULES.vignette.sameKindSpacing, R + o.radius + gap) : R + o.radius + gap;
     if (Math.hypot(x - o.x, z - o.z) < need) return 'near ' + o.id;
   }
   return null;

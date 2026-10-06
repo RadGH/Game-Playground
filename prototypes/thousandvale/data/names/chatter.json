@@ -1,5 +1,5 @@
 {
- "_doc": "Stream E (play-test 1, P19). What people on the roads and in the wilds say: about the time of day, the weather, and what has happened lately (kills, the world boss, deaths, events). Stream A picks and fills a line (a bark) when a player comes near a traveller or folk NPC (data/provinces/travellers.json says which pools each role uses). `pools` = line lists by id; `{token}` = filled from `tokens` below. A line may only be used when EVERY token in it is known for this speaker right now — a line with a missing token is skipped, so every pool also holds token-free lines (except the recent.* / worldboss.* pools, which are only chosen when their context exists). `rules` = how a speaker chooses. Original lines; checked against the banned-name list by tests/E.",
+ "_doc": "Stream E (play-test 1, P19). What people on the roads and in the wilds say: about the time of day, the weather, and what has happened lately (kills, the world boss, deaths, events). Stream A picks and fills a line (a bark) when a player comes near a traveller or folk NPC (data/provinces/travellers.json says which pools each role uses). `pools` = line lists by id; `{token}` = filled from `tokens` below. A line may only be used when EVERY token in it is known for this speaker right now — a line with a missing token is skipped, so every pool also holds token-free lines (except the recent.* / worldboss.* pools, which are only chosen when their context exists). `rules` = how a speaker chooses. Original lines; checked against the banned-name list by tests/E. Play-test 2 (Q18): `place.<set piece id>` pools (said by folk and visitors at that set piece) and the set-piece roles (farmer, orchard_keeper, miller, sexton, foreman, innkeeper, stablehand, trainer).",
  "tokens": {
   "name": "the speaker's display name",
   "from": "the town the traveller's route started at",
@@ -717,6 +717,154 @@
    "Gulls'll have your lunch before you've unwrapped it.",
    "Fog off the sea every evening, regular as rent.",
    "Smugglers' coves all along here. Not that I'd know."
+  ],
+  "place.sp_drill_field": [
+   "Mind the dummies. They hit back if you lean on them.",
+   "Dawn drill, every day. The Sergeant's idea of mercy is a short lunch.",
+   "Somebody put a helmet on the third dummy. Now he looks like he outranks us.",
+   "Sand in the boots means you've been working. Sand in the teeth means you've been learning.",
+   "Every arrow in that fence is somebody's first."
+  ],
+  "place.sp_brannock_fields": [
+   "Good soil here. Too good. Things grow that nobody planted.",
+   "The scarecrow faces a different way every morning. Nobody moves him. Nobody admits it.",
+   "Boars in the turnips again. They know the hedge better than we do.",
+   "Apples first, cider second, regret third. Brannock way.",
+   "Watch the bees. They're in a mood about the weather."
+  ],
+  "place.sp_turnwater_mill": [
+   "The wheel never stops. Not for floods, not for funerals.",
+   "Flour in your hair by noon, rats in your dreams by night.",
+   "Somebody mends the gearing at night. Hob says he doesn't. Hob sleeps very well.",
+   "Hear the stones? That's the sound of bread being argued into existence."
+  ],
+  "place.sp_saint_hulda_yard": [
+   "Keep to the path. The grass between graves is for the residents.",
+   "The bell rings itself on still nights. Not loud. Just enough.",
+   "New grave by the wall. Nobody's died that I know of.",
+   "Saint Hulda kept the dead tidy. We try to keep up the standard.",
+   "The hounds dig for bones. They're not the only ones."
+  ],
+  "place.sp_greyfletch_camp": [
+   "If it walks, we've tallied it. If it walks funny, we've tallied it twice.",
+   "Old Gristle took Bess the sheepdog. Uncle Oswy's been sharpening ever since.",
+   "Smoke keeps the flies off the meat and the meat off the flies.",
+   "Never hunt alone. The tally board has a column for that.",
+   "Bring a hide, get a drink. Bring Gristle's hide, get the barrel."
+  ],
+  "place.sp_gristles_hollow": [
+   "Smells like wet dog and old murder.",
+   "Every bone here was somebody's supper. Don't be the next course.",
+   "That den is warm. Something big just left it. Or didn't.",
+   "Quiet. The hounds are listening for him to wake."
+  ],
+  "place.sp_nine_maidens": [
+   "Count them. Then count again. Never the same number twice, they say.",
+   "The wind goes round the ring the wrong way.",
+   "Don't step in the mushroom ring. Step round it. You know this.",
+   "Nine girls danced on a holy day and the stones caught them. That's the polite version.",
+   "The altar holds rain that never dries."
+  ],
+  "place.sp_kind_mother_shrine": [
+   "Leave a coin. She doesn't need it, but you'll feel better.",
+   "Her hands are warm. Always. Even in frost.",
+   "Every pebble in those cairns is a wish. Some of them are rude.",
+   "Pilgrims sit here and say nothing for an hour. It's the best hour they get."
+  ],
+  "place.sp_coldharrow_ruins": [
+   "The fire was thirty years ago. The stones still smell of it.",
+   "Don't stand in the circle in the hall. Your shadow comes back late.",
+   "Brigands sleep here because nobody else will.",
+   "The Coldharrow girl survived the fire. Some say she lit it.",
+   "Old money under the old hearth, if you believe drunks."
+  ],
+  "place.sp_ashby_lumber_camp": [
+   "Timber! No. Wait. Not yet. Never mind.",
+   "Every tree we drop, the forest sends something to argue about it.",
+   "Mind the stumps after dark. They trip you on purpose.",
+   "Sawdust in the stew again. Adds body, says the foreman.",
+   "The flitters come out at the last hour of light. So we stop at the second-last."
+  ],
+  "place.sp_tench_pool": [
+   "Forty years fishing this pool and the croakers turn up like they paid for the place.",
+   "Deep water, flat calm. Something down there is thinking.",
+   "Sit on the jetty a while. The pool makes people quiet.",
+   "Big tench in here. Bigger than you'd credit. Hungrier too."
+  ],
+  "place.sp_pail_and_plough": [
+   "Halfway to Orrinsford, halfway home. Have a drink either way.",
+   "Ale's brown, stew's brown, the dog is brown. Consistent house.",
+   "Read the notice post. There's a bounty on that big hound.",
+   "Marra hears everything on this road. Buy a bowl and she might share.",
+   "Dice in the corner, songs by the hearth, fights by the door."
+  ],
+  "role.farmer": [
+   "Rain for the wheat, sun for the hay, and the two of them never agree.",
+   "Every boar in the county knows where my turnips are.",
+   "Up before the sun. The sun is a lazy layabout.",
+   "The soil's good this year. Suspiciously good.",
+   "You want work? There's always work. There's never pay, but there's work.",
+   "I talk to the scarecrow. He's the only one who listens.",
+   "Mud to the knees and glad of it."
+  ],
+  "role.orchard_keeper": [
+   "Apples don't fall far from the tree. Unless the boars get them.",
+   "The bees have opinions about everyone. Mostly bad ones.",
+   "Good cider takes a year. Bad cider takes a week and a strong stomach.",
+   "Never climb a pear tree in a skirt. Lesson learned.",
+   "Windfalls for the pigs, the best for the press, the worms for the birds.",
+   "An orchard is just a forest that's been taught manners."
+  ],
+  "role.miller": [
+   "The wheel keeps turning. So do I. Slower, these days.",
+   "Flour gets everywhere. I've been white since I was twelve.",
+   "Rats eat the grain, cats eat the rats, the cats eat better than me.",
+   "Never trust a miller with clean hands.",
+   "Grind fine for bread, coarse for porridge, and never on a feast day.",
+   "Water's high this week. Good for the wheel, bad for the cellar."
+  ],
+  "role.sexton": [
+   "Somebody has to keep them tucked in.",
+   "I ring the bell for the dead. Sometimes they ring it back.",
+   "Grass on the graves, weeds on the path, and always one more hole to dig.",
+   "Quiet neighbours, mostly. I've lived beside worse.",
+   "Mind where you step. Everybody here was somebody.",
+   "I know every name in this yard. Some of them know mine.",
+   "A good grave is square. A bad one is a story."
+  ],
+  "role.foreman": [
+   "Wood doesn't cut itself. I've asked.",
+   "Keep your axe sharp and your feet sharper.",
+   "Every tree has a way it wants to fall. Learn it or wear it.",
+   "Dawn to dusk. Not a minute past. Not after what happened.",
+   "I pay by the log. I dock by the finger.",
+   "Somebody's been nicking the good wedges again."
+  ],
+  "role.innkeeper": [
+   "Stool's free, stew's not.",
+   "Rooms are clean. The beds are honest. The fleas are local.",
+   "Everyone passes through a crossroads eventually. Most of them owe me.",
+   "I hear every rumour on this road. Half of them I started.",
+   "Wipe your boots. We've had enough mud from heroes.",
+   "Last orders are when I say. I haven't said yet.",
+   "Drink up, it's a long way to anywhere."
+  ],
+  "role.stablehand": [
+   "Horses are honest. They kick you to your face.",
+   "Hay, water, shovel, repeat.",
+   "That bay mare bites. That grey one bites harder. Pick a horse.",
+   "Leave your mount with me and you'll get it back. Mostly fed.",
+   "Duchess the ox is not a horse. Tell her that, I dare you.",
+   "Smells like money in here, if money smelled of horse."
+  ],
+  "role.trainer": [
+   "Again. And this time like you mean it.",
+   "Talent is nice. Practice is better. Bruises are the receipt.",
+   "I've trained better than you. I've also trained worse. Mostly worse.",
+   "Come back when you've bled a bit. Then we'll talk.",
+   "Learn the first lesson well and the rest will find you.",
+   "Everyone wants the big tricks. Nobody wants to learn to stand.",
+   "Watch your feet. Your feet lose more fights than your hands."
   ]
  }
 }

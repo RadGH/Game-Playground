@@ -1,0 +1,5422 @@
+{
+ "_doc": "Stream E (play-test 2, Q18). Bespoke SET PIECES near the start (Torbor Fields, around Torborhold): hand-designed places bigger than a vignette, each with its own monsters, NPCs, quests (data/quests/setpieces.json; trainers in data/quests/classes.json), lore and chatter (data/names/chatter.json `place.<id>` + set-piece roles). A recipe is a vignette recipe (data/vignettes/README.md: props, monsters, objects — js/sim/vignettes.js reads it unchanged) PLUS: setpiece: true; kind; pin = where the placer puts it (zone; near = a settlement name or another set piece id; dist = [min, max] metres from its centre, fromEdge = from its circle edge; water = metres to water from the disc edge, waterSide = which local side faces it; road = within metres of a road; route = a route id from data/provinces/torbor_downs-routes.json; biome + biomeWithin; high = prefer high ground; awayFromRoad = at least metres off any road); ground = {flat, surface} for stream B (level the disc, paint it); parts = primitive boxes/cylinders/cones/domes ({mesh, x, z, y, w, h, d, colour, yaw}, the js/client/site-view.js part shape); models = named models ({id, x, z, yaw, scale}) that stream D-world builds in a reusable experiment — `models` below gives each a description and a primitive fallback (`parts`, local to the model origin) to draw until the real model exists; buildings = proctown building bodies by `want` ({want, x, z, w, d, yaw}); fields = crop plots ({x, z, w, d, yaw, crop}); folk = workers the placer turns into `folk` placements (role, work, chatter pools, local path); boss = an encounter id the placer stands at the centre (a `rare` placement with a short respawn). All coordinates local metres, +z = front (yaw 0), everything inside `radius`. PLAY-TEST 2 / stream B: `bind` = {zone, piece, name} puts this set piece's CONTENT (NPCs, monsters, objects, folk, props) onto stream B's baked ground piece of that id (data/world/set-pieces.json: B shapes the walls, fields, grave rows, buildings, pond); the placement record carries `bound` (the B piece id) and `scale` (B's radius / ours: stream A and D multiply recipe offsets by it), and a bound set piece's `models`/`parts`/`buildings`/`fields` are NOT drawn (B's piece has its own). `name: true` = the B piece takes our name (written to data/provinces/torbor_downs-places.json setPieces/lanes for B's bake).",
+ "models": {
+  "gravestone": {
+   "desc": "An upright rounded-top headstone, ~1.1 m tall, weathered grey with lichen at the base; a few carved-name variants.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 0.7,
+     "h": 1,
+     "d": 0.18,
+     "colour": "#8a857c"
+    },
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": 0.95,
+     "w": 0.7,
+     "h": 0.18,
+     "d": 0.18,
+     "colour": "#8a857c"
+    }
+   ]
+  },
+  "gravestone_leaning": {
+   "desc": "The same headstone tilted ~15 degrees and half sunk, moss on the low side.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": -0.15,
+     "w": 0.7,
+     "h": 0.95,
+     "d": 0.18,
+     "colour": "#6d6961",
+     "yaw": 0.25
+    }
+   ]
+  },
+  "tomb_chest": {
+   "desc": "A waist-high stone box tomb with a carved lid and a cracked corner.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 1,
+     "h": 0.8,
+     "d": 2.1,
+     "colour": "#8a857c"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0.8,
+     "w": 1.15,
+     "h": 0.12,
+     "d": 2.25,
+     "colour": "#6d6961"
+    }
+   ]
+  },
+  "iron_fence": {
+   "desc": "A 2 m section of black wrought-iron railing with spear-point finials, ~1.2 m tall; tiles end to end.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 2,
+     "h": 0.06,
+     "d": 0.06,
+     "colour": "#3a3a3e"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 1,
+     "w": 2,
+     "h": 0.06,
+     "d": 0.06,
+     "colour": "#3a3a3e"
+    },
+    {
+     "mesh": "box",
+     "x": -0.95,
+     "z": 0,
+     "y": 0,
+     "w": 0.08,
+     "h": 1.25,
+     "d": 0.08,
+     "colour": "#3a3a3e"
+    },
+    {
+     "mesh": "box",
+     "x": 0.95,
+     "z": 0,
+     "y": 0,
+     "w": 0.08,
+     "h": 1.25,
+     "d": 0.08,
+     "colour": "#3a3a3e"
+    }
+   ]
+  },
+  "lychgate": {
+   "desc": "A roofed timber gateway into a churchyard: two posts, a small shingle roof, ~3 m wide, 3.2 m tall.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": -1.4,
+     "z": 0,
+     "y": 0,
+     "w": 0.3,
+     "h": 2.6,
+     "d": 0.3,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 1.4,
+     "z": 0,
+     "y": 0,
+     "w": 0.3,
+     "h": 2.6,
+     "d": 0.3,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "cone",
+     "x": 0,
+     "z": 0,
+     "y": 2.6,
+     "w": 3.8,
+     "h": 1,
+     "d": 1.8,
+     "colour": "#5a4a3a"
+    }
+   ]
+  },
+  "crypt_door": {
+   "desc": "A low stone ossuary front set into an earth bank: pitched stone lintel and a heavy iron-banded door.",
+   "parts": [
+    {
+     "mesh": "dome",
+     "x": 0,
+     "z": -1.5,
+     "y": -0.8,
+     "w": 5,
+     "h": 3,
+     "d": 4,
+     "colour": "#4f6b3a"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 2.4,
+     "h": 2.4,
+     "d": 0.6,
+     "colour": "#8a857c"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0.32,
+     "y": 0,
+     "w": 1.2,
+     "h": 1.8,
+     "d": 0.1,
+     "colour": "#3a3a3e"
+    }
+   ]
+  },
+  "scarecrow": {
+   "desc": "A cross of poles in a sack-head, ragged coat and straw hat, arms out, ~2.2 m.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 0.1,
+     "h": 2,
+     "d": 0.1,
+     "colour": "#6e553d"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 1.5,
+     "w": 1.6,
+     "h": 0.1,
+     "d": 0.1,
+     "colour": "#6e553d"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 1.1,
+     "w": 0.6,
+     "h": 0.7,
+     "d": 0.3,
+     "colour": "#6a5a40"
+    },
+    {
+     "mesh": "cone",
+     "x": 0,
+     "z": 0,
+     "y": 1.95,
+     "w": 0.6,
+     "h": 0.4,
+     "d": 0.6,
+     "colour": "#a8925a"
+    }
+   ]
+  },
+  "haystack": {
+   "desc": "A rounded loose haystack about 2.5 m across with a pole through the top.",
+   "parts": [
+    {
+     "mesh": "dome",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 2.6,
+     "h": 2.2,
+     "d": 2.6,
+     "colour": "#a8925a"
+    }
+   ]
+  },
+  "beehive": {
+   "desc": "A straw skep beehive on a little wooden stand; a few bees as particles.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 0.6,
+     "h": 0.5,
+     "d": 0.6,
+     "colour": "#6e553d"
+    },
+    {
+     "mesh": "dome",
+     "x": 0,
+     "z": 0,
+     "y": 0.5,
+     "w": 0.6,
+     "h": 0.6,
+     "d": 0.6,
+     "colour": "#a8925a"
+    }
+   ]
+  },
+  "cider_press": {
+   "desc": "A wooden screw press: a slatted tub, a big screw post and a turning bar, apple heap beside it.",
+   "parts": [
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 1.2,
+     "h": 0.8,
+     "d": 1.2,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0.8,
+     "w": 0.2,
+     "h": 1.2,
+     "d": 0.2,
+     "colour": "#6e553d"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 1.8,
+     "w": 1.6,
+     "h": 0.12,
+     "d": 0.12,
+     "colour": "#6e553d"
+    }
+   ]
+  },
+  "apple_tree": {
+   "desc": "A short broad orchard apple tree, ~3.5 m, gnarled trunk, round crown with red fruit dots; a few windfalls.",
+   "parts": [
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 0.35,
+     "h": 1.6,
+     "d": 0.35,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "dome",
+     "x": 0,
+     "z": 0,
+     "y": 1.3,
+     "w": 3,
+     "h": 2.2,
+     "d": 3,
+     "colour": "#5b7a3a"
+    }
+   ]
+  },
+  "watermill_wheel": {
+   "desc": "A 4.5 m undershot water wheel on an axle, wooden paddles, turning slowly; sits against the mill wall over the race.",
+   "parts": [
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 4.5,
+     "h": 0.6,
+     "d": 4.5,
+     "colour": "#4a3a2c",
+     "yaw": 1.5708
+    }
+   ]
+  },
+  "millstone": {
+   "desc": "A pair of round grinding stones on a wooden frame, a grain hopper above.",
+   "parts": [
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 1.4,
+     "h": 0.35,
+     "d": 1.4,
+     "colour": "#8a857c"
+    },
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": 0.35,
+     "w": 1.3,
+     "h": 0.3,
+     "d": 1.3,
+     "colour": "#6d6961"
+    },
+    {
+     "mesh": "cone",
+     "x": 0,
+     "z": 0,
+     "y": 1,
+     "w": 0.8,
+     "h": 0.6,
+     "d": 0.8,
+     "colour": "#6e553d"
+    }
+   ]
+  },
+  "sluice_gate": {
+   "desc": "A timber sluice: two posts and a sliding board with a lever, set across a channel.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": -1,
+     "z": 0,
+     "y": 0,
+     "w": 0.25,
+     "h": 1.8,
+     "d": 0.25,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 1,
+     "z": 0,
+     "y": 0,
+     "w": 0.25,
+     "h": 1.8,
+     "d": 0.25,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0.3,
+     "w": 1.8,
+     "h": 0.9,
+     "d": 0.1,
+     "colour": "#6e553d"
+    }
+   ]
+  },
+  "hunters_tent": {
+   "desc": "A low A-frame hide tent, stained, guy ropes, a pelt over the door.",
+   "parts": [
+    {
+     "mesh": "cone",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 3,
+     "h": 1.8,
+     "d": 3.2,
+     "colour": "#8a6a4a"
+    }
+   ]
+  },
+  "skinning_frame": {
+   "desc": "A rectangular pole frame with a stretched hide lashed inside it, knives on a stump beside.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": -0.9,
+     "z": 0,
+     "y": 0,
+     "w": 0.12,
+     "h": 2,
+     "d": 0.12,
+     "colour": "#6e553d"
+    },
+    {
+     "mesh": "box",
+     "x": 0.9,
+     "z": 0,
+     "y": 0,
+     "w": 0.12,
+     "h": 2,
+     "d": 0.12,
+     "colour": "#6e553d"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0.5,
+     "w": 1.6,
+     "h": 1.2,
+     "d": 0.05,
+     "colour": "#8a6a4a"
+    }
+   ]
+  },
+  "trophy_post": {
+   "desc": "A tall post hung with antlers, skulls and a boar tusk necklace; the hunters' boast board.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 0.25,
+     "h": 3,
+     "d": 0.25,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 2.6,
+     "w": 1.2,
+     "h": 0.2,
+     "d": 0.2,
+     "colour": "#d8d0b8"
+    }
+   ]
+  },
+  "smoking_rack": {
+   "desc": "A smoke-blackened pole rack over a smouldering pit, strips of meat and fish hanging.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 1.4,
+     "w": 2.2,
+     "h": 0.1,
+     "d": 0.1,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": -1,
+     "z": 0,
+     "y": 0,
+     "w": 0.1,
+     "h": 1.5,
+     "d": 0.1,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 1,
+     "z": 0,
+     "y": 0,
+     "w": 0.1,
+     "h": 1.5,
+     "d": 0.1,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0.9,
+     "w": 1.8,
+     "h": 0.5,
+     "d": 0.05,
+     "colour": "#7a3a2a"
+    }
+   ]
+  },
+  "standing_stone": {
+   "desc": "A rough grey megalith 2.5-3.5 m tall, lichen-spotted, slightly tapered; variants by scale and lean.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": -0.3,
+     "w": 1,
+     "h": 3.2,
+     "d": 0.7,
+     "colour": "#6d6961"
+    }
+   ]
+  },
+  "altar_stone": {
+   "desc": "A flat recumbent slab on two low stones, worn hollow in the middle.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": -0.8,
+     "z": 0,
+     "y": 0,
+     "w": 0.5,
+     "h": 0.5,
+     "d": 0.9,
+     "colour": "#6d6961"
+    },
+    {
+     "mesh": "box",
+     "x": 0.8,
+     "z": 0,
+     "y": 0,
+     "w": 0.5,
+     "h": 0.5,
+     "d": 0.9,
+     "colour": "#6d6961"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0.5,
+     "w": 2.4,
+     "h": 0.25,
+     "d": 1.2,
+     "colour": "#8a857c"
+    }
+   ]
+  },
+  "shrine_statue": {
+   "desc": "A 2.2 m stone figure of a hooded mother holding a bowl to her chest, on a plinth, worn smooth by hands.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 1,
+     "h": 0.6,
+     "d": 1,
+     "colour": "#8a857c"
+    },
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": 0.6,
+     "w": 0.7,
+     "h": 1.3,
+     "d": 0.7,
+     "colour": "#9a958a"
+    },
+    {
+     "mesh": "dome",
+     "x": 0,
+     "z": 0,
+     "y": 1.85,
+     "w": 0.6,
+     "h": 0.5,
+     "d": 0.6,
+     "colour": "#9a958a"
+    }
+   ]
+  },
+  "offering_bowl": {
+   "desc": "A shallow stone bowl on a short pillar, coins and flowers in it.",
+   "parts": [
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 0.3,
+     "h": 0.8,
+     "d": 0.3,
+     "colour": "#8a857c"
+    },
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": 0.8,
+     "w": 0.8,
+     "h": 0.15,
+     "d": 0.8,
+     "colour": "#6d6961"
+    }
+   ]
+  },
+  "prayer_cairn": {
+   "desc": "A knee-high heap of flat painted pebbles, each with a scratched wish.",
+   "parts": [
+    {
+     "mesh": "dome",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 1,
+     "h": 0.7,
+     "d": 1,
+     "colour": "#9a8f80"
+    }
+   ]
+  },
+  "broken_tower": {
+   "desc": "The stump of a round stone tower, 6-7 m, the top bitten off, scorched, one empty window.",
+   "parts": [
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": -0.3,
+     "w": 4.4,
+     "h": 6.5,
+     "d": 4.4,
+     "colour": "#6d6961"
+    }
+   ]
+  },
+  "collapsed_stair": {
+   "desc": "A stone stair climbing a broken wall to nowhere, the top steps fallen into rubble.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 1.4,
+     "h": 0.5,
+     "d": 3.2,
+     "colour": "#8a857c"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": -0.6,
+     "y": 0.5,
+     "w": 1.4,
+     "h": 0.5,
+     "d": 2,
+     "colour": "#8a857c"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": -1.1,
+     "y": 1,
+     "w": 1.4,
+     "h": 0.5,
+     "d": 1,
+     "colour": "#8a857c"
+    }
+   ]
+  },
+  "sigil_slab": {
+   "desc": "A cracked floor slab carved with a ring of unreadable marks that faintly glow violet at night.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 2.2,
+     "h": 0.15,
+     "d": 2.2,
+     "colour": "#5a5260"
+    }
+   ]
+  },
+  "saw_pit": {
+   "desc": "A long rectangular pit with a log on trestles across it and a two-man saw; sawdust heap.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": -0.4,
+     "w": 1.6,
+     "h": 0.5,
+     "d": 4.2,
+     "colour": "#5f5040"
+    },
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": 0.7,
+     "w": 0.6,
+     "h": 4.4,
+     "d": 0.6,
+     "colour": "#6e553d",
+     "yaw": 1.5708
+    }
+   ]
+  },
+  "log_stack": {
+   "desc": "A neat pyramid of felled trunks, bark on, ~4 m long, chocked with wedges.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 4.2,
+     "h": 1.4,
+     "d": 2,
+     "colour": "#6e553d"
+    }
+   ]
+  },
+  "grindstone": {
+   "desc": "A round whetstone wheel in a wooden frame with a foot treadle and a water trough.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 0.8,
+     "h": 0.7,
+     "d": 0.4,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": 0.7,
+     "w": 0.9,
+     "h": 0.2,
+     "d": 0.9,
+     "colour": "#8a857c",
+     "yaw": 1.5708
+    }
+   ]
+  },
+  "tree_stump": {
+   "desc": "A fresh-cut stump, pale top, axe left in it sometimes.",
+   "parts": [
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 0.8,
+     "h": 0.5,
+     "d": 0.8,
+     "colour": "#6e553d"
+    }
+   ]
+  },
+  "jetty": {
+   "desc": "A plank jetty on posts, 6 m long and 1.6 m wide, running out over the water.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0.3,
+     "w": 1.6,
+     "h": 0.15,
+     "d": 6,
+     "colour": "#6e553d"
+    },
+    {
+     "mesh": "box",
+     "x": -0.7,
+     "z": 2.6,
+     "y": -0.8,
+     "w": 0.2,
+     "h": 1.2,
+     "d": 0.2,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 0.7,
+     "z": 2.6,
+     "y": -0.8,
+     "w": 0.2,
+     "h": 1.2,
+     "d": 0.2,
+     "colour": "#4a3a2c"
+    }
+   ]
+  },
+  "rowboat": {
+   "desc": "A small clinker rowboat, oars shipped, pulled up or moored.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 1.2,
+     "h": 0.5,
+     "d": 3.2,
+     "colour": "#6e553d"
+    }
+   ]
+  },
+  "fish_trap": {
+   "desc": "A wicker funnel fish trap on a rope, some stacked on the bank.",
+   "parts": [
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 0.6,
+     "h": 0.6,
+     "d": 1.1,
+     "colour": "#a8925a",
+     "yaw": 1.5708
+    }
+   ]
+  },
+  "rod_rack": {
+   "desc": "A lean-to rack holding four fishing rods and a coil of net.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 1.6,
+     "h": 1.8,
+     "d": 0.2,
+     "colour": "#4a3a2c"
+    }
+   ]
+  },
+  "inn_sign": {
+   "desc": "A painted hanging sign on a gallows post: a milk pail over a plough.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 0.2,
+     "h": 3,
+     "d": 0.2,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 0.5,
+     "z": 0,
+     "y": 2.6,
+     "w": 1,
+     "h": 0.1,
+     "d": 0.1,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 0.6,
+     "z": 0,
+     "y": 1.9,
+     "w": 0.8,
+     "h": 0.6,
+     "d": 0.06,
+     "colour": "#8a3a2a"
+    }
+   ]
+  },
+  "hitching_post": {
+   "desc": "A horizontal rail on two posts with an iron ring, for tying horses.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": -1,
+     "z": 0,
+     "y": 0,
+     "w": 0.15,
+     "h": 1,
+     "d": 0.15,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 1,
+     "z": 0,
+     "y": 0,
+     "w": 0.15,
+     "h": 1,
+     "d": 0.15,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0.9,
+     "w": 2.2,
+     "h": 0.12,
+     "d": 0.12,
+     "colour": "#6e553d"
+    }
+   ]
+  },
+  "bench": {
+   "desc": "A rough plank bench for two.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0.4,
+     "w": 1.8,
+     "h": 0.1,
+     "d": 0.4,
+     "colour": "#6e553d"
+    },
+    {
+     "mesh": "box",
+     "x": -0.7,
+     "z": 0,
+     "y": 0,
+     "w": 0.1,
+     "h": 0.4,
+     "d": 0.4,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 0.7,
+     "z": 0,
+     "y": 0,
+     "w": 0.1,
+     "h": 0.4,
+     "d": 0.4,
+     "colour": "#4a3a2c"
+    }
+   ]
+  },
+  "notice_post": {
+   "desc": "A board on a post with layered nailed notices (bounties, lost sheep).",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 0.15,
+     "h": 2.2,
+     "d": 0.15,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0.1,
+     "y": 1.2,
+     "w": 1.2,
+     "h": 0.9,
+     "d": 0.05,
+     "colour": "#d8ccb0"
+    }
+   ]
+  },
+  "training_dummy": {
+   "desc": "A straw-stuffed sack man on a post, arms of rope, battered shield; spins a little when hit.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 0.12,
+     "h": 1.2,
+     "d": 0.12,
+     "colour": "#6e553d"
+    },
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": 1,
+     "w": 0.6,
+     "h": 0.9,
+     "d": 0.6,
+     "colour": "#a8925a"
+    },
+    {
+     "mesh": "dome",
+     "x": 0,
+     "z": 0,
+     "y": 1.9,
+     "w": 0.4,
+     "h": 0.35,
+     "d": 0.4,
+     "colour": "#a89a7a"
+    }
+   ]
+  },
+  "archery_butt": {
+   "desc": "A round straw target with painted rings on an A-frame stand, arrows stuck in it.",
+   "parts": [
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": 0.6,
+     "w": 1.2,
+     "h": 0.3,
+     "d": 1.2,
+     "colour": "#a8925a",
+     "yaw": 1.5708
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": -0.3,
+     "y": 0,
+     "w": 0.1,
+     "h": 1,
+     "d": 0.1,
+     "colour": "#6e553d"
+    }
+   ]
+  },
+  "weapon_rack": {
+   "desc": "A wooden rack of blunt practice swords, staves and spears.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 2,
+     "h": 1.4,
+     "d": 0.3,
+     "colour": "#4a3a2c"
+    }
+   ]
+  },
+  "sand_pit": {
+   "desc": "A shallow ring of raked sand edged with half-buried logs, 6 m across, for sparring.",
+   "parts": [
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0,
+     "y": -0.1,
+     "w": 6,
+     "h": 0.15,
+     "d": 6,
+     "colour": "#c8b890"
+    }
+   ]
+  },
+  "bone_heap": {
+   "desc": "A knee-high heap of gnawed sheep and deer bones, a few collars and a boot.",
+   "parts": [
+    {
+     "mesh": "dome",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 1.6,
+     "h": 0.6,
+     "d": 1.6,
+     "colour": "#d8d0b8"
+    }
+   ]
+  },
+  "den_mouth": {
+   "desc": "A low earth-and-root overhang hollow, big enough for a horse-sized hound, darkness inside, bones at the lip.",
+   "parts": [
+    {
+     "mesh": "dome",
+     "x": 0,
+     "z": 0,
+     "y": -0.8,
+     "w": 7,
+     "h": 3.5,
+     "d": 5,
+     "colour": "#5f5040"
+    },
+    {
+     "mesh": "dome",
+     "x": 0,
+     "z": 2.2,
+     "y": -0.4,
+     "w": 2.6,
+     "h": 1.8,
+     "d": 0.8,
+     "colour": "#0b0a0c"
+    }
+   ]
+  },
+  "grave_mound": {
+   "desc": "A fresh rounded earth mound with a wooden marker, 2 m long.",
+   "parts": [
+    {
+     "mesh": "dome",
+     "x": 0,
+     "z": 0,
+     "y": -0.1,
+     "w": 1,
+     "h": 0.35,
+     "d": 2,
+     "colour": "#5f5040"
+    }
+   ]
+  },
+  "open_grave": {
+   "desc": "A dug grave pit with spoil heaped beside it and a spade stuck in.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": -0.05,
+     "w": 1,
+     "h": 0.08,
+     "d": 2,
+     "colour": "#2a221a"
+    },
+    {
+     "mesh": "dome",
+     "x": 1,
+     "z": 0,
+     "y": 0,
+     "w": 0.9,
+     "h": 0.6,
+     "d": 2,
+     "colour": "#5f5040"
+    }
+   ]
+  },
+  "bell_frame": {
+   "desc": "A small bell hung in a two-post timber frame with a pull rope (the sexton's bell).",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": -0.6,
+     "z": 0,
+     "y": 0,
+     "w": 0.2,
+     "h": 2.6,
+     "d": 0.2,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 0.6,
+     "z": 0,
+     "y": 0,
+     "w": 0.2,
+     "h": 2.6,
+     "d": 0.2,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 2.5,
+     "w": 1.4,
+     "h": 0.2,
+     "d": 0.2,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "cone",
+     "x": 0,
+     "z": 0,
+     "y": 1.9,
+     "w": 0.6,
+     "h": 0.6,
+     "d": 0.6,
+     "colour": "#8a6a30"
+    }
+   ]
+  },
+  "gear_housing": {
+   "desc": "A wooden casing with a big wooden cog wheel visible through a missing plank.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 1.6,
+     "h": 1.6,
+     "d": 1.2,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "cyl",
+     "x": 0,
+     "z": 0.62,
+     "y": 0.8,
+     "w": 1.2,
+     "h": 0.15,
+     "d": 1.2,
+     "colour": "#6e553d",
+     "yaw": 1.5708
+    }
+   ]
+  },
+  "wooden_fence": {
+   "desc": "A 3 m section of split-rail field fence, two rails on three posts.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0.45,
+     "w": 3,
+     "h": 0.1,
+     "d": 0.1,
+     "colour": "#6e553d"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0.9,
+     "w": 3,
+     "h": 0.1,
+     "d": 0.1,
+     "colour": "#6e553d"
+    },
+    {
+     "mesh": "box",
+     "x": -1.4,
+     "z": 0,
+     "y": 0,
+     "w": 0.12,
+     "h": 1.1,
+     "d": 0.12,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": 1.4,
+     "z": 0,
+     "y": 0,
+     "w": 0.12,
+     "h": 1.1,
+     "d": 0.12,
+     "colour": "#4a3a2c"
+    }
+   ]
+  },
+  "stone_wall": {
+   "desc": "A 3 m stretch of dry-stone wall, knee-to-waist high, uneven top.",
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 0,
+     "y": 0,
+     "w": 3,
+     "h": 1,
+     "d": 0.6,
+     "colour": "#6d6961"
+    }
+   ]
+  }
+ },
+ "vignettes": [
+  {
+   "id": "sp_drill_field",
+   "name": "Torbor Drill Field",
+   "setpiece": true,
+   "kind": "drill_field",
+   "blurb": "The town watch's practice ground just outside Torborhold: straw dummies, archery butts, a sand sparring pit and racks of blunt weapons. Sergeant-at-Arms (trainer_arms) trains warriors, fighters, knights, swashbucklers, dragon knights and tacticians here; their class quests start here. Safe, no monsters.",
+   "lore": "Straw men with a hundred dents in them, a ring of raked sand, and a rack of swords too blunt to hurt anyone but your pride.",
+   "tags": {
+    "biomes": [
+     "grassland",
+     "shrubland",
+     "hills"
+    ],
+    "archetypes": [
+     "heartland"
+    ],
+    "band": [
+     1,
+     6
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 26,
+   "pin": {
+    "zone": "test",
+    "near": "Torborhold",
+    "fromEdge": [
+     60,
+     220
+    ]
+   },
+   "ground": {
+    "flat": true,
+    "surface": "dirt"
+   },
+   "props": [
+    {
+     "kind": "prop",
+     "id": "banner_pole",
+     "x": -8,
+     "z": 14,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "banner_pole",
+     "x": 8,
+     "z": 14,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": -15,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": -15,
+     "z": 0.5,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": 15,
+     "z": -10,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": 16.5,
+     "z": -11.5,
+     "yaw": 0.7
+    },
+    {
+     "kind": "ground",
+     "id": "sand_ripple",
+     "x": 0,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "sand_ripple",
+     "x": 11,
+     "z": -9,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "stone_marker",
+     "x": 11.5,
+     "z": -2,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -10.2,
+     "z": -20,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": -8.5,
+     "z": -20,
+     "yaw": 1.57
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -6.8,
+     "z": -20,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": -5.1,
+     "z": -20,
+     "yaw": 1.57
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -3.4,
+     "z": -20,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": -1.7,
+     "z": -20,
+     "yaw": 1.57
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": 0,
+     "z": -20,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": 1.7,
+     "z": -20,
+     "yaw": 1.57
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": 3.4,
+     "z": -20,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": 5.1,
+     "z": -20,
+     "yaw": 1.57
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": 6.8,
+     "z": -20,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": 8.5,
+     "z": -20,
+     "yaw": 1.57
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": 10.2,
+     "z": -20,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": 11.9,
+     "z": -20,
+     "yaw": 1.57
+    }
+   ],
+   "models": [
+    {
+     "id": "sand_pit",
+     "x": 0,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "id": "training_dummy",
+     "x": -12,
+     "z": 4,
+     "yaw": 3.14
+    },
+    {
+     "id": "training_dummy",
+     "x": -9,
+     "z": 4,
+     "yaw": 3.14
+    },
+    {
+     "id": "training_dummy",
+     "x": -6,
+     "z": 4,
+     "yaw": 3.14
+    },
+    {
+     "id": "training_dummy",
+     "x": -3,
+     "z": 4,
+     "yaw": 3.14
+    },
+    {
+     "id": "archery_butt",
+     "x": 8,
+     "z": -14,
+     "yaw": 0
+    },
+    {
+     "id": "archery_butt",
+     "x": 11.5,
+     "z": -14,
+     "yaw": 0
+    },
+    {
+     "id": "archery_butt",
+     "x": 15,
+     "z": -14,
+     "yaw": 0
+    },
+    {
+     "id": "weapon_rack",
+     "x": -14,
+     "z": -6,
+     "yaw": 1.57
+    },
+    {
+     "id": "weapon_rack",
+     "x": -14,
+     "z": -9,
+     "yaw": 1.57
+    },
+    {
+     "id": "bench",
+     "x": -6,
+     "z": 12,
+     "yaw": 3.14
+    },
+    {
+     "id": "bench",
+     "x": 0,
+     "z": 12,
+     "yaw": 3.14
+    },
+    {
+     "id": "notice_post",
+     "x": 6,
+     "z": 12,
+     "yaw": 3.14
+    }
+   ],
+   "parts": [],
+   "buildings": [
+    {
+     "want": "hut",
+     "x": 13,
+     "z": 8,
+     "w": 5,
+     "d": 4,
+     "yaw": 3.141592653589793
+    }
+   ],
+   "fields": [],
+   "folk": [],
+   "monsters": [],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Straw dummy",
+     "x": -9,
+     "z": 5,
+     "text": "You lay into the dummy until straw flies. Your arms recall how this is done.",
+     "buff": {
+      "status": "regen",
+      "seconds": 300
+     }
+    },
+    {
+     "type": "use",
+     "name": "Archery butts",
+     "x": 11.5,
+     "z": -12,
+     "text": "You pull three arrows out of the outer ring and one out of the fence. Nobody saw. Probably."
+    },
+    {
+     "type": "use",
+     "name": "Weapon rack",
+     "x": -13,
+     "z": -7.5,
+     "text": "Blunt blades, warped staves, a spear with a sock tied to the point. Practice gear, but honest."
+    },
+    {
+     "type": "use",
+     "name": "Sand pit",
+     "x": 0,
+     "z": -3,
+     "text": "You walk the ring once. The sand still holds the shape of somebody falling hard."
+    },
+    {
+     "type": "note",
+     "name": "Drill roster",
+     "x": 6,
+     "z": 11,
+     "text": "DRILL — dawn, every day but feast days. Bring your own bandages. The sergeant does not do bandages. — B.H."
+    }
+   ]
+  },
+  {
+   "id": "sp_brannock_fields",
+   "name": "Brannock Fields",
+   "setpiece": true,
+   "kind": "farmland",
+   "blurb": "A working farm just outside Torborhold: a farmhouse and barn, a wheat field, a turnip patch, a cabbage strip, an apple orchard with beehives and a cider press. Two boars raid the turnips. Quests from Hesketh Brannock (scarecrow, boars) and Ada the orchard keeper (cider). Folk: two farmers, an orchard keeper.",
+   "lore": "Wheat to your knees, apples overhead, and a scarecrow that has clearly seen things.",
+   "tags": {
+    "biomes": [
+     "grassland",
+     "shrubland"
+    ],
+    "archetypes": [
+     "heartland"
+    ],
+    "band": [
+     1,
+     6
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 45,
+   "pin": {
+    "zone": "test",
+    "near": "Torborhold",
+    "fromEdge": [
+     150,
+     450
+    ]
+   },
+   "ground": {
+    "flat": true,
+    "surface": "farmland"
+   },
+   "props": [
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": 6,
+     "z": -20,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": 7,
+     "z": -18.5,
+     "yaw": 0.6
+    },
+    {
+     "kind": "prop",
+     "id": "cart_wheel",
+     "x": 2,
+     "z": -16,
+     "yaw": 1.2
+    },
+    {
+     "kind": "prop",
+     "id": "well",
+     "x": -8,
+     "z": -12,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": -6,
+     "z": -18,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": -4.5,
+     "z": -19,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "signpost",
+     "x": 0,
+     "z": 34,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "root_mat",
+     "x": -26,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 10,
+     "z": -6,
+     "yaw": 0
+    }
+   ],
+   "models": [
+    {
+     "id": "apple_tree",
+     "x": -30,
+     "z": -4,
+     "yaw": 0
+    },
+    {
+     "id": "apple_tree",
+     "x": -30,
+     "z": 2,
+     "yaw": 0.7
+    },
+    {
+     "id": "apple_tree",
+     "x": -30,
+     "z": 8,
+     "yaw": 1.4
+    },
+    {
+     "id": "apple_tree",
+     "x": -24,
+     "z": -4,
+     "yaw": 0.7
+    },
+    {
+     "id": "apple_tree",
+     "x": -24,
+     "z": 2,
+     "yaw": 1.4
+    },
+    {
+     "id": "apple_tree",
+     "x": -24,
+     "z": 8,
+     "yaw": 2.1
+    },
+    {
+     "id": "apple_tree",
+     "x": -18,
+     "z": -4,
+     "yaw": 1.4
+    },
+    {
+     "id": "apple_tree",
+     "x": -18,
+     "z": 2,
+     "yaw": 2.1
+    },
+    {
+     "id": "apple_tree",
+     "x": -18,
+     "z": 8,
+     "yaw": 2.8
+    },
+    {
+     "id": "apple_tree",
+     "x": -12,
+     "z": -4,
+     "yaw": 2.1
+    },
+    {
+     "id": "apple_tree",
+     "x": -12,
+     "z": 2,
+     "yaw": 2.8
+    },
+    {
+     "id": "apple_tree",
+     "x": -12,
+     "z": 8,
+     "yaw": 3.5
+    },
+    {
+     "id": "scarecrow",
+     "x": 18,
+     "z": 9,
+     "yaw": 0.3
+    },
+    {
+     "id": "haystack",
+     "x": 4,
+     "z": -26,
+     "yaw": 0
+    },
+    {
+     "id": "haystack",
+     "x": 8,
+     "z": -28,
+     "yaw": 0
+    },
+    {
+     "id": "beehive",
+     "x": -32,
+     "z": 16,
+     "yaw": 0
+    },
+    {
+     "id": "beehive",
+     "x": -30,
+     "z": 18,
+     "yaw": 0
+    },
+    {
+     "id": "beehive",
+     "x": -28,
+     "z": 16.5,
+     "yaw": 0
+    },
+    {
+     "id": "cider_press",
+     "x": -22,
+     "z": 14,
+     "yaw": 0
+    },
+    {
+     "id": "wooden_fence",
+     "x": 27,
+     "z": -22,
+     "yaw": 1.57
+    },
+    {
+     "id": "wooden_fence",
+     "x": 27,
+     "z": -19,
+     "yaw": 1.57
+    },
+    {
+     "id": "wooden_fence",
+     "x": 27,
+     "z": -16,
+     "yaw": 1.57
+    },
+    {
+     "id": "wooden_fence",
+     "x": 27,
+     "z": -13,
+     "yaw": 1.57
+    },
+    {
+     "id": "wooden_fence",
+     "x": 27,
+     "z": -10,
+     "yaw": 1.57
+    },
+    {
+     "id": "wooden_fence",
+     "x": 27,
+     "z": -7,
+     "yaw": 1.57
+    },
+    {
+     "id": "wooden_fence",
+     "x": 27,
+     "z": -4,
+     "yaw": 1.57
+    },
+    {
+     "id": "wooden_fence",
+     "x": 27,
+     "z": -1,
+     "yaw": 1.57
+    },
+    {
+     "id": "wooden_fence",
+     "x": 27,
+     "z": 2,
+     "yaw": 1.57
+    },
+    {
+     "id": "wooden_fence",
+     "x": 27,
+     "z": 5,
+     "yaw": 1.57
+    },
+    {
+     "id": "wooden_fence",
+     "x": 27,
+     "z": 8,
+     "yaw": 1.57
+    },
+    {
+     "id": "wooden_fence",
+     "x": 27,
+     "z": 11,
+     "yaw": 1.57
+    },
+    {
+     "id": "wooden_fence",
+     "x": 27,
+     "z": 14,
+     "yaw": 1.57
+    },
+    {
+     "id": "wooden_fence",
+     "x": 27,
+     "z": 17,
+     "yaw": 1.57
+    },
+    {
+     "id": "wooden_fence",
+     "x": 27,
+     "z": 20,
+     "yaw": 1.57
+    },
+    {
+     "id": "wooden_fence",
+     "x": 11,
+     "z": 22.5,
+     "yaw": 0
+    },
+    {
+     "id": "wooden_fence",
+     "x": 14,
+     "z": 22.5,
+     "yaw": 0
+    },
+    {
+     "id": "wooden_fence",
+     "x": 17,
+     "z": 22.5,
+     "yaw": 0
+    },
+    {
+     "id": "wooden_fence",
+     "x": 20,
+     "z": 22.5,
+     "yaw": 0
+    },
+    {
+     "id": "wooden_fence",
+     "x": 23,
+     "z": 22.5,
+     "yaw": 0
+    },
+    {
+     "id": "wooden_fence",
+     "x": 26,
+     "z": 22.5,
+     "yaw": 0
+    }
+   ],
+   "parts": [],
+   "buildings": [
+    {
+     "want": "house",
+     "x": -12,
+     "z": -26,
+     "w": 8,
+     "d": 7,
+     "yaw": 0
+    },
+    {
+     "want": "granary",
+     "x": 2,
+     "z": -34,
+     "w": 9,
+     "d": 7,
+     "yaw": 0
+    }
+   ],
+   "fields": [
+    {
+     "x": 18,
+     "z": 10,
+     "w": 16,
+     "d": 22,
+     "yaw": 0,
+     "crop": "wheat"
+    },
+    {
+     "x": 18,
+     "z": -16,
+     "w": 16,
+     "d": 14,
+     "yaw": 0,
+     "crop": "turnip"
+    },
+    {
+     "x": -2,
+     "z": 22,
+     "w": 14,
+     "d": 8,
+     "yaw": 1.5707963267948966,
+     "crop": "cabbage"
+    }
+   ],
+   "folk": [
+    {
+     "role": "farmer",
+     "work": "farm",
+     "chatter": [
+      "role.farmer",
+      "place.sp_brannock_fields"
+     ],
+     "x": 16,
+     "z": 4,
+     "path": [
+      [
+       14,
+       -2
+      ],
+      [
+       14,
+       18
+      ],
+      [
+       20,
+       18
+      ],
+      [
+       20,
+       -2
+      ]
+     ]
+    },
+    {
+     "role": "farmer",
+     "work": "farm",
+     "chatter": [
+      "role.farmer",
+      "place.sp_brannock_fields"
+     ],
+     "x": 18,
+     "z": -16,
+     "path": [
+      [
+       14,
+       -20
+      ],
+      [
+       22,
+       -20
+      ],
+      [
+       22,
+       -12
+      ],
+      [
+       14,
+       -12
+      ]
+     ]
+    },
+    {
+     "role": "orchard_keeper",
+     "name": "Orchard keeper",
+     "work": "tend",
+     "chatter": [
+      "role.orchard_keeper",
+      "place.sp_brannock_fields"
+     ],
+     "x": -24,
+     "z": 2,
+     "path": [
+      [
+       -30,
+       -4
+      ],
+      [
+       -18,
+       -4
+      ],
+      [
+       -18,
+       8
+      ],
+      [
+       -30,
+       8
+      ]
+     ]
+    }
+   ],
+   "monsters": [
+    {
+     "type": "thicket_boar",
+     "count": 2,
+     "level": 0,
+     "x": 24,
+     "z": -26,
+     "radius": 5
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Scarecrow",
+     "x": 19,
+     "z": 10,
+     "text": "The scarecrow's button eyes follow you. You straighten its hat. It seems grateful, which is worse."
+    },
+    {
+     "type": "use",
+     "name": "Cider press",
+     "x": -21,
+     "z": 12.5,
+     "text": "You give the screw a turn. A trickle of cloudy cider comes out. It is very strong.",
+     "buff": {
+      "status": "regen",
+      "seconds": 300
+     }
+    },
+    {
+     "type": "use",
+     "name": "Beehives",
+     "x": -29,
+     "z": 14,
+     "text": "You lift a lid. The bees discuss you, loudly. You put the lid back."
+    },
+    {
+     "type": "note",
+     "name": "Planting tally",
+     "x": -9,
+     "z": -22,
+     "text": "Wheat in the long field. Turnips by the ditch (fence them, Hesketh, I mean it). Cabbages where the old pig sty was. Apples will do what apples do."
+    },
+    {
+     "type": "chest",
+     "name": "Hidden seed jar",
+     "x": -11,
+     "z": -21,
+     "tier": "uncommon",
+     "hidden": true,
+     "hint": "Farmers hide the good seed where nobody looks: under the step of the farmhouse."
+    }
+   ],
+   "bind": {
+    "zone": "test",
+    "piece": "hobbins_farm",
+    "name": true
+   }
+  },
+  {
+   "id": "sp_turnwater_mill",
+   "name": "Turnwater Mill",
+   "setpiece": true,
+   "kind": "mill",
+   "blurb": "A stone watermill on a stream (the water is behind it, local -z): the wheel, a sluice, the millstones under an open shed, a grain store at +x where cairn rats breed. The mill-wright (trainer_tinker) trains tinkers here. Quests from Miller Hob Turnwater (rats; the sluice).",
+   "lore": "The wheel groans round, the stones grumble, and somewhere in the grain sacks something squeaks back.",
+   "tags": {
+    "biomes": [
+     "grassland",
+     "temperateForest",
+     "shrubland",
+     "marsh"
+    ],
+    "archetypes": [
+     "heartland"
+    ],
+    "band": [
+     1,
+     6
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 28,
+   "pin": {
+    "zone": "test",
+    "near": "Torborhold",
+    "dist": [
+     300,
+     1100
+    ],
+    "water": 25,
+    "waterSide": "-z"
+   },
+   "ground": {
+    "flat": true,
+    "surface": "dirt"
+   },
+   "props": [
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": 10,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": 11,
+     "z": 5.5,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 12,
+     "z": 2.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 13,
+     "z": 4,
+     "yaw": 0.7
+    },
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": -10,
+     "z": 10,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "cart_wheel",
+     "x": -8,
+     "z": 13,
+     "yaw": 1.3
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -16,
+     "z": 14,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": -14,
+     "z": 14,
+     "yaw": 1.57
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -12,
+     "z": 14,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "signpost",
+     "x": 0,
+     "z": 24,
+     "yaw": 3.14
+    },
+    {
+     "kind": "prop",
+     "id": "stone_step",
+     "x": 0,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 4,
+     "z": -14,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": -12,
+     "z": -12,
+     "yaw": 0
+    },
+    {
+     "kind": "tree",
+     "id": "birch",
+     "x": -18,
+     "z": -14,
+     "yaw": -4.72
+    },
+    {
+     "kind": "tree",
+     "id": "birch",
+     "x": 18,
+     "z": -12,
+     "yaw": 2.08
+    }
+   ],
+   "models": [
+    {
+     "id": "watermill_wheel",
+     "x": 0,
+     "z": -11,
+     "yaw": 1.57
+    },
+    {
+     "id": "sluice_gate",
+     "x": -6,
+     "z": -15,
+     "yaw": 0
+    },
+    {
+     "id": "millstone",
+     "x": -4,
+     "z": 3,
+     "yaw": 0
+    },
+    {
+     "id": "gear_housing",
+     "x": 7.5,
+     "z": -4,
+     "yaw": -1.57
+    },
+    {
+     "id": "log_stack",
+     "x": -14,
+     "z": 6,
+     "yaw": 0.3
+    }
+   ],
+   "parts": [
+    {
+     "mesh": "box",
+     "x": -4,
+     "z": 3,
+     "y": 3.2,
+     "w": 4,
+     "h": 0.2,
+     "d": 4,
+     "colour": "#6e553d"
+    },
+    {
+     "mesh": "box",
+     "x": -6,
+     "z": 1,
+     "y": 0,
+     "w": 0.25,
+     "h": 3.2,
+     "d": 0.25,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": -2,
+     "z": 1,
+     "y": 0,
+     "w": 0.25,
+     "h": 3.2,
+     "d": 0.25,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": -6,
+     "z": 5,
+     "y": 0,
+     "w": 0.25,
+     "h": 3.2,
+     "d": 0.25,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": -2,
+     "z": 5,
+     "y": 0,
+     "w": 0.25,
+     "h": 3.2,
+     "d": 0.25,
+     "colour": "#4a3a2c"
+    },
+    {
+     "mesh": "box",
+     "x": -4,
+     "z": -17,
+     "y": -0.6,
+     "w": 16,
+     "h": 0.6,
+     "d": 3,
+     "colour": "#4f4a40"
+    }
+   ],
+   "buildings": [
+    {
+     "want": "mill",
+     "x": 2,
+     "z": -5,
+     "w": 8,
+     "d": 7,
+     "yaw": 0
+    },
+    {
+     "want": "granary",
+     "x": 13,
+     "z": 9,
+     "w": 6,
+     "d": 5,
+     "yaw": 3.141592653589793
+    }
+   ],
+   "fields": [],
+   "folk": [],
+   "monsters": [
+    {
+     "type": "cairn_rat",
+     "count": 3,
+     "level": 0,
+     "x": 14,
+     "z": 14,
+     "radius": 4
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Millstone",
+     "x": -4,
+     "z": 1.5,
+     "text": "You sweep the stones. The flour is gritty — someone has been grinding more than grain. Rat droppings, mostly."
+    },
+    {
+     "type": "use",
+     "name": "Sluice lever",
+     "x": -6,
+     "z": -13.5,
+     "text": "You heave the lever. The race roars, the wheel picks up speed, and the whole mill shudders awake."
+    },
+    {
+     "type": "use",
+     "name": "Gear housing",
+     "x": 7.5,
+     "z": -2,
+     "text": "Through a gap you see the great cog. Three teeth are new oak, carved by someone very patient."
+    },
+    {
+     "type": "note",
+     "name": "Mill ledger",
+     "x": 6,
+     "z": 1,
+     "text": "Sacks in: 40. Sacks out: 31. Rats: yes. Also one sack of something that was not grain. Ask nobody."
+    }
+   ],
+   "bind": {
+    "zone": "test",
+    "piece": "torbor_mill_pond",
+    "name": true
+   }
+  },
+  {
+   "id": "sp_saint_hulda_yard",
+   "name": "Saint Hulda's Yard",
+   "setpiece": true,
+   "kind": "graveyard",
+   "blurb": "Torborhold's old churchyard: an iron-railed square, a lychgate at the front (+z), four rows of graves either side of a stone path, box tombs, a fresh open grave in the back-right corner, and an ossuary dug into the back bank between the ruined chapel walls. Two barrow hounds dig among the graves. Old Mother Quell (trainer_grave) trains necromancers here. Quests from Sexton Abel Fenn (the hounds; the bell and the grave dust). One lantern (torch post) at the gate, nothing else lit.",
+   "lore": "The railings lean in as if listening. Somebody has dug a grave very recently, and somebody else has been digging the other way.",
+   "tags": {
+    "biomes": [
+     "grassland",
+     "shrubland",
+     "hills"
+    ],
+    "archetypes": [
+     "heartland"
+    ],
+    "band": [
+     1,
+     6
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 32,
+   "pin": {
+    "zone": "test",
+    "near": "Torborhold",
+    "dist": [
+     350,
+     850
+    ]
+   },
+   "ground": {
+    "flat": true,
+    "surface": "graveyard"
+   },
+   "props": [
+    {
+     "kind": "tree",
+     "id": "fir",
+     "x": -23,
+     "z": -14,
+     "yaw": -2.04,
+     "scale": 1.3
+    },
+    {
+     "kind": "tree",
+     "id": "fir",
+     "x": 23,
+     "z": -14,
+     "yaw": 5.96,
+     "scale": 1.2
+    },
+    {
+     "kind": "tree",
+     "id": "oak",
+     "x": -21,
+     "z": 17,
+     "yaw": -1.8,
+     "dead": true
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": -10,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": 14,
+     "z": 10,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": 2,
+     "z": -11,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "mushroom_ring",
+     "x": -14,
+     "z": -13,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "stone_step",
+     "x": 0,
+     "z": 21.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "stone_step",
+     "x": 0,
+     "z": 23.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "torch_post",
+     "x": 2.5,
+     "z": 21.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": -8,
+     "z": -16,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": 8,
+     "z": -16,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_pillar",
+     "x": -5,
+     "z": -12,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_pillar",
+     "x": 5,
+     "z": -12,
+     "yaw": 0
+    }
+   ],
+   "models": [
+    {
+     "id": "lychgate",
+     "x": 0,
+     "z": 19.5,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -18,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -18,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -16,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -16,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -14,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -14,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -12,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -12,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -10,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -10,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -8,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -8,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -6,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -6,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -4,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -4,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -2,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 0,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 2,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 4,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 4,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 6,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 6,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 8,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 8,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 10,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 10,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 12,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 12,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 14,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 14,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 16,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 16,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 18,
+     "z": -19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": 18,
+     "z": 19,
+     "yaw": 0
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": -17,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": -17,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": -15,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": -15,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": -13,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": -13,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": -11,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": -11,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": -9,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": -9,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": -7,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": -7,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": -5,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": -5,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": -3,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": -3,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": -1,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": -1,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": 1,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": 1,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": 3,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": 3,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": 5,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": 5,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": 7,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": 7,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": 9,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": 9,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": 11,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": 11,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": 13,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": 13,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": 15,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": 15,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": -19,
+     "z": 17,
+     "yaw": 1.57
+    },
+    {
+     "id": "iron_fence",
+     "x": 19,
+     "z": 17,
+     "yaw": 1.57
+    },
+    {
+     "id": "gravestone",
+     "x": -5,
+     "z": 14,
+     "yaw": 3.14
+    },
+    {
+     "id": "gravestone",
+     "x": -8,
+     "z": 14,
+     "yaw": 3.2
+    },
+    {
+     "id": "gravestone",
+     "x": -11,
+     "z": 14,
+     "yaw": 3.08
+    },
+    {
+     "id": "gravestone",
+     "x": -14,
+     "z": 14,
+     "yaw": 3.14
+    },
+    {
+     "id": "gravestone",
+     "x": -17,
+     "z": 14,
+     "yaw": 3.2
+    },
+    {
+     "id": "gravestone",
+     "x": -5,
+     "z": 8,
+     "yaw": 3.08
+    },
+    {
+     "id": "gravestone_leaning",
+     "x": -8,
+     "z": 8,
+     "yaw": 3.14
+    },
+    {
+     "id": "gravestone",
+     "x": -11,
+     "z": 8,
+     "yaw": 3.2
+    },
+    {
+     "id": "gravestone",
+     "x": -14,
+     "z": 8,
+     "yaw": 3.08
+    },
+    {
+     "id": "gravestone",
+     "x": -17,
+     "z": 8,
+     "yaw": 3.14
+    },
+    {
+     "id": "tomb_chest",
+     "x": -5,
+     "z": 2,
+     "yaw": 3.2
+    },
+    {
+     "id": "gravestone",
+     "x": -8,
+     "z": 2,
+     "yaw": 3.08
+    },
+    {
+     "id": "gravestone",
+     "x": -11,
+     "z": 2,
+     "yaw": 3.14
+    },
+    {
+     "id": "gravestone_leaning",
+     "x": -14,
+     "z": 2,
+     "yaw": 3.2
+    },
+    {
+     "id": "gravestone",
+     "x": -17,
+     "z": 2,
+     "yaw": 3.08
+    },
+    {
+     "id": "gravestone",
+     "x": -5,
+     "z": -4,
+     "yaw": 3.14
+    },
+    {
+     "id": "gravestone",
+     "x": -8,
+     "z": -4,
+     "yaw": 3.2
+    },
+    {
+     "id": "gravestone",
+     "x": -11,
+     "z": -4,
+     "yaw": 3.08
+    },
+    {
+     "id": "gravestone",
+     "x": -14,
+     "z": -4,
+     "yaw": 3.14
+    },
+    {
+     "id": "gravestone",
+     "x": -17,
+     "z": -4,
+     "yaw": 3.2
+    },
+    {
+     "id": "gravestone_leaning",
+     "x": 5,
+     "z": 14,
+     "yaw": 3.08
+    },
+    {
+     "id": "tomb_chest",
+     "x": 8,
+     "z": 14,
+     "yaw": 3.14
+    },
+    {
+     "id": "gravestone",
+     "x": 11,
+     "z": 14,
+     "yaw": 3.2
+    },
+    {
+     "id": "gravestone",
+     "x": 14,
+     "z": 14,
+     "yaw": 3.08
+    },
+    {
+     "id": "gravestone",
+     "x": 17,
+     "z": 14,
+     "yaw": 3.14
+    },
+    {
+     "id": "gravestone",
+     "x": 5,
+     "z": 8,
+     "yaw": 3.2
+    },
+    {
+     "id": "gravestone",
+     "x": 8,
+     "z": 8,
+     "yaw": 3.08
+    },
+    {
+     "id": "gravestone_leaning",
+     "x": 11,
+     "z": 8,
+     "yaw": 3.14
+    },
+    {
+     "id": "gravestone",
+     "x": 14,
+     "z": 8,
+     "yaw": 3.2
+    },
+    {
+     "id": "gravestone",
+     "x": 17,
+     "z": 8,
+     "yaw": 3.08
+    },
+    {
+     "id": "gravestone",
+     "x": 5,
+     "z": 2,
+     "yaw": 3.14
+    },
+    {
+     "id": "gravestone",
+     "x": 8,
+     "z": 2,
+     "yaw": 3.2
+    },
+    {
+     "id": "tomb_chest",
+     "x": 11,
+     "z": 2,
+     "yaw": 3.08
+    },
+    {
+     "id": "gravestone",
+     "x": 14,
+     "z": 2,
+     "yaw": 3.14
+    },
+    {
+     "id": "gravestone_leaning",
+     "x": 17,
+     "z": 2,
+     "yaw": 3.2
+    },
+    {
+     "id": "gravestone",
+     "x": 5,
+     "z": -4,
+     "yaw": 3.08
+    },
+    {
+     "id": "gravestone",
+     "x": 8,
+     "z": -4,
+     "yaw": 3.14
+    },
+    {
+     "id": "open_grave",
+     "x": 12,
+     "z": -8,
+     "yaw": 0
+    },
+    {
+     "id": "grave_mound",
+     "x": 15.5,
+     "z": -8,
+     "yaw": 0
+    },
+    {
+     "id": "crypt_door",
+     "x": 0,
+     "z": -14,
+     "yaw": 0
+    },
+    {
+     "id": "bell_frame",
+     "x": -6,
+     "z": 17,
+     "yaw": 0
+    },
+    {
+     "id": "tomb_chest",
+     "x": -4,
+     "z": -9,
+     "yaw": 0
+    },
+    {
+     "id": "tomb_chest",
+     "x": 4,
+     "z": -9,
+     "yaw": 0
+    },
+    {
+     "id": "tomb_chest",
+     "x": 14,
+     "z": -14,
+     "yaw": 0.1
+    }
+   ],
+   "parts": [],
+   "buildings": [],
+   "fields": [],
+   "folk": [
+    {
+     "role": "sexton",
+     "name": "Sexton",
+     "work": "dig",
+     "chatter": [
+      "role.gravedigger",
+      "role.sexton",
+      "place.sp_saint_hulda_yard"
+     ],
+     "x": 11,
+     "z": -6,
+     "path": [
+      [
+       11,
+       -6
+      ],
+      [
+       2,
+       -6
+      ],
+      [
+       2,
+       16
+      ],
+      [
+       -2,
+       16
+      ]
+     ]
+    }
+   ],
+   "monsters": [
+    {
+     "type": "barrow_hound",
+     "count": 2,
+     "level": 1,
+     "x": -12,
+     "z": 4,
+     "radius": 5
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Sexton's bell",
+     "x": -6,
+     "z": 16,
+     "text": "You ring it once. Every crow in the yard leaves. Something under the ground goes very still."
+    },
+    {
+     "type": "use",
+     "name": "Open grave",
+     "x": 12,
+     "z": -6.5,
+     "text": "Six feet down, as is proper. The coffin lid is cracked — from the inside? No. Surely not."
+    },
+    {
+     "type": "use",
+     "name": "Ossuary door",
+     "x": 0,
+     "z": -12,
+     "text": "The iron door is cold enough to sting. Behind it, bones are stacked by size, as tidy as firewood."
+    },
+    {
+     "type": "note",
+     "name": "Weathered epitaph",
+     "x": -8,
+     "z": 9,
+     "text": "HERE LIES WAT THATCHER. HE SAID THE ROOF WOULD HOLD."
+    },
+    {
+     "type": "chest",
+     "name": "Grave goods",
+     "x": 14,
+     "z": -12.5,
+     "tier": "uncommon",
+     "hidden": true,
+     "hint": "Someone was buried with their purse. The box tomb in the back-right corner does not quite close."
+    }
+   ],
+   "bind": {
+    "zone": "test",
+    "piece": "hollow_chapel",
+    "name": true
+   }
+  },
+  {
+   "id": "sp_greyfletch_camp",
+   "name": "Greyfletch Camp",
+   "setpiece": true,
+   "kind": "hunters_camp",
+   "blurb": "The Greyfletch family's hunting camp at the edge of the woods: hide tents round a fire, a skinning frame, smoking rack, a trophy post of antlers and a tally board of kills. Huntmaster Oswy Greyfletch (trainer_hunt) trains rangers, witch hunters and demon hunters and gives the start chain's mini-boss branch (Old Gristle). Two hunters about camp. Safe.",
+   "lore": "Smoke, drying meat and the smell of wet dog. Antlers on a post, and a board with tally marks for everything that ever walked past.",
+   "tags": {
+    "biomes": [
+     "temperateForest",
+     "grassland",
+     "shrubland"
+    ],
+    "archetypes": [
+     "heartland"
+    ],
+    "band": [
+     1,
+     6
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 24,
+   "pin": {
+    "zone": "test",
+    "near": "Torborhold",
+    "dist": [
+     600,
+     1100
+    ],
+    "biome": "temperateForest",
+    "biomeWithin": 60
+   },
+   "ground": {
+    "flat": false,
+    "surface": "dirt"
+   },
+   "props": [
+    {
+     "kind": "prop",
+     "id": "campfire",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "wood_pile",
+     "x": 3.5,
+     "z": -3,
+     "yaw": 0.5
+    },
+    {
+     "kind": "prop",
+     "id": "drying_rack",
+     "x": -6,
+     "z": -8,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "drying_rack",
+     "x": -3,
+     "z": -10,
+     "yaw": 0.6
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": 7,
+     "z": 6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 8.5,
+     "z": 4.5,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "sawhorse",
+     "x": 10,
+     "z": -2,
+     "yaw": 1
+    },
+    {
+     "kind": "ground",
+     "id": "pine_cone_scatter",
+     "x": -10,
+     "z": 10,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": 9,
+     "z": -9,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "root_mat",
+     "x": 14,
+     "z": 10,
+     "yaw": 0
+    },
+    {
+     "kind": "tree",
+     "id": "pine",
+     "x": -16,
+     "z": -12,
+     "yaw": -3.56
+    },
+    {
+     "kind": "tree",
+     "id": "pine",
+     "x": 14,
+     "z": -13,
+     "yaw": 2.48
+    },
+    {
+     "kind": "tree",
+     "id": "fir",
+     "x": -14,
+     "z": 14,
+     "yaw": -5.76
+    },
+    {
+     "kind": "tree",
+     "id": "pine",
+     "x": 17,
+     "z": 10,
+     "yaw": 4.56
+    }
+   ],
+   "models": [
+    {
+     "id": "hunters_tent",
+     "x": -7,
+     "z": 4,
+     "yaw": 0.6
+    },
+    {
+     "id": "hunters_tent",
+     "x": 6,
+     "z": 9,
+     "yaw": -0.8
+    },
+    {
+     "id": "hunters_tent",
+     "x": -2,
+     "z": 11,
+     "yaw": 0.1
+    },
+    {
+     "id": "skinning_frame",
+     "x": 8,
+     "z": -6,
+     "yaw": -1.1
+    },
+    {
+     "id": "smoking_rack",
+     "x": -4,
+     "z": -5,
+     "yaw": 0.3
+    },
+    {
+     "id": "trophy_post",
+     "x": 0,
+     "z": -12,
+     "yaw": 0
+    },
+    {
+     "id": "notice_post",
+     "x": 4,
+     "z": -12,
+     "yaw": 0
+    },
+    {
+     "id": "bench",
+     "x": -2,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "id": "tree_stump",
+     "x": 3,
+     "z": 3,
+     "yaw": 0
+    }
+   ],
+   "parts": [],
+   "buildings": [],
+   "fields": [],
+   "folk": [
+    {
+     "role": "hunter",
+     "work": "tend",
+     "chatter": [
+      "role.hunter",
+      "place.sp_greyfletch_camp"
+     ],
+     "x": 6,
+     "z": -4,
+     "path": [
+      [
+       6,
+       -4
+      ],
+      [
+       8,
+       -6
+      ],
+      [
+       2,
+       2
+      ]
+     ]
+    },
+    {
+     "role": "hunter",
+     "work": "cook",
+     "chatter": [
+      "role.hunter",
+      "place.sp_greyfletch_camp"
+     ],
+     "x": -2,
+     "z": -2,
+     "path": [
+      [
+       -2,
+       -2
+      ],
+      [
+       -4,
+       -5
+      ],
+      [
+       1,
+       -1
+      ]
+     ]
+    }
+   ],
+   "monsters": [],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Skinning frame",
+     "x": 7,
+     "z": -5,
+     "text": "A moor hound pelt the size of a cart cover is stretched here. The hunters say the beast it came from was the small one."
+    },
+    {
+     "type": "use",
+     "name": "Trophy post",
+     "x": 0,
+     "z": -10.5,
+     "text": "Antlers, tusks, a boar's jaw — and a bare nail with a name scratched under it: GRISTLE. Waiting."
+    },
+    {
+     "type": "use",
+     "name": "Tally board",
+     "x": 4,
+     "z": -11,
+     "text": "Columns of tally marks: hounds, boars, croakers. One column is headed \"fools who went alone\". It is long."
+    },
+    {
+     "type": "use",
+     "name": "Smoking rack",
+     "x": -4,
+     "z": -3.5,
+     "text": "You help yourself to a strip of smoked venison. Nobody stops you, which means it is the bad batch.",
+     "buff": {
+      "status": "regen",
+      "seconds": 300
+     }
+    }
+   ],
+   "bind": {
+    "zone": "test",
+    "piece": "hunters_clearing",
+    "name": true
+   }
+  },
+  {
+   "id": "sp_gristles_hollow",
+   "name": "Gristle's Hollow",
+   "setpiece": true,
+   "kind": "beast_den",
+   "blurb": "The lair of Old Gristle (mb_old_gristle), the huge moor hound that leads the packs into the sheep folds: an earth overhang den at the back (-z), bones and collars everywhere, two of his hounds lounging. The placer puts the boss at the centre (`boss`). Start chain branch B ends here. No NPCs.",
+   "lore": "Bones. Old ones, new ones, sheep ones, and a few you would rather not identify. The den mouth breathes out warm air.",
+   "tags": {
+    "biomes": [
+     "grassland",
+     "temperateForest",
+     "shrubland",
+     "hills"
+    ],
+    "archetypes": [
+     "heartland"
+    ],
+    "band": [
+     1,
+     6
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 20,
+   "pin": {
+    "zone": "test",
+    "near": "sp_greyfletch_camp",
+    "dist": [
+     300,
+     600
+    ],
+    "awayFromRoad": 120
+   },
+   "ground": {
+    "flat": false,
+    "surface": "dirt"
+   },
+   "boss": "mb_old_gristle",
+   "props": [
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": 0,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": -6,
+     "z": 2,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": 5,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": -3,
+     "z": -8,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": 8,
+     "z": 6,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "root_mat",
+     "x": -10,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "root_mat",
+     "x": 10,
+     "z": -8,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 2,
+     "z": 9,
+     "yaw": 0
+    },
+    {
+     "kind": "tree",
+     "id": "oak",
+     "x": -12,
+     "z": -9,
+     "yaw": -4.24,
+     "dead": true
+    },
+    {
+     "kind": "tree",
+     "id": "pine",
+     "x": 11,
+     "z": -10,
+     "yaw": 3.04
+    },
+    {
+     "kind": "prop",
+     "id": "stone_marker",
+     "x": -9,
+     "z": 9,
+     "yaw": 0.8
+    }
+   ],
+   "models": [
+    {
+     "id": "den_mouth",
+     "x": 0,
+     "z": -12,
+     "yaw": 0
+    },
+    {
+     "id": "bone_heap",
+     "x": -5,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "id": "bone_heap",
+     "x": 6,
+     "z": -5,
+     "yaw": 1
+    },
+    {
+     "id": "bone_heap",
+     "x": -9,
+     "z": 3,
+     "yaw": 2
+    }
+   ],
+   "parts": [],
+   "buildings": [],
+   "fields": [],
+   "folk": [],
+   "monsters": [
+    {
+     "type": "moor_hound",
+     "count": 2,
+     "level": 1,
+     "x": 6,
+     "z": 4,
+     "radius": 5
+    }
+   ],
+   "objects": [
+    {
+     "type": "note",
+     "name": "Gnawed collar",
+     "x": -3,
+     "z": 3,
+     "text": "A shepherd's dog collar, chewed through. The brass tag reads: BESS. GOOD GIRL. COME HOME."
+    },
+    {
+     "type": "use",
+     "name": "Bone heap",
+     "x": -5,
+     "z": -4.5,
+     "text": "You turn over the heap. Sheep, deer, a boar skull cracked like a nut. Whatever eats here is very big and very sure of itself."
+    }
+   ]
+  },
+  {
+   "id": "sp_nine_maidens",
+   "name": "The Nine Maidens",
+   "setpiece": true,
+   "kind": "standing_stones",
+   "blurb": "A ring of nine standing stones on high ground with a heel stone outside the ring (+z) and a recumbent altar at the centre; a fairy ring of mushrooms. Wenna of the Stones (trainer_wilds) trains druids and shamans here. Quests from Bettony the herb-woman (mushrooms; the heel stone at dusk). Safe.",
+   "lore": "Nine stones, dancing in a ring, caught mid-step a very long time ago. The wind sounds different inside.",
+   "tags": {
+    "biomes": [
+     "grassland",
+     "hills",
+     "shrubland"
+    ],
+    "archetypes": [
+     "heartland"
+    ],
+    "band": [
+     1,
+     6
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 22,
+   "pin": {
+    "zone": "test",
+    "near": "Torborhold",
+    "dist": [
+     700,
+     1300
+    ],
+    "high": true
+   },
+   "ground": {
+    "flat": false,
+    "surface": "grass"
+   },
+   "props": [
+    {
+     "kind": "ground",
+     "id": "mushroom_ring",
+     "x": -6,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": 5,
+     "z": 6,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": -8,
+     "z": 7,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "mushroom_ring",
+     "x": 9,
+     "z": -5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "rune_stone",
+     "x": 4,
+     "z": -4,
+     "yaw": 0.9
+    },
+    {
+     "kind": "prop",
+     "id": "stone_marker",
+     "x": -16,
+     "z": 11,
+     "yaw": 0.4
+    }
+   ],
+   "models": [
+    {
+     "id": "standing_stone",
+     "x": 0,
+     "z": 14,
+     "yaw": 0.2,
+     "scale": 0.9
+    },
+    {
+     "id": "standing_stone",
+     "x": 9,
+     "z": 10.72,
+     "yaw": 0.9,
+     "scale": 0.98
+    },
+    {
+     "id": "standing_stone",
+     "x": 13.79,
+     "z": 2.43,
+     "yaw": 1.6,
+     "scale": 1.06
+    },
+    {
+     "id": "standing_stone",
+     "x": 12.12,
+     "z": -7,
+     "yaw": 2.29,
+     "scale": 0.98
+    },
+    {
+     "id": "standing_stone",
+     "x": 4.79,
+     "z": -13.16,
+     "yaw": 2.99,
+     "scale": 1.1400000000000001
+    },
+    {
+     "id": "standing_stone",
+     "x": -4.79,
+     "z": -13.16,
+     "yaw": 3.69,
+     "scale": 1.1400000000000001
+    },
+    {
+     "id": "standing_stone",
+     "x": -12.12,
+     "z": -7,
+     "yaw": 4.39,
+     "scale": 0.98
+    },
+    {
+     "id": "standing_stone",
+     "x": -13.79,
+     "z": 2.43,
+     "yaw": 5.09,
+     "scale": 1.06
+    },
+    {
+     "id": "standing_stone",
+     "x": -9,
+     "z": 10.72,
+     "yaw": 5.79,
+     "scale": 0.98
+    },
+    {
+     "id": "standing_stone",
+     "x": 0,
+     "z": 19,
+     "yaw": 0,
+     "scale": 1.2
+    },
+    {
+     "id": "altar_stone",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.3
+    }
+   ],
+   "parts": [],
+   "buildings": [],
+   "fields": [],
+   "folk": [],
+   "monsters": [],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Heel stone",
+     "x": 0,
+     "z": 17.5,
+     "text": "You lay a palm on the heel stone. For a heartbeat the ring seems to turn, and you are standing still in the middle of it."
+    },
+    {
+     "type": "use",
+     "name": "Altar stone",
+     "x": 0,
+     "z": 1.5,
+     "text": "The hollow in the altar is full of rainwater that does not ripple when you breathe on it.",
+     "buff": {
+      "status": "regen",
+      "seconds": 300
+     }
+    },
+    {
+     "type": "use",
+     "name": "Ring of mushrooms",
+     "x": -6,
+     "z": -4.5,
+     "text": "You step over the ring, not into it. Everybody knows that much."
+    }
+   ],
+   "bind": {
+    "zone": "test",
+    "piece": "grey_maidens",
+    "name": true
+   }
+  },
+  {
+   "id": "sp_kind_mother_shrine",
+   "name": "Shrine of the Kind Mother",
+   "setpiece": true,
+   "kind": "shrine",
+   "blurb": "A small roadside shrine: a worn statue of a hooded mother holding a bowl, an offering bowl full of coins and flowers, prayer cairns of painted pebbles, a stone bench. Brother Cadoc (trainer_mind) trains monks and oracles here. Quest from Pilgrim Orla (lost prayer stones). No lights, no monsters.",
+   "lore": "A stone mother with a bowl, her face worn smooth by a thousand hands. The flowers in the bowl are fresh.",
+   "tags": {
+    "biomes": [
+     "grassland",
+     "shrubland",
+     "hills"
+    ],
+    "archetypes": [
+     "heartland"
+    ],
+    "band": [
+     1,
+     6
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 16,
+   "pin": {
+    "zone": "test",
+    "near": "Torborhold",
+    "dist": [
+     400,
+     900
+    ],
+    "road": 40
+   },
+   "ground": {
+    "flat": true,
+    "surface": "gravel"
+   },
+   "props": [
+    {
+     "kind": "prop",
+     "id": "stone_step",
+     "x": 0,
+     "z": 5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "stone_step",
+     "x": 0,
+     "z": 7,
+     "yaw": 0
+    },
+    {
+     "kind": "tree",
+     "id": "birch",
+     "x": -9,
+     "z": -7,
+     "yaw": -2.36
+    },
+    {
+     "kind": "tree",
+     "id": "birch",
+     "x": 9,
+     "z": -7.5,
+     "yaw": 2.82
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": 6,
+     "z": 2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "stone_marker",
+     "x": -8,
+     "z": 6,
+     "yaw": 0.2
+    }
+   ],
+   "models": [
+    {
+     "id": "shrine_statue",
+     "x": 0,
+     "z": -5,
+     "yaw": 0
+    },
+    {
+     "id": "offering_bowl",
+     "x": 0,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "id": "prayer_cairn",
+     "x": -5,
+     "z": -3,
+     "yaw": 0
+    },
+    {
+     "id": "prayer_cairn",
+     "x": 5,
+     "z": -3.5,
+     "yaw": 0
+    },
+    {
+     "id": "prayer_cairn",
+     "x": -6,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "id": "bench",
+     "x": 0,
+     "z": 3,
+     "yaw": 3.14
+    }
+   ],
+   "parts": [],
+   "buildings": [],
+   "fields": [],
+   "folk": [],
+   "monsters": [],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Offering bowl",
+     "x": 0,
+     "z": -1,
+     "text": "The coin sinks among the others with a soft chink. Something tight in your chest loosens.",
+     "cost": {
+      "gold": 1
+     },
+     "buff": {
+      "status": "regen",
+      "seconds": 300
+     }
+    },
+    {
+     "type": "use",
+     "name": "Prayer stones",
+     "x": -5,
+     "z": -1.8,
+     "text": "Each pebble carries a scratched wish: \"rain\", \"no rain\", \"let him come back\", \"let him NOT come back\"."
+    },
+    {
+     "type": "use",
+     "name": "Mother's statue",
+     "x": 0,
+     "z": -3.5,
+     "text": "You touch the worn hands like everyone else has. They are warm, though the morning is not."
+    }
+   ]
+  },
+  {
+   "id": "sp_coldharrow_ruins",
+   "name": "Coldharrow Ruins",
+   "setpiece": true,
+   "kind": "ruins",
+   "blurb": "The burned shell of Coldharrow manor and the stump of its tower: roofless walls, an arch, a collapsed stair, a cracked floor sigil that glows faintly at night. Road brigands squat by a fire on the east side. Ysolde Coldharrow, last of the family (trainer_pact), trains warlocks here and is the reason the house burned. Quests from Warden Maddoc (the brigands; how the fire started).",
+   "lore": "The fire was thirty years ago and the stones still smell of it. In the middle of the old hall, the floor is cracked in a perfect circle.",
+   "tags": {
+    "biomes": [
+     "grassland",
+     "shrubland",
+     "hills",
+     "temperateForest"
+    ],
+    "archetypes": [
+     "heartland"
+    ],
+    "band": [
+     1,
+     6
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 36,
+   "pin": {
+    "zone": "test",
+    "near": "Torborhold",
+    "dist": [
+     900,
+     1400
+    ]
+   },
+   "ground": {
+    "flat": false,
+    "surface": "gravel"
+   },
+   "props": [
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": -14,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": -8,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": -2,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": -17,
+     "z": -1,
+     "yaw": 1.57
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": -17,
+     "z": 5,
+     "yaw": 1.57
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": -14,
+     "z": 10,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": -6,
+     "z": 10,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": 1,
+     "z": 6,
+     "yaw": 1.57
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_arch",
+     "x": -10,
+     "z": 10,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_pillar",
+     "x": 6,
+     "z": 14,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_pillar",
+     "x": 10,
+     "z": 14,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_pillar",
+     "x": 14,
+     "z": 14,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": -9,
+     "z": 2,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": -4,
+     "z": 5,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 12,
+     "z": -8,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "campfire",
+     "x": 16,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 18,
+     "z": 6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": 19,
+     "z": 2.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "palisade_stake",
+     "x": 22,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "palisade_stake",
+     "x": 22,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "tree",
+     "id": "oak",
+     "x": -24,
+     "z": 16,
+     "yaw": -0.68,
+     "dead": true
+    },
+    {
+     "kind": "tree",
+     "id": "oak",
+     "x": 22,
+     "z": 20,
+     "yaw": 0.48,
+     "dead": true
+    },
+    {
+     "kind": "tree",
+     "id": "birch",
+     "x": -26,
+     "z": -14,
+     "yaw": -4.2
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": 8,
+     "z": -18,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "stone_step",
+     "x": -10,
+     "z": 12,
+     "yaw": 0
+    }
+   ],
+   "models": [
+    {
+     "id": "broken_tower",
+     "x": 8,
+     "z": -14,
+     "yaw": 0
+    },
+    {
+     "id": "collapsed_stair",
+     "x": 2,
+     "z": -12,
+     "yaw": 1.57
+    },
+    {
+     "id": "sigil_slab",
+     "x": -8,
+     "z": 2,
+     "yaw": 0
+    },
+    {
+     "id": "stone_wall",
+     "x": -26,
+     "z": 6,
+     "yaw": 1.57
+    },
+    {
+     "id": "stone_wall",
+     "x": -26,
+     "z": 0,
+     "yaw": 1.57
+    }
+   ],
+   "parts": [
+    {
+     "mesh": "box",
+     "x": -8,
+     "z": 2,
+     "y": -0.2,
+     "w": 18,
+     "h": 0.25,
+     "d": 15,
+     "colour": "#4a4640"
+    }
+   ],
+   "buildings": [],
+   "fields": [],
+   "folk": [],
+   "monsters": [
+    {
+     "type": "road_brigand",
+     "count": 3,
+     "level": 1,
+     "x": 17,
+     "z": 0,
+     "radius": 6
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Cracked sigil",
+     "x": -8,
+     "z": 3.5,
+     "text": "Your shadow falls across the circle and, for a moment, keeps going without you. Then it comes back."
+    },
+    {
+     "type": "use",
+     "name": "Collapsed stair",
+     "x": 2,
+     "z": -9.5,
+     "text": "The stair climbs to a doorway that opens on thirty feet of air. Scorch marks lead up, and none lead down."
+    },
+    {
+     "type": "note",
+     "name": "Burnt letter",
+     "x": -12,
+     "z": 6,
+     "text": "...the circle is drawn, Father. You said we had no gift. Watch. — Y.  (The rest is ash.)"
+    },
+    {
+     "type": "chest",
+     "name": "Buried strongbox",
+     "x": -15,
+     "z": 8,
+     "tier": "rare",
+     "hidden": true,
+     "hint": "Old houses hid their silver under the hearth. Find where the great fireplace stood, west end of the hall."
+    }
+   ]
+  },
+  {
+   "id": "sp_ashby_lumber_camp",
+   "name": "Ashby's Lumber Camp",
+   "setpiece": true,
+   "kind": "lumber_camp",
+   "blurb": "A clearing hacked into the forest edge: stumps everywhere at the back, a saw pit with a log across it, stacked trunks, a grindstone, a foreman's hut and a cook fire. Dusk flitters roost in the cut timber. Quests from Foreman Edda Ashby (flitters; a missing saw). Folk: two woodcutters and the foreman.",
+   "lore": "Sawdust, sap and swearing. The forest stops here in a hard line of stumps, like a crowd that stepped back from something.",
+   "tags": {
+    "biomes": [
+     "temperateForest",
+     "grassland"
+    ],
+    "archetypes": [
+     "heartland"
+    ],
+    "band": [
+     1,
+     6
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 30,
+   "pin": {
+    "zone": "test",
+    "near": "Torborhold",
+    "dist": [
+     600,
+     1200
+    ],
+    "biome": "temperateForest",
+    "biomeWithin": 60
+   },
+   "ground": {
+    "flat": false,
+    "surface": "dirt"
+   },
+   "props": [
+    {
+     "kind": "prop",
+     "id": "wood_pile",
+     "x": 6,
+     "z": 8,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "wood_pile",
+     "x": 8,
+     "z": 9.5,
+     "yaw": 1.1
+    },
+    {
+     "kind": "prop",
+     "id": "sawhorse",
+     "x": 3,
+     "z": 5,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "sawhorse",
+     "x": -3,
+     "z": -6,
+     "yaw": 1.2
+    },
+    {
+     "kind": "prop",
+     "id": "campfire",
+     "x": -8,
+     "z": 14,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": -12,
+     "z": 6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": -13,
+     "z": 4,
+     "yaw": 0.5
+    },
+    {
+     "kind": "prop",
+     "id": "cart_wheel",
+     "x": 16,
+     "z": 12,
+     "yaw": 1.4
+    },
+    {
+     "kind": "ground",
+     "id": "root_mat",
+     "x": -14,
+     "z": -14,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "pine_cone_scatter",
+     "x": 6,
+     "z": -14,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "pine_cone_scatter",
+     "x": -6,
+     "z": -16,
+     "yaw": 0
+    },
+    {
+     "kind": "tree",
+     "id": "pine",
+     "x": -22,
+     "z": -13,
+     "yaw": -4.6
+    },
+    {
+     "kind": "tree",
+     "id": "pine",
+     "x": 21,
+     "z": -14,
+     "yaw": 4.52
+    },
+    {
+     "kind": "tree",
+     "id": "fir",
+     "x": -6,
+     "z": -24,
+     "yaw": -0.96
+    },
+    {
+     "kind": "tree",
+     "id": "fir",
+     "x": 8,
+     "z": -24,
+     "yaw": -3.44
+    }
+   ],
+   "models": [
+    {
+     "id": "saw_pit",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "id": "log_stack",
+     "x": 10,
+     "z": -6,
+     "yaw": 0.2
+    },
+    {
+     "id": "log_stack",
+     "x": 12,
+     "z": 2,
+     "yaw": -0.1
+    },
+    {
+     "id": "log_stack",
+     "x": -10,
+     "z": -10,
+     "yaw": 1.4
+    },
+    {
+     "id": "grindstone",
+     "x": -6,
+     "z": 6,
+     "yaw": 0.5
+    },
+    {
+     "id": "bench",
+     "x": -2,
+     "z": 10,
+     "yaw": 3.14
+    },
+    {
+     "id": "tree_stump",
+     "x": -16,
+     "z": -18,
+     "yaw": -16
+    },
+    {
+     "id": "tree_stump",
+     "x": -8,
+     "z": -20,
+     "yaw": -8
+    },
+    {
+     "id": "tree_stump",
+     "x": 2,
+     "z": -21,
+     "yaw": 2
+    },
+    {
+     "id": "tree_stump",
+     "x": 12,
+     "z": -18,
+     "yaw": 12
+    },
+    {
+     "id": "tree_stump",
+     "x": 18,
+     "z": -12,
+     "yaw": 18
+    },
+    {
+     "id": "tree_stump",
+     "x": -20,
+     "z": -6,
+     "yaw": -20
+    },
+    {
+     "id": "tree_stump",
+     "x": 20,
+     "z": 6,
+     "yaw": 20
+    },
+    {
+     "id": "tree_stump",
+     "x": -18,
+     "z": 14,
+     "yaw": -18
+    }
+   ],
+   "parts": [],
+   "buildings": [
+    {
+     "want": "hut",
+     "x": -16,
+     "z": 10,
+     "w": 5,
+     "d": 4,
+     "yaw": 1.5707963267948966
+    }
+   ],
+   "fields": [],
+   "folk": [
+    {
+     "role": "woodcutter",
+     "work": "chop",
+     "chatter": [
+      "role.woodcutter",
+      "place.sp_ashby_lumber_camp"
+     ],
+     "x": -8,
+     "z": -18,
+     "path": [
+      [
+       -8,
+       -18
+      ],
+      [
+       2,
+       -18
+      ],
+      [
+       2,
+       -14
+      ]
+     ]
+    },
+    {
+     "role": "woodcutter",
+     "work": "saw",
+     "chatter": [
+      "role.woodcutter",
+      "place.sp_ashby_lumber_camp"
+     ],
+     "x": 1,
+     "z": 1.5,
+     "path": [
+      [
+       1,
+       2
+      ],
+      [
+       -1,
+       2
+      ],
+      [
+       1,
+       -2
+      ]
+     ]
+    },
+    {
+     "role": "foreman",
+     "name": "Foreman",
+     "work": "tend",
+     "chatter": [
+      "role.foreman",
+      "place.sp_ashby_lumber_camp"
+     ],
+     "x": -12,
+     "z": 12,
+     "path": [
+      [
+       -12,
+       12
+      ],
+      [
+       -4,
+       8
+      ],
+      [
+       8,
+       0
+      ]
+     ]
+    }
+   ],
+   "monsters": [
+    {
+     "type": "dusk_flitter",
+     "count": 2,
+     "level": 0,
+     "x": 11,
+     "z": -2,
+     "radius": 5
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Saw pit",
+     "x": 0,
+     "z": 3,
+     "text": "You take the bottom of the saw for a dozen strokes and get a face full of sawdust for your trouble. Honest work."
+    },
+    {
+     "type": "use",
+     "name": "Log pile",
+     "x": 10,
+     "z": -3.5,
+     "text": "The top log has claw marks along it. Not axe marks. Claw marks, and something has been sleeping in the gaps."
+    },
+    {
+     "type": "use",
+     "name": "Grindstone",
+     "x": -6,
+     "z": 7.5,
+     "text": "You pump the treadle and put an edge back on your blade. The stone sings.",
+     "buff": {
+      "status": "regen",
+      "seconds": 300
+     }
+    }
+   ],
+   "bind": {
+    "zone": "test",
+    "piece": "charcoal_clearing",
+    "name": true
+   }
+  },
+  {
+   "id": "sp_tench_pool",
+   "name": "Tench Pool",
+   "setpiece": true,
+   "kind": "fishing_spot",
+   "blurb": "A quiet fishing spot: a plank jetty out over the water (local -z), a moored rowboat, wicker fish traps, a rod rack under a lean-to and a smoking fire. Fen croakers squat in the reeds and steal the catch. Quest from Old Wat the fisher (croakers; the big tench). Folk: one fisher.",
+   "lore": "Still water, a sagging jetty and a fisher who has not caught anything since the croakers moved in.",
+   "tags": {
+    "biomes": [
+     "grassland",
+     "marsh",
+     "temperateForest",
+     "shrubland"
+    ],
+    "archetypes": [
+     "heartland"
+    ],
+    "band": [
+     1,
+     6
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 16,
+   "pin": {
+    "zone": "test",
+    "near": "Torborhold",
+    "dist": [
+     300,
+     1000
+    ],
+    "water": 8,
+    "waterSide": "-z"
+   },
+   "ground": {
+    "flat": false,
+    "surface": "dirt"
+   },
+   "props": [
+    {
+     "kind": "prop",
+     "id": "campfire",
+     "x": 4,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": 7,
+     "z": 2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 7.5,
+     "z": 4,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "drying_rack",
+     "x": -6,
+     "z": 4,
+     "yaw": 0.3
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": -4,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "root_mat",
+     "x": 9,
+     "z": -5,
+     "yaw": 0
+    },
+    {
+     "kind": "tree",
+     "id": "birch",
+     "x": -10,
+     "z": 5,
+     "yaw": -4.76
+    },
+    {
+     "kind": "tree",
+     "id": "oak",
+     "x": 9,
+     "z": 7,
+     "yaw": 2.36
+    }
+   ],
+   "models": [
+    {
+     "id": "jetty",
+     "x": 0,
+     "z": -8,
+     "yaw": 0
+    },
+    {
+     "id": "rowboat",
+     "x": 3.5,
+     "z": -10,
+     "yaw": 0.2
+    },
+    {
+     "id": "fish_trap",
+     "x": -3,
+     "z": -4,
+     "yaw": 0
+    },
+    {
+     "id": "fish_trap",
+     "x": -4.5,
+     "z": -3,
+     "yaw": 0
+    },
+    {
+     "id": "fish_trap",
+     "x": -2,
+     "z": -2.5,
+     "yaw": 1
+    },
+    {
+     "id": "rod_rack",
+     "x": -6,
+     "z": 0,
+     "yaw": 0.4
+    },
+    {
+     "id": "bench",
+     "x": 2,
+     "z": 2,
+     "yaw": 0
+    }
+   ],
+   "parts": [],
+   "buildings": [],
+   "fields": [],
+   "folk": [
+    {
+     "role": "fisher",
+     "work": "fish",
+     "chatter": [
+      "role.fisher",
+      "place.sp_tench_pool"
+     ],
+     "x": 0,
+     "z": -6,
+     "path": [
+      [
+       0,
+       -6
+      ],
+      [
+       0,
+       -2
+      ],
+      [
+       3,
+       2
+      ]
+     ]
+    }
+   ],
+   "monsters": [
+    {
+     "type": "fen_croaker",
+     "count": 2,
+     "level": 0,
+     "x": -7,
+     "z": -7,
+     "radius": 4
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Rod rack",
+     "x": -5.5,
+     "z": 1.5,
+     "text": "You borrow a rod and cast. Something takes the bait, considers you, and lets go."
+    },
+    {
+     "type": "use",
+     "name": "Fish traps",
+     "x": -3,
+     "z": -2,
+     "text": "You haul a trap. Empty — but the wicker is bitten clean through. Croakers, or something with a better jaw."
+    },
+    {
+     "type": "use",
+     "name": "Old jetty",
+     "x": 0,
+     "z": -5,
+     "text": "You sit at the end of the jetty with your feet over the water. The pool is very deep and very calm. You feel rested.",
+     "buff": {
+      "status": "regen",
+      "seconds": 300
+     }
+    }
+   ]
+  },
+  {
+   "id": "sp_pail_and_plough",
+   "name": "The Pail and Plough",
+   "setpiece": true,
+   "kind": "crossroads_inn",
+   "blurb": "A crossroads inn on the Torborhold–Orrinsford road, halfway: the inn (front to the road, +z), a stable, a well, benches and a long table outside, hitching posts, a signpost and a notice post. Innkeeper Marra (innkeeper_marra, start chain hub: both branches open here). Lute-master Emrys Fenwick (trainer_bard) trains bards here. A safe stop: no monsters. Lit (torches at the door and the yard).",
+   "lore": "A painted sign of a milk pail over a plough, a stable that smells of hay, and the noise of somebody losing at dice indoors.",
+   "tags": {
+    "biomes": [
+     "grassland",
+     "shrubland",
+     "hills"
+    ],
+    "archetypes": [
+     "heartland"
+    ],
+    "band": [
+     1,
+     6
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 32,
+   "pin": {
+    "zone": "test",
+    "route": "route_torborhold_orrinsford",
+    "road": 30,
+    "dist": [
+     500,
+     780
+    ]
+   },
+   "ground": {
+    "flat": true,
+    "surface": "gravel"
+   },
+   "props": [
+    {
+     "kind": "prop",
+     "id": "well",
+     "x": 10,
+     "z": 6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "torch_post",
+     "x": -4,
+     "z": 6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "torch_post",
+     "x": 4,
+     "z": 6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "torch_post",
+     "x": 16,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "signpost",
+     "x": 0,
+     "z": 26,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": -12,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": -13,
+     "z": -0.5,
+     "yaw": 0.5
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": -11,
+     "z": -4,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": 20,
+     "z": -12,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": 21,
+     "z": -10.5,
+     "yaw": 0.8
+    },
+    {
+     "kind": "prop",
+     "id": "cart_wheel",
+     "x": 24,
+     "z": -4,
+     "yaw": 1
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 6,
+     "z": 14,
+     "yaw": 0
+    },
+    {
+     "kind": "tree",
+     "id": "oak",
+     "x": -22,
+     "z": 14,
+     "yaw": -5.24
+    },
+    {
+     "kind": "tree",
+     "id": "oak",
+     "x": 24,
+     "z": 14,
+     "yaw": 2.76
+    }
+   ],
+   "models": [
+    {
+     "id": "inn_sign",
+     "x": 6,
+     "z": 8,
+     "yaw": 0
+    },
+    {
+     "id": "hitching_post",
+     "x": -12,
+     "z": 14,
+     "yaw": 0
+    },
+    {
+     "id": "hitching_post",
+     "x": -6,
+     "z": 16,
+     "yaw": 0
+    },
+    {
+     "id": "bench",
+     "x": -2,
+     "z": 12,
+     "yaw": 0
+    },
+    {
+     "id": "bench",
+     "x": 2,
+     "z": 12,
+     "yaw": 0
+    },
+    {
+     "id": "bench",
+     "x": 12,
+     "z": 12,
+     "yaw": 0.2
+    },
+    {
+     "id": "notice_post",
+     "x": -8,
+     "z": 8,
+     "yaw": 0
+    },
+    {
+     "id": "haystack",
+     "x": 22,
+     "z": -16,
+     "yaw": 0
+    }
+   ],
+   "parts": [
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 14,
+     "y": 0.75,
+     "w": 4,
+     "h": 0.12,
+     "d": 1.2,
+     "colour": "#6e553d"
+    },
+    {
+     "mesh": "box",
+     "x": 0,
+     "z": 14,
+     "y": 0,
+     "w": 0.3,
+     "h": 0.75,
+     "d": 0.3,
+     "colour": "#4a3a2c"
+    }
+   ],
+   "buildings": [
+    {
+     "want": "inn",
+     "x": 0,
+     "z": -4,
+     "w": 14,
+     "d": 10,
+     "yaw": 0
+    },
+    {
+     "want": "stable",
+     "x": 19,
+     "z": -4,
+     "w": 8,
+     "d": 9,
+     "yaw": -1.5707963267948966
+    }
+   ],
+   "fields": [],
+   "folk": [
+    {
+     "role": "stablehand",
+     "name": "Stablehand",
+     "work": "tend",
+     "chatter": [
+      "role.stablehand",
+      "place.sp_pail_and_plough"
+     ],
+     "x": 15,
+     "z": 2,
+     "path": [
+      [
+       15,
+       2
+      ],
+      [
+       12,
+       6
+      ],
+      [
+       16,
+       -8
+      ]
+     ]
+    }
+   ],
+   "monsters": [],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Inn sign",
+     "x": 6,
+     "z": 9,
+     "text": "A milk pail over a plough, freshly repainted. The pail has been given a face. The face looks worried."
+    },
+    {
+     "type": "use",
+     "name": "Well",
+     "x": 10,
+     "z": 7.5,
+     "text": "Cold, sweet water. You drink deep and the road dust goes down with it.",
+     "buff": {
+      "status": "regen",
+      "seconds": 300
+     }
+    },
+    {
+     "type": "use",
+     "name": "Notice post",
+     "x": -8,
+     "z": 9,
+     "text": "LOST: one ox, answers to Duchess. FOUND: one ox, answers to nothing. REWARD for news of the big hound on the south road."
+    },
+    {
+     "type": "use",
+     "name": "Hearth",
+     "x": 0,
+     "z": 2.2,
+     "text": "Through the open door you warm your hands at the great hearth. Somebody hands you a bowl of something brown and hot without asking. Bliss.",
+     "buff": {
+      "status": "regen",
+      "seconds": 300
+     }
+    }
+   ]
+  }
+ ]
+}

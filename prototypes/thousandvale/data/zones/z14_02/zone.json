@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 3,
-  "inputHash": "fdc4a8a3",
+  "bakeVersion": 4,
+  "inputHash": "b8a99ae8",
   "waterKinds": [
     "none",
     "sea",
@@ -200,7 +200,7 @@
   "summary": {
     "zone": "z14_02",
     "province": "Petbeck Basin",
-    "inputHash": "fdc4a8a3",
+    "inputHash": "b8a99ae8",
     "rivers": 5,
     "wetShare": 0.023,
     "unwalkableShare": 0.013,
@@ -284,18 +284,19 @@
     ],
     "roads": 12,
     "bridges": 3,
-    "paths": 6,
-    "pathMetres": 525,
-    "scatter": 21936,
+    "paths": 10,
+    "pathMetres": 643,
+    "scatter": 22292,
     "scatterKinds": {
-      "rock_small": 1374,
-      "tree_broadleaf": 9683,
-      "bush": 5722,
-      "tree_conifer": 1436,
-      "rock_large": 339,
-      "tree_dead": 232,
-      "reed": 3149,
-      "boulder": 1
+      "rock_small": 1379,
+      "tree_broadleaf": 9623,
+      "bush": 5643,
+      "tree_conifer": 1406,
+      "rock_large": 328,
+      "tree_dead": 229,
+      "reed": 3137,
+      "boulder": 1,
+      "hedge": 546
     },
     "sites": [
       "settlement(HUB) town Gullwick 1520 352 90",
@@ -311,13 +312,13 @@
       "x": 1512,
       "z": 352
     },
-    "placements": 285,
-    "vignettesAvoided": 686
+    "placements": 350,
+    "vignettesAvoided": 664
   },
   "files": {
-    "terrain.bin": 507007,
-    "nav.bin": 37700,
-    "scatter.bin": 175572,
-    "placements.json": 124087
+    "terrain.bin": 508707,
+    "nav.bin": 37592,
+    "scatter.bin": 178420,
+    "placements.json": 184229
   }
 }

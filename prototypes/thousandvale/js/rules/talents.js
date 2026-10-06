@@ -21,6 +21,11 @@
 import { TALENT_LIBRARY, describeNode, describeMod, nodeFor } from './farhold.js';
 
 export const TIER_LEVELS = [3, 8, 18, 28];
+/**
+ * The level a tier opens at FOR THIS CHARACTER: a class quest may open the first tier early
+ * (play-test 2 Q28: `rules.unlock(e, 'talents1')` -> tier 1 at level 1).
+ */
+export const tierLevelFor = (unit, tier) => (tier === 1 && unit?.unlocks?.talents1 ? 1 : TIER_LEVELS[tier - 1]);
 
 /** Plan dimensions that are only a NUMBER: a node made only of these (set/add/mul) is a plain node. */
 const PLAIN_DIM = /(^|\.)(mult|cooldown|mp|radius|reach|range|width|arc|seconds|statusMult|statusSeconds|heal|share|every|power|damage|resist|haste|movePct|speed|delay|chainFalloff|spread)$/;
@@ -158,7 +163,7 @@ export function pickTalent(engine, unit, skillId, tier, nodeId) {
   const mine = talentSkills(unit).find(s => s.id === skillId);
   if (!row || !mine) return { ok: false, why: 'That skill is not on your bar.' };
   if (!mine.open) return { ok: false, why: `${row.name} opens at level ${mine.unlockAt}.` };
-  const level = TIER_LEVELS[tier - 1];
+  const level = tierLevelFor(unit, tier);
   if (!level) return { ok: false, why: 'No such tier.' };
   if ((unit.level || 1) < level) return { ok: false, why: `That tier opens at level ${level}.` };
   const node = tierNodes(row, tier).find(nd => nd.id === nodeId);
@@ -202,7 +207,7 @@ export function cleanTalents(engine, unit) {
     const row = engine.skillData.skills[skillId];
     if (!row || !onBar.has(skillId)) continue;
     for (const [tier, id] of Object.entries(picks || {})) {
-      if (tierNodes(row, Number(tier)).some(nd => nd.id === id) && (unit.level || 1) >= (TIER_LEVELS[tier - 1] ?? Infinity)) (out[skillId] || (out[skillId] = {}))[tier] = id;
+      if (tierNodes(row, Number(tier)).some(nd => nd.id === id) && (unit.level || 1) >= (tierLevelFor(unit, Number(tier)) ?? Infinity)) (out[skillId] || (out[skillId] = {}))[tier] = id;
     }
   }
   unit.skillTalents = out;
@@ -217,8 +222,9 @@ export function talentView(engine, unit) {
     const picks = picksOf(unit, s.id);
     return {
       slot: s.slot, skillId: s.id, name: row.name, shape: row.shape, element: row.element || null, open: s.open, unlockAt: s.unlockAt,
-      tiers: TIER_LEVELS.map((level, i) => {
+      tiers: TIER_LEVELS.map((lv0, i) => {
         const tier = i + 1;
+        const level = tierLevelFor(unit, tier) ?? lv0;
         return {
           tier, level, open: s.open && (unit.level || 1) >= level, picked: picks[tier] || null,
           nodes: tierNodes(row, tier).map(nd => ({

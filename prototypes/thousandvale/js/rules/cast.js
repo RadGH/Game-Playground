@@ -79,9 +79,25 @@ export function createCombat(room) {
   field.onKill = (e) => {
     const xpCfg = balance.xp || {};
     const lootRng = room.streams.get('loot');
-    for (const [id] of e.damageBy || []) {
-      const p = field.get(id);
-      if (!p || p.kind !== 'player') continue;
+    // Q3/Q4 — PARTY LOOT. When the room takes party loot (`combat.partyLoot`, js/rules/index.js -> the
+    // host), a party that tagged the kill gets ONE drop for the corpse, rolled once with the party's
+    // average magic find, and the host decides who gets what (free items / Need-Greed-Skip by threshold,
+    // js/rules/loot-rules.js). A solo tagger — or any tagging when the room does not take party loot —
+    // keeps its own roll, exactly as before.
+    const taggers = [];
+    for (const [id] of e.damageBy || []) { const p = field.get(id); if (p && p.kind === 'player') taggers.push(p); }
+    const groups = new Map();
+    if (combat.partyLoot) for (const p of taggers) if (p.partyId != null) (groups.get(p.partyId) || groups.set(p.partyId, []).get(p.partyId)).push(p);
+    const partyDrop = new Map();          // member -> true: its items went to the party pile
+    for (const [pid, members] of groups) {
+      if (members.length < 2) continue;
+      const mf = members.reduce((a, m) => a + (m.derived?.magicFind || 0), 0) / members.length;
+      const drops = rpg.rollDrops(e, { rng: lootRng, magicFind: mf }) || [];
+      for (const it of drops) it.uid = `${room.id}:${++uidN}`;
+      for (const m of members) partyDrop.set(m, true);
+      combat.partyLoot(members, drops, e, pid);
+    }
+    for (const p of taggers) {
       p.kills = (p.kills || 0) + 1;
       const back = rpg.onKillRestore(p);
       const post = rpg.fx.onKill({ self: p, target: e, applyStatus: (t, type, spec) => applyStatus(t, type, spec) });
@@ -110,7 +126,7 @@ export function createCombat(room) {
       // never sees the sheet, so it is applied here (and only here)
       if (combat.award && p.derived?.xpFind) award = Math.round(award * (1 + p.derived.xpFind / 100));
       const coin = foundGold(p, e.gold);
-      const drops = rpg.rollDrops(e, { rng: lootRng, magicFind: p.derived.magicFind }) || [];
+      const drops = partyDrop.has(p) ? [] : rpg.rollDrops(e, { rng: lootRng, magicFind: p.derived.magicFind }) || [];
       for (const it of drops) it.uid = `${room.id}:${++uidN}`;
       // the room owns experience, gold and the bag when it says so (js/rules/index.js sets `award`);
       // otherwise (tests, the parity fixtures) the sheet keeps them itself, as Farhold does
@@ -129,7 +145,7 @@ export function createCombat(room) {
    * server keeps the position). The swing clock is the weapon's own pattern, scaled by haste,
    * exactly as Farhold's controller runs it; damage lands after the wind-up.
    */
-  combat.attack = (ch, { hand = 'main', yaw = null, held = 0 } = {}) => {
+  combat.attack = (ch, { hand = 'main', yaw = null, held = null, target = null } = {}) => {
     if (!ch || ch.dead || ch.removed) return { ok: false, why: 'dead' };
     if (yaw != null && Number.isFinite(yaw)) ch.yaw = yaw;
     const hands = weaponHands(ch);
@@ -152,14 +168,43 @@ export function createCombat(room) {
       const hstep = clock.mainStep++;
       const h = Math.max(0, Math.min(Number.isFinite(held) ? held : 0, t - (clock.readySince ?? clock[readyKey] ?? 0), 5));
       if (plan.hold === 'draw') {
-        const d = drawPower(plan.draw, h);
-        if (!d.ready) return { ok: false, why: 'not drawn', need: plan.draw?.min };
-        clock[readyKey] = t + (plan.afterShot ?? 0.12);
+        const after = plan.afterShot ?? 0.12;
+        // play-test 2 Q1: "entering combat spams the weapon and reads 'not drawn, not drawn'". The client's
+        // basic-attack key and its auto-attack send a CLICK (no `held`), and a click on a bow was refused
+        // outright. Farhold never refuses one either (player.js: "a click still shoots" keeps drawing to the
+        // nock on its own, and holding looses itself at full draw — `autoLoose`). So the server draws for you:
+        //   * no `held` (a click / auto-attack): draw to FULL and loose on its own — a steady stream of full
+        //     shots, the same cadence as holding the button in Farhold (draw.full + afterShot);
+        //   * a `held` short of the nock: keep drawing to the nock and loose the weak shot;
+        //   * a `held` past the nock: loose at once, at that draw's power (the parity path, unchanged).
+        const auto = !Number.isFinite(held);
+        const d = auto ? null : drawPower(plan.draw, h);
+        if (auto || !d.ready) {
+          const goal = auto ? (plan.draw?.full ?? 0.95) : (plan.draw?.min ?? 0.35);
+          const wait = Math.max(0, goal - h);
+          const power = drawPower(plan.draw, goal).power;
+          clock[readyKey] = t + wait + after;
+          clock.readySince = clock[readyKey];
+          clock.lastAt = t + wait; clock.lastEvery = after;
+          clock.drawing = { until: t + wait, target: target?.id ?? null };
+          field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'draw', wind: wait, every: wait + after, range: plan.range });
+          combat.later(wait, () => {
+            clock.drawing = null;
+            if (ch.dead || ch.removed) return;
+            // a drawn arrow follows the target it was drawn on (the room faced you at it when you pressed)
+            const tg = target && target.dying == null && !target.dead && !target.removed ? target : null;
+            if (tg) ch.yaw = Math.atan2(tg.x - ch.x, tg.z - ch.z);
+            field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'shoot', wind: 0, every: after, range: plan.range });
+            resolveArrow(ch, weapon, power, hstep);
+          }, ch.id);
+          return { ok: true, hand, kind, drawing: true, wind: wait, every: wait + after, power };
+        }
+        clock[readyKey] = t + after;
         clock.readySince = clock[readyKey];
-        clock.lastAt = t; clock.lastEvery = plan.afterShot ?? 0.12;
-        field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'shoot', wind: 0, every: plan.afterShot ?? 0.12 });
+        clock.lastAt = t; clock.lastEvery = after;
+        field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'shoot', wind: 0, every: after, range: plan.range });
         resolveArrow(ch, weapon, d.power, hstep);
-        return { ok: true, hand, kind, power: d.power };
+        return { ok: true, hand, kind, power: d.power, every: after };
       }
       // the staff's channel drinks mana while held: hold no longer than you can pay for
       const c = plan.charge || STAFF_CHARGE;

@@ -97,6 +97,10 @@ test('the server never believes a longer hold than the weapon has been ready for
   assert.equal(again.ok, false, 'straight after a shot: still nocking');
   s.room.run(() => { s.room.clock.advance(0.2); });
   const short = s.room.run(() => s.room.combat.attack(t, { held: 3 }));
-  assert.equal(short.ok, false, 'claiming a 3 s draw 0.08 s after the nock is refused (not drawn)');
-  assert.equal(short.why, 'not drawn');
+  // play-test 2 Q1: a short draw is no longer refused — as in Farhold ("a click still shoots") the bow keeps
+  // drawing to the nock and looses the WEAK shot. A claimed 3 s hold 0.08 s after the nock is believed as 0.08 s.
+  assert.equal(short.ok, true, 'a short draw keeps drawing instead of refusing');
+  assert.equal(short.drawing, true);
+  const plan = t.derived.swing.main;
+  assert.equal(short.power, plan.draw.powerMin, 'claiming a 3 s draw 0.08 s after the nock buys only the weakest shot');
 });

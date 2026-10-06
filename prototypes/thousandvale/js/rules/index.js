@@ -41,6 +41,8 @@ import { groundAdapter } from './terrain-read.js';
 import { serializeGear } from './character.js';
 export { serializeGear, restoreGear } from './character.js';
 export { nextTarget, tabOrder, validTarget } from './targeting.js';
+export { MOUNT_RULES, mountRefusal, mountSpeedMul, mountCalm, dismounts } from './mount.js';
+export { LOOT_THRESHOLDS, THRESHOLD_LABELS, DEFAULT_LOOT_THRESHOLD, RARITY_RANK, lootTier, lootRank, normalizeThreshold, locksForRoll, splitLoot, rollWinner } from './loot-rules.js';
 import { xpForLevel, levelFromXp, hashStr } from './farhold.js';
 
 let shared = null;
@@ -206,6 +208,13 @@ export function createRules(host, opts = {}) {
     host.award(e, { xp, gold, items: items?.length ? items : undefined, from: entOf(from) || undefined, reason: 'kill' });
   };
 
+  // Q3/Q4 — party loot: when the room offers `host.partyLoot(memberEntities, items, corpseEntity, partyId)`,
+  // a party that tagged a kill gets one drop for the corpse (cast.js onKill) and the room hands it out
+  // (free items, Need / Greed / Skip above the party's threshold — js/rules/loot-rules.js). Without the
+  // hook every tagger keeps its own roll (the M3 behaviour).
+  const partyLootFn = (members, items, from, partyId) => host.partyLoot(members.map(entOf).filter(Boolean), items, entOf(from) || null, partyId);
+  Object.defineProperty(combat, 'partyLoot', { configurable: true, get: () => (typeof host.partyLoot === 'function' ? partyLootFn : null) });
+
   // ------------------------------------------------------------------ sync
 
   function syncIn() {
@@ -242,6 +251,7 @@ export function createRules(host, opts = {}) {
             else if (u.anim !== 'dead') e.loop(u.anim);
             u._sentAnim = u.anim;
           }
+          if (u.dying != null && u.statuses && Object.keys(u.statuses).length) endStatuses(u);   // Q8: nothing burns on a corpse
           if (u.dying != null && !e.dead) { e.setHp(0); e.kill(u.owner ? null : entOf({ id: lastHitBy(u) })); if (!u.owner) host.despawn(e, 8000); continue; }
         } else if ((u.x !== e.x || u.z !== e.z) && !(u.kind === 'player' && (u.dead || e.dead))) {
           e.moveTo(u.x, u.z);                         // a dash or a knock moved a player (never a dead one: P8)
@@ -252,11 +262,34 @@ export function createRules(host, opts = {}) {
         e.setHp(Math.round(u.hp));
         if (u.kind === 'player') {
           e.setMp(Math.round(u.mp ?? 0));
+          // Q8: "died to an ash wisp, revived still on fire" — every status ends with the death (and one
+          // that lands on the body afterwards, from a pool or a DoT spread, ends the next tick)
+          if (u.dead && u.statuses && Object.keys(u.statuses).length) endStatuses(u);
           if (u.dead && !e.dead) e.kill(entOf({ id: u.killedBy }));
         }
       }
     }
   }
+  /**
+   * Q8 — end every status on `u` and tell the clients each one went out (the same `fx status on:false`
+   * a status that runs out sends), so a burning body does not wake up still burning. Wards, barriers,
+   * a form's buffs and the cast barrier go too: a death is a clean slate.
+   */
+  function endStatuses(u) {
+    const had = Object.keys(u.statuses || {});
+    u.statuses = {};
+    u.barrier = 0; u.castBarrierFor = 0;
+    for (const type of had) host.event({ type: 'fx', id: u.id, kind: 'status', status: type, on: false });
+    if (had.length) { const e = entOf(u); if (e) host.statusChanged?.(e, true); }
+    return had;
+  }
+  /** The status ids on an entity right now (A's `info.st`, so everyone near sees a burn); none on the dead. */
+  function statusesOf(e) {
+    const u = e?.r?.unit;
+    if (!u || u.dead || u.dying != null || e.dead) return [];
+    return Object.keys(u.statuses || {});
+  }
+
   const lastHitBy = u => { let best = null, bv = -1; for (const [id, v] of u.damageBy || []) if (v > bv) { bv = v; best = id; } return best; };
 
   /** field events -> protocol events (§6) */
@@ -277,8 +310,20 @@ export function createRules(host, opts = {}) {
           host.event({ type: 'cast', s: ev.id, slot: ev.slot ?? undefined, skill: ev.skill, aim: ev.aim });
           break;
         }
-        case 'swing': host.entities.get(ev.id)?.anim('attack'); host.event({ type: 'cast', s: ev.id, slot: 0, skill: 'basic' }); break;
-        case 'revive': { const e = host.entities.get(ev.id); if (e?.dead) e.revive(ev.hp / Math.max(1, e.hpMax)); break; }
+        case 'swing': {
+          // Q1: `every` (ms) is the basic attack's real cadence (a bow's draw + nock, a crossbow's reload) so
+          // the client's auto-attack can pace itself; `clip` 'draw' = the bow is being drawn (loose follows)
+          host.entities.get(ev.id)?.anim('attack');
+          host.event({ type: 'cast', s: ev.id, slot: 0, skill: 'basic', every: ev.every != null ? Math.round(ev.every * 1000) : undefined, clip: ev.clip === 'draw' || ev.clip === 'shoot' ? ev.clip : undefined });
+          break;
+        }
+        case 'revive': {
+          const e = host.entities.get(ev.id);
+          const u = e?.r?.unit;
+          if (u?.statuses && Object.keys(u.statuses).length) endStatuses(u);     // Q8: a raised body comes back clean
+          if (e?.dead) e.revive(ev.hp / Math.max(1, e.hpMax));
+          break;
+        }
         case 'fx': {
           const at = ev.id != null ? host.entities.get(ev.id) : null;
           host.event({ ...ev, t: undefined, type: 'fx', id: ev.id ?? 0, x: ev.x ?? at?.x, z: ev.z ?? at?.z });
@@ -433,12 +478,18 @@ export function createRules(host, opts = {}) {
     if (msg.t !== 'cast' || !Number.isInteger(msg.slot)) return { ok: false, why: 'unknown' };
     return run(() => {
       // face what the cast is aimed at: the Tab target, else the ground point
+      // play-test 2 (found by the Q28 class-quest trials): a skill aimed at YOURSELF or a friend used to turn
+      // you to atan2(0, 0) = due north (or toward the friend), so the swing already winding up at your enemy
+      // landed on empty air — a knight who kept Sworn Guard up never hit anything again. Only an enemy, or a
+      // ground point that is not under your feet, turns you.
       const t = msg.target != null ? host.entities.get(msg.target) : null;
-      if (t && !t.dead) u.yaw = Math.atan2(t.x - u.x, t.z - u.z);
-      else if (msg.aim && Number.isFinite(msg.aim.x) && Number.isFinite(msg.aim.z)) u.yaw = Math.atan2(msg.aim.x - u.x, msg.aim.z - u.z);
+      const far = (x, z) => Math.hypot(x - u.x, z - u.z) > 0.05;
+      const hostile = t && !t.dead && t !== e && t.r?.unit && t.r.unit.side === 'foe';
+      if (hostile && far(t.x, t.z)) u.yaw = Math.atan2(t.x - u.x, t.z - u.z);
+      else if (!t && msg.aim && Number.isFinite(msg.aim.x) && Number.isFinite(msg.aim.z) && far(msg.aim.x, msg.aim.z)) u.yaw = Math.atan2(msg.aim.x - u.x, msg.aim.z - u.z);
       e.face(u.yaw);
       const res = msg.slot === 0
-        ? combat.attack(u, { yaw: u.yaw, held: msg.held })
+        ? combat.attack(u, { yaw: u.yaw, held: msg.held, target: t && !t.dead && t.r?.unit && t.r.unit !== u ? t.r.unit : null })
         : combat.cast(u, msg.slot - 1, { aim: msg.aim, target: msg.target ?? null, yaw: u.yaw });
       if (res.ok) return { ok: true };
       return { ok: false, why: whyCode(res.why), text: res.why };
@@ -476,7 +527,7 @@ export function createRules(host, opts = {}) {
       const u = e.r.unit;
       if (!u) return;
       u.dead = false; u.killedBy = null;
-      u.statuses = {};
+      endStatuses(u);                       // Q8 (already ended at the death; this catches a body revived some other way)
       u.hp = u.maxHp; u.mp = u.maxMp;      // Farhold R22: a respawn restores health AND mana
       for (const m of field.monsters) if (m.threat?.has(u.id)) { m.threat.delete(u.id); if (m.targetId === u.id) m.targetId = null; }
       u.x = e.x; u.z = e.z;
@@ -520,14 +571,24 @@ export function createRules(host, opts = {}) {
    * A quest (or anything A rewards) unlocks something early: 'companion' / 'companion2' (P4).
    * Saved by A in the character's build (`saveBuild(e).unlocks`). Returns { ok, unlocks }.
    */
-  function unlock(e, key) {
+  function unlock(e, key, { source = null } = {}) {
     const u = e.r.unit;
     if (!u || !UNLOCK_KEYS.includes(key)) return { ok: false, text: 'Nothing to unlock.' };
-    return run(() => {
+    const out = run(() => {
+      if (key === 'perk') {
+        // Q28: an extra perk point, once per source (a quest id) so a re-sent turn-in never pays twice
+        const tag = 'perk:' + String(source ?? 'any');
+        if (u.unlocks?.[tag]) return { ok: false, text: 'Already given.', unlocks: { ...u.unlocks } };
+        u.unlocks = { ...(u.unlocks || {}), [tag]: true };
+        u.bonusPerks = (u.bonusPerks || 0) + 1;
+        return { ok: true, unlocks: { ...u.unlocks }, bonusPerks: u.bonusPerks };
+      }
       u.unlocks = { ...(u.unlocks || {}), [key]: true };
       grantCompanions(u);
       return { ok: true, unlocks: { ...u.unlocks } };
     });
+    if (out.ok && key !== 'companion' && key !== 'companion2') host.barChanged?.(e);
+    return out;
   }
 
   // ------------------------------------------------------------------ gear (protocol.md §7 M1, A's ask 3)
@@ -624,10 +685,10 @@ export function createRules(host, opts = {}) {
    */
   function restoreBuild(u, build) {
     if (!build || typeof build !== 'object') { u.perks = u.perks || []; return; }
+    u.unlocks = { ...(build.unlocks || {}), ...(u.unlocks || {}) };      // before cleanTalents: `talents1` opens tier 1 early
     u.skillTalents = build.talents && typeof build.talents === 'object' ? JSON.parse(JSON.stringify(build.talents)) : {};
     cleanTalents(engine, u);
     u.bonusPerks = Math.max(0, build.bonusPerks | 0);
-    u.unlocks = { ...(build.unlocks || {}), ...(u.unlocks || {}) };
     const forest = engine.forest;
     const want = Array.isArray(build.perks) ? build.perks.filter(id => typeof id === 'string' && forest.byId.has(id) && id !== 'start') : [];
     u.perks = [];
@@ -775,7 +836,7 @@ export function createRules(host, opts = {}) {
     companion: e => (e.r.unit ? companionInfo(e.r.unit, engine.classById(e.r.unit.classId), engine.progression.companions) : null),
     encounters: enc,
     stats: () => ({ builds, handoffs }),
-    addEntity, removeEntity, intent, step, respawn, onLevel,
+    addEntity, removeEntity, intent, step, respawn, onLevel, statusesOf,
     levelFor: xp => levelFromXp(xp, engine.levelCap),
     xpFor: level => xpForLevel(level, engine.levelCap),
     dispose() { room.run(() => { for (const m of [...field.monsters]) clearThreat(m); }); },

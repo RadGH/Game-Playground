@@ -382,6 +382,9 @@ export const SCATTER_KINDS = Object.freeze([
   { key: 'bush', solid: false, r: 0.9 }, { key: 'rock_small', solid: false, r: 0.5 },
   { key: 'rock_large', solid: true, r: 1.4 }, { key: 'boulder', solid: true, r: 2.4 },
   { key: 'reed', solid: false, r: 0.6 },
+  // play-test 2 (Q18, set pieces): orchard fruit trees in rows; hedgerow bushes along field / orchard edges (walkable
+  // through, like a bush — a client draws them as a clipped hedge; the hedge LINES are `hedge` placements too)
+  { key: 'tree_fruit', solid: true, r: 0.35 }, { key: 'hedge', solid: false, r: 0.9 },
 ]);
 export const SCATTER_VERSION = 1;
 export const NAV_VERSION = 1;

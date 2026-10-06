@@ -85,6 +85,12 @@ export const statText = (key, value) => (STAT_TEXT[key] ? STAT_TEXT[key](value) 
 const grantsText = g => Object.entries(g || {}).map(([k, v]) => statText(k, v)).join(', ');
 
 const TANGENT_GAP = 0.85;
+/** Radians between the two keystones of a forked path. */
+const KEY_FORK = 0.11;
+/** How much further out the second keystone of a fork sits. */
+const KEY_STAGGER = 0.8;
+/** Radians every arm node keeps clear of the seam between two arms (Q26). */
+export const ARM_MARGIN = 0.02;
 
 /** Lay the forest out from data/rules/perks.json. */
 export function buildTvForest(data) {
@@ -137,7 +143,15 @@ export function buildTvForest(data) {
     }
     // the paths past ring 6, each ending in its keystone(s) (a fork when a path carries two)
     const paths = arm.branches || [];
-    const spread = Math.min(sector * 0.42, (D.branchSpread ?? 0.2) * Math.max(1, paths.length - 1) / 2 + 0.06);
+    // Q26: every node of an arm stays INSIDE its wedge (angle ± sector/2, less a margin), keystone forks
+    // included — a 4-path arm with a 2-keystone fork used to poke 0.8° past the seam into its neighbour
+    const spread0 = Math.min(sector * 0.42, sector / 2 - ARM_MARGIN, (D.branchSpread ?? 0.2) * Math.max(1, paths.length - 1) / 2 + 0.06);
+    const pathGap = paths.length > 1 ? (2 * spread0) / (paths.length - 1) : sector;
+    // a forked path's two keystones: a narrower fork when the paths sit close, and the second one a step
+    // further out, so neighbouring forks never land on each other
+    const fork = Math.min(KEY_FORK, pathGap * 0.3);
+    const forkHalf = Math.max(0, ...paths.map(pp => ((pp.keys || []).length - 1) / 2 * fork));
+    const spread = Math.max(0, Math.min(spread0, sector / 2 - ARM_MARGIN - forkHalf));
     paths.forEach((path, p) => {
       const pa = angle + (paths.length > 1 ? -spread + (2 * spread) * p / (paths.length - 1) : 0);
       let last = null;
@@ -152,8 +166,9 @@ export function buildTvForest(data) {
       const keys = path.keys || [];
       const radius = (D.branchStart ?? 9.2) + path.nodes.length + 0.3;
       keys.forEach((k, i) => {
-        const a = pa + (keys.length > 1 ? (i - (keys.length - 1) / 2) * 0.11 : 0);
-        const node = add(ruleNode(k, { id: `${arm.key}:key:${k}`, arm: arm.key, ring: 7 + path.nodes.length, branch: path.key, x: Math.cos(a) * radius, y: Math.sin(a) * radius }));
+        const a = pa + (keys.length > 1 ? (i - (keys.length - 1) / 2) * fork : 0);
+        const r = radius + (keys.length > 1 ? i * KEY_STAGGER : 0);
+        const node = add(ruleNode(k, { id: `${arm.key}:key:${k}`, arm: arm.key, ring: 7 + path.nodes.length, branch: path.key, x: Math.cos(a) * r, y: Math.sin(a) * r }));
         link(last, node);
       });
     });
@@ -185,7 +200,10 @@ export function buildTvForest(data) {
     neighbours.get(a).push(b);
     neighbours.get(b).push(a);
   }
-  return { nodes, links, byId, neighbours, start, arms: arms.map(a => ({ key: a.key, name: a.name, color: a.color, blurb: a.blurb, angle: a.angle })) };
+  // `half` = the arm's wedge is angle ± half (play-test 2 Q26: the client drew ± π/8 for 12 arms whose
+  // wedges are ± π/12, so neighbouring wedges overlapped and the last-drawn one — The Long Odds — covered
+  // its neighbour's nodes while its own looked empty). Draw `angle - half .. angle + half`.
+  return { nodes, links, byId, neighbours, start, arms: arms.map(a => ({ key: a.key, name: a.name, color: a.color, blurb: a.blurb, angle: a.angle, half: sector / 2 })) };
 }
 
 /** Every stat key the forest may grant, with its reader (the perk audit). */

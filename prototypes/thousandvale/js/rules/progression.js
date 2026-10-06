@@ -51,4 +51,12 @@ export function companionInfo(unit, classDef, cfg = COMPANION_DEFAULTS) {
 }
 
 /** Unlock keys a quest (or anything else A grants) may set: `rules.unlock(e, key)`. */
-export const UNLOCK_KEYS = Object.freeze(['companion', 'companion2']);
+export const UNLOCK_KEYS = Object.freeze(['companion', 'companion2', 'talents1', 'perk']);
+/**
+ * Play-test 2 Q28 — what a class quest may give (data/quests/classes.json `reward`):
+ *   companion   the class companion now instead of at level 10 (13 classes have one)
+ *   companion2  its second body now instead of at level 20
+ *   talents1    the first talent tier opens at level 1 instead of 3 (js/rules/talents.js tierLevelFor)
+ *   perk        one extra perk-forest point (`bonusPerks`, saved in the build). Unlike the others it can be
+ *               paid more than once, so it takes a `source` (the quest id) and pays once per source.
+ */

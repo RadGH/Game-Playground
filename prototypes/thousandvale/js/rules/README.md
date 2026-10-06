@@ -38,6 +38,8 @@ It runs the same under Node (server), in a Web Worker (offline play) and on the 
 | `level-gap.js` | **The level gap** (P26): one wrapper round the engine's `rpg.strike` — a monster 1-3 levels above you hits you softer and takes more from you; it also applies the perk forest's hit rules. Off in the parity fixtures. | new (Farhold has no gap rule) |
 | `talents.js` | **Per-skill talent trees** (P6): Farhold's trees rewritten at load so every node changes HOW the skill works (no plain-number nodes, nothing inert on its shape), plus the pick / Unbinder API and the talent screen's data. Policy in `data/rules/talents.json`. | skilltalents.js trees, reshaped |
 | `perk-forest.js` | **The perk forest** (P6): 12 arms, every arm branching into 2-4 paths that end in keystones, 382 nodes; built in Farhold's forest shape, so Farhold's `perkBonuses`/`canTake`/`allocate`/`rpg.derive` run it. Cards written from the numbers (`STAT_TEXT`). Data in `data/rules/perks.json`. | perks.js shape, new tree |
+| `loot-rules.js` | **Party loot ladder** (play-test 2 Q3/Q4): rarity ranks, thresholds, which items lock for a Need/Greed/Skip roll, the roll's winner. | new |
+| `mount.js` | **Riding rules** (Q16): when you may call a mount, what takes you off, Calm, speed limits. A owns the mounts. | new |
 | `perk-rules.js` | **The readers for the forest's 20 Thousandvale rules** (Momentum, Unbroken, Weave, Brimming Cup, Banner of the Road, …) and its 4 new stats (healPower, dotPct, threatPct, xpFind). `TV_FLAG_READERS` / `TV_STAT_READERS` name every reader; the perk audit fails on a flag with none. | new |
 
 `terrain-read.js` belongs to stream B and `dungeon-tiers.js` to stream E. The purity rule applies to both, but the import rule doesn't.
@@ -67,7 +69,7 @@ room.run(() => room.combat.attack(ch, { yaw }));      // ALWAYS inside room.run
 - **Taken away without dying** (a parked camp, `room.remove`): no death, no reward, no corpse; followers drop it, links to it break, a delayed strike or DoT holding it can no longer kill it.
 - **Skill bar for the client**: `rules.bar(e)` → `[{slot 1..6, id, name, desc, cd (ms), mp, level, locked, empty, shape, element, ally, group, charges, form}]` — Farhold's live bar, so talents/forms/stances show.
 - **Party calls**: a non-companion `command` (focus/pounce/return) is also heard by party members' followers within 30 m; `empowerNext.pets` puts the rider on each party member's own next skill (`mech.empower`, the slot their bar spends).
-- **Rewards**: everyone who did damage gets XP, gold and their own loot roll. In a room these go to `host.award` and a `loot` event.
+- **Rewards**: everyone who did damage gets XP, gold and their own loot roll (a party gets one roll per corpse when the room offers `host.partyLoot`, play-test 2 Q4). In a room these go to `host.award` and a `loot` event.
 
 ## Play-test 1 (owner, 2026-10-05) — what changed in the rules
 
@@ -82,6 +84,35 @@ room.run(() => room.combat.attack(ch, { yaw }));      // ALWAYS inside room.run
 | P23 | A skill that cannot land is refused BEFORE mana or cooldown is spent: a named enemy out of reach (bolt/beam: range; ground: range + radius; melee: weapon reach + 1.5 m) or dead; a damaging bolt/beam/melee with no enemy in reach at all. Self, around, summon, form and ally skills are never refused here. Code `range`. | `cast-skills.js preflight` |
 | P26 | Level gap: a monster 1-3 levels above you deals x0.88/0.80/0.74 to you and takes x1.12/1.22/1.30 from you (4+ holds the last step). Two crag hyenas two levels up: won 17% -> 78% by a level-2 character. | `level-gap.js`, `data/rules/progression.json` |
 | P28 | The bog slime has no immunity and takes damage from every class (tested at L2 vs L6); "barely injure" was the level gap (P26). Clicking it / it clipping into the ground is the client's (D). | tests/C/playtest1 |
+
+## Play-test 2 (owner, 2026-10-05) — what changed in the rules
+
+| # | What | Where |
+|---|---|---|
+| Q1 | **Bows fire from the basic-attack key and auto-attack.** The client sends a click with no `held`, and a click on a draw weapon was refused ("not drawn") — every 250 ms, as auto-attack retried. Now no `held` = the server draws to FULL and looses on its own (Farhold's `autoLoose` cadence: `draw.full + afterShot`, ~1.15 shots/s on a shortbow), aimed at the target it was drawn on even if it moved; a `held` short of the nock keeps drawing to the nock and looses the weak shot (Farhold's "a click still shoots"); a `held` past the nock is the old parity path. A death mid-draw looses nothing. The `cast` event for slot 0 carries `every` (ms, the weapon's real cadence) and `clip` ('draw' / 'shoot'). Tested in a real room for 12 bases: bow, shortbow, a road bow, two crossbows, javelin, two wands, two staves, sceptre, quarterstaff. | `cast.js attack`, `index.js` intent + swing event |
+| — | **Casting on yourself no longer turns you round** (found by the Q28 trials): a self/ally skill sent `target: <your id>`, and the room faced you at `atan2(0,0)` = north, so the swing already winding up at your enemy hit air — a knight who kept Sworn Guard up never landed another swing (lost every 1v1). Only an enemy, or a ground point not under your feet, turns you now. | `index.js intent` |
+| Q8 | **Statuses end on death.** Every status (and barrier) comes off the moment a player or monster dies, each with an `fx status on:false` so the clients stop drawing it; one that lands on a body afterwards ends next tick; respawn and a party revive come back clean. `rules.statusesOf(e)` -> status ids (none on the dead) for A's `info.st`, so everyone near sees a burn. | `index.js endStatuses`, `statusesOf` |
+| Q26 | **Perk forest wedges.** Every arm's nodes now sit inside `angle ± half` (half = π/12 for 12 arms) with a margin — a 4-path arm with forked keystones used to poke into its neighbour; forks are narrower and staggered outward. `forestView().arms[i].half` is the wedge to draw: the client drew ± π/8, so neighbouring wedges overlapped and the last-drawn arm (The Long Odds) covered its neighbour's nodes while its own looked empty. | `perk-forest.js`, tests/C/playtest2 Q26 |
+| Q3/Q4 | **Party loot ladder** (`loot-rules.js`): ranks normal 0 < magic 1 < rare 2 < legendary 3 < set = unique 4 (Farhold rolls set pieces and uniques as `rarity: 'legendary'` with `setId`/`isUnique`); thresholds `magic`, `rare` (default), `legendary`, `unique` (`epic` is accepted as an alias of `legendary` — Farhold has no epic); `locksForRoll`, `splitLoot`, `rollWinner` (Need beats Greed, highest number, all-skip = stays on the corpse). Optional: when the room offers `host.partyLoot(members, items, corpse, partyId)`, a party that tagged a kill gets ONE drop for the corpse (rolled once, average magic find) instead of one per member. | `loot-rules.js`, `cast.js onKill` |
+| Q16 | **Riding rules** (`mount.js`, A owns the mounts in js/sim/mounts.js): calling takes 1.5 s standing still; not while fighting, swimming, dead or in a dungeon/instance; attack/cast/swim/death/dungeon take you off (the attack still happens); a damaging enemy hit throws you unless the mount's `calm` (0..0.8) holds; a DoT tick, heal or fully absorbed hit never does; 3 s before you can call it again. Speed = the mount's multiplier, clamped 1..2.5. Farhold's mount ITEMS (rarity + slot affixes) were considered and left out: a mount is a collectible you keep, not loot — Calm is kept as a per-mount number. | `mount.js` |
+| Q28 | **Class-quest rewards**: `rules.unlock(e, 'talents1')` opens the first talent tier at level 1 (`talents.js tierLevelFor`); `rules.unlock(e, 'perk', { source: questId })` pays one perk point once per quest (saved in `bonusPerks`). E's 30 class quests are checked by `tests/C/class-quests.test.mjs`: a plain bot of the class, at the quest's level, wins every kill step 1v1 (also a level up) and 1v2 — table below. | `progression.js`, `index.js unlock`, `talents.js` |
+
+Class-quest trials (hp left; 3 seeds 1v1 at the quest level / 2 seeds a level up / 2 seeds against two at once). The tightest are the shadow dancer against two barrow hounds (14-20% left) and the swashbuckler and druid against two boars (~40-60%); nothing is lost:
+
+```
+warrior        L2 vs moor_hound    1v1 97/95/95   +1 97/95   1v2 92/91
+fighter        L3 vs road_brigand  1v1 94/92/91   +1 94/93   1v2 86/92
+knight         L3 vs barrow_hound  1v1 90/90/90   +1 91/90   1v2 74/81
+swashbuckler   L2 vs thicket_boar  1v1 83/83/88   +1 83/85   1v2 48/59
+dragon_knight  L4 vs dusk_flitter  1v1 95/96/96   +1 96/96   1v2 96/96
+tactician      L3 vs thicket_boar  1v1 96/95/94   +1 97/96   1v2 84/85
+paladin        L3 vs road_brigand  1v1 86/85/87   +1 86/86   1v2 64/77
+rogue          L2 vs road_brigand  1v1 83/84/83   +1 85/85   1v2 57/69
+shadow_dancer  L3 vs barrow_hound  1v1 78/77/88   +1 78/78   1v2 14/20
+druid          L3 vs thicket_boar  1v1 96/98/97   +1 97/98   1v2 88/87
+casters (mage, sorcerer, chronomancer, enchanter, stormcaller, pyromancer, witch_hunter, demon_hunter, necromancer) 87-100
+```
+(`TV_CQ_REPORT=1 node --test tests/C/class-quests.test.mjs` prints the full table.) Ranged and caster classes mostly kill before the monster reaches them at these levels — the quests are easy for them, which is fine for a first quest.
 
 ### Build: talents and perks (the room's API, A and D)
 

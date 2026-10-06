@@ -129,8 +129,13 @@ test('P1: the light pool keeps a FIXED set of always-visible lights and hands th
 
 test('P1: the frame watchdog counts frames over the limit and names the spans that ran in them', () => {
   globalThis.document ||= { hidden: false };
+  // A fake page clock: the watchdog also reads performance.now() for spans and busy time, so on a loaded
+  // machine (the publish gate runs every suite at once) real time between these lines broke the counts.
+  const realNow = performance.now.bind(performance);
+  let t = realNow() + 60000;
+  performance.now = () => t;
+  try {
   const p = createPerf({ longMs: 100 });
-  let t = performance.now();
   p.frame(t);
   p.span('cheap', () => 0);
   t += 16; p.frame(t);
@@ -142,6 +147,7 @@ test('P1: the frame watchdog counts frames over the limit and names the spans th
   assert.equal(s.worstMs, 250);
   assert.equal(s.recent[0].spans[0][0], 'zone:scatter');
   p.reset(); assert.equal(p.stats().longFrames, 0);
+  } finally { performance.now = realNow; }
 });
 
 test('P10: a jump (waystone, door, respawn, relocate, a long move) fades; walking out of town does not', () => {

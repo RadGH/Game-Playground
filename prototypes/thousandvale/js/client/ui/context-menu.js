@@ -15,7 +15,7 @@ import { SLOT_NAME, RARITY_NAME } from './inv-core.js';
 import { rememberItems } from './item-card.js';
 
 export function createContextMenu({ net, infoOf = () => null, hud, actors, controls, me, chat, social, friends, setTarget, onTalk, onLoot, isLootable, partyInfo, tradeAsk }) {
-  const menu = h('div.name-menu.ent-menu', { role: 'menu', hidden: true });
+  const menu = h('div.ent-menu', { role: 'menu', hidden: true });   // its own class: the chat's .name-menu is a different menu
   (document.getElementById('hud') || document.body).appendChild(menu);
   document.addEventListener('pointerdown', e => { if (!menu.hidden && !menu.contains(e.target)) menu.hidden = true; }, true);
   window.addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { menu.hidden = true; e.stopImmediatePropagation(); } }, true);

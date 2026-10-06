@@ -19,12 +19,18 @@
 
 import * as THREE from 'three';
 
+export { softwareRenderer, svgPortrait } from './svg-portrait.js';
+import { softwareRenderer, svgPortrait } from './svg-portrait.js';
+
 export const PORTRAIT_LAYER = 1;
 const VERSION = 'p1';
 const SIZE = 96;
 const DB = 'tv-portraits', OS = 'p';
 
-export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 6 } = {}) {
+export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 6, software = null } = {}) {
+  // software renderer: no live pass and no static 3D renders — the 2D picture instead (freeze spec: zero long tasks)
+  const SOFT = software ?? softwareRenderer(renderer);
+  const VER = VERSION + (SOFT ? 's' : '');
   // ---------------------------------------------------------------- live
   const cam = new THREE.PerspectiveCamera(28, 1, 0.05, 6);
   cam.layers.set(PORTRAIT_LAYER);
@@ -35,12 +41,33 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
   const stats = { renders: 0, maxMs: 0 };
 
   function live(el, get, { kind = 'self' } = {}) {
+    if (SOFT) return liveSvg(el, get);
     const cv = document.createElement('canvas');
     cv.className = 'portrait-live';
     el.prepend(cv);
     const s = { el, cv, ctx: cv.getContext('2d'), get, kind, on: false, actorId: null, pbo: null, fence: null, w: 0, h: 0, buf: null, img: null };
     slots.push(s);
     return s;
+  }
+  // the 2D stand-in for a live slot: an <img> with the actor's face as SVG, redrawn when the actor or its look changes
+  const svgSlots = [];
+  function liveSvg(el, get) {
+    const img = document.createElement('img'); img.className = 'portrait-live portrait-svg'; img.alt = '';
+    el.prepend(img);
+    const s = { el, img, get, key: '' };
+    svgSlots.push(s);
+    return s;
+  }
+  async function svgPass() {
+    for (const s of svgSlots) {
+      const a = s.get();
+      const humanoid = a && (a.kind === 'player' || (a.kind === 'npc' && !a.pet)) && a.look;
+      const key = humanoid ? JSON.stringify([a.id, a.look.race, a.look.seed, a.look.custom || a.look.avatar || null, a.look.cls]) : '';
+      if (key === s.key) continue;
+      s.key = key;
+      if (!humanoid) { s.el.classList.remove('has-live'); s.img.removeAttribute('src'); continue; }
+      try { const av = await avatarFor({ ...a.look, gear: undefined }); if (s.key === key) { s.img.src = svgPortrait(av); s.el.classList.add('has-live'); } } catch { /* keep the letter */ }
+    }
   }
   /** Lights must be on the portrait layer too, or the face would be drawn with a different light set (a new shader). */
   function lightsOnLayer(now) {
@@ -99,6 +126,7 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
   }
   function pass() {
     const now = performance.now();
+    if (SOFT) { if (now - last > 500) { last = now; svgPass(); } return; }
     collect();
     if (now - last < 1000 / fps) return;
     last = now;
@@ -165,7 +193,7 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
   }
   const ready = (async () => {
     const d = await db(); if (!d) return;
-    await new Promise(res => { try { const req = d.transaction(OS, 'readonly').objectStore(OS).openCursor(); req.onsuccess = () => { const c = req.result; if (!c) return res(); const k = String(c.key); if (k.startsWith(VERSION + ':') && c.value instanceof Blob) mem.set(k.slice(VERSION.length + 1), URL.createObjectURL(c.value)); c.continue(); }; req.onerror = () => res(); } catch { res(); } });
+    await new Promise(res => { try { const req = d.transaction(OS, 'readonly').objectStore(OS).openCursor(); req.onsuccess = () => { const c = req.result; if (!c) return res(); const k = String(c.key); if (k.startsWith(VER + ':') && c.value instanceof Blob) mem.set(k.slice(VER.length + 1), URL.createObjectURL(c.value)); c.continue(); }; req.onerror = () => res(); } catch { res(); } });
     if (mem.size) for (const fn of listeners) { try { fn(null); } catch {} }
   })();
   const keyOf = look => `${look.race || 'human'}|${look.cls || ''}|${(look.seed >>> 0) || 1}|${look.avatar || look.custom ? JSON.stringify(look.avatar || look.custom).length + ':' + hash(JSON.stringify(look.avatar || look.custom)) : ''}`;
@@ -192,7 +220,7 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
         waiting.delete(job.k);
         if (!blob) continue;
         mem.set(job.k, URL.createObjectURL(blob));
-        db().then(d => { try { d?.transaction(OS, 'readwrite').objectStore(OS).put(blob, VERSION + ':' + job.k); } catch {} });
+        db().then(d => { try { d?.transaction(OS, 'readwrite').objectStore(OS).put(blob, VER + ':' + job.k); } catch {} });
         for (const fn of listeners) { try { fn(job.k); } catch {} }
       }
     } finally { busy = false; }
@@ -211,7 +239,9 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
     return R;
   }
   async function shoot(look) {
-    if (!createBody || !avatarFor) return null;
+    if (!avatarFor) return null;
+    if (SOFT) { const av = await avatarFor({ ...look, gear: undefined }); return new Blob([decodeURIComponent(svgPortrait(av).split(',')[1])], { type: 'image/svg+xml' }); }
+    if (!createBody) return null;
     const av = await avatarFor(look);
     const body = await createBody(av);
     await new Promise(r => setTimeout(r, 0));               // give the frame back between building and drawing
@@ -227,9 +257,19 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
     camera.position.set(t.x + Math.sin(0.32) * dist, t.y + dist * 0.12, t.z + Math.cos(0.32) * dist);
     camera.near = 0.01; camera.far = dist + 5; camera.lookAt(t); camera.updateProjectionMatrix();
     r.clear(); r.render(s2, camera);
-    const out = document.createElement('canvas'); out.width = SIZE; out.height = SIZE;
-    out.getContext('2d').drawImage(canvas, 0, 0);
+    // read back WITHOUT blocking: pixel-pack buffer + fence, collected on a later tick (drawImage would wait for the GPU)
+    const g2 = r.getContext(), buf = new Uint8Array(SIZE * SIZE * 4), pbo = g2.createBuffer();
+    g2.bindBuffer(g2.PIXEL_PACK_BUFFER, pbo); g2.bufferData(g2.PIXEL_PACK_BUFFER, buf.length, g2.STREAM_READ);
+    g2.readPixels(0, 0, SIZE, SIZE, g2.RGBA, g2.UNSIGNED_BYTE, 0); g2.bindBuffer(g2.PIXEL_PACK_BUFFER, null);
+    const fence = g2.fenceSync(g2.SYNC_GPU_COMMANDS_COMPLETE, 0); g2.flush();
     s2.remove(body.group); body.dispose?.();
+    for (let i = 0; i < 300; i++) { const st = g2.clientWaitSync(fence, 0, 0); if (st !== g2.TIMEOUT_EXPIRED) break; await new Promise(res => setTimeout(res, 50)); }
+    g2.deleteSync(fence);
+    g2.bindBuffer(g2.PIXEL_PACK_BUFFER, pbo); g2.getBufferSubData(g2.PIXEL_PACK_BUFFER, 0, buf); g2.bindBuffer(g2.PIXEL_PACK_BUFFER, null); g2.deleteBuffer(pbo);
+    const out = document.createElement('canvas'); out.width = SIZE; out.height = SIZE;
+    const img = new ImageData(SIZE, SIZE), row = SIZE * 4;
+    for (let y = 0; y < SIZE; y++) img.data.set(buf.subarray((SIZE - 1 - y) * row, (SIZE - y) * row), y * row);
+    out.getContext('2d').putImageData(img, 0, 0);
     return new Promise(res => out.toBlob(b => res(b), 'image/png'));
   }
 
@@ -239,7 +279,7 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
     /** A player's look seen in the world (info.look), kept for later static portraits by character id / name. */
     remember(id, look) { if (id != null && look) looks.set(String(id), look); },
     lookOf(id) { return looks.get(String(id)) || null; },
-    get stats() { return { ...stats, live: slots.filter(s => s.on).length, cached: mem.size, waiting: waiting.size }; },
+    get stats() { return { ...stats, software: SOFT, live: slots.filter(s => s.on).length, cached: mem.size, waiting: waiting.size }; },
   };
 }
 function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); }

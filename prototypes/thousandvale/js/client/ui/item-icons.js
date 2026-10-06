@@ -92,6 +92,22 @@ export { cacheReady };
 const queue = [];
 let busy = false;
 const idle = () => new Promise(r => setTimeout(() => (typeof requestIdleCallback === 'function' ? requestIdleCallback(r, { timeout: 600 }) : r()), 180));
+let stageTail = Promise.resolve();
+/** One subject on the stage at a time: resolves with a release function. */
+function lockStage() { let rel; const next = new Promise(r => { rel = r; }); const prev = stageTail; stageTail = prev.then(() => next); return prev.then(() => rel); }
+const IN_FLIGHT = 3;                               // icons whose GPU read-back is still on its way (none of them blocks)
+let inflight = 0;
+async function one(spec) {
+  const t0 = performance.now();
+  let canvas = null;
+  try { canvas = await render(spec); } catch (e) { console.warn('[icons]', spec.key, e.message); canvas = glyphCanvas({ kind: 'glyph', id: 'bundle', color: '#a08060' }); }
+  slowest = Math.max(slowest, performance.now() - t0);
+  const out = await toBlobUrl(canvas);             // async PNG encode, off the frame
+  waiting.delete(spec.key);
+  if (!out) return;
+  mem.set(spec.key, out.url); persist(spec.key, out.blob);
+  for (const fn of listeners) { try { fn(spec.key); } catch {} }
+}
 async function pump() {
   if (busy || !queue.length || !active) return;
   busy = true;
@@ -100,17 +116,12 @@ async function pump() {
     while (queue.length && active) {
       await idle();                                   // one icon per idle period, with a gap: the game keeps its frames
       if (!active) break;
+      while (inflight >= IN_FLIGHT) await new Promise(r => setTimeout(r, 60));
       const spec = queue.shift();
+      if (!spec) break;
       if (mem.has(spec.key)) { waiting.delete(spec.key); continue; }
-      const t0 = performance.now();
-      let canvas = null;
-      try { canvas = await render(spec); } catch (e) { console.warn('[icons]', spec.key, e.message); canvas = glyphCanvas({ kind: 'glyph', id: 'bundle', color: '#a08060' }); }
-      slowest = Math.max(slowest, performance.now() - t0);
-      const out = await toBlobUrl(canvas);           // async PNG encode, off the frame
-      waiting.delete(spec.key);
-      if (!out) continue;
-      mem.set(spec.key, out.url); persist(spec.key, out.blob);
-      for (const fn of listeners) { try { fn(spec.key); } catch {} }
+      inflight++;
+      one(spec).finally(() => { inflight--; });
     }
   } finally { busy = false; }
 }
@@ -141,7 +152,31 @@ function aim(camera, target, radius, yaw = 0.35, pitch = 0.12) {
   camera.near = Math.max(0.01, dist - radius * 4); camera.far = dist + radius * 6;
   camera.lookAt(target); camera.updateProjectionMatrix();
 }
-function shoot() { const { renderer, scene, camera, canvas } = stage(); renderer.clear(); renderer.render(scene, camera); const c = canvas2d(PX); c.getContext('2d').drawImage(canvas, 0, 0); return c; }
+/**
+ * Draw the stage and read it back WITHOUT blocking (play-test 2): a pixel-pack buffer + a fence, collected on a later tick.
+ * drawImage of a WebGL canvas waits for the GPU to finish — on a software renderer that alone was ~100 ms an icon.
+ * Returns a promise of a 2D canvas; the scene may be cleared as soon as this returns (the read is already queued).
+ */
+function shoot() {
+  const { renderer, scene, camera } = stage(); renderer.clear(); renderer.render(scene, camera);
+  const g = renderer.getContext();
+  if (typeof WebGL2RenderingContext === 'undefined' || !(g instanceof WebGL2RenderingContext)) { const c = canvas2d(PX); c.getContext('2d').drawImage(stage().canvas, 0, 0); return Promise.resolve(c); }
+  const buf = new Uint8Array(PX * PX * 4), pbo = g.createBuffer();
+  g.bindBuffer(g.PIXEL_PACK_BUFFER, pbo); g.bufferData(g.PIXEL_PACK_BUFFER, buf.length, g.STREAM_READ);
+  g.readPixels(0, 0, PX, PX, g.RGBA, g.UNSIGNED_BYTE, 0); g.bindBuffer(g.PIXEL_PACK_BUFFER, null);
+  const fence = g.fenceSync(g.SYNC_GPU_COMMANDS_COMPLETE, 0); g.flush();
+  return (async () => {
+    for (let i = 0; i < 400; i++) { if (g.clientWaitSync(fence, 0, 0) !== g.TIMEOUT_EXPIRED) break; await new Promise(r => setTimeout(r, 40)); }
+    g.deleteSync(fence);
+    const t0 = performance.now();
+    g.bindBuffer(g.PIXEL_PACK_BUFFER, pbo); g.getBufferSubData(g.PIXEL_PACK_BUFFER, 0, buf); g.bindBuffer(g.PIXEL_PACK_BUFFER, null); g.deleteBuffer(pbo);
+    const c = canvas2d(PX), img = new ImageData(PX, PX), row = PX * 4;
+    for (let y = 0; y < PX; y++) img.data.set(buf.subarray((PX - 1 - y) * row, (PX - y) * row), y * row);
+    c.getContext('2d').putImageData(img, 0, 0);
+    syncSpan(t0, 'readback');
+    return c;
+  })();
+}
 function canvas2d(w, h = w) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
 function disposeTree(o) { o.traverse(c => { c.geometry?.dispose(); c.material?.dispose?.(); }); }
 
@@ -196,6 +231,7 @@ async function armourShot(spec) {
   const actor = await create(base);
   syncSpan(t0, 'body');                             // (the body build: measured as one span, awaits included)
   await new Promise(r => setTimeout(r, 0));         // give the frame back between building and drawing
+  const release = await lockStage();               // the shared stage holds one subject at a time (several icons are in flight)
   t0 = performance.now();
   const { scene, camera } = stage();
   scene.add(actor.group);
@@ -210,10 +246,11 @@ async function armourShot(spec) {
   syncSpan(t0, 'pose');
   await new Promise(r => setTimeout(r, 0));         // and between posing and drawing
   t0 = performance.now();
-  const shot = shoot();
+  const shot = shoot();                           // queued read-back: the body can go now
   scene.remove(actor.group); actor.dispose();
+  release();
   syncSpan(t0, 'armourShot');
-  return shot;
+  return await shot;
 }
 
 async function render(spec) {
@@ -221,6 +258,7 @@ async function render(spec) {
   let shot;
   if (spec.kind === 'armour') shot = await armourShot(spec);
   else {
+    const release = await lockStage();
     const t0 = performance.now();
     const { scene, camera } = stage();
     const obj = itemModel(spec);
@@ -228,8 +266,10 @@ async function render(spec) {
     _box.setFromObject(obj);
     const c = _box.getCenter(new THREE.Vector3()), size = _box.getSize(new THREE.Vector3());
     aim(camera, c, Math.max(size.x, size.y, size.z) * (spec.kind === 'offhand' ? 0.55 : 0.5), 0.25, 0.1);
-    shot = shoot(); scene.remove(obj); disposeTree(obj);
+    const p = shoot(); scene.remove(obj); disposeTree(obj);
+    release();
     syncSpan(t0, spec.kind);
+    shot = await p;
   }
   return finish(shot);
 }

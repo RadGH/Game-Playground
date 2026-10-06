@@ -42,7 +42,9 @@ export function createHotbar({ net, hud, bag, me }) {
     });
     return b;
   });
-  bar?.append(sep, ...slots);
+  // its own little group hung off the RIGHT of the action bar, so the bar keeps its old width (and stays clear of the chat box)
+  const group = h('div.hb-group', { 'aria-label': 'Potions and food' }, ...slots);
+  bar?.append(group);
 
   const kindOf = it => it.id || it.baseKey || it.name;
   const stack = id => bag.state.bag.filter(x => isConsumable(x) && kindOf(x) === id);

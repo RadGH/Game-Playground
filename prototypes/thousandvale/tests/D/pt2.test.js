@@ -237,3 +237,13 @@ test('S3: categories are never for sale — only named items and mounts', async 
   const rows = saleRows([{ id: 'a', label: 'Wands & rods', item: { name: 'Wands & rods' } }, { id: 'b', label: 'Wands & rods', item: { name: 'Ashwood Wand' } }, { id: 'c', label: 'Mounts', mount: { id: 'pony', name: 'Pony' } }, { id: 'd', label: 'Goods', item: {} }]);
   assert.deepEqual(rows.map(r => r.id), ['b', 'c']);
 });
+
+test('Q13 fallback: the 2D face portrait is strict XML (an <img> refuses anything else) and framed on the head', async () => {
+  const { svgPortrait } = await import('../../js/client/ui/svg-portrait.js');
+  const url = svgPortrait({ body: { height: 0.5, width: 0.4, headSize: 0.5, skin: '#f1c27d' }, headShape: 'round', hair: { id: 'long', color: '#8a1a1a' }, eyes: { id: 'round', color: '#4a6b8a' } });
+  const svg = decodeURIComponent(url.split(',')[1]);
+  assert.match(url, /^data:image\/svg\+xml/);
+  assert.doesNotMatch(svg, /\sdata-avatar[\s>]/, 'no bare attributes');
+  assert.doesNotMatch(svg, /viewBox="0 0 300 400"/, 'cropped to the head');
+  assert.equal((svg.match(/&(?![a-z#0-9]+;)/gi) || []).length, 0);
+});

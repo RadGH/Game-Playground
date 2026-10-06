@@ -74,7 +74,9 @@ export function createLoot({ net, hud, actors, me }) {
     const a = panel.isOpen ? null : nearest();
     if ((a?.id ?? null) !== near) { near = a?.id ?? null; prompt.hidden = near == null; if (a) prompt.querySelector('span').textContent = `Loot ${a.name}`; }
     // walked away from an open corpse: close it
-    if (panel.isOpen && W.id != null) { const c = actors.get(W.id), m = me(); if (!c || (m && Math.hypot(c.pos.x - m.x, c.pos.z - m.z) > LOOT_RANGE + 3)) panel.close(); }
+    // (a chest is an object, not an actor, and a group window spans several bodies: only a body we can SEE walking off closes it;
+    //  the server closes the rest with lootWin {closed})
+    if (panel.isOpen && W.id != null) { const c = actors.get(W.id), m = me(); if (c && m && Math.hypot(c.pos.x - m.x, c.pos.z - m.z) > LOOT_RANGE + 5) panel.close(); }
   }
   /** E: true when it opened a corpse (main.js stops the key there). */
   function useKey() { if (near == null) return false; open(near); return true; }
@@ -136,6 +138,8 @@ export function createLoot({ net, hud, actors, me }) {
       W.data = m; draw();
       if (!(m.items || []).length && !(m.free || []).length && !(m.gold > 0)) lootable.delete(m.id);
     });
+    // S5: a chest (an object) opened with E answers used {kind:'chest', loot:true}; its lootWin follows — same window
+    n.on('used', u => { if (u && u.ok && u.loot && u.id != null) { W.id = u.id; W.data = null; panel.setTitle(u.name || 'A chest', 'Opening…'); panel.fill(h('p.dim', {}, 'Opening…')); iconsActive(true, 'loot'); panel.open(); } });
     n.on('lootR', r => { if (r.ok === false) hud.toast(r.msg || ({ far: 'Too far away.', gone: 'It is gone.', bagFull: 'Your bag is full.', roll: 'That is up for a party roll.' }[r.why]) || 'You cannot loot that.', 'warn'); });
     n.on('lootRoll', onRoll);
     n.on('lootRolled', onRolled);

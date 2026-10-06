@@ -52,10 +52,10 @@
     },
     "recall_charm": {
       "name": "Recall charm",
-      "desc": "Snap it to walk out of the wilds to your bound inn in 10 seconds of standing still. One use.",
+      "desc": "Snap it to walk out of the wilds to your bound inn after 5 seconds of standing still. One use.",
       "use": {
         "type": "recall",
-        "cast": 10
+        "cast": 5
       }
     },
     "whetstone": {

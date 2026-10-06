@@ -636,6 +636,23 @@ export function createProvince(opts) {
     pv.L.towns.forEach((t, i) => { const d = Math.hypot(t.x - e.x, t.z - e.z); if (d < bd) { bd = d; best = pv.towns[i]; } });
     transfer(o, best, { x: best.area.x, z: best.area.z }, 'respawn');
   }
+  /**
+   * The recall charm (C, the lead's follow-up): back to your bound town — `char.bind` (a town room id) when one is set,
+   * else the nearest town of this province, as a respawn picks it. Called by rules.useItem when the 5 s channel completes.
+   */
+  function recall(o) {
+    const e = o.entity;
+    if (!e || e.dead || !o.room) return false;
+    const pv = provOf(o.room);
+    if (!pv || !pv.towns.length) return false;
+    let best = o.char.bind ? rooms.get(o.char.bind) : null;
+    if (!best || !best.area) {
+      let bd = Infinity; best = pv.towns[0];
+      pv.L.towns.forEach((t, i) => { const d = Math.hypot(t.x - e.x, t.z - e.z); if (d < bd) { bd = d; best = pv.towns[i]; } });
+    }
+    transfer(o, best, { x: best.area.x, z: best.area.z }, 'recall');
+    return true;
+  }
   function safeRules(r, fn, ...a) { try { return r.rules[fn](...a); } catch (err) { log('rules ' + fn, err && err.message); return undefined; } }
 
   /** Town edges: walk into a town circle -> its room; walk out -> your wilds copy. Queued, EDGE_PER_TICK a tick. */
@@ -1544,6 +1561,23 @@ export function createProvince(opts) {
     if (ef.kind === 'none') return R({ ok: false, why: 'notYet', id: item.id, msg: (item.name || 'That') + ' does nothing yet. Keep it — it will.' });
     if (e.dead) return R({ ok: false, why: 'dead', id: item.id, msg: 'You are dead.' });
     const t = now();
+    // C (the lead's follow-up to play-test 2): buffs, a torch, a poultice, the recall charm, a revive flask — the rules do
+    // them (js/rules/buffs.js via rules.useItem). A recall consumes the charm only when its 5 s channel completes.
+    if (ef.kind === 'rules') {
+      if (!rules.useItem) return R({ ok: false, why: 'notYet', id: item.id, msg: (item.name || 'That') + ' does nothing yet.' });
+      const uid = item.uid;
+      const res = safeRules(o.room, 'useItem', e, ef.use, {
+        name: item.name, itemId: item.id, target: e.target || null,
+        done: () => { if (!recall(o)) return; const i = ch.bag.findIndex(x => x.uid === uid); if (i >= 0) consume(o, i); },
+      }) || { ok: false, why: 'item' };
+      if (!res.ok) return R({ ok: false, why: res.why || 'item', id: item.id, msg: res.text || 'Nothing happens.' });
+      if (res.consume) {
+        if (ef.charges > 0 && (item.left = (item.left ?? ef.charges) - 1) > 0) o.dirty = true;   // a bundle of torches: one at a time
+        else consume(o, idx);
+      }
+      if (o.mount && ef.use.type !== 'light' && ef.use.type !== 'buff') dismount(o, 'cast');
+      return R({ ok: true, id: item.id, ...(res.channel ? { channel: res.channel } : {}), ...(res.ms ? { ms: res.ms } : {}), ...(res.msg ? { msg: res.msg } : {}), ...(item.left > 0 ? { left: item.left } : {}) });
+    }
     if (ef.kind === 'potion') {
       if ((o.potionCdUntil || 0) > t) return R({ ok: false, why: 'cooldown', id: item.id, cd: o.potionCdUntil - t, msg: 'Your potions are on cooldown.' });
       let did = false;
@@ -1569,6 +1603,7 @@ export function createProvince(opts) {
     if (fighting(o, e)) return R({ ok: false, why: 'combat', id: item.id, msg: 'You cannot eat in a fight.' });
     consume(o, idx);
     o.regen = { kind: ef.kind, hpRate: ef.hpRate, mpRate: ef.mpRate, start: t, until: t + ef.ms };
+    if (ef.buff && rules.useItem) safeRules(o.room, 'useItem', e, { type: 'buff', buff: ef.buff }, { name: item.name, itemId: item.id });   // hearty stew: +5% health after
     R({ ok: true, id: item.id });
     s.sendJSON({ t: 'you', regen: { kind: ef.kind, ms: ef.ms } });
   }

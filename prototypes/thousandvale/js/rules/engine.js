@@ -10,6 +10,7 @@ import {
   Rpg, installUniques, installFoci, installWarbands, tuneFeel, tuneWeapons, setLevelCap, EFFECTS,
 } from './farhold.js';
 import { installLevelGap } from './level-gap.js';
+import { installItemBuffs } from './buffs.js';
 import { installTalentTrees } from './talents.js';
 import { buildTvForest } from './perk-forest.js';
 
@@ -65,5 +66,6 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP } = 
     forest, talentReport,
   };
   installLevelGap(engine);
+  installItemBuffs(engine);             // shop buffs: armour oil, hearty stew (js/rules/buffs.js)
   return engine;
 }

@@ -39,6 +39,7 @@ It runs the same under Node (server), in a Web Worker (offline play) and on the 
 | `talents.js` | **Per-skill talent trees** (P6): Farhold's trees rewritten at load so every node changes HOW the skill works (no plain-number nodes, nothing inert on its shape), plus the pick / Unbinder API and the talent screen's data. Policy in `data/rules/talents.json`. | skilltalents.js trees, reshaped |
 | `perk-forest.js` | **The perk forest** (P6): 12 arms, every arm branching into 2-4 paths that end in keystones, 382 nodes; built in Farhold's forest shape, so Farhold's `perkBonuses`/`canTake`/`allocate`/`rpg.derive` run it. Cards written from the numbers (`STAT_TEXT`). Data in `data/rules/perks.json`. | perks.js shape, new tree |
 | `loot-rules.js` | **Party loot ladder** (play-test 2 Q3/Q4): rarity ranks, thresholds, which items lock for a Need/Greed/Skip roll, the roll's winner. | new |
+| `buffs.js` | **Shop buffs** (lead's follow-up): timed self-buffs as `item:<kind>` statuses, their strike multiplier and sheet wrapper, the torch, recall and revive-flask numbers; `rules.useItem`. | new |
 | `mount.js` | **Riding rules** (Q16): when you may call a mount, what takes you off, Calm, speed limits. A owns the mounts. | new |
 | `perk-rules.js` | **The readers for the forest's 20 Thousandvale rules** (Momentum, Unbroken, Weave, Brimming Cup, Banner of the Road, …) and its 4 new stats (healPower, dotPct, threatPct, xpFind). `TV_FLAG_READERS` / `TV_STAT_READERS` name every reader; the perk audit fails on a flag with none. | new |
 
@@ -113,6 +114,29 @@ druid          L3 vs thicket_boar  1v1 96/98/97   +1 97/98   1v2 88/87
 casters (mage, sorcerer, chronomancer, enchanter, stormcaller, pyromancer, witch_hunter, demon_hunter, necromancer) 87-100
 ```
 (`TV_CQ_REPORT=1 node --test tests/C/class-quests.test.mjs` prints the full table.) Ranged and caster classes mostly kill before the monster reaches them at these levels — the quests are easy for them, which is fine for a first quest.
+
+### Shop buffs, torches, recall charms, revive flasks (the lead's follow-up to play-test 2)
+
+`rules.useItem(e, use, { name, itemId, target, done, broken })` carries out a consumable's `use` block (stream E's
+`goodsCatalog[id].use`; A's js/sim/consumables.js marks these `kind: 'rules'` and province.js `useItem` calls this):
+
+| Item | `use` | What it does |
+|---|---|---|
+| Whetstone | buff `dmgPct` 0.03, 15 min | +3% to every hit you land |
+| Armour oil | buff `armorPct` 0.04, 15 min | +4% armour (in the sheet: `rpg.derive` wrapper) |
+| Silver dust | buff `vsUndeadPct` 0.06, 10 min | +6% to the undead and anything cursed |
+| Fletching kit | buff `rangedPct` 0.04, 15 min | +4% while you hold a bow / crossbow / javelin |
+| Sack of oats | buff `mountSpeedPct` 0.1, 30 min | read by A for riding speed (`rules.itemBuffs(e).mountSpeedPct`) |
+| Hearty stew | food + buff `hpPct` 0.05, 30 min | +5% maximum health after the meal |
+| Bundle of torches | light, 10 min, 6 charges | 14 m of light (`item:torch` on `info.st`, `itemBuffs(e).lightRange`) and, at night (`host.isNight()`), +8% to undead and beasts |
+| Herb poultice | cleanse bleed + 8% heal | refused when there is nothing to treat |
+| Recall charm | recall | 5 s channel standing still (a step past 0.6 m, a hit, an attack/cast, death or a room change breaks it; refused while a monster has you as its target); `done()` runs when it completes — A consumes the charm and sends you to your bound town (`char.bind`, else the nearest) |
+| Revive flask / Emberheart Draught | revive | raises a dead PARTY member within 10 m (the target, else the nearest) at 40% health, statuses clean |
+
+Buffs are statuses `item:<kind>` (whetted, oiled, silvered, fletched, well_fed, oats, torch): one per kind (a second use refreshes the
+time and keeps the bigger number), they ride along on a zone change, count down with every other status, END ON DEATH, and are
+saved in `saveBuild().buffs`. Caps per stat in `BUFF_CAPS`. The channel sends `fx {kind:'channel', id, name, ms}` and
+`fx {kind:'channel', id, name, end: 'done'|'broken', why}`. tests/C/buffs.test.mjs.
 
 ### Build: talents and perks (the room's API, A and D)
 

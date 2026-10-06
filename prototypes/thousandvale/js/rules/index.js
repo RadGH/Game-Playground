@@ -37,10 +37,12 @@ import { canTakePerk, allocatePerk, refundPerk as refundPerkFor, refundAllPerks,
 /** What an arena object is called on a nameplate. */
 const OBJECT_NAMES = { pillar: 'Stone pillar', rock: 'Fallen rock', brazier: 'Brazier', lever: 'Lever', pool: 'Pool', cracked_floor: 'Cracked floor' };
 import { validTarget, TAB } from './targeting.js';
+import { applyItemBuff, itemBuffs as itemBuffsOf, sheetKey, saveItemBuffs, restoreItemBuffs, RECALL, REVIVE_FLASK } from './buffs.js';
 import { groundAdapter } from './terrain-read.js';
 import { serializeGear } from './character.js';
 export { serializeGear, restoreGear } from './character.js';
 export { nextTarget, tabOrder, validTarget } from './targeting.js';
+export { BUFF_KINDS, TORCH, RECALL, REVIVE_FLASK } from './buffs.js';
 export { MOUNT_RULES, mountRefusal, mountSpeedMul, mountCalm, dismounts } from './mount.js';
 export { LOOT_THRESHOLDS, THRESHOLD_LABELS, DEFAULT_LOOT_THRESHOLD, RARITY_RANK, lootTier, lootRank, normalizeThreshold, locksForRoll, splitLoot, rollWinner } from './loot-rules.js';
 import { xpForLevel, levelFromXp, hashStr } from './farhold.js';
@@ -459,6 +461,7 @@ export function createRules(host, opts = {}) {
       const u = e.r.unit;
       for (const p of room.combat.pending) if (p.who === e.id) p.fn = () => {};
       if (!u) return;
+      if (u.channel) breakChannel(u, 'left');             // a recall does not survive a room change
       combat.skillRt?.forget(u);
       if (e.kind === 'player') { room.followers.release(u); field.detach(u); }   // sheet and followers live on in the next room
       else if (e.kind === 'npc') field.detach(u);
@@ -476,6 +479,7 @@ export function createRules(host, opts = {}) {
       return { ok: true };
     }
     if (msg.t !== 'cast' || !Number.isInteger(msg.slot)) return { ok: false, why: 'unknown' };
+    if (u.channel) breakChannel(u, 'acted');           // attacking or casting breaks a recall
     return run(() => {
       // face what the cast is aimed at: the Tab target, else the ground point
       // play-test 2 (found by the Q28 class-quest trials): a skill aimed at YOURSELF or a friend used to turn
@@ -508,10 +512,14 @@ export function createRules(host, opts = {}) {
       // who is being fought: one pass over the monsters a second, not one per player
       const fought = second ? new Set() : null;
       if (second) for (const m of field.monsters) if (m.dying == null && m.targetId != null) fought.add(m.targetId);
+      const night = second ? !!host.isNight?.() : null;
       for (const p of field.players) {
+        if (p.channel) tickChannel(p, dt);
         if (p.dead) continue;
         perkTick(field, p, dt, second);    // perk forest: standing still, the Banner's aura
         if (!second) continue;
+        p._night = night;                  // a lit torch's night bonus (buffs.js itemStrikeMult)
+        sheetCheck(p);                     // an armour / health buff ran out: re-derive the sheet
         const fighting = fought.has(p.id);
         const mending = fighting ? 0 : p.maxHp * (engine.balance.player?.outOfCombatRegen ?? 0.015);
         p.hp = Math.min(p.maxHp, p.hp + (p.derived.hpRegen || 0) + mending);
@@ -520,6 +528,8 @@ export function createRules(host, opts = {}) {
         if (ent) ent.setState(2, fighting);
       }
     });
+    // a finished channel's effect (a recall moves the player to another room) runs outside the rules' turn
+    while (channelsDone.length) { const f = channelsDone.shift(); try { f(); } catch { /* the room's own errors are its own */ } }
   }
 
   function respawn(e) {
@@ -528,6 +538,7 @@ export function createRules(host, opts = {}) {
       if (!u) return;
       u.dead = false; u.killedBy = null;
       endStatuses(u);                       // Q8 (already ended at the death; this catches a body revived some other way)
+      if (u._sheetKey !== sheetKey(u)) { u._sheetKey = sheetKey(u); engine.rpg.refresh(u, { full: true }); }   // shop buffs ended with the death
       u.hp = u.maxHp; u.mp = u.maxMp;      // Farhold R22: a respawn restores health AND mana
       for (const m of field.monsters) if (m.threat?.has(u.id)) { m.threat.delete(u.id); if (m.targetId === u.id) m.targetId = null; }
       u.x = e.x; u.z = e.z;
@@ -558,6 +569,99 @@ export function createRules(host, opts = {}) {
       return out;
     });
   }
+
+  // ------------------------------------------------------------------ shop buffs, torches, recall, revive flasks
+
+  const channelsDone = [];
+  /** An armour/health buff came or went: re-derive the sheet (health keeps its share). Never on the dead. */
+  function sheetCheck(u) {
+    const k = sheetKey(u);
+    if ((u._sheetKey ?? '0|0') === k || u.dead) return;
+    u._sheetKey = k;
+    engine.rpg.refresh(u);
+  }
+  function tickChannel(u, dt) {
+    const c = u.channel;
+    if (u.dead) return breakChannel(u, 'dead');
+    if (Math.hypot(u.x - c.x, u.z - c.z) > c.drift) return breakChannel(u, 'moved');
+    if (u.hp < c.hp - 0.5) return breakChannel(u, 'hit');
+    c.hp = Math.max(c.hp, u.hp);
+    c.left -= dt;
+    if (c.left > 0) return;
+    u.channel = null;
+    host.event({ type: 'fx', kind: 'channel', id: u.id, name: c.name, end: 'done' });
+    if (c.done) channelsDone.push(c.done);
+  }
+  function breakChannel(u, why) {
+    const c = u.channel;
+    if (!c) return;
+    u.channel = null;
+    host.event({ type: 'fx', kind: 'channel', id: u.id, name: c.name, end: 'broken', why });
+    c.broken?.(why);
+  }
+
+  /**
+   * Use a consumable whose effect is the rules' (the lead's follow-up to play-test 2). `use` = stream E's
+   * goods `use` block (shops.json goodsCatalog) or A's potion effect (`{ type: 'revive' }`):
+   *   { type: 'buff', buff: { stat, amount, minutes } }   a timed self-buff (one per kind; buffs.js)
+   *   { type: 'light', minutes }                          a lit torch (light + a night bonus vs undead/beasts)
+   *   { type: 'cleanse', statuses, heal }                 a poultice: those statuses off + a share of max health
+   *   { type: 'recall' }                                  a 5 s channel, standing still; `opts.done()` runs when it
+   *                                                       completes (A: consume the charm, travel to the bound inn)
+   *   { type: 'revive' }                                  raise a dead party member within 10 m (`opts.target` = id,
+   *                                                       else the nearest) at 40% health
+   * Returns { ok, consume: true|false (false = A consumes in `done`), msg, ... } or { ok: false, why, text }.
+   */
+  function useItem(e, use, opts = {}) {
+    const u = e?.r?.unit;
+    if (!u || !use || typeof use !== 'object') return { ok: false, why: 'item', text: 'You cannot use that.' };
+    if (u.dead || e.dead) return { ok: false, why: 'dead', text: 'You are dead.' };
+    const name = opts.name || 'That';
+    if (use.type === 'buff' || use.type === 'light') {
+      const spec = use.type === 'light' ? { stat: 'light', minutes: use.minutes } : use.buff;
+      const r = run(() => {
+        const out = applyItemBuff(u, spec, { source: opts.itemId || null });
+        if (out.ok) { host.event({ type: 'fx', id: u.id, kind: 'status', status: out.id, on: true }); sheetCheck(u); }
+        return out;
+      });
+      if (!r.ok) return { ok: false, why: 'notYet', text: r.why };          // a buff with no numbers on it (kept, not spent)
+      return { ok: true, consume: true, buff: r.id, stat: r.stat, amount: r.amount, ms: r.seconds * 1000, msg: r.refreshed ? `${name}: refreshed.` : `${name}: ${Math.round(r.seconds / 60)} minutes.` };
+    }
+    if (use.type === 'cleanse') {
+      const gone = cleanse(e, use.statuses || []);
+      const got = use.heal > 0 ? restore(e, { hp: use.heal * u.maxHp }) : { hp: 0 };
+      if (!gone.length && !(got.hp > 0)) return { ok: false, why: 'full', text: 'Nothing to treat.' };
+      return { ok: true, consume: true, cleansed: gone, hp: got.hp };
+    }
+    if (use.type === 'recall') {
+      if (u.channel) return { ok: false, why: 'busy', text: 'You are already busy.' };
+      if (combatNow(u)) return { ok: false, why: 'combat', text: 'Not while you are fighting.' };
+      const seconds = RECALL.seconds;
+      run(() => { u.channel = { name: opts.name || 'Recall', left: seconds, x: u.x, z: u.z, hp: u.hp, drift: RECALL.drift, done: opts.done || null, broken: opts.broken || null }; });
+      host.event({ type: 'fx', kind: 'channel', id: u.id, name: opts.name || 'Recall', ms: seconds * 1000 });
+      return { ok: true, consume: false, channel: seconds * 1000, msg: `Stand still for ${seconds} seconds.` };
+    }
+    if (use.type === 'revive') {
+      return run(() => {
+        const want = opts.target != null ? field.get(opts.target) : null;
+        const ok = p => p && p.kind === 'player' && p.dead && p !== u && u.partyId != null && p.partyId === u.partyId && Math.hypot(p.x - u.x, p.z - u.z) <= REVIVE_FLASK.range;
+        const to = ok(want) ? want : field.players.filter(ok).sort((a, b) => Math.hypot(a.x - u.x, a.z - u.z) - Math.hypot(b.x - u.x, b.z - u.z))[0];
+        if (!to) return { ok: false, why: 'target', text: `No fallen party member within ${REVIVE_FLASK.range} m.` };
+        endStatuses(to);
+        to.dead = false; to.killedBy = null;
+        to.hp = Math.max(1, Math.round(to.maxHp * REVIVE_FLASK.share));
+        to.revivedBy = u.id;
+        for (const m of field.monsters) if (m.threat?.has(to.id)) { m.threat.delete(to.id); if (m.targetId === to.id) m.targetId = null; }
+        field.emit({ t: 'revive', id: to.id, by: u.id, hp: to.hp });
+        return { ok: true, consume: true, revived: to.id, hp: to.hp };
+      });
+    }
+    return { ok: false, why: 'notYet', text: `${name} does nothing yet.` };
+  }
+  /** Fighting = a monster has you as its target. */
+  const combatNow = u => field.monsters.some(m => m.dying == null && m.targetId === u.id);
+  /** The shop buffs on an entity: { dmgPct, armorPct, mountSpeedPct, light, lightRange, ... } (A: riding speed; D-world: torch light). */
+  function itemBuffs(e) { const u = e?.r?.unit; return u && !u.dead ? itemBuffsOf(u) : {}; }
 
   function onLevel(e) {
     run(() => {
@@ -714,6 +818,7 @@ export function createRules(host, opts = {}) {
     u.skillTalents = build.talents && typeof build.talents === 'object' ? JSON.parse(JSON.stringify(build.talents)) : {};
     cleanTalents(engine, u);
     u.bonusPerks = Math.max(0, build.bonusPerks | 0);
+    if (Array.isArray(build.buffs) && build.buffs.length) { restoreItemBuffs(u, build.buffs); engine.rpg.refresh(u); u._sheetKey = sheetKey(u); }
     const forest = engine.forest;
     const want = Array.isArray(build.perks) ? build.perks.filter(id => typeof id === 'string' && forest.byId.has(id) && id !== 'start') : [];
     u.perks = [];
@@ -730,7 +835,7 @@ export function createRules(host, opts = {}) {
   function saveBuild(e) {
     const u = e.r.unit;
     if (!u) return null;
-    return { v: 1, talents: JSON.parse(JSON.stringify(u.skillTalents || {})), perks: [...(u.perks || [])], bonusPerks: u.bonusPerks || 0, unlocks: { ...(u.unlocks || {}) } };
+    return { v: 1, talents: JSON.parse(JSON.stringify(u.skillTalents || {})), perks: [...(u.perks || [])], bonusPerks: u.bonusPerks || 0, unlocks: { ...(u.unlocks || {}) }, buffs: saveItemBuffs(u) };
   }
   /** The build changed: the sheet is re-derived, a companion that is now due arrives, the bar is resent. */
   function buildChanged(e, u) {
@@ -861,7 +966,7 @@ export function createRules(host, opts = {}) {
     companion: e => (e.r.unit ? companionInfo(e.r.unit, engine.classById(e.r.unit.classId), engine.progression.companions) : null),
     encounters: enc,
     stats: () => ({ builds, handoffs }),
-    addEntity, removeEntity, intent, step, respawn, onLevel, statusesOf, restore, cleanse,
+    addEntity, removeEntity, intent, step, respawn, onLevel, statusesOf, restore, cleanse, useItem, itemBuffs,
     levelFor: xp => levelFromXp(xp, engine.levelCap),
     xpFor: level => xpForLevel(level, engine.levelCap),
     dispose() { room.run(() => { for (const m of [...field.monsters]) clearThreat(m); }); },

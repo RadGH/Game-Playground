@@ -15,6 +15,7 @@
 // it off (`engine.levelGap = null`) — tests/C/parity-kit.mjs — because Farhold has no such rule.
 
 import { strikeMult } from './perk-rules.js';
+import { itemStrikeMult } from './buffs.js';
 
 const friendly = u => !!u && (u.kind === 'player' || u.owner != null || u.side === 'friend');
 const foe = u => !!u && u.side === 'foe';
@@ -37,7 +38,7 @@ export function installLevelGap(engine) {
   rpg._levelGap = true;
   rpg.strike = function levelGapStrike(attacker, defender, rng, opts) {
     // the level gap, and the perk forest's hit rules (js/rules/perk-rules.js) — one place for both
-    const k = gapMult(engine.levelGap, attacker, defender) * strikeMult(attacker, defender, opts);
+    const k = gapMult(engine.levelGap, attacker, defender) * strikeMult(attacker, defender, opts) * itemStrikeMult(attacker, defender);   // + shop buffs (buffs.js)
     if (k === 1) return strike.call(this, attacker, defender, rng, opts);
     const o = opts || {};
     return strike.call(this, attacker, defender, rng, { ...o, multiplier: (o.multiplier ?? 1) * k });

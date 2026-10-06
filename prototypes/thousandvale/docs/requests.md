@@ -2087,4 +2087,4 @@ Full shapes in docs/protocol.md §20. (S5/S9, S11/S19, S13/S16, S14, S17/S18 are
 **Lead**
 - Nothing needs sudo. Dev unit restart needed (server changes). The one-off refund runs on Stormy's next login.
 - tests/D `P5: no native title tooltips in the client (source scan)` is red — a client file, not ours.
-- 100-bot gate: see the PLAY-TEST 4 report (machine was at load 10-12 from a Playwright run when measured).
+- 100-bot gate (bots100-real) green on a quiet machine: p99 10.6 / 8.0 / 9.6 ms, worst 26.5 ms.

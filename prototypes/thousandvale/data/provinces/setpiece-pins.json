@@ -3,9 +3,9 @@
  "pins": {
   "sp_drill_field": {
    "zone": "z12_02",
-   "x": 474,
-   "z": 1547,
-   "yaw": -3.14
+   "x": 363,
+   "z": 1468,
+   "yaw": 2.75
   },
   "sp_kind_mother_shrine": {
    "zone": "z12_02",
@@ -27,9 +27,9 @@
   },
   "sp_pail_and_plough": {
    "zone": "z12_02",
-   "x": 743,
-   "z": 1906,
-   "yaw": -0.79
+   "x": 663,
+   "z": 1856,
+   "yaw": 0.79
   },
   "sp_gristles_hollow": {
    "zone": "z12_02",

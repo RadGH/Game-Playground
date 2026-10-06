@@ -347,3 +347,60 @@ the whole span is walkable deck; streams wadeable all the way across.
   reach gets a graded trail road to the nearest road, across zone edges (`link_<name>`, class trail, `link: true`) —
   Brackwater, Eelwick, Gull Steps, Last Lantern, Gorsehold, Burnt Barns, Lowmoor, Deepdene. The world bake now reads
   `data/provinces/<sheet>-places.json`, so a change to E's asks makes `world.json` stale (re-run bake-world, then the zones).
+
+
+## 10. Play-test 2 (2026-10-05): bespoke areas (Q18) and town offices (Q10)
+
+`ZONE_BAKE_VERSION` 4. All 16 Torbor Downs zones, horizon and map re-baked. Tests: `tests/B/setpieces.test.js` (8).
+
+**Set pieces** — `tools/lib/zone-setpieces.mjs`, authored in `data/world/set-pieces.json` (B) and overridable per zone by
+stream E's `setPieces` / `lanes` in `data/provinces/<sheet>-places.json` (same id: E's wins — E renames six of B's z12_02
+pieces to the places its quests use). Bake order: **lanes** (step 4a, graded like spurs; a lane that `joins` a town becomes
+one of its high streets; heights pulled to exactly the road they meet, so a crossroads is one level) → towns planned →
+**pieces fitted** (step 5b: a deterministic search round each `near` hint, keeping ≥ 130 m off zone edges, off water, rivers,
+roads, towns, site pins and each other; then the ground is prepared — fields smoothed to their best plane, graveyards and
+the inn yard levelled flat, levelling fading out within 6 m of any road so a road keeps its grade) → **stream E's own set
+pieces** levelled (`ground.flat`) or eased, `ground.surface` painted (dirt → yard, farmland → field, gravel, graveyard;
+grass unpainted), the recipe's `fields` painted and `buildings` kept in nav (a disc on one of B's pieces is skipped) →
+rivers → bridges → **mill ponds** dug (small lakes, level just under the rim, banks raised so they hold; before the wet
+skirt so their edge is buried like every lake) → paint → scatter → nav.
+
+| kind | what is baked |
+|---|---|
+| `farm` | flat farmyard (`yard`) + house + barn (`set_building` house / granary), up to `fields` strips on a 3×3 grid round it (corner cells sometimes split); each `field` / `crop` / `pasture`, hedge (or fence round a pasture) with a gate toward the yard; a footpath from the yard to the road net |
+| `graveyard` | levelled flat, `graveyard` surface, drystone `wall` with a lych-gate gap facing the nearest road (or town), a gravel path from it, grave rows (`data.graves` [[x, z, yaw, style]], style headstone / cross / slab / mound / tomb), yews in two corners, a chapel (`set_building` chapel) at the far end of a town's yard |
+| `orchard` | a gentle plane, `orchard` surface, fruit trees in rows (scatter `tree_fruit`), a hedge with a gate, a shed |
+| `mill_pond` | an oval pond (`lake` water), a mill on the low bank (`set_building` mill), the wheel at the water (`data.wheel`), reeds |
+| `clearing` | a gap in the trees, eased ground, a trampled `yard` middle, slot `camp` |
+| `inn` | at the crossing of two named roads (`at`): a flat yard in the flattest corner, inn facing road A, a stable, a well, a `signpost` at the crossing (arms `{to, yaw}` from the lanes' `to`) |
+| `stone_circle` | a ring of boulders (`data.stones` [[x, z, angle, standing/fallen]]) round a flat rock, slot `ritual` |
+| `sheepfold` | a round drystone `wall` with a gap, `pasture` inside, slots `shepherd`, `flock` |
+| `copse` | a dense round wood (broadleaf or conifer) with a bushy rim, in open country |
+| `belt` *(auto)* | 5–10 field strips round every planned settlement, outside its ring |
+| `graveyard` *(auto)* | one per planned settlement with no authored one, near it, by a road |
+
+z12_02 (the start): Barrow Lane (N–S out of Torborhold) and Wether Lane (E–W, to the Wamonhold road), The Wheel and Wether at
+their crossing, Torborhold Graveyard, Saint Hulda's Yard, Brannock Fields / Bracken End / Stonegate / Fallowmead farms,
+Torbor and Wether Pear orchards, Turnwater Mill, Ashby's Lumber Camp and Greyfletch Camp clearings, The Nine Maidens, two folds,
+two copses, belts round all three settlements (~70 fields). The four edge neighbours carry 7–10 authored pieces each, the four
+diagonals 4–5 (Ashcombe's Home Farm Lane in z12_01).
+
+**Placements** (all in zone metres, `data.setPiece` = the piece id): `set_piece` {piece, name, town, r, poly/w/d/angle (rect
+pieces), gate {x, z, width, yaw into the piece}, slots [{kind, x, z, r, yaw}], plus graves / stones / pond / wheel / crossing /
+fruit / fields count}, `field` {crop, grows (wheat, barley, oats, turnips, cabbages, flax | sheep, cattle | tilled), poly,
+furrowAngle, boundary, gate}, `hedge` / `fence` / `wall` {pts [[x, z, h]], h, material} (open polylines, the gap is the
+gate), `set_building` {want, w, d, angle, front, culture, label, lit, ground}, `signpost` {arms}. Roads gain `lane: true,
+name, to` on lanes. **Surfaces** appended before `road` (road stays the LAST biome entry): field, crop, pasture, yard,
+graveyard, orchard, gravel. **Scatter kinds** appended: 9 `tree_fruit` (solid), 10 `hedge` (not solid). **nav.bin**:
+set buildings BUILDING, stone walls SOLID (one sample wide, gate posts left open); hedges and fences are walk-through.
+
+**Town offices (Q10)** — `data/world/town-offices.json`: per settlement kind an office list handed to proctown's new opt-in
+`trades` option (`planTown({trades: {list, share, pick: 'square'}})`; without it proctown is byte-identical, so Farhold is
+untouched). Each office is one plot nearest the square, never shared. `building` placements carry `data.office` (want),
+`data.role` (smith, merchant, elder, innkeeper, healer, unbinder, broker, stablehand, barber, armourer, apothecary, bowyer,
+tailor, provisioner, trader, jeweller, miller, farmer), `data.lit` (a shop or service that should look open and lit) and
+`data.label` (sign text). A town gets 16 offices (Torborhold: hall, forge, inn, shop, temple, stable, barber, counting house,
+study, armoury, apothecary, bowyer, tailor, provisioner, market, jeweller); a hamlet inn, shop, mill, granary (+ shrine).
+Stream E's `offices.json` and A's schedules.js take the plot whose `data.role` is the NPC's role.
+
+Bake time is ~4–10 s a zone (was ~3 s); the whole province ~2 min. Zone files 16 MB total.

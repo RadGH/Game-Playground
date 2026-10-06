@@ -536,3 +536,16 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   quest file `include`, `reward.unlock` / `reward.perks` -> C's `rules.unlock`.
 - **A** tests: pt2-loot (5), pt2-services (6), pt2-real (2), pt2-quests (3); m1-social / m2 / placements updated to the new rules;
   tools/bot-client.mjs bots loot corpses (first-hour bot green again). 100-bot gate green (spread p99 8.9, herd 7.7, event 10.0 ms).
+
+## 2026-10-05 — stream B, play-test 2 (Q18 bespoke areas, Q10 town offices) — docs/world.md §10
+- **B** Q18 `tools/lib/zone-setpieces.mjs` + `data/world/set-pieces.json`: graded farm lanes, crossroads inn + signpost,
+  walled graveyards with grave rows and chapels, farms with hedged/fenced field patchworks, orchards in rows, mill ponds + mills,
+  clearings, stone circles, sheepfolds, copses; automatic field belt + graveyard for every planned settlement in all 16 zones;
+  z12_02 + its 8 neighbours authored by hand. Stream E's set pieces levelled/painted from their placements (`ground`), E's
+  overrides via places `setPieces`/`lanes`. New surfaces (field crop pasture yard graveyard orchard gravel, before `road`),
+  scatter kinds `tree_fruit` + `hedge`, placements set_piece/field/hedge/fence/wall/set_building/signpost. Levelling fades out
+  beside roads (fixed a 51-degree step on road_101 by E's Pail and Plough). ZONE_BAKE_VERSION 4; zones, horizon, map re-baked.
+- **B** Q10 proctown opt-in `trades` option (+ `assignTrades`, wantBases for 11 new wants; proctown + Farhold suites green) and
+  `data/world/town-offices.json`: every service role gets its own plot round the square; building placements carry
+  office/role/lit/label.
+- **B** tests/B/setpieces.test.js (8); tests/B 55/55.

@@ -250,6 +250,13 @@ const MODELS = {
     k.block(0.4, 0.78, 0.92, 0.3, 0.13, 0.3, C.stoneD, { yaw: 0.4, rz: 0.2 });    // the cracked corner
     lichen(k, -0.5, 0.9, 0.4); lichen(k, 0.45, -1.0, 0.3);
   }],
+  grave_slab: ['graveyard', 'Ledger slab', 'A flat stone ledger laid over a grave on a low plinth, edges worn round.', k => {
+    const st = k.tone(C.stone);
+    k.block(0, 0, 0, 1.0, 0.14, 2.1, C.stoneD);
+    k.block(0, 0.14, 0, 0.9, 0.1, 1.95, st);
+    k.block(0, 0.24, 0.55, 0.32, 0.02, 0.06, shade(st, -0.25)); k.block(0, 0.24, 0.55, 0.06, 0.02, 0.32, shade(st, -0.25));   // a carved cross
+    lichen(k, 0.35, -0.7, 0.25);
+  }],
   iron_fence: ['graveyard', 'Iron railing', 'A 2 m section of black wrought-iron railing with spear-point finials; tiles end to end.', k => {
     ironRun(k, -1, 1);
   }],

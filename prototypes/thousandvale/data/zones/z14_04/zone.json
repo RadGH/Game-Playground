@@ -175,17 +175,17 @@
     ],
     "roads": 2,
     "bridges": 0,
-    "paths": 7,
-    "pathMetres": 615,
-    "scatter": 11893,
+    "paths": 8,
+    "pathMetres": 1707,
+    "scatter": 11910,
     "scatterKinds": {
-      "rock_large": 739,
-      "tree_acacia": 2420,
-      "bush": 5315,
-      "rock_small": 2270,
+      "rock_large": 730,
+      "tree_acacia": 2432,
+      "bush": 5314,
+      "rock_small": 2285,
       "tree_broadleaf": 206,
-      "boulder": 199,
-      "tree_dead": 115,
+      "boulder": 198,
+      "tree_dead": 116,
       "tree_conifer": 5,
       "hedge": 624
     },
@@ -203,13 +203,13 @@
       "x": 1199,
       "z": 1026
     },
-    "placements": 174,
-    "vignettesAvoided": 678
+    "placements": 175,
+    "vignettesAvoided": 667
   },
   "files": {
-    "terrain.bin": 499728,
-    "nav.bin": 18830,
-    "scatter.bin": 95228,
-    "placements.json": 93192
+    "terrain.bin": 500249,
+    "nav.bin": 19446,
+    "scatter.bin": 95364,
+    "placements.json": 117140
   }
 }

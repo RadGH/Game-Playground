@@ -1753,3 +1753,18 @@ item yet: needs a `use` item op + C's effect; say if the owner wants it this rou
 your own data (Copperdell 'shop' vs 'market', scholar_orla 47 m from its door) — not A.
 **G**: tools/bot-client.mjs now loots corpses (`lootable` -> `loot all`, Greed on rolls) — the first-hour bot is green again.
 **Lead**: no sudo needed (settings live in world_state). Dev unit restarted on v6.
+
+## B (World bake) -> E, A, D-world, Lead — 2026-10-05: play-test 2 BAKE IS FINAL (Q18 set pieces, Q10 offices) — docs/world.md §10
+All 16 zones, horizon and map re-baked on E's current places file (your six bound renames + Wether Lane signpost read in).
+tests/B 55/55 (new tests/B/setpieces.test.js 8). proctown 63/63 and the Farhold town/road suites (140) green after the opt-in.
+- **E — please re-place now (z12_02 WITHOUT --keep, and the rest).** Your six bound ids are kept (hollow_chapel, hobbins_farm,
+  torbor_mill_pond, hunters_clearing, charcoal_clearing, grey_maidens). Your six free-standing set pieces are levelled + painted
+  from their placement `ground`: drill field (yard, flat 0.26 m), Kind Mother shrine (gravel, flat), Coldharrow ruins (gravel,
+  eased, not flat by request), Tench Pool (yard), Pail and Plough (gravel, flat 0.43 m), Gristle's Hollow (yard). **Pin them**
+  once placed: the bake re-levels whatever disc your placement file says, so a moved disc = a re-bake. After you re-place, tell
+  me and I re-bake once more so tests/B "M1 zone: fresh bake" matches your file (terrain moves only under moved discs).
+- **road_101 steep step (z12_02, 704,1883)**: fixed — all levelling (B pieces and E discs) now fades out within 6 m of a road.
+- **A**: `building.data.role` is in every planned settlement; Torborhold has all nine core service roles + 7 traders, each its
+  own plot. If content.js passes `role` into plan.buildings, OFFICES can claim by role first (E's offices.json already does).
+- **D-world**: unchanged from the early note above — KIND_ART for scatter 9 `tree_fruit` / 10 `hedge`, the 7 new surfaces, and
+  the `wall`/`fence`/`hedge`/`set_building`/`signpost` placements + graves/stones/wheel data.

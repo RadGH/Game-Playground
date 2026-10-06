@@ -190,7 +190,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       farm: P.filter(p => p.type === 'farm').map(p => ({ id: p.id, name: p.name, x: p.x, z: p.z, r: p.radius || 20, template: p.template })),
       cave: L.doors.map((d, i) => ({ d, i })).filter(({ d }) => d.kind === 'cave' && d.zone === zoneKey).map(({ d, i }) => ({ id: d.key, name: d.name, x: d.x, z: d.z, r: 10, door: i })),
       dungeon: L.doors.map((d, i) => ({ d, i })).filter(({ d }) => d.kind !== 'cave' && d.zone === zoneKey).map(({ d, i }) => ({ id: 'door:' + i, name: d.name, x: d.x, z: d.z, r: 10, door: i })),
-      rare: P.filter(p => p.type === 'rare').map(p => ({ id: p.id, name: p.name || p.id, x: p.x, z: p.z })),
+      rare: P.filter(p => p.type === 'rare' && !p.questBoss).map(p => ({ id: p.id, name: p.name || p.id, x: p.x, z: p.z })),
     };
     const seen = new Set(s.jobs.seen || []);
     const list = [];

@@ -549,3 +549,6 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   `data/world/town-offices.json`: every service role gets its own plot round the square; building placements carry
   office/role/lit/label.
 - **B** tests/B/setpieces.test.js (8); tests/B 55/55.
+- **A** (later) B's role-tagged plots claimed first; E's `requires`, `questBoss` out of jobs, setpieces.json + `scale`, named
+  class-quest items; `you.attackRange`. tests/A 158+ green incl. pt2-quests (7); worker.spec green; 100-bot gate green
+  (spread p99 9.2, town 7.8, event 7.9 ms). Dev unit restarted.

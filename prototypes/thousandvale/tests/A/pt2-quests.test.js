@@ -75,3 +75,50 @@ test('Q27 end to end: a new character enters the world holding the auto quest', 
   z.quests.quests = z.quests.quests.filter(q => q.id !== 'start_road');
   void run;
 });
+
+test('E\'s asks: `requires` waits for every listed quest; questBoss rares stay out of radiant jobs; a set piece\'s `scale` shrinks its offsets', async () => {
+  const { b } = await book();
+  const giver = { npcId: 'tester_elder', key: 'x' };
+  b.defs.set('need_two', { id: 'need_two', name: 'Two first', zone: b.defs.get('start_road').zone, giver: 'tester_elder', requires: ['start_road', 'cls_mage'], steps: [{ kind: 'talk', npc: 'tester_elder', count: 1 }] });
+  const ch = { id: 9, cls: 'mage', level: 3, quests: { active: {}, done: { start_road: 1 }, jobs: {} } };
+  assert.ok(!b.offers(ch, giver).some(q => q.id === 'need_two'), 'one of two done: not yet');
+  ch.quests.done.cls_mage = 2;
+  assert.ok(b.offers(ch, giver).some(q => q.id === 'need_two'), 'both done: offered');
+  const { vignettePoint, vignetteContent } = await import('../../js/sim/vignettes.js');
+  assert.deepEqual(vignettePoint({ x: 100, z: 50, yaw: 0, scale: 0.5 }, 10, 4), { x: 105, z: 52 });
+  const v = vignetteContent([{ id: 'p', recipe: 'r', x: 0, z: 0, yaw: 0, scale: 0.5 }], [{ id: 'r', name: 'Yard', objects: [{ type: 'use', name: 'Bell', x: 20, z: 0 }], monsters: [{ type: 'wolf', x: 0, z: 10 }] }]);
+  assert.equal(v.objects.find(o => o.name === 'Bell').x, 10, 'objects scaled');
+  assert.equal(v.camps[0].z, 5, 'monsters scaled');
+  const src = (await import('node:fs')).readFileSync(new URL('../../js/sim/quests.js', import.meta.url), 'utf8');
+  assert.ok(/type === 'rare' && !p\.questBoss/.test(src), 'the job pool skips quest bosses');
+});
+
+test('Q28 class-quest item: `reward.item {base, name}` is made on that base and carries its name', async () => {
+  const C = await realContent();
+  const z = C.layouts[0].zones[0];
+  const q = { id: 't_item', name: 'Item test', level: 2, auto: true, autoComplete: true, steps: [{ kind: 'kill', type: 'moor_hound', count: 1 }], reward: { xp: 0.1, item: { tier: 'rare', slot: 'weapon', base: 'bow', name: 'Greyfletch Longbow' } } };
+  z.quests = { ...(z.quests || {}), quests: [...((z.quests && z.quests.quests) || []), q] };
+  const { srv, clock, world } = await realServer();
+  const a = await joinReal(srv, clock, 'Fletchling', 'ranger');
+  const o = rec(world, a), r = o.room, e = o.entity;
+  const m = r.spawn({ kind: 'monster', type: 'moor_hound', level: 1, x: e.x + 2, z: e.z, team: 2 });
+  m.kill(e); await run(clock, 300);
+  const it = o.char.bag.find(i => i.name === 'Greyfletch Longbow');
+  assert.ok(it, 'named item in the bag: ' + o.char.bag.map(i => i.name).join(','));
+  assert.ok(/bow/.test(it.baseKey || it.base || ''), 'on the base asked for'); assert.ok(['rare', 'legendary'].includes(it.rarity));
+  a.close(); await srv.stop();
+  z.quests.quests = z.quests.quests.filter(x => x.id !== 't_item');
+});
+
+test('B\'s ask (Q10): a plot B tagged with a role (town-offices.json `data.role`) is that role\'s office first', async () => {
+  const { townFolk } = await import('../../js/sim/schedules.js');
+  const S = JSON.parse((await import('node:fs')).readFileSync(new URL('../../data/provinces/schedules.json', import.meta.url), 'utf8'));
+  const plan = { kind: 'town', square: { x: 0, z: 0 }, buildings: [
+    { id: 'forge_a', want: 'forge', x: 10, z: 0, yaw: 0 }, { id: 'forge_b', want: 'forge', x: -10, z: 0, yaw: 0, role: 'smith' },
+    { id: 'house_1', want: 'house', x: 0, z: 20, yaw: 0, role: 'merchant' }, { id: 'market_1', want: 'market', x: 0, z: -20, yaw: 0 } ] };
+  const folk = townFolk({ x: 0, z: 0, r: 80 }, { plan, schedules: S, kind: 'town', key: 't' });
+  assert.equal(folk.find(f => f.npc.role === 'smith').office.plot, 'forge_b', 'the smith takes the forge B planned for the smith');
+  assert.equal(folk.find(f => f.npc.role === 'merchant').office.plot, 'house_1', 'the merchant takes its tagged plot, not the market');
+  const { readFileSync } = await import('node:fs');
+  assert.ok(/role: d\.role \|\| null, office: d\.office/.test(readFileSync(new URL('../../js/sim/content.js', import.meta.url), 'utf8')), 'content.js carries role + office onto plan.buildings');
+});

@@ -91,8 +91,9 @@ export function townFolk(town, { plan = null, schedules, kind = 'town', key = 't
   function office(role, def, who) {
     const o = OFFICES[role] || (def && (def.service || []).some(x => SHOPLIKE.test(x)) ? { want: ['market', 'warehouse', 'granary'], kind: 'shop', lit: true } : { want: [], kind: 'office', lit: false });
     const free = p => !claimed.has(plotKey(p));
-    let p = null;
-    for (const w of o.want) { p = plots.find(q => q.want === w && free(q)); if (p) break; }
+    // stream B tags plots with the role they were planned for (town-offices.json): that plot first, never doubled up
+    let p = plots.find(q => q.role === role && free(q)) || null;
+    if (!p) for (const w of o.want) { p = plots.find(q => q.want === w && free(q)); if (p) break; }
     if (!p && o.kind !== 'barber') p = plots.find(q => SPECIAL.has(q.want) && q.want !== 'inn' && free(q) && !Object.values(OFFICES).some(x => x.want[0] === q.want && x.kind !== o.kind));
     if (!p) { const homes = plots.filter(q => (q.want === 'house' || q.want === 'hut') && free(q)); if (homes.length) p = homes.slice().sort((a, b) => Math.hypot(a.x - square.x, a.z - square.z) - Math.hypot(b.x - square.x, b.z - square.z))[hash(who) % Math.min(3, homes.length)]; }
     if (!p) {                       // no buildings at all (a camp, a test town): a spot of its own round the square

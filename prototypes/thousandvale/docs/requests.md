@@ -1768,3 +1768,25 @@ tests/B 55/55 (new tests/B/setpieces.test.js 8). proctown 63/63 and the Farhold 
   own plot. If content.js passes `role` into plan.buildings, OFFICES can claim by role first (E's offices.json already does).
 - **D-world**: unchanged from the early note above — KIND_ART for scatter 9 `tree_fruit` / 10 `hedge`, the 7 new surfaces, and
   the `wall`/`fence`/`hedge`/`set_building`/`signpost` placements + graves/stones/wheel data.
+
+## A (Server core) -> B, E, C, D-UI, Lead — 2026-10-05 (later): remaining play-test 2 asks folded in
+- **B**: content.js now carries each building's `data.role`, `data.office`, `data.lit`, `data.label` onto `plan.buildings`, and
+  schedules.js claims the plot whose `role === role` FIRST (then wants, then free specials, then a house). Where E's offices.json
+  lists a town, E's list (built from your role tags) is used as is. tests/A/pt2-quests "B's ask".
+- **E**: `requires` (all listed done) in `available()`; `questBoss` rares are out of the radiant jobs' `rare` pool;
+  `data/vignettes/setpieces.json` is in VIGNETTE_FILES and `scale` multiplies recipe offsets (vignettePoint: objects, monsters,
+  prop-avoid discs, the vignette/monster radii); class-quest `reward.item {tier, base, name}` -> C's `rules.makeItem` (else the
+  engine's rollDrop held to that base) renamed to `name`; `reward.perks`/`reward.unlock` -> `rules.unlock`.
+- **D-UI**: `uid:'gold'` (or `gold:true`) takes the corpse gold; `LOOT_MINS` has `unique`; `you.attackRange` (= `reach`) on joined
+  and after every equip; `look.avatar` and `look.custom` both accepted (stored as `custom`).
+- Remaining red unit tests are B's (horizon/map bake current) and E's (placements vs the moving z12_02 bake) — none in tests/A.
+
+## E (Content) -> B (World bake), Lead — 2026-10-05: re-placed on B's final bake (06b1e8c), set pieces pinned — please do the confirming re-bake
+Re-placed every zone INCLUDING z12_02 (no `--keep`): `node tools/place-vignettes.mjs`. tests/E 145/145 green on your bake.
+Set pieces cannot move on a re-bake: the six free-standing ones (Torbor Drill Field, Shrine of the Kind Mother, Coldharrow
+Ruins, Tench Pool, the Pail and Plough, Gristle's Hollow) are pinned in `data/provinces/setpiece-pins.json` (kept while the
+spot stays fair — your levelling under the disc keeps it fair); the six bound ones sit on your piece ids (hollow_chapel,
+hobbins_farm, torbor_mill_pond, hunters_clearing, charcoal_clearing, grey_maidens) — please keep those ids. places.json
+`setPieces`/`lanes` (the renames) are unchanged from what your final bake read. Please do your one confirming re-bake
+(z12_02 fresh-bake test + scatter/levelling under the new discs) and tell me; I re-run the placer once more if anything
+other than scatter moved.

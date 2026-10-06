@@ -532,7 +532,7 @@ export function createProvince(opts) {
         seen: ch.seen || { zones: [], places: [] },
         opened: Object.keys(ch.opened || {}).filter(k => ch.opened[k] > t),
         // play-test 2
-        reach: attackReach(o), mounts: mountBook.owned(ch), mount: o.mount || null, speedMul: e.speedMul || 1, prefs: prefsOf(ch), look: ch.look || null, clsName: clsNameOf(ch.cls),
+        reach: attackReach(o), attackRange: attackReach(o), mounts: mountBook.owned(ch), mount: o.mount || null, speedMul: e.speedMul || 1, prefs: prefsOf(ch), look: ch.look || null, clsName: clsNameOf(ch.cls),
       },
     };
     // the skill bar only changes on a level-up / form / talent (those arrive as `you {bar}` and refresh o.bar): a room
@@ -1303,7 +1303,17 @@ export function createProvince(opts) {
     const e = o.entity, rules = o.room.rules, lv = r.reward.level;
     const span = rules.xpFor ? Math.max(1, (safeRules(o.room, 'xpFor', lv + 1) || 0) - (safeRules(o.room, 'xpFor', lv) || 0)) : 100;
     const xp = Math.round(r.reward.xpShare * span);
-    const items = r.reward.item && rules.rollLoot ? (safeRules(o.room, 'rollLoot', e, { level: Math.max(lv, e.level || 1), tier: r.reward.item.tier || 'common' }) || []) : [];
+    // E's class-quest items name a base and a name (`reward.item {tier, slot, base, name}`): C's makeItem, else the engine's
+    // generator held to that base; plain `{tier}` rolls as before
+    const ri = r.reward.item, ilv = Math.max(lv, e.level || 1);
+    let items = [];
+    if (ri && ri.base) {
+      let it = rules.makeItem ? safeRules(o.room, 'makeItem', e, { base: ri.base, rarity: ri.tier || 'rare', level: ilv }) : null;
+      const eng = !it && rules.room && rules.room.engine;
+      if (!it && eng && eng.rpg) { try { it = eng.rpg.rollDrop({ level: ilv, rng: rules.room.streams.get('loot'), chance: 1, bases: [ri.base], rarityBoost: 0, floor: ri.tier === 'normal' ? null : (ri.tier || 'rare') }); } catch (err) { log('quest item', err && err.message); } }
+      if (it) { it = JSON.parse(JSON.stringify(it)); if (ri.name) it.name = ri.name; items = [it]; }
+    }
+    if (!items.length && ri && rules.rollLoot) items = safeRules(o.room, 'rollLoot', e, { level: ilv, tier: ri.tier || 'common' }) || [];
     const out = { ok: true, reward: { xp, gold: r.reward.gold, items: items.length }, next: r.next || undefined };
     if (reply) reply(out); else if (o.conn) o.conn.sendJSON({ t: 'questR', op: 'turnin', id: r.def.id, auto: true, ...out });
     // a quest may unlock something early (`reward.unlock`: 'companion' | 'companion2', C's rules.unlock — Q28 class quests)
@@ -1572,7 +1582,7 @@ export function createProvince(opts) {
       gearLook(o);
       const eqv = equipView(o);
       const worn = Object.keys(eqv).find(k => eqv[k] === item || (eqv[k] && eqv[k].uid === item.uid)) || slot;
-      s.sendJSON({ t: 'you', reach: attackReach(o) });
+      s.sendJSON({ t: 'you', reach: attackReach(o), attackRange: attackReach(o) });
       return s.sendJSON({ t: 'equip', slot: worn, item, equipment: eqv });
     }
     if (m.op === 'unequip') {
@@ -1589,7 +1599,7 @@ export function createProvince(opts) {
       o.dirty = true;
       s.sendJSON({ t: 'bag', add: [item], remove: [], gold: ch.gold });
       gearLook(o);
-      s.sendJSON({ t: 'you', reach: attackReach(o) });
+      s.sendJSON({ t: 'you', reach: attackReach(o), attackRange: attackReach(o) });
       return s.sendJSON({ t: 'equip', slot, item: null, equipment: equipView(o) });
     }
   }

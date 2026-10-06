@@ -19,6 +19,9 @@
 export const PROP_R = { default: 1.3, well: 1.6, ruined_wall: 2.2, wall: 2.2, cart: 2, wagon: 2.4, tent: 2.4, hut: 3, shack: 3, barrel: 0.9, crate: 0.9 };
 
 export function vignettePoint(pl, lx, lz) {
+  // a set piece BOUND onto one of stream B's ground pieces is shrunk to fit it (E: `scale` 0.4-1, play-test 2 Q18)
+  const k = pl.scale > 0 ? pl.scale : 1;
+  lx *= k; lz *= k;
   const c = Math.cos(pl.yaw || 0), s = Math.sin(pl.yaw || 0);
   return { x: pl.x + lx * c + lz * s, z: pl.z - lx * s + lz * c };
 }
@@ -30,7 +33,7 @@ export function vignetteContent(placements, recipes, { band = [1, 6], respawnMs 
     const v = byId.get(pl.recipe || pl.id);      // a curio names its recipe (data/vignettes/curios.json)
     if (!v) continue;
     const key = 'vig:' + pl.id;
-    objects.push({ type: 'vignette', name: v.name, x: pl.x, z: pl.z, key, r: v.radius || pl.radius || 10, lore: v.lore || null });
+    objects.push({ type: 'vignette', name: v.name, x: pl.x, z: pl.z, key, r: (v.radius || pl.radius || 10) * (pl.scale > 0 && !pl.radius ? pl.scale : 1), lore: v.lore || null });
     (v.objects || []).forEach((o, i) => {
       const p = vignettePoint(pl, o.x || 0, o.z || 0);
       const okey = `${key}:${i}`;
@@ -48,7 +51,7 @@ export function vignetteContent(placements, recipes, { band = [1, 6], respawnMs 
     for (const m of v.monsters || []) {
       const p = vignettePoint(pl, m.x || 0, m.z || 0);
       // P26: the level of the SPOT (E's ramp from the capital: levelBase, capped at levelCap) and countCap near the start
-      camps.push({ type: m.type, level: Math.max(1, Math.min(pl.levelCap ?? 99, (pl.levelBase ?? band[0]) + (m.level || 0))), x: p.x, z: p.z, count: Math.min(m.count || 1, pl.countCap ?? 99), radius: m.radius || 5, respawnMs, vignette: pl.id, ...(avoid.length ? { avoid } : {}) });
+      camps.push({ type: m.type, level: Math.max(1, Math.min(pl.levelCap ?? 99, (pl.levelBase ?? band[0]) + (m.level || 0))), x: p.x, z: p.z, count: Math.min(m.count || 1, pl.countCap ?? 99), radius: (m.radius || 5) * (pl.scale > 0 ? pl.scale : 1), respawnMs, vignette: pl.id, ...(avoid.length ? { avoid } : {}) });
     }
   }
   return { camps, objects };

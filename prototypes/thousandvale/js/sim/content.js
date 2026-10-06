@@ -7,7 +7,7 @@
 // Used by createWorld({ zoneSheet: content.sheet, encounterInfo: content.encounterInfo }).
 
 export const PROVINCE_FILES = ['data/provinces/torbor_downs.json'];
-export const VIGNETTE_FILES = ['data/vignettes/m1.json', 'data/vignettes/m2.json', 'data/vignettes/m2b.json', 'data/vignettes/curios.json'];   // curios: P19 mini vignettes
+export const VIGNETTE_FILES = ['data/vignettes/m1.json', 'data/vignettes/m2.json', 'data/vignettes/m2b.json', 'data/vignettes/curios.json', 'data/vignettes/setpieces.json'];   // curios: P19 mini vignettes; setpieces: play-test 2 Q18
 
 export async function loadZoneContent(readJson, zone = 'test') {
   const out = { sheet: null, encounterInfo: {}, vignettes: null };
@@ -98,7 +98,7 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
     for (const p of (bp && bp.placements) || []) {
       const wx = p.x + zx * 2048, wz = p.z + zy * 2048, d = p.data || {};
       if (p.kind === 'settlement') plan.settlements.push({ id: p.id, name: d.name, kind: d.kind, x: wx, z: wz });
-      else if (p.kind === 'building') plan.buildings.push({ id: p.id, town: d.town, want: d.want, x: wx, z: wz, yaw: p.yaw || 0, w: d.w || 6, d: d.d || 6 });   // id: the plot an office takes over (Q10)
+      else if (p.kind === 'building') plan.buildings.push({ id: p.id, town: d.town, want: d.want, x: wx, z: wz, yaw: p.yaw || 0, w: d.w || 6, d: d.d || 6, role: d.role || null, office: d.office || null, lit: d.lit ?? null, label: d.label || null });   // id: the plot an office takes over (Q10)
       else if (p.kind === 'town_square') plan.squares.push({ town: d.town, x: wx, z: wz });
     }
     zones.push({ key: wid, eid, sheet: zs ? { ...zs, id: eid } : null, vignettes, plan, quests: (vignettes && vignettes.quests) || await questsOf(eid), placements: vignettes ? vignettes.placements : [] });

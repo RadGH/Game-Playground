@@ -555,3 +555,7 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - **A** potions + food usable (lead's call): `item {op:'use', uid | 'id:<kind>'}` -> `itemR`; `js/sim/consumables.js` (shared
   30 s potion cooldown, heal/mana/group tonic/antidote; food/drink regen out of combat, ended by a hit); minimal C hooks
   `rules.restore` / `rules.cleanse` in js/rules/index.js (noted for C); `net.useItem`. tests/A/pt2-consumables (3).
+- **C** (lead's follow-up) `js/rules/buffs.js` + `rules.useItem` / `rules.itemBuffs`: shop items that said "does nothing yet" work — whetstone, armour oil, silver dust, fletching kit, oats, hearty stew's after-buff (timed self-buffs, one per kind, survive zone change + logout, end on death), torches (light radius flag + night bonus vs undead/beasts), herb poultice, recall charm (5 s channel -> bound/nearest town), revive flask (a fallen party member within 10 m). Wired: `js/sim/consumables.js` kind `rules` (minimal), `js/sim/province.js useItem` branch + `recall(o)` (minimal). tests/C/buffs.test.mjs (8).
+- **A** C's follow-up asks: reviewed C's useItem/recall edits (torch charge decrement now journaled); room `host.isNight()`;
+  `bind {npc}` at a town innkeeper saves `char.bind` (respawn + recall go home); oats riding speed via `rules.itemBuffs`
+  (rechecked 1 Hz); `net.bind`. tests/A/pt2-consumables (4).

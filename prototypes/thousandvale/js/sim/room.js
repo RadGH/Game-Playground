@@ -110,6 +110,7 @@ export function createRoom(opts) {
     log: (...a) => hooks.log && hooks.log('[rules ' + id + ']', ...a),
   };
   // stream C's one-drop-per-corpse-per-party hook (js/rules/cast.js onKill): only when the province takes party loot
+  host.isNight = () => (hooks.isNight ? !!hooks.isNight() : false);      // the realm clock (C: the torch's night bonus)
   if (hooks.partyLoot) host.partyLoot = (members, items, corpse, partyId) => hooks.partyLoot(members, items, corpse, partyId, room);
   room.host = host;
 

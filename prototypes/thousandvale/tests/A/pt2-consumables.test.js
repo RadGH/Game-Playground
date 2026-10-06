@@ -75,3 +75,47 @@ test('with the real rules: a bought healing potion heals through C\'s rules.rest
   assert.ok(e.hp > hp0 && e.r.unit.hp === e.hp, 'healed on the sheet and the entity: ' + hp0 + ' -> ' + e.hp);
   a.close(); await srv.stop();
 });
+
+test('C\'s asks: an innkeeper binds a home (saved; respawn goes there); the room host knows the night; oats speed up a ride; a torch bundle counts down and the count survives a reload', async () => {
+  const { srv, clock, world, store } = await realServer();
+  const a = await joinReal(srv, clock, 'Homebody', 'warrior');
+  const o = recR(world, a);
+  const pv = world.P.values().next().value;
+  const town = pv.towns[1] || pv.towns[0];
+  assert.equal(typeof town.host.isNight, 'function'); assert.equal(typeof town.host.isNight(), 'boolean');
+  const inn = [...town.objects.values()].find(x => x.data && x.data.npc && x.data.npc.role === 'innkeeper');
+  assert.ok(inn, 'an innkeeper in ' + town.name);
+  world.transfer(o, town, { x: inn.x + 1, z: inn.z }, 'test'); await run(clock, 300);
+  const got = box(a, ['bindR', 'used', 'you', 'itemR']);
+  a.use(inn.id); await run(clock, 200);
+  assert.equal(got.find(x => x.t === 'used').bind, true);
+  a.bind(inn.id); await run(clock, 200);
+  assert.equal(got.find(x => x.t === 'bindR').ok, true);
+  assert.equal(o.char.bind, town.id, 'saved on the character');
+  // die out in the wilds near the FIRST town: wake at home
+  world.transfer(o, pv.copies[0], { x: pv.L.towns[0].x + 200, z: pv.L.towns[0].z }, 'test'); await run(clock, 300);
+  recR(world, a).entity.kill(null); await run(clock, 200);
+  a.respawn(); await run(clock, 500);
+  assert.equal(recR(world, a).room, town, 'respawned at the bound inn');
+  // oats: a riding-speed item buff multiplies the mount
+  const o2 = recR(world, a);
+  o2.char.mounts = ['trail_horse']; o2.mount = 'trail_horse';
+  const base = o2.entity.speedMul;
+  o2.room.rules.itemBuffs = () => ({ mountSpeedPct: 0.1 });
+  world.transfer(o2, o2.room, { x: o2.entity.x, z: o2.entity.z }, 'test');
+  o2.entity.mount = 'trail_horse'; o2.entity.speedMul = 1.4;
+  await run(clock, 1200);
+  assert.ok(Math.abs(o2.entity.speedMul - 1.4 * 1.1) < 1e-6, 'oats: ' + o2.entity.speedMul + ' (was ' + base + ')');
+  // a torch bundle: one charge per use, the bag item keeps `left`, and the journal carries it (replayed on a reload)
+  world.grant(o2, { items: [{ kind: 'good', id: 'torch_bundle', name: 'Bundle of torches', use: { type: 'light', minutes: 10, charges: 6 } }], gold: 0, reason: 'test' }); await run(clock, 200);
+  a.item('use', 'id:torch_bundle'); await run(clock, 200);
+  const tb = o2.char.bag.find(i => i.id === 'torch_bundle');
+  assert.ok(tb && tb.left === 5, 'five torches left: ' + JSON.stringify(got.filter(x => x.t === 'itemR').pop()));
+  await world.flushJournal(); await run(clock, 100);
+  const acct = o2.char.account, id = o2.char.id;
+  a.close(); await run(clock, 500);
+  const re = await store.takeChar(acct, id, 'test-reader', 1000);
+  assert.equal(re.char.bag.find(i => i.id === 'torch_bundle').left, 5, 'the count survives a reload');
+  assert.equal(re.char.bind, town.id, 'the home survives a reload');
+  await srv.stop();
+});

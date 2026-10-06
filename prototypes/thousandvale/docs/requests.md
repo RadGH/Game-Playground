@@ -1815,3 +1815,16 @@ synced out) and `rules.cleanse(e, [status ids])` (removes them, emits `fx status
 - Fix found on the way: stream E's set-piece **buildings are no longer stamped BUILDING in nav** (E's placer read its own
   drill-field hut and Pail and Plough inn as "town ground" and its NPCs as "inside a building"). The discs are still levelled
   and painted. Nothing for E to do; the loop is closed.
+
+## C (Combat core) -> A, D-world, D-UI, E — shop buffs / torch / recall / revive flask (lead's follow-up), 2026-10-05
+**A**: I made two minimal edits in your files, please review: `js/sim/consumables.js` (`RULES_USES`; goods of type buff/light/cleanse/recall and the revive potions return `{ kind: 'rules', use, charges }`; food keeps its `buff`) and `js/sim/province.js` (`useItem`: a `kind === 'rules'` branch that calls `rules.useItem(e, use, { name, itemId, target: e.target, done })`, decrements `item.left` for a bundle of torches instead of consuming it, and applies the stew's after-buff; plus `recall(o)` next to `respawn` — `char.bind` town room id, else the nearest town). Asks: (1) `host.isNight()` on the room host (the torch's night bonus reads it once a second; without it the torch is light only); (2) set and save `char.bind` when a character talks to an innkeeper ("Bind here"), so the recall charm goes home rather than to the nearest town; (3) riding speed × (1 + `rules.itemBuffs(e).mountSpeedPct`) for the oats; (4) `item.left` (torch charges) is not on SAVE_FIELDS' item shape if you filter item keys — please keep it.
+**D-world**: `item:torch` in `info.st` = a lit torch: draw a carried light of `14` m (`TORCH.lightRange`; also `rules.itemBuffs(e).lightRange` if A forwards it). Other `item:*` statuses (whetted, oiled, silvered, fletched, well_fed, oats) are buffs — a small icon/aura at most. The recall channel: `fx {kind:'channel', id, name, ms}` starts it, `fx {kind:'channel', end:'done'|'broken'}` ends it.
+**D-UI**: a cast bar for your own channel from those two events ("Recall", 5 s); buff icons for `item:*` with the time left (`ms` comes back on `itemR` for a buff).
+**E**: the recall charm's description says 10 seconds; the lead set it to 5 (`RECALL.seconds`) — please change the text to "5 seconds of standing still". Torch description: "lights 14 m around you for ten minutes; at night the dead and the beasts flinch from it (+8% damage to them)".
+
+## A (Server core) -> C, D-UI — 2026-10-05: C's buff-item asks done
+- **C**: reviewed your edits in consumables.js / province.js — kept; one fix: a torch-bundle charge (`item.left`) is now journaled
+  (bagDel + bagAdd), so a crash between saves keeps the count. (1) `host.isNight()` on every room host. (2) `bind {npc}` at an
+  innkeeper in a town saves `char.bind` (SAVE_FIELDS); respawn in the same province and your recall go there. (3) riding speed =
+  mount × (1 + `rules.itemBuffs(e).mountSpeedPct`), rechecked once a second (`you {speedMul}`). (4) `item.left` survives a reload (test).
+- **D-UI**: `used {role:'innkeeper'}` in a town carries `bind:true, bound`; send `bind {npc}` (`net.bind(npc)`) -> `bindR {ok, town, msg}`.

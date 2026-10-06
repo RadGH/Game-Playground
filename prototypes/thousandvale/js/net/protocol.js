@@ -140,6 +140,7 @@ export const CLIENT_MSGS = Object.freeze({
   pref:    { on: 'p', fields: { k: 'str:16', v: 'bool' }, rate: 2, burst: 6 },
   follow:  { on: 'p', fields: { id: 'id' }, rate: 2, burst: 4 },
   inspect: { on: 'p', fields: { id: 'id' }, rate: 2, burst: 6 },
+  bind:    { on: 'p', fields: { npc: 'id' }, rate: 1, burst: 3 },
   settings: { on: 'gw', fields: { op: 'str:8', data: '?obj' }, rate: 1, burst: 4 },
   look:    { on: 'gw', fields: { char: 'int', look: 'obj' }, rate: 0.5, burst: 3 },
 });
@@ -211,6 +212,7 @@ export const SERVER_MSGS = Object.freeze({
   followR: ['id', 'ok'],
   inspectR: ['id', 'ok'],
   itemR: ['op', 'ok'],
+  bindR: ['ok'],
   settings: ['data'],
 });
 /** Talent ops (`talent {op}`) and perk ops (`perk {op}`), province socket (P6). */

@@ -339,6 +339,7 @@ export function connect(opts = {}) {
   net.setLook = (char, look) => sendJ(gw, { t: 'look', char, look });              // title screen -> lookR
   net.partyLoot = min => net.partyOp('loot', { code: min });                       // 'magic' | 'rare' | 'legendary' | 'unique' (leader)
   net.inspect = id => sendJ(game, { t: 'inspect', id });
+  net.bind = npc => sendJ(game, { t: 'bind', npc });                               // innkeeper: make this town home -> bindR
   net.useItem = uidOrKind => sendJ(game, { t: 'item', op: 'use', uid: String(uidOrKind) });   // a bag uid, or 'id:healing_potion' (hotbar) -> itemR                           // -> inspectR
   // D-UI's first names (play-test 2): the same messages
   net.lootOp = net.loot;

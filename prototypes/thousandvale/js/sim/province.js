@@ -119,6 +119,7 @@ export function createProvince(opts) {
     // play-test 2, Q3: a kill's gold + items wait on the corpse (js/sim/corpses.js); the body stays while they do
     holdKill: opts.corpseLoot === false ? null : (e, from, a, r) => corpses.hold(r, e, from, a),
     keepBody: (e, r) => corpses.keepBody(e, r),
+    isNight: () => isNight(),
     partyLoot: opts.corpseLoot === false ? null : (members, items, corpse, partyId, r) => corpses.partyDrop(r, members, items, corpse, partyId),
     onSwim: (e, on) => { if (on && e.char) { const o = online.get(e.char.id); if (o && o.entity === e && o.mount) dismount(o, 'swim'); } },
   };
@@ -399,6 +400,7 @@ export function createProvince(opts) {
       case 'pref': return prefOp(o, m);
       case 'follow': return followOp(o, m);
       case 'inspect': return inspectOp(o, m);
+      case 'bind': return bindOp(o, m);
       default: return bad(s, 'socket');
     }
   }
@@ -634,6 +636,8 @@ export function createProvince(opts) {
     // wake in the nearest town of this province
     let best = pv.towns[0], bd = Infinity;
     pv.L.towns.forEach((t, i) => { const d = Math.hypot(t.x - e.x, t.z - e.z); if (d < bd) { bd = d; best = pv.towns[i]; } });
+    const home = o.char.bind ? rooms.get(o.char.bind) : null;          // your bound inn's town, when it is in this province
+    if (home && home.area && provOf(home) === pv) best = home;
     transfer(o, best, { x: best.area.x, z: best.area.z }, 'respawn');
   }
   /**
@@ -702,7 +706,7 @@ export function createProvince(opts) {
     if (d.chest) return openChest(o, obj);
     if (d.note) return s.sendJSON({ t: 'used', id, ok: true, kind: 'note', name: obj.name, text: d.note.text, quest: d.note.quest || undefined, ...questOffer(o, obj) });
     if (d.npc) return s.sendJSON({ t: 'used', id, ok: true, kind: 'npc', name: obj.name, says: d.npc.says, quest: d.npc.quest || undefined, role: d.npc.role || undefined,
-      ...(shops.kindOf(obj) ? { shop: true, shopKind: shops.kindOf(obj) } : {}), ...(d.npc.role === 'barber' ? { barber: true, free: !(o.char.flags && o.char.flags.barberUsed) } : {}), ...(d.npc.role === 'unbinder' ? { unbinder: true } : {}),
+      ...(shops.kindOf(obj) ? { shop: true, shopKind: shops.kindOf(obj) } : {}), ...(d.npc.role === 'barber' ? { barber: true, free: !(o.char.flags && o.char.flags.barberUsed) } : {}), ...(d.npc.role === 'unbinder' ? { unbinder: true } : {}), ...(d.npc.role === 'innkeeper' && o.room.kind === 'town' ? { bind: true, bound: o.char.bind === o.room.id } : {}),
       ...(d.npc.service ? { service: d.npc.service } : {}), ...questOffer(o, obj) });
     if (d.use) return useThing(o, obj);
     if (d.trace) return s.sendJSON({ t: 'used', id, ok: true, kind: d.trace.kind, ...d.trace });
@@ -1572,7 +1576,7 @@ export function createProvince(opts) {
       }) || { ok: false, why: 'item' };
       if (!res.ok) return R({ ok: false, why: res.why || 'item', id: item.id, msg: res.text || 'Nothing happens.' });
       if (res.consume) {
-        if (ef.charges > 0 && (item.left = (item.left ?? ef.charges) - 1) > 0) o.dirty = true;   // a bundle of torches: one at a time
+        if (ef.charges > 0 && (item.left = (item.left ?? ef.charges) - 1) > 0) { o.dirty = true; journal(o, 'bagDel', { uid: item.uid }); journal(o, 'bagAdd', { item }); }   // a bundle of torches: one at a time (journaled: a crash keeps the count)
         else consume(o, idx);
       }
       if (o.mount && ef.use.type !== 'light' && ef.use.type !== 'buff') dismount(o, 'cast');
@@ -1727,7 +1731,7 @@ export function createProvince(opts) {
   function applyMount(o) {
     const e = o.entity, def = mountBook.get(o.mount);
     if (!def) { o.mount = null; return; }
-    e.mount = def.id; e.speedMul = mountSpeedMul(def); e.infoVer++;
+    e.mount = def.id; e.speedMul = mountSpeed(o, def); e.infoVer++;
     const c = o.room.clients.get(e.id); if (c) c.selfDirty = true;
     if (o.conn) o.conn.sendJSON({ t: 'you', mount: def.id, speedMul: e.speedMul });
   }
@@ -1924,6 +1928,27 @@ export function createProvince(opts) {
     if (t.dead) return R({ ok: false, why: 'dead', msg: 'They are dead.' });
     if (Math.hypot(t.x - e.x, t.z - e.z) > FOLLOW_M) return R({ ok: false, why: 'far', msg: 'Too far away to follow.' });
     return R({ ok: true, name: t.name });
+  }
+  /** E's innkeeper service "Make this inn your home": recall and respawn bring you to this town (saved `char.bind`). */
+  function bindOp(o, m) {
+    const s = o.conn, R = x => s.sendJSON({ t: 'bindR', ...x });
+    const r = o.room.objectNear(o.entity, m.npc, 6);
+    if (r.why) return R({ ok: false, why: r.why, msg: r.why === 'far' ? 'Walk over to them first.' : 'Who?' });
+    if (!(r.o.data && r.o.data.npc && r.o.data.npc.role === 'innkeeper') || o.room.kind !== 'town') return R({ ok: false, why: 'noInn', msg: 'Only an innkeeper in a town can give you a home.' });
+    o.char.bind = o.room.id; journal(o, 'set', { k: 'bind', v: o.room.id }); o.dirty = true;
+    return R({ ok: true, town: o.room.name, room: o.room.id, msg: o.room.name + ' is your home now.' });
+  }
+  /** C's oats (an item buff): riding speed × (1 + rules.itemBuffs(e).mountSpeedPct). Rechecked once a second while riding. */
+  function mountSpeed(o, def) {
+    const b = o.room.rules.itemBuffs ? safeRules(o.room, 'itemBuffs', o.entity) || {} : {};
+    return mountSpeedMul(def) * (1 + (+b.mountSpeedPct || 0));
+  }
+  function mountSpeedTick() {
+    for (const o of online.values()) {
+      if (!o.mount || !o.entity.mount) continue;
+      const def = mountBook.get(o.mount), v = def ? mountSpeed(o, def) : 1;
+      if (Math.abs(v - o.entity.speedMul) > 1e-6) { o.entity.speedMul = v; const c = o.room.clients.get(o.entity.id); if (c) c.selfDirty = true; if (o.conn) o.conn.sendJSON({ t: 'you', speedMul: v }); }
+    }
   }
   /** Q2 (D-UI's right-click menu): what someone is wearing. */
   function inspectOp(o, m) {
@@ -2157,7 +2182,7 @@ export function createProvince(opts) {
     if (ticks % 20 === 5) eventTick();           // events (realm + zone) at 1 Hz
     if (ticks % 20 === 7) zoneTick();
     if (ticks % 20 === 9) corpses.tick();
-    if (ticks % 20 === 11) foodTick();
+    if (ticks % 20 === 11) { foodTick(); mountSpeedTick(); }
     for (const o of online.values()) if (o.mountCast) mountCastTick(o);
     if (ticks % 4 === 1) npcTick(TICK_MS * 4);
     roadsTick();

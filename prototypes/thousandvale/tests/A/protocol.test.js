@@ -14,7 +14,7 @@ const GOOD = {
   talent: { op: 'pick', skill: 'firebolt', tier: 1, node: 'fan' }, perk: { op: 'take', id: 'early_bond' }, map: { op: 'get' },
   // play-test 2
   loot: { op: 'take', id: 12, uid: 'p0-ab-1' }, shop: { op: 'buy', npc: 7, id: 's3' }, mount: { op: 'summon', id: 'pony' },
-  barber: { npc: 9, look: { race: 'elf', seed: 3 } }, pref: { k: 'showHelm', v: false }, follow: { id: 4 }, inspect: { id: 4 },
+  barber: { npc: 9, look: { race: 'elf', seed: 3 } }, pref: { k: 'showHelm', v: false }, follow: { id: 4 }, inspect: { id: 4 }, bind: { npc: 5 },
   settings: { op: 'set', data: { tradeFriendsOnly: true } }, look: { char: 2, look: { race: 'dwarf', seed: 9 } },
 };
 

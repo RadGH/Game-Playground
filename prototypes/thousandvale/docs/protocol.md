@@ -135,6 +135,7 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `pref` | p | `k:str:16, v:bool` | 2 / 6 | Display prefs everyone sees (§18.5): `showGear`, `showHelm`. Answer `you {prefs}`. |
 | `follow` | p | `id:id` | 2 / 4 | May I follow this one? (§18.6) Answer `followR`. Following is client movement. |
 | `inspect` | p | `id:id` | 2 / 6 | What another player wears (§18.6, D-UI's right-click menu). Answer `inspectR`. |
+| `bind` | p | `npc:id` | 1 / 3 | An innkeeper in a town: make this town home (§18.11). Answer `bindR`. |
 | `settings` | gw | `op:str:8, data?:obj` | 1 / 4 | Account settings (§18.7): `get`, `set {data:{tradeFriendsOnly}}`. Answer `settings {data}`. |
 | `look` | gw | `char:int, look:obj` | 0.5 / 3 | Title screen "Customize Appearance" (§18.4): a look for a character not in the world. Answer `lookR`. |
 
@@ -203,6 +204,7 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `mountR` | `op, ok, why?, msg?, id?` | (game) Answer to `mount` (`combat`, `swim`, `indoors`, `none`, `dead`). |
 | `lookR` | `ok, look?, cost?, char?, why?, msg?` | Answer to `barber` (game) or `look` (gw); `look` = the cleaned look as stored. |
 | `followR` | `id, ok, name?, why?, msg?` | (game) Answer to `follow` (`hostile`, `far`, `gone`, `dead`, `self`, `target`). |
+| `bindR` | `ok, town?, room?, why?, msg?` | (game) Answer to `bind`. |
 | `itemR` | `op, ok, uid, id?, why?, msg?, cd?` | (game) Answer to `item {op:'use'}` (§18.10): `cooldown` (`cd` ms left), `combat`, `full`, `notYet`, `dead`, `item`. |
 | `inspectR` | `id, ok, name?, cls?, clsName?, level?, look?, equipment?, why?, msg?` | (game) Answer to `inspect` (within 40 m). |
 | `settings` | `data` | (gw) The account's settings (after `chars`, and after `settings set`). |
@@ -988,4 +990,12 @@ healing, mana, group tonic = the party within 30 m, antidote = cleanse) work in 
 {kind, ms}}`, then `you {regen:null}`); a fight or a hit ends the meal. Buff goods, torches, recall charms and revives answer
 `why:'notYet'` and stay in the bag. Success: `itemR {ok, id, cd?}` + `bag {remove}`. Effects go through C's `rules.restore(e,
 {hp, mp})` and `rules.cleanse(e, ids)` (js/rules/index.js, minimal hooks A added for C to own).
+
+### 18.11 Home inn, recall, buff items (C's follow-up)
+`used {kind:'npc', role:'innkeeper'}` in a town carries `bind: true, bound`; `bind {npc}` within 6 m saves `char.bind` (that town's
+room id, SAVE_FIELDS) -> `bindR {ok, town}`. A respawn in the wilds wakes you there when it is in the same province, else the
+nearest town; the recall charm (C's `rules.useItem`, a 5 s channel) goes there too. Buff goods, torches, poultices, recall charms
+and revive flasks are C's `rules.useItem` (consumables.js kind `rules`); a torch bundle keeps its charges on the bag item
+(`item.left`, journaled). The room host has `isNight()` (the realm clock). Riding speed = the mount's × (1 +
+`rules.itemBuffs(e).mountSpeedPct`) (oats), rechecked once a second (`you {speedMul}` on a change).
 

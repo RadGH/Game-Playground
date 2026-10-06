@@ -2,6 +2,10 @@
   "id": "rare_tithe_collector",
   "name": "Brother Tithe",
   "tier": "rare",
+  "announce": {
+    "r": 300,
+    "_doc": "S4: shown on the minimap of anyone within r metres while it lives"
+  },
   "zone": "torbor_cross",
   "body": "cult_zealot",
   "place": "walks the roads around Halsbridge collecting \"tithes\" for a church that does not exist",

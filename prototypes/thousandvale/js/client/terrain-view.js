@@ -76,6 +76,15 @@ export function extendWaterSurface(wg, grid, res, { reach = 2, maxDrop = 0.12 } 
   return out;
 }
 
+/**
+ * Play-test 2 (Q18, B's set-piece surfaces, docs/world.md §10): how much bare earth each shows (the path layer) and
+ * how hard the surface's own colour tints it — a ploughed field reads brown, a crop field gold, a pasture bright, a
+ * graveyard dark and kept. Unknown biomes keep the faint 18% pull. Exported for tests.
+ */
+export const SET_GROUND = {
+  field: { path: 0.85, tint: 0.45 }, crop: { path: 0.3, tint: 0.6 }, pasture: { path: 0, tint: 0.45 }, yard: { path: 0.8, tint: 0.3 },
+  graveyard: { path: 0, tint: 0.5 }, orchard: { path: 0.05, tint: 0.4 }, gravel: { path: 0.7, tint: 0.55 },
+};
 export function createTerrainView(T, { textureSize = 512, quality = 'high', clearings = [], biomeColors = null } = {}) {
   const group = new THREE.Group(); group.name = 'terrain';
   const grid = perf.span('terrain:grid', () => T.heightGrid());
@@ -94,8 +103,9 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
     let sand = SAND.has(b) ? 0.8 : 0;
     const w = T.waterAt(x, z);
     if (w.depth > 0) sand = Math.max(sand, 0.7);
-    let path = b === 'road' ? 0.92 : 0;
-    if (path) { forest = 0; sand = 0; rock = Math.min(rock, 0.15); }
+    const SP = SET_GROUND[b];
+    let path = b === 'road' ? 0.92 : SP ? SP.path : 0;
+    if (path || SP) { forest = 0; sand = 0; rock = Math.min(rock, 0.15); }
     for (const c of clearings) { const d = Math.hypot(x - c.x, z - c.z) / c.r; forest *= smooth(0.7, 1.2, d); path = Math.max(path, (1 - smooth(0.12, 0.6, d)) * 0.7); }
     forest *= 1 - rock; path *= 1 - rock;
     let s = forest + rock + sand + path;
@@ -104,7 +114,7 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
     // A faint pull toward the biome's own colour, so neighbouring biomes read differently.
     const hex = biomeColors?.[b];
     col.setRGB(1, 1, 1);
-    if (hex) { bcol.set(hex); const l = (bcol.r + bcol.g + bcol.b) / 3 || 1; col.setRGB(0.82 + 0.18 * bcol.r / l, 0.82 + 0.18 * bcol.g / l, 0.82 + 0.18 * bcol.b / l); }
+    if (hex) { bcol.set(hex); const l = (bcol.r + bcol.g + bcol.b) / 3 || 1; const k = SP ? SP.tint : 0.18; col.setRGB(1 - k + k * bcol.r / l, 1 - k + k * bcol.g / l, 1 - k + k * bcol.b / l); }
     return col;
   }
 

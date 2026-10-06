@@ -2,6 +2,7 @@
   "id": "rare_mere_moth_queen",
   "name": "The Mere Moth Queen",
   "tier": "rare",
+  "secret": true,
   "zone": "coldwater",
   "body": "carrion_moth",
   "place": "drifts over the reed beds of Coldwater Mere at dusk with a cloud of her children",

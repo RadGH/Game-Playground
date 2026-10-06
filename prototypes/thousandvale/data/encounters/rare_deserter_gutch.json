@@ -2,6 +2,7 @@
   "id": "rare_deserter_gutch",
   "name": "Sergeant Gutch",
   "tier": "rare",
+  "secret": true,
   "zone": "gorse_march",
   "body": "road_brigand",
   "place": "a deserter who still drills his \"company\" of three men in the burnt barns of the Gorse March",

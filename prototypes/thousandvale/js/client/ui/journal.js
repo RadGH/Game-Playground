@@ -60,7 +60,7 @@ export function createJournal({ atlas, net, me, hud, worldMap }) {
     const def = atlas.model?.quests.get(q.id);
     const steps = (q.steps || []).map((st, i) => h('li.' + (st.done || i < q.step ? 'done' : i === q.step ? 'now' : 'later'), {},
       h('span.j-tick', {}, st.done || i < q.step ? '✓' : i === q.step ? '▸' : '·'), `${st.text || 'Step'}`, st.of > 1 ? h('small', {}, ` ${i < q.step ? st.of : i === q.step ? st.n || 0 : 0}/${st.of}`) : null));
-    const reward = rewardWords(q.reward);
+    const reward = q.rewardText ? [q.rewardText] : rewardWords(q.reward);   // E/A: a ready-made reward line wins (play-test 2)
     const giver = q.giverName || atlas.model?.npcs.get(q.giver)?.name;
     const giverAt = atlas.model?.npcs.get(q.giver)?.at;
     const detail = h('div.j-detail', {},
@@ -69,7 +69,8 @@ export function createJournal({ atlas, net, me, hud, worldMap }) {
       h('div.j-goal', {}, h('span.label', {}, q.ready ? 'Done' : 'Goal'), h('p', {}, q.ready ? `Go back to ${giver || 'whoever asked'}${giverAt ? ` in ${giverAt}` : ''} and hand it in.` : q.goal),
         q.loc ? h('p.j-where', {}, '⌖ ', where(q)) : null,
         h('div.row', {}, q.loc ? h('button.ghost.small', { type: 'button', onclick: () => { worldMap?.panel.open(); worldMap?.showAt(q.loc.x, q.loc.z, q.loc.exact ? 0.6 : 0.2); } }, 'Show on map') : null,
-          q.id === atlas.tracked ? h('button.ghost.small.on', { type: 'button', onclick: () => { atlas.setTracked(null); draw(true); } }, 'Tracked ✓') : h('button.primary.small', { type: 'button', onclick: () => { atlas.setTracked(q.id); draw(true); } }, 'Track'))),
+          q.ready && q.remote !== false ? h('button.primary.small', { type: 'button', title: 'Hand it in from here (S10)', dataset: { turnin: q.id }, onclick: () => { net()?.quest?.('turnin', q.id); } }, 'Hand in') : null,
+          atlas.isTracked(q.id) ? h('button.ghost.small.on', { type: 'button', title: 'Take it off your screen (it stays in the journal)', onclick: () => { atlas.untrack(q.id); draw(true); } }, 'Tracked ✓') : h('button.primary.small', { type: 'button', onclick: () => { atlas.setTracked(q.id); draw(true); } }, 'Track'))),
       q.text ? h('p.j-text', {}, `“${q.text}”`) : null,
       giver ? h('p.tiny', {}, `From ${giver}${giverAt ? ` in ${giverAt}` : ''}.`) : null,
       h('span.label', {}, 'Steps'), h('ol.j-steps', {}, steps),
@@ -85,11 +86,11 @@ export function createJournal({ atlas, net, me, hud, worldMap }) {
   (document.getElementById('hud') || document.body).appendChild(tracker);
   let trackKey = '';
   function drawTracker() {
-    const qs = list();
+    const qs = list().filter(q => atlas.isTracked(q.id));      // S2: only what you track is on the HUD
     const p = me();
     tracker.hidden = !qs.length;
-    if (!qs.length) return;
-    const t = atlas.trackedQuest || qs[0];
+    if (!qs.length) { trackKey = ''; return; }
+    const t = (atlas.trackedQuest && atlas.isTracked(atlas.trackedQuest.id) ? atlas.trackedQuest : null) || qs[0];
     const others = qs.filter(q => q.id !== t.id).slice(0, 3);
     const key = JSON.stringify([t.id, t.goal, t.loc && [Math.round(t.loc.x), Math.round(t.loc.z)], p && Math.round(p.x / 10), p && Math.round(p.z / 10), others.map(q => q.id + q.goal)]);
     if (key === trackKey) return;

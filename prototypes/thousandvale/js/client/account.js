@@ -189,7 +189,7 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     b.dataset.tip = n && n.claimed ? `Account: ${n.username}` : 'Account: you are a guest — claim it to keep it (free)';
   }
 
-  const api = { wire, panel, draw, showChars, tab, refreshPill, portraitFor: null,
+  const api = { wire, panel, draw, showChars, tab, refreshPill, portraitFor: null, hasChars: () => lastChars.length > 0,
     /** Redraw the title's character list (a portrait arrived, or a new charList). */
     redrawChars(chars = null) { if (chars) lastChars = chars; if (lastChars.length && !T.mine.hidden) showChars(lastChars, lastUser); } };
   return api;

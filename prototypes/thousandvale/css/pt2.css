@@ -16,7 +16,7 @@
 .center-stack .toasts { min-height: 0; }
 .ask-pops { display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
 .ask-pops:empty { display: none; }
-.ask-pops .invite-pop { position: static !important; display: flex; align-items: center; gap: 10px; padding: 9px 12px 9px 16px; background: var(--panel-solid); border: 1px solid var(--edge-strong); border-radius: 10px; box-shadow: var(--shadow), 0 0 0 3px rgba(241, 213, 149, 0.12); pointer-events: auto; animation: popIn 0.25s ease-out; font-size: 15px; }
+.ask-pops .invite-pop { position: static !important; transform: none !important; width: auto !important; flex-wrap: nowrap; display: flex; align-items: center; gap: 10px; padding: 9px 12px 9px 16px; background: var(--panel-solid); border: 1px solid var(--edge-strong); border-radius: 10px; box-shadow: var(--shadow), 0 0 0 3px rgba(241, 213, 149, 0.12); pointer-events: auto; animation: popIn 0.25s ease-out; font-size: 15px; }
 .ask-pops .invite-pop[hidden] { display: none !important; }
 .ask-pops .invite-pop .primary { width: auto; padding: 6px 16px; font-size: 14px; }
 .ask-pops .invite-pop .ghost { padding: 6px 12px; align-self: stretch; }
@@ -173,3 +173,62 @@
 .inv-gearbox { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
 .inv-gearbox input { accent-color: var(--gold); margin: 0; }
 .trade-panel .tr-half { min-width: 0; } @media (max-width: 760px) { .trade-panel { width: calc(100vw - 16px) !important; } }
+.shop-says { margin: 0 0 8px; font-style: italic; color: var(--ink-dim); }
+.shop-cats { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; } .shop-cats .chip { padding: 2px 9px; font-size: 12px; text-transform: capitalize; }
+.sr-name small.desc { color: var(--ink-faint); font-size: 12px; }
+/* potions and food on keys 7 8 9 0 */
+.hb-sep { width: 1px; align-self: stretch; margin: 4px 2px; background: var(--edge); }
+.hb-slot .hb-face { display: grid; place-items: center; width: 100%; height: 100%; }
+.hb-slot .hb-face img { width: 82%; height: 82%; object-fit: contain; filter: drop-shadow(0 1px 1px #000); }
+.hb-slot .hb-face .glyph { font-family: var(--serif); color: var(--gold-hi); font-size: 18px; }
+.hb-slot .hb-n { position: absolute; right: 3px; bottom: 1px; font-size: 11px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px #000; }
+.hb-slot.none-left img { filter: grayscale(1) brightness(0.5); }
+.hb-slot.drop { outline: 2px dashed var(--gold-hi); }
+.actionbar.eating .hb-sep { background: var(--good); box-shadow: 0 0 6px var(--good); }
+@media (max-width: 760px) { .hb-slot { width: 40px !important; height: 40px !important; } .hb-sep { display: none; } }
+@media (max-width: 760px) { .actionbar { flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 16px); } }
+@media (max-width: 760px) { .ask-pops .invite-pop { flex-wrap: wrap !important; justify-content: center; max-width: calc(100vw - 24px); } }
+/* C's follow-up: own channel cast bar (recall) + buff icons */
+.castbar { position: absolute; left: 50%; bottom: 122px; transform: translateX(-50%); width: min(280px, calc(100vw - 40px)); height: 18px; border-radius: 5px; background: rgba(0, 0, 0, 0.7); border: 1px solid var(--edge-strong); overflow: hidden; }
+.castbar i { position: absolute; inset: 0 auto 0 0; width: 0; background: linear-gradient(90deg, #7a5a1e, var(--gold-hi)); }
+.castbar span { position: absolute; left: 8px; top: 0; line-height: 17px; font-size: 12px; font-weight: 700; text-shadow: 0 1px 2px #000; }
+.castbar em { position: absolute; right: 8px; top: 0; line-height: 17px; font-size: 11px; font-style: normal; text-shadow: 0 1px 2px #000; }
+.castbar.broken i { background: #8c1f15; } .castbar.done i { background: linear-gradient(90deg, #2f9a3d, #6fd86f); }
+.buffrow { position: absolute; left: 76px; top: 82px; display: flex; gap: 4px; pointer-events: auto; }
+.buff { position: relative; width: 26px; height: 26px; border-radius: 5px; display: grid; place-items: center; background: radial-gradient(circle at 40% 35%, #3a2f22, #15110c 75%); border: 1px solid var(--edge); font-size: 13px; color: var(--gold-hi); }
+.buff.item { border-color: #63e07a; }
+.buff em { position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); font-size: 10px; font-style: normal; color: var(--ink); text-shadow: 0 1px 2px #000; white-space: nowrap; }
+/* R6: mana bars (number on hover, like XP) */
+.bar.mp { height: 8px; margin-top: 4px; }
+.bar.mp i { background: linear-gradient(180deg, #5a8cff, #2f56c8 60%, #1d357e); transition: width 0.15s; }
+.bar.mp span { display: none; }
+.bar.mp:hover { height: 15px; } .bar.mp:hover span { display: grid; font-size: 11px; }
+.pmember .bar.mp { height: 4px; margin-top: 2px; }
+.pmember .bar.mp:hover { height: 4px; }
+@media (max-width: 760px) { .actionbar { left: 6px !important; right: 6px; transform: none !important; max-width: none; } }
+/* S1: the column under the minimap: event panel, event frame, quest tracker — stacked, never overlapping */
+.right-col { position: absolute; top: 218px; right: 14px; width: 300px; display: flex; flex-direction: column; align-items: stretch; gap: 6px; pointer-events: none; }
+.right-col > * { position: static !important; width: auto !important; left: auto !important; right: auto !important; top: auto !important; }
+.right-col > .tv-event, .right-col > .tv-tracker, .right-col > .tv-eventframe { pointer-events: auto; }
+.tv-event { position: relative; }
+.tv-event .ev-x { position: absolute; top: 4px; right: 4px; padding: 0 7px !important; font-size: 14px; line-height: 1.4; }
+.ev-bubble { position: absolute; top: 150px; right: 204px; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; pointer-events: auto;
+  background: radial-gradient(circle at 40% 35%, #6b3a1a, #2a160a 75%); border: 2px solid #ffb36a; color: #ffd9a0; font-size: 17px; box-shadow: 0 0 12px rgba(255, 150, 70, 0.6); animation: evpulse 2.4s ease-in-out infinite; }
+@media (max-width: 760px) { .right-col { left: 8px; right: 8px; width: auto; top: 214px; } .ev-bubble { right: 8px; top: 196px; } }
+.meal-pill { position: absolute; left: 50%; bottom: 146px; transform: translateX(-50%); padding: 3px 12px; border-radius: 12px; background: rgba(20, 40, 18, 0.85); border: 1px solid var(--good); font-size: 13px; display: flex; gap: 8px; }
+.meal-pill b { color: #b9f0a0; } .meal-pill em { font-style: normal; color: var(--ink); }
+/* S23: a corpse with loot for you: a star on its nameplate, coloured by the best thing in it */
+.plate.has-loot .plate-name::after { content: ' ✦'; color: #e8e0c8; text-shadow: 0 0 6px rgba(255, 240, 200, 0.9); }
+.plate.loot-magic .plate-name::after { color: #6fa8ff; text-shadow: 0 0 8px #4f86ff; }
+.plate.loot-rare .plate-name::after { color: #ffd54d; text-shadow: 0 0 8px #e6c23a; }
+.plate.loot-epic .plate-name::after { color: #d8a8ff; text-shadow: 0 0 8px #b46aff; }
+.plate.loot-legendary .plate-name::after, .plate.loot-unique .plate-name::after { color: #ff9a3d; text-shadow: 0 0 8px #ff8a2a; }
+.plate.loot-set .plate-name::after { color: #63e07a; text-shadow: 0 0 8px #63e07a; }
+.plate.has-loot.dead .plate-name { color: #d0c8b0; }
+.plate-title { font-size: 11px; font-weight: 600; color: #f1d595; text-shadow: 0 1px 2px #000, 0 0 5px rgba(0,0,0,0.8); letter-spacing: 0.02em; }
+/* S4: ranked targets — a bigger frame and bar, the rank in the border colour */
+.unitframe.target.ranked { min-width: 300px; padding-top: 9px; padding-bottom: 9px; }
+.unitframe.target.ranked .bar.hp { height: 20px; }
+.unitframe.target[data-rank='rare'], .unitframe.target[data-rank='elite'], .unitframe.target[data-rank='champion'] { border-color: #ffcf3a; box-shadow: var(--shadow), 0 0 14px rgba(255, 207, 58, 0.35); }
+.unitframe.target[data-rank='boss'], .unitframe.target[data-rank='miniboss'] { border-color: #ff5a3a; box-shadow: var(--shadow), 0 0 16px rgba(255, 90, 58, 0.45); }
+.unitframe.target.ranked .uf-name::before { content: '★ '; color: #ffcf3a; }

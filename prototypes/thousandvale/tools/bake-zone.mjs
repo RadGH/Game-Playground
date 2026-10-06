@@ -35,6 +35,7 @@ import { addZoneSites, TOWN_RADIUS } from './lib/zone-sites.mjs';
 import { encodeScatter, encodeNav, sameLayerFile } from './lib/zone-layers.mjs';
 import { carveTheme, inFen, shoreDistance, cutCliff } from './lib/zone-theme.mjs';
 import { layPaths } from './lib/zone-paths.mjs';
+import { planTownWalls, wallNav, wallPlacements, WALL_DEFAULTS } from './lib/zone-walls.mjs';
 import { SET_SURFACES, specsFor, layLanes, resolveSetPieces, prepareEPieces, carvePonds, paintSetPieces, setPieceScatter, setPieceKeepOff, setPiecePlacements, setPieceNav } from './lib/zone-setpieces.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -89,7 +90,7 @@ function placesFor(id) {
   let places = null, sheet = null;
   try { places = JSON.parse(readFileSync(join(HERE, '..', 'data', 'provinces', `${sid.sheet}-places.json`), 'utf8')).zones?.[sid.zone] || null; } catch { /* none */ }
   try { sheet = JSON.parse(readFileSync(join(HERE, '..', 'data', 'provinces', `${sid.sheet}.json`), 'utf8')).zones?.[sid.zone] || null; } catch { /* none */ }
-  return { rename: places?.rename || {}, asks: places?.asks || [], town: sheet?.town || null, setPieces: places?.setPieces || [], lanes: places?.lanes || [] };
+  return { rename: places?.rename || {}, asks: places?.asks || [], town: sheet?.town || null, archetype: sheet?.archetype || null, setPieces: places?.setPieces || [], lanes: places?.lanes || [] };
 }
 let SITE_PINS = {};
 try { SITE_PINS = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'site-pins.json'), 'utf8')); } catch { /* none */ }
@@ -100,6 +101,8 @@ try { OFFICES = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'town-
 const OFFICE_ROLE = OFFICES ? Object.fromEntries(Object.entries(OFFICES.roles).map(([role, want]) => [want, role]).reverse()) : {};
 let E_SETPIECES = [];
 try { E_SETPIECES = JSON.parse(readFileSync(join(HERE, '..', 'data', 'vignettes', 'setpieces.json'), 'utf8')).vignettes || []; } catch { /* none */ }
+let TOWN_WALLS = WALL_DEFAULTS;
+try { TOWN_WALLS = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'town-walls.json'), 'utf8')); } catch { /* defaults */ }
 let THEMES = {};
 try { THEMES = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'zone-themes.json'), 'utf8')); } catch { /* none */ }
 /** The E sheet zone id for a world zone, if any (written into meta so E can match on its own ids). */
@@ -546,7 +549,28 @@ export function bakeZone(id, opts = {}) {
   const keepOff = setPieceKeepOff(pieces);
   const paths = layPaths({ t: terrain, biome, SIZE, STEP, ZM, roadId: ROAD_SURFACE_ID, sites: meta.sites, vignettes, plans,
     blocked: keepOff, extraStarts: pieces.filter(p => p.pathFrom).map(p => ({ id: p.id, x: p.pathFrom.x, z: p.pathFrom.z, r: p.pathFrom.r || 0 })) });
-  const placements = [...placementsFor(meta, plans, roads, bridges, paths), ...setPiecePlacements(pieces, { groundAt: terrain.groundAt, culture: plans[0]?.culture || 'human' })];
+  // play-test 4 (S7): every planned settlement's perimeter — stone curtain + towers, palisade, barricade or fence by size
+  // and the zone's archetype (data/world/town-walls.json); a gate wherever a road, lane, street or path crosses the ring,
+  // turned to face OUT along it (tools/lib/zone-walls.mjs). SOLID in nav.bin below.
+  const ways = [
+    ...roads.map(r => ({ id: r.id, kind: 'road', width: r.width, pts: r.pts })),
+    ...plans.flatMap(pl => pl.streets.map((st, i) => ({ id: `${slug(pl.town.name)}_street_${i}`, kind: 'street', width: st.width, pts: st.pts.map(([x, z]) => [pl.origin.x + x, pl.origin.z + z]) }))),
+    ...paths.map(p => ({ id: p.id, kind: 'path', width: p.width, pts: p.pts })),
+  ];
+  const walls = planTownWalls({ plans, ways, groundAt: terrain.groundAt, wetAt: (x, z) => terrain.waterAt(x, z).kind !== 'none',
+    discs: vignettes.filter(v => Number.isFinite(v.x)).map(v => ({ x: v.x, z: v.z, r: v.radius || 1.5, id: v.id })), archetype: PL?.archetype || null, cfg: TOWN_WALLS, slug });
+  // the approaches: a road is painted only outside its town circle, so its last stretch to the gate (and on in to the
+  // high street) is painted here; a road sharing another's gate is led round to it outside the wall
+  const inPlot = (x, z) => plans.some(pl => pl.plots.some(p => { const dx = x - pl.origin.x - p.cx, dz = z - pl.origin.z - p.cz, c = Math.cos(p.angle), s = Math.sin(p.angle); return Math.abs(dx * c + dz * s) <= p.w / 2 + 0.5 && Math.abs(-dx * s + dz * c) <= p.d / 2 + 0.5; }));
+  for (const w of walls) for (const g of w.gates) for (const a of g.approaches) {
+    const half = a.width / 2, xs = a.pts.map(p => p[0]), zs = a.pts.map(p => p[1]);
+    for (let j = Math.max(0, Math.floor((Math.min(...zs) - half) / STEP)); j <= Math.min(SIZE - 1, Math.ceil((Math.max(...zs) + half) / STEP)); j++)
+      for (let i = Math.max(0, Math.floor((Math.min(...xs) - half) / STEP)); i <= Math.min(SIZE - 1, Math.ceil((Math.max(...xs) + half) / STEP)); i++) {
+        const o = j * SIZE + i; if (biome[o] === ROAD_SURFACE_ID || terrain.waterAt(i * STEP, j * STEP).kind !== 'none') continue;
+        if (polyDist(a.pts, i * STEP, j * STEP)[0] <= half && !inPlot(i * STEP, j * STEP)) biome[o] = ROAD_SURFACE_ID;
+      }
+  }
+  const placements = [...placementsFor(meta, plans, roads, bridges, paths), ...wallPlacements(walls), ...setPiecePlacements(pieces, { groundAt: terrain.groundAt, culture: plans[0]?.culture || 'human' })];
   const keepClear = [
     ...placed.map(s => ({ x: s.x, z: s.z, r: s.radius + 6 })),
     ...meta.sites.filter(s => s.type === 'dungeon').map(s => ({ x: s.x, z: s.z, r: 14 })),
@@ -561,8 +585,8 @@ export function bakeZone(id, opts = {}) {
   // (stream E's own set-piece buildings are NOT stamped: E places its NPCs and checks its discs against nav, and its own
   // hut must not read as 'town ground' to its own placer — E's vignette collision is E's/A's, like every vignette prop)
   const pieceNav = setPieceNav(pieces);
-  const nav = navFor(terrain, biome, scatter, plans, decks, pieceNav);
-  return { meta, height, waterTop: wTop, waterKind: wKind, biome, terrain, plans, townPlan: plans.find(p => p.town.hub) || null, placements, roads, bridges, paths, scatter, nav, vignettesUsed: vignettes.length, pieces, ePieces, pieceLog: SP.log };
+  const nav = navFor(terrain, biome, scatter, plans, decks, pieceNav, walls);
+  return { walls, meta, height, waterTop: wTop, waterKind: wKind, biome, terrain, plans, townPlan: plans.find(p => p.town.hub) || null, placements, roads, bridges, paths, scatter, nav, vignettesUsed: vignettes.length, pieces, ePieces, pieceLog: SP.log };
 }
 
 // ---------------------------------------------------------------------------------------------- scatter
@@ -630,7 +654,7 @@ function scatterFor(W, zone, t, biome, keepClear, keepOff = () => false) {
 }
 
 // ---------------------------------------------------------------------------------------------- nav
-function navFor(t, biome, scatter, plans, decks = [], extra = { buildings: [], walls: [] }) {
+function navFor(t, biome, scatter, plans, decks = [], extra = { buildings: [], walls: [] }, townWalls = []) {
   const bits = new Uint8Array(SIZE * SIZE), roadId = t.biomes.length - 1;
   for (let j = 0; j < SIZE; j++) for (let i = 0; i < SIZE; i++) {
     const x = i * STEP, z = j * STEP, o = j * SIZE + i;
@@ -680,6 +704,8 @@ function navFor(t, biome, scatter, plans, decks = [], extra = { buildings: [], w
       if (i >= 0 && j >= 0 && i < SIZE && j < SIZE) bits[j * SIZE + i] |= NAV.SOLID;
     }
   }
+  // town perimeters (play-test 4, S7): runs + towers SOLID, gate openings left as they are
+  wallNav(townWalls, { SIZE, STEP, mark: (i, j) => { bits[j * SIZE + i] |= NAV.SOLID; } });
   for (const plan of plans) {
     const { x: tx, z: tz } = plan.origin;
     stamp(tx, tz, plan.town.radius, NAV.TOWN);
@@ -752,7 +778,7 @@ export function placementsFor(meta, plans, roads = [], bridges = [], paths = [])
           ...(p.office ? { office: p.want, role: OFFICE_ROLE[p.want] || null, lit: !!OFFICES?.offices?.[p.want]?.lit, label: OFFICES?.offices?.[p.want]?.label || null } : {}) },
       });
     });
-    if (plan.wall) out.push({ kind: 'town_wall', id: `${town}_wall`, x: r2(tx), z: r2(tz), yaw: 0, data: { town, radius: plan.wallRadius, gates: plan.wall.gates } });
+    // (a proctown wall's record is written by tools/lib/zone-walls.mjs now, with every other settlement's perimeter)
   }
   // a road stops at a town's edge: inside, the town's own high streets (proctown `links`) carry it on
   const circles = plans.map(p => ({ x: p.origin.x, z: p.origin.z, r: p.town.radius }));
@@ -817,7 +843,7 @@ export function summarise(b) {
 export function zoneFiles(b) {
   const id = b.meta.zone;
   const pl = JSON.stringify({
-    _doc: 'Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall, road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).',
+    _doc: 'Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall (play-test 4: every planned settlement; data.style/material/tier/h/thick/tint/radius, runs [[[x,z,h]…]…] open polylines between openings, towers [{x,z,h,yaw}], gates [{id,x,z,h,yaw = the way OUT along the road,out:[dx,dz],width,pass,kind gatehouse|posts|gap,way,ways,led,ends,approaches}], openings [{kind water|keep,ends,grate}] — SOLID in nav.bin except the gates; tools/lib/zone-walls.mjs), road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).',
     zone: id, terrainHash: b.meta.inputHash, placements: b.placements,
   }, null, 1) + '\n';
   const lm = { extent: ZM, terrainHash: b.meta.inputHash, zone: id };

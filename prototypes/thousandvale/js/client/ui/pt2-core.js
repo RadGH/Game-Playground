@@ -211,3 +211,19 @@ export function gearShown(gear, { showGear = true, showHelm = true } = {}) {
   if (!showHelm) delete out.head;
   return out;
 }
+
+// ---- R3: an event that has not started says WHEN, never just "starting soon" ------------------------------
+/** "Starts in 1:23" from a wall-clock start time; "Starts when someone comes near" when it waits for a player. */
+export function soonText(at, now = Date.now(), { near = false } = {}) {
+  if (!Number.isFinite(at)) return near ? 'Starts as you arrive' : 'Starts when someone comes near';
+  const s = Math.max(0, Math.ceil((at - now) / 1000));
+  if (s <= 0) return 'Starting now';
+  return s >= 60 ? `Starts in ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` : `Starts in ${s} s`;
+}
+/** R3: the line for an event in each state (protocol §19: ready | soon | live | cooldown). */
+export function eventStateText(e, now = Date.now()) {
+  if (e.state === 'soon') return soonText(e.at, now);
+  if (e.state === 'cooldown') { if (!Number.isFinite(e.at)) return 'Resting'; const s = Math.max(0, Math.ceil((e.at - now) / 1000)); return s ? `Ready again in ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` : 'Ready again'; }
+  if (e.state === 'live') return 'Happening now';
+  return 'Comes alive when you come near';
+}

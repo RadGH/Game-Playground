@@ -103,7 +103,7 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
     lastMarkers = markers();
     if (atlas.dungeon) {
       const d = atlas.dungeon;
-      drawDungeon(g, v, { floors: d.floors, cell: d.cell, fog: d.fog, markers: lastMarkers, opts: {} });
+      drawDungeon(g, v, { floors: d.floors, cell: d.cell, fog: d.fog, markers: lastMarkers, opts: { names: state.opts.names } });
     } else {
       const detail = state.scale > 0.45 ? detailOnScreen(v) : null;
       drawMap(g, v, { model: atlas.model, world: atlas.world, zoneImage: k => atlas.src.zoneImage(k), fog: atlas.fog, markers: lastMarkers, detail, opts: { ...state.opts, level: me()?.level || 1 } });

@@ -2,6 +2,7 @@
   "id": "rare_green_shard",
   "name": "The Green Shard",
   "tier": "rare",
+  "secret": true,
   "zone": "sunken_wolds",
   "body": "glass_shard",
   "place": "hangs over a sinkhole in the Sunken Wolds, humming; plants grow strangely in its light",

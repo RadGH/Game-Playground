@@ -299,6 +299,14 @@ function base(ctx) {
   p.chest[0] = posture.chest; p.head[0] = posture.head - posture.chest * 0.6;
   const k = posture.knees || 0;
   p.kneeL[0] = p.kneeR[0] = k; p.legL[0] = p.legR[0] = -k * 0.5; p.footL[0] = p.footR[0] = -k * 0.5;
+  /**
+   * PLAY-TEST 4 (S6) — A FOCUS STANDS UP OUT OF THE FIST. The orb, the reliquary and the effigy are
+   * built up the hand's +y, which is the way to the ELBOW, so with no grip turn they lay back along
+   * the forearm ("rotated 90 degrees backwards"). A quarter turn of the grip about x swings the
+   * hand's +y onto its +z: with the forearm held out level (see `carry`), that is straight up.
+   * Every clip starts from this pose, so a cast or an emote keeps the focus out of the arm too.
+   */
+  if (ctx.hold.left === 'orb') p.gripL = [PI / 2, 0, 0];
   return p;
 }
 
@@ -326,7 +334,8 @@ function carry(p, ctx, mode, swing = 0) {
     if (mode === 'ready') { p.armL = [-0.45, 0.9, 0.05]; p.elbowL = [-1.35, -0.4, 0]; }
     else { p.armL[2] -= 0.08; p.elbowL[0] = -0.3; }
   } else if (h.left === 'book') { p.armL[0] = -0.35; p.elbowL = [-1.25, 0.2, 0]; p.handL = [0, 0, 0.2]; }
-  else if (h.left === 'torch' || h.left === 'orb' || h.left === 'caster') { p.elbowL[0] = mode === 'ready' ? -1.2 : -0.7; if (lp) aims.L = [lp[mode] ?? lp.idle, 0, 0]; }
+  else if (h.left === 'orb') { p.armL[0] = -0.12; p.elbowL[0] = mode === 'ready' ? -1.55 : -1.35; p.handL = [0, 0, 0.1]; }   // forearm out level, the focus upright on the fist (S6)
+  else if (h.left === 'torch' || h.left === 'caster') { p.elbowL[0] = mode === 'ready' ? -1.2 : -0.7; if (lp) aims.L = [lp[mode] ?? lp.idle, 0, 0]; }
   else if (h.dualTwo && h.left === 'heavy') {
     if (mode === 'ready') { p.armL = [-0.6, 0, 0.1]; p.elbowL[0] = -0.9; p.armR = [-0.6, 0, -0.1]; p.elbowR[0] = -0.9; aims.L = [-2.0, 0, -0.3]; aims.R = [-2.0, 0, 0.3]; }
     else { p.armL = [-0.55 + swing * 0.1, -0.1, -0.38]; p.elbowL = [-2.05, 0, 0]; aims.L = [2.5, -0.2, -0.15]; }

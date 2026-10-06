@@ -145,7 +145,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
   /** `fx {kind, …}` from the rules. */
   function onFx(ev) {
     const a = actorAt(ev.id);
-    const el = elementOf(ev.element || (ev.kind === 'arrow' || ev.kind === 'shot' ? 'physical' : 'arcane'));
+    const el = elementOf(ev.element || ev.el || (ev.kind === 'arrow' || ev.kind === 'shot' ? 'physical' : 'arcane'));
     switch (ev.kind) {
       case 'bolt': case 'arrow': case 'shot': {
         const L = lookOf(ev.skill);

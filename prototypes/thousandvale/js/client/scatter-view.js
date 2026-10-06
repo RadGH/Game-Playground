@@ -30,7 +30,7 @@ export const KIND_ART = [
   { key: 'reed', fern: ['reed', 'cattail'], scale: 1 },
   // play-test 2 (Q18, B's set pieces): orchard fruit trees — a young broadleaf, short and broad-crowned — and hedgerow
   // bushes, clipped wide and low
-  { key: 'tree_fruit', tree: ['sapling'], scale: 1.45, squash: [1.35, 0.95, 1.35] },
+  { key: 'tree_fruit', tree: ['oak', 'beech'], scale: 0.3, squash: [1.4, 0.95, 1.4] },
   { key: 'hedge', bush: ['shrub'], scale: 1.15, squash: [1.5, 0.85, 1.5] },
 ];
 /** How far each class of thing is drawn, by quality: [full detail, simplified, cards / last]. */

@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E (play-test 2, Q28). A low-level class quest for each of the 30 classes, merged into zone 'test' (the Torbor Fields) via test.json `include`. `npcs` are the class trainers (role 'trainer', `trains` = class ids; `at` = a set piece id from data/vignettes/setpieces.json, or Torborhold with an `office` kind resolved by data/provinces/offices.json). A quest with `classes` is offered only to those classes. Rewards: `item` {tier, slot, base (items.json base key), name (bespoke)}; `unlock: 'companion'` (rules.unlock: the class companion now instead of level 10) for the 13 companion classes; `perks: 1` (one extra perk-forest point) for the other 17. `rewardText` = the player-facing summary.",
+  "_doc": "Stream E (play-test 2, Q28). A low-level class quest for each of the 30 classes, merged into zone 'test' (the Torbor Fields) via test.json `include`. `npcs` are the class trainers (role 'trainer', `trains` = class ids; `at` = a set piece id from data/vignettes/setpieces.json, or Torborhold with an `office` kind resolved by data/provinces/offices.json). A quest with `classes` is offered only to those classes. Rewards: `item` {tier, slot, base (items.json base key), name (bespoke)}; `unlock: 'companion'` (rules.unlock: the class companion now instead of level 10) for the 13 companion classes; `perks: 1` (one extra perk-forest point) for the other 17. `rewardText` = the player-facing summary. S10 (play-test 4): `needsGiver: true` on the quests whose trainer hands you a companion — those are turned in in person; every other quest pays itself where you finish it (remote turn-in).",
   "zone": "test",
   "part": "classes",
   "npcs": {
@@ -574,7 +574,8 @@
       "rewardText": "A rare mace, Ledger of the Unquiet, and your companion comes to you now instead of at level 10.",
       "classes": [
         "priest"
-      ]
+      ],
+      "needsGiver": true
     },
     {
       "id": "class_paladin",
@@ -717,7 +718,8 @@
       "rewardText": "A rare wand, The Coin-Toss Wand, and your companion comes to you now instead of at level 10.",
       "classes": [
         "sorcerer"
-      ]
+      ],
+      "needsGiver": true
     },
     {
       "id": "class_chronomancer",
@@ -815,7 +817,8 @@
       "rewardText": "A rare robe, Lullaby Robes, and your companion comes to you now instead of at level 10.",
       "classes": [
         "enchanter"
-      ]
+      ],
+      "needsGiver": true
     },
     {
       "id": "class_stormcaller",
@@ -862,7 +865,8 @@
       "rewardText": "A rare wand, Pondstrike Wand, and your companion comes to you now instead of at level 10.",
       "classes": [
         "stormcaller"
-      ]
+      ],
+      "needsGiver": true
     },
     {
       "id": "class_pyromancer",
@@ -908,7 +912,8 @@
       "rewardText": "A rare scepter, Restraint of Ashby, and your companion comes to you now instead of at level 10.",
       "classes": [
         "pyromancer"
-      ]
+      ],
+      "needsGiver": true
     },
     {
       "id": "class_rogue",
@@ -1151,7 +1156,8 @@
       "rewardText": "A rare shortbow, Greyfletch's Promise, and your companion comes to you now instead of at level 10.",
       "classes": [
         "ranger"
-      ]
+      ],
+      "needsGiver": true
     },
     {
       "id": "class_witch_hunter",
@@ -1250,7 +1256,8 @@
       "rewardText": "A rare crossbow, Brother's Grudge, and your companion comes to you now instead of at level 10.",
       "classes": [
         "demon_hunter"
-      ]
+      ],
+      "needsGiver": true
     },
     {
       "id": "class_druid",
@@ -1297,7 +1304,8 @@
       "rewardText": "A rare quarterstaff, Rootgrown Staff, and your companion comes to you now instead of at level 10.",
       "classes": [
         "druid"
-      ]
+      ],
+      "needsGiver": true
     },
     {
       "id": "class_shaman",
@@ -1351,7 +1359,8 @@
       "rewardText": "A rare scepter, The Bear's Post, and your companion comes to you now instead of at level 10.",
       "classes": [
         "shaman"
-      ]
+      ],
+      "needsGiver": true
     },
     {
       "id": "class_necromancer",
@@ -1400,7 +1409,8 @@
       "rewardText": "A rare staff, Quell's Good Spade, and your companion comes to you now instead of at level 10.",
       "classes": [
         "necromancer"
-      ]
+      ],
+      "needsGiver": true
     },
     {
       "id": "class_warlock",
@@ -1447,7 +1457,8 @@
       "rewardText": "A rare wand, Coldharrow's Bargain, and your companion comes to you now instead of at level 10.",
       "classes": [
         "warlock"
-      ]
+      ],
+      "needsGiver": true
     },
     {
       "id": "class_monk",
@@ -1540,7 +1551,8 @@
       "rewardText": "A rare scepter, The Honest Dream, and your companion comes to you now instead of at level 10.",
       "classes": [
         "oracle"
-      ]
+      ],
+      "needsGiver": true
     },
     {
       "id": "class_tinker",
@@ -1588,7 +1600,8 @@
       "rewardText": "A rare crossbow, Millward's Crank-Bow, and your companion comes to you now instead of at level 10.",
       "classes": [
         "tinker"
-      ]
+      ],
+      "needsGiver": true
     },
     {
       "id": "class_bard",

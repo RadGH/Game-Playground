@@ -271,7 +271,7 @@ button.icon { font-size: 20px; line-height: 1; }
 .callout { position: absolute; top: 19vh; left: 50%; transform: translateX(-50%) scale(0.9); max-width: 80vw; text-align: center; opacity: 0; transition: opacity 0.35s, transform 0.35s;
   font-family: var(--serif); font-weight: 600; font-size: clamp(22px, 2.6vw, 34px); letter-spacing: 0.03em; color: #ffd9c7; text-shadow: 0 2px 4px #000, 0 0 18px rgba(255,80,40,0.55); }
 .callout.show { opacity: 1; transform: translateX(-50%) scale(1); }
-.callout.warn { color: #ffb36a; } .callout.emote { color: #f3ead8; font-style: italic; font-weight: 500; text-shadow: 0 2px 6px #000; }
+.callout.warn { color: #ffb36a; } .callout.cast { color: #ffc38a; } .callout.emote { color: #f3ead8; font-style: italic; font-weight: 500; text-shadow: 0 2px 6px #000; }
 .callout.phase { color: var(--gold-hi); text-shadow: 0 2px 4px #000, 0 0 18px rgba(241,213,149,0.5); }
 .callout.enrage { color: #ff6a55; font-size: clamp(28px, 3.4vw, 44px); text-transform: uppercase; animation: shake 0.4s; }
 .callout.victory { color: var(--gold-hi); font-size: clamp(28px, 3.4vw, 44px); }
@@ -322,7 +322,8 @@ button.icon { font-size: 20px; line-height: 1; }
 /* elite / boss nameplates */
 .plate.rank-elite .plate-name, .plate.rank-champion .plate-name { color: #ffd56a; }
 .plate.rank-elite .plate-bar, .plate.rank-champion .plate-bar { width: 96px; border-color: #c99a3a; }
-.plate.rank-rare .plate-name { color: #8fb4ff; }
+.plate.rank-rare .plate-name { color: #ffd040; font-size: 14px; } .plate.rank-rare .plate-bar { width: 120px; height: 9px; border-color: #ffd040; box-shadow: 0 0 6px rgba(255,208,64,0.6); }
+.plate.rank-rare .plate-lvl::after { content: "\2605"; margin-left: 2px; }
 .plate.rank-boss .plate-name { color: #ff9a7a; font-family: var(--serif); font-size: 16px; }
 .plate.rank-boss .plate-bar { display: none; }
 .plate.rank-elite .plate-lvl::after, .plate.rank-champion .plate-lvl::after { content: '+'; }

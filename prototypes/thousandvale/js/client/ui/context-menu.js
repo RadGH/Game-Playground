@@ -12,6 +12,7 @@ import { h, createPanel } from '../ui-panel.js';
 import { contextItems, followRefusal, followStep, findByName, className } from './pt2-core.js';
 import { send2 } from './net2.js';
 import { SLOT_NAME, RARITY_NAME } from './inv-core.js';
+import { rememberItems } from './item-card.js';
 
 export function createContextMenu({ net, infoOf = () => null, hud, actors, controls, me, chat, social, friends, setTarget, onTalk, onLoot, isLootable, partyInfo, tradeAsk }) {
   const menu = h('div.name-menu.ent-menu', { role: 'menu', hidden: true });
@@ -122,9 +123,22 @@ export function createContextMenu({ net, infoOf = () => null, hud, actors, contr
     }
     insp.fill(...facts);
     insp.open();
+    // a player: ask the server for the whole picture (inspectR: name, clsName, level, look, equipment)
+    if (a.kind === 'player') { inspId = id; const n = net(); if (typeof n?.inspect === 'function') n.inspect(id); }
+  }
+  let inspId = null;
+  function onInspectR(r) {
+    if (!r || !insp.isOpen) return;
+    const a = actors.get(inspId);
+    insp.setTitle(r.name || a?.name || 'Inspect', `Level ${r.level ?? a?.level ?? '?'} ${r.clsName || className(r.cls)}`);
+    const rows = Object.entries(r.equipment || {}).filter(([, g]) => g);
+    insp.fill(h('h4', {}, 'Wearing'), rows.length ? h('ul.insp-gear', {}, ...rows.map(([slot, g]) => h('li', { className: 'r-' + (g.rarity || 'normal'), dataset: g.uid != null ? { tipRender: 'item', tipItem: String(g.uid) } : {} },
+      h('span', {}, SLOT_NAME[slot] || slot), h('b', {}, String(g.name || g.base || '').replace(/_/g, ' ')), h('em', {}, RARITY_NAME[g.rarity] || '')))) : h('p.dim', {}, 'Plain travelling clothes.'));
+    rememberItems(rows.map(([, g]) => g));
   }
 
   function wire(n) {
+    n.on('inspectR', onInspectR);
     n.on('followR', r => { if (r && r.ok === false && F.id === r.id) stopFollow(r.msg || 'You cannot follow them.'); });
     n.on('joined', () => { if (F.id != null) stopFollow(null); });
   }

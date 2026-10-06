@@ -863,6 +863,10 @@
   "town": [
    "smith",
    "merchant",
+   "trader",
+   "armourer",
+   "apothecary",
+   "provisioner",
    "innkeeper",
    "elder",
    "healer",
@@ -879,6 +883,12 @@
    "smith",
    "merchant",
    "merchant",
+   "trader",
+   "armourer",
+   "bowyer",
+   "apothecary",
+   "tailor",
+   "provisioner",
    "innkeeper",
    "innkeeper",
    "elder",
@@ -898,13 +908,27 @@
    "innkeeper",
    "farmer",
    "miller",
+   "townsfolk",
    "townsfolk"
   ],
   "guards": {
    "town": 4,
    "city": 8,
-   "hamlet": 1
+   "hamlet": 1,
+   "village": 2
   },
-  "_note": "play-test 2 (Q10): where data/provinces/offices.json lists a town, ITS offices are the working NPCs (one per plot, quest NPCs included via `npc`); perTown then only adds townsfolk and guards. perTown's role lists stay for towns without an offices entry."
+  "_note": "play-test 2 (Q10): where data/provinces/offices.json lists a town, ITS offices are the working NPCs (one per plot, quest NPCs included via `npc`); perTown then only adds townsfolk and guards. perTown's role lists stay for towns without an offices entry.",
+  "village": [
+   "merchant",
+   "innkeeper",
+   "smith",
+   "provisioner",
+   "farmer",
+   "miller",
+   "townsfolk",
+   "townsfolk",
+   "townsfolk"
+  ],
+  "_note4": "play-test 4 (S11): `town`/`city` gained traders (market, armourer, apothecary, provisioner…) for the towns with no offices.json entry (Mill End, Three Wheels); `village` and `hamlet` are the people of every village/hamlet stream B planned in the wilds (stream A spawns them from js/sim/realm.js) — at least a trader (the merchant, General goods) and a few folk."
  }
 }

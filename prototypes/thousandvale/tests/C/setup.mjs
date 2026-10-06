@@ -24,6 +24,7 @@ export async function engineFor(seed = 1) {
 export async function parityEngineFor(seed = 1) {
   const e = await engineFor(seed);
   e.levelGap = null;
+  e.lootPool = null; e.armourTiers = null;   // play-test 4 S17/S18: Farhold picks its own bases, no themed tier
   e.xpCfg = e.balance.xp;          // play-test 3 R2: Thousandvale pays kills x1.5; Farhold does not
   return e;
 }

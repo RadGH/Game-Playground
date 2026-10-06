@@ -26,15 +26,15 @@ A test fails if any node in any tree is only a number, does nothing on its skill
 - **Tier 3 (level 18)**: *Soul Feed* — A kill with this skill: you heal 3% of your maximum health. · *Spread Thin* — Copies Gnawed from the target to up to 2 enemies within 6 m. · *Branding* — What it hits takes 20% more damage from every source for 6s.
 - **Tier 4 (level 28)**: *Devour* — Deals 60% of the remaining Gnawed damage on each target at once. · *Hungry Dark* — A kill with this skill: the body bursts for 50% weapon damage within 4 m. · *Cascade* — Bursts on impact, hitting everything within 2 metres. Jumps to 3 more enemies behind the first, each jump for 15% less.
 
-## The perk forest — one big tree, twelve directions
+## The perk forest — one big tree, fourteen directions
 
 - **One forest for everyone**, starting in the middle. You get a point every level, plus one more every fifth level (58 points by level 50), and spend each one on a node **next to** something you already have. The shape is the price: a keystone on the far edge costs the walk to reach it.
-- **382 nodes** (Farhold's has 169), in **12 arms**. Every arm splits into **2 to 4 paths** past its sixth ring, and **every path ends in a keystone** — 41 keystones in all (the game shows them as **Cornerstones**: "keystone" is on the banned-names list). Neighbouring arms are bridged at ring 4 and there is an odd node on every seam, so builds can wander sideways, not only outward.
+- **437 nodes** (Farhold's has 169), in **14 arms** (play-test 4 added The Gathering Storm and The Old Lore). Every arm splits into **2 to 4 paths** past its sixth ring, and **every path ends in a keystone** — 46 keystones in all (the game shows them as **Cornerstones**: "keystone" is on the banned-names list). Neighbouring arms are bridged at ring 4 and there is an odd node on every seam, so builds can wander sideways, not only outward.
 - Node kinds: small stat nodes, bigger stat nodes, **named nodes** (two stats together, or a rule — Riposte, Quarry, Shared Hide…) and **keystones** that change how you play, most with a cost.
 - Every card is written from its own numbers, and a test fails if any node grants something nothing in the game reads.
 - Giving back: the Unbinder takes back one node at the **end** of a walk (80 gold + 12 a level) or the whole forest (400 + 45 a level).
 
-### The twelve arms and where their paths lead
+### The fourteen arms and where their paths lead
 
 ### The Close Ground — Reach, weight and the willingness to be hit.
 
@@ -132,6 +132,21 @@ A test fails if any node in any tree is only a number, does nothing on its skill
 
 - **Fortune's Tithe** → **Fortune's Tithe**: +70% magic find and +30% gold found. *Cost: −12% damage — your eye is on the ground rather than on the fight.*
 - **The Collector** → **The Collector**: +25% experience and +40% gold found. *Cost: −8% damage.*
+
+### The Gathering Storm — Lightning that will not stay in the sky (play-test 4, S16)
+
+Notables: **Static Charge** (a lightning hit you land has a 25% chance to Shock its target for 3s) and **Live Wire** (+5% spell damage, +8% damage to Shocked enemies). Stat nodes include **+% damage to Shocked enemies**. Paths:
+
+- **The Conductor** → **Conductor**: Every hit you land on a Shocked enemy arcs to the nearest other enemy within 6 metres for 35% as lightning. +10% damage to Shocked enemies. *Cost: −10% damage to enemies that are not Shocked.*
+- **The Thunderhead** → **Thunderhead**: A critical lightning hit bursts: everything within 3.5 metres of the target takes 45% as lightning and is Shocked for 2s. +6% spell damage. *Cost: +8% skill cooldowns.*
+- **The Static Coat** → **Static Coat**: An enemy that hits you is Shocked for 3s and takes 30% of your damage as lightning — once every 2s. +15 magic resistance. *Cost: −8% damage.*
+
+### The Old Lore — The slow magics: written arcane letters and the green tongue of roots (play-test 4, S16)
+
+- **The Written Word** → **Spellwright**: Every arcane hit you land writes a mark on its target for 8s: it takes 4% more damage per mark, up to 5 marks. +6% spell damage. *Cost: −20% damage of every kind but arcane.*
+- **The Green Tongue** → **Rootbound**: Every nature hit you land slows its target by 25% for 3s and heals you for 4% of the damage. +6% spell damage. *Cost: −20% damage of every kind but nature.*
+
+Every class now has a high-level tree about how it fights: `perkTags(node)` (js/rules/perk-forest.js) reads what a node DOES (element, spell, damage-over-time, companion, healing, heavy/agile/ranged weapons, guarding), and tests/C/playtest4.test.mjs checks each of the 30 classes has 20+ top-tier nodes and 3+ cornerstones about its own skills and weapons, plus a cornerstone for its main element (lightning now has more than fire, ice or poison).
 
 ## Companions come later now (P4)
 

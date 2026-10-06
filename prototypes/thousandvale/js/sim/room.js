@@ -9,6 +9,7 @@
 //
 // client = { send(data), you(patch)?, ... } — the room adds its own per-client view state to it.
 
+import { npcIdentity } from './npc-names.js';
 import { Entity, BANDS } from './entity.js';
 import { createGrid } from './aoi.js';
 import { stepMove } from './movement.js';
@@ -135,6 +136,8 @@ export function createRoom(opts) {
 
   // ---- entities ----
   room.spawn = function (spec) {
+    // S19 (play-test 4): every NPC you can talk to gets a title above its name and a real name (js/sim/npc-names.js)
+    if (spec.kind === 'npc' && spec.data && (spec.data.npc || spec.data.folk)) { const id = npcIdentity(spec); spec = { ...spec, name: id.name, data: { ...spec.data, title: id.title } }; }
     if (nextId > 0xFFFE) nextId = 1;
     while (entities.has(nextId)) nextId++;
     const e = new Entity(room, nextId++, spec);
@@ -284,7 +287,7 @@ export function createRoom(opts) {
       const tx = c.x + Math.cos(a) * r, tz = c.z + Math.sin(a) * r;
       if (room.walkable(tx, tz) && !inProp(c, tx, tz)) { x = tx; z = tz; break; }
     }
-    const m = room.spawn({ kind: 'monster', type: c.type, level: c.level || 1, x, z, yaw: host.random('spawn') * 6.283, rank: c.rank || 'normal', state: c.rank && c.rank !== 'normal' ? STATE.elite : 0, name: c.name || (c.encounter && opts.encounterInfo && opts.encounterInfo[c.encounter] ? opts.encounterInfo[c.encounter].name : undefined), data: c.encounter || c.path ? { ...(c.encounter ? { encounter: c.encounter } : {}), ...(c.path ? { path: c.path } : {}) } : null });
+    const m = room.spawn({ kind: 'monster', type: c.type, level: c.level || 1, x, z, yaw: host.random('spawn') * 6.283, rank: c.rank || 'normal', state: c.rank && c.rank !== 'normal' ? STATE.elite : 0, name: c.name || (c.encounter && opts.encounterInfo && opts.encounterInfo[c.encounter] ? opts.encounterInfo[c.encounter].name : undefined), data: { camp: 1, ...(c.noRank ? { noRank: true } : {}), ...(c.encounter ? { encounter: c.encounter } : {}), ...(c.path ? { path: c.path } : {}) } });   // camp: S4 — only a camp's ordinary monster may roll a rank
     c.live.add(m.id);
   }
   /** A camp's respawn delay: a number, or [min, max] picked on the room's 'spawn' stream (rares: 20-60 min). */
@@ -384,7 +387,7 @@ export function createRoom(opts) {
         stepMove(st, { mx: 0, mz: 0, b: 0 }, tickMs, terrain);
         commitMove(e, st, 0, 0, 0); c.selfDirty = true;
       }
-      if (!e.dead && !e.airborne && e.kind === 'player') e.loop(e.state & STATE.swimming ? 'swim' : 'idle');
+      if (!e.dead && !e.airborne && e.kind === 'player') e.loop(e.state & STATE.swimming ? 'swim' : e.sitting ? 'sit' : 'idle');
       return;
     }
     let moved = false, lastB = 0, mxs = 0, mzs = 0;
@@ -404,10 +407,12 @@ export function createRoom(opts) {
     c.selfDirty = true;
     if (moved && !e.dead) {
       const going = Math.hypot(mxs, mzs) > 0.05;
+      // S20 (play-test 4): a step (or a jump) stands you up — the meal ends (the province's standUp hook)
+      if (e.sitting && (going || e.airborne)) { if (hooks.standUp) hooks.standUp(e, 'moved'); if (e.sitting) { e.sitting = false; e.infoVer++; } }
       e.setState(STATE.sprinting, going && !!(lastB & IN.SPRINT));
       if (e.airborne) e.loop(e.vy > 0 ? 'jump' : 'fall');
       else if (e.state & STATE.swimming) e.loop('swim');
-      else e.loop(going ? ((lastB & IN.SPRINT) ? 'sprint' : 'run') : 'idle');
+      else e.loop(going ? ((lastB & IN.SPRINT) ? 'sprint' : 'run') : e.sitting ? 'sit' : 'idle');
     }
   }
   function commitMove(e, st) {
@@ -562,7 +567,7 @@ export function createRoom(opts) {
     room.spawn({ kind: npc ? 'npc' : 'object', type: o.type, name: o.name || o.type, x: o.x, z: o.z, yaw: o.yaw || 0, team: npc ? 1 : 0, state: npc ? STATE.friendly : 0,
       data: { portal: o.portal || null, chest: o.chest || null, gate: o.gate || null, lever: o.lever || null, rules: !!o.rules, key: o.key || null, r: o.r || null, state: o.state || null, room: o.room ?? null,
         note: o.note || null, use: o.use || null, npc: o.npc || null, hidden: !!o.hidden, hint: o.hint || null, lore: o.lore || null, waystone: o.waystone || null, schedule: o.schedule || null,
-        treasure: o.treasure || null, site: o.site || null, shimmer: o.shimmer || null, office: o.office || null } });
+        treasure: o.treasure || null, site: o.site || null, shimmer: o.shimmer || null, office: o.office || null, ...(npc && o.title ? { title: o.title } : {}) } });
   }
   /** Change an object's state (lit, used, broken, open…): late joiners see it in `info`, everyone near gets `obj`. */
   room.objState = function (o, state, extra = {}) {

@@ -2,6 +2,10 @@
   "id": "rare_charcoal_tom",
   "name": "Charcoal Tom",
   "tier": "rare",
+  "announce": {
+    "r": 300,
+    "_doc": "S4: shown on the minimap of anyone within r metres while it lives"
+  },
   "zone": "wychwood",
   "body": "road_brigand",
   "place": "runs the charcoal clamps at the burners' camp and burns out anyone who cuts wood on \"his\" side",

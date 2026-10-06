@@ -18,6 +18,7 @@
 // healPower (cast-skills.js healUnit), dotPct (cast.js landStatus), xpFind (cast.js onKill).
 
 import { applyStatus } from './farhold.js';
+// (landing — the reentrancy guard for landed() — is declared below; afterHurt's Static Coat uses it too)
 
 /** Every flag this file (or the reader named) answers for. The perk audit reads this list. */
 export const TV_FLAG_READERS = Object.freeze({
@@ -41,6 +42,13 @@ export const TV_FLAG_READERS = Object.freeze({
   stillness: 'js/rules/perk-rules.js tickPlayer + strikeMult',
   vanguard: 'js/rules/perk-rules.js strikeMult',
   cornered: 'js/rules/perk-rules.js strikeMult',
+  // play-test 4 S16: The Gathering Storm (lightning) and The Old Lore (arcane, nature)
+  staticCharge: 'js/rules/perk-rules.js landed (field.land)',
+  conductor: 'js/rules/perk-rules.js landed + strikeMult',
+  thunderhead: 'js/rules/perk-rules.js landed',
+  staticCoat: 'js/rules/perk-rules.js afterHurt',
+  spellwright: 'js/rules/perk-rules.js landed + strikeMult',
+  rootbound: 'js/rules/perk-rules.js landed + strikeMult',
 });
 /** Thousandvale's own `derived` keys and their readers (Farhold's are read by Farhold's rpg.js). */
 export const TV_STAT_READERS = Object.freeze({
@@ -48,6 +56,7 @@ export const TV_STAT_READERS = Object.freeze({
   dotPct: 'js/rules/cast.js landStatus',
   threatPct: 'js/rules/threat.js threatFromDamage',
   xpFind: 'js/rules/cast.js field.onKill (the room awards the experience)',
+  shockPct: 'js/rules/perk-rules.js strikeMult',
 });
 
 /** The numbers every rule node quotes. One table, so a card can never disagree with the rule. */
@@ -71,6 +80,12 @@ export const PERK_RULES = Object.freeze({
   stillness: { after: 1.5, mult: 1.25 },
   vanguard: { above: 0.8, mult: 1.12 },
   cornered: { below: 0.35, mult: 1.25 },
+  staticCharge: { chance: 0.25, seconds: 3 },
+  conductor: { radius: 6, power: 0.35, notShocked: 0.9 },
+  thunderhead: { radius: 3.5, power: 0.45, seconds: 2 },
+  staticCoat: { seconds: 3, back: 0.3, every: 2 },
+  spellwright: { per: 0.04, max: 5, seconds: 8, other: 0.8 },
+  rootbound: { slow: 0.25, seconds: 3, heal: 0.04, other: 0.8 },
 });
 const R = PERK_RULES;
 
@@ -91,7 +106,13 @@ export function strikeMult(attacker, defender, opts = null) {
     if (f.stillness && (attacker._stillFor || 0) >= R.stillness.after) k *= R.stillness.mult;
     if (f.vanguard && own > R.vanguard.above) k *= R.vanguard.mult;
     if (f.cornered && own < R.cornered.below) k *= R.cornered.mult;
+    const el = opts?.element || 'physical';
+    if (f.conductor && defender.side === 'foe' && !defender.statuses?.shock) k *= R.conductor.notShocked;
+    if (f.spellwright && el !== 'arcane') k *= R.spellwright.other;
+    if (f.rootbound && el !== 'nature') k *= R.rootbound.other;
   }
+  const shockPct = attacker.derived?.shockPct;
+  if (shockPct && defender.statuses?.shock && defender.side === 'foe') k *= 1 + shockPct / 100;
   if (attacker._rally && defender.side === 'foe') k *= R.rally.mult;
   // a follower's bite on whatever its owner hit last
   const owner = attacker.owner;
@@ -139,7 +160,63 @@ export function afterHurt(field, victim, result, by, now) {
     field.emit({ t: 'heal', src: victim.id, dst: victim.id, amt: heal, hp: Math.round(victim.hp) });
     field.emit({ t: 'fx', kind: 'perk', id: victim.id, perk: 'secondWind' });
   }
+  // Static Coat: whatever hit you is Shocked and takes some of it back as lightning, once every 2 s
+  if (f.staticCoat && by && by.dying == null && !by.removed && now >= (cd.staticCoat ?? -Infinity)) {
+    cd.staticCoat = now + R.staticCoat.every;
+    shock(field, by, R.staticCoat.seconds);
+    if (by.side === 'foe' && field.strikeArea) { landing++; try { field.strikeArea(by.x, by.z, 0.1, victim, { falloff: 1, power: R.staticCoat.back, element: 'lightning', proc: true, kind: 'proc' }); } finally { landing--; } }
+    field.emit({ t: 'fx', kind: 'perk', id: victim.id, perk: 'staticCoat', to: by.id });
+  }
   if (victim.hp > victim.maxHp) victim.hp = victim.maxHp;
+}
+
+const SHOCK = { name: 'Shocked', kind: 'debuff', element: 'lightning', takeMore: 0.3, seconds: 5 };
+/** Shock `e` for `seconds` (the room's own shock row, with the time the perk says) and tell the client. */
+function shock(field, e, seconds) {
+  const spec = { ...(field.statusData?.shock || SHOCK), seconds };
+  const had = !!e.statuses?.shock;
+  applyStatus(e, 'shock', spec, 1);
+  if (!had) field.emit({ t: 'fx', kind: 'status', id: e.id, status: 'shock', on: true });
+}
+
+let landing = 0;
+/**
+ * Play-test 4 S16: a hit by `by` LANDED on `e` (js/rules/field.js field.land, every hit in the game goes
+ * through it). The storm and lore cornerstones act here. Their own arcs and bursts land too, so a
+ * reentrancy guard keeps one hit from setting off another chain of them.
+ */
+export function landed(field, by, e, result, element = 'physical') {
+  const f = flagsOf(by);
+  if (!f || landing || !result || !(result.amount > 0) || by.kind !== 'player' || e.side !== 'foe') return;
+  landing++;
+  try {
+    const rng = field.rng || Math.random;
+    if (element === 'lightning') {
+      if (f.staticCharge && e.dying == null && rng() < R.staticCharge.chance) shock(field, e, R.staticCharge.seconds);
+      if (f.thunderhead && result.crit) {
+        field.emit({ t: 'fx', kind: 'perk', id: by.id, perk: 'thunderhead', x: e.x, z: e.z, r: R.thunderhead.radius });
+        const hits = field.strikeArea(e.x, e.z, R.thunderhead.radius, by, { falloff: 1, power: R.thunderhead.power, element: 'lightning', proc: true, kind: 'proc' });
+        for (const h of hits) if (h.enemy.dying == null) shock(field, h.enemy, R.thunderhead.seconds);
+      }
+    }
+    if (f.conductor && e.statuses?.shock) {
+      const next = field.nearestTo(e.x, e.z, R.conductor.radius, e);
+      if (next) {
+        field.emit({ t: 'fx', kind: 'bolt', id: by.id, element: 'lightning', from: { x: e.x, z: e.z }, to: next.id, ms: 90, perk: 'conductor' });
+        field.strikeArea(next.x, next.z, 0.6, by, { falloff: 1, power: R.conductor.power, element: 'lightning', proc: true, kind: 'proc' });
+      }
+    }
+    if (f.spellwright && element === 'arcane' && e.dying == null) {
+      const n = Math.min(R.spellwright.max, Math.round(((e.statuses?.inscribed?.takeMore || 0) / R.spellwright.per)) + 1);
+      applyStatus(e, 'inscribed', { name: 'Inscribed', kind: 'debuff', element: 'arcane', takeMore: R.spellwright.per * n, seconds: R.spellwright.seconds, marks: n }, 1);
+      if (n === 1) field.emit({ t: 'fx', kind: 'status', id: e.id, status: 'inscribed', on: true });
+    }
+    if (f.rootbound && element === 'nature') {
+      if (e.dying == null) applyStatus(e, 'web', { ...(field.statusData?.web || { name: 'Snared', kind: 'slow', element: 'nature' }), slow: R.rootbound.slow, seconds: R.rootbound.seconds }, 1);
+      const heal = Math.round(result.amount * R.rootbound.heal);
+      if (heal > 0 && by.hp > 0 && by.hp < by.maxHp) { by.hp = Math.min(by.maxHp, by.hp + heal); field.emit({ t: 'heal', src: by.id, dst: by.id, amt: heal, hp: Math.round(by.hp) }); }
+    }
+  } finally { landing--; }
 }
 
 /** A kill that `killer` shared in (cast.js onKill runs this for everybody who tagged it). */

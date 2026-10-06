@@ -74,7 +74,8 @@ test('a quest from accept to reward; the chain unlocks the next; the log survive
   await until(clock, () => qr.length, 2000);
   assert.equal(qr[0].ok, true, JSON.stringify(qr[0]));
   assert.ok(logs.at(-1).active.some(q => q.id === 'wolves_at_the_fold'));
-  // eight moor hounds, killed with my credit, out in the wilds
+  // eight moor hounds, killed with my credit, out in the wilds — S10 (play-test 4): the eighth pays the quest right there
+  const xp0 = me().char.xp || 0, gold0 = me().char.gold || 0;
   const wild = P.copies[0];
   P.transfer(me(), wild, { x: maud.o.x + 400, z: maud.o.z }, 'test');
   await run(clock, 200);
@@ -84,16 +85,11 @@ test('a quest from accept to reward; the chain unlocks the next; the log survive
     await run(clock, 60);
   }
   await run(clock, 200);
-  const q = logs.at(-1).active.find(x => x.id === 'wolves_at_the_fold');
-  assert.ok(q.ready, 'all steps done: ' + JSON.stringify(q.steps));
-  const xp0 = me().char.xp || 0, gold0 = me().char.gold || 0;
-  P.transfer(me(), maud.r, { x: maud.o.x + 1, z: maud.o.z }, 'test');
-  await run(clock, 200);
-  a.quest('turnin', 'wolves_at_the_fold', maud.o.id);
+  assert.ok(!logs.at(-1).active.some(x => x.id === 'wolves_at_the_fold'), 'finished and handed in remotely');
   await until(clock, () => qr.length >= 2, 2000);
   assert.equal(qr[1].ok, true, JSON.stringify(qr[1]));
+  assert.equal(qr[1].remote, true); assert.equal(qr[1].auto, true);
   assert.equal(qr[1].next, 'toll_at_fitockpi');
-  await run(clock, 200);
   assert.ok((me().char.xp || 0) > xp0 && (me().char.gold || 0) > gold0, 'paid xp + gold');
   assert.ok(logs.at(-1).done.includes('wolves_at_the_fold'));
   // Reeve Corwin now offers the next story quest

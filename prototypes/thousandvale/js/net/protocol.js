@@ -26,7 +26,7 @@ export const KIND_NAMES = Object.freeze(['', 'player', 'monster', 'npc', 'object
 /** Animation names; index = wire id. APPEND ONLY. */
 export const ANIMS = Object.freeze(['idle', 'walk', 'run', 'sprint', 'jump', 'fall', 'swim',
   'attack', 'attack2', 'cast', 'channel', 'hit', 'die', 'dead',
-  'bite', 'howl', 'emote', 'interact']);
+  'bite', 'howl', 'emote', 'interact', 'sit']);   // 'sit' (play-test 4 S20): eating / drinking — sitting on the ground
 export const ANIM_ID = Object.freeze(Object.fromEntries(ANIMS.map((n, i) => [n, i])));
 
 export const STATE = Object.freeze({ dead: 1, combat: 2, casting: 4, airborne: 8, swimming: 16, sprinting: 32, elite: 64, friendly: 128 });
@@ -114,7 +114,7 @@ export const CLIENT_MSGS = Object.freeze({
   say:     { on: 'p', fields: { text: 'str:200' }, rate: 1, burst: 5 },
   respawn: { on: 'p', fields: {}, rate: 1, burst: 2 },
   use:     { on: 'p', fields: { id: 'id' }, rate: 4, burst: 8 },
-  item:    { on: 'p', fields: { op: 'str:8', uid: 'str:40', slot: '?str:16' }, rate: 5, burst: 10 },
+  item:    { on: 'p', fields: { op: 'str:8', uid: '?str:40', slot: '?str:16' }, rate: 5, burst: 10 },
   travel:  { on: 'p', fields: { to: 'str:48' }, rate: 1, burst: 3 },
   trace:   { on: 'p', fields: { kind: 'str:16' }, rate: 1, burst: 2 },
   quest:   { on: 'p', fields: { op: 'str:8', id: 'str:120', npc: '?id' }, rate: 2, burst: 6 },
@@ -133,7 +133,7 @@ export const CLIENT_MSGS = Object.freeze({
   map:     { on: 'p', fields: { op: 'str:8' }, rate: 1, burst: 3 },
   // play-test 2 (docs/protocol.md §18): corpse loot + party rolls (Q3/Q4), shops (Q11), mounts (Q16), barber (Q20),
   // display prefs (Q22), follow check (Q2); on the gateway: account settings (Q15), a title-screen look (Q21)
-  loot:    { on: 'p', fields: { op: 'str:8', id: '?id', uid: '?str:40', roll: '?int', choice: '?str:8', gold: '?bool' }, rate: 8, burst: 16 },
+  loot:    { on: 'p', fields: { op: 'str:8', id: '?id', uid: '?str:40', roll: '?int', choice: '?str:8', gold: '?bool', near: '?bool' }, rate: 8, burst: 16 },
   shop:    { on: 'p', fields: { op: 'str:8', npc: 'id', id: '?str:48', uid: '?str:40' }, rate: 4, burst: 10 },
   mount:   { on: 'p', fields: { op: 'str:8', id: '?str:32' }, rate: 1, burst: 3 },
   barber:  { on: 'p', fields: { npc: 'id', look: 'obj' }, rate: 0.5, burst: 3 },
@@ -232,7 +232,7 @@ export const PREF_KEYS = Object.freeze(['showGear', 'showHelm']);
 export const LOOT_MINS = Object.freeze(['magic', 'rare', 'legendary', 'unique']);   // = C's js/rules/loot-rules.js LOOT_THRESHOLDS ('epic' -> legendary)
 export const PARTY_MAX = 5;
 /** Item ops (`item {op}`). */
-export const ITEM_OPS = Object.freeze(['equip', 'unequip', 'destroy', 'use']);   // use: potions + food (uid, or 'id:<item id>' for a hotbar slot)
+export const ITEM_OPS = Object.freeze(['equip', 'unequip', 'destroy', 'use', 'stand']);   // stand (play-test 4 S20): get up from a meal   // use: potions + food (uid, or 'id:<item id>' for a hotbar slot)
 /** Chat channels a client may send on the gateway (`say` is local, on the province socket; `w` = whisper, needs `to`).
  *  The server also sends `system` lines (admin announcements). */
 export const CHAT_CHANNELS = Object.freeze(['party', 'guild', 'zone', 'trade', 'world', 'w']);

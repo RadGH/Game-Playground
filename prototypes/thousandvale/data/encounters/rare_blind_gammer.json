@@ -2,6 +2,7 @@
   "id": "rare_blind_gammer",
   "name": "Blind Gammer",
   "tier": "rare",
+  "secret": true,
   "zone": "delvers_hill",
   "body": "cairn_rat",
   "place": "the queen of the rats in the spoil heaps around Copperdell; miners leave cheese at the old adit",

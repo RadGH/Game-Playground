@@ -145,7 +145,7 @@ export async function startServer(o) {
     for (let n = 0; n < o.procs; n++) children.push(spawnChild(n, assign.filter(a => a.proc === n).map(a => a.province)));
   } else {
     const { layouts, events, encounterInfo, directorRules } = await loadLayouts(provinces);
-    world = createWorld({ ...common, directorOpts: { ...o.director, rules: directorRules || {} }, eventSize: directorRules && directorRules.size, layouts, events, encounterInfo, createRules, lingerMs: o.linger, saveEveryMs: o.saveEvery, processName: o.process, journalMs: o.journalMs });
+    world = createWorld({ ...common, directorOpts: { ...o.director, rules: directorRules || {} }, eventSize: directorRules && directorRules.size, realmNearM: directorRules && directorRules.nearMetres, layouts, events, encounterInfo, createRules, lingerMs: o.linger, saveEveryMs: o.saveEvery, processName: o.process, journalMs: o.journalMs });
     await world.init();
   }
 

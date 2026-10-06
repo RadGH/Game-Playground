@@ -67,7 +67,7 @@ export async function loadLayouts(keys, { copyCap = 300 } = {}) {
     if (provinces[key]) {
       const c = await loadProvinceContent(readJson, readBytes, key, { parseTerrain, parseNav, createProvinceTerrain, log });
       encounterInfo = c.encounterInfo;
-      layouts.push(buildLayout({ key, name: c.name, terrain: c.terrain, zones: c.zones, encounterInfo, copyCap: c.starterProvince ? Math.min(copyCap, STARTER_COPY_CAP) : copyCap, vignetteContent, starter: c.starter, rares: c.rares, jobs: c.jobs, schedules: c.schedules, horizon: c.horizon, travel: c.travel, marks: c.marks, shops: c.shops, mounts: c.mounts, offices: c.offices }));
+      layouts.push(buildLayout({ key, name: c.name, terrain: c.terrain, zones: c.zones, encounterInfo, copyCap: c.starterProvince ? Math.min(copyCap, STARTER_COPY_CAP) : copyCap, vignetteContent, starter: c.starter, rares: c.rares, jobs: c.jobs, schedules: c.schedules, horizon: c.horizon, travel: c.travel, marks: c.marks, shops: c.shops, mounts: c.mounts, offices: c.offices, extra: c.extra }));
       events.push(...c.events);
       directorRules ||= c.directorRules;
       continue;

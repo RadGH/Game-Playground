@@ -1,0 +1,18 @@
+{
+  "_doc": "Stream B (play-test 4, S7). Every planned settlement gets a perimeter, chosen by its size and its zone's archetype (stream E's sheet), drawn with proctown's town-edge kit (proctown/js/buildkit.js wallKitParts / fenceParts / gateLeafParts). tools/lib/zone-walls.mjs reads this file; change it -> re-bake the zones (node tools/bake-zone.mjs --province torbor_downs). `bySize` picks a style per settlement kind, `frontier` replaces it in a frontier-like zone (archetypes listed in `frontierArchetypes`), `towns` overrides one settlement by its slug. A style: material (kit kind: stone | cutstone | mudbrick | bone | palisade | barricade | rail | hedge | stake), tier (wall = curtain with towers and gatehouses; low = fence / barricade with gate posts), h (metres), thick (metres), seg (target metres between ring corners), towerEvery (metres along the wall between towers, 0 = only beside gates, -1 = none), margin (metres outside the outermost building), gate (gatehouse | posts | gap), tint (the colour the white kit is multiplied by). Every style is SOLID in nav.bin: a body only gets through at a gate (or over the water where a river runs through the ring).",
+  "frontierArchetypes": ["frontier", "blight", "ruinfield"],
+  "culturalStone": { "dwarf": "cutstone", "desert": "mudbrick", "undead": "bone", "orc": "palisade" },
+  "styles": {
+    "curtain":   { "material": "stone",     "tier": "wall", "h": 4.4, "thick": 1.2, "seg": 18, "towerEvery": 46, "margin": 8, "gate": "gatehouse", "tint": "#a29c90" },
+    "curtain_city": { "material": "stone",  "tier": "wall", "h": 4.4, "thick": 1.2, "seg": 18, "towerEvery": 38, "margin": 8, "gate": "gatehouse", "tint": "#a29c90" },
+    "stockade":  { "material": "palisade",  "tier": "wall", "h": 4.5, "thick": 0.8, "seg": 14, "towerEvery": 52, "margin": 7, "gate": "gatehouse", "tint": "#8a6a48" },
+    "palisade":  { "material": "palisade",  "tier": "wall", "h": 4.5, "thick": 0.8, "seg": 14, "towerEvery": 0,  "margin": 6, "gate": "gatehouse", "tint": "#8a6a48" },
+    "barricade": { "material": "barricade", "tier": "low",  "h": 2.0, "thick": 1.6, "seg": 10, "towerEvery": 0,  "margin": 5, "gate": "posts",     "tint": "#7d6448" },
+    "fence":     { "material": "rail",      "tier": "low",  "h": 1.25, "thick": 0.3, "seg": 10, "towerEvery": -1, "margin": 4, "gate": "posts",     "tint": "#8a6c50" },
+    "hedge":     { "material": "hedge",     "tier": "low",  "h": 1.4, "thick": 0.9, "seg": 10, "towerEvery": -1, "margin": 4, "gate": "posts",     "tint": "#56763a" }
+  },
+  "bySize":   { "capital": "curtain_city", "city": "curtain_city", "town": "curtain", "village": "palisade", "hamlet": "fence" },
+  "frontier": { "capital": "curtain_city", "city": "curtain_city", "town": "stockade", "village": "barricade", "hamlet": "barricade" },
+  "cultureFence": { "elf": "hedge" },
+  "towns": {}
+}

@@ -17,15 +17,30 @@
 //   st.dead(id)         // a death
 //   st.update(nowMs)    // every frame
 
+import * as THREE from 'three';
 import { statusLook } from './spell-looks.js';
+import { LIGHTS } from './lightpool.js';
 
 const GRACE_MS = 1500;
+/** C's torch (TORCH.lightRange): a lit torch lights 14 m round whoever carries it. */
+export const TORCH_RANGE = 14;
+/** Pure: does a status list carry a lit torch? Exported for tests. */
+export const torchOn = (st, dead) => !dead && Array.isArray(st) && st.includes('item:torch');
 
 /** Pure: the aura names a status list should show (dead bodies show none). Exported for tests. */
 export function wantedAuras(st, dead) {
   if (dead || !Array.isArray(st)) return new Set();
   const out = new Set();
-  for (const s of st) { const k = statusLook(s) || String(s || ''); if (k) out.add(k); }
+  // `item:*` are consumable buffs (C: whetted, oiled, well_fed, oats…) — no aura; `item:torch` is a carried light (torchOn)
+  for (const s of st) { if (String(s).startsWith('item:')) continue; const k = statusLook(s) || String(s || ''); if (k) out.add(k); }
+  return out;
+}
+
+/** S4: a rare's affixes that show as a standing aura (burning, frozen, shocking, venomous, shielded, frenzied…). Pure. */
+const MOD_AURA = [[/burn|fire|flam|blaz|molten/, 'burn'], [/frost|frozen|ice|cold/, 'freeze'], [/shock|storm|lightning|thunder/, 'haste'], [/venom|poison|toxic|plague/, 'poison'], [/shield|ward|armou?red/, 'barrier'], [/frenz|berserk|rage|enrag/, 'rally'], [/vampir|curse|shadow|gloom/, 'curse'], [/regen|troll/, 'regen']];
+export function modAuras(mods) {
+  const out = new Set();
+  if (Array.isArray(mods)) for (const m of mods) for (const [re, k] of MOD_AURA) if (re.test(String(m).toLowerCase())) { out.add(k); break; }
   return out;
 }
 
@@ -40,8 +55,14 @@ export function auraDiff(drawn, want, grace = new Map(), now = 0) {
   return { on, off };
 }
 
-export function createStatusSync({ actors, fx, infoOf = () => null, selfDead = () => false, selfId = () => null } = {}) {
+export function createStatusSync({ actors, fx, infoOf = () => null, selfDead = () => false, selfId = () => null, night = () => 0, groundY = null } = {}) {
   let next = 0;
+  /** A carried torch: a light SOURCE from the fixed pool riding the body (no new PointLight, so no shader recompile). */
+  function torch(a, on) {
+    if (on && !a.torchLight) a.torchLight = LIGHTS.add({ x: 0.35, y: 1.9, z: 0.2, color: '#ffb35a', intensity: 0, distance: TORCH_RANGE, decay: 1.4, flicker: 0.12, follow: a.group });
+    if (!on && a.torchLight) { a.torchLight.remove(); a.torchLight = null; }
+    if (a.torchLight) a.torchLight.intensity = 6 + 14 * night();
+  }
   const book = a => (a.auras ||= { drawn: new Set(), grace: new Map() });
   function set(a, s, on) {
     const b = book(a);
@@ -66,7 +87,17 @@ export function createStatusSync({ actors, fx, infoOf = () => null, selfDead = (
       b.grace.set(s, performance.now() + GRACE_MS);
       if (on) b.grace.delete('-' + s); else b.grace.set('-' + s, 1);
     },
-    dead(id) { const a = actors.get(id); if (a) clear(a); },
+    dead(id) { const a = actors.get(id); if (a) { clear(a); torch(a, false); } },
+    /** C's recall charm: `fx {kind:'channel', id, name, ms}` starts the channel, `{kind:'channel', id, end:'done'|'broken'}` ends it. */
+    onChannel(ev) {
+      if (!ev || ev.type !== 'fx' || ev.kind !== 'channel') return;
+      const a = actors.get(ev.id); if (!a) return;
+      const g = groundY ? groundY(a.pos.x, a.pos.z) : a.pos.y;
+      try {
+        if (!ev.end) { a.channelUntil = performance.now() + (ev.ms || 5000); fx.cast({ at: new THREE.Vector3(a.pos.x, g + 0.15, a.pos.z), element: 'arcane', ms: Math.min(8000, ev.ms || 5000), ground: g }); }
+        else { a.channelUntil = 0; if (ev.end === 'done') fx.pillar?.({ at: new THREE.Vector3(a.pos.x, g, a.pos.z), radius: 1.3, element: 'arcane', ms: 900 }); }
+      } catch { /* a missing effect is not worth a crash */ }
+    },
     update(now = performance.now()) {
       if (now < next) return;
       next = now + 250;
@@ -75,15 +106,17 @@ export function createStatusSync({ actors, fx, infoOf = () => null, selfDead = (
         if (a.id === 'preview') continue;
         const info = infoOf(a.id);
         const dead = a.dead || (a.id === me && selfDead());
-        if (dead) { if (a.auras?.drawn.size) clear(a); continue; }
+        if (dead) { if (a.auras?.drawn.size) clear(a); if (a.torchLight) torch(a, false); continue; }
+        torch(a, torchOn(info?.st, false));
         if (!info && !a.auras) continue;
         const want = wantedAuras(info?.st, false);
+        for (const k of modAuras(info?.mods || info?.affixes)) want.add(k);     // S4: a burning rare burns all the time
         const b = book(a);
         const { on, off } = auraDiff(b.drawn, want, b.grace, now);
         for (const s of on) set(a, s, true);
         for (const s of off) set(a, s, false);
       }
     },
-    stats() { let n = 0; for (const a of actors.actors.values()) n += a.auras?.drawn.size || 0; return { auras: n }; },
+    stats() { let n = 0, t = 0; for (const a of actors.actors.values()) { n += a.auras?.drawn.size || 0; if (a.torchLight) t++; } return { auras: n, torches: t }; },
   };
 }

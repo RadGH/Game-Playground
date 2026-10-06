@@ -2,6 +2,7 @@
   "id": "rare_mother_soot",
   "name": "Mother Soot",
   "tier": "rare",
+  "secret": true,
   "zone": "torbor_cross",
   "body": "ash_wisp",
   "place": "haunts the chimneys of Halsbridge's Mill End; the sweeps will not work there after dark",

@@ -5,6 +5,7 @@
 //   camps    monster camps in the wilds, kept outside the town
 // Pure. createWorld (js/sim/world.js) builds the rooms from this.
 
+import { townFolk } from './schedules.js';
 import { findWalkable } from './terrain.js';
 import { placementContent } from './placements.js';
 
@@ -170,7 +171,7 @@ export function dedupeWaystones(waystones, doors = []) {
   return aliases;
 }
 
-export function buildLayout({ key, name = null, terrain, zones = [], encounterInfo = {}, copyCap = 300, vignetteContent = null, townRadius = null, starter = null, rares = null, jobs = null, schedules = null, horizon = null, travel = null, marks = null, shops = null, mounts = null, offices = null }) {
+export function buildLayout({ key, name = null, terrain, zones = [], encounterInfo = {}, copyCap = 300, vignetteContent = null, townRadius = null, starter = null, rares = null, jobs = null, schedules = null, horizon = null, travel = null, marks = null, shops = null, mounts = null, offices = null, extra = null }) {
   const allSites = terrain.reader?.meta?.sites || [];
   const multi = zones.length > 1 || allSites.some(s => s.zone);
   const zoneList = zones.length ? zones : [{ key, sheet: null }];
@@ -211,6 +212,22 @@ export function buildLayout({ key, name = null, terrain, zones = [], encounterIn
     if (terrain.reader && (z.sheet || !multi)) camps.push(...zoneEncounterCamps(zt, zoneEncounterIds(z.sheet).filter(id => !(placed && placed.rares.has(id)) && !timed.has(id)), encounterInfo, z.sheet && z.sheet.id));
     zoneEvents.push(...(z.events || []));
   }
+  // S11 (play-test 4, "towns with only 1 NPC"): every village and hamlet stream B planned (not a hub: no town room of its
+  // own) gets its people in the wilds — a trader at B's shop, the innkeeper, a smith in a village, folk at home and at
+  // work — from stream E's schedules.json `perTown.village` / `perTown.hamlet` over B's plan (js/sim/schedules.js).
+  if (schedules && schedules.perTown) for (const z of zoneList) {
+    const pl = z.plan;
+    if (!pl || !Array.isArray(pl.settlements)) continue;
+    for (const st of pl.settlements) {
+      const kind = st.kind || 'hamlet';
+      if (st.hub || kind === 'town' || kind === 'city' || !schedules.perTown[kind]) continue;
+      if (towns.some(t => Math.hypot(t.x - st.x, t.z - st.z) < (t.r || 40))) continue;
+      const plan = { kind, buildings: (pl.buildings || []).filter(b => b.town === st.id), square: (pl.squares || []).find(q => q.town === st.id) || null };
+      const r = Number.isFinite(st.radius) ? st.radius : TOWN_RADIUS[kind] || 40;
+      const made = townFolk({ x: st.x, z: st.z, r, name: st.name }, { plan, schedules, kind, key: `${key}:${st.id}` });
+      for (const n of made) { n.settlement = st.name; objects.push(n); }
+    }
+  }
   // the starting zone's hub first (new characters and respawns default there), then other hubs
   const rank = t => (t.hub && t.zone === starter ? 0 : t.hub ? 1 : 2);
   towns.sort((a, b) => rank(a) - rank(b));
@@ -245,5 +262,6 @@ export function buildLayout({ key, name = null, terrain, zones = [], encounterIn
     if (!st) return null;
     return { kind: st.kind || t.kind, buildings: pl.buildings.filter(b => b.town === st.id), square: pl.squares.find(q => q.town === st.id) || null };
   });
-  return { key, name: name || main.name, terrain, towns, townPlans, schedules, shops, mounts, offices, horizon, doors, camps, objects: wildObjects, townObjects, waystones, waystoneAliases: aliases, zoneEvents, travel, folk, marks, rares, jobs, sheet, copyCap, zoneOf, zones: zoneList, gate: townGate(terrain, main, doors.find(d => d.kind !== 'cave') || { x: main.x + 100, z: main.z }) };
+  // play-test 4: `extra` = further province data files (refunds, wanderers, treasure events…) passed straight through to L
+  return { ...(extra || {}), key, name: name || main.name, terrain, towns, townPlans, schedules, shops, mounts, offices, horizon, doors, camps, objects: wildObjects, townObjects, waystones, waystoneAliases: aliases, zoneEvents, travel, folk, marks, rares, jobs, sheet, copyCap, zoneOf, zones: zoneList, gate: townGate(terrain, main, doors.find(d => d.kind !== 'cave') || { x: main.x + 100, z: main.z }) };
 }

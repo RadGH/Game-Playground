@@ -88,3 +88,52 @@ test('seatRider / unseat round-trip with a Chibi 2 rider; ride clips exist', asy
   // the clips build for a rig without touching the other lists
   void createClips;
 });
+
+// ---- play-test 4 (S22): the hoofed mounts ride an equine body (js/equine.js) -------------------------------------
+test('S22: the hoofed mounts are equine bodies; the ram and drake keep their creature bodies', async () => {
+  const { createMount } = await import('../js/mounts.js');
+  const { EQUINE_BREEDS } = await import('../js/equine.js');
+  for (const k of ['horse', 'pony', 'courser', 'warhorse', 'stag', 'dray']) {
+    assert.ok(EQUINE_BREEDS[MOUNT_TYPES[k].breed], `${k} has a breed`);
+    const m = await createMount(k);
+    assert.ok(m.creature.frame && m.creature.setMotion, `${k} is equine`);
+    m.dispose();
+  }
+  for (const k of ['ram', 'drake']) { const m = await createMount(k); assert.ok(!m.creature.frame, k); m.dispose(); }
+  assert.equal(mountSpecFor('dray').type, 'dray');            // Thousandvale's Dray Elk was a horse before
+  assert.equal(mountSpecFor('dray_elk').type, 'dray');
+});
+
+test('S22: hooves stand on the ground, the head is above the withers, the neck rises', async () => {
+  const THREE = await import('three');
+  const { createMount } = await import('../js/mounts.js');
+  for (const k of ['horse', 'pony', 'courser', 'warhorse', 'stag', 'dray']) {
+    const m = await createMount(k); m.update(0.016, 0); m.group.updateMatrixWorld(true);
+    const P = m.creature.parts;
+    for (const lg of P.legs) { const y = new THREE.Box3().setFromObject(lg.fet).min.y; assert.ok(Math.abs(y) < 0.03, `${k} ${lg.tag} hoof at ${y.toFixed(3)}`); }
+    const head = P.head.getWorldPosition(new THREE.Vector3()), neck = P.neck.getWorldPosition(new THREE.Vector3());
+    assert.ok(head.y > neck.y + 0.25, `${k}: poll ${head.y.toFixed(2)} vs neck root ${neck.y.toFixed(2)}`);
+    assert.ok(head.z > neck.z, `${k}: the neck runs forward`);
+    m.dispose();
+  }
+});
+
+test('S22: gaits are real leg patterns: trot moves diagonal pairs together, walk has four beats, gallop rocks', async () => {
+  const { createMount } = await import('../js/mounts.js');
+  const m = await createMount('horse'), legs = m.creature.parts.legs, hip = m.creature.parts.hip;
+  const angles = () => legs.map(l => l.pivot.rotation.x - l.rest);
+  m.setGait(4); for (let i = 0; i < 30; i++) m.update(0.03);       // past the 0.3 s crossfade
+  assert.equal(m.creature.style, 'trot');
+  for (let i = 0; i < 12; i++) { m.update(0.037); const a = angles(); assert.ok(Math.abs(a[0] - a[3]) < 0.12 && Math.abs(a[1] - a[2]) < 0.12, 'FL with BR, FR with BL'); assert.ok(Math.abs(a[0] - a[1]) > 0.05 || Math.abs(a[2] - a[3]) > 0.05 || i % 3, 'the pairs differ'); }
+  m.setGait(1.5); for (let i = 0; i < 30; i++) m.update(0.03);
+  assert.equal(m.creature.style, 'walk');
+  const a = angles(); assert.equal(new Set(a.map(v => v.toFixed(3))).size, 4, 'four different leg positions at a walk');
+  m.setGait(9); let lo = Infinity, hi = -Infinity;
+  for (let i = 0; i < 60; i++) { m.update(0.02); lo = Math.min(lo, hip.rotation.x); hi = Math.max(hi, hip.rotation.x); }
+  assert.equal(m.creature.style, 'gallop'); assert.ok(hi - lo > 0.08, `gallop rocks ${(hi - lo).toFixed(3)}`);
+  // cadence follows the ground speed (faster ground, faster legs), within the gait's range
+  m.setGait(6); m.update(0.02); const p0 = m.creature.phase; m.update(0.1); const slow = (m.creature.phase - p0 + 1) % 1;
+  m.setGait(10); m.update(0.02); const p1 = m.creature.phase; m.update(0.1); const fast = (m.creature.phase - p1 + 1) % 1;
+  assert.ok(fast > slow, `${fast} > ${slow}`);
+  m.dispose();
+});

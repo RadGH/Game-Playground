@@ -1,0 +1,67 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z11_03, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z11_03",
+ "terrainHash": "a23813e6",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_charcoal_and_cobwebs_0_0",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 94,
+   "z": 120,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "charcoal_and_cobwebs",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_hermits_peace_0_0",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1193,
+   "z": 360,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_hermits_peace",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_lost_and_hound_1_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1081,
+   "z": 1945,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "lost_and_hound",
+   "hunt": true
+  }
+ ]
+}

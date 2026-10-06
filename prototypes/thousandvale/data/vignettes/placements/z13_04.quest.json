@@ -1,0 +1,87 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_04, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z13_04",
+ "terrainHash": "e8ce72cb",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_burnt_barns_0_0",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1479,
+   "z": 158,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "burnt_barns",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_burnt_barns_0_1",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1479,
+   "z": 158,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "burnt_barns",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_hyenas_in_the_gorse_0_0",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 2009,
+   "z": 999,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "hyenas_in_the_gorse",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_hyenas_in_the_gorse_0_1",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 2009,
+   "z": 999,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "hyenas_in_the_gorse",
+   "hunt": true
+  }
+ ]
+}

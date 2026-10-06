@@ -149,6 +149,7 @@
         "Smoke over Torborhold! Raiders are at the gates.",
         "The guards of Torborhold are falling back to the square."
       ],
+      "monster": "brigand_captain", "bossName": "Harl Vesk, the Raider Captain", "_bossNote": "S24 (play-test 4): the raid ends with its captain — before this the runner fell back to a WOLF named after the event",
       "reward": {
         "xp": 0.8,
         "gold": 20,

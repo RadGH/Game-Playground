@@ -1042,3 +1042,41 @@ Rules-spawned arena objects may carry `info.look` (how to dress it — `'chained
 (an entity id: draw a chain from this object to it; drop the chain when the object's `state` is `broken`). The Chained Saint's
 four pillars use both. Every call-out that tells you to hide behind / get into / light / pull something names an object that is
 on the floor or a zone the client draws (tests/E/playtest3.test.js).
+
+## 20. Play-test 4 (2026-10-05) — still protocol v6 (additive)
+
+### 20.1 Shops (S3)
+A stock row is only a real named item or a mount (`js/sim/shops.js` `isProduct`); a category is a filter. A buy hands out a
+COPY of the cached row (the cached stock is shared by everyone in that town copy). A buy that lands nothing: `shopR {ok:false,
+why:'item', refund}` and the gold back. One-off refunds: data/provinces/refunds.json, paid once per character per key.
+
+### 20.2 Loot (S12, S23) and containers (S5)
+`loot {op:'open', id, near?}` -> `lootWin {id, name, items:[item + corpse], gold, free?, group:[{id, name, n, gold}], corpses:[ids]}`
+over every body within `LOOT_NEAR_M` 8 m that holds something for you (`near:false` = that body only). `take {id, uid}` finds the
+item on any body of the open window; `all {id}` empties them all. `lootable {id, on, n, best, free?}` per viewer. Any entity can
+hold loot (`corpses.holdFor` / `freeOn`): a treasure chest opens in the same window.
+
+### 20.3 Waystones (S8)
+`waystone {op:'learned', key, name, how, known}` — `how`: start (the starting town's stone, always known), town (entering a
+town room), near (within 15 m).
+
+### 20.4 Champions, rares, announced mini-bosses (S4)
+Monster info: `rank` champion|rare, `aff [{id, name, aura?}]`, `sc` (scale). `bossNear {list:[{id, name, x, z, level, enc, r}]}`
+and `rareNear {id, key, name, x, z, level, rank, r}` for encounters whose file has `announce {r}`; `secret: true` ones never.
+
+### 20.5 Quests turn in remotely (S10)
+A finished quest without `needsGiver` pays at once: `questR {op:'turnin', id, auto:true, remote:true, ok, reward, next?, name,
+done?}`. `quest {op:'turnin', id}` (no npc) hands in a finished one. Quest views: `remote:true` | `needsGiver:true, remote:false`.
+
+### 20.6 Eating sits you down (S20)
+ANIMS gains `sit` (index 18). `itemR {sit:true}`, `you {regen:{kind, ms, sit:true}}` … `you {regen:null, why}`; `info.sit:1`.
+`item {op:'stand'}` (uid optional now) stands you up; movement or a jump does too (room hook `standUp`), as do a cast, a hit, a fight.
+
+### 20.7 Mount call channel (S21)
+`ev fx {kind:'channel', id, ab:'mount', name, ms}` start; `fx {kind:'channel', id, ab:'mount', name, end:'done'|'broken', why?}`
+end; `castX {ab:'mount', why:'done'}` too; `mountR {casting, until}`.
+
+### 20.8 Event rewards (S24)
+Personal per contributor: `eventDone {uid, id, name, xp, gold, items:[{name, rarity}], onBody?, text}` + a system chat line.
+At least one rare-or-better each (on the boss's body as your share when the body is there), xp/gold x `lengthFactor(minutes)`
+(1 to 2.5), gold x (1 + 0.15 x (level - 1)), a world boss x2 and an extra item.

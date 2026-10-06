@@ -11,7 +11,7 @@ const ICONS = {
 export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
   const el = {
     hud: $('hud'), selfName: $('self-name'), selfLevel: $('self-level'), selfInitial: $('self-initial'),
-    selfHp: $('self-hp-fill'), selfLag: $('self-hp-lag'), selfHpText: $('self-hp-text'), selfXp: $('self-xp-fill'), selfXpText: $('self-xp-text'),
+    selfHp: $('self-hp-fill'), selfLag: $('self-hp-lag'), selfHpText: $('self-hp-text'), selfXp: $('self-xp-fill'), selfXpText: $('self-xp-text'), selfMp: $('self-mp'), selfMpFill: $('self-mp-fill'), selfMpText: $('self-mp-text'), tMp: $('target-mp'), tMpFill: $('target-mp-fill'), tMpText: $('target-mp-text'),
     tFrame: $('target-frame'), tName: $('target-name'), tLevel: $('target-level'), tInitial: $('target-initial'), tHp: $('target-hp-fill'), tLag: $('target-hp-lag'), tHpText: $('target-hp-text'), tSub: $('target-sub'),
     toasts: $('toasts'), conn: $('conn'), connText: $('conn-text'), chatLog: $('chat-log'), chatForm: $('chat-form'), chatInput: $('chat-input'),
     bar: $('actionbar'), death: $('death'), deathTimer: $('death-timer'), deathWait: $('death-wait'), rise: $('rise'), banner: $('zone-banner'), zoneName: $('zone-name'),
@@ -66,23 +66,30 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
 
   return {
     show() { el.hud.hidden = false; },
-    setSelf({ name, level, hp, hpMax, xp, next }) {
+    setSelf({ name, level, hp, hpMax, xp, next, mp, mpMax }) {
       if (name != null) { el.selfName.textContent = name; el.selfInitial.textContent = (name[0] || '?').toUpperCase(); }
       if (level != null) el.selfLevel.textContent = level;
       if (hp != null && hpMax) { const f = Math.max(0, Math.min(1, hp / hpMax)); el.selfHp.style.width = (f * 100) + '%'; el.selfHpText.textContent = `${fmt(hp)} / ${fmt(hpMax)}`; lag.selfTarget = f; }
-      if (xp != null && next) { el.selfXp.style.width = Math.min(100, xp / next * 100) + '%'; el.selfXpText.textContent = `${fmt(xp)} / ${fmt(next)} XP`; el.selfXp.parentElement.dataset.tip = `Experience: ${fmt(xp)} / ${fmt(next)}`; }
+      // R6: the bar under health is MANA (the one XP bar sits under the action bar, ui/pt2.js); number on hover
+      if (el.selfMp) { const has = mpMax > 0; el.selfMp.hidden = !has; if (has) { const f = Math.max(0, Math.min(1, (mp || 0) / mpMax)); el.selfMpFill.style.width = (f * 100) + '%'; el.selfMpText.textContent = `${fmt(mp)} / ${fmt(mpMax)}`; el.selfMp.dataset.tip = `Mana: ${fmt(mp)} / ${fmt(mpMax)}`; } }
+      if (xp != null && next && el.selfXp) { el.selfXp.style.width = Math.min(100, xp / next * 100) + '%'; el.selfXpText.textContent = `${fmt(xp)} / ${fmt(next)} XP`; el.selfXp.parentElement.dataset.tip = `Experience: ${fmt(xp)} / ${fmt(next)}`; }
     },
     setTarget(a) {
       if (!a) { el.tFrame.hidden = true; lag.targetId = null; return; }
       el.tFrame.hidden = false;
       el.tFrame.classList.toggle('hostile', !!a.hostile);
+      // S4: rares, elites, mini bosses and bosses get a bigger frame and health bar with their rank on it
+      const rk = a.kind === 'monster' && a.rank && a.rank !== 'normal' ? String(a.rank) : '';
+      if (el.tFrame.dataset.rank !== rk) { el.tFrame.dataset.rank = rk; el.tFrame.classList.toggle('ranked', !!rk); }
+      // R6: the target's mana when the server sends it (party frames / targetVitals), else hidden
+      if (el.tMp) { const has = a.mpMax > 0 && !(a.hp <= 0); el.tMp.hidden = !has; if (has) { el.tMpFill.style.width = (Math.max(0, Math.min(1, a.mp / a.mpMax)) * 100) + '%'; el.tMpText.textContent = `${fmt(a.mp)} / ${fmt(a.mpMax)}`; el.tMp.dataset.tip = `Mana: ${fmt(a.mp)} / ${fmt(a.mpMax)}`; } }
       el.tName.textContent = a.name; el.tLevel.textContent = a.level; el.tInitial.textContent = (a.name[0] || '?').toUpperCase();
       const f = Math.max(0, Math.min(1, a.hp / (a.hpMax || 1)));
       el.tHp.style.width = (f * 100) + '%';
       el.tHpText.textContent = a.hp <= 0 ? 'Dead' : `${fmt(a.hp)} / ${fmt(a.hpMax)}`;
       // play-test 2 Q25: a player shows their calling ("Ranger"), town folk their trade — never a blanket "Adventurer"
       const nice = t => String(t || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      el.tSub.textContent = a.kind === 'monster' ? (a.hp <= 0 ? 'Slain' : (a.family ? a.family[0].toUpperCase() + a.family.slice(1) : 'Beast'))
+      el.tSub.textContent = a.kind === 'monster' ? (a.hp <= 0 ? 'Slain' : `${a.rank && a.rank !== 'normal' ? nice(a.rank) + ' · ' : ''}${a.family ? a.family[0].toUpperCase() + a.family.slice(1) : 'Beast'}`)
         : a.kind === 'player' ? (a.clsName || nice(a.look?.cls) || 'Adventurer') : a.pet ? 'Companion' : a.role ? nice(a.role) : 'Townsfolk';
       if (lag.targetId !== a.id) { lag.target = f; lag.targetId = a.id; }
       lag.targetTarget = f;

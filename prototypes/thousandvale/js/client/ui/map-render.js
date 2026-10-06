@@ -57,10 +57,14 @@ const overlaps = (bb, b) => !(bb[2] < b.minX || bb[0] > b.maxX || bb[3] < b.minZ
 
 // labels already placed this frame (screen rects), so a later, less important label does not print over one
 let PLACED = null;
+// S25: "Names" off silences EVERY text label on the map — provinces, zones, bands, settlements, places, markers (not just markers)
+let NAMES_OFF = false;
+export function setNamesOff(on) { NAMES_OFF = !!on; }
 export function beginLabels() { PLACED = []; }
 export function endLabels() { PLACED = null; }
 /** Text with a light halo, in screen pixels. Returns false (and draws nothing) when it would overlap a placed label. */
 export function label(ctx, text, x, y, { size = 12, weight = 600, color = COLORS.text, halo = COLORS.textHalo, align = 'center', font = 'Alegreya Sans, system-ui, sans-serif', italic = false, force = false } = {}) {
+  if (NAMES_OFF) return false;
   ctx.font = `${italic ? 'italic ' : ''}${weight} ${size}px ${font}`;
   if (PLACED) {
     const w = ctx.measureText(text).width, x0 = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
@@ -80,6 +84,7 @@ export function label(ctx, text, x, y, { size = 12, weight = 600, color = COLORS
  */
 export function drawMap(ctx, view, src) {
   const { model, world, fog, markers = [], opts = {} } = src;
+  NAMES_OFF = opts.names === false;
   const W = view.w, H = view.h, b = view.bounds();
   screen(ctx);
   ctx.fillStyle = COLORS.sea; ctx.fillRect(0, 0, W, H);
@@ -170,6 +175,7 @@ export function drawMap(ctx, view, src) {
   if (model && opts.labels !== false) drawLabels(ctx, view, src);
   if (opts.names) drawMarkerNames(ctx, view, markers);
   endLabels();
+  NAMES_OFF = false;
 }
 function drawMarkerNames(ctx, view, markers) {
   const sorted = markers.filter(m => !m.hidden && m.name && m.kind !== 'me' && !['town', 'city', 'capital', 'hamlet', 'village'].includes(m.kind)).sort((a, b) => (b.priority || 0) - (a.priority || 0));
@@ -277,6 +283,8 @@ export function drawIcon(ctx, kind, x, y, size = 6, m = {}, t = 0, view = null) 
     }
     case 'party': ctx.beginPath(); ctx.arc(0, 0, S * 0.75, 0, Math.PI * 2); fill('#4aa8ff', '#06223a', 1.8); break;
     case 'pin': ctx.beginPath(); ctx.arc(0, -S * 0.6, S * 0.6, Math.PI, 0); ctx.lineTo(0, S); ctx.closePath(); fill('#e2483a', '#3a0a06', 1.4); ctx.beginPath(); ctx.arc(0, -S * 0.6, S * 0.22, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); break;
+    case 'loot': { ctx.beginPath(); for (let i = 0; i < 8; i++) { const r = i % 2 ? S * 0.35 : S * 0.85, an = i / 8 * Math.PI * 2 - Math.PI / 2; ctx.lineTo(Math.cos(an) * r, Math.sin(an) * r); } ctx.closePath(); fill(m.color || '#e8e0c8', '#1b130a', 1); break; }
+    case 'rare': { ctx.beginPath(); ctx.arc(0, 0, S * 0.8, 0, Math.PI * 2); fill(m.color || '#ffcf3a', '#2a0606', 1.6); ctx.beginPath(); ctx.arc(0, 0, S * 0.3, 0, Math.PI * 2); ctx.fillStyle = '#2a0606'; ctx.fill(); break; }
     case 'monster': ctx.beginPath(); ctx.arc(0, 0, S * 0.5, 0, Math.PI * 2); fill(m.boss ? '#ff3a3a' : '#d84a3a', '#2a0606', 1); break;
     case 'object': ctx.beginPath(); ctx.rect(-S * 0.55, -S * 0.55, S * 1.1, S * 1.1); fill(m.color || '#e0c060', '#2a1e06', 1.2); break;
     case 'me': {
@@ -334,5 +342,5 @@ export function drawDungeon(ctx, view, { floors, cell = 2, fog = null, markers =
   }
   screen(ctx);
   drawMarkers(ctx, view, markers, opts);
-  if (!opts.minimap) { beginLabels(); drawMarkerNames(ctx, view, markers); endLabels(); }
+  if (!opts.minimap && opts.names !== false) { beginLabels(); drawMarkerNames(ctx, view, markers); endLabels(); }
 }

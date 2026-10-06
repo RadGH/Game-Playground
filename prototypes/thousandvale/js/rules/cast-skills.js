@@ -161,7 +161,7 @@ function runtimeOf(combat) {
     obj.caster = ch.id;
     if (spec.taunt || spec.hp) obj.placed = true;
     for (const old of obj.removed || []) field.emit({ t: 'fx', kind: 'unplace', obj: old.id });
-    field.emit({ t: 'fx', kind: 'place', obj: obj.id, skill: obj.owner, x, z, r: obj.r, seconds: obj.left, element: obj.element });
+    field.emit({ t: 'fx', kind: 'place', obj: obj.id, skill: obj.owner, x, z, r: obj.r, seconds: obj.left, element: obj.element, ...(!spec.strike && !spec.debuff && !spec.taunt && (spec.heal || spec.buff) ? { helps: true } : {}) });
     if (spec.taunt) {
       const target = objectTarget(obj);
       for (const e of field.near(x, z, obj.r + 2)) threatTaunt(e, target, spec.seconds ?? 6);
@@ -1325,7 +1325,19 @@ function afterCast(combat, rt, ch, plan, ctx) {
     if (w.pets) { give(ch); for (const u of rt.allies(ch)) if (u !== ch) give(u); }
     else give(allyTargetOf(rt, ch, ctx.intent));
   }
-  if (plan.place && plan.kind !== 'ground' && !plan.dash) {
+  // play-test 4 S13: a zone a BOLT leaves (Grounding, Toxic Bloom, Slow Burner, Seedling, a junk pile…) belongs where
+  // the bolt LANDS, not round the caster — afterCast runs as the bolt leaves the hand, so a bolt's place/pool is handed
+  // to afterBolt (`plan._impactZones`), which puts it down at the first impact. Self/around/melee zones stay on the
+  // caster, ground zones on the aimed spot, beam pools along the beam (unchanged).
+  // A zone that only HELPS (a heal / buff ring with no strike or debuff, e.g. Thornlash's Seedling) stays with the caster,
+  // where the friends are; a zone that hurts goes where the bolt lands.
+  const atImpact = plan.kind === 'bolt' && !plan.sub;
+  const harmful = z => !!z && (!!z.strike || !!z.debuff || !!z.trigger || !!z.triggerRadius || z.kind === 'trap' || (!z.heal && !z.buff && !z.healAllies));
+  const impPlace = atImpact && plan.place && plan.place.follow !== 'self' && harmful(plan.place) ? plan.place : null;
+  const impPool = atImpact && plan.pool && !plan.line && plan.pool.at !== 'ahead' && poolSpec({ element: plan.element, ...plan.pool }).strike ? plan.pool : null;
+  if (impPlace || impPool) plan._impactZones = { place: impPlace, pool: impPool, intent: ctx.intent, a, done: false };
+  const deferPlace = !!plan._impactZones?.place, deferPool = !!plan._impactZones?.pool;
+  if (plan.place && plan.kind !== 'ground' && !plan.dash && !deferPlace) {
     const follow = plan.place.follow === 'self' ? 'self' : plan.place.follow === 'target' ? aimedEnemy(field, ch, ctx.intent, a, plan.range || 30) : null;
     const at = plan.place.follow === 'self' || plan.kind === 'self' || plan.kind === 'around' ? { x: ch.x, z: ch.z } : spot;
     rt.place(ch, plan, plan.place, at.x, at.z, follow);
@@ -1333,7 +1345,7 @@ function afterCast(combat, rt, ch, plan, ctx) {
     const follow = plan.place.follow === 'target' ? aimedEnemy(field, ch, ctx.intent, a, plan.range || 30) : null;
     rt.place(ch, plan, plan.place, spot.x, spot.z, follow);
   }
-  if (plan.pool && !plan.line) {
+  if (plan.pool && !plan.line && !deferPool) {
     const spec = poolSpec({ element: plan.element, ...plan.pool });
     if (plan.pool.along === 'beam' || (plan.kind === 'beam' && plan.pool.along !== false)) {
       for (let t = 2; t <= (plan.range || 18); t += 3) rt.place(ch, plan, { ...spec, radius: plan.pool.radius ?? Math.max(1.2, (plan.width || 2) * 0.6) }, ctx.origin.x + a.dx * t, ctx.origin.z + a.dz * t);
@@ -1413,6 +1425,16 @@ function afterCast(combat, rt, ch, plan, ctx) {
 /** skillrun.js `afterBolt`: a ricochet, a split on a condition, a bolt that comes back. */
 function afterBolt(combat, rt, ch, plan, at, hits, opts, collect) {
   const field = combat.field;
+  // S13: the bolt's own zone, at the first impact (see afterCast)
+  const iz = plan._impactZones;
+  if (iz && !iz.done) {
+    iz.done = true;
+    if (iz.place) {
+      const follow = iz.place.follow === 'target' ? (hits.find(h => h.enemy?.dying == null)?.enemy || aimedEnemy(field, ch, iz.intent, iz.a, plan.range || 30)) : null;
+      rt.place(ch, plan, iz.place, at.x, at.z, follow);
+    }
+    if (iz.pool) rt.place(ch, plan, poolSpec({ element: plan.element, ...iz.pool }), at.x, at.z);
+  }
   const struck = hits.find(h => h.result?.amount > 0)?.enemy || null;
   if (struck) plan._struck = struck;
   const used = new Set(hits.map(h => h.enemy));

@@ -80,3 +80,9 @@ Three part files that `test.json` pulls in with `include` (stream A's js/sim/con
 
 New fields: zone file `include`; quest `auto`, `classes` (A also reads `cls`), **`requires: [ids]`** (offered only when every one is done), `rewardText`;
 reward `unlock` / `perks` / `item.base` + `item.name`. Tests: `tests/E/playtest2.test.js`.
+
+## Hunting areas (play-test 4 S14)
+Kill / collect steps point at where their monster really spawns: `js/sim/hunts.js` groups the server's camps per type into
+areas and `js/sim/quests.js` sets each step's marker + `areas` from them at load. After `tools/place-vignettes.mjs`, run
+`node tools/content-hunts.mjs`: it tops up thin quest areas (`data/vignettes/placements/<zone>.quest.json`), writes
+`marks/torbor_downs-hunts.json` and re-points `marks/torbor_downs.json` (tests/E/playtest4-hunts.test.js fails until it is run).

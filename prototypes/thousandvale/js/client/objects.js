@@ -45,7 +45,18 @@ const KINDS = {
   cache:   { prop: 'crate', glow: '#ffd56a', label: o => (o.opened ? 'Dug up' : `Dig up ${o.name || 'the cache'}`), use: o => !o.opened, tint: '#7a5a2a', hiddenAlways: true },
 };
 
-export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null, labelLayer = null, camera = null } = {}) {
+// R7 (play-test 3): arena objects that say what the call-out says — `info.look = 'chained'` puts an iron shackle band on
+// the pillar, `info.tether = <entity id>` hangs a chain of links from it to that body (the Chained Saint) until the
+// object's state is `broken`. Links are one InstancedMesh per chain (shared geometry and material).
+const LINKS = 26;
+let linkGeo = null, linkMat = null;
+export function chainLinks(a, b, n = LINKS) {
+  // pure: n link centres along a slack chain from a to b (a catenary-ish sag), each with the direction it runs. Exported for tests.
+  const out = [], dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z, len = Math.hypot(dx, dy, dz) || 1, sag = Math.min(1.6, len * 0.12);
+  for (let i = 0; i < n; i++) { const t = (i + 0.5) / n; out.push({ x: a.x + dx * t, y: a.y + dy * t - Math.sin(Math.PI * t) * sag, z: a.z + dz * t, len }); }
+  return out;
+}
+export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null, labelLayer = null, camera = null, posOf = () => null } = {}) {
   const items = new Map();       // id -> object
   const group = new THREE.Group(); group.name = 'objects'; scene.add(group);
   const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85 });
@@ -105,6 +116,15 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
       fl.position.y = K.fire ? 0.7 : 1.6; fl.scale.set(K.fire ? 1.4 : 1.6, K.fire ? 2.0 : 2.6, 1); root.add(fl); o.flame2 = fl;
       o.light = LIGHTS.add({ x: 0, y: 1.2, z: 0, follow: root, color: K.fire ? '#ffae5c' : K.light, intensity: K.fire ? 16 : 8, distance: K.fire ? 14 : 9, decay: 1.6, flicker: K.fire ? 0.1 : 0 });
     }
+    if (o.look === 'chained') {
+      // an iron band round the pillar with a ring for the chain, high up where a chain would be fixed
+      const band = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.07, 6, 18), new THREE.MeshStandardMaterial({ color: '#3a3a40', metalness: 0.7, roughness: 0.45 }));
+      band.rotation.x = Math.PI / 2; band.position.y = 2.1; root.add(band);
+      const ringO = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.04, 6, 12), band.material); ringO.position.set(0, 2.1, 0.7); root.add(ringO);
+      if (!linkGeo) { linkGeo = new THREE.TorusGeometry(0.12, 0.035, 5, 10); linkMat = new THREE.MeshStandardMaterial({ color: '#4a4a52', metalness: 0.75, roughness: 0.4 }); }
+      const chain = new THREE.InstancedMesh(linkGeo, linkMat, LINKS); chain.frustumCulled = false; chain.castShadow = true; chain.visible = false;
+      scene.add(chain); o.chain = chain;
+    }
     if (o.type === 'brazier') {
       const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: '#ffb35a', blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
       fl.position.y = 0.8; fl.scale.set(1.2, 1.8, 1); root.add(fl); o.flame = fl;
@@ -128,13 +148,13 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
     if (cur.type === 'pillar') cur.root.visible = cur.state !== 'broken';
     return cur;
   }
-  function remove(id) { const o = items.get(id); if (!o) return; group.remove(o.root); if (o.light) o.light.remove(); if (o.labelEl) o.labelEl.remove(); items.delete(id); if (focus === o) focus = null; }
+  function remove(id) { const o = items.get(id); if (!o) return; group.remove(o.root); if (o.chain) scene.remove(o.chain); if (o.light) o.light.remove(); if (o.labelEl) o.labelEl.remove(); items.delete(id); if (focus === o) focus = null; }
   function clear() { for (const id of [...items.keys()]) remove(id); }
 
   /** `obj` event from an encounter. */
   function onObj(ev) {
     if (ev.gone) { remove(ev.id); return; }
-    upsert({ id: ev.id, type: ev.type, x: ev.x, z: ev.z, r: ev.r, state: ev.state, hp: ev.hp, key: ev.key, source: 'arena' });
+    upsert({ id: ev.id, type: ev.otype || (ev.type !== 'obj' ? ev.type : undefined), x: ev.x, z: ev.z, r: ev.r, state: ev.state, hp: ev.hp, key: ev.key, look: ev.look, tether: ev.tether, source: 'arena' });
   }
 
   function usable(o) { const K = KINDS[o.type]; if (!K) return false; if (o.hiddenChest && !o.revealed) return false; return typeof K.use === 'function' ? K.use(o) : !!K.use; }
@@ -157,6 +177,22 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
       if (o.ring) { o.ring.visible = can; o.ring.material.opacity = 0.32 + Math.sin(o.t * 3) * 0.16 + (o === focus ? 0.35 : 0); o.ring.rotation.y += dt * 0.4; }
       if (o.glow) o.glow.material.opacity = (can || !K.use ? 0.55 : 0.12) + Math.sin(o.t * 2.2) * 0.15 + (o === focus ? 0.25 : 0);
       if (o.flame) o.flame.visible = o.state === 'lit';
+      if (o.chain) {
+        const tp = o.tether != null && o.state !== 'broken' && o.root.visible ? posOf(o.tether) : null;
+        o.chain.visible = !!tp;
+        if (tp) {
+          const yaw = Math.atan2(tp.x - o.x, tp.z - o.z);
+          const a = { x: o.x + Math.sin(yaw) * 0.7, y: o.root.position.y + 2.1, z: o.z + Math.cos(yaw) * 0.7 };
+          const b = { x: tp.x, y: tp.y + (tp.h || 1.6) * 0.55, z: tp.z };
+          const pts = chainLinks(a, b);
+          for (let i = 0; i < pts.length; i++) {
+            const p = pts[i];
+            _q.setFromEuler(_e.set(i % 2 ? Math.PI / 2 : 0, yaw + Math.PI / 2, 0, 'YXZ'));
+            o.chain.setMatrixAt(i, _mm.compose(_vv.set(p.x, p.y, p.z), _q, _ss.set(1, 1, Math.max(0.6, Math.min(2.2, p.len / LINKS / 0.2)))));
+          }
+          o.chain.instanceMatrix.needsUpdate = true;
+        }
+      }
       if (o.arm) o.arm.rotation.z += ((o.state === 'used' ? -0.6 : 0.6) - o.arm.rotation.z) * Math.min(1, dt * 8);
       if (me && can) { const d = Math.hypot(o.x - me.x, o.z - me.z) - (o.r || 1) * 0.5; if (d < REACH && d < bd) { bd = d; best = o; } }
     }
@@ -169,6 +205,7 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
     }
   }
 
+  const _q = new THREE.Quaternion(), _e = new THREE.Euler(), _mm = new THREE.Matrix4(), _vv = new THREE.Vector3(), _ss = new THREE.Vector3();
   // floating labels for objects that carry a story: "Cleared by Aldra's party, 4 minutes ago" on a door
   const _v = new THREE.Vector3();
   function drawLabels() {

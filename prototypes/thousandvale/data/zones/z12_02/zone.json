@@ -320,13 +320,13 @@
       "x": 588,
       "z": 1264
     },
-    "placements": 366,
+    "placements": 369,
     "vignettesAvoided": 676
   },
   "files": {
-    "terrain.bin": 605155,
-    "nav.bin": 41817,
+    "terrain.bin": 605182,
+    "nav.bin": 42253,
     "scatter.bin": 149868,
-    "placements.json": 270122
+    "placements.json": 293731
   }
 }

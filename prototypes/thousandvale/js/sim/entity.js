@@ -133,15 +133,19 @@ export class Entity {
       if (this.gearOff) o.gearOff = 1;
       if (this.mount) o.mount = this.mount;                    // riding (Q16)
       if (this.mpMax > 0) o.mpMax = this.mpMax;                // R6+: mana bar maximum (the current value comes in `mp` events)
+      if (this.sitting) o.sit = 1;                             // S20: sitting down to eat / drink (anim 'sit' too)
     }
     else if (this.type) o.type = this.type;
     if (this.rank !== 'normal') o.rank = this.rank;
+    if (this.aff && this.aff.length) o.aff = this.aff;         // S4: a champion's / rare's modifiers [{id, name, aura?}]
+    if (this.sc && this.sc !== 1) o.sc = this.sc;              // S4: body scale (champions/rares are bigger; a Giant much bigger)
     if (this.st && this.st.length) o.st = this.st;             // statuses everyone draws (Q8)
     if ((this.kind === 'object' || this.kind === 'npc') && this.data) {
       const d = this.data;
       if (d.hidden) { o.hidden = 1; if (d.hint) o.hint = d.hint; }
       if (d.lore) o.lore = d.lore;
       if (d.npc && d.npc.role) o.role = d.npc.role;
+      if (d.title) o.title = d.title;                          // S19: the line above an NPC's name ('Weaponsmith', 'Unbinder — resets talents & perks')
       if (this.kind === 'npc') o.type = this.type;
       const key = d.key || (d.chest && d.chest.key);
       if (key) o.key = key;

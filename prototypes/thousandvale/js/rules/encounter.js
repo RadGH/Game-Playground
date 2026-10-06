@@ -20,6 +20,7 @@ import { applyStatus, incomingFrom, outgoingFrom, statusRef } from './farhold.js
 import { inside, segmentNear, wireShape, BODY_RADIUS } from './telegraph.js';
 import { monsterStrike, spawnMonster, applyModifier } from './monster-ai.js';
 import { taunt as threatTaunt, clearThreat } from './threat.js';
+import { affixSpecials } from './affixes.js';
 
 /** How a rank scales a monster's specials. */
 export const RANK_SCALE = {
@@ -90,7 +91,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     const id = e.encounterId
       || D.byType?.[e.defId]
       || (e.boss ? D.defaults?.boss?.[roomKind] || D.defaults?.boss?.any : null)
-      || (e.rank === 'champion' || e.rank === 'rare' ? D.defaults?.elite?.[roomKind] || D.defaults?.elite?.any : null);
+      || ((e.rank === 'champion' || e.rank === 'rare') && !e.affixed ? D.defaults?.elite?.[roomKind] || D.defaults?.elite?.any : null);   // S4: a rolled one uses its modifiers
     return id && D.scripts[id] ? D.scripts[id] : null;
   }
   function specialsFor(e) {
@@ -108,7 +109,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       e, script, started: false, startedAt: 0, phase: -1, bar: 0, enraged: false, softStacks: 0, dmgScale: 1,
       timers: {}, cast: null, adds: new Set(), shield: false, wipeFor: 0, fired: new Set(), counters: {},
       baseMaxHp: e.maxHp, homeX: e.home?.[0] ?? e.x, homeZ: e.home?.[1] ?? e.z,
-      abilities: script ? [] : specialsFor(e),
+      abilities: script ? [] : [...specialsFor(e), ...affixSpecials(field.room.engine, e.modifiers || [])],   // S4: a modifier's own special
       scale: script ? RANK_SCALE.boss : (RANK_SCALE[e.rank] || RANK_SCALE.normal),
     };
     if (script?.hpMult && script.hpMult !== 1) { e.maxHp = Math.round(e.maxHp * script.hpMult); e.hp = e.maxHp; st.baseMaxHp = e.maxHp; }

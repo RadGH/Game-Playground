@@ -67,6 +67,7 @@ export const STAT_TEXT = {
   healPower: v => `${sgn(v)}${n(v)}% healing you do`,
   dotPct: v => `${sgn(v)}${n(v)}% damage from your burns, poisons, bleeds and curses`,
   threatPct: v => (v >= 0 ? `+${n(v)}% threat from your damage` : `−${n(v)}% threat from your damage`),
+  shockPct: v => `${sgn(v)}${n(v)}% damage to Shocked enemies`,
 };
 /** Farhold `derived` keys that Thousandvale reads, and where (the forest may grant only these + TV_STAT_READERS). */
 export const FARHOLD_STAT_READERS = Object.freeze({
@@ -214,6 +215,42 @@ export const FLAG_READERS = Object.freeze({
   pack: 'farhold rpg.strike', bloodMagic: 'farhold skills.js bloodPrice', doubleGrip: 'farhold rpg.equip + weapons.js', farShot: 'farhold rpg.strike',
   ...TV_FLAG_READERS,
 });
+
+/**
+ * Play-test 4 S16: what a node is FOR, read from what it does (its grants, flag and power) — never from
+ * its name. Element tags (fire, ice, lightning, poison, shadow, holy, arcane, nature) and play-style tags
+ * (spell, dot, pet, heal, melee, ranged, tank). Generic numbers (crit, damage%, haste, health) carry no tag,
+ * so a class only counts a node as its own when the node is about how that class fights.
+ * The client may use it to point a class at its arms ("for you").
+ */
+const FLAG_ELEMENT = Object.freeze({
+  pyreHeart: 'fire', cauterise: 'fire', shatter: 'ice', stormWithin: 'lightning', staticCharge: 'lightning', conductor: 'lightning',
+  thunderhead: 'lightning', staticCoat: 'lightning', plagueBearer: 'poison', hollowPact: 'shadow', halo: 'holy', spellwright: 'arcane', rootbound: 'nature',
+});
+const FLAG_STYLE = Object.freeze({
+  doubleGrip: 'melee', fullSwing: 'melee', flurry: 'agile', windWalk: 'agile', stillness: 'ranged', opener: 'agile', cornered: 'agile', shieldWall: 'tank', riposte: 'melee', sunder: 'melee', farShot: 'ranged', volley: 'ranged', mark: 'ranged',
+  thePack: 'pet', earlyBond: 'pet', packTactics: 'pet', pack: 'pet', sharedHide: 'pet', brimming: 'heal', rally: 'tank', heldGround: 'tank', ironPresence: 'tank',
+  bloodScent: 'dot', contagion: 'dot', overflow: 'spell', bloodMagic: 'spell', weave: 'spell', mindWard: 'spell',
+});
+const STAT_TAG = Object.freeze({
+  spellPower: 'spell', int: 'spell', maxMp: 'spell', mpRegen: 'spell', skillCostPct: 'spell', dotPct: 'dot', petDamagePct: 'pet', followerSlots: 'pet',
+  healPower: 'heal', str: 'melee', areaPct: 'melee', dex: 'agile', arrowsPerShot: 'ranged', dodge: 'agile', haste: 'agile', blockChance: 'tank', blockPower: 'tank', armorPct: 'tank',
+  armor: 'tank', resistAll: 'tank', shockPct: 'lightning',
+});
+export function perkTags(node) {
+  const tags = new Set();
+  if (!node) return tags;
+  if (node.flag && FLAG_ELEMENT[node.flag]) { tags.add(FLAG_ELEMENT[node.flag]); tags.add('spell'); }
+  if (node.flag && FLAG_STYLE[node.flag]) tags.add(FLAG_STYLE[node.flag]);
+  for (const [k, v] of Object.entries({ ...(node.grants || {}), ...(node.whenGrants || {}) })) {
+    if (k === 'threatPct') { if (v > 0) tags.add('tank'); continue; }
+    if (STAT_TAG[k] && v > 0) tags.add(STAT_TAG[k]);
+  }
+  if (node.when) tags.add(node.when === 'swordBoard' ? 'tank' : 'melee');
+  return tags;
+}
+/** The top of the forest (S16): the notable ring, the last major ring, every path node and every cornerstone. */
+export const isTopTier = node => !!node && !node.oddball && node.id !== 'start' && (node.ring >= 5 || !!node.branch);
 
 /**
  * What the client calls each kind of node. "Keystone" is on the playground's banned list for

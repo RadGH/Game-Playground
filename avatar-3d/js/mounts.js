@@ -19,6 +19,7 @@
 
 import * as THREE from 'three';
 import { createCreature } from './creatures.js';
+import { createEquine } from './equine.js';
 import { CREATURE_TYPES } from './creature-types.js';
 import { MOUNT_TYPES, mountSpecFor, gaitFor } from './mount-types.js';
 import { CHIBI2_MOUNT_ANIMS } from './chibi2-motion.js';
@@ -47,12 +48,102 @@ const shade = (hex, k) => { const c = new THREE.Color(hex); if (k >= 0) c.lerp(n
  * Build a mount. `spec` = anything mountSpecFor takes (a type key, a game id, a look) or an already normalised spec.
  * -> { group, creature, spec, seat, setGait(speed), setAnim(name), get gait, get riderClip, update(dt, t), metrics(), dispose() }
  */
-export async function createMount(input, { detail = 1 } = {}) {
-  const spec = input && input.type && MOUNT_TYPES[input.type] && input.tack ? input : mountSpecFor(input);
-  const T = MOUNT_TYPES[spec.type];
-  const creature = await createCreature({ type: spec.creature, size: spec.size, colors: spec.colors, seed: 7 }, { detail });
-  const group = new THREE.Group(); group.name = 'mount-' + spec.type; group.userData.mount = spec.type;
-  group.add(creature.group);
+/**
+ * Tack cut from an equine body (play-test 4, S22): every strap, pad and plate is a patch of the surface it lies on
+ * (creature.frame.patch), so it fits the barrel / neck / head of whichever breed wears it. Hip space is the body's
+ * own metres at size 1 (the root is scaled by size), so world sizes go through M().
+ */
+function equineTack(creature, spec) {
+  const F = creature.frame, P = creature.parts, hip = P.hip, S = spec.size, tack = spec.tack || {};
+  const leather = tack.leather || '#5a3a22', cloth = tack.cloth || '#7a2a24', metal = tack.metal || '#b8b0a0', dark = shade(leather, -0.25);
+  const M = v => v / S, TOP = Math.PI / 2;
+  const patch = (o, colour, extra = { double: true }) => mesh(F.patch(o), colour, extra);
+  const U = F.saddleU, z = u => F.zAt(u), R = u => F.ringAt(u);
+  const barding = tack.kind === 'barding', harness = tack.kind === 'harness';
+
+  // the pad / blanket under the saddle, with a contrasting hem; a barded horse wears a caparison instead
+  if (barding) {
+    hip.add(patch({ u0: 0.06, u1: 0.93, a0: TOP - 1.95, a1: TOP + 1.95, push: 1.045, rows: 18, cols: 22 }, cloth));
+    for (const [a0, a1] of [[TOP - 1.95, TOP - 1.85], [TOP + 1.85, TOP + 1.95]]) hip.add(patch({ u0: 0.06, u1: 0.93, a0, a1, push: 1.05, rows: 18, cols: 2 }, tack.trim || '#d8b060'));
+    for (const sx of [-1, 1]) {
+      const Rb = R(0.32), badge = mesh(new THREE.CircleGeometry(M(0.11), 16), tack.trim || '#d8b060', { double: true });
+      badge.position.set(sx * Rb.rx * 1.075, -Rb.bot * 0.05, z(0.32)); badge.rotation.y = sx * Math.PI / 2; hip.add(badge);
+    }
+  } else {
+    const arc = harness ? 1.05 : 1.0;
+    hip.add(patch({ u0: U - 0.15, u1: U + 0.12, a0: TOP - arc, a1: TOP + arc, push: 1.02, rows: 8, cols: 14 }, cloth));
+    for (const [a0, a1] of [[TOP - arc - 0.05, TOP - arc + 0.06], [TOP + arc - 0.06, TOP + arc + 0.05]]) hip.add(patch({ u0: U - 0.15, u1: U + 0.12, a0, a1, push: 1.026, rows: 8, cols: 2 }, shade(cloth, 0.35)));
+    for (const u of [U - 0.15, U + 0.12]) hip.add(patch({ u0: u - 0.006, u1: u + 0.006, a0: TOP - arc, a1: TOP + arc, push: 1.026, rows: 1, cols: 14 }, shade(cloth, 0.35)));
+  }
+  // the saddle: a seat over the back, skirts down the flanks, a pommel in front and a high cantle behind
+  hip.add(patch({ u0: U - 0.09, u1: U + 0.07, a0: TOP - 0.72, a1: TOP + 0.72, push: 1.065, rows: 8, cols: 12 }, leather));
+  hip.add(patch({ u0: U - 0.075, u1: U + 0.06, a0: TOP - 0.55, a1: TOP + 0.55, push: 1.085, rows: 6, cols: 10 }, shade(leather, 0.08)));
+  for (const sx of [-1, 1]) hip.add(patch({ u0: U - 0.06, u1: U + 0.055, a0: sx < 0 ? TOP + 0.6 : TOP - 1.25, a1: sx < 0 ? TOP + 1.25 : TOP - 0.6, push: 1.06, rows: 4, cols: 5 }, shade(leather, -0.12)));
+  const Rf = R(U + 0.075), Rc = R(U - 0.095);
+  const pommel = box(M(0.15), M(0.09), M(0.07), shade(leather, -0.12)); pommel.position.set(0, Rf.top * 1.075 + M(0.035), z(U + 0.075)); pommel.rotation.x = -0.4; hip.add(pommel);
+  const cantle = mesh(new THREE.TorusGeometry(M(0.1), M(0.028), 6, 12, Math.PI), shade(leather, -0.12)); cantle.position.set(0, Rc.top * 1.075 + M(0.005), z(U - 0.095)); cantle.rotation.x = -0.35; hip.add(cantle);
+  // girth round the barrel, and a breastplate across the chest
+  hip.add(patch({ u0: U + 0.08, u1: U + 0.1, a0: 0, a1: Math.PI * 2, push: 1.012, rows: 1, cols: 26, closed: true }, dark, {}));
+  if (!barding) hip.add(patch({ u0: 0.9, u1: harness ? 0.95 : 0.915, a0: -0.35, a1: Math.PI + 0.35, push: harness ? 1.05 : 1.02, rows: harness ? 3 : 1, cols: 16 }, harness ? shade(leather, 0.1) : dark));
+  if (harness) {
+    // a padded breast collar with brass studs, a back pad, and packs strapped over the rump
+    for (let i = 0; i < 7; i++) { const a = -0.1 + (i / 6) * (Math.PI + 0.2), Rk = R(0.93); const stud = mesh(new THREE.SphereGeometry(M(0.018), 6, 4), metal, { metal: true }); stud.position.set(Math.cos(a) * Rk.rx * 1.06, Math.sin(a) * (Math.sin(a) > 0 ? Rk.top : Rk.bot) * 1.06, z(0.93)); hip.add(stud); }
+    for (const sx of [-1, 1]) {
+      const Rp = R(0.26);
+      const pack = box(M(0.13), M(0.24), M(0.3), shade(cloth, 0.15)); pack.position.set(sx * Rp.rx * 1.12, Rp.top * 0.35, z(0.26)); pack.rotation.z = -sx * 0.18; hip.add(pack);
+      const strap = box(M(0.135), M(0.03), M(0.04), dark); strap.position.set(sx * Rp.rx * 1.13, Rp.top * 0.35, z(0.26)); strap.rotation.z = -sx * 0.18; hip.add(strap);
+    }
+    const roll = cyl(M(0.07), M(0.07), R(0.3).rx * 2.1, shade(cloth, -0.1), 10); roll.rotation.z = Math.PI / 2; roll.position.set(0, R(0.3).top * 1.04 + M(0.06), z(0.3)); hip.add(roll);
+  }
+
+  // the seat: where the rider's hips go (counter-scaled so a rider under it is world-size)
+  const seat = new THREE.Object3D(); seat.name = 'seat';
+  const Rs = R(U - 0.01);
+  seat.position.set(0, Rs.top * 1.085 + M(0.02), z(U - 0.015)); seat.scale.setScalar(1 / S);
+  hip.add(seat);
+
+  // stirrups: a leather from under the skirt down to an iron where the rider's feet hang
+  const stirrupY = seat.position.y - M(0.36);
+  for (const sx of [-1, 1]) {
+    const Rw = R(U), x = sx * Rw.rx * 1.1, topY = Rw.top * 0.55, len = Math.max(M(0.05), topY - stirrupY);
+    const strap = box(M(0.024), len, M(0.012), dark); strap.position.set(x, topY - len / 2, z(U)); hip.add(strap);
+    const iron = mesh(new THREE.TorusGeometry(M(0.045), M(0.009), 5, 12), metal, { metal: true }); iron.position.set(x, stirrupY - M(0.03), z(U)); hip.add(iron);
+    const tread = box(M(0.08), M(0.012), M(0.04), metal, { metal: true }); tread.position.set(x, stirrupY - M(0.072), z(U)); hip.add(tread);
+    if (tack.bags && !harness) {
+      const Rb = R(U - 0.2);
+      const bag = box(M(0.1), M(0.19), M(0.23), shade(leather, 0.1)); bag.position.set(sx * Rb.rx * 1.12, Rb.top * 0.42, z(U - 0.2)); bag.rotation.z = -sx * 0.22; hip.add(bag);
+      const flap = box(M(0.11), M(0.06), M(0.24), shade(leather, -0.2)); flap.position.set(sx * Rb.rx * 1.15, Rb.top * 0.42 + M(0.08), z(U - 0.2)); flap.rotation.z = -sx * 0.22; hip.add(flap);
+    }
+  }
+
+  // barding plates: a crinet down the crest and a chanfron on the face, with a spike
+  if (barding) {
+    P.neck.add(patch({ on: 'neck', u0: 0.08, u1: 0.96, a0: TOP - 0.75, a1: TOP + 0.75, push: 1.08, rows: 10, cols: 8 }, metal, { metal: true, double: true }));
+    for (let i = 0; i < 6; i++) { const u = 0.15 + i * 0.14; P.neck.add(patch({ on: 'neck', u0: u, u1: u + 0.012, a0: TOP - 0.78, a1: TOP + 0.78, push: 1.095, rows: 1, cols: 8 }, shade(metal, -0.3), { metal: true, double: true })); }
+    P.head.add(patch({ on: 'head', u0: 0.04, u1: 0.78, a0: TOP - 1.0, a1: TOP + 1.0, push: 1.09, rows: 10, cols: 10 }, metal, { metal: true, double: true }));
+    const spike = mesh(new THREE.ConeGeometry(0.018, 0.12, 6), metal, { metal: true }); const Rh = F.headRing(0.12); spike.position.set(0, Rh.top * 1.09 + 0.04, Rh.c[2]); spike.rotation.x = -0.9; P.head.add(spike);
+  }
+
+  // the bridle: browband, a strap down each cheek, a noseband, a throatlatch, and the bit rings the reins tie to
+  const bits = [];
+  if (P.head) {
+    const hp = (o, c = dark) => P.head.add(patch({ on: 'head', push: 1.07, ...o }, c));
+    hp({ u0: 0.1, u1: 0.13, a0: TOP - 1.25, a1: TOP + 1.25, rows: 1, cols: 10 }, barding ? cloth : dark);
+    hp({ u0: 0.7, u1: 0.74, a0: 0, a1: Math.PI * 2, rows: 1, cols: 18, closed: true });
+    hp({ u0: 0.08, u1: 0.1, a0: Math.PI + 0.2, a1: Math.PI * 2 - 0.2, rows: 1, cols: 8 });
+    for (const a of [0, Math.PI]) hp({ u0: 0.11, u1: 0.72, a0: a - 0.09, a1: a + 0.09, rows: 6, cols: 1 });
+    const Rb = F.headRing(0.8);
+    for (const sx of [-1, 1]) {
+      const ring = mesh(new THREE.TorusGeometry(0.024, 0.006, 4, 10), metal, { metal: true });
+      ring.position.set(sx * Rb.rx * 1.08, -Rb.bot * 0.35, Rb.c[2]); ring.rotation.y = Math.PI / 2; P.head.add(ring);
+      bits.push(ring);
+    }
+  }
+  return { seat, bits, backTop: P.bodyY + Rs.top };
+}
+
+/** The Q16 tack on a creatures.js four-legged body (the ram, the drake): unchanged from the first mounts. */
+function quadTack(creature, spec) {
   const P = creature.parts, B = CREATURE_TYPES[spec.creature].body, S = spec.size, tack = spec.tack || {};
   const hip = P.hip;
   const leather = tack.leather || '#5a3a22', cloth = tack.cloth || '#7a2a24', metal = tack.metal || '#b8b0a0';
@@ -126,6 +217,23 @@ export async function createMount(input, { detail = 1 } = {}) {
       bits.push(ring);
     }
   }
+  return { seat, bits, backTop: P.bodyY + r };
+}
+
+export async function createMount(input, { detail = 1 } = {}) {
+  const spec = input && input.type && MOUNT_TYPES[input.type] && input.tack ? input : mountSpecFor(input);
+  const T = MOUNT_TYPES[spec.type];
+  // play-test 4 (S22): a hoofed mount rides its own equine body (equine.js); the ram and the drake keep creatures.js
+  const breed = T.breed || null;
+  const creature = breed
+    ? await createEquine({ breed, size: spec.size, colors: spec.colors, seed: 7 }, { detail })
+    : await createCreature({ type: spec.creature, size: spec.size, colors: spec.colors, seed: 7 }, { detail });
+  const group = new THREE.Group(); group.name = 'mount-' + spec.type; group.userData.mount = spec.type;
+  group.add(creature.group);
+  const { seat, bits, backTop } = breed ? equineTack(creature, spec) : quadTack(creature, spec);
+  const P = creature.parts, S = spec.size, tack = spec.tack || {};
+  const leather = tack.leather || '#5a3a22';
+
   // the reins run from the bit rings to where the rider's hands are (seat space, world metres). They are re-laid
   // every frame in update(): the head sways and the body bobs, and a rein that did not follow would detach.
   const handPts = [-1, 1].map(sx => { const o = new THREE.Object3D(); o.position.set(sx * 0.09, 0.3, 0.3); seat.add(o); return o; });
@@ -148,7 +256,8 @@ export async function createMount(input, { detail = 1 } = {}) {
   const G = T.gaits;
   function setGait(speed) {
     const g = gaitFor(speed, spec.type), s = Math.abs(+speed || 0);
-    if (g === 'idle') { creature.setAnim('idle'); creature.setRate(1); }
+    if (creature.setMotion) creature.setMotion(g, s);       // an equine body: its own walk / trot / gallop leg patterns
+    else if (g === 'idle') { creature.setAnim('idle'); creature.setRate(1); }
     else if (g === 'gallop') { creature.setAnim('run'); creature.setRate(Math.max(0.6, s / (G.pace.run * S))); }
     else { creature.setAnim('walk'); creature.setRate(Math.max(0.5, s / (G.pace.walk * S))); }
     if (g !== gait) { gait = g; if (rider?.body && rider.clips) rider.body.setAnim(g === 'gallop' ? 'rideGallop' : 'ride', 0.25); }
@@ -170,7 +279,7 @@ export async function createMount(input, { detail = 1 } = {}) {
       group.updateMatrixWorld(true);
       const m = creature.metrics(), p = seat.getWorldPosition(new THREE.Vector3());
       const g = group.getWorldPosition(new THREE.Vector3());
-      return { height: m.height, length: m.length, width: m.width, seatY: p.y - g.y, backY: (P.bodyY + r) * S };
+      return { height: m.height, length: m.length, width: m.width, seatY: p.y - g.y, backY: backTop * S };
     },
     dispose() { for (const m of reins) group.remove(m); creature.dispose(); },
   };

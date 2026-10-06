@@ -1,0 +1,347 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_02, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z12_02",
+ "terrainHash": "0ba48d02",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_tusks_in_the_turnips_0_0",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1475,
+   "z": 1518,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "tusks_in_the_turnips",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_tusks_in_the_turnips_0_1",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1475,
+   "z": 1518,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "tusks_in_the_turnips",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_frogs_are_not_food_0_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 183,
+   "z": 2013,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "frogs_are_not_food",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_bones_for_bryn_0_0",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 394,
+   "z": 1066,
+   "yaw": 0,
+   "radius": 2.905,
+   "quest": "bones_for_bryn",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_start_road_to_orrinsford_1_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 730,
+   "z": 1704,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "start_road_to_orrinsford",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_fighter_1_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 409,
+   "z": 1238,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_fighter",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_fighter_1_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 409,
+   "z": 1238,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_fighter",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_dragon_knight_2_0",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1060,
+   "z": 1295,
+   "yaw": 0,
+   "radius": 3.665,
+   "quest": "class_dragon_knight",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_priest_1_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 735,
+   "z": 1394,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "class_priest",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_mage_1_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 110,
+   "z": 1794,
+   "yaw": 0,
+   "radius": 4,
+   "quest": "class_mage",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_mage_2_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 104,
+   "z": 1680,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_mage",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_chronomancer_2_0",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 828,
+   "z": 1290,
+   "yaw": 0,
+   "radius": 1.716,
+   "quest": "class_chronomancer",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_witch_hunter_2_0",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 428,
+   "z": 1409,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_witch_hunter",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_witch_hunter_2_1",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 428,
+   "z": 1409,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_witch_hunter",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_fairy_ring_0_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 104,
+   "z": 1680,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "the_fairy_ring",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_stones_for_the_mother_0_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1112,
+   "z": 1887,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "stones_for_the_mother",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_stones_for_the_mother_0_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1112,
+   "z": 1887,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "stones_for_the_mother",
+   "hunt": true
+  }
+ ]
+}

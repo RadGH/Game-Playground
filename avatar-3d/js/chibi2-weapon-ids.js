@@ -31,6 +31,12 @@ export const FARHOLD_WEAPON_INFO = {
   fh_halberd: { family: 'polearm', hands: 2, haft: true, headY: -1.30, buttY: 0.66 },
   fh_quarterstaff: { family: 'staff', hands: 2, haft: true, headY: -0.78, buttY: 0.78 },
   fh_wand: { family: 'wand', hands: 1, haft: false, headY: -0.32, buttY: 0.02 },
+  // PLAY-TEST 4 (S17, Thousandvale): four more silhouettes so every weapon base in the loot pool reads
+  // as itself. New ids, nothing that already exists changed; the same head-past-the-fingers rule.
+  tv_scimitar: { family: 'sabre', hands: 1, haft: false, headY: -0.70, buttY: 0.08 },
+  tv_warpick: { family: 'axe', hands: 2, haft: true, headY: -0.86, buttY: 0.22 },
+  tv_club: { family: 'mace', hands: 1, haft: true, headY: -0.52, buttY: 0.08 },
+  tv_glaive: { family: 'polearm', hands: 1, haft: true, headY: -1.14, buttY: 0.50 },
 };
 
 export const FARHOLD_HELD = Object.keys(FARHOLD_WEAPON_INFO);
@@ -58,14 +64,16 @@ const RIGHT_KIND = {
   fh_spear: 'polearm', fh_halberd: 'polearm', fh_javelin: 'polearm', fh_quarterstaff: 'polearm',
   quarterstaff: 'staff', staff_orb: 'staff', staff_skull: 'staff', staff_crook: 'staff', staff_crystal: 'staff', staff_totem: 'staff',
   fh_wand: 'wand', wand: 'wand',
+  tv_scimitar: 'blade', tv_warpick: 'heavy', tv_club: 'haft', tv_glaive: 'polearm',
   lute: 'caster', book: 'caster', hourglass: 'caster', orb: 'caster', flame: 'caster', lightning: 'caster', ring_rune: 'caster',
   crossbow: 'crossbow', bow: 'none', none: 'none',
 };
-const TWO_HANDED = new Set(['greatsword', 'greataxe', 'warhammer', 'fh_greatsword', 'fh_greataxe', 'fh_maul', 'fh_halberd', 'fh_quarterstaff', 'quarterstaff']);
+const TWO_HANDED = new Set(['greatsword', 'greataxe', 'warhammer', 'fh_greatsword', 'fh_greataxe', 'fh_maul', 'fh_halberd', 'fh_quarterstaff', 'quarterstaff', 'tv_warpick']);
 const LEFT_KIND = {
   heater_shield: 'shield', kite_shield: 'shield', round_shield: 'shield', tower_shield: 'shield', buckler: 'shield',
   fh_heater_shield: 'shield', fh_kite_shield: 'shield', fh_tower_shield: 'shield',
   dagger: 'dagger', book: 'book', orb: 'orb', relic: 'orb', idol: 'orb', torch: 'torch', map: 'caster', quiver: 'none', none: 'none',
+  tv_ward: 'orb', tv_totem: 'orb',            // PLAY-TEST 4 (S17): foci built in chibi2-gear.js buildOffhand, held up like the orb
 };
 
 /**
@@ -73,10 +81,14 @@ const LEFT_KIND = {
  * head is extruded on its side and faces -z, a hammer's face plate is at -x, a crossbow's muzzle is
  * +z and a bow's belly -y with its limbs along z. The clips' grip solve reads this.
  */
-const EDGE_AXIS = { fh_axe: '-z', fh_greataxe: '-z', fh_halberd: '-z', fh_hammer: '-x', fh_maul: '-x', crossbow: '-z', bow: '-z' };
+const EDGE_AXIS = { fh_axe: '-z', fh_greataxe: '-z', fh_halberd: '-z', fh_hammer: '-x', fh_maul: '-x', crossbow: '-z', bow: '-z', tv_warpick: '-z', tv_glaive: '-z' };
 
-/** Held ids that are weapons a hand can swing — the ones an off hand may carry as a second weapon. */
-export const HELD_WEAPON_IDS = Object.keys(RIGHT_KIND).filter(id => !['caster', 'none', 'crossbow', 'staff', 'wand'].includes(RIGHT_KIND[id]));
+/**
+ * Held ids an off hand may carry as a second weapon. PLAY-TEST 4 (S15): wands are in it now — a
+ * second wand in the off hand fell through to the shield builder and drew nothing (or a heater
+ * shield), so a dual-wielding caster looked one-handed.
+ */
+export const HELD_WEAPON_IDS = Object.keys(RIGHT_KIND).filter(id => !['caster', 'none', 'crossbow', 'staff'].includes(RIGHT_KIND[id]));
 
 /** `{ right, left, twoHand, dualTwo, dual }` for an avatar — see chibi2-motion.js. */
 export function holdFor(a) {

@@ -12,6 +12,10 @@
 //   mountSpecFor('ram')                                // a MOUNT_TYPES key
 
 /**
+ * breed (play-test 4, S22): the hoofed mounts ride a body built for them (equine.js — a lofted barrel, an arched
+ * neck, a long head, jointed legs with hooves, real walk / trot / gallop leg patterns). A type without a breed
+ * (ram, drake) still rides its creatures.js body. `creature` stays for the creature table and stream A's looks.
+ *
  * gaits: speeds in metres a second (at size 1). Below `walk` the mount stands; up to `trot` it walks;
  * up to `gallop` it trots (the quad's walk clip, which already moves the legs in diagonal pairs, run
  * faster); past that it gallops (the run clip). `pace` is the ground speed each clip covers at rate 1,
@@ -21,34 +25,42 @@ const GAITS = { walk: 0.35, trot: 2.6, gallop: 5.2, pace: { walk: 1.6, run: 6.5 
 
 export const MOUNT_TYPES = {
   horse: {
-    label: 'Riding horse', creature: 'horse', size: 1,
+    label: 'Riding horse', creature: 'horse', breed: 'horse', size: 1,
     colors: { body: '#5a3e2a', belly: '#7a5a40', accent: '#1e1612' },
     tack: { kind: 'saddle', leather: '#5a3a22', cloth: '#7a2a24', metal: '#b8b0a0', bags: true },
     gaits: GAITS,
   },
   pony: {
-    label: 'Moorland pony', creature: 'pony', size: 1,
+    label: 'Moorland pony', creature: 'pony', breed: 'pony', size: 1,
     colors: { body: '#8a6a48', belly: '#c9b08a', accent: '#3a2a1c' },
     tack: { kind: 'saddle', leather: '#6a4a2a', cloth: '#3a5a3a', metal: '#a89a80', bags: true },
     gaits: { ...GAITS, trot: 2.2, gallop: 4.6, pace: { walk: 1.2, run: 5 } },
   },
   courser: {
-    label: 'Grey courser', creature: 'courser', size: 1,
+    label: 'Grey courser', creature: 'courser', breed: 'courser', size: 1,
     colors: { body: '#9a9a96', belly: '#c8c8c2', accent: '#3a3a3a' },
     tack: { kind: 'saddle', leather: '#3a2a20', cloth: '#2a3a6a', metal: '#d0c8b0', bags: false },
     gaits: { ...GAITS, gallop: 5.6, pace: { walk: 1.8, run: 7.5 } },
   },
   warhorse: {
-    label: 'Barded warhorse', creature: 'horse', size: 1.15,
-    colors: { body: '#2e2a28', belly: '#4a423c', accent: '#8a1e1e' },
+    label: 'Barded warhorse', creature: 'horse', breed: 'draft', size: 1.12,
+    colors: { body: '#2e2a28', belly: '#4a423c', accent: '#8a1e1e', hair: '#141110' },
     tack: { kind: 'barding', leather: '#2a1e16', cloth: '#8a1e1e', trim: '#d8b060', metal: '#9aa0a8', bags: false },
     gaits: { ...GAITS, gallop: 5.4 },
   },
   stag: {
-    label: 'Moor stag', creature: 'elk', size: 1,
+    label: 'Moor stag', creature: 'elk', breed: 'elk', size: 1,
     colors: { body: '#7a5634', belly: '#d8c2a0', accent: '#e8e0d0' },
     tack: { kind: 'saddle', leather: '#4a3018', cloth: '#5a7a3a', metal: '#c8b890', bags: false },
     gaits: { ...GAITS, gallop: 5.6, pace: { walk: 1.8, run: 7.5 } },
+  },
+  // play-test 4 (S22): Thousandvale's level-15 'Dray Elk' had no type and fell back to a plain horse. A heavy elk with
+  // a broad breast-collar harness and packs: the beast of burden of the mounts.
+  dray: {
+    label: 'Dray elk', creature: 'elk', breed: 'elk_dray', size: 1.15,
+    colors: { body: '#6a5a48', belly: '#b8a684', accent: '#3a2c1c' },
+    tack: { kind: 'harness', leather: '#3a2618', cloth: '#6a4a2a', metal: '#a89a78', bags: true },
+    gaits: { ...GAITS, trot: 2.3, gallop: 5.0 },
   },
   ram: {
     label: 'Crag ram', creature: 'ram', size: 1.25,
@@ -70,7 +82,7 @@ export const MOUNT_GAITS = ['idle', 'walk', 'trot', 'gallop'];
 /** Game ids (Thousandvale js/sim/mounts.js DEFAULT_MOUNTS) and creature ids that name a mount type. */
 export const MOUNT_ALIASES = {
   riding_horse: 'horse', trail_horse: 'horse', grey_courser: 'courser', moor_stag: 'stag', barded_warhorse: 'warhorse',
-  moor_pony: 'pony', crag_ram: 'ram', mire_drake: 'drake',
+  moor_pony: 'pony', crag_ram: 'ram', mire_drake: 'drake', dray_elk: 'dray',
   // creature ids (a `look.creature`)
   deer: 'stag', elk: 'stag', goat: 'ram', sheep: 'ram', dragon: 'drake',
 };
@@ -101,7 +113,7 @@ export function mountSpecFor(input) {
   let size = T.size;
   if (look && Number.isFinite(look.scale) && look.scale > 0) size = +Math.max(0.5, Math.min(2.5, T.size * look.scale)).toFixed(3);
   const tack = { ...T.tack, ...(look?.tack && typeof look.tack === 'object' ? look.tack : {}) };
-  return { type, creature: T.creature, size, colors, tack, label: T.label };
+  return { type, creature: T.creature, breed: T.breed || null, size, colors, tack, label: T.label };
 }
 
 /** Which gait a ground speed (m/s) is at, for a spec/type. Pure: the gallery, tests and games agree. */

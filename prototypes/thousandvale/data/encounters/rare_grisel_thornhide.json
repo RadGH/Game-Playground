@@ -2,6 +2,10 @@
   "id": "rare_grisel_thornhide",
   "name": "Grisel Thornhide",
   "tier": "rare",
+  "announce": {
+    "r": 300,
+    "_doc": "S4: shown on the minimap of anyone within r metres while it lives"
+  },
   "body": "thicket_boar",
   "place": "wilds: roams the farm fields between Torborhold and Wamonhold; 20-60 min respawn per copy, called out in zone chat",
   "_doc": "Stream E. A RARE: a huge old sow with brambles grown into her hide. She charges in long lines (sidestep), wallows to leave a sticky mud patch that snares, and bristles in a thorn ring. At 50% she charges three times in a row, re-aiming each time.",

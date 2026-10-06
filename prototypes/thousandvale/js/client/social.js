@@ -68,10 +68,10 @@ export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
       let f = frames.get(m.char);
       if (!f) {
         const root = document.createElement('div'); root.className = 'pmember';
-        root.innerHTML = '<div class="pm-icon"></div><div class="pm-body"><div class="pm-name"></div><div class="bar hp"><i></i></div><div class="pm-where"></div></div>';
+        root.innerHTML = '<div class="pm-icon"></div><div class="pm-body"><div class="pm-name"></div><div class="bar hp"><i></i></div><div class="bar mp" hidden><i></i><span></span></div><div class="pm-where"></div></div>';
         root.onclick = () => { const fr = frames.get(m.char); if (fr?.id != null) onTarget?.(fr.id); };
         el.frames.appendChild(root);
-        f = { root, icon: root.querySelector('.pm-icon'), name: root.querySelector('.pm-name'), bar: root.querySelector('.bar i'), where: root.querySelector('.pm-where') };
+        f = { root, icon: root.querySelector('.pm-icon'), name: root.querySelector('.pm-name'), bar: root.querySelector('.bar.hp i'), mp: root.querySelector('.bar.mp'), where: root.querySelector('.pm-where') };
         frames.set(m.char, f);
       }
       // play-test 2 Q13: the member's portrait (ui/portraits.js, static + cached) instead of a letter
@@ -93,6 +93,11 @@ export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
     for (const r of list) {
       const f = frames.get(r.char); if (!f) continue;
       f.bar.style.width = (r.hpMax ? Math.max(0, r.hp / r.hpMax) * 100 : 0).toFixed(1) + '%';
+      // R6: mana when the server sends it on party frames (mp / mpMax)
+      const live = r.id != null && actors?.get?.(r.id);
+      if (!(r.mpMax > 0) && live?.mpMax > 0) { r.mp = live.mp; r.mpMax = live.mpMax; }   // in view: the mp events fill in
+      if (f.mp) { const has = r.mpMax > 0; f.mp.hidden = !has; if (has) { f.mp.querySelector('i').style.width = (Math.max(0, r.mp / r.mpMax) * 100).toFixed(1) + '%'; f.mp.dataset.tip = `Mana: ${Math.round(r.mp)} / ${Math.round(r.mpMax)}`; } }
+      const ac = r.id != null && actors?.get?.(r.id); if (ac && r.mpMax > 0) { ac.mp = r.mp; ac.mpMax = r.mpMax; }
       f.root.classList.toggle('dead', r.dead);
       f.root.classList.toggle('offline', !r.online);
       const away = r.room !== myRoom;

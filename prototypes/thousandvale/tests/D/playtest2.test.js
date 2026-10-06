@@ -10,10 +10,10 @@ import { register } from 'node:module';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { describeBuilding } from '../../../../proctown/js/buildkit.js';
 import { officeDressing, officeKindFor, OFFICE_KINDS } from '../../../../proctown/js/offices.js';
-import { wantedAuras, auraDiff } from '../../js/client/status-sync.js';
 import { STATUS_LOOK } from '../../js/client/spell-looks.js';
 
 register('../../../../avatar-3d/tests/three-loader.mjs', import.meta.url);
+const { wantedAuras, auraDiff } = await import('../../js/client/status-sync.js');
 const G = new URL('../../', import.meta.url);
 const zones = readdirSync(new URL('data/zones/', G)).filter(z => existsSync(new URL(`data/zones/${z}/placements.json`, G)));
 const placementsOf = z => { const d = JSON.parse(readFileSync(new URL(`data/zones/${z}/placements.json`, G))); return d.placements || d; };
@@ -121,4 +121,63 @@ test('Q8: auras follow info.st — none on the dead, unknown ids still drawn, fr
   assert.deepEqual(auraDiff(drawn, new Set(), grace, 1500), { on: [], off: ['burn'] }, '…but not for long');
   const offGrace = new Map([['burn', 1000], ['-burn', 1]]);
   assert.deepEqual(auraDiff(new Set(), new Set(['burn']), offGrace, 500), { on: [], off: [] }, 'a fresh "off" is not undone by a stale "on"');
+});
+
+test('C torch + buffs: item:torch is a carried light, other item buffs draw no aura', async () => {
+  const { torchOn, TORCH_RANGE } = await import('../../js/client/status-sync.js');
+  assert.equal(TORCH_RANGE, 14);
+  assert.equal(torchOn(['item:torch'], false), true);
+  assert.equal(torchOn(['item:torch'], true), false, 'the dead carry no light');
+  assert.equal(torchOn(['burn'], false), false);
+  assert.equal(wantedAuras(['item:whetted', 'item:torch', 'item:well_fed'], false).size, 0);
+  const src = readFileSync(new URL('js/client/status-sync.js', G), 'utf8');
+  assert.ok(/LIGHTS\.add/.test(src) && !/new THREE\.PointLight/.test(src), 'the torch borrows the fixed light pool');
+});
+
+test('R5: every weapon type in the item data has a basic-attack look (and casters/bows are not drawn as swings)', async () => {
+  const { weaponLook, elementKey, ELEMENT_COLOUR } = await import('../../js/client/weapon-fx.js');
+  const items = JSON.parse(readFileSync(new URL('../emberveil/data/items.json', G)));
+  const types = new Set(Object.values(items.weaponBases).map(w => w.subtype));
+  const uq = JSON.parse(readFileSync(new URL('../farhold/data/uniques.json', G)));
+  for (const u of (Array.isArray(uq) ? uq : uq.uniques || Object.values(uq))) { const t = u && (u.subtype || u.base || u.type); if (t && !String(t).includes(':') && !['shield', 'ward', 'quiver', 'ring', 'necklace', 'mount', 'light', 'tool'].includes(t)) types.add(t); }
+  assert.ok(types.size >= 20, `${types.size} weapon types`);
+  for (const t of types) { const L = weaponLook(t); assert.ok(L && ['slash', 'thrust', 'smash', 'shoot', 'bolt', 'staff'].includes(L.kind), `${t}: ${L?.kind}`); }
+  for (const t of ['bow', 'shortbow', 'crossbow', 'javelin']) assert.equal(weaponLook(t).kind, 'shoot', t);
+  for (const t of ['wand', 'scepter', 'orb', 'tome']) assert.equal(weaponLook(t).kind, 'bolt', t);
+  assert.equal(weaponLook('staff', 'staff').kind, 'staff');
+  assert.equal(weaponLook('quarterstaff', 'melee').kind, 'slash', 'a quarterstaff swung is a swing');
+  for (const t of ['dagger', 'rapier', 'spear', 'halberd']) assert.equal(weaponLook(t).kind, 'thrust', t);
+  for (const t of ['hammer', 'warhammer', 'greataxe', 'mace']) assert.equal(weaponLook(t).kind, 'smash', t);
+  // every element C can tag has its own colour (the gloom staff is shadow, not white)
+  for (const e of ['physical', 'fire', 'ice', 'lightning', 'shadow', 'holy', 'nature', 'arcane', 'poison', 'gloom', 'frost']) assert.ok(ELEMENT_COLOUR[elementKey(e)], e);
+  assert.notEqual(ELEMENT_COLOUR[elementKey('gloom')], ELEMENT_COLOUR.physical);
+});
+
+test('R7: a chain hangs from the pillar to the saint, sagging, every link between the two', async () => {
+  const { chainLinks } = await import('../../js/client/objects.js');
+  const a = { x: 0, y: 2, z: 0 }, b = { x: 6, y: 1, z: 6 };
+  const pts = chainLinks(a, b, 20);
+  assert.equal(pts.length, 20);
+  for (const p of pts) { assert.ok(p.x > a.x && p.x < b.x && p.z > a.z && p.z < b.z); }
+  const mid = pts[10]; assert.ok(mid.y < (a.y + b.y) / 2, 'the chain sags');
+  const enc = JSON.parse(readFileSync(new URL('data/encounters/mb_chained_saint.json', G)));
+  const pillars = JSON.stringify(enc).match(/"look":\s*"chained"/g) || [];
+  assert.ok(pillars.length >= 4, 'the Chained Saint\'s pillars are chained (the look this client draws)');
+});
+
+test('S4 + S23 + S20: rares are bigger with their affix aura; loot sparkles by rarity; eating sits down', async () => {
+  const { rankScale, isLeader } = await import('../../js/client/actors.js');
+  const { modAuras } = await import('../../js/client/status-sync.js');
+  const { lootMarkLook, RARITY_COLOUR } = await import('../../js/client/loot-marker.js');
+  assert.ok(rankScale('rare') > rankScale('champion') && rankScale('champion') > rankScale(null));
+  assert.ok(rankScale('rare', ['giant']) > rankScale('rare') * 1.3, 'a giant is much bigger');
+  assert.equal(isLeader(['pack_leader']), true); assert.equal(isLeader(['burning']), false);
+  assert.deepEqual([...modAuras(['burning', 'giant'])], ['burn'], 'a burning rare burns; giant is size, not an aura');
+  assert.ok(modAuras(['frozen']).has('freeze') && modAuras(['venomous']).has('poison'));
+  assert.equal(lootMarkLook(null).beam, false); assert.equal(lootMarkLook('magic').colour, RARITY_COLOUR.magic);
+  assert.equal(lootMarkLook('rare').beam, true); assert.equal(lootMarkLook('legendary').beam, true);
+  assert.notEqual(lootMarkLook('rare').colour, lootMarkLook('magic').colour);
+  const src = readFileSync(new URL('js/client/actors.js', G), 'utf8');
+  assert.ok(/'sitGround'/.test(src) && /a\.eating/.test(src), 'eating plays the sitting pose');
+  assert.ok(/!a\.lootMark/.test(src), 'a body with loot for you does not fade away');
 });

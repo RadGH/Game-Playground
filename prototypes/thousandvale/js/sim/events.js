@@ -48,7 +48,7 @@ export function createEventRunner({ room, ev, rng = Math.random, info = {}, now 
     const c = centre();
     const enc = ev.boss || null, meta = (enc && info[enc]) || {};
     const type = ev.monster || meta.body || 'wolf';
-    const e = room.spawn({ kind: 'monster', type, level: ev.level || 5, x: c.x, z: c.z, rank: 'boss', state: STATE.elite, name: meta.name || ev.bossName || ev.name,
+    const e = room.spawn({ kind: 'monster', type, level: ev.level || 5, x: c.x, z: c.z, rank: 'boss', state: STATE.elite, name: ev.bossName || meta.name || ev.name,
       data: { encounter: enc, event: ev.uid, scale: ev.scale?.hp || 1 } });
     if (!e.r || !e.r.unit) { e.setMax(Math.round(e.hpMax * (ev.scale?.hp || 1))); e.setHp(e.hpMax); }   // the stand-in rules: scale here (C reads data.scale)
     spawned.add(e);
@@ -61,7 +61,7 @@ export function createEventRunner({ room, ev, rng = Math.random, info = {}, now 
   function clear() { for (const m of spawned) if (!m.removed) room.remove(m); spawned.clear(); }
 
   return {
-    ev, enrolled,
+    ev, enrolled, t0,
     get boss() { return boss; },
     get phase() { return phase; },
     step() {
@@ -106,16 +106,38 @@ export function createEventRunner({ room, ev, rng = Math.random, info = {}, now 
   };
 }
 
-/** Event reward for one character (quest-style: xp is a share of a level at the event's level, PLAN §6.5). */
-export function eventReward(ev, rules, entity, rng = Math.random) {
+/**
+ * S24 (play-test 4): how much longer than a short event this one ran pays more — x1 up to EVENT_SHORT_MIN, up to
+ * EVENT_LENGTH_CAP for a long one. A world boss pays WORLD_BOSS_MULT of everything.
+ */
+export const EVENT_SHORT_MIN = 4;
+export const EVENT_LENGTH_CAP = 2.5;
+export const WORLD_BOSS_MULT = 2;
+export const RARE_UP = new Set(['rare', 'legendary', 'set', 'unique']);
+export const lengthFactor = minutes => Math.max(1, Math.min(EVENT_LENGTH_CAP, (minutes || 0) / EVENT_SHORT_MIN));
+/**
+ * Event reward for ONE character — personal, never split or rolled for (S24): xp is a share of a level at the event's
+ * level (PLAN §6.5) and gold grows with the level, both scaled by how long the event ran; and EVERY participant gets at
+ * least one rare-or-better item (rolled until it is one, the item's own `chance` only gates extras above that).
+ * `opts.minutes` = how long it ran.
+ */
+export function eventReward(ev, rules, entity, rng = Math.random, opts = {}) {
   const rw = ev.reward || {};
   const lvl = Math.max(1, ev.level || entity.level || 1);
   const span = rules.xpFor ? Math.max(1, (rules.xpFor(lvl + 1) || 0) - (rules.xpFor(lvl) || 0)) : 100;
-  const xp = Math.round((rw.xp || 0) * span * (rules.xpMult ? rules.xpMult('event') || 1 : 1));     // R2: x1.25
-  const gold = Math.round(rw.gold || 0);
+  const big = ev.kind === 'worldboss' ? WORLD_BOSS_MULT : 1;
+  const k = lengthFactor(opts.minutes) * big;
+  const xp = Math.round((rw.xp || 0) * span * (rules.xpMult ? rules.xpMult('event') || 1 : 1) * k);     // R2: x1.25
+  const gold = Math.round((rw.gold || 0) * (1 + 0.15 * (lvl - 1)) * k);
   let items = [];
-  if (rw.item && (rw.item.chance == null || rng() < rw.item.chance) && rules.rollLoot) {
-    try { items = rules.rollLoot(entity, { level: lvl, tier: rw.item.tier || 'rare' }) || []; } catch { items = []; }
+  const tier = (rw.item && rw.item.tier) || 'rare';
+  if (rules.rollLoot) {
+    try {
+      if (rw.item && (rw.item.chance == null || rng() < rw.item.chance)) items = rules.rollLoot(entity, { level: lvl, tier }) || [];
+      // the guarantee: at least one rare or better for everyone who took part
+      for (let tries = 0; tries < 6 && !items.some(it => it && RARE_UP.has(it.rarity)); tries++) items = items.concat((rules.rollLoot(entity, { level: lvl, tier: 'rare' }) || []).filter(it => it && RARE_UP.has(it.rarity)));
+      if (big > 1) items = items.concat(rules.rollLoot(entity, { level: lvl, tier: 'rare' }) || []);
+    } catch { items = []; }
   }
   return { xp, gold, items };
 }

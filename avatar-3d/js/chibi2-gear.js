@@ -277,6 +277,31 @@ export function buildOffhand(a, c) {
     for (const x of [-1, 1]) add(new THREE.ConeGeometry(0.015, 0.05, 4), L, tone(straw, 0.8), { position: [x * 0.115, 0.14, 0.10], rotation: [0, 0, x * Math.PI / 2] });
     return;
   }
+  if (id === 'tv_ward') {
+    // PLAY-TEST 4 (S17): a WARDED FOCUS — a rune ring standing on a short handle, a hovering crystal
+    // in its middle and four tabs round the rim. Built up +y like the orb; held upright the same way.
+    const P = [0, 0.19, 0.10], glow = oc && oc !== '#9aa3ad' ? oc : '#9fe0ff', brass = '#c8a040';
+    add(new THREE.CylinderGeometry(0.02, 0.016, 0.12, 6), L, tone(brass, 0.7), { position: [0, 0.04, 0.10], metal: true });
+    add(new THREE.TorusGeometry(0.095, 0.012, 5, 18), L, brass, { position: P, metal: true });
+    for (let k = 0; k < 4; k++) { const t = k / 4 * Math.PI * 2 + Math.PI / 4; add(new THREE.BoxGeometry(0.03, 0.03, 0.02), L, lift(brass, 0.2), { position: [P[0] + Math.cos(t) * 0.1, P[1] + Math.sin(t) * 0.1, P[2]], rotation: [0, 0, t], metal: true }); }
+    add(new THREE.OctahedronGeometry(1), L, glow, { position: P, scale: [0.035, 0.055, 0.035] });
+    add(new THREE.TorusGeometry(0.06, 0.004, 4, 16), L, lift(glow, 0.5), { position: P, rotation: [0, 0, 0.6] });
+    return;
+  }
+  if (id === 'tv_totem') {
+    // PLAY-TEST 4 (S17): a TOTEM — a carved stack of three faces on a haft, a beak on top, two feathers.
+    const wood2 = oc && oc !== '#9aa3ad' ? oc : '#8a6a42', paint = '#b03a2a', teal = '#2a8a8a';
+    add(new THREE.CylinderGeometry(0.02, 0.02, 0.12, 6), L, wood, { position: [0, 0.03, 0.10] });
+    for (let k = 0; k < 3; k++) {
+      const y = 0.11 + k * 0.065;
+      add(new THREE.CylinderGeometry(0.042 - k * 0.004, 0.046 - k * 0.004, 0.06, 8), L, k % 2 ? tone(wood2, 0.85) : wood2, { position: [0, y, 0.10] });
+      for (const x of [-1, 1]) add(new THREE.BoxGeometry(0.012, 0.01, 0.01), L, k % 2 ? teal : paint, { position: [x * 0.016, y + 0.01, 0.10 + 0.043 - k * 0.004] });
+      add(new THREE.BoxGeometry(0.03, 0.006, 0.01), L, '#1a1008', { position: [0, y - 0.015, 0.10 + 0.043 - k * 0.004] });
+    }
+    add(new THREE.ConeGeometry(0.02, 0.06, 4), L, paint, { position: [0, 0.31, 0.13], rotation: [Math.PI / 2, 0, 0] });
+    for (const x of [-1, 1]) add(new THREE.BoxGeometry(0.012, 0.09, 0.004), L, x < 0 ? '#e8e0c8' : teal, { position: [x * 0.05, 0.3, 0.10], rotation: [0, 0, -x * 0.5] });
+    return;
+  }
   /**
    * THE TORCH POINTS OUT PAST THE FINGERS (2026-09-25). It was built up the hand's +y — toward the
    * elbow — so with the forearm raised the flame sat on the shoulder and the stick ran back into it

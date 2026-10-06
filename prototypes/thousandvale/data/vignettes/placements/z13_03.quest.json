@@ -1,0 +1,67 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_03, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z13_03",
+ "terrainHash": "13703724",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_millbrook_wheels_0_0",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 321,
+   "z": 1679,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "millbrook_wheels",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_moth_eaten_0_0",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1521,
+   "z": 1342,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "moth_eaten",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_tinkers_tools_0_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 2008,
+   "z": 1928,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_tinkers_tools",
+   "hunt": true
+  }
+ ]
+}

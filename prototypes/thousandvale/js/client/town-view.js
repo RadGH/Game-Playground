@@ -15,6 +15,7 @@ import * as THREE from 'three';
 import { LIGHTS } from './lightpool.js';
 import { describeBuilding, partsFor, radiusOf, MESHES, describeStall, stallParts, wallKitParts, CULTURE_KIT } from '../../../../proctown/js/buildkit.js';
 import { makeGlowTexture, makeFlameTexture } from './decor.js';
+import { buildSignBoards } from './sign-text.js';
 import { officeDressing, officeKindFor, OFFICE_KINDS } from '../../../../proctown/js/offices.js';
 
 /** proctown's plot from a placement record. Pure — exported for tests. */
@@ -124,6 +125,7 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
   const officeLights = [];  // world { x, y, z, color, strong }
   const fires = [];         // world { x, y, z, s }
   const spinners = [];      // { x, y, z, yaw, axis, speed, parts }
+  const signBoards = [];    // { text, x, y, z, yaw, w, h } — the name over each office door (B's label)
 
   let buildings = 0;
   const clearings = [];
@@ -141,6 +143,7 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
     for (const L of d.lights) { const w = W2(L.x, L.z); sink.lights.push({ x: w.x, y: b.ground + L.y, z: w.z, color: L.color, strong: !!L.strong }); }
     for (const f of d.fires) { const w = W2(f.x, f.z); sink.fires.push({ x: w.x, y: b.ground + f.y, z: w.z, s: f.s }); }
     for (const sp of d.spin) { const w = W2(sp.x, sp.z); sink.spinners.push({ x: w.x, y: b.ground + sp.y, z: w.z, yaw: b.yaw, axis: sp.axis, speed: sp.speed, parts: sp.parts }); }
+    if (d.fascia && b.label !== false) { const w = W2(d.fascia.x, d.fascia.z); (sink.signs || signBoards).push({ text: b.label || OFFICE_KINDS[kind].label, x: w.x, y: b.ground + d.fascia.y, z: w.z, yaw: b.yaw, w: d.fascia.w, h: d.fascia.h }); }
     return d;
   }
   for (const raw of placements) {
@@ -151,7 +154,7 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
     const { p, plot, seed, desc, kind, lit } = look;
     const ground = T.heightAt(p.x, p.z);
     const yaw = desc.yaw + (desc.lean || 0);
-    const b = { id: raw.id, x: p.x, z: p.z, ground, yaw, desc, seed, want: plot.want, kind, lit, town: town?.id, dressing: look.dressing };
+    const b = { id: raw.id, x: p.x, z: p.z, ground, yaw, desc, seed, want: plot.want, kind, lit, town: town?.id, dressing: look.dressing, label: raw.data?.label || null };
     descs.push(b);
     // a footing slab hides the wedge of daylight under a wall on sloping ground
     push('box', p.x, ground - 0.7, p.z, yaw, desc.footprint.w + 0.6, 0.95, desc.footprint.d + 0.6, '#5a5248');
@@ -301,6 +304,8 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
   const flameSprites = [];
   function addFlame(f, into = group) { const sp = new THREE.Sprite(flameMat); sp.position.set(f.x, f.y + f.s * 0.45, f.z); sp.scale.set(f.s * 0.9, f.s * 1.3, 1); sp.userData.s = f.s; into.add(sp); flameSprites.push(sp); }
   for (const f of fires) addFlame(f);
+  const boards = buildSignBoards(signBoards);
+  if (boards) group.add(boards.mesh);
   // lamp glows (sprites, cheap); a few real lights hop to the lamps nearest the camera at night
   const glowTex = makeGlowTexture();
   const lampSprites = lamps.map(l => { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: '#ffc36e', blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0, fog: true })); s.position.set(l.x, l.y + 2.75, l.z); s.scale.set(2.2, 2.2, 1); s.visible = false; group.add(s); return s; });
@@ -319,6 +324,7 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
     dimMat.emissiveIntensity = 0.32 * n;
     for (const s of lampSprites) { s.visible = n > 0.05; s.material.opacity = 0.85 * n; }
     for (const h of lampLights) h.intensity = n > 0.05 ? 14 * n : 0;
+    boards?.setNight(n);
     officeLights.forEach((l, i) => { officeSources[i].intensity = l.strong ? 5 + 9 * n : (n > 0.05 ? 9 * n : 0); officeGlows[i].visible = l.strong || n > 0.05; officeGlows[i].material.opacity = l.strong ? 0.35 + 0.5 * n : 0.8 * n; });
     for (const c of claimed.values()) c.setNight?.(n);
   }
@@ -345,7 +351,7 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
     claimed.get(b.id)?.dispose();
     const sub = new THREE.Group(); sub.name = 'office-' + kind;
     const subParts = Object.fromEntries(MESHES.map(m => [m, []]));
-    const sink = { lights: [], fires: [], spinners: [] };
+    const sink = { lights: [], fires: [], spinners: [], signs: [] };
     const lit = o.lit ?? OFFICE_KINDS[kind].lit;
     const before = glass.bright.length;
     dress(b, kind, lit, subParts, sink);
@@ -360,9 +366,10 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
     if (lampGlass.length) { const m = new THREE.InstancedMesh(unitGeometry('box'), winMat, lampGlass.length); lampGlass.forEach((it, i) => { m.setMatrixAt(i, it.m); m.setColorAt(i, it.c); }); sub.add(m); own.push(m); }
     for (const sp of sink.spinners) buildSpinner(sp, sub);
     for (const f of sink.fires) addFlame(f, sub);
+    const subBoards = buildSignBoards(sink.signs); if (subBoards) sub.add(subBoards.mesh);
     const srcs = sink.lights.map(l => LIGHTS.add({ x: l.x, y: l.y, z: l.z, color: l.color, intensity: 0, distance: 11, decay: 1.6, flicker: 0.06, owner: group }));
     group.add(sub);
-    const rec = { kind, setNight: n => { for (const h of srcs) h.intensity = n > 0.05 ? 9 * n : 0; }, dispose() { group.remove(sub); for (const m of own) m.dispose(); for (const h of srcs) h.remove(); } };
+    const rec = { kind, setNight: n => { for (const h of srcs) h.intensity = n > 0.05 ? 9 * n : 0; }, dispose() { group.remove(sub); subBoards?.dispose(); for (const m of own) m.dispose(); for (const h of srcs) h.remove(); } };
     rec.setNight(night);
     claimed.set(b.id, rec);
     offices.push({ x: b.x, z: b.z, kind, lit, label: OFFICE_KINDS[kind].label, building: b.id, claimed: true });
@@ -372,7 +379,7 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
   return {
     group, update, setNight, clearings, solids, lamps, offices, claimOffice, buildingsList: descs,
     towns: [...towns.values()],
-    stats: { buildings, lamps: lamps.length, windows: glass.bright.length + glass.dim.length, brightGlass: glass.bright.length, dimGlass: glass.dim.length, offices: offices.length, officeLights: officeLights.length, parts: Object.fromEntries(Object.entries(parts).map(([k, v]) => [k, v.length])) },
-    dispose() { for (const m of meshes) m.dispose(); kitMat.dispose(); winMat.dispose(); dimMat.dispose(); flameMat.dispose(); for (const s of lampSprites) s.material.dispose(); for (const s of officeGlows) s.material.dispose(); for (const h of lampLights) h.remove(); for (const h of officeSources) h.remove(); for (const c of claimed.values()) c.dispose(); },
+    stats: { signs: signBoards.length, buildings, lamps: lamps.length, windows: glass.bright.length + glass.dim.length, brightGlass: glass.bright.length, dimGlass: glass.dim.length, offices: offices.length, officeLights: officeLights.length, parts: Object.fromEntries(Object.entries(parts).map(([k, v]) => [k, v.length])) },
+    dispose() { for (const m of meshes) m.dispose(); kitMat.dispose(); winMat.dispose(); dimMat.dispose(); flameMat.dispose(); for (const s of lampSprites) s.material.dispose(); for (const s of officeGlows) s.material.dispose(); for (const h of lampLights) h.remove(); for (const h of officeSources) h.remove(); for (const c of claimed.values()) c.dispose(); boards?.dispose(); },
   };
 }

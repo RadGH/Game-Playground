@@ -30,7 +30,7 @@
     <div class="uf-body">
       <div class="uf-name" id="self-name">—</div>
       <div class="bar hp"><i id="self-hp-fill"></i><b id="self-hp-lag"></b><span id="self-hp-text">0 / 0</span></div>
-      <div class="bar xp" data-tip="Experience"><i id="self-xp-fill"></i><span id="self-xp-text"></span></div>
+      <div class="bar mp" id="self-mp" data-tip="Mana"><i id="self-mp-fill"></i><span id="self-mp-text"></span></div>
     </div>
   </section>
 
@@ -39,6 +39,7 @@
     <div class="uf-body">
       <div class="uf-name" id="target-name">—</div>
       <div class="bar hp"><i id="target-hp-fill"></i><b id="target-hp-lag"></b><span id="target-hp-text"></span></div>
+      <div class="bar mp" id="target-mp" hidden><i id="target-mp-fill"></i><span id="target-mp-text"></span></div>
       <div class="uf-sub" id="target-sub"></div>
     </div>
   </section>
@@ -105,11 +106,17 @@
     <button type="button" role="tab" id="tab-new" aria-selected="true">New adventurer</button>
     <button type="button" role="tab" id="tab-login" aria-selected="false">Log in</button>
   </div>
-  <form id="login" class="card" autocomplete="off">
+  <section id="front" class="card front" hidden aria-label="Your characters">
     <div class="field mychars" id="mychars" hidden>
       <span class="label">Your characters</span>
-      <div class="chips" id="char-chips"></div>
+      <p class="signed" id="front-who"></p>
+      <div class="chips char-list" id="char-chips"></div>
     </div>
+    <button type="button" class="primary" id="new-char">New character</button>
+    <p class="tiny">Click a character to play. Your characters are kept on this browser until you claim the account.</p>
+  </section>
+  <form id="login" class="card" autocomplete="off">
+    <p class="step-title"><button type="button" class="linkish" id="back-front" hidden>‹ Your characters</button><b>New character</b><span>Step 1 of 2 — name, people, calling</span></p>
     <div class="field">
       <label for="name">Name</label>
       <div class="row">
@@ -126,12 +133,9 @@
       <div class="chips classes" id="classes" role="radiogroup" aria-label="Calling"></div>
       <select id="class-more" aria-label="More callings"></select>
     </div>
-    <div class="field">
-      <button type="button" class="ghost wide customize" id="customize" data-tip="Choose your face, hair, skin and build — it replaces the calling's default look">Customize appearance</button>
-    </div>
     <div class="human-check" id="human-check" hidden></div>
     <p class="note" id="login-note"></p>
-    <button type="submit" class="primary" id="enter">Enter the world</button>
+    <button type="submit" class="primary" id="enter">Next: appearance</button>
     <p class="tiny">No sign-up: you play as a guest. Claim the account later to keep it.</p>
   </form>
   <form id="signin" class="card" autocomplete="on" hidden>

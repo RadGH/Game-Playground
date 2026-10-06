@@ -2,6 +2,10 @@
   "id": "rare_sallowmaw",
   "name": "Sallowmaw",
   "tier": "rare",
+  "announce": {
+    "r": 300,
+    "_doc": "S4: shown on the minimap of anyone within r metres while it lives"
+  },
   "body": "fen_croaker",
   "place": "wilds: the marsh south of Mawehaven; 20-60 min respawn per copy, called out in zone chat",
   "_doc": "Stream E. A RARE: a frog the size of a cart. Its tongue PULLS the farthest player into its mouth range (line + pull), it belly-slams where you stand, and burps a poison cone. At 50% it calls three ordinary croakers out of the reeds.",

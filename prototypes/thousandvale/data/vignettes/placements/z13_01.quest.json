@@ -1,0 +1,67 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_01, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z13_01",
+ "terrainHash": "f3d4195e",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_eels_and_omens_0_0",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1081,
+   "z": 1099,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "eels_and_omens",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_slime_jars_1_0",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 79,
+   "z": 445,
+   "yaw": 0,
+   "radius": 5,
+   "quest": "slime_jars",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_frog_chorus_0_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1048,
+   "z": 320,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "frog_chorus",
+   "hunt": true
+  }
+ ]
+}

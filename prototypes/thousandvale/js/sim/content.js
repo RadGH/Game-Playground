@@ -29,7 +29,7 @@ export async function loadZoneContent(readJson, zone = 'test') {
   try {
     const idx = await readJson('data/encounters/index.json');
     for (const f of idx.files || []) {
-      try { const e = await readJson('data/encounters/' + f); if (e && e.id) out.encounterInfo[e.id] = { name: e.name || e.id, body: e.body || null, ...(Number.isFinite(e.level) ? { level: e.level } : {}) }; } catch { /* skip */ }
+      try { const e = await readJson('data/encounters/' + f); if (e && e.id) out.encounterInfo[e.id] = { name: e.name || e.id, body: e.body || null, ...(Number.isFinite(e.level) ? { level: e.level } : {}), ...(e.announce ? { announce: { r: e.announce.r || 300 } } : {}), ...(e.secret ? { secret: true } : {}), ...(e.tier ? { tier: e.tier } : {}) }; } catch { /* skip */ }
     }
   } catch { /* no encounters */ }
   return out;
@@ -88,6 +88,8 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
         // play-test 3 R2: E's extra monster camps near the start live in <zone>.hunt.json (B's bake never reads it)
         let hunt = [];
         try { const h = await readJson(`data/vignettes/placements/${wid}.hunt.json`); if (!h.terrainHash || !reader.meta.inputHash || h.terrainHash === reader.meta.inputHash) hunt = h.placements || []; else log(`hunt ${wid}: made for another bake, skipped`); } catch { /* none */ }
+        // play-test 4 S14: camps that make every kill quest's area hold enough of its monster (<zone>.quest.json, tools/content-hunts.mjs)
+        try { const h = await readJson(`data/vignettes/placements/${wid}.quest.json`); if (!h.terrainHash || !reader.meta.inputHash || h.terrainHash === reader.meta.inputHash) hunt = [...hunt, ...(h.placements || [])]; else log(`quest camps ${wid}: made for another bake, skipped`); } catch { /* none */ }
         vignettes = { recipes, sites, hooks, treasure, wayside, quests: await questsOf(eid),
           placements: [...(pl.placements || []), ...hunt, ...(pl.features || []).map(f => ({ ...f, feature: true }))].map(p => ({ ...p, x: p.x + ox, z: p.z + oz, ...(Array.isArray(p.path) ? { path: p.path.map(([a, b]) => [a + ox, b + oz]) } : {}), ...(Array.isArray(p.pts) ? { pts: p.pts.map(([a, b]) => [a + ox, b + oz]) } : {}) })) };
         break;
@@ -127,9 +129,19 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
   const horizon = await opt('data/world/horizon.json');      // stream B's 32 m world horizon manifest (joined.room.horizon)
   // the living roads (P19, stream E): who travels, along which routes, and what they say (js/sim/travellers.js)
   const tv = await opt('data/provinces/travellers.json'), rt = await opt(`data/provinces/${provinceId}-routes.json`);
-  const travel = tv && rt ? { kinds: tv.kinds || {}, rules: tv.rules || {}, folkKinds: tv.folk || {}, routes: rt.routes || [], chatter: (await opt('data/names/chatter.json')) || { pools: {}, rules: {} }, names: (await opt('data/names/torbor.json')) || {} } : null;
+  // play-test 4 S9: stream E's wanderers (pedlars with a shop, errand runners with a delivery, storytellers) walk the same
+  // routes — their kinds join travellers.json's and every route's allowed list; their `rules` override travellers.json's
+  const wd = await opt('data/provinces/wanderers.json');
+  const wk = (wd && wd.kinds) || {};
+  if (shops && wd && wd.shops) shops.kinds = { ...(shops.kinds || {}), ...wd.shops };      // the pedlar's pack sells like any shop
+  const travel = tv && rt ? { kinds: { ...(tv.kinds || {}), ...wk }, rules: { ...(tv.rules || {}), ...((wd && wd.rules) || {}) }, folkKinds: tv.folk || {},
+    routes: (rt.routes || []).map(r => (Array.isArray(r.kinds) && Object.keys(wk).length ? { ...r, kinds: [...r.kinds, ...Object.keys(wk).filter(k => !r.kinds.includes(k))] } : r)),
+    chatter: (await opt('data/names/chatter.json')) || { pools: {}, rules: {} }, names: (await opt('data/names/torbor.json')) || {} } : null;
   const marks = ((await opt(`data/quests/marks/${provinceId}.json`)) || {}).quests || null;   // P17: E's map mark per quest
-  return { travel, marks, key: provinceId, name: sheet ? sheet.name : provinceId, terrain, zones, encounterInfo, events, zoneEvents, directorRules: (evData && evData.director) || null, starter, starterProvince, rares, jobs, schedules, horizon, shops, mounts, offices };
+  // play-test 4: data files that ride straight through buildLayout's `extra` into the province's L
+  const extra = { refunds: await opt('data/provinces/refunds.json'), wanderers: wd, treasure: await opt('data/provinces/road-events.json'), affixes: await opt('data/encounters/affixes.json'), spawnHints: await opt(`data/quests/marks/${provinceId}-hunts.json`),
+    titles: await opt('data/names/titles.json'), names: await opt('data/names/torbor.json') };
+  return { extra, travel, marks, key: provinceId, name: sheet ? sheet.name : provinceId, terrain, zones, encounterInfo, events, zoneEvents, directorRules: (evData && evData.director) || null, starter, starterProvince, rares, jobs, schedules, horizon, shops, mounts, offices };
 }
 
 /**
@@ -151,7 +163,7 @@ export function provinceEvents(evData, { provinceId, map, terrain, sheet = null,
   const events = [], zoneEvents = [];
   const min = m => (m == null ? undefined : m * 60000);
   const common = (e, s) => ({ id: e.id, name: e.name || (encounterInfo[e.encounter || e.boss] || {}).name || e.id, kind: e.kind || 'boss', province: provinceId,
-    x: s.x, z: s.z, r: Math.max(s.r || s.radius || 40, 30), level: e.level || 5, waves: e.waves || [], boss: e.boss || e.encounter || null, monster: e.monster || null,
+    x: s.x, z: s.z, r: Math.max(s.r || s.radius || 40, 30), level: e.level || 5, waves: e.waves || [], boss: e.boss || e.encounter || null, monster: e.monster || null, bossName: e.bossName || null,
     durationMs: min(e.durationMinutes), announce: [].concat(e.announce || []), reward: e.reward || null, enrol: e.autoEnrolMetres || 60,
     where: e.where || null, blurb: e.blurb || null });   // P27: where it is + what to do (E)
   if (evData) {

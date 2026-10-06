@@ -24,8 +24,8 @@ import { runtimeFor } from '../../js/rules/cast-skills.js';
 const engine = rulesEngine();
 const F = engine.forest;
 
-test('the forest: twelve arms, every one branching, more than twice Farhold\'s size, all reachable, nothing overlapping', () => {
-  assert.equal(F.arms.length, 12);
+test('the forest: fourteen arms (S16 added storm + lore), every one branching, more than twice Farhold\'s size, all reachable, nothing overlapping', () => {
+  assert.equal(F.arms.length, 14);
   assert.ok(F.nodes.length >= 340, `${F.nodes.length} nodes (Farhold has 169)`);
   for (const arm of F.arms) {
     const keys = F.nodes.filter(n => n.arm === arm.key && n.kind === 'keystone');

@@ -13,6 +13,10 @@
 // only), `requires` ([ids] all done),
 // `minLevel`, `order: 'any'` (steps in any order, a count each), `autoComplete` (pays itself when done); step
 // `visit {town}` = reach a settlement.
+// S10 (play-test 4) REMOTE TURN-IN: a finished quest pays itself where you stand (autoDone lists it; the province pays it
+// and says so with `questR {op:'turnin', auto:true, remote:true}`), unless the quest says `needsGiver: true` (the few
+// where handing it back IS the moment — a trainer giving you a companion). `quest {op:'turnin', id}` with no npc also
+// works for any finished quest that does not need its giver.
 //
 // `giver` = { key, npcId?, name, role?, x, z, vignette?, objectName? } — the object the player is using.
 // Character state (SAVE_FIELDS `quests`): { active: { id: { step, n, def? } }, done: { id: wall ms }, jobs: { offered:
@@ -22,6 +26,8 @@
 // killRare {zone, slot | rare} · collect {item, count, from, chance} · visit {vignette | site | at} ·
 // use {vignette, object | at} · talk / deliver {npc | at} · clear {dungeon:'door' | cave, floor? | boss?} · escort
 // (walk to `to`). Places resolve once at load: a vignette id -> its placement, a site name -> the bake site.
+
+import { huntAreas, pickArea, areasTouching } from './hunts.js';
 
 export const KILL_GOLD = level => 3 + level;            // one kill's gold at a level (quest gold = reward.gold × this)
 export const NEAR_M = 150;                              // a step's `near` place: within this many metres
@@ -43,6 +49,10 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
     for (const p of z.placements || []) if (p.id) placeOf.set(p.id, { x: p.x, z: p.z, r: p.radius || 12, name: p.name || p.id, zone: z.key, type: p.type, template: p.template || null });
   }
   const bare = n => String(n || '').toLowerCase().replace(/^the\s+/, '').trim();
+  // S14 (play-test 4): where each monster type REALLY spawns — the camps the server spawns, grouped into areas
+  const hunt = huntAreas(L.camps || [], L.zoneOf || null);
+  let placeNames = null;                                  // placeNamed()'s list, built on first use
+  const areaView = a => ({ x: a.x, z: a.z, r: a.r, n: a.n, zone: a.zone, lv: a.lv });
   const siteByName = name => sites.find(s => s.name === name) || sites.find(s => s.id === name)
     || [...placeOf.values()].find(p => bare(p.name) === bare(name)) || sites.find(s => bare(s.name) === bare(name)) || null;
   function resolveAt(st, zoneKey) {
@@ -76,6 +86,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       // E's marks (data/quests/marks/<province>.json) win; our own lookup fills what they leave null
       const mk = L.marks && L.marks[d.id];
       def.steps.forEach((st, i) => { const m = mk && mk.steps && mk.steps[i]; st.at = round1(m && Number.isFinite(m.x) ? m : stepAt(st, z.key, from)); });
+      def.steps.forEach(st => huntMark(st, z.key, from));
       if (mk && mk.giver && Number.isFinite(mk.giver.x) && !npcPos.has(d.giver)) def.giverAt = round1({ ...mk.giver, name: (npcs.get(d.giver) || {}).name || null });
       if (d.next) { nextOf.set(d.id, d.next); (lockedBy.get(d.next) || lockedBy.set(d.next, new Set()).get(d.next)).add(d.id); }
     }
@@ -93,6 +104,45 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
     if (best) return { x: best.x, z: best.z, r: (best.radius || 10) + 10 };
     const ev = encounter && (L.zoneEvents || []).find(e => e.boss === encounter || e.id === encounter);
     return ev && Number.isFinite(ev.x) ? { x: ev.x, z: ev.z, r: ev.r || 40, name: ev.name || null } : null;
+  }
+  /** S14: the named place a step's `where` line talks about ("the reeds round Tench Pool"), or null. */
+  function placeNamed(text, zoneKey = null, ref = null) {
+    if (!text) return null;
+    if (!placeNames) {
+      placeNames = [];
+      for (const p of placeOf.values()) if (p.name) placeNames.push({ n: bare(p.name), x: p.x, z: p.z, r: p.r || 12, zone: p.zone });
+      for (const t of sites) if (t.name) placeNames.push({ n: bare(t.name), x: t.x, z: t.z, r: t.r || t.radius || 30, zone: t.zone || null });
+      for (const t of L.towns || []) if (t.name) placeNames.push({ n: bare(t.name), x: t.x, z: t.z, r: t.r || 40, zone: t.zone || null });
+      placeNames = placeNames.filter(p => p.n.length >= 4).map(p => ({ ...p, k: p.n.replace(/[^a-z']+/g, ' ').trim() })).sort((a, b) => b.n.length - a.n.length);
+    }
+    const tx = ' ' + bare(text).replace(/[^a-z']+/g, ' ') + ' ';
+    // the same name can stand in several zones (a "Well"): only one in the quest's zone, or near its giver, counts
+    const local = p => (!zoneKey || (L.zoneOf ? L.zoneOf(p.x, p.z) : p.zone) === zoneKey) || (ref && Math.hypot(p.x - ref.x, p.z - ref.z) < 1200);
+    return placeNames.find(p => tx.includes(' ' + p.k + ' ') && local(p)) || null;
+  }
+  /**
+   * S14: a kill / collect step points at where its monster type really spawns. Without `near`, the marker becomes the
+   * best hunting area of that type (the quest's zone, the place its `where` names, then nearest the giver; never a
+   * thin one when a fuller one exists). With `near` (only kills inside NEAR_M of the place count), `areas` are the ones
+   * that reach into that circle. `st.areas` (up to 4, best first) goes to the client to draw.
+   */
+  function huntMark(st, zoneKey, from) {
+    const type = st.kind === 'kill' ? st.type : st.kind === 'collect' ? st.from : null;
+    const list = type && hunt.get(type);
+    if (!list || !list.length) return;
+    if (st.nearAt && Number.isFinite(st.nearAt.x)) {
+      const c = { x: st.nearAt.x, z: st.nearAt.z, r: (st.nearAt.r || 12) + NEAR_M };
+      const inside = areasTouching(list, c).sort((a, b) => Math.hypot(a.x - c.x, a.z - c.z) - Math.hypot(b.x - c.x, b.z - c.z));
+      if (!inside.length) return;
+      st.areas = inside.slice(0, 4).map(areaView);
+      if (!st.at || !areasTouching(inside, st.at).length) st.at = round1({ ...inside[0], name: st.nearAt.name || null });
+      return;
+    }
+    const a = pickArea(list, { ref: from || st.at, zone: zoneKey, count: st.count, place: placeNamed(st.where || st.text, zoneKey, from || st.at) });
+    if (!a) return;
+    st.at = round1({ x: a.x, z: a.z, r: a.r, name: (st.at && st.at.name) || null });
+    const more = list.filter(b => b !== a && (!a.zone || b.zone === a.zone)).sort((p, q) => Math.hypot(p.x - a.x, p.z - a.z) - Math.hypot(q.x - a.x, q.z - a.z));
+    st.areas = [a, ...more].slice(0, 4).map(areaView);
   }
   /** Where step `st` of a quest in `zoneKey` happens: { x, z, r, name? } or null (a marker for the map/tracker). */
   function stepAt(st, zoneKey, from = null) {
@@ -158,13 +208,13 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
     const any = def.order === 'any';
     const nOf = (st, i) => (!a ? 0 : any ? Math.min(st.count || 1, (a.ns && a.ns[i]) || 0) : i < a.step ? st.count || 1 : i === a.step ? a.n : 0);
     const steps = def.steps.map((st, i) => ({ text: st.text || st.kind, of: st.count || 1, n: nOf(st, i), done: !!a && (any ? nOf(st, i) >= (st.count || 1) : i < a.step),
-      kind: st.kind, ...(st.at ? { at: st.at } : {}), ...(st.where ? { where: st.where } : {}) }));
+      kind: st.kind, ...(st.at ? { at: st.at } : {}), ...(st.where ? { where: st.where } : {}), ...(st.areas ? { areas: st.areas } : {}) }));
     const ti = round1(turnInAt(def));
     const npc = def.giver ? npcs.get(def.giver) : null;
     return { id: def.id, name: def.name, level: def.level || 1, zone: def.zone, zoneName: zoneName(def.zone), giver: def.giver || null, giverName: (npc && npc.name) || (def.giverAt && def.giverAt.name) || null,
       text: def.offer || def.text || '', done: def.done || null,
       group: def.group || null, step: a ? a.step : 0, steps, ...(any ? { order: 'any' } : {}), ...(def.cls || def.classes ? { cls: def.cls || def.classes } : {}), ...(def.auto ? { auto: true } : {}), ready: !!a && a.step >= def.steps.length, job: !!def.job, reward: rewardView(def), story: def.story || null,
-      ...(ti ? { turnIn: ti } : {}) };
+      ...(ti ? { turnIn: ti } : {}), ...(def.needsGiver ? { needsGiver: true, remote: false } : { remote: true }) };
   }
 
   // ---- radiant jobs: frames bound to what exists in the giver's zone right now ----
@@ -217,6 +267,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       else if (g.kind === 'escort') { const to = bound[String(g.to || '').replace(/[{}]/g, '')]; Object.assign(step, { kind: 'visit', place: to }); }
       else if (g.kind === 'clear') Object.assign(step, { door: at ? at.door : -1, floor: g.floor || null, boss: !!g.boss, zone: zoneKey });
       step.at = round1(stepAt(step, zoneKey, giver));
+      huntMark(step, zoneKey, giver);
       const id = `job:${f.id}:${giver.key}:${Math.floor(t / 60000)}`;
       list.push({ id, name: subst(f.title), text: subst(f.text), level: Math.round((band[0] + band[1]) / 2), job: true, frame: f.id, giverKey: giver.key, giver: giver.npcId || null, zone: zoneKey, steps: [step], reward: f.reward || {},
         giverAt: round1({ x: giver.x, z: giver.z, r: 4, name: giver.name }) });
@@ -277,7 +328,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
   }
 
   return {
-    defs, npcs, placeOf, nextOf,
+    defs, npcs, placeOf, nextOf, hunt,
     offers(ch, giver) {
       const out = [];
       for (const def of defs.values()) if (gives(def, giver) && available(ch, def)) out.push(view(ch, def));
@@ -343,7 +394,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       return out;
     },
     /** Quests that finish themselves (`autoComplete`) and are complete now: the province pays them with no giver. */
-    autoDone(ch) { const s = stateOf(ch); return Object.entries(s.active).filter(([id, a]) => { const d = defOf(ch, id); return d && d.autoComplete && a.step >= d.steps.length; }).map(([id]) => id); },
+    autoDone(ch) { const s = stateOf(ch); return Object.entries(s.active).filter(([id, a]) => { const d = defOf(ch, id); return d && (d.autoComplete || !d.needsGiver) && a.step >= d.steps.length; }).map(([id]) => id); },
     /** Steps that need a position check (visit, escort, reach) — cheap to skip when nobody has one. */
     wantsPosition(ch) {
       const s = stateOf(ch), pos = st => st && (st.kind === 'visit' || st.kind === 'escort' || st.kind === 'reach');
@@ -359,7 +410,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       const s = stateOf(ch), a = s.active[id], def = defOf(ch, id);
       if (!a || !def) return { ok: false, why: 'unknown', msg: 'You are not on that quest.' };
       if (a.step < def.steps.length) return { ok: false, why: 'notDone', msg: 'It is not finished yet.' };
-      if (!(def.autoComplete && !giver) && !gives(def, giver)) return { ok: false, why: 'giver', msg: 'Take it back to whoever asked.' };
+      if (!(!giver && (def.autoComplete || !def.needsGiver)) && !gives(def, giver)) return { ok: false, why: 'giver', msg: 'Take it back to whoever asked.' };
       delete s.active[id];
       if (def.job) { s.jobs.recent ||= {}; s.jobs.recent[def.frame] = now(); }
       else s.done[id] = now();
@@ -368,6 +419,8 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
     },
     view(ch) { const s = stateOf(ch); return { active: Object.entries(s.active).map(([id, a]) => { const d = defOf(ch, id); return d ? view(ch, d, a) : null; }).filter(Boolean), done: Object.keys(s.done) }; },
     npcInfo: id => npcs.get(id) || null,
+    /** S5 (play-test 4): the quest-log view of a generated def (road events offer job-shaped quests through the job path). */
+    viewDef: (ch, def, a = null) => view(ch, def, a),
     zoneKeyOfE: eid => zoneKeyOfE.get(eid) || null,
   };
 }

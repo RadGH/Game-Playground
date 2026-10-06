@@ -1,0 +1,47 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_02, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z13_02",
+ "terrainHash": "b3a20e5d",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_bells_for_halsbridge_0_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1598,
+   "z": 1382,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "bells_for_halsbridge",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_under_the_cobbles_0_0",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1640,
+   "z": 1395,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "under_the_cobbles",
+   "hunt": true
+  }
+ ]
+}

@@ -586,3 +586,138 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   real-time schedule (`at`) and starts on demand after 60 quiet minutes; sizing capped at 5 players.
 - **A R6+** other players' mana: `info.mpMax`, `ev mp {id, n, max}` (<= 2 Hz), party frame columns 9-10.
 - Tests: tests/C/playtest3.test.mjs, tests/E/playtest3.test.js, tests/A/pt3-hunt.test.js, tests/A/pt3-events.test.js.
+- **D-UI** (play-test 2, later): client re-pointed to A's landed v6 (§18): looks sent as `custom`; shop categories / labels / sell prices
+  from `shopView`; `inspectR`; `you.reach` for ranged auto-attack; barber bill from E's shops.json price list (only changed parts sent,
+  first visit free); innkeeper "Make this inn your home" (`bind`); potions and food — a bag click uses them, hotbar keys 7 8 9 0
+  (`ui/hotbar.js`, shared potion cooldown sweep, "Eating…"); recall channel cast bar + buff icons with time left (`ui/buffs.js`);
+  quest offers / journal use `rewardText`.
+- **D-UI** (play-test 3): **R1** the title is a front page — your characters + "New character"; step 1 name/people/calling, step 2 the
+  appearance editor with the figure in starting clothes and a "Show class gear" toggle, "Create character" enters the world (the separate
+  Customize button is gone). **R3** events never say just "starting soon": a seconds countdown in the event frame, the call-out and the map
+  (`soonText`/`eventStateText`: ready / soon / live / cooldown "Ready again in 3:40"). **R6** a mana bar under health (the frame's XP bar is
+  gone — the one XP bar is under the action bar), target and party mana (`ev mp`, `info.mpMax`, party rows), numbers on hover.
+  **R8** beards use their own colour (`avatar-3d/js/chibi2-face.js`, opt-in by data: only avatars that set `facialHair.color`).
+
+## 2026-10-05 — stream D-world: play-test 2 (Q7 Q8 Q10 Q16 Q18 Q19 Q20/21 Q22) + play-test 3 (R4 R5 R7) + play-test 4 (S4 S20 S23)
+- **D-world Q7** the "floating tiny lanterns" were lit window boxes stamped at two fixed spots on each footprint's front edge (`town-view.js`): on round huts, L-shaped and set-back houses (18 of Torborhold's 90) they hung in the air. Glass now IS the building kit's own window parts (`buildingLook()`), in two glowing instanced meshes: bright on shops, dim on homes.
+- **D-world Q10** `proctown/js/offices.js` (new, reusable): office dressing for 23 trades — open forge shed with hearth fire + anvil + quench trough, striped awnings and goods tables, inn tankard sign + lanterns + benches, stable paddock, barber's pole, hall banners/steps/flag, temple steps/candles/statue, apothecary herbs, jeweller case, mill sails… each with a hanging picture sign and a `fascia` name board. Lanterns + light-pool sources only on lit offices (B's `data.lit`, A's `office.lit`). `js/client/sign-text.js`: every office name (B's label, "The Wheel and Wether") painted into one canvas atlas, one draw call per town. `WS.claimOffice(info.office)` dresses a house a service NPC took over. proctown/tests/offices.test.js.
+- **D-world Q8** `js/client/status-sync.js`: auras follow `info.st` (late arrivals see them), cleared on death / revive / room change (kept body), a grace window so a stale snapshot never undoes a fresh event; `STATUS_LOOK` covers every Farhold status id. C's `item:torch` = a carried 14 m pool light; `fx channel` (recall charm) draws a cast circle + pillar.
+- **D-world Q16** mounts in avatar-3d (`js/mounts.js` + pure `js/mount-types.js`, `mounts.html`; horse/pony/courser/warhorse/stag/new `ram`/drake with tack and a seat; `CHIBI2_MOUNT_ANIMS` ride/rideGallop). Client: `actors.setMount` seats the body (cached mounts, compiled before shown), gait follows speed, `H` key / `tv.mount()`, predictor uses `you.speedMul`, everyone sees riders via `info.mount`.
+- **D-world Q18/Q19** `proctown/js/propkit.js` (89 set-piece models incl. all 50 of E's ids + `grave_slab`, `cropField` 23 crops, `fenceLine`; `propkit.html` gallery). `js/client/setpiece-view.js` draws B's set pieces (graveyards with grave rows by style + lych-gate, fields by crop, hedges/fences/drystone walls, set buildings with office dressing, signposts, mill wheels, stone circles, sheepfolds, farmyards) and E's set-piece recipes (models, parts, buildings, fields, props, scaled into B's pieces) — one instanced set per zone, planned in slices. Terrain shows B's new surfaces (`SET_GROUND`); scatter draws `tree_fruit` and `hedge`.
+- **D-world Q20/21/22** a changed `info.look` (custom) re-dresses that body; others' hidden gear verified (`info.gearOff`).
+- **D-world R5** `js/client/weapon-fx.js`: every basic attack is seen — a crescent trail along the swing's arc in the element's colour (thrust slivers, upright smashes with a ground slam, wider two-handers), staff spells by shape (nova ring, cone/jet breath, dome pillar, wall), muzzle flashes, and a client-drawn arrow/bolt when a point-blank shot sends no projectile. `weaponLook()` tested against every weapon type in items.json + Farhold uniques.
+- **D-world R4** a call-out said at a cast's start is held for the whole wind-up (was 2.8 s max); a boss cast with no line names the attack. **R7** `info.look:'chained'` pillars wear an iron band and hang a sagging chain of links to `info.tether` (dropped when broken); arena `obj` events now read `otype` (they were drawn as type 'obj').
+- **D-world S4** rares/champions drawn bigger (`rankScale`, giants ×1.35), a gold/blue ring under them, a war-banner on pack leaders, affix auras (burning, frozen, venomous…) from `info.mods`, a bigger gold health bar for rares. **S20** eating/drinking sits the body down (`you.regen`, `info.eat`). **S23** `js/client/loot-marker.js`: a corpse with loot for you sparkles, tinted by best rarity, with a light column for rare+, and does not fade while it has loot.
+- Tests: tests/D 113 node (playtest2.test.js 9 new), tests/D/playtest2.spec.js (browser: towns, set pieces, looks/gear, mounts, statuses, weapons, call-outs, chains, rares, loot, eating); proctown 65; avatar-3d 38.
+
+## 2026-10-05 — Play-test 4 S17/S18 (streams C+E, fork F2 of the A+C+E agent)
+- **C** `js/rules/loot-pool.js` (new, pure) + `data/rules/loot-pool.json`: one wrapper round `rpg.rollDrop` picks group (weapon .40 / armour .36 / jewellery .08 / off-hand .16) -> family -> base by level; Farhold's lootTiers bases merged in at their minLevel. Drops at L1-8 before: swords 34.8% of weapons, axes/maces/spears/polearms/crossbows/javelins/shields/orbs/tomes 0%; after: 15 weapon families at 2-7% of weapon drops each (sword family 6.9%), shields 6%, foci ~7%. Bosses with `dropBases` keep theirs. Parity engine nulls `engine.lootPool`/`engine.armourTiers` (tests/C/setup.mjs).
+- **C/E** `data/rules/armour-tiers.json` (S18): second armour tier from level 15 — 11 themes (flame, storm, venom, frost, dawn, umbral, thorn, rune, bone, clockwork, fang) with emblem/trim/glow, one theme + set name per class (all 30), themes rolled from the pool of the classes wearing that weight. A themed piece: `tier:2`, `theme`, name prefix, armour x1.12, `themeLook`; uniques/sets/legendaries never. `js/rules/data.js` loads both files, `js/rules/engine.js` installs.
+- **E** `data/provinces/shops.json`: smith sells every melee family (13 bases), bowyer bows/crossbows/javelins/spears, apothecary "Staves, wands & rods" (wand/staff/scepter/orb/tome/quarterstaff), tailor 6 foci, market wider; `roles` regenerated (tools/content-shops.mjs). `js/sim/shops.js` takes bases IN TURN from a random start so every base shows before repeats.
+- **A** (2 lines) `js/sim/province.js` gearLook: `info.gear.<slot>.theme`.
+- Tests: `tests/E/playtest4-gear.test.js` (5). Requests: D-world base list + theme table (docs/requests.md "PLAY-TEST 4 (S17/S18)").
+
+## Play-test 4 S14 — kill quests point where the monster really spawns (streams E + A, 2026-10-05)
+- **A** `js/sim/hunts.js` (new, pure): the camps the server spawns grouped per monster type into hunting AREAS (`huntAreas`, camps < 90 m apart join; centre weighted by head count, `r` covers every camp and roam path, `n`, `zone`, `lv`), `pickArea` (quest zone -> the place the step's `where` names -> nearest the giver, a thin area counts as 500 m further).
+- **A** `js/sim/quests.js`: every kill / collect step's marker is recomputed from those areas at load (`huntMark`; E's marks can no longer point at an empty field), `near` steps show only the areas where kills count, radiant kill jobs too; quest views carry per step `areas: [{x, z, r, n, zone, lv}]` (up to 4, best first). `book.hunt` = the live areas.
+- **E** `tools/content-hunts.mjs` (new; run after `tools/place-vignettes.mjs`): adds copies of camps already standing in a quest's circle wherever it held fewer of the monster than the step needs (count, capped at 4) -> `data/vignettes/placements/<zone>.quest.json` (54 camps over 15 zones; `js/sim/content.js` merges it like `.hunt.json`), writes `data/quests/marks/torbor_downs-hunts.json` (35 types' areas) and re-points E's marks. Before: 63 of 117 kill/collect steps pointed at fewer monsters than they asked for (several at 1), and "the fairy ring"'s croakers "at Tench Pool" were marked 1.4 km away; after: 0.
+- Tests: `tests/E/playtest4-hunts.test.js` (6): every kill/collect step in every quest file holds its monster where it counts (>= min(count, 4)), areas hold the type, files current, pickArea rules, jobs, the quest log sent to the client carries areas.
+
+## Play-test 4 S11/S19 (streams A+E, 2026-10-05) — more people in every settlement, titles, real names, the Unbinder's offer
+- S11: the 28 villages/hamlets stream B planned outside the hub towns had 0-2 NPCs each ("towns with only 1 NPC"). js/sim/realm.js
+  now spawns their people from schedules.json `perTown.village` / `perTown.hamlet` over B's plan (js/sim/schedules.js townFolk):
+  a trader (General goods), an innkeeper, a smith + provisioner in villages, farmer/miller/residents, guards — 7-11 people each.
+  Their day/night schedules tick in the wilds copies too (province.js npcTick, a cached list per copy). `perTown.town`/`city`
+  gained traders (market, armourer, apothecary, provisioner…) for the two towns without an offices.json entry (Mill End, Three Wheels).
+- S11 Unbinder: every town room (18, all size town/city) has one; talking to it sends `unbind {prices, has, ops}` (province.js
+  unbinderOffer) — the reset itself was already the `talent clear` / `perk reset|refund` ops (tested end to end now).
+- S19: js/sim/npc-names.js — every NPC gets `info.title` (data/names/titles.json: shop kind > role > the trade in its name) and
+  a seeded real name when it only had a job for one; applied once in room.spawn. data/names/torbor.json pools 12 -> 42 each.
+- tests/A/pt4-npcs.test.js (5): merchants + crowd per town, an Unbinder per town, trader + folk per village/hamlet, titles +
+  real names for all ~700 NPCs, seeded names, Unbinder end to end (perks + talents back for gold).
+
+## Play-test 4 S13/S16 (stream C, 2026-10-05) — bolt zones land on the target; lightning (and arcane/nature) in the perk forest
+- S13: a BOLT's zone (Forked Bolt's Grounding, Toxic Bloom, Slow Burner, Seedling, Spilled Element, Junk Toss's bottle/pot pools
+  and Booby Trap) was put down round the caster — afterCast runs as the bolt leaves the hand. js/rules/cast-skills.js: a bolt's
+  `place`/`pool` now rides `plan._impactZones` to afterBolt and lands at the first impact. Self/around zones stay on the caster,
+  ground zones on the aimed spot, beam pools along the beam (unchanged); a bolt's zone that only HELPS (Thornlash's Seedling heal ring)
+  stays with the caster, where the friends are, and its `fx place` carries `helps: true`. Audit: every skill of every class, bare and with every
+  talent node, cast at a target 12 m away (tests/C/playtest4.test.mjs) — 15 bolt variants were wrong, all fixed, 0 left.
+- S16: two new perk-forest arms (data/rules/perks.json, ids of the old arms unchanged): **The Gathering Storm** (lightning: Static
+  Charge, Live Wire, `shockPct` "+% damage to Shocked enemies", cornerstones Conductor / Thunderhead / Static Coat) and **The Old
+  Lore** (arcane Spellwright, nature Rootbound). Readers: js/rules/perk-rules.js `landed()` (called from field.land on every hit,
+  with a reentrancy guard), strikeMult (shockPct + the cornerstones' costs), afterHurt (Static Coat). js/rules/perk-forest.js
+  `perkTags()` / `isTopTier()` say what a node is for. 382 -> 437 nodes, 12 -> 14 arms, 41 -> 46 cornerstones.
+- Tests: tests/C/playtest4.test.mjs (7): Grounding on the target, the all-skills zone audit, every class's top-tier tree, lightning
+  coverage >= fire/ice/poison, each new reader, and a real stormcaller fight with the storm arm (>15% more damage).
+
+## Play-test 4 S5/S9 — road events and wanderers (streams A + E, 2026-10-05)
+- js/sim/roadevents.js (new): random events near lone players in the wilds every 2.5-5 min — treasure chests (7 kinds, some guarded) opened in the
+  corpse loot window via corpses.holdFor (personal shares), delivery / escort / rescue quests as job-shaped generated quests that pay themselves.
+- data/provinces/road-events.json (new): chests, deliver/escort/rescue texts, rules, weights. data/provinces/wanderers.json (new): 7 wanderer
+  traveller kinds (pedlar + rag-and-bone with a 'pedlar' shop kind, errand runners with deliveries, storytellers/scholars/soldiers with lore + tips),
+  lore, tips, perRouteKm 1.25.
+- js/sim/travellers.js: wanderer data on the lead crew member, `stopNear` (stand still while a player is close), stable `data.key`.
+- js/sim/content.js: wanderer kinds merged into travel kinds + every route; the pedlar shop kind into shops; province.js hooks (use / talk /
+  offers / accept / 1 Hz tick / 5 Hz move); quests.js `viewDef`.
+- tests/A/pt4-events.test.js (6): scheduler drops events; chest guarded -> loot window -> bag -> packs up; delivery; escort; rescue; wanderers.
+
+## 2026-10-05 — D-world (avatar-3d, fork R) play-test 4 S18: tier-2 class armour with iconography
+- **D-world** `avatar-3d/js/chibi2-armour2.js` (new, opt-in): 24 emblem shapes (flame, bolt, drop, frost, sun, skull, leaf, rune, eye, claw, cog, blood, moon, hourglass, fist, note, arrow, sword, shield, cross, coin, feather, star, crown; snowflake/sunburst/gear aliases) in relief on chest, back/cape, shoulders and helm brow (`top.emblem`, `hat.emblem`), and five tier-2 decor kits `t2_pauldrons` / `t2_mantle` / `t2_harness` / `t2_vestments` / `t2_wildmantle` (registered in avatar-2d chibi2-parts.js). A look naming neither builds exactly what it did (tested over every tier-1 outfit + Emberveil class look).
+- **D-world** `avatar-3d/data/class-outfits-t2.json` (built by `tools/build-class-outfits-t2.mjs`): a tier-2 outfit for all 30 classes, emblem/trim/glow from C/E's `data/rules/armour-tiers.json`; `class-outfits.js` `loadClassOutfits2`, `isTier2Item` (look.tier / theme / numeric tier / level >= 15), `tier2Dress`. Gallery `avatar-3d/armour2.html`.
+- **D-world** hooks: `js/client/gear-look.js` `gearLook(eq, { tier2, themes })` (themed chest/head -> tier 2; themed off-hand carries `emblem` for the shield builder; `normItem` keeps the armour WEIGHT when a themed item carries `tier: 2`), `js/client/looks.js` loads the two tables. Tests: `avatar-3d/tests/class-outfits-t2.test.js` (6), `tests/D/armour-tier2.test.js` (3).
+
+## 2026-10-05 — D-world (avatar-3d, fork W) play-test 4 S6 / S15 / S17: off-hand grip, second wands, a model for every base
+- **S6** `avatar-3d/js/chibi2-motion.js`: a focus held in the off hand (orb, reliquary, effigy, ward, totem) gets a quarter grip turn
+  and a level forearm, so it stands upright on the fist instead of lying back along the forearm (all clips start from it).
+- **S15** `avatar-3d/js/chibi2-weapon-ids.js` (`HELD_WEAPON_IDS` keeps wands) + `js/client/gear-look.js` (off-hand wand no
+  longer filtered out): a dual-wielding caster shows both wands.
+- **S17** new `avatar-3d/js/chibi2-weapons-tv.js` (tv_scimitar, tv_warpick, tv_club, tv_glaive) and foci tv_ward / tv_totem in
+  chibi2-gear.js, registered in avatar-2d chibi2-parts.js; `js/client/gear-look.js` `HELD_BY_BASE` / `OFFHAND_BY_BASE`: every
+  weapon, shield, focus and quiver base in data/rules/loot-pool.json draws its own model (kite/tower/buckler shields are no longer
+  all heater shields; foci are no longer blank; javelin/glaive bases are no longer quarterstaves).
+- Tests: tests/D/weapon-models.test.js (5): every pool base builds a model in a hand and is registered, families never share a
+  silhouette, every off-hand base builds, two wands, the focus points up and away from the forearm. tests/D/playtest1.test.js
+  updated (it pinned kite shield/buckler -> heater shield).
+- **D-UI** (play-test 4): **S1** the "Happening now" panel opens for every live event (realm AND zone, also from an event frame), tucks
+  into a pulsing bubble by the minimap and back, and sits in ONE column under the minimap with the event frame ("1 fighter in range") and the
+  quest tracker, so none covers another. **S2** tracking is a set: untracked quests leave the HUD tracker and the map/minimap (journal
+  "Tracked ✓" untracks). **S3** shop rows that are only a category label are never for sale; categories are filter chips. **S4** ranked
+  targets get a bigger frame/bar with the rank; rares near you (and announced ones) are marked on the map/minimap with a rim arrow.
+  **S5/S12** chests and grouped corpses use the same loot window (`lootWin` with `chest` / `group`, rows carry their `corpse`).
+  **S10** "Hand in" in the journal for ready quests. **S14** a tracked kill/collect step's `areas` shaded on the map/minimap within 400 m.
+  **S19** NPC nameplates carry `<title>` from `info.title` / wanderer titles. **S20** "Eating — sit still" pill with seconds left.
+  **S21** the mount call shows a cast bar (`mountR casting`, interrupted / done). **S23** a corpse with loot for you gets a star on its
+  nameplate and a map/minimap mark, coloured by the best rarity (`lootable.best`). **S11** the Unbinder's dialog offers "Reset all talents /
+  perks — N g". **S9** a wanderer's rumour tip can be pinned on the map. **S25** "Names" off silences every map label (provinces, zones,
+  bands, settlements, places, markers; unit test counts zero fillText).
+
+## Play-test 4 S3 S4 S8 S10 S12 S15 S20 S21 S23 S24 (streams A + C + E, 2026-10-05)
+- **S3** "Wands & rods took 15 g and gave nothing": the shop's cached stock is shared, and `grant()` marked the row's item
+  `_granted` — every buy of a row after the first was swallowed. Buys hand out a copy; a miss refunds; rows are always real
+  items (`isProduct`); `data/provinces/refunds.json` pays the one victim (Stormy, 60 g, from the dev economy_log) once.
+  `buildLayout({extra})` passes new province data files straight into L.
+- **S4** champions (9%) and rares (2.5%) roll on wilds camp monsters from level 4 (`js/rules/affixes.js`,
+  `data/rules/affixes.json`): Farhold's rank stats + modifiers, the new Pack-leader (brings its pack), a telegraphed special per
+  modifier, a size floor, rares get their own names; `info.aff`/`info.sc`. 14 named rares are announced on nearby minimaps
+  (`bossNear`/`rareNear`), 16 stay secret.
+- **S8** waystones: home stone always known, a town's on entering, any within 15 m.
+- **S10** remote turn-in: a finished quest pays where you stand unless `needsGiver` (13 class-companion quests).
+- **S12/S23** one loot window over every corpse within 8 m; sparkles carry the best rarity for you.
+- **S15** (server side) verified the off-hand wand is on `info.gear.offhand`.
+- **S20** eating = sitting (`sit` anim, `info.sit`), mends out of combat, a step/jump/cast/hit/stand-up ends it.
+- **S21** the mount call sends the channel start/end events.
+- **S24** event rewards: the Torborhold raid had no boss in its data, so the runner raised a WOLF named after the event; now a
+  raider captain. Every participant gets their own rare+ (on the boss body), bonus xp/gold scaled by level and length, and
+  "Event complete: +N XP, +G gold".
+- Tests: tests/A/pt4-{shop,waystones,loot,food-mount,quests,champions,event-rewards,gearlook}.test.js.
+
+## 2026-10-05 — play-test 4 S22 (D-world, avatar-3d): mounts look like horses
+- `avatar-3d/js/equine.js` (new): a body made for hoofed mounts — lofted barrel (croup, saddle dip, withers, deep chest,
+  tucked flank), an arched deep neck out of the chest, a long head hung at the poll (jaw, muzzle, nostrils, eyes, ears),
+  jointed legs (forearm/gaskin taper, knee/hock, fetlock, pastern, hoof; socks; feathering on heavy breeds), mane sheet,
+  forelock, tail plume; elks with antlers + dewlap. Real gaits: four-beat walk, diagonal trot, rocking gallop, cadence from speed.
+- `avatar-3d/js/mounts.js`: hoofed types ride it; tack cut from the body surface (blanket, saddle, girth, breastplate,
+  stirrups, bags, bridle; warhorse caparison/crinet/chanfron; dray harness). Ram and drake unchanged.
+- `avatar-3d/js/mount-types.js`: `breed` per type; new `dray` type (our `dray` mount id was falling back to a plain horse).
+- No change in js/client (same createMount / seatRider / setGait API). tests/D/playtest2.spec.js Q16 green.

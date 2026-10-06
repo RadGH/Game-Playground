@@ -19,7 +19,7 @@ import { rarityOf } from './inv-core.js';
 const LOOT_RANGE = 6;
 
 export function createLoot({ net, hud, actors, me }) {
-  const lootable = new Set();          // corpse ids with something in them for me
+  const lootable = new Map();          // corpse id -> best rarity in it for me (S23: the marker's colour)
   const W = { id: null, data: null };
   const panel = createPanel({ id: 'loot', title: 'Loot', width: 300, cls: 'loot-panel', onClose: () => { if (W.id != null) send2.loot(net(), 'close', { id: W.id }); W.id = null; W.data = null; iconsActive(false, 'loot'); } });
 
@@ -45,15 +45,17 @@ export function createLoot({ net, hud, actors, me }) {
     for (const it of items) rows.push(row(it));
     if (free.length) { rows.push(h('h4', {}, 'Left by your party (anyone may take it)')); for (const it of free) rows.push(row(it)); }
     const empty = !rows.length;
-    panel.setTitle(d.name || actors.get(W.id)?.name || 'Loot', empty ? 'Empty' : `${items.length + free.length} item${items.length + free.length === 1 ? '' : 's'}${d.gold > 0 ? ` · ${goldText(d.gold)}` : ''}`);
+    const many = (d.corpses || []).length > 1;
+    panel.setTitle(d.chest ? (d.name || 'A chest') : many ? `${d.corpses.length} bodies` : (d.name || actors.get(W.id)?.name || 'Loot'), empty ? 'Empty' : `${items.length + free.length} item${items.length + free.length === 1 ? '' : 's'}${d.gold > 0 ? ` · ${goldText(d.gold)}` : ''}`);
     panel.fill(
       empty ? h('p.dim', {}, 'Nothing left.') : h('div.loot-list', {}, ...rows),
       h('div.row.end', {}, h('button.ghost.small', { type: 'button', onclick: () => panel.close() }, 'Close'), empty ? null : h('button.primary.small', { type: 'button', dataset: { act: 'all' }, onclick: takeAll }, 'Take all')));
   }
   function row(it) {
-    return h('div.loot-row', { dataset: { uid: String(it.uid) }, onclick: () => take(it.uid) }, itemCell(it, { small: true }), itemName(it), h('button.ghost.small', { type: 'button' }, 'Take'));
+    // S12: rows from several bodies carry which body they lie on (`corpse`); a party-pile row says so
+    return h('div.loot-row' + (it.shared ? '.shared' : ''), { dataset: { uid: String(it.uid) }, onclick: () => take(it.uid, it.corpse) }, itemCell(it, { small: true }), itemName(it), it.shared ? h('small.dim', {}, 'party') : null, h('button.ghost.small', { type: 'button' }, 'Take'));
   }
-  function take(uid) { if (W.id == null) return; hideTip(); send2.loot(net(), 'take', uid === 'gold' ? { id: W.id, uid: 'gold' } : { id: W.id, uid }); }
+  function take(uid, from = null) { if (W.id == null) return; hideTip(); send2.loot(net(), 'take', uid === 'gold' ? { id: W.id, uid: 'gold' } : { id: from ?? W.id, uid }); }
   function takeAll() { if (W.id == null) return; hideTip(); send2.loot(net(), 'all', { id: W.id }); }
   onIcon(() => { if (panel.isOpen && W.data) { clearTimeout(draw.t); draw.t = setTimeout(draw, 80); } });
 
@@ -64,10 +66,11 @@ export function createLoot({ net, hud, actors, me }) {
   function nearest() {
     const m = me(); if (!m || !lootable.size) return null;
     let best = null, bd = LOOT_RANGE;
-    for (const id of lootable) { const a = actors.get(id); if (!a) continue; const d = Math.hypot(a.pos.x - m.x, a.pos.z - m.z); if (d < bd) { bd = d; best = a; } }
+    for (const id of lootable.keys()) { const a = actors.get(id); if (!a) continue; const d = Math.hypot(a.pos.x - m.x, a.pos.z - m.z); if (d < bd) { bd = d; best = a; } }
     return best;
   }
   function tick() {
+    for (const id of lootable.keys()) { const el = actors.get(id)?.plate?.root; if (el && !el.classList.contains('has-loot')) markPlate(id); }
     const a = panel.isOpen ? null : nearest();
     if ((a?.id ?? null) !== near) { near = a?.id ?? null; prompt.hidden = near == null; if (a) prompt.querySelector('span').textContent = `Loot ${a.name}`; }
     // walked away from an open corpse: close it
@@ -116,11 +119,20 @@ export function createLoot({ net, hud, actors, me }) {
     }
   }
 
+  // S23: a corpse holding loot for you says so on its nameplate (a star in the colour of the best thing in it); D-world glows the body
+  function markPlate(id) {
+    const a = actors.get(id), el = a?.plate?.root; if (!el) return;
+    const r = lootable.get(id);
+    el.classList.toggle('has-loot', r != null);
+    for (const c of [...el.classList]) if (c.startsWith('loot-')) el.classList.remove(c);
+    if (r != null) el.classList.add('loot-' + r);
+  }
   function wire(n) {
-    n.on('lootable', m => { if (m.on === false) lootable.delete(m.id); else lootable.add(m.id); });
+    n.on('lootable', m => { if (m.on === false) lootable.delete(m.id); else lootable.set(m.id, m.best || m.rarity || 'normal'); markPlate(m.id); });
     n.on('lootWin', m => {
-      if (m.closed) { lootable.delete(m.id); if (W.id === m.id) { W.id = null; panel.close(); } return; }
-      if (W.id !== m.id) return;
+      if (m.closed) { lootable.delete(m.id); markPlate(m.id); if (W.id === m.id) { W.id = null; panel.close(); } return; }
+      // S5/S12: a chest's loot, or several bodies looted at once, can arrive without us asking for that exact id
+      if (W.id !== m.id) { if (!(m.chest || m.group || (m.corpses && m.corpses.length > 1))) return; W.id = m.id; iconsActive(true, 'loot'); panel.open(); }
       W.data = m; draw();
       if (!(m.items || []).length && !(m.free || []).length && !(m.gold > 0)) lootable.delete(m.id);
     });
@@ -132,6 +144,6 @@ export function createLoot({ net, hud, actors, me }) {
   return {
     wire, open, tick: () => { tick(); tickRolls(); }, useKey, onRoll, onRolled, choose, panel,
     isLootable: id => lootable.has(id), lootable,
-    get state() { return { open: panel.isOpen ? W.id : null, data: W.data, lootable: [...lootable], rolls: [...rolls.keys()], prompt: !prompt.hidden }; },
+    get state() { return { open: panel.isOpen ? W.id : null, data: W.data, lootable: [...lootable.keys()], rolls: [...rolls.keys()], prompt: !prompt.hidden }; },
   };
 }

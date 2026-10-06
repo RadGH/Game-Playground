@@ -19,6 +19,10 @@ export const RULES_DATA_FILES = {
   progression: '../../data/rules/progression.json',
   tvTalents: '../../data/rules/talents.json',
   tvPerks: '../../data/rules/perks.json',
+  // play-test 4: which base a drop is (S17) and the second armour tier (S18) — js/rules/loot-pool.js
+  lootPool: '../../data/rules/loot-pool.json',
+  affixes: '../../data/rules/affixes.json',            // play-test 4 S4: champions + rares in the wilds (js/rules/affixes.js)
+  armourTiers: '../../data/rules/armour-tiers.json',
 };
 
 /** URL of one data file, resolved against this module. */

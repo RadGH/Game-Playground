@@ -77,7 +77,7 @@ const WOOD = '#6e553d', DARK = '#4a3a2c', IRON = '#3b3a3e', STONE = '#8a857c', D
  */
 export function officeDressing(kind, desc, { lit = null, seed = 1 } = {}) {
   const K = OFFICE_KINDS[kind];
-  const out = { kind, parts: [], lights: [], fires: [], spin: [], signs: [] };
+  const out = { kind, parts: [], lights: [], fires: [], spin: [], signs: [], fascia: null };
   if (!K || !desc) return out;
   const on = lit == null ? K.lit : !!lit;
   const rng = makeRng(hash(seed, 31));
@@ -350,6 +350,15 @@ export function officeDressing(kind, desc, { lit = null, seed = 1 } = {}) {
       break;
     }
     default: break;
+  }
+  // a name board over the door (a game writes the trade's name on it: `fascia` = {x, y, z, w, h}, the board's front face,
+  // facing +z), so the street reads "Smithy", "The Wheel and Wether"… as well as the picture sign
+  {
+    const fw = Math.min(W * 0.78, 3.4), fy = Math.min(desc.door.h + 0.28, H * 0.98 - 0.5);
+    if (fw > 1.2 && fy > 1.6) {
+      part('box', dx, fy - 0.04, F + 0.04, fw + 0.16, 0.58, 0.08, trim);
+      out.fascia = { x: dx, y: fy, z: F + 0.09, w: fw, h: 0.5 };
+    }
   }
   // a touch of seeded variety: nudge loose clutter a few centimetres so no two shops are pixel-identical
   for (const p of P) if (p.mesh === 'cyl' && p.h < 1 && p.y === 0) { p.x += (rng() - 0.5) * 0.06; p.z += (rng() - 0.5) * 0.06; }

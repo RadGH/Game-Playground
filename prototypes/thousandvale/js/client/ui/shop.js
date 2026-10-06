@@ -20,11 +20,11 @@ const BAG_MAX = 120;
 export const SHOP_ROLES = new Set(['merchant', 'smith', 'trader', 'stablehand', 'stable', 'stablemaster', 'stable_master', 'fletcher', 'armourer', 'armorer', 'jeweller', 'jeweler', 'alchemist', 'grocer', 'tailor', 'weaponsmith', 'provisioner', 'pedlar', 'peddler', 'quartermaster', 'outfitter', 'tanner', 'bowyer', 'herbalist', 'fishmonger', 'general']);
 
 export function createShop({ net, hud, actors, me, bag }) {
-  const S = { npc: null, view: null, tab: 'buy', pending: false };
+  const S = { npc: null, view: null, tab: 'buy', cat: 'all', pending: false };
   const panel = createPanel({ id: 'shop', title: 'Shop', width: 420, cls: 'shop-panel', onClose: () => { S.npc = null; S.view = null; iconsActive(false, 'shop'); hideTip(); } });
 
   function open(npcId, name = null) {
-    S.npc = npcId; S.view = null; S.tab = 'buy';
+    S.npc = npcId; S.view = null; S.tab = 'buy'; S.cat = 'all';
     send2.shop(net(), 'open', { npc: npcId });
     panel.setTitle(name || 'Shop', 'Opening the shutters…');
     panel.fill(h('p.dim', {}, 'Opening the shutters…'));
@@ -41,28 +41,38 @@ export function createShop({ net, hud, actors, me, bag }) {
     if (S.tab === 'buy') body = buyList(v);
     else if (S.tab === 'sell') body = sellList(v);
     else body = backList(v);
-    panel.fill(tabs, body, h('p.tiny-left.shop-hint', {}, S.tab === 'sell' ? 'Click an item to sell it. Rare and better ask first.' : S.tab === 'back' ? 'Things you sold here — buy them back at the price you got.' : 'Click to buy. Hover for the item card.'));
+    const says = v.says ? h('p.shop-says', {}, `“${Array.isArray(v.says) ? v.says[0] : v.says}”`) : null;
+    panel.fill(says, tabs, body, h('p.tiny-left.shop-hint', {}, S.tab === 'sell' ? 'Click an item to sell it. Rare and better ask first.' : S.tab === 'back' ? 'Things you sold here — buy them back at the price you got.' : 'Click to buy. Hover for the item card.'));
   }
   const roleName = r => String(r || 'Trader').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   function buyList(v) {
-    const stock = v.stock || [];
-    if (!stock.length) return h('p.dim', {}, 'Nothing for sale today.');
+    // S3: only real things are for sale — a row whose "item" is just its category label (the old 'Wands & rods' for 15 g) is dropped;
+    // categories are the filter chips above the list, never rows
+    const all = (v.stock || []).filter(r => (r.mount && (r.mount.id || r.mount === true) && (r.item?.name || r.mount.name)) || (r.item && typeof r.item.name === 'string' && r.item.name.trim() && r.item.name !== r.label));
+    if (!all.length) return h('p.dim', {}, 'Nothing for sale today.');
+    // E's categories (protocol §18.2 `categories {cat: label}`, each row's `cat`): a chip per category the stock has
+    const cats = [...new Set(all.map(r => r.cat).filter(Boolean))];
+    if (S.cat !== 'all' && !cats.includes(S.cat)) S.cat = 'all';
+    const stock = S.cat === 'all' ? all : all.filter(r => r.cat === S.cat);
+    const catBar = cats.length > 1 ? h('div.chips.shop-cats', {}, ...[['all', 'Everything'], ...cats.map(c => [c, v.categories?.[c] || c.replace(/_/g, ' ')])].map(([id, label]) =>
+      h('button.chip', { type: 'button', 'aria-checked': String(S.cat === id), dataset: { cat: id }, onclick: () => { S.cat = id; draw(); } }, label))) : null;
     const lv = me()?.level || 1, free = BAG_MAX - (bag?.state?.bag?.length || 0);
-    return h('div.shop-list', {}, ...stock.map(row => {
+    return h('div', {}, catBar, h('div.shop-list', {}, ...stock.map(row => {
       const it = row.item || {};
       const why = buyRefusal(row, gold(), free);
       const req = slotOf(it) ? levelCheck(it, lv, bag?.state?.equipment) : { ok: true };
       return h('div.shop-row' + (why ? '.cant' : ''), { dataset: { id: String(row.id) }, title: why || null, onclick: () => buy(row, why) },
         itemCell(it, { key: 'shop:' + S.npc + ':' + row.id, small: true }),
-        h('div.sr-name', {}, itemName(it), row.mount ? h('small.mount', {}, ` Mount${it.speed ? ` · ${Math.round((it.speed - 1) * 100)}% faster` : ''}`) : null, !req.ok ? h('small.bad', {}, ` needs level ${req.level}`) : null),
+        h('div.sr-name', {}, it.name ? itemName(it) : h('b.iname', {}, row.mount?.name || 'Mount'), it.desc ? h('small.desc', {}, ` — ${it.desc}`) : null, row.level > lv ? h('small.bad', {}, ` level ${row.level}`) : null, row.mount ? h('small.mount', {}, ` Mount${it.speed ? ` · ${Math.round((it.speed - 1) * 100)}% faster` : ''}`) : null, !req.ok ? h('small.bad', {}, ` needs level ${req.level}`) : null),
         h('span.price' + (row.price > gold() ? '.no' : ''), {}, goldText(row.price)));
-    }));
+    })));
   }
   function sellList(v) {
     const items = (bag?.state?.bag || []).slice().sort((a, b) => (RARITY_RANK[rarityOf(a)] ?? 0) - (RARITY_RANK[rarityOf(b)] ?? 0));
     if (!items.length) return h('p.dim', {}, 'Your bag is empty.');
+    const sellMap = new Map((v.sell || []).map(r => [r.uid, r.price]));
     return h('div.shop-list', {}, ...items.map(it => {
-      const p = sellPrice(it, v.sellRate ?? 0.25);
+      const p = sellMap.get(it.uid) ?? sellPrice(it, v.sellRate ?? 0.25);
       return h('div.shop-row', { dataset: { uid: String(it.uid) }, onclick: () => sell(it, p) }, itemCell(it, { small: true }), h('div.sr-name', {}, itemName(it)), h('span.price.sell', {}, p ? goldText(p) : 'worthless'));
     }));
   }

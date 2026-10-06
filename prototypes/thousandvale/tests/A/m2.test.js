@@ -85,7 +85,8 @@ test('waystones: discover, travel inside the province for a fare, and to another
   // discover the town's waystone, then another town's (walk there = teleport in the test)
   P0.transfer(x, P0.townRoom, { x: ws0.x + 1, z: ws0.z }, 't'); await run(clock, 200);
   a.use(ws0.id); await run(clock, 200);
-  assert.ok(used.at(-1).ok && used.at(-1).fresh);
+  assert.ok(used.at(-1).ok);
+  assert.equal(used.at(-1).fresh, false, 'S8 (play-test 4): the home town\'s stone is known from the start');
   const t1 = TORBOR.towns[1], r1 = P0.rooms.get('torbor_downs/town:1');
   const ws1 = [...r1.objects.values()].find(q => q.type === 'waystone');
   P0.transfer(o(srv, a), r1, { x: ws1.x + 1, z: ws1.z }, 't'); await run(clock, 200);

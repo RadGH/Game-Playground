@@ -1,0 +1,32 @@
+{
+  "_doc": "Stream E (play-test 4, S5: 'more random events: some give treasure chests (loot window like corpses), others give quests (deliver items to town, etc.)'). Small events stream A's js/sim/roadevents.js drops near a lone player in the wilds every few minutes. `rules`: firstSec = the first one after entering the wilds; gapSec = the wait between two for the same player; spawnM = how far from the player; quietM = no new event when one is already this close; lifeSec = an event nobody touched packs up after this; maxPerRoom = at most this many at once in one wilds copy. `weights` = how often each kind. CHESTS (`chests`): a lootable box opened in the SAME loot window as a corpse (each player who opens it gets their own share, rolled at the event's level with `tier`); `guards` [min,max] monsters of the nearest camp's type stand round it and the box stays shut until they are down. QUESTS: `deliver` (a stranded courier hands you a parcel for a named NPC in the nearest town), `escort` (a traveller follows you to the nearest town; ambushes on the way), `rescue` (a captive at a guarded spot: kill the guards, free them, bring them home). Quest events pay themselves when done (no walk back). `{name}` = the NPC's name, `{town}` = the town, `{npc}` = the delivery NPC, `{role}` = their trade, `{guards}` = what guards them. Rewards: `xp` = share of a level, `gold` x a kill's gold at the event's level, `item.tier` an extra roll.",
+  "rules": { "firstSec": [45, 90], "gapSec": [150, 300], "spawnM": [70, 140], "quietM": 220, "lifeSec": 600, "maxPerRoom": 6, "ambushEveryM": 170, "maxAmbush": 2, "escortGiveUpSec": 90 },
+  "weights": { "chest": 45, "deliver": 20, "escort": 15, "rescue": 20 },
+  "chests": [
+    { "id": "wrecked_cart", "name": "Wrecked Cart", "look": "cart_wreck", "blurb": "A cart on its side, a wheel gone. Someone left in a hurry.", "guards": [0, 0], "tier": "magic" },
+    { "id": "buried_cache", "name": "Buried Cache", "look": "cache_dug", "blurb": "Fresh-turned earth and the corner of a strongbox.", "guards": [0, 0], "tier": "normal" },
+    { "id": "smugglers_stash", "name": "Smugglers' Stash", "look": "chest_iron", "blurb": "Iron-bound and padlocked, with its keepers still sitting on it.", "guards": [2, 3], "tier": "rare" },
+    { "id": "fallen_pack_mule", "name": "Fallen Pack Mule's Load", "look": "packs", "blurb": "Saddlebags spilled across the grass. Something ate the mule.", "guards": [1, 2], "tier": "magic" },
+    { "id": "hollow_stump", "name": "Hollow Stump Hoard", "look": "stump", "blurb": "A dry stump stuffed with a poacher's savings.", "guards": [0, 0], "tier": "normal" },
+    { "id": "toll_strongbox", "name": "Stolen Toll Strongbox", "look": "chest_iron", "blurb": "The Hollin toll box, prised open and abandoned by the ones who took it — or not abandoned.", "guards": [2, 2], "tier": "rare" },
+    { "id": "pilgrims_offering", "name": "Pilgrims' Offering Box", "look": "chest_small", "blurb": "A wayside offering box, its lid still sealed with wax.", "guards": [0, 1], "tier": "magic" }
+  ],
+  "deliver": [
+    { "id": "lame_horse", "name": "{first}, Courier", "role": "courier", "say": "My horse threw a shoe and the post won't wait. Take this to {npc} in {town}? They'll make it worth your while.", "item": "Sealed parcel", "title": "A Parcel for {town}", "text": "Carry the courier's sealed parcel to {npc} the {role} in {town}.", "xp": 0.3, "gold": 4 },
+    { "id": "sick_drover", "name": "{first} the Drover", "role": "drover", "say": "Fever's got me and the herd won't move itself. This letter is for {npc} in {town} — please.", "item": "Folded letter", "title": "The Drover's Letter", "text": "Bring the drover's letter to {npc} the {role} in {town}.", "xp": 0.3, "gold": 4 },
+    { "id": "herb_woman", "name": "Old {first}", "role": "herbalist", "say": "These roots go bad by sundown. {npc} in {town} pays for them. My knees don't.", "item": "Bundle of wet roots", "title": "Roots Before Sundown", "text": "Take the herbalist's roots to {npc} the {role} in {town} while they're fresh.", "xp": 0.3, "gold": 5 },
+    { "id": "lost_tinker", "name": "{first} the Tinker", "role": "tinker", "say": "Mended this lock for {npc} in {town}, then got turned round in the hills. Save me the walk?", "item": "Mended lock", "title": "The Mended Lock", "text": "Return the tinker's mended lock to {npc} the {role} in {town}.", "xp": 0.25, "gold": 4 }
+  ],
+  "escort": [
+    { "id": "lost_child", "name": "{first}, Lost", "role": "child", "say": "I followed the geese and now I don't know where home is. {town}? Is it far?", "title": "Home to {town}", "text": "See {name} safely to {town}.", "xp": 0.45, "gold": 6 },
+    { "id": "frightened_pedlar", "name": "{first} the Pedlar", "role": "pedlar", "say": "Things in the grass have been following me all morning. Walk with me to {town}?", "title": "Company on the Road", "text": "Walk {name} to {town} — something has been following them.", "xp": 0.45, "gold": 6 },
+    { "id": "blind_pilgrim", "name": "Brother {first}", "role": "pilgrim", "say": "My guide ran when the howling started. I am bound for {town}; lend me your arm?", "title": "The Blind Pilgrim", "text": "Lead Brother {name} to {town}.", "xp": 0.5, "gold": 6 }
+  ],
+  "rescue": [
+    { "id": "bound_trader", "name": "{first} {family}, Trader", "role": "merchant", "say": "They took the mules and left me tied for later. Cut me loose when they're dealt with!", "title": "Cut Loose", "text": "Deal with the {guards} holding {name}, free them, and bring them home to {town}.", "xp": 0.5, "gold": 7, "item": { "tier": "magic" }, "guards": [2, 3] },
+    { "id": "caged_scout", "name": "{first}, Scout", "role": "scout", "say": "Don't stand there gawping — the key's on one of these brutes.", "title": "The Caged Scout", "text": "Beat the {guards}, open the cage and see {name} back to {town}.", "xp": 0.55, "gold": 7, "item": { "tier": "magic" }, "guards": [2, 3] },
+    { "id": "taken_miller", "name": "{first} the Miller", "role": "miller", "say": "Please — my family in {town} think I'm dead.", "title": "The Miller's Way Home", "text": "Free {name} from the {guards} and walk them home to {town}.", "xp": 0.5, "gold": 7, "guards": [2, 2] }
+  ],
+  "thanks": ["Bless you. I'll stand you a drink in {town}.", "I owe you more than coin.", "Safe at last. Go well, friend."],
+  "deliverTargets": ["merchant", "innkeeper", "elder", "smith", "apothecary", "healer", "provisioner", "tailor", "armourer", "bowyer", "jeweller", "trader", "stablehand"]
+}

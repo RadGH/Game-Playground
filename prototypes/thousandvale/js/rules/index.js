@@ -46,6 +46,7 @@ export { BUFF_KINDS, TORCH, RECALL, REVIVE_FLASK } from './buffs.js';
 export { MOUNT_RULES, mountRefusal, mountSpeedMul, mountCalm, dismounts } from './mount.js';
 export { LOOT_THRESHOLDS, THRESHOLD_LABELS, DEFAULT_LOOT_THRESHOLD, RARITY_RANK, lootTier, lootRank, normalizeThreshold, locksForRoll, splitLoot, rollWinner } from './loot-rules.js';
 import { xpForLevel, levelFromXp, hashStr } from './farhold.js';
+import { rollWildRank, rareName, sizeFloor, escortCount } from './affixes.js';
 
 let shared = null;
 /** Build the process-wide engine (index.js does this itself at load; a host may call it first). */
@@ -185,7 +186,7 @@ export function createRules(host, opts = {}) {
     roomKind: host.kind || 'wilds',
     // adds and arena objects are room entities, so every client sees them
     spawn: (def, level, x, z, { rank = 'normal' } = {}) => {
-      const e = host.spawn({ kind: 'monster', type: def.id, level, x, z, rank });
+      const e = host.spawn({ kind: 'monster', type: def.id, level, x, z, rank, data: { noRank: true } });   // S4: an add never rolls a rank
       return e?.r?.unit || null;
     },
     // play-test 3 R7: `look` (how the client dresses it, e.g. 'chained') and `tether` (the id of the boss a chain
@@ -370,10 +371,18 @@ export function createRules(host, opts = {}) {
   // ordinary type is therefore a rare (two modifiers, x4.5 health) that never leashes.
   function rankFor(e, def) {
     const table = engine.bestiary.modifiers || [];
-    const pick = n => (table.length ? engine.rpg.pickModifiers(table, n, room.streams.get('spawn')) : []);
+    const named = Array.isArray(e.data?.affixes) ? e.data.affixes.map(id => table.find(m => m.id === id)).filter(Boolean) : null;   // S4: E may place a set champion
+    const pick = n => (named && named.length ? named : table.length ? engine.rpg.pickModifiers(table, n, room.streams.get('spawn')) : []);
     const isBossDef = (engine.bestiary.bosses || []).includes(def);
     if (e.rank === 'boss') return isBossDef ? { rank: 'boss', boss: true, modifiers: [] } : { rank: 'rare', boss: true, modifiers: pick(2) };
-    if (e.rank === 'elite') return { rank: 'champion', modifiers: pick(1) };
+    if (e.rank === 'elite' || e.rank === 'champion') return { rank: 'champion', modifiers: pick(1), rolled: !!(named && named.length) };
+    // a camp E marked 'rare' is a named rare with its own script and health (hpMult) — it stays as it was; only a rare
+    // with `data.affixes` (or a rolled one, below) is a Farhold-style rare with modifiers
+    if (e.rank === 'rare') return named && named.length ? { rank: 'rare', modifiers: pick(2), name: rareName(engine, room.streams.get('spawn')), rolled: true } : { rank: 'normal', modifiers: [] };
+    // play-test 4 S4: an ordinary wilds spawn may come out a champion or a rare (data/rules/affixes.json)
+    const rolled = isBossDef ? 'normal' : rollWildRank(engine, room.streams.get('spawn'), { level: e.level || 1, roomKind: host.kind || 'wilds', e });
+    if (rolled === 'champion') return { rank: 'champion', modifiers: pick(1), rolled: true };
+    if (rolled === 'rare') return { rank: 'rare', modifiers: pick(2), name: rareName(engine, room.streams.get('spawn')), rolled: true };
     return { rank: 'normal', modifiers: [] };
   }
 
@@ -431,9 +440,18 @@ export function createRules(host, opts = {}) {
         const rk = rankFor(e, def);
         // a monster that runs an encounter script: the script's phases, name and mechanics are its only
         // ones — no random rank modifiers, none of its Farhold body's own boss phases (E's asks 3/4)
-        const script = enc.scriptFor({ defId: def.id, boss: !!rk.boss, rank: rk.rank, encounterId: e.data?.encounter || null });
+        const script = enc.scriptFor({ defId: def.id, boss: !!rk.boss, rank: rk.rolled ? 'normal' : rk.rank, encounterId: e.data?.encounter || null });   // S4: a rolled champion / rare fights with its modifiers' specials, not the default elite script
         if (script) rk.modifiers = [];
-        const unit = spawnMonster(field, def, e.level || 1, e.x, e.z, { id: e.id, ...rk, name: script?.name || null });
+        const unit = spawnMonster(field, def, e.level || 1, e.x, e.z, { id: e.id, rank: rk.rank, modifiers: rk.modifiers, boss: rk.boss, name: script?.name || rk.name || null });
+        // play-test 4 S4: a champion / rare is visibly bigger (a floor, so a Giant stays giant), and the room entity says so
+        if (!script && (rk.rank === 'champion' || rk.rank === 'rare') && !rk.boss) {
+          const floor = sizeFloor(engine, rk.rank);
+          if ((unit.scale || 1) < floor) { const k = floor / (unit.scale || 1); unit.scale = floor; unit.reach = (unit.reach || 2.2) * (1 + (k - 1) * 0.6); }
+          if (rk.rolled) { e.rank = rk.rank; e.setState(64, true); unit.affixed = true; }                  // STATE.elite
+          if (!e.name || rk.name || rk.rolled) e.name = unit.name;
+          e.aff = (rk.modifiers || []).map(m => ({ id: m.id, name: m.prefix || m.name || m.id, ...(m.aura ? { aura: m.aura } : {}) }));
+        }
+        if ((unit.scale || 1) !== 1) e.sc = Math.round(unit.scale * 100) / 100;
         unit.encounterId = e.data?.encounter || null;
         if (rk.boss) unit.boss = true;
         if (script) {
@@ -459,6 +477,9 @@ export function createRules(host, opts = {}) {
         e.setHp(unit.hp);
         // a warband leader brings its escort and standard-bearer (Farhold actors.js spawnPack)
         if (def.leads?.length && e.data?.escortOf == null && !script) escortFor(field, unit, def);
+        // S4: a Pack-leader brings its own kind (two per `escort` pair), linked to it like a warband's escort
+        const packOf = !script && e.data?.escortOf == null ? escortCount(engine, unit.modifiers || []) : 0;
+        if (packOf > 0) escortFor(field, unit, { leads: Array.from({ length: Math.ceil(packOf / 2) }, () => def.id) });
       }
     });
   }

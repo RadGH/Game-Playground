@@ -1,5 +1,5 @@
 {
-  "_doc": "Thousandvale's PERK FOREST (stream C: js/rules/perk-forest.js builds it, js/rules/perk-rules.js reads its rules; owner guide docs/talents.md). Play-test 1 P6: 'a perk forest with several branches, much more expansive than Farhold' (Farhold js/perks.js: 8 arms, 169 nodes). Twelve arms, every one of them branching into 2-4 paths past ring 6, each path ending in a keystone; ~380 nodes. A stat entry is [derived key, value] and its card line is WRITTEN from the number (perk-forest.js STAT_TEXT), so a card can never disagree with what it does. `rules` are nodes that change a rule: `flag` (read by Farhold's code or by js/rules/perk-rules.js TV_FLAG_READERS), `power` (a Farhold js/effects.js keystone power), `grants` (stats, always on) and `when`/`whenGrants` (stats only in those hands). tests/C/perks.test.mjs fails if any key, flag or power has no reader. Node ids are `<arm>:<ring>:<i>`, `<arm>:path:<branch>:<step>` and `<arm>:key:<rule id>` — a save holds node ids, so moving a node to another arm or ring costs players their point; renaming one costs nothing.",
+  "_doc": "Thousandvale's PERK FOREST (stream C: js/rules/perk-forest.js builds it, js/rules/perk-rules.js reads its rules; owner guide docs/talents.md). Play-test 1 P6: 'a perk forest with several branches, much more expansive than Farhold' (Farhold js/perks.js: 8 arms, 169 nodes). Fourteen arms (play-test 4 S16 added The Gathering Storm — lightning — and The Old Lore — arcane and nature), every one of them branching into 2-4 paths past ring 6, each path ending in a keystone; ~380 nodes. A stat entry is [derived key, value] and its card line is WRITTEN from the number (perk-forest.js STAT_TEXT), so a card can never disagree with what it does. `rules` are nodes that change a rule: `flag` (read by Farhold's code or by js/rules/perk-rules.js TV_FLAG_READERS), `power` (a Farhold js/effects.js keystone power), `grants` (stats, always on) and `when`/`whenGrants` (stats only in those hands). tests/C/perks.test.mjs fails if any key, flag or power has no reader. Node ids are `<arm>:<ring>:<i>`, `<arm>:path:<branch>:<step>` and `<arm>:key:<rule id>` — a save holds node ids, so moving a node to another arm or ring costs players their point; renaming one costs nothing.",
   "rings": [
     { "at": 1, "radius": 3, "kind": "minor", "per": 2 },
     { "at": 2, "radius": 4, "kind": "minor", "per": 3 },
@@ -143,6 +143,27 @@
         { "key": "tithe", "name": "Fortune's Tithe", "nodes": [["magicFind", 12], ["goldFind", 14], "lucky_find", ["magicFind", 18]], "keys": ["fortunes_tithe"] },
         { "key": "collector", "name": "The Collector", "nodes": [["xpFind", 8], ["goldFind", 16], "keen_trader", ["xpFind", 12]], "keys": ["collector"] }
       ]
+    },
+    {
+      "key": "storm", "name": "The Gathering Storm", "color": "#ffe86a", "blurb": "Lightning that will not stay in the sky: shocks, arcs and the crack that follows.",
+      "minor": [["spellPower", 0.03], ["haste", 3], ["critChance", 3], ["mpRegen", 0.6], ["shockPct", 4]],
+      "major": [["shockPct", 10], ["spellPower", 0.06], ["critDamage", 15], ["cooldownReduction", 4], ["haste", 6]],
+      "talents": ["static_charge", "live_wire"],
+      "branches": [
+        { "key": "conductor", "name": "The Conductor", "nodes": [["shockPct", 8], ["spellPower", 0.05], "grounded_hand", ["shockPct", 10]], "keys": ["conductor"] },
+        { "key": "thunderhead", "name": "The Thunderhead", "nodes": [["critChance", 4], ["critDamage", 14], "quick_nerves", ["spellPower", 0.05]], "keys": ["thunderhead"] },
+        { "key": "static_coat", "name": "The Static Coat", "nodes": [["magicResist", 8], ["maxHp", 30], "charged_skin", ["armorPct", 10]], "keys": ["static_coat"] }
+      ]
+    },
+    {
+      "key": "lore", "name": "The Old Lore", "color": "#9b7bff", "blurb": "The slow magics: written arcane letters and the green tongue of roots.",
+      "minor": [["int", 4], ["spellPower", 0.03], ["maxMp", 20], ["magicResist", 6], ["hpRegen", 1]],
+      "major": [["spellPower", 0.06], ["int", 8], ["cooldownReduction", 4], ["healPower", 6], ["maxMp", 36]],
+      "talents": ["old_letters", "green_tongue"],
+      "branches": [
+        { "key": "written", "name": "The Written Word", "nodes": [["spellPower", 0.05], ["int", 6], "margin_notes", ["cooldownReduction", 4]], "keys": ["spellwright"] },
+        { "key": "green", "name": "The Green Tongue", "nodes": [["hpRegen", 1.5], ["spellPower", 0.05], "deep_roots", ["healPower", 8]], "keys": ["rootbound"] }
+      ]
     }
   ],
   "oddballs": [["thorns", 0.06], ["manaSteal", 4], ["dodge", 4], ["xpFind", 8], ["healPower", 6], ["resistAll", 5], ["dotPct", 8], ["areaPct", 6], ["threatPct", 10], ["petDamagePct", 10], ["cooldownReduction", 3], ["critChance", 3]],
@@ -252,5 +273,20 @@
     "quietHand": { "kind": "keystone", "name": "Soft Footfall", "flag": "quietHand", "grants": { "stealth": 0.1 }, "desc": "Your damage makes 40% less threat. −10% enemy notice range.", "cost": "Hard to hold an enemy's eye when you need to." },
     "cornered": { "kind": "keystone", "name": "Back to the Wall", "flag": "cornered", "grants": { "maxHp": -30 }, "desc": "While you are under 35% health every hit you land deals 25% more.", "cost": "−30 maximum health." },
     "collector": { "kind": "keystone", "name": "The Collector", "grants": { "xpFind": 25, "goldFind": 40, "damagePct": -8 }, "desc": "+25% experience and +40% gold found.", "cost": "−8% damage." }
+,
+    "static_charge": { "kind": "talent", "name": "Static Charge", "flag": "staticCharge", "desc": "A lightning hit you land has a 25% chance to leave its target Shocked for 3s." },
+    "live_wire": { "kind": "talent", "name": "Live Wire", "grants": { "spellPower": 0.05, "shockPct": 8 } },
+    "grounded_hand": { "kind": "talent", "name": "Grounded Hand", "grants": { "shockPct": 10, "critChance": 3 } },
+    "quick_nerves": { "kind": "talent", "name": "Quick Nerves", "grants": { "haste": 6, "critChance": 3 } },
+    "charged_skin": { "kind": "talent", "name": "Charged Skin", "grants": { "magicResist": 12, "thorns": 0.04 } },
+    "conductor": { "kind": "keystone", "name": "Conductor", "flag": "conductor", "grants": { "shockPct": 10 }, "desc": "Every hit you land on a Shocked enemy arcs to the nearest other enemy within 6 metres for 35% as lightning. +10% damage to Shocked enemies.", "cost": "−10% damage to enemies that are not Shocked." },
+    "thunderhead": { "kind": "keystone", "name": "Thunderhead", "flag": "thunderhead", "grants": { "spellPower": 0.06, "cooldownReduction": -8 }, "desc": "A critical lightning hit bursts: everything within 3.5 metres of the target takes 45% as lightning and is Shocked for 2s. +6% spell damage.", "cost": "+8% skill cooldowns." },
+    "static_coat": { "kind": "keystone", "name": "Static Coat", "flag": "staticCoat", "grants": { "magicResist": 15, "damagePct": -8 }, "desc": "An enemy that hits you is Shocked for 3s and takes 30% of your damage as lightning — once every 2s. +15 magic resistance.", "cost": "−8% damage." },
+    "old_letters": { "kind": "talent", "name": "Old Letters", "grants": { "spellPower": 0.05, "int": 5 } },
+    "green_tongue": { "kind": "talent", "name": "Green Tongue", "grants": { "healPower": 8, "hpRegen": 1.5 } },
+    "margin_notes": { "kind": "talent", "name": "Margin Notes", "grants": { "int": 6, "skillCostPct": 0.05 } },
+    "deep_roots": { "kind": "talent", "name": "Deep Roots", "grants": { "hpRegen": 2, "maxHp": 30 } },
+    "spellwright": { "kind": "keystone", "name": "Spellwright", "flag": "spellwright", "grants": { "spellPower": 0.06 }, "desc": "Every arcane hit you land writes a mark on its target for 8s: it takes 4% more damage per mark, up to 5 marks. +6% spell damage.", "cost": "−20% damage of every kind but arcane." },
+    "rootbound": { "kind": "keystone", "name": "Rootbound", "flag": "rootbound", "grants": { "spellPower": 0.06 }, "desc": "Every nature hit you land slows its target by 25% for 3s and heals you for 4% of the damage. +6% spell damage.", "cost": "−20% damage of every kind but nature." }
   }
 }

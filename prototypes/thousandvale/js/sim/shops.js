@@ -99,8 +99,11 @@ export function createShops({ data = null, mounts = null, now = () => Date.now()
     for (const [cat, row] of Object.entries(k.categories || {})) {
       const bases = over.bases || row.bases || [];
       if (!bases.length) continue;
+      // S17 (play-test 4): bases taken IN TURN from a random start, so every base (every weapon family) shows up
+      // before any repeats — a random pick per slot left whole families (maces, polearms) out of a 10-slot smithy
+      const start = Math.floor(rng() * bases.length);
       for (let i = 0; i < Math.min(16, row.count || 1); i++) {
-        const base = bases[Math.floor(rng() * bases.length)];
+        const base = bases[(start + i) % bases.length];
         const it = makeOne(rules, e, { base, rarity: pickRarity(row.rarity), level });
         if (it) { const item = JSON.parse(JSON.stringify(it)); delete item.uid; out.push({ id: 's' + (n++), cat, label: row.label || cat, item, price: price(item, rules, town && town.priceMult) }); }
       }
@@ -130,8 +133,12 @@ export function createShops({ data = null, mounts = null, now = () => Date.now()
       rows.push({ id: 'g' + i, cat: 'goods', label: 'Goods', item: { ...good(g, rules), shopPrice: pr }, price: pr, level: g.minLevel || 1 });
     });
     if (k.mounts && mounts && !(k.goods || []).length) rows.push(...mounts.forSale(ch).map(r => ({ ...r, cat: 'mounts', label: 'Mounts' })));
-    return rows;
+    // S3 (play-test 4): a category is a FILTER, never a product. Only a row holding a real, named item (or a mount) is
+    // for sale; anything else (a base the generator could not make) is dropped rather than sold as its category label.
+    return rows.filter(isProduct);
   }
   return { kindOf, shopOf, stock, price, sellPrice, pricing, kinds, towns, cache };
 }
+/** S3: a row a player can actually buy — a named item (gear or good) or a mount. */
+export const isProduct = r => !!(r && ((r.mount && r.mount.id) || (r.item && typeof r.item === 'object' && typeof r.item.name === 'string' && r.item.name.trim() && r.item.name !== r.label)));
 const title = id => String(id || '').replace(/_/g, ' ').replace(/\b\w/, c => c.toUpperCase());

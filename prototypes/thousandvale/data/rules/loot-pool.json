@@ -1,0 +1,33 @@
+{
+  "_doc": "Stream C/E, play-test 4 S17 ('only swords seen'). Which BASE a random drop is, when the dropper does not name its own bases (bosses with dropBases keep theirs). Farhold's balance.json lootTiers give levels 1-4 only dagger/sword/wand/shortbow, so a melee character saw swords and nothing else (measured: swords 34.8% of weapon drops at L1-8; axes, maces, spears, polearms, crossbows, javelins, shields, orbs, tomes 0%). Read by js/rules/loot-pool.js: first a GROUP by `groups` weight, then a FAMILY inside it (equal weight unless `w`), then a BASE of that family whose `from` level is reached (bases opened in the last `freshLevels` levels weigh 1, older ones `oldWeight`). Farhold's own lootTiers bases are merged in automatically at their minLevel (classified by the base's subtype/slot), so the higher-level bases still drop. Parity fixtures switch it off (engine.lootPool = null).",
+  "freshLevels": 10,
+  "oldWeight": 0.35,
+  "groups": { "weapon": 0.4, "armour": 0.36, "jewellery": 0.08, "offhand": 0.16 },
+  "families": {
+    "sword":     { "group": "weapon", "bases": [["sword", 1], ["rapier", 1], ["forager_blade", 3], ["longsword", 6], ["rimecut_sabre", 9], ["obsidian_scimitar", 14]] },
+    "greatsword":{ "group": "weapon", "bases": [["sword2h", 1], ["greatsword", 8]] },
+    "axe":       { "group": "weapon", "bases": [["battleaxe", 1], ["axe2h", 2], ["breakers_pick", 12]] },
+    "mace":      { "group": "weapon", "bases": [["iron_mace", 1], ["hammer", 1], ["lantern_mace", 3], ["warhammer", 6], ["axle_club", 11]] },
+    "dagger":    { "group": "weapon", "bases": [["dagger", 1], ["tithe_dagger", 4], ["houndmasters_lash", 8]] },
+    "spear":     { "group": "weapon", "bases": [["spear", 1]] },
+    "polearm":   { "group": "weapon", "bases": [["halberd", 1]] },
+    "javelin":   { "group": "weapon", "bases": [["javelin", 1], ["pathfinder_javelin", 4]] },
+    "bow":       { "group": "weapon", "bases": [["shortbow", 1], ["bow", 3], ["roadwarden_bow", 8]] },
+    "crossbow":  { "group": "weapon", "bases": [["crossbow", 1], ["stormpin_crossbow", 11]] },
+    "staff":     { "group": "weapon", "bases": [["staff", 1], ["quarterstaff", 4], ["pilgrims_staff", 8], ["bramble_staff", 9]] },
+    "wand":      { "group": "weapon", "bases": [["wand", 1]] },
+    "scepter":   { "group": "weapon", "bases": [["scepter", 1], ["gravebound_scepter", 16]] },
+    "orb":       { "group": "weapon", "bases": [["orb", 1]] },
+    "tome":      { "group": "weapon", "bases": [["tome", 1]] },
+    "head":      { "group": "armour", "bases": [["cloth_helm", 1], ["light_helm", 1], ["medium_helm", 1], ["heavy_helm", 3]] },
+    "chest":     { "group": "armour", "bases": [["cloth_chest", 1], ["light_chest", 1], ["medium_chest", 1], ["scaled_chest", 6], ["heavy_chest", 3]] },
+    "legs":      { "group": "armour", "bases": [["cloth_legs", 1], ["light_legs", 1], ["medium_legs", 1], ["scaled_legs", 6], ["heavy_legs", 3]] },
+    "hands":     { "group": "armour", "bases": [["light_gauntlets", 1], ["medium_gauntlets", 1], ["heavy_gauntlets", 3]] },
+    "feet":      { "group": "armour", "bases": [["light_boots", 1], ["medium_boots", 1], ["heavy_boots", 3]] },
+    "ring":      { "group": "jewellery", "bases": [["ring", 1], ["gold_signet", 6]] },
+    "neck":      { "group": "jewellery", "bases": [["necklace", 1], ["silver_amulet", 6]] },
+    "shield":    { "group": "offhand", "w": 2, "bases": [["buckler", 1], ["shield", 1], ["kite_shield", 3], ["tower_shield", 6]] },
+    "focus":     { "group": "offhand", "w": 2, "bases": [["warded_focus", 1], ["grimoire", 1], ["psalter", 2], ["spellguard_orb", 3], ["seer_orb", 4], ["reliquary", 4], ["effigy", 6]] },
+    "quiver":    { "group": "offhand", "bases": [["quiver", 1]] }
+  }
+}

@@ -6,6 +6,7 @@
 // and every fight call is passed its room's own rng. Rooms keep their mutable state in
 // js/rules/room.js, never here.
 
+import { installAffixes } from './affixes.js';
 import {
   Rpg, installUniques, installFoci, installWarbands, tuneFeel, tuneWeapons, setLevelCap, EFFECTS,
 } from './farhold.js';
@@ -13,6 +14,7 @@ import { installLevelGap } from './level-gap.js';
 import { installItemBuffs } from './buffs.js';
 import { installTalentTrees } from './talents.js';
 import { buildTvForest } from './perk-forest.js';
+import { installLootPool, buildLootPool } from './loot-pool.js';
 
 /** The same describe hook main.js passes, so a unique's power text matches Farhold's tooltip. */
 const EFFECTS_DESC = id => EFFECTS['legendary:' + id]?.desc?.() || null;
@@ -71,5 +73,8 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP } = 
   };
   installLevelGap(engine);
   installItemBuffs(engine);             // shop buffs: armour oil, hearty stew (js/rules/buffs.js)
+  // play-test 4 S17/S18: every weapon family drops at low levels; themed second-tier armour from level 15
+  installLootPool(engine, { pool: buildLootPool(data.lootPool, items, balance), tiers: data.armourTiers || null });
+  installAffixes(engine, data.affixes || null);          // play-test 4 S4: champion / rare rolls, Pack-leader, affix specials
   return engine;
 }

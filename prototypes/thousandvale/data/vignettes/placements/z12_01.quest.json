@@ -1,0 +1,47 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_01, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z12_01",
+ "terrainHash": "89c56ef1",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_bones_in_the_dust_0_0",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1376,
+   "z": 1722,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "bones_in_the_dust",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_spore_season_0_0",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 812,
+   "z": 540,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "spore_season",
+   "hunt": true
+  }
+ ]
+}

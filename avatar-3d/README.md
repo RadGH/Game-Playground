@@ -116,8 +116,9 @@ and so does a rider sitting on the seat.
 | `horse` | horse | 1 | saddle, saddlebags |
 | `pony` | pony | 1 | saddle, saddlebags |
 | `courser` | courser | 1 | saddle |
-| `warhorse` | horse | 1.15 | barding: caparison down both flanks + rump + chest, crinet on the neck, chanfron plate with a spike |
-| `stag` | elk | 1 | saddle |
+| `warhorse` | horse (equine `draft`) | 1.12 | barding: caparison down both flanks + rump + chest, crinet on the neck, chanfron plate with a spike |
+| `stag` | elk (equine `elk`) | 1 | saddle |
+| `dray` | elk (equine `elk_dray`) | 1.15 | harness: padded breast collar, packs, bedroll (S22) |
 | `ram` | **ram** (new creature type: sheep frame on pony legs, short coat, `curlHorns`) | 1.25 | fur blanket + roll, saddlebags |
 | `drake` | drake | 1.7 | drake saddle: riding horn and a high back |
 
@@ -151,6 +152,31 @@ unseat();                                                  // rider back under i
 `deer`/`elk`->stag, `horse` at size < 0.9 -> pony, >= 1.1 -> warhorse, else horse; unknown -> horse. Look colours (`body`, `belly`,
 `accent`, `#rrggbb`) override the type's; `look.scale` multiplies the type's size (a look's own `size` is ignored: the type carries
 the proportions). The table and mapping are pure (`mount-types.js`), so a server can import them.
+
+**Play-test 4 (S22, 2026-10-05): the hoofed mounts ride an equine body — `js/equine.js`.** The owner: *"mounts (horse)
+still look silly"*. They rode creatures.js's generic quad (capsule barrel, a level capsule neck, a ball head, stick legs).
+`createEquine({ breed, size, colors })` builds a body made for them: the barrel, neck and head are each a LOFT of egg-shaped
+rings along a line or curve, read from short per-breed profiles (croup high, the back dipping at the saddle, withers, a deep
+chest and a belly tucked up at the flank; a deep flat-sided neck rising out of the chest and arching; a long head hung at the
+poll, deep at the jaw, narrow to a soft muzzle), coloured per vertex (belly fade, dark muzzle, blaze, an elk's pale rump);
+legs are joint chains (shoulder/stifle -> knee/hock -> fetlock -> pastern -> hoof) with a muscle mass at the top, a tapering
+forearm/gaskin, sock markings and feathering on heavy breeds; a mane sheet over the crest falling to the off side, forelock,
+a two-piece tail plume; ears, eyes with lids, nostrils, mouth line; elks get antlers, a dewlap and a shaggy collar.
+Breeds (`EQUINE_BREEDS`): `horse`, `pony`, `courser`, `draft` (the warhorse), `elk` (the stag), `elk_dray` (the new
+**`dray`** type — Thousandvale's level-15 Dray Elk had no type and was drawn as a plain horse).
+**Gaits are real leg patterns** on one phase: walk four-beat (LH, LF, RH, RF; 62 % stance, head nod), trot diagonal pairs
+with a bounce, gallop with the hinds then the fronts landing, the body rocking and the neck swinging, the tail lifting with
+speed; a 0.3 s crossfade between gaits on the same phase; the cadence comes from ground speed / the breed's stride (so hooves
+keep up with the ground). Idle breathes, shifts weight, drifts the head down, flicks the ears and swishes the tail.
+**Tack is cut from the body** (`frame.patch({ on: 'body'|'neck'|'head', u0, u1, a0, a1, push })` — a piece of that surface
+pushed outward): blanket with a hem, seat + skirts, pommel, a curved cantle, girth, breastplate, stirrups, saddlebags,
+bridle (browband, cheek straps, noseband, throatlatch, bit rings); the warhorse's caparison with trim and badge, a banded
+crinet and a chanfron; the dray's padded studded breast collar, packs and a bedroll (`tack.kind: 'harness'`). The ram and
+the drake keep their creatures.js bodies and the Q16 tack unchanged (`quadTack`). API unchanged: `createMount` / `seatRider`
+/ `setGait` / `metrics`; `mountSpecFor` now also returns `breed`; `MOUNT_TYPES[k].breed` (pure) says which body. A colour
+`hair` (mane + tail) defaults to `accent`. Used only by Thousandvale (no live game imports mounts.js). Tests: mounts.test.js
+gains three (equine for the hoofed types, hooves on the ground / neck rising, trot pairs + four-beat walk + gallop rock +
+cadence follows speed).
 
 `creatures.js` gained only two additive things for this: a read-only `parts` getter on the creature handle, and the `curlHorns`
 feature (read only when the flag is set, so no existing type changes). Tests: `node --test avatar-3d/tests/mounts.test.js`.

@@ -92,12 +92,12 @@ test('P22: worn gear is drawn: armour by base tier, weapons by subtype, compact 
   const L = gearLook(full, { baseOf: k => BASES[k] });
   assert.equal(L.top.id, 'robe');
   assert.equal(L.held.id, 'fh_longsword');
-  assert.equal(L.offhand.id, 'fh_heater_shield');
+  assert.equal(L.offhand.id, 'fh_kite_shield');   // play-test 4 S17: a kite shield is drawn as a kite shield
   // the server's compact form (protocol: info.gear {slot: {base, sub?, rarity}})
   const compact = { weapon: { base: 'staff', sub: 'staff', rarity: 'normal' }, chest: { base: 'heavy_chest', rarity: 'normal' }, offhand: { base: 'buckler', rarity: 'magic' } };
   const C = gearLook(compact, { baseOf: k => BASES[k] });
   assert.equal(C.held.id, 'staff_orb');
-  assert.equal(C.offhand.id, 'fh_heater_shield', 'a buckler base is a shield (isShield from the base table)');
+  assert.equal(C.offhand.id, 'buckler', 'a buckler base is drawn as a buckler (play-test 4 S17: each shield base its own model)');
   assert.ok(['plate', 'scale_plate', 'tunic'].includes(C.top.id), `heavy chest -> ${C.top.id}`);
   assert.equal(normItem({ base: 'longsword' }, k => BASES[k]).subtype, 'sword');
   assert.equal(gearLook({ weapon: { base: 'longsword', rarity: 'normal' } }, { baseOf: k => BASES[k] }).held.id, 'fh_longsword', 'a longsword base draws the longsword');

@@ -2,6 +2,7 @@
   "id": "rare_burnt_barns_hound",
   "name": "The Burnt Barns Hound",
   "tier": "rare",
+  "secret": true,
   "zone": "gorse_march",
   "body": "barrow_hound",
   "place": "howls in the ash of the burnt barns on nights the wind comes from the north; the farmers say it guards the dead",

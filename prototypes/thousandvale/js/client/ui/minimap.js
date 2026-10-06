@@ -79,12 +79,12 @@ export function createMinimap({ atlas, me, onOpenMap, store }) {
     g.setTransform(d, 0, 0, d, 0, 0);
     const R = SIZE / 2 - 9, arrows = [];
     for (const m of all) {
-      if (!(m.tracked || m.kind === 'liveevent' || m.kind === 'party' || m.kind === 'pin' || m.kind === 'questdone' || (m.kind === 'quest' && all.filter(x => x.kind === 'quest').length <= 3))) continue;
+      if (!(m.tracked || m.kind === 'liveevent' || m.kind === 'rare' || m.kind === 'party' || m.kind === 'pin' || m.kind === 'questdone' || (m.kind === 'quest' && all.filter(x => x.kind === 'quest').length <= 3))) continue;
       const [sx, sy] = v.toScreen(m.x, m.z);
       if (Math.hypot(sx - SIZE / 2, sy - SIZE / 2) < R - 4) continue;
       const rp = rimPoint(sx, sy, { cx: SIZE / 2, cy: SIZE / 2, r: R });
       arrows.push({ x: rp.x, y: rp.y, m });
-      const col = m.kind === 'liveevent' ? '#ff6a3a' : m.kind === 'party' ? '#4aa8ff' : m.kind === 'pin' ? '#e2483a' : '#ffcf3a';
+      const col = m.kind === 'rare' ? '#ff4a3a' : m.kind === 'liveevent' ? '#ff6a3a' : m.kind === 'party' ? '#4aa8ff' : m.kind === 'pin' ? '#e2483a' : '#ffcf3a';
       g.save(); g.translate(rp.x, rp.y); g.rotate(rp.angle);
       g.beginPath(); g.moveTo(8, 0); g.lineTo(-5, -6); g.lineTo(-2, 0); g.lineTo(-5, 6); g.closePath();
       g.fillStyle = col; g.fill(); g.lineWidth = 1.5; g.strokeStyle = '#1b130a'; g.stroke(); g.restore();

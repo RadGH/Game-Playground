@@ -9,6 +9,7 @@
 //   * party members you can see (partyFrames ids -> actors).
 // DOM-free; the views ask `markers()` and subscribe to `onChange`.
 
+import { soonText, eventStateText } from './pt2-core.js';
 import { createMapSource } from './map-load.js';
 import { createFog, collectMarkers, locateQuest, zoneKeyAt, ZONE_M, whereText, titleCase } from './map-data.js';
 import { unrleTiles } from '../../sim/dungeon.js';
@@ -24,7 +25,7 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
   const src = createMapSource();
   const S = {
     model: null, world: null, fog: null, char: null, fogDirty: false, fogSavedAt: 0,
-    quests: [], tracked: store.get('track', null), events: new Map(), pins: [], party: [],
+    quests: [], tracked: store.get('track', null), trackSet: new Set(store.get('trackSet', null) || []), trackInit: store.get('trackSet', null) != null, events: new Map(), pins: [], party: [],
     dungeon: null, dFog: new Map(), detail: new Map(), at: 0, version: 0,
   };
   const listeners = new Set();
@@ -78,12 +79,19 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
     S.quests = (m.active || []).map(q => ({ ...q }));
     relocateQuests();
     // a freshly accepted quest becomes the tracked one; a finished tracked quest hands tracking to the next
-    const fresh = S.quests.find(q => !before.has(q.id));
-    if (fresh && before.size) setTracked(fresh.id, false);
-    if (!S.quests.some(q => q.id === S.tracked)) setTracked(S.quests[0]?.id || null, false);
+    const fresh = S.quests.filter(q => !before.has(q.id));
+    // S2: a quest you take is tracked (shown on the HUD); untracking hides it until you track it again
+    if (!S.trackInit) { for (const q of S.quests) S.trackSet.add(q.id); S.trackInit = true; }
+    else if (before.size) for (const q of fresh) S.trackSet.add(q.id);
+    for (const id of [...S.trackSet]) if (!S.quests.some(q => q.id === id)) S.trackSet.delete(id);
+    store.set('trackSet', [...S.trackSet]);
+    if (fresh.length && before.size) setTracked(fresh[0].id, false);
+    if (!S.quests.some(q => q.id === S.tracked && S.trackSet.has(q.id))) setTracked(S.quests.find(q => S.trackSet.has(q.id))?.id || null, false);
     changed();
   }
-  function setTracked(id, notify = true) { S.tracked = id; store.set('track', id); if (notify) changed(); }
+  function setTracked(id, notify = true) { S.tracked = id; if (id) { S.trackSet.add(id); store.set('trackSet', [...S.trackSet]); } store.set('track', id); if (notify) changed(); }
+  /** S2: stop showing a quest on the HUD (its map marker and arrow go too); the next tracked one leads. */
+  function untrack(id) { S.trackSet.delete(id); store.set('trackSet', [...S.trackSet]); if (S.tracked === id) { S.tracked = S.quests.find(q => S.trackSet.has(q.id))?.id || null; store.set('track', S.tracked); } changed(); }
 
   // ---- events ----
   function eventFromArena(ev) {
@@ -94,14 +102,27 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
   function onRealm(m) {
     const ev = m.ev || {};
     if (m.kind === 'eventStart') S.events.set('realm', { ...eventFromArena(ev), uid: ev.uid || 'realm', sub: `${ev.kind === 'worldboss' ? 'World boss' : 'Realm event'} — waystone travel there is free`, free: true });
-    else if (m.kind === 'eventSoon') S.events.set('realm', { ...eventFromArena(ev), uid: ev.uid || 'realm', sub: 'Starting soon', soon: true, at: m.at });
+    else if (m.kind === 'eventSoon') S.events.set('realm', { ...eventFromArena(ev), uid: ev.uid || 'realm', sub: soonText(m.at), soon: true, at: m.at });
     else if (m.kind === 'eventEnd') S.events.delete('realm');
     changed();
   }
   function onZoneEvent(m) {
     const ev = m.ev || {};
+    // R3 (§19): the zone's events with their state — ready / soon (countdown) / live / cooldown (ready again at)
+    if (m.kind === 'states') { applyStates(m.list); return; }
+    if (m.kind === 'end' && Number.isFinite(m.next)) { const k = 'zone:' + (ev.uid || ev.id); const e = { ...(S.events.get(k) || eventFromArena(ev)), state: 'cooldown', at: m.next, soon: false, timed: true }; e.sub = eventStateText(e) + ' — zone event'; S.events.set(k, e); changed(); return; }
     if (m.kind === 'end') S.events.delete('zone:' + (ev.uid || ev.id));
-    else S.events.set('zone:' + (ev.uid || ev.id), { ...eventFromArena(ev), sub: m.kind === 'soon' ? 'Starting soon — zone event' : `Zone event${ev.waves ? ` · wave ${ev.wave}/${ev.waves}` : ''}`, soon: m.kind === 'soon' });
+    else S.events.set('zone:' + (ev.uid || ev.id), { ...eventFromArena(ev), sub: m.kind === 'soon' ? `${soonText(m.at)} — zone event` : `Zone event${ev.waves ? ` · wave ${ev.wave}/${ev.waves}` : ''}`, soon: m.kind === 'soon', at: m.kind === 'soon' ? m.at : undefined });
+    changed();
+  }
+
+  function applyStates(list) {
+    for (const x of list || []) {
+      const k = 'zone:' + (x.uid || x.id);
+      const e = { ...(S.events.get(k) || {}), ...eventFromArena(x), state: x.state, at: x.at, soon: x.state === 'soon', timed: x.state === 'soon' || x.state === 'cooldown' };
+      e.sub = eventStateText(e) + ' — zone event';
+      S.events.set(k, e);
+    }
     changed();
   }
 
@@ -137,6 +158,8 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
     S.at -= dt;
     if (S.at > 0) return;
     S.at = 0.4;
+    // R3: a waiting event's line counts down in seconds (the map card, the minimap, the tracker read `sub`)
+    for (const e of S.events.values()) if (e.soon || e.timed) { const t = (e.state ? eventStateText(e) : soonText(e.at)) + (e.sub && e.sub.includes('zone event') ? ' — zone event' : ''); if (t !== e.sub) { e.sub = t; changed(); } }
     const p = me(); if (!p) return;
     if (S.dungeon) {
       const n = S.dungeon.fog.reveal(p.x, p.z, REVEAL_DUNGEON_M);
@@ -182,14 +205,16 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
         list.push({ id: 'mob:' + a.id, kind: 'monster', x: a.pos.x, z: a.pos.z, name: a.name, sub: `Level ${a.level}${a.rank ? ' ' + a.rank : ''}`, boss: a.rank === 'boss', priority: 2, size: a.rank === 'boss' ? 8 : 5 });
       }
       for (const m of partyMarkers()) list.push({ id: 'pm:' + m.char, kind: 'party', ...m, priority: 4, size: 6 });
+      for (const x of api.extraMarkers?.() || []) list.push(x);
       if (withMe && p) list.push({ id: 'me', kind: 'me', x: p.x, z: p.z, yaw: p.yaw, name: 'You', priority: 10, size: 8 });
       return list;
     }
-    const list = collectMarkers({ model: S.model, room: room(), known, fog: S.fog, quests: S.quests, tracked: S.tracked, events: [...S.events.values()].filter(e => Number.isFinite(e.x)), party: partyMarkers(), pins: S.pins, me: withMe ? p : null, level: p?.level || 1 });
+    const list = collectMarkers({ model: S.model, room: room(), known, fog: S.fog, quests: S.quests.filter(q => S.trackSet.has(q.id)), tracked: S.tracked, events: [...S.events.values()].filter(e => Number.isFinite(e.x)), party: partyMarkers(), pins: S.pins, me: withMe ? p : null, level: p?.level || 1 });
     for (const sp of S.placesSrv.values()) {
       if (!sp.discovered || !['vignette', 'hook'].includes(sp.kind)) continue;
       list.push({ id: 'sp:' + sp.key, kind: 'landmark', x: sp.x, z: sp.z, name: sp.name || 'A place of note', sub: sp.kind === 'hook' ? 'Something worth a closer look' : 'Point of interest', priority: 1, size: 5 });
     }
+    for (const x of api.extraMarkers?.() || []) list.push(x);      // play-test 4: loot on corpses, announced mini bosses, quest areas (ui/pt2.js)
     const meM = list.find(m => m.kind === 'me'); if (meM && p) meM.yaw = p.yaw;
     return list;
   }
@@ -217,16 +242,17 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
     n.on('quests', onQuests);
     n.on('realm', onRealm);
     n.on('zoneEvent', onZoneEvent);
+    n.on('zone', z => { if (Array.isArray(z.events)) applyStates(z.events); });   // R3: the zone's events + states on arrival
     n.on('partyFrames', onPartyFrames);
     n.on('explored', m => { if (S.fog && S.fog.merge(m.cells || [])) { S.fogDirty = true; changed(); } });
     // protocol §17.3: the server's own discovery — places you found light up the map round them, live events get a pin
-    n.on('mapData', m => { S.server = m; for (const p of m.places || []) learnPlace(p); for (const e of m.events || []) if (Number.isFinite(e.x)) S.events.set(e.realm ? 'realm' : 'zone:' + (e.uid || e.id), { ...e, sub: e.realm ? 'Realm event — waystone travel there is free' : 'Zone event', free: !!e.realm }); changed(); });
+    n.on('mapData', m => { S.server = m; for (const p of m.places || []) learnPlace(p); for (const e of m.events || []) if (Number.isFinite(e.x)) S.events.set(e.realm ? 'realm' : 'zone:' + (e.uid || e.id), { ...e, sub: e.realm ? 'Realm event — waystone travel there is free' : 'Zone event', free: !!e.realm, ...(e.state ? { state: e.state, at: e.at, soon: e.state === 'soon', timed: e.state === 'soon' || e.state === 'cooldown' } : {}) }); for (const e of S.events.values()) if (e.state && !e.free) e.sub = eventStateText(e) + ' — zone event'; changed(); });
     n.on('discover', m => { for (const p of m.places || []) learnPlace(p); changed(); });
     n.on('joined', () => { try { net()?.map?.(); } catch { /* old server */ } });
   }
 
-  return {
-    wire, tick, markers, addPin, removePin, setTracked, floorAt, src, load, setDungeon,
+  const api = {
+    wire, tick, markers, addPin, removePin, setTracked, untrack, isTracked: id => S.trackSet.has(id), floorAt, src, load, setDungeon,
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     get model() { return S.model; }, get world() { return S.world; }, get fog() { return S.fog; }, get dungeon() { return S.dungeon; },
     get quests() { return S.quests; }, get tracked() { return S.tracked; }, get trackedQuest() { return S.quests.find(q => q.id === S.tracked) || null; },
@@ -238,5 +264,7 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
     ZONE_M,
     /** test hook: reveal a circle */
     reveal(x, z, r) { if (S.fog) { S.fog.reveal(x, z, r); S.fogDirty = true; changed(); } },
+    extraMarkers: null,
   };
+  return api;
 }

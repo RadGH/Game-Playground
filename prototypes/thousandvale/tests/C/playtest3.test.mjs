@@ -287,7 +287,8 @@ const SHEET = JSON.parse(readFileSync(new URL('../../data/provinces/torbor_downs
 function botFight(cls, level, camps, seed = 1, maxSteps = 4000) {
   const terrain = standInTerrain(2, 2048), sx = terrain.spawn.x, sz = terrain.spawn.z;
   const room = createRoom({ id: `f${cls}${level}${seed}`, kind: 'wilds', terrain, seed, createRules, hooks: { log: () => {} },
-    camps: camps.map(c => ({ respawnMs: 1e9, radius: 2, ...c, x: sx + (c.dx ?? 0), z: sz + (c.dz ?? 6) })),
+    // noRank: the AUTHORED camp (play-test 4 S4 rolls champions/rares from level 4; those are meant to be harder)
+    camps: camps.map(c => ({ respawnMs: 1e9, radius: 2, noRank: true, ...c, x: sx + (c.dx ?? 0), z: sz + (c.dz ?? 6) })),
     encounterInfo: { mb_old_gristle: { name: 'Old Gristle', body: 'moor_hound' } } });
   const me = room.addPlayer({ id: 1, name: 'T', cls, level, xp: 0, gold: 0, room: room.id, x: sx, z: sz }, null);
   room.step();

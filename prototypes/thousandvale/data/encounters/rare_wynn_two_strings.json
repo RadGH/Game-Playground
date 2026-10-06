@@ -2,6 +2,7 @@
   "id": "rare_wynn_two_strings",
   "name": "Wynn Two-Strings",
   "tier": "rare",
+  "secret": true,
   "zone": "redcliff",
   "body": "brigand_archer",
   "place": "a deserter from Redcliff Fort who shoots two arrows at once from the cliff tops",

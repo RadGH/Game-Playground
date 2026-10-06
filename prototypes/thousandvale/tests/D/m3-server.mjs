@@ -8,7 +8,7 @@
 //   POST http://127.0.0.1:<hook>/level {name, level}    set a character's level everywhere it is read
 //   POST http://127.0.0.1:<hook>/give  {name, gold, items, itemName?, slot?, rarity?}  grant gold and N plain test items (a bag message follows)
 //   POST http://127.0.0.1:<hook>/event {id, announceMs}  force a realm event (the admin page's button)
-//   POST http://127.0.0.1:<hook>/roll  {name, n, level, boost}  grant n REAL items rolled by Farhold's generator (inventory spec)
+//   POST http://127.0.0.1:<hook>/roll  {name, n, level, boost, bases?}  grant n REAL items rolled by Farhold's generator (inventory spec; bases = only these item bases)
 //   GET  http://127.0.0.1:<hook>/who                    online characters [{char, name, level}]
 //   POST http://127.0.0.1:<hook>/kill {name}              the character dies where it stands (death/respawn spec)
 //   POST http://127.0.0.1:<hook>/teleport {name, x, z}  move a character within its room (the freeze spec starts walks
@@ -64,7 +64,7 @@ const hook = http.createServer(async (req, res) => {
       await prepareRules();
       const rpg = rulesEngine().rpg, items = [];
       const want = Math.max(1, Math.min(40, b.n | 0));
-      for (let i = 0; i < want * 8 && items.length < want; i++) { const it = rpg.rollDrop({ level: Math.max(1, b.level | 0 || 5) + (i % 4) * 2, rarityBoost: b.boost ?? 2 }); if (it) items.push(it); }
+      for (let i = 0; i < want * 8 && items.length < want; i++) { const it = rpg.rollDrop({ level: Math.max(1, b.level | 0 || 5) + (i % 4) * 2, rarityBoost: b.boost ?? 2, chance: 1, ...(Array.isArray(b.bases) ? { bases: b.bases } : {}) }); if (it) items.push(it); }
       W.grant(o, { items, gold: 0, reason: 'test' });
       return send(200, { ok: true, items: items.length });
     }
@@ -75,7 +75,7 @@ const hook = http.createServer(async (req, res) => {
     }
     if (req.url === '/kill') { const e = o.entity; e.setHp(0); e.kill(null); return send(200, { ok: true, dead: !!e.dead }); }   // P8 spec
     if (req.url === '/give') {
-      const items = Array.from({ length: Math.max(0, Math.min(12, b.items | 0)) }, (_, i) => ({ name: b.itemName || ['Hollin Shortsword', 'Weathered Cloak', 'Copper Ring', 'Ashwood Staff'][(itemN + i) % 4], rarity: b.rarity || ['common', 'magic', 'rare'][(itemN++ + i) % 3], slot: b.slot || 'weapon', ...(b.slot && b.slot !== 'weapon' ? { type: 'armor' } : {}), value: 4, level: b.slot ? 1 : 3 }));
+      const items = Array.from({ length: Math.max(0, Math.min(12, b.items | 0)) }, (_, i) => ({ name: b.itemName || ['Hollin Shortsword', 'Weathered Cloak', 'Copper Ring', 'Ashwood Staff'][(itemN + i) % 4], rarity: b.rarity || ['common', 'magic', 'rare'][(itemN++ + i) % 3], ...(b.kind ? { kind: b.kind, id: b.id || 'healing_potion', use: { type: 'heal', hp: 0.3 } } : { slot: b.slot || 'weapon', ...(b.slot && b.slot !== 'weapon' ? { type: 'armor' } : {}) }), value: 4, level: b.slot ? 1 : 3 }));
       W.grant(o, { items, gold: Math.max(0, b.gold | 0), reason: 'test' });
       return send(200, { ok: true, items: items.length });
     }

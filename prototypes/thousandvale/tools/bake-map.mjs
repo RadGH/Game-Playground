@@ -136,6 +136,16 @@ export function bakeMap() {
           }
       };
       for (const b of P.filter(p => p.kind === 'building')) fill(b.x, b.z, b.data.w, b.data.d, b.data.angle, [92, 62, 44]);
+      // town perimeters (play-test 4, S7): the runs as a dark line, towers as dots; gates are simply where the line breaks
+      for (const w of P.filter(p => p.kind === 'town_wall')) {
+        const ink = w.data.tier === 'wall' ? [64, 60, 56] : [104, 84, 60];
+        const dot = (x, zz) => { const i = Math.floor(x / ZMPP), j = Math.floor(zz / ZMPP); if (i < 0 || j < 0 || i >= ZPX || j >= ZPX) return; const o = (j * ZPX + i) * 4; px[o] = ink[0]; px[o + 1] = ink[1]; px[o + 2] = ink[2]; };
+        for (const run of w.data.runs) for (let k = 0; k < run.length - 1; k++) {
+          const [ax, az] = run[k], [bx, bz] = run[k + 1], L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.ceil(L / (ZMPP / 2)));
+          for (let q = 0; q <= n; q++) dot(ax + (bx - ax) * q / n, az + (bz - az) * q / n);
+        }
+        for (const t of w.data.towers) fill(t.x, t.z, 4.6, 4.6, 0, ink);
+      }
       for (const b of P.filter(p => p.kind === 'bridge')) {
         const [ax, az] = b.data.a, [bx, bz] = b.data.b;
         fill((ax + bx) / 2, (az + bz) / 2, Math.hypot(bx - ax, bz - az), b.data.width, Math.atan2(bz - az, bx - ax), [138, 100, 64]);

@@ -27,6 +27,7 @@ const SLOT_GLYPH = { head: '⛑', necklace: '◎', chest: '▣', hands: '✋', l
 export function createBag({ net: getNet, hud, me = null }) {
   const root = $('bag');
   const btn = $('bag-btn');
+  let useHook = null;
   const S = { bag: [], equipment: {}, gold: 0, fresh: new Set(), level: 1, filter: 'all', sort: 'new', search: '' };
   try { Object.assign(S, JSON.parse(localStorage.getItem(UI_KEY) || '{}')); S.search = ''; } catch {}
   const level = () => (me?.()?.level ?? S.level ?? getNet()?.joined?.you?.level ?? 1);
@@ -50,7 +51,7 @@ export function createBag({ net: getNet, hud, me = null }) {
           <div class="row"><input id="inv-search" type="search" placeholder="Find by name…" aria-label="Find by name"><select id="inv-sort" aria-label="Sort"></select></div>
         </div>
         <div class="bag-grid" id="bag-grid"></div>
-        <p class="bag-hint"><span id="inv-count"></span> Click to wear · drag onto a slot to pick it · right-click to throw away · hold <kbd>Shift</kbd> to compare the other hand.</p>
+        <p class="bag-hint"><span id="inv-count"></span> Click to wear (or drink / eat) · drag onto a slot or a 7–0 key · right-click to throw away · hold <kbd>Shift</kbd> to compare the other hand.</p>
       </section>
     </div>`;
   const el = { gold: $('bag-gold'), sub: $('inv-sub'), grid: $('bag-grid'), left: $('doll-left'), right: $('doll-right'), bottom: $('doll-bottom'), stats: $('doll-stats'),
@@ -157,7 +158,7 @@ export function createBag({ net: getNet, hud, me = null }) {
     const list = viewBag(S.bag, { filter: S.filter, sort: S.sort, equipment: worn, level: level(), score: scoreOf, search: S.search });
     const cells = list.map(it => {
       const d = slotEl(it);
-      d.onclick = () => wear(it);
+      d.onclick = () => { if (!(useHook && useHook(it))) wear(it); };   // potions / food: used (play-test 2 §18.10)
       d.oncontextmenu = async e => { e.preventDefault(); hideTip(); if (await confirmBox(`Throw away ${nameOf(it)}? It is gone for good.`, { yes: 'Throw away', danger: true })) getNet()?.item('destroy', it.uid); };
       return d;
     });
@@ -208,6 +209,8 @@ export function createBag({ net: getNet, hud, me = null }) {
 
   return {
     wire, toggle, state: S, draw,
+    /** fn(item) -> true when it USED the item (a consumable) instead of wearing it. */
+    setUseHook(fn) { useHook = fn; },
     /** Kept for older callers: the card is the shared tooltip now (data-tip-render="item"). */
     card() {}, hideCard: hideTip,
     get isOpen() { return !root.hidden; },

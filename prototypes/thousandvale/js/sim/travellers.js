@@ -111,8 +111,13 @@ export function createTravellers({ room, travel, folk = [], rng = Math.random, c
     const k = kinds[g.kind] || {};
     g.crew.forEach((c, i) => {
       const p = slot(g, i);
+      // play-test 4 S9: a wanderer's FIRST crew member carries what the kind offers — a shop (`shop`, shops.js kindOf
+      // reads npc.shop), a delivery to the town the group walks to (`offers`), or lore and a tip (`curious`)
+      const lead = i === 0;
+      const wand = lead && (k.shop || k.offers || k.curious) ? { kind: g.kind, ...(k.offers ? { offers: k.offers } : {}), ...(k.curious ? { curious: true } : {}), ...(k.shop ? { shop: k.shop } : {}) } : null;
       c.e = room.spawn({ kind: 'npc', type: 'npc', name: c.name, x: p.x, z: p.z, yaw: p.yaw, team: 1, state: 128,
-        data: { npc: { role: c.role, says: k.blurb ? [k.blurb] : [], traveller: g.kind }, traveller: { kind: g.kind, group: g.id, name: k.name || g.kind, from: endName(g, -1), to: endName(g, 1), beast: k.beast || null, cart: !!k.cart, armed: c.armed || undefined } } });
+        data: { key: 'trav:' + g.id + ':' + i, npc: { role: c.role, says: k.blurb ? [k.blurb] : [], traveller: g.kind, ...(wand && k.shop ? { shop: k.shop } : {}), ...(wand ? { title: k.name || null } : {}) },
+          traveller: { kind: g.kind, group: g.id, name: k.name || g.kind, from: endName(g, -1), to: endName(g, 1), beast: k.beast || null, cart: !!k.cart, armed: c.armed || undefined }, ...(wand ? { wanderer: wand } : {}) } });
     });
     g.live = true; counters.materialised++;
   }
@@ -148,6 +153,8 @@ export function createTravellers({ room, travel, folk = [], rng = Math.random, c
       if (Math.abs(g.s - end) < 0.5) {
         if (!g.waitUntil) { g.waitUntil = t + (range((R.waitAtTownMinutes || [2, 6]).map(m => m * 60), 180)) * 1000; counters.arrived++; }
         if (t >= g.waitUntil && near > 80) { park(g); groups.splice(gi, 1); replace(g.route); continue; }
+      } else if (kinds[g.kind] && kinds[g.kind].stopNear && g.live && crewNear(g, all, kinds[g.kind].stopNear)) {
+        g.pauseUntil = t + 2500;             // S9: a wanderer stands still while someone is at their elbow (shop / talk range holds)
       } else if (t >= g.pauseUntil) {
         // a wayside pause now and then (look about, drink): the road feels walked, not conveyed
         if ((g.dir > 0 ? g.s >= g.nextStopAt : g.s <= g.nextStopAt)) { g.pauseUntil = t + (5 + rng() * 15) * 1000; g.nextStopAt = g.s + g.dir * (300 + rng() * 500); }
@@ -170,6 +177,11 @@ export function createTravellers({ room, travel, folk = [], rng = Math.random, c
     // night thins the road: groups of day-only kinds far from everyone go home
     if (night) for (let gi = groups.length - 1; gi >= 0; gi--) { const g = groups[gi], k = kinds[g.kind] || {}; if (!k.night && !g.live && rng() < 0.002) groups.splice(gi, 1); }
     else for (const r of routes) if (rng() < 0.002 && groups.filter(g => g.route === r).length < wanted(r, false)) replace(r);
+  }
+  /** S9: is any player within `m` metres of any of this group's crew? */
+  function crewNear(g, ps, m) {
+    for (const c of g.crew) { if (!c.e || c.e.removed) continue; for (const p of ps) if (Math.abs(p.x - c.e.x) <= m && Math.abs(p.z - c.e.z) <= m && Math.hypot(p.x - c.e.x, p.z - c.e.z) <= m) return true; }
+    return false;
   }
   function replace(route) {
     // a fresh group at one end of a route that fits (the same route, or another one at random)

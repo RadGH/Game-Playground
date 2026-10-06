@@ -39,41 +39,55 @@ test.beforeAll(async ({ browser }) => {
 });
 test.afterAll(async () => { try { bot?.close(); } catch {} await ctx?.close(); srv?.kill('SIGTERM'); });
 
-test('Q21 + Q25: title screen — Customize Appearance changes the figure; the look is what the new character wears', async () => {
+test('R1 + Q21 + Q25: new character = name/people/calling, then the editor in starting clothes (class gear toggle); the front page lists characters', async () => {
   test.setTimeout(300000);
   await page.goto(base + '?quality=low&fresh=1&tod=0.45');
   await page.waitForSelector('#loading.done', { timeout: 120000 });
   await page.fill('#name', 'Wren');
   await page.click('#classes [data-cls="ranger"]');
-  await page.click('#customize');
+  await page.click('#enter');                       // step 1 -> step 2 (R1)
   await expect(page.locator('#panel-appearance')).toBeVisible();
+  await page.waitForTimeout(2000);
+  expect(await page.evaluate(() => thousandvale.actors.get('preview')?.look?.gear), 'starting clothes while customising').toEqual({});
+  await shot('r1-step2-bare');
+  await page.click('#panel-appearance [data-k="classGear"]');
+  await page.waitForTimeout(1500);
+  expect(await page.evaluate(() => thousandvale.actors.get('preview')?.look?.gear)).toBeUndefined();
+  await page.click('#panel-appearance [data-k="classGear"]');
   // pick hair "long" and a red hair colour, a tall body
   await page.selectOption('#panel-appearance [data-slot="hair"] select', 'long');
   await page.click('#panel-appearance [data-swatch="hair"] .ap-sw:nth-child(7)');
   await page.waitForTimeout(2500);
-  const prev = await page.evaluate(() => thousandvale.actors.get('preview')?.look?.avatar || null);
+  const prev = await page.evaluate(() => thousandvale.actors.get('preview')?.look?.custom || null);
   expect(prev?.hair?.id).toBe('long');
   await shot('title-editor');
-  await page.click('#panel-appearance [data-act="save"]');
+  await page.click('#panel-appearance [data-act="save"]');   // "Create character" enters the world
   const saved = await page.evaluate(() => thousandvale.S.look);
-  expect(saved.avatar.hair.id).toBe('long');
-  await page.click('#enter');
+  expect(saved.custom.hair.id).toBe('long');
   await page.waitForFunction(() => window.tv && tv.state().status === 'online' && tv.state().you?.id != null, null, { timeout: 90000 });
   await page.waitForFunction(() => tv.warm()?.done, null, { timeout: 300000 });
   // the server keeps the look: my own entity's info carries the custom hair
-  await expect.poll(() => page.evaluate(() => thousandvale.S.mirror.infos.get(tv.state().you.id)?.look?.avatar?.hair?.id || thousandvale.actors.get(tv.state().you.id)?.look?.avatar?.hair?.id), { timeout: 15000 }).toBe('long');
+  await expect.poll(() => page.evaluate(() => thousandvale.S.mirror.infos.get(tv.state().you.id)?.look?.custom?.hair?.id || thousandvale.actors.get(tv.state().you.id)?.look?.custom?.hair?.id), { timeout: 15000 }).toBe('long');
   // the character select (title, after a reload) names the calling
   const p2 = await ctx.newPage();
   await p2.goto(base + '?quality=low&tod=0.45');
-  await p2.waitForSelector('#mychars:not([hidden]) .chip.char', { timeout: 60000 });
+  await p2.waitForSelector('#front:not([hidden]) #mychars:not([hidden]) .chip.char', { timeout: 60000 });
+  await expect(p2.locator('#new-char')).toBeVisible();
+  await expect(p2.locator('#login')).toBeHidden();
   const chip = await p2.locator('#char-chips .chip.char').first().textContent();
   expect(chip).toContain('Ranger');
   expect(chip).not.toContain('Adventurer');
   await p2.waitForTimeout(6000);
   await shot('title-chars', p2);
+  await p2.click('#new-char');
+  await expect(p2.locator('#login')).toBeVisible();
+  await expect(p2.locator('#back-front')).toBeVisible();
   await p2.close();
   // a spy on what the client sends from here on
-  await page.evaluate(() => { window.__sent = []; const n = thousandvale.S.net, raw = n._raw.bind(n); n._raw = (w, d) => { try { window.__sent.push(JSON.parse(d)); } catch {} return raw(w, d); }; const ti = n.tradeOp; n.tradeOp = (op, a) => { window.__sent.push({ t: 'trade', op, ...a }); return ti(op, a); }; const it = n.item; n.item = (op, uid, slot) => { window.__sent.push({ t: 'item', op, uid, slot }); return it(op, uid, slot); }; });
+  await page.evaluate(() => { window.__sent = []; const n = thousandvale.S.net, raw = n._raw.bind(n); n._raw = (w, d) => { try { window.__sent.push(JSON.parse(d)); } catch {} return raw(w, d); }; const ti = n.tradeOp; n.tradeOp = (op, a) => { window.__sent.push({ t: 'trade', op, ...a }); return ti(op, a); }; const it = n.item; n.item = (op, uid, slot) => { window.__sent.push({ t: 'item', op, uid, slot }); return it(op, uid, slot); };
+    const wrap = (name, f) => { const o = n[name]; if (typeof o === 'function') n[name] = (...a) => { window.__sent.push(f(...a)); return o(...a); }; };
+    wrap('lootOp', (op, a = {}) => ({ t: 'loot', op, ...a })); wrap('shopOp', (op, a = {}) => ({ t: 'shop', op, ...a }));
+    wrap('barber', (npc, look) => ({ t: 'barber', npc, look })); wrap('pref', (k, v) => ({ t: 'pref', k, v })); wrap('follow', id => ({ t: 'follow', id })); });
 });
 
 test('Q6 + Q5: one banner area with a hierarchy; call-outs, toasts and the invite pop-up never overlap and sit top centre', async () => {
@@ -170,10 +184,13 @@ test('Q14: trading with another player — ask, offer, lock, accept, done', asyn
   await hook('/give', { name: 'Wren', items: 1, itemName: 'Trade Token', slot: 'ring1' });
   await expect.poll(() => page.evaluate(() => thousandvale.bag.state.bag.length), { timeout: 10000 }).toBeGreaterThan(0);
   bot.on('tradeAsk', m => bot.tradeOp('accept', { id: m.trade }));
+  const meT = await page.evaluate(() => tv.state().you);
+  await hook('/teleport', { name: 'Brem', x: meT.x + 2, z: meT.z + 1.5 });
+  await page.waitForTimeout(1500);
   const brem = await page.evaluate(() => tv.state().ents.find(e => e.name === 'Brem')?.id);
   await page.evaluate(id => tvui2.context(id, 560, 300), brem);
   await page.click('.ent-menu [data-act="trade"]');
-  await expect(page.locator('#panel-trade')).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('#panel-trade')).toBeVisible({ timeout: 15000 }).catch(async e => { console.log('[Q14] chat:', await page.evaluate(() => [...document.querySelectorAll('#chat-log p')].slice(-6).map(p => p.textContent).join(' | '))); throw e; });
   const uid = await page.evaluate(() => thousandvale.bag.state.bag.find(i => i.name === 'Trade Token').uid);
   await page.evaluate(u => thousandvale.ui2.trade.toggleItem(u), uid);
   await expect.poll(() => page.evaluate(() => tvui2.state().trade.t?.you.items), { timeout: 10000 }).toBe(1);
@@ -201,6 +218,16 @@ test('Q12: a second ring goes on the other hand', async () => {
   expect(w.at(-1).slot).toBe('ring2');
   await shot('rings');
   await page.keyboard.press('KeyB');
+});
+
+test('potions (§18.10): a potion fills key 7 and 7 / a bag click uses it', async () => {
+  await hook('/give', { name: 'Wren', items: 2, itemName: 'Healing Potion', kind: 'potion', id: 'healing_potion', rarity: 'common' });
+  await expect.poll(() => page.evaluate(() => tvui2.state().hotbar[0]), { timeout: 10000 }).toBe('healing_potion');
+  await sent();
+  await page.keyboard.press('Digit7');
+  const w = (await sent()).find(m => m.t === 'item' && m.op === 'use');
+  expect(w?.uid).toBe('id:healing_potion');
+  await shot('hotbar');
 });
 
 test('Q3 + Q4: the loot window on a body and the Need / Greed / Skip pop-up (wire checked)', async () => {
@@ -253,6 +280,7 @@ test('Q11: a merchant\'s shop — buy, sell, buy back tabs', async () => {
 });
 
 test('Q15 + Q22: Esc opens the pause menu; settings save; Show equipment hides armour on you', async () => {
+  test.setTimeout(240000);
   await page.evaluate(() => tv.target(null));
   await page.mouse.click(5, 300);
   await page.keyboard.press('Escape');
@@ -278,18 +306,20 @@ test('Q15 + Q22: Esc opens the pause menu; settings save; Show equipment hides a
 });
 
 test('Q20: the barber chair — the editor changes you in the world, Save sends barber {npc, look}', async () => {
+  test.setTimeout(180000);
   await sent();
   await page.evaluate(() => tvui2.editor('barber'));
   await expect(page.locator('#panel-appearance')).toBeVisible();
   await page.selectOption('#panel-appearance [data-slot="hair"] select', 'mohawk');
   await page.waitForTimeout(1500);
-  expect(await page.evaluate(() => thousandvale.actors.get(tv.state().you.id).look.avatar?.hair?.id)).toBe('mohawk');
+  expect(await page.evaluate(() => thousandvale.actors.get(tv.state().you.id).look.custom?.hair?.id)).toBe('mohawk');
   await shot('barber');
   await page.click('#panel-appearance [data-act="save"]');
-  expect((await sent()).find(m => m.t === 'barber')?.look?.avatar?.hair?.id).toBe('mohawk');
+  expect((await sent()).find(m => m.t === 'barber')?.look?.custom?.hair?.id).toBe('mohawk');
 });
 
 test('Q23 + Q26: the perk forest search rings what it finds', async () => {
+  test.setTimeout(180000);
   await page.keyboard.press('KeyN');
   await expect(page.locator('#panel-perks [data-k="pfsearch"]')).toBeVisible({ timeout: 15000 });
   await page.fill('#panel-perks [data-k="pfsearch"]', 'long odds');
@@ -301,6 +331,74 @@ test('Q23 + Q26: the perk forest search rings what it finds', async () => {
   await page.waitForTimeout(500);
   await shot('perk-forest');
   await page.keyboard.press('Escape');
+});
+
+test('R6 + R3: mana bars (you, target, number on hover) and event countdowns in seconds', async () => {
+  await expect(page.locator('#self-mp')).toBeVisible();
+  expect(await page.getAttribute('#self-mp', 'data-tip')).toMatch(/Mana: \d/);
+  await expect(page.locator('#self-frame .bar.xp')).toHaveCount(0);
+  const brem = await page.evaluate(() => tv.state().ents.find(e => e.name === 'Brem')?.id);
+  await page.evaluate(id => { tv.target(id); tvui2.fake('ev', { k: 0, e: [{ type: 'mp', id, n: 30, max: 60 }] }); }, brem);
+  await expect(page.locator('#target-mp')).toBeVisible({ timeout: 5000 });
+  expect(await page.getAttribute('#target-mp', 'data-tip')).toBe('Mana: 30 / 60');
+  await page.evaluate(() => { const ev = { uid: 'skein', id: 'skein', name: 'Grandmother Skein', x: 0, z: 0, r: 30 }; thousandvale.worldUi.onZoneEvent({ kind: 'soon', ev, at: Date.now() + 14000, inMs: 14000 }); tvui.fake('zoneEvent', { kind: 'soon', ev, at: Date.now() + 14000 }); });
+  await page.waitForTimeout(1200);
+  const frame = await page.locator('.tv-eventframe span').textContent();
+  expect(frame).toMatch(/Starts in 1[0-3] s/);
+  const sub = await page.evaluate(() => tvui.atlas().events);
+  expect(JSON.stringify(sub)).not.toContain('Starting soon');
+  await page.evaluate(() => tvui.fake('zoneEvent', { kind: 'states', list: [{ id: 'skein', name: 'Grandmother Skein', x: 0, z: 0, r: 30, state: 'ready', near: 80 }] }));
+  expect(JSON.stringify(await page.evaluate(() => tvui.atlas().events))).toContain('Comes alive when you come near');
+  await shot('mana-countdown');
+});
+
+test('play-test 4: S1 event panel tucks into a bubble and never covers the tracker; S2 untracked quests leave the HUD; S3 S12 S20 S21 S23 S19 S4', async () => {
+  test.setTimeout(120000);
+  // S1
+  await page.evaluate(() => thousandvale.worldUi.onRealm({ kind: 'eventStart', ev: { uid: 'e1', id: 'world_grimtallow', name: 'Grimtallow', kind: 'worldboss', zoneName: 'Blackthorn Scar' } }));
+  await page.evaluate(() => tvui.fake('quests', { active: [{ id: 'q1', name: 'Rope for Old Pell', steps: [{ text: 'Find rope', n: 0, of: 1 }], step: 0 }, { id: 'q2', name: 'Wolf Pelts', steps: [{ text: 'Kill wolves', n: 1, of: 5 }], step: 0 }], done: [] }));
+  await page.waitForTimeout(800);
+  await expect(page.locator('.tv-event')).toBeVisible();
+  const r = await page.evaluate(() => ['.tv-event', '.tv-tracker'].map(s => document.querySelector(s).getBoundingClientRect()).map(b => ({ top: b.top, bottom: b.bottom })));
+  expect(r[0].bottom).toBeLessThanOrEqual(r[1].top + 1);
+  await shot('s1-event-tracker');
+  await page.click('.tv-event .ev-x');
+  await expect(page.locator('.ev-bubble')).toBeVisible();
+  await expect(page.locator('.tv-event')).toBeHidden();
+  await page.click('.ev-bubble');
+  await expect(page.locator('.tv-event')).toBeVisible();
+  // S2
+  const before = await page.locator('.tv-tracker .tr-main, .tv-tracker .tr-row').count();
+  await page.evaluate(() => thousandvale.ui2.atlasUntrack('q2'));
+  await page.waitForTimeout(300);
+  const after = await page.locator('.tv-tracker .tr-main, .tv-tracker .tr-row').count();
+  expect(after).toBe(before - 1);
+  // S3: a row that is only a category label is not for sale
+  const npc = await page.evaluate(() => { const me = tv.state().you; return tv.state().ents.filter(e => e.kind === 'npc').sort((a, b) => Math.hypot(a.x - me.x, a.z - me.z) - Math.hypot(b.x - me.x, b.z - me.z))[0]; });
+  await hook('/teleport', { name: 'Wren', x: npc.x + 2, z: npc.z + 1 }); await page.waitForTimeout(1500);
+  await page.evaluate(n => { tvui2.openShop(n.id, 'Test'); setTimeout(() => tvui2.fake('shopView', { npc: n.id, name: 'Test', categories: { wands: 'Wands & rods' }, stock: [{ id: 'x', cat: 'wands', label: 'Wands & rods', item: { name: 'Wands & rods' }, price: 15 }, { id: 'y', cat: 'wands', label: 'Wands & rods', item: { name: 'Ashwood Wand', rarity: 'normal', type: 'weapon', subtype: 'wand' }, price: 12 }], buyback: [] }), 600); }, npc);
+  await page.waitForTimeout(1500);
+  expect(await page.locator('#panel-shop .shop-row').count()).toBe(1);
+  await page.evaluate(() => thousandvale.ui2.shop.panel.close());
+  // S12: one window for several bodies
+  await page.evaluate(() => tvui2.fake('lootWin', { id: 900, group: true, corpses: [900, 901, 902], gold: 7, items: [{ uid: 'g1', name: 'Wolf Pelt', corpse: 901 }, { uid: 'g2', name: 'Fang', corpse: 902 }] }));
+  await expect(page.locator('#panel-loot')).toBeVisible();
+  expect(await page.locator('#panel-loot .tvp-head h3').textContent()).toBe('3 bodies');
+  await page.evaluate(() => thousandvale.ui2.loot.panel.close());
+  // S20 / S21
+  await page.evaluate(() => { tvui2.fake('you', { regen: { kind: 'food', ms: 20000 } }); tvui2.fake('mountR', { ok: true, casting: 1500 }); });
+  await expect(page.locator('.meal-pill')).toBeVisible();
+  await expect(page.locator('.castbar')).toBeVisible();
+  await shot('s20-s21');
+  await page.evaluate(() => tvui2.fake('you', { regen: null }));
+  // S23 + S19 + S4
+  const brem = await page.evaluate(() => tv.state().ents.find(e => e.name === 'Brem')?.id);
+  await page.evaluate(id => tvui2.fake('lootable', { id, on: true, best: 'rare' }), brem);
+  await page.waitForTimeout(400);
+  expect(await page.evaluate(id => thousandvale.actors.get(id).plate.root.className, brem)).toContain('loot-rare');
+  await page.evaluate(id => tvui2.fake('lootable', { id, on: false }), brem);
+  expect(await page.evaluate(() => [...thousandvale.actors.actors.values()].some(a => a.kind === 'npc' && a.npcTitle))).toBe(true);
+  await shot('s19-titles');
 });
 
 test('phone size: the centre column, settings and the editor fit', async ({ browser }) => {

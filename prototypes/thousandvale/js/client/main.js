@@ -59,9 +59,12 @@ import { LIGHTS } from './lightpool.js';
 import { createTransition, isJump } from './transition.js';
 import { createSpells } from './spells.js';
 import { createStatusSync } from './status-sync.js';
+import { createWeaponFx } from './weapon-fx.js';
+import { createLootMarkers } from './loot-marker.js';
+import { makeGlowTexture } from './decor.js';
 import { createUi2 } from './ui/pt2.js';          // D-UI play-test 2: menus, loot, rolls, shops, trade, pause/settings, portraits, editor
 import { savedQuality } from './ui/settings.js';
-import { lookWith } from './ui/appearance-core.js';
+import { lookWith, lookCustom } from './ui/appearance-core.js';
 import { avatarFor } from './looks.js';
 
 const q = new URLSearchParams(location.search);
@@ -105,10 +108,14 @@ const tele = createTelegraphs(scene, {
 // P20: every skill's look (spell-looks.js) drawn with avatar-3d SpellFx from the rules' cast/fx/hit events
 let SKILLS = null; loadSkillData().then(d => { SKILLS = d?.skills || null; window.__skillClasses = d?.classes || {}; }).catch(() => {});
 const spells = createSpells(scene, { camera, renderer: view.renderer, actors, quality, lights: LIGHTS, groundY: (x, z) => groundY(x, z), skillOf: id => SKILLS?.[id] || null });
+// R5: every weapon's basic attack drawn (swing crescents, staff spells, shot flashes)
+const weaponFx = createWeaponFx(scene, { spellFx: spells.fx, actors, groundY: (x, z) => groundY(x, z), targetOf: id => (id === S.selfId ? S.target : null) });
+// Q3/S23: a corpse with loot for you sparkles, tinted by the best rarity on it
+const lootMarks = createLootMarkers({ actors, glowTexture: makeGlowTexture() });
 // Q8: auras follow the server's info.st on every body (late arrivals see them; a death clears them)
-const statusSync = createStatusSync({ actors, fx: spells.fx, infoOf: id => S.mirror?.infos.get(id), selfDead: () => S.self.dead, selfId: () => S.selfId });
+const statusSync = createStatusSync({ actors, fx: spells.fx, infoOf: id => S.mirror?.infos.get(id), selfDead: () => S.self.dead, selfId: () => S.selfId, night: () => S.night || 0, groundY: (x, z) => groundY(x, z) });
 const travel = createTransition({ el: document.getElementById('travel-veil'), view, scene, camera });
-const objects = createObjects(scene, { onUse: (id, o) => (String(id).startsWith('demo:') ? demoUse(o) : S.net?.use(id)), onNear: o => worldUi.lore(o.key || o.id, o.name, o.lore), labelLayer: document.getElementById('plates'), camera });
+const objects = createObjects(scene, { onUse: (id, o) => (String(id).startsWith('demo:') ? demoUse(o) : S.net?.use(id)), onNear: o => worldUi.lore(o.key || o.id, o.name, o.lore), labelLayer: document.getElementById('plates'), camera, posOf: id => { const a = actors.get(id); return a && !a.dead ? { x: a.pos.x, y: a.pos.y, z: a.pos.z, h: a.height } : null; } });
 
 // --- session state ----------------------------------------------------------------------------------
 const S = {
@@ -212,7 +219,7 @@ const boss = createBossUi({ actors, serverNow: () => (S.net ? S.net.clock.server
 const menubar = createMenubar();
 const social = createSocial({ net: () => S.net, hud, actors, onTarget: id => setTarget(id), myChar: () => S.net?.joined?.you?.char ?? null });
 const bag = createBag({ net: () => S.net, hud, me: () => ({ level: S.self.level, cls: S.self.cls }) });   // P15: required level vs yours
-const worldUi = createWorldUi({ hud, net: () => S.net, me: () => S.predictor.pos, room: () => S.room, onFootprints: heat => footprints.set(heat) });
+const worldUi = createWorldUi({ hud, net: () => S.net, me: () => S.predictor.pos, room: () => S.room, onFootprints: heat => footprints.set(heat), callout: (t, st) => boss.callout(t, st, null, true) });
 
 // --- M3 social windows (chat channels, friends, guild, mail, the Callboard, account, help) ------------------
 const me = () => ({ name: S.self.name, level: S.self.level, cls: S.self.cls, char: S.net?.joined?.you?.char ?? null, inGuild: !!guild?.guild });
@@ -234,12 +241,12 @@ const help = createHelp();
 loadZoneNames();
 const ui = createUiSuite({ net: () => S.net, hud, room: () => S.room, actors, objects, worldUi, social, chat, panels: { friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel },
   me: () => (S.selfId != null && S.phase === 'world' ? { id: S.selfId, x: S.predictor.pos.x, z: S.predictor.pos.z, yaw: S.lastInput?.yaw ?? controls.cam.yaw, level: S.self.level, cls: S.self.cls, char: S.net?.joined?.you?.char ?? null } : null) });
-const ui2 = createUi2({ net: () => S.net, hud, actors, controls, chat, social, friends, bag, help, account, objects, worldUi, renderer: view.renderer, scene,
+const ui2 = createUi2({ net: () => S.net, atlas: ui.atlas, hud, actors, controls, chat, social, friends, bag, help, account, objects, worldUi, renderer: view.renderer, scene,
   me: () => (S.selfId != null && S.phase === 'world' ? { id: S.selfId, x: S.predictor.pos.x, z: S.predictor.pos.z, level: S.self.level, name: S.self.name, dead: S.self.dead, char: S.net?.joined?.you?.char ?? null } : null),
   self: () => S.self, targetId: () => S.target, setTarget: id => setTarget(id), infoOf: id => S.mirror.infos.get(id) || null,
   avatarFor, createBody: async av => (await import('../../../../avatar-3d/js/chibi2.js')).createChibi2Character(av), defaultLook, races: PLAYABLE_RACES, raceNames: RACE_NAMES,
   titleLook: () => S.look, onLogout: () => { try { S.net?.leave(); } catch {} backToTitle(); },
-  onLookPreview: (look, mode) => previewLook(look, mode), onLookSave: look => { S.look = look; store.set('look', look); previewLook(look, 'title'); } });
+  onLookPreview: (look, mode) => previewLook(look, mode), onLookSave: look => { S.look = look; store.set('look', look); previewLook(look, 'title'); if (S.titleStep === 'look') enterWorld(); } });
 const PANELS = { party: { toggle: () => social.toggleMenu() }, bag: { toggle: () => bag.toggle() }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
 for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());
 window.addEventListener('keydown', e => {
@@ -248,6 +255,7 @@ window.addEventListener('keydown', e => {
   else if (PANEL_KEYS[e.code] && !e.ctrlKey && !e.metaKey && !e.altKey) PANELS[PANEL_KEYS[e.code]].toggle();
   else if (e.code === 'F1' || (e.key === '?' && !e.ctrlKey)) { e.preventDefault(); help.toggle(); }
   else if (e.key === '/' && !e.ctrlKey) { e.preventDefault(); e.stopImmediatePropagation(); chat.focus('/'); }
+  else if (e.code === 'KeyH' && !e.ctrlKey && !e.metaKey) toggleMount();   // Q16
   else if (e.code === 'KeyC') { if (S.room?.kind === 'wilds') S.net?.campfire(); else hud.toast('You can only make camp out in the wilds.', 'warn'); }
   else if (e.code === 'Escape') {
     // close the top window first; only then does Esc clear the target (controls.js)
@@ -287,10 +295,15 @@ function initTitle() {
     if (!list.some(c => c.id === S.cls)) S.cls = 'warrior';
     refreshChips(); rebuildPreview();
   });
-  $('reroll').onclick = () => { S.look.seed = (Math.random() * 1e9) >>> 0; delete S.look.avatar; rebuildPreview(); };
-  $('customize')?.addEventListener('click', () => ui2.openEditor('title', { look: S.look }));   // play-test 2 Q21
+  $('reroll').onclick = () => { S.look.seed = (Math.random() * 1e9) >>> 0; delete S.look.avatar; delete S.look.custom; rebuildPreview(); };
+  // R1 (play-test 3): the front page lists your characters + "New character"; step 1 = name/people/calling, step 2 = the
+  // appearance editor with the figure in starting clothes (class gear on a toggle); "Create character" enters the world
+  $('new-char')?.addEventListener('click', () => titleStep('new'));
+  $('back-front')?.addEventListener('click', () => titleStep('front'));
+  $('tab-new')?.addEventListener('click', () => titleStep(account.hasChars?.() ? 'front' : 'new'));
+  $('tab-login')?.addEventListener('click', () => { $('front').hidden = true; });
   $('build-tag').textContent = `client ${q.get('build') || 'dev'} · ${netMode() === 'ws' ? 'online' : 'offline (in-browser server)'}`;
-  $('login').addEventListener('submit', e => { e.preventDefault(); enterWorld(); });
+  $('login').addEventListener('submit', e => { e.preventDefault(); toAppearance(); });
   refreshChips();
 }
 function refreshChips() {
@@ -302,7 +315,7 @@ function rebuildPreview() {
   if (!W.spot || S.phase === 'world') return;
   actors.remove('preview');
   const { x, z } = W.spot, y = groundY(x, z);
-  preview = actors.add({ id: 'preview', kind: 'player', name: '', level: 1, hp: 1, hpMax: 1, look: { ...S.look, cls: S.cls }, x, y, z, yaw: 0.35 });
+  preview = actors.add({ id: 'preview', kind: 'player', name: '', level: 1, hp: 1, hpMax: 1, look: titleLook(), x, y, z, yaw: 0.35 });
   preview.noPlate = true;
   preview.still = { x, y, z, yaw: 0.35 };
   store.set('look', S.look); store.set('cls', S.cls);
@@ -313,13 +326,38 @@ function previewLook(look, mode) {
   if (mode === 'barber' || mode === 'revert') {
     const a = actors.get(S.selfId); if (!a) return;
     if (!look) { a.look = { ...a.look }; actors.setLook(S.selfId, { ...(S.mirror.infos.get(S.selfId)?.look || a.look), cls: a.look.cls, gear: a.look.gear }); return; }
-    actors.setLook(S.selfId, { ...a.look, race: look.race, seed: look.seed, avatar: look.avatar || undefined, gear: a.look.gear });
+    actors.setLook(S.selfId, { ...a.look, race: look.race, seed: look.seed, custom: lookCustom(look) || undefined, avatar: undefined, gear: a.look.gear });
     return;
   }
   if (!look) return;
-  S.look = { race: look.race, seed: look.seed, ...(look.avatar ? { avatar: look.avatar } : {}) };
+  S.look = { race: look.race, seed: look.seed, ...(lookCustom(look) ? { custom: lookCustom(look) } : {}) };
   refreshChips();
-  if (preview && actors.get('preview')) actors.setLook('preview', { ...S.look, cls: S.cls }); else rebuildPreview();
+  if (preview && actors.get('preview')) actors.setLook('preview', titleLook()); else rebuildPreview();
+}
+/** The title figure: the class outfit, or plain starting clothes while you customise (unless "Show class gear"). */
+function titleLook() { return { ...S.look, cls: S.cls, ...(S.titleBare ? { gear: {} } : {}) }; }
+/** R1: which title card shows — 'front' (your characters), 'new' (name/people/calling), 'look' (the editor). */
+function titleStep(step) {
+  S.titleStep = step;
+  const has = !!account.hasChars?.();
+  $('front').hidden = step !== 'front';
+  $('login').hidden = step !== 'new';
+  $('signin').hidden = true;
+  $('back-front').hidden = !has;
+  $('tab-new')?.setAttribute('aria-selected', 'true'); $('tab-login')?.setAttribute('aria-selected', 'false');
+  if (step !== 'look' && S.titleBare) { S.titleBare = false; previewLook(S.look, 'title'); }
+  if (step === 'new') setTimeout(() => $('name').focus(), 0);
+}
+function toAppearance() {
+  const name = cleanName($('name').value);
+  if (!name || name.length < 2) { $('login-note').textContent = 'Pick a name of 2–16 letters.'; return; }
+  $('login-note').textContent = '';
+  // an existing character of yours with that name: just play it
+  if (S.net?.chars?.some(c => c.name.toLowerCase() === name.toLowerCase())) { enterWorld(); return; }
+  titleStep('look');
+  S.titleBare = true; previewLook(S.look, 'title');
+  ui2.openEditor('title', { look: S.look, saveLabel: 'Create character', gearToggle: { on: false, onChange: on => { S.titleBare = !on; previewLook(S.look, 'title'); } },
+    onDismiss: () => { if (S.phase === 'title') titleStep('new'); } });
 }
 
 // --- connecting -----------------------------------------------------------------------------------------
@@ -368,7 +406,7 @@ async function enterWorld(pick = null) {
   try {
     await net.ready;
     let ch = pick || net.chars.find(c => c.name.toLowerCase() === name.toLowerCase());
-    if (!ch) { const look = lookWith(S.look, S.look.avatar); ch = await net.createChar({ name, cls: S.cls, look }); ui2.lookStore.set(name, look); }
+    if (!ch) { const look = lookWith(S.look, lookCustom(S.look)); ch = await net.createChar({ name, cls: S.cls, look }); ui2.lookStore.set(name, look); }
     const join = (q.get('join') || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 8) || null;
     await net.play(ch.id, join ? { join } : {});
     clearTimeout(timer);
@@ -402,11 +440,19 @@ function wireNet(net) {
     if (patch.xpNext != null) S.self.next = patch.xpNext;
     if (patch.hpMax != null) S.self.hpMax = patch.hpMax;
     if (patch.hp != null) S.self.hp = patch.hp;
-    if (patch.attackRange != null) S.reach = basicReach();
+    if ('reach' in patch || patch.attackRange != null) S.reach = basicReach();
     hud.setSelf(S.self);
     if (Array.isArray(patch.bar)) refreshBar();   // §15.10: level-up, form/stance, talent pick (client.js merged it into joined.you)
     if (levelled) levelFlash(S.selfId);
+    // Q16: riding — the predictor walks at the server's speed factor, and my body sits on the mount
+    if (patch.speedMul != null) S.predictor.speedMul = patch.speedMul;
+    if ('mount' in patch) { S.self.mount = patch.mount || null; actors.setMount(S.selfId, S.self.mount); if (patch.dismount && patch.dismount !== 'asked') hud.toast({ cast: 'You get down to fight.', hit: 'You are thrown from the saddle!', swim: 'Your mount will not swim.', dead: 'You fall from the saddle.' }[patch.dismount] || 'You get down.', 'warn'); }
+    if ('regen' in patch) actors.setEating(S.selfId, patch.regen ? patch.regen.kind || 'food' : null);   // S20
+    if (patch.mountNew) hud.toast('You have a mount! Press H to ride.', 'good');
   });
+  net.on('lootable', m => lootMarks.set(m.id, m.on !== false, m.best || m.rarity || (m.free ? 'magic' : null)));
+  net.on('lootWin', m => { if (m.closed) lootMarks.set(m.id, false); });
+  net.on('mountR', r => { if (!r.ok && r.msg) hud.toast(r.msg, 'warn'); });
   net.on('equip', m => { S.reach = basicReach(m.equipment); });
   net.on('equip', m => { const a = actors.get(S.selfId); if (a && m.equipment) actors.setLook(S.selfId, { ...a.look, gear: ui2.gearFor(m.equipment) }); });   // Q22: shown as the settings say   // P22: what I wear, on me
   net.on('chat', m => { if (m.ch === 'say' && m.from != null) actors.say(m.from, m.text); });   // the line itself: chat.js
@@ -455,23 +501,24 @@ function onJoined(j) {
   // Every id in the old room is void now — except our own body, which keeps its model under the new id.
   const keep = prevSelf != null && actors.get(prevSelf) ? prevSelf : null;
   for (const id of [...actors.actors.keys()]) if (id !== keep) actors.remove(id);
-  if (keep != null) actors.rekey(keep, S.selfId);
+  if (keep != null) { actors.rekey(keep, S.selfId); statusSync.dead(S.selfId); }   // C/Q8: the kept body starts the new room with no stale aura or torch
   if (S.target != null) setTarget(null);
   tele.clear(); objects.clear(); boss.clear();
   worldUi.joined(j);
   preview = null;
   const you = j.you;
-  Object.assign(S.self, { name: you.name, cls: you.cls, level: you.level, xp: you.xp || 0, next: you.xpNext || 100, hp: you.hp, hpMax: you.hpMax, dead: you.hp <= 0 });
+  Object.assign(S.self, { name: you.name, cls: you.cls, level: you.level, xp: you.xp || 0, next: you.xpNext || 100, hp: you.hp, hpMax: you.hpMax, mp: you.mp ?? 0, mpMax: you.mpMax ?? 0, dead: you.hp <= 0 });
   S.reach = basicReach(you.equipment);         // Q1: a ranged weapon fires from range
   S.predictor.locked = S.self.dead;
+  S.predictor.speedMul = you.speedMul || 1; S.self.mount = you.mount || null;
   useRoom(j.room, { x: you.x, z: you.z }).then(() => {
     S.predictor.reset({ x: you.x, y: you.y, z: you.z });
     const a = actors.get(S.selfId) || actors.add({ id: S.selfId, kind: 'player', name: you.name, level: you.level, hp: you.hp, hpMax: you.hpMax, hostile: false,
-      look: lookFor(S.mirror.infos.get(S.selfId)?.look || { race: S.look.race, seed: S.look.seed, ...(S.look.avatar ? { avatar: S.look.avatar } : {}) }, you.char, you.cls, ui2.gearFor(you.equipment || S.mirror.infos.get(S.selfId)?.gear || {})), x: you.x, y: you.y, z: you.z, yaw: you.yaw }, { self: true });
+      look: lookFor(S.mirror.infos.get(S.selfId)?.look || { race: S.look.race, seed: S.look.seed, ...(lookCustom(S.look) ? { custom: lookCustom(S.look) } : {}) }, you.char, you.cls, ui2.gearFor(you.equipment || S.mirror.infos.get(S.selfId)?.gear || {})), x: you.x, y: you.y, z: you.z, yaw: you.yaw }, { self: true });
     a.self = true;
     // P8: a respawn that lands in another room (the graveyard town) arrives as `joined`, not as a snapshot with
     // dead=false — the body kept its corpse pose for good ("my character never stood up")
-    actors.setDead(S.selfId, S.self.dead); actors.setHp(S.selfId, you.hp, you.hpMax);
+    actors.setDead(S.selfId, S.self.dead); actors.setHp(S.selfId, you.hp, you.hpMax); actors.setMount(S.selfId, S.self.mount);
     controls.setFacing(you.yaw || 0); controls.cam.yaw = you.yaw || 0;
     hud.setSelf(S.self);
     refreshBar();
@@ -484,7 +531,7 @@ function onJoined(j) {
 
 /** A player's look in the world: body from `look`, clothes = exactly the worn `gear` (P22; plain clothes where empty). */
 function lookFor(look, charId, cls, gear = {}) {
-  const base = look && (look.race || look.avatar || look.body) ? { ...look, cls: look.cls || cls } : defaultLook(charId ?? 0, cls);
+  const base = look && (look.race || look.avatar || look.custom || look.body) ? { ...look, cls: look.cls || cls } : defaultLook(charId ?? 0, cls);
   return { ...base, gear: gear || {} };
 }
 
@@ -498,7 +545,7 @@ function ensureActor(id) {
     const kind = info.kind || KIND_NAMES[e.kind] || 'monster';
     if (kind === 'object') {
       objects.upsert({ id, type: info.type, name: info.name, x: e.x, z: e.z, yaw: e.yaw || 0, r: info.r, state: info.state, source: 'room', opened: info.type === 'chest' && wasOpened(info.key),
-        hidden: !!info.hidden, hint: info.hint, lore: info.lore, shimmer: info.shimmer, key: info.key, banner: info.banner || null, trace: info.trace || null });
+        hidden: !!info.hidden, hint: info.hint, lore: info.lore, shimmer: info.shimmer, key: info.key, banner: info.banner || null, trace: info.trace || null, look: info.look || null, tether: info.tether ?? null });   // R7: look 'chained' + tether
       objectState(id, info);
       return null;
     }
@@ -511,10 +558,11 @@ function ensureActor(id) {
       hp: Math.round((e.hp ?? 1) * hpMax), hpMax, hostile: !npc && (info.team === 2 || (kind === 'monster' && info.team !== 1)),
       look: kind === 'player' ? lookFor(info.look, info.char ?? id, info.cls, info.gear) : npc ? folkLook(info, id) : null,
       creature: kind === 'monster' || pet ? { type: info.type || 'wolf', seed: (id * 7919) >>> 0 } : null, family: info.type && !npc ? displayName(info.type, 'monster') : null,
-      x: e.x, y, z: e.z, yaw: e.yaw || 0, rank: info.rank || null, role: info.role || null, pet,
+      x: e.x, y, z: e.z, yaw: e.yaw || 0, rank: info.rank || null, role: info.role || null, pet, mods: info.mods || info.affixes || null,   // S4
     });
     if (npc) { objects.upsert({ id, type: 'npc', name: a.name, x: e.x, z: e.z, source: 'room' }); if (info.office) WS.claimOffice(info.office); }   // Q10: its own building, dressed
     if (e.state & STATE.dead) actors.setDead(id, true);
+    if (kind === 'player' && info.mount) actors.setMount(id, info.mount);
   }
   return a;
 }
@@ -551,11 +599,12 @@ function refreshFromInfo(id) {
   // P22: another player (or my own entity, seen by the server) changed what they wear
   if (a.kind === 'player' && info.gear && gearKey(info.gear) !== gearKey(a.look?.gear || {}) && !(id === S.selfId && S.net?.joined?.you?.equipment)) actors.setLook(id, { ...a.look, gear: info.gear });
   // Q20/Q21: a new face or body (the barber, the title editor) reaches everyone through info.look; gear stays as worn
-  if (a.kind === 'player' && info.look && lookSig(info.look) !== lookSig(a.look)) actors.setLook(id, { ...a.look, race: info.look.race || a.look?.race, seed: info.look.seed ?? a.look?.seed, avatar: info.look.avatar || undefined, gear: a.look?.gear });
+  if (a.kind === 'player' && info.look && lookSig(info.look) !== lookSig(a.look)) actors.setLook(id, { ...a.look, race: info.look.race || a.look?.race, seed: info.look.seed ?? a.look?.seed, custom: lookCustom(info.look) || undefined, gear: a.look?.gear });
+  if (a.kind === 'player' && id !== S.selfId) { actors.setMount(id, info.mount || null); actors.setEating(id, info.eat || null); }   // S20: others eat sitting down too (info.eat)   // Q16: everyone sees the rider
   if (levelled && id !== S.selfId) levelFlash(id);
 }
 /** The part of a look that is the body (not the clothes): race, seed and the editor's avatar. */
-const lookSig = l => (l ? `${l.race || ''}|${l.seed ?? ''}|${l.avatar ? JSON.stringify(l.avatar) : ''}` : '');
+const lookSig = l => (l ? `${l.race || ''}|${l.seed ?? ''}|${lookCustom(l) ? JSON.stringify(lookCustom(l)) : ''}` : '');
 
 function onSnap(s) {
   S.stats.snaps++; S.stats.bytes += s.bytes || 0;
@@ -564,7 +613,7 @@ function onSnap(s) {
     const d = S.predictor.reconcile(s.ack, s.self);
     if (d > 0.02) { S.stats.corrections++; S.stats.maxCorrection = Math.max(S.stats.maxCorrection, d); }
   }
-  if (s.vitals) { S.self.hp = s.vitals.hp; S.self.hpMax = s.vitals.hpMax; actors.setHp(S.selfId, s.vitals.hp, s.vitals.hpMax); hud.setSelf(S.self); }
+  if (s.vitals) { S.self.hp = s.vitals.hp; S.self.hpMax = s.vitals.hpMax; S.self.mp = s.vitals.mp; S.self.mpMax = s.vitals.mpMax; actors.setHp(S.selfId, s.vitals.hp, s.vitals.hpMax); hud.setSelf(S.self); }
   if (S.selfId != null && !!s.dead !== S.self.dead) setSelfDead(!!s.dead);
   for (const id of s.left) { actors.remove(id); objects.remove(id); if (S.target === id) setTarget(null); }
   for (const r of s.ents) {
@@ -593,7 +642,7 @@ function remember(ev) { S.events.push(ev); if (S.events.length > 200) S.events.s
 function onEvent(ev) {
   if (!ev.type && ev.t) ev = { ...ev, type: ev.t };   // encounter events may still carry `t`
   remember(ev);
-  if (ev.type === 'cast' || ev.type === 'hit' || ev.type === 'fx') { spells.onEvent(ev); statusSync.onEvent(ev); }
+  if (ev.type === 'cast' || ev.type === 'hit' || ev.type === 'fx') { spells.onEvent(ev); statusSync.onEvent(ev); statusSync.onChannel(ev); weaponFx.onEvent(ev); }
   const me = S.selfId;
   switch (ev.type) {
     case 'cast':
@@ -671,6 +720,8 @@ function onEvent(ev) {
 }
 function levelFlash(id) { const a = actors.get(id); if (a) fx.burst({ x: a.pos.x, y: a.pos.y + 1, z: a.pos.z }, { color: '#ffe08a', count: 24 }); }
 
+/** Q16: H — call your fastest mount, or get down. The server says no in a fight, in water or indoors (mountR). */
+function toggleMount() { if (!S.net) return; if (S.self.mount) S.net.mount('off'); else S.net.mount('summon'); }
 function setSelfDead(dead) {
   if (S.self.dead === dead) return;
   S.self.dead = dead; S.predictor.locked = dead;
@@ -754,8 +805,10 @@ function castSkill(n) {
  */
 const RANGED_SUB = /bow|crossbow|wand|sling|javelin|throw/i;
 function basicReach(eq) {
-  const r = S.net?.joined?.you?.attackRange;
-  if (Number.isFinite(r) && r > 0) return r;
+  const y = S.net?.joined?.you || {};
+  const r = y.reach ?? y.attackRange;                      // protocol §18.8: you.reach (null = melee)
+  if (Number.isFinite(r) && r > 0) return Math.max(2.4, r - 1);
+  if ('reach' in y && y.reach === null) return 2.4;
   const w = (eq || S.net?.joined?.you?.equipment || {}).weapon;
   return w && RANGED_SUB.test(`${w.subtype || ''} ${w.baseKey || ''} ${w.base || ''}`) ? 24 : 2.4;
 }
@@ -947,6 +1000,8 @@ function frame(now) {
   fx.update(dt);
   spells.update(dt);
   statusSync.update();
+  weaponFx.update(dt);
+  lootMarks.update(dt);
   hud.tick(dt);
   LIGHTS.update(dt, camera.position);
   W.horizon?.update(camera.position);       // far-horizon chunk LOD (built in a worker; cheap when nothing changes)
@@ -974,7 +1029,7 @@ if (AUTO) Promise.all([loadLookData(), loadMonsterLooks()]).then(() => enterWorl
 // A browser that already has an account: connect now and list its characters on the title screen (M3).
 else if (TOKENS().get() && q.get('fresh') !== '1') {
   const net = startNet();
-  net.ready.then(n => { if (S.phase === 'title') account.showChars(n.chars, n.claimed ? n.username : null); }).catch(() => {});
+  net.ready.then(n => { if (S.phase === 'title') { account.showChars(n.chars, n.claimed ? n.username : null); if (n.chars?.length && S.titleStep !== 'look' && $('signin').hidden) titleStep('front'); } }).catch(() => {});
 }
 Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
   rebuildPreview();
@@ -990,6 +1045,11 @@ Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
 
 // --- test hook (stream G's two-player spec; also handy in the console) -----------------------------------
 const tv = {
+  /** Play a server event through the client's own handlers (screenshots / demos: a swing, a staff spell…). */
+  fxEvent(ev) { onEvent(ev); },
+  weaponFx: () => weaponFx.stats,
+  /** Q16: toggle the mount (as H does). */
+  mount() { toggleMount(); },
   state() {
     const me = actors.get(S.selfId);
     return {
@@ -1173,4 +1233,4 @@ const tv = {
   },
 };
 window.tv = tv;
-window.thousandvale = { S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui2 };
+window.thousandvale = { lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui2 };

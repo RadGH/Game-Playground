@@ -2,6 +2,7 @@
   "id": "rare_scab",
   "name": "Scab",
   "tier": "rare",
+  "secret": true,
   "zone": "blackthorn_scar",
   "body": "cinder_imp",
   "place": "a warband's pet imp that got loose and now burns the camps of anyone it dislikes, which is everyone",

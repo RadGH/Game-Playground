@@ -29,6 +29,7 @@
 import * as THREE from 'three';
 import { profile, taperedCurve } from './chibi2-geometry.js';
 import { FARHOLD_HELD, FARHOLD_OFFHAND } from './chibi2-weapon-ids.js';
+import { TV_BUILDERS } from './chibi2-weapons-tv.js';
 
 /** Grips sit a little forward of the bone, the same place every other held item does. */
 const Z = 0.055;
@@ -390,6 +391,7 @@ const BUILDERS = {
       for (const s of [-1, 1]) c.add(new THREE.OctahedronGeometry(1), R, lift(hc, 0.6), { position: [s * 0.03, -0.30, Z + 0.02], scale: [0.010, 0.014, 0.010] });
     }
   },
+
 };
 
 /**
@@ -452,11 +454,13 @@ export function strapShield(c, oc, kind, q = 0, emblem = null) {
  */
 export { FARHOLD_HELD, FARHOLD_OFFHAND };
 for (const id of FARHOLD_HELD) {
-  if (!BUILDERS[id]) throw new Error(`chibi2-weapons: no builder for catalogued id "${id}"`);
+  if (!BUILDERS[id] && !TV_BUILDERS[id]) throw new Error(`chibi2-weapons: no builder for catalogued id "${id}"`);
 }
-for (const id of Object.keys(BUILDERS)) {
+for (const id of [...Object.keys(BUILDERS), ...Object.keys(TV_BUILDERS)]) {
   if (!FARHOLD_HELD.includes(id)) throw new Error(`chibi2-weapons: "${id}" is built but not catalogued`);
 }
+/** The parts vocabulary, lent to the play-test 4 models in chibi2-weapons-tv.js (same helpers, same look). */
+const KIT = { Z, WOOD, IRON, STEEL, DARK, GOLD, tone, lift, low, extrude, grip, pommel, guard, blade, haft, langets, collar, axeHead, gem };
 
 /**
  * Build one, or return false if the id belongs to the original vocabulary.
@@ -465,7 +469,12 @@ for (const id of Object.keys(BUILDERS)) {
 export function buildFarholdHeld(a, c) {
   const id = a.held?.id;
   const fn = BUILDERS[id];
-  if (!fn) return false;
+  if (!fn) {
+    const tv = TV_BUILDERS[id];                       // play-test 4 (S17): Thousandvale's extra silhouettes
+    if (!tv) return false;
+    tv(c, a.held.color || STEEL, a.held.quality ?? 0, KIT);
+    return true;
+  }
   fn(c, a.held.color || STEEL, a.held.quality ?? 0, a);
   return true;
 }

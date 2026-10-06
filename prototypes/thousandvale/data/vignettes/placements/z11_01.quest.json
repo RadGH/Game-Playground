@@ -1,0 +1,107 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z11_01, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z11_01",
+ "terrainHash": "6a42e50c",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_snow_in_the_pass_0_0",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1933,
+   "z": 589,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "snow_in_the_pass",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_hyenas_and_goats_0_0",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 289,
+   "z": 1392,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "hyenas_and_goats",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_beetles_on_the_road_0_0",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 888,
+   "z": 552,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "beetles_on_the_road",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_brigand_toll_0_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1671,
+   "z": 776,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "brigand_toll",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_brigand_toll_1_0",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1936,
+   "z": 688,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "brigand_toll",
+   "hunt": true
+  }
+ ]
+}

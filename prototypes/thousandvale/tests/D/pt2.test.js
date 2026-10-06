@@ -139,7 +139,7 @@ test('Q20/Q21: a custom look is small, cleaned, laid over the seeded face, and k
   const back = customFrom(base);
   assert.equal(back.hair.id, 'short'); assert.equal(back.body.skin, '#ffdbb4');
   const look = lookWith({ race: 'elf', seed: 9 }, { hair: { id: 'long' } });
-  assert.deepEqual(look, { race: 'elf', seed: 9, v: 1, avatar: { hair: { id: 'long' } } });
+  assert.deepEqual(look, { race: 'elf', seed: 9, v: 1, custom: { hair: { id: 'long' } } });
   assert.ok(JSON.stringify(lookWith({ race: 'elf', seed: 9 }, customFrom(base))).length < 1536);
   assert.equal(lookCustom({ custom: { a: 1 } }).a, 1);
   assert.equal(customKey({ hair: { id: 'long' } }), customKey({ hair: { id: 'long' } }));
@@ -185,4 +185,49 @@ test('Q26 + Q23: on the real forest, every node sits inside its own arm\'s area;
   assert.ok(searchForest(F, 'zzzqqq').length === 0);
   const byText = searchForest(F, 'secret-word', n => (n.id === one.id ? 'a SECRET-WORD in the card' : ''));
   assert.deepEqual(byText, [one.id]);
+});
+
+test('R3: an event says when — seconds, minutes, or "when someone comes near"; every state has a line', async () => {
+  const { soonText, eventStateText } = await import('../../js/client/ui/pt2-core.js');
+  assert.equal(soonText(14000, 0), 'Starts in 14 s');
+  assert.equal(soonText(83000, 0), 'Starts in 1:23');
+  assert.equal(soonText(0, 5), 'Starting now');
+  assert.equal(soonText(undefined), 'Starts when someone comes near');
+  assert.equal(eventStateText({ state: 'ready' }), 'Comes alive when you come near');
+  assert.equal(eventStateText({ state: 'cooldown', at: 220000 }, 0), 'Ready again in 3:40');
+  assert.equal(eventStateText({ state: 'live' }), 'Happening now');
+  assert.equal(eventStateText({ state: 'soon', at: 9000 }, 0), 'Starts in 9 s');
+});
+
+test('Q20: the barber charges only for what changed (same sums as the server), first visit free', async () => {
+  const { diffCustom, mergeCustom, barberCost } = await import('../../js/client/ui/appearance-core.js');
+  const base = { hair: { id: 'short', color: '#111111' }, eyes: { id: 'round' }, body: { height: 0.5, skin: '#ffdbb4' } };
+  const now = { hair: { id: 'long', color: '#111111' }, eyes: { id: 'round' }, body: { height: 0.5, skin: '#ffdbb4' } };
+  assert.deepEqual(diffCustom(base, now), { hair: { id: 'long', color: '#111111' } });
+  const stored = { eyes: { id: 'wide' } };
+  const send = mergeCustom(stored, diffCustom(base, now));
+  assert.deepEqual(send, { eyes: { id: 'wide' }, hair: { id: 'long', color: '#111111' } });
+  const P = { prices: { hair: 5, hairColour: 4, beard: 4, eyes: 6, face: 10, skin: 12, body: 20, everything: 40 }, perLevel: 0.05 };
+  assert.equal(barberCost(stored, send, { ...P, level: 1 }), 9, 'hair 5 + a colour it never had 4');
+  assert.equal(barberCost(stored, send, { ...P, level: 1, free: true }), 0);
+  assert.equal(barberCost({}, { body: { skin: '#5c3a1e' } }, { ...P, level: 11 }), 18, 'skin 12 x 1.5');
+  assert.equal(barberCost({}, {}, { ...P, raceChanged: true }), 40);
+});
+
+test('S25: with Names off the world map draws no text at all — provinces, zones, bands, settlements, places', async () => {
+  const { drawMap } = await import('../../js/client/ui/map-render.js');
+  const { makeView } = await import('../../js/client/ui/map-data.js');
+  const texts = [];
+  const ctx = new Proxy({}, { get: (t, k) => (k === 'fillText' || k === 'strokeText' ? (s => texts.push(s)) : k === 'measureText' ? (s => ({ width: String(s).length * 6 })) : k in t ? t[k] : () => {}), set: (t, k, v) => { t[k] = v; return true; } });
+  const model = { provinces: [{ name: 'Torbor Downs', zones: [1], cx: 1024, cz: 1024, playable: true }], playable: { band: [1, 8] },
+    zones: new Map([['z12_02', { key: 'z12_02', playable: true, name: 'The Torbor Fields', band: [1, 4], bounds: { minX: 0, minZ: 0, maxX: 2048, maxZ: 2048 } }]]),
+    settlements: [{ name: 'Torborhold', x: 1000, z: 1000, size: 3, hub: true }], rivers: [], roads: [] };
+  const markers = [{ kind: 'landmark', name: 'The Hanging Oak', x: 1010, z: 1010, priority: 3, size: 5 }];
+  for (const scale of [0.01, 0.1, 0.5]) {
+    const view = makeView({ cx: 1024, cz: 1024, scale, w: 800, h: 600 });
+    texts.length = 0; drawMap(ctx, view, { model, markers, opts: { names: true, zones: false } });
+    assert.ok(texts.length > 0, `names on draws text at scale ${scale}`);
+    texts.length = 0; drawMap(ctx, view, { model, markers, opts: { names: false, zones: false } });
+    assert.deepEqual(texts, [], `names off draws nothing at scale ${scale}`);
+  }
 });

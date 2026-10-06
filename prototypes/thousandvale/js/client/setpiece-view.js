@@ -20,6 +20,7 @@ import { LIGHTS } from './lightpool.js';
 import { unitGeometry, localToWorld } from './town-view.js';
 import { makeGlowTexture, makeFlameTexture, createDecor } from './decor.js';
 import { createBudget } from './perf.js';
+import { buildSignBoards } from './sign-text.js';
 import { MESHES, describeBuilding, partsFor, radiusOf } from '../../../../proctown/js/buildkit.js';
 import { officeDressing, officeKindFor, OFFICE_KINDS } from '../../../../proctown/js/offices.js';
 import * as KIT from '../../../../proctown/js/propkit.js';
@@ -224,6 +225,7 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
   // set_buildings: proctown bodies (+ office dressing on a chapel/mill/inn/stable), in the building's own frame
   const solids = plan.solids.map(s => { const g = groundOf(s.x, s.z); return { x: s.x, z: s.z, r: s.r, bottom: g - 1, top: g + s.h }; });
   const abs = [];      // parts already in absolute height (buildings)
+  const signs = [];    // name boards over office doors (B's label: 'The Wheel and Wether')
   for (const b of plan.buildings) {
     let desc; try { desc = describeBuilding({ plot: b.plot, culture: b.culture, seed: b.seed, want: b.plot.want }); } catch { continue; }
     const g = groundOf(b.plot.cx, b.plot.cz), yaw = desc.yaw + (desc.lean || 0), c = Math.cos(yaw), s = Math.sin(yaw);
@@ -236,6 +238,7 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
       for (const q of d.parts) place(q, q.tag === 'lamp' ? (plan.glassAbs || (plan.glassAbs = [])) : abs);
       for (const L of d.lights) plan.lights.push({ x: b.plot.cx + L.x * c + L.z * s, y: L.y, z: b.plot.cz - L.x * s + L.z * c, color: L.color, strong: !!L.strong, rel: true });
       for (const f of d.fires) plan.fires.push({ x: b.plot.cx + f.x * c + f.z * s, y: f.y, z: b.plot.cz - f.x * s + f.z * c, s: f.s });
+      if (d.fascia) signs.push({ text: b.label || OFFICE_KINDS[b.kind].label, x: b.plot.cx + d.fascia.x * c + d.fascia.z * s, y: g + d.fascia.y, z: b.plot.cz - d.fascia.x * s + d.fascia.z * c, yaw, w: d.fascia.w, h: d.fascia.h });
       for (const sp of d.spin) plan.spin.push({ x: b.plot.cx + sp.x * c + sp.z * s, y: sp.y, z: b.plot.cz - sp.x * s + sp.z * c, yaw, axis: sp.axis, speed: sp.speed, parts: sp.parts });
     }
     solids.push({ x: b.plot.cx, z: b.plot.cz, r: radiusOf(desc) * 0.85, bottom: g - 1, top: g + top });
@@ -302,10 +305,13 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
       group.add(decor.group);
     } catch (e) { console.warn('[setpieces] props', e.message); }
   }
+  const boards = buildSignBoards(signs);
+  if (boards) group.add(boards.mesh);
   let t = 0, night = 0;
   function setNight(n) {
     night = n;
     glassMat.emissiveIntensity = 1.6 * n;
+    boards?.setNight(n);
     for (const { l, h, s } of lights) { h.intensity = l.strong ? 6 + 10 * n : n > 0.05 ? (l.soft ? 4 : 9) * n : 0; s.visible = l.strong || n > 0.05; s.material.opacity = l.strong ? 0.35 + 0.5 * n : 0.8 * n; }
   }
   return {
@@ -317,7 +323,7 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
       for (let i = 0; i < flames.length; i++) { const f = flames[i]; f.scale.y = f.userData.s * (1.2 + Math.sin(t * 9 + i) * 0.12); }
       decor?.update?.(dt, pos);
     },
-    stats: { parts: plan.parts.length + abs.length, buildings: plan.buildings.length, spinners: spinners.length, lights: lights.length, props: propList.length, meshes: meshes.length },
-    dispose() { for (const m of meshes) m.dispose(); kitMat.dispose(); glassMat.dispose(); flameMat.dispose(); for (const { h, s } of lights) { h.remove(); s.material.dispose(); } decor?.dispose?.(); for (const d of disposers) d(); },
+    stats: { signs: signs.length, parts: plan.parts.length + abs.length, buildings: plan.buildings.length, spinners: spinners.length, lights: lights.length, props: propList.length, meshes: meshes.length },
+    dispose() { for (const m of meshes) m.dispose(); kitMat.dispose(); glassMat.dispose(); flameMat.dispose(); for (const { h, s } of lights) { h.remove(); s.material.dispose(); } decor?.dispose?.(); boards?.dispose(); for (const d of disposers) d(); },
   };
 }

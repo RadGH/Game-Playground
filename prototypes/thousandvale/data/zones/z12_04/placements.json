@@ -1,5 +1,5 @@
 {
- "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall, road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall (play-test 4: every planned settlement; data.style/material/tier/h/thick/tint/radius, runs [[[x,z,h]…]…] open polylines between openings, towers [{x,z,h,yaw}], gates [{id,x,z,h,yaw = the way OUT along the road,out:[dx,dz],width,pass,kind gatehouse|posts|gap,way,ways,led,ends,approaches}], openings [{kind water|keep,ends,grate}] — SOLID in nav.bin except the gates; tools/lib/zone-walls.mjs), road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
  "zone": "z12_04",
  "terrainHash": "e88810dc",
  "placements": [
@@ -8201,6 +8201,611 @@
       1114.28
      ]
     ]
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "coldwater_wall",
+   "x": 1474,
+   "z": 1846,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "name": "Coldwater",
+    "settlement": "town",
+    "style": "curtain",
+    "material": "stone",
+    "tier": "wall",
+    "h": 4.4,
+    "thick": 1.2,
+    "tint": "#a29c90",
+    "radius": 62.86,
+    "solid": true,
+    "runs": [
+     [
+      [
+       1428.1,
+       1888.96,
+       1173.68
+      ],
+      [
+       1418.02,
+       1874.61,
+       1173.38
+      ],
+      [
+       1412.3,
+       1858.03,
+       1173.03
+      ],
+      [
+       1411.37,
+       1840.52,
+       1173.37
+      ],
+      [
+       1415.33,
+       1823.43,
+       1173.27
+      ],
+      [
+       1423.84,
+       1808.1,
+       1173.4
+      ],
+      [
+       1436.26,
+       1795.72,
+       1173.75
+      ],
+      [
+       1451.62,
+       1787.25,
+       1174.32
+      ],
+      [
+       1468.72,
+       1783.36,
+       1175.54
+      ],
+      [
+       1486.23,
+       1784.34,
+       1176.02
+      ],
+      [
+       1502.79,
+       1790.12,
+       1176.6
+      ],
+      [
+       1517.11,
+       1800.24,
+       1176.46
+      ],
+      [
+       1528.07,
+       1813.93,
+       1176.59
+      ],
+      [
+       1534.83,
+       1830.12,
+       1176.68
+      ],
+      [
+       1536.85,
+       1847.54,
+       1176.54
+      ],
+      [
+       1533.98,
+       1864.84,
+       1176.21
+      ],
+      [
+       1526.44,
+       1880.67,
+       1175.87
+      ],
+      [
+       1514.82,
+       1893.81,
+       1175.8
+      ],
+      [
+       1500.02,
+       1903.23,
+       1175.19
+      ],
+      [
+       1483.2,
+       1908.19,
+       1174.58
+      ],
+      [
+       1465.66,
+       1908.31,
+       1174.25
+      ],
+      [
+       1448.78,
+       1903.58,
+       1173.99
+      ],
+      [
+       1433.85,
+       1894.37,
+       1174.09
+      ]
+     ]
+    ],
+    "towers": [
+     {
+      "x": 1426.17,
+      "z": 1886.8,
+      "h": 1173.58,
+      "yaw": -0.8646
+     },
+     {
+      "x": 1436.12,
+      "z": 1896.17,
+      "h": 1174.19,
+      "yaw": -0.6466
+     },
+     {
+      "x": 1411.28,
+      "z": 1850.28,
+      "h": 1173.29,
+      "yaw": -1.5026
+     },
+     {
+      "x": 1422.69,
+      "z": 1809.68,
+      "h": 1173.46,
+      "yaw": -2.1868
+     },
+     {
+      "x": 1457.19,
+      "z": 1785.42,
+      "h": 1174.65,
+      "yaw": -2.8709
+     },
+     {
+      "x": 1499.26,
+      "z": 1788.43,
+      "h": 1176.47,
+      "yaw": 2.7281
+     },
+     {
+      "x": 1529.96,
+      "z": 1817.36,
+      "h": 1176.58,
+      "yaw": 2.0439
+     },
+     {
+      "x": 1535.47,
+      "z": 1859.17,
+      "h": 1176.38,
+      "yaw": 1.3597
+     },
+     {
+      "x": 1513.31,
+      "z": 1895.06,
+      "h": 1175.74,
+      "yaw": 0.6756
+     },
+     {
+      "x": 1473.46,
+      "z": 1908.86,
+      "h": 1174.37,
+      "yaw": -0.0086
+     }
+    ],
+    "gates": [
+     {
+      "id": "coldwater_gate_0",
+      "x": 1430.89,
+      "z": 1891.76,
+      "h": 1173.9,
+      "yaw": -0.755,
+      "out": [
+       -0.6853,
+       0.7282
+      ],
+      "width": 4.7,
+      "pass": 4.7,
+      "slant": 0.001,
+      "kind": "gatehouse",
+      "way": "road_link_coldwater",
+      "wayKind": "road",
+      "ways": [
+       "road_link_coldwater"
+      ],
+      "led": [],
+      "ends": [
+       [
+        1433.85,
+        1894.37
+       ],
+       [
+        1428.1,
+        1888.96
+       ]
+      ],
+      "approaches": [
+       {
+        "way": "road_link_coldwater",
+        "width": 3.5,
+        "pts": [
+         [
+          1440.82,
+          1881.22
+         ],
+         [
+          1439.47,
+          1882.65
+         ],
+         [
+          1438.11,
+          1884.09
+         ],
+         [
+          1436.76,
+          1885.53
+         ],
+         [
+          1435.4,
+          1886.97
+         ],
+         [
+          1434.05,
+          1888.4
+         ],
+         [
+          1432.69,
+          1889.84
+         ],
+         [
+          1431.34,
+          1891.28
+         ],
+         [
+          1430.05,
+          1892.65
+         ],
+         [
+          1428.76,
+          1894.03
+         ],
+         [
+          1427.46,
+          1895.4
+         ],
+         [
+          1426.17,
+          1896.77
+         ],
+         [
+          1424.88,
+          1898.14
+         ],
+         [
+          1423.59,
+          1899.52
+         ],
+         [
+          1422.3,
+          1900.89
+         ],
+         [
+          1421.01,
+          1902.26
+         ],
+         [
+          1419.71,
+          1903.63
+         ],
+         [
+          1418.42,
+          1905.01
+         ],
+         [
+          1417.13,
+          1906.38
+         ],
+         [
+          1415.78,
+          1907.82
+         ],
+         [
+          1414.42,
+          1909.25
+         ],
+         [
+          1413.07,
+          1910.69
+         ],
+         [
+          1411.71,
+          1912.13
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "openings": []
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "netherby_wall",
+   "x": 711,
+   "z": 732,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "name": "Netherby",
+    "settlement": "hamlet",
+    "style": "fence",
+    "material": "rail",
+    "tier": "low",
+    "h": 1.25,
+    "thick": 0.3,
+    "tint": "#8a6c50",
+    "radius": 42.95,
+    "solid": true,
+    "runs": [
+     [
+      [
+       704.53,
+       774.46,
+       944.9
+      ],
+      [
+       694.8,
+       771.78,
+       944.57
+      ],
+      [
+       685.97,
+       766.9,
+       944.72
+      ],
+      [
+       678.52,
+       760.1,
+       944.67
+      ],
+      [
+       672.86,
+       751.75,
+       944.28
+      ],
+      [
+       669.31,
+       742.31,
+       944.15
+      ],
+      [
+       668.05,
+       732.31,
+       944.01
+      ],
+      [
+       669.16,
+       722.28,
+       943.73
+      ],
+      [
+       672.58,
+       712.79,
+       943.52
+      ],
+      [
+       678.12,
+       704.36,
+       943.58
+      ],
+      [
+       685.48,
+       697.46,
+       943.59
+      ],
+      [
+       694.24,
+       692.46,
+       943.25
+      ],
+      [
+       703.92,
+       689.64,
+       943.21
+      ],
+      [
+       714,
+       689.15,
+       942.93
+      ],
+      [
+       723.91,
+       691.04,
+       942.84
+      ],
+      [
+       733.11,
+       695.18,
+       942.78
+      ],
+      [
+       741.08,
+       701.35,
+       942.57
+      ],
+      [
+       747.4,
+       709.21,
+       942.61
+      ],
+      [
+       751.72,
+       718.33,
+       942.85
+      ],
+      [
+       753.78,
+       728.2,
+       942.88
+      ],
+      [
+       753.49,
+       738.28,
+       942.86
+      ],
+      [
+       750.85,
+       748.02,
+       943.13
+      ],
+      [
+       746.02,
+       756.87,
+       943.48
+      ],
+      [
+       739.25,
+       764.35,
+       943.92
+      ],
+      [
+       730.93,
+       770.05,
+       944.19
+      ],
+      [
+       721.5,
+       773.65,
+       944.55
+      ],
+      [
+       711.5,
+       774.95,
+       944.94
+      ]
+     ]
+    ],
+    "towers": [],
+    "gates": [
+     {
+      "id": "netherby_gate_0",
+      "x": 708,
+      "z": 774.85,
+      "h": 945.15,
+      "yaw": -0.0694,
+      "out": [
+       -0.0693,
+       0.9976
+      ],
+      "width": 4.7,
+      "pass": 4.7,
+      "slant": 0,
+      "kind": "posts",
+      "way": "road_link_netherby",
+      "wayKind": "road",
+      "ways": [
+       "road_link_netherby"
+      ],
+      "led": [],
+      "ends": [
+       [
+        711.5,
+        774.95
+       ],
+       [
+        704.53,
+        774.46
+       ]
+      ],
+      "approaches": [
+       {
+        "way": "road_link_netherby",
+        "width": 3.5,
+        "pts": [
+         [
+          709.1,
+          759.19
+         ],
+         [
+          708.96,
+          761.06
+         ],
+         [
+          708.83,
+          762.94
+         ],
+         [
+          708.7,
+          764.81
+         ],
+         [
+          708.57,
+          766.63
+         ],
+         [
+          708.45,
+          768.46
+         ],
+         [
+          708.32,
+          770.28
+         ],
+         [
+          708.19,
+          772.1
+         ],
+         [
+          708.07,
+          773.93
+         ],
+         [
+          707.94,
+          775.75
+         ],
+         [
+          707.81,
+          777.54
+         ],
+         [
+          707.69,
+          779.32
+         ],
+         [
+          707.56,
+          781.11
+         ],
+         [
+          707.44,
+          782.89
+         ],
+         [
+          707.31,
+          784.68
+         ],
+         [
+          707.19,
+          786.46
+         ],
+         [
+          707.06,
+          788.25
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "openings": []
    }
   },
   {

@@ -4,6 +4,45 @@
 and the Quaternius mesh mode (`quaternius.js`) are **deprecated**: they stay on the avatar page,
 labelled as such, only so the three can be compared. Nothing new is built for them.
 
+## Tier-2 class armour and emblems (2026-10-05, Thousandvale play-test 4 S18) — opt-in
+
+"A second tier of armour for every class with iconography (flames, lightning bolts, poison drops…)."
+`js/chibi2-armour2.js` (called by chibi2.js right after `buildGear`, same context) draws two opt-in things;
+a look that names neither builds exactly what it did before (`tests/class-outfits-t2.test.js` runs
+`buildArmour2` over every tier-1 outfit and every Emberveil class look and asserts it adds nothing).
+
+* **Emblems** — `top.emblem` (+ `emblemColor`) puts the icon in relief on a backing disc on the chest and on
+  the back (on a long cape if one is worn — `cape` / `travel_cloak` / `tattered_cape` — else on the body);
+  `hat.emblem` puts it on the helm brow (`BROW` table of brow points per hat). 24 shapes, extruded 2D
+  outlines with a lighter/darker detail layer (`EMBLEMS`, `EMBLEM_IDS`): flame, bolt, drop, blood, frost
+  (alias snowflake), sun (alias sunburst), skull, leaf, rune, moon, eye, hourglass, fist, note, cog (alias
+  gear), arrow, sword, shield, cross, claw, coin, feather, star, crown. The extra fields survive the shared
+  normaliser (it `Object.assign`s a slot), so they need no registration.
+* **Five tier-2 decor kits** (registered in `avatar-2d/js/parts/chibi2-parts.js`, 2D draws the nearest kin):
+  `t2_pauldrons` (layered plate pauldrons with three trimmed lames, a crest fin, a gorget, the emblem on each
+  shoulder), `t2_mantle` (a high flared collar behind the head, gem-set shoulder caps with the emblem, a stole
+  down the front tipped with it), `t2_harness` (one great leather pauldron, a baldric whose buckle IS the
+  chest emblem, bracers), `t2_vestments` (a long trimmed tabard front and back with the emblem on it,
+  shoulder caps, a cord belt), `t2_wildmantle` (a fur ring with horns and tufts in the emblem colour).
+  `decor.color` is the kit, `decor.color2` its trim. A kit replaces the class's tier-1 decor.
+
+**Data** — `data/class-outfits-t2.json` (built by `node tools/build-class-outfits-t2.mjs`): a complete tier-2
+outfit for all 30 classes (the tier-1 table has 24). Emblem, trim and glow follow Thousandvale's
+`data/rules/armour-tiers.json` class themes (warrior flame, mage frost, necromancer bone/skull …) so a preview
+and a dropped themed piece agree.
+
+```js
+import { loadClassOutfits2, dressAs, tier2Dress, isTier2Item } from '../../avatar-3d/js/class-outfits.js';
+const t2 = await loadClassOutfits2();
+const portrait = dressAs(avatar, t2.pyromancer);                       // the whole tier-2 outfit
+const worn = tier2Dress(gearLook, t2.pyromancer, { chest: true, head: true, emblem: 'flame', trim: '#c8461e', emblemColor: '#ffae42' });
+isTier2Item(item)   // look.tier, else a theme, else a numeric tier >= 2, else item level >= ITEM_TIER2_LEVEL (15); never rarity alone
+```
+
+Gallery: `armour2.html` (`?view=pairs` tier 1 vs tier 2 for every class, `&back=1` the backs, `?view=emblems`,
+`?view=kits`). Cost: +1,000–2,800 triangles a character (budget asserted < 16,000). Not done here: the emblem
+on a SHIELD face (the off-hand grip was being reworked in the same round — `chibi2-weapons.js`).
+
 ## Class outfits and the 2026-09-25 look fixes
 
 **Class outfits** — `data/class-outfits.json` + `js/class-outfits.js` (no Three.js). An outfit is only
@@ -392,3 +431,30 @@ budgets, sprite pixel equivalence, parent visibility, paused-camera billboards, 
 controls, benchmark state restoration, rapid renderer switching, mobile framing/canvas pixels, and
 eight new humanoids with live effects in the opt-in Emberveil stage. Screenshots go to
 `test-results/chibi2-*.png`. The original avatar, geometry and spell tests cover default paths.
+
+## Play-test 4 (2026-10-05, Thousandvale): foci held up, second wands, four new weapons
+
+- **S6 — a focus stands up out of the fist.** The orb, reliquary (`relic`), effigy (`idol`) and the new `tv_ward` /
+  `tv_totem` are built up the hand's +y, which is the way to the ELBOW, and their left-hand kind (`orb`) had no grip turn,
+  so they lay back along the forearm. `chibi2-motion.js` `base()` now gives `gripL` a quarter turn about x for that kind
+  (+y onto the hand's +z) and `carry()` holds the forearm out level, so the focus stands upright on the fist in every clip.
+  Global fix (Farhold's R25 foci use the same ids and had the same fault); shields, books and torches are unchanged.
+- **S15 — any wand in the off hand.** `HELD_WEAPON_IDS` (chibi2-weapon-ids.js) no longer drops the `wand` kind, so an
+  off-hand `fh_wand` is built by the main-hand builder on the left hand instead of falling through to the shield builder.
+  `holdFor` already gives it `left: 'wand'` (REST_PITCH.wand). Farhold never puts a wand in the off hand, so nothing moves there.
+- **S17 — four more silhouettes**, `avatar-3d/js/chibi2-weapons-tv.js` (new file; chibi2-weapons.js stays `fh_`-only,
+  which Farhold's round17 test enforces): `tv_scimitar` (blade), `tv_warpick` (two-handed, pick spike on -z), `tv_club`
+  (haft, spiked), `tv_glaive` (one-handed polearm, edge -z). Catalogued in `FARHOLD_WEAPON_INFO` (so the grip-rule test
+  covers them) and dispatched by `buildFarholdHeld`, which lends the kit's part helpers in as `K`. Two caster foci in
+  chibi2-gear.js `buildOffhand`: `tv_ward` (a rune ring with a hovering crystal) and `tv_totem` (three carved faces).
+  All registered in avatar-2d `chibi2-parts.js` (a new `held` slot section; avatar-2d `parts/index.js` merges `held` now).
+  Thousandvale's `js/client/gear-look.js` maps every loot-pool base to a model (`HELD_BY_BASE`, `OFFHAND_BY_BASE`; old
+  Emberveil `look.held` ids are swapped for their kit model), checked by `prototypes/thousandvale/tests/D/weapon-models.test.js`.
+
+## Play-test 4 (2026-10-05, Thousandvale): mounts (S22)
+
+Riders are unchanged (`ride` / `rideGallop` in `CHIBI2_MOUNT_ANIMS`, `seatRider`). What a Chibi 2 rider sits on changed:
+the hoofed mounts (horse, pony, courser, warhorse, stag and the new dray elk) are built by `js/equine.js` — lofted barrel /
+neck / head, jointed legs with hooves, mane and tail, tack cut from the body's own surface, and walk / trot / gallop leg
+patterns with a crossfade. The seat is still on the hip, counter-scaled, ~0.04 m above the saddle's back, so a rider's hips
+land where they did. See README "Mounts" for the details and `node --test avatar-3d/tests/mounts.test.js`.

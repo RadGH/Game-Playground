@@ -272,9 +272,13 @@
             "wand",
             "hammer",
             "battleaxe",
-            "staff"
+            "staff",
+            "iron_mace",
+            "javelin",
+            "crossbow",
+            "halberd"
           ],
-          "count": 4,
+          "count": 6,
           "rarity": {
             "normal": 0.5,
             "magic": 0.42,
@@ -339,23 +343,23 @@
       "light": true,
       "categories": {
         "weapon": {
-          "label": "Blades & hafts",
+          "label": "Blades, axes, maces & polearms",
           "bases": [
             "sword",
-            "longsword",
             "rapier",
             "dagger",
-            "hammer",
-            "warhammer",
-            "battleaxe",
             "iron_mace",
-            "sword2h",
-            "greatsword",
+            "hammer",
+            "battleaxe",
             "axe2h",
+            "sword2h",
             "halberd",
-            "spear"
+            "spear",
+            "longsword",
+            "warhammer",
+            "greatsword"
           ],
-          "count": 10,
+          "count": 13,
           "rarity": {
             "normal": 0.55,
             "magic": 0.38,
@@ -527,14 +531,16 @@
       "light": true,
       "categories": {
         "weapon": {
-          "label": "Wands & rods",
+          "label": "Staves, wands & rods",
           "bases": [
             "wand",
+            "staff",
             "scepter",
             "orb",
-            "tome"
+            "tome",
+            "quarterstaff"
           ],
-          "count": 4,
+          "count": 6,
           "rarity": {
             "normal": 0.5,
             "magic": 0.42,
@@ -633,7 +639,7 @@
             "reliquary",
             "effigy"
           ],
-          "count": 3,
+          "count": 6,
           "rarity": {
             "normal": 0.5,
             "magic": 0.42,
@@ -1486,11 +1492,21 @@
         },
         {
           "base": "spear",
-          "rarity": "magic",
+          "rarity": "normal",
           "cat": "Odds and ends"
         },
         {
           "base": "shortbow",
+          "rarity": "magic",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "wand",
+          "rarity": "magic",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "hammer",
           "rarity": "magic",
           "cat": "Odds and ends"
         },
@@ -1550,52 +1566,67 @@
         {
           "base": "sword",
           "rarity": "normal",
-          "cat": "Blades & hafts"
-        },
-        {
-          "base": "longsword",
-          "rarity": "normal",
-          "cat": "Blades & hafts"
+          "cat": "Blades, axes, maces & polearms"
         },
         {
           "base": "rapier",
           "rarity": "normal",
-          "cat": "Blades & hafts"
+          "cat": "Blades, axes, maces & polearms"
         },
         {
           "base": "dagger",
           "rarity": "normal",
-          "cat": "Blades & hafts"
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "iron_mace",
+          "rarity": "normal",
+          "cat": "Blades, axes, maces & polearms"
         },
         {
           "base": "hammer",
           "rarity": "normal",
-          "cat": "Blades & hafts"
-        },
-        {
-          "base": "warhammer",
-          "rarity": "magic",
-          "cat": "Blades & hafts"
+          "cat": "Blades, axes, maces & polearms"
         },
         {
           "base": "battleaxe",
-          "rarity": "magic",
-          "cat": "Blades & hafts"
+          "rarity": "normal",
+          "cat": "Blades, axes, maces & polearms"
         },
         {
-          "base": "iron_mace",
-          "rarity": "magic",
-          "cat": "Blades & hafts"
+          "base": "axe2h",
+          "rarity": "normal",
+          "cat": "Blades, axes, maces & polearms"
         },
         {
           "base": "sword2h",
           "rarity": "magic",
-          "cat": "Blades & hafts"
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "halberd",
+          "rarity": "magic",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "spear",
+          "rarity": "magic",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "longsword",
+          "rarity": "magic",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "warhammer",
+          "rarity": "magic",
+          "cat": "Blades, axes, maces & polearms"
         },
         {
           "base": "greatsword",
           "rarity": "rare",
-          "cat": "Blades & hafts"
+          "cat": "Blades, axes, maces & polearms"
         },
         {
           "base": "buckler",
@@ -1809,22 +1840,32 @@
         {
           "base": "wand",
           "rarity": "normal",
-          "cat": "Wands & rods"
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "staff",
+          "rarity": "normal",
+          "cat": "Staves, wands & rods"
         },
         {
           "base": "scepter",
           "rarity": "normal",
-          "cat": "Wands & rods"
+          "cat": "Staves, wands & rods"
         },
         {
           "base": "orb",
           "rarity": "magic",
-          "cat": "Wands & rods"
+          "cat": "Staves, wands & rods"
         },
         {
           "base": "tome",
           "rarity": "magic",
-          "cat": "Wands & rods"
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "quarterstaff",
+          "rarity": "magic",
+          "cat": "Staves, wands & rods"
         }
       ],
       "markup": 1,
@@ -1947,6 +1988,21 @@
         },
         {
           "base": "grimoire",
+          "rarity": "normal",
+          "cat": "Caster's off hand"
+        },
+        {
+          "base": "seer_orb",
+          "rarity": "magic",
+          "cat": "Caster's off hand"
+        },
+        {
+          "base": "reliquary",
+          "rarity": "magic",
+          "cat": "Caster's off hand"
+        },
+        {
+          "base": "effigy",
           "rarity": "magic",
           "cat": "Caster's off hand"
         }

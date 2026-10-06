@@ -22,6 +22,7 @@ import { compactCreature } from '../../../../avatar-3d/js/mesh-merge.js';
 import { avatarFor, bodyTypeFor, loadMonsterLooks } from './looks.js';
 import { normalizeAvatar } from '../../../../avatar-2d/js/render.js';
 import { perf, compileBeforeShow } from './perf.js';
+import { createMount, seatRider, mountSpecFor, CHIBI2_MOUNT_ANIMS } from '../../../../avatar-3d/js/mounts.js';
 
 /** A creature spec from what the server sent: `{ type, size?, seed, colors? }` — colour varied by seed within its family. */
 function creatureFor(spec) {
@@ -34,7 +35,15 @@ const TAU = Math.PI * 2;
 /** Shortest signed difference between two angles. */
 export function angleDelta(a, b) { let d = (b - a) % TAU; if (d > Math.PI) d -= TAU; if (d < -Math.PI) d += TAU; return d; }
 
-const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim'];   // swim: P25
+/** S4: how much bigger a monster of this rank / with these affixes is drawn. Pure — exported for tests. */
+export function rankScale(rank, mods = null) {
+  let k = rank === 'boss' ? 1.45 : rank === 'rare' ? 1.32 : rank === 'champion' ? 1.24 : rank === 'elite' ? 1.18 : 1;
+  if (Array.isArray(mods) && mods.some(m => /giant|huge|colossal/.test(String(m)))) k *= 1.35;
+  return +k.toFixed(3);
+}
+export const isLeader = mods => Array.isArray(mods) && mods.some(m => /leader|alpha|chief|warlord|pack/.test(String(m)));
+const RANK_COLOUR = { rare: '#ffd040', champion: '#5aa0ff', elite: '#c0c0c0' };
+const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim', 'sitGround', 'drink', ...CHIBI2_MOUNT_ANIMS];   // sitGround/drink: eating and drinking (S20)   // swim: P25; ride/rideGallop: Q16
 
 /** Pure LOD choice — exported for tests. `list` = [{ id, kind, d }] -> Set of ids that get a full body. */
 export function chooseFull(list, { fullMax = 30, monsterRange = 120, selfId = null } = {}) {
@@ -141,7 +150,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     queue.push(a);
     return a;
   }
-  function pick(i) { return { name: i.name, level: i.level, hp: i.hp, hpMax: i.hpMax, hostile: !!i.hostile, look: i.look, creature: i.creature, family: i.family, rank: i.rank || null, pet: !!i.pet, role: i.role || null }; }
+  function pick(i) { return { name: i.name, level: i.level, hp: i.hp, hpMax: i.hpMax, hostile: !!i.hostile, look: i.look, creature: i.creature, family: i.family, rank: i.rank || null, pet: !!i.pet, role: i.role || null, mods: Array.isArray(i.mods) ? i.mods : null }; }
 
   async function build(a) {
     a.building = true; lodStats.built++;
@@ -152,7 +161,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         const looks = await loadMonsterLooks();
         const look = looks[a.creature?.type] || null;
         a.flying = !!look?.flying;
-        const big = a.rank === 'boss' ? 1.45 : a.rank === 'elite' || a.rank === 'champion' || a.rank === 'rare' ? 1.18 : 1;
+        const big = rankScale(a.rank, a.mods);      // S4: rares and champions stand out by size (a giant much more)
         if (look?.avatar) {
           // A humanoid monster (brigand, cultist, knight): a Chibi 2 body, scaled up when it is an elite or boss.
           body = await createChibi2Character(normalizeAvatar(look.avatar), { anims: CHIBI_ANIMS });
@@ -190,8 +199,67 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         if (Number.isFinite(size.x) && size.y > 0.05 && size.y < 20) { a.pickR = Math.max(0.6, Math.min(4, Math.max(size.x, size.z) * 0.55)); a.pickTop = Math.max(0.6, size.y); if (a.kind === 'monster' || a.pet) a.height = Math.max(0.6, Math.min(a.height, size.y * 1.05)); }
       } catch { /* the default volume stands */ }
       if (a.dead) setAnim(a, 'dead');
+      if (a.kind === 'monster' && (isLeader(a.mods) || a.rank === 'rare' || a.rank === 'champion')) addRankMark(a);
     } catch (e) {
       console.warn('[actors] body failed for', a.id, e);
+    }
+  }
+
+  // ---- mounts (play-test 2, Q16): `info.mount` / `you.mount` names what someone rides; the body sits in its saddle ----
+  const mountCache = new Map();          // mount id -> a spare built mount (dismounting keeps it for the next ride)
+  function dropMount(a) {
+    if (!a.mount) { a.mountHave = null; return; }
+    try { a.unseat?.(); } catch {}
+    a.group.remove(a.mount.group);
+    if (!mountCache.has(a.mountHave)) mountCache.set(a.mountHave, a.mount); else a.mount.dispose();
+    a.mount = null; a.unseat = null; a.mountHave = null;
+    if (a.baseHeight) { a.height = a.baseHeight; a.baseHeight = 0; }
+    if (a.model) { a.group.add(a.model); a.model.position.set(0, 0, 0); a.model.rotation.set(0, a.yaw, 0); }
+  }
+  async function syncMount(a) {
+    const want = a.dead ? null : a.mountWant ?? null;
+    if (want === (a.mountHave ?? null)) return;
+    dropMount(a);
+    if (!want || !a.body) return;
+    a.mounting = true;
+    try {
+      let m = mountCache.get(want); mountCache.delete(want);
+      if (!m) {
+        m = await createMount(mountSpecFor(a.mountLook || want), { detail: quality === 'low' ? 0.6 : 1 });
+        m.group.traverse(o => { if (o.isMesh) o.castShadow = true; });
+        if (renderer) await compileBeforeShow(renderer, m.group, camera, scene);
+      }
+      if (!actors.has(a.id) || !a.body || (a.mountWant ?? null) !== want || a.dead) { mountCache.set(want, m); return; }
+      a.group.add(m.group); m.group.rotation.y = a.yaw;
+      a.unseat = seatRider(m, a.body);
+      a.mount = m; a.mountHave = want;
+      try { const mm = m.metrics(); a.baseHeight = a.height; a.height = a.height + (mm.seatY || 1) * 0.85; } catch {}
+    } catch (e) { console.warn('[actors] mount failed', want, e); a.mountHave = want; }
+    finally { a.mounting = false; }
+  }
+  /** S20: eating ('food') or drinking ('drink') sits the body down until it moves; null = done. */
+  function setEating(id, kind) { const a = actors.get(id); if (a) a.eating = kind || null; }
+  /** Q16: what this actor rides (a mount id, or null to get down). `look` = the mount's own look when the server sends one. */
+  function setMount(id, mountId, look = null) {
+    const a = actors.get(id); if (!a || a.kind === 'monster' || a.pet) return;
+    a.mountWant = mountId || null; if (look) a.mountLook = look;
+  }
+
+  // S4: a gold ring under a rare (blue for a champion) and a banner-glow over a pack leader: seen from across a field
+  const markGeo = new THREE.RingGeometry(0.9, 1.08, 40); markGeo.rotateX(-Math.PI / 2);
+  const markMats = {};
+  function addRankMark(a) {
+    if (a.rankMark) return;
+    const col = isLeader(a.mods) ? '#ff9a30' : RANK_COLOUR[a.rank] || '#ffd040';
+    const mat = markMats[col] || (markMats[col] = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.75, depthWrite: false, fog: true }));
+    const m = new THREE.Mesh(markGeo, mat); m.position.y = 0.06; m.scale.setScalar(Math.max(1, (a.pickR || 1) * 1.2)); m.renderOrder = 2;
+    a.group.add(m); a.rankMark = m;
+    if (isLeader(a.mods)) {
+      // a war-banner on a pole riding the leader's back, and a glow over it
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.6, 5), new THREE.MeshStandardMaterial({ color: '#4a3a2a' }));
+      pole.position.set(0, a.height + 0.5, -0.25); a.group.add(pole); a.pole = pole;
+      const flag = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.4), new THREE.MeshStandardMaterial({ color: '#a8281e', side: THREE.DoubleSide, emissive: '#5a1008' }));
+      flag.position.set(0.28, 0.55, 0); pole.add(flag); a.flag = flag;
     }
   }
 
@@ -204,7 +272,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
 
   function remove(id) {
     const a = actors.get(id); if (!a) return;
-    scene.remove(a.group); a.body?.dispose?.(); a.plate?.root.remove();
+    dropMount(a); a.torchLight?.remove(); a.torchLight = null; scene.remove(a.group); a.body?.dispose?.(); a.plate?.root.remove();
     if (a.ripples) for (const r of a.ripples) { scene.remove(r); r.material.dispose(); }
     a.group.clear();           // detaches any spell aura riding the body (SpellFx drops an aura whose group has no parent)
     actors.delete(id);
@@ -215,15 +283,17 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     if (!plateLayer) return null;
     const root = document.createElement('div');
     root.className = `plate ${a.kind} ${a.hostile ? 'hostile' : 'friendly'}${a.self ? ' self' : ''}${a.rank && a.rank !== 'normal' ? ' rank-' + a.rank : ''}`;
-    root.innerHTML = `<div class="plate-bubble"></div><div class="plate-name"><span class="plate-lvl"></span><span class="plate-n"></span></div><div class="plate-bar"><i></i><b></b></div>`;
+    root.innerHTML = `<div class="plate-bubble"></div><div class="plate-title" hidden></div><div class="plate-name"><span class="plate-lvl"></span><span class="plate-n"></span></div><div class="plate-bar"><i></i><b></b></div>`;
     plateLayer.appendChild(root);
-    const p = { root, bubble: root.querySelector('.plate-bubble'), bubbleUntil: 0, name: root.querySelector('.plate-n'), lvl: root.querySelector('.plate-lvl'), bar: root.querySelector('.plate-bar i'), lag: root.querySelector('.plate-bar b'), lagW: 1 };
+    const p = { root, bubble: root.querySelector('.plate-bubble'), bubbleUntil: 0, title: root.querySelector('.plate-title'), name: root.querySelector('.plate-n'), lvl: root.querySelector('.plate-lvl'), bar: root.querySelector('.plate-bar i'), lag: root.querySelector('.plate-bar b'), lagW: 1 };
     a.plate = p; refreshPlate(a);
     return p;
   }
   function refreshPlate(a) {
     const p = a.plate; if (!p) return;
     p.name.textContent = a.name; p.lvl.textContent = a.level;
+    // play-test 4 S19: what a town NPC IS ("<Weaponsmith>", "<Barber>") over the name (ui/pt2.js sets a.npcTitle)
+    if (p.title) { p.title.hidden = !a.npcTitle; if (a.npcTitle) p.title.textContent = `<${a.npcTitle}>`; }
     const f = Math.max(0, Math.min(1, a.hp / (a.hpMax || 1)));
     p.bar.style.width = (f * 100).toFixed(1) + '%';
     p.root.classList.toggle('hurt', f < 0.999);
@@ -285,7 +355,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         const full = fullSet.has(a.id) || a.id === 'preview';
         if (a.lod === undefined || full !== (a.lod === 'full')) { a.lod = full ? 'full' : 'far'; a.lodSince = now; }
         // a body far away for half a minute is let go
-        if (a.lod === 'far' && a.body && now - a.lodSince > 30000) { a.group.remove(a.model); a.body.dispose?.(); a.body = null; a.model = null; a.building = false; a.group.add(a.standin); }
+        if (a.lod === 'far' && a.body && now - a.lodSince > 30000) { dropMount(a); a.group.remove(a.model); a.body.dispose?.(); a.body = null; a.model = null; a.building = false; a.group.add(a.standin); }
       }
     }
     // build the nearest full actor still waiting for a body (one a frame)
@@ -322,12 +392,16 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       a.recoil.multiplyScalar(Math.exp(-dt * 10));
       a.punch *= Math.exp(-dt * 12);
       a.group.position.set(a.pos.x + a.recoil.x, a.pos.y + (a.flying && !a.dead ? 1.3 + Math.sin(now / 420 + (typeof a.id === 'number' ? a.id : 0)) * 0.15 : 0), a.pos.z + a.recoil.z);
-      if (a.model) { a.model.rotation.y = a.yaw; a.model.scale.setScalar(1 + a.punch * 0.12); }
+      if (a.mount) { a.mount.group.rotation.y = a.yaw; a.mount.setGait(a.speed); }
+      if (a.model) { a.model.rotation.y = a.mount ? 0 : a.yaw; a.model.scale.setScalar(1 + a.punch * 0.12); }
+      if (a.body && a.mountWant !== (a.mountHave ?? null) && !a.mounting) syncMount(a);
       if (a.swim || a.ripples) ripple(a, now);
 
       // Animation.
       let want;
       if (a.dead) want = 'dead';
+      else if (a.mount) want = a.mount.riderClip;
+      else if (a.eating && a.speed <= 0.4 && !(a.oneShot && now < a.oneShotUntil)) want = a.eating === 'drink' ? 'drink' : 'sitGround';   // S20: sat down to eat           // Q16: in the saddle; the mount's gait picks ride / rideGallop
       else if (a.swim && (a.kind === 'player' || a.humanoid || a.kind === 'npc')) want = 'swim';      // P25
       else if (a.oneShot && now < a.oneShotUntil) want = a.oneShot;
       else {
@@ -362,12 +436,12 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       if (!a.body && !a.building && !queue.includes(a)) queue.push(a);
       if (a.body) {
         const dCam = Math.hypot(a.pos.x - camera.position.x, a.pos.z - camera.position.z);
-        if (dCam > ANIM_NEAR && !a.self) { a.animAcc = (a.animAcc || 0) + dt; if (a.animAcc >= 0.1) { a.body.update(a.animAcc, now / 1000); a.animAcc = 0; } }
-        else a.body.update(dt, now / 1000);
+        if (dCam > ANIM_NEAR && !a.self) { a.animAcc = (a.animAcc || 0) + dt; if (a.animAcc >= 0.1) { a.body.update(a.animAcc, now / 1000); a.mount?.update(a.animAcc, now / 1000); a.animAcc = 0; } }
+        else { a.body.update(dt, now / 1000); a.mount?.update(dt, now / 1000); }
       }
 
       // Corpses fade and sink after a while (monsters only; players stand back up on respawn).
-      if (a.dead && a.kind === 'monster' && a.deathAt && now - a.deathAt > 9000) {
+      if (a.dead && a.kind === 'monster' && a.deathAt && now - a.deathAt > 9000 && !a.lootMark) {   // a body with loot for you stays (Q3)
         a.fade = Math.max(0, 1 - (now - a.deathAt - 9000) / 2500);
         a.group.position.y -= (1 - a.fade) * 0.8;
       } else a.fade = 1;
@@ -406,6 +480,8 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
   }
   function setDead(id, dead) {
     const a = actors.get(id); if (!a) return;
+    if (dead) { a.mountWant = null; dropMount(a); }
+    if (a.rankMark) a.rankMark.visible = !dead; if (a.pole) a.pole.visible = !dead;
     if (a.dead === dead && (dead ? a.deathAt : true)) { refreshPlate(a); return; }
     a.dead = dead;
     if (dead) { a.hp = 0; a.deathAt = performance.now(); a.oneShot = null; a.deadPos = { x: a.pos.x, z: a.pos.z }; }
@@ -464,5 +540,5 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     p.root.classList.toggle('self-plate', !!a.self);
   }
 
-  return { actors, lodStats, add, remove, rekey, say, update, setLook, playAttack, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
+  return { actors, lodStats, setMount, setEating, add, remove, rekey, say, update, setLook, playAttack, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
 }

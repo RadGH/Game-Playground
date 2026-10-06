@@ -2,6 +2,7 @@
   "id": "rare_thornbound_crawler",
   "name": "The Thornbound Crawler",
   "tier": "rare",
+  "secret": true,
   "zone": "blackthorn_scar",
   "body": "ossuary_crawler",
   "place": "drags itself through the thorn thickets of the Scar, wrapped in its own briars",

@@ -85,6 +85,11 @@ export function createBossUi({ actors, serverNow, toast } = {}) {
         const c = { name: ev.name || ev.ab, start: now, end: now + (ev.ms || 1000), int: !!ev.int, ab: ev.ab };
         casts.set(ev.id, c);
         plateCast(ev.id, c);
+        // R4: the warning stays readable for the WHOLE wind-up — the line the caster just said (sent at the cast's start)
+        // is held until the cast goes off; a boss cast with nothing said names the attack itself
+        const ms = (ev.ms || 1000) + 700;
+        if (lastSay.id === ev.id && performance.now() - lastSay.at < 500) holdCallout(ms);
+        else if (ev.id === B.id) { callout(`${c.name}!`, 'cast', B.name); holdCallout(ms); }
         break;
       }
       case 'castX': {
@@ -104,6 +109,7 @@ export function createBossUi({ actors, serverNow, toast } = {}) {
       case 'say': {
         const who = ev.id === B.id ? B.name : actors.get(ev.id)?.name;
         callout(ev.text, ev.style || 'yell', who);
+        lastSay.id = ev.id; lastSay.at = performance.now();
         break;
       }
     }
@@ -129,13 +135,16 @@ export function createBossUi({ actors, serverNow, toast } = {}) {
 
   // --- call-out banners ---------------------------------------------------------------------------
   let calloutTimer = 0;
-  function callout(text, style = 'yell', who = null) {
+  const lastSay = { id: null, at: 0 };
+  /** Keep the current call-out up for at least `ms` more (R4: a 3 s wind-up keeps its warning for 3 s, not 2.8 s at most). */
+  function holdCallout(ms) { clearTimeout(calloutTimer); calloutTimer = setTimeout(() => el.callout.classList.remove('show'), Math.max(2800, ms)); }
+  function callout(text, style = 'yell', who = null, quiet = false) {
     if (!text) return;
     el.callout.className = 'callout show ' + style;
     el.callout.textContent = text;
     clearTimeout(calloutTimer);
     calloutTimer = setTimeout(() => el.callout.classList.remove('show'), style === 'warn' || style === 'enrage' ? 3600 : 2800);
-    toast?.chat?.(who ? `${who}: ${text}` : text, style === 'emote' ? 'emote' : 'yell');
+    if (!quiet) toast?.chat?.(who ? `${who}: ${text}` : text, style === 'emote' ? 'emote' : 'yell');
   }
 
   // --- nameplate cast bars --------------------------------------------------------------------------

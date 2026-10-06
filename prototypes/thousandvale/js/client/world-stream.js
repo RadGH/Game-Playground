@@ -21,6 +21,7 @@ import { createScatterView } from './scatter-view.js';
 import { createTownView } from './town-view.js';
 import { createSiteView } from './site-view.js';
 import { createSetPieceView } from './setpiece-view.js';
+import { createWallsView } from './walls-view.js';   // play-test 4 S7 (stream B): town perimeters + gates
 import { perf, nextFrame } from './perf.js';
 
 /** Bounds for a zone key when the server sent none: `zXX_YY` in world metres, anything else zone-local. */
@@ -108,7 +109,9 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
         if (vigOk && extras.vignetteFile) { end = perf.begin('zone:sites'); const sv = await createSiteView(T, extras.vignetteFile, { quality }); end(); if (sv && loaded.get(q.key) === L) { if (!(await show(sv))) return L; L.views.push(sv); L.sites = sv; } else sv?.dispose?.(); }
         // Q18: bespoke areas — B's ground (graveyards, fields, hedges, set buildings) + E's set-piece dressing
         if (extras.placements.length || (vigOk && extras.vignetteFile)) { end = perf.begin('zone:setpieces'); const sp = await createSetPieceView(T, { placements: extras.placements, vignetteFile: vigOk ? extras.vignetteFile : null }, { quality }); end(); if (sp && loaded.get(q.key) === L) { if (!(await show(sp))) return L; L.views.push(sp); L.setpieces = sp; } else sp?.dispose?.(); }
-        if (solids && loaded.get(q.key) === L) solids.add(q.key, [...(L.town?.solids || []), ...(L.sites?.solids || []), ...(L.scatter?.solids || []), ...(L.setpieces?.solids || [])]);
+        // S7 (stream B): town walls / palisades / fences / barricades and their gates; night rides on the town view's setNight
+        if (extras.placements.length) { const wv = createWallsView(T, extras.placements, { quality }); if (wv && loaded.get(q.key) === L && await show(wv)) { L.views.push(wv); L.walls = wv; if (L.town?.setNight) { const sn = L.town.setNight; L.town.setNight = n => { sn(n); wv.setNight(n); }; } } else wv?.dispose?.(); }
+        if (solids && loaded.get(q.key) === L) solids.add(q.key, [...(L.town?.solids || []), ...(L.sites?.solids || []), ...(L.scatter?.solids || []), ...(L.setpieces?.solids || []), ...(L.walls?.solids || [])]);
       } catch (e) { console.warn('[world] zone extras failed', q.key, e); }
       L.ready = true;
       onZoneReady?.(L);

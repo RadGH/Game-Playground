@@ -99,7 +99,7 @@ export function connect(opts = {}) {
       case 'pong': onPong(m); return;
       case 'partyState': net.party = m.party; emit('party', m.party); return;
       case 'partyInvite': emit('partyInvite', m); return;
-      case 'partyFrames': emit('partyFrames', m.m.map(r => ({ char: r[0], hp: r[1], hpMax: r[2], room: r[3], x: r[4], z: r[5], dead: !!r[6], online: !!r[7], id: r[8] }))); return;
+      case 'partyFrames': emit('partyFrames', m.m.map(r => ({ char: r[0], hp: r[1], hpMax: r[2], room: r[3], x: r[4], z: r[5], dead: !!r[6], online: !!r[7], id: r[8], mp: r[9], mpMax: r[10] }))); return;
       case 'chat': emit('chat', m); return;
       case 'ignored': if (net.joined) net.joined.you.ignore = m.list; emit('ignored', m.list); return;
       case 'groupHint': emit('groupHint', m); return;
@@ -327,7 +327,7 @@ export function connect(opts = {}) {
   net.mail = (op, a = {}) => sendJ(game, pick({ t: 'mail', op }, a, ['id', 'to', 'subject', 'body', 'items', 'gold']));
   // ---- play-test 2 (docs/protocol.md §18) ----
   /** loot('open'|'take'|'all'|'close', {id: corpse entity id, uid?}) | ('roll', {roll, choice:'need'|'greed'|'skip'}) -> lootWin / lootR / lootRolled */
-  net.loot = (op, a = {}) => sendJ(game, pick({ t: 'loot', op }, a, ['id', 'uid', 'roll', 'choice']));
+  net.loot = (op, a = {}) => sendJ(game, pick({ t: 'loot', op }, a, ['id', 'uid', 'roll', 'choice', 'gold', 'near']));
   /** shop('open', {npc}) | ('buy', {npc, id}) | ('sell'|'back', {npc, uid}) -> shopView / shopR */
   net.shop = (op, a = {}) => sendJ(game, pick({ t: 'shop', op }, a, ['npc', 'id', 'uid']));
   /** mount('summon', {id?}) | ('off') -> mountR + you {mount, speedMul} */
@@ -340,6 +340,7 @@ export function connect(opts = {}) {
   net.partyLoot = min => net.partyOp('loot', { code: min });                       // 'magic' | 'rare' | 'legendary' | 'unique' (leader)
   net.inspect = id => sendJ(game, { t: 'inspect', id });
   net.bind = npc => sendJ(game, { t: 'bind', npc });                               // innkeeper: make this town home -> bindR
+  net.stand = () => sendJ(game, { t: 'item', op: 'stand' });                       // S20: get up from a meal -> you {regen:null, why:'stood'}
   net.useItem = uidOrKind => sendJ(game, { t: 'item', op: 'use', uid: String(uidOrKind) });   // a bag uid, or 'id:healing_potion' (hotbar) -> itemR                           // -> inspectR
   // D-UI's first names (play-test 2): the same messages
   net.lootOp = net.loot;

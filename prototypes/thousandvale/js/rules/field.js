@@ -23,6 +23,7 @@ import {
   traitsOf, applyStatus, staggerFor, pushFor, COMBAT_FEEL, addCorpse, untargetable,
 } from './farhold.js';
 import { threatFromDamage } from './threat.js';
+import { landed as perkLanded } from './perk-rules.js';
 
 /** The bleed row out of data/skills.json, used when the room has no status table (as actors.js does). */
 const BLEED = { name: 'Bleeding', kind: 'damage', element: 'physical', perSecond: 0.26, seconds: 6 };
@@ -180,6 +181,7 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
     e.struckAt = field.clock;
     if (e.state !== 'chase') e.state = 'chase';
     if (!(result.amount > 0) && !result.blocked && !result.noDamage) return;
+    if (by?.perkFlags && result.amount > 0) perkLanded(field, by, e, result, element);   // play-test 4 S16: the storm/lore cornerstones
     const dx = e.x - fromX, dz = e.z - fromZ;
     const len = Math.hypot(dx, dz) || 1;
     // play-test 1 P20: every landed hit has an impact the client can draw — Farhold drew the spark

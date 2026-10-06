@@ -17,18 +17,30 @@
 //   C.op(o, msg)            the `loot` message: open | take | all | close | roll
 //   C.tick()                1 Hz: time out rolls, forget bodies that are gone
 //   C.leftRoom(o)           a player left a room: their open window closes
+//   C.holdFor(room, body, charId, {gold, items}) / C.freeOn(room, body, items) / C.forgetBody / C.hasLoot
+//                           play-test 4 S5: any entity can hold loot (a treasure chest is a room object) — same window
+//
+// Play-test 4:
+//   S12 "looting a corpse loots all nearby corpses at once": `open` (and `all`) gather every body within LOOT_NEAR_M of
+//       you that holds something for you into ONE window (`lootWin.group`, each item tagged `corpse`); `near:false` keeps
+//       the old one-body window. A take finds the item on whichever grouped body holds it. Same shares, same rolls.
+//   S23 "corpse shows an indicator when it holds loot, coloured by best rarity": every `lootable {on:true}` carries
+//       `best` = the best rarity of what is on it FOR YOU (normal | magic | rare | legendary | unique) and `n` = how many
+//       things (gold counts as one); re-sent whenever that changes. Cheap: no item list until you open it.
 
 import { LOOT_OPS, ROLL_CHOICES } from '../net/protocol.js';
-import { locksForRoll, normalizeThreshold, rollWinner } from '../rules/loot-rules.js';   // stream C's ladder: one ranking for server, client and tests
+import { locksForRoll, normalizeThreshold, rollWinner, lootTier, RARITY_RANK } from '../rules/loot-rules.js';   // stream C's ladder: one ranking for server, client and tests
 
 export const CORPSE_MS = 5 * 60000;     // a body with loot on it lasts this long after the kill
 export const LOOT_RANGE = 6;            // metres from the body to open / take
 export const ROLL_MS = 30000;           // Need / Greed / Skip: time to answer
 export const ROLL_R = 60;               // party members this close to the body (same room) are in the roll
 export const DEFAULT_LOOT_MIN = 'rare';
+export const LOOT_NEAR_M = 8;           // S12: bodies this close to YOU join the one loot window
 
 export function createCorpses({ now, newUid, rng = Math.random, partyOf, online, grant, log = () => {}, counters = {}, bagMax = 120 }) {
   const bodies = new Map();       // `${room.id}:${entity.id}` -> body
+  const windows = new Map();      // S12: char id -> { room, keys: [body keys], main: entity id } (a grouped window)
   const rolls = new Map();        // roll id -> roll
   let rollN = 0;
   const keyOf = (room, e) => room.id + ':' + e.id;
@@ -48,6 +60,20 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
   const shareEmpty = s => !s || (!s.items.length && !s.gold);
   const hasAny = b => b.free.length > 0 || b.pile.length > 0 || b.rolls.size > 0 || [...b.shares.values()].some(s => !shareEmpty(s));
 
+  /** S23: what is on body `b` for char `c` — { n, best } (best = top rarity tier; gold alone = 'normal'). */
+  function bestFor(c, b) {
+    const s = b.shares.get(c);
+    const list = [...(s ? s.items : []), ...(b.pileFor.has(c) ? b.pile : []), ...b.free];
+    let best = null, rank = -1;
+    for (const it of list) { const t = lootTier(it), r = RARITY_RANK[t] ?? 0; if (r > rank) { rank = r; best = t; } }
+    const n = list.length + (s && s.gold ? 1 : 0);
+    return { n, best: best || (n ? 'normal' : null) };
+  }
+  /** The sparkle for char `c` on body `b`, with its colour (S23). */
+  function sparkle(c, b, extra = {}) {
+    const on = lootableFor(c, b);
+    tell(c, on ? { t: 'lootable', id: b.e.id, on: true, ...bestFor(c, b), ...extra } : { t: 'lootable', id: b.e.id, on: false });
+  }
   /** A kill's reward for `killer` (a player entity) from monster `m`: kept on the body. */
   function hold(room, killer, m, { gold = 0, items = [] }) {
     if (!killer || !killer.char || !m || m.kind !== 'monster') return false;
@@ -69,7 +95,7 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
       if (voters && voters.length > 1) startRoll(b, it, voters);
       else share.items.push(it);
     }
-    if (!shareEmpty(share)) tell(c, { t: 'lootable', id: m.id, on: true });
+    if (!shareEmpty(share)) sparkle(c, b);
     counters.corpseHolds = (counters.corpseHolds || 0) + 1;
     return true;
   }
@@ -94,7 +120,7 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
       else b.pile.push(it);
     }
     for (const c of chars) b.pileFor.add(c);
-    if (b.pile.length) for (const c of chars) tell(c, { t: 'lootable', id: m.id, on: true });
+    if (b.pile.length) for (const c of chars) sparkle(c, b);
     counters.partyDrops = (counters.partyDrops || 0) + 1;
     return true;
   }
@@ -135,7 +161,7 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
   }
   /** Something everyone skipped lies free: tell the players near the body. */
   function freeNote(b) {
-    for (const o of online.values()) if (o.conn && o.room === b.room && o.entity && Math.hypot(o.entity.x - b.e.x, o.entity.z - b.e.z) <= 40) { o.conn.sendJSON({ t: 'lootable', id: b.e.id, on: true, free: true }); b.freeTold.add(o.char.id); }
+    for (const o of online.values()) if (o.conn && o.room === b.room && o.entity && Math.hypot(o.entity.x - b.e.x, o.entity.z - b.e.z) <= 40) { sparkle(o.char.id, b, { free: true }); b.freeTold.add(o.char.id); }
   }
 
   function view(b, c) {
@@ -145,10 +171,50 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
     if (b.free.length) v.free = b.free;
     return v;
   }
+  /**
+   * S12: one window over every body in char `c`'s group: `items` / `free` are all of them, each tagged `corpse` (the body
+   * that holds it — send it back as the take's `id`), `gold` the sum, `group` the per-body breakdown. `id`/`name` = the
+   * body you clicked (or the first one left). Null when nothing is left for you on any of them.
+   */
+  function groupView(c) {
+    const w = windows.get(c);
+    if (!w) return null;
+    const list = w.keys.map(k => bodies.get(k)).filter(b => b && !b.e.removed && lootableFor(c, b));
+    if (!list.length) return null;
+    const main = list.find(b => b.e.id === w.main) || list[0];
+    const parts = list.map(b => { const v = view(b, c); return { id: b.e.id, name: b.name, items: v.items.map(it => ({ ...it, corpse: b.e.id })), gold: v.gold, free: (v.free || []).map(it => ({ ...it, corpse: b.e.id })) }; });
+    const v = { t: 'lootWin', id: main.e.id, name: list.length > 1 ? main.name + ' and ' + (list.length - 1) + ' more' : main.name, items: parts.flatMap(p => p.items), gold: parts.reduce((a, p) => a + (p.gold || 0), 0), group: parts.map(p => ({ id: p.id, name: p.name, n: p.items.length + p.free.length, gold: p.gold })), corpses: parts.map(p => p.id) };
+    const free = parts.flatMap(p => p.free);
+    if (free.length) v.free = free;
+    return v;
+  }
+  function sendWin(c) {
+    const o = online.get(c), w = windows.get(c);
+    if (!o || !o.conn || !w) return;
+    const v = groupView(c);
+    if (!v) { o.conn.sendJSON({ t: 'lootWin', id: w.main, closed: true }); closeWin(c); return; }
+    o.conn.sendJSON(v);
+  }
+  function closeWin(c) {
+    const w = windows.get(c);
+    if (!w) return;
+    windows.delete(c);
+    for (const k of w.keys) { const b = bodies.get(k); if (b) b.watchers.delete(c); }
+  }
+  /** Bodies in `o`'s room within LOOT_NEAR_M of them holding something for them, `first` leading. */
+  function nearBodies(o, first) {
+    const c = o.char.id, e = o.entity, out = [first];
+    for (const b of bodies.values()) {
+      if (b === first || b.room !== o.room || b.e.removed || !lootableFor(c, b)) continue;
+      if (Math.hypot(b.e.x - e.x, b.e.z - e.z) <= LOOT_NEAR_M) out.push(b);
+    }
+    return out;
+  }
   function refreshWatchers(b) {
     for (const c of [...b.watchers]) {
       const o = online.get(c);
       if (!o || !o.conn || o.room !== b.room) { b.watchers.delete(c); continue; }
+      if (windows.has(c) && windows.get(c).keys.includes(b.key)) { sendWin(c); continue; }
       if (!lootableFor(c, b)) { o.conn.sendJSON({ t: 'lootWin', id: b.e.id, closed: true }); b.watchers.delete(c); }
       else o.conn.sendJSON(view(b, c));
     }
@@ -157,10 +223,14 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
   /** After a take: refresh this player's window and sparkle, and everyone else's open window. */
   function after(o, b) {
     const c = o.char.id;
-    if (!lootableFor(c, b)) { o.conn.sendJSON({ t: 'lootWin', id: b.e.id, closed: true }); o.conn.sendJSON({ t: 'lootable', id: b.e.id, on: false }); b.watchers.delete(c); }
+    const grouped = windows.has(c) && windows.get(c).keys.includes(b.key);
+    if (!lootableFor(c, b)) { if (!grouped) o.conn.sendJSON({ t: 'lootWin', id: b.e.id, closed: true }); o.conn.sendJSON({ t: 'lootable', id: b.e.id, on: false }); if (!grouped) b.watchers.delete(c); }
+    else sparkle(c, b);                                                         // S23: the colour may have dropped
     if (!b.pile.length && b.pileFor.size) { for (const x of b.pileFor) if (x !== c && !lootableFor(x, b)) tell(x, { t: 'lootable', id: b.e.id, on: false }); }
+    else if (b.pileFor.size) for (const x of b.pileFor) if (x !== c) sparkle(x, b);
     if (!b.free.length && b.freeTold.size) { for (const x of b.freeTold) if (shareEmpty(b.shares.get(x))) tell(x, { t: 'lootable', id: b.e.id, on: false }); b.freeTold.clear(); }
     refreshWatchers(b);
+    if (grouped) sendWin(c);
     if (!hasAny(b)) forget(b);
   }
 
@@ -170,12 +240,12 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
     for (const rid of b.rolls) { const r = rolls.get(rid); if (r) resolveGone(r); }
     const told = new Set([...b.shares.keys(), ...b.freeTold, ...b.pileFor]);
     for (const c of told) tell(c, { t: 'lootable', id: b.e.id, on: false });
-    for (const c of b.watchers) tell(c, { t: 'lootWin', id: b.e.id, closed: true });
+    for (const c of b.watchers) { if (windows.has(c) && windows.get(c).keys.includes(b.key)) sendWin(c); else tell(c, { t: 'lootWin', id: b.e.id, closed: true }); }
   }
   function resolveGone(r) { rolls.delete(r.id); }
 
   function keepBody(e, room) {
-    if (!e || e.kind !== 'monster') return 0;
+    if (!e || (e.kind !== 'monster' && !bodies.has(keyOf(room, e)))) return 0;
     const b = bodies.get(keyOf(room, e));
     if (!b || b.e !== e) return 0;
     if (!hasAny(b)) { forget(b); return 0; }
@@ -184,12 +254,20 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
     return Math.min(left, 10000);
   }
 
-  function reach(o, id) {
+  function reach(o, id, range = LOOT_RANGE) {
     const b = bodies.get(keyOf(o.room, { id }));
     if (!b || b.e.removed) return { why: 'gone', msg: 'There is nothing left on it.' };
     const e = o.entity;
-    if (Math.hypot(b.e.x - e.x, b.e.z - e.z) > LOOT_RANGE + 0.5) return { why: 'far', msg: 'Walk over to it first.' };
+    if (Math.hypot(b.e.x - e.x, b.e.z - e.z) > range + 0.5) return { why: 'far', msg: 'Walk over to it first.' };
     return { b };
+  }
+  /** S12: a take's item may be on any body of the open group (an old client sends the clicked body's id). */
+  function findInGroup(o, b, uid) {
+    const c = o.char.id, w = windows.get(c);
+    const has = x => { const s = x.shares.get(c); return (s && s.items.some(i => i.uid === uid)) || (x.pileFor.has(c) && x.pile.some(i => i.uid === uid)) || x.free.some(i => i.uid === uid); };
+    if (uid === 'gold' || has(b) || !w) return b;
+    for (const k of w.keys) { const x = bodies.get(k); if (x && x.room === o.room && !x.e.removed && has(x) && Math.hypot(x.e.x - o.entity.x, x.e.z - o.entity.z) <= LOOT_NEAR_M + 1) return x; }
+    return b;
   }
   /** Move one item (or the gold) from a share / the free pile to the bag. Returns 'bagFull' | null. */
   function takeOne(o, b, uid) {
@@ -219,28 +297,47 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
       return null;
     }
     if (m.id == null) return 'id';
-    if (m.op === 'close') { const b = bodies.get(keyOf(o.room, { id: m.id })); if (b) b.watchers.delete(o.char.id); return null; }
+    const c = o.char.id;
+    if (m.op === 'close') { const b = bodies.get(keyOf(o.room, { id: m.id })); if (b) b.watchers.delete(c); closeWin(c); return null; }
     if (o.entity.dead) return R({ ok: false, why: 'dead', msg: 'You are dead.' });
-    const q = reach(o, m.id);
+    const w0 = windows.get(c);
+    const inGroup = w0 && w0.room === o.room && w0.keys.includes(keyOf(o.room, { id: m.id }));
+    const q = reach(o, m.id, m.op !== 'open' && inGroup ? LOOT_NEAR_M + 1 : LOOT_RANGE);
     if (q.why) return R({ ok: false, why: q.why, msg: q.msg });
-    const b = q.b;
-    if (!lootableFor(o.char.id, b)) return R({ ok: false, why: 'gone', msg: 'There is nothing on it for you.' });
+    let b = q.b;
+    if (!lootableFor(c, b) && !(m.op !== 'open' && inGroup && groupView(c))) return R({ ok: false, why: 'gone', msg: 'There is nothing on it for you.' });
     if (o.frozen) return R({ ok: false, why: 'busy', msg: 'Busy, try again in a moment.' });
-    if (m.op === 'open') { b.watchers.add(o.char.id); s.sendJSON(view(b, o.char.id)); return null; }
+    const near = m.near !== false;
+    if (m.op === 'open' || (m.op === 'all' && !inGroup)) {
+      // S12: one window over every body near you that holds something for you
+      closeWin(c);
+      const group = near ? nearBodies(o, b) : [b];
+      windows.set(c, { room: o.room, keys: group.map(x => x.key), main: b.e.id });
+      for (const x of group) x.watchers.add(c);
+      if (m.op === 'open') { s.sendJSON(near ? groupView(c) : view(b, c)); if (!near) windows.delete(c); return null; }
+    }
     if (m.op === 'take') {
-      const why = takeOne(o, b, m.gold ? 'gold' : (m.uid || ''));
+      const uid = m.gold ? 'gold' : (m.uid || '');
+      b = findInGroup(o, b, uid);
+      const why = takeOne(o, b, uid);
       if (why) return R({ ok: false, why, msg: why === 'bagFull' ? 'Your bag is full.' : 'That is not there any more.' });
-      b.watchers.add(o.char.id);
+      b.watchers.add(c);
       after(o, b);
       return null;
     }
-    // all: the gold, then every item that fits
-    const c = o.char.id, sh = b.shares.get(c);
+    // all: the gold, then every item that fits — from every body of the window (S12)
+    const w = windows.get(c);
+    const list = w ? w.keys.map(k => bodies.get(k)).filter(x => x && x.room === o.room && !x.e.removed) : [b];
     let full = false;
-    if (sh && sh.gold) takeOne(o, b, 'gold');
-    for (const it of [...(sh ? sh.items : []), ...(b.pileFor.has(c) ? b.pile : []), ...b.free]) { if (takeOne(o, b, it.uid) === 'bagFull') { full = true; break; } }
-    b.watchers.add(c);
-    after(o, b);
+    for (const x of list) {
+      const sh = x.shares.get(c);
+      if (sh && sh.gold) takeOne(o, x, 'gold');
+      for (const it of [...(sh ? sh.items : []), ...(x.pileFor.has(c) ? x.pile : []), ...x.free]) { if (takeOne(o, x, it.uid) === 'bagFull') { full = true; break; } }
+      x.watchers.add(c);
+      if (full) break;
+    }
+    for (const x of list) if (bodies.get(x.key) === x) after(o, x);
+    if (w) sendWin(c);
     if (full) R({ ok: false, why: 'bagFull', msg: 'Your bag is full.' });
     return null;
   }
@@ -250,7 +347,30 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
     for (const r of [...rolls.values()]) if (t >= r.until) resolve(r);
     for (const b of [...bodies.values()]) if (b.e.removed || t >= b.until + 60000) forget(b, true);
   }
-  function leftRoom(o) { for (const b of bodies.values()) b.watchers.delete(o.char.id); }
+  function leftRoom(o) { for (const b of bodies.values()) b.watchers.delete(o.char.id); windows.delete(o.char.id); }
 
-  return { hold, partyDrop, keepBody, op, tick, leftRoom, bodies, rolls, view, _resolve: id => { const r = rolls.get(id); if (r) resolve(r); } };
+  // ---- S5 containers: any entity (a treasure chest object) can hold loot, opened with the same window ----
+  /** A personal share for `charId` on `bodyEnt` (an entity in `room`; a chest object is fine). */
+  function holdFor(room, bodyEnt, charId, { gold = 0, items = [] } = {}) {
+    if (!bodyEnt || charId == null) return false;
+    items = (items || []).filter(it => it && typeof it === 'object');
+    if (!gold && !items.length) return false;
+    const b = body(room, bodyEnt);
+    const share = shareOf(b, charId);
+    share.gold += Math.max(0, Math.round(gold));
+    for (const raw of items) { const it = JSON.parse(JSON.stringify(raw)); if (it.uid) it.ruid = it.uid; it.uid = newUid(); share.items.push(it); }
+    sparkle(charId, b);
+    return true;
+  }
+  /** Items on `bodyEnt` that anyone may take (told to players within 40 m). */
+  function freeOn(room, bodyEnt, items = []) {
+    const b = body(room, bodyEnt);
+    for (const raw of items || []) { if (!raw || typeof raw !== 'object') continue; const it = JSON.parse(JSON.stringify(raw)); if (it.uid) it.ruid = it.uid; it.uid = newUid(); b.free.push(it); }
+    if (b.free.length) freeNote(b);
+    return true;
+  }
+  const hasLoot = (room, e) => { const b = bodies.get(keyOf(room, e)); return !!(b && hasAny(b)); };
+  const forgetBody = (room, e) => { const b = bodies.get(keyOf(room, e)); if (b) forget(b, true); };
+
+  return { hold, partyDrop, keepBody, op, tick, leftRoom, bodies, rolls, view, holdFor, freeOn, hasLoot, forgetBody, bestFor, windows, _resolve: id => { const r = rolls.get(id); if (r) resolve(r); } };
 }

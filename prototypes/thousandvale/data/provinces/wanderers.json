@@ -1,0 +1,44 @@
+{
+  "_doc": "Stream E (play-test 4, S9: 'more wandering merchants, quest givers and interesting NPCs along the roads'). Extra traveller `kinds` merged into data/provinces/travellers.json's kinds by js/sim/content.js and added to every route's allowed kinds (they walk the same routes, same rules). Extra fields stream A's travellers.js / roadevents.js read: `stopNear` = the group stands still while a player is within this many metres (so a shop or a talk is never cut off by them walking out of reach); `shop` = the shop kind the FIRST crew member sells from (a kind in `shops` below, or in shops.json); `offers: 'deliver'` = the first crew member hands out a delivery quest to a named NPC in the town the group is walking to (data/provinces/road-events.json `deliver` texts); `curious` = the first crew member shares a lore line from `lore` when talked to and, once per character per traveller, a small `tip` (gold, a good, or a rumour of something nearby). `shops` = shop kinds merged into shops.json's kinds (same format). Rules bump: `perRouteKm` overrides travellers.json's (more people on the road: one group about every 800 m of road, ~40% of them wanderers by weight).",
+  "rules": { "perRouteKm": 1.25 },
+  "kinds": {
+    "pedlar": { "night": true, "name": "Wandering Pedlar", "weight": 4, "speedMps": 1.2, "stopNear": 8, "shop": "pedlar", "blurb": "Pots, pins, blades and blankets — all off the back of one donkey.", "beast": "donkey", "crew": [{ "role": "pedlar", "count": [1, 1], "name": "{first} the Pedlar", "armed": false }], "chatter": ["role.tinker", "road.onroute"] },
+    "rag_and_bone": { "name": "Rag-and-Bone Cart", "weight": 2, "speedMps": 1.1, "stopNear": 8, "shop": "pedlar", "cart": true, "blurb": "Buys anything, sells everything.", "crew": [{ "role": "pedlar", "count": [1, 1], "name": "{first} {family}, Rag-and-Bone", "armed": false }, { "role": "porter", "count": [0, 1], "name": "Porter", "armed": false }], "chatter": ["role.tinker", "road.onroute"] },
+    "errand_runner": { "night": true, "name": "Errand Runner", "weight": 3, "speedMps": 1.5, "stopNear": 7, "offers": "deliver", "blurb": "Too many letters, not enough legs.", "crew": [{ "role": "courier", "count": [1, 1], "name": "{first}, Errand Runner", "armed": false }], "chatter": ["role.courier", "road.onroute"] },
+    "worried_parent": { "name": "Worried Parent", "weight": 2, "speedMps": 1.3, "stopNear": 7, "offers": "deliver", "blurb": "Sending word ahead to family in town.", "crew": [{ "role": "villager", "count": [1, 1], "name": "{first} {family}", "armed": false }], "chatter": ["road.onroute"] },
+    "storyteller": { "name": "Storyteller", "weight": 2, "speedMps": 1.1, "stopNear": 7, "curious": true, "blurb": "Knows a tale for every stone on this road.", "crew": [{ "role": "minstrel", "count": [1, 1], "name": "{first} the Storyteller", "armed": false }], "chatter": ["role.minstrel", "road.onroute"] },
+    "hedge_scholar": { "name": "Hedge Scholar", "weight": 2, "speedMps": 1.0, "stopNear": 7, "curious": true, "blurb": "Measuring the barrows with a knotted string.", "crew": [{ "role": "scholar", "count": [1, 1], "name": "{first} {family}, Scholar", "armed": false }], "chatter": ["road.onroute"] },
+    "retired_soldier": { "night": true, "name": "Old Soldier", "weight": 1, "speedMps": 1.0, "stopNear": 7, "curious": true, "blurb": "Walks the road he once guarded, out of habit.", "crew": [{ "role": "veteran", "count": [1, 1], "name": "Old {first}", "armed": true }], "chatter": ["role.guard_patrol", "road.danger"] }
+  },
+  "shops": {
+    "pedlar": { "name": "Pedlar's Pack", "role": "pedlar", "says": "Have a rummage. Mind the pins.", "sign": "pack",
+      "categories": {
+        "weapon": { "label": "Blades & sticks", "bases": ["dagger", "battleaxe", "iron_mace", "spear", "shortbow", "wand", "javelin", "staff", "hammer"], "count": 4, "rarity": { "normal": 0.6, "magic": 0.4 } },
+        "armor": { "label": "Worn gear", "bases": ["light_chest", "light_boots", "cloth_helm", "light_gauntlets", "buckler", "cloth_legs"], "count": 3, "rarity": { "normal": 0.7, "magic": 0.3 } },
+        "other": { "label": "Trinkets", "bases": ["ring", "necklace"], "count": 2, "rarity": { "normal": 0.5, "magic": 0.5 } }
+      },
+      "goods": [
+        { "id": "healing_potion", "source": "potion", "price": 10, "minLevel": 1 },
+        { "id": "travel_rations", "source": "good", "price": 3, "minLevel": 1 },
+        { "id": "trail_ale", "source": "good", "price": 3, "minLevel": 1 },
+        { "id": "torch_bundle", "source": "good", "price": 6, "minLevel": 1 },
+        { "id": "whetstone", "source": "good", "price": 5, "minLevel": 1 }
+      ] }
+  },
+  "lore": [
+    "They say the Downs were a sea once, and the barrows are the hulls of drowned ships turned over.",
+    "Never whistle on the causeway at dusk. Something in the reeds whistles back.",
+    "The waystones are older than Torborhold. Older than anyone's grandmother's grandmother.",
+    "A wolf that walks alone in daylight is either starving or not a wolf. Either way, walk faster.",
+    "The old toll at Hollin took one coin in ten. The bandits that took it over take ten in ten.",
+    "Bury your coin under a hawthorn and the dead won't touch it. The living will, mind.",
+    "Every fen light is a lantern somebody dropped. Don't go looking for who.",
+    "My grandfather swore the Saint at Orrin's Rise still walks, chains and all."
+  ],
+  "tips": [
+    { "kind": "gold", "amount": [3, 8], "say": "Here — for listening to an old fool. Buy yourself something hot." },
+    { "kind": "good", "id": "travel_rations", "say": "Take this. Road's long and the inns are dear." },
+    { "kind": "good", "id": "trail_ale", "say": "A swallow for the road. Don't tell the innkeep where you got it." },
+    { "kind": "rumour", "say": "Word is there's something nasty denning near {place}. Worth a look, if you're the sort." }
+  ]
+}

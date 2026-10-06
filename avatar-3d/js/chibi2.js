@@ -8,6 +8,7 @@ import { buildFace, HEAD_SHAPES } from './chibi2-face.js';
 import { buildExtraHat, HATS_COVER_CROWN, CLASS_HATS, HELM_BRIM } from './chibi2-hats.js';
 import { raceOf } from './chibi2-races.js';
 import { holdFor } from './chibi2-weapon-ids.js';
+import { buildArmour2 } from './chibi2-armour2.js';
 
 export { CHIBI2_ANIMS, CHIBI2_SWIM_ANIMS, CHIBI2_ALL_ANIMS };
 const templates = new Map();
@@ -157,7 +158,9 @@ function buildTemplate(a, rig) {
     buildAviatorCap(a, head, leather);
   } else buildExtraHat(a, { add, head, H, W, T, trim, leather, steel, darkSteel });
   // Held and off-hand items, accessories, marks, capes, greaves and decorations live in chibi2-gear.js.
-  buildGear(a, { add, head, ellipsoid, strip, H, W, T, L: rig.leg, A: rig.arm, trim, leather, steel, darkSteel, skin: a.body.skin, faceWidth, faceDepth, chestZ: body.chestZ, hipsZ: body.hipsZ, faceZ: face.faceZ, topStyle: body.top, LW: body.LW, rig });
+  const gearCtx = { add, head, ellipsoid, strip, H, W, T, L: rig.leg, A: rig.arm, trim, leather, steel, darkSteel, skin: a.body.skin, faceWidth, faceDepth, chestZ: body.chestZ, hipsZ: body.hipsZ, faceZ: face.faceZ, topStyle: body.top, LW: body.LW, rig };
+  buildGear(a, gearCtx);
+  buildArmour2(a, gearCtx);   // tier-2 armour kits + emblems (chibi2-armour2.js) — opt-in: nothing for a look that names neither
   return b.finish();
 }
 

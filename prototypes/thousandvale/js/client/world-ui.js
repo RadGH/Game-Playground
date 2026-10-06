@@ -7,6 +7,7 @@
 // travelR, realm {kind: eventSoon|eventStart|eventEnd, ev, at, won}, eventFrame, groupHint, zone.
 
 import { clockText, timeName } from './daynight.js';
+import { soonText } from './ui/pt2-core.js';
 
 const ROLE_NAME = { smith: 'Smith', merchant: 'Merchant', elder: 'Elder', innkeeper: 'Innkeeper', healer: 'Healer', unbinder: 'Unbinder', broker: 'Broker', guard: 'Guard' };
 /** What town folk say when the server sends no lines (their trade, said plainly). */
@@ -49,7 +50,7 @@ export function deedLines(d) {
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const mmss = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
 
-export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBanner }) {
+export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBanner, callout: sharedCallout = null }) {
   const root = document.getElementById('hud');
   const mk = (cls, html = '', tag = 'div') => { const d = document.createElement(tag); d.className = cls; d.innerHTML = html; root.appendChild(d); return d; };
   const net = () => getNet();
@@ -61,7 +62,7 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
   function tick(t) {
     const txt = `${timeName(t)} · ${clockText(t)}`;
     if (txt !== lastClock) { lastClock = txt; clock.querySelector('span').textContent = txt; clock.classList.toggle('night', t < 0.22 || t > 0.8); }
-    if (event.at && event.kind === 'eventSoon') eventEl.querySelector('.ev-time').textContent = `in ${mmss(event.at - Date.now())}`;
+    if (event.kind === 'eventSoon') eventEl.querySelector('.ev-time').textContent = soonText(event.at).replace(/^Starts /, '');
   }
 
   // ---- dialog (npc, note, use, grave, campfire) ----
@@ -146,7 +147,7 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
     for (const q of offers) questNames.set(q.id, q.name);
     let h = '';
     if (ready.length) h += `<div class="q-block"><h4>Ready to hand in</h4>${ready.map(id => `<div class="q-row"><b>${esc(questNames.get(id) || tracked.find(q => q.id === id)?.name || id)}</b><button class="primary" data-turnin="${esc(id)}">Hand in</button></div>`).join('')}</div>`;
-    if (offers.length) h += `<div class="q-block"><h4>${offers.some(q => q.job) ? 'Work on offer' : 'A request'}</h4>${offers.map(q => `<div class="q-row"><div><b>${esc(q.name)}</b>${q.level ? ` <small>lvl ${q.level}</small>` : ''}<p>${esc(q.text || '')}</p>${rewardText(q.reward) ? `<small class="q-reward">Reward: ${esc(rewardText(q.reward))}</small>` : ''}</div><button class="primary" data-accept="${esc(q.id)}">Accept</button></div>`).join('')}</div>`;
+    if (offers.length) h += `<div class="q-block"><h4>${offers.some(q => q.job) ? 'Work on offer' : 'A request'}</h4>${offers.map(q => `<div class="q-row"><div><b>${esc(q.name)}</b>${q.level ? ` <small>lvl ${q.level}</small>` : ''}<p>${esc(q.text || '')}</p>${(q.rewardText || rewardText(q.reward)) ? `<small class="q-reward">Reward: ${esc(q.rewardText || rewardText(q.reward))}</small>` : ''}</div><button class="primary" data-accept="${esc(q.id)}">Accept</button></div>`).join('')}</div>`;
     if (!h && u.quest) h = `<p class="quest">Quest: <b>${esc(String(u.quest).replace(/_/g, ' '))}</b></p>`;
     return h;
   }
@@ -176,9 +177,15 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
   // zone events (every copy runs its own, §15.3)
   function onZoneEvent(m) {
     const ev = m.ev || {};
-    if (m.kind === 'soon') { hud.chat(m.text || `${ev.name || 'Trouble'} is coming${m.at ? ` in ${mmss(m.at - Date.now())}` : ''}.`, 'event'); callout(`${ev.name || 'Trouble'} approaches`, 'phase'); }
-    else if (m.kind === 'start') { hud.chat(m.text || `${ev.name} has begun nearby — join in, everyone shares the credit.`, 'event'); callout(`${ev.name || 'A zone event'} has begun!`, 'enrage'); onEventFrame({ name: ev.name, hp: ev.hp ?? 1, players: ev.players || 0 }); }
-    else if (m.kind === 'end') { hud.chat(m.won ? `${ev.name} is over — well fought!` : `${ev.name} faded away.`, 'event'); if (m.won) callout('Victory!', 'victory'); }
+    if (m.kind === 'soon') {
+      hud.chat(m.text || `${ev.name || 'Trouble'} is coming${m.at ? ` in ${mmss(m.at - Date.now())}` : ''}.`, 'event');
+      callout(m.at ? `${ev.name || 'Trouble'} — ${soonText(m.at).toLowerCase()}` : `${ev.name || 'Trouble'} approaches`, 'phase');
+      // R3: a real countdown in the event frame until it begins (never just "starting soon")
+      zoneSoon = { name: ev.name || 'A zone event', at: m.at };
+      soonTick();
+    }
+    else if (m.kind === 'start') { zoneSoon = null; zoneLive(ev); hud.chat(m.text || `${ev.name} has begun nearby — join in, everyone shares the credit.`, 'event'); callout(`${ev.name || 'A zone event'} has begun!`, 'enrage'); onEventFrame({ name: ev.name, hp: ev.hp ?? 1, players: ev.players || 0 }); }
+    else if (m.kind === 'end') { zoneSoon = null; if (liveZone && liveZone === (ev.uid || ev.id || ev.name) && !event.live) { liveZone = null; eventEl.className = 'tv-event ended'; eventEl.querySelector('.ev-kind').textContent = m.won ? 'Victory' : 'It is over'; eventEl.querySelector('.ev-time').textContent = ''; setTimeout(() => { if (!liveZone && !event.live) hideEv(); }, 8000); } if (m.called === 'off') { hud.chat(`${ev.name || 'The event'} was called off — everyone walked away.`, 'event'); return; } if (Number.isFinite(m.next)) hud.chat(`${ev.name || 'It'} will be ready again in ${mmss(m.next - Date.now())}.`, 'system'); hud.chat(m.won ? `${ev.name} is over — well fought!` : `${ev.name} faded away.`, 'event'); if (m.won) callout('Victory!', 'victory'); }
     else if (ev.name) onEventFrame({ name: `${ev.name}${ev.waves ? ` — wave ${ev.wave}/${ev.waves}` : ''}`, hp: ev.hp ?? 1, players: ev.players || 0 });
   }
 
@@ -189,9 +196,32 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
 
   // ---- realm event ----
   const event = { kind: null, at: 0, live: null };
-  const eventEl = mk('tv-event', '<div class="ev-head"><b class="ev-kind"></b><span class="ev-time"></span></div><strong class="ev-name"></strong><div class="ev-sub"></div><button class="primary ev-go">Travel there free</button>');
+  const eventEl = mk('tv-event', '<button class="ghost ev-x" aria-label="Hide" data-tip="Tuck it away (a bubble by the map brings it back)">–</button><div class="ev-head"><b class="ev-kind"></b><span class="ev-time"></span></div><strong class="ev-name"></strong><div class="ev-sub"></div><button class="primary ev-go">Travel there free</button>');
   eventEl.hidden = true;
   eventEl.querySelector('.ev-go').onclick = () => net()?.travel('event');
+  // S1: the panel can be tucked away into a bubble beside the minimap; a new event (or a click on the bubble) brings it back
+  const bubble = mk('ev-bubble', '<span>★</span>', 'button');
+  bubble.hidden = true; bubble.type = 'button'; bubble.dataset.tip = 'An event is on — click to show it';
+  let tucked = null, evKey = null;
+  function showEv(key) {
+    if (key !== evKey) { evKey = key; tucked = null; }
+    if (tucked === evKey) { eventEl.hidden = true; bubble.hidden = false; } else { eventEl.hidden = false; bubble.hidden = true; }
+  }
+  function hideEv() { eventEl.hidden = true; bubble.hidden = true; evKey = null; }
+  eventEl.querySelector('.ev-x').onclick = () => { tucked = evKey; eventEl.hidden = true; bubble.hidden = false; };
+  bubble.onclick = () => { tucked = null; eventEl.hidden = false; bubble.hidden = true; };
+  /** A zone event that is running gets the same panel (it used to show only a 4 s frame). */
+  let liveZone = null;
+  function zoneLive(ev, frame = null) {
+    if (event.live) return;                                   // the realm event has the panel
+    liveZone = ev.uid || ev.id || ev.name;
+    eventEl.className = 'tv-event live zone';
+    eventEl.querySelector('.ev-kind').textContent = 'Happening now';
+    eventEl.querySelector('.ev-time').textContent = frame && frame.players ? `${frame.players} fighting` : '';
+    eventEl.querySelector('.ev-name').textContent = ev.name || 'A zone event';
+    eventEl.querySelector('.ev-sub').textContent = `${ev.where || where(ev)} — join in: everyone near shares the credit.`;
+    showEv('zone:' + liveZone);
+  }
   const frameEl = mk('tv-eventframe', '<b></b><div class="bar"><i></i></div><span></span>');
   frameEl.hidden = true;
   let frameUntil = 0;
@@ -200,18 +230,18 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
     const ev = m.ev || {};
     event.kind = m.kind;
     if (m.kind === 'eventSoon') {
-      event.at = m.at || Date.now() + 600000; event.live = null;
-      eventEl.hidden = false; eventEl.className = 'tv-event soon';
+      event.at = m.at ?? null; event.live = null;
+      eventEl.className = 'tv-event soon'; showEv('realm:' + (ev.uid || ev.id));
       eventEl.querySelector('.ev-kind').textContent = ev.kind === 'worldboss' ? 'World boss' : 'Realm event';
       eventEl.querySelector('.ev-name').textContent = ev.name || 'Something stirs';
       eventEl.querySelector('.ev-sub').textContent = `${ev.roamed ? 'It has broken out to ' : 'Gathering in '}${where(ev)}. Waystone travel to it will be free while it runs.`;
       eventEl.classList.toggle('roamed', !!ev.roamed);
       if (m.text) hud.chat(m.text, 'event');        // the event's own announcement (and where it broke out to, M3)
-      hud.chat(`Realm event: ${ev.name} will rise in ${where(ev)} in ${mmss(event.at - Date.now())}.`, 'event');
+      hud.chat(`Realm event: ${ev.name} will rise in ${where(ev)} — ${soonText(event.at).toLowerCase()}.`, 'event');
       callout(ev.roamed ? `${ev.name} has broken out — to ${where(ev)}!` : `${ev.name} stirs in ${where(ev)}`, 'phase');
     } else if (m.kind === 'eventStart') {
       event.live = ev; event.at = 0;
-      eventEl.hidden = false; eventEl.className = 'tv-event live';
+      eventEl.className = 'tv-event live'; showEv('realm:' + (ev.uid || ev.id));
       eventEl.querySelector('.ev-kind').textContent = 'Happening now';
       eventEl.querySelector('.ev-time').textContent = '';
       eventEl.querySelector('.ev-name').textContent = ev.name || 'A realm event';
@@ -226,16 +256,27 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
       eventEl.querySelector('.ev-time').textContent = '';
       eventEl.querySelector('.ev-sub').textContent = m.won ? 'The realm owes you a drink.' : 'It slipped away — this time.';
       hud.chat(m.won ? `${ev.name} has been defeated!` : `${ev.name} withdrew.`, 'event');
-      setTimeout(() => { if (!event.live && event.kind === 'eventEnd') eventEl.hidden = true; }, 12000);
+      setTimeout(() => { if (!event.live && event.kind === 'eventEnd') hideEv(); }, 12000);
     }
   }
   function onEventFrame(f) {
+    if (!event.live && f.uid !== 'demo' && f.name) zoneLive({ uid: f.uid, name: f.name.replace(/ — wave .*$/, '') }, f);
+    else if (event.live) eventEl.querySelector('.ev-time').textContent = f.players ? `${f.players} fighting` : '';
     frameEl.hidden = false; frameUntil = performance.now() + 4000;
     frameEl.querySelector('b').textContent = f.name;
     frameEl.querySelector('i').style.width = Math.round(Math.max(0, Math.min(1, f.hp)) * 100) + '%';
-    frameEl.querySelector('span').textContent = `${f.players} fighting · event group (shared credit)`;
+    frameEl.querySelector('span').textContent = `${f.players} ${f.players === 1 ? 'fighter' : 'fighting'} in range · shared credit`;
   }
-  setInterval(() => { if (!frameEl.hidden && performance.now() > frameUntil) frameEl.hidden = true; }, 1000);
+  let zoneSoon = null;
+  function soonTick() {
+    if (!zoneSoon) return;
+    frameEl.hidden = false; frameUntil = performance.now() + 1500;
+    frameEl.querySelector('b').textContent = zoneSoon.name;
+    frameEl.querySelector('i').style.width = '100%';
+    frameEl.querySelector('span').textContent = soonText(zoneSoon.at);
+    if (Number.isFinite(zoneSoon.at) && zoneSoon.at < Date.now() - 15000) zoneSoon = null;   // it started; the start message clears it anyway
+  }
+  setInterval(() => { soonTick(); if (!frameEl.hidden && performance.now() > frameUntil) frameEl.hidden = true; }, 1000);
 
   // ---- open groups ----
   const groupEl = mk('tv-group', '<span></span><button class="primary">Group up</button><button class="ghost">×</button>');
@@ -268,6 +309,8 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
 
   // ---- callouts (reuse the boss callout element) ----
   function callout(text, style) {
+    // one owner for the banner (R4): two timers on one element let an old event's timer wipe a boss warning mid wind-up
+    if (sharedCallout) { sharedCallout(text, style); return; }
     const el = document.getElementById('callout'); if (!el) return;
     el.textContent = text; el.className = `callout show ${style || ''}`;
     clearTimeout(callout.t); callout.t = setTimeout(() => { el.className = 'callout'; }, 3600);

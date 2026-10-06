@@ -2,6 +2,7 @@
   "id": "rare_lantern_drowner",
   "name": "The Lantern Drowner",
   "tier": "rare",
+  "secret": true,
   "zone": "brackwater",
   "body": "marsh_wisp",
   "place": "a light that bobs over the deepest pool of Brackwater Fen at dusk, pretending to be a lost traveller's lamp",

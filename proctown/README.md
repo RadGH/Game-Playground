@@ -350,3 +350,31 @@ in: terrain-aware streets, and plot-fill (yards, pens, woodpiles —
 the kit does the clutter that touches a building, but the empty half of a big plot is still empty).
 From §3: level-of-detail past the two tiers `features.js` has, signage glyphs, smoke by day and
 window light at night.
+
+## Office dressing (offices.js)
+
+`js/offices.js` dresses a service building so you can find the smith without reading a map (Thousandvale play-test 2,
+Q10: "each NPC needs their own office; each NPC structure a distinct look; active lights where they should attract the
+player"). Pure, same frame and unit shapes as `partsFor()` (origin at the plot centre, +z = the street/door side,
+`y` = the bottom of a part, tilts `rx`/`rz` applied after `yaw`, Euler order 'YXZ').
+
+```js
+import { officeDressing, officeKindFor, OFFICE_KINDS } from './js/offices.js';
+const desc = describeBuilding({ plot, culture, seed, want: 'forge' });
+const d = officeDressing(officeKindFor('smith'), desc, { lit: true, seed });
+// d.parts  unit shapes (tag 'lamp' = lantern glass: draw it with a material that glows at night)
+// d.lights [{x,y,z,color,strong}] lanterns / the forge hearth — only when lit
+// d.fires  [{x,y,z,s}] flames;  d.spin [{x,y,z,axis,speed,parts}] mill sails (parts relative to the hub)
+// d.signs  hanging picture signs;  d.fascia {x,y,z,w,h} the name board over the door (a game writes the label on it)
+```
+
+23 trades (`OFFICE_KINDS`, each with a label, a sign emblem and whether it is a lit shop): forge (open shed, hearth with
+fire, anvil, quench trough, tool rack), shop / provisioner / market (striped awning, goods table, crates, market stalls),
+inn (tankard sign, two lanterns, benches, barrels, a hitch), stable (paddock, hay, trough, saddle on the rail), barber
+(striped pole), armoury, bowyer, tailor, apothecary, jeweller, temple / chapel / shrine (steps, sun disc, candles,
+statue — unlit), hall (banners, steps, flagpole — unlit), counting house, study, mill (turning sails), granary /
+warehouse, barracks / watchpost. `officeKindFor()` takes a want, an office name or an NPC role (`smith` -> forge,
+`elder` -> hall, `unbinder` -> study; `house`/`hut` -> null: a home is never dressed or lit).
+Tests: `node --test proctown/tests/offices.test.js`. Thousandvale draws it in `js/client/town-view.js` (lit glass +
+light-pool lanterns on shops only) and writes every label into one canvas atlas (`js/client/sign-text.js`, one draw
+call per town).

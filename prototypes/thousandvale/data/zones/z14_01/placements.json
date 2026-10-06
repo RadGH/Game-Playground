@@ -1,5 +1,5 @@
 {
- "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall, road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall (play-test 4: every planned settlement; data.style/material/tier/h/thick/tint/radius, runs [[[x,z,h]…]…] open polylines between openings, towers [{x,z,h,yaw}], gates [{id,x,z,h,yaw = the way OUT along the road,out:[dx,dz],width,pass,kind gatehouse|posts|gap,way,ways,led,ends,approaches}], openings [{kind water|keep,ends,grate}] — SOLID in nav.bin except the gates; tools/lib/zone-walls.mjs), road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
  "zone": "z14_01",
  "terrainHash": "2d4e6443",
  "placements": [
@@ -7332,6 +7332,610 @@
       66.07
      ]
     ]
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "saltmouth_wall",
+   "x": 880,
+   "z": 1616,
+   "yaw": 0,
+   "data": {
+    "town": "saltmouth",
+    "name": "Saltmouth",
+    "settlement": "town",
+    "style": "curtain",
+    "material": "stone",
+    "tier": "wall",
+    "h": 4.4,
+    "thick": 1.2,
+    "tint": "#a29c90",
+    "radius": 61.81,
+    "solid": true,
+    "runs": [
+     [
+      [
+       829.37,
+       1651.45,
+       61.39
+      ],
+      [
+       821.28,
+       1635.31,
+       61.29
+      ],
+      [
+       818.21,
+       1617.52,
+       60.88
+      ],
+      [
+       820.41,
+       1599.6,
+       60.79
+      ],
+      [
+       827.68,
+       1583.08,
+       60.76
+      ],
+      [
+       839.43,
+       1569.37,
+       60.87
+      ],
+      [
+       854.63,
+       1559.64,
+       60.77
+      ],
+      [
+       872,
+       1554.71,
+       61.02
+      ],
+      [
+       890.05,
+       1555.01,
+       60.98
+      ],
+      [
+       907.24,
+       1560.52,
+       60.97
+      ],
+      [
+       922.11,
+       1570.75,
+       60.92
+      ],
+      [
+       933.39,
+       1584.85,
+       61.26
+      ],
+      [
+       940.11,
+       1601.6,
+       61.61
+      ],
+      [
+       941.71,
+       1619.59,
+       61.3
+      ],
+      [
+       938.04,
+       1637.26,
+       61.12
+      ],
+      [
+       929.42,
+       1653.12,
+       61.03
+      ],
+      [
+       916.58,
+       1665.82,
+       61.3
+      ],
+      [
+       900.63,
+       1674.26,
+       61.29
+      ],
+      [
+       882.92,
+       1677.74,
+       61.25
+      ],
+      [
+       864.95,
+       1675.95,
+       61.27
+      ],
+      [
+       848.27,
+       1669.04,
+       61.46
+      ],
+      [
+       834.3,
+       1657.62,
+       61.43
+      ]
+     ]
+    ],
+    "towers": [
+     {
+      "x": 827.76,
+      "z": 1649.04,
+      "h": 61.36,
+      "yaw": -1.0069
+     },
+     {
+      "x": 836.3,
+      "z": 1659.71,
+      "h": 61.43,
+      "yaw": -0.7852
+     },
+     {
+      "x": 818.36,
+      "z": 1611.49,
+      "h": 60.82,
+      "yaw": -1.6439
+     },
+     {
+      "x": 835.07,
+      "z": 1573.55,
+      "h": 60.79,
+      "yaw": -2.3278
+     },
+     {
+      "x": 872,
+      "z": 1554.71,
+      "h": 61.02,
+      "yaw": -3.0118
+     },
+     {
+      "x": 912.52,
+      "z": 1563.44,
+      "h": 60.86,
+      "yaw": 2.5875
+     },
+     {
+      "x": 938.42,
+      "z": 1595.81,
+      "h": 61.54,
+      "yaw": 1.9036
+     },
+     {
+      "x": 938.04,
+      "z": 1637.26,
+      "h": 61.12,
+      "yaw": 1.2196
+     },
+     {
+      "x": 911.55,
+      "z": 1669.15,
+      "h": 61.36,
+      "yaw": 0.5357
+     },
+     {
+      "x": 870.87,
+      "z": 1677.13,
+      "h": 61.24,
+      "yaw": -0.1482
+     }
+    ],
+    "gates": [
+     {
+      "id": "saltmouth_gate_0",
+      "x": 831.74,
+      "z": 1654.61,
+      "h": 61.39,
+      "yaw": -0.8961,
+      "out": [
+       -0.7809,
+       0.6247
+      ],
+      "width": 4.7,
+      "pass": 4.7,
+      "slant": 0,
+      "kind": "gatehouse",
+      "way": "spur_saltmouth",
+      "wayKind": "road",
+      "ways": [
+       "spur_saltmouth"
+      ],
+      "led": [],
+      "ends": [
+       [
+        834.3,
+        1657.62
+       ],
+       [
+        829.37,
+        1651.45
+       ]
+      ],
+      "approaches": [
+       {
+        "way": "spur_saltmouth",
+        "width": 3.5,
+        "pts": [
+         [
+          842.86,
+          1645.71
+         ],
+         [
+          841.43,
+          1646.86
+         ],
+         [
+          840,
+          1648
+         ],
+         [
+          838.57,
+          1649.14
+         ],
+         [
+          837.14,
+          1650.29
+         ],
+         [
+          835.71,
+          1651.43
+         ],
+         [
+          834.29,
+          1652.57
+         ],
+         [
+          832.86,
+          1653.71
+         ],
+         [
+          831.43,
+          1654.86
+         ],
+         [
+          830,
+          1656
+         ],
+         [
+          828.57,
+          1657.14
+         ],
+         [
+          827.14,
+          1658.29
+         ],
+         [
+          825.71,
+          1659.43
+         ],
+         [
+          824.29,
+          1660.57
+         ],
+         [
+          822.86,
+          1661.71
+         ],
+         [
+          821.43,
+          1662.86
+         ],
+         [
+          820,
+          1664
+         ],
+         [
+          818.57,
+          1665.14
+         ],
+         [
+          817.14,
+          1666.29
+         ],
+         [
+          815.71,
+          1667.43
+         ],
+         [
+          814.29,
+          1668.57
+         ],
+         [
+          812.86,
+          1669.71
+         ],
+         [
+          811.43,
+          1670.86
+         ],
+         [
+          810,
+          1672
+         ],
+         [
+          808.57,
+          1673.14
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "openings": []
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "gull_steps_wall",
+   "x": 282,
+   "z": 1266,
+   "yaw": 0,
+   "data": {
+    "town": "gull_steps",
+    "name": "Gull Steps",
+    "settlement": "hamlet",
+    "style": "fence",
+    "material": "rail",
+    "tier": "low",
+    "h": 1.25,
+    "thick": 0.3,
+    "tint": "#8a6c50",
+    "radius": 42.95,
+    "solid": true,
+    "runs": [
+     [
+      [
+       319.26,
+       1287.37,
+       78.35
+      ],
+      [
+       313.25,
+       1295.47,
+       77.96
+      ],
+      [
+       305.51,
+       1301.94,
+       77.78
+      ],
+      [
+       296.48,
+       1306.43,
+       77.52
+      ],
+      [
+       286.65,
+       1308.7,
+       77.39
+      ],
+      [
+       276.57,
+       1308.6,
+       77.2
+      ],
+      [
+       266.78,
+       1306.16,
+       77.05
+      ],
+      [
+       257.83,
+       1301.51,
+       77.04
+      ],
+      [
+       250.22,
+       1294.89,
+       77.06
+      ],
+      [
+       244.36,
+       1286.68,
+       77.32
+      ],
+      [
+       240.57,
+       1277.33,
+       77.62
+      ],
+      [
+       239.07,
+       1267.36,
+       77.75
+      ],
+      [
+       239.94,
+       1257.31,
+       77.82
+      ],
+      [
+       243.13,
+       1247.74,
+       78.14
+      ],
+      [
+       248.46,
+       1239.17,
+       78.49
+      ],
+      [
+       255.64,
+       1232.09,
+       78.76
+      ],
+      [
+       264.27,
+       1226.88,
+       78.94
+      ],
+      [
+       273.89,
+       1223.82,
+       78.83
+      ],
+      [
+       283.95,
+       1223.09,
+       78.78
+      ],
+      [
+       293.9,
+       1224.73,
+       78.91
+      ],
+      [
+       303.2,
+       1228.65,
+       78.97
+      ],
+      [
+       311.32,
+       1234.62,
+       78.98
+      ],
+      [
+       317.83,
+       1242.32,
+       78.9
+      ],
+      [
+       322.37,
+       1251.33,
+       78.78
+      ],
+      [
+       324.68,
+       1261.15,
+       78.85
+      ],
+      [
+       324.63,
+       1271.24,
+       78.7
+      ],
+      [
+       322.23,
+       1281.04,
+       78.45
+      ]
+     ]
+    ],
+    "towers": [],
+    "gates": [
+     {
+      "id": "gull_steps_gate_0",
+      "x": 320.87,
+      "z": 1284.26,
+      "h": 78.36,
+      "yaw": 1.1318,
+      "out": [
+       0.9052,
+       0.425
+      ],
+      "width": 4.7,
+      "pass": 4.7,
+      "slant": 0,
+      "kind": "posts",
+      "way": "road_link_gull_steps",
+      "wayKind": "road",
+      "ways": [
+       "road_link_gull_steps"
+      ],
+      "led": [],
+      "ends": [
+       [
+        322.23,
+        1281.04
+       ],
+       [
+        319.26,
+        1287.37
+       ]
+      ],
+      "approaches": [
+       {
+        "way": "road_link_gull_steps",
+        "width": 3.5,
+        "pts": [
+         [
+          307.94,
+          1278.19
+         ],
+         [
+          309.56,
+          1278.95
+         ],
+         [
+          311.18,
+          1279.71
+         ],
+         [
+          312.8,
+          1280.47
+         ],
+         [
+          314.42,
+          1281.24
+         ],
+         [
+          316.05,
+          1282
+         ],
+         [
+          317.67,
+          1282.76
+         ],
+         [
+          319.29,
+          1283.52
+         ],
+         [
+          320.91,
+          1284.28
+         ],
+         [
+          322.64,
+          1285.09
+         ],
+         [
+          324.37,
+          1285.9
+         ],
+         [
+          326.1,
+          1286.72
+         ],
+         [
+          327.83,
+          1287.53
+         ],
+         [
+          329.55,
+          1288.34
+         ],
+         [
+          331.28,
+          1289.15
+         ],
+         [
+          333.01,
+          1289.97
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "openings": []
    }
   },
   {

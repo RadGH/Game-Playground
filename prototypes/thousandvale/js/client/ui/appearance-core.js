@@ -92,12 +92,55 @@ export function customKey(custom) {
 }
 
 /** The custom part of a look, whichever key it came under (`avatar` on the wire, `custom` in older saves). */
-export const lookCustom = look => (look ? look.avatar || look.custom || null : null);
+export const lookCustom = look => (look ? look.custom || look.avatar || null : null);
 
 /** The look to send: race + seed + custom (null custom = the random face from the seed). Always under 1.5 KB. */
 export function lookWith(look, custom) {
   const c = cleanCustom(custom);
   const out = { race: look?.race || 'human', seed: (look?.seed >>> 0) || 1, v: 1 };
-  if (c) out.avatar = c;                               // protocol v6: `avatar` = avatar-2d JSON (the server checks ids, clamps numbers)
+  if (c) out.custom = c;                               // protocol v6 §18 stores it as `custom` (avatar-2d ids checked, numbers clamped)
   return out;
+}
+
+// ---- the barber's bill (play-test 2 Q20) — the same sums as the server (js/sim/province.js barberCost) ----------
+/** Only the parts of `cur` that differ from `base` (the editor starts from your whole face; the barber charges for changes). */
+export function diffCustom(base, cur) {
+  const b = cleanCustom(base) || {}, c = cleanCustom(cur) || {};
+  const same = (x, y) => JSON.stringify(x ?? null) === JSON.stringify(y ?? null);
+  const out = {};
+  for (const k of Object.keys(c)) {
+    if (k === 'body') { const d = {}; for (const [bk, v] of Object.entries(c.body)) if (!same(v, b.body?.[bk])) d[bk] = v; if (Object.keys(d).length) out.body = d; }
+    else if (!same(c[k], b[k])) out[k] = c[k];
+  }
+  return out;
+}
+/** Lay changed parts over a stored custom blob (body dials merged, not replaced). */
+export function mergeCustom(stored, changes) {
+  const s = cleanCustom(stored) || {}, ch = cleanCustom(changes) || {};
+  const out = { ...s, ...ch };
+  if (s.body || ch.body) out.body = { ...(s.body || {}), ...(ch.body || {}) };
+  return cleanCustom(out);
+}
+export const BARBER_DEFAULT = { prices: { hair: 5, hairColour: 4, beard: 4, eyes: 6, face: 10, skin: 12, body: 20, everything: 40 }, perLevel: 0.05 };
+/** Gold for a barber change: each part at its list price, a new people = everything, capped, scaled by level; first visit free. */
+export function barberCost(before, after, { prices = {}, perLevel = 0.05, level = 1, free = false, raceChanged = false, seedChanged = false } = {}) {
+  if (free) return 0;
+  const P = { ...BARBER_DEFAULT.prices, ...prices };
+  const a = before || {}, b = after || {};
+  const same = (x, y) => JSON.stringify(x ?? null) === JSON.stringify(y ?? null);
+  const idOf = v => (v && typeof v === 'object' ? v.id : v);
+  let sum = 0;
+  if (raceChanged) sum = P.everything;
+  else {
+    if (!same(idOf(a.hair), idOf(b.hair))) sum += P.hair;
+    if (!same(a.hair?.color, b.hair?.color)) sum += P.hairColour;
+    if (!same(a.facialHair, b.facialHair)) sum += P.beard;
+    if (!same(a.eyes, b.eyes)) sum += P.eyes;
+    if (['headShape', 'nose', 'mouth', 'brows', 'ears'].some(k => !same(a[k], b[k])) || seedChanged) sum += P.face;
+    const ab = a.body || {}, bb = b.body || {};
+    if (!same(ab.skin, bb.skin)) sum += P.skin;
+    const { skin: _x, ...ra } = ab, { skin: _y, ...rb } = bb; void _x; void _y;
+    if (!same(ra, rb)) sum += P.body;
+  }
+  return Math.round(Math.min(sum, P.everything) * (1 + perLevel * (level - 1)));
 }

@@ -146,7 +146,7 @@ test('Q27: it leads to another town AND to a mini boss, in either order, then ho
   // levels never fall along a branch, and the boss quest is not the first fight
   const lv = id => byId.get(id).level;
   assert.ok(lv('start_two_good_legs') === 1 && lv('start_letters_south') <= lv('start_road_to_orrinsford') && lv('start_road_to_orrinsford') <= lv('start_the_priors_favour'));
-  assert.ok(lv('start_signs_of_the_beast') <= lv('start_old_gristle') && lv('start_old_gristle') >= 4);
+  assert.ok(lv('start_signs_of_the_beast') <= lv('start_old_gristle') && lv('start_old_gristle') >= 2);     // play-test 3 R2: a level-2 boss quest
   assert.equal(byId.get('start_home_with_news').next, 'toll_at_fitockpi', 'and on into the province story');
   // and it pays for a first horse along the way (Q16): the chain's gold vs the stable's cheapest mount
   const gold = chain.reduce((a, q) => a + Math.round(q.reward.gold * KILL_GOLD(q.level)), 0);
@@ -173,11 +173,11 @@ test('Q27: the road — the Pail and Plough stands by the Torborhold-Orrinsford 
   assert.ok(ok, 'the den is in the hub\'s walkable component');
 });
 
-test('Q27: Old Gristle is winnable at the chain\'s levels — every class at level 4, most at level 3 (a bot that never dodges)', () => {
+test('Q27: Old Gristle is winnable at the chain\'s levels — every class at level 2, most at level 1 (a bot that never dodges; play-test 3 R2)', () => {
   const fight = (cls, level, seed) => {
     const terrain = standInTerrain(2, 2048), sx = terrain.spawn.x, sz = terrain.spawn.z;
     const room = createRoom({ id: `g${cls}${level}${seed}`, kind: 'wilds', terrain, seed, createRules, hooks: { log: () => {} },
-      camps: [{ type: 'moor_hound', level: 4, x: sx, z: sz + 6, count: 1, radius: 2, rank: 'rare', encounter: 'mb_old_gristle', respawnMs: 1e9 }], encounterInfo: { mb_old_gristle: { name: 'Old Gristle', body: 'moor_hound' } } });
+      camps: [{ type: 'moor_hound', level: 2, x: sx, z: sz + 6, count: 1, radius: 2, rank: 'rare', encounter: 'mb_old_gristle', respawnMs: 1e9 }], encounterInfo: { mb_old_gristle: { name: 'Old Gristle', body: 'moor_hound' } } });
     const me = room.addPlayer({ id: 1, name: 'T', cls, level, xp: 0, gold: 0, room: room.id, x: sx, z: sz }, null);
     room.step();
     const boss = [...room.entities.values()].find(e => e.kind === 'monster');
@@ -192,11 +192,11 @@ test('Q27: Old Gristle is winnable at the chain\'s levels — every class at lev
     }
     return boss.dead && !me.dead;
   };
-  const at4 = CLASSES.filter(c => fight(c.id, 4, 1)).length;
-  assert.ok(at4 >= 27, `level 4: ${at4}/30 won`);
+  const at4 = CLASSES.filter(c => fight(c.id, 2, 1)).length;
+  assert.ok(at4 >= 27, `level 2: ${at4}/30 won`);
   const some = ['warrior', 'cleric', 'mage', 'rogue', 'ranger', 'necromancer', 'bard', 'knight', 'druid', 'tinker'];
-  const at3 = some.filter(c => fight(c, 3, 2)).length;
-  assert.ok(at3 >= 7, `level 3: ${at3}/10 won`);
+  const at3 = some.filter(c => fight(c, 1, 2)).length;
+  assert.ok(at3 >= 7, `level 1: ${at3}/10 won`);
 });
 
 // ------------------------------------------------------------------------------------------------- Q9 / Q11 / Q16 / Q20

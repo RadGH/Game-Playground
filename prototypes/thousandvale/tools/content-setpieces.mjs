@@ -17,6 +17,8 @@
 // buildings/fields), plus: a `rare` record for a set piece `boss` (in = the set piece, short respawn: a quest boss),
 // `folk` records for its workers (in = the set piece, world path in zone metres). `ground` goes to stream B as a
 // terrain ask (flat/surface) through the record itself (B reads our placements every bake).
+import { readFileSync } from 'node:fs';
+import { ROOT } from './content-lib.mjs';
 import { findSpot, settlementEdge, ROAD_GAP, openPoint, walkLine, discProblem } from './content-place.mjs';
 import { vignettePoint } from '../js/sim/vignettes.js';
 
@@ -84,7 +86,9 @@ export function placeSetpieces({ list, eid, ctx, rnd, push, problems, terrain, l
   function extras(v, rec, lv, scale) {
     if (v.boss) {
       const bl = Math.max(lv + 1, 2);
-      push({ type: 'rare', id: v.boss, slot: null, name: null, in: v.id, questBoss: true, x: rec.x, z: rec.z, yaw: 0, path: null, respawnMin: [2, 4], level: Math.min(top + 1, Math.max(4, bl)) });
+      // play-test 3 R2: the script's own level when it has one (Old Gristle is a level-2 quest boss now), else the ramp's
+      const authored = encounterLevel(v.boss);
+      push({ type: 'rare', id: v.boss, slot: null, name: null, in: v.id, questBoss: true, x: rec.x, z: rec.z, yaw: 0, path: null, respawnMin: [2, 4], level: authored ?? Math.min(top + 1, Math.max(4, bl)) });
     }
     (v.folk || []).forEach((f, i) => {
       const L = (lx, lz) => vignettePoint(rec, lx * scale, lz * scale);
@@ -194,4 +198,9 @@ export function slotFolk({ bake, eid, push, ctx, walkLine, taken = new Set(), ch
   }
   void eid;
   return n;
+}
+
+/** An encounter script's authored level (data/encounters/<id>.json `level`), or null. */
+function encounterLevel(id) {
+  try { const d = JSON.parse(readFileSync(new URL(`data/encounters/${id}.json`, ROOT), 'utf8')); return Number.isFinite(d.level) ? d.level : null; } catch { return null; }
 }

@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E (play-test 2, Q27). THE STARTING CHAIN every new character gets, whatever the class: 'The South Road'. Merged into zone 'test' (The Torbor Fields) by test.json `include`. Elder Maud in Torborhold -> the south road -> the Pail and Plough (a crossroads inn, set piece sp_pail_and_plough) -> TWO branches the innkeeper hands out together, done in either order: (A) on to Orrinsford, the next town (Prior Wendel, zone saint_orrins_rise) and his small favour at Saint Hulda's Yard; (B) Greyfletch Camp's huntmaster, the beast's signs, then the mini boss Old Gristle at Gristle's Hollow (data/encounters/mb_old_gristle.json, level 4). Both done -> 'Home with News' back to Maud, which leads into the province story (toll_at_fitockpi). Levels 1 -> 5 over ~1.7 km of road, with fights on the way so a new character levels into the boss. NEW FIELDS for stream A (docs/requests.md, E -> A play-test 2): `auto: true` = granted to every new character (and to any character that has neither done nor holds it) — it starts in the quest log; `requires: [ids]` = offered only when EVERY listed quest is done (on top of the `next` rule). `rewardText` = one player-facing line summing up the reward.",
+  "_doc": "Stream E (play-test 2, Q27). THE STARTING CHAIN every new character gets, whatever the class: 'The South Road'. Merged into zone 'test' (The Torbor Fields) by test.json `include`. Elder Maud in Torborhold -> the south road -> the Pail and Plough (a crossroads inn, set piece sp_pail_and_plough) -> TWO branches the innkeeper hands out together, done in either order: (A) on to Orrinsford, the next town (Prior Wendel, zone saint_orrins_rise) and his small favour at Saint Hulda's Yard; (B) Greyfletch Camp's huntmaster, the beast's signs, then the mini boss Old Gristle at Gristle's Hollow (data/encounters/mb_old_gristle.json, level 2 since play-test 3 R2; Signs of the Beast and Old Gristle are level-2 quests). Both done -> 'Home with News' back to Maud, which leads into the province story (toll_at_fitockpi). Levels 1 -> 5 over ~1.7 km of road, with fights on the way so a new character levels into the boss. NEW FIELDS for stream A (docs/requests.md, E -> A play-test 2): `auto: true` = granted to every new character (and to any character that has neither done nor holds it) — it starts in the quest log; `requires: [ids]` = offered only when EVERY listed quest is done (on top of the `next` rule). `rewardText` = one player-facing line summing up the reward.",
   "zone": "test",
   "part": "start",
   "npcs": {
@@ -143,7 +143,7 @@
     {
       "id": "start_signs_of_the_beast",
       "name": "Signs of the Beast",
-      "level": 3,
+      "level": 2,
       "giver": "innkeeper_marra",
       "requires": [
         "start_letters_south"
@@ -184,9 +184,9 @@
     {
       "id": "start_old_gristle",
       "name": "Old Gristle",
-      "level": 4,
+      "level": 2,
       "giver": "trainer_hunt",
-      "group": "a careful solo at level 4, or 2-3 players",
+      "group": "a solo at level 2, or 2-3 players",
       "offer": "Nine winters he's led the packs into the folds, and he's grown the size of a pony on Torborhold's sheep. He dens in a hollow full of bones, out past the camp. When he howls, the pack comes — kill the hounds he calls, and stay out of the line when he crouches. He pounces long.",
       "steps": [
         {

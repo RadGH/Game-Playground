@@ -14,7 +14,7 @@ import { parseTerrain, parseNav, NAV } from '../js/rules/terrain-read.js';
 import { boringWalk, SIGHT, LIMIT as BORING_LIMIT } from './boring-walk.mjs';
 import { J, ROOT, allVignettes, questFiles, provinceMap } from './content-lib.mjs';
 import { POINT_TYPES, zoneContext, provinceComponents, discProblem, findSpot, findPoint, openPoint, walkLine, hintFrom, hintScore, rngFor, KIND_RULES, settlementEdge, levelField, campLevels, heavyOk, capCount, countCapAt, groundPieces } from './content-place.mjs';
-import { fillDensity, routesFor, placeWords } from './content-living.mjs';
+import { fillDensity, fillHunting, HUNT, routesFor, placeWords } from './content-living.mjs';
 import { placeSetpieces, slotFolk } from './content-setpieces.mjs';
 import { buildOffices } from './content-offices.mjs';
 import { writeShops } from './content-shops.mjs';
@@ -83,6 +83,14 @@ fillBoring(states.filter(st => !st.kept));
 for (const st of states) if (!st.kept) fillDensity(st, { LF, typeMid });         // P19: something to see or do every ~100 m (tools/content-living.mjs)
 for (const st of states) if (!st.kept) patchRoads(st);                // the same measure tests/E/living.test.js uses, as a last pass
 for (const st of states) st.file.levels = LF.span(st.eid);
+// play-test 3 R2: monsters near the start, in a file of their own (<zone>.hunt.json — B's bake never reads it, so it runs on kept zones too)
+for (const st of states) {
+  const h = fillHunting(st, { LF, typeMid });
+  const hf = new URL(`data/vignettes/placements/${st.wid}.hunt.json`, ROOT);
+  if (!h.file.length) { if (existsSync(hf)) writeFileSync(hf, JSON.stringify({ _doc: 'empty', zone: st.wid, terrainHash: st.file.terrainHash, placements: [] }, null, 1) + '\n'); continue; }
+  writeFileSync(hf, JSON.stringify({ _doc: `Stream E (play-test 3 R2). Extra monster camps near the start for world zone ${st.wid}: solos and pairs (a third roaming a small loop) wherever the level ramp is <= ${HUNT.maxLevel} — tools/content-living.mjs fillHunting. Same record shape as the main placements file (type camp, stray/roam, hunt: true); js/sim/content.js merges them. Not read by stream B's bake (monsters need no cleared ground).`, zone: st.wid, eid: st.eid, terrainHash: st.file.terrainHash, stats: h.stats, placements: h.file }, null, 1) + '\n');
+  console.log(`${st.wid} hunt ${JSON.stringify(h.stats)}`);
+}
 if (!arg) livingFiles(states);                                      // routes, event places, quest marks (whole province only)
 { // keep the free set pieces where they are next run (B levels the ground under them; they must not wander off it)
   for (const st of states) for (const p of st.file.placements) if (p.setpiece && !p.bound) SP_PINS.pins[p.id] = { zone: st.wid, x: p.x, z: p.z, yaw: p.yaw };

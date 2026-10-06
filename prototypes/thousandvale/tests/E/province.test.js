@@ -105,7 +105,8 @@ test('M3: Grimtallow carries the structured on-demand rule A reads (schedule.onD
   const ev = J('data/quests/events.json').realm.find(e => e.id === 'world_grimtallow');
   assert.ok(ev, 'world_grimtallow exists');
   assert.equal(ev.schedule.type, 'fixed');
-  assert.deepEqual(ev.schedule.onDemand, { minInBand: 12, quietMinutes: 90 });
+  // play-test 3 R3: fewer than 5 players at a time — one in band walking up is enough, after a quiet hour
+  assert.deepEqual(ev.schedule.onDemand, { minInBand: 1, quietMinutes: 60 });
   // the prose says the same thing as the numbers
   assert.match(ev.schedule.also, new RegExp(`>= ${ev.schedule.onDemand.minInBand}\\b.*${ev.schedule.onDemand.quietMinutes} minutes`));
 });

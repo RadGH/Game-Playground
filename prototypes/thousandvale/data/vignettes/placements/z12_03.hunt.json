@@ -1,0 +1,3363 @@
+{
+ "_doc": "Stream E (play-test 3 R2). Extra monster camps near the start for world zone z12_03: solos and pairs (a third roaming a small loop) wherever the level ramp is <= 3.5 — tools/content-living.mjs fillHunting. Same record shape as the main placements file (type camp, stray/roam, hunt: true); js/sim/content.js merges them. Not read by stream B's bake (monsters need no cleared ground).",
+ "zone": "z12_03",
+ "eid": "saint_orrins_rise",
+ "terrainHash": "a6a668c3",
+ "stats": {
+  "targets": 28934,
+  "added": 135,
+  "stray": 99,
+  "roamer": 36,
+  "covered": 0.985
+ },
+ "placements": [
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_1",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 478,
+   "z": 226,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_2",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 272,
+   "z": 328,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     297,
+     327
+    ],
+    [
+     283,
+     361
+    ],
+    [
+     245,
+     329
+    ],
+    [
+     263,
+     298
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_3",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1411,
+   "z": 568,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1431,
+     599
+    ],
+    [
+     1386,
+     592
+    ],
+    [
+     1375,
+     536
+    ],
+    [
+     1436,
+     542
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_4",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1351,
+   "z": 889,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_5",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2007,
+   "z": 144,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_6",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1188,
+   "z": 829,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_7",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 211,
+   "z": 710,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_8",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 793,
+   "z": 380,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_9",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1042,
+   "z": 204,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     999,
+     208
+    ],
+    [
+     1050,
+     149
+    ],
+    [
+     1106,
+     210
+    ],
+    [
+     1033,
+     253
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_10",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 636,
+   "z": 676,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_11",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 121,
+   "z": 536,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_12",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 864,
+   "z": 1072,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_13",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1513,
+   "z": 696,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_14",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1861,
+   "z": 764,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_15",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 633,
+   "z": 1185,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_16",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 564,
+   "z": 297,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_17",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 309,
+   "z": 1123,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     278,
+     1140
+    ],
+    [
+     291,
+     1091
+    ],
+    [
+     352,
+     1113
+    ],
+    [
+     338,
+     1170
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_18",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 187,
+   "z": 415,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_19",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1023,
+   "z": 1015,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_20",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 642,
+   "z": 555,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_21",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 567,
+   "z": 176,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_22",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1672,
+   "z": 480,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1693,
+     499
+    ],
+    [
+     1659,
+     503
+    ],
+    [
+     1650,
+     470
+    ],
+    [
+     1689,
+     448
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_23",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 403,
+   "z": 865,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_24",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 392,
+   "z": 280,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_25",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 804,
+   "z": 481,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     827,
+     472
+    ],
+    [
+     809,
+     513
+    ],
+    [
+     771,
+     496
+    ],
+    [
+     792,
+     457
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_26",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 41,
+   "z": 726,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_27",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1321,
+   "z": 1049,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_28",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1233,
+   "z": 894,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_29",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2008,
+   "z": 49,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_30",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 1112,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_31",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 34,
+   "z": 302,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_32",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1180,
+   "z": 732,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_33",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1239,
+   "z": 515,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_34",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 170,
+   "z": 620,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_35",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 40,
+   "z": 576,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     18,
+     619
+    ],
+    [
+     2,
+     530
+    ],
+    [
+     60,
+     541
+    ],
+    [
+     75,
+     594
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_36",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1599,
+   "z": 672,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1649,
+     680
+    ],
+    [
+     1600,
+     729
+    ],
+    [
+     1546,
+     654
+    ],
+    [
+     1609,
+     631
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_37",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 716,
+   "z": 64,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_38",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 345,
+   "z": 378,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_39",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1325,
+   "z": 804,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_40",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 717,
+   "z": 905,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_41",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 148,
+   "z": 748,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_42",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1132,
+   "z": 109,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_43",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2008,
+   "z": 384,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     2046,
+     345
+    ],
+    [
+     2035,
+     416
+    ],
+    [
+     1969,
+     416
+    ],
+    [
+     1989,
+     347
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_44",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1371,
+   "z": 461,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_45",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1288,
+   "z": 978,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_46",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 323,
+   "z": 40,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_47",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1006,
+   "z": 629,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_48",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1937,
+   "z": 535,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1931,
+     509
+    ],
+    [
+     1973,
+     532
+    ],
+    [
+     1952,
+     561
+    ],
+    [
+     1896,
+     539
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_49",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 952,
+   "z": 290,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     987,
+     257
+    ],
+    [
+     973,
+     328
+    ],
+    [
+     925,
+     311
+    ],
+    [
+     935,
+     257
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_50",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 400,
+   "z": 192,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_51",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 391,
+   "z": 743,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_52",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 676,
+   "z": 819,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_53",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1080,
+   "z": 446,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_54",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1438,
+   "z": 138,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1479,
+     123
+    ],
+    [
+     1456,
+     177
+    ],
+    [
+     1382,
+     162
+    ],
+    [
+     1401,
+     93
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_55",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 493,
+   "z": 130,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_56",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 976,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_57",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 489,
+   "z": 912,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_58",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 178,
+   "z": 281,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_59",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1310,
+   "z": 633,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1293,
+     613
+    ],
+    [
+     1329,
+     616
+    ],
+    [
+     1322,
+     655
+    ],
+    [
+     1288,
+     646
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_60",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1824,
+   "z": 471,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1790,
+     471
+    ],
+    [
+     1819,
+     435
+    ],
+    [
+     1854,
+     470
+    ],
+    [
+     1833,
+     497
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_61",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 867,
+   "z": 814,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     807,
+     815
+    ],
+    [
+     865,
+     763
+    ],
+    [
+     911,
+     831
+    ],
+    [
+     864,
+     872
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_62",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 2010,
+   "z": 222,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_63",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1746,
+   "z": 325,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1737,
+     359
+    ],
+    [
+     1714,
+     324
+    ],
+    [
+     1758,
+     293
+    ],
+    [
+     1784,
+     326
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_64",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 482,
+   "z": 296,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     517,
+     322
+    ],
+    [
+     467,
+     331
+    ],
+    [
+     454,
+     269
+    ],
+    [
+     512,
+     256
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_65",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 639,
+   "z": 976,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_66",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1383,
+   "z": 380,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1405,
+     390
+    ],
+    [
+     1372,
+     404
+    ],
+    [
+     1349,
+     366
+    ],
+    [
+     1409,
+     355
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_67",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1261,
+   "z": 725,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_68",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 735,
+   "z": 672,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     733,
+     717
+    ],
+    [
+     678,
+     673
+    ],
+    [
+     732,
+     616
+    ],
+    [
+     785,
+     652
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_69",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1785,
+   "z": 700,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_70",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1584,
+   "z": 40,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_71",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 735,
+   "z": 134,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_72",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1436,
+   "z": 894,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_73",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1507,
+   "z": 544,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1570,
+     550
+    ],
+    [
+     1511,
+     606
+    ],
+    [
+     1454,
+     535
+    ],
+    [
+     1508,
+     476
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_74",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1936,
+   "z": 112,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_75",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1904,
+   "z": 706,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1867,
+     664
+    ],
+    [
+     1934,
+     681
+    ],
+    [
+     1939,
+     751
+    ],
+    [
+     1862,
+     745
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_76",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 204,
+   "z": 148,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     202,
+     183
+    ],
+    [
+     172,
+     147
+    ],
+    [
+     205,
+     112
+    ],
+    [
+     233,
+     147
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_77",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 803,
+   "z": 1021,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_78",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 692,
+   "z": 513,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_79",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 960,
+   "z": 144,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_80",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 787,
+   "z": 312,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_81",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 920,
+   "z": 1068,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_82",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1788,
+   "z": 783,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_83",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 874,
+   "z": 1144,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     896,
+     1199
+    ],
+    [
+     805,
+     1152
+    ],
+    [
+     859,
+     1080
+    ],
+    [
+     927,
+     1133
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_84",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 856,
+   "z": 632,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_85",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1094,
+   "z": 370,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1082,
+     406
+    ],
+    [
+     1052,
+     354
+    ],
+    [
+     1113,
+     331
+    ],
+    [
+     1122,
+     376
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_86",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 981,
+   "z": 453,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1024,
+     474
+    ],
+    [
+     942,
+     504
+    ],
+    [
+     940,
+     412
+    ],
+    [
+     1012,
+     406
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_87",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1043,
+   "z": 939,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_88",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 185,
+   "z": 1031,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_89",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 344,
+   "z": 1040,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_90",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1350,
+   "z": 230,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1283,
+     232
+    ],
+    [
+     1330,
+     167
+    ],
+    [
+     1419,
+     216
+    ],
+    [
+     1373,
+     275
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_91",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 128,
+   "z": 464,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_92",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1730,
+   "z": 552,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1743,
+     626
+    ],
+    [
+     1675,
+     552
+    ],
+    [
+     1722,
+     495
+    ],
+    [
+     1798,
+     558
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_93",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1447,
+   "z": 689,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_94",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 131,
+   "z": 46,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_95",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1186,
+   "z": 137,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1232,
+     95
+    ],
+    [
+     1211,
+     177
+    ],
+    [
+     1148,
+     165
+    ],
+    [
+     1153,
+     97
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_96",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1095,
+   "z": 839,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_97",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 307,
+   "z": 241,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_98",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 867,
+   "z": 341,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     823,
+     329
+    ],
+    [
+     869,
+     301
+    ],
+    [
+     904,
+     346
+    ],
+    [
+     842,
+     383
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_99",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 219,
+   "z": 770,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_100",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1305,
+   "z": 502,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_101",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1391,
+   "z": 837,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_102",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 111,
+   "z": 1137,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_103",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1953,
+   "z": 185,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_104",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1071,
+   "z": 553,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1079,
+     582
+    ],
+    [
+     1039,
+     563
+    ],
+    [
+     1065,
+     526
+    ],
+    [
+     1106,
+     538
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_105",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1002,
+   "z": 713,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_106",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 733,
+   "z": 404,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_107",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 502,
+   "z": 583,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_108",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1138,
+   "z": 944,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_109",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1615,
+   "z": 407,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_110",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 422,
+   "z": 929,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     381,
+     964
+    ],
+    [
+     392,
+     914
+    ],
+    [
+     448,
+     898
+    ],
+    [
+     459,
+     956
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_111",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 379,
+   "z": 37,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     359,
+     85
+    ],
+    [
+     345,
+     14
+    ],
+    [
+     388,
+     1
+    ],
+    [
+     426,
+     63
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_112",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 557,
+   "z": 383,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_113",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 861,
+   "z": 87,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_114",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1087,
+   "z": 1045,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_115",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1511,
+   "z": 224,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_116",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 572,
+   "z": 557,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_117",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1513,
+   "z": 781,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_118",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 283,
+   "z": 827,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_119",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 665,
+   "z": 31,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     711,
+     64
+    ],
+    [
+     637,
+     81
+    ],
+    [
+     621,
+     0
+    ],
+    [
+     703,
+     0
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_120",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 64,
+   "z": 359,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     113,
+     352
+    ],
+    [
+     68,
+     396
+    ],
+    [
+     31,
+     368
+    ],
+    [
+     41,
+     311
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_121",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 878,
+   "z": 1009,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_122",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 39,
+   "z": 1049,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_123",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 811,
+   "z": 565,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     821,
+     527
+    ],
+    [
+     840,
+     582
+    ],
+    [
+     797,
+     591
+    ],
+    [
+     779,
+     562
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_124",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1562,
+   "z": 818,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_125",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 721,
+   "z": 1193,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_126",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 220,
+   "z": 1158,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_127",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 959,
+   "z": 1011,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_128",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 277,
+   "z": 107,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     273,
+     43
+    ],
+    [
+     320,
+     119
+    ],
+    [
+     273,
+     168
+    ],
+    [
+     231,
+     89
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_129",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1150,
+   "z": 872,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_130",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 232,
+   "z": 240,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_131",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1380,
+   "z": 669,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_132",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 692,
+   "z": 1075,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_133",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 744,
+   "z": 806,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_134",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 637,
+   "z": 870,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_saint_orrins_rise_135",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 633,
+   "z": 621,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  }
+ ]
+}

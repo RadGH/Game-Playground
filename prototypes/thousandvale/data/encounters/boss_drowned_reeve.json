@@ -290,7 +290,7 @@
       ],
       "first": 14,
       "cast": 1.5,
-      "say": "HIGH TIDE. — Climb onto a raised plinth before the water hits!",
+      "say": "HIGH TIDE. — Get into one of the four dry circles before the water hits!",
       "telegraphs": [
         {
           "shape": "circle",

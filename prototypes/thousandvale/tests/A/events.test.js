@@ -74,7 +74,7 @@ test('zone events: every copy runs its own (waves, then the boss), the zone hear
   const startMsg = zev.find(m => m.kind === 'soon' || m.kind === 'start');
   assert.ok(startMsg, 'the zone hears its event: ' + JSON.stringify(zev));
   assert.equal(startMsg.ev.id, def.id);
-  await run(clock, (def.warnMs || 0) + 2000);
+  await run(clock, (def.countdownMs ?? def.warnMs ?? 0) + 2000);     // R3: the countdown starts when someone comes near
   const mine = () => [...room.entities.values()].filter(e => e.kind === 'monster' && e.data && e.data.event && String(e.data.event).startsWith(def.id) && !e.dead);
   for (let w = 0; w < def.waves.length; w++) {
     assert.ok(await until(clock, () => mine().length > 0, 10000), 'wave ' + (w + 1) + ' arrives');

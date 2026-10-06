@@ -109,6 +109,7 @@ export function createGateway(opts) {
       case 'relocate': return relocate(p, m);
       case 'status': p.status = m.status; return;
       case 'eventState': director.onState(m); return;
+      case 'eventNear': director.near(m.id, m.levels || []); return;      // R3: someone walked up to a realm event
     }
   }
   /** A province process moves a character to a province another process holds: ticket there, tell the client. */
@@ -374,7 +375,7 @@ export function createGateway(opts) {
   function sendPartyFrames() {
     for (const p of parties.byId.values()) {
       if (p.members.length < 2) continue;
-      const rows = p.members.map(c => frames.get(c) || [c, 0, 0, null, 0, 0, 0, presence.get(c)?.online ? 1 : 0, 0]);
+      const rows = p.members.map(c => frames.get(c) || [c, 0, 0, null, 0, 0, 0, presence.get(c)?.online ? 1 : 0, 0, 0, 0]);
       if (!rows.some(r => r[7])) continue;
       const msg = JSON.stringify({ t: 'partyFrames', m: rows });
       for (const c of p.members) { const g = gwByChar.get(c); if (g && presence.get(c)) g.send(msg); }

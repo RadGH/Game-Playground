@@ -22,7 +22,15 @@
 // kept in world_state (`persist`), so a restart neither forgets a cooldown nor replays a boss; an event with `roamTo`
 // (the world boss breaking out, E's `roam`) sometimes marches on another arena, and the announcement says where.
 
-export const DIRECTOR = Object.freeze({ gapMinutes: [40, 80], announceMs: 10 * 60000, reminders: [5, 1], durationMs: 20 * 60000, firstMs: 2 * 60000, inBandLevels: 3, retryMs: 60000 });
+export const DIRECTOR = Object.freeze({ gapMinutes: [40, 80], announceMs: 10 * 60000, reminders: [5, 1], durationMs: 20 * 60000, firstMs: 2 * 60000, inBandLevels: 3, retryMs: 60000,
+  startOn: 'schedule', countdownSeconds: 15, nearGapMinutes: 3 });
+// Play-test 3 R3 (E's events.json director.startOn = 'near'): "events should activate when a player goes nearby, not
+// wait in real time" — fewer than 5 people play at a time. With startOn 'near' the director never picks a weighted event
+// on its own: a province process reports who stands at an event (`near(id, levels)`) and, if nothing is running, the
+// event is off cooldown, nearGapMinutes have passed since the last one and someone there is in band (and at least the
+// event's `startOn.minLevel`), it is announced with a countdownSeconds countdown (`eventSoon {at, inMs}`, a real time)
+// and starts. A FIXED-schedule event (the world boss) is still announced announceMinutes ahead with its real start time;
+// walking up to it starts it early only when its on-demand rule allows (quiet long enough, enough in band).
 
 /** Boss health and adds for `n` enrolled players (events.json `director.size`). */
 export function eventScale(n, size = {}) {
@@ -60,7 +68,7 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
   let loaded = !persist;
   if (persist) Promise.resolve(persist.load()).then(v => { if (v && v.lastRun) for (const [k, t] of Object.entries(v.lastRun)) if (!lastRun.has(k) || lastRun.get(k) < t) lastRun.set(k, t); loaded = true; }, () => { loaded = true; });
   const save = () => { if (persist) Promise.resolve(persist.save({ lastRun: Object.fromEntries(lastRun) })).catch(err => log('director save failed', err && err.message)); };
-  let cur = null, next = now() + (firstMs ?? R.firstMs), n = 0;
+  let cur = null, next = now() + (firstMs ?? R.firstMs), n = 0, lastEnd = -Infinity;
   const allProcs = () => { if (procList) return procList(); const s = new Set(); for (const e of list) { const p = procOf(e.province); if (p !== undefined) s.add(p); } return s; };
   const inBand = (e, on) => on.filter(p => Math.abs((p.level || 1) - (e.level || 1)) <= R.inBandLevels).length;
 
@@ -89,6 +97,7 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
       const l = lastRun.get(e.id);
       if ((l == null || wall - l >= od.quietMs) && inBand(e, on) >= od.minInBand) return { e, startIn: ANNOUNCE, onDemand: true };
     }
+    if (R.startOn === 'near') return null;            // R3: weighted events start when someone walks up (near())
     const pool = ok.filter(e => (!e.schedule || e.schedule.type !== 'fixed') && (e.weight ?? 1) > 0 && inBand(e, on) >= (e.minInBand ?? 1));
     const total = pool.reduce((a, e) => a + (e.weight ?? 1), 0);
     if (!total) return null;
@@ -96,7 +105,7 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
     for (const e of pool) { r -= e.weight ?? 1; if (r <= 0) return { e, startIn: ANNOUNCE }; }
     return { e: pool[pool.length - 1], startIn: ANNOUNCE };
   }
-  function begin(e, startIn) {
+  function begin(e, startIn, near = false) {
     n++;
     const t = now();
     let ev = { ...e, uid: e.id + ':' + n };
@@ -108,8 +117,9 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
       roamText = (ev.name || 'The beast') + ' has broken out' + (to.zoneName ? ' and marches on ' + to.zoneName : '') + '!';
     }
     cur = { ev, state: 'soon', startAt: t + startIn, endAt: t + startIn + (e.durationMs || R.durationMs), reminded: new Set() };
-    const first = (e.announce || [])[0];
-    broadcast({ t: 'realm', kind: 'eventSoon', ev: view(cur.ev), at: wallNow() + startIn, text: roamText ? (first ? first + ' ' : '') + roamText : first || undefined });
+    let first = (e.announce || [])[0];
+    if (near) first = `${e.name || 'An event'} begins in ${Math.round(startIn / 1000)} seconds!` + (first ? ' ' + first : '');
+    broadcast({ t: 'realm', kind: 'eventSoon', ev: view(cur.ev), at: wallNow() + startIn, inMs: Math.round(startIn), text: roamText ? (first ? first + ' ' : '') + roamText : first || undefined });
   }
 
   return {
@@ -147,6 +157,34 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
       else cur.live = m;
     },
     status() { return cur ? { state: cur.state, ev: view(cur.ev), scale: cur.ev.scale || null, startsIn: Math.max(0, Math.round((cur.startAt - now()) / 1000)), live: cur.live || null } : { state: 'idle', nextIn: Math.max(0, Math.round((next - now()) / 1000)), events: list.length }; },
+    /**
+     * R3: someone stands at realm event `id` (a province process says so; `levels` = the levels of the players there).
+     * Starts it after the countdown when the rules allow; returns true when it did.
+     */
+    near(id, levels = []) {
+      if (cur || !loaded) return false;
+      const e = list.find(x => x.id === id);
+      if (!e || procOf(e.province) === undefined) return false;
+      const t = now(), wall = wallNow();
+      if (R.startOn !== 'near' && !(e.schedule && e.schedule.type === 'fixed')) return false;
+      if (t < lastEnd + (R.nearGapMinutes ?? 3) * 60000 && lastEnd > -Infinity) return false;
+      const minLv = (e.startOn && e.startOn.minLevel) || 1;
+      const band = levels.filter(l => l >= minLv && Math.abs(l - (e.level || 1)) <= R.inBandLevels);
+      if (!band.length) return false;
+      if (online().length < (e.minOnline ?? 1)) return false;
+      const fixed = e.schedule && e.schedule.type === 'fixed';
+      if (fixed) {
+        const od = onDemandOf(e.schedule);
+        const l = lastRun.get(e.id);
+        if (!od || (l != null && wall - l < od.quietMs) || band.length < Math.min(od.minInBand, 5)) return false;
+      } else {
+        const cd = (e.schedule && e.schedule.cooldownMinutes || 0) * 60000, l = lastRun.get(e.id);
+        if (l != null && wall - l < cd) return false;
+        if (band.length < Math.min(e.minInBand ?? 1, 5)) return false;
+      }
+      begin(e, Math.round((R.countdownSeconds ?? 15) * 1000), true);
+      return true;
+    },
     /** Tests/admin: start an event now (skips the wait; `announce` = ms of warning). */
     force(id = null, { announce = 0 } = {}) {
       const e = id ? list.find(x => x.id === id) : list[0];
@@ -166,7 +204,7 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
     for (const p of allProcs()) sendTo(p, { k: 'event', op: 'stop', uid: ev.uid });
     broadcast({ t: 'realm', kind: 'eventEnd', ev: view(ev), won: !!won, why });
     log('event ended', ev.uid, why);
-    cur = null; next = now() + gap();
+    cur = null; next = now() + gap(); lastEnd = now();
   }
   function view(e) { return { id: e.id, uid: e.uid, name: e.name, province: e.province, x: e.x, z: e.z, r: e.r || 50, level: e.level, kind: e.kind || 'boss', zoneName: e.zoneName || null, roamed: !!e.roamed }; }
 }

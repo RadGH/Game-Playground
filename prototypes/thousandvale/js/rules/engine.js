@@ -61,6 +61,10 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP } = 
     mercenaries: data.mercenaries || null,
     encounters: data.encounters || { scripts: {}, specials: { families: {} }, defaults: {}, byType: {} },
     progression: data.progression || {},
+    /** play-test 3 R2: Farhold's xp rules with Thousandvale's kill multiplier (data/rules/progression.json `xp`) */
+    xpCfg: { ...(balance.xp || {}), kill: (balance.xp?.kill ?? 0.2) * (data.progression?.xp?.killMult ?? 1) },
+    /** quest / event experience multiplier (a share of a level's span x this) */
+    xpMult: kind => data.progression?.xp?.[kind + 'Mult'] ?? 1,
     /** P26 — the level-gap softening (js/rules/level-gap.js); null turns it off (parity fixtures) */
     levelGap: data.progression?.levelGap || null,
     forest, talentReport,

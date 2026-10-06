@@ -85,8 +85,11 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
         // placements are in zone metres: move them into world metres
         const ox = zx * 2048, oz = zy * 2048;
         // placements[] + features[] (hooks that ARE a bake feature: a ford, a settlement, a `pts` line)
+        // play-test 3 R2: E's extra monster camps near the start live in <zone>.hunt.json (B's bake never reads it)
+        let hunt = [];
+        try { const h = await readJson(`data/vignettes/placements/${wid}.hunt.json`); if (!h.terrainHash || !reader.meta.inputHash || h.terrainHash === reader.meta.inputHash) hunt = h.placements || []; else log(`hunt ${wid}: made for another bake, skipped`); } catch { /* none */ }
         vignettes = { recipes, sites, hooks, treasure, wayside, quests: await questsOf(eid),
-          placements: [...(pl.placements || []), ...(pl.features || []).map(f => ({ ...f, feature: true }))].map(p => ({ ...p, x: p.x + ox, z: p.z + oz, ...(Array.isArray(p.path) ? { path: p.path.map(([a, b]) => [a + ox, b + oz]) } : {}), ...(Array.isArray(p.pts) ? { pts: p.pts.map(([a, b]) => [a + ox, b + oz]) } : {}) })) };
+          placements: [...(pl.placements || []), ...hunt, ...(pl.features || []).map(f => ({ ...f, feature: true }))].map(p => ({ ...p, x: p.x + ox, z: p.z + oz, ...(Array.isArray(p.path) ? { path: p.path.map(([a, b]) => [a + ox, b + oz]) } : {}), ...(Array.isArray(p.pts) ? { pts: p.pts.map(([a, b]) => [a + ox, b + oz]) } : {}) })) };
         break;
       } catch { /* none yet */ }
     }
@@ -165,14 +168,18 @@ export function provinceEvents(evData, { provinceId, map, terrain, sheet = null,
       if (!s) continue;
       // E's `roam`: now and then the boss marches on a neighbouring zone's event arena (the director picks; M3)
       const roamTo = e.roam && Array.isArray(e.roam.toZones) ? e.roam.toZones.map(z => { const a = arenaOf(z); return a && map[z] ? { zone: map[z], zoneName: nameOf(z), x: a.x, z: a.z, r: Math.max(a.r || a.radius || 40, 30) } : null; }).filter(Boolean) : [];
-      events.push({ ...common(e, s), zone: map[e.zone], zoneName: nameOf(e.zone), band: bandOf(e.zone), schedule: e.schedule, minOnline: e.minOnline, minInBand: e.minInBand, weight: e.weight, ...(roamTo.length ? { roamTo, roam: { chance: e.roam.chance ?? 0.25 } } : {}) });
+      events.push({ ...common(e, s), zone: map[e.zone], zoneName: nameOf(e.zone), band: bandOf(e.zone), schedule: e.schedule, minOnline: e.minOnline, minInBand: e.minInBand, weight: e.weight, ...(e.startOn ? { startOn: e.startOn } : {}), ...(roamTo.length ? { roamTo, roam: { chance: e.roam.chance ?? 0.25 } } : {}) });
     }
     for (const e of evData.zone || []) {
       if (!map[e.zone]) continue;
       const s = siteOf(e.site, e.zone);
       if (!s) continue;
-      const every = e.every && e.every.minutes ? e.every.minutes : [35, 55];
-      zoneEvents.push({ ...common(e, s), zone: map[e.zone], zoneName: nameOf(e.zone), eid: e.zone, everyMs: [every[0] * 60000, every[1] * 60000], warnMs: min(e.warnMinutes) || 0 });
+      // play-test 3 R3: a zone event starts when a player comes near (countdown, then the waves) and rests between runs
+      const dz = (evData.director && evData.director.zone) || {};
+      const rest = e.cooldownMinutes || dz.cooldownMinutes || (e.every && e.every.minutes) || [3, 5];
+      const cool = [rest[0] * 60000, (rest[1] ?? rest[0]) * 60000];
+      zoneEvents.push({ ...common(e, s), zone: map[e.zone], zoneName: nameOf(e.zone), eid: e.zone, everyMs: cool, cooldownMs: cool,
+        countdownMs: Math.round((e.countdownSeconds ?? dz.countdownSeconds ?? 15) * 1000), nearM: e.nearMetres ?? dz.nearMetres ?? 50, warnMs: 0 });
     }
   } else if (sheet && sheet.worldBoss) {
     const wb = sheet.worldBoss, s = byId(wb.id), info = encounterInfo[wb.id] || {};

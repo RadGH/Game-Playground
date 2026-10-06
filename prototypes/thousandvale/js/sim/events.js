@@ -37,7 +37,9 @@ export function createEventRunner({ room, ev, rng = Math.random, info = {}, now 
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2 + rng() * 0.4, d = R * (0.8 + rng() * 0.2);
       let x = c.x + Math.cos(a) * d, z = c.z + Math.sin(a) * d;
-      if (!room.walkable(x, z)) { x = c.x + Math.cos(a) * R * 0.5; z = c.z + Math.sin(a) * R * 0.5; }
+      // R4: never in a wall / deep water — round the ring, then nearer the middle, then the middle itself
+      for (let k = 1; k < 16 && !room.walkable(x, z); k++) { const aa = a + k * 0.7, dd = d * (k < 8 ? 1 : 0.5); x = c.x + Math.cos(aa) * dd; z = c.z + Math.sin(aa) * dd; }
+      if (!room.walkable(x, z)) { x = c.x; z = c.z; }
       const m = room.spawn({ kind: 'monster', type: w.type, level: w.level || ev.level || 1, x, z, yaw: a + Math.PI, rank: w.rank || 'normal', data: { event: ev.uid } });
       spawned.add(m);
     }
@@ -109,7 +111,7 @@ export function eventReward(ev, rules, entity, rng = Math.random) {
   const rw = ev.reward || {};
   const lvl = Math.max(1, ev.level || entity.level || 1);
   const span = rules.xpFor ? Math.max(1, (rules.xpFor(lvl + 1) || 0) - (rules.xpFor(lvl) || 0)) : 100;
-  const xp = Math.round((rw.xp || 0) * span);
+  const xp = Math.round((rw.xp || 0) * span * (rules.xpMult ? rules.xpMult('event') || 1 : 1));     // R2: x1.25
   const gold = Math.round(rw.gold || 0);
   let items = [];
   if (rw.item && (rw.item.chance == null || rng() < rw.item.chance) && rules.rollLoot) {

@@ -29,18 +29,31 @@ export const RANK_SCALE = {
   boss: { dmg: 1, size: 1, wind: 1, extra: 0, cd: 1 },
 };
 /**
- * Play-test 1 P12 — "red zones give no time to react". The least time, in seconds, between a
- * telegraph appearing on the client (`tele` event) and its damage, by the caster's rank; a BIG hit
- * (damage x2 or more, or 7 m+ across) and a group mechanic (stack / soak / safe spot) get
- * `MIN_WIND.big` / `MIN_WIND.mechanic` on top. The data's own wind is kept where it is longer.
+ * Play-test 1 P12 — "red zones give no time to react" — and play-test 3 R4 — "get inside its reach happens too
+ * fast to react". The least time, in seconds, between a telegraph appearing on the client (`tele` event, sent
+ * with the ability's call-out text at the START of the cast) and its damage:
+ *   * REACT by the caster's rank — the time a person needs to see the zone, read the call-out and move
+ *     (1.6 s for an ordinary monster, a little more for a champion/rare/boss whose hit is bigger);
+ *   * + LATENCY 0.25 s — the warning reaches the player one way late and the step back reaches the server one
+ *     way late (a 150-250 ms round trip at the owner's distance), so that much is never theirs to use;
+ *   * + BIG 0.4 s for a hit worth x2 or more, or 7 m+ across (further to run);
+ *   * + MECHANIC 0.8 s when the answer is not "step out": a stack / soak / safe spot, a ring or donut you
+ *     must step INTO, or a line-of-sight blast you must hide from behind an arena object — the call-out has
+ *     to be read and understood before anyone moves.
+ * Normal 1.85 s, boss 2.05 s, a boss's donut 2.85 s, a big boss donut 3.25 s. The data's own wind is kept
+ * where it is longer. tests/C/playtest3.test.mjs walks every script and every special.
  */
-export const MIN_WIND = { normal: 1.0, champion: 1.1, rare: 1.2, boss: 1.2, big: 0.5, mechanic: 0.6 };
+export const MIN_WIND = { normal: 1.6, champion: 1.7, rare: 1.8, boss: 1.8, big: 0.4, mechanic: 0.8, latency: 0.25 };
+/** True when the answer to a telegraph is not simply "step out of the red" (R4). */
+export function isMechanic(spec = {}) {
+  return spec.kind === 'stack' || spec.kind === 'soak' || spec.kind === 'safe' || spec.shape === 'donut' || spec.shape === 'ring' || !!spec.los;
+}
 export function minWindFor(e, spec = {}) {
   const rank = e?.boss ? 'boss' : (e?.rank in MIN_WIND ? e.rank : 'normal');
-  let w = MIN_WIND[rank] ?? MIN_WIND.normal;
+  let w = (MIN_WIND[rank] ?? MIN_WIND.normal) + MIN_WIND.latency;
   const size = Math.max(spec.r ?? 0, (spec.len ?? 0) / 2);
   if ((spec.damage ?? 1) >= 2 || size >= 7) w += MIN_WIND.big;
-  if (spec.kind === 'stack' || spec.kind === 'soak' || spec.kind === 'safe') w += MIN_WIND.mechanic;
+  if (isMechanic(spec)) w += MIN_WIND.mechanic;
   return w;
 }
 
@@ -490,10 +503,10 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
   function spawnAdds(st, spec) {
     const def = field.room.engine.enemyDef(spec.type) || field.room.engine.enemyDef(st.e.defId);
     const n = spec.count ?? 2;
+    const cx = spec.at === 'home' ? st.homeX : st.e.x, cz = spec.at === 'home' ? st.homeZ : st.e.z;
     for (let i = 0; i < n; i++) {
       const ang = (i / n) * Math.PI * 2 + rng() * 0.4, d = spec.radius ?? 6;
-      const x = (spec.at === 'home' ? st.homeX : st.e.x) + Math.cos(ang) * d;
-      const z = (spec.at === 'home' ? st.homeZ : st.e.z) + Math.sin(ang) * d;
+      const { x, z } = addSpot(cx, cz, ang, d);
       const u = (spawn ? spawn(def, spec.level ?? st.e.level, x, z, { rank: spec.rank || 'normal' }) : spawnMonster(field, def, spec.level ?? st.e.level, x, z, { rank: spec.rank || 'normal' }));
       if (!u) continue;
       u.addOf = st.e;
@@ -502,6 +515,31 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       st.adds.add(u);
     }
   }
+
+  /**
+   * Play-test 3 R4: "it spawned minions inside dungeon walls, which got stuck". An add's spot must be FLOOR — not
+   * a wall tile, not a blocked nav sample (a tree, a rock, deep water), and reachable from where it is called in a
+   * straight line (never on the far side of a wall, in the next room). Tried at the wanted angle and radius first,
+   * then round the circle, then at shorter radii; the caller's own spot is the last resort (always floor: the boss
+   * is standing on it). No terrain `blocked` (Farhold's flat test field): the spot is used as it is.
+   */
+  function addSpot(cx, cz, ang, d) {
+    const T = field.terrain, B = T?.blocked;
+    const want = { x: cx + Math.cos(ang) * d, z: cz + Math.sin(ang) * d };
+    if (!B) return want;
+    // (B is nav.bin in the wilds — trees, rocks, buildings, deep water — and the wall tiles in a dungeon)
+    const floor = (x, z) => !B(x, z) && !B(x + 0.6, z) && !B(x - 0.6, z) && !B(x, z + 0.6) && !B(x, z - 0.6);
+    const reach = (x, z) => { const L = Math.hypot(x - cx, z - cz), n = Math.max(1, Math.ceil(L / 0.5)); for (let k = 1; k <= n; k++) { const t = k / n; if (B(cx + (x - cx) * t, cz + (z - cz) * t)) return false; } return true; };
+    for (const r of [d, d * 0.75, d * 0.5, d * 0.3, 1.5]) {
+      for (let k = 0; k < 12; k++) {
+        const a = ang + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * (Math.PI / 6);
+        const x = cx + Math.cos(a) * r, z = cz + Math.sin(a) * r;
+        if (floor(x, z) && reach(x, z)) return { x, z };
+      }
+    }
+    return { x: cx, z: cz };
+  }
+  enc.addSpot = addSpot;
 
   function setShield(st, on) {
     st.shield = !!on;

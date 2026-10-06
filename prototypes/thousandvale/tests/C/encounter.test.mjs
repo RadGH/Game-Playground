@@ -69,7 +69,7 @@ test('DODGE: a player who steps out before the wind-up ends takes nothing; one w
     const before = s.ps[0].hp;
     boss.dmg = [1, 1]; boss.attackEvery = 99; boss.swingTimer = 99;     // only the telegraph can hurt
     if (move) { s.ps[0].x = 12; s.ps[0].z = -3; }
-    s.step(35);
+    s.step(60);   // (R4: a big boss hit gets >= 2.45 s of warning)
     const res = s.events().find(e => e.t === 'teleR' && e.id === tele.id);
     assert.ok(res, 'it resolved');
     if (move) { assert.deepEqual(res.hits, []); assert.equal(s.ps[0].hp, before, 'moved out: no damage'); }
@@ -160,7 +160,7 @@ test('STACK, SOAK and SAFE: shared damage, a soak that punishes everyone when un
   {
     const s = await arena({ data: oneShot({ shape: 'circle', at: 'target', r: 3, wind: 1, kind: 'stack', need: 2, damage: 4 }), players: 2, at: [[0, -3], [0.5, -3]] });
     const boss = spawn(s, 'moor_hound', 10, 0, 1, { boss: true }); boss.attackEvery = 99; boss.swingTimer = 99;
-    s.step(50);   // (P12: a group mechanic gets at least 1.8 s of warning)
+    s.step(80);   // (R4: a group / line-of-sight mechanic gets >= 2.85-3.25 s of warning)
     const r = s.events().find(e => e.t === 'teleR');
     assert.equal(r.hits.length, 2, 'both stood in the stack');
   }
@@ -172,7 +172,7 @@ test('STACK, SOAK and SAFE: shared damage, a soak that punishes everyone when un
     const t = s.events().find(e => e.t === 'tele');
     const soaker = s.ps.find(p => Math.hypot(p.x - t.x, p.z - t.z) < 0.01);
     soaker.x += 10;
-    s.step(50);   // (P12: a group mechanic gets at least 1.8 s of warning)
+    s.step(80);   // (R4: a group / line-of-sight mechanic gets >= 2.85-3.25 s of warning)
     assert.equal(s.events().find(e => e.t === 'teleR').hits.length, 2, 'unsoaked: the whole arena pays');
   }
   // safe: only the player standing in the light is spared
@@ -181,7 +181,7 @@ test('STACK, SOAK and SAFE: shared damage, a soak that punishes everyone when un
     const boss = spawn(s, 'moor_hound', 10, 0, 0, { boss: true }); boss.attackEvery = 99; boss.swingTimer = 99;
     s.step(1);
     s.ps[0].x = 5; s.ps[0].z = 0; s.ps[1].x = -5; s.ps[1].z = 0;
-    s.step(50);   // (P12: a group mechanic gets at least 1.8 s of warning)
+    s.step(80);   // (R4: a group / line-of-sight mechanic gets >= 2.85-3.25 s of warning)
     const r = s.events().find(e => e.t === 'teleR' && e.hits.length);
     assert.deepEqual(r.hits, ['p1']);
   }
@@ -194,7 +194,7 @@ test('LINE OF SIGHT: a pillar between you and the boss saves you, and cracks', a
   const boss = spawn(s, 'moor_hound', 10, 0, 0, { boss: true }); boss.attackEvery = 99; boss.swingTimer = 99; boss.speed = 0;
   s.step(1);
   s.ps[0].x = 0; s.ps[0].z = -9; s.ps[1].x = 8; s.ps[1].z = -9;
-  s.step(50);   // (P12: a group mechanic gets at least 1.8 s of warning)
+  s.step(80);   // (R4: a group / line-of-sight mechanic gets >= 2.85-3.25 s of warning)
   assert.deepEqual(s.events().find(e => e.t === 'teleR').hits, ['p1'], 'the one behind the pillar was spared');
   const pillar = [...s.enc.objects.values()][0];
   assert.equal(pillar.hp, 1, 'the pillar took the blast');

@@ -6,8 +6,8 @@
   "arena": {
     "radius": 45,
     "objects": [
-      { "id": "pillar_n", "type": "pillar", "x": 0, "z": 14, "r": 1.6, "hp": 3 },
-      { "id": "pillar_s", "type": "pillar", "x": 0, "z": -14, "r": 1.6, "hp": 3 },
+      { "id": "pillar_n", "type": "pillar", "name": "Great stone", "x": 0, "z": 14, "r": 1.6, "hp": 3 },
+      { "id": "pillar_s", "type": "pillar", "name": "Great stone", "x": 0, "z": -14, "r": 1.6, "hp": 3 },
       { "id": "sap_e", "type": "pool", "x": 16, "z": 0, "r": 4, "every": 1, "boss": [ { "heal": 0.01 }, { "say": "Sap swells the Colossus!", "style": "warn" } ] }
     ]
   },

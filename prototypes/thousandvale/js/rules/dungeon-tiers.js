@@ -670,7 +670,10 @@ function arenaProps(room, objects, floorIndex, roomCentre, encId) {
  *        each boss/mini-boss room lists its arena objects as `props` (the encounter engine spawns the
  *        real objects itself — props are for the viewer, the client's dressing and the tests).
  */
-export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spiral', encounters = null, arenas = null, set = null } = {}) {
+// play-test 3 R2: `floorStep` (levels per floor down, default 2), `eliteStep` (an elite / mini-boss over its floor, default
+// 1) and `bossStep` (the last boss over its floor, default 2) — the starter dungeon (the Ploughman's Crypt behind the
+// "Barrow entrance" near Torborhold) runs 1/0/1 so a level-2 party meets a level-2 mini-boss, not a level-4 one.
+export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spiral', encounters = null, arenas = null, set = null, floorStep = 2, eliteStep = 1, bossStep = 2 } = {}) {
   floors = Math.max(1, Math.min(4, floors | 0));
   const key = familyFor(family);
   const fam = FAMILIES[key];
@@ -714,7 +717,7 @@ export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spira
     widthSoFar += grid.w * CELL + GAP;
     const at = r => ({ x: origin.x + (r.i + r.w / 2) * CELL, z: origin.z + (r.j + r.h / 2) * CELL });
     rooms.forEach((r, k) => { r.id = k; const p = at(r); r.x = p.x; r.z = p.z; });
-    const lv = level + 2 * f;
+    const lv = level + floorStep * f;
     const startRoom = rooms.find(r => r.kind === start);
     const sp = at(startRoom);
     const floor = {
@@ -732,16 +735,16 @@ export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spira
       if (r.kind === 'fight' || r.kind === 'key') {
         floor.packs.push({ x: p.x, z: p.z, count: 3 + rng.int(2), rank: 'normal', level: lv, radius, type: rng.pick(fam.roster.normal), room: r.id });
         if (!eliteGiven && r.kind === 'fight' && rng() < 0.5) {
-          floor.packs.push({ x: p.x + 2, z: p.z + 2, count: 1, rank: 'elite', level: lv + 1, radius: 1, type: fam.roster.elite, room: r.id });
+          floor.packs.push({ x: p.x + 2, z: p.z + 2, count: 1, rank: 'elite', level: lv + eliteStep, radius: 1, type: fam.roster.elite, room: r.id });
           eliteGiven = true;
         }
       } else if (r.kind === 'miniboss') {
         const mb = mbs[f % mbs.length];
-        floor.packs.push({ x: p.x, z: p.z, count: 1, rank: 'elite', level: lv + 1, radius: 1, type: mb.type, room: r.id, encounter: mb.id });
+        floor.packs.push({ x: p.x, z: p.z, count: 1, rank: 'elite', level: lv + eliteStep, radius: 1, type: mb.type, room: r.id, encounter: mb.id });
         out.encounters.miniboss.push(mb.id);
         floor.props.push(...arenaProps(r, arenas?.[mb.id], f, p, mb.id));
       } else if (r.kind === 'boss') {
-        floor.packs.push({ x: p.x, z: p.z, count: 1, rank: 'boss', level: lv + 2, radius: 1, type: enc.boss.type, room: r.id, encounter: enc.boss.id });
+        floor.packs.push({ x: p.x, z: p.z, count: 1, rank: 'boss', level: lv + bossStep, radius: 1, type: enc.boss.type, room: r.id, encounter: enc.boss.id });
         out.encounters.boss = enc.boss.id;
         floor.props.push(...arenaProps(r, arenas?.[enc.boss.id], f, p, enc.boss.id));
       }

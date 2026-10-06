@@ -188,7 +188,10 @@ export function createRules(host, opts = {}) {
       const e = host.spawn({ kind: 'monster', type: def.id, level, x, z, rank });
       return e?.r?.unit || null;
     },
-    spawnObject: o => host.spawn({ kind: 'object', type: o.type, name: o.spec?.name || OBJECT_NAMES[o.type] || o.type, x: o.x, z: o.z, data: { rules: true, key: o.key } }),
+    // play-test 3 R7: `look` (how the client dresses it, e.g. 'chained') and `tether` (the id of the boss a chain
+    // runs to from it) ride on the object so the arena on screen matches the call-out
+    spawnObject: o => host.spawn({ kind: 'object', type: o.type, name: o.spec?.name || OBJECT_NAMES[o.type] || o.type, x: o.x, z: o.z,
+      data: { rules: true, key: o.key, ...(o.spec?.look ? { look: o.spec.look } : {}), ...(o.spec?.tether && o.enc ? { tether: o.enc.id } : {}) } }),
     objState: (o, state, extra) => {
       const ent = host.objState ? host.entities.get(o.id) : null;
       if (!ent || ent.kind !== 'object') return false;
@@ -316,7 +319,11 @@ export function createRules(host, opts = {}) {
           // Q1: `every` (ms) is the basic attack's real cadence (a bow's draw + nock, a crossbow's reload) so
           // the client's auto-attack can pace itself; `clip` 'draw' = the bow is being drawn (loose follows)
           host.entities.get(ev.id)?.anim('attack');
-          host.event({ type: 'cast', s: ev.id, slot: 0, skill: 'basic', every: ev.every != null ? Math.round(ev.every * 1000) : undefined, clip: ev.clip === 'draw' || ev.clip === 'shoot' ? ev.clip : undefined });
+          // R5: what the weapon is (`wk` melee|arrow|bolt|staff, `wt` sword/staff/wand/bow…, `el` element, `two`), the
+          // swing's wind-up (`wind` ms: the hit lands this long after) and a melee swing's reach/arc — the client draws it
+          host.event({ type: 'cast', s: ev.id, slot: 0, skill: 'basic', every: ev.every != null ? Math.round(ev.every * 1000) : undefined, clip: ev.clip === 'draw' || ev.clip === 'shoot' ? ev.clip : undefined,
+            wk: ev.wk, wt: ev.wt, el: ev.el, two: ev.two, hand: ev.hand === 'off' ? 'off' : undefined, step: ev.step || undefined, wind: ev.wind > 0 ? Math.round(ev.wind * 1000) : undefined,
+            reach: ev.reach != null ? Math.round(ev.reach * 100) / 100 : undefined, arc: ev.arc != null ? Math.round(ev.arc * 1000) / 1000 : undefined, strike: ev.strike });
           break;
         }
         case 'revive': {
@@ -969,6 +976,8 @@ export function createRules(host, opts = {}) {
     addEntity, removeEntity, intent, step, respawn, onLevel, statusesOf, restore, cleanse, useItem, itemBuffs,
     levelFor: xp => levelFromXp(xp, engine.levelCap),
     xpFor: level => xpForLevel(level, engine.levelCap),
+    /** play-test 3 R2: 'quest' | 'event' experience multiplier (data/rules/progression.json xp) */
+    xpMult: kind => (engine.xpMult ? engine.xpMult(kind) : 1),
     dispose() { room.run(() => { for (const m of [...field.monsters]) clearThreat(m); }); },
     /** for tests and devtools */
     room, field, combat,

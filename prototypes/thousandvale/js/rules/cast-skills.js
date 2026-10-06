@@ -1000,7 +1000,7 @@ function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, 
   const to = { x: origin.x + dx * dist, z: origin.z + dz * dist };
   const flight = Math.max(0.09, dist / BOLT_SPEED);
   const chase = target?.enemy || null;
-  field.emit({ t: 'fx', kind: 'bolt', id: ch.id, skill: plan.skill?.id, element: plan.element, from: { x: origin.x, z: origin.z }, to: chase ? chase.id : to, ms: Math.round(flight * 1000) });
+  field.emit({ t: 'fx', kind: 'bolt', id: ch.id, skill: plan.skill?.id, element: plan.element, from: { x: origin.x, z: origin.z }, to: chase ? chase.id : to, ms: Math.round(flight * 1000), ...(plan.fxTag || {}) });
   combat.later(flight, () => {
     const at = chase && chase.dying == null ? { x: chase.x, z: chase.z } : to;
     const splash = plan.splash * (combat.room.engine.rpg.fx.sum(ch, 'boltSplash') || 1);

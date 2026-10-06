@@ -242,14 +242,14 @@ export const MAIL_OPS = Object.freeze(['list', 'read', 'send', 'take', 'return',
 export const ROOM_KINDS = Object.freeze(['wilds', 'town', 'instance']);
 
 export const EVENT_TYPES = Object.freeze(['cast', 'hit', 'miss', 'die', 'xp', 'level', 'loot', 'aggro', 'fx', 'open',
-  'tele', 'teleR', 'castbar', 'castX', 'phase', 'enrage', 'say', 'obj', 'boss']);
+  'tele', 'teleR', 'castbar', 'castX', 'phase', 'enrage', 'say', 'obj', 'boss', 'mp']);
 
 /**
  * Event fields (docs/protocol.md §6, encounter rows from docs/encounters.md §7). Every event also has
  * `type`, and `x, z` (the room fills them in). Ids are local room entity ids. `?` = optional.
  */
 export const EVENT_FIELDS = Object.freeze({
-  cast: ['s', 'slot?', 'skill', 'aim?', 'target?'],
+  cast: ['s', 'slot?', 'skill', 'aim?', 'target?', 'every?', 'clip?', 'wk?', 'wt?', 'el?', 'two?', 'hand?', 'step?', 'wind?', 'reach?', 'arc?', 'strike?'],
   hit: ['s', 'd', 'n', 'crit?', 'el?', 'kind', 'skill?'],
   miss: ['s', 'd', 'why'],
   die: ['d', 'by?'],
@@ -268,6 +268,7 @@ export const EVENT_FIELDS = Object.freeze({
   say: ['id', 'text', 'style'],
   obj: ['id', 'state?', 'otype?', 'r?', 'key?', 'hp?', 'gone?'],
   boss: ['id', 'name?', 'title?', 'bars?', 'phases?', 'enrageMs?', 'arena?', 'end?', 'won?'],
+  mp: ['id', 'n', 'max'],                  // play-test 3 R6+: a player's mana, <= 2 Hz, only on change
 });
 /** Telegraph shapes (`tele.shape`) and object states (`obj.state`, `info.state`). */
 export const TELE_SHAPES = Object.freeze(['circle', 'ring', 'donut', 'cone', 'line', 'cross']);

@@ -27,6 +27,17 @@ import { castSkillPlan, installSkillRuntime, throwBolt, runtimeFor } from './cas
 /** rpg.js CAST_ELEMENTS, element -> the status it leaves (Farhold main.js `statusForElement`). */
 const ELEMENT_LEAVES = { fire: 'burn', ice: 'chill', lightning: 'shock', poison: 'poison', shadow: 'curse', arcane: null };
 
+/**
+ * Play-test 3 R5 — "gloom staff: no attack animation, no particle effect. ALL weapons need a prominent effect."
+ * What every basic-attack event carries so the client can draw it without knowing the item: `wk` how the weapon
+ * attacks (melee | arrow | bolt | staff), `wt` its type (items.json `subtype`: sword, staff, wand, bow…), `el` its
+ * element (physical included — the client picks a look per element), `two` two-handed. The full event list is in
+ * docs/protocol.md "Basic attacks" and docs/requests.md (C/A -> D-world, play-test 3 R5).
+ */
+export function weaponTag(weapon, kind = 'melee') {
+  return { wk: kind, wt: weapon?.subtype || weapon?.baseKey || weapon?.key || 'fist', two: weapon?.twoHanded ? 1 : undefined };
+}
+
 export const CAST = {
   /** Farhold player.js `comboResetSeconds`: stop swinging this long and the pattern starts over */
   COMBO_RESET: 1.1,
@@ -77,7 +88,7 @@ export function createCombat(room) {
    */
   let uidN = 0;
   field.onKill = (e) => {
-    const xpCfg = balance.xp || {};
+    const xpCfg = engine.xpCfg || balance.xp || {};          // R2: kills x progression.json xp.killMult
     const lootRng = room.streams.get('loot');
     // Q3/Q4 — PARTY LOOT. When the room takes party loot (`combat.partyLoot`, js/rules/index.js -> the
     // host), a party that tagged the kill gets ONE drop for the corpse, rolled once with the party's
@@ -152,6 +163,7 @@ export function createCombat(room) {
     const weapon = hand === 'off' ? hands.off : hands.main;
     if (hand === 'off' && !hands.dual) return { ok: false, why: 'no off-hand weapon' };
     const kind = isStaff(weapon) ? 'staff' : (weapon?.castElement && weapon?.ranged) ? 'bolt' : weapon?.ranged ? 'arrow' : 'melee';
+    const tag = { ...weaponTag(weapon, kind), el: elementOf(weapon) || 'physical' };     // R5: on every swing event
     if (hand === 'off' && kind !== 'melee') return { ok: false, why: 'the off hand only swings' };
 
     const clock = ch.swing;
@@ -187,14 +199,14 @@ export function createCombat(room) {
           clock.readySince = clock[readyKey];
           clock.lastAt = t + wait; clock.lastEvery = after;
           clock.drawing = { until: t + wait, target: target?.id ?? null };
-          field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'draw', wind: wait, every: wait + after, range: plan.range });
+          field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'draw', wind: wait, every: wait + after, range: plan.range, ...tag });
           combat.later(wait, () => {
             clock.drawing = null;
             if (ch.dead || ch.removed) return;
             // a drawn arrow follows the target it was drawn on (the room faced you at it when you pressed)
             const tg = target && target.dying == null && !target.dead && !target.removed ? target : null;
             if (tg) ch.yaw = Math.atan2(tg.x - ch.x, tg.z - ch.z);
-            field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'shoot', wind: 0, every: after, range: plan.range });
+            field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'shoot', wind: 0, every: after, range: plan.range, ...tag });
             resolveArrow(ch, weapon, power, hstep);
           }, ch.id);
           return { ok: true, hand, kind, drawing: true, wind: wait, every: wait + after, power };
@@ -202,7 +214,7 @@ export function createCombat(room) {
         clock[readyKey] = t + after;
         clock.readySince = clock[readyKey];
         clock.lastAt = t; clock.lastEvery = after;
-        field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'shoot', wind: 0, every: after, range: plan.range });
+        field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'shoot', wind: 0, every: after, range: plan.range, ...tag });
         resolveArrow(ch, weapon, d.power, hstep);
         return { ok: true, hand, kind, power: d.power, every: after };
       }
@@ -213,7 +225,7 @@ export function createCombat(room) {
       clock[readyKey] = t + (plan.afterCast ?? 0.28);
       clock.readySince = clock[readyKey];
       clock.lastAt = t; clock.lastEvery = plan.afterCast ?? 0.28;
-      field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'castStaff', wind: 0, every: plan.afterCast ?? 0.28 });
+      field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'castStaff', wind: 0, every: plan.afterCast ?? 0.28, ...tag });
       resolveStaff(ch, weapon, hh, c, hstep);
       return { ok: true, hand, kind, held: hh };
     }
@@ -243,7 +255,8 @@ export function createCombat(room) {
       : kind === 'bolt' ? () => resolveWand(ch, weapon, step)
         : () => resolveArrow(ch, weapon, plan?.power ?? 1, step);
     if (wind <= 0) fire(); else pending.push({ at: t + wind, fn: fire, who: ch.id });
-    field.emit({ t: 'swing', id: ch.id, hand, step, clip: stepRow?.clip || 'attack', wind, every });
+    const shapeNow = kind === 'melee' ? strikeAt(weapon, step) : null;
+    field.emit({ t: 'swing', id: ch.id, hand, step, clip: stepRow?.clip || 'attack', wind, every, ...tag, ...(shapeNow ? { reach: shapeNow.reach, arc: shapeNow.arc, strike: shapeNow.key || undefined } : {}) });
     return { ok: true, hand, kind, step, wind, every };
   };
 
@@ -283,7 +296,7 @@ export function createCombat(room) {
       const target = scanLine(ch.x, ch.z, dx, dz, range, 1.1 + homing * 2.6);
       const dist = target ? target.distance : range;
       const at = { x: ch.x + dx * dist, z: ch.z + dz * dist };
-      field.emit({ t: 'fx', kind: 'arrow', id: ch.id, element, from: { x: ch.x, z: ch.z }, to: at, ms: Math.round(dist / speed * 1000) });
+      field.emit({ t: 'fx', kind: 'arrow', id: ch.id, element, from: { x: ch.x, z: ch.z }, to: at, ms: Math.round(dist / speed * 1000), basic: 1, ...weaponTag(weapon, 'arrow'), el: element });
       const brand = brandFor(ch, leaves);
       // main.js bursts a quiver's arrowBurst at the moment of the shot, around what the scan found
       if (target && burst > 0) {
@@ -332,9 +345,10 @@ export function createCombat(room) {
     // main.js passes `{ ...meleeOpts, power: how.mult * share }`, so the strike shape's own share is NOT in a wand bolt
     opts.power = (how.mult || 1) * share;
     plan.mods = mods;
+    plan.fxTag = { basic: 1, ...weaponTag(weapon, 'bolt'), el: element };      // R5: the client draws the wand's own bolt
     throwBolt(combat, ch, plan, a, a.dx, a.dz, opts);
     // Twin Bolt: a second bolt a beat behind the first, at a share of its damage
-    if (mods.twin) combat.later(mods.twin.ms / 1000, () => throwBolt(combat, ch, { ...plan, mods: null }, aimOfCh(ch), Math.sin(ch.yaw), Math.cos(ch.yaw), { ...opts, power: (how.mult || 1) * share * mods.twin.power }), ch.id);
+    if (mods.twin) combat.later(mods.twin.ms / 1000, () => throwBolt(combat, ch, { ...plan, mods: null, fxTag: plan.fxTag }, aimOfCh(ch), Math.sin(ch.yaw), Math.cos(ch.yaw), { ...opts, power: (how.mult || 1) * share * mods.twin.power }), ch.id);
   }
 
   /**
@@ -365,6 +379,14 @@ export function createCombat(room) {
     const a = aimOfCh(ch);
     const statusOn = (enemy, k) => { if (spell.status) landStatus(ch, spell.status, statuses[spell.status], enemy, Math.max(1, base * k)); };
     const rt = runtimeFor(combat);
+    // R5: the staff's spell, drawn — the shape it really takes (a charged form, else the element's own spell)
+    {
+      const form = charged?.shape || (spell.shape === 'nova' || spell.shape === 'cone' || spell.shape === 'wave' ? spell.shape : 'bolt');
+      const reachM = form === 'jet' ? (spell.range || 9) * shape.scale * (charged.rangeScale || 1.45) : (form === 'cone' || form === 'wave') ? (spell.range || 9) * shape.scale : form === 'bolt' || form === 'mortar' || form === 'storm' ? (spell.range || 12) * shape.scale : undefined;
+      field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...weaponTag(weapon, 'staff'), el: element, shape: form, spell: spell.key || undefined, charged: charged ? 1 : undefined,
+        x: ch.x, z: ch.z, yaw: Math.round(Math.atan2(a.dx, a.dz) * 1000) / 1000, r: form === 'nova' || form === 'dome' || form === 'wall' ? Math.round(radius * 100) / 100 : undefined,
+        reach: reachM != null ? Math.round(reachM * 100) / 100 : undefined, arc: form === 'cone' ? (spell.arc || 0.9) * shape.scale : form === 'jet' ? (spell.arc || 0.9) * shape.scale * 0.8 : form === 'wave' ? 0.45 : undefined });
+    }
     if (charged?.shape === 'jet') {
       const range = (spell.range || 9) * shape.scale * (charged.rangeScale || 1.45);
       const wide = (spell.arc || 0.9) * shape.scale * 0.8;
@@ -412,6 +434,7 @@ export function createCombat(room) {
       }
       if (charged?.shape === 'storm') plan.chains = charged.chains || 5;
       plan.mods = mods;
+      plan.fxTag = { basic: 1, ...weaponTag(weapon, 'staff'), el: element };
       throwBolt(combat, ch, plan, a, a.dx, a.dz, { ...opts, power: (spell.mult || 1) * (shape.charge?.power || 1) * (mods.power || 1) });
     }
   }
@@ -436,6 +459,8 @@ export function createCombat(room) {
       if (leaves && statuses[leaves] && result?.amount > 0) landStatus(ch, leaves, statuses[leaves], enemy, Math.max(1, result.amount * 0.7));
     };
     const opts = { element, onHit: brandHit, applyStatus: hookFor(ch), power: share * shape.damage, strike: shape, kind: 'swing' };
+    // R5: the swing itself, drawn at the moment it lands (a trail along the arc, in the weapon's element)
+    field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...weaponTag(weapon, 'melee'), el: element, shape: 'swing', hand, step, x: ch.x, z: ch.z, yaw: Math.round((ch.yaw || 0) * 1000) / 1000, reach: Math.round(reach * 100) / 100, arc: Math.round(arc * 1000) / 1000, strike: shape.key || undefined });
     const hits = field.strike(ch, ch, { reach, arc, ...opts });
     runtimeFor(combat).resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: null, element });   // unique powers
     if (ch.perkFlags?.sunder && shape.last) for (const h of hits) h.enemy.armor = Math.max(0, (h.enemy.armor || 0) - 8);

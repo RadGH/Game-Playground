@@ -346,10 +346,27 @@ export function createRoom(opts) {
     if (tick % 10 === 1) fillCamps(now);
     if (barDirty.size) flushBars();
     if (stDirty.size || tick % 20 === 3) flushStatuses(tick % 20 === 3);
+    if (tick % 10 === 5) flushMana();
     // 4. snapshots + events
     send();
     events = [];
   };
+
+  /**
+   * Play-test 3 R6+: other players' mana (target frame, party frames). Health rides the snapshot; mana does not, so a
+   * player's mana goes out as an `mp {id, n, max}` event at most every 500 ms, only when the whole number changed.
+   * `info.mpMax` carries the maximum for a late joiner; your own mana is still in `you`.
+   */
+  function flushMana() {
+    for (const c of clients.values()) {
+      const e = c.entity;
+      if (!e || e.kind !== 'player') continue;
+      const n = Math.round(e.mp || 0), max = Math.round(e.mpMax || 0);
+      if (e._mpSent === n && e._mpMaxSent === max) continue;
+      e._mpSent = n; e._mpMaxSent = max;
+      room.emit({ type: 'mp', id: e.id, n, max });
+    }
+  }
 
   function markAwake(x, z) {
     const r = VIEW.awakeR, cell = grid.cell, cols = grid.cols, ox = grid.origin.x, oz = grid.origin.z;

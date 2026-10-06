@@ -1,5 +1,5 @@
 {
-  "_doc": "Thousandvale progression rules owned by stream C (js/rules/progression.js). Play-test 1 P4: nothing follows you at level 1 \u2014 a class companion (classes.json `pet`) comes at `companions.main`, its second body (`pet.extra`) at `companions.extra`; a quest can grant either earlier (rules.unlock(e, 'companion' | 'companion2')), and so can the perk-forest notable Early Bond (flag earlyBond: main at level 1... once the point is spent). Summoning SKILLS keep Farhold's slot ladder (data/skills.json unlockAt 1/3/6/12/18/24), so a level-1 bar has one skill. `levelGap` is P26: see js/rules/level-gap.js.",
+  "_doc": "Thousandvale progression rules owned by stream C (js/rules/progression.js). Play-test 1 P4: nothing follows you at level 1 — a class companion (classes.json `pet`) comes at `companions.main`, its second body (`pet.extra`) at `companions.extra`; a quest can grant either earlier (rules.unlock(e, 'companion' | 'companion2')), and so can the perk-forest notable Early Bond (flag earlyBond: main at level 1... once the point is spent). Summoning SKILLS keep Farhold's slot ladder (data/skills.json unlockAt 1/3/6/12/18/24), so a level-1 bar has one skill. `levelGap` is P26: see js/rules/level-gap.js.",
   "companions": {
     "main": 10,
     "extra": 20,
@@ -7,7 +7,7 @@
     "earlyBondExtra": 12
   },
   "levelGap": {
-    "_doc": "P26 (js/rules/level-gap.js): a monster 1-3 levels ABOVE the player hits it softer and takes more from it. `monsterDamage[g]` multiplies a monster's hit on a player (or follower) g levels lower; `playerDamage[g]` multiplies a player's (or follower's) hit on a monster g levels higher. Index 0 = same level; a gap past the end uses the LAST entry (no cliff at 4 \u2014 the monster's own level curve keeps making 4+ hard). A monster BELOW you: Farhold's numbers, unchanged.",
+    "_doc": "P26 (js/rules/level-gap.js): a monster 1-3 levels ABOVE the player hits it softer and takes more from it. `monsterDamage[g]` multiplies a monster's hit on a player (or follower) g levels lower; `playerDamage[g]` multiplies a player's (or follower's) hit on a monster g levels higher. Index 0 = same level; a gap past the end uses the LAST entry (no cliff at 4 — the monster's own level curve keeps making 4+ hard). A monster BELOW you: Farhold's numbers, unchanged.",
     "monsterDamage": [
       1,
       0.88,
@@ -20,5 +20,11 @@
       1.22,
       1.3
     ]
+  },
+  "xp": {
+    "_doc": "Play-test 3 R2 (js/rules/engine.js xpCfg, rules.xpMult): the owner reached level 2 only after killing everything he could find. Farhold's balance.json pays a kill xp.kill = 0.2 of the enemy's xp (a level-1 moor hound = 2 xp against 58 for level 2), so Thousandvale multiplies: kills x1.5 (0.2 -> 0.3: a level-1 hound pays 3, a level-3 brigand 11-12), quest turn-ins and event rewards x1.25 (both are a share of a level's span, data/quests/README.md). The level curve itself is Farhold's and unchanged (58 / 153 / 237 xp for levels 2 / 3 / 4), as is the grey-con rule (5 levels below pays nothing). With the starting chain's own rewards a new character reaches level 2 after Two Good Legs + ~10 kills, and level 4 by Home with News (tests/C/playtest3.test.mjs walks it).",
+    "killMult": 1.5,
+    "questMult": 1.25,
+    "eventMult": 1.25
   }
 }

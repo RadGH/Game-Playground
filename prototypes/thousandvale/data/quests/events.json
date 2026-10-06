@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E (M2). The event director's list (PLAN §5.2). `director` = the realm rules (ONE big event at a time, sized to who is online and in band, announced 10 minutes ahead, waystone travel to it free while it runs). `realm` = the big events, each on a schedule or a trigger; the province world boss Grimtallow is a fixed-time scheduled event. `zone` = the per-zone event bosses, each running on its own in every zone copy at stream B's event arena (`site` = the arena id in data/zones/<world zone>/placements.json): two waves from the zone's camp mix, then the boss (an encounter script id in data/encounters/). Everyone within autoEnrolMetres joins a temporary event group (PLAN §5.3). Times are real minutes; reward xp = share of a level's XP, gold = multiple of a kill's gold (data/quests/README.md). Every event carries a `blurb` (one or two sentences for the map and the event card: what happens and what to do).",
+  "_doc": "Stream E (M2). The event director's list (PLAN §5.2). `director` = the realm rules (ONE big event at a time, sized to who is online and in band, announced 10 minutes ahead, waystone travel to it free while it runs). `realm` = the big events, each on a schedule or a trigger; the province world boss Grimtallow is a fixed-time scheduled event. `zone` = the per-zone event bosses, each running on its own in every zone copy at stream B's event arena (`site` = the arena id in data/zones/<world zone>/placements.json): two waves from the zone's camp mix, then the boss (an encounter script id in data/encounters/). Everyone within autoEnrolMetres joins a temporary event group (PLAN §5.3). Times are real minutes; reward xp = share of a level's XP, gold = multiple of a kill's gold (data/quests/README.md). Every event carries a `blurb` (one or two sentences for the map and the event card: what happens and what to do). Play-test 3 R3: nothing waits on a real-time clock except the world boss's fixed schedule; events start when someone comes near (director.startOn 'near', director.zone), after a short countdown shown as a real number, and are sized for fewer than 5 players.",
   "director": {
     "oneRealmEventAtATime": true,
     "announceMinutes": 10,
@@ -9,19 +9,33 @@
     ],
     "freeWaystoneTravel": true,
     "gapMinutes": [
-      40,
-      80
+      10,
+      20
     ],
     "inBandLevels": 3,
     "size": {
-      "healthPerPlayer": 0.12,
-      "addWavePerPlayers": 6,
+      "healthPerPlayer": 0.35,
+      "addWavePerPlayers": 2,
       "minPlayers": 1,
-      "capPlayers": 60,
-      "note": "Boss health x (1 + healthPerPlayer x (enrolled - 1)), one extra add per addWavePerPlayers enrolled; soak/stack needs come from the encounter script's own `party` note."
+      "capPlayers": 5,
+      "note": "Play-test 3 R3 — fewer than 5 players at a time: boss health x (1 + healthPerPlayer x (enrolled - 1)) up to capPlayers 5 (x2.4 for five), one extra add per addWavePerPlayers enrolled (two for five)."
     },
-    "pick": "Of the events whose minOnline is met and whose cooldown is over, the scheduled one due soonest wins; otherwise weighted by `weight`. An event whose zone has fewer than minInBand characters in band is skipped.",
-    "credit": "By contribution (damage, healing, soaks); loot is personal."
+    "pick": "Play-test 3 R3 — the owner: 'events should activate when a player goes nearby, not wait in real time; fewer than 5 people will play at a time'. startOn 'near': a realm event starts when a player in its band comes within its radius + nearMetres (and its cooldown is over, and nothing else is running, and nearGapMinutes have passed since the last one), after a countdownSeconds countdown sent as a real time. A FIXED-schedule event (the world boss) is still announced announceMinutes ahead with its real start time (`at`), and also starts on demand when someone in band walks up and it has been quiet quietMinutes. Weighted events never start on their own.",
+    "credit": "By contribution (damage, healing, soaks); loot is personal.",
+    "startOn": "near",
+    "nearMetres": 60,
+    "countdownSeconds": 15,
+    "nearGapMinutes": 3,
+    "zone": {
+      "startOn": "near",
+      "nearMetres": 50,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "_doc": "Play-test 3 R3 (stream A js/sim/province.js zoneEventsTick): a zone event waits at its arena, armed, until a player comes within the arena radius + nearMetres; then a countdown of countdownSeconds (sent as a real time, `zoneEvent {kind:'soon', at, inMs}`), then the waves. Everyone walking away during the countdown calls it off. After it ends it rests cooldownMinutes (the map shows when it is ready again: `kind:'cooldown', at`). No real-time schedule."
+    }
   },
   "realm": [
     {
@@ -35,14 +49,14 @@
         "type": "fixed",
         "everyHours": 3,
         "atMinute": 30,
-        "also": "on demand when >= 12 characters in band are online and none ran in the last 90 minutes",
+        "also": "on demand when >= 1 character in band walks up to its arena and none ran in the last 60 minutes",
         "onDemand": {
-          "minInBand": 12,
-          "quietMinutes": 90
+          "minInBand": 1,
+          "quietMinutes": 60
         }
       },
       "minOnline": 1,
-      "minInBand": 8,
+      "minInBand": 1,
       "durationMinutes": 20,
       "level": 10,
       "weight": 0,
@@ -94,10 +108,10 @@
       },
       "schedule": {
         "type": "weighted",
-        "cooldownMinutes": 120
+        "cooldownMinutes": 60
       },
-      "minOnline": 4,
-      "minInBand": 4,
+      "minOnline": 1,
+      "minInBand": 1,
       "durationMinutes": 12,
       "level": 3,
       "weight": 3,
@@ -153,7 +167,11 @@
           "z": 5360
         }
       ],
-      "levelAuthored": 4
+      "levelAuthored": 4,
+      "startOn": {
+        "minLevel": 3,
+        "_doc": "Torborhold is where new characters start: the raid comes only when someone of level 3+ is in town."
+      }
     },
     {
       "id": "siege_halsbridge",
@@ -165,10 +183,10 @@
       },
       "schedule": {
         "type": "weighted",
-        "cooldownMinutes": 180
+        "cooldownMinutes": 90
       },
-      "minOnline": 10,
-      "minInBand": 6,
+      "minOnline": 1,
+      "minInBand": 1,
       "durationMinutes": 18,
       "level": 5,
       "weight": 2,
@@ -239,10 +257,10 @@
       "monster": "mire_drake",
       "schedule": {
         "type": "weighted",
-        "cooldownMinutes": 150
+        "cooldownMinutes": 90
       },
-      "minOnline": 6,
-      "minInBand": 4,
+      "minOnline": 1,
+      "minInBand": 1,
       "durationMinutes": 15,
       "level": 8,
       "weight": 2,
@@ -293,13 +311,6 @@
       "kind": "avalanche",
       "site": "event_hollin_pass",
       "announce": "An avalanche has torn open the hillside above the pass, and the thing it uncovered is getting up.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 7,
       "waves": [
@@ -354,7 +365,12 @@
           "z": 2829
         }
       ],
-      "levelAuthored": 8
+      "levelAuthored": 8,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     },
     {
       "id": "event_ashcombe",
@@ -363,13 +379,6 @@
       "kind": "the_ruin_wakes",
       "site": "event_ashcombe",
       "announce": "Lights in the old counting house, at noon. The Warden of the ruin is walking its wall again.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 6,
       "waves": [
@@ -424,7 +433,12 @@
           "z": 3224
         }
       ],
-      "levelAuthored": 6
+      "levelAuthored": 6,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     },
     {
       "id": "event_brackwater",
@@ -433,13 +447,6 @@
       "kind": "drowning_bell",
       "site": "event_brackwater",
       "announce": "A bell rings under the fen, and the reeds lean toward it. Somebody has to stop the ringer.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 7,
       "waves": [
@@ -494,7 +501,12 @@
           "z": 3029
         }
       ],
-      "levelAuthored": 7
+      "levelAuthored": 7,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     },
     {
       "id": "event_saltmouth",
@@ -503,13 +515,6 @@
       "kind": "the_wreckers_night",
       "site": "event_saltmouth",
       "announce": "False lights on the headland. The wreckers are out, and their sergeant is counting the take.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 8,
       "waves": [
@@ -564,7 +569,12 @@
           "z": 3420
         }
       ],
-      "levelAuthored": 8
+      "levelAuthored": 8,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     },
     {
       "id": "event_delvers_hill",
@@ -573,13 +583,6 @@
       "kind": "the_collapse",
       "site": "event_delvers_hill",
       "announce": "The old workings have fallen in, and something big came up through the hole with the dust.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 6,
       "waves": [
@@ -634,7 +637,12 @@
           "z": 4832
         }
       ],
-      "levelAuthored": 6
+      "levelAuthored": 6,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     },
     {
       "id": "event_grandmother_skein",
@@ -643,13 +651,6 @@
       "kind": "harvest_festival",
       "site": "event_grandmother_skein",
       "announce": "Silk over the barley, thick as rope. The thing under the old sinkhole is awake.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 4,
       "waves": [
@@ -704,7 +705,12 @@
           "z": 6040
         }
       ],
-      "levelAuthored": 4
+      "levelAuthored": 4,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     },
     {
       "id": "event_torbor_cross",
@@ -713,13 +719,6 @@
       "kind": "riot_in_the_market",
       "site": "event_torbor_cross",
       "announce": "A drummer in a sky-blue hood is whipping the market crowd into a mob. Stop the drum, stop the riot.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 5,
       "waves": [
@@ -774,7 +773,12 @@
           "z": 5200
         }
       ],
-      "levelAuthored": 5
+      "levelAuthored": 5,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     },
     {
       "id": "event_gullwick",
@@ -783,13 +787,6 @@
       "kind": "the_serpent_surfaces",
       "site": "event_gullwick",
       "announce": "The lake goes still, then very not still. Sluicegrip has come up for the ferry boats.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 7,
       "waves": [
@@ -844,7 +841,12 @@
           "z": 4784
         }
       ],
-      "levelAuthored": 7
+      "levelAuthored": 7,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     },
     {
       "id": "event_wychwood",
@@ -853,13 +855,6 @@
       "kind": "the_great_hunt",
       "site": "event_wychwood",
       "announce": "Horns in the forest — but nobody in Wychwood owns a horn. The pack is hunting, and its leader wants company.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 6,
       "waves": [
@@ -914,7 +909,12 @@
           "z": 6936
         }
       ],
-      "levelAuthored": 7
+      "levelAuthored": 7,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     },
     {
       "id": "event_saint_orrins_rise",
@@ -923,13 +923,6 @@
       "kind": "the_procession",
       "site": "event_saint_orrins_rise",
       "announce": "The pilgrims' procession is on the road, and something with wings is following it.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 5,
       "waves": [
@@ -984,7 +977,12 @@
           "z": 7016
         }
       ],
-      "levelAuthored": 5
+      "levelAuthored": 5,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     },
     {
       "id": "event_millbrook",
@@ -993,13 +991,6 @@
       "kind": "harvest_festival",
       "site": "event_millbrook",
       "announce": "Bunting, cider, pies — and a harvest cart with far too many teeth.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 6,
       "waves": [
@@ -1054,7 +1045,12 @@
           "z": 7480
         }
       ],
-      "levelAuthored": 6
+      "levelAuthored": 6,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     },
     {
       "id": "event_redcliff",
@@ -1063,13 +1059,6 @@
       "kind": "siege_at_the_fort",
       "site": "event_redcliff",
       "announce": "Raiders are at Redcliff Fort with fire and ladders, and a spitting imp to light the gate.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 8,
       "waves": [
@@ -1124,7 +1113,12 @@
           "z": 7099
         }
       ],
-      "levelAuthored": 8
+      "levelAuthored": 8,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     },
     {
       "id": "event_blackthorn_scar",
@@ -1133,13 +1127,6 @@
       "kind": "warband_raid",
       "site": "event_blackthorn_scar",
       "announce": "The thorn wall moves. A warband's briar-giant is walking through it, and the raiders walk behind.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 10,
       "waves": [
@@ -1194,7 +1181,12 @@
           "z": 9290
         }
       ],
-      "levelAuthored": 10
+      "levelAuthored": 10,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     },
     {
       "id": "event_coldwater",
@@ -1203,13 +1195,6 @@
       "kind": "the_serpent_surfaces",
       "site": "event_coldwater",
       "announce": "Coldwater Mere churns. Old Murkfin has come up out of the silt, hungry.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 7,
       "waves": [
@@ -1264,7 +1249,12 @@
           "z": 9982
         }
       ],
-      "levelAuthored": 7
+      "levelAuthored": 7,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     },
     {
       "id": "event_gorse_march",
@@ -1273,13 +1263,6 @@
       "kind": "siege_at_the_fort",
       "site": "event_gorse_march",
       "announce": "The Red Banner has come for Gorsehold Redoubt. Hask himself is leading the ladders.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 8,
       "waves": [
@@ -1334,7 +1317,12 @@
           "z": 9347
         }
       ],
-      "levelAuthored": 8
+      "levelAuthored": 8,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     },
     {
       "id": "event_sunken_wolds",
@@ -1343,13 +1331,6 @@
       "kind": "the_great_hunt",
       "site": "event_sunken_wolds",
       "announce": "Something grey is hunting the hunters of the Wolds. It leaves the boots.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 10,
       "waves": [
@@ -1404,7 +1385,12 @@
           "z": 9199
         }
       ],
-      "levelAuthored": 10
+      "levelAuthored": 10,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ]
     }
   ]
 }

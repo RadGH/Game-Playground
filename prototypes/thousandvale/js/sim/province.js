@@ -271,7 +271,9 @@ export function createProvince(opts) {
     const fams = ds.families || (ds.family ? [ds.family] : null);
     const family = fams && fams.length ? fams[dseed % fams.length] : undefined;
     // no `arenas` option: the encounter engine (stream C) spawns arena objects at the pull (E's ask)
-    const plan = caveDungeon(planDungeon(dseed, { floors: ds.floors || 2, level: ds.level || dungeonLevel, ...(family ? { family } : {}) }), d.cave || null);
+    const steps = {};       // play-test 3 R2: the sheet's level steps (the starter dungeon is gentler), E's planDungeon options
+    for (const k of ['floorStep', 'eliteStep', 'bossStep']) if (Number.isFinite(ds[k])) steps[k] = ds[k];
+    const plan = caveDungeon(planDungeon(dseed, { floors: ds.floors || 2, level: ds.level || dungeonLevel, ...(family ? { family } : {}), ...steps }), d.cave || null);
     const dterr = dungeonTerrain(plan);
     const spec = dungeonRoomSpec(plan, { exitTo: { room: 'wilds', x: d.x + 3, z: d.z + 3 } });
     const r = createRoom({
@@ -560,7 +562,7 @@ export function createProvince(opts) {
       const p = partyOf.get(o.char.id);
       if (!p || p.members.length < 2) continue;
       const e = o.entity;
-      rows.push([o.char.id, Math.round(e.hp), e.hpMax, o.room.id, Math.round(e.x * 10) / 10, Math.round(e.z * 10) / 10, e.dead ? 1 : 0, o.conn ? 1 : 0, e.id]);
+      rows.push([o.char.id, Math.round(e.hp), e.hpMax, o.room.id, Math.round(e.x * 10) / 10, Math.round(e.z * 10) / 10, e.dead ? 1 : 0, o.conn ? 1 : 0, e.id, Math.round(e.mp || 0), e.mpMax || 0]);   // [9] mp [10] mpMax (R6+)
     }
     if (rows.length) send({ k: 'frames', rows });
   }
@@ -910,7 +912,6 @@ export function createProvince(opts) {
   // ---- events: the realm event (the director starts it here) and every copy's own zone events (PLAN §5.2) ----
   let liveEvent = null, realmRun = null;
   const zoneRuns = new Map();     // `${room.id}|${zone}` -> { run, room, def }
-  const zoneNext = new Map();     // same key -> room clock ms when the next may start
   const eventView = ev => ({ id: ev.id, uid: ev.uid, name: ev.name, province: ev.province, x: ev.x, z: ev.z, r: ev.r || 50, level: ev.level, kind: ev.kind || 'boss', zoneName: ev.zoneName || null, where: ev.where || null, blurb: ev.blurb || null });
   /** The room holding a point: a hub town's room when it is inside one (a town attack), else the first copy. */
   function roomForPoint(pv, p) { const ti = pv.L.towns.findIndex(t => Math.hypot(p.x - t.x, p.z - t.z) < t.r); return ti >= 0 ? pv.towns[ti] : pv.copies[0]; }
@@ -988,7 +989,32 @@ export function createProvince(opts) {
     for (const p of room.host.near(v.x, v.z, v.r * 2 + 30, x => x.kind === 'player')) { const c = room.clients.get(p.id); if (c) c.send(msg); }
     return v;
   }
+  /**
+   * Play-test 3 R3: a REALM event starts when someone walks up to it (the director decides — one at a time, cooldowns,
+   * in band). Once a second this process tells the gateway who stands within an event's radius + `realmNearM` of each of
+   * its realm events (`eventNear {id, levels}`, at most every 5 s per event); nothing is sent while one is running.
+   */
+  const realmEvents = (opts.events || []).filter(e => P.has(e.province) && Number.isFinite(e.x));
+  const nearSent = new Map();
+  const realmNearM = opts.realmNearM ?? 60;
+  function realmNear() {
+    if (liveEvent || realmRun || !realmEvents.length) return;
+    const t = now();
+    for (const e of realmEvents) {
+      if (t - (nearSent.get(e.id) || -1e12) < 5000) continue;
+      const spots = e.arenas && e.arenas.length ? e.arenas : [e];
+      const levels = [];
+      for (const o of online.values()) {
+        if (!o.entity || o.entity.dead || !o.conn || provOf(o.room)?.L.key !== e.province || o.room.kind === 'instance') continue;
+        if (spots.some(s => Math.hypot(o.entity.x - s.x, o.entity.z - s.z) <= (e.r || 50) + realmNearM)) levels.push(o.char.level || 1);
+      }
+      if (!levels.length) continue;
+      nearSent.set(e.id, t);
+      send({ k: 'eventNear', id: e.id, levels });
+    }
+  }
   function eventTick() {
+    realmNear();
     if (realmRun) {
       const { run, room } = realmRun;
       const res = run.step();
@@ -1003,41 +1029,107 @@ export function createProvince(opts) {
     }
     zoneEventsTick();
   }
+  /**
+   * Play-test 3 R3 — "events should activate when a player goes nearby, not wait in real time" (fewer than 5 players at
+   * a time). Every zone event waits ARMED at its arena in every copy. A living player within the arena radius + `nearM`
+   * (E's director.zone.nearMetres, 50) starts a COUNTDOWN (`countdownMs`, 15 s) sent as a real time — `zoneEvent
+   * {kind:'soon', ev, at: wall ms, inMs}` — then the waves. Everybody walking away (2.5x the trigger) during the countdown
+   * calls it off (`kind:'end', called: 'off'`). After it ends it RESTS (`cooldownMs`, 3-5 min) and says when it is ready
+   * again (`kind:'end', next: wall ms`; `kind:'states'` and the `zone` message carry every event's state and time).
+   * `zoneEventFirstMs` (tests) = how long after boot the events are armed at all; `zoneEventGapMs` overrides the rest.
+   */
+  const zoneWait = new Map();     // key -> { state: 'soon' | 'cooldown', at (room ms), wallAt, ev? }
+  const zoneArmedAt = new Map();  // room id -> room ms the copy's events are armed (zoneEventFirstMs after it is first seen)
   function zoneEventsTick() {
     for (const pv of P.values()) {
       const defs = pv.L.zoneEvents || [];
       if (!defs.length) continue;
       for (const room of pv.copies) {
-        // who is in which zone of this copy
-        const inZone = new Map();
-        for (const c of room.clients.values()) { const z = pv.L.zoneOf(c.entity.x, c.entity.z); (inZone.get(z) || inZone.set(z, []).get(z)).push(c); }
         const t = room.now();
+        if (!zoneArmedAt.has(room.id)) zoneArmedAt.set(room.id, t + (zoneEventFirstMs ?? 0));
+        const armed = t >= zoneArmedAt.get(room.id);
+        const players = [];
+        const inZone = new Map();
+        for (const c of room.clients.values()) {
+          if (!c.entity) continue;
+          const z = pv.L.zoneOf(c.entity.x, c.entity.z); (inZone.get(z) || inZone.set(z, []).get(z)).push(c);
+          if (!c.entity.dead) players.push(c);
+        }
         for (const def of defs) {
           const key = room.id + '|' + def.id;
           const cur = zoneRuns.get(key);
-          const here = inZone.get(def.zone) || [];
+          // who hears it: everyone in its zone, and anyone close to the arena (an arena near a zone border)
+          const hearR = ((def.r || 40) + (def.nearM ?? 50)) * 2.5;
+          const here = [...new Set([...(inZone.get(def.zone) || []), ...players.filter(c => Math.hypot(c.entity.x - def.x, c.entity.z - def.z) <= hearR)])];
           if (cur) {
             const res = cur.run.step();
             if (res === 'live') { frameTo(cur.run, room); continue; }
             if (res === 'won') { rewardEvent(cur.run, room); deedOf(def.zone).last.eventWon = def.name; }
-            tellZone(here, { kind: 'end', ev: cur.run.view(), won: res === 'won' });
             zoneRuns.delete(key);
-            zoneNext.set(key, t + gapOf(def, room));
+            const rest = gapOf(def, room);
+            zoneWait.set(key, { state: 'cooldown', at: t + rest, wallAt: wallNow() + rest });
+            tellZone(here, { kind: 'end', ev: cur.run.view(), won: res === 'won', next: wallNow() + rest, inMs: rest });
+            tellStates(pv, room, def.zone, here);
             continue;
           }
-          if (!zoneNext.has(key)) { zoneNext.set(key, t + (zoneEventFirstMs ?? Math.round(5 * 60000 + room.host.random('event') * Math.max(0, def.everyMs[0] - 5 * 60000)))); continue; }
-          if (t < zoneNext.get(key) || !here.length) continue;      // a zone event plays where somebody can see it
-          const ev = { ...def, uid: def.id + ':' + room.id + ':' + t, scale: eventScale(here.length, opts.eventSize) };
-          const run = createEventRunner({ room, ev, rng: () => room.host.random('event'), info: encounterInfo });
-          run.contrib = new Map();
-          zoneRuns.set(key, { run, room, def });
-          tellZone(here, { kind: def.warnMs ? 'soon' : 'start', ev: run.view(), text: def.announce[0] || undefined, at: def.warnMs ? wallNow() + def.warnMs : undefined });
-          run.step();
+          const w = zoneWait.get(key);
+          if (w && w.state === 'cooldown') {
+            if (t < w.at) continue;
+            zoneWait.delete(key);
+            tellStates(pv, room, def.zone, here);
+          }
+          const trig = (def.r || 40) + (def.nearM ?? 50);
+          const dist = c => Math.hypot(c.entity.x - def.x, c.entity.z - def.z);
+          if (w && w.state === 'soon') {
+            if (!players.some(c => dist(c) <= trig * 2.5)) {          // everybody left: called off, armed again
+              zoneWait.delete(key);
+              tellZone(here, { kind: 'end', ev: w.view, won: false, called: 'off' });
+              tellStates(pv, room, def.zone, here);
+              continue;
+            }
+            if (t < w.at) continue;
+            zoneWait.delete(key);
+            const n = Math.max(1, players.filter(c => dist(c) <= Math.max(def.enrol || 60, (def.r || 40) * 1.2) + 30).length);
+            const ev = { ...def, warnMs: 0, uid: def.id + ':' + room.id + ':' + t, scale: eventScale(n, opts.eventSize) };
+            const run = createEventRunner({ room, ev, rng: () => room.host.random('event'), info: encounterInfo });
+            run.contrib = new Map();
+            zoneRuns.set(key, { run, room, def });
+            run.step();
+            tellZone(here, { kind: 'start', ev: run.view(), text: (def.announce || [])[0] || undefined });
+            tellStates(pv, room, def.zone, here);
+            continue;
+          }
+          if (!armed || !players.some(c => dist(c) <= trig)) continue;
+          const ms = def.countdownMs ?? 15000;
+          const view = defView(def, 'soon');
+          zoneWait.set(key, { state: 'soon', at: t + ms, wallAt: wallNow() + ms, view });
+          const secs = Math.round(ms / 1000);
+          tellZone(here, { kind: 'soon', ev: view, at: wallNow() + ms, inMs: ms, text: `${def.name || 'Trouble'} begins in ${secs} seconds.` + ((def.announce || [])[0] ? ' ' + def.announce[0] : '') });
+          tellStates(pv, room, def.zone, here);
         }
       }
     }
   }
-  const gapOf = (def, room) => zoneEventGapMs ?? Math.round(def.everyMs[0] + room.host.random('event') * (def.everyMs[1] - def.everyMs[0]));
+  /** A zone event's card before it has a runner (the countdown). */
+  function defView(def, phase) {
+    return { uid: null, id: def.id, name: def.name, kind: def.kind || 'zone', zoneName: def.zoneName || null, x: def.x, z: def.z, r: def.r || 40, phase, wave: 0, waves: (def.waves || []).length,
+      boss: 0, hp: 1, players: 0, level: def.level || null, ...(def.where ? { where: def.where } : {}), ...(def.blurb ? { blurb: def.blurb } : {}) };
+  }
+  /** R3: every zone event of `zone` in this copy with its state — ready (comes alive when you come near), soon (countdown,
+   *  `at`), live, cooldown (`at` = ready again) — for the map and the event card. Times are wall ms. */
+  function zoneEventStates(pv, room, zone) {
+    const out = [];
+    for (const def of pv.L.zoneEvents || []) {
+      if (zone && def.zone !== zone) continue;
+      const key = room.id + '|' + def.id, cur = zoneRuns.get(key), w = zoneWait.get(key);
+      const armed = !zoneArmedAt.has(room.id) || room.now() >= zoneArmedAt.get(room.id);
+      const state = cur ? 'live' : w ? w.state : armed ? 'ready' : 'asleep';
+      out.push({ id: def.id, name: def.name, x: def.x, z: def.z, r: def.r || 40, level: def.level || null, state, ...(w ? { at: w.wallAt } : {}), near: (def.r || 40) + (def.nearM ?? 50) });
+    }
+    return out;
+  }
+  function tellStates(pv, room, zone, clients) { if (clients.length) tellZone(clients, { kind: 'states', zone, list: zoneEventStates(pv, room, zone) }); }
+  const gapOf = (def, room) => zoneEventGapMs ?? Math.round((def.cooldownMs || def.everyMs)[0] + room.host.random('event') * ((def.cooldownMs || def.everyMs)[1] - (def.cooldownMs || def.everyMs)[0]));
   function tellZone(clients, msg) { const d = JSON.stringify({ t: 'zoneEvent', ...msg }); for (const c of clients) c.send(d); }
 
   // ---- watching the rooms: open groups, traces, deeds ----
@@ -1145,7 +1237,7 @@ export function createProvince(opts) {
       const moved = o.heatAt ? Math.round(Math.hypot(o.entity.x - o.heatAt.x, o.entity.z - o.heatAt.z) / 0.8) : 0;     // ~0.8 m a step
       o.heatAt = { x: o.entity.x, z: o.entity.z };
       if (moved) d.heat.set(cell, Math.min(65535, (d.heat.get(cell) || 0) + Math.min(moved, 20)));
-      if (o.zone !== z) { o.zone = z; o.conn.sendJSON(zoneMsg(pv, z)); presence(o); }
+      if (o.zone !== z) { o.zone = z; o.conn.sendJSON({ ...zoneMsg(pv, z), events: zoneEventStates(pv, o.room, z) }); presence(o); }
       discoverNear(o, pv, z);
       if (pv.book.wantsPosition(o.char)) questEvent(o, { kind: 'visit', x: o.entity.x, z: o.entity.z });
     }
@@ -1324,7 +1416,7 @@ export function createProvince(opts) {
     questSaved(o);
     const e = o.entity, rules = o.room.rules, lv = r.reward.level;
     const span = rules.xpFor ? Math.max(1, (safeRules(o.room, 'xpFor', lv + 1) || 0) - (safeRules(o.room, 'xpFor', lv) || 0)) : 100;
-    const xp = Math.round(r.reward.xpShare * span);
+    const xp = Math.round(r.reward.xpShare * span * (rules.xpMult ? safeRules(o.room, 'xpMult', 'quest') || 1 : 1));     // R2: x1.25 (C's progression.json)
     // E's class-quest items name a base and a name (`reward.item {tier, slot, base, name}`): C's makeItem, else the engine's
     // generator held to that base; plain `{tier}` rolls as before
     const ri = r.reward.item, ilv = Math.max(lv, e.level || 1);

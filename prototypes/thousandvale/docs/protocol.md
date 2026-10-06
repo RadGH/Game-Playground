@@ -290,7 +290,7 @@ room routes it to clients whose view covers `(x, z)`, or only to `to` (a local i
 
 | `type` | Fields | Meaning |
 |---|---|---|
-| `cast` | `s, slot, skill, aim?, target?` | `s` started a skill (client plays the wind-up for others; my own already played). |
+| `cast` | `s, slot, skill, aim?, target?` (+ basic attacks: `wk, wt, el, wind, reach, arc…`, §19.1) | `s` started a skill (client plays the wind-up for others; my own already played). |
 | `hit` | `s, d, n, crit?, el?, kind:'dmg'|'heal'|'absorb', skill?` | `n` = amount (whole number). `el` = element. |
 | `miss` | `s, d, why:'dodge'|'block'|'immune'|'evade'` | |
 | `die` | `d, by?` | `d` died (corpse stays until it leaves the view). |
@@ -317,6 +317,7 @@ props the encounter scripts own (`info.rules:1`; `use` on them goes to `rules.us
 `info` may carry `key` (a stable id from the plan or script, e.g. `f1-pillar-3`), `r` (radius) and `state`.
 | `aggro` | `s, d` | A monster picked a target (red flash on the nameplate). |
 | `fx` | `id, x, z, …` | Any one-off visual (telegraphs: `shape`, `r`, `ms`). |
+| `mp` | `id, n, max` | A player's mana (play-test 3 R6+): at most 2 Hz, only when the whole number changed — target / party mana bars (§19.2). |
 
 ---
 
@@ -999,3 +1000,45 @@ and revive flasks are C's `rules.useItem` (consumables.js kind `rules`); a torch
 (`item.left`, journaled). The room host has `isNight()` (the realm clock). Riding speed = the mount's × (1 +
 `rules.itemBuffs(e).mountSpeedPct`) (oats), rechecked once a second (`you {speedMul}` on a change).
 
+
+## 19. Play-test 3 (2026-10-05) — still protocol v6 (every change is additive)
+
+### 19.1 Basic attacks you can draw (R5)
+Every basic attack of every weapon (melee, bows/crossbows/javelins, wands, staves incl. charged forms) sends:
+- `ev cast {s, slot:0, skill:'basic', wk, wt, el, two?, hand?, step?, wind?, every?, clip?, reach?, arc?, strike?}` at the START of the
+  swing. `wk` = how it attacks: `melee` | `arrow` | `bolt` (wand) | `staff`. `wt` = the weapon type (items.json `subtype`: sword, sword2h,
+  axe, axe2h, hammer, mace, dagger, spear, polearm, staff, wand, scepter, orb, tome, bow, crossbow, javelin; `fist` bare-handed).
+  `el` = the weapon's element (`physical` included). `wind` = ms until the hit lands; a melee swing carries `reach` (m) and `arc` (rad).
+  A bow on auto-attack sends `clip:'draw'` first, then `clip:'shoot'`.
+- the attack itself when it happens:
+  - melee: `ev fx {kind:'attack', id, wk:'melee', wt, el, shape:'swing', hand, step, x, z, yaw, reach, arc, strike?}` (the moment it lands);
+  - staff: `ev fx {kind:'attack', id, wk:'staff', wt, el, shape, spell?, charged?, x, z, yaw, r?, reach?, arc?}` — `shape` = what the
+    spell really is: `nova` (r round the caster), `cone` / `wave` (reach + arc), `jet` (charged cone), `dome` (charged nova), `wall`
+    (charged, plus `fx pool`), `bolt` / `mortar` / `storm` (plus the `fx bolt` below);
+  - wand / staff bolt: `ev fx {kind:'bolt', id, element, from, to, ms, basic:1, wk, wt, el}`; bow: `ev fx {kind:'arrow', id, element, from, to, ms, basic:1, wk:'arrow', wt, el}`.
+- every hit that lands: `ev fx {kind:'impact', id: target, src: attacker, el?, crit, killed, strike?}`.
+
+### 19.2 Other players' mana (R6+)
+- `info.mpMax` on players (0 = no mana bar). `ev mp {id, n, max}` — a player's mana, at most twice a second, only when the whole
+  number changed (health stays in the snapshot). Your own mana is still in `you`.
+- `partyFrames.m` rows grow two columns: `[char, hp, hpMax, room, x, z, dead, online, id, mp, mpMax]`.
+
+### 19.3 Events start when someone comes near (R3)
+- **Zone events** wait armed at their arena. A living player within `r + 50` m starts a countdown:
+  `zoneEvent {kind:'soon', ev, at, inMs, text}` (`at` = wall-clock ms it starts; `inMs` = 15000). Then `kind:'start'` and the waves.
+  Everyone walking away (2.5x the trigger) calls it off: `kind:'end', called:'off'`. After a run: `kind:'end', won, next, inMs`
+  (`next` = wall ms it is ready again; it rests 3-5 min). `kind:'states', zone, list:[{id, name, x, z, r, level, state, at?, near}]`
+  on every change, and the `zone` message carries the same list as `events`. `state`: `ready` (comes alive when you come near —
+  `near` = the trigger radius), `soon` (countdown, `at`), `live`, `cooldown` (`at` = ready again).
+- **Realm events** (E's `director.startOn: 'near'`): a weighted event never starts on a clock; a province process sends the
+  gateway `eventNear {id, levels}` (who stands within `r + 60` m), and the director starts it after a 15 s countdown when nothing
+  else runs, it is off cooldown, 3 min have passed since the last one and someone there is in band and at least its
+  `startOn.minLevel` (the Torborhold raid: level 3). `realm {kind:'eventSoon', ev, at, inMs, text}` — `at` is always a real time.
+  The world boss keeps its fixed schedule (announced 10 min ahead with its real `at`) and also starts early when someone in
+  band walks up after 60 quiet minutes.
+
+### 19.4 Arena objects match their call-outs (R7)
+Rules-spawned arena objects may carry `info.look` (how to dress it — `'chained'`: a pillar with a shackle ring) and `info.tether`
+(an entity id: draw a chain from this object to it; drop the chain when the object's `state` is `broken`). The Chained Saint's
+four pillars use both. Every call-out that tells you to hide behind / get into / light / pull something names an object that is
+on the floor or a zone the client draws (tests/E/playtest3.test.js).

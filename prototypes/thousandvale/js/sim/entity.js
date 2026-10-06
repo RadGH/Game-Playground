@@ -72,6 +72,7 @@ export class Entity {
   setMax(hpMax, mpMax = this.mpMax) {
     hpMax = Math.max(1, Math.round(hpMax)); mpMax = Math.max(0, Math.round(mpMax));
     if (hpMax !== this.hpMax) { this.hpMax = hpMax; this.hp = Math.min(this.hp, hpMax); this.mark(F.HP); this.infoVer++; }
+    if (mpMax !== this.mpMax && this.kind === 'player') this.infoVer++;     // R6+: info.mpMax
     this.mpMax = mpMax; this.mp = Math.min(this.mp, mpMax);
   }
   /** Play an animation. One-shots (attack, cast, bite, hit…) hold for their duration: loop() waits. */
@@ -131,6 +132,7 @@ export class Entity {
       if (this.gear) o.gear = this.gear;                       // gear: what is worn, to draw (P22; trimmed by the wearer's prefs, Q22)
       if (this.gearOff) o.gearOff = 1;
       if (this.mount) o.mount = this.mount;                    // riding (Q16)
+      if (this.mpMax > 0) o.mpMax = this.mpMax;                // R6+: mana bar maximum (the current value comes in `mp` events)
     }
     else if (this.type) o.type = this.type;
     if (this.rank !== 'normal') o.rank = this.rank;
@@ -146,6 +148,8 @@ export class Entity {
       if (d.r) o.r = d.r;
       if (d.state) o.state = d.state;
       if (d.rules) o.rules = 1;
+      if (d.look) o.look = d.look;                             // R7: how an arena object is dressed ('chained')
+      if (d.tether != null) o.tether = d.tether;               // R7: the entity a chain runs to from this object
       if (d.banner) o.banner = d.banner;                       // a cleared dungeon's door: {by, party, at}
       if (d.trace) o.trace = d.trace;                          // grave {who, level, by, at, until} / campfire {who, at, until}
       if (d.waystone) o.waystone = d.waystone.key;

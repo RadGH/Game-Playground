@@ -184,7 +184,7 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
     const len = Math.hypot(dx, dz) || 1;
     // play-test 1 P20: every landed hit has an impact the client can draw — Farhold drew the spark
     // only for a strike with a shape, so a skill with no knock landed with nothing to see
-    const impact = { t: 'fx', kind: 'impact', id: e.id, crit: !!result.crit, killed: !!result.dead, strike: strike?.key || null, el: element !== 'physical' ? element : undefined, ab: typeof skill === 'string' ? skill : undefined };
+    const impact = { t: 'fx', kind: 'impact', id: e.id, src: by?.id ?? undefined, crit: !!result.crit, killed: !!result.dead, strike: strike?.key || null, el: element !== 'physical' ? element : undefined, ab: typeof skill === 'string' ? skill : undefined };
     if (!strike) { field.emit(impact); return; }
     const push = pushFor(e, (strike.push || 0) * share);
     if (push > 0.01) {

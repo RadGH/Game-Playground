@@ -673,7 +673,11 @@
         "name": "The Ploughman's Crypt",
         "family": "crypt_spiral",
         "floors": 2,
-        "level": 3
+        "level": 2,
+        "floorStep": 1,
+        "eliteStep": 0,
+        "bossStep": 1,
+        "_doc": "Play-test 3 R2: the starter dungeon behind the Barrow entrance near Torborhold is a level-2 dungeon. Floor 1: packs and mini-boss at level 2; floor 2: level 3, the last boss level 4 (it was 3 / mini-boss 4 / floor 2 at 5 / boss 7)."
       },
       "eventBoss": "event_grandmother_skein",
       "elite": "elite_hobb_gallowsby",

@@ -18,12 +18,13 @@ export async function engineFor(seed = 1) {
 /**
  * An engine for the PARITY fixtures: Thousandvale's one deliberate divergence in the hit maths — the
  * level-gap softening (js/rules/level-gap.js, play-test 1 P26) — is switched off, because Farhold has no
- * such rule. Nothing else is excluded: perks and talents are empty on a parity character, and the
+ * such rule (and so is play-test 3's kill-experience multiplier). Nothing else is excluded: perks and talents are empty on a parity character, and the
  * range preflight (P23) never refuses a cast the fixtures make.
  */
 export async function parityEngineFor(seed = 1) {
   const e = await engineFor(seed);
   e.levelGap = null;
+  e.xpCfg = e.balance.xp;          // play-test 3 R2: Thousandvale pays kills x1.5; Farhold does not
   return e;
 }
 

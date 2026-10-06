@@ -223,7 +223,7 @@
       ],
       "first": 16,
       "cast": 1.5,
-      "say": "The vault is flooding — get up on a ledge!",
+      "say": "The vault is flooding — get into one of the dry circles!",
       "telegraphs": [
         {
           "shape": "circle",

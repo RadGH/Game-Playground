@@ -312,3 +312,109 @@ export function placeWords(ctx, x, z) {
   return `in the ${words}, about ${m} m ${compass(s.x, s.z, x, z)} of ${s.name}`;
 }
 void readFileSync; void POINT_TYPES;
+
+// ---- play-test 3, R2: something to kill near the start -----------------------------------------------------------
+/**
+ * The owner, play-test 3: "the map is still so empty, no enemies to kill" — he reached level 2 after killing
+ * everything he saw. fillDensity puts ONE thing every ~100 m and only 11 of every 32 are monsters, so near the start
+ * the nearest hound could be 150 m away. This pass looks only at MONSTERS: wherever the level ramp is still low
+ * (<= HUNT.maxLevel, i.e. within ~1.4 km of the start hub) every reachable open sample gets a monster camp within
+ * HUNT.target m, and every road sample one within HUNT.roadTarget m — solos and pairs (the starting-area rule),
+ * a third of them walking a small loop.
+ *
+ * The records go to data/vignettes/placements/<zone>.hunt.json, NOT the main file: stream B's bake reads the main file
+ * (keep-clear discs for scatter), and a monster camp needs no cleared ground — so this pass never forces a re-bake and
+ * runs on kept zones too. js/sim/content.js merges the two. Same inputs -> same output (the zone's own seeded rng, used
+ * after the main file is complete).
+ */
+export const HUNT = Object.freeze({ maxLevel: 3.5, target: 55, roadTarget: 50, maxAdd: 260, roamShare: 0.35 });
+
+export function fillHunting(st, { LF, typeMid, hunt = HUNT } = {}) {
+  const { ctx, rnd, zs, eid } = st;
+  const P = ctx.placed, ext = ctx.extent;
+  const top = zs.band[1], lvl = (x, z) => LF.at(eid, x, z);
+  const mix = (zs.camps || []).filter(c => c.type);
+  const N = Math.floor(ext / STEP) + 1;
+  const d = new Float32Array(N * N).fill(1e9);
+  const kind = new Uint8Array(N * N);
+  let targets = 0;
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    const x = i * STEP, z = j * STEP;
+    if (x < RIM || z < RIM || x > ext - RIM || z > ext - RIM) continue;
+    if (lvl(x, z) > hunt.maxLevel) continue;
+    const b = ctx.bitsAt(x, z);
+    if (!(b & NAV.WALK) || (b & (NAV.DEEP | NAV.STEEP | NAV.BUILDING | NAV.TOWN | NAV.SHALLOW))) continue;
+    if (settlementEdge(ctx, x, z) < 70) continue;                       // the stray rule's town gap
+    if (!ctx.inMainLoose(x, z)) continue;
+    kind[j * N + i] = b & NAV.ROAD ? 2 : 1; targets++;
+  }
+  const out = { file: [], stats: { targets, added: 0, stray: 0, roamer: 0 } };
+  if (!targets || !mix.length) return out;
+  const stamp = (px, pz, r) => {
+    const reach = r + Math.max(hunt.target, hunt.roadTarget) + 60;
+    const i0 = Math.max(0, Math.floor((px - reach) / STEP)), i1 = Math.min(N - 1, Math.ceil((px + reach) / STEP));
+    const j0 = Math.max(0, Math.floor((pz - reach) / STEP)), j1 = Math.min(N - 1, Math.ceil((pz + reach) / STEP));
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const v = Math.max(0, Math.hypot(i * STEP - px, j * STEP - pz) - r); const k = j * N + i; if (v < d[k]) d[k] = v; }
+  };
+  const isMonster = p => p.type === 'camp' || p.type === 'rare';
+  const stampRec = p => { stamp(p.x, p.z, Math.min(p.radius || 8, 12)); for (const q of p.path || []) stamp(q[0], q[1], 8); };
+  for (const p of P) if (isMonster(p)) stampRec(p);
+  const mine = [];
+  for (let iter = 0; iter < hunt.maxAdd * 3 && mine.length < hunt.maxAdd; iter++) {
+    let best = -1, need = 0;
+    for (let k = 0; k < d.length; k++) {
+      const t = kind[k]; if (t !== 1 && t !== 2) continue;
+      const over = d[k] - (t === 2 ? hunt.roadTarget : hunt.target);
+      if (over > need) { need = over; best = k; }
+    }
+    if (best < 0) break;
+    const cx = (best % N) * STEP, cz = Math.floor(best / N) * STEP, onRoad = kind[best] === 2;
+    const rec = monster(cx, cz, onRoad, rnd() < hunt.roamShare) || monster(cx, cz, onRoad, false);
+    if (!rec) {
+      const r = 2;
+      for (let j = Math.max(0, Math.floor(best / N) - r); j <= Math.min(N - 1, Math.floor(best / N) + r); j++) for (let i = Math.max(0, (best % N) - r); i <= Math.min(N - 1, (best % N) + r); i++) if (kind[j * N + i]) kind[j * N + i] = 3;
+      continue;
+    }
+    P.push(rec); mine.push(rec); stampRec(rec);
+  }
+  // out of the main file again: these live in <zone>.hunt.json
+  for (const r of mine) P.splice(P.indexOf(r), 1);
+  let over = 0, cover = 0;
+  for (let k = 0; k < d.length; k++) if (kind[k]) { cover++; if (d[k] > (kind[k] === 2 ? hunt.roadTarget : hunt.target)) over++; }
+  out.file = mine;
+  out.stats = { targets, added: mine.length, stray: mine.filter(r => !r.roam).length, roamer: mine.filter(r => r.roam).length, covered: +(1 - over / Math.max(1, cover)).toFixed(3) };
+  return out;
+
+  function monster(x, z, onRoad, roams) {
+    const lv = lvl(x, z);
+    const w = mix.map(c => Math.exp(-Math.abs(lv - Math.max(LF.span(eid)[0], typeMid(c))) * 1.1) * (onRoad && /brigand|cult|zealot/.test(c.type) ? 3 : 1) * (heavyOk(c.type, lv) ? 1 : 0));
+    if (!w.some(v => v > 0)) return null;
+    const c = pick(mix, w);
+    const near = { x, z, min: onRoad ? 12 : 0, max: onRoad ? 40 : 30 };
+    const s = findSpot(ctx, rnd, 'stray', 6, { near, tries: 120, spread: 0, score: (px, pz) => -Math.hypot(px - x, pz - z) });
+    if (!s) return null;
+    const lvls = campLevels(lvl(s.x, s.z), top);
+    const count = rnd() < 0.5 ? [1, 1] : [1, 2];                         // solos and pairs: the start is for learning
+    const n = out.stats.added + mine.length + 1;
+    if (!roams) return { type: 'camp', id: `hunt_${eid}_${n}`, monster: c.type, with: null, level: lvls, count, x: s.x, z: s.z, yaw: 0, radius: 6, stray: true, hunt: true };
+    const path = loopAt(s, 30 + rnd() * 40, 4);
+    if (!path) return null;
+    return { type: 'camp', id: `hunt_${eid}_${n}`, monster: c.type, with: null, level: lvls, count, x: s.x, z: s.z, yaw: 0, radius: 6, path, roam: true, hunt: true };
+  }
+  function loopAt(c, R, n) {
+    const a0 = rnd() * 6.283, pts = [];
+    for (let i = 0; i < n; i++) {
+      let p = null;
+      for (let t = 0; t < 10 && !p; t++) {
+        const a = a0 + i / n * 6.283 + (rnd() - 0.5) * 0.5, r = R * (0.7 + rnd() * 0.5);
+        const x = Math.round(c.x + Math.cos(a) * r), z = Math.round(c.z + Math.sin(a) * r);
+        if (openPoint(ctx, x, z, { slope: 30, allowRoad: true }) && settlementEdge(ctx, x, z) > 70 && (!pts.length || walkLine(ctx, { x: pts[pts.length - 1][0], z: pts[pts.length - 1][1] }, { x, z }))) p = [x, z];
+      }
+      if (!p) return null;
+      pts.push(p);
+    }
+    if (!walkLine(ctx, { x: pts[n - 1][0], z: pts[n - 1][1] }, { x: pts[0][0], z: pts[0][1] }) || !walkLine(ctx, c, { x: pts[0][0], z: pts[0][1] })) return null;
+    return pts;
+  }
+  function pick(list, w) { let t = w.reduce((a, b) => a + b, 0) * rnd(); for (let i = 0; i < list.length; i++) { t -= w[i]; if (t <= 0) return list[i]; } return list[list.length - 1]; }
+}

@@ -4,7 +4,7 @@
   "tier": "miniboss",
   "body": "ash_wisp",
   "place": "dungeon flooded_cistern set B: floor 1 mini-boss (24 m pump room)",
-  "_doc": "Stream E (M2). A lamp-spirit that lit the cistern for the workers and went wrong in the dark. It is fast and fragile and hard to pin: it teleports between three WALL LAMPS (it can only blink to a lit one). Light gives it power — snuff the lamps by using them (they count as \"lit\" when you put them OUT; once all three are dark, it is stranded and exposed). P1: sparks, a flare cone, a lantern-beam line. P2 at 50%: it splits into wisps (adds) behind a glow ward that drops when they die.",
+  "_doc": "Stream E (M2). A lamp-spirit that lit the cistern for the workers and went wrong in the dark. It is fast and fragile and hard to pin: it teleports between three WALL LAMPS (it can only blink to a lit one). Light gives it power — snuff the lamps by using them (they count as \"lit\" when you put them OUT; once all three are dark, it is stranded and exposed). P1: sparks, a flare cone, a lantern-beam line. P2 at 50%: it splits into wisps (adds) behind a glow ward that drops when they die. Play-test 3 R7: two broken columns stand in the room so the Blinding Flash (line of sight) has something to hide behind.",
   "party": "Solo: fine (the lamps are the fight). 2-3: one snuffs while the others hit. 5: the snuffing is over in seconds; M5 should add a fourth lamp per 2 extra players and raise health x1.5.",
   "hpMult": 2,
   "arena": {
@@ -30,6 +30,24 @@
         "name": "Wall lamp (use to snuff)",
         "x": 0,
         "z": 8
+      },
+      {
+        "id": "col_w",
+        "type": "pillar",
+        "name": "Broken column",
+        "x": -5,
+        "z": 3,
+        "r": 1.2,
+        "hp": 2
+      },
+      {
+        "id": "col_e",
+        "type": "pillar",
+        "name": "Broken column",
+        "x": 5,
+        "z": 3,
+        "r": 1.2,
+        "hp": 2
       }
     ]
   },
@@ -131,7 +149,7 @@
       ],
       "first": 12,
       "cast": 2.5,
-      "say": "The Lamp swells up bright — look away! Get behind something!",
+      "say": "The Lamp swells up bright — look away! Get behind a column!",
       "telegraphs": [
         {
           "shape": "circle",

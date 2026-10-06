@@ -93,6 +93,7 @@
     "bristle": {
       "id": "bristle",
       "name": "Thorn Bristle",
+      "say": "{boss} bristles with thorns — get in close!",
       "every": [
         14,
         17

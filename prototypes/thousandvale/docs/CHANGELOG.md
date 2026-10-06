@@ -559,3 +559,30 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - **A** C's follow-up asks: reviewed C's useItem/recall edits (torch charge decrement now journaled); room `host.isNight()`;
   `bind {npc}` at a town innkeeper saves `char.bind` (respawn + recall go home); oats riding speed via `rules.itemBuffs`
   (rechecked 1 Hz); `net.bind`. tests/A/pt2-consumables (4).
+
+## 2026-10-05 — streams C + E + A (one agent), owner play-test 3 (round-playtest3.md R2-R5, R7, R6+ server side)
+- **C R4** `js/rules/encounter.js`: telegraph floors a human can read and beat — `MIN_WIND` 1.6 s normal / 1.7 champion / 1.8 rare+boss,
+  + 0.25 s latency, + 0.4 s big, + 0.8 s for a MECHANIC (`isMechanic`: stack/soak/safe, ring/donut "get inside", line-of-sight hide);
+  call-outs already go out with the cast bar; four mechanic specials without words got them. Pack leader's frenzy ring inner radius
+  3 -> 4 m (2.8+ s warning). `addSpot`: adds are called onto floor (no wall tile / nav-blocked sample, straight-line reachable from
+  the caller), every script with adds tested in all 8 dungeon families' corners. `js/sim/events.js` waves likewise.
+- **E R7** The Chained Saint: four "Chained pillar"s (`look: chained`, `tether: true` -> chain to the Saint), call-out "hide behind a
+  pillar", the plinth flood says "get into one of the two dry circles". Audit of every call-out: Drowned Reeve / Sunken Coffer (no
+  plinths/ledges -> dry circles), Drowned Lamp (a line-of-sight flash with nothing to hide behind -> two broken columns), Sluicegrip
+  (no walkway -> between the channels), Briar Colossus pillars named "Great stone". tests/E/playtest3 checks every script.
+- **C R5** every basic attack is drawable: `cast` carries `wk/wt/el/wind/reach/arc`, new `fx attack` (melee swing at impact; staff
+  spell shape incl. charged forms), `fx bolt`/`arrow` carry the weapon, `fx impact` carries `src`. All 57 bases tested.
+- **C R2.1** experience: kills x1.5 (balance xp.kill 0.2 -> 0.3), quests and events x1.25 (data/rules/progression.json `xp`;
+  `engine.xpCfg`, `rules.xpMult`). Level curve unchanged. The starting chain now takes a new character to ~L5 by Home with News.
+- **E R2.2** `tools/content-living.mjs fillHunting` -> `data/vignettes/placements/<zone>.hunt.json` (B never reads it): 633 solo/pair
+  camps (a third roaming) where the level ramp is <= 3.5 — z12_02 259 (95 -> 258 camps within 1 km of Torborhold); A's
+  `content.js` merges them; dormant camps wake them (tests/A/pt3-hunt).
+- **E R2.3/2.4** Old Gristle level 4 -> 2, hpMult 4.5 -> 3.5 (~144 hp at L2); "Old Gristle" and "Signs of the Beast" are level-2
+  quests; the Ploughman's Crypt (Barrow entrance) is a level-2 dungeon (`floorStep 1, eliteStep 0, bossStep 1`: mini-boss L2, last
+  boss L4) — new planDungeon options, passed by province.js. Chain winnable: Gristle L2 30/30 bots, every kill step's pair >= 27/30.
+- **A R3** events start when someone comes near: zone events armed -> 15 s countdown (`zoneEvent soon {at, inMs}`) -> waves; walking
+  away calls it off; 3-5 min rest with `next`; `states` + `zone.events`. Realm director `startOn:'near'` (E's events.json): weighted
+  events only via `eventNear` from the province (in band, min level, cooldown, 3 min gap), 15 s countdown; the world boss keeps its
+  real-time schedule (`at`) and starts on demand after 60 quiet minutes; sizing capped at 5 players.
+- **A R6+** other players' mana: `info.mpMax`, `ev mp {id, n, max}` (<= 2 Hz), party frame columns 9-10.
+- Tests: tests/C/playtest3.test.mjs, tests/E/playtest3.test.js, tests/A/pt3-hunt.test.js, tests/A/pt3-events.test.js.

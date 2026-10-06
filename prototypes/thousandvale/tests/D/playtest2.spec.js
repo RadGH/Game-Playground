@@ -217,9 +217,8 @@ test('R4 + R7 + S4 + S20 + S23: call-out held for the wind-up, chained pillars, 
   await page.evaluate(() => { tv.target?.(null); if (thousandvale.S.self.dead) thousandvale.S.net.respawn(); });
   await page.waitForTimeout(3000);
   await hook('/teleport', { name: 'Wren', x: 26624 - 520, z: 5360 + 180 });
-  await expect.poll(async () => page.evaluate(() => [...thousandvale.actors.actors.values()].filter(a => a.kind === 'monster' && !a.dead && a.body).length), { timeout: 120000, intervals: [3000] }).toBeGreaterThan(1);
-  const m = await page.evaluate(() => { const me = tv.state().you; const list = [...thousandvale.actors.actors.values()].filter(a => a.kind === 'monster' && !a.dead && a.body).sort((p, q) => Math.hypot(p.pos.x - me.x, p.pos.z - me.z) - Math.hypot(q.pos.x - me.x, q.pos.z - me.z)); return list.slice(0, 2).map(a => a.id); });
-  expect(m.length).toBeGreaterThan(0);
+  let m = [];
+  await expect.poll(async () => (m = await page.evaluate(() => { const me = tv.state().you; const list = [...thousandvale.actors.actors.values()].filter(a => a.kind === 'monster' && !a.dead && a.body && a.rank !== 'boss').sort((p, q) => Math.hypot(p.pos.x - me.x, p.pos.z - me.z) - Math.hypot(q.pos.x - me.x, q.pos.z - me.z)); return list.slice(0, 2).map(a => a.id); })).length, { timeout: 120000, intervals: [3000] }).toBeGreaterThan(1);
   // R4: a boss line said at the cast's start stays up for the whole 4 s wind-up (it used to vanish at 2.8 s)
   await page.evaluate(id => { tv.fxEvent({ type: 'say', id, text: 'Get inside its reach!', style: 'warn' }); tv.fxEvent({ type: 'castbar', id, ab: 'sweep', name: 'Tail Sweep', ms: 4000 }); }, m[0]);
   await page.waitForTimeout(3500);
@@ -234,7 +233,7 @@ test('R4 + R7 + S4 + S20 + S23: call-out held for the wind-up, chained pillars, 
   await page.evaluate(() => { for (let k = 0; k < 4; k++) thousandvale.objects.remove('demo:pillar' + k); });
   // S4: the second monster becomes a burning pack-leader rare (what the server's info.rank/mods will say)
   if (m[1] != null) {
-    await page.evaluate(id => { const info = thousandvale.S.mirror.infos.get(id); info.rank = 'rare'; info.mods = ['burning', 'pack_leader']; const a = thousandvale.actors.get(id); thousandvale.actors.remove(id); }, m[1]);
+    await page.evaluate(id => { const info = thousandvale.S.mirror.infos.get(id); info.rank = 'rare'; info.aff = [{ id: 'burning', name: 'Burning', aura: 'burn' }, { id: 'pack_leader', name: 'Pack Leader' }]; const a = thousandvale.actors.get(id); thousandvale.actors.remove(id); }, m[1]);
     await expect.poll(async () => page.evaluate(id => { const a = thousandvale.actors.get(id); return !!(a && a.body && a.rankMark); }, m[1]), { timeout: 30000 }).toBe(true);
     await page.waitForTimeout(800);
     const r = await page.evaluate(id => { const a = thousandvale.actors.get(id); tv.fly(a.pos.x + 5, a.pos.y + 3, a.pos.z + 5, a.pos.x, a.pos.y + 0.8, a.pos.z); return { auras: [...(a.auras?.drawn || [])], flag: !!a.pole }; }, m[1]);

@@ -227,3 +227,6 @@ export function eventStateText(e, now = Date.now()) {
   if (e.state === 'live') return 'Happening now';
   return 'Comes alive when you come near';
 }
+
+/** S3: the rows a shop really sells — a named item or a mount; a row that is only its category label is never for sale. */
+export const saleRows = stock => (stock || []).filter(r => (r.mount && (r.mount.id || r.mount === true) && (r.item?.name || r.mount.name)) || (r.item && typeof r.item.name === 'string' && r.item.name.trim() && r.item.name !== r.label));

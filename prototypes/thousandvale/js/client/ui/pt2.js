@@ -73,7 +73,7 @@ export function createUi2(o) {
   // ---- potions and food (§18.10): keys 7 8 9 0 + use from the bag
   const hotbar = createHotbar({ net, hud, bag, me });
   bag.setUseHook?.(it => hotbar.useItem(it));
-  const buffs = createBuffs({ me, infoOf });          // C: the recall cast bar + buff icons with time left
+  const buffs = createBuffs({ me, infoOf, net });          // C: the recall cast bar + buff icons with time left
   // ---- Q2
   const menu = createContextMenu({ net, infoOf, hud, actors, controls, me, chat, social, friends, setTarget,
     onTalk: id => { net()?.use(id); }, onLoot: id => loot.open(id), isLootable: id => loot.isLootable(id),
@@ -198,6 +198,10 @@ export function createUi2(o) {
       if (r.look) { const id = me()?.id, a = id != null ? actors.get(id) : null; if (a) actors.setLook(id, { ...a.look, ...r.look, gear: a.look.gear }); if (me()?.name) lookStore.set(me().name, r.look); }
     });
     n.on('charList', m => account.redrawChars?.(m.chars));
+    // S4 (§20.4): announced mini bosses near you
+    n.on('bossNear', m => { for (const b of m.list || []) announced.set('boss:' + (b.enc || b.id), { name: b.name, x: b.x, z: b.z, level: b.level, rank: 'mini boss', until: Date.now() + 120000 }); });
+    // S24 (§20.8): an event's personal reward, said in the banner column
+    n.on('eventDone', m => { const bits = [m.xp ? `${m.xp} XP` : '', m.gold ? `${m.gold} gold` : '', ...(m.items || []).map(i => i.name)].filter(Boolean).join(' · '); banner.push({ level: 'zone', lead: 'Event complete', name: m.name || 'Victory', sub: (m.onBody ? 'Your share lies on the body — ' : '') + bits }); });
     n.on('rareNear', m => { if (m && Number.isFinite(m.x)) { announced.set(m.key ?? m.id, { name: m.name, x: m.x, z: m.z, level: m.level, rank: m.rank, until: Date.now() + (m.ms || 300000) }); hud.chat(`${m.name} has been seen nearby.`, 'event'); } });   // S4
     // S14: where a kill/collect step's monsters live (`steps[].areas`) — shaded on the map/minimap near you, for tracked quests
     n.on('quests', m => {

@@ -174,6 +174,8 @@ test('S4 + S23 + S20: rares are bigger with their affix aura; loot sparkles by r
   assert.equal(isLeader(['pack_leader']), true); assert.equal(isLeader(['burning']), false);
   assert.deepEqual([...modAuras(['burning', 'giant'])], ['burn'], 'a burning rare burns; giant is size, not an aura');
   assert.ok(modAuras(['frozen']).has('freeze') && modAuras(['venomous']).has('poison'));
+  assert.ok(modAuras([{ id: 'fiery', name: 'Fiery', aura: 'burn' }]).has('burn'), 'the server\'s affix row with its own aura');
+  assert.ok(rankScale('rare', [{ id: 'giant', name: 'Giant' }]) > rankScale('rare'));
   assert.equal(lootMarkLook(null).beam, false); assert.equal(lootMarkLook('magic').colour, RARITY_COLOUR.magic);
   assert.equal(lootMarkLook('rare').beam, true); assert.equal(lootMarkLook('legendary').beam, true);
   assert.notEqual(lootMarkLook('rare').colour, lootMarkLook('magic').colour);

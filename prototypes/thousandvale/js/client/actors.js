@@ -38,10 +38,12 @@ export function angleDelta(a, b) { let d = (b - a) % TAU; if (d > Math.PI) d -= 
 /** S4: how much bigger a monster of this rank / with these affixes is drawn. Pure — exported for tests. */
 export function rankScale(rank, mods = null) {
   let k = rank === 'boss' ? 1.45 : rank === 'rare' ? 1.32 : rank === 'champion' ? 1.24 : rank === 'elite' ? 1.18 : 1;
-  if (Array.isArray(mods) && mods.some(m => /giant|huge|colossal/.test(String(m)))) k *= 1.35;
+  if (Array.isArray(mods) && mods.some(m => /giant|huge|colossal/.test(modKey(m)))) k *= 1.35;
   return +k.toFixed(3);
 }
-export const isLeader = mods => Array.isArray(mods) && mods.some(m => /leader|alpha|chief|warlord|pack/.test(String(m)));
+/** An affix as text: an id string, or the server's {id, name, aura} (protocol §20.4). */
+export const modKey = m => (m && typeof m === 'object' ? `${m.id || ''} ${m.name || ''}` : String(m || '')).toLowerCase();
+export const isLeader = mods => Array.isArray(mods) && mods.some(m => /leader|alpha|chief|warlord|pack/.test(modKey(m)));
 const RANK_COLOUR = { rare: '#ffd040', champion: '#5aa0ff', elite: '#c0c0c0' };
 const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim', 'sitGround', 'drink', ...CHIBI2_MOUNT_ANIMS];   // sitGround/drink: eating and drinking (S20)   // swim: P25; ride/rideGallop: Q16
 
@@ -150,7 +152,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     queue.push(a);
     return a;
   }
-  function pick(i) { return { name: i.name, level: i.level, hp: i.hp, hpMax: i.hpMax, hostile: !!i.hostile, look: i.look, creature: i.creature, family: i.family, rank: i.rank || null, pet: !!i.pet, role: i.role || null, mods: Array.isArray(i.mods) ? i.mods : null }; }
+  function pick(i) { return { name: i.name, level: i.level, hp: i.hp, hpMax: i.hpMax, hostile: !!i.hostile, look: i.look, creature: i.creature, family: i.family, rank: i.rank || null, pet: !!i.pet, role: i.role || null, mods: Array.isArray(i.mods) ? i.mods : null, sc: Number.isFinite(i.sc) && i.sc > 0 ? i.sc : null }; }
 
   async function build(a) {
     a.building = true; lodStats.built++;
@@ -161,7 +163,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         const looks = await loadMonsterLooks();
         const look = looks[a.creature?.type] || null;
         a.flying = !!look?.flying;
-        const big = rankScale(a.rank, a.mods);      // S4: rares and champions stand out by size (a giant much more)
+        const big = a.sc ? Math.max(0.5, Math.min(3, a.sc)) : rankScale(a.rank, a.mods);      // S4: rares and champions stand out by size (a giant much more)
         if (look?.avatar) {
           // A humanoid monster (brigand, cultist, knight): a Chibi 2 body, scaled up when it is an elite or boss.
           body = await createChibi2Character(normalizeAvatar(look.avatar), { anims: CHIBI_ANIMS });
@@ -182,6 +184,8 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       // P1: compile the body's shaders BEFORE it replaces the stand-in. A new monster family or outfit is a new
       // program; compiled on its first draw it froze the frame for 1.5-3 s on the test VM. compileAsync uses
       // KHR_parallel_shader_compile, so on a real GPU the stand-in simply stays up a few frames longer.
+      // S4: a rare's ring and banner ride the body, so they compile with it (added after the first draw they froze 1.8 s)
+      if (a.kind === 'monster' && (isLeader(a.mods) || a.rank === 'rare' || a.rank === 'champion')) addRankMark(a, body.group);
       if (renderer) await compileBeforeShow(renderer, body.group, camera, scene);
       if (!actors.has(a.id) || a.body) { body.dispose?.(); return; }
       a.body = body; a.model = body.group;
@@ -199,7 +203,6 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         if (Number.isFinite(size.x) && size.y > 0.05 && size.y < 20) { a.pickR = Math.max(0.6, Math.min(4, Math.max(size.x, size.z) * 0.55)); a.pickTop = Math.max(0.6, size.y); if (a.kind === 'monster' || a.pet) a.height = Math.max(0.6, Math.min(a.height, size.y * 1.05)); }
       } catch { /* the default volume stands */ }
       if (a.dead) setAnim(a, 'dead');
-      if (a.kind === 'monster' && (isLeader(a.mods) || a.rank === 'rare' || a.rank === 'champion')) addRankMark(a);
     } catch (e) {
       console.warn('[actors] body failed for', a.id, e);
     }
@@ -248,16 +251,20 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
   // S4: a gold ring under a rare (blue for a champion) and a banner-glow over a pack leader: seen from across a field
   const markGeo = new THREE.RingGeometry(0.9, 1.08, 40); markGeo.rotateX(-Math.PI / 2);
   const markMats = {};
-  function addRankMark(a) {
+  function addRankMark(a, into) {
     if (a.rankMark) return;
+    const s = into.scale.x || 1;          // the body group may be scaled up (a rare): marks are sized in world metres
+    // measured here (before the body is on show): its own box, in world metres — a.height/pickR are not known yet
+    const box = new THREE.Box3().setFromObject(into), size = box.getSize(new THREE.Vector3());
+    const H = Number.isFinite(size.y) && size.y > 0.2 && size.y < 20 ? size.y : 1.4, R = Number.isFinite(size.x) ? Math.max(0.9, Math.max(size.x, size.z) * 0.6) : 1.1;
     const col = isLeader(a.mods) ? '#ff9a30' : RANK_COLOUR[a.rank] || '#ffd040';
     const mat = markMats[col] || (markMats[col] = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.75, depthWrite: false, fog: true }));
-    const m = new THREE.Mesh(markGeo, mat); m.position.y = 0.06; m.scale.setScalar(Math.max(1, (a.pickR || 1) * 1.2)); m.renderOrder = 2;
-    a.group.add(m); a.rankMark = m;
+    const m = new THREE.Mesh(markGeo, mat); m.position.y = 0.06 / s; m.scale.setScalar(R * 1.15 / s); m.renderOrder = 2;
+    into.add(m); a.rankMark = m;
     if (isLeader(a.mods)) {
       // a war-banner on a pole riding the leader's back, and a glow over it
       const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.6, 5), new THREE.MeshStandardMaterial({ color: '#4a3a2a' }));
-      pole.position.set(0, a.height + 0.5, -0.25); a.group.add(pole); a.pole = pole;
+      pole.position.set(0, (H + 0.5) / s, -0.25 / s); pole.scale.setScalar(1 / s); into.add(pole); a.pole = pole;
       const flag = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.4), new THREE.MeshStandardMaterial({ color: '#a8281e', side: THREE.DoubleSide, emissive: '#5a1008' }));
       flag.position.set(0.28, 0.55, 0); pole.add(flag); a.flag = flag;
     }

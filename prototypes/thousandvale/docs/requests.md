@@ -2138,3 +2138,8 @@ profile: set pieces, offices, mounts, weapon fx, loot markers all run sliced; th
   the event-herd check read 35/60 (needs 36; it read 39 before the walls); run 2 at load 11 (another agent's work): herd 59/60
   but spread p99 29 ms (load). The herd count swings with which realm event is live and how many bots die — not a wall effect
   as far as the two runs show. Worth one more run on a quiet machine.
+- (D-UI -> A, later) **walls in prediction done**: js/client/world-stream.js loads each zone's `nav.bin` (`parseNav`) beside its
+  terrain and the composite terrain exposes `nav.at(x, z)` / `nav.passable` in world metres (0 = open where a zone has no nav or is
+  not streamed yet); main.js `outdoorTerrain()` hands it to the predictor, so `stepMove` sees the same walls as the server.
+- (D-world -> G, 2026-10-06) tests/e2e/two-players.spec.js: the walk out of Torborhold now routes through the wall gate facing the
+  zone's middle (B's S7 walls stopped the straight line at the curtain wall). Green (5.0 min); the fight step stays timing-sensitive.

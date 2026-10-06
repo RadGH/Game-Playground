@@ -60,15 +60,37 @@ test('two players see each other move and hit a wolf together', async ({ browser
   const ang = town ? (Math.atan2(1024 - (town.z % 2048), 1024 - (town.x % 2048)) || 0) : 0;
   const ux = Math.cos(ang), uz = Math.sin(ang);
   if (area) {
-    const out = { x: area.x + ux * (area.r + 25), z: area.z + uz * (area.r + 25) };
-    for (const [P, dx] of [[A, 0], [B, 3]]) await P.page.evaluate(([x, z]) => window.tv.walkTo(x, z), [out.x + dx, out.z]);
-    // at ~4 fps headless a 115 m walk is slow: wait on the handoff, not on a clock (re-issue the walk if it stalled)
-    for (const [P, dx] of [[A, 0], [B, 3]]) {
-      await expect.poll(async () => {
-        const kind = await P.page.evaluate(() => window.thousandvale.S.room?.kind);
-        if (kind !== 'wilds') await P.page.evaluate(([x, z]) => window.tv.walkTo(x, z), [out.x + dx, out.z]);
-        return kind;
-      }, { timeout: 120000, intervals: [2000], message: 'handed over from the town to the wilds' }).toBe('wilds');
+    // play-test 4 (S7): the town has a wall now — leave through the gate that faces the zone's middle (B's town_wall
+    // placement: gates with an `out` direction), via a point just inside it and one just outside, then on out
+    const gateRoute = await A.page.evaluate(async ([ux, uz, area]) => {
+      const L = [...window.thousandvale.WS.loaded.values()].find(L => L.town); if (!L) return null;
+      const d = await (await fetch(new URL(`data/zones/${L.key}/placements.json`, location.href))).json();
+      const walls = (d.placements || d).filter(p => p.kind === 'town_wall');
+      const ox = L.T.ox || 0, oz = L.T.oz || 0;
+      let best = null, bs = -2;
+      for (const w of walls) for (const g of w.data.gates || []) {
+        const gx = g.x + ox, gz = g.z + oz;
+        if (Math.hypot(gx - area.x, gz - area.z) > area.r) continue;
+        const sc = g.out[0] * ux + g.out[1] * uz; if (sc > bs) { bs = sc; best = { gx, gz, o: g.out }; }
+      }
+      if (!best) return null;
+      const { gx, gz, o } = best, far = area.r + 30 - Math.hypot(gx - area.x, gz - area.z);
+      return [[gx - o[0] * 7, gz - o[1] * 7], [gx + o[0] * 8, gz + o[1] * 8], [gx + o[0] * Math.max(20, far), gz + o[1] * Math.max(20, far)]];
+    }, [ux, uz, area]);
+    const route = gateRoute || [[area.x + ux * (area.r + 25), area.z + uz * (area.r + 25)]];
+    // at ~4 fps headless a 115 m walk is slow: wait on each leg, not on a clock (re-issue the walk if it stalled)
+    for (const [P, dx] of [[A, 0], [B, 2]]) {
+      for (const [i, [x, z]] of route.entries()) {
+        const last = i === route.length - 1;
+        await expect.poll(async () => {
+          const s = await P.page.evaluate(() => ({ kind: window.thousandvale.S.room?.kind, you: window.tv.state().you }));
+          if (s.kind === 'wilds') return true;
+          if (!last && Math.hypot(s.you.x - x - dx, s.you.z - z) < 2.5) return true;
+          await P.page.evaluate(([x, z]) => window.tv.walkTo(x, z), [x + dx, z]);
+          return false;
+        }, { timeout: 120000, intervals: [2000], message: last ? 'handed over from the town to the wilds' : `walked to leg ${i} of the way out` }).toBe(true);
+        if ((await P.page.evaluate(() => window.thousandvale.S.room?.kind)) === 'wilds') break;
+      }
     }
   }
 

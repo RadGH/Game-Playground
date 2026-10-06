@@ -231,3 +231,9 @@ test('S25: with Names off the world map draws no text at all — provinces, zone
     assert.deepEqual(texts, [], `names off draws nothing at scale ${scale}`);
   }
 });
+
+test('S3: categories are never for sale — only named items and mounts', async () => {
+  const { saleRows } = await import('../../js/client/ui/pt2-core.js');
+  const rows = saleRows([{ id: 'a', label: 'Wands & rods', item: { name: 'Wands & rods' } }, { id: 'b', label: 'Wands & rods', item: { name: 'Ashwood Wand' } }, { id: 'c', label: 'Mounts', mount: { id: 'pony', name: 'Pony' } }, { id: 'd', label: 'Goods', item: {} }]);
+  assert.deepEqual(rows.map(r => r.id), ['b', 'c']);
+});

@@ -20,7 +20,7 @@ import { perf } from './perf.js';
 const idle = () => new Promise(r => (typeof requestIdleCallback === 'function' ? requestIdleCallback(() => r(), { timeout: 300 }) : setTimeout(r, 20)));
 const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim'];
 
-export async function warmBodies({ scene, renderer, camera, monsterLooks = {}, maxHumanoids = 12, extraTypes = ['wolf'] } = {}) {
+export async function warmBodies({ scene, renderer, camera, monsterLooks = {}, maxHumanoids = 12, extraTypes = ['wolf'], extras = [] } = {}) {
   const pen = new THREE.Group(); pen.name = 'shader-warm-pen'; pen.position.set(0, -6000, 0);
   scene.add(pen);
   const types = new Set(extraTypes), humanoids = [];
@@ -46,6 +46,8 @@ export async function warmBodies({ scene, renderer, camera, monsterLooks = {}, m
       pen.add(body.group); people++;
     } catch { /* ignore */ }
   }
+  // samples of the play-test 2-4 effect materials (swing crescents, loot sparkles/beams, rare rings): first drawn mid-fight they compiled on the spot
+  for (const o of extras) if (o) pen.add(o);
   // lay them out so frustum tests never skip one, compile everything with the scene's lights, then hide the pen
   pen.children.forEach((c, i) => c.position.set((i % 8) * 3, 0, Math.floor(i / 8) * 3));
   const before = renderer.info.programs?.length || 0;

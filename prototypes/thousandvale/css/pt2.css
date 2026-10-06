@@ -232,3 +232,4 @@
 .unitframe.target[data-rank='rare'], .unitframe.target[data-rank='elite'], .unitframe.target[data-rank='champion'] { border-color: #ffcf3a; box-shadow: var(--shadow), 0 0 14px rgba(255, 207, 58, 0.35); }
 .unitframe.target[data-rank='boss'], .unitframe.target[data-rank='miniboss'] { border-color: #ff5a3a; box-shadow: var(--shadow), 0 0 16px rgba(255, 90, 58, 0.45); }
 .unitframe.target.ranked .uf-name::before { content: '★ '; color: #ffcf3a; }
+.meal-pill { align-items: center; pointer-events: auto; } .meal-pill button { padding: 1px 8px !important; }

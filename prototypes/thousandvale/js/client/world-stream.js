@@ -23,6 +23,7 @@ import { createSiteView } from './site-view.js';
 import { createSetPieceView } from './setpiece-view.js';
 import { createWallsView } from './walls-view.js';   // play-test 4 S7 (stream B): town perimeters + gates
 import { perf, nextFrame } from './perf.js';
+import { parseNav } from '../rules/terrain-read.js';   // play-test 4: walls + houses block prediction like the server (stepMove reads terrain.nav.at)
 
 /** Bounds for a zone key when the server sent none: `zXX_YY` in world metres, anything else zone-local. */
 export function zoneBounds(key, worldMetres = true) {
@@ -56,6 +57,8 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
     moveAt(x, z) { const L = at(x, z); if (L && L.T.moveAt) return L.T.moveAt(x, z); return terrain.walkable(x, z) ? 'walk' : 'out'; },
     slopeDeg(x, z) { const L = at(x, z); return L ? L.T.slopeDeg(x, z) : 0; },
     biomeKey(x, z) { const L = at(x, z); return L ? L.T.biomeKey(x, z) : 'grassland'; },
+    /** The stitched nav map, the same shape as js/sim/province-terrain.js `nav` (raw bits; 0 where a zone has none). */
+    nav: { at(x, z) { const L = at(x, z); return L && L.nav ? L.nav.at(x - L.ox, z - L.oz) : 0; }, passable(x, z) { const L = at(x, z); return !L || !L.nav || L.nav.passable(x - L.ox, z - L.oz); } },
     zoneAt(x, z) { const q = zones.find(q => x >= q.bounds.minX && x < q.bounds.maxX && z >= q.bounds.minZ && z < q.bounds.maxZ); return q ? q.key : null; },
   };
 
@@ -77,14 +80,15 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
     let groundResolve;
     const ground = new Promise(r => { groundResolve = r; });
     const p = (async () => {
-      const [base, extras] = await Promise.all([loadClientTerrain(q.key), loadZoneExtras(q.key)]);
+      const [base, extras, nav] = await Promise.all([loadClientTerrain(q.key), loadZoneExtras(q.key),
+        fetch(new URL(`../../data/zones/${encodeURIComponent(q.key)}/nav.bin`, import.meta.url)).then(r => (r.ok ? r.arrayBuffer() : null)).then(b => (b ? parseNav(b) : null)).catch(() => null)]);
       if (!zones.some(z => z.key === q.key)) return null;
       await nextFrame();                    // P1: the parse and the ground build land in different frames
       if (!zones.some(z => z.key === q.key)) return null;
       const T = worldZone(base, q.bounds.minX, q.bounds.minZ);
       let end = perf.begin('zone:ground');
       T.zoneKey = q.key;
-      const L = { key: q.key, T, bounds: { ...T.bounds }, views: [], extras, ready: false };
+      const L = { key: q.key, T, bounds: { ...T.bounds }, views: [], extras, ready: false, nav, ox: q.bounds.minX, oz: q.bounds.minZ };
       const biomeColors = base.reader ? Object.fromEntries(base.reader.biomes.map(b => [b.key, b.color])) : null;
       const ground = createTerrainView(T, { quality, textureSize: quality === 'low' ? 256 : 512, biomeColors, clearings: opts.clearingsFor ? opts.clearingsFor(T, extras) : [] });
       scene.add(ground.group); L.views.push(ground); L.ground = ground;

@@ -156,7 +156,7 @@ async function useWorld(room, at) {
 }
 const groundY = (x, z) => (D.view ? 0 : WS.terrain.heightAt(x, z));
 /** What prediction walks on outdoors — WITH the water layer, so swimming and wading predict what the server does (P25/P2). */
-function outdoorTerrain() { return { heightAt: WS.terrain.heightAt, walkable: WS.terrain.walkable, waterAt: WS.terrain.waterAt, moveAt: WS.terrain.moveAt, bounds: WS.terrain.bounds }; }
+function outdoorTerrain() { return { heightAt: WS.terrain.heightAt, walkable: WS.terrain.walkable, waterAt: WS.terrain.waterAt, moveAt: WS.terrain.moveAt, bounds: WS.terrain.bounds, nav: WS.terrain.nav }; }   // nav: walls/houses (play-test 4)
 
 // --- dungeon instances (drawn from joined.room.dungeon; the outdoor ground is hidden, not thrown away) ---
 const D = { view: null, roomId: null };
@@ -558,7 +558,7 @@ function ensureActor(id) {
       hp: Math.round((e.hp ?? 1) * hpMax), hpMax, hostile: !npc && (info.team === 2 || (kind === 'monster' && info.team !== 1)),
       look: kind === 'player' ? lookFor(info.look, info.char ?? id, info.cls, info.gear) : npc ? folkLook(info, id) : null,
       creature: kind === 'monster' || pet ? { type: info.type || 'wolf', seed: (id * 7919) >>> 0 } : null, family: info.type && !npc ? displayName(info.type, 'monster') : null,
-      x: e.x, y, z: e.z, yaw: e.yaw || 0, rank: info.rank || null, role: info.role || null, pet, mods: info.mods || info.affixes || null,   // S4
+      x: e.x, y, z: e.z, yaw: e.yaw || 0, rank: info.rank || null, role: info.role || null, pet, mods: info.aff || info.mods || info.affixes || null, sc: info.sc || null,   // S4 (protocol §20.4: aff [{id, name, aura?}], sc)
     });
     if (npc) { objects.upsert({ id, type: 'npc', name: a.name, x: e.x, z: e.z, source: 'room' }); if (info.office) WS.claimOffice(info.office); }   // Q10: its own building, dressed
     if (e.state & STATE.dead) actors.setDead(id, true);
@@ -600,7 +600,7 @@ function refreshFromInfo(id) {
   if (a.kind === 'player' && info.gear && gearKey(info.gear) !== gearKey(a.look?.gear || {}) && !(id === S.selfId && S.net?.joined?.you?.equipment)) actors.setLook(id, { ...a.look, gear: info.gear });
   // Q20/Q21: a new face or body (the barber, the title editor) reaches everyone through info.look; gear stays as worn
   if (a.kind === 'player' && info.look && lookSig(info.look) !== lookSig(a.look)) actors.setLook(id, { ...a.look, race: info.look.race || a.look?.race, seed: info.look.seed ?? a.look?.seed, custom: lookCustom(info.look) || undefined, gear: a.look?.gear });
-  if (a.kind === 'player' && id !== S.selfId) { actors.setMount(id, info.mount || null); actors.setEating(id, info.eat || null); }   // S20: others eat sitting down too (info.eat)   // Q16: everyone sees the rider
+  if (a.kind === 'player' && id !== S.selfId) { actors.setMount(id, info.mount || null); actors.setEating(id, info.sit ? 'food' : info.eat || null); }   // S20: others eat sitting down too (info.eat)   // Q16: everyone sees the rider
   if (levelled && id !== S.selfId) levelFlash(id);
 }
 /** The part of a look that is the body (not the clothes): race, seed and the editor's avatar. */
@@ -1039,7 +1039,7 @@ Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
   S.warm = { done: false };
   import('./scatter-view.js').then(m => m.prewarmScatter({ quality })).catch(() => {})
     .then(() => Promise.all([import('./warmup.js'), loadMonsterLooks()]))
-    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks }))
+    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [weaponFx.sample(), lootMarks.sample()] }))
     .then(r => { S.warm = { done: true, ...r }; }, e => { S.warm = { done: true, error: e?.message }; });
 });
 

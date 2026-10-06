@@ -10,7 +10,7 @@ import { h, createPanel, confirmBox } from '../ui-panel.js';
 import { send2 } from './net2.js';
 import { itemCell, itemName, goldText } from './item-cell.js';
 import { onIcon, iconsActive } from './item-icons.js';
-import { sellPrice, buyRefusal, SHOP_WHY } from './pt2-core.js';
+import { sellPrice, buyRefusal, SHOP_WHY, saleRows } from './pt2-core.js';
 import { hideTip } from './tips.js';
 import { RARITY_RANK, rarityOf, slotOf, levelCheck } from './inv-core.js';
 
@@ -48,7 +48,7 @@ export function createShop({ net, hud, actors, me, bag }) {
   function buyList(v) {
     // S3: only real things are for sale — a row whose "item" is just its category label (the old 'Wands & rods' for 15 g) is dropped;
     // categories are the filter chips above the list, never rows
-    const all = (v.stock || []).filter(r => (r.mount && (r.mount.id || r.mount === true) && (r.item?.name || r.mount.name)) || (r.item && typeof r.item.name === 'string' && r.item.name.trim() && r.item.name !== r.label));
+    const all = saleRows(v.stock);
     if (!all.length) return h('p.dim', {}, 'Nothing for sale today.');
     // E's categories (protocol §18.2 `categories {cat: label}`, each row's `cat`): a chip per category the stock has
     const cats = [...new Set(all.map(r => r.cat).filter(Boolean))];

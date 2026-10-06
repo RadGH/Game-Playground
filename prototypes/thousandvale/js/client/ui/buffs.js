@@ -8,7 +8,7 @@ import { h } from '../ui-panel.js';
 const GLYPH = { whetted: '⚔', oiled: '◈', silvered: '✧', fletched: '➶', well_fed: '♨', oats: '♞', torch: '🔥' };
 const NICE = id => String(id).replace(/^item:/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
-export function createBuffs({ me, infoOf }) {
+export function createBuffs({ me, infoOf, net = null }) {
   const root = document.getElementById('hud');
   // ---- the cast bar ----
   const fill = h('i'), label = h('span'), time = h('em');
@@ -53,7 +53,7 @@ export function createBuffs({ me, infoOf }) {
   function startBar(name, ms) { onFx({ kind: 'channel', id: me()?.id, name, ms }); }
   function endBar(how, text) { if (!C.on) return; onFx({ kind: 'channel', id: me()?.id, end: how }); if (text) label.textContent = text; }
   // ---- S20: eating / drinking — a pill with the time left; moving or a fight ends it (the server says so)
-  const meal = h('div.meal-pill', { hidden: true }, h('b'), h('em'));
+  const meal = h('div.meal-pill', { hidden: true }, h('b'), h('em'), h('button.ghost.small', { type: 'button', dataset: { act: 'stand' }, onclick: () => { const n = net?.(); n?.item?.('stand'); } }, 'Stand up'));   // §20.6
   root?.appendChild(meal);
   const M = { until: 0, kind: null };
   function mealTick(now) {
@@ -67,7 +67,7 @@ export function createBuffs({ me, infoOf }) {
     n.on('you', p => {
       if ('mount' in p && p.mount) endBar('done');
       if ('regen' in p) {
-        if (p.regen) { M.kind = p.regen.kind; M.until = performance.now() + (p.regen.ms || 20000); meal.hidden = false; meal.querySelector('b').textContent = M.kind === 'drink' ? 'Drinking — sit still' : 'Eating — sit still'; }
+        if (p.regen) { M.kind = p.regen.kind; M.until = performance.now() + (p.regen.ms || 20000); meal.hidden = false; meal.querySelector('b').textContent = M.kind === 'drink' ? 'Drinking — sitting' : 'Eating — sitting'; }
         else { M.kind = null; meal.hidden = true; }
       }
     });

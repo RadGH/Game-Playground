@@ -40,7 +40,12 @@ export function wantedAuras(st, dead) {
 const MOD_AURA = [[/burn|fire|flam|blaz|molten/, 'burn'], [/frost|frozen|ice|cold/, 'freeze'], [/shock|storm|lightning|thunder/, 'haste'], [/venom|poison|toxic|plague/, 'poison'], [/shield|ward|armou?red/, 'barrier'], [/frenz|berserk|rage|enrag/, 'rally'], [/vampir|curse|shadow|gloom/, 'curse'], [/regen|troll/, 'regen']];
 export function modAuras(mods) {
   const out = new Set();
-  if (Array.isArray(mods)) for (const m of mods) for (const [re, k] of MOD_AURA) if (re.test(String(m).toLowerCase())) { out.add(k); break; }
+  // the server's affix rows carry their own `aura` (a status-look id) when they have one (protocol §20.4); ids/names otherwise
+  if (Array.isArray(mods)) for (const m of mods) {
+    if (m && typeof m === 'object' && m.aura) { out.add(statusLook(m.aura) || String(m.aura)); continue; }
+    const t = m && typeof m === 'object' ? `${m.id || ''} ${m.name || ''}`.toLowerCase() : String(m).toLowerCase();
+    for (const [re, k] of MOD_AURA) if (re.test(t)) { out.add(k); break; }
+  }
   return out;
 }
 
@@ -110,7 +115,7 @@ export function createStatusSync({ actors, fx, infoOf = () => null, selfDead = (
         torch(a, torchOn(info?.st, false));
         if (!info && !a.auras) continue;
         const want = wantedAuras(info?.st, false);
-        for (const k of modAuras(info?.mods || info?.affixes)) want.add(k);     // S4: a burning rare burns all the time
+        for (const k of modAuras(info?.aff || info?.mods || info?.affixes)) want.add(k);     // S4: a burning rare burns all the time
         const b = book(a);
         const { on, off } = auraDiff(b.drawn, want, b.grace, now);
         for (const s of on) set(a, s, true);

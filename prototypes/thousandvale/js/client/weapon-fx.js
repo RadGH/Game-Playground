@@ -153,5 +153,7 @@ export function createWeaponFx(scene, { spellFx = null, actors = null, groundY =
       it.m.material.opacity = 0.95 * (1 - k) * (1 - k);
     }
   }
-  return { onEvent, update, stats, dispose() { for (const it of items) { scene.remove(it.m); it.m.material.dispose(); } for (const g of GEO.values()) g.dispose(); } };
+  /** A visible crescent with the pool's material settings, for the boot shader warm-up (warmup.js `extras`). */
+  function sample() { const m = new THREE.Mesh(geoFor(1.6), items[0].m.material.clone()); m.material.opacity = 0.5; return m; }
+  return { sample, onEvent, update, stats, dispose() { for (const it of items) { scene.remove(it.m); it.m.material.dispose(); } for (const g of GEO.values()) g.dispose(); } };
 }

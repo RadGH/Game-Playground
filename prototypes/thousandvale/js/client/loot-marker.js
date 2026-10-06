@@ -62,5 +62,12 @@ export function createLootMarkers({ actors, glowTexture }) {
       if (m.beam) m.beam.material.opacity = 0.22 + Math.sin(m.t * 1.7) * 0.08;
     }
   }
-  return { set, update, marks, clear() { for (const id of [...marks.keys()]) drop(id); } };
+  /** The sparkle + beam materials, visible, for the boot shader warm-up (warmup.js `extras`). */
+  function sample() {
+    const g = new THREE.Group();
+    g.add(new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture, color: '#ffd040', blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.9, fog: true })));
+    g.add(new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: '#ffd040', transparent: true, opacity: 0.32, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: true })));
+    return g;
+  }
+  return { sample, set, update, marks, clear() { for (const id of [...marks.keys()]) drop(id); } };
 }

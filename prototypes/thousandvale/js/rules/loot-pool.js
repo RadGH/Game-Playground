@@ -125,6 +125,8 @@ export function installLootPool(engine, { pool = null, tiers = null } = {}) {
       if (key) o = { ...opts, bases: [key] };
     }
     const it = roll.call(this, o);
+    // the level it dropped / was made at (Farhold's rollDrop leaves ilvl at 1): the gear look's `lvl` (tier-2 on L15+)
+    if (it && typeof it === 'object' && it.dropLevel == null) it.dropLevel = level;
     return it && engine.armourTiers ? themeItem(engine.armourTiers, engine.items, it, level, rng, pools) : it;
   };
 }

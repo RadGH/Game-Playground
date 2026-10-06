@@ -741,3 +741,8 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - **B** proctown `js/buildkit.js` (opt-in, WALL_KINDS unchanged): barricade wall/tower/gate pieces, `gateLeafParts`,
   `gatePostParts`, `grateParts`, `EXTRA_WALL_KINDS`/`ALL_WALL_KINDS`.
 - Re-baked all 16 zones, horizon, map.
+
+## Play-test 4 follow-up (stream A, 2026-10-06) — town walls stop players; tier-2 gear look on plain L15+ pieces
+- `js/sim/movement.js`: a step may not cross B's nav SOLID/BUILDING (sampled every 0.5 m, slide along, never trapped);
+  `province-terrain.js` stitched `nav.at`. tests/A/pt4-walls (4).
+- `info.gear.<slot>.lvl` / `.tier`; `js/rules/loot-pool.js` stamps `dropLevel` (Farhold's rollDrop leaves `ilvl` at 1).

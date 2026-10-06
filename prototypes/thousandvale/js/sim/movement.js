@@ -19,6 +19,23 @@
 import { IN } from '../net/protocol.js';
 import * as TR from '../rules/terrain-read.js';
 
+// WALLS AND HOUSES (play-test 4, B's town walls): when the terrain carries stream B's nav (`terrain.nav.at(x, z)` -> NAV
+// bits), a step may not cross a SOLID (wall runs, towers, gate jambs, grates, rocks) or BUILDING cell. The step is
+// SAMPLED every NAV_STEP_M (a mount covers 2.4 m in one 100 ms input — testing only the end point would hop a wall),
+// then the usual axis-slide. A body already standing on a blocked cell is never trapped (a bad spawn, an old save).
+export const NAV_STEP_M = 0.5;
+const NAV_BLOCK = (TR.NAV ? TR.NAV.SOLID | TR.NAV.BUILDING : 32 | 128);
+const navBlocked = (nav, x, z) => (nav.at(x, z) & NAV_BLOCK) !== 0;
+/** True when the straight step (x0,z0) -> (x1,z1) touches a blocked nav cell (start excluded). */
+export function navCrosses(terrain, x0, z0, x1, z1) {
+  const nav = terrain && terrain.nav;
+  if (!nav || typeof nav.at !== 'function') return false;
+  const d = Math.hypot(x1 - x0, z1 - z0);
+  const n = Math.max(1, Math.ceil(d / NAV_STEP_M));
+  for (let i = 1; i <= n; i++) { const t = i / n; if (navBlocked(nav, x0 + (x1 - x0) * t, z0 + (z1 - z0) * t)) return true; }
+  return false;
+}
+
 const WADE_DEPTH = TR.WADE_DEPTH ?? 1.1;
 const DRY_FOOT_DEPTH = TR.DRY_FOOT_DEPTH ?? 0.25;
 
@@ -91,6 +108,14 @@ export function stepMove(state, input, dtMs, terrain) {
   if (ok && (nx !== state.x || nz !== state.z) && !ok(nx, nz) && ok(state.x, state.z)) {
     if (ok(nx, state.z)) nz = state.z;
     else if (ok(state.x, nz)) nx = state.x;
+    else { nx = state.x; nz = state.z; }
+  }
+  // walls and houses (B's nav): never step across a blocked cell; slide along the wall when one axis is free
+  const nav = terrain.nav;
+  if (nav && typeof nav.at === 'function' && (nx !== state.x || nz !== state.z) && !navBlocked(nav, state.x, state.z)
+      && navCrosses(terrain, state.x, state.z, nx, nz)) {
+    if (!navCrosses(terrain, state.x, state.z, nx, state.z)) nz = state.z;
+    else if (!navCrosses(terrain, state.x, state.z, state.x, nz)) nx = state.x;
     else { nx = state.x; nz = state.z; }
   }
   state.x = nx; state.z = nz;

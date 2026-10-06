@@ -22,3 +22,19 @@ test('S15: a second wand in the off hand rides on info.gear.offhand (base wand),
   assert.equal(b.mirror.infos.get(o.entity.id).gear.offhand.base, 'wand', 'the other player sees it');
   a.close(); b.close(); await srv.stop();
 });
+
+test('follow-up: info.gear.<slot> carries the item level (lvl) and tier, so others draw tier 2 on a plain level-15+ piece', async () => {
+  const { srv, clock, world } = await realServer();
+  const a = await joinReal(srv, clock, 'Plated', 'warrior');
+  const o = rec(world, a);
+  const eng = rulesEngine(), rng = o.room.rules.room.streams.get('loot');
+  let chest = null;
+  for (let k = 0; k < 80 && !chest; k++) { const it = eng.rpg.rollDrop({ level: 18, rng, chance: 1, bases: ['heavy_chest'] }); if (it && it.slot === 'chest' && !it.theme) chest = it; }
+  assert.ok(chest, 'a plain level-18 chest');
+  world.grant(o, { items: [chest], gold: 0, reason: 'test' }); await run(clock, 200);
+  o.char.level = 20; o.entity.setLevel && o.entity.setLevel(20);
+  a.item('equip', o.char.bag.at(-1).uid); await run(clock, 300);
+  const g = o.entity.info().gear || {};
+  assert.ok(g.chest && g.chest.lvl >= 15, 'lvl on the worn chest: ' + JSON.stringify(g.chest));
+  a.close(); await srv.stop();
+});

@@ -68,7 +68,11 @@ export function createProvinceTerrain({ key, zones, zoneMetres = ZONE_METRES, st
     zoneAt: (x, z) => { const q = zoneAt(x, z); return q ? q.key : null; },
   };
   // nav.bin stitched the same way (stream C reads `terrain.nav.passable`); a zone without one is open ground
-  const nav = zones.some(q => q.nav) ? { passable: (x, z) => { const q = zoneAt(x, z); return !!q && (!q.nav || q.nav.passable(x - q.ox, z - q.oz)); } } : null;
+  const nav = zones.some(q => q.nav) ? {
+    passable: (x, z) => { const q = zoneAt(x, z); return !!q && (!q.nav || q.nav.passable(x - q.ox, z - q.oz)); },
+    // play-test 4 (B's town walls): the raw bits at a point (0 = open ground where a zone has no nav) — js/sim/movement.js
+    at: (x, z) => { const q = zoneAt(x, z); return q && q.nav && q.nav.at ? q.nav.at(x - q.ox, z - q.oz) : 0; },
+  } : null;
   return {
     key: null, kind: 'province', province: key, reader, heightAt, walkable, waterAt, ...(moveAt ? { moveAt } : {}), ...(passable ? { passable } : {}), bounds, nav,
     size: Math.max(maxX - minX, maxZ - minZ), origin: { x: minX, z: minZ }, spawn,

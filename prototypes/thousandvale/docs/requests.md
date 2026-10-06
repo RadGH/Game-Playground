@@ -2119,3 +2119,22 @@ when the renderer is software (`WEBGL_debug_renderer_info` UNMASKED_RENDERER con
 low-quality pick) and use the static portrait there, and (b) on a real GPU wait one more frame after the fence signals before
 `getBufferSubData`, and cap to one slot per pass. tests/D/freeze.spec.js limit is 100 ms. (Nothing of D-world's showed up in the
 profile: set pieces, offices, mounts, weapon fx, loot markers all run sliced; their materials are now warmed at boot.)
+
+## A (Server core) -> B, D-UI, D-world, Lead — 2026-10-06: walls stop players; gear look carries the item level
+- **B / D-world (walls):** `js/sim/movement.js` `stepMove` now refuses to cross a nav `SOLID` or `BUILDING` cell when the terrain
+  has `nav.at(x, z)` — the step is sampled every 0.5 m (`NAV_STEP_M`, so a 2.4 m mounted step cannot hop a wall), then the usual
+  axis-slide along the wall; a body already standing on a blocked cell is never trapped. The province terrain's stitched `nav`
+  now has `at(x, z)` (raw bits, 0 where a zone has no nav). tests/A/pt4-walls: every wall run sampled (182 approaches, on foot
+  and mounted) never lets a step through and stops >= 80%; every gate of every walled settlement walks through both ways.
+- **D-UI (prediction):** the client runs the same `stepMove`, but the client terrain has no `nav` yet, so it predicts through a
+  wall and is pulled back by the server. To predict exactly: give the client's terrain the stitched nav (load each zone's
+  `nav.bin` with `parseNav` from js/rules/terrain-read.js and expose `terrain.nav = { at(x, z) }` in province metres, as
+  js/sim/province-terrain.js does). Nothing else changes.
+- **D-world (S18):** `info.gear.<slot>` now carries `lvl` (the level the item dropped / was made at — Farhold's own `ilvl` is 1
+  on every rollDrop item, so the rules stamp `dropLevel`) and `tier` (when >= 2). A plain level-15+ piece shows tier 2.
+- **Lead:** dev unit restarted (08:15). Gates: A 202 pass / 8 skip / 0 fail, C 243/243, E+B+D-node 347/347, bots100 in-process
+  green; bots100-real below.
+- **bots100-real after the walls** (two runs): run 1 at load 4-9: timing GREEN (p99 11.4 / 12.3 / 12.5 ms, worst 22-39 ms) but
+  the event-herd check read 35/60 (needs 36; it read 39 before the walls); run 2 at load 11 (another agent's work): herd 59/60
+  but spread p99 29 ms (load). The herd count swings with which realm event is live and how many bots die — not a wall effect
+  as far as the two runs show. Worth one more run on a quiet machine.

@@ -534,6 +534,31 @@ export function createRules(host, opts = {}) {
     });
   }
 
+  /**
+   * Play-test 2 (A's consumables: potions and food). Minimal hooks A calls; stream C owns them.
+   * restore(e, {hp, mp}) adds to the unit (clamped), returns what was actually restored.
+   * cleanse(e, ids) removes those statuses (fx status off each), returns the ids removed.
+   */
+  function restore(e, { hp = 0, mp = 0 } = {}) {
+    const u = e?.r?.unit;
+    if (!u || u.dead || e.dead) return { hp: 0, mp: 0 };
+    return run(() => {
+      const h0 = u.hp, m0 = u.mp;
+      u.hp = Math.min(u.maxHp, u.hp + Math.max(0, hp));
+      u.mp = Math.min(u.maxMp, u.mp + Math.max(0, mp));
+      return { hp: u.hp - h0, mp: u.mp - m0 };
+    });
+  }
+  function cleanse(e, ids = []) {
+    const u = e?.r?.unit;
+    if (!u || !u.statuses) return [];
+    return run(() => {
+      const out = [];
+      for (const id of ids) if (u.statuses[id]) { delete u.statuses[id]; out.push(id); host.event({ type: 'fx', id: e.id, kind: 'status', status: id, on: false }); }
+      return out;
+    });
+  }
+
   function onLevel(e) {
     run(() => {
       const u = e.r.unit;
@@ -836,7 +861,7 @@ export function createRules(host, opts = {}) {
     companion: e => (e.r.unit ? companionInfo(e.r.unit, engine.classById(e.r.unit.classId), engine.progression.companions) : null),
     encounters: enc,
     stats: () => ({ builds, handoffs }),
-    addEntity, removeEntity, intent, step, respawn, onLevel, statusesOf,
+    addEntity, removeEntity, intent, step, respawn, onLevel, statusesOf, restore, cleanse,
     levelFor: xp => levelFromXp(xp, engine.levelCap),
     xpFor: level => xpForLevel(level, engine.levelCap),
     dispose() { room.run(() => { for (const m of [...field.monsters]) clearThreat(m); }); },

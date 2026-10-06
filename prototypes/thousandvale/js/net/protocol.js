@@ -210,6 +210,7 @@ export const SERVER_MSGS = Object.freeze({
   lookR: ['ok'],
   followR: ['id', 'ok'],
   inspectR: ['id', 'ok'],
+  itemR: ['op', 'ok'],
   settings: ['data'],
 });
 /** Talent ops (`talent {op}`) and perk ops (`perk {op}`), province socket (P6). */
@@ -229,7 +230,7 @@ export const PREF_KEYS = Object.freeze(['showGear', 'showHelm']);
 export const LOOT_MINS = Object.freeze(['magic', 'rare', 'legendary', 'unique']);   // = C's js/rules/loot-rules.js LOOT_THRESHOLDS ('epic' -> legendary)
 export const PARTY_MAX = 5;
 /** Item ops (`item {op}`). */
-export const ITEM_OPS = Object.freeze(['equip', 'unequip', 'destroy']);
+export const ITEM_OPS = Object.freeze(['equip', 'unequip', 'destroy', 'use']);   // use: potions + food (uid, or 'id:<item id>' for a hotbar slot)
 /** Chat channels a client may send on the gateway (`say` is local, on the province socket; `w` = whisper, needs `to`).
  *  The server also sends `system` lines (admin announcements). */
 export const CHAT_CHANNELS = Object.freeze(['party', 'guild', 'zone', 'trade', 'world', 'w']);

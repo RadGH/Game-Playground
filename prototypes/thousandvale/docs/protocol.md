@@ -113,7 +113,7 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `say` | p | `text:str:200` | 1 / 5 | Say chat, heard within 40 m. |
 | `respawn` | p | — | 1 / 2 | Get up after dying: in the wilds or town you wake in the town (a `joined` handoff, `via:'respawn'`); in a dungeon, at its entrance. |
 | `use` | p | `id:id` | 4 / 8 | Use an object within 4 m: a portal/door (dungeon entrance), stairs, an exit, a chest. Answer `used {id, ok, why?, kind?}`; a move arrives as a `joined` handoff. |
-| `item` | p | `op:str:8, uid:str:40, slot?:str:16` | 5 / 10 | `equip {uid, slot?}` (slot defaults to the item's own), `unequip {uid, slot?}`, `destroy {uid}`. The uid must be in YOUR bag (or worn, for unequip). Answers `bag` + `equip`, or `err {code:'item'|'bagFull'}`. |
+| `item` | p | `op:str:8, uid:str:40, slot?:str:16` | 5 / 10 | `equip {uid, slot?}` (slot defaults to the item's own), `unequip {uid, slot?}`, `destroy {uid}`, `use {uid | 'id:<item id>'}` (potions + food, §18.10 -> `itemR`). The uid must be in YOUR bag (or worn, for unequip). Answers `bag` + `equip`, or `err {code:'item'|'bagFull'}`. |
 | `travel` | p | `to:str:48` | 1 / 3 | Travel: a waystone `key` you have discovered (stand at any waystone; a gold fare by distance; not in combat or a dungeon), or `'event'` = free travel to the live realm event (§16). Answer `travelR`; the move is a `joined` handoff (or a `relocate` to another process). |
 | `trace` | p | `kind:str:16` | 1 / 2 | Leave a trace: `campfire` (10 min, one per player, wilds only). Graves appear by themselves where a player dies (1 h). |
 | `quest` | p | `op:str:8, id:str:120, npc?:id` | 2 / 6 | Quests and jobs (§15.9): `accept {id, npc}` / `turnin {id, npc}` standing within 6 m of the giver (`npc` = its entity id), `abandon {id}`. Answer `questR`; the log comes as `quests`. |
@@ -203,6 +203,7 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `mountR` | `op, ok, why?, msg?, id?` | (game) Answer to `mount` (`combat`, `swim`, `indoors`, `none`, `dead`). |
 | `lookR` | `ok, look?, cost?, char?, why?, msg?` | Answer to `barber` (game) or `look` (gw); `look` = the cleaned look as stored. |
 | `followR` | `id, ok, name?, why?, msg?` | (game) Answer to `follow` (`hostile`, `far`, `gone`, `dead`, `self`, `target`). |
+| `itemR` | `op, ok, uid, id?, why?, msg?, cd?` | (game) Answer to `item {op:'use'}` (§18.10): `cooldown` (`cd` ms left), `combat`, `full`, `notYet`, `dead`, `item`. |
 | `inspectR` | `id, ok, name?, cls?, clsName?, level?, look?, equipment?, why?, msg?` | (game) Answer to `inspect` (within 40 m). |
 | `settings` | `data` | (gw) The account's settings (after `chars`, and after `settings set`). |
 
@@ -977,4 +978,14 @@ only that class is offered it), `requires` ([ids], all done), `minLevel`, a ques
 setpieces.json merged into zone `test`), `order: 'any'` (every step counts on its own; the log row carries `order:'any'` and each step
 its own `n`/`done`), `autoComplete` (paid when done, no turn-in: `questR {op:'turnin', auto:true}`), `reward.unlock`
 ('companion' | 'companion2' | 'talents1', C's `rules.unlock`), `reward.perks: n` (C's `unlock('perk', {source: quest id})`); step `visit {town:'<settlement>'}` = reach that town.
+
+### 18.10 Potions and food (the lead's call after play-test 2)
+`item {op:'use', uid}` — `uid` = a bag item, or `'id:<item id>'` for a hotbar slot (the first such item; the hotbar itself is
+client-side). A consumable is a bag item with `kind:'potion'|'good'` (`js/sim/consumables.js`). Potions (healing, greater
+healing, mana, group tonic = the party within 30 m, antidote = cleanse) work in a fight and share ONE cooldown (`POTION_CD_MS`
+30 s, `you {potionCd}`); a heal restores the listed amount or a share of max, whichever is more, and is emitted as `hit {kind:
+'heal', ab:'potion'}`. Food / drink (`use.type`) are out of combat only: `regen` × max per second for `seconds` (`you {regen:
+{kind, ms}}`, then `you {regen:null}`); a fight or a hit ends the meal. Buff goods, torches, recall charms and revives answer
+`why:'notYet'` and stay in the bag. Success: `itemR {ok, id, cd?}` + `bag {remove}`. Effects go through C's `rules.restore(e,
+{hp, mp})` and `rules.cleanse(e, ids)` (js/rules/index.js, minimal hooks A added for C to own).
 

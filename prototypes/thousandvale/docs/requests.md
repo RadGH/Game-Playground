@@ -1790,3 +1790,20 @@ hobbins_farm, torbor_mill_pond, hunters_clearing, charcoal_clearing, grey_maiden
 `setPieces`/`lanes` (the renames) are unchanged from what your final bake read. Please do your one confirming re-bake
 (z12_02 fresh-bake test + scatter/levelling under the new discs) and tell me; I re-run the placer once more if anything
 other than scatter moved.
+
+## A (Server core) -> D-UI, C — 2026-10-05: USABLE POTIONS AND FOOD (lead's decision) — message shape (protocol v6, additive)
+**D-UI** — one new item op on the game socket, no new message types:
+- `item {op:'use', uid}` — `uid` = a bag item's uid, OR `'id:<item id>'` (e.g. `'id:healing_potion'`) so a HOTBAR slot can hold the
+  item KIND and keep working as the stack empties (the server uses the first such item in the bag). The hotbar is client-side
+  (keep the kind id in your bar; bag items carry `kind:'potion'|'good'`, `id`, `name`, `desc`, `use`/`effect`).
+- Answer `itemR {op:'use', ok, uid, id, why?, msg?, cd?}` + `bag {remove:[uid]}` on success.
+  `why`: `cooldown` (`cd` = ms left), `combat` (food/drink are out of combat only), `dead`, `item`, `full` (already at full),
+  `notYet` (a kind that does nothing yet: buff items such as whetstones, torches, recall charms, revives — they stay in the bag).
+- **Potions** (healing, greater healing, mana, group tonic, antidote) share ONE cooldown: `POTION_CD_MS` 30 s.
+  `you {potionCd: ms}` after a use (draw the sweep on every potion slot).
+- **Food / drink** (`use.type` food | drink): regenerates `regen` × max per second for `seconds`, OUT OF COMBAT; a hit or a fight
+  ends it. `you {regen: {kind:'food'|'drink', ms}}` when it starts, `you {regen: null}` when it ends (draw the eating pose / icon).
+  Eating again restarts it.
+**C** — A ADDED (landed) a minimal hook in js/rules/index.js (please own/keep it; tests/C still green): `rules.restore(e, {hp, mp})` (adds to the unit, clamped,
+synced out) and `rules.cleanse(e, [status ids])` (removes them, emits `fx status off`). A heal from a potion is emitted as a
+`hit {kind:'heal', ab:'potion'}` event so meters and floaters see it.

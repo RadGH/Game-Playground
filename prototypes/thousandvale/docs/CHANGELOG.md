@@ -552,3 +552,6 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - **A** (later) B's role-tagged plots claimed first; E's `requires`, `questBoss` out of jobs, setpieces.json + `scale`, named
   class-quest items; `you.attackRange`. tests/A 158+ green incl. pt2-quests (7); worker.spec green; 100-bot gate green
   (spread p99 9.2, town 7.8, event 7.9 ms). Dev unit restarted.
+- **A** potions + food usable (lead's call): `item {op:'use', uid | 'id:<kind>'}` -> `itemR`; `js/sim/consumables.js` (shared
+  30 s potion cooldown, heal/mana/group tonic/antidote; food/drink regen out of combat, ended by a hit); minimal C hooks
+  `rules.restore` / `rules.cleanse` in js/rules/index.js (noted for C); `net.useItem`. tests/A/pt2-consumables (3).

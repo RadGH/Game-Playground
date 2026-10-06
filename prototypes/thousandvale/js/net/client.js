@@ -338,7 +338,8 @@ export function connect(opts = {}) {
   net.settings = data => sendJ(gw, data ? { t: 'settings', op: 'set', data } : { t: 'settings', op: 'get' });   // -> settings {data}
   net.setLook = (char, look) => sendJ(gw, { t: 'look', char, look });              // title screen -> lookR
   net.partyLoot = min => net.partyOp('loot', { code: min });                       // 'magic' | 'rare' | 'legendary' | 'unique' (leader)
-  net.inspect = id => sendJ(game, { t: 'inspect', id });                           // -> inspectR
+  net.inspect = id => sendJ(game, { t: 'inspect', id });
+  net.useItem = uidOrKind => sendJ(game, { t: 'item', op: 'use', uid: String(uidOrKind) });   // a bag uid, or 'id:healing_potion' (hotbar) -> itemR                           // -> inspectR
   // D-UI's first names (play-test 2): the same messages
   net.lootOp = net.loot;
   net.roll = (roll, choice) => net.loot('roll', { roll, choice });

@@ -40,6 +40,7 @@ import { createCorpses } from './corpses.js';
 import { createShops, SHOP_RANGE } from './shops.js';
 import { createMountBook } from './mounts.js';
 import { cleanLook } from './looks.js';
+import { effectOf, potionAmount, POTION_CD_MS, GROUP_R as TONIC_R } from './consumables.js';
 import { mountRefusal, mountSpeedMul, dismounts, MOUNT_RULES } from '../rules/mount.js';   // stream C's riding rules (when, how fast, what throws you)
 
 const LEASE_MS = 30000, HEARTBEAT_MS = 10000, TICKET_WAIT_MS = 3000;
@@ -1527,6 +1528,75 @@ export function createProvince(opts) {
     if (asked === 'ring1') return 'ring';
     return asked;
   }
+  /**
+   * Potions and food (js/sim/consumables.js; the lead's call after play-test 2). `item {op:'use', uid}` — uid, or 'id:<item id>'
+   * for a hotbar slot (the first such item in the bag). Potions share POTION_CD_MS and work in a fight; food and drink are out
+   * of combat and mend over time (foodTick). Effects go through C's rules.restore / rules.cleanse.
+   */
+  function useItem(o, m) {
+    const s = o.conn, ch = o.char, e = o.entity, rules = o.room.rules;
+    const R = x => s.sendJSON({ t: 'itemR', op: 'use', uid: m.uid, ...x });
+    const want = String(m.uid || '');
+    const idx = want.startsWith('id:') ? ch.bag.findIndex(i => i.id === want.slice(3) && effectOf(i)) : ch.bag.findIndex(i => i.uid === want);
+    if (idx < 0) return R({ ok: false, why: 'item', msg: 'You have none of those.' });
+    const item = ch.bag[idx], ef = effectOf(item);
+    if (!ef) return R({ ok: false, why: 'item', id: item.id, msg: 'You cannot use that.' });
+    if (ef.kind === 'none') return R({ ok: false, why: 'notYet', id: item.id, msg: (item.name || 'That') + ' does nothing yet. Keep it — it will.' });
+    if (e.dead) return R({ ok: false, why: 'dead', id: item.id, msg: 'You are dead.' });
+    const t = now();
+    if (ef.kind === 'potion') {
+      if ((o.potionCdUntil || 0) > t) return R({ ok: false, why: 'cooldown', id: item.id, cd: o.potionCdUntil - t, msg: 'Your potions are on cooldown.' });
+      let did = false;
+      if (ef.cleanse) did = (rules.cleanse ? safeRules(o.room, 'cleanse', e, ef.cleanse) || [] : []).length > 0;
+      else {
+        const targets = [e];
+        if (ef.group) { const p = partyOf.get(ch.id); if (p) for (const c of p.members) { const mo = online.get(c); if (mo && mo !== o && mo.room === o.room && !mo.entity.dead && Math.hypot(mo.entity.x - e.x, mo.entity.z - e.z) <= TONIC_R) targets.push(mo.entity); } }
+        for (const te of targets) {
+          const amt = potionAmount(ef, te.hpMax, te.mpMax);
+          const got = restoreOn(o.room, te, amt);
+          if (got.hp > 0 || got.mp > 0) did = true;
+          if (got.hp > 0) o.room.emit({ type: 'hit', s: e.id, d: te.id, n: Math.round(got.hp), kind: 'heal', ab: 'potion' });
+        }
+      }
+      if (!did) return R({ ok: false, why: 'full', id: item.id, msg: ef.cleanse ? 'Nothing to cure.' : 'You are already at full.' });
+      o.potionCdUntil = t + POTION_CD_MS;
+      consume(o, idx);
+      if (o.mount) dismount(o, 'cast');
+      R({ ok: true, id: item.id, cd: POTION_CD_MS });
+      return s.sendJSON({ t: 'you', potionCd: POTION_CD_MS });
+    }
+    // food / drink
+    if (fighting(o, e)) return R({ ok: false, why: 'combat', id: item.id, msg: 'You cannot eat in a fight.' });
+    consume(o, idx);
+    o.regen = { kind: ef.kind, hpRate: ef.hpRate, mpRate: ef.mpRate, start: t, until: t + ef.ms };
+    R({ ok: true, id: item.id });
+    s.sendJSON({ t: 'you', regen: { kind: ef.kind, ms: ef.ms } });
+  }
+  /** C's rules.restore when present; the stand-in rules have none, so the entity is set directly there. */
+  function restoreOn(room, te, { hp = 0, mp = 0 }) {
+    if (room.rules.restore) return safeRules(room, 'restore', te, { hp, mp }) || { hp: 0, mp: 0 };
+    const h0 = te.hp, m0 = te.mp;
+    te.setHp(te.hp + hp); te.setMp(te.mp + mp);
+    return { hp: te.hp - h0, mp: te.mp - m0 };
+  }
+  function consume(o, idx) {
+    const [it] = o.char.bag.splice(idx, 1);
+    journal(o, 'bagDel', { uid: it.uid });
+    econ.add('sink', 'use', { items: 1 }, o.char.level || 1);
+    o.dirty = true;
+    if (o.conn) o.conn.sendJSON({ t: 'bag', add: [], remove: [it.uid], gold: o.char.gold });
+  }
+  /** 1 Hz: food and drink mend while you are out of combat; a fight, a hit or death ends the meal. */
+  function foodTick() {
+    const t = now();
+    for (const o of online.values()) {
+      const g = o.regen; if (!g) continue;
+      const e = o.entity;
+      const stop = e.dead || fighting(o, e) || (o.lastHitAt || 0) > g.start;
+      if (!stop) restoreOn(o.room, e, { hp: g.hpRate * e.hpMax, mp: g.mpRate * e.mpMax });
+      if (stop || t >= g.until) { o.regen = null; if (o.conn) o.conn.sendJSON({ t: 'you', regen: null }); }
+    }
+  }
   /** C's ask (Q1): how far the basic attack reaches, so the client stops walking a ranger into 2.4 m. The rules'
    *  `attackRange(e)` when they have one, else the main-hand swing plan's `range` (bows, crossbows, wands); null = melee. */
   function attackReach(o) {
@@ -1546,6 +1616,7 @@ export function createProvince(opts) {
     if (trades.offered(ch.id, m.uid)) return s.err('item', 'That item is in your trade window.');
     ch.bag ||= []; ch.equipment ||= {};
     const rules = o.room.rules;
+    if (m.op === 'use') return useItem(o, m);
     const bagIdx = ch.bag.findIndex(i => i.uid === m.uid);
     if (m.op === 'destroy') {
       if (bagIdx < 0) return s.err('item');
@@ -2051,6 +2122,7 @@ export function createProvince(opts) {
     if (ticks % 20 === 5) eventTick();           // events (realm + zone) at 1 Hz
     if (ticks % 20 === 7) zoneTick();
     if (ticks % 20 === 9) corpses.tick();
+    if (ticks % 20 === 11) foodTick();
     for (const o of online.values()) if (o.mountCast) mountCastTick(o);
     if (ticks % 4 === 1) npcTick(TICK_MS * 4);
     roadsTick();

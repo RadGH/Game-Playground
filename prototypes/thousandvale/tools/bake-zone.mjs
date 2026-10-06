@@ -558,7 +558,9 @@ export function bakeZone(id, opts = {}) {
   scatter.push(...setPieceScatter(pieces, { isWet: (x, z) => terrain.waterAt(x, z).kind !== 'none', onRoad: roadAtSample }));
   // decks for every world bridge whose span reaches into this zone (one on the edge is stamped by both zones)
   const decks = meta.bridges;
-  const pieceNav = setPieceNav(pieces); pieceNav.buildings.push(...ePieces.flatMap(e => e.buildings));
+  // (stream E's own set-piece buildings are NOT stamped: E places its NPCs and checks its discs against nav, and its own
+  // hut must not read as 'town ground' to its own placer — E's vignette collision is E's/A's, like every vignette prop)
+  const pieceNav = setPieceNav(pieces);
   const nav = navFor(terrain, biome, scatter, plans, decks, pieceNav);
   return { meta, height, waterTop: wTop, waterKind: wKind, biome, terrain, plans, townPlan: plans.find(p => p.town.hub) || null, placements, roads, bridges, paths, scatter, nav, vignettesUsed: vignettes.length, pieces, ePieces, pieceLog: SP.log };
 }

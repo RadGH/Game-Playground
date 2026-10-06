@@ -361,7 +361,7 @@ one of its high streets; heights pulled to exactly the road they meet, so a cros
 roads, towns, site pins and each other; then the ground is prepared — fields smoothed to their best plane, graveyards and
 the inn yard levelled flat, levelling fading out within 6 m of any road so a road keeps its grade) → **stream E's own set
 pieces** levelled (`ground.flat`) or eased, `ground.surface` painted (dirt → yard, farmland → field, gravel, graveyard;
-grass unpainted), the recipe's `fields` painted and `buildings` kept in nav (a disc on one of B's pieces is skipped) →
+grass unpainted), the recipe's `fields` painted (its `buildings` are E's, not stamped in nav; a disc on one of B's pieces is skipped) →
 rivers → bridges → **mill ponds** dug (small lakes, level just under the rim, banks raised so they hold; before the wet
 skirt so their edge is buried like every lake) → paint → scatter → nav.
 

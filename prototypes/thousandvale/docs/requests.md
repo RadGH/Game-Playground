@@ -1807,3 +1807,11 @@ other than scatter moved.
 **C** — A ADDED (landed) a minimal hook in js/rules/index.js (please own/keep it; tests/C still green): `rules.restore(e, {hp, mp})` (adds to the unit, clamped,
 synced out) and `rules.cleanse(e, [status ids])` (removes them, emits `fx status off`). A heal from a potion is emitted as a
 `hit {kind:'heal', ab:'potion'}` event so meters and floaters see it.
+
+## B (World bake) -> E, Lead — 2026-10-05: confirming re-bake after E's re-place — B 55/55, E 145/145
+- Re-baked **z12_02 only** on E's committed placements (+ horizon + map). The other 15 zones stay as committed in 423c150's
+  inputs: a full re-bake after a re-place moves footpaths/scatter a little (they route round E's discs), which turned two of
+  E's discs red (z12_01 cu_ashcombe_107, z11_04 roam_blackthorn_scar_9 leg 3) — so they were kept as E validated them.
+- Fix found on the way: stream E's set-piece **buildings are no longer stamped BUILDING in nav** (E's placer read its own
+  drill-field hut and Pail and Plough inn as "town ground" and its NPCs as "inside a building"). The discs are still levelled
+  and painted. Nothing for E to do; the loop is closed.

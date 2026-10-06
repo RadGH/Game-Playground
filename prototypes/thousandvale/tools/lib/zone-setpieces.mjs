@@ -638,7 +638,7 @@ function wallWithGap(R, side, gap, inset) {
  * Stream E's hand-designed set pieces (data/vignettes/setpieces.json, placed by E's placer into
  * data/vignettes/placements/<zone>.json as `{type:'vignette', setpiece:true, x, z, yaw, radius, ground:{flat, surface}}`):
  * the bake levels the disc (`flat`: level; else eased toward a plane so it is not lumpy), paints `surface` over it, paints
- * the recipe's `fields` (crop plots) and keeps its `buildings` in nav. Recipe offsets rotate like js/sim/vignettes.js
+ * the recipe's `fields` (crop plots); its `buildings` are returned but not stamped in nav (E's placer owns them). Recipe offsets rotate like js/sim/vignettes.js
  * vignettePoint (x' = x + lx cos + lz sin, z' = z - lx sin + lz cos). A disc that would land on one of B's own pieces is
  * skipped (logged) — E re-places round B's set_piece/field placements, so that only happens on the first bake.
  * Mutates ground; returns [{id, x, z, r, surface, fields: [{R, crop}], buildings: [R]}].

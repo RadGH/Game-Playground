@@ -750,3 +750,9 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - **D-world (round 4 fold-in, 2026-10-06)** S4 reads A's `info.aff [{id, name, aura}]` (each affix's own aura) and `info.sc` (the server's scale); the rare's ring and pack-leader banner are attached to the body BEFORE its shader compile (added after the first draw they cost a 1.8 s compile on the test VM); swing crescents and loot sparkle/beam materials join the boot shader warm-up (`warmBodies({extras})`). S20 reads `info.sit` / `you.regen.sit`. R4: world-ui's event banners now go through boss.js's one call-out (two timers on one element let an event's timer wipe a boss warning mid wind-up).
 - **D-world freeze**: tests/D/freeze.spec.js is red ONLY on D-UI's live portraits (`ui/portraits.js` getBufferSubData, 1.1-2.7 s on SwiftShader; request in requests.md). A/B with that read-back stubbed: zero long tasks while streaming and walking (max 25-29 ms a frame) with all of D-world's round 2-4 work on.
 - **D-world e2e**: tests/e2e/two-players.spec.js leaves Torborhold through a wall gate (B's `town_wall` gates) instead of a straight line that now ends at the wall; green.
+- **D-UI** (finishing pass): portraits never stall — on a software renderer they are 2D faces from avatar-2d (`ui/svg-portrait.js`,
+  strict-XML SVG), on a GPU the live pass and the static renders read back through a pixel-pack buffer + fence; item icons read back
+  the same way and up to 3 are in flight behind a stage lock (`ui/item-icons.js`); freeze.spec green. Consumables hang in their own
+  group to the right of the action bar (the bar keeps its width, the chat box stays clickable). The entity menu has its own class
+  (`.ent-menu`). The editor offers Accessory and Face marks, and a new character starts with neither (no rolled visor). `tv.cast`
+  turns you to the target first (a swing lands in its arc — the e2e players were swinging at the air).

@@ -8,7 +8,7 @@
 //   ed.open({ look, avatar, mode: 'title'|'barber', price })    // avatar = the Chibi 2 avatar you look like now
 
 import { h, createPanel } from '../ui-panel.js';
-import { FACE_SLOTS, BODY_DIALS, PALETTES, cleanCustom, customFrom, lookWith, lookCustom, diffCustom, mergeCustom, barberCost } from './appearance-core.js';
+import { FACE_SLOTS, BODY_DIALS, PALETTES, cleanCustom, customFrom, lookWith, lookCustom, diffCustom, mergeCustom, barberCost, freshCustom } from './appearance-core.js';
 
 const PRETTY = id => String(id).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
@@ -27,9 +27,12 @@ export function createAppearanceEditor({ parent = null, races = [], raceNames = 
     E.stored = cleanCustom(lookCustom(E.look)) || {};
     E.custom = { ...(customFrom(av) || {}), ...E.stored };
     E.custom.body = { ...(customFrom(av)?.body || {}), ...(E.stored.body || {}) };
+    const fresh = E.mode === 'title' && !lookCustom(E.look);
+    if (fresh) E.custom = freshCustom(E.custom);   // a new character starts with no accessory (lead: the grey visor)
     E.base = JSON.parse(JSON.stringify(E.custom));           // what you looked like when you sat down: the bill is the difference
     draw();
     panel.open();
+    if (fresh) changed();                           // the figure drops the rolled accessory at once
   }
   /** The look to send. At the barber only what you CHANGED goes over your stored look (he charges per part changed). */
   const current = () => (E.mode === 'barber' ? lookWith(E.look, mergeCustom(E.stored, diffCustom(E.base, E.custom))) : lookWith(E.look, E.custom));
@@ -66,7 +69,7 @@ export function createAppearanceEditor({ parent = null, races = [], raceNames = 
           E.look.race = r;
           // a new people starts from that people's own face and build (then your choices on top)
           const av = avatarFor ? await avatarFor({ race: r, seed: E.look.seed }) : null;
-          E.custom = customFrom(av) || {}; changed(); draw();
+          E.custom = freshCustom(customFrom(av) || {}); changed(); draw();
         } }, raceNames[r] || r)))));
     }
     rows.push(swatches('Skin', 'skin', PALETTES.skin, E.custom.body?.skin));
@@ -82,13 +85,13 @@ export function createAppearanceEditor({ parent = null, races = [], raceNames = 
         h('button.ghost.small.ap-step', { type: 'button', 'aria-label': `Previous ${s.label}`, onclick: () => step(-1) }, '‹'),
         h('select', { 'aria-label': s.label, onchange: e => setSlot(s.slot, e.target.value) }, ...s.ids.map(id => h('option', { value: id, selected: id === cur }, PRETTY(id)))),
         h('button.ghost.small.ap-step', { type: 'button', 'aria-label': `Next ${s.label}`, onclick: () => step(1) }, '›')));
-      if (s.color && !(s.slot === 'facialHair' && (cur || 'none') === 'none') && !(s.slot === 'hair' && cur === 'bald')) rows.push(swatches(`${s.label} colour`, s.slot, PALETTES[s.color], E.custom[s.slot]?.color));
+      if (s.color && !(s.slot === 'facialHair' && (cur || 'none') === 'none') && !(s.slot === 'hair' && cur === 'bald') && !(s.slot === 'accessory' && (cur || 'none') === 'none')) rows.push(swatches(`${s.label} colour`, s.slot, PALETTES[s.color], E.custom[s.slot]?.color));
     }
     const costTxt = '';
     panel.setTitle(E.mode === 'barber' ? 'The Barber' : 'Customize Appearance', E.mode === 'barber' ? 'A new look, if you can sit still' : 'Overrides your calling\'s default face');
     panel.fill(h('div.ap-body', {}, ...rows), E.mode === 'barber' && E.bill ? h('p.tiny-left.ap-bill', {}, billText()) : null,
       h('div.row.ap-foot', {},
-        h('button.ghost.small', { type: 'button', title: 'A new random face for your people', onclick: async () => { E.look.seed = (Math.random() * 1e9) >>> 0; const av = avatarFor ? await avatarFor({ race: E.look.race, seed: E.look.seed }) : null; E.custom = customFrom(av) || {}; changed(); draw(); } }, 'Random'),
+        h('button.ghost.small', { type: 'button', title: 'A new random face for your people', onclick: async () => { E.look.seed = (Math.random() * 1e9) >>> 0; const av = avatarFor ? await avatarFor({ race: E.look.race, seed: E.look.seed }) : null; E.custom = E.mode === 'title' ? freshCustom(customFrom(av) || {}) : (customFrom(av) || {}); changed(); draw(); } }, 'Random'),
         h('button.ghost.small', { type: 'button', title: 'Back to how you looked when you opened this', onclick: () => { E.look = JSON.parse(JSON.stringify(E.start)); E.custom = JSON.parse(JSON.stringify(E.base)); changed(); draw(); } }, 'Undo all'),
         h('span.grow'),
         h('button.ghost.small', { type: 'button', onclick: () => panel.close() }, 'Cancel'),

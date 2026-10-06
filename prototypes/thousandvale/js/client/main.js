@@ -1086,7 +1086,7 @@ const tv = {
   cast(slot = 0, targetId) {
     if (!S.net) return false;
     const t = targetId != null ? actors.get(targetId) : actors.get(S.target);
-    if (t) setTarget(t.id);
+    if (t) { setTarget(t.id); controls.setFacing(Math.atan2(t.pos.x - S.predictor.pos.x, t.pos.z - S.predictor.pos.z)); }   // a swing lands in its arc: face the target first (as tryStrike does)
     S.net.cast({ slot, target: t?.id, aim: t ? { x: t.pos.x, z: t.pos.z } : undefined });
     actors.playAttack(S.selfId, t?.id);
     return true;

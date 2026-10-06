@@ -21,6 +21,9 @@ export const FACE_SLOTS = [
   { slot: 'mouth', label: 'Mouth', ids: ['smile', 'neutral', 'frown', 'open', 'grin', 'smirk', 'o'] },
   { slot: 'ears', label: 'Ears', ids: ['normal', 'pointed', 'big', 'none'] },
   { slot: 'facialHair', label: 'Beard', color: 'hair', ids: ['none', 'stubble', 'goatee', 'mustache', 'full', 'long', 'chinstrap', 'soul_patch', 'braided_beard'] },
+  // R1 "face, accessories, hair": glasses, earrings, a scarf… and marks on the skin. A new character starts with NONE of either.
+  { slot: 'accessory', label: 'Accessory', color: 'cloth', ids: ['none', 'glasses', 'round_glasses', 'monocle', 'eyepatch', 'goggles', 'earrings', 'nose_ring', 'sunglasses', 'scarf', 'pendant', 'prayer_beads'] },
+  { slot: 'extras', label: 'Face marks', ids: ['none', 'freckles', 'blush', 'scar', 'scar_cheek', 'warpaint', 'tattoo', 'wrinkles', 'freckles_heavy', 'cheek_stripes', 'war_stripe'] },
 ];
 export const BODY_DIALS = [
   { key: 'height', label: 'Height', min: 0, max: 1 },
@@ -31,6 +34,7 @@ export const BODY_DIALS = [
 export const PALETTES = {
   skin: ['#ffdbb4', '#f1c27d', '#e0ac69', '#c68642', '#8d5524', '#5c3a1e', '#d98f6a', '#c9cfc3'],
   hair: ['#111111', '#3b2a1a', '#6b4a2a', '#a86a3a', '#d9c27a', '#f2e2b0', '#8a1a1a', '#d94a2a', '#888888', '#eeeeee', '#4a3a8a', '#2a7a5a'],
+  cloth: ['#2a2a3a', '#c9a227', '#8a8f99', '#2f4f7f', '#8a2e2e', '#2e7d32', '#e8e8e8', '#6b4a2a'],
   eye: ['#4a6b8a', '#3a8a5a', '#6b4a2a', '#222222', '#8a6a2a', '#5a4aaa', '#c33333', '#7fe0ee', '#e0c040'],
 };
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -144,3 +148,6 @@ export function barberCost(before, after, { prices = {}, perLevel = 0.05, level 
   }
   return Math.round(Math.min(sum, P.everything) * (1 + perLevel * (level - 1)));
 }
+
+/** A NEW character's starting face: no accessory and no face marks (the seeded random face may roll a visor or a scar). */
+export function freshCustom(custom) { return { ...(custom || {}), accessory: { id: 'none' }, extras: { id: 'none' } }; }

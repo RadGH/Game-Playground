@@ -83,7 +83,9 @@ let active = false, slowest = 0, maxSync = 0;
 const spans = [];
 const syncSpan = (t0, what = '') => { const d = performance.now() - t0; if (d > maxSync) maxSync = d; spans.push(what + ':' + Math.round(d)); if (spans.length > 40) spans.shift(); return d; };
 export { syncSpan };
-export function iconsActive(on) { active = !!on; if (active) pump(); }
+/** Each window that shows icons says so (bag, loot, shop, trade — play-test 2): the queue runs while ANY is open. */
+const owners = new Set();
+export function iconsActive(on, who = 'bag') { if (on) owners.add(who); else owners.delete(who); active = owners.size > 0; if (active) pump(); }
 export { cacheReady };
 
 // ---- the render queue (one at a time, between frames) ----

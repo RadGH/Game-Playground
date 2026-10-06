@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set-piece Kit</title>
+<link rel="stylesheet" href="../shared/style.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="propkit.css">
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+</head>
+<body class="pk-body">
+<div class="pk-bar">
+  <a href="../" class="muted">&larr; Playground</a>
+  <h1>Set-piece Kit</h1>
+  <span class="muted small">Every model in <code>proctown/js/propkit.js</code>: graveyards, farmland, orchards, mills, shrines, ruins, lumber and hunting camps, fishing, inn yards — eight unit shapes, instanced. Drag to orbit, wheel to zoom.</span>
+  <label>Show <select id="group"><option value="all">Everything</option></select></label>
+  <label>Seed <input id="seed" type="number" value="1" min="1"></label>
+  <label class="chk"><input type="checkbox" id="night"> Night</label>
+  <span id="stats" class="muted small"></span>
+</div>
+<div id="view"></div>
+<script type="module" src="js/propkit-app.js"></script>
+</body>
+</html>

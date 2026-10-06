@@ -24,6 +24,10 @@ export const STATUS_LOOK = {
   fear: 'confused', confused: 'confused', root: 'root', silence: 'silence', weaken: 'curse', curse: 'curse', gnawed: 'curse', strip: 'sunder',
   sunder: 'sunder', regen: 'regen', rally: 'rally', might: 'rally', haste: 'haste', marked: 'marked', mark: 'marked', barrier: 'barrier',
   shield: 'barrier', ward: 'barrier', block: 'block', deflect: 'deflect', enchant: 'enchant', blind: 'blind', disarm: 'disarm', dazed: 'dazed',
+  // play-test 2 (Q8): the rest of the status ids Farhold's skills apply, so none falls back to a plain mote
+  web: 'root', stagger: 'dazed', frostbite: 'freeze', lagging: 'slow', rune: 'enchant', wither: 'curse', vulnerable: 'sunder', stasis: 'freeze',
+  brand: 'marked', killer: 'marked', ignite: 'burn', scorch: 'burn', burning: 'burn', poisoned: 'poison', bleeding: 'bleed', frozen: 'freeze', stunned: 'stun',
+  snare: 'root', rooted: 'root', taunt: 'marked', taunted: 'marked', hex: 'curse', doom: 'curse', exposed: 'sunder', shocked: 'dazed',
 };
 export const statusLook = s => STATUS_LOOK[String(s || '').toLowerCase()] || null;
 

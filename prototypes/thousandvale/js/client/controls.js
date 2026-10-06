@@ -6,12 +6,13 @@
 //         Mouse wheel        zoom                         Q / E          turn the camera
 // Mouse:  left click         select (an enemy: select; the ground: walk there)
 //         right click        on an enemy: attack it (walks into range first) — on the ground: walk there
+//                            on anyone else (or Shift + right-click on an enemy): their menu (play-test 2 Q2)
 //         drag (either)      orbit the camera; right-drag also turns you to face where the camera looks
 //
 // Pure-ish: no three.js import; it is handed a camera and a heightAt. The step function `intent()` is
 // what the game loop samples once per sim step to build an input message.
 
-export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCycleTarget, onClearTarget, onChat, onPickGround, getTarget, onRise, onSkill }) {
+export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCycleTarget, onClearTarget, onChat, onPickGround, getTarget, onRise, onSkill, onContext }) {
   const keys = new Set();
   const cam = { yaw: Math.PI, pitch: 0.38, dist: 9, distWant: 9, focus: { x: 0, y: 0, z: 0 }, ready: false };
   let blocker = null;
@@ -59,7 +60,9 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     const ndc = { x: ((e.clientX - r.left) / r.width) * 2 - 1, y: -((e.clientY - r.top) / r.height) * 2 + 1 };
     const hit = onSelect?.(ndc, d.button);   // returns { id, hostile } or null
     if (hit) {
-      if (d.button === 2 && hit.hostile) { chase = hit.id; moveGoal = null; onAttack?.(hit.id); }
+      // play-test 2 Q2: right-click a friend / town folk / corpse = the menu; an enemy is still attacked (Shift = menu)
+      if (d.button === 2 && hit.hostile && !e.shiftKey) { chase = hit.id; moveGoal = null; onAttack?.(hit.id); }
+      else if (d.button === 2) onContext?.(hit.id, e.clientX, e.clientY);
       return;
     }
     const g = onPickGround?.(ndc);

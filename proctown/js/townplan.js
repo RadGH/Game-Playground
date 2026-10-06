@@ -556,6 +556,8 @@ function planOnce({
   links = [],
   /** R27 — `(radius) => links`, asked at the radius this attempt really builds to. Wins over `links`. */
   linksAt = null,
+  /** OPT-IN (Thousandvale, 2026-10-05) — an explicit office list instead of WANT_ORDER. See `assignTrades`. */
+  trades = null,
 } = {}) {
   const base = CULTURES[culture] || CULTURES.human;
   const cfg = { ...base, ...(squeeze || {}), followGround: followGround ?? 0.35 };
@@ -703,10 +705,13 @@ function planOnce({
    * plots in want-order, so whatever a small town does without is whatever is at the bottom of that
    * list — which is the same rule as before, applied to a number that makes sense.
    */
-  const wants = WANT_ORDER.filter(k => size >= (WANT_FROM[k] ?? 0));
-  const byArea = [...out.plots].sort((a, b) => (b.w * b.d) - (a.w * a.d));
-  const roomForTrades = Math.max(1, Math.floor(out.plots.length / 3));
-  wants.slice(0, roomForTrades).forEach((want, i) => { if (byArea[i]) byArea[i].want = want; });
+  if (trades) assignTrades(out, trades, size);
+  else {
+    const wants = WANT_ORDER.filter(k => size >= (WANT_FROM[k] ?? 0));
+    const byArea = [...out.plots].sort((a, b) => (b.w * b.d) - (a.w * a.d));
+    const roomForTrades = Math.max(1, Math.floor(out.plots.length / 3));
+    wants.slice(0, roomForTrades).forEach((want, i) => { if (byArea[i]) byArea[i].want = want; });
+  }
   for (const p of out.plots) if (!p.want) p.want = p.district === 'residential' ? 'house' : 'hut';
 
   out.blocked = out.blocked || 0;
@@ -855,6 +860,51 @@ function buildWall(radius, streets, rng, kind = 'stone', ring = radius) {
  * join rather than to the nearest CORNER, which is what makes a T-junction look like a T rather
  * than like two roads that nearly meet.
  */
+/**
+ * OPT-IN OFFICES — `planTown({ trades: { list, share, pick, minArea } })`.
+ *
+ * Thousandvale (an MMO on this planner) hands every townsperson who sells or serves something their
+ * own building — the smith at a forge, the barber at a barber's, the broker at a counting house —
+ * because a town where five NPCs share one door reads as broken. WANT_ORDER cannot express that: it
+ * is one fixed list for every game. So a caller may pass its own:
+ *
+ *   list    [ 'hall', { want: 'forge', from: 2, minArea: 40 }, … ]  in priority order; `from` = smallest
+ *           settlement size that wants it (default 0). Each entry gets ONE plot, and never a plot another
+ *           entry already took. Whatever does not fit falls off the END of the list.
+ *   share   the most of the town's plots offices may take (default 1/3, the old rule)
+ *   pick    'area'   (default) biggest plots first, the old rule
+ *           'square' offices front the middle of town: the plot nearest the square that is at least
+ *                    `minArea` m² (else the biggest left), so a player finds the shops round the square
+ *   minArea default floor in m² for 'square' (per-entry minArea wins), default 24
+ *
+ * Without `trades` nothing here runs and every existing town is byte-identical (tests/townplan.test.js).
+ * Each assigned plot also gets `office: true` so a caller can tell an office from a house that happens
+ * to share a want name.
+ */
+export function assignTrades(out, trades, size) {
+  const list = (trades.list || []).map(e => (typeof e === 'string' ? { want: e } : e))
+    .filter(e => e && e.want && size >= (e.from ?? 0));
+  const room = Math.max(1, Math.floor(out.plots.length * (trades.share ?? 1 / 3)));
+  const floor = trades.minArea ?? 24;
+  const sq = out.square || { cx: 0, cz: 0 };
+  const free = new Set(out.plots);
+  const area = p => p.w * p.d;
+  for (const e of list.slice(0, room)) {
+    if (!free.size) break;
+    let best = null, bestS = Infinity;
+    for (const p of free) {
+      let s;
+      if (trades.pick === 'square') {
+        const big = area(p) >= (e.minArea ?? floor);
+        s = Math.hypot(p.cx - sq.cx, p.cz - sq.cz) - 0.6 * Math.sqrt(area(p)) + (big ? 0 : 1e4 - area(p));
+      } else s = -area(p);
+      if (s < bestS) { bestS = s; best = p; }
+    }
+    best.want = e.want; best.office = true; free.delete(best);
+  }
+  return out;
+}
+
 export function nearestOnStreets(streets, px, pz, { skip = null } = {}) {
   let best = null;
   for (const st of streets) {

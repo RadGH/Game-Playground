@@ -20,6 +20,7 @@ import { createTerrainView } from './terrain-view.js';
 import { createScatterView } from './scatter-view.js';
 import { createTownView } from './town-view.js';
 import { createSiteView } from './site-view.js';
+import { createSetPieceView } from './setpiece-view.js';
 import { perf, nextFrame } from './perf.js';
 
 /** Bounds for a zone key when the server sent none: `zXX_YY` in world metres, anything else zone-local. */
@@ -100,12 +101,14 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
       };
       try {
         await nextFrame();
-        if (extras.placements.length) { end = perf.begin('zone:town'); const town = createTownView(T, extras.placements, { quality }); end(); if (loaded.get(q.key) !== L) { town.dispose?.(); return L; } if (!(await show(town))) return L; L.views.push(town); L.town = town; await nextFrame(); }
+        if (extras.placements.length) { end = perf.begin('zone:town'); const town = createTownView(T, extras.placements, { quality }); end(); if (loaded.get(q.key) !== L) { town.dispose?.(); return L; } if (!(await show(town))) return L; L.views.push(town); L.town = town; for (const o of offices.values()) town.claimOffice(o); await nextFrame(); }
         if (extras.scatter) { end = perf.begin('zone:scatter'); const sc = await createScatterView(T, extras.scatter, { quality, avoid: L.town ? L.town.clearings : [] }); end(); if (loaded.get(q.key) !== L) { sc.dispose?.(); return L; } sc.refresh?.(lastPos); if (!(await show(sc))) return L; L.views.push(sc); L.scatter = sc; await nextFrame(); }
         else if (opts.fallbackDecor) { const d = await opts.fallbackDecor(T, L); if (d && loaded.get(q.key) === L) { scene.add(d.group); L.views.push(d); } }
         const vigOk = !extras.vignetteHash || !base.reader || extras.vignetteHash === base.reader.meta.inputHash;   // made for another bake: the server skips them too
         if (vigOk && extras.vignetteFile) { end = perf.begin('zone:sites'); const sv = await createSiteView(T, extras.vignetteFile, { quality }); end(); if (sv && loaded.get(q.key) === L) { if (!(await show(sv))) return L; L.views.push(sv); L.sites = sv; } else sv?.dispose?.(); }
-        if (solids && loaded.get(q.key) === L) solids.add(q.key, [...(L.town?.solids || []), ...(L.sites?.solids || []), ...(L.scatter?.solids || [])]);
+        // Q18: bespoke areas — B's ground (graveyards, fields, hedges, set buildings) + E's set-piece dressing
+        if (extras.placements.length || (vigOk && extras.vignetteFile)) { end = perf.begin('zone:setpieces'); const sp = await createSetPieceView(T, { placements: extras.placements, vignetteFile: vigOk ? extras.vignetteFile : null }, { quality }); end(); if (sp && loaded.get(q.key) === L) { if (!(await show(sp))) return L; L.views.push(sp); L.setpieces = sp; } else sp?.dispose?.(); }
+        if (solids && loaded.get(q.key) === L) solids.add(q.key, [...(L.town?.solids || []), ...(L.sites?.solids || []), ...(L.scatter?.solids || []), ...(L.setpieces?.solids || [])]);
       } catch (e) { console.warn('[world] zone extras failed', q.key, e); }
       L.ready = true;
       onZoneReady?.(L);
@@ -127,6 +130,7 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
   }
 
   let decideAt = 0, t = 0;
+  const offices = new Map();        // Q10: server-claimed offices (plot key -> info.office)
   function update(dt, pos) {
     t += dt;
     if (pos) lastPos = pos;
@@ -158,6 +162,17 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
     ready: (x, z) => !!at(x, z),
     zoneAt: (x, z) => at(x, z),
     setVisible(v) { for (const L of loaded.values()) for (const view of L.views) view.group.visible = v; },
+    /**
+     * Q10: a service NPC's office (`info.office`) — dress the house it took over (a town plan with no plot of that
+     * trade). Remembered, so a zone that loads later dresses it too.
+     */
+    claimOffice(o) {
+      if (!o) return;
+      const k = o.plot != null ? 'p:' + o.plot : `${Math.round(o.x)},${Math.round(o.z)}`;
+      if (offices.get(k)?.kind === o.kind) return;
+      offices.set(k, o);
+      for (const L of loaded.values()) if (L.town?.claimOffice(o)) break;
+    },
     /** Towns drawn right now (for lamps at night, and the map). */
     towns() { const out = []; for (const L of loaded.values()) if (L.town) out.push(...L.town.towns); return out; },
     stats() { let tris = 0; const keys = [...loaded.keys()]; return { zones: keys, loading: [...loading.keys()], trees: [...loaded.values()].reduce((a, L) => a + (L.scatter?.stats.trees || 0), 0), buildings: [...loaded.values()].reduce((a, L) => a + (L.town?.stats.buildings || 0), 0), tris }; },

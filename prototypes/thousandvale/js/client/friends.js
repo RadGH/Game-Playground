@@ -30,7 +30,7 @@ export function createFriends({ net: getNet, hud, chat, social }) {
     panel.setTitle('Friends', list.length ? `${online} of ${list.length} online` : '');
     const input = h('input', { maxLength: 16, placeholder: 'Name', 'aria-label': 'Friend name', onkeydown: e => { if (e.key === 'Enter') { add(input.value); input.value = ''; } } });
     const rows = sortFriends(list).map(f => h('li.fr-row' + (f.online ? '.online' : ''), {},
-      h('i.dot', { title: f.online ? 'Online' : 'Offline' }),
+      portrait(f),
       h('div.fr-main', {},
         h('a.chat-name', { href: '#', onclick: e => { e.preventDefault(); chat.nameMenu(f.name, e.clientX, e.clientY, { char: f.char }); } }, f.name),
         h('small', {}, [f.level ? `Level ${f.level}` : '', className(f.cls)].filter(Boolean).join(' '), f.online ? h('em', {}, ' · ' + (zoneName(f.zone) || 'In the Vale')) : h('em', {}, ' · Offline'))),
@@ -61,5 +61,11 @@ export function createFriends({ net: getNet, hud, chat, social }) {
     });
   }
 
-  return { wire, panel, add, remove, isFriend, draw, get list() { return list; } };
+  /** Play-test 2 Q13: a portrait (ui/portraits.js) with the online dot on its corner; the dot alone until it is ready. */
+  function portrait(f) {
+    const pic = api.portraitFor?.(f);
+    return pic ? h('span.fr-pic', { title: f.online ? 'Online' : 'Offline' }, h('img', { src: pic, alt: '' }), h('i.dot')) : h('i.dot', { title: f.online ? 'Online' : 'Offline' });
+  }
+  const api = { wire, panel, add, remove, isFriend, draw, portraitFor: null, get list() { return list; } };
+  return api;
 }

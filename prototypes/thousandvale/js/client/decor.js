@@ -229,7 +229,7 @@ export async function createDecor(hf, { placements = [], paths = [], seed = 7, a
 
 const PROP_CACHE = new Map();
 let FLAME = null;
-function makeFlameTexture() {
+export function makeFlameTexture() {
   if (FLAME) return FLAME;
   const c = document.createElement('canvas'); c.width = 64; c.height = 128; const g = c.getContext('2d');
   const grd = g.createRadialGradient(32, 92, 2, 32, 80, 50);

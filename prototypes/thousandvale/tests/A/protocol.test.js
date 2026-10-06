@@ -12,6 +12,10 @@ const GOOD = {
   guild: { op: 'motd', text: 'Raid at eight' }, callboard: { op: 'join', dungeon: 'torbor_downs:2', role: 'tank' }, report: { name: 'Bren', why: 'spam', text: 'selling gold' },
   mail: { op: 'send', to: 'Bren', subject: 'Hi', body: 'For you', items: ['p0-ab12cd34-1f'], gold: 5 },
   talent: { op: 'pick', skill: 'firebolt', tier: 1, node: 'fan' }, perk: { op: 'take', id: 'early_bond' }, map: { op: 'get' },
+  // play-test 2
+  loot: { op: 'take', id: 12, uid: 'p0-ab-1' }, shop: { op: 'buy', npc: 7, id: 's3' }, mount: { op: 'summon', id: 'pony' },
+  barber: { npc: 9, look: { race: 'elf', seed: 3 } }, pref: { k: 'showHelm', v: false }, follow: { id: 4 }, inspect: { id: 4 },
+  settings: { op: 'set', data: { tradeFriendsOnly: true } }, look: { char: 2, look: { race: 'dwarf', seed: 9 } },
 };
 
 test('every client message type has a valid example and the example passes', () => {

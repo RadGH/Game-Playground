@@ -229,3 +229,62 @@ export function forestBounds(F) {
   if (!Number.isFinite(minX)) return { minX: -1, minY: -1, maxX: 1, maxY: 1 };
   return { minX, minY, maxX, maxY };
 }
+
+// ---- play-test 2 Q26: each arm's coloured area is drawn from WHERE ITS NODES ARE, not from a fixed wedge ----------
+/**
+ * The sector each arm's nodes actually occupy: { key, mid, a0, a1, r0, r1 } in radians / forest units, padded so a node's
+ * whole circle sits inside. A branch that grows sideways (The Long Odds' Collector and Fortune's Tithe) widens its own
+ * arm's area instead of falling outside it. The hub (no arm) is skipped.
+ */
+export function armSectors(F, { pad = 0.9 } = {}) {
+  const by = new Map();
+  for (const n of F.nodes) { if (!n.arm) continue; (by.get(n.arm) || by.set(n.arm, []).get(n.arm)).push(n); }
+  const out = [];
+  for (const [key, nodes] of by) {
+    let sx = 0, sy = 0;
+    for (const n of nodes) { const r = Math.hypot(n.x, n.y) || 1; sx += n.x / r; sy += n.y / r; }
+    const armDef = (F.arms || []).find(a => a.key === key);
+    const mid = armDef && Number.isFinite(armDef.angle) ? armDef.angle : Math.atan2(sy, sx);
+    let lo = Infinity, hi = -Infinity, r0 = Infinity, r1 = 0;
+    for (const n of nodes) {
+      const r = Math.hypot(n.x, n.y);
+      const d = Math.atan2(Math.sin(Math.atan2(n.y, n.x) - mid), Math.cos(Math.atan2(n.y, n.x) - mid));
+      // with C's slice known, the angle is checked on node CENTRES (a circle pad near the hub would swallow the neighbours)
+      const w = armDef && Number.isFinite(armDef.half) ? 0.02 : r > pad ? Math.asin(Math.min(1, pad / r)) : Math.PI;
+      lo = Math.min(lo, d - w); hi = Math.max(hi, d + w);
+      r0 = Math.min(r0, r - pad); r1 = Math.max(r1, r + pad);
+    }
+    // C's own slice (arm.angle ± arm.half, play-test 2) is the base; it only grows where a node would poke out of it
+    const arm = (F.arms || []).find(a => a.key === key);
+    if (arm && Number.isFinite(arm.angle)) {
+      const half = Number.isFinite(arm.half) ? arm.half : Math.PI / 8;
+      const off = Math.atan2(Math.sin(arm.angle - mid), Math.cos(arm.angle - mid));
+      lo = Math.min(lo, off - half); hi = Math.max(hi, off + half); r0 = 0;
+    }
+    out.push({ key, mid, a0: mid + Math.max(-Math.PI, lo), a1: mid + Math.min(Math.PI, hi), r0: Math.max(0, r0), r1 });
+  }
+  return out;
+}
+/** Is the point (x, y) inside a sector from armSectors? */
+export function inSector(s, x, y) {
+  const r = Math.hypot(x, y);
+  if (r < s.r0 - 1e-9 || r > s.r1 + 1e-9) return false;
+  const span = s.a1 - s.a0;
+  if (span >= Math.PI * 2 - 1e-9) return true;
+  const d = ((Math.atan2(y, x) - s.a0) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+  return d <= span + 1e-9;
+}
+
+// ---- play-test 2 Q23: search the forest -------------------------------------------------------------------------
+/** Node ids whose name / kind / arm / text holds every word typed (case-insensitive). textOf(node) adds the card text. */
+export function searchForest(F, query, textOf = null) {
+  const words = String(query || '').toLowerCase().split(/\s+/).filter(Boolean);
+  if (!words.length) return [];
+  const armName = new Map((F.arms || []).map(a => [a.key, a.name || a.key]));
+  const hits = [];
+  for (const n of F.nodes) {
+    const hay = `${n.name || ''} ${n.id} ${n.kind || ''} ${armName.get(n.arm) || ''} ${textOf ? textOf(n) || '' : ''}`.toLowerCase();
+    if (words.every(w => hay.includes(w))) hits.push(n.id);
+  }
+  return hits;
+}

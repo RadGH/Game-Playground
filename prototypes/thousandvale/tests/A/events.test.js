@@ -114,7 +114,10 @@ test('realm town attack: raiders come into the hub town\'s own room; free travel
   assert.ok(raiders().length >= 4, 'raiders in the town room: ' + raiders().length);
   // someone out in the wilds takes the free travel: it lands them in the town room, in the fight
   const me = () => P.online.get(a.joined.you.char);
-  P.transfer(me(), P.copies[0], { x: L.towns[0].x + 600, z: L.towns[0].z }, 'test');
+  // a quiet spot ~600 m out (no camp within 150 m: a fight cancels the travel, and E's camps move with every placement run)
+  let spot = { x: L.towns[0].x + 600, z: L.towns[0].z };
+  for (let k = 0; k < 64; k++) { const a2 = k / 64 * Math.PI * 2, p = { x: L.towns[0].x + Math.cos(a2) * 600, z: L.towns[0].z + Math.sin(a2) * 600 }; if ((!L.terrain.walkable || L.terrain.walkable(p.x, p.z)) && !L.camps.some(c => Math.hypot(c.x - p.x, c.z - p.z) < 150) && !L.towns.some(t => Math.hypot(t.x - p.x, t.z - p.z) < t.r + 20)) { spot = p; break; } }
+  P.transfer(me(), P.copies[0], spot, 'test');
   await run(clock, 300);
   const tr = []; a.on('travelR', m => tr.push(m));
   a.travel('event');

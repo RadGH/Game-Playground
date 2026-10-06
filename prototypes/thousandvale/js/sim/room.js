@@ -69,7 +69,9 @@ export function createRoom(opts) {
     event(ev) {
       if (ev.type === 'loot' && ev.items && hooks.loot) { hooks.loot(ev, room); return; }
       if (hooks.observe) { if (ev.x === undefined) fillXZ(ev); hooks.observe(ev, room); }
-      if (ev.type === 'fx' && (ev.kind === 'form' || ev.kind === 'build') && ev.id) barDirty.add(ev.id);   // a form/stance/talent/perk changed slots   // a form/stance changed slots: resend you.bar after the tick
+      if (ev.type === 'fx' && (ev.kind === 'form' || ev.kind === 'build') && ev.id) barDirty.add(ev.id);
+      if (ev.type === 'fx' && ev.kind === 'status' && ev.id) stDirty.add(ev.id);          // Q8: info.st follows the rules
+      else if (ev.type === 'die' && ev.d) { stDirty.add(ev.d); stClear.add(ev.d); }   // a form/stance/talent/perk changed slots   // a form/stance changed slots: resend you.bar after the tick
       room.emit(ev);
     },
     /** Emit without interception (the world's own loot events). */
@@ -107,9 +109,16 @@ export function createRoom(opts) {
     kind,
     log: (...a) => hooks.log && hooks.log('[rules ' + id + ']', ...a),
   };
+  // stream C's one-drop-per-corpse-per-party hook (js/rules/cast.js onKill): only when the province takes party loot
+  if (hooks.partyLoot) host.partyLoot = (members, items, corpse, partyId) => hooks.partyLoot(members, items, corpse, partyId, room);
   room.host = host;
 
   const barDirty = new Set();       // player entity ids whose skill bar must be resent (level-up, form, talent)
+  // STATUSES OTHERS SEE (play-test 2, Q8: "revived still on fire; other people don't see the fire"). `info.st` = the status
+  // ids an entity carries, so a late arrival draws the aura too. Rechecked when the rules announce a status (fx status),
+  // on a death and a revive (both clear it, with an `fx status on:false` per status so a client drawing from events
+  // drops the aura), and once a second for anything still showing one (a status that ran out without a word).
+  const stDirty = new Set(), stClear = new Set();
   const rules = createRules(host, { seed, roomId: id });
   room.rules = rules;
   function safe(fnName, ...args) {
@@ -184,6 +193,29 @@ export function createRoom(opts) {
     barDirty.clear();
   }
   room.removePlayer = function (e) { room.remove(e); };
+  /** The status ids the rules hold on `e` (C's `rules.statusesOf(e)` when it has one, else its unit's `statuses` keys). */
+  function statusesOf(e) {
+    if (e.dead) return [];
+    if (rules.statusesOf) { const l = safe('statusesOf', e); return Array.isArray(l) ? l.map(String) : []; }
+    const s = e.r && e.r.unit && e.r.unit.statuses;
+    return s && typeof s === 'object' ? Object.keys(s) : [];
+  }
+  /** Bring `e.st` in step; `announce` = also emit `fx status on:false` for each status that went (a death, a revive, a sweep). */
+  function syncStatuses(e, announce) {
+    const now = statusesOf(e).sort();
+    const old = e.st || [];
+    if (now.length === old.length && now.every((x, i) => x === old[i])) return;
+    if (announce) for (const s of old) if (!now.includes(s)) room.emit({ type: 'fx', id: e.id, kind: 'status', status: s, on: false });
+    e.st = now.length ? now : null;
+    e.infoVer++;
+  }
+  function flushStatuses(sweep) {
+    for (const id of stDirty) { const e = entities.get(id); if (e) syncStatuses(e, stClear.has(id)); }
+    stDirty.clear(); stClear.clear();
+    if (sweep) for (const e of entities.values()) if (e.st) syncStatuses(e, true);
+  }
+  /** A revive / respawn outside the rules' own events (the province's town respawn): clear what others draw. */
+  room.statusChanged = function (e, clear = true) { if (!e) return; stDirty.add(e.id); if (clear) stClear.add(e.id); };
 
   room.input = function (e, msg) {
     const c = clients.get(e.id);
@@ -212,6 +244,7 @@ export function createRoom(opts) {
     e.revive(1);                    // alive first: a dead body never moves (Entity.moveTo, P8)
     e.moveTo(spawnPoint.x, spawnPoint.z);
     safe('respawn', e);
+    room.statusChanged(e);
     const c = clients.get(e.id); if (c) c.selfDirty = true;
     return true;
   };
@@ -219,6 +252,8 @@ export function createRoom(opts) {
     const ch = e.char;
     if (!ch) return;
     xp = Math.max(0, Math.round(xp)); gold = Math.max(0, Math.round(gold));
+    // play-test 2, Q3: a kill's gold and items wait on the corpse until looted (js/sim/corpses.js); the experience is now
+    if (reason === 'kill' && from && from.kind === 'monster' && hooks.holdKill && (gold || (items && items.length)) && hooks.holdKill(e, from, { gold, items: items || [] }, room)) { gold = 0; items = null; }
     ch.xp = (ch.xp || 0) + xp; ch.gold = (ch.gold || 0) + gold;
     const c = clients.get(e.id);
     if (xp) room.event({ type: 'xp', to: e.id, n: xp, total: ch.xp });
@@ -300,10 +335,16 @@ export function createRoom(opts) {
     safe('step', tickMs);
     // 3. despawns + camps
     if (despawns.length) {
-      for (let i = despawns.length - 1; i >= 0; i--) if (despawns[i].at <= now) { room.remove(despawns[i].e); despawns.splice(i, 1); }
+      for (let i = despawns.length - 1; i >= 0; i--) if (despawns[i].at <= now) {
+        // a body with loot still on it stays until it is looted or its time is up (Q3, hooks.keepBody)
+        const keep = hooks.keepBody && !despawns[i].e.removed ? hooks.keepBody(despawns[i].e, room) : 0;
+        if (keep > 0) { despawns[i].at = now + keep; continue; }
+        room.remove(despawns[i].e); despawns.splice(i, 1);
+      }
     }
     if (tick % 10 === 1) fillCamps(now);
     if (barDirty.size) flushBars();
+    if (stDirty.size || tick % 20 === 3) flushStatuses(tick % 20 === 3);
     // 4. snapshots + events
     send();
     events = [];
@@ -335,7 +376,7 @@ export function createRoom(opts) {
       const dt = Math.min(m.dt, 100, c.budget);
       if (dt <= 0) continue;
       c.budget -= dt;
-      const st = { x: e.x, y: e.y, z: e.z, vy: e.vy, airborne: e.airborne };
+      const st = { x: e.x, y: e.y, z: e.z, vy: e.vy, airborne: e.airborne, speedMul: e.speedMul || 1 };
       stepMove(st, m, dt, terrain);
       commitMove(e, st);
       e.face(m.yaw);
@@ -364,6 +405,7 @@ export function createRoom(opts) {
     e.setState(STATE.swimming, on);
     if (on) e.loop('swim');
     safe('onSwim', e, on);
+    if (hooks.onSwim) hooks.onSwim(e, on, room);          // the province: a rider gets off (Q16)
   }
 
   // ---- snapshots (docs/protocol.md §4) ----
@@ -502,7 +544,7 @@ export function createRoom(opts) {
     room.spawn({ kind: npc ? 'npc' : 'object', type: o.type, name: o.name || o.type, x: o.x, z: o.z, yaw: o.yaw || 0, team: npc ? 1 : 0, state: npc ? STATE.friendly : 0,
       data: { portal: o.portal || null, chest: o.chest || null, gate: o.gate || null, lever: o.lever || null, rules: !!o.rules, key: o.key || null, r: o.r || null, state: o.state || null, room: o.room ?? null,
         note: o.note || null, use: o.use || null, npc: o.npc || null, hidden: !!o.hidden, hint: o.hint || null, lore: o.lore || null, waystone: o.waystone || null, schedule: o.schedule || null,
-        treasure: o.treasure || null, site: o.site || null, shimmer: o.shimmer || null } });
+        treasure: o.treasure || null, site: o.site || null, shimmer: o.shimmer || null, office: o.office || null } });
   }
   /** Change an object's state (lit, used, broken, open…): late joiners see it in `info`, everyone near gets `obj`. */
   room.objState = function (o, state, extra = {}) {

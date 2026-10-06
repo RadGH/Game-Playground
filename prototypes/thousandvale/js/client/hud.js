@@ -80,7 +80,10 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
       const f = Math.max(0, Math.min(1, a.hp / (a.hpMax || 1)));
       el.tHp.style.width = (f * 100) + '%';
       el.tHpText.textContent = a.hp <= 0 ? 'Dead' : `${fmt(a.hp)} / ${fmt(a.hpMax)}`;
-      el.tSub.textContent = a.kind === 'monster' ? (a.hp <= 0 ? 'Slain' : (a.family ? a.family[0].toUpperCase() + a.family.slice(1) : 'Beast')) : 'Adventurer';
+      // play-test 2 Q25: a player shows their calling ("Ranger"), town folk their trade — never a blanket "Adventurer"
+      const nice = t => String(t || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      el.tSub.textContent = a.kind === 'monster' ? (a.hp <= 0 ? 'Slain' : (a.family ? a.family[0].toUpperCase() + a.family.slice(1) : 'Beast'))
+        : a.kind === 'player' ? (a.clsName || nice(a.look?.cls) || 'Adventurer') : a.pet ? 'Companion' : a.role ? nice(a.role) : 'Townsfolk';
       if (lag.targetId !== a.id) { lag.target = f; lag.targetId = a.id; }
       lag.targetTarget = f;
     },

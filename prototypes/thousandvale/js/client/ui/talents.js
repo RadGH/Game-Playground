@@ -14,6 +14,7 @@
 
 import { createPanel, h } from '../ui-panel.js';
 import { loadSkillData } from '../skillbar.js';
+import { searchForest } from './talent-model.js';
 import { makeSource, skillLadder, nextUnlockText, treeState, pickCheck, talentPicksWaiting, forestState, perkCheck, refundCheck, perkTotals, talentsFromServer, perksFromServer, forestFromJson } from './talent-model.js';
 import { createPerkGraph } from './perk-forest.js';
 import { esc } from './tips.js';
@@ -156,6 +157,23 @@ export function createTalentsUi({ net: getNet, hud, me }) {
     perkBody.side = h('div.pf-foot');
     perks.fill(perkBody.top = h('div.pf-top'), perkBody.bar, perkBody.graphHost, perkBody.side);
     graph = createPerkGraph(perkBody.graphHost, { describe: perkTipHtml, onTake: takePerk, onRefund: refundPerk });
+    // play-test 2 Q23: a search box over the forest — rings and zooms to every node whose name or card holds the words
+    const count = h('em', { 'aria-live': 'polite' });
+    const input = h('input', { type: 'search', placeholder: 'Search the forest…', 'aria-label': 'Search the perk forest', dataset: { k: 'pfsearch' },
+      oninput: () => runSearch(input.value, count, false), onkeydown: e => { e.stopPropagation(); if (e.key === 'Enter') runSearch(input.value, count, true); if (e.key === 'Escape') { input.value = ''; runSearch('', count, false); input.blur(); } } });
+    perkBody.search = h('div.pf-search.pf-overlay', {}, input, count);
+    perkBody.graphHost.appendChild(perkBody.search);
+  }
+  function runSearch(q, count, zoom) {
+    if (!graph || !S.src) return [];
+    const strip = t => String(t || '').replace(/<[^>]+>/g, ' ');
+    const ids = searchForest(S.src.forest, q, n => strip(perkTipHtml(n.id)));
+    const n = graph.setSearch(ids);
+    count.textContent = q.trim() ? (n ? `${n} found` : 'none') : '';
+    if (n && (zoom || n <= 24)) graph.fitIds(ids);
+    else if (!q.trim()) graph.fit();
+    perkBody.lastSearch = ids;
+    return ids;
   }
   function drawPerks() {
     if (!perks.isOpen) return;

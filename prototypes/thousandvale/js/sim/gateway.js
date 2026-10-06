@@ -29,6 +29,7 @@ import { createFriends } from './friends.js';
 import { createGuilds } from './guilds.js';
 import { createCallboard } from './callboard.js';
 import { sha256Hex } from './sha256.js';
+import { cleanLook } from './looks.js';
 
 const TICKET_MS = 30000;
 
@@ -39,7 +40,7 @@ export function createGateway(opts) {
     unlimitedIps = ['127.0.0.1', '::1', '::ffff:127.0.0.1', 'worker'], filterText = t => t,
     starterProvince = null, events = null, clockDayMs = 2 * 3600000, directorOpts = {},
     hasher = null, chatFilter = null, ipSalt = 'thousandvale', chatOpts = {}, guildOpts = {}, callboardOpts = {},
-    mailSweepMs = 60000, chargeTimeoutMs = 5000,
+    mailSweepMs = 60000, chargeTimeoutMs = 5000, classNames = null,
   } = opts;
   const nameOk = n => !chatFilter || chatFilter.name(n);
   const classSet = classes ? new Set(classes) : null;
@@ -92,6 +93,7 @@ export function createGateway(opts) {
         if (!was || was.online !== m.online || was.level !== m.level) { partyChanged([parties.of(m.char)]); guilds.changed(m.char); }
         if (!was || was.online !== m.online || was.level !== m.level || was.zone !== m.zone) friends.changed(m.char);
         if (was && was.online && !m.online) callboard.drop(m.char);
+        if ((!was || was.proc !== p.id) && social.has(m.char)) p.bus.send({ k: 'social', char: m.char, ...social.get(m.char) });
         return;
       }
       case 'gone': {
@@ -184,20 +186,26 @@ export function createGateway(opts) {
         }, err => { log('auth failed', err); s.state = 'anon'; s.err('auth'); });
       case 'chars':
         if (s.state !== 'authed') return bad(s, 'order');
-        return store.listChars(s.account).then(chars => s.sendJSON({ t: 'charList', chars }));
+        // play-test 2, Q25: the class's NAME ("Ranger", not "Adventurer"); the account settings (Q15) ride along
+        return store.listChars(s.account).then(chars => {
+          s.sendJSON({ t: 'charList', chars: chars.map(c => ({ ...c, clsName: clsName(c.cls) })) });
+          return settingsOf(s.account).then(data => s.sendJSON({ t: 'settings', data }));
+        });
       case 'create': {
         if (s.state !== 'authed') return bad(s, 'order');
         const name = cleanName(m.name);
         if (!name || !nameOk(name)) return s.err('name');
         if (classSet ? !classSet.has(m.cls) : !/^[a-z][a-z0-9_]{1,31}$/.test(m.cls)) return s.err('cls');
         let look = null;
-        if (m.look) { const j = JSON.stringify(m.look); if (j.length > 4096) return s.err('state', 'Look too big.'); look = JSON.parse(j); }
+        if (m.look) { const c = cleanLook(m.look); if (!c.ok) return s.err('state', c.msg); look = c.look; }
         return store.createChar(s.account, { name, cls: m.cls, look }).then(r => {
           if (r.err) return s.err(r.err);
           s.sendJSON({ t: 'created', char: r.char });
         });
       }
       case 'play': return play(s, m);
+      case 'settings': return settingsOp(s, m);
+      case 'look': return lookOp(s, m);
       case 'party': return onParty(s, m);
       case 'chat': { if (!CHAT_CHANNELS.includes(m.ch)) return bad(s, 'channel'); return chat.chat(s, m); }
       case 'ignore': return onIgnore(s, m);
@@ -243,16 +251,71 @@ export function createGateway(opts) {
       s.sendJSON({ t: 'ticket', path: '/p/' + proc, ticket, room: 'zone' });
       if (p) s.sendJSON({ t: 'partyState', party: partyView(p) });
       friends.load(c.id); guilds.load(c.id);
+      settingsOf(s.account).then(d => pushSocial(c.id, { tradeFriendsOnly: !!d.tradeFriendsOnly }));
       if (store.mailUnread) store.mailUnread(c.id).then(n => { if (n && gwByChar.get(c.id) === s) s.sendJSON({ t: 'mailNew', unread: n }); }, () => {});
     });
   }
 
+  // ---- play-test 2: class names (Q25), account settings (Q15), a title-screen look (Q21) ----
+  function clsName(id) {
+    if (classNames && classNames[id]) return classNames[id];
+    return String(id || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+  /** Account settings, stored per account (world_state `settings:<account>`, both stores have it). */
+  const SETTING_KEYS = { tradeFriendsOnly: 'bool' };
+  const SETTING_DEFAULTS = { tradeFriendsOnly: false };
+  const settingsCache = new Map();
+  function settingsOf(account) {
+    if (settingsCache.has(account)) return Promise.resolve(settingsCache.get(account));
+    const get = store.getWorld ? store.getWorld('settings:' + account) : Promise.resolve(null);
+    return Promise.resolve(get).then(v => { const d = { ...SETTING_DEFAULTS, ...(v && typeof v === 'object' ? v : {}) }; settingsCache.set(account, d); return d; }, () => ({ ...SETTING_DEFAULTS }));
+  }
+  function settingsOp(s, m) {
+    if (s.state !== 'authed') return bad(s, 'order');
+    if (m.op === 'get') return settingsOf(s.account).then(data => s.sendJSON({ t: 'settings', data }));
+    if (m.op !== 'set' || !m.data) return bad(s, 'op');
+    return settingsOf(s.account).then(cur => {
+      const next = { ...cur };
+      for (const [k, v] of Object.entries(m.data)) { if (SETTING_KEYS[k] === 'bool' && typeof v === 'boolean') next[k] = v; }
+      settingsCache.set(s.account, next);
+      const save = store.setWorld ? store.setWorld('settings:' + s.account, next) : null;
+      return Promise.resolve(save).then(() => {
+        s.sendJSON({ t: 'settings', data: next });
+        for (const g of gwByChar.values()) if (g.account === s.account && g.charId != null) pushSocial(g.charId, { tradeFriendsOnly: next.tradeFriendsOnly });
+      });
+    });
+  }
+  /** What a province needs to refuse a trade request (Q15): the target's friends and its account setting. */
+  const social = new Map();       // char id -> { friends: [ids], tradeFriendsOnly }
+  function pushSocial(c, patch) {
+    const cur = { friends: [], tradeFriendsOnly: false, ...(social.get(c) || {}), ...patch };
+    social.set(c, cur);
+    const proc = procOfChar(c);
+    if (proc !== undefined) sendTo(proc, { k: 'social', char: c, ...cur });
+  }
+  function lookOp(s, m) {
+    if (s.state !== 'authed') return bad(s, 'order');
+    const reply = x => s.sendJSON({ t: 'lookR', char: m.char, ...x });
+    return store.listChars(s.account).then(chars => {
+      const c = chars.find(x => x.id === m.char);
+      if (!c) return reply({ ok: false, why: 'missing', msg: 'No such character.' });
+      if (presence.get(c.id)?.online) return reply({ ok: false, why: 'online', msg: 'That character is in the world. Change looks at a barber there.' });
+      const r = cleanLook(m.look, c.look);
+      if (!r.ok) return reply({ ok: false, why: r.why, msg: r.msg });
+      if (!store.setLook) return reply({ ok: false, why: 'state', msg: 'Not on this server.' });
+      return store.setLook(s.account, c.id, r.look).then(w => {
+        if (w.err) return reply({ ok: false, why: w.err, msg: w.err === 'lease' ? 'That character is still logged in. Try again in a few seconds.' : 'No such character.' });
+        reply({ ok: true, look: r.look });
+      });
+    }).catch(err => { log('look failed', err && err.message); reply({ ok: false, why: 'state', msg: 'That did not work.' }); });
+  }
+
   // ---- parties ----
-  const partyBrief = p => (p ? { id: p.id, leader: p.leader, members: [...p.members] } : null);
+  const partyBrief = p => (p ? { id: p.id, leader: p.leader, members: [...p.members], lootMin: p.lootMin || 'rare' } : null);
   function partyView(p) {
     return {
-      id: p.id, leader: p.leader, code: p.code,
-      members: p.members.map(c => { const pr = presence.get(c), n = names.get(c) || {}; return { char: c, name: pr ? pr.name : n.name, cls: pr ? pr.cls : n.cls, level: pr ? pr.level : n.level, online: !!(pr && pr.online) }; }),
+      id: p.id, leader: p.leader, code: p.code, lootMin: p.lootMin || 'rare', loot: p.lootMin || 'rare',
+      members: p.members.map(c => { const pr = presence.get(c), n = names.get(c) || {}; return { char: c, name: pr ? pr.name : n.name, cls: pr ? pr.cls : n.cls, level: pr ? pr.level : n.level, online: !!(pr && pr.online), look: (pr && pr.look) || null }; }),
     };
   }
   /** Tell every member's gateway session and every province process that holds a member. */
@@ -299,9 +362,10 @@ export function createGateway(opts) {
       case 'leave': r = parties.leave(me); if (r.ok) leftParty(me); break;
       case 'kick': r = parties.kick(me, m.char); if (r.ok) leftParty(m.char); break;
       case 'lead': r = parties.lead(me, m.char); break;
+      case 'loot': r = parties.loot(me, String(m.code || m.name || '')); if (!r.ok) return s.err('party', 'Only the party leader can set the loot rule (magic, rare, legendary or unique).'); break;
     }
     if (!r || !r.ok) return s.err(r ? r.why : 'party');
-    if (m.op !== 'code' && m.op !== 'invite' && m.op !== 'decline') {      // a queued party that changed shape leaves the Callboard
+    if (m.op !== 'code' && m.op !== 'invite' && m.op !== 'decline' && m.op !== 'loot') {      // a queued party that changed shape leaves the Callboard
       for (const q of r.changed || []) if (q) callboard.partyGone(q.id);
       callboard.drop(me); if (m.op === 'kick' && m.char != null) callboard.drop(m.char);
     }
@@ -384,7 +448,7 @@ export function createGateway(opts) {
 
   // ---- M3 services ----
   const accounts = createAccounts({ store, hasher, verifyHuman, wallNow, log, filter: chatFilter, sendAll, kickChar, counters, trustIps: unlimitedIps });
-  const friends = createFriends({ store, presence, gwByChar, log });
+  const friends = createFriends({ store, presence, gwByChar, log, onList: (c, ids) => pushSocial(c, { friends: ids }) });
   const guilds = createGuilds({ store, presence, gwByChar, wallNow, filter: chatFilter, charge, log, counters, opts: guildOpts });
   const chat = createChat({ store, presence, gwByChar, parties, guilds, friends, wallNow, filter: chatFilter, log, counters, mute, opts: chatOpts });
   const callboard = createCallboard({ parties, presence, gwByChar, partyChanged: list => partyChanged(list), sendTo, procOf: c => procOfChar(c), now, wallNow, log, opts: callboardOpts });

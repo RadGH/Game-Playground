@@ -16,6 +16,7 @@ import { iconFor, onIcon, specFor, iconsActive } from './ui/item-icons.js';
 import { installItemCards, rememberItems, scoreOf, nameOf, farholdReady } from './ui/item-card.js';
 import { hideTip, installGameTips } from './ui/tips.js';
 import { confirmBox } from './ui-panel.js';
+import { wearSlot } from './ui/pt2-core.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -115,7 +116,10 @@ export function createBag({ net: getNet, hud, me = null }) {
     const req = levelCheck(it, level(), S.equipment);
     if (!slotOf(it)) { hud.toast('That cannot be worn.', 'warn'); return; }
     if (!req.ok) { hud.toast(`${nameOf(it)} needs level ${req.level} — you are level ${level()}.`, 'warn'); return; }
-    getNet()?.item('equip', it.uid, slot || undefined); hideTip();
+    // Q12: a click on a second ring puts it on the EMPTY hand (never over the first); a drag onto an exact ring slot
+    // names it ('ring1' / 'ring2' on the wire — 'ring' alone means "you pick" to the server, protocol v6)
+    const wire = slot === 'ring' ? 'ring1' : slot || wearSlot(it, S.equipment) || undefined;
+    getNet()?.item('equip', it.uid, wire === 'ring' ? undefined : wire); hideTip();
   }
   function dropOnSlot(e, slot) {
     let d; try { d = JSON.parse(e.dataTransfer.getData('text/x-tv-item')); } catch { return; }

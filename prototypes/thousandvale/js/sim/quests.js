@@ -8,6 +8,11 @@
 //   book.ready(ch, giver)               -> ids this giver can take back now
 //   book.turnIn(ch, id, giver)          -> { ok, why?, reward:{ xpShare, level, gold, item } }
 //   book.view(ch)                       -> { active: [view], done: [ids] }      (the client's quest log)
+//   book.grantAuto(ch) -> [ids] given ; book.autoDone(ch) -> [ids] complete and self-finishing   (play-test 2, Q27/Q28)
+// Quest fields (play-test 2): `auto` (everyone gets it on entering the world), `cls` / `classes` (id | [ids]: that class
+// only), `requires` ([ids] all done),
+// `minLevel`, `order: 'any'` (steps in any order, a count each), `autoComplete` (pays itself when done); step
+// `visit {town}` = reach a settlement.
 //
 // `giver` = { key, npcId?, name, role?, x, z, vignette?, objectName? } — the object the player is using.
 // Character state (SAVE_FIELDS `quests`): { active: { id: { step, n, def? } }, done: { id: wall ms }, jobs: { offered:
@@ -42,6 +47,10 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
     || [...placeOf.values()].find(p => bare(p.name) === bare(name)) || sites.find(s => bare(s.name) === bare(name)) || null;
   function resolveAt(st, zoneKey) {
     if (st.at && typeof st.at === 'object' && Number.isFinite(st.at.x)) return st.at;
+    if (st.town) {                    // play-test 2 (Q27): "reach <town>" — inside its circle
+      const t = (L.towns || []).find(q => bare(q.name) === bare(st.town)) || sites.find(q => (q.kind === 'settlement' || q.type === 'settlement') && bare(q.name) === bare(st.town));
+      if (t) return { x: t.x, z: t.z, r: Math.max(12, (t.r || t.radius || 40) * 0.7), name: t.name };
+    }
     if (st.vignette && placeOf.has(st.vignette)) return placeOf.get(st.vignette);
     if (st.site) { const s = siteByName(st.site); if (s) return { x: s.x, z: s.z, r: s.r || s.radius || 40, name: s.name || s.id }; }
     void zoneKey;
@@ -128,22 +137,33 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
     const sf = def.startsFrom;
     return !!(sf && giver.vignette === sf.vignette && giver.objectName === sf.object);
   }
+  /** Play-test 2 (Q28): a class quest is only for that class (`cls`: id or [ids]); `minLevel` waits for the level. */
+  function fits(ch, def) {
+    const only = def.cls || def.classes;                 // E writes `classes: [ids]`
+    if (only && !(Array.isArray(only) ? only : [only]).includes(ch.cls)) return false;
+    if (def.minLevel && (ch.level || 1) < def.minLevel) return false;
+    if (Array.isArray(def.requires) && def.requires.length && !def.requires.every(q => stateOf(ch).done[q])) return false;   // E: every listed quest done
+    return true;
+  }
   function available(ch, def) {
     const s = stateOf(ch);
     if (s.done[def.id] || s.active[def.id]) return false;
+    if (!fits(ch, def)) return false;
     const pre = lockedBy.get(def.id);
     return !pre || [...pre].some(q => s.done[q]);
   }
   const rewardView = (def) => ({ xp: def.reward?.xp || 0, gold: Math.round((def.reward?.gold || 0) * KILL_GOLD(def.level || 1)), item: def.reward?.item?.tier || null });
   function view(ch, def, a = null) {
     // each step carries its marker (`at`: {x, z, r, name?} world metres) and E's `where` line when it has one (P17)
-    const steps = def.steps.map((st, i) => ({ text: st.text || st.kind, of: st.count || 1, n: a ? (i < a.step ? st.count || 1 : i === a.step ? a.n : 0) : 0, done: !!a && i < a.step,
+    const any = def.order === 'any';
+    const nOf = (st, i) => (!a ? 0 : any ? Math.min(st.count || 1, (a.ns && a.ns[i]) || 0) : i < a.step ? st.count || 1 : i === a.step ? a.n : 0);
+    const steps = def.steps.map((st, i) => ({ text: st.text || st.kind, of: st.count || 1, n: nOf(st, i), done: !!a && (any ? nOf(st, i) >= (st.count || 1) : i < a.step),
       kind: st.kind, ...(st.at ? { at: st.at } : {}), ...(st.where ? { where: st.where } : {}) }));
     const ti = round1(turnInAt(def));
     const npc = def.giver ? npcs.get(def.giver) : null;
     return { id: def.id, name: def.name, level: def.level || 1, zone: def.zone, zoneName: zoneName(def.zone), giver: def.giver || null, giverName: (npc && npc.name) || (def.giverAt && def.giverAt.name) || null,
       text: def.offer || def.text || '', done: def.done || null,
-      group: def.group || null, step: a ? a.step : 0, steps, ready: !!a && a.step >= def.steps.length, job: !!def.job, reward: rewardView(def), story: def.story || null,
+      group: def.group || null, step: a ? a.step : 0, steps, ...(any ? { order: 'any' } : {}), ...(def.cls || def.classes ? { cls: def.cls || def.classes } : {}), ...(def.auto ? { auto: true } : {}), ready: !!a && a.step >= def.steps.length, job: !!def.job, reward: rewardView(def), story: def.story || null,
       ...(ti ? { turnIn: ti } : {}) };
   }
 
@@ -223,6 +243,23 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
   // ---- progress ----
   function stepDone(a, def) { const st = def.steps[a.step]; if (!st) return; if (a.n >= (st.count || 1)) { a.step++; a.n = 0; } }
   function bump(a, def, k = 1) { a.n += k; stepDone(a, def); }
+  const fullCount = st => (st.kind === 'clear' || st.kind === 'visit' || st.kind === 'reach' || st.kind === 'escort' ? st.count || 1 : 1);
+  /**
+   * Play-test 2 (Q27 "lead to another town and defeat a mini boss, in any order"): a quest with `order: 'any'` keeps a
+   * count per step (`a.ns`) and every step that matches moves; `a.step` = how many steps are complete, so "ready" and
+   * the turn-in work unchanged. Returns true when something moved.
+   */
+  function bumpAny(a, def, ev, k = null) {
+    a.ns ||= def.steps.map(() => 0);
+    let moved = false;
+    def.steps.forEach((st, i) => {
+      const of = st.count || 1;
+      if ((a.ns[i] || 0) >= of || st.kind === 'collect' && k === 'credit' || !matches(st, ev)) return;
+      a.ns[i] = Math.min(of, (a.ns[i] || 0) + fullCount(st)); moved = true;
+    });
+    a.step = def.steps.filter((st, i) => (a.ns[i] || 0) >= (st.count || 1)).length;
+    return moved;
+  }
   const within = (p, x, z, pad = 0) => !!p && Math.hypot(p.x - x, p.z - z) <= (p.r || 12) + pad;
   function matches(st, ev) {
     switch (st.kind) {
@@ -273,6 +310,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       const s = stateOf(ch), a = s.active[id], def = defOf(ch, id);
       if (!a || !def || !events.length) return false;
       let moved = false;
+      if (def.order === 'any') { for (const ev of events) if (bumpAny(a, def, ev, 'credit')) moved = true; return moved; }
       for (const ev of events) {
         if (a.step >= def.steps.length) break;
         const st = def.steps[a.step];
@@ -288,19 +326,40 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       for (const [id, a] of Object.entries(s.active)) {
         const def = defOf(ch, id);
         if (!def || a.step >= def.steps.length) continue;
+        if (def.order === 'any') { if (bumpAny(a, def, ev)) moved.push(id); continue; }
         const st = def.steps[a.step];
-        if (matches(st, ev)) { bump(a, def, st.kind === 'clear' || st.kind === 'visit' || st.kind === 'reach' || st.kind === 'escort' ? st.count || 1 : 1); moved.push(id); }
+        if (matches(st, ev)) { bump(a, def, fullCount(st)); moved.push(id); }
       }
       return moved;
     },
+    /** Q27: give every `auto` quest this character can have and has not had (on entering the world). */
+    grantAuto(ch) {
+      const s = stateOf(ch), out = [];
+      for (const def of defs.values()) {
+        if (!def.auto || !available(ch, def) || Object.keys(s.active).length >= 25) continue;
+        s.active[def.id] = { step: 0, n: 0 };
+        out.push(def.id);
+      }
+      return out;
+    },
+    /** Quests that finish themselves (`autoComplete`) and are complete now: the province pays them with no giver. */
+    autoDone(ch) { const s = stateOf(ch); return Object.entries(s.active).filter(([id, a]) => { const d = defOf(ch, id); return d && d.autoComplete && a.step >= d.steps.length; }).map(([id]) => id); },
     /** Steps that need a position check (visit, escort, reach) — cheap to skip when nobody has one. */
-    wantsPosition(ch) { const s = stateOf(ch); for (const [id, a] of Object.entries(s.active)) { const d = defOf(ch, id); const st = d && d.steps[a.step]; if (st && (st.kind === 'visit' || st.kind === 'escort' || st.kind === 'reach')) return true; } return false; },
+    wantsPosition(ch) {
+      const s = stateOf(ch), pos = st => st && (st.kind === 'visit' || st.kind === 'escort' || st.kind === 'reach');
+      for (const [id, a] of Object.entries(s.active)) {
+        const d = defOf(ch, id); if (!d) continue;
+        if (d.order === 'any') { if (d.steps.some((st, i) => pos(st) && ((a.ns && a.ns[i]) || 0) < (st.count || 1))) return true; continue; }
+        if (pos(d.steps[a.step])) return true;
+      }
+      return false;
+    },
     ready(ch, giver) { const s = stateOf(ch); return Object.entries(s.active).filter(([id, a]) => { const d = defOf(ch, id); return d && a.step >= d.steps.length && gives(d, giver); }).map(([id]) => id); },
     turnIn(ch, id, giver) {
       const s = stateOf(ch), a = s.active[id], def = defOf(ch, id);
       if (!a || !def) return { ok: false, why: 'unknown', msg: 'You are not on that quest.' };
       if (a.step < def.steps.length) return { ok: false, why: 'notDone', msg: 'It is not finished yet.' };
-      if (!gives(def, giver)) return { ok: false, why: 'giver', msg: 'Take it back to whoever asked.' };
+      if (!(def.autoComplete && !giver) && !gives(def, giver)) return { ok: false, why: 'giver', msg: 'Take it back to whoever asked.' };
       delete s.active[id];
       if (def.job) { s.jobs.recent ||= {}; s.jobs.recent[def.frame] = now(); }
       else s.done[id] = now();

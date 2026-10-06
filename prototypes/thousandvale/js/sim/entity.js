@@ -37,6 +37,9 @@ export class Entity {
     this.dirty = new Array(BANDS).fill(F.FULL);
     this.infoVer = 1;
     this.removed = false;
+    this.st = null;                 // status ids others draw (play-test 2, Q8): the room keeps it in step with the rules
+    this.mount = null;              // the mount a player rides (Q16), on `info.mount`
+    this.speedMul = 1;              // movement speed factor while mounted (stepMove's state.speedMul)
   }
   mark(bits) { const d = this.dirty; for (let b = 0; b < BANDS; b++) d[b] |= bits; }
 
@@ -123,9 +126,15 @@ export class Entity {
   /** The description clients get in `info`. */
   info() {
     const o = { id: this.id, kind: this.kind, name: this.name, level: this.level, hpMax: this.hpMax, team: this.team };
-    if (this.kind === 'player') { o.cls = this.cls; if (this.look) o.look = this.look; if (this.gear) o.gear = this.gear; }   // gear: what is worn, to draw (P22)
+    if (this.kind === 'player') {
+      o.cls = this.cls; if (this.look) o.look = this.look;
+      if (this.gear) o.gear = this.gear;                       // gear: what is worn, to draw (P22; trimmed by the wearer's prefs, Q22)
+      if (this.gearOff) o.gearOff = 1;
+      if (this.mount) o.mount = this.mount;                    // riding (Q16)
+    }
     else if (this.type) o.type = this.type;
     if (this.rank !== 'normal') o.rank = this.rank;
+    if (this.st && this.st.length) o.st = this.st;             // statuses everyone draws (Q8)
     if ((this.kind === 'object' || this.kind === 'npc') && this.data) {
       const d = this.data;
       if (d.hidden) { o.hidden = 1; if (d.hint) o.hint = d.hint; }
@@ -142,7 +151,8 @@ export class Entity {
       if (d.waystone) o.waystone = d.waystone.key;
       if (d.site) o.site = d.site;                             // fort / farm / hook marker: {kind, template, friendly, blurb}
       if (d.treasure) o.treasure = { chain: d.treasure.chain, step: d.treasure.step, of: d.treasure.of, cache: d.treasure.cache || undefined };
-      if (d.shimmer) o.shimmer = d.shimmer;                    // a hidden cache glints within this many metres for someone who has every clue
+      if (d.shimmer) o.shimmer = d.shimmer;
+      if (d.office) o.office = d.office;                       // a service NPC's own building (Q10): {kind, plot, x, z, yaw, lit}                    // a hidden cache glints within this many metres for someone who has every clue
     }
     return o;
   }

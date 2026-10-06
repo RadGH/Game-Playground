@@ -170,7 +170,7 @@ export function dedupeWaystones(waystones, doors = []) {
   return aliases;
 }
 
-export function buildLayout({ key, name = null, terrain, zones = [], encounterInfo = {}, copyCap = 300, vignetteContent = null, townRadius = null, starter = null, rares = null, jobs = null, schedules = null, horizon = null, travel = null, marks = null }) {
+export function buildLayout({ key, name = null, terrain, zones = [], encounterInfo = {}, copyCap = 300, vignetteContent = null, townRadius = null, starter = null, rares = null, jobs = null, schedules = null, horizon = null, travel = null, marks = null, shops = null, mounts = null, offices = null }) {
   const allSites = terrain.reader?.meta?.sites || [];
   const multi = zones.length > 1 || allSites.some(s => s.zone);
   const zoneList = zones.length ? zones : [{ key, sheet: null }];
@@ -245,5 +245,5 @@ export function buildLayout({ key, name = null, terrain, zones = [], encounterIn
     if (!st) return null;
     return { kind: st.kind || t.kind, buildings: pl.buildings.filter(b => b.town === st.id), square: pl.squares.find(q => q.town === st.id) || null };
   });
-  return { key, name: name || main.name, terrain, towns, townPlans, schedules, horizon, doors, camps, objects: wildObjects, townObjects, waystones, waystoneAliases: aliases, zoneEvents, travel, folk, marks, rares, jobs, sheet, copyCap, zoneOf, zones: zoneList, gate: townGate(terrain, main, doors.find(d => d.kind !== 'cave') || { x: main.x + 100, z: main.z }) };
+  return { key, name: name || main.name, terrain, towns, townPlans, schedules, shops, mounts, offices, horizon, doors, camps, objects: wildObjects, townObjects, waystones, waystoneAliases: aliases, zoneEvents, travel, folk, marks, rares, jobs, sheet, copyCap, zoneOf, zones: zoneList, gate: townGate(terrain, main, doors.find(d => d.kind !== 'cave') || { x: main.x + 100, z: main.z }) };
 }

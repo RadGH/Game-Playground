@@ -40,7 +40,7 @@ test('every placement kind becomes room content; town-side things go to the town
     if (p.type === 'treasure_cache') assert.ok(objs.some(o => o.type === 'cache' && o.key === `tr:${p.chain}:${p.step}` && o.hidden), 'hidden cache ' + p.id);
     if (p.type === 'waystone') assert.ok(L.waystones.some(w => w.key === 'ws:' + p.id), 'waystone ' + p.id);
     if (p.type === 'cave') assert.ok(L.doors.some(d => d.key === 'cave:' + p.id && d.sheet.dungeon.floors >= 1), 'cave door ' + p.id);
-    if (p.type === 'rare') { const c = L.camps.find(x => x.encounter === p.id && x.rank === 'rare'); assert.ok(c && c.path && c.path.length === p.path.length && Array.isArray(c.respawnMs), 'rare ' + p.id); }
+    if (p.type === 'rare') { const c = L.camps.find(x => x.encounter === p.id && x.rank === 'rare'); assert.ok(c && Array.isArray(c.respawnMs) && (!Array.isArray(p.path) || p.path.length < 2 || (c.path && c.path.length === p.path.length)), 'rare ' + p.id); }   // a rare may stand still (E's mini bosses, play-test 2)
     if (p.type === 'camp') assert.ok(L.camps.some(c => c.place === p.id && c.type === p.monster), 'camp ' + p.id);
   }
   // the three hooks that are bake features (features[])

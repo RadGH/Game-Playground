@@ -1,0 +1,175 @@
+/* Thousandvale — play-test 2 interface (stream D-UI): the centre column (banner, call-outs, toasts, pop-ups), the
+   entity menu, loot + rolls, shops, trade, the pause menu and settings, the appearance editor, portraits, the XP bar. */
+
+/* ---------------------------------------------------------------- Q6 one centre column, Q5 pop-ups at the top */
+.center-stack { position: absolute; top: 74px; left: 50%; transform: translateX(-50%); width: min(620px, calc(100vw - 32px)); display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; z-index: 20; }
+.center-stack > * { position: static !important; transform: none !important; left: auto !important; top: auto !important; }
+.center-stack .zone-banner { display: none; opacity: 1; transition: none; }
+.center-stack .zone-banner.show { display: block; animation: zbIn 3.4s ease forwards; }
+@keyframes zbIn { 0% { opacity: 0; transform: translateY(-6px); } 10% { opacity: 1; transform: none; } 82% { opacity: 1; } 100% { opacity: 0; } }
+.zone-banner .zb-sub { display: block; margin-top: 2px; font-size: 14px; color: var(--ink-dim); font-style: italic; text-shadow: 0 1px 4px #000; }
+.zone-banner[data-level='province'] strong { font-size: clamp(34px, 4.6vw, 54px); }
+.zone-banner[data-level='place'] strong { font-size: clamp(20px, 2.4vw, 28px); color: #e9dcc0; }
+.zone-banner[data-level='place'] .zb-sub { max-width: 520px; margin: 4px auto 0; font-size: 15px; color: var(--ink); }
+.center-stack .callout { display: none; }
+.center-stack .callout.show { display: block; transform: none !important; }
+.center-stack .toasts { min-height: 0; }
+.ask-pops { display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+.ask-pops:empty { display: none; }
+.ask-pops .invite-pop { position: static !important; display: flex; align-items: center; gap: 10px; padding: 9px 12px 9px 16px; background: var(--panel-solid); border: 1px solid var(--edge-strong); border-radius: 10px; box-shadow: var(--shadow), 0 0 0 3px rgba(241, 213, 149, 0.12); pointer-events: auto; animation: popIn 0.25s ease-out; font-size: 15px; }
+.ask-pops .invite-pop[hidden] { display: none !important; }
+.ask-pops .invite-pop .primary { width: auto; padding: 6px 16px; font-size: 14px; }
+.ask-pops .invite-pop .ghost { padding: 6px 12px; align-self: stretch; }
+@keyframes popIn { from { opacity: 0; transform: translateY(-8px); } }
+
+/* ---------------------------------------------------------------- Q2 the entity menu, inspect */
+.ent-menu .nm-title small { font-family: var(--sans); color: var(--ink-faint); font-size: 12px; }
+.nm-item.off, .nm-item:disabled { color: var(--ink-faint); cursor: default; }
+.inspect-panel .insp-gear { list-style: none; margin: 0; padding: 0; }
+.insp-gear li { display: grid; grid-template-columns: 78px 1fr auto; gap: 8px; padding: 3px 0; border-bottom: 1px solid rgba(217, 178, 106, 0.12); text-transform: capitalize; }
+.insp-gear li span { color: var(--ink-faint); font-size: 12px; }
+.insp-gear li em { font-size: 12px; color: var(--ink-faint); }
+.r-magic > b, .iname.r-magic { color: #8fb4ff; } .r-rare > b, .iname.r-rare { color: #ffe17a; } .r-epic > b, .iname.r-epic { color: #d8a8ff; }
+.r-legendary > b, .r-unique > b, .iname.r-legendary, .iname.r-unique { color: #ffb36a; } .r-set > b, .iname.r-set { color: #8ff0a0; }
+.iname { font-weight: 700; }
+.islot.small { width: 40px; height: 40px; flex: none; padding: 2px; }
+.islot.small .glyph { font-size: 16px; }
+
+/* ---------------------------------------------------------------- Q3 loot, Q4 rolls */
+.loot-panel .loot-list { display: flex; flex-direction: column; gap: 4px; max-height: 50vh; overflow-y: auto; }
+.loot-row { display: flex; align-items: center; gap: 9px; padding: 4px 6px; border-radius: 7px; cursor: pointer; background: rgba(0, 0, 0, 0.25); border: 1px solid transparent; }
+.loot-row:hover { border-color: var(--edge-strong); background: rgba(217, 178, 106, 0.08); }
+.loot-row .iname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.loot-row.gold b { flex: 1; color: var(--gold-hi); }
+.gold-slot { display: grid; place-items: center; width: 40px; height: 40px; border-color: #c9a227 !important; color: #ffd34d; font-size: 20px; }
+.row.end { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.row.end .primary { width: auto; }
+.loot-prompt { bottom: 136px; }
+.roll-stack { position: absolute; left: 50%; bottom: 168px; transform: translateX(-50%); display: flex; flex-direction: column-reverse; gap: 8px; pointer-events: none; z-index: 25; }
+.roll-card { width: min(330px, calc(100vw - 32px)); padding: 9px 11px 10px; background: var(--panel-solid); border: 1px solid var(--edge-strong); border-radius: 10px; box-shadow: var(--shadow); pointer-events: auto; animation: popIn 0.25s ease-out; }
+.roll-card.r-rare { border-color: #e6c23a; } .roll-card.r-legendary, .roll-card.r-unique { border-color: #ff8a2a; } .roll-card.r-magic { border-color: #4f86ff; } .roll-card.r-set { border-color: #63e07a; }
+.rc-head { display: flex; gap: 9px; align-items: center; }
+.rc-name { display: flex; flex-direction: column; min-width: 0; }
+.rc-name small { color: var(--ink-faint); font-size: 12px; }
+.rc-bar { height: 5px; margin: 8px 0; border-radius: 3px; background: rgba(0, 0, 0, 0.55); overflow: hidden; }
+.rc-bar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #a07a2a, var(--gold-hi)); transition: width 0.25s linear; }
+.rc-btns { display: flex; gap: 6px; }
+.rc-btns button { flex: 1; }
+.rc-btns .primary.small { width: auto; }
+.rc-said { font-size: 13px; color: var(--ink-dim); font-style: italic; }
+.roll-card.done { opacity: 0.85; }
+
+/* ---------------------------------------------------------------- Q11 shops */
+.shop-tabs, .set-tabs { margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+.shop-tabs .chip, .set-tabs .chip { padding: 4px 12px; font-size: 13px; }
+.shop-list { display: flex; flex-direction: column; gap: 4px; max-height: min(52vh, 460px); overflow-y: auto; padding-right: 2px; }
+.shop-row { display: flex; align-items: center; gap: 9px; padding: 4px 8px 4px 4px; border-radius: 7px; cursor: pointer; background: rgba(0, 0, 0, 0.25); border: 1px solid transparent; }
+.shop-row:hover { border-color: var(--edge-strong); background: rgba(217, 178, 106, 0.08); }
+.shop-row.cant { opacity: 0.6; }
+.sr-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sr-name small { color: var(--ink-faint); } .sr-name small.mount { color: #9fe0c0; } .sr-name small.bad { color: var(--bad); }
+.price { font-weight: 700; color: var(--gold-hi); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.price.no { color: var(--bad); }
+.price.sell { color: #b9e0a0; }
+.shop-hint { margin-top: 8px; }
+
+/* ---------------------------------------------------------------- Q14 trade */
+.tr-halves { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tr-half { padding: 8px; border: 1px solid var(--edge); border-radius: 8px; background: rgba(0, 0, 0, 0.25); }
+.tr-half.locked { border-color: #e6c23a; } .tr-half.ok { border-color: var(--good); box-shadow: inset 0 0 12px rgba(127, 224, 138, 0.2); }
+.tr-half h4 { margin: 0 0 6px !important; display: flex; justify-content: space-between; gap: 6px; }
+.tr-say { font-family: var(--sans); font-size: 12px; color: var(--ink-faint); letter-spacing: 0; }
+.tr-half.locked .tr-say { color: #ffe17a; } .tr-half.ok .tr-say { color: var(--good); }
+.tr-grid, .tr-baggrid { display: grid; grid-template-columns: repeat(6, 40px); gap: 4px; }
+.tr-baggrid { grid-template-columns: repeat(auto-fill, 40px); max-height: 140px; overflow-y: auto; }
+.tr-gold { margin-top: 6px; } .tr-gold input { width: 110px; } .tr-gold b { color: var(--gold-hi); }
+.tr-bag { margin-top: 8px; }
+.islot.offered { outline: 2px solid var(--gold-hi); opacity: 0.55; }
+
+/* ---------------------------------------------------------------- Q15 pause + settings */
+.tv-panel.centered.pause-panel, .tv-panel.centered.settings-panel { left: 50%; top: 18vh; right: auto; transform: translateX(-50%); }
+.tv-panel.centered.pause-panel.placed, .tv-panel.centered.settings-panel.placed { transform: none; }
+.pause-list { display: flex; flex-direction: column; gap: 8px; }
+.pause-list .ghost.wide { margin: 0; padding: 9px; font-size: 15px; }
+.pause-note { margin-top: 10px; }
+.danger-ish:hover { color: #ff9a85 !important; border-color: #ff9a85 !important; }
+.set-body { display: flex; flex-direction: column; gap: 2px; }
+.set-row { display: grid; grid-template-columns: 1fr 150px 46px; align-items: center; gap: 8px; padding: 4px 0; }
+.set-row.check { grid-template-columns: 22px 1fr; cursor: pointer; }
+.set-row.check input { width: 16px; height: 16px; margin: 0; accent-color: var(--gold); }
+.set-row select { margin: 0 !important; grid-column: span 2; }
+.set-row em { font-style: normal; font-variant-numeric: tabular-nums; color: var(--ink-dim); font-size: 13px; text-align: right; }
+.set-row input[type='range'] { accent-color: var(--gold); width: 100%; }
+.keys-list { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; max-height: 46vh; overflow-y: auto; }
+.keys-list dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 8px; margin: 0; font-size: 13px; }
+.keys-list dd { margin: 0; color: var(--ink-dim); }
+.keys-list kbd { font-size: 11px; padding: 1px 5px; border: 1px solid var(--edge); border-radius: 4px; background: rgba(0, 0, 0, 0.4); white-space: nowrap; }
+#hud { --ui-scale: 1; }
+.ui-scaled #hud > .unitframe, .ui-scaled #hud > .actionbar, .ui-scaled #hud > .chat, .ui-scaled #hud > .menubar, .ui-scaled #hud > .partyframes, .ui-scaled #hud > .tv-panel, .ui-scaled #hud > .xpbar, .ui-scaled #hud > .tv-dialog { zoom: var(--ui-scale); }
+
+/* ---------------------------------------------------------------- Q20/Q21 appearance editor */
+.appearance-panel .ap-body { display: flex; flex-direction: column; gap: 3px; max-height: 62vh; overflow-y: auto; padding-right: 4px; }
+.ap-row { display: flex; align-items: center; gap: 6px; min-height: 30px; }
+.ap-label { flex: 0 0 92px; font-size: 13px; color: var(--ink-dim); }
+.ap-row select { flex: 1; margin: 0 !important; }
+.ap-row.dial input { flex: 1; accent-color: var(--gold); }
+.ap-row .chips { display: flex; flex-wrap: wrap; gap: 4px; } .ap-row .chips .chip { padding: 3px 9px; font-size: 13px; }
+.ap-step { padding: 2px 9px !important; font-size: 16px !important; line-height: 1.2 !important; }
+.ap-swatches { display: flex; flex-wrap: wrap; gap: 4px; }
+.ap-sw { width: 20px; height: 20px; padding: 0; border-radius: 50%; border: 2px solid rgba(0, 0, 0, 0.6); cursor: pointer; box-shadow: 0 0 0 1px var(--edge); }
+.ap-sw[aria-pressed='true'] { box-shadow: 0 0 0 2px var(--gold-hi); }
+.ap-foot { display: flex; gap: 6px; margin-top: 10px; align-items: center; }
+.ap-foot .grow { flex: 1; }
+.ap-foot .primary { width: auto; }
+.card .customize { margin: 0; padding: 8px; }
+.tv-panel.appearance-panel.title-mode:not(.placed) { left: max(16px, 6vw) !important; right: auto !important; top: 10vh !important; }
+@media (max-width: 760px) { .tv-panel.appearance-panel.title-mode:not(.placed) { left: 8px !important; right: 8px !important; top: auto !important; bottom: 8px; width: auto !important; } .appearance-panel .ap-body { max-height: 42vh; } }
+
+/* ---------------------------------------------------------------- Q13 portraits */
+.uf-portrait { overflow: visible; }
+.uf-portrait .portrait-live { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 50%; display: block; pointer-events: none; }
+.uf-portrait:not(.has-live) .portrait-live { display: none; }
+.uf-portrait.has-live > span { visibility: hidden; }
+.uf-portrait em { z-index: 2; }
+.pm-icon.pic { background-size: cover; background-position: center 30%; color: transparent; }
+.fr-pic { position: relative; width: 30px; height: 30px; flex: none; }
+.fr-pic img { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--edge); background: #1a1612; object-fit: cover; }
+.fr-pic .dot { position: absolute; right: -1px; bottom: -1px; }
+.chip.char { display: inline-flex; align-items: center; gap: 7px; padding: 3px 12px 3px 3px; }
+.char-pic { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--edge); background: #1a1612; object-fit: cover; flex: none; }
+.char-pic.letter { display: grid; place-items: center; font-family: var(--serif); color: var(--gold-hi); font-size: 14px; }
+.char-txt small { color: var(--ink-faint); }
+
+/* ---------------------------------------------------------------- Q24 the XP bar (number on hover only) */
+.xpbar { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); width: min(480px, calc(100vw - 32px)); height: 7px; border-radius: 4px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 0, 0, 0.75); overflow: hidden; pointer-events: auto; cursor: default; }
+.xpbar i { position: absolute; inset: 0 auto 0 0; width: 0; background: linear-gradient(90deg, #6a42b8, var(--xp)); transition: width 0.4s; }
+.xpbar span { display: none; }
+.xpbar:hover { height: 16px; bottom: 0; }
+.xpbar:hover span { display: grid; position: absolute; inset: 0; place-items: center; font-size: 11px; font-weight: 700; text-shadow: 0 1px 2px #000; }
+.actionbar { bottom: 18px; }
+.inv-xp { position: relative; height: 8px; margin: 0 12px 6px; border-radius: 4px; background: rgba(0, 0, 0, 0.55); border: 1px solid rgba(0, 0, 0, 0.7); overflow: hidden; flex: none; }
+.inv-xp i { position: absolute; inset: 0 auto 0 0; width: 0; background: linear-gradient(90deg, #6a42b8, var(--xp)); }
+.inv-xp span { display: none; }
+.inv-xp:hover { height: 16px; }
+.inv-xp:hover span { display: grid; position: absolute; inset: 0; place-items: center; font-size: 11px; font-weight: 700; text-shadow: 0 1px 2px #000; }
+
+/* ---------------------------------------------------------------- Q23 perk forest search */
+.pf-search { display: inline-flex; align-items: center; gap: 6px; }
+.pf-overlay { position: absolute; top: 8px; left: 8px; z-index: 2; padding: 4px 8px; background: rgba(18, 15, 12, 0.85); border: 1px solid var(--edge); border-radius: 8px; }
+.pf-search input { width: 170px; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--edge); background: rgba(0, 0, 0, 0.45); color: var(--ink); }
+.pf-search em { font-style: normal; font-size: 12px; color: var(--ink-faint); min-width: 54px; }
+
+@media (max-width: 760px) {
+  .center-stack { top: 64px; }
+  .roll-stack { bottom: 150px; }
+  .tr-halves { grid-template-columns: 1fr; }
+  .tr-grid { grid-template-columns: repeat(6, 36px); }
+  .set-row { grid-template-columns: 1fr 110px 40px; }
+  .keys-list { grid-template-columns: 1fr; }
+  .xpbar { width: calc(100vw - 24px); }
+  .ap-label { flex-basis: 74px; }
+}
+.inv-gearrow { grid-column: 1 / -1; display: flex; gap: 14px; justify-content: center; padding: 4px 0 0; font-size: 13px; color: var(--ink-dim); }
+.inv-gearbox { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+.inv-gearbox input { accent-color: var(--gold); margin: 0; }
+.trade-panel .tr-half { min-width: 0; } @media (max-width: 760px) { .trade-panel { width: calc(100vw - 16px) !important; } }

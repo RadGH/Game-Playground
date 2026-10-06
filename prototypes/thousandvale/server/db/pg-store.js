@@ -68,8 +68,8 @@ export function createPgStore({ connectionString = process.env.DATABASE_URL, rea
       return { account: x.id, claimed: x.claimed, username: x.username, banned: x.banned_until ? new Date(x.banned_until).getTime() : 0, kind: x.kind };
     },
     async listChars(account) {
-      const r = await q('SELECT id, name, cls, level, room FROM characters WHERE account_id = $1 AND realm = $2 ORDER BY id', [account, realm]);
-      return r.rows.map(brief);
+      const r = await q(`SELECT id, name, cls, level, room, blob->'look' AS look FROM characters WHERE account_id = $1 AND realm = $2 ORDER BY id`, [account, realm]);
+      return r.rows.map(x => ({ ...brief(x), look: x.look || null }));
     },
     async createChar(account, { name, cls, look = null }) {
       const n = await q('SELECT count(*)::int AS n FROM characters WHERE account_id = $1 AND realm = $2', [account, realm]);
@@ -133,6 +133,15 @@ export function createPgStore({ connectionString = process.env.DATABASE_URL, rea
         return true;
       } catch (err) { try { await c.query('ROLLBACK'); } catch { /* ignore */ } throw err; }
       finally { c.release(); }
+    },
+    /** Play-test 2 (Q21): a new look on a character nobody holds (the title screen). */
+    async setLook(account, id, look) {
+      const r = await q(
+        `UPDATE characters SET blob = jsonb_set(blob, '{look}', $3::jsonb, true), version = version + 1
+         WHERE id = $1 AND account_id = $2 AND (lease_owner IS NULL OR lease_until < now()) RETURNING id`, [id, account, JSON.stringify(look)]);
+      if (r.rows.length) return { ok: true };
+      const e = await q('SELECT 1 FROM characters WHERE id = $1 AND account_id = $2', [id, account]);
+      return { err: e.rows.length ? 'lease' : 'missing' };
     },
     async releaseChar(id, owner) {
       await q('UPDATE characters SET lease_owner = NULL, lease_until = NULL WHERE id = $1 AND lease_owner = $2', [id, owner]);

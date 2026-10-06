@@ -28,6 +28,10 @@ export const KIND_ART = [
   { key: 'rock_large', rock: ['boulder', 'mossy_boulder'], scale: 1, size: 2 },
   { key: 'boulder', rock: ['boulder'], scale: 1.4, size: 3 },
   { key: 'reed', fern: ['reed', 'cattail'], scale: 1 },
+  // play-test 2 (Q18, B's set pieces): orchard fruit trees — a young broadleaf, short and broad-crowned — and hedgerow
+  // bushes, clipped wide and low
+  { key: 'tree_fruit', tree: ['sapling'], scale: 1.45, squash: [1.35, 0.95, 1.35] },
+  { key: 'hedge', bush: ['shrub'], scale: 1.15, squash: [1.5, 0.85, 1.5] },
 ];
 /** How far each class of thing is drawn, by quality: [full detail, simplified, cards / last]. */
 export const RANGES = { high: { tree: [80, 240, 700], small: 220, reed: 110 }, medium: { tree: [60, 200, 560], small: 170, reed: 90 }, low: { tree: [0, 90, 280], small: 70, reed: 40 } };

@@ -8,7 +8,7 @@
 //   g.fit(); g.zoom(1.25); g.focus(id); g.destroy();
 
 import { registerTip, refreshTip, hideTip, tipOpen } from './tips.js';
-import { forestBounds } from './talent-model.js';
+import { forestBounds, armSectors } from './talent-model.js';
 
 const KIND_R = { hub: 13, minor: 7, major: 10, talent: 12, keystone: 16 };
 const COL = { taken: '#f1d595', open: '#7fe08a', reach: '#c7b99b', locked: '#5c5246' };
@@ -20,7 +20,7 @@ export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } 
   wrap.appendChild(cv); host.appendChild(wrap);
   const g = cv.getContext('2d');
   const V = { x: 0, y: 0, s: 1, w: 1, h: 1 };          // view: world point at the centre, pixels per world unit
-  let F = null, ST = new Map(), arms = [], rim = 12, hover = null, focusId = null, dirty = true, raf = 0;
+  let F = null, ST = new Map(), arms = [], rim = 12, hover = null, focusId = null, dirty = true, raf = 0, sectors = [], found = null, pulse = 0;
   const armColor = k => arms.find(a => a.key === k)?.color || '#b8a888';
 
   registerTip('perk', () => (hover ? describe?.(hover) : null));
@@ -57,13 +57,15 @@ export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } 
     if (!dirty || !F) return;
     dirty = false;
     g.clearRect(0, 0, V.w, V.h);
-    // faint arm sectors: a wash of each arm's colour toward its keystones
-    for (const a of arms) {
-      if (a.angle == null) continue;
-      const [cx, cy] = toScreen(0, 0), R = (rim + 1) * V.s;
-      const grd = g.createRadialGradient(cx, cy, 0, cx, cy, R);
-      grd.addColorStop(0, 'rgba(0,0,0,0)'); grd.addColorStop(1, hexA(a.color, 0.10));
-      g.fillStyle = grd; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, R, a.angle - Math.PI / 8, a.angle + Math.PI / 8); g.closePath(); g.fill();
+    // each arm's area (play-test 2 Q26): the sector its OWN nodes occupy (talent-model.js armSectors), so a branch that
+    // grows sideways widens its arm's colour instead of sitting outside it
+    const [cx, cy] = toScreen(0, 0);
+    for (const sct of sectors) {
+      const col = armColor(sct.key), R0 = Math.max(0, sct.r0) * V.s, R1 = sct.r1 * V.s;
+      const grd = g.createRadialGradient(cx, cy, R0, cx, cy, R1);
+      grd.addColorStop(0, hexA(col, 0.04)); grd.addColorStop(1, hexA(col, 0.13));
+      g.fillStyle = grd; g.beginPath(); g.arc(cx, cy, R1, sct.a0, sct.a1); g.arc(cx, cy, R0, sct.a1, sct.a0, true); g.closePath(); g.fill();
+      g.strokeStyle = hexA(col, 0.22); g.lineWidth = 1; g.stroke();
     }
     // links: a taken–taken edge is the path you walked (gold), taken–open is where you can go next (green)
     for (const [a, b] of F.links) {
@@ -75,13 +77,16 @@ export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } 
       g.lineWidth = sa === 'taken' && sb === 'taken' ? 3 : 1.6;
       g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
     }
-    // nodes
+    // nodes (a search dims everything it did not find and rings what it did)
     const labels = V.s > unit * 1.15;
+    if (found) { pulse = (pulse + 0.08) % (Math.PI * 2); dirty = true; }
     for (const n of F.nodes) {
       const [x, y] = toScreen(n.x, n.y), r = radius(n);
       if (x < -r - 4 || x > V.w + r + 4 || y < -r - 4 || y > V.h + r + 4) continue;
       const st = ST.get(n.id) || 'locked', ac = n.arm ? armColor(n.arm) : '#c9b98f';
       g.save();
+      const hit = found && found.has(n.id);
+      if (found && !hit) g.globalAlpha = 0.28;
       if (st === 'open') { g.shadowColor = '#7fe08a'; g.shadowBlur = 12; }
       if (st === 'taken') { g.shadowColor = '#f1d595'; g.shadowBlur = 10; }
       g.beginPath();
@@ -96,8 +101,9 @@ export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } 
       g.strokeStyle = n.id === hover ? '#ffffff' : COL[st];
       g.stroke();
       if (n.id === focusId) { g.beginPath(); g.arc(x, y, r + 6, 0, Math.PI * 2); g.strokeStyle = 'rgba(255,255,255,0.7)'; g.setLineDash([4, 4]); g.stroke(); g.setLineDash([]); }
+      if (hit) { g.globalAlpha = 1; g.beginPath(); g.arc(x, y, r + 5 + Math.sin(pulse) * 2.5, 0, Math.PI * 2); g.strokeStyle = '#fff3c4'; g.lineWidth = 2.5; g.shadowColor = '#ffe08a'; g.shadowBlur = 12; g.stroke(); g.shadowBlur = 0; }
       g.restore();
-      if (labels && (n.kind === 'keystone' || n.kind === 'talent' || n.kind === 'hub' || V.s > unit * 2.2)) {
+      if (labels && (n.kind === 'keystone' || n.kind === 'talent' || n.kind === 'hub' || V.s > unit * 2.2 || (found && found.has(n.id)))) {
         g.font = `${n.kind === 'keystone' ? 600 : 500} ${n.kind === 'keystone' ? 13 : 11}px "Alegreya Sans", sans-serif`;
         g.textAlign = 'center'; g.fillStyle = st === 'locked' ? 'rgba(199,185,155,0.55)' : '#f3ead8';
         const t = shortName(n);
@@ -107,8 +113,10 @@ export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } 
     // arm names round the rim
     g.font = `600 ${Math.round(Math.max(9, Math.min(14, V.w / 50)))}px Cinzel, serif`; g.textAlign = 'center'; g.globalAlpha = V.w < 520 ? 0.75 : 1;
     for (const a of arms) {
-      if (a.angle == null) continue;
-      const [x, y] = toScreen(Math.cos(a.angle) * (rim + 0.9), Math.sin(a.angle) * (rim + 0.9));
+      const sct = sectors.find(z => z.key === a.key);
+      const ang = sct ? sct.mid : a.angle, rr = sct ? sct.r1 + 0.3 : rim + 0.9;
+      if (ang == null) continue;
+      const [x, y] = toScreen(Math.cos(ang) * rr, Math.sin(ang) * rr);
       if (y < 8 || y > V.h - 4) continue;
       const tw = g.measureText(a.name).width;
       g.fillStyle = hexA(a.color, 0.95); g.fillText(a.name, Math.max(tw / 2 + 6, Math.min(V.w - tw / 2 - 6, x)), Math.max(16, y));
@@ -181,7 +189,22 @@ export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } 
 
   return {
     canvas: cv, view: V,
-    set(forest, state, { arms: a } = {}) { const first = !F; F = forest; rim = Math.max(1, ...forest.nodes.map(n => Math.hypot(n.x, n.y))); ST = state || new Map(); if (a) arms = a; dirty = true; if (first) requestAnimationFrame(fit); },
+    set(forest, state, { arms: a } = {}) { const first = !F, isNew = F !== forest; F = forest; rim = Math.max(1, ...forest.nodes.map(n => Math.hypot(n.x, n.y))); ST = state || new Map(); if (a) arms = a; if (isNew) sectors = armSectors(forest); dirty = true; if (first) requestAnimationFrame(fit); },
+    /** Q23: ring these node ids and dim the rest (null / [] = no search). Returns how many were found. */
+    setSearch(ids) { found = ids && ids.length ? new Set(ids) : null; dirty = true; return found ? found.size : 0; },
+    /** Zoom so every one of these nodes is on screen. */
+    fitIds(ids) {
+      const ns = (ids || []).map(id => F?.byId.get(id)).filter(Boolean); if (!ns.length) return;
+      resize();
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const n of ns) { minX = Math.min(minX, n.x); maxX = Math.max(maxX, n.x); minY = Math.min(minY, n.y); maxY = Math.max(maxY, n.y); }
+      const pad = 1.6;
+      V.x = (minX + maxX) / 2; V.y = (minY + maxY) / 2;
+      V.s = Math.max(8, Math.min(unit * 2.4, Math.min(V.w / (maxX - minX + pad * 2), V.h / (maxY - minY + pad * 2))));
+      if (ns.length === 1) focusId = ns[0].id;
+      dirty = true;
+    },
+    get sectors() { return sectors; },
     fit, zoom: f => zoom(f),
     focus(id) { const n = F?.byId.get(id); if (!n) return; V.x = n.x; V.y = n.y; V.s = Math.max(V.s, unit * 1.3); focusId = id; dirty = true; },
     redraw() { dirty = true; },

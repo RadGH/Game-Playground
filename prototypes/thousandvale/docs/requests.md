@@ -1485,3 +1485,271 @@ tests/E 128 + 1 TODO (A), tests/B 47/47. The z13_01 door is reachable again and 
   on-hit burst (the client stops doubling it from `hit`); flying bestiary entries (`flying: true`) hover and play `fly`.
 - (D-UI -> D-world, 2026-10-05) both done: item-icons no longer blocks (bag-open only, toBlob, IndexedDB, budgeted; test in
   tests/D/inventory.spec.js "no freeze"); the "[object Object]" badge was `perkPoints` as an object — fixed in ui/talents.js.
+
+## D-UI (Client) -> A (Server core), play-test 2 — 2026-10-05: the shapes the client is being built against
+The client windows below are built NOW against these shapes (a raw `sendJ` until net/client.js has a method). If you pick
+different names, post them here and D-UI re-points the client; anything not landed keeps a client-side fallback.
+Please add net/client.js methods with these names (they are what the client calls first): `net.lootOp`, `net.roll`,
+`net.shop`, `net.settings`, `net.setLook`, `net.inspect`, `net.partyOp('loot', {rarity})`.
+- **Q3 corpse loot** (game socket): a corpse with loot for me carries `info.loot: true` (or ev `{type:'lootable', d}` to me);
+  `loot {op:'open', id}` -> `lootWin {id, name, gold, items:[item…], locked?:[uid]}`; `loot {op:'take', id, uid}` /
+  `loot {op:'take', id, gold:true}` / `loot {op:'all', id}` -> `bag` + a fresh `lootWin` (empty -> `lootWin {id, items:[], gold:0}`);
+  `loot {op:'close', id}`; `lootWin {id, closed:true, why?}` when it goes away (despawn, far). E/click on a lootable corpse sends `open`.
+- **Q4 rolls**: `roll {id, item, ms, corpse?}` (S->C, everyone eligible in the party) ; `roll {op:'need'|'greed'|'skip', id}` (C->S);
+  `rollR {id, item, results:[{name, choice, n}], winner:{char, name}|null}` (S->C, whole party). Threshold: `party {op:'loot', rarity}`
+  on the gateway (leader only; `rarity` one of magic|rare|epic|legendary), the party state carries `loot: '<rarity>'` (default `rare`).
+- **Q11 shops**: `used {kind:'npc', role, shop:true, …}` for a trader; `shop {op:'list', npc}` -> `shop {npc, name, role, items:[{...item, price, stock?}],
+  buyback:[{...item, price}], sellRate, repair?:{cost}}`; `shop {op:'buy', npc, uid, n?}` (uid = the stock item's uid), `shop {op:'sell', npc, uid}`,
+  `shop {op:'buyback', npc, uid}`, `shop {op:'repair', npc}` -> `shopR {op, ok, why?, msg?, gold?}` (+ `bag`/`you` as usual; a fresh `shop` after each op).
+  Roles that sell: merchant, smith, trader(s), stable master (mounts) — whatever E names; the client opens a shop for ANY npc whose `used` says `shop:true`.
+- **Q12 rings**: client now sends `item {op:'equip', uid, slot:'ring2'}` when ring is worn and ring2 is empty; please do the same server-side when no slot comes.
+- **Q14 trade**: built on §13 exactly (tradeAsk/tradeState). The "friends only" setting (Q15) is enforced by YOU: `settings {tradeFriends:bool}`
+  -> refuse `trade ask` from non-friends with `why:'friendsOnly'`.
+- **Q15/Q22 settings**: `settings {tradeFriends?:bool, showGear?:bool}` (game socket) saved on the character; `joined.you.settings` echoes them;
+  `info.showGear:false` on a player who hides gear (D-world draws them without gear; the client already draws self from the local setting).
+- **Q20/Q21 looks**: the look JSON gains `custom: {body:{height,width,headSize,round,skin}, headShape, hair:{id,color}, eyes:{id,color}, brows:{id},
+  nose:{id}, mouth:{id}, ears:{id}, facialHair:{id,color}}` (≤ 1.5 KB; `create {look}` already takes it). Barber: `look {look, npc}` within 8 m of a
+  `barber` npc, costs gold -> `lookR {ok, why?, cost?}` + `info` with the new look to everyone near. Please keep `look` on `charList` entries,
+  `friends.list` rows and `party.members` (portraits on the title screen, friends list and party frames).
+- **Q2 inspect** (optional; the client shows name/level/class/worn gear from `info` meanwhile): `inspect {id}` -> `inspectR {id, name, cls, level, equipment}`.
+- **Q2 follow**: client-only (the client walks you behind them; any movement key stops it). Nothing needed.
+- **Q25**: `charList` rows already carry `cls`; the "Adventurer" was the client's target frame and the chip text — fixed client side.
+
+## A (Server core) -> D-UI, D-world, C, E — 2026-10-05: play-test 2 PROTOCOL SHAPES (v6) — build against these now
+Protocol goes to **v6** when this lands (PROTOCOL_VERSION 6). All new client messages are on the PROVINCE socket unless
+marked (gw). Every refusal carries `msg` (plain text to show as is). Full text will be in protocol.md §18.
+**D-UI**
+- **Q3 loot on corpses.** Kill items AND kill gold stay on the corpse (personal: each player sees only their own share).
+  Server -> you: `lootable {id, on}` (id = the corpse's entity id; draw a sparkle / loot cursor while `on`; it goes off when
+  emptied or the body despawns, ~5 min). Client -> `loot {op:'open', id}` (within 6 m) -> `lootWin {id, name, items:[item],
+  gold, free?:[item]}` (`free` = items everyone skipped in a party roll: anyone may take them). `loot {op:'take', id, uid}` /
+  `loot {op:'all', id}` -> `bag` as usual + a fresh `lootWin` (or `lootWin {id, closed:true}` when empty). `loot {op:'close', id}`.
+  Refusals: `lootR {op, ok:false, why:'far'|'gone'|'bagFull'|'roll', msg}`. Fields: `loot {op, id?, uid?, roll?, choice?}`.
+- **Q4 party rolls.** Party threshold: gw `party {op:'loot', code:'magic'|'rare'|'legendary'}` (leader only; default 'rare').
+  `partyState.party.lootMin` carries it. An item at/above it from a party member's kill goes to a roll among members in the
+  room within 60 m: `lootRoll {roll, corpse, item, ms:30000, members:[{char,name}]}`; answer `loot {op:'roll', roll, choice:
+  'need'|'greed'|'skip'}`; everyone gets `lootRolled {roll, item:{name,rarity}, rolls:[{char,name,choice,n}], winner:{char,name}|null}`
+  (winner's item arrives as `bag`; all skip -> it lies on the corpse in `free` for anyone). Timeout = skip.
+- **Q11 shops.** `shop {op:'open', npc}` (npc = entity id, within 6 m of a role with a shop: merchant, smith, any E trader,
+  stablehand for mounts) -> `shopView {npc, name, role, title, stock:[{id, item, price, mount?}], buyback:[{uid, item, price}],
+  sellRate}`. `shop {op:'buy', npc, id}` · `shop {op:'sell', npc, uid}` · `shop {op:'back', npc, uid}` (buy back what you sold
+  this session) -> `bag` + a fresh `shopView`, or `shopR {op, ok:false, why:'gold'|'far'|'bagFull'|'item'|'level', msg}`.
+  An item's sell price is in `shopView.sellRate` × its `price` — or ask: every bag item may carry `value` (gold you get).
+- **Q12** `item {op:'equip', uid}` with NO slot (or the item's own slot) now picks the free ring / free off hand first.
+  Send `slot:'ring1'|'ring2'|'offhand'` only when the player dragged it onto that exact slot.
+- **Q14 trade** is complete on the server: `trade {op:'ask', id:<their entity id>}` -> they get `tradeAsk {trade, from, name}`
+  -> `trade {op:'accept', id:<trade>}` / `trade {op:'cancel'}` (decline) -> `tradeState`... (protocol.md §M1.5). NEW: refusal
+  text when they only take requests from friends (`err {code:'trade', msg}`).
+- **Q15 settings (gw, per account).** `settings {op:'get'}` / `settings {op:'set', data:{tradeFriendsOnly:true}}` ->
+  `settings {data:{tradeFriendsOnly:false}}` (sent once after `authed` too).
+- **Q16 mounts.** `mount {op:'summon', id?}` (id = a mount you own; default your best) / `mount {op:'off'}` -> `mountR {ok, why?,
+  msg?}`. `joined.you.mounts = [{id, name, speed}]`, `you {mounts}` on a change, `you {mount: id|null, speedMul}`. Others see
+  `info.mount = id` on the player (draw them riding). While mounted, pass `speedMul` into stepMove's state (see D-world). Casting,
+  being hit, swimming, dying, entering a dungeon dismount you. A first mount is given at level 5; the stablehand sells more
+  (shop above, rows with `mount`). Summon refused in combat / swimming / indoors.
+- **Q20/21 looks.** Title screen (gw): `look {char, look}` saves a custom look on a character that is not in the world ->
+  `lookR {char, ok, look?, why?, msg?}` (the look comes back cleaned). In the world: `barber {npc, look}` at a barber NPC
+  (role 'barber', E places one) -> `lookR {ok, look, cost}`; others get a new `info.look`. Look shape = what `create` takes:
+  `{v:1, race, seed, avatar?: <avatar-2d JSON: body{height,width,headSize,skin,...}, <slot>: id | {id,color,x,y,scale,rot}>}`.
+  Part ids are checked against avatar-2d's catalog; unknown ids are dropped (falls back to default), numbers clamped.
+- **Q22** `pref {k:'showGear'|'showHelm', v:bool}` -> `you {prefs}`; others see `info.gear` without the head piece / with
+  `info.gearOff:1` and no gear. `joined.you.prefs = {showGear, showHelm}` (default true).
+- **Q25** `charList.chars[i].clsName` (e.g. "Ranger").
+- **Q2 follow.** `follow {id}` -> `followR {id, ok, why?, msg?}` (refused for hostiles, other rooms, >40 m). Following itself is
+  client movement; the server only answers whether it is allowed. Optional — your /follow can call it first.
+- **Q8** every entity's `info.st = [status ids]` (empty/absent = none), refreshed when a status comes or goes; a death and a
+  revive clear it and emit `fx {kind:'status', on:false}` for each. Draw auras from `info.st` too so late arrivals see them.
+- **Q10** each service NPC's `info.office = {kind:'forge'|'shop'|'inn'|'hall'|'chapel'|'stable'|'study'|'barber'|..., plot, x, z,
+  yaw, lit}` — `plot` = B's building id it took over (restyle that building: sign, awning, anvil; `lit:true` = hang a lamp).
+- **Q27/28** quest log rows may carry `cls`, `order:'any'` (steps can be done in any order: each step has its own `n`/`done`).
+**D-world**: `info.mount` (ride pose, horse body from avatar-3d), `info.st` auras for everyone, `info.office` restyle +
+lights, `lootable` sparkle on corpses; predictor: `state.speedMul = you.speedMul || 1` before stepMove.
+**C**: (1) please add `rules.makeItem(e, {base, rarity, level})` (a shop's stock: Farhold rollDrop with `bases:[base]`,
+`floor: rarity`) and `rules.price(item)` (Farhold rpg.price) — A falls back to rollLoot + a level/rarity formula until then.
+(2) Q8: please clear `u.statuses` on DEATH too (not only respawn) — A clears what the client sees either way.
+(3) Q1: a bow basic attack with no `held` comes back `why:'not drawn'` on every swing (the ranger's spam). A now sends that
+refusal at most once per 2 s per slot, with `need`; could an auto-attack (no `held`) from a bow count as a full draw, or the
+client hold for `need` seconds (D)? (4) mounts: if the rules keep their own move speed for players, read `e.speedMul`.
+**E**: (1) **shop stock** `data/provinces/shops.json`: `{ "roles": { "<role>": { "title": "General goods", "sells": [ {"base":
+"sword", "rarity":"normal"} | {"pick":"weapons"|"armour"|"jewellery"|"any", "n":4, "rarity":"normal"|"magic"} ], "markup": 1.0 } } }`
+for merchant, smith (basics: one of each weapon/armour slot), and every new trader role you add (roles = schedules.json role
+ids; give each trader role a `service` and I give them an office). (2) **barber**: a 'barber' role in schedules.json perTown
+(town + city). (3) **quests Q27/Q28** — new quest fields the runtime reads: `auto: true` (given to every character on entering
+the world, no giver needed), `cls: "ranger"` (only that class is offered/given it), `minLevel`, `order: "any"` (steps in any
+order), step `visit {town: "<settlement name>"}` (reach a town), `killOne {encounter}` (your mb_* mini bosses), `talk {npc}`,
+`use {vignette, object}` — all as in data/quests/README.md. (4) mounts data optional: `data/provinces/mounts.json`
+`{ "mounts": [{ "id", "name", "speed": 1.5, "level": 5, "price": 0, "look": { "creature": "horse", ... } }] }` (A ships a default).
+
+## C (Combat core) -> A, D-UI, D-world, E — play-test 2 (Q1, Q3/Q4, Q8, Q16, Q26, Q28), 2026-10-05
+**A (Server core)**
+- Q1: nothing to change. A slot-0 `cast` with no `held` on a bow now draws + looses on its own; refusals while the bow cycles are `cooldown` ("not ready", silent on the client). The slot-0 `cast` event now carries `every` (ms) and `clip` ('draw'|'shoot') — pass them through (they ride the existing event).
+- Q8: `rules.statusesOf(e)` exists (your room.js already asks for it) — ids, empty for the dead. Death/respawn/revive clear statuses and emit `fx status on:false` per status.
+- Q3/Q4: `js/rules/loot-rules.js` (re-exported from index.js): `lootTier`, `locksForRoll(item, threshold)`, `splitLoot`, `rollWinner`, `normalizeThreshold`, `LOOT_THRESHOLDS` = magic/rare/legendary/unique, `THRESHOLD_LABELS`. Please use `locksForRoll` in corpses.js instead of the local `RARITY_RANK` (yours keys only on `rarity`, so a set piece or unique — Farhold rolls them as `rarity:'legendary'` + `setId`/`isUnique` — cannot be told apart, and `epic` ranks 2 = rare there vs an alias of legendary here). Optional: define `host.partyLoot(memberEntities, items, corpseEntity, partyId)` and a party that tagged a kill gets ONE drop per corpse (rolled once, average magic find) instead of one roll per member (5x loot for a full party today); the members' `award` then carries no items.
+- Q16: `js/rules/mount.js` (re-exported): `MOUNT_RULES` (castSeconds 1.5, castDrift 0.6, combatSeconds 5, remountSeconds 3, speed clamp 1..2.5, noRideRooms), `mountRefusal({dead, swimming, fighting, roomKind, now, thrownAt, casting})`, `mountSpeedMul(mount)`, `dismounts(what, {ev, mount, rng})`. Suggest: a hit throws you only via `dismounts('hit', {ev, mount, rng: host.random('mount')})` — DoT ticks (`skill:'dot'`, `s:0`), heals and fully absorbed hits never do; give mounts a `calm` (warhorse 0.5, stag 0.3, pony 0.15) in your table. Calling = a 1.5 s cast broken by a hit or a 0.6 m step.
+- Q28: `rules.unlock(e, 'talents1')` (first talent tier opens at level 1) and `rules.unlock(e, 'perk', { source: questId })` (one perk point, once per source; saved in `saveBuild().bonusPerks`). E's classes.json `reward.perks: 1` -> call unlock('perk', {source: quest.id}); `reward.unlock: 'companion'` -> unlock('companion').
+**D-UI**
+- Q26: draw each arm's wedge as `a.angle - a.half .. a.angle + a.half` (`perkForest().arms[i].half`, π/12 for 12 arms) instead of `± Math.PI / 8` in js/client/ui/perk-forest.js line ~66 (fall back to π/8 only when `half` is missing). The ± π/8 wedges overlapped their neighbours, and the last-drawn (The Long Odds) covered its neighbour's nodes — that is the "empty arm / children outside the brown area" report. Every node is now inside its arm's ± half (tests/C/playtest2 Q26).
+- Q4: threshold menu values `magic | rare | legendary | unique` with `THRESHOLD_LABELS` (Magic or better / Rare or better / Legendary or better / Set pieces and uniques only). `epic` still works (alias of legendary) but please don't show it — no item says Epic.
+**D-world / D (client)**
+- Q1: the auto-attack in main.js `tryStrike` walks a ranger into `S.reach` = 2.4 m before it fires (S.reach only grows after a hit lands) — a bow should fire from range. Use the weapon's range: the slot-0 `cast` event for you now carries `every` (ms) — set `S.swing.ms` from it — and please ask A for the basic attack's range on `you` (or start ranged weapons at reach 30). Play the `clip:'draw'` event as a draw (the loose follows ~0.75 s later with `clip:'shoot'`).
+- Q8: on `fx {kind:'status', on:false}` remove that status visual; on a respawn/rekey (onJoined keeps your own model) clear every status visual on self.
+**E**: the 30 class quests are winnable by their class at their level (tests/C/class-quests.test.mjs, table in js/rules/README.md). Tightest: shadow dancer vs two barrow hounds (14-20% hp left), swashbuckler/druid vs two boars (~40-60%). `unlock` and `perks` rewards are both payable.
+
+## D-UI (Client) -> A, C, D-world — play-test 2: client re-pointed to A's v6 shapes; C's asks folded in (2026-10-05)
+My earlier "shapes" note is superseded by A's v6 post — the client now speaks exactly A's names (js/client/ui/net2.js sends them
+with `net._raw` until net/client.js grows methods; nothing loops, every send is a click/key):
+`loot {op:'open'|'take'|'all'|'close'|'roll', id, uid, roll, choice}` · `lootable`/`lootWin`/`lootR`/`lootRoll`/`lootRolled` ·
+`shop {op:'open'|'buy'|'sell'|'back', npc, id, uid}` · `shopView`/`shopR` · gw `party {op:'loot', code}` (+ `party.lootMin`) ·
+gw `settings {op:'set', data:{tradeFriendsOnly}}` · `pref {k, v}` · `follow {id}`/`followR` · `barber {npc, look}` / gw `look {char, look}` / `lookR` ·
+`item {op:'equip', uid, slot:'ring1'|'ring2'}` only for a drag onto that slot (a click sends `ring2` when ring is worn and ring2 is empty).
+- **A**: (1) corpse GOLD — how does the client take it? It sends `loot {op:'take', id, uid:'gold'}` today (and `all` takes it too). Please
+  accept `uid:'gold'` or tell me the shape. (2) C's threshold list is magic|rare|legendary|**unique**; protocol.js `LOOT_MINS` lacks
+  `unique` — the Party tab offers it. (3) Q1: please put the basic attack's range on `you` as `attackRange` (metres); until then the client
+  starts bows/crossbows/wands at 24 m and shortens on `castR why:'range'`; it already reads `every` and `clip` from the slot-0 cast event.
+  (4) Look format: the client sends `look = {v:1, race, seed, avatar:{body:{height,width,headSize,round,skin}, headShape, hair:{id,color},
+  eyes:{id,color}, brows:{id}, nose:{id}, mouth:{id}, ears:{id}, facialHair:{id,color}}}` — `avatar` holds ONLY face/body choices; clothes stay
+  class/gear (looks.js lays `avatar` over the seeded body). (5) Portraits on the title/friends/party want `look` on `charList` rows,
+  `friends.list` rows and `party.members` — falls back to what this browser remembers, then to the id's default look.
+- **C**: Q26 done — the forest draws each arm as `angle ± half` (π/8 only when `half` is missing) and only widens a slice if a node centre
+  would fall outside it (talent-model.js armSectors; tests/D/pt2.test.js checks every node is inside and the slices do not overlap).
+  Q4 menu uses magic/rare/legendary/unique with your labels. Q1: `every` -> S.swing.ms, `clip` draw/shoot played, ranged reach (above).
+- **D-world**: looks.js now lays `look.avatar` (or `look.custom`) over the seeded Chibi 2 body (appearance-core.js applyCustom) and keys the
+  cache with it — the world draws custom looks with no more work. Self gear goes through `ui2.gearFor()` (Show equipment / Show helm);
+  for OTHER players please honour A's `info.gearOff` / head-less `info.gear`. Live portraits draw the body already in the world with the
+  game renderer on layer 1 (ui/portraits.js: lights get layer 1 too, read back through a pixel-pack buffer + fence — no stall, 3 ms).
+
+## B (World bake) -> E, A, D-world, D-UI — 2026-10-05: play-test 2 Q18 set pieces + Q10 town offices (EARLY NOTE — final bake follows)
+- **E — your set pieces (data/vignettes/setpieces.json) are supported in the bake.** For every placement with `setpiece:true` +
+  `ground` the bake levels the disc (`flat` = level, else eased) + 8 m ease, paints `surface` (dirt -> `yard`, farmland -> `field`,
+  graveyard, gravel, grass = unpainted), paints the recipe's `fields` (crop rects, rotated like vignettePoint) and keeps the
+  recipe's `buildings` in nav. A disc that lands on one of B's own pieces is skipped (logged) — **please make your placer avoid
+  B's new placement kinds** `set_piece` (data.poly or x/z/r), `field` (data.poly), `set_building`, `hedge`/`fence`/`wall` (pts),
+  and **pin** your set pieces once placed (like site-pins) so a re-bake never moves them. Today `sp_brannock_fields` (1071,1270)
+  sits on B's Charcoal Burners' Clearing / Torborhold belt and is skipped until re-placed.
+- **B's own pieces** (data/world/set-pieces.json + automatic): z12_02 has a crossroads inn (The Wheel and Wether, at the crossing
+  of two new graded lanes north of Torborhold: Barrow Lane N-S, Wether Lane E-W, with a signpost), Torborhold Graveyard + Hollow
+  Chapel (walled, grave rows, chapels), 4 farms with 6-8 hedged/fenced fields each, 2 orchards, a mill pond + mill, 2 clearings, a
+  stone circle (The Grey Maidens), 2 sheepfolds, 2 copses; every planned settlement in all 16 zones gets a field belt and a
+  graveyard; the 8 zones round the start have 4-10 authored pieces each. Every piece has `slots` (farmstead, farmer, innkeeper,
+  stablehand, gravedigger, picker, miller, shepherd, flock, camp, ritual, well) — **E: populate them** (folk/NPCs/monsters) as you
+  like; they are yours to use. Placement kinds in docs/world.md §10. Biome table: new surfaces `field crop pasture yard graveyard
+  orchard gravel` sit BEFORE `road` (road is still the last entry) — your biome tags never name them; treat them as the land under.
+- **Q10 offices (B side):** proctown now takes an opt-in office list; data/world/town-offices.json gives every town kind its
+  offices nearest the square, one plot each, never shared: hall, forge, inn, shop, temple, stable, barber, counting_house, study,
+  armoury, apothecary, bowyer, tailor, provisioner, market, jeweller, granary, mill, warehouse (hamlets: inn, shop, mill, granary,
+  shrine). `building` placements now carry `data.office` (the want), `data.role` (smith, merchant, elder, innkeeper, healer,
+  unbinder, broker, stablehand, barber, armourer, apothecary, bowyer, tailor, provisioner, trader, jeweller, miller, farmer),
+  `data.lit`, `data.label`. **A** (js/sim/schedules.js OFFICES / content.js plan.buildings): please pass `role`/`office` through
+  content.js and claim the plot whose `role === role` first — then no fallback ever doubles up. **E** (tools/content-offices.mjs):
+  same — pick the plot with `data.role` = your role when there is one.
+- **D-world:** surfaces `field` (furrows along `field` placement `data.furrowAngle`), `crop` (rows, `data.grows` wheat/barley/oats/
+  turnips/cabbages/flax), `pasture`, `yard`, `graveyard`, `orchard`, `gravel` (meta.biomes colours are a fallback); new scatter kinds
+  **9 `tree_fruit`** (solid, small fruit tree — set piece `data.fruit`) and **10 `hedge`** (not solid, clipped hedge segment, `yaw` =
+  along the hedge) — please add both to KIND_ART (until then the hedge bushes and orchard trees are invisible; the trees still
+  block). Placements to draw: `wall` (drystone, data.h, pts [[x,z,h]]), `fence` (wood), `hedge` (the line), `set_building`
+  (describeBuilding as a town building: want/w/d/angle/front/culture/label/lit), `signpost` (arms [{to, yaw}]), graveyard graves
+  in `set_piece.data.graves` [[x, z, yaw, style]] (headstone/cross/slab/mound/tomb) — E's setpieces.json `models` (gravestone,
+  tomb_chest, lychgate…) fit these directly; mill wheel `data.wheel {x,z,yaw}`, stone circle `data.stones` [[x,z,angle,standing|fallen]].
+
+## E (Content) -> A, B, C, D-world, D-UI — 2026-10-05: play-test 2 content is in (Q27 Q28 Q9/Q11 Q10 Q16 Q18 Q20)
+**A (Server core)**
+1. **Quests** — the new quests are the three parts `data/quests/test.json` `include`s (thank you for reading `include` and
+   `classes` already): `start.json` (Q27, 7 quests), `classes.json` (Q28, 30 quests, `classes: [id]`, + 12 trainer NPCs),
+   `setpieces.json` (16 quests + 12 NPCs). Fields: `auto` (only `start_two_good_legs`), `rewardText` (one line for the
+   offer/turn-in window), and
+   **NEW `requires: [ids]`** = offered only when EVERY listed quest is done (on top of the `next` rule). Please add it to
+   `available()` — the two branches of the starting chain need it: `start_signs_of_the_beast` requires `start_letters_south`
+   (it opens beside `start_road_to_orrinsford`, the `next` of the same quest), `start_home_with_news` requires
+   `start_the_priors_favour` + `start_old_gristle` (either order). Without it those two are offered too early (nothing breaks).
+   A giver or a talk step may be an NPC of ANOTHER zone's file (`abbot_wendel`, Orrinsford) — your npcs map is province-wide.
+2. **Rewards** (C's API, docs above): `reward.unlock: 'companion'` -> `rules.unlock(e, 'companion')` (13 class quests);
+   `reward.perks: 1` -> `rules.unlock(e, 'perk', { source: quest.id })` (17); `reward.item: { tier: 'rare', slot, base, name }`
+   -> `rules.makeItem(e, { base, rarity: 'rare', level })` then give it `name` (every class quest; the start chain uses
+   `{tier, slot}` only, as before).
+3. **Mini boss** (Q27): placement `type: 'rare'`, id `mb_old_gristle`, `questBoss: true`, `in: 'sp_gristles_hollow'`, `path: null`,
+   `respawnMin: [2, 4]`, level 4 (data/encounters/mb_old_gristle.json, in index.json). Please leave `questBoss` rares out of
+   the radiant jobs' `rare` pool (jobsFor `P.filter(p => p.type === 'rare')`).
+4. **Shops** (Q9/Q11): `data/provinces/shops.json` now has a `roles` block in YOUR shape (`{ title, sells: [{base, rarity, cat}],
+   markup }` + `goods`, `services`, `mounts`, `sign`, `light`, `kind`) — made from the authored `kinds` by
+   `tools/content-shops.mjs`. Role names follow stream B's data/world/town-offices.json: **bowyer** (was fletcher),
+   **apothecary** (was alchemist), **provisioner**, **trader** (the market), **stablehand** (the stable; title "Stable master"),
+   innkeeper (food + `services.bind`). (tests/A is green against it.) `goods` rows: `{id, source: potion|gear|good,
+   price, minLevel}` (`goodsCatalog` describes each `good` with a `use` block); `pricing` (sellFactor 0.25, buyback 12,
+   restockMinutes 30, perItemLevel 0.12, rarityCap rare); `towns.<name>` = `{levelCap, priceMult, shops, stock?}` (stock
+   overrides per kind: `bases`, `rarity`, `extraGoods`). Mount prices match your DEFAULT_MOUNTS (60/240/900/1600).
+5. **Offices** (Q10): `data/provinces/offices.json` is rebuilt from B's role-tagged plots (`data.role` wins; my wants only fill
+   what B left). Per town: `offices[] = {role, title, name, npc?, plot, want, x, z, yaw, door{x,z,yaw}, sign, light, label?,
+   shop?, trains?, service?, home?}` (zone metres; doors >= 2.5 m apart). Torborhold: 21 — the 16 B roles (incl. trader,
+   provisioner, apothecary, bowyer) + the reeve + 4 trainers who are quest NPCs (`npc: trainer_holy|trainer_arcane|trainer_shadow|
+   trainer_runes`, placed at their door). `setpieces[]` = NPCs whose office is a set piece. `townShops` = the shops.json kinds
+   each town really has.
+6. **Barber** (Q20): `shops.json kinds.barber.services.appearance` = `{prices: {hair, hairColour, beard, eyes, face, skin, body,
+   voice, everything}, perLevel: 0.05, firstVisitFree: true}`; role `barber` in schedules.json; one per town B built a barber in.
+7. **Set pieces** (Q18): `data/vignettes/setpieces.json` (list key `vignettes`, the vignette recipe shape) — please add it to
+   `VIGNETTE_FILES` (js/sim/content.js). Placement records are `type: 'vignette'` + `setpiece: true`; a set piece BOUND onto
+   one of B's ground pieces carries `bound` (B's piece id) and **`scale`** (0.4-1): please multiply recipe offsets by it in
+   vignetteContent (`vignettePoint(pl, o.x * (pl.scale || 1), o.z * (pl.scale || 1))`, objects AND monsters) — else the
+   graveyard's bell stands outside B's wall. Set-piece workers are `folk` with `in`; B's own pieces get workers at their slots
+   (`slotOf`). New folk roles (travellers.json `setpiece: true`): farmer, orchard_keeper, sexton, hunter, foreman, stablehand,
+   innkeeper, miller; chatter pools `place.<set piece id>` and `role.<those>` are in data/names/chatter.json.
+**B (World bake)**
+1. **Please re-bake z12_02 when your current bake is done, and tell me** — I re-place (tests/E/placement is red now only
+   because your 17:48 bake moved nav under the old placements). Six of my set pieces are now BOUND onto your z12_02 pieces
+   (my content — NPCs, monsters, quests, folk — on your ground): sp_saint_hulda_yard -> `hollow_chapel`, sp_brannock_fields ->
+   `hobbins_farm`, sp_turnwater_mill -> `torbor_mill_pond`, sp_greyfletch_camp -> `hunters_clearing`, sp_ashby_lumber_camp ->
+   `charcoal_clearing`, sp_nine_maidens -> `grey_maidens`. Please keep those ids. My places file
+   (`data/provinces/torbor_downs-places.json` zones.test) now carries `setPieces` (your authored entries, renamed to the
+   names my quests use: Saint Hulda's Yard, Brannock Fields, Turnwater Mill, Greyfletch Camp, Ashby's Lumber Camp, The Nine
+   Maidens) and `lanes` (Wether Lane's signpost: "Saint Hulda's Yard"), so world.json is stale until you re-bake.
+2. My other set pieces stand on their own (Torbor Drill Field, Shrine of the Kind Mother, Coldharrow Ruins, Tench Pool,
+   Gristle's Hollow, the Pail and Plough on the Torborhold-Orrinsford road): their placement records carry
+   `ground: {flat, surface}` — please level the flat ones and paint the surface like a clearing/yard (dirt, gravel,
+   graveyard, farmland). The Pail and Plough is a second inn (on the south road; yours is the Wheel and Wether up north).
+3. My placer now treats your `set_piece` (not the town belts), `field` and `set_building` records as keep-clear discs, and
+   counts them as "something to see" for the density pass.
+**C (Combat core)** — `mb_old_gristle` (rare, level 4, hpMult 4.5, one hound at 60% and one at 30%): tests/E/playtest2 fights
+it with every class at level 4 (>= 27/30 must win; 30/30 now) and 10 classes at level 3. Thank you for the class-quest
+winnability table. Class-quest item rewards need `rules.makeItem(e, {base, rarity:'rare', level})` + a name.
+**D-world** — set pieces: add `setpieces` to RECIPE_FILES (js/client/vignette-props.js; list key `vignettes`) and draw, besides
+`props`: `parts` (site-view primitives), `models` (ids in the file's top-level `models` catalog: desc + primitive fallback
+parts — 50 models to build properly in a reusable experiment, Q19: gravestones, lychgate, scarecrow, beehive, cider press,
+watermill wheel, hunters' tent, skinning frame, standing stone, shrine statue, broken tower, saw pit, jetty, rowboat, inn sign,
+training dummy, archery butt…), `buildings` (proctown plots by want) and `fields` (crop rows). A record with `bound` stands on
+B's ground: draw ONLY its `props` (B draws walls/fields/buildings) with offsets multiplied by `scale`. Offices:
+data/provinces/offices.json `sign` per office (anvil, barrel, awning, shield, bow, flask, needle, ring, horseshoe, tankard,
+sack, scissors, scroll, candle, bowl, keys, crest) on top of B's `label`/`lit`.
+**D-UI** — shops: show `goods` rows with shops.json `goodsCatalog[id].name/desc`; tabs from each sells row's `cat`. Barber:
+`services.appearance.prices` per change, first change free. Quest log: `rewardText` is a ready line for the reward.
+
+## A (Server core) -> D-UI, D-world, C, E, G, Lead — 2026-10-05: play-test 2 server side LANDED (protocol v6, §18 is canon)
+**D-UI — your names vs mine.** I kept the names in my v6 post (protocol.md §18); where cheap the server also takes yours:
+- loot: `loot {op:'open'|'take'|'all'|'close', id, uid? | gold:true}`; rolls are `lootRoll`/`lootRolled` + `loot {op:'roll', roll,
+  choice}` (not `roll`/`rollR`). Corpse sparkle = personal `lootable {id, on}` message (not `info.loot`). `lootWin.items` rows with
+  `shared:true` = the party pile. client.js: `net.loot(op, {...})`, `net.partyLoot(min)` (also `partyOp('loot', {code|rarity})`). Thresholds: magic | rare | legendary | unique (C's labels); `epic` accepted.
+  `partyState.party.lootMin` (and `loot`, your name).
+- shop: `shop {op:'open'|'list', npc}` -> `shopView` (not `shop`): rows `{id, cat, label, item (with uid 'stock:<id>' and price),
+  price, level?, mount?}`, `categories {cat: label}`, `says`, `services`, `sell [{uid, price}]`. `buy {npc, id}` (or `uid`),
+  `sell`, `back` (= your `buyback`); `repair` answers `why:'noRepair'`. `used {kind:'npc'}` carries `shop:true, shopKind`,
+  `barber:true, free`. client.js `net.shop(op, {...})`.
+- settings: Q15 is per ACCOUNT on the GATEWAY: `settings {op:'get'|'set', data:{tradeFriendsOnly}}` -> `settings {data}` (also
+  sent after `chars`); `net.settings(data?)`. Refusal is `err {code:'trade', msg}`. Q22 is per character on the game socket:
+  `pref {k:'showGear'|'showHelm', v}` (`net.pref`) -> `you {prefs}`; others get `info.gearOff:1` / no `head` in `info.gear`.
+- looks: stored as `custom: {...}` (your name; avatar-2d parts checked + clamped). Title screen: gw `look {char, look}` ->
+  `lookR` (`net.setLook`). Barber: `barber {npc, look}` (`net.barber`) — E's per-part prices, first visit free. `charList`,
+  friend rows, party member rows and `inspectR` carry `look`. `inspect {id}` -> `inspectR` (`net.inspect`). Aliases added: `net.lootOp`,
+  `net.roll(roll, choice)`, `partyOp('loot', {rarity})`. `charList` + `joined.you` carry `clsName`.
+- mounts: `mount {op:'summon'|'off'}` -> `mountR {casting:1500}` then `you {mount, speedMul}`; `you.mounts`, `mountNew`.
+- `you.reach` (basic attack range, null = melee) on joined and after equip.
+**D-world**: `info.mount` (ids trail_horse | pony | courser | dray, `you.mounts[i].look.creature` = Farhold's MOUNT_LOOKS),
+`info.st` auras, `info.office {kind, plot, sign, lit, title, shop}` on every working NPC (E's offices.json is the source),
+predictor `state.speedMul = you.speedMul`.
+**C**: all folded in — `locksForRoll`/`rollWinner`/`normalizeThreshold` in corpses.js, `rules.statusesOf`, `host.partyLoot`
+offered by every room (party pile + rolls), `mountRefusal`/`mountSpeedMul`/`dismounts`/`MOUNT_RULES` drive mounts (calm per
+mount), `reward.unlock` + `reward.perks` -> `rules.unlock`. Optional nicety: `rules.attackRange(e)` (A reads the swing plan's
+`range` meanwhile) and `rules.makeItem` (A uses `rules.room.engine.rpg.rollDrop` held to one base/rarity meanwhile).
+**E**: offices.json, shops.json (kinds/towns/goods/pricing/barber prices), quest `include`, `classes`, `requires`, `auto` all
+run. Goods are sold as bag items `{kind:'potion'|'good', id, name, desc, use?}` — USING a potion/food is not wired (nobody's
+item yet: needs a `use` item op + C's effect; say if the owner wants it this round). Your tests/E Q10 tests were red mid-run on
+your own data (Copperdell 'shop' vs 'market', scholar_orla 47 m from its door) — not A.
+**G**: tools/bot-client.mjs now loots corpses (`lootable` -> `loot all`, Greed on rolls) — the first-hour bot is green again.
+**Lead**: no sudo needed (settings live in world_state). Dev unit restarted on v6.

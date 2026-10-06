@@ -54,6 +54,20 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
   const sites = await opt('data/provinces/sites.json');
   const hooks = ((await opt('data/hooks.json')) || {}).hooks || [];
   const treasure = ((await opt('data/quests/treasure.json')) || {}).chains || [];
+  // a zone's quest file may `include` other files (stream E, play-test 2: start.json, classes.json, setpieces.json are parts
+  // of zone 'test'): their npcs and quests are merged into it
+  const questsOf = async eid => {
+    const q = await opt(`data/quests/${eid}.json`);
+    if (!q || !Array.isArray(q.include)) return q;
+    const out = { ...q, npcs: { ...(q.npcs || {}) }, quests: [...(q.quests || [])] };
+    for (const f of q.include) {
+      const part = await opt('data/quests/' + String(f).replace(/^.*\//, ''));
+      if (!part) { log('quest include ' + f + ' missing'); continue; }
+      Object.assign(out.npcs, part.npcs || {});
+      for (const d of part.quests || []) if (!out.quests.some(x => x.id === d.id)) out.quests.push(d);
+    }
+    return out;
+  };
   const wayside = Object.fromEntries((((await opt('data/vignettes/wayside.json')) || {}).kinds || []).map(k => [k.id, k]));   // roadside dressing kinds
   const zones = [], parts = [];
   for (const [eid, wid] of Object.entries(map.map)) {
@@ -71,7 +85,7 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
         // placements are in zone metres: move them into world metres
         const ox = zx * 2048, oz = zy * 2048;
         // placements[] + features[] (hooks that ARE a bake feature: a ford, a settlement, a `pts` line)
-        vignettes = { recipes, sites, hooks, treasure, wayside, quests: await opt(`data/quests/${eid}.json`),
+        vignettes = { recipes, sites, hooks, treasure, wayside, quests: await questsOf(eid),
           placements: [...(pl.placements || []), ...(pl.features || []).map(f => ({ ...f, feature: true }))].map(p => ({ ...p, x: p.x + ox, z: p.z + oz, ...(Array.isArray(p.path) ? { path: p.path.map(([a, b]) => [a + ox, b + oz]) } : {}), ...(Array.isArray(p.pts) ? { pts: p.pts.map(([a, b]) => [a + ox, b + oz]) } : {}) })) };
         break;
       } catch { /* none yet */ }
@@ -84,10 +98,10 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
     for (const p of (bp && bp.placements) || []) {
       const wx = p.x + zx * 2048, wz = p.z + zy * 2048, d = p.data || {};
       if (p.kind === 'settlement') plan.settlements.push({ id: p.id, name: d.name, kind: d.kind, x: wx, z: wz });
-      else if (p.kind === 'building') plan.buildings.push({ town: d.town, want: d.want, x: wx, z: wz, yaw: p.yaw || 0, d: d.d || 6 });
+      else if (p.kind === 'building') plan.buildings.push({ id: p.id, town: d.town, want: d.want, x: wx, z: wz, yaw: p.yaw || 0, w: d.w || 6, d: d.d || 6 });   // id: the plot an office takes over (Q10)
       else if (p.kind === 'town_square') plan.squares.push({ town: d.town, x: wx, z: wz });
     }
-    zones.push({ key: wid, eid, sheet: zs ? { ...zs, id: eid } : null, vignettes, plan, quests: (vignettes && vignettes.quests) || await opt(`data/quests/${eid}.json`), placements: vignettes ? vignettes.placements : [] });
+    zones.push({ key: wid, eid, sheet: zs ? { ...zs, id: eid } : null, vignettes, plan, quests: (vignettes && vignettes.quests) || await questsOf(eid), placements: vignettes ? vignettes.placements : [] });
   }
   if (!parts.length) throw new Error('province ' + provinceId + ': no zone is baked');
   const startE = sheet && sheet.grid ? sheet.grid.start : null;
@@ -103,12 +117,16 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
   const rares = (await opt('data/provinces/rares.json')) || {};
   const jobs = await opt('data/quests/jobs.json');
   const schedules = await opt('data/provinces/schedules.json');
+  // play-test 2: shop stock (Q11) and mounts (Q16), stream E's data (A has stand-ins for both)
+  const shops = await opt('data/provinces/shops.json');
+  const mounts = await opt('data/provinces/mounts.json');
+  const offices = await opt('data/provinces/offices.json');      // Q10: E's one-plot-per-NPC offices per hub town
   const horizon = await opt('data/world/horizon.json');      // stream B's 32 m world horizon manifest (joined.room.horizon)
   // the living roads (P19, stream E): who travels, along which routes, and what they say (js/sim/travellers.js)
   const tv = await opt('data/provinces/travellers.json'), rt = await opt(`data/provinces/${provinceId}-routes.json`);
   const travel = tv && rt ? { kinds: tv.kinds || {}, rules: tv.rules || {}, folkKinds: tv.folk || {}, routes: rt.routes || [], chatter: (await opt('data/names/chatter.json')) || { pools: {}, rules: {} }, names: (await opt('data/names/torbor.json')) || {} } : null;
   const marks = ((await opt(`data/quests/marks/${provinceId}.json`)) || {}).quests || null;   // P17: E's map mark per quest
-  return { travel, marks, key: provinceId, name: sheet ? sheet.name : provinceId, terrain, zones, encounterInfo, events, zoneEvents, directorRules: (evData && evData.director) || null, starter, starterProvince, rares, jobs, schedules, horizon };
+  return { travel, marks, key: provinceId, name: sheet ? sheet.name : provinceId, terrain, zones, encounterInfo, events, zoneEvents, directorRules: (evData && evData.director) || null, starter, starterProvince, rares, jobs, schedules, horizon, shops, mounts, offices };
 }
 
 /**

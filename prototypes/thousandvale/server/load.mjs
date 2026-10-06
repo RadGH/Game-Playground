@@ -43,6 +43,12 @@ export function loadClasses() {
   catch { return null; }
 }
 
+/** Class id -> display name (play-test 2, Q25: the character list showed "Adventurer" for a ranger). */
+export function loadClassNames() {
+  try { return Object.fromEntries(JSON.parse(readFileSync(join(PLAYGROUND, 'prototypes/farhold/data/classes.json'), 'utf8')).classes.map(c => [c.id, c.name || c.id])); }
+  catch { return null; }
+}
+
 const readJson = async f => JSON.parse(readFileSync(join(GAME, f), 'utf8'));
 const readBytes = async f => readFileSync(join(GAME, f));
 
@@ -61,7 +67,7 @@ export async function loadLayouts(keys, { copyCap = 300 } = {}) {
     if (provinces[key]) {
       const c = await loadProvinceContent(readJson, readBytes, key, { parseTerrain, parseNav, createProvinceTerrain, log });
       encounterInfo = c.encounterInfo;
-      layouts.push(buildLayout({ key, name: c.name, terrain: c.terrain, zones: c.zones, encounterInfo, copyCap: c.starterProvince ? Math.min(copyCap, STARTER_COPY_CAP) : copyCap, vignetteContent, starter: c.starter, rares: c.rares, jobs: c.jobs, schedules: c.schedules, horizon: c.horizon, travel: c.travel, marks: c.marks }));
+      layouts.push(buildLayout({ key, name: c.name, terrain: c.terrain, zones: c.zones, encounterInfo, copyCap: c.starterProvince ? Math.min(copyCap, STARTER_COPY_CAP) : copyCap, vignetteContent, starter: c.starter, rares: c.rares, jobs: c.jobs, schedules: c.schedules, horizon: c.horizon, travel: c.travel, marks: c.marks, shops: c.shops, mounts: c.mounts, offices: c.offices }));
       events.push(...c.events);
       directorRules ||= c.directorRules;
       continue;

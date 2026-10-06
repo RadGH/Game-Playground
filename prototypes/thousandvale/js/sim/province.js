@@ -18,7 +18,7 @@
 // the same thing get a "Group up" hint), player traces (graves, campfires, door banners, zone deeds,
 // footprint heat), the day/night clock, NPC schedules (town folk at work by day, at the inn by night).
 
-import { PROTOCOL_VERSION, TICK_MS, CODES, ITEM_OPS, STATE, TALENT_OPS, PERK_OPS } from '../net/protocol.js';
+import { PROTOCOL_VERSION, TICK_MS, CODES, ITEM_OPS, STATE, TALENT_OPS, PERK_OPS, SHOP_OPS, MOUNT_OPS, PREF_KEYS } from '../net/protocol.js';
 import { createRoom } from './room.js';
 import { createRules as rulesV0 } from './rules-v0.js';
 import { createTickStats } from './tickstats.js';
@@ -36,6 +36,11 @@ import { createQuestBook } from './quests.js';
 import { townFolk, blockAt } from './schedules.js';
 import { createMail } from './mail.js';
 import { createTravellers } from './travellers.js';
+import { createCorpses } from './corpses.js';
+import { createShops, SHOP_RANGE } from './shops.js';
+import { createMountBook } from './mounts.js';
+import { cleanLook } from './looks.js';
+import { mountRefusal, mountSpeedMul, dismounts, MOUNT_RULES } from '../rules/mount.js';   // stream C's riding rules (when, how fast, what throws you)
 
 const LEASE_MS = 30000, HEARTBEAT_MS = 10000, TICKET_WAIT_MS = 3000;
 export const BAG_MAX = 120;
@@ -57,6 +62,9 @@ export const KIT_KEEP = new Set(['weapon', 'offhand', 'mainhand', 'offHand']);
 export const RECENT_Q_MS = 15 * 60000;    // P17: kills / event wins / clears this recent count toward a quest you accept now
 export const RECENT_Q_MAX = 60;
 export const ROLES = ['smith', 'merchant', 'elder', 'innkeeper', 'healer', 'unbinder', 'broker'];
+export const BARBER_M = 6;
+export const FOLLOW_M = 40;               // Q2: you may follow someone this close (and not hostile)
+export const CAST_REFUSAL_MS = 2000;      // Q1: the same refusal for the same slot is sent at most this often
 const RARE = new Set(['rare', 'unique', 'legendary', 'set']);
 
 export function createProvince(opts) {
@@ -102,10 +110,16 @@ export function createProvince(opts) {
       if (!o || o.entity !== e) return;
       if (a.xp) journal(o, 'xp', { d: a.xp, level: a.level });
       grant(o, { ...a, goldAdded: true });
+      if (a.level >= 2) starterMount(o);                     // Q16: the first mount at level 5
     },
     newUid,
     loot: (ev, r) => { const e = r.entities.get(ev.to); const o = e && e.char && online.get(e.char.id); if (o && o.entity === e) grant(o, { items: ev.items, gold: 0, reason: 'kill', goldAdded: true }); },
     observe: (ev, r) => observe(ev, r),
+    // play-test 2, Q3: a kill's gold + items wait on the corpse (js/sim/corpses.js); the body stays while they do
+    holdKill: opts.corpseLoot === false ? null : (e, from, a, r) => corpses.hold(r, e, from, a),
+    keepBody: (e, r) => corpses.keepBody(e, r),
+    partyLoot: opts.corpseLoot === false ? null : (members, items, corpse, partyId, r) => corpses.partyDrop(r, members, items, corpse, partyId),
+    onSwim: (e, on) => { if (on && e.char) { const o = online.get(e.char.id); if (o && o.entity === e && o.mount) dismount(o, 'swim'); } },
   };
   const host = r => r.host;
 
@@ -151,8 +165,10 @@ export function createProvince(opts) {
     // town folk with day and night places (PLAN §4.3): stream E's schedules over stream B's town plan when both are
     // there (js/sim/schedules.js), else the roles round the square by day, at the inn by night
     if (L.schedules) {
-      const quest = out.filter(o => o.type === 'npc' && o.npc && o.npc.id);
-      out.push(...townFolk(t, { plan: L.townPlans && L.townPlans[i], schedules: L.schedules, kind: (L.townPlans && L.townPlans[i] && L.townPlans[i].kind) || t.kind || 'town', key: L.key + ':' + i, questNpcs: quest }));
+      const staffed = officeFolk(L, t, i, out);          // Q10: stream E's offices.json, when it lists this town
+      const quest = out.filter(o => o.type === 'npc' && o.npc && o.npc.id && !o.officeFixed);
+      out.push(...townFolk(t, { plan: L.townPlans && L.townPlans[i], schedules: L.schedules, kind: (L.townPlans && L.townPlans[i] && L.townPlans[i].kind) || t.kind || 'town', key: L.key + ':' + i, questNpcs: quest,
+        onlyFolk: !!staffed, taken: staffed || [] }));
       return out;
     }
     const inn = { x: t.x - t.r * 0.35, z: t.z + t.r * 0.3 };
@@ -163,6 +179,34 @@ export function createProvince(opts) {
       out.push({ type: 'npc', name: roleName(role), x: day.x, z: day.z, key: `npc:${L.key}:${i}:${role}`, npc: { role, says: [] }, schedule: { blocks: [{ from: 0.22, at: day, do: 'work' }, { from: 0.8, at: night, do: 'rest' }] } });
     });
     return out;
+  }
+  /**
+   * Q10 with stream E's data/provinces/offices.json: one building plot per working NPC in each hub town (zone metres,
+   * moved to world metres by the town's own centre). A quest NPC who keeps an office (`npc`) is ONE body: the placed quest
+   * NPC takes the office's role / shop / door; otherwise a body is made for the office. Everyone stays at their door day
+   * and night. Returns the doors taken (or null when E has no entry for this town -> schedules.js plans the offices).
+   */
+  function officeFolk(L, t, i, out) {
+    const towns = L.offices && L.offices.towns;
+    if (!towns) return null;
+    const bare = n => String(n || '').toLowerCase().replace(/^the\s+/, '');
+    const entry = Object.values(towns).find(x => bare(x.name) === bare(t.name));
+    if (!entry || !Array.isArray(entry.offices)) return null;
+    const dx = t.x - entry.x, dz = t.z - entry.z;
+    const taken = [];
+    for (const of of entry.offices) {
+      const door = of.door || { x: of.x, z: of.z, yaw: of.yaw || 0 };
+      const at = { x: door.x + dx, z: door.z + dz, yaw: door.yaw || 0 };
+      const office = { kind: of.want || of.role, plot: of.plot || null, want: of.want || null, x: Math.round((of.x + dx) * 10) / 10, z: Math.round((of.z + dz) * 10) / 10, yaw: of.yaw || 0, w: of.w || null, d: of.d || null,
+        lit: !!of.light, sign: of.sign || null, title: of.title || null, shop: of.shop || null, ...(of.home ? { home: true } : {}) };
+      const npcInfo = { role: of.role, shop: of.shop || null, service: of.service || null, ...(of.trains ? { trains: of.trains } : {}) };
+      const schedule = { blocks: [{ from: 0, at, do: 'work' }], says: null };
+      const q = of.npc ? out.find(o => o.type === 'npc' && o.npc && o.npc.id === of.npc) : null;
+      if (q) { q.npc = { ...q.npc, ...npcInfo }; Object.assign(q, { x: at.x, z: at.z, yaw: at.yaw, office, schedule, officeFixed: true }); }
+      else out.push({ type: 'npc', name: of.name || of.title || of.role, x: at.x, z: at.z, yaw: at.yaw, key: `npc:${L.key}:${i}:${of.plot || of.role}`, npc: { ...(of.npc ? { id: of.npc } : {}), says: [], ...npcInfo }, office, schedule, officeFixed: true });
+      taken.push({ x: at.x, z: at.z, plot: of.plot || null });
+    }
+    return taken;
   }
   function makeCopy(pv) {
     const L = pv.L;
@@ -269,6 +313,7 @@ export function createProvince(opts) {
       case 'relocated': return relocated(m);
       case 'event': return onEvent(m);
       case 'waystones': remoteWaystones = m.list; return;
+      case 'social': social.set(m.char, { friends: new Set(m.friends || []), tradeFriendsOnly: !!m.tradeFriendsOnly }); return;
     }
   });
 
@@ -308,11 +353,22 @@ export function createProvince(opts) {
         return;
       }
       case 'cast': {
+        if (o.mount && !e.dead) dismount(o, 'cast');            // Q16: attacking or casting gets you off the horse
         const msg = m.held !== undefined ? { ...m, held: Math.max(0, Math.min(5, m.held)) } : m;
         const res = r.intent(e, msg);
         if (res && res.ok === false) {
-          const out = { t: 'castR', slot: m.slot, ok: false, why: res.why || 'unknown' };
+          // Q1 "not drawn, not drawn, not drawn": one refusal per slot and reason per CAST_REFUSAL_MS (the client
+          // repeats its attack every frame while the button is down; the answer does not change that fast)
+          const why = String(res.why || 'unknown').replace(/ (\w)/g, (_, c) => c.toUpperCase());
+          const k = m.slot + ':' + why, t = now();
+          o.castRefused ||= new Map();
+          if (t - (o.castRefused.get(k) || -1e9) < CAST_REFUSAL_MS) return;
+          o.castRefused.set(k, t);
+          const out = { t: 'castR', slot: m.slot, ok: false, why };
           if (res.text) out.text = String(res.text).slice(0, 200);
+          else if (why === 'notDrawn') out.text = 'Hold the attack to draw your bow, then let go.';
+          if (Number.isFinite(res.need)) out.need = res.need;
+          if (Number.isFinite(res.wait)) out.wait = Math.round(res.wait * 1000) / 1000;
           s.sendJSON(out);
         }
         return;
@@ -334,6 +390,14 @@ export function createProvince(opts) {
       case 'talent': return talentOp(o, m);
       case 'perk': return perkOp(o, m);
       case 'map': return m.op === 'get' ? s.sendJSON(mapData(o)) : bad(s, 'op');
+      // play-test 2
+      case 'loot': { const why = corpses.op(o, m); if (typeof why === 'string') bad(s, why); return; }
+      case 'shop': return shopOp(o, m);
+      case 'mount': return mountOp(o, m);
+      case 'barber': return barberOp(o, m);
+      case 'pref': return prefOp(o, m);
+      case 'follow': return followOp(o, m);
+      case 'inspect': return inspectOp(o, m);
       default: return bad(s, 'socket');
     }
   }
@@ -381,6 +445,8 @@ export function createProvince(opts) {
     online.set(ch.id, o);
     o.entity = place.room.addPlayer(ch, client, place.at);
     startingKit(o);
+    starterMount(o, true);
+    autoQuests(o);
     gearLook(o);
     tagParty(o);
     if (place.room.kind === 'wilds') o.homeCopy = place.room;
@@ -465,6 +531,8 @@ export function createProvince(opts) {
         quests: (provOf(o.room) || first).book.view(ch),
         seen: ch.seen || { zones: [], places: [] },
         opened: Object.keys(ch.opened || {}).filter(k => ch.opened[k] > t),
+        // play-test 2
+        reach: attackReach(o), mounts: mountBook.owned(ch), mount: o.mount || null, speedMul: e.speedMul || 1, prefs: prefsOf(ch), look: ch.look || null, clsName: clsNameOf(ch.cls),
       },
     };
     // the skill bar only changes on a level-up / form / talent (those arrive as `you {bar}` and refresh o.bar): a room
@@ -481,7 +549,7 @@ export function createProvince(opts) {
 
   // ---- presence for the gateway (parties, ignore, the director) ----
   function presence(o) {
-    send({ k: 'presence', char: o.char.id, name: o.char.name, cls: o.char.cls, level: o.char.level, room: o.room.id, province: provOf(o.room).L.key, zone: o.zone || null, online: !!o.conn, ignore: o.char.ignore || [], mutedUntil: o.char.mutedUntil || 0, account: o.char.account });
+    send({ k: 'presence', char: o.char.id, name: o.char.name, cls: o.char.cls, level: o.char.level, room: o.room.id, province: provOf(o.room).L.key, zone: o.zone || null, online: !!o.conn, ignore: o.char.ignore || [], mutedUntil: o.char.mutedUntil || 0, account: o.char.account, look: o.char.look || null });
   }
   function sendFrames() {
     const rows = [];
@@ -508,6 +576,8 @@ export function createProvince(opts) {
     from.remove(old);
     o.room = to;
     o.entity = to.addPlayer(o.char, client || null, { x: at.x, z: at.z, carry });
+    corpses.leftRoom(o);
+    if (o.mount) { if (to.kind === 'instance' || via === 'respawn') o.mount = null; else applyMount(o); }
     gearLook(o);
     if (!client) to.detach(o.entity);
     tagParty(o);
@@ -557,6 +627,7 @@ export function createProvince(opts) {
     if (o.room.kind === 'instance') { o.room.respawn(e); return; }
     e.revive(1);
     o.room.rules.respawn && safeRules(o.room, 'respawn', e);
+    o.room.statusChanged(e);                           // Q8: no aura survives a death
     o.char.hp = e.hpMax;
     const pv = provOf(o.room);
     // wake in the nearest town of this province
@@ -612,7 +683,9 @@ export function createProvince(opts) {
     if (d.note || d.npc || d.use || d.chest) questTouch(o, obj);          // talk / use steps, and what this one offers
     if (d.chest) return openChest(o, obj);
     if (d.note) return s.sendJSON({ t: 'used', id, ok: true, kind: 'note', name: obj.name, text: d.note.text, quest: d.note.quest || undefined, ...questOffer(o, obj) });
-    if (d.npc) return s.sendJSON({ t: 'used', id, ok: true, kind: 'npc', name: obj.name, says: d.npc.says, quest: d.npc.quest || undefined, role: d.npc.role || undefined, ...questOffer(o, obj) });
+    if (d.npc) return s.sendJSON({ t: 'used', id, ok: true, kind: 'npc', name: obj.name, says: d.npc.says, quest: d.npc.quest || undefined, role: d.npc.role || undefined,
+      ...(shops.kindOf(obj) ? { shop: true, shopKind: shops.kindOf(obj) } : {}), ...(d.npc.role === 'barber' ? { barber: true, free: !(o.char.flags && o.char.flags.barberUsed) } : {}), ...(d.npc.role === 'unbinder' ? { unbinder: true } : {}),
+      ...(d.npc.service ? { service: d.npc.service } : {}), ...questOffer(o, obj) });
     if (d.use) return useThing(o, obj);
     if (d.trace) return s.sendJSON({ t: 'used', id, ok: true, kind: d.trace.kind, ...d.trace });
     if (d.lever) {
@@ -957,6 +1030,17 @@ export function createProvince(opts) {
   }
   function observe(ev, r) {
     if (ev.type === 'hit' || ev.type === 'die') contribute(ev, r);
+    if ((ev.type === 'hit' && ev.kind === 'dmg' && (ev.n || 0) > 0) || ev.type === 'die') {      // Q16: a hit (unless the mount keeps calm) or a death unhorses you
+      const d = r.entities.get(ev.d);
+      const od = d && d.kind === 'player' && d.char ? online.get(d.char.id) : null;
+      if (od && od.entity === d) {
+        if (ev.type === 'hit' && ev.s && ev.skill !== 'dot') od.lastHitAt = now();
+        if (d.mount && dismounts(ev.type === 'die' ? 'die' : 'hit', { ev, mount: mountBook.get(d.mount), rng: () => r.host.random('mount') })) { dismount(od, ev.type === 'die' ? 'dead' : 'hit'); if (ev.type === 'hit') od.thrownAt = now(); }
+      }
+      // your own hits count as fighting too (C: "you hit something in the last 5 s")
+      const src = ev.type === 'hit' ? r.entities.get(ev.s) : null;
+      if (src && src.kind === 'player' && src.char && d && d.kind === 'monster') { const os = online.get(src.char.id); if (os) os.lastHitAt = now(); }
+    }
     if (ev.type === 'hit' && ev.kind === 'dmg') {
       const src = r.entities.get(ev.s), dst = r.entities.get(ev.d);
       if (!src || !dst || src.kind !== 'player' || dst.kind !== 'monster' || !src.char) return;
@@ -1136,8 +1220,12 @@ export function createProvince(opts) {
       list.push({ ...ev, at: t });
       while (list.length > RECENT_Q_MAX || (list.length && t - list[0].at > RECENT_Q_MS)) list.shift();
     }
-    const moved = bookOf(o).progress(o.char, ev);
-    if (moved.length) { questSaved(o); sendQuests(o); }
+    const b = bookOf(o);
+    const moved = b.progress(o.char, ev);
+    if (moved.length) {
+      questSaved(o); sendQuests(o);
+      for (const id of b.autoDone(o.char)) { const r = b.turnIn(o.char, id, null); if (r.ok) payQuest(o, r); }
+    }
     return moved;
   }
   function questTouch(o, obj) {
@@ -1206,12 +1294,25 @@ export function createProvince(opts) {
     }
     const r = b.turnIn(ch, m.id, g);
     if (!r.ok) return reply(r);
+    payQuest(o, r, reply);
+  }
+  /** Pay a turned-in quest (an NPC's turn-in, or a quest that finishes itself — `autoComplete`, Q27). */
+  function payQuest(o, r, reply = null) {
+    const ch = o.char;
     questSaved(o);
     const e = o.entity, rules = o.room.rules, lv = r.reward.level;
     const span = rules.xpFor ? Math.max(1, (safeRules(o.room, 'xpFor', lv + 1) || 0) - (safeRules(o.room, 'xpFor', lv) || 0)) : 100;
     const xp = Math.round(r.reward.xpShare * span);
     const items = r.reward.item && rules.rollLoot ? (safeRules(o.room, 'rollLoot', e, { level: Math.max(lv, e.level || 1), tier: r.reward.item.tier || 'common' }) || []) : [];
-    reply({ ok: true, reward: { xp, gold: r.reward.gold, items: items.length }, next: r.next || undefined });
+    const out = { ok: true, reward: { xp, gold: r.reward.gold, items: items.length }, next: r.next || undefined };
+    if (reply) reply(out); else if (o.conn) o.conn.sendJSON({ t: 'questR', op: 'turnin', id: r.def.id, auto: true, ...out });
+    // a quest may unlock something early (`reward.unlock`: 'companion' | 'companion2', C's rules.unlock — Q28 class quests)
+    const rw = r.def.reward || {};
+    if (rules.unlock && (rw.unlock || rw.perks)) {
+      for (const u of [].concat(rw.unlock || [])) safeRules(o.room, 'unlock', e, u);
+      for (let k = 0; k < Math.min(5, rw.perks | 0); k++) safeRules(o.room, 'unlock', e, 'perk', { source: r.def.id + (k ? ':' + k : '') });   // C: once per source
+      buildChanged(o);
+    }
     o.room.award(e, { xp, gold: r.reward.gold, items, reason: 'quest' });
     econ.add('faucet', 'quest', { gold: r.reward.gold }, ch.level || 1);
     sendQuests(o);
@@ -1393,9 +1494,36 @@ export function createProvince(opts) {
     for (const it of Object.values(eq)) if (it && typeof it === 'object' && !it.uid) { it.uid = newUid(); named = true; }
     if (named && o.char) journalGear(o);
     const out = {};
-    for (const [slot, it] of Object.entries(eq)) if (it && typeof it === 'object') out[slot] = { base: it.baseKey || it.base || it.name || slot, ...(it.subtype ? { sub: it.subtype } : {}), rarity: it.rarity || 'normal', ...(it.uniqueId ? { unique: it.uniqueId } : {}) };
-    const before = JSON.stringify(o.entity.gear || null), after = JSON.stringify(out);
-    if (before !== after) { o.entity.gear = out; o.entity.infoVer++; }
+    // Q22: the wearer's display choice is what EVERYONE draws — no gear at all (plain clothes), or no head piece
+    const pr = prefsOf(o.char);
+    for (const [slot, it] of Object.entries(eq)) if (it && typeof it === 'object') {
+      if (!pr.showGear && slot !== 'weapon' && slot !== 'offhand' && slot !== 'mainhand') continue;
+      if (!pr.showHelm && slot === 'head') continue;
+      out[slot] = { base: it.baseKey || it.base || it.name || slot, ...(it.subtype ? { sub: it.subtype } : {}), rarity: it.rarity || 'normal', ...(it.uniqueId ? { unique: it.uniqueId } : {}) };
+    }
+    const off = !pr.showGear;
+    const before = JSON.stringify(o.entity.gear || null) + !!o.entity.gearOff, after = JSON.stringify(out) + off;
+    if (before !== after) { o.entity.gear = out; o.entity.gearOff = off; o.entity.infoVer++; }
+  }
+  /**
+   * Play-test 2, Q12 "with one ring on, a second ring replaced it instead of going on the other hand": the client sent the
+   * item's own slot ('ring') and that was passed on as an exact slot, which skips Farhold's free-hand choice. Only an
+   * exact slot the player dragged onto ('ring1'/'ring2'/'offhand'/…) is passed on; the item's own slot means "you pick".
+   */
+  function equipInto(item, asked) {
+    if (!asked) return null;
+    const own = item.type === 'weapon' ? 'weapon' : item.slot;
+    if (asked === own || (asked === 'ring' && own === 'ring1')) return null;
+    if (asked === 'ring1') return 'ring';
+    return asked;
+  }
+  /** C's ask (Q1): how far the basic attack reaches, so the client stops walking a ranger into 2.4 m. The rules'
+   *  `attackRange(e)` when they have one, else the main-hand swing plan's `range` (bows, crossbows, wands); null = melee. */
+  function attackReach(o) {
+    const e = o.entity, rules = o.room.rules;
+    if (rules.attackRange) { const r = safeRules(o.room, 'attackRange', e); return Number.isFinite(r) ? r : null; }
+    const plan = e.r && e.r.unit && e.r.unit.derived && e.r.unit.derived.swing && e.r.unit.derived.swing.main;
+    return plan && Number.isFinite(plan.range) ? plan.range : null;
   }
   function equipView(o) {
     const g = o.room.rules.gear ? safeRules(o.room, 'gear', o.entity) : null;
@@ -1420,11 +1548,13 @@ export function createProvince(opts) {
     if (m.op === 'equip') {
       if (bagIdx < 0) return s.err('item');
       const item = ch.bag[bagIdx];
-      const slot = m.slot || item.slot;
+      const into = equipInto(item, m.slot);
+      const slot = into || item.slot || (item.type === 'weapon' ? 'weapon' : null);
       if (!slot) return s.err('item', 'That cannot be worn.');
       let removed = [];
       if (rules.equip) {
-        const r = safeRules(o.room, 'equip', e, item, slot);
+        // Q12: no slot named (or the item's own generic slot) -> the rules pick: the free ring hand, the free off hand
+        const r = safeRules(o.room, 'equip', e, item, into);
         if (!r || !r.ok) return s.err('item', (r && r.text) || 'You cannot wear that.');
         removed = r.removed || [];
       } else {
@@ -1440,7 +1570,10 @@ export function createProvince(opts) {
       o.dirty = true;
       s.sendJSON({ t: 'bag', add: removed, remove: [item.uid], gold: ch.gold });
       gearLook(o);
-      return s.sendJSON({ t: 'equip', slot, item, equipment: equipView(o) });
+      const eqv = equipView(o);
+      const worn = Object.keys(eqv).find(k => eqv[k] === item || (eqv[k] && eqv[k].uid === item.uid)) || slot;
+      s.sendJSON({ t: 'you', reach: attackReach(o) });
+      return s.sendJSON({ t: 'equip', slot: worn, item, equipment: eqv });
     }
     if (m.op === 'unequip') {
       if (ch.bag.length >= BAG_MAX) return s.err('bagFull');
@@ -1456,8 +1589,241 @@ export function createProvince(opts) {
       o.dirty = true;
       s.sendJSON({ t: 'bag', add: [item], remove: [], gold: ch.gold });
       gearLook(o);
+      s.sendJSON({ t: 'you', reach: attackReach(o) });
       return s.sendJSON({ t: 'equip', slot, item: null, equipment: equipView(o) });
     }
+  }
+
+  // ---- play-test 2: corpse loot (Q3/Q4), shops (Q11), mounts (Q16), barber (Q20), prefs (Q22), follow (Q2) ----
+  const corpses = createCorpses({ now, newUid, rng: () => (first.towns[0] || first.copies[0]).host.random('roll'), partyOf: c => partyOf.get(c) || null, online, grant: (o, a) => grant(o, a), log, counters, bagMax: BAG_MAX });
+  const mountBook = createMountBook(first.L.mounts || opts.mountData || null);
+  const shops = createShops({ data: first.L.shops || opts.shopData || null, mounts: mountBook, now: wallNow, log, rng: () => (first.towns[0] || first.copies[0]).host.random('shop') });
+  const social = new Map();        // char id -> { friends: Set, tradeFriendsOnly } (the gateway keeps it current, Q15)
+  const clsNameOf = cls => (opts.classNames && opts.classNames[cls]) || String(cls || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  const prefsOf = ch => ({ showGear: !(ch.prefs && ch.prefs.showGear === false), showHelm: !(ch.prefs && ch.prefs.showHelm === false) });
+
+  /** Q16: the first mount at level 5 (on login for a character already past it). */
+  function starterMount(o, quiet = false) {
+    if (!mountBook.grantStarter(o.char)) return;
+    journal(o, 'set', { k: 'mounts', v: o.char.mounts }); o.dirty = true;
+    if (!quiet && o.conn) o.conn.sendJSON({ t: 'you', mounts: mountBook.owned(o.char), mountNew: mountBook.starter.id });
+  }
+  function applyMount(o) {
+    const e = o.entity, def = mountBook.get(o.mount);
+    if (!def) { o.mount = null; return; }
+    e.mount = def.id; e.speedMul = mountSpeedMul(def); e.infoVer++;
+    const c = o.room.clients.get(e.id); if (c) c.selfDirty = true;
+    if (o.conn) o.conn.sendJSON({ t: 'you', mount: def.id, speedMul: e.speedMul });
+  }
+  function dismount(o, why) {
+    const e = o.entity;
+    o.mount = null;
+    if (e.mount) { e.mount = null; e.speedMul = 1; e.infoVer++; }
+    if (o.conn) o.conn.sendJSON({ t: 'you', mount: null, speedMul: 1, dismount: why });
+  }
+  /** Q16 with stream C's rules (js/rules/mount.js): calling a mount is a 1.5 s cast standing still; a hit or a step breaks it. */
+  const fighting = (o, e) => !!(e.state & STATE.combat) || (now() - (o.lastHitAt || -1e9)) < MOUNT_RULES.combatSeconds * 1000;
+  function mountOp(o, m) {
+    const s = o.conn, e = o.entity;
+    if (!MOUNT_OPS.includes(m.op)) return bad(s, 'op');
+    const R = x => s.sendJSON({ t: 'mountR', op: m.op, ...x });
+    if (m.op === 'off') { o.mountCast = null; if (o.mount) dismount(o, 'asked'); return R({ ok: true }); }
+    const def = m.id ? mountBook.get(m.id) : mountBook.best(o.char);
+    if (!def || !(o.char.mounts || []).includes(def.id)) return R({ ok: false, why: 'none', msg: (o.char.level || 1) < 5 ? 'You get your first mount at level 5. A stablehand sells others.' : 'You do not own that mount. A stablehand sells them.' });
+    const why = mountRefusal({ dead: e.dead, swimming: !!(e.state & STATE.swimming), fighting: fighting(o, e), roomKind: o.room.kind, now: now() / 1000, thrownAt: o.thrownAt != null ? o.thrownAt / 1000 : null, casting: !!o.mountCast });
+    if (why) return R({ ok: false, why: e.dead ? 'dead' : (e.state & STATE.swimming) ? 'swim' : o.room.kind === 'instance' ? 'indoors' : fighting(o, e) ? 'combat' : 'busy', msg: why });
+    const ms = Math.round(MOUNT_RULES.castSeconds * 1000);
+    o.mountCast = { id: def.id, until: now() + ms, x: e.x, z: e.z };
+    o.room.emit({ type: 'castbar', id: e.id, ab: 'mount', name: 'Call ' + def.name, ms });
+    return R({ ok: true, id: def.id, casting: ms });
+  }
+  /** Each tick for someone calling a mount: a step past castDrift or a hit breaks it; done -> riding. */
+  function mountCastTick(o) {
+    const c = o.mountCast, e = o.entity;
+    if (!c) return;
+    const broke = e.dead || (e.state & STATE.swimming) || Math.hypot(e.x - c.x, e.z - c.z) > MOUNT_RULES.castDrift || (o.lastHitAt || 0) > c.until - MOUNT_RULES.castSeconds * 1000;
+    if (broke) { o.mountCast = null; o.room.emit({ type: 'castX', id: e.id, ab: 'mount', why: 'moved' }); if (o.conn) o.conn.sendJSON({ t: 'mountR', op: 'summon', ok: false, why: 'interrupted', msg: 'You stopped calling your mount.' }); return; }
+    if (now() < c.until) return;
+    o.mountCast = null;
+    o.mount = c.id; applyMount(o);
+  }
+
+  /** Q11: a shop NPC within reach, and the kind it trades (its office's `shop`, else its role's). */
+  function shopNpc(o, npcId) {
+    const r = o.room.objectNear(o.entity, npcId, SHOP_RANGE);
+    if (r.why) return { why: r.why, msg: r.why === 'far' ? 'Walk over to them first.' : 'Who?' };
+    const kind = shops.kindOf(r.o);
+    if (!kind) return { why: 'noShop', msg: (r.o.name || 'They') + ' has nothing to sell.' };
+    return { npc: r.o, role: (r.o.data.npc && r.o.data.npc.role) || null, kind };
+  }
+  const townNameOf = o => (o.room.kind === 'town' ? o.room.name : null);
+  function shopView(o, npc, role) {
+    const kind = shops.kindOf(npc), sh = shops.shopOf(kind);
+    const stock = shops.stock(npc, o.entity, o.room.rules, townNameOf(o));
+    o.shopAt = { npc: npc.id, room: o.room.id, stock };
+    const rules = o.room.rules;
+    return { t: 'shopView', npc: npc.id, name: npc.name, role, kind, title: sh ? sh.title : npc.name, says: (sh && sh.says) || undefined, services: (sh && sh.services) || undefined,
+      categories: sh && sh.categories ? Object.fromEntries(Object.entries(sh.categories).map(([k, v]) => [k, v.label || k])) : undefined,
+      stock: stock.map(r => (r.item ? { ...r, item: { ...r.item, uid: 'stock:' + r.id, price: r.price } } : r)), sellRate: shops.pricing.sellFactor,
+      buyback: (o.buyback || []).map(b => ({ uid: b.item.uid, item: b.item, price: b.price })),
+      sell: (o.char.bag || []).map(it => ({ uid: it.uid, price: shops.sellPrice(it, rules) })) };
+  }
+  function shopOp(o, m) {
+    const s = o.conn, ch = o.char, e = o.entity;
+    if (!SHOP_OPS.includes(m.op)) return bad(s, 'op');
+    const R = x => s.sendJSON({ t: 'shopR', op: m.op, ...x });
+    // D-UI's first names: list = open, buyback = back, buy by `uid` = the stock row; repair: Farhold items never wear out
+    const op = m.op === 'list' ? 'open' : m.op === 'buyback' ? 'back' : m.op;
+    if (op === 'repair') return R({ ok: false, why: 'noRepair', msg: 'Nothing you carry wears out. The smith sells new gear instead.' });
+    if (op === 'buy' && !m.id && m.uid) m = { ...m, id: String(m.uid).replace(/^stock:/, '') };
+    if (e.dead) return R({ ok: false, why: 'dead', msg: 'You are dead.' });
+    if (o.frozen) return R({ ok: false, why: 'busy', msg: 'Busy, try again in a moment.' });
+    const q = shopNpc(o, m.npc);
+    if (q.why) return R({ ok: false, why: q.why, msg: q.msg });
+    const { npc, role } = q;
+    const rules = o.room.rules;
+    ch.bag ||= [];
+    if (op === 'open') return s.sendJSON(shopView(o, npc, role));
+    if (op === 'buy') {
+      const stock = o.shopAt && o.shopAt.npc === npc.id && o.shopAt.room === o.room.id ? o.shopAt.stock : shops.stock(npc, e, rules, townNameOf(o));
+      const row = stock.find(x => x.id === m.id);
+      if (!row) return R({ ok: false, why: 'item', msg: 'That is not for sale here any more.' });
+      if (row.level && (ch.level || 1) < row.level) return R({ ok: false, why: 'level', msg: 'You need to be level ' + row.level + ' for that.' });
+      if ((ch.gold || 0) < row.price) return R({ ok: false, why: 'gold', msg: 'That costs ' + row.price + ' gold.', cost: row.price });
+      if (!row.mount && ch.bag.length >= BAG_MAX) return R({ ok: false, why: 'bagFull', msg: CODES.bagFull });
+      ch.gold -= row.price; journal(o, 'gold', { d: -row.price }); econ.add('sink', 'shop', { gold: row.price }, ch.level || 1);
+      if (row.mount) {
+        ch.mounts ||= [];
+        if (!ch.mounts.includes(row.mount.id)) ch.mounts.push(row.mount.id);
+        journal(o, 'set', { k: 'mounts', v: ch.mounts }); o.dirty = true;
+        s.sendJSON({ t: 'bag', add: [], remove: [], gold: ch.gold });
+        s.sendJSON({ t: 'you', mounts: mountBook.owned(ch), mountNew: row.mount.id });
+        saveNow(o);
+      } else {
+        s.sendJSON({ t: 'bag', add: [], remove: [], gold: ch.gold });
+        grant(o, { items: [row.item], gold: 0, reason: 'shop', from: npc });
+      }
+      R({ ok: true, id: m.id, cost: row.price });
+      return s.sendJSON(shopView(o, npc, role));
+    }
+    if (op === 'sell') {
+      const i = ch.bag.findIndex(it => it.uid === m.uid);
+      if (i < 0) return R({ ok: false, why: 'item', msg: CODES.item });
+      if (trades.offered(ch.id, m.uid)) return R({ ok: false, why: 'item', msg: 'That item is in your trade window.' });
+      const [it] = ch.bag.splice(i, 1);
+      const price = shops.sellPrice(it, rules);
+      ch.gold = (ch.gold || 0) + price;
+      journal(o, 'bagDel', { uid: it.uid }); journal(o, 'gold', { d: price });
+      econ.add('faucet', 'sell', { gold: price }, ch.level || 1); econ.add('sink', 'sell', { items: 1 }, ch.level || 1);
+      o.buyback ||= []; o.buyback.push({ item: it, price });
+      while (o.buyback.length > (shops.pricing.buyback || 12)) o.buyback.shift();
+      o.dirty = true;
+      s.sendJSON({ t: 'bag', add: [], remove: [it.uid], gold: ch.gold });
+      R({ ok: true, uid: it.uid, gold: price });
+      if (RARE_SALE.has(it.rarity)) saveNow(o);
+      return s.sendJSON(shopView(o, npc, role));
+    }
+    // back: buy back something sold this session, for what it fetched
+    const k = (o.buyback || []).findIndex(b => b.item.uid === m.uid);
+    if (k < 0) return R({ ok: false, why: 'item', msg: 'That is gone.' });
+    const b = o.buyback[k];
+    if ((ch.gold || 0) < b.price) return R({ ok: false, why: 'gold', msg: 'That costs ' + b.price + ' gold.', cost: b.price });
+    if (ch.bag.length >= BAG_MAX) return R({ ok: false, why: 'bagFull', msg: CODES.bagFull });
+    o.buyback.splice(k, 1);
+    ch.gold -= b.price; ch.bag.push(b.item);
+    journal(o, 'gold', { d: -b.price }); journal(o, 'bagAdd', { item: b.item });
+    econ.add('sink', 'buyback', { gold: b.price }, ch.level || 1);
+    o.dirty = true;
+    s.sendJSON({ t: 'bag', add: [b.item], remove: [], gold: ch.gold });
+    R({ ok: true, uid: b.item.uid, cost: b.price });
+    return s.sendJSON(shopView(o, npc, role));
+  }
+  const RARE_SALE = new Set(['rare', 'unique', 'legendary', 'set']);
+
+  /** Q20: a new look at a barber, for gold. Others get the new `info.look`. */
+  function barberOp(o, m) {
+    const s = o.conn, ch = o.char, e = o.entity;
+    const R = x => s.sendJSON({ t: 'lookR', ...x });
+    const r = o.room.objectNear(e, m.npc, BARBER_M);
+    if (r.why) return R({ ok: false, why: r.why, msg: r.why === 'far' ? 'Walk over to the barber first.' : 'Who?' });
+    if (!(r.o.data && r.o.data.npc && r.o.data.npc.role === 'barber')) return R({ ok: false, why: 'noBarber', msg: 'Only a barber can change how you look.' });
+    const c = cleanLook(m.look, ch.look);
+    if (!c.ok) return R({ ok: false, why: c.why, msg: c.msg });
+    const cost = barberCost(ch, ch.look, c.look);
+    if ((ch.gold || 0) < cost) return R({ ok: false, why: 'gold', msg: 'That look costs ' + cost + ' gold.', cost });
+    if (cost) { ch.gold -= cost; journal(o, 'gold', { d: -cost }); econ.add('sink', 'barber', { gold: cost }, ch.level || 1); }
+    ch.flags = { ...(ch.flags || {}), barberUsed: true }; journal(o, 'set', { k: 'flags', v: ch.flags });
+    ch.look = c.look; e.look = c.look; e.infoVer++;
+    journal(o, 'set', { k: 'look', v: c.look }); o.dirty = true;
+    s.sendJSON({ t: 'bag', add: [], remove: [], gold: ch.gold });
+    R({ ok: true, look: c.look, cost });
+    presence(o);                                   // party frames + friends lists draw the new face
+    saveNow(o);
+  }
+  /**
+   * What a barber charges (stream E's shops.json `barber.services.appearance`): each part changed at its list price (hair,
+   * hair colour, beard, eyes, face, skin, body; a new race = everything), capped at `everything`, × (1 + perLevel × (level
+   * - 1)). The first change a character ever makes is free.
+   */
+  function barberCost(ch, before, after) {
+    if (!(ch.flags && ch.flags.barberUsed)) return 0;
+    const svc = (shops.kinds.barber && shops.kinds.barber.services && shops.kinds.barber.services.appearance) || {};
+    const P = { hair: 5, hairColour: 4, beard: 4, eyes: 6, face: 10, skin: 12, body: 20, everything: 40, ...(svc.prices || {}) };
+    const a = (before && before.custom) || {}, b = (after && after.custom) || {};
+    const same = (x, y) => JSON.stringify(x ?? null) === JSON.stringify(y ?? null);
+    const idOf = v => (v && typeof v === 'object' ? v.id : v);
+    let sum = 0;
+    if ((before && before.race) !== after.race) sum = P.everything;
+    else {
+      if (!same(idOf(a.hair), idOf(b.hair))) sum += P.hair;
+      if (!same(a.hair && a.hair.color, b.hair && b.hair.color)) sum += P.hairColour;
+      if (!same(a.facialHair, b.facialHair)) sum += P.beard;
+      if (!same(a.eyes, b.eyes)) sum += P.eyes;
+      if (['headShape', 'nose', 'mouth', 'brows', 'ears', 'extras'].some(k => !same(a[k], b[k])) || (before && before.seed) !== after.seed) sum += P.face;
+      const ab = a.body || {}, bb = b.body || {};
+      if (!same(ab.skin, bb.skin)) sum += P.skin;
+      const { skin: _s1, ...ra } = ab, { skin: _s2, ...rb } = bb; void _s1; void _s2;
+      if (!same(ra, rb) || ['top', 'bottom', 'shoes', 'hat', 'accessory', 'cape', 'decor'].some(k => !same(a[k], b[k]))) sum += P.body;
+    }
+    sum = Math.min(sum, P.everything);
+    return Math.round(sum * (1 + (svc.perLevel ?? 0.05) * ((ch.level || 1) - 1)));
+  }
+  /** Q22: show / hide your gear (or just the head piece) — for everybody who looks at you. */
+  function prefOp(o, m) {
+    if (!PREF_KEYS.includes(m.k)) return bad(o.conn, 'k');
+    o.char.prefs = { ...prefsOf(o.char), [m.k]: !!m.v };
+    journal(o, 'set', { k: 'prefs', v: o.char.prefs }); o.dirty = true;
+    gearLook(o);
+    o.conn.sendJSON({ t: 'you', prefs: prefsOf(o.char) });
+  }
+  /** Q2: may I follow this one? (Following itself is the client walking after them.) */
+  function followOp(o, m) {
+    const s = o.conn, e = o.entity;
+    const t = o.room.entities.get(m.id);
+    const R = x => s.sendJSON({ t: 'followR', id: m.id, ...x });
+    if (!t || t.removed) return R({ ok: false, why: 'gone', msg: 'They are not here.' });
+    if (t === e) return R({ ok: false, why: 'self', msg: 'You cannot follow yourself.' });
+    if (t.kind === 'object') return R({ ok: false, why: 'target', msg: 'You cannot follow that.' });
+    if (t.kind === 'monster' || (t.team !== e.team && !(t.state & STATE.friendly))) return R({ ok: false, why: 'hostile', msg: 'You cannot follow an enemy.' });
+    if (t.dead) return R({ ok: false, why: 'dead', msg: 'They are dead.' });
+    if (Math.hypot(t.x - e.x, t.z - e.z) > FOLLOW_M) return R({ ok: false, why: 'far', msg: 'Too far away to follow.' });
+    return R({ ok: true, name: t.name });
+  }
+  /** Q2 (D-UI's right-click menu): what someone is wearing. */
+  function inspectOp(o, m) {
+    const s = o.conn, e = o.entity, t = o.room.entities.get(m.id);
+    const R = x => s.sendJSON({ t: 'inspectR', id: m.id, ...x });
+    if (!t || t.kind !== 'player' || !t.char) return R({ ok: false, why: 'target', msg: 'Nothing to inspect.' });
+    if (Math.hypot(t.x - e.x, t.z - e.z) > FOLLOW_M) return R({ ok: false, why: 'far', msg: 'Too far away.' });
+    const ot = online.get(t.char.id);
+    return R({ ok: true, name: t.name, cls: t.char.cls, clsName: clsNameOf(t.char.cls), level: t.level, look: t.char.look || null, equipment: ot ? equipView(ot) : {} });
+  }
+  /** Q27: quests every character is given on entering the world (stream E's `auto: true`). */
+  function autoQuests(o) {
+    const b = bookOf(o);
+    if (!b.grantAuto) return;
+    const got = b.grantAuto(o.char);
+    if (got && got.length) questSaved(o);
   }
 
   // ---- parties (membership comes from the gateway) ----
@@ -1542,6 +1908,8 @@ export function createProvince(opts) {
         if (!near(o, to)) return s.err('tradeFar');
         if ((o.char.level || 1) < tradeMinLevel || (to.char.level || 1) < tradeMinLevel) return s.err('trade', 'Trading opens at level ' + tradeMinLevel + '.');
         if (ignores(to.char, me)) return s.err('trade');
+        const soc = social.get(to.char.id);       // Q15: "only allow trade requests from friends" (their account setting)
+        if (soc && soc.tradeFriendsOnly && !soc.friends.has(me)) return s.err('trade', to.char.name + ' only takes trade requests from friends.');
         r = trades.ask(me, to.char.id);
         if (r.ok && to.conn) to.conn.sendJSON({ t: 'tradeAsk', trade: r.trade.id, from: o.entity.id, name: o.char.name });
         break;
@@ -1672,6 +2040,8 @@ export function createProvince(opts) {
     if (ticks % 10 === 0) sendFrames();
     if (ticks % 20 === 5) eventTick();           // events (realm + zone) at 1 Hz
     if (ticks % 20 === 7) zoneTick();
+    if (ticks % 20 === 9) corpses.tick();
+    for (const o of online.values()) if (o.mountCast) mountCastTick(o);
     if (ticks % 4 === 1) npcTick(TICK_MS * 4);
     roadsTick();
     const t = now();

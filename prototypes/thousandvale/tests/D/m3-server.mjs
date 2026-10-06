@@ -6,7 +6,7 @@
 //
 //   node tests/D/m3-server.mjs --port 8494 --hook 8495 [--event-first 60000]
 //   POST http://127.0.0.1:<hook>/level {name, level}    set a character's level everywhere it is read
-//   POST http://127.0.0.1:<hook>/give  {name, gold, items}  grant gold and N plain test items (a bag message follows)
+//   POST http://127.0.0.1:<hook>/give  {name, gold, items, itemName?, slot?, rarity?}  grant gold and N plain test items (a bag message follows)
 //   POST http://127.0.0.1:<hook>/event {id, announceMs}  force a realm event (the admin page's button)
 //   POST http://127.0.0.1:<hook>/roll  {name, n, level, boost}  grant n REAL items rolled by Farhold's generator (inventory spec)
 //   GET  http://127.0.0.1:<hook>/who                    online characters [{char, name, level}]
@@ -75,7 +75,7 @@ const hook = http.createServer(async (req, res) => {
     }
     if (req.url === '/kill') { const e = o.entity; e.setHp(0); e.kill(null); return send(200, { ok: true, dead: !!e.dead }); }   // P8 spec
     if (req.url === '/give') {
-      const items = Array.from({ length: Math.max(0, Math.min(12, b.items | 0)) }, (_, i) => ({ name: b.itemName || ['Hollin Shortsword', 'Weathered Cloak', 'Copper Ring', 'Ashwood Staff'][(itemN + i) % 4], rarity: ['common', 'magic', 'rare'][(itemN++ + i) % 3], slot: 'weapon', value: 4, level: 3 }));
+      const items = Array.from({ length: Math.max(0, Math.min(12, b.items | 0)) }, (_, i) => ({ name: b.itemName || ['Hollin Shortsword', 'Weathered Cloak', 'Copper Ring', 'Ashwood Staff'][(itemN + i) % 4], rarity: b.rarity || ['common', 'magic', 'rare'][(itemN++ + i) % 3], slot: b.slot || 'weapon', ...(b.slot && b.slot !== 'weapon' ? { type: 'armor' } : {}), value: 4, level: b.slot ? 1 : 3 }));
       W.grant(o, { items, gold: Math.max(0, b.gold | 0), reason: 'test' });
       return send(200, { ok: true, items: items.length });
     }

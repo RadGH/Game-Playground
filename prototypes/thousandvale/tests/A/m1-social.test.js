@@ -207,12 +207,22 @@ test('kills pay xp, gold and loot that persist (stand-in rules), and the log cou
   const a = await joinAs(srv, clock, 'Hunter');
   const r = W.copies[0];
   let kills = 0;
+  // play-test 2 (Q3): the gold and loot wait on the corpse until looted
+  const lootable = new Set(); a.on('lootable', m => { if (m.on) lootable.add(m.id); else lootable.delete(m.id); });
   for (let k = 0; k < 6; k++) {
     const wolf = [...r.entities.values()].find(e => e.kind === 'monster' && !e.dead);
     W.transfer(W.online.get(a.joined.you.char), r, { x: wolf.x + 1.5, z: wolf.z }, 'test');
     await run(clock, 100);
     for (let g = 0; g < 60 && !wolf.dead; g++) { a.cast({ slot: 0, target: wolf.id }); await run(clock, 950); if (ent(srv, a).dead) { a.respawn(); await run(clock, 200); break; } }
-    if (wolf.dead) kills++;
+    if (wolf.dead) {
+      kills++;
+      await run(clock, 300);
+      assert.ok(lootable.has(wolf.id), 'the corpse is lootable');
+      const me = ent(srv, a); W.transfer(W.online.get(a.joined.you.char), r, { x: wolf.x + 1, z: wolf.z }, 'test');
+      void me;
+      a.loot('all', { id: wolf.id }); await run(clock, 300);
+      assert.ok(!lootable.has(wolf.id), 'looted clean');
+    }
   }
   assert.ok(kills >= 3, 'kills ' + kills);
   assert.ok(a.joined.you.gold > 0 && a.joined.you.xp > 0);

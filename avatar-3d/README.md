@@ -104,6 +104,57 @@ Emberveil 2 parks the party's vehicle behind them on the world stage, stands it 
 circle in the firelight, and rolls it across the stage during a crossing
 (`prototypes/emberveil/js/stage.js`: `setVehicle`, `parkVehicle`, `camp`, `travelAcross`).
 
+## Mounts (mounts.js) — `js/mounts.js` + pure `js/mount-types.js`, demo `mounts.html`
+
+Added 2026-10-05 for Thousandvale (play-test 2, Q16); built so Farhold, Bannerline or any page can use it.
+A mount is a **creature body** (creatures.js) wearing **tack**, plus a **seat** where a rider's hips go.
+Every piece of tack is parented to the creature's hip (or head), so it bobs and pitches with the gait —
+and so does a rider sitting on the seat.
+
+| type | creature | size | tack |
+|---|---|---|---|
+| `horse` | horse | 1 | saddle, saddlebags |
+| `pony` | pony | 1 | saddle, saddlebags |
+| `courser` | courser | 1 | saddle |
+| `warhorse` | horse | 1.15 | barding: caparison down both flanks + rump + chest, crinet on the neck, chanfron plate with a spike |
+| `stag` | elk | 1 | saddle |
+| `ram` | **ram** (new creature type: sheep frame on pony legs, short coat, `curlHorns`) | 1.25 | fur blanket + roll, saddlebags |
+| `drake` | drake | 1.7 | drake saddle: riding horn and a high back |
+
+Tack on every type: a blanket (curved over the barrel) with a trim, the seat, pommel and cantle, a girth,
+stirrup leathers down both flanks to an iron at the rider's foot height (0.36 m under the seat), a bridle
+(noseband, browband, cheek straps, bit rings) and two **reins re-laid every frame** from the bit rings to
+the rider's hand points (`mount.hands`), so they stay attached while the head sways.
+
+**API**
+
+```js
+import { createMount, seatRider, mountSpecFor, gaitFor, MOUNT_TYPES, CHIBI2_MOUNT_ANIMS } from './js/mounts.js';
+import { createChibi2Character, CHIBI2_ANIMS } from './js/chibi2.js';
+const mount = await createMount(mountSpecFor('riding_horse'), { detail: 1 });
+scene.add(mount.group);                                   // faces +z, feet at y = 0
+const rider = await createChibi2Character(avatar, { anims: [...CHIBI2_ANIMS, ...CHIBI2_MOUNT_ANIMS] });
+const unseat = seatRider(mount, rider);                    // rider.group -> child of mount.seat, plays 'ride'
+mount.setGait(speed);      // m/s -> 'idle' | 'walk' | 'trot' | 'gallop' (returned); the rider switches ride <-> rideGallop
+mount.update(dt, t); rider.update(dt);                     // every frame
+unseat();                                                  // rider back under its old parent, old transform, idle
+```
+
+- `createMount(spec)` returns `{ group, creature, spec, seat, hands, gait, riderClip, rider, setGait(speed), setAnim(name), update(dt, t), metrics() -> { height, length, width, seatY, backY }, dispose() }`. `setAnim` passes a creature clip straight through (idle / walk / run / dead / graze).
+- **Gaits** come from `MOUNT_TYPES[type].gaits` (`walk` / `trot` / `gallop` thresholds in m/s, `pace` = ground speed of the walk and run clips at rate 1). Trot is the quad's walk clip (its legs already move in diagonal pairs) run faster; gallop is the run clip. The rate is set from the speed so legs keep up with the ground. `gaitFor(speed, type)` is the same choice, pure.
+- **The seat** is an Object3D on the hip, counter-scaled by the mount's size, so whatever you parent to it is world-size. `seatRider` lifts the rider so its hip joint sits just above the saddle (`riderHipsY(body)` measures the Chibi 2 hip joint).
+- **Rider clips** (`chibi2-motion.js`, opt-in list `CHIBI2_MOUNT_ANIMS`): `ride` (astride: thighs spread round the barrel, shins down the flanks, hands low on the reins, small trot bounce) and `rideGallop` (crouched forward, hands out, bigger bounce). A rider built without them falls back to idle (standing in the saddle), so add the list.
+- **Dismount**: `unseat()`, then stand the rider where you like (the gallery puts it at the mount's left side). A game decides when (Thousandvale: the server's `you {mount:null, dismount}`).
+
+**Game ids** — `mountSpecFor(x)` takes a type key, a game id or a look object and returns `{ type, creature, size, colors, tack, label }`:
+`riding_horse`->horse, `grey_courser`->courser, `moor_stag`->stag, `pony`, `warhorse`; Thousandvale's `look { creature, size, colors }`:
+`deer`/`elk`->stag, `horse` at size < 0.9 -> pony, >= 1.1 -> warhorse, else horse; unknown -> horse. Look colours (`body`, `belly`,
+`accent`, `#rrggbb`) override the type's; `look.scale` multiplies the type's size (a look's own `size` is ignored: the type carries
+the proportions). The table and mapping are pure (`mount-types.js`), so a server can import them.
+
+`creatures.js` gained only two additive things for this: a read-only `parts` getter on the creature handle, and the `curlHorns`
+feature (read only when the flag is set, so no existing type changes). Tests: `node --test avatar-3d/tests/mounts.test.js`.
+
 ## Spell effects — `js/spellfx.js`, demo `spellfx.html`
 
 Combat effects for a 3D stage: **projectiles** that fly between two points, **impacts** that burst where they land, **cast** flashes, **heal**/**revive**, and looping **status auras** stuck to a body. Everything is built from shaped geometry (cones, spinning shard clusters, expanding torus rings, ground rune discs, tumbling planes, jagged lines) and the 49 particle sprites in `assets/data/fx/` drawn as billboards — deliberately **no glowing spheres**. Bright parts are additive with tone mapping off so they stay vivid; smoke, shadow and toxic cloud use normal blending so they read as dark against a bright sky.

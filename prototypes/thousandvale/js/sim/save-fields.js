@@ -29,6 +29,9 @@ export const SAVE_FIELDS = Object.freeze([
   { k: 'kitV', def: 0 },
   { k: 'build', def: null },       // the rules' build blob: talents, perks, unlocks (C's rules.saveBuild; P4/P6)
   { k: 'seen', def: { zones: [], places: [] } },   // map discovery: zone keys entered, place keys found (P3/P27)           // starting-kit version applied (play-test 1 P22: 1 = class weapon only, plain clothes)         // once-a-day things: key -> UTC day number (the world boss's first kill of the day)
+  { k: 'mounts', def: [] },        // mount ids this character owns (play-test 2, Q16)
+  { k: 'prefs', def: null },
+  { k: 'flags', def: {} },         // one-off facts: { barberUsed } (the first barber visit is free, E's shops.json)       // display choices others see: { showGear, showHelm } (Q22)
   { k: 'jseq', col: 'journal_seq', def: 0 },   // last journal row this blob contains (js/sim/journal.js)
 ]);
 

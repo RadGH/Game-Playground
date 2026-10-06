@@ -16,7 +16,7 @@ Readers:
 
 | Constant | Value | Where |
 |---|---|---|
-| `PROTOCOL_VERSION` | `5` | `js/net/protocol.js`. Bumped on any wire change. A client with another value is refused with `refuse {code:'version'}` → the client shows "A new version is out — reload". |
+| `PROTOCOL_VERSION` | `6` | `js/net/protocol.js`. Bumped on any wire change. A client with another value is refused with `refuse {code:'version'}` → the client shows "A new version is out — reload". |
 | `BUILD` | string | The server's build id (dev: `dev`; published copies: the git hash). A client whose `build` differs is refused with `code:'build'` → "reload". The client is always served by the same server as its socket (PLAN §10.1). |
 | `SNAP_VERSION` | `1` | First byte after the type byte of every binary snapshot. |
 | `TICK_MS` | `50` | Simulation 20 Hz (PLAN §8.3). |
@@ -128,6 +128,15 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `talent` | p | `op:str:8, skill?:str:48, tier?:int, node?:str:48` | 3 / 10 | Talents (§17.2): `pick {skill, tier, node}`, `clear {skill}`. Answer `talentR`; the bar comes as `you {bar}`, the build as `you {talents, perks, perkPoints}`. |
 | `perk` | p | `op:str:8, id?:str:64` | 3 / 10 | The perk forest (§17.2): `take {id}`, `refund {id}`, `reset`. Answer `perkR`. |
 | `map` | p | `op:str:8` | 1 / 3 | The world map (§17.3): `get` -> `mapData`. |
+| `loot` | p | `op:str:8, id?:id, uid?:str:40, roll?:int, choice?:str:8` | 8 / 16 | Corpse loot (§18.1): `open {id}`, `take {id, uid}` (uid `'gold'` = the gold), `all {id}`, `close {id}`; party roll `roll {roll, choice: need\|greed\|skip}`. |
+| `shop` | p | `op:str:8, npc:id, id?:str:48, uid?:str:40` | 4 / 10 | Shops (§18.2): `open`, `buy {id}` (a stock row), `sell {uid}`, `back {uid}` (buy back). Answer `shopView` / `shopR`. |
+| `mount` | p | `op:str:8, id?:str:32` | 1 / 3 | Mounts (§18.3): `summon {id?}` (default: your fastest), `off`. Answer `mountR` + `you {mount, speedMul}`. |
+| `barber` | p | `npc:id, look:obj` | 0.5 / 3 | A new look at a barber (§18.4), costs `BARBER_COST` gold. Answer `lookR`. |
+| `pref` | p | `k:str:16, v:bool` | 2 / 6 | Display prefs everyone sees (§18.5): `showGear`, `showHelm`. Answer `you {prefs}`. |
+| `follow` | p | `id:id` | 2 / 4 | May I follow this one? (§18.6) Answer `followR`. Following is client movement. |
+| `inspect` | p | `id:id` | 2 / 6 | What another player wears (§18.6, D-UI's right-click menu). Answer `inspectR`. |
+| `settings` | gw | `op:str:8, data?:obj` | 1 / 4 | Account settings (§18.7): `get`, `set {data:{tradeFriendsOnly}}`. Answer `settings {data}`. |
+| `look` | gw | `char:int, look:obj` | 0.5 / 3 | Title screen "Customize Appearance" (§18.4): a look for a character not in the world. Answer `lookR`. |
 
 ### 3.2 Server → client
 
@@ -184,6 +193,18 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `perkR` | `op, ok, why?, msg?, id, perks?, left?` | Answer to `perk` (`why`: `notReady`, `dead`, `combat`, or the rules' own; `left` = perk points left). |
 | `mapData` | `province, name, bounds, zones, places, events, waystones, horizon` | (game socket) The map (§17.3): zones with name + level band, towns always, places you found, events now. |
 | `discover` | `zone?, places` | (game socket) You found a zone / places (§17.3); also merged into `joined.you.seen` by client.js. |
+| `lootable` | `id, on, free?` | (game) A corpse has loot for you (sparkle) / no longer has (§18.1). `free` = items everyone skipped in a roll. |
+| `lootWin` | `id, name?, items?, gold?, free?, closed?` | (game) The loot window's contents for you; `closed:true` when it is empty or gone. |
+| `lootR` | `op, ok, why?, msg?` | (game) Answer to `loot` when refused (`far`, `gone`, `bagFull`, `roll`, `dead`, `busy`), or a roll accepted. |
+| `lootRoll` | `roll, corpse, item, ms, members` | (game) Need / Greed / Skip for a party item (§18.1); 30 s, silence = skip. |
+| `lootRolled` | `roll, corpse, item, rolls, winner` | (game) A roll's result: every choice + number; the winner's item arrives as `bag`. |
+| `shopView` | `npc, name, role, title, stock, buyback, sell, sellRate` | (game) A shop (§18.2): `stock [{id, item, price, mount?, level?}]`, `buyback [{uid, item, price}]`, `sell [{uid, price}]` = what each bag item fetches. |
+| `shopR` | `op, ok, why?, msg?, cost?` | (game) Answer to `shop` (`gold`, `far`, `bagFull`, `item`, `level`, `noShop`, `dead`). |
+| `mountR` | `op, ok, why?, msg?, id?` | (game) Answer to `mount` (`combat`, `swim`, `indoors`, `none`, `dead`). |
+| `lookR` | `ok, look?, cost?, char?, why?, msg?` | Answer to `barber` (game) or `look` (gw); `look` = the cleaned look as stored. |
+| `followR` | `id, ok, name?, why?, msg?` | (game) Answer to `follow` (`hostile`, `far`, `gone`, `dead`, `self`, `target`). |
+| `inspectR` | `id, ok, name?, cls?, clsName?, level?, look?, equipment?, why?, msg?` | (game) Answer to `inspect` (within 40 m). |
+| `settings` | `data` | (gw) The account's settings (after `chars`, and after `settings set`). |
 
 ---
 
@@ -862,3 +883,98 @@ a 2–3 s freeze is client-side loading.
 ### 17.8 Waystones (P14)
 No generated door waystone within 90 m of one already standing; waystones closer than 60 m merge (the placed one wins; a character
 who found the merged one keeps the kept one — `waystoneAliases`); a door's stone is named after its dungeon.
+
+## 18. Play-test 2 (2026-10-05) — protocol v6
+
+### 18.1 Loot stays on the corpse; party rolls (Q3, Q4)
+A kill's items AND gold no longer go straight to the bag: `room.award` hands them to `js/sim/corpses.js` (`hooks.holdKill`) and
+they wait on the monster's body, each player's share personal. You get `lootable {id, on:true}` (id = the corpse's entity id).
+`loot {op:'open', id}` within 6 m (`LOOT_RANGE`) -> `lootWin {id, name, items:[item], gold, free?}`; `take {id, uid}` (uid `'gold'`
+for the gold), `all {id}` -> `bag` + a fresh `lootWin` (or `{closed:true}`) + `lootable {on:false}` when nothing is left for you.
+The body stays past its normal despawn while loot is on it (`hooks.keepBody`), at most `CORPSE_MS` (5 min) after the kill.
+**Party rolls.** The leader sets `party {op:'loot', code:'magic'|'rare'|'legendary'}` (default `rare`; `partyState.party.lootMin`).
+An item at/above it from a member's kill goes to a roll among the members in the same room within 60 m (`ROLL_R`; one member
+alone keeps it as a personal share): `lootRoll {roll, corpse, item, ms, members}`; `loot {op:'roll', roll, choice}`; after all
+answered or 30 s (`ROLL_MS`, silence = skip) everyone gets `lootRolled {roll, item, rolls:[{char,name,choice,n}], winner}`.
+Highest Need wins, else highest Greed (1-100 each). All skip -> the item lies on the corpse in `free` for ANYONE
+(`lootable {on:true, free:true}` to players within 40 m).
+
+### 18.2 Shops (Q9, Q11)
+A town NPC trades the shop KIND its office names (stream E's `data/provinces/offices.json` `shop`, carried as `npc.shop`; else
+its role's kind) from E's `data/provinces/shops.json` (`js/sim/shops.js`; stand-ins `general`, `weaponsmith`, `stable` without
+the file). `used {kind:'npc'}` says `shop:true, shopKind` for a trader (and `barber:true, free` for a barber). `shop {op:'open',
+npc}` within 6 m -> `shopView {npc, name, role, kind, title, says, services, categories, stock, buyback, sell, sellRate}`.
+`stock` rows: `{id, cat, label, item, price, level?, mount?}` — gear `categories` rolled by the rules at the buyer's level
+(never above the town's `levelCap`, rarity weights capped at `pricing.rarityCap`), per NPC per 3-level bracket, restocked every
+`restockMinutes`; `goods` (potions, Thousandvale goods as bag items `{kind:'potion'|'good', id, name, desc, use?}`, Farhold gear;
+a mount id in `goods` is a mount row). Every stock item also carries `uid: 'stock:<id>'` and `price`. Prices: the rules' price
+(Farhold rpg.price) × (1 + `perItemLevel` × (item level − 1)) × the town's `priceMult`. `buy {id}` (or `uid`), `sell {uid}` pays
+`sellFactor` (25 %), `back {uid}` buys back the last 12 sold this session for what they fetched. Aliases: `list` = open,
+`buyback` = back; `repair` is refused (Farhold items never wear out). Items in an open trade cannot be sold.
+### 18.3 Mounts (Q16)
+`char.mounts` (SAVE_FIELDS) = owned ids — Farhold's mount bases, the ids E's stable sells: `trail_horse` (1.4×), `pony`
+(1.5×), `courser` (1.75×), `dray` (1.65×) (`js/sim/mounts.js`; each with a `calm`). The Trail Horse is given free at level 5
+(`you {mounts, mountNew}`) and sold from level 1; the stable master sells the rest. WHEN you ride is stream C's
+`js/rules/mount.js`: `mount {op:'summon', id?}` -> `mountR {ok, casting:1500}` + a `castbar` event; standing still for 1.5 s
+(a 0.6 m step or a hit breaks it: `mountR {why:'interrupted'}` + `castX`) sets `entity.mount` (`info.mount`, everyone draws
+the rider) and `entity.speedMul` (`mountSpeedMul`, on-land speeds in `stepMove` via `state.speedMul`; the client predicts with
+`you.speedMul`). Refused (`mountRefusal`) while fighting (in combat, or a hit given/taken in the last 5 s), swimming, dead,
+indoors, or for 3 s after being thrown. Casting or attacking, swimming, dying, a respawn and entering a dungeon dismount you;
+a damaging enemy hit throws you unless the mount's calm holds (`dismounts('hit')` — DoT ticks, heals, absorbed hits never do).
+`you {mount:null, speedMul:1, dismount: why}`. `joined.you` carries `mounts`, `mount`, `speedMul`.
+### 18.4 Looks (Q20, Q21)
+`js/sim/looks.js cleanLook(raw, stored)` cleans every look a client sends (create, the title screen, the barber):
+`{v:1, race, seed, avatar?}` where `avatar` is avatar-2d JSON — part ids checked against avatar-2d's catalog (unknown -> the slot
+is dropped, the default shows), colours `#rrggbb`, numbers clamped, held/off-hand parts dropped, ≤ 4 KB. A look with an
+`avatar` is stored as `custom: {…avatar parts}` (D-UI's name; `avatar` is read as the same) — it overrides the class default. Title screen: gw `look {char, look}`
+(refused while the character is in the world) -> `lookR {char, ok, look}`; `charList` rows carry `look`. In the world:
+`barber {npc, look}` at a `barber` NPC -> `lookR {ok, look, cost}`, and everyone gets the new `info.look`. Price (E's
+`barber.services.appearance`): each part changed at its list price (hair, hair colour, beard, eyes, face, skin, body; a new race =
+everything), capped at `everything`, × (1 + 0.05 × (level − 1)); the first change a character makes is free (`char.flags`).
+
+### 18.5 Display prefs (Q22)
+`pref {k:'showGear'|'showHelm', v}` (saved, `char.prefs`) trims `info.gear` for EVERYONE: no head piece, or no worn gear at all
+(weapons stay) with `info.gearOff:1`. `joined.you.prefs`.
+
+### 18.6 Follow (Q2)
+`follow {id}` -> `followR {id, ok, name}`; refused for monsters / other teams (`hostile`), objects, the dead, >40 m. The client
+does the following.
+
+### 18.7 Settings, trade requests from friends only (Q14, Q15)
+Account settings live in the world-state table under `settings:<account>` (both stores): gw `settings {op:'get'|'set', data}`
+-> `settings {data:{tradeFriendsOnly}}` (also sent after every `chars`). The gateway pushes `{k:'social', char, friends:[ids],
+tradeFriendsOnly}` to the province holding a character (on play, on a friend-list change, on a settings change, on a move to
+another process); `trade {op:'ask'}` to someone whose account has `tradeFriendsOnly` and who has not friended you is refused
+with `err {code:'trade', msg}`. The trade flow itself is §M1.5: `trade ask {id: entity}` -> `tradeAsk {trade, from, name}` ->
+`trade accept {id: trade}` / `cancel`.
+
+### 18.8 Statuses everyone sees (Q8), offices (Q10), class names (Q25), ring slots (Q12), casting refusals (Q1)
+- `info.st = [status ids]` on every entity, kept in step with the rules (rechecked on every `fx status`, on a death, on a
+  revive/respawn, and once a second while any is showing). A death and a revive clear it AND emit `fx {kind:'status', on:false}`
+  for each status, so a client drawing auras from events drops them too.
+- Each service NPC (`schedules.js` OFFICES) has its own building, staffed day and night: `info.office = {kind, plot, want, x, z,
+  yaw, w, d, lit}` (`plot` = B's building id it took over; `lit` = draw a lamp — shops yes, the elder/healer/unbinder no).
+  Everybody else gets a slot of their own where they gather (no two NPCs on one spot at any hour).
+- `charList.chars[i].clsName` and `joined.you.clsName` (Farhold's class name).
+- `item {op:'equip', uid}` with no slot or the item's own slot lets the rules choose (free ring hand, free off hand); `ring1` /
+  `ring2` / `offhand` are exact. `equip.slot` reports where it went.
+- `castR` refusals: at most one per slot and reason per 2 s (`CAST_REFUSAL_MS`); `why` is camelCase (`notDrawn`), with `text`,
+  `need` (seconds of draw) and `wait` when the rules give them.
+
+- `joined.you.reach` / `you {reach}` (after equip): the basic attack's range in metres (the rules' `attackRange(e)`, else the
+  main-hand swing plan's `range`: bows ~38 m); null = melee. `inspect {id}` -> `inspectR {name, cls, clsName, level, look,
+  equipment}`. Party rows and friend rows carry `look` (portraits).
+- Party loot, C's one-drop-per-corpse rule: the room gives the rules `host.partyLoot(members, items, corpse, partyId)`; a party
+  that tagged a kill gets ONE drop, rolled once by C. Items under the line go to a PARTY PILE on the corpse (any member takes
+  them; `lootWin.items` rows with `shared:true`), items at/above go to Need / Greed / Skip. Ranking + winner are C's
+  `js/rules/loot-rules.js` (`locksForRoll`, `rollWinner`; thresholds magic | rare | legendary | unique, `epic` = legendary).
+- Town NPCs: where E's `offices.json` lists a town, ITS offices are the working NPCs (one body per office; a quest NPC who keeps
+  one gains its role/shop and stands at its door), schedules.json then only adds townsfolk and guards.
+
+### 18.9 Quests (Q27, Q28)
+Quest fields the runtime reads: `auto: true` (given to every character on entering the world), `cls` / `classes` (id or [ids]:
+only that class is offered it), `requires` ([ids], all done), `minLevel`, a quest file's `include` (E's start.json, classes.json,
+setpieces.json merged into zone `test`), `order: 'any'` (every step counts on its own; the log row carries `order:'any'` and each step
+its own `n`/`done`), `autoComplete` (paid when done, no turn-in: `questR {op:'turnin', auto:true}`), `reward.unlock`
+('companion' | 'companion2' | 'talents1', C's `rules.unlock`), `reward.perks: n` (C's `unlock('perk', {source: quest id})`); step `visit {town:'<settlement>'}` = reach that town.
+

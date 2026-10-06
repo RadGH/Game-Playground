@@ -36,6 +36,16 @@ export const CHIBI2_COMBAT_ALL = [...CHIBI2_ALL_ANIMS, ...CHIBI2_COMBAT_ANIMS];
 export const CHIBI2_RIDE_ANIMS = ['boat', 'sit'];
 
 /**
+ * IN THE SADDLE, opt-in — added 2026-10-05 for mounts (avatar-3d/js/mounts.js, Thousandvale Q16). `ride` sits
+ * astride a saddle at a walk or trot (thighs spread round the barrel, shins down the flanks into the stirrups,
+ * hands low and forward on the reins); `rideGallop` crouches forward over the neck with the hands pushed out
+ * and a bigger bounce. Their own list: nothing that builds today's lists changes.
+ *
+ *   createChibi2Character(avatar, { anims: [...CHIBI2_ANIMS, ...CHIBI2_MOUNT_ANIMS] })
+ */
+export const CHIBI2_MOUNT_ANIMS = ['ride', 'rideGallop'];
+
+/**
  * WORKING AT SOMETHING, opt-in — added 2026-09-21. All three loop (the gather bar decides how long
  * the job takes), so none is in `ONE_SHOTS`, and each returns to its first pose at the loop point.
  */
@@ -114,6 +124,7 @@ const LENGTHS = {
   arcCut: 0.62, slam: 1.05, lunge: 0.55, shoot: 0.6, reload: 1, castPoint: 0.35,
   castStaff: 0.7, channel: 1.6,
   boat: 2.4, sit: 3,
+  ride: 1.0, rideGallop: 0.5,
   pickSwing: 1, chopSwing: 0.85, forage: 1.4,
   chop: 0.72, hack: 0.6, smash: 0.9, uppercut: 0.6, stab: 0.42, flurry: 0.6, bash: 0.55, block: 1.6,
   parry: 0.45, offSlash: 0.5, offThrust: 0.42, crossSlash: 0.7, twinCleave: 0.95, twinSlam: 1.1,
@@ -1004,6 +1015,24 @@ const CLIPS = {
     p.legL[0] = -1.15; p.legR[0] = -1.15; p.legL[2] = -0.26; p.legR[2] = 0.26; p.kneeL[0] = 0.85; p.kneeR[0] = 0.85;
     p.chest[0] = 0.08 + ride * 0.02; p.armL[0] = -0.7; p.armR[0] = -0.7; p.armL[2] = -0.2; p.armR[2] = 0.2;
     p.elbowL[0] = -0.85; p.elbowR[0] = -0.85; p.head[0] = ride * 0.03; o.bob = ride * 0.01; return restAims(ctx);
+  },
+  ride(p, u, cy, ctx, o) {
+    const bump = sin(cy * 2);
+    p.legL[0] = -0.78; p.legR[0] = -0.78; p.legL[2] = -0.62; p.legR[2] = 0.62; p.legL[1] = 0.25; p.legR[1] = -0.25;
+    p.kneeL[0] = 1.05; p.kneeR[0] = 1.05; p.footL[0] = -0.25; p.footR[0] = -0.25;
+    p.hips[0] = 0.06; p.chest[0] = 0.14 + bump * 0.02; p.head[0] = -0.08 - bump * 0.015;
+    p.armL[0] = -0.5; p.armR[0] = -0.5; p.armL[2] = -0.06; p.armR[2] = 0.06; p.armL[1] = 0.12; p.armR[1] = -0.12;
+    p.elbowL[0] = -1.0; p.elbowR[0] = -1.0;
+    o.bob = bump * 0.012; return restAims(ctx);
+  },
+  rideGallop(p, u, cy, ctx, o) {
+    const bump = sin(cy), lift = Math.abs(bump);
+    p.legL[0] = -0.62; p.legR[0] = -0.62; p.legL[2] = -0.6; p.legR[2] = 0.6; p.legL[1] = 0.25; p.legR[1] = -0.25;
+    p.kneeL[0] = 1.25; p.kneeR[0] = 1.25; p.footL[0] = -0.35; p.footR[0] = -0.35;
+    p.hips[0] = 0.18; p.chest[0] = 0.42 + bump * 0.05; p.head[0] = -0.38 - bump * 0.04;
+    p.armL[0] = -0.95 - bump * 0.08; p.armR[0] = -0.95 - bump * 0.08; p.armL[2] = -0.08; p.armR[2] = 0.08; p.armL[1] = 0.15; p.armR[1] = -0.15;
+    p.elbowL[0] = -0.55; p.elbowR[0] = -0.55;
+    o.bob = lift * 0.035 - 0.01; o.surge = bump * 0.012; return restAims(ctx);
   },
   pickSwing(p, u, cy, ctx, o) {
     // A ONE-ARMED PICK SWING (2026-09-24: "the character leans over at the hips and swings both

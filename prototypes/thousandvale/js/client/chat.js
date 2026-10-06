@@ -149,6 +149,7 @@ export function createChat({ net: getNet, hud, social, me, actions = {}, onTypin
       case 'unmute': if (arg) muteLocal(arg, false); return true;
       case 'claim': actions.openAccount?.(); return true;
     }
+    if (actions.command?.(cmd, arg, rest)) return true;      // play-test 2: /follow, /trade, /settings (ui/pt2.js)
     line(`Unknown command /${cmd}. Type /help.`, 'bad');
     return true;
   }

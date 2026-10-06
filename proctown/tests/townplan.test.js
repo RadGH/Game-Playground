@@ -388,3 +388,33 @@ test('R22 — a link stays ON the wall when the town grows to fit it', () => {
   assert.ok(kept && Math.hypot(kept.pts[0][0] - link[0], kept.pts[0][1] - link[1]) < 1e-9,
     'a link moved on a town that never grew');
 });
+
+// ---- opt-in office list (Thousandvale, 2026-10-05) ------------------------------------------------
+test('trades: without the option every town is exactly what it was', () => {
+  for (const seed of [3, 11, 42]) for (const size of [1, 3, 5]) {
+    const a = planTown({ seed, size, culture: 'human' });
+    const b = planTown({ seed, size, culture: 'human', trades: null });
+    assert.deepEqual(a.plots.map(p => p.want), b.plots.map(p => p.want));
+    assert.ok(a.plots.every(p => !p.office));
+  }
+});
+
+test('trades: each office in the list gets its own plot, in priority order, near the square', () => {
+  const list = ['hall', 'forge', 'inn', 'shop', 'temple', 'stable', 'barber', 'counting_house', 'study',
+    { want: 'armoury', from: 3 }, { want: 'jeweller', from: 6 }];
+  for (const culture of Object.keys(CULTURES)) for (const seed of [5, 9, 77]) {
+    const plan = planTown({ seed, size: 3, culture, trades: { list, share: 0.6, pick: 'square' } });
+    const offices = plan.plots.filter(p => p.office);
+    const wants = offices.map(p => p.want);
+    assert.equal(new Set(wants).size, wants.length, `${culture}/${seed}: two offices share a want`);
+    assert.ok(!wants.includes('jeweller'), 'an entry above the settlement size is skipped');
+    const room = Math.max(1, Math.floor(plan.plots.length * 0.6));
+    const expect = list.filter(e => typeof e === 'string' || (e.from ?? 0) <= 3).slice(0, room).map(e => e.want || e);
+    assert.deepEqual(wants.slice().sort(), expect.slice().sort(), `${culture}/${seed}`);
+    // the offices sit nearer the square than the homes, on average
+    const d = p => Math.hypot(p.cx - plan.square.cx, p.cz - plan.square.cz);
+    const homes = plan.plots.filter(p => !p.office);
+    if (homes.length >= 3) assert.ok(offices.reduce((s, p) => s + d(p), 0) / offices.length < homes.reduce((s, p) => s + d(p), 0) / homes.length + 1e-6, `${culture}/${seed}: offices are not central`);
+    assert.equal(overlaps(plan).length, 0);
+  }
+});

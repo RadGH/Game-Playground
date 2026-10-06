@@ -471,3 +471,68 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   badge was C's `perkPoints` object; badges are numbers only and the Skills/Perk windows read `talentTree` + `perkPoints.left`
   (picks go to the server; refunds say "an Unbinder in town"). The m3-server test hook levels a character through real XP so
   the rules' sheet levels too.
+
+## 2026-10-05 — stream C (play-test 2: Q1, Q8, Q16, Q26, Q28, Q3/Q4)
+- **C** Q1 `js/rules/cast.js`: a draw weapon's click (no `held`) is no longer refused "not drawn" — the server draws to full and looses on its own at Farhold's held cadence (draw.full + afterShot), aimed at the target it was drawn on; a short `held` keeps drawing to the nock (Farhold "a click still shoots"). Slot-0 `cast` events carry `every` (ms) + `clip` draw/shoot. tests/C/playtest2: 12 ranged/caster bases land damage in a real room; parity-ranged's "not drawn" assertion updated (deliberate divergence: a short draw shoots weak instead of refusing — Farhold's controller already does this client-side).
+- **C** `js/rules/index.js` intent: a self/ally-targeted skill no longer turns you to face north (`atan2(0,0)`) — found by the class-quest trials (a knight with Sworn Guard up whiffed every swing).
+- **C** Q8 `index.js`: statuses + barrier end on death (players and monsters) with `fx status on:false` per status; respawn / revive come back clean; `rules.statusesOf(e)` for A's `info.st`.
+- **C** Q26 `js/rules/perk-forest.js`: every arm's nodes inside angle ± sector/2 (forks narrowed + staggered); `arms[i].half` for the client's wedge (it drew ± π/8 over ± π/12 wedges).
+- **C** Q3/Q4 `js/rules/loot-rules.js` (rank ladder incl. set/unique, thresholds magic/rare/legendary/unique + `epic` alias, splitLoot, rollWinner); `cast.js onKill` one drop per party per corpse when the room offers `host.partyLoot`.
+- **C** Q16 `js/rules/mount.js`: riding rules (call 1.5 s, refusals, dismount triggers, Calm vs hits, DoTs never throw you, remount lockout, speed clamp).
+- **C** Q28 `rules.unlock(e, 'talents1')` (first talent tier at level 1) and `rules.unlock(e, 'perk', { source })` (once per quest); `tests/C/class-quests.test.mjs` runs every kill step of E's 30 class quests with a bot of that class — all winnable (table in js/rules/README.md).
+
+## 2026-10-05 — stream D-UI (play-test 2: menus, HUD, windows)
+- **D-UI** `js/client/ui/pt2.js` assembles the play-test-2 interface (main.js creates/wires/ticks it, plus `ui2.pass()` after the render); `window.tvui2` test hooks (state of every window, `fake(ev, msg)` through the real handlers).
+- **D-UI** Q2 `ui/context-menu.js`: right-click a friendly body (or Shift + right-click an enemy) -> Target · Follow · Inspect · Whisper · Invite · Trade · Add friend (players), Talk (town folk), Attack/Loot (beasts); `/follow [Name]`, `/unfollow`, `/tradewith Name`, `/settings`; following walks behind the leader, any movement key / ground click / attack ends it; `follow {id}` -> followR. Inspect window (worn gear from `info.gear`).
+- **D-UI** Q3/Q4 `ui/loot.js`: `lootable` corpses, E / click to open, the loot window (take / take all / gold / party leftovers), `lootR` refusals; Need/Greed/Skip cards with a 30 s bar, results to chat (`lootRolled`); the party loot threshold (leader only; magic/rare/legendary/unique) in the Party tab.
+- **D-UI** Q5/Q6 `ui/banner.js`: one centre column (pop-ups, the area banner, call-outs, toasts) so nothing overlaps; the banner has a hierarchy province > zone > place with a short queue; vignette lore is a place banner; the party invite and trade asks sit top centre.
+- **D-UI** Q11 `ui/shop.js`: Buy / Sell / Buy back over A's `shop`/`shopView`/`shopR`; "Browse wares" / "See the mounts" in a trader's dialog (world-ui `npcButtons`).
+- **D-UI** Q12: a click on a second ring sends `slot:'ring2'`; a drag onto the first ring slot sends `ring1`.
+- **D-UI** Q13 `ui/portraits.js`: LIVE portraits (self + target) drawn with the game's renderer on layer 1 (lights on layer 1 too, nothing compiled), read back through a pixel-pack buffer + fence (no GPU stall: 3 ms worst vs 440 ms with drawImage); STATIC portraits (title characters, friends, party frames) on a small renderer of their own, toBlob + IndexedDB.
+- **D-UI** Q14 `ui/trade.js`: the trade window on §13 (offer from your bag, gold, lock, accept), asks at the top centre, friends-only declines client side too.
+- **D-UI** Q15/Q22 `ui/settings.js`: Esc (nothing open, no target) -> pause menu (Resume, Settings, Help, Log out); Settings: graphics quality (after reload), volumes (saved; no sound in the game yet), interface size, key list, "Only allow trade requests from friends" (gw settings), Show equipment / Show helm (`pref`; your own figure follows at once).
+- **D-UI** Q20/Q21 `ui/appearance.js` + `ui/appearance-core.js`: one character editor (people on the title, skin, height/build/head/roundness, every face part + colours) — "Customize appearance" on the title, the barber's chair in the world (`barber {npc, look}`); `look.avatar` holds only face/body and `looks.js avatarFor` lays it over the seeded body, so class outfits and worn gear still apply.
+- **D-UI** Q23/Q26 perk forest: a search box (rings + zooms to matches by name or card text); each arm's area is C's `angle ± half` slice, widened only if a node centre would fall outside (`talent-model.js armSectors`).
+- **D-UI** Q24: an XP bar over the action bar and in the character window, numbers on hover only. Q25: target frame and character list name the calling (never "Adventurer"). Q1 (C's ask): bows/crossbows/wands fire from range (24 m until A sends `you.attackRange`), the swing pace from the cast event's `every`, draw/shoot clips played.
+- **D-UI** tests: `tests/D/pt2.test.js` (12 node tests, incl. every real perk node inside its arm's slice), `tests/D/pt2.spec.js` (real server + a bot player). The test hook's `/give` takes `slot`/`rarity`.
+
+## 2026-10-05 — Stream E: play-test 2 content (Q27 Q28 Q9/Q11 Q10 Q16 Q18 Q20)
+- **Q27 starting chain** "The South Road" (data/quests/start.json, included by test.json, 7 quests): auto-granted; Elder Maud -> the south
+  road -> the Pail and Plough -> two branches in either order (Orrinsford + Prior Wendel / Greyfletch Camp + the mini boss
+  **Old Gristle**, data/encounters/mb_old_gristle.json, level 4) -> home -> the province story. New quest field `requires`.
+- **Q28 class quests** (data/quests/classes.json): 30 (one per class, `classes`, levels 2-4) from 12 trainers (4 in Torborhold houses, 8 at set pieces);
+  rewards: a named rare + the companion now (13 classes) or a perk point (17). Winnable per C's table and tests/E.
+- **Q9/Q11/Q16/Q20 shops** (data/provinces/shops.json): 15 trader kinds with gear categories, fixed goods (potions, food,
+  torches, recall charm, buff consumables, mounts, quivers, lights) and services (barber price list, first change free);
+  per-town flavour; `roles` generated for A's runtime by tools/content-shops.mjs. Role names follow B's town offices.
+- **Q10 offices** (data/provinces/offices.json, tools/content-offices.mjs): one building per working NPC in all 16 hub towns
+  (237), from B's role-tagged plots; quest NPCs keep the office of their role (one body) or a home; doors >= 2.5 m apart.
+  schedules.json: `office` anchor + 9 new roles.
+- **Q18 set pieces** (data/vignettes/setpieces.json, tools/content-setpieces.mjs): 12 hand-designed places near Torborhold,
+  each with NPCs/monsters/objects/lore/chatter/quests; 6 bound onto B's baked ground pieces (renamed via places.json
+  setPieces/lanes), 6 on their own; 50-model catalog for D; workers at every B set-piece slot. B's set pieces/fields/buildings
+  are keep-clear discs. Chatter: 20 new pools.
+- Placer: road coverage last pass (`patchRoads`, the independent measure); NPCs with an office stand at its door.
+- tests/E/playtest2.test.js (15): class quest per class, chain order + reachability + winnable boss (all classes), shop stock,
+  barber, unique offices, set pieces placed. tests/E 145 green.
+
+## 2026-10-05 — stream A, play-test 2 (protocol v6, docs/protocol.md §18)
+- **A** Q3/Q4 `js/sim/corpses.js`: kill gold + items wait on the corpse (personal shares, `lootable`/`loot`/`lootWin`), the body
+  is kept while loot is on it (5 min cap, room `hooks.keepBody`); party threshold (gw `party {op:'loot'}`, default rare, C's
+  `js/rules/loot-rules.js` ladder) -> Need / Greed / Skip 30 s (`lootRoll`/`lootRolled`, C's `rollWinner`), all skip -> free on
+  the corpse for anyone; C's one-drop-per-party `host.partyLoot` -> a party pile + rolls.
+- **A** Q8 room `info.st` (C's `rules.statusesOf`), cleared + `fx status off` on death/revive, 1 Hz sweep.
+- **A** Q10 town NPCs from E's `offices.json` (one body per office, quest NPC keepers merged, staffed day and night, `info.office`);
+  schedules.js gives every service NPC a unique plot where E has no entry; no two folk on one spot (slots).
+- **A** Q11 `js/sim/shops.js` over E's `shops.json` (kinds, town caps/mults, categories via the rules' engine, goods, pricing,
+  buyback); `shop` ops + `used.shop`.
+- **A** Q12 equip with the item's own slot lets Farhold pick the free ring / off hand. Q14/Q15 gw `settings` (account, world
+  state `settings:<account>`), friends-only trade requests (`social` bus push). Q16 `js/sim/mounts.js` (Farhold ids, calm) with
+  C's `js/rules/mount.js` (1.5 s call, dismount rules, remount delay), `speedMul` in stepMove, starter at 5, stable sells.
+- **A** Q20/Q21 `js/sim/looks.js` (avatar-2d catalog check, `custom` parts), gw `look` (title screen), `barber` (E's prices,
+  first visit free). Q22 `pref` showGear/showHelm trims `info.gear` for all. Q25 `clsName` on charList + you. Q2 `follow`,
+  `inspect`. Q1 castR dedupe (2 s per slot/why, `need`). `you.reach` = basic attack range (C's ask).
+- **A** Q27/Q28 quests: `auto`, `cls`/`classes`, `requires`, `minLevel`, `order:'any'`, `autoComplete`, `visit {town}`,
+  quest file `include`, `reward.unlock` / `reward.perks` -> C's `rules.unlock`.
+- **A** tests: pt2-loot (5), pt2-services (6), pt2-real (2), pt2-quests (3); m1-social / m2 / placements updated to the new rules;
+  tools/bot-client.mjs bots loot corpses (first-hour bot green again). 100-bot gate green (spread p99 8.9, herd 7.7, event 10.0 ms).

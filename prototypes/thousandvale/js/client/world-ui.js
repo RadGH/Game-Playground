@@ -108,7 +108,9 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
         const role = u.role ? (ROLE_NAME[u.role] || u.role) : null;
         const lines = (u.says && u.says.length ? u.says : ROLE_LINES[u.role] || ['Safe roads, traveller.']);
         const line = lines[Math.floor(Math.random() * lines.length)];
-        show(u.name || role || 'Someone', role && role !== u.name ? role : '', `<p class="say">“${esc(line)}”</p>${questHtml(u)}`);
+        // play-test 2 Q11/Q20: a trader's dialog offers the shop, the barber his chair (ui/pt2.js fills npcButtons)
+        const extra = api.npcButtons ? api.npcButtons(u) || [] : [];
+        show(u.name || role || 'Someone', role && role !== u.name ? role : '', `<p class="say">“${esc(line)}”</p>${questHtml(u)}`, extra.length ? [...extra, { text: 'Goodbye', on: () => {} }] : []);
         wireQuestButtons(u);
         return true;
       }
@@ -254,7 +256,7 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
   deedsEl.hidden = true;
   function onZone(z) {
     const band = Array.isArray(z.band) ? ` · levels ${z.band[0]}–${z.band[1]}` : '';
-    hud.zone(z.name || z.zone);
+    hud.zone(z.name || z.zone, { sub: Array.isArray(z.band) ? `Levels ${z.band[0]}–${z.band[1]}` : '' });
     deedsEl.querySelector('b').textContent = (z.name || z.zone) + band;
     const lines = deedLines(z.deeds);
     deedsEl.querySelector('ul').innerHTML = lines.map(l => `<li>${esc(l)}</li>`).join('') || '<li class="quiet">A quiet hour here.</li>';
@@ -277,6 +279,9 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
     if (!text || seenLore.has(key)) return;
     seenLore.add(key);
     hud.chat(`${name}: ${text}`, 'lore');
+    // play-test 2 Q6: a place is the smallest area — it goes through the one banner (it waits behind a zone banner)
+    const ob = api.onBanner || onBanner;
+    if (ob) { ob({ level: 'place', name, sub: text, lead: 'You come upon' }); return; }
     const el = mk('tv-lore', `<b>${esc(name)}</b><p>${esc(text)}</p>`);
     setTimeout(() => el.classList.add('out'), 7000); setTimeout(() => el.remove(), 8200);
   }
@@ -291,11 +296,13 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
     n.on('questR', onQuestR);
     n.on('zoneEvent', onZoneEvent);
   }
-  return {
+  const api = {
+    npcButtons: null, onBanner: null,
     knownWaystones: () => [...known],
     wire, tick, onUsed, openTravel, onQuests, onQuestR, onZoneEvent, setKnown, lore, onRealm, onEventFrame, onGroupHint, onZone, show, callout,
     joined(j) { setKnown(j.you?.waystones); if (j.event) onRealm({ kind: 'eventStart', ev: j.event }); },
     get event() { return event; }, get dialogOpen() { return !dialog.hidden; }, closeDialog() { dialog.hidden = true; },
     ago,
   };
+  return api;
 }

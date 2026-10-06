@@ -48,6 +48,7 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     note: $('signin-note'), go: $('signin-go'), forgot: $('signin-forgot'), reset: $('reset'), mine: $('mychars'), chips: $('char-chips'), who: $('signin-who'),
   };
 
+  let lastChars = [], lastUser = null;       // the title's character list, for redraws (play-test 2)
   // ---- title: tabs ----
   function tab(which) {
     const login = which === 'login';
@@ -99,7 +100,15 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     const list = chars || [];
     T.mine.hidden = !list.length && !username;
     T.who.textContent = username ? `Logged in as ${username}` : '';
-    T.chips.replaceChildren(...list.map(c => h('button.chip.char', { type: 'button', title: `Play ${c.name}`, onclick: () => onPick(c) }, c.name, h('small', {}, ` ${c.level || 1} ${String(c.cls || '').replace(/_/g, ' ')}`))));
+    lastChars = list; lastUser = username;
+    // play-test 2 Q25: the calling's real name ("Ranger"); Q13: the character's portrait (ui/portraits.js) when ready
+    const nice = c => c.clsName || String(c.cls || '').replace(/_/g, ' ').replace(/\b\w/g, x => x.toUpperCase()) || 'Adventurer';
+    T.chips.replaceChildren(...list.map(c => {
+      const pic = api.portraitFor?.(c);
+      return h('button.chip.char', { type: 'button', title: `Play ${c.name}`, onclick: () => onPick(c), dataset: { char: String(c.id) } },
+        pic ? h('img.char-pic', { src: pic, alt: '' }) : h('span.char-pic.letter', {}, (c.name[0] || '?').toUpperCase()),
+        h('span.char-txt', {}, c.name, h('small', {}, ` Level ${c.level || 1} ${nice(c)}`)));
+    }));
     const label = T.mine.querySelector('.label');
     if (label) label.textContent = username ? `${username} — your characters` : 'Your characters';
     if (list.length && !$('name').value) $('name').value = list[0].name;
@@ -180,5 +189,8 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     b.dataset.tip = n && n.claimed ? `Account: ${n.username}` : 'Account: you are a guest — claim it to keep it (free)';
   }
 
-  return { wire, panel, draw, showChars, tab, refreshPill };
+  const api = { wire, panel, draw, showChars, tab, refreshPill, portraitFor: null,
+    /** Redraw the title's character list (a portrait arrived, or a new charList). */
+    redrawChars(chars = null) { if (chars) lastChars = chars; if (lastChars.length && !T.mine.hidden) showChars(lastChars, lastUser); } };
+  return api;
 }

@@ -236,7 +236,7 @@ test('day/night: the clock comes in welcome; NPCs go to work by day and to the i
   a.close(); await srv.stop();
 });
 
-test('town folk follow stream E\'s schedules over stream B\'s town plan: the smith at the forge by day, the inn at dusk, home late', async () => {
+test('town folk over stream B\'s town plan: every service NPC has an office of its own (the smith at the forge, day and night); nobody shares a spot', async () => {
   const { townFolk, blockAt } = await import('../../js/sim/schedules.js');
   const S = await readJson('data/provinces/schedules.json');
   const L = buildLayout({ key: 'torbor_downs', name: C.name, terrain: C.terrain, zones: C.zones, encounterInfo: C.encounterInfo, vignetteContent, starter: C.starter, schedules: S });
@@ -249,9 +249,21 @@ test('town folk follow stream E\'s schedules over stream B\'s town plan: the smi
   const forge = plan.buildings.find(b => b.want === 'forge'), inn = plan.buildings.find(b => b.want === 'inn');
   const P = S.clock.phases;
   const at = t => blockAt(smith.schedule.blocks, t, P).at;
-  assert.ok(Math.hypot(at(0.5).x - forge.x, at(0.5).z - forge.z) < 10, 'at the forge by day');
-  assert.ok(Math.hypot(at(0.78).x - inn.x, at(0.78).z - inn.z) < 10, 'at the inn at dusk');
-  assert.ok(Math.hypot(at(0.97).x - inn.x, at(0.97).z - inn.z) > 2, 'home late');
+  void inn;
+  // play-test 2 (Q10): the smith is at the forge by day AND at night (a service is always where you expect it)
+  for (const t of [0.3, 0.5, 0.78, 0.97]) assert.ok(Math.hypot(at(t).x - forge.x, at(t).z - forge.z) < 10, 'at the forge at ' + t);
+  assert.equal(smith.office.kind, 'forge'); assert.equal(smith.office.plot, forge.id);
+  const offices = folk.filter(f => f.office);
+  assert.ok(offices.length >= 7, 'every service role has an office: ' + offices.map(f => f.npc.role));
+  const plots = offices.map(f => f.office.plot).filter(Boolean);
+  assert.equal(new Set(plots).size, plots.length, 'no two offices share a building');
+  for (const f of offices) if (['smith', 'merchant', 'stablehand', 'innkeeper'].includes(f.npc.role)) assert.equal(f.office.lit, true, f.npc.role + ' has a lamp');
+  assert.equal(folk.find(f => f.npc.role === 'elder').office.lit, false, 'the elder\'s hall draws no eye');
+  // nobody stands on anybody else at any hour
+  for (const t of [0.1, 0.25, 0.5, 0.78, 0.9, 0.97]) {
+    const spots = folk.map(f => blockAt(f.schedule.blocks, t, P).at);
+    for (let i = 0; i < spots.length; i++) for (let j = i + 1; j < spots.length; j++) assert.ok(Math.hypot(spots[i].x - spots[j].x, spots[i].z - spots[j].z) > 0.9, `two folk on one spot at ${t}: ${folk[i].key} ${JSON.stringify(spots[i])} + ${folk[j].key} ${JSON.stringify(spots[j])}`);
+  }
   for (const f of folk) for (const b of f.schedule.blocks) assert.ok(Math.hypot(b.at.x - L.towns[0].x, b.at.z - L.towns[0].z) < L.towns[0].r, f.npc.role + ' stays in town');
 });
 

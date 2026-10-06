@@ -9,6 +9,7 @@ import { randomChibi2, CHIBI2_RACES } from '../../../../avatar-3d/js/chibi2-race
 import { loadClassOutfits, dressAs } from '../../../../avatar-3d/js/class-outfits.js';
 import { CREATURE_TYPES } from '../../../../avatar-3d/js/creature-types.js';
 import { gearLook, gearKey } from './gear-look.js';
+import { applyCustom, customKey, lookCustom } from './ui/appearance-core.js';   // play-test 2 Q20/Q21: the face/body a player chose
 
 export const PLAYABLE_RACES = ['human', 'elf', 'dwarf', 'halfling'];
 export const RACE_NAMES = Object.fromEntries(PLAYABLE_RACES.map(r => [r, CHIBI2_RACES[r]?.name?.replace(/^Chibi 2 /, '') || r]));
@@ -26,8 +27,8 @@ export async function loadLookData() {
 /** The avatar JSON for a player look. Cached by key: a crowd of the same class+seed builds once. */
 const cache = new Map();
 export async function avatarFor(look) {
-  // A full Chibi 2 avatar JSON (a later character editor may send one) is used as it is.
-  if (look?.avatar) return look.avatar;
+  // A bare avatar JSON (no race/seed wrapper) is used as it is. `look.avatar` (protocol v6) is the face and body the
+  // player chose in the editor: laid over the seeded body below, so clothes still follow the class / worn gear (P22).
   if (look?.body && look?.headShape) return look;
   const race = PLAYABLE_RACES.includes(look?.race) ? look.race : 'human';
   const cls = look?.cls || 'warrior';
@@ -35,10 +36,11 @@ export async function avatarFor(look) {
   // P22: in the world a character wears plain clothes plus exactly its gear (`look.gear`, slot -> item); with no
   // `gear` field at all (the title preview, town folk) it is dressed in its class outfit as before
   const worn = look && look.gear !== undefined && look.gear !== null;
-  const key = `${race}|${cls}|${seed}${worn ? '|g:' + gearKey(look.gear) : ''}`;
+  const custom = lookCustom(look), ck = custom ? customKey(custom) : '';
+  const key = `${race}|${cls}|${seed}${ck ? '|c:' + ck : ''}${worn ? '|g:' + gearKey(look.gear) : ''}`;
   if (cache.has(key)) return cache.get(key);
   const { presets: data, outfits: o, bases: B } = await loadLookData();
-  const base = randomChibi2(randomAvatar, data, { race, seed, makeRng, known: (slot, id) => partIds(slot).includes(id) });
+  const base = applyCustom(randomChibi2(randomAvatar, data, { race, seed, makeRng, known: (slot, id) => partIds(slot).includes(id) }), custom);
   let a;
   if (worn) a = { ...base, ...gearLook(look.gear, { baseOf: k => B?.[k] || null }) };
   else { const outfit = o[cls] || o.warrior; a = outfit ? dressAs(base, outfit) : base; }

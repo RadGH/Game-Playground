@@ -3,7 +3,7 @@
 // floats on both sides, so a well-behaved client reconciles to within rounding.
 //
 //   stepMove(state, input, dtMs, terrain) -> state (mutated)
-//     state   = { x, y, z, vy, airborne, swim?, wade? }   (swim/wade are OUTPUTS: derived from where you are)
+//     state   = { x, y, z, vy, airborne, swim?, wade?, speedMul? }   (swim/wade are OUTPUTS; speedMul = riding, Q16)
 //     input   = { mx, mz, b }      world-space direction (length <= 1, longer is normalised), b = IN bits
 //     terrain = { heightAt(x,z), walkable?(x,z), waterAt?(x,z), moveAt?(x,z), bounds?: {minX,minZ,maxX,maxZ} }
 //
@@ -77,6 +77,8 @@ export function stepMove(state, input, dtMs, terrain) {
   const swimming = here === 'swim' && !state.airborne;
   let speed = swimming ? ((b & IN.SPRINT) ? MOVE.swimSprint : MOVE.swim) : (b & IN.SPRINT) ? MOVE.sprint : MOVE.run;
   if (here === 'wade' && !state.airborne) speed *= MOVE.wade;
+  // riding (play-test 2, Q16): the mount's factor on land; the client predicts with the same `you.speedMul`
+  if (!swimming && state.speedMul > 0 && state.speedMul !== 1) speed *= Math.min(3, state.speedMul);
   let nx = state.x + mx * speed * dt, nz = state.z + mz * speed * dt;
   const bd = terrain.bounds;
   if (bd) {

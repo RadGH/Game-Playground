@@ -5,7 +5,8 @@
 //
 // A building is described from its plot + culture + a seed (`describeBuilding`) and comes back as unit
 // shapes (`partsFor`): eight InstancedMeshes hold every building in the zone, whatever its culture.
-// Lit windows go into their own instanced mesh so night can turn them on (setNight).
+// Window glass goes into two glowing instanced meshes (bright on shops, dim on homes) so night can turn them on
+// (setNight); service buildings get proctown's office dressing (offices.js: a forge, an awning, a sign — Q10).
 //
 // Conventions (docs/world.md §6): a building's `yaw` faces its street (protocol: yaw 0 faces +z, the door
 // is at local +z); proctown's frontage angle is `facing`, so facing = PI/2 - yaw.
@@ -13,7 +14,8 @@
 import * as THREE from 'three';
 import { LIGHTS } from './lightpool.js';
 import { describeBuilding, partsFor, radiusOf, MESHES, describeStall, stallParts, wallKitParts, CULTURE_KIT } from '../../../../proctown/js/buildkit.js';
-import { makeGlowTexture } from './decor.js';
+import { makeGlowTexture, makeFlameTexture } from './decor.js';
+import { officeDressing, officeKindFor, OFFICE_KINDS } from '../../../../proctown/js/offices.js';
 
 /** proctown's plot from a placement record. Pure — exported for tests. */
 export function plotFromPlacement(p) {
@@ -26,6 +28,20 @@ export const buildingSeed = (townSeed, p) => (townSeed ^ Math.imul(Math.round(p.
 export function localToWorld(x, z, yaw, lx, lz) {
   const c = Math.cos(yaw), s = Math.sin(yaw);
   return { x: x + lx * c + lz * s, z: z - lx * s + lz * c };
+}
+/**
+ * One building's look, pure (no Three.js): its proctown description, which office it is (B's `data.office`, else a
+ * service `want`; null = an ordinary home), whether it is lit (a shop: Q10), its kit parts and its office dressing.
+ * Exported for tests (play-test 2 Q7/Q10).
+ */
+export function buildingLook(raw, { culture = 'human', townSeed = 0, ox = 0, oz = 0 } = {}) {
+  const p = { ...raw, x: raw.x + ox, z: raw.z + oz };
+  const plot = plotFromPlacement(p);
+  const seed = buildingSeed(townSeed, p);
+  const desc = describeBuilding({ plot, culture, townSeed, seed, want: plot.want, district: plot.district });
+  const kind = officeKindFor(raw.data?.office) || officeKindFor(plot.want);
+  const lit = kind ? (raw.data?.lit ?? OFFICE_KINDS[kind].lit) : false;
+  return { p, plot, seed, desc, kind, lit, parts: partsFor(desc), dressing: kind ? officeDressing(kind, desc, { lit, seed }) : null };
 }
 const strHash = s => { let h = 2166136261; for (const ch of String(s)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
 
@@ -82,38 +98,70 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
 
   // ---- parts, collected per unit mesh -------------------------------------------------------------
   const parts = Object.fromEntries(MESHES.map(m => [m, []]));   // [{ m: Matrix4, c: Color }]
-  const windows = [];
   const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _v = new THREE.Vector3(), _s = new THREE.Vector3();
-  const push = (mesh, x, y, z, yaw, w, h, d, colour) => {
-    _e.set(0, yaw, 0); _q.setFromEuler(_e);
-    (parts[mesh] || parts.box).push({ m: new THREE.Matrix4().compose(_v.set(x, y, z), _q, _s.set(w, h, d)), c: new THREE.Color(colour) });
+  // a part may carry tilts (rx pitch, rz roll) applied after its yaw — Euler order 'YXZ' (proctown offices/propkit)
+  const push = (mesh, x, y, z, yaw, w, h, d, colour, rx = 0, rz = 0, into = parts) => {
+    _e.set(rx, yaw, rz, 'YXZ'); _q.setFromEuler(_e);
+    (into[mesh] || into.box).push({ m: new THREE.Matrix4().compose(_v.set(x, y, z), _q, _s.set(w, h, d)), c: new THREE.Color(colour) });
   };
-  const placePart = (part, ox2, oz2, ground, yaw) => {
+  const placePart = (part, ox2, oz2, ground, yaw, into = parts) => {
     const c = Math.cos(yaw), s = Math.sin(yaw);
-    push(part.mesh, ox2 + part.x * c + part.z * s, ground + part.y, oz2 - part.x * s + part.z * c, yaw + (part.yaw || 0), part.w, part.h, part.d, part.colour);
+    push(part.mesh, ox2 + part.x * c + part.z * s, ground + part.y, oz2 - part.x * s + part.z * c, yaw + (part.yaw || 0), part.w, part.h, part.d, part.colour, part.rx || 0, part.rz || 0, into);
   };
+  // glass: the kit's own window parts (and lantern glass) go in two glowing meshes instead of the plain kit — BRIGHT on
+  // the buildings meant to draw a player in (shops, the inn, the smithy: Q10), DIM on ordinary homes. Play-test 2 Q7:
+  // the old lit windows were two boxes stamped at a fixed spot on the footprint's front edge whatever the building's
+  // real shape — on round huts, L-shaped houses and set-back fronts (18 of Torborhold's 90) they hung in the air in
+  // front of the wall: the "floating tiny lanterns".
+  const glass = { bright: [], dim: [] };
+  const placeGlass = (part, ox2, oz2, ground, yaw, bright) => {
+    const c = Math.cos(yaw), s = Math.sin(yaw);
+    const x = ox2 + part.x * c + part.z * s, z = oz2 - part.x * s + part.z * c;
+    _e.set(part.rx || 0, yaw + (part.yaw || 0), part.rz || 0, 'YXZ'); _q.setFromEuler(_e);
+    (bright ? glass.bright : glass.dim).push({ m: new THREE.Matrix4().compose(_v.set(x, ground + part.y, z), _q, _s.set(part.w, part.h, part.d)), c: new THREE.Color(part.colour || '#2a2620') });
+  };
+  const offices = [];       // { x, z, kind, lit, label, building }
+  const officeLights = [];  // world { x, y, z, color, strong }
+  const fires = [];         // world { x, y, z, s }
+  const spinners = [];      // { x, y, z, yaw, axis, speed, parts }
 
   let buildings = 0;
   const clearings = [];
   const solids = [];
+  const descs = [];
+  /** Dress one service building (Q10) — its look from proctown's office dressing, in the building's own frame. */
+  function dress(b, kind, lit, into = parts, sink = { lights: officeLights, fires, spinners }, made = null) {
+    const d = made || officeDressing(kind, b.desc, { lit, seed: b.seed });
+    for (const part of d.parts) {
+      if (part.tag === 'lamp') { placeGlass(part, b.x, b.z, b.ground, b.yaw, true); continue; }
+      placePart(part, b.x, b.z, b.ground, b.yaw, into);
+    }
+    const c = Math.cos(b.yaw), s = Math.sin(b.yaw);
+    const W2 = (lx, lz) => ({ x: b.x + lx * c + lz * s, z: b.z - lx * s + lz * c });
+    for (const L of d.lights) { const w = W2(L.x, L.z); sink.lights.push({ x: w.x, y: b.ground + L.y, z: w.z, color: L.color, strong: !!L.strong }); }
+    for (const f of d.fires) { const w = W2(f.x, f.z); sink.fires.push({ x: w.x, y: b.ground + f.y, z: w.z, s: f.s }); }
+    for (const sp of d.spin) { const w = W2(sp.x, sp.z); sink.spinners.push({ x: w.x, y: b.ground + sp.y, z: w.z, yaw: b.yaw, axis: sp.axis, speed: sp.speed, parts: sp.parts }); }
+    return d;
+  }
   for (const raw of placements) {
     if (raw.kind !== 'building') continue;
-    const p = W(raw);
     const town = towns.get(raw.data?.town);
-    const plot = plotFromPlacement(p);
-    const desc = describeBuilding({ plot, culture: cultureOf(raw.data?.town), townSeed: town ? town.seed : 0, seed: buildingSeed(town ? town.seed : 0, p), want: plot.want, district: plot.district });
+    // an office (B's `data.office` once baked, else a service `want`) is dressed and, when it is a shop, lit
+    const look = buildingLook(raw, { culture: cultureOf(raw.data?.town), townSeed: town ? town.seed : 0, ox, oz });
+    const { p, plot, seed, desc, kind, lit } = look;
     const ground = T.heightAt(p.x, p.z);
     const yaw = desc.yaw + (desc.lean || 0);
+    const b = { id: raw.id, x: p.x, z: p.z, ground, yaw, desc, seed, want: plot.want, kind, lit, town: town?.id, dressing: look.dressing };
+    descs.push(b);
     // a footing slab hides the wedge of daylight under a wall on sloping ground
     push('box', p.x, ground - 0.7, p.z, yaw, desc.footprint.w + 0.6, 0.95, desc.footprint.d + 0.6, '#5a5248');
     let top = 0;
-    for (const part of partsFor(desc)) { top = Math.max(top, part.y + part.h); placePart(part, p.x, p.z, ground, yaw); }
-    // two lit windows on the front, either side of the door, for the night
-    const fw = desc.footprint.w, fd = desc.footprint.d;
-    for (const side of [-1, 1]) {
-      const wpt = localToWorld(p.x, p.z, yaw, side * fw * 0.28, fd / 2 + 0.04);
-      windows.push({ x: wpt.x, y: ground + Math.min(1.5, (desc.storeyHeight || 2.4) * 0.55), z: wpt.z, yaw, w: Math.min(0.8, fw * 0.14) });
+    for (const part of look.parts) {
+      top = Math.max(top, part.y + part.h);
+      if (part.tag === 'window') placeGlass(part, p.x, p.z, ground, yaw, lit);
+      else placePart(part, p.x, p.z, ground, yaw);
     }
+    if (kind) { dress(b, kind, lit, parts, undefined, look.dressing); offices.push({ x: p.x, z: p.z, kind, lit, label: raw.data?.label || OFFICE_KINDS[kind].label, building: raw.id }); }
     solids.push({ x: p.x, z: p.z, r: radiusOf(desc) * 0.85, h: top, bottom: ground - 1, top: ground + top });
     buildings++;
   }
@@ -219,14 +267,40 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
     m.computeBoundingSphere();
     group.add(m); meshes.push(m);
   }
-  // lit windows (warm, emissive, off by day)
-  const winMat = new THREE.MeshStandardMaterial({ color: '#2a2622', emissive: '#ffb45c', emissiveIntensity: 0, roughness: 0.6 });
-  let winMesh = null;
-  if (windows.length) {
-    winMesh = new THREE.InstancedMesh(unitGeometry('box'), winMat, windows.length);
-    windows.forEach((w, i) => { _e.set(0, w.yaw, 0); _q.setFromEuler(_e); winMesh.setMatrixAt(i, _m.compose(_v.set(w.x, w.y, w.z), _q, _s.set(w.w, w.w * 1.1, 0.08))); });
-    group.add(winMesh); meshes.push(winMesh);
+  // glass: bright (shops) and dim (homes) — warm and emissive at night, the glass colour by day
+  const winMat = new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#ffb45c', emissiveIntensity: 0, roughness: 0.4 });
+  const dimMat = new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#e8a050', emissiveIntensity: 0, roughness: 0.4 });
+  const glassMeshes = [];
+  for (const [list, mat, name] of [[glass.bright, winMat, 'glass-bright'], [glass.dim, dimMat, 'glass-dim']]) {
+    if (!list.length) continue;
+    const m = new THREE.InstancedMesh(unitGeometry('box'), mat, list.length);
+    list.forEach((it, i) => { m.setMatrixAt(i, it.m); m.setColorAt(i, it.c); });
+    m.name = name; m.computeBoundingSphere(); group.add(m); meshes.push(m); glassMeshes.push(m);
   }
+  // turning parts (mill sails): a small group per spinner, its own instanced pieces
+  const spinGroups = [];
+  function buildSpinner(sp, into = group) {
+    const g = new THREE.Group(); g.position.set(sp.x, sp.y, sp.z); g.rotation.set(0, sp.yaw, 0, 'YXZ');
+    const turn = new THREE.Group(); g.add(turn);
+    const per = Object.fromEntries(MESHES.map(m => [m, []]));
+    for (const part of sp.parts) push(part.mesh, part.x, part.y, part.z, part.yaw || 0, part.w, part.h, part.d, part.colour, part.rx || 0, part.rz || 0, per);
+    for (const [kind, list] of Object.entries(per)) {
+      if (!list.length) continue;
+      const m = new THREE.InstancedMesh(unitGeometry(kind), kitMat, list.length);
+      list.forEach((it, i) => { m.setMatrixAt(i, it.m); m.setColorAt(i, it.c); });
+      m.castShadow = !cheap; m.computeBoundingSphere(); turn.add(m); meshes.push(m);
+    }
+    into.add(g);
+    const S = { g, turn, axis: sp.axis, speed: sp.speed };
+    spinGroups.push(S);
+    return S;
+  }
+  for (const sp of spinners) buildSpinner(sp);
+  // flames (forge hearth, temple candles) — sprites; their light comes from officeLights
+  const flameMat = new THREE.SpriteMaterial({ map: makeFlameTexture(), color: 0xffc070, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true });
+  const flameSprites = [];
+  function addFlame(f, into = group) { const sp = new THREE.Sprite(flameMat); sp.position.set(f.x, f.y + f.s * 0.45, f.z); sp.scale.set(f.s * 0.9, f.s * 1.3, 1); sp.userData.s = f.s; into.add(sp); flameSprites.push(sp); }
+  for (const f of fires) addFlame(f);
   // lamp glows (sprites, cheap); a few real lights hop to the lamps nearest the camera at night
   const glowTex = makeGlowTexture();
   const lampSprites = lamps.map(l => { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: '#ffc36e', blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0, fog: true })); s.position.set(l.x, l.y + 2.75, l.z); s.scale.set(2.2, 2.2, 1); s.visible = false; group.add(s); return s; });
@@ -234,21 +308,71 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
   // nightfall and walking past lamps never recompile a shader
   const lampLights = lamps.map(l => LIGHTS.add({ x: l.x, y: l.y + 2.7, z: l.z, color: '#ffb862', intensity: 0, distance: 18, decay: 1.6, flicker: 0.05, owner: group }));
 
+  // office lanterns and hearths: pool light SOURCES too (only lit offices carry any: Q10 — shops draw the eye, homes do not)
+  const officeSources = officeLights.map(l => LIGHTS.add({ x: l.x, y: l.y, z: l.z, color: l.color, intensity: 0, distance: l.strong ? 14 : 11, decay: 1.6, flicker: l.strong ? 0.18 : 0.06, owner: group }));
+  const officeGlows = officeLights.map(l => { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: l.color, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0, fog: true })); s.position.set(l.x, l.y, l.z); s.scale.set(l.strong ? 2.4 : 1.3, l.strong ? 2.4 : 1.3, 1); s.visible = false; group.add(s); return s; });
+
   let night = 0, relightAt = 0, t = 0;
   function setNight(n) {
     night = n;
-    winMat.emissiveIntensity = 1.6 * n;
+    winMat.emissiveIntensity = 1.7 * n;
+    dimMat.emissiveIntensity = 0.32 * n;
     for (const s of lampSprites) { s.visible = n > 0.05; s.material.opacity = 0.85 * n; }
     for (const h of lampLights) h.intensity = n > 0.05 ? 14 * n : 0;
+    officeLights.forEach((l, i) => { officeSources[i].intensity = l.strong ? 5 + 9 * n : (n > 0.05 ? 9 * n : 0); officeGlows[i].visible = l.strong || n > 0.05; officeGlows[i].material.opacity = l.strong ? 0.35 + 0.5 * n : 0.8 * n; });
+    for (const c of claimed.values()) c.setNight?.(n);
   }
   function update(dt, cam) {
     t += dt;
+    for (const S of spinGroups) S.turn.rotation[S.axis] += S.speed * dt;
+    for (let i = 0; i < flameSprites.length; i++) { const f = flameSprites[i], k = f.userData.s; f.scale.y = k * (1.2 + Math.sin(t * 9 + i) * 0.12); }
+  }
+
+  /**
+   * The server's own office list (`info.office` on a service NPC: {kind, plot, x, z, lit}) — a role that took over an
+   * ordinary house as its shop (no dedicated plot in this town) gets that house dressed now. Idempotent per building.
+   */
+  const claimed = new Map();
+  function claimOffice(o) {
+    if (!o) return false;
+    const kind = officeKindFor(o.kind) || officeKindFor(o.want);
+    if (!kind) return false;
+    let b = o.plot != null ? descs.find(d => d.id === o.plot) : null;
+    if (!b && Number.isFinite(o.x)) for (const d of descs) for (const [x, z] of [[o.x, o.z], [o.x + ox, o.z + oz]]) if (Math.hypot(d.x - x, d.z - z) < 2.5) b = d;
+    if (!b) return false;
+    if (b.kind === kind || claimed.get(b.id)?.kind === kind) return true;
+    if (b.kind) return true;            // already dressed as another trade: the plan wins
+    claimed.get(b.id)?.dispose();
+    const sub = new THREE.Group(); sub.name = 'office-' + kind;
+    const subParts = Object.fromEntries(MESHES.map(m => [m, []]));
+    const sink = { lights: [], fires: [], spinners: [] };
+    const lit = o.lit ?? OFFICE_KINDS[kind].lit;
+    const before = glass.bright.length;
+    dress(b, kind, lit, subParts, sink);
+    const lampGlass = glass.bright.splice(before);
+    const own = [];
+    for (const [k, list] of Object.entries(subParts)) {
+      if (!list.length) continue;
+      const m = new THREE.InstancedMesh(unitGeometry(k), kitMat, list.length);
+      list.forEach((it, i) => { m.setMatrixAt(i, it.m); m.setColorAt(i, it.c); });
+      m.castShadow = !cheap; m.computeBoundingSphere(); sub.add(m); own.push(m);
+    }
+    if (lampGlass.length) { const m = new THREE.InstancedMesh(unitGeometry('box'), winMat, lampGlass.length); lampGlass.forEach((it, i) => { m.setMatrixAt(i, it.m); m.setColorAt(i, it.c); }); sub.add(m); own.push(m); }
+    for (const sp of sink.spinners) buildSpinner(sp, sub);
+    for (const f of sink.fires) addFlame(f, sub);
+    const srcs = sink.lights.map(l => LIGHTS.add({ x: l.x, y: l.y, z: l.z, color: l.color, intensity: 0, distance: 11, decay: 1.6, flicker: 0.06, owner: group }));
+    group.add(sub);
+    const rec = { kind, setNight: n => { for (const h of srcs) h.intensity = n > 0.05 ? 9 * n : 0; }, dispose() { group.remove(sub); for (const m of own) m.dispose(); for (const h of srcs) h.remove(); } };
+    rec.setNight(night);
+    claimed.set(b.id, rec);
+    offices.push({ x: b.x, z: b.z, kind, lit, label: OFFICE_KINDS[kind].label, building: b.id, claimed: true });
+    return true;
   }
 
   return {
-    group, update, setNight, clearings, solids, lamps,
+    group, update, setNight, clearings, solids, lamps, offices, claimOffice, buildingsList: descs,
     towns: [...towns.values()],
-    stats: { buildings, lamps: lamps.length, windows: windows.length, parts: Object.fromEntries(Object.entries(parts).map(([k, v]) => [k, v.length])) },
-    dispose() { for (const m of meshes) m.dispose(); kitMat.dispose(); winMat.dispose(); for (const s of lampSprites) s.material.dispose(); for (const h of lampLights) h.remove(); },
+    stats: { buildings, lamps: lamps.length, windows: glass.bright.length + glass.dim.length, brightGlass: glass.bright.length, dimGlass: glass.dim.length, offices: offices.length, officeLights: officeLights.length, parts: Object.fromEntries(Object.entries(parts).map(([k, v]) => [k, v.length])) },
+    dispose() { for (const m of meshes) m.dispose(); kitMat.dispose(); winMat.dispose(); dimMat.dispose(); flameMat.dispose(); for (const s of lampSprites) s.material.dispose(); for (const s of officeGlows) s.material.dispose(); for (const h of lampLights) h.remove(); for (const h of officeSources) h.remove(); for (const c of claimed.values()) c.dispose(); },
   };
 }

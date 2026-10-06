@@ -58,6 +58,11 @@ import { perf, compileBeforeShow } from './perf.js';
 import { LIGHTS } from './lightpool.js';
 import { createTransition, isJump } from './transition.js';
 import { createSpells } from './spells.js';
+import { createStatusSync } from './status-sync.js';
+import { createUi2 } from './ui/pt2.js';          // D-UI play-test 2: menus, loot, rolls, shops, trade, pause/settings, portraits, editor
+import { savedQuality } from './ui/settings.js';
+import { lookWith } from './ui/appearance-core.js';
+import { avatarFor } from './looks.js';
 
 const q = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
@@ -74,6 +79,7 @@ const CASTR_TEXT = { range: 'Out of range.', target: 'You need a target.', dead:
 /** Software rendering (headless test browsers, no GPU driver) draws "high" at ~1 fps, so it starts low. */
 function detectQuality() {
   if (q.get('quality')) return q.get('quality');
+  if (savedQuality()) return savedQuality();          // Settings > Graphics (play-test 2 Q15)
   try {
     const g = document.createElement('canvas').getContext('webgl2');
     const e = g && g.getExtension('WEBGL_debug_renderer_info');
@@ -99,6 +105,8 @@ const tele = createTelegraphs(scene, {
 // P20: every skill's look (spell-looks.js) drawn with avatar-3d SpellFx from the rules' cast/fx/hit events
 let SKILLS = null; loadSkillData().then(d => { SKILLS = d?.skills || null; window.__skillClasses = d?.classes || {}; }).catch(() => {});
 const spells = createSpells(scene, { camera, renderer: view.renderer, actors, quality, lights: LIGHTS, groundY: (x, z) => groundY(x, z), skillOf: id => SKILLS?.[id] || null });
+// Q8: auras follow the server's info.st on every body (late arrivals see them; a death clears them)
+const statusSync = createStatusSync({ actors, fx: spells.fx, infoOf: id => S.mirror?.infos.get(id), selfDead: () => S.self.dead, selfId: () => S.selfId });
 const travel = createTransition({ el: document.getElementById('travel-veil'), view, scene, camera });
 const objects = createObjects(scene, { onUse: (id, o) => (String(id).startsWith('demo:') ? demoUse(o) : S.net?.use(id)), onNear: o => worldUi.lore(o.key || o.id, o.name, o.lore), labelLayer: document.getElementById('plates'), camera });
 
@@ -119,7 +127,7 @@ const S = {
 // --- the outdoor world: zones streamed around you (world-stream.js), the far horizon beyond them ----------
 const STARTER_ZONE = q.get('zone') || 'z12_02';
 const SOLIDS = createSolids();
-const WS = createWorldStream(scene, { quality, solids: SOLIDS, onZoneReady: L => { L.town?.setNight(S.night || 0); if (!D.view) objects.setGround(WS.terrain.heightAt); }, opts: {
+const WS = createWorldStream(scene, { quality, solids: SOLIDS, onZoneReady: L => { L.town?.setNight(S.night || 0); L.setpieces?.setNight(S.night || 0); if (!D.view) objects.setGround(WS.terrain.heightAt); }, opts: {
   compile: group => compileBeforeShow(view.renderer, group, camera, scene),
   // A zone with no baked scatter (the M0 test zone) gets the old random woods and the waystone camp.
   fallbackDecor: async T => {
@@ -184,7 +192,7 @@ const controls = createControls({
   onSelect: ndc => {
     if (S.phase !== 'world') return null;
     const a = actors.pickAt(ndc, { exclude: S.selfId });
-    if (a) { setTarget(a.id); return { id: a.id, hostile: a.hostile && !a.dead }; }
+    if (a) { setTarget(a.id); ui2.onPick(a); return { id: a.id, hostile: a.hostile && !a.dead }; }
     return null;
   },
   onPickGround: ndc => (S.phase === 'world' ? pickGround(ndc) : null),
@@ -194,6 +202,7 @@ const controls = createControls({
   onChat: () => hud.focusChat(),
   onRise: () => rise(),
   onSkill: n => castSkill(n),
+  onContext: (id, x, y) => ui2.contextAt(id, x, y),
 });
 
 // the camera stops short of buildings, fort walls and big rocks (dungeon walls come in through cameraHeight)
@@ -211,6 +220,7 @@ const chat = createChat({ net: () => S.net, hud, social, me, onTyping: on => con
   openAccount: () => account.panel.open(), openFriends: () => friends.panel.open(),
   friendAdd: n => friends.add(n), friendRemove: n => friends.remove(n), isFriend: n => friends.isFriend(n),
   guildInvite: n => guild.invite(n), canGuildInvite: () => guild.canInvite(),
+  command: (cmd, arg, rest) => ui2.command(cmd, arg, rest),
 } });
 hud.chat = chat.line;                 // every system/combat/loot line lands in the chat window's All tab
 hud.focusChat = prefill => chat.focus(prefill);
@@ -224,11 +234,17 @@ const help = createHelp();
 loadZoneNames();
 const ui = createUiSuite({ net: () => S.net, hud, room: () => S.room, actors, objects, worldUi, social, chat, panels: { friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel },
   me: () => (S.selfId != null && S.phase === 'world' ? { id: S.selfId, x: S.predictor.pos.x, z: S.predictor.pos.z, yaw: S.lastInput?.yaw ?? controls.cam.yaw, level: S.self.level, cls: S.self.cls, char: S.net?.joined?.you?.char ?? null } : null) });
+const ui2 = createUi2({ net: () => S.net, hud, actors, controls, chat, social, friends, bag, help, account, objects, worldUi, renderer: view.renderer, scene,
+  me: () => (S.selfId != null && S.phase === 'world' ? { id: S.selfId, x: S.predictor.pos.x, z: S.predictor.pos.z, level: S.self.level, name: S.self.name, dead: S.self.dead, char: S.net?.joined?.you?.char ?? null } : null),
+  self: () => S.self, targetId: () => S.target, setTarget: id => setTarget(id), infoOf: id => S.mirror.infos.get(id) || null,
+  avatarFor, createBody: async av => (await import('../../../../avatar-3d/js/chibi2.js')).createChibi2Character(av), defaultLook, races: PLAYABLE_RACES, raceNames: RACE_NAMES,
+  titleLook: () => S.look, onLogout: () => { try { S.net?.leave(); } catch {} backToTitle(); },
+  onLookPreview: (look, mode) => previewLook(look, mode), onLookSave: look => { S.look = look; store.set('look', look); previewLook(look, 'title'); } });
 const PANELS = { party: { toggle: () => social.toggleMenu() }, bag: { toggle: () => bag.toggle() }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
 for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());
 window.addEventListener('keydown', e => {
   if (S.phase !== 'world' || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) return;
-  if (e.code === 'KeyE' && objects.useFocus()) { e.preventDefault(); e.stopImmediatePropagation(); }
+  if (e.code === 'KeyE' && (ui2.useKey() || objects.useFocus())) { e.preventDefault(); e.stopImmediatePropagation(); }
   else if (PANEL_KEYS[e.code] && !e.ctrlKey && !e.metaKey && !e.altKey) PANELS[PANEL_KEYS[e.code]].toggle();
   else if (e.code === 'F1' || (e.key === '?' && !e.ctrlKey)) { e.preventDefault(); help.toggle(); }
   else if (e.key === '/' && !e.ctrlKey) { e.preventDefault(); e.stopImmediatePropagation(); chat.focus('/'); }
@@ -239,6 +255,7 @@ window.addEventListener('keydown', e => {
     else if (closeTop()) e.stopImmediatePropagation();
     else if (!document.getElementById('party-menu').hidden) { social.toggleMenu(false); e.stopImmediatePropagation(); }
     else if (bag.isOpen) { bag.toggle(false); e.stopImmediatePropagation(); }
+    else if (S.target == null && ui2.escape()) e.stopImmediatePropagation();   // nothing open, nothing targeted: the menu (Q15)
   }
 }, true);
 
@@ -270,7 +287,8 @@ function initTitle() {
     if (!list.some(c => c.id === S.cls)) S.cls = 'warrior';
     refreshChips(); rebuildPreview();
   });
-  $('reroll').onclick = () => { S.look.seed = (Math.random() * 1e9) >>> 0; rebuildPreview(); };
+  $('reroll').onclick = () => { S.look.seed = (Math.random() * 1e9) >>> 0; delete S.look.avatar; rebuildPreview(); };
+  $('customize')?.addEventListener('click', () => ui2.openEditor('title', { look: S.look }));   // play-test 2 Q21
   $('build-tag').textContent = `client ${q.get('build') || 'dev'} · ${netMode() === 'ws' ? 'online' : 'offline (in-browser server)'}`;
   $('login').addEventListener('submit', e => { e.preventDefault(); enterWorld(); });
   refreshChips();
@@ -288,6 +306,20 @@ function rebuildPreview() {
   preview.noPlate = true;
   preview.still = { x, y, z, yaw: 0.35 };
   store.set('look', S.look); store.set('cls', S.cls);
+}
+
+/** Q20/Q21: the appearance editor's live preview — the title figure, or you in the world at the barber's chair. */
+function previewLook(look, mode) {
+  if (mode === 'barber' || mode === 'revert') {
+    const a = actors.get(S.selfId); if (!a) return;
+    if (!look) { a.look = { ...a.look }; actors.setLook(S.selfId, { ...(S.mirror.infos.get(S.selfId)?.look || a.look), cls: a.look.cls, gear: a.look.gear }); return; }
+    actors.setLook(S.selfId, { ...a.look, race: look.race, seed: look.seed, avatar: look.avatar || undefined, gear: a.look.gear });
+    return;
+  }
+  if (!look) return;
+  S.look = { race: look.race, seed: look.seed, ...(look.avatar ? { avatar: look.avatar } : {}) };
+  refreshChips();
+  if (preview && actors.get('preview')) actors.setLook('preview', { ...S.look, cls: S.cls }); else rebuildPreview();
 }
 
 // --- connecting -----------------------------------------------------------------------------------------
@@ -336,7 +368,7 @@ async function enterWorld(pick = null) {
   try {
     await net.ready;
     let ch = pick || net.chars.find(c => c.name.toLowerCase() === name.toLowerCase());
-    if (!ch) ch = await net.createChar({ name, cls: S.cls, look: { race: S.look.race, seed: S.look.seed, v: 1 } });
+    if (!ch) { const look = lookWith(S.look, S.look.avatar); ch = await net.createChar({ name, cls: S.cls, look }); ui2.lookStore.set(name, look); }
     const join = (q.get('join') || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 8) || null;
     await net.play(ch.id, join ? { join } : {});
     clearTimeout(timer);
@@ -370,11 +402,13 @@ function wireNet(net) {
     if (patch.xpNext != null) S.self.next = patch.xpNext;
     if (patch.hpMax != null) S.self.hpMax = patch.hpMax;
     if (patch.hp != null) S.self.hp = patch.hp;
+    if (patch.attackRange != null) S.reach = basicReach();
     hud.setSelf(S.self);
     if (Array.isArray(patch.bar)) refreshBar();   // §15.10: level-up, form/stance, talent pick (client.js merged it into joined.you)
     if (levelled) levelFlash(S.selfId);
   });
-  net.on('equip', m => { const a = actors.get(S.selfId); if (a && m.equipment) actors.setLook(S.selfId, { ...a.look, gear: m.equipment }); });   // P22: what I wear, on me
+  net.on('equip', m => { S.reach = basicReach(m.equipment); });
+  net.on('equip', m => { const a = actors.get(S.selfId); if (a && m.equipment) actors.setLook(S.selfId, { ...a.look, gear: ui2.gearFor(m.equipment) }); });   // Q22: shown as the settings say   // P22: what I wear, on me
   net.on('chat', m => { if (m.ch === 'say' && m.from != null) actors.say(m.from, m.text); });   // the line itself: chat.js
   net.on('zone', z => learnZone(z.zone, z.name));
   social.wire(net);
@@ -382,6 +416,7 @@ function wireNet(net) {
   bag.wire(net);
   ui.wire(net);
   worldUi.wire(net);
+  ui2.wire(net);
   net.on('relocate', () => { travel.cover('Crossing into another province…'); hud.toast('Crossing into another province…', 'info'); });
   // P10: the moment a waystone jump is granted, veil the screen and start loading the far stone's ground
   net.on('travelR', r => {
@@ -427,11 +462,12 @@ function onJoined(j) {
   preview = null;
   const you = j.you;
   Object.assign(S.self, { name: you.name, cls: you.cls, level: you.level, xp: you.xp || 0, next: you.xpNext || 100, hp: you.hp, hpMax: you.hpMax, dead: you.hp <= 0 });
+  S.reach = basicReach(you.equipment);         // Q1: a ranged weapon fires from range
   S.predictor.locked = S.self.dead;
   useRoom(j.room, { x: you.x, z: you.z }).then(() => {
     S.predictor.reset({ x: you.x, y: you.y, z: you.z });
     const a = actors.get(S.selfId) || actors.add({ id: S.selfId, kind: 'player', name: you.name, level: you.level, hp: you.hp, hpMax: you.hpMax, hostile: false,
-      look: lookFor(S.mirror.infos.get(S.selfId)?.look || { race: S.look.race, seed: S.look.seed }, you.char, you.cls, you.equipment || S.mirror.infos.get(S.selfId)?.gear || {}), x: you.x, y: you.y, z: you.z, yaw: you.yaw }, { self: true });
+      look: lookFor(S.mirror.infos.get(S.selfId)?.look || { race: S.look.race, seed: S.look.seed, ...(S.look.avatar ? { avatar: S.look.avatar } : {}) }, you.char, you.cls, ui2.gearFor(you.equipment || S.mirror.infos.get(S.selfId)?.gear || {})), x: you.x, y: you.y, z: you.z, yaw: you.yaw }, { self: true });
     a.self = true;
     // P8: a respawn that lands in another room (the graveyard town) arrives as `joined`, not as a snapshot with
     // dead=false — the body kept its corpse pose for good ("my character never stood up")
@@ -477,7 +513,7 @@ function ensureActor(id) {
       creature: kind === 'monster' || pet ? { type: info.type || 'wolf', seed: (id * 7919) >>> 0 } : null, family: info.type && !npc ? displayName(info.type, 'monster') : null,
       x: e.x, y, z: e.z, yaw: e.yaw || 0, rank: info.rank || null, role: info.role || null, pet,
     });
-    if (npc) objects.upsert({ id, type: 'npc', name: a.name, x: e.x, z: e.z, source: 'room' });
+    if (npc) { objects.upsert({ id, type: 'npc', name: a.name, x: e.x, z: e.z, source: 'room' }); if (info.office) WS.claimOffice(info.office); }   // Q10: its own building, dressed
     if (e.state & STATE.dead) actors.setDead(id, true);
   }
   return a;
@@ -514,8 +550,12 @@ function refreshFromInfo(id) {
   actors.refreshPlate(a);
   // P22: another player (or my own entity, seen by the server) changed what they wear
   if (a.kind === 'player' && info.gear && gearKey(info.gear) !== gearKey(a.look?.gear || {}) && !(id === S.selfId && S.net?.joined?.you?.equipment)) actors.setLook(id, { ...a.look, gear: info.gear });
+  // Q20/Q21: a new face or body (the barber, the title editor) reaches everyone through info.look; gear stays as worn
+  if (a.kind === 'player' && info.look && lookSig(info.look) !== lookSig(a.look)) actors.setLook(id, { ...a.look, race: info.look.race || a.look?.race, seed: info.look.seed ?? a.look?.seed, avatar: info.look.avatar || undefined, gear: a.look?.gear });
   if (levelled && id !== S.selfId) levelFlash(id);
 }
+/** The part of a look that is the body (not the clothes): race, seed and the editor's avatar. */
+const lookSig = l => (l ? `${l.race || ''}|${l.seed ?? ''}|${l.avatar ? JSON.stringify(l.avatar) : ''}` : '');
 
 function onSnap(s) {
   S.stats.snaps++; S.stats.bytes += s.bytes || 0;
@@ -553,12 +593,16 @@ function remember(ev) { S.events.push(ev); if (S.events.length > 200) S.events.s
 function onEvent(ev) {
   if (!ev.type && ev.t) ev = { ...ev, type: ev.t };   // encounter events may still carry `t`
   remember(ev);
-  if (ev.type === 'cast' || ev.type === 'hit' || ev.type === 'fx') spells.onEvent(ev);
+  if (ev.type === 'cast' || ev.type === 'hit' || ev.type === 'fx') { spells.onEvent(ev); statusSync.onEvent(ev); }
   const me = S.selfId;
   switch (ev.type) {
     case 'cast':
-      if (ev.s === me) S.swing.last = performance.now();
-      else actors.playAttack(ev.s, ev.target);
+      if (ev.s === me) {
+        S.swing.last = performance.now();
+        // Q1 (C): the basic attack's own pace, and a bow's draw then loose ('draw' / 'shoot') as two plays
+        if (!(ev.slot > 0) && Number.isFinite(ev.every) && ev.every > 0) S.swing.ms = ev.every;
+        if (ev.clip === 'draw' || ev.clip === 'shoot') actors.playAttack(me, ev.target);
+      } else actors.playAttack(ev.s, ev.target);
       break;
     case 'hit': {
       const dst = actors.get(ev.d), src = actors.get(ev.s);
@@ -583,7 +627,7 @@ function onEvent(ev) {
       break;
     }
     case 'die': {
-      actors.setDead(ev.d, true);
+      actors.setDead(ev.d, true); statusSync.dead(ev.d);
       const a = actors.get(ev.d), by = actors.get(ev.by);
       if (ev.d === me) { setSelfDead(true); hud.chat(by ? `You were slain by ${by.name}.` : 'You have fallen.', 'bad'); }
       else if (a && ev.by === me) hud.chat(`You have slain ${a.name}.`, 'combat');
@@ -630,7 +674,7 @@ function levelFlash(id) { const a = actors.get(id); if (a) fx.burst({ x: a.pos.x
 function setSelfDead(dead) {
   if (S.self.dead === dead) return;
   S.self.dead = dead; S.predictor.locked = dead;
-  actors.setDead(S.selfId, dead);
+  actors.setDead(S.selfId, dead); statusSync.dead(S.selfId);   // Q8: no aura survives a death or a revive
   if (dead) { S.self.deadAt = performance.now(); controls.stopChase(); }
   else { hud.toast('You rise again.', 'good'); if (travel.covered) setTimeout(() => travel.reveal(), 50); }
 }
@@ -704,6 +748,17 @@ function castSkill(n) {
 }
 
 /** Swing at the target if we think the weapon is ready; the server decides (castR says no). */
+/**
+ * Q1: how far the basic attack reaches — a bow, crossbow or wand fires from range instead of walking to 2.4 m (the server
+ * says no with why:'range' if this is too far, and the castR handler shortens it). `you.attackRange` from A wins.
+ */
+const RANGED_SUB = /bow|crossbow|wand|sling|javelin|throw/i;
+function basicReach(eq) {
+  const r = S.net?.joined?.you?.attackRange;
+  if (Number.isFinite(r) && r > 0) return r;
+  const w = (eq || S.net?.joined?.you?.equipment || {}).weapon;
+  return w && RANGED_SUB.test(`${w.subtype || ''} ${w.baseKey || ''} ${w.base || ''}`) ? 24 : 2.4;
+}
 function tryStrike(fromKey, slot = 0) {
   if (S.phase !== 'world' || S.self.dead || !S.net) return false;
   const t = actors.get(S.target);
@@ -806,7 +861,7 @@ function dayNight(dt) {
   const n = k.night;
   if (Math.abs(n - S.night) > 0.01 || !dayNight.done) {
     S.night = n; dayNight.done = true;
-    for (const L of WS.loaded.values()) L.town?.setNight(n);
+    for (const L of WS.loaded.values()) { L.town?.setNight(n); L.setpieces?.setNight(n); }
     W.horizon?.setNight(n);
     // leaves glow a little by day (thin cards read as lit canopy); at night that glow would look like phosphor
     if (leafMats?.leaf?.emissiveIntensity != null) leafMats.leaf.emissiveIntensity = 0.55 * (1 - n * 0.85);
@@ -864,6 +919,7 @@ function frame(now) {
     if (!D.view) WS.update(dt, S.fly ? { x: S.fly.lx, z: S.fly.lz } : drawn);
     worldUi.tick(S.tod);
     ui.tick(dt);
+    ui2.tick(dt);
     D.view?.update(dt, S.fly ? { x: S.fly.lx, z: S.fly.lz } : drawn);
     tele.update(dt);
     boss.update(dt);
@@ -890,10 +946,12 @@ function frame(now) {
   }
   fx.update(dt);
   spells.update(dt);
+  statusSync.update();
   hud.tick(dt);
   LIGHTS.update(dt, camera.position);
   W.horizon?.update(camera.position);       // far-horizon chunk LOD (built in a worker; cheap when nothing changes)
   perf.span('render', () => view.render());
+  if (S.phase === 'world') ui2.pass();         // Q13: live portraits, drawn with this frame's renderer in the same task
   perf.setPrograms(view.renderer.info.programs?.length || 0);
   perf.frameEnd();
 }
@@ -1115,4 +1173,4 @@ const tv = {
   },
 };
 window.tv = tv;
-window.thousandvale = { S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account };
+window.thousandvale = { S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui2 };

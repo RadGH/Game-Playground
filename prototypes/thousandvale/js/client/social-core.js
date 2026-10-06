@@ -72,6 +72,7 @@ export const CHAT_HELP = [
   '/s say · /p party · /g guild · /z zone · /t trade · /world · /w Name text · /r reply',
   '/invite Name · /leave · /kick Name · /lead Name · /link (party join link)',
   '/friend Name · /unfriend Name · /ignore Name · /unignore Name · /report Name',
+  '/follow [Name] · /unfollow · /tradewith [Name] · /settings',
   '/ginvite Name · /gleave · /motd text · /claim (save your account)',
 ];
 
@@ -232,10 +233,10 @@ export const popLeft = (pop, now) => Math.max(0, Math.min(1, (pop.until - now) /
 // ---- keyboard shortcuts (the help overlay reads this; main.js/panels bind them) ----
 export const SHORTCUTS = [
   { group: 'Moving', keys: [['W A S D', 'Move'], ['Shift', 'Sprint'], ['Space', 'Jump'], ['Drag', 'Turn the camera'], ['Q · E (hold)', 'Turn the camera'], ['Click ground', 'Walk there']] },
-  { group: 'Fighting', keys: [['Click', 'Select'], ['Right-click', 'Attack an enemy'], ['Tab', 'Next enemy'], ['F', 'Strike'], ['1 – 6', 'Skills'], ['Esc', 'Clear target / close a window'], ['R', 'Rise after falling']] },
-  { group: 'World', keys: [['E', 'Use, talk, open'], ['C', 'Make camp (wilds)']] },
+  { group: 'Fighting', keys: [['Click', 'Select'], ['Right-click', 'Attack an enemy'], ['Right-click a friend', 'Their menu: follow, trade, inspect, whisper…'], ['Shift + right-click', 'The menu on an enemy'], ['Tab', 'Next enemy'], ['F', 'Strike'], ['1 – 6', 'Skills'], ['Esc', 'Close a window / clear target / the menu (settings, log out)'], ['R', 'Rise after falling']] },
+  { group: 'World', keys: [['E', 'Use, talk, open, loot a body'], ['C', 'Make camp (wilds)']] },
   { group: 'Windows', keys: [['M', 'Map (wheel zooms, drag pans, right-click drops a pin)'], ['J', 'Journal (quests)'], ['B', 'Bag and gear'], ['K', 'Skills and talents'], ['N', 'Perk forest'], ['P', 'Party menu: party, friends, guild, mail, Group Finder'], ['O', 'Friends tab'], ['G', 'Guild tab'], ['F1 or ?', 'This help']] },
-  { group: 'Chat', keys: [['Enter', 'Talk'], ['/', 'Start a command'], ['/w Name', 'Whisper'], ['/r', 'Answer the last whisper'], ['/help', 'All chat commands']] },
+  { group: 'Chat', keys: [['Enter', 'Talk'], ['/', 'Start a command'], ['/w Name', 'Whisper'], ['/r', 'Answer the last whisper'], ['/follow Name', 'Follow a friend (move to stop)'], ['/tradewith Name', 'Ask a player to trade'], ['/help', 'All chat commands']] },
 ];
 /** Window hotkeys: KeyboardEvent.code -> panel id. */
 export const PANEL_KEYS = { KeyB: 'bag', KeyP: 'party', KeyO: 'friends', KeyG: 'guild', KeyM: 'map', KeyJ: 'journal', KeyK: 'skills', KeyN: 'perks' };

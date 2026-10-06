@@ -74,7 +74,10 @@ export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
         f = { root, icon: root.querySelector('.pm-icon'), name: root.querySelector('.pm-name'), bar: root.querySelector('.bar i'), where: root.querySelector('.pm-where') };
         frames.set(m.char, f);
       }
-      f.icon.textContent = (m.name[0] || '?').toUpperCase();
+      // play-test 2 Q13: the member's portrait (ui/portraits.js, static + cached) instead of a letter
+      const pic = api.portraitFor?.(m);
+      if (pic) { if (f.icon.dataset.pic !== pic) { f.icon.dataset.pic = pic; f.icon.textContent = ''; f.icon.style.backgroundImage = `url("${pic}")`; f.icon.classList.add('pic'); } }
+      else if (!f.icon.dataset.pic) f.icon.textContent = (m.name[0] || '?').toUpperCase();
       f.name.innerHTML = '';
       f.name.append(document.createTextNode(m.name));
       const sm = document.createElement('small'); sm.textContent = `${m.level} ${CLASS_NAME(m.cls)}`; f.name.append(sm);
@@ -121,5 +124,6 @@ export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
     n.on('err', e => { if (['party', 'partyFull', 'noCode'].includes(e.code)) hud.toast(e.msg || e.code, 'warn'); });
   }
 
-  return { wire, invite, copyLink, toggleMenu, render, get party() { return party; } };
+  const api = { wire, invite, copyLink, toggleMenu, render, portraitFor: null, get party() { return party; } };
+  return api;
 }

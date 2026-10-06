@@ -14,11 +14,11 @@ import { FRIENDS_MAX } from './store-memory-m3.js';
 
 export const FRIEND_OPS = Object.freeze(['add', 'remove', 'list']);
 
-export function createFriends({ store, presence, gwByChar, log = () => {} }) {
+export function createFriends({ store, presence, gwByChar, log = () => {}, onList = null }) {
   const lists = new Map();          // char -> Map(friendId -> { id, name, cls, level })
   const watchers = new Map();       // friendId -> Set(char)
 
-  const view = (c, f) => { const pr = presence.get(f.id); return { char: f.id, name: pr ? pr.name : f.name, cls: pr ? pr.cls : f.cls, level: pr ? pr.level : f.level, online: !!(pr && pr.online), zone: pr ? (pr.zone || null) : null }; };
+  const view = (c, f) => { const pr = presence.get(f.id); return { char: f.id, name: pr ? pr.name : f.name, cls: pr ? pr.cls : f.cls, level: pr ? pr.level : f.level, online: !!(pr && pr.online), zone: pr ? (pr.zone || null) : null, look: (pr && pr.look) || f.look || null }; };
   function send(c) { const g = gwByChar.get(c), l = lists.get(c); if (g && l) g.sendJSON({ t: 'friends', list: [...l.values()].map(f => view(c, f)) }); }
   function index(c, l) {
     for (const f of l.keys()) { if (!watchers.has(f)) watchers.set(f, new Set()); watchers.get(f).add(c); }
@@ -33,6 +33,7 @@ export function createFriends({ store, presence, gwByChar, log = () => {} }) {
     const l = new Map(rows.map(r => [r.id, { id: r.id, name: r.name, cls: r.cls, level: r.level }]));
     lists.set(c, l); index(c, l);
     send(c);
+    if (onList) onList(c, [...l.keys()]);          // play-test 2 (Q15): the province needs the list for 'friends only' trades
   }
 
   async function op(s, m) {
@@ -75,6 +76,7 @@ export function createFriends({ store, presence, gwByChar, log = () => {} }) {
     op: (s, m) => Promise.resolve(op(s, m)).catch(err => { log('friend op failed', err && err.message); s.err('state', 'That did not work.'); }),
     changed, drop,
     has: (a, b) => !!(lists.get(a) && lists.get(a).has(b)),
+    ids: c => (lists.get(c) ? [...lists.get(c).keys()] : []),
     size: () => lists.size,
   };
 }

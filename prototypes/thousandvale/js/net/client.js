@@ -275,6 +275,7 @@ export function connect(opts = {}) {
     const o = { t: 'party', op };
     if (a.name) o.name = a.name;
     if (a.code) o.code = a.code;
+    if (a.rarity && !a.code) o.code = a.rarity;   // party('loot', {rarity}) (D-UI's name)
     if (a.char != null) o.char = a.char;
     if (a.party != null) o.char = a.party;      // accept/decline carry the party id in `char`
     sendJ(gw, o);
@@ -324,6 +325,23 @@ export function connect(opts = {}) {
   net.report = (name, why, text) => sendJ(gw, text ? { t: 'report', name, why, text } : { t: 'report', name, why });
   /** mail('list') | ('read'|'take'|'return'|'delete', {id}) | ('send', {to, subject, body, items:[uids], gold}) — province socket */
   net.mail = (op, a = {}) => sendJ(game, pick({ t: 'mail', op }, a, ['id', 'to', 'subject', 'body', 'items', 'gold']));
+  // ---- play-test 2 (docs/protocol.md §18) ----
+  /** loot('open'|'take'|'all'|'close', {id: corpse entity id, uid?}) | ('roll', {roll, choice:'need'|'greed'|'skip'}) -> lootWin / lootR / lootRolled */
+  net.loot = (op, a = {}) => sendJ(game, pick({ t: 'loot', op }, a, ['id', 'uid', 'roll', 'choice']));
+  /** shop('open', {npc}) | ('buy', {npc, id}) | ('sell'|'back', {npc, uid}) -> shopView / shopR */
+  net.shop = (op, a = {}) => sendJ(game, pick({ t: 'shop', op }, a, ['npc', 'id', 'uid']));
+  /** mount('summon', {id?}) | ('off') -> mountR + you {mount, speedMul} */
+  net.mount = (op, a = {}) => sendJ(game, pick({ t: 'mount', op }, a, ['id']));
+  net.barber = (npc, look) => sendJ(game, { t: 'barber', npc, look });            // -> lookR
+  net.pref = (k, v) => sendJ(game, { t: 'pref', k, v: !!v });                      // showGear | showHelm -> you {prefs}
+  net.follow = id => sendJ(game, { t: 'follow', id });                             // -> followR (may I follow them?)
+  net.settings = data => sendJ(gw, data ? { t: 'settings', op: 'set', data } : { t: 'settings', op: 'get' });   // -> settings {data}
+  net.setLook = (char, look) => sendJ(gw, { t: 'look', char, look });              // title screen -> lookR
+  net.partyLoot = min => net.partyOp('loot', { code: min });                       // 'magic' | 'rare' | 'legendary' | 'unique' (leader)
+  net.inspect = id => sendJ(game, { t: 'inspect', id });                           // -> inspectR
+  // D-UI's first names (play-test 2): the same messages
+  net.lootOp = net.loot;
+  net.roll = (roll, choice) => net.loot('roll', { roll, choice });
   net.close = () => { stop(); setStatus('closed'); };
   /** Raw access for tests (evil client): send any string/bytes on a socket. */
   net._raw = (which, data) => { const s = which === 'gw' ? gw : game; if (s && s.readyState === OPEN) s.send(data); };

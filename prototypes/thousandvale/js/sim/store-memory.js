@@ -10,6 +10,7 @@
 //   createChar(account, { name, cls, look }) -> { char } | { err: 'name' | 'full' }
 //   takeChar(account, id, owner, leaseMs) -> { char, fence } | { err: 'missing' | 'lease' }
 //   saveChar(char, fence) -> true | false             refused when version or fence moved on
+//   setLook(account, id, look) -> { ok } | { err: 'missing' | 'lease' }   (a character nobody holds; play-test 2 Q21)
 //   releaseChar(id, owner) ; heartbeat(owner, ids, leaseMs) ; clearLeases(ownerPrefix) -> count
 //   appendJournal(rows [{ char, seq, kind, payload, fence }]) -> rows kept (a row whose fence moved on is refused)
 //   tradeChars([{ ch, fence }, { ch, fence }]) -> true | false   both blobs in one all-or-nothing write
@@ -54,7 +55,7 @@ export function createMemoryStore({ now = () => Date.now(), data = null, onChang
       return { account: a.id, claimed: !!a.claimed, username: a.username || null, banned: a.bannedUntil || 0, kind: t ? t.kind : 'guest' };
     },
     async listChars(account) {
-      return Object.values(d.chars).filter(r => r.account === account).map(brief);
+      return Object.values(d.chars).filter(r => r.account === account).map(r => ({ ...brief(r), look: (r.blob && r.blob.look) || null }));
     },
     async createChar(account, { name, cls, look = null }) {
       const lower = name.toLowerCase();
@@ -112,6 +113,16 @@ export function createMemoryStore({ now = () => Date.now(), data = null, onChang
       }
       changed();
       return true;
+    },
+    /** Play-test 2 (Q21): a new look on a character nobody holds (the title screen). { ok } | { err: 'missing'|'lease' } */
+    async setLook(account, id, look) {
+      const r = d.chars[id];
+      if (!r || r.account !== account) return { err: 'missing' };
+      if (r.lease_owner && r.lease_until > now()) return { err: 'lease' };
+      r.blob = { ...(r.blob || {}), look: JSON.parse(JSON.stringify(look)) };
+      r.version++;
+      changed();
+      return { ok: true };
     },
     async releaseChar(id, owner) {
       const r = d.chars[id];

@@ -6,7 +6,7 @@
 //   parseFrame(str)    -> { msg } | { bad: reason }   (JSON text frame -> validated message)
 //   createBuckets()    -> per-socket rate limiter: take(t) -> true if allowed
 
-export const PROTOCOL_VERSION = 5;      // v5: play-test 1 (talent, perk, map; mapData, discover, talentR, perkR; swim state)
+export const PROTOCOL_VERSION = 6;      // v6: play-test 2 (loot, shop, mount, barber, pref, follow; settings + look on gw)
 export const SNAP_VERSION = 1;
 export const TICK_MS = 50;
 export const MAX_FRAME = 16 * 1024;
@@ -131,6 +131,17 @@ export const CLIENT_MSGS = Object.freeze({
   talent:  { on: 'p', fields: { op: 'str:8', skill: '?str:48', tier: '?int', node: '?str:48' }, rate: 3, burst: 10 },
   perk:    { on: 'p', fields: { op: 'str:8', id: '?str:64' }, rate: 3, burst: 10 },
   map:     { on: 'p', fields: { op: 'str:8' }, rate: 1, burst: 3 },
+  // play-test 2 (docs/protocol.md §18): corpse loot + party rolls (Q3/Q4), shops (Q11), mounts (Q16), barber (Q20),
+  // display prefs (Q22), follow check (Q2); on the gateway: account settings (Q15), a title-screen look (Q21)
+  loot:    { on: 'p', fields: { op: 'str:8', id: '?id', uid: '?str:40', roll: '?int', choice: '?str:8', gold: '?bool' }, rate: 8, burst: 16 },
+  shop:    { on: 'p', fields: { op: 'str:8', npc: 'id', id: '?str:48', uid: '?str:40' }, rate: 4, burst: 10 },
+  mount:   { on: 'p', fields: { op: 'str:8', id: '?str:32' }, rate: 1, burst: 3 },
+  barber:  { on: 'p', fields: { npc: 'id', look: 'obj' }, rate: 0.5, burst: 3 },
+  pref:    { on: 'p', fields: { k: 'str:16', v: 'bool' }, rate: 2, burst: 6 },
+  follow:  { on: 'p', fields: { id: 'id' }, rate: 2, burst: 4 },
+  inspect: { on: 'p', fields: { id: 'id' }, rate: 2, burst: 6 },
+  settings: { on: 'gw', fields: { op: 'str:8', data: '?obj' }, rate: 1, burst: 4 },
+  look:    { on: 'gw', fields: { char: 'int', look: 'obj' }, rate: 0.5, burst: 3 },
 });
 
 /** Server -> client JSON messages (documentation + tests; the server is trusted, the client does not validate). */
@@ -187,13 +198,35 @@ export const SERVER_MSGS = Object.freeze({
   perkR: ['op', 'ok'],
   mapData: ['province', 'zones', 'places', 'events'],
   discover: ['places'],
+  // play-test 2
+  lootable: ['id', 'on'],
+  lootWin: ['id'],
+  lootR: ['op', 'ok'],
+  lootRoll: ['roll', 'corpse', 'item', 'ms', 'members'],
+  lootRolled: ['roll', 'item', 'rolls', 'winner'],
+  shopView: ['npc', 'stock', 'buyback'],
+  shopR: ['op', 'ok'],
+  mountR: ['ok'],
+  lookR: ['ok'],
+  followR: ['id', 'ok'],
+  inspectR: ['id', 'ok'],
+  settings: ['data'],
 });
 /** Talent ops (`talent {op}`) and perk ops (`perk {op}`), province socket (P6). */
 export const TALENT_OPS = Object.freeze(['pick', 'clear']);
 export const PERK_OPS = Object.freeze(['take', 'refund', 'reset']);
 
 /** Party ops (`party {op}`); docs/protocol.md §3.3. */
-export const PARTY_OPS = Object.freeze(['invite', 'accept', 'decline', 'leave', 'kick', 'lead', 'join', 'code', 'group']);
+export const PARTY_OPS = Object.freeze(['invite', 'accept', 'decline', 'leave', 'kick', 'lead', 'join', 'code', 'group', 'loot']);
+/** Loot ops (`loot {op}`), shop ops (`shop {op}`), mount ops (`mount {op}`), display prefs (`pref {k}`), play-test 2. */
+export const LOOT_OPS = Object.freeze(['open', 'take', 'all', 'close', 'roll']);
+/** Shop op aliases D-UI's first draft used ('list' = open, 'buyback' = back, 'repair' = refused: no durability). */
+export const ROLL_CHOICES = Object.freeze(['need', 'greed', 'skip']);
+export const SHOP_OPS = Object.freeze(['open', 'buy', 'sell', 'back', 'list', 'buyback', 'repair']);
+export const MOUNT_OPS = Object.freeze(['summon', 'off']);
+export const PREF_KEYS = Object.freeze(['showGear', 'showHelm']);
+/** Party loot thresholds (`party {op:'loot', code}`), lowest first; Farhold's rarity ladder. */
+export const LOOT_MINS = Object.freeze(['magic', 'rare', 'legendary', 'unique']);   // = C's js/rules/loot-rules.js LOOT_THRESHOLDS ('epic' -> legendary)
 export const PARTY_MAX = 5;
 /** Item ops (`item {op}`). */
 export const ITEM_OPS = Object.freeze(['equip', 'unequip', 'destroy']);

@@ -34,6 +34,7 @@ test('S20: eating sits you down (anim + info.sit others see), mends over time, a
   assert.ok(got.some(x => x.t === 'you' && x.regen && x.regen.sit));
   assert.equal(e.sitting, true); assert.equal(e.animId, ANIM_ID.sit, 'the sit pose on the wire');
   assert.equal(b.mirror.infos.get(e.id).sit, 1, 'the other player sees them sitting');
+  assert.equal(b.mirror.infos.get(e.id).eat, 'food', 'and eating (info.eat)');
   assert.ok(e.hp > hp0, 'mending');
   // standing still keeps the meal (idle input does not stand you up)
   step(a, 0); await run(clock, 1100, 50);
@@ -44,6 +45,7 @@ test('S20: eating sits you down (anim + info.sit others see), mends over time, a
   assert.equal(got.filter(x => x.t === 'you' && x.regen === null).pop().why, 'moved');
   await run(clock, 600);
   assert.equal(b.mirror.infos.get(e.id).sit, undefined, 'standing for everyone');
+  assert.equal(b.mirror.infos.get(e.id).eat, undefined, 'no longer eating');
   await run(clock, 2100, 50);
   assert.equal(o.regen, null, 'the meal stays over (only the slow natural regen from here)');
   a.close(); b.close(); await srv.stop();

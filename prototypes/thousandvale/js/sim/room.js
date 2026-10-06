@@ -408,7 +408,7 @@ export function createRoom(opts) {
     if (moved && !e.dead) {
       const going = Math.hypot(mxs, mzs) > 0.05;
       // S20 (play-test 4): a step (or a jump) stands you up — the meal ends (the province's standUp hook)
-      if (e.sitting && (going || e.airborne)) { if (hooks.standUp) hooks.standUp(e, 'moved'); if (e.sitting) { e.sitting = false; e.infoVer++; } }
+      if (e.sitting && (going || e.airborne)) { if (hooks.standUp) hooks.standUp(e, 'moved'); if (e.sitting) { e.sitting = false; e.eating = null; e.infoVer++; } }
       e.setState(STATE.sprinting, going && !!(lastB & IN.SPRINT));
       if (e.airborne) e.loop(e.vy > 0 ? 'jump' : 'fall');
       else if (e.state & STATE.swimming) e.loop('swim');

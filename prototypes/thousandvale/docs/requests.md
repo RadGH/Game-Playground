@@ -2143,3 +2143,5 @@ profile: set pieces, offices, mounts, weapon fx, loot markers all run sliced; th
   not streamed yet); main.js `outdoorTerrain()` hands it to the predictor, so `stepMove` sees the same walls as the server.
 - (D-world -> G, 2026-10-06) tests/e2e/two-players.spec.js: the walk out of Torborhold now routes through the wall gate facing the
   zone's middle (B's S7 walls stopped the straight line at the curtain wall). Green (5.0 min); the fight step stays timing-sensitive.
+
+## A -> D-world, D-UI — 2026-10-06: `info.eat` (food|drink) on a player while eating (with `info.sit`); `info.mods` (affix ids) on champions/rares next to `info.aff`. Dev unit restarted.

@@ -1834,7 +1834,7 @@ export function createProvince(opts) {
   }
   function sitDown(o) {
     const e = o.entity;
-    e.sitting = true; e.infoVer++;
+    e.sitting = true; e.eating = (o.regen && o.regen.kind) || 'food'; e.infoVer++;
     e.anim('sit', 0);
   }
   /** S20: the meal is over — `why` done | moved | stood | cast | hit | combat | dead | left. */
@@ -1842,7 +1842,7 @@ export function createProvince(opts) {
     const e = o.entity;
     const had = !!o.regen;
     o.regen = null;
-    if (e && e.sitting) { e.sitting = false; e.infoVer++; if (!e.dead) e.loop('idle'); }
+    if (e && (e.sitting || e.eating)) { e.sitting = false; e.eating = null; e.infoVer++; if (!e.dead) e.loop('idle'); }
     if (had && o.conn) o.conn.sendJSON({ t: 'you', regen: null, why });
   }
   /** C's rules.restore when present; the stand-in rules have none, so the entity is set directly there. */

@@ -134,10 +134,11 @@ export class Entity {
       if (this.mount) o.mount = this.mount;                    // riding (Q16)
       if (this.mpMax > 0) o.mpMax = this.mpMax;                // R6+: mana bar maximum (the current value comes in `mp` events)
       if (this.sitting) o.sit = 1;                             // S20: sitting down to eat / drink (anim 'sit' too)
+      if (this.eating) o.eat = this.eating;                    // S20 (D-world): 'food' | 'drink' while the meal runs
     }
     else if (this.type) o.type = this.type;
     if (this.rank !== 'normal') o.rank = this.rank;
-    if (this.aff && this.aff.length) o.aff = this.aff;         // S4: a champion's / rare's modifiers [{id, name, aura?}]
+    if (this.aff && this.aff.length) { o.aff = this.aff; o.mods = this.aff.map(a => a.id); }   // S4: modifiers [{id, name, aura?}]; `mods` = ids (D-UI reads it)
     if (this.sc && this.sc !== 1) o.sc = this.sc;              // S4: body scale (champions/rares are bigger; a Giant much bigger)
     if (this.st && this.st.length) o.st = this.st;             // statuses everyone draws (Q8)
     if ((this.kind === 'object' || this.kind === 'npc') && this.data) {

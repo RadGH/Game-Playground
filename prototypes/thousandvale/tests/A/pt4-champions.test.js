@@ -26,6 +26,7 @@ test('S4: ordinary wilds spawns roll champions (~9%) and rares (~2.5%): bigger, 
   for (const e of [...t.champion, ...t.rare]) {
     const i = e.info();
     assert.ok(i.aff && i.aff.length === (e.rank === 'rare' ? 2 : 1), 'modifiers on info');
+    assert.deepEqual(i.mods, i.aff.map(a => a.id), 'mods = the ids');
     assert.ok(i.sc >= 1.25, 'bigger: ' + i.sc);
     assert.ok(e.state & 64, 'elite state bit');
     assert.ok(e.r.unit.dropBonus >= 1, 'better loot (Farhold rank dropBonus)');

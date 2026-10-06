@@ -43,10 +43,10 @@ import * as THREE from 'three';
  * level), wide (x); legK leg thickness; tail Lt (0 = a stub); mane length; hump at the withers; markings.
  */
 export const EQUINE_BREEDS = {
-  horse:   { H: 1.40, L: 1.42, w: 0.25, d: 0.32, Ln: 0.58, up: 0.95, arch: 0.07, neckK: 1, Lh: 0.54, down: 0.92, headK: 1, legK: 1, Lt: 0.8, mane: 0.11, hump: 0.07, blaze: true, socks: ['BL'], hoof: '#2a2420' },
-  pony:    { H: 1.10, L: 1.18, w: 0.26, d: 0.30, Ln: 0.43, up: 0.82, arch: 0.06, neckK: 1.12, Lh: 0.46, down: 0.86, headK: 1.08, legK: 1.25, Lt: 0.66, mane: 0.15, hump: 0.04, forelock: 1.6, blaze: false, socks: [], hoof: '#2e2822' },
-  courser: { H: 1.52, L: 1.50, w: 0.22, d: 0.31, Ln: 0.68, up: 1.05, arch: 0.08, neckK: 0.9, Lh: 0.52, down: 0.95, headK: 0.92, legK: 0.84, Lt: 0.86, mane: 0.09, hump: 0.08, tailUp: 0.2, blaze: true, socks: ['FL', 'BL', 'BR'], hoof: '#3a3430' },
-  draft:   { H: 1.44, L: 1.62, w: 0.31, d: 0.37, Ln: 0.66, up: 0.88, arch: 0.11, neckK: 1.3, Lh: 0.6, down: 0.98, headK: 1.15, legK: 1.35, Lt: 0.8, mane: 0.13, hump: 0.06, feather: true, blaze: true, socks: [], hoof: '#2a2420' },
+  horse:   { H: 1.40, L: 1.42, w: 0.25, d: 0.32, Ln: 0.58, up: 0.95, arch: 0.08, neckK: 1.28, Lh: 0.54, down: 0.92, headK: 1.05, legK: 1.1, Lt: 0.8, mane: 0.11, hump: 0.07, blaze: true, socks: ['BL'], hoof: '#2a2420' },
+  pony:    { H: 1.10, L: 1.18, w: 0.26, d: 0.30, Ln: 0.43, up: 0.82, arch: 0.06, neckK: 1.35, Lh: 0.46, down: 0.86, headK: 1.08, legK: 1.25, Lt: 0.66, mane: 0.15, hump: 0.04, forelock: 1.6, blaze: false, socks: [], hoof: '#2e2822' },
+  courser: { H: 1.52, L: 1.50, w: 0.22, d: 0.31, Ln: 0.68, up: 1.05, arch: 0.08, neckK: 1.12, Lh: 0.52, down: 0.95, headK: 0.92, legK: 0.95, Lt: 0.86, mane: 0.09, hump: 0.08, tailUp: 0.2, blaze: true, socks: ['FL', 'BL', 'BR'], hoof: '#3a3430' },
+  draft:   { H: 1.44, L: 1.62, w: 0.31, d: 0.37, Ln: 0.66, up: 0.88, arch: 0.11, neckK: 1.5, Lh: 0.6, down: 0.98, headK: 1.15, legK: 1.35, Lt: 0.8, mane: 0.13, hump: 0.06, feather: true, blaze: true, socks: [], hoof: '#2a2420' },
   elk:     { H: 1.46, L: 1.42, w: 0.23, d: 0.32, Ln: 0.56, up: 0.72, arch: 0.02, neckK: 1.15, Lh: 0.56, down: 0.78, headK: 0.95, legK: 0.88, Lt: 0, mane: 0, dewlap: 0.12, hump: 0.12, ears: 1.5, antlers: 1, rump: true, hoof: '#2a2420' },
   elk_dray:{ H: 1.46, L: 1.55, w: 0.27, d: 0.35, Ln: 0.58, up: 0.7, arch: 0.03, neckK: 1.35, Lh: 0.6, down: 0.8, headK: 1.05, legK: 1.08, Lt: 0, mane: 0, dewlap: 0.15, hump: 0.14, ears: 1.5, antlers: 1.35, rump: true, feather: true, hoof: '#2a2420' },
 };

@@ -2088,3 +2088,34 @@ Full shapes in docs/protocol.md §20. (S5/S9, S11/S19, S13/S16, S14, S17/S18 are
 - Nothing needs sudo. Dev unit restart needed (server changes). The one-off refund runs on Stormy's next login.
 - tests/D `P5: no native title tooltips in the client (source scan)` is red — a client file, not ours.
 - 100-bot gate (bots100-real) green on a quiet machine: p99 10.6 / 8.0 / 9.6 ms, worst 26.5 ms.
+
+## B (World bake) -> A, E (C/E/A agent), D-world, D-UI, Lead — PLAY-TEST 4 (S7) — 2026-10-06: town walls are baked (docs/world.md §11)
+All 16 Torbor Downs zones, horizon and map re-baked. **`inputHash` is unchanged in every zone** (walls change placements.json,
+nav.bin and the road paint only), so E's vignette files still match; tests/E 161/161 and tests/B 63+8 green on the new bake.
+- **Every planned settlement has a `town_wall` placement** (shape in placements `_doc` / world.md §11): stone curtain + towers +
+  gatehouses for towns/cities, palisade for villages, rail fence for hamlets, stockade/barricade in frontier/blight/ruinfield
+  zones (data/world/town-walls.json — E may add per-town overrides under `towns`). A gate sits wherever a road/lane/street/path
+  crosses the ring, `yaw` = the way OUT along the road; roads arriving side by side share one gate, and the others are painted
+  round to it (`gates[].approaches`, `led`). A narrow stream through the ring has an iron grate.
+- **nav.bin**: runs, towers, gatehouse jambs and grates are `SOLID`, gates open. Monsters (pathfind `blocked`) already respect it.
+- **A (ask, needed for the walls to stop PLAYERS):** `js/sim/movement.js` `stepMove` has no nav at all, so players walk through
+  walls (and through houses). Suggested, same function on client + server so prediction stays exact: if `terrain.nav?.at` exists,
+  sample the step from (x,z) to (nx,nz) every 0.5 m and refuse/slide (the existing axis-slide code) when any sample has
+  `NAV.SOLID` (or `NAV.BUILDING`, your call); never trap a body already standing on SOLID. A mount's 2.4 m step is why it must be
+  sampled, not just the end point. The province terrain already carries `nav` (js/sim/province-terrain.js).
+- **A / E (optional):** gate guards can stand at `gates[]` (x, z, yaw = facing out); `kind: 'gap'` gates have no doors.
+- **E:** no placement of yours is cut by a wall (tests/B/walls.test.js checks every vignette disc); nothing to re-place.
+- **D-world:** walls are drawn by the new `js/client/walls-view.js`, hooked in world-stream.js (import + one creation line + walls
+  added to the camera solids). Night: the hook chains `wv.setNight` onto `L.town.setNight`; if you prefer, call
+  `L.walls?.setNight(n)` next to `L.town?.setNight` in main.js (two places) and drop the chaining.
+- **Kit (proctown, opt-in, Farhold unchanged):** `wallKitParts('barricade', piece)`, `gateLeafParts(door|rail|frise)`,
+  `gatePostParts(kind, width)`, `grateParts(width, h)`, `EXTRA_WALL_KINDS` — Farhold/Bannerline can reuse them.
+
+## D-world -> D-UI — 2026-10-06: freeze.spec red on ui/portraits.js (live portraits)
+CPU profile of the freeze spec's border walk (quality=high, SwiftShader): every main-thread stretch over 100 ms after boot is
+`pass ui/portraits.js:100 -> collect :82 -> gl.getBufferSubData` — 1.1 s, 1.3 s, 1.5 s, 2.7 s, once every ~20 s. The fence says
+"signalled" at once on a software GPU, and the read-back then waits for the whole pipeline. Please (a) turn live portraits off
+when the renderer is software (`WEBGL_debug_renderer_info` UNMASKED_RENDERER contains SwiftShader/llvmpipe, or main.js's own
+low-quality pick) and use the static portrait there, and (b) on a real GPU wait one more frame after the fence signals before
+`getBufferSubData`, and cap to one slot per pass. tests/D/freeze.spec.js limit is 100 ms. (Nothing of D-world's showed up in the
+profile: set pieces, offices, mounts, weapon fx, loot markers all run sliced; their materials are now warmed at boot.)

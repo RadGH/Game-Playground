@@ -721,3 +721,23 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   stirrups, bags, bridle; warhorse caparison/crinet/chanfron; dray harness). Ram and drake unchanged.
 - `avatar-3d/js/mount-types.js`: `breed` per type; new `dray` type (our `dray` mount id was falling back to a plain horse).
 - No change in js/client (same createMount / seatRider / setGait API). tests/D/playtest2.spec.js Q16 green.
+- 2026-10-06 screenshot pass: thicker necks (`neckK`) on horse/pony/courser/draft and slightly heavier legs so a mount
+  reads as a stocky stylised horse under a Chibi 2 rider rather than a stick figure.
+
+## 2026-10-06 — stream B (play-test 4, S7: town walls)
+- **B** `tools/lib/zone-walls.mjs` (new): every planned settlement gets a perimeter by size + zone archetype from
+  `data/world/town-walls.json` (stone curtain + towers + gatehouses / stockade / palisade / barricade / rail fence / hedge). Gates
+  are cut where roads, lanes, streets and paths cross the ring (exact segment-circle crossings), turned to face OUT along the road;
+  side-by-side roads share one gate and the others get painted approaches; openings that collide merge; a settlement with no road
+  still gets a gate; narrow streams get a grate. `wallNav` stamps runs/towers/jambs/grates SOLID in nav.bin.
+- **B** `tools/bake-zone.mjs`: walls planned after the footpaths, `town_wall` placements (replacing proctown's city-only record),
+  approach paint, nav stamp; `placesFor` carries the sheet archetype. inputHash unchanged. `tools/bake-map.mjs` draws walls/towers.
+- **B** `tools/lib/wall-checks.mjs` + `tests/B/walls.test.js` (8): every road crossing has a gate, gates face out along their road
+  (<= 20 deg), no wall under a road/street/path/painted road, plot or E disc, walkable through every gate, solid elsewhere, every
+  gate reaches the square over nav; planner cases (slanted road, grate, no-road ring); kit pieces; client part list.
+- **B** `js/client/walls-view.js` (new) + hook in `js/client/world-stream.js`: instanced kit pieces, gatehouses widened to the road,
+  doors standing open INTO the town, banners and gate torches (lit at night), posts + field gates, barricade frise dragged aside,
+  grates; camera solids. `tests/B/walls.spec.js` + shots `tests/B/shots/s7-*.png`.
+- **B** proctown `js/buildkit.js` (opt-in, WALL_KINDS unchanged): barricade wall/tower/gate pieces, `gateLeafParts`,
+  `gatePostParts`, `grateParts`, `EXTRA_WALL_KINDS`/`ALL_WALL_KINDS`.
+- Re-baked all 16 zones, horizon, map.

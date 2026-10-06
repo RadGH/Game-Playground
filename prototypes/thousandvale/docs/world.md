@@ -404,3 +404,39 @@ study, armoury, apothecary, bowyer, tailor, provisioner, market, jeweller); a ha
 Stream E's `offices.json` and A's schedules.js take the plot whose `data.role` is the NPC's role.
 
 Bake time is ~4–10 s a zone (was ~3 s); the whole province ~2 min. Zone files 16 MB total.
+
+## 11. Play-test 4 (2026-10-06): town walls and gates (S7)
+
+`tools/lib/zone-walls.mjs`, styles in `data/world/town-walls.json`, run by `tools/bake-zone.mjs` after the footpaths (so every way
+into a town is known) and before nav. All 16 zones, horizon and map re-baked; `inputHash` unchanged.
+
+| settlement | heartland | frontier / blight / ruinfield |
+|---|---|---|
+| city, capital | stone curtain (`curtain_city`), towers every ~38 m, gatehouses | same |
+| town | stone curtain, towers every ~46 m, gatehouses | stockade (palisade + watchtowers) |
+| village | palisade, gatehouses with flanking towers | barricade |
+| hamlet | rail fence (elf: hedge), gate posts + field gates | barricade |
+
+Stone becomes cutstone / mudbrick / bone / palisade for dwarf / desert / undead / orc cultures.
+
+**The ring** stands outside every building by the style's margin (a proctown-walled city keeps proctown's wall radius); a street
+that ends inside the town pushes the ring clear of its end instead of holing it. **Gates**: every exact crossing of a road, lane,
+street or path with the ring; crossings within 26 m of each other share one gate (the widest road owns it; others side by side
+widen its passage, others further off are LED round to it with painted approaches outside and inside); gates whose openings
+collide merge; a ring no road reaches gets one gate facing the nearest way. `yaw` = atan2(dx, dz) of the way OUT along the main
+road (never the wall's normal — Farhold's rotation bug), `pass` = clear passage, `kind` gatehouse | posts | gap (passage > 12 m).
+The opening grows along the ring while a bundled way runs on beside the wall. **Openings**: water where a river runs through the
+ring (a grate if ≤ 16 m), keep where one of stream E's discs stands on the line. Roads are painted only outside a town circle, so
+each gate's `approaches` are painted from the rim to the gate and on to the high street.
+
+**placements `town_wall`** (zone metres): `data.{town, name, settlement, style, material, tier, h, thick, tint, radius, solid,
+runs [[[x,z,h]…]…] (ordered by increasing angle, so local +X of a piece is OUTSIDE), towers [{x,z,h,yaw}], gates [{id,x,z,h,yaw,
+out,width,pass,slant,kind,way,wayKind,ways,led,ends,approaches[{way,width,led,inside,pts}]}], openings [{kind,a0,a1,metres,ends,
+grate,h}]}`. **nav.bin**: runs (≥ 1.5 m half-width, so no diagonal step slips through), towers (r 2.6), gate jambs (run end to
+passage edge) and grates SOLID. Players are not yet stopped by nav (A's movement.js — asked in requests.md).
+
+**Tests** `tests/B/walls.test.js` via `tools/lib/wall-checks.mjs` on the checked-in files: every settlement walled with ≥ 1 gate;
+no road placement / street or path centreline / painted road sample under a run or tower; every gate faces away from the town and
+within 20° of its road; no wall across a plot or E disc; nav passable along the road through every gate and SOLID mid-run; every
+gate's outside reaches the town square by flood fill. Drawn by `js/client/walls-view.js` with proctown's kit (barricade, gate
+leaves, posts and grates are opt-in additions there).

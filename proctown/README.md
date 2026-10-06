@@ -378,3 +378,13 @@ warehouse, barracks / watchpost. `officeKindFor()` takes a want, an office name 
 Tests: `node --test proctown/tests/offices.test.js`. Thousandvale draws it in `js/client/town-view.js` (lit glass +
 light-pool lanterns on shops only) and writes every label into one canvas atlas (`js/client/sign-text.js`, one draw
 call per town).
+
+## Opt-in edge pieces: barricade, gate leaves, posts, grates (Thousandvale play-test 4)
+
+`js/buildkit.js` adds pieces outside `WALL_KINDS` / `FENCE_KINDS` so Farhold's per-kind meshes are unchanged:
+`EXTRA_WALL_KINDS = ['barricade']` (`wallKitParts('barricade', 'wall' | 'tower' | 'gatehouse')` — leaning stakes over a log rail,
+outside = local +X), `gateLeafParts(kind, thick, len)` (one leaf hinged at its origin along +X: `door` planks + iron bands, `rail`
+field gate, `frise` a cheval de frise built at length `len`), `gatePostParts(kind, width)` (posts / stake bundles / hedge piers
+outside the passage) and `grateParts(width, h)` (an iron water grate with piers). Parts may carry `rx`/`rz` tilts (Euler 'YXZ').
+Thousandvale's `js/client/walls-view.js` shows how to lay them on a baked ring (pieces stretched to fit each straight, gatehouse
+widened to the road, leaves swung inward).

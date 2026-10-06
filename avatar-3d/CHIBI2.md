@@ -457,4 +457,5 @@ Riders are unchanged (`ride` / `rideGallop` in `CHIBI2_MOUNT_ANIMS`, `seatRider`
 the hoofed mounts (horse, pony, courser, warhorse, stag and the new dray elk) are built by `js/equine.js` — lofted barrel /
 neck / head, jointed legs with hooves, mane and tail, tack cut from the body's own surface, and walk / trot / gallop leg
 patterns with a crossfade. The seat is still on the hip, counter-scaled, ~0.04 m above the saddle's back, so a rider's hips
-land where they did. See README "Mounts" for the details and `node --test avatar-3d/tests/mounts.test.js`.
+land where they did. 2026-10-06: necks thickened (`neckK` 1.12-1.5) and legs a touch heavier after the screenshot pass so
+the horses stop reading as pipe-cleaners under a big-headed rider. See README "Mounts" for the details and `node --test avatar-3d/tests/mounts.test.js`.

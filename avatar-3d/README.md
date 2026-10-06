@@ -111,6 +111,12 @@ A mount is a **creature body** (creatures.js) wearing **tack**, plus a **seat** 
 Every piece of tack is parented to the creature's hip (or head), so it bobs and pitches with the gait —
 and so does a rider sitting on the seat.
 
+**Play-test 4 (S22, 2026-10-05/06):** the hoofed types (horse, pony, courser, warhorse, stag, dray) no longer ride the
+generic creatures.js quad — they are built by `js/equine.js` (`createEquine`, breed table `EQUINE_BREEDS`): lofted barrel
+with croup / saddle dip / withers / deep chest, an arched neck out of the chest (`neckK` thickness), a long head hung at
+the poll, jointed legs ending in hooves (socks, feathering on heavy breeds), mane, forelock and tail, and real walk / trot /
+gallop leg patterns with a 0.3 s crossfade. Each type names its `breed` in mount-types.js. Ram and drake still use creatures.js.
+
 | type | creature | size | tack |
 |---|---|---|---|
 | `horse` | horse | 1 | saddle, saddlebags |

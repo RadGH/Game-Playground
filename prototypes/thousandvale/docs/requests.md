@@ -2978,3 +2978,9 @@ A chain sends it once, when its last hop lands; a fork / ricochet / split when t
 `info.gear.<slot>.el` (the item's `castElement || brand`) and `.g5` only when it differs from `base`; `info.pool.shelf: true` for E's shelf pools
 (none of today's 308 spots carries `shelf` yet — it shows the moment E's file has one). `fx` events pass through whole, so C's `targets` on a
 chain bolt needs nothing from A (tested with a made-up event). tests/A/pt5-slots (3).
+
+**F follow-up — 2026-10-06 (no id changed):** the catalog's `items` now lists the Thousandvale item C makes from each of the 66 new
+rows (`{ game, base, template, slot }`, read through C's own `installTvGear`), and `travel_cloak` / `leather_belt` / `hand_lantern` /
+`pitch_torch` are listed on the old model gear-look draws for them; the test fails if a new row has no mapped item. Sabatons: the thin
+lines behind the ankles were the free edge of the shin plate (arc shortened). Themed shields: the emblem was buried in the almond's
+spine and the pavise's ridge — lifted clear; all four read (sheet F-emb2).

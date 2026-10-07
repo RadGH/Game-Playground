@@ -21,7 +21,7 @@ const hook = (path, body) => fetch(hookBase + path, { method: 'POST', body: JSON
 const shot = (name, p = page) => p.screenshot({ path: join(SHOTS, `pt5-${name}.png`) });
 const sent = (p = page) => p.evaluate(() => window.__sent.splice(0));
 /** Nothing on screen may read like a raw float or an object. */
-const BAD = /\d\.\d{4,}|\[object |undefined|NaN\b/;
+const BAD = /(?<![\d.])\d+\.\d{4,}(?![\d.])|\[object |undefined|NaN\b/;      // (a browser version like 153.0.8010.12 in the bug report's context is not a raw float)
 async function clean(p = page, where = '') { const t = await p.evaluate(() => [...document.querySelectorAll('#hud, .tv-panel, .tipbox')].map(e => (e.hidden ? '' : e.innerText)).join('\n')); const m = t.match(BAD); expect(m ? `${where}: "${t.slice(Math.max(0, m.index - 40), m.index + 40)}"` : '').toBe(''); }
 /**
  * Record everything the client sends (the helper methods and the raw socket). The windows here are driven with made-up
@@ -430,7 +430,7 @@ soft('T20: a letter shows what it holds; taking needs bag room and says so; a gi
   await expect(page.locator('#panel-mail [data-act="take"]')).toHaveText('Take and unwrap');
   await expect(page.locator('#panel-mail [data-act="take"]')).toBeEnabled();        // a system letter needs no town
   // the attachment has the full card before you take it
-  await page.locator('#panel-mail .ml-items .islot.gift').hover();
+  await page.locator('#panel-mail .ml-items .islot.gift').hover({ force: true });      // it bobs (never "stable")
   await expect(page.locator('#tipbox .ic-crate')).toContainText('Rare at the least', { timeout: 5000 });
   await shot('t20-mail-gift');
   // a full bag: said before the click, with the numbers

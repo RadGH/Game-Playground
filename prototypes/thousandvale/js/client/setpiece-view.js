@@ -25,7 +25,10 @@ import { windUniform } from './decor.js';
 // with ONE material for the whole page (so one shader program, warmed at boot through cropSample()) swaying on the
 // page's own wind clock.
 let SHEAF_GEO = null, CROP_MAT = null;
-const sheafGeo = () => SHEAF_GEO || (SHEAF_GEO = sheafGeometry(THREE));
+let SHEAF_BLADES = 16;
+/** Software / low-quality renderers draw half the blades (main.js calls this once, before any zone is built). */
+export function setCropDetail(blades) { if (!SHEAF_GEO) SHEAF_BLADES = Math.max(4, blades | 0); }
+const sheafGeo = () => SHEAF_GEO || (SHEAF_GEO = sheafGeometry(THREE, SHEAF_BLADES));
 function cropMaterial() {
   if (!CROP_MAT) CROP_MAT = sheafWind(new THREE.MeshLambertMaterial({ vertexColors: true }), windUniform);
   return CROP_MAT;

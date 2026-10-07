@@ -32,25 +32,27 @@ function prism(THREE, section) {
 }
 
 /**
- * The `sheaf` unit shape (2026-10-07): a 1 x 1 x 1 patch of thin standing stalks — 34 tapering blades at seeded spots,
+ * The `sheaf` unit shape (2026-10-07): a 1 x 1 x 1 patch of thin standing stalks — 16 tapering blades at seeded spots (pass fewer for a cheap renderer),
  * leaning a little, heights 0.62-1.0 so the top line is uneven. Vertex colours run from a darker, greener foot to full
  * tint at the ear (they multiply the instance colour); normals point up-and-out so a field shades as one soft mass.
  * `position.y` is 0 at the root and up to 1 at the tip — a wind shader sways by it (see sheafWind).
  */
-export function sheafGeometry(THREE, blades = 34) {
+export function sheafGeometry(THREE, blades = 16) {
   let seed = 1234567;
   const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
   const pos = [], nor = [], col = [], idx = [];
   for (let b = 0; b < blades; b++) {
     // thin (a patch is stretched to fit its row, so a blade is drawn narrow here), and turned mostly ACROSS the
     // stretch so it never becomes a wide shard
-    const x = rnd() - 0.5, z = rnd() - 0.5, h = 0.6 + rnd() * 0.4, yaw = (rnd() - 0.5) * 0.9, w = 0.022 + rnd() * 0.02, lean = (rnd() - 0.5) * 0.2, lz = (rnd() - 0.5) * 0.12;
+    const x = rnd() - 0.5, z = rnd() - 0.5, h = 0.6 + rnd() * 0.4, yaw = (rnd() - 0.5) * 0.9, w = 0.03 + rnd() * 0.025, lean = (rnd() - 0.5) * 0.2, lz = (rnd() - 0.5) * 0.12;
     const cx = Math.cos(yaw), sz = Math.sin(yaw) * 0.35, o = pos.length / 3;
-    // every normal points straight up, and each blade is drawn with both windings: a field is lit like the ground it
-    // stands on from either side (a double-sided material would turn the far face black)
+    // ONE quad a blade — narrow at the root, flared at the ear — drawn with both windings and every normal straight
+    // up: a field is lit like the ground it stands on from either side (a double-sided material would turn the far
+    // face black), for 4 triangles a blade. Ten fields of a town's belt are ~350,000 triangles in one draw call; the
+    // first cut of this (34 blades, 8 triangles each) was 3 million and stalled the software renderer the tests run on.
     const v = (side, y, k) => { pos.push(x + cx * w * side * k + lean * y * y, y, z + sz * w * side * k + lz * y * y); nor.push(0, 1, 0); const c = y <= 0 ? 0.6 : 1; col.push(c * (y <= 0 ? 0.9 : 1), c, c * (y <= 0 ? 0.78 : 1)); };
-    v(-1, 0, 1); v(1, 0, 1); v(-1, h * 0.72, 0.7); v(1, h * 0.72, 0.7); v(-1, h, 1.9); v(1, h, 1.9);        // a stalk that swells into an ear
-    for (const [i, j, k] of [[0, 1, 2], [1, 3, 2], [2, 3, 4], [3, 5, 4]]) idx.push(o + i, o + j, o + k, o + i, o + k, o + j);
+    v(-1, 0, 0.8); v(1, 0, 0.8); v(-1, h, 1.7); v(1, h, 1.7);
+    idx.push(o, o + 1, o + 2, o + 1, o + 3, o + 2, o, o + 2, o + 1, o + 1, o + 2, o + 3);
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pos), 3));

@@ -19,7 +19,7 @@ export function isJump(handoff, prevPos, nextPos) {
   return false;
 }
 
-export function createTransition({ el, view, scene, camera, maxMs = 12000 } = {}) {
+export function createTransition({ el, view, scene, camera, maxMs = 6000 } = {}) {
   let covered = false, coveredAt = 0, token = 0, safety = null;
   const label = el?.querySelector('.tr-text');
   function cover(text = 'Travelling…') {
@@ -40,7 +40,10 @@ export function createTransition({ el, view, scene, camera, maxMs = 12000 } = {}
     if (!force) {
       // compile every program the new place needs while the veil is still up (no first-frame hitch after it lifts)
       try { if (view?.renderer?.compileAsync) await Promise.race([view.renderer.compileAsync(scene, camera), new Promise(r => setTimeout(r, 2500))]); } catch { /* compile() is an optimisation */ }
-      await nextFrame(); await nextFrame();
+      // two frames so the new ground is on screen — but never WAIT on frames: a tab that is not being drawn (a second
+      // window, a hidden tab) gets none, and the veil stayed up over its HUD until the 12 s safety (play-test 7)
+      const frame = () => Promise.race([nextFrame(), new Promise(r => setTimeout(r, 350))]);
+      await frame(); await frame();
       // a minimum so a very fast jump still reads as a jump rather than a flicker
       const min = 260 - (performance.now() - coveredAt);
       if (min > 0) await new Promise(r => setTimeout(r, min));

@@ -62,7 +62,7 @@ import { createStatusSync } from './status-sync.js';
 import { createWeaponFx } from './weapon-fx.js';
 import { createFormFx } from './form-fx.js';             // play-test 5 (D-world): T15 caster forms, T16 sceptre swings
 import { createReviveFx } from './revive-fx.js';         // T4: each class's revive
-import { cropSample } from './setpiece-view.js';       // play-test 6 (U4): the standing-crop material, warmed at boot
+import { cropSample, setCropDetail } from './setpiece-view.js';       // play-test 6 (U4): the standing-crop material, warmed at boot
 import { createAngling } from './angling-view.js';      // T25: rod, float, line, catch, fish pools
 import { basicReach as reachOf, shortenReach } from './reach.js';   // T14: walk into the attack form's real reach
 import { createLootMarkers } from './loot-marker.js';
@@ -99,6 +99,7 @@ function detectQuality() {
   return 'high';
 }
 const quality = detectQuality();
+if (quality === 'low') setCropDetail(8);          // standing crops: half the blades on a cheap renderer
 const view = createScene($('view'), { quality });
 const { scene, camera } = view;
 perf.hookGl(view.renderer.getContext());
@@ -524,6 +525,8 @@ function wireNet(net) {
   net.on('travelR', r => {
     if (!r.ok || S.phase !== 'world') return;
     travel.cover('Travelling…');
+    // a jump inside the SAME room brings no `joined` to lift the veil: lift it once the move has had time to land
+    setTimeout(() => { if (travel.covered) travel.reveal(); }, (r.delayMs || 1500) + 2000);
     // A sends where (`at`, `province`) and moves us `delayMs` (1.5 s) later: stream that ground in behind the veil now
     const w = r.at || (S.room?.waystones || []).find(x => x.key === r.to);
     if (w && (!r.province || r.province === S.room?.province) && WS.terrain.zoneAt(w.x, w.z)) WS.whenReady(w.x, w.z);

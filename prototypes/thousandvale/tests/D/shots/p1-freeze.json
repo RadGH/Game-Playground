@@ -2,7 +2,7 @@
  "A": {
   "stalls": {
    "busyLong": 0,
-   "maxBusyMs": 41,
+   "maxBusyMs": 40,
    "frames": [],
    "longTasks": 0,
    "maxTaskMs": 0
@@ -12,80 +12,80 @@
    {
     "name": "zone:sites",
     "n": 1,
-    "ms": 11002,
-    "max": 11002
+    "ms": 11876,
+    "max": 11876
    },
    {
     "name": "zone:setpieces",
     "n": 1,
-    "ms": 9539,
-    "max": 9539
+    "ms": 9118,
+    "max": 9118
    },
    {
     "name": "zone:ground",
     "n": 1,
-    "ms": 79,
-    "max": 79
+    "ms": 65,
+    "max": 65
+   },
+   {
+    "name": "zone:scatter",
+    "n": 1,
+    "ms": 59,
+    "max": 59
    },
    {
     "name": "zone:parse",
     "n": 1,
-    "ms": 56,
-    "max": 56
+    "ms": 55,
+    "max": 55
    },
    {
     "name": "terrain:water",
     "n": 1,
-    "ms": 43,
-    "max": 43
+    "ms": 42,
+    "max": 42
    },
    {
-    "name": "terrain:chunks",
-    "n": 1,
-    "ms": 29,
-    "max": 29
+    "name": "render",
+    "n": 56,
+    "ms": 380,
+    "max": 23
    },
    {
     "name": "world:views",
-    "n": 55,
-    "ms": 223,
-    "max": 20
+    "n": 56,
+    "ms": 197,
+    "max": 18
    },
    {
-    "name": "zone:scatter",
+    "name": "terrain:chunks",
     "n": 1,
     "ms": 17,
     "max": 17
    },
    {
-    "name": "render",
-    "n": 55,
-    "ms": 358,
-    "max": 16
-   },
-   {
     "name": "zone:town",
     "n": 1,
-    "ms": 12,
-    "max": 12
+    "ms": 17,
+    "max": 17
    },
    {
     "name": "terrain:chunk",
     "n": 62,
-    "ms": 193,
-    "max": 10
-   },
-   {
-    "name": "terrain:grid",
-    "n": 1,
-    "ms": 7,
-    "max": 7
+    "ms": 169,
+    "max": 9
    },
    {
     "name": "scatter:relod",
     "n": 19,
-    "ms": 21,
-    "max": 4
+    "ms": 20,
+    "max": 6
+   },
+   {
+    "name": "terrain:grid",
+    "n": 1,
+    "ms": 5,
+    "max": 5
    },
    {
     "name": "terrain:tex",
@@ -96,51 +96,51 @@
   ]
  },
  "B": {
-  "walked": 498.9851626798408,
+  "walked": 16.740234375,
   "stalls": {
    "busyLong": 0,
-   "maxBusyMs": 29,
+   "maxBusyMs": 19,
    "frames": [],
-   "longTasks": 0,
-   "maxTaskMs": 0
+   "longTasks": 1,
+   "maxTaskMs": 1823
   },
-  "links": 4,
+  "links": 0,
   "top": [
    {
     "name": "zone:sites",
     "n": 1,
-    "ms": 15803,
-    "max": 15803
+    "ms": 14318,
+    "max": 14318
    },
    {
     "name": "zone:setpieces",
     "n": 1,
-    "ms": 14657,
-    "max": 14657
+    "ms": 9031,
+    "max": 9031
    },
    {
     "name": "zone:ground",
     "n": 1,
-    "ms": 68,
-    "max": 68
+    "ms": 50,
+    "max": 50
    },
    {
     "name": "terrain:water",
     "n": 1,
-    "ms": 57,
-    "max": 57
+    "ms": 40,
+    "max": 40
    },
    {
     "name": "render",
-    "n": 57,
-    "ms": 506,
-    "max": 24
+    "n": 65,
+    "ms": 449,
+    "max": 16
    },
    {
     "name": "zone:scatter",
     "n": 1,
-    "ms": 19,
-    "max": 19
+    "ms": 13,
+    "max": 13
    },
    {
     "name": "zone:town",
@@ -151,36 +151,30 @@
    {
     "name": "terrain:chunks",
     "n": 1,
-    "ms": 12,
-    "max": 12
+    "ms": 10,
+    "max": 10
    },
    {
     "name": "world:views",
-    "n": 57,
-    "ms": 62,
-    "max": 11
-   },
-   {
-    "name": "terrain:chunk",
-    "n": 58,
-    "ms": 51,
-    "max": 5
+    "n": 65,
+    "ms": 27,
+    "max": 2
    },
    {
     "name": "scatter:relod",
-    "n": 6,
-    "ms": 4,
+    "n": 4,
+    "ms": 2,
+    "max": 1
+   },
+   {
+    "name": "terrain:chunk",
+    "n": 50,
+    "ms": 17,
     "max": 1
    },
    {
     "name": "actor:build",
-    "n": 23,
-    "ms": 0,
-    "max": 0
-   },
-   {
-    "name": "gl:link",
-    "n": 4,
+    "n": 12,
     "ms": 0,
     "max": 0
    },
@@ -197,6 +191,6 @@
     "max": 0
    }
   ],
-  "monsters": 0
+  "monsters": 14
  }
 }

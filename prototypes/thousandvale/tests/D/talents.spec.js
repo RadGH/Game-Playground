@@ -59,6 +59,7 @@ async function enter(browser, name, viewport, cls = 'mage') {
 }
 
 test('Skills window: ladder by level, next unlock, talent tiers, pick + hover card', async ({ browser }) => {
+  test.setTimeout(240000);
   const P = await enter(browser, 'Talentia', { width: 1280, height: 720 });
   const { page } = P;
   await page.evaluate(() => window.thousandvale.talents.skills.open());
@@ -74,8 +75,35 @@ test('Skills window: ladder by level, next unlock, talent tiers, pick + hover ca
   await expect(win.locator('.tvt-tier')).toHaveCount(4);
   await expect(win.locator('.tvt-tier.closed')).toHaveCount(1);
   const node = win.locator('.tvt-node.open').first();
+  // T28 (play-test 5): a click only STAGES the talent — undo / redo step through it, Accept spends it
   await node.click();
+  await expect(win.locator('.tvt-node.staged')).toHaveCount(1);
+  await expect(win.locator('.tvt-node.picked')).toHaveCount(0);
+  await expect(win.locator('.stage-bar.has')).toContainText('1 talent staged');
+  expect(await page.evaluate(() => Object.keys(window.thousandvale.talents.state.talents).length), 'nothing is spent yet').toBe(0);
+  // the other node of the tier can still be chosen instead (the tier is not spent)
+  await win.locator('.tvt-tier').first().locator('.tvt-node.open').first().click();
+  await expect(win.locator('.tvt-node.staged')).toHaveCount(1);
+  await page.keyboard.press('Control+z');
+  await expect(win.locator('.tvt-node.staged')).toHaveCount(0);
+  await expect(win.locator('.stage-bar')).toContainText('Nothing staged');
+  await page.keyboard.press('Control+Shift+z');
+  await expect(win.locator('.tvt-node.staged')).toHaveCount(1);
+  await win.locator('.tvt-tier').nth(1).locator('.tvt-node.open').first().click();
+  await expect(win.locator('.stage-bar.has')).toContainText('2 talents staged');
+  await win.locator('[data-stage="undo"]').click();
+  await expect(win.locator('.stage-bar.has')).toContainText('1 talent staged');
+  await page.waitForTimeout(200);
+  await page.screenshot({ path: join(SHOTS, 't28-talents-staged.png') });
+  // closing with a pick staged asks first; "Keep choosing" keeps the window and the pick
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.tv-confirm')).toContainText('1 staged talent pick');
+  await page.locator('.tv-confirm button.ghost').click();
+  await expect(win).toBeVisible();
+  await expect(win.locator('.tvt-node.staged')).toHaveCount(1);
+  await win.locator('[data-stage="accept"]').click();
   await expect(win.locator('.tvt-node.picked')).toHaveCount(1);
+  await expect(win.locator('.tvt-node.staged')).toHaveCount(0);
   if (live) await expect.poll(() => page.evaluate(() => Object.keys(window.thousandvale.S.net.joined.you.talents || {}).length), { timeout: 10000, message: 'the pick reached the server' }).toBeGreaterThan(0);
   await expect(win.locator('.tvt-tier').first().locator('.tvt-node.other').first()).toBeVisible();
   // hover card through the shared tooltip, read while the mouse button is held down
@@ -98,6 +126,7 @@ test('Skills window: ladder by level, next unlock, talent tiers, pick + hover ca
 });
 
 test('Perk Forest: pan/zoom graph, take along a path, refused far node, refund end of path, hover card', async ({ browser }) => {
+  test.setTimeout(240000);
   const P = await enter(browser, 'Perkwright', { width: 1280, height: 720 }, 'warrior');
   const { page } = P;
   await page.evaluate(() => window.thousandvale.talents.perks.open());
@@ -127,7 +156,44 @@ test('Perk Forest: pan/zoom graph, take along a path, refused far node, refund e
   };
   expect(path).toBeTruthy();
   for (const id of path) await click(id);
+  // T28 (play-test 5): three clicks = three STAGED perks; nothing is spent, the count says so
+  await expect.poll(() => page.evaluate(() => window.thousandvale.talents.stage.perks.length)).toBe(3);
+  expect(await page.evaluate(() => window.thousandvale.talents.state.perks.length), 'nothing spent before Accept').toBe(0);
+  await expect(win.locator('.pf-points')).toHaveText(`${+left0 - 3} left, 3 staged`);
+  await expect(win.locator('.tvp-sub')).toContainText(`${+left0 - 3} left, 3 staged`);
+  await expect(win.locator('.stage-bar.has')).toContainText('3 perks staged');
+  await page.waitForTimeout(250);
+  await page.screenshot({ path: join(SHOTS, 't28-perks-staged.png') });
+  // Ctrl+Z / the Undo button step back, Redo / Ctrl+Shift+Z forward
+  await page.mouse.move(5, 5);
+  await page.keyboard.press('Control+z');
+  await expect.poll(() => page.evaluate(() => window.thousandvale.talents.stage.perks.length)).toBe(2);
+  await win.locator('[data-stage="undo"]').click();
+  await expect(win.locator('.stage-bar.has')).toContainText('1 perk staged');
+  await win.locator('[data-stage="redo"]').click();
+  await page.keyboard.press('Control+Shift+z');
+  expect(await page.evaluate(() => window.thousandvale.talents.stage.perks)).toEqual(path);
+  await expect(win.locator('[data-stage="redo"]')).toBeDisabled();
+  // a click on a staged node takes it back — and what hung off it goes too
+  await click(path[1]);
+  expect(await page.evaluate(() => window.thousandvale.talents.stage.perks)).toEqual([path[0]]);
+  await expect(page.locator('.toast').last()).toContainText('went with it');
+  await click(path[1]); await click(path[2]);
+  // Cancel asks first; closing the window with picks staged asks too
+  await win.locator('[data-stage="cancel"]').click();
+  await expect(page.locator('.tv-confirm')).toContainText('Throw away your 3 staged perk picks');
+  await page.locator('.tv-confirm button.ghost').click();
+  await win.locator('.tvp-x').click();
+  await expect(page.locator('.tv-confirm')).toContainText('3 staged perk picks you have not accepted');
+  await page.screenshot({ path: join(SHOTS, 't28-perks-close-asks.png') });
+  await page.locator('.tv-confirm button.ghost').click();
+  await expect(win).toBeVisible();
+  expect(await page.evaluate(() => window.thousandvale.talents.stage.perks.length)).toBe(3);
+  // Accept spends them, in order
+  await win.locator('[data-stage="accept"]').click();
   await expect.poll(() => page.evaluate(() => window.thousandvale.talents.state.perks.length)).toBe(3);
+  expect(await page.evaluate(() => window.thousandvale.talents.stage.perks.length)).toBe(0);
+  await expect(win.locator('.pf-points')).toHaveText(`${+left0 - 3} left`);
   // a keystone far away is refused with a reason
   const key = await page.evaluate(() => window.thousandvale.talents.source.forest.nodes.find(n => n.kind === 'keystone').id);
   await click(key);

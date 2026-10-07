@@ -17,7 +17,7 @@ register('../../../../avatar-3d/tests/three-loader.mjs', import.meta.url);
 const THREE = await import('three');
 const { swingClip } = await import('../../js/client/actors.js').catch(() => ({}));
 const { approachReach, basicReach, shortenReach, MELEE_REACH } = await import('../../js/client/reach.js');
-const { formLook, FORM_FAMILY, isImbuedSwing, createFormFx } = await import('../../js/client/form-fx.js');
+const { formLook, FORM_FAMILY, isImbuedSwing, sceptreElement, createFormFx } = await import('../../js/client/form-fx.js');
 const { REVIVE_STYLE, REVIVE_LOOK, reviveStyle, createReviveFx } = await import('../../js/client/revive-fx.js');
 const { gearLook, gearKey, g5RowFor, DRAWN_SLOTS, wornLightRange, isTorchItem } = await import('../../js/client/gear-look.js');
 const A = await import('../../js/client/angling-view.js');
@@ -107,11 +107,28 @@ test('T15/T16: the drawer draws each form, the ward dome and the sceptre\'s swin
   assert.equal(forms.onEvent({ type: 'fx', kind: 'attack', shape: 'swing', wt: 'sword', el: 'physical', ...at, el: 'physical' }), false);
   assert.equal(isImbuedSwing({ wt: 'scepter', el: 'fire' }), true); assert.equal(isImbuedSwing({ wt: 'scepter', el: 'physical' }), false); assert.equal(isImbuedSwing({ wt: 'mace', el: 'fire', imbue: 1 }), true); assert.equal(isImbuedSwing({ wt: 'sword', el: 'fire' }), false);
   assert.ok(forms.onEvent({ type: 'fx', kind: 'attack', shape: 'swing', wt: 'scepter', imbue: 1, reach: 2.6, arc: 1.6, ...at, el: 'lightning' })); assert.equal(forms.stats.imbued, 1);
+  // C's named chain targets: arcs to exactly those bodies; once seen, the client stops guessing
+  assert.ok(forms.onEvent({ type: 'fx', kind: 'chain', id: 1, element: 'lightning', first: 2, targets: [3, 4] })); assert.equal(forms.stats.chains, 1);
+  assert.ok(forms.onEvent({ type: 'fx', kind: 'chain', id: 1, element: 'ice', first: 2, targets: [3, 4, 999], fork: 1 }));
+  await new Promise(r => setTimeout(r, 120)); run(forms, 0.05);
+  assert.equal(forms.stats.chainArcs, 4, 'one arc per named body that is on screen (the unknown id draws nothing)');
+  await new Promise(r => setTimeout(r, 200)); run(forms, 0.05);          // the earlier bolts' own landings are done
+  const f1 = forms.stats.forks;
+  forms.onEvent({ type: 'fx', kind: 'bolt', basic: 1, form: 'chain', id: 1, el: 'ice', from: { x: 0, z: 0 }, to: { x: 0, z: 8 }, ms: 10 });
+  await new Promise(r => setTimeout(r, 60)); run(forms, 0.05);
+  assert.equal(forms.stats.forks, f1, 'no guessed jumps after a real chain event');
+  // the sceptre's standing glow: only a sceptre with an element, from the compact gear form too
+  assert.equal(sceptreElement({ base: 'scepter', el: 'fire' }), 'fire'); assert.equal(sceptreElement({ baseKey: 'gravebound_scepter', castElement: 'shadow' }), 'shadow');
+  assert.equal(sceptreElement({ base: 'scepter' }), null); assert.equal(sceptreElement({ base: 'longsword', el: 'fire' }), null); assert.equal(sceptreElement({ base: 'mace', g5: 'g5_crownsceptre', el: 'holy' }), 'holy');
+  const grip = new THREE.Bone(); grip.position.set(0.3, 1, 0); grip.updateMatrixWorld(true);
+  actors.get(1).look = { gear: { weapon: { base: 'scepter', el: 'fire' } } }; actors.get(1).body = { parts: { gripR: grip } };
+  run(forms, 0.05); assert.equal(forms.stats.glows, 1, 'a sceptre in hand glows');
+  actors.get(1).look = { gear: { weapon: { base: 'longsword' } } }; run(forms, 0.05); assert.equal(forms.stats.glows, 0);
   assert.ok(forms.live > 0, 'pieces are on screen');
   assert.equal(scene.children.length, before, 'drawing uses the pools: nothing is added to the scene per effect');
   await new Promise(r => setTimeout(r, 260));          // the bolts land (their rings, splinters and jumps are timed)
   run(forms, 0.2);
-  assert.ok(forms.stats.forks >= 3, `fork + chain + fan drew shards (${forms.stats.forks})`);
+  assert.ok(forms.stats.forks >= 3, `fork + fan + chains drew shards (${forms.stats.forks})`);
   run(forms, 3);
   assert.equal(forms.live, 0, 'everything fades and is put away');
   assert.ok(scene.children.every(c => !c.visible), 'no pooled piece is left visible');

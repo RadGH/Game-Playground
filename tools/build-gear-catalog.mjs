@@ -24,6 +24,8 @@ import { createChibi2Character, CHIBI2_ONLY_PARTS } from '../avatar-3d/js/chibi2
 import { CLASS_HATS } from '../avatar-3d/js/chibi2-hats.js';
 import { T2_DECOR } from '../avatar-3d/js/chibi2-armour2.js';
 import { heldLook, offhandLook, gearLook } from '../prototypes/thousandvale/js/client/gear-look.js';
+import { installFoci } from '../prototypes/farhold/js/foci.js';
+import { installTvGear } from '../prototypes/thousandvale/js/rules/tv-gear.js';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const OUT = join(ROOT, 'avatar-3d/data/gear-catalog.json');
@@ -88,7 +90,10 @@ const GAME_TEXT = Object.fromEntries(['farhold', 'emberveil', 'bannerline', 'tho
 // the class outfit tables are shared: Farhold and Thousandvale dress from them, Emberveil from its own class-looks
 const OUTFITS = ['class-outfits.json', 'class-outfits-t2.json'].map(f => readFileSync(join(ROOT, 'avatar-3d/data', f), 'utf8')).join('\n');
 GAME_TEXT.farhold += OUTFITS; GAME_TEXT.thousandvale += OUTFITS;
-const gamesOf = id => Object.keys(GAME_TEXT).filter(g => new RegExp(`[:,\\[]\\s*["']${id}["']`).test(GAME_TEXT[g]));
+{ const shops = join(ROOT, 'prototypes/thousandvale/data/provinces/shops.json'); if (existsSync(shops)) GAME_TEXT.thousandvale += readFileSync(shops, 'utf8'); }
+// a g5_ id is unmistakable, so any mention counts; an old id ('sword', 'cap') only counts where it is a VALUE
+const gamesOf = id => isG5(id) ? Object.keys(GAME_TEXT).filter(g => GAME_TEXT[g].includes(id)) : gamesOfOld(id);
+const gamesOfOld = id => Object.keys(GAME_TEXT).filter(g => new RegExp(`[:,\\[]\\s*["']${id}["']`).test(GAME_TEXT[g]));
 
 // ---------------------------------------------------------------- Thousandvale: which item bases draw which model
 const ITEMS = JSON.parse(readFileSync(join(ROOT, 'prototypes/emberveil/data/items.json'), 'utf8'));
@@ -170,6 +175,32 @@ for (const id of vocab('accessory')) if (await builds('accessory', id)) {
   const type = ACC_TYPE[id] || 'face';
   row({ id, kind: 'accessory', slot: 'accessory', gameSlot: type === 'amulet' ? 'necklace' : null, type, file: ACC_TYPE[id] ? 'avatar-3d/js/chibi2-gear.js' : 'avatar-3d/js/chibi2-face.js',
     builder: ACC_TYPE[id] ? `buildAccessory('${id}')` : `buildFace('${id}')`, name: nameOf('accessory', id) });
+}
+
+// ---- Thousandvale's items made FROM the catalog (stream C, js/rules/tv-gear.js + data/rules/gear-tv.json): each new row
+// becomes an item base whose key is the row's `base` and whose numbers are copied from a plain `template` base. The
+// plain bases of the three extra slots (travel_cloak, leather_belt, hand_lantern, pitch_torch) land on the old model
+// gear-look draws for them.
+{
+  const cfgPath = join(ROOT, 'prototypes/thousandvale/data/rules/gear-tv.json');
+  if (existsSync(cfgPath)) {
+    const cfg = JSON.parse(readFileSync(cfgPath, 'utf8')), table = JSON.parse(JSON.stringify(ITEMS));
+    installFoci(table);                                   // the engine installs Farhold's foci first: four catalog foci copy them
+    const report = installTvGear(table, cfg, { rows });
+    for (const r of rows) {
+      if (!r.new || !report.catalog.includes(r.base)) continue;
+      const b = table.weaponBases[r.base] || table.armorBases[r.base];
+      r.items = [{ game: 'thousandvale', base: r.base, template: b.tvFrom || null, slot: b.slot || (b.type === 'weapon' ? 'weapon' : null) }];
+    }
+    for (const [key, b] of Object.entries(cfg.bases?.armor || {})) {
+      if (!['back', 'waist', 'light'].includes(b.slot)) continue;
+      const look = gearLook({ [b.slot]: { ...b, baseKey: key } });
+      for (const slot of ['cape', 'decor', 'offhand']) {
+        const id = look[slot]?.id, r = id && id !== 'none' && rows.find(x => x.id === id && x.slot === slot && !x.new);
+        if (r && !r.items.some(i => i.base === key)) r.items.push({ game: 'thousandvale', base: key, slot: b.slot });
+      }
+    }
+  }
 }
 
 const order = { weapon: 0, offhand: 1, armour: 2, hat: 3, accessory: 4 };

@@ -108,7 +108,9 @@ export function createAngling(scene, { actors = null, forms = null, spellFx = nu
   const rodGeo = rodGeometry(), floatGeo = floatGeometry(), fishGeo = fishGeometry();
   const rodMat = solid(), floatMat = solid();
   const lineMat = new THREE.LineBasicMaterial({ color: '#eef4f6', transparent: true, opacity: 0.75, fog: true });
-  const ringGeo = new THREE.RingGeometry(0.9, 1, 48); ringGeo.rotateX(-Math.PI / 2);
+  const ringGeo = new THREE.RingGeometry(0.84, 1, 48); ringGeo.rotateX(-Math.PI / 2);
+  // a pale shaft of glitter standing on a pool, so it reads from far off (rings lie flat and vanish at a low angle)
+  const glintGeo = new THREE.CylinderGeometry(0.12, 0.7, 1, 10, 1, true); glintGeo.translate(0, 0.5, 0);
   const ringMat = () => new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: true });
   const lines = new Map();        // angler id -> state
   const pools = new Map();        // pool id -> state
@@ -239,6 +241,7 @@ export function createAngling(scene, { actors = null, forms = null, spellFx = nu
       p = { id, x: at.x, z: at.z, tier: info?.tier || 1, shelf: !!info?.shelf, rings: [], fish: null, period: jumpPeriod(id), t: 0, y: surface(at.x, at.z), jump: -1, jumpYaw: 0 };
       const tint = POOL_TINT[p.tier] || POOL_TINT[1];
       for (let i = 0; i < 3; i++) { const m = new THREE.Mesh(ringGeo, ringMat()); m.material.color.set(tint); m.position.set(p.x, p.y + 0.04, p.z); m.renderOrder = 2; m.frustumCulled = false; scene.add(m); p.rings.push(m); }
+      p.glint = new THREE.Mesh(glintGeo, ringMat()); p.glint.material.color.set(tint); p.glint.renderOrder = 2; p.glint.frustumCulled = false; scene.add(p.glint);
       p.fish = new THREE.Mesh(fishGeo, solid()); p.fish.visible = false; p.fish.scale.setScalar((1.6 + p.tier * 0.3) * (p.shelf ? 0.6 : 1));        // E: a `shelf` pool is ankle-deep — a small fish, a low hop p.fish.material.color.set(tint).lerp(new THREE.Color('#ffffff'), 0.5); scene.add(p.fish);
       pools.set(id, p); stats.pools = pools.size;
     }
@@ -249,20 +252,23 @@ export function createAngling(scene, { actors = null, forms = null, spellFx = nu
     const p = pools.get(id); if (!p) return;
     if (fished) splash(p.x, p.z, 2.4);
     for (const m of p.rings) { scene.remove(m); m.material.dispose(); }
+    scene.remove(p.glint); p.glint.material.dispose();
     scene.remove(p.fish); p.fish.material.dispose();
     pools.delete(id); stats.pools = pools.size;
   }
   function updatePool(p, dt, now) {
     const cp = camera?.position, d = cp ? Math.hypot(p.x - cp.x, p.z - cp.z) : 0, on = d < 220;
     for (const m of p.rings) m.visible = on;
+    p.glint.visible = on && d > 25;
     if (!on) { p.fish.visible = false; return; }
+    if (p.glint.visible) { const far = Math.min(1, (d - 25) / 40); p.glint.position.set(p.x, p.y, p.z); p.glint.scale.set(1 + far * 1.5, (p.shelf ? 2.5 : 4) + far * 3, 1 + far * 1.5); p.glint.rotation.y += dt * 0.6; p.glint.material.opacity = (0.16 + 0.1 * Math.sin(p.t * 2.2)) * far; }
     p.t += dt;
     if (!(p.y > -1e5)) p.y = surface(p.x, p.z);
     // three rings, each 2.6 s from the middle out to 2.8 m, a third of a cycle apart — bigger and brighter from afar
-    const R = 2.8 + (d > 60 ? 0.8 : 0);
+    const R = 3.2 + Math.min(1.6, Math.max(0, d - 30) / 25);
     p.rings.forEach((m, i) => {
       const k = ((p.t / 2.6) + i / 3) % 1;
-      m.position.set(p.x, p.y + 0.04, p.z); m.scale.setScalar(0.25 + R * k); m.material.opacity = (d > 60 ? 0.85 : 0.6) * (1 - k) * Math.min(1, k * 6);
+      m.position.set(p.x, p.y + 0.04, p.z); m.scale.setScalar(0.25 + R * k); m.material.opacity = (d > 40 ? 0.95 : 0.7) * (1 - k) * Math.min(1, k * 6);
     });
     // the jumper
     if (p.jump < 0 && p.t >= p.next0()) { p.jump = 0; p.jumpYaw = (p.t * 2.399) % (Math.PI * 2); stats.jumps++; splash(p.x - Math.sin(p.jumpYaw) * 0.8, p.z - Math.cos(p.jumpYaw) * 0.8, 0.9); }
@@ -310,9 +316,10 @@ export function createAngling(scene, { actors = null, forms = null, spellFx = nu
     const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, 0, 0, 1, 0, 1, 1, 0]), 3));
     g.add(new THREE.Line(lg, lineMat));
     const r = new THREE.Mesh(ringGeo, ringMat()); r.material.opacity = 0.5; g.add(r);
+    const gl = new THREE.Mesh(glintGeo, ringMat()); gl.material.opacity = 0.3; g.add(gl);
     for (const c of g.children) if (c.isMesh) c.castShadow = true;
     return g;
   }
   return { onEvent, onLocal, setPhase, setLine, setPool, removePool, update, sample, stats, lines, pools,
-    dispose() { for (const s of [...lines.values()]) drop(s); for (const id of [...pools.keys()]) removePool(id); for (const g of [rodGeo, floatGeo, fishGeo, ringGeo]) g.dispose(); } };
+    dispose() { for (const s of [...lines.values()]) drop(s); for (const id of [...pools.keys()]) removePool(id); for (const g of [rodGeo, floatGeo, fishGeo, ringGeo, glintGeo]) g.dispose(); } };
 }

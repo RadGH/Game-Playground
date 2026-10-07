@@ -2,6 +2,8 @@
 // No DOM, no network: the panels in chat.js / friends.js / guild.js / mail.js / callboard.js / account.js call these,
 // and tests/D/m3-social.test.js checks them. Wire shapes: docs/protocol.md §16 (protocol v4).
 
+import { shortcutsTable, panelKeys } from './input/bindings.js';
+
 /** Chat channels in tab order. `send` = how a line on this tab goes out ('say' is the province socket). */
 export const CHANNELS = [
   { id: 'all', label: 'All', send: 'say', hint: 'Everything. Typing here talks out loud to people near you.' },
@@ -231,12 +233,8 @@ export function mmss(ms) { const s = Math.max(0, Math.ceil(ms / 1000)); return `
 export const popLeft = (pop, now) => Math.max(0, Math.min(1, (pop.until - now) / (pop.ms || 30000)));
 
 // ---- keyboard shortcuts (the help overlay reads this; main.js/panels bind them) ----
-export const SHORTCUTS = [
-  { group: 'Moving', keys: [['W A S D', 'Move'], ['Shift', 'Sprint'], ['Space', 'Jump'], ['Drag', 'Turn the camera'], ['Q · E (hold)', 'Turn the camera'], ['Click ground', 'Walk there']] },
-  { group: 'Fighting', keys: [['Click', 'Select'], ['Right-click', 'Attack an enemy'], ['Right-click a friend', 'Their menu: follow, trade, inspect, whisper…'], ['Shift + right-click', 'The menu on an enemy'], ['Tab', 'Next enemy'], ['F', 'Strike'], ['1 – 6', 'Skills'], ['Esc', 'Close a window / clear target / the menu (settings, log out)'], ['R', 'Rise after falling']] },
-  { group: 'World', keys: [['E', 'Use, talk, open, loot a body'], ['C', 'Make camp (wilds)'], ['X', 'Cast your fishing line (face water; X again reels in)'], ['Space · E', 'Hook a bite; hold Space to reel during the tug'], ['H', 'Ride your mount / get down (from level 5; not in a fight, water or a dungeon)']] },
-  { group: 'Windows', keys: [['M', 'Map (wheel zooms, drag pans, right-click drops a pin)'], ['J', 'Journal (quests)'], ['B', 'Bag and gear (Shift-click an item for the other hand)'], ['V', 'Character: stats and damage, beside the bag'], ['K', 'Skills and talents'], ['N', 'Perk forest'], ['P', 'Party menu: party, friends, guild, mail, Group Finder'], ['O', 'Friends tab'], ['G', 'Guild tab'], ['F1 or ?', 'This help']] },
-  { group: 'Chat', keys: [['Enter', 'Talk'], ['/', 'Start a command'], ['/w Name', 'Whisper'], ['/r', 'Answer the last whisper'], ['/follow Name', 'Follow a friend (move to stop)'], ['/bug · /suggest', 'Send a bug report or a suggestion'], ['/tradewith Name', 'Ask a player to trade'], ['/help', 'All chat commands']] },
-];
+// Play-test 5 (T27, stream G): both tables are BUILT from the one binding table (js/client/input/bindings.js), so the help
+// window, the settings tab, the on-screen hints, the controller and the touch layout can never disagree about a key.
+export const SHORTCUTS = shortcutsTable();
 /** Window hotkeys: KeyboardEvent.code -> panel id. */
-export const PANEL_KEYS = { KeyB: 'bag', KeyP: 'party', KeyO: 'friends', KeyG: 'guild', KeyM: 'map', KeyJ: 'journal', KeyK: 'skills', KeyN: 'perks', KeyV: 'sheet' };
+export const PANEL_KEYS = panelKeys();

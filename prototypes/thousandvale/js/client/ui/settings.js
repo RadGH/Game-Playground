@@ -14,6 +14,7 @@ import { h, createPanel } from '../ui-panel.js';
 import { SETTINGS_DEFAULTS, QUALITIES, cleanSettings } from './pt2-core.js';
 import { SHORTCUTS } from '../social-core.js';
 import { send2 } from './net2.js';
+import { bindingsTab } from '../input/bindings-ui.js';   // T27 (stream G): the one binding table — re-bind keys, controller glyphs, touch
 
 const KEY = 'tv.settings';
 const load = () => { try { return cleanSettings(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch { return { ...SETTINGS_DEFAULTS }; } };
@@ -83,8 +84,7 @@ export function createSettings({ net, hud, help, onLogout, onGear }) {
       slider('sfx', 'Sound effects', 0, 1, 0.05, v => `${Math.round(v * 100)}%`),
       h('p.tiny-left', {}, 'Saved now; the valley has no sound yet, so these take effect when it does.'),
     ];
-    else body = [h('div.keys-list', {}, ...SHORTCUTS.map(g => h('section', {}, h('h4', {}, g.group), h('dl', {}, ...g.keys.flatMap(([k, what]) => [h('dt', {}, h('kbd', {}, k)), h('dd', {}, what)]))))),
-      h('p.tiny-left', {}, 'Changing keys is not in yet — this is the list as it stands.')];
+    else body = bindingsTab({ redraw: draw });   // T27: generated from js/client/input/bindings.js (SHORTCUTS is built from the same table)
     panel.setTitle('Settings', 'Saved as you change them');
     panel.fill(tabs, h('div.set-body', {}, ...body), h('div.row.end', {}, h('button.ghost.small', { type: 'button', onclick: () => { S = { ...SETTINGS_DEFAULTS }; save(); apply(); draw(); for (const k of ['tradeFriends', 'showGear', 'showHelm']) set(k, S[k]); } }, 'Defaults'), h('button.primary.small', { type: 'button', onclick: () => panel.close() }, 'Done')));
   }

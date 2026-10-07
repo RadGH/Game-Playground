@@ -162,7 +162,7 @@ export class Entity {
       if (d.site) o.site = d.site;                             // fort / farm / hook marker: {kind, template, friendly, blurb}
       if (d.treasure) o.treasure = { chain: d.treasure.chain, step: d.treasure.step, of: d.treasure.of, cache: d.treasure.cache || undefined };
       if (d.shimmer) o.shimmer = d.shimmer;
-      if (d.pool) o.pool = { tier: d.pool.tier, minSkill: d.pool.minSkill, left: d.pool.left, water: d.pool.water };   // T25: a fish pool
+      if (d.pool) o.pool = { tier: d.pool.tier, minSkill: d.pool.minSkill, left: d.pool.left, water: d.pool.water, ...(d.pool.shelf ? { shelf: true } : {}) };   // T25: a fish pool
       if (d.office) o.office = d.office;                       // a service NPC's own building (Q10): {kind, plot, x, z, yaw, lit}                    // a hidden cache glints within this many metres for someone who has every clue
     }
     return o;

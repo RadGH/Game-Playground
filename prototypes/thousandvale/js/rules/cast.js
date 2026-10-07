@@ -420,10 +420,13 @@ export function createCombat(room) {
         const first = hits.find(h => h.result?.amount > 0)?.enemy || null;
         if (first && st.split) {
           const used = new Set(hits.map(h => h.enemy));
+          const shards = [];
           for (const e of field.near(first.x, first.z, st.split.range, first).filter(x => !used.has(x) && x.dying == null).slice(0, st.split.shards)) {
             field.emit({ t: 'fx', kind: 'bolt', id: ch.id, element, from: { x: first.x, z: first.z }, to: e.id, ms: 120, ...plan.fxTag, fork: 1 });
+            shards.push(e.id);
             for (const h of field.strikeArea(e.x, e.z, 1, ch, { ...opts, falloff: 1, power: opts.power * st.split.keep })) hits.push(h);
           }
+          field.emit({ t: 'fx', kind: 'chain', id: ch.id, element, first: first.id, targets: shards, fork: 1, ...plan.fxTag });
         }
         if (first && st.pool) rt.dropPool(ch, { x: first.x, z: first.z, r: st.pool.radius, seconds: st.pool.seconds, element, power: st.pool.power * share });
         if (first && st.ward) wardUp(ch, st.ward);

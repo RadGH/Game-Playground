@@ -124,7 +124,7 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
     const g = F ? F.pool(tier) : { minSkill: 1 };
     const left = s.always ? 99 : (F ? F.poolCatches(tier, () => room.host.random('fish')) : 5);
     const e = room.spawn({ kind: 'object', type: 'fishpool', name: tier >= 3 ? 'Deep fish pool' : tier === 2 ? 'Busy fish pool' : 'Fish pool', x: s.x, z: s.z, team: 0,
-      data: { key: 'pool:' + s.id, r: R.poolR, state: 'idle', pool: { id: s.id, tier, minSkill: g.minSkill, left, water: s.water || 'river', always: !!s.always, zone: s.zone, band: s.band || null, shore: s.shore || null } } });
+      data: { key: 'pool:' + s.id, r: R.poolR, state: 'idle', pool: { id: s.id, tier, minSkill: g.minSkill, left, water: s.water || 'river', always: !!s.always, zone: s.zone, band: s.band || null, shore: s.shore || null, ...(s.shelf ? { shelf: true } : {}) } } });
     let m = poolsIn.get(room.id); if (!m) { m = new Map(); poolsIn.set(room.id, m); }
     m.set(s.id, e);
     counters.poolsOpened = (counters.poolsOpened || 0) + 1;

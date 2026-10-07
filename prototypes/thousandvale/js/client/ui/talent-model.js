@@ -288,3 +288,62 @@ export function searchForest(F, query, textOf = null) {
   }
   return hits;
 }
+
+// ---------------------------------------------------------------- play-test 5 (T28): staged picks — nothing is spent until Accept
+/**
+ * A list of picks you have marked but not committed, with undo / redo. `key(x)` names a pick (two picks with the same
+ * key replace each other — a talent tier holds one). Pure.
+ */
+export function createStage(key = x => String(x)) {
+  let list = [], redo = [];
+  return {
+    get list() { return list.slice(); }, get n() { return list.length; }, get canUndo() { return list.length > 0; }, get canRedo() { return redo.length > 0; },
+    has: k => list.some(x => key(x) === k),
+    /** Stage a pick (replacing one with the same key). A new pick forgets what could be redone. */
+    add(x) { list = list.filter(y => key(y) !== key(x)).concat([x]); redo = []; },
+    /** Take one staged pick back out (not the undo stack: a click on a staged node). */
+    drop(k) { const had = list.length; list = list.filter(x => key(x) !== k); if (list.length !== had) redo = []; return list.length !== had; },
+    undo() { const x = list.pop(); if (x !== undefined) redo.push(x); return x; },
+    redo() { const x = redo.pop(); if (x !== undefined) list = list.filter(y => key(y) !== key(x)).concat([x]); return x; },
+    clear() { list = []; redo = []; },
+    /** Commit: the picks in the order they were made; the stage is empty afterwards. */
+    take() { const out = list; list = []; redo = []; return out; },
+  };
+}
+/**
+ * The forest with staged perks on top of the ones you own: staged nodes read 'staged', and what is "open" is worked out
+ * from both. `left` = points still free after the staged ones (`knownLeft` = the server's count when it sent one).
+ */
+export function stagedForest(src, perks = [], staged = [], level = 1, bonus = 0, knownLeft = null) {
+  const st = forestState(src, [...perks, ...staged], level, bonus);
+  const base = knownLeft != null ? knownLeft : forestState(src, perks, level, bonus).left;
+  const left = Math.max(0, base - staged.length);
+  const state = new Map(st.state);
+  const S = new Set(staged);
+  for (const [id, v] of state) {
+    if (S.has(id)) state.set(id, 'staged');
+    else if (v === 'open' && left <= 0) state.set(id, 'reach');
+    else if (v === 'reach' && left > 0) state.set(id, 'open');
+  }
+  return { state, left, base, staged: staged.length, spent: forestState(src, perks, level, bonus).spent, taken: st.taken };
+}
+/** May this node be staged? The path rule over owned + staged, and the points left after what is staged. */
+export function stageCheck(src, perks, staged, level, bonus, id, knownLeft = null) {
+  const f = stagedForest(src, perks, staged, level, bonus, knownLeft);
+  const node = src.forest.byId.get(id);
+  if (!node) return { ok: false, why: 'No such perk.' };
+  if (f.taken.has(id)) return { ok: false, why: staged.includes(id) ? 'That one is already staged.' : 'You already have that one.' };
+  if (f.left <= 0) return { ok: false, why: staged.length ? 'Every point is staged. Accept, or undo one first.' : 'No points left. You earn more as you level.' };
+  if (!(src.forest.neighbours.get(id) || []).some(n => f.taken.has(n))) return { ok: false, why: `Nothing you have taken or staged connects to ${node.name || id} yet.` };
+  return { ok: true, node };
+}
+/** Staged perks that would be cut off if `id` were un-staged (they hang off it): those go with it. */
+export function stagedDependents(src, perks, staged, id) {
+  const keep = staged.filter(x => x !== id), F = src.forest, start = F.start?.id;
+  const have = new Set([...perks, ...keep]); if (start) have.add(start);
+  const seen = new Set(start ? [start] : perks.slice(0, 1)), q = [...seen];
+  while (q.length) { const c = q.pop(); for (const n of F.neighbours.get(c) || []) if (have.has(n) && !seen.has(n)) { seen.add(n); q.push(n); } }
+  return keep.filter(x => !seen.has(x));
+}
+/** "3 left, 2 staged" */
+export const pointsText = (left, staged) => `${left} left${staged ? `, ${staged} staged` : ''}`;

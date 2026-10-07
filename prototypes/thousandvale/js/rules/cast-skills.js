@@ -1105,6 +1105,8 @@ const takesRepeats = plan => { const r = plan.repeatSpec; return !!(r && (r.grow
 function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, hop = 0, from = null, skip = null) {
   const field = combat.field;
   const origin = from || a;
+  // D-world's ask (play-test 5): one record of where a chain REALLY went, shared by every hop of this bolt
+  if (!hop && plan.chains > 0 && !plan._chain) plan = { ...plan, _chain: { ids: [], first: null } };
   const homing = (!hop && plan.homing) ? plan.homing : 0;
   // the Tab target, when it is roughly along the shot, is what the bolt is thrown at
   let target = null;
@@ -1131,7 +1133,7 @@ function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, 
   const to = { x: origin.x + dx * dist, z: origin.z + dz * dist };
   const flight = Math.max(0.09, dist / BOLT_SPEED);
   const chase = target?.enemy || null;
-  field.emit({ t: 'fx', kind: 'bolt', id: ch.id, skill: plan.skill?.id, element: plan.element, from: { x: origin.x, z: origin.z }, to: chase ? chase.id : to, ms: Math.round(flight * 1000), ...(plan.fxTag || {}) });
+  field.emit({ t: 'fx', kind: 'bolt', id: ch.id, skill: plan.skill?.id, element: plan.element, from: { x: origin.x, z: origin.z }, to: chase ? chase.id : to, ms: Math.round(flight * 1000), ...(plan.fxTag || {}), ...(hop ? { hop, fromId: skip?.id ?? undefined } : {}) });
   combat.later(flight, () => {
     const at = chase && chase.dying == null ? { x: chase.x, z: chase.z } : to;
     const splash = plan.splash * (combat.room.engine.rpg.fx.sum(ch, 'boltSplash') || 1);
@@ -1140,10 +1142,14 @@ function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, 
       if (plan.mods && !hop) rt.resolveAttack(ch, plan.mods, hits, { x: ch.x, z: ch.z, at: { x: at.x, z: at.z }, element: plan.element });
       if (!hop && plan.skill) afterBolt(combat, rt, ch, plan, at, hits, strikeOpts, collect);
       const left = (plan.chains || 0) - hop;
+      const trail = plan._chain;
+      if (trail && chase) { if (hop) trail.ids.push(chase.id); else trail.first = chase.id; }
+      let hopped = false;
       if (left > 0) {
         const conductors = field.near(at.x, at.z, 12, chase).filter(e => e.statuses?.shock);
         const next = (conductors.sort((p, q) => Math.hypot(p.x - at.x, p.z - at.z) - Math.hypot(q.x - at.x, q.z - at.z))[0]) || field.nearestTo(at.x, at.z, 8, chase) || null;
         if (next) {
+          hopped = true;
           const ndx = next.x - at.x, ndz = next.z - at.z, nlen = Math.hypot(ndx, ndz) || 1;
           const keep = plan.chainFalloff ?? 0.65;
           // play-test 5 (found by T15's chain test): the hop starts AT the body just struck, and the scan along it finds
@@ -1154,6 +1160,8 @@ function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, 
           fireBolt(combat, rt, ch, { ...plan, range: 14 }, a, ndx / nlen, ndz / nlen, { ...strikeOpts, power: (strikeOpts?.power ?? 1) * keep }, collect, intent, hop + 1, { x: at.x, z: at.z }, leave);
         }
       }
+      // the chain is over: `targets` = the entity ids it jumped to, in order (`first` = what the bolt itself struck)
+      if (trail && !hopped && !trail.sent) { trail.sent = true; field.emit({ t: 'fx', kind: 'chain', id: ch.id, skill: plan.skill?.id, element: plan.element, first: trail.first ?? undefined, targets: trail.ids, ...(plan.fxTag || {}) }); }
       void hits;
     });
   }, ch.id);
@@ -1591,7 +1599,8 @@ function afterBolt(combat, rt, ch, plan, at, hits, opts, collect) {
   const struck = hits.find(h => h.result?.amount > 0)?.enemy || null;
   if (struck) plan._struck = struck;
   const used = new Set(hits.map(h => h.enemy));
-  const hit = (from, e, keep) => { used.add(e); collect(field.strikeArea(e.x, e.z, 1.1, ch, { ...opts, falloff: 1, power: (opts.power ?? plan.mult) * keep })); return e; };
+  const jumped = [];
+  const hit = (from, e, keep) => { used.add(e); jumped.push(e.id); collect(field.strikeArea(e.x, e.z, 1.1, ch, { ...opts, falloff: 1, power: (opts.power ?? plan.mult) * keep })); return e; };
   const jump = (from, keep, n, range) => {
     let cur = from;
     for (let i = 0; i < n; i++) {
@@ -1610,6 +1619,8 @@ function afterBolt(combat, rt, ch, plan, at, hits, opts, collect) {
     const ok = when === 'hit' ? !!struck : when === 'kill' ? hits.some(h => h.result?.dead) : when.startsWith('tag:') ? hits.some(h => h.enemy.statuses?.[when.slice(4)]) : false;
     if (ok) for (const e of (field.near(at.x, at.z, sp.range ?? 8) || []).filter(e => !used.has(e)).slice(0, sp.shards ?? 2)) hit(at, e, sp.keep ?? 0.5);
   }
+  // a ricochet / split: the bodies it went on to, in order (D-world draws the arcs to exactly these)
+  if (jumped.length) field.emit({ t: 'fx', kind: 'chain', id: ch.id, skill: plan.skill?.id, element: plan.element, first: struck?.id ?? undefined, targets: jumped, fork: sp && !plan.ricochet ? 1 : undefined });
   if (plan.returns) {
     // the bolt flies back to its caster: a line from where it landed to where the caster is when it arrives
     const keep = typeof plan.returns === 'number' ? plan.returns : plan.returns.keep ?? 0.8;

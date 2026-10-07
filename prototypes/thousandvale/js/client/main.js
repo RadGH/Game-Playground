@@ -71,6 +71,7 @@ import { createUi5 } from './ui/pt5.js';          // D-UI play-test 5: kit step,
 import { savedQuality } from './ui/settings.js';
 import { lookWith, lookCustom } from './ui/appearance-core.js';
 import { avatarFor } from './looks.js';
+import { installInput } from './input/index.js';   // play-test 5 T27 (stream G): gamepad, re-bound keys, key hints that follow the device (touch only when the phone layout is on)
 
 const q = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
@@ -261,6 +262,8 @@ const ui5 = createUi5({ net: () => S.net, hud, bag, mail, worldUi, journal: ui.j
   me: () => (S.selfId != null && S.phase === 'world' ? { id: S.selfId, x: S.predictor.pos.x, z: S.predictor.pos.z } : null), self: () => S.self, room: () => S.room, bar: () => S.bar,
   targetId: () => S.target, setTarget: id => setTarget(id), stats: () => ({ fps: FPS.fps }), zoneName: () => document.getElementById('zone-name')?.textContent || null,
   ensureNet: () => kitNet(), onKitPreview: g => { S.titleGear = g; previewLook(S.look, 'title'); }, onKitBack: () => { if (S.phase === 'title') { S.titleGear = null; toAppearance(); } }, onKitCreate: c => { S.kit = c; enterWorld(); } });
+// T27: one binding table (js/client/input/bindings.js) drives the keyboard, the gamepad, the hints and — when switched on — touch
+const input = installInput({ controls, hud, setTarget: id => setTarget(id), targetId: () => S.target, pause: () => ui2.escape(), inWorld: () => S.phase === 'world', dead: () => S.self.dead, settings: ui2.settings, chat: () => chat.focus() });
 const PANELS = { ...ui5.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: () => bag.toggle() }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
 for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());
 window.addEventListener('keydown', e => {
@@ -1048,6 +1051,7 @@ function frame(now) {
   weaponFx.update(dt); formFx.update(dt); angling.update(dt);
   lootMarks.update(dt);
   hud.tick(dt);
+  input.tick(dt);                           // T27: poll the gamepad, keep the focus ring on its element
   LIGHTS.update(dt, camera.position);
   W.horizon?.update(camera.position);       // far-horizon chunk LOD (built in a worker; cheap when nothing changes)
   perf.span('render', () => view.render());
@@ -1284,4 +1288,4 @@ const tv = {
   },
 };
 window.tv = tv;
-window.thousandvale = { formFx, reviveFx, angling, lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui, ui2, ui5 };
+window.thousandvale = { input, formFx, reviveFx, angling, lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui, ui2, ui5 };

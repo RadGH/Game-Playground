@@ -1,0 +1,40 @@
+/* UI gallery — the frame page (ui-gallery-frame.html). Only what is NOT the game's interface: the still picture that
+   stands in for the 3D world, the phone's hardware outline, the loading note and the on-phone scene picker.
+   The game's own stylesheets are added by js/client/gallery/frame-boot.js from index.html's list. */
+html[data-gallery="frame"], html[data-gallery="frame"] body { margin: 0; height: 100%; overflow: hidden; background: #0d1014; }
+html[data-gallery="frame"] #view { display: none; }
+.gallery-backdrop { position: fixed; inset: 0; z-index: 0; background: #1b2420 center / cover no-repeat; background-image: url("../js/client/gallery/fixtures/world.jpg"); }
+.gallery-backdrop[data-kind="title"] { background-image: url("../js/client/gallery/fixtures/title.jpg"); }
+html[data-device^="phone"] .gallery-backdrop { background-position: 50% 60%; }
+/* the title card sits where the game puts it; its own loading veil is not part of a mockup */
+html[data-gallery="frame"] #loading { display: none; }
+html[data-stage="world"] #title { display: none; }
+
+.gallery-wait { position: fixed; inset: 0; z-index: 9000; display: grid; place-content: center; justify-items: center; gap: 10px; background: #0d1014; color: #c9c2b0; font: 14px/1.4 system-ui, sans-serif; }
+.gallery-wait i { width: 26px; height: 26px; border-radius: 50%; border: 3px solid #3a4038; border-top-color: #d8b25a; animation: gallery-spin .9s linear infinite; }
+.gallery-wait.failed i { display: none; }
+.gallery-wait.failed { color: #ff9a8a; padding: 24px; text-align: center; }
+@keyframes gallery-spin { to { transform: rotate(360deg); } }
+
+/* iPhone 15 Pro hardware, drawn over everything (never catches a tap) */
+.gallery-device { position: fixed; inset: 0; z-index: 9500; pointer-events: none; }
+.gd-island { position: absolute; background: #000; border-radius: 20px; }
+.gd-home { position: absolute; background: rgba(255, 255, 255, .82); border-radius: 3px; mix-blend-mode: difference; }
+html[data-device="phone-p"] .gd-island { top: 11px; left: 50%; width: 126px; height: 37px; margin-left: -63px; }
+html[data-device="phone-p"] .gd-home { bottom: 8px; left: 50%; width: 139px; height: 5px; margin-left: -69.5px; }
+html[data-device="phone-l"] .gd-island { left: 11px; top: 50%; width: 37px; height: 126px; margin-top: -63px; }
+html[data-device="phone-l"] .gd-home { bottom: 8px; left: 50%; width: 139px; height: 5px; margin-left: -69.5px; }
+.gd-safe { position: absolute; top: var(--safe-top, 0); right: var(--safe-right, 0); bottom: var(--safe-bottom, 0); left: var(--safe-left, 0); border: 1px dashed rgba(120, 220, 255, .75); display: none; }
+html[data-show-safe="1"] .gd-safe { display: block; }
+
+/* opened on a real phone: a scene picker */
+.gallery-pick { position: fixed; z-index: 9600; left: calc(env(safe-area-inset-left, 0px) + 8px); bottom: calc(env(safe-area-inset-bottom, 0px) + 8px); min-width: 44px; min-height: 44px; padding: 0 12px; border-radius: 22px; border: 1px solid rgba(255, 255, 255, .35); background: rgba(12, 16, 20, .72); color: #fff; font: 600 12px system-ui, sans-serif; opacity: .55; }
+html[data-device="phone-l"] .gallery-pick, html[data-device="phone-p"] .gallery-pick { left: auto; right: calc(env(safe-area-inset-right, 0px) + 8px); bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 50%); transform: translateY(-50%) rotate(-90deg); transform-origin: right center; right: 22px; min-height: 28px; height: 28px; border-radius: 8px 8px 0 0; }
+.gallery-sheet { position: fixed; z-index: 9700; inset: 0; overflow: auto; -webkit-overflow-scrolling: touch; background: #12161b; color: #e8e2d2; font: 15px/1.45 system-ui, sans-serif; padding: calc(env(safe-area-inset-top, 0px) + 10px) calc(env(safe-area-inset-right, 0px) + 14px) calc(env(safe-area-inset-bottom, 0px) + 20px) calc(env(safe-area-inset-left, 0px) + 14px); }
+.gallery-sheet header { display: flex; align-items: center; justify-content: space-between; }
+.gallery-sheet .gs-x { width: 44px; height: 44px; font-size: 26px; background: none; border: 0; color: inherit; }
+.gallery-sheet h4 { margin: 16px 0 6px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #a79f8a; }
+.gallery-sheet a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; margin: 0 6px 6px 0; border-radius: 8px; background: #1e252c; color: #e8e2d2; text-decoration: none; }
+.gallery-sheet a.on { background: #d8b25a; color: #1a1408; }
+.gallery-sheet .gs-row { margin: 8px 0 0; }
+.gallery-sheet .gs-notes { color: #b8b1a0; white-space: pre-wrap; margin: 10px 0 0; }

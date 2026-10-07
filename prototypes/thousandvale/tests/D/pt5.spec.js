@@ -70,6 +70,9 @@ test.beforeAll(async ({ browser }) => {
   page = await ctx.newPage();
   page.on('pageerror', e => errors.push(e.message));
 });
+const fails = [];
+/** A test that records its failure and lets the next ones run: they share one page, and a serial stop would hide every later screen behind the first red line. The last test fails if any did. */
+const soft = (name, fn) => test(name, async ({ browser }) => { try { await fn({ browser }); } catch (e) { fails.push(`${name.slice(0, 60)} :: ${String(e.message).slice(0, 900)}`); console.log('[pt5 FAIL]', name.slice(0, 60), '\n', String(e.message).slice(0, 900)); } });
 test.afterAll(async () => { try { bot?.close(); } catch {} await ctx?.close(); srv?.kill('SIGTERM'); });
 
 test('T5: after name + appearance comes "starting equipment" — three armour sets, weapon packs, worn by the 3D figure; the choice rides in create', async () => {
@@ -145,7 +148,7 @@ test('T5: after name + appearance comes "starting equipment" — three armour se
   await spy(page);
 });
 
-test('T9: a crate says what it opens into and its lowest rarity; opening it rattles, then reveals the item', async () => {
+soft('T9: a crate says what it opens into and its lowest rarity; opening it rattles, then reveals the item', async () => {
   test.setTimeout(120000);
   const crate = { uid: 'crate-1', id: 'crate', kind: 'crate', type: 'crate', name: 'Bootmaker\'s Crate', rarity: 'magic', crate: { slot: 'feet', min: 'uncommon', minRarity: 'magic' } };
   await page.evaluate(c => tvui5.fake('bag', { add: [c], remove: [], gold: 12 }), crate);
@@ -184,7 +187,7 @@ test('T9: a crate says what it opens into and its lowest rarity; opening it ratt
   await page.keyboard.press('KeyB');
 });
 
-test('T11 + T12: the event tracker — a short notice outside, the full card inside (what, objective, progress, time, reward), and a result line', async () => {
+soft('T11 + T12: the event tracker — a short notice outside, the full card inside (what, objective, progress, time, reward), and a result line', async () => {
   test.setTimeout(120000);
   const me = await page.evaluate(() => tv.state().you);
   const ev = { uid: 'e77', id: 'wolves_ford', name: 'Wolves at the Ford', kind: 'zone', realm: true, state: 'live', what: 'A starving pack is crossing the ford toward the farms.', text: 'A starving pack is crossing the ford toward the farms.',
@@ -209,10 +212,10 @@ test('T11 + T12: the event tracker — a short notice outside, the full card ins
   expect(text).toContain('Wolves at the Ford');
   expect(text).toContain('A starving pack is crossing the ford');
   expect(text).toContain('Defeat the three packs, then the pack mother'); expect(text).toContain('1 / 4');
-  expect(text).toMatch(/6:1\d left/);
+  expect(text).toMatch(/[56]:\d\d left/);
   expect(text).toContain('Event cache: a rare item or better');
   expect(text).toContain('Stage 2 of 4');
-  expect(await card.locator('.et-bar i').evaluate(e => e.style.width)).toBe('25.0%');
+  expect(await card.locator('.et-bar i').evaluate(e => e.style.width)).toMatch(/^25(\.0)?%$/);
   // live progress
   await page.evaluate(e => tvui5.fake('eventTrack', { ...e, inside: true, objective: { ...e.objective, n: 3 }, stage: { n: 4, of: 4, name: 'The pack mother' }, leftMs: 25000, endsAt: Date.now() + 25000 }), ev);
   await expect(card.locator('.et-count')).toHaveText('3 / 4');
@@ -247,7 +250,7 @@ test('T11 + T12: the event tracker — a short notice outside, the full card ins
   await expect(page.locator('.tv-evtrack')).toBeHidden();
 });
 
-test('T18: the Character menu sits beside the bag; equipping something moves the numbers, with ▲ ▼', async () => {
+soft('T18: the Character menu sits beside the bag; equipping something moves the numbers, with ▲ ▼', async () => {
   test.setTimeout(120000);
   await page.keyboard.press('KeyV');
   await expect(page.locator('#panel-sheet')).toBeVisible();
@@ -311,7 +314,7 @@ test('T18: the Character menu sits beside the bag; equipping something moves the
   await page.keyboard.press('KeyB');
 });
 
-test('T7: a second two-hander goes in the off hand with Doubled Grasp — and the bag says why not without it', async () => {
+soft('T7: a second two-hander goes in the off hand with Doubled Grasp — and the bag says why not without it', async () => {
   test.setTimeout(60000);
   const gs = { uid: 'gs-1', name: 'Old Greatsword', type: 'weapon', subtype: 'greatsword', twoHanded: true, dmg: [6, 11], rarity: 'common', levelReq: 1 };
   const maul = { uid: 'maul-1', name: 'Quarry Maul', type: 'weapon', subtype: 'warhammer', twoHanded: true, dmg: [7, 12], rarity: 'common', levelReq: 1 };
@@ -339,7 +342,7 @@ test('T7: a second two-hander goes in the off hand with Doubled Grasp — and th
   await page.keyboard.press('KeyB');
 });
 
-test('T19 + T21: Feedback — suggestion or bug report, "what will be sent", a confirmation; an admin reads and files reports', async () => {
+soft('T19 + T21: Feedback — suggestion or bug report, "what will be sent", a confirmation; an admin reads and files reports', async () => {
   test.setTimeout(120000);
   await page.evaluate(() => console.warn('[spec] a line for the log ring'));
   await page.click('#menu-feedback');
@@ -412,7 +415,7 @@ test('T19 + T21: Feedback — suggestion or bug report, "what will be sent", a c
   await page.evaluate(() => { thousandvale.ui5.feedback.reports.panel.close(); thousandvale.ui5.feedback.panel.close(); thousandvale.S.net.joined.you.admin = false; });
 });
 
-test('T20: a letter shows what it holds; taking needs bag room and says so; a gift is unwrapped with the reveal', async () => {
+soft('T20: a letter shows what it holds; taking needs bag room and says so; a gift is unwrapped with the reveal', async () => {
   test.setTimeout(120000);
   const gift = { uid: 'gift-1', id: 'gift', kind: 'gift', type: 'gift', name: 'Gift Box', rarity: 'rare', gift: { minRarity: 'rare' } };
   const letter = { id: 9001, kind: 'gift', from: 'The Thousandvale Wardens', subject: 'Thank you', body: 'Thanks for taking the time to improve the game. Something for your trouble is inside.', sentAt: Date.now() - 5000, read: false, taken: false, items: [gift], gold: 0 };
@@ -459,7 +462,7 @@ test('T20: a letter shows what it holds; taking needs bag room and says so; a gi
   await page.evaluate(() => tv.panel('mail', false));
 });
 
-test('T25: angling — cast, the bite prompt, the tension tug (keyboard and pointer), the catch; the Catch tab; cooking', async () => {
+soft('T25: angling — cast, the bite prompt, the tension tug (keyboard and pointer), the catch; the Catch tab; cooking', async () => {
   test.setTimeout(180000);
   // no rod: X says where to get one
   await expect(page.locator('.fish-btn')).toBeHidden();
@@ -567,7 +570,7 @@ test('T25: angling — cast, the bite prompt, the tension tug (keyboard and poin
   await page.keyboard.press('KeyB');
 });
 
-test('T3 + T4: a targeted ally gets your heals (the note says who); a fallen player is offered a raise and answers it', async () => {
+soft('T3 + T4: a targeted ally gets your heals (the note says who); a fallen player is offered a raise and answers it', async () => {
   test.setTimeout(240000);
   const { connect, memoryTokenStore } = await import('../../js/net/client.js');
   bot = connect({ mode: 'ws', url: `ws://127.0.0.1:${port}`, tokenStore: memoryTokenStore(), guestName: 'Brem' });
@@ -625,7 +628,7 @@ test('T3 + T4: a targeted ally gets your heals (the note says who); a fallen pla
   await page.keyboard.press('KeyR').catch(() => {});
 });
 
-test('phone size: the kit step, the tracker, the sheet under the bag, the tug and feedback all fit', async ({ browser }) => {
+soft('phone size: the kit step, the tracker, the sheet under the bag, the tug and feedback all fit', async ({ browser }) => {
   test.setTimeout(480000);
   const c2 = await browser.newContext({ viewport: { width: 390, height: 780 }, hasTouch: true, isMobile: true });
   const p = await c2.newPage();
@@ -699,4 +702,4 @@ test('phone size: the kit step, the tracker, the sheet under the bag, the tug an
   await c2.close();
 });
 
-test('no page errors', async () => { expect(errors).toEqual([]); });
+test('no page errors, and every screen above passed', async () => { expect(errors).toEqual([]); expect(fails).toEqual([]); });

@@ -100,6 +100,25 @@ test('armory: a deep link opens the model in both hands with an attack clip, and
   expect(errors).toEqual([]);
 });
 
+test('armory: both hands opens on a dual clip (one-handers) or a twin clip (two two-handers), and the new clips are in the picker', async ({ page }) => {
+  await page.goto('armory/#id=fh_dagger&hand=both');
+  await page.waitForFunction(() => window.armory?.ready, null, { timeout: 120_000 });
+  expect(await page.inputValue('#anim')).toBe('dualFlurry');
+  expect(await page.evaluate(() => window.armory.actor.anim)).toBe('dualFlurry');
+  const options = await page.$$eval('#anim option', os => os.map(o => o.value));
+  for (const n of ['dualSlashR', 'dualSlashL', 'dualCross', 'dualStabR', 'dualStabL', 'dualFlurry', 'twinChopR', 'twinChopL', 'twinCrash', 'standUp', 'fishCast', 'fishWait', 'fishReel', 'fishShow']) expect(options, n).toContain(n);
+  expect(await page.$$eval('#anim optgroup', gs => gs.map(g => g.label))).toEqual(expect.arrayContaining(['Dual wield', 'Angling', 'Revive']));
+  await page.goto('armory/#id=fh_greatsword');
+  await page.waitForFunction(() => window.armory?.state.id === 'fh_greatsword' && window.armory.ready, null, { timeout: 120_000 });
+  const b = await page.evaluate(() => window.armory.builds);
+  await page.click('#hands [data-hand="both"]');
+  await page.waitForFunction(n => window.armory.builds > n, b);
+  expect(await page.inputValue('#anim')).toBe('twinCrash');
+  expect(await page.evaluate(() => window.armory.live.holds.length)).toBe(2);       // the second two-hander is drawn
+  await page.click('#hands [data-hand="main"]');
+  expect(await page.inputValue('#anim')).toBe('idle');
+});
+
 test('armory: a flag note is kept, shows in the grid and exports as JSON', async ({ page }) => {
   await page.goto('armory/#id=fh_sword');
   await page.waitForFunction(() => window.armory?.ready, null, { timeout: 120_000 });

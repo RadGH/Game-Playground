@@ -9,12 +9,16 @@
 // `net.talent` / `net.perk` when stream A's client has them (docs/requests.md "D (Client) -> A/C, play-test P6");
 // until then the windows run in PREVIEW: picks are kept in this browser only and a banner says so.
 //
+// T28 (play-test 5): picks are STAGED. A click marks a perk or a talent as pending (blue, dashed, "3 left, 2 staged"); Undo / Redo
+// (Ctrl+Z / Ctrl+Shift+Z) step through the staged picks; Accept sends them to the server in order; Cancel — or closing the
+// window with picks still staged — asks first. Nothing is spent until Accept.
+//
 //   const T = createTalentsUi({ net: () => S.net, hud, me: () => ({ level, cls, char }) });
 //   T.wire(net); T.skills.toggle(); T.perks.toggle(); T.refresh();
 
-import { createPanel, h } from '../ui-panel.js';
+import { createPanel, h, confirmBox } from '../ui-panel.js';
 import { loadSkillData } from '../skillbar.js';
-import { searchForest } from './talent-model.js';
+import { searchForest, createStage, stagedForest, stageCheck, stagedDependents, pointsText } from './talent-model.js';
 import { makeSource, skillLadder, nextUnlockText, treeState, pickCheck, talentPicksWaiting, forestState, perkCheck, refundCheck, perkTotals, talentsFromServer, perksFromServer, forestFromJson } from './talent-model.js';
 import { createPerkGraph } from './perk-forest.js';
 import { esc } from './tips.js';
@@ -56,6 +60,8 @@ export async function loadTalentSource() {
 export function createTalentsUi({ net: getNet, hud, me }) {
   const net = () => getNet?.();
   const S = { src: null, talents: {}, trees: {}, perks: [], bonus: 0, serverLeft: null, sel: null, server: { talents: false, perks: false }, history: [] };
+  const PS = createStage();                                   // staged perk ids, in the order they were clicked
+  const TS = createStage(x => `${x.skill}:${x.tier}`);        // staged talent picks { skill, tier, node, name } — one per tier
   const lvl = () => me()?.level || 1;
   const bar = () => net()?.joined?.you?.bar || null;
   const prevKey = () => 'tv.preview.p6.' + (me()?.char ?? 'anon');
@@ -104,6 +110,7 @@ export function createTalentsUi({ net: getNet, hud, me }) {
     const s = ladder.find(x => x.id === S.sel);
     skills.fill(
       banner('talents'),
+      TS.n || TS.canRedo ? stageBar('talents') : null,
       next ? h('p.tvt-next', {}, next) : h('p.tvt-next.done', {}, 'Every skill of your calling is unlocked.'),
       h('div.tvt-cols', {}, list, s ? detail(s, level) : h('p.empty', {}, 'No skills yet.')),
     );
@@ -114,7 +121,10 @@ export function createTalentsUi({ net: getNet, hud, me }) {
   }
   function detail(s, level) {
     const tree = S.src.tree(s.id);
-    const st = treeState(tree, S.talents[s.id] || {}, level, { skillUnlocked: s.unlocked });
+    const mine = TS.list.filter(x => x.skill === s.id);
+    const st = treeState(tree, { ...(S.talents[s.id] || {}), ...Object.fromEntries(mine.map(x => [x.tier, x.node])) }, level, { skillUnlocked: s.unlocked });
+    // a staged tier is not spent: its pick reads "staged" and the other nodes of the tier can still be clicked instead
+    for (const t of st.tiers) { const sg = mine.find(x => x.tier === t.tier); if (!sg) continue; t.staged = true; for (const n of t.nodes) n.state = n.id === sg.node ? 'staged' : 'open'; }
     const facts = [s.mp ? `${s.mp} mana` : null, s.cd ? `${(s.cd / 1000).toFixed(s.cd % 1000 ? 1 : 0)} s cooldown` : null, s.element && s.element !== 'physical' ? s.element : null].filter(Boolean);
     return h('section.tvt-detail', { 'aria-label': s.name },
       h('header.tvt-dhead', {}, h('h4', {}, s.name), h('span.tvt-state' + (s.unlocked ? '.ok' : ''), {}, s.unlocked ? `Key ${s.slot}` : `Unlocks at level ${s.level}`)),
@@ -123,31 +133,83 @@ export function createTalentsUi({ net: getNet, hud, me }) {
       h('p.tvt-desc', {}, s.desc || ''),
       h('h5.tvt-th', {}, 'Talents', h('small', {}, ' — one pick per tier; each one changes how the skill works')),
       ...st.tiers.map(t => h('div.tvt-tier' + (t.open ? '' : '.closed') + (t.picked ? '.spent' : ''), {},
-        h('div.tvt-tierhead', {}, h('b', {}, `Tier ${t.tier}`), h('span', {}, t.open ? (t.picked ? 'Chosen' : 'Choose one') : (s.unlocked ? `Opens at level ${t.level}` : `Level ${t.level}, once the skill is unlocked`))),
+        h('div.tvt-tierhead', {}, h('b', {}, `Tier ${t.tier}`), h('span', {}, t.staged ? 'Staged — press Accept to keep it' : t.open ? (t.picked ? 'Chosen' : 'Choose one') : (s.unlocked ? `Opens at level ${t.level}` : `Level ${t.level}, once the skill is unlocked`))),
         h('div.tvt-nodes', {}, ...t.nodes.map(n => h('button.tvt-node.' + n.state, {
-          type: 'button', disabled: n.state !== 'open' && n.state !== 'picked',
-          'aria-pressed': String(n.state === 'picked'),
+          type: 'button', disabled: n.state !== 'open' && n.state !== 'picked' && n.state !== 'staged',
+          'aria-pressed': String(n.state === 'picked' || n.state === 'staged'),
           dataset: { node: n.id, tier: t.tier, tipHtml: nodeTipHtml(n, t, s) },
           onclick: () => pickTalent(s, t.tier, n.id),
-        }, h('b', {}, n.name), h('span', {}, n.desc || ''), n.state === 'picked' ? h('i.tvt-tick', {}, 'Chosen') : null))))));
+        }, h('b', {}, n.name), h('span', {}, n.desc || ''), n.state === 'picked' ? h('i.tvt-tick', {}, 'Chosen') : n.state === 'staged' ? h('i.tvt-tick.staged', {}, 'Staged') : null))))));
   }
   function nodeTipHtml(n, t, s) {
-    const state = n.state === 'picked' ? '<div class="good">Chosen</div>' : n.state === 'open' ? '<div class="good">Click to choose — one per tier</div>'
+    const state = n.state === 'picked' ? '<div class="good">Chosen</div>' : n.state === 'staged' ? '<div class="good">Staged — not spent yet. Click it again to take it back; Accept keeps it.</div>'
+      : n.state === 'open' ? '<div class="good">Click to stage it — one per tier. Nothing is spent until you press Accept.</div>'
       : n.state === 'other' ? '<div class="bad">This tier is already chosen. An Unbinder in town can take it back.</div>'
         : `<div class="bad">${s.unlocked ? `Opens at level ${t.level}` : `Unlock ${esc(s.name)} first`}</div>`;
     return `<div class="tip-title">${esc(n.name)}</div><div class="tip-sub">${esc(s.name)} · tier ${t.tier}${n.bespoke ? '' : ' · shared talent'}</div><hr><div>${esc(n.desc || '')}</div>${state}`;
   }
   function pickTalent(s, tier, nodeId) {
     const tree = S.src.tree(s.id), picks = S.talents[s.id] || {};
-    const c = pickCheck(tree, picks, lvl(), tier, nodeId, { skillUnlocked: s.unlocked });
+    const key = `${s.id}:${tier}`;
+    if (TS.list.some(x => x.skill === s.id && x.tier === tier && x.node === nodeId)) { TS.drop(key); refresh(); return; }   // a second click takes it back
+    const others = Object.fromEntries(TS.list.filter(x => x.skill === s.id && x.tier !== tier).map(x => [x.tier, x.node]));
+    const c = pickCheck(tree, { ...picks, ...others }, lvl(), tier, nodeId, { skillUnlocked: s.unlocked });
     if (!c.ok) { hud?.toast(c.why, 'warn'); return; }
-    const n = net();
-    if (S.server.talents && typeof n?.talent === 'function') { n.talent('pick', { skill: s.id, tier, node: nodeId }); return; }
-    S.talents = { ...S.talents, [s.id]: { ...picks, [tier]: nodeId } };
-    savePreview();
-    hud?.toast(`${tree.tiers.find(x => x.tier === tier)?.nodes.find(x => x.id === nodeId)?.name || 'Talent'} chosen (preview).`, 'good');
+    TS.add({ skill: s.id, tier, node: nodeId, name: tree.tiers.find(x => x.tier === tier)?.nodes.find(x => x.id === nodeId)?.name || 'Talent', skillName: s.name });
     refresh();
   }
+  /** Accept: every staged talent goes to the server (or into the preview), in the order it was picked. */
+  function acceptTalents() {
+    const list = TS.take(); if (!list.length) return;
+    const n = net();
+    if (S.server.talents && typeof n?.talent === 'function') for (const x of list) n.talent('pick', { skill: x.skill, tier: x.tier, node: x.node });
+    else { for (const x of list) S.talents = { ...S.talents, [x.skill]: { ...(S.talents[x.skill] || {}), [x.tier]: x.node } }; savePreview(); hud?.toast(`${list.length} talent${list.length > 1 ? 's' : ''} chosen (preview).`, 'good'); }
+    refresh();
+  }
+
+  // ================================================================ T28: the staged-picks bar (both windows)
+  function stageBar(which) {
+    const st = which === 'perks' ? PS : TS, n = st.n, word = which === 'perks' ? 'perk' : 'talent';
+    const act = (k, label, on, cls = 'ghost', off = false) => h(`button.${cls}.small`, { type: 'button', disabled: off, dataset: { stage: k }, onclick: on }, label);
+    return h('div.stage-bar' + (n ? '.has' : ''), { role: 'group', 'aria-label': `Staged ${word} picks`, dataset: { which } },
+      h('span.stage-text', {}, n ? h('b', {}, `${n} ${word}${n > 1 ? 's' : ''} staged`) : h('b', {}, 'Nothing staged'), n ? ' — nothing is spent until you press Accept.' : ' — Redo brings your last pick back.',
+        which === 'talents' && n ? h('small', {}, ' ' + st.list.map(x => `${x.skillName}: ${x.name}`).join(' · ')) : null),
+      h('span.grow'),
+      act('undo', 'Undo', () => { st.undo(); prune(); refresh(); }, 'ghost', !st.canUndo), act('redo', 'Redo', () => { st.redo(); prune(); refresh(); }, 'ghost', !st.canRedo),
+      act('cancel', 'Cancel', () => cancelStage(which), 'ghost', !n), act('accept', n ? `Accept ${n}` : 'Accept', () => (which === 'perks' ? acceptPerks() : acceptTalents()), 'primary', !n));
+  }
+  async function cancelStage(which) {
+    const st = which === 'perks' ? PS : TS; if (!st.n) return true;
+    if (!(await confirmBox(`Throw away your ${st.n} staged ${which === 'perks' ? 'perk' : 'talent'} pick${st.n > 1 ? 's' : ''}? Nothing has been spent.`, { yes: 'Throw them away', no: 'Keep choosing', danger: true }))) return false;
+    st.clear(); refresh(); return true;
+  }
+  /** Staged picks the server (or a level change) has made impossible are dropped quietly. */
+  function prune() {
+    for (const id of PS.list) if (S.perks.includes(id) || !S.src?.forest.byId.has(id)) PS.drop(id);
+    for (const x of TS.list) if (S.talents[x.skill]?.[x.tier]) TS.drop(`${x.skill}:${x.tier}`);
+  }
+  // closing a window with picks still staged asks first (the X, Esc, the hotkey and the menu button all come through here)
+  for (const [p, which] of [[skills, 'talents'], [perks, 'perks']]) {
+    const close0 = p.close.bind(p); let asking = false;
+    p.close = () => {
+      const st = which === 'perks' ? PS : TS;
+      if (!st.n || p.root.hidden) return close0();
+      if (asking) return;
+      asking = true;
+      confirmBox(`You have ${st.n} staged ${which === 'perks' ? 'perk' : 'talent'} pick${st.n > 1 ? 's' : ''} you have not accepted. Close and throw ${st.n > 1 ? 'them' : 'it'} away?`, { yes: 'Close without accepting', no: 'Keep choosing', danger: true })
+        .then(yes => { asking = false; if (yes) { st.clear(); close0(); refresh(); } });
+    };
+  }
+  // Ctrl+Z / Ctrl+Shift+Z (or Ctrl+Y) step through the staged picks of the window that is open
+  window.addEventListener('keydown', e => {
+    if (!(e.ctrlKey || e.metaKey) || (e.code !== 'KeyZ' && e.code !== 'KeyY')) return;
+    if (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+    const st = perks.isOpen && (PS.canUndo || PS.canRedo) ? PS : skills.isOpen && (TS.canUndo || TS.canRedo) ? TS : null;
+    if (!st) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (e.code === 'KeyY' || e.shiftKey) st.redo(); else st.undo();
+    prune(); refresh();
+  }, true);
 
   // ================================================================ Perk Forest window
   let graph = null;
@@ -156,7 +218,8 @@ export function createTalentsUi({ net: getNet, hud, me }) {
     perkBody.bar = h('div.pf-bar');
     perkBody.graphHost = h('div.pf-host');
     perkBody.side = h('div.pf-foot');
-    perks.fill(perkBody.top = h('div.pf-top'), perkBody.bar, perkBody.graphHost, perkBody.side);
+    perkBody.stage = h('div.pf-stage');
+    perks.fill(perkBody.top = h('div.pf-top'), perkBody.bar, perkBody.stage, perkBody.graphHost, perkBody.side);
     graph = createPerkGraph(perkBody.graphHost, { describe: perkTipHtml, onTake: takePerk, onRefund: refundPerk });
     // play-test 2 Q23: a search box over the forest — rings and zooms to every node whose name or card holds the words
     const count = h('em', { 'aria-live': 'polite' });
@@ -180,14 +243,15 @@ export function createTalentsUi({ net: getNet, hud, me }) {
     if (!perks.isOpen) return;
     if (!S.src) { perks.fill(h('p.empty', {}, 'Reading the forest…')); graph = null; return; }
     if (!graph || !perks.body.contains(perkBody.graphHost)) buildPerkFrame();
-    const level = lvl(), st = forestState(S.src, S.perks, level, S.bonus);
-    const left = S.serverLeft ?? st.left;
-    perks.setTitle('Perk Forest', `${left} point${left === 1 ? '' : 's'} to spend · ${st.spent} spent`);
+    prune();
+    const level = lvl(), st = stagedForest(S.src, S.perks, PS.list, level, S.bonus, S.server.perks ? S.serverLeft : null);
+    const left = st.left;
+    perks.setTitle('Perk Forest', `${pointsText(left, st.staged)} · ${st.spent} spent`);
     const b = banner('perks');
     perkBody.top.replaceChildren(...(b ? [b] : []));
     const arms = S.src.forest.arms || [];
     perkBody.bar.replaceChildren(...[
-      h('span.pf-points' + (left ? '.has' : ''), { dataset: { tip: 'One point a level, and an extra one every fifth level.' } }, h('b', {}, String(left)), ` point${left === 1 ? '' : 's'} left`),
+      h('span.pf-points' + (left ? '.has' : ''), { dataset: { tip: 'One point a level, and an extra one every fifth level.' } }, h('b', {}, String(left)), ` left`, st.staged ? h('i.pf-staged', {}, `, ${st.staged} staged`) : null),
       h('span.pf-arms', {}, ...arms.map(a => h('button.pf-arm', { type: 'button', style: `--arm:${a.color}`, dataset: { tip: a.blurb || a.name }, onclick: () => focusArm(a) }, a.name))),
       h('span.grow'),
       h('button.ghost.small', { type: 'button', 'aria-label': 'Zoom in', onclick: () => graph.zoom(1.3) }, '+'),
@@ -196,11 +260,13 @@ export function createTalentsUi({ net: getNet, hud, me }) {
       !S.server.perks && S.history.length ? h('button.ghost.small', { type: 'button', onclick: undoPerk }, 'Undo') : null,
       !S.server.perks && S.perks.length ? h('button.ghost.small.x', { type: 'button', onclick: () => { S.history.push([...S.perks]); S.perks = []; savePreview(); refresh(); } }, 'Reset') : null,
     ].filter(Boolean));
+    // T28: the staged-picks bar is always there (so Undo / Redo / Accept never move under the pointer)
+    perkBody.stage.replaceChildren(stageBar('perks'));
     graph.set(S.src.forest, st.state, { arms });
-    const tot = perkTotals(S.src, S.perks);
+    const tot = perkTotals(S.src, [...S.perks, ...PS.list]);
     const lines = Object.entries(tot).map(([k, v]) => `${v > 0 ? '+' : ''}${Math.round(v * (k === 'spellPower' ? 100 : 1) * 10) / 10}${STAT_NAME[k] || ' ' + k}`);
-    perkBody.side.replaceChildren(h('p.pf-help', {}, 'Drag to look around, wheel or pinch to zoom. Click a ', h('b.g', {}, 'glowing'), ' node next to one you hold to take it; right-click (or hold) a taken one at the end of a path to hand it back', S.server.perks ? ' (an Unbinder in town does that, for a little gold).' : '.'),
-      ...(lines.length ? [h('p.pf-totals', {}, h('b', {}, 'Your perks: '), lines.join(' · '))] : []));
+    perkBody.side.replaceChildren(h('p.pf-help', {}, 'Drag to look around, wheel or pinch to zoom. Click a ', h('b.g', {}, 'glowing'), ' node next to one you hold to stage it (blue) — click it again to take it back, press Accept to spend the points; right-click (or hold) a taken one at the end of a path to hand it back', S.server.perks ? ' (an Unbinder in town does that, for a little gold).' : '.'),
+      ...(lines.length ? [h('p.pf-totals', {}, h('b', {}, PS.n ? 'Your perks, with the staged ones: ' : 'Your perks: '), lines.join(' · '))] : []));
   }
   function focusArm(a) {
     const nodes = S.src.forest.nodes.filter(n => n.arm === a.key);
@@ -209,22 +275,38 @@ export function createTalentsUi({ net: getNet, hud, me }) {
   }
   function perkTipHtml(id) {
     const n = S.src?.forest.byId.get(id); if (!n) return null;
-    const st = forestState(S.src, S.perks, lvl(), S.bonus).state.get(id);
+    const st = stagedForest(S.src, S.perks, PS.list, lvl(), S.bonus, S.server.perks ? S.serverLeft : null).state.get(id);
     const arm = (S.src.forest.arms || []).find(a => a.key === n.arm);
     const say = st === 'taken' ? (n.kind === 'hub' ? '<div class="tip-sub">Every arm starts here.</div>' : (S.server.perks ? '<div class="good">Yours. An Unbinder in town can hand it back (the end of a path only).</div>' : '<div class="good">Yours. Right-click to hand it back (only the end of a path).</div>'))
-      : st === 'open' ? '<div class="good">Click to take — 1 point.</div>' : st === 'reach' ? '<div class="bad">Next to your path, but you have no points left.</div>'
+      : st === 'staged' ? '<div class="good">Staged — not spent yet. Click it again to take it back; Accept keeps it.</div>'
+      : st === 'open' ? '<div class="good">Click to stage it — 1 point. Nothing is spent until you press Accept.</div>' : st === 'reach' ? '<div class="bad">Next to your path, but you have no points left.</div>'
         : '<div class="bad">Take a perk that connects to this one first.</div>';
     return `<div class="tip-title">${esc(n.name || n.id)}</div><div class="tip-sub">${esc(KIND_NAME[n.kind] || 'Perk')}${arm ? ` · ${esc(arm.name)}` : n.oddball ? ' · between the arms' : ''}</div>${n.desc && n.desc !== n.name ? `<hr><div>${esc(n.desc)}</div>` : ''}${say}`;
   }
   function takePerk(id) {
-    const c = perkCheck(S.src, S.perks, lvl(), S.bonus, id);
-    if (!c.ok) { if (forestState(S.src, S.perks, lvl(), S.bonus).state.get(id) !== 'taken') hud?.toast(c.why, 'warn'); return; }
+    if (PS.has(id)) return unstagePerk(id);                         // a second click takes a staged perk back
+    const c = stageCheck(S.src, S.perks, PS.list, lvl(), S.bonus, id, S.server.perks ? S.serverLeft : null);
+    if (!c.ok) { if (!S.perks.includes(id) && id !== S.src.forest.start?.id) hud?.toast(c.why, 'warn'); return; }
+    PS.add(id);
+    refresh();
+  }
+  /** Take a staged perk back out; staged perks that hung off it go with it. */
+  function unstagePerk(id) {
+    const gone = stagedDependents(S.src, S.perks, PS.list, id);
+    PS.drop(id); for (const g of gone) PS.drop(g);
+    if (gone.length) hud?.toast(`${gone.length} staged perk${gone.length > 1 ? 's' : ''} further along that path went with it.`, 'info');
+    refresh();
+  }
+  /** Accept: the staged perks are spent, in the order you clicked them (the server takes them one message each). */
+  function acceptPerks() {
+    const list = PS.take(); if (!list.length) return;
     const n = net();
-    if (S.server.perks && typeof n?.perk === 'function') { n.perk('take', { id }); return; }
-    S.history.push([...S.perks]); S.perks = [...S.perks, id]; savePreview();
+    if (S.server.perks && typeof n?.perk === 'function') { for (const id of list) n.perk('take', { id }); hud?.toast(`${list.length} perk${list.length > 1 ? 's' : ''} accepted.`, 'good'); }
+    else { S.history.push([...S.perks]); S.perks = [...S.perks, ...list]; savePreview(); }
     refresh();
   }
   function refundPerk(id) {
+    if (PS.has(id)) return unstagePerk(id);
     const c = refundCheck(S.src, S.perks, id);
     if (!c.ok) { hud?.toast(c.why, 'warn'); return; }
     const n = net();
@@ -295,6 +377,8 @@ export function createTalentsUi({ net: getNet, hud, me }) {
 
   return {
     skills, perks, wire, refresh, ready, state: S,
+    /** T28: what is staged, and the same actions the buttons run (specs). */
+    stage: { get perks() { return PS.list; }, get talents() { return TS.list; }, perkStage: PS, talentStage: TS, takePerk, acceptPerks, acceptTalents },
     /** Test hook: the graph (screen positions of nodes) and the current source. */
     get graph() { return graph; }, get source() { return S.src; },
   };

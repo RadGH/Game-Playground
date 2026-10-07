@@ -17,6 +17,7 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
   const cam = { yaw: Math.PI, pitch: 0.38, dist: 9, distWant: 9, focus: { x: 0, y: 0, z: 0 }, ready: false };
   let blocker = null;
   let drag = null, moveGoal = null, chase = null, typing = false, facing = Math.PI, jumpQueued = false;
+  let analog = null;   // T27 (stream G): a stick's vector from js/client/input (gamepad, the phone's thumb stick) — null = keys only
 
   const isTyping = () => typing || (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName));
 
@@ -83,6 +84,7 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     if (keys.has('KeyD') || keys.has('ArrowRight')) fx -= 1;
     if (keys.has('KeyQ')) cam.yaw += 0.045;
     if (keys.has('KeyE')) cam.yaw -= 0.045;
+    if (analog && (analog.mx || analog.mz)) { fz += analog.mz; fx -= analog.mx; moveGoal = null; chase = null; }   // stick: x right, z forward
     // Camera forward on the ground = direction from camera to player.
     const cf = { x: Math.sin(cam.yaw), z: Math.cos(cam.yaw) };
     const cr = { x: Math.cos(cam.yaw), z: -Math.sin(cam.yaw) };
@@ -100,7 +102,7 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     const len = Math.hypot(mx, mz);
     if (len > 1e-3) { mx /= len; mz /= len; if (!(fz < 0 && fx === 0)) facing = Math.atan2(mx, mz); else facing = cam.yaw; }
     if (chase != null && !targetPos) chase = null;
-    const sprint = keys.has('ShiftLeft') || keys.has('ShiftRight');
+    const sprint = keys.has('ShiftLeft') || keys.has('ShiftRight') || !!(analog && analog.sprint);
     const b = (sprint && len > 1e-3 ? 1 : 0) | (jumpQueued ? 2 : 0);   // IN.SPRINT = 1, IN.JUMP = 2
     jumpQueued = false;
     return { mx, mz, yaw: facing, b, sprint, inRange, chasing: chase };
@@ -109,6 +111,8 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
   /** Place the camera behind `p` (the drawn player position). Keeps it above the ground. */
   function updateCamera(p, dt, height = 1.7) {
     const k = cam.ready ? 1 - Math.exp(-dt * 14) : 1;
+    if (analog && (analog.camX || analog.camY)) { cam.yaw -= analog.camX * dt * 2.6; cam.pitch = Math.max(-0.25, Math.min(1.25, cam.pitch + analog.camY * dt * 1.5)); }   // right stick
+    if (analog && analog.zoom) cam.distWant = Math.max(2.8, Math.min(26, cam.distWant * (1 - analog.zoom * dt * 1.6)));
     cam.focus.x += (p.x - cam.focus.x) * k;
     cam.focus.y += (p.y + height - cam.focus.y) * (cam.ready ? 1 - Math.exp(-dt * 8) : 1);
     cam.focus.z += (p.z - cam.focus.z) * k;
@@ -145,6 +149,8 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     /** fn(ax, ay, az, bx, by, bz) -> 0..1, how far along focus->camera the first solid starts (solids.js firstHit). */
     setBlocker(f) { blocker = f; },
     setFacing(y) { facing = y; },
+    /** T27: { mx, mz, camX, camY, sprint, zoom } from a stick (-1..1 each; mz forward, mx right), added to the keys. null = none. */
+    setAnalog(a) { analog = a || null; },
     get chasing() { return chase; },
     get moveGoal() { return moveGoal; },
   };

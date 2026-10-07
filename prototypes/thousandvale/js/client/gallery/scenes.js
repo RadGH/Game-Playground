@@ -1,0 +1,219 @@
+// UI gallery — the scenes (play-test 5, T26 — stream G). DATA: each scene names the real modules it shows, the steps
+// that bring the interface to that state, and the notes printed beside the frame. No markup lives here.
+//
+//   id        the deep link:  ui-gallery.html#scene=<id>&device=<desktop|laptop|phone-p|phone-l|pad>&layout=<current|proposed>&variant=<a|b>
+//   stage     'world' (default: the HUD over a still of the 3D world) or 'title' (the title screen; `title` = which step)
+//   modules   the files this scene exists to show — tests/G/gallery.test.js fails when a module under js/client/ui/ is in
+//             no scene and not on NO_SCREEN below
+//   steps     [verb, ...args] — the verbs are in stage.js (panel, hub, play, call, click, hover, target, dead, …).
+//             'play' plays a server moment: recorded (fixtures/session.json) or hand-kept (fixtures/moments.json).
+//   phone / pad   { steps } run after `steps` in that frame's PROPOSED layout;  phoneCurrent = steps for the phone frame's CURRENT layout
+//   expect    a selector that must be on screen when the steps are done (the stage reports a scene that did not get there)
+//   only      frames this scene is for (default: all)
+//   notes     { all, desktop, phone, pad } — plain language, shown beside the frame
+//
+// To add a scene: add an entry here. That is all (docs/UI.md "Adding a scene").
+
+const U = 'js/client/ui/';
+const chat = [['chat', [
+  { text: 'Anyone for the Barrow? Need a tank.', cls: 'say', from: 'Sella' },
+  { text: 'I can tank it. Two minutes — selling junk first.', cls: 'party', from: 'Aldra' },
+  { text: 'You loot: Gilded Band of the Hare', cls: 'loot rarity-rare' },
+  { text: 'Brem has come online.', cls: 'system' },
+]]];
+const fight = [['vitals', 0.64, 0.42], ['play', 'hurt-party'], ['target', 'enemy'], ['cast', 2], ['track', 2], ...chat];
+const stagePerks = ['run', async G => {
+  const T = G.ui.talents; if (!T) return;
+  for (let i = 0; i < 60 && !T.source?.forest; i++) await new Promise(r => setTimeout(r, 50));
+  const F = T.source?.forest; if (!F) return;
+  // stage three perks next to the ones already held — through the same action a click on a glowing node runs (talents.js stage.takePerk)
+  const have = new Set([F.start?.id, ...(T.state.perks || [])]);
+  for (let n = 0; n < 3; n++) {
+    const next = F.nodes.find(x => !have.has(x.id) && (F.neighbours.get(x.id) || []).some(y => have.has(y)));
+    if (!next) break;
+    have.add(next.id); T.stage.takePerk(next.id);
+  }
+  T.graph?.fit?.();
+}];
+
+export const GROUPS = ['Start', 'In the world', 'Character', 'Windows', 'Social', 'Loot and trade', 'Angling', 'System', 'Controller', 'Phone', 'Reference'];
+
+export const SCENES = [
+  // ------------------------------------------------------------------------------------------------ Start
+  { id: 'title-new', expect: '#login:not([hidden]) #classes .chip', group: 'Start', title: 'Title — new adventurer', stage: 'title', step: 'new', modules: ['index.html'],
+    notes: { all: 'Step 1 of 3: a name, a people, a calling. This is index.html’s own markup; the six chips and the “More callings” list are filled from the class data.',
+      phone: 'Proposed: the card is the whole screen and scrolls; every chip is 44 px tall; inputs are 16 px so iOS does not zoom the page when you tap one. On its side the card takes the left 400 px and the figure stays visible on the right.',
+      pad: 'D-pad or stick moves the ring between chips, A picks, the name box opens the on-screen keyboard.' } },
+  { id: 'title-chars', expect: '#front:not([hidden]) #char-chips .chip', group: 'Start', title: 'Title — your characters', stage: 'title', step: 'front', modules: [U + 'portraits.js', U + 'svg-portrait.js', 'js/client/account.js'],
+    notes: { all: 'What a returning player sees: their characters (portrait, level, calling) and “New character”. The portraits are the game’s own — in the gallery they use its 2D-face path (the one it falls back to on computers without a graphics card).',
+      phone: 'Each character is one full-width row, 56 px tall.' } },
+  { id: 'title-login', expect: '#signin:not([hidden])', group: 'Start', title: 'Title — log in', stage: 'title', step: 'login', modules: ['js/client/account.js'],
+    notes: { all: 'The Log in tab: username, password, “Forgot your password?”.', pad: 'Text boxes open the on-screen keyboard (see the “On-screen keyboard” scene). A controller player can stay a guest and never type.' } },
+  { id: 'create-look', expect: '#panel-appearance:not([hidden])', group: 'Start', title: 'Creation — appearance', stage: 'title', step: 'look', modules: [U + 'appearance.js', U + 'appearance-core.js'],
+    notes: { all: 'Step 2: the appearance editor (also the barber’s chair in the world). The figure it dresses is the 3D one behind it — here a still picture.',
+      phone: 'Proposed: a sheet over the lower two thirds upright, so the figure stays in view above it; on its side the editor is the left column. Swatches are 44 px (fewer to a row than on a desktop).',
+      pad: 'LB / RB step through the editor’s sections; left / right on a list changes it.' } },
+  { id: 'create-kit', expect: '#panel-kits:not([hidden]) .kit-choice', group: 'Start', title: 'Creation — starting equipment', stage: 'title', step: 'kit', modules: [U + 'kit-step.js', U + 'item-card.js'],
+    notes: { all: 'Step 3 (new this round, T5): three armour sets and the weapon packs for the calling, each piece with its numbers written out. The kits are the server’s real answer for a cleric, recorded.',
+      phone: 'Each choice is a full-width card you tap; hold a piece for its full card.', pad: 'Up / down between choices, A picks, Menu = Create.' } },
+
+  // ------------------------------------------------------------------------------------------------ In the world
+  { id: 'hud', expect: '#target-frame:not([hidden])', group: 'In the world', title: 'HUD — in a fight', modules: ['js/client/hud.js', 'js/client/menubar.js', U + 'hotbar.js', U + 'buffs.js', U + 'minimap.js', U + 'event-tracker.js', U + 'pt2.js', U + 'pt5.js', U + 'suite.js', U + 'banner.js', U + 'tips.js', U + 'atlas.js', U + 'map-data.js', U + 'map-load.js'],
+    steps: [...fight, ['play', 'event-live']],
+    notes: { all: 'Everything on screen while you play: your frame and the target’s (top left), the party, the minimap, the event tracker and the quest tracker (right), chat (bottom left), the action bar (F + 1–6, then 7 8 9 0 for potions and food) and the window buttons down the right edge. State: a level 24 cleric in a party of four, recorded from a real server.',
+      desktop: 'This is the game today, untouched.',
+      phone: 'Proposed layout, built for thumbs on a phone held sideways:\n• LEFT THUMB: a stick that appears wherever you put your thumb down in the lower-left 40% (push to the edge to sprint). Nothing else lives there, so you cannot miss it.\n• RIGHT THUMB: Attack in the corner (76 px), skills 1–4 on an arc one thumb-length away (52 px), then a second arc: skills 5 and 6 straight above the corner (the easiest stretch), Belt, Target, Ally, Jump (46 px). These are the game’s real action-bar buttons, moved — same cooldown sweep, same cards.\n• HEALERS: the party frames are 44 px rows under your own frame — tap one and your heals go there; tap your own frame to heal yourself. The green Ally button does the same without reaching (it starts with whoever is hurt most).\n• Minimap top right (tap = map); the event and quest trackers fold to short cards under it.\n• Chat is a bubble with an unread count; the wheel button opens every window.\n• Key letters are gone from the buttons; nothing is under the island or the home bar.\nVariant B (switch above the frame): a flat 2×4 grid instead of the arcs.',
+      pad: 'The same HUD with the hints switched to the controller’s buttons: X strikes, Y B RB RT are skills 1–4, hold LT for skills 5–6 and the D-pad potions. The glyphs follow the controller plugged in (Xbox / PlayStation / generic) and flip back to keys the moment you touch the keyboard.' },
+    phoneCurrent: [], phone: { steps: [['touch', 'stick']] } },
+  { id: 'hud-heal', expect: '#target-frame.friendly', group: 'In the world', title: 'HUD — healing a friend', modules: ['js/client/social.js', U + 'pt5.js'],
+    steps: [['vitals', 0.9, 0.7], ['play', 'hurt-party'], ['target', 'ally'], ['wait', 400]],
+    notes: { all: 'A party member is targeted: the target frame turns friendly and the note over the action bar says who your heals and wards will land on (T3).',
+      phone: 'One thumb: tap the party row (44 px tall). The row you picked is outlined. Tapping your own frame clears it.', pad: 'D-pad down / up steps through the party (the first press goes to whoever is hurt most), D-pad left clears.' } },
+  { id: 'hud-boss', expect: '#boss:not([hidden])', group: 'In the world', title: 'HUD — boss fight', modules: ['js/client/boss.js'],
+    steps: [['vitals', 0.55, 0.3], ['play', 'hurt-party'], ['target', 'elite'], ['play', 'boss'], ['wait', 500]],
+    notes: { all: 'The boss frame (name, phases as ticks on the bar, enrage timer, cast bar) and a call-out line.', phone: 'The boss bar sits under the target frame at 60% width so it clears the minimap and the party column.' } },
+  { id: 'hud-popups', expect: '.roll-card', group: 'In the world', title: 'HUD — banners, pop-ups, a loot roll', modules: [U + 'banner.js', U + 'loot.js'],
+    steps: [['call', 'tvui2.banner', { level: 'zone', lead: 'You enter', name: 'The Torbor Fields', sub: 'Levels 20–26' }], ['play', 'party-invite'], ['play', 'loot-roll'], ['play', 'realm-soon'], ['toast', 'Not enough mana.', 'warn']],
+    notes: { all: 'The things that appear on their own: the area banner, a party invite, a Need / Greed / Skip roll, a realm event announcement, a warning line.',
+      phone: 'Pop-ups that ask something stack under the target frame; their buttons are 44 px. The roll card moves to the top right under the minimap so it never covers the skill arc.', pad: 'A pop-up takes the focus ring while it is up: A = the gold button, B = the other.' } },
+  { id: 'death', expect: '#rise:not([hidden])', group: 'In the world', title: 'Death', modules: ['js/client/hud.js'], steps: [['dead', 0]],
+    notes: { all: 'You have fallen: the Rise button (after a 2.5 s wait).', phone: 'The Rise button is 52 px tall and thumb-centred.', pad: 'A rises.' } },
+  { id: 'revive', expect: '.revive-ask:not([hidden])', group: 'In the world', title: 'Death — a friend offers to raise you', modules: [U + 'pt5.js'], steps: [['dead', 0], ['play', 'revive-ask']],
+    notes: { all: 'T4: a party member cast a revive on you. Accept stands you up where you fell; the offer has a timer.', pad: 'The ring starts on Accept.' } },
+  { id: 'dialog', expect: '.tv-dialog:not([hidden])', group: 'In the world', title: 'Talking to town folk', modules: ['js/client/world-ui.js'], steps: [['reply', 'use', 'offers'], ['wait', 300]],
+    notes: { all: 'An NPC’s dialog with its buttons (quests to take or hand in, a shop, the barber’s chair, an inn to call home). Recorded from the starter town.',
+      phone: 'The dialog is a bottom sheet; its buttons are full-width, 48 px.', pad: 'Up / down between the buttons, A presses, B walks away.' } },
+  { id: 'context', expect: '.ent-menu:not([hidden])', group: 'In the world', title: 'Right-click menu on a player', modules: [U + 'context-menu.js'], steps: [['target', 'ally'], ['call', 'tvui2.context', '@ally', 640, 300]],
+    notes: { all: 'The menu on another player: follow, trade, inspect, whisper, invite, friend, report.',
+      phone: 'There is no right-click on a phone: hold on a player (or on their party row). The menu opens as a bottom sheet in two columns.', pad: 'X (the “other” button) on a targeted player opens it.' } },
+  { id: 'tooltip', expect: '#tipbox:not([hidden]), .phone-sheet:not([hidden])', group: 'In the world', title: 'A skill’s card', modules: [U + 'tips.js'], steps: [...fight, ['hover', '#actionbar .slot:nth-child(3)']],
+    phone: { steps: [['holdSheet', '#actionbar .slot:nth-child(3)']] },
+    notes: { all: 'Every hover card in the game goes through one tooltip engine. This one is a skill: cost, cooldown, exactly who it touches (T2).',
+      phone: 'No hover on a phone: HOLD anything that has a card (about a third of a second) and it opens as a sheet you can read at leisure; tap outside to close. A quick tap still uses the thing.', pad: 'Y shows the card of whatever the ring is on.' } },
+
+  // ------------------------------------------------------------------------------------------------ Character
+  { id: 'bag', expect: '#bag:not([hidden]) #bag-grid .islot:not(.empty)', group: 'Character', title: 'Bag and paper doll', modules: ['js/client/bag.js', U + 'inv-core.js', U + 'item-icons.js', U + 'item-cell.js'], steps: [['panel', 'bag'], ['icons']],
+    notes: { all: 'The character window: the paper doll on the left (what you wear), the bag on the right with filters, search and sort. The 3D item icons are drawn by the game’s icon renderer.',
+      phone: 'Proposed: the bag is a full-screen sheet. Upright: what you wear is a strip of squares on top, the bag is a grid of 58 px squares below. On its side: worn gear left, bag right. The tab bar (bottom upright, a rail on the left on its side) moves between Bag · Character · Skills · Perks · Map · Journal · Social with one tap.\nWhy a rail on its side: the screen is only 372 px tall there and a bottom bar would cost 15% of it; the left edge next to the island is dead space anyway.',
+      pad: 'The ring moves square to square; A wears, X opens the item’s menu, Y shows its card; LB / RB change the filter.' } },
+  { id: 'bag-character', expect: '#panel-sheet:not([hidden]) .sh-row', group: 'Character', title: 'Character menu beside the bag', modules: [U + 'char-sheet.js', U + 'pt5-core.js'], steps: [['panel', 'bag'], ['panel', 'sheet'], ['icons']],
+    notes: { all: 'T18: the Character menu (health, armour, damage per ability, angling skill) docks beside the bag. The numbers are the server’s own sheet, recorded.',
+      phone: 'No room for two windows side by side: Character is its own tab next to Bag — one tap swaps them.' } },
+  { id: 'item-card', expect: '#tipbox:not([hidden]) .itemtip, .phone-sheet:not([hidden]) .itemtip', group: 'Character', title: 'Item card and compare', modules: [U + 'item-card.js'], steps: [['panel', 'bag'], ['icons'], ['hover', '#bag-grid .islot:not(.empty)']],
+    phone: { steps: [['run', async G => { const c = document.querySelector('#bag-grid .islot:not(.empty)'); if (c) await G.input.touch?.itemSheet(c); }]] },
+    notes: { all: 'The card of an item in the bag: what it is, its numbers, and how it compares with what you are wearing.',
+      phone: 'On a phone a tap on an item does not wear it straight away (too easy to mis-tap): it opens the card as a sheet with three big buttons — Use / wear, Other hand, Throw away. The comparison is in the card itself.', pad: 'Y on an item shows this card next to the ring.' } },
+  { id: 'crate', expect: '.tv-reveal:not([hidden])', group: 'Character', title: 'Opening a crate', modules: [U + 'reveal.js'], steps: [['call', 'tvui5.reveal', '@item.crate-boots', 'crate'], ['wait', 1200]],
+    notes: { all: 'T9: a crate opens into an item for your calling, with a short reveal.', phone: 'The button under it is 48 px.' } },
+  { id: 'skills', expect: '#panel-skills:not([hidden])', group: 'Character', title: 'Skills and talents', modules: [U + 'talents.js', U + 'talent-model.js'], steps: [['panel', 'skills'], ['wait', 500], ['click', '#panel-skills .tvt-skill:not(.locked)']],
+    notes: { all: 'The skill ladder for the calling and the talent tree of the chosen skill. Picks are staged first (T28): Undo, Redo, Cancel, Accept.',
+      phone: 'A full-screen sheet; skills are 48 px rows, the tree’s nodes are finger-sized; the staged-picks bar is pinned to the bottom.' } },
+  { id: 'perks', expect: '#panel-perks:not([hidden]) canvas', group: 'Character', title: 'Perk forest', modules: [U + 'perk-forest.js', U + 'talents.js'], steps: [['panel', 'perks'], ['wait', 700], stagePerks, ['wait', 300]],
+    pad: { steps: [['cursor', '#panel-perks canvas', 0.56, 0.44]] },
+    notes: { all: 'The perk forest with three picks staged (blue): nothing is spent until Accept (T28). The forest and the character’s taken perks are real.',
+      phone: 'The graph is the whole screen: drag to look around, pinch to zoom (it already supported pinch). The bar with Undo · Redo · Cancel · Accept is pinned to the bottom, each button 48 px, so the thumb that staged a perk can accept it. The search box and the arm chips scroll sideways in one row; the long help paragraph is gone (hold a node for its card).',
+      pad: 'A canvas cannot be stepped through, so the ring becomes a POINTER you steer with the left stick: A stages the perk under it, X hands one back, LT / RT zoom, the right stick pans. D-pad leaves the canvas for the buttons (Undo / Redo / Accept).' } },
+
+  // ------------------------------------------------------------------------------------------------ Windows
+  { id: 'map', expect: '#panel-map:not([hidden]) canvas', group: 'Windows', title: 'World map', modules: [U + 'worldmap.js', U + 'map-render.js', U + 'map-image-worker.js', U + 'atlas.js'], steps: [['panel', 'map'], ['wait', 1500]],
+    pad: { steps: [['cursor', '#panel-map canvas', 0.5, 0.5]] },
+    notes: { all: 'The world map: the province with what you have discovered, waystones, quest and event markers, your party. Recorded map data; the fog of war is the character’s own.',
+      phone: 'The map fills the sheet: drag pans, pinch zooms, hold drops a pin (the desktop’s right-click). The preset buttons scroll in one row above it.', pad: 'The steered pointer again: A selects what is under it (a waystone to travel to), X drops a pin, LT / RT zoom, right stick pans.' } },
+  { id: 'journal', expect: '#panel-journal:not([hidden])', group: 'Windows', title: 'Journal — quests', modules: [U + 'journal.js'], steps: [['panel', 'journal'], ['wait', 300]],
+    notes: { all: 'The quests you carry, the steps of the chosen one, rewards, track / abandon.', phone: 'List above, the chosen quest below (upright); list left, quest right (on its side).', pad: 'LB / RB change the tab (Quests · Done · Catch).' } },
+  { id: 'shop', expect: '#panel-shop:not([hidden])', group: 'Windows', title: 'Shop', modules: [U + 'shop.js', U + 'item-cell.js'], steps: [['call', 'tvui2.openShop', '@shop', 'Merchant'], ['wait', 900]],
+    notes: { all: 'A merchant’s wares, your bag to sell from, and buy-back. Recorded from a real merchant in the starter town.', phone: 'Rows are 52 px; tap = buy (it asks first when it costs more than a tenth of your gold), hold = the item’s card.' } },
+  { id: 'settings', expect: '#panel-settings:not([hidden]) .set-row', group: 'Windows', title: 'Settings', modules: [U + 'settings.js', U + 'pt2-core.js'], steps: [['settings', 'game']],
+    notes: { all: 'Esc opens the menu; Settings has Game, Graphics, Sound and Key bindings tabs.', phone: 'Sliders and checkboxes are 44 px rows.', pad: 'LB / RB switch tabs; left / right moves a slider.' } },
+  { id: 'settings-keys', expect: '#panel-settings:not([hidden]) .bind-row, #panel-settings:not([hidden]) .ctl-ref', group: 'Windows', title: 'Settings — key bindings', modules: ['js/client/input/bindings-ui.js', 'js/client/input/bindings.js'], steps: [['settings', 'keys']],
+    pad: { steps: [['click', '#panel-settings [data-bind="pad"]']] }, phone: { steps: [['click', '#panel-settings [data-bind="touch"]']] },
+    notes: { all: 'New (T27): keys can be changed. Click a key, press the new one; a key already in use swaps places. The Controller tab picks the button names (automatic / Xbox / PlayStation / generic) and lists every button; the Touch tab lists the phone controls. All three lists are generated from one table (js/client/input/bindings.js).' } },
+  { id: 'pause', expect: '#panel-pause:not([hidden])', group: 'Windows', title: 'Pause menu', modules: [U + 'settings.js'], steps: [['call', 'tvui2.pauseMenu']],
+    notes: { all: 'Resume · Settings · Help · Log out. The world keeps going.', pad: 'Menu (Start) opens it from anywhere.' } },
+  { id: 'help', expect: '#panel-help:not([hidden]) dl', group: 'Windows', title: 'Help — controls', modules: ['js/client/help.js'], steps: [['panel', 'help']],
+    notes: { all: 'F1: the controls list. It is now drawn from the binding table, so it shows your own keys — or the controller’s buttons when that is what you last touched.' } },
+  { id: 'feedback', expect: '#panel-feedback:not([hidden]) textarea', group: 'Windows', title: 'Feedback form', modules: [U + 'feedback.js'], steps: [['call', 'tvui5.feedback', 'bug']],
+    notes: { all: 'T19: a suggestion or a bug report, with what gets attached written out.', pad: 'The text box opens the on-screen keyboard.' } },
+  { id: 'reports', expect: '#panel-reports:not([hidden]) .rp-row', group: 'Windows', title: 'Admin — reports', modules: [U + 'feedback.js'], steps: [['call', 'tvui5.reports'], ['play', 'admin-reports'], ['click', '#panel-reports .rp-row']],
+    notes: { all: 'T21: what an admin account sees — every report with its state, the client details and the recent log lines.' } },
+  { id: 'account', expect: '#panel-account:not([hidden])', group: 'Windows', title: 'Account', modules: ['js/client/account.js'], steps: [['panel', 'account']],
+    notes: { all: 'Claim a guest account (free), or see the one you are logged into.' } },
+
+  // ------------------------------------------------------------------------------------------------ Social
+  { id: 'party', expect: '#panel-partyhub:not([hidden])', group: 'Social', title: 'Party menu', modules: [U + 'party-hub.js', 'js/client/social.js'], steps: [['hub', 'party']],
+    notes: { all: 'The Party menu’s first tab: your party, invite by name, the join link, the loot threshold.', phone: 'The Social tab of the tab bar; its own tabs (Party · Friends · Guild · Mail · Group Finder) scroll in one row.', pad: 'LB / RB step through the five tabs.' } },
+  { id: 'friends', expect: '#panel-partyhub:not([hidden])', group: 'Social', title: 'Friends', modules: ['js/client/friends.js'], steps: [['hub', 'friends']],
+    notes: { all: 'Friends with portraits, who is online and where.' } },
+  { id: 'guild', expect: '#panel-partyhub:not([hidden])', group: 'Social', title: 'Guild', modules: ['js/client/guild.js'], steps: [['hub', 'guild']],
+    notes: { all: 'The guild tab (this character is in none: found one, or wait for an invite).' } },
+  { id: 'mail', expect: '#panel-partyhub:not([hidden]) .ml-row', group: 'Social', title: 'Mail with a gift', modules: ['js/client/mail.js', U + 'reveal.js'], steps: [['hub', 'mail'], ['play', 'mail-gift'], ['wait', 300]],
+    notes: { all: 'T20: a letter with a gift box attached — taking it unwraps it. Two older letters under it.', phone: 'List above, letter below; “Take” is a full-width 48 px button.' } },
+  { id: 'callboard', expect: '#panel-partyhub:not([hidden])', group: 'Social', title: 'Group Finder', modules: ['js/client/callboard.js'], steps: [['hub', 'callboard']],
+    notes: { all: 'Queue for a dungeon as tank, healer or damage.' } },
+  { id: 'chat', expect: '#chat-log p', group: 'Social', title: 'Chat', modules: ['js/client/chat.js'], steps: [...chat, ['focus', '#chat-input']],
+    phone: { steps: [['touch', 'chat']] }, pad: { steps: [['osk', '#chat-input']] },
+    notes: { all: 'The chat window with its channel tabs.', phone: 'Folded to a bubble while you fight (with an unread count). Opened, it is a panel down the left (on its side) or the lower half (upright); the game controls step aside while you type.', pad: 'Chat is in the quick wheel; it opens the on-screen keyboard.' } },
+  { id: 'inspect', expect: '#panel-inspect:not([hidden])', group: 'Social', title: 'Inspecting a player', modules: [U + 'context-menu.js'], steps: [['reply', 'inspect'], ['wait', 600]],
+    notes: { all: 'What another player is wearing.' } },
+
+  // ------------------------------------------------------------------------------------------------ Loot and trade
+  { id: 'loot', expect: '#panel-loot:not([hidden]) .loot-row', group: 'Loot and trade', title: 'Loot window', modules: [U + 'loot.js'], steps: [['target', 'enemy'], ['push', 'game', { t: 'lootable', id: '@enemy', on: true, best: 'rare' }], ['call', 'tvui2.openLoot', '@enemy'], ['play', 'loot'], ['wait', 500]],
+    notes: { all: 'A body’s loot: gold, a junk item, a magic one, and a rare one the party will roll for.', phone: 'A sheet with 52 px rows and a full-width “Take all”.', pad: 'A takes the row, Menu takes all.' } },
+  { id: 'loot-roll', expect: '.roll-card', group: 'Loot and trade', title: 'Need / Greed / Skip', modules: [U + 'loot.js'], steps: [...fight, ['play', 'loot-roll'], ['wait', 300]],
+    notes: { all: 'The roll card with its timer.', phone: 'Top right under the minimap; the three buttons share the card’s width, 44 px tall.' } },
+  { id: 'trade', expect: '#panel-trade:not([hidden])', group: 'Loot and trade', title: 'Trade', modules: [U + 'trade.js'], steps: [['play', 'trade'], ['wait', 500]],
+    notes: { all: 'A trade with a party member: both sides, gold, lock, confirm. Recorded from a real trade between two clients.' } },
+
+  // ------------------------------------------------------------------------------------------------ Angling
+  { id: 'fish-bite', expect: '.tv-fish[data-state="bite"]', group: 'Angling', title: 'Angling — a bite', modules: [U + 'angling.js'], steps: [['play', 'rod'], ['play', 'fish-bite'], ['wait', 300]],
+    notes: { all: 'T25: the float dips — press in time.', phone: 'The Attack button turns into a big blue Hook! button (84 px) for as long as the bite lasts: the thumb is already there.', pad: 'A hooks (A means “what the screen is asking for”: hook > use > jump).' } },
+  { id: 'fish-tug', expect: '.fish-tug', group: 'Angling', title: 'Angling — the tug', modules: [U + 'angling.js'], steps: [['play', 'rod'], ['play', 'fish-tug'], ['wait', 600]],
+    notes: { all: 'Hold to pull the float up, let go to let it sink; keep it in the green band.', phone: 'Hold the Reel button.', pad: 'Hold A.' } },
+  { id: 'fish-catch', expect: '.tv-fish:not([hidden])', group: 'Angling', title: 'Angling — a catch', modules: [U + 'angling.js'], steps: [['play', 'rod'], ['play', 'fish-tug'], ['play', 'fish-catch'], ['wait', 600]],
+    notes: { all: 'A first catch and a personal record.' } },
+  { id: 'cook', expect: '#panel-cook:not([hidden]) .ck-row', group: 'Angling', title: 'Cooking at a fire', modules: [U + 'angling.js'], steps: [['play', 'cook'], ['call', 'tvui5.cook'], ['play', 'cook'], ['wait', 300]],
+    notes: { all: 'Recipes at a campfire or an inn hearth: what each needs and why one cannot be made.' } },
+  { id: 'journal-catch', expect: '#panel-journal:not([hidden])', group: 'Angling', title: 'Journal — the Catch tab', modules: [U + 'journal.js'], steps: [['call', 'tvui5.catchTab'], ['wait', 400]],
+    notes: { all: 'Species found per zone, biggest size, legend trophies.' } },
+
+  // ------------------------------------------------------------------------------------------------ Controller
+  { id: 'pad-wheel', expect: '.tv-radial:not([hidden]) .rd-slice', group: 'Controller', title: 'Quick wheel', only: ['pad', 'phone-l', 'phone-p'], modules: ['js/client/input/radial.js'], steps: [...fight, ['wheel', 'bag']],
+    notes: { all: 'Every window in one hold.', pad: 'A controller has no M, J, B, V, K, N, P keys, and sixteen buttons are not enough for nine windows. Hold LB: the wheel opens, point with either stick, let go to open what you pointed at. RB (while it is open) flips to the second ring: Mount, Fish, Camp, Map, Help. B cancels.',
+      phone: 'The wheel button (gold ring, top right): tap it and tap a slice, or hold it, slide to a slice and let go. It is how you reach every window and the things that have no button (mount, camp, cast a line).' } },
+  { id: 'pad-focus', expect: '.pad-ring:not([hidden])', group: 'Controller', title: 'Focus ring in a window', only: ['pad'], modules: ['js/client/input/focus.js', 'js/client/input/gamepad.js'], steps: [['panel', 'bag'], ['icons'], ['ring', '#bag-grid .islot:not(.empty)']],
+    notes: { pad: 'In any window the pad drives a focus ring: D-pad or left stick jumps to the nearest control in that direction (it works on every window with no per-window code), A presses it, B backs out, X is the “other” click (what right-click does), Y shows its card, LB / RB step through the window’s tabs, the right stick scrolls.' } },
+  { id: 'pad-osk', expect: '.tv-osk:not([hidden]) .osk-key', group: 'Controller', title: 'On-screen keyboard', only: ['pad'], modules: ['js/client/input/osk.js'], steps: [...chat, ['osk', '#chat-input']],
+    notes: { pad: 'Text only where it cannot be avoided (chat, a name, a search box): pressing A on a text box opens this. A types, X deletes, Y is a space, the stick click is capitals, Menu sends, B closes.' } },
+  { id: 'pad-mod', expect: '#actionbar', group: 'Controller', title: 'Second set (hold LT)', only: ['pad'], modules: ['js/client/input/gamepad.js'], steps: [...fight, ['attr', 'html', 'data-pad-mod', '1']],
+    notes: { pad: 'While LT / L2 is held the action bar shows which slots the face buttons now fire: skills 5 and 6 on Y and B, the four potion slots on the D-pad, mount on X, cast a line on A, camp on RB.' } },
+
+  // ------------------------------------------------------------------------------------------------ Phone
+  { id: 'phone-belt', expect: '.tv-radial:not([hidden]) .rd-slice', group: 'Phone', title: 'The belt (hold)', only: ['phone-l', 'phone-p'], modules: ['js/client/input/touch.js'], steps: [...fight, ['touch', 'belt']],
+    notes: { phone: 'Potions and food: TAP the red-ringed Belt button to drink the first slot (the one you want in a hurry); HOLD it and the four slots fan out under your thumb — slide to one and let go. Why not four more buttons: the fight screen already has twelve.' } },
+  { id: 'phone-sheet', expect: '.phone-tabs .pt-tab', group: 'Phone', title: 'A window as a sheet (tab bar)', only: ['phone-l', 'phone-p'], modules: ['js/client/input/touch.js'], steps: [['panel', 'journal'], ['wait', 300]],
+    notes: { phone: 'Every window is a full-screen sheet instead of a floating box: no dragging, no overlap. One tab bar moves between the seven you use most; Close goes back to the world. The fight controls are hidden while a sheet is open so a stray thumb cannot cast.' } },
+
+  // ------------------------------------------------------------------------------------------------ Reference
+  { id: 'controls', expect: '.ctl-three .ctl-ref', group: 'Reference', title: 'Controls — all three devices', modules: ['js/client/input/bindings.js', 'js/client/input/bindings-ui.js'], steps: [['controls']],
+    notes: { all: 'The whole binding table, three ways: keyboard and mouse, controller (with its glyphs), touch. This page is GENERATED from js/client/input/bindings.js — the same table the game’s input, the settings tab, the help window and every on-screen hint read — so it cannot be wrong without the game being wrong too.' } },
+];
+
+export const sceneById = id => SCENES.find(s => s.id === id) || null;
+
+/** Modules under js/client/ui/ that have no screen of their own, and why (the coverage test reads this). */
+export const NO_SCREEN = {
+  'js/client/ui/net2.js': 'only sends messages (no markup)',
+  'js/client/ui/svg-portrait.js': 'a helper of portraits.js — seen wherever a portrait is (Title — your characters, the HUD frames)',
+};
+
+/** The frames. `w`/`h` in CSS px; `safe` = the iPhone 15 Pro's insets in that orientation. */
+export const DEVICES = [
+  { id: 'desktop', label: 'Desktop 1920 × 1080', w: 1920, h: 1080 },
+  { id: 'laptop', label: 'Laptop 1366 × 768', w: 1366, h: 768 },
+  { id: 'phone-l', label: 'iPhone 15 Pro — on its side', w: 852, h: 393, phone: true, safe: { top: 0, right: 59, bottom: 21, left: 59 } },
+  { id: 'phone-p', label: 'iPhone 15 Pro — upright', w: 393, h: 852, phone: true, safe: { top: 59, right: 0, bottom: 34, left: 0 } },
+  { id: 'pad', label: 'Controller (desktop frame)', w: 1366, h: 768, pad: true },
+];
+export const deviceById = id => DEVICES.find(d => d.id === id) || DEVICES[0];
+/** Is a scene meant for a frame? */
+export const sceneFits = (s, deviceId) => !s.only || s.only.includes(deviceId);

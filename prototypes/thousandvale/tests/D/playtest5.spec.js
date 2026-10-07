@@ -139,8 +139,12 @@ test('T15 + T16: every attack form and the sceptre swing draw, and link no new s
   const me = await page.evaluate(() => { const s = tv.state().you; return { id: s.id, x: s.x, z: s.z }; });
   const fire = (ev, wait, name) => page.evaluate(ev => tv.fxEvent(ev), ev).then(() => page.waitForTimeout(wait)).then(() => (name ? shot(name) : null));
   const at = { type: 'fx', kind: 'attack', id: me.id, x: me.x, z: me.z, yaw: 0, wk: 'staff', wt: 'staff' };
-  await fire({ ...at, shape: 'beam', form: 'beam', el: 'holy', reach: 18 }, 110, 't15-form-beam.png');
-  await page.waitForTimeout(700);
+  // (the lance lives a third of a second and this VM draws about a frame a second: slowed down for its picture only)
+  await page.evaluate(() => { thousandvale.formFx.timeScale = 0.04; });
+  await fire({ ...at, shape: 'beam', form: 'beam', el: 'holy', reach: 18 }, 2200, 't15-form-beam.png');
+  await fire({ type: 'fx', kind: 'bolt', basic: 1, form: 'fork', id: me.id, el: 'lightning', from: { x: me.x, z: me.z }, to: { x: me.x + 1, z: me.z + 7 }, ms: 10 }, 2600, 't15-form-fork-slow.png');
+  await page.evaluate(() => { thousandvale.formFx.timeScale = 1; });
+  await page.waitForTimeout(1500);
   await fire({ ...at, shape: 'cone', form: 'cone', el: 'fire', reach: 9, arc: 1.0 }, 190, 't15-form-cone.png');
   await page.waitForTimeout(700);
   await fire({ ...at, shape: 'nova', form: 'nova', el: 'ice', r: 5 }, 230, 't15-form-nova.png');
@@ -198,13 +202,13 @@ test('T4: each class\'s revive on a fallen player, then the body gets up', async
   expect(r.fx.lands).toBe(6); expect(Object.keys(r.fx.byStyle).sort()).toEqual(['aegis', 'bloom', 'choir', 'grave', 'spirits', 'sunburst']);
   expect(r.perf.newProgramNames, 'no new shader program while the revives play').toEqual([]);
   // …and the body gets up: off the ground, onto a knee, upright
-  const first = await page.evaluate(() => { tv.view(4.5, 0.3, Math.PI * 0.75); thousandvale.actors.setHp('fallen', 60, 100); thousandvale.actors.setDead('fallen', false); return thousandvale.actors.get('fallen').anim; });
+  const first = await page.evaluate(() => { const f = thousandvale.actors.get('fallen').pos; tv.fly(f.x + 3, f.y + 1.6, f.z - 3, f.x, f.y + 0.7, f.z); thousandvale.actors.setHp('fallen', 60, 100); thousandvale.actors.setDead('fallen', false); return thousandvale.actors.get('fallen').anim; });
   const seen = [first];
   for (const [wait, name] of [[350, 'a'], [450, 'b'], [450, 'c']]) { await page.waitForTimeout(wait); seen.push(await page.evaluate(() => thousandvale.actors.get('fallen').anim)); await shot(`t4-standup-${name}.png`); }
   expect(seen[0]).toBe('standUp');
   await page.waitForTimeout(2500);
   expect(await page.evaluate(() => thousandvale.actors.get('fallen').anim)).toMatch(/idle|ready/);
-  await page.evaluate(() => thousandvale.actors.remove('fallen'));
+  await page.evaluate(() => { tv.fly(null); thousandvale.actors.remove('fallen'); });
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
@@ -215,9 +219,12 @@ test('T25: a pool seen from the road, the cast, the bite, the tug and the catch'
   await page.evaluate(() => tv.perf(true));
   // a pool nine metres ahead; first seen from 60 m back
   await page.evaluate(() => tv.fishDemo({ pool: 'demo-pool', dz: 9, tier: 2 }));
-  await page.evaluate(([x, z]) => { const y = thousandvale.WS.terrain.heightAt(x, z) || 0; tv.fly(x + 12, y + 9, z - 52, x, y, z + 9); }, [me.x, me.z]);
+  await page.evaluate(([x, z]) => { const y = thousandvale.WS.terrain.heightAt(x, z) || 0; tv.fly(x + 10, y + 24, z - 46, x, y, z + 9); }, [me.x, me.z]);
   await page.waitForTimeout(3200);
   await shot('t25-pool-from-60m.png');
+  await page.evaluate(([x, z]) => { const y = thousandvale.WS.terrain.heightAt(x, z) || 0; tv.fly(x + 5, y + 5, z - 6, x, y, z + 9); }, [me.x, me.z]);
+  await page.waitForTimeout(2500);
+  await shot('t25-pool-near.png');
   const jumped = await page.waitForFunction(() => tv.fx5().angling.jumps >= 1, null, { timeout: 20000 }).then(() => true, () => false);
   expect(jumped, 'the pool\'s fish jumps').toBe(true);
   await page.evaluate(() => { tv.fly(null); tv.view(7, 0.35, Math.PI * 0.72); });

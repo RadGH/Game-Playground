@@ -58,6 +58,11 @@ export function formLook(form) {
   return { family, draw, muzzle: family === 'beam' ? 'line' : family === 'cone' ? 'wide' : family === 'shield' ? 'ward' : family === 'fork' ? 'split' : family === 'area' ? 'heavy' : 'point' };
 }
 /** Is this swing a sceptre's (T16)? `imbue` is C's flag; the type covers an older server. Pure. */
+/** The element a worn weapon glows in when it is a sceptre (full item or the compact info.gear form), else null. Pure. */
+export function sceptreElement(w) {
+  if (!w || !/scept|scepter|sceptre/i.test(`${w.subtype || w.sub || ''} ${w.baseKey || w.base || ''} ${w.catalogBase || ''} ${w.g5 || w.look?.g5 || ''}`)) return null;
+  const el = elementKey(w.castElement || w.brand || w.el); return el === 'physical' ? null : el;
+}
 export const isImbuedSwing = ev => !!ev && (ev.imbue === 1 || ev.imbue === true || /scept|scepter|sceptre/i.test(String(ev.wt || ''))) && elementKey(ev.el) !== 'physical';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -151,6 +156,28 @@ export function createFormFx(scene, { spellFx = null, actors = null, groundY = (
     return out.sort((q, r) => q[0] - r[0]).slice(0, n).map(([, b]) => V(b.pos.x, b.pos.y + Math.max(0.4, (b.height || 1.4) * 0.55), b.pos.z));
   }
   const later = (ms, fn) => pending.push({ at: performance.now() + Math.max(0, ms), fn });
+  const chestOf = id => { const b = actors?.get(id); return b?.pos ? V(b.pos.x, b.pos.y + Math.max(0.4, (b.height || 1.4) * 0.55), b.pos.z) : null; };
+  let seenChain = false;                  // once C's `fx chain` has named real targets, the client stops guessing them
+
+  // ---- T16: a sceptre's head glows in its element all the time (a few pooled orbs riding the nearest wielders' grips) ----
+  const GLOWS = 6, glowOrbs = [];
+  for (let i = 0; i < GLOWS; i++) glowOrbs.push(mk(orbGeo));
+  const _g = new THREE.Vector3(), _d = new THREE.Vector3();
+  function updateGlows(now) {
+    let n = 0;
+    if (actors?.actors) for (const a of actors.actors.values()) {
+      if (n >= GLOWS) break;
+      const w = a.look?.gear?.weapon; if (!w || a.dead || a.lod === 'far' || a.fishing || !a.body?.parts?.gripR) continue;
+      const el = sceptreElement(w); if (!el) continue;
+      const m4 = a.body.parts.gripR.matrixWorld, e = m4.elements;
+      _d.set(-e[4], -e[5], -e[6]); const sc = _d.length(); if (sc < 0.2) continue;                 // hands-free clips shrink the grip: no glow on a put-away sceptre
+      _g.setFromMatrixPosition(m4).addScaledVector(_d, 0.42);
+      const m = glowOrbs[n++]; m.visible = true; m.position.copy(_g); m.material.color.set(colourOf(el));
+      const pulse = 0.5 + 0.5 * Math.sin(now / 260 + n); m.scale.setScalar(0.1 + 0.03 * pulse); m.material.opacity = 0.4 + 0.2 * pulse;
+    }
+    stats.glows = n;
+    for (let i = n; i < GLOWS; i++) glowOrbs[i].visible = false;
+  }
 
   // ---- events -----------------------------------------------------------------------------------------------
   function onEvent(ev) {
@@ -170,9 +197,20 @@ export function createFormFx(scene, { spellFx = null, actors = null, groundY = (
       if (to) {
         if (L.draw.includes('landRing')) later(ms, () => ring(to.x, to.z, ev.r || (ev.form === 'lob' ? 3 : 3.2), el, { life: 0.55 }));
         if (L.draw.includes('linger')) later(ms + 120, () => ring(to.x, to.z, (ev.r || 3) * 0.8, el, { life: 1.6, from: 0.9, opacity: 0.5 }));
-        if (L.draw.includes('splinters') && a) later(ms, () => { const d = to.clone().sub(V(a.pos.x, to.y, a.pos.z)).setY(0).normalize(), side = V(d.z, 0, -d.x); shards(to, [-1, 1].map(k => to.clone().addScaledVector(d, 3).addScaledVector(side, k * 1.8)), el); });
-        if (L.draw.includes('jumps')) later(ms, () => { const links = nearestFoes(to, a, 2); let from = to; for (const p of links) { shards(from, [p], el, { life: 0.2, width: 0.07 }); from = p; } });
+        if (L.draw.includes('splinters') && a && !seenChain && !ev.hop) later(ms, () => { const d = to.clone().sub(V(a.pos.x, to.y, a.pos.z)).setY(0).normalize(), side = V(d.z, 0, -d.x); shards(to, [-1, 1].map(k => to.clone().addScaledVector(d, 3).addScaledVector(side, k * 1.8)), el); });
+        if (L.draw.includes('jumps') && !seenChain && !ev.hop) later(ms, () => { const links = nearestFoes(to, a, 2); let from = to; for (const p of links) { shards(from, [p], el, { life: 0.2, width: 0.07 }); from = p; } });
       }
+      return true;
+    }
+    // C names the bodies a chain or fork really reached: arcs to exactly those, hop by hop (a fork's shards leave together)
+    if (ev.type === 'fx' && ev.kind === 'chain') {
+      seenChain = true; stats.chains = (stats.chains || 0) + 1;
+      const el = elOf(ev), ids = Array.isArray(ev.targets) ? ev.targets : [];
+      let from = chestOf(ev.first) || chestOf(ev.id);
+      ids.forEach((id, i) => {
+        const start = ev.fork ? from : null;
+        later(ev.fork ? 0 : i * 70, () => { const to = chestOf(id), a0 = start || chestOf(i ? ids[i - 1] : ev.first) || chestOf(ev.id); if (to && a0) { stats.chainArcs = (stats.chainArcs || 0) + 1; shards(a0, [to], el, { life: 0.24, width: 0.09 }); try { spellFx?.impact({ at: to, element: el, scale: 0.5, ground: groundY(to.x, to.z), height: 1.2, density: 0.5 }); } catch {} } });
+      });
       return true;
     }
     if (ev.type === 'fx' && ev.kind === 'ward') {
@@ -233,7 +271,10 @@ export function createFormFx(scene, { spellFx = null, actors = null, groundY = (
     return L.draw.length > 0;
   }
 
+  let timeScale = 1;          // (specs / demos: slow the pieces down to look at them — this VM draws about one frame a second)
   function update(dt) {
+    dt *= timeScale;
+    updateGlows(performance.now());
     if (pending.length) { const now = performance.now(); for (let i = pending.length - 1; i >= 0; i--) if (pending[i].at <= now) { const p = pending.splice(i, 1)[0]; try { p.fn(); } catch {} } }
     for (let i = live.length - 1; i >= 0; i--) {
       const l = live[i]; l.t += dt;
@@ -251,5 +292,5 @@ export function createFormFx(scene, { spellFx = null, actors = null, groundY = (
   }
   /** The pooled pieces, lent to revive-fx.js and angling-view.js (same pools, same one material setting). */
   const prims = { play, ring, lance, dome, shards, later, colourOf, at };
-  return { prims, onEvent, update, sample, stats, get live() { return live.length; }, dispose() { for (const list of Object.values(pools)) for (const m of list) { scene.remove(m); m.material.dispose(); } for (const g of [lanceGeo, ringGeo, domeGeo, shardGeo, orbGeo, ...fanGeos.values()]) g.dispose(); } };
+  return { prims, onEvent, update, sample, stats, get timeScale() { return timeScale; }, set timeScale(v) { timeScale = Math.max(0.01, +v || 1); }, get live() { return live.length; }, dispose() { for (const list of Object.values(pools)) for (const m of list) { scene.remove(m); m.material.dispose(); } for (const g of [lanceGeo, ringGeo, domeGeo, shardGeo, orbGeo, ...fanGeos.values()]) g.dispose(); } };
 }

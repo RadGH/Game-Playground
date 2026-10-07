@@ -51,9 +51,9 @@
       "props": [
         { "kind": "prop", "id": "well", "x": 0, "z": 0, "yaw": 0 },
         { "kind": "prop", "id": "stone_step", "x": 2, "z": 0, "yaw": 1.57 },
-        { "kind": "prop", "id": "fence_post", "x": -4, "z": -3, "yaw": 0 },
+        { "kind": "prop", "id": "fence_post", "x": -4, "z": -2.2, "yaw": 0 },
         { "kind": "prop", "id": "fence_rail", "x": -4, "z": -1, "yaw": 1.57 },
-        { "kind": "prop", "id": "fence_post", "x": -4, "z": 1, "yaw": 0 }
+        { "kind": "prop", "id": "fence_post", "x": -4, "z": 0.2, "yaw": 0 }
       ],
       "monsters": [ { "type": "cairn_rat", "count": 5, "level": 0, "x": 0, "z": 2, "radius": 5 } ],
       "objects": [
@@ -148,9 +148,9 @@
       "props": [
         { "kind": "prop", "id": "drying_rack", "x": -2, "z": -2, "yaw": 0.3 },
         { "kind": "prop", "id": "skull_totem", "x": 3, "z": -3, "yaw": 0 },
-        { "kind": "prop", "id": "fence_post", "x": -5, "z": 4, "yaw": 0 },
+        { "kind": "prop", "id": "fence_post", "x": -4.2, "z": 4, "yaw": 0 },
         { "kind": "prop", "id": "fence_rail", "x": -3, "z": 4, "yaw": 0 },
-        { "kind": "prop", "id": "fence_post", "x": -1, "z": 4, "yaw": 0 },
+        { "kind": "prop", "id": "fence_post", "x": -1.8, "z": 4, "yaw": 0 },
         { "kind": "prop", "id": "campfire", "x": 1, "z": 0, "yaw": 0 },
         { "kind": "ground", "id": "mushroom_ring", "x": 3, "z": 3, "yaw": 0 }
       ],

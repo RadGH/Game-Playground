@@ -12,6 +12,8 @@ import {
   inEvent, mergeEvent, eventLines, eventResult, mmss, rowText, sheetDiff, basicSheet, createLogRing, feedbackCheck, feedbackCtx, feedbackPreview, FEEDBACK_MAX,
   bagRoom, tugParams, tugStart, tugStep, tugHeld, tugTension, catchRows, anglingText, cookRows,
 } from '../../js/client/ui/pt5-core.js';
+import { createStage, stagedForest, stageCheck, stagedDependents, pointsText } from '../../js/client/ui/talent-model.js';
+import { DOLL_SLOTS, DOLL_LEFT, DOLL_RIGHT, DOLL_BOTTOM, SLOT_NAME, slotOf, filterGroup } from '../../js/client/ui/inv-core.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
@@ -274,4 +276,50 @@ test('source: the new screens keep their styles in css/pt5.css and never use a n
   // the menu bar carries the two new buttons, and the help overlay lists their keys
   const mb = src('js/client/menubar.js');
   assert.match(mb, /id: 'sheet', key: 'V'/); assert.match(mb, /id: 'feedback'/);
+});
+
+test('T28: perk and talent picks are staged — undo / redo, replace within a tier, nothing spent until taken', () => {
+  const st = createStage();
+  st.add('a'); st.add('b'); st.add('c');
+  assert.deepEqual(st.list, ['a', 'b', 'c']);
+  assert.equal(st.undo(), 'c'); assert.equal(st.undo(), 'b'); assert.deepEqual(st.list, ['a']);
+  assert.equal(st.redo(), 'b'); assert.deepEqual(st.list, ['a', 'b']); assert.ok(st.canRedo);
+  st.add('d'); assert.ok(!st.canRedo, 'a new pick forgets what could be redone'); assert.deepEqual(st.list, ['a', 'b', 'd']);
+  assert.ok(st.drop('b')); assert.deepEqual(st.list, ['a', 'd']); assert.ok(!st.drop('zz'));
+  assert.deepEqual(st.take(), ['a', 'd']); assert.equal(st.n, 0); assert.ok(!st.canUndo && !st.canRedo);
+  // talents: one per tier of a skill
+  const ts = createStage(x => `${x.skill}:${x.tier}`);
+  ts.add({ skill: 'bolt', tier: 1, node: 'fan' }); ts.add({ skill: 'bolt', tier: 1, node: 'pull' }); ts.add({ skill: 'bolt', tier: 2, node: 'pool' });
+  assert.deepEqual(ts.list.map(x => x.node), ['pull', 'pool']);
+  // the forest: a line  hub - a - b - c  and a side node d off a
+  const nb = { hub: ['a'], a: ['hub', 'b', 'd'], b: ['a', 'c'], c: ['b'], d: ['a'] };
+  const nodes = Object.keys(nb).map(id => ({ id, name: id.toUpperCase() }));
+  const src = { forest: { nodes, byId: new Map(nodes.map(n => [n.id, n])), neighbours: new Map(Object.entries(nb)), start: nodes[0] }, pointsFor: () => 3 };
+  let f = stagedForest(src, [], ['a', 'b'], 5, 0);
+  assert.equal(f.state.get('a'), 'staged'); assert.equal(f.state.get('b'), 'staged'); assert.equal(f.state.get('c'), 'open'); assert.equal(f.state.get('hub'), 'taken');
+  assert.equal(f.left, 1); assert.equal(f.staged, 2); assert.equal(f.spent, 0);
+  assert.equal(pointsText(f.left, f.staged), '1 left, 2 staged'); assert.equal(pointsText(3, 0), '3 left');
+  f = stagedForest(src, [], ['a', 'b', 'c'], 5, 0);
+  assert.equal(f.left, 0); assert.equal(f.state.get('d'), 'reach', 'every point is staged: nothing more is open');
+  assert.equal(stageCheck(src, [], ['a', 'b', 'c'], 5, 0, 'd').ok, false);
+  assert.match(stageCheck(src, [], ['a', 'b', 'c'], 5, 0, 'd').why, /Every point is staged/);
+  assert.equal(stageCheck(src, [], [], 5, 0, 'c').ok, false, 'the path rule holds over staged picks');
+  assert.equal(stageCheck(src, [], ['a', 'b'], 5, 0, 'c').ok, true);
+  assert.match(stageCheck(src, [], ['a'], 5, 0, 'a').why, /already staged/);
+  // the server's own count of points wins over the local sum
+  assert.equal(stagedForest(src, ['a'], ['b'], 5, 0, 7).left, 6);
+  assert.equal(stageCheck(src, ['a'], ['b'], 5, 0, 'c', 1).ok, false);
+  // un-staging the middle of a staged path takes what hung off it
+  assert.deepEqual(stagedDependents(src, [], ['a', 'b', 'c', 'd'], 'b'), ['c']);
+  assert.deepEqual(stagedDependents(src, [], ['a', 'b', 'c', 'd'], 'a'), ['b', 'c', 'd']);
+  assert.deepEqual(stagedDependents(src, ['a'], ['b', 'd'], 'd'), []);
+});
+
+test('slots: the paper doll has Back, Waist and Light, in the rules\' order, and their items sort as armour', () => {
+  for (const s of ['back', 'waist', 'light']) { assert.ok([...DOLL_LEFT, ...DOLL_RIGHT, ...DOLL_BOTTOM].includes(s), s + ' has a square'); assert.ok(SLOT_NAME[s]); }
+  assert.ok(DOLL_LEFT.indexOf('back') > DOLL_LEFT.indexOf('chest'));
+  assert.ok(DOLL_RIGHT.indexOf('waist') < DOLL_RIGHT.indexOf('legs'));
+  assert.equal(slotOf({ slot: 'back', type: 'armor' }), 'back'); assert.equal(slotOf({ slot: 'cape' }), 'back'); assert.equal(slotOf({ slot: 'belt' }), 'waist');
+  assert.equal(filterGroup({ slot: 'waist', type: 'armor' }), 'armour'); assert.equal(filterGroup({ slot: 'light', type: 'armor' }), 'other');
+  assert.equal(kitGear({ items: [{ slot: 'back', name: 'Cloak' }, { slot: 'light', name: 'Lantern' }] }, null).back.name, 'Cloak');
 });

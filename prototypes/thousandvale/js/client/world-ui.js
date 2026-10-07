@@ -142,7 +142,7 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
 
   // ---- quests (protocol §15.9): offers + turn-ins in the dialog, a tracker, results ----
   const questNames = new Map();
-  const rewardText = r => [r?.xp ? `${Math.round(r.xp * 100)}% of a level` : '', r?.gold ? `${r.gold} gold` : '', r?.item ? (typeof r.item === 'string' ? `a ${r.item} item` : `a ${r.item.tier || 'good'} item`) : '', ...crateRewards(r)].filter(Boolean).join(', ');
+  const rewardText = r => r?.text || [r?.xp ? `${Math.round(r.xp * 100)}% of a level` : '', r?.gold ? `${r.gold} gold` : '', r?.item ? (typeof r.item === 'string' ? `a ${r.item} item` : `a ${r.item.tier || 'good'} item`) : '', ...crateRewards(r)].filter(Boolean).join(', ');
   function questHtml(u) {
     const offers = u.offers || [], ready = u.ready || [];
     for (const q of offers) questNames.set(q.id, q.name);

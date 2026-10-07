@@ -221,3 +221,14 @@
 .itemtip .ic-attack { color: #9fd8f0; margin: 2px 0; }
 .sh-ab.pending .sh-value { color: var(--ink-faint); font-style: italic; font-weight: 400; }
 @media (min-width: 761px) { .inv-doll .doll-col { gap: 6px; } .doll-figure { min-height: 330px; } }
+
+/* ---------------------------------------------------------------- T28: staged perk and talent picks (undo / redo / accept) */
+.stage-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; padding: 6px 10px; border: 1px dashed var(--edge); border-radius: 8px; font-size: 13px; color: var(--ink-faint); }
+.stage-bar.has { border: 1px solid #8fd0ff; background: rgba(60, 120, 170, 0.16); color: var(--ink-dim); }
+.stage-bar .stage-text { flex: 1 1 220px; min-width: 0; } .stage-bar b { color: var(--ink-dim); } .stage-bar.has b { color: #8fd0ff; } .stage-bar small { display: block; color: var(--ink-faint); font-size: 12px; }
+.stage-bar .grow { flex: 0 0 0; } .stage-bar button:disabled { opacity: 0.4; cursor: default; } .stage-bar button.primary.small { width: auto; }
+.pf-stage .stage-bar { margin-bottom: 6px; }
+.pf-points .pf-staged { font-style: normal; color: #8fd0ff; }
+.tvt-node.staged { border: 2px dashed #8fd0ff; background: linear-gradient(180deg, rgba(50, 90, 130, 0.6), rgba(24, 44, 66, 0.6)); cursor: pointer; }
+.tvt-tick.staged { color: #8fd0ff; }
+.tvt-tier.spent .tvt-node.open { opacity: 1; }

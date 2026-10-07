@@ -185,10 +185,10 @@ test('R5: every weapon draws its basic attack — a ranger\'s real shots, and sw
   await hook('/teleport', { name: 'Wren', x: 26624 - 300, z: you.z + 60 });
   await expect.poll(async () => page.evaluate(() => [...thousandvale.actors.actors.values()].filter(a => a.kind === 'monster' && !a.dead).length), { timeout: 120000, intervals: [3000] }).toBeGreaterThan(0);
   const before = await page.evaluate(() => tv.weaponFx().shots);
-  await page.evaluate(() => { const me = tv.state().you; const m = [...thousandvale.actors.actors.values()].filter(a => a.kind === 'monster' && !a.dead).sort((p, q) => Math.hypot(p.pos.x - me.x, p.pos.z - me.z) - Math.hypot(q.pos.x - me.x, q.pos.z - me.z))[0]; tv.target(m.id); });
-  for (let i = 0; i < 8; i++) { await page.keyboard.press('KeyF'); await page.waitForTimeout(700); }
+  await page.evaluate(() => { const me = tv.state().you; const m = [...thousandvale.actors.actors.values()].filter(a => a.kind === 'monster' && !a.dead).sort((p, q) => Math.hypot(p.pos.x - me.x, p.pos.z - me.z) - Math.hypot(q.pos.x - me.x, q.pos.z - me.z))[0]; if (m) tv.target(m.id); });      // (a monster seen a moment ago may be gone: the loop below re-targets)
+  for (let i = 0; i < 8; i++) { await page.evaluate(() => { if (tv.state().target == null) { const me = tv.state().you, m = [...thousandvale.actors.actors.values()].filter(a => a.kind === 'monster' && !a.dead).sort((p, q) => Math.hypot(p.pos.x - me.x, p.pos.z - me.z) - Math.hypot(q.pos.x - me.x, q.pos.z - me.z))[0]; if (m) tv.target(m.id); } }); await page.keyboard.press('KeyF'); await page.waitForTimeout(700); }
   const shots = await page.evaluate(() => tv.weaponFx().shots);
-  console.log('[R5] shots', before, '->', shots);
+  console.log('[R5] shots', before, '->', shots, JSON.stringify(await page.evaluate(() => { const T = thousandvale, S = T.S, t = T.actors.get(S.target), p = S.predictor.pos, y = S.net?.joined?.you || {}; return { reach: S.reach, known: S.reachKnown, youReach: y.reach, range: y.attackRange, weapon: y.equipment?.weapon?.baseKey || y.equipment?.weapon?.base || null, target: S.target, dist: t ? Math.round(Math.hypot(t.pos.x - p.x, t.pos.z - p.z)) : null, tdead: t?.dead, hostile: t?.hostile, dead: S.self.dead, casts: S.events.filter(e => e.type === 'cast').length, monsters: [...T.actors.actors.values()].filter(a => a.kind === 'monster' && !a.dead).length }; })));
   expect(shots).toBeGreaterThan(before);
   // the other weapon kinds, through the client's own handler with C's event shapes (cast.js weaponTag)
   await page.evaluate(() => { tv.hud(false); const p = thousandvale.actors.get(tv.state().you.id).pos; tv.fly(p.x + 5, p.y + 3.2, p.z + 5, p.x, p.y + 1, p.z); });

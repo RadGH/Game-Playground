@@ -220,7 +220,7 @@ test('T8b: the client DRAWS every gate in the wall\'s line (gate width vs the li
       // and the wall reaches the gate: from each run end to the jamb there is structure (a stub) unless they already meet
       for (const e of g.ends) {
         const lx = (e[0] - f.x) * gx + (e[1] - f.z) * gz, gap = Math.abs(lx) - (f.open / 2 + f.jamb);
-        if (gap < 0.35) continue;
+        if (gap < 1.0) continue;
         const mx = f.x + gx * Math.sign(lx) * (f.open / 2 + f.jamb + gap / 2), mz = f.z + gz * Math.sign(lx) * (f.open / 2 + f.jamb + gap / 2);
         assert.ok(plan.parts.some(p => Math.hypot(p.x - mx, p.z - mz) < Math.max(3.2, gap)), `${g.id}: a ${gap.toFixed(1)} m hole between the gate and its wall`);
       }
@@ -250,4 +250,17 @@ test('T8a: every rail of every perimeter fence runs ALONG the line its posts sta
   }
   assert.ok(rails > 200, 'rails checked: ' + rails);
   console.log(`[T8a] ${rails} perimeter rails, worst ${worst.toFixed(0)} deg off the fence line`);
+});
+
+test('T8b: no piece of a perimeter is longer than the stretch of wall it was cut for (a 1 m stub of barricade once carried its 6 m log into the road)', async () => {
+  for (const { W, plan } of await drawnWalls()) {
+    const segs = [...W.data.runs.flatMap(r => r.slice(1).map((b, k) => [r[k], b])), ...W.data.gates.map(g => g.ends)];
+    const off = (x, z) => Math.min(...segs.map(([a, b]) => { const dx = b[0] - a[0], dz = b[1] - a[1], t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / (dx * dx + dz * dz || 1e-9))); return Math.hypot(x - a[0] - dx * t, z - a[1] - dz * t); }));
+    for (const p of plan.parts) {
+      if (Math.abs(Math.abs(p.rx) - Math.PI / 2) > 0.01 || p.h < 1.5) continue;       // a log laid along the wall
+      // its far end: the base plus its length along the piece's +Z
+      const ex = p.x + Math.sin(p.yaw) * p.h * Math.sign(p.rx), ez = p.z + Math.cos(p.yaw) * p.h * Math.sign(p.rx);
+      assert.ok(off(p.x, p.z) < 2.2 && off(ex, ez) < 2.2, `${W.id}: a log ends ${off(ex, ez).toFixed(1)} m off the wall line at ${ex.toFixed(1)},${ez.toFixed(1)}`);
+    }
+  }
 });

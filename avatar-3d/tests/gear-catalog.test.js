@@ -201,6 +201,16 @@ test('every existing look builds the geometry it built before round 5', async ()
   assert.equal(calls, 0);
 });
 
+test('every new row is mapped to an in-game item (the Armory shows them), and the plain cloak / belt / light bases land on a model', () => {
+  for (const r of cat.find({ isNew: true })) {
+    const it = r.items.find(i => i.game === 'thousandvale');
+    assert.ok(it, `${r.id}: no Thousandvale item is made from this row`);
+    assert.equal(it.base, r.base); assert.ok(it.template, `${r.id}: no template base`); assert.ok(it.slot, `${r.id}: no slot`);
+  }
+  const mapped = new Set(cat.rows.flatMap(r => r.items.map(i => i.base)));
+  for (const base of ['travel_cloak', 'leather_belt', 'hand_lantern', 'pitch_torch']) assert.ok(mapped.has(base), `${base} draws no catalog model`);
+});
+
 test('loadGearCatalog reads the same file', async () => {
   const c = await loadGearCatalog();
   assert.equal(c.rows.length, CATALOG.rows.length);

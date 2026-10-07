@@ -37,7 +37,10 @@ export function planWalls(placements, { ox = 0, oz = 0, groundAt = () => 0 } = {
     const c = Math.cos(yaw), s = Math.sin(yaw);
     for (const p of list) {
       const lx = p.x * sx, lz = p.z * sz;
-      parts.push({ mesh: p.mesh, x: x + lx * c + lz * s, y: g + p.y * sy, z: z - lx * s + lz * c, w: p.w * sx, h: p.h * sy, d: p.d * sz, yaw: yaw + (p.yaw || 0), rx: p.rx || 0, rz: p.rz || 0, colour: p.colour });
+      // a part LAID DOWN along the piece (a barricade's log: a cylinder tipped rx 90 degrees) has its length in `h`, so a
+      // piece shortened along z must shorten that, or a 1 m stub of barricade carries a 6 m log out into the road
+      const laid = Math.abs(Math.abs(p.rx || 0) - Math.PI / 2) < 0.01 && !(p.yaw || 0);
+      parts.push({ mesh: p.mesh, x: x + lx * c + lz * s, y: g + p.y * sy, z: z - lx * s + lz * c, w: p.w * sx, h: p.h * (laid ? sz : sy), d: p.d * (laid ? 1 : sz), yaw: yaw + (p.yaw || 0), rx: p.rx || 0, rz: p.rz || 0, colour: p.colour });
     }
   };
   for (const rec of placements) {
@@ -125,7 +128,7 @@ export function planWalls(placements, { ox = 0, oz = 0, groundAt = () => 0 } = {
       for (const e of gt.ends || []) {
         const dx = e[0] + ox - x, dz = e[1] + oz - z, lx = dx * c - dz * s, lz = dx * s + dz * c, sg = Math.sign(lx) || 1;
         const edge = sg * (open / 2 + jamb);
-        if (Math.abs(lx) - Math.abs(edge) < 0.35) continue;
+        if (Math.abs(lx) - Math.abs(edge) < 1.0) continue;         // (under a metre the jamb and the run already meet)
         const [jx, jz] = at(edge, 0), ex = e[0] + ox, ez = e[1] + oz;
         // local +X of the gate frame runs AGAINST the ring's angle, and a run piece's outside is its +X only when it is
         // laid with the angle increasing: so the stub on the +X side runs end -> jamb, the other jamb -> end

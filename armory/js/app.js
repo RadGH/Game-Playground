@@ -11,6 +11,7 @@ import { installTooltips } from '../../shared/tooltip.js';
 import { fmt } from '../../shared/format.js';
 import { createChibi2Character } from '../../avatar-3d/js/chibi2.js';
 import * as motion from '../../avatar-3d/js/chibi2-motion.js';
+import * as dualMotion from '../../avatar-3d/js/chibi2-motion-dual.js';      // importing it registers the dual-wield, angling and revive clips
 import { CHIBI2_RACES, CHIBI2_RACE_IDS } from '../../avatar-3d/js/chibi2-races.js';
 import { createScene, createThumbnailer, vertexKeys, extractAdded, holdOf, staticModel, frameBox, poseForPicture, characterStats } from '../../avatar-3d/js/preview-kit.js';
 import { loadRows } from './source.js';
@@ -31,13 +32,17 @@ const label = (map, v) => map[v] || String(v).replace(/_/g, ' ').replace(/^\w/, 
 // every clip the motion module offers
 const ANIM_GROUPS = Object.fromEntries(Object.entries(motion.CHIBI2_ANIM_GROUPS).map(([k, v]) => [k, [...v]]));
 let ANIMS = [...new Set([...motion.CHIBI2_EVERY_ANIMS, ...motion.CHIBI2_SWIM_ANIMS])];
-for (const [name, v] of Object.entries(motion)) {
+for (const [name, v] of [...Object.entries(motion), ...Object.entries(dualMotion)]) {
   // any opt-in list the motion module exports later (CHIBI2_DUAL_ANIMS…) is picked up without a change here
   if (!/^CHIBI2_\w+_ANIMS$/.test(name) || !Array.isArray(v)) continue;
   const group = name.replace(/^CHIBI2_|_ANIMS$/g, '').toLowerCase().replace(/^\w/, c => c.toUpperCase());
   for (const n of v) if (typeof n === 'string' && !ANIMS.includes(n)) { ANIMS.push(n); (ANIM_GROUPS[group] ||= []).push(n); }
 }
-const ATTACKS = new Set([...(ANIM_GROUPS.Strikes || []), ...(ANIM_GROUPS.Weapons || []), ...(ANIM_GROUPS.Dual || [])]);
+const GROUP_NAMES = { Dual: 'Dual wield', Angle: 'Angling', Revive: 'Revive' };
+for (const [k, nice] of Object.entries(GROUP_NAMES)) if (ANIM_GROUPS[k]) { ANIM_GROUPS[nice] = ANIM_GROUPS[k]; delete ANIM_GROUPS[k]; }
+/** The clip both-hands mode opens on: a dual clip for a pair of one-handers, a twin clip for two two-handers. */
+const bothClip = row => { const want = row.hands === 2 ? 'twinCrash' : 'dualFlurry'; return ANIMS.includes(want) ? want : null; };
+const ATTACKS = new Set([...(ANIM_GROUPS.Strikes || []), ...(ANIM_GROUPS.Weapons || []), ...(ANIM_GROUPS['Dual wield'] || [])]);
 
 // ---------------------------------------------------------------- building and measuring
 const baseKeyCache = new Map();
@@ -396,7 +401,7 @@ function drawControls() {
   const modes = handModes(row), hand = v.hand || defaultHand(row);
   $('hands').hidden = !modes.length;
   $('hands').replaceChildren(el('span', { class: 'lbl', text: 'Hand' }), ...[['main', 'Main hand'], ['off', 'Off hand'], ['both', 'Both hands']].map(([id, text]) =>
-    el('button', { type: 'button', class: 'seg' + (hand === id ? ' on' : ''), 'data-hand': id, disabled: modes.includes(id) ? null : '', text, onclick: () => { v.hand = id; update({ build: true }); } })));
+    el('button', { type: 'button', class: 'seg' + (hand === id ? ' on' : ''), 'data-hand': id, disabled: modes.includes(id) ? null : '', text, onclick: () => { v.hand = id; if (id === 'both' && bothClip(row)) v.anim = bothClip(row); else if (id !== 'both' && (ANIM_GROUPS['Dual wield'] || []).includes(v.anim)) v.anim = 'idle'; update({ build: true }); } })));
   $('anim').value = ANIMS.includes(v.anim) ? v.anim : 'idle';
   for (const [id, key] of [['race', 'race'], ['height', 'height'], ['build', 'build'], ['hair', 'hair'], ['quality', 'quality'], ['speed', 'speed']]) $(id).value = v[key];
   $('quality-row').hidden = !(row.slot === 'held' || row.slot === 'offhand');
@@ -421,6 +426,8 @@ function select(key, { scroll = false } = {}) {
   for (const c of document.querySelectorAll('.gcard')) c.classList.toggle('on', c.dataset.key === key);
   if (!row) { writeHash(); window.armory.ready = false; return; }
   if (!handModes(row).includes(view().hand)) view().hand = '';
+  // a link that asks for both hands and names no clip opens on the pair's own attack
+  if (view().hand === 'both' && view().anim === 'idle' && !/[#&]anim=/.test(location.hash) && bothClip(row)) view().anim = bothClip(row);
   window.armory.ready = false;
   drawHead(); drawControls(); drawStats(); drawHold(); drawItems(); drawFlag(); drawIcon();
   rebuild().then(() => { if (state.id === key && !camSet.has('once')) { setCamera('body'); camSet.add('once'); } });

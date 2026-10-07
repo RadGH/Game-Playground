@@ -84,11 +84,11 @@ export function createCharSheet({ net, hud, bag, self, bar }) {
       h('h4', { title: 'What each ability deals in a second of use against an even-level enemy, counting its cooldown. An estimate, not a promise.' }, 'Damage a second (estimated)'),
       (sh.abilities || []).length ? h('ul.sh-list.abilities', { dataset: { part: 'abilities' } }, ...sh.abilities.map(ability)) : h('p.sh-note', {}, 'No abilities yet.'),
       a ? h('div.sh-angling', { dataset: { tip: 'Rises with every catch. A higher skill hooks better fish, opens the better pools and makes the tug easier.' } }, h('h4', {}, 'Angling'), h('div.sh-angbar', {}, h('i', { style: `width:${(a.frac * 100).toFixed(1)}%` }), h('span', {}, a.text)), h('small', {}, a.sub)) : null,
-      sh.basic ? h('p.sh-note.basic', {}, 'Basic view: added up here from your level and what you wear. The full numbers (perks, talents, buffs, every ability) come from the server.') : null);
+      sh.basic && S.server ? h('p.sh-note.basic', {}, 'Basic numbers for now — the full sheet (perks, talents, every ability) follows in a moment.') : sh.basic ? h('p.sh-note.basic', {}, 'Basic view: added up here from your level and what you wear. The full numbers (perks, talents, buffs, every ability) come from the server.') : null);
   }
 
   function wire(n) {
-    n.on('sheet', m => setSheet({ core: m.core || [], advanced: m.advanced || [], abilities: m.abilities || [], angling: m.angling || null }, true));
+    n.on('sheet', m => setSheet({ core: m.core || [], advanced: m.advanced || [], abilities: m.abilities || [], angling: m.angling || null, basic: !!m.basic }, true));
     n.on('joined', j => { S.server = false; S.sheet = null; S.lastSig = ''; S.diff = {}; const sh = j?.you?.sheet; if (sh && Array.isArray(sh.core)) setSheet(sh, true); else setTimeout(refresh, 0); });
     n.on('equip', () => { setTimeout(() => { refresh(); if (panel.isOpen && S.server) ask(); }, 0); });
     n.on('you', p => { if (p.sheet) setSheet(p.sheet, true); else if (p.angling) { S.angling = { ...(S.angling || {}), ...p.angling }; draw(); } else if (p.level != null || p.hpMax != null || p.mpMax != null || p.bar) setTimeout(refresh, 0); });

@@ -83,8 +83,9 @@ export function createEventTracker({ hud, me, net, parent = null }) {
     if (!m || (m.uid == null && m.id == null && !m.name)) return;
     const k = find(m), had = events.get(k);
     if (had && (had.state === 'won' || had.state === 'lost')) return;
-    const e = upsert(m, { state: m.state === 'soon' ? 'soon' : 'live' });
-    if (e) { e.state = m.state === 'soon' ? 'soon' : 'live'; e.tracked = true; e.seen = Date.now(); if (m.realm) e.free = true; }
+    const st = m.state === 'soon' ? 'soon' : m.state === 'offer' ? 'offer' : 'live';     // offer: a road event someone may take on
+    const e = upsert(m, { state: st });
+    if (e) { e.state = st; e.tracked = true; e.seen = Date.now(); if (m.realm) e.free = true; }
     draw();
   }
   /** `eventAt {uid|null}`: you walked into / out of an event's ground. */
@@ -141,7 +142,7 @@ export function createEventTracker({ hud, me, net, parent = null }) {
       if ((e.state === 'won' || e.state === 'lost') && now - (e.endedAt || 0) > RESULT_MS) events.delete(k);
       else if (e.state === 'soon' && Number.isFinite(e.at) && now - e.at > 20000) events.delete(k);              // it never started
       else if (e.state === 'live' && Number.isFinite(e.endsAt) && now - e.endsAt > 60000) events.delete(k);    // the server went quiet about it
-      else if (e.tracked && (e.state === 'live' || e.state === 'soon') && now - (e.seen || 0) > 15000) events.delete(k);   // you walked out of hearing
+      else if (e.tracked && (e.state === 'live' || e.state === 'soon' || e.state === 'offer') && now - (e.seen || 0) > 15000) events.delete(k);   // you walked out of hearing
     }
     const list = [...events.values()].sort((a, b) => (inEvent(b, p) - inEvent(a, p)) || (a.since - b.since));
     // the clock ticks every second: when ONLY the time changed, patch the text in place (a rebuilt card would swallow a

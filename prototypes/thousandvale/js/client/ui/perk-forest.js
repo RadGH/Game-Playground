@@ -11,7 +11,7 @@ import { registerTip, refreshTip, hideTip, tipOpen } from './tips.js';
 import { forestBounds, armSectors } from './talent-model.js';
 
 const KIND_R = { hub: 13, minor: 7, major: 10, talent: 12, keystone: 16 };
-const COL = { taken: '#f1d595', open: '#7fe08a', reach: '#c7b99b', locked: '#5c5246' };
+const COL = { taken: '#f1d595', open: '#7fe08a', reach: '#c7b99b', locked: '#5c5246', staged: '#8fd0ff' };   // staged (T28): marked, not yet accepted
 
 export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } = {}) {
   const wrap = document.createElement('div'); wrap.className = 'pf-wrap';
@@ -70,12 +70,15 @@ export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } 
     // links: a taken–taken edge is the path you walked (gold), taken–open is where you can go next (green)
     for (const [a, b] of F.links) {
       const A = F.byId.get(a), B = F.byId.get(b); if (!A || !B) continue;
-      const sa = ST.get(a), sb = ST.get(b);
+      let sa = ST.get(a), sb = ST.get(b);
+      const pend = sa === 'staged' || sb === 'staged';          // a path you have staged: blue and dashed until accepted
+      if (sa === 'staged') sa = 'taken'; if (sb === 'staged') sb = 'taken';
       const [x1, y1] = toScreen(A.x, A.y), [x2, y2] = toScreen(B.x, B.y);
       if (Math.max(x1, x2) < -40 || Math.min(x1, x2) > V.w + 40 || Math.max(y1, y2) < -40 || Math.min(y1, y2) > V.h + 40) continue;
       g.strokeStyle = sa === 'taken' && sb === 'taken' ? 'rgba(241,213,149,0.95)' : (sa === 'taken' || sb === 'taken') && (sa === 'open' || sb === 'open') ? 'rgba(127,224,138,0.75)' : 'rgba(150,135,110,0.32)';
       g.lineWidth = sa === 'taken' && sb === 'taken' ? 3 : 1.6;
-      g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
+      if (pend && sa === 'taken' && sb === 'taken') { g.strokeStyle = 'rgba(143,208,255,0.95)'; g.setLineDash([7, 5]); }
+      g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); g.setLineDash([]);
     }
     // nodes (a search dims everything it did not find and rings what it did)
     const labels = V.s > unit * 1.15;
@@ -89,17 +92,20 @@ export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } 
       if (found && !hit) g.globalAlpha = 0.28;
       if (st === 'open') { g.shadowColor = '#7fe08a'; g.shadowBlur = 12; }
       if (st === 'taken') { g.shadowColor = '#f1d595'; g.shadowBlur = 10; }
+      if (st === 'staged') { g.shadowColor = '#8fd0ff'; g.shadowBlur = 14; }
       g.beginPath();
       if (n.kind === 'keystone') poly(g, x, y, r, 8, Math.PI / 8);
       else if (n.kind === 'talent') poly(g, x, y, r, 6, 0);
       else if (n.kind === 'major') poly(g, x, y, r, 4, Math.PI / 4);
       else g.arc(x, y, r, 0, Math.PI * 2);
-      g.fillStyle = st === 'taken' ? ac : st === 'locked' ? '#221d17' : hexA(ac, 0.35);
+      g.fillStyle = st === 'taken' ? ac : st === 'locked' ? '#221d17' : st === 'staged' ? hexA(ac, 0.7) : hexA(ac, 0.35);
       g.fill();
       g.shadowBlur = 0;
-      g.lineWidth = n.id === hover ? 3 : st === 'open' ? 2.4 : 1.6;
+      g.lineWidth = n.id === hover ? 3 : st === 'open' ? 2.4 : st === 'staged' ? 3 : 1.6;
       g.strokeStyle = n.id === hover ? '#ffffff' : COL[st];
-      g.stroke();
+      if (st === 'staged') g.setLineDash([5, 3]);
+      g.stroke(); g.setLineDash([]);
+      if (st === 'staged') { g.beginPath(); g.arc(x, y, r + 5, 0, Math.PI * 2); g.strokeStyle = 'rgba(143,208,255,0.9)'; g.lineWidth = 1.5; g.stroke(); }
       if (n.id === focusId) { g.beginPath(); g.arc(x, y, r + 6, 0, Math.PI * 2); g.strokeStyle = 'rgba(255,255,255,0.7)'; g.setLineDash([4, 4]); g.stroke(); g.setLineDash([]); }
       if (hit) { g.globalAlpha = 1; g.beginPath(); g.arc(x, y, r + 5 + Math.sin(pulse) * 2.5, 0, Math.PI * 2); g.strokeStyle = '#fff3c4'; g.lineWidth = 2.5; g.shadowColor = '#ffe08a'; g.shadowBlur = 12; g.stroke(); g.shadowBlur = 0; }
       g.restore();
@@ -136,7 +142,7 @@ export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } 
   function setHover(id, ev) {
     if (id === hover) return;
     hover = id; dirty = true;
-    cv.style.cursor = id ? (ST.get(id) === 'open' ? 'pointer' : 'help') : 'grab';
+    cv.style.cursor = id ? (ST.get(id) === 'open' || ST.get(id) === 'staged' ? 'pointer' : 'help') : 'grab';
     if (!id) { hideTip(); return; }
     if (tipOpen()) refreshTip();
     else if (ev) cv.dispatchEvent(new PointerEvent('pointerover', { bubbles: true, clientX: ev.clientX, clientY: ev.clientY }));
@@ -150,7 +156,7 @@ export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } 
     if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) }; drag = null; return; }
     drag = { x: e.clientX, y: e.clientY, vx: V.x, vy: V.y, moved: 0, button: e.button, id: nodeAt(e.offsetX, e.offsetY) };
     clearTimeout(press);
-    if (e.pointerType === 'touch') press = setTimeout(() => { if (drag && drag.moved < 6 && drag.id && ST.get(drag.id) === 'taken') { onRefund?.(drag.id); drag = null; } }, 650);
+    if (e.pointerType === 'touch') press = setTimeout(() => { if (drag && drag.moved < 6 && drag.id && (ST.get(drag.id) === 'taken' || ST.get(drag.id) === 'staged')) { onRefund?.(drag.id); drag = null; } }, 650);
   });
   cv.addEventListener('pointermove', e => {
     if (pts.has(e.pointerId)) pts.set(e.pointerId, { x: e.clientX, y: e.clientY });

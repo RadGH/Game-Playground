@@ -2875,3 +2875,106 @@ tests/A/pt5-slots.test.js (2): worn, drawn by another player, off again, still w
 `travel_cloak`, `leather_belt`, `g5_swallowtail`, `g5_girdle`); worn lights at the general store in a new category `kinds.general.categories.light`
 ("Lanterns & torches": `hand_lantern`, `pitch_torch`, `g5_hexlantern`, `g5_cresset`). Crates: `start_letters_south` also pays a `back` crate (common),
 `start_road_to_orrinsford` a `waist` crate (uncommon) — 99 crates in all; the start chain now fills eleven slots. tests/E 198 green. No re-placement.
+
+## Round 5 contracts — G (UI gallery T26, controller T27) -> D-UI, D-world, lead — 2026-10-06 (written first; kept true)
+
+**What G adds (new files only unless listed under "hooks"):** `ui-gallery.html`, `ui-gallery-frame.html`, `css/ui-gallery.css`,
+`css/layout-phone.css`, `css/input.css`, `js/client/gallery/**`, `js/client/input/**`, `tools/record-ui-fixtures.mjs`, `tests/G/**`, `docs/UI.md`.
+
+**The gallery mounts YOUR modules, it does not copy them.** The frame page fetches `index.html` and uses its `<body>` markup and its
+stylesheet list as they are, then `js/client/gallery/stage.js` calls the same `create*()` functions `main.js` calls (hud, menubar, social,
+bag, chat, friends, guild, mail, callboard, account, help, `createUiSuite`, `createUi2`, `createUi5`) with stub 3D pieces and the real
+`js/net/client.js` on a fake socket replaying a recorded wire transcript. So: **a new window shows up in the gallery when it is created
+by one of those and gets a scene in `js/client/gallery/scenes.js`** — `tests/G/gallery.test.js` fails if a module under `js/client/ui/`
+has no scene and is not on the explicit "no screen" list. Nothing for D-UI to do except keep `window.tvui / tvui2 / tvui5` hooks working.
+
+**Hooks G makes in files it does not own (small, opt-in, listed here as they land):**
+- `js/client/controls.js`: `controls.setAnalog({ mx, mz, camX, camY, zoom })` — a stick's movement / camera vector added to the keys in
+  `intent()` (D-world's file; default null = unchanged).
+- `js/client/main.js`: one import + one `installInput({...})` call after `controls`/`hud` exist (gamepad, key rebinding, hints, and — only
+  when the phone layout is switched on — touch).
+- `js/client/social-core.js`: `SHORTCUTS` and `PANEL_KEYS` are DERIVED from `js/client/input/bindings.js` (same exports, same shape).
+- `js/client/ui/settings.js`: the "Key bindings" tab body comes from `input/bindings-ui.js` (rebinding + controller glyph choice).
+
+**One binding table:** `js/client/input/bindings.js` — `ACTIONS` (id, group, label, default key code, pad button, touch control). Any key
+shown on screen should be a `<kbd>` with the default key text (as now) or `<kbd data-action="strike">`; `input/hints.js` re-labels them
+for the device last used. Please do not print a key inside a sentence in a tooltip where a `<kbd>` can do it.
+
+**Phone layout** is `html[data-layout="phone"]` + `css/layout-phone.css`; the game never sets it until the owner approves (one switch:
+`PHONE_LAYOUT_ENABLED` in `js/client/input/layout.js`).
+
+## Round 5 contracts — D-UI, addendum 2 (slots, card texts, T28 staged picks; for G) — 2026-10-06
+- **C's slots (`back`, `waist`, `light`)**: on the paper doll (`js/client/ui/inv-core.js` DOLL_LEFT/RIGHT/BOTTOM, order as `rules.SLOTS`), in the bag's filters
+  (cloak + belt = Armour), on the kit step and the item card. `attackText` / `focusText` / `convertText` print on the item card; affix and power text goes
+  through `whoText`; `bar[].targets` and `bar[].revive` print on the action-bar card and in the Skills window; a `pending` ability row reads "measuring…".
+- **Protocol §21**: D-UI is on A's final names (checked line by line): `kits`/`kitsR`, `create.kit`, `sheet` (`basic`, `pending`), `eventTrack` (states
+  `soon|live|offer`), `eventDone.result`, `eventAt` + `joined.you.eventAt`, `feedback`/`feedbackR`, `admin {op:'reports'|'report'}` (`trashed`),
+  `fish*`, `cook`/`cookList`/`cookR`, `reviveAsk`/`revive`/`reviveR`, `itemR {op:'equip'}`, `you.dual2h`, `reward.text` / `reward.crates`.
+- **T28 (staged perk + talent picks)**: no new message. Accept sends the existing `perk {op:'take', id}` / `talent {op:'pick', skill, tier, node}` once
+  per staged pick, in the order they were clicked. **A:** nothing to do; if two `perk take` in one tick are ever throttled, say so and D-UI will pace them.
+- **G (gallery / controller):** two new window keys and one action key need rows in `input/bindings.js` when `PANEL_KEYS` / `SHORTCUTS` become derived:
+  `KeyV` -> panel `sheet` (Character), `KeyX` -> cast / reel in (bound in `js/client/ui/angling.js`), and during a bite `Space`/`E` hook, hold `Space`
+  in the tug. Undo / redo in the perk and skills windows are `Ctrl+Z` / `Ctrl+Shift+Z` (`Ctrl+Y`). New windows for scenes: `tvui5.openSheet()`,
+  `tvui5.feedback('bug')`, `tvui5.reports()`, `tvui5.cook({recipes})`, `tvui5.catchTab()`, `tvui5.reveal(item, 'crate'|'gift')`, `tvui5.fish.bite(ms)` /
+  `.tug({...})` / `.caught({...})`, `tvui5.kits(kits)` + `thousandvale.ui5.kits.open({cls})`, and `tv.fake(ev, msg)` plays any server message through
+  every handler (e.g. `tv.fake('eventTrack', {...})`, `tv.fake('reviveAsk', {...})`, `tv.fake('sheet', {...})`). Every one of these builds from the
+  injected state alone — none needs a live socket. The staged-pick bar: `tvui.talents().stage.takePerk(id)`.
+
+## Round 5 — G status + asks (2026-10-06) -> D-UI, D-world, lead
+
+**Landed (all in the working tree, nothing committed):** the interface gallery `ui-gallery.html` (docs/UI.md is the guide), the one binding
+table `js/client/input/bindings.js`, controller support live in the game, key re-binding (Settings > Key bindings), the phone layout as a
+proposal behind `html[data-layout="phone"]` (OFF: `PHONE_LAYOUT_ENABLED = false` in `js/client/input/layout.js`).
+
+**Hooks made in files G does not own** (each a few lines, all opt-in — say if any is in your way):
+- `js/client/controls.js` (D-world): `let analog`, two lines in `intent()` / `updateCamera()`, and `setAnalog(a)` on the returned object.
+  `{ mx, mz, camX, camY, sprint, zoom }`, each -1..1; null = keys only (the default, so nothing changes without a pad or the phone stick).
+- `js/client/main.js`: `import { installInput }`, one `installInput({ controls, hud, setTarget, targetId, pause, inWorld, dead, settings, chat })`
+  call just above `const PANELS`, `input.tick(dt)` after `hud.tick(dt)` in the frame loop, and `input` on `window.thousandvale`.
+- `js/client/social-core.js`: `SHORTCUTS = shortcutsTable()` and `PANEL_KEYS = panelKeys()` (built from the table; same shapes; D's two tests pass).
+- `js/client/ui/settings.js`: the Key bindings tab body is `bindingsTab({ redraw: draw })` from `input/bindings-ui.js`.
+- `js/client/help.js`: drawn from `referenceTable()` on open (your own keys; the controller's buttons when a pad was touched last).
+
+**Asks:**
+- **D-UI — move the title screen's glue out of main.js** (`initTitle`, `refreshChips`, `titleStep`, `toAppearance`, `toKit` -> `js/client/title.js`,
+  taking `{ S, account, ui2, ui5, startNet, onPreview }`). The gallery cannot import it from main.js, so `js/client/gallery/title-lite.js` carries a
+  60-line copy of the chip-filling part — the one duplication in the gallery. Not urgent; next round.
+- **D-UI — a key shown on screen should be a `<kbd>`** (or `<span class="key">` on a slot) holding the DEFAULT key text, or `<kbd data-action="strike">`.
+  `input/hints.js` re-labels those for a re-bound key or a controller. Keys written inside a sentence ("(F, or right-click an enemy)" in the Strike
+  tooltip, "X reels in" in the fishing pill, "(R)" on the Rise button) stay keyboard words — fine for now, wrong for a pad player.
+- **D-UI — a new window = a new scene.** `node --test tests/G/gallery.test.js` fails when a file under `js/client/ui/` is in no scene of
+  `js/client/gallery/scenes.js`; adding one is a five-line entry (docs/UI.md "Adding a scene").
+- **A — nothing.** The gallery uses `connect({ socketFactory })` as it is.
+
+**Publish gate notes (lead):**
+- node: `node --test prototypes/thousandvale/tests/G/*.test.js` (two files, ~20 tests, under a second) — add to the unit run.
+- browser (shared lock): `npx playwright test prototypes/thousandvale/tests/G/gallery.spec.js` (every scene x 7 frame passes, ~10 min; no game
+  server) and `tests/G/gamepad.spec.js` (half in the gallery, half in the real game through tests/D/m3-server.mjs).
+- `tests/G/shots/**` are the mockups of record: a UI change shows up there as changed pictures. Commit them with the change that caused them.
+- The gallery is static: it works from `publish-stable.sh` / `publish-pages.sh` as it is (relative paths only; a test checks). It needs
+  `js/client/gallery/fixtures/{session.json,moments.json,world.jpg,title.jpg}` in the published tree; `fixtures/.wire.json` (the raw tape) is git-ignored.
+- After a protocol change that alters a window's data, re-record: `flock … node prototypes/thousandvale/tools/record-ui-fixtures.mjs` (~6 min).
+
+## Round 5 — E, after W's hand-over (fence gaps; bound set pieces that no longer fit) — 2026-10-06
+- **Fence gaps:** `hedge_witch_garden` and `dry_well` (data/vignettes/m1.json): posts moved to 1.2 m either side of their 2.4 m rail.
+- **Bound set pieces — `node tools/content-fit.mjs` (`--fix`):** measures each of the 6 recipes bound onto a B ground piece at its placement's scale
+  against what B draws there. Found **154 misfits + 2 crowded fence rows** in 4 of them; all moved out of the drawn lists into the recipe's
+  `ifFree` block (kept, drawn by nothing): Saint Hulda's Yard 119 (71 iron railing sections inside B's wall, 40 graves + lychgate twinning B's, 2 models
+  and 6 props standing on B's graves), Brannock Fields 16 (house + granary B built, 3 fields and 5 things landing in them, 8 apple trees piled up) with
+  its two fence rows re-spaced 21 -> 11 sections, Turnwater Mill 5 (mill + wheel B draws, things inside B's mill), the Nine Maidens 11 (the whole second
+  ring + altar). Greyfletch Camp and Ashby's Lumber Camp fit. A model that a quest object sits on (crypt door, gear housing) is never moved.
+- **D-world:** nothing to change; `ifFree` is a key to ignore. If set pieces are ever drawn unbound, add `ifFree.{models,buildings,fields,props}` back.
+- **W:** tests/B/fences.test.js "sections in a row": the neighbour distance is now 3.6 / the recipe's bound scale, and the floor is 10 sections (the
+  61+ were Saint Hulda's railing). tests/E/playtest5-fit.test.js holds the rest. No re-placement.
+- **D-UI — found by looking at the gallery (desktop, `ui-gallery.html#scene=hud`):** in a party, the zone-deeds note (`.tv-deeds`, top 88 px left 14 px —
+  "The Torbor Fields · levels 1–4 / A quiet hour here") is drawn on top of the first party frame (`.partyframes`, top 84 px left 14 px). Not touched by G.
+
+**C -> D-world (chain / fork targets, your ask).** `fx {kind:'chain', id (caster), skill? | basic:1 + wk/wt/form, element, first (entity id the bolt
+itself struck), targets: [entity ids it jumped to, in order], fork?: 1 (shards leave `first` together instead of hopping one after another)}`.
+A chain sends it once, when its last hop lands; a fork / ricochet / split when the bolt lands. Each hop's own `fx bolt` also carries `hop`
+(1, 2, …) and `fromId` (the body it left). Draw the arcs to exactly these ids. tests/C/playtest5 (fork, Arc Lash).
+
+## A -> D-world — 2026-10-06: your two asks are in
+`info.gear.<slot>.el` (the item's `castElement || brand`) and `.g5` only when it differs from `base`; `info.pool.shelf: true` for E's shelf pools
+(none of today's 308 spots carries `shelf` yet — it shows the moment E's file has one). `fx` events pass through whole, so C's `targets` on a
+chain bolt needs nothing from A (tested with a made-up event). tests/A/pt5-slots (3).

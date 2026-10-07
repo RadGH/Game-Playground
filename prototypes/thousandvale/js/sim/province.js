@@ -1939,6 +1939,8 @@ export function createProvince(opts) {
   }
   /** What a player wears, compact, on its entity's `info` (`gear: {slot: {base, sub?, rarity}}`) so others draw it. */
   const lvlOf = it => Math.max(0, (it.dropLevel | 0), (it.itemLevel || it.ilvl || it.level || 0) | 0);
+  // play-test 5 (D-world): `g5` = the catalog model when it is not the base itself; `el` = the element a staff / wand / sceptre is tinted with
+  const g5Of = it => { const g = it.g5 || (it.look && typeof it.look === 'object' && it.look.g5) || null; return g && g !== (it.baseKey || it.base) ? g : null; };
   function gearLook(o) {
     const eq = equipView(o) || {};
     // worn items the rules made (a class kit) carry no server uid, so the client could never take them off: give one
@@ -1951,7 +1953,7 @@ export function createProvince(opts) {
     for (const [slot, it] of Object.entries(eq)) if (it && typeof it === 'object') {
       if (!pr.showGear && slot !== 'weapon' && slot !== 'offhand' && slot !== 'mainhand') continue;
       if (!pr.showHelm && slot === 'head') continue;
-      out[slot] = { base: it.baseKey || it.base || it.name || slot, ...(it.subtype ? { sub: it.subtype } : {}), rarity: it.rarity || 'normal', ...(it.uniqueId ? { unique: it.uniqueId } : {}), ...(it.theme ? { theme: it.theme } : {}), ...(it.g5 || (it.look && it.look.g5) ? { g5: it.g5 || it.look.g5 } : {}), ...(lvlOf(it) ? { lvl: lvlOf(it) } : {}), ...(it.tier >= 2 ? { tier: it.tier } : {}) };   // S18: tier-2 theme id (armour-tiers.json); item level + tier so others draw tier 2 on a plain L15+ piece
+      out[slot] = { base: it.baseKey || it.base || it.name || slot, ...(it.subtype ? { sub: it.subtype } : {}), rarity: it.rarity || 'normal', ...(it.uniqueId ? { unique: it.uniqueId } : {}), ...(it.theme ? { theme: it.theme } : {}), ...(g5Of(it) ? { g5: g5Of(it) } : {}), ...(it.castElement || it.brand ? { el: it.castElement || it.brand } : {}), ...(lvlOf(it) ? { lvl: lvlOf(it) } : {}), ...(it.tier >= 2 ? { tier: it.tier } : {}) };   // S18: tier-2 theme id (armour-tiers.json); item level + tier so others draw tier 2 on a plain L15+ piece
     }
     const off = !pr.showGear;
     const before = JSON.stringify(o.entity.gear || null) + !!o.entity.gearOff, after = JSON.stringify(out) + off;

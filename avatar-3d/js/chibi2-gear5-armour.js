@@ -573,9 +573,11 @@ export const G5_SHOE_BUILDERS = {
       band(c, knee, M.shin, -L * 0.455, 0.03, 0.03, col2, { metal: true });
       // the shin plate: front of the boot shaft, keeled, with a rim at the top
       const sp = span(M.shin, topY, -L * 0.44, 0.03);
-      add(arcProfile(sp, 0, 1.9, 8), knee, col, { metal: true });
+      // the arc stops just short of the sides: at 1.9 rad it wrapped past them, and its free edge stood proud of the
+      // boot shaft — seen from behind that edge was a thin dark line down the back of each ankle
+      add(arcProfile(sp, 0, 1.42, 8), knee, col, { metal: true });
       add(taperedCurve(sp.map(([y, , rz]) => [0, y, rz + 0.003]), [0.008, 0.011, 0.008], 3, 5), knee, hi, { metal: true });
-      add(arcProfile([[topY - 0.012, sp[0][1] + 0.006, sp[0][2] + 0.006, 0], [topY + 0.014, sp[0][1] + 0.008, sp[0][2] + 0.008, 0]], 0, 1.9, 8), knee, col2, { metal: true });
+      add(arcProfile([[topY - 0.012, sp[0][1] + 0.006, sp[0][2] + 0.006, 0], [topY + 0.014, sp[0][1] + 0.008, sp[0][2] + 0.008, 0]], 0, 1.42, 8), knee, col2, { metal: true });
     }
   },
 };

@@ -13,3 +13,4 @@ library/synced/
 !library/synced/.gitkeep
 tools/scratch/
 tools/certs/
+prototypes/thousandvale/js/client/gallery/fixtures/.wire.json

@@ -99,7 +99,7 @@ export function createFeedback({ net, hud, context }) {
   const R = { list: [], kind: '', state: 'new', open: null, loading: false, err: '' };
   const reports = { panel: createPanel({ id: 'reports', title: 'Reports', width: 560, cls: 'reports-panel', onOpen: () => { load(); drawReports(); } }) };
   function load() { R.loading = true; R.err = ''; if (!send({ t: 'admin', op: 'reports', ...(R.kind ? { kind: R.kind } : {}), ...(R.state ? { state: R.state } : {}) })) { R.loading = false; R.err = 'You are not connected.'; } setTimeout(() => { if (R.loading) { R.loading = false; R.err = 'The server did not answer.'; drawReports(); } }, 8000); }
-  function setState(id, state) { send({ t: 'admin', op: 'report', id, state }); }
+  function setState(id, state) { send({ t: 'admin', op: 'report', id, state: state === 'trash' ? 'trashed' : state }); }   // protocol §21.9 says 'trashed'
   function drawReports() {
     const P = reports.panel; if (!P.isOpen) return;
     const sel = (k, opts, label) => h('label.rp-filter', {}, label, h('select', { dataset: { f: k }, onchange: e => { R[k] = e.target.value; R.open = null; load(); drawReports(); } }, ...opts.map(([v, t]) => h('option', { value: v, selected: R[k] === v }, t))));

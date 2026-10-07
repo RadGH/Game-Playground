@@ -455,6 +455,9 @@ test('T15: fork splits onto a second enemy; ward shields the caster up to its ca
     w.room.intent(mage, { t: 'cast', slot: 0, target: a.id, aim: { x: a.x, z: a.z } });
     w.steps(30);
     assert.ok(a.hp < a.hpMax && b.hp < b.hpMax, 'the bolt and a shard');
+    const ev = w.events.find(e => e.type === 'fx' && e.kind === 'chain');
+    assert.ok(ev && ev.fork === 1 && ev.first === a.id, 'a fork says where it went');
+    assert.deepEqual(ev.targets, [b.id]);
   }
   { // ward
     const w = world();
@@ -517,6 +520,12 @@ test('T15: staves — Thousandvale\'s lance and aegis ring, and Arc Lash chains 
     assert.ok(b.r.unit.hp < 1e6, 'it jumped to the second enemy');
     const bolts = w.events.slice(from).filter(e => e.type === 'fx' && e.kind === 'bolt');
     assert.equal(bolts.length, 4, 'the bolt and three jumps');
+    // D-world's ask: the chain event names the bodies it really jumped to, in order, and each hop says where it came from
+    const chain = w.events.slice(from).filter(e => e.type === 'fx' && e.kind === 'chain');
+    assert.equal(chain.length, 1);
+    assert.equal(chain[0].first, a.id);
+    assert.deepEqual(chain[0].targets, [b.id, a.id, b.id], 'a -> b -> a -> b: exactly what was struck');
+    assert.deepEqual(bolts.slice(1).map(e => [e.hop, e.fromId, e.to]), [[1, a.id, b.id], [2, b.id, a.id], [3, a.id, b.id]]);
   }
 });
 

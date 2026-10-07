@@ -60,9 +60,9 @@ function shieldMount(c, part, h) {
   const pos = [-0.1, -0.11 * T * A, 0.02], rot = [0, -Math.PI / 2, 0];
   const face = (u, v, d = 0) => [pos[0] - 0.012 - d, pos[1] + v, pos[2] + u];
   for (const s of [-1, 1]) c.add(tor(0.085, 0.01, 10, Math.PI), L, LEATHER, { position: [pos[0] + 0.02, pos[1] + s * 0.06, 0], rotation: [Math.PI / 2, 0, -Math.PI / 2] });
-  const emblem = (size = 0.06, v = 0) => {
+  const emblem = (size = 0.06, v = 0, lift0 = 0.004) => {   // lift0: how far off the board — past a spine or ridge, or it is buried
     if (!part?.emblem) return false;
-    try { placeEmblem(c.add, L, part.emblem, part.emblemColor || '#ffcf4a', { position: face(0, v, 0.004), rotation: rot, size, back: '#2a2a30', rim: part.color2 || BRASS }); } catch { return false; }
+    try { placeEmblem(c.add, L, part.emblem, part.emblemColor || '#ffcf4a', { position: face(0, v, lift0), rotation: rot, size, back: '#2a2a30', rim: part.color2 || BRASS }); } catch { return false; }
     return true;
   };
   void h;
@@ -109,7 +109,7 @@ export const G5_OFFHAND_BUILDERS = {
     // the spine: a ridge standing off the face from tip to tip
     c.add(taperedCurve([m.face(0, h * 0.46, 0.004), m.face(0, h * 0.1, 0.02), m.face(0, -h * 0.46, 0.004)], [0.006, 0.018, 0.006], 4, 8), m.L, lift(st, 0.25), { metal: true });
     for (let i = 1; i < n; i += 2) for (const s of [-1, 1]) c.add(sph(6, 4), m.L, BRASS, { position: m.face(s * pts[i][0] * 0.86, pts[i][1], 0.002), scale: [0.007, 0.011, 0.011], metal: true });
-    if (!m.emblem(0.045, h * 0.12)) c.add(sph(8, 5), m.L, BRASS, { position: m.face(0, h * 0.1, 0.02), scale: [0.02, 0.036, 0.036], metal: true });
+    if (!m.emblem(0.045, h * 0.12, 0.03)) c.add(sph(8, 5), m.L, BRASS, { position: m.face(0, h * 0.1, 0.02), scale: [0.02, 0.036, 0.036], metal: true });
     if (q >= 2) c.add(ico(), m.L, lift(st, 0.55), { position: m.face(0, -h * 0.2, 0.014), scale: [0.01, 0.022, 0.016], metal: true });
   },
   /** A pavise: a tall board with an arched top, a hollow ridge up the middle and iron-shod corners. */
@@ -123,7 +123,7 @@ export const G5_OFFHAND_BUILDERS = {
     c.add(profile([[-h * 0.48, 0.05, 0.03], [h * 0.2, 0.04, 0.026], [h * 0.47, 0.022, 0.012]], 8), m.L, lift(st, 0.14), { position: [m.pos[0] - 0.008, m.pos[1], m.pos[2]], rotation: m.rot, metal: true });
     for (const v of [-h * 0.32, h * 0.26]) board(c, m, [[-w, v - 0.016], [w, v - 0.016], [w, v + 0.016], [-w, v + 0.016]], 0.006, tone(st, 0.7), -0.016);
     for (const s of [-1, 1]) board(c, m, [[s * w, -h * 0.5], [s * w * 0.5, -h * 0.5], [s * w, -h * 0.34]], 0.008, IRON, -0.017);
-    if (!m.emblem(0.05, h * 0.02)) for (const s of [-1, 1]) c.add(sph(6, 4), m.L, BRASS, { position: m.face(s * w * 0.6, h * 0.26, 0.004), scale: [0.009, 0.014, 0.014], metal: true });
+    if (!m.emblem(0.05, h * 0.02, 0.04)) for (const s of [-1, 1]) c.add(sph(6, 4), m.L, BRASS, { position: m.face(s * w * 0.6, h * 0.26, 0.004), scale: [0.009, 0.014, 0.014], metal: true });
     if (q >= 2) c.add(ico(), m.L, lift(st, 0.55), { position: m.face(0, h * 0.4, 0.016), scale: [0.012, 0.024, 0.02], metal: true });
   },
 

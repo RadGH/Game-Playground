@@ -56,7 +56,7 @@ export function crateRewardText(c) {
   return `Crate: ${CRATE_SHORT[s.slot] || s.slot.replace(/_/g, ' ')} (${rarityWord(s.min)} or better)`;
 }
 /** Every crate on a quest reward, as text rows. */
-export const crateRewards = reward => (Array.isArray(reward?.crates) ? reward.crates : reward?.crate ? [reward.crate] : []).map(crateRewardText);
+export const crateRewards = reward => (reward?.text ? [] : null) || (Array.isArray(reward?.crates) ? reward.crates : reward?.crate ? [reward.crate] : []).map(crateRewardText);
 
 // ---- T5: starting kits -------------------------------------------------------------------------------------
 const arr = v => (Array.isArray(v) ? v : v && typeof v === 'object' ? Object.entries(v).map(([id, x]) => ({ id, ...x })) : []);
@@ -208,7 +208,7 @@ export function eventLines(e, { now = Date.now(), me = null } = {}) {
   else if (e.state === 'live') time = Number.isFinite(e.endsAt) ? (e.endsAt > now ? `${mmss(e.endsAt - now)} left` : 'Time is up') : '';
   return {
     key: e.key, name: e.name || 'An event', state: e.state, scope: e.scope || 'zone',
-    head: e.state === 'soon' ? 'Coming' : e.state === 'won' ? 'Won' : e.state === 'lost' ? 'Failed' : inside ? 'You are in it' : 'Nearby',
+    head: e.state === 'offer' ? 'On offer' : e.state === 'soon' ? 'Coming' : e.state === 'won' ? 'Won' : e.state === 'lost' ? 'Failed' : inside ? 'You are in it' : 'Nearby',
     what: e.what || (e.state === 'soon' ? 'Something is about to happen here.' : ''),
     stage: e.stage && e.stage.of > 1 && e.state === 'live' ? `Stage ${whole(Math.min(e.stage.n || 1, e.stage.of))} of ${whole(e.stage.of)}${e.stage.name ? ' — ' + e.stage.name : ''}` : '',
     objective, time, urgent: e.state === 'live' && Number.isFinite(e.endsAt) && e.endsAt - now < 30000,
@@ -415,9 +415,9 @@ export function anglingText(a = {}) {
 export function cookRows(recipes = [], count = () => 0, skill = 1, names = {}) {
   return recipes.map(r => {
     const needs = (r.needs || []).map(n => { const id = n.id || n.fish || n.tag, want = n.n ?? n.count ?? 1, have = Number.isFinite(n.have) ? n.have : count(id, !!n.tag && !n.fish && !n.id); return { id, name: n.name || names[id] || (n.tag ? `any ${String(n.tag).replace(/_/g, ' ')}` : title(id)), want, have, ok: have >= want }; });
-    const low = (r.skill || 0) > skill;
+    const low = (r.skill || 0) > skill && r.can !== true;
     const can = typeof r.can === 'boolean' ? r.can : needs.every(n => n.ok) && !low;
     const times = low || !needs.length ? 0 : Math.min(...needs.map(n => Math.floor(n.have / Math.max(1, n.want))));
-    return { id: r.id, name: r.name || title(r.id), text: r.makes?.text || r.desc || '', needs, can, times: can ? Math.max(1, times) : 0, why: low ? `Needs angling ${r.skill}.` : can ? '' : `You lack ${needs.filter(n => !n.ok).map(n => `${n.want - n.have} ${n.name}`).join(', ')}.` };
+    return { id: r.id, name: r.name || title(r.id), text: r.makes?.text || r.desc || '', needs, can, times: can ? Math.max(1, times) : 0, why: can ? '' : r.why && typeof r.why === 'string' && /\s/.test(r.why) ? r.why : low ? `Needs angling ${r.skill}.` : `You lack ${needs.filter(n => !n.ok).map(n => `${n.want - n.have} ${n.name}`).join(', ')}.` };
   });
 }

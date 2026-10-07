@@ -1,0 +1,795 @@
+{
+ "_about": "Hand-kept server moments for the UI gallery: things no server can be made to do on demand while recording (a bite, a crate, a revive offer, an event at stage 2 of 4). Each is a list of messages in the protocol's own shapes (docs/protocol.md; the same ones tests/D/pt2.spec.js and pt5.spec.js play through tvui*.fake). s = which socket ('game' unless said). Strings starting with @ are filled in when played: @now+60000 (the gallery clock, ms), @me.x+40 / @me.z (your position), @enemy / @ally / @npc / @self (an entity id in view), @char.ally (a party member's character id). tools/record-ui-fixtures.mjs never writes this file.",
+ "moments": {
+  "event-live": [
+   {
+    "t": "eventTrack",
+    "uid": "e77",
+    "id": "wolves_ford",
+    "name": "Wolves at the Ford",
+    "kind": "zone",
+    "state": "live",
+    "what": "A starving pack is crossing the ford toward the farms.",
+    "objective": {
+     "text": "Defeat the three packs, then the pack mother",
+     "n": 2,
+     "of": 4,
+     "kind": "wave"
+    },
+    "stage": {
+     "n": 3,
+     "of": 4,
+     "name": "The third pack"
+    },
+    "leftMs": 372000,
+    "endsAt": "@now+372000",
+    "rewardText": "Event cache: a rare item or better, gold and experience",
+    "inside": true,
+    "inRange": true,
+    "players": 4,
+    "x": "@me.x+12",
+    "z": "@me.z+8",
+    "r": 40,
+    "level": 22
+   }
+  ],
+  "event-far": [
+   {
+    "t": "eventTrack",
+    "uid": "e78",
+    "id": "stone_snow",
+    "name": "The Stone in the Snow",
+    "kind": "zone",
+    "state": "live",
+    "what": "Something under the snow is waking.",
+    "objective": {
+     "text": "Break the stone",
+     "n": 1,
+     "of": 3,
+     "kind": "stages"
+    },
+    "leftMs": 540000,
+    "endsAt": "@now+540000",
+    "rewardText": "A rare item for everyone who takes part",
+    "inside": false,
+    "inRange": false,
+    "players": 2,
+    "x": "@me.x+410",
+    "z": "@me.z-120",
+    "r": 30,
+    "level": 23
+   }
+  ],
+  "event-done": [
+   {
+    "t": "zoneEvent",
+    "kind": "end",
+    "ev": {
+     "uid": "e77",
+     "id": "wolves_ford",
+     "name": "Wolves at the Ford",
+     "info": {
+      "onSuccess": "The ford is quiet again."
+     }
+    },
+    "won": true,
+    "result": {
+     "xp": 1240,
+     "gold": 64,
+     "items": [
+      {
+       "name": "Ashwood Bow",
+       "rarity": "rare"
+      }
+     ]
+    }
+   },
+   {
+    "t": "eventDone",
+    "uid": "e77",
+    "id": "wolves_ford",
+    "name": "Wolves at the Ford",
+    "result": "success",
+    "credited": true,
+    "xp": 1240,
+    "gold": 64,
+    "items": [
+     {
+      "name": "Ashwood Bow",
+      "rarity": "rare"
+     }
+    ],
+    "text": "Wolves at the Ford — success"
+   }
+  ],
+  "realm-soon": [
+   {
+    "s": "gw",
+    "t": "realm",
+    "kind": "eventSoon",
+    "ev": {
+     "id": "world_grimtallow",
+     "uid": "g1",
+     "name": "Grimtallow, the Siege-Husk",
+     "province": "torbor_downs",
+     "zoneName": "Blackthorn Scar",
+     "x": "@me.x+900",
+     "z": "@me.z",
+     "r": 100,
+     "level": 24,
+     "kind": "worldboss"
+    },
+    "at": "@now+540000"
+   }
+  ],
+  "boss": [
+   {
+    "t": "ev",
+    "k": 0,
+    "e": [
+     {
+      "type": "boss",
+      "id": "@enemy",
+      "name": "The Screelhag",
+      "title": "Mother of the Moor",
+      "bars": 2,
+      "enrageMs": 185000,
+      "phases": [
+       {
+        "n": 0,
+        "name": "The Hunt",
+        "at": 1
+       },
+       {
+        "n": 1,
+        "name": "Shrieking Gale",
+        "at": 0.6
+       },
+       {
+        "n": 2,
+        "name": "Last Breath",
+        "at": 0.25
+       }
+      ]
+     },
+     {
+      "type": "castbar",
+      "id": "@enemy",
+      "ab": "shriek",
+      "name": "Rending Shriek",
+      "ms": 26000,
+      "int": 1
+     },
+     {
+      "type": "say",
+      "id": "@enemy",
+      "text": "The Screelhag draws breath!",
+      "style": "warn"
+     }
+    ]
+   }
+  ],
+  "loot": [
+   {
+    "t": "lootable",
+    "id": "@enemy",
+    "on": true,
+    "best": "rare"
+   },
+   {
+    "t": "lootWin",
+    "id": "@enemy",
+    "name": "Moor Stalker",
+    "gold": 37,
+    "items": [
+     {
+      "uid": "l1",
+      "name": "Stalker Pelt",
+      "rarity": "normal",
+      "kind": "junk",
+      "value": 6
+     },
+     {
+      "uid": "l2",
+      "name": "Fanged Charm",
+      "rarity": "magic",
+      "slot": "neck",
+      "ilvl": 22,
+      "levelReq": 20,
+      "affixes": [
+       {
+        "stat": "crit",
+        "value": 0.02,
+        "text": "+2% critical chance"
+       }
+      ]
+     },
+     {
+      "uid": "l3",
+      "name": "Gilded Band of the Hare",
+      "rarity": "rare",
+      "slot": "ring",
+      "ilvl": 23,
+      "levelReq": 21,
+      "shared": true,
+      "affixes": [
+       {
+        "stat": "moveSpeed",
+        "value": 0.05,
+        "text": "+5% movement speed"
+       },
+       {
+        "stat": "hpMax",
+        "value": 40,
+        "text": "+40 health"
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "loot-roll": [
+   {
+    "t": "lootRoll",
+    "roll": 7,
+    "corpse": 5,
+    "item": {
+     "name": "Gilded Band of the Hare",
+     "rarity": "rare",
+     "slot": "ring",
+     "ilvl": 23,
+     "levelReq": 21,
+     "affixes": [
+      {
+       "stat": "moveSpeed",
+       "value": 0.05,
+       "text": "+5% movement speed"
+      }
+     ]
+    },
+    "ms": 30000,
+    "members": [
+     {
+      "char": 1,
+      "name": "Maren"
+     },
+     {
+      "char": 2,
+      "name": "Aldra"
+     },
+     {
+      "char": 3,
+      "name": "Brem"
+     },
+     {
+      "char": 4,
+      "name": "Sella"
+     }
+    ]
+   }
+  ],
+  "loot-rolled": [
+   {
+    "t": "lootRolled",
+    "roll": 7,
+    "item": {
+     "name": "Gilded Band of the Hare",
+     "rarity": "rare"
+    },
+    "rolls": [
+     {
+      "char": 1,
+      "name": "Maren",
+      "choice": "need",
+      "n": 88
+     },
+     {
+      "char": 2,
+      "name": "Aldra",
+      "choice": "greed",
+      "n": 40
+     },
+     {
+      "char": 3,
+      "name": "Brem",
+      "choice": "skip"
+     },
+     {
+      "char": 4,
+      "name": "Sella",
+      "choice": "need",
+      "n": 31
+     }
+    ],
+    "winner": {
+     "char": 1,
+     "name": "Maren"
+    }
+   }
+  ],
+  "mail-gift": [
+   {
+    "t": "mailList",
+    "mail": [
+     {
+      "id": 9001,
+      "kind": "gift",
+      "from": "The Thousandvale Wardens",
+      "subject": "Thank you",
+      "body": "Thanks for taking the time to improve the game. Something for your trouble is inside.",
+      "sentAt": "@now-5000",
+      "read": false,
+      "taken": false,
+      "items": [
+       {
+        "uid": "gift-1",
+        "id": "gift",
+        "kind": "gift",
+        "type": "gift",
+        "name": "Gift Box",
+        "rarity": "rare",
+        "gift": {
+         "minRarity": "rare"
+        }
+       }
+      ],
+      "gold": 0
+     },
+     {
+      "id": 9000,
+      "from": "Aldra",
+      "subject": "For the road",
+      "body": "Found this in the Scar. It is more your sort of thing than mine. See you at the ford.",
+      "sentAt": "@now-5400000",
+      "read": true,
+      "taken": false,
+      "items": [
+       {
+        "uid": "m-ring",
+        "name": "Signet of the Long Road",
+        "slot": "ring",
+        "rarity": "rare",
+        "ilvl": 21,
+        "levelReq": 19,
+        "affixes": [
+         {
+          "stat": "hpMax",
+          "value": 44,
+          "text": "+44 health"
+         }
+        ]
+       }
+      ],
+      "gold": 25
+     },
+     {
+      "id": 8999,
+      "from": "Brem",
+      "subject": "Group tonight?",
+      "body": "The Barrow at eight bells. Bring potions.",
+      "sentAt": "@now-86400000",
+      "read": true,
+      "taken": true,
+      "items": [],
+      "gold": 0
+     }
+    ],
+    "unread": 1
+   },
+   {
+    "t": "mailOpen",
+    "mail": {
+     "id": 9001,
+     "kind": "gift",
+     "from": "The Thousandvale Wardens",
+     "subject": "Thank you",
+     "body": "Thanks for taking the time to improve the game. Something for your trouble is inside.",
+     "sentAt": "@now-5000",
+     "read": true,
+     "taken": false,
+     "items": [
+      {
+       "uid": "gift-1",
+       "id": "gift",
+       "kind": "gift",
+       "type": "gift",
+       "name": "Gift Box",
+       "rarity": "rare",
+       "gift": {
+        "minRarity": "rare"
+       }
+      }
+     ],
+     "gold": 0
+    }
+   }
+  ],
+  "rod": [
+   {
+    "t": "bag",
+    "add": [
+     {
+      "uid": "rod-1",
+      "id": "angling_rod",
+      "kind": "tool",
+      "tool": "rod",
+      "name": "Willow Rod",
+      "rarity": "common"
+     }
+    ],
+    "remove": [],
+    "gold": 1850
+   }
+  ],
+  "fish-wait": [
+   {
+    "t": "fishR",
+    "ok": true,
+    "state": "wait",
+    "at": {
+     "x": "@me.x",
+     "z": "@me.z+6"
+    },
+    "water": "river"
+   }
+  ],
+  "fish-bite": [
+   {
+    "t": "fishR",
+    "ok": true,
+    "state": "wait",
+    "at": {
+     "x": "@me.x",
+     "z": "@me.z+6"
+    },
+    "water": "river"
+   },
+   {
+    "t": "fishBite",
+    "ms": 600000
+   }
+  ],
+  "fish-tug": [
+   {
+    "t": "fishR",
+    "ok": true,
+    "state": "wait",
+    "at": {
+     "x": "@me.x",
+     "z": "@me.z+6"
+    },
+    "water": "river"
+   },
+   {
+    "t": "fishBite",
+    "ms": 600000
+   },
+   {
+    "t": "fishTug",
+    "ms": 600000,
+    "band": 0.34,
+    "pull": 0.4,
+    "jitter": 0.3,
+    "need": 0.55,
+    "rarity": "rare",
+    "heft": "heavy"
+   }
+  ],
+  "fish-catch": [
+   {
+    "t": "fishCatch",
+    "ok": true,
+    "kind": "fish",
+    "species": {
+     "id": "moon_eel",
+     "name": "Moon Eel",
+     "rarity": "rare"
+    },
+    "size": 61.35,
+    "record": true,
+    "first": true,
+    "skill": {
+     "level": 4,
+     "xp": 3,
+     "next": 50,
+     "up": true
+    },
+    "pool": {
+     "id": 5,
+     "left": 3
+    },
+    "item": {
+     "uid": "fish-9",
+     "id": "moon_eel",
+     "kind": "fish",
+     "name": "Moon Eel",
+     "rarity": "rare",
+     "size": 61.35
+    }
+   }
+  ],
+  "cook": [
+   {
+    "t": "bag",
+    "add": [
+     {
+      "uid": "fish-1",
+      "id": "silver_perch",
+      "species": "silver_perch",
+      "kind": "fish",
+      "type": "fish",
+      "name": "Silver Perch",
+      "rarity": "common",
+      "size": 22
+     },
+     {
+      "uid": "fish-2",
+      "id": "silver_perch",
+      "species": "silver_perch",
+      "kind": "fish",
+      "type": "fish",
+      "name": "Silver Perch",
+      "rarity": "common",
+      "size": 24.5
+     }
+    ],
+    "remove": [],
+    "gold": 1850
+   },
+   {
+    "t": "used",
+    "ok": true,
+    "kind": "campfire",
+    "cook": true
+   },
+   {
+    "t": "cookList",
+    "fire": true,
+    "recipes": [
+     {
+      "id": "perch_skewer",
+      "name": "Perch Skewer",
+      "needs": [
+       {
+        "id": "silver_perch",
+        "name": "Silver Perch",
+        "n": 1,
+        "have": 2
+       }
+      ],
+      "makes": {
+       "id": "perch_skewer",
+       "name": "Perch Skewer",
+       "text": "Eat sitting down: restores health over 20 s."
+      },
+      "can": true
+     },
+     {
+      "id": "eel_pie",
+      "name": "Eel Pie",
+      "needs": [
+       {
+        "id": "moon_eel",
+        "name": "Moon Eel",
+        "n": 1,
+        "have": 0
+       },
+       {
+        "id": "silver_perch",
+        "name": "Silver Perch",
+        "n": 2,
+        "have": 2
+       }
+      ],
+      "makes": {
+       "id": "eel_pie",
+       "name": "Eel Pie",
+       "text": "Eat sitting down: restores health and mana over 30 s."
+      },
+      "can": false
+     }
+    ]
+   }
+  ],
+  "revive-ask": [
+   {
+    "t": "reviveAsk",
+    "id": 501,
+    "from": "Brem",
+    "fromId": 2,
+    "skill": "Second Dawn",
+    "skillId": "second_dawn",
+    "hpPct": 0.25,
+    "ms": 60000,
+    "until": "@now+60000",
+    "note": "You come back in the middle of the fight."
+   }
+  ],
+  "party-invite": [
+   {
+    "s": "gw",
+    "t": "partyInvite",
+    "name": "Aldra",
+    "party": 77
+   }
+  ],
+  "trade-ask": [
+   {
+    "t": "tradeAsk",
+    "trade": 31,
+    "from": "@ally",
+    "name": "Brem"
+   }
+  ],
+  "admin-reports": [
+   {
+    "t": "adminReports",
+    "list": [
+     {
+      "id": 41,
+      "kind": "bug",
+      "state": "new",
+      "text": "The gate in Torborhold shut on my horse and I could not get back in.",
+      "at": "@now-60000",
+      "name": "Wren",
+      "client": {
+       "name": "Wren",
+       "level": 2,
+       "cls": "cleric",
+       "zone": "The Torbor Fields",
+       "x": 1024,
+       "z": 987,
+       "build": "dev",
+       "fps": 58,
+       "log": [
+        "[warn] gate state late",
+        "[game] You cannot enter."
+       ]
+      }
+     },
+     {
+      "id": 40,
+      "kind": "suggestion",
+      "state": "new",
+      "text": "More fish in the northern lakes, and a bigger bag please.",
+      "at": "@now-3600000",
+      "name": "Brem",
+      "level": 4
+     },
+     {
+      "id": 39,
+      "kind": "bug",
+      "state": "trashed",
+      "text": "asdf",
+      "at": "@now-7200000",
+      "name": "Nobody"
+     }
+    ],
+    "counts": {
+     "new": 2,
+     "approved": 0,
+     "declined": 0,
+     "trashed": 1
+    }
+   }
+  ],
+  "feedback-sent": [
+   {
+    "t": "feedbackR",
+    "ok": true,
+    "id": 41,
+    "first": true
+   }
+  ],
+  "rare-near": [
+   {
+    "t": "rareNear",
+    "id": 9901,
+    "key": "rare:greyback",
+    "name": "Old Greyback",
+    "rank": "rare",
+    "level": 24,
+    "x": "@me.x+70",
+    "z": "@me.z-40",
+    "ms": 300000
+   }
+  ],
+  "group-hint": [
+   {
+    "s": "gw",
+    "t": "groupHint",
+    "key": "demo",
+    "with": [
+     {
+      "char": 2,
+      "name": "Aldra"
+     },
+     {
+      "char": 3,
+      "name": "Brem"
+     }
+    ]
+   }
+  ],
+  "hurt-party": [
+   {
+    "s": "gw",
+    "t": "partyFrames",
+    "m": "@partyFrames"
+   }
+  ]
+ },
+ "items": {
+  "crate-boots": {
+   "uid": "boots-9",
+   "name": "Wayfarer Boots of the Hare",
+   "slot": "feet",
+   "tier": "light",
+   "rarity": "rare",
+   "armor": 26,
+   "ilvl": 23,
+   "levelReq": 21,
+   "affixes": [
+    {
+     "stat": "moveSpeed",
+     "value": 0.06,
+     "text": "+6% movement speed"
+    }
+   ]
+  },
+  "gift-ring": {
+   "uid": "ring-7",
+   "name": "Signet of the Long Road",
+   "slot": "ring",
+   "rarity": "rare",
+   "ilvl": 23,
+   "levelReq": 21,
+   "affixes": [
+    {
+     "stat": "hpMax",
+     "value": 44,
+     "text": "+44 health"
+    }
+   ]
+  }
+ },
+ "actors": {
+  "_about": "Bodies near you for when the recording has none in view (monsters, a ranked one). Only what a target frame needs; the stage puts them a few metres away.",
+  "list": [
+   {
+    "id": 90001,
+    "kind": "monster",
+    "name": "Moor Stalker",
+    "level": 24,
+    "hpMax": 2140,
+    "hostile": true,
+    "family": "Moor hound",
+    "dx": 7,
+    "dz": 9
+   },
+   {
+    "id": 90002,
+    "kind": "monster",
+    "name": "Moor Stalker",
+    "level": 23,
+    "hpMax": 1980,
+    "hostile": true,
+    "family": "Moor hound",
+    "dx": -11,
+    "dz": 14
+   },
+   {
+    "id": 90003,
+    "kind": "monster",
+    "name": "Old Greyback",
+    "level": 25,
+    "hpMax": 9600,
+    "hostile": true,
+    "family": "Dire wolf",
+    "rank": "rare",
+    "dx": 16,
+    "dz": 22
+   }
+  ]
+ }
+}

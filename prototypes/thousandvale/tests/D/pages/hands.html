@@ -22,7 +22,7 @@ const scene = new THREE.Scene();
 scene.add(new THREE.HemisphereLight('#ffffff', '#505868', 2.2)); const sun = new THREE.DirectionalLight('#fff', 2); sun.position.set(2, 5, 4); scene.add(sun);
 const rows = Math.ceil(cfg.length / cols), SX = 1.7, SY = 2.3;
 const camera = new THREE.OrthographicCamera(-cols * SX / 2, cols * SX / 2, rows * SY / 2, -rows * SY / 2, 0.1, 100);
-const ANIMS = [...new Set([...CHIBI2_EVERY_ANIMS, ...(DUAL.CHIBI2_DUAL_ANIMS || []), ...(DUAL.CHIBI2_ANGLE_ANIMS || [])])];
+const ANIMS = [...new Set([...CHIBI2_EVERY_ANIMS, ...(DUAL.CHIBI2_DUAL_ANIMS || []), ...(DUAL.CHIBI2_ANGLE_ANIMS || []), ...(DUAL.CHIBI2_REVIVE_ANIMS || [])])];
 const bodies = [];
 for (const [i, c] of cfg.entries()) {
   const av = normalizeAvatar({ body: { race: c.race || 'human' }, top: { id: 'tunic', color: '#6a7a9a' }, bottom: { id: 'pants', color: '#4a4038' }, shoes: { id: 'boots', color: '#3a2e24' },

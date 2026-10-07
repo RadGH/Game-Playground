@@ -95,3 +95,30 @@ test('back / waist / light: unequip by slot puts the piece in the bag and off in
   assert.ok(slotFits({ slot: 'back' }, 'jewellery') && slotFits({ slot: 'light' }, 'any'));
   a.close(); await srv.stop();
 });
+
+test('D-world\'s asks: info.gear carries the element of a caster weapon (`el`); a shelf pool says so on info.pool; `targets` on an fx event reaches the client untouched', async () => {
+  const { srv, clock, world } = await realServer({ roadEvents: false });
+  const P = world.province;
+  const a = await joinReal(srv, clock, 'Tinted', 'mage');
+  const o = rec(world, a);
+  const worn = Object.values(a.joined.you.equipment).find(it => it && (it.castElement || it.brand));
+  assert.ok(worn, 'a mage starts with an attuned caster weapon');
+  assert.equal(o.entity.gear.weapon.el, worn.castElement || worn.brand, 'info.gear.weapon.el: ' + JSON.stringify(o.entity.gear.weapon));
+  assert.ok(!('g5' in o.entity.gear.weapon) || o.entity.gear.weapon.g5 !== o.entity.gear.weapon.base, 'g5 only when it is not the base itself');
+  // a shelf pool (E marks shallow-shore pools `shelf: true`)
+  const copy = P.copies[0];
+  const spot = { ...Object.values(world.layouts[0].angling.pools.zones).flat()[0], id: 'pool_test_shelf', shelf: true };
+  world.layouts[0].angling.pools.zones.__t = [spot];
+  P.angling.ensurePools(copy);
+  const any = [...copy.objects.values()].find(e => e.type === 'fishpool');
+  assert.ok(any && !('shelf' in any.info().pool), 'an ordinary pool has no shelf flag');
+  any.data = { ...any.data, pool: { ...any.data.pool, shelf: true } };
+  assert.equal(any.info().pool.shelf, true);
+  delete world.layouts[0].angling.pools.zones.__t;
+  // an fx event with targets passes through the room as it is
+  const fx = []; a.on('ev', m => { for (const e of m.e) if (e.type === 'fx' && e.kind === 'bolt') fx.push(e); });
+  o.room.host.event({ type: 'fx', kind: 'bolt', id: o.entity.id, form: 'chain', targets: [7, 9, 12] });
+  await until(clock, () => fx.length, 1000);
+  assert.deepEqual(fx[0].targets, [7, 9, 12]);
+  a.close(); await srv.stop();
+});

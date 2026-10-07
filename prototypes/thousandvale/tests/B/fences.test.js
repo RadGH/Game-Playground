@@ -45,12 +45,18 @@ test('T8a recipes: every fence_rail runs along the line to the fence posts it ha
   assert.ok(rails >= 20 && hung >= 15, `rails ${rails}, between posts ${hung}`);
 });
 
+/** recipe id -> the scale its one placement is drawn at, when stream E bound it onto a B ground piece. */
+const BOUND_SCALE = Object.fromEntries(readdirSync(new URL('data/vignettes/placements/', ROOT)).filter(f => /^z\d+_\d+\.json$/.test(f))
+  .flatMap(f => json('data/vignettes/placements/' + f).placements.filter(p => p.bound && p.scale > 0 && p.scale < 1).map(p => [p.recipe || p.id, p.scale])));
+
 test('T8a recipes: fence / wall section models in a row run along the row', () => {
   const bad = []; let n = 0;
   for (const { file, v } of RECIPES) {
     const secs = (v.models || []).filter(m => ['wooden_fence', 'iron_fence', 'stone_wall'].includes(m.id));
     for (const s of secs) {
-      const nb = secs.filter(o => o !== s && Math.hypot(o.x - s.x, o.z - s.z) < 3.6);
+      // stream E (play-test 5): a set piece BOUND onto one of B's ground pieces is drawn with its positions x `scale`,
+      // so its sections are written 1/scale further apart (tools/content-fit.mjs) — neighbours are that much further too
+      const nb = secs.filter(o => o !== s && Math.hypot(o.x - s.x, o.z - s.z) < 3.6 / (BOUND_SCALE[v.id] || 1));
       if (!nb.length) continue;
       n++;
       // some neighbour continues this section's own line (a corner's other neighbour does not, and need not)
@@ -58,7 +64,7 @@ test('T8a recipes: fence / wall section models in a row run along the row', () =
     }
   }
   assert.deepEqual(bad, []);
-  assert.ok(n >= 60, 'sections in rows: ' + n);
+  assert.ok(n >= 10, 'sections in rows: ' + n);       // was 60 with Saint Hulda's railing, which stood inside B's wall and is gone
 });
 
 /** Rails and posts in a kit part list (model space): a post is upright and thin, a rail long, thin and level. */

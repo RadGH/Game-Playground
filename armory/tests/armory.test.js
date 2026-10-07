@@ -137,3 +137,17 @@ test('the real gear catalog: every row is usable by the page', async () => {
     if (r.field) assert.equal(a[r.slot].id, base[r.slot].id, `${r.key}: a field row must not replace its slot`);
   }
 });
+
+test('the 66 new rows each show a mapped Thousandvale item, named, on a known template base', async () => {
+  const { loadGearCatalog } = await import('../../avatar-3d/js/gear-catalog.js');
+  const itemData = JSON.parse(readFileSync(ROOT + 'prototypes/emberveil/data/items.json', 'utf8'));
+  const fresh = prepareRows((await loadGearCatalog()).rows).filter(r => r.isNew);
+  assert.ok(fresh.length >= 60);
+  for (const r of fresh) {
+    const list = itemRows(r, itemData);
+    assert.ok(list.some(i => i.game === 'thousandvale'), `${r.id}: no Thousandvale item shown`);
+    assert.ok(list.every(i => i.name), `${r.id}: an item with no name`);
+  }
+  const unknown = fresh.filter(r => !itemRows(r, itemData).some(i => i.known)).map(r => r.id);
+  assert.ok(unknown.length <= fresh.length * 0.25, 'most new rows resolve to a template base: ' + unknown.join(', '));
+});

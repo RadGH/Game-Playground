@@ -13,6 +13,7 @@ import { zoneName } from '../names.js';
 
 export function rewardWords(r) {
   if (!r) return [];
+  if (r.text) return [r.text];            // the server's own reward line (protocol §21.4)
   const out = [];
   if (r.xp) out.push(`${Math.round(r.xp * 100)}% of a level in experience`);
   if (r.gold) out.push(`${r.gold} gold`);

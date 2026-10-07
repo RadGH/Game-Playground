@@ -860,3 +860,18 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - (A, follow-up) C's new slots `back` / `waist` / `light`: equip, unequip, save + restore, mail and crates already carried any slot
   key (nothing is filtered by a slot list); `info.gear` rows now carry `g5` (the catalog model id) and crates name the three slots
   (a jewellery crate may hold them). tests/A/pt5-slots (2).
+
+## 2026-10-06 — play-test 5, stream G: interface gallery (T26), controller + one binding table (T27)
+- **`ui-gallery.html`** — every screen and menu as a deep-linkable scene in Desktop / Laptop / iPhone 15 Pro (both ways up, safe areas drawn) /
+  Controller frames. The frame runs the game's REAL interface modules (index.html's markup and stylesheets fetched at run time, the same
+  `create*()` calls as main.js) on a recorded server session (`tools/record-ui-fixtures.mjs` -> `js/client/gallery/fixtures/`). docs/UI.md.
+- **One binding table** `js/client/input/bindings.js`: action -> key, gamepad button, touch control. The help window, Settings > Key bindings,
+  every on-screen key hint, the controller and the gallery's Controls scene read it; `social-core.js` SHORTCUTS / PANEL_KEYS are built from it.
+- **Controller support** (standard-mapping pads): sticks, face buttons + LT modifier, D-pad targeting (enemies and party), a quick wheel on LB,
+  a focus ring in every window, a steered pointer on the map and the perk forest, an on-screen keyboard, glyphs by controller family, hints
+  that flip between keys and glyphs by the last device used.
+- **Keys can be re-bound** (Settings > Key bindings; saved in the browser; a key in use swaps).
+- **Phone layout proposal** (`css/layout-phone.css`, `js/client/input/touch.js`) behind `<html data-layout="phone">` — OFF in the game
+  (`PHONE_LAYOUT_ENABLED` in `js/client/input/layout.js`); the gallery shows it beside today's layout.
+- Tests: `tests/G/bindings.test.js`, `tests/G/gallery.test.js` (node), `tests/G/gallery.spec.js`, `tests/G/gamepad.spec.js` (Playwright).
+- (A, follow-up) D-world: `info.gear.*.el`, `g5` only when not the base, `info.pool.shelf`; fx `targets` pass through (tests/A/pt5-slots 3).

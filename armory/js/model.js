@@ -182,11 +182,13 @@ export function itemRows(row, itemData) {
   const bases = { ...(itemData?.weaponBases || {}), ...(itemData?.armorBases || {}) };
   const out = [];
   const add = (game, base, given = {}) => {
-    const b = bases[base] || {};
+    // a new model's item is injected by the game from a TEMPLATE base in the shared file (catalog `items[].template`)
+    const own = bases[base], b = own || bases[given.template] || {};
     out.push({
-      game, base, name: given.name || b.name || (base === row.base ? row.name : title(base)),
-      detail: [b.subtype || b.slot || given.type, b.tier, b.twoHanded ? 'two-handed' : '', b.weaponCategory].filter(Boolean).join(' · '),
-      known: !!bases[base], data: bases[base] || null,
+      game, base, template: !own && bases[given.template] ? given.template : null,
+      name: given.name || own?.name || (base === row.base ? row.name : title(base)),
+      detail: [b.subtype || b.slot || given.type, b.tier, b.twoHanded ? 'two-handed' : '', b.weaponCategory, !own && bases[given.template] ? `built on the "${b.name}" base` : ''].filter(Boolean).join(' · '),
+      known: !!(own || bases[given.template]), data: own || bases[given.template] || null,
     });
   };
   for (const it of row.items || []) add(it.game, it.base, it);
@@ -198,7 +200,10 @@ export function itemRows(row, itemData) {
 export function iconItem(row, itemData, game = 'thousandvale') {
   const rows = itemRows(row, itemData), hit = rows.find(r => r.game === game && r.data) || rows.find(r => r.data);
   if (!hit) return null;
-  return { ...hit.data, baseKey: hit.base, baseName: hit.data.name, name: hit.data.name, rarity: 'normal', slot: hit.data.slot || (hit.data.type === 'weapon' ? 'weapon' : undefined) };
+  const item = { ...hit.data, baseKey: hit.base, baseName: hit.name, name: hit.name, rarity: 'normal', slot: hit.data.slot || (hit.data.type === 'weapon' ? 'weapon' : undefined) };
+  // an injected item names its model the way the game does (`look.g5`); the template's own old look must not leak in
+  if (hit.template) item.look = { g5: row.id };
+  return item;
 }
 
 // ---------------------------------------------------------------- flags

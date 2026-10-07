@@ -99,7 +99,7 @@ test('dungeon: a party shares one private instance, an outsider gets their own; 
   await run(clock, 200);
   a.use(stairs.id);
   await run(clock, 300);
-  const f1 = ra.meta.plan.floors[1].entry;
+  const f1 = ra.meta.plan.floors[1].landing || ra.meta.plan.floors[1].entry;      // play-test 6: E's landing = where a floor is arrived on
   assert.ok(Math.hypot(ent(srv, a).x - f1.x, ent(srv, a).z - f1.z) < 1, 'arrived on floor 2');
   // the boss and the mini-bosses are ranked
   const ranks = [...ra.entities.values()].filter(e => e.kind === 'monster').map(e => e.rank);

@@ -285,6 +285,8 @@ export function drawIcon(ctx, kind, x, y, size = 6, m = {}, t = 0, view = null) 
     case 'pin': ctx.beginPath(); ctx.arc(0, -S * 0.6, S * 0.6, Math.PI, 0); ctx.lineTo(0, S); ctx.closePath(); fill('#e2483a', '#3a0a06', 1.4); ctx.beginPath(); ctx.arc(0, -S * 0.6, S * 0.22, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); break;
     case 'loot': { ctx.beginPath(); for (let i = 0; i < 8; i++) { const r = i % 2 ? S * 0.35 : S * 0.85, an = i / 8 * Math.PI * 2 - Math.PI / 2; ctx.lineTo(Math.cos(an) * r, Math.sin(an) * r); } ctx.closePath(); fill(m.color || '#e8e0c8', '#1b130a', 1); break; }
     case 'rare': { ctx.beginPath(); ctx.arc(0, 0, S * 0.8, 0, Math.PI * 2); fill(m.color || '#ffcf3a', '#2a0606', 1.6); ctx.beginPath(); ctx.arc(0, 0, S * 0.3, 0, Math.PI * 2); ctx.fillStyle = '#2a0606'; ctx.fill(); break; }
+    case 'npc': ctx.beginPath(); ctx.arc(0, 0, S * 0.5, 0, Math.PI * 2); fill('#7fe08a', '#0a2a10', 1); break;          // U14: someone in sight
+    case 'player': ctx.beginPath(); ctx.arc(0, 0, S * 0.5, 0, Math.PI * 2); fill('#bfe0ff', '#06223a', 1); break;
     case 'monster': ctx.beginPath(); ctx.arc(0, 0, S * 0.5, 0, Math.PI * 2); fill(m.boss ? '#ff3a3a' : '#d84a3a', '#2a0606', 1); break;
     case 'object': ctx.beginPath(); ctx.rect(-S * 0.55, -S * 0.55, S * 1.1, S * 1.1); fill(m.color || '#e0c060', '#2a1e06', 1.2); break;
     case 'me': {

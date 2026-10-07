@@ -143,7 +143,7 @@
 .kit-foot { margin-top: 6px; margin-bottom: 0 !important; }
 @media (max-width: 760px) {
   .tv-panel.kits-panel.title-mode:not(.placed) { left: 8px !important; right: 8px !important; top: auto !important; bottom: 8px; width: auto !important; }
-  .kits-panel { max-height: 54vh !important; } .kit-intro { display: none; } .kit-items { grid-template-columns: 1fr; }
+  .kits-panel { max-height: 50vh !important; } .kit-intro { display: none; } .kit-items { grid-template-columns: 1fr; }
 }
 
 /* ---------------------------------------------------------------- T25: angling */
@@ -204,7 +204,7 @@
 .ally-note { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); padding: 3px 12px; background: var(--panel); border: 1px solid rgba(127, 224, 138, 0.55); border-radius: 12px; font-size: 13px; color: var(--ink-dim); white-space: nowrap; pointer-events: none; z-index: 5; }
 .ally-note[hidden] { display: none; } .ally-note b { color: var(--good); } .ally-note small { color: var(--ink-faint); }
 .unitframe.target.friendly { border-color: rgba(127, 224, 138, 0.7); }
-#self-frame { cursor: pointer; } .pmember { cursor: pointer; }
+#self-frame { cursor: pointer; pointer-events: auto; }   /* a click on your own frame clears the target: heals go to you */ .pmember { cursor: pointer; }
 .revive-ask { margin: 0 auto 18px; max-width: 420px; padding: 14px 18px; background: var(--panel-solid); border: 1px solid var(--gold-hi); border-radius: 12px; box-shadow: var(--shadow), 0 0 30px -6px var(--gold); pointer-events: auto; text-align: center; }
 .revive-ask[hidden] { display: none; }
 .revive-ask strong { display: block; font-family: var(--serif); font-size: 19px; color: var(--gold-hi); } .revive-ask p { margin: 6px 0 10px; color: var(--ink); font-size: 15px; }

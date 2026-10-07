@@ -42,7 +42,7 @@ import { createShops, SHOP_RANGE } from './shops.js';
 import { configureNpcNames } from './npc-names.js';
 import { createMountBook } from './mounts.js';
 import { cleanLook } from './looks.js';
-import { effectOf, potionAmount, POTION_CD_MS, GROUP_R as TONIC_R } from './consumables.js';
+import { effectOf as effectOfRaw, potionAmount, potionCdMs, potionText, GROUP_R as TONIC_R, stackable, stackKey, stackMaxOf, countOf } from './consumables.js';
 import { isCrate, crateItem, openCrate } from './crates.js';
 import { createSystemMail } from './sysmail.js';
 import { createFeedback } from './feedback.js';
@@ -92,6 +92,10 @@ export function createProvince(opts) {
   const bootNonce = randomHex(4);
   let uidN = 0;
   const newUid = () => `${processName}-${bootNonce}-${(++uidN).toString(36)}`;
+  // U17 (play-test 6): potion numbers from shops.json `potions` when the file has them (E/C's one place for them)
+  const potionTable = (layouts[0] && layouts[0].shops && layouts[0].shops.potions) || opts.potionTable || null;
+  const effectOf = item => effectOfRaw(item, potionTable);
+  const POTION_CD_MS = potionCdMs(potionTable);
   const tickets = new Map();     // ticket -> { char, account, exp, near, at }
   const online = new Map();      // char id -> o
   const partyOf = new Map();     // char id -> { id, leader, members } (from the gateway)
@@ -122,13 +126,13 @@ export function createProvince(opts) {
       if (a.xp) journal(o, 'xp', { d: a.xp, level: a.level });
       grant(o, { ...a, goldAdded: true });
       if (a.level >= 2) starterMount(o);                     // Q16: the first mount at level 5
-      if (a.level !== o.sheetLevel) { o.sheetLevel = a.level; wantSheet(o); }   // T18: a level changes the sheet
+      if (a.level !== o.sheetLevel) { o.sheetLevel = a.level; wantSheet(o); potionCards(o); }   // T18: a level changes the sheet (and what a potion is worth to you)
     },
     newUid,
     loot: (ev, r) => { const e = r.entities.get(ev.to); const o = e && e.char && online.get(e.char.id); if (o && o.entity === e) grant(o, { items: ev.items, gold: 0, reason: 'kill', goldAdded: true }); },
     observe: (ev, r) => observe(ev, r),
     // play-test 2, Q3: a kill's gold + items wait on the corpse (js/sim/corpses.js); the body stays while they do
-    holdKill: opts.corpseLoot === false ? null : (e, from, a, r) => corpses.hold(r, e, from, a),
+    holdKill: opts.corpseLoot === false ? null : (e, from, a, r) => corpses.hold(r, e, from, potionDrop(e, from, a, r)),
     keepBody: (e, r) => corpses.keepBody(e, r),
     isNight: () => isNight(),
     partyLoot: opts.corpseLoot === false ? null : (members, items, corpse, partyId, r) => corpses.partyDrop(r, members, items, corpse, partyId),
@@ -400,7 +404,7 @@ export function createProvince(opts) {
         return;
       }
       case 'respawn': return respawn(o);
-      case 'use': return use(o, m.id);
+      case 'use': return use(o, m.id, m.to);
       case 'item': return itemOp(o, m);
       case 'trade': return tradeOp(o, m);
       case 'travel': return travel(o, m.to);
@@ -473,6 +477,8 @@ export function createProvince(opts) {
     online.set(ch.id, o);
     o.entity = place.room.addPlayer(ch, client, place.at);
     startingKit(o);
+    restack(o, false);                        // U5: an old save's loose potions become stacks before the first `joined`
+    potionCards(o, false);                    // U17: their cards say what they do for THIS character
     applyRefunds(o);
     learnWaystone(o, homeWaystone(), 'start');
     starterMount(o, true);
@@ -670,7 +676,15 @@ export function createProvince(opts) {
     const e = o.entity;
     if (!e.dead) return;
     if (o.reviveAsk) endReviveAsk(o, 'declined');           // T4: releasing to town turns the offer down
-    if (o.room.kind === 'instance') { o.room.respawn(e); return; }
+    if (o.room.kind === 'instance') {
+      // U12 (play-test 6): you get up on the floor you died on (its landing — E's arrival point, clear of packs), not at the top
+      const plan = o.room.meta && o.room.meta.plan;
+      const fl = plan ? plan.floors[floorAt(plan, e.x)] : null;
+      const at = fl ? (fl.landing || fl.entry) : null;
+      o.room.respawn(e, at);
+      if (o.conn && fl) o.conn.sendJSON({ t: 'you', floor: fl.index + 1, respawned: 'floor' });
+      return;
+    }
     e.revive(1);
     o.room.rules.respawn && safeRules(o.room, 'respawn', e);
     o.room.statusChanged(e);                           // Q8: no aura survives a death
@@ -731,7 +745,7 @@ export function createProvince(opts) {
   }
 
   // ---- using things ----
-  function use(o, id) {
+  function use(o, id, to = null) {
     const e = o.entity, s = o.conn;
     if (e.dead) return s.sendJSON({ t: 'used', id, ok: false, why: 'dead' });
     const r = o.room.objectNear(e, id);
@@ -743,6 +757,7 @@ export function createProvince(opts) {
       if (d.portal.to === 'wilds') { const back = { x: d.portal.x, z: d.portal.z }; o.char.exit = null; return transfer(o, pickCopy(o.char, o), back, 'exit'); }
       if (d.portal.to === 'dungeon') return enterDungeon(o, obj);
     }
+    if (d.lift) return liftUse(o, obj, to);              // U12: the stair up asks which floor
     if (d.waystone) return discover(o, obj);
     if (d.treasure) return treasureUse(o, obj);
     if (d.road && roadEvents.use(o, obj)) return;                          // S5: a road event's chest / captive
@@ -768,6 +783,26 @@ export function createProvince(opts) {
     }
     return s.sendJSON({ t: 'used', id, ok: false, why: 'unknown' });
   }
+  /**
+   * PLAY-TEST 6, U12 — "going up a floor should ask which level so you can easily return to the top, like an elevator".
+   * A dungeon's stair up (`type:'lift'`, stream E's `floor.lift`) knows every floor above it. One floor above: you go
+   * (floor 1's landing is the entrance). Two or more: `used {kind:'lift', here, choices:[{to:'f:<n>', floor, label, name}]}`
+   * and the client answers `use {id, to:'f:<n>'}`. A second plain `use` on the same lift within 4 s takes the floor just
+   * above (a client that knows nothing of lifts still climbs).
+   */
+  function liftUse(o, obj, to) {
+    const s = o.conn, L = obj.data.lift, list = L.to || [];
+    if (!list.length) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'unknown' });
+    const go = t => { s.sendJSON({ t: 'used', id: obj.id, ok: true, kind: 'stairs', floor: t.floor, label: t.label }); o.liftAsk = null; transfer(o, o.room, { x: t.x, z: t.z }, 'stairs'); questFloor(o); };
+    const m = /^f:(\d+)$/.exec(String(to || ''));
+    if (m) { const t = list.find(x => x.floor === +m[1]); if (!t) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'floor', msg: 'These stairs do not go there.' }); return go(t); }
+    const again = o.liftAsk && o.liftAsk.id === obj.id && now() - o.liftAsk.at < 4000;
+    if (list.length === 1 || again) return go(list[0]);
+    o.liftAsk = { id: obj.id, at: now() };
+    s.sendJSON({ t: 'used', id: obj.id, ok: true, kind: 'lift', name: obj.name, here: L.here, choices: list.map(t => ({ to: 'f:' + t.floor, floor: t.floor, label: t.label, name: t.name || undefined })) });
+  }
+  /** The floor (index) of a dungeon plan a point is on. */
+  function floorAt(plan, x) { let i = 0; for (let k = 0; k < plan.floors.length; k++) if (x >= plan.floors[k].origin.x) i = k; return i; }
   function enterDungeon(o, doorObj) {
     const ch = o.char, p = partyOfChar(ch.id), pv = provOf(o.room);
     const doorIdx = doorObj.data.portal.door || 0;
@@ -1084,8 +1119,12 @@ export function createProvince(opts) {
         ? (p ? 'Event complete: +' + p.xp + ' XP, +' + p.gold + ' gold' + (p.items.length ? ' — ' + p.items.map(n => n.name).join(', ') + (p.bodyName ? ' (on ' + p.bodyName + ')' : '') : '')
              : 'Event complete: ' + run.ev.name + '. You did not take part, so there is no reward this time.')
         : 'Event failed: ' + run.ev.name + ' — ' + whyText + '.' + (I.onFail ? ' ' + I.onFail : '');
+      // U9 (play-test 6): `got` — what YOU got, as a sentence. Never empty, never null (the result card printed "null").
+      const list = p ? [p.xp ? p.xp + ' experience' : '', p.gold ? p.gold + ' gold' : '', ...p.items.map(n => n.name)].filter(Boolean) : [];
+      const got = p ? (list.length ? 'You got ' + (list.length > 1 ? list.slice(0, -1).join(', ') + ' and ' + list.at(-1) : list[0]) + '.' + (p.bodyName ? ' Your share lies on ' + p.bodyName + '.' : '') : 'Your share lies on the body.')
+        : won ? 'You did not take part, so there is no share this time.' : 'No reward this time.';
       o.conn.sendJSON({ t: 'eventDone', uid: run.ev.uid, id: run.ev.id, name: run.ev.name, result: won ? 'success' : 'fail', won, ...(won ? {} : { why: run.why || 'time' }), credited: !!p,
-        xp: p ? p.xp : 0, gold: p ? p.gold : 0, items: p ? p.items : [], onBody: p ? p.onBody : undefined, text, ...(won && I.onSuccess ? { story: I.onSuccess } : !won && I.onFail ? { story: I.onFail } : {}) });
+        xp: p ? p.xp : 0, gold: p ? p.gold : 0, items: p ? p.items : [], onBody: p ? p.onBody : undefined, text, got, story: won ? (I.onSuccess || run.ev.name + ' is over. Well fought.') : (I.onFail || run.ev.name + ' was lost.') });
       o.conn.sendJSON({ t: 'chat', ch: 'system', from: 0, name: run.ev.name, text });
       if (o.eventAtKey && o.eventAtKey === run.ev.uid) { o.eventAtKey = null; o.conn.sendJSON({ t: 'eventAt', uid: null }); }
     };
@@ -1839,31 +1878,116 @@ export function createProvince(opts) {
     }
     ch.bag ||= [];
     if (gold && !goldAdded) ch.gold = (ch.gold || 0) + gold;
-    const added = [];
+    const added = [], grown = [];
     let overflow = 0, urgent = false;
     for (const it of items) {
       if (!it || typeof it !== 'object' || it._granted) continue;
       it._granted = true;
       const item = JSON.parse(JSON.stringify(it)); delete item._granted;
+      // U5 (play-test 6): a consumable joins a stack of its kind that has room; only what is left over takes a new slot
+      if (stackable(item)) {
+        let n = countOf(item);
+        const key = stackKey(item), max = stackMaxOf(item);
+        for (const st of ch.bag) {
+          if (!n) break;
+          if (!stackable(st) || stackKey(st) !== key || countOf(st) >= max) continue;
+          const k = Math.min(n, max - countOf(st));
+          st.count = countOf(st) + k; n -= k;
+          if (!grown.includes(st)) grown.push(st);
+        }
+        if (!n) continue;
+        item.count = n;
+      }
+      if (item.kind === 'potion') { const t = potionText(item, { hpMax: o.entity.hpMax, mpMax: o.entity.mpMax }, potionTable); if (t) { item.desc = t.desc; if (t.restore) item.restore = t.restore; } }
       if (item.uid) item.ruid = item.uid;
       item.uid = newUid();
-      if (ch.bag.length >= BAG_MAX) { overflow += Math.max(1, Math.round(item.value || 1)); continue; }
+      if (ch.bag.length >= BAG_MAX) { overflow += Math.max(1, Math.round(item.value || 1)) * countOf(item); continue; }
       ch.bag.push(item); added.push(item);
       if (RARE.has(item.rarity)) urgent = true;
     }
     if (overflow) ch.gold = (ch.gold || 0) + overflow;
     if (gold || overflow) journal(o, 'gold', { d: gold + overflow });
+    for (const st of grown) { journal(o, 'bagDel', { uid: st.uid }); journal(o, 'bagAdd', { item: st }); }
     for (const it of added) journal(o, 'bagAdd', { item: it });
     const lvl = ch.level || 1;
     if (gold) econ.add('faucet', reason, { gold }, lvl);
     if (added.length) econ.add('faucet', reason, { items: added.length }, lvl);
     if (overflow) econ.add('faucet', 'overflow', { gold: overflow }, lvl);
-    if (!added.length && !gold && !overflow) return added;
+    const got = grown.filter(st => !added.includes(st)).concat(added);       // what the caller hears it gave: the stacks that grew + the new items
+    if (!got.length && !gold && !overflow) return got;
     o.dirty = true;
-    if (o.conn) o.conn.sendJSON({ t: 'bag', add: added, remove: [], gold: ch.gold });
-    if (added.length || gold) o.room.emit({ type: 'loot', to: o.entity.id, d: from ? from.id : o.entity.id, items: added.map(i => ({ uid: i.uid, name: i.name, rarity: i.rarity })), gold: gold || undefined });
+    // a stack that grew goes out as remove + add of the same uid (the client's bag applies remove, then add)
+    if (o.conn) o.conn.sendJSON({ t: 'bag', add: got, remove: grown.map(st => st.uid), gold: ch.gold });
+    if (got.length || gold) o.room.emit({ type: 'loot', to: o.entity.id, d: from ? from.id : o.entity.id, items: got.map(i => ({ uid: i.uid, name: i.name, rarity: i.rarity })), gold: gold || undefined });
     if (urgent) saveNow(o);
-    return added;
+    return got;
+  }
+  /**
+   * U5: bring loose consumables of the same kind together (an old save, a letter or a trade that arrived as its own item).
+   * Journaled like any bag change; `tell` = send the client the result.
+   */
+  /**
+   * U17 (play-test 6, stream E's shops.json `potionDrops: { chance: {normal, champion, rare, elite, boss}, table: [[minLevel, id]…] }`):
+   * a kill may leave a potion beside its usual loot — the best table row the monster's level reaches, by its rank's chance.
+   */
+  const potionDrops = (layouts[0] && layouts[0].shops && layouts[0].shops.potionDrops) || opts.potionDrops || null;
+  function potionDrop(e, from, a, r) {
+    if (!potionDrops || !from || from.kind !== 'monster') return a;
+    const ch = potionDrops.chance || {}, p = ch[from.rank] ?? ch.normal ?? 0;
+    if (!(p > 0) || r.host.random('potion') >= p) return a;
+    const rows = (potionDrops.table || []).filter(row => Array.isArray(row) && (from.level || 1) >= row[0]);
+    if (!rows.length) return a;
+    const top = Math.max(...rows.map(row => row[0]));
+    const pick = rows.filter(row => row[0] === top || row[0] <= 1);
+    const id = pick[Math.floor(r.host.random('potion') * pick.length)][1];
+    const it = shops.potionOf(id, r.rules);
+    counters.potionDrops = (counters.potionDrops || 0) + 1;
+    return it ? { ...a, items: [...(a.items || []), it] } : a;
+  }
+  /**
+   * U17 follow-up: a potion's description is WRITTEN from the numbers it uses and the drinker's own maxima ("Restores 50% of
+   * your health (94 now)…"), and re-written when those change (a level, a piece of gear). `tell` = send the changed items.
+   */
+  function potionCards(o, tell = true) {
+    const e = o.entity, changed = [];
+    for (const it of o.char.bag || []) {
+      if (!it || it.kind !== 'potion') continue;
+      const t = potionText(it, { hpMax: e.hpMax, mpMax: e.mpMax }, potionTable);
+      if (!t || (it.desc === t.desc && JSON.stringify(it.restore || null) === JSON.stringify(t.restore))) continue;
+      it.desc = t.desc; if (t.restore) it.restore = t.restore; else delete it.restore;
+      changed.push(it);
+    }
+    if (!changed.length) return false;
+    o.dirty = true;                               // the text is re-made at every login, so it needs no journal row
+    if (tell && o.conn) o.conn.sendJSON({ t: 'bag', add: changed, remove: changed.map(it => it.uid), gold: o.char.gold });
+    return true;
+  }
+  function restack(o, tell = true) {
+    const ch = o.char, bag = ch.bag || [];
+    const first = new Map(), gone = [], grown = [];
+    for (const it of bag) {
+      if (!stackable(it)) continue;
+      const key = stackKey(it), max = stackMaxOf(it);
+      let n = countOf(it);
+      for (const st of first.get(key) || []) {
+        if (!n) break;
+        if (countOf(st) >= max) continue;
+        const k = Math.min(n, max - countOf(st));
+        st.count = countOf(st) + k; n -= k;
+        if (!grown.includes(st)) grown.push(st);
+      }
+      if (!n) { gone.push(it); continue; }
+      if (n !== countOf(it)) { it.count = n; if (!grown.includes(it)) grown.push(it); }
+      (first.get(key) || first.set(key, []).get(key)).push(it);
+    }
+    if (!gone.length && !grown.length) return false;
+    ch.bag = bag.filter(it => !gone.includes(it));
+    for (const it of gone) journal(o, 'bagDel', { uid: it.uid });
+    for (const st of grown) if (!gone.includes(st)) { journal(o, 'bagDel', { uid: st.uid }); journal(o, 'bagAdd', { item: st }); }
+    o.dirty = true;
+    const keep = grown.filter(st => !gone.includes(st));
+    if (tell && o.conn) o.conn.sendJSON({ t: 'bag', add: keep, remove: [...gone, ...keep].map(it => it.uid), gold: ch.gold });
+    return true;
   }
   /**
    * S3 (play-test 4): one-off refunds from data/provinces/refunds.json, each paid ONCE per character per `key`
@@ -2083,6 +2207,15 @@ export function createProvince(opts) {
     return { hp: te.hp - h0, mp: te.mp - m0 };
   }
   function consume(o, idx) {
+    const st = o.char.bag[idx];
+    if (st && stackable(st) && countOf(st) > 1) {         // U5: one off the stack (a fresh torch of the bundle is whole again)
+      st.count = countOf(st) - 1; delete st.left;
+      journal(o, 'bagDel', { uid: st.uid }); journal(o, 'bagAdd', { item: st });
+      econ.add('sink', 'use', { items: 1 }, o.char.level || 1);
+      o.dirty = true;
+      if (o.conn) o.conn.sendJSON({ t: 'bag', add: [st], remove: [st.uid], gold: o.char.gold });
+      return;
+    }
     const [it] = o.char.bag.splice(idx, 1);
     journal(o, 'bagDel', { uid: it.uid });
     econ.add('sink', 'use', { items: 1 }, o.char.level || 1);
@@ -2264,9 +2397,9 @@ export function createProvince(opts) {
     const rules = o.room.rules;
     return { t: 'shopView', npc: npc.id, name: npc.name, role, kind, title: sh ? sh.title : npc.name, says: (sh && sh.says) || undefined, services: (sh && sh.services) || undefined,
       categories: sh && sh.categories ? Object.fromEntries(Object.entries(sh.categories).map(([k, v]) => [k, v.label || k])) : undefined,
-      stock: stock.map(r => (r.item ? { ...r, item: { ...r.item, _granted: undefined, uid: 'stock:' + r.id, price: r.price } } : r)), sellRate: shops.pricing.sellFactor,
+      stock: stock.map(r => { if (!r.item) return r; const t = r.item.kind === 'potion' ? potionText(r.item, { hpMax: o.entity.hpMax, mpMax: o.entity.mpMax }, potionTable) : null; return { ...r, item: { ...r.item, _granted: undefined, uid: 'stock:' + r.id, price: r.price, ...(t ? { desc: t.desc, restore: t.restore || undefined } : {}) } }; }), sellRate: shops.pricing.sellFactor,
       buyback: (o.buyback || []).map(b => ({ uid: b.item.uid, item: b.item, price: b.price })),
-      sell: (o.char.bag || []).map(it => ({ uid: it.uid, price: shops.sellPrice(it, rules) })) };
+      sell: (o.char.bag || []).map(it => { const each = shops.sellPrice(it, rules), n = countOf(it); return n > 1 ? { uid: it.uid, price: each * n, each, count: n } : { uid: it.uid, price: each }; }) };
   }
   function shopOp(o, m) {
     const s = o.conn, ch = o.char, e = o.entity;
@@ -2321,7 +2454,7 @@ export function createProvince(opts) {
       if (i < 0) return R({ ok: false, why: 'item', msg: CODES.item });
       if (trades.offered(ch.id, m.uid)) return R({ ok: false, why: 'item', msg: 'That item is in your trade window.' });
       const [it] = ch.bag.splice(i, 1);
-      const price = shops.sellPrice(it, rules);
+      const price = shops.sellPrice(it, rules) * countOf(it);          // U5: a stack sells whole
       ch.gold = (ch.gold || 0) + price;
       journal(o, 'bagDel', { uid: it.uid }); journal(o, 'gold', { d: price });
       econ.add('faucet', 'sell', { gold: price }, ch.level || 1); econ.add('sink', 'sell', { items: 1 }, ch.level || 1);
@@ -2342,6 +2475,7 @@ export function createProvince(opts) {
     o.buyback.splice(k, 1);
     ch.gold -= b.price; ch.bag.push(b.item);
     journal(o, 'gold', { d: -b.price }); journal(o, 'bagAdd', { item: b.item });
+    setTimeoutTicks(() => { if (online.get(ch.id) === o) restack(o); }, 1);
     econ.add('sink', 'buyback', { gold: b.price }, ch.level || 1);
     o.dirty = true;
     s.sendJSON({ t: 'bag', add: [b.item], remove: [], gold: ch.gold });
@@ -2601,6 +2735,7 @@ export function createProvince(opts) {
         o.savedSeq = Math.max(o.savedSeq, sq);
         o.lastSaveAt = now();
         if (o.conn) o.conn.sendJSON({ t: 'bag', add: get, remove: [...out], gold: o.char.gold });
+        restack(o);                           // U5: traded potions join the stacks already carried
       }
       t.committing = false;
       counters.trades++;
@@ -2612,7 +2747,7 @@ export function createProvince(opts) {
   }
   const tickTimers = [];
   function setTimeoutTicks(fn, n) { tickTimers.push({ at: ticks + n, fn }); }
-  const mail = createMail({ store, online, journal, syncChar: o => syncChar(o), econ, trades, send, setTimeoutTicks, wallNow, filter: chatFilter, log, counters, BAG_MAX, saveNow: o => saveNow(o), opts: mailOpts });
+  const mail = createMail({ store, online, journal, syncChar: o => syncChar(o), econ, trades, send, setTimeoutTicks, wallNow, filter: chatFilter, log, counters, BAG_MAX, saveNow: o => saveNow(o), opts: mailOpts, restack: o => restack(o) });
 
   // ---- play-test 5: system mail (T20), feedback + admins (T19/T21), revives (T4), the character sheet (T18) ----
   /** The ONE mail API (js/sim/sysmail.js): `mailTo({ to, subject, body, items?, gold?, gift?, crate? })` — events, quests, anything. */
@@ -2726,7 +2861,7 @@ export function createProvince(opts) {
    * every ability's numbers, which must never land inside a login storm's tick.
    */
   const sheetQueue = new Set();
-  function wantSheet(o) { if (o && o.char) sheetQueue.add(o.char.id); }
+  function wantSheet(o) { if (o && o.char) { sheetQueue.add(o.char.id); if (o.entity && o.conn && o.sheetHp !== o.entity.hpMax + ':' + o.entity.mpMax) { o.sheetHp = o.entity.hpMax + ':' + o.entity.mpMax; potionCards(o); } } }
   function sheetOf(o) {
     const e = o.entity, ch = o.char, rules = o.room.rules;
     let sh = rules.sheet ? safeRules(o.room, 'sheet', e) : null;
@@ -2972,7 +3107,7 @@ export function createProvince(opts) {
     accept, step, init, shutdown, status, rooms, P, online, partyOf, econ, tickStats, owner, counters, trades,
     room: copies[0], townRoom, copies, instances, town, door, gate,
     saveNow, logout, transfer, moveTo, grant, corpses, roadEvents, mute, flushEconomy, newUid, flushJournal, timeOfDay, devSetLevel,
-    mailTo: a => sysmail.mailTo(a), offerRevive, angling, feedback, zoneRuns, kitCache, sheetOf,
+    mailTo: a => sysmail.mailTo(a), offerRevive, angling, feedback, zoneRuns, kitCache, sheetOf, restack,
     chatterContext: (r, x, z) => chatterContext(provOf(r), r, x, z),
     get liveEvent() { return liveEvent; },
   };

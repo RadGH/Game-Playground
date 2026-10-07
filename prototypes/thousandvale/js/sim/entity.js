@@ -135,12 +135,14 @@ export class Entity {
       if (this.mpMax > 0) o.mpMax = this.mpMax;                // R6+: mana bar maximum (the current value comes in `mp` events)
       if (this.sitting) o.sit = 1;                             // S20: sitting down to eat / drink (anim 'sit' too)
       if (this.eating) o.eat = this.eating;                    // S20 (D-world): 'food' | 'drink' while the meal runs
-      if (this.fishing) o.fishing = this.fishing;              // T25: a line out — {x, z, tug?} where the bobber floats
+      if (this.fishing) o.fishing = this.fishing;
+      if (this.form) o.form = this.form;                       // play-test 6 U16: the creature a shape-shifted druid is drawn as (C's shape object)              // T25: a line out — {x, z, tug?} where the bobber floats
     }
     else if (this.type) o.type = this.type;
     if (this.rank !== 'normal') o.rank = this.rank;
     if (this.aff && this.aff.length) { o.aff = this.aff; o.mods = this.aff.map(a => a.id); }   // S4: modifiers [{id, name, aura?}]; `mods` = ids (D-UI reads it)
     if (this.sc && this.sc !== 1) o.sc = this.sc;              // S4: body scale (champions/rares are bigger; a Giant much bigger)
+    if (this.ward) o.ward = this.ward;                         // play-test 6 U8: a boss's ward while it holds {max, ms, until}
     if (this.st && this.st.length) o.st = this.st;             // statuses everyone draws (Q8)
     if ((this.kind === 'object' || this.kind === 'npc') && this.data) {
       const d = this.data;
@@ -162,6 +164,10 @@ export class Entity {
       if (d.site) o.site = d.site;                             // fort / farm / hook marker: {kind, template, friendly, blurb}
       if (d.treasure) o.treasure = { chain: d.treasure.chain, step: d.treasure.step, of: d.treasure.of, cache: d.treasure.cache || undefined };
       if (d.shimmer) o.shimmer = d.shimmer;
+      if (d.floor) o.floor = d.floor;                          // play-test 6 (U14): which dungeon floor it stands on (1 = top)
+      if (d.dir) o.portal = d.dir;                             // 'down' | 'up' | 'out' on stairs, lifts, the way in and the way out
+      if (d.leave) o.leave = 1;                                // U10: the way you came in (leaves the dungeon; not the exit portal)
+      if (d.lift) o.lift = { here: d.lift.here, floors: d.lift.to.map(t => t.floor) };
       if (d.pool) o.pool = { tier: d.pool.tier, minSkill: d.pool.minSkill, left: d.pool.left, water: d.pool.water, ...(d.pool.shelf ? { shelf: true } : {}) };   // T25: a fish pool
       if (d.office) o.office = d.office;                       // a service NPC's own building (Q10): {kind, plot, x, z, yaw, lit}                    // a hidden cache glints within this many metres for someone who has every clue
     }

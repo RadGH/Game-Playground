@@ -333,7 +333,9 @@ html[data-layout="phone"] .help-grid dl, html[data-layout="phone"] .ctl-ref dl {
 html[data-layout="phone"] .loot-row, html[data-layout="phone"] .shop-row { min-height: 52px; }
 html[data-layout="phone"] .roll-card { width: min(340px, 92vw); }
 html[data-layout="phone"] .rc-btns button { min-height: var(--tap); flex: 1; }
-html[data-layout="phone"] .roll-stack { left: auto; transform: none; right: calc(var(--sr) + 8px); bottom: auto; top: calc(var(--st) + 106px); flex-direction: column; }
+html[data-layout="phone"] .roll-stack { bottom: calc(var(--sb) + 10px); }
+html[data-layout="phone"] .roll-card { width: 250px; }
+@media (orientation: portrait) { html[data-layout="phone"] .roll-stack { bottom: auto; top: calc(var(--st) + 300px); } html[data-layout="phone"] .roll-card { width: 300px; } }
 html[data-layout="phone"] .trade-panel .tr-split, html[data-layout="phone"] .tr-halves { grid-template-columns: 1fr 1fr; }
 
 /* fishing: the tug bar sits beside the Reel button's thumb, the bite prompt mid-screen */
@@ -366,9 +368,20 @@ html[data-layout="phone"] .linkish { min-height: var(--tap); padding: 0 6px; }
   html[data-layout="phone"] .brand h1 { font-size: 26px; } html[data-layout="phone"] .brand p { display: none; }
   html[data-layout="phone"] .title .field { margin-bottom: 8px; }
 }
-/* the appearance editor and the starting-equipment step: a sheet over the lower half upright (the figure stays in view), a column on its side */
-html[data-layout="phone"] .tv-panel.appearance-panel, html[data-layout="phone"] .tv-panel.kits-panel { top: 34% !important; border-top: 1px solid var(--edge-strong); border-radius: 16px 16px 0 0; }
-@media (orientation: landscape) { html[data-layout="phone"] .tv-panel.appearance-panel, html[data-layout="phone"] .tv-panel.kits-panel { top: var(--st) !important; right: auto !important; width: 56% !important; border-radius: 0; border-right: 1px solid var(--edge-strong); } }
+/* the appearance editor: a sheet over the lower part upright (the figure stays in view above it), a column on its side.
+   The starting-equipment step is a full sheet upright (three sets and the weapon packs need the room). */
+html[data-layout="phone"] .tv-panel.appearance-panel.title-mode:not(.x), html[data-layout="phone"] .tv-panel.appearance-panel { top: 36% !important; bottom: var(--sb) !important; left: var(--sl) !important; right: var(--sr) !important; max-height: none !important; border-top: 1px solid var(--edge-strong); border-radius: 16px 16px 0 0; }
+html[data-layout="phone"] .tv-panel.kits-panel.title-mode:not(.x), html[data-layout="phone"] .tv-panel.kits-panel { top: var(--st) !important; bottom: var(--sb) !important; left: var(--sl) !important; right: var(--sr) !important; max-height: none !important; }
+html[data-layout="phone"] .appearance-panel .ap-body { max-height: none; }
+html[data-layout="phone"] .kit-intro { display: block; }
+@media (orientation: landscape) {
+  html[data-layout="phone"] .tv-panel.appearance-panel.title-mode:not(.x), html[data-layout="phone"] .tv-panel.appearance-panel, html[data-layout="phone"] .tv-panel.kits-panel.title-mode:not(.x), html[data-layout="phone"] .tv-panel.kits-panel { top: var(--st) !important; right: auto !important; width: 56% !important; border-radius: 0; border-top: 0; border-right: 1px solid var(--edge-strong); }
+}
+html[data-layout="phone"] .ap-row { flex-wrap: wrap; min-height: var(--tap); }
+html[data-layout="phone"] .ap-swatches { gap: 6px; flex: 1 1 100%; }
+html[data-layout="phone"] .ap-foot { flex-wrap: wrap; }
+html[data-layout="phone"] .ap-foot .primary { flex: 1 1 100%; order: -1; }
+html[data-layout="phone"] .step-title { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: center; }
 html[data-layout="phone"] .ap-sw { min-width: var(--tap); min-height: var(--tap); }
 html[data-layout="phone"] .kit-choice { padding: 10px; }
 
@@ -382,6 +395,6 @@ html[data-layout="phone"] .fish-btn { display: none !important; }               
 html[data-layout="phone"] .title-foot { position: static; margin-top: 10px; grid-column: 1; }
 html[data-layout="phone"] a { min-width: var(--tap); justify-content: center; }
 html[data-layout="phone"] .ap-row.ap-gear, html[data-layout="phone"] .map-toggle { min-height: var(--tap); padding: 0 8px; }
-html[data-layout="phone"] .kit-item .islot, html[data-layout="phone"] .islot.small { width: var(--tap); height: var(--tap); }
+html[data-layout="phone"] .kit-item .islot, html[data-layout="phone"] .islot.small, html[data-layout="phone"] .gold-slot { width: var(--tap); height: var(--tap); }
 html[data-layout="phone"] .inv-bag, html[data-layout="phone"] .inv-tools, html[data-layout="phone"] .inv-filters, html[data-layout="phone"] .inv-doll, html[data-layout="phone"] .inv-tools .row { min-width: 0; max-width: 100%; }
 html[data-layout="phone"] .inv-tools input { min-width: 0; flex: 1 1 0; }

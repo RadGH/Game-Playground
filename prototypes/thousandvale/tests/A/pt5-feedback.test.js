@@ -86,8 +86,8 @@ test('T19 + T20: a bug report from inside the world is stored with both contexts
   assert.ok(o.char.bag.some(i => i.uid === ir[0].opened.item.uid), 'what was inside is in the bag');
   // a second report: thanks, but one gift per character; and the rate limit answers
   a.feedback('suggestion', 'More fish.'); await until(clock, () => fr.length >= 4);
-  assert.equal(fr[3].ok, false); assert.equal(fr[3].why, 'slow', 'one every 20 s');
-  await run(clock, 21000);
+  assert.equal(fr[3].ok, false); assert.equal(fr[3].why, 'slow', 'one every 2 s');
+  await run(clock, 2100);
   a.feedback('suggestion', 'More fish.'); await until(clock, () => fr.length >= 5);
   assert.equal(fr[4].ok, true); assert.equal(fr[4].first, false, 'no second gift');
   assert.equal((await store.listFeedback({})).length, 2);
@@ -116,7 +116,7 @@ test('T21: only an account with the admin flag reads reports and changes their s
   const boss = await claimedAs(srv, clock, 'Bossy'), pleb = await claimedAs(srv, clock, 'Pleb');
   const fr = on(pleb, 'feedbackR');
   pleb.feedback('bug', 'The gate is sideways.'); await until(clock, () => fr.length);
-  await run(clock, 21000);
+  await run(clock, 2100);
   pleb.feedback('suggestion', 'Add fishing.'); await until(clock, () => fr.length >= 2);
   // nobody is an admin yet
   const ar = on(boss, 'adminR'), reps = on(boss, 'adminReports');
@@ -215,5 +215,18 @@ test('T20: ONE mail API — province.mailTo / gateway.mailTo post items, gold, a
   assert.equal(new Set(o.char.bag.map(i => i.uid)).size, 3, 'every posted item has its own uid');
   assert.equal((await store.escrow()).items, 0, 'nothing left in escrow');
   // a system letter cannot be sent back
+  a.close(); await srv.stop();
+});
+
+test('U2 (play-test 6): the owner files reports while play-testing — 2 s apart is fine, and thirty in a row all go through', async () => {
+  const { FEEDBACK } = await import('../../js/sim/feedback.js');
+  assert.equal(FEEDBACK.gapMs, 2000); assert.ok(FEEDBACK.perHour >= 1000);
+  const { srv, clock, store } = m3Server();
+  await srv.ready;
+  const a = await joinAs(srv, clock, 'Prolific');
+  const fr = on(a, 'feedbackR');
+  for (let k = 0; k < 30; k++) { a.feedback('bug', 'Report number ' + k); await until(clock, () => fr.length > k, 2000); await run(clock, 2100); }
+  assert.equal(fr.filter(m => m.ok).length, 30, JSON.stringify(fr.filter(m => !m.ok)[0]));
+  assert.equal((await store.listFeedback({ limit: 100 })).length, 30);
   a.close(); await srv.stop();
 });

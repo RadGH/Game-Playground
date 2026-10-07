@@ -1,0 +1,132 @@
+{
+  "id": "ev_harl_vesk",
+  "name": "Harl Vesk, the Raider Captain",
+  "tier": "event",
+  "body": "brigand_captain",
+  "place": "realm event siege_torborhold: the raid's captain, fought in the open at Torborhold's gate (no arena, no furniture)",
+  "_doc": "Stream E (play-test 6 U8). The captain of the raid on Torborhold. Before this the siege's boss had NO script and fell back to the Barrow Warden's (defaults.boss.any) — the dungeon boss's name, and a ward that only three braziers can break, in a town street with no braziers: 'he became unkillable'. Harl is a level-3 fight for whoever is in town: a wide axe sweep to step out of, a charge down a line, and at half health he whistles up three raiders (no ward — he keeps fighting). Out of raiders, he fights on with a second, shorter health bar. Nothing in this script needs an object to be there. Enrage 4 min.",
+  "party": "Solo: fair at level 3-4 (step out of the sweep, sidestep the charge). 2-5: the event's own sizing adds health and raiders.",
+  "hpMult": 2.5,
+  "say": {
+    "pull": [
+      "Torborhold! Open your stores and nobody burns.",
+      "Take the gate. I'll take the rest."
+    ],
+    "death": "Harl Vesk drops his axe. The raiders run for the fields.",
+    "reset": "Harl Vesk spits and walks back to his line."
+  },
+  "enrage": {
+    "seconds": 240,
+    "damage": 2.5,
+    "say": "Harl Vesk has run out of patience!"
+  },
+  "abilities": {
+    "axe_sweep": {
+      "id": "axe_sweep",
+      "name": "Axe Sweep",
+      "every": [
+        8,
+        11
+      ],
+      "first": 4,
+      "range": 6,
+      "say": "Harl winds up a wide sweep — step back!",
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 2.2,
+          "wind": 1.8,
+          "damage": 1.8
+        }
+      ]
+    },
+    "gate_charge": {
+      "id": "gate_charge",
+      "name": "Gate Charge",
+      "every": [
+        14,
+        18
+      ],
+      "first": 9,
+      "cast": 0.8,
+      "say": "Harl lowers his shoulder — get out of the line!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 16,
+          "w": 3,
+          "wind": 1.8,
+          "damage": 2.2
+        }
+      ]
+    },
+    "thrown_torch": {
+      "id": "thrown_torch",
+      "name": "Thrown Torch",
+      "every": [
+        12,
+        16
+      ],
+      "first": 7,
+      "range": 18,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 3.2,
+          "wind": 1.8,
+          "damage": 1.4,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "At the Gate",
+      "abilities": [
+        "axe_sweep",
+        "gate_charge"
+      ]
+    },
+    {
+      "name": "To Me!",
+      "at": 0.5,
+      "say": "To me, you dogs! Earn your share!",
+      "abilities": [
+        "axe_sweep",
+        "gate_charge",
+        "thrown_torch"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "road_brigand",
+            "count": 3,
+            "radius": 8
+          }
+        },
+        {
+          "say": "Three raiders answer the whistle. Harl is NOT shielded: keep hitting him or clear them first.",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "name": "On His Own",
+      "newBar": {
+        "hp": 0.5
+      },
+      "say": "Fine. I'll do it myself.",
+      "abilities": [
+        "axe_sweep",
+        "gate_charge",
+        "thrown_torch"
+      ]
+    }
+  ]
+}

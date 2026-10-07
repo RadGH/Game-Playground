@@ -8,7 +8,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { propModel, cropField, fenceLine, PROP_MODEL_IDS, PROP_MODEL_INFO, PROP_GROUPS, CROP_IDS, CROP_PART_CAP, FENCE_LINE_KINDS } from '../js/propkit.js';
+import { PROP_MESHES, propModel, cropField, fenceLine, PROP_MODEL_IDS, PROP_MODEL_INFO, PROP_GROUPS, CROP_IDS, CROP_PART_CAP, FENCE_LINE_KINDS } from '../js/propkit.js';
 import { MESHES } from '../js/buildkit.js';
 
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -16,7 +16,7 @@ const SEEDS = [1, 2, 7, 42, 20261005];
 const allParts = m => [...m.parts, ...m.spin.flatMap(s => s.parts)];
 
 function checkPart(p, where) {
-  assert.ok(MESHES.includes(p.mesh), `${where}: unknown mesh ${p.mesh}`);
+  assert.ok(MESHES.includes(p.mesh) || PROP_MESHES.includes(p.mesh), `${where}: unknown mesh ${p.mesh}`);
   for (const k of ['x', 'y', 'z', 'yaw', 'rx', 'rz']) assert.ok(Number.isFinite(p[k]), `${where}: ${k} not finite`);
   for (const k of ['w', 'h', 'd']) assert.ok(Number.isFinite(p[k]) && p[k] > 0, `${where}: ${k} must be positive (${p[k]})`);
   assert.match(p.colour, HEX, `${where}: colour ${p.colour}`);

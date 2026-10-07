@@ -80,14 +80,14 @@ function barData(engine) {
 }
 export function buildSkillBar(engine, ch, rpgView) {
   const bar = createSkillBar({ data: barData(engine), player: ch, rpg: rpgView, canSummon: (petId, sl) => ch.canSummon?.(petId, sl) ?? { ok: true } });
-  fillSlots(engine, bar, engine.skillData.classes?.[ch.classId] || engine.skillData.classes?.ranger || []);
-  bar.relearn = (ids = null) => { fillSlots(engine, bar, ids || engine.skillData.classes?.[ch.classId] || []); return bar.slots.map(sl => sl.id); };
+  fillSlots(engine, bar, engine.skillData.classes?.[ch.classId] || engine.skillData.classes?.ranger || [], ch.classId);
+  bar.relearn = (ids = null) => { fillSlots(engine, bar, ids || engine.skillData.classes?.[ch.classId] || [], ch.classId); return bar.slots.map(sl => sl.id); };
   return bar;
 }
 /** skills.js `fill(ids)`, with the descriptions from the cache. */
-export function fillSlots(engine, bar, ids) {
+export function fillSlots(engine, bar, ids, classId = null) {
   const data = engine.skillData;
-  const unlockAt = data.unlockAt || [1, 3, 6, 12, 18, 24];
+  const unlockAt = unlockLadder(data, classId);
   const slots = bar.slots;
   const next = (ids || []).map((id, i) => ({
     id: id || null,
@@ -104,6 +104,20 @@ export function fillSlots(engine, bar, ids) {
   for (const sl of next) if (!sl.empty && data.skills[sl.id]) Object.assign(sl, describedSlot(engine, sl.id, sl.unlockAt));
   slots.length = 0;
   slots.push(...next);
+}
+
+/**
+ * The level each key opens at. Farhold's ladder is 1 / 3 / 6 / 12 / 18 / 24. Owner feedback 6 (U11): a level-2 druid
+ * "could not heal me" — the heal sat on key 2, which opened at level 3, so a healer had no heal for anyone in its
+ * first two levels. A HEALER class (skills-tv.json `healers`) has BOTH its first two keys from level 1: its direct
+ * heal and its attack.
+ */
+export function unlockLadder(data, classId = null) {
+  const base = data.unlockAt || [1, 3, 6, 12, 18, 24];
+  if (!classId || !(data.healers || []).includes(classId)) return base;
+  const out = [...base];
+  out[1] = out[0];
+  return out;
 }
 
 /** A character's current skill ids, slot by slot (empty slots are null). */

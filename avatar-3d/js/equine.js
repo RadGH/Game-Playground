@@ -210,9 +210,12 @@ export async function createEquine(spec = {}, { detail = 1 } = {}) {
     eye.position.set(sx * R.rx * 0.9, R.top * 0.45, R.c[2]); eye.scale.set(0.6, 1, 1.15); head.add(eye);
     const lid = mesh(new THREE.SphereGeometry(0.027 * hk, n(10, 6), n(6, 4), 0, Math.PI * 2, 0, Math.PI / 2), shade(C.body, -0.15));
     lid.position.copy(eye.position); lid.position.y += 0.004; lid.scale.set(0.7, 0.55, 1.2); lid.rotation.z = -sx * 0.25; head.add(lid);
-    const Rm = at(0.95);
-    const nos = mesh(new THREE.SphereGeometry(0.017 * hk, n(8, 5), n(6, 4)), '#1a1210', { rough: 0.4 });
-    nos.position.set(sx * Rm.rx * 0.6, Rm.top * 0.1, Rm.c[2] + 0.005); nos.scale.set(0.8, 0.6, 1); head.add(nos);
+    const Rm = at(0.92);
+    // NOSTRILS (2026-10-07: "the horse's weird nostrils" — a player took them for a second pair of eyes). They were
+    // glossy black balls two thirds the size of the eye, proud of the top of the muzzle. A nostril is a small matte
+    // slit on the SIDE of the nose end, a little below its midline and half sunk into it, running along the nose.
+    const nos = mesh(new THREE.SphereGeometry(0.011 * hk, n(8, 5), n(6, 4)), shade(C.body, -0.62), { rough: 0.95 });
+    nos.position.set(sx * Rm.rx * 0.74, Rm.top * -0.12, Rm.c[2] - 0.004 * hk); nos.scale.set(0.42, 0.75, 1.15); nos.rotation.y = sx * 0.5; head.add(nos);
     // ears: up in the world, so turned back against the head's pitch, leaning a touch forward and out
     const ek = (Bd.ears || 1) * hk;
     const ear = new THREE.Group(); ear.position.set(sx * 0.05 * hk, hTop(0) * hk * 0.8, 0.0); ear.rotation.set(-Bd.down + 0.3, 0, -sx * (isElk ? 0.75 : 0.22)); head.add(ear);

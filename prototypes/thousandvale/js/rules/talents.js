@@ -141,7 +141,19 @@ export function nodeText(node, row, statuses = {}, skills = {}) {
   if (key) TEXT.set(key, { row, text });
   return text;
 }
+/** Card sentences for the mods only Thousandvale's rules read (Farhold's describer answers "No change." for them). */
+function tvNodeText(node, statuses = {}) {
+  const set = node?.mod?.set || {};
+  const out = [];
+  const pack = set['form.pack'];
+  if (pack) out.push(`Taking the shape calls ${pack.count ?? 2} ${pack.name || 'followers'} to fight beside you for ${pack.seconds ?? 30}s (or until you leave the shape); they take no follower slot.`);
+  const behind = set['form.basic.behindStatus'];
+  if (behind) out.push(`In the shape, a basic hit from behind the target applies ${statuses[behind]?.name || behind}.`);
+  return out.join(' ');
+}
 function nodeTextRaw(node, row, statuses = {}, skills = {}) {
+  const tv = tvNodeText(node, statuses);
+  if (tv) return tv;
   const heals = row?.shape === 'self' && !row?.mult;
   if (!node.bespoke) return heals ? describeMod(node.mod, { heals }) : (node.desc || describeMod(node.mod));
   // a resource rider names the skill's own resource (Farhold's card printed "Spends all your undefined")

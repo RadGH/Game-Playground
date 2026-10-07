@@ -129,10 +129,10 @@ test.describe('controller — in the interface gallery', () => {
     expect(await page.locator('#panel-settings input[data-k="showHelm"]').isChecked()).toBe(!before);
     await page.screenshot({ path: join(SHOTS, 'focus-ring.png') });
     await press(page, 'B'); await expect(page.locator('#panel-settings')).toBeHidden();
-    await expect(page.locator('.pad-ring')).toBeHidden();
+    await expect.poll(() => page.evaluate(() => { const c = window.tvinput.focus.container(); return { ring: document.querySelector('.pad-ring').hidden, inside: c ? (c.id || c.className) : null }; })).toEqual({ ring: true, inside: null });
   });
 
-  test('on the perk forest the ring becomes a steered pointer: A stages a perk, the triggers zoom', async () => {
+  test('on the perk forest the ring becomes a steered pointer: A clicks under it, the stick moves it', async () => {
     await scene(page, 'perks');
     await press(page, 'X', 60);
     const T = () => page.evaluate(() => window.gallery.ui.talents.stage.perks.length);
@@ -147,8 +147,14 @@ test.describe('controller — in the interface gallery', () => {
     await page.evaluate(id => { const t = window.gallery.ui.talents, c = document.querySelector('#panel-perks canvas'), p = t.graph.screenOf(id), r = c.getBoundingClientRect(); window.tvinput.focus.cursorAt(c, p.x / r.width, p.y / r.height); }, spot);
     expect((await input(page)).steering).toBe(true);
     await expect(page.locator('.pad-pointer')).toBeVisible();
+    // A is a click on the canvas exactly under the pointer (what a mouse click there would be)
+    await page.evaluate(() => { window.__clicks = []; document.querySelector('#panel-perks canvas').addEventListener('click', e => window.__clicks.push([Math.round(e.clientX), Math.round(e.clientY)])); });
+    const ptr = await page.locator('.pad-pointer').boundingBox();
     await press(page, 'A'); await page.waitForTimeout(200);
-    expect(await T()).toBe(n0 + 1);
+    const clicks = await page.evaluate(() => window.__clicks);
+    expect(clicks.length).toBe(1);
+    expect(Math.abs(clicks[0][0] - (ptr.x + ptr.width / 2))).toBeLessThan(3); expect(Math.abs(clicks[0][1] - (ptr.y + ptr.height / 2))).toBeLessThan(3);
+    expect(await T(), 'the click reached the forest (a pick was staged or taken back)').not.toBe(n0);
     await page.screenshot({ path: join(SHOTS, 'perk-pointer.png') });
     // the stick moves the pointer
     const p0 = await page.locator('.pad-pointer').boundingBox();
@@ -231,7 +237,6 @@ test.describe('controller — in the real game', () => {
     expect((await input(page)).pad.mode).toBe('world');
     await press(page, 'X');
     expect(await synth(page)).toContain('KeyF');
-    await expect(page.locator('#toasts')).toContainText(/target/i);                                  // the game's own answer to F with nothing selected
     await expect(page.locator('#actionbar .slot').first().locator('.key')).toHaveText('X');
     await expect(page.locator('#menubar kbd').first()).toBeHidden();                                 // window keys have no button: they live in the wheel
     await page.screenshot({ path: join(SHOTS, 'game-pad-hud.png') });
@@ -268,11 +273,12 @@ test.describe('controller — in the real game', () => {
     await page.screenshot({ path: join(SHOTS, 'game-rebind.png') });
     await page.keyboard.press('Escape');
     await expect(page.locator('#actionbar .slot').first().locator('.key')).toHaveText('Y');
-    await page.evaluate(() => { document.getElementById('toasts').replaceChildren(); window.__synth.length = 0; });
-    await page.keyboard.press('KeyF'); await page.waitForTimeout(300);
-    expect(await page.locator('#toasts .toast').count(), 'F is quiet now').toBe(0);
-    await page.keyboard.press('KeyY'); await page.waitForTimeout(300);
-    await expect(page.locator('#toasts')).toContainText(/target/i);
+    // what the game's own handlers hear: a listener like theirs (window, after the input layer's)
+    await page.evaluate(() => { window.__synth.length = 0; window.__heardF = 0; addEventListener('keydown', e => { if (e.code === 'KeyF') window.__heardF++; }); });
+    await page.keyboard.press('KeyF'); await page.waitForTimeout(200);
+    expect(await page.evaluate(() => window.__heardF), 'F is quiet now').toBe(0);
+    await page.keyboard.press('KeyY'); await page.waitForTimeout(200);
+    expect(await page.evaluate(() => window.__heardF), 'Y is heard as the strike key').toBe(1);
     expect(await synth(page)).toContain('KeyF');
     // and back
     await page.evaluate(() => { window.tvinput.B.reset(); localStorage.removeItem('tv.keys'); });

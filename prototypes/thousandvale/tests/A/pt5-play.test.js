@@ -296,7 +296,7 @@ test('E\'s asks: a quest\'s `reward.goods` and crates are PAID at turn-in (and `
   assert.equal(qr[0].ok, true, JSON.stringify(qr[0]));
   await run(clock, 300);
   const want = def.reward.goods[0];
-  assert.equal(o.char.bag.filter(i => i.id === want.id).length, want.count, `${want.count} x ${want.id} in the bag`);
+  assert.equal(o.char.bag.filter(i => i.id === want.id).reduce((n, i) => n + (i.count || 1), 0), want.count, `${want.count} x ${want.id} in the bag (one stack)`);
   assert.equal(o.char.bag.filter(i => i.kind === 'crate').length, def.reward.crates.length, 'and its crate');
   assert.ok(o.char.bag.find(i => i.id === want.id).use, 'a usable good (bait)');
   // bait goes on the hook for its casts

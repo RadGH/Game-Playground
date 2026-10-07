@@ -80,6 +80,13 @@ by something new in `main.js`, add the same `create…()` call to `stage.js` (th
 | Phone, upright | 393 × 852, safe area top 59, bottom 34 | same switch |
 | Controller | 1366 × 768 | the desktop interface with the gamepad layer on (hints as button glyphs, the focus ring, the wheel) |
 
+52 scenes in all: 46 in each desktop frame, 49 in each phone frame, 50 in the controller frame (a few scenes exist
+only where they mean something — the quick wheel, the focus ring, the belt).
+
+**What the spec measured (2026-10-07):** in the proposed phone layout, 0 of ~800 on-screen controls are smaller than
+44 px or outside the safe area, either way up. With today's layout on the same screen: on its side 765 of 1,014
+controls are under 44 px and 244 poke outside the safe area; upright 1,130 of 1,554 and 358. (`tests/G/shots/report.json`)
+
 The iPhone 15 Pro's Dynamic Island and home bar are drawn over the phone frames; "Outline the safe area" shows the
 rectangle everything must stay inside. The phone's insets are CSS variables (`--safe-top` …) that default to the real
 `env(safe-area-inset-*)`, so the same stylesheet is right on a real phone.

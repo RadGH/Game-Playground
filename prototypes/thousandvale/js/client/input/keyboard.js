@@ -45,5 +45,5 @@ function onKey(e) {
 if (typeof window !== 'undefined') {
   window.addEventListener('keydown', onKey, true);
   window.addEventListener('keyup', onKey, true);
-  window.addEventListener('pointerdown', e => device.seen(e.pointerType === 'touch' ? 'touch' : 'keyboard'), true);
+  window.addEventListener('pointerdown', e => { if (e.isTrusted) device.seen(e.pointerType === 'touch' ? 'touch' : 'keyboard'); }, true);   // not the clicks the pad's pointer makes
 }

@@ -218,13 +218,25 @@
       ],
       "onEnter": [
         {
-          "shield": true
+          "shield": {
+            "seconds": 15,
+            "pool": 0.08
+          }
         },
         {
-          "say": "The imp is wreathed in flame! Tip all three water butts!",
+          "say": "The imp is wreathed in flame! Tip all three water butts! It fails by itself in 15 seconds.",
           "style": "warn"
         }
-      ]
+      ],
+      "ward": {
+        "seconds": 15,
+        "break": "objects",
+        "need": 3,
+        "what": "brazier",
+        "say": "The imp is wreathed in flame! Tip all three water butts! It fails by itself in 15 seconds.",
+        "fade": "The ward fails by itself. No opening this time.",
+        "pool": 0.08
+      }
     },
     {
       "name": "Soggy",

@@ -234,7 +234,7 @@ test('T25 cooking: a campfire, E\'s recipe, fish out and a meal in; the meal is 
   assert.equal(used[1].cook, true, 'using the fire offers cooking');
   a.cook(stick.id, 2); await until(clock, () => cr.length >= 2);
   assert.equal(cr[1].ok, true, JSON.stringify(cr[1]));
-  assert.equal(cr[1].items.length, 2);
+  assert.equal(cr[1].n, 2); assert.equal(cr[1].item.count, 2, 'two meals, one stack (play-test 6 U5)');
   assert.equal(o.char.bag.filter(i => i.kind === 'fish').length, 1, 'two fish went in the pan');
   const meal = o.char.bag.find(i => i.cooked);
   assert.ok(meal && meal.kind === 'good' && meal.use && meal.use.type === 'food', JSON.stringify(meal));

@@ -235,7 +235,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     emit({ t: 'castX', id: st.e.id, ab: st.cast.ab.id, why });
     // the zones marked at cast start go away with the cast (and the ones still waiting to be placed)
     st.cast.gone = true;
-    for (const t of st.cast.tele) if (!t.dead) { t.dead = true; emit({ t: 'teleR', id: t.id, x: 1 }); }
+    for (const t of st.cast.tele) if (!t.dead) { t.dead = true; emit({ t: 'teleR', id: t.id, x: 1, why: why === 'interrupt' ? 'interrupted' : why }); }
     if (why === 'interrupt') runActions(st, st.cast.ab.onInterrupt || []);
     st.cast = null;
   }
@@ -419,7 +419,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       const hitObj = (spec.breaks && inside(t, o.x, o.z, o.r ?? 1)) || (spec.los && o.lastBlock === t.gid);
       if (hitObj) damageObject(st, o, 1);
     }
-    if (spec.leave) addObject(st, { ...spec.leave, x: t.x - st.homeX, z: t.z - st.homeZ, rel: true });
+    if (spec.leave) { const left = addObject(st, { ...spec.leave, x: t.x - st.homeX, z: t.z - st.homeZ, rel: true }); if (left) left.leftBy = st.e; }
     enc.stats.hits += hits.length;
     enc.stats.dodged += Math.max(0, players().filter(p => Math.hypot(p.x - t.x, p.z - t.z) < (t.r ?? t.len ?? 5) + 6).length - hits.length);
     emit({ t: 'teleR', id: t.id, hits: hits.map(([f]) => f.id) });
@@ -542,11 +542,42 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
   }
   enc.addSpot = addSpot;
 
-  function setShield(st, on) {
-    st.shield = !!on;
-    // a shield is a barrier the size of a mountain: Farhold's strike takes damage off `barrier` first
-    st.e.barrier = on ? 1e12 : 0;
-    emit({ t: 'fx', kind: 'shield', id: st.e.id, on: !!on });
+  /**
+   * A boss WARD. Owner feedback 6 (U8): "the ward became shielded and it never went away and he became unkillable …
+   * it wore off but it took way too long". A ward used to be a barrier the size of a mountain with no clock: it
+   * stood until the script's own answer (three braziers) and nothing on screen said so. Now every ward has
+   *   * a LIFE (`seconds`, default data/rules/progression.json `ward.seconds`) after which it fades by itself, and
+   *   * a BREAKING POINT (`pool` x the boss's maximum health): it is a real barrier, and enough damage shatters it;
+   * the script's own way still drops it at once (with whatever bonus the script gives). `on` may be `true` or
+   * `{ seconds, pool }`. The client is told how long and how much: at the start, once a second, and why it ended.
+   */
+  function setShield(st, on, why = 'script') {
+    if (!on) {
+      if (!st.shield) return;
+      st.shield = false; st.ward = null;
+      st.e.barrier = 0;
+      emit({ t: 'fx', kind: 'shield', id: st.e.id, on: false, why });
+      return;
+    }
+    const W = room.engine?.progression?.ward || {};
+    const cfg = typeof on === 'object' ? on : {};
+    const seconds = cfg.seconds ?? W.seconds ?? 18;
+    const max = Math.max(1, Math.round((st.e.maxHp || 1) * (cfg.pool ?? W.pool ?? 0.1)));
+    st.shield = true;
+    st.ward = { left: seconds, ms: Math.round(seconds * 1000), max, next: 1 };
+    st.e.barrier = max;
+    emit({ t: 'fx', kind: 'shield', id: st.e.id, on: true, ms: st.ward.ms, pool: max, name: cfg.name || 'Ward' });
+  }
+  /** The ward on a unit right now, for the client's bar: `{ on, hp, max, leftMs, ms }`, or null. */
+  enc.wardOf = u => { const st = states.get(u); return st?.shield && st.ward ? { on: true, hp: Math.max(0, Math.round(u.barrier || 0)), max: st.ward.max, leftMs: Math.max(0, Math.round(st.ward.left * 1000)), ms: st.ward.ms } : null; };
+  function tickWard(st, dt) {
+    const w = st.ward;
+    if (!st.shield || !w) return;
+    if ((st.e.barrier || 0) <= 0) { setShield(st, false, 'broken'); say(st, st.script?.phases?.[st.phase]?.shieldBroken || 'The ward shatters under the blows!', null, 'warn'); return; }
+    w.left -= dt;
+    if (w.left <= 0) { setShield(st, false, 'expired'); say(st, st.script?.phases?.[st.phase]?.shieldFaded || 'The ward gutters out.', null, 'warn'); return; }
+    w.next -= dt;
+    if (w.next <= 0) { w.next = 1; emit({ t: 'fx', kind: 'shield', id: st.e.id, hp: Math.round(st.e.barrier), max: w.max, left: Math.round(w.left * 1000) }); }
   }
 
   // ---- arena objects
@@ -631,6 +662,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       o.next = o.spec.every ?? 1;
       const st = states.get(o.enc);
       if (!st) continue;
+      if (o.leftBy && (o.leftBy.dying != null || o.leftBy.removed)) { removeObject(o); continue; }     // U3: nothing a dead caster left hurts anyone
       const s = o.spec;
       for (const f of friends()) {
         if (Math.hypot(f.x - o.x, f.z - o.z) > o.r + BODY_RADIUS) continue;
@@ -650,6 +682,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     // adds that died leave the set; a shield tied to them drops with the last one
     for (const a of st.adds) if (a.dying != null || a.removed) st.adds.delete(a);
     if (st.shield && st.script?.phases?.[st.phase]?.shieldWhileAdds && st.adds.size === 0) { setShield(st, false); say(st, st.script.phases[st.phase].shieldDown); }
+    tickWard(st, dt);
     checkTriggers(st);
     checkPhases(st);
     const en = st.script.enrage;
@@ -683,6 +716,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     if (st.base) Object.assign(e, { dmg: [...st.base.dmg], attackEvery: st.base.attackEvery, armor: st.base.armor, modDmg: st.base.modDmg, modifiers: st.base.modifiers });
     states.delete(e);
     e.maxHp = st.baseMaxHp / (st.script?.hpMult || 1);
+    setShield(st, false, 'reset');          // U8: a ward that ends with a reset says so (the client stops drawing it)
     e.hp = e.maxHp; e.statuses = {}; e.barrier = 0;
     clearThreat(e);
     e.state = 'return';
@@ -705,10 +739,23 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     tickTele();
     tickObjects(dt);
     for (const st of states.values()) {
+      // owner feedback 6 (U3): "void zone / telegraph effects should end immediately when the enemy dies". A dead or
+      // removed caster's running telegraphs are withdrawn THIS tick (they used to stay drawn until they would have
+      // gone off) and the puddles it left behind are taken away (they used to keep hurting for their full 8 s)
+      if ((st.e.dying != null || st.e.removed) && !st.swept) { st.swept = true; sweepOwner(st.e, st.e.removed && st.e.dying == null ? 'gone' : 'dead'); }
       if (st.e.removed) { states.delete(st.e); continue; }
       if (st.script && st.started && st.e.dying == null) tickBoss(st, dt);
     }
   }
+  /** Withdraw everything `owner` still has on the ground: telegraphs (not an `afterDeath` one) and left-behind pools. */
+  function sweepOwner(owner, why = 'dead') {
+    let n = 0;
+    for (const t of tele) if (!t.dead && t.owner === owner && !t.spec?.afterDeath) { t.dead = true; n++; emit({ t: 'teleR', id: t.id, x: 1, why }); }
+    for (const o of [...objects.values()]) if (o.leftBy === owner) { removeObject(o); n++; }
+    if (n) prune();
+    return n;
+  }
+  enc.sweepOwner = sweepOwner;
   enc.tick = tick;
   enc.think = think;
   enc.beforeKill = beforeKill;

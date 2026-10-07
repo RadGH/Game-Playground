@@ -130,6 +130,22 @@ export function poolTvGear(pool, items, cfg, report) {
   return n;
 }
 
+/**
+ * Owner feedback 6 (U6): "Shields show 0.2% chance to block". The shared item table writes a shield's BUILT-IN block as
+ * a fraction (0.2 = one hit in five); Farhold restates the rollable block affix in percent at load (its affixes.js) but
+ * not this built-in line, and the sheet reads the stat as percent — so the card said 0.2% and the shield really gave
+ * +0.2%. Thousandvale writes it as the percent it was always meant to be (20). Safe to run more than once: a value
+ * above 1 is already a percent. `UNIT_FIXES` is the whole list; tests/C/playtest6 sweeps every stat for another.
+ */
+export const UNIT_FIXES = Object.freeze({ block_chance: { ids: ['base_block_chance'], scale: 100, max: 1 } });
+export function fixUnits(item) {
+  for (const a of item?.affixes || []) {
+    const f = UNIT_FIXES[a.stat];
+    if (f && f.ids.includes(a.id) && a.value > 0 && a.value <= f.max) a.value = Math.round(a.value * f.scale);
+  }
+  return item;
+}
+
 /** T17: may this weapon take a conversion? Physical, magic or rare, not already branded. */
 export function canConvert(cfg, items, item) {
   const c = cfg?.convert;
@@ -179,6 +195,7 @@ export function attachTvGear(engine, cfg) {
     const gen = loot.generate;
     loot.generate = function tvGenerate(baseKey, rarity, quality, opts) {
       const item = gen.call(this, baseKey, rarity, quality, opts);
+      fixUnits(item);
       const base = item && (items.weaponBases[baseKey] || items.armorBases[baseKey]);
       if (item && base?.g5) {
         item.g5 = base.g5;
@@ -197,6 +214,7 @@ export function attachTvGear(engine, cfg) {
   /** Every new item passes through here once: T17 conversion (drops only), then the caster stamp. */
   engine.finishItem = (item, { rng = null, fresh = true, convert = true } = {}) => {
     if (!item || typeof item !== 'object') return item;
+    fixUnits(item);                       // an old save's shield (block 0.2) is corrected as it is loaded
     const c = engine.tvGear?.convert;
     if (convert && fresh && rng && c && canConvert(engine.tvGear, items, item) && rng() < (c.chance ?? 0)) {
       const els = Object.keys(c.affixes || {});

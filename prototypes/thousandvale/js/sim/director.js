@@ -202,7 +202,10 @@ export function createDirector({ now, wallNow = now, log = () => {}, events = nu
   function end(won, why) {
     const ev = cur.ev;
     for (const p of allProcs()) sendTo(p, { k: 'event', op: 'stop', uid: ev.uid });
-    broadcast({ t: 'realm', kind: 'eventEnd', ev: view(ev), won: !!won, why });
+    // play-test 6 U9: the end always carries a real sentence (the result card printed "null" when there was none)
+    const I = ev.info || {};
+    const text = won ? (I.onSuccess || (ev.name || 'The event') + ' is over. Well fought.') : (I.onFail || (ev.name || 'The event') + ' was lost.');
+    broadcast({ t: 'realm', kind: 'eventEnd', ev: view(ev), won: !!won, result: won ? 'success' : 'fail', why: why || undefined, text });
     log('event ended', ev.uid, why);
     cur = null; next = now() + gap(); lastEnd = now();
   }

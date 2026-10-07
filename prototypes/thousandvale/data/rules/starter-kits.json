@@ -1,432 +1,2364 @@
 {
- "_doc": "Stream C (play-test 5, T5): the starting equipment a new character chooses after the look screen. Per class: exactly 3 `armour` sets ({id, name, blurb, pieces: [armour base keys]}, 3 pieces each, budget bases only — cloth/light/medium/heavy helm, chest, legs, gauntlets, boots; never plate/runed/scaled/dragon gear, never heavier than the class wears) and 3-6 `weapons` packs ({id, name, blurb, main, off?, style?, element?, spell?}). `main`/`off` are item base keys (emberveil items.json weaponBases/armorBases, plus the foci Farhold's foci.js adds in memory: grimoire, seer_orb, reliquary, psalter, effigy). For a caster: `element` is the wand/staff/sceptre's element (fire, ice, lightning, poison, shadow, arcane — Farhold has no holy attunement), `spell` a staff's spell key (Farhold weapons.js STAFF_SPELLS for that element), `style` a wand's castStyle (docs/requests.md 'Round 5 contracts — C', T15). The FIRST weapons pack of a class is its old Farhold starter, so a character made with no choice gets what it got before; the first armour set contains the old starting armour. Blurbs say what the thing IS and carry no numbers. Read by js/rules/starter-kits.js (kitsFor / validKit / starterGear); checked by tests/C/starter-kits.test.mjs. This file is GENERATED from a table (the generator lived in the agent scratchpad) but is the source of truth now: edit it by hand.",
+ "_doc": "Stream C (play-test 5, T5): the starting equipment a new character chooses after the look screen. Per class: exactly 3 `armour` sets ({id, name, blurb, pieces: [armour base keys]}, 3 pieces each, budget bases only \u2014 cloth/light/medium/heavy helm, chest, legs, gauntlets, boots; never plate/runed/scaled/dragon gear, never heavier than the class wears) and 3-6 `weapons` packs ({id, name, blurb, main, off?, style?, element?, spell?}). `main`/`off` are item base keys (emberveil items.json weaponBases/armorBases, plus the foci Farhold's foci.js adds in memory: grimoire, seer_orb, reliquary, psalter, effigy). For a caster: `element` is the wand/staff/sceptre's element (fire, ice, lightning, poison, shadow, arcane \u2014 Farhold has no holy attunement), `spell` a staff's spell key (Farhold weapons.js STAFF_SPELLS for that element), `style` a wand's castStyle (docs/requests.md 'Round 5 contracts \u2014 C', T15). The FIRST weapons pack of a class is its old Farhold starter, so a character made with no choice gets what it got before; the first armour set contains the old starting armour. Blurbs say what the thing IS and carry no numbers. Read by js/rules/starter-kits.js (kitsFor / validKit / starterGear); checked by tests/C/starter-kits.test.mjs. This file is GENERATED from a table (the generator lived in the agent scratchpad) but is the source of truth now: edit it by hand. Owner feedback 6 (U15): no pack is strictly worse than another \u2014 every pack fills BOTH hands (a one-hander always has a shield, buckler, focus or second weapon beside it) or is a two-hander; every class with a shield has a one-hander-and-shield pack.",
  "version": 1,
  "classes": {
   "warrior": {
    "armour": [
-    {"id":"line_mail","name":"Line-Holder's Mail","blurb":"Heavy chest, heavy helm and heavy gauntlets. Nothing on: legs, boots.","pieces":["heavy_chest","heavy_helm","heavy_gauntlets"]},
-    {"id":"march_harness","name":"Marching Harness","blurb":"Mail chest, heavy helm and mail boots. Nothing on: legs, gloves.","pieces":["medium_chest","heavy_helm","medium_boots"]},
-    {"id":"pit_leathers","name":"Pit Fighter's Leathers","blurb":"Leather chest, leather gauntlets and leather boots. Nothing on: head, legs.","pieces":["light_chest","light_gauntlets","light_boots"]}
+    {
+     "id": "line_mail",
+     "name": "Line-Holder's Mail",
+     "blurb": "Heavy chest, heavy helm and heavy gauntlets. Nothing on: legs, boots.",
+     "pieces": [
+      "heavy_chest",
+      "heavy_helm",
+      "heavy_gauntlets"
+     ]
+    },
+    {
+     "id": "march_harness",
+     "name": "Marching Harness",
+     "blurb": "Mail chest, heavy helm and mail boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "medium_chest",
+      "heavy_helm",
+      "medium_boots"
+     ]
+    },
+    {
+     "id": "pit_leathers",
+     "name": "Pit Fighter's Leathers",
+     "blurb": "Leather chest, leather gauntlets and leather boots. Nothing on: head, legs.",
+     "pieces": [
+      "light_chest",
+      "light_gauntlets",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"sword_shield","name":"Sword and Board","blurb":"Longsword: one-handed, with a shield (blocks).","main":"longsword","off":"shield"},
-    {"id":"twin_swords","name":"Twin Blades","blurb":"Sword: one-handed, with a second sword in the off hand (it swings too, for less).","main":"sword","off":"sword"},
-    {"id":"greatsword","name":"The Long Edge","blurb":"Greatsword: two-handed.","main":"greatsword"},
-    {"id":"hammer_shield","name":"Hammer and Wall","blurb":"Warhammer: one-handed, heavy, with a shield (blocks).","main":"warhammer","off":"shield"},
-    {"id":"great_axe","name":"Woodcutter's Answer","blurb":"Two-handed axe.","main":"axe2h"}
+    {
+     "id": "sword_shield",
+     "name": "Sword and Board",
+     "blurb": "Longsword: one-handed, with a shield (blocks).",
+     "main": "longsword",
+     "off": "shield"
+    },
+    {
+     "id": "twin_swords",
+     "name": "Twin Blades",
+     "blurb": "Sword: one-handed, with a second sword in the off hand (it swings too, for less).",
+     "main": "sword",
+     "off": "sword"
+    },
+    {
+     "id": "greatsword",
+     "name": "The Long Edge",
+     "blurb": "Greatsword: two-handed.",
+     "main": "greatsword"
+    },
+    {
+     "id": "hammer_shield",
+     "name": "Hammer and Wall",
+     "blurb": "Warhammer: one-handed, heavy, with a shield (blocks).",
+     "main": "warhammer",
+     "off": "shield"
+    },
+    {
+     "id": "great_axe",
+     "name": "Woodcutter's Answer",
+     "blurb": "Two-handed axe.",
+     "main": "axe2h"
+    },
+    {
+     "id": "spear_shield",
+     "name": "Line Spear and Shield",
+     "blurb": "Spear: one-handed, long reach, with a shield in the off hand (armour and a chance to block).",
+     "main": "spear",
+     "off": "shield"
+    }
    ]
   },
   "fighter": {
    "armour": [
-    {"id":"drill_plate","name":"Drill-Yard Half Plate","blurb":"Mail chest, heavy helm and heavy gauntlets. Nothing on: legs, boots.","pieces":["medium_chest","heavy_helm","heavy_gauntlets"]},
-    {"id":"duel_mail","name":"Duellist's Mail","blurb":"Mail chest, mail gauntlets and mail boots. Nothing on: head, legs.","pieces":["medium_chest","medium_gauntlets","medium_boots"]},
-    {"id":"salle_leathers","name":"Salle Leathers","blurb":"Leather chest, leather helm and leather legs. Nothing on: gloves, boots.","pieces":["light_chest","light_helm","light_legs"]}
+    {
+     "id": "drill_plate",
+     "name": "Drill-Yard Half Plate",
+     "blurb": "Mail chest, heavy helm and heavy gauntlets. Nothing on: legs, boots.",
+     "pieces": [
+      "medium_chest",
+      "heavy_helm",
+      "heavy_gauntlets"
+     ]
+    },
+    {
+     "id": "duel_mail",
+     "name": "Duellist's Mail",
+     "blurb": "Mail chest, mail gauntlets and mail boots. Nothing on: head, legs.",
+     "pieces": [
+      "medium_chest",
+      "medium_gauntlets",
+      "medium_boots"
+     ]
+    },
+    {
+     "id": "salle_leathers",
+     "name": "Salle Leathers",
+     "blurb": "Leather chest, leather helm and leather legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "light_chest",
+      "light_helm",
+      "light_legs"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"two_hander","name":"Schooled Two-Hander","blurb":"Two-handed sword.","main":"sword2h"},
-    {"id":"sword_shield","name":"Guard and Counter","blurb":"Longsword: one-handed, with a shield (blocks).","main":"longsword","off":"shield"},
-    {"id":"rapier_dagger","name":"Main and Parry","blurb":"Rapier: one-handed, light, with a dagger in the off hand (it swings too, for less).","main":"rapier","off":"dagger"},
-    {"id":"halberd","name":"Yard Halberd","blurb":"Halberd: two-handed polearm.","main":"halberd"},
-    {"id":"twin_hammers","name":"Paired Mallets","blurb":"Hammer: one-handed, with a second hammer in the off hand (it swings too, for less).","main":"hammer","off":"hammer"}
+    {
+     "id": "two_hander",
+     "name": "Schooled Two-Hander",
+     "blurb": "Two-handed sword.",
+     "main": "sword2h"
+    },
+    {
+     "id": "sword_shield",
+     "name": "Guard and Counter",
+     "blurb": "Longsword: one-handed, with a shield (blocks).",
+     "main": "longsword",
+     "off": "shield"
+    },
+    {
+     "id": "rapier_dagger",
+     "name": "Main and Parry",
+     "blurb": "Rapier: one-handed, light, with a dagger in the off hand (it swings too, for less).",
+     "main": "rapier",
+     "off": "dagger"
+    },
+    {
+     "id": "halberd",
+     "name": "Yard Halberd",
+     "blurb": "Halberd: two-handed polearm.",
+     "main": "halberd"
+    },
+    {
+     "id": "twin_hammers",
+     "name": "Paired Mallets",
+     "blurb": "Hammer: one-handed, with a second hammer in the off hand (it swings too, for less).",
+     "main": "hammer",
+     "off": "hammer"
+    },
+    {
+     "id": "mace_shield",
+     "name": "Drill Mace and Shield",
+     "blurb": "Mace: one-handed, with a shield in the off hand (armour and a chance to block).",
+     "main": "iron_mace",
+     "off": "shield"
+    }
    ]
   },
   "paladin": {
    "armour": [
-    {"id":"vigil_mail","name":"Vigil Mail","blurb":"Mail chest, mail helm and mail gauntlets. Nothing on: legs, boots.","pieces":["medium_chest","medium_helm","medium_gauntlets"]},
-    {"id":"pilgrim_harness","name":"Road Pilgrim's Harness","blurb":"Mail chest, leather boots and mail legs. Nothing on: head, gloves.","pieces":["medium_chest","light_boots","medium_legs"]},
-    {"id":"penitent_wraps","name":"Penitent's Leathers","blurb":"Leather chest, leather gauntlets and leather boots. Nothing on: head, legs.","pieces":["light_chest","light_gauntlets","light_boots"]}
+    {
+     "id": "vigil_mail",
+     "name": "Vigil Mail",
+     "blurb": "Mail chest, mail helm and mail gauntlets. Nothing on: legs, boots.",
+     "pieces": [
+      "medium_chest",
+      "medium_helm",
+      "medium_gauntlets"
+     ]
+    },
+    {
+     "id": "pilgrim_harness",
+     "name": "Road Pilgrim's Harness",
+     "blurb": "Mail chest, leather boots and mail legs. Nothing on: head, gloves.",
+     "pieces": [
+      "medium_chest",
+      "light_boots",
+      "medium_legs"
+     ]
+    },
+    {
+     "id": "penitent_wraps",
+     "name": "Penitent's Leathers",
+     "blurb": "Leather chest, leather gauntlets and leather boots. Nothing on: head, legs.",
+     "pieces": [
+      "light_chest",
+      "light_gauntlets",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"sword_psalter","name":"Blade and Book","blurb":"Sword: one-handed, with a psalter (a focus: spell power and mana).","main":"sword","off":"psalter"},
-    {"id":"sword_shield","name":"Oath and Shield","blurb":"Longsword: one-handed, with a shield (blocks).","main":"longsword","off":"shield"},
-    {"id":"mace_shield","name":"Mace of the Watch","blurb":"Iron mace: one-handed, with a shield (blocks).","main":"iron_mace","off":"shield"},
-    {"id":"sceptre_reliquary","name":"Sceptre and Relic","blurb":"Sceptre: one-handed, MELEE; its swings deal arcane force damage, with a reliquary (a focus: a barrier and its own power).","main":"scepter","off":"reliquary","element":"arcane"},
-    {"id":"hammer_psalter","name":"Hammer and Hymnal","blurb":"Warhammer: one-handed, heavy, with a psalter (a focus: spell power and mana).","main":"warhammer","off":"psalter"}
+    {
+     "id": "sword_psalter",
+     "name": "Blade and Book",
+     "blurb": "Sword: one-handed, with a psalter (a focus: spell power and mana).",
+     "main": "sword",
+     "off": "psalter"
+    },
+    {
+     "id": "sword_shield",
+     "name": "Oath and Shield",
+     "blurb": "Longsword: one-handed, with a shield (blocks).",
+     "main": "longsword",
+     "off": "shield"
+    },
+    {
+     "id": "mace_shield",
+     "name": "Mace of the Watch",
+     "blurb": "Iron mace: one-handed, with a shield (blocks).",
+     "main": "iron_mace",
+     "off": "shield"
+    },
+    {
+     "id": "sceptre_reliquary",
+     "name": "Sceptre and Relic",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal arcane force damage, with a reliquary (a focus: a barrier and its own power).",
+     "main": "scepter",
+     "off": "reliquary",
+     "element": "arcane"
+    },
+    {
+     "id": "hammer_psalter",
+     "name": "Hammer and Hymnal",
+     "blurb": "Warhammer: one-handed, heavy, with a psalter (a focus: spell power and mana).",
+     "main": "warhammer",
+     "off": "psalter"
+    }
    ]
   },
   "ranger": {
    "armour": [
-    {"id":"trail_leathers","name":"Trail Leathers","blurb":"Leather chest, leather boots and leather gauntlets. Nothing on: head, legs.","pieces":["light_chest","light_boots","light_gauntlets"]},
-    {"id":"hide_hood","name":"Stalker's Hood and Hides","blurb":"Leather chest, leather helm and leather legs. Nothing on: gloves, boots.","pieces":["light_chest","light_helm","light_legs"]},
-    {"id":"warden_greens","name":"Warden's Greens","blurb":"Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.","pieces":["cloth_chest","cloth_helm","light_boots"]}
+    {
+     "id": "trail_leathers",
+     "name": "Trail Leathers",
+     "blurb": "Leather chest, leather boots and leather gauntlets. Nothing on: head, legs.",
+     "pieces": [
+      "light_chest",
+      "light_boots",
+      "light_gauntlets"
+     ]
+    },
+    {
+     "id": "hide_hood",
+     "name": "Stalker's Hood and Hides",
+     "blurb": "Leather chest, leather helm and leather legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "light_chest",
+      "light_helm",
+      "light_legs"
+     ]
+    },
+    {
+     "id": "warden_greens",
+     "name": "Warden's Greens",
+     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"shortbow","name":"Hunter's Shortbow","blurb":"Shortbow: two-handed, ranged, quick to draw.","main":"shortbow"},
-    {"id":"longbow","name":"Long Yew","blurb":"Bow: two-handed, ranged.","main":"bow"},
-    {"id":"crossbow","name":"Gamekeeper's Crossbow","blurb":"Crossbow: two-handed, ranged, no draw.","main":"crossbow"},
-    {"id":"javelins","name":"Javelins and Buckler","blurb":"Javelins: thrown, one-handed, ranged, with a buckler (a small shield that blocks).","main":"javelin","off":"buckler"}
+    {
+     "id": "shortbow",
+     "name": "Hunter's Shortbow",
+     "blurb": "Shortbow: two-handed, ranged, quick to draw.",
+     "main": "shortbow"
+    },
+    {
+     "id": "longbow",
+     "name": "Long Yew",
+     "blurb": "Bow: two-handed, ranged.",
+     "main": "bow"
+    },
+    {
+     "id": "crossbow",
+     "name": "Gamekeeper's Crossbow",
+     "blurb": "Crossbow: two-handed, ranged, no draw.",
+     "main": "crossbow"
+    },
+    {
+     "id": "javelins",
+     "name": "Javelins and Buckler",
+     "blurb": "Javelins: thrown, one-handed, ranged, with a buckler (a small shield that blocks).",
+     "main": "javelin",
+     "off": "buckler"
+    },
+    {
+     "id": "sword_buckler",
+     "name": "Trail Sword and Buckler",
+     "blurb": "Sword: one-handed, for when they close in, with a buckler in the off hand (a little armour and a chance to block).",
+     "main": "sword",
+     "off": "buckler"
+    }
    ]
   },
   "rogue": {
    "armour": [
-    {"id":"alley_leathers","name":"Alley Leathers","blurb":"Leather chest, leather boots and leather gauntlets. Nothing on: head, legs.","pieces":["light_chest","light_boots","light_gauntlets"]},
-    {"id":"rooftop_hood","name":"Rooftop Hood and Wraps","blurb":"Leather chest, leather helm and leather legs. Nothing on: gloves, boots.","pieces":["light_chest","light_helm","light_legs"]},
-    {"id":"fence_coat","name":"Fence's Soft Coat","blurb":"Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.","pieces":["cloth_chest","cloth_helm","light_boots"]}
+    {
+     "id": "alley_leathers",
+     "name": "Alley Leathers",
+     "blurb": "Leather chest, leather boots and leather gauntlets. Nothing on: head, legs.",
+     "pieces": [
+      "light_chest",
+      "light_boots",
+      "light_gauntlets"
+     ]
+    },
+    {
+     "id": "rooftop_hood",
+     "name": "Rooftop Hood and Wraps",
+     "blurb": "Leather chest, leather helm and leather legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "light_chest",
+      "light_helm",
+      "light_legs"
+     ]
+    },
+    {
+     "id": "fence_coat",
+     "name": "Fence's Soft Coat",
+     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"twin_daggers","name":"Pair of Knives","blurb":"Dagger: one-handed, fast, short reach, with a dagger in the off hand (it swings too, for less).","main":"dagger","off":"dagger"},
-    {"id":"rapier_dagger","name":"Needle and Knife","blurb":"Rapier: one-handed, light, with a dagger in the off hand (it swings too, for less).","main":"rapier","off":"dagger"},
-    {"id":"sword_dagger","name":"Short Blade and Shiv","blurb":"Sword: one-handed, with a dagger in the off hand (it swings too, for less).","main":"sword","off":"dagger"},
-    {"id":"dagger_buckler","name":"Knife and Buckler","blurb":"Dagger: one-handed, fast, short reach, with a buckler (a small shield that blocks).","main":"dagger","off":"buckler"}
+    {
+     "id": "twin_daggers",
+     "name": "Pair of Knives",
+     "blurb": "Dagger: one-handed, fast, short reach, with a dagger in the off hand (it swings too, for less).",
+     "main": "dagger",
+     "off": "dagger"
+    },
+    {
+     "id": "rapier_dagger",
+     "name": "Needle and Knife",
+     "blurb": "Rapier: one-handed, light, with a dagger in the off hand (it swings too, for less).",
+     "main": "rapier",
+     "off": "dagger"
+    },
+    {
+     "id": "sword_dagger",
+     "name": "Short Blade and Shiv",
+     "blurb": "Sword: one-handed, with a dagger in the off hand (it swings too, for less).",
+     "main": "sword",
+     "off": "dagger"
+    },
+    {
+     "id": "dagger_buckler",
+     "name": "Knife and Buckler",
+     "blurb": "Dagger: one-handed, fast, short reach, with a buckler (a small shield that blocks).",
+     "main": "dagger",
+     "off": "buckler"
+    },
+    {
+     "id": "twin_swords",
+     "name": "Back-alley Blades",
+     "blurb": "Sword: one-handed, with a second sword in the off hand (it swings too, for less).",
+     "main": "sword",
+     "off": "sword"
+    }
    ]
   },
   "cleric": {
    "armour": [
-    {"id":"chapel_mail","name":"Chapel Mail","blurb":"Mail chest, mail helm and mail boots. Nothing on: legs, gloves.","pieces":["medium_chest","medium_helm","medium_boots"]},
-    {"id":"alms_coat","name":"Almoner's Coat","blurb":"Leather chest, mail helm and leather boots. Nothing on: legs, gloves.","pieces":["light_chest","medium_helm","light_boots"]},
-    {"id":"wayside_robe","name":"Wayside Robe","blurb":"Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.","pieces":["cloth_chest","cloth_helm","light_boots"]}
+    {
+     "id": "chapel_mail",
+     "name": "Chapel Mail",
+     "blurb": "Mail chest, mail helm and mail boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "medium_chest",
+      "medium_helm",
+      "medium_boots"
+     ]
+    },
+    {
+     "id": "alms_coat",
+     "name": "Almoner's Coat",
+     "blurb": "Leather chest, mail helm and leather boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "light_chest",
+      "medium_helm",
+      "light_boots"
+     ]
+    },
+    {
+     "id": "wayside_robe",
+     "name": "Wayside Robe",
+     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"sceptre","name":"Plain Sceptre","blurb":"Sceptre: one-handed, MELEE; its swings deal arcane force damage.","main":"scepter","element":"arcane"},
-    {"id":"sceptre_reliquary","name":"Sceptre and Reliquary","blurb":"Sceptre: one-handed, MELEE; its swings deal frost damage, with a reliquary (a focus: a barrier and its own power).","main":"scepter","off":"reliquary","element":"ice"},
-    {"id":"staff_ring","name":"Staff of the Circle","blurb":"Staff: two-handed; its attack is a ring of arcane force around you.","main":"staff","element":"arcane","spell":"nova"},
-    {"id":"staff_frost","name":"Winter Crook","blurb":"Staff: two-handed; its attack is a ring of frost around you.","main":"staff","element":"ice","spell":"nova"},
-    {"id":"wand_ward","name":"Warding Wand and Psalter","blurb":"Wand: one-handed, ranged; throws a bolt of arcane force; each hit gives you a small barrier, with a psalter (a focus: spell power and mana).","main":"wand","off":"psalter","style":"ward","element":"arcane"},
-    {"id":"wand_beam","name":"Lightline Wand and Orb","blurb":"Wand: one-handed, ranged; fires an instant line of lightning through everything in it, with an orb in the off hand (more spell power).","main":"wand","off":"orb","style":"beam","element":"lightning"}
+    {
+     "id": "sceptre",
+     "name": "Plain Sceptre",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal arcane force damage, with a shield in the off hand (armour and a chance to block).",
+     "main": "scepter",
+     "element": "arcane",
+     "off": "shield"
+    },
+    {
+     "id": "sceptre_reliquary",
+     "name": "Sceptre and Reliquary",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal frost damage, with a reliquary (a focus: a barrier and its own power).",
+     "main": "scepter",
+     "off": "reliquary",
+     "element": "ice"
+    },
+    {
+     "id": "staff_ring",
+     "name": "Staff of the Circle",
+     "blurb": "Staff: two-handed; its attack is a ring of arcane force around you.",
+     "main": "staff",
+     "element": "arcane",
+     "spell": "nova"
+    },
+    {
+     "id": "staff_frost",
+     "name": "Winter Crook",
+     "blurb": "Staff: two-handed; its attack is a ring of frost around you.",
+     "main": "staff",
+     "element": "ice",
+     "spell": "nova"
+    },
+    {
+     "id": "wand_ward",
+     "name": "Warding Wand and Psalter",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of arcane force; each hit gives you a small barrier, with a psalter (a focus: spell power and mana).",
+     "main": "wand",
+     "off": "psalter",
+     "style": "ward",
+     "element": "arcane"
+    },
+    {
+     "id": "wand_beam",
+     "name": "Lightline Wand and Orb",
+     "blurb": "Wand: one-handed, ranged; fires an instant line of lightning through everything in it, with an orb in the off hand (more spell power).",
+     "main": "wand",
+     "off": "orb",
+     "style": "beam",
+     "element": "lightning"
+    },
+    {
+     "id": "mace_shield",
+     "name": "Chapel Mace and Shield",
+     "blurb": "Mace: one-handed, with a shield in the off hand (armour and a chance to block).",
+     "main": "iron_mace",
+     "off": "shield"
+    }
    ]
   },
   "bard": {
    "armour": [
-    {"id":"road_motley","name":"Road Motley","blurb":"Leather chest, leather gauntlets and leather legs. Nothing on: head, boots.","pieces":["light_chest","light_gauntlets","light_legs"]},
-    {"id":"tavern_best","name":"Tavern Best","blurb":"Leather chest, leather boots and leather helm. Nothing on: legs, gloves.","pieces":["light_chest","light_boots","light_helm"]},
-    {"id":"festival_silks","name":"Festival Silks","blurb":"Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.","pieces":["cloth_chest","cloth_helm","light_boots"]}
+    {
+     "id": "road_motley",
+     "name": "Road Motley",
+     "blurb": "Leather chest, leather gauntlets and leather legs. Nothing on: head, boots.",
+     "pieces": [
+      "light_chest",
+      "light_gauntlets",
+      "light_legs"
+     ]
+    },
+    {
+     "id": "tavern_best",
+     "name": "Tavern Best",
+     "blurb": "Leather chest, leather boots and leather helm. Nothing on: legs, gloves.",
+     "pieces": [
+      "light_chest",
+      "light_boots",
+      "light_helm"
+     ]
+    },
+    {
+     "id": "festival_silks",
+     "name": "Festival Silks",
+     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"quarterstaff","name":"Walking Staff","blurb":"Quarterstaff: two-handed, a melee pole (not a spell staff).","main":"quarterstaff"},
-    {"id":"twin_daggers","name":"Sleeve Knives","blurb":"Dagger: one-handed, fast, short reach, with a dagger in the off hand (it swings too, for less).","main":"dagger","off":"dagger"},
-    {"id":"rapier_dagger","name":"Stage Rapier and Dirk","blurb":"Rapier: one-handed, light, with a dagger in the off hand (it swings too, for less).","main":"rapier","off":"dagger"},
-    {"id":"wand_fan","name":"Three-Note Wand and Songbook","blurb":"Wand: one-handed, ranged; throws three bolts of arcane force in a fan, with a tome in the off hand (spell power and mana).","main":"wand","off":"tome","style":"fan","element":"arcane"},
-    {"id":"wand_chain","name":"Jangling Wand and Glass","blurb":"Wand: one-handed, ranged; throws a bolt of lightning that jumps to more enemies, with a seer's orb (a focus with its own power).","main":"wand","off":"seer_orb","style":"chain","element":"lightning"}
+    {
+     "id": "quarterstaff",
+     "name": "Walking Staff",
+     "blurb": "Quarterstaff: two-handed, a melee pole (not a spell staff).",
+     "main": "quarterstaff"
+    },
+    {
+     "id": "twin_daggers",
+     "name": "Sleeve Knives",
+     "blurb": "Dagger: one-handed, fast, short reach, with a dagger in the off hand (it swings too, for less).",
+     "main": "dagger",
+     "off": "dagger"
+    },
+    {
+     "id": "rapier_dagger",
+     "name": "Stage Rapier and Dirk",
+     "blurb": "Rapier: one-handed, light, with a dagger in the off hand (it swings too, for less).",
+     "main": "rapier",
+     "off": "dagger"
+    },
+    {
+     "id": "wand_fan",
+     "name": "Three-Note Wand and Songbook",
+     "blurb": "Wand: one-handed, ranged; throws three bolts of arcane force in a fan, with a tome in the off hand (spell power and mana).",
+     "main": "wand",
+     "off": "tome",
+     "style": "fan",
+     "element": "arcane"
+    },
+    {
+     "id": "wand_chain",
+     "name": "Jangling Wand and Glass",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of lightning that jumps to more enemies, with a seer's orb (a focus with its own power).",
+     "main": "wand",
+     "off": "seer_orb",
+     "style": "chain",
+     "element": "lightning"
+    },
+    {
+     "id": "rapier_buckler",
+     "name": "Stage Rapier and Buckler",
+     "blurb": "Rapier: one-handed and quick, with a buckler in the off hand (a little armour and a chance to block).",
+     "main": "rapier",
+     "off": "buckler"
+    }
    ]
   },
   "mage": {
    "armour": [
-    {"id":"tower_robes","name":"Tower Robes","blurb":"Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.","pieces":["cloth_chest","cloth_helm","cloth_legs"]},
-    {"id":"travel_robes","name":"Travelling Scholar's Robes","blurb":"Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.","pieces":["cloth_chest","cloth_legs","light_boots"]},
-    {"id":"lab_wraps","name":"Workroom Wraps","blurb":"Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.","pieces":["cloth_chest","cloth_helm","light_gauntlets"]}
+    {
+     "id": "tower_robes",
+     "name": "Tower Robes",
+     "blurb": "Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "cloth_legs"
+     ]
+    },
+    {
+     "id": "travel_robes",
+     "name": "Travelling Scholar's Robes",
+     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_legs",
+      "light_boots"
+     ]
+    },
+    {
+     "id": "lab_wraps",
+     "name": "Workroom Wraps",
+     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_gauntlets"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"staff_cone","name":"Rimewood Staff","blurb":"Staff: two-handed; its attack is a short cone of frost in front of you.","main":"staff","element":"ice","spell":"cone"},
-    {"id":"staff_nova","name":"Staff of the Still Pond","blurb":"Staff: two-handed; its attack is a ring of frost around you.","main":"staff","element":"ice","spell":"nova"},
-    {"id":"staff_lob","name":"Skyshard Staff","blurb":"Staff: two-handed; its attack is a thrown blast of arcane force that bursts where it lands.","main":"staff","element":"arcane","spell":"lob"},
-    {"id":"wand_bolt","name":"Icicle Wand and Orb","blurb":"Wand: one-handed, ranged; throws a single bolt of frost, with an orb in the off hand (more spell power).","main":"wand","off":"orb","style":"bolt","element":"ice"},
-    {"id":"wand_burst","name":"Firecracker Wand and Tome","blurb":"Wand: one-handed, ranged; throws a bolt of fire that bursts where it lands, with a tome in the off hand (spell power and mana).","main":"wand","off":"tome","style":"burst","element":"fire"},
-    {"id":"wand_beam","name":"Ruled-Line Wand and Grimoire","blurb":"Wand: one-handed, ranged; fires an instant line of arcane force through everything in it, with a grimoire (a focus: mana and its own power).","main":"wand","off":"grimoire","style":"beam","element":"arcane"}
+    {
+     "id": "staff_cone",
+     "name": "Rimewood Staff",
+     "blurb": "Staff: two-handed; its attack is a short cone of frost in front of you.",
+     "main": "staff",
+     "element": "ice",
+     "spell": "cone"
+    },
+    {
+     "id": "staff_nova",
+     "name": "Staff of the Still Pond",
+     "blurb": "Staff: two-handed; its attack is a ring of frost around you.",
+     "main": "staff",
+     "element": "ice",
+     "spell": "nova"
+    },
+    {
+     "id": "staff_lob",
+     "name": "Skyshard Staff",
+     "blurb": "Staff: two-handed; its attack is a thrown blast of arcane force that bursts where it lands.",
+     "main": "staff",
+     "element": "arcane",
+     "spell": "lob"
+    },
+    {
+     "id": "wand_bolt",
+     "name": "Icicle Wand and Orb",
+     "blurb": "Wand: one-handed, ranged; throws a single bolt of frost, with an orb in the off hand (more spell power).",
+     "main": "wand",
+     "off": "orb",
+     "style": "bolt",
+     "element": "ice"
+    },
+    {
+     "id": "wand_burst",
+     "name": "Firecracker Wand and Tome",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of fire that bursts where it lands, with a tome in the off hand (spell power and mana).",
+     "main": "wand",
+     "off": "tome",
+     "style": "burst",
+     "element": "fire"
+    },
+    {
+     "id": "wand_beam",
+     "name": "Ruled-Line Wand and Grimoire",
+     "blurb": "Wand: one-handed, ranged; fires an instant line of arcane force through everything in it, with a grimoire (a focus: mana and its own power).",
+     "main": "wand",
+     "off": "grimoire",
+     "style": "beam",
+     "element": "arcane"
+    }
    ]
   },
   "necromancer": {
    "armour": [
-    {"id":"grave_robes","name":"Gravedigger's Robes","blurb":"Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.","pieces":["cloth_chest","cloth_helm","cloth_legs"]},
-    {"id":"barrow_shroud","name":"Barrow Shroud","blurb":"Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.","pieces":["cloth_chest","cloth_legs","light_boots"]},
-    {"id":"embalmer_wraps","name":"Embalmer's Wraps","blurb":"Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.","pieces":["cloth_chest","cloth_helm","light_gauntlets"]}
+    {
+     "id": "grave_robes",
+     "name": "Gravedigger's Robes",
+     "blurb": "Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "cloth_legs"
+     ]
+    },
+    {
+     "id": "barrow_shroud",
+     "name": "Barrow Shroud",
+     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_legs",
+      "light_boots"
+     ]
+    },
+    {
+     "id": "embalmer_wraps",
+     "name": "Embalmer's Wraps",
+     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_gauntlets"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"staff_cone","name":"Charnel Staff","blurb":"Staff: two-handed; its attack is a short cone of shadow in front of you.","main":"staff","element":"shadow","spell":"cone"},
-    {"id":"staff_blight","name":"Bogwood Staff","blurb":"Staff: two-handed; its attack is a thrown blast of poison that bursts wide where it lands.","main":"staff","element":"poison","spell":"ground"},
-    {"id":"staff_nova","name":"Staff of the Last Breath","blurb":"Staff: two-handed; its attack is a ring of shadow around you.","main":"staff","element":"shadow","spell":"nova"},
-    {"id":"wand_seeking","name":"Bone Wand and Effigy","blurb":"Wand: one-handed, ranged; throws a bolt of shadow that turns after its target, with an effigy (a focus with its own power).","main":"wand","off":"effigy","style":"seeking","element":"shadow"},
-    {"id":"wand_pool","name":"Rot Wand and Tome","blurb":"Wand: one-handed, ranged; throws a bolt of poison that leaves poisoned ground where it hits, with a tome in the off hand (spell power and mana).","main":"wand","off":"tome","style":"pool","element":"poison"},
-    {"id":"sceptre_grimoire","name":"Tomb Sceptre and Grimoire","blurb":"Sceptre: one-handed, MELEE; its swings deal shadow damage, with a grimoire (a focus: mana and its own power).","main":"scepter","off":"grimoire","element":"shadow"}
+    {
+     "id": "staff_cone",
+     "name": "Charnel Staff",
+     "blurb": "Staff: two-handed; its attack is a short cone of shadow in front of you.",
+     "main": "staff",
+     "element": "shadow",
+     "spell": "cone"
+    },
+    {
+     "id": "staff_blight",
+     "name": "Bogwood Staff",
+     "blurb": "Staff: two-handed; its attack is a thrown blast of poison that bursts wide where it lands.",
+     "main": "staff",
+     "element": "poison",
+     "spell": "ground"
+    },
+    {
+     "id": "staff_nova",
+     "name": "Staff of the Last Breath",
+     "blurb": "Staff: two-handed; its attack is a ring of shadow around you.",
+     "main": "staff",
+     "element": "shadow",
+     "spell": "nova"
+    },
+    {
+     "id": "wand_seeking",
+     "name": "Bone Wand and Effigy",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of shadow that turns after its target, with an effigy (a focus with its own power).",
+     "main": "wand",
+     "off": "effigy",
+     "style": "seeking",
+     "element": "shadow"
+    },
+    {
+     "id": "wand_pool",
+     "name": "Rot Wand and Tome",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of poison that leaves poisoned ground where it hits, with a tome in the off hand (spell power and mana).",
+     "main": "wand",
+     "off": "tome",
+     "style": "pool",
+     "element": "poison"
+    },
+    {
+     "id": "sceptre_grimoire",
+     "name": "Tomb Sceptre and Grimoire",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal shadow damage, with a grimoire (a focus: mana and its own power).",
+     "main": "scepter",
+     "off": "grimoire",
+     "element": "shadow"
+    }
    ]
   },
   "warlock": {
    "armour": [
-    {"id":"pact_robes","name":"Pact Robes","blurb":"Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.","pieces":["cloth_chest","cloth_helm","cloth_legs"]},
-    {"id":"crossroads_coat","name":"Crossroads Coat","blurb":"Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.","pieces":["cloth_chest","cloth_legs","light_boots"]},
-    {"id":"binding_wraps","name":"Binder's Wraps","blurb":"Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.","pieces":["cloth_chest","cloth_helm","light_gauntlets"]}
+    {
+     "id": "pact_robes",
+     "name": "Pact Robes",
+     "blurb": "Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "cloth_legs"
+     ]
+    },
+    {
+     "id": "crossroads_coat",
+     "name": "Crossroads Coat",
+     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_legs",
+      "light_boots"
+     ]
+    },
+    {
+     "id": "binding_wraps",
+     "name": "Binder's Wraps",
+     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_gauntlets"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"staff_nova","name":"Blackthorn Staff","blurb":"Staff: two-handed; its attack is a ring of shadow around you.","main":"staff","element":"shadow","spell":"nova"},
-    {"id":"staff_cone","name":"Brimstone Staff","blurb":"Staff: two-handed; its attack is a short cone of fire in front of you.","main":"staff","element":"fire","spell":"cone"},
-    {"id":"staff_ground","name":"Staff of the Sinking Dark","blurb":"Staff: two-handed; its attack is a thrown blast of shadow that bursts wide where it lands.","main":"staff","element":"shadow","spell":"ground"},
-    {"id":"wand_chain","name":"Tangle Wand and Effigy","blurb":"Wand: one-handed, ranged; throws a bolt of shadow that jumps to more enemies, with an effigy (a focus with its own power).","main":"wand","off":"effigy","style":"chain","element":"shadow"},
-    {"id":"wand_heavy","name":"Leaden Wand and Orb","blurb":"Wand: one-handed, ranged; throws one slow bolt of shadow that lands hard, with an orb in the off hand (more spell power).","main":"wand","off":"orb","style":"heavy","element":"shadow"},
-    {"id":"wand_fork","name":"Split-Tongue Wand and Tome","blurb":"Wand: one-handed, ranged; throws a bolt of fire that splits on what it hits, with a tome in the off hand (spell power and mana).","main":"wand","off":"tome","style":"fork","element":"fire"}
+    {
+     "id": "staff_nova",
+     "name": "Blackthorn Staff",
+     "blurb": "Staff: two-handed; its attack is a ring of shadow around you.",
+     "main": "staff",
+     "element": "shadow",
+     "spell": "nova"
+    },
+    {
+     "id": "staff_cone",
+     "name": "Brimstone Staff",
+     "blurb": "Staff: two-handed; its attack is a short cone of fire in front of you.",
+     "main": "staff",
+     "element": "fire",
+     "spell": "cone"
+    },
+    {
+     "id": "staff_ground",
+     "name": "Staff of the Sinking Dark",
+     "blurb": "Staff: two-handed; its attack is a thrown blast of shadow that bursts wide where it lands.",
+     "main": "staff",
+     "element": "shadow",
+     "spell": "ground"
+    },
+    {
+     "id": "wand_chain",
+     "name": "Tangle Wand and Effigy",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of shadow that jumps to more enemies, with an effigy (a focus with its own power).",
+     "main": "wand",
+     "off": "effigy",
+     "style": "chain",
+     "element": "shadow"
+    },
+    {
+     "id": "wand_heavy",
+     "name": "Leaden Wand and Orb",
+     "blurb": "Wand: one-handed, ranged; throws one slow bolt of shadow that lands hard, with an orb in the off hand (more spell power).",
+     "main": "wand",
+     "off": "orb",
+     "style": "heavy",
+     "element": "shadow"
+    },
+    {
+     "id": "wand_fork",
+     "name": "Split-Tongue Wand and Tome",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of fire that splits on what it hits, with a tome in the off hand (spell power and mana).",
+     "main": "wand",
+     "off": "tome",
+     "style": "fork",
+     "element": "fire"
+    }
    ]
   },
   "demon_hunter": {
    "armour": [
-    {"id":"hunt_leathers","name":"Night-Hunt Leathers","blurb":"Leather chest, leather boots and leather gauntlets. Nothing on: head, legs.","pieces":["light_chest","light_boots","light_gauntlets"]},
-    {"id":"stake_coat","name":"Staker's Hood and Coat","blurb":"Leather chest, leather helm and leather legs. Nothing on: gloves, boots.","pieces":["light_chest","light_helm","light_legs"]},
-    {"id":"ash_cloak","name":"Ashen Travelling Gear","blurb":"Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.","pieces":["cloth_chest","cloth_helm","light_boots"]}
+    {
+     "id": "hunt_leathers",
+     "name": "Night-Hunt Leathers",
+     "blurb": "Leather chest, leather boots and leather gauntlets. Nothing on: head, legs.",
+     "pieces": [
+      "light_chest",
+      "light_boots",
+      "light_gauntlets"
+     ]
+    },
+    {
+     "id": "stake_coat",
+     "name": "Staker's Hood and Coat",
+     "blurb": "Leather chest, leather helm and leather legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "light_chest",
+      "light_helm",
+      "light_legs"
+     ]
+    },
+    {
+     "id": "ash_cloak",
+     "name": "Ashen Travelling Gear",
+     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"crossbow","name":"Heavy Crossbow","blurb":"Crossbow: two-handed, ranged, no draw.","main":"crossbow"},
-    {"id":"twin_daggers","name":"Twin Stilettos","blurb":"Dagger: one-handed, fast, short reach, with a dagger in the off hand (it swings too, for less).","main":"dagger","off":"dagger"},
-    {"id":"shortbow","name":"Horn Shortbow","blurb":"Shortbow: two-handed, ranged, quick to draw.","main":"shortbow"},
-    {"id":"javelins","name":"Barbed Javelins and Buckler","blurb":"Javelins: thrown, one-handed, ranged, with a buckler (a small shield that blocks).","main":"javelin","off":"buckler"}
+    {
+     "id": "crossbow",
+     "name": "Heavy Crossbow",
+     "blurb": "Crossbow: two-handed, ranged, no draw.",
+     "main": "crossbow"
+    },
+    {
+     "id": "twin_daggers",
+     "name": "Twin Stilettos",
+     "blurb": "Dagger: one-handed, fast, short reach, with a dagger in the off hand (it swings too, for less).",
+     "main": "dagger",
+     "off": "dagger"
+    },
+    {
+     "id": "shortbow",
+     "name": "Horn Shortbow",
+     "blurb": "Shortbow: two-handed, ranged, quick to draw.",
+     "main": "shortbow"
+    },
+    {
+     "id": "javelins",
+     "name": "Barbed Javelins and Buckler",
+     "blurb": "Javelins: thrown, one-handed, ranged, with a buckler (a small shield that blocks).",
+     "main": "javelin",
+     "off": "buckler"
+    },
+    {
+     "id": "sword_dagger",
+     "name": "Hunter's Pair",
+     "blurb": "Sword: one-handed, with a dagger in the off hand (it swings too, for less).",
+     "main": "sword",
+     "off": "dagger"
+    }
    ]
   },
   "scavenger": {
    "armour": [
-    {"id":"patch_leathers","name":"Patchwork Leathers","blurb":"Leather chest, leather boots and leather gauntlets. Nothing on: head, legs.","pieces":["light_chest","light_boots","light_gauntlets"]},
-    {"id":"picker_hood","name":"Picker's Hood and Breeches","blurb":"Leather chest, leather helm and leather legs. Nothing on: gloves, boots.","pieces":["light_chest","light_helm","light_legs"]},
-    {"id":"rag_layers","name":"Rag Layers","blurb":"Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.","pieces":["cloth_chest","cloth_helm","light_boots"]}
+    {
+     "id": "patch_leathers",
+     "name": "Patchwork Leathers",
+     "blurb": "Leather chest, leather boots and leather gauntlets. Nothing on: head, legs.",
+     "pieces": [
+      "light_chest",
+      "light_boots",
+      "light_gauntlets"
+     ]
+    },
+    {
+     "id": "picker_hood",
+     "name": "Picker's Hood and Breeches",
+     "blurb": "Leather chest, leather helm and leather legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "light_chest",
+      "light_helm",
+      "light_legs"
+     ]
+    },
+    {
+     "id": "rag_layers",
+     "name": "Rag Layers",
+     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"quarterstaff","name":"Prodding Pole","blurb":"Quarterstaff: two-handed, a melee pole (not a spell staff).","main":"quarterstaff"},
-    {"id":"twin_daggers","name":"Two Rusty Knives","blurb":"Dagger: one-handed, fast, short reach, with a dagger in the off hand (it swings too, for less).","main":"dagger","off":"dagger"},
-    {"id":"sword_buckler","name":"Found Sword and Pot-Lid","blurb":"Sword: one-handed, with a buckler (a small shield that blocks).","main":"sword","off":"buckler"},
-    {"id":"hammer_dagger","name":"Mallet and Shiv","blurb":"Hammer: one-handed, with a dagger in the off hand (it swings too, for less).","main":"hammer","off":"dagger"},
-    {"id":"javelins","name":"Scrap Javelins and Pot-Lid","blurb":"Javelins: thrown, one-handed, ranged, with a buckler (a small shield that blocks).","main":"javelin","off":"buckler"}
+    {
+     "id": "quarterstaff",
+     "name": "Prodding Pole",
+     "blurb": "Quarterstaff: two-handed, a melee pole (not a spell staff).",
+     "main": "quarterstaff"
+    },
+    {
+     "id": "twin_daggers",
+     "name": "Two Rusty Knives",
+     "blurb": "Dagger: one-handed, fast, short reach, with a dagger in the off hand (it swings too, for less).",
+     "main": "dagger",
+     "off": "dagger"
+    },
+    {
+     "id": "sword_buckler",
+     "name": "Found Sword and Pot-Lid",
+     "blurb": "Sword: one-handed, with a buckler (a small shield that blocks).",
+     "main": "sword",
+     "off": "buckler"
+    },
+    {
+     "id": "hammer_dagger",
+     "name": "Mallet and Shiv",
+     "blurb": "Hammer: one-handed, with a dagger in the off hand (it swings too, for less).",
+     "main": "hammer",
+     "off": "dagger"
+    },
+    {
+     "id": "javelins",
+     "name": "Scrap Javelins and Pot-Lid",
+     "blurb": "Javelins: thrown, one-handed, ranged, with a buckler (a small shield that blocks).",
+     "main": "javelin",
+     "off": "buckler"
+    },
+    {
+     "id": "spear",
+     "name": "Scrap Pike",
+     "blurb": "Spear: one-handed, long reach, with a buckler in the off hand (a little armour and a chance to block).",
+     "main": "spear",
+     "off": "buckler"
+    }
    ]
   },
   "swashbuckler": {
    "armour": [
-    {"id":"deck_leathers","name":"Deck Leathers","blurb":"Leather chest, leather boots and leather helm. Nothing on: legs, gloves.","pieces":["light_chest","light_boots","light_helm"]},
-    {"id":"captain_coat","name":"Captain's Cast-Offs","blurb":"Leather chest, leather gauntlets and leather legs. Nothing on: head, boots.","pieces":["light_chest","light_gauntlets","light_legs"]},
-    {"id":"port_finery","name":"Port-Town Finery","blurb":"Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.","pieces":["cloth_chest","cloth_helm","light_boots"]}
+    {
+     "id": "deck_leathers",
+     "name": "Deck Leathers",
+     "blurb": "Leather chest, leather boots and leather helm. Nothing on: legs, gloves.",
+     "pieces": [
+      "light_chest",
+      "light_boots",
+      "light_helm"
+     ]
+    },
+    {
+     "id": "captain_coat",
+     "name": "Captain's Cast-Offs",
+     "blurb": "Leather chest, leather gauntlets and leather legs. Nothing on: head, boots.",
+     "pieces": [
+      "light_chest",
+      "light_gauntlets",
+      "light_legs"
+     ]
+    },
+    {
+     "id": "port_finery",
+     "name": "Port-Town Finery",
+     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"rapier","name":"Lone Rapier","blurb":"Rapier: one-handed, light.","main":"rapier"},
-    {"id":"rapier_dagger","name":"Rapier and Left-Hand Dagger","blurb":"Rapier: one-handed, light, with a dagger in the off hand (it swings too, for less).","main":"rapier","off":"dagger"},
-    {"id":"rapier_buckler","name":"Rapier and Buckler","blurb":"Rapier: one-handed, light, with a buckler (a small shield that blocks).","main":"rapier","off":"buckler"},
-    {"id":"twin_swords","name":"Brace of Cutlasses","blurb":"Sword: one-handed, with a second sword in the off hand (it swings too, for less).","main":"sword","off":"sword"}
+    {
+     "id": "rapier",
+     "name": "Lone Rapier",
+     "blurb": "Rapier: one-handed, light, with a buckler in the off hand (a little armour and a chance to block).",
+     "main": "rapier",
+     "off": "buckler"
+    },
+    {
+     "id": "rapier_dagger",
+     "name": "Rapier and Left-Hand Dagger",
+     "blurb": "Rapier: one-handed, light, with a dagger in the off hand (it swings too, for less).",
+     "main": "rapier",
+     "off": "dagger"
+    },
+    {
+     "id": "twin_swords",
+     "name": "Brace of Cutlasses",
+     "blurb": "Sword: one-handed, with a second sword in the off hand (it swings too, for less).",
+     "main": "sword",
+     "off": "sword"
+    },
+    {
+     "id": "sword_dagger",
+     "name": "Sword and Main-gauche",
+     "blurb": "Sword: one-handed, with a dagger in the off hand (it swings too, for less).",
+     "main": "sword",
+     "off": "dagger"
+    }
    ]
   },
   "dragon_knight": {
    "armour": [
-    {"id":"scale_plate","name":"Scale-Pattern Plate","blurb":"Heavy chest, heavy helm and heavy gauntlets. Nothing on: legs, boots.","pieces":["heavy_chest","heavy_helm","heavy_gauntlets"]},
-    {"id":"wyrm_rider","name":"Rider's Harness","blurb":"Heavy chest, mail legs and heavy boots. Nothing on: head, gloves.","pieces":["heavy_chest","medium_legs","heavy_boots"]},
-    {"id":"cinder_leathers","name":"Scorch-Proof Leathers","blurb":"Mail chest, mail legs and leather boots. Nothing on: head, gloves.","pieces":["medium_chest","medium_legs","light_boots"]}
+    {
+     "id": "scale_plate",
+     "name": "Scale-Pattern Plate",
+     "blurb": "Heavy chest, heavy helm and heavy gauntlets. Nothing on: legs, boots.",
+     "pieces": [
+      "heavy_chest",
+      "heavy_helm",
+      "heavy_gauntlets"
+     ]
+    },
+    {
+     "id": "wyrm_rider",
+     "name": "Rider's Harness",
+     "blurb": "Heavy chest, mail legs and heavy boots. Nothing on: head, gloves.",
+     "pieces": [
+      "heavy_chest",
+      "medium_legs",
+      "heavy_boots"
+     ]
+    },
+    {
+     "id": "cinder_leathers",
+     "name": "Scorch-Proof Leathers",
+     "blurb": "Mail chest, mail legs and leather boots. Nothing on: head, gloves.",
+     "pieces": [
+      "medium_chest",
+      "medium_legs",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"longsword","name":"Knight's Longsword","blurb":"Longsword: one-handed.","main":"longsword"},
-    {"id":"greatsword","name":"Wyrm-Cleaver","blurb":"Greatsword: two-handed.","main":"greatsword"},
-    {"id":"great_axe","name":"Headsman's Axe","blurb":"Two-handed axe.","main":"axe2h"},
-    {"id":"sword_shield","name":"Longsword and Scale Shield","blurb":"Longsword: one-handed, with a shield (blocks).","main":"longsword","off":"shield"},
-    {"id":"halberd","name":"Drake-Hook Halberd","blurb":"Halberd: two-handed polearm.","main":"halberd"}
+    {
+     "id": "longsword",
+     "name": "Knight's Longsword",
+     "blurb": "Longsword: one-handed, with a shield in the off hand (armour and a chance to block).",
+     "main": "longsword",
+     "off": "shield"
+    },
+    {
+     "id": "greatsword",
+     "name": "Wyrm-Cleaver",
+     "blurb": "Greatsword: two-handed.",
+     "main": "greatsword"
+    },
+    {
+     "id": "great_axe",
+     "name": "Headsman's Axe",
+     "blurb": "Two-handed axe.",
+     "main": "axe2h"
+    },
+    {
+     "id": "halberd",
+     "name": "Drake-Hook Halberd",
+     "blurb": "Halberd: two-handed polearm.",
+     "main": "halberd"
+    },
+    {
+     "id": "spear_buckler",
+     "name": "Wyrm Spear and Buckler",
+     "blurb": "Spear: one-handed, long reach, with a buckler in the off hand (a little armour and a chance to block).",
+     "main": "spear",
+     "off": "buckler"
+    }
    ]
   },
   "pyromancer": {
    "armour": [
-    {"id":"kiln_robes","name":"Kiln Robes","blurb":"Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.","pieces":["cloth_chest","cloth_helm","cloth_legs"]},
-    {"id":"soot_coat","name":"Soot-Stained Coat","blurb":"Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.","pieces":["cloth_chest","cloth_legs","light_boots"]},
-    {"id":"firewalker_wraps","name":"Firewalker's Wraps","blurb":"Cloth chest, leather boots and leather gauntlets. Nothing on: head, legs.","pieces":["cloth_chest","light_boots","light_gauntlets"]}
+    {
+     "id": "kiln_robes",
+     "name": "Kiln Robes",
+     "blurb": "Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "cloth_legs"
+     ]
+    },
+    {
+     "id": "soot_coat",
+     "name": "Soot-Stained Coat",
+     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_legs",
+      "light_boots"
+     ]
+    },
+    {
+     "id": "firewalker_wraps",
+     "name": "Firewalker's Wraps",
+     "blurb": "Cloth chest, leather boots and leather gauntlets. Nothing on: head, legs.",
+     "pieces": [
+      "cloth_chest",
+      "light_boots",
+      "light_gauntlets"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"staff_cone","name":"Charwood Staff","blurb":"Staff: two-handed; its attack is a short cone of fire in front of you.","main":"staff","element":"fire","spell":"cone"},
-    {"id":"staff_wave","name":"Staff of the Running Fire","blurb":"Staff: two-handed; its attack is a line of fire straight ahead.","main":"staff","element":"fire","spell":"wave"},
-    {"id":"staff_burst","name":"Bombard Staff","blurb":"Staff: two-handed; its attack is a thrown blast of fire that bursts where it lands.","main":"staff","element":"fire","spell":"burst"},
-    {"id":"wand_burst","name":"Squib Wand and Orb","blurb":"Wand: one-handed, ranged; throws a bolt of fire that bursts where it lands, with an orb in the off hand (more spell power).","main":"wand","off":"orb","style":"burst","element":"fire"},
-    {"id":"wand_pool","name":"Tinder Wand and Tome","blurb":"Wand: one-handed, ranged; throws a bolt of fire that leaves burning ground where it hits, with a tome in the off hand (spell power and mana).","main":"wand","off":"tome","style":"pool","element":"fire"},
-    {"id":"sceptre_grimoire","name":"Brand Sceptre and Grimoire","blurb":"Sceptre: one-handed, MELEE; its swings deal fire damage, with a grimoire (a focus: mana and its own power).","main":"scepter","off":"grimoire","element":"fire"}
+    {
+     "id": "staff_cone",
+     "name": "Charwood Staff",
+     "blurb": "Staff: two-handed; its attack is a short cone of fire in front of you.",
+     "main": "staff",
+     "element": "fire",
+     "spell": "cone"
+    },
+    {
+     "id": "staff_wave",
+     "name": "Staff of the Running Fire",
+     "blurb": "Staff: two-handed; its attack is a line of fire straight ahead.",
+     "main": "staff",
+     "element": "fire",
+     "spell": "wave"
+    },
+    {
+     "id": "staff_burst",
+     "name": "Bombard Staff",
+     "blurb": "Staff: two-handed; its attack is a thrown blast of fire that bursts where it lands.",
+     "main": "staff",
+     "element": "fire",
+     "spell": "burst"
+    },
+    {
+     "id": "wand_burst",
+     "name": "Squib Wand and Orb",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of fire that bursts where it lands, with an orb in the off hand (more spell power).",
+     "main": "wand",
+     "off": "orb",
+     "style": "burst",
+     "element": "fire"
+    },
+    {
+     "id": "wand_pool",
+     "name": "Tinder Wand and Tome",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of fire that leaves burning ground where it hits, with a tome in the off hand (spell power and mana).",
+     "main": "wand",
+     "off": "tome",
+     "style": "pool",
+     "element": "fire"
+    },
+    {
+     "id": "sceptre_grimoire",
+     "name": "Brand Sceptre and Grimoire",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal fire damage, with a grimoire (a focus: mana and its own power).",
+     "main": "scepter",
+     "off": "grimoire",
+     "element": "fire"
+    }
    ]
   },
   "stormcaller": {
    "armour": [
-    {"id":"gale_robes","name":"Gale Robes","blurb":"Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.","pieces":["cloth_chest","cloth_helm","cloth_legs"]},
-    {"id":"hilltop_coat","name":"Hilltop Coat","blurb":"Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.","pieces":["cloth_chest","cloth_legs","light_boots"]},
-    {"id":"kite_wraps","name":"Kite-Flyer's Wraps","blurb":"Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.","pieces":["cloth_chest","cloth_helm","light_gauntlets"]}
+    {
+     "id": "gale_robes",
+     "name": "Gale Robes",
+     "blurb": "Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "cloth_legs"
+     ]
+    },
+    {
+     "id": "hilltop_coat",
+     "name": "Hilltop Coat",
+     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_legs",
+      "light_boots"
+     ]
+    },
+    {
+     "id": "kite_wraps",
+     "name": "Kite-Flyer's Wraps",
+     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_gauntlets"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"wand_chain","name":"Forked-Sky Wand","blurb":"Wand: one-handed, ranged; throws a bolt of lightning that jumps to more enemies.","main":"wand","style":"chain","element":"lightning"},
-    {"id":"wand_fork","name":"Splinter Wand and Orb","blurb":"Wand: one-handed, ranged; throws a bolt of lightning that splits on what it hits, with an orb in the off hand (more spell power).","main":"wand","off":"orb","style":"fork","element":"lightning"},
-    {"id":"wand_beam","name":"Bright-Line Wand and Tome","blurb":"Wand: one-handed, ranged; fires an instant line of lightning through everything in it, with a tome in the off hand (spell power and mana).","main":"wand","off":"tome","style":"beam","element":"lightning"},
-    {"id":"staff_arc","name":"Lightning-Struck Staff","blurb":"Staff: two-handed; its attack is a bolt of lightning; charged, it jumps between enemies.","main":"staff","element":"lightning","spell":"arc"},
-    {"id":"staff_nova","name":"Staff of the Thunderhead","blurb":"Staff: two-handed; its attack is a ring of lightning around you.","main":"staff","element":"lightning","spell":"nova"},
-    {"id":"staff_wave","name":"Weathervane Staff","blurb":"Staff: two-handed; its attack is a line of lightning straight ahead.","main":"staff","element":"lightning","spell":"wave"}
+    {
+     "id": "wand_chain",
+     "name": "Forked-Sky Wand",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of lightning that jumps to more enemies, with an orb in the off hand (spell power; your hits burst).",
+     "main": "wand",
+     "style": "chain",
+     "element": "lightning",
+     "off": "orb"
+    },
+    {
+     "id": "wand_fork",
+     "name": "Splinter Wand and Orb",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of lightning that splits on what it hits, with an orb in the off hand (more spell power).",
+     "main": "wand",
+     "off": "orb",
+     "style": "fork",
+     "element": "lightning"
+    },
+    {
+     "id": "wand_beam",
+     "name": "Bright-Line Wand and Tome",
+     "blurb": "Wand: one-handed, ranged; fires an instant line of lightning through everything in it, with a tome in the off hand (spell power and mana).",
+     "main": "wand",
+     "off": "tome",
+     "style": "beam",
+     "element": "lightning"
+    },
+    {
+     "id": "staff_arc",
+     "name": "Lightning-Struck Staff",
+     "blurb": "Staff: two-handed; its attack is a bolt of lightning; charged, it jumps between enemies.",
+     "main": "staff",
+     "element": "lightning",
+     "spell": "arc"
+    },
+    {
+     "id": "staff_nova",
+     "name": "Staff of the Thunderhead",
+     "blurb": "Staff: two-handed; its attack is a ring of lightning around you.",
+     "main": "staff",
+     "element": "lightning",
+     "spell": "nova"
+    },
+    {
+     "id": "staff_wave",
+     "name": "Weathervane Staff",
+     "blurb": "Staff: two-handed; its attack is a line of lightning straight ahead.",
+     "main": "staff",
+     "element": "lightning",
+     "spell": "wave"
+    }
    ]
   },
   "druid": {
    "armour": [
-    {"id":"grove_mail","name":"Grove-Keeper's Mail","blurb":"Mail chest, mail helm and mail boots. Nothing on: legs, gloves.","pieces":["medium_chest","medium_helm","medium_boots"]},
-    {"id":"bark_harness","name":"Bark and Hide Harness","blurb":"Leather chest, mail helm and mail legs. Nothing on: gloves, boots.","pieces":["light_chest","medium_helm","medium_legs"]},
-    {"id":"moss_leathers","name":"Moss Leathers","blurb":"Leather chest, leather gauntlets and leather boots. Nothing on: head, legs.","pieces":["light_chest","light_gauntlets","light_boots"]}
+    {
+     "id": "grove_mail",
+     "name": "Grove-Keeper's Mail",
+     "blurb": "Mail chest, mail helm and mail boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "medium_chest",
+      "medium_helm",
+      "medium_boots"
+     ]
+    },
+    {
+     "id": "bark_harness",
+     "name": "Bark and Hide Harness",
+     "blurb": "Leather chest, mail helm and mail legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "light_chest",
+      "medium_helm",
+      "medium_legs"
+     ]
+    },
+    {
+     "id": "moss_leathers",
+     "name": "Moss Leathers",
+     "blurb": "Leather chest, leather gauntlets and leather boots. Nothing on: head, legs.",
+     "pieces": [
+      "light_chest",
+      "light_gauntlets",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"quarterstaff","name":"Oak Quarterstaff","blurb":"Quarterstaff: two-handed, a melee pole (not a spell staff).","main":"quarterstaff"},
-    {"id":"staff_cone","name":"Spore Staff","blurb":"Staff: two-handed; its attack is a short cone of poison in front of you.","main":"staff","element":"poison","spell":"cone"},
-    {"id":"staff_lob","name":"Seedpod Staff","blurb":"Staff: two-handed; its attack is a thrown blast of poison that bursts where it lands.","main":"staff","element":"poison","spell":"lob"},
-    {"id":"sceptre_effigy","name":"Thorn Sceptre and Effigy","blurb":"Sceptre: one-handed, MELEE; its swings deal poison damage, with an effigy (a focus with its own power).","main":"scepter","off":"effigy","element":"poison"},
-    {"id":"wand_lob","name":"Acorn Wand and Glass","blurb":"Wand: one-handed, ranged; lobs an arc of poison that lands on the target, with a seer's orb (a focus with its own power).","main":"wand","off":"seer_orb","style":"lob","element":"poison"},
-    {"id":"spear","name":"Boar Spear","blurb":"Spear: one-handed, long reach.","main":"spear"}
+    {
+     "id": "quarterstaff",
+     "name": "Oak Quarterstaff",
+     "blurb": "Quarterstaff: two-handed, a melee pole (not a spell staff).",
+     "main": "quarterstaff"
+    },
+    {
+     "id": "staff_cone",
+     "name": "Spore Staff",
+     "blurb": "Staff: two-handed; its attack is a short cone of poison in front of you.",
+     "main": "staff",
+     "element": "poison",
+     "spell": "cone"
+    },
+    {
+     "id": "staff_lob",
+     "name": "Seedpod Staff",
+     "blurb": "Staff: two-handed; its attack is a thrown blast of poison that bursts where it lands.",
+     "main": "staff",
+     "element": "poison",
+     "spell": "lob"
+    },
+    {
+     "id": "sceptre_effigy",
+     "name": "Thorn Sceptre and Effigy",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal poison damage, with an effigy (a focus with its own power).",
+     "main": "scepter",
+     "off": "effigy",
+     "element": "poison"
+    },
+    {
+     "id": "wand_lob",
+     "name": "Acorn Wand and Glass",
+     "blurb": "Wand: one-handed, ranged; lobs an arc of poison that lands on the target, with a seer's orb (a focus with its own power).",
+     "main": "wand",
+     "off": "seer_orb",
+     "style": "lob",
+     "element": "poison"
+    },
+    {
+     "id": "spear",
+     "name": "Boar Spear",
+     "blurb": "Spear: one-handed, long reach, with a buckler in the off hand (a little armour and a chance to block).",
+     "main": "spear",
+     "off": "buckler"
+    }
    ]
   },
   "oracle": {
    "armour": [
-    {"id":"seer_robes","name":"Seer's Robes","blurb":"Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.","pieces":["cloth_chest","cloth_helm","cloth_legs"]},
-    {"id":"pilgrim_robes","name":"Robes of the Long Road","blurb":"Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.","pieces":["cloth_chest","cloth_legs","light_boots"]},
-    {"id":"augur_wraps","name":"Augur's Wraps","blurb":"Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.","pieces":["cloth_chest","cloth_helm","light_gauntlets"]}
+    {
+     "id": "seer_robes",
+     "name": "Seer's Robes",
+     "blurb": "Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "cloth_legs"
+     ]
+    },
+    {
+     "id": "pilgrim_robes",
+     "name": "Robes of the Long Road",
+     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_legs",
+      "light_boots"
+     ]
+    },
+    {
+     "id": "augur_wraps",
+     "name": "Augur's Wraps",
+     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_gauntlets"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"sceptre","name":"Omen Sceptre","blurb":"Sceptre: one-handed, MELEE; its swings deal arcane force damage.","main":"scepter","element":"arcane"},
-    {"id":"sceptre_orb","name":"Sceptre and Seeing Glass","blurb":"Sceptre: one-handed, MELEE; its swings deal frost damage, with a seer's orb (a focus with its own power).","main":"scepter","off":"seer_orb","element":"ice"},
-    {"id":"staff_lob","name":"Staff of Falling Stars","blurb":"Staff: two-handed; its attack is a thrown blast of arcane force that bursts where it lands.","main":"staff","element":"arcane","spell":"lob"},
-    {"id":"staff_shard","name":"Hoarfrost Staff","blurb":"Staff: two-handed; its attack is a line of frost straight ahead.","main":"staff","element":"ice","spell":"shard"},
-    {"id":"wand_seeking","name":"Foretold Wand and Glass","blurb":"Wand: one-handed, ranged; throws a bolt of arcane force that turns after its target, with a seer's orb (a focus with its own power).","main":"wand","off":"seer_orb","style":"seeking","element":"arcane"},
-    {"id":"wand_ward","name":"Turn-Aside Wand and Tome","blurb":"Wand: one-handed, ranged; throws a bolt of arcane force; each hit gives you a small barrier, with a tome in the off hand (spell power and mana).","main":"wand","off":"tome","style":"ward","element":"arcane"}
+    {
+     "id": "sceptre",
+     "name": "Omen Sceptre",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal arcane force damage, with a warded focus in the off hand (a barrier that refills).",
+     "main": "scepter",
+     "element": "arcane",
+     "off": "warded_focus"
+    },
+    {
+     "id": "sceptre_orb",
+     "name": "Sceptre and Seeing Glass",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal frost damage, with a seer's orb (a focus with its own power).",
+     "main": "scepter",
+     "off": "seer_orb",
+     "element": "ice"
+    },
+    {
+     "id": "staff_lob",
+     "name": "Staff of Falling Stars",
+     "blurb": "Staff: two-handed; its attack is a thrown blast of arcane force that bursts where it lands.",
+     "main": "staff",
+     "element": "arcane",
+     "spell": "lob"
+    },
+    {
+     "id": "staff_shard",
+     "name": "Hoarfrost Staff",
+     "blurb": "Staff: two-handed; its attack is a line of frost straight ahead.",
+     "main": "staff",
+     "element": "ice",
+     "spell": "shard"
+    },
+    {
+     "id": "wand_seeking",
+     "name": "Foretold Wand and Glass",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of arcane force that turns after its target, with a seer's orb (a focus with its own power).",
+     "main": "wand",
+     "off": "seer_orb",
+     "style": "seeking",
+     "element": "arcane"
+    },
+    {
+     "id": "wand_ward",
+     "name": "Turn-Aside Wand and Tome",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of arcane force; each hit gives you a small barrier, with a tome in the off hand (spell power and mana).",
+     "main": "wand",
+     "off": "tome",
+     "style": "ward",
+     "element": "arcane"
+    }
    ]
   },
   "tactician": {
    "armour": [
-    {"id":"staff_officer","name":"Staff Officer's Mail","blurb":"Mail chest, mail helm and mail boots. Nothing on: legs, gloves.","pieces":["medium_chest","medium_helm","medium_boots"]},
-    {"id":"field_harness","name":"Field Harness","blurb":"Mail chest, leather boots and leather gauntlets. Nothing on: head, legs.","pieces":["medium_chest","light_boots","light_gauntlets"]},
-    {"id":"scout_leathers","name":"Forward Scout's Leathers","blurb":"Leather chest, leather helm and leather legs. Nothing on: gloves, boots.","pieces":["light_chest","light_helm","light_legs"]}
+    {
+     "id": "staff_officer",
+     "name": "Staff Officer's Mail",
+     "blurb": "Mail chest, mail helm and mail boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "medium_chest",
+      "medium_helm",
+      "medium_boots"
+     ]
+    },
+    {
+     "id": "field_harness",
+     "name": "Field Harness",
+     "blurb": "Mail chest, leather boots and leather gauntlets. Nothing on: head, legs.",
+     "pieces": [
+      "medium_chest",
+      "light_boots",
+      "light_gauntlets"
+     ]
+    },
+    {
+     "id": "scout_leathers",
+     "name": "Forward Scout's Leathers",
+     "blurb": "Leather chest, leather helm and leather legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "light_chest",
+      "light_helm",
+      "light_legs"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"sceptre","name":"Commander's Baton","blurb":"Sceptre: one-handed, MELEE; its swings deal arcane force damage.","main":"scepter","element":"arcane"},
-    {"id":"sceptre_shield","name":"Baton and Shield","blurb":"Sceptre: one-handed, MELEE; its swings deal lightning damage, with a shield (blocks).","main":"scepter","off":"shield","element":"lightning"},
-    {"id":"sword_shield","name":"Officer's Sword and Shield","blurb":"Sword: one-handed, with a shield (blocks).","main":"sword","off":"shield"},
-    {"id":"sword_tome","name":"Longsword and Field Manual","blurb":"Longsword: one-handed, with a tome in the off hand (spell power and mana).","main":"longsword","off":"tome"},
-    {"id":"spear_shield","name":"Spear and Shield","blurb":"Spear: one-handed, long reach, with a shield (blocks).","main":"spear","off":"shield"}
+    {
+     "id": "sceptre",
+     "name": "Commander's Baton",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal arcane force damage, with a shield in the off hand (armour and a chance to block).",
+     "main": "scepter",
+     "element": "arcane",
+     "off": "shield"
+    },
+    {
+     "id": "sceptre_shield",
+     "name": "Baton and Shield",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal lightning damage, with a shield (blocks).",
+     "main": "scepter",
+     "off": "shield",
+     "element": "lightning"
+    },
+    {
+     "id": "sword_shield",
+     "name": "Officer's Sword and Shield",
+     "blurb": "Sword: one-handed, with a shield (blocks).",
+     "main": "sword",
+     "off": "shield"
+    },
+    {
+     "id": "sword_tome",
+     "name": "Longsword and Field Manual",
+     "blurb": "Longsword: one-handed, with a tome in the off hand (spell power and mana).",
+     "main": "longsword",
+     "off": "tome"
+    },
+    {
+     "id": "spear_shield",
+     "name": "Spear and Shield",
+     "blurb": "Spear: one-handed, long reach, with a shield (blocks).",
+     "main": "spear",
+     "off": "shield"
+    },
+    {
+     "id": "mace_shield",
+     "name": "Officer's Mace and Shield",
+     "blurb": "Mace: one-handed, with a shield in the off hand (armour and a chance to block).",
+     "main": "iron_mace",
+     "off": "shield"
+    }
    ]
   },
   "chronomancer": {
    "armour": [
-    {"id":"clock_robes","name":"Clockmaker's Robes","blurb":"Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.","pieces":["cloth_chest","cloth_helm","cloth_legs"]},
-    {"id":"hourglass_coat","name":"Hourglass Coat","blurb":"Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.","pieces":["cloth_chest","cloth_legs","light_boots"]},
-    {"id":"pendulum_wraps","name":"Pendulum Wraps","blurb":"Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.","pieces":["cloth_chest","cloth_helm","light_gauntlets"]}
+    {
+     "id": "clock_robes",
+     "name": "Clockmaker's Robes",
+     "blurb": "Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "cloth_legs"
+     ]
+    },
+    {
+     "id": "hourglass_coat",
+     "name": "Hourglass Coat",
+     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_legs",
+      "light_boots"
+     ]
+    },
+    {
+     "id": "pendulum_wraps",
+     "name": "Pendulum Wraps",
+     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_gauntlets"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"staff_nova","name":"Staff of the Stopped Hour","blurb":"Staff: two-handed; its attack is a ring of arcane force around you.","main":"staff","element":"arcane","spell":"nova"},
-    {"id":"staff_cone","name":"Slow-Winter Staff","blurb":"Staff: two-handed; its attack is a short cone of frost in front of you.","main":"staff","element":"ice","spell":"cone"},
-    {"id":"staff_arcane_cone","name":"Staff of the Thin Moment","blurb":"Staff: two-handed; its attack is a short cone of arcane force in front of you.","main":"staff","element":"arcane","spell":"cone"},
-    {"id":"wand_seeking","name":"Second-Hand Wand and Glass","blurb":"Wand: one-handed, ranged; throws a bolt of arcane force that turns after its target, with a seer's orb (a focus with its own power).","main":"wand","off":"seer_orb","style":"seeking","element":"arcane"},
-    {"id":"wand_heavy","name":"Late-Bell Wand and Tome","blurb":"Wand: one-handed, ranged; throws one slow bolt of arcane force that lands hard, with a tome in the off hand (spell power and mana).","main":"wand","off":"tome","style":"heavy","element":"arcane"},
-    {"id":"wand_nova","name":"Still-Frame Wand and Orb","blurb":"Wand: one-handed, ranged; bursts a ring of frost around you, with an orb in the off hand (more spell power).","main":"wand","off":"orb","style":"nova","element":"ice"}
+    {
+     "id": "staff_nova",
+     "name": "Staff of the Stopped Hour",
+     "blurb": "Staff: two-handed; its attack is a ring of arcane force around you.",
+     "main": "staff",
+     "element": "arcane",
+     "spell": "nova"
+    },
+    {
+     "id": "staff_cone",
+     "name": "Slow-Winter Staff",
+     "blurb": "Staff: two-handed; its attack is a short cone of frost in front of you.",
+     "main": "staff",
+     "element": "ice",
+     "spell": "cone"
+    },
+    {
+     "id": "staff_arcane_cone",
+     "name": "Staff of the Thin Moment",
+     "blurb": "Staff: two-handed; its attack is a short cone of arcane force in front of you.",
+     "main": "staff",
+     "element": "arcane",
+     "spell": "cone"
+    },
+    {
+     "id": "wand_seeking",
+     "name": "Second-Hand Wand and Glass",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of arcane force that turns after its target, with a seer's orb (a focus with its own power).",
+     "main": "wand",
+     "off": "seer_orb",
+     "style": "seeking",
+     "element": "arcane"
+    },
+    {
+     "id": "wand_heavy",
+     "name": "Late-Bell Wand and Tome",
+     "blurb": "Wand: one-handed, ranged; throws one slow bolt of arcane force that lands hard, with a tome in the off hand (spell power and mana).",
+     "main": "wand",
+     "off": "tome",
+     "style": "heavy",
+     "element": "arcane"
+    },
+    {
+     "id": "wand_nova",
+     "name": "Still-Frame Wand and Orb",
+     "blurb": "Wand: one-handed, ranged; bursts a ring of frost around you, with an orb in the off hand (more spell power).",
+     "main": "wand",
+     "off": "orb",
+     "style": "nova",
+     "element": "ice"
+    }
    ]
   },
   "monk": {
    "armour": [
-    {"id":"temple_wraps","name":"Temple Wraps and Sandals","blurb":"Cloth chest, leather boots and cloth legs. Nothing on: head, gloves.","pieces":["cloth_chest","light_boots","cloth_legs"]},
-    {"id":"novice_robes","name":"Novice's Robes","blurb":"Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.","pieces":["cloth_chest","cloth_helm","cloth_legs"]},
-    {"id":"mountain_bindings","name":"Mountain Bindings","blurb":"Cloth chest, leather boots and leather gauntlets. Nothing on: head, legs.","pieces":["cloth_chest","light_boots","light_gauntlets"]}
+    {
+     "id": "temple_wraps",
+     "name": "Temple Wraps and Sandals",
+     "blurb": "Cloth chest, leather boots and cloth legs. Nothing on: head, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "light_boots",
+      "cloth_legs"
+     ]
+    },
+    {
+     "id": "novice_robes",
+     "name": "Novice's Robes",
+     "blurb": "Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "cloth_legs"
+     ]
+    },
+    {
+     "id": "mountain_bindings",
+     "name": "Mountain Bindings",
+     "blurb": "Cloth chest, leather boots and leather gauntlets. Nothing on: head, legs.",
+     "pieces": [
+      "cloth_chest",
+      "light_boots",
+      "light_gauntlets"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"quarterstaff","name":"Temple Staff","blurb":"Quarterstaff: two-handed, a melee pole (not a spell staff).","main":"quarterstaff"},
-    {"id":"spear","name":"Pilgrim's Spear","blurb":"Spear: one-handed, long reach.","main":"spear"},
-    {"id":"twin_daggers","name":"Paired Sai","blurb":"Dagger: one-handed, fast, short reach, with a dagger in the off hand (it swings too, for less).","main":"dagger","off":"dagger"},
-    {"id":"twin_hammers","name":"Bell Mallets","blurb":"Hammer: one-handed, with a second hammer in the off hand (it swings too, for less).","main":"hammer","off":"hammer"}
+    {
+     "id": "quarterstaff",
+     "name": "Temple Staff",
+     "blurb": "Quarterstaff: two-handed, a melee pole (not a spell staff).",
+     "main": "quarterstaff"
+    },
+    {
+     "id": "spear",
+     "name": "Pilgrim's Spear",
+     "blurb": "Spear: one-handed, long reach, with a buckler in the off hand (a little armour and a chance to block).",
+     "main": "spear",
+     "off": "buckler"
+    },
+    {
+     "id": "twin_daggers",
+     "name": "Paired Sai",
+     "blurb": "Dagger: one-handed, fast, short reach, with a dagger in the off hand (it swings too, for less).",
+     "main": "dagger",
+     "off": "dagger"
+    },
+    {
+     "id": "twin_hammers",
+     "name": "Bell Mallets",
+     "blurb": "Hammer: one-handed, with a second hammer in the off hand (it swings too, for less).",
+     "main": "hammer",
+     "off": "hammer"
+    },
+    {
+     "id": "mace_buckler",
+     "name": "Cudgel and Buckler",
+     "blurb": "Mace: one-handed, with a buckler in the off hand (a little armour and a chance to block).",
+     "main": "iron_mace",
+     "off": "buckler"
+    }
    ]
   },
   "shaman": {
    "armour": [
-    {"id":"spirit_mail","name":"Spirit-Talker's Mail","blurb":"Mail chest, mail helm and mail boots. Nothing on: legs, gloves.","pieces":["medium_chest","medium_helm","medium_boots"]},
-    {"id":"totem_harness","name":"Bone and Hide Harness","blurb":"Leather chest, mail helm and mail legs. Nothing on: gloves, boots.","pieces":["light_chest","medium_helm","medium_legs"]},
-    {"id":"fen_leathers","name":"Fen-Walker's Leathers","blurb":"Leather chest, leather gauntlets and leather boots. Nothing on: head, legs.","pieces":["light_chest","light_gauntlets","light_boots"]}
+    {
+     "id": "spirit_mail",
+     "name": "Spirit-Talker's Mail",
+     "blurb": "Mail chest, mail helm and mail boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "medium_chest",
+      "medium_helm",
+      "medium_boots"
+     ]
+    },
+    {
+     "id": "totem_harness",
+     "name": "Bone and Hide Harness",
+     "blurb": "Leather chest, mail helm and mail legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "light_chest",
+      "medium_helm",
+      "medium_legs"
+     ]
+    },
+    {
+     "id": "fen_leathers",
+     "name": "Fen-Walker's Leathers",
+     "blurb": "Leather chest, leather gauntlets and leather boots. Nothing on: head, legs.",
+     "pieces": [
+      "light_chest",
+      "light_gauntlets",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"quarterstaff","name":"Rattle Staff","blurb":"Quarterstaff: two-handed, a melee pole (not a spell staff).","main":"quarterstaff"},
-    {"id":"staff_arc","name":"Sky-Father Staff","blurb":"Staff: two-handed; its attack is a bolt of lightning; charged, it jumps between enemies.","main":"staff","element":"lightning","spell":"arc"},
-    {"id":"staff_ground","name":"Mire Staff","blurb":"Staff: two-handed; its attack is a thrown blast of poison that bursts wide where it lands.","main":"staff","element":"poison","spell":"ground"},
-    {"id":"sceptre_effigy","name":"Storm Rattle and Effigy","blurb":"Sceptre: one-handed, MELEE; its swings deal lightning damage, with an effigy (a focus with its own power).","main":"scepter","off":"effigy","element":"lightning"},
-    {"id":"wand_chain","name":"Spirit Wand and Reliquary","blurb":"Wand: one-handed, ranged; throws a bolt of lightning that jumps to more enemies, with a reliquary (a focus: a barrier and its own power).","main":"wand","off":"reliquary","style":"chain","element":"lightning"},
-    {"id":"mace_buckler","name":"Bone Mace and Hide Buckler","blurb":"Iron mace: one-handed, with a buckler (a small shield that blocks).","main":"iron_mace","off":"buckler"}
+    {
+     "id": "quarterstaff",
+     "name": "Rattle Staff",
+     "blurb": "Quarterstaff: two-handed, a melee pole (not a spell staff).",
+     "main": "quarterstaff"
+    },
+    {
+     "id": "staff_arc",
+     "name": "Sky-Father Staff",
+     "blurb": "Staff: two-handed; its attack is a bolt of lightning; charged, it jumps between enemies.",
+     "main": "staff",
+     "element": "lightning",
+     "spell": "arc"
+    },
+    {
+     "id": "staff_ground",
+     "name": "Mire Staff",
+     "blurb": "Staff: two-handed; its attack is a thrown blast of poison that bursts wide where it lands.",
+     "main": "staff",
+     "element": "poison",
+     "spell": "ground"
+    },
+    {
+     "id": "sceptre_effigy",
+     "name": "Storm Rattle and Effigy",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal lightning damage, with an effigy (a focus with its own power).",
+     "main": "scepter",
+     "off": "effigy",
+     "element": "lightning"
+    },
+    {
+     "id": "wand_chain",
+     "name": "Spirit Wand and Reliquary",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of lightning that jumps to more enemies, with a reliquary (a focus: a barrier and its own power).",
+     "main": "wand",
+     "off": "reliquary",
+     "style": "chain",
+     "element": "lightning"
+    },
+    {
+     "id": "mace_buckler",
+     "name": "Bone Mace and Hide Buckler",
+     "blurb": "Iron mace: one-handed, with a buckler (a small shield that blocks).",
+     "main": "iron_mace",
+     "off": "buckler"
+    }
    ]
   },
   "witch_hunter": {
    "armour": [
-    {"id":"inquest_coat","name":"Inquest Coat","blurb":"Mail chest, leather boots and mail legs. Nothing on: head, gloves.","pieces":["medium_chest","light_boots","medium_legs"]},
-    {"id":"writ_mail","name":"Writ-Bearer's Mail","blurb":"Mail chest, mail helm and mail gauntlets. Nothing on: legs, boots.","pieces":["medium_chest","medium_helm","medium_gauntlets"]},
-    {"id":"lantern_leathers","name":"Night-Watch Leathers","blurb":"Leather chest, leather boots and leather helm. Nothing on: legs, gloves.","pieces":["light_chest","light_boots","light_helm"]}
+    {
+     "id": "inquest_coat",
+     "name": "Inquest Coat",
+     "blurb": "Mail chest, leather boots and mail legs. Nothing on: head, gloves.",
+     "pieces": [
+      "medium_chest",
+      "light_boots",
+      "medium_legs"
+     ]
+    },
+    {
+     "id": "writ_mail",
+     "name": "Writ-Bearer's Mail",
+     "blurb": "Mail chest, mail helm and mail gauntlets. Nothing on: legs, boots.",
+     "pieces": [
+      "medium_chest",
+      "medium_helm",
+      "medium_gauntlets"
+     ]
+    },
+    {
+     "id": "lantern_leathers",
+     "name": "Night-Watch Leathers",
+     "blurb": "Leather chest, leather boots and leather helm. Nothing on: legs, gloves.",
+     "pieces": [
+      "light_chest",
+      "light_boots",
+      "light_helm"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"shortbow","name":"Yew Shortbow","blurb":"Shortbow: two-handed, ranged, quick to draw.","main":"shortbow"},
-    {"id":"crossbow","name":"Silver-Bolt Crossbow","blurb":"Crossbow: two-handed, ranged, no draw.","main":"crossbow"},
-    {"id":"sword_dagger","name":"Sword and Bodkin","blurb":"Sword: one-handed, with a dagger in the off hand (it swings too, for less).","main":"sword","off":"dagger"},
-    {"id":"sword_buckler","name":"Sword and Hand-Shield","blurb":"Sword: one-handed, with a buckler (a small shield that blocks).","main":"sword","off":"buckler"},
-    {"id":"javelins","name":"Iron Javelins and Hand-Shield","blurb":"Javelins: thrown, one-handed, ranged, with a buckler (a small shield that blocks).","main":"javelin","off":"buckler"}
+    {
+     "id": "shortbow",
+     "name": "Yew Shortbow",
+     "blurb": "Shortbow: two-handed, ranged, quick to draw.",
+     "main": "shortbow"
+    },
+    {
+     "id": "crossbow",
+     "name": "Silver-Bolt Crossbow",
+     "blurb": "Crossbow: two-handed, ranged, no draw.",
+     "main": "crossbow"
+    },
+    {
+     "id": "sword_dagger",
+     "name": "Sword and Bodkin",
+     "blurb": "Sword: one-handed, with a dagger in the off hand (it swings too, for less).",
+     "main": "sword",
+     "off": "dagger"
+    },
+    {
+     "id": "sword_buckler",
+     "name": "Sword and Hand-Shield",
+     "blurb": "Sword: one-handed, with a buckler (a small shield that blocks).",
+     "main": "sword",
+     "off": "buckler"
+    },
+    {
+     "id": "javelins",
+     "name": "Iron Javelins and Hand-Shield",
+     "blurb": "Javelins: thrown, one-handed, ranged, with a buckler (a small shield that blocks).",
+     "main": "javelin",
+     "off": "buckler"
+    },
+    {
+     "id": "mace_buckler",
+     "name": "Writ-server's Cudgel",
+     "blurb": "Mace: one-handed, with a buckler in the off hand (a little armour and a chance to block).",
+     "main": "iron_mace",
+     "off": "buckler"
+    }
    ]
   },
   "knight": {
    "armour": [
-    {"id":"sworn_plate","name":"Sworn Plate","blurb":"Heavy chest, heavy helm and heavy gauntlets. Nothing on: legs, boots.","pieces":["heavy_chest","heavy_helm","heavy_gauntlets"]},
-    {"id":"tourney_harness","name":"Tourney Harness","blurb":"Heavy chest, heavy helm and heavy boots. Nothing on: legs, gloves.","pieces":["heavy_chest","heavy_helm","heavy_boots"]},
-    {"id":"squire_mail","name":"Squire's Mail","blurb":"Mail chest, mail helm and mail legs. Nothing on: gloves, boots.","pieces":["medium_chest","medium_helm","medium_legs"]}
+    {
+     "id": "sworn_plate",
+     "name": "Sworn Plate",
+     "blurb": "Heavy chest, heavy helm and heavy gauntlets. Nothing on: legs, boots.",
+     "pieces": [
+      "heavy_chest",
+      "heavy_helm",
+      "heavy_gauntlets"
+     ]
+    },
+    {
+     "id": "tourney_harness",
+     "name": "Tourney Harness",
+     "blurb": "Heavy chest, heavy helm and heavy boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "heavy_chest",
+      "heavy_helm",
+      "heavy_boots"
+     ]
+    },
+    {
+     "id": "squire_mail",
+     "name": "Squire's Mail",
+     "blurb": "Mail chest, mail helm and mail legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "medium_chest",
+      "medium_helm",
+      "medium_legs"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"longsword","name":"Sworn Longsword","blurb":"Longsword: one-handed.","main":"longsword"},
-    {"id":"sword_shield","name":"Longsword and Heater","blurb":"Longsword: one-handed, with a shield (blocks).","main":"longsword","off":"shield"},
-    {"id":"hammer_shield","name":"Warhammer and Heater","blurb":"Warhammer: one-handed, heavy, with a shield (blocks).","main":"warhammer","off":"shield"},
-    {"id":"spear_shield","name":"Lance-Point and Heater","blurb":"Spear: one-handed, long reach, with a shield (blocks).","main":"spear","off":"shield"},
-    {"id":"halberd","name":"Gate-Guard Halberd","blurb":"Halberd: two-handed polearm.","main":"halberd"}
+    {
+     "id": "longsword",
+     "name": "Sworn Longsword",
+     "blurb": "Longsword: one-handed, with a shield in the off hand (armour and a chance to block).",
+     "main": "longsword",
+     "off": "shield"
+    },
+    {
+     "id": "hammer_shield",
+     "name": "Warhammer and Heater",
+     "blurb": "Warhammer: one-handed, heavy, with a shield (blocks).",
+     "main": "warhammer",
+     "off": "shield"
+    },
+    {
+     "id": "spear_shield",
+     "name": "Lance-Point and Heater",
+     "blurb": "Spear: one-handed, long reach, with a shield (blocks).",
+     "main": "spear",
+     "off": "shield"
+    },
+    {
+     "id": "halberd",
+     "name": "Gate-Guard Halberd",
+     "blurb": "Halberd: two-handed polearm.",
+     "main": "halberd"
+    },
+    {
+     "id": "mace_shield",
+     "name": "Sworn Mace and Shield",
+     "blurb": "Mace: one-handed, with a shield in the off hand (armour and a chance to block).",
+     "main": "iron_mace",
+     "off": "shield"
+    }
    ]
   },
   "sorcerer": {
    "armour": [
-    {"id":"wild_robes","name":"Wild-Talent Robes","blurb":"Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.","pieces":["cloth_chest","cloth_helm","cloth_legs"]},
-    {"id":"hedge_coat","name":"Hedge-Road Coat","blurb":"Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.","pieces":["cloth_chest","cloth_legs","light_boots"]},
-    {"id":"spark_wraps","name":"Spark-Scorched Wraps","blurb":"Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.","pieces":["cloth_chest","cloth_helm","light_gauntlets"]}
+    {
+     "id": "wild_robes",
+     "name": "Wild-Talent Robes",
+     "blurb": "Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "cloth_legs"
+     ]
+    },
+    {
+     "id": "hedge_coat",
+     "name": "Hedge-Road Coat",
+     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_legs",
+      "light_boots"
+     ]
+    },
+    {
+     "id": "spark_wraps",
+     "name": "Spark-Scorched Wraps",
+     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_gauntlets"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"wand_bolt","name":"Raw Wand","blurb":"Wand: one-handed, ranged; throws a single bolt of arcane force.","main":"wand","style":"bolt","element":"arcane"},
-    {"id":"wand_burst","name":"Popping Wand and Orb","blurb":"Wand: one-handed, ranged; throws a bolt of arcane force that bursts where it lands, with an orb in the off hand (more spell power).","main":"wand","off":"orb","style":"burst","element":"arcane"},
-    {"id":"wand_fan","name":"Wildfire Wand and Tome","blurb":"Wand: one-handed, ranged; throws three bolts of fire in a fan, with a tome in the off hand (spell power and mana).","main":"wand","off":"tome","style":"fan","element":"fire"},
-    {"id":"wand_lob","name":"Skylark Wand and Grimoire","blurb":"Wand: one-handed, ranged; lobs an arc of lightning that lands on the target, with a grimoire (a focus: mana and its own power).","main":"wand","off":"grimoire","style":"lob","element":"lightning"},
-    {"id":"staff_nova","name":"Staff of Loose Power","blurb":"Staff: two-handed; its attack is a ring of arcane force around you.","main":"staff","element":"arcane","spell":"nova"},
-    {"id":"staff_arc","name":"Crackling Staff","blurb":"Staff: two-handed; its attack is a bolt of lightning; charged, it jumps between enemies.","main":"staff","element":"lightning","spell":"arc"}
+    {
+     "id": "wand_bolt",
+     "name": "Raw Wand",
+     "blurb": "Wand: one-handed, ranged; throws a single bolt of arcane force, with an orb in the off hand (spell power; your hits burst).",
+     "main": "wand",
+     "style": "bolt",
+     "element": "arcane",
+     "off": "orb"
+    },
+    {
+     "id": "wand_burst",
+     "name": "Popping Wand and Orb",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of arcane force that bursts where it lands, with an orb in the off hand (more spell power).",
+     "main": "wand",
+     "off": "orb",
+     "style": "burst",
+     "element": "arcane"
+    },
+    {
+     "id": "wand_fan",
+     "name": "Wildfire Wand and Tome",
+     "blurb": "Wand: one-handed, ranged; throws three bolts of fire in a fan, with a tome in the off hand (spell power and mana).",
+     "main": "wand",
+     "off": "tome",
+     "style": "fan",
+     "element": "fire"
+    },
+    {
+     "id": "wand_lob",
+     "name": "Skylark Wand and Grimoire",
+     "blurb": "Wand: one-handed, ranged; lobs an arc of lightning that lands on the target, with a grimoire (a focus: mana and its own power).",
+     "main": "wand",
+     "off": "grimoire",
+     "style": "lob",
+     "element": "lightning"
+    },
+    {
+     "id": "staff_nova",
+     "name": "Staff of Loose Power",
+     "blurb": "Staff: two-handed; its attack is a ring of arcane force around you.",
+     "main": "staff",
+     "element": "arcane",
+     "spell": "nova"
+    },
+    {
+     "id": "staff_arc",
+     "name": "Crackling Staff",
+     "blurb": "Staff: two-handed; its attack is a bolt of lightning; charged, it jumps between enemies.",
+     "main": "staff",
+     "element": "lightning",
+     "spell": "arc"
+    }
    ]
   },
   "runesmith": {
    "armour": [
-    {"id":"forge_plate","name":"Forge Plate","blurb":"Heavy chest, heavy helm and heavy boots. Nothing on: legs, gloves.","pieces":["heavy_chest","heavy_helm","heavy_boots"]},
-    {"id":"anvil_harness","name":"Anvil Harness","blurb":"Mail chest, heavy helm and mail boots. Nothing on: legs, gloves.","pieces":["medium_chest","heavy_helm","medium_boots"]},
-    {"id":"apron_leathers","name":"Apron and Leathers","blurb":"Leather chest, leather gauntlets and leather boots. Nothing on: head, legs.","pieces":["light_chest","light_gauntlets","light_boots"]}
+    {
+     "id": "forge_plate",
+     "name": "Forge Plate",
+     "blurb": "Heavy chest, heavy helm and heavy boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "heavy_chest",
+      "heavy_helm",
+      "heavy_boots"
+     ]
+    },
+    {
+     "id": "anvil_harness",
+     "name": "Anvil Harness",
+     "blurb": "Mail chest, heavy helm and mail boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "medium_chest",
+      "heavy_helm",
+      "medium_boots"
+     ]
+    },
+    {
+     "id": "apron_leathers",
+     "name": "Apron and Leathers",
+     "blurb": "Leather chest, leather gauntlets and leather boots. Nothing on: head, legs.",
+     "pieces": [
+      "light_chest",
+      "light_gauntlets",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"hammer","name":"Smith's Hammer","blurb":"Hammer: one-handed.","main":"hammer"},
-    {"id":"hammer_shield","name":"Hammer and Rune Shield","blurb":"Hammer: one-handed, with a shield (blocks).","main":"hammer","off":"shield"},
-    {"id":"warhammer_shield","name":"Sledge and Rune Shield","blurb":"Warhammer: one-handed, heavy, with a shield (blocks).","main":"warhammer","off":"shield"},
-    {"id":"great_axe","name":"Rune-Cut Great Axe","blurb":"Two-handed axe.","main":"axe2h"},
-    {"id":"axe_hammer","name":"Axe and Hammer","blurb":"Battleaxe: one-handed, with a hammer in the off hand (it swings too, for less).","main":"battleaxe","off":"hammer"}
+    {
+     "id": "hammer",
+     "name": "Smith's Hammer",
+     "blurb": "Hammer: one-handed, with a shield in the off hand (armour and a chance to block).",
+     "main": "hammer",
+     "off": "shield"
+    },
+    {
+     "id": "warhammer_shield",
+     "name": "Sledge and Rune Shield",
+     "blurb": "Warhammer: one-handed, heavy, with a shield (blocks).",
+     "main": "warhammer",
+     "off": "shield"
+    },
+    {
+     "id": "great_axe",
+     "name": "Rune-Cut Great Axe",
+     "blurb": "Two-handed axe.",
+     "main": "axe2h"
+    },
+    {
+     "id": "axe_hammer",
+     "name": "Axe and Hammer",
+     "blurb": "Battleaxe: one-handed, with a hammer in the off hand (it swings too, for less).",
+     "main": "battleaxe",
+     "off": "hammer"
+    },
+    {
+     "id": "axe_shield",
+     "name": "Forge Axe and Shield",
+     "blurb": "Battleaxe: one-handed, with a shield in the off hand (armour and a chance to block).",
+     "main": "battleaxe",
+     "off": "shield"
+    }
    ]
   },
   "shadow_dancer": {
    "armour": [
-    {"id":"dusk_leathers","name":"Dusk Leathers","blurb":"Leather chest, leather boots and leather helm. Nothing on: legs, gloves.","pieces":["light_chest","light_boots","light_helm"]},
-    {"id":"soft_step","name":"Soft-Step Wraps","blurb":"Leather chest, leather gauntlets and leather legs. Nothing on: head, boots.","pieces":["light_chest","light_gauntlets","light_legs"]},
-    {"id":"masque_silks","name":"Masquerade Silks","blurb":"Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.","pieces":["cloth_chest","cloth_helm","light_boots"]}
+    {
+     "id": "dusk_leathers",
+     "name": "Dusk Leathers",
+     "blurb": "Leather chest, leather boots and leather helm. Nothing on: legs, gloves.",
+     "pieces": [
+      "light_chest",
+      "light_boots",
+      "light_helm"
+     ]
+    },
+    {
+     "id": "soft_step",
+     "name": "Soft-Step Wraps",
+     "blurb": "Leather chest, leather gauntlets and leather legs. Nothing on: head, boots.",
+     "pieces": [
+      "light_chest",
+      "light_gauntlets",
+      "light_legs"
+     ]
+    },
+    {
+     "id": "masque_silks",
+     "name": "Masquerade Silks",
+     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"dagger","name":"Single Dirk","blurb":"Dagger: one-handed, fast, short reach.","main":"dagger"},
-    {"id":"twin_daggers","name":"Mirrored Dirks","blurb":"Dagger: one-handed, fast, short reach, with a dagger in the off hand (it swings too, for less).","main":"dagger","off":"dagger"},
-    {"id":"rapier_dagger","name":"Thin Blade and Dirk","blurb":"Rapier: one-handed, light, with a dagger in the off hand (it swings too, for less).","main":"rapier","off":"dagger"},
-    {"id":"twin_swords","name":"Twin Sabres","blurb":"Sword: one-handed, with a second sword in the off hand (it swings too, for less).","main":"sword","off":"sword"}
+    {
+     "id": "dagger",
+     "name": "Single Dirk",
+     "blurb": "Dagger: one-handed, fast, short reach, with a second one in the off hand (it swings too, for less).",
+     "main": "dagger",
+     "off": "dagger"
+    },
+    {
+     "id": "rapier_dagger",
+     "name": "Thin Blade and Dirk",
+     "blurb": "Rapier: one-handed, light, with a dagger in the off hand (it swings too, for less).",
+     "main": "rapier",
+     "off": "dagger"
+    },
+    {
+     "id": "twin_swords",
+     "name": "Twin Sabres",
+     "blurb": "Sword: one-handed, with a second sword in the off hand (it swings too, for less).",
+     "main": "sword",
+     "off": "sword"
+    },
+    {
+     "id": "dagger_buckler",
+     "name": "Dusk Knife and Buckler",
+     "blurb": "Dagger: one-handed and fast, with a buckler in the off hand (a little armour and a chance to block).",
+     "main": "dagger",
+     "off": "buckler"
+    }
    ]
   },
   "tinker": {
    "armour": [
-    {"id":"workshop_mail","name":"Workshop Mail","blurb":"Mail chest, leather boots and mail legs. Nothing on: head, gloves.","pieces":["medium_chest","light_boots","medium_legs"]},
-    {"id":"rivet_harness","name":"Riveted Harness","blurb":"Mail chest, leather boots and leather gauntlets. Nothing on: head, legs.","pieces":["medium_chest","light_boots","light_gauntlets"]},
-    {"id":"tool_leathers","name":"Tool-Belt Leathers","blurb":"Leather chest, leather gauntlets and leather legs. Nothing on: head, boots.","pieces":["light_chest","light_gauntlets","light_legs"]}
+    {
+     "id": "workshop_mail",
+     "name": "Workshop Mail",
+     "blurb": "Mail chest, leather boots and mail legs. Nothing on: head, gloves.",
+     "pieces": [
+      "medium_chest",
+      "light_boots",
+      "medium_legs"
+     ]
+    },
+    {
+     "id": "rivet_harness",
+     "name": "Riveted Harness",
+     "blurb": "Mail chest, leather boots and leather gauntlets. Nothing on: head, legs.",
+     "pieces": [
+      "medium_chest",
+      "light_boots",
+      "light_gauntlets"
+     ]
+    },
+    {
+     "id": "tool_leathers",
+     "name": "Tool-Belt Leathers",
+     "blurb": "Leather chest, leather gauntlets and leather legs. Nothing on: head, boots.",
+     "pieces": [
+      "light_chest",
+      "light_gauntlets",
+      "light_legs"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"shortbow","name":"Pulley Shortbow","blurb":"Shortbow: two-handed, ranged, quick to draw.","main":"shortbow"},
-    {"id":"crossbow","name":"Crank Crossbow","blurb":"Crossbow: two-handed, ranged, no draw.","main":"crossbow"},
-    {"id":"twin_daggers","name":"Two Sharp Files","blurb":"Dagger: one-handed, fast, short reach, with a dagger in the off hand (it swings too, for less).","main":"dagger","off":"dagger"},
-    {"id":"hammer_buckler","name":"Wrench-Hammer and Gear Buckler","blurb":"Hammer: one-handed, with a buckler (a small shield that blocks).","main":"hammer","off":"buckler"},
-    {"id":"javelins","name":"Spring Javelins and Gear Buckler","blurb":"Javelins: thrown, one-handed, ranged, with a buckler (a small shield that blocks).","main":"javelin","off":"buckler"}
+    {
+     "id": "shortbow",
+     "name": "Pulley Shortbow",
+     "blurb": "Shortbow: two-handed, ranged, quick to draw.",
+     "main": "shortbow"
+    },
+    {
+     "id": "crossbow",
+     "name": "Crank Crossbow",
+     "blurb": "Crossbow: two-handed, ranged, no draw.",
+     "main": "crossbow"
+    },
+    {
+     "id": "twin_daggers",
+     "name": "Two Sharp Files",
+     "blurb": "Dagger: one-handed, fast, short reach, with a dagger in the off hand (it swings too, for less).",
+     "main": "dagger",
+     "off": "dagger"
+    },
+    {
+     "id": "hammer_buckler",
+     "name": "Wrench-Hammer and Gear Buckler",
+     "blurb": "Hammer: one-handed, with a buckler (a small shield that blocks).",
+     "main": "hammer",
+     "off": "buckler"
+    },
+    {
+     "id": "javelins",
+     "name": "Spring Javelins and Gear Buckler",
+     "blurb": "Javelins: thrown, one-handed, ranged, with a buckler (a small shield that blocks).",
+     "main": "javelin",
+     "off": "buckler"
+    },
+    {
+     "id": "sword_buckler",
+     "name": "Shop Sword and Buckler",
+     "blurb": "Sword: one-handed, with a buckler in the off hand (a little armour and a chance to block).",
+     "main": "sword",
+     "off": "buckler"
+    }
    ]
   },
   "priest": {
    "armour": [
-    {"id":"cloister_mail","name":"Cloister Mail","blurb":"Mail chest, mail helm and mail boots. Nothing on: legs, gloves.","pieces":["medium_chest","medium_helm","medium_boots"]},
-    {"id":"vesper_coat","name":"Vesper Coat","blurb":"Cloth chest, cloth helm and mail boots. Nothing on: legs, gloves.","pieces":["cloth_chest","cloth_helm","medium_boots"]},
-    {"id":"dawn_robes","name":"Robes of the Early Bell","blurb":"Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.","pieces":["cloth_chest","cloth_helm","light_boots"]}
+    {
+     "id": "cloister_mail",
+     "name": "Cloister Mail",
+     "blurb": "Mail chest, mail helm and mail boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "medium_chest",
+      "medium_helm",
+      "medium_boots"
+     ]
+    },
+    {
+     "id": "vesper_coat",
+     "name": "Vesper Coat",
+     "blurb": "Cloth chest, cloth helm and mail boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "medium_boots"
+     ]
+    },
+    {
+     "id": "dawn_robes",
+     "name": "Robes of the Early Bell",
+     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"sceptre","name":"Chapter Sceptre","blurb":"Sceptre: one-handed, MELEE; its swings deal shadow damage.","main":"scepter","element":"shadow"},
-    {"id":"sceptre_reliquary","name":"Sceptre and Saint's Box","blurb":"Sceptre: one-handed, MELEE; its swings deal arcane force damage, with a reliquary (a focus: a barrier and its own power).","main":"scepter","off":"reliquary","element":"arcane"},
-    {"id":"staff_nova","name":"Staff of the Morning Office","blurb":"Staff: two-handed; its attack is a ring of arcane force around you.","main":"staff","element":"arcane","spell":"nova"},
-    {"id":"staff_cone","name":"Staff of the Night Office","blurb":"Staff: two-handed; its attack is a short cone of shadow in front of you.","main":"staff","element":"shadow","spell":"cone"},
-    {"id":"wand_ward","name":"Sheltering Wand and Psalter","blurb":"Wand: one-handed, ranged; throws a bolt of arcane force; each hit gives you a small barrier, with a psalter (a focus: spell power and mana).","main":"wand","off":"psalter","style":"ward","element":"arcane"},
-    {"id":"wand_seeking","name":"Accusing Wand and Grimoire","blurb":"Wand: one-handed, ranged; throws a bolt of shadow that turns after its target, with a grimoire (a focus: mana and its own power).","main":"wand","off":"grimoire","style":"seeking","element":"shadow"}
+    {
+     "id": "sceptre",
+     "name": "Chapter Sceptre",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal shadow damage, with a shield in the off hand (armour and a chance to block).",
+     "main": "scepter",
+     "element": "shadow",
+     "off": "shield"
+    },
+    {
+     "id": "sceptre_reliquary",
+     "name": "Sceptre and Saint's Box",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal arcane force damage, with a reliquary (a focus: a barrier and its own power).",
+     "main": "scepter",
+     "off": "reliquary",
+     "element": "arcane"
+    },
+    {
+     "id": "staff_nova",
+     "name": "Staff of the Morning Office",
+     "blurb": "Staff: two-handed; its attack is a ring of arcane force around you.",
+     "main": "staff",
+     "element": "arcane",
+     "spell": "nova"
+    },
+    {
+     "id": "staff_cone",
+     "name": "Staff of the Night Office",
+     "blurb": "Staff: two-handed; its attack is a short cone of shadow in front of you.",
+     "main": "staff",
+     "element": "shadow",
+     "spell": "cone"
+    },
+    {
+     "id": "wand_ward",
+     "name": "Sheltering Wand and Psalter",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of arcane force; each hit gives you a small barrier, with a psalter (a focus: spell power and mana).",
+     "main": "wand",
+     "off": "psalter",
+     "style": "ward",
+     "element": "arcane"
+    },
+    {
+     "id": "wand_seeking",
+     "name": "Accusing Wand and Grimoire",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of shadow that turns after its target, with a grimoire (a focus: mana and its own power).",
+     "main": "wand",
+     "off": "grimoire",
+     "style": "seeking",
+     "element": "shadow"
+    },
+    {
+     "id": "mace_shield",
+     "name": "Cloister Mace and Shield",
+     "blurb": "Mace: one-handed, with a shield in the off hand (armour and a chance to block).",
+     "main": "iron_mace",
+     "off": "shield"
+    }
    ]
   },
   "enchanter": {
    "armour": [
-    {"id":"court_leathers","name":"Courtly Leathers","blurb":"Leather chest, leather boots and leather helm. Nothing on: legs, gloves.","pieces":["light_chest","light_boots","light_helm"]},
-    {"id":"glamour_hood","name":"Hood and Hose of Glamour","blurb":"Leather chest, leather helm and leather legs. Nothing on: gloves, boots.","pieces":["light_chest","light_helm","light_legs"]},
-    {"id":"salon_robes","name":"Salon Robes","blurb":"Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.","pieces":["cloth_chest","cloth_helm","light_boots"]}
+    {
+     "id": "court_leathers",
+     "name": "Courtly Leathers",
+     "blurb": "Leather chest, leather boots and leather helm. Nothing on: legs, gloves.",
+     "pieces": [
+      "light_chest",
+      "light_boots",
+      "light_helm"
+     ]
+    },
+    {
+     "id": "glamour_hood",
+     "name": "Hood and Hose of Glamour",
+     "blurb": "Leather chest, leather helm and leather legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "light_chest",
+      "light_helm",
+      "light_legs"
+     ]
+    },
+    {
+     "id": "salon_robes",
+     "name": "Salon Robes",
+     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "light_boots"
+     ]
+    }
    ],
    "weapons": [
-    {"id":"staff_cone","name":"Staff of Soft Words","blurb":"Staff: two-handed; its attack is a short cone of arcane force in front of you.","main":"staff","element":"arcane","spell":"cone"},
-    {"id":"staff_nova","name":"Staff of the Cold Stare","blurb":"Staff: two-handed; its attack is a ring of frost around you.","main":"staff","element":"ice","spell":"nova"},
-    {"id":"staff_ground","name":"Staff of Bad Dreams","blurb":"Staff: two-handed; its attack is a thrown blast of shadow that bursts wide where it lands.","main":"staff","element":"shadow","spell":"ground"},
-    {"id":"wand_fork","name":"Two-Minds Wand and Glass","blurb":"Wand: one-handed, ranged; throws a bolt of arcane force that splits on what it hits, with a seer's orb (a focus with its own power).","main":"wand","off":"seer_orb","style":"fork","element":"arcane"},
-    {"id":"wand_nova","name":"Hush Wand and Tome","blurb":"Wand: one-handed, ranged; bursts a ring of arcane force around you, with a tome in the off hand (spell power and mana).","main":"wand","off":"tome","style":"nova","element":"arcane"},
-    {"id":"wand_cone","name":"Shiver Wand and Orb","blurb":"Wand: one-handed, ranged; sprays a short cone of frost in front of you, with an orb in the off hand (more spell power).","main":"wand","off":"orb","style":"cone","element":"ice"}
+    {
+     "id": "staff_cone",
+     "name": "Staff of Soft Words",
+     "blurb": "Staff: two-handed; its attack is a short cone of arcane force in front of you.",
+     "main": "staff",
+     "element": "arcane",
+     "spell": "cone"
+    },
+    {
+     "id": "staff_nova",
+     "name": "Staff of the Cold Stare",
+     "blurb": "Staff: two-handed; its attack is a ring of frost around you.",
+     "main": "staff",
+     "element": "ice",
+     "spell": "nova"
+    },
+    {
+     "id": "staff_ground",
+     "name": "Staff of Bad Dreams",
+     "blurb": "Staff: two-handed; its attack is a thrown blast of shadow that bursts wide where it lands.",
+     "main": "staff",
+     "element": "shadow",
+     "spell": "ground"
+    },
+    {
+     "id": "wand_fork",
+     "name": "Two-Minds Wand and Glass",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of arcane force that splits on what it hits, with a seer's orb (a focus with its own power).",
+     "main": "wand",
+     "off": "seer_orb",
+     "style": "fork",
+     "element": "arcane"
+    },
+    {
+     "id": "wand_nova",
+     "name": "Hush Wand and Tome",
+     "blurb": "Wand: one-handed, ranged; bursts a ring of arcane force around you, with a tome in the off hand (spell power and mana).",
+     "main": "wand",
+     "off": "tome",
+     "style": "nova",
+     "element": "arcane"
+    },
+    {
+     "id": "wand_cone",
+     "name": "Shiver Wand and Orb",
+     "blurb": "Wand: one-handed, ranged; sprays a short cone of frost in front of you, with an orb in the off hand (more spell power).",
+     "main": "wand",
+     "off": "orb",
+     "style": "cone",
+     "element": "ice"
+    }
    ]
   }
  }

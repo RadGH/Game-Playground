@@ -834,8 +834,8 @@
         {
           "id": "greater_healing",
           "source": "potion",
-          "price": 22,
-          "minLevel": 8
+          "price": 20,
+          "minLevel": 5
         },
         {
           "id": "mana_potion",
@@ -1102,6 +1102,12 @@
           "source": "good",
           "price": 6,
           "minLevel": 1
+        },
+        {
+          "id": "healing_potion",
+          "source": "potion",
+          "price": 10,
+          "minLevel": 1
         }
       ],
       "services": {
@@ -1257,6 +1263,18 @@
           "id": "healing_potion",
           "source": "potion",
           "price": 9,
+          "minLevel": 1
+        },
+        {
+          "id": "greater_healing",
+          "source": "potion",
+          "price": 22,
+          "minLevel": 5
+        },
+        {
+          "id": "mana_potion",
+          "source": "potion",
+          "price": 10,
           "minLevel": 1
         },
         {
@@ -2407,8 +2425,8 @@
         {
           "id": "greater_healing",
           "source": "potion",
-          "price": 22,
-          "minLevel": 8
+          "price": 20,
+          "minLevel": 5
         },
         {
           "id": "mana_potion",
@@ -2718,6 +2736,12 @@
           "source": "good",
           "price": 6,
           "minLevel": 1
+        },
+        {
+          "id": "healing_potion",
+          "source": "potion",
+          "price": 10,
+          "minLevel": 1
         }
       ],
       "services": {
@@ -2800,6 +2824,18 @@
           "minLevel": 1
         },
         {
+          "id": "greater_healing",
+          "source": "potion",
+          "price": 22,
+          "minLevel": 5
+        },
+        {
+          "id": "mana_potion",
+          "source": "potion",
+          "price": 10,
+          "minLevel": 1
+        },
+        {
           "id": "herb_poultice",
           "source": "good",
           "price": 5,
@@ -2868,5 +2904,37 @@
       ]
     }
   },
-  "_rolesDoc": "MADE by tools/content-shops.mjs from `kinds` (do not edit by hand): stream A's js/sim/shops.js reads roles.<role> = { title, sells: [{ base, rarity }], markup } (+ goods, services, mounts, sign, light, kind). `cat` = the shop tab (the kind's category label)."
+  "_rolesDoc": "MADE by tools/content-shops.mjs from `kinds` (do not edit by hand): stream A's js/sim/shops.js reads roles.<role> = { title, sells: [{ base, rarity }], markup } (+ goods, services, mounts, sign, light, kind). `cat` = the shop tab (the kind's category label).",
+  "potionDrops": {
+    "_doc": "Stream E (play-test 6 U17). A potion beside the usual loot of a kill: `chance` by the monster's rank, then `table` rows [monster level, potion id] — stream A's js/sim/province.js potionDrop picks evenly among the rows of the HIGHEST level the monster reaches plus the level-1 rows (so a level-6 kill gives healing, mana or greater healing). Personal, like the rest of the loot. What a potion restores is js/sim/consumables.js (stream C's numbers).",
+    "chance": {
+      "normal": 0.06,
+      "elite": 0.4,
+      "champion": 0.35,
+      "rare": 0.6,
+      "boss": 1
+    },
+    "table": [
+      [
+        1,
+        "healing_potion"
+      ],
+      [
+        1,
+        "mana_potion"
+      ],
+      [
+        6,
+        "greater_healing"
+      ],
+      [
+        12,
+        "greater_healing"
+      ],
+      [
+        12,
+        "group_tonic"
+      ]
+    ]
+  }
 }

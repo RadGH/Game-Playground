@@ -164,6 +164,7 @@
         "The guards of Torborhold are falling back to the square."
       ],
       "monster": "brigand_captain",
+      "encounter": "ev_harl_vesk",
       "bossName": "Harl Vesk, the Raider Captain",
       "_bossNote": "S24 (play-test 4): the raid ends with its captain — before this the runner fell back to a WOLF named after the event",
       "reward": {

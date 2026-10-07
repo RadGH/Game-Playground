@@ -279,7 +279,7 @@ test('T5: kitsFor / validKit / starterGear from the booted rules; applyKit dress
   for (const cls of CLASSES) {
     const k = kitsFor(cls);
     assert.equal(k.armour.length, 3, cls);
-    assert.ok(k.weapons.length >= 3 && k.weapons.length <= 6, cls);
+    assert.ok(k.weapons.length >= 4 && k.weapons.length <= 7, cls);
     for (const pack of k.weapons) for (const it of pack.items) {
       assert.ok(it.starter && it.name, `${cls}/${pack.id}`);
       if (it.type === 'weapon' && it.weaponCategory === 'magic' && it.castElement) assert.ok(it.attackText || it.focusText, `${cls}/${pack.id}: ${it.name} has its card line`);

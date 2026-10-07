@@ -39,7 +39,7 @@ test('every node of every tree changes how the skill works — no plain numbers,
     }
   }
   // play-test 5 (T4): five revive skills were added to the table (the five they replace stay in it, off every bar)
-  assert.equal(Object.keys(rows).length, 188);    // + three direct heals (paladin, bard, oracle)
+  assert.equal(Object.keys(rows).length, 189);    // + three direct heals (paladin, bard, oracle)
   assert.equal(new Set(Object.values(engine.skillData.classes).flat()).size, 180, 'thirty classes, six skills each, none shared');
   assert.deepEqual(plain, [], 'nodes that are only a number');
   assert.deepEqual(inert, [], 'library nodes that do nothing on this skill');

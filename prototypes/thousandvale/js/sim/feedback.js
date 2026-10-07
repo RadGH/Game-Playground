@@ -10,11 +10,11 @@
 // STORED in the store (`addFeedback` — Postgres table `feedback`, or the memory store) AND handed to `sink(row)`: the
 // server appends every report (and every state change) to `.data/feedback-<env>.jsonl`, so tools/feedback-report.mjs can
 // read reports from a server that keeps nothing else on disk.
-// LIMITS: one report per `gapMs` and `perHour` per account; text <= 2000 chars; the client context <= 6 kB of JSON.
+// LIMITS: one report per `gapMs` (2 s) and `perHour` (1000 — play-test 6 U2: the owner files them while play-testing) per account; text <= 2000 chars; the client context <= 6 kB of JSON.
 
 import { FEEDBACK_KINDS, FEEDBACK_STATES } from '../net/protocol.js';
 
-export const FEEDBACK = Object.freeze({ textMax: 2000, ctxMax: 6000, logLines: 60, logLine: 300, depth: 4, keys: 40, str: 500, gapMs: 20000, perHour: 12, list: 100 });
+export const FEEDBACK = Object.freeze({ textMax: 2000, ctxMax: 6000, logLines: 60, logLine: 300, depth: 4, keys: 40, str: 500, gapMs: 2000, perHour: 1000, list: 100 });
 export const THANKS = Object.freeze({
   subject: 'Thank you',
   body: 'Thank you for taking the time to improve the game. Every report is read.\n\nThere is a small gift with this letter — open it from your bag.',

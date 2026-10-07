@@ -22,10 +22,12 @@ test('a potion heals (by uid or by kind), costs the item, and starts the shared 
   const got = box(a, ['itemR', 'you']);
   a.item('use', 'id:healing_potion'); await run(clock, 100);
   assert.equal(got.find(x => x.t === 'itemR').why, 'full', 'full health: refused');
-  assert.equal(o.char.bag.filter(i => i.id === 'healing_potion').length, 2, 'nothing spent');
+  const held = id => o.char.bag.filter(i => i.id === id).reduce((n, i) => n + (i.count || 1), 0);      // play-test 6 U5: potions stack
+  assert.equal(held('healing_potion'), 2, 'nothing spent');
+  assert.equal(o.char.bag.filter(i => i.id === 'healing_potion').length, 1, 'two potions are one stack');
   e.setHp(Math.round(e.hpMax * 0.3)); const hp0 = e.hp;
   a.item('use', o.char.bag.find(i => i.id === 'healing_potion').uid); await run(clock, 100);
-  assert.ok(e.hp > hp0, 'healed'); assert.equal(o.char.bag.filter(i => i.id === 'healing_potion').length, 1, 'one used');
+  assert.ok(e.hp > hp0, 'healed'); assert.equal(held('healing_potion'), 1, 'one used');
   assert.ok(got.some(x => x.t === 'you' && x.potionCd === POTION_CD_MS));
   e.setHp(Math.round(e.hpMax * 0.3));
   a.item('use', 'id:healing_potion'); await run(clock, 100);

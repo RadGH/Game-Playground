@@ -20,7 +20,9 @@ import { MAIL_OPS } from '../net/protocol.js';
 
 export const MAIL = Object.freeze({ items: 6, postage: 1, minLevel: 5, expireMs: 30 * 86400000, perHour: 20, subjectMax: 60, bodyMax: 500, list: 50 });
 
-export function createMail({ store, online, journal, syncChar, econ, trades, send = () => {}, setTimeoutTicks, wallNow, filter = null, log = () => {}, counters = {}, BAG_MAX = 120, saveNow = () => {}, opts = {} }) {
+export function createMail({ store, online, journal, syncChar, econ, trades, send = () => {}, setTimeoutTicks, wallNow, filter = null, log = () => {}, counters = {}, BAG_MAX = 120, saveNow = () => {}, restack = () => {}, opts = {} }) {
+  /** U1 (play-test 6): the unread count the badge shows, re-sent after anything that can change it (read, take, delete). */
+  const tellUnread = o => store.mailUnread(o.char.id).then(n => { if (o.conn) o.conn.sendJSON({ t: 'mailNew', unread: n }); }, () => {});
   const R = { ...MAIL, ...opts };
   const sentLog = new Map();      // char -> [wall ms] (spam limit)
   const clean = (t, n) => { const s = String(t || '').replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, '').slice(0, n); return filter ? filter.text(s) : s; };
@@ -117,6 +119,8 @@ export function createMail({ store, online, journal, syncChar, econ, trades, sen
     counters.mailTaken = (counters.mailTaken || 0) + 1;
     if (o.conn) o.conn.sendJSON({ t: 'bag', add: got, remove: [], gold: ch.gold });
     reply(o, op, { ok: true, id: mail.id, items: got.length, gold: mail.gold });
+    restack(o);                 // U5: posted potions join the stacks already carried
+    tellUnread(o);
     if (o.savePending) { o.savePending = false; saveNow(o); }
   }
 
@@ -131,7 +135,7 @@ export function createMail({ store, online, journal, syncChar, econ, trades, sen
         if (!mail.read) await store.mailRead(ch.id, mail.id, wallNow());
         const { itemsFull, ...view } = mail;
         if (o.conn) o.conn.sendJSON({ t: 'mailOpen', mail: { ...view, read: true, items: itemsFull.length ? itemsFull : view.items } });
-        return;
+        return tellUnread(o);
       }
       case 'send': return sendMail(o, m);
       case 'take': return take(o, m);
@@ -146,6 +150,7 @@ export function createMail({ store, online, journal, syncChar, econ, trades, sen
         const ok = await store.mailDelete(ch.id, m.id ?? -1);
         if (!ok) return fail(o, 'delete', 'holds', 'Take what is in it first (or send it back).');
         reply(o, 'delete', { ok: true, id: m.id });
+        tellUnread(o);
         return list(o);
       }
     }

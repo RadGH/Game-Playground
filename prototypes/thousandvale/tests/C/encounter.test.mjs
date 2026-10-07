@@ -108,7 +108,9 @@ test('PHASES: the Barrow Warden changes phase at 70%, raises its ward, and its s
   assert.equal(st.phase, 0, 'not yet at 71%');
   boss.hp = Math.round(boss.maxHp * 0.69); s.step(2);
   assert.equal(st.phase, 1, 'the ward phase at 69%');
-  assert.ok(boss.barrier > 1e9, 'the ward is up');
+  // owner feedback 6 (U8): a ward is a real barrier with a life — 10% of the boss's health, 18 s — not a mountain
+  assert.equal(boss.barrier, Math.round(boss.maxHp * 0.1), 'the ward is up');
+  assert.ok(s.enc.wardOf(boss).ms >= 8000 && s.enc.wardOf(boss).ms <= 30000 && s.enc.wardOf(boss).max === boss.barrier, 'with a stated life and a breaking point');
   assert.equal(st.adds.size, 3, 'three hounds answered');
   // kill the hounds, light the braziers: the ward breaks and the Warden is exposed
   s.room.run(() => { for (const a of st.adds) { a.hp = 0; s.room.field.kill(a); } });

@@ -460,11 +460,11 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
     }
     if (!made.length) return Rr({ ok: false, why: (why && why.why) || 'fish', msg: (why && why.text) || 'You cannot cook that.' });
     const added = grant(o, { items: made, gold: 0, reason: 'cook' }) || [];
-    counters.cooked = (counters.cooked || 0) + added.length;
+    counters.cooked = (counters.cooked || 0) + made.length;
     if (e && !e.dead) e.anim('interact');
     o.room.emit({ type: 'fx', kind: 'cook', id: e.id, at: fire.id, x: fire.x, z: fire.z });
-    for (let k = 0; k < added.length; k++) questEvent(o, { kind: 'cook', recipe: rc.id, meal: rc.makes, x: e.x, z: e.z });
-    Rr({ ok: true, item: added[0] || null, items: added, n: added.length, msg: 'You cook ' + (added.length > 1 ? added.length + ' x ' : '') + (meal.name || rc.name) + '.' });
+    for (let k = 0; k < made.length; k++) questEvent(o, { kind: 'cook', recipe: rc.id, meal: rc.makes, x: e.x, z: e.z });
+    Rr({ ok: true, item: added[0] || null, items: added, n: made.length, msg: 'You cook ' + (made.length > 1 ? made.length + ' x ' : '') + (meal.name || rc.name) + '.' });
     reply(o, 'cookList', { ok: true, fire: true, fireName: fire.name, level: A.level, recipes: recipes.map(x => recipeView(x, fishCounts(ch), A.level)) });
   }
 

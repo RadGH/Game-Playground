@@ -8,6 +8,7 @@ import { createPanel, h, confirmBox } from './ui-panel.js';
 import { rememberItems } from './ui/item-card.js';
 import { iconFor } from './ui/item-icons.js';
 import { bagRoom, isGift, isCrate } from './ui/pt5-core.js';
+import { UNSEEN } from './ui/unseen.js';
 
 /** An item square with its 3D icon and the shared item card on hover (P7/P15/P16). */
 let synthUid = 0;
@@ -27,9 +28,7 @@ export function createMail({ net: getNet, hud, bag, me, inTown }) {
   const panel = createPanel({ id: 'mail', title: 'Mail', width: 420, cls: 'mail-panel', onOpen: () => { S.view = S.view === 'compose' ? 'compose' : 'inbox'; net()?.mail('list'); draw(); } });
 
   function setBadge() {
-    const b = document.getElementById('menu-mail')?.querySelector('b');
-    if (b) b.textContent = S.unread ? String(S.unread) : '';
-    document.getElementById('menu-mail')?.classList.toggle('alert', S.unread > 0);
+    UNSEEN.set('mail', S.unread);            // U1: the one place the mail badge (and the Party button's share of it) is painted
   }
   function draw() {
     setBadge();
@@ -146,11 +145,12 @@ export function createMail({ net: getNet, hud, bag, me, inTown }) {
       if (!S.list.some(x => x.id === mail.id)) S.list.push(mail);
       S.unread = S.list.filter(x => !x.read).length;
       if (S.open && S.open.id === mail.id) S.open = { ...mail, read: true };
+      setBadge();                               // read = seen: the badge drops now, whether or not the window is drawn
       draw();
     });
     n.on('mailNew', m => {
       const more = (m.unread || 0) > S.unread;
-      S.unread = m.unread || 0; setBadge();
+      S.unread = Math.max(0, m.unread || 0); setBadge();
       if (more) { hud.toast('You have mail', 'good'); hud.chat('A letter has arrived. Open your mail with M.', 'system'); }
       if (panel.isOpen && S.view === 'inbox') net()?.mail('list');
     });

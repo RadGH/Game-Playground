@@ -1,0 +1,3 @@
+{
+  "grove_wolf": { "creature": { "type": "wolf", "size": 0.95, "colors": { "body": "#566650", "belly": "#a9b596", "accent": "#2c3a2a", "eyes": "#d8f06a" } } }
+}

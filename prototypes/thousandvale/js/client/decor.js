@@ -18,7 +18,7 @@ import { makeNoise2D, fbm } from '../../../../worldgen/js/noise.js';
 const SPECIES = ['pine', 'fir', 'oak', 'birch'];
 const VARIANTS = 2;
 
-const windUniform = { value: 0 };
+export const windUniform = { value: 0 };      // the page's one wind clock (leaves here; standing crops in setpiece-view.js)
 function addWind(material, amount) {
   material.onBeforeCompile = shader => {
     shader.uniforms.uWindT = windUniform;

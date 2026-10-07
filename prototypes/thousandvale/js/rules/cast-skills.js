@@ -267,10 +267,11 @@ function runtimeOf(combat) {
   // ---- main.js dropPool / tickPools: burning ground that strikes every 0.75 s and leaves its element's status
   const ELEMENT_LEAVES = { fire: 'burn', ice: 'chill', lightning: 'shock', poison: 'poison', shadow: 'curse' };
   rt.pools = [];
+  let poolN = 0;
   rt.dropPool = (ch, { x, z, r, seconds, element = 'physical', power = 0.5 }) => {
-    const pool = { caster: ch.id, x, z, r, left: seconds, life: seconds, every: 0.75, next: 0.75, element, power };
+    const pool = { pid: `${ch.id}:${++poolN}`, caster: ch.id, x, z, r, left: seconds, life: seconds, every: 0.75, next: 0.75, element, power };
     rt.pools.push(pool);
-    field.emit({ t: 'fx', kind: 'pool', id: ch.id, x, z, r, seconds, element });
+    field.emit({ t: 'fx', kind: 'pool', id: ch.id, pid: pool.pid, x, z, r, seconds, element });
     return pool;
   };
   function tickPools(dt) {
@@ -331,14 +332,23 @@ function runtimeOf(combat) {
         entered.aura.left = Infinity; entered.aura.life = Infinity;
       }
       if (spec.onEnter) castSub(ch, spec.onEnter, plan, { shape: spec.onEnter.shape || 'around' });
+      // owner feedback 6 (U18): a shape with a PACK (Moonpelt's Wolf Pack) calls its followers as it is taken
+      if (spec.pack && PF()) {
+        const pk = spec.pack;
+        entered.pack = PF().summon(pk.def || 'grove_wolf', ch, { count: pk.count ?? 2, at: { x: ch.x, z: ch.z }, temporary: true, lifetime: pk.seconds ?? 30 }) || [];
+      }
       if (spec.threatDrop) for (const e of field.monsters) if (e.dying == null && Math.hypot(e.x - ch.x, e.z - ch.z) > (spec.threatDrop.beyond ?? 10)) { e.state = 'wander'; e.threatFor = 0; e.threat?.delete(ch.id); }
-      field.emit({ t: 'fx', kind: 'form', id: ch.id, form: entered.id, group: entered.group, body: spec.body?.creature || null, on: true });
+      // owner feedback 6 (U16): `shape` = the whole body to draw (creature, scale, colours), not only its name
+      field.emit({ t: 'fx', kind: 'form', id: ch.id, form: entered.id, group: entered.group, body: spec.body?.creature || null, on: true, shape: shapeBody(entered) || undefined });
     } else if (left) field.emit({ t: 'fx', kind: 'form', id: ch.id, form: left.id, group: left.group, on: false });
     for (const sl of ch.skills.slots) sl.views = null;
   };
   function exitEffects(ch, left, plan = null) {
     const spec = left.spec || {};
     petBuffOn(ch, left, false);
+    // the pack leaves with the shape
+    for (const p of left.pack || []) if (p && p.dying == null && !p.removed) { p.lifetime = 0; p.left = 0; p.expireAt = 0; PF()?.dismiss?.(p); }
+    left.pack = null;
     if (left.aura) { left.aura.left = 0; const i = mechWorld.placed.indexOf(left.aura); if (i >= 0) mechWorld.placed.splice(i, 1); field.emit({ t: 'fx', kind: 'unplace', obj: left.aura.id }); }
     if (left.why === 'expired' || left.why === 'toggle' || left.why === 'swap') {
       const parent = plan || { skill: { id: left.skill, unlockAt: slotOf(ch, left.skill)?.unlockAt || 1 }, element: spec.element || 'nature' };
@@ -557,6 +567,31 @@ function runtimeOf(combat) {
     }
   };
 
+  /**
+   * Owner feedback 6 (U3) — a zone ends with its caster: the moment a player dies, every zone / post they placed and
+   * every pool of burning ground they left is taken away (and the client told), so nothing of theirs strikes or
+   * heals after the death. An aura a form holds goes too (the form itself is ended by the death elsewhere).
+   */
+  rt.endZonesOf = (u) => {
+    let n = 0;
+    for (let i = mechWorld.placed.length - 1; i >= 0; i--) {
+      const o = mechWorld.placed[i];
+      if (o.caster !== u.id) continue;
+      mechWorld.placed.splice(i, 1);
+      field.byId.delete(`obj:${o.id}`);
+      field.emit({ t: 'fx', kind: 'unplace', obj: o.id, why: 'dead' });
+      n++;
+    }
+    for (let i = rt.pools.length - 1; i >= 0; i--) {
+      const p = rt.pools[i];
+      if (p.caster !== u.id) continue;
+      rt.pools.splice(i, 1);
+      field.emit({ t: 'fx', kind: 'pool', id: u.id, pid: p.pid, end: 1, why: 'dead' });
+      n++;
+    }
+    u.trail = null; u.skillAuras = [];
+    return n;
+  };
   /** A unit left this room (handed to another, or gone): nothing here acts for it any more. */
   rt.forget = (u) => {
     rt.links.delete(u.id);
@@ -647,6 +682,7 @@ function runtimeOf(combat) {
     rt.tickPlayers(dt);                // main.js: auras, orbs, trail, the player's statuses, the cast barrier
     tickPools(dt);                     // main.js ticks the pools last in the frame
     for (const p of field.players) if (p.tvCast) tickRevive(p, dt);     // play-test 5 T4: a revive being cast
+    for (const p of field.players) { if (p.dead && !p._zonesEnded) { p._zonesEnded = true; rt.endZonesOf(p); } else if (!p.dead && p._zonesEnded) p._zonesEnded = false; }
   };
 
   // ---- play-test 5 T4: REVIVES (data/rules/skills-tv.json `tv.revive`; contract in docs/requests.md "Round 5 contracts — C")
@@ -753,6 +789,15 @@ function runtimeOf(combat) {
   };
   return rt;
 }
+
+/** Owner feedback 6 (U16): the body a shape form draws — `{ id, name, group, skill, creature, scale, colors, upright }` — or null (a stance, a song). */
+export function shapeBody(form) {
+  const b = form?.spec?.body;
+  if (!form || !b || !b.creature) return null;
+  return { id: form.id, name: form.name || form.spec.name || form.id, group: form.group || 'shape', skill: form.skill || null, creature: b.creature, scale: b.scale ?? 1, colors: b.colors ? { ...b.colors } : null, ...(b.upright ? { upright: true } : {}) };
+}
+/** The shape `u` is in right now (see shapeBody), or null. */
+export const shapeOfUnit = u => shapeBody(formOf(u, 'shape'));
 
 /** The one line an offer shows the fallen player (also the card's): what they come back with. */
 function reviveNote(rv, statuses = {}) {

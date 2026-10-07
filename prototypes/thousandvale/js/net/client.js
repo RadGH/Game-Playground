@@ -268,7 +268,7 @@ export function connect(opts = {}) {
     sendJ(game, o);
   };
   net.target = id => sendJ(game, id ? { t: 'target', id } : { t: 'target' });
-  net.use = id => sendJ(game, { t: 'use', id });
+  net.use = (id, to) => sendJ(game, to ? { t: 'use', id, to: String(to) } : { t: 'use', id });      // to: a lift's floor 'f:<n>' (U12)
   net.item = (op, uid, slot) => sendJ(game, slot ? { t: 'item', op, uid, slot } : { t: 'item', op, uid });
   /** party('invite', {name}) | ('accept'|'decline', {party: id}) | ('join', {code}) | ('code') | ('leave') | ('kick'|'lead', {char}) */
   net.partyOp = (op, a = {}) => {

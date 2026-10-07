@@ -315,7 +315,7 @@ test('P26: a level-2 character against a pair of crag hyenas two levels up wins 
   const run = on => {
     const was = engine.levelGap;
     engine.levelGap = on ? was : null;
-    let wins = 0, n = 0;
+    let wins = 0, n = 0, left = 0;
     try {
       for (const cls of ['warrior', 'cleric', 'mage', 'rogue']) for (let s = 1; s <= 3; s++) {
         const { room, me, sx, sz } = roomWith({ cls, level: 2, id: `gap${cls}${s}${on}` });
@@ -329,14 +329,16 @@ test('P26: a level-2 character against a pair of crag hyenas two levels up wins 
           held += 0.05;
           if (room.intent(me, { t: 'cast', slot: 0, target: t.id, held }).ok) held = 0;
         }
-        n++; if (!me.dead) wins++;
+        n++; if (!me.dead) { wins++; left += me.hp / Math.max(1, me.hpMax); }
       }
     } finally { engine.levelGap = was; }
-    return wins / n;
+    return { won: wins / n, left: left / n };
   };
   const off = run(false), on = run(true);
-  assert.ok(on >= 0.6, `with the rule: ${Math.round(on * 100)}% won`);
-  assert.ok(on > off + 0.2, `without: ${Math.round(off * 100)}%`);
+  assert.ok(on.won >= 0.6, `with the rule: ${Math.round(on.won * 100)}% won`);
+  // owner feedback 6: a level-2 healer now has its attack key from level 1, so this sample wins without the rule too —
+  // the rule is judged by what it is FOR: how much health the same fights leave you (it used to be judged by wins)
+  assert.ok(on.won >= off.won && on.left > off.left + 0.04, `health left with the rule ${Math.round(on.left * 100)}% vs without ${Math.round(off.left * 100)}% (won ${Math.round(off.won * 100)}% without)`);
 });
 
 // ---------------------------------------------------------------------------- P28

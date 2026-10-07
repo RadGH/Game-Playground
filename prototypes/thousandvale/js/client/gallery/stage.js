@@ -396,7 +396,7 @@ VERBS.track = async (n = 2) => { for (const q of ui.atlas.quests.slice(0, n)) ui
 /** Wait until the bag's 3D item icons are drawn (they are rendered a few at a time). */
 VERBS.icons = async (ms = 9000) => { const t0 = performance.now(); while (performance.now() - t0 < ms && document.querySelector('#bag .islot.pending, .tv-panel:not([hidden]) .islot.pending')) await sleep(150); };
 /** Settings on a tab: game | graphics | audio | keys. */
-VERBS.settings = async (tab = 'game') => { ui2.settings.panel.open(); await sleep(60); document.querySelector(`#panel-settings [data-tab="${tab}"]`)?.click(); await sleep(60); };
+VERBS.settings = async (tab = 'game') => { ui2.settings.panel.open(); const on = () => document.querySelector(`#panel-settings [data-tab="${tab}"][aria-checked="true"]`); for (let i = 0; i < 8 && !on(); i++) { (await waitFor(`#panel-settings [data-tab="${tab}"]`))?.click(); await sleep(120); } };
 /** The whole binding table three ways (generated from input/bindings.js). */
 VERBS.controls = async () => { const { controlsReference } = await import('../input/bindings-ui.js'); $('hud').appendChild(controlsReference({ set: GX.glyphs || input.device.glyphs })); };
 async function runSteps(steps = []) {

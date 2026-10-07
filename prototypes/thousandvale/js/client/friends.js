@@ -5,11 +5,12 @@
 import { sortFriends, mergeFriend } from './social-core.js';
 import { createPanel, h, confirmBox } from './ui-panel.js';
 import { zoneName, className } from './names.js';
+import { UNSEEN } from './ui/unseen.js';
 
 export function createFriends({ net: getNet, hud, chat, social }) {
   const net = () => getNet();
   let list = [], seen = false;
-  const panel = createPanel({ id: 'friends', title: 'Friends', width: 330, onOpen: () => draw() });
+  const panel = createPanel({ id: 'friends', title: 'Friends', width: 330, onOpen: () => { UNSEEN.seen('friends'); draw(); } });   // U1: looking at the list clears its badge
 
   function add(name) {
     const n = String(name || '').trim();
@@ -25,8 +26,8 @@ export function createFriends({ net: getNet, hud, chat, social }) {
 
   function draw() {
     const online = list.filter(f => f.online).length;
-    document.getElementById('menu-friends')?.querySelector('b')?.replaceChildren(online ? String(online) : '');
     if (!panel.isOpen) return;
+    UNSEEN.seen('friends');
     panel.setTitle('Friends', list.length ? `${online} of ${list.length} online` : '');
     const input = h('input', { maxLength: 16, placeholder: 'Name', 'aria-label': 'Friend name', onkeydown: e => { if (e.key === 'Enter') { add(input.value); input.value = ''; } } });
     const rows = sortFriends(list).map(f => h('li.fr-row' + (f.online ? '.online' : ''), {},
@@ -48,7 +49,8 @@ export function createFriends({ net: getNet, hud, chat, social }) {
     n.on('friends', m => {
       const before = new Map(list.map(f => [f.char, f]));
       list = m.list || [];
-      if (seen) for (const f of list) if (!before.has(f.char)) hud.chat(`${f.name} is now on your friends list.`, 'system');
+      if (seen) for (const f of list) if (!before.has(f.char)) { hud.chat(`${f.name} is now on your friends list.`, 'system'); if (!panel.isOpen) UNSEEN.add('friends', 'new:' + f.char); }
+      for (const k of [...before.keys()]) if (!list.some(x => x.char === k)) { UNSEEN.drop('friends', 'new:' + k); UNSEEN.drop('friends', 'on:' + k); }
       if (seen) for (const [c, f] of before) if (!list.some(x => x.char === c)) hud.chat(`${f.name} was removed from your friends list.`, 'system');
       seen = true;
       draw();
@@ -56,7 +58,7 @@ export function createFriends({ net: getNet, hud, chat, social }) {
     n.on('friendState', r => {
       const old = list.find(f => f.char === r.char);
       list = mergeFriend(list, r);
-      if (old && old.online !== r.online) { hud.chat(`${r.name} ${r.online ? 'is online' : 'went offline'}.`, 'friend'); if (r.online) hud.toast(`${r.name} is online`, 'info'); }
+      if (old && old.online !== r.online) { hud.chat(`${r.name} ${r.online ? 'is online' : 'went offline'}.`, 'friend'); if (r.online) hud.toast(`${r.name} is online`, 'info'); if (r.online && !panel.isOpen) UNSEEN.add('friends', 'on:' + r.char); else if (!r.online) UNSEEN.drop('friends', 'on:' + r.char); }
       draw();
     });
   }

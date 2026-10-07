@@ -86,7 +86,10 @@ export function createAngling({ net, hud, bag, reveal = null, typing = () => fal
     say('tug', { tension: 0.5 });
     const frame = now => {
       if (S.state !== 'tug' || !S.tug) return;
-      const s = tugStep(S.tug, (now - S.last) / 1000, S.holding); S.last = now;
+      // real time whatever the frame rate: a slow frame is played as several short steps (one step is capped at 0.1 s)
+      let left = Math.min(0.6, (now - S.last) / 1000); S.last = now;
+      let s = S.tug;
+      do { const d = Math.min(left, 0.05); s = tugStep(S.tug, d, S.holding); left -= d; } while (left > 0.0005 && !s.done);
       band.style.bottom = ((s.centre - p.band / 2) * 100).toFixed(2) + '%'; band.style.height = (p.band * 100).toFixed(2) + '%';
       float.style.bottom = (s.pos * 100).toFixed(2) + '%';
       const inBand = Math.abs(s.pos - s.centre) <= p.band / 2;

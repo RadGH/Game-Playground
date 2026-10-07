@@ -200,6 +200,7 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
       }
       for (const a of actors?.actors?.values?.() || []) {
         if (!a.hostile || a.dead || a.id === p?.id) continue;
+        if (api.sightOwnsMonsters) continue;                      // play-test 6 U14: ui/pt5.js draws what is in the line of sight
         if (!S.dungeon.fog.seen(a.pos.x, a.pos.z)) continue;
         if (p && Math.hypot(a.pos.x - p.x, a.pos.z - p.z) > 40) continue;
         list.push({ id: 'mob:' + a.id, kind: 'monster', x: a.pos.x, z: a.pos.z, name: a.name, sub: `Level ${a.level}${a.rank ? ' ' + a.rank : ''}`, boss: a.rank === 'boss', priority: 2, size: a.rank === 'boss' ? 8 : 5 });
@@ -264,7 +265,7 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
     ZONE_M,
     /** test hook: reveal a circle */
     reveal(x, z, r) { if (S.fog) { S.fog.reveal(x, z, r); S.fogDirty = true; changed(); } },
-    extraMarkers: null,
+    extraMarkers: null, sightOwnsMonsters: false,
   };
   return api;
 }

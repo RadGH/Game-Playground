@@ -18,6 +18,20 @@
 import * as THREE from 'three';
 import { LIGHTS } from './lightpool.js';
 import { unitGeometry, localToWorld } from './town-view.js';
+import { sheafGeometry, sheafWind } from '../../../../proctown/js/propkit-three.js';   // play-test 6 (U4): standing crops
+import { windUniform } from './decor.js';
+
+// U4 ("looks like coffins"): grain is drawn as `sheaf` patches — thin stalks, uneven top — in ONE instanced mesh per zone,
+// with ONE material for the whole page (so one shader program, warmed at boot through cropSample()) swaying on the
+// page's own wind clock.
+let SHEAF_GEO = null, CROP_MAT = null;
+const sheafGeo = () => SHEAF_GEO || (SHEAF_GEO = sheafGeometry(THREE));
+function cropMaterial() {
+  if (!CROP_MAT) CROP_MAT = sheafWind(new THREE.MeshLambertMaterial({ vertexColors: true }), windUniform);
+  return CROP_MAT;
+}
+/** One visible sheaf with the crop material, for the boot shader warm-up (warmup.js `extras`). */
+export function cropSample() { const m = new THREE.InstancedMesh(sheafGeo(), cropMaterial(), 1); m.setMatrixAt(0, new THREE.Matrix4()); m.setColorAt(0, new THREE.Color('#c9a84a')); m.receiveShadow = true; return m; }
 import { makeGlowTexture, makeFlameTexture, createDecor } from './decor.js';
 import { createBudget } from './perf.js';
 import { buildSignBoards } from './sign-text.js';
@@ -247,12 +261,14 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
   }
   // every part into one instanced mesh per unit shape
   const byMesh = Object.fromEntries(MESHES.map(m => [m, []]));
+  byMesh.sheaf = [];                                           // standing crops (propkit cropField grain / vine leaves)
   for (const q of plan.parts) (byMesh[q.mesh] || byMesh.box).push({ q, g: groundOf(q.x, q.z) });
   for (const q of abs) (byMesh[q.mesh] || byMesh.box).push({ q, g: 0 });
   await budget.slice();
   for (const [kind, list] of Object.entries(byMesh)) {
     if (!list.length) continue;
-    const m = new THREE.InstancedMesh(unitGeometry(kind), kitMat, list.length);
+    const sheaf = kind === 'sheaf';
+    const m = new THREE.InstancedMesh(sheaf ? sheafGeo() : unitGeometry(kind), sheaf ? cropMaterial() : kitMat, list.length);
     for (let i = 0; i < list.length; i++) {
       const { q, g } = list[i];
       _e.set(q.rx || 0, q.yaw || 0, q.rz || 0, 'YXZ'); _q.setFromEuler(_e);
@@ -260,7 +276,7 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
       m.setColorAt(i, col.set(q.colour || '#8a857c'));
       if ((i & 1023) === 1023) await budget.slice();
     }
-    m.castShadow = !cheap; m.receiveShadow = true; m.computeBoundingSphere(); m.name = 'sp-' + kind;
+    m.castShadow = !cheap && !sheaf; m.receiveShadow = true; m.computeBoundingSphere(); m.name = 'sp-' + kind;
     group.add(m); meshes.push(m);
   }
   // lantern glass (lit buildings, the inn sign's lamp): warm at night

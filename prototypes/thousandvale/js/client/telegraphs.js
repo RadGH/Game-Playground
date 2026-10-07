@@ -130,7 +130,9 @@ export function createTelegraphs(scene, { heightAt = () => 0, serverNow, posOf, 
   }
   function resolve(ev) {
     const t = live.get(ev.id); if (!t) return;
-    if (ev.x) { t.state = 'cancel'; t.endAt = performance.now() + 300; return; }
+    // play-test 6 (U3): cancelled = the caster died or was interrupted. The drawing goes AT ONCE (it used to fade for
+    // 300 ms, and a shape still on the ground reads as still dangerous), with no landing flash.
+    if (ev.x) { remove(ev.id); return; }
     t.state = 'land'; t.endAt = performance.now() + 420;
     t.mesh.material.uniforms.uProg.value = 1;
     const hitMe = (ev.hits || []).includes(selfId());
@@ -139,6 +141,11 @@ export function createTelegraphs(scene, { heightAt = () => 0, serverNow, posOf, 
     return t;
   }
   function remove(id) { const t = live.get(id); if (!t) return; group.remove(t.mesh); t.mesh.geometry.dispose(); t.mesh.material.dispose(); live.delete(id); }
+  /**
+   * U3: every telegraph a body was casting, gone now — called when that body's death (or its interrupted cast) arrives,
+   * without waiting for the server's `teleR {x: 1}` for each shape. A shape that has already landed keeps its flash.
+   */
+  function dropSource(src) { let n = 0; if (src == null) return n; for (const t of [...live.values()]) if (t.src === src && t.state === 'live') { remove(t.id); n++; } return n; }
   function clear() { for (const id of [...live.keys()]) remove(id); }
 
   function update(dt) {
@@ -175,6 +182,7 @@ export function createTelegraphs(scene, { heightAt = () => 0, serverNow, posOf, 
   }
 
   return {
+    dropSource, get count() { return live.size; },
     add, resolve, remove, clear, update, live,
     setGround(f) { ground = f; for (const t of live.values()) place(t, true); },
     get standingInDanger() { return mineAny; },

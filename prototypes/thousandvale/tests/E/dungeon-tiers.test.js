@@ -99,10 +99,11 @@ test('floors are connected: stairs down -> next entry, stairs up exists, A\'s st
       const last = k === p.floors.length - 1;
       if (!last && !f.stairsDown) bad.push(`${family} s${seed} F${k}: no stairs down`);
       if (k > 0 && !f.stairsUp) bad.push(`${family} s${seed} F${k}: no stairs up`);
-      if (k > 0 && !f.shortcutUp) bad.push(`${family} s${seed} F${k}: no shortcut up`);
+      if (k > 0 && !(f.lift && f.lift.to.length === k)) bad.push(`${family} s${seed} F${k}: no lift to every floor above`);
+      if (f.shortcutUp) bad.push(`${family} s${seed} F${k}: the old shortcut is back`);
       // js/sim/dungeon.js puts you 3 m west of the previous floor's stairs down
       if (k > 0) { const prev = p.floors[k - 1]; if (!walk(prev, { x: prev.stairsDown.x - 3, z: prev.stairsDown.z })) bad.push(`${family} s${seed} F${k}: stairs-up landing on a wall`); }
-      if (k === 0 && !f.exit) bad.push(`${family} s${seed}: no way out on floor 1`);
+      if (k === 0 && !f.door) bad.push(`${family} s${seed}: no door back out on floor 1`);
     });
     const last = p.floors[p.floors.length - 1];
     if (!last.chest || !last.exit) bad.push(`${family} s${seed}: no reward chest / loop-back exit`);
@@ -199,4 +200,66 @@ test('drop-in for stream A: dungeonTerrain / dungeonRoomSpec / describeDungeon a
 test('purity: no DOM, fetch, storage, wall clock or Math.random', () => {
   const src = readFileSync(new URL('../../js/rules/dungeon-tiers.js', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"`])\/\/.*$/gm, '$1');
   for (const re of [/\bwindow\./, /\bdocument\./, /\bfetch\(/, /localStorage|indexedDB/, /Math\.random\(/, /Date\.now\(/, /performance\.now\(/, /from ['"]three['"]/, /\bimport\b/]) assert.ok(!re.test(src), String(re));
+});
+
+// ------------------------------------------------------------------------------------------- play-test 6: U10, U12
+import { FLOOR_NAMES } from '../../js/rules/dungeon-tiers.js';
+
+/** Tiles reachable from a point with every tile of the given rooms treated as wall. */
+function floodWithout(f, from, rooms) {
+  const blocked = new Uint8Array(f.w * f.h);
+  for (const r of rooms) for (let j = r.j; j < r.j + r.h; j++) for (let i = r.i; i < r.i + r.w; i++) blocked[j * f.w + i] = 1;
+  const seen = new Uint8Array(f.w * f.h), s = tileIndex(f, from.x, from.z), q = [s];
+  if (!f.tiles[s] || blocked[s]) return seen;
+  seen[s] = 1;
+  for (let h = 0; h < q.length; h++) {
+    const k = q[h], i = k % f.w;
+    for (const n of [i > 0 ? k - 1 : -1, i < f.w - 1 ? k + 1 : -1, k - f.w, k + f.w]) if (n >= 0 && n < seen.length && f.tiles[n] && !blocked[n] && !seen[n]) { seen[n] = 1; q.push(n); }
+  }
+  return seen;
+}
+const inRoom = (f, r, pt) => { const c = f.cell || 2, i = Math.floor((pt.x - f.origin.x) / c), j = Math.floor((pt.z - f.origin.z) / c); return i >= r.i && i < r.i + r.w && j >= r.j && j < r.j + r.h; };
+const U_CASES = Object.keys(FAMILIES).flatMap(family => [1, 2, 3, 4].flatMap(floors => [3, 17, 404, 2026, 77777, 919191].map(seed => ({ family, floors, seed }))));
+
+test('U10: in EVERY family the way out stands only behind the last boss — one exit, on the last floor, cut off from that floor\'s start by the boss room', () => {
+  const bad = [];
+  for (const { family, floors, seed } of U_CASES) {
+    const p = planDungeon(seed, { floors, family }), w = `${family} x${floors} s${seed}`;
+    const exits = p.floors.filter(f => f.exit);
+    if (exits.length !== 1 || exits[0] !== p.floors[p.floors.length - 1]) { bad.push(`${w}: exits on floors ${exits.map(f => f.index)}`); continue; }
+    const f = exits[0], boss = f.rooms.find(r => r.kind === 'boss'), reward = f.rooms.find(r => r.kind === 'reward');
+    if (!inRoom(f, reward, f.exit)) bad.push(`${w}: the exit is not in the reward room`);
+    if (!flood(f, f.landing)[tileIndex(f, f.exit.x, f.exit.z)]) bad.push(`${w}: the exit cannot be reached at all`);
+    if (floodWithout(f, f.landing, [boss])[tileIndex(f, f.exit.x, f.exit.z)]) bad.push(`${w}: the exit can be reached without crossing the boss room`);
+    // nothing that takes you out or up stands in a boss or mini-boss room, on any floor; the door back out is floor 1's only
+    p.floors.forEach((g, k) => {
+      if (!!g.door !== (k === 0)) bad.push(`${w} F${k}: door`);
+      if (g.door && !(g.door.name && !/way out|exit|portal/i.test(g.door.name))) bad.push(`${w}: the door is named like the exit`);
+      for (const key of ['door', 'lift', 'stairsUp', 'landing']) if (g[key]) for (const r of g.rooms.filter(r2 => r2.kind === 'boss' || r2.kind === 'miniboss')) if (inRoom(g, r, g[key])) bad.push(`${w} F${k}: ${key} stands in the ${r.kind} room`);
+      if (g.door && !walk(g, g.door)) bad.push(`${w}: the door is in a wall`);
+    });
+  }
+  assert.deepEqual(bad.slice(0, 20), []);
+});
+
+test('U12: every floor has a name and a landing you can stand on, clear of monsters; the lift on each lower floor offers every floor above, nearest first', () => {
+  const bad = [];
+  for (const { family, floors, seed } of U_CASES) {
+    const p = planDungeon(seed, { floors, family }), w = `${family} x${floors} s${seed}`;
+    if (new Set(p.floors.map(f => f.name)).size !== floors) bad.push(`${w}: floor names repeat (${p.floors.map(f => f.name).join(', ')})`);
+    p.floors.forEach((f, k) => {
+      if (f.label !== 'Floor ' + (k + 1) || !f.name) bad.push(`${w} F${k}: label / name`);
+      if (!f.landing || !walk(f, f.landing)) { bad.push(`${w} F${k}: landing in a wall`); return; }
+      const start = f.rooms.find(r => r.kind === (k === 0 ? 'entry' : 'arrival'));
+      if (!inRoom(f, start, f.landing)) bad.push(`${w} F${k}: the landing is not in the ${start.kind} room`);
+      for (const pk of f.packs) if (Math.hypot(pk.x - f.landing.x, pk.z - f.landing.z) < (pk.radius || 4) + 6) bad.push(`${w} F${k}: you would get up inside a ${pk.rank} pack`);
+      if (!flood(f, f.landing)[tileIndex(f, f.entry.x, f.entry.z)]) bad.push(`${w} F${k}: the landing is cut off from the floor`);
+      if (k === 0) { if (f.lift) bad.push(`${w}: a lift on the top floor`); return; }
+      if (!walk(f, f.lift)) bad.push(`${w} F${k}: lift in a wall`);
+      if (f.lift.to.map(t => t.floor).join() !== Array.from({ length: k }, (_, i) => k - 1 - i).join()) bad.push(`${w} F${k}: lift goes to ${f.lift.to.map(t => t.floor)}`);
+      for (const t of f.lift.to) { const g = p.floors[t.floor]; if (t.x !== g.landing.x || t.z !== g.landing.z || t.name !== g.name || t.label !== g.label) bad.push(`${w} F${k}: lift row for floor ${t.floor} is not that floor's landing`); }
+    });
+  }
+  assert.deepEqual(bad.slice(0, 20), []);
+  for (const fam of Object.keys(FAMILIES)) assert.ok(FLOOR_NAMES[fam] && FLOOR_NAMES[fam].length === 4, fam + ': floor names');
 });

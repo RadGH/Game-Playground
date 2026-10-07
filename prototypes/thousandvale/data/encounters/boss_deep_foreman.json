@@ -67,8 +67,9 @@
     { "name": "Shift Start", "abilities": ["pick", "ore_toss", "drill_lines", "whistle"] },
     { "name": "Blasting", "at": 0.6, "say": "BLASTING IN PROGRESS. CLEAR THE FACE.",
       "abilities": ["stamp_fuses", "shift_rats", "ore_toss"],
-      "onEnter": [ { "shield": true }, { "adds": { "type": "cairn_rat", "count": 4, "radius": 8, "at": "home" } },
-        { "say": "Old Ninth locks into an iron shell. Light all three blasting fuses!", "style": "warn" } ] },
+      "ward": {"seconds": 20, "pool": 0.1, "break": "objects", "need": 3, "what": "brazier", "say": "Old Ninth locks into an iron shell. Light all three blasting fuses! It fails by itself in 20 seconds.", "fade": "The ward fails by itself. No opening this time."},
+      "onEnter": [ { "shield": { "seconds": 20, "pool": 0.1 } }, { "adds": { "type": "cairn_rat", "count": 4, "radius": 8, "at": "home" } },
+        { "say": "Old Ninth locks into an iron shell. Light all three blasting fuses! It fails by itself in 20 seconds.", "style": "warn" } ] },
     { "name": "Overtime", "newBar": { "hp": 0.5 }, "say": "OVERTIME. NOBODY LEAVES UNTIL THE SEAM IS CLEARED.",
       "abilities": ["pick", "hold_props", "shift_bell", "grinding_wheel"],
       "onEnter": [ { "ability": "cave_in" } ] }

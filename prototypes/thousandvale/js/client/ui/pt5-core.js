@@ -209,7 +209,7 @@ export function eventLines(e, { now = Date.now(), me = null } = {}) {
   return {
     key: e.key, name: e.name || 'An event', state: e.state, scope: e.scope || 'zone',
     head: e.state === 'offer' ? 'On offer' : e.state === 'soon' ? 'Coming' : e.state === 'won' ? 'Won' : e.state === 'lost' ? 'Failed' : inside ? 'You are in it' : 'Nearby',
-    what: e.what || (e.state === 'soon' ? 'Something is about to happen here.' : ''),
+    what: e.what || (e.state === 'soon' ? (e.scope === 'realm' ? 'A realm event is gathering. The waystones will carry you to it free once it starts.' : 'Something is about to happen near here.') : ''),
     stage: e.stage && e.stage.of > 1 && e.state === 'live' ? `Stage ${whole(Math.min(e.stage.n || 1, e.stage.of))} of ${whole(e.stage.of)}${e.stage.name ? ' — ' + e.stage.name : ''}` : '',
     objective, time, urgent: e.state === 'live' && Number.isFinite(e.endsAt) && e.endsAt - now < 30000,
     reward: e.reward || '', players: e.players > 1 ? `${whole(e.players)} taking part` : '',
@@ -225,7 +225,9 @@ export function eventResult(m = {}, name = '') {
   const got = [xp ? `${whole(xp)} experience` : '', gold ? `${whole(gold)} gold` : '', ...((r.items || m.items || []).map(i => (typeof i === 'string' ? i : i?.name)).filter(Boolean))].filter(Boolean);
   if (m.called === 'off' || m.why === 'left' || m.why === 'off' || m.why === 'fled') return { won: false, text: `${n} was called off — everyone walked away.`, got: '' };
   const won = verdict ? verdict === 'success' : !!(m.won ?? r.won);
-  const tail = (won ? info.onSuccess || ev.onSuccess : info.onFail || ev.onFail) || (won ? '' : m.why === 'time' ? 'Time ran out.' : '');
+  const said = v => (typeof v === 'string' && v.trim() && !/^(null|undefined)$/i.test(v.trim()) ? v.trim() : '');      // never print a missing line
+  const tail = said(m.story) || said(won ? info.onSuccess || ev.onSuccess : info.onFail || ev.onFail) || (won ? '' : m.why === 'time' ? 'Time ran out.' : '');
+  if (said(m.got)) return { won, text: `${won ? 'Won' : 'Failed'}: ${n}.${tail ? ' ' + tail : ''}`, got: said(m.got) };      // the server's own sentence (protocol §22)
   return { won, text: `${won ? 'Won' : 'Failed'}: ${n}.${tail ? ' ' + tail : ''}`,
     got: got.length ? (won ? `You got ${got.join(', ')}.` : `You still got ${got.join(', ')}.`) : m.onBody ? 'Your share lies on the body.' : won ? (m.credited === false ? 'You did not take part, so no share this time.' : '') : 'No reward this time.' };
 }

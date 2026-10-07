@@ -42,15 +42,23 @@ export function createKitStep({ parent = null, onPreview, onBack, onCreate, askS
     onClose: () => { iconsActive(false, 'kits'); if (!S.created) onBack?.(); S.created = false; } });
 
   /** The kits for a calling (cached). null when there are none — the caller skips the step. */
-  async function load(cls) {
-    if (S.test) return S.test;
-    if (cache.has(cls)) return cache.get(cls);
-    let k = null;
-    // the server's answer first (A: kits {cls} -> kitsR — no rules import in the browser), C's module as the fallback
-    try { const raw = askServer ? await askServer(cls) : null; if (raw) { const n = normaliseKits(raw); if (usable(n)) k = n; } } catch { /* fall through */ }
-    if (!k) { try { k = await fetchKits(cls); } catch (e) { console.info('[kits] no starting kits for', cls, '-', e.message); } }
-    cache.set(cls, k);
-    return k;
+  const flying = new Map();        // cls -> the load in flight (two askers share ONE load; a late empty answer never replaces a good one)
+  function load(cls) {
+    if (S.test) return Promise.resolve(S.test);
+    if (cache.get(cls)) return Promise.resolve(cache.get(cls));
+    if (flying.has(cls)) return flying.get(cls);
+    const run = (async () => {
+      let k = null;
+      // the server's answer first (A: kits {cls} -> kitsR — no rules import in the browser), C's module as the fallback
+      try { const raw = askServer ? await askServer(cls) : null; if (raw) { const n = normaliseKits(raw); if (usable(n)) k = n; } } catch { /* fall through */ }
+      // (time-boxed: a slow machine must never sit on the title screen waiting for the rules to boot — no kits = the default gear)
+      if (!k) { try { k = await Promise.race([fetchKits(cls), new Promise(r => setTimeout(() => r(null), 20000))]); } catch (e) { console.info('[kits] no starting kits for', cls, '-', e.message); } }
+      if (k) cache.set(cls, k);
+      return k || cache.get(cls) || null;
+    })();
+    flying.set(cls, run);
+    run.finally(() => flying.delete(cls));
+    return run;
   }
   const pick = () => ({ armour: S.kits.armour.find(a => a.id === S.armour) || null, weapons: S.kits.weapons.find(w => w.id === S.weapons) || null });
   const gear = () => { const p = pick(); return kitGear(p.armour, p.weapons); };
@@ -94,7 +102,10 @@ export function createKitStep({ parent = null, onPreview, onBack, onCreate, askS
     if (S.cls !== cls || !S.kits) { S.armour = k.armour[0]?.id ?? null; S.weapons = k.weapons[0]?.id ?? null; }
     S.cls = cls; S.kits = k; S.className = className; S.busy = false; S.created = false;
     iconsActive(true, 'kits');
-    panel.open(); draw(); onPreview?.(gear());
+    panel.open();
+    // the choice must be offered even if drawing a preview trips: each part on its own, and the reason on the console
+    try { draw(); } catch (e) { console.warn('[kits] draw failed:', e?.stack || e?.message); }
+    try { onPreview?.(gear()); } catch (e) { console.warn('[kits] preview failed:', e?.stack || e?.message); }
     return true;
   }
   return {

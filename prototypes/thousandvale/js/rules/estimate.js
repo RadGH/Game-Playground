@@ -61,6 +61,8 @@ export function coreRows(engine, u) {
     { id: 'critDamage', label: 'Critical damage', value: Math.round(d.critDamage ?? 50), unit: '%', tip: 'How much more a critical hit deals.' },
     { id: 'spellPower', label: 'Spell power', value: Math.round((d.spellPower || 0) * 100), unit: '%', tip: 'Added to every hit that is not physical: fire, ice, lightning, poison, shadow, holy, arcane.' },
     { id: 'armor', label: 'Armour', value: Math.round(armor), unit: '', tip: `Physical hits on you are reduced by ${Math.round(armor / (100 + Math.max(0, armor)) * 100)}% (armour / (100 + armour)).` },
+    // owner feedback 6 (U13): the reduction itself, to one decimal, so +6 armour is seen to move it (35 -> 41 armour is 25.9% -> 29.1%)
+    { id: 'armorReduction', label: 'Physical damage reduced', value: armorReduction(armor), unit: '%', tip: `From your ${Math.round(armor)} armour: armour / (100 + armour). One more point of armour is worth about ${r2(armorReduction(armor + 1) - armorReduction(armor))}% here; each point is worth a little less than the one before.` },
     { id: 'dodge', label: 'Dodge', value: r1(d.dodge || 0), unit: '%', tip: 'The chance a hit misses you entirely (never more than 35%).' },
     { id: 'hpRegen', label: 'Health regeneration', value: r1(d.hpRegen || 0), unit: '/s', tip: 'Health restored every second, in or out of a fight. Out of a fight you also mend 1.5% of your health a second.' },
     { id: 'mpRegen', label: 'Mana regeneration', value: r1(d.mpRegen || 0), unit: '/s', tip: 'Mana restored every second. Out of a fight you also regain 2% of your mana a second.' },
@@ -69,6 +71,8 @@ export function coreRows(engine, u) {
   for (const k of ['str', 'dex', 'int', 'con']) rows.push({ id: k, label: ATTR[k], value: Math.round(d[k] ?? u.attrs?.[k] ?? 0), unit: '', tip: ATTR_TIP[k] });
   return rows;
 }
+/** The share of a physical hit armour takes off, in percent to one decimal — Farhold rpg.strike: `amount *= 100 / (100 + armour)`. */
+export const armorReduction = armor => Math.round(Math.max(0, armor) / (100 + Math.max(0, armor)) * 1000) / 10;
 const ATTR = { str: 'Strength', dex: 'Dexterity', int: 'Intelligence', con: 'Constitution' };
 const ATTR_TIP = {
   str: 'Raises the damage of weapons that scale with Strength.', dex: 'Raises the damage of weapons that scale with Dexterity, and your dodge.',
@@ -81,7 +85,7 @@ export function advancedRows(engine, u) {
   const spec = [
     ['magicResist', 'Magic resistance', '', 'Reduces magical hits on you the way armour reduces physical ones.', 1, true],
     ['resistAll', 'All damage resisted', '%', 'Taken off every hit on you.', 1, false],
-    ['blockChance', 'Block chance', '%', 'The chance a shield blocks a hit.', 100, false],
+    ['blockChance', 'Block chance', '%', 'The chance a hit on you is blocked.', 1, false],
     ['blockPower', 'Block power', '', 'How much a block takes off the hit.', 1, false],
     ['maxBarrier', 'Barrier', '', 'A shield of this much damage from your off-hand focus; it regenerates out of a fight.', 1, false],
     ['barrierRegen', 'Barrier regeneration', '/s', 'How fast that barrier comes back.', 1, false],

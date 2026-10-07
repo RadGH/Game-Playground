@@ -62,11 +62,13 @@ import { createStatusSync } from './status-sync.js';
 import { createWeaponFx } from './weapon-fx.js';
 import { createFormFx } from './form-fx.js';             // play-test 5 (D-world): T15 caster forms, T16 sceptre swings
 import { createReviveFx } from './revive-fx.js';         // T4: each class's revive
+import { cropSample } from './setpiece-view.js';       // play-test 6 (U4): the standing-crop material, warmed at boot
 import { createAngling } from './angling-view.js';      // T25: rod, float, line, catch, fish pools
 import { basicReach as reachOf, shortenReach } from './reach.js';   // T14: walk into the attack form's real reach
 import { createLootMarkers } from './loot-marker.js';
 import { makeGlowTexture } from './decor.js';
 import { createUi2 } from './ui/pt2.js';          // D-UI play-test 2: menus, loot, rolls, shops, trade, pause/settings, portraits, editor
+import { tileLos } from './ui/pt6-core.js';
 import { createUi5 } from './ui/pt5.js';          // D-UI play-test 5: kit step, crates, event tracker, character sheet, feedback, angling
 import { savedQuality } from './ui/settings.js';
 import { lookWith, lookCustom } from './ui/appearance-core.js';
@@ -258,7 +260,7 @@ const ui2 = createUi2({ net: () => S.net, atlas: ui.atlas, hud, actors, controls
   titleLook: () => S.look, onLogout: () => { try { S.net?.leave(); } catch {} backToTitle(); },
   onLookPreview: (look, mode) => previewLook(look, mode), onLookSave: look => { S.look = look; store.set('look', look); previewLook(look, 'title'); if (S.titleStep === 'look') toKit(); } });
 // play-test 5 (created BEFORE the key handler below, so a bite's Space / E reaches the fishing prompt first)
-const ui5 = createUi5({ net: () => S.net, hud, bag, mail, worldUi, journal: ui.journal, actors, hotbar: ui2.hotbar, askPop: ui2.askPop, build: q.get('build') || 'dev', quality,
+const ui5 = createUi5({ atlas: ui.atlas, objects, inDungeon: () => !!D.view, lootable: () => ui2.loot?.lootable || new Map(), infoOf: id => S.mirror.infos.get(id) || null, selfId: () => S.selfId, los: (ax, az, bx, bz) => sightLine(ax, az, bx, bz), net: () => S.net, hud, bag, mail, worldUi, journal: ui.journal, actors, hotbar: ui2.hotbar, askPop: ui2.askPop, build: q.get('build') || 'dev', quality,
   me: () => (S.selfId != null && S.phase === 'world' ? { id: S.selfId, x: S.predictor.pos.x, z: S.predictor.pos.z } : null), self: () => S.self, room: () => S.room, bar: () => S.bar,
   targetId: () => S.target, setTarget: id => setTarget(id), stats: () => ({ fps: FPS.fps }), zoneName: () => document.getElementById('zone-name')?.textContent || null,
   ensureNet: () => kitNet(), onKitPreview: g => { S.titleGear = g; previewLook(S.look, 'title'); }, onKitBack: () => { if (S.phase === 'title') { S.titleGear = null; toAppearance(); } }, onKitCreate: c => { S.kit = c; enterWorld(); } });
@@ -379,12 +381,22 @@ function toAppearance() {
     onDismiss: () => { if (S.phase === 'title') titleStep('new'); } });
 }
 
+/** Play-test 6 U14: can the character see from a to b? Dungeon: no wall tile between; outdoors: no building, fort wall or big rock between. */
+function sightLine(ax, az, bx, bz) {
+  if (D.view) return tileLos((x, z) => D.view.terrain.walkable(x, z), ax, az, bx, bz, 0.75);
+  return SOLIDS.firstHit(ax, groundY(ax, az) + 1.6, az, bx, groundY(bx, bz) + 1.2, bz) >= 0.97;
+}
 /** T5 (play-test 5): step 3 — starting equipment on the figure. A calling with no kits goes straight in, as before. */
 async function toKit() {
   titleStep('kit');
   S.titleBare = false;
   const name = id => document.querySelector(`#classes [data-cls="${id}"]`)?.textContent || [...($('class-more')?.options || [])].find(o => o.value === id)?.textContent || id;
-  const ok = await ui5.kits.open({ cls: S.cls, className: name(S.cls) });
+  // the kits may take a few seconds to arrive (a first connection): say so — never a title screen with no card and no word
+  const note = $('loading'), text = $('loading-text'), was = text?.textContent;
+  if (note && text) { text.textContent = 'Laying out your starting gear…'; note.classList.remove('done'); }
+  let ok = false;
+  try { ok = await ui5.kits.open({ cls: S.cls, className: name(S.cls) }); } catch (e) { console.warn('[kits] step tripped:', e?.stack || e?.message); ok = ui5.kits.panel.isOpen; }
+  if (note && text) { note.classList.add('done'); text.textContent = was || ''; }
   if (!ok && S.phase === 'title') { S.kit = null; enterWorld(); }
 }
 /** The connection the kit step asks through (a guest is made under the name from step 1, exactly as entering does). */
@@ -436,7 +448,12 @@ async function enterWorld(pick = null) {
   const fresh = !S.net;
   const net = startNet({ guestName: name });
   S.phase = 'joining';
-  const fail = text => { $('login-note').textContent = text; ui5.kits.failed(text); btn.disabled = false; btn.textContent = 'Next: appearance'; S.phase = 'title'; if (fresh && !net.claimed) dropNet(); };
+  const fail = text => {
+    $('login-note').textContent = text;
+    // say it where the player is looking: on the kit step (a kit the server refused), else back on step 1 with the note showing —
+    // never a title screen with every card hidden (a taken name used to end there)
+    if (ui5.kits.panel.isOpen && !/name/i.test(text)) ui5.kits.failed(text);
+    else if (S.titleStep === 'kit' || S.titleStep === 'look') { ui5.kits.close(); S.titleGear = null; setTimeout(() => { titleStep('new'); $('login-note').textContent = text; }, 0); } btn.disabled = false; btn.textContent = 'Next: appearance'; S.phase = 'title'; if (fresh && !net.claimed) dropNet(); };
   const timer = setTimeout(() => { if (S.phase === 'joining' && net.status !== 'online') fail(mode === 'ws' ? 'Cannot reach the game server. Add ?offline=1 to play against an in-browser server.' : 'The in-browser server did not start.'); }, 20000);
   try {
     await net.ready;
@@ -603,6 +620,7 @@ function ensureActor(id) {
     if (npc) { objects.upsert({ id, type: 'npc', name: a.name, x: e.x, z: e.z, source: 'room' }); if (info.office) WS.claimOffice(info.office); }   // Q10: its own building, dressed
     if (e.state & STATE.dead) actors.setDead(id, true);
     if (kind === 'player' && info.mount) actors.setMount(id, info.mount);
+    if (kind === 'player' && info.form) actors.setShape(id, shapeOfForm(info.form));          // U16: arrived already shaped
   }
   return a;
 }
@@ -629,12 +647,24 @@ function objectState(id, info) {
   objects.upsert({ id, state: info.state, name: info.name });
   if (info.type === 'gate' && info.state === 'open' && D.view) { const o = objects.items.get(id); if (o) D.view.openGate(D.view.floorAt(o.x, o.z)); }
 }
+/** U16: the body in a form record / `fx form` event, or null (stances, tempers and songs have no body). C: `{ group:'shape', creature | shape:{…} }`. */
+function shapeOfForm(f) {
+  if (!f || typeof f !== 'object' || f.on === false) return null;
+  const sh = f.shape && typeof f.shape === 'object' ? f.shape : f.body && typeof f.body === 'object' ? { id: f.id || f.form, ...f.body } : f;
+  if ((f.group || sh.group || 'shape') !== 'shape') return null;
+  const creature = [sh.creature, sh.body, f.body].find(v => typeof v === 'string');
+  return creature ? { id: sh.id || f.form || f.id || creature, creature, scale: sh.scale, colors: sh.colors, upright: sh.upright } : null;
+}
 function refreshFromInfo(id) {
   objectState(id, S.mirror.infos.get(id));
   const a = actors.get(id), info = S.mirror.infos.get(id);
   if (info?.type === 'fishpool' && info.pool) angling.setPool(id, null, info.pool);     // T25: a fished-out pool goes (left 0)
   if (!a || !info) return;
   if (a.kind === 'player') angling.setLine(id, info.fishing || null);                  // T25: a line in the water (late arrivals see the float)
+  // play-test 6 (U16/U18): a druid's shape changes the MODEL — `info.form` (group 'shape') carries the creature; null changes back
+  if (a.kind === 'player' && 'form' in info) actors.setShape(id, shapeOfForm(info.form));
+  // U8: a boss ward for someone who walks in late (`info.ward {max, ms, until}`); the live changes come as `fx shield`
+  if (a.kind === 'monster' && 'ward' in info) { const w = info.ward, on = !!w && w.on !== false; if (on !== (boss.ward.shielded && boss.bossId === id)) { let left = on && w.until ? w.until - (S.net ? S.net.clock.serverNow() : Date.now()) : null; if (on && !(left > 0 && left <= (w.ms || 6e4) + 500)) left = w.leftMs ?? w.ms ?? 0; boss.shield(id, on, on ? { ms: left, total: w.ms, text: w.text || null, need: w.need, have: w.have } : { why: 'faded' }); } }
   const levelled = info.level > a.level;
   a.name = info.name ? displayName(info.name, a.kind) : a.name; a.level = info.level || a.level; a.hpMax = info.hpMax || a.hpMax;
   actors.refreshPlate(a);
@@ -721,6 +751,7 @@ function onEvent(ev) {
     }
     case 'die': {
       actors.setDead(ev.d, true); statusSync.dead(ev.d);
+      tele.dropSource(ev.d); spells.ownerGone(ev.d);          // play-test 6 (U3): what the dead were casting is gone with them, at once
       const a = actors.get(ev.d), by = actors.get(ev.by);
       if (ev.d === me) { setSelfDead(true); hud.chat(by ? `You were slain by ${by.name}.` : 'You have fallen.', 'bad'); }
       else if (a && ev.by === me) hud.chat(`You have slain ${a.name}.`, 'combat');
@@ -755,7 +786,7 @@ function onEvent(ev) {
       }
       break;
     }
-    case 'boss': case 'phase': case 'castbar': case 'castX': case 'enrage': case 'say': case 'fx': boss.onEvent(ev); break;
+    case 'boss': case 'phase': case 'castbar': case 'castX': case 'enrage': case 'say': case 'fx': if (ev.type === 'fx' && ev.kind === 'form' && (ev.group || 'shape') === 'shape') actors.setShape(ev.id, ev.on === false ? null : shapeOfForm(ev)); if (ev.type === 'castX' && ev.id != null) tele.dropSource(ev.id); boss.onEvent(ev); break;   // U3: an interrupted cast takes its telegraph with it
     case 'obj': objects.onObj(ev); break;
     case 'aggro':
       if (ev.d === me) { const a = actors.get(ev.s); if (a) fx.number({ x: a.pos.x, y: a.pos.y + a.height + 0.3, z: a.pos.z }, '!', 'in'); }
@@ -827,7 +858,7 @@ function castSkill(n) {
   if (S.phase !== 'world' || S.self.dead || !S.net) return false;
   const sk = S.bar.find(b => b.slot === n);
   if (!sk || sk.empty) { hud.toast(sk?.desc || 'Nothing on that key yet.', 'warn'); return false; }
-  if (sk.locked) { hud.toast(`${sk.name} unlocks at level ${sk.level}.`, 'warn'); return false; }
+  if (sk.locked) { hud.toast(sk.lockedText ? `${sk.name}: ${sk.lockedText.replace(/^U/, 'u')}.` : `${sk.name} unlocks at level ${sk.level}.`, 'warn'); return false; }
   const now = performance.now();
   if ((S.cds?.[n] || 0) > now) { hud.toast(`${sk.name} is not ready.`, 'warn'); return false; }
   const t = S.target != null ? actors.get(S.target) : null;
@@ -1039,7 +1070,9 @@ function frame(now) {
     const ang = 0.35 + Math.sin(titleOrbit) * 0.35, dist = 6.2;
     camera.position.set(px + Math.sin(ang) * dist, py + 2.2, pz + Math.cos(ang) * dist);
     const side = window.innerWidth > 760 ? 1.9 : 0;
-    camera.lookAt(px - Math.cos(ang) * side, py + 1.15, pz + Math.sin(ang) * side);
+    // on a phone the editor / kit panel fills the lower half: look lower, so the figure stands in the upper half
+    const low = !side && (S.titleStep === 'look' || S.titleStep === 'kit') ? 1.25 : 0;
+    camera.lookAt(px - Math.cos(ang) * side, py + 1.15 - low, pz + Math.sin(ang) * side);
     if (preview?.still) preview.still.yaw = ang;
     actors.update(dt, 0, {});
     view.follow({ x: px, y: py, z: pz });
@@ -1088,7 +1121,7 @@ Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
   S.warm = { done: false };
   import('./scatter-view.js').then(m => m.prewarmScatter({ quality })).catch(() => {})
     .then(() => Promise.all([import('./warmup.js'), loadMonsterLooks()]))
-    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [weaponFx.sample(), lootMarks.sample(), formFx.sample(), angling.sample()] }))
+    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [weaponFx.sample(), lootMarks.sample(), formFx.sample(), angling.sample(), cropSample()], extraTypes: ['wolf', 'boar', 'crocodile', 'mushroom', 'bear'] }))
     .then(r => { S.warm = { done: true, ...r }; }, e => { S.warm = { done: true, error: e?.message }; });
 });
 
@@ -1096,6 +1129,8 @@ Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
 const tv = {
   /** Play a server event through the client's own handlers (screenshots / demos: a swing, a staff spell…). */
   fxEvent(ev) { onEvent(ev); },
+  /** U16 (specs / demos): shape a player (default: you) as a creature, or back with null. */
+  shape(shape, id = S.selfId) { return actors.setShape(id, shape); },
   /** Play a server message through EVERY handler the client registered for it (specs, screenshots). Returns how many heard it. */
   fake(ev, msg) { const fns = TAPS.get(ev) || []; for (const fn of [...fns]) { try { fn(msg); } catch (e) { console.error('[fake]', ev, e); } } return fns.length; },
   weaponFx: () => weaponFx.stats,

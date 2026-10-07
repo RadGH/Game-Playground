@@ -61,7 +61,7 @@ export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
     const me = myChar();
     const others = party ? party.members.filter(m => m.char !== me) : [];
     el.frames.hidden = !others.length;
-    const badge = el.btn.querySelector('b'); if (badge) badge.textContent = party && party.members.length > 1 ? String(party.members.length) : '';
+    // (play-test 6 U1: the Party button's badge is NEWS only — unseen mail / friends, ui/unseen.js — never the size of your party)
     const keep = new Set();
     for (const m of others) {
       keep.add(m.char);

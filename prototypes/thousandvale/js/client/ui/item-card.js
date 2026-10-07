@@ -12,6 +12,8 @@ import { registerTip, refreshTip } from './tips.js';
 import { slotOf, altSlotOf, SLOT_NAME, RARITY_NAME, rarityOf, levelCheck, compareTo, plainScore } from './inv-core.js';
 import { iconFor } from './item-icons.js';
 import { isCrate, crateLines, rarityClass } from './pt5-core.js';
+import { potionLine } from './pt6-core.js';
+import { fmt, pct } from '../../../../../shared/format.js';
 
 const items = new Map();                       // uid -> item
 export function rememberItems(list) { for (const it of list || []) if (it && it.uid != null) items.set(String(it.uid), it); }
@@ -21,6 +23,10 @@ let F = { describe: null, score: null, name: null };
 // C's wording (js/rules/wording.js, pure): Farhold's "companions" reads "your followers" — one vocabulary on every card (T2)
 let who = t => t;
 import('../../rules/wording.js').then(m => { if (typeof m.whoText === 'function') who = t => { try { return m.whoText(t) || t; } catch { return t; } }; }).catch(() => {});
+// play-test 6 (U6): every property line is C's `affixText` (js/rules/item-text.js) — the one place that knows which stats are
+// fractions and which are percents ("0.2% chance to block" was a fraction printed as a percent). No arithmetic here.
+let ruleText = null;
+import('../../rules/item-text.js').then(m => { if (typeof m.affixText === 'function') ruleText = m.affixText; }).catch(() => {});
 const fload = Promise.all([import('../../../../farhold/js/effects.js'), import('../../../../farhold/js/rpg.js')])
   .then(([e, r]) => { F = { describe: e.describeAffix, score: r.itemScore, name: r.displayName }; }).catch(() => {});
 export const farholdReady = () => fload;
@@ -31,12 +37,20 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 const title = s => String(s || '').replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\b\w/g, c => c.toUpperCase());
 function affixText(a) {
   if (a.text) return who(a.text);
+  if (ruleText) { try { const t = ruleText(a); if (t) return t; } catch { /* fall through */ } }
   try { if (F.describe) return who(F.describe(a)); } catch { /* fall through */ }
+  // last resort (the rules' text did not load): the name and the number as stored — a fraction below 1 is shown as a percent ONCE
   const v = a.value ?? '';
-  return `${a.name || title(a.stat || a.id)}${v !== '' ? ` ${v > 0 ? '+' : ''}${Math.round(v * 100) / 100}` : ''}`;
+  const shown = typeof v === 'number' ? (Math.abs(v) < 1 && v !== 0 ? pct(v, 1) : fmt(v)) : String(v);
+  return `${a.name || title(a.stat || a.id)}${v !== '' ? ` ${v > 0 ? '+' : ''}${shown}` : ''}`;
 }
 
-let ctx = { equipment: () => ({}), level: () => 1 };
+let ctx = { equipment: () => ({}), level: () => 1, vitals: () => null };
+/** More context for the cards (play-test 6: your health and mana, so a potion says what it restores for YOU). */
+export function setCardContext(c = {}) { ctx = { ...ctx, ...c }; }
+// U17: the rules' own potion numbers (js/sim/consumables.js is pure) — the item table's old "Restores 40 HP" is not what it does
+let potions = null;
+import('../../sim/consumables.js').then(m => { if (typeof m.effectOf === 'function' && typeof m.potionAmount === 'function') potions = m; }).catch(() => {});
 let shift = false;
 export function installItemCards(c = {}) {
   ctx = { ...ctx, ...c };
@@ -74,8 +88,13 @@ export function itemCardHtml(item, { worn = false, level = null, equipment = nul
   if (item.attackSpeed && item.type === 'weapon' && item.attackSpeed !== 'normal') base.push(`${esc(item.attackSpeed)} attacks`);
   if (item.ranged) base.push('ranged');
   if (base.length) b.push(`<div class="ic-base">${base.join(' · ')}</div>`);
+  if (item.count > 1) b.push(`<div class="ic-base">A stack of <b>${esc(fmt(item.count, { decimals: 0 }))}</b>${item.stackMax ? ` <span class="ic-dim">(holds ${esc(item.stackMax)})</span>` : ''} — one is used at a time.</div>`);
   if (item.kind === 'fish' && item.size) b.push(`<div class="ic-base"><b>${esc(Math.round(item.size * 10) / 10)}</b> cm${item.record ? ' · your biggest' : ''}</div>`);
-  if (item.desc && !item.lore) b.push(`<div class="ic-dim">${esc(item.desc)}</div>`);
+  let potionSaid = false;
+  if (item.kind === 'potion' && potions) {
+    try { const ef = potions.effectOf(item), v = ctx.vitals?.(); if (ef && v && v.hpMax) { const line = potionLine(potions.potionAmount(ef, v.hpMax, v.mpMax || 0), ef, (potions.POTION_CD_MS || 0) / 1000); if (line) { b.push(`<div class="ic-base">${esc(line)}</div>`); potionSaid = true; } } } catch { /* the plain description below */ }
+  }
+  if (item.desc && !item.lore && !(potionSaid && /restores?\s+\d/i.test(item.desc))) b.push(`<div class="ic-dim">${esc(item.desc)}</div>`);
   // T15 / T17 (C): what a caster weapon's attack IS, what a focus adds, what a converted weapon deals — written from the numbers
   for (const k of ['attackText', 'focusText', 'convertText']) if (item[k]) b.push(`<div class="ic-attack">${esc(who(item[k]))}</div>`);
   if (item.weaponHeadline) b.push(`<div class="ic-dim">${esc(item.weaponHeadline)}</div>`);

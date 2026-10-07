@@ -56,8 +56,9 @@
     { "name": "Ore Rush", "abilities": ["coin_spray", "runaway_east", "runaway_north", "ore_toss"] },
     { "name": "Lights Out", "at": 0.6, "say": "The cart snaps its lid at the lanterns. Darkness.",
       "abilities": ["runaway_east", "rat_swarm", "ore_toss"],
-      "onEnter": [ { "shield": true }, { "reset": "brazier" }, { "adds": { "type": "cairn_rat", "count": 4, "radius": 8, "at": "home" } },
-        { "say": "The Hungry Cart hides in the dark. Light all three mine lanterns!", "style": "warn" } ] },
+      "ward": {"seconds": 20, "pool": 0.1, "break": "objects", "need": 3, "what": "brazier", "say": "The Hungry Cart hides in the dark. Light all three mine lanterns! It fails by itself in 20 seconds.", "fade": "The ward fails by itself. No opening this time."},
+      "onEnter": [ { "shield": { "seconds": 20, "pool": 0.1 } }, { "reset": "brazier" }, { "adds": { "type": "cairn_rat", "count": 4, "radius": 8, "at": "home" } },
+        { "say": "The Hungry Cart hides in the dark. Light all three mine lanterns! It fails by itself in 20 seconds.", "style": "warn" } ] },
     { "name": "Feeding Time", "newBar": { "hp": 0.5 }, "say": "The cart rears up on its back wheels. It is very, very hungry.",
       "abilities": ["coin_spray", "gulp", "share_the_load", "both_rails", "teeth"] }
   ],

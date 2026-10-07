@@ -23,11 +23,11 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
   for (let i = 0; i < 7; i++) {
     const b = document.createElement('button');
     b.className = 'slot' + (i ? ' empty' : '');
-    b.innerHTML = `<span class="key">${i ? i : 'F'}</span>${i === 0 ? ICONS.sword : '<span class="face"></span>'}<span class="cd"></span>`;
+    b.innerHTML = `<span class="key">${i ? i : 'F'}</span>${i === 0 ? ICONS.sword : '<span class="face"></span>'}<span class="cd"></span><span class="lockat"></span>`;
     b.dataset.tip = i === 0 ? 'Strike — a basic weapon attack on your target (F, or right-click an enemy)' : 'Empty';
     b.addEventListener('click', () => onSlot?.(i));
     el.bar.appendChild(b);
-    slots.push({ b, cd: b.querySelector('.cd'), face: b.querySelector('.face'), until: 0, len: 1 });
+    slots.push({ b, cd: b.querySelector('.cd'), face: b.querySelector('.face'), lockat: b.querySelector('.lockat'), until: 0, len: 1 });
   }
 
   el.rise.addEventListener('click', () => onRise?.());
@@ -62,9 +62,10 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
     const facts = [sk.mp ? `${fmt(sk.mp)} mana` : '', sk.cd ? `${(sk.cd / 1000).toFixed(sk.cd % 1000 ? 1 : 0)} s cooldown` : '', sk.element && sk.element !== 'physical' ? sk.element : '',
       sk.targets ? '' : sk.ally ? (sk.group ? 'reaches your party' : 'on a friend or yourself') : ''].filter(Boolean).join(' · ');
     // T2/T3/T4 (play-test 5): exactly who it touches, in the rules' own words, and a revive's terms
+    const how = sk.ally && !sk.revive ? '<div class="tip-who">To heal someone else: click their party frame (or press T for the next party member), then this key. No one targeted: it lands on you.</div>' : '';
     const who = sk.targets ? `<div class="tip-who">Affects: ${escH(sk.targets)}</div>` : '';
     const rv = sk.revive ? `<div class="tip-who">Revive: ${[sk.revive.mass ? 'every fallen party member near you' : 'one fallen party member', Number.isFinite(sk.revive.hpPct) ? `back at ${Math.round(sk.revive.hpPct * 100)}% health` : '', sk.revive.castMs ? `${(sk.revive.castMs / 1000).toFixed(sk.revive.castMs % 1000 ? 1 : 0)} s cast` : 'instant', sk.revive.combat ? 'works in a fight' : 'out of a fight only'].filter(Boolean).map(escH).join(' · ')}</div>` : '';
-    return `<div class="tip-title">${escH(sk.name)}</div>${sk.locked ? `<div class="bad">Unlocks at level ${escH(sk.level)}</div>` : ''}${facts ? `<div class="tip-sub">${escH(facts)}</div>` : ''}${who}${rv}${sk.desc ? `<hr><div>${escH(sk.desc)}</div>` : ''}`;
+    return `<div class="tip-title">${escH(sk.name)}</div>${sk.locked ? `<div class="bad">${escH(sk.lockedText || `Unlocks at level ${sk.level}`)}</div>` : ''}${facts ? `<div class="tip-sub">${escH(facts)}</div>` : ''}${who}${how}${rv}${sk.desc ? `<hr><div>${escH(sk.desc)}</div>` : ''}`;
   }
 
   return {
@@ -93,7 +94,7 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
       // play-test 2 Q25: a player shows their calling ("Ranger"), town folk their trade — never a blanket "Adventurer"
       const nice = t => String(t || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
       el.tSub.textContent = a.kind === 'monster' ? (a.hp <= 0 ? 'Slain' : `${a.rank && a.rank !== 'normal' ? nice(a.rank) + ' · ' : ''}${a.family ? a.family[0].toUpperCase() + a.family.slice(1) : 'Beast'}`)
-        : a.kind === 'player' ? (a.clsName || nice(a.look?.cls) || 'Adventurer') : a.pet ? 'Companion' : a.role ? nice(a.role) : 'Townsfolk';
+        : a.kind === 'player' ? (a.formName ? `${a.formName} · ` : '') + (a.clsName || nice(a.look?.cls) || 'Adventurer') : a.pet ? 'Companion' : a.role ? nice(a.role) : 'Townsfolk';
       if (lag.targetId !== a.id) { lag.target = f; lag.targetId = a.id; }
       lag.targetTarget = f;
     },
@@ -118,6 +119,8 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
         s.b.classList.toggle('locked', !!sk?.locked);
         s.b.classList.toggle('ally', !!sk?.ally);
         if (s.face) s.face.textContent = sk ? initials(sk.name) : '';
+        // play-test 6 U11: a locked key says WHEN it opens, on the key itself ("my heal did nothing" was a level-3 skill at level 2)
+        if (s.lockat) s.lockat.textContent = sk?.locked ? `Lv ${sk.level}` : '';
         // P5: a rich skill card on the shared tooltip (readable while a key is held)
         delete s.b.dataset.tip;
         s.b.dataset.tipHtml = sk ? skillTip(sk) : `<div class="tip-sub">${escH(found?.desc || 'Empty')}</div>`;

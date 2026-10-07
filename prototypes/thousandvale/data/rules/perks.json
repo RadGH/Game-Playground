@@ -13,7 +13,7 @@
   "arms": [
     {
       "key": "melee", "name": "The Close Ground", "color": "#e07a4a", "blurb": "Reach, weight and the willingness to be hit.",
-      "minor": [["str", 4], ["damageFlat", 3], ["armor", 6], ["maxHp", 22], ["critChance", 3]],
+      "minor": [["str", 4], ["damageFlat", 3], ["armor", 10], ["maxHp", 22], ["critChance", 3]],
       "major": [["damagePct", 8], ["str", 9], ["armorPct", 12], ["critDamage", 18], ["areaPct", 10]],
       "talents": ["riposte", "sunder"],
       "branches": [

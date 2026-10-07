@@ -19,7 +19,7 @@ export function createGuild({ net: getNet, hud, chat, me, onMotd }) {
 
   function draw() {
     const online = guild ? guild.members.filter(m => m.online).length : 0;
-    document.getElementById('menu-guild')?.querySelector('b')?.replaceChildren(guild && online > 1 ? String(online) : '');
+    // (U1: no badge for "how many are online" — that is in the window's title; a badge is only for news)
     if (!panel.isOpen) return;
     if (!guild) return drawNone();
     panel.setTitle(guild.name, `${online} of ${guild.members.length} online`);

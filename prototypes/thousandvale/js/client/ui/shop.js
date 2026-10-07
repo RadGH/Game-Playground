@@ -71,9 +71,10 @@ export function createShop({ net, hud, actors, me, bag }) {
     const items = (bag?.state?.bag || []).slice().sort((a, b) => (RARITY_RANK[rarityOf(a)] ?? 0) - (RARITY_RANK[rarityOf(b)] ?? 0));
     if (!items.length) return h('p.dim', {}, 'Your bag is empty.');
     const sellMap = new Map((v.sell || []).map(r => [r.uid, r.price]));
+    const eachMap = new Map((v.sell || []).map(r => [r.uid, r.each]));
     return h('div.shop-list', {}, ...items.map(it => {
       const p = sellMap.get(it.uid) ?? sellPrice(it, v.sellRate ?? 0.25);
-      return h('div.shop-row', { dataset: { uid: String(it.uid) }, onclick: () => sell(it, p) }, itemCell(it, { small: true }), h('div.sr-name', {}, itemName(it)), h('span.price.sell', {}, p ? goldText(p) : 'worthless'));
+      return h('div.shop-row', { dataset: { uid: String(it.uid) }, onclick: () => sell(it, p) }, itemCell(it, { small: true }), h('div.sr-name', {}, itemName(it), it.count > 1 ? h('small.sr-stack', {}, ` × ${it.count}${eachMap.get(it.uid) ? ` — ${goldText(eachMap.get(it.uid))} each, sold together` : ' — the whole stack'}`) : null), h('span.price.sell', {}, p ? goldText(p) : 'worthless'));
     }));
   }
   function backList(v) {

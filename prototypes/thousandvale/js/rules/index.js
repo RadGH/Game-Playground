@@ -30,7 +30,7 @@ import { attachWarbands, escortFor } from './warband.js';
 import { allyEffects, aimsAtAlly } from './ally.js';
 import { cardText, whoOf, whoText } from './wording.js';
 import { reviveOf, directHealSlot } from './tv-skills.js';
-import { runtimeFor } from './cast-skills.js';
+import { runtimeFor, shapeOfUnit } from './cast-skills.js';
 import { attackReach, basicCard, isHeldFocus, stampCaster } from './caster-forms.js';
 import { TV_SLOTS } from './tv-gear.js';
 import { weaponHands } from './farhold.js';
@@ -88,6 +88,7 @@ export const TYPE_ALIASES = { wolf: 'moor_hound', hound: 'moor_hound' };
 function whyCode(text = '') {
   if (/not ready|cooldown/i.test(text)) return 'cooldown';
   if (/mana/i.test(text)) return 'mana';
+  if (/unlocks at level|opens at level/i.test(text)) return 'locked';
   if (/no fallen party member|nobody is left to raise/i.test(text)) return 'target';
   if (/while you are fighting/i.test(text)) return 'combat';
   if (/dead/i.test(text)) return 'dead';
@@ -540,7 +541,9 @@ export function createRules(host, opts = {}) {
     if (!u) return { ok: false, why: 'unknown' };
     if (msg.t === 'target') {
       const t = msg.id ? host.entities.get(msg.id) : null;
-      if (msg.id && !validTarget(u, t, { range: TAB.RANGE * 1.5 })) return { ok: false, why: 'target' };
+      // owner feedback 6 (U11 / T4): a FALLEN party member may be targeted (a revive aims at `e.target`); anything else must be alive
+      const fallenFriend = t && t.kind === 'player' && t.dead && t.r?.unit && u.partyId != null && t.r.unit.partyId === u.partyId && Math.hypot(t.x - u.x, t.z - u.z) <= TAB.RANGE * 1.5;
+      if (msg.id && !fallenFriend && !validTarget(u, t, { range: TAB.RANGE * 1.5 })) return { ok: false, why: 'target' };
       e.setTarget(msg.id || 0);
       return { ok: true };
     }
@@ -1168,6 +1171,8 @@ export function createRules(host, opts = {}) {
         // play-test 5 T2: the card says exactly who it touches (js/rules/wording.js); `who` / `targets` for the UI
         slot: i + 1, id: s.id || null, name: s.name, desc: row ? cardText(row, s.descShort || s.desc || '', { statuses: engine.statuses }) : (s.descShort || s.desc || ''),
         who: who.who, targets: who.targets,
+        // owner feedback 6: a locked key says when it opens, on the bar itself
+        ...(s.locked ? { lockedText: `Unlocks at level ${s.unlockAt}` } : {}),
         ...(rv ? { revive: { style: rv.style || null, castMs: Math.round((rv.castTime || 0) * 1000), combat: !!rv.combat, mass: !!rv.mass, hpPct: rv.share ?? 0.5 } } : {}),
         cd: Math.round((s.cooldown || 0) * 1000), mp: Math.round(s.mp || 0), level: s.unlockAt, locked: !!s.locked,
         empty: !!s.empty, shape: s.shape || null, element: s.element || null,
@@ -1182,6 +1187,10 @@ export function createRules(host, opts = {}) {
   return {
     equip, unequip, canEquip, gear, saveGear, rollLoot, onParty, useObject, bar, backfill, unlock, revived,
     applyKit, makeItem, makeCrate, openCrate, sheet, sheetWith,
+    /** U16: the creature body a shape form draws (`{ id, name, creature, scale, colors, upright }`), or null — A: `info.form` */
+    formOf: e => { const u = e?.r?.unit; return u ? room.run(() => shapeOfUnit(u)) : null; },
+    /** U8: a boss ward's bar — `{ on, hp, max, leftMs, ms }` or null */
+    wardOf: e => (e?.r?.unit ? enc.wardOf(e.r.unit) : null),
     /** every worn slot, in paper-doll order (play-test 5: `back`, `waist`, `light` joined) */
     SLOTS: engine.tvGear?.slotOrder || ['weapon', 'offhand', 'head', 'chest', 'legs', 'hands', 'feet', 'necklace', 'ring', 'ring2'],
     /** T25: the angling rules (pure; A drives the cast / bite / tug loop with them) */

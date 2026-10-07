@@ -117,7 +117,7 @@ export const CLIENT_MSGS = Object.freeze({
   target:  { on: 'p', fields: { id: '?id' }, rate: 10, burst: 20 },
   say:     { on: 'p', fields: { text: 'str:200' }, rate: 1, burst: 5 },
   respawn: { on: 'p', fields: {}, rate: 1, burst: 2 },
-  use:     { on: 'p', fields: { id: 'id' }, rate: 4, burst: 8 },
+  use:     { on: 'p', fields: { id: 'id', to: '?str:16' }, rate: 4, burst: 8 },      // to (play-test 6 U12): a lift's floor, 'f:<n>'
   item:    { on: 'p', fields: { op: 'str:8', uid: '?str:40', slot: '?str:16' }, rate: 5, burst: 10 },
   travel:  { on: 'p', fields: { to: 'str:48' }, rate: 1, burst: 3 },
   trace:   { on: 'p', fields: { kind: 'str:16' }, rate: 1, burst: 2 },
@@ -152,7 +152,7 @@ export const CLIENT_MSGS = Object.freeze({
   kits:    { on: 'gw', fields: { cls: 'str:32' }, rate: 2, burst: 6 },
   revive:  { on: 'p', fields: { op: 'str:8', id: '?int' }, rate: 2, burst: 4 },
   sheet:   { on: 'p', fields: {}, rate: 2, burst: 4 },
-  feedback: { on: 'both', fields: { kind: 'str:16', text: 'str:2000', ctx: '?obj' }, rate: 0.2, burst: 5 },      // the real limit is js/sim/feedback.js (1 per 20 s, 12 an hour, answered)
+  feedback: { on: 'both', fields: { kind: 'str:16', text: 'str:2000', ctx: '?obj' }, rate: 0.5, burst: 10 },      // the real limit is js/sim/feedback.js (1 per 20 s, 12 an hour, answered)
   admin:   { on: 'both', fields: { op: 'str:16', id: '?int', state: '?str:16', kind: '?str:16', limit: '?int', before: '?int', note: '?str:500' }, rate: 2, burst: 10 },
   fish:    { on: 'p', fields: { op: 'str:8', aim: '?vec2', held: '?num', score: '?num', holds: '?nums' }, rate: 4, burst: 8 },
   cook:    { on: 'p', fields: { op: '?str:8', id: '?str:64', n: '?int' }, rate: 2, burst: 6 },
@@ -309,7 +309,8 @@ export const EVENT_FIELDS = Object.freeze({
 /** Telegraph shapes (`tele.shape`) and object states (`obj.state`, `info.state`). */
 export const TELE_SHAPES = Object.freeze(['circle', 'ring', 'donut', 'cone', 'line', 'cross']);
 export const OBJ_STATES = Object.freeze(['idle', 'lit', 'used', 'broken', 'open', 'closed']);
-export const OBJ_TYPES = Object.freeze(['portal', 'stairs', 'exit', 'chest', 'gate', 'lever', 'pillar', 'rock', 'brazier', 'pool', 'cracked_floor', 'sarcophagus', 'support_beam', 'ore_cart']);
+export const OBJ_TYPES = Object.freeze(['portal', 'stairs', 'exit', 'chest', 'gate', 'lever', 'pillar', 'rock', 'brazier', 'pool', 'cracked_floor', 'sarcophagus', 'support_beam', 'ore_cart',
+  'door', 'lift', 'fishpool']);      // play-test 6: the way you came in (U10), the stair up that asks which floor (U12); play-test 5 fish pools
 
 /** Validate a decoded client message. Returns null when fine, else a reason. */
 export function validate(msg, socketKind = null) {

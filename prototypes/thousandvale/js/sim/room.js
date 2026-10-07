@@ -70,6 +70,8 @@ export function createRoom(opts) {
     event(ev) {
       if (ev.type === 'loot' && ev.items && hooks.loot) { hooks.loot(ev, room); return; }
       if (hooks.observe) { if (ev.x === undefined) fillXZ(ev); hooks.observe(ev, room); }
+      watchTelegraphs(ev);
+      if (ev.type === 'fx' && (ev.kind === 'form' || ev.kind === 'shield') && ev.id) lateInfo(ev);
       if (ev.type === 'fx' && (ev.kind === 'form' || ev.kind === 'build') && ev.id) barDirty.add(ev.id);
       if (ev.type === 'fx' && ev.kind === 'status' && ev.id) stDirty.add(ev.id);          // Q8: info.st follows the rules
       else if (ev.type === 'die' && ev.d) { stDirty.add(ev.d); stClear.add(ev.d); }   // a form/stance/talent/perk changed slots   // a form/stance changed slots: resend you.bar after the tick
@@ -77,10 +79,64 @@ export function createRoom(opts) {
     },
     /** Emit without interception (the world's own loot events). */
     emit(ev) {
-      if (ev.x === undefined) fillXZ(ev);
+      if (ev.x === undefined && !ev._at) fillXZ(ev);
       events.push(ev);
     },
   };
+  /**
+   * PLAY-TEST 6, U3 — "void-zone / telegraph effects must end immediately when the enemy dies or the cast is interrupted".
+   * The rules own what a telegraph DOES; this is the net under them for what everyone SEES: every live `tele {id, s}` and
+   * every ground pool a MONSTER lays (`fx {kind:'pool', id: caster, x, z, seconds}`) is remembered by its source, and the
+   * moment that source dies (`die`) or is removed, each one still running is ended on the wire (a `tele` the rules mark
+   * `after: 1` — it lands even if its caster is dead — is left alone) —
+   * `teleR {id, x: 1, why}` / `fx {kind:'pool', id, x, z, end: 1, why}` — unless the rules already ended it themselves.
+   */
+  const liveTele = new Map();        // tele id -> { s, x, z, after, until }
+  /** Give an event the place it is DELIVERED by (not serialised): for events whose own `x` means something else. */
+  const routed = (ev, at) => { Object.defineProperty(ev, '_at', { value: { x: at.x, z: at.z }, enumerable: false }); return ev; };
+  const livePools = new Map();       // source id -> [{ x, z, until }]
+  function endFor(src, why) {
+    for (const [tid, t] of liveTele) if (t.s === src && !t.after) { liveTele.delete(tid); room.emit(routed({ type: 'teleR', id: tid, x: 1, why }, t)); }
+    const pools = livePools.get(src);
+    if (pools) { livePools.delete(src); const t = room.now(); for (const p of pools) if (p.until > t) room.emit(routed({ type: 'fx', kind: 'pool', id: src, x: p.x, z: p.z, end: 1, why }, p)); }
+  }
+  function watchTelegraphs(ev) {
+    switch (ev.type) {
+      case 'tele': {
+        if (ev.id == null || ev.s == null) break;
+        const src = entities.get(ev.s);
+        liveTele.set(ev.id, { s: ev.s, after: !!ev.after, x: Number.isFinite(ev.x) ? ev.x : src ? src.x : 0, z: Number.isFinite(ev.z) ? ev.z : src ? src.z : 0, until: room.now() + (ev.ms || 0) + 2000 });
+        break;
+      }
+      // a telegraph's END is sent to whoever could see the telegraph: `teleR` has no place of its own, and its `x` is the
+      // "cancelled" flag, not a coordinate — routed by position it reached nobody (which is why a cancelled zone stayed drawn)
+      case 'teleR': { const t = liveTele.get(ev.id); if (t) { routed(ev, t); liveTele.delete(ev.id); } break; }
+      case 'fx':
+        if (ev.kind === 'pool' && !ev.end && ev.id != null) { const src = entities.get(ev.id); if (src && src.kind === 'monster') { const l = livePools.get(ev.id) || []; l.push({ x: ev.x, z: ev.z, until: room.now() + (ev.seconds || 4) * 1000 }); livePools.set(ev.id, l); } }
+        break;
+      case 'die': if (ev.d != null && (liveTele.size || livePools.size)) endFor(ev.d, 'dead'); break;
+      // an INTERRUPTED cast: the rules end that cast's own zones themselves (`teleR x:1` from cancelCast) — zones of an earlier,
+      // finished cast still land, so nothing more is ended here
+    }
+    if (liveTele.size > 64) { const t = room.now(); for (const [tid, x] of liveTele) if (x.until < t) liveTele.delete(tid); }
+  }
+  /**
+   * Play-test 6 (C's asks): what a late joiner must still see — a druid's SHAPE (U16: `info.form` = C's shape object while a
+   * `group:'shape'` form is on) and a boss's WARD (U8: `info.ward = {max, ms, until (room ms)}` while the shield holds).
+   */
+  function lateInfo(ev) {
+    const e = entities.get(ev.id);
+    if (!e) return;
+    if (ev.kind === 'form') {
+      if (ev.group && ev.group !== 'shape') return;          // a stance / temper / song has no body: it neither sets nor clears the shape
+      const shape = ev.on === false ? null : (ev.shape && typeof ev.shape === 'object' ? ev.shape : ev.body ? { id: ev.form, group: ev.group || 'shape', creature: ev.body } : null);
+      const next = shape && (shape.group === undefined || shape.group === 'shape') && shape.creature ? shape : null;
+      if (JSON.stringify(next) !== JSON.stringify(e.form || null)) { e.form = next; e.infoVer++; }
+    } else if (ev.on === true || ev.on === false) {
+      const next = ev.on ? { max: ev.pool ?? ev.max ?? null, ms: ev.ms ?? null, until: ev.ms ? room.now() + ev.ms : null, ...(ev.name ? { name: ev.name } : {}) } : null;
+      e.ward = next; e.infoVer++;
+    }
+  }
   function fillXZ(ev) {
     const ref = entities.get(ev.d) || entities.get(ev.s) || entities.get(ev.id) || entities.get(ev.to);
     if (ref) { ev.x = ref.x; ev.z = ref.z; }
@@ -155,6 +211,7 @@ export function createRoom(opts) {
   room.remove = function (e) {
     if (e.removed) return;
     e.removed = true;
+    if (liveTele.size || livePools.size) endFor(e.id, 'gone');          // U3: nothing it was winding up outlives it on screen
     safe('removeEntity', e);
     grid.remove(e);
     entities.delete(e.id);
@@ -168,6 +225,7 @@ export function createRoom(opts) {
     const e = room.spawn({ kind: 'player', name: char.name, level: char.level || 1, x, z, yaw: char.yaw || 0, char, team: 1, r: at && at.carry });
     if (char.hp > 0) e.setHp(Math.min(char.hp, e.hpMax));
     char.room = id;
+    if (rules.formOf) { const f = safe('formOf', e); if (f && f.creature && (f.group === undefined || f.group === 'shape')) e.form = f; }      // U16: a shape carried into this room
     if (client) room.attach(e, client);
     return e;
   };
@@ -246,10 +304,11 @@ export function createRoom(opts) {
       if (c && (!deliver || deliver(o.char))) c.send(msg);
     }
   };
-  room.respawn = function (e) {
+  room.respawn = function (e, at = null) {
     if (!e.dead) return false;
     e.revive(1);                    // alive first: a dead body never moves (Entity.moveTo, P8)
-    e.moveTo(spawnPoint.x, spawnPoint.z);
+    const p = at && Number.isFinite(at.x) && Number.isFinite(at.z) ? at : spawnPoint;      // U12: a dungeon floor's landing
+    e.moveTo(p.x, p.z);
     safe('respawn', e);
     room.statusChanged(e);
     const c = clients.get(e.id); if (c) c.selfDirty = true;
@@ -465,7 +524,8 @@ export function createRoom(opts) {
         let n = 0, personal = false, all = true;
         for (let i = 0; i < events.length; i++) {
           const ev = events[i];
-          const mine = ev.to !== undefined ? ev.to === me.id : (Math.abs(ev.x - me.x) <= R && Math.abs(ev.z - me.z) <= R);
+          const at = ev._at || ev;
+          const mine = ev.to !== undefined ? ev.to === me.id : (Math.abs(at.x - me.x) <= R && Math.abs(at.z - me.z) <= R);
           if (mine) { evIdx[n++] = i; if (ev.to !== undefined) personal = true; } else all = false;
         }
         if (n) {
@@ -570,7 +630,8 @@ export function createRoom(opts) {
     room.spawn({ kind: npc ? 'npc' : 'object', type: o.type, name: o.name || o.type, x: o.x, z: o.z, yaw: o.yaw || 0, team: npc ? 1 : 0, state: npc ? STATE.friendly : 0,
       data: { portal: o.portal || null, chest: o.chest || null, gate: o.gate || null, lever: o.lever || null, rules: !!o.rules, key: o.key || null, r: o.r || null, state: o.state || null, room: o.room ?? null,
         note: o.note || null, use: o.use || null, npc: o.npc || null, hidden: !!o.hidden, hint: o.hint || null, lore: o.lore || null, waystone: o.waystone || null, schedule: o.schedule || null,
-        treasure: o.treasure || null, site: o.site || null, shimmer: o.shimmer || null, office: o.office || null, ...(npc && o.title ? { title: o.title } : {}) } });
+        treasure: o.treasure || null, site: o.site || null, shimmer: o.shimmer || null, office: o.office || null,
+        /* play-test 6: dungeon floors, the lift, the way in */ ...(o.lift ? { lift: o.lift } : {}), ...(o.floor ? { floor: o.floor } : {}), ...(o.dir ? { dir: o.dir } : {}), ...(o.leave ? { leave: true } : {}), ...(npc && o.title ? { title: o.title } : {}) } });
   }
   /** Change an object's state (lit, used, broken, open…): late joiners see it in `info`, everyone near gets `obj`. */
   room.objState = function (o, state, extra = {}) {

@@ -33,6 +33,20 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
   const looks = new Map();
   const lookOf = id => { if (!id || id === 'basic' || id === 'dot') return null; if (!looks.has(id)) { const sk = skillOf(id); looks.set(id, sk ? skillLook(id, sk) : null); } return looks.get(id); };
   const lingering = new Map();     // placed obj id -> { until }
+  // play-test 6 (U3): ground zones that can be taken away early. key -> { src (caster id), entries: SpellFx live entries }
+  const zones = new Map();
+  let zoneSeq = 0;
+  /** Run `draw()` and remember what it added to SpellFx, so the zone can be ended before its own time is up. */
+  function trackZone(key, src, ms, draw) {
+    const before = new Set(fx.live);
+    draw();
+    const entries = fx.live.filter(e => !before.has(e));
+    if (entries.length) zones.set(key ?? 'z' + (++zoneSeq), { src: src ?? null, entries, until: performance.now() + ms + 2500 });
+    if (zones.size > 60) for (const [k, z] of zones) if (z.until < performance.now()) zones.delete(k);
+  }
+  function endZone(key) { const z = zones.get(key); if (!z) return 0; for (const e of z.entries) { try { fx._end(e); } catch {} } zones.delete(key); stats.zonesEnded = (stats.zonesEnded || 0) + 1; return 1; }
+  /** U3: every ground zone a body laid down ends with it (its death arrives before the server's own clean-up does). */
+  function ownerGone(src) { let n = 0; if (src == null) return n; for (const [k, z] of [...zones]) if (z.src === src) n += endZone(k); return n; }
   let seenSpellFx = false, seenImpacts = false;   // C's richer events, once seen, replace the client's own guesses
   const stats = { casts: 0, projectiles: 0, impacts: 0, areas: 0, statuses: 0, unknown: 0 };
 
@@ -165,11 +179,19 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
         const c = { x: ev.x, z: ev.z }; if (c.x == null) break;
         const L = { element: el, area: { kind: el === 'ice' || el === 'lightning' ? 'storm' : 'vortex', r: ev.r || 3 } };
         const ms = Math.min(6000, (ev.seconds || 2) * 1000);
-        area(L, c, 0, { lingerMs: ms });
+        trackZone(ev.obj ?? ev.zone ?? null, ev.id ?? ev.s ?? null, ms, () => area(L, c, 0, { lingerMs: ms }));
         if (ev.obj != null) lingering.set(ev.obj, performance.now() + ms);
         break;
       }
-      case 'unplace': lingering.delete(ev.obj); break;
+      case 'unplace': lingering.delete(ev.obj); endZone(ev.obj); break;
+      // A (round 6): a zone the rules announced, and its end the moment its caster dies or is interrupted
+      case 'zone': {
+        if (ev.end) { endZone(ev.id); endZone(ev.obj); lingering.delete(ev.obj ?? ev.id); break; }
+        if (ev.x == null) break;
+        const ms = Math.min(8000, ev.ms || (ev.seconds || 2) * 1000);
+        trackZone(ev.id ?? ev.obj ?? null, ev.s ?? null, ms, () => area({ element: el, area: { kind: el === 'ice' || el === 'lightning' ? 'storm' : 'vortex', r: ev.r || 3 } }, { x: ev.x, z: ev.z }, 0, { lingerMs: ms }));
+        break;
+      }
       case 'arc': case 'link': case 'linkShare': {
         const from = ev.from ? V(ev.from.x, g(ev.from) + 1.1, ev.from.z) : a ? chest(a) : null;
         projectile(from, target(ev.to), ev.kind === 'arc' ? el : 'arcane', { body: 'bolt', ms: 90 });
@@ -257,6 +279,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
   }
 
   return {
+    ownerGone, endZone, zones,
     fx, onEvent, lookOf, stats, demo, get ready() { return ready; },
     update(dt) {
       fx.update(dt);

@@ -232,3 +232,19 @@ Contracts for the other streams: docs/requests.md "Round 5 contracts — C". Tes
 **Parity**: the fixtures build their engine with `tvSkills: false, tvGear: false` (tests/C/setup.mjs), so Farhold's own skill table, item bases and caster behaviour are what is compared.
 
 **Farhold findings from this round** (left as they are in Farhold): (5) a chained bolt never jumps — the hop starts at the body just struck and `hitScan` finds that same body first, so "chains to 2 more" strikes one enemy three times (main.js `fireBolt`, actors.js `hitScan`); Thousandvale's hop skips the body it left. (6) An uncharged Arc Lash staff throws a plain bolt although its row says `chains: 3` (only the charged storm jumps); Thousandvale's tap chains. (7) `CAST_ELEMENTS` has no holy, so a caster weapon cannot be attuned to holy (`attune: 'holy'` silently becomes another element).
+
+## Owner feedback 6 (2026-10-07) — what changed in the rules
+
+Contracts: docs/requests.md "Round 6 contracts — C". Tests: `tests/C/playtest6.test.mjs`, `starter-kits.test.mjs`.
+
+| # | What | Where |
+|---|---|---|
+| U3 | **A zone ends with its caster.** A dead or removed monster's running telegraphs are withdrawn that tick (`teleR x:1 why:'dead'`) and the puddles it left are removed (they kept hurting for 8 s); a dead player's placed zones, posts and burning ground end at once (`fx unplace` / `fx pool end`). | `encounter.js sweepOwner`, `cast-skills.js endZonesOf` |
+| U6 | **Percent units.** A shield's built-in block was a fraction on a percent stat: the card said 0.2% and the shield gave 0.2%. It is 20 now (old saves corrected on load). `item-text.js affixText` prints every property (who-wording + unit fixes: spell power as a percentage, small per-second values to two decimals). The sheet's `blockChance` row was shown x100. One table-driven sweep over every rollable and built-in property. | `tv-gear.js fixUnits`, `item-text.js`, `estimate.js` |
+| U8 | **Boss wards** last `seconds` (18 by default, `progression.json ward`) and absorb `pool` x the boss's health (10%): they fade by themselves, shatter under enough damage, and still drop at once to the script's own answer. `fx shield` start / once-a-second / end with `why`; `rules.wardOf(e)`. | `encounter.js setShield / tickWard` |
+| U11 | The direct heals have no line-of-sight rule and reach 30 m; only a missing shared `partyId` can refuse one. A fallen party member can be targeted. | `index.js intent` |
+| U13 | Armour takes `armour / (100 + armour)` off a physical hit (Farhold `rpg.strike`). New sheet row `armorReduction` to one decimal with the formula; the low-ring armour perk is +10 (was +6). | `estimate.js`, `data/rules/perks.json` |
+| U15 | Starter packs: every pack fills both hands or is a two-hander; every shield class has a one-hander-and-shield pack; 4-7 packs a class. | `data/rules/starter-kits.json` |
+| U16 | `rules.formOf(e)` and `fx form … shape` = the creature body a shape draws (`{ id, name, creature, scale, colors, upright }`). | `cast-skills.js shapeBody` |
+| U17 | Healing potion 25% -> 50% of health, greater 45% -> 80%, mana 30% -> 50%, tonic 15% -> 25%; shared cooldown 30 -> 20 s. | `js/sim/consumables.js` (table only) |
+| U18 | **Moonpelt Shape** (druid key 3): a wolf shape — two fast bleeding bites, its own talent tree; tier 3 **Wolf Pack** calls two pack wolves while the shape lasts (`form.pack`). Fenrunner leaves the bar; Briarback moves to key 5. | `data/rules/skills-tv.json`, `cast-skills.js formCast`, `talents.js tvNodeText` |

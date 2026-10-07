@@ -1,0 +1,35 @@
+<!doctype html>
+<!-- Stream D test page (play-test 6, U19): one mount, six views (whole: front / side / three-quarter; head: front / side / three-quarter).
+     ?mount=pony|horse|courser|warhorse|stag|ram|drake … -->
+<html lang="en"><head><meta charset="utf-8"><title>Mount views — Thousandvale D test page</title>
+<style>html,body{margin:0;background:#20242c;color:#fff;font:12px monospace}canvas{display:inline-block;margin:2px}#gl{display:none}</style>
+<script type="importmap">{ "imports": { "three": "../../../../../vendor/three/three.module.js", "three/addons/": "../../../../../vendor/three/addons/" } }</script>
+</head><body><canvas id="gl" width="640" height="480"></canvas><div id="out"></div>
+<script type="module">
+import * as THREE from 'three';
+import { createMount, mountSpecFor } from '../../../../../avatar-3d/js/mounts.js';
+const q = new URLSearchParams(location.search), ids = (q.get('mount') || 'pony').split(',');
+const W = 640, H = 480;
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gl'), antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(W, H, false); renderer.setClearColor('#6f8496');
+const scene = new THREE.Scene();
+scene.add(new THREE.HemisphereLight('#ffffff', '#59606c', 2.0)); const sun = new THREE.DirectionalLight('#fff', 2.2); sun.position.set(3, 6, 4); scene.add(sun);
+const cam = new THREE.PerspectiveCamera(32, W / H, 0.05, 100), out = document.getElementById('out');
+for (const id of ids) {
+  const m = await createMount(mountSpecFor(id), { detail: 1 });
+  scene.add(m.group); m.update?.(0.016, 0); m.group.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(m.group), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+  const long = size.x > size.z ? 'x' : 'z', fwd = new THREE.Vector3(long === 'x' ? 1 : 0, 0, long === 'z' ? 1 : 0), side = new THREE.Vector3(fwd.z, 0, -fwd.x);
+  // the head: the highest vertex in the front fifth of the body
+  const head = new THREE.Vector3(), v = new THREE.Vector3(); let best = -1e9;
+  m.group.traverse(o => { if (!o.isMesh) return; const p = o.geometry.attributes.position; for (let i = 0; i < p.count; i += 3) { v.fromBufferAttribute(p, i).applyMatrix4(o.matrixWorld); const f = v.dot(fwd); if (f > best) { best = f; head.copy(v); } } });
+  head.addScaledVector(fwd, -0.12);
+  const views = [['whole front', c, fwd, 4.6], ['whole side', c, side, 4.6], ['whole 3/4', c, fwd.clone().add(side).normalize(), 4.6], ['head front', head, fwd.clone().setY(0.12).normalize(), 1.15], ['head side', head, side, 1.25], ['head 3/4', head, fwd.clone().add(side).setY(0.25).normalize(), 1.2]];
+  for (const [label, at, dir, dist] of views) {
+    cam.position.copy(at).addScaledVector(dir, dist); cam.position.y += dist * 0.08; cam.lookAt(at); renderer.render(scene, cam);
+    const cv = document.createElement('canvas'); cv.width = W / 2; cv.height = H / 2; const g = cv.getContext('2d'); g.drawImage(renderer.domElement, 0, 0, W / 2, H / 2); g.fillStyle = '#fff'; g.font = '12px monospace'; g.fillText(id + ' — ' + label, 6, 14); out.appendChild(cv);
+  }
+  scene.remove(m.group);
+}
+window.ready = true;
+</script></body></html>

@@ -19,6 +19,10 @@ const KINDS = {
   stairs:  { prop: 'stone_step', glow: '#ffd38a', label: o => o.name || 'Take the stairs', use: true, stack: 3 },
   exit:    { prop: 'ruined_arch', glow: '#7fe0a0', label: o => o.name || 'Leave the dungeon', use: true },
   chest:   { prop: 'crate', glow: '#ffcf4a', label: o => (o.opened ? 'Empty' : `Open ${o.name || 'the chest'}`), use: o => !o.opened, tint: '#c99a3a', scale: 1.25 },
+  // play-test 6 (U10/U12): the way you came in is a DOORWAY with daylight in it (no portal swirl), the stair up is a flight of steps
+  door:     { prop: null, glow: null, label: o => o.name || 'The way you came in', use: true, doorway: true },
+  entrance: { prop: null, glow: null, label: o => o.name || 'Dungeon entrance', use: true, doorway: true },
+  lift:     { prop: 'stone_step', glow: '#ffd38a', label: o => o.name || 'Stairs up', use: true, stack: 5, scale: 1.15 },
   brazier: { prop: 'fire_ring', glow: '#ff9a3d', label: o => (o.state === 'lit' ? 'Burning' : 'Light the brazier'), use: o => o.state !== 'lit' },
   lever:   { prop: null, glow: '#ffd38a', label: o => (o.state === 'used' ? 'Pulled' : 'Pull the lever'), use: o => o.state !== 'used' },
   pillar:  { prop: 'ruined_pillar', glow: null, label: () => null, use: false },
@@ -91,6 +95,14 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
       const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.0), new THREE.MeshStandardMaterial({ color: '#8a8f99', metalness: 0.6, roughness: 0.4 }));
       arm.geometry.translate(0, 0.5, 0); arm.position.y = 0.3; arm.rotation.z = 0.6; root.add(arm); o.arm = arm;
       const knob = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshStandardMaterial({ color: '#b03a2a' })); knob.position.y = 1.0; arm.add(knob);
+    } else if (K.doorway) {
+      // two stone jambs and a lintel, a pale slab of daylight between them and three steps climbing into it
+      const stone = new THREE.MeshStandardMaterial({ color: '#7d776c', roughness: 0.95 });
+      for (const sx of [-1, 1]) { const j = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3.0, 0.6), stone); j.position.set(sx * 1.15, 1.5, 0); j.castShadow = true; root.add(j); }
+      const lintel = new THREE.Mesh(new THREE.BoxGeometry(3.1, 0.5, 0.7), stone); lintel.position.set(0, 3.2, 0); lintel.castShadow = true; root.add(lintel);
+      for (let i = 0; i < 3; i++) { const st = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.22, 0.5), stone); st.position.set(0, 0.11 + i * 0.22, 0.75 - i * 0.5); st.receiveShadow = true; root.add(st); }
+      const day = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 2.9), new THREE.MeshBasicMaterial({ color: '#fff3cf', transparent: true, opacity: 0.85, side: THREE.DoubleSide, fog: false }));
+      day.position.set(0, 1.5, -0.2); root.add(day); o.daylight = day;
     } else if (o.type === 'pool') {
       const disc = new THREE.Mesh(new THREE.CircleGeometry(o.r || 3, 40), new THREE.MeshBasicMaterial({ color: K.glow, transparent: true, opacity: 0.45, depthWrite: false }));
       disc.rotation.x = -Math.PI / 2; disc.position.y = 0.06; root.add(disc);

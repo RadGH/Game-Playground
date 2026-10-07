@@ -36,10 +36,15 @@ for (const [name, v] of [...Object.entries(motion), ...Object.entries(dualMotion
   // any opt-in list the motion module exports later (CHIBI2_DUAL_ANIMS…) is picked up without a change here
   if (!/^CHIBI2_\w+_ANIMS$/.test(name) || !Array.isArray(v)) continue;
   const group = name.replace(/^CHIBI2_|_ANIMS$/g, '').toLowerCase().replace(/^\w/, c => c.toUpperCase());
-  for (const n of v) if (typeof n === 'string' && !ANIMS.includes(n)) { ANIMS.push(n); (ANIM_GROUPS[group] ||= []).push(n); }
+  for (const n of v) {
+    if (typeof n !== 'string') continue;
+    if (!ANIMS.includes(n)) ANIMS.push(n);
+    // a clip already in the full list but in no menu group still gets a place in the picker
+    if (!Object.values(ANIM_GROUPS).some(g => g.includes(n))) (ANIM_GROUPS[group] ||= []).push(n);
+  }
 }
 const GROUP_NAMES = { Dual: 'Dual wield', Angle: 'Angling', Revive: 'Revive' };
-for (const [k, nice] of Object.entries(GROUP_NAMES)) if (ANIM_GROUPS[k]) { ANIM_GROUPS[nice] = ANIM_GROUPS[k]; delete ANIM_GROUPS[k]; }
+for (const [k, nice] of Object.entries(GROUP_NAMES)) if (ANIM_GROUPS[k] && k !== nice) { ANIM_GROUPS[nice] = ANIM_GROUPS[k]; delete ANIM_GROUPS[k]; }
 /** The clip both-hands mode opens on: a dual clip for a pair of one-handers, a twin clip for two two-handers. */
 const bothClip = row => { const want = row.hands === 2 ? 'twinCrash' : 'dualFlurry'; return ANIMS.includes(want) ? want : null; };
 const ATTACKS = new Set([...(ANIM_GROUPS.Strikes || []), ...(ANIM_GROUPS.Weapons || []), ...(ANIM_GROUPS['Dual wield'] || [])]);

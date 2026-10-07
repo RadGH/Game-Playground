@@ -22,8 +22,10 @@ export function createEventTracker({ hud, me, net, parent = null }) {
   (parent || document.getElementById('right-col') || document.getElementById('hud') || document.body).prepend(root);
   const events = new Map();       // key -> entry (pt5-core mergeEvent)
   const folded = new Set();
-  let sig = '';
+  const cards = new Map();        // key -> { sig, el }: a card's DOM is kept until its own content changes
 
+  /** append, minus the holes: DOM `append(null)` writes the WORD "null" (play-test 6 U9: "Won: Home to Torborhold. null"). */
+  const put = (el, ...kids) => { for (const k of kids.flat()) if (k != null && k !== false && k !== '') el.append(k); return el; };
   const keyOf = ev => String(ev?.uid ?? ev?.id ?? ev?.name ?? '');
   function find(ev) {
     const k = keyOf(ev);
@@ -91,7 +93,7 @@ export function createEventTracker({ hud, me, net, parent = null }) {
   /** `eventAt {uid|null}`: you walked into / out of an event's ground. */
   function onAt(m) {
     for (const [k, e] of events) e.inRange = m.uid != null && (k === String(m.uid) || (m.id != null && e.id === m.id));
-    draw(true);
+    draw();
   }
   /** The personal reward: folded into the result card if the end line is already up (or arrives in a moment). */
   function onDone(m) {
@@ -116,24 +118,24 @@ export function createEventTracker({ hud, me, net, parent = null }) {
     const el = h(`section.et-card.${e.state}${L.inside ? '.inside' : '.outside'}${fold ? '.folded' : ''}${e.scope === 'realm' ? '.realm' : ''}`, { dataset: { key: e.key } }, head, h('strong.et-name', {}, L.name));
     if (fold) return el;
     if (ended) {
-      el.append(h('p.et-result', {}, L.result), e.got ? h('p.et-got', {}, e.got) : null);
+      put(el, h('p.et-result', {}, L.result), e.got ? h('p.et-got', {}, e.got) : null);
       return el;
     }
     if (!L.inside && e.state === 'live') {
       // T11: outside the event = a short notice, never a fixture
-      el.append(h('p.et-what', {}, [L.what, whereText].filter(Boolean).join(' — ') || 'Happening near you.'));
-      if (e.scope === 'realm' && e.free !== false) el.append(h('button.primary.small.et-go', { type: 'button', dataset: { act: 'travel' } }, 'Travel there free'));
+      put(el, h('p.et-what', {}, [L.what, whereText].filter(Boolean).join(' — ') || 'Happening near you.'));
+      if (e.scope === 'realm' && e.free !== false) put(el, h('button.primary.small.et-go', { type: 'button', dataset: { act: 'travel' } }, 'Travel there free'));
       return el;
     }
-    if (L.what) el.append(h('p.et-what', {}, L.what));
-    if (e.state === 'soon' && whereText) el.append(h('p.et-what.dim', {}, whereText));
-    if (L.stage) el.append(h('p.et-stage', {}, L.stage));
+    if (L.what) put(el, h('p.et-what', {}, L.what));
+    if (e.state === 'soon' && whereText) put(el, h('p.et-what.dim', {}, whereText));
+    if (L.stage) put(el, h('p.et-stage', {}, L.stage));
     if (L.objective && e.state === 'live') {
-      el.append(h('div.et-obj', {}, h('span.et-label', {}, 'Objective'), h('span.et-objtext', {}, L.objective.text), L.objective.count ? h('b.et-count', {}, L.objective.count) : null),
+      put(el, h('div.et-obj', {}, h('span.et-label', {}, 'Objective'), h('span.et-objtext', {}, L.objective.text), L.objective.count ? h('b.et-count', {}, L.objective.count) : null),
         L.objective.frac != null ? h('div.et-bar', { role: 'progressbar', 'aria-valuenow': String(Math.round(L.objective.frac * 100)), 'aria-valuemin': '0', 'aria-valuemax': '100' }, h('i', { style: `width:${(L.objective.frac * 100).toFixed(1)}%` })) : null);
     }
-    if (L.reward) el.append(h('div.et-reward', {}, h('span.et-label', {}, 'Reward'), h('span', {}, L.reward)));
-    if (L.players && e.state === 'live') el.append(h('p.et-players', {}, `${L.players} · everyone here shares the credit`));
+    if (L.reward) put(el, h('div.et-reward', {}, h('span.et-label', {}, 'Reward'), h('span', {}, L.reward)));
+    if (L.players && e.state === 'live') put(el, h('p.et-players', {}, `${L.players} · everyone here shares the credit`));
     return el;
   }
   function draw(force = false) {
@@ -148,17 +150,24 @@ export function createEventTracker({ hud, me, net, parent = null }) {
     // the clock ticks every second: when ONLY the time changed, patch the text in place (a rebuilt card would swallow a
     // click that lands between pointer-down and pointer-up, and drop the tooltip under the pointer)
     const lines = list.map(e => eventLines(e, { now, me: p }));
-    const s = JSON.stringify(list.map((e, i) => [e.key, e.state, folded.has(e.key), { ...lines[i], time: !!lines[i].time, urgent: 0 }, e.got, p && Number.isFinite(e.x) ? Math.round(Math.hypot(e.x - p.x, e.z - p.z) / 10) : 0]));
-    if (!force && s === sig) {
-      for (const [i, e] of list.entries()) {
-        const t = root.querySelector(`.et-card[data-key="${CSS.escape(e.key)}"] .et-time`);
-        if (t) { if (t.textContent !== lines[i].time) t.textContent = lines[i].time; t.classList.toggle('urgent', !!lines[i].urgent); }
-      }
-      return;
-    }
-    sig = s;
+    // Each card is rebuilt only when ITS OWN content changed (the clock is patched in place): a server that talks about
+    // one event every second must never rebuild the card of another — a rebuilt card swallows the click that lands
+    // between pointer-down and pointer-up, and drops the tooltip under the pointer.
+    const els = list.map((e, i) => {
+      const sg = JSON.stringify([e.state, folded.has(e.key), { ...lines[i], time: !!lines[i].time, urgent: 0 }, e.got, e.free, p && Number.isFinite(e.x) && !lines[i].inside ? Math.round(Math.hypot(e.x - p.x, e.z - p.z) / 10) : 0]);
+      let c = cards.get(e.key);
+      if (!c || c.sig !== sg || force) { c = { sig: sg, el: card(e, now, p) }; cards.set(e.key, c); }
+      else { const t = c.el.querySelector('.et-time'); if (t) { if (t.textContent !== lines[i].time) t.textContent = lines[i].time; t.classList.toggle('urgent', !!lines[i].urgent); } }
+      return c.el;
+    });
+    for (const k of [...cards.keys()]) if (!events.has(k)) cards.delete(k);
     root.hidden = !list.length;
-    root.replaceChildren(...list.map(e => card(e, now, p)));
+    const cur = [...root.children];
+    if (cur.length !== els.length || cur.some((c, i) => c !== els[i])) {
+      // put changed cards in place one by one, leaving the untouched ones attached
+      for (const c of cur) if (!els.includes(c)) c.remove();
+      els.forEach((el, i) => { if (root.children[i] !== el) root.insertBefore(el, root.children[i] || null); });
+    }
   }
   root.addEventListener('click', ev => {
     const b = ev.target.closest('[data-act]'); if (!b) return;

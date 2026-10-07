@@ -64,7 +64,21 @@ export function createCharSheet({ net, hud, bag, self, bar }) {
       h('b.sh-value', {}, val),
       d ? h('span.sh-diff.' + d.dir, {}, `${d.dir === 'up' ? '▲' : '▼'} ${d.text}`) : h('span.sh-diff'));
   }
+  /** U7: the lines the bag window shows under the figure — the SAME rows as this window (never a second sum). */
+  function bagLines() {
+    const sh = S.sheet; if (!sh) return null;
+    const by = new Map([...(sh.core || []), ...(sh.advanced || [])].map(r => [String(r.id), r]));
+    const out = [];
+    const armour = by.get('armor') || by.get('armour'), red = by.get('armorReduction');
+    if (armour) out.push({ label: 'armour', text: rowText(armour) + (red ? ` (${rowText(red)})` : ''), tip: [armour.tip, red?.tip].filter(Boolean).join(' ') });
+    const lo = by.get('damageMin'), hi = by.get('damageMax'), w = by.get('weapon');
+    if (lo && hi) out.push({ label: 'damage', text: `${rowText(lo)}–${rowText(hi)}`, tip: lo.tip || hi.tip || '' });
+    else if (w) out.push({ label: w.text ? '' : 'damage', text: rowText(w), tip: w.tip || '' });
+    return out;
+  }
+  bag?.setStats?.(bagLines);
   function draw() {
+    bag?.draw?.();
     if (!panel.isOpen) return;
     const sh = S.sheet || { core: [], advanced: [], abilities: [] }, me = self?.() || {};
     panel.setTitle('Character', `${me.name || ''}${me.level ? ` · level ${me.level}` : ''}${me.cls ? ' ' + pretty(me.cls) : ''}`);

@@ -875,3 +875,50 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   (`PHONE_LAYOUT_ENABLED` in `js/client/input/layout.js`); the gallery shows it beside today's layout.
 - Tests: `tests/G/bindings.test.js`, `tests/G/gallery.test.js` (node), `tests/G/gallery.spec.js`, `tests/G/gamepad.spec.js` (Playwright).
 - (A, follow-up) D-world: `info.gear.*.el`, `g5` only when not the base, `info.pool.shelf`; fx `targets` pass through (tests/A/pt5-slots 3).
+
+## 2026-10-07 — stream E, owner feedback 6 (U4, U8, U10, U12, U17)
+- **U8**: every boss ward (19 scripts) has a life and a pool (`shield: {seconds, pool}`, 15-25 s) and a `ward` block with a call-out that says
+  what to do and for how long; the raid on Torborhold got its own captain script (`ev_harl_vesk`) and a boss with no script falls back to a
+  nameless, ward-less `plain_boss` instead of the Barrow Warden. tests/E/playtest6-wards.test.js.
+- **U10/U12**: js/rules/dungeon-tiers.js — the way out stands only behind the last boss; floor 1 has a `door` (the way you came in); every floor has
+  a name, a `landing` (where you arrive and where you get up after dying) and, below the top, a `lift` to every floor above; `shortcutUp` removed;
+  the mine's reward room now opens off the boss room. Tests over 8 families x 4 depths x 6 seeds in tests/E/dungeon-tiers.test.js.
+- **U17**: shops — Greater Healing from level 5 at apothecary and healer, inns sell a healing potion; `potionDrops` in shops.json. tests/E/playtest6-potions.test.js.
+- **U4**: no data change — the "coffins" are stream B's oats field drawn as grain rows (docs/requests.md, for D-world).
+
+## 2026-10-07 — stream C (combat rules), owner feedback 6
+- U3 zones and telegraphs end with their caster (monsters and players). U6 shields block 20% (was 0.2%); `js/rules/item-text.js`; unit sweep test.
+- U8 boss wards have a life (18 s default) and a breaking point (10% of the boss's health); `rules.wardOf`. U11 fallen party members are targetable.
+- U13 `armorReduction` sheet row; low-ring armour perk +6 -> +10. U15 starter packs always fill both hands. U16 `rules.formOf` / `fx form.shape`.
+- U17 potions heal 50% / 80% on a 20 s cooldown. U18 druid Moonpelt Shape (wolf) with the Wolf Pack talent.
+
+## Owner feedback 6 — A (server core) — 2026-10-07 — still protocol v7 (docs/protocol.md §22)
+- **U3**: a telegraph's end was routed by `teleR.x` — which is the "cancelled" flag, not a place — so cancels reached nobody and a dead
+  caster's zone stayed drawn. Ends now go to whoever saw the telegraph; and the room ends every telegraph / monster pool the moment
+  its source dies or is removed (`js/sim/room.js`).
+- **U5**: consumables stack (`count`): grant, loot, shop buy / sell, mail, trade, cooking, quest goods, save, login (`consumables.js`, `province.js`).
+- **U9**: `eventDone.got` / `story` and `realm eventEnd.text` are always real sentences. **U2**: feedback 2 s / 1000 an hour.
+- **U10 / U12 / U14**: one way out behind the last boss, the way in is a `door`; respawn on the floor you died on; the stair up is a
+  `lift` (asks which floor when there is a choice); `info.floor` / `info.portal` on dungeon objects (`dungeon.js`, `province.js`).
+- **U11**: reproduced with two real WebSocket clients in The Ploughman's Crypt — the only refusal is "Greensap unlocks at level 3"
+  (the owner's druid was level 2). Server side was fine; the unlock level is stream C's data. tests/A/pt6-dungeon.
+- **U1**: `mailNew {unread}` after read / take / delete. C's asks: `info.form`, `info.ward`. E's: potion numbers + potion drops from shops.json.
+- `tools/feedback-state.mjs`. Tests: tests/A/pt6-dungeon (5), pt6-misc (8), pt5-feedback (+1).
+- (A, round 6 leftovers) potion cards written from the table + the holder's health (`potionText`, `item.restore`); U11 green at level 1 (C's data); `info.form` verified against rules.formOf for late joiners. tests/A 254: 246 pass / 8 skip / 0 fail.
+
+## Play-test 5 (late) + owner feedback 6 — D-UI (interface) — 2026-10-07
+- **T28 staged picks**: a click in the Perk Forest or on a talent only STAGES it (blue, dashed; "19 left, 3 staged"). Undo / Redo (Ctrl+Z /
+  Ctrl+Shift+Z), Accept spends them in order, Cancel and closing the window ask first. `talent-model.js` createStage / stagedForest.
+- **Slots**: Back, Waist and Light on the paper doll. Item cards print the rules' attack / focus / conversion lines.
+- **Kit step**: one kits load at a time (a late empty answer used to wipe a good one and skip the step), a loading line, and a failed create
+  goes back to step 1 with the reason showing.
+- **U1 badges**: a red badge is news only (`js/client/ui/unseen.js`) — unread mail, a friend who came online or was added, new things in the
+  bag — and clears when you look. Party size, friends online, guild online and "items carried" are no longer badges. Skill / perk points are a
+  quiet gold number.
+- **U5 stacks**: count on the cell, the 7-0 keys, the card and the shop's sell row. **U6**: item properties are the rules' `affixText`
+  ("20% chance to block"). **U7 / U13**: the bag's armour and damage are the Character menu's rows; "35 (25.9%) armour" follows the sheet's
+  `armorReduction`. **U17**: a potion's card says what it restores for you.
+- **U8**: a ward bar on the boss frame (what is left to break, seconds until it fades). **U9**: a result card never prints a missing line.
+  **U11**: a locked key shows "Lv N"; the heal's card says how to heal someone else. **U12**: the stair up asks which floor.
+  **U14**: enemies, people, other players, doors, stairs and chests in your line of sight are on the minimap, in dungeons too.
+  **U16 / U18**: your frame names the shape you are in.

@@ -963,7 +963,9 @@ function hashStr(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h
 
 /**
  * Crop looks. `kind` picks the planting style:
- *   grain  — row strips broken into clumps (a field reads as a mass, not single stalks)
+ *   grain  — a stubble strip down each row and `sheaf` patches standing on it (mesh 'sheaf': a square metre of thin
+ *            stalks of uneven height — propkit-three.js `sheafGeometry`). 2026-10-07: the rows used to be one long
+ *            pale box each with a lighter lid, which a player riding through read as rows of coffins.
  *   tall   — stalks with leaves (maize)
  *   leafy  — a dome per plant, an optional root showing (turnip/beet)
  *   vine   — a low vine strip with fruit domes (pumpkin/squash)
@@ -1019,16 +1021,20 @@ export function cropField({ w = 10, d = 10, crop = 'wheat', seed = 1 } = {}) {
   const earth = def.kind === 'bare' ? def.colour : '#5f5040';
   for (let r = 0; r < rows; r++) {
     const x = x0 + r * def.row;
-    k.block(x, -0.04, 0, def.row * (def.kind === 'bare' ? 0.55 : 0.6), def.kind === 'bare' ? 0.2 : 0.16, len, shade(earth, (rng() - 0.5) * 0.1));
+    k.block(x, -0.04, 0, def.row * (def.kind === 'bare' ? 0.55 : def.kind === 'grain' ? 0.72 : 0.6), def.kind === 'bare' ? 0.2 : def.kind === 'grain' ? 0.1 : 0.16, len, shade(def.kind === 'grain' ? '#7a6a48' : earth, (rng() - 0.5) * 0.1));   // grain: a flat strip of stubble between the furrows
     if (def.kind === 'bare') continue;
     const n = Math.max(1, Math.floor(len / step));
     for (let i = 0; i < n; i++) {
       const z = -len / 2 + (i + 0.5) * (len / n), jz = (rng() - 0.5) * 0.1;
       switch (def.kind) {
         case 'grain': {
-          const seg = len / n - 0.15, h = def.h * (0.85 + rng() * 0.25);
-          k.block(x, 0.05, z + jz, def.row * 0.62, h * 0.8, seg, shade(def.colour, (rng() - 0.5) * 0.12));
-          k.block(x, 0.05 + h * 0.8, z + jz, def.row * 0.56, h * 0.22, seg * 0.95, shade(def.top, (rng() - 0.5) * 0.1));
+          // two overlapping patches of stalks per clump, each a little different in height, lean and tint (ripe gold to
+          // a greener stand), wide enough to meet the next row: the field reads as one standing mass with an uneven top
+          const seg = len / n, h = def.h * (0.8 + rng() * 0.4);
+          for (let j = 0; j < 2; j++) {
+            const t = rng(), tint = shade(t < 0.5 ? def.colour : def.top, (rng() - 0.5) * 0.16);
+            k.on('sheaf', x + (rng() - 0.5) * 0.18, 0.04, z + (j - 0.5) * seg * 0.5 + jz, def.row * (1.15 + rng() * 0.2), h * (j ? 0.86 + rng() * 0.2 : 1), seg * 0.66, j && rng() < 0.3 ? shade('#8a9a52', (rng() - 0.5) * 0.1) : tint, { yaw: (rng() - 0.5) * 0.16 });
+          }
           break;
         }
         case 'tall': {
@@ -1065,7 +1071,7 @@ export function cropField({ w = 10, d = 10, crop = 'wheat', seed = 1 } = {}) {
           const seg = len / n;
           k.block(x, 0, z - seg / 2 + 0.05, 0.1, def.h + 0.2, 0.1, C.woodD);
           k.block(x, def.h, z, 0.03, 0.03, seg, '#3a3a3a');
-          k.block(x, 0.45, z, 0.45, def.h - 0.35, seg * 0.92, shade(def.colour, (rng() - 0.5) * 0.12));
+          k.on('sheaf', x, 0.4, z, 0.6, def.h - 0.3, seg * 0.96, shade(def.colour, (rng() - 0.5) * 0.12));        // the leaf wall: cards, not a slab
           k.on('cone', x + 0.24, 0.55, z, 0.16, 0.25, 0.16, def.fruit, { rx: Math.PI });
           break;
         }
@@ -1115,3 +1121,5 @@ export function fenceLine(points, { kind = 'wooden', seed = 1 } = {}) {
 }
 
 export { MESHES };
+/** Every unit shape a prop or crop part may name: the building kit's eight, plus `sheaf` (standing crops, propkit-three.js). */
+export const PROP_MESHES = Object.freeze([...MESHES, 'sheaf']);

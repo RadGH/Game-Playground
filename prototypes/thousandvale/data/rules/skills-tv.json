@@ -1,5 +1,5 @@
 {
- "_doc": "Stream C (play-test 5: T3 direct heals, T4 revives). What Thousandvale changes in Farhold's skill table, applied IN MEMORY at engine boot by js/rules/tv-skills.js (Farhold's data/skills.json is shared with a live game and is never written). `patch`: fields merged onto an existing row (a `forms` entry is merged per form; null removes a field). `add`: whole new rows, each with its own talent tree in Farhold's format (4 tiers x 2 nodes, every node a rule \u2014 never a plain number). `classes`: the six skill ids of a class, by key 1-6. A row's `tv` block holds what only Thousandvale's rules read (js/rules/cast-skills.js): `tv.revive` = { share (health the body returns with, 0..1), mp (mana share, optional), castTime (seconds, 0 = instant), combat (may it be cast while a monster attacks you), mass (every fallen party member in range, else one), range (m), style (the look D-world draws), apply: { status: {id, seconds?}, barrier: {share, seconds}, debuff: {id, name, seconds, dealLess, takeMore} } }. The card sentences for a `tv` block are written from these numbers by js/rules/wording.js. The parity fixtures build their engine with tvSkills off (tests/C/setup.mjs). `tv.touch` = a touch heal's reach in metres (a party member further than that is not reached: it lands on the caster).",
+ "_doc": "Stream C (play-test 5: T3 direct heals, T4 revives). What Thousandvale changes in Farhold's skill table, applied IN MEMORY at engine boot by js/rules/tv-skills.js (Farhold's data/skills.json is shared with a live game and is never written). `patch`: fields merged onto an existing row (a `forms` entry is merged per form; null removes a field). `add`: whole new rows, each with its own talent tree in Farhold's format (4 tiers x 2 nodes, every node a rule \u2014 never a plain number). `classes`: the six skill ids of a class, by key 1-6. A row's `tv` block holds what only Thousandvale's rules read (js/rules/cast-skills.js): `tv.revive` = { share (health the body returns with, 0..1), mp (mana share, optional), castTime (seconds, 0 = instant), combat (may it be cast while a monster attacks you), mass (every fallen party member in range, else one), range (m), style (the look D-world draws), apply: { status: {id, seconds?}, barrier: {share, seconds}, debuff: {id, name, seconds, dealLess, takeMore} } }. The card sentences for a `tv` block are written from these numbers by js/rules/wording.js. The parity fixtures build their engine with tvSkills off (tests/C/setup.mjs). `tv.touch` = a touch heal's reach in metres (a party member further than that is not reached: it lands on the caster). `form.pack` (Thousandvale's, the Moonpelt talent Wolf Pack) = followers called when the shape is taken: { def, name, count, seconds }; they take no follower slot and leave when the shape ends or their time is up.",
  "healers": [
   "cleric",
   "priest",
@@ -18,6 +18,11 @@
     },
     "sporecap": {
      "heal": null
+    },
+    "moonpelt": {
+     "name": "Lick Wounds",
+     "status": null,
+     "heal": 0.2
     }
    }
   },
@@ -34,6 +39,28 @@
      "mass": true,
      "range": 30,
      "style": "choir"
+    }
+   }
+  },
+  "thornlash": {
+   "forms": {
+    "moonpelt": {
+     "name": "Rending Leap",
+     "shape": "dash",
+     "range": 8,
+     "dash": {
+      "to": "target",
+      "range": 8
+     },
+     "mult": 1.6,
+     "cooldown": 4,
+     "stack": {
+      "status": "bleed",
+      "max": 2
+     },
+     "statuses": null,
+     "onHit": null,
+     "statusMult": 0.35
     }
    }
   }
@@ -1094,6 +1121,177 @@
      ]
     }
    }
+  },
+  "moonpelt_shape": {
+   "name": "Moonpelt Shape",
+   "shape": "self",
+   "element": "nature",
+   "cooldown": 1.5,
+   "mp": 8,
+   "form": {
+    "id": "moonpelt",
+    "name": "Moonpelt",
+    "group": "shape",
+    "toggle": true,
+    "body": {
+     "creature": "wolf",
+     "scale": 1.25,
+     "upright": true,
+     "colors": {
+      "body": "#5b5f6b",
+      "belly": "#b9bcc4",
+      "accent": "#2b2d36",
+      "eyes": "#f2d24a"
+     }
+    },
+    "stats": {
+     "movePct": 0.25,
+     "hastePct": 0.2,
+     "armorPct": -0.15
+    },
+    "basic": {
+     "shape": "melee",
+     "reach": 2.4,
+     "arc": 1.8,
+     "mult": 0.6,
+     "hits": 2,
+     "element": "physical",
+     "status": "bleed"
+    }
+   },
+   "talents": {
+    "1": {
+     "nodes": [
+      {
+       "id": "moon_leap",
+       "name": "Moon Leap",
+       "fx": "leap",
+       "mod": {
+        "set": {
+         "form.onEnter.shape": "dash",
+         "form.onEnter.dash": {
+          "to": "target",
+          "range": 10,
+          "leap": true,
+          "land": {
+           "radius": 2.5,
+           "mult": 1
+          }
+         },
+         "form.onEnter.mult": 0.5
+        }
+       }
+      },
+      {
+       "id": "blood_scent",
+       "name": "Blood Scent",
+       "fx": "stack",
+       "mod": {
+        "set": {
+         "form.basic.every": {
+          "n": 3,
+          "stack": {
+           "status": "bleed",
+           "add": 2,
+           "max": 5
+          }
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "nodes": [
+      {
+       "id": "hamstring",
+       "name": "Hamstring",
+       "fx": "tag",
+       "mod": {
+        "set": {
+         "form.basic.behindStatus": "weaken"
+        }
+       }
+      },
+      {
+       "id": "pack_hide",
+       "name": "Pack Hide",
+       "fx": "ward",
+       "mod": {
+        "set": {
+         "form.petBuff": {
+          "name": "Pack Hide",
+          "resist": 0.2
+         }
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "nodes": [
+      {
+       "id": "wolf_pack",
+       "name": "Wolf Pack",
+       "fx": "summon",
+       "mod": {
+        "set": {
+         "form.pack": {
+          "def": "grove_wolf",
+          "name": "pack wolves",
+          "count": 2,
+          "seconds": 30
+         }
+        }
+       }
+      },
+      {
+       "id": "lone_hunter",
+       "name": "Lone Hunter",
+       "fx": "drain",
+       "mod": {
+        "set": {
+         "form.basic.heal": 0.015
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "nodes": [
+      {
+       "id": "pack_alpha",
+       "name": "Pack Alpha",
+       "fx": "summon",
+       "mod": {
+        "set": {
+         "form.petBuff": {
+          "name": "Pack Alpha",
+          "damage": 0.3,
+          "biteStatus": "bleed"
+         }
+        }
+       }
+      },
+      {
+       "id": "moons_favour",
+       "name": "Moon's Favour",
+       "fx": "burst",
+       "mod": {
+        "set": {
+         "form.onExit": {
+          "shape": "self",
+          "burst": {
+           "radius": 6,
+           "heal": 0.12
+          }
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
   }
  },
  "classes": {
@@ -1116,9 +1314,9 @@
   "druid": [
    "thornlash",
    "renew",
-   "briarback_shape",
+   "moonpelt_shape",
    "green_return",
-   "fenrunner_shape",
+   "briarback_shape",
    "sporecap_shape"
   ],
   "paladin": [

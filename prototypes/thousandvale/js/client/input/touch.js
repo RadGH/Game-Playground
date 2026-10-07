@@ -87,7 +87,8 @@ export function createTouch({ api, input, run, radial }) {
   function beltItems() {
     return [...document.querySelectorAll('#actionbar .hb-slot')].map((s, i) => {
       const img = s.querySelector('.hb-face img'), n = s.querySelector('.hb-n')?.textContent || '';
-      const name = (s.dataset.tipHtml || '').replace(/<[^>]+>/g, ' ').trim().split('  ')[0] || s.dataset.tip || `Slot ${i + 1}`;
+      const kind = window.tvui2?.state?.().hotbar?.[i];                                   // the item kind on that key (ui/hotbar.js)
+      const name = kind ? String(kind).replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase()) : `Slot ${i + 1}`;
       return { id: 'item' + (i + 1), label: s.classList.contains('empty') ? 'Empty' : (name.length > 16 ? name.slice(0, 15) + '…' : name) + (n ? ` ×${n}` : ''), html: img ? `<img src="${img.src}" alt="">` : ICON.belt, sub: ACTION_BY_ID['item' + (i + 1)].label };
     });
   }

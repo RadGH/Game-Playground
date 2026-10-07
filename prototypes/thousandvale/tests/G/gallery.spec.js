@@ -78,7 +78,7 @@ for (const pass of [...PASSES, ...EXTRA]) {
     let errs = [];
     page.on('pageerror', e => errs.push('page error: ' + e.message.split('\n')[0]));
     page.on('console', m => { if (m.type() === 'error' && !/favicon|ERR_|404/.test(m.text())) errs.push('console: ' + m.text().slice(0, 200)); });
-    const scenes = SCENES.filter(s => sceneFits(s, pass.device) && (!pass.scenes || pass.scenes.includes(s.id)) && (!process.env.G_SCENE || process.env.G_SCENE === s.id));
+    const scenes = SCENES.filter(s => sceneFits(s, pass.device) && !(pass.layout === 'current' && s.proposedOnly) && (!pass.scenes || pass.scenes.includes(s.id)) && (!process.env.G_SCENE || process.env.G_SCENE === s.id));
     const failures = [], counts = { scenes: 0, controls: 0, small: 0, unsafe: 0, worst: [] };
     for (const s of scenes) {
       errs = [];

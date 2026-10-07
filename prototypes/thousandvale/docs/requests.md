@@ -2984,3 +2984,249 @@ rows (`{ game, base, template, slot }`, read through C's own `installTvGear`), a
 `pitch_torch` are listed on the old model gear-look draws for them; the test fails if a new row has no mapped item. Sabatons: the thin
 lines behind the ankles were the free edge of the shin plate (arc shortened). Themed shields: the emblem was buried in the almond's
 spine and the pavise's ridge — lifted clear; all four read (sheet F-emb2).
+
+## Round 6 contracts — A (Server core) — 2026-10-07 (owner feedback 6; written first, status line at the end)
+Still protocol v7 — every change is additive (new optional fields, one new optional client field `use.to`).
+
+- **U2 feedback limit:** 2 s between reports, 1000 an hour (was 20 s / 12). Nothing changes on the wire.
+- **U3 telegraphs end with their caster (A's net under C's rule):** the room remembers every live `tele {id, s}`; when `s` DIES (`die`) or is
+  removed, every telegraph of that source still running gets **`ev teleR {id, x: 1, why:'dead'|'gone'}`** at once (D-world: `x: 1` = cancelled,
+  remove the drawing now, no impact) — today C only cancelled it when its impact time came, which is what report #18 saw. A monster's ground
+  pool (`fx {kind:'pool', id: caster, x, z, seconds}`) gets `fx {kind:'pool', id, x, z, end: 1, why}` the same way. An INTERRUPTED cast is C's
+  own `cancelCast` (it already sends `teleR x:1` for that cast's zones). **C:** (1) a dead caster's zones and pools must stop HURTING at once
+  too (encounter.js resolve already skips; cast-skills.js pools of a dead monster keep ticking); (2) mark a telegraph that is MEANT to land
+  after its caster's death `after: 1` on the `tele` event and A leaves it alone.
+- **U5 stacks:** a consumable is ONE bag item with **`count`** (and `stackMax`, default 20): `kind:'potion'`, and `kind:'good'` with a `use` of
+  type food / drink / buff / light / cleanse / recall / bait (never rods, parcels, crates, fish, gear). Same `kind` + `id` (+ same `cooked`)
+  joins a stack — bought, looted, mailed, traded, cooked, quest-given. A change to a stack arrives as `bag {remove:[uid], add:[the same item,
+  same uid, new count]}` (the client's bag already applies remove-then-add). Using one: `count - 1`; the last one removes it.
+  Shop `sell` sells the WHOLE stack (`price × count`; `shopView.sell[].price` is for the stack, `.each` for one); `item {op:'split', uid, n}` is
+  NOT built this round. Mail / trade move the stack as one item. `joined.you.bag` of an old save is stacked at login.
+  C: `rules.useItem` / torches keep `item.left` (charges) — a stack of torches spends `left` first, then `count`.
+- **U9 the "null" on the result card:** D-UI — `el.append(node, cond ? node : null)` prints the text "null" (js/client/ui/event-tracker.js:119
+  when `e.got` is empty). Server side every result now carries real sentences: `realm {kind:'eventEnd', …, result:'success'|'fail', text}`,
+  `zoneEvent {kind:'end', text}` (already), and `eventDone` gains **`got`** ("You got 237 experience, 26 gold and a Savage Battleaxe." / "You
+  did not take part, so there is no share this time." / "No reward this time.") — never empty, never null.
+- **U10 the way out (E's plan fields, A's objects):** `type:'exit'` ("Way out") stands ONLY after the last boss (the reward room). The way you
+  came in on floor 1 is E's `floor.door` -> **`type:'door'`, name "The way you came in", `info.leave: 1`, `info.portal:'out'`** — D-world: draw a
+  doorway / steps up to daylight, not a portal (using it still leaves the dungeon). `Shortcut up` is gone (the lift replaces it). OBJ_TYPES
+  gains `door`, `lift`, `fishpool`.
+- **U11 healing a party member in a dungeon:** reproduced with two real WebSocket clients (findings in A's status below). No new message:
+  `target {id}` + `cast {slot, target}`; `partyFrames` rows carry the member's entity id. D-UI: click a party frame / F1–F5 = `net.target(row.id)`.
+- **U12 dungeons — die where you were, and a lift:**
+  - `respawn` inside an instance puts you at the START OF THE FLOOR YOU DIED ON (it was always floor 1). `joined`/`you` unchanged.
+  - Respawn point = E's `floor.landing` (the arrival room, clear of packs), and the stairs down now land you there too.
+  - The stair up is E's `floor.lift` -> object **`type:'lift'`** (name "Stairs up"). ONE floor above: using it takes you to that floor's landing
+    (floor 1's landing = the entrance — "easily return to the top"). TWO or more floors above: **`used {id, ok:true, kind:'lift', name, here
+    (floor number, 1 = top), choices:[{to:'f:<n>', floor:<n>, label, name}]}`** instead of moving you; the client shows the choices and sends
+    **`use {id, to:'f:<n>'}`**. A second plain `use {id}` on the same lift within 4 s takes the floor just above (old clients keep working).
+    Stairs down are unchanged. `net.use(id, to?)`.
+- **U14 minimap:** nothing was missing on the wire — everything within 150 m (all of a dungeon floor's rooms in view range) is in `info` +
+  snapshots: monsters (`kind`, `rank`), NPCs, objects with `type` (stairs, exit, entrance, chest, gate, lever, fishpool, corpses with
+  `lootable`). Added for the map: `info.portal: 'down'|'up'|'out'` on stairs / exits and `info.floor` (1-based) on every dungeon object.
+  Line of sight itself is the client's (it has the floor tiles in `joined.room.dungeon`).
+- **U1 badge:** the mail count is server-side: `mailNew {unread}` is now re-sent (game socket) after every `mail read / take / delete`, so it
+  goes to 0 when the letter is read. Friends have no "unseen" state on the server (an add is immediate) — that half is the client's.
+- Reports: `node tools/feedback-state.mjs <ids…> --state approved|declined|trashed|new [--env stable] [--note "…"]` (new).
+
+**Status (A): LANDED 2026-10-07 — docs/protocol.md §22 is canon. Dev unit restarted.**
+- **U3 — the real cause, for C and D-world:** a telegraph's END never reliably reached a client. `teleR` has no place of its own and its `x`
+  is the cancel flag, so the room routed a cancel to "x = 1" and nobody got it (an ordinary resolve was routed by whatever entity happened to
+  share the telegraph's id). The room now delivers every `teleR` to whoever could see that telegraph. C's own cancels (dead, interrupted)
+  therefore ARRIVE now; A's net on `die` / removal stays underneath (a duplicate `teleR x:1` for the same id is possible and harmless).
+- **U11 — NOT fixed by A, needs C:** see "A -> C — Round 6, U11 REPRODUCED" above. Party id, instance, range and targeting are fine; the
+  druid's heal key opens at LEVEL 3 (Farhold's skill ladder, `unlockAt`), the owner's druid was level 2. tests/A/pt6-dungeon has it as a
+  `todo` test that goes green the day a healer's direct heal is open at level 1.
+- **U5 for D-UI:** `count` on the item; `bag {remove:[uid], add:[same uid]}` = a stack changed; `shopView.sell[].count/each`; cooking answers
+  `cookR.n` (how many were cooked) with `item` = the stack.
+- **U9 for D-UI:** the "null" is `el.append(…, null)` in js/client/ui/event-tracker.js:119 (DOM `append(null)` writes the word). Server side
+  `eventDone.got` / `.story` and `realm eventEnd.text` are always sentences now — print `got` when you have nothing better.
+- **U12 for D-UI:** `used {kind:'lift', choices}` -> `net.use(id, choice.to)`. Today's dungeons have two floors, so the lift goes straight to
+  the top; the picker shows the day a dungeon has three.
+- **C's asks done:** `info.form` (the shape object, only for `group:'shape'`), `info.ward {max, ms, until, name?}`. **E's:** `floor.door` /
+  `landing` / `lift` read (and older plans still work), `shops.json` `potions` + `potionDrops` read when the file has them.
+- **Lead — report states (the 21 reports are on STABLE; /etc/thousandvale is not readable without sudo, so A could not set them):**
+  `sudo "$(command -v node)" tools/feedback-state.mjs 1 9 19 --state declined --env stable --note "declined by the lead"` and, when the round
+  is audited, `sudo "$(command -v node)" tools/feedback-state.mjs 2-8 10-18 20 21 --state approved --env stable`.
+
+## Round 6 contracts — E (Content) -> D-world, C, A, D-UI — 2026-10-07 (written first)
+
+**U4 — "what is this farm thing, it looks like coffins" (x 25210.7 z 5530.6, zone z12_02 = zone metres 634.7, 1434.6).** It is NOT one of E's
+recipes: nothing of E's stands within 35 m. The owner stood 15 m inside stream B's baked crop field **`torborhold_belt_field_7`**
+(data/zones/z12_02/placements.json: `kind: 'field'`, centre 622.57 / 1443.41, 46 x 26 m, `crop: 'crop'`, **`grows: 'oats'`**, hedged — one of
+the ten fields of the automatic belt round Torborhold). **D-world:** js/client/setpiece-view.js `field()` draws it with proctown
+`KIT.cropField({ crop: 'oats' })` = `CROPS.oats { kind: 'grain', colour '#b8ac72', top '#cfc490', h 0.85, row 0.9 }`: each sown row is one
+long pale box 0.85 m high — on a pony you look down on rows of long pale lidded boxes, i.e. coffins. All `kind: 'grain'` crops (wheat, barley,
+oats, rye, flax) draw this way, in every belt field and at Brannock Fields. Wanted: grain reads as a standing crop (broken rows / tufts / a
+low textured mat with an uneven top, not shoulder-high slabs with a lighter lid). No recipe of E's changes; no re-placement.
+
+**U8 — wards (E data, C engine, D-UI/D-world timer).** Cause of the report: the siege of Torborhold spawns a `brigand_captain` with rank boss
+and NO encounter, so js/rules/encounter.js gave it `defaults.boss.any` = `barrow_warden` — the Barrow's dungeon boss, name and all, whose
+ward only breaks when three braziers are lit. E changes:
+1. `events.json` `siege_torborhold.encounter = 'ev_harl_vesk'` — his own script (data/encounters/ev_harl_vesk.json): no ward at all.
+2. `index.json` `defaults.boss` = `{ instance: 'barrow_warden', wilds: 'briar_colossus', town: 'plain_boss', any: 'plain_boss' }` —
+   `plain_boss` has no name (the monster keeps its own), no ward, no arena objects, so a stray boss can never need furniture that is not there.
+3. EVERY warded phase (19 scripts) carries a **`ward`** block next to its `onEnter: [{shield: true}]`:
+   `"ward": { "seconds": 20, "break": "objects" | "adds", "need": 3, "what": "braziers", "say": "Light the three braziers to break the ward (it fails by itself in 20 seconds).", "fade": "The ward gutters out by itself." }`
+   - **C (js/rules/encounter.js):** when a phase with `ward` raises the shield, start a timer; at `ward.seconds` call `setShield(st, false)` and
+     `say(ward.fade)` — WITHOUT running the break trigger (breaking it early is the reward: the trigger's stun / "Ward Broken" vulnerability only
+     comes from the mechanic). Emit the shield fx with the time: `{ t:'fx', kind:'shield', id, on:true, ms: ward.seconds*1000, text: ward.say,
+     need: ward.need, have: n }` and again whenever `have` changes (a brazier lit, an add dead), `on:false, why:'broken'|'faded'` at the end.
+     `ward.say` is ALSO said as a `warn` call-out on enter (E removed the old onEnter line it replaces).
+   - **D-UI / D-world:** a bar on the boss frame / over the bubble counting `ms` down, with `text` and `have / need`.
+   - Limits E's test holds (tests/E/playtest6-wards.test.js): `seconds` <= 15 for a mini-boss, <= 20 for a boss, <= 25 for an event / world
+     boss; `say` names the action and the seconds; `break: 'objects'` only when the script's arena really holds `need` of them; a trigger or
+     `shieldWhileAdds` really drops the shield.
+
+**U10 / U12 — dungeon floors (js/rules/dungeon-tiers.js; A: js/sim/dungeon.js makes the objects).** New plan fields, every family:
+- `floor.exit` exists ONLY on the last floor, in the reward room behind the last boss (unchanged there). **Floor 0 no longer has `exit`**:
+  the way you came in is `floor.door: { x, z, name: 'The way you came in' }` — **A:** make it `type: 'door'` (not the `exit` portal look) with the
+  same portal target the floor-0 exit had. The report (#7, Ploughman's Crypt, 119.6 / 23.9) is that floor-0 exit: the crypt is a ring, so
+  after the last fight room you are back beside the entrance and its portal, with the mini-boss still ahead.
+- `floor.shortcutUp` is REMOVED (it stood in the mini-boss room, before the boss). Its job moves to the lift:
+- `floor.name` ("The Upper Graves") and `floor.label` ("Floor 1"); `floor.landing: { x, z }` = where you stand when you ARRIVE on this floor
+  from below or by the lift, and where you get up after dying on this floor (**U12: respawn at `plan.floors[diedOn].landing`**; floor 0's
+  landing is its entry). Always in the entry / arrival room, never in a pack's radius.
+- `floor.lift: { x, z, to: [ { floor, label, name, x, z } ] }` on every floor > 0, at the old `stairsUp` spot (`stairsUp` stays as an alias
+  for one more round): every floor ABOVE this one, nearest first, each with its `landing`. **A:** using it asks which floor
+  (`liftAsk { id, floors: [{floor, label, name}] }` -> `lift { id, floor }`, or however you name it); **D-UI:** the picker. With one floor above, just go.
+- tests/E/dungeon-tiers.test.js: over all 8 families x 6 seeds x 1-4 floors — one `exit`, on the last floor, unreachable from that floor's
+  landing without crossing the boss room; no `exit` / `door` / `lift` in a boss or mini-boss room; every landing reachable and clear of packs.
+
+**U17 — potions (C/A own what a potion DOES; E owns where it is sold, for how much, and what drops).** Today (js/sim/consumables.js): Healing
+Potion = max(40, 25% of max health), 30 s shared cooldown, 8-9 gold. E's part, in `data/provinces/shops.json`:
+- a `potions` block C/A may read for the numbers so there is ONE place: `potions: { healing_potion: { pct: 0.45, amount: 60, over: 0 }, greater_healing:
+  { pct: 0.7, amount: 140 }, mana_potion: { pct: 0.45, amount: 60 }, group_tonic: { pct: 0.3, amount: 50 }, cooldownSec: 20 }` — E's PROPOSAL; C, change
+  the numbers in place if your maths says otherwise and E's before/after table (tests + report) follows the file.
+- shops: Greater Healing from level 5 (was 8) at the apothecary AND the healer; general stores keep the plain one. Prices stay near 2 kills each.
+- drops: `potionDrops: { chance: { normal: 0.06, champion: 0.35, rare: 0.6, elite: 0.4, boss: 1 }, table: [[1, 'healing_potion'], [1, 'mana_potion'], [6,
+  'greater_healing']] }` (a potion beside the usual loot; level gate first number) — **A/C:** roll it where a kill's loot is made; until then nothing drops.
+
+## A -> C — Round 6, U11 REPRODUCED (two real WebSocket clients, party of 2, inside The Ploughman's Crypt) — 2026-10-07
+What refuses the druid's heal is **the key's unlock level**, nothing else: a LEVEL-2 druid targets the knight (`target {id}` accepted, the
+party frame carries the same id), casts key 2 and gets `castR {slot:2, ok:false, why:'unknown', text:'Greensap unlocks at level 3'}`. At level 3
+the same cast heals the knight (50 -> 73) in the instance. Targeting, the instance, the range and the party are all fine.
+The owner's druid was level 2 when the report was filed (#3, 02:37) — a healer's first two levels have NO heal for anybody.
+- **C — please:** every healer's direct ally heal (T3's key 1 or 2) usable from LEVEL 1 (unlock the key at 1, or put the heal on key 1), and the
+  refusal `why:'locked'` with `need: <level>` instead of `'unknown'` (js/rules/index.js maps the text; D-UI can then say "unlocks at level 3").
+- A's test `tests/A/pt6-dungeon.test.js` "U11" drives two real sockets through this; it asserts the heal lands at the level the bar says the key
+  is open, and that a healer has an ally heal open at level 1 (**red until the unlock level changes**).
+
+## Round 6 contracts — C (Combat rules) -> A, E, D-world, D-UI — 2026-10-07 (owner feedback 6; written first, status line at the end)
+
+- **U3 — a zone ends with its caster.** C sends the cancels itself (A: no second one needed, yours is a harmless net):
+  - a MONSTER dies or is removed: every telegraph it still has running -> `teleR {id, x: 1, why: 'dead'}` the same tick; every puddle / pool it
+    LEFT behind (a special's `leave`) is removed at once (`obj` gone, as when it runs out) and deals nothing after. An authored arena object
+    (a brazier, a seep pool) stays. A telegraph marked `afterDeath` in E's data still goes off (a death burst is the point of it).
+  - a monster's cast is interrupted: its marked zones go (`teleR x:1, why:'interrupted'`) — as before.
+  - a PLAYER dies: every placed zone / post of theirs -> `fx {kind:'unplace', obj}`, every burning pool -> `fx {kind:'pool', pid, end: 1}`
+    (the `fx pool` that starts one now carries `pid`), a revive being cast -> `castX`. None of them strikes or heals after the death.
+- **U5 — stacks.** A's rule stands as written. Nothing in the rules holds a consumable: `rules.useItem(e, use, opts)` never reads or writes
+  `count` (A decrements). Items C makes are never stackable: gear, crates, gift boxes, fish.
+- **U6 — percent units.** A shield's built-in block was a FRACTION (0.2) on a stat the sheet reads as PERCENT, so the card said "0.2%" and the
+  shield gave +0.2% (not 20). Now `base_block_chance` is 20 (a save's old shield is corrected when it is loaded) and the card says "20% chance
+  to block". **D-UI: print item properties with `affixText(a)` from `js/rules/item-text.js`** (pure; = Farhold's `describeAffix` + who-wording +
+  the unit fixes: spell power reads "+18% spell power", small per-second values keep two decimals). Sheet rows: `blockChance` was shown x100 — fixed.
+- **U13 — armour.** Formula (Farhold `rpg.strike`): a physical hit is multiplied by `100 / (100 + armour)`, so the share taken off is
+  `armour / (100 + armour)`. The perk IS applied (35 -> 41 armour = 25.9% -> 29.1%); the old tooltip rounded both to whole percents / did not
+  re-read. New core sheet row **`armorReduction`** `{ value: 29.1, unit: '%' }` (one decimal) with the formula in its tip — D-UI: show this row,
+  never your own arithmetic. The low-ring armour perks are +10 now (was +6): 35 -> 45 = 31.0%.
+- **U8 — boss wards.** Every `{ "shield": true }` in an encounter is now a ward with a LIFE and a BREAKING POINT: it lasts `seconds` (default
+  18) and absorbs `pool` x the boss's maximum health (default 0.10) — hit it enough and it shatters early; the script's own way (braziers,
+  adds) still drops it at once with its bonus. E may write `{ "shield": { "seconds": 15, "pool": 0.08 } }` per boss.
+  `fx {kind:'shield', id, on: true, ms, pool (hit points), name}` at the start; `fx {kind:'shield', id, hp, max, left (ms)}` once a second while
+  it holds (D-UI / D-world: a bar + a countdown on the boss); `fx {kind:'shield', id, on: false, why: 'broken'|'expired'|'script'}` at the end.
+  `rules.wardOf(e)` -> `{ on, hp, max, leftMs, ms }` or null (A: `info.ward` for late joiners, if wanted).
+- **U11 — healing in a dungeon.** Rules side checked with a test (two players handed into an instance room): the direct heals have no line of
+  sight rule and reach 30 m (the paladin's touch 6 m); the only thing that can refuse is party membership — `unit.partyId` must be the same
+  non-null value on both (A: `rules.onParty(e, id)` after a handoff into an instance — `e.data.partyId` is read on entry). New: a `target {id}`
+  on a DEAD party member is accepted (it was refused, which made a revive untargetable through `e.target`).
+- **U15 — starter kits.** Every pack now fills both hands or is a two-hander (a lone one-hander always has a shield, buckler, focus or second
+  weapon beside it); every class with `shield` has a sword-and-shield (or mace / sceptre-and-shield) pack; 4-7 packs a class. `kitsFor` shape
+  unchanged. Pack ids changed for the packs that were a bare one-hander (A: `validKit` falls back to the first pack for an unknown saved id).
+- **U16 — the body a shape draws.** `rules.formOf(e)` -> `null` or `{ id, name, group: 'shape', skill, creature, scale, colors: {body, belly,
+  accent, eyes}, upright?: bool }` (`creature` = an avatar-3d creature type: boar, wolf, crocodile, mushroom…). The same object rides on the
+  event: `fx {kind:'form', id, form, group, on: true, body: <creature>, shape: {…that object}}` and `on: false` when it ends. **A: please put it on
+  the entity as `info.form` (null when none) so late joiners draw the shape; D-world: build the creature from `shape` in place of the avatar while it
+  is set, keep the nameplate, and play the creature's attack clip on basic attacks.** Stances / tempers / songs have `group` other than `shape` and no body.
+- **U17 — potions.** Healing potion 25% -> 50% of maximum health (never less than 60), greater 45% -> 80% (120), mana 30% -> 50%, group tonic
+  15% -> 25%; shared cooldown 30 s -> 20 s (js/sim/consumables.js numbers — A, I edit only the table and `POTION_CD_MS`). Numbers by level in C's report.
+- **U18 — the druid's wolf.** New skill `moonpelt_shape` (Moonpelt Shape) on key 3 (level 6): `form.id: 'moonpelt'`, body `{ creature: 'wolf',
+  scale: 1.25, upright: true }` (a wolf on its hind legs if D-world can; a big wolf otherwise), two fast biting attacks that leave Bleeding.
+  Its tier-3 talent **Wolf Pack** (`wolf_pack`) calls 2 pack wolves (`grove_wolf` followers, 30 s, no follower slot) when you take the shape.
+  Druid keys now: thornlash, renew, moonpelt_shape, green_return, briarback_shape, sporecap_shape (`fenrunner_shape` leaves the bar; Briarback moves 3 -> 5).
+
+**Status (C): ALL LANDED (2026-10-07)** — tests/C/playtest6.test.mjs (12) + starter-kits. What differs from the text above (these WIN):
+- **U8:** E's own `{ "shield": { seconds, pool } }` is honoured (the Barrow Warden: 20 s, 10%); a boss RESET also ends the ward
+  (`fx shield on:false why:'reset'`). `why` values: `broken | expired | script | reset`.
+- **U18 Wolf Pack:** the two wolves come when the shape is TAKEN and leave when it ends or after 30 s (talent field `form.pack`), so D-world
+  sees them as ordinary followers (`grove_wolf` npc entities, `data.pet`, owner = the druid). Druid forms other skills take in the shape:
+  Thornlash -> "Rending Leap", Greensap -> "Lick Wounds".
+- **U17 (A / E):** the bag item's own `desc` still says "Restores 40 HP" (the shared item table's text) — the real amount is
+  `potionAmount(effectOf(item), hpMax, mpMax)`; please print that on the card (D-UI) or rewrite the desc where shops make the item (A).
+- **U15 (A):** pack ids that changed meaning: any saved `kit.weapons` id still resolves (`validKit` falls back to the first pack); the first
+  pack of a class is still its old starter weapon, now with an off hand where it had none.
+- **U6 (D-UI):** `js/rules/item-text.js` exports `affixText(a)` and `itemLines(item)`.
+- **U3 (A):** monsters' left-behind puddles are arena objects (`obj … gone:1` / the object entity despawns), not `fx pool`; C's own `fx pool`
+  (players' burning ground) now carries `pid` and ends with `fx {kind:'pool', pid, end:1, why:'dead'}`.
+
+## Round 6 — E status (landed; where it differs from E's first section, this wins) — 2026-10-07
+- **U4** — see E's first section: the "coffins" are B's oats field `torborhold_belt_field_7`, drawn by D-world with proctown's grain rows. E changed nothing; no re-placement.
+- **U8 wards** — follows **C's shape**: all 19 warded phases raise the ward with `{ "shield": { "seconds", "pool" } }` (mini-boss 15 s / 0.08, boss 20 s / 0.10,
+  event 25 s / 0.10, world 25 s / 0.12) and carry a `ward` block beside it for the words: `{ seconds, pool, break: 'objects'|'adds', need, what, say, fade,
+  addsToo? }`. `ward.say` is ALSO in `onEnter` as a `warn` call-out (C: do not say it twice; use `ward.say` for the fx `name`/text and `ward.fade` as the
+  `why: 'expired'` line if you want one). The 8 wards that broke with their adds had no call-out at all; they now say "Kill the three … to break the ward.
+  It fails by itself in N seconds." New scripts: `ev_harl_vesk` (the raid on Torborhold: `siege_torborhold.encounter`; no ward) and `plain_boss`
+  (`defaults.boss.town` / `.any`; nameless, no ward, no furniture). **C:** tests/C/encounter.test.mjs "PHASES: the Barrow Warden…" pins the shield fx
+  without `ms` — it now reads `ms: 20000` from the data; yours to update.
+- **U10 / U12** — js/rules/dungeon-tiers.js as written in E's first section (`door`, `landing`, `lift`, `label`, `name`; `exit` only behind the last
+  boss; `shortcutUp` gone). A's js/sim/dungeon.js already reads them. One real fault found by the new test: in `mine_descent` and the families that borrow
+  it the reward room (chest + way out) hung off the SHAFT, so it could be reached past the boss's gate without entering the boss room; it now opens off the
+  boss room. **D-world/D-UI:** floor names for the lift picker are `lift.to[].name` ("The Upper Graves", "The Sealed Vault", …).
+- **U17 potions** — values are C's (js/sim/consumables.js: healing 25% -> 50% of max health, min 60; greater 45% -> 80%, min 120; cooldown 30 -> 20 s).
+  E: Greater Healing from level 5 (was 8) at the apothecary (20 g) and now the healer (22 g); the healer also sells mana potions; every inn sells a
+  healing potion (the Pail and Plough had no potion seller). E dropped its proposed `potions` numbers block (one place: C's table).
+  `shops.json` **`potionDrops`** `{ chance: { normal 0.06, elite 0.4, champion 0.35, rare 0.6, boss 1 }, table: [[1,'healing_potion'], [1,'mana_potion'],
+  [6,'greater_healing'], [12,'greater_healing'], [12,'group_tonic']] }` — in A's shape; A's js/sim/province.js `potionDrop` already rolls it.
+- **U11 follow-up (C, after A's reproduction):** a HEALER class (cleric, priest, druid, shaman, paladin, bard, oracle) has its first TWO keys
+  open at level 1 — its direct heal and its attack (`js/rules/character.js unlockLadder`); everyone else keeps 1 / 3 / 6 / 12 / 18 / 24.
+  `bar[].lockedText` = "Unlocks at level N" on a locked key (D-UI: print it on the key / its tooltip); casting a locked key answers
+  `castR {ok:false, why:'locked', text}`. **A:** tests/A/pt6-dungeon "a healer's direct heal is open at level 1" passes now — please drop its `todo`.
+
+## A -> D-UI, C, Lead — 2026-10-07 (round 6 leftovers)
+- **Potion cards:** a potion's `desc` is written by the server from C's table and the holder's own maxima — "Restores 50% of your health (94 now),
+  never less than 60. Shares a 20 s cooldown with other potions." — on grant, in `shopView.stock` and at login, and re-sent (`bag` remove + add,
+  same uid) when a level or gear changes the number. The item also carries `restore: {stat:'hp'|'mp', pct, min, group?}` if a card wants to
+  recompute it. `js/sim/consumables.js` `potionText(item, {hpMax, mpMax})` is the one writer.
+- **U11:** with C's level-1 heals the two-socket test passes with a LEVEL-1 druid; the todo marker is gone.
+- **U16:** `info.form` is exactly `rules.formOf(e)` (creature, scale, colors, upright…), also for a late joiner and after a room change (tested with a real druid).
+
+## Round 6 contracts — D-UI (interface) -> A, C, G, D-world — 2026-10-07
+D-UI reads A's §22 and C's round-6 names as written (`item.count`/`stackMax`, `shopView.sell[].each`, `eventDone.got`/`story`, `used {kind:'lift', choices}` ->
+`net.use(id, to)`, `fx shield {on|hp,max,left|on:false,why}`, `info.ward`, `sheet.core armorReduction`, `bar[].lockedText`, `info.form.name`, `affixText`).
+- **A — U5 split:** not built on the client because there is no message (`item {op:'split', uid, n}` is "not this round"). The bag shows the count and uses one
+  at a time; selling, mailing and trading move the whole stack and the rows say so. When `split` exists: Shift-drag onto an empty square is the plan.
+- **A — U1:** friends "unseen" is kept in the browser for the session (a friend added or come online while the Friends tab was shut). It is not saved; a reload
+  starts clean. If the owner wants it to survive a reload, it needs a server field.
+- **D-world — U8:** `js/client/boss.js` gained `wardBar()` (the DOM bar under the health bar). `fx shield` WITHOUT `on` is now an update (it used to be read
+  as "off" and dropped your shell every second) — your shell / ring code is untouched.
+- **G:** new stylesheet `css/pt6.css` (in index.html's list); `tvui5.lift({...})`, `tvui5.sight()`; the badge rule lives in `js/client/ui/unseen.js`
+  (`UNSEEN.add / set / seen`) if a scene wants a badge lit.
+
+## Round 6 contracts — D-world (3D client) -> A, C, E, D-UI, lead — 2026-10-07 (status as built)
+- **U3 (A, C):** `teleR {id, x: 1}` removes the drawing in the same call (no fade, no flash). The client also drops every live telegraph of a body
+  on its `die {d}` and on `castX {id}`, and every ground zone it laid (`fx pool|place|zone` are tracked by `obj` / zone `id` and by caster) on
+  its death, on `fx unplace {obj}` and on `fx {kind:'zone', id, end: 1}`. A shape that already LANDED keeps its flash.
+- **U16 / U18 (C, A):** read `info.form` (late joiners) and `fx {kind:'form', id, group:'shape', on, shape | body}`; the body object may be
+  `shape: {id, creature, scale, colors, upright}` or `body: {creature, …}` (skills-tv.json's own spelling) — both work. `upright: true` rears the
+  creature onto its hind legs. `grove_wolf` followers have their own look (`data/monster-looks.json`: a green-grey wolf).
+- **U8 (C, D-UI):** `fx {kind:'shield', id, on, ms, need, have, text, why}` drives the shell on the boss (thins and flickers faster as it runs
+  down), a ring on the ground that drains like a clock (amber in the last quarter), and the boss frame's own line "Warded 12s · 1/3"
+  (js/client/boss.js — it was "Shielded"). `info.ward {ms, until}` shows the same for someone who walks in late. D-UI: nothing needed from you;
+  if your bar also prints the seconds, say so and I drop mine from the frame.
+- **U10 (A):** `type:'door'` / `'entrance'` = a stone doorway with daylight in it and three steps (no portal glow); `type:'lift'` = a flight of steps.
+- **U4 (E, B, W):** grain is a new unit shape `sheaf` (proctown/js/propkit-three.js `sheafGeometry`, `sheafWind`; `PROP_MESHES` in propkit.js) —
+  anyone instancing `cropField` parts needs a mesh for `sheaf` (setpiece-view.js does; site-view.js does not use cropField). Vineyard leaf walls
+  use it too. No data changed.
+- **Lead — shared code touched:** proctown `propkit.js` (grain + vineyard leaves, stubble strip), `propkit-three.js` (new exports), proctown test
+  accepts `sheaf`; avatar-3d `equine.js` (nostrils only).

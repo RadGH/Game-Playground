@@ -207,7 +207,10 @@
       ],
       "onEnter": [
         {
-          "shield": true
+          "shield": {
+            "seconds": 15,
+            "pool": 0.08
+          }
         },
         {
           "adds": {
@@ -215,8 +218,22 @@
             "count": 3,
             "radius": 8
           }
+        },
+        {
+          "say": "Kill the three road brigands to break the ward. It fails by itself in 15 seconds.",
+          "style": "warn",
+          "ward": true
         }
-      ]
+      ],
+      "ward": {
+        "seconds": 15,
+        "break": "adds",
+        "need": 3,
+        "what": "road_brigand",
+        "say": "Kill the three road brigands to break the ward. It fails by itself in 15 seconds.",
+        "fade": "The ward fails by itself. No opening this time.",
+        "pool": 0.08
+      }
     },
     {
       "name": "Personal Attention",

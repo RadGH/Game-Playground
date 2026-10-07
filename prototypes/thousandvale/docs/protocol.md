@@ -1170,7 +1170,7 @@ for 60 s, zone events), `fled` (the boss is gone).
 
 ### 21.7 Feedback (T19)
 **`feedback {kind:'suggestion'|'bug', text, ctx?}`** on either socket → **`feedbackR {ok, id?, first?, why?, msg}`**
-(`why`: `kind`, `empty`, `slow`, `failed`). Limits: one every 20 s and 12 an hour per account; `text` ≤ 2000 characters; `ctx` is
+(`why`: `kind`, `empty`, `slow`, `failed`). Limits: one every 2 s and 1000 an hour per account (play-test 6 U2; they were 20 s and 12); `text` ≤ 2000 characters; `ctx` is
 cleaned (`js/sim/feedback.js` `sanitize`: plain JSON, depth 4, strings ≤ 500, `logs` ≤ 60 lines of ≤ 300, ≤ 6 kB — trimmed, never
 refused). The server adds its own context: account, character, room, zone, position, health, target, nearby counts, running
 events, quests in the log, tick, protocol, build, time. Stored in the `feedback` table (schema v5) / the memory store AND
@@ -1216,3 +1216,46 @@ Rules: stream C's `js/rules/fishing.js` over `data/rules/fishing.json`; content:
   innkeeper) → `cookR {ok, item, items, n, msg}`. Meals are E's food goods (the S20 meal code eats them).
 - Quests: step kinds `catch {count, fish?, pool?, rarity?}` and `cook {count, meal?}`; `grant: [{good, count}]` on accept and
   `reward.goods`; job frames with `giverRole:'angler'`. Fish, junk and trophies sell for their own `price`.
+
+## 22. Owner feedback 6 (2026-10-07) — still protocol v7 (additive)
+
+### 22.1 Telegraphs end with their caster (U3)
+The END of a telegraph (`teleR`) is delivered to everyone who could see the telegraph itself. It used to be routed like any event,
+by its `x` / `z` — but `teleR.x` is the "cancelled" flag (`x: 1`) and it has no place of its own, so a cancel was "at x = 1" and
+reached nobody: a dead or interrupted caster's zone stayed drawn. The room now remembers where each live `tele {id, s}` is and
+routes its `teleR` there. On top of the rules' own cancels the room ends every telegraph still running the moment its source
+dies or is removed: `teleR {id, x: 1, why: 'dead'|'gone'}`; a monster's ground pool gets `fx {kind:'pool', id, x, z, end: 1, why}`.
+A `tele` marked `after: 1` (meant to land after its caster's death) is left alone.
+
+### 22.2 Stacks (U5)
+A consumable is one bag item with `count` (1..`stackMax`, default 20): potions, and goods that are used up (food, drink, buffs,
+torches, cures, recall charms, bait, cooked meals). Never rods, parcels, crates, gifts, fish, junk, trophies or gear
+(`js/sim/consumables.js` `stackable`, `stackKey` = kind + id). Granted, looted, bought, quest-given, cooked, mailed and traded ones
+join a stack with room. A stack that changes is sent as `bag {remove:[uid], add:[the same item, same uid, new count]}`. Using
+one takes one off. `shop sell` sells the whole stack (`shopView.sell[] = {uid, price (the stack), each, count}`); mail and trade
+move a stack as one item; a login brings an old save's loose potions together. Splitting a stack is not built.
+Potion numbers may come from `shops.json` `potions` (`{id: {pct, amount}, cooldownSec}`); `potionDrops {chance: {rank: p}, table:
+[[minLevel, id]…]}` adds a potion to a kill's loot.
+
+### 22.3 Results are sentences (U9)
+`eventDone` gains `got` ("You got 237 experience, 26 gold and Savage Battleaxe." / "You did not take part, so there is no share this
+time." / "No reward this time.") and always carries `story`; `realm {kind:'eventEnd'}` gains `result: 'success'|'fail'` and `text`.
+
+### 22.4 Dungeons: the way out, the floor you died on, the lift (U10, U12, U14)
+- `type:'exit'` ("Way out") stands only on the last floor, behind the boss. The way you came in is `type:'door'` ("The way you
+  came in", `info.leave: 1`): it leaves the dungeon but is not the exit portal. No "Shortcut up".
+- `respawn` in an instance: you get up at the landing of the floor you died on (`you {floor, respawned:'floor'}`).
+- The stair up is `type:'lift'` (`info.lift = {here, floors:[…]}`). One floor above: `use {id}` takes you to its landing. Two or
+  more: `used {id, ok, kind:'lift', name, here, choices:[{to:'f:<n>', floor, label, name}]}` and the client sends `use {id, to}`;
+  a second plain `use {id}` within 4 s takes the floor just above. `use` gains `to?:str:16`.
+- Every dungeon object carries `info.floor` (1 = top) and stairs / lifts / doors / exits `info.portal: 'down'|'up'|'out'`.
+  OBJ_TYPES gains `door`, `lift`, `fishpool`.
+
+### 22.5 Small things
+- U2: feedback limits are 2 s apart and 1000 an hour.
+- U1: `mailNew {unread}` is re-sent on the game socket after `mail read`, `take` and `delete`.
+- U11: healing a party member in an instance needs no new message (`target {id}`, `cast {slot, target}`; `partyFrames` rows carry
+  the entity id). What refused it was the heal key's unlock level (stream C's data).
+- `info.form` (U16): stream C's shape object while a druid is in a shape. `info.ward` (U8): `{max, ms, until (room ms), name?}`
+  while a boss's ward holds.
+- `node tools/feedback-state.mjs <ids…> --state approved|declined|trashed|new [--env stable]`.

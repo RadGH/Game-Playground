@@ -40,7 +40,8 @@
     { "name": "Rooted", "newBar": { "hp": 0.4 }, "say": "It sinks its roots and raises a wall of bark!",
       "shieldWhileAdds": true, "shieldDown": "The bark splits — strike now!",
       "abilities": ["thorn_lines", "bramble_nova", "seedburst"],
-      "onEnter": [ { "shield": true }, { "adds": { "type": "thicket_boar", "count": 4, "radius": 9 } } ] }
+      "ward": {"seconds": 20, "pool": 0.1, "break": "adds", "need": 4, "what": "thicket_boar", "say": "Kill the four thicket boars to break the ward. It fails by itself in 20 seconds.", "fade": "The ward fails by itself. No opening this time."},
+      "onEnter": [ { "shield": { "seconds": 20, "pool": 0.1 } }, { "say": "Kill the four thicket boars to break the ward. It fails by itself in 20 seconds.", "style": "warn", "ward": true }, { "adds": { "type": "thicket_boar", "count": 4, "radius": 9 } } ] }
   ],
   "triggers": [
     { "when": { "broken": 2 }, "do": [ { "say": "Both great stones are rubble — nowhere left to hide from the roar!", "style": "warn" } ] }

@@ -9,7 +9,7 @@
 //             'play' plays a server moment: recorded (fixtures/session.json) or hand-kept (fixtures/moments.json).
 //   phone / pad   { steps } run after `steps` in that frame's PROPOSED layout;  phoneCurrent = steps for the phone frame's CURRENT layout
 //   expect    a selector that must be on screen when the steps are done (the stage reports a scene that did not get there)
-//   only      frames this scene is for (default: all)
+//   only      frames this scene is for (default: all);  proposedOnly = it shows something only the proposed layout has
 //   notes     { all, desktop, phone, pad } — plain language, shown beside the frame
 //
 // To add a scene: add an entry here. That is all (docs/UI.md "Adding a scene").
@@ -51,7 +51,7 @@ export const SCENES = [
     notes: { all: 'The Log in tab: username, password, “Forgot your password?”.', pad: 'Text boxes open the on-screen keyboard (see the “On-screen keyboard” scene). A controller player can stay a guest and never type.' } },
   { id: 'create-look', expect: '#panel-appearance:not([hidden])', group: 'Start', title: 'Creation — appearance', stage: 'title', step: 'look', modules: [U + 'appearance.js', U + 'appearance-core.js'],
     notes: { all: 'Step 2: the appearance editor (also the barber’s chair in the world). The figure it dresses is the 3D one behind it — here a still picture.',
-      phone: 'Proposed: a sheet over the lower two thirds upright, so the figure stays in view above it; on its side the editor is the left column. Swatches are 44 px (fewer to a row than on a desktop).',
+      phone: 'Proposed: a sheet over the lower two thirds upright, so the figure stays in view above it (the next step, equipment, is a full sheet: three sets and the weapon packs need the room); on its side the editor is the left column. Swatches are 44 px (fewer to a row than on a desktop).',
       pad: 'LB / RB step through the editor’s sections; left / right on a list changes it.' } },
   { id: 'create-kit', expect: '#panel-kits:not([hidden]) .kit-choice', group: 'Start', title: 'Creation — starting equipment', stage: 'title', step: 'kit', modules: [U + 'kit-step.js', U + 'item-card.js'],
     notes: { all: 'Step 3 (new this round, T5): three armour sets and the weapon packs for the calling, each piece with its numbers written out. The kits are the server’s real answer for a cleric, recorded.',
@@ -86,7 +86,7 @@ export const SCENES = [
   { id: 'context', expect: '.ent-menu:not([hidden])', group: 'In the world', title: 'Right-click menu on a player', modules: [U + 'context-menu.js'], steps: [['target', 'ally'], ['call', 'tvui2.context', '@ally', 640, 300]],
     notes: { all: 'The menu on another player: follow, trade, inspect, whisper, invite, friend, report.',
       phone: 'There is no right-click on a phone: hold on a player (or on their party row). The menu opens as a bottom sheet in two columns.', pad: 'X (the “other” button) on a targeted player opens it.' } },
-  { id: 'tooltip', expect: '#tipbox:not([hidden]), .phone-sheet:not([hidden])', group: 'In the world', title: 'A skill’s card', modules: [U + 'tips.js'], steps: [...fight, ['hover', '#actionbar .slot:nth-child(3)']],
+  { id: 'tooltip', expect: '#tipbox:not([hidden]), .phone-sheet:not([hidden])', group: 'In the world', title: 'A skill’s card', modules: [U + 'tips.js'], steps: [...fight, ['wait', 400], ['hover', '#actionbar .slot:nth-child(3)']],
     phone: { steps: [['holdSheet', '#actionbar .slot:nth-child(3)']] },
     notes: { all: 'Every hover card in the game goes through one tooltip engine. This one is a skill: cost, cooldown, exactly who it touches (T2).',
       phone: 'No hover on a phone: HOLD anything that has a card (about a third of a second) and it opens as a sheet you can read at leisure; tap outside to close. A quick tap still uses the thing.', pad: 'Y shows the card of whatever the ring is on.' } },
@@ -134,7 +134,7 @@ export const SCENES = [
     notes: { all: 'F1: the controls list. It is now drawn from the binding table, so it shows your own keys — or the controller’s buttons when that is what you last touched.' } },
   { id: 'feedback', expect: '#panel-feedback:not([hidden]) textarea', group: 'Windows', title: 'Feedback form', modules: [U + 'feedback.js'], steps: [['call', 'tvui5.feedback', 'bug']],
     notes: { all: 'T19: a suggestion or a bug report, with what gets attached written out.', pad: 'The text box opens the on-screen keyboard.' } },
-  { id: 'reports', expect: '#panel-reports:not([hidden]) .rp-row', group: 'Windows', title: 'Admin — reports', modules: [U + 'feedback.js'], steps: [['admin'], ['call', 'tvui5.reports'], ['play', 'admin-reports'], ['click', '#panel-reports .rp-row']],
+  { id: 'reports', expect: '#panel-reports:not([hidden])', group: 'Windows', title: 'Admin — reports', modules: [U + 'feedback.js'], steps: [['admin'], ['call', 'tvui5.reports'], ['play', 'admin-reports'], ['click', '#panel-reports .rp-row']],
     notes: { all: 'T21: what an admin account sees — every report with its state, the client details and the recent log lines.' } },
   { id: 'account', expect: '#panel-account:not([hidden])', group: 'Windows', title: 'Account', modules: ['js/client/account.js'], steps: [['panel', 'account']],
     notes: { all: 'Claim a guest account (free), or see the one you are logged into.' } },
@@ -188,9 +188,9 @@ export const SCENES = [
     notes: { pad: 'While LT / L2 is held the action bar shows which slots the face buttons now fire: skills 5 and 6 on Y and B, the four potion slots on the D-pad, mount on X, cast a line on A, camp on RB.' } },
 
   // ------------------------------------------------------------------------------------------------ Phone
-  { id: 'phone-belt', expect: '.tv-radial:not([hidden]) .rd-slice', group: 'Phone', title: 'The belt (hold)', only: ['phone-l', 'phone-p'], modules: ['js/client/input/touch.js'], steps: [...fight, ['touch', 'belt']],
+  { id: 'phone-belt', proposedOnly: true, expect: '.tv-radial:not([hidden]) .rd-slice', group: 'Phone', title: 'The belt (hold)', only: ['phone-l', 'phone-p'], modules: ['js/client/input/touch.js'], steps: [...fight, ['touch', 'belt']],
     notes: { phone: 'Potions and food: TAP the red-ringed Belt button to drink the first slot (the one you want in a hurry); HOLD it and the four slots fan out under your thumb — slide to one and let go. Why not four more buttons: the fight screen already has twelve.' } },
-  { id: 'phone-sheet', expect: '.phone-tabs .pt-tab', group: 'Phone', title: 'A window as a sheet (tab bar)', only: ['phone-l', 'phone-p'], modules: ['js/client/input/touch.js'], steps: [['panel', 'journal'], ['wait', 300]],
+  { id: 'phone-sheet', proposedOnly: true, expect: '.phone-tabs .pt-tab', group: 'Phone', title: 'A window as a sheet (tab bar)', only: ['phone-l', 'phone-p'], modules: ['js/client/input/touch.js'], steps: [['panel', 'journal'], ['wait', 300]],
     notes: { phone: 'Every window is a full-screen sheet instead of a floating box: no dragging, no overlap. One tab bar moves between the seven you use most; Close goes back to the world. The fight controls are hidden while a sheet is open so a stray thumb cannot cast.' } },
 
   // ------------------------------------------------------------------------------------------------ Reference

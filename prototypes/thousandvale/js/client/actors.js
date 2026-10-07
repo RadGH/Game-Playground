@@ -109,6 +109,20 @@ export function farHeadGeometry() {
 }
 const CLASS_TINT = { warrior: '#b04a3a', knight: '#9aa4b4', paladin: '#e0c060', ranger: '#4f8a3a', rogue: '#3a3a44', cleric: '#e8e0c8', mage: '#4a6ad0', bard: '#c060a0', monk: '#d0902a', druid: '#6a9a4a', necromancer: '#5a3a6a', pyromancer: '#e0602a' };
 
+/** Is a Chibi 2 body what is showing for this actor? (a player in a druid shape is a beast until it changes back — U16) */
+const person = a => (a.kind === 'player' || !!a.humanoid) && !a.shape;
+/**
+ * U16 (play-test 6): the creature a shape is drawn as, from C's `shape` object `{ id, creature, scale, colors, upright }`.
+ * Pure — exported for tests. -> { key (cache key), type (avatar-3d creature type), size, colors, upright } or null.
+ */
+export function shapeSpec(shape) {
+  if (!shape || typeof shape !== 'object') return null;
+  const type = bodyTypeFor(shape.creature || shape.body || 'wolf');
+  const size = Math.max(0.5, Math.min(2.5, Number(shape.scale) || 1));
+  const colors = shape.colors && typeof shape.colors === 'object' ? shape.colors : null;
+  return { key: `${shape.id || type}|${type}|${size}|${colors ? JSON.stringify(colors) : ''}|${shape.upright ? 'u' : ''}`, id: shape.id || type, type, size, colors, upright: !!shape.upright };
+}
+
 export function createActors(scene, { plateLayer, camera, quality = 'high', renderer = null, waterAt = null }) {
   const actors = new Map();
   const queue = [];
@@ -235,7 +249,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     if (a.model) { a.group.add(a.model); a.model.position.set(0, 0, 0); a.model.rotation.set(0, a.yaw, 0); }
   }
   async function syncMount(a) {
-    const want = a.dead ? null : a.mountWant ?? null;
+    const want = a.dead || a.shape || a.shapeWant ? null : a.mountWant ?? null;      // (U16: a shape does not ride)
     if (want === (a.mountHave ?? null)) return;
     dropMount(a);
     if (!want || !a.body) return;
@@ -285,16 +299,74 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     }
   }
 
+  // ---- druid shapes (play-test 6, U16/U18): `info.form` / `fx form` says what a player is shaped as; the avatar is put
+  // away and a real creature body stands in its place under the same name plate, walks and strikes with the creature's
+  // own clips, and the avatar comes back when the shape ends. Bodies are compiled before they show and kept for the
+  // next time (the boot warm-up has already linked every shape's programs), so the swap is a frame, not a stall. ----
+  const BEAST_CLIP = { idle: 'idle', ready: 'idle', walk: 'walk', run: 'run', attack: 'attack', hit: 'idle', dead: 'dead', cast: 'attack', swim: 'walk', jump: 'idle', guard: 'idle' };
+  const shapeCache = new Map();          // spec.key -> spare bodies
+  function dropShape(a, dispose = false) {
+    const sh = a.shape; if (!sh) return;
+    a.group.remove(sh.pivot); a.shape = null;
+    if (dispose || (shapeCache.get(sh.key)?.length || 0) >= 2) sh.body.dispose?.();
+    else { if (!shapeCache.has(sh.key)) shapeCache.set(sh.key, []); shapeCache.get(sh.key).push(sh); }
+    if (a.model) a.model.visible = true;
+    if (a.baseShapeHeight) { a.height = a.baseShapeHeight; a.baseShapeHeight = 0; }
+    a.pickR = a.basePickR ?? a.pickR; a.pickTop = a.basePickTop ?? a.pickTop;
+    a.anim = null;
+  }
+  async function syncShape(a) {
+    const want = a.dead && !a.shape ? null : a.shapeWant || null;
+    if ((want?.key ?? null) === (a.shape?.key ?? null)) return;
+    if (!want) { dropShape(a); lodStats.shapes = (lodStats.shapes || 0); return; }
+    if (!a.body) return;
+    a.shaping = true;
+    try {
+      let sh = shapeCache.get(want.key)?.pop() || null;
+      if (!sh) {
+        const spec = randomCreature(want.type, 7);
+        spec.size = +(spec.size * want.size).toFixed(2);
+        if (want.colors) spec.colors = { ...spec.colors, ...want.colors };
+        const body = await createCreature(spec, { detail: quality === 'low' ? 0.7 : 1 });
+        try { compactCreature(body); } catch {}
+        body.group.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
+        const pivot = new THREE.Group(); pivot.name = 'shape:' + want.id; pivot.add(body.group);
+        let h = 1.2, len = 1.4;
+        try { const box = new THREE.Box3().setFromObject(body.group), size = box.getSize(new THREE.Vector3()); if (size.y > 0.1 && size.y < 12) { h = size.y; len = Math.max(size.x, size.z); } } catch {}
+        // `upright` (the Moonpelt wolf): reared back on its hind legs — tipped up about the haunches and lifted so the hind feet stay down
+        if (want.upright) { body.group.rotation.x = -0.95; body.group.position.set(0, len * 0.36, -len * 0.12); h = Math.max(h, len * 0.95); }
+        if (renderer) await compileBeforeShow(renderer, pivot, camera, scene);
+        sh = { key: want.key, id: want.id, body, pivot, h, r: Math.max(0.6, Math.min(3, len * 0.5)), anim: null };
+      }
+      if (!actors.has(a.id) || !a.body || (a.shapeWant?.key ?? null) !== want.key) { if (!shapeCache.has(sh.key)) shapeCache.set(sh.key, []); shapeCache.get(sh.key).push(sh); return; }
+      dropMount(a); dropShape(a);
+      a.shape = sh; a.group.add(sh.pivot); sh.pivot.rotation.y = a.yaw; sh.anim = null;
+      if (a.model) a.model.visible = false;
+      a.baseShapeHeight = a.height; a.basePickR = a.pickR; a.basePickTop = a.pickTop;
+      a.height = Math.max(0.8, sh.h * 1.02); a.pickR = sh.r; a.pickTop = sh.h;
+      a.oneShot = null; a.anim = null; a.fishing = null;
+      lodStats.shapes = (lodStats.shapes || 0) + 1;
+    } catch (e) { console.warn('[actors] shape failed', want?.id, e); a.shapeWant = null; }
+    finally { a.shaping = false; }
+  }
+  /** U16: what this player is shaped as (C's `{ id, creature, scale, colors, upright }`), or null to change back. */
+  function setShape(id, shape) {
+    const a = actors.get(id); if (!a || a.kind !== 'player') return false;
+    a.shapeWant = shapeSpec(shape);
+    return true;
+  }
+
   function setAnim(a, name) {
     if (!a.body) { a.anim = name; return; }
-    if ((a.kind === 'monster' || a.pet) && !a.humanoid) { if (a.anim !== name) a.body.setAnim(name); }
+    if (a.shape) { const n = BEAST_CLIP[name] || (/^dual|^twin|attack/.test(name) ? 'attack' : name === 'dead' ? 'dead' : 'idle'); if (a.shape.anim !== n || n === 'attack') { a.shape.body.setAnim(n); a.shape.anim = n; } }      // U16: the shape's own clips
+    else if ((a.kind === 'monster' || a.pet) && !a.humanoid) { if (a.anim !== name) a.body.setAnim(name); }
     else a.body.setAnim(name, name === 'standUp' ? 0.04 : 0.14, STRIKES.has(name));
     a.anim = name;
   }
 
   function remove(id) {
     const a = actors.get(id); if (!a) return;
-    dropMount(a); a.torchLight?.remove(); a.torchLight = null; scene.remove(a.group); a.body?.dispose?.(); a.plate?.root.remove();
+    dropMount(a); dropShape(a, true); a.torchLight?.remove(); a.torchLight = null; scene.remove(a.group); a.body?.dispose?.(); a.plate?.root.remove();
     if (a.ripples) for (const r of a.ripples) { scene.remove(r); r.material.dispose(); }
     a.group.clear();           // detaches any spell aura riding the body (SpellFx drops an aura whose group has no parent)
     actors.delete(id);
@@ -377,7 +449,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         const full = fullSet.has(a.id) || a.id === 'preview';
         if (a.lod === undefined || full !== (a.lod === 'full')) { a.lod = full ? 'full' : 'far'; a.lodSince = now; }
         // a body far away for half a minute is let go
-        if (a.lod === 'far' && a.body && now - a.lodSince > 30000) { dropMount(a); a.group.remove(a.model); a.body.dispose?.(); a.body = null; a.model = null; a.building = false; a.group.add(a.standin); }
+        if (a.lod === 'far' && a.body && now - a.lodSince > 30000) { dropMount(a); dropShape(a); a.group.remove(a.model); a.body.dispose?.(); a.body = null; a.model = null; a.building = false; a.group.add(a.standin); }
       }
     }
     // build the nearest full actor still waiting for a body (one a frame)
@@ -416,6 +488,8 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       a.group.position.set(a.pos.x + a.recoil.x, a.pos.y + (a.flying && !a.dead ? 1.3 + Math.sin(now / 420 + (typeof a.id === 'number' ? a.id : 0)) * 0.15 : 0), a.pos.z + a.recoil.z);
       if (a.mount) { a.mount.group.rotation.y = a.yaw; a.mount.setGait(a.speed); }
       if (a.model) { a.model.rotation.y = a.mount ? 0 : a.yaw; a.model.scale.setScalar(1 + a.punch * 0.12); }
+      if (a.shape) { a.shape.pivot.rotation.y = a.yaw; a.shape.pivot.scale.setScalar(1 + a.punch * 0.12); }
+      if (a.body && (a.shapeWant?.key ?? null) !== (a.shape?.key ?? null) && !a.shaping) syncShape(a);
       if (a.body && a.mountWant !== (a.mountHave ?? null) && !a.mounting) syncMount(a);
       if (a.swim || a.ripples) ripple(a, now);
 
@@ -424,10 +498,10 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       if (a.dead) want = 'dead';
       else if (a.mount) want = a.mount.riderClip;
       else if (a.eating && a.speed <= 0.4 && !(a.oneShot && now < a.oneShotUntil)) want = a.eating === 'drink' ? 'drink' : 'sitGround';   // S20: sat down to eat           // Q16: in the saddle; the mount's gait picks ride / rideGallop
-      else if (a.swim && (a.kind === 'player' || a.humanoid || a.kind === 'npc')) want = 'swim';      // P25
+      else if (a.swim && !a.shape && (a.kind === 'player' || a.humanoid || a.kind === 'npc')) want = 'swim';      // P25
       else if (a.oneShot === 'standUp' && now < a.oneShotUntil && a.speed > 0.6) { a.oneShot = null; want = 'walk'; }   // T4: walking off cuts the getting-up short
       else if (a.oneShot && now < a.oneShotUntil) want = a.oneShot;
-      else if (a.fishing && a.speed <= 0.4 && (a.kind === 'player' || a.humanoid)) want = a.fishing === 'tug' ? 'fishReel' : 'fishWait';   // T25: a line in the water
+      else if (a.fishing && a.speed <= 0.4 && person(a)) want = a.fishing === 'tug' ? 'fishReel' : 'fishWait';   // T25: a line in the water
       else {
         a.oneShot = null;
         const sp = a.speed;
@@ -435,7 +509,8 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       }
       if (want !== a.anim) setAnim(a, want);
       if (a.body?.setRate) {
-        if (a.kind === 'player' || a.humanoid) {
+        if (a.shape) a.shape.body.setRate?.(a.anim === 'run' ? Math.max(0.6, a.speed / 5.2) : a.anim === 'walk' ? Math.max(0.5, a.speed / 1.5) : 1);
+        else if (a.kind === 'player' || a.humanoid) {
           const run = a.anim === 'run';
           a.body.setRate(a.anim === 'run' || a.anim === 'walk' ? Math.max(0.5, a.speed * (run ? 0.65 : 1.05) / (run ? 3.4 : 2.0)) : a.anim === 'swim' ? (a.speed > 0.4 ? 1.1 : 0.45) : 1);
         } else a.body.setRate(a.anim === 'run' ? Math.max(0.6, a.speed / 5.2) : a.anim === 'walk' ? Math.max(0.5, a.speed / 1.5) : 1);
@@ -462,6 +537,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         const dCam = Math.hypot(a.pos.x - camera.position.x, a.pos.z - camera.position.z);
         if (dCam > ANIM_NEAR && !a.self) { a.animAcc = (a.animAcc || 0) + dt; if (a.animAcc >= 0.1) { a.body.update(a.animAcc, now / 1000); a.mount?.update(a.animAcc, now / 1000); a.animAcc = 0; } }
         else { a.body.update(dt, now / 1000); a.mount?.update(dt, now / 1000); }
+        if (a.shape) a.shape.body.update(dt, now / 1000);
       }
 
       // Corpses fade and sink after a while (monsters only; players stand back up on respawn).
@@ -494,7 +570,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     if (t && !a.self) a.yaw = Math.atan2(t.pos.x - a.pos.x, t.pos.z - a.pos.z);
     a.lastCombat = now;
     if (now - (a.swingAt || 0) < 280 && !o?.force) return;
-    const people = a.kind === 'player' || a.humanoid;
+    const people = person(a);
     if (o?.hand === 'off') a.offSeen = true;
     const clip = (people && o?.clip) || (people && a.body?.hold ? swingClip(a.body.hold, { hand: o?.hand, count: a.swingN | 0, offSeen: !!a.offSeen, mainCount: a.mainN | 0 }) : 'attack');
     a.swingN = (a.swingN | 0) + 1; if (o?.hand !== 'off') a.mainN = (a.mainN | 0) + 1; a.swingAt = now; a.fishing = null;
@@ -503,7 +579,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
   }
   /** T25 / T4: play one of the body's one-shot clips (fishCast, fishShow, standUp…) for its own length. */
   function playClip(id, clip, ms = null) {
-    const a = actors.get(id); if (!a || a.dead || !(a.kind === 'player' || a.humanoid)) return false;
+    const a = actors.get(id); if (!a || a.dead || !person(a)) return false;
     a.oneShot = clip; a.oneShotUntil = performance.now() + (ms ?? Math.round((CHIBI2_DUAL_SECONDS[clip] || 1) * 1000));
     setAnim(a, clip);
     return true;
@@ -534,7 +610,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       // is no drag). A beast, or a body that lay dead for under a second, just stands.
       const lay = a.deathAt ? performance.now() - a.deathAt : 0;
       a.deathAt = 0; a.fade = 1; a.deadPos = null; a.oneShot = null;
-      if (a.body && (a.kind === 'player' || a.humanoid) && lay > 900) { a.anim = null; a.oneShot = 'standUp'; a.oneShotUntil = performance.now() + Math.round(CHIBI2_DUAL_SECONDS.standUp * 1000); setAnim(a, 'standUp'); a.stoodAt = performance.now(); }
+      if (a.body && person(a) && lay > 900) { a.anim = null; a.oneShot = 'standUp'; a.oneShotUntil = performance.now() + Math.round(CHIBI2_DUAL_SECONDS.standUp * 1000); setAnim(a, 'standUp'); a.stoodAt = performance.now(); }
       else if (a.body) { a.anim = null; setAnim(a, 'idle'); }
     }
     refreshPlate(a);
@@ -587,5 +663,5 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     p.root.classList.toggle('self-plate', !!a.self);
   }
 
-  return { actors, lodStats, setMount, setEating, add, remove, rekey, say, update, setLook, playAttack, playClip, setFishing, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
+  return { actors, lodStats, setShape, setMount, setEating, add, remove, rekey, say, update, setLook, playAttack, playClip, setFishing, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
 }

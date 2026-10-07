@@ -18,6 +18,7 @@ import { hideTip, installGameTips } from './ui/tips.js';
 import { confirmBox } from './ui-panel.js';
 import { wearSlot } from './ui/pt2-core.js';
 import { offhandRefusal, hasDual2h, BAG_MAX as BAG_CAP } from './ui/pt5-core.js';
+import { UNSEEN } from './ui/unseen.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -99,6 +100,7 @@ export function createBag({ net: getNet, hud, me = null }) {
       const url = iconFor(item);
       if (url) { const img = document.createElement('img'); img.src = url; img.alt = ''; img.draggable = false; d.appendChild(img); }
       else { const g = document.createElement('span'); g.className = 'glyph'; g.textContent = (nameOf(item)[0] || '?').toUpperCase(); d.appendChild(g); d.classList.add('pending'); }
+      if (item.count > 1) { const n = document.createElement('b'); n.className = 'stack'; n.textContent = item.count > 999 ? '999+' : String(item.count); d.appendChild(n); }   // U5: a stack shows how many
       if (slotOf(item)) {
         const req = levelCheck(item, lv, S.equipment);
         if (!req.ok) { const r = document.createElement('span'); r.className = 'req no'; r.textContent = req.level; d.appendChild(r); d.classList.add('toohigh'); }
@@ -148,17 +150,18 @@ export function createBag({ net: getNet, hud, me = null }) {
     if (d.worn) { getNet()?.item('unequip', d.uid, d.worn); hideTip(); }
   });
 
+  /** U7 (play-test 6): the numbers under the figure are the CHARACTER MENU's (the server's sheet) — one source. fn() -> [{label, text, tip}] | null */
+  let sheetLines = null;
   function stats() {
-    let armour = 0, dmg = null;
-    for (const it of Object.values(S.equipment || {})) { if (!it) continue; armour += it.armor || 0; }
-    const w = S.equipment?.weapon; if (w?.dmg) dmg = w.dmg;
-    return `<b>Level ${level()}</b><span data-tip="Armour from everything you wear">${armour} armour</span>${dmg ? `<span data-tip="Your main-hand weapon's damage">${dmg[0]}–${dmg[1]} damage</span>` : '<span class="dim">Bare hands</span>'}`;
+    const rows = sheetLines?.();
+    if (rows && rows.length) return `<b>Level ${level()}</b>` + rows.map(r => `<span data-tip="${esc(r.tip || '')}">${esc(r.text)} <i>${esc(r.label)}</i></span>`).join('');
+    // before any sheet has arrived: say so rather than add things up a second way
+    return `<b>Level ${level()}</b><span class="dim" data-tip="The numbers come from the Character menu (V) the moment the server sends them.">Counting…</span>`;
   }
-
   let drawT = 0;
   function draw() {
     el.gold.textContent = `${S.gold.toLocaleString()} gold`;
-    if (el.badge) el.badge.textContent = S.bag.length ? S.bag.length : '';
+    if (!root.hidden) UNSEEN.seen('bag');      // U1: the badge is "new since you last looked", not how much you carry
     if (root.hidden) return;
     const worn = S.equipment || {};
     const put = (box, list) => { box.replaceChildren(...list.map(sl => { const it = worn[sl] || null; const d = slotEl(it, { slot: sl, worn: !!it }); if (it) d.onclick = () => { getNet()?.item('unequip', it.uid, sl); hideTip(); }; return d; })); };
@@ -212,9 +215,15 @@ export function createBag({ net: getNet, hud, me = null }) {
     n.on('you', p => { let ch = false; if (p.gold != null) { S.gold = p.gold; ch = true; } if (p.level != null && p.level !== S.level) { S.level = p.level; ch = true; } if (ch) draw(); });
     n.on('bag', m => {
       const rm = new Set(m.remove || []);
+      // U5: a stack that changed arrives as remove + add of the SAME uid — it keeps its place, and only a bigger count is news
+      const was = new Map(S.bag.filter(i => rm.has(i.uid)).map(i => [i.uid, { at: S.bag.indexOf(i), count: i.count || 1 }]));
+      for (const u of rm) if (!(m.add || []).some(i => i.uid === u)) UNSEEN.drop('bag', u);
       S.bag = S.bag.filter(i => !rm.has(i.uid));
       for (const it of m.add || []) {
-        S.bag.push(it); S.fresh.add(it.uid); setTimeout(() => { S.fresh.delete(it.uid); if (!root.hidden) redrawSoon(); }, 2000);
+        const old = was.get(it.uid);
+        if (old) { S.bag.splice(Math.min(old.at, S.bag.length), 0, it); if ((it.count || 1) <= old.count) continue; }
+        else S.bag.push(it);
+        S.fresh.add(it.uid); if (root.hidden) UNSEEN.add('bag', it.uid); setTimeout(() => { S.fresh.delete(it.uid); if (!root.hidden) redrawSoon(); }, 2000);
         iconFor(it);
         if (slotOf(it)) { const req = levelCheck(it, level(), S.equipment); if (!req.ok) hud.chat(`${nameOf(it)} needs level ${req.level} to wear.`, 'system'); }
       }
@@ -229,6 +238,8 @@ export function createBag({ net: getNet, hud, me = null }) {
     wire, toggle, state: S, draw,
     /** fn(open) each time the window opens or closes (the Character menu docks beside it). */
     onToggle(fn) { toggleFns.add(fn); return () => toggleFns.delete(fn); },
+    /** U7: where the stat lines under the figure come from (the Character menu's sheet). */
+    setStats(fn) { sheetLines = fn; if (!root.hidden) draw(); },
     get max() { return bagMax(); }, get dual2h() { return dual2h(); },
     /** fn(item) -> true when it USED the item (a consumable) instead of wearing it. */
     setUseHook(fn) { useHook = fn; },

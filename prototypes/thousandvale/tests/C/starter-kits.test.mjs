@@ -28,7 +28,7 @@ test('every class has 3 armour sets and 3-6 weapon packs, built only from bases 
   for (const c of engine.classes) {
     const p = kitPlan(c.id);
     if (p.armour.length !== 3) bad.push(`${c.id}: ${p.armour.length} armour sets`);
-    if (p.weapons.length < 3 || p.weapons.length > 6) bad.push(`${c.id}: ${p.weapons.length} weapon packs`);
+    if (p.weapons.length < 4 || p.weapons.length > 7) bad.push(`${c.id}: ${p.weapons.length} weapon packs`);   // owner feedback 6 (U15): more packs
     for (const list of [p.armour, p.weapons]) {
       const ids = list.map(x => x.id);
       if (new Set(ids).size !== ids.length) bad.push(`${c.id}: duplicate id in ${ids}`);
@@ -90,7 +90,8 @@ test('weapon packs obey the hands: no off hand with a two-hander, shields only f
       if (c.armorTier === 'cloth' && c.primaryAttr === 'INT' && main.weaponCategory === 'heavy') bad.push(`${c.id}/${w.id}: a cloth caster with ${w.main}`);
     }
     const oldOff = c.offStarter || (c.startingArmour || []).find(k => engine.items.armorBases[k]?.slot === 'offhand') || null;
-    if (packs[0].main !== (c.starter || 'sword') || (packs[0].off || null) !== oldOff) bad.push(`${c.id}: first pack ${packs[0].main}+${packs[0].off || '-'} is not the old ${c.starter}+${oldOff || '-'}`);
+    // owner feedback 6 (U15): the first pack still holds the old starter WEAPON, but never a bare one-hander any more
+    if (packs[0].main !== (c.starter || 'sword') || (oldOff && (packs[0].off || null) !== oldOff)) bad.push(`${c.id}: first pack ${packs[0].main}+${packs[0].off || '-'} is not the old ${c.starter}+${oldOff || '-'}`);
   }
   assert.deepEqual(bad, []);
 });
@@ -205,6 +206,35 @@ test('no kit name, blurb or kit item name uses a banned word (CLAUDE.md conventi
       // an item's own name may carry Farhold's element word ("Flame", "Gloom" …) — those are checked like any other
       for (const it of row.items) check(`${cls}/${row.id} item`, it.baseName || it.name);
     }
+  }
+  assert.deepEqual(bad, []);
+});
+
+// Owner feedback 6 (U15): "why choose a single longsword when you can pick a longsword AND a shield".
+test('no weapon pack is strictly worse than another: every pack fills both hands or is a two-hander; shield classes have a one-hander with a shield', async () => {
+  const { readFileSync } = await import('node:fs');
+  const json = JSON.parse(readFileSync(new URL('../../data/rules/starter-kits.json', import.meta.url), 'utf8'));
+  const classes = JSON.parse(readFileSync(new URL('../../../farhold/data/classes.json', import.meta.url), 'utf8')).classes;
+  const { engineFor } = await import('./setup.mjs');
+  const { setKitSource, kitsFor } = await import('../../js/rules/starter-kits.js');
+  const eng = await engineFor(3);
+  setKitSource(eng, json);
+  const bad = [];
+  for (const c of classes) {
+    const k = kitsFor(c.id, json, eng);
+    const sig = new Set();
+    for (const pack of k.weapons) {
+      const [main, off] = pack.items;
+      if (!main) { bad.push(`${c.id}/${pack.id}: no main hand`); continue; }
+      if (!main.twoHanded && !off) bad.push(`${c.id}/${pack.id}: a bare ${main.name} with an empty off hand`);
+      if (main.twoHanded && off) bad.push(`${c.id}/${pack.id}: a two-hander with an off hand`);
+      // a pack that is another pack minus something
+      const key = `${pack.main}|${pack.off || ''}|${pack.style || ''}|${pack.element || ''}|${pack.spell || ''}`;
+      if (sig.has(key)) bad.push(`${c.id}/${pack.id}: the same pack twice`);
+      sig.add(key);
+    }
+    for (const a of k.weapons) for (const b of k.weapons) if (a !== b && a.main === b.main && !a.off && b.off && (a.style || '') === (b.style || '') && (a.element || '') === (b.element || '')) bad.push(`${c.id}: ${a.id} is ${b.id} without its off hand`);
+    if (c.shield && !k.weapons.some(p => !p.items[0].twoHanded && p.items[1]?.isShield)) bad.push(`${c.id}: can carry a shield but no pack has one beside a one-hander`);
   }
   assert.deepEqual(bad, []);
 });

@@ -91,3 +91,7 @@ html[data-input="pad"] :focus { outline: none; }
 .ctl-three h3 { margin: 0 0 6px; font-family: var(--serif, Georgia, serif); color: var(--gold-hi, #f1d595); font-size: 17px; letter-spacing: 0.05em; }
 .ctl-three .ctl-ref { grid-template-columns: 1fr; }
 @media (max-width: 900px) { .ctl-three { grid-template-columns: 1fr; padding: calc(var(--safe-top, 0px) + 12px) calc(var(--safe-right, 0px) + 12px) calc(var(--safe-bottom, 0px) + 12px) calc(var(--safe-left, 0px) + 12px); } }
+/* a row with several chords (skills 1–6 on a pad) wraps inside its own column instead of squeezing the words beside it */
+.ctl-ref dt, .help-grid.live dt { max-width: 210px; white-space: normal; }
+.help-grid.live dl { grid-template-columns: minmax(84px, max-content) minmax(110px, 1fr); align-items: baseline; }
+.help-grid.live { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }

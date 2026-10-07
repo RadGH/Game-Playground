@@ -65,6 +65,8 @@ export function createShops({ data = null, mounts = null, now = () => Date.now()
   const sellPrice = (item, rules) => (ownPrice(item) ? Math.max(0, Math.round(item.price)) : item && (item.kind === 'crate' || item.kind === 'gift') ? 1 : Math.max(1, Math.floor(price(item, rules) * pricing.sellFactor)));
   /** A goods-catalog item by id (E's quest `grant` / `reward.goods`: a rod, a tin of worms), or null. */
   const goodOf = id => (catalog[id] ? good({ id, source: 'good' }, null) : null);
+  /** A potion item by id (play-test 6 U17: potion drops), named from the engine's potion table when the rules have one. */
+  const potionOf = (id, rules = null) => good({ id, source: 'potion' }, rules);
   const engineOf = rules => (rules && rules.room && rules.room.engine) || null;
 
   function pickRarity(weights, cap) {
@@ -145,7 +147,7 @@ export function createShops({ data = null, mounts = null, now = () => Date.now()
     // for sale; anything else (a base the generator could not make) is dropped rather than sold as its category label.
     return rows.filter(isProduct);
   }
-  return { kindOf, shopOf, stock, price, sellPrice, pricing, kinds, towns, cache, goodOf, catalog };
+  return { kindOf, shopOf, stock, price, sellPrice, pricing, kinds, towns, cache, goodOf, potionOf, catalog };
 }
 /** S3: a row a player can actually buy — a named item (gear or good) or a mount. */
 export const isProduct = r => !!(r && ((r.mount && r.mount.id) || (r.item && typeof r.item === 'object' && typeof r.item.name === 'string' && r.item.name.trim() && r.item.name !== r.label)));

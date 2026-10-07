@@ -54,8 +54,9 @@
     { "name": "Benediction", "abilities": ["censure", "cross_of_light", "glare"] },
     { "name": "Darkened Nave", "at": 0.6, "say": "Darkness, my children. Let me hold the light for you.",
       "abilities": ["censure", "steal_light", "procession"],
-      "onEnter": [ { "shield": true }, { "reset": "brazier" }, { "adds": { "type": "barrow_hound", "count": 2, "radius": 8, "at": "home" } },
-        { "say": "The lanterns go dark and a shell of stolen light closes around the Bishop. Light all three lanterns!", "style": "warn" } ] },
+      "ward": {"seconds": 20, "pool": 0.1, "break": "objects", "need": 3, "what": "brazier", "say": "The lanterns go dark and a shell of stolen light closes around the Bishop. Light all three lanterns! It fails by itself in 20 seconds.", "fade": "The ward fails by itself. No opening this time."},
+      "onEnter": [ { "shield": { "seconds": 20, "pool": 0.1 } }, { "reset": "brazier" }, { "adds": { "type": "barrow_hound", "count": 2, "radius": 8, "at": "home" } },
+        { "say": "The lanterns go dark and a shell of stolen light closes around the Bishop. Light all three lanterns! It fails by itself in 20 seconds.", "style": "warn" } ] },
     { "name": "Last Rites", "newBar": { "hp": 0.55 }, "say": "You gave it back to them? Then burn in it.",
       "abilities": ["censure", "mirror_beams", "last_rites", "halo"] }
   ],

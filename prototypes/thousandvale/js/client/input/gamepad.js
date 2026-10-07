@@ -52,14 +52,15 @@ export function createGamepad({ api, focus, radial, osk, run }) {
     const title = !api.inWorld?.();
     switch (btn) {
       case 'A': focus.press(); break;
-      case 'B': if (!title) keyTap('Escape'); else document.querySelector('#back-front:not([hidden]), .tv-panel:not([hidden]) [data-act="back"]')?.click(); break;
+      case 'B': document.activeElement?.blur?.();   // the game ignores keys while a text box, list or checkbox has the focus
+        if (!title) keyTap('Escape'); else document.querySelector('#back-front:not([hidden]), .tv-panel:not([hidden]) [data-act="back"]')?.click(); break;
       case 'X': focus.alt(); break;
       case 'Y': focus.details(); break;
       case 'LB': focus.tab(-1); break;
       case 'RB': focus.tab(1); break;
       case 'LT': focus.zoom(-1); break;
       case 'RT': focus.zoom(1); break;
-      case 'START': for (let i = 0; i < 6 && focus.container() && !title; i++) keyTap('Escape', 10); break;
+      case 'START': document.activeElement?.blur?.(); for (let i = 0; i < 6 && focus.container() && !title; i++) keyTap('Escape', 10); break;
       case 'BACK': if (!title) keyTap('KeyM'); break;
       case 'UP': focus.move(0, -1); break; case 'DOWN': focus.move(0, 1); break; case 'LEFT': focus.move(-1, 0); break; case 'RIGHT': focus.move(1, 0); break;
     }

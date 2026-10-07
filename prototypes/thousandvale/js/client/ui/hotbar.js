@@ -67,7 +67,8 @@ export function createHotbar({ net, hud, bag, me }) {
       const face = b.querySelector('.hb-face'); face.replaceChildren();
       if (it) { rememberItems([it]); const url = iconFor(it); face.append(url ? h('img', { src: url, alt: '' }) : h('span.glyph', {}, (nameOf(it)[0] || '?').toUpperCase())); }
       else if (id) face.append(h('span.glyph', {}, '·'));
-      b.querySelector('.hb-n').textContent = list.length > 1 ? String(list.length) : '';
+      const total = list.reduce((s, x) => s + (x.count || 1), 0);            // U5: stacks
+      b.querySelector('.hb-n').textContent = total > 1 ? String(total) : '';
       if (it) { delete b.dataset.tip; b.dataset.tipRender = 'item'; b.dataset.tipItem = String(it.uid); }
       else { delete b.dataset.tipRender; b.dataset.tip = id ? `None left — ${String(id).replace(/_/g, ' ')}` : 'Drag a potion or food here (or buy some: they fill the empty keys)'; }
       b.dataset.potion = it && potionLike(it) ? '1' : '';

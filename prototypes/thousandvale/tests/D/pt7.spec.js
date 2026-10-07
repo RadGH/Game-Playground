@@ -125,4 +125,65 @@ soft('V9: on a phone-width screen the bag\'s Stats button opens the Character me
   await ctx.close();
 });
 
+soft('§23.1: split a stack (Shift-click, a number box), join two by dropping one on the other; the friends badge is the server\'s and survives; kits fail with a reason', async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 1180, height: 720 } });
+  const page = await ctx.newPage(); page.setDefaultTimeout(20000);
+  const errors = []; page.on('pageerror', e => errors.push(e.message));
+  // kits: the server answers before you are in the world; a calling it does not know comes back with the reason, and nothing runs in the page
+  await page.goto(base + '?quality=low&fresh=1&tod=0.45');
+  await page.waitForSelector('#loading.done', { timeout: 120000 });
+  await page.fill('#name', 'Splitta');
+  const loaded = await page.evaluate(async () => { const real = await thousandvale.ui5.kits.load('warrior'); const none = await thousandvale.ui5.kits.load('no_such_calling'); return { sets: real ? real.armour.length : 0, items: real ? real.armour[0].items.length : 0, none, why: thousandvale.ui5.kits.why, rules: performance.getEntriesByType('resource').some(r => /js\/rules\/index\.js/.test(r.name)) }; });
+  expect(loaded.sets).toBe(3); expect(loaded.items).toBeGreaterThan(0);
+  expect(loaded.none).toBe(null); expect(loaded.why).toMatch(/no starting kits|could not|did not answer/);
+  expect(loaded.rules, 'the rules engine is not loaded into the page for kits').toBe(false);
+  // into the world
+  await page.goto(base + '?quality=low&autoplay=1&name=Splitta&cls=warrior&tod=0.45');
+  await page.waitForFunction(() => window.tv && tv.state().status === 'online' && tv.state().you?.id != null, null, { timeout: 180000 });
+  await page.waitForTimeout(3000);
+  await page.evaluate(() => { window.__sent = []; const n = thousandvale.S.net; for (const k of ['splitItem', 'mergeItem', 'friendsSeen', 'useItem', 'item']) { n[k] = (...a) => { window.__sent.push({ k, a }); }; }
+    tv.fake('bag', { add: [{ uid: 'p1', id: 'healing_potion', kind: 'potion', name: 'Healing Potion', count: 7, stackMax: 20 }, { uid: 'p2', id: 'healing_potion', kind: 'potion', name: 'Healing Potion', count: 2, stackMax: 20, apart: 1 }, { uid: 'm1', id: 'mana_potion', kind: 'potion', name: 'Mana Potion', count: 3, stackMax: 20 }], remove: [], gold: 3 }); });
+  await page.keyboard.press('KeyB');
+  await page.locator('#bag-grid [data-tip-item="p1"]').click({ modifiers: ['Shift'] });
+  const box = page.locator('.tv-split');
+  await expect(box).toBeVisible();
+  await expect(box).toContainText('Split Healing Potion (7)');
+  await expect(box.locator('[data-act="split"]')).toHaveText('Split off 3');
+  await box.locator('input[type="number"]').fill('2');
+  await expect(box.locator('[data-act="split"]')).toHaveText('Split off 2');
+  await box.locator('input[type="number"]').fill('99');
+  await expect(box.locator('[data-act="split"]')).toHaveText('Split off 6');          // never the whole stack
+  await box.locator('input[type="number"]').fill('2');
+  await page.waitForTimeout(200);
+  await page.screenshot({ path: join(SHOTS, 'pt7-split.png') });
+  await box.locator('[data-act="split"]').click();
+  expect(await page.evaluate(() => window.__sent.find(m => m.k === 'splitItem')?.a)).toEqual(['p1', 2]);
+  expect(await page.evaluate(() => window.__sent.some(m => m.k === 'useItem' || m.k === 'item')), 'a Shift-click does not drink the potion').toBe(false);
+  // join: drop p2 on p1 (the same thing) -> merge; on the mana potion -> refused with the reason
+  const drop = (from, onto) => page.evaluate(([f, o]) => { const dt = new DataTransfer(); dt.setData('text/x-tv-item', JSON.stringify({ uid: f, worn: null })); const el = document.querySelector(`#bag-grid [data-tip-item="${o}"]`); el.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: dt })); el.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt })); }, [from, onto]);
+  await drop('p2', 'p1');
+  expect(await page.evaluate(() => window.__sent.find(m => m.k === 'mergeItem')?.a)).toEqual(['p2', 'p1']);
+  await page.evaluate(() => { window.__sent.length = 0; });
+  await drop('p2', 'm1');
+  expect(await page.evaluate(() => window.__sent.filter(m => m.k === 'mergeItem').length)).toBe(0);
+  await expect(page.locator('#toasts')).toContainText('same thing');
+  await page.evaluate(() => tv.fake('itemR', { op: 'split', ok: false, why: 'bagFull' }));
+  await expect(page.locator('#toasts')).toContainText('needs a free square');
+  await page.keyboard.press('KeyB');
+  // friends: the server's own unseen count lights the badge (it is there after a reload); looking tells the server and clears it
+  const badge = id => page.evaluate(i => document.getElementById(i)?.querySelector('b')?.textContent ?? null, id);
+  await page.evaluate(() => tv.fake('friends', { list: [{ char: 9, name: 'Brem', online: false, unseen: true }, { char: 8, name: 'Aldra', online: false, unseen: true }], unseen: [{ char: 9, name: 'Brem', kind: 'addedYou', at: Date.now() }, { char: 8, name: 'Aldra', kind: 'added', at: Date.now() }], unseenCount: 2 }));
+  expect(await badge('menu-friends')).toBe('2'); expect(await badge('party-btn')).toBe('2');
+  await page.evaluate(() => tv.fake('friendNew', { char: 7, name: 'Cyn', kind: 'addedYou' }));
+  expect(await badge('party-btn')).toBe('3');
+  await page.screenshot({ path: join(SHOTS, 'pt7-friends-unseen.png') });
+  await page.evaluate(() => tv.panel('friends', true));
+  expect(await page.evaluate(() => window.__sent.some(m => m.k === 'friendsSeen'))).toBe(true);
+  expect(await badge('party-btn')).toBe(''); expect(await badge('menu-friends')).toBe('');
+  await page.evaluate(() => tv.fake('friends', { list: [{ char: 9, name: 'Brem', online: false }], unseen: [], unseenCount: 0 }));
+  expect(await badge('party-btn')).toBe('');
+  expect(errors).toEqual([]);
+  await ctx.close();
+});
+
 test('every check above passed', async () => { expect(fails).toEqual([]); });

@@ -138,7 +138,7 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `bind` | p | `npc:id` | 1 / 3 | An innkeeper in a town: make this town home (§18.11). Answer `bindR`. |
 | `settings` | gw | `op:str:8, data?:obj` | 1 / 4 | Account settings (§18.7): `get`, `set {data:{tradeFriendsOnly}}`. Answer `settings {data}`. |
 | `look` | gw | `char:int, look:obj` | 0.5 / 3 | Title screen "Customize Appearance" (§18.4): a look for a character not in the world. Answer `lookR`. |
-| `kits` | gw | `cls:str:32` | 2 / 6 | Play-test 5 (§21.2): the starter kits of a class (stream C's `kitsFor`). Answer `kitsR`. `create` gains `kit?:obj` = `{armour, weapons}` ids. |
+| `kits` | gw | `cls:str:32` | 10 / 40 | Play-test 5 (§21.2): the starter kits of a class (stream C's `kitsFor`). Answer `kitsR`. `create` gains `kit?:obj` = `{armour, weapons}` ids. |
 | `revive` | p | `op:str:8, id?:int` | 2 / 4 | §21.3: answer a `reviveAsk` — `accept` or `decline`. Answer `reviveR`. |
 | `sheet` | p | — | 2 / 4 | §21.6: ask for the character sheet again. Answer `sheet`. |
 | `feedback` | both | `kind:str:16, text:str:2000, ctx?:obj` | 0.2 / 5 | §21.7: a suggestion or a bug report (`ctx` = the client's own context). Answer `feedbackR`. |
@@ -1270,3 +1270,13 @@ time." / "No reward this time.") and always carries `story`; `realm {kind:'event
 - **Fish pools (V3):** `liveShare` 0.6 of a zone's listed spots are open per copy; every town with a spot within 600 m keeps a
   never-empty tier-1 pool (`info.pool.always: 1`, `info.pool.town`); spots near a town's edge are in both rooms; a cast at a pool
   above your skill lands beside it as open water (`fishR.note`).
+
+### 23.1 D-UI's asks (owner feedback 7)
+- **Stacks:** `item {op:'split', uid, n}` -> `itemR {op:'split', ok, uid, made (the new stack's uid), count, n}` + `bag {remove:[uid], add:[both]}`;
+  `item {op:'merge', uid, onto}` -> `itemR {op:'merge', ok, onto, count, moved, left}` + `bag`. A split-off stack carries `apart: 1` and is
+  not swept back together (by loot, by a login) until it is merged or changes hands. Refusals: `count`, `bagFull`, `item`, `full`.
+- **Kits:** `kits {cls}` is answered in ANY state after `hello` (signed in or not), 40 at once: `kitsR {cls, ok, kits}` with every set and
+  pack carrying its real item objects — or `{ok:false, kits:null, why:'none'|'noItems'|'failed'}`. Never sets with empty `items`.
+- **Friends unseen:** `friends {list, unseen:[{char, name, kind:'added'|'addedYou', at}], unseenCount}` (a fresh row also has `unseen: true`);
+  `friendNew {char, name, kind:'addedYou'}` to someone who was just added; `friend {op:'seen', char?}` clears one or all. Kept in world state
+  (`friendsUnseen:<char>`), so the badge survives a reload.

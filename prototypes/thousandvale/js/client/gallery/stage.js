@@ -64,7 +64,7 @@ const actors = (() => {
   const map = new Map();
   return {
     actors: map, get: id => map.get(id) || null, lodStats: {},
-    add(o) { const a = { height: 1.8, dead: false, hostile: false, ...o, pos: { x: o.x || 0, y: o.y || 0, z: o.z || 0 } }; map.set(o.id, a); return a; },
+    add(o) { const a = { height: 1.8, dead: false, hostile: false, ...o, pos: { x: o.x || 0, y: o.y || 0, z: o.z || 0 }, group: { add() {}, remove() {}, children: [] } }; map.set(o.id, a); return a; },   // `group`: where the game hangs 3D things (a boss's ward shell) — nothing is drawn here
     remove(id) { map.delete(id); },
     setLook(id, look) { const a = map.get(id); if (a) a.look = look; },
     setHp(id, hp, max) { const a = map.get(id); if (a) { a.hp = hp; if (max) a.hpMax = max; } },

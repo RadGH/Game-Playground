@@ -3450,3 +3450,16 @@ in town and says so. **A:** `always: true` is on 15 pools now, not 1; `pool.town
   brighter. At 150 m a pool is at the very edge of what the server sends, so the picture there shows none: that is the `fishPools` list
   asked for above. So the owner's "only one" was (a) density + the 150 m entity range, plus (c) near-range faintness, now fixed.
 - **Also fixed:** pools of a room you left were kept (hidden) on the client; they are dropped on a room change now.
+
+## A -> D-UI, Lead — 2026-10-07: the three asks (Round 7 contracts — A, addendum; docs/protocol.md §23.1)
+- **Split / merge a stack:** `net.splitItem(uid, n)` = `item {op:'split', uid, n}` -> `itemR {op:'split', ok, made, count, n}`; `net.mergeItem(uid,
+  onto)` = `item {op:'merge', uid, onto}` -> `itemR {op:'merge', ok, onto, count, moved, left}`; both followed by `bag {remove, add}`. A split-off
+  stack has `apart: 1` and is left alone by auto-stacking until merged or handed over (mail / trade).
+- **`kitsR` is complete, always:** the server's own answer already carried real items on dev AND in the live build (checked by running the
+  published copy's loader: 30 callings, no empty set). What could leave the screen with nothing: (1) `kits` was refused — silently — unless the
+  socket was already signed in, so a new visitor's creation screen asking before its guest account existed got no answer; (2) the message
+  was limited to 6 at once, so a screen asking for every calling had most of its asks dropped, also silently. Now: answered in any state after
+  `hello`, 40 at once, and either `{ok:true, kits}` with items in every set and pack or `{ok:false, kits:null, why}` — never sets with empty
+  `items`. D-UI: the in-page rules fallback can go; treat `ok:false` as "no kit step".
+- **Friends unseen:** `friends.unseen [{char, name, kind:'added'|'addedYou', at}]` + `unseenCount` + `unseen:true` on the row; `friendNew` when
+  someone adds you; `net.friendsSeen(char?)` = `friend {op:'seen'}` clears it. Server-kept, so it survives a reload.

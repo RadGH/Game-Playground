@@ -140,6 +140,25 @@ test('the gallery page itself: scene list, device frames, deep links, notes', as
   await ctx.close();
 });
 
+test('V9 (owner feedback 7): on a phone held upright, a real TAP on the bag\'s Stats button brings the Character window up on top', async ({ browser }) => {
+  test.setTimeout(120000);
+  const ctx = await browser.newContext({ viewport: { width: 393, height: 852 }, hasTouch: true });
+  const page = await ctx.newPage();
+  await page.goto(BASE + 'ui-gallery-frame.html?scene=bag&device=phone-p&layout=proposed&freeze=1');
+  await page.waitForFunction(() => document.documentElement.dataset.ready === '1', null, { timeout: 45000 });
+  await page.locator('#inv-stats').tap();
+  await expect(page.locator('#panel-sheet')).toBeVisible();
+  const top = await page.evaluate(() => { const e = document.elementFromPoint(196, 420); return e?.closest('#panel-sheet') ? 'sheet' : e?.closest('#bag') ? 'bag' : (e?.id || e?.className); });
+  expect(top, 'the Character window is what you see, not the bag under it').toBe('sheet');
+  expect(await page.locator('#panel-sheet .sh-row').count()).toBeGreaterThan(5);
+  // and the filter row shows every chip (V8)
+  await page.locator('.phone-tabs [data-tab="bag"]').tap();
+  await expect(page.locator('#bag .inv-filters .chip', { hasText: 'Upgrades' })).toBeVisible();
+  const box = await page.locator('#bag .inv-filters .chip', { hasText: 'Upgrades' }).boundingBox();
+  expect(box.x + box.width).toBeLessThanOrEqual(393);
+  await ctx.close();
+});
+
 test('on a real phone the page shows the scene full-screen with a picker (no frame in a frame)', async ({ browser }) => {
   test.setTimeout(120000);
   const ctx = await browser.newContext({ viewport: { width: 393, height: 852 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });

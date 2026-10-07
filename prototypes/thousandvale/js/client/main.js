@@ -397,7 +397,7 @@ async function toKit() {
   let ok = false;
   try { ok = await ui5.kits.open({ cls: S.cls, className: name(S.cls) }); } catch (e) { console.warn('[kits] step tripped:', e?.stack || e?.message); ok = ui5.kits.panel.isOpen; }
   if (note && text) { note.classList.add('done'); text.textContent = was || ''; }
-  if (!ok && S.phase === 'title') { S.kit = null; enterWorld(); }
+  if (!ok && S.phase === 'title') { S.kit = null; S.kitWhy = ui5.kits.why || ''; enterWorld(); }
 }
 /** The connection the kit step asks through (a guest is made under the name from step 1, exactly as entering does). */
 async function kitNet() {
@@ -816,6 +816,7 @@ function startWorld(j) {
   hud.setSelf(S.self);
   account.refreshPill();
   ui5.kits.close(); S.titleGear = null; S.kit = null;
+  if (S.kitWhy) { hud.chat(`${S.kitWhy} You start in your calling's usual gear.`, 'system'); hud.toast(S.kitWhy, 'warn'); S.kitWhy = ''; }
   if (!S.net?.claimed) hud.chat('You are playing as a guest. Open Account (the person button, right) to claim it — free — and keep this character.', 'system');
   const zone = j.room.name || 'The Vale';
   hud.zone(zone);

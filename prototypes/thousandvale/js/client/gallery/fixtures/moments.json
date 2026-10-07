@@ -165,6 +165,15 @@
       "id": "@enemy",
       "text": "The Screelhag draws breath!",
       "style": "warn"
+     },
+     {
+      "type": "fx",
+      "kind": "shield",
+      "id": "@enemy",
+      "on": true,
+      "ms": 20000,
+      "pool": 480,
+      "name": "Moor Ward"
      }
     ]
    }
@@ -716,6 +725,30 @@
     "s": "gw",
     "t": "partyFrames",
     "m": "@partyFrames"
+   }
+  ],
+  "lift": [
+   {
+    "t": "used",
+    "id": 77,
+    "ok": true,
+    "kind": "lift",
+    "name": "Stairs up",
+    "here": 3,
+    "choices": [
+     {
+      "to": "f:2",
+      "floor": 2,
+      "label": "Floor 2",
+      "name": "The Ossuary"
+     },
+     {
+      "to": "f:1",
+      "floor": 1,
+      "label": "Floor 1",
+      "name": "The Antechamber"
+     }
+    ]
    }
   ]
  },

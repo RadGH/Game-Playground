@@ -88,7 +88,7 @@ export function itemCardHtml(item, { worn = false, level = null, equipment = nul
   if (item.attackSpeed && item.type === 'weapon' && item.attackSpeed !== 'normal') base.push(`${esc(item.attackSpeed)} attacks`);
   if (item.ranged) base.push('ranged');
   if (base.length) b.push(`<div class="ic-base">${base.join(' · ')}</div>`);
-  if (item.count > 1) b.push(`<div class="ic-base">A stack of <b>${esc(fmt(item.count, { decimals: 0 }))}</b>${item.stackMax ? ` <span class="ic-dim">(holds ${esc(item.stackMax)})</span>` : ''} — one is used at a time.</div>`);
+  if (item.count > 1) b.push(`<div class="ic-base">A stack of <b>${esc(fmt(item.count, { decimals: 0 }))}</b>${item.stackMax ? ` <span class="ic-dim">(holds ${esc(item.stackMax)})</span>` : ''} — one is used at a time. Shift-click to split it.</div>`);
   if (item.kind === 'fish' && item.size) b.push(`<div class="ic-base"><b>${esc(Math.round(item.size * 10) / 10)}</b> cm${item.record ? ' · your biggest' : ''}</div>`);
   let potionSaid = false;
   if (item.kind === 'potion' && potions) {

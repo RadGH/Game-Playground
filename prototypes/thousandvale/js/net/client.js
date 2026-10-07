@@ -270,6 +270,9 @@ export function connect(opts = {}) {
   net.target = id => sendJ(game, id ? { t: 'target', id } : { t: 'target' });
   net.use = (id, to) => sendJ(game, to ? { t: 'use', id, to: String(to) } : { t: 'use', id });      // to: a lift's floor 'f:<n>' (U12)
   net.item = (op, uid, slot) => sendJ(game, slot ? { t: 'item', op, uid, slot } : { t: 'item', op, uid });
+  net.splitItem = (uid, n) => sendJ(game, { t: 'item', op: 'split', uid: String(uid), n: n | 0 });            // -> itemR {op:'split', ok, uid, made} + bag
+  net.mergeItem = (uid, onto) => sendJ(game, { t: 'item', op: 'merge', uid: String(uid), onto: String(onto) });   // drop one stack on another -> itemR {op:'merge'} + bag
+  net.friendsSeen = char => sendJ(gw, char != null ? { t: 'friend', op: 'seen', char } : { t: 'friend', op: 'seen' });   // clears `friends.unseen`
   /** party('invite', {name}) | ('accept'|'decline', {party: id}) | ('join', {code}) | ('code') | ('leave') | ('kick'|'lead', {char}) */
   net.partyOp = (op, a = {}) => {
     const o = { t: 'party', op };

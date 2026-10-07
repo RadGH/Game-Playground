@@ -952,3 +952,4 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   docs/economy/README.md. data/provinces/economy.json (new), shops.json fixed prices, angling.json fish prices (62 species), quest purses at levels 1-2;
   tuned C's data/rules/prices.json and fishing.json `value` numbers. tests/E/playtest7-economy.test.js pins the ratios.
 - **V3**: 385 pools (was 308), 257 of them tier 1, 238 open at once, a town pool beside 15 of the 16 hub towns with the angler standing by it.
+- (A, D-UI's asks) stack split / merge (`item split|merge`), `kits` answered before sign-in and 40 at once with a complete or plainly-empty reply, friends `unseen` kept server-side (`friend seen`). tests/A/pt7-asks (4).

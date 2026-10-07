@@ -168,7 +168,7 @@ export function createUi5(o) {
     n.on('joined', () => { if (!self?.().dead) { riseBox.hidden = true; R.ask = null; } });
     // T7: the server's own words when a piece will not go where you put it
     n.on('itemR', r => { if (r.op === 'equip' && r.ok === false && r.msg) hud.toast(r.msg, 'warn'); });
-    n.on('kitsR', m => { const ws = kitWait.get(m.cls); if (ws) { kitWait.delete(m.cls); for (const w of ws) w(m.kits || null); } });
+    n.on('kitsR', m => { const ws = kitWait.get(m.cls); if (ws) { kitWait.delete(m.cls); for (const w of ws) w(m); } });
     // the chat's system lines belong in the log ring too
     n.on('chat', m => { if (m.ch === 'system' && m.text) LOG.push('system', m.text); });
     n.on('err', e => LOG.push('server', `${e.code || 'err'}: ${e.msg || ''}`));

@@ -118,7 +118,7 @@ export const CLIENT_MSGS = Object.freeze({
   say:     { on: 'p', fields: { text: 'str:200' }, rate: 1, burst: 5 },
   respawn: { on: 'p', fields: {}, rate: 1, burst: 2 },
   use:     { on: 'p', fields: { id: 'id', to: '?str:16' }, rate: 4, burst: 8 },      // to (play-test 6 U12): a lift's floor, 'f:<n>'
-  item:    { on: 'p', fields: { op: 'str:8', uid: '?str:40', slot: '?str:16' }, rate: 5, burst: 10 },
+  item:    { on: 'p', fields: { op: 'str:8', uid: '?str:40', slot: '?str:16', n: '?int', onto: '?str:40' }, rate: 5, burst: 10 },      // n / onto: split and merge a stack (owner feedback 7)
   travel:  { on: 'p', fields: { to: 'str:48' }, rate: 1, burst: 3 },
   trace:   { on: 'p', fields: { kind: 'str:16' }, rate: 1, burst: 2 },
   quest:   { on: 'p', fields: { op: 'str:8', id: 'str:120', npc: '?id' }, rate: 2, burst: 6 },
@@ -126,7 +126,7 @@ export const CLIENT_MSGS = Object.freeze({
   leave:   { on: 'both', fields: {}, rate: 1, burst: 2 },
   // M3 (protocol v4, docs/protocol.md §16)
   account: { on: 'gw', fields: { op: 'str:8', user: '?str:24', pass: '?str:128', old: '?str:128', email: '?str:120', code: '?str:16', human: '?str:2048' }, rate: 0.5, burst: 4 },
-  friend:  { on: 'gw', fields: { op: 'str:8', name: '?str:24', char: '?int' }, rate: 1, burst: 5 },
+  friend:  { on: 'gw', fields: { op: 'str:8', name: '?str:24', char: '?int' }, rate: 1, burst: 5 },      // ops add | remove | list | seen (seen: clears the unseen badge; char = one, none = all)
   guild:   { on: 'gw', fields: { op: 'str:8', name: '?str:24', char: '?int', id: '?int', text: '?str:200' }, rate: 1, burst: 5 },
   callboard: { on: 'gw', fields: { op: 'str:8', dungeon: '?str:64', role: '?str:8', id: '?int' }, rate: 1, burst: 5 },
   report:  { on: 'gw', fields: { name: 'str:24', why: 'str:16', text: '?str:200' }, rate: 0.1, burst: 3 },
@@ -149,7 +149,7 @@ export const CLIENT_MSGS = Object.freeze({
   look:    { on: 'gw', fields: { char: 'int', look: 'obj' }, rate: 0.5, burst: 3 },
   // play-test 5 (docs/protocol.md §21): starter kits (T5), revive answers (T4), the character sheet (T18), feedback (T19),
   // admins (T21), angling + cooking (T25)
-  kits:    { on: 'gw', fields: { cls: 'str:32' }, rate: 2, burst: 6 },
+  kits:    { on: 'gw', fields: { cls: 'str:32' }, rate: 10, burst: 40 },      // a creation screen may ask for every calling at once (30): none may be dropped silently
   revive:  { on: 'p', fields: { op: 'str:8', id: '?int' }, rate: 2, burst: 4 },
   sheet:   { on: 'p', fields: {}, rate: 2, burst: 4 },
   feedback: { on: 'both', fields: { kind: 'str:16', text: 'str:2000', ctx: '?obj' }, rate: 0.5, burst: 10 },      // the real limit is js/sim/feedback.js (1 per 20 s, 12 an hour, answered)
@@ -268,7 +268,7 @@ export const PREF_KEYS = Object.freeze(['showGear', 'showHelm']);
 export const LOOT_MINS = Object.freeze(['magic', 'rare', 'legendary', 'unique']);   // = C's js/rules/loot-rules.js LOOT_THRESHOLDS ('epic' -> legendary)
 export const PARTY_MAX = 5;
 /** Item ops (`item {op}`). */
-export const ITEM_OPS = Object.freeze(['equip', 'unequip', 'destroy', 'use', 'stand', 'open']);   // open (play-test 5 T9): a crate / gift box (= use)   // stand (play-test 4 S20): get up from a meal   // use: potions + food (uid, or 'id:<item id>' for a hotbar slot)
+export const ITEM_OPS = Object.freeze(['equip', 'unequip', 'destroy', 'use', 'stand', 'open', 'split', 'merge']);   // split {uid, n} / merge {uid, onto}: consumable stacks   // open (play-test 5 T9): a crate / gift box (= use)   // stand (play-test 4 S20): get up from a meal   // use: potions + food (uid, or 'id:<item id>' for a hotbar slot)
 /** Chat channels a client may send on the gateway (`say` is local, on the province socket; `w` = whisper, needs `to`).
  *  The server also sends `system` lines (admin announcements). */
 export const CHAT_CHANNELS = Object.freeze(['party', 'guild', 'zone', 'trade', 'world', 'w']);

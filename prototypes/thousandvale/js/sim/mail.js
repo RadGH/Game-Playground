@@ -113,6 +113,7 @@ export function createMail({ store, online, journal, syncChar, econ, trades, sen
     catch (err) { log('mail take failed', err && err.message); ok = false; }
     o.frozen = false; o.saving = false; o.mailBusy = false;
     if (!ok) { counters.mailFails = (counters.mailFails || 0) + 1; return fail(o, op, 'failed', 'Could not take it just now. The letter still holds everything.'); }
+    for (const i of got) delete i.apart;          // a split-off stack that changed hands joins the receiver's stacks
     ch.bag = (ch.bag || []).concat(got);
     ch.gold = (ch.gold || 0) + mail.gold;
     ch.version = next.version;

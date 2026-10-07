@@ -57,7 +57,7 @@ export function createBag({ net: getNet, hud, me = null }) {
           <div class="row"><input id="inv-search" type="search" placeholder="Find by name…" aria-label="Find by name"><select id="inv-sort" aria-label="Sort"></select></div>
         </div>
         <div class="bag-grid" id="bag-grid"></div>
-        <p class="bag-hint"><span id="inv-count"></span> Click to wear (or use / open) · <kbd>Shift</kbd>-click for the other hand · drag onto a slot or a 7–0 key · right-click to throw away · hold <kbd>Shift</kbd> to compare the other hand.</p>
+        <p class="bag-hint"><span id="inv-count"></span> Click to wear (or use / open) · <kbd>Shift</kbd>-click for the other hand (a stack: split it; drop one stack on another to join them) · drag onto a slot or a 7–0 key · right-click to throw away · hold <kbd>Shift</kbd> to compare the other hand.</p>
       </section>
     </div>`;
   const el = { gold: $('bag-gold'), sub: $('inv-sub'), grid: $('bag-grid'), left: $('doll-left'), right: $('doll-right'), bottom: $('doll-bottom'), stats: $('doll-stats'),
@@ -158,6 +158,33 @@ export function createBag({ net: getNet, hud, me = null }) {
     // before any sheet has arrived: say so rather than add things up a second way
     return `<b>Level ${level()}</b><span class="dim" data-tip="The numbers come from the Character menu (V) the moment the server sends them.">Counting…</span>`;
   }
+  /** Split a stack: how many to take off (1 .. count-1). The server answers with both stacks. */
+  function splitAsk(it) {
+    hideTip();
+    document.querySelector('.tv-split')?.remove();
+    const max = it.count - 1, half = Math.max(1, Math.floor(it.count / 2));
+    const num = document.createElement('input'); Object.assign(num, { type: 'number', min: 1, max, step: 1, value: half }); num.setAttribute('aria-label', 'How many to split off');
+    const range = document.createElement('input'); Object.assign(range, { type: 'range', min: 1, max, step: 1, value: half });
+    const box = document.createElement('div'); box.className = 'tv-confirm tv-split'; box.setAttribute('role', 'dialog');
+    const p = document.createElement('p'); p.textContent = `Split ${nameOf(it)} (${it.count}) — how many go in the new stack?`;
+    const row = document.createElement('div'); row.className = 'row';
+    const no = document.createElement('button'); no.type = 'button'; no.className = 'ghost'; no.textContent = 'Cancel';
+    const yes = document.createElement('button'); yes.type = 'button'; yes.className = 'primary'; yes.dataset.act = 'split';
+    const val = () => Math.max(1, Math.min(max, Math.round(+num.value || 0)));
+    const paint = () => { yes.textContent = `Split off ${val()}`; };
+    num.oninput = () => { range.value = String(val()); paint(); }; range.oninput = () => { num.value = range.value; paint(); };
+    const done = ok => { box.remove(); if (ok) { const n = getNet(); if (typeof n?.splitItem === 'function') n.splitItem(it.uid, val()); else n?._raw?.('game', JSON.stringify({ t: 'item', op: 'split', uid: String(it.uid), n: val() })); } };
+    no.onclick = () => done(false); yes.onclick = () => done(true);
+    box.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') done(false); if (e.key === 'Enter') done(true); });
+    row.append(no, yes); box.append(p, range, num, row); paint();
+    (document.getElementById('hud') || document.body).appendChild(box);
+    num.focus(); num.select();
+  }
+  const sameStack = (a, b) => !!a && !!b && a.uid !== b.uid && a.kind === b.kind && (a.id ?? a.baseKey) === (b.id ?? b.baseKey) && !!a.cooked === !!b.cooked && (a.stackMax || b.stackMax || a.count > 1 || b.count > 1 || a.kind === 'potion');
+  function merge(fromUid, onto) {
+    const n = getNet();
+    if (typeof n?.mergeItem === 'function') n.mergeItem(fromUid, onto.uid); else n?._raw?.('game', JSON.stringify({ t: 'item', op: 'merge', uid: String(fromUid), onto: String(onto.uid) }));
+  }
   let drawT = 0;
   function draw() {
     el.gold.textContent = `${S.gold.toLocaleString()} gold`;
@@ -174,12 +201,26 @@ export function createBag({ net: getNet, hud, me = null }) {
     const cells = list.map(it => {
       const d = slotEl(it);
       d.onclick = e => {
+        // §23.1: Shift-click a stack = split some off (before anything would drink it)
+        if (e.shiftKey && it.count > 1) { splitAsk(it); return; }
         if (useHook && useHook(it)) return;
         // Shift-click = the other hand / the other ring (T7: a second two-hander with Doubled Grasp)
         if (e.shiftKey && slotOf(it) === 'weapon') { wear(it, 'offhand'); return; }
         if (e.shiftKey && altSlotOf(it)) { wear(it, altSlotOf(it)); return; }
         wear(it);
       };   // potions / food: used (play-test 2 §18.10)
+      // §23.1: drop a stack on another stack of the same thing = merge them
+      d.addEventListener('dragover', e => { if (e.dataTransfer.types.includes('text/x-tv-item')) { e.preventDefault(); d.classList.add('drop'); } });
+      d.addEventListener('dragleave', () => d.classList.remove('drop'));
+      d.addEventListener('drop', e => {
+        d.classList.remove('drop');
+        let x; try { x = JSON.parse(e.dataTransfer.getData('text/x-tv-item')); } catch { return; }
+        if (x.worn || x.uid === it.uid) return;
+        const from = find(x.uid); if (!from) return;
+        e.preventDefault(); e.stopPropagation();
+        if (!sameStack(from, it)) { hud.toast('Only two stacks of the same thing go together.', 'warn'); return; }
+        merge(from.uid, it);
+      });
       d.oncontextmenu = async e => { e.preventDefault(); hideTip(); if (await confirmBox(`Throw away ${nameOf(it)}? It is gone for good.`, { yes: 'Throw away', danger: true })) getNet()?.item('destroy', it.uid); };
       return d;
     });
@@ -231,12 +272,14 @@ export function createBag({ net: getNet, hud, me = null }) {
       remember(); draw();
     });
     n.on('equip', m => { S.equipment = { ...(m.equipment || {}) }; remember(); draw(); if (m.item) hud.chat(`You equip ${nameOf(m.item)}.`, 'system'); });
+    n.on('itemR', r => { if ((r.op === 'split' || r.op === 'merge') && r.ok === false) hud.toast(r.msg || ({ count: 'There are not that many in the stack.', bagFull: 'Your bag is full — a split needs a free square.', full: 'That stack is full.', item: 'Those two do not go together.' }[r.why]) || 'That did not work.', 'warn'); });
     n.on('err', e => { if (e.code === 'item' || e.code === 'bagFull') hud.toast(e.msg || 'You cannot do that.', 'warn'); });
   }
 
   return {
     wire, toggle, state: S, draw,
     /** fn(open) each time the window opens or closes (the Character menu docks beside it). */
+    splitAsk, sameStack,
     onToggle(fn) { toggleFns.add(fn); return () => toggleFns.delete(fn); },
     /** U7: where the stat lines under the figure come from (the Character menu's sheet). */
     setStats(fn) { sheetLines = fn; if (!root.hidden) draw(); },

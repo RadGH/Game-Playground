@@ -9,8 +9,9 @@ import { UNSEEN } from './ui/unseen.js';
 
 export function createFriends({ net: getNet, hud, chat, social }) {
   const net = () => getNet();
-  let list = [], seen = false;
-  const panel = createPanel({ id: 'friends', title: 'Friends', width: 330, onOpen: () => { UNSEEN.seen('friends'); draw(); } });   // U1: looking at the list clears its badge
+  let list = [], seen = false, srv = false;      // srv: the server keeps the unseen list (protocol §23.1)
+  const tellSeen = () => { if (!srv || !UNSEEN.count('friends')) return; const n = net(); if (typeof n?.friendsSeen === 'function') n.friendsSeen(); else n?._raw?.('gw', JSON.stringify({ t: 'friend', op: 'seen' })); };
+  const panel = createPanel({ id: 'friends', title: 'Friends', width: 330, onOpen: () => { tellSeen(); UNSEEN.set('friends', 0); UNSEEN.seen('friends'); draw(); } });   // U1: looking at the list clears its badge
 
   function add(name) {
     const n = String(name || '').trim();
@@ -27,7 +28,7 @@ export function createFriends({ net: getNet, hud, chat, social }) {
   function draw() {
     const online = list.filter(f => f.online).length;
     if (!panel.isOpen) return;
-    UNSEEN.seen('friends');
+    tellSeen(); UNSEEN.set('friends', 0); UNSEEN.seen('friends');
     panel.setTitle('Friends', list.length ? `${online} of ${list.length} online` : '');
     const input = h('input', { maxLength: 16, placeholder: 'Name', 'aria-label': 'Friend name', onkeydown: e => { if (e.key === 'Enter') { add(input.value); input.value = ''; } } });
     const rows = sortFriends(list).map(f => h('li.fr-row' + (f.online ? '.online' : ''), {},
@@ -49,12 +50,15 @@ export function createFriends({ net: getNet, hud, chat, social }) {
     n.on('friends', m => {
       const before = new Map(list.map(f => [f.char, f]));
       list = m.list || [];
-      if (seen) for (const f of list) if (!before.has(f.char)) { hud.chat(`${f.name} is now on your friends list.`, 'system'); if (!panel.isOpen) UNSEEN.add('friends', 'new:' + f.char); }
+      if (seen) for (const f of list) if (!before.has(f.char)) { hud.chat(`${f.name} is now on your friends list.`, 'system'); if (!panel.isOpen && !srv) UNSEEN.add('friends', 'new:' + f.char); }
       for (const k of [...before.keys()]) if (!list.some(x => x.char === k)) { UNSEEN.drop('friends', 'new:' + k); UNSEEN.drop('friends', 'on:' + k); }
       if (seen) for (const [c, f] of before) if (!list.some(x => x.char === c)) hud.chat(`${f.name} was removed from your friends list.`, 'system');
+      // the server's own count of friends you have not looked at yet: it is there after a reload too
+      if ('unseenCount' in m || Array.isArray(m.unseen)) { srv = true; UNSEEN.set('friends', panel.isOpen ? 0 : (m.unseenCount ?? m.unseen.length)); }
       seen = true;
       draw();
     });
+    n.on('friendNew', m => { srv = true; if (!panel.isOpen) UNSEEN.set('friends', UNSEEN.count('friends') + 1); hud.chat(`${m.name || 'Someone'} added you as a friend.`, 'friend'); hud.toast(`${m.name || 'Someone'} added you as a friend`, 'info'); if (panel.isOpen) tellSeen(); });
     n.on('friendState', r => {
       const old = list.find(f => f.char === r.char);
       list = mergeFriend(list, r);

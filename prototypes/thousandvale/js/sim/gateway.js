@@ -217,8 +217,14 @@ export function createGateway(opts) {
       }
       case 'play': return play(s, m);
       case 'kits': {
-        if (s.state !== 'authed') return bad(s, 'order');
-        return Promise.resolve(kitsOf(m.cls)).then(kits => s.sendJSON({ t: 'kitsR', cls: m.cls, kits: kits || null, ok: !!kits }));
+        // The starter kits are public data and ALWAYS answered once the hello is done — signed in or not (owner feedback 7:
+        // a new visitor's creation screen asked before its guest account existed, got silence, and fell back to "0 armour").
+        // The answer is complete: every set and pack with its real item objects (the gateway process boots the rules for it).
+        if (s.state === 'hello') return bad(s, 'order');
+        return Promise.resolve(kitsOf(m.cls)).then(kits => {
+          const whole = !!(kits && (kits.armour || []).length && (kits.weapons || []).length && [...kits.armour, ...kits.weapons].every(k => Array.isArray(k.items) && k.items.length));
+          s.sendJSON({ t: 'kitsR', cls: m.cls, kits: whole ? kits : null, ok: whole, ...(whole ? {} : { why: kits ? 'noItems' : 'none', msg: 'No starting kits for that calling on this server.' }) });
+        }, () => s.sendJSON({ t: 'kitsR', cls: m.cls, kits: null, ok: false, why: 'failed' }));
       }
       case 'feedback': {
         if (s.state !== 'authed') return bad(s, 'order');
@@ -509,7 +515,7 @@ export function createGateway(opts) {
 
   // ---- M3 services ----
   const accounts = createAccounts({ store, hasher, verifyHuman, wallNow, log, filter: chatFilter, sendAll, kickChar, counters, trustIps: unlimitedIps });
-  const friends = createFriends({ store, presence, gwByChar, log, onList: (c, ids) => pushSocial(c, { friends: ids }) });
+  const friends = createFriends({ store, presence, gwByChar, log, wallNow, onList: (c, ids) => pushSocial(c, { friends: ids }) });
   const guilds = createGuilds({ store, presence, gwByChar, wallNow, filter: chatFilter, charge, log, counters, opts: guildOpts });
   const chat = createChat({ store, presence, gwByChar, parties, guilds, friends, wallNow, filter: chatFilter, log, counters, mute, opts: chatOpts });
   const callboard = createCallboard({ parties, presence, gwByChar, partyChanged: list => partyChanged(list), sendTo, procOf: c => procOfChar(c), now, wallNow, log, opts: callboardOpts });

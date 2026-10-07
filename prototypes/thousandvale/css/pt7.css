@@ -20,3 +20,7 @@
 .shop-card .itemtip { min-width: 0; max-width: none; }
 .shop-card .dim { margin: 0; color: var(--ink-faint); font-style: italic; }
 .shop-cardfoot { margin: 6px 0 0 !important; } .shop-cardfoot .bad { color: var(--bad); font-size: 12.5px; } .shop-cardfoot .price { color: #ffd56a; font-weight: 700; }
+
+/* protocol §23.1: split a stack */
+.tv-split input[type='range'] { width: 100%; margin: 4px 0; accent-color: var(--gold); }
+.tv-split input[type='number'] { width: 90px; margin: 0 auto 8px; display: block; text-align: center; background: rgba(0, 0, 0, 0.45); border: 1px solid var(--edge); border-radius: 6px; padding: 6px; color: var(--ink); }

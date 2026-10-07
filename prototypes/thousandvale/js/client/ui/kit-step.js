@@ -18,24 +18,8 @@ import { rememberItems, nameOf } from './item-card.js';
 import { rarityOf } from './inv-core.js';
 
 const cache = new Map();
-let rulesJson;
 /** A kits answer is only usable when its sets carry real item objects (a server with no rules engine sends base keys only). */
 const usable = k => !!k && (k.armour.length || k.weapons.length) && [...k.armour, ...k.weapons].every(x => x.items.length > 0);
-/**
- * The fallback when the server has no kits to send (a gateway process with no rules engine): C's pure module, run here.
- * It needs the booted rules engine for real item objects, so the rules (and their data) load in the page — only on this
- * path, only on the title screen, and while you are still choosing a face.
- */
-async function fetchKits(cls) {
-  const mod = await import('../../rules/starter-kits.js');
-  if (rulesJson === undefined) { try { const r = await fetch(new URL('../../../data/rules/starter-kits.json', import.meta.url)); rulesJson = r.ok ? await r.json() : null; } catch { rulesJson = null; } }
-  const fn = mod.kitsFor || mod.default;
-  if (typeof fn !== 'function') return null;
-  let k = normaliseKits(await fn(cls, rulesJson));
-  if (!usable(k)) { const idx = await import('../../rules/index.js'); k = normaliseKits(await fn(cls, rulesJson, idx.rulesEngine?.() || null)); }
-  return usable(k) ? k : null;
-}
-
 export function createKitStep({ parent = null, onPreview, onBack, onCreate, askServer = null }) {
   const S = { cls: null, kits: null, armour: null, weapons: null, busy: false, created: false, test: null };
   const panel = createPanel({ id: 'kits', title: 'Starting equipment', width: 400, cls: 'kits-panel title-mode', parent,
@@ -48,11 +32,14 @@ export function createKitStep({ parent = null, onPreview, onBack, onCreate, askS
     if (cache.get(cls)) return Promise.resolve(cache.get(cls));
     if (flying.has(cls)) return flying.get(cls);
     const run = (async () => {
-      let k = null;
-      // the server's answer first (A: kits {cls} -> kitsR — no rules import in the browser), C's module as the fallback
-      try { const raw = askServer ? await askServer(cls) : null; if (raw) { const n = normaliseKits(raw); if (usable(n)) k = n; } } catch { /* fall through */ }
-      // (time-boxed: a slow machine must never sit on the title screen waiting for the rules to boot — no kits = the default gear)
-      if (!k) { try { k = await Promise.race([fetchKits(cls), new Promise(r => setTimeout(() => r(null), 20000))]); } catch (e) { console.info('[kits] no starting kits for', cls, '-', e.message); } }
+      // protocol §23.1: `kits {cls}` is answered in any state with complete items, or ok:false + why. No rules run in the page.
+      let k = null; S.why = '';
+      try {
+        const r = askServer ? await askServer(cls) : null;
+        const raw = r && typeof r === 'object' && ('kits' in r || 'ok' in r) ? r.kits : r;
+        if (raw) { const n = normaliseKits(raw); if (usable(n)) k = n; }
+        if (!k) S.why = { none: 'This calling has no starting kits yet.', noItems: 'The server could not lay the kits out.', failed: 'The server could not fetch the kits.' }[r?.why] || (r ? 'The kits came back empty.' : 'The server did not answer about starting kits.');
+      } catch (e) { S.why = 'The starting kits could not be fetched.'; }
       if (k) cache.set(cls, k);
       return k || cache.get(cls) || null;
     })();
@@ -115,6 +102,8 @@ export function createKitStep({ parent = null, onPreview, onBack, onCreate, askS
     close() { S.created = true; panel.close(); },
     /** Tests / screenshots before the rules data lands: kits to use instead of C's. */
     useKits(k) { S.test = k ? normaliseKits(k) : null; cache.clear(); S.kits = null; },
+    /** Why the last load came back with nothing (said to the player when the step is skipped). */
+    get why() { return S.why || ''; },
     get choice() { return S.kits ? { armour: S.armour, weapons: S.weapons } : null; },
     get state() { return { open: panel.isOpen, cls: S.cls, armour: S.armour, weapons: S.weapons, sets: S.kits?.armour.length || 0, packs: S.kits?.weapons.length || 0, gear: S.kits ? Object.fromEntries(Object.entries(gear()).map(([s, it]) => [s, it.name])) : {} }; },
   };

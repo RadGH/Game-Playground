@@ -1895,7 +1895,7 @@ export function createProvince(opts) {
         const key = stackKey(item), max = stackMaxOf(item);
         for (const st of ch.bag) {
           if (!n) break;
-          if (!stackable(st) || stackKey(st) !== key || countOf(st) >= max) continue;
+          if (!stackable(st) || st.apart || stackKey(st) !== key || countOf(st) >= max) continue;      // `apart`: a stack the player split off stays as they left it
           const k = Math.min(n, max - countOf(st));
           st.count = countOf(st) + k; n -= k;
           if (!grown.includes(st)) grown.push(st);
@@ -1967,11 +1967,48 @@ export function createProvince(opts) {
     if (tell && o.conn) o.conn.sendJSON({ t: 'bag', add: changed, remove: changed.map(it => it.uid), gold: o.char.gold });
     return true;
   }
+  /**
+   * Owner feedback 7 (D-UI's ask): SPLIT a stack (`item {op:'split', uid, n}` — n off the stack into a new slot; the new
+   * stack is `apart`, so it is not swept back together until the player merges it or it changes hands) and MERGE two stacks
+   * (`item {op:'merge', uid, onto}` — drop one on another: as many as fit move across). Both answer `itemR {op, ok, …}` and a
+   * `bag {remove, add}` with the stacks as they are now.
+   */
+  function stackOp(o, m) {
+    const s = o.conn, ch = o.char;
+    const R = x => s.sendJSON({ t: 'itemR', op: m.op, uid: m.uid, ...x });
+    const src = ch.bag.find(i => i.uid === m.uid);
+    if (!src || !stackable(src)) return R({ ok: false, why: 'item', msg: 'That does not stack.' });
+    if (m.op === 'split') {
+      const n = m.n | 0;
+      if (n < 1 || n >= countOf(src)) return R({ ok: false, why: 'count', msg: 'Split off at least one and leave at least one.' });
+      if (ch.bag.length >= BAG_MAX) return R({ ok: false, why: 'bagFull', msg: CODES.bagFull });
+      const made = { ...JSON.parse(JSON.stringify(src)), uid: newUid(), count: n, apart: 1 };
+      delete made.left; delete made.ruid;
+      src.count = countOf(src) - n;
+      ch.bag.splice(ch.bag.indexOf(src) + 1, 0, made);
+      journal(o, 'bagDel', { uid: src.uid }); journal(o, 'bagAdd', { item: src }); journal(o, 'bagAdd', { item: made });
+      o.dirty = true;
+      s.sendJSON({ t: 'bag', add: [src, made], remove: [src.uid], gold: ch.gold });
+      return R({ ok: true, made: made.uid, count: src.count, n });
+    }
+    const dst = ch.bag.find(i => i.uid === m.onto);
+    if (!dst || dst === src || !stackable(dst) || stackKey(dst) !== stackKey(src)) return R({ ok: false, why: 'item', msg: 'Those do not go together.' });
+    if (trades.offered(ch.id, m.onto)) return R({ ok: false, why: 'item', msg: 'That item is in your trade window.' });
+    const k = Math.min(countOf(src), stackMaxOf(dst) - countOf(dst));
+    if (k <= 0) return R({ ok: false, why: 'full', msg: 'That stack is full.' });
+    dst.count = countOf(dst) + k; delete dst.apart;
+    const gone = countOf(src) - k <= 0;
+    if (gone) ch.bag.splice(ch.bag.indexOf(src), 1); else src.count = countOf(src) - k;
+    journal(o, 'bagDel', { uid: src.uid }); journal(o, 'bagDel', { uid: dst.uid }); journal(o, 'bagAdd', { item: dst }); if (!gone) journal(o, 'bagAdd', { item: src });
+    o.dirty = true;
+    s.sendJSON({ t: 'bag', add: gone ? [dst] : [dst, src], remove: [src.uid, dst.uid], gold: ch.gold });
+    R({ ok: true, onto: dst.uid, count: dst.count, moved: k, left: gone ? 0 : src.count });
+  }
   function restack(o, tell = true) {
     const ch = o.char, bag = ch.bag || [];
     const first = new Map(), gone = [], grown = [];
     for (const it of bag) {
-      if (!stackable(it)) continue;
+      if (!stackable(it) || it.apart) continue;
       const key = stackKey(it), max = stackMaxOf(it);
       let n = countOf(it);
       for (const st of first.get(key) || []) {
@@ -2259,6 +2296,7 @@ export function createProvince(opts) {
     const rules = o.room.rules;
     if (m.op === 'use' || m.op === 'open') return useItem(o, m);
     if (m.op === 'stand') { if (o.regen) endMeal(o, 'stood'); return; }
+    if (m.op === 'split' || m.op === 'merge') return stackOp(o, m);
     const bagIdx = ch.bag.findIndex(i => i.uid === m.uid);
     if (m.op === 'destroy') {
       if (bagIdx < 0) return s.err('item');
@@ -2735,7 +2773,7 @@ export function createProvince(opts) {
       if (!ok) return fail('tradeFailed');
       for (const [o, give, get, dg, nx, sq] of [[a, ia, ib, t.b.gold - t.a.gold, na, seqA], [b, ib, ia, t.a.gold - t.b.gold, nb, seqB]]) {
         const out = new Set(give.map(i => i.uid));
-        o.char.bag = o.char.bag.filter(i => !out.has(i.uid)).concat(JSON.parse(JSON.stringify(get)));
+        o.char.bag = o.char.bag.filter(i => !out.has(i.uid)).concat(JSON.parse(JSON.stringify(get)).map(i => { delete i.apart; return i; }));
         o.char.gold = (o.char.gold || 0) + dg;
         o.char.version = nx.version;
         o.savedSeq = Math.max(o.savedSeq, sq);

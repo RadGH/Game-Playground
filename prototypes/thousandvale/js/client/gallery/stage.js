@@ -269,6 +269,7 @@ function wireNet(net) {
   net.on('ev', ({ e }) => { for (const ev0 of e || []) { const ev = !ev0.type && ev0.t ? { ...ev0, type: ev0.t } : ev0; if (['boss', 'phase', 'castbar', 'castX', 'enrage', 'say', 'fx'].includes(ev.type)) boss.onEvent(ev); } });
   net.on('equip', m => { const a = actors.get(S.selfId); if (a && m.equipment) a.look = { ...a.look, gear: ui2.gearFor(m.equipment) }; });
   net.on('zone', z => learnZone(z.zone, z.name));
+  net.on('used', u => { if (worldUi.onUsed(u)) return; if (!u.ok && u.msg) hud.toast(u.msg, 'warn'); });   // as main.js routes it: dialogs, notes, graves
   net.on('castR', r => hud.toast(r.text || 'You cannot do that.', 'warn'));
   // the same order main.js wires them in
   social.wire(net);
@@ -384,6 +385,12 @@ const VERBS = {
   async calm() { $('toasts')?.replaceChildren(); $('zone-banner')?.classList.remove('show'); document.querySelectorAll('.tv-banner .show, .banner-stack .show').forEach(e => e.classList.remove('show')); },
 };
 VERBS.run = async fn => { await fn(api, VERBS); };
+/** Stand next to a body (shops, loot and trade close when you are too far): an entity id or @token. */
+VERBS.near = async id => { const a = actors.get(id); if (!a) throw new Error('nobody to stand next to: ' + id); S.pos = { x: a.pos.x + 1.2, z: a.pos.z + 1 }; const self = actors.get(S.selfId); if (self) { self.pos.x = S.pos.x; self.pos.z = S.pos.z; } };
+/** Look at what a player wears (the right-click menu's Inspect). */
+VERBS.inspect = async id => { ui2.menu.inspect(id); await sleep(200); };
+/** This account is an admin (the Reports window is theirs only). */
+VERBS.admin = async () => { S.net.admin = true; };
 /** Track the first n quests so the HUD's quest tracker shows. */
 VERBS.track = async (n = 2) => { for (const q of ui.atlas.quests.slice(0, n)) ui.atlas.setTracked(q.id); await sleep(80); };
 /** Wait until the bag's 3D item icons are drawn (they are rendered a few at a time). */

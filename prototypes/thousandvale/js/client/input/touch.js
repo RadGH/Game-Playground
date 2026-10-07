@@ -107,7 +107,7 @@ export function createTouch({ api, input, run, radial }) {
     btn.addEventListener('pointerup', end); btn.addEventListener('pointercancel', end);
   }
   /** Keep a placed wheel on the screen (and out of the safe areas). */
-  function clampAt(c) { const m = 150, cs = getComputedStyle(html), n = k => parseFloat(cs.getPropertyValue(k)) || 0; return { x: Math.max(m + n('--safe-left'), Math.min(innerWidth - m - n('--safe-right'), c.x)), y: Math.max(m + n('--safe-top'), Math.min(innerHeight - m - n('--safe-bottom'), c.y)) }; }
+  function clampAt(c) { const m = 162, cs = getComputedStyle(html), n = k => parseFloat(cs.getPropertyValue(k)) || 0; return { x: Math.max(m + n('--safe-left'), Math.min(innerWidth - m - n('--safe-right'), c.x)), y: Math.max(m + n('--safe-top'), Math.min(innerHeight - m - n('--safe-bottom'), c.y)) }; }
   function wheelCentre() { const h = radial.root.querySelector('.rd-hub'); if (!h || radial.root.hidden) return null; const r = h.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
 
   // ---------------------------------------------------------------- chat: a bubble while you play

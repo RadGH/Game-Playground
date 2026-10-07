@@ -121,7 +121,7 @@ export const SCENES = [
       phone: 'The map fills the sheet: drag pans, pinch zooms, hold drops a pin (the desktop’s right-click). The preset buttons scroll in one row above it.', pad: 'The steered pointer again: A selects what is under it (a waystone to travel to), X drops a pin, LT / RT zoom, right stick pans.' } },
   { id: 'journal', expect: '#panel-journal:not([hidden])', group: 'Windows', title: 'Journal — quests', modules: [U + 'journal.js'], steps: [['panel', 'journal'], ['wait', 300]],
     notes: { all: 'The quests you carry, the steps of the chosen one, rewards, track / abandon.', phone: 'List above, the chosen quest below (upright); list left, quest right (on its side).', pad: 'LB / RB change the tab (Quests · Done · Catch).' } },
-  { id: 'shop', expect: '#panel-shop:not([hidden])', group: 'Windows', title: 'Shop', modules: [U + 'shop.js', U + 'item-cell.js'], steps: [['call', 'tvui2.openShop', '@shop', 'Merchant'], ['wait', 900]],
+  { id: 'shop', expect: '#panel-shop:not([hidden])', group: 'Windows', title: 'Shop', modules: [U + 'shop.js', U + 'item-cell.js'], steps: [['near', '@shop'], ['call', 'tvui2.openShop', '@shop', 'Hal Fletchard'], ['wait', 600], ['icons']],
     notes: { all: 'A merchant’s wares, your bag to sell from, and buy-back. Recorded from a real merchant in the starter town.', phone: 'Rows are 52 px; tap = buy (it asks first when it costs more than a tenth of your gold), hold = the item’s card.' } },
   { id: 'settings', expect: '#panel-settings:not([hidden]) .set-row', group: 'Windows', title: 'Settings', modules: [U + 'settings.js', U + 'pt2-core.js'], steps: [['settings', 'game']],
     notes: { all: 'Esc opens the menu; Settings has Game, Graphics, Sound and Key bindings tabs.', phone: 'Sliders and checkboxes are 44 px rows.', pad: 'LB / RB switch tabs; left / right moves a slider.' } },
@@ -134,7 +134,7 @@ export const SCENES = [
     notes: { all: 'F1: the controls list. It is now drawn from the binding table, so it shows your own keys — or the controller’s buttons when that is what you last touched.' } },
   { id: 'feedback', expect: '#panel-feedback:not([hidden]) textarea', group: 'Windows', title: 'Feedback form', modules: [U + 'feedback.js'], steps: [['call', 'tvui5.feedback', 'bug']],
     notes: { all: 'T19: a suggestion or a bug report, with what gets attached written out.', pad: 'The text box opens the on-screen keyboard.' } },
-  { id: 'reports', expect: '#panel-reports:not([hidden]) .rp-row', group: 'Windows', title: 'Admin — reports', modules: [U + 'feedback.js'], steps: [['call', 'tvui5.reports'], ['play', 'admin-reports'], ['click', '#panel-reports .rp-row']],
+  { id: 'reports', expect: '#panel-reports:not([hidden]) .rp-row', group: 'Windows', title: 'Admin — reports', modules: [U + 'feedback.js'], steps: [['admin'], ['call', 'tvui5.reports'], ['play', 'admin-reports'], ['click', '#panel-reports .rp-row']],
     notes: { all: 'T21: what an admin account sees — every report with its state, the client details and the recent log lines.' } },
   { id: 'account', expect: '#panel-account:not([hidden])', group: 'Windows', title: 'Account', modules: ['js/client/account.js'], steps: [['panel', 'account']],
     notes: { all: 'Claim a guest account (free), or see the one you are logged into.' } },
@@ -153,15 +153,15 @@ export const SCENES = [
   { id: 'chat', expect: '#chat-log p', group: 'Social', title: 'Chat', modules: ['js/client/chat.js'], steps: [...chat, ['focus', '#chat-input']],
     phone: { steps: [['touch', 'chat']] }, pad: { steps: [['osk', '#chat-input']] },
     notes: { all: 'The chat window with its channel tabs.', phone: 'Folded to a bubble while you fight (with an unread count). Opened, it is a panel down the left (on its side) or the lower half (upright); the game controls step aside while you type.', pad: 'Chat is in the quick wheel; it opens the on-screen keyboard.' } },
-  { id: 'inspect', expect: '#panel-inspect:not([hidden])', group: 'Social', title: 'Inspecting a player', modules: [U + 'context-menu.js'], steps: [['reply', 'inspect'], ['wait', 600]],
+  { id: 'inspect', expect: '#panel-inspect:not([hidden])', group: 'Social', title: 'Inspecting a player', modules: [U + 'context-menu.js'], steps: [['target', 'ally'], ['inspect', '@ally'], ['wait', 600]],
     notes: { all: 'What another player is wearing.' } },
 
   // ------------------------------------------------------------------------------------------------ Loot and trade
-  { id: 'loot', expect: '#panel-loot:not([hidden]) .loot-row', group: 'Loot and trade', title: 'Loot window', modules: [U + 'loot.js'], steps: [['target', 'enemy'], ['push', 'game', { t: 'lootable', id: '@enemy', on: true, best: 'rare' }], ['call', 'tvui2.openLoot', '@enemy'], ['play', 'loot'], ['wait', 500]],
+  { id: 'loot', expect: '#panel-loot:not([hidden]) .loot-row', group: 'Loot and trade', title: 'Loot window', modules: [U + 'loot.js'], steps: [['target', 'enemy'], ['near', '@enemy'], ['push', 'game', { t: 'lootable', id: '@enemy', on: true, best: 'rare' }], ['call', 'tvui2.openLoot', '@enemy'], ['play', 'loot'], ['wait', 500]],
     notes: { all: 'A body’s loot: gold, a junk item, a magic one, and a rare one the party will roll for.', phone: 'A sheet with 52 px rows and a full-width “Take all”.', pad: 'A takes the row, Menu takes all.' } },
   { id: 'loot-roll', expect: '.roll-card', group: 'Loot and trade', title: 'Need / Greed / Skip', modules: [U + 'loot.js'], steps: [...fight, ['play', 'loot-roll'], ['wait', 300]],
     notes: { all: 'The roll card with its timer.', phone: 'Top right under the minimap; the three buttons share the card’s width, 44 px tall.' } },
-  { id: 'trade', expect: '#panel-trade:not([hidden])', group: 'Loot and trade', title: 'Trade', modules: [U + 'trade.js'], steps: [['play', 'trade'], ['wait', 500]],
+  { id: 'trade', expect: '#panel-trade:not([hidden])', group: 'Loot and trade', title: 'Trade', modules: [U + 'trade.js'], steps: [['near', '@ally'], ['play', 'trade'], ['wait', 500], ['icons']],
     notes: { all: 'A trade with a party member: both sides, gold, lock, confirm. Recorded from a real trade between two clients.' } },
 
   // ------------------------------------------------------------------------------------------------ Angling

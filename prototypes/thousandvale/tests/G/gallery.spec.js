@@ -42,6 +42,8 @@ function touchAudit(safe) {
   const SEL = 'button, a[href], input, select, textarea, [role="tab"], [role="radio"], [role="button"], [role="menuitem"], [tabindex]:not([tabindex="-1"]), .islot:not(.empty), .pmember, .slot:not(.empty), .loot-row, .interact';
   const vw = innerWidth, vh = innerHeight, small = [], unsafe = [];
   let n = 0;
+  /** Inside something that scrolls? Then it can be brought clear of the edges; only what is pinned is judged against the safe area. */
+  const scrolls = e => { for (let p = e.parentElement; p && p !== document.body; p = p.parentElement) { const c = getComputedStyle(p); if ((/auto|scroll/.test(c.overflowY) && p.scrollHeight > p.clientHeight + 2) || (/auto|scroll/.test(c.overflowX) && p.scrollWidth > p.clientWidth + 2)) return true; } return false; };
   const name = e => (e.id ? '#' + e.id : e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/).slice(0, 3).join('.') : '')) + (e.textContent ? ` "${e.textContent.trim().slice(0, 18)}"` : '');
   for (const el0 of document.querySelectorAll(SEL)) {
     if (el0.closest('.gallery-device, .gallery-pick, .gallery-sheet, [hidden], [aria-hidden="true"]') || el0.disabled) continue;
@@ -59,7 +61,7 @@ function touchAudit(safe) {
     // a control nested in a bigger one (an × inside a row) counts on its own
     n++;
     if (r.width < 43.5 || r.height < 43.5) small.push(`${name(el)} ${Math.round(r.width)}x${Math.round(r.height)}`);
-    if (r.left < safe.left - 0.5 || r.top < safe.top - 0.5 || r.right > vw - safe.right + 0.5 || r.bottom > vh - safe.bottom + 0.5) unsafe.push(`${name(el)} at ${Math.round(r.left)},${Math.round(r.top)} ${Math.round(r.width)}x${Math.round(r.height)}`);
+    if (!scrolls(el) && (r.left < safe.left - 0.5 || r.top < safe.top - 0.5 || r.right > vw - safe.right + 0.5 || r.bottom > vh - safe.bottom + 0.5)) unsafe.push(`${name(el)} at ${Math.round(r.left)},${Math.round(r.top)} ${Math.round(r.width)}x${Math.round(r.height)}`);
   }
   return { n, small, unsafe };
 }

@@ -376,3 +376,12 @@ html[data-layout="phone"] .kit-choice { padding: 10px; }
 html[data-layout="phone"] .tv-radial { --R: 118px; }
 html[data-layout="phone"] .tv-radial .rd-slice { width: 72px; height: 72px; margin: -36px 0 0 -36px; }
 html[data-layout="phone"] .tv-radial .rd-hub { width: 112px; height: 112px; margin: -56px 0 0 -56px; }
+
+/* ================================================================ found by the 44 px / safe-area audit (tests/G/gallery.spec.js) */
+html[data-layout="phone"] .fish-btn { display: none !important; }                       /* casting is in the quick wheel (and the rod in the bag) */
+html[data-layout="phone"] .title-foot { position: static; margin-top: 10px; grid-column: 1; }
+html[data-layout="phone"] a { min-width: var(--tap); justify-content: center; }
+html[data-layout="phone"] .ap-row.ap-gear, html[data-layout="phone"] .map-toggle { min-height: var(--tap); padding: 0 8px; }
+html[data-layout="phone"] .kit-item .islot, html[data-layout="phone"] .islot.small { width: var(--tap); height: var(--tap); }
+html[data-layout="phone"] .inv-bag, html[data-layout="phone"] .inv-tools, html[data-layout="phone"] .inv-filters, html[data-layout="phone"] .inv-doll, html[data-layout="phone"] .inv-tools .row { min-width: 0; max-width: 100%; }
+html[data-layout="phone"] .inv-tools input { min-width: 0; flex: 1 1 0; }

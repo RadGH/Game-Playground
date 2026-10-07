@@ -227,7 +227,7 @@
       "done": "Six at once? No? Well, it'll be six at once soon. The rack's yours to use, and so's this. Take a perk point while you're at it — you've earned the knack of standing in a crowd.",
       "reward": {
         "xp": 0.6,
-        "gold": 12,
+        "gold": 15,
         "item": {
           "tier": "rare",
           "slot": "weapon",
@@ -386,7 +386,7 @@
       "done": "The scarecrow clapped. Well, it flapped. Close enough. A rapier with a little bit of swagger in the blade, and a perk point.",
       "reward": {
         "xp": 0.6,
-        "gold": 12,
+        "gold": 15,
         "item": {
           "tier": "rare",
           "slot": "weapon",
@@ -550,7 +550,7 @@
       "done": "Reed splints and a prayer. That's half of medicine, and the other half is shouting at people to sit still. A scepter blessed at the shrine, and a perk point.",
       "reward": {
         "xp": 0.6,
-        "gold": 12,
+        "gold": 15,
         "item": {
           "tier": "rare",
           "slot": "weapon",
@@ -877,7 +877,7 @@
       "done": "The pig is asleep. The pig has never been asleep. You're better than you think. Robes that hum softly, and a bound imp now does as you ask.",
       "reward": {
         "xp": 0.6,
-        "gold": 12,
+        "gold": 15,
         "item": {
           "tier": "rare",
           "slot": "chest",
@@ -1037,7 +1037,7 @@
       "done": "Empty! Somebody beat us to it. That's fine. You found the stair, they'll come back to it, and we'll be waiting. A dagger that's never been seen in daylight, and a perk point.",
       "reward": {
         "xp": 0.6,
-        "gold": 12,
+        "gold": 15,
         "item": {
           "tier": "rare",
           "slot": "weapon",
@@ -1151,7 +1151,7 @@
       "done": "A button, a tooth and a very old coin. Lucky trinkets, every one. Keep the coin. A javelin I found the same way, and a perk point.",
       "reward": {
         "xp": 0.6,
-        "gold": 12,
+        "gold": 15,
         "item": {
           "tier": "rare",
           "slot": "weapon",
@@ -1258,7 +1258,7 @@
       "done": "Clean hides, clean shots. You'll do. Here's a bow from my own rack — and hear that rustle? Your hunting cat's found you.",
       "reward": {
         "xp": 0.6,
-        "gold": 12,
+        "gold": 15,
         "item": {
           "tier": "rare",
           "slot": "weapon",
@@ -1648,7 +1648,7 @@
       "done": "Empty hands, full heart, very muddy knees. That's monkhood. A staff to lean on, never to rely on, and a perk point.",
       "reward": {
         "xp": 0.6,
-        "gold": 12,
+        "gold": 15,
         "item": {
           "tier": "rare",
           "slot": "weapon",
@@ -1815,7 +1815,7 @@
       "done": "Nobody threw anything! A triumph. A dagger for when the song ends badly, and a perk point.",
       "reward": {
         "xp": 0.6,
-        "gold": 12,
+        "gold": 15,
         "item": {
           "tier": "rare",
           "slot": "weapon",

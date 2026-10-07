@@ -27,6 +27,7 @@
 import { FISH_OPS, STATE } from '../net/protocol.js';
 import { createFishing } from '../rules/fishing.js';
 import { crateItem } from './crates.js';
+import { economy } from './economy-knobs.js';
 
 export const ANGLING = Object.freeze({
   castMin: 1.5, castMax: 24,        // metres from your feet to the bobber
@@ -39,6 +40,10 @@ export const ANGLING = Object.freeze({
   fireM: 6, hearthM: 9,             // cooking: a fire / an innkeeper this close
   poolRespawnMs: [30000, 90000],    // a fished-out pool's replacement opens after this
   cookMax: 10,
+  // owner feedback 7, V3 ("I've only seen the one right at the start" — 308 spots were listed and 94 open):
+  liveShare: 0.6,                   // this share of a zone's listed spots is open at once (never fewer than E's meta.live)
+  townReachM: 600,                  // a town with a listed spot this close keeps one always-open beginner pool (tier 1) there
+  borderM: 130,                     // a spot this close outside a town's circle is in the town's room too (you see it from the gate)
 });
 const FIRE_TYPES = new Set(['campfire', 'hearth', 'cookfire', 'firepit', 'fire']);
 
@@ -106,15 +111,39 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
   }
   const poolSeen = new Set();        // room ids whose pools were opened
   const poolsIn = new Map();         // room id -> Map(spot id -> entity)
+  /**
+   * V3: every town with a listed spot within `townReachM` has ONE beginner pool: tier 1, never fished out, named for the town.
+   * E's own choice wins (a spot with `town` + `always`); for a town E has not given one, the nearest listed spot is taken
+   * (tier 1 first) and opened as tier 1. Worked out once per province.
+   */
+  const townPoolsOf = new Map();     // layout key -> Map(spot id -> town name)
+  function townPools(pv) {
+    let m = townPoolsOf.get(pv.L.key);
+    if (m) return m;
+    m = new Map();
+    const all = poolData && poolData.zones ? Object.entries(poolData.zones).flatMap(([wid, list]) => (zoneRow(pv, wid) ? (list || []).map(sp => ({ ...sp, zone: wid })) : [])) : [];
+    for (const t of pv.L.towns || []) {
+      const mine = all.find(sp => sp.town && String(sp.town).toLowerCase() === String(t.name).toLowerCase() && (sp.always || sp.start));
+      if (mine) { m.set(mine.id, t.name); continue; }
+      let best = null, bd = Infinity;
+      for (const sp of all) { if (m.has(sp.id)) continue; const d = Math.hypot(sp.x - t.x, sp.z - t.z) + (sp.tier === 1 ? 0 : 150); if (d < bd && Math.hypot(sp.x - t.x, sp.z - t.z) <= R.townReachM) { bd = d; best = sp; } }
+      if (best) m.set(best.id, t.name);
+    }
+    townPoolsOf.set(pv.L.key, m);
+    return m;
+  }
+  /** The listed spots a room holds: a wilds copy every spot of its zones; a town's room the ones in its circle + `borderM`. */
   const spotsOf = (pv, room) => {
     const out = [];
     if (!poolData || !poolData.zones) return out;
+    const tp = townPools(pv);
+    const ti = room.kind === 'town' ? pv.towns.indexOf(room) : -1, t = ti >= 0 ? pv.L.towns[ti] : null;
     for (const [wid, list] of Object.entries(poolData.zones)) {
       if (!zoneRow(pv, wid)) continue;
-      for (const s of list || []) {
-        const ti = pv.L.towns.findIndex(t => Math.hypot(s.x - t.x, s.z - t.z) < t.r);
-        const mine = room.kind === 'town' ? (ti >= 0 && pv.towns[ti] === room) : room.kind === 'wilds' ? ti < 0 : false;
-        if (mine) out.push({ ...s, zone: wid });
+      for (const sp of list || []) {
+        if (room.kind === 'town' ? !(t && Math.hypot(sp.x - t.x, sp.z - t.z) < t.r + R.borderM) : room.kind !== 'wilds') continue;
+        const town = tp.get(sp.id) || null;
+        out.push(town ? { ...sp, zone: wid, tier: 1, always: true, town } : { ...sp, zone: wid });
       }
     }
     return out;
@@ -122,15 +151,20 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
   function openPool(room, s) {
     const tier = Math.max(1, Math.min(3, s.tier | 0 || 1));
     const g = F ? F.pool(tier) : { minSkill: 1 };
-    const left = s.always ? 99 : (F ? F.poolCatches(tier, () => room.host.random('fish')) : 5);
-    const e = room.spawn({ kind: 'object', type: 'fishpool', name: tier >= 3 ? 'Deep fish pool' : tier === 2 ? 'Busy fish pool' : 'Fish pool', x: s.x, z: s.z, team: 0,
-      data: { key: 'pool:' + s.id, r: R.poolR, state: 'idle', pool: { id: s.id, tier, minSkill: g.minSkill, left, water: s.water || 'river', always: !!s.always, zone: s.zone, band: s.band || null, shore: s.shore || null, ...(s.shelf ? { shelf: true } : {}) } } });
+    const always = !!(s.always || s.start);
+    const left = always ? 99 : (F ? F.poolCatches(tier, () => room.host.random('fish')) : 5);
+    const e = room.spawn({ kind: 'object', type: 'fishpool', name: s.town ? s.town + ' fish pool' : tier >= 3 ? 'Deep fish pool' : tier === 2 ? 'Busy fish pool' : 'Fish pool', x: s.x, z: s.z, team: 0,
+      data: { key: 'pool:' + s.id, r: R.poolR, state: 'idle', pool: { id: s.id, tier, minSkill: g.minSkill, left, water: s.water || 'river', always, zone: s.zone, band: s.band || null, shore: s.shore || null, ...(s.shelf ? { shelf: true } : {}), ...(s.town ? { town: s.town } : {}) } } });
     let m = poolsIn.get(room.id); if (!m) { m = new Map(); poolsIn.set(room.id, m); }
     m.set(s.id, e);
     counters.poolsOpened = (counters.poolsOpened || 0) + 1;
     return e;
   }
-  /** Open a room's pools the first time anyone could see them: `meta.<zone>.live` per zone (the `start` pool always). */
+  /**
+   * Open a room's pools the first time anyone could see them. A WILDS copy: per zone, `liveShare` of the listed spots (never
+   * fewer than E's `meta.<zone>.live`) — every always-open one (the start pool, each town's pool), then the beginner (tier-1)
+   * and roadside spots first, so a walking newcomer SEES pools. A TOWN's room: every beginner spot in its reach.
+   */
   function ensurePools(room) {
     if (!F || !poolData || poolSeen.has(room.id) || (room.kind !== 'wilds' && room.kind !== 'town')) return;
     poolSeen.add(room.id);
@@ -139,11 +173,13 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
     const byZone = new Map();
     for (const s of spotsOf(pv, room)) (byZone.get(s.zone) || byZone.set(s.zone, []).get(s.zone)).push(s);
     for (const [wid, list] of byZone) {
-      const live = room.kind === 'town' ? list.length : Math.max(1, ((poolData.meta && poolData.meta[wid] && poolData.meta[wid].live) | 0) || 4);
       const must = list.filter(s => s.start || s.always);
       const rest = list.filter(s => !(s.start || s.always));
-      // a seeded shuffle of the rest, roadside ones first in line (a walking newcomer sees one early)
-      const order = rest.map(s => ({ s, k: room.host.random('fish') + (s.road != null && s.road < 40 ? -0.5 : 0) })).sort((a, b) => a.k - b.k).map(x => x.s);
+      if (room.kind === 'town') { for (const s of [...must, ...rest.filter(q => (q.tier | 0 || 1) === 1)]) openPool(room, s); continue; }
+      const all = (poolData.zones[wid] || []).length;
+      const live = Math.max(1, ((poolData.meta && poolData.meta[wid] && poolData.meta[wid].live) | 0) || 4, Math.ceil(all * R.liveShare));
+      // a seeded shuffle: beginner pools first, roadside ones before the far bank
+      const order = rest.map(s => ({ s, k: room.host.random('fish') + ((s.tier | 0 || 1) === 1 ? -1 : 0) + (s.road != null && s.road < 45 ? -0.5 : 0) })).sort((a, b) => a.k - b.k).map(x => x.s);
       for (const s of [...must, ...order].slice(0, Math.max(live, must.length))) openPool(room, s);
     }
   }
@@ -226,8 +262,15 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
     if (o.fishing) stop(o, 'recast', true);
     const hit = castAt(o, m.aim);
     if (hit.why) return refuse(o, hit.why, hit.msg);
-    const pool = hit.pool || null, pd = pool ? pool.data.pool : null;
-    const ok = F.canFish({ skill: A.level, pool: pd ? { tier: pd.tier } : null, rod });
+    let pool = hit.pool || null, pd = pool ? pool.data.pool : null, note = null;
+    let ok = F.canFish({ skill: A.level, pool: pd ? { tier: pd.tier } : null, rod });
+    // V3: a pool above your skill does not close the water round it — the line lands beside it, as open water, and says so
+    if (!ok.ok && pd && F.canFish({ skill: A.level, pool: null, rod }).ok) {
+      note = 'That pool needs angling ' + (ok.need || pd.minSkill) + '. You cast beside it.';
+      pool = null; pd = null; hit.pool = null;
+      if (!hit.w) hit.w = waterAt(room, hit.x, hit.z) || { kind: 'river', depth: 1 };
+      ok = { ok: true };
+    }
     if (!ok.ok) return refuse(o, ok.why || 'skill', ok.text || 'You cannot fish here yet.', ok.need ? { need: ok.need } : {});
     const pv = provOf(room);
     const wid = zoneOf(pv, hit.x, hit.z), zr = zoneRow(pv, wid);
@@ -248,7 +291,7 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
     e.busyUntil = 0; e.loop('fish');
     room.emit({ type: 'fx', kind: 'fish', id: e.id, phase: 'cast', x: hit.x, z: hit.z, ...(pool ? { pool: pool.id } : {}) });
     counters.casts = (counters.casts || 0) + 1;
-    fishR(o, { ok: true, state: 'wait', at: o.fishing.at, water, ...(pool ? { pool: pool.id, tier: pd.tier, left: pd.left } : {}), rod: rod.id, ...(bait ? { bait: { id: bait.id, left: bait.left } } : {}) });
+    fishR(o, { ok: true, state: 'wait', at: o.fishing.at, water, ...(pool ? { pool: pool.id, tier: pd.tier, left: pd.left } : {}), rod: rod.id, ...(bait ? { bait: { id: bait.id, left: bait.left } } : {}), ...(note ? { note, msg: note } : {}) });
   }
   function hook(o) {
     const f = o.fishing, e = o.entity, ch = o.char;
@@ -456,7 +499,7 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
         }
       }
       if (!gone) { why = { text: 'You have no fish for that.' }; break; }
-      made.push({ kind: 'good', id: rc.makes, name: meal.name || rc.name, desc: meal.desc || '', rarity: 'normal', stack: 1, cooked: true, value: 2, ...(meal.use ? { use: meal.use } : {}) });
+      made.push({ kind: 'good', id: rc.makes, name: meal.name || rc.name, desc: meal.desc || '', rarity: 'normal', stack: 1, cooked: true, value: economy().cook.mealValue, ...(meal.use ? { use: meal.use } : {}) });
     }
     if (!made.length) return Rr({ ok: false, why: (why && why.why) || 'fish', msg: (why && why.text) || 'You cannot cook that.' });
     const added = grant(o, { items: made, gold: 0, reason: 'cook' }) || [];

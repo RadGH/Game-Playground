@@ -168,7 +168,7 @@ export class Entity {
       if (d.dir) o.portal = d.dir;                             // 'down' | 'up' | 'out' on stairs, lifts, the way in and the way out
       if (d.leave) o.leave = 1;                                // U10: the way you came in (leaves the dungeon; not the exit portal)
       if (d.lift) o.lift = { here: d.lift.here, floors: d.lift.to.map(t => t.floor) };
-      if (d.pool) o.pool = { tier: d.pool.tier, minSkill: d.pool.minSkill, left: d.pool.left, water: d.pool.water, ...(d.pool.shelf ? { shelf: true } : {}) };   // T25: a fish pool
+      if (d.pool) o.pool = { tier: d.pool.tier, minSkill: d.pool.minSkill, left: d.pool.left, water: d.pool.water, ...(d.pool.shelf ? { shelf: true } : {}), ...(d.pool.always ? { always: 1 } : {}), ...(d.pool.town ? { town: d.pool.town } : {}) };   // T25: a fish pool
       if (d.office) o.office = d.office;                       // a service NPC's own building (Q10): {kind, plot, x, z, yaw, lit}                    // a hidden cache glints within this many metres for someone who has every clue
     }
     return o;

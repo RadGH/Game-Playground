@@ -19,10 +19,13 @@ export const DEFAULT_MOUNTS = Object.freeze([
   { id: 'dray', name: 'Dray Elk', speed: 1.65, calm: 0.5, level: 15, price: 1600, look: { creature: { type: 'elk', size: 1.45, colors: { body: '#6a5a48', belly: '#b8a684', accent: '#3a2c1c' }, features: { antlers: true } } } },
 ]);
 
+import { economy } from './economy-knobs.js';
+
 export function createMountBook(data = null) {
+  const EM = economy().mounts || {};        // V2: E's economy.json `mounts [{id, price, level}]` re-prices the table
   const list = (data && Array.isArray(data.mounts) && data.mounts.length ? data.mounts : DEFAULT_MOUNTS)
     .filter(m => m && typeof m.id === 'string')
-    .map(m => ({ id: m.id, name: m.name || m.id, speed: Math.max(1, Math.min(2.5, +m.speed || 1.4)), calm: Math.max(0, Math.min(0.8, +m.calm || 0)), level: Math.max(1, m.level | 0 || 1), price: Math.max(0, m.price | 0), starter: !!m.starter, look: m.look || null }));
+    .map(m => ({ id: m.id, name: m.name || m.id, speed: Math.max(1, Math.min(2.5, +m.speed || 1.4)), calm: Math.max(0, Math.min(0.8, +m.calm || 0)), level: Math.max(1, (EM[m.id] && EM[m.id].level) | 0 || m.level | 0 || 1), price: Math.max(0, (EM[m.id] && Number.isFinite(EM[m.id].price) ? EM[m.id].price : m.price) | 0), starter: !!m.starter, look: m.look || null }));
   const byId = new Map(list.map(m => [m.id, m]));
   const starter = list.find(m => m.starter) || list.find(m => m.price === 0) || list[0];   // given free at STARTER_LEVEL (and sold from its own level)
   const view = m => ({ id: m.id, name: m.name, speed: m.speed, calm: m.calm, level: m.level, ...(m.look ? { look: m.look } : {}) });

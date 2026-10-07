@@ -321,9 +321,9 @@
    "name": "Jed Weirside",
    "role": "angler",
    "at": "Millbrook",
-   "x": 676,
-   "z": 1648,
-   "yaw": 0,
+   "x": 100,
+   "z": 1304,
+   "yaw": -1.57,
    "angler": true
   }
  ]

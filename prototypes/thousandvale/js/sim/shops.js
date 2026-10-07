@@ -18,6 +18,7 @@
 
 export const SHOP_RANGE = 6;
 export const BRACKET = 3;
+import { economy } from './economy-knobs.js';
 export const DEFAULT_PRICING = Object.freeze({ sellFactor: 0.25, buyback: 12, restockMinutes: 30, perItemLevel: 0.12, rarityCap: 'rare' });
 export const DEFAULT_SHOPS = Object.freeze({
   general: { name: 'General Goods', role: 'merchant', categories: { other: { label: 'Rings & charms', bases: ['ring', 'necklace'], count: 3, rarity: { normal: 0.6, magic: 0.4 } }, armor: { label: 'Plain clothes', bases: ['cloth_helm', 'cloth_chest', 'cloth_legs', 'light_boots'], count: 4, rarity: { normal: 1 } } }, goods: [] },
@@ -32,7 +33,9 @@ export function createShops({ data = null, mounts = null, now = () => Date.now()
   const kinds = { ...DEFAULT_SHOPS, ...((data && data.kinds) || {}) };
   const towns = (data && data.towns) || {};
   const catalog = (data && data.goodsCatalog) || {};
-  const pricing = { ...DEFAULT_PRICING, ...((data && data.pricing) || {}) };
+  // V2: economy.json server.shop are the base numbers; shops.json `pricing` (E) still wins where it names the same key
+  const ES = economy().shop;
+  const pricing = { ...DEFAULT_PRICING, sellFactor: ES.sellFactor, perItemLevel: ES.perItemLevel, buyback: ES.buyback, restockMinutes: ES.restockMinutes, ...((data && data.pricing) || {}) };
   const roleKind = { ...ROLE_KIND };
   for (const [k, v] of Object.entries(kinds)) if (v && v.role && !roleKind[v.role]) roleKind[v.role] = k;
   const cache = new Map();          // `${npcKey}|${bracket}` -> { at, stock }
@@ -53,16 +56,19 @@ export function createShops({ data = null, mounts = null, now = () => Date.now()
   function price(item, rules = null, townMult = 1) {
     if (item && Number.isFinite(item.shopPrice)) return item.shopPrice;
     let p = 0;
+    // owner feedback 7 V2 (stream C's edit, 2 lines): `rules.price` is FINAL for the item's level (js/rules/economy.js), so the
+    // per-item-level rise below is only for the old Farhold price — applying both priced a level-2 glove 12% twice over
+    const final = !!(rules && rules.price);
     if (rules) {
       try { p = rules.price ? +rules.price(item) : (engineOf(rules) && engineOf(rules).rpg.price ? +engineOf(rules).rpg.price(item) : 0); } catch (err) { log('price failed', err && err.message); }
     }
-    if (!(p > 0)) p = Math.round(15 * (RARITY_PRICE[item && item.rarity] || 1));
-    return Math.max(1, Math.round(p * (1 + pricing.perItemLevel * (itemLevel(item) - 1)) * (townMult || 1)));
+    if (!(p > 0)) p = Math.round(ES.fallbackPrice * ((ES.rarityPrice || RARITY_PRICE)[item && item.rarity] || 1));
+    return Math.max(1, Math.round(p * (final && p > 0 ? 1 : 1 + pricing.perItemLevel * (itemLevel(item) - 1)) * (townMult || 1)));
   }
   // T25 (play-test 5): a fish, junk, a trophy or a cooked meal sells for its OWN price (E's `price` = what a merchant pays;
   // C scales it by the fish's size) — never the gear formula. Junk is worth nothing (selling it just gets rid of it).
   const ownPrice = item => item && (item.kind === 'fish' || item.kind === 'junk' || item.kind === 'trophy') && Number.isFinite(item.price);
-  const sellPrice = (item, rules) => (ownPrice(item) ? Math.max(0, Math.round(item.price)) : item && (item.kind === 'crate' || item.kind === 'gift') ? 1 : Math.max(1, Math.floor(price(item, rules) * pricing.sellFactor)));
+  const sellPrice = (item, rules) => (ownPrice(item) ? Math.max(0, Math.round(item.price * (item.kind === 'fish' ? ES.fishFactor : 1))) : item && (item.kind === 'crate' || item.kind === 'gift') ? ES.crateSell : rules && rules.sellPrice ? Math.max(1, +rules.sellPrice(item) || 1) : Math.max(1, Math.floor(price(item, rules) * pricing.sellFactor)));   // V2: what a merchant pays for gear is the rules' one function when it exists
   /** A goods-catalog item by id (E's quest `grant` / `reward.goods`: a rod, a tin of worms), or null. */
   const goodOf = id => (catalog[id] ? good({ id, source: 'good' }, null) : null);
   /** A potion item by id (play-test 6 U17: potion drops), named from the engine's potion table when the rules have one. */

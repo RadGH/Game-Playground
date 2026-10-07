@@ -117,9 +117,9 @@
    "name": "Corporal Finch Loach",
    "role": "angler",
    "at": "Gorsehold",
-   "x": 1780,
-   "z": 1542,
-   "yaw": 0.79,
+   "x": 1788,
+   "z": 1540,
+   "yaw": 1.57,
    "angler": true
   }
  ]

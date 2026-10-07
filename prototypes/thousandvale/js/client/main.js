@@ -538,6 +538,8 @@ function wireNet(net) {
     if (u.msg) hud.toast(u.msg, 'info');
   });
   net.on('targetR', r => { if (S.target === r.id) setTarget(null); hud.toast(r.why === 'range' ? 'Too far away to target.' : 'You cannot target that.', 'warn'); });
+  // play-test 7 (V3): the open fish pools of the zone, listed beyond entity range (asked of A: `fishPools {open: [{id, x, z, tier}]}`)
+  net.on('fishPools', m => { try { angling.setKnown(m.open || m.list || []); } catch {} });
   net.on('castR', r => {
     if (r.slot > 0 && S.cds) { S.cds[r.slot] = 0; hud.cooldown(r.slot, 0); }
     if (r.why === 'cooldown' && !(r.slot > 0)) { S.swing.ms = Math.min(2500, S.swing.ms + 60); return; }
@@ -559,7 +561,7 @@ function onJoined(j) {
   for (const id of [...actors.actors.keys()]) if (id !== keep) actors.remove(id);
   if (keep != null) { actors.rekey(keep, S.selfId); statusSync.dead(S.selfId); }   // C/Q8: the kept body starts the new room with no stale aura or torch
   if (S.target != null) setTarget(null);
-  tele.clear(); objects.clear(); boss.clear();
+  tele.clear(); objects.clear(); boss.clear(); angling.clearPools();
   worldUi.joined(j);
   preview = null;
   const you = j.you;

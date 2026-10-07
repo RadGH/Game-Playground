@@ -134,7 +134,7 @@ export function createUi2(o) {
     row.replaceChildren(h('label', { title: 'Items this rare or rarer from a party kill go to a Need / Greed / Skip roll; the rest is personal loot.' }, 'Loot rolls for ',
       h('select', { disabled: !lead, dataset: { k: 'lootMin' }, onchange: e => { send2.lootMin(net(), e.target.value); hud.chat(`Loot rolls now start at ${LOOT_TIERS.find(t => t.id === e.target.value)?.label.toLowerCase()}.`, 'party'); } },
         ...LOOT_TIERS.map(t => h('option', { value: t.id, selected: t.id === cur }, t.label)))),
-      lead ? null : h('small.dim', {}, ' (the leader sets this)'));
+      ...(lead ? [] : [h('small.dim', {}, ' (the leader sets this)')]));   // (replaceChildren prints a bare null as the word "null" — found in the gallery, stream G)
   }
 
   // ---- map + minimap marks (play-test 4): S23 corpses with loot for you, S4 rares near you / announced, S14 where a kill quest's prey lives

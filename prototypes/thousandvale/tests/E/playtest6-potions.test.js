@@ -19,10 +19,10 @@ test('U17: a healing potion is worth drinking — at least 45% of your health at
   assert.ok(POTIONS.healing_potion.pct >= 0.45);
 });
 
-test('U17: every town can sell you one — plain at the general store, healer and apothecary; greater from level 5; a potion costs about two kills', () => {
+test('U17: every town can sell you one — plain at the general store, healer and apothecary; greater from level 5; a potion costs a handful of kills', () => {
   const has = (k, id) => S.kinds[k].goods.find(g => g.id === id);
-  for (const k of ['general', 'apothecary', 'healer']) { const g = has(k, 'healing_potion'); assert.ok(g && g.minLevel === 1 && g.price <= KILL_GOLD(1) * 3, k); }
-  for (const k of ['apothecary', 'healer']) { const g = has(k, 'greater_healing'); assert.ok(g && g.minLevel <= 5 && g.price <= KILL_GOLD(5) * 3, k + ' greater'); }
+  for (const k of ['general', 'apothecary', 'healer']) { const g = has(k, 'healing_potion'); assert.ok(g && g.minLevel === 1 && g.price <= KILL_GOLD(1) * 8, k); }       // V2 (tools/sim-economy.mjs): a potion is ~4% of an hour of questing
+  for (const k of ['apothecary', 'healer']) { const g = has(k, 'greater_healing'); assert.ok(g && g.minLevel <= 5 && g.price <= KILL_GOLD(5) * 14, k + ' greater'); }
   for (const t of Object.values(S.towns)) if (t.shops) assert.ok(t.shops.some(k => (S.kinds[k].goods || []).some(g => g.id === 'healing_potion')), 'a town with no potion seller');       // the roadside inn sells one too
   for (const k of ['apothecary', 'healer']) assert.deepEqual(S.roles[S.kinds[k].role].goods, S.kinds[k].goods, 'run tools/content-shops.mjs');
 });

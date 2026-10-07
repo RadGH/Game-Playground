@@ -297,6 +297,7 @@ export function pgM3({ pool, q, realm, SAVE_SQL, saveParams }) {
         return { id: r.rows[0].id, first };
       });
     },
+    async hasFeedback(char) { const r = await q('SELECT 1 FROM feedback WHERE char_id = $1 LIMIT 1', [char]); return r.rows.length > 0; },
     async feedbackGiftFailed(char) { await q('UPDATE feedback SET gift = false WHERE char_id = $1', [char]); },
     async listFeedback({ state = null, kind = null, limit = 100, before = null, hideTrashed = false } = {}) {
       const r = await q(`SELECT * FROM feedback WHERE realm = $1 AND ($2::text IS NULL OR state = $2) AND ($3::text IS NULL OR kind = $3) AND ($4::bigint IS NULL OR id < $4)

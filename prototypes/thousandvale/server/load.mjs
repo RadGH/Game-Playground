@@ -64,6 +64,9 @@ export function feedbackSink(env = 'dev', file = feedbackFile(env)) {
   };
 }
 
+/** V2: the server's gold numbers (data/rules/economy.json; js/sim/economy-knobs.js merges it over its defaults). Null when the file is not there. */
+export function loadEconomy() { for (const f of ['data/provinces/economy.json', 'data/rules/economy.json']) { try { return JSON.parse(readFileSync(join(GAME, f), 'utf8')); } catch { /* next */ } } return null; }
+
 export async function makeStore(o) {
   if (o.db === 'pg') { const { createPgStore } = await import('./db/pg-store.js'); return createPgStore({ log }); }
   if (o.db === 'json') { const { createJsonStore } = await import('./db/json-store.js'); return createJsonStore(o.dbFile); }

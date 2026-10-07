@@ -262,6 +262,7 @@ export function memoryM3(d, { now, changed, sha256Hex, randomHex, packChar, prun
       changed();
       return { id, first };
     },
+    async hasFeedback(char) { return (d.feedback || []).some(f => f.char === char); },
     async feedbackGiftFailed(char) { for (const f of d.feedback || []) if (f.char === char) f.gift = false; changed(); },
     async listFeedback({ state = null, kind = null, limit = 100, before = null, hideTrashed = false } = {}) {
       return (d.feedback || []).filter(f => (!state || f.state === state) && (!kind || f.kind === kind) && (!before || f.id < before) && !(hideTrashed && f.state === 'trashed'))

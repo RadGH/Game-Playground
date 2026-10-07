@@ -70,7 +70,7 @@
       "done": "Eight? Good. The shepherds will sleep tonight, and so will I.",
       "reward": {
         "xp": 0.35,
-        "gold": 6,
+        "gold": 10,
         "crates": [
           {
             "slot": "chest",
@@ -98,7 +98,7 @@
       "done": "Lovely. Take a turnip. Take two, they've been bitten anyway.",
       "reward": {
         "xp": 0.35,
-        "gold": 6,
+        "gold": 8,
         "crates": [
           {
             "slot": "feet",
@@ -205,7 +205,7 @@
       "done": "That's his hand. That's his... Thank you. I'd rather know. Take this — he'd not need it now.",
       "reward": {
         "xp": 0.3,
-        "gold": 4,
+        "gold": 5,
         "crates": [
           {
             "slot": "legs",
@@ -244,7 +244,7 @@
       "done": "Crates back, and another cart turned over? Right. That settles it. Here's the job I've been meaning to give someone.",
       "reward": {
         "xp": 0.3,
-        "gold": 5,
+        "gold": 6,
         "crates": [
           {
             "slot": "weapon",

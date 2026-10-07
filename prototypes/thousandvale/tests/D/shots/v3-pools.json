@@ -1,0 +1,90 @@
+{
+ "zones": {
+  "z12_02": {
+   "listed": 2,
+   "live": 26,
+   "sent": 2,
+   "drawn": 2,
+   "rows": [
+    {
+     "id": "pool_z12_02_1",
+     "tier": 1,
+     "road": 11,
+     "sent": true,
+     "drawn": true,
+     "sentNear": 4
+    },
+    {
+     "id": "pool_z12_02_7",
+     "tier": 1,
+     "road": 4,
+     "sent": true,
+     "drawn": true,
+     "sentNear": 3
+    }
+   ],
+   "views": [
+    {
+     "tod": "day",
+     "dist": 30,
+     "sent": true,
+     "drawn": true
+    },
+    {
+     "tod": "day",
+     "dist": 80,
+     "sent": true,
+     "drawn": true
+    },
+    {
+     "tod": "day",
+     "dist": 150,
+     "sent": true,
+     "drawn": true
+    },
+    {
+     "tod": "night",
+     "dist": 30,
+     "sent": true,
+     "drawn": true
+    },
+    {
+     "tod": "night",
+     "dist": 80,
+     "sent": true,
+     "drawn": true
+    },
+    {
+     "tod": "night",
+     "dist": 150,
+     "sent": true,
+     "drawn": true
+    }
+   ]
+  }
+ },
+ "towns": {
+  "Halsbridge": {
+   "zone": "z13_02",
+   "listedWithin150": 3,
+   "sentWithin150": 3,
+   "drawn": 3,
+   "nearest": {
+    "d": 8,
+    "tier": 1,
+    "left": 99
+   }
+  },
+  "Ashcombe": {
+   "zone": "z12_01",
+   "listedWithin150": 2,
+   "sentWithin150": 2,
+   "drawn": 2,
+   "nearest": {
+    "d": 8,
+    "tier": 1,
+    "left": 99
+   }
+  }
+ }
+}

@@ -53,3 +53,12 @@ schedules), `tests/E/quests.test.js` (sites).
   Tests: `tests/E/playtest5-gear.test.js`.
 - **`road-events.json`** — every kind now carries an `info` block (name, what, objective, durationSec, onSuccess, onFail, rewardText): see
   data/quests/README.md "Event info"; `node tools/content-events.mjs`.
+
+## The economy (owner feedback 7, V2)
+
+- **`economy.json`** — every gold number a place or a person pays or charges: `unit` (one kill's gold, the same numbers as data/rules/prices.json `kill`),
+  `quest.mult`, `event`, `chest`, `treasure`, `roadChest`, `fare`, `mounts`, `mail`, `guild`, `barber`, and `targets` (the rules as ratios).
+  Read by js/sim/economy-knobs.js. Measure any change with `node tools/sim-economy.mjs`; tables in docs/economy/README.md; the rules are pinned by
+  tests/E/playtest7-economy.test.js. A fixed price in `shops.json` must cost at least one kill and at most twenty hours at the level it opens.
+- **Pools (V3)** — `angling-pools.json` now has a `town` pool (always open, tier 1) for every hub town with water in reach, with the angler beside it;
+  `byRoad` pools from a second roadside pass; 60% of a zone's pools are tier 1 and 60% are open at once.

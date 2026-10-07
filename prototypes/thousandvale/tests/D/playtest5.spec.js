@@ -166,8 +166,8 @@ test('T15 + T16: every attack form and the sceptre swing draw, and link no new s
   expect(r.fx.forms.arcs).toBe(1); expect(r.fx.forms.imbued).toBe(1); expect(r.fx.forms.forks).toBeGreaterThanOrEqual(2);
   expect(Object.keys(r.fx.forms.forms).length).toBeGreaterThanOrEqual(10);
   expect(r.perf.newProgramNames, 'no new shader program while the forms play').toEqual([]);
-  await page.waitForTimeout(2500);
-  expect((await page.evaluate(() => tv.fx5())).live, 'every pooled piece is put away').toBe(0);
+  // (effects run on frame time, and this VM draws about a frame a second under load: wait for them rather than for the clock)
+  await expect.poll(async () => (await page.evaluate(() => tv.fx5())).live, { timeout: 60000, intervals: [1000], message: 'every pooled piece is put away' }).toBe(0);
   expect(errors, errors.join('\n')).toEqual([]);
 });
 

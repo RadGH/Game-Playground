@@ -121,6 +121,15 @@ export function createTouch({ api, input, run, radial }) {
   if (chatEl) { const x = mk('ph-chat-x', 'Close the chat', ICON.close, chatEl); tap(x, () => setChat(false)); }
   document.getElementById('chat-input')?.addEventListener('focus', () => setChat(true));
 
+  // ---------------------------------------------------------------- V7: quests + events behind ONE bubble; the party as round portraits
+  const SCROLL = svg('<path d="M6 3h11a2 2 0 0 1 2 2v14a2 2 0 0 0 2 2H8a2 2 0 0 1-2-2Z"/><path d="M6 3a2 2 0 0 0-2 2v2h2"/><path d="M10 8h6M10 12h6M10 16h3"/>');
+  const info = mk('ph-info', 'Quests, events and a bigger map', SCROLL + '<b></b>');
+  tap(info, () => { html.dataset.hudinfo = html.dataset.hudinfo === 'open' ? '' : 'open'; info.classList.toggle('on', html.dataset.hudinfo === 'open'); });
+  const pmin = mk('ph-partymin', 'Party frames: small or full', svg('<circle cx="7" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><circle cx="12" cy="17" r="3"/>'));
+  const setParty = min => { html.dataset.party = min ? 'min' : ''; pmin.classList.toggle('on', !!min); try { localStorage.setItem('tv.phone.party', min ? 'min' : ''); } catch { /* private window */ } };
+  tap(pmin, () => setParty(html.dataset.party !== 'min'));
+  try { if (localStorage.getItem('tv.phone.party') === 'min') setParty(true); } catch { /* private window */ }
+
   // ---------------------------------------------------------------- prompts are buttons
   hud.addEventListener('click', e => { const p = e.target.closest?.('.interact'); if (p && !p.hidden) { e.stopPropagation(); actionKey('interact'); } }, true);
   document.getElementById('minimap')?.addEventListener('click', () => {}, true);
@@ -185,8 +194,36 @@ export function createTouch({ api, input, run, radial }) {
     if (performance.now() - swallow < 700) { e.stopPropagation(); e.preventDefault(); swallow = 0; return; }
     if (e.tvPass) return;
     const cell = e.target.closest?.('#bag .islot:not(.empty)');
-    if (cell && cell.dataset.tipRender) { e.stopPropagation(); e.preventDefault(); itemSheet(cell); }
+    if (cell && cell.dataset.tipRender) { e.stopPropagation(); e.preventDefault(); itemSheet(cell); return; }
+    const row = e.target.closest?.('#panel-shop .shop-row');
+    if (row) { e.stopPropagation(); e.preventDefault(); shopSheet(row); }
   }, true);
+  /** V13: a shop row — the item's card (with the comparison against what you wear) and one big button for what a click does. */
+  function shopSheet(row) {
+    const cell = row.querySelector('.islot'), price = row.querySelector('.price')?.textContent || '';
+    const tabOn = document.querySelector('#panel-shop .shop-tabs [aria-checked="true"]')?.dataset.tab || 'buy';
+    const label = tabOn === 'sell' ? `Sell${price ? ' for ' + price : ''}` : tabOn === 'back' ? `Buy back${price ? ' for ' + price : ''}` : `Buy${price ? ' for ' + price : ''}`;
+    const go = () => { const ev = new MouseEvent('click', { bubbles: true, cancelable: true }); ev.tvPass = true; row.dispatchEvent(ev); };
+    const acts = [{ label, primary: true, run: go }];
+    if (cell && tipHost(cell)) return sheetFor(cell, acts);
+    sBody.replaceChildren(Object.assign(document.createElement('div'), { className: 'ps-tip', textContent: row.querySelector('.sr-name')?.textContent || '' }));
+    const x = document.createElement('button'); x.type = 'button'; x.className = 'ghost ps-x'; x.textContent = 'Close'; x.onclick = closeSheet;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'primary ps-act'; b.textContent = label; b.onclick = () => { closeSheet(); go(); };
+    sActs.replaceChildren(b, x); sheet.hidden = false; return true;
+  }
+  /** A small button in a sheet's title bar that folds part of it away (V6: see the figure; V12: more map). */
+  function headToggle(panelSel, cls, label, attr) {
+    const head = document.querySelector(panelSel + ' .tvp-head'); if (!head || head.querySelector('.' + cls)) return;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost ph-headbtn ' + cls; b.textContent = label[0];
+    b.onclick = e => { e.stopPropagation(); const on = html.dataset[attr] !== '1'; html.dataset[attr] = on ? '1' : ''; b.textContent = label[on ? 1 : 0]; b.classList.toggle('on', on); };
+    head.insertBefore(b, head.querySelector('.tvp-x'));
+  }
+  // a mouse cannot flick a row sideways: let it drag rows that scroll (the gallery on a desktop; a phone scrolls them natively)
+  let dragRow = null;
+  document.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') return; for (let p = e.target; p && p !== document.body; p = p.parentElement) { if (p.scrollWidth > p.clientWidth + 4 && /auto|scroll/.test(getComputedStyle(p).overflowX)) { dragRow = { el: p, x: e.clientX, left: p.scrollLeft, moved: 0 }; return; } } }, true);
+  document.addEventListener('pointermove', e => { if (!dragRow) return; const d = e.clientX - dragRow.x; dragRow.moved = Math.max(dragRow.moved, Math.abs(d)); if (dragRow.moved > 6) dragRow.el.scrollLeft = dragRow.left - d; }, true);
+  document.addEventListener('pointerup', () => { if (dragRow && dragRow.moved > 6) swallow = performance.now(); dragRow = null; }, true);
+
   /** A bag or paper-doll square: its card, and what a click / Shift-click / right-click would do as buttons. */
   function itemSheet(cell) {
     const worn = !!cell.closest('#paperdoll, .inv-doll');
@@ -218,19 +255,37 @@ export function createTouch({ api, input, run, radial }) {
     const top = open.length ? open.sort((a, b) => (+b.style.zIndex || 0) - (+a.style.zIndex || 0))[0] : null;
     const id = top ? (TABS.find(t => top.matches(t.sel))?.id || 'other') : '';
     if (id !== lastSheet) { lastSheet = id; html.dataset.sheet = id; for (const b of tabs.children) b.classList.toggle('on', b.dataset.tab === id); if (id) { setChat(false); api.controls?.setAnalog?.(null); } }
+    // V7: how many quests and events sit behind the bubble; each party row's health / mana as numbers the round frames draw; who is targeted
+    const n = document.querySelectorAll('.right-col .et-card, .right-col .tr-main, .right-col .tr-row').length;
+    const badge = info.querySelector('b'); if (badge.textContent !== (n ? String(n) : '')) badge.textContent = n ? String(n) : '';
+    const tname = document.querySelector('#target-frame:not([hidden]) #target-name')?.textContent || '';
+    for (const m of document.querySelectorAll('#party .pmember')) {
+      const hp = parseFloat(m.querySelector('.bar.hp i')?.style.width || '100') / 100, mpEl = m.querySelector('.bar.mp'), mp = mpEl && !mpEl.hidden ? parseFloat(mpEl.querySelector('i')?.style.width || '0') / 100 : 0;
+      if (m.dataset.hp !== hp.toFixed(2)) { m.dataset.hp = hp.toFixed(2); m.style.setProperty('--hp', hp.toFixed(3)); }
+      if (m.dataset.mp !== mp.toFixed(2)) { m.dataset.mp = mp.toFixed(2); m.style.setProperty('--mp', mp.toFixed(3)); }
+      const name = m.querySelector('.pm-name')?.firstChild?.textContent || '';
+      m.classList.toggle('targeted', !!tname && name === tname);
+    }
+    if (id === 'map') headToggle('#panel-map', 'ph-mapside', ['Hide list', 'Show list'], 'mapside');
+    if (document.querySelector('#panel-appearance:not([hidden])')) headToggle('#panel-appearance', 'ph-peek', ['Preview', 'Back to editing'], 'peek');
+    if (document.querySelector('#panel-kits:not([hidden])')) headToggle('#panel-kits', 'ph-peek', ['Preview', 'Back to choosing'], 'peek');
     const fs = document.querySelector('.tv-fish:not([hidden])')?.dataset.state || '';
     const f = fs === 'bite' || fs === 'tug' ? fs : '';
     if (html.dataset.fishing !== f) { html.dataset.fishing = f; hook.querySelector('span').textContent = f === 'tug' ? 'Reel' : 'Hook!'; }
   }
 
   return {
-    ui, tabs, sheet, tick, sheetFor, itemSheet, closeSheet, closeSheets, setChat,
+    ui, tabs, sheet, tick, sheetFor, itemSheet, shopSheet, closeSheet, closeSheets, setChat, setParty,
+    setInfo(on) { html.dataset.hudinfo = on ? 'open' : ''; info.classList.toggle('on', !!on); },
     /** For the gallery's still pictures: show a control mid-press. */
     demo(what, a = 0.7, b = -0.5) {
       if (what === 'stick') { const r = zone.getBoundingClientRect(); base.style.left = (r.width * 0.42) + 'px'; base.style.top = (r.height * 0.55) + 'px'; base.classList.add('on'); const br = base.getBoundingClientRect(); ST.ox = br.left + br.width / 2; ST.oy = br.top + br.height / 2; stickAt(ST.ox + a * ST.R, ST.oy + b * ST.R); }
       else if (what === 'belt') { const r = belt.getBoundingClientRect(); radial.open({ items: beltItems(), title: 'Belt', hold: true, at: clampAt({ x: r.left + r.width / 2, y: r.top + r.height / 2 }), onPick: w => actionKey(w.id) }); radial.point(0); belt.classList.add('on'); }
       else if (what === 'wheel') { radial.open({ hold: false }); radial.point(typeof a === 'number' ? 0 : a); }
       else if (what === 'chat') setChat(true);
+      else if (what === 'party') setParty(a !== false && a !== 0);
+      else if (what === 'info') { html.dataset.hudinfo = 'open'; info.classList.add('on'); }
+      else if (what === 'shop') { const r = document.querySelector('#panel-shop .shop-row'); if (r) return shopSheet(r); }
     },
   };
 }

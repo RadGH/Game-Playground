@@ -1,0 +1,55 @@
+THE ECONOMY — working tree — gold per hour, everything sold
+activity          level 1    level 5   level 10   level 20
+questing              727       2435       5610      10549
+killing               424       2084       5230      11080
+events                644       2253       4640       9213
+dungeon              1942       4663       6509      13914
+fishing               671       1731       5609       9072
+fishing p10-p90   580-776  1437-2019  5155-6063 7679-10737
+legend (once a zone)    not yet    not yet    not yet 6899g/1.8h
+fishing / questing       92%        71%       100%        86%
+
+where it comes from
+  L1  killing   coin 340, soldDrops 84  (85 kills, 4.0 gold + 1.0 of sold drops each)
+  L1  questing  purses 542, soldCrates 25, kills 160  (4 quests (136 gold each, 1.05 crates), 32 kills)
+  L1  events    zoneEvents 125, soldRares 65, roadEvents 329, kills 125  (2.5 zone events (50 gold + a rare each), 5 road events)
+  L1  dungeon   coin 844, soldDrops 353, chest 745  (1.77 runs an hour (34 min each, 40 bodies))
+  L1  fishing   fish 532, sunkenCrates 49, junk 38, pulledUp 52  (skill 3, The Torbor Fields, 22 pools open to you (best tier 1), 17 s walk between pools)
+  L5  killing   coin 1322, soldDrops 762  (85 kills, 15.6 gold + 9.0 of sold drops each)
+  L5  questing  purses 1554, soldCrates 97, kills 785  (4 quests (389 gold each, 0.79 crates), 32 kills)
+  L5  events    zoneEvents 630, soldRares 248, roadEvents 763, kills 613  (2.5 zone events (252 gold + a rare each), 5 road events)
+  L5  dungeon   coin 1513, soldDrops 1604, chest 1546  (1.72 runs an hour (35 min each, 43 bodies))
+  L5  fishing   fish 1337, sunkenCrates 248, junk 29, pulledUp 117  (skill 28, The Gullwick Lakes, 33 pools open to you (best tier 2), 19 s walk between pools)
+  L10 killing   coin 2224, soldDrops 3006  (85 kills, 26.2 gold + 35.4 of sold drops each)
+  L10 questing  purses 3441, soldCrates 200, kills 1969  (4 quests (860 gold each, 0.77 crates), 32 kills)
+  L10 events    zoneEvents 1260, soldRares 530, roadEvents 1312, kills 1538  (2.5 zone events (504 gold + a rare each), 5 road events)
+  L10 dungeon   coin 1984, soldDrops 1893, chest 2632  (1.75 runs an hour (34 min each, 41 bodies))
+  L10 fishing   fish 4842, sunkenCrates 522, junk 24, pulledUp 221  (skill 50, The Sunken Wolds, 37 pools open to you (best tier 3), 19 s walk between pools)
+  L20 killing   coin 3693, soldDrops 7387  (85 kills, 43.4 gold + 86.9 of sold drops each)
+  L20 questing  purses 5898, soldCrates 480, kills 4171  (4 quests (1475 gold each, 0.77 crates), 32 kills)
+  L20 events    zoneEvents 2520, soldRares 1035, roadEvents 2399, kills 3259  (2.5 zone events (1008 gold + a rare each), 5 road events)
+  L20 dungeon   coin 2968, soldDrops 5883, chest 5063  (1.88 runs an hour (32 min each, 35 bodies))
+  L20 fishing   fish 7688, sunkenCrates 1368, junk 17, pulledUp 0  (skill 80, The Sunken Wolds, 37 pools open to you (best tier 3), 19 s walk between pools)
+
+PRICES                level 1    level 5   level 10   level 20      hours of questing to buy (same columns)
+plain gear                208        802       1611       3182         0.29   0.33   0.29   0.30
+uncommon gear             508       2098       4005       7949         0.70   0.86   0.71   0.75
+rare gear                2327       8841      17907      35003         3.20   3.63   3.19   3.32
+legendary (worth)        7794      33842      58514     125190        10.72  13.90  10.43  11.87
+  sells: uncommon           6         25         48         95         0.01   0.01   0.01   0.01
+  sells: rare              27        105        215        420         0.04   0.04   0.04   0.04
+healing potion             30         30         30         30         0.04   0.01   0.01   0.00
+greater healing           108        108        108        108         0.15   0.04   0.02   0.01
+travel rations              9          9          9          9         0.01   0.00   0.00   0.00
+hearty stew                27         27         27         27         0.04   0.01   0.00   0.00
+best mount                750       4200      16500      33000         1.03   1.72   2.94   3.13
+unbind a talent            68        100        140        220         0.09   0.04   0.02   0.02
+unbind a perk              92        140        200        320         0.13   0.06   0.04   0.03
+waystone 2 km              21         21         21         21         0.03   0.01   0.00   0.00
+waystone 8 km              65         65         65         65         0.09   0.03   0.01   0.01
+hazel rod                  12         12         12         12         0.02   0.00   0.00   0.00
+ash rod                  1350       1350       1350       1350         1.86   0.55   0.24   0.13
+one kill pays          4+0.99 15.55+8.9726.17+35.3743.45+86.91      (coin + sold drops)
+
+FISH  62 species: common 1-5 g (24), uncommon 3-28 g (21), rare 28-54 g (10), epic 50-232 g (7); legends 2400-6300 g; sunken crate 4.0% of casts
+fishing an hour:  L1: 168.41 fish, 8.24 crates, 0 legends, 39.56 pools | L5: 167.85 fish, 8.09 crates, 0 legends, 38.63 pools | L10: 178.29 fish, 8.03 crates, 0 legends, 40.27 pools | L20: 203.12 fish, 8.77 crates, 0.56 legends, 44.71 pools

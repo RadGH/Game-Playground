@@ -221,9 +221,9 @@
    "name": "Greta Icewell",
    "role": "angler",
    "at": "Hollin Toll",
-   "x": 1780,
+   "x": 1784,
    "z": 252,
-   "yaw": 2.36,
+   "yaw": -3.14,
    "angler": true
   }
  ]

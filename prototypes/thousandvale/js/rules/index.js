@@ -33,6 +33,7 @@ import { reviveOf, directHealSlot } from './tv-skills.js';
 import { runtimeFor, shapeOfUnit } from './cast-skills.js';
 import { attackReach, basicCard, isHeldFocus, stampCaster } from './caster-forms.js';
 import { TV_SLOTS } from './tv-gear.js';
+import { itemPrice, sellPrice as sellPriceOf, priceParts, killGold as killGoldOf, goldFound, isGear, retrainPrice as retrainPriceTv, questHour as questHourOf } from './economy.js';
 import { weaponHands } from './farhold.js';
 import { makeCrate as makeCrateItem, openCrate as openCrateItem, isCrate, crateText } from './crates.js';
 import { kitsFor as kitsForRaw, validKit as validKitRaw, starterGear as starterGearRaw, kitPlan } from './starter-kits.js';
@@ -78,6 +79,28 @@ export { kitPlan, isCrate };
 export const makeCrate = (spec = {}, { level = null, cls = null } = {}) => makeCrateItem(shared?.crates || null, { ...(cls ? { cls } : {}), ...spec, ...(level && spec.level == null && spec.maxLevel == null ? { level } : {}) });
 /** T9: the crate's card line for a spec (quest reward rows). */
 export const crateLabel = spec => crateText(shared?.crates || null, spec, { gift: !!spec?.gift });
+// ---- owner feedback 7 (V2): gold, for the server and E's tools/sim-economy.mjs (no room needed) ----
+/** The LIST price of an item — final (level, slot, rarity in it); a shop multiplies by its town's factor only. */
+export const priceOf = item => itemPrice(shared?.prices || null, item);
+/** What a merchant pays for it (never more than the list price). */
+export const sellPriceFor = item => sellPriceOf(shared?.prices || null, item);
+/** `{ price, sell, level, slot, parts }` for a tooltip or the sim. */
+export const priceRow = item => (isGear(item) ? { ...priceParts(shared?.prices || null, item), sell: sellPriceOf(shared?.prices || null, item) } : { price: priceOf(item), sell: sellPriceFor(item), level: 1, slot: null, parts: null });
+/** What a kill pays before gold find: `killGold(level, rank?, type?)` (type = a bestiary id, for its own coin weight). */
+export const killGold = (level = 1, rank = 'normal', type = null) => killGoldOf(shared?.prices || null, level, { rank, defGold: type ? shared?.enemyDef(type)?.gold ?? null : null });
+export { goldFound };
+/** The Unbinder's price at a level, and the hour of questing gold it is measured in (for E's sim). */
+export const unbinderPrice = (kind = 'talent', scope = 'one', level = 1) => retrainPriceTv(shared?.prices || null, kind, scope, level);
+export const questHour = (level = 1) => questHourOf(shared?.prices || null, level);
+/** The average worth of what a crate opens into at `level` (list price and sell price over `n` opens) — for the sim. */
+export function crateValue(spec = {}, level = 1, cls = null, n = 200) {
+  if (!shared) return null;
+  const rng = makeRng(hashStr(`crate:${JSON.stringify(spec)}:${level}:${cls}`));
+  const crate = makeCrateItem(shared.crates, spec);
+  let price = 0, sell = 0, got = 0;
+  for (let i = 0; i < n; i++) { const [it] = openCrateItem(shared, crate, { cls, level, rng }); if (!it) continue; got++; price += priceOf(it); sell += sellPriceFor(it); }
+  return got ? { price: Math.round(price / got), sell: Math.round(sell / got), n: got } : null;
+}
 /** T25: the angling rules (js/rules/fishing.js), booted with C's numbers and E's fish. */
 export const fishing = () => shared?.fishing || null;
 
@@ -1152,7 +1175,12 @@ export function createRules(host, opts = {}) {
   }
 
   /** What the Unbinder charges: `kind` 'talent' | 'perk', `scope` 'one' | 'all' (Farhold's balance.retrain). */
-  const retrainPrice = (e, kind = 'talent', scope = 'one') => retrainPriceOf(kind, scope, e?.r?.unit?.level || e?.level || 1, engine.balance.retrain || null);
+  // owner feedback 7: the Unbinder is priced in minutes of questing at your level (data/rules/prices.json `retrain`);
+  // Farhold's own table (68-320 gold) only when that knob is absent (a parity engine)
+  const retrainPrice = (e, kind = 'talent', scope = 'one') => {
+    const lvl = e?.r?.unit?.level || e?.level || 1;
+    return retrainPriceTv(engine.prices, kind, scope, lvl) ?? retrainPriceOf(kind, scope, lvl, engine.balance.retrain || null);
+  };
 
   /**
    * The player's skill bar as the client draws it (A's `you.bar`, D's ask): Farhold's own bar, so a
@@ -1187,6 +1215,9 @@ export function createRules(host, opts = {}) {
   return {
     equip, unequip, canEquip, gear, saveGear, rollLoot, onParty, useObject, bar, backfill, unlock, revived,
     applyKit, makeItem, makeCrate, openCrate, sheet, sheetWith,
+    /** owner feedback 7 (V2): an item's list price (final), what a merchant pays, and the parts for a tooltip */
+    price: priceOf, sellPrice: sellPriceFor, priceRow,
+    killGold,
     /** U16: the creature body a shape form draws (`{ id, name, creature, scale, colors, upright }`), or null — A: `info.form` */
     formOf: e => { const u = e?.r?.unit; return u ? room.run(() => shapeOfUnit(u)) : null; },
     /** U8: a boss ward's bar — `{ on, hp, max, leftMs, ms }` or null */

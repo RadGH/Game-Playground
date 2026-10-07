@@ -1,5 +1,5 @@
 {
- "_doc": "Stream E (play-test 5, T25 ANGLING) — the TEXT content of angling: what there is to catch, cook, buy and who teaches it. The numbers of the loop (bite wait, tug difficulty, skill gain, table weights by rarity) are stream C's (js/rules/fishing.js + data/rules/fishing.json); pool positions are data/provinces/angling-pools.json; the quests are data/quests/angling.json. `fish[]`: id, name, desc, water (river | lake | marsh | coast — marsh = fresh water in a marsh/fen biome), bands [lo, hi] = the zone LEVELS it lives in (a zone offers a fish when the zone's band overlaps), time (any | day | night | dawn | dusk), rarity (common | uncommon | rare | epic), size [minCm, maxCm], price (gold a merchant pays), skill (angling skill needed), pool: true = only from a fish pool. `junk[]`: worthless catches. `legends[]`: one named fish per zone (zone = sheet zone id): landing it gives the `trophy` item and the `title` ('<name> <title>'). `pullBack[]`: 'something pulls back' — a monster `type` (Farhold bestiary id) climbs out, by water kind and zone band. `crates`: the chance of a sunken crate and the T9 crate it is. `meals{}`: same shape as data/provinces/shops.json goodsCatalog (the existing food + buff code eats them). `recipes[]`: cooked at a campfire or inn hearth; needs = [{fish: id, count}] or [{tag: any | river | lake | marsh | coast | <rarity>, count}]; skill = angling skill needed to know it. `tools[]`: rods (a Tool item, no weapon slot; bonus.band = wider tug band, bonus.wait = shorter bite wait). `bait[]`: optional consumables. `anglers[]`: one per town; they sell `sells`, buy fish and give angler jobs (data/quests/jobs.json frames with a `fish` slot). `skill.ranks`: rank name from each skill value up.",
+ "_doc": "Stream E (play-test 5, T25 ANGLING) — the TEXT content of angling: what there is to catch, cook, buy and who teaches it. The numbers of the loop (bite wait, tug difficulty, skill gain, table weights by rarity) are stream C's (js/rules/fishing.js + data/rules/fishing.json); pool positions are data/provinces/angling-pools.json; the quests are data/quests/angling.json. `fish[]`: id, name, desc, water (river | lake | marsh | coast — marsh = fresh water in a marsh/fen biome), bands [lo, hi] = the zone LEVELS it lives in (a zone offers a fish when the zone's band overlaps), time (any | day | night | dawn | dusk), rarity (common | uncommon | rare | epic), size [minCm, maxCm], price (gold a merchant pays), skill (angling skill needed), pool: true = only from a fish pool. `junk[]`: worthless catches. `legends[]`: one named fish per zone (zone = sheet zone id): landing it gives the `trophy` item and the `title` ('<name> <title>'). `pullBack[]`: 'something pulls back' — a monster `type` (Farhold bestiary id) climbs out, by water kind and zone band. `crates`: the chance of a sunken crate and the T9 crate it is. `meals{}`: same shape as data/provinces/shops.json goodsCatalog (the existing food + buff code eats them). `recipes[]`: cooked at a campfire or inn hearth; needs = [{fish: id, count}] or [{tag: any | river | lake | marsh | coast | <rarity>, count}]; skill = angling skill needed to know it. `tools[]`: rods (a Tool item, no weapon slot; bonus.band = wider tug band, bonus.wait = shorter bite wait). `bait[]`: optional consumables. `anglers[]`: one per town; they sell `sells`, buy fish and give angler jobs (data/quests/jobs.json frames with a `fish` slot). `skill.ranks`: rank name from each skill value up. OWNER FEEDBACK 7 (V2): `price` is a species' worth RELATIVE to other fish, deliberately spread wide — common 1-4, uncommon 6-14, rare 30-60, epic 150-300 — and a legend carries its own `price` (500 + 20 x its skill). Stream C's fishing.json `value` turns it into gold (rarity factor x mult x the zone-level factor); tools/sim-economy.mjs measures the hour.",
  "fish": [
   {
    "id": "silver_perch",
@@ -39,7 +39,7 @@
     8,
     16
    ],
-   "price": 1,
+   "price": 2,
    "skill": 0
   },
   {
@@ -59,7 +59,7 @@
     10,
     22
    ],
-   "price": 2,
+   "price": 1,
    "skill": 0
   },
   {
@@ -79,7 +79,7 @@
     18,
     40
    ],
-   "price": 3,
+   "price": 2,
    "skill": 0
   },
   {
@@ -120,7 +120,7 @@
     45,
     95
    ],
-   "price": 9,
+   "price": 16,
    "skill": 10
   },
   {
@@ -140,7 +140,7 @@
     25,
     45
    ],
-   "price": 8,
+   "price": 14,
    "skill": 5
   },
   {
@@ -160,7 +160,7 @@
     35,
     75
    ],
-   "price": 11,
+   "price": 19,
    "skill": 20
   },
   {
@@ -181,7 +181,7 @@
     40,
     90
    ],
-   "price": 10,
+   "price": 17,
    "skill": 15
   },
   {
@@ -201,7 +201,7 @@
     15,
     32
    ],
-   "price": 3,
+   "price": 1,
    "skill": 0
   },
   {
@@ -221,7 +221,7 @@
     60,
     110
    ],
-   "price": 26,
+   "price": 33,
    "skill": 40,
    "pool": true
   },
@@ -242,8 +242,8 @@
     35,
     70
    ],
-   "price": 22,
-   "skill": 30,
+   "price": 28,
+   "skill": 20,
    "pool": true
   },
   {
@@ -263,7 +263,7 @@
     120,
     240
    ],
-   "price": 70,
+   "price": 113,
    "skill": 70,
    "pool": true
   },
@@ -304,7 +304,7 @@
     30,
     70
    ],
-   "price": 3,
+   "price": 2,
    "skill": 0
   },
   {
@@ -346,7 +346,7 @@
     6,
     14
    ],
-   "price": 1,
+   "price": 3,
    "skill": 0
   },
   {
@@ -366,7 +366,7 @@
     25,
     55
    ],
-   "price": 9,
+   "price": 15,
    "skill": 10
   },
   {
@@ -386,7 +386,7 @@
     25,
     50
    ],
-   "price": 5,
+   "price": 4,
    "skill": 15
   },
   {
@@ -426,7 +426,7 @@
     40,
     85
    ],
-   "price": 13,
+   "price": 22,
    "skill": 25
   },
   {
@@ -446,7 +446,7 @@
     35,
     70
    ],
-   "price": 28,
+   "price": 35,
    "skill": 45,
    "pool": true
   },
@@ -467,8 +467,8 @@
     45,
     90
    ],
-   "price": 24,
-   "skill": 35
+   "price": 30,
+   "skill": 20
   },
   {
    "id": "coldwater_lamprey",
@@ -487,7 +487,7 @@
     30,
     60
    ],
-   "price": 10,
+   "price": 23,
    "skill": 30
   },
   {
@@ -507,7 +507,7 @@
     90,
     160
    ],
-   "price": 75,
+   "price": 147,
    "skill": 75,
    "pool": true
   },
@@ -528,7 +528,7 @@
     10,
     24
    ],
-   "price": 2,
+   "price": 1,
    "skill": 0
   },
   {
@@ -588,7 +588,7 @@
     15,
     30
    ],
-   "price": 3,
+   "price": 4,
    "skill": 5
   },
   {
@@ -608,7 +608,7 @@
     50,
     100
    ],
-   "price": 10,
+   "price": 18,
    "skill": 15
   },
   {
@@ -628,7 +628,7 @@
     40,
     80
    ],
-   "price": 12,
+   "price": 21,
    "skill": 25
   },
   {
@@ -648,7 +648,7 @@
     35,
     75
    ],
-   "price": 13,
+   "price": 22,
    "skill": 30
   },
   {
@@ -668,7 +668,7 @@
     40,
     95
    ],
-   "price": 9,
+   "price": 16,
    "skill": 10
   },
   {
@@ -679,7 +679,7 @@
     "marsh"
    ],
    "bands": [
-    5,
+    3,
     10
    ],
    "time": "night",
@@ -688,8 +688,8 @@
     25,
     55
    ],
-   "price": 27,
-   "skill": 45,
+   "price": 37,
+   "skill": 20,
    "pool": true
   },
   {
@@ -709,7 +709,7 @@
     110,
     200
    ],
-   "price": 30,
+   "price": 38,
    "skill": 50,
    "pool": true
   },
@@ -730,7 +730,7 @@
     80,
     150
    ],
-   "price": 72,
+   "price": 80,
    "skill": 70
   },
   {
@@ -750,7 +750,7 @@
     6,
     12
    ],
-   "price": 1,
+   "price": 2,
    "skill": 0
   },
   {
@@ -770,7 +770,7 @@
     15,
     30
    ],
-   "price": 3,
+   "price": 2,
    "skill": 0
   },
   {
@@ -810,7 +810,7 @@
     25,
     55
    ],
-   "price": 4,
+   "price": 3,
    "skill": 5
   },
   {
@@ -830,7 +830,7 @@
     20,
     45
    ],
-   "price": 10,
+   "price": 19,
    "skill": 15
   },
   {
@@ -850,7 +850,7 @@
     25,
     45
    ],
-   "price": 11,
+   "price": 20,
    "skill": 20
   },
   {
@@ -870,7 +870,7 @@
     90,
     180
    ],
-   "price": 15,
+   "price": 20,
    "skill": 35
   },
   {
@@ -881,7 +881,7 @@
     "coast"
    ],
    "bands": [
-    5,
+    3,
     10
    ],
    "time": "dusk",
@@ -890,8 +890,8 @@
     45,
     90
    ],
-   "price": 26,
-   "skill": 40,
+   "price": 31,
+   "skill": 20,
    "pool": true
   },
   {
@@ -911,7 +911,7 @@
     60,
     120
    ],
-   "price": 30,
+   "price": 40,
    "skill": 50
   },
   {
@@ -931,8 +931,334 @@
     150,
     280
    ],
-   "price": 80,
+   "price": 180,
    "skill": 80,
+   "pool": true
+  },
+  {
+   "id": "foldside_tench",
+   "name": "Foldside Tench",
+   "desc": "Fat, slow and fond of the sheep-wash. The first fish most Torbor children land.",
+   "water": [
+    "river",
+    "lake"
+   ],
+   "bands": [
+    1,
+    5
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    18,
+    34
+   ],
+   "price": 3,
+   "skill": 0
+  },
+  {
+   "id": "sheepwash_trout",
+   "name": "Sheepwash Trout",
+   "desc": "Lies under the fold bridge and judges every bait on its merits.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    1,
+    5
+   ],
+   "time": "day",
+   "rarity": "uncommon",
+   "size": [
+    20,
+    40
+   ],
+   "price": 3,
+   "skill": 2
+  },
+  {
+   "id": "sedge_pickerel",
+   "name": "Sedge Pickerel",
+   "desc": "A pike in miniature with a pike's opinion of itself.",
+   "water": [
+    "marsh",
+    "lake"
+   ],
+   "bands": [
+    1,
+    6
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    16,
+    36
+   ],
+   "price": 3,
+   "skill": 0
+  },
+  {
+   "id": "quay_whiting",
+   "name": "Quay Whiting",
+   "desc": "Shoals under the fish stalls, living on what the gulls drop.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    1,
+    6
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    18,
+    38
+   ],
+   "price": 3,
+   "skill": 0
+  },
+  {
+   "id": "torbor_goldscale",
+   "name": "Torbor Goldscale",
+   "desc": "Every scale a new coin. Innkeepers pay for it before it is cooked, so it can be seen on the plate.",
+   "water": [
+    "river",
+    "lake"
+   ],
+   "bands": [
+    1,
+    5
+   ],
+   "time": "any",
+   "rarity": "epic",
+   "size": [
+    24,
+    46
+   ],
+   "price": 50,
+   "skill": 1,
+   "pool": true
+  },
+  {
+   "id": "highforce_trout",
+   "name": "Highforce Trout",
+   "desc": "Holds station under the falls and takes whatever the white water brings.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    22,
+    44
+   ],
+   "price": 5,
+   "skill": 40
+  },
+  {
+   "id": "ironback_barbel",
+   "name": "Ironback Barbel",
+   "desc": "Plated like a gauntlet and about as easy to turn.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "dusk",
+   "rarity": "uncommon",
+   "size": [
+    40,
+    80
+   ],
+   "price": 28,
+   "skill": 50
+  },
+  {
+   "id": "kingsrun_salmon",
+   "name": "Kingsrun Salmon",
+   "desc": "Runs the high rivers once a year and was once reserved for one table.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    13,
+    20
+   ],
+   "time": "dawn",
+   "rarity": "rare",
+   "size": [
+    60,
+    110
+   ],
+   "price": 54,
+   "skill": 65
+  },
+  {
+   "id": "tarn_whitefish",
+   "name": "Tarn Whitefish",
+   "desc": "Pale as the snowmelt it lives in, and nearly as cold to hold.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    20,
+    40
+   ],
+   "price": 5,
+   "skill": 40
+  },
+  {
+   "id": "deepmere_pike",
+   "name": "Deepmere Pike",
+   "desc": "Old enough to have outlived the boat that first hooked it.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    60,
+    120
+   ],
+   "price": 28,
+   "skill": 55
+  },
+  {
+   "id": "starless_char",
+   "name": "Starless Char",
+   "desc": "Black above, black below; anglers find it by the hole it leaves in the reflections.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    15,
+    20
+   ],
+   "time": "night",
+   "rarity": "epic",
+   "size": [
+    50,
+    95
+   ],
+   "price": 232,
+   "skill": 80,
+   "pool": true
+  },
+  {
+   "id": "blackwater_bowfin",
+   "name": "Blackwater Bowfin",
+   "desc": "Breathes air when the bog runs out of anything better.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    30,
+    60
+   ],
+   "price": 5,
+   "skill": 40
+  },
+  {
+   "id": "fenlord_catfish",
+   "name": "Fenlord Catfish",
+   "desc": "Rules a mile of drowned ditch and takes tribute in ducklings.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    12,
+    20
+   ],
+   "time": "night",
+   "rarity": "rare",
+   "size": [
+    80,
+    150
+   ],
+   "price": 54,
+   "skill": 65
+  },
+  {
+   "id": "shoal_mackerel",
+   "name": "Shoal Mackerel",
+   "desc": "Comes in thousands or not at all.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "day",
+   "rarity": "common",
+   "size": [
+    24,
+    40
+   ],
+   "price": 5,
+   "skill": 40
+  },
+  {
+   "id": "greatfin_tunny",
+   "name": "Greatfin Tunny",
+   "desc": "Fast enough to be somewhere else before the float settles.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    70,
+    140
+   ],
+   "price": 28,
+   "skill": 55
+  },
+  {
+   "id": "abyss_halibut",
+   "name": "Abyss Halibut",
+   "desc": "A flat acre of muscle from where the charts stop. Both eyes are on you.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    16,
+    20
+   ],
+   "time": "any",
+   "rarity": "epic",
+   "size": [
+    110,
+    190
+   ],
+   "price": 232,
+   "skill": 85,
    "pool": true
   }
  ],
@@ -953,13 +1279,13 @@
    "id": "bent_horseshoe",
    "name": "Bent Horseshoe",
    "desc": "Unlucky for the horse, mildly lucky for you.",
-   "price": 1
+   "price": 3
   },
   {
    "id": "rusty_bucket",
    "name": "Rusty Bucket",
    "desc": "Holds almost no water, which is how it ended up down there.",
-   "price": 1
+   "price": 3
   },
   {
    "id": "tangle_of_line",
@@ -977,13 +1303,13 @@
    "id": "soggy_ledger",
    "name": "Soggy Ledger",
    "desc": "Every page reads the same now: blue.",
-   "price": 1
+   "price": 3
   },
   {
    "id": "cracked_jug",
    "name": "Cracked Jug",
    "desc": "Still smells of trail ale. So does the fish that lived in it.",
-   "price": 1
+   "price": 3
   },
   {
    "id": "river_weed",
@@ -995,19 +1321,19 @@
    "id": "lost_bobber",
    "name": "Somebody's Lost Bobber",
    "desc": "Painted with care, lost with swearing.",
-   "price": 1
+   "price": 3
   },
   {
    "id": "toll_token",
    "name": "Bent Toll Token",
    "desc": "Good for one crossing of a bridge that fell down years ago.",
-   "price": 2
+   "price": 6
   },
   {
    "id": "chewed_oar",
    "name": "Chewed Oar Blade",
    "desc": "Tooth marks the width of your hand. Best not to think about it.",
-   "price": 1
+   "price": 3
   }
  ],
  "legends": [
@@ -1023,7 +1349,8 @@
    "trophy": {
     "name": "Old Ploughshare's Scale",
     "desc": "A scale the size of a saucer. It still smells of the Torbor."
-   }
+   },
+   "price": 2400
   },
   {
    "id": "legend_the_penitent",
@@ -1037,7 +1364,8 @@
    "trophy": {
     "name": "The Penitent's Fin",
     "desc": "Pale as candle wax. The Prior asked you not to hang it in the yard."
-   }
+   },
+   "price": 2700
   },
   {
    "id": "legend_copperjaw",
@@ -1051,7 +1379,8 @@
    "trophy": {
     "name": "Copperjaw's Hoard",
     "desc": "Thirty-one hooks, two lures and a spoon, all from one fish."
-   }
+   },
+   "price": 3000
   },
   {
    "id": "legend_mossback",
@@ -1065,7 +1394,8 @@
    "trophy": {
     "name": "Mossback's Jaw",
     "desc": "More teeth than a fish needs and a small fern."
-   }
+   },
+   "price": 3300
   },
   {
    "id": "legend_the_millers_debt",
@@ -1079,7 +1409,8 @@
    "trophy": {
     "name": "The Miller's Receipt",
     "desc": "A signed note: \"Paid in full. One fish.\""
-   }
+   },
+   "price": 3300
   },
   {
    "id": "legend_tollkeeper",
@@ -1093,7 +1424,8 @@
    "trophy": {
     "name": "The Tollkeeper's Tooth",
     "desc": "Long as a finger. The ducks sent their thanks."
-   }
+   },
+   "price": 3600
   },
   {
    "id": "legend_cistern_pale",
@@ -1107,7 +1439,8 @@
    "trophy": {
     "name": "A Blind Eel's Lamp",
     "desc": "It never had eyes. This is the old lantern it lived in."
-   }
+   },
+   "price": 3900
   },
   {
    "id": "legend_snowmelt",
@@ -1121,7 +1454,8 @@
    "trophy": {
     "name": "Snowmelt's Ice",
     "desc": "A lump of ice from its belly that has not melted yet."
-   }
+   },
+   "price": 4200
   },
   {
    "id": "legend_grandfather_mud",
@@ -1135,7 +1469,8 @@
    "trophy": {
     "name": "Grandfather's Whisker",
     "desc": "As long as your arm and still twitching a little."
-   }
+   },
+   "price": 4500
   },
   {
    "id": "legend_the_fifth_lake",
@@ -1149,7 +1484,8 @@
    "trophy": {
     "name": "Chart of the Fifth Lake",
     "desc": "A fisher's chart with one lake drawn in and crossed out, many times."
-   }
+   },
+   "price": 4800
   },
   {
    "id": "legend_bellmouth",
@@ -1163,7 +1499,8 @@
    "trophy": {
     "name": "The Coldwater Clapper",
     "desc": "The clapper of a small bell, polished by years of stomach."
-   }
+   },
+   "price": 4800
   },
   {
    "id": "legend_the_harbourmaster",
@@ -1177,7 +1514,8 @@
    "trophy": {
     "name": "The Harbourmaster's Seal",
     "desc": "A brass harbour seal it had no business owning."
-   }
+   },
+   "price": 5100
   },
   {
    "id": "legend_red_runner",
@@ -1191,7 +1529,8 @@
    "trophy": {
     "name": "Red Runner's Tail",
     "desc": "Still stained red. The colour does not wash out."
-   }
+   },
+   "price": 5100
   },
   {
    "id": "legend_deserters_supper",
@@ -1205,7 +1544,8 @@
    "trophy": {
     "name": "A Full Mess Tin",
     "desc": "Recovered from the fish, lid on, contents best left alone."
-   }
+   },
+   "price": 5400
   },
   {
    "id": "legend_thornbelly",
@@ -1220,7 +1560,8 @@
     "name": "Thornbelly's Spine",
     "desc": "A ridge of black thorns. Do not hang it over the bed."
    },
-   "foundIn": "coldwater"
+   "foundIn": "coldwater",
+   "price": 6000
   },
   {
    "id": "legend_steeplejack",
@@ -1234,7 +1575,8 @@
    "trophy": {
     "name": "Steeplejack's Plate",
     "desc": "One armour plate from its back. It makes a decent buckler."
-   }
+   },
+   "price": 6300
   }
  ],
  "pullBack": [
@@ -1647,7 +1989,7 @@
    "id": "angling_rod",
    "name": "Hazel Rod",
    "desc": "A hazel switch, a length of line and a hook. A Tool: it takes no weapon slot. Lets you fish any water.",
-   "price": 4,
+   "price": 12,
    "minSkill": 0,
    "bonus": {}
   },
@@ -1655,7 +1997,7 @@
    "id": "ash_rod",
    "name": "Whippy Ash Rod",
    "desc": "Longer, springier and far too good for gudgeon. The tug band is 15% wider.",
-   "price": 60,
+   "price": 1350,
    "minSkill": 25,
    "bonus": {
     "band": 0.15
@@ -1665,7 +2007,7 @@
    "id": "river_wardens_rod",
    "name": "River Warden's Rod",
    "desc": "Split cane with a brass reel. The tug band is 25% wider and bites come 20% sooner.",
-   "price": 320,
+   "price": 7200,
    "minSkill": 50,
    "bonus": {
     "band": 0.25,
@@ -1678,7 +2020,7 @@
    "id": "bait_worms",
    "name": "Tin of Worms",
    "desc": "Ten worms. Bites come 25% sooner for the next ten casts.",
-   "price": 2,
+   "price": 9,
    "effect": {
     "wait": -0.25,
     "casts": 10
@@ -1688,7 +2030,7 @@
    "id": "bait_bread_paste",
    "name": "Bread Paste",
    "desc": "Common fish cannot resist it; rare fish can. Ten casts with fewer junk catches.",
-   "price": 3,
+   "price": 15,
    "effect": {
     "junk": -0.5,
     "casts": 10
@@ -1698,7 +2040,7 @@
    "id": "bait_bright_lure",
    "name": "Bright Tin Lure",
    "desc": "Flashes like a perch's dream. Ten casts with a better chance at uncommon and rare fish.",
-   "price": 12,
+   "price": 60,
    "effect": {
     "rarity": 0.25,
     "casts": 10

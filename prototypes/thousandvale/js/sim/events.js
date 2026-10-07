@@ -14,6 +14,7 @@
 //        arenas:[{x, z}] (flyover landings), reward:{xp (share of a level), gold, item:{tier, chance?}} }
 
 import { STATE } from '../net/protocol.js';
+import { eventGold, lengthFactor as knobLength, economy } from './economy-knobs.js';
 
 export const WAVE_GAP_MS = 4000;          // a breath between a cleared wave and the next
 export const WAVE_MAX_MS = 90000;         // a wave nobody clears still gives way to the next
@@ -198,11 +199,11 @@ export function rewardPreview(ev, rules, level = 1) {
   const lvl = Math.max(1, ev.level || level || 1);
   let span = 100;
   try { if (rules && rules.xpFor) span = Math.max(1, (rules.xpFor(lvl + 1) || 0) - (rules.xpFor(lvl) || 0)); } catch { /* the stand-in */ }
-  const big = ev.kind === 'worldboss' ? WORLD_BOSS_MULT : 1;
+  const big = ev.kind === 'worldboss' ? economy().event.worldBossMult : 1;
   let mult = 1;
   try { if (rules && rules.xpMult) mult = rules.xpMult('event') || 1; } catch { /* none */ }
   const xp = Math.round((rw.xp || 0) * span * mult * big);
-  const gold = Math.round((rw.gold || 0) * (1 + 0.15 * (lvl - 1)) * big);
+  const gold = eventGold(rw.gold, lvl, 0, ev.kind === 'worldboss');
   const items = ['A rare item or better for everyone who takes part'];
   if (rw.chest) items.push('A cache to open');
   const text = (ev.info && ev.info.rewardText) || (xp + ' XP, ' + gold + ' gold and a rare item or better');
@@ -213,11 +214,12 @@ export function rewardPreview(ev, rules, level = 1) {
  * S24 (play-test 4): how much longer than a short event this one ran pays more — x1 up to EVENT_SHORT_MIN, up to
  * EVENT_LENGTH_CAP for a long one. A world boss pays WORLD_BOSS_MULT of everything.
  */
+// V2 (owner feedback 7): the numbers live in data/rules/economy.json server.event (js/sim/economy-knobs.js); these are the defaults' names
 export const EVENT_SHORT_MIN = 4;
 export const EVENT_LENGTH_CAP = 2.5;
 export const WORLD_BOSS_MULT = 2;
 export const RARE_UP = new Set(['rare', 'legendary', 'set', 'unique']);
-export const lengthFactor = minutes => Math.max(1, Math.min(EVENT_LENGTH_CAP, (minutes || 0) / EVENT_SHORT_MIN));
+export const lengthFactor = minutes => knobLength(minutes);
 /**
  * Event reward for ONE character — personal, never split or rolled for (S24): xp is a share of a level at the event's
  * level (PLAN §6.5) and gold grows with the level, both scaled by how long the event ran; and EVERY participant gets at
@@ -228,10 +230,10 @@ export function eventReward(ev, rules, entity, rng = Math.random, opts = {}) {
   const rw = ev.reward || {};
   const lvl = Math.max(1, ev.level || entity.level || 1);
   const span = rules.xpFor ? Math.max(1, (rules.xpFor(lvl + 1) || 0) - (rules.xpFor(lvl) || 0)) : 100;
-  const big = ev.kind === 'worldboss' ? WORLD_BOSS_MULT : 1;
+  const big = ev.kind === 'worldboss' ? economy().event.worldBossMult : 1;
   const k = lengthFactor(opts.minutes) * big;
   const xp = Math.round((rw.xp || 0) * span * (rules.xpMult ? rules.xpMult('event') || 1 : 1) * k);     // R2: x1.25
-  const gold = Math.round((rw.gold || 0) * (1 + 0.15 * (lvl - 1)) * k);
+  const gold = eventGold(rw.gold, lvl, opts.minutes, ev.kind === 'worldboss');
   let items = [];
   const tier = (rw.item && rw.item.tier) || 'rare';
   if (rules.rollLoot) {

@@ -7,7 +7,7 @@
       "name": "Tam Sedgeley",
       "role": "angler",
       "at": "Torborhold",
-      "greeting": "Ever held a rod? No? Good. No bad habits to fix.",
+      "greeting": "Ever held a rod? No? Good. No bad habits to fix. See the ripples, just south of where I'm standing? That's the town pool. It never fishes out.",
       "placedBy": "content-pools"
     }
   },
@@ -31,8 +31,8 @@
           "text": "Walk to the fish pool Tam pointed out",
           "where": "the rippling water on the river by Torborhold, a short walk along the bank from Tam",
           "at": {
-            "x": 25208,
-            "z": 5406,
+            "x": 25190,
+            "z": 5412,
             "r": 14,
             "name": "the fish pool"
           }
@@ -54,7 +54,7 @@
       "done": "Three! And only one of them looks surprised to be here. Keep the rod. Anywhere there's water you can cast, but the pools are where the good ones crowd, and they move about once you've thinned them.",
       "reward": {
         "xp": 0.4,
-        "gold": 6,
+        "gold": 10,
         "goods": [
           {
             "id": "bait_worms",
@@ -100,7 +100,7 @@
       "done": "Burnt on one side, raw on the other? Then you did it right. Sit down when you eat it: a meal eaten standing does half the good.",
       "reward": {
         "xp": 0.4,
-        "gold": 8,
+        "gold": 10,
         "goods": [
           {
             "id": "bait_bread_paste",

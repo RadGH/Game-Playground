@@ -15,7 +15,7 @@ const OPEN = 1, CLOSED = 3;
 export const replyKey = m => [m.t, m.op, m.t === 'kits' ? m.cls : null].filter(Boolean).join(':');
 const b64ToBuf = b64 => { const s = atob(b64), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u.buffer; };
 
-export function createFakeServer(session, moments = {}, { world = true, onSend = null } = {}) {
+export function createFakeServer(session, moments = {}, { world = true, onSend = null, onUnanswered = null } = {}) {
   const socks = { gw: null, game: null };
   const sent = [];
   const hs = session.handshake || { gw: {}, game: {} };
@@ -65,7 +65,7 @@ export function createFakeServer(session, moments = {}, { world = true, onSend =
   }
   function answer(which, m) {
     const r = recorded(replyKey(m), m);
-    if (!r) return null;
+    if (!r) { onUnanswered?.(which, m); return null; }
     setTimeout(() => { for (const e of r.in) deliver(e.s || which, e.m); }, 30);
     return true;
   }

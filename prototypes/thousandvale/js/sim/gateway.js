@@ -32,6 +32,7 @@ import { sha256Hex } from './sha256.js';
 import { cleanLook } from './looks.js';
 import { createFeedback } from './feedback.js';
 import { createSystemMail } from './sysmail.js';
+import { configureEconomy } from './economy-knobs.js';
 
 const TICKET_MS = 30000;
 
@@ -45,6 +46,7 @@ export function createGateway(opts) {
     mailSweepMs = 60000, chargeTimeoutMs = 5000, classNames = null,
     kitsFor = null, feedbackSink = null, feedbackOpts = {},      // play-test 5: C's kitsFor(classId) (T5); the JSONL sink + limits (T19)
   } = opts;
+  if (opts.economy !== undefined) configureEconomy(opts.economy);          // V2: the guild fee and the gift's rarity come from data/rules/economy.json
   const nameOk = n => !chatFilter || chatFilter.name(n);
   const classSet = classes ? new Set(classes) : null;
   const counters = { msgsIn: 0, bytesIn: 0, bytesOut: 0, bad: 0, kicks: 0, logins: 0, humanFails: 0, relocations: 0, mailNotes: 0, charges: 0 };

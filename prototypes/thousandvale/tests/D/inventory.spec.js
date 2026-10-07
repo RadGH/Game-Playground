@@ -112,7 +112,8 @@ test('character window: doll + bag, icons, item card with required level, equip,
   const before = await bag(page);
   await up.click();
   await expect.poll(() => page.locator('#bag .inv-doll .islot img').count(), { timeout: 15000 }).toBeGreaterThan(0);
-  expect(await bag(page)).toBeLessThanOrEqual(before);
+  // (a starting kit fills both hands since play-test 6: a two-hander sends BOTH the old weapon and the off-hand piece back to the bag)
+  expect(await bag(page)).toBeLessThanOrEqual(before + 1);
   // a few more upgrades so the doll reads (armour: nothing to refuse)
   await page.locator('#inv-filters .chip[data-f="armour"]').click();
   for (let i = 0; i < 6; i++) { const u = page.locator('#bag-grid .islot:has(.up)').first(); if (!(await u.count())) break; await u.click(); await page.waitForTimeout(600); }

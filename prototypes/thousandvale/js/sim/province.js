@@ -45,8 +45,9 @@ import { cleanLook } from './looks.js';
 import { effectOf as effectOfRaw, potionAmount, potionCdMs, potionText, GROUP_R as TONIC_R, stackable, stackKey, stackMaxOf, countOf } from './consumables.js';
 import { isCrate, crateItem, openCrate } from './crates.js';
 import { createSystemMail } from './sysmail.js';
-import { createFeedback } from './feedback.js';
+import { createFeedback, NUDGE } from './feedback.js';
 import { createAngling } from './angling.js';
+import { configureEconomy, economy, chestGold, treasureGold, eventGold, travelFare as fareOf } from './economy-knobs.js';
 import { mountRefusal, mountSpeedMul, dismounts, MOUNT_RULES } from '../rules/mount.js';   // stream C's riding rules (when, how fast, what throws you)
 
 const LEASE_MS = 30000, HEARTBEAT_MS = 10000, TICKET_WAIT_MS = 3000;
@@ -84,10 +85,12 @@ export function createProvince(opts) {
     journalMs = JOURNAL_FLUSH_MS, tradeMinLevel = 1, perfNow = now,
     copyIdleMs = 5 * 60000, instanceIdleMs = 30 * 60000, dungeonLevel = 3, encounterInfo = {},
     planDungeon = planTiers, filterText = t => t, chestResetMs = 30 * 60000,
-    clock: realmClock = { epoch: wallNow(), dayMs: 2 * 3600000 }, travelFare = d => 2 + Math.round(d / 400),
+    clock: realmClock = { epoch: wallNow(), dayMs: 2 * 3600000 }, travelFare = null,
     zoneEventFirstMs = null, zoneEventGapMs = null,        // tests: when the first / next zone event of a copy starts
     mailOpts = {}, chatFilter = null,
   } = opts;
+  // V2 (owner feedback 7): every gold number the server applies comes from data/rules/economy.json `server` (js/sim/economy-knobs.js)
+  if (opts.economy !== undefined || (layouts[0] && layouts[0].economy)) configureEconomy(opts.economy || layouts[0].economy);
   const owner = processName + ':' + randomHex(4);
   const bootNonce = randomHex(4);
   let uidN = 0;
@@ -126,7 +129,7 @@ export function createProvince(opts) {
       if (a.xp) journal(o, 'xp', { d: a.xp, level: a.level });
       grant(o, { ...a, goldAdded: true });
       if (a.level >= 2) starterMount(o);                     // Q16: the first mount at level 5
-      if (a.level !== o.sheetLevel) { o.sheetLevel = a.level; wantSheet(o); potionCards(o); }   // T18: a level changes the sheet (and what a potion is worth to you)
+      if (a.level !== o.sheetLevel) { o.sheetLevel = a.level; wantSheet(o); potionCards(o); feedbackNudge(o); }   // T18: a level changes the sheet (and what a potion is worth to you)
     },
     newUid,
     loot: (ev, r) => { const e = r.entities.get(ev.to); const o = e && e.char && online.get(e.char.id); if (o && o.entity === e) grant(o, { items: ev.items, gold: 0, reason: 'kill', goldAdded: true }); },
@@ -489,6 +492,7 @@ export function createProvince(opts) {
     s.state = 'in'; s.client = client;
     joined(s, o, tk.at ? { from: null, via: 'relocate' } : null);
     presence(o);
+    feedbackNudge(o);                         // V1: a character already past level 3 gets its letter at this login
   }
   /** Place queued arrivals: at least one a tick, more while the tick is under budget. */
   function drainJoins(t0) {
@@ -893,7 +897,7 @@ export function createProvince(opts) {
     const items = (o.room.rules.rollLoot ? safeRules(o.room, 'rollLoot', o.entity, { level: lvl, tier: t.tier }) : null) || [];
     s.sendJSON({ t: 'used', id: obj.id, ok: true, kind: 'cache', chain: t.chain, chainName: t.chainName });
     o.room.emit({ type: 'open', to: o.entity.id, d: obj.id, x: obj.x, z: obj.z });
-    grant(o, { items, gold: Math.round(lvl * 10 + 20), reason: 'treasure', goldAdded: false, from: obj });
+    grant(o, { items, gold: treasureGold(lvl), reason: 'treasure', goldAdded: false, from: obj });
     saveNow(o);
   }
   function hintOf(o, chain) { for (const x of o.room.objects.values()) if (x.data && x.data.treasure && x.data.treasure.chain === chain && x.data.treasure.cache) return x.data.treasure.hint; return null; }
@@ -907,7 +911,7 @@ export function createProvince(opts) {
     if (c.after && !((ch.opened[objKey(o, c.after)] || 0) > t)) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'locked', msg: (c.afterName ? 'Try the ' + c.afterName.toLowerCase() + ' first.' : 'It will not open yet.') });
     const lvl = c.level || e.level;
     const items = (o.room.rules.rollLoot ? safeRules(o.room, 'rollLoot', e, { level: lvl, tier: c.tier }) : null) || [];
-    const gold = Math.round(lvl * 4 + 5);
+    const gold = chestGold(lvl);
     ch.gold = (ch.gold || 0) + gold;
     ch.opened[key] = t + (c.onceMs || (o.room.kind === 'instance' ? 24 * 3600000 : chestResetMs));
     journal(o, 'opened', { key, until: ch.opened[key] });
@@ -993,7 +997,8 @@ export function createProvince(opts) {
     if (!(ch.waystones || []).includes(to)) return s.sendJSON({ t: 'travelR', ok: false, why: 'undiscovered', msg: 'You have not found that waystone yet.' });
     const near = (ch.waystones || []).length && [...o.room.objects.values()].some(x => x.data && x.data.waystone && Math.hypot(x.x - e.x, x.z - e.z) < 6);
     if (!near) return s.sendJSON({ t: 'travelR', ok: false, why: 'far', msg: 'Stand at a waystone to travel.' });
-    const cost = travelFare(Math.hypot(w.x - e.x, w.z - e.z) + (w.province !== provOf(o.room).L.key ? 4000 : 0));
+    const far = w.province !== provOf(o.room).L.key, dist = Math.hypot(w.x - e.x, w.z - e.z);
+    const cost = travelFare ? travelFare(dist + (far ? economy().travel.crossProvinceMetres : 0)) : fareOf(dist, far);
     if (cost > (ch.gold || 0)) return s.sendJSON({ t: 'travelR', ok: false, why: 'gold', cost, msg: 'The fare is ' + cost + ' gold.' });
     ch.gold -= cost; journal(o, 'gold', { d: -cost }); econ.add('sink', 'fare', { gold: cost }, ch.level);
     s.sendJSON({ t: 'bag', add: [], remove: [], gold: ch.gold });
@@ -1091,7 +1096,7 @@ export function createProvince(opts) {
   function mailEventShare(run, room, charId, o) {
     const ch = o && o.char;
     const lvl = Math.max(1, run.ev.level || (ch && ch.level) || 1);
-    let rw = { gold: Math.round(((run.ev.reward || {}).gold || 0) * (1 + 0.15 * (lvl - 1))), items: [] };
+    let rw = { gold: eventGold((run.ev.reward || {}).gold, lvl, 0, false), items: [] };
     if (o && o.entity && o.room.rules) { try { const full = eventReward(run.ev, o.room.rules, o.entity, () => room.host.random('event'), { minutes: (now() - (run.t0 ?? now())) / 60000 }); rw = { gold: full.gold, items: full.items || [] }; } catch { /* the plain share */ } }
     counters.eventMailed = (counters.eventMailed || 0) + 1;
     sysmail.mailTo({ to: charId, kind: 'event', subject: run.ev.name + ': your share', body: 'You helped at ' + run.ev.name + ' and were gone when it ended. This is what you earned.', gold: rw.gold, items: rw.items,
@@ -1901,7 +1906,7 @@ export function createProvince(opts) {
       if (item.kind === 'potion') { const t = potionText(item, { hpMax: o.entity.hpMax, mpMax: o.entity.mpMax }, potionTable); if (t) { item.desc = t.desc; if (t.restore) item.restore = t.restore; } }
       if (item.uid) item.ruid = item.uid;
       item.uid = newUid();
-      if (ch.bag.length >= BAG_MAX) { overflow += Math.max(1, Math.round(item.value || 1)) * countOf(item); continue; }
+      if (ch.bag.length >= BAG_MAX) { overflow += Math.max(economy().bag.overflowPerItem, Math.round(item.value || 1)) * countOf(item); continue; }
       ch.bag.push(item); added.push(item);
       if (RARE.has(item.rarity)) urgent = true;
     }
@@ -2512,7 +2517,8 @@ export function createProvince(opts) {
   function barberCost(ch, before, after) {
     if (!(ch.flags && ch.flags.barberUsed)) return 0;
     const svc = (shops.kinds.barber && shops.kinds.barber.services && shops.kinds.barber.services.appearance) || {};
-    const P = { hair: 5, hairColour: 4, beard: 4, eyes: 6, face: 10, skin: 12, body: 20, everything: 40, ...(svc.prices || {}) };
+    const EB = economy().barber;
+    const P = { ...EB, ...(svc.prices || {}) };
     const a = (before && before.custom) || {}, b = (after && after.custom) || {};
     const same = (x, y) => JSON.stringify(x ?? null) === JSON.stringify(y ?? null);
     const idOf = v => (v && typeof v === 'object' ? v.id : v);
@@ -2530,7 +2536,7 @@ export function createProvince(opts) {
       if (!same(ra, rb) || ['top', 'bottom', 'shoes', 'hat', 'accessory', 'cape', 'decor'].some(k => !same(a[k], b[k]))) sum += P.body;
     }
     sum = Math.min(sum, P.everything);
-    return Math.round(sum * (1 + (svc.perLevel ?? 0.05) * ((ch.level || 1) - 1)));
+    return Math.round(sum * (1 + (svc.perLevel ?? EB.perLevel) * ((ch.level || 1) - 1)));
   }
   /** Q22: show / hide your gear (or just the head piece) — for everybody who looks at you. */
   function prefOp(o, m) {
@@ -2777,6 +2783,24 @@ export function createProvince(opts) {
     };
     feedback.submit({ account: ch.account, char: ch.id, name: ch.name, cls: ch.cls, level: ch.level }, m, server)
       .then(r => { if (o.conn) o.conn.sendJSON({ t: 'feedbackR', ...r }); }, err => { log('feedback failed', err && err.message); if (o.conn) o.conn.sendJSON({ t: 'feedbackR', ok: false, why: 'failed', msg: 'That did not go through. Please try again.' }); });
+  }
+  /**
+   * Owner feedback 7, V1 — "when a character reaches level 3 and has not submitted feedback yet, mail them … once per
+   * character". Checked when a level is gained and at every entry (so a character already past level 3 gets it at its next
+   * login). The saved flag `char.flags.feedbackNudge` is set whether the letter was posted or not needed (the character has
+   * already sent a report), so the question is asked of the store once.
+   */
+  function feedbackNudge(o) {
+    const ch = o.char;
+    if ((ch.level || 1) < NUDGE.level || (ch.flags && ch.flags.feedbackNudge) || o.nudging || !store.hasFeedback || !store.mailSystem) return;
+    o.nudging = true;
+    Promise.resolve(store.hasFeedback(ch.id)).then(had => (had ? { ok: true, skipped: true } : sysmail.mailTo({ to: ch.id, subject: NUDGE.subject, body: NUDGE.body, from: NUDGE.from }))).then(r => {
+      o.nudging = false;
+      if (!r || !r.ok || online.get(ch.id) !== o) return;           // not posted (or gone): asked again next time
+      ch.flags = { ...(ch.flags || {}), feedbackNudge: wallNow() };
+      journal(o, 'set', { k: 'flags', v: ch.flags }); o.dirty = true;
+      if (!r.skipped) counters.feedbackNudges = (counters.feedbackNudges || 0) + 1;
+    }, err => { o.nudging = false; log('feedback nudge failed', err && err.message); });
   }
   /** T21: an admin's calls from inside the world (the flag is read from the store each time). */
   function adminOp(o, m) {

@@ -1259,3 +1259,14 @@ time." / "No reward this time.") and always carries `story`; `realm {kind:'event
 - `info.form` (U16): stream C's shape object while a druid is in a shape. `info.ward` (U8): `{max, ms, until (room ms), name?}`
   while a boss's ward holds.
 - `node tools/feedback-state.mjs <ids…> --state approved|declined|trashed|new [--env stable]`.
+
+## 23. Owner feedback 7 (2026-10-07) — still protocol v7
+
+- **The feedback letter (V1):** at level 3 (or the next login when already past it) a character that has never sent feedback gets one
+  system letter (`js/sim/feedback.js` `NUDGE`). Saved once: `char.flags.feedbackNudge`.
+- **The economy knobs (V2):** `js/sim/economy-knobs.js` — every gold number the server applies (quest, road, chest, treasure, event,
+  fare, postage, guild fee, sell-back and shop fallbacks, barber, overflow, meal value, mount prices) read from stream E's
+  `data/provinces/economy.json` (E's key names; defaults = the old numbers). `--` nothing on the wire changes.
+- **Fish pools (V3):** `liveShare` 0.6 of a zone's listed spots are open per copy; every town with a spot within 600 m keeps a
+  never-empty tier-1 pool (`info.pool.always: 1`, `info.pool.town`); spots near a town's edge are in both rooms; a cast at a pool
+  above your skill lands beside it as open water (`fishR.note`).

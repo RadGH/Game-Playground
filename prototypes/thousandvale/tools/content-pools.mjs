@@ -4,6 +4,11 @@
 //   node tools/content-pools.mjs            write data/provinces/angling-pools.json, the anglers' NPC rows in each
 //                                           zone's quest file, and the first quest's pool mark (data/quests/angling.json)
 //   node tools/content-pools.mjs --check    change nothing; exit 1 when a file would change
+//
+// OWNER FEEDBACK 7 (V3, "I've only seen the one right at the start"): every hub town with water within POOL.townReach m has
+// a pool OF ITS OWN (`town`, `always`, tier 1) where the gate road, the bridge or the quay meets the water, and its angler
+// stands beside it and says where it is; a second pass adds pools wherever a road runs beside or crosses the water; at
+// least 60% of a zone's pools are tier 1 and 60% of the listed spots are open at once (`meta.live`).
 //   then: node tools/content-hunts.mjs      (it copies the anglers into <zone>.quest.json so the server spawns them)
 //
 // WHAT A POOL IS. A spot IN the water (>= POOL.depth m deep) with a dry, walkable SHORE point POOL.shore m away that
@@ -31,8 +36,11 @@ const readJ = f => JSON.parse(readFileSync(P(f), 'utf8'));
 const CHECK = process.argv.includes('--check');
 const ZM = 2048;
 
-export const POOL = Object.freeze({ depth: 0.5, wade: 0.35, shelf: [0.22, 0.1], few: 12, shore: [3, 15], gap: 110, startGap: 80, max: 30, edge: 40, lattice: 6, roadside: 45, far: 220 });
-export const ANGLER = Object.freeze({ reach: 420, startPool: 150 });
+export const POOL = Object.freeze({ depth: 0.5, wade: 0.35, shelf: [0.22, 0.1], few: 12, shore: [3, 15], gap: 90, startGap: 80, max: 44, edge: 40, lattice: 6, roadside: 45, far: 220,
+  // owner feedback 7 V3: more pools where a road runs beside or crosses the water (a second pass, closer together), a
+  // pool of its own for every town with water in reach, and most pools open to a beginner
+  roadGap: 60, roadMax: 16, roadM: 35, townReach: 700, townRoadM: 40, tier1Share: 0.6 });
+export const ANGLER = Object.freeze({ reach: 420, startPool: 150, toPool: 60 });
 /** Baked water kind -> angling water kind, by the zone's archetype (data/provinces/torbor_downs.json). */
 export const WATER_BY_ARCHETYPE = Object.freeze({
   marsh: { river: 'marsh', lake: 'marsh', sea: 'coast' },
@@ -103,7 +111,7 @@ function shoreOf(F, reach, x, z, wade = POOL.wade) {
   return null;
 }
 
-export function poolsForZone(F, { hub, archetype, band, gap = POOL.gap, eid = null, reach = null }) {
+export function poolsForZone(F, { hub, archetype, band, gap = POOL.gap, eid = null, reach = null, town = null }) {
   reach ||= reachFrom(F, hub.x, hub.z);
   const waterOf = WATER_BY_ZONE[eid] || WATER_BY_ARCHETYPE[archetype] || WATER_BY_ARCHETYPE.default;
   const scan = (depth, wade, flat) => {
@@ -122,30 +130,49 @@ export function poolsForZone(F, { hub, archetype, band, gap = POOL.gap, eid = nu
   const spaced = l => { const o = []; for (const c of l) if (!o.some(p => Math.hypot(p.x - c.x, p.z - c.z) < gap)) o.push(c); return o; };
   if (spaced(cands).length < POOL.few) cands.push(...scan(POOL.shelf[0], POOL.shelf[1], true));
   const picked = [];
+  // V3: the TOWN's own pool — the candidate nearest the town's middle among those a road passes (the gate road, the
+  // bridge, the quay); with no road by the water, simply the nearest. One per town, always open, anyone may fish it.
+  if (town) {
+    const d = c => Math.hypot(c.shore.x - town.x, c.shore.z - town.z);
+    const near = cands.filter(c => d(c) <= POOL.townReach);
+    // nearest first; a pool a road passes is worth walking 120 m further for, not more
+    const cost = c => d(c) + (c.road <= POOL.townRoadM ? 0 : 120);
+    const best = near.sort((a, b) => cost(a) - cost(b) || a.z - b.z || a.x - b.x)[0];
+    if (best) { best.town = town.name; best.always = true; best.fromTown = Math.round(d(best)); picked.push(best); }
+  }
   for (const c of cands) {
     if (picked.length >= POOL.max) break;
     if (picked.some(p => Math.hypot(p.x - c.x, p.z - c.z) < gap)) continue;
     picked.push(c);
   }
+  // V3: "more spots along rivers" — where a road runs beside the water or crosses it, pools sit closer together
+  let extra = 0;
+  for (const c of cands) {
+    if (extra >= POOL.roadMax) break;
+    if (c.road > POOL.roadM || picked.some(p => Math.hypot(p.x - c.x, p.z - c.z) < POOL.roadGap)) continue;
+    c.byRoad = true; picked.push(c); extra++;
+  }
   // tiers: beside a road = 1; a walk away = 2 (one in three stays 1 so there is always something for a beginner);
   // the far ones = 3 from a zone whose band reaches level 5, else 2
   for (const p of picked) {
     const h = hash(F.wid + ':' + p.x + ':' + p.z) % 3;
-    p.tier = p.road <= POOL.roadside ? 1 : p.road <= POOL.far ? (h === 0 ? 1 : 2) : (band[1] >= 5 && h !== 0 ? 3 : 2);
+    p.tier = p.town || p.road <= POOL.roadside ? 1 : p.road <= POOL.far ? (h !== 2 ? 1 : 2) : (band[1] >= 5 && h !== 0 ? 3 : 2);
   }
   // every zone keeps something a beginner may fish: at least a quarter of its pools (and never fewer than two) are tier 1,
   // the ones nearest a road first (`picked` is in that order)
-  const want = Math.min(picked.length, Math.max(2, Math.ceil(picked.length / 4)));
-  for (const p of picked) { if (picked.filter(q => q.tier === 1).length >= want) break; p.tier = 1; }
+  // (V3: 174 of the first 308 needed angling 25 or 50 — a newcomer saw ripples he could not use. Now at least
+  // POOL.tier1Share of a zone's pools are tier 1.)
+  const want = Math.min(picked.length, Math.max(2, Math.ceil(picked.length * POOL.tier1Share)));
+  for (const p of picked.slice().sort((a, b) => a.road - b.road)) { if (picked.filter(q => q.tier === 1).length >= want) break; p.tier = 1; }
   return { reach, waterOf, cands: cands.length, pools: picked };
 }
 
 /** Where a town's angler stands: the reachable bank nearest the town centre, outside the buildings; else the town's edge. */
-function anglerSpot(F, reach, town, taken) {
+function anglerSpot(F, reach, town, taken, reachM = ANGLER.reach) {
   let best = null;
-  for (let z = Math.max(4, town.z - ANGLER.reach); z <= Math.min(ZM - 4, town.z + ANGLER.reach); z += 4) for (let x = Math.max(4, town.x - ANGLER.reach); x <= Math.min(ZM - 4, town.x + ANGLER.reach); x += 4) {
+  for (let z = Math.max(4, Math.round((town.z - reachM) / 4) * 4); z <= Math.min(ZM - 4, town.z + reachM); z += 4) for (let x = Math.max(4, Math.round((town.x - reachM) / 4) * 4); x <= Math.min(ZM - 4, town.x + reachM); x += 4) {
     const d = Math.hypot(x - town.x, z - town.z);
-    if (d > ANGLER.reach || (best && d >= best.d)) continue;
+    if (d > reachM || (best && d >= best.d)) continue;
     if (!bank(F, reach, x, z, 0) || (F.bits[F.idx(x, z)] & NAV.ROAD)) continue;
     // water within 6 m, in a direction we can name (the angler faces it)
     let face = null;
@@ -153,7 +180,7 @@ function anglerSpot(F, reach, town, taken) {
     if (!face || taken.some(p => Math.hypot(p.x - x, p.z - z) < 4)) continue;
     best = { x, z, d, yaw: +Math.atan2(face.x - x, face.z - z).toFixed(2), water: true };
   }
-  if (best) return best;
+  if (best || reachM !== ANGLER.reach) return best;
   for (let r = (town.r || 60) - 8; r >= 10; r -= 6) for (let a = 0; a < 24; a++) {
     const x = Math.round(town.x + Math.cos(a / 24 * 6.283) * r), z = Math.round(town.z + Math.sin(a / 24 * 6.283) * r);
     const k = F.idx(x, z), b = F.bits[k];
@@ -178,18 +205,22 @@ export function buildPools() {
     const [, zx, zy] = /^z(\d+)_(\d+)$/.exec(wid).map(Number), ox = zx * ZM, oz = zy * ZM;
     const town = main.settlements.find(s => s.name === zs.town) || main.settlements.find(s => s.kind !== 'hamlet') || main.settlements[0];
     const F = zoneFacts(wid);
-    const R = poolsForZone(F, { hub: town, archetype: zs.archetype, band: zs.band, gap: eid === 'test' ? POOL.startGap : POOL.gap, eid, reach: reachOf(eid) });
+    const R = poolsForZone(F, { hub: town, archetype: zs.archetype, band: zs.band, gap: eid === 'test' ? POOL.startGap : POOL.gap, eid, reach: reachOf(eid), town });
     const who = angling.anglers.find(a => a.zone === eid);
     let spot = null;
     if (who) {
-      spot = anglerSpot(F, R.reach, town, main.placements.filter(p => p.type === 'npc'));
+      // V3: the angler stands BY the town's pool (4-60 m along the bank from it) and points at it; with no pool in
+      // reach of the town (Last Lantern: the Scar is dry) they keep to the town's edge
+      const tp = R.pools.find(p => p.town), others = main.placements.filter(p => p.type === 'npc');
+      if (tp) { spot = anglerSpot(F, R.reach, { x: tp.shore.x, z: tp.shore.z }, [...others, { x: tp.shore.x, z: tp.shore.z }], ANGLER.toPool); if (spot) spot.d = Math.round(Math.hypot(spot.x - town.x, spot.z - town.z)); }
+      spot ||= anglerSpot(F, R.reach, town, others);
       if (!spot) problems.push(`${eid}: no spot for ${who.id}`);
     }
-    const pools = R.pools.map((p, i) => ({ id: `pool_${wid}_${i + 1}`, x: p.x + ox, z: p.z + oz, shore: { x: p.shore.x + ox, z: p.shore.z + oz }, water: p.water, band: zs.band, tier: p.tier, road: p.road }));
+    const pools = R.pools.map((p, i) => ({ id: `pool_${wid}_${i + 1}`, x: p.x + ox, z: p.z + oz, shore: { x: p.shore.x + ox, z: p.shore.z + oz }, water: p.water, band: zs.band, tier: p.tier, road: p.road, ...(p.shelf ? { shelf: true } : {}), ...(p.byRoad ? { byRoad: true } : {}), ...(p.town ? { town: p.town, always: true, fromTown: p.fromTown } : {}) }));
     // the start pool: the tier-1 pool nearest the Torborhold angler; if none is close, the nearest pool becomes tier 1
     if (eid === 'test' && spot) {
       const near = pools.map(p => ({ p, d: Math.hypot(p.shore.x - (spot.x + ox), p.shore.z - (spot.z + oz)) })).sort((a, b) => a.d - b.d);
-      const pick = near.find(n => n.p.tier === 1 && n.d <= ANGLER.startPool) || near[0];
+      const pick = near.find(n => n.p.town) || near.find(n => n.p.tier === 1 && n.d <= ANGLER.startPool) || near[0];      // the first quest's pool IS Torborhold's own
       if (!pick || pick.d > ANGLER.startPool) problems.push(`test: no pool within ${ANGLER.startPool} m of the angler (nearest ${pick ? Math.round(pick.d) : 'none'})`);
       if (pick) { pick.p.tier = 1; pick.p.start = true; pick.p.always = true; }
     }
@@ -198,10 +229,16 @@ export function buildPools() {
     if (legend && !pools.length && !legend.foundIn) problems.push(`${eid}: no water at all, and its legend ${legend.id} names no \`foundIn\` zone`);
     if (legend && legend.foundIn) { const there = out.zones[map[legend.foundIn]]; if (there && !there.some(p => p.water === legend.water)) problems.push(`${eid}: legend ${legend.id} is found in ${legend.foundIn}, which has no ${legend.water} pool`); }
     out.zones[wid] = pools;
-    out.meta[wid] = { sheet: eid, name: zs.name, band: zs.band, live: pools.length ? Math.max(2, Math.min(8, Math.ceil(pools.length / 3))) : 0, water: R.waterOf, kinds, candidates: R.cands,
-      roadside: pools.filter(p => p.road <= POOL.roadside).length, tiers: [1, 2, 3].map(t => pools.filter(p => p.tier === t).length) };
+    out.meta[wid] = { sheet: eid, name: zs.name, band: zs.band, live: pools.length ? Math.max(2, Math.ceil(pools.length * 0.6), pools.filter(p => p.tier === 1).length + Math.ceil(pools.filter(p => p.tier > 1).length / 2)) : 0, water: R.waterOf, kinds, candidates: R.cands,
+      // (live = every beginner pool and half of the better ones: something to grow into is always in sight)
+      roadside: pools.filter(p => p.road <= POOL.roadside).length, townPool: (pools.find(p => p.town) || {}).id || null, tiers: [1, 2, 3].map(t => pools.filter(p => p.tier === t).length) };
     if (who && spot) out.anglers.push({ id: who.id, name: who.name, town: who.town, sheet: eid, zone: wid, x: spot.x + ox, z: spot.z + oz, yaw: spot.yaw, byWater: spot.water, fromTown: Math.round(spot.d),
-      pool: (pools.map(p => ({ p, d: Math.hypot(p.shore.x - (spot.x + ox), p.shore.z - (spot.z + oz)) })).sort((a, b) => a.d - b.d)[0] || {}).p?.id || null });
+      ...(() => { const near = pools.map(p => ({ p, d: Math.hypot(p.shore.x - (spot.x + ox), p.shore.z - (spot.z + oz)) })).sort((a, b) => a.d - b.d);
+        const mine = near.find(n => n.p.town) || near[0] || null;
+        if (!mine) return { pool: null, toPool: null, points: 'No water for a mile, and what there was the blight drank. Sell me what you bring from elsewhere.' };
+        const dx = mine.p.x - (spot.x + ox), dz = mine.p.z - (spot.z + oz), dir = ['east', 'south-east', 'south', 'south-west', 'west', 'north-west', 'north', 'north-east'][Math.round(Math.atan2(dz, dx) / (Math.PI / 4) + 8) % 8];
+        const m = Math.round(mine.d);
+        return { pool: mine.p.id, toPool: m, points: m <= 80 ? `See the ripples, just ${dir} of where I'm standing? That's the town pool. It never fishes out.` : `The nearest pool is about ${Math.round(m / 10) * 10} paces ${dir} of here. Look for the ripples.` }; })() });
   }
   return { out, problems, angling };
 }
@@ -226,7 +263,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const file = a.sheet === 'test' ? 'data/quests/angling.json' : `data/quests/${a.sheet}.json`;
     let doc; try { doc = readJ(file); } catch { continue; }
     doc.npcs ||= {};
-    doc.npcs[a.id] = { name: def.name, role: 'angler', at: def.town, greeting: def.greeting, placedBy: 'content-pools' };
+    doc.npcs[a.id] = { name: def.name, role: 'angler', at: def.town, greeting: def.greeting + ' ' + a.points, placedBy: 'content-pools' };
     if (a.sheet === 'test') {
       const start = out.zones[a.zone].find(p => p.start);
       for (const q of doc.quests || []) for (const st of q.steps || []) if (st.pool === 'start' || st.startPool) { st.startPool = true; if (start) st.at = { x: start.shore.x, z: start.shore.z, r: 14, name: 'the fish pool' }; }
@@ -234,7 +271,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     changed += write(file, JSON.stringify(doc, null, 2) + '\n');
   }
   for (const [wid, m] of Object.entries(out.meta)) console.log(`${wid} ${m.sheet.padEnd(18)} pools ${String(out.zones[wid].length).padStart(2)} (live ${m.live}, roadside ${m.roadside}, tiers ${m.tiers.join('/')}) ${m.kinds.join(',') || 'DRY'}`);
-  for (const a of out.anglers) console.log(`angler ${a.id.padEnd(22)} ${a.byWater ? 'on the bank' : 'IN TOWN (no water in reach)'} ${a.fromTown} m from ${a.town}'s middle`);
+  for (const a of out.anglers) console.log(`angler ${a.id.padEnd(22)} ${a.byWater ? 'on the bank' : 'IN TOWN (no water in reach)'} ${a.fromTown} m from ${a.town}'s middle; ${a.pool ? 'town pool ' + a.toPool + ' m away' : 'NO POOL'}`);
   console.log(`pools: ${total} in ${Object.keys(out.zones).length} zones; anglers ${out.anglers.length}; ${changed} file(s) ${CHECK ? 'would change' : 'written'}`);
   if (problems.length) { console.log('PROBLEMS:\n  ' + problems.join('\n  ')); process.exit(2); }
   if (CHECK && changed) process.exit(1);

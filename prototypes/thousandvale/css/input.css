@@ -95,3 +95,9 @@ html[data-input="pad"] :focus { outline: none; }
 .ctl-ref dt, .help-grid.live dt { max-width: 210px; white-space: normal; }
 .help-grid.live dl { grid-template-columns: minmax(84px, max-content) minmax(110px, 1fr); align-items: baseline; }
 .help-grid.live { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+
+/* owner feedback 7, V4: the title card's "‹ Your characters / New character / Step 1 of 2 — …" line ran together */
+.step-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin: 0 0 12px; }
+.step-title b { font-family: var(--serif, Georgia, serif); font-size: 17px; color: var(--gold-hi, #f1d595); letter-spacing: 0.04em; }
+.step-title span { flex: 1 1 100%; color: var(--ink-dim, #c7b99b); font-size: 13px; }
+.step-title .linkish { flex: 1 1 100%; text-align: left; padding: 0; }

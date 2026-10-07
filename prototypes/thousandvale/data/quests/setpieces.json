@@ -109,7 +109,7 @@
       "done": "Not bad. The dummy will need a new head, but not bad.",
       "reward": {
         "xp": 0.3,
-        "gold": 5,
+        "gold": 8,
         "crates": [
           {
             "slot": "chest",
@@ -144,7 +144,7 @@
       "done": "There. He looks taller already. Take this, and some turnips, they're only a little bitten.",
       "reward": {
         "xp": 0.35,
-        "gold": 6,
+        "gold": 10,
         "crates": [
           {
             "slot": "feet",
@@ -177,7 +177,7 @@
       "done": "The reeve said thank you? Out loud? Gods, it's strong this year.",
       "reward": {
         "xp": 0.3,
-        "gold": 5,
+        "gold": 8,
         "crates": [
           {
             "slot": "hands",
@@ -205,7 +205,7 @@
       "done": "Quiet. Lovely, chewing-free quiet. Here, for your trouble.",
       "reward": {
         "xp": 0.35,
-        "gold": 7,
+        "gold": 9,
         "crates": [
           {
             "slot": "head",
@@ -246,7 +246,7 @@
       "done": "New oak teeth? I never put those in. Somebody's been mending my mill at night. Should I be grateful or afraid?",
       "reward": {
         "xp": 0.4,
-        "gold": 8,
+        "gold": 10,
         "crates": [
           {
             "slot": "armor",
@@ -274,7 +274,7 @@
       "done": "Everyone is back where they belong. Thank you. They can't say it, so I will.",
       "reward": {
         "xp": 0.4,
-        "gold": 7,
+        "gold": 9,
         "crates": [
           {
             "slot": "weapon",
@@ -437,7 +437,7 @@
       "done": "Every one back where it was. \"Let him come back\" — that's mine. Thank you.",
       "reward": {
         "xp": 0.35,
-        "gold": 6,
+        "gold": 8,
         "crates": [
           {
             "slot": "armor",
@@ -603,7 +603,7 @@
       "done": "Peace on the water. I may even catch something. Here — and don't tell Edda I still have her saw.",
       "reward": {
         "xp": 0.35,
-        "gold": 6,
+        "gold": 8,
         "crates": [
           {
             "slot": "legs",
@@ -641,7 +641,7 @@
       "done": "Eating the wheat AND sleeping in the barn? That's my girl. I'll pay Hesketh for the wheat. Mostly.",
       "reward": {
         "xp": 0.35,
-        "gold": 6,
+        "gold": 8,
         "crates": [
           {
             "slot": "weapon",

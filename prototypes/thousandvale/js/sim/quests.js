@@ -28,8 +28,9 @@
 // (walk to `to`). Places resolve once at load: a vignette id -> its placement, a site name -> the bake site.
 
 import { huntAreas, pickArea, areasTouching } from './hunts.js';
+import { killGoldAt, questGold } from './economy-knobs.js';
 
-export const KILL_GOLD = level => 3 + level;            // one kill's gold at a level (quest gold = reward.gold × this)
+export const KILL_GOLD = level => killGoldAt(level);     // one kill's gold at a level (quest gold = reward.gold × this) — data/rules/economy.json server.quest (V2)
 export const NEAR_M = 150;                              // a step's `near` place: within this many metres
 const JOB_ROLES = new Set(['elder', 'sergeant', 'captain', 'quartermaster', 'tollkeeper', 'broker', 'innkeeper', 'angler']);   // angler: play-test 5 T25 (frames with giverRole 'angler')
 const RARITY_RANK = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4 };
@@ -203,7 +204,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
     const pre = lockedBy.get(def.id);
     return !pre || [...pre].some(q => s.done[q]);
   }
-  const rewardView = (def) => ({ xp: def.reward?.xp || 0, gold: Math.round((def.reward?.gold || 0) * KILL_GOLD(def.level || 1)), item: def.reward?.item?.tier || null,
+  const rewardView = (def) => ({ xp: def.reward?.xp || 0, gold: questGold(def.reward?.gold, def.level || 1), item: def.reward?.item?.tier || null,
     // play-test 5: T9 crates ({slot, min} each — "Crate: boots (uncommon or better)"), T25 goods, E's own reward line
     ...(def.reward?.crates ? { crates: [].concat(def.reward.crates).map(c => ({ slot: c.slot || 'any', min: c.min || c.minRarity || 'uncommon' })) } : {}), ...(def.reward?.goods ? { goods: def.reward.goods } : {}), ...(def.rewardText ? { text: def.rewardText } : {}) });
   function view(ch, def, a = null) {
@@ -431,7 +432,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       if (def.job) { s.jobs.recent ||= {}; s.jobs.recent[def.frame] = now(); }
       else s.done[id] = now();
       const rw = def.reward || {};
-      return { ok: true, def, next: nextOf.get(id) || def.next || null, reward: { xpShare: rw.xp || 0, level: def.level || 1, gold: Math.round((rw.gold || 0) * KILL_GOLD(def.level || 1)), item: rw.item || null } };
+      return { ok: true, def, next: nextOf.get(id) || def.next || null, reward: { xpShare: rw.xp || 0, level: def.level || 1, gold: questGold(rw.gold, def.level || 1), item: rw.item || null } };
     },
     view(ch) { const s = stateOf(ch); return { active: Object.entries(s.active).map(([id, a]) => { const d = defOf(ch, id); return d ? view(ch, d, a) : null; }).filter(Boolean), done: Object.keys(s.done) }; },
     npcInfo: id => npcs.get(id) || null,

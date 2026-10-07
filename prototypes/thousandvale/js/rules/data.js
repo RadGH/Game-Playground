@@ -29,6 +29,7 @@ export const RULES_DATA_FILES = {
   fishing: '../../data/rules/fishing.json',
   crates: '../../data/rules/crates.json',
   tvGear: '../../data/rules/gear-tv.json',
+  prices: '../../data/rules/prices.json',              // owner feedback 7 V2: item price + kill gold (js/rules/economy.js)
 };
 /**
  * Files that belong to ANOTHER stream and may not be there yet (or may be half-written while that stream works):

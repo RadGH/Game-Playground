@@ -23,6 +23,7 @@ import {
   wandBehaviour, STAFF_CHARGE, talentPlan,
 } from './farhold.js';
 import { castSkillPlan, installSkillRuntime, throwBolt, runtimeFor } from './cast-skills.js';
+import { killGold, goldFound } from './economy.js';
 import { wandStyle, staffStyle, riderOf, isHeldFocus, isCaster, isSceptre, attackReach } from './caster-forms.js';
 
 /** rpg.js CAST_ELEMENTS, element -> the status it leaves (Farhold main.js `statusForElement`). */
@@ -137,7 +138,11 @@ export function createCombat(room) {
       // `xpFind` (gear and perks): Farhold's gainXp applies it; when the ROOM awards the experience it
       // never sees the sheet, so it is applied here (and only here)
       if (combat.award && p.derived?.xpFind) award = Math.round(award * (1 + p.derived.xpFind / 100));
-      const coin = foundGold(p, e.gold);
+      // owner feedback 7 (V2): a kill pays by its LEVEL and rank (data/rules/prices.json), not by Farhold's health curve;
+      // gold find is applied here and nowhere else
+      const coin = engine.prices
+        ? goldFound(engine.prices, killGold(engine.prices, e.level || 1, { rank: e.rank, boss: !!e.boss, defGold: e.goldBase ?? null }), p.derived?.goldFind || 0)
+        : foundGold(p, e.gold);
       const drops = partyDrop.has(p) ? [] : rpg.rollDrops(e, { rng: lootRng, magicFind: p.derived.magicFind }) || [];
       for (const it of drops) it.uid = `${room.id}:${++uidN}`;
       // the room owns experience, gold and the bag when it says so (js/rules/index.js sets `award`);

@@ -12,6 +12,7 @@ import { itemCell, itemName, goldText } from './item-cell.js';
 import { onIcon, iconsActive } from './item-icons.js';
 import { sellPrice, buyRefusal, SHOP_WHY, saleRows } from './pt2-core.js';
 import { hideTip } from './tips.js';
+import { itemCardHtml, rememberItems } from './item-card.js';
 import { RARITY_RANK, rarityOf, slotOf, levelCheck } from './inv-core.js';
 
 const SHOP_RANGE = 7;
@@ -20,7 +21,7 @@ const BAG_MAX = 120;
 export const SHOP_ROLES = new Set(['merchant', 'smith', 'trader', 'stablehand', 'stable', 'stablemaster', 'stable_master', 'fletcher', 'armourer', 'armorer', 'jeweller', 'jeweler', 'alchemist', 'grocer', 'tailor', 'weaponsmith', 'provisioner', 'pedlar', 'peddler', 'quartermaster', 'outfitter', 'tanner', 'bowyer', 'herbalist', 'fishmonger', 'general']);
 
 export function createShop({ net, hud, actors, me, bag }) {
-  const S = { npc: null, view: null, tab: 'buy', cat: 'all', pending: false };
+  const S = { npc: null, view: null, tab: 'buy', cat: 'all', pending: false, sel: null, touch: false };
   const panel = createPanel({ id: 'shop', title: 'Shop', width: 420, cls: 'shop-panel', onClose: () => { S.npc = null; S.view = null; iconsActive(false, 'shop'); hideTip(); } });
 
   function open(npcId, name = null) {
@@ -38,11 +39,11 @@ export function createShop({ net, hud, actors, me, bag }) {
     const tabs = h('div.chips.shop-tabs', { role: 'tablist' }, ...[['buy', 'Buy'], ['sell', 'Sell'], ['back', `Buy back${(v.buyback || []).length ? ` (${v.buyback.length})` : ''}`]].map(([id, label]) =>
       h('button.chip', { type: 'button', role: 'tab', 'aria-checked': String(S.tab === id), dataset: { tab: id }, onclick: () => { S.tab = id; draw(); } }, label)));
     let body;
-    if (S.tab === 'buy') body = buyList(v);
+    if (S.tab === 'buy') body = h('div.shop-buy', {}, buyList(v), buyCard(v));
     else if (S.tab === 'sell') body = sellList(v);
     else body = backList(v);
     const says = v.says ? h('p.shop-says', {}, `“${Array.isArray(v.says) ? v.says[0] : v.says}”`) : null;
-    panel.fill(says, tabs, body, h('p.tiny-left.shop-hint', {}, S.tab === 'sell' ? 'Click an item to sell it. Rare and better ask first.' : S.tab === 'back' ? 'Things you sold here — buy them back at the price you got.' : 'Click to buy. Hover for the item card.'));
+    panel.fill(says, tabs, body, h('p.tiny-left.shop-hint', {}, S.tab === 'sell' ? 'Click an item to sell it. Rare and better ask first.' : S.tab === 'back' ? 'Things you sold here — buy them back at the price you got.' : 'Point at a thing (or tap it) to see it against what you wear; click it — or press Buy — to buy it.'));
   }
   const roleName = r => String(r || 'Trader').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   function buyList(v) {
@@ -61,11 +62,37 @@ export function createShop({ net, hud, actors, me, bag }) {
       const it = row.item || {};
       const why = buyRefusal(row, gold(), free);
       const req = slotOf(it) ? levelCheck(it, lv, bag?.state?.equipment) : { ok: true };
-      return h('div.shop-row' + (why ? '.cant' : ''), { dataset: { id: String(row.id) }, title: why || null, onclick: () => buy(row, why) },
+      // play-test 7 V13: pointing at a row (or the first tap on it) shows it in the compare card under the list; a click / the Buy button buys
+      return h('div.shop-row' + (why ? '.cant' : '') + (S.sel === row.id ? '.sel' : ''), { dataset: { id: String(row.id) }, title: why || null, tabIndex: 0,
+        onpointerenter: e => { if (e.pointerType !== 'touch') select(row.id); }, onfocus: () => select(row.id),
+        onpointerdown: e => { S.touch = e.pointerType === 'touch'; },
+        onclick: () => { if (S.touch && S.sel !== row.id) { select(row.id); return; } if (S.touch) return; buy(row, why); } },
         itemCell(it, { key: 'shop:' + S.npc + ':' + row.id, small: true }),
         h('div.sr-name', {}, it.name ? itemName(it) : h('b.iname', {}, row.mount?.name || 'Mount'), it.desc ? h('small.desc', {}, ` — ${it.desc}`) : null, row.level > lv ? h('small.bad', {}, ` level ${row.level}`) : null, row.mount ? h('small.mount', {}, ` Mount${it.speed ? ` · ${Math.round((it.speed - 1) * 100)}% faster` : ''}`) : null, !req.ok ? h('small.bad', {}, ` needs level ${req.level}`) : null),
         h('span.price' + (row.price > gold() ? '.no' : ''), {}, goldText(row.price)));
     })));
+  }
+  /** The thing on the shelf against what you wear in its slot — the bag's own item card, with the price and a Buy button. */
+  function buyCard(v) {
+    const box = h('div.shop-card', { dataset: { k: 'shopcard' } });
+    paintCard(box, v);
+    return box;
+  }
+  function paintCard(box, v) {
+    const row = saleRows(v.stock).find(r => r.id === S.sel) || null;
+    if (!row || !row.item) { box.replaceChildren(h('p.dim', {}, 'Point at something on the shelf to see it against what you are wearing.')); return; }
+    const it = row.item.uid == null ? { ...row.item, uid: 'shop:' + S.npc + ':' + row.id } : row.item;
+    rememberItems([it]);
+    const free = BAG_MAX - (bag?.state?.bag?.length || 0), why = buyRefusal(row, gold(), free);
+    const card = h('div.shop-cardbody'); card.innerHTML = itemCardHtml(it, { equipment: bag?.state?.equipment || {}, level: me()?.level || 1 });
+    box.replaceChildren(card, h('div.row.shop-cardfoot', {}, why ? h('span.bad', {}, why) : h('span.price', {}, goldText(row.price)), h('span.grow'),
+      h('button.primary.small', { type: 'button', disabled: !!why, dataset: { act: 'buy' }, onclick: () => buy(row, why) }, `Buy — ${goldText(row.price)}`)));
+  }
+  function select(id) {
+    if (S.sel === id) return;
+    S.sel = id;
+    for (const r of panel.body.querySelectorAll('.shop-row')) r.classList.toggle('sel', r.dataset.id === String(id));
+    const box = panel.body.querySelector('[data-k="shopcard"]'); if (box && S.view) paintCard(box, S.view);
   }
   function sellList(v) {
     const items = (bag?.state?.bag || []).slice().sort((a, b) => (RARITY_RANK[rarityOf(a)] ?? 0) - (RARITY_RANK[rarityOf(b)] ?? 0));

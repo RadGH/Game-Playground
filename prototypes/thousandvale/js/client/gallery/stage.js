@@ -280,7 +280,9 @@ function wireNet(net) {
   worldUi.wire(net);
   ui2.wire(net);
 }
-const fake = createFakeServer(GX.session, GX.moments, { world: !TITLE });
+/** A request the recording has no answer for (buy, wear, accept…): say so, so a tap in the gallery never looks dead. */
+const QUIET = new Set(['pref', 'settings', 'trace', 'follow', 'loot', 'fish', 'sheet', 'map', 'mail', 'friend', 'guild', 'callboard', 'cook', 'kits', 'account', 'inspect', 'party', 'chat', 'say', 'admin']);
+const fake = createFakeServer(GX.session, GX.moments, { world: !TITLE, onUnanswered: (w, m) => { if (api?.ready && !QUIET.has(m.t)) hud.toast(`The gallery plays a recording: “${[m.t, m.op].filter(Boolean).join(' ')}” was sent and nothing changes here.`, 'info'); } });
 const nearest = f => [...actors.actors.values()].filter(f).sort((a, b) => Math.hypot(a.pos.x - S.pos.x, a.pos.z - S.pos.z) - Math.hypot(b.pos.x - S.pos.x, b.pos.z - S.pos.z))[0] || null;
 /** The @tokens of fixtures/moments.json and of scene steps. */
 fake.resolve = tok => {
@@ -410,7 +412,7 @@ async function runSteps(steps = []) {
 
 // ---- boot ----------------------------------------------------------------------------------------------------------
 const title = initTitleLite({ S, account, ui2, ui5, startNet, races: PLAYABLE_RACES, raceNames: RACE_NAMES });
-const api = window.gallery = { S, GX, scene, fake, hud, actors, objects, controls, panels: PANELS, ui, ui2, ui5, bag, social, chat, mail, friends, guild, callboard, account, help, worldUi, boss, menubar, input, title, verbs: VERBS, runSteps, openPanels, setTarget,
+var api = window.gallery = { S, GX, scene, fake, hud, actors, objects, controls, panels: PANELS, ui, ui2, ui5, bag, social, chat, mail, friends, guild, callboard, account, help, worldUi, boss, menubar, input, title, verbs: VERBS, runSteps, openPanels, setTarget,
   /** What the page shows, for the spec: visible text of the interface. */
   text: () => [...document.querySelectorAll('#hud, #title:not([hidden]), .tv-panel, .tipbox, body > .ap-root, body > [class*="kit"], .phone-ui, .pad-ui')].map(e => (e.hidden ? '' : e.innerText)).join('\n'),
   ready: false, done: null };

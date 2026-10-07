@@ -153,8 +153,8 @@
    "name": "Skipper Hale Tarrow",
    "role": "angler",
    "at": "Saltmouth",
-   "x": 880,
-   "z": 1320,
+   "x": 800,
+   "z": 1296,
    "yaw": -2.75,
    "angler": true
   }

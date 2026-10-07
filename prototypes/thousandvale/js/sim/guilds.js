@@ -13,6 +13,7 @@
 //   const G = createGuilds({ store, presence, gwByChar, wallNow, filter, charge, log, counters })
 //   G.load(charId) ; G.op(s, m) ; G.changed(charId) ; G.drop(charId) ; G.idOf(charId) ; G.onlineMembers(charId)
 
+import { economy } from './economy-knobs.js';
 import { GUILD_MAX } from './store-memory-m3.js';
 
 export const GUILD_OPS = Object.freeze(['create', 'invite', 'accept', 'decline', 'leave', 'kick', 'promote', 'demote', 'lead', 'motd', 'roster', 'disband']);
@@ -25,7 +26,7 @@ export function cleanGuildName(s) {
 }
 
 export function createGuilds({ store, presence, gwByChar, wallNow, filter = null, charge = async () => true, log = () => {}, counters = {}, opts = {} }) {
-  const R = { ...GUILD, ...opts };
+  const R = { ...GUILD, fee: economy().guild.fee, ...opts };          // V2: the founding fee from data/rules/economy.json server.guild
   const byId = new Map();           // guild id -> view { id, name, motd, ranks, members: [{ char, name, cls, level, rank }] }
   const ofChar = new Map();         // char -> guild id
   const invites = new Map();        // char -> { guild, from, at }

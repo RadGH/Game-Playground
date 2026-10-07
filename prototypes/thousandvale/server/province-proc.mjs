@@ -9,7 +9,7 @@ import { WebSocketServer } from 'ws';
 import { createProvince } from '../js/sim/province.js';
 import { startTicker } from '../js/net/clock.js';
 import { MAX_FRAME } from '../js/net/protocol.js';
-import { log, loadRules, makeStore, loadLayouts, loadClasses, feedbackSink } from './load.mjs';
+import { log, loadRules, makeStore, loadLayouts, loadClasses, feedbackSink, loadEconomy } from './load.mjs';
 import { wireSocket, startPinger } from './ws-conn.mjs';
 import { createChatFilter } from '../js/sim/chatfilter.js';
 
@@ -24,7 +24,7 @@ const { layouts, events, encounterInfo, directorRules } = await loadLayouts(cfg.
 const province = createProvince({
   proc: cfg.n, layouts, store, bus, createRules, encounterInfo, build: cfg.build, now, log, eventSize: directorRules && directorRules.size, events, realmNearM: directorRules && directorRules.nearMetres,   // R3: realm events start when someone walks up
   lingerMs: cfg.linger, saveEveryMs: cfg.saveEvery, journalMs: cfg.journalMs, processName: cfg.process, chatFilter: createChatFilter(), classes: loadClasses(),
-  kitsFor: kitsFor || null, feedbackSink: cfg.feedbackFile === false ? null : feedbackSink(cfg.env || 'dev', cfg.feedbackFile || undefined),      // play-test 5: T5 kits, T19 feedback file
+  economy: loadEconomy(), kitsFor: kitsFor || null, feedbackSink: cfg.feedbackFile === false ? null : feedbackSink(cfg.env || 'dev', cfg.feedbackFile || undefined),      // play-test 5: T5 kits, T19 feedback file
 });
 await province.init();
 bus.send({ k: 'hello', proc: cfg.n, provinces: layouts.map(L => L.key), events });

@@ -54,6 +54,7 @@ export function spawnMonster(field, def, level, x, z, { rank = 'normal', modifie
   const r = rng || field.room.streams.get('spawn');
   const unit = field.rpg.makeEnemy(def, level, r, { rank: boss && rank === 'normal' ? 'boss' : rank, modifiers, name });
   if (id != null) unit.id = id;
+  unit.goldBase = def.gold ?? null;          // owner feedback 7: its own coin weight for js/rules/economy.js killGold
   unit.x = x; unit.z = z; unit.y = field.terrain ? groundAt(field.terrain, x, z) : 0;
   unit.state = 'wander'; unit.wanderTimer = 0; unit.swingTimer = 0; unit.hitFlash = 0;
   unit.stagger = 0; unit.push = null; unit.recoil = null; unit.sunder = 0; unit.sunderLeft = 0; unit.closing = 0;

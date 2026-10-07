@@ -27,7 +27,7 @@
 //   R.events                      Map id -> event   R.spawnFor(o, kind) (tests)
 
 export const ROAD_DEFAULTS = Object.freeze({ firstSec: [45, 90], gapSec: [150, 300], spawnM: [70, 140], quietM: 220, lifeSec: 600, maxPerRoom: 6, ambushEveryM: 170, maxAmbush: 2, escortGiveUpSec: 90 });
-const KILL_GOLD = level => 3 + level;
+import { roadKillGold as KILL_GOLD, roadChestGold } from './economy-knobs.js';       // V2: data/rules/economy.json server.road
 
 export function createRoadEvents({ data = null, wanderers = null, online, corpses, grant, questEvent, bookOf, provOf, now, wallNow, rng = Math.random, log = () => {}, counters = {}, journal = () => {}, questSaved = () => {}, sendQuests = () => {}, partyOf = () => null, enabled = true }) {
   const D = data || {};
@@ -162,7 +162,7 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
     const rules = ev.room.rules, e = o.entity;
     let items = [];
     try { items = (rules.rollLoot ? rules.rollLoot(e, { level: ev.level, tier: ev.spec.tier || 'magic' }) : []) || []; } catch (err) { log('road chest loot', err && err.message); }
-    const gold = Math.round(ev.level * 5 + 6 + rng() * ev.level * 3);
+    const gold = roadChestGold(ev.level, rng());
     corpses.holdFor(ev.room, ev.chest, o.char.id, { gold, items });
   }
   function openUp(ev) {

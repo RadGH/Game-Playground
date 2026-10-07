@@ -13,6 +13,7 @@
 // LIMITS: one report per `gapMs` (2 s) and `perHour` (1000 — play-test 6 U2: the owner files them while play-testing) per account; text <= 2000 chars; the client context <= 6 kB of JSON.
 
 import { FEEDBACK_KINDS, FEEDBACK_STATES } from '../net/protocol.js';
+import { economy } from './economy-knobs.js';
 
 export const FEEDBACK = Object.freeze({ textMax: 2000, ctxMax: 6000, logLines: 60, logLine: 300, depth: 4, keys: 40, str: 500, gapMs: 2000, perHour: 1000, list: 100 });
 export const THANKS = Object.freeze({
@@ -55,6 +56,12 @@ export function sanitize(ctx, L = FEEDBACK) {
   return out;
 }
 
+/** Owner feedback 7, V1: the letter a character gets ONCE at level 3 when it has never sent feedback. */
+export const NUDGE = Object.freeze({
+  level: 3, subject: 'Share your thoughts', from: 'The Vale',
+  body: 'Help us make the game better by submitting feedback. Earn a free item as a reward the first time you share feedback or submit a bug.\n\nThe Feedback button is on the menu bar.',
+});
+
 export const cleanState = s => { const v = String(s || '').toLowerCase(); return v === 'trash' ? 'trashed' : FEEDBACK_STATES.includes(v) ? v : null; };
 
 export function createFeedback({ store, wallNow = () => Date.now(), sink = null, sysmail = null, log = () => {}, counters = {}, filter = null, opts = {} }) {
@@ -84,7 +91,7 @@ export function createFeedback({ store, wallNow = () => Date.now(), sink = null,
     // T20: the first report of each CHARACTER brings a thank-you letter with a gift box (a rare item or better)
     let first = false;
     if (res.first && who.char != null && sysmail) {
-      const r = await sysmail.mailTo({ to: who.char, subject: THANKS.subject, body: THANKS.body, from: THANKS.from, gift: { minRarity: 'rare', level: who.level || 1 } });
+      const r = await sysmail.mailTo({ to: who.char, subject: THANKS.subject, body: THANKS.body, from: THANKS.from, gift: { minRarity: economy().gift.feedbackMinRarity, level: who.level || 1 } });
       first = !!(r && r.ok);
       if (first) counters.feedbackGifts = (counters.feedbackGifts || 0) + 1;
       else if (store.feedbackGiftFailed) { try { await store.feedbackGiftFailed(who.char); } catch { /* next time */ } }

@@ -17,13 +17,14 @@
 //   M.op(o, m)          o = the province's online record; m = mail {op, ...}
 
 import { MAIL_OPS } from '../net/protocol.js';
+import { economy } from './economy-knobs.js';
 
 export const MAIL = Object.freeze({ items: 6, postage: 1, minLevel: 5, expireMs: 30 * 86400000, perHour: 20, subjectMax: 60, bodyMax: 500, list: 50 });
 
 export function createMail({ store, online, journal, syncChar, econ, trades, send = () => {}, setTimeoutTicks, wallNow, filter = null, log = () => {}, counters = {}, BAG_MAX = 120, saveNow = () => {}, restack = () => {}, opts = {} }) {
   /** U1 (play-test 6): the unread count the badge shows, re-sent after anything that can change it (read, take, delete). */
   const tellUnread = o => store.mailUnread(o.char.id).then(n => { if (o.conn) o.conn.sendJSON({ t: 'mailNew', unread: n }); }, () => {});
-  const R = { ...MAIL, ...opts };
+  const R = { ...MAIL, postage: economy().mail.postage, ...opts };          // V2: postage from data/rules/economy.json server.mail
   const sentLog = new Map();      // char -> [wall ms] (spam limit)
   const clean = (t, n) => { const s = String(t || '').replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, '').slice(0, n); return filter ? filter.text(s) : s; };
   const reply = (o, op, x) => { if (o.conn) o.conn.sendJSON({ t: 'mailR', op, ...x }); };

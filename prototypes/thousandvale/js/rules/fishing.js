@@ -126,10 +126,17 @@ export function createFishing(numbers = {}, content = null) {
   /** Every fish that can bite here for this angler (pool-only fish only with `pool`). */
   function listFor({ water = null, band = null, time = 'day', skill = 1, pool: p = null } = {}) {
     const s = skillOf(skill);
-    return fish.filter(f => f && f.id
+    const pick = b => fish.filter(f => f && f.id
       && (!water || list(f.water).includes(water))
-      && bandSuits(f.bands, band) && timeSuits(f.time, time)
+      && bandSuits(f.bands, b) && timeSuits(f.time, time)
       && num(f.skill, 0) <= s && (!f.pool || !!p));
+    const got = pick(band);
+    if (got.length || band == null) return got;
+    // owner feedback 7: water in a zone ABOVE every species' band (the fish list stops at level 10 today) still holds
+    // fish — the ones of the highest band this water has — instead of nothing but weed. Their price follows the zone.
+    const top = Math.max(0, ...fish.filter(f => f && (!water || list(f.water).includes(water))).map(f => num((f.bands || [])[1], 0)));
+    const lvl = Array.isArray(band) ? num(band[0], 1) : num(band, 1);
+    return top > 0 && lvl > top ? pick(top) : got;
   }
   function legendFor({ water, time = 'day', skill = 1, zone = null, caught = null }) {
     if (!zone) return null;
@@ -160,7 +167,17 @@ export function createFishing(numbers = {}, content = null) {
     const frac = Math.pow(rng(), k);
     return { size: Math.round(lerp(lo, hi, frac)), frac };
   }
-  const priceOf = (base, frac) => (base > 0 ? Math.max(1, Math.round(base * (num(N.size?.priceMin, 0.7) + num(N.size?.priceSpan, 0.8) * frac))) : 0);
+  /**
+   * Owner feedback 7 (V2): what a catch is WORTH. E's `price` on a species is its worth relative to other fish; the
+   * numbers that turn it into gold are C's (`value`): a rarity factor (commons little, the prized few a lot), one
+   * overall factor, and a rise with the level of the water fished (`band`), so an hour's fishing keeps pace with an
+   * hour's questing at every level. Applied HERE and nowhere else: `item.price` is final.
+   */
+  const bandOf = b => Math.max(1, Math.round(Array.isArray(b) ? num(b[0], 1) : num(b, 1)));
+  const bandK = band => 1 + num(N.value?.perBand, 0) * (bandOf(band) - 1);
+  const priceOf = (base, frac, rarity = 'common', band = 1) => (base > 0
+    ? Math.max(1, Math.round(base * (num(N.size?.priceMin, 0.7) + num(N.size?.priceSpan, 0.8) * frac) * num(N.value?.rarity?.[rarity], 1) * num(N.value?.mult, 1) * bandK(band)))
+    : 0);
 
   /**
    * One catch. Returns
@@ -192,7 +209,7 @@ export function createFishing(numbers = {}, content = null) {
       edge += num(p ? K.legend?.pool : K.legend?.open, p ? 0.04 : 0.012);
       if (x < edge) {
         const sz = sizeOf({ size: lg.size || K.legend?.size || [90, 160] }, skill, rng);
-        return { kind: 'legend', id: lg.id, name: lg.name, desc: lg.desc || '', rarity: 'epic', size: sz.size, price: num(lg.price, num(K.legend?.price, 120)), skill: num(lg.skill, 0), seed, legend: true, title: lg.title || null, trophy: lg.trophy || null, zone: lg.zone };
+        return { kind: 'legend', id: lg.id, name: lg.name, desc: lg.desc || '', rarity: 'epic', size: sz.size, price: Math.round(num(lg.price, num(K.legend?.price, 120)) * bandK(band)), skill: num(lg.skill, 0), seed, legend: true, title: lg.title || null, trophy: lg.trophy || null, zone: lg.zone };
       }
     }
     // junk (less with skill, less in a pool, less on bread paste)
@@ -212,7 +229,7 @@ export function createFishing(numbers = {}, content = null) {
     const of = here.filter(f => (f.rarity || 'common') === rar);
     const f = of[Math.floor(rng() * of.length) % of.length];
     const sz = sizeOf(f, skill, rng);
-    return { kind: 'fish', id: f.id, name: f.name, desc: f.desc || '', rarity: rar, size: sz.size, price: priceOf(num(f.price, 0), sz.frac), skill: num(f.skill, 0), seed };
+    return { kind: 'fish', id: f.id, name: f.name, desc: f.desc || '', rarity: rar, size: sz.size, price: priceOf(num(f.price, 0), sz.frac, rar, band), skill: num(f.skill, 0), seed };
   }
 
   // ---------------------------------------------------------------- the tug

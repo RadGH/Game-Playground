@@ -1,0 +1,66 @@
+{
+  "_doc": "Stream C (owner feedback 7, V2: 'overhaul the gold rewards and item pricing'). The gold FORMULAS the rules own; js/rules/economy.js reads every number from here and tools/sim-economy.mjs (stream E) measures the result. `gear`: an item's list price = (base + perLevel x the level it was made at) x slot x rarity x extras; a merchant pays `sellFactor` of that. `kill`: what a monster pays = (base + perLevel x level) x its own weight (its Farhold `gold` / goldRef, clamped to weight[0..1]) x rank. `goldFind`: the stat multiplies KILL gold only, once, capped. Before this file a kill's gold grew exponentially with level (a level-20 brigand paid 163 gold while the average level-20 drop was priced 65), an item's price ignored its level and its slot, and quests paid less than two kills.",
+  "gear": {
+    "base": 45,
+    "perLevel": 144,
+    "min": 5,
+    "slot": {
+      "weapon": 1.2,
+      "weapon2h": 1.5,
+      "offhand": 0.9,
+      "head": 0.9,
+      "chest": 1.15,
+      "legs": 1.0,
+      "hands": 0.8,
+      "feet": 0.8,
+      "ring": 1.0,
+      "ring2": 1.0,
+      "necklace": 1.1,
+      "back": 0.8,
+      "waist": 0.7,
+      "light": 0.6
+    },
+    "rarity": {
+      "normal": 1,
+      "magic": 2.5,
+      "rare": 11,
+      "legendary": 30
+    },
+    "unique": 1.5,
+    "set": 1.25,
+    "tier2": 1.1,
+    "sellFactor": 0.012
+  },
+  "kill": {
+    "base": 4,
+    "perLevel": 1,
+    "goldRef": 5,
+    "weight": [
+      0.7,
+      1.4
+    ],
+    "rank": {
+      "normal": 1,
+      "champion": 2.5,
+      "rare": 5,
+      "boss": 12
+    }
+  },
+  "goldFind": {
+    "cap": 100
+  },
+  "_tuned": "Owner feedback 7 V2, tuned by stream E (economy lead) with tools/sim-economy.mjs after C landed the formulas. Kill: 2 + 1 x level -> 4 + 1 x level, weight 0.6-1.8 -> 0.7-1.4, rank 3 / 6 / 15 -> 2.5 / 5 / 12. Gear: 45 + 42 x level -> 45 + 144 x level, sellFactor 0.04 -> 0.012. Why: with the real rank rolls (one spawn in five is a champion or a rare) and real drops (0.45 items a kill, worth two uncommon pieces on average) the first numbers paid 4.5 uncommon pieces per hour of killing at level 10; these pay about one. The whole scale is three times the first draft's so that whole-gold rounding still tells level 1 from level 2 and a 1-gold fish is small change. Only numbers changed; tests/C/playtest7 pins the rules.",
+  "retrain": {
+    "_doc": "Owner feedback 7 follow-up: what the Unbinder charges. Farhold's shared table (68-320 gold) is a few minutes of play at these prices, so Thousandvale prices it in TIME: `hour` = an hour of questing gold at a level (base at level 1 + perLevel for each level after; fitted to tools/sim-economy.mjs: 727 / 2435 / 5610 / 10549 at levels 1 / 5 / 10 / 20), `minutes` = what taking ONE back costs in minutes of that, `allHours` = what taking everything of a kind back costs.",
+    "hour": {
+      "base": 730,
+      "perLevel": 520
+    },
+    "minutes": {
+      "talent": 15,
+      "perk": 17.5,
+      "spell": 20
+    },
+    "allHours": 2
+  }
+}

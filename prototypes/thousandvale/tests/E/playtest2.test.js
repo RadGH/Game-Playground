@@ -12,6 +12,9 @@ import { parseTerrain, parseNav } from '../../js/rules/terrain-read.js';
 import { zoneContext, provinceComponents, discProblem, ruleKind } from '../../tools/content-place.mjs';
 import { questFiles } from '../../tools/content-lib.mjs';
 import { KILL_GOLD } from '../../js/sim/quests.js';
+import { configureEconomy, questGold } from '../../js/sim/economy-knobs.js';
+// owner feedback 7 V2: what a quest pays is data (data/provinces/economy.json), read the way the server reads it
+configureEconomy(JSON.parse(readFileSync(new URL('../../data/provinces/economy.json', import.meta.url), 'utf8')));
 import { createRoom } from '../../js/sim/room.js';
 import { standInTerrain } from '../../js/sim/terrain.js';
 import { createRules } from '../../js/rules/index.js';
@@ -153,9 +156,10 @@ test('Q27: it leads to another town AND to a mini boss, in either order, then ho
   assert.ok(lv('start_signs_of_the_beast') <= lv('start_old_gristle') && lv('start_old_gristle') >= 2);     // play-test 3 R2: a level-2 boss quest
   assert.equal(byId.get('start_home_with_news').next, 'toll_at_fitockpi', 'and on into the province story');
   // and it pays for a first horse along the way (Q16): the chain's gold vs the stable's cheapest mount
-  const gold = chain.reduce((a, q) => a + Math.round(q.reward.gold * KILL_GOLD(q.level)), 0);
+  const gold = chain.reduce((a, q) => a + questGold(q.reward.gold, q.level), 0);
   const horse = SHOPS.kinds.stable.goods.find(g => g.id === 'trail_horse');
-  assert.ok(gold >= horse.price * 3, `chain gold ${gold} vs horse ${horse.price}`);
+  // (it was 'three times over' when a horse cost 60 gold; a mount is an hour's goal now — the chain still buys it with change to spare)
+  assert.ok(gold >= horse.price * 1.5, `chain gold ${gold} vs horse ${horse.price}`);
 });
 
 test('Q27: the road — the Pail and Plough stands by the Torborhold-Orrinsford road, the boss den is reachable and respawns quickly', () => {
@@ -226,7 +230,7 @@ test('Q9/Q11: every shop kind has stock — gear from real bases, goods that exi
   }
   // priced against what a kill pays (3 + level): a level-1 potion is a couple of kills, not a fortune
   const pot = SHOPS.kinds.general.goods.find(g => g.id === 'healing_potion');
-  assert.ok(pot.price <= KILL_GOLD(1) * 3, `healing potion ${pot.price} g`);
+  assert.ok(pot.price <= KILL_GOLD(1) * 8, `healing potion ${pot.price} g`);      // V2: about six level-1 kills (4% of an hour's questing)
   assert.ok(SHOPS.pricing.sellFactor > 0 && SHOPS.pricing.sellFactor < 0.5);
   // stream A's runtime reads `roles` (js/sim/shops.js): it must be the one tools/content-shops.mjs makes from `kinds`
   assert.deepEqual(SHOPS.roles, rolesFrom(SHOPS), 'shops.json roles are stale: run node tools/content-shops.mjs');

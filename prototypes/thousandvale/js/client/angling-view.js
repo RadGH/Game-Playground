@@ -111,6 +111,7 @@ export function createAngling(scene, { actors = null, forms = null, spellFx = nu
   const ringGeo = new THREE.RingGeometry(0.84, 1, 48); ringGeo.rotateX(-Math.PI / 2);
   // a pale shaft of glitter standing on a pool, so it reads from far off (rings lie flat and vanish at a low angle)
   const glintGeo = new THREE.CylinderGeometry(0.12, 0.7, 1, 10, 1, true); glintGeo.translate(0, 0.5, 0);
+  const sparkGeo = new THREE.OctahedronGeometry(1, 0);            // a twinkle over the shaft (play-test 7, V3: "I've only seen the one")
   const ringMat = () => new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: true });
   const lines = new Map();        // angler id -> state
   const pools = new Map();        // pool id -> state
@@ -242,33 +243,59 @@ export function createAngling(scene, { actors = null, forms = null, spellFx = nu
       const tint = POOL_TINT[p.tier] || POOL_TINT[1];
       for (let i = 0; i < 3; i++) { const m = new THREE.Mesh(ringGeo, ringMat()); m.material.color.set(tint); m.position.set(p.x, p.y + 0.04, p.z); m.renderOrder = 2; m.frustumCulled = false; scene.add(m); p.rings.push(m); }
       p.glint = new THREE.Mesh(glintGeo, ringMat()); p.glint.material.color.set(tint); p.glint.renderOrder = 2; p.glint.frustumCulled = false; scene.add(p.glint);
+      p.spark = new THREE.Mesh(sparkGeo, ringMat()); p.spark.material.color.set('#ffffff'); p.spark.renderOrder = 3; p.spark.frustumCulled = false; scene.add(p.spark);
       p.fish = new THREE.Mesh(fishGeo, solid()); p.fish.visible = false; p.fish.scale.setScalar((1.6 + p.tier * 0.3) * (p.shelf ? 0.6 : 1));        // E: a `shelf` pool is ankle-deep — a small fish, a low hop p.fish.material.color.set(tint).lerp(new THREE.Color('#ffffff'), 0.5); scene.add(p.fish);
+      if (info?.id != null && !String(id).startsWith('spot:')) { p.spot = info.id; real.add(String(info.id)); if (pools.has('spot:' + info.id)) removePool('spot:' + info.id); }
       pools.set(id, p); stats.pools = pools.size;
     }
     if (at && Number.isFinite(at.x)) { p.x = at.x; p.z = at.z; p.y = surface(p.x, p.z); }
     if (info?.tier && info.tier !== p.tier) { p.tier = info.tier; for (const m of p.rings) m.material.color.set(POOL_TINT[p.tier] || POOL_TINT[1]); }
   }
+  /**
+   * V3: pools the server has only LISTED (open, but further than it sends entities — `fishPools {open: [{id, x, z, tier, shelf}]}`),
+   * so the shaft over a pool shows from a road half a kilometre off. A listed pool is keyed 'spot:<id>'; when its real
+   * entity arrives (`info.pool.id`) the listed one steps aside.
+   */
+  function setKnown(list) {
+    const want = new Set((list || []).map(s => 'spot:' + s.id));
+    for (const k of [...pools.keys()]) if (String(k).startsWith('spot:') && !want.has(k)) removePool(k);
+    for (const s of list || []) {
+      const k = 'spot:' + s.id; if (!Number.isFinite(s.x) || real.has(String(s.id))) continue;
+      setPool(k, { x: s.x, z: s.z }, { tier: s.tier || 1, shelf: !!s.shelf, left: s.left ?? 5 });
+    }
+    stats.known = want.size;
+  }
+  const real = new Set();          // spot ids that have a live entity on this screen
   function removePool(id, fished = false) {
     const p = pools.get(id); if (!p) return;
+    if (p.spot != null) real.delete(String(p.spot));
     if (fished) splash(p.x, p.z, 2.4);
     for (const m of p.rings) { scene.remove(m); m.material.dispose(); }
-    scene.remove(p.glint); p.glint.material.dispose();
+    scene.remove(p.glint); p.glint.material.dispose(); scene.remove(p.spark); p.spark.material.dispose();
     scene.remove(p.fish); p.fish.material.dispose();
     pools.delete(id); stats.pools = pools.size;
   }
   function updatePool(p, dt, now) {
-    const cp = camera?.position, d = cp ? Math.hypot(p.x - cp.x, p.z - cp.z) : 0, on = d < 220;
+    const cp = camera?.position, d = cp ? Math.hypot(p.x - cp.x, p.z - cp.z) : 0, on = d < 600;      // (the server sends a pool from 150 m; `setKnown` pools are further)
     for (const m of p.rings) m.visible = on;
-    p.glint.visible = on && d > 25;
+    p.glint.visible = on && d > 9; p.spark.visible = p.glint.visible;
     if (!on) { p.fish.visible = false; return; }
-    if (p.glint.visible) { const far = Math.min(1, (d - 25) / 40); p.glint.position.set(p.x, p.y, p.z); p.glint.scale.set(1 + far * 1.5, (p.shelf ? 2.5 : 4) + far * 3, 1 + far * 1.5); p.glint.rotation.y += dt * 0.6; p.glint.material.opacity = (0.16 + 0.1 * Math.sin(p.t * 2.2)) * far; }
+    if (p.glint.visible) {
+      // from the road: a pale shaft standing on the pool and a twinkle at its head, both growing with distance so they
+      // hold about the same size on screen from 40 m to the edge of sight (150 m), day or night (additive, so the dark helps)
+      const far = Math.min(1, 0.35 + (d - 9) / 25), grow = 1 + Math.max(0, d - 40) / 45, H = (p.shelf ? 3 : 5) * grow;
+      p.glint.position.set(p.x, p.y, p.z); p.glint.scale.set(1.2 * grow, H, 1.2 * grow); p.glint.rotation.y += dt * 0.6;
+      p.glint.material.opacity = (0.3 + 0.12 * Math.sin(p.t * 2.2)) * far;
+      const tw = Math.max(0, Math.sin(p.t * 3.1 + p.x)) ** 6;
+      p.spark.position.set(p.x, p.y + H + 0.4 * grow, p.z); p.spark.rotation.y += dt * 2; p.spark.scale.setScalar((0.28 + 0.5 * tw) * grow); p.spark.material.opacity = (0.55 + 0.45 * tw) * far;
+    }
     p.t += dt;
     if (!(p.y > -1e5)) p.y = surface(p.x, p.z);
     // three rings, each 2.6 s from the middle out to 2.8 m, a third of a cycle apart — bigger and brighter from afar
     const R = 3.2 + Math.min(1.6, Math.max(0, d - 30) / 25);
     p.rings.forEach((m, i) => {
       const k = ((p.t / 2.6) + i / 3) % 1;
-      m.position.set(p.x, p.y + 0.04, p.z); m.scale.setScalar(0.25 + R * k); m.material.opacity = (d > 40 ? 0.95 : 0.7) * (1 - k) * Math.min(1, k * 6);
+      m.position.set(p.x, p.y + 0.04, p.z); m.scale.setScalar(0.25 + R * k); m.material.opacity = (d > 20 ? 1 : 0.75) * (1 - k * k) * Math.min(1, k * 6);
     });
     // the jumper
     if (p.jump < 0 && p.t >= p.next0()) { p.jump = 0; p.jumpYaw = (p.t * 2.399) % (Math.PI * 2); stats.jumps++; splash(p.x - Math.sin(p.jumpYaw) * 0.8, p.z - Math.cos(p.jumpYaw) * 0.8, 0.9); }
@@ -317,9 +344,14 @@ export function createAngling(scene, { actors = null, forms = null, spellFx = nu
     g.add(new THREE.Line(lg, lineMat));
     const r = new THREE.Mesh(ringGeo, ringMat()); r.material.opacity = 0.5; g.add(r);
     const gl = new THREE.Mesh(glintGeo, ringMat()); gl.material.opacity = 0.3; g.add(gl);
+    const sk = new THREE.Mesh(sparkGeo, ringMat()); sk.material.opacity = 0.3; g.add(sk);
     for (const c of g.children) if (c.isMesh) c.castShadow = true;
     return g;
   }
-  return { onEvent, onLocal, setPhase, setLine, setPool, removePool, update, sample, stats, lines, pools,
-    dispose() { for (const s of [...lines.values()]) drop(s); for (const id of [...pools.keys()]) removePool(id); for (const g of [rodGeo, floatGeo, fishGeo, ringGeo, glintGeo]) g.dispose(); } };
+  /** V3: every pool this screen knows of (sent or listed), for a map marker: [{ id, x, z, tier, listed }]. */
+  const list = () => [...pools.entries()].map(([id, p]) => ({ id, x: p.x, z: p.z, tier: p.tier, listed: String(id).startsWith('spot:') }));
+  /** A room change: the pools of the room left behind go (its entities are dropped without a `left` each). Listed ones stay. */
+  function clearPools() { for (const id of [...pools.keys()]) if (!String(id).startsWith('spot:')) removePool(id); }
+  return { list, clearPools, onEvent, onLocal, setPhase, setLine, setPool, setKnown, removePool, update, sample, stats, lines, pools,
+    dispose() { for (const s of [...lines.values()]) drop(s); for (const id of [...pools.keys()]) removePool(id); for (const g of [rodGeo, floatGeo, fishGeo, ringGeo, glintGeo, sparkGeo]) g.dispose(); } };
 }

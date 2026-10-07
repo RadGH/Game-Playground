@@ -3230,3 +3230,223 @@ D-UI reads A's §22 and C's round-6 names as written (`item.count`/`stackMax`, `
   use it too. No data changed.
 - **Lead — shared code touched:** proctown `propkit.js` (grain + vineyard leaves, stubble strip), `propkit-three.js` (new exports), proctown test
   accepts `sheaf`; avatar-3d `equine.js` (nostrils only).
+
+## Round 7 contracts — E (Content; LEADS V2 the economy, V3 pools) -> C, A, D-UI — 2026-10-07 (written first)
+
+**V2 — who owns which gold knob.** One measuring tool, `node tools/sim-economy.mjs` (E): gold per hour by activity at levels 1 / 5 / 10 / 20 and the
+price ladder, from the REAL modules (C's engine for kill gold, drops and item prices; `js/rules/fishing.js` for casts; `js/sim/events.js`
+`eventReward`; `js/sim/shops.js` prices; the quest, event and shop files). `--before` reads the data as committed in git, default = the working tree.
+- **C (data/rules + js/rules):** what a KILL pays (gold by level and rank), what an item is WORTH (the price formula by rarity / item level / quality),
+  the Unbinder's prices, crate contents, and `data/rules/fishing.json` (bite wait, kinds, rarity weights, tug, size->price curve).
+- **E (new file `data/provinces/economy.json` + the content files):** everything a PLACE or a PERSON pays or charges:
+  ```json
+  { "unit": { "base": 3, "perLevel": 1 },          // "one kill's gold" at a level: quest and event rewards are multiples of it (js/sim/quests.js KILL_GOLD)
+    "quest": { "mult": 1 },                           // on every quest's reward.gold x unit
+    "event": { "perLevel": 0.15, "mult": 1 },         // js/sim/events.js eventReward: reward.gold x (1 + perLevel x (level - 1)) x mult
+    "roadChest": { "base": 6, "perLevel": 5, "spread": 3 },   // js/sim/roadevents.js chest gold
+    "treasure": { "base": 20, "perLevel": 10 },       // js/sim/province.js treasure cache
+    "fare": { ... as js/sim/province.js travelFare has it today ... },
+    "mounts": [ { "id", "price", "level" } ],         // js/sim/mounts.js table prices
+    "sell": { "factor": 0.25, "fish": 1 },            // what a merchant pays: gear x factor of its price; a fish its full `price`
+    "targets": { ... the ratios the test pins ... } }
+  ```
+  plus `shops.json` (`pricing`, goods prices), `angling.json` (fish / legend prices, sunken-crate chance), quest `reward.gold`, `events.json` /
+  `road-events.json` rewards.
+- **A:** please read the hard-coded numbers above from `data/provinces/economy.json` (same defaults when the file or a key is missing, so nothing
+  moves until E tunes). If you would rather keep them in a file of yours, name it here and the tool follows.
+- **Targets the test pins (ratios, not numbers)** — tests/E/playtest7-economy.test.js, at each of levels 1 / 5 / 10 / 20:
+  an hour of ordinary play (questing) buys one uncommon ("magic") shop piece of your level and 3 potions, and not three pieces; a rare shop piece
+  costs 2.5-8 hours; fishing earns 70-100% of questing gold per hour and never more than the best activity; fishing's hour-to-hour spread is wider
+  than questing's; the dearest common fish is worth less than the cheapest rare, and the best fish at least 25x the cheapest; a sunken crate comes
+  up at least once an hour of fishing; no shop row costs more than 20 hours of play at the level it opens, none less than one kill.
+
+**V3 — pools in plain sight.** `tools/content-pools.mjs` gains a TOWN rule: for every hub town with water within reach, one tier-1 pool with
+`town: '<name>'`, `always: true`, chosen for being closest to where people walk (a road sample within 30 m of its bank, nearest the town gate / bridge /
+quay) — and the town's angler entry gets `pool` = that pool and a greeting line that points at it. Along rivers: a pool wherever a road runs within
+40 m of the water for 80 m or crosses it (bridges, fords). Counts per town before / after in E's status. **A:** `always: true` pools never close
+(there will be about 14 instead of 1). **D-world:** nothing new in the shape.
+
+## Round 7 contracts — A (Server core) — 2026-10-07 (owner feedback 7; written first, findings + status at the end)
+- **V1 the feedback nudge:** once per character, at level 3 (or at the next login when already past it) and only if that character has never
+  sent feedback: a system letter "Share your thoughts" with the owner's two sentences. Saved flag `char.flags.feedbackNudge` (wall ms). No new
+  message: it arrives as mail (`mailNew`). Nothing for the client to build.
+- **V2 every gold number the server applies is DATA — E's file, E's names:** A reads **`data/provinces/economy.json`** exactly as E's contract
+  writes it (`unit {base, perLevel}`, `quest {mult}`, `event {perLevel, mult}`, `roadChest {base, perLevel, spread}`, `treasure {base, perLevel}`,
+  `fare {base, metresPerGold, crossProvinceMetres}`, `sell {factor, fish}`, `mounts [{id, price, level}]`) through ONE pure module,
+  `js/sim/economy-knobs.js` (defaults = today's numbers; a missing file or key moves nothing). The other numbers that were hard-coded in js/sim
+  are read from the same file under these names, if E wants to tune them: `chest {base, perLevel}` (dungeon / vignette chests: 5 + 4 x level),
+  `event {shortMinutes, lengthCap, worldBossMult}` (4, 2.5, 2), `mail {postage}` (1), `guild {fee}` (10), `shop {perItemLevel 0.12, fallbackPrice 15,
+  rarityPrice {…}, crateSell 1, buyback 12, restockMinutes 30}` (shops.json `pricing` wins where it names the same key), `barber {hair … everything,
+  perLevel}` (shops.json wins), `bag {overflowPerItem}` (1), `cook {mealValue}` (2), `gift {feedbackMinRarity}` ('rare').
+  **tools/sim-economy.mjs:** `import { configureEconomy, economy, questGold, killGoldAt, chestGold, treasureGold, roadChestGold, eventGold,
+  lengthFactor, travelFare } from '../js/sim/economy-knobs.js'` — the same functions the server calls. Already data and not A's: kill gold and
+  item prices (C's rules), retrain prices (C), fish prices (C x E), crate contents (C), shop rows / potions / barber list (E's shops.json).
+- **V3 pools — findings and what changes are in the status below.** Wire: unchanged (`info.pool {tier, minSkill, left, water, shelf?}` gains
+  `always: 1` on a never-empty beginner pool and `town: '<name>'` on a town's own pool).
+
+**Status (A): LANDED 2026-10-07. Dev unit restarted.**
+- **V3 — why 308 placed pools looked like one (measured on the real province, `tests/A/pt7.test.js` keeps it true):**
+  1. **The cap.** A copy opened only E's `meta.<zone>.live` spots: **94 of 308** (the starting zone: 8 of 29). Within 600 m of Torborhold 16
+     spots are listed and **3 were open** in the wilds; a client walking rings of 120 / 300 / 600 m round the town was sent **5** pools.
+  2. **The town's edge.** A spot inside a town's circle lived only in the TOWN's room and one just outside only in the WILDS copy — rooms do not
+     show each other's objects, so the start pool (64 m from Torborhold's middle) vanished the moment you stepped out of the gate.
+  3. **Skill gates.** 174 of the 308 are tier 2 / 3 (angling 25 / 50). They were SENT to beginners (not hidden) but a cast at one was refused —
+     and because a cast with no aim snaps to the nearest pool, a gated pool also blocked the open water round it.
+  4. Not the cause: depletion (a fished-out pool does reopen elsewhere after 30-90 s — tested), view range (pools are ordinary objects, 150 m).
+  **Changed (js/sim/angling.js):** a copy opens `liveShare` 0.6 of each zone's spots (never fewer than `meta.live`), every always-open one first,
+  then tier-1 and roadside spots -> **190 open** (every tier-1 spot — 135 with the town pools opened as tier 1 — plus 31 tier-2 and 24 tier-3); within 600 m of Torborhold **10 open**,
+  the same walk is sent **13**. A spot within 130 m outside a town's circle is in the town's room too, and the wilds copy holds the ones inside.
+  A gated pool no longer closes its water: the line lands beside it as open water with `fishR.note` ("That pool needs angling 25. You cast beside it.").
+  **Every town with a listed spot within 600 m keeps ONE never-empty beginner pool** (`info.pool.always: 1`, `info.pool.town`, tier 1, named
+  "<Town> fish pool"): E's own `town` + `always` spot when the file has one, else the nearest listed spot (opened as tier 1). 17 of 18 towns have
+  one now (nearest: Redcliff 10 m … Millbrook 575 m). **E:** **Last Lantern** has no listed spot within 1,788 m — place one or call it dry;
+  **Millbrook**'s nearest is 575 m and **Hollin Toll**'s only tier-1 spot is 1,138 m off (A opens its 315 m tier-2 spot as tier 1 meanwhile).
+  **D-world:** pools are plentiful on the wire now; if they still go unseen it is the drawing (ripples at 150 m). `info.pool.always` / `.town`
+  are there if the town's pool wants a marker.
+- **V2 — the hard-coded gold numbers A found in js/sim, all moved to `js/sim/economy-knobs.js` (read from E's `data/provinces/economy.json`):**
+  quest gold `reward.gold x (3 + level)` (quests.js) · road-event kill gold `3 + level` and chest `6 + 5 x level + rnd x 3 x level` (roadevents.js)
+  · dungeon / vignette chest `5 + 4 x level` · treasure cache `20 + 10 x level` · waystone fare `2 + metres / 400`, +4000 m across provinces
+  (province.js) · event gold `x (1 + 0.15 x (level - 1))`, length factor 4 min / cap 2.5, world boss x2 (events.js) · sell-back 0.25, +12% per
+  item level, fallback price 15 x rarity, crate sells for 1, buyback 12, restock 30 min (shops.js) · postage 1 (mail.js) · guild fee 10 (guilds.js)
+  · barber price list (province.js) · bag-overflow 1 · cooked meal value 2 · the feedback gift's rarity · mount prices (mounts.js, E's `mounts`).
+  E's file does not exist yet: until it does every number is the default. `tests/A/pt7.test.js` fails if a bare number comes back.
+- **V1:** the letter is posted (subject "Share your thoughts"); flag `char.flags.feedbackNudge`.
+
+## Round 7 contracts — C (Combat rules: V2 the formulas) -> E, A, D-UI — 2026-10-07 (written first; status at the end)
+
+C's gold knobs live in **`data/rules/prices.json`** (its own file, so it cannot collide with A's `data/rules/economy.json` `server` block or E's
+`data/provinces/economy.json`) and in `data/rules/fishing.json` `value`. Pure functions in **`js/rules/economy.js`**; the booted ones on the rules object.
+- **What an item is worth — ONE function.** `rules.price(item)` = the list price a shop asks before the TOWN's own multiplier:
+  `(gear.base + gear.perLevel x level) x gear.slot[slot] x gear.rarity[rarity] x (unique | set | tier-2 factor)`, `level` = the level the item
+  was made at (`item.dropLevel`). **The level is already in it: A — `shops.js price()` must not multiply `rules.price` by `perItemLevel` again**
+  (today that factor is 1 only because Farhold stamps `ilvl: 1`; a test in tests/C pins "shop price = rules.price x town multiplier").
+  `rules.sellPrice(item)` = what a merchant pays: `price x gear.sellFactor` for gear (never above it), a fish / junk / trophy its own `price`,
+  a crate / gift 1. **A: please make shop sell-back call `rules.sellPrice`; D-UI: the item card's "Sells for" = `rules.sellPrice`, shop rows =
+  A's price.** `rules.priceRow(item)` -> `{ price, sell, level, slot, parts: {base, slot, rarity, extra} }` for a tooltip / E's sim.
+- **What a kill pays.** `kill.base + kill.perLevel x level`, x the monster's own weight (its Farhold `gold` against `kill.goldRef`, clamped),
+  x `kill.rank[normal|champion|rare|boss]`. Linear in level (Farhold's was exponential: a level-20 brigand paid 163). Applied where the
+  reward is made (js/rules/cast.js); `rules.killGold(level, rank?, type?)` for the sim. Each tagger is paid in full, as before.
+- **Gold find** (`derived.goldFind`, percent) multiplies KILL gold only, once, in the rules (`goldFind.cap` percent at most). A / E: do not apply it
+  to quest, event or chest gold, and never a second time to the kill gold `host.award` receives (it arrives already multiplied).
+- **Fish.** A catch's price = E's `price` for the species (its worth RELATIVE to other fish) x the size curve x `value.rarity[rarity]` x
+  `value.mult` x `(1 + value.perBand x (band - 1))`, `band` = the zone level passed to `roll` — all inside `fishing.roll`, so `item.price` is final
+  (A / shops: pay it as it is; never scale it again). Legends: `kinds.legend.price x (1 + perBand x (band - 1))`. Sunken-crate and legend odds stay
+  where they are (`angling.json crates.chance`, `fishing.json kinds`).
+- **Crates.** A crate's worth is the item it opens into (priced by the function above); the box itself sells for 1.
+  `rules.crateValue(spec, level, cls?)` -> the average list price and sell price of what it opens into (measured over 200 opens) for the sim.
+- **Quest / event / chest gold** stay A's and E's knobs; `rules.killGold(level)` is the "unit" E's file calls one kill's gold — E: read it
+  from the rules rather than keeping a second `unit {base, perLevel}`, or the two drift.
+**Status (C): LANDED (2026-10-07).** tests/C/playtest7.test.mjs (7). Knobs: `data/rules/prices.json` (`gear`, `kill`, `goldFind`), `data/rules/fishing.json` `value`.
+- **Kill gold** (hound, normal / champion / rare) — before: L1 4/10/20 · L5 7/17/33 · L10 12/31/60 · L20 41/106/204 (a brigand 16 / 26 / 48 / 163).
+  After: L1 2/7/14 · L5 6/17/34 · L10 10/29/58 · L20 18/53/106 (a brigand 5 / 13 / 22 / 40). `(2 + 1 x level) x weight x rank`.
+- **Gear list price** — before (Farhold: 15 x quality x rarity, no level, no slot): the average drop listed at 12 / 11 / 28 / 65 at levels 1 / 5 / 10 / 20.
+  After `(45 + 42 x level) x slot x rarity (1 / 2.5 / 11 / 30)`: a normal sword 104 / 306 / 558 / 1062, an uncommon chest 250 / 733 / 1337 / 2544, a rare
+  sword 1148 / 3366 / 6138 / 11682; a merchant pays 4% (the average drop sells for 7 / 21 / 53 / 110).
+- **An hour of killing** (80 kills, drops sold): 409 / 1080 / 2284 / 4544 gold -> an uncommon chest is 0.6-0.7 hours, a rare sword 2.6-3.1 hours.
+- **Fishing** (150 casts, mixed waters, a pool every 4th cast, skill = 4 x level + 10) — before: 239 / 958 / 703 / about 100 gold (level-20 water held
+  nothing but weed: no species has a band above 10). After: 160 / 1130 / 1402 / 5110, plus about 6 sunken crates (each an uncommon-or-better item
+  listing 169 / 524 / 1224 / 2264 on average). Best single fish: 3 / 47 / 146 / 1377. `value: { mult 1, perBand 0.1, rarity 0.6 / 0.9 / 1.6 / 2.5 }`.
+- **E — three things your sim should look at:** (1) level-1 water is thin (39% of an hour's killing: every band-1 species has a base price of 1-2);
+  (2) no species has `bands` above 10 — C now falls back to the top-band fish of that water and the zone factor prices them, but real level 11-20
+  fish are yours to add; (3) `rules.killGold(level)` is "one kill's gold" — please read it instead of a second `unit` table.
+- **A — two lines of js/sim/shops.js are C's edit** (the double-application the lead warned of was real: a level-2 glove was priced x1.12 on top of
+  a price that already had its level): the per-item-level rise is skipped when the price came from `rules.price`, and sell-back calls
+  `rules.sellPrice` when it exists (so `shop.sellFactor` no longer applies to gear — the factor is `prices.json gear.sellFactor`; fish keep
+  your `fishFactor`, which must stay 1 or it is a second multiplier on a final price).
+
+## Round 7 contracts — D-world (V3: fishing spots are not being seen) -> A, E, D-UI — 2026-10-07 (written first; findings added below)
+What the code says before the walk (the walk's table goes under this when it has run — tests/D/playtest7.spec.js -> tests/D/shots/v3-pools.json):
+- **Why "only the one at the start": two server-side limits multiply.** (1) js/sim/angling.js opens only `meta.<zone>.live` of a zone's
+  listed spots at a time (Torbor Fields: 8 of 29; Saint Orrin's Rise 2 of 6; the whole province ~94 of 308), over zones of about 3 km².
+  (2) An entity is only SENT inside `VIEW.bands[2]` = 150 m (js/sim/room.js), so a pool does not exist on a screen until you are 150 m from
+  it. With ~8 open pools scattered along several kilometres of river, most of a walk has none in range.
+- **D-world's part (done):** every pool the server sends is drawn (object type `fishpool`), from the moment it arrives; rings + a jumping
+  fish up close, and from 25 m outward a pale shaft with a twinkle at its head that grows with distance (so it holds its size on screen out
+  to 150 m, day and night). Pools are no longer hidden beyond 220 m.
+- **Ask A — list the open pools beyond entity range:** on entering a province room and whenever a pool opens / closes, send
+  **`fishPools { open: [ { id (spot id = info.pool.id), x, z, tier, shelf? } ] }`** for the zone(s) the player is in (8 rows). The client
+  already listens (`net.on('fishPools')` -> `angling.setKnown`) and draws the far shaft for a listed pool up to 600 m, handing over to the
+  real entity when it arrives. Without it nothing changes.
+- **Ask A / E — more of them open:** the drawing cannot fix density. Suggested: open ALL tier-1 spots within 400 m of a town (E's `start` /
+  `always` flags or a `near: town` flag) permanently, and raise `meta.<zone>.live` (e.g. half the listed spots).
+- **Ask D-UI — a map marker:** the minimap / world map has no pool marker today (nothing in js/client/ui reads `fishpool`). The data is on
+  the client either way: `thousandvale.angling.pools` (each `{ x, z, tier }`, real and listed) or `info.type === 'fishpool'` in the mirror.
+  Please draw a small fish / ripple glyph; say here if you want an accessor instead (`angling.list()` is one line for me to add).
+
+## Round 7 contracts — G (owner feedback 7: V4 V6–V10 V12–V15) -> D-UI, lead — 2026-10-07
+- **V13 (shop compare), split:** on the PHONE layout G's touch layer opens a row's item card as a sheet with the Buy button (`input/touch.js` `shopSheet`;
+  the card is whatever the shared item tooltip draws for that `.islot`, so it gains the worn-item comparison the moment the tooltip has it for shop
+  stock). **D-UI:** the desktop shop — show the same compare card (as the bag's item card does) on hover / before the confirm. If shop stock items
+  need `rememberItems` + a slot for the comparison to appear, that is in `ui/shop.js` / `ui/item-card.js` (yours); nothing is needed from G.
+- **V9 (Stats button dead on phone upright):** it was G's phone stylesheet — the bag sheet sat above the Character window (`z-index`); fixed in
+  `css/layout-phone.css`. Nothing wrong in `ui/pt5.js`.
+- **V4 (title line smushed):** fixed for every layout in `css/input.css` (`.step-title` — breadcrumb, heading, step text on their own lines). That
+  stylesheet is loaded by `input/index.js`; D-UI may move the rule into `css/social.css` beside `.linkish` if preferred (then delete mine).
+- **V7:** party rows get `--hp` / `--mp` (0..1) and `.targeted` from `input/touch.js` each frame (phone layout only), read from the frames' own bars
+  and the target frame's name — no change in `social.js`.
+
+## Round 7 — E -> C: the numbers the sim asks of YOUR knobs (V2) — 2026-10-07
+`node tools/sim-economy.mjs` is in (`--before` = git HEAD; `--set=prices.kill.perLevel=0.3` tries a knob in memory without editing a file; it calls
+your js/rules/economy.js `killGold` / `itemPrice` / `sellPrice`, `engine.fishing.roll`, real `rollDrops`, A's economy-knobs). With prices.json as it
+stands now (kill 2 + 1 x level, rank 3 / 6 / 15, weight 0.6-1.8, sellFactor 0.04, gear 45 + 42 x level) an hour of killing at level 10 earns 6,300
+gold against an uncommon piece at 1,400 — 4.5 pieces an hour — and sold drops alone are 46 gold a kill. The rule the lead set is ONE uncommon
+piece + a few potions per hour of ordinary play, a rare in several hours. The set below meets it at levels 1 / 5 / 10 / 20 (measured, 300 simulated hours):
+```
+prices.json   kill   { base: 1, perLevel: 0.3, weight: [0.7, 1.4], rank: { normal: 1, champion: 2.5, rare: 5, boss: 12 } }
+              gear   { base: 15, perLevel: 48, sellFactor: 0.012 }      (rarity 1 / 2.5 / 11 / 30 and the slot table as you have them)
+fishing.json  value  { mult: 0.3, perBand: 0.065, rarity: { common: 1, uncommon: 1, rare: 1, epic: 1 } }
+```
+Why each: **kill coin** — with ranks rolling on 20% of spawns and brigands at weight 1.8 the average kill paid 2.2x the base; **sellFactor** — a kill
+drops 0.45 items worth ~2 uncommon pieces on average, so every 1% of sell-back is 0.75 of an uncommon piece per hour of killing; 1.2% keeps "sell
+what you find" at about a third of a killer's income instead of two thirds; **gear base 15** — level 1 was priced like level 2 (an hour and a half for
+the first uncommon); **fish `rarity` all 1** — the spread is in E's species prices now (common 1-3, uncommon 12-26, rare 30-44, epic 90-200, legends 800-2,100
+of their own), a second rarity factor on top made the tier-3 pools pay 3x questing; **perBand 0.065** — the 0.33 you have makes level-10 water 4x level-1 water
+on top of the better fish it already holds. One thing I cannot fix from E's side: a catch is floored at 1 gold, and 150 catches an hour is 150 gold at
+level 1 whatever `mult` says — fine as it is (93% of questing at level 1), just know `mult` does nothing below ~0.4 there.
+Result with that set + E's economy.json (unit 4.5 + 0.75 x level, event perLevel 1 x mult 2, chest 20 + 25 x level, mounts 250 / 1,400 / 5,500 / 11,000):
+```
+gold per hour     level 1   level 5  level 10  level 20          hours of questing to buy:   L1    L5    L10   L20
+questing              200       825     1,764     3,309          uncommon piece              0.83  0.84  0.74  0.80
+killing               118       721     1,637     3,711          rare piece                  3.65  3.60  3.22  3.52
+events (mult 2)       ~260    ~1,000    ~2,000    ~4,000          best mount of the level     1.25  1.70  3.12  3.32
+dungeon               514     1,292     1,711     3,826
+fishing               186       608     1,765     2,253   = 93% / 74% / 100% / 68% of questing (level 20 fishes the province's level-10 water)
+```
+If you would rather land other numbers, run the tool: the test (tests/E/playtest7-economy.test.js) reads the bounds from
+`data/provinces/economy.json` `targets` and checks ratios only. The Unbinder (68-320 gold = 0.1-0.4 h) is yours and reads fine as it is.
+
+## Round 7 — E status (V2 economy, V3 pools) — 2026-10-07 — LANDED; this supersedes E's two earlier round-7 notes where they differ
+**V2.** `tools/sim-economy.mjs` + tables in `docs/economy/README.md` (before / after). The numbers the sim asked for were applied by E as economy lead
+after C landed its formulas — **C: three of your data values and one test bound changed, formulas untouched:**
+- `data/rules/prices.json` — kill `2 + 1 x level` -> **`4 + 1 x level`**, weight 0.6-1.8 -> **0.7-1.4**, rank 3 / 6 / 15 -> **2.5 / 5 / 12**; gear `45 + 42 x level` ->
+  **`45 + 144 x level`**, sellFactor 0.04 -> **0.012**. (Everything is on a three-times-larger scale than E's first note, so whole-gold rounding still
+  tells level 1 from level 2 — your "level 2 pays more" test — and a 1-gold fish is small change.)
+- `data/rules/fishing.json` `value` — mult 1 -> **1.22**, perBand 0.1 -> **0.005**, rarity 0.6 / 0.9 / 1.6 / 2.5 -> **0.9 / 1 / 1.1 / 1.2**; `kinds.legend.price` 300 -> 900
+  (every legend carries its own `price` in angling.json anyway).
+- tests/C/playtest7.test.mjs — the kill-hour model now counts the rank roll (one spawn in five is a champion or rare; without it the model was half
+  the real figure), and "level-10 open water pays more than level-1" is `> 1.5x` (it was pinned at 3x).
+**Why the first numbers did not hold:** with real rank rolls and real drops (0.45 items a kill, worth two uncommon pieces on average) an hour of killing
+at level 10 earned 6,300 gold against an uncommon piece at 1,400.
+**E's own knobs** — `data/provinces/economy.json`: `unit` = one kill's gold (4 + level, the same numbers as prices.json `kill`; a test keeps them equal),
+`quest.mult` 2.7, `event` perLevel 1 x mult 2.8 (a level-10 zone event paid 28 gold), `chest` 60 + 120 x level, `treasure` 120 + 90 x level, `roadChest`
+24 + 21 x level, `fare` 6 + 1 per 135 m, `mounts` 750 / 4,200 / 16,500 / 33,000 (the stable's shelf in shops.json carries the same), mail 3, guild 30, barber x3.
+`shops.json`: every fixed price x3 on the new scale, then healing potion 30, greater healing 108, group tonic 360, ash rod 1,350, River Warden's rod 7,200.
+`angling.json`: 62 species (was 46): species prices spread common 1-5 / uncommon 3-28 / rare 28-54 / epic 50-232; five new level-1 fish (four uncommon, and
+the prized Torbor Goldscale); eleven species for level 11-20 water; legends 2,400-6,300 each. Level 1-2 quest purses raised (28 quests).
+- **A:** nothing new to read — your economy-knobs already takes every key. `sell.factor` there now equals prices.json `gear.sellFactor` (0.012).
+- **Still cheap, not mine:** the Unbinder (68-320 gold = 2-9 minutes of questing on the new scale) — Farhold's shared `balance.retrain`; C, a Thousandvale
+  override x10 would put it back at a quarter of an hour.
+**V3.** `tools/content-pools.mjs` re-run, then `content-hunts.mjs` (no vignette re-place): **308 -> 385 pools**, tier 1 **134 -> 257** (67%; 174 needed angling
+25 / 50 before, 128 now), `meta.live` **94 -> 326** open at once (every tier-1 pool and half of the better ones), pools beside a road 55 -> 75, and **15 town pools**
+(`town`, `always: true`, tier 1) — one for every hub town but Last Lantern. Each angler now stands 4-8 m from the town pool (Coldwater's 77 m: no free
+bank nearer) and the greeting ends with where it is. Millbrook: there is no water nearer than 562 m from the town's middle; its town pool and its angler
+are both there now (the nearest tier-1 pool was 899 m). **Last Lantern is dry** — the Blackthorn Scar's bake has no water sample at all; its angler stays
+in town and says so. **A:** `always: true` is on 15 pools now, not 1; `pool.town` names the town; `byRoad: true` marks the second-pass roadside pools.
+- **D-world findings from the walk (2026-10-07, tests/D/playtest7.spec.js, table in tests/D/shots/v3-pools.json):** standing on the shore of
+  each of the 29 listed Torbor Fields spots, the server SENT a pool at **18** of them (the others are closed) and the client DREW all 18 —
+  nothing sent is undrawn (not (b)). Halsbridge: 2 listed within 150 m of the angler, 2 sent, nearest 45 m. Ashcombe: 2 listed, 1 sent, 6 m away.
+  From 80 m the shaft + twinkle is clear by day and by night (v3-pool-day-80m.png, v3-pool-night-80m.png, v3-pool-halsbridge-80m.png,
+  v3-pool-ashcombe-80m.png). At 30 m by day it was too faint (the shaft only faded in from 25 m) — now it stands from 10 m and the rings are
+  brighter. At 150 m a pool is at the very edge of what the server sends, so the picture there shows none: that is the `fishPools` list
+  asked for above. So the owner's "only one" was (a) density + the 150 m entity range, plus (c) near-range faintness, now fixed.
+- **Also fixed:** pools of a room you left were kept (hidden) on the client; they are dropped on a room change now.

@@ -36,7 +36,7 @@
       "done": "Good. You came back, and with all your fingers. That's more than the last three. Now, a real errand.",
       "reward": {
         "xp": 0.4,
-        "gold": 8,
+        "gold": 13,
         "crates": [
           {
             "slot": "feet",
@@ -71,7 +71,7 @@
       "done": "A letter for the Prior and a sword that's been used? Sit. Eat. Then I've two jobs and you can do them in whatever order your legs like.",
       "reward": {
         "xp": 0.45,
-        "gold": 8,
+        "gold": 10,
         "crates": [
           {
             "slot": "chest",
@@ -208,7 +208,7 @@
       "done": "Grey, coarse, and every tuft from a different dog. They're all his pack. Old Gristle. I thought he was dead. I hoped he was dead.",
       "reward": {
         "xp": 0.5,
-        "gold": 10,
+        "gold": 12,
         "crates": [
           {
             "slot": "hands",
@@ -243,7 +243,7 @@
       "done": "You did it. You actually did it. Take this — I made it for the day somebody did. Go and tell Marra she can let the dogs out again.",
       "reward": {
         "xp": 0.7,
-        "gold": 18,
+        "gold": 22,
         "crates": [
           {
             "slot": "weapon",

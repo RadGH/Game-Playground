@@ -60,6 +60,8 @@ export function createAppearanceEditor({ parent = null, races = [], raceNames = 
   function setDial(k, v) { E.custom.body = { ...(E.custom.body || {}), [k]: v }; changed(); }
 
   function draw() {
+    // play-test 7 V5: a change (Beard, a colour…) rebuilds the rows — keep where the player had scrolled to, in the list and in the window
+    const keep = [panel.root.querySelector('.ap-body')?.scrollTop || 0, panel.body.scrollTop || 0];
     const rows = [];
     // R1: preview your calling's gear on or off (the figure stands in starting clothes by default)
     if (E.gearToggle) rows.push(h('label.ap-row.ap-gear', { title: 'Your figure wears plain starting clothes; tick to see your calling\'s gear on it.' }, h('input', { type: 'checkbox', checked: !!E.gearToggle.on, dataset: { k: 'classGear' }, onchange: e => { E.gearToggle.on = e.target.checked; E.gearToggle.onChange?.(e.target.checked); } }), h('span', {}, 'Show class gear')));
@@ -97,6 +99,11 @@ export function createAppearanceEditor({ parent = null, races = [], raceNames = 
         h('button.ghost.small', { type: 'button', onclick: () => panel.close() }, 'Cancel'),
         h('button.primary.small', { type: 'button', dataset: { act: 'save' }, onclick: () => { E.saved = true; const look = current(); panel.close(); onSave?.(look, E.mode, cost()); } }, `${E.saveLabel || 'Save'}${costTxt}`)));
     paintCost();
+    const list = panel.root.querySelector('.ap-body');
+    if (list) list.scrollTop = keep[0];
+    panel.body.scrollTop = keep[1];
+    // (a layout that has not settled yet clamps scrollTop to 0: set it again once it has)
+    requestAnimationFrame(() => { const l = panel.root.querySelector('.ap-body'); if (l && l.scrollTop !== keep[0]) l.scrollTop = keep[0]; if (panel.body.scrollTop !== keep[1]) panel.body.scrollTop = keep[1]; });
   }
   function swatches(label, slot, list, cur) {
     return h('div.ap-row.sw', { dataset: { swatch: slot } }, h('span.ap-label', {}, label), h('div.ap-swatches', {}, ...list.map(c =>

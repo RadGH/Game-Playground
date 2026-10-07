@@ -922,3 +922,33 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   **U11**: a locked key shows "Lv N"; the heal's card says how to heal someone else. **U12**: the stair up asks which floor.
   **U14**: enemies, people, other players, doors, stairs and chests in your line of sight are on the minimap, in dungeons too.
   **U16 / U18**: your frame names the shape you are in.
+
+### Play-test 6 — D-world (2026-10-07, owner feedback)
+- **U3** a cancelled telegraph is removed at once; a body's telegraphs and ground zones go with its death or interrupted cast (`telegraphs.js` `dropSource`, `spells.js` `ownerGone` / `endZone`).
+- **U4** grain fields are standing crops (new `sheaf` unit shape in proctown's kit, one instanced mesh and one swaying material per page) instead of one long pale box per row.
+- **U16 / U18** a druid's shape changes the model: a creature body under the same name plate with its own walk and attack clips, and back (`actors.js` `setShape`); the Moonpelt wolf stands upright; pack wolves have their own look.
+- **U19** the horse's nostrils are small matte slits (avatar-3d `equine.js`).
+- **U8** a boss ward thins as it runs down, a ground ring drains like a clock, the frame counts the seconds and the break progress. **U10** the way in is a doorway, the stair up is a stair.
+
+## Play-test 7 — D-UI — 2026-10-07
+- **V5**: the character editor keeps its scroll position when an option changes (it rebuilt its rows and jumped to the top).
+- **V11**: one scrollbar style for the whole game (`css/pt7.css`): thin, dark track, gold thumb — Firefox and WebKit.
+- **V13**: the shop shows the thing on the shelf against what you wear (the bag's item card) with the price and a Buy button; on touch the
+  first tap shows the card and Buy buys.
+
+## Owner feedback 7 — A (server core) — 2026-10-07
+- **V3 fish pools**: only 94 of 308 listed spots were open (3 of the 16 within 600 m of Torborhold), pools did not show across a town's
+  edge, and a skill-gated pool blocked the water round it. Now 190 open, tier-1 and roadside first; every town with water in reach keeps a
+  never-empty beginner pool; border spots are in both rooms; a gated pool's water can be fished (`js/sim/angling.js`).
+- **V2 economy**: `js/sim/economy-knobs.js` — every gold number in js/sim reads stream E's `data/provinces/economy.json` (defaults unchanged).
+- **V1**: one "Share your thoughts" letter at level 3 for a character that has never sent feedback (`char.flags.feedbackNudge`).
+- Tests: tests/A/pt7.test.js (6).
+
+## 2026-10-07 — stream C, owner feedback 7 (V2 gold)
+- `js/rules/economy.js` + `data/rules/prices.json`: item price by level / slot / rarity (one function for buy, sell-back and the card), kill gold linear in level, gold find applied once. `fishing.json value`: fish worth by rarity and zone. Shop no longer applies the item level twice (js/sim/shops.js, two lines).
+
+## 2026-10-07 — stream E, owner feedback 7 (V2 economy — lead; V3 fishing spots)
+- **V2**: tools/sim-economy.mjs (gold per hour by activity at levels 1/5/10/20 + the price ladder, from the real rules; `--before`, `--set`), tables in
+  docs/economy/README.md. data/provinces/economy.json (new), shops.json fixed prices, angling.json fish prices (62 species), quest purses at levels 1-2;
+  tuned C's data/rules/prices.json and fishing.json `value` numbers. tests/E/playtest7-economy.test.js pins the ratios.
+- **V3**: 385 pools (was 308), 257 of them tier 1, 238 open at once, a town pool beside 15 of the 16 hub towns with the angler standing by it.

@@ -40,7 +40,7 @@ test('T25 pools: every zone with water has pools a beginner may fish, more spots
     if (!l.length) { assert.equal(eid, 'blackthorn_scar', eid + ' has no pools'); continue; }       // the Scar has no water at all
     assert.ok(l.length >= 6, `${eid}: ${l.length} pools`);
     assert.ok(l.some(p => p.tier === 1), `${eid}: no tier-1 pool`);
-    assert.ok(m.live >= 2 && m.live <= l.length / 2 + 1, `${eid}: live ${m.live} of ${l.length}`);
+    assert.ok(m.live >= 2 && m.live <= l.length, `${eid}: live ${m.live} of ${l.length}`);      // owner feedback 7 V3: most spots are open at once now
     for (const w of new Set(l.map(p => p.water))) {
       const fish = ANG.fish.filter(f => f.water.includes(w) && f.bands[0] <= zs.band[1] && f.bands[1] >= zs.band[0]);
       assert.ok(fish.filter(f => f.skill <= 10).length >= 3, `${eid} ${w}: a beginner's table has ${fish.filter(f => f.skill <= 10).length} fish`);
@@ -82,7 +82,7 @@ test('T25: an angler in every hub town, on walkable ground, as an NPC the server
   assert.equal(start.length, 1);
   assert.ok(start[0].always && start[0].tier === 1);
   const d = Math.hypot(start[0].shore.x - tam.x, start[0].shore.z - tam.z);
-  assert.ok(d <= ANGLER.startPool && d >= 8, `the first pool is ${Math.round(d)} m from Tam`);
+  assert.ok(d <= ANGLER.startPool && d >= 2, `the first pool is ${Math.round(d)} m from Tam`);      // V3: Tam stands beside the town pool
 });
 
 test('T25: the first quest hands over the rod, walks you to the start pool, counts three catches; the chain goes on to cooking and a legend', () => {

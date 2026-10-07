@@ -90,6 +90,8 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP, tvS
   installLootPool(engine, { pool: lootPool, tiers: data.armourTiers || null });
   // play-test 5: T17 conversion + the caster stamp on every new item (`engine.finishItem`), `engine.makeItem`
   if (tvGear) attachTvGear(engine, data.tvGear || null);
+  // owner feedback 7 (V2): the gold formulas (js/rules/economy.js); a parity engine keeps Farhold's own gold
+  engine.prices = tvGear ? (data.prices || null) : null;
   engine.crates = data.crates || null;                    // T9 / T20 (js/rules/crates.js)
   engine.kits = data.starterKits || null;                 // T5 (js/rules/starter-kits.js)
   setKitSource(engine, engine.kits);

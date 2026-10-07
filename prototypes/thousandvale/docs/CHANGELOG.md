@@ -756,3 +756,107 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   group to the right of the action bar (the bar keeps its width, the chat box stays clickable). The entity menu has its own class
   (`.ent-menu`). The editor offers Accessory and Face marks, and a new character starts with neither (no rolled visor). `tv.cast`
   turns you to the target first (a swing lands in its arc — the e2e players were swinging at the air).
+
+## Play-test 5 (stream X, 2026-10-06) — playground home page + the Armory (T1, T24, viewer half of T22/T23)
+- **T1** the playground home page lists Thousandvale under Prototypes with TWO buttons: "Play on this network" (`http://<host>:8490/prototypes/thousandvale/`, hidden on github.io) and a separate "Live link" read from `data/live-links.json`; `tools/update-live-link.sh` rewrites that file from `ops/tunnel/quick.sh --url` (never starts/stops the tunnel).
+- **T24** the home page is drawn from `data/experiments.json` (groups, status on every card, deprecated marks, search + status chips); new experiment `armory/` reviews every wearable/holdable Chibi 2 model (file + builder, measured triangles/size/bones, grip readout per hand, main/off/both hands, every clip, race/size, Thousandvale's own icon, flag notes with JSON export, deep links). Shared helper `avatar-3d/js/preview-kit.js` (new file, opt-in).
+
+## 2026-10-06 — stream E, play-test 5 (T9, T10, T12, T15/T23, T25 content)
+- **T9 crates**: `reward.crates [{slot, min}]` on 97 quest rewards in 19 files (tools/content-crates.mjs) — the start chain fills nine slots.
+- **T10 rares**: measured (tools/content-rares.mjs): a newcomer's first half hour met 0.9 special monsters, because the rank roll needs level 4 and
+  95% of what stands near the start is level 1-3. 62 fixed roadside champions placed (tools/content-hunts.mjs 1b) -> 5.9 on the same walk.
+- **T12 events**: an `info` block (name, what, objective + count, durationSec, onSuccess, onFail, rewardText) on all 38 events
+  (events.json realm 4 + zone 16, road-events.json 17 + the coded ambush) — tools/content-events.mjs, tests/E/playtest5-events.test.js.
+- **T15/T23 gear**: tools/content-gear.mjs shelves F's new catalog rows in shops.json (64 of 66), band-gated by `minCap`.
+- **T25 angling**: data/provinces/angling.json (46 fish, 12 junk, 16 legends, 12 meals + recipes, 3 rods, 3 baits, 16 anglers),
+  data/provinces/angling-pools.json (308 pools on B's water, tools/content-pools.mjs), data/quests/angling.json (4 quests from Tam Sedgeley at
+  Torborhold), 5 angler job frames, shops.json `kinds.angler`.
+
+## Play-test 5 — D-UI (interface) — 2026-10-06
+- **T5 starting equipment**: step 3 of making a character (`js/client/ui/kit-step.js`): three armour sets + the calling's weapon packs, worn by the
+  3D title figure as you pick, each piece with its real numbers (and the bag's item card on hover). Kits come from A's `kits {cls}` (C's `kitsFor`);
+  the choice goes in `create.kit`. A calling with no kits skips the step.
+- **T9 crates / T20 gifts**: the item card says what a crate opens into and its lowest rarity; opening rattles the box, then reveals the item
+  (`ui/reveal.js`). Quest reward rows read "Crate: boots (Magic or better)". Mail shows what a letter holds by name, checks bag room before the
+  click (with the numbers), lets system letters be emptied anywhere, and unwraps a gift at once.
+- **T11 / T12 events**: one tracker card per event (`ui/event-tracker.js`) — name, what is happening, objective + live progress, time left,
+  reward; "Won / Failed: …" with what you got when it ends. Outside the event the card is a two-line notice (with free travel for a realm
+  event); inside it the travel offer is gone. The old `.tv-event` panel and its bubble are retired.
+- **T18 Character menu** (`ui/char-sheet.js`, key **V**): core stats, an Advanced switch, estimated damage a second per ability, a tooltip on
+  every number. Docks to the left of the bag (under it on a phone); a change of gear marks every number that moved ▲ / ▼.
+- **T3 / T4 / T7**: a note over the action bar says who your heals go to; pets and followers count as friendly targets; the death screen
+  shows "X offers to raise you" with Accept / No thanks; the off hand takes a second two-hander with Doubled Grasp (drag or Shift-click) and
+  says why not without it.
+- **T19 / T21 feedback**: a Feedback button on the menu bar (`ui/feedback.js`): Suggestion or Bug report, "What will be sent with it"
+  (character, place, build, the last 40 log lines), a confirmation. Admins get a Reports window (filter, read, approve / decline / trash).
+- **T25 angling** (`ui/angling.js`): X casts, a bite prompt with a shrinking ring, a tension tug you hold with Space, the mouse or a finger,
+  a catch card, the journal's **Catch** tab (species by water, biggest, legends), a cooking window at any fire, Angling on the Character menu.
+- New: `css/pt5.css`, `js/client/ui/pt5.js` (hub) + `pt5-core.js` (pure), `tests/D/pt5.test.js`, `tests/D/pt5.spec.js`; `tv.fake(ev, msg)` plays a
+  server message through every client handler (specs).
+
+## Play-test 5 — A (server core) — 2026-10-06 — protocol v7, schema v5 (docs/protocol.md §21)
+- **T12 events end, and say what they are.** Found the bug: a wave was spawned on a ring 32–40 m round the arena centre and each
+  monster stood where it landed; a monster notices a player at ~26 m, so whatever nobody walked up to never came, the wave never
+  cleared and the next one only arrived after 90 s (the old runner, run against the new test: "a wave monster 46 m away"). Waves
+  now land 16–24 m from the players in the arena, from one side, with a path to them, and stragglers are re-aimed every second.
+  A waves-only event (the Torborhold siege) no longer ends in a stand-in "wolf" boss named after the event. Every event ends:
+  won, or lost with a reason (time, everyone left, everyone fell, the boss got away). `eventTrack` (1 Hz: name, what, objective +
+  progress, stage, time left, reward, inside, credited), `eventDone` for everyone who was there, win or lose. Road events get the
+  same tracker and E's time limits. A contributor who had left when it was won is paid by letter. (`js/sim/events.js`,
+  `province.js` trackEvents / finishEvent, `roadevents.js`.)
+- **T11** `eventAt` when you walk into / out of an event's area; `travel 'event'` answers `here` when you already stand in it.
+- **T19 feedback** (`js/sim/feedback.js`): `feedback {kind, text, ctx}` on either socket; cleaned, capped, rate-limited; the server's
+  own context added; stored in the `feedback` table / the memory store and appended to `<state>/feedback-<env>.jsonl`.
+- **T20 system mail** (`js/sim/sysmail.js`): one `mailTo(...)` for letters with items, gold, a gift box or a crate; system letters
+  are taken anywhere. The first feedback of a character posts a thank-you with a Gift Box that opens into a rare or better.
+- **T21 admins**: `accounts.admin` (schema v5), set only by `tools/make-admin.mjs`; `admin {op:'reports'|'report'}` in the game,
+  a **feedback** tab on the admin page, `tools/feedback-report.mjs` (Markdown; database or JSONL).
+- **T9 crates** (`js/sim/crates.js`): crate / gift items open with `item {op:'use'}`; quests pay `reward.crates`.
+- **T5 starter kits**: `kits {cls}`, `create.kit` validated against C's `kitsFor`, worn once on the first entry.
+- **T4 revive**: `host.offerRevive` → `reviveAsk` → `revive {accept|decline}` → the body stands up where it lies; `rules.revived`.
+- **T3 / T7 / T14 / T18**: friendly targets pass through; `itemR {op:'equip'}` with the refusal sentence, `you.dual2h`;
+  `you.reach` on every bar change; the `sheet` message (queued, 2 a tick).
+- **T25 angling** (`js/sim/angling.js`): cast / bite / hook / tug / land, pools that drain and move, the saved skill and catch
+  journal, rods and bait from the bag, cooking at a fire, crate / legend / monster outcomes, `catch` / `cook` quest steps, quest
+  `grant` and `reward.goods`, angler job frames; fish sell for their own price.
+- **T10 rares** (E's ask): a placed camp's `rank` / `affixes` / `respawnMin` reach the spawned monster (`placements.js`, `room.js`).
+- Tools: `tools/make-admin.mjs`, `tools/feedback-report.mjs`, `tools/lib/tv-env.mjs`. Server: `--feedback-file`.
+- Tests: `tests/A/pt5-events` (4), `pt5-feedback` (6), `pt5-angling` (5), `pt5-play` (6).
+
+## 2026-10-06 — stream C (combat rules), owner play-test 5
+- **T2** every skill / talent / perk card says exactly who it touches (`js/rules/wording.js`; `bar[].who`, `bar[].targets`); `petsOnly` buffs and Farhold's `revive` are your own followers only; "all allies" is one list; a swap reaches your own follower. `js/rules/ally-audit.md` regenerated with the wording table.
+- **T3** healers (cleric, priest, druid, shaman): key 1 or 2 is a direct heal on the party member you target, else you.
+- **T4** six revives (`data/rules/skills-tv.json`): cleric mass, priest instant in combat, druid with a mend, paladin with a barrier, necromancer weakened, shaman long cast to full. `host.offerRevive` / `rules.revived`.
+- **T5** `data/rules/starter-kits.json` + `js/rules/starter-kits.js`: 3 armour sets and 3-6 weapon packs per class; `kitsFor`, `validKit`, `starterGear`, `rules.applyKit`.
+- **T7** Doubled Grasp: two two-handers go on and survive a login; the off hand now swings (it never did), alternating with the main hand.
+- **T9 / T20** crates and gift boxes (`js/rules/crates.js`): `rules.makeCrate`, `rules.openCrate`.
+- **T10** rares from level 2: champion 9% -> 5%, rare 2.5% -> 6% (E's first-30-minutes walk: 0.9 -> 14.7 special monsters).
+- **T14** `rules.attackRange(e)` is the attack's real reach; out of reach is refused `range`. `rules.basic(e)`.
+- **T15 / T16** 13 wand styles, 2 staff styles, 4 focus riders, off-hand wands, sceptres as elemental melee (`js/rules/caster-forms.js`); chained bolts really jump.
+- **T17** conversion affix on 5.5% of magic / rare physical weapons (`js/rules/tv-gear.js`).
+- **T18** the character sheet with measured ability damage (`js/rules/estimate.js`): `rules.sheet`, `rules.sheetWith`, `host.sheetChanged`.
+- **T23** F's gear catalog becomes item bases (62), plus `cloth_gloves` / `cloth_shoes`; `rules.makeItem`.
+- **T25** `js/rules/fishing.js` + `data/rules/fishing.json` (numbers); `rules.fishing`.
+
+### Play-test 5 — D-world (2026-10-06)
+- **T22** weapons are held by the handle: a held item's grip is turned relative to the HAND where it used to be aimed in the chest's frame (a blade pointing the way its forearm points hid its hilt in the wrist), and no clip leaves a weapon hand without a grip (every main-hand strike used to drop the off hand's). avatar-3d `chibi2-motion.js`; rule + audit in `tests/D/grips.test.js` (every model, both hands, every clip); `tests/D/pages/hands.html` to look.
+- **T6** dual-wield strikes: `avatar-3d/js/chibi2-motion-dual.js` (new, opt-in) — `dualSlashR/L`, `dualCross`, `dualStabR/L`, `dualFlurry`, `twinChopR/L`, `twinCrash`; `actors.js` `swingClip` picks from both hands and from the event's `hand`.
+- **T7** a two-hander in each hand is drawn in each hand (staves and polearms too), both shouldered at rest.
+- **T4** `js/client/revive-fx.js`: six revive looks (choir, sunburst, bloom, aegis, grave, spirits) while casting and on landing; a revived body gets up (`standUp`).
+- **T14** `js/client/reach.js`: the client walks inside the attack form's real reach and stops learning a longer one from far hits.
+- **T15 / T16** `js/client/form-fx.js`: a look per caster attack form (beam lance, cone fan, nova ring, lob arc, burst / pool rings, fork splinters, chain jumps, fan flare, ward dome) and the sceptre's elemental swing — all from fixed pools, no new shader program.
+- **T23** `gear-look.js` draws stream F's catalog models in every slot (gloves, rings, necklaces and belts are drawn for the first time).
+- **T25** `js/client/angling-view.js`: rod in the hand, cast / wait / reel / show clips, the float and its line, bite and catch splashes, the catch held up, and fish pools (rings + a jumping fish) seen from the road.
+- **T23 / T15 (stream F, models)**: 66 new Chibi 2 models with `g5_` ids — 20 armour (5 slots x cloth/leather/mail/plate; hands are drawn for the first time, as `top.gloves`), 29 weapons (one per weapon type + six wands and six staves, one silhouette per attack form), 12 off-hand (4 shields, 6 foci, hip quiver, cresset torch), 5 worn accessories (cloak, lantern, girdle, torc, signet ring). `avatar-3d/data/gear-catalog.json` (259 rows, every old and new model) + pure reader `avatar-3d/js/gear-catalog.js`; generator `tools/build-gear-catalog.mjs`; test `avatar-3d/tests/gear-catalog.test.js`. Docs: avatar-3d/CHIBI2.md "Gear catalog".
+- (A, follow-up) `server/privacy.json` v2 + `public/privacy.html`: a **Feedback** entry — a report is stored with the account, the
+  character, where it stood and up to 60 recent log lines, and is read by the game's admins. Dev's smoke-test report #1 trashed.
+  T10 census on C's final dial (champion 0.05, rare 0.06): 21 champions + 14 rares among 371 monsters within 800 m of Torborhold.
+
+### Play-test 5 — stream W, town geometry (2026-10-06)
+- **T8a** fences: three recipes had `fence_rail` props turned 90 degrees to their posts (the Drill Field beside Torborhold, Turnwater Mill, the Spider Bridge toll) — fixed in `data/vignettes/{setpieces,m2b}.json`, rule in `data/vignettes/README.md`; a hamlet's field gate has its posts on the fence line and its leaves latched back instead of standing across the fence. `tests/B/fences.test.js`.
+- **T8b** gates lie in the wall: `town_wall` gates gain `wallYaw` + `open`; jambs in nav follow the wall line; `walls-view.js` draws from them with proctown's new opt-in `gatehouseParts`. All 16 zones + the map re-baked. 31 of 78 gates were more than 3 degrees out of their wall (worst 54); now none (worst 1.2).
+- **T13** buildings: `js/client/building-tune.js` + proctown's opt-in `describeBuilding({ tune })` — storeys 2.26 -> 3.59 m, doors 1.82 -> 2.80 m showing above ground (worst 0.79 -> 2.60), two-storey offices 99 -> 316 of 411, burrows no longer dug in. Plots and nav unchanged. `tests/B/buildings.test.js`.
+- **Follow-up:** `back` / `waist` / `light` equipment slots (cloaks, belts, worn lanterns and torches; all 66 catalog rows are items); paladin / bard / oracle direct heals on key 2 (`mercy_touch`, `mending_verse`, `kind_omen`).
+- (A, follow-up) C's new slots `back` / `waist` / `light`: equip, unequip, save + restore, mail and crates already carried any slot
+  key (nothing is filtered by a slot list); `info.gear` rows now carry `g5` (the catalog model id) and crates name the three slots
+  (a jewellery crate may hold them). tests/A/pt5-slots (2).

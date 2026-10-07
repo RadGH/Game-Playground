@@ -82,6 +82,45 @@
    "radius": 8,
    "quest": "hyenas_in_the_gorse",
    "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_04_1",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1576,
+   "z": 232,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "packleader"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_gorsehold",
+   "name": "Corporal Finch Loach",
+   "role": "angler",
+   "at": "Gorsehold",
+   "x": 1780,
+   "z": 1542,
+   "yaw": 0.79,
+   "angler": true
   }
  ]
 }

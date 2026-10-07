@@ -19,6 +19,13 @@
       "role": "fisher",
       "at": "Netherby",
       "greeting": "Netherby's the last village before the mere gets deep. And odd."
+    },
+    "angler_coldwater": {
+      "name": "Marta Stillmere",
+      "role": "angler",
+      "at": "Coldwater",
+      "greeting": "Hear that bell? There is no bell. Lovely evening for it, though.",
+      "placedBy": "content-pools"
     }
   },
   "quests": [
@@ -41,10 +48,12 @@
       "reward": {
         "xp": 0.4,
         "gold": 7,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -108,7 +117,13 @@
       "done": "Fresh water! Tastes of nothing! Wonderful!",
       "reward": {
         "xp": 0.35,
-        "gold": 6
+        "gold": 6,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {

@@ -75,7 +75,7 @@ export function connect(opts = {}) {
       case 'refuse': net.lastKick = m; emit('kick', m); setStatus('refused'); stop(); return;
       case 'authed':
         if (m.token) tokenStore.set(m.token);
-        net.account = m.account; net.claimed = !!m.claimed; net.username = m.username || null; attempt = 0;
+        net.account = m.account; net.claimed = !!m.claimed; net.username = m.username || null; net.admin = !!m.admin; attempt = 0;
         sendJ(s, { t: 'chars' });
         return;
       case 'charList':
@@ -237,10 +237,10 @@ export function connect(opts = {}) {
   }
 
   // ---- API ----
-  net.createChar = function ({ name, cls, look }) {
+  net.createChar = function ({ name, cls, look, kit }) {
     return new Promise((resolve, reject) => {
       createWaiter = { resolve, reject };
-      const o = { t: 'create', name, cls }; if (look) o.look = look;
+      const o = { t: 'create', name, cls }; if (look) o.look = look; if (kit) o.kit = kit;      // kit {armour, weapons}: T5
       sendJ(gw, o);
     });
   };
@@ -342,6 +342,19 @@ export function connect(opts = {}) {
   net.bind = npc => sendJ(game, { t: 'bind', npc });                               // innkeeper: make this town home -> bindR
   net.stand = () => sendJ(game, { t: 'item', op: 'stand' });                       // S20: get up from a meal -> you {regen:null, why:'stood'}
   net.useItem = uidOrKind => sendJ(game, { t: 'item', op: 'use', uid: String(uidOrKind) });   // a bag uid, or 'id:healing_potion' (hotbar) -> itemR                           // -> inspectR
+  // ---- play-test 5 (docs/protocol.md §21) ----
+  net.kits = cls => sendJ(gw, { t: 'kits', cls });                                  // -> kitsR {cls, kits} (C's kitsFor)
+  net.revive = (op, id) => sendJ(game, id != null ? { t: 'revive', op, id } : { t: 'revive', op });   // accept | decline a reviveAsk -> reviveR
+  net.sheet = () => sendJ(game, { t: 'sheet' });                                    // -> sheet {core, advanced, abilities, angling}
+  net.openItem = uid => sendJ(game, { t: 'item', op: 'open', uid: String(uid) });   // a crate / gift box -> itemR {opened}
+  /** feedback('suggestion'|'bug', text, ctx?) -> feedbackR. Goes over the game socket when in the world (the server adds where you stand). */
+  net.feedback = (kind, text, ctx) => sendJ(game && game.readyState === OPEN && net.joined ? game : gw, ctx ? { t: 'feedback', kind, text: String(text).slice(0, 2000), ctx } : { t: 'feedback', kind, text: String(text).slice(0, 2000) });
+  /** admin('reports', {kind?, state?, limit?, before?}) -> adminReports ; admin('report', {id, state, note?}) -> adminR (admin accounts only) */
+  net.adminOp = (op, a = {}) => sendJ(game && game.readyState === OPEN && net.joined ? game : gw, pick({ t: 'admin', op }, a, ['id', 'state', 'kind', 'limit', 'before', 'note']));
+  /** fish('cast', {aim?}) | ('hook') | ('land', {held}) | ('stop') -> fishR / fishBite / fishTug / fishCatch */
+  net.fish = (op, a = {}) => sendJ(game, pick({ t: 'fish', op }, a, ['aim', 'held', 'score', 'holds']));
+  /** cook() -> cookList ; cook(id, n?) -> cookR */
+  net.cook = (id, n) => sendJ(game, id ? (n ? { t: 'cook', id, n } : { t: 'cook', id }) : { t: 'cook' });
   // D-UI's first names (play-test 2): the same messages
   net.lootOp = net.loot;
   net.roll = (roll, choice) => net.loot('roll', { roll, choice });

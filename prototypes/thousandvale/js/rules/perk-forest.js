@@ -17,6 +17,7 @@
 // reachable from the hub), the cards (written from the numbers) and that every key, flag and power
 // has a reader.
 
+import { whoText, whoKey } from './wording.js';
 import { TV_FLAG_READERS, TV_STAT_READERS } from './perk-rules.js';
 
 /** Every stat a node may grant, as the card says it. The key IS a `derived` field (rpg.derive). */
@@ -54,7 +55,7 @@ export const STAT_TEXT = {
   resistAll: v => `${sgn(v)}${n(v)}% resistance to all damage`,
   thorns: v => `${pc(v)} thorns — an attacker takes back ${pc(v)} of the damage it dealt`,
   areaPct: v => `${sgn(v)}${n(v)}% attack area`,
-  petDamagePct: v => `${sgn(v)}${n(v)}% companion damage`,
+  petDamagePct: v => `${sgn(v)}${n(v)}% follower damage`,          // play-test 5 T2: every follower of yours (effects.js petPower), not only the class companion
   followerSlots: v => `${sgn(v)}${n(v)} follower slot${Math.abs(v) === 1 ? '' : 's'}, and ${sgn(v)}${n(v)} of each thing you summon`,
   arrowsPerShot: v => `${sgn(v)}${n(v)} arrow${Math.abs(v) === 1 ? '' : 's'} on every shot`,
   hpOnKill: v => `${sgn(v)}${n(v)} health on every kill`,
@@ -259,12 +260,14 @@ export const isTopTier = node => !!node && !node.oddball && node.id !== 'start' 
 export const KIND_LABELS = Object.freeze({ hub: 'Where you began', minor: 'Minor', major: 'Major', talent: 'Notable', keystone: 'Cornerstone' });
 
 /** The forest as the client draws it (D): plain JSON, no Maps. */
+const perkCard = text => { const t = whoText(text || ''); const k = whoKey(t); return k ? `${t} ${k}` : t; };
 export function forestView(forest) {
   return {
     arms: forest.arms,
     nodes: forest.nodes.map(nd => ({
       id: nd.id, kind: nd.kind, label: KIND_LABELS[nd.kind] || nd.kind, arm: nd.arm, ring: nd.ring, branch: nd.branch || null, x: Math.round(nd.x * 1000) / 1000, y: Math.round(nd.y * 1000) / 1000,
-      name: nd.name, desc: nd.desc, cost: nd.cost || null, when: nd.when || null, oddball: !!nd.oddball, rule: nd.ruleId || null,
+      // play-test 5 T2: a perk card that says "followers" / "party" spells out who that is (js/rules/wording.js)
+      name: nd.name, desc: perkCard(nd.desc), cost: nd.cost || null, when: nd.when || null, oddball: !!nd.oddball, rule: nd.ruleId || null,
     })),
     links: forest.links,
     start: 'start',

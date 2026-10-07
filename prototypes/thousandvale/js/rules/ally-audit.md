@@ -1,3 +1,70 @@
+# Who a card touches (play-test 5, T2) — and the ally-targeting audit
+
+Every skill, talent, perk and item-power card goes through `js/rules/wording.js`. One vocabulary:
+
+| Words on the card | Exactly who |
+|---|---|
+| you | the caster |
+| you (or the party member you target) | the friendly target of the cast if it is a party member within 30 m, else the caster |
+| your followers | your OWN pets, summons and hired blades — never another player, never their pets |
+| party members | the other players in your party within 30 m |
+| all allies / allies / every other ally | you + party members within 30 m + your followers + those party members' own pets ("every other ally" leaves you out) |
+
+What changed in behaviour so the cards are true (js/rules/cast-skills.js):
+
+| Effect | Before | Now |
+|---|---|---|
+| "For Ns, your followers: …" (`selfBuff.petsOnly`: Stoke the Familiar, Den Guard, Wrath of the Raised…) | every party member and their pets too | your own followers only |
+| "Revives every fallen follower" (Farhold `revive`: Unleash the Hound, Stoke the Familiar, Second Rising) | also stood dead party PLAYERS up | your own followers only; a player needs a revive skill (T4) |
+| a barrier / status / cleanse for "all allies" (`pets: true`) | skipped a party member's own pets | reaches them (one list: `rt.allies`) |
+| "swaps places with the aimed follower or enemy" (Reposition, Swap Partner, Fiendish Swap) | the follower half was never ported | swaps with your own aimed follower when no enemy is aimed at (a player is never moved) |
+| the heal of Prayer of Dawn (`around` + heal) | always the caster | the party member you target, else you (T3) |
+| Mending Post, Greensap | no direct heal | a direct heal on the party member you target, else you (T3) |
+| a chained bolt (Forked Bolt, a chaining wand, Arc Lash) | re-struck the same body every hop (Farhold does too) | jumps to the nearest OTHER enemy |
+
+Each sentence Farhold writes, and the code that makes Thousandvale's version true (tests/C/playtest5.test.mjs casts one per kind and checks who it lands on):
+
+| Farhold's phrase (pattern) | Code that carries it out |
+|---|---|
+| `/the most-hurt of you and your followers/g` | followers.js onHealPulse -> allies(owner) |
+| `/\b[Hh]eals you for (\d+(?:\.\d+)?)% of your maximum health/g` | castPlan self/around/ground: allyTargetOf |
+| `/Every follower heals (\d+(?:\.\d+)?)% of its maximum health/g` | afterCast healPets -> allies(ch) except you |
+| `/heals your nearest follower/g` | env.healNearestPet -> your own followers |
+| `/(heal(?:s\|ing)) you and your followers/g` | healAllies / placed heal -> allies(ch) |
+| `/you and your followers/g` | allies(ch) |
+| `/Gives you (Mending[^.]*)\. Everything following you is mended with you\./g` | castPlan self status: regen -> the target + your followers; with pets -> allies(ch) |
+| `/Everything following you is mended with you\./g` | castPlan self status regen |
+| `/Everything following you gets the same\./g` | castPlan self status with pets -> allies(ch) |
+| `/Your followers get the same/g` | talent: status with pets -> allies(ch) |
+| `/your followers get the same/g` | talent: status with pets -> allies(ch) |
+| `/[Yy]ou and every follower:/g` | afterCast selfBuff pets -> allies(ch) |
+| `/You and every follower get a (barrier\|ward)/g` | afterCast barrier/ward pets -> allies(ch) |
+| `/you and every follower get a (barrier\|ward)/g` | afterCast barrier/ward pets -> allies(ch) |
+| `/\bYou get a barrier worth (\d+(?:\.\d+)?)% of your maximum health/g` | afterCast barrier without pets: allyTargetOf, worth THEIR health |
+| `/\bYou get a (barrier\|ward)/g` | afterCast barrier/ward without pets: allyTargetOf |
+| `/(Removes\|removes) (\d+) harmful status(es)? from you and every follower/g` | afterCast cleanse pets -> allies(ch) |
+| `/(Removes\|removes) (\d+) harmful status(es)? from you(?! \()/g` | afterCast cleanse: allyTargetOf |
+| `/Links the follower nearest your aim to you/g` | afterCast link: allyTargetOf, else nearest of allies(ch) |
+| `/beside the follower nearest your aim/g` | dash to ally: allyAlong |
+| `/to the follower nearest your aim/g` | dash to ally: allyAlong |
+| `/the aimed follower or enemy \(not a boss\)/g` | dash swap: enemy first, else your own follower (players are never moved) |
+| `/the follower or enemy you aim at/g` | dash swap |
+| `/A follower swapped with/g` | dash swap allyBarrier |
+| `/Orders your followers to/g` | afterCast command (not petOnly): Fo.order(you) + each party player |
+| `/also empowers? your followers' next attack/g` | afterCast empowerNext.pets |
+| `/Revives every fallen follower at once/g` | afterCast revive -> Fo.reviveAll(you) (players: only a revive skill, T4) |
+| `/Every follower within (\d+) m moves with you/g` | Fo.bringAlong(you) |
+| `/with every follower\./g` | Fo.bringAlong(you) |
+| `/for each follower alive/g` | env.followers() -> owner === you |
+| `/every follower ability's cooldowns?/g` | Fo.cutAbilities(you) |
+| `/attack your follower\b/g` | petTaunt |
+| `/\bfollowers within (\d+) m get/g` | afterCast selfBuff petsShare -> petsOf(you) |
+| `/\b[Yy]our companions\b/g` | effects.js petPower / pets: your own followers |
+| `/\beach companion\b/g` | cast.js onKill post.petHeal -> room.followers.heal(you) |
+| `/\beach of your companions\b/g` | cast.js onKill post.petHeal |
+| `/(?<!class )\bcompanion damage\b/g` | effects.js petPower |
+
+---
 # Ally-targeting audit (generated — tests/C/ally-audit.test.mjs)
 
 Every skill, each talent node on its own, each druid-shape skill and each song finale, cast with the Tab target on a
@@ -5,7 +72,7 @@ hurt, poisoned party member 2.5 m away. **Reaches the ally** = what the plan pro
 checked to land on that ally (and on nobody outside the party, and on nobody 120 m away). A row with nothing in it
 is a skill that does nothing for friends (damage, control, personal buffs).
 
-2301 casts, 565 of them do something for an ally.
+2301 casts, 500 of them do something for an ally.
 
 | Cast | Reaches the ally |
 |---|---|
@@ -95,34 +162,21 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | cleric/mend +emboldened | heal |
 | cleric/mend +wellspring | heal |
 | cleric/sunlance | — |
-| cleric/sanctuary | heal |
-| cleric/sanctuary +moving_sanctuary | heal |
-| cleric/sanctuary +small_mercy | heal |
-| cleric/sanctuary +wide | heal |
-| cleric/sanctuary +searing_ground | heal |
-| cleric/sanctuary +hushed_ground | heal |
-| cleric/sanctuary +deepen | heal |
-| cleric/sanctuary +shelter | heal |
-| cleric/sanctuary +sanctified_rest | heal, revive |
-| cleric/sanctuary +bulwark | heal |
-| cleric/sanctuary +warding_light | barrier, heal |
-| cleric/sanctuary +twin_sanctuary | heal |
-| cleric/sanctuary +aegis | heal |
-| cleric/guardian_light | — |
-| cleric/guardian_light +clearing_light | cleanse |
-| cleric/raise_the_fallen | heal, revive, status |
-| cleric/raise_the_fallen +swift_return | heal, revive, status |
-| cleric/raise_the_fallen +rising_ward | barrier, heal, revive, status |
-| cleric/raise_the_fallen +quick | heal, revive, status |
-| cleric/raise_the_fallen +raised_in_wrath | heal, revive, status |
-| cleric/raise_the_fallen +shared_breath | heal, revive, status |
-| cleric/raise_the_fallen +deepen | heal, revive, status |
-| cleric/raise_the_fallen +cleansing_rise | cleanse, heal, revive, status |
-| cleric/raise_the_fallen +pulse_of_return | heal, revive, status |
-| cleric/raise_the_fallen +hunger | heal, revive, status |
-| cleric/raise_the_fallen +undying_company | heal, revive, status |
-| cleric/raise_the_fallen +grace_given | heal, revive, status |
-| cleric/raise_the_fallen +wellspring | heal, revive, status |
+| cleric/sanctuary | — |
+| cleric/guardian_light | heal |
+| cleric/guardian_light +twin_lights | heal |
+| cleric/guardian_light +clearing_light | heal |
+| cleric/guardian_light +quick | heal |
+| cleric/guardian_light +lantern_death | heal |
+| cleric/guardian_light +searing_lamp | heal |
+| cleric/guardian_light +deepen | heal |
+| cleric/guardian_light +lamp_bearer | heal |
+| cleric/guardian_light +lamplighter | heal |
+| cleric/guardian_light +hunger | heal |
+| cleric/guardian_light +choir | heal |
+| cleric/guardian_light +last_light | heal |
+| cleric/guardian_light +aegis | heal |
+| cleric/raise_the_fallen | — |
 | cleric/judgement | heal |
 | cleric/judgement +wide_light | heal |
 | cleric/judgement +shackling_light | heal |
@@ -137,27 +191,33 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | cleric/judgement +standing_light | heal |
 | cleric/judgement +conflagration | heal |
 | bard/discord_note | — |
-| bard/ballad_of_valour | — |
-| bard/ballad_of_valour (finale) | status |
-| bard/ballad_of_valour +marching_verse (finale) | status |
-| bard/ballad_of_valour +rousing_verse (finale) | status |
-| bard/ballad_of_valour +steel_chorus (finale) | status |
-| bard/ballad_of_valour +steady_breath (finale) | status |
-| bard/ballad_of_valour +encore (finale) | status |
-| bard/ballad_of_valour +champions_verse (finale) | status |
-| bard/ballad_of_valour +unbroken_march (finale) | status |
-| bard/ballad_of_valour +double_time (finale) | status |
+| bard/ballad_of_valour | status |
+| bard/ballad_of_valour +marching_verse | status |
+| bard/ballad_of_valour +rousing_verse | status |
+| bard/ballad_of_valour +steel_chorus | status |
+| bard/ballad_of_valour +steady_breath | status |
+| bard/ballad_of_valour +encore | status |
+| bard/ballad_of_valour +champions_verse | status |
+| bard/ballad_of_valour +unbroken_march | status |
+| bard/ballad_of_valour +double_time | status |
 | bard/song_of_ruin | — |
-| bard/air_of_mending | — |
+| bard/air_of_mending | heal |
 | bard/air_of_mending (finale) | cleanse, heal |
+| bard/air_of_mending +close_harmony | heal |
 | bard/air_of_mending +close_harmony (finale) | cleanse, heal |
+| bard/air_of_mending +carrying_tune | heal |
 | bard/air_of_mending +carrying_tune (finale) | cleanse, heal |
+| bard/air_of_mending +soothing_finale | heal |
 | bard/air_of_mending +soothing_finale (finale) | cleanse, heal |
+| bard/air_of_mending +steady_voice | heal |
 | bard/air_of_mending +steady_voice (finale) | cleanse, heal |
+| bard/air_of_mending +restful_verse | heal |
 | bard/air_of_mending +restful_verse (finale) | cleanse, heal |
+| bard/air_of_mending +calm_breath | heal |
 | bard/air_of_mending +calm_breath (finale) | cleanse, heal |
-| bard/air_of_mending +tending_hands | cleanse |
+| bard/air_of_mending +tending_hands | cleanse, heal |
 | bard/air_of_mending +tending_hands (finale) | cleanse, heal |
+| bard/air_of_mending +warm_air | heal |
 | bard/air_of_mending +warm_air (finale) | cleanse, heal |
 | bard/quickstep_jig | — |
 | bard/grand_finale | — |
@@ -175,7 +235,6 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | necromancer/marrow_lance | — |
 | necromancer/raise_thrall | — |
 | necromancer/raise_thrall +shared_grave | heal |
-| necromancer/raise_thrall +second_rising | revive |
 | necromancer/raise_thrall +undying_ranks | barrier |
 | necromancer/corpse_pyre | — |
 | necromancer/drain | heal |
@@ -193,11 +252,8 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | necromancer/drain +wellspring | heal |
 | necromancer/toxic_cloud | — |
 | necromancer/buried_march | — |
-| necromancer/buried_march +army_commander | status |
-| necromancer/buried_march +grave_tide | revive |
 | warlock/gnawing_dark | — |
 | warlock/bind_imp | — |
-| warlock/bind_imp +fiend_returns | revive |
 | warlock/curse | — |
 | warlock/soul_pact | — |
 | warlock/void_rift | — |
@@ -205,22 +261,12 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | demon_hunter/hex_bolt | — |
 | demon_hunter/tumbling_shot | — |
 | demon_hunter/chain_hook | — |
-| demon_hunter/unleash_hound | revive |
-| demon_hunter/unleash_hound +pack_of_one | revive |
-| demon_hunter/unleash_hound +guardian_hound | revive |
-| demon_hunter/unleash_hound +quick | revive |
-| demon_hunter/unleash_hound +blooded_hound | revive, status |
-| demon_hunter/unleash_hound +shared_hide | barrier, revive |
-| demon_hunter/unleash_hound +deepen | revive |
-| demon_hunter/unleash_hound +blood_bond | link, revive |
-| demon_hunter/unleash_hound +shared_kill | empower, revive |
-| demon_hunter/unleash_hound +hunger | revive |
-| demon_hunter/unleash_hound +alpha_hide | revive, status |
-| demon_hunter/unleash_hound +night_bond | revive |
-| demon_hunter/unleash_hound +aegis | revive |
+| demon_hunter/unleash_hound | — |
+| demon_hunter/unleash_hound +shared_hide | barrier |
+| demon_hunter/unleash_hound +blood_bond | link |
+| demon_hunter/unleash_hound +shared_kill | empower |
 | demon_hunter/grudge_bolt | — |
 | demon_hunter/night_hunt | — |
-| demon_hunter/night_hunt +pack_returns | revive |
 | scavenger/lucky_strike | — |
 | scavenger/junk_toss | — |
 | scavenger/scrounge | heal |
@@ -241,11 +287,9 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | swashbuckler/flourish | — |
 | swashbuckler/daring_leap | — |
 | swashbuckler/mocking_parry | — |
-| swashbuckler/mocking_parry +crowd_pleaser | status |
 | swashbuckler/pinning_thrust | — |
 | swashbuckler/matadors_turn | — |
 | swashbuckler/grandeur | — |
-| swashbuckler/grandeur +spotlight | status |
 | dragon_knight/scale_rend | — |
 | dragon_knight/flamethrower | — |
 | dragon_knight/wyrmfall | — |
@@ -268,16 +312,10 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | pyromancer/fire_wall | — |
 | pyromancer/ember_stride | — |
 | pyromancer/ember_stride +fire_ward | ward |
-| pyromancer/stoke_familiar | revive, status |
-| pyromancer/stoke_familiar +bonfire | revive, status |
-| pyromancer/stoke_familiar +clean_flame | cleanse, revive, status |
-| pyromancer/stoke_familiar +quick | revive, status |
-| pyromancer/stoke_familiar +feeding_flame | heal, revive, status |
-| pyromancer/stoke_familiar +quick_kindling | revive, status |
-| pyromancer/stoke_familiar +overheat | revive, status |
-| pyromancer/stoke_familiar +fireguard | revive, status, ward |
-| pyromancer/stoke_familiar +great_flame | revive, status |
-| pyromancer/stoke_familiar +shared_blaze | revive, status |
+| pyromancer/stoke_familiar | — |
+| pyromancer/stoke_familiar +clean_flame | cleanse |
+| pyromancer/stoke_familiar +feeding_flame | heal |
+| pyromancer/stoke_familiar +fireguard | ward |
 | pyromancer/flashover | — |
 | pyromancer/meteor | — |
 | stormcaller/chain_bolt | — |
@@ -289,29 +327,22 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | stormcaller/tempest_eye | — |
 | druid/thornlash | — |
 | druid/thornlash +seedling | heal |
-| druid/renew | status |
+| druid/renew | heal, status |
 | druid/renew +blooming | heal, status |
-| druid/renew +cleansing_sap | cleanse, status |
-| druid/renew +quick | status |
-| druid/renew +overgrowth | barrier, status |
+| druid/renew +cleansing_sap | cleanse, heal, status |
+| druid/renew +quick | heal, status |
+| druid/renew +overgrowth | barrier, heal, status |
 | druid/renew +grafting | heal, status |
-| druid/renew +deepen | status |
-| druid/renew +heartwood | status |
-| druid/renew +lifeblood | status |
-| druid/renew +echo | status |
-| druid/renew +second_flush | status |
-| druid/renew +wild_sap | status, ward |
-| druid/renew +wellspring | status |
+| druid/renew +deepen | heal, status |
+| druid/renew +heartwood | heal, status |
+| druid/renew +lifeblood | heal, status |
+| druid/renew +echo | heal, status |
+| druid/renew +second_flush | heal, status |
+| druid/renew +wild_sap | heal, status, ward |
+| druid/renew +wellspring | heal, status |
 | druid/briarback_shape | — |
 | druid/renew @briarback | barrier |
-| druid/call_wolf @briarback | status |
 | druid/call_wolf | — |
-| druid/call_wolf +thorny_pelts | status |
-| druid/call_wolf +pack_mend | heal |
-| druid/call_wolf +den_scent | status |
-| druid/call_wolf +pack_bond | link |
-| druid/call_wolf +alphas_call | revive |
-| druid/call_wolf +wild_pack | status |
 | druid/fenrunner_shape | — |
 | druid/renew @fenrunner | cleanse, heal |
 | druid/sporecap_shape | heal |
@@ -350,22 +381,12 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | oracle/fate_thread +mirrored_pain | link, status |
 | oracle/fate_thread +hunger | link, status |
 | oracle/fate_thread +long_weave | link, status |
-| oracle/fate_thread +lifeline | link, revive, status |
+| oracle/fate_thread +lifeline | link, status |
 | oracle/fate_thread +aegis | link, status |
 | oracle/turn_aside | — |
 | oracle/turn_aside +warded_burst | ward |
-| oracle/last_prophecy | status |
-| oracle/last_prophecy +swift_end | status |
-| oracle/last_prophecy +seers_calm | status |
-| oracle/last_prophecy +stunning_vision | status |
-| oracle/last_prophecy +all_paths | status, ward |
-| oracle/last_prophecy +deepen | status |
-| oracle/last_prophecy +fated_fall | status |
-| oracle/last_prophecy +spoken_doom | status |
-| oracle/last_prophecy +hunger | status |
-| oracle/last_prophecy +ending_written | status |
-| oracle/last_prophecy +retold | status |
-| oracle/last_prophecy +crescendo | status |
+| oracle/last_prophecy | — |
+| oracle/last_prophecy +all_paths | ward |
 | tactician/exploit_gap | — |
 | tactician/exploit_gap +marked_opening | empower |
 | tactician/rally | status |
@@ -469,11 +490,8 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | shaman/mending_post +quickening_post | heal, status |
 | shaman/mending_post +wellspring | heal |
 | shaman/storm_post | — |
-| shaman/storm_post +storm_bond | status |
 | shaman/call_spirit | — |
-| shaman/call_spirit +spirit_hide | status |
 | shaman/call_spirit +bonded_spirits | link |
-| shaman/call_spirit +rewaking | revive |
 | shaman/warding_spirits | ward |
 | shaman/warding_spirits +five_charges | ward |
 | shaman/warding_spirits +thorned_wards | ward |
@@ -493,7 +511,7 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | shaman/great_post +thunder_totem | heal |
 | shaman/great_post +warding_ground | heal |
 | shaman/great_post +deepen | heal |
-| shaman/great_post +bears_totem | heal, status |
+| shaman/great_post +bears_totem | heal |
 | shaman/great_post +pulling_post | heal |
 | shaman/great_post +hunger | heal |
 | shaman/great_post +old_ones_rise | heal |
@@ -555,7 +573,7 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | knight/sworn_ward +to_your_side | link |
 | knight/sworn_ward +oath_ward | link, ward |
 | knight/sworn_ward +hunger | link |
-| knight/sworn_ward +not_today | link, status |
+| knight/sworn_ward +not_today | link |
 | knight/sworn_ward +oath_retort | link |
 | knight/sworn_ward +aegis | link |
 | knight/challenge | — |
@@ -589,7 +607,6 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | runesmith/stoneskin | — |
 | runesmith/stoneskin +runed_ward | ward |
 | runesmith/forge_flame | — |
-| runesmith/forge_flame +shared_forge | status |
 | runesmith/warding_glyph | status |
 | runesmith/warding_glyph +moving_glyph | status |
 | runesmith/warding_glyph +wide_glyph | status |
@@ -662,32 +679,20 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | priest/dawn_prayer +lingering_prayer | heal |
 | priest/dawn_prayer +searing_prayer | heal |
 | priest/dawn_prayer +deepen | heal |
-| priest/dawn_prayer +blessed_company | heal, status |
+| priest/dawn_prayer +blessed_company | heal |
 | priest/dawn_prayer +answered | heal |
 | priest/dawn_prayer +echo | heal |
 | priest/dawn_prayer +twice_said | heal |
 | priest/dawn_prayer +undead_dawn | heal |
 | priest/dawn_prayer +wellspring | heal |
 | priest/mark_the_killer | — |
-| priest/vigil | status |
-| priest/vigil +night_watch | status |
-| priest/vigil +vigil_light | heal, status |
-| priest/vigil +quick | status |
-| priest/vigil +steeled_watch | status |
-| priest/vigil +answering_dark | status |
-| priest/vigil +deepen | status |
-| priest/vigil +killers_debt | status |
-| priest/vigil +calm_before | cleanse, status |
-| priest/vigil +hunger | status |
-| priest/vigil +dawn_rising | status |
-| priest/vigil +debt_of_light | barrier, status |
-| priest/vigil +aegis | status |
+| priest/vigil | — |
 | priest/dread_hymn | status |
 | priest/dread_hymn +wide_hymn | status |
 | priest/dread_hymn +cold_dread | status |
 | priest/dread_hymn +wide | status |
 | priest/dread_hymn +haunting | status |
-| priest/dread_hymn +steadying_verse | heal, status |
+| priest/dread_hymn +steadying_verse | status |
 | priest/dread_hymn +deepen | status |
 | priest/dread_hymn +despair | status |
 | priest/dread_hymn +dark_refrain | status |
@@ -698,8 +703,8 @@ is a skill that does nothing for friends (damage, control, personal buffs).
 | priest/twinlight | heal |
 | priest/twinlight +cleansing_dawn | cleanse, heal |
 | priest/twinlight +dusk_ward | barrier, heal |
-| priest/twinlight +shared_light | heal, status |
-| priest/twinlight +raising_light | heal, revive |
+| priest/twinlight +shared_light | heal |
+| priest/twinlight +raising_light | heal |
 | priest/twinlight +deepen | heal |
 | priest/twinlight +sunward | heal |
 | priest/twinlight +lingering_dusk | heal |

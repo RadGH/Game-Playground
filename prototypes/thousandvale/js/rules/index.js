@@ -28,6 +28,15 @@ import { attachEncounters } from './encounter.js';
 import { attachFollowers } from './followers.js';
 import { attachWarbands, escortFor } from './warband.js';
 import { allyEffects, aimsAtAlly } from './ally.js';
+import { cardText, whoOf, whoText } from './wording.js';
+import { reviveOf, directHealSlot } from './tv-skills.js';
+import { runtimeFor } from './cast-skills.js';
+import { attackReach, basicCard, isHeldFocus, stampCaster } from './caster-forms.js';
+import { TV_SLOTS } from './tv-gear.js';
+import { weaponHands } from './farhold.js';
+import { makeCrate as makeCrateItem, openCrate as openCrateItem, isCrate, crateText } from './crates.js';
+import { kitsFor as kitsForRaw, validKit as validKitRaw, starterGear as starterGearRaw, kitPlan } from './starter-kits.js';
+import { sheetJob, cachedAbilities, statRows, sheetWith as sheetWithItem } from './estimate.js';
 import { companionsDue, companionInfo, UNLOCK_KEYS } from './progression.js';
 import { tickPlayer as perkTick } from './perk-rules.js';
 import { talentView, pickTalent as pickTalentFor, unpickTalent as unpickTalentFor, resetTalents as resetTalentsFor, cleanTalents, tierNodes, TIER_LEVELS } from './talents.js';
@@ -57,6 +66,21 @@ export async function prepareRules(data = null, opts = {}) {
 await prepareRules();
 export const rulesEngine = () => shared;
 
+// ---- play-test 5: what A and the client call WITHOUT a room (character creation, the kit screen, a quest reward) ----
+/** T5: the kit screen's data for a class — `{ cls, armour: [{id, name, blurb, items}] x3, weapons: [{id, name, blurb, items}] }`. */
+export const kitsFor = classId => kitsForRaw(classId, shared?.kits || null, shared);
+/** T5: settle a choice — `{ ok, armour, weapons, fell? }` (missing / unknown id = the first of each). */
+export const validKit = (classId, choice) => validKitRaw(classId, choice, shared?.kits || null);
+/** T5: the chosen kit as `char.equipment` (`{ weapon, offhand?, head?, chest?, … }`). */
+export const starterGear = (classId, choice) => starterGearRaw(classId, choice, shared?.kits || null, shared);
+export { kitPlan, isCrate };
+/** T9 / T20: a crate (or, with `spec.gift`, a gift box) as a bag item. `level` caps how high it can ever roll (level + 3). */
+export const makeCrate = (spec = {}, { level = null, cls = null } = {}) => makeCrateItem(shared?.crates || null, { ...(cls ? { cls } : {}), ...spec, ...(level && spec.level == null && spec.maxLevel == null ? { level } : {}) });
+/** T9: the crate's card line for a spec (quest reward rows). */
+export const crateLabel = spec => crateText(shared?.crates || null, spec, { gift: !!spec?.gift });
+/** T25: the angling rules (js/rules/fishing.js), booted with C's numbers and E's fish. */
+export const fishing = () => shared?.fishing || null;
+
 /** Monster `type` names the room's camps use, mapped to Farhold bestiary ids. */
 export const TYPE_ALIASES = { wolf: 'moor_hound', hound: 'moor_hound' };
 
@@ -64,6 +88,8 @@ export const TYPE_ALIASES = { wolf: 'moor_hound', hound: 'moor_hound' };
 function whyCode(text = '') {
   if (/not ready|cooldown/i.test(text)) return 'cooldown';
   if (/mana/i.test(text)) return 'mana';
+  if (/no fallen party member|nobody is left to raise/i.test(text)) return 'target';
+  if (/while you are fighting/i.test(text)) return 'combat';
   if (/dead/i.test(text)) return 'dead';
   if (/range|reach/i.test(text)) return 'range';
   if (/target/i.test(text)) return 'target';
@@ -218,6 +244,12 @@ export function createRules(host, opts = {}) {
   // a party that tagged a kill gets one drop for the corpse (cast.js onKill) and the room hands it out
   // (free items, Need / Greed / Skip above the party's threshold — js/rules/loot-rules.js). Without the
   // hook every tagger keeps its own roll (the M3 behaviour).
+  // play-test 5 T4: a revive skill asks the room first when it takes offers (`host.offerRevive(caster, target, spec)`:
+  // the fallen player accepts or declines, then A calls `rules.revived`); without the hook the body stands up at once
+  combat.endStatuses = u => endStatuses(u);
+  Object.defineProperty(combat, 'offerRevive', { configurable: true, get: () => (typeof host.offerRevive === 'function'
+    ? (c, t, spec) => { const ce = entOf(c), te = entOf(t); return ce && te ? host.offerRevive(ce, te, spec) : null; } : null) });
+
   const partyLootFn = (members, items, from, partyId) => host.partyLoot(members.map(entOf).filter(Boolean), items, entOf(from) || null, partyId);
   Object.defineProperty(combat, 'partyLoot', { configurable: true, get: () => (typeof host.partyLoot === 'function' ? partyLootFn : null) });
 
@@ -324,14 +356,20 @@ export function createRules(host, opts = {}) {
           // swing's wind-up (`wind` ms: the hit lands this long after) and a melee swing's reach/arc — the client draws it
           host.event({ type: 'cast', s: ev.id, slot: 0, skill: 'basic', every: ev.every != null ? Math.round(ev.every * 1000) : undefined, clip: ev.clip === 'draw' || ev.clip === 'shoot' ? ev.clip : undefined,
             wk: ev.wk, wt: ev.wt, el: ev.el, two: ev.two, hand: ev.hand === 'off' ? 'off' : undefined, step: ev.step || undefined, wind: ev.wind > 0 ? Math.round(ev.wind * 1000) : undefined,
-            reach: ev.reach != null ? Math.round(ev.reach * 100) / 100 : undefined, arc: ev.arc != null ? Math.round(ev.arc * 1000) / 1000 : undefined, strike: ev.strike });
+            reach: ev.reach != null ? Math.round(ev.reach * 100) / 100 : undefined, arc: ev.arc != null ? Math.round(ev.arc * 1000) / 1000 : undefined, strike: ev.strike,
+            // play-test 5: `form` = the caster style (T15), `imbue` = a sceptre's elemental swing (T16)
+            form: ev.form, imbue: ev.imbue });
           break;
         }
         case 'revive': {
           const e = host.entities.get(ev.id);
           const u = e?.r?.unit;
-          if (u?.statuses && Object.keys(u.statuses).length) endStatuses(u);     // Q8: a raised body comes back clean
+          // Q8: a raised body comes back clean. `keep` = the reviver cleaned it already and then added the
+          // skill's own rider (a mend over time, a weakness — play-test 5 T4), which must not be wiped here.
+          if (!ev.keep && u?.statuses && Object.keys(u.statuses).length) endStatuses(u);
           if (e?.dead) e.revive(ev.hp / Math.max(1, e.hpMax));
+          // everyone near draws the class's own revive (`skill` = the skill id, `style` = its look)
+          if (ev.skill) host.event({ type: 'fx', kind: 'revive', id: ev.id, by: ev.by ?? 0, skill: ev.skill, style: ev.style || undefined, x: e?.x, z: e?.z });
           break;
         }
         case 'fx': {
@@ -520,9 +558,23 @@ export function createRules(host, opts = {}) {
       if (hostile && far(t.x, t.z)) u.yaw = Math.atan2(t.x - u.x, t.z - u.z);
       else if (!t && msg.aim && Number.isFinite(msg.aim.x) && Number.isFinite(msg.aim.z) && far(msg.aim.x, msg.aim.z)) u.yaw = Math.atan2(msg.aim.x - u.x, msg.aim.z - u.z);
       e.face(u.yaw);
+      const tUnit = t && !t.dead && t.r?.unit && t.r.unit !== u ? t.r.unit : null;
       const res = msg.slot === 0
-        ? combat.attack(u, { yaw: u.yaw, held: msg.held, target: t && !t.dead && t.r?.unit && t.r.unit !== u ? t.r.unit : null })
+        ? combat.attack(u, { yaw: u.yaw, held: msg.held, target: tUnit })
         : combat.cast(u, msg.slot - 1, { aim: msg.aim, target: msg.target ?? null, yaw: u.yaw });
+      // play-test 5 T7 (and T6's data half): with a weapon in each hand the OFF hand swings too, half a beat after the
+      // main hand, on its own clock (Farhold's two timers). Thousandvale only ever sent the main hand, so a second
+      // weapon — or a second two-hander under Doubled Grasp — was dead weight. An off-hand wand fires its own bolt.
+      if (msg.slot === 0 && res.ok && engine.casterForms) {
+        const hands = weaponHands(u);
+        if (hands.dual && !isHeldFocus(hands.off)) {
+          combat.later(Math.max(0.12, (res.every || 0.6) * 0.5), () => {
+            if (u.dead || u.removed || !weaponHands(u).dual) return;
+            if (tUnit && tUnit.dying == null && !tUnit.removed) u.yaw = Math.atan2(tUnit.x - u.x, tUnit.z - u.z);
+            combat.attack(u, { hand: 'off', yaw: u.yaw, target: tUnit });
+          }, u.id);
+        }
+      }
       if (res.ok) return { ok: true };
       return { ok: false, why: whyCode(res.why), text: res.why };
     });
@@ -556,6 +608,7 @@ export function createRules(host, opts = {}) {
         if (ent) ent.setState(2, fighting);
       }
     });
+    tickSheets();                    // T18: one slice of a character sheet being measured (outside the room's own turn)
     // a finished channel's effect (a recall moves the player to another room) runs outside the rules' turn
     while (channelsDone.length) { const f = channelsDone.shift(); try { f(); } catch { /* the room's own errors are its own */ } }
   }
@@ -689,7 +742,15 @@ export function createRules(host, opts = {}) {
   /** Fighting = a monster has you as its target. */
   const combatNow = u => field.monsters.some(m => m.dying == null && m.targetId === u.id);
   /** The shop buffs on an entity: { dmgPct, armorPct, mountSpeedPct, light, lightRange, ... } (A: riding speed; D-world: torch light). */
-  function itemBuffs(e) { const u = e?.r?.unit; return u && !u.dead ? itemBuffsOf(u) : {}; }
+  function itemBuffs(e) {
+    const u = e?.r?.unit;
+    if (!u || u.dead) return {};
+    const out = itemBuffsOf(u);
+    // play-test 5 slots: a WORN light (a lantern, a torch in the `light` slot) lights as far as its own property says
+    const worn = u.equipment?.light ? (u.derived?.lightRange || 0) : 0;
+    if (worn > 0) { out.light = 1; out.lightRange = Math.max(out.lightRange || 0, worn); out.wornLight = u.equipment.light.g5 || u.equipment.light.baseKey; }
+    return out;
+  }
 
   function onLevel(e) {
     run(() => {
@@ -753,6 +814,15 @@ export function createRules(host, opts = {}) {
   function equip(e, item, slot = null) {
     const u = e.r.unit;
     if (!u || !item || typeof item !== 'object') return { ok: false, text: 'Nothing to equip.' };
+    // play-test 5 slots: a cloak (`back`) and a belt (`waist`) are Thousandvale's own slots — Farhold's `equip` does not
+    // know them, so they are put on here (its level rule still asked); the sheet sums their properties like any ring's
+    const want = slot || item.slot;
+    if (TV_SLOTS.includes(want)) {
+      if (item.slot !== want) return { ok: false, text: `${item.name || 'That'} will not go in that slot.` };
+      const why = engine.rpg.equipRefusal(u, item, { into: want });
+      if (why) return { ok: false, text: why };
+      return run(() => { const old = u.equipment[want] || null; u.equipment[want] = item; engine.rpg.refresh(u); return { ok: true, removed: old ? [old] : [] }; });
+    }
     return run(() => {
       // the bag is the room's (char.bag), never the sheet's: whatever Farhold moves into `u.bag` is
       // handed back as `removed` and taken off the sheet again
@@ -769,11 +839,97 @@ export function createRules(host, opts = {}) {
   function unequip(e, slot) {
     const u = e.r.unit;
     if (!u || !u.equipment?.[slot]) return { ok: false, text: 'Nothing is worn there.' };
+    if (TV_SLOTS.includes(slot)) return run(() => { const item = u.equipment[slot]; u.equipment[slot] = null; engine.rpg.refresh(u); return { ok: true, item }; });
     return run(() => {
       const item = engine.rpg.unequip(u, slot);
       u.bag = u.bag.filter(it => it !== item);      // the room puts it in char.bag
       return { ok: !!item, item };
     });
+  }
+  // ------------------------------------------------------------------ play-test 5: kits, crates, items, the sheet
+  /** T5: put the chosen starter kit on a brand-new character (replaces whatever it wears). `{ ok, items, kit }`. */
+  function applyKit(e, choice = {}) {
+    const u = e?.r?.unit;
+    if (!u) return { ok: false, text: 'Not here.' };
+    const v = validKitRaw(u.classId, choice, engine.kits);
+    const gearSet = v.ok ? starterGearRaw(u.classId, v, engine.kits, engine) : null;
+    if (!gearSet) return { ok: false, text: 'No such kit.' };
+    return run(() => {
+      for (const slot of Object.keys(u.equipment || {})) if (['weapon', 'offhand', 'head', 'chest', 'legs', 'hands', 'feet'].includes(slot)) u.equipment[slot] = null;
+      for (const [slot, item] of Object.entries(gearSet)) u.equipment[slot] = item;
+      engine.rpg.refresh(u, { full: true });
+      u.hp = u.maxHp; u.mp = u.maxMp;
+      for (const sl of u.skills?.slots || []) sl.views = null;
+      return { ok: true, items: Object.values(gearSet), kit: { armour: v.armour, weapons: v.weapons } };
+    });
+  }
+  /** T23 / E: one item of a named base — `{ base, rarity?, level? }` (level defaults to the player's). Null for an unknown base. */
+  function makeItem(e, spec = {}) {
+    if (!engine.makeItem || !spec?.base) return null;
+    const lvl = spec.level || e?.r?.unit?.level || e?.level || 1;
+    const it = engine.makeItem({ base: spec.base, rarity: spec.rarity || 'normal', level: lvl, rng: room.streams.get('loot') });
+    if (it) it.uid = `${room.id}:m${++madeN}`;
+    return it;
+  }
+  let madeN = 0;
+  /** T9 / T20: a crate or gift box for `e` (or for nobody yet: `e` null). `spec` in E's, A's or C's words. */
+  function makeCrate(e, spec = {}) {
+    const u = e?.r?.unit;
+    const s = { ...spec };
+    if (u && s.level == null && s.maxLevel == null && s.capLevel !== false && !s.gift) s.level = u.level || 1;       // never more than 3 levels above where it was earned
+    const it = makeCrateItem(engine.crates, s);
+    it.uid = `${room.id}:c${++madeN}`;
+    return it;
+  }
+  /** T9 / T20: open it — `[item…]`, rolled now at the opener's level for the opener's class (the room's loot stream). */
+  function openCrate(e, item) {
+    const u = e?.r?.unit;
+    if (!isCrate(item)) return [];
+    const out = openCrateItem(engine, item, { cls: u?.classId || e?.char?.cls || null, level: u?.level || e?.level || 1, rng: room.streams.get('loot'), magicFind: u?.derived?.magicFind || 0 });
+    for (const it of out) it.uid = `${room.id}:m${++madeN}`;
+    return out;
+  }
+  /** T18: the character sheet (js/rules/estimate.js): core + advanced stats and every ability's MEASURED damage per second. */
+  function sheet(e) {
+    const u = e?.r?.unit;
+    if (!u) return null;
+    const rows = statRows(engine, u);
+    const have = cachedAbilities(u);
+    if (have) { sheetJobs.delete(u); return { ...rows, abilities: have, pending: false }; }
+    // not measured for this build yet: measure it a slice a tick (never a stall), hand back what is known so far,
+    // and tell the room when it is complete (`host.sheetChanged(e)`) so it can send the finished sheet
+    let job = sheetJobs.get(u);
+    if (!job || job.j.stale) { job = { j: sheetJob(engine, u) }; sheetJobs.delete(u); sheetJobs.set(u, job); }
+    return { ...rows, abilities: job.j.rows(), pending: true };
+  }
+  const sheetJobs = new Map();
+  /** One slice of one pending sheet per tick (js/rules/estimate.js `sheetJob`): a few milliseconds, round-robin. */
+  function tickSheets() {
+    const next = sheetJobs.entries().next().value;
+    if (!next) return;
+    const [u, job] = next;
+    sheetJobs.delete(u);
+    if (u.removed || !field.byId.has(u.id)) return;
+    let done = false;
+    try { done = job.j.step(); } catch { done = true; }
+    if (!done) { sheetJobs.set(u, job); return; }             // back of the queue
+    if (job.j.stale) return;                                   // the build changed meanwhile: the next `sheet` starts over
+    const ent = entOf(u);
+    if (ent) host.sheetChanged?.(ent);
+  }
+  /** T18: the same sheet as if `item` were worn in `slot` (a compare before you equip). */
+  function sheetWith(e, item, slot = null) {
+    const u = e?.r?.unit;
+    return u && item ? sheetWithItem(engine, u, item, slot) : null;
+  }
+
+  /** T7: would `item` go into `slot` right now? Asks without doing: `{ ok, text }` (Farhold's own sentence when not). */
+  function canEquip(e, item, slot = null) {
+    const u = e?.r?.unit;
+    if (!u || !item || typeof item !== 'object') return { ok: false, text: 'Nothing to equip.' };
+    if (TV_SLOTS.includes(slot || item.slot) && item.slot !== (slot || item.slot)) return { ok: false, text: `${item.name || 'That'} will not go in that slot.` };
+    const why = engine.rpg.equipRefusal(u, item, { into: slot || null });
+    return why ? { ok: false, text: why } : { ok: true };
   }
   const gear = e => ({ ...(e.r.unit?.equipment || {}) });
   const saveGear = e => (e.r.unit ? serializeGear(e.r.unit).equipment : {});
@@ -832,6 +988,21 @@ export function createRules(host, opts = {}) {
   }
 
   function onParty(e, id) { const u = e.r.unit; if (u) u.partyId = id ?? null; }
+
+  /**
+   * Play-test 5 T4 — the fallen player ACCEPTED a revive offer (A's `host.offerRevive` flow). `spec` is what the offer
+   * carried (`rt.reviveSpec`: hpPct, mpPct, apply, skill, style, by). Stands the unit up if the room has not, cleans
+   * it, drops it from every threat table and adds the skill's rider. Returns { ok, hp }.
+   */
+  function revived(e, spec = {}) {
+    const u = e?.r?.unit;
+    if (!u || u.kind !== 'player') return { ok: false, why: 'notPlayer' };
+    return run(() => {
+      const by = spec.by != null ? field.get(spec.by) : null;
+      runtimeFor(combat).reviveUnit(u, spec, by || null);
+      return { ok: true, hp: Math.round(u.hp) };
+    });
+  }
 
   // ------------------------------------------------------------------ build: talents and perks (P6)
 
@@ -917,11 +1088,27 @@ export function createRules(host, opts = {}) {
   function refundPerk(e, id) {
     const u = e.r.unit;
     if (!u) return { ok: false, text: 'Not here.' };
+    const grip = gripHeld(u, id);
+    if (grip) return { ok: false, text: grip };
     return ret(e, run(() => { const r = refundPerkFor(u, engine.forest, id); if (r.ok) buildChanged(e, u); return r.ok ? { ok: true } : r; }));
+  }
+  /**
+   * Play-test 5 T7: Doubled Grasp cannot be given back while it is what holds your second weapon — otherwise a
+   * two-hander would be left in an off hand that may not hold it (and would vanish on the next login).
+   */
+  function gripHeld(u, id = null) {
+    if (!u?.perkFlags?.doubleGrip) return null;
+    const node = id ? engine.forest.byId.get(id) : null;
+    if (id && node?.flag !== 'doubleGrip') return null;
+    const main = u.equipment?.weapon, off = u.equipment?.offhand;
+    if (off && off.type === 'weapon' && (main?.twoHanded || off.twoHanded)) return `Take ${off.name} out of your off hand first: Doubled Grasp is what lets you hold it.`;
+    return null;
   }
   function resetPerks(e) {
     const u = e.r.unit;
     if (!u) return { ok: false, text: 'Not here.' };
+    const grip = gripHeld(u);
+    if (grip) return { ok: false, text: grip };
     return ret(e, run(() => { const n = refundAllPerks(u); if (n) buildChanged(e, u); return n ? { ok: true, removed: n } : { ok: false, why: 'No perks to give back.' }; }));
   }
   // ---- A's contract (docs/protocol.md §17.2): one entry each for the `talent` and `perk` messages ----
@@ -975,8 +1162,13 @@ export function createRules(host, opts = {}) {
     return room.run(() => u.skills.state().map((s, i) => {
       const row = s.empty ? null : u.skills.rowFor(i);
       const ally = aimsAtAlly(row);
+      const who = whoOf(row, { allyEffects, aimsAtAlly });
+      const rv = reviveOf(row);
       return {
-        slot: i + 1, id: s.id || null, name: s.name, desc: s.descShort || s.desc || '',
+        // play-test 5 T2: the card says exactly who it touches (js/rules/wording.js); `who` / `targets` for the UI
+        slot: i + 1, id: s.id || null, name: s.name, desc: row ? cardText(row, s.descShort || s.desc || '', { statuses: engine.statuses }) : (s.descShort || s.desc || ''),
+        who: who.who, targets: who.targets,
+        ...(rv ? { revive: { style: rv.style || null, castMs: Math.round((rv.castTime || 0) * 1000), combat: !!rv.combat, mass: !!rv.mass, hpPct: rv.share ?? 0.5 } } : {}),
         cd: Math.round((s.cooldown || 0) * 1000), mp: Math.round(s.mp || 0), level: s.unlockAt, locked: !!s.locked,
         empty: !!s.empty, shape: s.shape || null, element: s.element || null,
         ally, group: !ally && !!row && allyEffects(row).size > 0,
@@ -988,7 +1180,18 @@ export function createRules(host, opts = {}) {
   }
 
   return {
-    equip, unequip, gear, saveGear, rollLoot, onParty, useObject, bar, backfill, unlock,
+    equip, unequip, canEquip, gear, saveGear, rollLoot, onParty, useObject, bar, backfill, unlock, revived,
+    applyKit, makeItem, makeCrate, openCrate, sheet, sheetWith,
+    /** every worn slot, in paper-doll order (play-test 5: `back`, `waist`, `light` joined) */
+    SLOTS: engine.tvGear?.slotOrder || ['weapon', 'offhand', 'head', 'chest', 'legs', 'hands', 'feet', 'necklace', 'ring', 'ring2'],
+    /** T25: the angling rules (pure; A drives the cast / bite / tug loop with them) */
+    fishing: engine.fishing,
+    /** T14: the basic attack's reach in metres as it is right now (weapon, caster form, druid shape); null = melee */
+    attackRange: e => { const u = e?.r?.unit; return u ? room.run(() => attackReach(engine, u)) : null; },
+    /** T14/T15: the slot-0 card — what the basic attack is, written from the numbers it uses */
+    basic: e => { const u = e?.r?.unit; return u ? room.run(() => basicCard(engine, u)) : null; },
+    /** T3: which key (1 | 2) of a class is its direct heal; 0 = not a healer */
+    directHealSlot: cls => directHealSlot(engine.skillData, cls),
     talents, pickTalent, unpickTalent, resetTalents, perkForest, perks, takePerk, refundPerk, resetPerks, retrainPrice, saveBuild,
     talent, perk, build,
     companion: e => (e.r.unit ? companionInfo(e.r.unit, engine.classById(e.r.unit.classId), engine.progression.companions) : null),

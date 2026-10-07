@@ -9,12 +9,13 @@ import { randomChibi2, CHIBI2_RACES } from '../../../../avatar-3d/js/chibi2-race
 import { loadClassOutfits, loadClassOutfits2, dressAs } from '../../../../avatar-3d/js/class-outfits.js';
 import { CREATURE_TYPES } from '../../../../avatar-3d/js/creature-types.js';
 import { gearLook, gearKey } from './gear-look.js';
+import { loadGearCatalog } from '../../../../avatar-3d/js/gear-catalog.js';   // play-test 5 (T23): stream F's new models for every slot
 import { applyCustom, customKey, lookCustom } from './ui/appearance-core.js';   // play-test 2 Q20/Q21: the face/body a player chose
 
 export const PLAYABLE_RACES = ['human', 'elf', 'dwarf', 'halfling'];
 export const RACE_NAMES = Object.fromEntries(PLAYABLE_RACES.map(r => [r, CHIBI2_RACES[r]?.name?.replace(/^Chibi 2 /, '') || r]));
 
-let presets = null, outfits = null, bases = null, outfits2 = null, armourThemes = null;
+let presets = null, outfits = null, bases = null, outfits2 = null, armourThemes = null, gearCatalog = null;
 export async function loadLookData() {
   if (!presets) presets = fetch(new URL('../../../../avatar-2d/data/presets.json', import.meta.url)).then(r => r.json());
   if (!outfits) outfits = loadClassOutfits();
@@ -23,8 +24,9 @@ export async function loadLookData() {
   // play-test 4 S18: tier-2 class armour (avatar-3d class-outfits-t2.json) + C/E's themes for themed worn pieces
   if (!outfits2) outfits2 = loadClassOutfits2();
   if (!armourThemes) armourThemes = fetch(new URL('../../data/rules/armour-tiers.json', import.meta.url)).then(r => (r.ok ? r.json() : {})).then(d => d.themes || {}).catch(() => ({}));
-  const [p, o, b, o2, th] = await Promise.all([presets, outfits, bases, outfits2, armourThemes]);
-  return { presets: p, outfits: o, bases: b, outfits2: o2, themes: th };
+  if (!gearCatalog) gearCatalog = Promise.resolve().then(() => loadGearCatalog()).catch(() => null);      // absent = the older tables draw everything
+  const [p, o, b, o2, th, gc] = await Promise.all([presets, outfits, bases, outfits2, armourThemes, gearCatalog]);
+  return { presets: p, outfits: o, bases: b, outfits2: o2, themes: th, catalog: gc };
 }
 
 /** The avatar JSON for a player look. Cached by key: a crowd of the same class+seed builds once. */
@@ -42,10 +44,10 @@ export async function avatarFor(look) {
   const custom = lookCustom(look), ck = custom ? customKey(custom) : '';
   const key = `${race}|${cls}|${seed}${ck ? '|c:' + ck : ''}${worn ? '|g:' + gearKey(look.gear) : ''}`;
   if (cache.has(key)) return cache.get(key);
-  const { presets: data, outfits: o, bases: B, outfits2: O2, themes: TH } = await loadLookData();
+  const { presets: data, outfits: o, bases: B, outfits2: O2, themes: TH, catalog: GC } = await loadLookData();
   const base = applyCustom(randomChibi2(randomAvatar, data, { race, seed, makeRng, known: (slot, id) => partIds(slot).includes(id) }), custom);
   let a;
-  if (worn) a = { ...base, ...gearLook(look.gear, { baseOf: k => B?.[k] || null, tier2: O2?.[cls] || null, themes: TH }) };
+  if (worn) a = { ...base, ...gearLook(look.gear, { baseOf: k => B?.[k] || null, tier2: O2?.[cls] || null, themes: TH, catalog: GC }) };
   else { const outfit = o[cls] || o.warrior; a = outfit ? dressAs(base, outfit) : base; }
   if (cache.size > 300) cache.delete(cache.keys().next().value);
   cache.set(key, a);

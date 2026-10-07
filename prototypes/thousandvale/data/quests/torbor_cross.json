@@ -25,6 +25,13 @@
       "role": "trader",
       "at": "Halsbridge",
       "greeting": "Rats is my trade. Business has never been better, which is the problem."
+    },
+    "angler_halsbridge": {
+      "name": "Perrin Underarch",
+      "role": "angler",
+      "at": "Halsbridge",
+      "greeting": "Best spot in the province is right under the bridge. The pike thinks so too.",
+      "placedBy": "content-pools"
     }
   },
   "quests": [
@@ -48,10 +55,12 @@
       "reward": {
         "xp": 0.45,
         "gold": 8,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "millbrook_wheels"
     },
@@ -96,7 +105,13 @@
       "done": "Bless you. The wheel turns in peace.",
       "reward": {
         "xp": 0.35,
-        "gold": 5
+        "gold": 5,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {

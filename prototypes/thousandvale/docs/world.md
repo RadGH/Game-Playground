@@ -424,7 +424,7 @@ that ends inside the town pushes the ring clear of its end instead of holing it.
 street or path with the ring; crossings within 26 m of each other share one gate (the widest road owns it; others side by side
 widen its passage, others further off are LED round to it with painted approaches outside and inside); gates whose openings
 collide merge; a ring no road reaches gets one gate facing the nearest way. `yaw` = atan2(dx, dz) of the way OUT along the main
-road (never the wall's normal — Farhold's rotation bug), `pass` = clear passage, `kind` gatehouse | posts | gap (passage > 12 m).
+road (what a walker follows; since play-test 5 the gate STRUCTURE is drawn by `wallYaw`, in the wall's line — §12), `pass` = clear passage, `kind` gatehouse | posts | gap (passage > 12 m).
 The opening grows along the ring while a bundled way runs on beside the wall. **Openings**: water where a river runs through the
 ring (a grate if ≤ 16 m), keep where one of stream E's discs stands on the line. Roads are painted only outside a town circle, so
 each gate's `approaches` are painted from the rim to the gate and on to the high street.
@@ -440,3 +440,47 @@ no road placement / street or path centreline / painted road sample under a run 
 within 20° of its road; no wall across a plot or E disc; nav passable along the road through every gate and SOLID mid-run; every
 gate's outside reaches the town square by flood fill. Drawn by `js/client/walls-view.js` with proctown's kit (barricade, gate
 leaves, posts and grates are opt-in additions there).
+
+## 12. Play-test 5 (2026-10-06): gates in the wall, fences on their posts, taller buildings (stream W)
+
+All 16 zones re-baked (`placements.json` ×16 gain two gate fields, `nav.bin` ×10 where a gate's jambs moved) and the map
+(`data/world/map/zones/*.png` ×10). `terrain.bin`, scatter and `inputHash` are unchanged. Tests: `tests/B/walls.test.js`
+(T8a/T8b, 11), `tests/B/fences.test.js` (4), `tests/B/buildings.test.js` (7), `proctown/tests/buildtune.test.js` (5).
+
+**T8b — a gate lies IN its wall.** §11 turned the gatehouse to the ROAD. Where a road left town at a slant (31 of 78 drawn gates
+more than 3° out, 26 more than 10°; the worst 54°, Torborhold's east gate 50°) the gatehouse stood skewed across the wall line with a hole either side. Now:
+- `gates[].x, z` is ON the ring; **`wallYaw`** = atan2(nx, nz) of the ring's outward normal there — the way the STRUCTURE
+  faces, its width along the wall; **`open`** = the clear opening along the wall =
+  `pass / cos(slant) + 2 × depth × tan(slant)` (depth: half a gatehouse, 1.7 m; a pair of posts, 1.5 m), so the road still
+  fits through at its own angle. Torborhold east: `pass` 4.7 m → `open` 11.34 m.
+- `yaw` / `out` are unchanged: the way OUT along the road. Anything that WALKS through a gate keeps using them.
+- nav: the jambs are stamped along the wall line, `open` apart (`wallNav`), not square to the road.
+- `js/client/walls-view.js` draws from `wallYaw`/`open`: proctown's opt-in `gatehouseParts(kind, open)` moves the jambs apart
+  and stretches only the lintel (scaling the whole piece fattened the jambs), and short lengths of wall join each jamb to
+  the end of its run. `planWalls()` returns `gates: [{x, z, yaw, open, jamb, kind, stubs}]` for tests.
+
+**T8a — fences.** Two causes. (1) Three of stream E's recipes (the **Drill Field** beside Torborhold, Turnwater Mill, the
+Spider Bridge toll) placed `fence_rail` props at yaw 1.57 between posts spaced along X; a rail runs along local X at yaw 0,
+so every rail stood across its own fence. Fixed in `data/vignettes/{setpieces,m2b}.json` (posts re-spaced to the rail's
+2.4 m), rule written into `data/vignettes/README.md`. (2) A hamlet's field gate: its posts stood square to the ROAD rather
+than on the fence line, and its two leaves were swung to 100° — a length of rail fence at a right angle to its posts. The
+posts are on the fence line now (T8b), the fence runs up to them, and the leaves are latched back 25° off the fence.
+
+**T13 — building heights.** Every town in Torbor Downs is halfling culture: 2.0–2.5 m storeys, 1.75–2.2 m doors, and a
+burrow sinks 48% of a storey (its door started 1.1 m under the grass) — against a 1.75 m character (1.5–2.0). The trade
+plots are shallow strips only a hovel fits, and a hovel is nearly square: the town hall was a 2.6 m hut on an 8.6 m plot.
+`js/client/building-tune.js` (`BUILDING_SCALE`, `tuneFor(want, {office, plot, seed})`) feeds proctown's opt-in
+`describeBuilding({ tune })` from town-view, setpiece-view and site-view: storeys 3.3–3.9 m, doors 2.6–3.0 × 1.3–1.8 m,
+nothing dug in, the plot filled (92% offices / 78% homes), two storeys for 17 trades where the plot is ≥ 2.4 m deep (and
+one home in three), roofs at least 0.8 pitch where the type allows, fewer turf mounds. **Plots, door sides and yaws do
+not change**, so nav.bin and the NPC spots are untouched.
+
+| | before | after |
+|---|---|---|
+| door showing above ground (avg; worst) | 1.82 m; 0.79 m | 2.80 m; 2.60 m |
+| storey | 2.26 m | 3.59 m |
+| eave, homes / offices (avg); lowest | 2.38 m / 2.70 m; 1.04 m | 5.08 m / 6.41 m; 3.30 m |
+| roof pitch (avg) | 0.65 | 0.81 |
+| footprint (avg) | 4.78 × 3.82 m | 5.21 × 4.78 m |
+| offices of two storeys or more | 99 of 411 | 316 of 411 |
+| doors showing less than 2.0 m (the tallest body) | 471 of 821 | 0 |

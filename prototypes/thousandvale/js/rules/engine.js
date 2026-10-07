@@ -15,6 +15,11 @@ import { installItemBuffs } from './buffs.js';
 import { installTalentTrees } from './talents.js';
 import { buildTvForest } from './perk-forest.js';
 import { installLootPool, buildLootPool } from './loot-pool.js';
+import { installTvSkills } from './tv-skills.js';
+import { buildCasterForms } from './caster-forms.js';
+import { installTvGear, poolTvGear, attachTvGear } from './tv-gear.js';
+import { setKitSource } from './starter-kits.js';
+import { createFishing } from './fishing.js';
 
 /** The same describe hook main.js passes, so a unique's power text matches Farhold's tooltip. */
 const EFFECTS_DESC = id => EFFECTS['legendary:' + id]?.desc?.() || null;
@@ -27,18 +32,24 @@ export const DEFAULT_LEVEL_CAP = 50;
  * engine in a process must agree on it. createEngine sets it explicitly rather than trusting the
  * default.
  */
-export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP } = {}) {
+export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP, tvSkills = true, tvGear = true } = {}) {
   const { items, balance, skills, classes, enemies, talents, uniques, tools } = data;
   if (!items || !balance || !skills) throw new Error('createEngine: items, balance and skills are required');
 
   // main.js line ~299: Farhold's 184 uniques and the four foci, in memory, before anything reads items
   installUniques(items, uniques, { tools, describe: EFFECTS_DESC });
   installFoci(items, { describe: EFFECTS_DESC, balance });
+  // play-test 5 (T23 + two missing bases): Thousandvale's own item bases and stream F's gear catalog, in memory, after
+  // Farhold's foci are in (a catalog focus copies one) and before `Rpg` reads the table. Off for the parity fixtures.
+  const gearReport = tvGear ? installTvGear(items, data.tvGear || null, data.gearCatalog || null) : null;
   // main.js line ~439: the combat and weapon knobs (both mutate module tables in place, idempotent)
   tuneFeel(balance.player?.combat);
   tuneWeapons(balance.player);
   setLevelCap(levelCap);
 
+  // play-test 5 (T3, T4): Thousandvale's own skill rows and class lists (data/rules/skills-tv.json), in memory, BEFORE the
+  // talent trees are rewritten — a parity engine keeps Farhold's table (`tvSkills: false`)
+  const skillReport = tvSkills ? installTvSkills(skills, data.tvSkills || null) : null;
   // P6 — Thousandvale's talent trees (data/rules/talents.json), in memory, before any bar is built
   const talentReport = installTalentTrees(skills, data.tvTalents || {});
   const rpg = new Rpg(items, { ...balance, seed }, talents);
@@ -69,12 +80,23 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP } = 
     xpMult: kind => data.progression?.xp?.[kind + 'Mult'] ?? 1,
     /** P26 — the level-gap softening (js/rules/level-gap.js); null turns it off (parity fixtures) */
     levelGap: data.progression?.levelGap || null,
-    forest, talentReport,
+    forest, talentReport, skillReport, gearReport,
   };
   installLevelGap(engine);
   installItemBuffs(engine);             // shop buffs: armour oil, hearty stew (js/rules/buffs.js)
   // play-test 4 S17/S18: every weapon family drops at low levels; themed second-tier armour from level 15
-  installLootPool(engine, { pool: buildLootPool(data.lootPool, items, balance), tiers: data.armourTiers || null });
+  const lootPool = buildLootPool(data.lootPool, items, balance);
+  if (tvGear) poolTvGear(lootPool, items, data.tvGear || null, gearReport);          // the new bases drop from their first level
+  installLootPool(engine, { pool: lootPool, tiers: data.armourTiers || null });
+  // play-test 5: T17 conversion + the caster stamp on every new item (`engine.finishItem`), `engine.makeItem`
+  if (tvGear) attachTvGear(engine, data.tvGear || null);
+  engine.crates = data.crates || null;                    // T9 / T20 (js/rules/crates.js)
+  engine.kits = data.starterKits || null;                 // T5 (js/rules/starter-kits.js)
+  setKitSource(engine, engine.kits);
+  // T25 — angling: C's numbers + E's fish (absent = an empty water: junk only, never an error)
+  engine.fishing = data.fishing ? createFishing(data.fishing, data.angling || null) : null;
+  // play-test 5 (T14-T16): caster forms — how wands, staves, sceptres and foci attack (js/rules/caster-forms.js); off for parity
+  engine.casterForms = tvGear ? buildCasterForms(data.casterForms || null) : null;
   installAffixes(engine, data.affixes || null);          // play-test 4 S4: champion / rare rolls, Pack-leader, affix specials
   return engine;
 }

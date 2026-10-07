@@ -31,9 +31,10 @@ import { huntAreas, pickArea, areasTouching } from './hunts.js';
 
 export const KILL_GOLD = level => 3 + level;            // one kill's gold at a level (quest gold = reward.gold × this)
 export const NEAR_M = 150;                              // a step's `near` place: within this many metres
-const JOB_ROLES = new Set(['elder', 'sergeant', 'captain', 'quartermaster', 'tollkeeper', 'broker', 'innkeeper']);
+const JOB_ROLES = new Set(['elder', 'sergeant', 'captain', 'quartermaster', 'tollkeeper', 'broker', 'innkeeper', 'angler']);   // angler: play-test 5 T25 (frames with giverRole 'angler')
+const RARITY_RANK = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4 };
 
-export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null, rng = Math.random, now = () => Date.now(), isNight = () => false }) {
+export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null, rng = Math.random, now = () => Date.now(), isNight = () => false, angling = null }) {
   const sites = (L.terrain.reader && L.terrain.reader.meta && L.terrain.reader.meta.sites) || [];
   const defs = new Map();
   const nextOf = new Map();      // id -> the quest it unlocks
@@ -202,7 +203,9 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
     const pre = lockedBy.get(def.id);
     return !pre || [...pre].some(q => s.done[q]);
   }
-  const rewardView = (def) => ({ xp: def.reward?.xp || 0, gold: Math.round((def.reward?.gold || 0) * KILL_GOLD(def.level || 1)), item: def.reward?.item?.tier || null });
+  const rewardView = (def) => ({ xp: def.reward?.xp || 0, gold: Math.round((def.reward?.gold || 0) * KILL_GOLD(def.level || 1)), item: def.reward?.item?.tier || null,
+    // play-test 5: T9 crates ({slot, min} each — "Crate: boots (uncommon or better)"), T25 goods, E's own reward line
+    ...(def.reward?.crates ? { crates: [].concat(def.reward.crates).map(c => ({ slot: c.slot || 'any', min: c.min || c.minRarity || 'uncommon' })) } : {}), ...(def.reward?.goods ? { goods: def.reward.goods } : {}), ...(def.rewardText ? { text: def.rewardText } : {}) });
   function view(ch, def, a = null) {
     // each step carries its marker (`at`: {x, z, r, name?} world metres) and E's `where` line when it has one (P17)
     const any = def.order === 'any';
@@ -244,7 +247,10 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
     };
     const seen = new Set(s.jobs.seen || []);
     const list = [];
-    const frames = jobs.frames.filter(f => !(recent[f.id] && t - recent[f.id] < (R.repeatGapMinutes || 60) * 60000));
+    // T25: fish this zone's waters hold (E's angling.json, by level band) for the angler's job frames
+    pool.fish = ((angling && angling.fish) || []).filter(f => f && f.id && (!Array.isArray(f.bands) || (band[0] <= f.bands[1] && band[1] >= f.bands[0])) && !f.pool).map(f => ({ id: f.id, name: f.name, rarity: f.rarity || 'common', skill: f.skill || 0, x: giver.x, z: giver.z }));
+    // a frame written for one kind of giver (`giverRole`) is only that giver's; an angler offers nothing else
+    const frames = jobs.frames.filter(f => (f.giverRole ? f.giverRole === giver.role : giver.role !== 'angler') && !(recent[f.id] && t - recent[f.id] < (R.repeatGapMinutes || 60) * 60000));
     const bag = frames.slice();
     for (let guard = 0; list.length < (R.maxOffered || 4) && bag.length && guard < 40; guard++) {
       const total = bag.reduce((a, f) => a + (f.weight || 1), 0);
@@ -266,6 +272,8 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       else if (g.kind === 'visit' || g.kind === 'use' || g.kind === 'talk' || g.kind === 'deliver') Object.assign(step, { place: at, kind: g.kind === 'use' ? 'visit' : g.kind === 'deliver' || g.kind === 'talk' ? 'reach' : 'visit' });
       else if (g.kind === 'escort') { const to = bound[String(g.to || '').replace(/[{}]/g, '')]; Object.assign(step, { kind: 'visit', place: to }); }
       else if (g.kind === 'clear') Object.assign(step, { door: at ? at.door : -1, floor: g.floor || null, boss: !!g.boss, zone: zoneKey });
+      else if (g.kind === 'catch') Object.assign(step, { fish: target ? target.id : null, pool: !!g.pool, rarity: g.rarity || null });   // T25: an angler's job
+      else if (g.kind === 'cook') Object.assign(step, { meal: g.meal || null });
       step.at = round1(stepAt(step, zoneKey, giver));
       huntMark(step, zoneKey, giver);
       const id = `job:${f.id}:${giver.key}:${Math.floor(t / 60000)}`;
@@ -283,6 +291,11 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       else if (n.type === 'settlement') cands = cands.filter(c => Math.hypot(c.x - giver.x, c.z - giver.z) > (c.r || 40) + 30);
       if (n.from === 'farm.pests' && out.farm) cands = cands.filter(c => (L.camps.some(k => k.type === c.id && Math.hypot(k.x - out.farm.x, k.z - out.farm.z) < 80)));
       if (n.family === 'humanoid') cands = cands.filter(c => /brigand|cult|zealot|bandit|raider|smuggler|wrecker/.test(c.id));
+      if (n.type === 'fish') {                      // T25: a named fish, or one of a rarity the giver's zone holds, not above a skill
+        if (n.id) cands = cands.filter(c => c.id === n.id);
+        if (Array.isArray(n.rarity)) cands = cands.filter(c => n.rarity.includes(c.rarity));
+        if (Number.isFinite(n.maxSkill)) cands = cands.filter(c => (c.skill || 0) <= n.maxSkill);
+      }
       cands = cands.filter(c => !Object.values(out).includes(c));
       if (!cands.length) return null;
       if (n.prefer === 'undiscovered') { const fresh = cands.filter(c => !seen.has(c.id)); if (fresh.length && rng() < 0.8) cands = fresh; }
@@ -323,6 +336,9 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       case 'use': return ev.kind === 'use' && ev.vignette === st.vignette && (!st.object || ev.name === st.object);
       case 'talk': case 'deliver': return ev.kind === 'talk' && ev.npcId === st.npc;
       case 'clear': return ev.kind === 'clear' && ev.door === st.door && ev.zone === st.zone && (st.boss || st.floor == null ? ev.boss : ev.floor >= st.floor || ev.boss);
+      // play-test 5 T25 (E's step kinds): a landed fish (never junk or a crate) / a cooked meal
+      case 'catch': return ev.kind === 'fish' && (!st.fish || ev.species === st.fish) && (!st.pool || !!ev.pool) && (!st.rarity || (RARITY_RANK[ev.rarity] ?? 0) >= (RARITY_RANK[st.rarity] ?? 0));
+      case 'cook': return ev.kind === 'cook' && (!st.meal || ev.meal === st.meal || ev.recipe === st.meal);
       default: return false;
     }
   }

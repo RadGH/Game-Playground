@@ -168,7 +168,7 @@ for (let i = 0; i < CLASSES.length; i += 6) {
   });
 }
 
-test('the audit list covers every class and every skill', () => {
+test('the audit list covers every class and every skill', async () => {
   for (const c of CLASSES) assert.ok(ROWS.some(r => r.classId === c), c);
   const bare = ROWS.filter(r => !r.label.includes(' '));
   assert.equal(new Set(bare.map(r => r.label)).size, 180);
@@ -181,6 +181,28 @@ test('the audit list covers every class and every skill', () => {
       `${ROWS.length} casts, ${ROWS.filter(r => r.want.length).length} of them do something for an ally.`, '',
       '| Cast | Reaches the ally |', '|---|---|'];
     for (const r of ROWS) if (r.want.length || !r.label.includes(' ')) lines.push(`| ${r.label} | ${r.want.join(', ') || '—'} |`);
-    writeFileSync(new URL('../../js/rules/ally-audit.md', import.meta.url), lines.join('\n') + '\n');
+    // play-test 5 T2: the wording table — which words a card uses for whom, and the code that makes each sentence true
+    const W = await import('../../js/rules/wording.js');
+    const head = ['# Who a card touches (play-test 5, T2) — and the ally-targeting audit', '',
+      'Every skill, talent, perk and item-power card goes through `js/rules/wording.js`. One vocabulary:', '',
+      '| Words on the card | Exactly who |', '|---|---|',
+      '| you | the caster |',
+      '| you (or the party member you target) | the friendly target of the cast if it is a party member within 30 m, else the caster |',
+      '| your followers | your OWN pets, summons and hired blades — never another player, never their pets |',
+      '| party members | the other players in your party within 30 m |',
+      '| all allies / allies / every other ally | you + party members within 30 m + your followers + those party members\' own pets ("every other ally" leaves you out) |',
+      '', 'What changed in behaviour so the cards are true (js/rules/cast-skills.js):', '',
+      '| Effect | Before | Now |', '|---|---|---|',
+      '| "For Ns, your followers: …" (`selfBuff.petsOnly`: Stoke the Familiar, Den Guard, Wrath of the Raised…) | every party member and their pets too | your own followers only |',
+      '| "Revives every fallen follower" (Farhold `revive`: Unleash the Hound, Stoke the Familiar, Second Rising) | also stood dead party PLAYERS up | your own followers only; a player needs a revive skill (T4) |',
+      '| a barrier / status / cleanse for "all allies" (`pets: true`) | skipped a party member\'s own pets | reaches them (one list: `rt.allies`) |',
+      '| "swaps places with the aimed follower or enemy" (Reposition, Swap Partner, Fiendish Swap) | the follower half was never ported | swaps with your own aimed follower when no enemy is aimed at (a player is never moved) |',
+      '| the heal of Prayer of Dawn (`around` + heal) | always the caster | the party member you target, else you (T3) |',
+      '| Mending Post, Greensap | no direct heal | a direct heal on the party member you target, else you (T3) |',
+      '| a chained bolt (Forked Bolt, a chaining wand, Arc Lash) | re-struck the same body every hop (Farhold does too) | jumps to the nearest OTHER enemy |',
+      '', 'Each sentence Farhold writes, and the code that makes Thousandvale\'s version true (tests/C/playtest5.test.mjs casts one per kind and checks who it lands on):', '',
+      '| Farhold\'s phrase (pattern) | Code that carries it out |', '|---|---|',
+      ...W.WORDING_RULES.map(r => `| \`${r.pattern.replace(/\|/g, '\\|')}\` | ${r.reader} |`), '', '---', ''];
+    writeFileSync(new URL('../../js/rules/ally-audit.md', import.meta.url), head.join('\n') + lines.join('\n') + '\n');
   }
 });

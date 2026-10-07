@@ -240,6 +240,7 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
     const ev = events.get(def.road.ev);
     if (!ev) return;
     ev.touched = true;
+    ev.acceptedAt ||= now();                 // T12: the event's clock starts when someone takes it on
     if (def.road.kind === 'deliver') {
       const item = { kind: 'good', id: 'road_parcel', name: def.road.item || (ev.spec && ev.spec.item) || 'Sealed parcel', desc: 'For ' + def.road.target.name + ' in ' + def.road.target.town + '.', rarity: 'normal', stack: 1, quest: def.id, noSell: true };
       grant(o, { items: [item], gold: 0, reason: 'quest', from: obj });
@@ -311,6 +312,7 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
       o.room.emit({ type: 'say', id: obj.id, text: 'For me? About time. Here, for your legs.', style: 'bark' });
       const ev = events.get(def.road.ev) || { id: def.road.ev, room: { id: def.road.room } };
       questEvent(o, { kind: 'use', vignette: 'road:' + def.road.room + ':' + ev.id, name: 'delivered' });
+      if (ev && ev.spec) result(ev, 'success', null, [o]);
       counters.roadDelivered = (counters.roadDelivered || 0) + 1;
       return { delivered: id };
     }
@@ -376,15 +378,96 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
       const anyone = nearestPlayer(ev);
       if (ev.kind === 'chest') {
         if (!ev.opened && guardsDown(ev) && anyone && anyone.d <= 80) openUp(ev);
-        if (ev.opened && ev.rolled.size && !corpses.hasLoot(ev.room, ev.chest)) { ev.emptyAt ||= t; if (t - ev.emptyAt > 4000) { end(ev); continue; } }
+        if (ev.opened && ev.rolled.size && !corpses.hasLoot(ev.room, ev.chest)) { ev.emptyAt ||= t; if (t - ev.emptyAt > 4000) { result(ev, 'success', null, [...ev.rolled].map(c => online.get(c)).filter(Boolean)); end(ev); continue; } }
       }
       if (ev.leaveAt && t >= ev.leaveAt && ev.npc && !ev.npc.removed) { ev.room.remove(ev.npc); }
       if (ev.follow) followCheck(ev, t);
       if (ev.done && t >= ev.doneAt) { end(ev); continue; }
       const idleFor = t - ev.born;
       const stale = !ev.follow && !onQuest(ev).length && (idleFor > R.lifeSec * 1000 && (!anyone || anyone.d > 120));
-      if (stale || idleFor > R.lifeSec * 4000) end(ev);
+      if (stale || idleFor > R.lifeSec * 4000) { end(ev); continue; }
+      // T12 (play-test 5, E's `info.durationSec`): a road event someone took on has a time limit — at 0 it FAILS with its
+      // `onFail` line (the quest is given up for them, the NPC leaves). A chest keeps its lifeSec as before.
+      const dl = deadline(ev);
+      if (dl && t >= dl && !ev.done) fail(ev, 'time');
     }
+  }
+  // ---- T11 / T12: every road event says what it is, what to do, how long is left and what it pays; and it ENDS ----
+  const uidOf = ev => 'road:' + ev.room.id + ':' + ev.id;
+  function infoOf(ev) {
+    if (ev._info) return ev._info;
+    const I = (ev.spec && ev.spec.info) || {};
+    const tok = { ...(ev.tok || {}), guards: guardWord(ev) };
+    const nm = fill(I.name || (ev.spec && (ev.spec.title || ev.spec.name)) || 'Something by the road', tok);
+    ev._info = { name: nm, what: fill(I.what || (ev.spec && (ev.spec.blurb || ev.spec.text || ev.spec.say)) || '', tok), goal: fill((I.objective && I.objective.text) || '', tok), durationSec: I.durationSec || R.lifeSec,
+      onSuccess: fill(I.onSuccess || 'Done.', tok), onFail: fill(I.onFail || 'Too late.', tok), rewardText: fill(I.rewardText || (ev.kind === 'chest' ? 'A chest for everyone who opens it' : 'Gold, experience and an item, paid on the spot'), tok) };
+    return ev._info;
+  }
+  /** When the event runs out (room ms): a chest from when it appeared, a quest from when it was taken on; null = no clock yet. */
+  function deadline(ev) {
+    if (ev.virtual || !ev.spec) return null;
+    const ms = infoOf(ev).durationSec * 1000;
+    if (ev.kind === 'chest') return ev.born + Math.max(ms, R.lifeSec * 1000);
+    return ev.acceptedAt ? ev.acceptedAt + ms : null;
+  }
+  function objectiveOf(ev, o) {
+    const I = infoOf(ev);
+    const total = ev.guards.filter(m => !(m.data && m.data.ambush)).length, down = ev.guards.filter(m => !(m.data && m.data.ambush) && (m.removed || m.dead)).length;
+    const amb = ev.guards.filter(m => m.data && m.data.ambush && !m.removed && !m.dead).length;
+    if (amb) { const A = (D.coded && D.coded.ambush && D.coded.ambush.info) || {}; return { kind: 'defend', text: fill((A.objective && A.objective.text) || 'Kill the ambushers', { ...(ev.tok || {}), name: ev.name || 'them' }), n: 0, of: amb }; }
+    if (ev.kind === 'chest') return total && down < total ? { kind: 'kill', text: 'Defeat the ' + guardWord(ev), n: down, of: total } : { kind: 'open', text: I.goal || 'Open it', n: o && ev.rolled.has(o.char.id) && !corpses.hasLoot(ev.room, ev.chest) ? 1 : 0, of: 1 };
+    if (ev.kind === 'rescue' && !ev.freed) return total && down < total ? { kind: 'kill', text: 'Defeat the ' + guardWord(ev), n: down, of: total } : { kind: 'rescue', text: 'Free ' + (ev.name || 'the captive'), n: 0, of: 1 };
+    if (ev.kind === 'deliver') return { kind: 'deliver', text: I.goal || 'Deliver the parcel', n: ev.done ? 1 : 0, of: 1 };
+    return { kind: 'escort', text: ev.kind === 'rescue' ? 'Bring ' + (ev.name || 'them') + ' home to ' + (ev.town ? ev.town.name : 'town') : (I.goal || 'See them safely to town'), n: ev.done ? 1 : 0, of: 1 };
+  }
+  /** 1 Hz (the province's tracker): `eventTrack` to everyone on a road event's quest, and to anyone standing by it. */
+  function track() {
+    const t = now(), wall = wallNow();
+    for (const ev of events.values()) {
+      if (ev.virtual || !ev.spec || ev.room.removed) continue;
+      const I = infoOf(ev);
+      const on = ev.kind === 'chest' ? [] : onQuest(ev);
+      const seen = new Set(on);
+      const cx = ev.npc && !ev.npc.removed ? ev.npc.x : ev.x, cz = ev.npc && !ev.npc.removed ? ev.npc.z : ev.z;
+      const near = ev.kind === 'deliver' && ev.acceptedAt ? [] : ev.room.host.near(cx, cz, ev.kind === 'chest' ? 70 : 30, x => x.kind === 'player' && x.char).map(p => online.get(p.char.id)).filter(o => o && o.entity && o.room === ev.room);
+      for (const o of near) seen.add(o);
+      if (!seen.size) continue;
+      const dl = deadline(ev);
+      for (const o of seen) {
+        if (!o.conn) continue;
+        const d = Math.hypot(o.entity.x - cx, o.entity.z - cz);
+        const mine = on.includes(o) || (ev.kind === 'chest' && ev.rolled.has(o.char.id));
+        o.conn.sendJSON({ t: 'eventTrack', uid: uidOf(ev), id: (ev.spec && ev.spec.id) || ev.kind, name: I.name, kind: 'road', road: ev.kind, realm: false, state: ev.kind === 'chest' || mine ? 'live' : 'offer',
+          what: I.what, text: I.what, goal: I.goal || undefined, objective: objectiveOf(ev, o), stage: { n: ev.kind === 'rescue' && ev.freed ? 2 : 1, of: ev.kind === 'rescue' ? 2 : 1, name: null },
+          ...(dl ? { leftMs: Math.max(0, dl - t), endsAt: wall + Math.max(0, dl - t) } : { leftMs: null, endsAt: null }), reward: { text: I.rewardText, items: [I.rewardText] }, rewardText: I.rewardText,
+          x: Math.round(cx), z: Math.round(cz), r: 30, level: ev.level, inside: d <= 30, inRange: d <= 30, credited: mine, enrolled: mine, dist: Math.round(d), players: seen.size });
+      }
+    }
+  }
+  /** The result line: `eventDone {uid, name, result, why?, text}` + a system chat line, to the ones it concerns. */
+  function result(ev, res, why, who) {
+    if (ev.resultSent || !ev.spec) return;
+    ev.resultSent = true;
+    const I = infoOf(ev), won = res === 'success';
+    const text = won ? I.name + ': ' + I.onSuccess : 'Event failed: ' + I.name + ' — ' + ({ time: 'time ran out', left: 'left behind' }[why] || 'lost') + '. ' + I.onFail;
+    counters['road_' + (won ? 'won' : 'lost')] = (counters['road_' + (won ? 'won' : 'lost')] || 0) + 1;
+    for (const o of new Set(who || [])) {
+      if (!o || !o.conn) continue;
+      o.conn.sendJSON({ t: 'eventDone', uid: uidOf(ev), id: (ev.spec && ev.spec.id) || ev.kind, name: I.name, kind: 'road', result: res, won, ...(won ? {} : { why: why || 'time' }), credited: won, xp: 0, gold: 0, items: [], text, story: won ? I.onSuccess : I.onFail });
+      if (!won) tell(o, text);
+    }
+  }
+  /** Out of time (or given up): the quest is dropped for everyone on it, everyone near hears why, the event packs up. */
+  function fail(ev, why) {
+    const who = new Set(onQuest(ev));
+    for (const p of who) {
+      const act = p.char.quests.active;
+      const id = Object.keys(act).find(k => act[k].def && act[k].def.road && act[k].def.road.ev === ev.id && act[k].def.road.room === ev.room.id);
+      if (id) { bookOf(p).abandon(p.char, id); questSaved(p); sendQuests(p); }
+    }
+    for (const p of ev.room.host.near(ev.x, ev.z, 70, x => x.kind === 'player' && x.char)) { const o = online.get(p.char.id); if (o) who.add(o); }
+    result(ev, 'fail', why, [...who]);
+    end(ev);
   }
   function nearestPlayer(ev) {
     let best = null;
@@ -402,7 +485,9 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
     if (enteredTown) return arrive(ev);
     if (withThem) ev.lastWith = t;
     else if (t - ev.lastWith > R.escortGiveUpSec * 1000) {
-      for (const p of onQuest(ev)) { const id = Object.keys(p.char.quests.active).find(k => p.char.quests.active[k].def && p.char.quests.active[k].def.road && p.char.quests.active[k].def.road.ev === ev.id); if (id) { bookOf(p).abandon(p.char, id); questSaved(p); sendQuests(p); tell(p, n.name + ' gave up waiting for you and turned back.'); } }
+      const gone = onQuest(ev);
+      for (const p of gone) { const id = Object.keys(p.char.quests.active).find(k => p.char.quests.active[k].def && p.char.quests.active[k].def.road && p.char.quests.active[k].def.road.ev === ev.id); if (id) { bookOf(p).abandon(p.char, id); questSaved(p); sendQuests(p); tell(p, n.name + ' gave up waiting for you and turned back.'); } }
+      result(ev, 'fail', 'left', gone); ev.resultSent = false; ev.acceptedAt = null;      // T12: said out loud; the event can be taken on again
       ev.follow = null; ev.freed = ev.kind === 'rescue' ? ev.freed : false; n.loop('idle');
     }
   }
@@ -412,7 +497,9 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
     const thanks = D.thanks || ['Thank you.'];
     ev.room.emit({ type: 'say', id: ev.npc.id, text: fill(pick(thanks), { town: ev.town ? ev.town.name : 'town' }), style: 'bark' });
     ev.npc.loop('wave');
-    for (const o of onQuest(ev)) progress(o, ev, 'arrived');
+    const who = onQuest(ev);
+    for (const o of who) progress(o, ev, 'arrived');
+    result(ev, 'success', null, who);
     counters.roadArrived = (counters.roadArrived || 0) + 1;
   }
   /** ~5 Hz: escorts walk a few metres behind whoever they follow; an ambush every `ambushEveryM` metres walked. */
@@ -446,7 +533,7 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
     counters.roadAmbush = (counters.roadAmbush || 0) + 1;
   }
 
-  return { tick, move, use, offers, accepted, talk, events, spawnFor, end, stats: () => ({ live: events.size, ...Object.fromEntries(Object.entries(counters).filter(([k]) => k.startsWith('road'))) }) };
+  return { tick, move, use, offers, accepted, talk, events, spawnFor, end, track, fail, deadline, infoOf, stats: () => ({ live: events.size, ...Object.fromEntries(Object.entries(counters).filter(([k]) => k.startsWith('road'))) }) };
 }
 
 const ROLE_WORD = { smith: 'smith', merchant: 'merchant', innkeeper: 'innkeeper', elder: 'elder', apothecary: 'apothecary', healer: 'healer', provisioner: 'provisioner', tailor: 'tailor', armourer: 'armourer', bowyer: 'bowyer', jeweller: 'jeweller', trader: 'trader', stablehand: 'stablehand' };

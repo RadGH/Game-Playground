@@ -11,12 +11,16 @@
 import { registerTip, refreshTip } from './tips.js';
 import { slotOf, altSlotOf, SLOT_NAME, RARITY_NAME, rarityOf, levelCheck, compareTo, plainScore } from './inv-core.js';
 import { iconFor } from './item-icons.js';
+import { isCrate, crateLines, rarityClass } from './pt5-core.js';
 
 const items = new Map();                       // uid -> item
 export function rememberItems(list) { for (const it of list || []) if (it && it.uid != null) items.set(String(it.uid), it); }
 export const itemByUid = uid => items.get(String(uid)) || null;
 
 let F = { describe: null, score: null, name: null };
+// C's wording (js/rules/wording.js, pure): Farhold's "companions" reads "your followers" — one vocabulary on every card (T2)
+let who = t => t;
+import('../../rules/wording.js').then(m => { if (typeof m.whoText === 'function') who = t => { try { return m.whoText(t) || t; } catch { return t; } }; }).catch(() => {});
 const fload = Promise.all([import('../../../../farhold/js/effects.js'), import('../../../../farhold/js/rpg.js')])
   .then(([e, r]) => { F = { describe: e.describeAffix, score: r.itemScore, name: r.displayName }; }).catch(() => {});
 export const farholdReady = () => fload;
@@ -26,8 +30,8 @@ export const nameOf = it => (F.name ? F.name(it) : String(it?.name || 'Item'));
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const title = s => String(s || '').replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\b\w/g, c => c.toUpperCase());
 function affixText(a) {
-  if (a.text) return a.text;
-  try { if (F.describe) return F.describe(a); } catch { /* fall through */ }
+  if (a.text) return who(a.text);
+  try { if (F.describe) return who(F.describe(a)); } catch { /* fall through */ }
   const v = a.value ?? '';
   return `${a.name || title(a.stat || a.id)}${v !== '' ? ` ${v > 0 ? '+' : ''}${Math.round(v * 100) / 100}` : ''}`;
 }
@@ -52,8 +56,13 @@ export function itemCardHtml(item, { worn = false, level = null, equipment = nul
   const icon = iconFor(item);
   const b = [];
   b.push(`<div class="ic-head">${icon ? `<img class="ic-icon r-${esc(r)}" src="${icon}" alt="">` : ''}<div><div class="ic-name r-${esc(r)}">${esc(nameOf(item))}</div>`
-    + `<div class="ic-kind">${esc(RARITY_NAME[r] || title(r))} ${esc(slot ? SLOT_NAME[slot] || title(slot) : item.kind === 'junk' ? 'junk' : 'item')}`
+    + `<div class="ic-kind">${esc(RARITY_NAME[r] || title(r))} ${esc(slot ? SLOT_NAME[slot] || title(slot) : isCrate(item) ? crateLines(item).kind.toLowerCase() : item.kind === 'junk' ? 'junk' : item.kind === 'fish' ? 'fish' : 'item')}`
     + `${item.baseName && item.baseName !== item.name ? ' · ' + esc(item.baseName) : ''}${item.twoHanded ? ' · two-handed' : ''}</div></div></div>`);
+  // T9 / T20 (play-test 5): a crate or a gift says what it opens into and the lowest rarity it can be
+  if (isCrate(item)) {
+    const c = crateLines(item);
+    b.push(`<div class="ic-crate"><div class="ic-crate-what">${esc(c.opens)}</div><div class="ic-crate-min r-${esc(rarityClass(c.min))}">${esc(c.rarity)}</div><div class="ic-dim">${esc(c.how)}</div></div>`);
+  }
   if (slot) {
     const req = levelCheck(item, lv, eq);
     b.push(`<div class="ic-req">${item.ilvl ? `Item level ${esc(item.ilvl)} · ` : ''}<span class="${req.ok ? (req.reduced ? 'req-cut' : 'req-ok') : 'req-no'}">Requires level ${req.level}</span>`
@@ -65,13 +74,17 @@ export function itemCardHtml(item, { worn = false, level = null, equipment = nul
   if (item.attackSpeed && item.type === 'weapon' && item.attackSpeed !== 'normal') base.push(`${esc(item.attackSpeed)} attacks`);
   if (item.ranged) base.push('ranged');
   if (base.length) b.push(`<div class="ic-base">${base.join(' · ')}</div>`);
+  if (item.kind === 'fish' && item.size) b.push(`<div class="ic-base"><b>${esc(Math.round(item.size * 10) / 10)}</b> cm${item.record ? ' · your biggest' : ''}</div>`);
+  if (item.desc && !item.lore) b.push(`<div class="ic-dim">${esc(item.desc)}</div>`);
+  // T15 / T17 (C): what a caster weapon's attack IS, what a focus adds, what a converted weapon deals — written from the numbers
+  for (const k of ['attackText', 'focusText', 'convertText']) if (item[k]) b.push(`<div class="ic-attack">${esc(who(item[k]))}</div>`);
   if (item.weaponHeadline) b.push(`<div class="ic-dim">${esc(item.weaponHeadline)}</div>`);
   const rolled = (item.affixes || []).filter(a => !a.baseIntrinsic), built = (item.affixes || []).filter(a => a.baseIntrinsic);
   if (rolled.length || built.length) {
     b.push('<ul class="ic-affixes">' + rolled.map(a => `<li class="${a.id === 'legendary_effect' ? 'ic-legend' : String(a.stat).startsWith('cond_') ? 'ic-cond' : ''}">${esc(affixText(a))}</li>`).join('')
       + built.map(a => `<li class="ic-built">${esc(affixText(a))} <i>(built in)</i></li>`).join('') + '</ul>');
   }
-  if (item.uniquePower || item.power?.text) b.push(`<div class="ic-legend">${esc(item.power?.text || item.uniquePower)}</div>`);
+  if (item.uniquePower || item.power?.text) b.push(`<div class="ic-legend">${esc(who(item.power?.text || item.uniquePower))}</div>`);
   if (item.lore) b.push(`<div class="ic-lore">${esc(item.lore)}</div>`);
   if (slot && !worn) {
     const c = compareTo(item, eq, { score: scoreOf, alt: alt && !!altSlotOf(item) });

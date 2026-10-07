@@ -7,7 +7,7 @@
 //   createGuest(name?) -> { account, token }          token returned once; only its hash is kept
 //   authToken(token) -> { account, claimed } | null
 //   listChars(account) -> [{ id, name, cls, level, room }]
-//   createChar(account, { name, cls, look }) -> { char } | { err: 'name' | 'full' }
+//   createChar(account, { name, cls, look, kit }) -> { char } | { err: 'name' | 'full' }   (kit: the chosen starter kit, T5)
 //   takeChar(account, id, owner, leaseMs) -> { char, fence } | { err: 'missing' | 'lease' }
 //   saveChar(char, fence) -> true | false             refused when version or fence moved on
 //   setLook(account, id, look) -> { ok } | { err: 'missing' | 'lease' }   (a character nobody holds; play-test 2 Q21)
@@ -52,17 +52,17 @@ export function createMemoryStore({ now = () => Date.now(), data = null, onChang
       const a = t ? d.accounts[t.account] : Object.values(d.accounts).find(x => x.tokenHash === h);     // tokenHash: stores written before M3
       if (!a) return null;
       if (t) t.used = now();
-      return { account: a.id, claimed: !!a.claimed, username: a.username || null, banned: a.bannedUntil || 0, kind: t ? t.kind : 'guest' };
+      return { account: a.id, claimed: !!a.claimed, username: a.username || null, banned: a.bannedUntil || 0, kind: t ? t.kind : 'guest', admin: !!a.admin };
     },
     async listChars(account) {
       return Object.values(d.chars).filter(r => r.account === account).map(r => ({ ...brief(r), look: (r.blob && r.blob.look) || null }));
     },
-    async createChar(account, { name, cls, look = null }) {
+    async createChar(account, { name, cls, look = null, kit = null }) {
       const lower = name.toLowerCase();
       if (Object.values(d.chars).some(r => r.cols.name.toLowerCase() === lower)) return { err: 'name' };
       if (Object.values(d.chars).filter(r => r.account === account).length >= MAX_CHARS_PER_ACCOUNT) return { err: 'full' };
       const id = d.nextChar++;
-      const { cols, blob } = packChar({ name, cls, look, level: 1, xp: 0, gold: 0 });
+      const { cols, blob } = packChar({ name, cls, look, kit, level: 1, xp: 0, gold: 0 });
       d.chars[id] = { id, account, cols, blob, version: 0, lease_owner: null, lease_fence: 0, lease_until: 0 };
       changed();
       return { char: brief(d.chars[id]) };

@@ -62,6 +62,45 @@
    "radius": 8,
    "quest": "frog_chorus",
    "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_01_1",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1104,
+   "z": 655,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "stormlash"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_brackwater",
+   "name": "Mog Eelwright",
+   "role": "angler",
+   "at": "Brackwater",
+   "x": 1140,
+   "z": 1022,
+   "yaw": 1.18,
+   "angler": true
   }
  ]
 }

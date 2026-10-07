@@ -25,6 +25,13 @@
       "role": "scout",
       "at": "cult_cellar",
       "greeting": "Shh. Smugglers. And worse than smugglers. Cultists. Who smuggle."
+    },
+    "angler_redcliff": {
+      "name": "Corwen Claywater",
+      "role": "angler",
+      "at": "Redcliff",
+      "greeting": "The river runs red here. It is only the clay. Mostly it is the clay.",
+      "placedBy": "content-pools"
     }
   },
   "quests": [
@@ -55,10 +62,12 @@
       "reward": {
         "xp": 0.6,
         "gold": 12,
-        "item": {
-          "tier": "uncommon",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "into_the_scar"
     },
@@ -80,7 +89,13 @@
       "done": "Thank you. I'll name a barn after you. When I build one.",
       "reward": {
         "xp": 0.4,
-        "gold": 7
+        "gold": 7,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {

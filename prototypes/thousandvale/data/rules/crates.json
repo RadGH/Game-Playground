@@ -1,0 +1,237 @@
+{
+  "_doc": "Stream C (play-test 5: T9 crates, T20 gift boxes). A crate is an item that opens into ONE random item of a named kind with a minimum rarity (js/rules/crates.js). `min` maps the quest vocabulary (stream E: common | uncommon | rare | epic | legendary) and the loot words (normal | magic | rare | legendary | unique) to Farhold's roll: `floor` = the lowest rarity the roll may come out as (null = any), `boost` = the rarity roll's luck multiplier, `show` = the rarity the crate ITSELF is drawn as. `slots` names what a slot word may open into as loot-pool families (data/rules/loot-pool.json); `weapon`, `offhand` and the armour slots are narrowed to what the opener's class uses (`forClass`, on unless the crate says false). `offhandFor` = which off-hand families a class gets: by its shield flag, its primary attribute and whether it shoots a bow. `names` are the crate's own names by slot. `maxAbove` = a crate never rolls more than this many levels above the level it was given at (its `maxLevel`), so a level-2 quest crate kept for later cannot become a level-40 item.",
+  "min": {
+    "common": {
+      "floor": null,
+      "boost": 1,
+      "show": "normal"
+    },
+    "normal": {
+      "floor": null,
+      "boost": 1,
+      "show": "normal"
+    },
+    "uncommon": {
+      "floor": "magic",
+      "boost": 1,
+      "show": "magic"
+    },
+    "magic": {
+      "floor": "magic",
+      "boost": 1,
+      "show": "magic"
+    },
+    "rare": {
+      "floor": "rare",
+      "boost": 1,
+      "show": "rare"
+    },
+    "epic": {
+      "floor": "rare",
+      "boost": 2.5,
+      "show": "rare"
+    },
+    "legendary": {
+      "floor": "legendary",
+      "boost": 1,
+      "show": "legendary"
+    },
+    "unique": {
+      "floor": "legendary",
+      "boost": 1,
+      "show": "legendary"
+    }
+  },
+  "minText": {
+    "common": "any rarity",
+    "normal": "any rarity",
+    "uncommon": "uncommon or better",
+    "magic": "uncommon or better",
+    "rare": "rare or better",
+    "epic": "rare or better, with better odds of a legendary",
+    "legendary": "legendary",
+    "unique": "legendary"
+  },
+  "slots": {
+    "weapon": [
+      "sword",
+      "greatsword",
+      "axe",
+      "mace",
+      "dagger",
+      "spear",
+      "polearm",
+      "javelin",
+      "bow",
+      "crossbow",
+      "staff",
+      "wand",
+      "scepter"
+    ],
+    "offhand": [
+      "shield",
+      "focus",
+      "orb",
+      "tome",
+      "quiver"
+    ],
+    "head": [
+      "head"
+    ],
+    "chest": [
+      "chest"
+    ],
+    "legs": [
+      "legs"
+    ],
+    "hands": [
+      "hands"
+    ],
+    "feet": [
+      "feet"
+    ],
+    "ring": [
+      "ring"
+    ],
+    "neck": [
+      "neck"
+    ],
+    "armor": [
+      "head",
+      "chest",
+      "legs",
+      "hands",
+      "feet"
+    ],
+    "jewellery": [
+      "ring",
+      "neck",
+      "cloak",
+      "belt"
+    ],
+    "back": [
+      "cloak"
+    ],
+    "waist": [
+      "belt"
+    ],
+    "light": [
+      "light"
+    ]
+  },
+  "aliases": {
+    "armour": "armor",
+    "necklace": "neck",
+    "amulet": "neck",
+    "jewelry": "jewellery",
+    "accessory": "jewellery",
+    "gloves": "hands",
+    "boots": "feet",
+    "helm": "head",
+    "off": "offhand",
+    "shield": "offhand",
+    "cloak": "back",
+    "cape": "back",
+    "belt": "waist",
+    "lantern": "light",
+    "torch": "light"
+  },
+  "any": {
+    "weapon": 0.4,
+    "armor": 0.45,
+    "jewellery": 0.15
+  },
+  "classWeapon": {
+    "sword": [
+      "sword"
+    ],
+    "sword2h": [
+      "greatsword"
+    ],
+    "axe2h": [
+      "axe"
+    ],
+    "hammer": [
+      "mace"
+    ],
+    "iron_mace": [
+      "mace"
+    ],
+    "dagger": [
+      "dagger"
+    ],
+    "bow": [
+      "bow"
+    ],
+    "crossbow": [
+      "crossbow"
+    ],
+    "javelin": [
+      "javelin"
+    ],
+    "staff": [
+      "staff"
+    ],
+    "wand": [
+      "wand"
+    ],
+    "scepter": [
+      "scepter"
+    ]
+  },
+  "offhandFor": {
+    "shield": [
+      "shield"
+    ],
+    "INT": [
+      "focus",
+      "orb",
+      "tome"
+    ],
+    "bow": [
+      "quiver"
+    ],
+    "else": [
+      "shield",
+      "focus"
+    ]
+  },
+  "names": {
+    "weapon": "Weapon Crate",
+    "offhand": "Off-hand Crate",
+    "head": "Helm Crate",
+    "chest": "Chestpiece Crate",
+    "legs": "Leggings Crate",
+    "hands": "Glove Crate",
+    "feet": "Boot Crate",
+    "ring": "Ring Box",
+    "neck": "Amulet Box",
+    "armor": "Armour Crate",
+    "jewellery": "Jewel Box",
+    "any": "Supply Crate",
+    "gift": "Gift Box",
+    "sunken": "Sunken Crate",
+    "back": "Cloak Bundle",
+    "waist": "Belt Box",
+    "light": "Lamp Box"
+  },
+  "what": {
+    "weapon": "a weapon",
+    "offhand": "an off-hand item",
+    "head": "a piece of headgear",
+    "chest": "a chestpiece",
+    "legs": "leggings",
+    "hands": "gloves",
+    "feet": "boots",
+    "ring": "a ring",
+    "neck": "an amulet",
+    "armor": "a piece of armour",
+    "jewellery": "a ring, an amulet, a cloak or a belt",
+    "any": "a weapon, a piece of armour or a jewel",
+    "back": "a cloak",
+    "waist": "a belt",
+    "light": "a lantern or a torch"
+  },
+  "maxAbove": 3,
+  "tries": 24
+}

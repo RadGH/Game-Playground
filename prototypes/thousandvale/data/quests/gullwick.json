@@ -25,6 +25,13 @@
       "role": "fisher",
       "at": "drowned_shrine",
       "greeting": "Best fishing's by the old shrine. Worst wisps, too."
+    },
+    "angler_gullwick": {
+      "name": "Josey Fourlakes",
+      "role": "angler",
+      "at": "Gullwick",
+      "greeting": "Four lakes, and I have a favourite stone on each. No, I will not say which.",
+      "placedBy": "content-pools"
     }
   },
   "quests": [
@@ -47,10 +54,12 @@
       "reward": {
         "xp": 0.4,
         "gold": 7,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "gull_steps"
     },
@@ -72,7 +81,13 @@
       "done": "I can hear myself think! It's mostly about fish.",
       "reward": {
         "xp": 0.4,
-        "gold": 6
+        "gold": 6,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {

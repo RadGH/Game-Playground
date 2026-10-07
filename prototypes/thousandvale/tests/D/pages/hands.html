@@ -1,0 +1,47 @@
+<!doctype html>
+<!-- Stream D test page (play-test 5, T6/T22): Chibi 2 bodies in a row, each holding what `cfg` says, frozen at a
+     point of a clip, so a spec (or a person) can LOOK at every weapon in each hand.
+     ?cfg=[{"held":"fh_sword","offhand":"fh_dagger","anim":"idle","u":0.5,"label":"..."}]&cam=front|side|back|top&cols=6 -->
+<html lang="en"><head><meta charset="utf-8"><title>Hands — Thousandvale D test page</title>
+<style>html,body{margin:0;background:#20242c;overflow:hidden}canvas{display:block}.lab{position:absolute;color:#fff;font:11px/1.2 monospace;transform:translate(-50%,0);text-align:center;white-space:pre;text-shadow:0 1px 2px #000}</style>
+<script type="importmap">{ "imports": { "three": "../../../../../vendor/three/three.module.js", "three/addons/": "../../../../../vendor/three/addons/" } }</script>
+</head><body><canvas id="c"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import { createChibi2Character } from '../../../../../avatar-3d/js/chibi2.js';
+import { CHIBI2_EVERY_ANIMS, CHIBI2_CLIP_SECONDS } from '../../../../../avatar-3d/js/chibi2-motion.js';
+import * as DUAL from '../../../../../avatar-3d/js/chibi2-motion-dual.js';
+import { normalizeAvatar } from '../../../../../avatar-2d/js/render.js';
+const q = new URLSearchParams(location.search);
+const cfg = JSON.parse(q.get('cfg') || '[{"held":"fh_sword","offhand":"fh_sword"}]');
+const cam = q.get('cam') || 'front', cols = +(q.get('cols') || 6);
+const W = innerWidth, H = innerHeight;
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(W, H); renderer.setClearColor('#20242c');
+const scene = new THREE.Scene();
+scene.add(new THREE.HemisphereLight('#ffffff', '#505868', 2.2)); const sun = new THREE.DirectionalLight('#fff', 2); sun.position.set(2, 5, 4); scene.add(sun);
+const rows = Math.ceil(cfg.length / cols), SX = 1.7, SY = 2.3;
+const camera = new THREE.OrthographicCamera(-cols * SX / 2, cols * SX / 2, rows * SY / 2, -rows * SY / 2, 0.1, 100);
+const ANIMS = [...new Set([...CHIBI2_EVERY_ANIMS, ...(DUAL.CHIBI2_DUAL_ANIMS || []), ...(DUAL.CHIBI2_ANGLE_ANIMS || [])])];
+const bodies = [];
+for (const [i, c] of cfg.entries()) {
+  const av = normalizeAvatar({ body: { race: c.race || 'human' }, top: { id: 'tunic', color: '#6a7a9a' }, bottom: { id: 'pants', color: '#4a4038' }, shoes: { id: 'boots', color: '#3a2e24' },
+    held: { id: c.held || 'none', color: c.color || '#c8ccd6' }, offhand: { id: c.offhand || 'none', color: c.ocolor || '#c8ccd6' } });
+  if (c.held) av.held = { ...av.held, id: c.held }; if (c.offhand) av.offhand = { ...av.offhand, id: c.offhand };
+  const b = await createChibi2Character(av, { anims: ANIMS });
+  const col = i % cols, row = Math.floor(i / cols);
+  const pivot = new THREE.Group(); pivot.position.set((col - (cols - 1) / 2) * SX, ((rows - 1) / 2 - row) * SY - 0.75, 0);
+  pivot.add(b.group); scene.add(pivot);
+  pivot.rotation.y = cam === 'side' ? -Math.PI / 2 : cam === 'back' ? Math.PI : cam === 'q' ? -0.7 : cam === 'q2' ? 0.7 : 0;
+  if (cam === 'top') pivot.rotation.x = Math.PI / 2.4;
+  const name = c.anim || 'idle', dur = (DUAL.CHIBI2_DUAL_SECONDS || {})[name] || CHIBI2_CLIP_SECONDS[name] || 1;
+  b.setAnim(name, 0); let t = (c.u ?? 0.5) * dur; while (t > 0) { const d = Math.min(0.05, t); b.update(d); t -= d; }
+  bodies.push(b);
+  const lab = document.createElement('div'); lab.className = 'lab';
+  lab.textContent = c.label || `${c.held || '-'} | ${c.offhand || '-'}\n${name}@${c.u ?? 0.5} (${b.anim})`;
+  lab.style.left = ((col + 0.5) / cols * W) + 'px'; lab.style.top = ((row + 1) / rows * H - 28) + 'px'; document.body.appendChild(lab);
+}
+camera.position.set(0, 0, 20); camera.lookAt(0, 0, 0);
+renderer.render(scene, camera);
+window.bodies = bodies; window.THREE = THREE; window.ready = true;
+</script></body></html>

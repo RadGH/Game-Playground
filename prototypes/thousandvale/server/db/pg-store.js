@@ -56,25 +56,25 @@ export function createPgStore({ connectionString = process.env.DATABASE_URL, rea
     },
     async authToken(token) {
       const r = await q(`WITH t AS (UPDATE account_tokens SET last_used = now() WHERE token_hash = $1 RETURNING account_id, kind)
-        UPDATE accounts a SET last_login = now() FROM t WHERE a.id = t.account_id RETURNING a.id, a.claimed, a.username, a.banned_until, t.kind`, [sha(token)]);
+        UPDATE accounts a SET last_login = now() FROM t WHERE a.id = t.account_id RETURNING a.id, a.claimed, a.username, a.banned_until, a.admin, t.kind`, [sha(token)]);
       if (!r.rows.length) {
         // a guest made by an older server (token in accounts.token_hash): move it over once
         const old = await q(`WITH m AS (INSERT INTO account_tokens (token_hash, account_id, kind) SELECT token_hash, id, 'guest' FROM accounts WHERE token_hash = $1
-                             ON CONFLICT DO NOTHING RETURNING account_id) SELECT a.id, a.claimed, a.username, a.banned_until, 'guest' AS kind FROM accounts a JOIN m ON m.account_id = a.id`, [sha(token)]);
+                             ON CONFLICT DO NOTHING RETURNING account_id) SELECT a.id, a.claimed, a.username, a.banned_until, a.admin, 'guest' AS kind FROM accounts a JOIN m ON m.account_id = a.id`, [sha(token)]);
         if (!old.rows.length) return null;
         r.rows.push(old.rows[0]);
       }
       const x = r.rows[0];
-      return { account: x.id, claimed: x.claimed, username: x.username, banned: x.banned_until ? new Date(x.banned_until).getTime() : 0, kind: x.kind };
+      return { account: x.id, claimed: x.claimed, username: x.username, banned: x.banned_until ? new Date(x.banned_until).getTime() : 0, kind: x.kind, admin: !!x.admin };
     },
     async listChars(account) {
       const r = await q(`SELECT id, name, cls, level, room, blob->'look' AS look FROM characters WHERE account_id = $1 AND realm = $2 ORDER BY id`, [account, realm]);
       return r.rows.map(x => ({ ...brief(x), look: x.look || null }));
     },
-    async createChar(account, { name, cls, look = null }) {
+    async createChar(account, { name, cls, look = null, kit = null }) {
       const n = await q('SELECT count(*)::int AS n FROM characters WHERE account_id = $1 AND realm = $2', [account, realm]);
       if (n.rows[0].n >= MAX_CHARS_PER_ACCOUNT) return { err: 'full' };
-      const { cols, blob } = packChar({ name, cls, look, level: 1, xp: 0, gold: 0 });
+      const { cols, blob } = packChar({ name, cls, look, kit, level: 1, xp: 0, gold: 0 });
       try {
         const r = await q(
           `INSERT INTO characters (account_id, realm, name, cls, level, xp, gold, room, x, z, blob)

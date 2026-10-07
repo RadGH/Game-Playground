@@ -8,19 +8,47 @@
 
 import { createPanel, h, confirmBox } from '../ui-panel.js';
 import { bandTone, titleCase } from './map-data.js';
+import { crateRewards, catchRows, anglingText, rarityClass } from './pt5-core.js';
+import { zoneName } from '../names.js';
 
 export function rewardWords(r) {
   if (!r) return [];
   const out = [];
   if (r.xp) out.push(`${Math.round(r.xp * 100)}% of a level in experience`);
   if (r.gold) out.push(`${r.gold} gold`);
-  if (r.item) out.push(`${/^[aeiou]/i.test(r.item) ? 'an' : 'a'} ${r.item} item`);
+  if (r.item) { const t = typeof r.item === 'string' ? r.item : r.item.tier || 'good'; out.push(`${/^[aeiou]/i.test(t) ? 'an' : 'a'} ${t} item`); }
+  out.push(...crateRewards(r));                 // T9: "Crate: boots (Magic or better)"
   return out;
 }
 
 export function createJournal({ atlas, net, me, hud, worldMap }) {
   const panel = createPanel({ id: 'journal', title: 'Journal', width: 640, cls: 'journal-panel', onOpen: () => draw(true) });
   const S = { sel: null, tab: 'active', done: [], last: '' };
+  // T25 (play-test 5): the Catch tab — set by ui/pt5.js: { data: () => E's angling.json, angling: () => you.angling }
+  let catchSrc = null;
+  function catchModel() {
+    const a = catchSrc?.angling?.() || null, d = catchSrc?.data?.() || null;
+    if (!d || !(d.fish || []).length) return null;
+    // A sends catches per species ({n, best, zone, zones}) — or per zone ({zone: {species: {n, best}}}) as saved
+    let catches = a?.catches || null;
+    if (!catches && a?.caught) { catches = {}; for (const [z, m] of Object.entries(a.caught)) for (const [sp, c] of Object.entries(m || {})) { const o = catches[sp] ||= { n: 0, best: null, zone: z }; o.n += c.n || 0; if (c.best != null && (o.best == null || c.best > o.best)) { o.best = c.best; o.zone = z; } } }
+    return { rows: catchRows(d, { catches: catches || {}, legends: a?.legends || [] }, z => zoneName(z) || z), angling: a };
+  }
+  function drawCatch(tabs) {
+    const m = catchModel();
+    if (!m) { panel.fill(tabs, h('div.j-empty', {}, h('p', {}, 'Nothing caught yet.'), h('p.tiny', {}, 'Find the angler by the water near Torborhold: they will lend you a rod. Then face any water and press X.'))); return; }
+    const R = m.rows, a = m.angling ? anglingText(m.angling) : null;
+    const fish = r => h('li.jc-fish' + (r.known ? '.known' : ''), { dataset: { id: r.id, ...(r.hint ? { tip: r.hint } : {}) } },
+      h('b.r-' + rarityClass(r.rarity), {}, r.name), r.known ? h('span', {}, `× ${r.n}`) : h('span.dim', {}, r.hint || 'not yet caught'), r.bestText ? h('em', {}, `biggest ${r.bestText}`) : null);
+    panel.fill(tabs,
+      h('div.jc-top', {},
+        a ? h('div.jc-skill', {}, h('b', {}, a.text), h('div.jc-bar', {}, h('i', { style: `width:${(a.frac * 100).toFixed(1)}%` })), h('small', {}, a.sub)) : null,
+        h('div.jc-sum', {}, h('span', {}, h('b', {}, `${R.found} / ${R.total}`), ' species found'), h('span', {}, h('b', {}, `${R.legendsFound} / ${R.legends.length}`), ' legends landed'), R.biggest ? h('span', {}, 'Biggest: ', h('b', {}, R.biggest.text)) : null)),
+      h('div.jc-body', {},
+        ...R.groups.map(g => h('section.jc-group', {}, h('h4', {}, g.name, h('small', {}, ` ${g.found} / ${g.rows.length}`)), h('ul', {}, ...g.rows.map(fish)))),
+        R.legends.length ? h('section.jc-group.legends', {}, h('h4', {}, 'Legends', h('small', {}, ' one in every zone')), h('ul', {}, ...R.legends.map(l => h('li.jc-fish.legend' + (l.known ? '.known' : ''), { dataset: l.hint ? { tip: l.hint } : {} },
+          h('b', {}, l.known ? '★ ' + l.name : '☆ ' + l.name), h('span' + (l.known ? '' : '.dim'), {}, l.known ? (l.title ? `Title: ${l.title}` : l.zone) : (l.hint || l.zone)), l.bestText ? h('em', {}, l.bestText) : null)))) : null));
+  }
 
   function where(q) {
     const L = q.loc; if (!L) return q.where ? titleCase(q.where) : '';
@@ -36,13 +64,15 @@ export function createJournal({ atlas, net, me, hud, worldMap }) {
     if (!panel.isOpen) return;
     const qs = list();
     const p = me();
-    const key = JSON.stringify([S.tab, S.sel, atlas.tracked, qs.map(q => [q.id, q.step, q.goal, q.loc && Math.round(Math.hypot(q.loc.x - (p?.x || 0), q.loc.z - (p?.z || 0)) / 25)]), S.done.length]);
+    const key = JSON.stringify([S.tab, S.tab === 'catch' ? catchSrc?.angling?.() : 0, S.sel, atlas.tracked, qs.map(q => [q.id, q.step, q.goal, q.loc && Math.round(Math.hypot(q.loc.x - (p?.x || 0), q.loc.z - (p?.z || 0)) / 25)]), S.done.length]);
     if (!force && key === S.last) return;
     S.last = key;
     if (!qs.some(q => q.id === S.sel)) S.sel = atlas.tracked || qs[0]?.id || null;
     const tabs = h('div.chips.j-tabs', { role: 'tablist' },
       h('button.chip', { type: 'button', role: 'tab', 'aria-checked': String(S.tab === 'active'), onclick: () => { S.tab = 'active'; draw(true); } }, `Quests (${qs.length})`),
-      h('button.chip', { type: 'button', role: 'tab', 'aria-checked': String(S.tab === 'done'), onclick: () => { S.tab = 'done'; draw(true); } }, `Finished (${S.done.length})`));
+      h('button.chip', { type: 'button', role: 'tab', 'aria-checked': String(S.tab === 'done'), onclick: () => { S.tab = 'done'; draw(true); } }, `Finished (${S.done.length})`),
+      catchSrc ? h('button.chip', { type: 'button', role: 'tab', dataset: { tab: 'catch' }, 'aria-checked': String(S.tab === 'catch'), onclick: () => { S.tab = 'catch'; draw(true); } }, 'Catch') : null);
+    if (S.tab === 'catch') { drawCatch(tabs); return; }
     if (S.tab === 'done') {
       const names = S.done.map(id => atlas.model?.quests.get(id)?.name || titleCase(String(id).replace(/^job:([^:]+).*/, '$1'))).filter(Boolean);
       panel.fill(tabs, names.length ? h('ul.j-done', {}, ...names.map(n => h('li', {}, '✓ ', n))) : h('p.empty', {}, 'Nothing finished yet. Talk to people in town — anyone with a request has a gold mark over them.'));
@@ -113,5 +143,5 @@ export function createJournal({ atlas, net, me, hud, worldMap }) {
     n.on('questR', r => { if (r.ok && r.op === 'abandon') draw(true); });
   }
   atlas.onChange(() => { draw(); drawTracker(); });
-  return { panel, wire, draw, drawTracker, tick: () => { drawTracker(); draw(); }, get state() { return { sel: S.sel, tab: S.tab, done: S.done.length }; } };
+  return { panel, wire, draw, drawTracker, setCatch(src) { catchSrc = src; draw(true); }, showTab(t) { S.tab = t; panel.open(); draw(true); }, tick: () => { drawTracker(); draw(); }, get state() { return { sel: S.sel, tab: S.tab, done: S.done.length }; } };
 }

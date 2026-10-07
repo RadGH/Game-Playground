@@ -507,6 +507,8 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
     }
     return n;
   };
+  /** How many of `owner`'s followers lie fallen (play-test 5 T4: the cleric's revive has work with only followers down). */
+  F.fallen = owner => bookOf(owner).fallen.length;
   F.reviveAll = (owner, share = 0.5) => {
     const book = bookOf(owner);
     const back = book.fallen.splice(0, book.fallen.length);

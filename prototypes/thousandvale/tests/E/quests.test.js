@@ -103,7 +103,7 @@ test('province story chain: 8-10 steps, >= 8 zones, quest levels never fall, que
 });
 
 test('radiant jobs: ~20 frames, slots typed, every {placeholder} is a declared slot, undiscovered places preferred', () => {
-  const TYPES = ['monster', 'vignette', 'settlement', 'fort', 'rare', 'dungeon', 'farm', 'cave'];
+  const TYPES = ['monster', 'vignette', 'settlement', 'fort', 'rare', 'dungeon', 'farm', 'cave', 'fish'];   // fish: play-test 5 angler jobs (data/provinces/angling.json)
   assert.ok(JOBS.frames.length >= 18);
   assert.ok(JOBS.rules.preferUndiscovered);
   const ids = new Set();

@@ -89,8 +89,12 @@ test('Sworn Ward links the knight to the cleric: a bite on the cleric is carried
 test('Raise the Fallen stands a dead party member back up at half health; a stranger stays down', async () => {
   const { room, knight, cleric, stranger } = await party();
   for (const u of [knight, stranger]) { u.dead = true; u.hp = 0; u.x = 1; u.z = -6; }
-  const r = room.run(() => room.combat.cast(cleric, 4, {}));
-  assert.ok(r.ok, r.why);
+  // play-test 5 T4: Raise the Fallen is the cleric's key 3 now, a 4 s cast that raises every fallen party member
+  const slot = cleric.skills.slots.findIndex(sl => sl.id === 'raise_the_fallen');
+  const r = room.run(() => room.combat.cast(cleric, slot, {}));
+  assert.ok(r.ok && r.casting, r.why);
+  assert.ok(knight.dead, 'still casting');
+  for (let i = 0; i < 90; i++) room.run(() => { room.clock.advance(0.05); room.combat.tick(0.05); });
   assert.ok(!knight.dead && knight.hp >= Math.round(knight.maxHp * 0.5) - 1);
   assert.ok(stranger.dead);
 });

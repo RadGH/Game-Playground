@@ -399,8 +399,8 @@
   },
   "files": {
     "terrain.bin": 510460,
-    "nav.bin": 34976,
+    "nav.bin": 34956,
     "scatter.bin": 151028,
-    "placements.json": 269945
+    "placements.json": 270573
   }
 }

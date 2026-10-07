@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E (M2). Radiant job frames (after Farhold data/job-frames.json). The job board fills each `needs` slot from what EXISTS right now in the zone copy (a frame whose slots cannot all bind is never offered, so nothing points at an empty field). Slot types: monster (a type from the zone's camps; `band: 'zone'` = level within the zone band; `family` filter), vignette, settlement (`same: 'giver'` = the giver's own), fort, farm (a farm placement; `from: 'farm.pests'` = one of that farm template's pests in data/provinces/sites.json), cave (a cave placement), rare (`alive` = currently spawned), dungeon. Text placeholders: {slot.name}, {slot.id}, {zone.name}, {giver.role}. Rewards follow the quest rule: xp = share of a level, gold = multiple of a kill's gold. Each frame has a `where` template (same placeholders) for the tracker/journal location line.",
+  "_doc": "Stream E (M2). Radiant job frames (after Farhold data/job-frames.json). The job board fills each `needs` slot from what EXISTS right now in the zone copy (a frame whose slots cannot all bind is never offered, so nothing points at an empty field). Slot types: monster (a type from the zone's camps; `band: 'zone'` = level within the zone band; `family` filter), vignette, settlement (`same: 'giver'` = the giver's own), fort, farm (a farm placement; `from: 'farm.pests'` = one of that farm template's pests in data/provinces/sites.json), cave (a cave placement), rare (`alive` = currently spawned), dungeon. Text placeholders: {slot.name}, {slot.id}, {zone.name}, {giver.role}. Rewards follow the quest rule: xp = share of a level, gold = multiple of a kill's gold. Each frame has a `where` template (same placeholders) for the tracker/journal location line. ANGLER JOBS (play-test 5, T25): slot type `fish` = a fish from data/provinces/angling.json that lives in the giver's zone (bands overlap the zone band, `band: 'zone'`), filtered by `rarity` (a list) and `maxSkill` when given, or pinned with `id`; fish slots expose {fish.name} and {fish.id}. Goal `catch` = land `count` of `target` (a fish id) with a rod; `pool: true` = only catches from a fish pool count; target 'junk' = junk catches. These frames are offered by anglers (role 'angler'); until the server has a `fish` slot pool they simply never bind.",
   "rules": {
     "preferUndiscovered": "A vignette/fort/settlement slot picks a place the character has NOT discovered with weight x4 over discovered ones (PLAN §3.4 'prefer undiscovered places').",
     "maxOffered": 4,
@@ -616,6 +616,150 @@
         }
       },
       "where": "{cave.name}, in {zone.name}"
+    },
+    {
+      "id": "angler_three_for_the_pan",
+      "scope": "zone",
+      "weight": 5,
+      "giverRole": "angler",
+      "needs": [
+        {
+          "slot": "fish",
+          "type": "fish",
+          "band": "zone",
+          "rarity": [
+            "common"
+          ],
+          "maxSkill": 10
+        }
+      ],
+      "title": "Three {fish.name} for the pan",
+      "text": "The inn wants {fish.name} for tonight and I have a rod, a bad back and no time. Bring me three.",
+      "goal": {
+        "kind": "catch",
+        "target": "{fish.id}",
+        "count": 3
+      },
+      "reward": {
+        "xp": 0.2,
+        "gold": 4
+      },
+      "where": "any water in {zone.name} where {fish.name} bite"
+    },
+    {
+      "id": "angler_silver_perch",
+      "scope": "zone",
+      "weight": 3,
+      "giverRole": "angler",
+      "needs": [
+        {
+          "slot": "fish",
+          "type": "fish",
+          "id": "silver_perch"
+        }
+      ],
+      "title": "Bring 3 {fish.name}",
+      "text": "Somebody's cat will eat nothing but {fish.name}. Somebody pays well. Three of them, and do not ask whose cat.",
+      "goal": {
+        "kind": "catch",
+        "target": "{fish.id}",
+        "count": 3
+      },
+      "reward": {
+        "xp": 0.2,
+        "gold": 5
+      },
+      "where": "rivers and lakes around {zone.name}"
+    },
+    {
+      "id": "angler_something_better",
+      "scope": "zone",
+      "weight": 3,
+      "giverRole": "angler",
+      "needs": [
+        {
+          "slot": "fish",
+          "type": "fish",
+          "band": "zone",
+          "rarity": [
+            "uncommon"
+          ]
+        }
+      ],
+      "title": "A proper {fish.name}",
+      "text": "Anyone can catch gudgeon. Bring me one {fish.name} from {zone.name} and I will stop saying that about you.",
+      "goal": {
+        "kind": "catch",
+        "target": "{fish.id}",
+        "count": 1
+      },
+      "reward": {
+        "xp": 0.3,
+        "gold": 8
+      },
+      "where": "the waters of {zone.name}"
+    },
+    {
+      "id": "angler_work_the_pools",
+      "scope": "zone",
+      "weight": 3,
+      "giverRole": "angler",
+      "needs": [
+        {
+          "slot": "fish",
+          "type": "fish",
+          "band": "zone",
+          "rarity": [
+            "common"
+          ]
+        }
+      ],
+      "title": "Work the pools",
+      "text": "See the rings on the water, where the {fish.name} jump? That is a pool. Land five catches from pools in {zone.name} before somebody else empties them.",
+      "goal": {
+        "kind": "catch",
+        "target": "any",
+        "count": 5,
+        "pool": true
+      },
+      "reward": {
+        "xp": 0.3,
+        "gold": 6
+      },
+      "where": "fish pools along the water in {zone.name}"
+    },
+    {
+      "id": "angler_the_one_that_got_away",
+      "scope": "zone",
+      "weight": 1,
+      "giverRole": "angler",
+      "needs": [
+        {
+          "slot": "fish",
+          "type": "fish",
+          "band": "zone",
+          "rarity": [
+            "rare",
+            "epic"
+          ]
+        }
+      ],
+      "title": "The {fish.name} that got away",
+      "text": "I had a {fish.name} on the line for an hour. An hour! Land one, show me, and I will finally be able to sleep.",
+      "goal": {
+        "kind": "catch",
+        "target": "{fish.id}",
+        "count": 1
+      },
+      "reward": {
+        "xp": 0.5,
+        "gold": 14,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      },
+      "where": "fish pools in {zone.name}"
     }
   ]
 }

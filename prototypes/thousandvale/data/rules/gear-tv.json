@@ -1,0 +1,329 @@
+{
+  "_doc": "Stream C (play-test 5: T17 conversion affix, T23 gear catalog, plus two missing bases). Everything here is applied IN MEMORY to the item table at engine boot by js/rules/tv-gear.js (emberveil/data/items.json is shared with live games and is never written). `bases.armor` / `bases.weapon` = whole new item bases. `convert` = the T17 affix: on `chance` of magic-or-better PHYSICAL weapons (never a wand, staff, sceptre, orb, tome or quarterstaff \u2014 Farhold files those `magic` \u2014 and never a weapon that already carries a brand) one rolled property is replaced by a conversion: the weapon's damage is that element instead of physical (Farhold's own brand stat, so its registry applies and describes it), plus `value` (a fraction) more damage of that element. `catalog` = how a row of avatar-3d/data/gear-catalog.json (stream F) becomes an item base: `weapon` maps F's weapon `type` to the base whose numbers it copies; `armour` maps F's `archetype` to the armour weight and `piece` maps the game slot to the base suffix; `offhand` / `accessory` map F's `type` to a base; `forms` maps F's `form` word to the caster styles a new wand may be (picked by the row id) and `staffSpells` to a Farhold staff-spell key; `elements` renames F's element words to the six a caster can be attuned to (holy is not one of them: left to the roll). `focusByForm` picks the focus a catalog focus copies from its `form` (so its rider matches its look) and `shields` the shield a `shield:<shape>` tag copies. An item made from a catalog base keeps the TEMPLATE's key as its `baseKey` (every rule that asks 'is this a quarterstaff / a rapier / a reliquary' keeps working) and carries the catalog id as `g5` and `catalogBase`. Play-test 5 slots addendum: `back` (cloaks) and `waist` (belts) are Thousandvale's own equipment slots and `light` (a worn lantern or torch) is Farhold's; their bases carry their stats as intrinsic properties (the sheet sums every worn item's properties, whatever slot it is in). `families` are added to the loot pool, `slotOrder` is the paper doll's order.",
+  "bases": {
+    "armor": {
+      "cloth_gloves": {
+        "name": "Cloth Gloves",
+        "type": "armor",
+        "slot": "hands",
+        "tier": "cloth",
+        "armor": 1,
+        "dodgeBonus": 0
+      },
+      "cloth_shoes": {
+        "name": "Cloth Shoes",
+        "type": "armor",
+        "slot": "feet",
+        "tier": "cloth",
+        "armor": 1,
+        "dodgeBonus": 0
+      },
+      "travel_cloak": {
+        "name": "Travel Cloak",
+        "type": "armor",
+        "slot": "back",
+        "tier": "any",
+        "armor": 0,
+        "dodgeBonus": 0,
+        "intrinsic": [
+          {
+            "stat": "armor",
+            "value": 2,
+            "name": "Thick Weave"
+          },
+          {
+            "stat": "magicResist",
+            "value": 2,
+            "name": "Lined"
+          }
+        ]
+      },
+      "leather_belt": {
+        "name": "Leather Belt",
+        "type": "armor",
+        "slot": "waist",
+        "tier": "any",
+        "armor": 0,
+        "dodgeBonus": 0,
+        "intrinsic": [
+          {
+            "stat": "armor",
+            "value": 2,
+            "name": "Broad Leather"
+          },
+          {
+            "stat": "hp",
+            "value": 8,
+            "name": "Braced"
+          }
+        ]
+      },
+      "hand_lantern": {
+        "name": "Hand Lantern",
+        "type": "armor",
+        "slot": "light",
+        "tier": "any",
+        "armor": 0,
+        "dodgeBonus": 0,
+        "lit": true,
+        "intrinsic": [
+          {
+            "stat": "cond_lightRange",
+            "value": 16,
+            "name": "Lantern Light"
+          }
+        ]
+      },
+      "pitch_torch": {
+        "name": "Pitch Torch",
+        "type": "armor",
+        "slot": "light",
+        "tier": "any",
+        "armor": 0,
+        "dodgeBonus": 0,
+        "lit": true,
+        "intrinsic": [
+          {
+            "stat": "cond_lightRange",
+            "value": 10,
+            "name": "Torch Light"
+          }
+        ]
+      }
+    },
+    "weapon": {}
+  },
+  "pool": {
+    "cloth_gloves": [
+      "hands",
+      1
+    ],
+    "cloth_shoes": [
+      "feet",
+      1
+    ],
+    "travel_cloak": [
+      "cloak",
+      3
+    ],
+    "leather_belt": [
+      "belt",
+      2
+    ],
+    "hand_lantern": [
+      "light",
+      2
+    ],
+    "pitch_torch": [
+      "light",
+      1
+    ]
+  },
+  "convert": {
+    "chance": 0.055,
+    "rarities": [
+      "magic",
+      "rare"
+    ],
+    "value": [
+      0.04,
+      0.1
+    ],
+    "affixes": {
+      "fire": {
+        "id": "tv_convert_fire",
+        "name": "Kindled",
+        "stat": "cond_brandFire"
+      },
+      "ice": {
+        "id": "tv_convert_ice",
+        "name": "Rimed",
+        "stat": "cond_brandIce"
+      },
+      "lightning": {
+        "id": "tv_convert_lightning",
+        "name": "Stormtouched",
+        "stat": "cond_brandLightning"
+      },
+      "poison": {
+        "id": "tv_convert_poison",
+        "name": "Venomed",
+        "stat": "cond_brandNature"
+      },
+      "shadow": {
+        "id": "tv_convert_shadow",
+        "name": "Duskforged",
+        "stat": "cond_brandShadow"
+      },
+      "holy": {
+        "id": "tv_convert_holy",
+        "name": "Dawnlit",
+        "stat": "cond_brandHoly"
+      },
+      "arcane": {
+        "id": "tv_convert_arcane",
+        "name": "Starwrought",
+        "stat": "cond_brandArcane"
+      }
+    }
+  },
+  "catalog": {
+    "weapon": {
+      "sword": "sword",
+      "dagger": "dagger",
+      "axe": "battleaxe",
+      "axe2h": "axe2h",
+      "sword2h": "sword2h",
+      "mace": "iron_mace",
+      "hammer": "hammer",
+      "hammer2h": "warhammer",
+      "spear": "spear",
+      "polearm": "halberd",
+      "javelin": "javelin",
+      "bow": "bow",
+      "crossbow": "crossbow",
+      "wand": "wand",
+      "staff": "staff",
+      "quarterstaff": "quarterstaff",
+      "scepter": "scepter",
+      "orb": "orb",
+      "tome": "tome"
+    },
+    "armour": {
+      "cloth": "cloth",
+      "leather": "light",
+      "mail": "medium",
+      "plate": "heavy"
+    },
+    "piece": {
+      "head": "helm",
+      "chest": "chest",
+      "legs": "legs",
+      "hands": "gauntlets",
+      "feet": "boots"
+    },
+    "clothPiece": {
+      "hands": "cloth_gloves",
+      "feet": "cloth_shoes"
+    },
+    "offhand": {
+      "shield": "shield",
+      "buckler": "buckler",
+      "tome": "tome",
+      "orb": "orb",
+      "relic": "reliquary",
+      "idol": "effigy",
+      "ward": "warded_focus",
+      "totem": "effigy",
+      "quiver": "quiver",
+      "focus": "warded_focus",
+      "torch": "pitch_torch"
+    },
+    "accessory": {
+      "amulet": "necklace",
+      "necklace": "necklace",
+      "ring": "ring",
+      "cloak": "travel_cloak",
+      "belt": "leather_belt",
+      "lantern": "hand_lantern"
+    },
+    "forms": {
+      "projectile": [
+        "bolt",
+        "seeking",
+        "heavy"
+      ],
+      "cone": [
+        "cone"
+      ],
+      "area": [
+        "burst",
+        "nova",
+        "lob",
+        "pool"
+      ],
+      "beam": [
+        "beam"
+      ],
+      "fork": [
+        "fan",
+        "chain",
+        "fork"
+      ],
+      "shield": [
+        "ward"
+      ]
+    },
+    "staffStyles": {
+      "beam": "beam",
+      "shield": "ward"
+    },
+    "staffSpells": {
+      "cone": "cone",
+      "area": "nova",
+      "projectile": "lob",
+      "fork": "arc"
+    },
+    "elements": {
+      "fire": "fire",
+      "ice": "ice",
+      "frost": "ice",
+      "lightning": "lightning",
+      "storm": "lightning",
+      "poison": "poison",
+      "nature": "poison",
+      "shadow": "shadow",
+      "arcane": "arcane"
+    },
+    "focusByForm": {
+      "shield": "warded_focus",
+      "area": "seer_orb",
+      "fork": "grimoire",
+      "projectile": "reliquary",
+      "beam": "effigy",
+      "cone": "spellguard_orb"
+    },
+    "shields": {
+      "kite": "kite_shield",
+      "tower": "tower_shield",
+      "round": "buckler",
+      "buckler": "buckler",
+      "heater": "shield",
+      "targe": "buckler"
+    }
+  },
+  "families": {
+    "cloak": {
+      "group": "jewellery",
+      "w": 0.8
+    },
+    "belt": {
+      "group": "jewellery",
+      "w": 0.8
+    },
+    "light": {
+      "group": "jewellery",
+      "w": 0.5
+    }
+  },
+  "slots": {
+    "back": "Back",
+    "waist": "Waist",
+    "light": "Light"
+  },
+  "slotOrder": [
+    "weapon",
+    "offhand",
+    "head",
+    "chest",
+    "back",
+    "hands",
+    "waist",
+    "legs",
+    "feet",
+    "necklace",
+    "ring",
+    "ring2",
+    "light"
+  ]
+}

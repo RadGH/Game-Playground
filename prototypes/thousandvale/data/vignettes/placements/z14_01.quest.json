@@ -62,6 +62,101 @@
    "radius": 4,
    "quest": "the_respectable_importer",
    "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z14_01_1",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 618,
+   "z": 1535,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "stormlash"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z14_01_2",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 904,
+   "z": 1880,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "thorned"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z14_01_3",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1200,
+   "z": 2009,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "giant"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_saltmouth",
+   "name": "Skipper Hale Tarrow",
+   "role": "angler",
+   "at": "Saltmouth",
+   "x": 880,
+   "z": 1320,
+   "yaw": -2.75,
+   "angler": true
   }
  ]
 }

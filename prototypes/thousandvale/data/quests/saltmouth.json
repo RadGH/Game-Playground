@@ -25,6 +25,13 @@
       "role": "smuggler",
       "at": "smugglers_cellar",
       "greeting": "I'm a respectable importer. Of things. Don't look in the barrel."
+    },
+    "angler_saltmouth": {
+      "name": "Skipper Hale Tarrow",
+      "role": "angler",
+      "at": "Saltmouth",
+      "greeting": "Rivers! Ponds! Hah. Come back when you have been pulled off a harbour wall.",
+      "placedBy": "content-pools"
     }
   },
   "quests": [
@@ -54,10 +61,12 @@
       "reward": {
         "xp": 0.5,
         "gold": 10,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -78,7 +87,13 @@
       "done": "The children win. Hurrah for the children.",
       "reward": {
         "xp": 0.4,
-        "gold": 7
+        "gold": 7,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {

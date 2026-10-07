@@ -112,6 +112,9 @@ export function createRoom(opts) {
   };
   // stream C's one-drop-per-corpse-per-party hook (js/rules/cast.js onKill): only when the province takes party loot
   host.isNight = () => (hooks.isNight ? !!hooks.isNight() : false);      // the realm clock (C: the torch's night bonus)
+  // play-test 5, T4: stream C's revive skills ASK the fallen player (the province sends `reviveAsk`, the body stands up on
+  // `revive {op:'accept'}`): host.offerRevive(caster, target, { skill, name, hpPct, mpPct?, ms?, note?, apply? }) -> { ok, why? }
+  host.offerRevive = (caster, target, spec = {}) => (hooks.offerRevive ? hooks.offerRevive(caster, target, spec, room) : { ok: false, why: 'notReady' });
   if (hooks.partyLoot) host.partyLoot = (members, items, corpse, partyId) => hooks.partyLoot(members, items, corpse, partyId, room);
   room.host = host;
 
@@ -287,7 +290,7 @@ export function createRoom(opts) {
       const tx = c.x + Math.cos(a) * r, tz = c.z + Math.sin(a) * r;
       if (room.walkable(tx, tz) && !inProp(c, tx, tz)) { x = tx; z = tz; break; }
     }
-    const m = room.spawn({ kind: 'monster', type: c.type, level: c.level || 1, x, z, yaw: host.random('spawn') * 6.283, rank: c.rank || 'normal', state: c.rank && c.rank !== 'normal' ? STATE.elite : 0, name: c.name || (c.encounter && opts.encounterInfo && opts.encounterInfo[c.encounter] ? opts.encounterInfo[c.encounter].name : undefined), data: { camp: 1, ...(c.noRank ? { noRank: true } : {}), ...(c.encounter ? { encounter: c.encounter } : {}), ...(c.path ? { path: c.path } : {}) } });   // camp: S4 — only a camp's ordinary monster may roll a rank
+    const m = room.spawn({ kind: 'monster', type: c.type, level: c.level || 1, x, z, yaw: host.random('spawn') * 6.283, rank: c.rank || 'normal', state: c.rank && c.rank !== 'normal' ? STATE.elite : 0, name: c.name || (c.encounter && opts.encounterInfo && opts.encounterInfo[c.encounter] ? opts.encounterInfo[c.encounter].name : undefined), data: { camp: 1, ...(c.noRank ? { noRank: true } : {}), ...(c.encounter ? { encounter: c.encounter } : {}), ...(c.path ? { path: c.path } : {}), ...(c.affixes ? { affixes: c.affixes } : {}) } });   // camp: S4 — only a camp's ordinary monster may roll a rank
     c.live.add(m.id);
   }
   /** A camp's respawn delay: a number, or [min, max] picked on the room's 'spawn' stream (rares: 20-60 min). */
@@ -387,7 +390,7 @@ export function createRoom(opts) {
         stepMove(st, { mx: 0, mz: 0, b: 0 }, tickMs, terrain);
         commitMove(e, st, 0, 0, 0); c.selfDirty = true;
       }
-      if (!e.dead && !e.airborne && e.kind === 'player') e.loop(e.state & STATE.swimming ? 'swim' : e.sitting ? 'sit' : 'idle');
+      if (!e.dead && !e.airborne && e.kind === 'player') e.loop(e.state & STATE.swimming ? 'swim' : e.sitting ? 'sit' : e.fishing ? (e.fishing.tug ? 'reel' : 'fish') : 'idle');   // T25: a line out is its own pose
       return;
     }
     let moved = false, lastB = 0, mxs = 0, mzs = 0;
@@ -412,7 +415,7 @@ export function createRoom(opts) {
       e.setState(STATE.sprinting, going && !!(lastB & IN.SPRINT));
       if (e.airborne) e.loop(e.vy > 0 ? 'jump' : 'fall');
       else if (e.state & STATE.swimming) e.loop('swim');
-      else e.loop(going ? ((lastB & IN.SPRINT) ? 'sprint' : 'run') : e.sitting ? 'sit' : 'idle');
+      else e.loop(going ? ((lastB & IN.SPRINT) ? 'sprint' : 'run') : e.sitting ? 'sit' : e.fishing ? (e.fishing.tug ? 'reel' : 'fish') : 'idle');
     }
   }
   function commitMove(e, st) {

@@ -25,6 +25,13 @@
       "role": "hunter",
       "at": "hunters_hide",
       "greeting": "Lost my bow, lost my dog, lost my way. Found a lot of boar."
+    },
+    "angler_hermits_rest": {
+      "name": "Quiet Oswin",
+      "role": "angler",
+      "at": "Hermit's Rest",
+      "greeting": "...Shh. You will scare them. Fine. What do you want?",
+      "placedBy": "content-pools"
     }
   },
   "quests": [
@@ -54,10 +61,12 @@
       "reward": {
         "xp": 0.5,
         "gold": 10,
-        "item": {
-          "tier": "uncommon",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "flags_over_redcliff"
     },
@@ -79,7 +88,13 @@
       "done": "Kilns clear! I'll sell you charcoal at a discount. A very small one.",
       "reward": {
         "xp": 0.4,
-        "gold": 6
+        "gold": 6,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {

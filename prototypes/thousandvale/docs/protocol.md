@@ -16,7 +16,7 @@ Readers:
 
 | Constant | Value | Where |
 |---|---|---|
-| `PROTOCOL_VERSION` | `6` | `js/net/protocol.js`. Bumped on any wire change. A client with another value is refused with `refuse {code:'version'}` → the client shows "A new version is out — reload". |
+| `PROTOCOL_VERSION` | `7` | `js/net/protocol.js`. Bumped on any wire change. A client with another value is refused with `refuse {code:'version'}` → the client shows "A new version is out — reload". |
 | `BUILD` | string | The server's build id (dev: `dev`; published copies: the git hash). A client whose `build` differs is refused with `code:'build'` → "reload". The client is always served by the same server as its socket (PLAN §10.1). |
 | `SNAP_VERSION` | `1` | First byte after the type byte of every binary snapshot. |
 | `TICK_MS` | `50` | Simulation 20 Hz (PLAN §8.3). |
@@ -138,6 +138,13 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `bind` | p | `npc:id` | 1 / 3 | An innkeeper in a town: make this town home (§18.11). Answer `bindR`. |
 | `settings` | gw | `op:str:8, data?:obj` | 1 / 4 | Account settings (§18.7): `get`, `set {data:{tradeFriendsOnly}}`. Answer `settings {data}`. |
 | `look` | gw | `char:int, look:obj` | 0.5 / 3 | Title screen "Customize Appearance" (§18.4): a look for a character not in the world. Answer `lookR`. |
+| `kits` | gw | `cls:str:32` | 2 / 6 | Play-test 5 (§21.2): the starter kits of a class (stream C's `kitsFor`). Answer `kitsR`. `create` gains `kit?:obj` = `{armour, weapons}` ids. |
+| `revive` | p | `op:str:8, id?:int` | 2 / 4 | §21.3: answer a `reviveAsk` — `accept` or `decline`. Answer `reviveR`. |
+| `sheet` | p | — | 2 / 4 | §21.6: ask for the character sheet again. Answer `sheet`. |
+| `feedback` | both | `kind:str:16, text:str:2000, ctx?:obj` | 0.2 / 5 | §21.7: a suggestion or a bug report (`ctx` = the client's own context). Answer `feedbackR`. |
+| `admin` | both | `op:str:16, id?:int, state?:str:16, kind?:str:16, limit?:int, before?:int, note?:str:500` | 2 / 10 | §21.9: admin accounts only — `reports` (list) / `report` (set a state). Answers `adminReports`, `adminR`. |
+| `fish` | p | `op:str:8, aim?:vec2, held?:num, score?:num, holds?:nums` | 4 / 8 | §21.10 angling: `cast`, `hook`, `land`, `stop`. Answers `fishR`, `fishBite`, `fishTug`, `fishCatch`. |
+| `cook` | p | `op?:str:8, id?:str:64, n?:int` | 2 / 6 | §21.10: no `id` = list (`cookList`), with `id` = cook it at a fire (`cookR`). |
 
 ### 3.2 Server → client
 
@@ -208,6 +215,22 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `itemR` | `op, ok, uid, id?, why?, msg?, cd?` | (game) Answer to `item {op:'use'}` (§18.10): `cooldown` (`cd` ms left), `combat`, `full`, `notYet`, `dead`, `item`. |
 | `inspectR` | `id, ok, name?, cls?, clsName?, level?, look?, equipment?, why?, msg?` | (game) Answer to `inspect` (within 40 m). |
 | `settings` | `data` | (gw) The account's settings (after `chars`, and after `settings set`). |
+| `kitsR` | `cls, kits, ok` | (gw) Play-test 5 (§21.2): `kits = {cls, armour:[{id, name, blurb, items}], weapons:[{id, name, blurb, items}]}` or null. |
+| `reviveAsk` | `id, from, fromId, skill, skillId, hpPct, ms, until, note?` | (game) §21.3: someone offers to raise you. Answer with `revive`. |
+| `reviveR` | `op, id, ok, why?, msg?, name?, hpPct?` | (game) §21.3: to the fallen (`accept`/`decline`/`expired`) and to the caster (`done`/`declined`/`expired`). |
+| `sheet` | `core, advanced, abilities, angling, gold, bag, bagMax, basic?` | (game) §21.6: the character sheet (stream C's rows + A's part). |
+| `eventTrack` | `uid, id, name, kind, realm, state, what, objective, stage, leftMs, endsAt, reward, inside, credited, …` | (game) §21.5: the 1 Hz event tracker. |
+| `eventDone` | `uid, id, name, result, why?, credited, xp, gold, items, onBody?, text, story?` | (game) §21.5: how an event ended, for everyone who was there. |
+| `eventAt` | `uid, id?, realm?` | (game) §21.5: the event whose area you stand in (`uid:null` = none). |
+| `feedbackR` | `ok, id?, first?, why?, msg` | (both) §21.7: answer to `feedback`. |
+| `adminReports` | `list, counts` | (both) §21.9: feedback reports for an admin. |
+| `adminR` | `op, ok, id?, state?, why?, msg?, counts?` | (both) §21.9: answer to an admin change (or a refusal: `forbidden`). |
+| `fishR` | `ok, state, at?, water?, pool?, why?, msg?` | (game) §21.10: a cast accepted (`state:'wait'`) / refused, or the line coming in (`state:'idle', why`). |
+| `fishBite` | `ms` | (game) §21.10: a bite — answer `fish {op:'hook'}` within `ms`. |
+| `fishTug` | `ms, band, need, pull, speed, jitter, seed, heft, rarity, hint` | (game) §21.10: the tension game to play in the browser. |
+| `fishCatch` | `ok, lost?, kind, item?, items?, species?, size?, record?, first?, skill, pool?, title?, monster?, msg?` | (game) §21.10: what came out of the water. |
+| `cookList` | `ok, fire, level, recipes` | (game) §21.10: recipes, what each needs and whether you can cook it here. |
+| `cookR` | `ok, id, item?, items?, n?, why?, msg?` | (game) §21.10: answer to `cook {id}`. |
 
 ---
 
@@ -1080,3 +1103,116 @@ end; `castX {ab:'mount', why:'done'}` too; `mountR {casting, until}`.
 Personal per contributor: `eventDone {uid, id, name, xp, gold, items:[{name, rarity}], onBody?, text}` + a system chat line.
 At least one rare-or-better each (on the boss's body as your share when the body is there), xp/gold x `lengthFactor(minutes)`
 (1 to 2.5), gold x (1 + 0.15 x (level - 1)), a world boss x2 and an extra item.
+
+## 21. Play-test 5 (2026-10-06) — protocol v7 (every change is additive; the bump only makes an old cached client reload)
+
+Source: `agent/mmo/round-playtest5.md` T3–T25. New modules: `js/sim/crates.js`, `sysmail.js`, `feedback.js`, `angling.js`; schema v5.
+
+### 21.1 Healing an ally (T3)
+Nothing new on the wire. `target {id}` takes a friendly player or pet (anything but an object, within 60 m); `cast {slot, target}`
+hands the id to the rules; stream C's healers put a direct heal on key 1 or 2 (`bar[].ally`, `bar[].who`, `bar[].targets`).
+`partyFrames` rows carry the member's entity id (`id`, 0 in another room).
+
+### 21.2 Starter kits (T5)
+`kits {cls}` → `kitsR {cls, kits}` (stream C's `kitsFor(cls)`: three armour sets, several weapon packs, real item objects).
+`create {name, cls, look?, kit?: {armour, weapons}}`: ids are checked against the class's kits — an unknown one answers
+`err {code:'kit'}`; no `kit` at all = the old default (class weapon, plain clothes). The choice is saved on the blob (`kit`) and
+worn ONCE on the first entry (`kitV` 2): `rules.applyKit(e, {armour, weapons})` when the rules have it, else each kit item through
+`rules.equip` (a pack's second weapon into the off hand). `joined.you.kit` echoes it.
+
+### 21.3 Reviving a player (T4)
+Stream C's revive skills call `host.offerRevive(caster, target, spec)` (`spec = {skill, name, hpPct, mpPct?, ms?, note?, style?,
+apply?}`; `{ok}` or `why: 'alive'|'notPlayer'|'gone'|'busy'`). The fallen player gets **`reviveAsk {id, from (caster name), fromId,
+skill (name), skillId, hpPct, ms, until (wall ms), note?}`** and answers **`revive {op:'accept'|'decline', id}`** →
+`reviveR {op, id, ok, why?}`. Accept: the body stands up WHERE IT LIES with `hpPct` of its health, `rules.revived(e, {...spec, by})`
+runs (C adds the heal over time / shield / weakness), everyone near gets `ev fx {kind:'revive', id, by, skill, name}`, the caster
+`reviveR {op:'done', id, name, target}`. Declined / run out (`ms`, default 60 s, 5–120): the caster hears `declined` / `expired`.
+`respawn` (release to town) turns an open offer down. A reconnect while an offer is open gets the `reviveAsk` again.
+
+### 21.4 Crates and gift boxes (T9, T20)
+An item with `kind:'crate'` + `crate {slot, minRarity, min, forClass, maxLevel?}` — or `kind:'gift'` + `gift {minRarity, level?}` —
+opens with `item {op:'use'|'open', uid}`: `bag {remove:[box], add:[items]}` and `itemR {op:'use', ok, opened: {item, items, from:
+'crate'|'gift', name}}` (also `crateR {ok, uid, item, items, from}`). The roll is `rules.openCrate(e, item)`; without it
+`js/sim/crates.js` re-rolls `rollLoot` until the rarity (and the slot) is met. Level: the opener's, never above `maxLevel`.
+Quests: `reward.crates: [{slot, min, forClass?}]` → one crate item each at turn-in (`maxLevel` = quest level + 3);
+`questR.reward.crates = [{name, rarity, desc}]`; quest views carry `reward.crates [{slot, min}]`, `reward.goods`, `reward.text`.
+
+### 21.5 Events say what they are, and end (T11, T12)
+The bug: a wave stood on a ring 32–40 m round the arena and waited to be found (monsters notice a player at ~26 m), so "I killed the
+wolves and nothing happened". A wave now lands 16–24 m from the players in the arena, from one side, with a path to them, and
+stragglers are re-aimed every second (`js/sim/events.js`). A waves-only event is won when its last wave is down (it used to spawn
+a stand-in boss). Every event ENDS: `won`, or `lost` with `why` — `time` (its `durationMs`), `left` / `wiped` (nobody alive in reach
+for 60 s, zone events), `fled` (the boss is gone).
+- **`eventTrack`** — 1 Hz to everyone enrolled in or within hearing of a live or counting-down event (zone events, the realm event,
+  road events): `{uid, id, name, kind, realm, state:'soon'|'live'|'offer', what, text, goal?, objective:{kind:'wait'|'kill'|'boss'|
+  'open'|'rescue'|'deliver'|'escort'|'defend', text, n, of, hp?}, stage:{n, of, name}, wave, waves, hp, players, startsAt? (soon),
+  leftMs, endsAt (wall ms), reward:{xp, gold, items:[text], text}, rewardText, x, z, r, level, inside, inRange (= inside), credited,
+  enrolled, dist}`.
+- **`eventDone`** — to everyone enrolled or in hearing, win or lose: `{uid, id, name, result:'success'|'fail', won, why?, credited,
+  xp, gold, items:[{name, rarity}], onBody?, text, story?}` + one system chat line. `text` = "Event complete: +237 XP, +17 gold — …",
+  "Event complete: <name>. You did not take part…" or "Event failed: <name> — time ran out. <E's onFail>".
+- **`eventAt {uid|null, id?, realm?}`** when you walk into / out of an event's area (radius + 15 m); `joined.you.eventAt`.
+  `travel {to:'event'}` when you already stand in it: `travelR {ok:false, why:'here'}`.
+- `zoneEvent {kind:'end'}` gains `result`, `why`, `text`; `ev` views gain `what`, `goal`, `objective`, `stage`, `leftMs`.
+- A contributor who had left the room when an event was won gets the gold and the item by LETTER (§21.8).
+- Road events (`js/sim/roadevents.js`): the same `eventTrack` / `eventDone`; a road quest someone took on runs out after E's
+  `info.durationSec` (the quest is given up for them, `why:'time'`).
+- E's `info` block on every event (`what`, `objective`, `durationSec`, `onSuccess`, `onFail`, `rewardText`) fills the text.
+
+### 21.6 The sheet, the reach, two two-handers (T18, T14, T7)
+- **`sheet {core, advanced, abilities, …}`** = `rules.sheet(e)` (stream C's estimator; rows `{id, label, value, unit, tip}`) +
+  `{gold, bag, bagMax, angling}`. Sent after the join and after every equip / unequip / level / talent / perk / form change, and on
+  `sheet {}`. Queued, 2 a tick. Until the rules have `sheet`, A sends its own numbers marked `basic: true`.
+- `you {reach, attackRange}` rides on every `you {bar}` (a form, a stance, a weapon swap, a talent) as well as on equip.
+- `item {op:'equip', uid, slot:'offhand'}` is passed to the rules untouched; every equip answers **`itemR {op:'equip', uid, slot,
+  ok, why?, msg?}`** (a refusal carries the rules' sentence; `err {code:'item'}` is still sent). `joined.you.dual2h` / `you {dual2h}`
+  = the Doubled Grasp perk is owned.
+
+### 21.7 Feedback (T19)
+**`feedback {kind:'suggestion'|'bug', text, ctx?}`** on either socket → **`feedbackR {ok, id?, first?, why?, msg}`**
+(`why`: `kind`, `empty`, `slow`, `failed`). Limits: one every 20 s and 12 an hour per account; `text` ≤ 2000 characters; `ctx` is
+cleaned (`js/sim/feedback.js` `sanitize`: plain JSON, depth 4, strings ≤ 500, `logs` ≤ 60 lines of ≤ 300, ≤ 6 kB — trimmed, never
+refused). The server adds its own context: account, character, room, zone, position, health, target, nearby counts, running
+events, quests in the log, tick, protocol, build, time. Stored in the `feedback` table (schema v5) / the memory store AND
+appended to `<state>/feedback-<env>.jsonl` (`.data/` in the tree for dev, `/var/lib/thousandvale/` for stable; `--feedback-file`).
+
+### 21.8 System mail (T20)
+`js/sim/sysmail.js` — ONE call: `mailTo({to: charId | name, subject, body, from?, items?, gold?, gift?: {minRarity, level?},
+crate?: {slot, min}})` → `{ok, id}`. `province.mailTo`, `gateway.mailTo`, `gateway.admin.mailTo`. A system letter
+(`mail.kind === 'system'`) is taken ANYWHERE (a player's letter still in a town) and cannot be returned.
+`mailR {op:'take', ok:false, why:'bagFull', need, free}`. The first feedback of each character posts "Thank you" with a Gift Box
+(`gift {minRarity:'rare'}`), opened like a crate.
+
+### 21.9 Admins (T21)
+`accounts.admin` is set ONLY by `node tools/make-admin.mjs <username>` (never by a client). `authed.admin`, `accountR {op:'info'}.admin`
+and `joined.you.admin` tell the client. **`admin {op:'reports', state?, kind?, limit?, before?}`** → **`adminReports {list:[{id, at,
+kind, text, state, account, char, name, cls, level, client, ctx, server, note, stateAt, stateBy}], counts}`** (no `state` = all but
+trashed); **`admin {op:'report', id, state:'new'|'approved'|'declined'|'trashed', note?}`** → `adminR {ok, id, state, counts}`.
+The flag is read from the store on every call. Anyone else: `adminR {ok:false, why:'forbidden'}`. The admin page (127.0.0.1) has
+a **feedback** tab with the same list and buttons (`/api/feedback`, `/api/feedback-state`).
+`node tools/feedback-report.mjs [--env dev|stable] [--state …] [--kind …] [--since …]` prints every report as Markdown.
+
+### 21.10 Angling (T25)
+Rules: stream C's `js/rules/fishing.js` over `data/rules/fishing.json`; content: stream E's `data/provinces/angling.json` and
+`angling-pools.json`. Server: `js/sim/angling.js`.
+- **`fish {op:'cast', aim?}`** (or using a rod from the bag) → `fishR {ok, state:'wait', at, water, pool?, tier?, left?, rod}` or
+  `{ok:false, state:'idle', why:'noRod'|'noWater'|'far'|'combat'|'swim'|'dead'|'skill'|'bagFull'|'notReady', msg, need?}`.
+  No `aim`: a pool within 24 m, else the first water along where you face.
+- 2–9 s later **`fishBite {ms}`**; **`fish {op:'hook'}`** → too soon `fishR {ok:false, why:'early'}`, too late `why:'late'`, else the
+  roll: junk straight in, a monster (`fishCatch {kind:'monster', monster, monsterId}` — it climbs out beside you), anything else
+  **`fishTug {ms, band, need, pull, speed, jitter, seed, heft, rarity, hint}`** (played in the browser).
+- **`fish {op:'land', held}`** (`held` 0..1 = the share of the tug the marker stayed in the band; a tug answered early only counts
+  the part played) → **`fishCatch {ok, kind:'fish'|'junk'|'crate'|'legend', item, items, species:{id, name, rarity, legend?}, size,
+  first?, best?, record?, xp, skill:{level, xp, next, up?}, pool?:{id, left}, title?, msg?}`** or `{ok:false, lost:true, msg}`.
+- `fish {op:'stop'}`; a step of more than 2 m, a hit, a cast, swimming, dying or a room change reel in: `fishR {state:'idle', why}`.
+- Everyone near: `ev fx {kind:'fish', id, phase:'cast'|'bite'|'tug'|'landed'|'catch'|'lost'|'monster'|'end', x, z, rarity?, heft?}`,
+  `info.fishing = {x, z, tug?}`, ANIMS `fish` (19) and `reel` (20).
+- Pools: objects `type:'fishpool'`, `info.pool = {tier, minSkill, left, water}`; `meta.<zone>.live` open per copy, a fished-out one
+  goes (`fx {kind:'pool', phase:'gone'}`) and another listed spot opens 30–90 s later. The `start` pool never runs out.
+- Saved `angling = {xp, level, casts, catches:{[species]:{n, best, zone, zones}}, legends, titles, bait}`; `joined.you.angling` /
+  `you {angling}` add `next`, `rank`, `max`. Bait (`use.type:'bait'`) is used from the bag and lasts its `casts`.
+- Cooking: `used {…, cook:true}` on a campfire or an innkeeper; **`cook {}`** → `cookList {fire, level, recipes:[{id, name, desc,
+  skill, can, why?, needs:[{id, name, n, have}], makes:{id, name, text}}]}`; **`cook {id, n?}`** within 6 m of a fire (9 m of an
+  innkeeper) → `cookR {ok, item, items, n, msg}`. Meals are E's food goods (the S20 meal code eats them).
+- Quests: step kinds `catch {count, fish?, pool?, rarity?}` and `cook {count, meal?}`; `grant: [{good, count}]` on accept and
+  `reward.goods`; job frames with `giverRole:'angler'`. Fish, junk and trophies sell for their own `price`.

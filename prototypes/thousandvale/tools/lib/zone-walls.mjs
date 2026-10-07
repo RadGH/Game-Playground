@@ -13,9 +13,13 @@
 //   style      data/world/town-walls.json: by settlement kind, replaced in a frontier/blight/ruinfield zone; per-town overrides
 //   radius     outside the outermost building by the style's margin (a proctown-walled city keeps proctown's wall radius,
 //              which its main streets were already carried out to); never past the town circle - 2 m
-//   gates      { x, z, h, yaw, width, kind, road } — yaw = atan2(dx, dz) of the way OUT, along the road (so the gate's front
-//              faces down the road away from the town; its doors swing in). kind: gatehouse | posts | gap (an opening too
-//              wide for a gatehouse: towers stand either side instead) | water (a river through the ring)
+//   gates      { x, z, h, yaw, out, wallYaw, open, width, kind, road } — (x, z) is ON the ring. yaw / out = the way OUT along
+//              the road (what a walker follows). wallYaw = atan2(nx, nz) of the ring's outward normal there: the way the
+//              gate STRUCTURE faces. Play-test 5 (T8b): the structure stands IN the wall — its width runs along the ring's
+//              tangent whatever angle the road crosses at — and `open` is its clear opening along the wall, wide enough
+//              for the road to pass at its slant (pass / cos + the depth of the gate x tan). Before, the gatehouse was
+//              turned to the road, so where a road left town at an angle the gate stood skewed in its wall with a gap
+//              either side. kind: gatehouse | posts | gap (an opening too wide for a gatehouse: towers stand either side)
 //   runs       open polylines [[x, z, h]…] of wall between openings; towers [{x, z, h, yaw}] along them
 //
 // Exported for tests: planTownWalls, wallNav (the SOLID stamp nav.bin uses), WALL_DEFAULTS.
@@ -48,6 +52,10 @@ export const POST = 1.0;
 export const NAV_HALF = 1.5;
 /** A gatehouse's clear opening in proctown's kit (x = -2.1..2.1), scaled up to the road; wider than this is a `gap`. */
 export const GATEHOUSE_OPEN = 4.2, GATEHOUSE_MAX = 12;
+/** Half the depth (along the road) a gate takes up: a gatehouse is 3.4 m through, a pair of posts is only the nav stamp. */
+export const GATE_HALF_DEPTH = { gatehouse: 1.7, posts: NAV_HALF };
+/** The clear opening along the wall line is never asked to be wider than this (a road at a very flat slant becomes a `gap`). */
+export const OPEN_MAX = 15;
 /** Tower footprint radius (proctown's stone tower is 4.8 m across, the palisade one ~4.2). */
 export const TOWER_R = 2.6;
 /** A stream narrower than this where it runs through the ring gets a grate (SOLID in nav); a wider river stays open. */
@@ -206,12 +214,16 @@ export function planTownWalls(ctx) {
       const px = main.uz, pz = -main.ux;              // across the gate
       let lo = -main.w.width / 2, hi = main.w.width / 2;
       for (const c of bundle.slice(1)) { const q = (c.x - main.x) * px + (c.z - main.z) * pz; lo = Math.min(lo, q - c.w.width / 2); hi = Math.max(hi, q + c.w.width / 2); }
-      const mid = (lo + hi) / 2, gx = main.x + px * mid, gz = main.z + pz * mid;
-      const pass = hi - lo + 1.2;                     // the clear passage
-      const slant = Math.min(main.slant, 1.15);
-      // how much ring the opening takes: the passage + the posts, seen at the slant
-      const half = Math.min(Math.PI / 3, ((pass / 2 + POST + st.thick / 2) / Math.cos(slant)) / R);
-      const ag = angle(gx, gz);
+      const mid = (lo + hi) / 2;
+      const pass = hi - lo + 1.2;                     // the clear passage, square to the road
+      // T8b: the gate stands ON the ring and IN its line. Its normal is the ring's; the road crosses it at `th`.
+      const ag = angle(main.x + px * mid, main.z + pz * mid), [gx, gz] = at(ag);
+      const nx = Math.cos(ag), nz = Math.sin(ag);
+      const th = Math.min(Math.acos(Math.max(-1, Math.min(1, main.ux * nx + main.uz * nz))), 1.15);
+      // the clear opening ALONG THE WALL: the passage seen at the slant, plus what the gate's own depth cuts off it
+      const open = pass / Math.cos(th) + 2 * (GATE_HALF_DEPTH[st.gate] ?? NAV_HALF) * Math.tan(th);
+      // how much ring the opening takes: the opening + the posts
+      const half = Math.min(Math.PI / 3, (open / 2 + POST + st.thick / 2) / R);
       // a way through the gate that runs on at a slant beside the wall (a street proctown carried out to it) would have
       // the next stretch of wall standing on its edge: grow the opening along the ring while any bundled way is that close
       let a0 = ag - half, a1 = ag + half;
@@ -219,8 +231,8 @@ export function planTownWalls(ctx) {
       for (let k = 0; k < 40 && close(a0 - 0.5 / R); k++) a0 -= 0.5 / R;
       for (let k = 0; k < 40 && close(a1 + 0.5 / R); k++) a1 += 0.5 / R;
       let kind = st.gate;
-      if (pass > GATEHOUSE_MAX) kind = 'gap';
-      return { main, bundle, led, gx, gz, ux: main.ux, uz: main.uz, pass, slant: main.slant, a0, a1, kind };
+      if (pass > GATEHOUSE_MAX || open > OPEN_MAX) kind = 'gap';
+      return { main, bundle, led, gx, gz, ux: main.ux, uz: main.uz, nx, nz, open, pass, slant: main.slant, a0, a1, kind };
     }
 
     // 3. openings: the gates, then the river where it runs through the ring, then stream E's discs
@@ -327,6 +339,7 @@ export function planTownWalls(ctx) {
     out.push({ town: id, name: town.name, kind: town.kind, style: st.key, material: st.material, tier: st.tier, h: st.h, thick: st.thick, tint: st.tint,
       cx: r2(cx), cz: r2(cz), r: r2(R), runs, towers,
       gates: gateOut.map((g, k) => ({ id: `${id}_gate_${k}`, x: r2(g.gx), z: r2(g.gz), h: r2(groundAt(g.gx, g.gz)), yaw: +Math.atan2(g.ux, g.uz).toFixed(4), out: [+g.ux.toFixed(4), +g.uz.toFixed(4)],
+        wallYaw: +Math.atan2(g.nx, g.nz).toFixed(4), open: r2(g.kind === 'gap' ? 2 * R * Math.sin((g.a1 - g.a0) / 2) : g.open),
         width: r2(g.kind === 'gap' ? 2 * R * Math.sin((g.a1 - g.a0) / 2) : g.pass), pass: r2(g.pass), slant: +g.slant.toFixed(3), kind: g.kind,
         way: g.main.w.id, wayKind: g.main.w.kind, ways: [...new Set([...g.bundle, ...g.led].map(c => c.w.id))], led: g.led.map(c => c.w.id),
         ends: [at(g.a0), at(g.a1)].map(([x, z]) => [r2(x), r2(z)]),
@@ -362,7 +375,9 @@ export function wallNav(walls, { SIZE, STEP, mark }) {
     // a gatehouse's / gate's jambs: from each run end in to the edge of the passage, so the ONLY way through is the road
     for (const g of w.gates) {
       if (g.kind === 'gap' || !g.ends) continue;
-      const px = g.out[1], pz = -g.out[0], off = g.width / 2 + half;
+      // T8b: the jambs stand on the WALL line (the ring's tangent at the gate), `open` apart — not square to the road
+      const wall = Number.isFinite(g.wallYaw) && g.open > 0;
+      const px = wall ? Math.cos(g.wallYaw) : g.out[1], pz = wall ? -Math.sin(g.wallYaw) : -g.out[0], off = (wall ? g.open : g.width) / 2 + half;
       const J = [[g.x + px * off, g.z + pz * off], [g.x - px * off, g.z - pz * off]];
       for (const j of J) {
         const e = g.ends.slice().sort((a, b) => Math.hypot(a[0] - j[0], a[1] - j[1]) - Math.hypot(b[0] - j[0], b[1] - j[1]))[0];

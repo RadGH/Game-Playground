@@ -51,7 +51,12 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
       case 'camp': {
         camped = true;
         const level = pickIn(p.level, h), count = pickIn(p.count, h >>> 3);
-        camps.push({ type: p.monster, level, x: p.x, z: p.z, count, radius: p.radius || 10, respawnMs, place: p.id, ...(p.filler ? { filler: true } : {}),
+        // play-test 5 T10 (E's roadside champions): a camp may be placed WITH a rank and its affixes (`rank:'champion'`,
+        // `affixes:['giant']`, its own `respawnMin`) — a fixed-rank camp never also rolls (js/rules/affixes.js skips a ranked body)
+        const fixed = p.rank && p.rank !== 'normal' ? { rank: p.rank, ...(Array.isArray(p.affixes) && p.affixes.length ? { affixes: p.affixes.slice(0, 4) } : {}), ...(p.name ? { name: p.name } : {}), ...(p.champion ? { champion: true } : {}) } : null;
+        const rm = p.respawnMin;
+        const ownRespawn = rm != null ? (Array.isArray(rm) ? [rm[0] * 60000, rm[1] * 60000] : rm * 60000) : null;
+        camps.push({ type: p.monster, level, x: p.x, z: p.z, count, radius: p.radius || 10, respawnMs: ownRespawn ?? respawnMs, place: p.id, ...(fixed || {}), ...(p.filler ? { filler: true } : {}),
           ...(p.roam && Array.isArray(p.path) && p.path.length > 1 ? { path: p.path } : {}), ...(p.doorGuard ? { doorGuard: true } : {}) });   // roamers walk E's loop (C)
         if (p.doorGuard) doorGuard = true;
         if (p.with) camps.push({ type: p.with, level, x: p.x + 4, z: p.z + 3, count: Math.max(1, count >> 1), radius: 6, respawnMs, place: p.id });

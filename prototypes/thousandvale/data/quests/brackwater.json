@@ -25,6 +25,13 @@
       "role": "hedge-witch",
       "at": "fen_witch_hut",
       "greeting": "My jars are open and my slimes are loose. Help a poor old woman, dear, it's slightly your fault for existing."
+    },
+    "angler_brackwater": {
+      "name": "Mog Eelwright",
+      "role": "angler",
+      "at": "Brackwater",
+      "greeting": "If it wriggles, I sell it. If it does not, give it a minute.",
+      "placedBy": "content-pools"
     }
   },
   "quests": [
@@ -54,10 +61,12 @@
       "reward": {
         "xp": 0.5,
         "gold": 10,
-        "item": {
-          "tier": "uncommon",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "the_antler_stockade"
     },
@@ -86,10 +95,12 @@
       "reward": {
         "xp": 0.4,
         "gold": 7,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {

@@ -30,6 +30,8 @@ import { createGuilds } from './guilds.js';
 import { createCallboard } from './callboard.js';
 import { sha256Hex } from './sha256.js';
 import { cleanLook } from './looks.js';
+import { createFeedback } from './feedback.js';
+import { createSystemMail } from './sysmail.js';
 
 const TICKET_MS = 30000;
 
@@ -41,6 +43,7 @@ export function createGateway(opts) {
     starterProvince = null, events = null, clockDayMs = 2 * 3600000, directorOpts = {},
     hasher = null, chatFilter = null, ipSalt = 'thousandvale', chatOpts = {}, guildOpts = {}, callboardOpts = {},
     mailSweepMs = 60000, chargeTimeoutMs = 5000, classNames = null,
+    kitsFor = null, feedbackSink = null, feedbackOpts = {},      // play-test 5: C's kitsFor(classId) (T5); the JSONL sink + limits (T19)
   } = opts;
   const nameOk = n => !chatFilter || chatFilter.name(n);
   const classSet = classes ? new Set(classes) : null;
@@ -182,8 +185,8 @@ export function createGateway(opts) {
           if (!a) { s.state = 'anon'; return s.err('auth'); }
           if ((a.banned || 0) > wallNow()) { s.sendJSON({ t: 'refuse', code: 'banned', msg: CODES.banned }); return s.closeSoon('banned'); }
           s.account = a.account; s.state = 'authed'; counters.logins++;
-          s.token = m.token; s.claimed = !!a.claimed; s.username = a.username || null;
-          s.sendJSON({ t: 'authed', account: a.account, claimed: !!a.claimed, username: a.username || undefined });
+          s.token = m.token; s.claimed = !!a.claimed; s.username = a.username || null; s.admin = !!a.admin;
+          s.sendJSON({ t: 'authed', account: a.account, claimed: !!a.claimed, username: a.username || undefined, ...(a.admin ? { admin: true } : {}) });
         }, err => { log('auth failed', err); s.state = 'anon'; s.err('auth'); });
       case 'chars':
         if (s.state !== 'authed') return bad(s, 'order');
@@ -199,12 +202,35 @@ export function createGateway(opts) {
         if (classSet ? !classSet.has(m.cls) : !/^[a-z][a-z0-9_]{1,31}$/.test(m.cls)) return s.err('cls');
         let look = null;
         if (m.look) { const c = cleanLook(m.look); if (!c.ok) return s.err('state', c.msg); look = c.look; }
-        return store.createChar(s.account, { name, cls: m.cls, look }).then(r => {
+        // T5 (play-test 5): the starting equipment picked on the new screen — an armour set id + a weapon pack id out of
+        // C's kitsFor(cls). Unknown ids are refused; nothing picked = the first of each (applied on first entry).
+        return Promise.resolve(kitChoice(m.cls, m.kit)).then(k => {
+          if (k && k.err) { s.err('kit', k.err); return null; }
+          return store.createChar(s.account, { name, cls: m.cls, look, kit: k });
+        }).then(r => {
+          if (!r) return;
           if (r.err) return s.err(r.err);
           s.sendJSON({ t: 'created', char: r.char });
         });
       }
       case 'play': return play(s, m);
+      case 'kits': {
+        if (s.state !== 'authed') return bad(s, 'order');
+        return Promise.resolve(kitsOf(m.cls)).then(kits => s.sendJSON({ t: 'kitsR', cls: m.cls, kits: kits || null, ok: !!kits }));
+      }
+      case 'feedback': {
+        if (s.state !== 'authed') return bad(s, 'order');
+        const pr = s.charId != null ? presence.get(s.charId) : null;
+        const who = { account: s.account, char: pr ? pr.char : null, name: pr ? pr.name : null, cls: pr ? pr.cls : null, level: pr ? pr.level : null };
+        const server = { via: 'gateway', build, protocol: PROTOCOL_VERSION, claimed: !!s.claimed, username: s.username || null, ...(pr ? { room: pr.room, province: pr.province, zone: pr.zone || null, online: !!pr.online } : {}), at: new Date(wallNow()).toISOString() };
+        return feedback.submit(who, m, server).then(r => s.sendJSON({ t: 'feedbackR', ...r }), err => { log('feedback failed', err && err.message); s.sendJSON({ t: 'feedbackR', ok: false, why: 'failed', msg: 'That did not go through. Please try again.' }); });
+      }
+      case 'admin': {
+        if (s.state !== 'authed') return bad(s, 'order');
+        // the flag is read from the store every time: tools/make-admin.mjs takes effect (and is taken away) without a re-login
+        return Promise.resolve(store.isAdmin ? store.isAdmin(s.account) : false).then(ok => { s.admin = !!ok; return feedback.adminOp({ admin: !!ok, by: s.username || 'account ' + s.account }, m); })
+          .then(r => s.sendJSON(r), err => { log('admin op failed', err && err.message); s.sendJSON({ t: 'adminR', op: m.op, ok: false, why: 'failed', msg: 'That did not work.' }); });
+      }
       case 'settings': return settingsOp(s, m);
       case 'look': return lookOp(s, m);
       case 'party': return onParty(s, m);
@@ -245,7 +271,7 @@ export function createGateway(opts) {
       // already in the world somewhere? go back to that process (it takes over the entity)
       const proc = presence.has(c.id) ? procOfChar(c.id) : near ? procOfChar(near) : procForRoom(c.room);
       const ticket = randomHex(16);
-      sendTo(proc, { k: 'ticket', ticket, char: c.id, account: s.account, claimed: !!s.claimed, near, exp: now() + TICKET_MS });
+      sendTo(proc, { k: 'ticket', ticket, char: c.id, account: s.account, claimed: !!s.claimed, admin: !!s.admin, username: s.username || null, near, exp: now() + TICKET_MS });
       const p = parties.of(c.id);
       if (p) sendTo(proc, { k: 'party', char: c.id, party: partyBrief(p) });
       // the province process gets the ticket over the bus first; a ticket that arrives later is waited for
@@ -256,6 +282,38 @@ export function createGateway(opts) {
       if (store.mailUnread) store.mailUnread(c.id).then(n => { if (n && gwByChar.get(c.id) === s) s.sendJSON({ t: 'mailNew', unread: n }); }, () => {});
     });
   }
+
+  // ---- play-test 5: starter kits (T5), feedback + admins (T19/T21), system mail (T20) ----
+  /** C's kitsFor(cls) -> { armour: [{id, name, blurb, items}], weapons: [...] } (sync or a promise), or null when the rules have none. */
+  function kitsOf(cls) {
+    if (typeof kitsFor !== 'function') return null;
+    try { return Promise.resolve(kitsFor(cls)).then(k => (k && typeof k === 'object' && (Array.isArray(k.armour) || Array.isArray(k.weapons)) ? k : null), () => null); } catch { return null; }
+  }
+  /** Validate `create.kit` against the class's kits: -> { armour, weapons } | null (no kits on this server) | { err } */
+  function kitChoice(cls, kit) {
+    if (kit == null) return null;                  // nothing picked: today's default gear (bots, old clients)
+    return Promise.resolve(kitsOf(cls)).then(k => {
+      if (!k) {      // no kits known HERE (a gateway without the rules): keep clean ids, the province looks them up when it applies them
+        const id = v => (typeof v === 'string' && /^[a-z0-9][a-z0-9_:\-]{0,47}$/i.test(v) ? v : null);
+        const a = id(kit && (kit.armour ?? kit.armor)), w = id(kit && (kit.weapons ?? kit.weapon));
+        return a || w ? { armour: a, weapons: w } : null;
+      }
+      const pickOf = (list, id, what) => {
+        const l = Array.isArray(list) ? list : [];
+        if (id == null) return l.length ? l[0].id : null;
+        return typeof id === 'string' && l.some(x => x.id === id) ? id : { err: 'That ' + what + ' is not one your class can start with.' };
+      };
+      const want = kit && typeof kit === 'object' ? kit : {};
+      const a = pickOf(k.armour, want.armour ?? want.armor, 'armour set'), w = pickOf(k.weapons, want.weapons ?? want.weapon, 'weapon pack');
+      if (a && a.err) return a;
+      if (w && w.err) return w;
+      return { armour: a, weapons: w };
+    });
+  }
+  let gwUid = 0;
+  const gwNonce = randomHex(4);
+  const sysmail = createSystemMail({ store, newUid: () => `gw-${gwNonce}-${(++gwUid).toString(36)}`, wallNow, notify: c => mailNote(c), log, counters });
+  const feedback = createFeedback({ store, wallNow, sink: feedbackSink, sysmail, log, counters, filter: chatFilter, opts: feedbackOpts });
 
   // ---- play-test 2: class names (Q25), account settings (Q15), a title-screen look (Q21) ----
   function clsName(id) {
@@ -525,7 +583,13 @@ export function createGateway(opts) {
     announce: text => { const t = String(text || '').slice(0, 300); if (!t) return false; const d = JSON.stringify({ t: 'chat', ch: 'system', from: 0, name: 'The Vale', text: t }); for (const g of gwByChar.values()) g.send(d); chat.logLine({ ch: 'system', name: 'admin', text: t }); return true; },
     forceEvent: (id, announceMs = 60000) => director.force(id || null, { announce: announceMs }),
     economy: hours => store.economyReport ? store.economyReport(wallNow() - (hours || 24) * 3600000) : Promise.resolve([]),
+    // play-test 5 (T21): feedback reports for the admin page — the same calls an in-game admin makes
+    feedback: (q = {}) => feedback.adminOp({ admin: true, by: 'admin page' }, { op: 'reports', ...q }),
+    feedbackState: (id, state, note) => feedback.adminOp({ admin: true, by: 'admin page' }, { op: 'report', id, state, ...(note != null ? { note } : {}) }),
+    admins: () => (store.listAdmins ? store.listAdmins() : Promise.resolve([])),
+    /** T20: post a system letter (items, gold, a gift box) to any character — the one API every system uses. */
+    mailTo: a => sysmail.mailTo(a),
   };
 
-  return { accept, attach, step, status, parties, presence, director, mute, counters, epoch, clockDayMs, partyChanged, admin, chat, friends, guilds, callboard, accounts, ipHash, kickChar };
+  return { accept, attach, step, status, parties, presence, director, mute, counters, epoch, clockDayMs, partyChanged, admin, chat, friends, guilds, callboard, accounts, ipHash, kickChar, mailTo: a => sysmail.mailTo(a), feedback, kitsOf };
 }

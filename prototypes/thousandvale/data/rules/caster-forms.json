@@ -1,0 +1,203 @@
+{
+  "_doc": "Stream C (play-test 5: T14 reach, T15 caster forms, T16 sceptres). How a wand, staff, sceptre or off-hand focus attacks when you press the basic attack. `styles` = a WAND's behaviour (`item.castStyle`): the first six are Farhold's own six wand behaviours with Farhold's numbers (the `farhold` key names the row in weapons.js WAND_BEHAVIOURS \u2014 those numbers are read from there, never from here, so they cannot drift); the rest are Thousandvale's. `shape`: bolt (a projectile through the same flight as a skill's bolt) | cone | beam | nova | lob. `range` in metres is also what `rules.attackRange` answers (T14: the client walks into THIS range before auto-attacking); a nova's reach is `radius x novaReach`. `mult` = share of weapon damage per hit. `castForm` is stream F's six-word vocabulary (projectile | cone | area | beam | fork | shield) for picking a model. `w` = how often a dropped wand comes out this way. `staffStyles` = the two forms Thousandvale adds to Farhold's staff spells (weapons.js STAFF_SPELLS: cone / nova / wave / lob / chain / ground per element), `staffStyleChance` = the share of staves that get one. `focusRiders` = what an off-hand focus adds to the main hand's caster attack; `focusBases` says which focus base carries which. `offhandBolt` = the share of damage an off-hand wand's own bolt deals (Farhold's OFFHAND_DAMAGE is used when absent). js/rules/caster-forms.js writes every card sentence from these numbers.",
+  "novaReach": 0.85,
+  "rangeSlack": 1.5,
+  "styles": {
+    "bolt": {
+      "farhold": "plain",
+      "castForm": "projectile",
+      "shape": "bolt",
+      "range": 34,
+      "w": 3,
+      "text": "one fast, straight {el} bolt"
+    },
+    "burst": {
+      "farhold": "burst",
+      "castForm": "area",
+      "shape": "bolt",
+      "range": 34,
+      "w": 2,
+      "text": "one {el} bolt that bursts wide on impact"
+    },
+    "fan": {
+      "farhold": "split",
+      "castForm": "fork",
+      "shape": "bolt",
+      "range": 34,
+      "w": 2,
+      "text": "three {el} bolts in a fan"
+    },
+    "chain": {
+      "farhold": "chain",
+      "castForm": "fork",
+      "shape": "bolt",
+      "range": 34,
+      "w": 2,
+      "text": "one {el} bolt"
+    },
+    "seeking": {
+      "farhold": "seeking",
+      "castForm": "projectile",
+      "shape": "bolt",
+      "range": 34,
+      "w": 2,
+      "text": "one {el} bolt that turns after what you aimed at"
+    },
+    "heavy": {
+      "farhold": "heavy",
+      "castForm": "projectile",
+      "shape": "bolt",
+      "range": 28.9,
+      "w": 2,
+      "text": "one slow {el} bolt that lands hard"
+    },
+    "cone": {
+      "castForm": "cone",
+      "shape": "cone",
+      "range": 9,
+      "arc": 0.9,
+      "mult": 0.8,
+      "w": 2
+    },
+    "beam": {
+      "castForm": "beam",
+      "shape": "beam",
+      "range": 18,
+      "width": 1.2,
+      "mult": 0.75,
+      "w": 2
+    },
+    "nova": {
+      "castForm": "area",
+      "shape": "nova",
+      "radius": 5,
+      "mult": 0.7,
+      "w": 1.5
+    },
+    "lob": {
+      "castForm": "area",
+      "shape": "lob",
+      "range": 16,
+      "radius": 3,
+      "mult": 0.9,
+      "speed": 20,
+      "w": 1.5
+    },
+    "fork": {
+      "castForm": "fork",
+      "shape": "bolt",
+      "range": 30,
+      "splash": 1.2,
+      "mult": 0.8,
+      "split": {
+        "shards": 2,
+        "range": 8,
+        "keep": 0.5
+      },
+      "w": 2,
+      "text": "one {el} bolt"
+    },
+    "ward": {
+      "castForm": "shield",
+      "shape": "bolt",
+      "range": 26,
+      "splash": 1.3,
+      "mult": 0.8,
+      "ward": {
+        "share": 0.02,
+        "cap": 0.1,
+        "seconds": 4
+      },
+      "w": 1.5,
+      "text": "one {el} bolt"
+    },
+    "pool": {
+      "castForm": "area",
+      "shape": "bolt",
+      "range": 24,
+      "splash": 1.6,
+      "mult": 0.7,
+      "pool": {
+        "seconds": 3,
+        "radius": 2.4,
+        "power": 0.2
+      },
+      "w": 1.5,
+      "text": "one {el} bolt"
+    }
+  },
+  "staffStyleChance": 0.22,
+  "staffStyles": {
+    "beam": {
+      "castForm": "beam",
+      "shape": "beam",
+      "name": "Lance",
+      "range": 16,
+      "width": 1.4,
+      "mult": 0.85
+    },
+    "ward": {
+      "castForm": "shield",
+      "shape": "nova",
+      "name": "Aegis Ring",
+      "radius": 5,
+      "mult": 0.6,
+      "ward": {
+        "share": 0.03,
+        "cap": 0.12,
+        "seconds": 5,
+        "allies": true
+      }
+    }
+  },
+  "staffForms": {
+    "cone": "cone",
+    "nova": "area",
+    "wave": "beam",
+    "lob": "area",
+    "ground": "area",
+    "chain": "fork"
+  },
+  "focusRiders": {
+    "echo": {
+      "name": "Echo",
+      "every": 4,
+      "mult": 0.6,
+      "delay": 0.25
+    },
+    "burst": {
+      "name": "Burst",
+      "radius": 2.5,
+      "mult": 0.35
+    },
+    "ward": {
+      "name": "Ward",
+      "share": 0.02,
+      "cap": 0.1,
+      "seconds": 4
+    },
+    "siphon": {
+      "name": "Siphon",
+      "mana": 2
+    }
+  },
+  "focusBases": {
+    "orb": "burst",
+    "tome": "echo",
+    "warded_focus": "ward",
+    "rune_aegis": "ward",
+    "arcane_bulwark": "ward",
+    "spellguard_orb": "burst",
+    "grimoire": "echo",
+    "seer_orb": "burst",
+    "reliquary": "siphon",
+    "effigy": "siphon",
+    "psalter": "siphon"
+  },
+  "focusForms": {
+    "echo": "fork",
+    "burst": "area",
+    "ward": "shield",
+    "siphon": "projectile"
+  }
+}

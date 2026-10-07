@@ -42,6 +42,101 @@
    "radius": 8,
    "quest": "croaking_at_dawn",
    "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z14_02_1",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 474,
+   "z": 888,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "gilded"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z14_02_2",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 952,
+   "z": 1972,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "ironclad"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z14_02_3",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1073,
+   "z": 898,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "venomous"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_gullwick",
+   "name": "Josey Fourlakes",
+   "role": "angler",
+   "at": "Gullwick",
+   "x": 1444,
+   "z": 428,
+   "yaw": -0.79,
+   "angler": true
   }
  ]
 }

@@ -84,7 +84,7 @@ export function heldLook(item) {
   if (item.look?.held && !HELD_BY_BASE[item.baseKey]) return { id: MODERN[item.look.held] || item.look.held, color: item.look.color || '#b9c2cc', quality: QUALITY[item.rarity] || 0 };
   const sub = item.subtype || item.baseKey;
   let id = HELD_BY_BASE[item.baseKey] || HELD_BY_SUBTYPE[item.baseKey] || HELD_BY_SUBTYPE[item.subtype] || 'fh_sword';   // the base is the more specific (a longsword base has subtype 'sword')
-  const el = item.castElement || item.brand || null;
+  const el = item.castElement || item.brand || item.el || null;      // `el`: the compact info.gear form (asked of A, play-test 5)
   if (sub === 'staff' && el) id = STAFF_TOPPER[el] || 'staff_orb';
   const color = el ? (ELEMENT_TINT[el] || '#b9c2cc') : item.look?.color ? item.look.color : item.rarity === 'legendary' ? '#ffb040' : item.rarity === 'rare' ? '#e8d020' : '#b9c2cc';
   return { id, color, quality: QUALITY[item.rarity] || 0, element: el || null };
@@ -101,7 +101,8 @@ export function offhandLook(item) {
   if (item.type === 'weapon' && !OFFHAND_BY_SUBTYPE[item.subtype]) {
     const h = heldLook(item);
     // S15: a second wand IS drawn in the off hand now (avatar-3d HELD_WEAPON_IDS takes wands); staves/bows stay two-handed
-    if (h.id && h.id !== 'none' && !/^staff|^bow$|^crossbow$|^book$|^orb$/.test(h.id)) return h;
+    // T7 (play-test 5): a second two-hander — staves included — is drawn in the off hand (the perk decides on the server)
+    if (h.id && h.id !== 'none' && !/^bow$|^crossbow$|^book$|^orb$/.test(h.id)) return h;
   }
   return { id: OFFHAND_BY_SUBTYPE[item.subtype] || 'none', color: '#9aa3ad' };
 }
@@ -119,11 +120,89 @@ export function normItem(it, baseOf = () => null) {
     isShield: it.isShield ?? b.isShield, isMagicShield: it.isMagicShield ?? b.isMagicShield, isUnique: it.isUnique || !!it.unique, type: it.type || b.type || null };
 }
 
+// ---------------------------------------------------------------- play-test 5 (T23): the gear catalog's new models
+//
+// Stream F's `g5_` models (avatar-3d/data/gear-catalog.json, read through avatar-3d/js/gear-catalog.js) cover every
+// slot — including four the game never drew at all: gloves, rings, necklaces and belts. An item says which model it
+// is with `look.g5` / `g5` (C stamps both on catalog items) or simply by its base id being the row's id (the compact
+// `info.gear` form carries only `base`). For the slots with NO older model, any item is drawn with the catalog's model
+// for its slot and armour weight, so a pair of leather gloves from the old loot table shows on the hands too.
+
+/** A worn light that is a torch (a flame on a stick) rather than a lantern. */
+export const isTorchItem = (item, row = null) => row?.type === 'torch' || /torch|cresset|brand\b/i.test(`${item?.g5 || ''} ${item?.look?.g5 || ''} ${item?.catalogBase || ''} ${item?.baseKey || item?.base || ''}`);
+/**
+ * How far a worn light reaches (metres), 0 for none: the server's own number when it sends one (`lightRange` / `light`),
+ * else C's plain bases — a lantern 16 m, a torch 10 m. Pure.
+ */
+export function wornLightRange(gear) {
+  const it = gear?.light; if (!it || typeof it !== 'object') return 0;
+  const n = it.lightRange ?? it.range ?? (typeof it.light === 'number' ? it.light : null);
+  return Number.isFinite(n) && n > 0 ? n : isTorchItem(it) ? 10 : 16;
+}
+export const isG5 = id => typeof id === 'string' && id.startsWith('g5_');
+/** Equipment slot -> the catalog's game slot. */
+const G5_SLOT = { weapon: 'weapon', mainhand: 'weapon', offhand: 'offhand', head: 'head', chest: 'chest', legs: 'legs', feet: 'feet', hands: 'hands', gloves: 'hands',
+  back: 'cape', cape: 'cape', cloak: 'cape', necklace: 'necklace', neck: 'necklace', amulet: 'necklace', ring: 'ring', ring2: 'ring', belt: 'belt', waist: 'belt', light: 'light' };
+/** Slots the game drew nothing for before the catalog: every item in them takes the catalog's model for its kind. */
+const G5_ONLY = new Set(['hands', 'necklace', 'ring']);
+/** Slots a worn set is keyed and drawn by, in a fixed order. */
+export const DRAWN_SLOTS = ['head', 'chest', 'legs', 'feet', 'hands', 'weapon', 'offhand', 'back', 'cape', 'necklace', 'neck', 'ring', 'ring2', 'belt', 'waist', 'light'];
+
+/** The catalog row a worn item is drawn with, or null (the older tables draw it). Pure. */
+export function g5RowFor(item, slot, catalog) {
+  if (!catalog || !item) return null;
+  const gs = G5_SLOT[slot]; if (!gs) return null;
+  const named = item.look?.g5 || item.g5 || (isG5(item.baseKey) ? item.baseKey : isG5(item.base) ? item.base : null);
+  if (named) return catalog.byId(named, gs === 'offhand' ? 'offhand' : null) || catalog.byId(named) || null;
+  if (!G5_ONLY.has(gs)) return null;
+  try { return catalog.forItem({ ...item, slot: gs }) || null; } catch { return null; }
+}
+
+/**
+ * Lay every catalog-drawn item over a look. `eq` = normalised items by slot. Mirrors gear-catalog.js `applyGear`
+ * (one level deep: gloves merge into the top, rings into the accessory) with two game rules on top: a two-hander in
+ * the OFF hand is drawn there (T7), and a belt or lantern never replaces a tier-2 kit's own decor.
+ */
+export function applyG5(out, eq, catalog) {
+  const drawn = [];
+  const free = k => !out[k]?.id || out[k].id === 'none';
+  for (const slot of DRAWN_SLOTS) {
+    const item = eq[slot]; if (!item) continue;
+    const row = g5RowFor(item, slot, catalog);
+    // C's slots addendum (play-test 5): `waist` and `light` are worn. A tier-2 kit's decor wins over a belt, a belt over a
+    // lantern; a worn TORCH goes in the off hand when that is empty, else on the hip. Plain bases take the older parts.
+    const gs = G5_SLOT[slot];
+    if (gs === 'light' && isTorchItem(item, row)) {
+      if (free('offhand')) { out.offhand = { id: row?.id || 'torch', color: row?.color || '#ff8c2a' }; if (row) drawn.push(row.id); }
+      else if (free('decor')) out.decor = { id: 'belt_torch', color: '#6a4a2a' };
+      continue;
+    }
+    if (!row && (gs === 'belt' || gs === 'light')) { if (free('decor')) out.decor = { id: gs === 'belt' ? 'belt_pouches' : 'belt_lantern', color: rarityTint(item) || (gs === 'belt' ? '#6a4a2a' : '#c8a040') }; continue; }
+    if (!row) continue;
+    const el = item.castElement || item.brand || item.el || row.element || null;
+    const weapon = row.kind === 'weapon' || row.slot === 'held';
+    const color = weapon ? (el ? ELEMENT_TINT[el] || row.color : item.look?.color || (item.rarity === 'legendary' ? '#ffb040' : item.rarity === 'rare' ? '#e8d020' : row.color))
+      : item.look?.color || rarityTint(item) || row.color;
+    const part = { id: row.id, ...(color ? { color } : {}), ...(row.color2 ? { color2: row.color2 } : {}), quality: QUALITY[item.rarity] || 0, ...(el && weapon ? { element: el } : {}) };
+    if (row.slot === 'held') { out[slot === 'offhand' ? 'offhand' : 'held'] = part; drawn.push(row.id); continue; }
+    if (row.slot === 'decor' && out.decor?.id && out.decor.id !== 'none') continue;
+    const field = slot === 'ring2' ? 'ring2' : row.field || null;
+    if (field) out[row.slot] = { ...(out[row.slot] || { id: 'none' }), [field]: part };
+    else {
+      const keep = row.slot === 'top' ? { gloves: out.top?.gloves } : row.slot === 'accessory' ? { ring: out.accessory?.ring, ring2: out.accessory?.ring2 } : {};
+      out[row.slot] = { ...Object.fromEntries(Object.entries(keep).filter(([, v]) => v != null)), ...part };
+    }
+    drawn.push(row.id);
+  }
+  if (drawn.length) out.g5 = drawn;         // (not an avatar slot: a note for tests and the perf read-out; the normaliser drops it)
+  return out;
+}
+
 /** The worn item as it came (the raw form keeps a themed piece's numeric `tier`, which normItem drops for the weight). */
 const raw = (equipment, slot) => (equipment?.[slot] && typeof equipment[slot] === 'object') ? equipment[slot] : null;
 
 /** The parts to put on a body for a worn set (`slot -> item`, full items or the compact info.gear form). */
-export function gearLook(equipment = {}, { baseOf = () => null, tierOf = null, tier2 = null, themes = null } = {}) {
+export function gearLook(equipment = {}, { baseOf = () => null, tierOf = null, tier2 = null, themes = null, catalog = null } = {}) {
   const out = JSON.parse(JSON.stringify(PLAIN));
   const lookup = tierOf ? (k => ({ tier: tierOf(k) })) : baseOf;
   const eq = {};
@@ -154,16 +233,16 @@ export function gearLook(equipment = {}, { baseOf = () => null, tierOf = null, t
       return tier2Dress(look, tier2, { chest: which === 'chest', head: which === 'head', element: it?.element || null,
         emblem: th?.emblem || it?.look?.emblem || null, trim: th?.trim || it?.look?.trim || null, emblemColor: th?.glow || it?.look?.glow || null });
     };
-    return hd ? dress(ch ? dress(out, 'chest') : out, 'head') : dress(out, 'chest');
+    return applyG5(hd ? dress(ch ? dress(out, 'chest') : out, 'head') : dress(out, 'chest'), eq, catalog);     // T23: LAST — tier2Dress replaces `decor`
   }
-  return out;
+  return applyG5(out, eq, catalog);
 }
 
 /** A short key of what is drawn (cache key; a change means the body must be re-dressed). */
 export function gearKey(equipment = {}) {
   const eq = equipment || {};
-  return ['head', 'chest', 'legs', 'feet', 'weapon', 'offhand', 'back'].map(s => {
+  return DRAWN_SLOTS.map(s => {
     const i = eq[s]; if (!i) return '-';
-    return `${i.baseKey || i.base || i.subtype || i.sub || i.name || '?'}:${i.rarity || ''}:${i.castElement || i.brand || ''}:${i.tier || ''}:${i.unique || ''}:${i.lvl ?? i.level ?? ''}:${i.theme || ''}`;
+    return `${i.baseKey || i.base || i.subtype || i.sub || i.name || '?'}:${i.rarity || ''}:${i.castElement || i.brand || i.el || ''}:${i.tier || ''}:${i.unique || ''}:${i.lvl ?? i.level ?? ''}:${i.theme || ''}:${i.look?.g5 || i.g5 || ''}`;
   }).join('|');
 }

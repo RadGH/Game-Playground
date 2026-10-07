@@ -23,6 +23,7 @@ import {
   wandBehaviour, STAFF_CHARGE, talentPlan,
 } from './farhold.js';
 import { castSkillPlan, installSkillRuntime, throwBolt, runtimeFor } from './cast-skills.js';
+import { wandStyle, staffStyle, riderOf, isHeldFocus, isCaster, isSceptre, attackReach } from './caster-forms.js';
 
 /** rpg.js CAST_ELEMENTS, element -> the status it leaves (Farhold main.js `statusForElement`). */
 const ELEMENT_LEAVES = { fire: 'burn', ice: 'chill', lightning: 'shock', poison: 'poison', shadow: 'curse', arcane: null };
@@ -158,13 +159,27 @@ export function createCombat(room) {
    */
   combat.attack = (ch, { hand = 'main', yaw = null, held = null, target = null } = {}) => {
     if (!ch || ch.dead || ch.removed) return { ok: false, why: 'dead' };
+    if (ch.tvCast) runtimeFor(combat).cancelRevive(ch, 'acted');       // play-test 5 T4: swinging ends a revive being cast
     if (yaw != null && Number.isFinite(yaw)) ch.yaw = yaw;
     const hands = weaponHands(ch);
     const weapon = hand === 'off' ? hands.off : hands.main;
     if (hand === 'off' && !hands.dual) return { ok: false, why: 'no off-hand weapon' };
     const kind = isStaff(weapon) ? 'staff' : (weapon?.castElement && weapon?.ranged) ? 'bolt' : weapon?.ranged ? 'arrow' : 'melee';
-    const tag = { ...weaponTag(weapon, kind), el: elementOf(weapon) || 'physical' };     // R5: on every swing event
-    if (hand === 'off' && kind !== 'melee') return { ok: false, why: 'the off hand only swings' };
+    // play-test 5 (T15/T16): `form` = the caster style this attack takes; `imbue` = a sceptre's elemental swing
+    const forms = engine.casterForms || null;
+    const style = forms ? (kind === 'bolt' ? wandStyle(forms, weapon) : kind === 'staff' ? staffStyle(forms, weapon) : null) : null;
+    const tag = { ...weaponTag(weapon, kind), el: elementOf(weapon) || 'physical',     // R5: on every swing event
+      ...(style ? { form: style.key } : {}), ...(forms && kind === 'melee' && isSceptre(weapon) && weapon.castElement ? { imbue: 1 } : {}) };
+    if (hand === 'off' && forms && isHeldFocus(weapon)) return { ok: false, why: 'a focus is held, not swung' };
+    // Farhold: only a melee weapon swings from the off hand. Thousandvale (T15): an off-hand WAND fires its own bolt.
+    if (hand === 'off' && kind !== 'melee' && !(forms && kind === 'bolt')) return { ok: false, why: 'the off hand only swings' };
+    // play-test 5 T14: a ranged or caster attack on a NAMED target further than the attack really reaches is refused
+    // before anything is spent — "a short-range cone starts shooting from out of range and waits for the enemy"
+    if (forms && hand !== 'off' && target && kind !== 'melee') {
+      const reach = attackReach(engine, ch);
+      const d = Math.hypot(target.x - ch.x, target.z - ch.z) - (target.bodyR || 0.5);
+      if (reach != null && d > reach + forms.rangeSlack) return { ok: false, why: `out of range (${Math.round(d)} m, reaches ${Math.round(reach)} m)`, refused: 'range', reach };
+    }
 
     const clock = ch.swing;
     const t = now();
@@ -226,8 +241,8 @@ export function createCombat(room) {
       clock.readySince = clock[readyKey];
       clock.lastAt = t; clock.lastEvery = plan.afterCast ?? 0.28;
       field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'castStaff', wind: 0, every: plan.afterCast ?? 0.28, ...tag });
-      resolveStaff(ch, weapon, hh, c, hstep);
-      return { ok: true, hand, kind, held: hh };
+      resolveStaff(ch, weapon, hh, c, hstep, { target });
+      return { ok: true, hand, kind, held: hh, every: plan.afterCast ?? 0.28 };
     }
 
     // ---- a click weapon (melee, wand, crossbow, javelin): the weapon's own pattern clock
@@ -252,7 +267,7 @@ export function createCombat(room) {
     if (hand === 'off') clock.offStep++; else clock.mainStep++;
 
     const fire = kind === 'melee' ? () => resolveSwing(ch, hand, step, weapon)
-      : kind === 'bolt' ? () => resolveWand(ch, weapon, step)
+      : kind === 'bolt' ? () => resolveWand(ch, weapon, step, { hand, target })
         : () => resolveArrow(ch, weapon, plan?.power ?? 1, step);
     if (wind <= 0) fire(); else pending.push({ at: t + wind, fn: fire, who: ch.id });
     const shapeNow = kind === 'melee' ? strikeAt(weapon, step) : null;
@@ -324,38 +339,142 @@ export function createCombat(room) {
   }
 
   /** A WAND (main.js `swingWith` wand branch): its behaviour row decides the bolt. */
-  function resolveWand(ch, weapon, step) {
-    if (runtimeFor(combat).formBasic(ch, 'main')) return;
-    const mods = rpg.attackMods(ch, 'bolt', { weapon, hand: 'main' });
-    const share = mods.power || 1;
+  function resolveWand(ch, weapon, step, { hand = 'main', target = null, scale = 1, echo = false } = {}) {
+    if (hand !== 'off' && runtimeFor(combat).formBasic(ch, 'main')) return;
+    const forms = engine.casterForms || null;
+    const st = forms ? wandStyle(forms, weapon) : null;
+    const mods = rpg.attackMods(ch, 'bolt', { weapon, hand });
+    // an off-hand wand (Thousandvale only) hits for the off-hand share; an Echo rider repeats at its own share
+    const share = (mods.power || 1) * (hand === 'off' ? (forms?.offhandBolt ?? OFFHAND_DAMAGE) : 1) * scale;
     feel.swing.charge = null;
     const shape = { ...withArea(strikeAt(weapon, step), ch.derived.areaPct || 0) };
     if (mods.scale && mods.scale !== 1) shape.scale = (shape.scale || 1) * mods.scale;
-    ch.lastStrike = shape;
+    if (hand !== 'off') ch.lastStrike = shape;
     const element = mods.element || elementOf(weapon);
     const leaves = mods.element ? ELEMENT_LEAVES[mods.element] || null : statusOf(weapon);
-    const how = wandBehaviour(weapon);
+    const how = st?.how || (st ? {} : wandBehaviour(weapon));
+    const a = aimOfCh(ch);
+    const mult = st?.mult ?? how.mult ?? 1;
+    const brand = brandFor(ch, leaves);
+    const rt = runtimeFor(combat);
+    const tagOf = () => ({ basic: 1, ...weaponTag(weapon, 'bolt'), el: element, ...(st ? { form: st.key } : {}), ...(hand === 'off' ? { hand: 'off' } : {}) });
+    const after = hits => { if (st) afterCasterHits(ch, weapon, hits, { hand, echo, element, share, redo: k => resolveWand(ch, weapon, step, { hand, target, scale: scale * k, echo: true }) }); };
+
+    // ---- play-test 5 T15: the shapes that are not a projectile
+    if (st && st.shape !== 'bolt') {
+      const opts = { element, onHit: brand, applyStatus: hookFor(ch), power: mult * share, kind: 'bolt' };
+      const yaw = Math.round(Math.atan2(a.dx, a.dz) * 1000) / 1000;
+      if (st.shape === 'cone') {
+        const reach = st.range * shape.scale, arc = st.arc * shape.scale;
+        field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...tagOf(), shape: 'cone', x: ch.x, z: ch.z, yaw, reach: Math.round(reach * 100) / 100, arc: Math.round(arc * 1000) / 1000 });
+        const hits = field.strike(ch, ch, { reach, arc, strike: shape, ...opts });
+        rt.resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: null, element });
+        after(hits);
+      } else if (st.shape === 'beam') {
+        const len = st.range, to = { x: ch.x + a.dx * len, z: ch.z + a.dz * len };
+        field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...tagOf(), shape: 'beam', x: ch.x, z: ch.z, yaw, reach: len, w: st.width, to });
+        const hits = field.strikeSegment(ch.x + a.dx * 0.5, ch.z + a.dz * 0.5, to.x, to.z, st.width / 2 * shape.scale + 0.4, ch, { ...opts, falloff: 1 });
+        rt.resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: null, element });
+        after(hits);
+      } else if (st.shape === 'nova') {
+        const r = st.radius * shape.scale;
+        field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...tagOf(), shape: 'nova', x: ch.x, z: ch.z, yaw, r: Math.round(r * 100) / 100 });
+        const hits = field.strikeArea(ch.x, ch.z, r, ch, { ...opts, falloff: 0.35 });
+        rt.resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: null, element });
+        after(hits);
+      } else {                                       // lob: an arc onto the target (else as far as it reaches along the aim)
+        const tg = target && target.dying == null && !target.removed ? target : null;
+        let dx = a.dx, dz = a.dz, dist = st.range;
+        if (tg) { const ex = tg.x - ch.x, ez = tg.z - ch.z, len = Math.hypot(ex, ez) || 1; dx = ex / len; dz = ez / len; dist = Math.min(st.range, len); }
+        const at = { x: ch.x + dx * dist, z: ch.z + dz * dist };
+        const ms = Math.max(0.2, dist / (st.speed || 20));
+        const r = st.radius * shape.scale;
+        field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...tagOf(), shape: 'lob', x: ch.x, z: ch.z, yaw, to: at, r: Math.round(r * 100) / 100, ms: Math.round(ms * 1000) });
+        combat.later(ms, () => {
+          if (ch.removed) return;
+          rt.withCaster(ch, () => {
+            const hits = field.strikeArea(at.x, at.z, r, ch, { ...opts, falloff: 0.5 });
+            rt.resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: { x: at.x, z: at.z }, element });
+            after(hits);
+          });
+        }, ch.id);
+      }
+      return;
+    }
+
     const plan = {
-      element, range: (weapon.castRange ?? 34) * (how.slow ? 0.85 : 1),
-      splash: (how.splash ?? 2.2) * shape.scale, projectiles: how.projectiles || 1, spread: how.spread || 0,
+      element, range: st && !st.how ? st.range : (weapon.castRange ?? 34) * (how.slow ? 0.85 : 1),
+      splash: (st?.splash ?? how.splash ?? 2.2) * shape.scale, projectiles: how.projectiles || 1, spread: how.spread || 0,
       chains: how.chains || 0, homing: how.homing || 0, status: leaves, statusSpec: leaves ? statuses[leaves] : null,
     };
-    const a = aimOfCh(ch);
-    const opts = { element, onHit: brandFor(ch, leaves), applyStatus: hookFor(ch), power: (how.mult || 1) * share * shape.damage, kind: 'bolt' };
+    const opts = { element, onHit: brand, applyStatus: hookFor(ch), power: mult * share * shape.damage, kind: 'bolt' };
     // main.js passes `{ ...meleeOpts, power: how.mult * share }`, so the strike shape's own share is NOT in a wand bolt
-    opts.power = (how.mult || 1) * share;
+    opts.power = mult * share;
     plan.mods = mods;
-    plan.fxTag = { basic: 1, ...weaponTag(weapon, 'bolt'), el: element };      // R5: the client draws the wand's own bolt
-    throwBolt(combat, ch, plan, a, a.dx, a.dz, opts);
+    plan.fxTag = tagOf();      // R5: the client draws the wand's own bolt
+    // T15: a forking / warding / pooling bolt and a focus rider act when the bolt lands (`collect` is handed its hits)
+    let landed = false;
+    const collect = st ? hits => {
+      if (!landed) {
+        landed = true;
+        const first = hits.find(h => h.result?.amount > 0)?.enemy || null;
+        if (first && st.split) {
+          const used = new Set(hits.map(h => h.enemy));
+          for (const e of field.near(first.x, first.z, st.split.range, first).filter(x => !used.has(x) && x.dying == null).slice(0, st.split.shards)) {
+            field.emit({ t: 'fx', kind: 'bolt', id: ch.id, element, from: { x: first.x, z: first.z }, to: e.id, ms: 120, ...plan.fxTag, fork: 1 });
+            for (const h of field.strikeArea(e.x, e.z, 1, ch, { ...opts, falloff: 1, power: opts.power * st.split.keep })) hits.push(h);
+          }
+        }
+        if (first && st.pool) rt.dropPool(ch, { x: first.x, z: first.z, r: st.pool.radius, seconds: st.pool.seconds, element, power: st.pool.power * share });
+        if (first && st.ward) wardUp(ch, st.ward);
+        after(hits);
+      }
+      return hits;
+    } : (h => h);
+    throwBolt(combat, ch, plan, a, a.dx, a.dz, opts, {}, collect);
     // Twin Bolt: a second bolt a beat behind the first, at a share of its damage
-    if (mods.twin) combat.later(mods.twin.ms / 1000, () => throwBolt(combat, ch, { ...plan, mods: null, fxTag: plan.fxTag }, aimOfCh(ch), Math.sin(ch.yaw), Math.cos(ch.yaw), { ...opts, power: (how.mult || 1) * share * mods.twin.power }), ch.id);
+    if (mods.twin) combat.later(mods.twin.ms / 1000, () => throwBolt(combat, ch, { ...plan, mods: null, fxTag: plan.fxTag }, aimOfCh(ch), Math.sin(ch.yaw), Math.cos(ch.yaw), { ...opts, power: mult * share * mods.twin.power }), ch.id);
+  }
+
+  /** T15: a ward — each attack that hits tops up a small barrier (never past its cap). */
+  function wardUp(u, w, by = null) {
+    const capAmt = Math.round(u.maxHp * (w.cap ?? 0.1));
+    const add = Math.round(u.maxHp * (w.share ?? 0.02));
+    if ((u.barrier || 0) >= capAmt) { u.castBarrierFor = Math.max(u.castBarrierFor || 0, w.seconds ?? 4); return; }
+    u.barrier = Math.min(capAmt, (u.barrier || 0) + add);
+    if (u.kind === 'player') u.castBarrierFor = Math.max(u.castBarrierFor || 0, w.seconds ?? 4); else u.barrierFor = w.seconds ?? 4;
+    field.emit({ t: 'fx', kind: 'ward', id: u.id, by: (by || u).id, amt: add });
+  }
+
+  /**
+   * T15: what an off-hand FOCUS adds to a caster's main-hand attack once its hits are in (data/rules/caster-forms.json
+   * `focusRiders`): Echo (every Nth attack repeats), Burst (a small burst round the first enemy struck), Ward (a
+   * barrier), Siphon (mana). Never on the off hand's own bolt, never on an echo.
+   */
+  function afterCasterHits(ch, weapon, hits, { hand = 'main', echo = false, element, share = 1, redo = null } = {}) {
+    const forms = engine.casterForms;
+    if (!forms || hand === 'off' || echo || !isCaster(weapon)) return;
+    const rider = riderOf(forms, weaponHands(ch).off);
+    if (!rider) return;
+    const first = hits.find(h => h.result?.amount > 0)?.enemy || null;
+    if (rider.key === 'echo') {
+      ch.swing.riderN = (ch.swing.riderN || 0) + 1;
+      if (ch.swing.riderN % (rider.every || 4) === 0 && redo) combat.later(rider.delay ?? 0.25, () => { if (!ch.dead && !ch.removed) { field.emit({ t: 'fx', kind: 'rider', id: ch.id, rider: 'echo' }); redo(rider.mult ?? 0.6); } }, ch.id);
+      return;
+    }
+    if (!first) return;
+    if (rider.key === 'burst') {
+      field.emit({ t: 'fx', kind: 'rider', id: ch.id, rider: 'burst', x: first.x, z: first.z, r: rider.radius, el: element });
+      runtimeFor(combat).withCaster(ch, () => field.strikeArea(first.x, first.z, rider.radius, ch, { element, power: (rider.mult ?? 0.35) * share, falloff: 0.5, proc: true, kind: 'focus' }));
+    } else if (rider.key === 'ward') wardUp(ch, rider);
+    else if (rider.key === 'siphon') { ch.mp = Math.min(ch.maxMp ?? ch.mp, (ch.mp || 0) + (rider.mana || 0)); field.emit({ t: 'fx', kind: 'rider', id: ch.id, rider: 'siphon', amt: rider.mana || 0 }); }
   }
 
   /**
    * A STAFF (main.js `swingWith` staff branch): a close-range spell by element, free to cast. A tap
    * is the ordinary spell; a real charge is its charged form (jet, dome, wall, mortar, storm).
    */
-  function resolveStaff(ch, weapon, held, c, step = 0) {
+  function resolveStaff(ch, weapon, held, c, step = 0, { target = null } = {}) {
     if (runtimeFor(combat).formBasic(ch, 'main')) return;
     const mods = rpg.attackMods(ch, 'staff', { weapon, hand: 'main' });
     const share = mods.power || 1;
@@ -379,13 +498,38 @@ export function createCombat(room) {
     const a = aimOfCh(ch);
     const statusOn = (enemy, k) => { if (spell.status) landStatus(ch, spell.status, statuses[spell.status], enemy, Math.max(1, base * k)); };
     const rt = runtimeFor(combat);
+    const tvStyle = engine.casterForms ? staffStyle(engine.casterForms, weapon) : null;      // play-test 5 T15
     // R5: the staff's spell, drawn — the shape it really takes (a charged form, else the element's own spell)
-    {
+    if (!tvStyle) {
       const form = charged?.shape || (spell.shape === 'nova' || spell.shape === 'cone' || spell.shape === 'wave' ? spell.shape : 'bolt');
       const reachM = form === 'jet' ? (spell.range || 9) * shape.scale * (charged.rangeScale || 1.45) : (form === 'cone' || form === 'wave') ? (spell.range || 9) * shape.scale : form === 'bolt' || form === 'mortar' || form === 'storm' ? (spell.range || 12) * shape.scale : undefined;
       field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...weaponTag(weapon, 'staff'), el: element, shape: form, spell: spell.key || undefined, charged: charged ? 1 : undefined,
         x: ch.x, z: ch.z, yaw: Math.round(Math.atan2(a.dx, a.dz) * 1000) / 1000, r: form === 'nova' || form === 'dome' || form === 'wall' ? Math.round(radius * 100) / 100 : undefined,
         reach: reachM != null ? Math.round(reachM * 100) / 100 : undefined, arc: form === 'cone' ? (spell.arc || 0.9) * shape.scale : form === 'jet' ? (spell.arc || 0.9) * shape.scale * 0.8 : form === 'wave' ? 0.45 : undefined });
+    }
+    // ---- play-test 5 T15: Thousandvale's two staff styles (a lance, an aegis ring) replace the element's spell
+    if (tvStyle) {
+      const k = (tvStyle.mult ?? 1) * share * (shape.charge?.power || 1);
+      const yawR = Math.round(Math.atan2(a.dx, a.dz) * 1000) / 1000;
+      const tvTag = { ...weaponTag(weapon, 'staff'), el: element, form: tvStyle.key, basic: 1 };
+      if (tvStyle.shape === 'beam') {
+        const len = tvStyle.range * shape.scale, to = { x: ch.x + a.dx * len, z: ch.z + a.dz * len };
+        field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...tvTag, shape: 'beam', x: ch.x, z: ch.z, yaw: yawR, reach: Math.round(len * 100) / 100, w: tvStyle.width, to });
+        const hits = field.strikeSegment(ch.x + a.dx * 0.5, ch.z + a.dz * 0.5, to.x, to.z, tvStyle.width / 2 + 0.4, ch, { element, onHit: brand, applyStatus: hook, power: k, falloff: 1, kind: 'staff' });
+        for (const { enemy } of hits) statusOn(enemy, 0.6);
+        rt.resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: null, element });
+      } else {
+        const r = tvStyle.radius * shape.scale;
+        field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...tvTag, shape: 'nova', x: ch.x, z: ch.z, yaw: yawR, r: Math.round(r * 100) / 100, ward: tvStyle.ward ? 1 : undefined });
+        const hits = field.strikeArea(ch.x, ch.z, r, ch, { falloff: 0.35, element, power: k, kind: 'staff' });
+        for (const { enemy, result } of hits) { brand(enemy, result); statusOn(enemy, 0.6); }
+        rt.resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: null, element });
+        if (tvStyle.ward && hits.some(h => h.result?.amount > 0)) {
+          wardUp(ch, tvStyle.ward);
+          if (tvStyle.ward.allies) for (const u of rt.allies(ch)) if (u !== ch && u.dying == null && !u.dead && Math.hypot(u.x - ch.x, u.z - ch.z) <= r) wardUp(u, tvStyle.ward, ch);
+        }
+      }
+      return;
     }
     if (charged?.shape === 'jet') {
       const range = (spell.range || 9) * shape.scale * (charged.rangeScale || 1.45);
@@ -433,6 +577,9 @@ export function createCombat(room) {
         plan.kind = 'ground'; plan.radius = radius * 1.4; plan.groundRadius = radius * 1.4; plan.ground = Math.max(plan.ground || 0, 3);
       }
       if (charged?.shape === 'storm') plan.chains = charged.chains || 5;
+      // T15: Arc Lash's card says it chains — on a tap Farhold throws one plain bolt (only the charged storm jumps).
+      // Thousandvale makes the tap honest: it jumps `spell.chains` times.
+      else if (engine.casterForms && spell.shape === 'chain') plan.chains = spell.chains || 3;
       plan.mods = mods;
       plan.fxTag = { basic: 1, ...weaponTag(weapon, 'staff'), el: element };
       throwBolt(combat, ch, plan, a, a.dx, a.dz, { ...opts, power: (spell.mult || 1) * (shape.charge?.power || 1) * (mods.power || 1) });
@@ -460,10 +607,12 @@ export function createCombat(room) {
     };
     const opts = { element, onHit: brandHit, applyStatus: hookFor(ch), power: share * shape.damage, strike: shape, kind: 'swing' };
     // R5: the swing itself, drawn at the moment it lands (a trail along the arc, in the weapon's element)
-    field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...weaponTag(weapon, 'melee'), el: element, shape: 'swing', hand, step, x: ch.x, z: ch.z, yaw: Math.round((ch.yaw || 0) * 1000) / 1000, reach: Math.round(reach * 100) / 100, arc: Math.round(arc * 1000) / 1000, strike: shape.key || undefined });
+    const imbued = !!(engine.casterForms && isSceptre(weapon) && weapon.castElement);      // T16
+    field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...weaponTag(weapon, 'melee'), el: element, shape: 'swing', hand, step, ...(imbued ? { imbue: 1 } : {}), x: ch.x, z: ch.z, yaw: Math.round((ch.yaw || 0) * 1000) / 1000, reach: Math.round(reach * 100) / 100, arc: Math.round(arc * 1000) / 1000, strike: shape.key || undefined });
     const hits = field.strike(ch, ch, { reach, arc, ...opts });
     runtimeFor(combat).resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: null, element });   // unique powers
     if (ch.perkFlags?.sunder && shape.last) for (const h of hits) h.enemy.armor = Math.max(0, (h.enemy.armor || 0) - 8);
+    if (imbued) afterCasterHits(ch, weapon, hits, { hand, element, share, redo: null });                 // T15: a focus rider on a sceptre
     const swung = { self: ch, mana: 0 };
     rpg.fx.onSwing(swung);
     if (swung.mana > 0) ch.mp = Math.min(ch.derived.maxMp || ch.mp, ch.mp + swung.mana);
@@ -478,7 +627,7 @@ export function createCombat(room) {
     return hits;
   }
   combat.resolveSwing = resolveSwing;
-  combat.resolveWand = (ch, w, step = 0) => resolveWand(ch, w, step);
+  combat.resolveWand = (ch, w, step = 0, opts = {}) => resolveWand(ch, w, step, opts);
   combat.resolveArrow = (ch, w, power = 1, step = 0) => resolveArrow(ch, w, power, step);
 
   // ------------------------------------------------------------------ skills

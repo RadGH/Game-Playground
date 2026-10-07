@@ -354,7 +354,11 @@ export function officeDressing(kind, desc, { lit = null, seed = 1 } = {}) {
   // a name board over the door (a game writes the trade's name on it: `fascia` = {x, y, z, w, h}, the board's front face,
   // facing +z), so the street reads "Smithy", "The Wheel and Wether"… as well as the picture sign
   {
-    const fw = Math.min(W * 0.78, 3.4), fy = Math.min(desc.door.h + 0.28, H * 0.98 - 0.5);
+    // (on a building of two storeys or more there is wall above the door, so the board goes clear OVER it; only a
+    // one-storey front has to tuck it under the eave — Thousandvale play-test 5, T13: with a 2.9 m door the old one
+    // rule put the board across the top of the doorway of every tall shop)
+    const tall = (front.storeys || 1) >= 2;
+    const fw = Math.min(W * 0.78, 3.4), fy = tall ? desc.door.h + 0.28 : Math.min(desc.door.h + 0.28, H * 0.98 - 0.5);
     if (fw > 1.2 && fy > 1.6) {
       part('box', dx, fy - 0.04, F + 0.04, fw + 0.16, 0.58, 0.08, trim);
       out.fascia = { x: dx, y: fy, z: F + 0.09, w: fw, h: 0.5 };

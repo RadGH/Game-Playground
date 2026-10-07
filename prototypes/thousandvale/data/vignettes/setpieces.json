@@ -1424,44 +1424,58 @@
     {
      "kind": "prop",
      "id": "fence_post",
-     "x": -10.2,
+     "x": -9.6,
      "z": -20,
      "yaw": 0
     },
     {
      "kind": "prop",
      "id": "fence_rail",
-     "x": -8.5,
+     "x": -8.4,
      "z": -20,
-     "yaw": 1.57
+     "yaw": 0
     },
     {
      "kind": "prop",
      "id": "fence_post",
-     "x": -6.8,
+     "x": -7.2,
      "z": -20,
      "yaw": 0
     },
     {
      "kind": "prop",
      "id": "fence_rail",
-     "x": -5.1,
+     "x": -6,
      "z": -20,
-     "yaw": 1.57
+     "yaw": 0
     },
     {
      "kind": "prop",
      "id": "fence_post",
-     "x": -3.4,
+     "x": -4.8,
      "z": -20,
      "yaw": 0
     },
     {
      "kind": "prop",
      "id": "fence_rail",
-     "x": -1.7,
+     "x": -3.6,
      "z": -20,
-     "yaw": 1.57
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -2.4,
+     "z": -20,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": -1.2,
+     "z": -20,
+     "yaw": 0
     },
     {
      "kind": "prop",
@@ -1473,51 +1487,58 @@
     {
      "kind": "prop",
      "id": "fence_rail",
-     "x": 1.7,
+     "x": 1.2,
      "z": -20,
-     "yaw": 1.57
+     "yaw": 0
     },
     {
      "kind": "prop",
      "id": "fence_post",
-     "x": 3.4,
+     "x": 2.4,
      "z": -20,
      "yaw": 0
     },
     {
      "kind": "prop",
      "id": "fence_rail",
-     "x": 5.1,
+     "x": 3.6,
      "z": -20,
-     "yaw": 1.57
+     "yaw": 0
     },
     {
      "kind": "prop",
      "id": "fence_post",
-     "x": 6.8,
+     "x": 4.8,
      "z": -20,
      "yaw": 0
     },
     {
      "kind": "prop",
      "id": "fence_rail",
-     "x": 8.5,
+     "x": 6,
      "z": -20,
-     "yaw": 1.57
+     "yaw": 0
     },
     {
      "kind": "prop",
      "id": "fence_post",
-     "x": 10.2,
+     "x": 7.2,
      "z": -20,
      "yaw": 0
     },
     {
      "kind": "prop",
      "id": "fence_rail",
-     "x": 11.9,
+     "x": 8.4,
      "z": -20,
-     "yaw": 1.57
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": 9.6,
+     "z": -20,
+     "yaw": 0
     }
    ],
    "models": [
@@ -2276,7 +2297,7 @@
     {
      "kind": "prop",
      "id": "fence_post",
-     "x": -16,
+     "x": -15.2,
      "z": 14,
      "yaw": 0
     },
@@ -2285,12 +2306,12 @@
      "id": "fence_rail",
      "x": -14,
      "z": 14,
-     "yaw": 1.57
+     "yaw": 0
     },
     {
      "kind": "prop",
      "id": "fence_post",
-     "x": -12,
+     "x": -12.8,
      "z": 14,
      "yaw": 0
     },

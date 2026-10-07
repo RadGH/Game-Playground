@@ -460,7 +460,7 @@ for (const id of [...Object.keys(BUILDERS), ...Object.keys(TV_BUILDERS)]) {
   if (!FARHOLD_HELD.includes(id)) throw new Error(`chibi2-weapons: "${id}" is built but not catalogued`);
 }
 /** The parts vocabulary, lent to the play-test 4 models in chibi2-weapons-tv.js (same helpers, same look). */
-const KIT = { Z, WOOD, IRON, STEEL, DARK, GOLD, tone, lift, low, extrude, grip, pommel, guard, blade, haft, langets, collar, axeHead, gem };
+export const KIT = { Z, WOOD, IRON, STEEL, DARK, GOLD, tone, lift, low, extrude, grip, pommel, guard, blade, haft, langets, collar, axeHead, gem };
 
 /**
  * Build one, or return false if the id belongs to the original vocabulary.

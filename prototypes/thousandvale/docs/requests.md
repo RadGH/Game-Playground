@@ -2145,3 +2145,733 @@ profile: set pieces, offices, mounts, weapon fx, loot markers all run sliced; th
   zone's middle (B's S7 walls stopped the straight line at the curtain wall). Green (5.0 min); the fight step stays timing-sensitive.
 
 ## A -> D-world, D-UI — 2026-10-06: `info.eat` (food|drink) on a player while eating (with `info.sit`); `info.mods` (affix ids) on champions/rares next to `info.aff`. Dev unit restarted.
+
+## Round 5 contracts — E (Content) -> A, C, D-UI, D-world, F — 2026-10-06 (written first; I adapt to C's/A's sections when they land)
+
+**T9 — crate as a quest reward (E -> C, A, D-UI).** Quests carry `reward.crates: [ { "slot", "min", "forClass"? } ]` (a list: a quest may
+hand over two). `slot` = `weapon` (a weapon YOUR class can use — `forClass` is implied true for `weapon`/`offhand`) · `offhand` · `head` ·
+`chest` · `legs` · `hands` · `feet` · `ring` · `neck` · `armor` (any armour slot) · `any`. `min` = the lowest rarity it can open into, in the
+quest vocabulary already used by `reward.item.tier`: `common` | `uncommon` | `rare` | `epic`. A crate is rolled at the level of the
+character when it is OPENED (never above quest level + 3). C: if your crate item wants other field names, say so under "Round 5
+contracts — C" and I rename in one pass (tools/content-crates.mjs rewrites every quest). A: grant one crate item per entry on turn-in.
+D-UI: the quest window's reward row should read e.g. "Crate: boots (uncommon or better)". `reward.item` rows on starter quests are
+REPLACED by crates (class quests keep their named rare AND gain a crate).
+
+**T12 — event text on every event (E fills, A reads).** Until A's section names other fields, every record in `data/quests/events.json`
+(`realm[]`, `zone[]`) and every kind in `data/provinces/road-events.json` (`chests[]`, `deliver`, `escort`, `rescue`) and
+`data/provinces/wanderers.json` events carries an `info` block:
+```json
+"info": { "name": "The Stone in the Snow",
+          "what": "One sentence: what is happening.",
+          "objective": { "kind": "waves_boss|kill|boss|open|deliver|escort|rescue|defend|survive", "text": "Defeat the three waves, then the Chained Saint", "count": 4, "unit": "stages" },
+          "durationSec": 600,
+          "onSuccess": "The pass is quiet again.", "onFail": "The thing in the snow walks off into the hills.",
+          "rewardText": "Event cache: a rare item or better, gold and experience" }
+```
+`objective.count` + `unit` is what the server counts (stages = waves + boss; kills; 1 chest; 1 delivery…). `durationSec` is the hard
+limit: at 0 the event FAILS with `onFail`. tests/E/playtest5-events.test.js fails when any event lacks one of name / what / objective.text +
+count / durationSec / rewardText / onSuccess / onFail.
+
+**T25 — Angling content (E -> C, A, D-UI, D-world).** I write `data/provinces/angling.json` (mine; C's `data/rules/fishing.json` holds
+the numbers/tables SHAPE — tell me where you want the fish rows and I move them):
+- `fish[]`: `{ id, name, desc, water: ['river'|'lake'|'marsh'|'coast'], bands: [lo, hi] (zone level band), time: 'any'|'day'|'night'|'dawn'|'dusk', rarity: 'common'|'uncommon'|'rare'|'epic', size: [minCm, maxCm], price (gold), skill (min angling skill), pool?: true (pools only) }`
+- `junk[]`: `{ id, name, desc, price }` · `legends[]`: `{ id, name, desc, zone (sheet zone id), water, time, skill, title, trophy: {name, desc} }` (one per zone, 16)
+- `pullBack[]`: `{ water, type (monster type id that climbs out), bands }` · `crates`: `{ chance, crate: {slot:'any', min:'uncommon'} }` (the T9 crate)
+- `recipes[]`: `{ id, name, desc, needs: [{fish|tag, count}], makes: goodId, skill }` and `meals{}` in the SAME shape as shops.json `goodsCatalog` (`use: {type:'food', regen, seconds, buff}`), so A's food code eats them unchanged.
+- `tools`: the rods (`angling_rod` starter + 2 better; `{id, name, desc, price, minSkill, bonus}`), sold by anglers.
+- `anglers[]`: `{ id, name, town, greeting, sells: [...] }`; the Torborhold one gives quest `angle_first_cast` (data/quests/angling.json, included by test.json).
+Pools: `data/provinces/angling-pools.json` `{ zones: { "<world zone id>": [ { id, x, z (WORLD metres, in the water), shore: {x, z} (dry, walkable, ≤ 12 m from the pool), water, band, tier: 1|2|3 (skill gate 1/25/50), start?: true } ] } }`. A: a pool depletes after 4–6 catches and respawns at another listed pool spot of the same zone (I list ~3x more spots than are live: `live` per zone in the file). D-world draws ripples at (x, z).
+Quest step kinds I use (A: please read them): `{ "kind": "catch", "count", "fish"?: id, "pool"?: true, "where" }` (count catches, any fish unless `fish`) and `{ "kind": "cook", "count", "meal"?: id }`. Job frames get `goal.kind: 'catch'` with `target: fish id`.
+
+**T10 — rares (E -> C, A).** Measured numbers in my final report. C: `data/rules/affixes.json` `chance` is yours — please set `minLevel` 4 -> 2 (the start chain's own quest camps can carry `noRank` if R2's winnability test needs it) and `champion` 0.09 -> 0.14, `rare` 0.025 -> 0.05. A: `js/sim/placements.js` case 'camp' — please pass `rank` and `affixes` from a camp placement through to the camp (`rank: p.rank, affixes: p.affixes` -> `e.data.affixes`, which js/rules/index.js already reads): I place fixed champions beside the roads of every zone as `{type:'camp', rank:'champion', affixes:['giant'], count:1, respawnMin:[4,8]}`.
+
+**T15/T23 — new gear in shops and drops (E -> F, C).** `tools/content-gear.mjs` reads `avatar-3d/data/gear-catalog.json` and puts every catalog item into the shop that sells its kind (`data/provinces/shops.json` categories, by level band of the town) and proposes the loot-pool rows. It needs per catalog item: an id that is the item BASE id C injects, a `slot`/`type` (wand, staff, focus, sword…, cloth/leather/plate + slot) and a `minLevel` (or tier). F/C: if the base id differs from the catalog id, add `base` on the catalog row.
+
+## Round 5 contracts — W (town geometry: T8 fences/gates, T13 building heights) — 2026-10-06 (written first)
+
+**T8b — gates lie IN the wall (W -> A, D-world, E).** `town_wall` gate records keep every field they have (`x, z, yaw, out, pass, width, ends…`
+— `yaw`/`out` stay "the way OUT along the road", so anything that walks a road through a gate is unchanged) and GAIN:
+- `wallYaw` — atan2(nx, nz) of the ring's outward normal at the gate: the way the gate STRUCTURE faces. Its width runs along the wall
+  (perpendicular to `wallYaw`), whatever angle the road crosses at.
+- `open` — metres of clear opening along the wall line (≥ `pass`; a road crossing at a slant gets a wider gate), centred on (`x`, `z`).
+`js/client/walls-view.js` draws from `wallYaw`/`open`. **nav.bin**: the gate jambs are stamped along the wall line (run end -> edge of
+`open`) instead of square to the road; the passage along the road stays clear (tests/B/walls.test.js promise 5 unchanged). A: nothing
+to change in js/sim if you only read nav.bin; tests/A/pt4-walls.test.js is re-run by me. If zone files are re-baked I say so here.
+
+**T13 — taller buildings (W -> D-world, A, E).** FOOTPRINTS DO NOT CHANGE (plots, nav, door x/z, NPC spots stay where they are). Only
+heights grow: storey height, door height, eave/roof. Done as an opt-in in proctown (`describeBuilding({ …, scale })` style option —
+exact name in my final note below) that Thousandvale passes; Farhold's towns stay byte-identical. Anything in js/client that hangs a
+thing at a hard-coded height on a building (signs, lanterns) reads it from the description, which already carries the new heights.
+
+**T8a — fences.** No data contract; a fix in whichever drawing path turns rails across their posts (noted below when found).
+
+## Round 5 contracts — D-UI (interface) -> A, C, E, D-world — 2026-10-06 (written FIRST; D-UI builds against these, and re-points to whatever A/C publish if it differs)
+Nothing below needs a new client.js method: unknown message types already reach listeners under their own `t`, and the
+interface sends with `net._raw`. Where A/C already chose another name, say so here and D-UI follows. All times are wall-clock ms
+(like `zoneEvent.at`), all extra fields optional.
+
+**T5 starting equipment** — C: `js/rules/starter-kits.js` `kitsFor(classId, kitsJson?) -> { armour: [{ id, name, blurb, items: [item] }] (3), weapons: [{ id, name, blurb, items: [item] }] (2+) }`
+(sync or a promise — both work). `items` are ordinary item objects exactly as a bag item is sent (name, type, slot, subtype/baseKey, tier, rarity, dmg/armor,
+twoHanded, affixes…), so the same item card and the same 3D gear look draw them. D-UI fetches `data/rules/starter-kits.json` and passes it as the 2nd argument if `kitsFor` wants it.
+A: `create { name, cls, look, kit: { armour: '<set id>', weapons: '<pack id>' } }` (please let `net.createChar({ …, kit })` forward `kit`; until then D-UI writes the message itself). A refusal = the usual `err { code: 'kit', msg }`. No `kit` = today's default gear.
+
+**T9 crates / T20 gifts** — an item with `kind: 'crate'` (or `'gift'`) and `crate: { type: 'weapon'|'armour'|'jewellery'|<slot>|'any', minRarity: 'magic'|'rare'|…, label? }`.
+Open = the existing `item { op: 'use', uid }`. Answer (either): `crateR { ok, uid, item, from: 'crate'|'gift', msg? }` or `itemR { ok, op: 'use', opened: { item, from } }`; refusal `why: 'bagFull'` + `msg`. The new item still arrives through `bag { add }` as usual.
+Mail: `mailR { op: 'take', ok: false, why: 'bagFull', need, free }` when the bag cannot hold it; `joined.you.bagMax` if the cap is not 120.
+
+**T11 / T12 events** — on `zoneEvent` (`soon|start|update|end`), `realm` (`eventSoon|eventStart|eventEnd`) and `eventFrame`, the `ev` object (or the frame itself) carries:
+`{ uid, name, text (one line: what is happening), objective: { text, n, of } (or objectives: [ … ]), endsAt, reward: { text } | rewardText, x, z, r, inRange (bool, this player), players, hp (0..1, optional), wave, waves }`.
+`inRange: true` => the "travel there" notice folds away for that player. End: `zoneEvent { kind: 'end', ev, won: bool, why?: 'time'|'left'|'killed', result: { text?, xp, gold, items: [{name, rarity}] } }` (the existing `eventDone {name, xp, gold, items, onBody}` is read too).
+
+**T18 character sheet** — the server runs C's pure estimator on the real player and sends `sheet { core: [row], advanced: [row], abilities: [abilityRow], angling?: { level, xp, next } }`
+on join and after every equip / level / perk / talent / buff change; `{ t: 'sheet' }` asks for it again. `row = { id, label, value (number), unit: ''|'%'|'s'|'/s'|'m', tip (how it is worked out, plain words), lowerIsBetter? }`,
+`abilityRow = { id, slot, name, dps (number|null), hit?: [min, max], every? (s), tip, why? (plain words when it cannot be estimated) }`. D-UI formats the numbers, keeps the previous sheet and shows ▲/▼ per row.
+Until `sheet` arrives D-UI shows a small basic sheet from `joined.you` + worn gear (marked as such). If C would rather the CLIENT run the estimator: export `characterSheet(you, rulesData)` returning the same object and D-UI calls it.
+
+**T3** — no new message: an ally skill is cast with `target` = your friendly target (a player, or a pet/follower on your side), else you. `bar[].ally` / `bar[].group` as today; `bar[].targets` (C's T2 wording, e.g. "party members") is shown on the skill card if sent.
+**T4 revive** — `reviveAsk { id, from (name), skill (name), hpPct?, ms (time to answer), note? }` -> the dead player answers `revive { op: 'accept'|'decline', id }`. If revives need no consent, send nothing and the body just stands up.
+**T7** — `joined.you.dual2h: true` (or the perk id in `joined.you.perks`; C please name it here) lets the paper doll offer the off hand to a two-hander; the equip message is the usual `item { op: 'equip', uid, slot: 'offhand' }`.
+
+**T19 feedback** — gateway socket: `feedback { kind: 'suggestion'|'bug', text (<= 2000), ctx?: { char, name, cls, level, province, zone, room, x, z, build, ua, screen, quality, fps, rtt, log: [string] (<= 40 lines, each <= 300) } }` (ctx only on a bug report)
+-> `feedbackR { ok, id?, first? (the thank-you letter is on its way), why?, msg? }`.
+**T21 admin (only if A wants it in-game)** — `joined.you.admin: true` shows a Reports button. `admin { op: 'reports', kind?, state? }` -> `adminReports { list: [{ id, kind, state: 'new'|'approved'|'declined'|'trash', text, at, name, level, cls, ctx }] }`; `admin { op: 'report', id, state }` -> `adminR { ok, id, state, msg? }`.
+
+**T25 angling** (province socket):
+- `fish { op: 'cast' }` -> `fishR { ok, why?, msg?, state: 'wait', at?: { x, z } }`; `fishBite { ms }` (the window to press); `fish { op: 'hook' }` -> `fishTug { ms (3000–6000), band (0.15–0.4 of the bar), pull (how hard the fish drags, 0..1), jitter (0..1), rarity, hint? }` or `fishR { ok: false, why: 'early'|'late' }`;
+  the tug runs in the browser; `fish { op: 'land', held: 0..1 (share of the time the marker stayed in the band) }` -> `fishCatch { ok, lost?, item?, species?: { id, name, rarity, legend? }, size? (cm), record? (bool), crate?, monster? (name), skill: { level, xp, next, up? }, msg? }`; `fish { op: 'stop' }` reels in.
+- `joined.you.angling = { level, xp, next, catches: { [speciesId]: { n, best (cm), zone } }, legends: [speciesId] }`, patched by `you { angling }`.
+- C/E: `data/rules/fishing.json` `{ fish: [{ id, name, water: 'river'|'lake'|'marsh'|'coast', zones?: [zoneKey], band?: [lo, hi], rarity, legend?, zone? (the legend's zone), text }], recipes: [{ id, name, needs: [{ id, n }], makes: { name, text } }] }` — the Catch tab lists species per zone from it (unknown ones as "???").
+- Cooking: using a campfire / hearth answers `used { ok, kind: 'campfire'|'hearth', cook: true }` (or `cookList { recipes: [{ id, name, needs: [{ id, name, n, have }], makes: { name, text }, can }] }`); `cook { id, n? }` -> `cookR { ok, item?, msg? }`.
+- D-world: D-UI raises DOM events for the 3D side — `window` `tv:fish` with `detail: { state: 'cast'|'wait'|'bite'|'tug'|'catch'|'lost'|'idle', tension?: 0..1 }`.
+
+## Round 5 contracts — X (Experiments home + Armory) -> F, D-UI, D-world, lead — 2026-10-06 (written first)
+
+**What X builds (all NEW files, nothing of yours edited):** `armory/` (the review page for every wearable / holdable Chibi 2
+model), `data/experiments.json` + `data/live-links.json` + `js/home.js` + `css/home.css` at the playground root (the home page is
+data-driven now), `tools/update-live-link.sh`, and `avatar-3d/js/preview-kit.js` (NEW file: one small shared viewer helper —
+renderer + lights + orbit + a thumbnail queue; no existing page is switched to it).
+
+**F -> X (the gear catalog).** The Armory reads `avatar-3d/data/gear-catalog.json` through `avatar-3d/js/gear-catalog.js` as soon as
+they exist; until then it lists the existing registries through its own stop-gap (`armory/js/registry-source.js`). What the page
+shows per row, so please carry as much of it as you can — anything missing is shown as "not stated", nothing breaks:
+- `id` (the Chibi 2 part id, what goes in `avatar.<slot>.id`), `name`, `slot` (avatar slot: `held` | `offhand` | `hat` | `top` |
+  `bottom` | `shoes` | `cape` | `decor` | `accessory`), `kind` (`weapon` | `offhand` | `armour` | `accessory`),
+  `type` (weapon type: sword, dagger, wand, staff, focus, shield…), `archetype` (cloth | leather | plate…), `hands` (1 | 2),
+  `file` (source file, repo-relative) and `builder` (function / table key), `games` (`['thousandvale', 'farhold']`),
+  `items` (the in-game base ids mapped to it, e.g. `[{ game:'thousandvale', base:'tv_estoc' }]`), `round` or `new: true` for this
+  round's models (the page has a "new this round" filter), an optional default `color` / `color2`.
+- If `gear-catalog.js` exports a way to get a LOOK for a row (`lookFor(row) -> { slot, part: { id, color, … } }`) I use it;
+  otherwise I build `{ [row.slot]: { id: row.id, color: row.color } }` myself.
+- Triangles, pieces, bounds in metres, bones and grip extents are MEASURED live by the Armory from the real builders (a recording
+  `SkinBuilder` over `createRig`), so they cannot go stale — you do not need to put them in the catalog.
+
+**D-UI -> X (icons), optional.** The Armory imports `prototypes/thousandvale/js/client/ui/item-icons.js` read-only and calls
+`iconFor(item)` with the mapped item row, so the icon preview IS the game's. A row with no item mapped to it gets the same framing
+from the Armory's own renderer, labelled as such. If you ever export `iconForSpec(spec)` (the queue entry point that takes an
+`iconSpec` result), the Armory will use it and the second path goes away — not needed this round.
+
+**D-world (T22 grips).** `armory/#id=fh_daggers&hand=both&anim=attack` is the page to check a grip on: main hand / off hand /
+both, every clip in `CHIBI2_EVERY_ANIMS`, race and size toggles, orbit, and a "flag" note per model with JSON export.
+
+**Lead.** CLAUDE.md gets an `armory/` row and the Thousandvale prototypes row from X (T1 says lead for the row — I write it, edit
+freely). `data/live-links.json` holds the public URL; `tools/update-live-link.sh` refreshes it from `ops/tunnel/quick.sh --url`
+(reads only; never starts or stops the tunnel). Run it after the tunnel restarts, then publish.
+
+## Round 5 contracts — A (Server core) — 2026-10-06 (play-test 5; kept true as the work lands — status line at the end)
+
+**Protocol v7** (`PROTOCOL_VERSION` in js/net/protocol.js; every change is additive, the bump only makes an old cached client
+reload). Everything below is in `js/net/protocol.js` + `js/net/client.js` (the `net.*` helper is named on each line).
+
+### What A calls in C's rules (each one optional — A checks `typeof rules.x === 'function'` every time, never a copy)
+| call | when | A's fallback while it does not exist |
+|---|---|---|
+| `kitsFor(classId)` (pure, C names the module in its contract) | `create` validation + the kit screen | `create.kit` is ignored, the class's old kit is kept |
+| `rules.applyKit(e, {armour, weapons})` -> `{ok, items?}` (equips the kit on a fresh character) | first entry of a character whose blob has `kit` | A builds each kit item with `rules.makeItem(e, spec)` + `rules.equip(e, item)` |
+| `rules.openCrate(e, item)` -> `[item…]` (crate / gift box roll) | `item {op:'use'}` on an item with `crate` or `gift` | `rules.rollLoot(e, {level, tier})` re-rolled until `minRarity` is met (and `slot`/`type` when it can) |
+| `rules.makeCrate(e, spec)` -> item | a quest's `reward.crate` | A builds `{id:'crate', type:'crate', name, rarity, crate: spec}` itself |
+| `host.offerRevive(caster, target, spec)` (A GIVES this to C) | C's revive skills call it instead of reviving a player directly | — |
+| `rules.revived(e, spec)` | after the dead player accepted and stands up | nothing extra happens |
+| `rules.attackRange(e)` (exists) — must be the reach of the CURRENT basic-attack form | `you.reach` after equip / form / bar change (T14) | swing plan range |
+| `rules.sheet(e)` -> object | `you.sheet` (T18) | A's own numbers from `unit.derived` |
+| `js/rules/fishing.js` (pure) — A reads C's contract for the exact names | T25 | fishing answers `why:'notReady'` |
+
+### T3 — healing an ally
+Nothing new on the wire: `target {id}` already accepts a friendly player (or a pet), `cast {slot, target}` passes the id to
+`rules.intent` (C decides "targeted ally, else self"). A does NOT add a fallback target of its own: the client sends the
+friendly `target` on the cast (D-UI does). `partyFrames` rows already carry the member's entity id (`id`, 0 when they are in another room).
+
+### T4 — reviving a dead player
+- C's revive skill -> `host.offerRevive(caster, target, spec)`; `spec = { skill, name, hpPct (0..1), mpPct?, ms? (offer window,
+  default 60000), note? (card line: "Returns with a shield"), mass?, apply? }`. Returns `{ok}` / `{ok:false, why:'alive'|'notPlayer'|'busy'}`.
+  A dead MONSTER or pet is C's own business; this is for `kind === 'player'` bodies only.
+- server -> dead player: **`reviveOffer {id, from (entity id), name (caster), skill, skillName, hpPct, note, ms, until (wall ms)}`**
+- dead player -> server: **`revive {op:'accept'|'decline', id}`** (`net.revive(op, id)`) -> **`reviveR {op, id, ok, why?}`**
+- on accept: the body stands up where it lies with `hpPct` health, `ev fx {kind:'revive', id, by, skill}` goes to everyone
+  near (D-world draws the class's effect from `skill`), `rules.revived(e, spec)` runs (C adds the heal-over-time / shield /
+  weakness), the caster hears `reviveR {op:'done', id, name}`. Declined / timed out: caster hears `reviveR {op:'declined'|'expired'}`.
+- `respawn` (release to town) while an offer is open cancels it. `info.dead` bodies are targetable with `target {id}` as before.
+
+### T5 — starter kit
+- **`create {name, cls, look?, kit?: {armour:'<id>', weapons:'<id>'}}`** (`net.createChar({name, cls, look, kit})`). Validated
+  against C's `kitsFor(cls)` (unknown id -> `err {code:'state', msg}`); missing = the first of each. Saved on the blob as `kit`.
+- **`kits {cls}`** on the gateway (`net.kits(cls)`) -> **`kitsR {cls, kits}`** = C's `kitsFor(cls)` as is (so the screen needs no rules import).
+- Applied once on first entry (`kitV` 2). `joined.you.equipment` already shows the result.
+
+### T7 — two two-handers
+`item {op:'equip', uid, slot:'offhand'}` is passed to `rules.equip(e, item, 'offhand')` untouched (C's rule decides on the perk).
+Refusal text comes back as `err {code:'item', msg}` and now also as **`itemR {op:'equip', uid, ok:false, why, msg}`**.
+
+### T9 — crates (and T20 gift boxes: the same code)
+- an item with `crate: {slot?, type?, minRarity, level?}` or `gift: {minRarity, level?}` opens with the existing
+  **`item {op:'use', uid}`** (alias `op:'open'`, `net.openItem(uid)`) -> `bag {remove:[crate], add:[items]}` +
+  **`itemR {op:'use', uid, ok:true, opened: {from: {name, kind:'crate'|'gift'}, items:[item…]}}`** (the reveal).
+- quest reward: `reward.crate: {slot|type, minRarity, level?, name?}` in E's data -> the crate lands in the bag at turn-in;
+  `questR.reward.crate = {name, rarity}`. (`reward.item` keeps working.)
+
+### T10 — rares
+Measured and written up under "T10" in A's landing note (before/after numbers).
+
+### T11 / T12 — events tell you everything, and end
+- **`eventTrack`** (1 Hz, to everyone enrolled in or within hearing of a live or counting-down event; zone events AND the realm event):
+  `{uid, id, name, kind, realm (bool), state:'soon'|'live', what (one sentence), objective:{text, n, of, kind:'kill'|'boss'|'wave'},
+  stage:{n, of, name}, startsAt? (wall ms, state soon), endsAt (wall ms), leftMs, reward:{xp, gold, items:[text], text},
+  inside (bool: you stand in its area), credited (bool: you have done something that counts), players, x, z, r, level}`
+- **`eventDone`** (already sent to paid players) now goes to EVERYONE who was enrolled or in hearing, win or lose:
+  `{uid, id, name, result:'success'|'fail', why? ('time'|'fled'|'off'), credited, xp, gold, items:[{name, rarity}], onBody?, text}`
+  (`text` is the one-line result: "Wolves at the Ford — success: +120 XP, +14 gold, Ashwood Bow").
+- **`eventAt {uid|null, id?, realm?}`** to a player when they walk into / out of an event's area (T11: hide "teleport there now"
+  while `uid` matches the announced event). `travel {to:'event'}` when already there answers `travelR {ok:false, why:'here'}`.
+- `zoneEvent` / `eventFrame` / `realm` stay as they are (their `ev` gains `what`, `objective`, `endsAt`, `reward`).
+
+### T14 — reach
+`you {reach, attackRange}` is re-sent whenever the bar changes (form / stance / weapon swap / talent), not only on equip.
+`castR {ok:false, why:'range', need}` already carries the metres needed.
+
+### T18 — the sheet
+`joined.you.sheet` and `you {sheet}` after every equip / unequip / level / talent / perk / kit / fishing-skill change, and on
+**`sheet {}`** (`net.sheet()`). `sheet = rules.sheet(e)` (C's shape) plus A's part: `{ gold, bag: n, bagMax, angling:{level, xp, next} }`.
+
+### T19 — feedback
+- **`feedback {kind:'suggestion'|'bug', text (<= 2000), ctx?: obj}`** on EITHER socket (`net.feedback(kind, text, ctx)` — uses the
+  game socket when in the world). `ctx` is the client's own context, free-form but capped: <= 6 kB as JSON, <= 60 `logs` lines of
+  <= 300 chars, depth 4; control characters stripped. Suggested keys: `where:{x,y,z,zone,room}`, `char:{name,cls,level}`,
+  `logs:[…]`, `ua`, `screen`, `fps`, `build`, `url`.
+- -> **`feedbackR {ok, id?, why? ('slow'|'empty'|'kind'|'size'), msg, first? (bool: a thank-you letter is on its way)}`**.
+- limits: 1 per 20 s and 12 per hour per account. The server adds its own context (account, character id/name/class/level,
+  room, zone, position, hp, target, tick, protocol, build, server time).
+- stored in the `feedback` table (Postgres, schema v5) / the memory store, AND appended to `.data/feedback-<env>.jsonl`.
+
+### T20 — system mail (one API)
+- `js/sim/sysmail.js` `createSystemMail({store, newUid, wallNow, notify})` -> `mailTo({to: charId | name, from?, subject, body,
+  items?: [item…], gold?, gift?: {minRarity, level?, name?}, crate?: {...}, kind?: 'system'|'event'|'gift'})`.
+  The province exposes it as `province.mailTo(...)`, the gateway as `gw.mailTo(...)`; event contributors who had left the room
+  when an event paid out now get their reward by letter.
+- system letters (`mail.kind !== 'player'`) can be read AND taken anywhere (no town needed), cannot be returned.
+- the first feedback of each character mails "Thank you" with a **Gift Box** (`gift: {minRarity:'rare'}`) — opened like a crate.
+- `mailList` rows carry `kind` and compact `items` (`{uid, name, rarity, slot}`); `mailOpen` carries the full item objects.
+
+### T21 — admins
+- `authed.admin: true` and `accountR {op:'info'}.admin` when the account has the flag (`node tools/make-admin.mjs`).
+- gateway: **`admin {op:'feedback', state?, kind?, limit?, before? (id)}`** -> **`adminR {op:'feedback', ok, list:[{id, at, kind, text,
+  state, account, char, name, client, server, note}], counts:{new, approved, declined, trashed}}`**;
+  **`admin {op:'state', id, state:'new'|'approved'|'declined'|'trashed', note?}`** -> `adminR {op:'state', ok, id, state}`.
+  (`net.admin(op, {...})`.) A non-admin gets `adminR {ok:false, why:'forbidden'}`.
+- the admin page (127.0.0.1) has the same list with the same four buttons. `node tools/feedback-report.mjs` prints it as Markdown.
+
+### T25 — Angling
+- save: `char.angling = { xp, level, casts, caught: { '<zone>': { '<species>': {n, best} } }, legends: ['<species>'], titles: [..] }`;
+  `joined.you.angling` = that + `next` (xp for the next level) ; `you {angling}` on change.
+- **`fish {op:'cast', aim:{x,z}}`** (`net.fish(op, {...})`) -> `fishR {op:'cast', ok, at:{x,z}, water:'river'|'lake'|'marsh'|'coast',
+  pool?: entity id}` or `{ok:false, why:'noRod'|'noWater'|'far'|'combat'|'busy'|'swim'|'dead'|'skill', msg}`
+- server, 2–9 s later: `fishR {op:'bite', ms}` (the window to answer) — `fish {op:'hook'}` -> one of
+  `fishR {op:'tug', tug:{ms, need (0..1 share of time in the band), band, speed, pull, seed}, heft:'light'|'heavy'|'huge'}`,
+  `fishR {op:'catch', …}` (junk comes straight in), `fishR {op:'monster', id, name}` (something climbs out and fights),
+  `fishR {op:'miss', why:'early'|'late'}`.
+- **`fish {op:'land', score (0..1), holds?: [ms…]}`** when the tug is over -> `fishR {op:'catch', kind:'fish'|'junk'|'crate'|'legend',
+  item, species, name, size, best (bool: your biggest), first (bool: new species here), skill:{level, xp, next, up},
+  pool?: {id, left}, title?}` or `fishR {op:'lost', species?, msg}`.
+- `fish {op:'cancel'}` ; walking > 2 m, a hit or a cast also end it: `fishR {op:'end', why}`.
+- everyone near sees `ev fx {kind:'fish', id (the angler), phase:'cast'|'bite'|'tug'|'catch'|'lost'|'end', x, z, rarity?}`; the
+  angler's `info.fishing = {x, z}` while a line is out (late joiners draw the bobber).
+- pools: room objects `type:'fishpool'`, `info.pool = {tier, minSkill, left, water}`; they vanish at 0 and another opens elsewhere.
+  E's placement file tells where (A reads E's contract for the file name).
+- cooking: **`cook {op:'list'}`** -> `cookR {op:'list', ok, fire (bool), recipes:[{id, name, needs:[{id, name, n, have}], makes:{id, name}, can}]}`;
+  **`cook {op:'make', id, n?}`** -> `cookR {op:'make', ok, made:[item…]}` — needs a fire within 6 m (a campfire, an inn hearth / innkeeper).
+- quests hear `{kind:'fish', species, rarity, zone, water, legend}` and `{kind:'cook', recipe}`.
+
+### A follows D-UI's and E's names where they wrote first (read this before the bullets above — these WIN)
+- T4: the offer is **`reviveAsk {id, from (caster NAME), fromId (entity id), skill (skill NAME), skillId, hpPct, ms, until, note}`** (not `reviveOffer`).
+- T5: a bad kit answers `err {code:'kit', msg}`.
+- T9/T20: `itemR {op:'use', ok, opened: {item (the first), items:[…], from:'crate'|'gift', name}}`; E's quest field is
+  `reward.crates: [{slot, min, forClass?}]` (one crate item per entry). Crate item: `{id:'crate', kind:'crate', type:'crate',
+  crate:{slot, type, minRarity, min, forClass, maxLevel}}`; gift: `kind:'gift'`, `gift:{minRarity}`. `mailR {op:'take', ok:false,
+  why:'bagFull', need, free}`; `joined.you.bagMax`.
+- T11/T12: `eventTrack` also carries D-UI's names: `text` (= `what`), `inRange` (= `inside`), `rewardText`, `wave`, `waves`, `hp`.
+  `zoneEvent {kind:'end'}` gains `why` and `result:{text, xp, gold, items}` (your own share; also in `eventDone`).
+  E's `info` block (`what`, `objective`, `durationSec`, `onSuccess`, `onFail`, `rewardText`) is what fills them.
+- T18: the sheet is its own message **`sheet {core, advanced, abilities, angling, …}`** (and `joined.you.sheet`); `{t:'sheet'}` asks again.
+- T19: `ctx.log` and `ctx.logs` are both read.
+- T21: D-UI's ops work as written: `admin {op:'reports', kind?, state?}` -> **`adminReports {list, counts}`**; `admin {op:'report', id,
+  state}` -> `adminR {ok, id, state}` (`'trash'` = `'trashed'`). `joined.you.admin: true` and `authed.admin: true`. Either socket.
+- T25: D-UI's names: `fish {op:'cast', aim?}` -> `fishR {ok, state:'wait', at, water, pool?}`; `fishBite {ms}`; `fish {op:'hook'}` ->
+  `fishTug {ms, band, pull, jitter, need, rarity, hint, heft}` or `fishR {ok:false, why:'early'|'late'}`; `fish {op:'land', held}` ->
+  `fishCatch {ok, lost?, kind, item?, species:{id, name, rarity, legend?}, size, record, first, crate?, monster?, skill:{level, xp,
+  next, up?}, pool?, title?, msg}`; `fish {op:'stop'}`. `you.angling = {level, xp, next, catches:{[species]:{n, best, zone,
+  zones:[…]}}, legends:[…], titles:[…]}`. Cooking: `used {…, cook:true}` on a campfire / an innkeeper; `cook {}` -> `cookList
+  {fire, recipes}`; `cook {id, n?}` -> `cookR {ok, item, items, msg}`. E's quest steps `catch` / `cook` are counted.
+
+**Status (A): ALL LANDED 2026-10-06 — docs/protocol.md §21 is canon (protocol v7, schema v5). Dev unit restarted on it.**
+- Built against C's and E's sections as they landed: `kitsFor` (through `net.kits`, with real `items` — the gateway hands the kits
+  module the booted engine), `rules.applyKit` / `makeCrate` / `openCrate` / `revived` / `sheet` / `attackRange` / `perks().flags`,
+  `js/rules/fishing.js` `createFishing(numbers, content)`; E's `reward.crates`, `info` blocks, `grant`, `reward.goods`, `catch` /
+  `cook` steps, angler job frames (`giverRole`), `angling.json`, `angling-pools.json`, placed champions (`rank`, `affixes`,
+  `respawnMin`), shop `minCap`, road-event `durationSec`.
+- **E's four asks:** (1) placed champions spawn with rank + modifier (tests/A/pt5-rares: 5 of them within 800 m of Torborhold);
+  (2) `minCap` read in js/sim/shops.js `build`; (3) `grant` paid on accept and `reward.goods` at turn-in (tests/A/pt5-angling,
+  pt5-play); (4) a road quest someone took on fails at `info.durationSec` (a chest keeps `lifeSec`).
+- **T10 measured** (server census, every monster within 800 m of Torborhold, ~375): before this round 0 champions + 2 rares;
+  with the placed ranks passed through 5 + 2; with C's new chances as well 36–40 champions + 16–20 rares.
+- **For D-UI / D-world:** `eventTrack.state` can also be `'offer'` (a road quest you stand beside but have not taken); `fx {kind:
+  'fish', phase}` also sends `landed` (with `what`, `rarity`) just before `catch`/`end`, and `monster`; `fx {kind:'pool', phase:'gone'}`;
+  `fx {kind:'cook', id, at}`; `info.fishing.tug` while reeling; a rod or bait USED from the bag casts / baits (`itemR {fish:true}`).
+- **For C:** A calls `rules.revived(e, {...spec, hpPct, by: <caster entity id>})` (an id, never the entity).
+- **Lead:** no sudo steps. Stable picks up schema v5 by itself at its next start. `node tools/make-admin.mjs <username>` (dev) /
+  `sudo "$(command -v node)" tools/make-admin.mjs <username> --env stable`; reports: `node tools/feedback-report.mjs` /
+  `sudo "$(command -v node)" tools/feedback-report.mjs --env stable`. Dev has ONE test report (#1, "live smoke test") — trash it.
+
+## Round 5 contracts — F (models + gear catalog) -> C, E, D-world, X, lead — 2026-10-06 (shape first; rows land as models are checked)
+
+**Files (all F's):** `avatar-3d/data/gear-catalog.json` (data) + `avatar-3d/js/gear-catalog.js` (pure reader: no three, no DOM) +
+the new models in `avatar-3d/js/chibi2-gear5.js` (dispatch) / `chibi2-gear5-weapons.js` / `chibi2-gear5-armour.js` /
+`chibi2-gear5-offhand.js`, ids in the pure `avatar-3d/js/chibi2-gear5-ids.js`. **Every new part id starts `g5_`.** Nothing that
+exists changes look; an avatar that names no `g5_` id builds exactly what it built before (a test compares vertex counts).
+
+**One catalog row** (old models and new ones, same shape — X: this is your field list plus a few):
+```json
+{ "id": "g5_cuirass",            // the Chibi 2 part id (what goes in avatar.<slot>.id, or in avatar.<slot>.<field>.id)
+  "base": "g5_cuirass",          // E/C: the item BASE id to inject for it. New rows: same as id. Old rows: absent (see items)
+  "kind": "armour",              // weapon | armour | offhand | accessory | hat   (hat = headwear with no armour archetype)
+  "slot": "top",                 // AVATAR slot: held | offhand | hat | top | bottom | shoes | cape | decor | accessory
+  "field": null,                 // set when the part rides an extra field of that slot: "gloves" (top.gloves), "ring" (accessory.ring)
+  "gameSlot": "chest",           // weapon | offhand | head | chest | legs | hands | feet | cape | necklace | ring | light | belt | null
+  "type": "chest",               // weapon type (sword, dagger, axe, axe2h, sword2h, mace, hammer, hammer2h, spear, polearm, javelin,
+                                 //  bow, crossbow, wand, staff, quarterstaff, scepter, orb, tome) | shield | focus kind (tome, orb,
+                                 //  relic, idol, ward, totem) | armour piece = the gameSlot | cloak, quiver, lantern, torch, belt, amulet, ring
+  "archetype": "plate",          // armour only: cloth | leather | mail | plate   (item tier -> archetype: ARCHETYPE_OF_TIER in the reader)
+  "hands": null,                 // weapons: 1 | 2
+  "file": "avatar-3d/js/chibi2-gear5-armour.js", "builder": "G5_TOPS.g5_cuirass",
+  "name": "Riveted Cuirass",     // a suggested item name (original names only)
+  "element": null,               // fire | ice | lightning | poison | shadow | holy | arcane | nature | null
+  "form": null,                  // magic attack form the silhouette suggests: projectile | cone | area | beam | fork | shield | null
+  "tags": ["armour", "plate", "chest"],
+  "color": "#9aa2ac", "color2": "#d8b040",   // default tint; a game may pass its own (rarity / element tint)
+  "minLevel": 1,                 // suggested first level for drops/shops (E's content-gear.mjs)
+  "new": true, "round": 5,
+  "games": ["thousandvale"],     // which games draw it today (old rows: farhold / emberveil / bannerline / thousandvale)
+  "items": [] }                  // old rows: the base ids already mapped to it, e.g. [{ "game": "thousandvale", "base": "longsword" }]
+```
+**Reader API** (`import … from '../../avatar-3d/js/gear-catalog.js'`):
+- `await loadGearCatalog()` -> catalog (fetch in a browser, fs under node) · `createGearCatalog(json)` for a JSON you already hold.
+- `cat.rows` · `cat.byId(id)` · `cat.find({ kind, slot, gameSlot, type, archetype, form, element, hands, isNew, game })` -> rows.
+- `cat.forItem(item)` -> the NEW row for a game item (`{ slot, tier, subtype, twoHanded, castForm|form, element, isFocus… }`) or null:
+  armour by gameSlot + `ARCHETYPE_OF_TIER[item.tier]`, weapons by `WEAPON_TYPE_OF_SUBTYPE`, wands/staves/foci by `form` first.
+- `lookFor(row, { color, color2, quality, emblem… })` -> `{ slot, part }` (X's shape; `part` is `{ id, color, … }`, or for a `field`
+  row `{ [field]: { id, color, … } }` — merge it INTO the slot, do not replace the slot).
+- `lookPatch(row, opts)` -> `{ [slot]: part }` and `applyGear(avatar, rowsOrIds, optsById?)` -> a new avatar with every patch merged
+  one level deep. **D-world: call `applyGear` LAST** (after `tier2Dress`, which replaces `decor`), so gloves/rings/belts survive.
+- `ARCHETYPES`, `ARCHETYPE_OF_TIER` (`cloth→cloth, light→leather, medium|scaled→mail, heavy|plate→plate, runed→cloth`),
+  `WEAPON_TYPES`, `ATTACK_FORMS`, `GAME_SLOTS`.
+
+**How each game slot is drawn** (so C/E/D-world know what an injected item needs to carry — `look: { g5: '<catalog id>' }` is enough,
+D-world resolves the rest through the catalog): head -> `hat.id` · chest -> `top.id` · legs -> `bottom.id` · feet -> `shoes.id` ·
+**hands -> `top.gloves = { id, color, color2 }`** (new: there was no hands model at all) · weapon -> `held.id` (a one-hander also
+works as `offhand.id`: dual wield) · shield/focus/quiver/torch -> `offhand.id` · cape -> `cape.id` · necklace -> `accessory.id` ·
+**ring -> `accessory.ring = { id, color }`** (a band on the right hand; ring2 -> `accessory.ring2`, left hand) ·
+light (lantern) / belt -> `decor.id` (one decor at a time: a tier-2 kit wins over a belt).
+- The data has cloth/light/medium/heavy for head, chest, legs and light/medium/heavy for hands, feet (no cloth gloves or cloth shoes
+  base yet). F builds all 5 slots x 4 archetypes anyway; **C: `g5_` cloth hands/feet need a new base** (`slot: hands|feet, tier: cloth`).
+- Holding: a `g5_` weapon is registered in `chibi2-weapon-ids.js` (`RIGHT_KIND` etc.), so the existing clips carry it; bows are
+  left-hand items like `bow` (`BOW_IDS`). Head/blade at -y, butt at +y, handle through the fist — same rule the T22 audit checks.
+
+**Tests F owns:** `avatar-3d/tests/gear-catalog.test.js` — fails if a wearable/holdable id is built in code and missing from the
+catalog, or catalogued with no builder; every `g5_` id survives the shared normaliser; every armour slot x archetype, every weapon
+type, every focus kind and every attack form (wand + staff + focus) has a `new` row; a look with no `g5_` id is geometry-identical.
+
+## Round 5 contracts — D-world (3D client + avatar-3d motion/grips) -> A, C, F, X, D-UI — 2026-10-06 (written before building; kept true)
+
+**What D-world MAKES (others may consume):**
+- `avatar-3d/js/chibi2-motion-dual.js` (NEW file, opt-in, generic — Farhold can adopt): `CHIBI2_DUAL_ANIMS` =
+  `['dualSlashR', 'dualSlashL', 'dualCross', 'dualStabR', 'dualStabL', 'dualFlurry', 'twinChopR', 'twinChopL', 'twinCrash']`
+  (main-hand cut, off-hand cut, both together — for two one-handers; the three `twin*` are for a two-hander in EACH hand) and
+  `CHIBI2_ANGLE_ANIMS` = `['fishCast', 'fishWait', 'fishReel', 'fishShow']`, `CHIBI2_REVIVE_ANIMS` = `['standUp']`,
+  `dualAttackFor(hold, { hand: 'main'|'off', step })` -> the clip name to play for a swing. A game asks for them like any opt-in
+  list: `createChibi2Character(av, { anims: [...CHIBI2_ANIMS, ...CHIBI2_DUAL_ANIMS] })`. Nothing that builds today's lists changes.
+  **X (Armory):** add these three lists to the clip picker if you want them browsable (`chibi2-motion.js` `registerClips` is how they
+  get in; importing the dual module is enough).
+- **Grip rule (T22), for F and X:** a held item is authored in hand space with its HANDLE on the grip line `x = 0, z = 0.055`
+  through `y in [-0.04, +0.04]` (the fist), business end at `-y`, butt at `+y`; an off-hand copy is the same builder on `handL`.
+  `prototypes/thousandvale/tests/D/grips.test.js` checks every id in `FARHOLD_WEAPON_INFO` + every `g5_` held id + the old
+  vocabulary, in BOTH hands, and checks every clip in the lists above + `CHIBI2_EVERY_ANIMS` keeps an off-hand weapon aimed
+  (an un-aimed grip lies along the forearm — that was the "held 90 degrees wrong" bug).
+- `js/client/form-fx.js`: `formLook(form)` (pure) -> how a wand / staff / focus attack form is drawn.
+- `js/client/angling-view.js`, `js/client/revive-fx.js`: the T25 and T4 visuals (below).
+
+**What D-world READS (please keep these names, or tell me under your section):**
+- **C / A — T6:** the swing event already carries `hand: 'main'|'off'` and `step` (`fx {kind:'attack', shape:'swing', hand, step}`
+  and `cast {skill:'basic', hand?, step?}`). I pick the clip from `hand` + what is in both hands. **Ask (C/A): put `hand` and
+  `step` on the `cast` event of a basic swing too** (the `cast` arrives at the wind-up, the `fx` at the strike — the clip must
+  start at the wind-up). Without it I alternate by my own counter for a dual wielder, which is right as long as main and off
+  swings alternate.
+- **C / A — T7:** two two-handers: `info.gear.weapon` and `info.gear.offhand` both two-handed items (nothing new needed) — the
+  off hand is drawn as the same model on the left hand and the body uses the `twin*` clips.
+- **A — T14:** `you.reach` = metres at which the CURRENT basic-attack form really lands (a 5 m cone wand: 5; a self-centred
+  area: its radius; a bolt: its range). The client walks to `reach * 0.85` (never closer than 1.4 m) before swinging and no
+  longer grows its idea of reach from a lucky hit when `you.reach` is present. `castR {why:'range', need}` shortens it.
+- **C — T15/T16:** on the basic-attack events: `form` (`projectile|cone|area|beam|fork|chain|shield|ward|nova|wave|jet|wall|
+  mortar|storm|dome|bolt`) next to the existing `shape`, `el`, `reach`, `arc`, `r`; for a beam/fork/chain the targets hit as
+  `to: {x, z}` or `targets: [id…]`; a sceptre swing is the normal `fx {kind:'attack', shape:'swing', wt:'scepter', el}` (the
+  client adds the element burst along the arc + an impact on the target). Unknown forms fall back to a projectile.
+- **A — T4:** `ev fx {kind:'revive', id (the body), by (caster id), skill (skill ID)}`. **C: one fx hint per revive skill** —
+  either `fxHint` on the skill row or tell me the skill ids; I map by id and fall back by element (`el`) / class. Styles I
+  draw: `pillar` (long cast, light from above), `spark` (instant battle revive, lightning crack), `bloom` (druid: roots +
+  leaves, heal-over-time motes stay 6 s), `ward` (comes back inside a shield dome), `chorus` (mass revive: ring at the caster,
+  a ray to every body), `grave` (comes back weakened: dark hands, grey pall), `flame` (rekindled), `tide`.
+  While the cast is channelled: `cast {skill, target}` + `fx {kind:'channel'}` already exist — I draw a tether caster -> body.
+- **A — T25:** `ev fx {kind:'fish', id, phase:'cast'|'bite'|'tug'|'catch'|'lost'|'end', x, z, rarity?, kind?}`,
+  `info.fishing = {x, z}`, room objects `type:'fishpool'` with `info.pool = {tier, left, water}`; for the angler's own client
+  also D-UI's DOM event `tv:fish {state, tension}` (rod bend). **Ask (A): the rod — `info.gear.tool = {base:'angling_rod'…}`
+  is not needed**; I put the rod in the hand only while `info.fishing` / a fish phase is live (weapons are put away).
+- **F — T23:** `loadGearCatalog()` / `cat.forItem(item)` / `applyGear(avatar, …)` as written in F's section; an item may carry
+  `look: { g5: '<id>' }`. gear-look resolves every equipped slot through the catalog first and falls back to the old tables.
+
+## Round 5 contracts — C (Combat rules) -> A, D-UI, D-world, E, F — 2026-10-06 (kept true as the work lands; status line at the end)
+
+Everything is optional for the caller as before: A's `typeof rules.x === 'function'` checks hold. Where D-UI / A / E wrote a name first, C uses THEIR name.
+
+**T2 — who a skill touches.** One vocabulary, used on every card (skill, talent, perk, item power): **you** · **your followers** (your own pets,
+summons and hired blades — never other players) · **party members** (other players in your party within 30 m) · **all allies** (you + party members
+within 30 m + your followers; a party member's own pets count too). A card that uses one of the group terms ends with a one-line key that spells it out.
+`bar[]` gains `who`: `'self'|'ally'|'allies'|'followers'|'enemy'|null` (who the FRIENDLY part lands on; `ally` = the one you target, else you) and
+`targets` (D-UI's name): the same in plain words ("you or the party member you target", "all allies", "your followers"). Table: js/rules/ally-audit.md.
+
+**T3 — healers.** cleric key 1 Mend · priest key 2 Prayer of Dawn (now heals the ally you target, else you) · druid key 2 Greensap (now a direct heal
++ the mend over time) · shaman key 2 Mending Post (planted at the targeted ally's feet and heals them at once; no ally targeted = where you aim / you).
+All four are `bar[].ally: true`: send the friendly `target` (A's "no target = `e.target`" fallback is fine).
+
+**T4 — revives** (6 classes; new skill ids, each `shape: 'self'`, `bar[].revive = { style, castMs, combat: bool, mass: bool, hpPct }`):
+| class | slot | id | name | niche | `style` (fx hint) |
+|---|---|---|---|---|---|
+| cleric | 3 | `raise_the_fallen` (reworked, same id) | Raise the Fallen | MASS: every fallen party member within 30 m at 50% health; 4 s cast; out of combat only | `choir` (a pillar of light on each body, white-gold) |
+| priest | 4 | `second_dawn` | Second Dawn | IN-COMBAT, instant, one target, 25% health, 3 min cooldown | `sunburst` (one sharp flash from above, gold) |
+| druid | 4 | `green_return` | Green Return | in or out of combat, 2.5 s cast, 20% health + Mending (25% more over 10 s), 2 min cooldown | `bloom` (vines and flowers grow over the body, green) |
+| paladin | 5 | `oathbound_rise` | Oathbound Rise | in or out of combat, 2 s cast, 30% health + a barrier worth 30% for 10 s, 2.5 min cooldown | `aegis` (a gold shield dome closes over the body) |
+| necromancer | 5 | `unquiet_return` | Unquiet Return | instant, in combat, 60% health but Grave-touched for 20 s (deals 30% less, takes 15% more), 1 min cooldown | `grave` (violet smoke and hands from the ground) |
+| shaman | 3 | `call_back_the_spirit` | Call Back the Spirit | 8 s cast, out of combat only, FULL health and mana, 10 s cooldown | `spirits` (ancestor wisps circle down into the body, blue) |
+Dropped to make room: priest `dread_hymn`, druid `call_wolf` (the class companion is still earned at level 10), paladin `shining_rebuke`, necromancer
+`toxic_cloud`, shaman `storm_post`; the cleric's `raise_the_fallen` moves from key 5 to key 3 (`sanctuary` 3->4, `guardian_light` 4->5).
+- Target: the dead party member you have targeted (`cast {slot, target}`), else the nearest fallen party member within 30 m. Refusals (`castR why`):
+  `target` "No fallen party member within 30 m." · `combat` "Not while you are fighting." (the out-of-combat ones).
+- Cast time: `castbar {id, ab, name, ms}` when it starts; moving more than 0.6 m, dying or another cast ends it (`castX {id, ab, why}`); mana and cooldown
+  are only paid when the cast completes. While casting: `fx {kind:'reviveCast', id (caster), on (target id, or ids for mass), ab, style, ms}`.
+- **A:** on completion C calls `host.offerRevive(casterEntity, targetEntity, spec)` once per body, `spec = { skill (id), name, hpPct, mpPct?, note,
+  mass?, style, apply: { status?: {id, seconds}, barrier?: {share, seconds}, debuff?: {...} } }`. When the player accepts, call
+  `rules.revived(targetEntity, spec)` — C stands the unit up (health, statuses clean, threat dropped) and adds the rider in `spec.apply`. With no
+  `host.offerRevive` (tests, offline) C revives at once. Fallen FOLLOWERS never go through the offer (C raises them itself; only the cleric's and the
+  old follower revives — demon hunter Unleash the Hound, pyromancer Stoke the Familiar — do that, and those two no longer touch players).
+- **D-world:** draw `fx reviveCast` by `style` on the body for `ms`, and A's `fx {kind:'revive', id, by, skill}` — `skill` is one of the six ids above.
+
+**T5 — starter kits.** `data/rules/starter-kits.json` + `js/rules/starter-kits.js` (pure). `kitsFor(classId)` -> `{ cls, armour: [{ id, name, blurb,
+items: [item] }] x3, weapons: [{ id, name, blurb, items: [item] }] x3-6 }` — `items` are real item objects (normal rarity, no affixes, the same every
+call), so the item card and the gear look draw them. It needs the booted rules (import it from `js/rules/index.js`: `import { kitsFor } from
+'../rules/index.js'`); the client should use A's `net.kits(cls)`. `validKit(classId, {armour, weapons})` -> `{ok, armour, weapons}` (missing/unknown id
+= the first of each). `rules.applyKit(e, {armour, weapons})` -> `{ ok, items }` (replaces whatever is worn; for a brand-new character). `starterGear(classId,
+{armour, weapons})` -> `{ slot: item }` (A can put it straight into `char.equipment` before the first entry instead).
+
+**T7 — two two-handers.** Perk id `doubled_grasp` (Cornerstone "Doubled Grasp"), sheet flag `doubleGrip`: `rules.perks(e).flags.includes('doubleGrip')`
+-> A sets `you.dual2h`. `rules.equip(e, item, 'offhand')` takes a two-hander with it and refuses without it (sentence in `text`). `rules.canEquip(e, item,
+slot)` -> `{ok, text}` asks without doing. Both hands swing: the basic attack (slot 0) now also swings the OFF hand on its own clock (it never did in
+Thousandvale) — `cast {slot:0}` events carry `hand: 'off'` for those, `two: 1` for a two-hander, and alternate main / off.
+
+**T9 / T20 — crates and gifts.** Item shape is A's: `{ id:'crate', kind:'crate', type:'crate', name, desc, rarity, crate: { slot, min, minRarity,
+forClass, cls?, level?, maxLevel? } }`; a gift is `{ id:'gift', kind:'gift', type:'gift', gift: { minRarity, level? } }`. `rules.makeCrate(e|null, spec)`
+-> item (`spec` = E's `{slot, min, forClass}` or `{type, minRarity}`; `spec.gift: true` makes a gift). `rules.openCrate(e, item)` -> `[item…]` (one
+item today; rolled at the opener's level, never above `maxLevel`; `forClass` / slot `weapon` | `offhand` = something the opener's class uses).
+`slot`: weapon · offhand · head · chest · legs · hands · feet · ring · neck · armor · jewellery · any. `min`: common | uncommon (magic) | rare | epic
+(rare, rolled twice as lucky) | legendary. Pure versions in js/rules/crates.js (`makeCrate`, `openCrate(engine, item, {cls, level, rng})`, `crateText`).
+
+**T10 — rares.** data/rules/affixes.json `chance`: champion 0.09 -> 0.14, rare 0.025 -> 0.05, minLevel 4 -> 2 (E's ask). Measured numbers in C's report.
+
+**T14 — reach.** `rules.attackRange(e)` = the reach in metres of the basic attack as it is RIGHT NOW (weapon, caster form, druid shape); `null` = melee.
+`rules.basic(e)` -> the slot-0 card `{ slot:0, id:'basic', name, desc, kind (melee|arrow|bolt|staff|form), form, reach, every (ms), el, wt, two, hands }`.
+A basic attack on a NAMED target further than that is refused `castR {ok:false, why:'range'}` before anything is spent (melee is never refused).
+
+**T15 — caster forms.** A wand, staff, sceptre, orb, tome or focus carries `castStyle` (the exact behaviour) and `castForm` (F's six words). Basic-attack
+events (`cast slot:0`, `fx attack`, `fx bolt` with `basic:1`) carry `form: <castStyle>`:
+| castStyle | castForm | what the basic attack is | reach |
+|---|---|---|---|
+| bolt / seeking / heavy | projectile | one bolt (seeking turns; heavy is slow and hits hard) | 34 m (heavy 29) |
+| burst | area | a bolt that bursts 3.2 m | 34 |
+| fan | fork | three bolts in a fan | 34 |
+| chain | fork | a bolt that jumps to 2 more | 34 |
+| fork | fork | a bolt that splits into 2 shards on what it hits | 30 |
+| cone | cone | a cone in front of you (no projectile) | 9 |
+| beam | beam | an instant line through everything | 18 |
+| nova | area | a ring round you | 5 |
+| lob | area | an arc that lands on the target, 3 m | 16 |
+| ward | shield | a bolt; each hit gives you a small barrier | 26 |
+| pool | area | a bolt that leaves burning / freezing ground | 24 |
+Staves keep Farhold's element spells (cone / nova / wave / lob / chain / ground + charged forms) and gain `beam` and `ward`. An off-hand focus
+(orb, tome, relic, idol, ward-focus) adds a RIDER to the main hand's attack: `focusRider` `echo` (every 4th attack repeats), `burst` (your hit also
+bursts round the first enemy), `ward` (hits give a barrier), `siphon` (hits give mana). An off-hand WAND fires its own bolt on its own clock.
+New fx: `fx {kind:'attack', shape:'beam'|'cone'|'nova'|'lob', form, el, x, z, yaw, reach, arc?, r?, to?}`; `fx {kind:'ward', id, amt}` when a ward hit shields.
+
+**T16 — sceptres.** A sceptre is a MELEE weapon whose swings deal its element (never a bolt). Its swing events carry `wt:'scepter'`, `el:<element>` and
+`imbue: 1` — D-world: draw the element on the swing trail and a small burst of it on every hit (`fx impact` already carries `el`).
+
+**T17 — conversion affix.** Seven affixes `tv_convert_<fire|ice|lightning|poison|shadow|holy|arcane>` (Kindled, Rimed, Stormtouched, Venomed,
+Duskforged, Dawnlit, Starwrought): the weapon's damage is that element instead of physical. On about 1 in 18 magic-or-better PHYSICAL weapons; never on
+a wand, staff, sceptre, orb or tome, never on a weapon that already has a brand. The item carries `brand: <element>` and `converted: true`.
+
+**T18 — the sheet.** `rules.sheet(e)` -> `{ core: [row], advanced: [row], abilities: [abilityRow], dummy: {level, armor} }` in D-UI's row shape
+(`{id, label, value, unit, tip, lowerIsBetter?}`; `abilityRow = {id, slot, name, dps|null, hps?, hit?: [min, max], every? (s), cd? (s), tip, why?}`).
+Ability numbers are MEASURED: each ability is cast for real against a training dummy (your level, no armour, one target) in a private scratch room and
+the damage it does over one cooldown is counted — DoTs, zones and repeats included. `rules.sheetWith(e, item, slot?)` -> the same sheet as if `item`
+were worn (for a compare). Pure: js/rules/estimate.js `characterSheet(engine, unit)`.
+
+**T23 — gear catalog.** js/rules/gear-catalog.js reads `avatar-3d/data/gear-catalog.json` if it is there (absent / partial = nothing injected, no
+error). Every row with `new: true` and a `base` becomes an item base in memory: weapons copy the numbers of the plain base of their `type`, armour of
+their `gameSlot` + archetype (cloth/leather/mail/plate = cloth/light/medium/heavy), with the row's `name`, `minLevel`, `look: { g5: id }` and, for
+casters, `castStyle` from `form` + `element`. Items made from it carry `g5: '<catalog id>'` and `look.g5`. They join the loot pool at `minLevel`.
+New bases with no catalog row needed: `cloth_gloves`, `cloth_shoes` (F's ask). **E:** base id = the row's `base`; `rules.makeItem(e, {base, rarity?, level?})` builds one.
+
+**T25 — Angling.** js/rules/fishing.js (pure) + data/rules/fishing.json (NUMBERS only). The fish, junk, legends, recipes and rods stay in E's
+`data/provinces/angling.json` (D-UI: read the species list from there or from A; C's file has no fish rows). `createFishing(numbers, content)` ->
+`{ wait(rng, {bait?, pool?}) -> seconds 2..9 · biteMs(skill) · roll({water, band, time, skill, zone, pool?: {tier}, rod?, caught?: Set of legend ids,
+rng}) -> { kind:'fish'|'junk'|'crate'|'legend'|'monster', id, name, rarity, size (cm), price, crate?, monster?: {type}, say? } · tug(catch, skill,
+rod?) -> { ms, band, need, speed, pull, jitter, seed, heft } · lands(tug, score) -> bool · xp(catch, {first, best}) · gain(state, xp) -> { level, xp,
+next, up } · levelOf(xp) · next(level) · rank(level) · pool(tier) -> { minSkill, catches: [lo, hi], rareBoost } · canFish({skill, pool, rod}) ->
+{ok, why} · item(catch) -> bag item { id, kind:'fish', type:'fish', name, desc, rarity, size, price, species } · canCook(recipe, counts, skill) }`.
+`rules.fishing` is the booted instance (numbers + E's content when the file is there).
+
+**Status (C): ALL LANDED (2026-10-06).** Tests: tests/C 300 (playtest5 21, playtest5-loot 12, playtest5-sheet 7, fishing 14, starter-kits 9 new), tests/A rules-facing 95/95, tests/E playtest5 37/37.
+What differs from the contract text above (these WIN):
+- **T10 (E's follow-up):** champion **0.05**, rare **0.06**, minLevel 2. `node tools/content-rares.mjs` = **14.73** special monsters in the first 30 minutes (4.33 rolled champions + 5.2 rolled rares + 5 placed + 0.2 named); was 0.9.
+- **T18:** `rules.sheet(e)` returns `{ core, advanced, abilities, dummy, pending }`. With `pending: true` the stat rows are final and unmeasured abilities carry `pending: true` (dps null); the rules measure one slice per tick (about 13 ticks) and then call **`host.sheetChanged(entity)`** — A: send the sheet again there; D-UI: show "measuring…" on a pending row. `rules.sheetWith(e, item, slot)` gives the stat rows only (`abilities: null`).
+- **T23:** an item from a catalog base has `baseKey` = its TEMPLATE base (sword, quarterstaff, reliquary…), `catalogBase` = the catalog `base`, `g5` + `look.g5` = the model id. Not injected (the sheet has no such slot): cloak, belt, lantern, torch.
+- **T15:** every caster item carries `attackText` (a focus: `focusText`) and a converted weapon `convertText` — **D-UI: print these on the item card** (they are written from the numbers the attack uses); pass Farhold's affix text through `whoText` from js/rules/wording.js so "companions" reads "your followers".
+- **T4 (A):** `spec.by` is the caster's entity id; the `revive` field event carries `keep: 1` when C has already cleaned the body. With no `host.offerRevive` the body stands at once and C emits `fx {kind:'revive', id, by, skill, style}` itself.
+- **T7 (A):** Doubled Grasp cannot be refunded / reset while it holds a weapon in the off hand: `rules.refundPerk` / `resetPerks` answer `{ok:false, text}`.
+- **T5 (E's ask):** "Starfall Staff" -> "Skyshard Staff", the two pool-wand blurbs and the axe-and-hammer blurb fixed; tests/C/starter-kits scans every kit and kit-item name against the whole banned list.
+- **Behaviour changes other streams may notice:** the off hand swings (dual wielders deal more: extra `cast slot:0` events with `hand:'off'`); a chained bolt jumps to another enemy instead of re-hitting the same one; `petsOnly` buffs no longer reach party members; a hunter's / pyromancer's follower revive no longer raises players; a ranged basic attack on a named target out of reach is refused `range`.
+
+## Round 5 contracts — E (T12 events, filled) -> A, D-UI — 2026-10-06
+The `info` block is on all 38 events exactly as posted (A's section adopted the same names, nothing renamed): `data/quests/events.json`
+realm 4 + zone 16; `data/provinces/road-events.json` chests 7, deliver 4, escort 3, rescue 3, and **new key `coded.ambush.info`**.
+- A: `objective.kind` in the data is `waves_boss` | `boss` | `open` | `deliver` | `escort` | `rescue` | `defend`; map to your wire kinds
+  (`wave`/`boss`/`kill`) as you like. `objective.count` for a runner event = `waves.length + 1` (the boss always spawns), so `stage.of` = it.
+- A: the escort **ambush** is started from code (js/sim/roadevents.js `ambush()`) and had no record: its text is `road.coded.ambush.info`
+  (slot `{name}` = the escorted NPC). Wanderers with `offers: 'deliver'` use the `deliver[]` variants' info; `curious` tips are not events.
+- A: road-event `info` text keeps the record's slots — run it through the same `fill(…, tok)` as `title`/`text` (`{name}` `{town}` `{npc}` `{guards}`).
+- A: `durationSec` for road events is NEW behaviour to enforce: chest = `rules.lifeSec` (600), deliver/escort 900, rescue 1200, ambush 120.
+  Today a road quest never times out once accepted; at 0 it should end with `onFail`.
+- `rewardText` is composed from each record's own reward (a runner event always says "a rare item or better for everyone who takes
+  part" because `eventReward` guarantees it). Do not edit `info` by hand — `node tools/content-events.mjs` rewrites it; the words are in
+  that tool. `tests/E/playtest5-events.test.js` (9 tests) fails when an event lacks a field or the files are stale.
+
+## Round 5 contracts — E, addendum 1 (T10 rares: measured, and one small ask of A) — 2026-10-06
+`node tools/content-rares.mjs` walks a newcomer's first 30 minutes (the start chain, 4.5 km, 40 kills, sight 45 m) over the layout the
+server really spawns. **Before: 0.9 special monsters expected** (0.54 rolled champions + 0.15 rolled rares + 0.2 of a named rare) — of the
+78 ordinary monsters met only 4 are level 4+, and `chance.minLevel` was 4, so near the start the roll almost never ran. That is why the
+owner never saw one. With C's new `chance` (0.14 / 0.05 from level 2): ~13 champions + ~4.5 rares on the same walk.
+- **E placed 62 fixed ROADSIDE CHAMPIONS** (9 in the starting zone, 5 of them on the start chain's own walk, one every ~600 m) in
+  `data/vignettes/placements/<zone>.quest.json` (tools/content-hunts.mjs step 1b): `{ type:'camp', id:'champ_<zone>_<n>', monster, level:[l,l],
+  count:[1,1], rank:'champion', affixes:['giant'|'fiery'|'packleader'|…], respawnMin:[4,8], champion:true }`.
+- **A — two lines, please** (js/sim/placements.js `case 'camp'` and js/sim/room.js camp spawn): pass `rank: p.rank`, `affixes: p.affixes` and
+  `respawnMs` from `p.respawnMin` (minutes, like a `rare` record) onto the camp row, and put `affixes` on the spawned monster's `data`
+  (`data: { camp: 1, affixes: c.affixes }`) — js/rules/index.js already reads `e.data.affixes` ("E may place a set champion"). Until then the
+  62 spawn as ordinary monsters (the tool prints "the server is not passing their rank through yet"). A fixed-rank camp must not ALSO roll.
+- tests/E/playtest5-rares.test.js holds the "several" bar: >= 4 special monsters on the walk from E's placed ones + the roll.
+
+## Round 5 contracts — E, addendum 2 (what landed; supersedes the shapes in E's first section where they differ) — 2026-10-06
+**T25 pools — `data/provinces/angling-pools.json`** (made by `tools/content-pools.mjs` from B's water; 308 pools, 15 zones — the Blackthorn Scar is dry):
+`{ pools: n, zones: { "<world zone>": [ { id: 'pool_<zone>_<n>', x, z (WORLD m, in the water), shore: {x, z} (walkable, on the 2 m nav grid, 3-15 m
+from x,z), water: 'river'|'lake'|'marsh'|'coast', band: [lo, hi], tier: 1|2|3, road (m to the nearest road), shelf? (a shallow-shore pool),
+start?, always? } ] }, meta: { "<world zone>": { sheet, name, band, live, water: { river, lake, sea }, kinds: [...], roadside, tiers: [n1, n2, n3] } },
+anglers: [ { id, name, town, sheet, zone, x, z (WORLD m), yaw (faces the water), byWater, fromTown, pool (nearest pool id) } ] }`.
+- **A:** open `meta.<zone>.live` of a zone's spots at a time (tier-1 spots first so a beginner always has one); a fished-out pool closes and
+  another listed spot of the same tier (else any) opens. The pool with `always: true` (one, by Torborhold) never closes. For a cast OUTSIDE a
+  pool: catch-table water = `meta.<zone>.water[terrain.waterAt(x, z).kind]` (a marsh zone's standing water is `marsh`, the Gullwick and Sunken Wolds
+  "rivers" are `lake`, Saltmouth's lake is `coast`); zone band = `meta.<zone>.band`.
+- **A — a legend may live next door:** `angling.json` `legends[]` gained an optional `foundIn` (sheet zone id). Thornbelly (the dry Blackthorn Scar's
+  legend) is caught in `coldwater`; it still counts as the Scar's legend in the journal. Roll a legend where `(foundIn || zone)` is the caster's zone.
+- **D-world:** ripples + jumping fish at each OPEN pool's `x, z`; `shelf: true` pools sit in ankle-to-knee water (keep the effect low).
+**T25 anglers.** 16 NPCs, role `angler` (`<zone>.quest.json` npc records with `angler: true`; greeting from the zone's quest file `npcs`, which
+carry `placedBy: 'content-pools'`). 14 stand on the bank nearest their town; Millbrook's and Last Lantern's stand at the town's edge (no water within
+420 m). The role opens `shops.json` `kinds.angler` (js/sim/shops.js `roleKind` picks it up by itself): three rods and three baits as **goods**
+(`goodsCatalog.<id>.use = { type: 'rod', minSkill, bonus: { band?, wait? } }` and `{ type: 'bait', effect: { wait?|junk?|rarity?, casts } }`).
+- **A:** "has a rod" = a bag item with `use.type === 'rod'` (ids `angling_rod`, `ash_rod`, `river_wardens_rod`); a rod is a Tool — it is never
+  equipped and takes no slot; the best one in the bag that the angler's skill allows counts. A shop good may carry `minSkill` (angling skill needed to buy).
+  `kinds.angler.buys: ['fish']` = the angler buys fish (so does every merchant, at the usual sell factor; a fish item's `price` is its full price).
+- **A — quests (data/quests/angling.json, part of zone `test`; 4 quests from Tam Sedgeley, `angle_first_cast` -> `angle_supper` ->
+  `angle_silver_lining` -> `angle_the_patient`):** `grant: [{ good: 'angling_rod', count: 1 }]` on a quest = goods handed over on ACCEPT (once);
+  `reward.goods: [{ id, count }]` = goods at turn-in; steps `{ kind: 'catch', count, pool?: true, fish?: '<species id>', rarity?: 'uncommon' (that or
+  better) }` and `{ kind: 'cook', count, meal?: '<meal id>' }`; the first quest's `visit` step carries a ready `at: {x, z, r, name}` (the start
+  pool's bank). Map marks for all four are in `marks/torbor_downs.json`.
+- **A — jobs (data/quests/jobs.json, 5 angler frames):** slot type `fish` (`needs: [{ slot: 'fish', type: 'fish', band: 'zone', rarity?: [...],
+  maxSkill?, id? }]` binds a species of `angling.json` the zone's waters and band offer), `goal: { kind: 'catch', target: '{fish.id}' | 'any' | 'junk',
+  count, pool? }`, and `giverRole: 'angler'` (offer these at an angler, not at the elder / innkeeper). Until `fish` binds, the frames are simply never offered.
+**T15 / T23 — `tools/content-gear.mjs`** shelves every `new` catalog row with a `base` into `shops.json` (casters -> apothecary, bows -> bowyer, other
+weapons -> weaponsmith, shields -> weaponsmith + armourer, foci -> tailor, cloth -> tailor, leather -> tailor + armourer, mail/plate -> armourer,
+rings/amulets -> jeweller, cloaks/belts -> tailor; one weapon in three also on the market stall). It ran against NO catalog so far (the file was not on
+disk when E finished its pass — re-run it once F's rows are in: `node tools/content-gear.mjs`; tests/E/playtest5-gear.test.js then checks every row).
+- **A — one filter, please (js/sim/shops.js `build`):** a category may carry `minCap: { "<base>": <level> }`; skip that base in a town whose
+  `levelCap` is below it (`bases.filter(b => !(row.minCap && row.minCap[b] > (town?.levelCap ?? 99)))`). Without it the late pieces are simply sold everywhere.
+**T5 — C's starter kits read well** (30 classes, 90 armour sets, 150 weapon packs; no duplicate names, blurbs say what the thing is). Four fixes, C's file:
+1. mage **"Starfall Staff"** — `Starfall` is on the banned list (playground CLAUDE.md convention 9). Suggest "Sky-Shard Staff".
+2. necromancer "Rot Wand and Tome" and pyromancer "Tinder Wand and Tome": the blurb says "leaves the ground burning or freezing" — name the one
+   it does ("leaves poisoned ground behind", "leaves the ground burning").
+3. runesmith "Axe and Hammer": "Battleaxe: one-handed, with a SECOND hammer in the off hand" — there is no first hammer; "with a hammer in the off hand".
+4. Kits wear three armour pieces and the blurb lists the bare slots ("Nothing on: legs, boots") — good: the start chain's crates (feet, chest, legs,
+   head, neck, hands, weapon, off hand, ring, in that order) fill exactly those gaps. No change asked.
+- **X status (2026-10-06, done):** the Armory reads F's catalog (`loadGearCatalog` + `lookFor`; the stop-gap list is deleted). All 259 rows build and draw, the 66 `new` rows included (gloves on `top.gloves`, rings, belts). Nothing needed from F, D-UI or D-world. **D-world (T22):** `armory/#id=fh_daggers&hand=both&anim=flurry&speed=0.25` — the "How it is held" table gives each hand's long axis, palm position and a live angle to the forearm; at rest both daggers read `y`, 26% along, 0 cm off the handle, so the 90° fault is in a clip's grip turn, not in the model. **Lead:** `data/live-links.json` holds today's tunnel address; run `tools/update-live-link.sh` after any tunnel restart, then publish. New root files to commit: `data/`, `js/home.js`, `css/home.css`, `armory/`, `avatar-3d/js/preview-kit.js`, `tests/{experiments.test.js,home.spec.js}`, `tools/update-live-link.sh`; changed: `index.html`, `package.json` (test:unit gains `armory/tests`), `CLAUDE.md`, `GAME-GUIDE.md`.
+
+## Round 5 contracts — D-UI, addendum 1 (re-pointed to A's and C's sections; what the interface reads now) — 2026-10-06
+D-UI now uses A's helpers where they exist (`net.kits`, `net.createChar({kit})`, `net.sheet`, `net.feedback`, `net.adminOp`, `net.fish`, `net.cook(id, n)`,
+`net.revive`) and reads BOTH name sets wherever two were written (`eventTrack.what|text`, `inside|inRange`, `leftMs|endsAt`, `crate.min|minRarity`,
+`crate.slot|type`, `eventDone.result` as `'success'|'fail'` or an object, `adminReports` / `adminR {op:'feedback', list}`, state `trashed` = `trash`,
+report rows' `client`|`ctx`). Nothing else is needed from anyone for the screens to work; these are the open points:
+- **A / C — T5:** `kitsR.kits` must carry real `items`. Today the gateway's `kitsFor` runs with no rules engine and answers the sets with `items: []` (base
+  keys only). D-UI treats that as "no kits from the server" and runs C's `kitsFor(cls, json, rulesEngine())` in the page instead (works — it is also the
+  path for a gateway process that has no rules at all — but it loads the rules data on the title screen). With items in `kitsR` that load never happens.
+- **C — T5 data:** the grimoire a kit hands out carries `look: {"0":"b","1":"o","2":"o","3":"k"}` (a string spread into an object). And the warrior's first
+  set "Line-Holder's Mail" contains **Plate Armor** (`heavy_chest`) — the owner's words were "budget only — no high-end plate"; the name alone will read as
+  plate on the kit screen. Your call (rename the base for kits, or use `medium_chest`).
+- **A — T18:** D-UI shows the server's `sheet` as sent (rows in D-UI's shape) and asks with `net.sheet()` when the window opens. Please keep `tip` on every
+  row — the tooltip is the "how it is worked out" the owner asked for; a row without one is shown without a tooltip.
+- **A — T20:** D-UI unwraps a gift right after `mailR {op:'take', ok:true}` by sending `item {op:'use', uid}` for the gift it finds in the bag (the `bag {add}`
+  must reach the client before or with the `mailR`, as it does for every take today).
+- **D-world — T25:** X is bound by D-UI (`js/client/ui/angling.js`: cast / reel in; Space or E hooks a bite; hold Space, the mouse or a finger to reel in
+  the tug). `tv:fish` only ever carries `cast | wait | bite | tug | catch | lost | idle` (+ `tension` during the tug, ~10 Hz).
+- **Lead:** new key **V** (Character menu) and **X** (cast); both are in the F1 help. `tv.fake(ev, msg)` (main.js) plays a server message through every
+  client handler — the D specs use it for windows whose trigger cannot be made to happen on demand.
+
+## Round 5 — E status (final) — 2026-10-06
+Landed: T9 crates (97), T10 champions (62) + measurement, T12 `info` on 38 events, T15/T23 shelving (64 of F's 66 new rows; re-run
+`node tools/content-gear.mjs` if rows are added), T25 content (angling.json, angling-pools.json 308 pools, 4 quests, 5 job frames, angler shop).
+- **T10 numbers** (`node tools/content-rares.mjs`, a newcomer's first 30 minutes on the start chain): **before 0.9** special monsters ->
+  **5.9** with E's placed champions alone (A passes their rank: landed) -> **22.5** with C's new roll (0.14 champion / 0.06 rare from level 2:
+  ~12 champions + ~5 rares rolled, 5 placed, 0.2 named). That is one about every 80 seconds — "several" with room to spare. **Lead/C:** if a
+  play-test says special monsters are now ordinary, the dial is C's `chance.champion` (0.08 gives ~12 in the half hour); E's placed ones stay either way.
+- **Still open for A** (asked above): `minCap` filter in js/sim/shops.js `build` (without it late catalog pieces are sold in every town — harmless);
+  `grant` on quest accept and `reward.goods` at turn-in (the rod is also on Tam's shelf for 4 gold if `grant` is not read yet).
+- **W / B:** zone bakes changed under this round (nav.bin of 10 zones). Pools and anglers were re-checked against the nav on disk at the end
+  (`node tools/content-pools.mjs --check`, tests/E/playtest5-pools.test.js). After any further bake: `node tools/content-pools.mjs && node
+  tools/content-hunts.mjs`. A full `tools/place-vignettes.mjs` run now MOVES every zone (it no longer reproduces the committed placements) —
+  E did not re-place this round; doing so needs B's confirming re-bake.
+- **W:** data/vignettes/m2b.json and setpieces.json (E's files) were edited this round by another stream (fence posts -> rails); fine by E, noted
+  so the lead knows whose diff it is.
+
+## Round 5 — D-world status + asks (2026-10-06) -> A, C, F, X, D-UI, lead
+Built against the contracts above; everything below is drawn from events as A/C named them. Files: `js/client/{form-fx,revive-fx,angling-view,reach}.js`
+(new), `actors.js`, `gear-look.js`, `looks.js`, `objects.js`, small hooks in `main.js`; avatar-3d `js/chibi2-motion-dual.js` (new) + the grip fix
+in `js/chibi2-motion.js`; tests `tests/D/grips.test.js`, `tests/D/playtest5.test.js`, `tests/D/playtest5.spec.js`.
+- **A — `info.gear` (two small fields, please):** the compact entry has no element, so OTHER players' staves, wands and sceptres are drawn
+  untinted and a sceptre's swing on someone else relies on the event alone. Add `el` (the item's `castElement || brand`, when it has one) and
+  `g5` (when `item.look.g5` / `item.g5` is not the same string as `base`). gear-look.js already reads both (`item.el`, `item.g5`).
+- **A — pools:** `info.pool.shelf: true` for E's shelf pools (I draw a smaller fish and a lower hop there). `left: 0` (or the entity leaving)
+  removes the pool with one last splash.
+- **A — fish events:** I read `ev fx {kind:'fish', id, phase, x, z, rarity?}` exactly as written, plus `info.fishing = {x, z}` for late
+  arrivals. If the catch is a crate, `what: 'crate'` on the `catch` event tints it wooden (optional).
+- **A / C — T6:** `cast {slot:0, hand:'off'}` plays the off hand's own strike (`dualSlashL` / `dualStabL` / `twinChopL`), also on your own
+  body (the client used to ignore its own basic `cast`). Until the first `hand:'off'` arrives for a body the client alternates the pair by its
+  own count (main, off, main, off, both), so a server without the off-hand clock still shows both hands working.
+- **C — T14:** the client stops at `approachReach(you.reach)` (15% inside, at least 1 m: a 9 m cone -> 7.65 m, a 5 m nova -> 4 m) and no
+  longer learns a longer reach from a far hit when `you.reach` is known; a SKILL refused for range no longer shortens the basic attack.
+- **C — T15:** `form` values drawn: bolt, seeking, heavy, burst, fan, chain, fork, cone, beam, nova, lob, ward, pool (+ F's six family words
+  and the older shape names). For `chain` the client draws the jumps to the two nearest foes of the landing point (a guess — send
+  `targets: [id…]` on the `fx bolt` if you want the real ones drawn). `fx {kind:'ward', id}` closes a dome round the caster.
+- **F — catalog regenerated by me once** (`tools/build-gear-catalog.mjs`): I registered every two-hander (war pick, halberd, spear, glaive,
+  quarterstaves, the caster staves, and the two-handed / staff `g5_` models) as OFF-HAND parts in `avatar-2d/js/parts/chibi2-parts.js` (T7:
+  the normaliser was throwing a second two-hander away), which flips `offhandToo` on those rows. `avatar-3d/tests/gear-catalog.test.js` is
+  green after it. `HELD_WEAPON_IDS` now includes staves (a second staff fell through to the shield builder).
+- **X — Armory:** `avatar-3d/js/chibi2-motion-dual.js` exports `CHIBI2_DUAL_ANIMS`, `CHIBI2_ANGLE_ANIMS`, `CHIBI2_REVIVE_ANIMS` — import it and
+  add the three lists to the clip picker if you want them browsable (importing registers the clips). Grip rule + test: avatar-3d/CHIBI2.md
+  "Grips and paired weapons".
+- **D-UI — T25:** `tv:fish` is read as written. A first `wait` with no line out is treated as the cast (so the cast clip plays even if only
+  the server's answer is announced); `tension` bends the rod.
+- **Lead — shared avatar-3d code touched** (all suites re-run): `chibi2-motion.js` (daggers ride the fist; any weapon hand a clip does not aim
+  gets a fist grip; `blade.ready` -1.85 -> -2.1, `wand.ready` -1.5 -> -2.0; a second two-hander's partner is shouldered too; new exports
+  `registerClips`, `sampleClip`, `MOTION_KIT`), `chibi2-weapon-ids.js` (one line: staves are off-hand weapons), `avatar-2d/js/parts/chibi2-parts.js`
+  (appended block: two-handers as off-hand parts). Farhold, Emberveil and Bannerline dual wielders and dagger users get the corrected holds.
+
+**F status — 2026-10-06, DONE (contract above holds; three things to know):**
+- The catalog has **259 rows, 66 new**. `cat.forItem(item)` resolves every weapon base and every head/chest/legs/hands/feet/off-hand
+  base in items.json to a new row (tested); an item can also just carry `look: { g5: '<id>' }`.
+- **C:** there is still no cloth `hands` / `feet` base in items.json — `g5_cloth_handwraps` and `g5_cloth_curltoes` need one to
+  drop. There is no `belt` slot in either game: `g5_girdle` is a `decor` model with `gameSlot: 'belt'` and nothing equips it yet.
+  `g5_cresset` (torch) and `g5_hexlantern` are `gameSlot: 'light'` (Farhold's light slot; Thousandvale has none).
+- One name changed after the contract: `g5_stonemaul` is "Quarrybound Sledge" (the word it had is on the banned list). Ids are final.
+
+## Round 5 contracts — C (slots addendum) -> A, D-UI, D-world, E, F — 2026-10-06 (written first; T23 "every slot … and accessory")
+
+Three more worn slots, so the cloak, belt, lantern and torch of F's catalog are real items. Farhold is not edited: `light` is already one of
+its slots; `back` and `waist` are Thousandvale's own, kept in the same `equipment` map (Farhold's sheet sums the properties of everything in
+that map, so their stats count like any ring's).
+
+| slot key | what goes in it | plain bases (budget) | catalog rows that land here |
+|---|---|---|---|
+| `back` | a cloak | `travel_cloak` (+2 armour, +2 magic resistance) | F `type: cloak` (`g5_swallowtail`) |
+| `waist` | a belt | `leather_belt` (+2 armour, +8 health) | F `type: belt` (`g5_girdle`) |
+| `light` | a lantern or a torch you WEAR (lit all the time, no charges) | `hand_lantern` (lights 16 m), `pitch_torch` (lights 10 m) | F `type: lantern` (`g5_hexlantern`), `type: torch` (`g5_cresset`) |
+
+An item of these says `slot: 'back' | 'waist' | 'light'`, `type: 'armor'`, `subtype` = the slot, and rolls rarity and properties like a ring.
+- **A (save / load / equip):** nothing new on the wire. `item {op:'equip', uid}` -> `rules.equip(e, item)` puts it in its own slot (or pass
+  `slot`); `item {op:'unequip', slot:'back'|'waist'|'light'}` -> `rules.unequip(e, slot)`. `rules.saveGear(e)` / `joined.you.equipment` now may
+  carry the keys `back`, `waist`, `light` — please save and restore them like the others (if the equipment blob is filtered by a slot list
+  anywhere, add the three). `rules.SLOTS` (new, on the rules object) = every slot key in paper-doll order. A worn light shows as
+  `rules.itemBuffs(e).lightRange` (the bigger of the worn light and a lit consumable torch) and `light: 1`; the consumable torch keeps its
+  night bonus, a worn light has none. `info.gear` should carry `back`, `waist`, `light` (each `{ base, g5, rarity, … }` like the others).
+- **D-UI (paper doll / bag):** three more squares: Back, Waist, Light. `rules.SLOTS` order: weapon, offhand, head, chest, back, hands, waist,
+  legs, feet, necklace, ring, ring2, light. The item card needs nothing special (armour 0; their stats are ordinary property lines).
+- **D-world (gear-look):** `info.gear.back.g5` -> F's cape builder (`cape.id`); `info.gear.waist.g5` and `info.gear.light.g5` (a lantern) ->
+  `decor.id` (a tier-2 kit wins over a belt, a belt over a lantern, as F wrote); a worn TORCH (`g5_cresset`, F slot `offhand`) is drawn in
+  the off hand only when the off hand is empty, else at the hip. A plain base with no `g5` (`travel_cloak`, `leather_belt`, `hand_lantern`,
+  `pitch_torch`) wants any existing cape / belt / lantern / torch part. A worn light should glow `lightRange` metres at night.
+- **E (drops / shops):** they are in the drop pool from level 1-3 (families `cloak`, `belt`, `light`) and in crates (`slot: 'back' | 'waist' |
+  'light'`; `any` and `jewellery` crates may hold them). Please re-run `node tools/content-gear.mjs` so the four catalog rows and the four
+  plain bases reach a shop (cloaks + belts: the outfitter / tailor; lantern + torch: the general store).
+- **F:** nothing to change; your `gameSlot: cape | belt | light` rows are read as `back` / `waist` / `light`.
+
+**T3 addendum — three more healers.** paladin key 2 `mercy_touch` (Mercy's Touch: a touch heal, reach 6 m — the target must be that close, else
+it lands on you); bard key 2 `mending_verse` (Mending Verse: heals the target and leaves Mending on them); oracle key 2 `kind_omen` (Kind Omen:
+a small heal and a ward against the next big hit). All `bar[].ally: true`. Class lists now: paladin `sanctified_blade, mercy_touch, consecrate, martyrs_vow, oathbound_rise, daybreak_descent` (`oath_hammer` leaves the
+bar); bard `discord_note, mending_verse, ballad_of_valour, song_of_ruin, air_of_mending, grand_finale` (`quickstep_jig` leaves); oracle
+`omen_bolt, kind_omen, foresight, prophecy, fate_thread, last_prophecy` (`turn_aside` leaves).
+**Status (C, addendum): LANDED.** All 66 new catalog rows are items (nothing skipped). tests/C/playtest5-loot "T23 slots" x2, playtest5 "T3 hybrid healers".
+
+**W — final note (2026-10-06, done).**
+- **Re-baked**: all 16 Torbor Downs zones (`placements.json` x16: gates gain `wallYaw` + `open`, and `x, z` now sit exactly on the ring —
+  moved at most 1.5 m on 4 bundled gates; `nav.bin` x10: gate jambs follow the wall line) and the map (`data/world/map/zones/*.png` x10).
+  `terrain.bin`, scatter and `inputHash` unchanged. `tests/B/zone-bake.test.js`, `map.test.js`, `walls.test.js`, `tests/A/pt4-walls.test.js` green.
+- **E**: nothing of yours moved — wall runs shift by under a metre only beside the slanted gates, and `checkWalls` still finds no wall across
+  any of your discs — so placements should NOT need re-running; run `tools/place-vignettes.mjs --check` (or your usual) if you want proof.
+  I edited three of your recipes, fence props only: `sp_drill_field` and `sp_turnwater_mill` (`data/vignettes/setpieces.json`) and
+  `weavers_bridge_toll` (`m2b.json`) had `fence_rail` at yaw 1.57 between posts spaced along X — a rail runs along local **X at yaw 0**
+  (rule now in `data/vignettes/README.md`; `tests/B/fences.test.js` checks every recipe). Posts re-spaced to the rail's 2.4 m.
+- **A**: no change needed. `yaw` / `out` still mean "the way out along the road"; nav is still the only thing that stops a body.
+- **D-world**: lines touched in your files — `walls-view.js` (the gate block of `planWalls`: frame from `wallYaw`, `gatehouseParts`, stubs,
+  latched field gates; returns `gates[]`), `town-view.js` / `setpiece-view.js` / `site-view.js` (one `tune: tuneFor(...)` argument each +
+  the import). New file `js/client/building-tune.js` (T13's numbers: the option is `describeBuilding({ tune })`).
+- **proctown** (shared, opt-in only): `describeBuilding({ tune })`, `gatehouseParts(kind, open)`; `offices.js` puts the name board clear
+  over the door on a front of two storeys or more (Thousandvale is its only user). Untuned kit output is byte-identical — Farhold unchanged.
+
+## A -> C, D-world, D-UI — 2026-10-06: slots addendum done (`back`, `waist`, `light`)
+Nothing was filtered by a slot list, so equip / unequip by slot / save + restore / mail / trade already carried them; added: `info.gear.<slot>.g5`
+(the catalog model id, on every slot that has one) and crate wording + `slotFits` for the three (a `jewellery` crate may hold them).
+tests/A/pt5-slots.test.js (2): worn, drawn by another player, off again, still worn after a real log-out and log-in, posted by letter, out of a crate.
+
+## Round 5 — E, after C's slots addendum (back / waist / light) — 2026-10-06
+`node tools/content-gear.mjs` re-run: **66 of 66** new catalog rows are on a shelf. Cloaks and belts at the tailor (`kinds.tailor.categories.armor`:
+`travel_cloak`, `leather_belt`, `g5_swallowtail`, `g5_girdle`); worn lights at the general store in a new category `kinds.general.categories.light`
+("Lanterns & torches": `hand_lantern`, `pitch_torch`, `g5_hexlantern`, `g5_cresset`). Crates: `start_letters_south` also pays a `back` crate (common),
+`start_road_to_orrinsford` a `waist` crate (uncommon) — 99 crates in all; the start chain now fills eleven slots. tests/E 198 green. No re-placement.

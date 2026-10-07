@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 // Play-test 4 S4 (streams C + A): champions and rares roll in the wilds — bigger, more health, a modifier's special,
 // better loot, a Pack-leader brings its pack; announced mini-bosses show on nearby players' minimaps, secret ones do not.
 import test from 'node:test';
@@ -18,8 +19,10 @@ test('S4: ordinary wilds spawns roll champions (~9%) and rares (~2.5%): bigger, 
   const t = { normal: [], champion: [], rare: [] };
   for (let i = 0; i < 600; i++) { const e = mob(r, o, i); t[e.rank].push(e); }
   const share = k => t[k].length / 600;
-  assert.ok(share('champion') > 0.04 && share('champion') < 0.16, 'champions ' + share('champion'));
-  assert.ok(share('rare') > 0.005 && share('rare') < 0.06, 'rares ' + share('rare'));
+  // the rates are stream C's data (data/rules/affixes.json `chance`; play-test 5 T10 raised them): the shares follow the file
+  const CH = JSON.parse(readFileSync(new URL('../../data/rules/affixes.json', import.meta.url), 'utf8')).chance;
+  assert.ok(share('champion') > CH.champion * 0.5 && share('champion') < CH.champion * 1.7, 'champions ' + share('champion') + ' for a chance of ' + CH.champion);
+  assert.ok(share('rare') > CH.rare * 0.25 && share('rare') < CH.rare * 2.2, 'rares ' + share('rare') + ' for a chance of ' + CH.rare);
   const avg = l => l.reduce((s, e) => s + e.hpMax, 0) / l.length;
   assert.ok(avg(t.champion) > avg(t.normal) * 1.6, 'champion health bar');
   assert.ok(avg(t.rare) > avg(t.champion), 'rare tougher still');
@@ -34,7 +37,7 @@ test('S4: ordinary wilds spawns roll champions (~9%) and rares (~2.5%): bigger, 
   assert.ok(t.rare.every(e => / the /.test(e.name)), 'a rare has a name of its own: ' + t.rare.map(e => e.name));
   assert.ok(t.champion.every(e => e.name !== 'moor_hound' && /Moor Hound/.test(e.name)), 'champion prefix');
   // never at level 1, never for an add, an escort or a named encounter body
-  for (let i = 0; i < 200; i++) assert.equal(mob(r, o, i, { level: 3 }).rank, 'normal', 'not before level 4');
+  for (let i = 0; i < 200; i++) assert.equal(mob(r, o, i, { level: CH.minLevel - 1 }).rank, 'normal', 'not before level ' + CH.minLevel);
   for (let i = 0; i < 100; i++) assert.equal(mob(r, o, i, { data: { noRank: true } }).rank, 'normal');
   for (let i = 0; i < 100; i++) assert.equal(r.spawn({ kind: 'monster', type: 'moor_hound', level: 5, x: o.entity.x + 50, z: o.entity.z }).rank, 'normal', 'not a camp body');
   a.close(); await srv.stop();

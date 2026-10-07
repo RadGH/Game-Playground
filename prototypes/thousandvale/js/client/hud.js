@@ -60,8 +60,11 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
   /** The action-bar skill card (name, unlock, cost, cooldown, who it reaches, what it does). */
   function skillTip(sk) {
     const facts = [sk.mp ? `${fmt(sk.mp)} mana` : '', sk.cd ? `${(sk.cd / 1000).toFixed(sk.cd % 1000 ? 1 : 0)} s cooldown` : '', sk.element && sk.element !== 'physical' ? sk.element : '',
-      sk.ally ? (sk.group ? 'reaches your party' : 'on a friend or yourself') : ''].filter(Boolean).join(' · ');
-    return `<div class="tip-title">${escH(sk.name)}</div>${sk.locked ? `<div class="bad">Unlocks at level ${escH(sk.level)}</div>` : ''}${facts ? `<div class="tip-sub">${escH(facts)}</div>` : ''}${sk.desc ? `<hr><div>${escH(sk.desc)}</div>` : ''}`;
+      sk.targets ? '' : sk.ally ? (sk.group ? 'reaches your party' : 'on a friend or yourself') : ''].filter(Boolean).join(' · ');
+    // T2/T3/T4 (play-test 5): exactly who it touches, in the rules' own words, and a revive's terms
+    const who = sk.targets ? `<div class="tip-who">Affects: ${escH(sk.targets)}</div>` : '';
+    const rv = sk.revive ? `<div class="tip-who">Revive: ${[sk.revive.mass ? 'every fallen party member near you' : 'one fallen party member', Number.isFinite(sk.revive.hpPct) ? `back at ${Math.round(sk.revive.hpPct * 100)}% health` : '', sk.revive.castMs ? `${(sk.revive.castMs / 1000).toFixed(sk.revive.castMs % 1000 ? 1 : 0)} s cast` : 'instant', sk.revive.combat ? 'works in a fight' : 'out of a fight only'].filter(Boolean).map(escH).join(' · ')}</div>` : '';
+    return `<div class="tip-title">${escH(sk.name)}</div>${sk.locked ? `<div class="bad">Unlocks at level ${escH(sk.level)}</div>` : ''}${facts ? `<div class="tip-sub">${escH(facts)}</div>` : ''}${who}${rv}${sk.desc ? `<hr><div>${escH(sk.desc)}</div>` : ''}`;
   }
 
   return {

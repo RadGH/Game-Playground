@@ -7,6 +7,7 @@ import { composeCheck, expiresText, attachText, hasAttachments, sortMail, MAIL_L
 import { createPanel, h, confirmBox } from './ui-panel.js';
 import { rememberItems } from './ui/item-card.js';
 import { iconFor } from './ui/item-icons.js';
+import { bagRoom, isGift, isCrate } from './ui/pt5-core.js';
 
 /** An item square with its 3D icon and the shared item card on hover (P7/P15/P16). */
 let synthUid = 0;
@@ -37,14 +38,16 @@ export function createMail({ net: getNet, hud, bag, me, inTown }) {
     if (S.view === 'compose') return drawCompose();
     drawInbox();
   }
-  function townNote() { return inTown?.() ? null : h('p.tiny-left.warn-text', {}, 'You can read letters anywhere, but sending and taking need a town.'); }
+  /** System letters (a thank-you gift, an event's reward) can be read AND emptied anywhere; players' letters need a town. */
+  const isSystem = m => !!m && !!m.kind && m.kind !== 'player' && m.kind !== 'return';
+  function townNote(m = null) { return inTown?.() || isSystem(m) ? null : h('p.tiny-left.warn-text', {}, 'You can read letters anywhere, but sending and taking need a town.'); }
 
   function drawInbox() {
     panel.setTitle('Mail', S.unread ? `${S.unread} unread` : `${S.list.length} letter${S.list.length === 1 ? '' : 's'}`);
     const rows = sortMail(S.list).map(m => h('li.ml-row' + (m.read ? '' : '.unread') + (m.kind === 'return' ? '.returned' : ''), { tabIndex: 0, onclick: () => read(m.id), onkeydown: e => { if (e.key === 'Enter') read(m.id); } },
       h('div.ml-top', {}, h('b', {}, m.kind === 'return' ? `Returned: ${m.from || 'unknown'}` : m.from || 'Someone'), h('span.ml-when', {}, when(m.sentAt))),
       h('div.ml-subj', {}, m.subject || '(no subject)'),
-      h('div.ml-meta', {}, hasAttachments(m) ? h('span.ml-att', {}, '✉ ' + attachText(m)) : m.taken && (m.items?.length || m.gold) ? h('span.ml-taken', {}, 'Taken') : null,
+      h('div.ml-meta', {}, hasAttachments(m) ? h('span.ml-att' + (m.kind === 'gift' ? '.gift' : ''), {}, (m.kind === 'gift' ? '❖ ' : '✉ ') + attachText(m)) : m.taken && (m.items?.length || m.gold) ? h('span.ml-taken', {}, 'Taken') : null,
         m.kind !== 'return' && hasAttachments(m) ? h('span.ml-exp', {}, expiresText(m.expiresAt)) : null)));
     panel.fill(
       h('div.row', {}, h('button.primary.small', { type: 'button', onclick: () => compose() }, 'Write a letter'), h('span.grow'), h('button.ghost.small', { type: 'button', onclick: () => net()?.mail('list') }, 'Refresh')),
@@ -56,20 +59,28 @@ export function createMail({ net: getNet, hud, bag, me, inTown }) {
   function drawRead() {
     const m = S.open;
     panel.setTitle(m.subject || '(no subject)', m.from ? `from ${m.from}` : '');
-    const items = (m.items || []).map(it => itemSlot(it, m.taken ? '.taken' : ''));
+    const list = m.items || [];
+    const items = list.map(it => itemSlot(it, (m.taken ? '.taken' : '') + (isGift(it) ? '.gift' : isCrate(it) ? '.crate' : '')));
     const left = hasAttachments(m);
+    // T20 (play-test 5): taking needs room in the bag — say so BEFORE the click, with the numbers
+    const room = bagRoom(bag?.state?.bag?.length || 0, list.length, bag?.max || undefined);
+    const gift = list.find(it => isGift(it) || isCrate(it)) || null;
+    const canTake = left && room.ok && (inTown?.() || isSystem(m));
     panel.fill(
-      h('div.ml-head', {}, h('span', {}, when(m.sentAt)), m.kind === 'return' ? h('span.ml-tag', {}, 'Returned to you') : null, left && m.kind !== 'return' ? h('span.ml-exp', {}, expiresText(m.expiresAt)) : null),
+      h('div.ml-head', {}, h('span', {}, when(m.sentAt)), m.kind === 'return' ? h('span.ml-tag', {}, 'Returned to you') : isSystem(m) ? h('span.ml-tag.sys', {}, m.kind === 'gift' ? 'A gift' : m.kind === 'event' ? 'Event reward' : 'From the realm') : null, left && m.kind !== 'return' && m.expiresAt ? h('span.ml-exp', {}, expiresText(m.expiresAt)) : null),
       h('div.ml-body', {}, m.body || (m.body === undefined ? 'Opening…' : '')),
-      (m.items || []).length || m.gold ? h('div.ml-attach', {}, h('span.label', {}, m.taken ? 'It held' : 'Inside'), h('div.ml-items', {}, items, m.gold ? h('span.ml-gold', {}, `${m.gold} gold`) : null)) : null,
-      townNote(),
+      list.length || m.gold ? h('div.ml-attach' + (gift && left ? '.has-gift' : ''), {}, h('span.label', {}, m.taken ? 'It held' : `Inside — ${attachText(m)}`), h('div.ml-items', {}, items, m.gold ? h('span.ml-gold', {}, `${m.gold} gold`) : null),
+        left && list.length ? h('p.ml-names', {}, list.map(it => it.name).filter(Boolean).join(' · ')) : null,
+        gift && left ? h('p.ml-gifthint', {}, isGift(gift) ? 'The gift goes into your bag and is unwrapped at once.' : 'The crate goes into your bag — click it there to open it.') : null) : null,
+      left && !room.ok ? h('p.tiny-left.warn-text.ml-room', {}, room.why) : null,
+      left ? townNote(m) : null,
       h('div.row.end', {},
         h('button.ghost', { type: 'button', onclick: () => { S.view = 'inbox'; S.open = null; draw(); } }, '← Inbox'),
         h('span.grow'),
         m.kind !== 'return' && m.fromChar ? h('button.ghost', { type: 'button', onclick: () => compose({ to: m.from, subject: m.subject && !/^re:/i.test(m.subject) ? `Re: ${m.subject}`.slice(0, MAIL_LIMITS.subject) : m.subject || '' }) }, 'Reply') : null,
         left && m.kind !== 'return' && m.fromChar ? h('button.ghost', { type: 'button', title: 'Send it back to the sender, untouched', onclick: async () => { if (await confirmBox('Send this letter back, with everything in it?', { yes: 'Send back' })) net()?.mail('return', { id: m.id }); } }, 'Return') : null,
         !left ? h('button.ghost.danger-text', { type: 'button', onclick: () => net()?.mail('delete', { id: m.id }) }, 'Delete') : null,
-        left ? h('button.primary.small', { type: 'button', onclick: () => net()?.mail('take', { id: m.id }) }, 'Take all') : null));
+        left ? h('button.primary.small', { type: 'button', disabled: !canTake, dataset: { act: 'take' }, title: canTake ? '' : (room.ok ? 'Sending and taking need a town.' : room.why), onclick: () => { S.taking = { id: m.id, items: list.slice() }; net()?.mail('take', { id: m.id }); } }, gift && isGift(gift) ? 'Take and unwrap' : list.length || !m.gold ? 'Take all' : 'Take the gold') : null));
   }
 
   function compose(pre = {}) {
@@ -131,7 +142,7 @@ export function createMail({ net: getNet, hud, bag, me, inTown }) {
     });
     n.on('mailOpen', m => {
       const mail = m.mail; if (!mail) return;
-      S.list = S.list.map(x => (x.id === mail.id ? { ...x, ...mail, read: true, items: (mail.items || []).map(i => ({ uid: i.uid, name: i.name, rarity: i.rarity, slot: i.slot })) } : x));
+      S.list = S.list.map(x => (x.id === mail.id ? { ...x, ...mail, read: true, items: (mail.items || []).map(i => ({ ...i })) } : x));
       if (!S.list.some(x => x.id === mail.id)) S.list.push(mail);
       S.unread = S.list.filter(x => !x.read).length;
       if (S.open && S.open.id === mail.id) S.open = { ...mail, read: true };
@@ -145,16 +156,19 @@ export function createMail({ net: getNet, hud, bag, me, inTown }) {
     });
     n.on('mailR', r => {
       if (r.op === 'send') S.sending = false;
-      if (!r.ok) { const t = r.msg || MAIL_WHY[r.why] || 'That did not work.'; hud.toast(t, 'warn'); if (panel.isOpen && S.view === 'compose') draw(); return; }
+      if (!r.ok && r.why === 'bagFull') { hud.toast(r.msg || bagRoom(0, r.need ?? 1, r.free ?? 0).why, 'warn'); S.taking = null; draw(); return; }
+      if (!r.ok) { S.taking = null; const t = r.msg || MAIL_WHY[r.why] || 'That did not work.'; hud.toast(t, 'warn'); if (panel.isOpen && S.view === 'compose') draw(); return; }
       if (r.op === 'send') { hud.toast(`Letter sent to ${r.to || S.draft.to}`, 'good'); hud.chat(`Your letter is on its way to ${r.to || S.draft.to}${r.cost ? ` (${r.cost} gold postage)` : ''}.`, 'system'); S.view = 'inbox'; S.draft = { to: '', subject: '', body: '', items: [], gold: 0 }; }
-      else if (r.op === 'take') { hud.toast('Taken from the letter', 'good'); if (S.open) S.open = { ...S.open, taken: true }; }
+      else if (r.op === 'take') { hud.toast('Taken from the letter', 'good'); if (S.open) S.open = { ...S.open, taken: true }; const t = S.taking; S.taking = null; if (t) api.onTaken?.(t.items); }
       else if (r.op === 'return') { hud.toast('Letter sent back', 'info'); S.view = 'inbox'; S.open = null; }
       else if (r.op === 'delete') { S.list = S.list.filter(x => x.id !== r.id); S.view = 'inbox'; S.open = null; }
       net()?.mail('list');
       draw();
     });
-    n.on('bag', () => { if (panel.isOpen && S.view === 'compose') draw(); });
+    n.on('bag', () => { if (panel.isOpen && (S.view === 'compose' || S.view === 'read')) draw(); });
   }
 
-  return { wire, panel, compose, draw, get state() { return S; } };
+  /** onTaken(items): set by ui/pt5.js — a gift taken from a letter is unwrapped at once. */
+  const api = { wire, panel, compose, draw, onTaken: null, get state() { return S; } };
+  return api;
 }

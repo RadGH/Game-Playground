@@ -25,6 +25,13 @@
       "role": "scavenger",
       "at": "duel_stones",
       "greeting": "Finders keepers. I find, you keep me alive, we split it."
+    },
+    "angler_ashcombe": {
+      "name": "Old Nettie Cray",
+      "role": "angler",
+      "at": "Ashcombe",
+      "greeting": "The cellars flooded forty years back. The fishing has never been better.",
+      "placedBy": "content-pools"
     }
   },
   "quests": [
@@ -54,10 +61,12 @@
       "reward": {
         "xp": 0.5,
         "gold": 10,
-        "item": {
-          "tier": "uncommon",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "copper_and_candles"
     },
@@ -128,10 +137,12 @@
       "reward": {
         "xp": 0.3,
         "gold": 8,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {

@@ -17,6 +17,7 @@ import { describeBuilding, partsFor, radiusOf, MESHES, describeStall, stallParts
 import { makeGlowTexture, makeFlameTexture } from './decor.js';
 import { buildSignBoards } from './sign-text.js';
 import { officeDressing, officeKindFor, OFFICE_KINDS } from '../../../../proctown/js/offices.js';
+import { tuneFor } from './building-tune.js';
 
 /** proctown's plot from a placement record. Pure — exported for tests. */
 export function plotFromPlacement(p) {
@@ -39,7 +40,8 @@ export function buildingLook(raw, { culture = 'human', townSeed = 0, ox = 0, oz 
   const p = { ...raw, x: raw.x + ox, z: raw.z + oz };
   const plot = plotFromPlacement(p);
   const seed = buildingSeed(townSeed, p);
-  const desc = describeBuilding({ plot, culture, townSeed, seed, want: plot.want, district: plot.district });
+  // T13 (play-test 5): Thousandvale's own heights — taller storeys and doors, nothing dug in, the plot filled (building-tune.js)
+  const desc = describeBuilding({ plot, culture, townSeed, seed, want: plot.want, district: plot.district, tune: tuneFor(plot.want, { office: raw.data?.office || null, plot, seed }) });
   const kind = officeKindFor(raw.data?.office) || officeKindFor(plot.want);
   const lit = kind ? (raw.data?.lit ?? OFFICE_KINDS[kind].lit) : false;
   return { p, plot, seed, desc, kind, lit, parts: partsFor(desc), dressing: kind ? officeDressing(kind, desc, { lit, seed }) : null };

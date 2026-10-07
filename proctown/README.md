@@ -388,3 +388,33 @@ field gate, `frise` a cheval de frise built at length `len`), `gatePostParts(kin
 outside the passage) and `grateParts(width, h)` (an iron water grate with piers). Parts may carry `rx`/`rz` tilts (Euler 'YXZ').
 Thousandvale's `js/client/walls-view.js` shows how to lay them on a baked ring (pieces stretched to fit each straight, gatehouse
 widened to the road, leaves swung inward).
+
+## Opt-in: taller buildings (`tune`) and wide gatehouses (Thousandvale play-test 5)
+
+Both are OPT-IN. Without them the kit's output is byte-identical (`tests/buildtune.test.js` compares every part), so
+Farhold's towns do not change.
+
+**`describeBuilding({ ..., tune })`** — make the same building taller without moving it. The plot, the door's side and
+the yaw are untouched; only heights and the size INSIDE the plot change. No extra random draws.
+
+| knob | what it does |
+|---|---|
+| `storeyHeight: [lo, hi]` | metres a storey, replacing `knobs.storeyHeight` x the culture's `storeyScale` |
+| `doorHeight`, `doorWidth: [lo, hi]` | replace the knobs of the same name |
+| `minStoreys: n` | at least n storeys, whatever the base says (a hovel is `[1, 1]`) |
+| `sink: k` | multiplies how far a dug-in base sinks; `0` stands it on the ground. A burrow's door otherwise starts 48% of a storey under the grass |
+| `fill: 0..1` | the footprint takes at least this share of the plot each way, past the base's own max size and ratio |
+| `minPitch: p` | the roof is at least this steep, as far as its roof type allows |
+| `roofBias: {type: k}` | multiplies the culture's weight for a roof type |
+| `windowScale: k` | multiplies window size |
+
+Why: Thousandvale's character is 1.75 m; a halfling storey is 2.0-2.5 m and its door 1.75-2.2 m, so the owner's verdict
+was "too short/squat". `prototypes/thousandvale/js/client/building-tune.js` holds that game's numbers.
+
+**`gatehouseParts(kind, open)`** — a gatehouse whose clear opening is `open` metres instead of 4.2. The jambs keep their
+size and move apart; only what spans the passage (lintel, wall walk, rib arch) grows. `open` 4.2 is the kit piece. Use it
+when a gate has to stand in the wall's line while a road crosses at a slant: the opening along the wall is
+`pass / cos(slant) + 2 x 1.7 x tan(slant)`. Scaling `wallKitParts(kind, 'gatehouse')` along x fattens the jambs instead.
+
+**Office name board** (`offices.js`): on a front of two storeys or more the board sits clear over the door
+(`door.h + 0.28`); a one-storey front still tucks it under the eave.

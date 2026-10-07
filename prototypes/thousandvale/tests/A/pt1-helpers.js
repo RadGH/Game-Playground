@@ -14,8 +14,8 @@ export async function realContent() {
   if (cache) return cache;
   const quiet = console.log;
   const L = await loadLayouts(['torbor_downs']);
-  const { createRules } = await loadRules('auto');
-  cache = { ...L, createRules, classes: loadClasses() };
+  const { createRules, kitsFor } = await loadRules('auto');
+  cache = { ...L, createRules, kitsFor: kitsFor || null, classes: loadClasses() };
   console.log = quiet;
   return cache;
 }
@@ -25,7 +25,7 @@ export async function realServer(opts = {}) {
   const C = await realContent();
   const clock = opts.clock || createVirtualClock();
   const store = createMemoryStore({ now: clock.now });
-  const world = createWorld({ store, layouts: C.layouts, events: C.events, encounterInfo: C.encounterInfo, createRules: C.createRules, classes: C.classes,
+  const world = createWorld({ store, layouts: C.layouts, events: C.events, encounterInfo: C.encounterInfo, createRules: C.createRules, classes: C.classes, kitsFor: C.kitsFor,
     now: clock.now, lingerMs: 0, log: () => {}, directorOpts: { rules: C.directorRules || {} }, warm: false, ...opts });
   const srv = createLoopbackServer({ clock, world });
   await srv.ready;

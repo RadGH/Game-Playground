@@ -6,7 +6,7 @@
 //   parseFrame(str)    -> { msg } | { bad: reason }   (JSON text frame -> validated message)
 //   createBuckets()    -> per-socket rate limiter: take(t) -> true if allowed
 
-export const PROTOCOL_VERSION = 6;      // v6: play-test 2 (loot, shop, mount, barber, pref, follow; settings + look on gw)
+export const PROTOCOL_VERSION = 7;      // v7: play-test 5 (create.kit, kits, revive, sheet, feedback, admin, fish, cook) — all additive; v6: play-test 2
 export const SNAP_VERSION = 1;
 export const TICK_MS = 50;
 export const MAX_FRAME = 16 * 1024;
@@ -26,7 +26,8 @@ export const KIND_NAMES = Object.freeze(['', 'player', 'monster', 'npc', 'object
 /** Animation names; index = wire id. APPEND ONLY. */
 export const ANIMS = Object.freeze(['idle', 'walk', 'run', 'sprint', 'jump', 'fall', 'swim',
   'attack', 'attack2', 'cast', 'channel', 'hit', 'die', 'dead',
-  'bite', 'howl', 'emote', 'interact', 'sit']);   // 'sit' (play-test 4 S20): eating / drinking — sitting on the ground
+  'bite', 'howl', 'emote', 'interact', 'sit',     // 'sit' (play-test 4 S20): eating / drinking — sitting on the ground
+  'fish', 'reel']);                               // play-test 5 T25: a line in the water / fighting the fish
 export const ANIM_ID = Object.freeze(Object.fromEntries(ANIMS.map((n, i) => [n, i])));
 
 export const STATE = Object.freeze({ dead: 1, combat: 2, casting: 4, airborne: 8, swimming: 16, sprinting: 32, elite: 64, friendly: 128 });
@@ -75,6 +76,8 @@ export const CODES = Object.freeze({
   guild: 'Guild action not possible.',
   mail: 'Mail action not possible.',
   callboard: 'Callboard action not possible.',
+  kit: 'That starting kit is not one your class can pick.',
+  forbidden: 'Admins only.',
 });
 
 // ---- field types -------------------------------------------------------------------------------
@@ -87,6 +90,7 @@ function check(type, v) {
   if (type === 'id') return isInt(v) && v >= 0 && v <= 0xFFFF;
   if (type === 'vec2') return v !== null && typeof v === 'object' && !Array.isArray(v) && isNum(v.x) && isNum(v.z) && Object.keys(v).length === 2;
   if (type === 'obj') return v !== null && typeof v === 'object' && !Array.isArray(v);
+  if (type === 'nums') return Array.isArray(v) && v.length <= 64 && v.every(isNum);
   if (type === 'uids') return Array.isArray(v) && v.length <= 12 && v.every(u => typeof u === 'string' && u.length <= 40);
   if (type.startsWith('str:')) return typeof v === 'string' && v.length <= +type.slice(4);
   return false;
@@ -101,7 +105,7 @@ export const CLIENT_MSGS = Object.freeze({
   guest:   { on: 'gw', fields: { name: '?str:24', human: '?str:2048' }, rate: 1, burst: 3 },
   auth:    { on: 'gw', fields: { token: 'str:64' }, rate: 1, burst: 3 },
   chars:   { on: 'gw', fields: {}, rate: 2, burst: 4 },
-  create:  { on: 'gw', fields: { name: 'str:24', cls: 'str:32', look: '?obj' }, rate: 1, burst: 3 },
+  create:  { on: 'gw', fields: { name: 'str:24', cls: 'str:32', look: '?obj', kit: '?obj' }, rate: 1, burst: 3 },   // kit {armour, weapons}: play-test 5 T5
   play:    { on: 'gw', fields: { char: 'int', join: '?str:8' }, rate: 1, burst: 3 },
   party:   { on: 'gw', fields: { op: 'str:8', name: '?str:24', code: '?str:64', char: '?int' }, rate: 2, burst: 10 },
   chat:    { on: 'gw', fields: { ch: 'str:8', text: 'str:200', to: '?str:24' }, rate: 1, burst: 5 },
@@ -143,6 +147,15 @@ export const CLIENT_MSGS = Object.freeze({
   bind:    { on: 'p', fields: { npc: 'id' }, rate: 1, burst: 3 },
   settings: { on: 'gw', fields: { op: 'str:8', data: '?obj' }, rate: 1, burst: 4 },
   look:    { on: 'gw', fields: { char: 'int', look: 'obj' }, rate: 0.5, burst: 3 },
+  // play-test 5 (docs/protocol.md §21): starter kits (T5), revive answers (T4), the character sheet (T18), feedback (T19),
+  // admins (T21), angling + cooking (T25)
+  kits:    { on: 'gw', fields: { cls: 'str:32' }, rate: 2, burst: 6 },
+  revive:  { on: 'p', fields: { op: 'str:8', id: '?int' }, rate: 2, burst: 4 },
+  sheet:   { on: 'p', fields: {}, rate: 2, burst: 4 },
+  feedback: { on: 'both', fields: { kind: 'str:16', text: 'str:2000', ctx: '?obj' }, rate: 0.2, burst: 5 },      // the real limit is js/sim/feedback.js (1 per 20 s, 12 an hour, answered)
+  admin:   { on: 'both', fields: { op: 'str:16', id: '?int', state: '?str:16', kind: '?str:16', limit: '?int', before: '?int', note: '?str:500' }, rate: 2, burst: 10 },
+  fish:    { on: 'p', fields: { op: 'str:8', aim: '?vec2', held: '?num', score: '?num', holds: '?nums' }, rate: 4, burst: 8 },
+  cook:    { on: 'p', fields: { op: '?str:8', id: '?str:64', n: '?int' }, rate: 2, burst: 6 },
 });
 
 /** Server -> client JSON messages (documentation + tests; the server is trusted, the client does not validate). */
@@ -214,7 +227,30 @@ export const SERVER_MSGS = Object.freeze({
   itemR: ['op', 'ok'],
   bindR: ['ok'],
   settings: ['data'],
+  // play-test 5
+  kitsR: ['cls', 'kits'],
+  reviveAsk: ['id', 'from', 'fromId', 'skill', 'skillId', 'hpPct', 'ms', 'until', 'note'],
+  reviveR: ['op', 'id', 'ok'],
+  sheet: ['core', 'advanced', 'abilities', 'angling'],
+  eventTrack: ['uid', 'id', 'name', 'state', 'what', 'objective', 'endsAt', 'leftMs', 'reward', 'inside'],
+  eventDone: ['uid', 'id', 'name', 'result', 'credited', 'xp', 'gold', 'items', 'text'],
+  eventAt: ['uid'],
+  feedbackR: ['ok', 'id', 'first', 'why', 'msg'],
+  adminReports: ['list', 'counts'],
+  adminR: ['op', 'ok', 'id', 'state'],
+  fishR: ['ok', 'state', 'at', 'why', 'msg'],
+  fishBite: ['ms'],
+  fishTug: ['ms', 'band', 'pull', 'jitter', 'need', 'rarity'],
+  fishCatch: ['ok', 'lost', 'kind', 'item', 'species', 'size', 'record', 'skill'],
+  cookList: ['fire', 'recipes'],
+  cookR: ['ok', 'item', 'items', 'msg'],
 });
+/** Play-test 5: feedback kinds + report states (T19/T21), revive answers (T4), fishing ops (T25). */
+export const FEEDBACK_KINDS = Object.freeze(['suggestion', 'bug']);
+export const FEEDBACK_STATES = Object.freeze(['new', 'approved', 'declined', 'trashed']);
+export const REVIVE_OPS = Object.freeze(['accept', 'decline']);
+export const FISH_OPS = Object.freeze(['cast', 'hook', 'land', 'stop', 'cancel']);
+export const ADMIN_OPS = Object.freeze(['reports', 'feedback', 'report', 'state']);
 /** Talent ops (`talent {op}`) and perk ops (`perk {op}`), province socket (P6). */
 export const TALENT_OPS = Object.freeze(['pick', 'clear']);
 export const PERK_OPS = Object.freeze(['take', 'refund', 'reset']);
@@ -232,7 +268,7 @@ export const PREF_KEYS = Object.freeze(['showGear', 'showHelm']);
 export const LOOT_MINS = Object.freeze(['magic', 'rare', 'legendary', 'unique']);   // = C's js/rules/loot-rules.js LOOT_THRESHOLDS ('epic' -> legendary)
 export const PARTY_MAX = 5;
 /** Item ops (`item {op}`). */
-export const ITEM_OPS = Object.freeze(['equip', 'unequip', 'destroy', 'use', 'stand']);   // stand (play-test 4 S20): get up from a meal   // use: potions + food (uid, or 'id:<item id>' for a hotbar slot)
+export const ITEM_OPS = Object.freeze(['equip', 'unequip', 'destroy', 'use', 'stand', 'open']);   // open (play-test 5 T9): a crate / gift box (= use)   // stand (play-test 4 S20): get up from a meal   // use: potions + food (uid, or 'id:<item id>' for a hotbar slot)
 /** Chat channels a client may send on the gateway (`say` is local, on the province socket; `w` = whisper, needs `to`).
  *  The server also sends `system` lines (admin announcements). */
 export const CHAT_CHANNELS = Object.freeze(['party', 'guild', 'zone', 'trade', 'world', 'w']);

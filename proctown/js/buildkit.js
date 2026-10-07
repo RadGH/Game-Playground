@@ -154,9 +154,29 @@ export function fitToPlot(plot = {}) {
  * Deterministic from `seed` alone: the same plot in the same town is the same building every time
  * you walk back into it, and nothing has to be stored. `townSeed` shifts the whole town's palette a
  * little, so a region reads as one place (section 3.7) without any two towns matching.
+ *
+ * `tune` is OPT-IN (Thousandvale play-test 5, T13: "many buildings are too short/squat, especially the
+ * trade buildings"). Without it nothing changes — not a number, not a random draw — so Farhold's towns
+ * are what they were. With it a game can make the same building taller without moving it:
+ *
+ *   storeyHeight [lo, hi]   metres a storey, REPLACING knobs.storeyHeight x the culture's storeyScale
+ *                           (a halfling storey is 2.0-2.5 m, and a 1.75 m character's head is in the thatch)
+ *   doorHeight   [lo, hi]   metres, replacing knobs.doorHeight      doorWidth [lo, hi] likewise
+ *   minStoreys   n          at least this many storeys, whatever the base says (a hovel is [1, 1])
+ *   sink         k          multiplies how far a dug-in base sinks (0 = it stands on the ground: a burrow's
+ *                           door starts 48% of a storey UNDER the grass, i.e. you cannot walk through it)
+ *   fill         0..1       the footprint takes at least this share of the plot it was given, each way,
+ *                           past the base's own max size and ratio (a hall on an 8.6 x 3.7 m plot was a
+ *                           2.6 m hut, because only a hovel fits that depth and a hovel is nearly square)
+ *   minPitch     p          the roof is at least this steep, as far as its roof TYPE allows
+ *   roofBias     {type: k}  multiplies the culture's weight for a roof type (fewer flat turf mounds)
+ *   windowScale  k          multiplies window size, so they keep their share of a taller wall
+ *
+ * Every knob changes a height or a size INSIDE the plot: the plot, the door's side and the building's
+ * yaw are untouched, so a game's collision and its NPC spots stay where they were.
  */
 export function describeBuilding({
-  plot = {}, culture = 'human', seed = 1, townSeed = 0, want = null, district = null,
+  plot = {}, culture = 'human', seed = 1, townSeed = 0, want = null, district = null, tune = null,
 } = {}) {
   const cult = CULTURE_KIT.cultures[culture] || CULTURE_KIT.cultures.human;
   const K = KIT.knobs;
@@ -197,16 +217,27 @@ export function describeBuilding({
   w = Math.min(avail.w, w * (1 - rng() * K.sizeJitter));
   d = Math.min(avail.d, d * (1 - rng() * K.sizeJitter));
   w = Math.max(2.2, w); d = Math.max(2.2, d);
+  if (tune && tune.fill > 0) {
+    w = Math.max(w, Math.min(avail.w, avail.w * tune.fill));
+    d = Math.max(d, Math.min(avail.d, avail.d * tune.fill));
+  }
 
   // ---- how tall. Money buys a storey; the culture decides how tall a storey is
-  const storeys = clamp(
+  let storeys = clamp(
     Math.round(lerp(base.storeys[0], base.storeys[1], rng() * 0.7 + wealth * 0.3)),
     1, 6,
   );
-  const storeyHeight = lerp(K.storeyHeight[0], K.storeyHeight[1], rng()) * (cult.storeyScale ?? 1);
+  if (tune && tune.minStoreys > storeys) storeys = clamp(Math.round(tune.minStoreys), 1, 6);
+  const storeyRoll = rng();
+  const storeyHeight = tune && tune.storeyHeight
+    ? lerp(tune.storeyHeight[0], tune.storeyHeight[1], storeyRoll)
+    : lerp(K.storeyHeight[0], K.storeyHeight[1], storeyRoll) * (cult.storeyScale ?? 1);
 
   // ---- roof type, then the material, then the pitch they agree on
-  const roofType = weighted(cult.roofs, rng, base.roofs.filter(r => KIT.roofs[r])) || base.roofs[0];
+  const roofWeights = tune && tune.roofBias
+    ? Object.fromEntries(Object.entries(cult.roofs).map(([k, v]) => [k, v * (tune.roofBias[k] ?? 1)]))
+    : cult.roofs;
+  const roofType = weighted(roofWeights, rng, base.roofs.filter(r => KIT.roofs[r])) || base.roofs[0];
   const roofDef = KIT.roofs[roofType];
   const okRoofMat = Object.keys(cult.roofMaterials).filter(m => {
     const def = KIT.roofMaterials[m];
@@ -219,7 +250,8 @@ export function describeBuilding({
   const rMat = KIT.roofMaterials[roofMaterial];
   const lo = Math.max(rMat.pitch[0], roofDef.pitch[0]);
   const hi = Math.max(lo, Math.min(rMat.pitch[1], roofDef.pitch[1]));
-  const roofPitch = lerp(lo, hi, rng());
+  let roofPitch = lerp(lo, hi, rng());
+  if (tune && tune.minPitch > roofPitch) roofPitch = Math.max(roofPitch, Math.min(tune.minPitch, roofDef.pitch[1]));
 
   const okWallMat = Object.keys(cult.wallMaterials).filter(m => {
     const def = KIT.wallMaterials[m];
@@ -271,7 +303,7 @@ export function describeBuilding({
     roof: m.roof ?? 'main',
     shape: m.shape === 'round' ? 'round' : 'box',
     lift: (m.lift ?? 0),
-    sink: (m.sink ?? 0) * storeyHeight,
+    sink: (m.sink ?? 0) * storeyHeight * (tune && Number.isFinite(tune.sink) ? tune.sink : 1),
     // metres the upper storeys hang out over the street, if this base jetties at all
     jetty: (m.jetty ?? 0) * lerp(K.jetty[0], K.jetty[1], rng()) * 2,
     taper: m.taper ?? 0,
@@ -283,13 +315,15 @@ export function describeBuilding({
   let frontMass = masses[0];
   for (const m of masses) if (m.floor === 0 && m.z + m.d / 2 > frontMass.z + frontMass.d / 2) frontMass = m;
 
-  const doorW = clamp(lerp(K.doorWidth[0], K.doorWidth[1], rng()), 0.8, frontMass.w * 0.55);
+  const doorWs = (tune && tune.doorWidth) || K.doorWidth, doorHs = (tune && tune.doorHeight) || K.doorHeight;
+  const winK = (tune && tune.windowScale) || 1;
+  const doorW = clamp(lerp(doorWs[0], doorWs[1], rng()), 0.8, frontMass.w * 0.55);
   const door = {
     mass: frontMass.index,
     x: frontMass.x + (rng() - 0.5) * Math.max(0, frontMass.w - doorW * 2.4) * 0.6,
     z: frontMass.z + frontMass.d / 2,
     w: doorW,
-    h: Math.min(lerp(K.doorHeight[0], K.doorHeight[1], rng()), storeyHeight - 0.25),
+    h: Math.min(lerp(doorHs[0], doorHs[1], rng()), storeyHeight - 0.25),
     round: (base.extras || []).includes('round_door'),
   };
 
@@ -313,8 +347,8 @@ export function describeBuilding({
           windows.push({
             mass: m.index, side, storey: s + m.floor,
             along,
-            w: lerp(KIT.knobs.windowSize[0], KIT.knobs.windowSize[1], rng()),
-            h: lerp(KIT.knobs.windowSize[0], KIT.knobs.windowSize[1], rng()) * 1.15,
+            w: lerp(KIT.knobs.windowSize[0], KIT.knobs.windowSize[1], rng()) * winK,
+            h: lerp(KIT.knobs.windowSize[0], KIT.knobs.windowSize[1], rng()) * 1.15 * winK,
             shutters: wealth > 0.45 && rng() < 0.5,
           });
         }
@@ -1465,6 +1499,29 @@ export function gateLeafParts(kind = 'door', thick = 0.16, len = 1) {
     part('box', 0.5, 0.78, 0, 1, 0.06, thick + 0.04, IRON),
     part('box', 0.9, 0.46, 0, 0.06, 0.08, thick + 0.08, IRON),
   ];
+}
+
+/**
+ * OPT-IN (Thousandvale play-test 5, T8b): a gatehouse whose clear opening is `open` metres instead of the kit's 4.2.
+ *
+ * `wallKitParts(kind, 'gatehouse')` is one fixed size, and the only way a game could widen it was to scale the whole
+ * piece along x — which fattens the jambs with it (a 9 m gate got 3.4 m jambs). Here the jambs keep their size and
+ * move apart, and only what spans the passage (the lintel, the walk above it, a rib arch) grows. The gatehouse rule
+ * still holds: nothing inside x = -open/2..open/2 below 4.9 m, nothing outside z = +/-1.9. `open` 4.2 returns the kit
+ * piece unchanged. Frame as the kit: the passage runs along Z (OUT = +Z), the gate's WIDTH — the wall line — along X.
+ */
+export function gatehouseParts(kind = 'stone', open = 4.2) {
+  const base = wallKitParts(kind, 'gatehouse');
+  const grow = Math.max(0, open - 4.2);
+  if (grow < 1e-6) return base;
+  const k = open / 4.2;
+  const mapX = x => (Math.abs(x) <= 2.1 ? x * k : x + Math.sign(x) * grow / 2);
+  return base.map(p => {
+    const turned = Math.abs(Math.sin(p.yaw || 0)) > 0.7;          // a part laid across (its `d` runs along X)
+    const along = turned ? p.d : p.w;
+    if (along > 4.2) return turned ? { ...p, d: p.d + grow } : { ...p, w: p.w + grow };   // spans the passage: stretch it
+    return { ...p, x: mapX(p.x) };                                 // a jamb, a cap, a merlon, an arch block: move it
+  });
 }
 
 /** An iron grate across a stream where it runs through a town's wall: `width` m along X, `h` m tall, piers either side. */

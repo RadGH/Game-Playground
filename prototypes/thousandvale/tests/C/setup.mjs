@@ -11,8 +11,8 @@ export const readJson = u => JSON.parse(readFileSync(u, 'utf8'));
 export const loadData = () => loadRulesData(readJson);
 
 /** A fresh engine (fresh data — the engine mutates items in memory). */
-export async function engineFor(seed = 1) {
-  return createEngine(await loadData(), { seed });
+export async function engineFor(seed = 1, opts = {}) {
+  return createEngine(await loadData(), { seed, ...opts });
 }
 
 /**
@@ -22,7 +22,8 @@ export async function engineFor(seed = 1) {
  * range preflight (P23) never refuses a cast the fixtures make.
  */
 export async function parityEngineFor(seed = 1) {
-  const e = await engineFor(seed);
+  // play-test 5: Farhold's own skill table and item bases (no T3/T4 rows, no T15/T23 gear, no T17 conversion)
+  const e = await engineFor(seed, { tvSkills: false, tvGear: false });
   e.levelGap = null;
   e.lootPool = null; e.armourTiers = null;   // play-test 4 S17/S18: Farhold picks its own bases, no themed tier
   e.xpCfg = e.balance.xp;          // play-test 3 R2: Thousandvale pays kills x1.5; Farhold does not

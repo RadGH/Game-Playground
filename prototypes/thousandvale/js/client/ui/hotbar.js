@@ -109,7 +109,7 @@ export function createHotbar({ net, hud, bag, me }) {
       }
     });
     n.on('itemR', r => {
-      if (r.op !== 'use') return;
+      if (r.op !== 'use' || r.handled) return;      // handled: a crate / gift's own refusal (ui/reveal.js)
       if (r.ok) { if (r.cd && potionLike({ name: r.id, kind: r.kind })) { cd.until = performance.now() + r.cd; cd.len = r.cd; } return; }
       const why = { cooldown: `Not ready yet${r.cd ? ` (${Math.ceil(r.cd / 1000)} s)` : ''}.`, combat: 'Not while fighting — eat once the fight is over.', full: 'You are already at full.', notYet: 'That does nothing yet.', dead: 'You are dead.', item: 'You have none.' };
       hud.toast(r.msg || why[r.why] || 'You cannot use that now.', 'warn');

@@ -35,3 +35,21 @@ schedules), `tests/E/quests.test.js` (sites).
 - **`schedules.json`** — anchor `office` (the NPC's own plot) and the new roles (armourer, bowyer, apothecary, provisioner,
   trader, tailor, jeweller, barber, reeve, trainer), named as stream B's data/world/town-offices.json.
 - **`travellers.json`** — folk roles with `setpiece: true` work only at set pieces / B's slots (never picked by the filler).
+
+## Angling (play-test 5, T25)
+
+- **`angling.json`** — the text content: `fish[]` (46: id, name, desc, `water` river | lake | marsh | coast, `bands` = zone levels, `time`, `rarity`,
+  `size` cm, `price`, `skill`, `pool?` = pools only), `junk[]` (12), `legends[]` (one per zone: `zone`, optional `foundIn` when the zone itself is dry,
+  `water`, `time`, `skill`, `title`, `trophy`), `pullBack[]` (the monster that climbs out, real bestiary ids), `crates` (the sunken crate: a T9 crate),
+  `meals{}` (shops.json goodsCatalog shape) + `recipes[]`, `tools[]` (three rods) + `bait[]`, `anglers[]` (one per hub town), `skill.ranks`.
+  The NUMBERS of the loop are stream C's (`js/rules/fishing.js`, `data/rules/fishing.json`). Tests: `tests/E/playtest5-angling.test.js`.
+- **`angling-pools.json`** — MADE by `node tools/content-pools.mjs` from stream B's baked water (never edit by hand): 308 pool spots (world metres,
+  each with a walkable `shore` point a cast away, a `water` kind, a `tier` 1/2/3 and its distance to the nearest road), `meta.<zone>` (`live` = how
+  many are open at once, `water` = what each baked water kind counts as in that zone), and where each town's angler stands. Roadside pools are tier 1;
+  every zone keeps at least a quarter of its pools at tier 1. The pool flagged `start` + `always` is the first quest's, by Torborhold.
+  Tests: `tests/E/playtest5-pools.test.js` (in the water, bank walkable, legends catchable, a newcomer passes two on the first walk).
+- **`shops.json`** gained `kinds.angler` (role `angler`: rods and bait as goods) and, from `node tools/content-gear.mjs`, every NEW row of stream F's
+  `avatar-3d/data/gear-catalog.json` on a shelf (64 of 66; `catalog: [bases]` + `minCap: {base: level}` + `countBase` on a category are that tool's).
+  Tests: `tests/E/playtest5-gear.test.js`.
+- **`road-events.json`** — every kind now carries an `info` block (name, what, objective, durationSec, onSuccess, onFail, rewardText): see
+  data/quests/README.md "Event info"; `node tools/content-events.mjs`.

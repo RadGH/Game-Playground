@@ -19,7 +19,7 @@ const WEAPON_FAMILY = {            // a Farhold base's subtype -> our family
   spear: 'spear', polearm: 'polearm', javelin: 'javelin', bow: 'bow', crossbow: 'crossbow', staff: 'staff',
   wand: 'wand', scepter: 'scepter', orb: 'orb', tome: 'tome',
 };
-const ARMOUR_FAMILY = { head: 'head', chest: 'chest', legs: 'legs', hands: 'hands', feet: 'feet', ring: 'ring', necklace: 'neck' };
+const ARMOUR_FAMILY = { head: 'head', chest: 'chest', legs: 'legs', hands: 'hands', feet: 'feet', ring: 'ring', necklace: 'neck', back: 'cloak', waist: 'belt', light: 'light' };   // back / waist / light: play-test 5 slots
 
 /** The family a base key belongs to (null = not a drop base we know). */
 export function familyOf(items, key) {
@@ -127,6 +127,8 @@ export function installLootPool(engine, { pool = null, tiers = null } = {}) {
     const it = roll.call(this, o);
     // the level it dropped / was made at (Farhold's rollDrop leaves ilvl at 1): the gear look's `lvl` (tier-2 on L15+)
     if (it && typeof it === 'object' && it.dropLevel == null) it.dropLevel = level;
-    return it && engine.armourTiers ? themeItem(engine.armourTiers, engine.items, it, level, rng, pools) : it;
+    const out = it && engine.armourTiers ? themeItem(engine.armourTiers, engine.items, it, level, rng, pools) : it;
+    // play-test 5: every drop is finished once — the T17 conversion roll, then what a caster item is (js/rules/tv-gear.js)
+    return out && engine.finishItem ? engine.finishItem(out, { rng, fresh: true }) : out;
   };
 }

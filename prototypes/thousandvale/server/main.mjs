@@ -50,7 +50,7 @@ import { MAX_FRAME, PROTOCOL_VERSION } from '../js/net/protocol.js';
 import { createStaticHandler } from './static.js';
 import { statusPage } from './status-page.js';
 import { turnstileFromEnv } from './turnstile.js';
-import { GAME, PLAYGROUND, log, loadRules, makeStore, loadClasses, loadClassNames, loadLayouts, defaultProvinces } from './load.mjs';
+import { GAME, PLAYGROUND, log, loadRules, makeStore, loadClasses, loadClassNames, loadLayouts, defaultProvinces, feedbackSink } from './load.mjs';
 import { wireSocket, startPinger } from './ws-conn.mjs';
 import { hashPassword, verifyPassword } from './passwords.js';
 import { createChatFilter } from '../js/sim/chatfilter.js';
@@ -85,6 +85,7 @@ function args(argv) {
     else if (k === '--process') o.process = take();
     else if (k === '--env') o.env = take();
     else if (k === '--public') o.publicDir = resolve(take());
+    else if (k === '--feedback-file') { const f = take(); o.feedbackFile = f === 'off' ? false : resolve(f); }   // T19: where reports are also appended (default <state>/feedback-<env>.jsonl)
     else if (k === '--journal-ms') o.journalMs = +take();   // lease owner prefix: give a second server on the same DB its own name
     else if (k === '--event-first') { o.director.firstMs = +take(); o.director.demo = true; }   // tests/demos: first event after N ms (any event, no head counts),
     else if (k === '--event-announce') o.director.announceMs = +take(); // announced N ms ahead,
@@ -121,7 +122,7 @@ export async function startServer(o) {
   const verifyHuman = turnstileFromEnv(process.env, { log });
   const humanSiteKey = verifyHuman ? process.env.TV_TURNSTILE_SITEKEY || null : null;
   const store = await makeStore(o);
-  const { createRules, rules } = await loadRules(o.rules);
+  const { createRules, rules, kitsFor } = await loadRules(o.rules);
   const classes = loadClasses();
   const publicMode = !!o.publicDir;
   const chatFilter = createChatFilter();
@@ -132,6 +133,8 @@ export async function startServer(o) {
     unlimitedIps: [...(publicMode ? ['worker'] : ['127.0.0.1', '::1', '::ffff:127.0.0.1', 'worker']), ...(o.unlimitedIp || [])],
     guestsPerIpPerHour: o.guestsPerIpHour ?? 20,
     guestsPerHour: o.guestsPerHour ?? (env === 'stable' ? 200 : 0),
+    // play-test 5: C's starter kits for `create.kit` (T5); every feedback report also goes to <state>/feedback-<env>.jsonl (T19)
+    kitsFor: kitsFor || null, feedbackSink: o.feedbackFile === false ? null : feedbackSink(env, o.feedbackFile || undefined),
   };
   const unlimitedSockets = new Set(o.unlimitedIp || []);
 
@@ -153,7 +156,7 @@ export async function startServer(o) {
     const c = { n, provs, proc: null, restarts: 0, bus: null, handlers: [], status: null };
     c.bus = { send: m => { if (c.proc && c.proc.connected) c.proc.send({ bus: m }); }, on: fn => c.handlers.push(fn) };
     const start = () => {
-      const argv = [JSON.stringify({ n, provinces: provs, db: o.db, build: o.build, rules: o.rules, linger: o.linger, saveEvery: o.saveEvery, journalMs: o.journalMs, process: `${o.process}.${n}`, env })];
+      const argv = [JSON.stringify({ n, provinces: provs, db: o.db, build: o.build, rules: o.rules, linger: o.linger, saveEvery: o.saveEvery, journalMs: o.journalMs, process: `${o.process}.${n}`, env, feedbackFile: o.feedbackFile ?? null })];
       c.proc = fork(join(GAME, 'server/province-proc.mjs'), argv, { stdio: ['ignore', 'inherit', 'inherit', 'ipc'] });
       c.proc.on('message', m => { if (m && m.bus) for (const h of c.handlers) h(m.bus); else if (m && m.ready) c.ready = true; });
       c.proc.on('exit', (code, sig) => {

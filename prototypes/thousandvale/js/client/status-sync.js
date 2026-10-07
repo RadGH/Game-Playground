@@ -17,6 +17,7 @@
 //   st.dead(id)         // a death
 //   st.update(nowMs)    // every frame
 
+import { wornLightRange } from './gear-look.js';
 import * as THREE from 'three';
 import { statusLook } from './spell-looks.js';
 import { LIGHTS } from './lightpool.js';
@@ -63,8 +64,9 @@ export function auraDiff(drawn, want, grace = new Map(), now = 0) {
 export function createStatusSync({ actors, fx, infoOf = () => null, selfDead = () => false, selfId = () => null, night = () => 0, groundY = null } = {}) {
   let next = 0;
   /** A carried torch: a light SOURCE from the fixed pool riding the body (no new PointLight, so no shader recompile). */
-  function torch(a, on) {
-    if (on && !a.torchLight) a.torchLight = LIGHTS.add({ x: 0.35, y: 1.9, z: 0.2, color: '#ffb35a', intensity: 0, distance: TORCH_RANGE, decay: 1.4, flicker: 0.12, follow: a.group });
+  function torch(a, on, range = TORCH_RANGE) {
+    if (a.torchLight && on && a.torchLight.distance !== range) a.torchLight.distance = range;      // a worn lantern reaches further than a torch
+    if (on && !a.torchLight) a.torchLight = LIGHTS.add({ x: 0.35, y: 1.9, z: 0.2, color: '#ffb35a', intensity: 0, distance: range, decay: 1.4, flicker: 0.12, follow: a.group });
     if (!on && a.torchLight) { a.torchLight.remove(); a.torchLight = null; }
     if (a.torchLight) a.torchLight.intensity = 6 + 14 * night();
   }
@@ -112,7 +114,9 @@ export function createStatusSync({ actors, fx, infoOf = () => null, selfDead = (
         const info = infoOf(a.id);
         const dead = a.dead || (a.id === me && selfDead());
         if (dead) { if (a.auras?.drawn.size) clear(a); if (a.torchLight) torch(a, false); continue; }
-        torch(a, torchOn(info?.st, false));
+        // play-test 5 (C's `light` slot): a worn lantern or torch lights all the time, as far as the item says
+        const worn = a.kind === 'player' ? wornLightRange(a.look?.gear || info?.gear) : 0;
+        torch(a, torchOn(info?.st, false) || worn > 0, worn > 0 ? Math.max(worn, torchOn(info?.st, false) ? TORCH_RANGE : 0) : TORCH_RANGE);
         if (!info && !a.auras) continue;
         const want = wantedAuras(info?.st, false);
         for (const k of modAuras(info?.aff || info?.mods || info?.affixes)) want.add(k);     // S4: a burning rare burns all the time

@@ -26,7 +26,11 @@ const BANNED = (() => { const src = readFileSync(new URL('tests/E/content.test.j
 const CLASSES = J('../farhold/data/classes.json').classes;
 const PETS = new Set(['necromancer', 'druid', 'shaman', 'warlock', 'pyromancer', 'stormcaller', 'tinker', 'ranger', 'demon_hunter', 'sorcerer', 'oracle', 'enchanter', 'priest']);
 const ITEMS = J('../emberveil/data/items.json');
-const BASES = new Set([...Object.keys(ITEMS.weaponBases), ...Object.keys(ITEMS.armorBases), ...Object.keys(FOCUS_BASES)]);
+// play-test 5 T23: stream C injects every NEW row of stream F's gear catalog as an item base in memory (js/rules/gear-catalog.js)
+const G5_BASES = (() => { try { const c = JSON.parse(readFileSync(new URL('../../../../avatar-3d/data/gear-catalog.json', import.meta.url), 'utf8')); return (Array.isArray(c) ? c : c.rows).filter(r => r.new && r.base).map(r => r.base); } catch { return []; } })();
+// play-test 5 slots addendum: stream C's own bases for the back / waist / light slots (data/rules/gear-tv.json)
+const TV_BASES = (() => { try { const d = JSON.parse(readFileSync(new URL('../../data/rules/gear-tv.json', import.meta.url), 'utf8')); return Object.values(d).filter(v => v && typeof v === 'object' && !Array.isArray(v)).flatMap(v => Object.keys(v)); } catch { return []; } })();
+const BASES = new Set([...Object.keys(ITEMS.weaponBases), ...Object.keys(ITEMS.armorBases), ...Object.keys(FOCUS_BASES), ...G5_BASES, ...TV_BASES]);
 const SHOPS = J('data/provinces/shops.json');
 const OFFICES = J('data/provinces/offices.json');
 const SETP = J('data/vignettes/setpieces.json');
@@ -294,7 +298,7 @@ test('Q10: each NPC has a unique office — quest NPCs in a town keep one and st
   // every quest NPC standing in a hub town has an office there, and is placed within a few metres of its door
   const hubNames = new Set(Object.values(OFFICES.towns).map(t => t.name));
   for (const [id, n] of Object.entries(ALLNPC)) {
-    if (!hubNames.has(n.at)) continue;
+    if (!hubNames.has(n.at) || n.placedBy) continue;      // play-test 5: an angler works the bank, not a building
     assert.ok(owners.has(id), `${id} (${n.at}) has no office`);
     const t = Object.values(OFFICES.towns).find(x => x.name === n.at), o = t.offices.find(x => x.npc === id), p = npcPlaced(id);
     assert.ok(p && Math.hypot(p.x - o.door.x, p.z - o.door.z) <= 5, `${id} stands ${p ? Math.round(Math.hypot(p.x - o.door.x, p.z - o.door.z)) : '?'} m from its door`);

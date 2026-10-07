@@ -69,7 +69,9 @@ export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
       if (!f) {
         const root = document.createElement('div'); root.className = 'pmember';
         root.innerHTML = '<div class="pm-icon"></div><div class="pm-body"><div class="pm-name"></div><div class="bar hp"><i></i></div><div class="bar mp" hidden><i></i><span></span></div><div class="pm-where"></div></div>';
-        root.onclick = () => { const fr = frames.get(m.char); if (fr?.id != null) onTarget?.(fr.id); };
+        // T3 (play-test 5): a click targets them — your heals and wards then go to them; say so when they are out of reach
+        root.onclick = () => { const fr = frames.get(m.char); if (fr?.id) onTarget?.(fr.id); else hud.toast(`${fr?.member?.name || m.name} is too far away to target.`, 'warn'); };
+        root.dataset.tip = 'Click to target — your heals and wards go to your target';
         el.frames.appendChild(root);
         f = { root, icon: root.querySelector('.pm-icon'), name: root.querySelector('.pm-name'), bar: root.querySelector('.bar.hp i'), mp: root.querySelector('.bar.mp'), where: root.querySelector('.pm-where') };
         frames.set(m.char, f);

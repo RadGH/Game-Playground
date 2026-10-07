@@ -24,6 +24,7 @@ import { buildSignBoards } from './sign-text.js';
 import { MESHES, describeBuilding, partsFor, radiusOf } from '../../../../proctown/js/buildkit.js';
 import { officeDressing, officeKindFor, OFFICE_KINDS } from '../../../../proctown/js/offices.js';
 import * as KIT from '../../../../proctown/js/propkit.js';
+import { tuneFor } from './building-tune.js';
 
 let recipesP = null;
 /** E's set-piece recipes + its model table (fallback primitive parts per model id). */
@@ -227,7 +228,7 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
   const abs = [];      // parts already in absolute height (buildings)
   const signs = [];    // name boards over office doors (B's label: 'The Wheel and Wether')
   for (const b of plan.buildings) {
-    let desc; try { desc = describeBuilding({ plot: b.plot, culture: b.culture, seed: b.seed, want: b.plot.want }); } catch { continue; }
+    let desc; try { desc = describeBuilding({ plot: b.plot, culture: b.culture, seed: b.seed, want: b.plot.want, tune: tuneFor(b.plot.want, { plot: b.plot, seed: b.seed }) }); } catch { continue; }
     const g = groundOf(b.plot.cx, b.plot.cz), yaw = desc.yaw + (desc.lean || 0), c = Math.cos(yaw), s = Math.sin(yaw);
     const place = (q, list) => list.push({ ...q, x: b.plot.cx + q.x * c + q.z * s, y: g + q.y, z: b.plot.cz - q.x * s + q.z * c, yaw: yaw + (q.yaw || 0), rx: q.rx || 0, rz: q.rz || 0 });
     abs.push({ mesh: 'box', x: b.plot.cx, y: g - 0.7, z: b.plot.cz, w: desc.footprint.w + 0.6, h: 0.95, d: desc.footprint.d + 0.6, yaw, rx: 0, rz: 0, colour: '#5a5248' });

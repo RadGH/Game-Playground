@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E (M2). The event director's list (PLAN §5.2). `director` = the realm rules (ONE big event at a time, sized to who is online and in band, announced 10 minutes ahead, waystone travel to it free while it runs). `realm` = the big events, each on a schedule or a trigger; the province world boss Grimtallow is a fixed-time scheduled event. `zone` = the per-zone event bosses, each running on its own in every zone copy at stream B's event arena (`site` = the arena id in data/zones/<world zone>/placements.json): two waves from the zone's camp mix, then the boss (an encounter script id in data/encounters/). Everyone within autoEnrolMetres joins a temporary event group (PLAN §5.3). Times are real minutes; reward xp = share of a level's XP, gold = multiple of a kill's gold (data/quests/README.md). Every event carries a `blurb` (one or two sentences for the map and the event card: what happens and what to do). Play-test 3 R3: nothing waits on a real-time clock except the world boss's fixed schedule; events start when someone comes near (director.startOn 'near', director.zone), after a short countdown shown as a real number, and are sized for fewer than 5 players.",
+  "_doc": "Stream E (M2). The event director's list (PLAN §5.2). `director` = the realm rules (ONE big event at a time, sized to who is online and in band, announced 10 minutes ahead, waystone travel to it free while it runs). `realm` = the big events, each on a schedule or a trigger; the province world boss Grimtallow is a fixed-time scheduled event. `zone` = the per-zone event bosses, each running on its own in every zone copy at stream B's event arena (`site` = the arena id in data/zones/<world zone>/placements.json): two waves from the zone's camp mix, then the boss (an encounter script id in data/encounters/). Everyone within autoEnrolMetres joins a temporary event group (PLAN §5.3). Times are real minutes; reward xp = share of a level's XP, gold = multiple of a kill's gold (data/quests/README.md). Every event carries a `blurb` (one or two sentences for the map and the event card: what happens and what to do). Play-test 3 R3: nothing waits on a real-time clock except the world boss's fixed schedule; events start when someone comes near (director.startOn 'near', director.zone), after a short countdown shown as a real number, and are sized for fewer than 5 players. INFO (play-test 5 T12, tools/content-events.mjs): every realm and zone event carries `info` = { name, what (one sentence), objective { kind, text, count, unit } (count = what the server counts: stages = waves + the boss), durationSec (the hard limit: at 0 the event FAILS), onSuccess / onFail (the result line), rewardText (a preview composed from `reward`) }. Never edit `info` by hand: change the words in the tool and re-run it.",
   "director": {
     "oneRealmEventAtATime": true,
     "announceMinutes": 10,
@@ -96,7 +96,21 @@
           "x": 23689,
           "z": 9497
         }
-      ]
+      ],
+      "info": {
+        "name": "Grimtallow, the Siege-Husk",
+        "what": "A siege-husk of thorn and bone has risen in its arena in the Blackthorn Scar.",
+        "objective": {
+          "kind": "boss",
+          "text": "Bring down Grimtallow, the Siege-Husk",
+          "count": 1,
+          "unit": "boss"
+        },
+        "durationSec": 1200,
+        "onSuccess": "Grimtallow is down, and the Scar is only ordinarily dangerous again.",
+        "onFail": "Grimtallow sinks back into the thorns, undefeated.",
+        "rewardText": "An epic item for everyone who takes part, a small chance of a legendary one on your first kill of the day, gold and more than a level of experience"
+      }
     },
     {
       "id": "siege_torborhold",
@@ -149,7 +163,9 @@
         "Smoke over Torborhold! Raiders are at the gates.",
         "The guards of Torborhold are falling back to the square."
       ],
-      "monster": "brigand_captain", "bossName": "Harl Vesk, the Raider Captain", "_bossNote": "S24 (play-test 4): the raid ends with its captain — before this the runner fell back to a WOLF named after the event",
+      "monster": "brigand_captain",
+      "bossName": "Harl Vesk, the Raider Captain",
+      "_bossNote": "S24 (play-test 4): the raid ends with its captain — before this the runner fell back to a WOLF named after the event",
       "reward": {
         "xp": 0.8,
         "gold": 20,
@@ -172,6 +188,20 @@
       "startOn": {
         "minLevel": 3,
         "_doc": "Torborhold is where new characters start: the raid comes only when someone of level 3+ is in town."
+      },
+      "info": {
+        "name": "Raiders at Torborhold",
+        "what": "Raiders are storming the gates of Torborhold.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Break the three raider waves, then defeat Harl Vesk, the Raider Captain",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 720,
+        "onSuccess": "The raiders are broken and Torborhold still has its gates.",
+        "onFail": "The raiders take what they came for and ride off with it.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
       }
     },
     {
@@ -243,7 +273,21 @@
           "z": 5280
         }
       ],
-      "levelAuthored": 5
+      "levelAuthored": 5,
+      "info": {
+        "name": "The Red Banner at Halsbridge",
+        "what": "A warband under a red banner is marching on Halsbridge.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Cut down the three warband waves, then defeat Castellan Odrun",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 1080,
+        "onSuccess": "The red banner is down and Halsbridge holds.",
+        "onFail": "The warband sacks the market and marches off before anyone can stop it.",
+        "rewardText": "A rare item or better for everyone who takes part, a chance of an epic one, gold and about a level of experience"
+      }
     },
     {
       "id": "drake_flyover",
@@ -301,7 +345,21 @@
           "x": 29365,
           "z": 7099
         }
-      ]
+      ],
+      "info": {
+        "name": "Drake on the Wing",
+        "what": "A mire drake is flying its route across four zones and landing to feed.",
+        "objective": {
+          "kind": "boss",
+          "text": "Kill the mire drake at one of its landings",
+          "count": 1,
+          "unit": "boss"
+        },
+        "durationSec": 900,
+        "onSuccess": "The drake is dead, and the herds can stop looking up.",
+        "onFail": "The drake finishes its meal and flies home, fat and unbothered.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and about a level of experience"
+      }
     }
   ],
   "zone": [
@@ -371,7 +429,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "The Stone in the Snow",
+        "what": "An avalanche above the pass has uncovered something chained in the snow.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Clear the three waves from the slope, then defeat the Chained Saint",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The thing in the snow lies still, and the pass is quiet.",
+        "onFail": "The snow slides again and buries it all, for now.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     },
     {
       "id": "event_ashcombe",
@@ -439,7 +511,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "The Ruin Wakes",
+        "what": "The Warden of the ruin is walking the old counting-house wall again.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Beat back the three waves of scavengers, then lay the Barrow Warden down",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The Warden lies down, and the ruin goes back to being a ruin.",
+        "onFail": "The Warden finishes its rounds and returns below, unpaid.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     },
     {
       "id": "event_brackwater",
@@ -507,7 +593,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "The Drowning Bell",
+        "what": "A bell is ringing under the fen and everything in the reeds is coming to it.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Cut through the three waves from the reeds, then stop the Bell Ringer",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The bell is silent, and the fen is merely damp.",
+        "onFail": "The bell rings itself out and sinks, to ring another day.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     },
     {
       "id": "event_saltmouth",
@@ -575,7 +675,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "The Wreckers' Night",
+        "what": "Wreckers are lighting false lamps on the headland to bring a ship onto the rocks.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Clear the three waves on the beach, then defeat Sergeant Wark",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The false lamps are out and the ship sails past.",
+        "onFail": "The lamps do their work, and the wreckers go home rich.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     },
     {
       "id": "event_delvers_hill",
@@ -643,7 +757,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "The Collapse",
+        "what": "The old workings have caved in and something big has climbed out.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Beat back the three waves from the hole, then kill Rustjaw",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Rustjaw is dead, and the hole is only a hole.",
+        "onFail": "The thing digs itself back under the hill.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     },
     {
       "id": "event_grandmother_skein",
@@ -711,7 +839,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "Grandmother Skein",
+        "what": "The great spider under the sinkhole has woken and the field is filling with beasts.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Clear the three waves drawn to the field, then kill Grandmother Skein",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Grandmother Skein is dead, and the barley is safe to stand in.",
+        "onFail": "Grandmother Skein goes back down the hole to wait.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     },
     {
       "id": "event_torbor_cross",
@@ -779,7 +921,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "Riot in the Market",
+        "what": "A drummer is whipping the Halsbridge market into a mob.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Put down the three waves of rioters, then stop Drummer Ossa",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The drum is broken and the market finds its manners again.",
+        "onFail": "The mob tires itself out and takes the stalls home with it.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     },
     {
       "id": "event_gullwick",
@@ -847,7 +1003,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "The Serpent Surfaces",
+        "what": "Sluicegrip has surfaced beside the ferry and the boats cannot cross.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Fight off the three waves from the water, then kill Sluicegrip",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Sluicegrip sinks for good, and the ferry runs again.",
+        "onFail": "Sluicegrip eats a boat and goes back under.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     },
     {
       "id": "event_wychwood",
@@ -915,7 +1085,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "The Great Hunt",
+        "what": "Something is hunting through Wychwood with a pack at its heels.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Survive the three waves of the hunt, then kill the pack leader",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The pack leader is dead, and the hunt is over.",
+        "onFail": "The hunt passes through and on, and takes its kills with it.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     },
     {
       "id": "event_saint_orrins_rise",
@@ -983,7 +1167,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "The Procession",
+        "what": "Something winged is following the pilgrims up the hill road.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Guard the road through three waves, then kill the Gallowmother",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The Gallowmother is down and the procession reaches the top.",
+        "onFail": "The pilgrims scatter, and the Gallowmother takes the slowest.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     },
     {
       "id": "event_millbrook",
@@ -1051,7 +1249,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "Harvest Festival",
+        "what": "A harvest cart with far too many teeth has crashed the festival.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Clear the three waves from the green, then stop the Hungry Cart",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The cart is firewood, and the festival carries on.",
+        "onFail": "The cart eats the pies and rolls off into the dark.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     },
     {
       "id": "event_redcliff",
@@ -1119,7 +1331,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "Siege at the Fort",
+        "what": "Raiders have brought fire and ladders to the walls of Redcliff Fort.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Throw back the three waves at the wall, then kill the imp lighting the gate",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The gate is scorched but standing, and the raiders are gone.",
+        "onFail": "The gate burns, and the raiders help themselves.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     },
     {
       "id": "event_blackthorn_scar",
@@ -1187,7 +1413,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "Warband Raid",
+        "what": "A briar-giant has walked through the thorn wall with a warband behind it.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Break the three warband waves, then fell the Briar Colossus",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The colossus is down, and the thorn wall closes over the gap.",
+        "onFail": "The warband marches on through the breach.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     },
     {
       "id": "event_coldwater",
@@ -1255,7 +1495,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "The Serpent Surfaces",
+        "what": "Old Murkfin has come up out of the silt and the shallows are boiling.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Fight off the three waves from the mere, then kill Old Murkfin",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Old Murkfin floats belly up, and the mere is still.",
+        "onFail": "Old Murkfin slides back into the silt.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     },
     {
       "id": "event_gorse_march",
@@ -1323,7 +1577,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "Siege at the Fort",
+        "what": "Warlord Hask is leading the ladders against Gorsehold Redoubt.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Hold the walls through three waves, then defeat Warlord Hask",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Hask is beaten, and the redoubt keeps its flag.",
+        "onFail": "The redoubt falls, and Hask puts his own flag on it.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     },
     {
       "id": "event_sunken_wolds",
@@ -1391,7 +1659,21 @@
       "cooldownMinutes": [
         3,
         5
-      ]
+      ],
+      "info": {
+        "name": "The Great Hunt",
+        "what": "Something grey is hunting the hunters of the Wolds.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Survive the three waves it drives ahead of it, then kill Greycoat",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Greycoat is dead, and the hunters go back to hunting.",
+        "onFail": "Greycoat loses interest and pads off into the mist.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
     }
   ]
 }

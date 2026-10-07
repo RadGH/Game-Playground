@@ -43,6 +43,28 @@ Halsbridge, a drake flyover across four zones. `zone[]`: one event per zone, run
 B's arena `event_<zone>` (Torbor Fields: `event_grandmother_skein`): two waves from the zone's camp mix, then a boss
 (an encounter script id). Everyone within `autoEnrolMetres` joins a temporary event group.
 
+### Event info (play-test 5 T12) — `info` on EVERY event
+
+Every `realm[]` and `zone[]` record here, and every chest / deliver / escort / rescue variant in
+`data/provinces/road-events.json` (plus `coded.ambush`, the one kind the server starts from code), carries:
+
+```json
+"info": { "name": "The Stone in the Snow",
+          "what": "An avalanche above the pass has uncovered something chained in the snow.",
+          "objective": { "kind": "waves_boss", "text": "Clear the three waves from the slope, then defeat the Chained Saint", "count": 4, "unit": "stages" },
+          "durationSec": 600,
+          "onSuccess": "The thing in the snow lies still, and the pass is quiet.",
+          "onFail": "The snow slides again and buries it all, for now.",
+          "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience" }
+```
+
+`what` is exactly one sentence. `objective.count` is what the server counts (`stages` = every wave + the boss; 1 chest;
+1 delivery; 1 arrival; a rescue's 2 steps). `durationSec` is the hard limit — at 0 the event fails with `onFail`.
+Road-event text uses the record's own slots (`{name}` `{town}` `{npc}` `{guards}`).
+**Never edit `info` by hand.** The words live in `tools/content-events.mjs` (`TEXT`, keyed by event id); the numbers and
+`rewardText` are derived from the record. After adding or changing an event: `node tools/content-events.mjs` (it exits 1
+when an event has no words). `tests/E/playtest5-events.test.js` fails when any event lacks a field or the files are stale.
+
 ## Radiant jobs (`jobs.json`)
 
 Frames fill slots from what exists in the zone copy: `monster`, `vignette`, `settlement`, `fort`, **`farm`** (with
@@ -86,3 +108,32 @@ Kill / collect steps point at where their monster really spawns: `js/sim/hunts.j
 areas and `js/sim/quests.js` sets each step's marker + `areas` from them at load. After `tools/place-vignettes.mjs`, run
 `node tools/content-hunts.mjs`: it tops up thin quest areas (`data/vignettes/placements/<zone>.quest.json`), writes
 `marks/torbor_downs-hunts.json` and re-points `marks/torbor_downs.json` (tests/E/playtest4-hunts.test.js fails until it is run).
+
+## Play-test 5 (2026-10-06): crates, angling quests, roadside champions
+
+**Crates (T9).** `reward.crates: [{ slot, min }]` — a gear crate per entry: a random item of that slot (`weapon` / `offhand` = something your class
+uses; `head` `chest` `legs` `hands` `feet` `ring` `neck`; `armor` = any armour slot; `any`) at `min` rarity or better (`common` `uncommon` `rare` `epic`),
+rolled at the opener's level. Written by `node tools/content-crates.mjs` (safe to re-run; `--check` for tests): the start chain by hand (nine
+different slots over its seven quests), every quest of the Torbor Fields and the set pieces (slots dealt in turn), every class quest (an armour crate
+beside its named rare), the first two quests of every other zone (weapon + armour, uncommon). A loose random `reward.item` on those quests became the
+crate; a NAMED `item` (base + name) stays. 97 crates on 19 files. Tests: `tests/E/playtest5-crates.test.js`.
+
+**Angling quests (T25)** — `angling.json`, a part of zone `test` (in `test.json` `include`). Tam Sedgeley (`angler_torborhold`) stands on the river
+bank by Torborhold; four quests: `angle_first_cast` (the rod, the first pool, three catches) -> `angle_supper` (cook one) -> `angle_silver_lining`
+(three Silver Perch) -> `angle_the_patient` (an uncommon fish; points at the zone's legend). New fields: quest `grant: [{good, count}]` (goods handed
+over on accept), `reward.goods: [{id, count}]`, step kinds `catch {count, pool?, fish?, rarity?}` and `cook {count, meal?}`, `startPool: true` on a
+visit step (tools/content-pools.mjs writes its `at`). The anglers of the other 15 towns are `npcs` of their zone's file with `placedBy:
+'content-pools'` — the placer skips them, `tools/content-hunts.mjs` writes them (and the angling quests' map marks). `jobs.json` has five angler frames
+(slot type `fish`, `goal.kind: 'catch'`, `giverRole: 'angler'`). The fish, meals, rods, legends and angler names live in
+`data/provinces/angling.json`; the pools in `data/provinces/angling-pools.json` (see data/provinces/README.md).
+
+**Roadside champions (T10).** `tools/content-hunts.mjs` step 1b adds fixed champions to `<zone>.quest.json`: a copy of an ordinary roadside camp,
+one body, `rank: 'champion'`, one named modifier (`affixes`), back in 4-8 minutes; one every ~600 m along the start chain's own walk first, then
+260 m apart beside the routes, never under level 2 or within 60 m of a town. 62 in the province, 9 in the Torbor Fields. `node
+tools/content-rares.mjs` prints what a newcomer's first half hour meets (before this round: 0.9 special monsters; 5.9 with the placed champions alone; 22.5 with stream C's new roll, 0.14 / 0.06 from level 2).
+
+**Order of the tools after a re-placement:** `place-vignettes.mjs` -> `content-pools.mjs` -> `content-hunts.mjs`; `content-crates.mjs`,
+`content-events.mjs` and `content-gear.mjs` only touch their own fields and can run at any time. NOTE (2026-10-06): a full `place-vignettes.mjs` run
+no longer reproduces the committed placement files (every zone moves — the vignette recipes were edited this round and B's wall bake came after the last
+placement), so it needs B's confirming re-bake after it. This round did NOT re-place: pools, anglers and champions all go into `.quest.json`, which
+B's bake never reads.

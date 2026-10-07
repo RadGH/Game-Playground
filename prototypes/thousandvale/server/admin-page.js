@@ -33,7 +33,7 @@ pre { white-space: pre-wrap; background: #0e1013; padding: 8px; border-radius: 6
 <span id="msg" class="dim"></span></header>
 <main id="main"><p class="dim">Paste the admin token (TV_ADMIN_TOKEN, or the admin-token file next to the server's data).</p></main>
 <script>
-const TABS = ['overview', 'online', 'rooms', 'chat', 'reports', 'resets', 'economy', 'owner'];
+const TABS = ['overview', 'online', 'rooms', 'chat', 'reports', 'feedback', 'resets', 'economy', 'owner'];
 let tab = 'overview', token = '';
 try { token = sessionStorage.getItem('tv.admin') || ''; } catch {}
 const $ = s => document.querySelector(s);
@@ -69,6 +69,19 @@ const views = {
   async rooms() { const l = await api('/api/rooms'); return '<table><tr><th>Room</th><th>Kind</th><th>Players</th><th>Monsters</th><th>Entities</th></tr>' + l.map(r => '<tr><td>' + esc(r.id) + ' <span class="dim">' + esc(r.name || '') + '</span></td><td>' + r.kind + '</td><td>' + r.players + '</td><td>' + r.monsters + '</td><td>' + (r.entities ?? '') + '</td></tr>').join('') + '</table>'; },
   async chat() { const l = await api('/api/chat'); return '<table><tr><th>When</th><th>Ch</th><th>From</th><th>To</th><th>Text</th></tr>' + l.slice().reverse().map(r => '<tr><td class="dim">' + when(r.at) + '</td><td>' + esc(r.ch) + '</td><td>' + esc(r.name) + ' <span class="dim">#' + esc(r.from) + '</span></td><td class="dim">' + esc(r.to) + '</td><td>' + esc(r.text) + '</td></tr>').join('') + '</table>'; },
   async reports() { const l = await api('/api/reports'); return '<table><tr><th>When</th><th>About</th><th>From</th><th>Why</th><th>Text / their lines</th><th></th></tr>' + l.map(r => '<tr><td class="dim">' + when(r.created) + '</td><td>' + esc(r.aboutName) + ' <span class="dim">#' + esc(r.aboutChar) + '</span></td><td>' + esc(r.fromName) + '</td><td>' + esc(r.reason) + '</td><td>' + esc(r.text) + '<pre>' + esc((r.chat || []).map(c => '[' + c.ch + '] ' + c.text).join('\\n')) + '</pre></td><td>' + (r.handled ? '<span class="ok">done</span>' : '<button class="btn" onclick="act(\\'/api/report-done\\',{id:' + r.id + '},\\'report\\')">mark done</button>') + '</td></tr>').join('') + '</table>'; },
+  async feedback() {
+    const st = window.fbState || '', kd = window.fbKind || '';
+    const r = await api('/api/feedback?state=' + encodeURIComponent(st) + '&kind=' + encodeURIComponent(kd));
+    const c = r.counts || {};
+    const pick = (name, cur, vals) => vals.map(v => '<button class="btn' + (cur === v[0] ? ' on' : '') + '" onclick="window.' + name + '=\\'' + v[0] + '\\';show()">' + v[1] + '</button>').join(' ');
+    const btn = (id, s, label, cls) => '<button class="btn ' + (cls || '') + '" onclick="act(\\'/api/feedback-state\\',{id:' + id + ',state:\\'' + s + '\\'},\\'feedback\\')">' + label + '</button>';
+    const ctx = o => Object.entries(o || {}).filter(e => e[0] !== 'logs' && e[1] !== null && typeof e[1] !== 'object').map(e => e[0] + ' ' + e[1]).join(' · ');
+    return '<p class="dim">Suggestions and bug reports sent from the game (T19). ' + (c.new || 0) + ' new, ' + (c.approved || 0) + ' approved, ' + (c.declined || 0) + ' declined, ' + (c.trashed || 0) + ' trashed. The same list as Markdown: <code>node tools/feedback-report.mjs</code></p>' +
+      '<div class="row">State: ' + pick('fbState', st, [['', 'all but trashed'], ['new', 'new'], ['approved', 'approved'], ['declined', 'declined'], ['trashed', 'trashed']]) + ' &nbsp; Kind: ' + pick('fbKind', kd, [['', 'both'], ['bug', 'bugs'], ['suggestion', 'suggestions']]) + '</div>' +
+      '<table><tr><th>#</th><th>When</th><th>Kind</th><th>From</th><th>Report</th><th>State</th><th></th></tr>' + (r.list || []).map(f => '<tr><td class="dim">' + f.id + '</td><td class="dim">' + when(f.at) + '</td><td>' + esc(f.kind) + '</td><td>' + esc(f.name || '') + ' <span class="dim">' + (f.level ? 'L' + f.level + ' ' + esc(f.cls || '') : '') + ' acct ' + esc(f.account) + '</span></td><td>' + esc(f.text) +
+        '<div class="dim">' + esc(ctx(f.server)) + '</div>' + (ctx(f.client) ? '<div class="dim">client: ' + esc(ctx(f.client)) + '</div>' : '') + ((f.client && f.client.logs && f.client.logs.length) ? '<details><summary>' + f.client.logs.length + ' log lines</summary><pre>' + esc(f.client.logs.join('\\n')) + '</pre></details>' : '') + (f.note ? '<div>Note: ' + esc(f.note) + '</div>' : '') + '</td><td>' + esc(f.state) + (f.stateBy ? ' <span class="dim">' + esc(f.stateBy) + '</span>' : '') + '</td><td>' +
+        btn(f.id, 'approved', 'approve', 'ok') + ' ' + btn(f.id, 'declined', 'decline', 'warn') + ' ' + btn(f.id, 'trashed', 'trash', 'bad') + ' ' + btn(f.id, 'new', 'new', '') + '</td></tr>').join('') + '</table>' + ((r.list || []).length ? '' : '<p class="dim">Nothing here.</p>');
+  },
   async resets() { const l = await api('/api/resets'); return '<p class="dim">Password reset codes (the game sends no email). Pass a live code to the player; it works once, for an hour.</p><table><tr><th>When</th><th>Username</th><th>Email</th><th>Code</th><th>State</th></tr>' + l.map(r => '<tr><td class="dim">' + when(r.at) + '</td><td>' + esc(r.username) + '</td><td>' + esc(r.email || '') + '</td><td><b>' + esc(r.code) + '</b></td><td>' + (r.used ? 'used' : r.live ? '<span class="ok">live until ' + when(r.until) + '</span>' : '<span class="dim">expired</span>') + '</td></tr>').join('') + '</table>'; },
   async economy() {
     const e = await api('/api/economy?hours=24'); const s = e.sum;

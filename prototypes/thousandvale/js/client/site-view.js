@@ -16,6 +16,7 @@
 import * as THREE from 'three';
 import { nextFrame } from './perf.js';
 import { describeBuilding, partsFor, radiusOf } from '../../../../proctown/js/buildkit.js';
+import { tuneFor } from './building-tune.js';   // T13: Thousandvale's building heights
 import { buildBush } from '../../../../highdef-3d/js/kit/trees.js';
 import { createDecor, foliageMaterials } from './decor.js';
 import { unitGeometry, localToWorld } from './town-view.js';
@@ -187,7 +188,7 @@ export async function createSiteView(T, file, { quality = 'high' } = {}) {
   const solids = plan.solids.map(s => { const g = T.heightAt(s.x, s.z); return { x: s.x, z: s.z, r: s.r, bottom: g - 1, top: g + s.h }; });
   for (const b of plan.buildings) {
     const g = T.heightAt(b.plot.x, b.plot.z);
-    const desc = describeBuilding({ plot: { cx: b.plot.x, cz: b.plot.z, w: b.plot.w, d: b.plot.d, angle: b.plot.angle, facing: b.plot.facing, want: b.plot.want }, culture: 'halfling', seed: Math.round(b.plot.x * 7 + b.plot.z * 13) >>> 0, want: b.plot.want });
+    const desc = describeBuilding({ plot: { cx: b.plot.x, cz: b.plot.z, w: b.plot.w, d: b.plot.d, angle: b.plot.angle, facing: b.plot.facing, want: b.plot.want }, culture: 'halfling', seed: Math.round(b.plot.x * 7 + b.plot.z * 13) >>> 0, want: b.plot.want, tune: tuneFor(b.plot.want, { plot: b.plot, seed: Math.round(b.plot.x * 7 + b.plot.z * 13) >>> 0 }) });
     const c = Math.cos(desc.yaw), s = Math.sin(desc.yaw);
     let top = 0;
     all.push({ mesh: 'box', x: b.plot.x, y: g - 0.7, z: b.plot.z, yaw: desc.yaw, w: desc.footprint.w + 0.6, h: 0.95, d: desc.footprint.d + 0.6, colour: '#5a5248' });

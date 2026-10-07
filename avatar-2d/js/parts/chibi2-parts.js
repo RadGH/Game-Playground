@@ -7,6 +7,8 @@
 // sword in each hand shows two swords in the portrait too.
 import { top, bottom, shoes } from './clothes.js';
 import { cape, held, offhand as offhandCatalog } from './gear.js';
+import { accessory } from './accessories.js';
+import { G5_TABLES } from '../../../avatar-3d/js/chibi2-gear5-ids.js';
 const offhandCat = () => offhandCatalog;
 import { hat } from './accessories.js';
 import { decor } from './decor.js';
@@ -83,3 +85,37 @@ Object.assign(CHIBI2_2D.offhand, {
   tv_ward: { name: 'Warded focus', alias: 'orb', get pieces() { return offhandCat().orb?.pieces || []; } },
   tv_totem: { name: 'Totem', alias: 'idol', get pieces() { return offhandCat().idol?.pieces || []; } },
 });
+
+// PLAY-TEST 5 (T23): the g5_ models (3D in avatar-3d/js/chibi2-gear5-*.js, listed in chibi2-gear5-ids.js). The
+// paper doll draws each one's nearest kin (`alias2d`); a one-handed g5_ weapon is also an off-hand part (dual wield).
+{
+  const cats = { top, bottom, shoes, cape, decor, hat, held, offhand: offhandCatalog, accessory };
+  for (const t of G5_TABLES) {
+    if (t.field) continue;                          // gloves and rings ride an extra field: nothing to register
+    CHIBI2_2D[t.slot] = CHIBI2_2D[t.slot] || {};
+    for (const [id, row] of Object.entries(t.table)) {
+      const from = row.alias2d;
+      CHIBI2_2D[t.slot][id] = { name: row.name, alias: from, get pieces() { return cats[t.slot][from]?.pieces || []; } };
+      if (t.slot === 'held' && row.hands === 1 && !['caster', 'none', 'crossbow', 'staff'].includes(row.hold)) {
+        CHIBI2_2D.offhand[id] = offWeapon(from, row.name);
+      }
+    }
+  }
+}
+
+// PLAY-TEST 5 (T7: "the 2x 2h perk must allow two two-handers to be equipped" — and be SEEN): every two-hander is an
+// off-hand part too — war picks, polearms, quarterstaves, the caster staves and the two-handed g5_ models. Until now
+// the normaliser threw a second halberd or staff back to "nothing in the off hand" (greatswords, greataxes and mauls
+// were already listed). New ids only; nothing that exists changes.
+{
+  const kin = { tv_warpick: 'fh_greataxe', tv_glaive: 'fh_javelin' };
+  for (const id of ['tv_warpick', 'tv_glaive', 'fh_halberd', 'fh_spear', 'fh_quarterstaff', 'quarterstaff', 'staff_orb', 'staff_skull', 'staff_crook', 'staff_crystal', 'staff_totem']) {
+    const from = held[id] ? id : kin[id];
+    if (from && held[from] && !CHIBI2_2D.offhand[id] && !offhandCatalog[id]) CHIBI2_2D.offhand[id] = offWeapon(from, held[id]?.name || CHIBI2_2D.held[id]?.name || id);
+  }
+  const G5_HELD_TABLE = G5_TABLES.find(t => t.slot === 'held' && !t.field)?.table || {};
+  for (const [id, row] of Object.entries(G5_HELD_TABLE)) {
+    if (row.hands === 2 && !row.bow && !['caster', 'none', 'crossbow'].includes(row.hold) && !CHIBI2_2D.offhand[id]) CHIBI2_2D.offhand[id] = offWeapon(row.alias2d, row.name);
+    if (row.hands === 1 && row.hold === 'staff' && !CHIBI2_2D.offhand[id]) CHIBI2_2D.offhand[id] = offWeapon(row.alias2d, row.name);
+  }
+}

@@ -4,7 +4,8 @@
   "include": [
     "start.json",
     "classes.json",
-    "setpieces.json"
+    "setpieces.json",
+    "angling.json"
   ],
   "npcs": {
     "elder_maud": {
@@ -70,10 +71,12 @@
       "reward": {
         "xp": 0.35,
         "gold": 6,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "chest",
+            "min": "common"
+          }
+        ]
       },
       "next": "toll_at_fitockpi"
     },
@@ -95,7 +98,13 @@
       "done": "Lovely. Take a turnip. Take two, they've been bitten anyway.",
       "reward": {
         "xp": 0.35,
-        "gold": 6
+        "gold": 6,
+        "crates": [
+          {
+            "slot": "feet",
+            "min": "common"
+          }
+        ]
       },
       "next": "the_old_sow"
     },
@@ -124,10 +133,12 @@
       "reward": {
         "xp": 0.6,
         "gold": 20,
-        "item": {
-          "tier": "uncommon",
-          "slot": "weapon"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -156,10 +167,12 @@
       "reward": {
         "xp": 0.7,
         "gold": 25,
-        "item": {
-          "tier": "uncommon",
-          "slot": "armor"
-        }
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "webs_in_the_barley"
     },
@@ -193,10 +206,12 @@
       "reward": {
         "xp": 0.3,
         "gold": 4,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "legs",
+            "min": "common"
+          }
+        ]
       }
     },
     {
@@ -229,7 +244,13 @@
       "done": "Crates back, and another cart turned over? Right. That settles it. Here's the job I've been meaning to give someone.",
       "reward": {
         "xp": 0.3,
-        "gold": 5
+        "gold": 5,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "common"
+          }
+        ]
       },
       "next": "toll_at_fitockpi"
     },
@@ -251,7 +272,13 @@
       "done": "Six! My nephew says thank you. He says it very quietly, he's still upset.",
       "reward": {
         "xp": 0.35,
-        "gold": 6
+        "gold": 6,
+        "crates": [
+          {
+            "slot": "ring",
+            "min": "common"
+          }
+        ]
       },
       "next": "the_big_one"
     },
@@ -274,10 +301,12 @@
       "reward": {
         "xp": 0.6,
         "gold": 20,
-        "item": {
-          "tier": "uncommon",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "offhand",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -303,7 +332,13 @@
       "done": "So it's true. When she comes up, the whole village will need you. The whole field, more like.",
       "reward": {
         "xp": 0.4,
-        "gold": 8
+        "gold": 8,
+        "crates": [
+          {
+            "slot": "neck",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "grandmother_wakes"
     },
@@ -327,10 +362,12 @@
       "reward": {
         "xp": 1,
         "gold": 40,
-        "item": {
-          "tier": "rare",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "rare"
+          }
+        ]
       }
     },
     {
@@ -354,10 +391,12 @@
       "reward": {
         "xp": 0.4,
         "gold": 8,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "chest",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -387,10 +426,12 @@
       "reward": {
         "xp": 1.2,
         "gold": 50,
-        "item": {
-          "tier": "rare",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "feet",
+            "min": "rare"
+          }
+        ]
       },
       "next": "the_restless_cloister"
     }

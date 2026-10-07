@@ -4,8 +4,9 @@
 // town, and an iron grate where a stream runs through the ring.
 //
 // Data (tools/lib/zone-walls.mjs, docs/world.md §11): runs [[x, z, h]…] (open polylines, ordered round the ring so a
-// piece's local +X is OUTSIDE), towers [{x, z, h, yaw}], gates [{x, z, h, yaw, out, width, pass, kind}] where yaw =
-// atan2(dx, dz) of the way OUT along the road, openings [{kind, ends, grate, h}]. Same conventions as town-view.js: a
+// piece's local +X is OUTSIDE), towers [{x, z, h, yaw}], gates [{x, z, h, yaw, out, wallYaw, open, width, pass, kind, ends}]
+// where yaw = atan2(dx, dz) of the way OUT along the road and wallYaw = the wall's outward normal there (the gate is
+// drawn IN the wall, by wallYaw; play-test 5 T8b), openings [{kind, ends, grate, h}]. Same conventions as town-view.js: a
 // part's local frame turned by yaw (protocol yaw = three's rotation.y), its `y` its bottom, tilts rx/rz after yaw.
 //
 // planWalls() is pure (no three) and exported for tests; createWallsView() builds the meshes (one InstancedMesh per
@@ -15,7 +16,7 @@ import * as THREE from 'three';
 import { LIGHTS } from './lightpool.js';
 import { unitGeometry } from './town-view.js';
 import { makeFlameTexture } from './decor.js';
-import { wallKitParts, fenceParts, gatePostParts, gateLeafParts, grateParts, tintParts, MESHES, WALL_SEG, FENCE_SEG } from '../../../../proctown/js/buildkit.js';
+import { wallKitParts, gatehouseParts, fenceParts, gatePostParts, gateLeafParts, grateParts, tintParts, MESHES, WALL_SEG, FENCE_SEG } from '../../../../proctown/js/buildkit.js';
 
 const FENCES = new Set(['rail', 'hedge', 'stake']);
 const WOOD = '#7a5a3c';
@@ -25,10 +26,11 @@ const BANNER = '#7b2a26';
  * Every part of every perimeter in a zone, in world metres with absolute heights.
  * placements: the zone's placements (zone metres); ox/oz: the zone's world origin; groundAt(x, z): world ground height.
  * Returns { parts: [{ mesh, x, y, z, w, h, d, yaw, rx, rz, colour }], fires: [{ x, y, z, s }], solids: [{ x, z, r, bottom, top }],
- *           stats: { towns, pieces, towers, gates, grates } }.
+ *           stats: { towns, pieces, towers, gates, grates },
+ *           gates: [{ x, z, yaw, open, jamb, kind, stubs }] — each drawn gate's frame (world metres; local X = along the wall) }.
  */
 export function planWalls(placements, { ox = 0, oz = 0, groundAt = () => 0 } = {}) {
-  const parts = [], fires = [], solids = [];
+  const parts = [], fires = [], solids = [], gates = [];
   const stats = { towns: 0, pieces: 0, towers: 0, gates: 0, grates: 0 };
   // place a kit part list at (x, z) on ground g, turned by yaw (scaled along local x/z first if asked)
   const put = (list, x, z, g, yaw, { sx = 1, sz = 1, sy = 1 } = {}) => {
@@ -69,44 +71,74 @@ export function planWalls(placements, { ox = 0, oz = 0, groundAt = () => 0 } = {
     for (const gt of d.gates || []) {
       if (gt.kind === 'gap') continue;
       stats.gates++;
-      const x = gt.x + ox, z = gt.z + oz, g = groundAt(x, z) - 0.1, yaw = gt.yaw || 0, pass = gt.pass || gt.width || 4.2;
+      // T8b (play-test 5): the gate stands IN the wall. Its frame is the ring's at that point — local +Z = the wall's
+      // outward normal (`wallYaw`), local X = along the wall — whatever angle the road crosses at; `open` is the clear
+      // opening along the wall (wider than the road's `pass` when the road comes through at a slant). `yaw` (the way
+      // out along the road) is only the fallback for a bake older than T8b.
+      const x = gt.x + ox, z = gt.z + oz, g = groundAt(x, z) - 0.1, yaw = gt.wallYaw ?? gt.yaw ?? 0, pass = gt.pass || gt.width || 4.2;
+      const open = Math.max(gt.open || pass, gt.kind === 'gatehouse' ? 4.2 : 1.5);
+      const c = Math.cos(yaw), s = Math.sin(yaw);
+      const at = (lx, lz) => [x + lx * c + lz * s, z - lx * s + lz * c];
+      let jamb;                                        // metres of structure outside the opening, each side
       if (gt.kind === 'gatehouse') {
-        // the kit gatehouse opens 4.2 m (x -2.1..2.1): widened to the road, never narrowed
-        const sx = Math.max(1, pass / 4.2), open = 4.2 * sx;
-        put(tintParts(wallKitParts(mat, 'gatehouse'), tint), x, z, g, yaw, { sx });
+        jamb = 1.6;
+        // jambs keep their size and move apart; only the lintel grows (proctown's opt-in gatehouseParts)
+        put(tintParts(gatehouseParts(mat, open), tint), x, z, g, yaw);
         // the two doors, hinged at the INNER face of the jambs and swung ~80 degrees into the town (out = local +Z)
-        const leaf = gateLeafParts(mat === 'palisade' || mat === 'barricade' ? 'door' : 'door', 0.16).map(p => ({ ...p, colour: p.colour.startsWith('#3') ? p.colour : WOOD }));
-        const hgt = mat === 'palisade' ? 4.6 : 4.7;
+        const leaf = gateLeafParts('door', 0.16).map(p => ({ ...p, colour: p.colour.startsWith('#3') ? p.colour : WOOD }));
+        const hgt = mat === 'palisade' ? 4.6 : 4.7, len = Math.min(open / 2 * 0.98, 3.4);
         for (const [hx, yw] of [[-open / 2, 1.4], [open / 2, Math.PI - 1.4]]) {
-          const c = Math.cos(yaw), s = Math.sin(yaw), lx = hx, lz = -1.6;
-          put(leaf, x + lx * c + lz * s, z - lx * s + lz * c, g, yaw + yw, { sx: open / 2 * 0.98, sy: hgt });
+          const [hxw, hzw] = at(hx, -1.6);
+          put(leaf, hxw, hzw, g, yaw + yw, { sx: len, sy: hgt });
         }
         // a banner over the arch on the OUTSIDE face (stone kinds), and a torch either side of the mouth
         if (!['palisade', 'barricade', 'hedge'].includes(mat)) put([{ mesh: 'box', x: 0, y: 4.95, z: 1.78, w: Math.min(1.6, open * 0.3), h: 1.25, d: 0.06, colour: BANNER }], x, z, g, yaw);
         for (const sg of [-1, 1]) {
-          const c = Math.cos(yaw), s = Math.sin(yaw), lx = sg * (open / 2 + 0.55), lz = 1.95;
-          const fx = x + lx * c + lz * s, fz = z - lx * s + lz * c;
+          const [fx, fz] = at(sg * (open / 2 + 0.55), 1.95);
           put([{ mesh: 'box', x: 0, y: 2.6, z: 0, w: 0.12, h: 0.55, d: 0.12, colour: '#3a2c20' }], fx, fz, g, yaw);
           fires.push({ x: fx, y: g + 3.3, z: fz, s: 0.55 });
         }
-        const c = Math.cos(yaw), s = Math.sin(yaw);
-        for (const sg of [-1, 1]) { const lx = sg * (open / 2 + 0.8); solids.push({ x: x + lx * c, z: z - lx * s, r: 1.0, bottom: g - 1, top: g + 6.5 }); }
+        for (const sg of [-1, 1]) { const [jx, jz] = at(sg * (open / 2 + 0.8), 0); solids.push({ x: jx, z: jz, r: 1.0, bottom: g - 1, top: g + 6.5 }); }
       } else {
-        // posts (fence / hedge / barricade): posts either side, and the gate leaves standing open
+        // posts (fence / hedge / barricade): posts either side ON THE FENCE LINE, and the gate leaves latched back
         const postKind = mat === 'barricade' ? 'barricade' : mat === 'hedge' ? 'hedge' : mat === 'stake' ? 'stake' : 'rail';
-        put(tintParts(gatePostParts(postKind, pass), postKind === 'rail' ? WOOD : tint), x, z, g, yaw);
+        jamb = postKind === 'barricade' ? 1.4 : postKind === 'hedge' ? 0.9 : 0.35;
+        put(tintParts(gatePostParts(postKind, open), postKind === 'rail' ? WOOD : tint), x, z, g, yaw);
         if (postKind === 'barricade') {
-          // the cheval de frise that closes the road, dragged aside along the road outside
-          const len = Math.max(2, pass * 0.8), leaf = tintParts(gateLeafParts('frise', 0.16, len), tint), c = Math.cos(yaw), s = Math.sin(yaw), lx = pass / 2 + 1.0, lz = 1.4;
-          put(leaf, x + lx * c + lz * s, z - lx * s + lz * c, g, yaw - Math.PI / 2);
+          // the cheval de frise that closes the road, dragged aside: it lies ALONG the barricade, just outside it
+          const len = Math.max(2, Math.min(pass, 5) * 0.8), leaf = tintParts(gateLeafParts('frise', 0.16, len), tint);
+          const [lx, lz] = at(open / 2 + 1.2, 1.7);
+          put(leaf, lx, lz, g, yaw);
         } else {
-          const leaf = tintParts(gateLeafParts('rail'), WOOD);
-          for (const [hx, yw] of [[-pass / 2, 1.75], [pass / 2, Math.PI - 1.75]]) {
-            const c = Math.cos(yaw), s = Math.sin(yaw);
-            put(leaf, x + hx * c, z - hx * s, g, yaw + yw, { sx: pass / 2 * 0.96, sy: 1.15 });
+          // T8a: a field gate swung to ~100 degrees read as a length of fence turned across its own posts. It is
+          // latched BACK now: 25 degrees off the fence, inside it, so the rails run with the fence they belong to.
+          const leaf = tintParts(gateLeafParts('rail'), WOOD), len = Math.min(open / 2 * 0.96, 2.6), back = 0.44;
+          for (const [hx, yw] of [[-open / 2, Math.PI - back], [open / 2, back]]) {
+            const [hxw, hzw] = at(hx, 0);
+            put(leaf, hxw, hzw, g, yaw + yw, { sx: len, sy: 1.15 });
           }
         }
       }
+      // the wall runs on from each jamb to where its run stops (the opening is cut a little wider than the gate, and
+      // wider still where a second way runs beside the wall): the same pieces as a run, so there is no gap beside a gate
+      const frame = { x, z, yaw, open, jamb, kind: gt.kind, stubs: 0 };
+      for (const e of gt.ends || []) {
+        const dx = e[0] + ox - x, dz = e[1] + oz - z, lx = dx * c - dz * s, lz = dx * s + dz * c, sg = Math.sign(lx) || 1;
+        const edge = sg * (open / 2 + jamb);
+        if (Math.abs(lx) - Math.abs(edge) < 0.35) continue;
+        const [jx, jz] = at(edge, 0), ex = e[0] + ox, ez = e[1] + oz;
+        // local +X of the gate frame runs AGAINST the ring's angle, and a run piece's outside is its +X only when it is
+        // laid with the angle increasing: so the stub on the +X side runs end -> jamb, the other jamb -> end
+        const [ax, az, bx, bz] = sg > 0 ? [ex, ez, jx, jz] : [jx, jz, ex, ez];
+        const L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.round(L / seg)), ryaw = Math.atan2(bx - ax, bz - az);
+        for (let q = 0; q < n; q++) {
+          const tm = (q + 0.5) / n, px = ax + (bx - ax) * tm, pz = az + (bz - az) * tm;
+          put(piece, px, pz, Math.min(groundAt(px, pz), groundAt(ax, az), groundAt(bx, bz)) - 0.12, ryaw, { sz: L / n / seg });
+          solids.push({ x: px, z: pz, r: Math.max(0.6, (d.thick || 1) / 2 + 0.3), bottom: g - 1, top: g + (d.h || 3) });
+        }
+        frame.stubs++; stats.pieces += n;
+      }
+      gates.push(frame);
     }
     for (const o of d.openings || []) {
       if (!o.grate || !o.ends) continue;
@@ -117,7 +149,7 @@ export function planWalls(placements, { ox = 0, oz = 0, groundAt = () => 0 } = {
       stats.grates++;
     }
   }
-  return { parts, fires, solids, stats };
+  return { parts, fires, solids, stats, gates };
 }
 
 export function createWallsView(T, placements, { quality = 'high' } = {}) {

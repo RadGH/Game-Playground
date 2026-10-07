@@ -9,11 +9,13 @@ import { buildExtraHat, HATS_COVER_CROWN, CLASS_HATS, HELM_BRIM } from './chibi2
 import { raceOf } from './chibi2-races.js';
 import { holdFor } from './chibi2-weapon-ids.js';
 import { buildArmour2 } from './chibi2-armour2.js';
+import { buildGear5 } from './chibi2-gear5.js';
+import { G5_HATS_COVER_CROWN, G5_HAT_BRIM } from './chibi2-gear5-ids.js';
 
 export { CHIBI2_ANIMS, CHIBI2_SWIM_ANIMS, CHIBI2_ALL_ANIMS };
 const templates = new Map();
 /** Hats with a brim the hair shows beneath, and the height (head units) the hair is cut off at. */
-const HAT_BRIM = { wizard: 0.5, wide_brim: 0.41, straw: 0.43, top_hat: 0.51, feather_cap: 0.43, bard_red_feather: 0.43, cap: 0.44, bandana: 0.44, leather_cap: 0.4, ...HELM_BRIM };
+const HAT_BRIM = { wizard: 0.5, wide_brim: 0.41, straw: 0.43, top_hat: 0.51, feather_cap: 0.43, bard_red_feather: 0.43, cap: 0.44, bandana: 0.44, leather_cap: 0.4, ...HELM_BRIM, ...G5_HAT_BRIM };
 const sphere = () => new THREE.SphereGeometry(1, 10, 6);
 const ring = (r, tube) => new THREE.TorusGeometry(r, tube, 4, 12);
 
@@ -37,7 +39,7 @@ function buildTemplate(a, rig) {
 
   if (a.hair.id !== 'bald') {
     const hairId = a.hair.id;
-    const headwearCoversCrown = ['feather_cap', 'bard_red_feather', 'horned_helm', 'dragon_helm', 'hood', 'wide_brim', 'goggles_up', 'wizard', ...HATS_COVER_CROWN].includes(a.hat.id);
+    const headwearCoversCrown = ['feather_cap', 'bard_red_feather', 'horned_helm', 'dragon_helm', 'hood', 'wide_brim', 'goggles_up', 'wizard', ...HATS_COVER_CROWN, ...G5_HATS_COVER_CROWN].includes(a.hat.id);
     // A raised hood tucks away everything outside the face opening; only a fringe shows under its brow.
     const hoodUp = a.hat.id === 'hood', fringeUnder = hoodUp || a.hat.id === 'goggles_up';   // a brimmed hat shows the flattened cap instead (HAT_BRIM)
     const cap = new THREE.SphereGeometry(1, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2);
@@ -161,6 +163,7 @@ function buildTemplate(a, rig) {
   const gearCtx = { add, head, ellipsoid, strip, H, W, T, L: rig.leg, A: rig.arm, trim, leather, steel, darkSteel, skin: a.body.skin, faceWidth, faceDepth, chestZ: body.chestZ, hipsZ: body.hipsZ, faceZ: face.faceZ, topStyle: body.top, LW: body.LW, rig };
   buildGear(a, gearCtx);
   buildArmour2(a, gearCtx);   // tier-2 armour kits + emblems (chibi2-armour2.js) — opt-in: nothing for a look that names neither
+  buildGear5(a, { ...gearCtx, body, face });   // play-test 5: the g5_ models (chibi2-gear5.js) — opt-in: nothing for a look that names no g5_ id
   return b.finish();
 }
 

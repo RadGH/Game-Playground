@@ -25,6 +25,13 @@
       "role": "scout",
       "at": "Scree End",
       "greeting": "I climb things. Mostly to get away from other things."
+    },
+    "angler_hollin_toll": {
+      "name": "Greta Icewell",
+      "role": "angler",
+      "at": "Hollin Toll",
+      "greeting": "Cut a hole, drop a line, do not fall in. That is the whole craft up here.",
+      "placedBy": "content-pools"
     }
   },
   "quests": [
@@ -47,10 +54,12 @@
       "reward": {
         "xp": 0.45,
         "gold": 9,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -71,7 +80,13 @@
       "done": "The goats are safe. They don't thank you; they're goats.",
       "reward": {
         "xp": 0.4,
-        "gold": 7
+        "gold": 7,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {

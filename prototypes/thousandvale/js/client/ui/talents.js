@@ -110,7 +110,7 @@ export function createTalentsUi({ net: getNet, hud, me }) {
   }
   function skillTipHtml(s) {
     const facts = [s.mp ? `${s.mp} mana` : '', s.cd ? `${(s.cd / 1000).toFixed(s.cd % 1000 ? 1 : 0)} s cooldown` : '', s.element && s.element !== 'physical' ? s.element : ''].filter(Boolean).join(' · ');
-    return `<div class="tip-title">${esc(s.name)}</div><div class="${s.unlocked ? 'good' : 'bad'}">${s.unlocked ? 'Unlocked' : `Unlocks at level ${s.level}`}</div>${facts ? `<div class="tip-sub">${esc(facts)}</div>` : ''}${s.desc ? `<hr><div>${esc(s.desc)}</div>` : ''}`;
+    return `<div class="tip-title">${esc(s.name)}</div><div class="${s.unlocked ? 'good' : 'bad'}">${s.unlocked ? 'Unlocked' : `Unlocks at level ${s.level}`}</div>${facts ? `<div class="tip-sub">${esc(facts)}</div>` : ''}${s.targets ? `<div class="tip-who">Affects: ${esc(s.targets)}</div>` : ''}${s.desc ? `<hr><div>${esc(s.desc)}</div>` : ''}`;
   }
   function detail(s, level) {
     const tree = S.src.tree(s.id);
@@ -119,6 +119,7 @@ export function createTalentsUi({ net: getNet, hud, me }) {
     return h('section.tvt-detail', { 'aria-label': s.name },
       h('header.tvt-dhead', {}, h('h4', {}, s.name), h('span.tvt-state' + (s.unlocked ? '.ok' : ''), {}, s.unlocked ? `Key ${s.slot}` : `Unlocks at level ${s.level}`)),
       facts.length ? h('p.tvt-facts', {}, facts.join(' · ')) : null,
+      s.targets ? h('p.tvt-facts.tvt-who', {}, `Affects: ${s.targets}`) : null,
       h('p.tvt-desc', {}, s.desc || ''),
       h('h5.tvt-th', {}, 'Talents', h('small', {}, ' — one pick per tier; each one changes how the skill works')),
       ...st.tiers.map(t => h('div.tvt-tier' + (t.open ? '' : '.closed') + (t.picked ? '.spent' : ''), {},

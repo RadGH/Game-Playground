@@ -25,6 +25,13 @@
       "role": "trader",
       "at": "tinker_wagon",
       "greeting": "Pots mended, knives sharpened, carts un-overturned. Usually."
+    },
+    "angler_millbrook": {
+      "name": "Jed Weirside",
+      "role": "angler",
+      "at": "Millbrook",
+      "greeting": "The miller says the chub are his. The chub and I disagree.",
+      "placedBy": "content-pools"
     }
   },
   "quests": [
@@ -48,10 +55,12 @@
       "reward": {
         "xp": 0.45,
         "gold": 8,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "the_broken_keep"
     },
@@ -103,10 +112,12 @@
       "reward": {
         "xp": 0.35,
         "gold": 6,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {

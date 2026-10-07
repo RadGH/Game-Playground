@@ -183,7 +183,9 @@ test('quest NPCs, quest vignettes and treasure steps: everything the zone\'s que
     const ids = new Set(z.pl.filter(p => p.type === 'vignette').map(p => p.id));
     for (const v of pins[z.eid] || []) assert.ok(ids.has(v), `${z.eid}: quest vignette ${v} not placed`);
     const q = J(`data/quests/${z.eid}.json`);
-    for (const nid of Object.keys(q.npcs || {})) assert.ok(z.pl.some(p => p.type === 'npc' && p.id === nid), `${z.eid}: npc ${nid}`);
+    // play-test 5: an NPC another tool places (`placedBy`: the anglers, tools/content-pools.mjs) stands in <zone>.quest.json
+    const extra = (() => { try { return J(`data/vignettes/placements/${z.file.zone}.quest.json`).placements; } catch { return []; } })();
+    for (const [nid, n] of Object.entries(q.npcs || {})) assert.ok((n.placedBy ? extra : z.pl).some(p => p.type === 'npc' && p.id === nid), `${z.eid}: npc ${nid}`);
     // an NPC in a town stands inside that town's circle, never in a building
     for (const n of z.pl.filter(p => p.type === 'npc')) {
       const s = z.file.settlements.find(s2 => s2.name === n.at);

@@ -14,6 +14,7 @@ grows the library to ~120.
 | `tags` | Where the bake may put it: `biomes` (World Forge biome keys, see `t.biomes`), `archetypes` (keys of `data/provinces/archetypes.json`), `band` [min, max] level, `cultures`. |
 | `radius` | Metres it needs clear and walkable (scatter stays off it). |
 | `props[]` | `{kind, id, x, z, yaw, scale?}` relative to the centre. `kind`: `prop` = `highdef-3d/js/kit/rocks.js` PROP_BUILDERS id, `ground` = its GROUND_BUILDERS id, `tree` = `pine/fir/oak/birch` (`dead: true` = leafless). |
+| *(fences)* | A `fence_rail` prop is 2.4 m long and runs along the recipe's **local X at yaw 0** (put a `fence_post` at x ± 1.2). To run it along local Z use yaw 1.57. Play-test 5 (T8): three recipes had rails at yaw 1.57 between posts spaced along X — every rail stood ACROSS its own fence. `tests/B/fences.test.js` checks every recipe. The `wooden_fence` / `iron_fence` / `stone_wall` models follow the same rule (they run along local X). |
 | `monsters[]` | The one encounter: `{type (Farhold bestiary id), count, level (added to the zone's low band), x, z, radius}` — becomes a camp. |
 | `objects[]` | `{type: chest|note|npc|use, name, x, z, …}`: chest `tier` (`only`, `hidden`+`hint`, `after` = opens once that object is used); note `text`; npc `says[]`; use `text`, `gives`, `cost`, `buff`. `quest` = the quest it starts. |
 

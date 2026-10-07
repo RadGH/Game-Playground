@@ -63,10 +63,10 @@ export function createAccounts({ store, hasher = null, verifyHuman = null, wallN
   const limited = s => !trustIps.includes(s.ip);
 
   /** Sign this socket in (login or a reset). */
-  function signedIn(s, account, token, username) {
-    s.account = account; s.token = token; s.claimed = true; s.username = username; s.state = 'authed';
+  function signedIn(s, account, token, username, admin = false) {
+    s.account = account; s.token = token; s.claimed = true; s.username = username; s.state = 'authed'; s.admin = !!admin;
     counters.logins = (counters.logins || 0) + 1;
-    s.sendJSON({ t: 'authed', account, token, claimed: true, username });
+    s.sendJSON({ t: 'authed', account, token, claimed: true, username, ...(admin ? { admin: true } : {}) });
   }
 
   async function handle(s, m) {
@@ -77,7 +77,7 @@ export function createAccounts({ store, hasher = null, verifyHuman = null, wallN
       case 'info': {
         if (s.state !== 'authed') return 'order';
         const a = await store.accountInfo(s.account);
-        return reply(s, op, { ok: true, claimed: !!(a && a.claimed), username: a ? a.username : null, email: a ? a.email : null });
+        return reply(s, op, { ok: true, claimed: !!(a && a.claimed), username: a ? a.username : null, email: a ? a.email : null, ...(a && a.admin ? { admin: true } : {}) });
       }
       case 'claim': {
         if (s.state !== 'authed') return 'order';
@@ -114,7 +114,7 @@ export function createAccounts({ store, hasher = null, verifyHuman = null, wallN
           limiter.clear(uKey);
           const token = await store.newToken(info.account, 'session');
           const a = await store.accountInfo(info.account);
-          return signedIn(s, info.account, token, a ? a.username : username);
+          return signedIn(s, info.account, token, a ? a.username : username, !!(a && a.admin));
         } catch (err) { s.state = 'anon'; log('login failed', err && err.message); return fail(s, op, 'auth', 'Login is not working right now.'); }
       }
       case 'logout': {

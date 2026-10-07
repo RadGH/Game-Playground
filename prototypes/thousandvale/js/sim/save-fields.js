@@ -33,6 +33,8 @@ export const SAVE_FIELDS = Object.freeze([
   { k: 'prefs', def: null },
   { k: 'flags', def: {} },
   { k: 'bind', def: null },        // the town room id this character calls home (an innkeeper's bind): recall + respawn go there         // one-off facts: { barberUsed } (the first barber visit is free, E's shops.json)       // display choices others see: { showGear, showHelm } (Q22)
+  { k: 'kit', def: null },         // play-test 5 T5: the starter kit picked at creation { armour, weapons } (applied once, kitV 2)
+  { k: 'angling', def: null },     // play-test 5 T25: { xp, level, casts, catches: { species: { n, best, zone, zones } }, legends: [], titles: [] }
   { k: 'jseq', col: 'journal_seq', def: 0 },   // last journal row this blob contains (js/sim/journal.js)
 ]);
 

@@ -93,7 +93,7 @@ test('planner: a road straight in gets one gatehouse on it, facing out along it,
   assert.ok(g.pass >= 6, 'the passage takes the road');
 });
 
-test('planner: a road crossing the ring at a slant gets a gate turned to the ROAD, not to the wall', () => {
+test('planner: a road crossing the ring at a slant — `out` follows the ROAD, the gate itself stands IN the wall (T8b)', () => {
   // a road that misses the centre by 35 m: it crosses the ring at ~30 degrees off radial, twice
   const w = ring({ roads: [straight('r', 465, 300, 465, 700)] });
   assert.equal(w.gates.length, 2);
@@ -101,6 +101,25 @@ test('planner: a road crossing the ring at a slant gets a gate turned to the ROA
     assert.ok(Math.abs(Math.abs(g.out[1]) - 1) < 1e-3, 'out runs along the road (z)');
     assert.ok(g.out[0] * (g.x - 500) + g.out[1] * (g.z - 500) > 0, 'and away from the town');
     assert.ok(g.slant > 0.3, 'this is the slanted case');
+    // play-test 5 (T8b): the STRUCTURE is in the wall's line — its normal is the ring's radial at the gate, not the road
+    const rx = g.x - 500, rz = g.z - 500, R = Math.hypot(rx, rz), nx = Math.sin(g.wallYaw), nz = Math.cos(g.wallYaw);
+    assert.ok(Math.abs(R - w.r) < 0.05, 'the gate is on the ring');
+    assert.ok((nx * rx + nz * rz) / R > 0.9999, `wallYaw is the ring's normal (off by ${(Math.acos((nx * rx + nz * rz) / R) * 180 / Math.PI).toFixed(1)} deg)`);
+    const th = Math.acos(g.out[0] * nx + g.out[1] * nz);
+    assert.ok(th > 0.3, 'so it is NOT square to the road here');
+    // and it is wide enough that the road still fits through it at that slant, right through the gatehouse's depth
+    assert.ok(g.open >= g.pass / Math.cos(th) + 2 * 1.5 * Math.tan(th) - 0.02, `open ${g.open} too narrow for a ${g.pass} m passage at ${(th * 180 / Math.PI).toFixed(0)} deg`);
+    // the wall stops either side of it, on its line: both run ends within a hand of the gate's own line
+    for (const e of g.ends) assert.ok(Math.abs((e[0] - g.x) * nx + (e[1] - g.z) * nz) < 1.0, 'a run end off the gate line');
+  }
+  // nav: the slanted road is open all the way through, and the jambs either side of the opening ARE solid, on the wall line
+  const S = 512, bits = new Uint8Array(S * S);
+  wallNav([w], { SIZE: S, STEP: 2, mark: (i, j) => { bits[j * S + i] = 1; } });
+  const nav = (x, z) => bits[Math.round(z / 2) * S + Math.round(x / 2)];
+  for (const g of w.gates) {
+    for (let s = -8; s <= 8; s += 0.5) assert.equal(nav(g.x + g.out[0] * s, g.z + g.out[1] * s), 0, `the road is blocked ${s} m along it`);
+    const tx = Math.cos(g.wallYaw), tz = -Math.sin(g.wallYaw);
+    for (const sg of [-1, 1]) assert.equal(nav(g.x + tx * sg * (g.open / 2 + 1.6), g.z + tz * sg * (g.open / 2 + 1.6)), 1, 'no jamb beside the opening');
   }
   assert.ok(w.gates.some(g => g.out[1] > 0) && w.gates.some(g => g.out[1] < 0), 'one gate each way');
 });
@@ -155,4 +174,80 @@ test('client: walls-view plans pieces, towers, open doors and grates from the ba
   const doors = plan.parts.filter(p => p.colour === '#7a5a3c' && Math.hypot(p.x - g.x, p.z - g.z) < 6);
   assert.ok(doors.length >= 8, 'two leaves of planks');
   for (const p of doors) assert.ok((p.x - g.x) * g.out[0] + (p.z - g.z) * g.out[1] < 0, 'a door swung OUT of the town');
+});
+
+// --------------------------------------------------------------------------------- play-test 5: T8b + T8a
+/** Every town_wall of every zone with the client's plan of it: [{ zone, W (record), plan }]. */
+async function drawnWalls() {
+  const { planWalls } = await import('../../js/client/walls-view.js');
+  return ZONES.flatMap(id => zone(id).P.filter(p => p.kind === 'town_wall').map(W => ({ zone: id, W, plan: planWalls([W], { groundAt: () => 50 }) })));
+}
+const deg = r => r * 180 / Math.PI;
+
+test('T8b: every baked gate lies IN its wall — on the ring, its normal the ring\'s, the road fitting through at its slant', () => {
+  let slanted = 0, n = 0;
+  for (const id of ZONES) for (const W of zone(id).P.filter(p => p.kind === 'town_wall')) for (const g of W.data.gates) {
+    if (g.kind === 'gap') continue;
+    n++;
+    const rx = g.x - W.x, rz = g.z - W.z, R = Math.hypot(rx, rz), nx = Math.sin(g.wallYaw), nz = Math.cos(g.wallYaw);
+    assert.ok(Number.isFinite(g.wallYaw) && g.open > 0, `${g.id}: no wallYaw/open (bake older than T8b)`);
+    assert.ok(Math.abs(R - W.data.radius) < 0.1, `${g.id}: ${(R - W.data.radius).toFixed(2)} m off the ring`);
+    assert.ok(deg(Math.acos(Math.min(1, (nx * rx + nz * rz) / R))) < 0.5, `${g.id}: turned ${deg(Math.acos(Math.min(1, (nx * rx + nz * rz) / R))).toFixed(1)} deg out of its wall`);
+    const th = Math.acos(Math.max(-1, Math.min(1, g.out[0] * nx + g.out[1] * nz)));
+    if (th > 0.2) slanted++;
+    assert.ok(g.open >= g.pass / Math.cos(th) + 2 * 1.5 * Math.tan(th) - 0.05, `${g.id}: open ${g.open} m is too narrow for its road at ${deg(th).toFixed(0)} deg`);
+  }
+  assert.ok(n >= 70 && slanted >= 8, `gates ${n}, slanted ${slanted}: the slanted case is in the data`);
+});
+
+test('T8b: the client DRAWS every gate in the wall\'s line (gate width vs the line between the wall ends either side), with no gap beside it', async () => {
+  let worst = 0, n = 0;
+  for (const { W, plan } of await drawnWalls()) {
+    const gates = W.data.gates.filter(g => g.kind !== 'gap');
+    assert.equal(plan.gates.length, gates.length);
+    gates.forEach((g, k) => {
+      const f = plan.gates[k];
+      // the wall's own line here, from the DATA either side of the gate (not from wallYaw): the chord between the run ends
+      const [a, b] = g.ends, L = Math.hypot(b[0] - a[0], b[1] - a[1]), wx = (b[0] - a[0]) / L, wz = (b[1] - a[1]) / L;
+      const gx = Math.cos(f.yaw), gz = -Math.sin(f.yaw);          // the drawn gate's width axis (local +X)
+      const off = deg(Math.acos(Math.min(1, Math.abs(gx * wx + gz * wz))));
+      worst = Math.max(worst, off); n++;
+      // (a chord is exactly parallel to the tangent only when the opening is symmetric: one grown along the ring for a
+      // second way is a few degrees off. Before T8b the worst here was 54 degrees.)
+      assert.ok(off < 9, `${g.id}: drawn ${off.toFixed(1)} deg out of the wall's line`);
+      // every part of the gate structure stands within the gate's depth of that line, i.e. nothing sticks out of the wall
+      const near = plan.parts.filter(p => Math.hypot(p.x - f.x, p.z - f.z) < f.open / 2 + f.jamb && p.y < 60 && p.colour !== '#7a5a3c');
+      // and the wall reaches the gate: from each run end to the jamb there is structure (a stub) unless they already meet
+      for (const e of g.ends) {
+        const lx = (e[0] - f.x) * gx + (e[1] - f.z) * gz, gap = Math.abs(lx) - (f.open / 2 + f.jamb);
+        if (gap < 0.35) continue;
+        const mx = f.x + gx * Math.sign(lx) * (f.open / 2 + f.jamb + gap / 2), mz = f.z + gz * Math.sign(lx) * (f.open / 2 + f.jamb + gap / 2);
+        assert.ok(plan.parts.some(p => Math.hypot(p.x - mx, p.z - mz) < Math.max(3.2, gap)), `${g.id}: a ${gap.toFixed(1)} m hole between the gate and its wall`);
+      }
+      assert.ok(near.length >= 2, `${g.id}: nothing drawn`);
+    });
+  }
+  console.log(`[T8b] ${n} drawn gates, worst ${worst.toFixed(1)} deg out of the wall's line`);
+});
+
+test('T8a: every rail of every perimeter fence runs ALONG the line its posts stand on (runs, gate stubs and gate leaves)', async () => {
+  let rails = 0, worst = 0;
+  for (const { W, plan } of await drawnWalls()) {
+    if (!['rail', 'stake'].includes(W.data.material)) continue;
+    // the fence line near a point: the nearest run segment (or gate chord)
+    const segs = [...W.data.runs.flatMap(r => r.slice(1).map((b, k) => [r[k], b])), ...W.data.gates.map(g => g.ends)];
+    const lineAt = (x, z) => { let best = Infinity, u = null; for (const [a, b] of segs) { const dx = b[0] - a[0], dz = b[1] - a[1], L2 = dx * dx + dz * dz || 1e-9, t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / L2)), q = Math.hypot(x - a[0] - dx * t, z - a[1] - dz * t); if (q < best) { best = q; const L = Math.sqrt(L2); u = [dx / L, dz / L]; } } return u; };
+    for (const p of plan.parts) {
+      if (p.mesh !== 'box' || p.rz) continue;                 // (a gate leaf's diagonal brace is tilted on purpose)
+      const long = Math.max(p.w, p.d); if (long < 1.2 || p.h > 0.4) continue;      // a rail: long, thin, level
+      // the rail's long axis in the world: local X = (cos yaw, -sin yaw), local Z = (sin yaw, cos yaw)
+      const ax = p.w >= p.d ? [Math.cos(p.yaw), -Math.sin(p.yaw)] : [Math.sin(p.yaw), Math.cos(p.yaw)];
+      const u = lineAt(p.x, p.z), off = deg(Math.acos(Math.min(1, Math.abs(ax[0] * u[0] + ax[1] * u[1]))));
+      rails++; worst = Math.max(worst, off);
+      // a gate leaf is latched back 25 degrees off its fence; before play-test 5 it stood at 100 (a panel ACROSS the posts)
+      assert.ok(off < 40, `${W.id}: a rail ${off.toFixed(0)} deg across its fence line at ${p.x.toFixed(1)},${p.z.toFixed(1)}`);
+    }
+  }
+  assert.ok(rails > 200, 'rails checked: ' + rails);
+  console.log(`[T8a] ${rails} perimeter rails, worst ${worst.toFixed(0)} deg off the fence line`);
 });

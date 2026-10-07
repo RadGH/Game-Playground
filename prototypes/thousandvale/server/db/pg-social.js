@@ -68,8 +68,8 @@ export function pgM3({ pool, q, realm, SAVE_SQL, saveParams }) {
       } catch (err) { if (err.code === '23505') return { err: 'taken' }; throw err; }
     },
     async loginInfo(username) {
-      const r = await q('SELECT id, pass_hash, banned_until FROM accounts WHERE lower(username) = lower($1)', [username]);
-      return r.rows.length ? { account: r.rows[0].id, passHash: r.rows[0].pass_hash, banned: toMs(r.rows[0].banned_until) } : null;
+      const r = await q('SELECT id, pass_hash, banned_until, admin FROM accounts WHERE lower(username) = lower($1)', [username]);
+      return r.rows.length ? { account: r.rows[0].id, passHash: r.rows[0].pass_hash, banned: toMs(r.rows[0].banned_until), admin: !!r.rows[0].admin } : null;
     },
     async newToken(account, kind = 'session') {
       const token = randomBytes(32).toString('hex');
@@ -92,10 +92,10 @@ export function pgM3({ pool, q, realm, SAVE_SQL, saveParams }) {
       return r.rows.length ? r.rows[0].id : null;
     },
     async accountInfo(account) {
-      const r = await q('SELECT id, claimed, username, email, banned_until, ban_reason, created_at FROM accounts WHERE id = $1', [account]);
+      const r = await q('SELECT id, claimed, username, email, banned_until, ban_reason, created_at, admin FROM accounts WHERE id = $1', [account]);
       if (!r.rows.length) return null;
       const a = r.rows[0];
-      return { id: a.id, claimed: a.claimed, username: a.username, email: a.email, banned: toMs(a.banned_until), banReason: a.ban_reason, created: toMs(a.created_at) };
+      return { id: a.id, claimed: a.claimed, username: a.username, email: a.email, banned: toMs(a.banned_until), banReason: a.ban_reason, created: toMs(a.created_at), admin: !!a.admin };
     },
     async banAccount(account, untilMs, reason = '') { const r = await q('UPDATE accounts SET banned_until = $2, ban_reason = $3 WHERE id = $1', [account, ms(untilMs), reason]); return r.rowCount > 0; },
     async banIp(ipHash, untilMs, reason = '') {
@@ -283,6 +283,45 @@ export function pgM3({ pool, q, realm, SAVE_SQL, saveParams }) {
         [JSON.stringify(rows.map(r => ({ at: r.at, ch: r.ch, from_char: r.from ?? null, from_name: r.name ?? null, to_key: r.to == null ? null : String(r.to), text: r.text })))]);
     },
     async pruneChat(beforeMs) { const r = await q('DELETE FROM chat_log WHERE at < $1', [ms(beforeMs)]); return r.rowCount; },
+    // ---- feedback (play-test 5, T19/T21) + admin accounts (schema v5) ----
+    async addFeedback(row) {
+      return tx(async c => {
+        const ids = row.char != null ? await c.query('SELECT 1 FROM characters WHERE id = $1', [row.char]) : { rows: [] };
+        const char = ids.rows.length ? row.char : null;
+        const acc = row.account != null ? await c.query('SELECT 1 FROM accounts WHERE id = $1', [row.account]) : { rows: [] };
+        const had = char != null ? await c.query('SELECT 1 FROM feedback WHERE char_id = $1 AND gift LIMIT 1', [char]) : { rows: [1] };
+        const first = char != null && !had.rows.length;
+        const r = await c.query(`INSERT INTO feedback (realm, created_at, account_id, char_id, name, cls, level, kind, text, client, server, state, gift)
+          VALUES ($1, COALESCE($2, now()), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id`,
+          [realm, ms(row.at), acc.rows.length ? row.account : null, char, row.name || null, row.cls || null, row.level || null, row.kind, row.text, JSON.stringify(row.client || {}), JSON.stringify(row.server || {}), row.state || 'new', first]);
+        return { id: r.rows[0].id, first };
+      });
+    },
+    async feedbackGiftFailed(char) { await q('UPDATE feedback SET gift = false WHERE char_id = $1', [char]); },
+    async listFeedback({ state = null, kind = null, limit = 100, before = null, hideTrashed = false } = {}) {
+      const r = await q(`SELECT * FROM feedback WHERE realm = $1 AND ($2::text IS NULL OR state = $2) AND ($3::text IS NULL OR kind = $3) AND ($4::bigint IS NULL OR id < $4)
+        AND (NOT $5::boolean OR state <> 'trashed') ORDER BY id DESC LIMIT $6`, [realm, state, kind, before, !!hideTrashed, limit]);
+      return r.rows.map(x => ({ id: x.id, at: toMs(x.created_at), account: x.account_id, char: x.char_id, name: x.name, cls: x.cls, level: x.level, kind: x.kind, text: x.text, client: x.client || {}, server: x.server || {},
+        state: x.state, stateAt: x.state_at ? toMs(x.state_at) : null, stateBy: x.state_by, note: x.note || '', gift: !!x.gift }));
+    },
+    async feedbackCounts() {
+      const r = await q('SELECT state, count(*)::int AS n FROM feedback WHERE realm = $1 GROUP BY state', [realm]);
+      const c = { new: 0, approved: 0, declined: 0, trashed: 0, total: 0 };
+      for (const x of r.rows) { c[x.state] = (c[x.state] || 0) + x.n; c.total += x.n; }
+      return c;
+    },
+    async setFeedbackState(id, state, { by = 'admin', at = Date.now(), note = null } = {}) {
+      const r = await q('UPDATE feedback SET state = $2, state_at = $3, state_by = $4, note = COALESCE($5, note) WHERE id = $1 AND realm = $6', [id, state, ms(at), by, note, realm]);
+      return r.rowCount > 0;
+    },
+    async setAdmin(who, on = true) {
+      const r = typeof who === 'number'
+        ? await q('UPDATE accounts SET admin = $2 WHERE id = $1 RETURNING id, username, admin', [who, !!on])
+        : await q('UPDATE accounts SET admin = $2 WHERE lower(username) = lower($1) RETURNING id, username, admin', [String(who), !!on]);
+      return r.rows.length ? { ok: true, account: r.rows[0].id, username: r.rows[0].username, admin: r.rows[0].admin } : { err: 'missing' };
+    },
+    async isAdmin(account) { const r = await q('SELECT admin FROM accounts WHERE id = $1', [account]); return !!(r.rows.length && r.rows[0].admin); },
+    async listAdmins() { const r = await q('SELECT id, username FROM accounts WHERE admin ORDER BY id'); return r.rows.map(x => ({ account: x.id, username: x.username })); },
     async getWorld(key) { const r = await q('SELECT value FROM world_state WHERE key = $1', [key]); return r.rows.length ? r.rows[0].value : null; },
     async setWorld(key, value) { await q('INSERT INTO world_state (key, value, updated_at) VALUES ($1, $2, now()) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()', [key, JSON.stringify(value)]); },
     async economyReport(sinceMs = 0) {

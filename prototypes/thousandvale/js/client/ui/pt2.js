@@ -201,7 +201,7 @@ export function createUi2(o) {
     // S4 (§20.4): announced mini bosses near you
     n.on('bossNear', m => { for (const b of m.list || []) announced.set('boss:' + (b.enc || b.id), { name: b.name, x: b.x, z: b.z, level: b.level, rank: 'mini boss', until: Date.now() + 120000 }); });
     // S24 (§20.8): an event's personal reward, said in the banner column
-    n.on('eventDone', m => { const bits = [m.xp ? `${m.xp} XP` : '', m.gold ? `${m.gold} gold` : '', ...(m.items || []).map(i => i.name)].filter(Boolean).join(' · '); banner.push({ level: 'zone', lead: 'Event complete', name: m.name || 'Victory', sub: (m.onBody ? 'Your share lies on the body — ' : '') + bits }); });
+    n.on('eventDone', m => { if (worldUi.tracker) return; /* play-test 5: the event tracker's result card says it */ const bits = [m.xp ? `${m.xp} XP` : '', m.gold ? `${m.gold} gold` : '', ...(m.items || []).map(i => i.name)].filter(Boolean).join(' · '); banner.push({ level: 'zone', lead: 'Event complete', name: m.name || 'Victory', sub: (m.onBody ? 'Your share lies on the body — ' : '') + bits }); });
     n.on('rareNear', m => { if (m && Number.isFinite(m.x)) { announced.set(m.key ?? m.id, { name: m.name, x: m.x, z: m.z, level: m.level, rank: m.rank, until: Date.now() + (m.ms || 300000) }); hud.chat(`${m.name} has been seen nearby.`, 'event'); } });   // S4
     // S14: where a kill/collect step's monsters live (`steps[].areas`) — shaded on the map/minimap near you, for tracked quests
     n.on('quests', m => {

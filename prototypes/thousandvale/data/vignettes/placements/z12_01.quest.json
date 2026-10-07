@@ -42,6 +42,101 @@
    "radius": 8,
    "quest": "spore_season",
    "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_01_1",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1182,
+   "z": 1015,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "vicious"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_01_2",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 879,
+   "z": 600,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "giant"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_01_3",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 272,
+   "z": 480,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "frostbound"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_ashcombe",
+   "name": "Old Nettie Cray",
+   "role": "angler",
+   "at": "Ashcombe",
+   "x": 1408,
+   "z": 1048,
+   "yaw": -2.75,
+   "angler": true
   }
  ]
 }

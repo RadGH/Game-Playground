@@ -234,7 +234,13 @@
           "base": "longsword",
           "name": "Holloway's Second-Best Longsword"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare longsword, Holloway's Second-Best Longsword, and one extra perk-forest point.",
       "classes": [
@@ -282,7 +288,13 @@
           "base": "sword2h",
           "name": "The Patient Answer"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare two-handed sword, The Patient Answer, and one extra perk-forest point.",
       "classes": [
@@ -328,7 +340,13 @@
           "base": "kite_shield",
           "name": "Gatepost Shield"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare kite shield, Gatepost Shield, and one extra perk-forest point.",
       "classes": [
@@ -375,7 +393,13 @@
           "base": "rapier",
           "name": "Scarecrow's Applause"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare rapier, Scarecrow's Applause, and one extra perk-forest point.",
       "classes": [
@@ -422,7 +446,13 @@
           "base": "greatsword",
           "name": "Wyrmwaker"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare greatsword, Wyrmwaker, and one extra perk-forest point.",
       "classes": [
@@ -474,7 +504,13 @@
           "base": "sword",
           "name": "The Beekeeper's Order"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare sword, The Beekeeper's Order, and one extra perk-forest point.",
       "classes": [
@@ -521,7 +557,13 @@
           "base": "scepter",
           "name": "Bryn's Steady Hand"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare scepter, Bryn's Steady Hand, and one extra perk-forest point.",
       "classes": [
@@ -569,7 +611,13 @@
           "base": "iron_mace",
           "name": "Ledger of the Unquiet"
         },
-        "unlock": "companion"
+        "unlock": "companion",
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare mace, Ledger of the Unquiet, and your companion comes to you now instead of at level 10.",
       "classes": [
@@ -617,7 +665,13 @@
           "base": "sword",
           "name": "Kind Mother's Edge"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare sword, Kind Mother's Edge, and one extra perk-forest point.",
       "classes": [
@@ -666,7 +720,13 @@
           "base": "staff",
           "name": "Voss's Icebound Rod"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare staff, Voss's Icebound Rod, and one extra perk-forest point.",
       "classes": [
@@ -713,7 +773,13 @@
           "base": "wand",
           "name": "The Coin-Toss Wand"
         },
-        "unlock": "companion"
+        "unlock": "companion",
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare wand, The Coin-Toss Wand, and your companion comes to you now instead of at level 10.",
       "classes": [
@@ -767,7 +833,13 @@
           "base": "staff",
           "name": "Yesterday's Staff"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare staff, Yesterday's Staff, and one extra perk-forest point.",
       "classes": [
@@ -812,7 +884,13 @@
           "base": "cloth_chest",
           "name": "Lullaby Robes"
         },
-        "unlock": "companion"
+        "unlock": "companion",
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare robe, Lullaby Robes, and your companion comes to you now instead of at level 10.",
       "classes": [
@@ -860,7 +938,13 @@
           "base": "wand",
           "name": "Pondstrike Wand"
         },
-        "unlock": "companion"
+        "unlock": "companion",
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare wand, Pondstrike Wand, and your companion comes to you now instead of at level 10.",
       "classes": [
@@ -907,7 +991,13 @@
           "base": "scepter",
           "name": "Restraint of Ashby"
         },
-        "unlock": "companion"
+        "unlock": "companion",
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare scepter, Restraint of Ashby, and your companion comes to you now instead of at level 10.",
       "classes": [
@@ -954,7 +1044,13 @@
           "base": "dagger",
           "name": "Mabry's Quiet Thanks"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare dagger, Mabry's Quiet Thanks, and one extra perk-forest point.",
       "classes": [
@@ -1001,7 +1097,13 @@
           "base": "dagger",
           "name": "Quell's Missing Hour"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare dagger, Quell's Missing Hour, and one extra perk-forest point.",
       "classes": [
@@ -1056,7 +1158,13 @@
           "base": "javelin",
           "name": "Finders-Keepers"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare javelin, Finders-Keepers, and one extra perk-forest point.",
       "classes": [
@@ -1103,7 +1211,13 @@
           "base": "warhammer",
           "name": "Stonehand's Pupil"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare warhammer, Stonehand's Pupil, and one extra perk-forest point.",
       "classes": [
@@ -1151,7 +1265,13 @@
           "base": "shortbow",
           "name": "Greyfletch's Promise"
         },
-        "unlock": "companion"
+        "unlock": "companion",
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare shortbow, Greyfletch's Promise, and your companion comes to you now instead of at level 10.",
       "classes": [
@@ -1198,7 +1318,13 @@
           "base": "crossbow",
           "name": "Milk-Sweetener"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare crossbow, Milk-Sweetener, and one extra perk-forest point.",
       "classes": [
@@ -1251,7 +1377,13 @@
           "base": "crossbow",
           "name": "Brother's Grudge"
         },
-        "unlock": "companion"
+        "unlock": "companion",
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare crossbow, Brother's Grudge, and your companion comes to you now instead of at level 10.",
       "classes": [
@@ -1299,7 +1431,13 @@
           "base": "quarterstaff",
           "name": "Rootgrown Staff"
         },
-        "unlock": "companion"
+        "unlock": "companion",
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare quarterstaff, Rootgrown Staff, and your companion comes to you now instead of at level 10.",
       "classes": [
@@ -1354,7 +1492,13 @@
           "base": "scepter",
           "name": "The Bear's Post"
         },
-        "unlock": "companion"
+        "unlock": "companion",
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare scepter, The Bear's Post, and your companion comes to you now instead of at level 10.",
       "classes": [
@@ -1404,7 +1548,13 @@
           "base": "staff",
           "name": "Quell's Good Spade"
         },
-        "unlock": "companion"
+        "unlock": "companion",
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare staff, Quell's Good Spade, and your companion comes to you now instead of at level 10.",
       "classes": [
@@ -1452,7 +1602,13 @@
           "base": "wand",
           "name": "Coldharrow's Bargain"
         },
-        "unlock": "companion"
+        "unlock": "companion",
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare wand, Coldharrow's Bargain, and your companion comes to you now instead of at level 10.",
       "classes": [
@@ -1499,7 +1655,13 @@
           "base": "quarterstaff",
           "name": "Stillwater Staff"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare quarterstaff, Stillwater Staff, and one extra perk-forest point.",
       "classes": [
@@ -1546,7 +1708,13 @@
           "base": "scepter",
           "name": "The Honest Dream"
         },
-        "unlock": "companion"
+        "unlock": "companion",
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare scepter, The Honest Dream, and your companion comes to you now instead of at level 10.",
       "classes": [
@@ -1595,7 +1763,13 @@
           "base": "crossbow",
           "name": "Millward's Crank-Bow"
         },
-        "unlock": "companion"
+        "unlock": "companion",
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare crossbow, Millward's Crank-Bow, and your companion comes to you now instead of at level 10.",
       "classes": [
@@ -1648,7 +1822,13 @@
           "base": "dagger",
           "name": "Pail and Plough Ballad"
         },
-        "perks": 1
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       },
       "rewardText": "A rare dagger, Pail and Plough Ballad, and one extra perk-forest point.",
       "classes": [

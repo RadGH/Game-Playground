@@ -89,7 +89,7 @@ export function skillLadder(src, cls, level = 1, bar = null) {
     return {
       id, slot: b?.slot ?? i + 1, name: b?.name || row.name || id, desc: b?.desc || row.desc || '', level: lv,
       unlocked: level >= lv, cd: b?.cd ?? (row.cooldown || 0) * 1000, mp: b?.mp ?? row.mp ?? 0, element: b?.element || row.element || null,
-      shape: b?.shape || row.shape || null, hasTalents: !!row.talents,
+      shape: b?.shape || row.shape || null, hasTalents: !!row.talents, targets: b?.targets || null,   // T2: who it touches, in the rules' words
     };
   }).sort((a, b) => a.level - b.level || a.slot - b.slot);
   const next = out.find(s => !s.unlocked);

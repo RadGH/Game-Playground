@@ -19,6 +19,13 @@
       "role": "scout",
       "at": "the Warband Stockade",
       "greeting": "Their stockade. My vantage. Their arrows. My problem."
+    },
+    "angler_last_lantern": {
+      "name": "Wick Thornaby",
+      "role": "angler",
+      "at": "Last Lantern",
+      "greeting": "Throw back anything with thorns. Throw back anything that asks you to.",
+      "placedBy": "content-pools"
     }
   },
   "quests": [
@@ -50,10 +57,12 @@
       "reward": {
         "xp": 0.7,
         "gold": 14,
-        "item": {
-          "tier": "uncommon",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "the_heart_of_the_scar"
     },
@@ -105,10 +114,12 @@
       "reward": {
         "xp": 0.45,
         "gold": 9,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {

@@ -139,7 +139,10 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
     chatter: (await opt('data/names/chatter.json')) || { pools: {}, rules: {} }, names: (await opt('data/names/torbor.json')) || {} } : null;
   const marks = ((await opt(`data/quests/marks/${provinceId}.json`)) || {}).quests || null;   // P17: E's map mark per quest
   // play-test 4: data files that ride straight through buildLayout's `extra` into the province's L
-  const extra = { refunds: await opt('data/provinces/refunds.json'), wanderers: wd, treasure: await opt('data/provinces/road-events.json'), affixes: await opt('data/encounters/affixes.json'), spawnHints: await opt(`data/quests/marks/${provinceId}-hunts.json`),
+  // play-test 5 T25: angling — C's numbers, E's fish / recipes / rods and E's pool spots (js/sim/angling.js)
+  const fishNumbers = await opt('data/rules/fishing.json');
+  const angling = fishNumbers ? { numbers: fishNumbers, content: await opt('data/provinces/angling.json'), pools: await opt('data/provinces/angling-pools.json') } : null;
+  const extra = { angling, refunds: await opt('data/provinces/refunds.json'), wanderers: wd, treasure: await opt('data/provinces/road-events.json'), affixes: await opt('data/encounters/affixes.json'), spawnHints: await opt(`data/quests/marks/${provinceId}-hunts.json`),
     titles: await opt('data/names/titles.json'), names: await opt('data/names/torbor.json') };
   return { extra, travel, marks, key: provinceId, name: sheet ? sheet.name : provinceId, terrain, zones, encounterInfo, events, zoneEvents, directorRules: (evData && evData.director) || null, starter, starterProvince, rares, jobs, schedules, horizon, shops, mounts, offices };
 }
@@ -165,7 +168,7 @@ export function provinceEvents(evData, { provinceId, map, terrain, sheet = null,
   const common = (e, s) => ({ id: e.id, name: e.name || (encounterInfo[e.encounter || e.boss] || {}).name || e.id, kind: e.kind || 'boss', province: provinceId,
     x: s.x, z: s.z, r: Math.max(s.r || s.radius || 40, 30), level: e.level || 5, waves: e.waves || [], boss: e.boss || e.encounter || null, monster: e.monster || null, bossName: e.bossName || null,
     durationMs: min(e.durationMinutes), announce: [].concat(e.announce || []), reward: e.reward || null, enrol: e.autoEnrolMetres || 60,
-    where: e.where || null, blurb: e.blurb || null });   // P27: where it is + what to do (E)
+    where: e.where || null, blurb: e.blurb || null, info: e.info || null });   // P27: where it is + what to do (E); T12 (play-test 5): E's `info` block (what, objective, durationSec, onSuccess, onFail, rewardText)
   if (evData) {
     for (const e of evData.realm || []) {
       const zs = e.zones || [e.zone];

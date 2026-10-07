@@ -459,3 +459,130 @@ neck / head, jointed legs with hooves, mane and tail, tack cut from the body's o
 patterns with a crossfade. The seat is still on the hip, counter-scaled, ~0.04 m above the saddle's back, so a rider's hips
 land where they did. 2026-10-06: necks thickened (`neckK` 1.12-1.5) and legs a touch heavier after the screenshot pass so
 the horses stop reading as pipe-cleaners under a big-headed rider. See README "Mounts" for the details and `node --test avatar-3d/tests/mounts.test.js`.
+
+## Grips and paired weapons (2026-10-06, Thousandvale play-test 5)
+
+**The fault.** "Dual-wielded daggers are held 90 degrees wrong — not by the handle." A held item is modelled running
+straight out of the fist along the forearm (`-y` in hand space) and the GRIP bone's rotation is what turns it into
+something a fist could hold. Two things left that rotation wrong:
+
+1. `aim()` points a weapon in the CHEST's frame. Whenever the forearm happens to point the same way as the aim, the
+   handle lies along the forearm and hides in the wrist, and the blade seems to grow out of the knuckles. Worst case:
+   daggers at `ready` (forearm level, blade straight forward — 17 degrees apart).
+2. Every strike written for the main hand returns an aim for `R` only. For the length of that clip the second weapon
+   had NO grip rotation and lay along the left forearm like a spike strapped to the wrist — every swing a dual
+   wielder makes.
+
+**The fix (chibi2-motion.js — shared by every game).**
+- `fistGrip(p, side, 'idle' | 'ready')`: a fixed turn of the grip RELATIVE TO THE HAND (46 / 63 degrees), so the
+  weapon rides the fist wherever the arm goes. Daggers are carried this way in `idle`, `walk`, `run` and `ready`.
+- In `poseAt`, a hand that holds a weapon and was given neither an aim nor a grip gets `fistGrip` (a staff, bow,
+  torch or crossbow gets its rest pitch). A clip may return `aims.L = false` to say "I set the grip myself".
+- `REST_PITCH.blade.ready` -1.85 -> -2.1 and `wand.ready` -1.5 -> -2.0 (both were nearly in line with the forearm).
+- A two-hander in EACH hand: the right one is now shouldered at rest like the left (it hung at the hip pointing back).
+- A staff may be an off-hand weapon (`HELD_WEAPON_IDS`): a second staff used to fall through to the shield builder.
+
+**The rule, as a test** (`prototypes/thousandvale/tests/D/grips.test.js`, node, no browser): for every held id in
+`FARHOLD_WEAPON_INFO`, the original vocabulary and every `g5_` id, in BOTH hands — the handle crosses the fist on the
+grip line (`x = 0, z = 0.055`, y from -0.07 to 0), the weapon runs along y, the head is at -y; and for eleven pairs of
+weapons — no clip leaves a weapon hand without an aim or a grip, and in every carrying clip (and in the waiting hand of
+every strike) the weapon stands 25-165 degrees off its own forearm. `sampleClip(rig, name, u)` is the hook it uses.
+
+**New clips, opt-in** (`avatar-3d/js/chibi2-motion-dual.js` — importing it registers them through
+`registerClips`; a character only builds the ones its `anims` list names; all 14 cost ~2 ms per template):
+
+| List | Clips | For |
+|---|---|---|
+| `CHIBI2_DUAL_ANIMS` | `dualSlashR`, `dualSlashL`, `dualCross` | two one-handers: main-hand cut, off-hand cut, both |
+| | `dualStabR`, `dualStabL`, `dualFlurry` | two daggers: forward-grip thrusts, and three fast ones |
+| | `twinChopR`, `twinChopL`, `twinCrash` | a two-hander in each hand: one off its shoulder at a time, then both |
+| `CHIBI2_ANGLE_ANIMS` | `fishCast`, `fishWait`, `fishReel`, `fishShow` | angling — HANDS-FREE; the game parents its own rod to `handR` (`ROD_MOUNT`) and its catch to `handL` (`CATCH_MOUNT`) |
+| `CHIBI2_REVIVE_ANIMS` | `standUp` | getting up from the `dead` pose: chest off the ground, a knee under, upright |
+
+`dualAttackFor(hold, { hand: 'main' | 'off', step })` names the clip for a swing (every third main swing is the
+"both" clip); `dualAttackByCount(hold, n)` alternates main / off / main / off / both for a game that is not told whose
+turn it is. Both return `null` when the hands do not hold a pair (play `attack`). `R` is the MAIN hand in this rig —
+it sits at +x, which is the character's own left when it faces +z.
+
+Look at them: `prototypes/thousandvale/tests/D/pages/hands.html?cfg=[…]&cam=q` (served by the playground's dev server)
+lays out any list of `{ held, offhand, anim, u }` bodies frozen at a point of a clip.
+
+## Gear catalog (2026-10-06, Thousandvale play-test 5: T23 + the models for T15)
+
+**One list of every wearable / holdable Chibi 2 model, old and new**: `avatar-3d/data/gear-catalog.json` (259 rows), read
+through the pure `avatar-3d/js/gear-catalog.js` (no Three.js — tools, node tests and games all read it). The `armory/`
+experiment lists and previews everything in it. The file is GENERATED — never edit it by hand:
+
+```
+node --import ./avatar-3d/tests/three-register.mjs tools/build-gear-catalog.mjs          # rewrite it
+node --import ./avatar-3d/tests/three-register.mjs tools/build-gear-catalog.mjs --check  # is it current?
+node --test avatar-3d/tests/gear-catalog.test.js                                         # code <-> catalog, both ways
+```
+
+### The 66 new models (`g5_` ids)
+
+Every one is a new id; nothing that existed changed (the test builds 276 older looks and compares vertex counts with the
+commit before). The design list — id, slot, name, hold — is `js/chibi2-gear5-ids.js` (pure); the models are in three files
+reached through one dispatch, `js/chibi2-gear5.js` `buildGear5(a, c)`, which chibi2.js calls after `buildArmour2`.
+
+| File | What | Count |
+|---|---|---|
+| `js/chibi2-gear5-weapons.js` | one per weapon type in the item data: kris (dagger), leafblade (sword), flamberge (two-handed sword), halfmoon axe, headsman's longaxe (two-handed), morningstar (mace), cooper's mallet (hammer), quarry sledge (two-handed hammer), winged partisan (spear), bardiche (polearm), harpoon (javelin), horn recurve (bow), arbalest (crossbow), ironshod bo (quarterstaff), crownhead sceptre, armillary orb, open codex — plus **six wands and six staves, one silhouette per magic attack form** | 29 |
+| `js/chibi2-gear5-armour.js` | head / chest / legs / hands / feet × cloth / leather / mail / plate | 20 |
+| `js/chibi2-gear5-offhand.js` | four shields (targe, notched scutcheon, almond kite, pavise), six foci (one per focus kind, each also one attack form), hip quiver, cresset torch; worn: swallowtail cloak, hooded lantern, war girdle, torc, signet ring | 17 |
+
+Attack forms and the silhouette that says them: **projectile** a dart / a spire / a sealed folio · **cone** a bell mouth / a
+horn / a thurible · **area** a hoop / a halo / a caged orb · **beam** lenses on prongs / a lens "eye" · **fork** tines /
+branches / an antler · **shield** a small escutcheon / a sigil plate.
+
+### Where a part goes in the avatar
+
+| Game slot | Avatar | Note |
+|---|---|---|
+| weapon | `held.id` | a one-hander also works as `offhand.id` (the row says `offhandToo`). Bows are left-hand items (`BOW_IDS`). |
+| shield / focus / quiver / torch | `offhand.id` | a themed shield's `offhand.emblem` is drawn on its face |
+| head · chest · legs · feet | `hat.id` · `top.id` · `bottom.id` · `shoes.id` | each `g5_` top/bottom/shoes has a plain garment under it (`style` in the id table) |
+| **hands** | **`top.gloves = { id, color, color2 }`** | new: Chibi 2 had no hands model. A field, not a slot — fields survive the 2D normaliser, new top-level keys do not |
+| cape | `cape.id` | |
+| necklace | `accessory.id` | |
+| **ring** | **`accessory.ring` / `accessory.ring2` = `{ id, color, color2 }`** | right / left hand |
+| light, belt | `decor.id` | one decor at a time (a tier-2 kit takes the slot) |
+
+### How a game adds an item from a catalog row
+
+```js
+import { loadGearCatalog, applyGear } from '../../avatar-3d/js/gear-catalog.js';
+const cat = await loadGearCatalog();
+
+// 1. pick the row: by id, by what it is, or straight from an item
+const row = cat.byId('g5_wand_bell');
+const rows = cat.find({ kind: 'armour', gameSlot: 'chest', archetype: 'plate', isNew: true });
+const forThis = cat.forItem(item);   // item: { slot, tier } | { type:'weapon', subtype, twoHanded, form } | { look: { g5: id } }
+
+// 2. make the item: row.base is the suggested base id, row.name a name, row.minLevel a first level,
+//    row.gameSlot / row.type / row.archetype / row.hands / row.form what kind of base it is.
+//    Carry `look: { g5: row.id }` on the item and step 3 needs nothing else.
+
+// 3. draw it: merge the row's look into the avatar LAST (after tier2Dress, which replaces decor)
+const dressed = applyGear(avatar, [row, cat.byId('g5_plate_gauntlets')], { [row.id]: { color: '#ff8a40', quality: 2 } });
+```
+
+`lookFor(row, opts)` returns `{ slot, part }` if you would rather merge it yourself (a `field` row's part must be merged
+INTO the slot). Item weight → archetype is `ARCHETYPE_OF_TIER` (`light` → leather, `medium`/`scaled` → mail, `heavy` →
+plate, `runed` → cloth); subtype → weapon type is `weaponTypeOf(item)`.
+
+### Adding another model later (Farhold, or round 6)
+
+1. One row in `js/chibi2-gear5-ids.js` (or a new id table of your own with its own prefix, added to `G5_TABLES`).
+2. One builder under the same id in the matching `chibi2-gear5-*.js` table. Held things: handle through the fist at
+   `z = Z`, head at −y, butt at +y, authored on `'handR'` (the dispatch swaps the bone for the off hand); staves alone
+   carry the topper at +y. Nothing else needs registering — the 2D stand-in, the hold kind and the body style are read
+   from the row.
+3. `tools/build-gear-catalog.mjs`, then the test. LOOK at it: `G5_IDS=<id> flock /tmp/claude-1000/farhold-pw.lock npx
+   playwright test avatar-3d/tests/gear5-shots.spec.js` writes a two-angle sheet to `/tmp/claude-1000/g5-shots/`
+   (`G5_VIEWS`, `G5_EXTRA`, `G5_OFF=1` are documented at the top of the spec; it is skipped unless `G5_IDS` is set).
+
+Known limits: long shields lie along the raised forearm at `ready` like the existing kite/tower shields (the rig's
+shield pose); robe panels and the hauberk skirt are rigid on the hips like the existing robes; the signet is a glint at
+game distance; old rows' `games` are a text scan of each game's code and data (a heuristic), and `items` lists
+Thousandvale's mapping only.

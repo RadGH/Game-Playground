@@ -17,17 +17,22 @@ import { installItemCards, rememberItems, scoreOf, nameOf, farholdReady } from '
 import { hideTip, installGameTips } from './ui/tips.js';
 import { confirmBox } from './ui-panel.js';
 import { wearSlot } from './ui/pt2-core.js';
+import { offhandRefusal, hasDual2h, BAG_MAX as BAG_CAP } from './ui/pt5-core.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const BAG_MAX = 120;
+const BAG_MAX = BAG_CAP;
 const UI_KEY = 'tv.inv.ui';
-const SLOT_GLYPH = { head: '⛑', necklace: '◎', chest: '▣', hands: '✋', legs: '‖', feet: '⌓', ring: '○', ring2: '○', weapon: '⚔', offhand: '⛨', mount: '♞', light: '✦', tool: '⚒' };
+const SLOT_GLYPH = { head: '⛑', necklace: '◎', chest: '▣', hands: '✋', legs: '‖', feet: '⌓', ring: '○', ring2: '○', weapon: '⚔', offhand: '⛨', mount: '♞', light: '✦', tool: '⚒', back: '◣', waist: '═' };
 
 export function createBag({ net: getNet, hud, me = null }) {
   const root = $('bag');
   const btn = $('bag-btn');
   let useHook = null;
+  const toggleFns = new Set();
+  /** T7 (play-test 5): the Doubled Grasp perk lets a two-handed weapon sit in each hand. */
+  const dual2h = () => hasDual2h(getNet()?.joined?.you);
+  const bagMax = () => getNet()?.joined?.you?.bagMax || BAG_MAX;
   const S = { bag: [], equipment: {}, gold: 0, fresh: new Set(), level: 1, filter: 'all', sort: 'new', search: '' };
   try { Object.assign(S, JSON.parse(localStorage.getItem(UI_KEY) || '{}')); S.search = ''; } catch {}
   const level = () => (me?.()?.level ?? S.level ?? getNet()?.joined?.you?.level ?? 1);
@@ -36,7 +41,7 @@ export function createBag({ net: getNet, hud, me = null }) {
 
   root.classList.add('inv');
   root.innerHTML = `
-    <header><h3>Character</h3><span class="inv-sub" id="inv-sub"></span><span class="gold" id="bag-gold">0 gold</span><button class="ghost" id="bag-close" aria-label="Close" data-tip="Close (Esc)">×</button></header>
+    <header><h3>Character</h3><span class="inv-sub" id="inv-sub"></span><button class="ghost small inv-stats" id="inv-stats" type="button" data-tip="Stats and damage, beside this window (V)">Stats</button><span class="gold" id="bag-gold">0 gold</span><button class="ghost" id="bag-close" aria-label="Close" data-tip="Close (Esc)">×</button></header>
     <div class="inv-body">
       <section class="inv-doll" aria-label="Worn gear">
         <div class="doll-col" id="doll-left"></div>
@@ -51,7 +56,7 @@ export function createBag({ net: getNet, hud, me = null }) {
           <div class="row"><input id="inv-search" type="search" placeholder="Find by name…" aria-label="Find by name"><select id="inv-sort" aria-label="Sort"></select></div>
         </div>
         <div class="bag-grid" id="bag-grid"></div>
-        <p class="bag-hint"><span id="inv-count"></span> Click to wear (or drink / eat) · drag onto a slot or a 7–0 key · right-click to throw away · hold <kbd>Shift</kbd> to compare the other hand.</p>
+        <p class="bag-hint"><span id="inv-count"></span> Click to wear (or use / open) · <kbd>Shift</kbd>-click for the other hand · drag onto a slot or a 7–0 key · right-click to throw away · hold <kbd>Shift</kbd> to compare the other hand.</p>
       </section>
     </div>`;
   const el = { gold: $('bag-gold'), sub: $('inv-sub'), grid: $('bag-grid'), left: $('doll-left'), right: $('doll-right'), bottom: $('doll-bottom'), stats: $('doll-stats'),
@@ -78,6 +83,7 @@ export function createBag({ net: getNet, hud, me = null }) {
     root.hidden = !open; btn?.classList.toggle('on', open);
     iconsActive(open);                    // icons render only while this window is open (P1: no freezes in play)
     if (open) draw(); else hideTip();
+    for (const fn of toggleFns) fn(open);
     return open;
   }
 
@@ -103,6 +109,8 @@ export function createBag({ net: getNet, hud, me = null }) {
     } else if (slot) {
       const g = document.createElement('span'); g.className = 'slotglyph'; g.textContent = SLOT_GLYPH[slot] || ''; d.appendChild(g);
       d.dataset.tip = `${SLOT_NAME[slot] || slot} — empty`;
+      // T7: say what the off hand will take while a two-hander is in the main hand
+      if (slot === 'offhand' && S.equipment?.weapon?.twoHanded) d.dataset.tip = dual2h() ? 'Off hand — empty. Doubled Grasp: drag a second two-handed weapon here (or Shift-click it in your bag).' : `Off hand — ${S.equipment.weapon.name || 'your weapon'} needs both hands. The Doubled Grasp perk lets you hold a two-hander in each hand.`;
     }
     if (slot) {
       const s = document.createElement('span'); s.className = 'slotname'; s.textContent = SLOT_NAME[slot] || slot; d.appendChild(s);
@@ -119,6 +127,7 @@ export function createBag({ net: getNet, hud, me = null }) {
     if (!req.ok) { hud.toast(`${nameOf(it)} needs level ${req.level} — you are level ${level()}.`, 'warn'); return; }
     // Q12: a click on a second ring puts it on the EMPTY hand (never over the first); a drag onto an exact ring slot
     // names it ('ring1' / 'ring2' on the wire — 'ring' alone means "you pick" to the server, protocol v6)
+    if (slot === 'offhand') { const no = offhandRefusal(it, S.equipment, { dual2h: dual2h() }); if (no) { hud.toast(no, 'warn'); return; } }
     const wire = slot === 'ring' ? 'ring1' : slot || wearSlot(it, S.equipment) || undefined;
     getNet()?.item('equip', it.uid, wire === 'ring' ? undefined : wire); hideTip();
   }
@@ -126,7 +135,10 @@ export function createBag({ net: getNet, hud, me = null }) {
     let d; try { d = JSON.parse(e.dataTransfer.getData('text/x-tv-item')); } catch { return; }
     if (d.worn) return;                                        // worn -> another slot: not a thing the server does
     const it = find(d.uid); if (!it) return;
-    if (slotOf(it) !== slot && altSlotOf(it) !== slot) { hud.toast(`${nameOf(it)} does not go in ${SLOT_NAME[slot] || slot}.`, 'warn'); return; }
+    // T7: the off hand takes a second two-hander when the perk is owned — and says why not otherwise
+    const hand = slot === 'offhand' && slotOf(it) === 'weapon';
+    if (hand) { const no = offhandRefusal(it, S.equipment, { dual2h: dual2h() }); if (no) { hud.toast(no, 'warn'); return; } }
+    else if (slotOf(it) !== slot && altSlotOf(it) !== slot) { hud.toast(`${nameOf(it)} does not go in ${SLOT_NAME[slot] || slot}.`, 'warn'); return; }
     wear(it, slot);
   }
   el.grid.addEventListener('dragover', e => { if (e.dataTransfer.types.includes('text/x-tv-item')) e.preventDefault(); });
@@ -158,7 +170,13 @@ export function createBag({ net: getNet, hud, me = null }) {
     const list = viewBag(S.bag, { filter: S.filter, sort: S.sort, equipment: worn, level: level(), score: scoreOf, search: S.search });
     const cells = list.map(it => {
       const d = slotEl(it);
-      d.onclick = () => { if (!(useHook && useHook(it))) wear(it); };   // potions / food: used (play-test 2 §18.10)
+      d.onclick = e => {
+        if (useHook && useHook(it)) return;
+        // Shift-click = the other hand / the other ring (T7: a second two-hander with Doubled Grasp)
+        if (e.shiftKey && slotOf(it) === 'weapon') { wear(it, 'offhand'); return; }
+        if (e.shiftKey && altSlotOf(it)) { wear(it, altSlotOf(it)); return; }
+        wear(it);
+      };   // potions / food: used (play-test 2 §18.10)
       d.oncontextmenu = async e => { e.preventDefault(); hideTip(); if (await confirmBox(`Throw away ${nameOf(it)}? It is gone for good.`, { yes: 'Throw away', danger: true })) getNet()?.item('destroy', it.uid); };
       return d;
     });
@@ -168,7 +186,7 @@ export function createBag({ net: getNet, hud, me = null }) {
     for (let k = 0; k < pad; k++) cells.push(slotEl(null));
     el.grid.replaceChildren(...cells);
     rehover();
-    el.count.textContent = `${S.bag.length} / ${BAG_MAX}${list.length !== S.bag.length ? ` (showing ${list.length})` : ''} ·`;
+    el.count.textContent = `${S.bag.length} / ${bagMax()}${list.length !== S.bag.length ? ` (showing ${list.length})` : ''} ·`;
     el.sub.textContent = S.filter !== 'all' ? FILTERS.find(f => f.id === S.filter)?.label || '' : '';
   }
   // A redraw replaces the square under the pointer, and the tooltip engine only hears about a square when the
@@ -209,6 +227,9 @@ export function createBag({ net: getNet, hud, me = null }) {
 
   return {
     wire, toggle, state: S, draw,
+    /** fn(open) each time the window opens or closes (the Character menu docks beside it). */
+    onToggle(fn) { toggleFns.add(fn); return () => toggleFns.delete(fn); },
+    get max() { return bagMax(); }, get dual2h() { return dual2h(); },
     /** fn(item) -> true when it USED the item (a consumable) instead of wearing it. */
     setUseHook(fn) { useHook = fn; },
     /** Kept for older callers: the card is the shared tooltip now (data-tip-render="item"). */

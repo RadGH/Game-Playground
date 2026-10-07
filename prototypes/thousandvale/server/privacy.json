@@ -1,9 +1,9 @@
 {
   "_doc": "Thousandvale privacy note (stream A, PLAN §9.4). Served at /privacy.json; the client shows `summary` before the first public link and links the rest. Keep it TRUE: if the server starts storing something new, add it here in the same change. Plain words, no legalese.",
-  "version": 1,
-  "updated": "2026-10-05",
+  "version": 2,
+  "updated": "2026-10-06",
   "title": "What Thousandvale keeps about you",
-  "summary": "Thousandvale needs no sign-up. Your browser keeps a random key that is your account; the server keeps only a scrambled copy of it, your characters and what they own. If you claim the account we also keep your username, a scrambled copy of your password and, only if you give one, an email address. Chat is logged for 30 days so reports can be checked. We do not sell or share any of it, show no ads and use no trackers.",
+  "summary": "Thousandvale needs no sign-up. Your browser keeps a random key that is your account; the server keeps only a scrambled copy of it, your characters and what they own. If you claim the account we also keep your username, a scrambled copy of your password and, only if you give one, an email address. Chat is logged for 30 days so reports can be checked. A suggestion or bug report you send is kept with where your character was and a few recent log lines, and read by the game's admins. We do not sell or share any of it, show no ads and use no trackers.",
   "stored": [
     {
       "what": "Account key",
@@ -49,6 +49,11 @@
       "what": "Reports",
       "detail": "When someone reports a player: who reported whom, the reason, and the reported player's last chat lines (up to 20).",
       "kept": "Until the report is dealt with and cleared."
+    },
+    {
+      "what": "Feedback",
+      "detail": "When you send a suggestion or a bug report from the Feedback button: what you wrote, your account and character (name, class, level), where the character was standing, and the last lines of the game's own log in your browser (up to 60), so a bug can be found. The game's admins read these reports.",
+      "kept": "Until an admin clears it; a thrown-away report is kept, marked as trashed, so the same thing is not looked at twice."
     },
     {
       "what": "Network address",

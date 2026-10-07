@@ -23,6 +23,7 @@ import { avatarFor, bodyTypeFor, loadMonsterLooks } from './looks.js';
 import { normalizeAvatar } from '../../../../avatar-2d/js/render.js';
 import { perf, compileBeforeShow } from './perf.js';
 import { createMount, seatRider, mountSpecFor, CHIBI2_MOUNT_ANIMS } from '../../../../avatar-3d/js/mounts.js';
+import { CHIBI2_DUAL_ANIMS, CHIBI2_ANGLE_ANIMS, CHIBI2_REVIVE_ANIMS, CHIBI2_DUAL_SECONDS, dualAttackFor, dualAttackByCount } from '../../../../avatar-3d/js/chibi2-motion-dual.js';   // play-test 5: T6 dual-wield strikes, T25 angling, T4 standing back up
 
 /** A creature spec from what the server sent: `{ type, size?, seed, colors? }` — colour varied by seed within its family. */
 function creatureFor(spec) {
@@ -45,7 +46,21 @@ export function rankScale(rank, mods = null) {
 export const modKey = m => (m && typeof m === 'object' ? `${m.id || ''} ${m.name || ''}` : String(m || '')).toLowerCase();
 export const isLeader = mods => Array.isArray(mods) && mods.some(m => /leader|alpha|chief|warlord|pack/.test(modKey(m)));
 const RANK_COLOUR = { rare: '#ffd040', champion: '#5aa0ff', elite: '#c0c0c0' };
-const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim', 'sitGround', 'drink', ...CHIBI2_MOUNT_ANIMS];   // sitGround/drink: eating and drinking (S20)   // swim: P25; ride/rideGallop: Q16
+const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim', 'sitGround', 'drink', ...CHIBI2_MOUNT_ANIMS, ...CHIBI2_DUAL_ANIMS, ...CHIBI2_ANGLE_ANIMS, ...CHIBI2_REVIVE_ANIMS];   // sitGround/drink: eating and drinking (S20)   // swim: P25; ride/rideGallop: Q16
+
+/** Clips that are a strike: asked for again = a new swing, so they restart (T6: the dual-wield strikes too). */
+const STRIKES = new Set(['attack', 'hit', ...CHIBI2_DUAL_ANIMS, 'fishCast', 'fishShow', 'standUp']);
+/**
+ * T6: the clip for a basic swing, from what is in both hands. `hand: 'off'` (the server names the off hand) wins; with
+ * no word on whose turn it is the pair alternates by the actor's own swing count: main, off, main, off, both.
+ * Pure — exported for tests. -> a clip name ('attack' when the hands hold no pair).
+ */
+export function swingClip(hold, { hand = null, count = 0, offSeen = false, mainCount = 0 } = {}) {
+  if (!hold) return 'attack';
+  if (hand === 'off') return dualAttackFor(hold, { hand: 'off' }) || 'attack';
+  // once the server has swung the off hand itself (C, play-test 5), a main swing is the main hand's — every third, both
+  return (offSeen ? dualAttackFor(hold, { hand: 'main', step: mainCount }) : dualAttackByCount(hold, count)) || 'attack';
+}
 
 /** Pure LOD choice — exported for tests. `list` = [{ id, kind, d }] -> Set of ids that get a full body. */
 export function chooseFull(list, { fullMax = 30, monsterRange = 120, selfId = null } = {}) {
@@ -273,7 +288,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
   function setAnim(a, name) {
     if (!a.body) { a.anim = name; return; }
     if ((a.kind === 'monster' || a.pet) && !a.humanoid) { if (a.anim !== name) a.body.setAnim(name); }
-    else a.body.setAnim(name, 0.14, name === 'attack' || name === 'hit');
+    else a.body.setAnim(name, name === 'standUp' ? 0.04 : 0.14, STRIKES.has(name));
     a.anim = name;
   }
 
@@ -410,7 +425,9 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       else if (a.mount) want = a.mount.riderClip;
       else if (a.eating && a.speed <= 0.4 && !(a.oneShot && now < a.oneShotUntil)) want = a.eating === 'drink' ? 'drink' : 'sitGround';   // S20: sat down to eat           // Q16: in the saddle; the mount's gait picks ride / rideGallop
       else if (a.swim && (a.kind === 'player' || a.humanoid || a.kind === 'npc')) want = 'swim';      // P25
+      else if (a.oneShot === 'standUp' && now < a.oneShotUntil && a.speed > 0.6) { a.oneShot = null; want = 'walk'; }   // T4: walking off cuts the getting-up short
       else if (a.oneShot && now < a.oneShotUntil) want = a.oneShot;
+      else if (a.fishing && a.speed <= 0.4 && (a.kind === 'player' || a.humanoid)) want = a.fishing === 'tug' ? 'fishReel' : 'fishWait';   // T25: a line in the water
       else {
         a.oneShot = null;
         const sp = a.speed;
@@ -466,14 +483,33 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
   }
 
   // --- events -----------------------------------------------------------------------------------
-  function playAttack(id, targetId) {
+  /**
+   * A swing. `o.hand` / `o.clip` come from the server's event when it has them; a pair of weapons picks its own
+   * strike (T6: main hand, off hand, both — see swingClip). The same swing is often told twice (the snapshot's anim
+   * and the cast event): a second call inside 280 ms is the same swing and does not start another.
+   */
+  function playAttack(id, targetId, o = null) {
     const a = actors.get(id); if (!a || a.dead) return;
-    const t = actors.get(targetId);
+    const t = actors.get(targetId), now = performance.now();
     if (t && !a.self) a.yaw = Math.atan2(t.pos.x - a.pos.x, t.pos.z - a.pos.z);
-    a.oneShot = 'attack'; a.oneShotUntil = performance.now() + (a.kind === 'monster' ? 650 : 600);
-    a.lastCombat = performance.now();
-    setAnim(a, 'attack');
+    a.lastCombat = now;
+    if (now - (a.swingAt || 0) < 280 && !o?.force) return;
+    const people = a.kind === 'player' || a.humanoid;
+    if (o?.hand === 'off') a.offSeen = true;
+    const clip = (people && o?.clip) || (people && a.body?.hold ? swingClip(a.body.hold, { hand: o?.hand, count: a.swingN | 0, offSeen: !!a.offSeen, mainCount: a.mainN | 0 }) : 'attack');
+    a.swingN = (a.swingN | 0) + 1; if (o?.hand !== 'off') a.mainN = (a.mainN | 0) + 1; a.swingAt = now; a.fishing = null;
+    a.oneShot = clip; a.oneShotUntil = now + (clip === 'attack' ? (a.kind === 'monster' ? 650 : 600) : Math.round((CHIBI2_DUAL_SECONDS[clip] || 0.6) * 1000));
+    setAnim(a, clip);
   }
+  /** T25 / T4: play one of the body's one-shot clips (fishCast, fishShow, standUp…) for its own length. */
+  function playClip(id, clip, ms = null) {
+    const a = actors.get(id); if (!a || a.dead || !(a.kind === 'player' || a.humanoid)) return false;
+    a.oneShot = clip; a.oneShotUntil = performance.now() + (ms ?? Math.round((CHIBI2_DUAL_SECONDS[clip] || 1) * 1000));
+    setAnim(a, clip);
+    return true;
+  }
+  /** T25: 'wait' (line out), 'tug' (fighting a fish) or null. Moving, swinging or dying ends it. */
+  function setFishing(id, state) { const a = actors.get(id); if (a) a.fishing = state || null; }
   function playHit(id, fromId, amount) {
     const a = actors.get(id); if (!a) return;
     const src = actors.get(fromId);
@@ -491,11 +527,15 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     if (a.rankMark) a.rankMark.visible = !dead; if (a.pole) a.pole.visible = !dead;
     if (a.dead === dead && (dead ? a.deathAt : true)) { refreshPlate(a); return; }
     a.dead = dead;
-    if (dead) { a.hp = 0; a.deathAt = performance.now(); a.oneShot = null; a.deadPos = { x: a.pos.x, z: a.pos.z }; }
+    if (dead) { a.hp = 0; a.deathAt = performance.now(); a.oneShot = null; a.fishing = null; a.deadPos = { x: a.pos.x, z: a.pos.z }; }
     else {
       // standing back up: drop the corpse pose at once (a crossfade from 'dead' reads as being dragged upright)
+      // T4: a person gets up — off the ground, onto a knee, upright (`standUp` starts in the corpse's own pose, so there
+      // is no drag). A beast, or a body that lay dead for under a second, just stands.
+      const lay = a.deathAt ? performance.now() - a.deathAt : 0;
       a.deathAt = 0; a.fade = 1; a.deadPos = null; a.oneShot = null;
-      if (a.body) { a.anim = null; setAnim(a, 'idle'); }
+      if (a.body && (a.kind === 'player' || a.humanoid) && lay > 900) { a.anim = null; a.oneShot = 'standUp'; a.oneShotUntil = performance.now() + Math.round(CHIBI2_DUAL_SECONDS.standUp * 1000); setAnim(a, 'standUp'); a.stoodAt = performance.now(); }
+      else if (a.body) { a.anim = null; setAnim(a, 'idle'); }
     }
     refreshPlate(a);
   }
@@ -547,5 +587,5 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     p.root.classList.toggle('self-plate', !!a.self);
   }
 
-  return { actors, lodStats, setMount, setEating, add, remove, rekey, say, update, setLook, playAttack, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
+  return { actors, lodStats, setMount, setEating, add, remove, rekey, say, update, setLook, playAttack, playClip, setFishing, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
 }

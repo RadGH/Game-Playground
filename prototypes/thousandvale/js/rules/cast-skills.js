@@ -28,6 +28,7 @@ import {
 import { allyEffects, aimsAtAlly } from './ally.js';
 import { healed as perkHealed, weaveRefund } from './perk-rules.js';
 import { taunt as threatTaunt, threatFromHeal } from './threat.js';
+import { reviveOf } from './tv-skills.js';
 
 /** plan keys this file does not act on yet — reported, never silently dropped */
 export const PENDING_KEYS = [];   // everything a plan can carry is acted on (followers via js/rules/followers.js)
@@ -645,8 +646,122 @@ function runtimeOf(combat) {
     }
     rt.tickPlayers(dt);                // main.js: auras, orbs, trail, the player's statuses, the cast barrier
     tickPools(dt);                     // main.js ticks the pools last in the frame
+    for (const p of field.players) if (p.tvCast) tickRevive(p, dt);     // play-test 5 T4: a revive being cast
+  };
+
+  // ---- play-test 5 T4: REVIVES (data/rules/skills-tv.json `tv.revive`; contract in docs/requests.md "Round 5 contracts — C")
+  /** Fallen party PLAYERS `ch` could raise right now: in its party, dead, within the skill's range (nearest first). */
+  rt.fallenFor = (ch, range = ALLY_RANGE) => field.players
+    .filter(u => u !== ch && u.dead && !u.removed && ch.partyId != null && u.partyId === ch.partyId && Math.hypot(u.x - ch.x, u.z - ch.z) <= range)
+    .sort((p, q) => Math.hypot(p.x - ch.x, p.z - ch.z) - Math.hypot(q.x - ch.x, q.z - ch.z));
+  /** "Fighting" for a revive: a live monster has you as its target. */
+  rt.inCombat = ch => field.monsters.some(m => m.dying == null && m.targetId === ch.id);
+  /** What the room is told about one revive (JSON only — A may hold it while the fallen player decides). */
+  rt.reviveSpec = (ch, row) => {
+    const rv = reviveOf(row);
+    return { skill: row.id || null, name: row.name, hpPct: rv.share ?? 0.5, ...(rv.mp ? { mpPct: rv.mp } : {}), mass: !!rv.mass, style: rv.style || null, by: ch.id, note: reviveNote(rv, statuses), apply: rv.apply ? JSON.parse(JSON.stringify(rv.apply)) : null };
+  };
+  /**
+   * Stand a fallen player up (the offer was accepted, or the room takes no offers): health, mana, a clean slate,
+   * no monster remembers them — then the skill's own rider (a mend over time, a barrier, a weakness).
+   * Safe to call on a body the room has already raised: it only adds what is missing.
+   */
+  rt.reviveUnit = (u, spec = {}, by = null) => {
+    if (!u || u.removed) return false;
+    const wasDead = !!u.dead;
+    combat.endStatuses?.(u);                 // index.js: statuses off + the `fx status on:false` for each
+    if (!combat.endStatuses) { u.statuses = {}; u.barrier = 0; u.castBarrierFor = 0; }
+    u.dead = false; u.killedBy = null;
+    const want = Math.max(1, Math.round(u.maxHp * Math.max(0.01, Math.min(1, spec.hpPct ?? 0.5))));
+    if (wasDead || u.hp < want) u.hp = want;
+    if (spec.mpPct) u.mp = Math.max(u.mp || 0, Math.round((u.maxMp || 0) * Math.min(1, spec.mpPct)));
+    u.revivedBy = by?.id ?? spec.by ?? null;
+    for (const m of field.monsters) if (m.threat?.has(u.id)) { m.threat.delete(u.id); if (m.targetId === u.id) m.targetId = null; }
+    field.emit({ t: 'revive', id: u.id, by: u.revivedBy, hp: u.hp, skill: spec.skill || null, style: spec.style || null, keep: 1 });
+    const a = spec.apply || {};
+    if (a.status) {
+      const base = statusSpec(a.status.id) || {};
+      applyStatus(u, a.status.id, { ...base, ...a.status }, 1);
+      field.emit({ t: 'fx', kind: 'status', id: u.id, status: a.status.id, on: true });
+    }
+    if (a.barrier) { u.barrier = Math.max(u.barrier || 0, Math.round(u.maxHp * (a.barrier.share ?? 0.2))); u.castBarrierFor = a.barrier.seconds ?? 8; }
+    if (a.debuff) {
+      const d = a.debuff;
+      applyStatus(u, d.id || 'grave_touched', { name: d.name || 'Weakened', kind: 'debuff', element: 'shadow', seconds: d.seconds ?? 10, dealLess: d.dealLess || 0, takeMore: d.takeMore || 0 }, 1);
+      field.emit({ t: 'fx', kind: 'status', id: u.id, status: d.id || 'grave_touched', on: true });
+    }
+    return true;
+  };
+  function cancelRevive(ch, why) {
+    const c = ch.tvCast;
+    if (!c) return;
+    ch.tvCast = null;
+    field.emit({ t: 'castX', id: ch.id, ab: c.row.id, why });
+  }
+  rt.cancelRevive = cancelRevive;
+  function tickRevive(ch, dt) {
+    const c = ch.tvCast;
+    if (ch.dead || ch.removed) return cancelRevive(ch, 'dead');
+    if (Math.hypot(ch.x - c.x, ch.z - c.z) > 0.6) return cancelRevive(ch, 'moved');
+    c.left -= dt;
+    if (c.left > 0) return;
+    ch.tvCast = null;
+    finishRevive(ch, c.slot, c.row, c.intent, c.targets);
+  }
+  /** The cast is done: pay for it (Farhold's bar), run the row's own riders, raise or offer each body. */
+  function finishRevive(ch, slot, row, intent, targetIds) {
+    const rv = reviveOf(row);
+    const range = rv.range ?? ALLY_RANGE;
+    const still = rt.fallenFor(ch, range + 2).filter(u => targetIds.includes(u.id));
+    if (!still.length && !fallenFollowers(ch, row)) { field.emit({ t: 'castX', id: ch.id, ab: row.id, why: 'target' }); return { ok: false, why: 'Nobody is left to raise.', refused: 'target' }; }
+    const plan = ch.skills.use(slot);
+    if (!plan.ok) { field.emit({ t: 'castX', id: ch.id, ab: row.id, why: 'notReady' }); return { ok: false, why: plan.why }; }
+    const out = castPlan(combat, ch, plan, { intent: { ...intent, target: null }, slot });
+    const spec = rt.reviveSpec(ch, { ...row, id: plan.skill?.id || row.id });
+    out.revived = [];
+    out.offered = [];
+    for (const u of still) {
+      field.emit({ t: 'fx', kind: 'reviveDone', id: ch.id, on: u.id, ab: spec.skill, style: spec.style, x: u.x, z: u.z });
+      const offered = combat.offerRevive ? combat.offerRevive(ch, u, spec) : null;
+      if (offered && offered.ok !== false) { out.offered.push(u.id); continue; }
+      if (rt.reviveUnit(u, spec, ch)) out.revived.push(u.id);
+    }
+    return out;
+  }
+  /** A row that also carries Farhold's follower `revive` (the cleric's) has something to do with only followers down. */
+  const fallenFollowers = (ch, row) => !!(row.revive && (PF()?.fallen?.(ch) ?? 0) > 0);
+  /**
+   * Begin a revive skill. Refused, before anything is spent, when nobody can be raised or the skill is for out
+   * of combat and you are fighting. A cast time puts up a cast bar; walking, dying or another action ends it.
+   */
+  rt.startRevive = (ch, slot, row, intent = {}) => {
+    const rv = reviveOf(row);
+    const range = rv.range ?? ALLY_RANGE;
+    const name = row.name || 'That';
+    const fallen = rt.fallenFor(ch, range);
+    const named = intent.target != null ? fallen.find(u => u.id === intent.target) : null;
+    const targets = rv.mass ? fallen : (named ? [named] : fallen.slice(0, 1));
+    if (!targets.length && !fallenFollowers(ch, row)) return { ok: false, why: `${name}: no fallen party member within ${range} m.`, refused: 'target' };
+    if (!rv.combat && rt.inCombat(ch)) return { ok: false, why: `${name}: not while you are fighting.`, refused: 'combat' };
+    const ids = targets.map(u => u.id);
+    if (!(rv.castTime > 0)) return finishRevive(ch, slot, row, intent, ids);
+    ch.tvCast = { slot, row, intent, targets: ids, left: rv.castTime, x: ch.x, z: ch.z };
+    const ms = Math.round(rv.castTime * 1000);
+    field.emit({ t: 'castbar', id: ch.id, ab: row.id, name, ms });
+    field.emit({ t: 'fx', kind: 'reviveCast', id: ch.id, on: ids.length === 1 ? ids[0] : ids, ab: row.id, style: rv.style || null, ms, x: targets[0]?.x ?? ch.x, z: targets[0]?.z ?? ch.z });
+    return { ok: true, casting: true, ms, targets: ids };
   };
   return rt;
+}
+
+/** The one line an offer shows the fallen player (also the card's): what they come back with. */
+function reviveNote(rv, statuses = {}) {
+  const a = rv.apply || {};
+  if (a.status) return `You return with ${statuses[a.status.id]?.name || a.status.id}.`;
+  if (a.barrier) return `You return with a barrier worth ${Math.round((a.barrier.share ?? 0.2) * 100)}% of your health.`;
+  if (a.debuff) return `You return ${a.debuff.name || 'weakened'} for ${a.debuff.seconds ?? 10}s.`;
+  if (rv.share >= 1) return 'You return at full health.';
+  return '';
 }
 
 // ============================================================================ helpers
@@ -712,10 +827,14 @@ function aimedEnemy(field, ch, intent, a, range) {
 export function castSkillPlan(combat, ch, slot, intent = {}) {
   // the bar asks this before a summon (Farhold main.js passes `pets.canAdmit`)
   ch.canSummon = (petId, sl) => combat.room.followers?.canAdmit(ch, petId, { name: sl?.name }) ?? { ok: true };
+  const rt0 = runtimeOf(combat);
+  if (ch.tvCast) rt0.cancelRevive(ch, 'acted');          // T4: another cast ends a revive being cast (nothing was spent)
   const pre = ch.skills.check(slot);
   if (!pre.ok) return { ok: false, why: pre.why || 'not ready' };
   const row = ch.skills.rowFor(slot);
   const kind = row?.shape;
+  // play-test 5 T4: a revive skill (its own targeting, cast time and offer; mana and cooldown are paid when it completes)
+  if (reviveOf(row)) return rt0.withCaster(ch, () => rt0.startRevive(ch, slot, { ...row, id: ch.skills.slots[slot]?.id || row.id }, intent));
   // play-test 1 P23: is there something to hit, in reach? asked BEFORE the bar spends mana or starts
   // the cooldown (Farhold spends first, then flies a bolt at nothing). A recast or a channel's second
   // press is never refused here.
@@ -728,6 +847,7 @@ export function castSkillPlan(combat, ch, slot, intent = {}) {
   if (!hasFollowers && kind === 'summon' && !row.summon?.temporary) return { ok: false, why: REFUSED_KINDS.summon };
   const plan = ch.skills.use(slot);
   if (!plan.ok) return { ok: false, why: plan.why };
+  plan.tv = row?.tv || null;                 // Thousandvale-only row fields (a touch heal's reach)
   // the perk forest's Weave: a different skill than the last, inside the window, gives its mana back
   const back = weaveRefund(ch, plan.skill?.id, plan.paidWith === 'mana' ? plan.spent : 0, combat.room.clock.now());
   if (back > 0) ch.mp = Math.min(ch.maxMp, ch.mp + back);
@@ -815,7 +935,15 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
       if (chance > 0 && room.rng() < chance) combat.later(0.26, () => castPlan(combat, ch, { ...plan, mult: plan.mult * 0.5, damage: Math.round(plan.damage * 0.5) }, { echo: true, intent }), ch.id);
     }
 
-    const ground = range => { const s = groundTargetOf(ch, intent, range); plan.at = s; return s; };
+    // play-test 5 T3: a GROUND skill that heals (Mending Post) with a party member targeted lands at their feet
+    // (clamped to its range) and heals them at once; with nobody targeted it lands where you aim and heals you
+    const groundAlly = plan.kind === 'ground' && plan.healFrac > 0 && !plan.sub ? allyTargetOf(rt, ch, intent) : null;
+    const ground = range => {
+      const s = groundAlly && groundAlly !== ch ? groundTargetOf(ch, { aim: { x: groundAlly.x, z: groundAlly.z } }, range) : groundTargetOf(ch, intent, range);
+      plan.at = s;
+      return s;
+    };
+    if (groundAlly) { out.healed = rt.healUnit(ch, groundAlly, Math.round(groundAlly.maxHp * plan.healFrac * (1 + rpg.fx.sum(ch, 'healBonus')))); out.healTarget = groundAlly.id; }
 
     if (plan.kind === 'summon' && plan.summon && typeof plan.summon === 'object') {
       // summonFrom in afterCast puts it down
@@ -879,7 +1007,8 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
       field.emit({ t: 'move', id: ch.id, x: ch.x, z: ch.z, why: 'dash' });
     } else if (plan.kind === 'self') {
       // ally targeting: a heal or a buff on a `self` skill may be aimed at a party member
-      const to = allyTargetOf(rt, ch, intent);
+      // a TOUCH heal (`tv.touch`, Mercy's Touch) only reaches a friend that close; further and it lands on you
+      const to = allyTargetOf(rt, ch, intent, plan.tv?.touch ?? ALLY_RANGE);
       spell({ x: to.x, z: to.z, on: to.id, heal: plan.heal ? 1 : undefined, status: plan.status || undefined });
       if (plan.heal) {
         const share = plan.healFrac || (plan.heal / Math.max(1, ch.maxHp));
@@ -892,9 +1021,10 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
         // ally audit (M2): "you and every follower" (`pets`) is a GROUP buff — you, the party in range
         // and your followers; a mend over time (regen) can be aimed at one ally (+ your followers, as
         // Farhold mends them with you); any other status is personal and stays on the caster.
+        // play-test 5 T2: "all allies" is ONE list everywhere (rt.allies) — a party member's own pet is in it too
         const on = plan.pets ? [ch, ...rt.partyPlayers(ch)] : plan.status === 'regen' ? [to] : [ch];
         for (const u of on) applyStatus(u, plan.status, plan.statusSpec, 1);
-        if (plan.pets || plan.status === 'regen') for (const u of rt.allies(ch)) if (u.owner === ch) applyStatus(u, plan.status, plan.statusSpec, 1);
+        if (plan.pets || plan.status === 'regen') for (const u of rt.allies(ch)) if (u.owner === ch || (plan.pets && u.kind !== 'player' && !on.includes(u))) applyStatus(u, plan.status, plan.statusSpec, 1);
         out.statusOn = on.map(u => u.id);
       }
       if (plan.trail) ch.trail = { left: plan.trail.seconds, step: plan.trail.step || 1.4, radius: plan.trail.radius, burns: plan.trail.burns, power: plan.mult, element: plan.element, lastX: ch.x, lastZ: ch.z };
@@ -934,7 +1064,8 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
         }, ch.id);
       }
       if (plan.ground > 0) rt.dropPool(ch, { x: ch.x, z: ch.z, r: plan.groundRadius || plan.radius, seconds: plan.ground, element: plan.element, power: power * 0.35 });
-      if (plan.healFrac) rt.healUnit(ch, ch, Math.round(ch.maxHp * plan.healFrac));
+      // play-test 5 T3: the heal of an `around` skill (Prayer of Dawn) is a DIRECT heal — the ally you target, else you
+      if (plan.healFrac) { const to = allyTargetOf(rt, ch, intent); out.healed = rt.healUnit(ch, to, Math.round(to.maxHp * plan.healFrac)); out.healTarget = to.id; }
     } else {
       // a bolt (main.js fireBolt), one per projectile
       const n = plan.projectiles || 1;
@@ -971,7 +1102,7 @@ function decorate(rt, ch, plan, opts) {
 const takesRepeats = plan => { const r = plan.repeatSpec; return !!(r && (r.grow || r.scatter || r.alternate || r.target)); };
 
 /** main.js `fireBolt`: flight time from the distance, the hit lands where the body is when it arrives. */
-function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, hop = 0, from = null) {
+function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, hop = 0, from = null, skip = null) {
   const field = combat.field;
   const origin = from || a;
   const homing = (!hop && plan.homing) ? plan.homing : 0;
@@ -984,7 +1115,7 @@ function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, 
       if (len <= plan.range + 1) { dx = ex / (len || 1); dz = ez / (len || 1); target = { enemy: t, distance: len }; }
     }
   }
-  if (!target) target = hitScan(field, origin.x, origin.z, dx, dz, plan.range, 1.4 + homing * 2.6);
+  if (!target) target = hitScan(field, origin.x, origin.z, dx, dz, plan.range, 1.4 + homing * 2.6, skip);
   if (!target && homing > 0) {
     const reach = 2.5 + homing * 3.5;
     for (let t = 4; t <= plan.range && !target; t += 3) {
@@ -1015,7 +1146,12 @@ function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, 
         if (next) {
           const ndx = next.x - at.x, ndz = next.z - at.z, nlen = Math.hypot(ndx, ndz) || 1;
           const keep = plan.chainFalloff ?? 0.65;
-          fireBolt(combat, rt, ch, { ...plan, range: 14 }, a, ndx / nlen, ndz / nlen, { ...strikeOpts, power: (strikeOpts?.power ?? 1) * keep }, collect, intent, hop + 1, { x: at.x, z: at.z });
+          // play-test 5 (found by T15's chain test): the hop starts AT the body just struck, and the scan along it finds
+          // that same body first (distance 0) — in Farhold too (main.js fireBolt -> actors.js hitScan), so a "chain"
+          // struck one enemy two, three, four times and never jumped. Thousandvale's hop skips the body it left;
+          // the parity engine keeps Farhold's behaviour (reported to the lead as a Farhold finding).
+          const leave = combat.room.engine.casterForms ? chase : null;
+          fireBolt(combat, rt, ch, { ...plan, range: 14 }, a, ndx / nlen, ndz / nlen, { ...strikeOpts, power: (strikeOpts?.power ?? 1) * keep }, collect, intent, hop + 1, { x: at.x, z: at.z }, leave);
         }
       }
       void hits;
@@ -1024,10 +1160,10 @@ function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, 
 }
 
 /** actors.js `hitScan` on the ground plane: the nearest live monster along a shot. */
-function hitScan(field, x, z, dx, dz, range, width) {
+function hitScan(field, x, z, dx, dz, range, width, skip = null) {
   let best = null, bestT = Infinity;
   for (const e of field.monsters) {
-    if (e.dying != null) continue;
+    if (e.dying != null || e === skip) continue;
     const ex = e.x - x, ez = e.z - z;
     const t = ex * dx + ez * dz;
     if (t < 0 || t > range) continue;
@@ -1138,6 +1274,9 @@ function dash(combat, rt, ch, plan, a, intent, opts, collect) {
   const allyAlong = () => {
     const t = allyTargetOf(rt, ch, intent, range);
     if (t !== ch) return t;
+    return ownFollowerAlong();
+  };
+  const ownFollowerAlong = () => {
     let best = null, bd = Infinity;
     for (const p of rt.petsOf(ch)) {
       if (p.dying != null || p.decoy) continue;
@@ -1170,6 +1309,15 @@ function dash(combat, rt, ch, plan, a, intent, opts, collect) {
         to = { x: e.x, z: e.z };
         e.x = from.x; e.z = from.z;
         if (d.enemyStatus) { const r = statusRef(d.enemyStatus); combat.landStatus(ch, r.id, { ...(combat.room.engine.statuses[r.id] || {}), ...r }, e, 1); }
+      } else {
+        // play-test 5 T2: the card has always said "…the aimed follower or enemy"; the follower half was never ported.
+        // Your OWN follower only — another player is never moved by somebody else's skill.
+        const pet = ownFollowerAlong();
+        if (pet) {
+          to = { x: pet.x, z: pet.z };
+          pet.x = from.x; pet.z = from.z;
+          if (d.allyBarrier) { pet.barrier = Math.round(pet.maxHp * d.allyBarrier); pet.barrierFor = 6; }
+        }
       }
       break;
     }
@@ -1251,7 +1399,11 @@ function afterCast(combat, rt, ch, plan, ctx) {
       u.barrier = Math.max(u.barrier || 0, worth);
       u.castBarrierFor = b.seconds ?? 6;
     }
-    if (b.pets) Fo?.barrierAll(ch, worth, b.seconds ?? 6);
+    if (b.pets) {
+      Fo?.barrierAll(ch, worth, b.seconds ?? 6);
+      // T2: a party member's own pets are allies too
+      for (const u of rt.allies(ch)) if (u.kind !== 'player' && u.owner !== ch && u.dying == null) { u.barrier = Math.max(u.barrier || 0, Math.round(worth)); u.barrierFor = b.seconds ?? 6; }
+    }
   }
   if (plan.healPets) {
     // MMO: "your followers" becomes the rest of your party (pets included) — a group heal
@@ -1265,22 +1417,21 @@ function afterCast(combat, rt, ch, plan, ctx) {
     if (over > 0) { to.barrier = Math.max(to.barrier || 0, Math.min(Math.round(to.maxHp * plan.overflowBarrier), over)); to.castBarrierFor = 8; }
   }
   if (plan.revive) {
-    // MMO: raise fallen party members near the caster (Farhold: fallen followers)
+    // Farhold's `revive` key raises your own fallen FOLLOWERS, here as there. A fallen PLAYER is raised only by a
+    // revive skill (play-test 5 T4: `row.tv.revive`, startRevive below) — until then a hunter's "Unleash the Hound"
+    // stood dead party members up for free every 18 seconds.
     const share = typeof plan.revive === 'number' ? plan.revive : plan.revive.share ?? 0.5;
-    for (const u of field.players) {
-      if (!u.dead || u === ch || (ch.partyId == null || u.partyId !== ch.partyId)) continue;
-      if (Math.hypot(u.x - ch.x, u.z - ch.z) > ALLY_RANGE) continue;
-      u.dead = false;
-      u.hp = Math.max(1, Math.round(u.maxHp * share));
-      u.revivedBy = ch.id;
-      field.emit({ t: 'revive', id: u.id, by: ch.id, hp: u.hp });
-    }
-    Fo?.reviveAll(ch, share);                 // and fallen followers, as Farhold does
+    Fo?.reviveAll(ch, share);
   }
   if (plan.cleanse) {
     const cl = plan.cleanse;
     rt.cleanseUnit(allyTargetOf(rt, ch, ctx.intent), cl.count ?? 1, cl.types || null);
-    if (cl.pets) { for (const u of rt.allies(ch)) if (u !== ch && !u.owner) rt.cleanseUnit(u, cl.count ?? 1); Fo?.cleanseAll(ch, cl.count ?? 1); }
+    if (cl.pets) {
+      const first = allyTargetOf(rt, ch, ctx.intent);
+      if (first !== ch) rt.cleanseUnit(ch, cl.count ?? 1);          // "every ally" includes you when you aimed it at a friend
+      for (const u of rt.allies(ch)) if (u !== ch && u !== first && u.owner !== ch) rt.cleanseUnit(u, cl.count ?? 1);   // party members and THEIR pets
+      Fo?.cleanseAll(ch, cl.count ?? 1);                            // your own followers (Farhold's own pass)
+    }
   }
   if (plan.link) {
     const l = plan.link;
@@ -1300,7 +1451,9 @@ function afterCast(combat, rt, ch, plan, ctx) {
     const b = plan.selfBuff;
     const id = `buff:${plan.skill?.id || 'skill'}`;
     if (!b.petsOnly) apply(ch, id, { name: b.name || plan.skill?.name || 'Buff', kind: 'buff', element: plan.element, ...b, seconds: b.seconds ?? 8 });
-    if (b.pets || b.petsOnly) for (const u of rt.allies(ch)) if (u !== ch) apply(u, id, { name: b.name || 'Buff', kind: 'buff', ...b, seconds: b.seconds ?? 8 });
+    // T2: `pets` = all allies; `petsOnly` ("For 10s, your followers: …") = your OWN followers and nobody else — it
+    // used to land on every party member as well (Stoke the Familiar gave a whole party +50% damage)
+    if (b.pets || b.petsOnly) for (const u of rt.allies(ch)) if (u !== ch && (b.pets || u.owner === ch)) apply(u, id, { name: b.name || 'Buff', kind: 'buff', ...b, seconds: b.seconds ?? 8 });
     if (b.petsShare) {
       for (const pet of rt.petsOf(ch)) {
         if (pet.dying != null || Math.hypot(pet.x - ch.x, pet.z - ch.z) > 8) continue;

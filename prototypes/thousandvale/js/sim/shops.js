@@ -59,7 +59,12 @@ export function createShops({ data = null, mounts = null, now = () => Date.now()
     if (!(p > 0)) p = Math.round(15 * (RARITY_PRICE[item && item.rarity] || 1));
     return Math.max(1, Math.round(p * (1 + pricing.perItemLevel * (itemLevel(item) - 1)) * (townMult || 1)));
   }
-  const sellPrice = (item, rules) => Math.max(1, Math.floor(price(item, rules) * pricing.sellFactor));
+  // T25 (play-test 5): a fish, junk, a trophy or a cooked meal sells for its OWN price (E's `price` = what a merchant pays;
+  // C scales it by the fish's size) — never the gear formula. Junk is worth nothing (selling it just gets rid of it).
+  const ownPrice = item => item && (item.kind === 'fish' || item.kind === 'junk' || item.kind === 'trophy') && Number.isFinite(item.price);
+  const sellPrice = (item, rules) => (ownPrice(item) ? Math.max(0, Math.round(item.price)) : item && (item.kind === 'crate' || item.kind === 'gift') ? 1 : Math.max(1, Math.floor(price(item, rules) * pricing.sellFactor)));
+  /** A goods-catalog item by id (E's quest `grant` / `reward.goods`: a rod, a tin of worms), or null. */
+  const goodOf = id => (catalog[id] ? good({ id, source: 'good' }, null) : null);
   const engineOf = rules => (rules && rules.room && rules.room.engine) || null;
 
   function pickRarity(weights, cap) {
@@ -97,7 +102,10 @@ export function createShops({ data = null, mounts = null, now = () => Date.now()
     const over = (town && town.stock && town.stock[kindId]) || {};
     let n = 0;
     for (const [cat, row] of Object.entries(k.categories || {})) {
-      const bases = over.bases || row.bases || [];
+      // play-test 5 (E's `minCap: {base: level}` on a category): a late piece is only on the shelf in a town whose `levelCap`
+      // reaches it — without this the new high-level catalog gear was sold in every town
+      const cap = town && Number.isFinite(town.levelCap) ? town.levelCap : 99;
+      const bases = (over.bases || row.bases || []).filter(b => !(row.minCap && row.minCap[b] > cap));
       if (!bases.length) continue;
       // S17 (play-test 4): bases taken IN TURN from a random start, so every base (every weapon family) shows up
       // before any repeats — a random pick per slot left whole families (maces, polearms) out of a 10-slot smithy
@@ -137,7 +145,7 @@ export function createShops({ data = null, mounts = null, now = () => Date.now()
     // for sale; anything else (a base the generator could not make) is dropped rather than sold as its category label.
     return rows.filter(isProduct);
   }
-  return { kindOf, shopOf, stock, price, sellPrice, pricing, kinds, towns, cache };
+  return { kindOf, shopOf, stock, price, sellPrice, pricing, kinds, towns, cache, goodOf, catalog };
 }
 /** S3: a row a player can actually buy — a named item (gear or good) or a mount. */
 export const isProduct = r => !!(r && ((r.mount && r.mount.id) || (r.item && typeof r.item === 'object' && typeof r.item.name === 'string' && r.item.name.trim() && r.item.name !== r.label)));

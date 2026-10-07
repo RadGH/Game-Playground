@@ -1,0 +1,190 @@
+{
+  "_doc": "Stream E (play-test 5, T25 ANGLING). The angling quests of the Torbor Fields, merged into zone 'test' by test.json `include`. Tam Sedgeley stands on the river bank by Torborhold (tools/content-pools.mjs puts her there and writes `npcs` and the first step's `at`; do not hand-edit those two). NEW fields (docs/requests.md 'Round 5 contracts — E'): quest `grant: [{good, count}]` = goods (shops.json goodsCatalog ids) handed over when the quest is ACCEPTED (the rod — a Tool, no weapon slot); `reward.goods: [{id, count}]`; step kinds `catch` {count, fish? (a species id), pool? (true = only a catch from a fish pool counts), rarity? (that rarity or better)} and `cook` {count, meal? (a meal id)} — stream A's quest book hears {kind:'fish', species, rarity, zone, water, legend, pool} and {kind:'cook', recipe}. `startPool: true` on a visit step = the always-open pool nearest Tam (data/provinces/angling-pools.json `start`).",
+  "zone": "test",
+  "part": "angling",
+  "npcs": {
+    "angler_torborhold": {
+      "name": "Tam Sedgeley",
+      "role": "angler",
+      "at": "Torborhold",
+      "greeting": "Ever held a rod? No? Good. No bad habits to fix.",
+      "placedBy": "content-pools"
+    }
+  },
+  "quests": [
+    {
+      "id": "angle_first_cast",
+      "name": "A Line in the Water",
+      "level": 1,
+      "giver": "angler_torborhold",
+      "offer": "See that patch of river where the water can't sit still? That's a fish pool: more fish than sense. Take this rod, it's hazel and it owes me nothing. Walk down, face the water, cast, and wait for the float to dip. Then pull. Not before. Everyone pulls before.",
+      "grant": [
+        {
+          "good": "angling_rod",
+          "count": 1
+        }
+      ],
+      "steps": [
+        {
+          "kind": "visit",
+          "startPool": true,
+          "text": "Walk to the fish pool Tam pointed out",
+          "where": "the rippling water on the river by Torborhold, a short walk along the bank from Tam",
+          "at": {
+            "x": 25208,
+            "z": 5406,
+            "r": 14,
+            "name": "the fish pool"
+          }
+        },
+        {
+          "kind": "catch",
+          "count": 3,
+          "pool": true,
+          "text": "Catch 3 fish from a fish pool",
+          "where": "any fish pool: ripples and jumping fish on the river by Torborhold"
+        },
+        {
+          "kind": "talk",
+          "npc": "angler_torborhold",
+          "text": "Show Tam what you caught",
+          "where": "Tam Sedgeley, on the river bank by Torborhold"
+        }
+      ],
+      "done": "Three! And only one of them looks surprised to be here. Keep the rod. Anywhere there's water you can cast, but the pools are where the good ones crowd, and they move about once you've thinned them.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 6,
+        "goods": [
+          {
+            "id": "bait_worms",
+            "count": 5
+          }
+        ],
+        "crates": [
+          {
+            "slot": "any",
+            "min": "uncommon"
+          }
+        ]
+      },
+      "rewardText": "The Hazel Rod is yours to keep, with a tin of worms and a crate of somebody's lost gear Tam hooked last spring.",
+      "next": "angle_supper"
+    },
+    {
+      "id": "angle_supper",
+      "name": "Supper Is What You Make It",
+      "level": 2,
+      "giver": "angler_torborhold",
+      "offer": "A fish in the bag is worth four coppers. A fish on a stick is supper, and supper mends you faster than a merchant's rations. Catch a couple more, then find a fire: a campfire, an inn hearth, anything that's alight on purpose.",
+      "steps": [
+        {
+          "kind": "catch",
+          "count": 2,
+          "text": "Catch 2 more fish",
+          "where": "any water with a rod in your hand; a fish pool is quicker"
+        },
+        {
+          "kind": "cook",
+          "count": 1,
+          "text": "Cook a fish at a campfire or an inn hearth",
+          "where": "any campfire, or the hearth of the Pail and Plough on the south road"
+        },
+        {
+          "kind": "talk",
+          "npc": "angler_torborhold",
+          "text": "Tell Tam how it tasted",
+          "where": "Tam Sedgeley, on the river bank by Torborhold"
+        }
+      ],
+      "done": "Burnt on one side, raw on the other? Then you did it right. Sit down when you eat it: a meal eaten standing does half the good.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 8,
+        "goods": [
+          {
+            "id": "bait_bread_paste",
+            "count": 5
+          }
+        ],
+        "crates": [
+          {
+            "slot": "hands",
+            "min": "common"
+          }
+        ]
+      },
+      "rewardText": "Bread-paste bait and a crate with a pair of gloves in it, more or less.",
+      "next": "angle_silver_lining"
+    },
+    {
+      "id": "angle_silver_lining",
+      "name": "Silver Lining",
+      "level": 3,
+      "giver": "angler_torborhold",
+      "offer": "The innkeepers pay for silver perch, because silver perch look expensive on a plate. Bring me three and I'll show you where the anglers' jobs get chalked up: every town with a bank has someone like me, and we all want fish we can't be bothered to catch.",
+      "steps": [
+        {
+          "kind": "catch",
+          "count": 3,
+          "fish": "silver_perch",
+          "text": "Catch 3 Silver Perch",
+          "where": "rivers and lakes of the Torbor Fields; they bite at any hour"
+        },
+        {
+          "kind": "talk",
+          "npc": "angler_torborhold",
+          "text": "Bring the perch to Tam",
+          "where": "Tam Sedgeley, on the river bank by Torborhold"
+        }
+      ],
+      "done": "Lovely. Look at the vanity on that one. Now you know enough to be asked for favours: any angler, any town, ask what they're short of.",
+      "reward": {
+        "xp": 0.5,
+        "gold": 12,
+        "crates": [
+          {
+            "slot": "ring",
+            "min": "uncommon"
+          }
+        ]
+      },
+      "rewardText": "Coin, and a crate that rattles like a ring.",
+      "next": "angle_the_patient"
+    },
+    {
+      "id": "angle_the_patient",
+      "name": "The Patient One",
+      "level": 4,
+      "giver": "angler_torborhold",
+      "offer": "There's a fish in this river older than the mill. Old Ploughshare. Comes up at dawn, takes one bait a year, and has my second-best hook in its lip. You're not ready for it. Prove me wrong by degrees: land me something uncommon first.",
+      "steps": [
+        {
+          "kind": "catch",
+          "count": 1,
+          "rarity": "uncommon",
+          "text": "Catch a fish of uncommon quality or better",
+          "where": "the better fish pools, a walk away from the roads; your skill decides which you may fish"
+        },
+        {
+          "kind": "talk",
+          "npc": "angler_torborhold",
+          "text": "Show Tam the catch",
+          "where": "Tam Sedgeley, on the river bank by Torborhold"
+        }
+      ],
+      "done": "Well. That's a proper fish. Every zone in the Downs has one like Old Ploughshare, a legend with a name, and each wants its own water and its own hour. Your journal keeps count. So do I.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 20,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "rare"
+          }
+        ]
+      },
+      "rewardText": "A heavy purse and a crate Tam swears came up on a line: a weapon, rare or better."
+    }
+  ]
+}

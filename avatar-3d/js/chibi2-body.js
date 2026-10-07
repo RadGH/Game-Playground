@@ -20,6 +20,8 @@
 import * as THREE from 'three';
 import { shade } from '../../avatar-2d/js/render.js';
 import { profile, taperedCurve } from './chibi2-geometry.js';
+// PLAY-TEST 5 (T23): the plain garment under each g5_ armour piece — new ids only (chibi2-gear5-ids.js)
+import { G5_TOP_STYLES, G5_BOTTOM_STYLES, G5_SHOE_STYLES } from './chibi2-gear5-ids.js';
 
 const sphere = () => new THREE.SphereGeometry(1, 10, 6);
 const low = () => new THREE.SphereGeometry(1, 8, 5);
@@ -69,6 +71,7 @@ export const TOP_STYLES = {
   tank: { sleeve: 'none', collar: 'scoop', front: 'none', hem: 'none' },
   rags: { sleeve: 'short', collar: 'round', front: 'patches', hem: 'jagged', belt: 'rope' },
   harness: { sleeve: 'none', bare: true, collar: 'none', front: 'harness', hem: 'none', belt: 'wide', cuffs: 'bracers' },
+  ...G5_TOP_STYLES,
 };
 export const topStyle = id => TOP_STYLES[id] || TOP_STYLES.tunic;
 /** Tops whose hem reaches the knee or lower — the robe family. Gear and the hips read this. */
@@ -90,6 +93,7 @@ export const BOTTOM_STYLES = {
   skirt: { leg: 0, garment: 'skirt' },
   kilt: { leg: 0, belt: true, garment: 'kilt' },
   loincloth: { leg: 0, belt: 'rope', garment: 'loincloth' },
+  ...G5_BOTTOM_STYLES,
 };
 export const bottomStyle = id => BOTTOM_STYLES[id] || BOTTOM_STYLES.pants;
 
@@ -105,6 +109,7 @@ export const SHOE_STYLES = {
   pointed: { shaft: 0.3, foot: 'pointed' },
   hooves: { shaft: 0, foot: 'hoof' },
   wraps: { shaft: 0.55, foot: 'wrap' },
+  ...G5_SHOE_STYLES,
 };
 export const shoeStyle = id => SHOE_STYLES[id] || SHOE_STYLES.boots;
 

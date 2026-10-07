@@ -1,5 +1,6 @@
 // The ADMIN page (stream A, PLAN §11.7): online players, rooms, kick / timed mute / ban (account + address hash) /
-// rename, the last hour of chat, reports, password-reset codes, the economy log, server stats, and two owner
+// rename, the last hour of chat, reports, FEEDBACK (play-test 5 T21: suggestions + bug reports with new / approved /
+// declined / trashed), password-reset codes, the economy log, server stats, and two owner
 // buttons (start a realm event now, a realm-wide announcement).
 //
 // SAFETY: it listens on 127.0.0.1 ONLY (refuses any other host) and is never tunnelled — reach it by SSH tunnel
@@ -56,6 +57,9 @@ export async function startAdmin({ port, gateway, status, store, log = () => {},
     '/api/rooms': async () => (status().rooms || []),
     '/api/chat': async q => A.chat(q.since ? +q.since : Date.now() - 3600000),
     '/api/reports': async () => A.reports(200),
+    // play-test 5 T21: feedback (suggestions + bug reports) — ?state=new|approved|declined|trashed (none = all but trashed) &kind=bug|suggestion
+    '/api/feedback': async q => A.feedback({ ...(q.state ? { state: String(q.state) } : {}), ...(q.kind ? { kind: String(q.kind) } : {}), limit: Math.max(1, Math.min(100, +q.limit || 100)), ...(q.before ? { before: +q.before } : {}) }),
+    '/api/admins': async () => A.admins(),
     '/api/resets': async () => A.resets(),
     '/api/economy': async q => {
       const hours = Math.max(1, Math.min(24 * 30, +q.hours || 24));
@@ -73,6 +77,7 @@ export async function startAdmin({ port, gateway, status, store, log = () => {},
     '/api/unban': async b => A.unban(num(b.account)),
     '/api/rename': async b => A.rename(num(b.char), String(b.name || '')),
     '/api/report-done': async b => ({ ok: await A.handleReport(num(b.id)) }),
+    '/api/feedback-state': async b => A.feedbackState(num(b.id), String(b.state || ''), b.note != null ? String(b.note).slice(0, 500) : null),
     '/api/announce': async b => ({ ok: A.announce(b.text) }),
     '/api/event': async b => ({ ok: A.forceEvent(b.id ? String(b.id) : null, Math.max(0, +b.announceMs || 60000)) }),
   };

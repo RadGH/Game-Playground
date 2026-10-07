@@ -25,6 +25,13 @@
       "role": "pilgrim",
       "at": "drowned_shrine",
       "greeting": "I came to pray. The shrine had other plans and also frogs."
+    },
+    "angler_orrinsford": {
+      "name": "Sister Brindle",
+      "role": "angler",
+      "at": "Orrinsford",
+      "greeting": "The Prior calls it idleness. I call it contemplation with a hook in it.",
+      "placedBy": "content-pools"
     }
   },
   "quests": [
@@ -48,10 +55,12 @@
       "reward": {
         "xp": 0.4,
         "gold": 6,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "bells_for_halsbridge"
     },
@@ -73,7 +82,13 @@
       "done": "The bell rings clean. My ears thank you; my head thanks you more.",
       "reward": {
         "xp": 0.35,
-        "gold": 5
+        "gold": 5,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {

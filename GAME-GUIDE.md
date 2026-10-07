@@ -582,6 +582,8 @@ attributes differ — which fails as a refusal, not a crash, so it looks like a 
 ## Reviewing gear models, and measuring one (the Armory)
 
 `armory/` lists every wearable and holdable Chibi 2 model from the gear catalog
+
+**Gear catalog** (`avatar-3d/js/gear-catalog.js`, pure): `loadGearCatalog()` → `cat.find({ gameSlot, archetype, type, form, isNew })`, `cat.forItem(item)`, `applyGear(avatar, rows)`. 259 models, 66 of them the `g5_` set (one per armour slot × cloth/leather/mail/plate, per weapon type, per shield and focus kind, six wands + six staves by attack form, cloak/lantern/belt/torc/ring). Hands are `top.gloves`, rings `accessory.ring`. See `avatar-3d/CHIBI2.md` "Gear catalog".
 (`avatar-3d/data/gear-catalog.json`, reader `avatar-3d/js/gear-catalog.js`): source file and builder, triangles,
 size in metres, grip, which game items map to it, a 3D preview in either hand or both with any animation, and
 the in-game icon. Link straight to a model: `armory/#id=fh_daggers&hand=both&anim=flurry`. When you add a model,

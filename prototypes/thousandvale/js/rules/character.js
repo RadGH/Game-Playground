@@ -28,6 +28,7 @@ export function createCharacter(engine, { id, classId = 'warrior', level = 1, na
       const piece = attuneWeapon(rpg.loot.generate(key, 'normal', 'low', { rng: roll }));
       if (piece) rpg.equip(ch, piece, { force: true });
     }
+    for (const it of Object.values(ch.equipment || {})) if (it) engine.finishItem?.(it, { fresh: false, convert: false });
     // Farhold also hands over a torch, a mount and a gathering tool here. None of them change a
     // combat number at level 1 and their modules pull in Three.js (light.js), so they are left to
     // the inventory stream; tests/C/character.test.mjs pins that the sheet's damage is unaffected.
@@ -124,7 +125,14 @@ export function restoreGear(engine, ch, blob) {
   for (const slot of Object.keys(ch.equipment || {})) ch.equipment[slot] = null;
   for (const [slot, item] of Object.entries(blob.equipment || {})) {
     if (!item || typeof item !== 'object') continue;
-    engine.rpg.equip(ch, JSON.parse(JSON.stringify(item)), { into: slot, force: true });
+    const copy = JSON.parse(JSON.stringify(item));
+    engine.finishItem?.(copy, { fresh: false, convert: false });        // an older save's caster item gets its card line (it keeps what it did)
+    // play-test 5 T7: the two HANDS are put back exactly as they were saved. Farhold's `equip` clears the off hand
+    // when a two-hander goes into the main hand unless the sheet has Doubled Grasp — and a login restores the gear
+    // BEFORE the perks, so a second two-hander fell into a bag that is then overwritten: gone on every login.
+    // …and so are Thousandvale's own slots (a cloak, a belt), which Farhold's `equip` does not know
+    if (slot === 'weapon' || slot === 'offhand' || slot === 'back' || slot === 'waist') ch.equipment[slot] = copy;
+    else engine.rpg.equip(ch, copy, { into: slot, force: true });
   }
   ch.bag = Array.isArray(blob.bag) ? JSON.parse(JSON.stringify(blob.bag)) : [];
   engine.rpg.refresh(ch, { full: true });

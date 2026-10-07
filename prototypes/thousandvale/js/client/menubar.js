@@ -14,6 +14,8 @@ const I = {
   journal: '<path d="M5 4a2 2 0 0 1 2-2h12v18H7a2 2 0 0 0-2 2Z"/><path d="M5 20V4"/><path d="M9 7h6M9 11h6"/>',
   skills: '<path d="M12 2 15 9l7 1-5 5 1.5 7L12 18.5 5.5 22 7 15 2 10l7-1Z"/>',
   perks: '<circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><circle cx="12" cy="12.5" r="2.2"/><path d="M12 7.2v3.1M10.4 14l-3.8 2.6M13.6 14l3.8 2.6"/>',
+  sheet: '<circle cx="12" cy="6" r="3"/><path d="M12 9v7M8 12h8M12 16l-3 5M12 16l3 5"/>',
+  feedback: '<path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8Z"/><path d="M12 8v5"/><path d="M12 16h.01"/>',
   help: '<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
 };
 // Friends, guild, mail and the Group Finder live as TABS of the Party menu (play-test P18, ui/party-hub.js).
@@ -22,9 +24,11 @@ export const MENU = [
   { id: 'map', key: 'M', label: 'Map' },
   { id: 'journal', key: 'J', label: 'Journal — your quests' },
   { id: 'bag', btn: 'bag-btn', key: 'B', label: 'Bag and gear' },
+  { id: 'sheet', key: 'V', label: 'Character — stats and damage' },
   { id: 'skills', key: 'K', label: 'Skills and talents' },
   { id: 'perks', key: 'N', label: 'Perk forest' },
   { id: 'account', key: '', label: 'Account' },
+  { id: 'feedback', key: '', label: 'Feedback — a suggestion or a bug report' },
   { id: 'help', key: 'F1', label: 'Controls' },
 ];
 

@@ -196,7 +196,7 @@ function aim(p, side, pitch, roll = 0, yaw = 0, edgeAxis = '+x') {
 
 /** Where each kind of weapon points at rest, while walking, and at the ready. */
 const REST_PITCH = {
-  blade: { idle: -0.95, walk: -0.95, ready: -1.85 },
+  blade: { idle: -0.95, walk: -0.95, ready: -2.1 },          // ready (2026-10-06): was -1.85, 31 degrees off a level forearm — the hilt hid in the wrist
   dagger: { idle: -0.8, walk: -0.8, ready: -1.6 },
   // 2026-09-25: a one-handed hammer, mace or axe hung head-down by the boot at -0.55; carried with
   // the head up and forward it reads as held rather than dragged ("back 45-90 degrees in his hand")
@@ -204,7 +204,7 @@ const REST_PITCH = {
   heavy: { idle: 2.5, walk: 2.5, ready: -2.1 },          // idle/walk: over the shoulder
   polearm: { idle: -PI + 0.12, walk: -PI + 0.2, ready: -1.45 },
   staff: { idle: 0.05, walk: 0.1, ready: 0.15 },        // staffs carry the topper at +y: pitch is the butt
-  wand: { idle: -0.9, walk: -0.9, ready: -1.5 },
+  wand: { idle: -0.9, walk: -0.9, ready: -2.0 },             // ready (2026-10-06): was -1.5, dead in line with the raised forearm
   crossbow: { idle: 0, walk: 0, ready: 0 },              // the stock lies along +z, so pitch 0 holds it level
   // a bow is built for the SHOT (limbs up the hand's +z with the arm held out, belly toward -y), so
   // the same pitch that holds it level in the shot stands it upright in a hanging hand
@@ -214,6 +214,23 @@ const REST_PITCH = {
   torch: { idle: -2.45, walk: -2.45, ready: -2.2 },
   caster: null, none: null, shield: null, book: null, orb: null,
 };
+
+/** Where a weapon waits while the OTHER hand strikes: up and forward, clear of the body. */
+const GUARD_PITCH = { blade: -2.05, dagger: -1.9, haft: -2.1, heavy: -2.2, polearm: -1.6, wand: -1.7 };
+
+/**
+ * A FIST HOLDS A HANDLE ACROSS THE PALM (2026-10-06). `aim` points a weapon in the chest's frame, which is right
+ * for a strike and wrong for carrying: whenever the forearm happens to point the same way as the aim, the handle
+ * lies along the forearm and vanishes into the wrist, and the blade seems to grow out of the knuckles ("held 90
+ * degrees wrong, not by the handle" — worst on daggers at the ready, where forearm and blade both pointed straight
+ * forward). This is the other way to hold something: a fixed turn of the GRIP relative to the hand, so the weapon
+ * rides the fist wherever the arm goes — point forward of the knuckles, pommel out the back of the fist.
+ * `how` is 'idle' (a relaxed 46 degrees) or 'ready' (63 degrees: point up when the forearm is level).
+ */
+const FIST = { idle: -0.8, ready: -1.1 };
+function fistGrip(p, side, how = 'idle', k = 1) {
+  p['grip' + side] = [(FIST[how] ?? how) * k, 0, 0];
+}
 
 // ---------------------------------------------------------------------------- the clips
 
@@ -314,7 +331,7 @@ function base(ctx) {
 function carry(p, ctx, mode, swing = 0) {
   const h = ctx.hold, aims = {};
   const rp = REST_PITCH[h.right];
-  if (h.right === 'heavy' && !h.dualTwo && mode !== 'ready') {
+  if (h.right === 'heavy' && mode !== 'ready') {            // (2026-10-06: also with a second two-hander in the left hand — the right one hung at the hip pointing backwards)
     // a two-hander over the right shoulder: hand at the chest, forearm up, the blade back past the head
     p.armR = [-0.55 + swing * 0.1, 0.1, 0.38]; p.elbowR = [-2.05, 0, 0];
     aims.R = [rp[mode] ?? rp.idle, 0.2, 0.15];
@@ -323,7 +340,8 @@ function carry(p, ctx, mode, swing = 0) {
     p.armR = [-0.62, 0, -0.32]; p.elbowR[0] = -0.95;
     p.armL = [-0.85, 0, 0.42]; p.elbowL[0] = -0.8;
     aims.R = [rp.ready, 0.1, h.right === 'polearm' ? -0.35 : -0.15];
-  } else if (rp) aims.R = [rp[mode] ?? rp.idle, 0, 0];
+  } else if (h.right === 'dagger') { fistGrip(p, 'R', mode === 'ready' ? 'ready' : 'idle'); aims.R = false; }     // a knife rides the fist (see fistGrip)
+  else if (rp) aims.R = [rp[mode] ?? rp.idle, 0, 0];
   if (h.right === 'polearm' && mode !== 'ready') { p.armR[2] += 0.08; p.elbowR[0] = -0.55; aims.R = [rp[mode], 0, 0]; }
   if (h.right === 'staff') { p.elbowR[0] = mode === 'ready' ? -0.9 : -0.45; p.armR[0] += mode === 'ready' ? -0.3 : 0; aims.R = [rp[mode] ?? 0, 0, 0]; }
   if (h.right === 'wand' || h.right === 'caster') p.elbowR[0] = mode === 'ready' ? -1.1 : -0.35;
@@ -339,7 +357,8 @@ function carry(p, ctx, mode, swing = 0) {
   else if (h.dualTwo && h.left === 'heavy') {
     if (mode === 'ready') { p.armL = [-0.6, 0, 0.1]; p.elbowL[0] = -0.9; p.armR = [-0.6, 0, -0.1]; p.elbowR[0] = -0.9; aims.L = [-2.0, 0, -0.3]; aims.R = [-2.0, 0, 0.3]; }
     else { p.armL = [-0.55 + swing * 0.1, -0.1, -0.38]; p.elbowL = [-2.05, 0, 0]; aims.L = [2.5, -0.2, -0.15]; }
-  } else if (lp) aims.L = [lp[mode] ?? lp.idle, 0, 0];
+  } else if (h.left === 'dagger') { fistGrip(p, 'L', mode === 'ready' ? 'ready' : 'idle'); aims.L = false; }
+  else if (lp) aims.L = [lp[mode] ?? lp.idle, 0, 0];
   return aims;
 }
 
@@ -365,6 +384,22 @@ function poseAt(name, u, ctx) {
   aims = clip(p, u, cycle, ctx, out);
   if (aims === undefined) aims = carry(p, ctx, 'idle');
   out.aim = aims || {};
+  /**
+   * NO WEAPON IS EVER LEFT UN-AIMED (2026-10-06, Thousandvale play-test 5, T22: "dual-wielded daggers are held 90
+   * degrees wrong, not by the handle"). A held item is authored running straight out of the fist along the forearm
+   * and the GRIP's rotation is what turns it into something a fist could hold. Every strike written for the main
+   * hand returns an aim for `R` only, so for the length of that clip the second weapon lost its grip rotation and
+   * lay along the left forearm like a spike strapped to the wrist — which is every swing a dual wielder makes. The
+   * same thing happened to the main hand in the few clips that aim nothing (`boat`, `castBook`). A hand that holds
+   * a weapon and was given no aim now holds it the way a fist holds a handle (`fistGrip`): across the palm.
+   */
+  if (!HANDS_FREE.has(name)) for (const [s, kind, k] of [['R', h.right, 1], ['L', h.left, -1]]) {
+    if (s in out.aim || !REST_PITCH[kind]) continue;
+    if (s === 'R' && h.left === 'bow') continue;
+    const one = ONE_SHOTS.has(name) && name !== 'dead' && name !== 'jump' && name !== 'hit';
+    if (kind === 'staff' || kind === 'bow' || kind === 'torch' || kind === 'crossbow') out.aim[s] = [REST_PITCH[kind][one ? 'ready' : 'idle'], 0, 0];
+    else fistGrip(p, s, one ? 'ready' : 'idle');
+  }
   for (const s of ['R', 'L']) if (out.aim[s]) aim(p, s, ...withEdge(out.aim[s], h, s));
   return out;
 }
@@ -1082,6 +1117,32 @@ const CLIPS = {
 };
 
 const rigLeg = ctx => ctx.rig.leg;
+
+/**
+ * CLIPS FROM ANOTHER FILE (2026-10-06). An opt-in family can live in its own module (chibi2-motion-dual.js is the
+ * first: dual-wield strikes, angling, standing back up) and add itself here, so this file stops being the only
+ * place a clip can be written. `defs` is `{ name: { pose(p, u, cycle, ctx, out), seconds, oneShot?, handsFree? } }`.
+ * A name that already exists is refused: nothing a game plays today can be replaced from outside.
+ * Registering builds nothing — a clip is only generated for a character whose `anims` list names it.
+ */
+export function registerClips(defs) {
+  for (const [name, d] of Object.entries(defs)) {
+    if (CLIPS[name]) { if (CLIPS[name] === d.pose) continue; throw new Error(`chibi2-motion: clip "${name}" already exists`); }
+    CLIPS[name] = d.pose; LENGTHS[name] = d.seconds || 1;
+    if (d.oneShot) ONE_SHOTS.add(name);
+    if (d.handsFree) HANDS_FREE.add(name);
+  }
+}
+/**
+ * One frame of one clip for a rig, BEFORE the follow-through pass: `{ pose, aim: { R?, L? }, bob, … }`. For tests
+ * and tools (the grip audit asks "is the off hand's weapon aimed in every clip?" without building a mesh).
+ */
+export function sampleClip(rig, name, u) {
+  const names = rig.bones.map(b => b.name).filter(n => !n.startsWith('eye') && !n.startsWith('pupil'));
+  return poseAt(name, u, { names, hold: rig.hold || HOLD_NONE, posture: rig.posture || { chest: 0, head: 0, knees: 0 }, R: rig.round || 0, rig });
+}
+/** The helpers every clip here is written with, lent to the opt-in clip files. */
+export const MOTION_KIT = { ss, env, phases, stance, carry, restAims, REST_PITCH, GUARD_PITCH, END, base, PI, fistGrip, FIST, clip: name => CLIPS[name] };
 
 function swimPose(p, name, cy, o) {
   const stroke = sin(cy);

@@ -19,6 +19,7 @@
 // Unbinder in town, who charges gold — `retrainPrice`).
 
 import { TALENT_LIBRARY, describeNode, describeMod, nodeFor } from './farhold.js';
+import { whoText, whoKey } from './wording.js';
 
 export const TIER_LEVELS = [3, 8, 18, 28];
 /**
@@ -133,7 +134,10 @@ const TEXT = new Map();
 export function nodeText(node, row, statuses = {}, skills = {}) {
   const key = row && node?.id ? `${row.name}|${node.tier}|${node.id}|${node.bespoke ? 1 : 0}` : null;
   if (key) { const hit = TEXT.get(key); if (hit && hit.row === row) return hit.text; }
-  const text = nodeTextRaw(node, row, statuses, skills);
+  // play-test 5 T2: who the node touches, in Thousandvale's one vocabulary (js/rules/wording.js)
+  const said = whoText(nodeTextRaw(node, row, statuses, skills), { ...(row || {}), ...(node.mod || {}), ...((node.mod || {}).set || {}) });
+  const k = whoKey(said);
+  const text = k ? `${said} ${k}` : said;
   if (key) TEXT.set(key, { row, text });
   return text;
 }

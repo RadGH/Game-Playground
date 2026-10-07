@@ -23,6 +23,21 @@ export const RULES_DATA_FILES = {
   lootPool: '../../data/rules/loot-pool.json',
   affixes: '../../data/rules/affixes.json',            // play-test 4 S4: champions + rares in the wilds (js/rules/affixes.js)
   armourTiers: '../../data/rules/armour-tiers.json',
+  // play-test 5: T3/T4 skill changes, T15 caster forms, T5 starter kits, T25 angling numbers, T9/T17 crates + conversion
+  tvSkills: '../../data/rules/skills-tv.json',
+  casterForms: '../../data/rules/caster-forms.json',
+  fishing: '../../data/rules/fishing.json',
+  crates: '../../data/rules/crates.json',
+  tvGear: '../../data/rules/gear-tv.json',
+};
+/**
+ * Files that belong to ANOTHER stream and may not be there yet (or may be half-written while that stream works):
+ * read if present, `null` otherwise — never an error. E's angling text (T25) and F's gear catalog (T23).
+ */
+export const OPTIONAL_DATA_FILES = {
+  starterKits: '../../data/rules/starter-kits.json',
+  angling: '../../data/provinces/angling.json',
+  gearCatalog: '../../../../avatar-3d/data/gear-catalog.json',
 };
 
 /** URL of one data file, resolved against this module. */
@@ -40,6 +55,9 @@ export function rulesDataUrl(key) {
 export async function loadRulesData(readJson) {
   const out = {};
   for (const key of Object.keys(RULES_DATA_FILES)) out[key] = await readJson(rulesDataUrl(key));
+  for (const [key, p] of Object.entries(OPTIONAL_DATA_FILES)) {
+    try { out[key] = await readJson(new URL(p, import.meta.url)); } catch { out[key] = null; }
+  }
   out.encounters = await loadEncounters(readJson);
   return out;
 }

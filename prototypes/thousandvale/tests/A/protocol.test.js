@@ -4,7 +4,7 @@ import { CLIENT_MSGS, SERVER_MSGS, validate, parseFrame, createBuckets, cleanNam
 import { readFileSync } from 'node:fs';
 
 const GOOD = {
-  hello: { v: 1, build: 'dev' }, guest: { human: 'XXXX.DUMMY.TOKEN.XXXX' }, auth: { token: 'a'.repeat(64) }, chars: {}, create: { name: 'Aldra', cls: 'warrior', look: { race: 'elf' } },
+  hello: { v: 1, build: 'dev' }, guest: { human: 'XXXX.DUMMY.TOKEN.XXXX' }, auth: { token: 'a'.repeat(64) }, chars: {}, create: { name: 'Aldra', cls: 'warrior', look: { race: 'elf' }, kit: { armour: 'a1', weapons: 'w2' } },
   play: { char: 3, join: 'ABCDE' }, party: { op: 'group', code: 'test/wilds:1:42' }, chat: { ch: 'party', text: 'hi all' }, ignore: { name: 'Bren', on: true },
   use: { id: 12 }, travel: { to: 'ws:test:t0' }, trace: { kind: 'campfire' }, quest: { op: 'accept', id: 'wolves_at_the_fold', npc: 40 }, trade: { op: 'offer', id: 3, items: ['p0-ab12cd34-1f'], gold: 10 }, item: { op: 'equip', uid: 'p0-ab12cd34-1f', slot: 'head' }, ping: { c: 12.5 }, enter: { ticket: 'abc' }, in: { s: 1, dt: 50, mx: 0.5, mz: -0.5, yaw: 1.2, b: 1 },
   cast: { slot: 0, aim: { x: 1, z: 2 }, target: 7, ct: 1000, held: 1.5 }, target: { id: 4 }, say: { text: 'hi' }, respawn: {}, leave: {},
@@ -16,6 +16,9 @@ const GOOD = {
   loot: { op: 'take', id: 12, uid: 'p0-ab-1' }, shop: { op: 'buy', npc: 7, id: 's3' }, mount: { op: 'summon', id: 'pony' },
   barber: { npc: 9, look: { race: 'elf', seed: 3 } }, pref: { k: 'showHelm', v: false }, follow: { id: 4 }, inspect: { id: 4 }, bind: { npc: 5 },
   settings: { op: 'set', data: { tradeFriendsOnly: true } }, look: { char: 2, look: { race: 'dwarf', seed: 9 } },
+  // play-test 5
+  kits: { cls: 'warrior' }, revive: { op: 'accept', id: 3 }, sheet: {}, feedback: { kind: 'bug', text: 'The wolves never came.', ctx: { where: { x: 1, z: 2 }, logs: ['a', 'b'] } },
+  admin: { op: 'report', id: 4, state: 'approved', note: 'good one' }, fish: { op: 'land', held: 0.7 }, cook: { id: 'cook_fish_on_a_stick', n: 2 },
 };
 
 test('every client message type has a valid example and the example passes', () => {

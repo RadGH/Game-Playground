@@ -25,6 +25,13 @@
       "role": "miner",
       "at": "dry_well",
       "greeting": "Down the well's quicker than the shaft, if you don't mind the rats."
+    },
+    "angler_copperdell": {
+      "name": "Dunmer Slagfoot",
+      "role": "angler",
+      "at": "Copperdell",
+      "greeting": "Twelve hours underground, then I come up here and stare at water. Do not talk to me about ore.",
+      "placedBy": "content-pools"
     }
   },
   "quests": [
@@ -57,10 +64,12 @@
       "reward": {
         "xp": 0.5,
         "gold": 10,
-        "item": {
-          "tier": "uncommon",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "eels_and_omens"
     },
@@ -84,7 +93,13 @@
       "done": "Lovely bright ones. Lamps for everybody. Mind your eyebrows.",
       "reward": {
         "xp": 0.35,
-        "gold": 6
+        "gold": 6,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {

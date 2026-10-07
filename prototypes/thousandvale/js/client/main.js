@@ -60,9 +60,14 @@ import { createTransition, isJump } from './transition.js';
 import { createSpells } from './spells.js';
 import { createStatusSync } from './status-sync.js';
 import { createWeaponFx } from './weapon-fx.js';
+import { createFormFx } from './form-fx.js';             // play-test 5 (D-world): T15 caster forms, T16 sceptre swings
+import { createReviveFx } from './revive-fx.js';         // T4: each class's revive
+import { createAngling } from './angling-view.js';      // T25: rod, float, line, catch, fish pools
+import { basicReach as reachOf, shortenReach } from './reach.js';   // T14: walk into the attack form's real reach
 import { createLootMarkers } from './loot-marker.js';
 import { makeGlowTexture } from './decor.js';
 import { createUi2 } from './ui/pt2.js';          // D-UI play-test 2: menus, loot, rolls, shops, trade, pause/settings, portraits, editor
+import { createUi5 } from './ui/pt5.js';          // D-UI play-test 5: kit step, crates, event tracker, character sheet, feedback, angling
 import { savedQuality } from './ui/settings.js';
 import { lookWith, lookCustom } from './ui/appearance-core.js';
 import { avatarFor } from './looks.js';
@@ -110,6 +115,10 @@ let SKILLS = null; loadSkillData().then(d => { SKILLS = d?.skills || null; windo
 const spells = createSpells(scene, { camera, renderer: view.renderer, actors, quality, lights: LIGHTS, groundY: (x, z) => groundY(x, z), skillOf: id => SKILLS?.[id] || null });
 // R5: every weapon's basic attack drawn (swing crescents, staff spells, shot flashes)
 const weaponFx = createWeaponFx(scene, { spellFx: spells.fx, actors, groundY: (x, z) => groundY(x, z), targetOf: id => (id === S.selfId ? S.target : null) });
+// play-test 5: a look per caster attack form + the sceptre's elemental swing (T15/T16), each class's revive (T4), angling (T25)
+const formFx = createFormFx(scene, { spellFx: spells.fx, actors, groundY: (x, z) => groundY(x, z) });
+const reviveFx = createReviveFx({ forms: formFx, spellFx: spells.fx, actors, groundY: (x, z) => groundY(x, z) });
+const angling = createAngling(scene, { actors, forms: formFx, spellFx: spells.fx, camera, groundY: (x, z) => groundY(x, z), waterAt: (x, z) => (D.view ? null : WS.terrain.waterAt(x, z)), selfId: () => S.selfId });
 // Q3/S23: a corpse with loot for you sparkles, tinted by the best rarity on it
 const lootMarks = createLootMarkers({ actors, glowTexture: makeGlowTexture() });
 // Q8: auras follow the server's info.st on every body (late arrivals see them; a death clears them)
@@ -227,7 +236,7 @@ const chat = createChat({ net: () => S.net, hud, social, me, onTyping: on => con
   openAccount: () => account.panel.open(), openFriends: () => friends.panel.open(),
   friendAdd: n => friends.add(n), friendRemove: n => friends.remove(n), isFriend: n => friends.isFriend(n),
   guildInvite: n => guild.invite(n), canGuildInvite: () => guild.canInvite(),
-  command: (cmd, arg, rest) => ui2.command(cmd, arg, rest),
+  command: (cmd, arg, rest) => ui2.command(cmd, arg, rest) || ui5.command(cmd, arg, rest),
 } });
 hud.chat = chat.line;                 // every system/combat/loot line lands in the chat window's All tab
 hud.focusChat = prefill => chat.focus(prefill);
@@ -246,8 +255,13 @@ const ui2 = createUi2({ net: () => S.net, atlas: ui.atlas, hud, actors, controls
   self: () => S.self, targetId: () => S.target, setTarget: id => setTarget(id), infoOf: id => S.mirror.infos.get(id) || null,
   avatarFor, createBody: async av => (await import('../../../../avatar-3d/js/chibi2.js')).createChibi2Character(av), defaultLook, races: PLAYABLE_RACES, raceNames: RACE_NAMES,
   titleLook: () => S.look, onLogout: () => { try { S.net?.leave(); } catch {} backToTitle(); },
-  onLookPreview: (look, mode) => previewLook(look, mode), onLookSave: look => { S.look = look; store.set('look', look); previewLook(look, 'title'); if (S.titleStep === 'look') enterWorld(); } });
-const PANELS = { party: { toggle: () => social.toggleMenu() }, bag: { toggle: () => bag.toggle() }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
+  onLookPreview: (look, mode) => previewLook(look, mode), onLookSave: look => { S.look = look; store.set('look', look); previewLook(look, 'title'); if (S.titleStep === 'look') toKit(); } });
+// play-test 5 (created BEFORE the key handler below, so a bite's Space / E reaches the fishing prompt first)
+const ui5 = createUi5({ net: () => S.net, hud, bag, mail, worldUi, journal: ui.journal, actors, hotbar: ui2.hotbar, askPop: ui2.askPop, build: q.get('build') || 'dev', quality,
+  me: () => (S.selfId != null && S.phase === 'world' ? { id: S.selfId, x: S.predictor.pos.x, z: S.predictor.pos.z } : null), self: () => S.self, room: () => S.room, bar: () => S.bar,
+  targetId: () => S.target, setTarget: id => setTarget(id), stats: () => ({ fps: FPS.fps }), zoneName: () => document.getElementById('zone-name')?.textContent || null,
+  ensureNet: () => kitNet(), onKitPreview: g => { S.titleGear = g; previewLook(S.look, 'title'); }, onKitBack: () => { if (S.phase === 'title') { S.titleGear = null; toAppearance(); } }, onKitCreate: c => { S.kit = c; enterWorld(); } });
+const PANELS = { ...ui5.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: () => bag.toggle() }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
 for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());
 window.addEventListener('keydown', e => {
   if (S.phase !== 'world' || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) return;
@@ -335,7 +349,7 @@ function previewLook(look, mode) {
   if (preview && actors.get('preview')) actors.setLook('preview', titleLook()); else rebuildPreview();
 }
 /** The title figure: the class outfit, or plain starting clothes while you customise (unless "Show class gear"). */
-function titleLook() { return { ...S.look, cls: S.cls, ...(S.titleBare ? { gear: {} } : {}) }; }
+function titleLook() { return { ...S.look, cls: S.cls, ...(S.titleGear ? { gear: S.titleGear } : S.titleBare ? { gear: {} } : {}) }; }   // T5: the kit you are choosing, worn
 /** R1: which title card shows — 'front' (your characters), 'new' (name/people/calling), 'look' (the editor). */
 function titleStep(step) {
   S.titleStep = step;
@@ -346,6 +360,7 @@ function titleStep(step) {
   $('back-front').hidden = !has;
   $('tab-new')?.setAttribute('aria-selected', 'true'); $('tab-login')?.setAttribute('aria-selected', 'false');
   if (step !== 'look' && S.titleBare) { S.titleBare = false; previewLook(S.look, 'title'); }
+  if (step !== 'kit' && S.titleGear) { S.titleGear = null; previewLook(S.look, 'title'); }
   if (step === 'new') setTimeout(() => $('name').focus(), 0);
 }
 function toAppearance() {
@@ -356,10 +371,27 @@ function toAppearance() {
   if (S.net?.chars?.some(c => c.name.toLowerCase() === name.toLowerCase())) { enterWorld(); return; }
   titleStep('look');
   S.titleBare = true; previewLook(S.look, 'title');
-  ui2.openEditor('title', { look: S.look, saveLabel: 'Create character', gearToggle: { on: false, onChange: on => { S.titleBare = !on; previewLook(S.look, 'title'); } },
+  ui5.kits.load(S.cls);                                  // T5: have the starting kits ready by the time the face is done
+  ui2.openEditor('title', { look: S.look, saveLabel: 'Next: equipment', gearToggle: { on: false, onChange: on => { S.titleBare = !on; previewLook(S.look, 'title'); } },
     onDismiss: () => { if (S.phase === 'title') titleStep('new'); } });
 }
 
+/** T5 (play-test 5): step 3 — starting equipment on the figure. A calling with no kits goes straight in, as before. */
+async function toKit() {
+  titleStep('kit');
+  S.titleBare = false;
+  const name = id => document.querySelector(`#classes [data-cls="${id}"]`)?.textContent || [...($('class-more')?.options || [])].find(o => o.value === id)?.textContent || id;
+  const ok = await ui5.kits.open({ cls: S.cls, className: name(S.cls) });
+  if (!ok && S.phase === 'title') { S.kit = null; enterWorld(); }
+}
+/** The connection the kit step asks through (a guest is made under the name from step 1, exactly as entering does). */
+async function kitNet() {
+  const name = cleanName($('name').value);
+  if (!name || name.length < 2) return null;
+  const net = startNet({ guestName: name });
+  const ok = await Promise.race([net.ready.then(() => true, () => false), new Promise(r => setTimeout(() => r(false), 8000))]);
+  return ok ? net : null;
+}
 // --- connecting -----------------------------------------------------------------------------------------
 const netMode = () => (q.has('offline') && q.get('offline') !== '0' ? 'worker' : 'ws');
 const tokenKey = () => 'thousandvale.token.' + (netMode() === 'ws' ? (q.get('server') || location.host) : 'offline');
@@ -401,12 +433,12 @@ async function enterWorld(pick = null) {
   const fresh = !S.net;
   const net = startNet({ guestName: name });
   S.phase = 'joining';
-  const fail = text => { $('login-note').textContent = text; btn.disabled = false; btn.textContent = 'Enter the world'; S.phase = 'title'; if (fresh && !net.claimed) dropNet(); };
+  const fail = text => { $('login-note').textContent = text; ui5.kits.failed(text); btn.disabled = false; btn.textContent = 'Next: appearance'; S.phase = 'title'; if (fresh && !net.claimed) dropNet(); };
   const timer = setTimeout(() => { if (S.phase === 'joining' && net.status !== 'online') fail(mode === 'ws' ? 'Cannot reach the game server. Add ?offline=1 to play against an in-browser server.' : 'The in-browser server did not start.'); }, 20000);
   try {
     await net.ready;
     let ch = pick || net.chars.find(c => c.name.toLowerCase() === name.toLowerCase());
-    if (!ch) { const look = lookWith(S.look, lookCustom(S.look)); ch = await net.createChar({ name, cls: S.cls, look }); ui2.lookStore.set(name, look); }
+    if (!ch) { const look = lookWith(S.look, lookCustom(S.look)); ch = await net.createChar({ name, cls: S.cls, look, kit: S.kit || undefined }); ui2.lookStore.set(name, look); }
     const join = (q.get('join') || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 8) || null;
     await net.play(ch.id, join ? { join } : {});
     clearTimeout(timer);
@@ -416,7 +448,10 @@ async function enterWorld(pick = null) {
   }
 }
 
+const TAPS = new Map();   // event -> every handler the client registered (tv.fake plays a server message through all of them)
 function wireNet(net) {
+  const on0 = net.on;
+  net.on = (ev, fn) => { (TAPS.get(ev) || TAPS.set(ev, []).get(ev)).push(fn); return on0(ev, fn); };
   net.on('status', st => {
     const pill = st === 'online' ? 'open' : st === 'reconnecting' ? 'reconnecting' : ['refused', 'kicked', 'closed', 'left'].includes(st) ? 'closed' : 'connecting';
     hud.conn(pill, { rtt: net.clock.rtt, mode: netMode() });
@@ -460,6 +495,7 @@ function wireNet(net) {
   social.wire(net);
   chat.wire(net); friends.wire(net); guild.wire(net); mail.wire(net); callboard.wire(net); account.wire(net);
   bag.wire(net);
+  ui5.wire(net);
   ui.wire(net);
   worldUi.wire(net);
   ui2.wire(net);
@@ -485,7 +521,7 @@ function wireNet(net) {
   net.on('castR', r => {
     if (r.slot > 0 && S.cds) { S.cds[r.slot] = 0; hud.cooldown(r.slot, 0); }
     if (r.why === 'cooldown' && !(r.slot > 0)) { S.swing.ms = Math.min(2500, S.swing.ms + 60); return; }
-    if (r.why === 'range') { const t = actors.get(S.target); if (t) S.reach = Math.max(1.6, Math.min(S.reach, Math.hypot(t.pos.x - S.predictor.pos.x, t.pos.z - S.predictor.pos.z)) * 0.8); }
+    if (r.why === 'range' && !(r.slot > 0)) { const t = actors.get(S.target); S.reach = shortenReach(S.reach, { need: r.need, dist: t ? Math.hypot(t.pos.x - S.predictor.pos.x, t.pos.z - S.predictor.pos.z) : null }); }   // T14: only the basic attack's own refusal, and only ever shorter
     hud.toast(r.text || CASTR_TEXT[r.why] || 'You cannot do that.', 'warn');
   });
 }
@@ -546,6 +582,7 @@ function ensureActor(id) {
     if (kind === 'object') {
       objects.upsert({ id, type: info.type, name: info.name, x: e.x, z: e.z, yaw: e.yaw || 0, r: info.r, state: info.state, source: 'room', opened: info.type === 'chest' && wasOpened(info.key),
         hidden: !!info.hidden, hint: info.hint, lore: info.lore, shimmer: info.shimmer, key: info.key, banner: info.banner || null, trace: info.trace || null, look: info.look || null, tether: info.tether ?? null });   // R7: look 'chained' + tether
+      if (info.type === 'fishpool') angling.setPool(id, { x: e.x, z: e.z }, info.pool || null);     // T25: ripples and a jumping fish, seen from the road
       objectState(id, info);
       return null;
     }
@@ -592,7 +629,9 @@ function objectState(id, info) {
 function refreshFromInfo(id) {
   objectState(id, S.mirror.infos.get(id));
   const a = actors.get(id), info = S.mirror.infos.get(id);
+  if (info?.type === 'fishpool' && info.pool) angling.setPool(id, null, info.pool);     // T25: a fished-out pool goes (left 0)
   if (!a || !info) return;
+  if (a.kind === 'player') angling.setLine(id, info.fishing || null);                  // T25: a line in the water (late arrivals see the float)
   const levelled = info.level > a.level;
   a.name = info.name ? displayName(info.name, a.kind) : a.name; a.level = info.level || a.level; a.hpMax = info.hpMax || a.hpMax;
   actors.refreshPlate(a);
@@ -615,7 +654,7 @@ function onSnap(s) {
   }
   if (s.vitals) { S.self.hp = s.vitals.hp; S.self.hpMax = s.vitals.hpMax; S.self.mp = s.vitals.mp; S.self.mpMax = s.vitals.mpMax; actors.setHp(S.selfId, s.vitals.hp, s.vitals.hpMax); hud.setSelf(S.self); }
   if (S.selfId != null && !!s.dead !== S.self.dead) setSelfDead(!!s.dead);
-  for (const id of s.left) { actors.remove(id); objects.remove(id); if (S.target === id) setTarget(null); }
+  for (const id of s.left) { actors.remove(id); objects.remove(id); angling.removePool(id); angling.setPhase(id, 'end'); if (S.target === id) setTarget(null); }
   for (const r of s.ents) {
     if (r.id === S.selfId) continue;
     const a = ensureActor(r.id); if (!a) continue;
@@ -642,7 +681,7 @@ function remember(ev) { S.events.push(ev); if (S.events.length > 200) S.events.s
 function onEvent(ev) {
   if (!ev.type && ev.t) ev = { ...ev, type: ev.t };   // encounter events may still carry `t`
   remember(ev);
-  if (ev.type === 'cast' || ev.type === 'hit' || ev.type === 'fx') { spells.onEvent(ev); statusSync.onEvent(ev); statusSync.onChannel(ev); weaponFx.onEvent(ev); }
+  if (ev.type === 'cast' || ev.type === 'hit' || ev.type === 'fx') { spells.onEvent(ev); statusSync.onEvent(ev); statusSync.onChannel(ev); weaponFx.onEvent(ev); formFx.onEvent(ev); reviveFx.onEvent(ev); angling.onEvent(ev); }
   const me = S.selfId;
   switch (ev.type) {
     case 'cast':
@@ -650,8 +689,9 @@ function onEvent(ev) {
         S.swing.last = performance.now();
         // Q1 (C): the basic attack's own pace, and a bow's draw then loose ('draw' / 'shoot') as two plays
         if (!(ev.slot > 0) && Number.isFinite(ev.every) && ev.every > 0) S.swing.ms = ev.every;
-        if (ev.clip === 'draw' || ev.clip === 'shoot') actors.playAttack(me, ev.target);
-      } else actors.playAttack(ev.s, ev.target);
+        if (ev.clip === 'draw' || ev.clip === 'shoot') actors.playAttack(me, ev.target, { force: true });
+        else if (ev.hand === 'off') actors.playAttack(me, ev.target, { hand: 'off' });          // T6/T7: the off hand swings on its own clock (C)
+      } else actors.playAttack(ev.s, ev.target, { hand: ev.hand, force: ev.clip === 'shoot' });   // T6: a pair of weapons picks its own strike (actors.js swingClip)
       break;
     case 'hit': {
       const dst = actors.get(ev.d), src = actors.get(ev.s);
@@ -665,7 +705,8 @@ function onEvent(ev) {
       fx.burst(at, { blood: dst.kind === 'monster', count: ev.crit ? 12 : 7 });
       if (mine) {
         fx.number(at, ev.crit ? `${ev.n}!` : `${ev.n}`, ev.crit ? 'crit' : 'out'); fx.shake(ev.crit ? 0.55 : 0.28); fx.hitStop(ev.crit ? 90 : 55);
-        if (src) S.reach = Math.max(S.reach, Math.min(30, Math.hypot(dst.pos.x - src.pos.x, dst.pos.z - src.pos.z)));
+        // T14: a hit from further out only teaches the reach when the server never said it (a spell landing at 25 m taught a 9 m cone wand to fire from 25 m)
+        if (src && !S.reachKnown && (!ev.skill || ev.skill === 'basic' || ev.skill === 'melee' || ev.skill === 'arrow' || ev.skill === 'bolt')) S.reach = Math.max(S.reach, Math.min(30, Math.hypot(dst.pos.x - src.pos.x, dst.pos.z - src.pos.z)));
       } else if (onMe) { fx.number(at, `-${ev.n}`, 'in'); fx.shake(0.35); }
       else fx.number(at, `${ev.n}`, 'other');
       break;
@@ -738,6 +779,7 @@ function startWorld(j) {
   hud.show();
   hud.setSelf(S.self);
   account.refreshPill();
+  ui5.kits.close(); S.titleGear = null; S.kit = null;
   if (!S.net?.claimed) hud.chat('You are playing as a guest. Open Account (the person button, right) to claim it — free — and keep this character.', 'system');
   const zone = j.room.name || 'The Vale';
   hud.zone(zone);
@@ -788,11 +830,14 @@ function castSkill(n) {
   const t = S.target != null ? actors.get(S.target) : null;
   const p = S.predictor.pos;
   let target, aim;
-  if (sk.ally) { target = t && !t.hostile && t.kind === 'player' ? t.id : S.selfId; aim = t && !t.hostile ? { x: t.pos.x, z: t.pos.z } : { x: p.x, z: p.z }; }
+  // T3/T4 (play-test 5): a friendly skill lands on the ally you have targeted (a player, or a pet / follower on your side), else on you;
+  // a revive is sent at the fallen party member you target (none targeted: the rules pick the nearest)
+  if (sk.revive) { target = t && !t.hostile && t.kind === 'player' ? t.id : undefined; aim = t ? { x: t.pos.x, z: t.pos.z } : { x: p.x, z: p.z }; }
+  else if (sk.ally) { const friend = t && !t.hostile && (t.kind === 'player' || t.pet); target = friend ? t.id : S.selfId; aim = friend ? { x: t.pos.x, z: t.pos.z } : { x: p.x, z: p.z }; }
   else if (t && t.hostile && !t.dead) { target = t.id; aim = { x: t.pos.x, z: t.pos.z }; controls.setFacing(Math.atan2(t.pos.x - p.x, t.pos.z - p.z)); }
   else { const yaw = S.lastInput?.yaw ?? controls.cam.yaw; aim = { x: p.x + Math.sin(yaw) * 6, z: p.z + Math.cos(yaw) * 6 }; }
   S.net.cast({ slot: n, target, aim });
-  actors.playAttack(S.selfId, target);
+  actors.playAttack(S.selfId, target, { force: true });
   hud.press(n);
   if (sk.cd) { (S.cds ||= {})[n] = now + sk.cd; hud.cooldown(n, sk.cd); }
   return true;
@@ -806,11 +851,10 @@ function castSkill(n) {
 const RANGED_SUB = /bow|crossbow|wand|sling|javelin|throw/i;
 function basicReach(eq) {
   const y = S.net?.joined?.you || {};
-  const r = y.reach ?? y.attackRange;                      // protocol §18.8: you.reach (null = melee)
-  if (Number.isFinite(r) && r > 0) return Math.max(2.4, r - 1);
-  if ('reach' in y && y.reach === null) return 2.4;
-  const w = (eq || S.net?.joined?.you?.equipment || {}).weapon;
-  return w && RANGED_SUB.test(`${w.subtype || ''} ${w.baseKey || ''} ${w.base || ''}`) ? 24 : 2.4;
+  // T14 (reach.js): `you.reach` is the reach of the attack FORM (a 9 m cone, a 5 m nova); walk inside it before swinging
+  const out = reachOf(y, (eq || y.equipment || {}).weapon);
+  S.reachKnown = out.known;
+  return out.reach;
 }
 function tryStrike(fromKey, slot = 0) {
   if (S.phase !== 'world' || S.self.dead || !S.net) return false;
@@ -973,6 +1017,7 @@ function frame(now) {
     worldUi.tick(S.tod);
     ui.tick(dt);
     ui2.tick(dt);
+    ui5.tick(dt);
     D.view?.update(dt, S.fly ? { x: S.fly.lx, z: S.fly.lz } : drawn);
     tele.update(dt);
     boss.update(dt);
@@ -1000,7 +1045,7 @@ function frame(now) {
   fx.update(dt);
   spells.update(dt);
   statusSync.update();
-  weaponFx.update(dt);
+  weaponFx.update(dt); formFx.update(dt); angling.update(dt);
   lootMarks.update(dt);
   hud.tick(dt);
   LIGHTS.update(dt, camera.position);
@@ -1039,7 +1084,7 @@ Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
   S.warm = { done: false };
   import('./scatter-view.js').then(m => m.prewarmScatter({ quality })).catch(() => {})
     .then(() => Promise.all([import('./warmup.js'), loadMonsterLooks()]))
-    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [weaponFx.sample(), lootMarks.sample()] }))
+    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [weaponFx.sample(), lootMarks.sample(), formFx.sample(), angling.sample()] }))
     .then(r => { S.warm = { done: true, ...r }; }, e => { S.warm = { done: true, error: e?.message }; });
 });
 
@@ -1047,7 +1092,13 @@ Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
 const tv = {
   /** Play a server event through the client's own handlers (screenshots / demos: a swing, a staff spell…). */
   fxEvent(ev) { onEvent(ev); },
+  /** Play a server message through EVERY handler the client registered for it (specs, screenshots). Returns how many heard it. */
+  fake(ev, msg) { const fns = TAPS.get(ev) || []; for (const fn of [...fns]) { try { fn(msg); } catch (e) { console.error('[fake]', ev, e); } } return fns.length; },
   weaponFx: () => weaponFx.stats,
+  /** play-test 5: what the form / revive / angling drawers have drawn (specs read these). */
+  fx5: () => ({ forms: formFx.stats, revives: reviveFx.stats, angling: angling.stats, live: formFx.live, lines: angling.lines.size, pools: angling.pools.size, reach: S.reach, reachKnown: !!S.reachKnown }),
+  /** T25 (specs / demos): a fish pool on the water at an offset from you, or an angler's phase. */
+  fishDemo(o = {}) { const p = S.predictor.pos; if (o.pool) angling.setPool(o.pool, { x: p.x + (o.dx || 0), z: p.z + (o.dz || 8) }, { tier: o.tier || 1, left: 5 }); if (o.phase) angling.setPhase(o.id ?? S.selfId, o.phase, { x: o.x ?? p.x + (o.dx || 0), z: o.z ?? p.z + (o.dz || 6), rarity: o.rarity, tension: o.tension }); return { lines: angling.lines.size, pools: angling.pools.size }; },
   /** Q16: toggle the mount (as H does). */
   mount() { toggleMount(); },
   state() {
@@ -1233,4 +1284,4 @@ const tv = {
   },
 };
 window.tv = tv;
-window.thousandvale = { lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui2 };
+window.thousandvale = { formFx, reviveFx, angling, lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui, ui2, ui5 };

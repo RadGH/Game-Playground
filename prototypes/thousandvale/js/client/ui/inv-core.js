@@ -3,15 +3,16 @@
 // the compare delta, and the icon key an item's picture is cached under. tests/D/inventory.test.js drives it.
 
 /** The paper doll, Farhold's equipment slots (rpg.js SLOTS) in the order the doll draws them. */
-export const DOLL_LEFT = ['head', 'necklace', 'chest', 'hands'];
-export const DOLL_RIGHT = ['legs', 'feet', 'ring', 'ring2'];
-export const DOLL_BOTTOM = ['weapon', 'offhand'];
-export const DOLL_EXTRA = ['mount', 'light', 'tool'];        // drawn only when something is worn there
+// play-test 5 (C's slots addendum): back (cloak), waist (belt) and light (a worn lantern or torch) are real slots — order as rules.SLOTS
+export const DOLL_LEFT = ['head', 'necklace', 'chest', 'back', 'hands'];
+export const DOLL_RIGHT = ['waist', 'legs', 'feet', 'ring', 'ring2'];
+export const DOLL_BOTTOM = ['weapon', 'offhand', 'light'];
+export const DOLL_EXTRA = ['mount', 'tool'];        // drawn only when something is worn there
 export const DOLL_SLOTS = [...DOLL_LEFT, ...DOLL_RIGHT, ...DOLL_BOTTOM];
 
 export const SLOT_NAME = {
   head: 'Head', chest: 'Chest', legs: 'Legs', feet: 'Feet', hands: 'Hands', weapon: 'Main hand', mainhand: 'Main hand', offhand: 'Off hand',
-  necklace: 'Neck', neck: 'Neck', ring: 'Ring', ring1: 'Ring', ring2: 'Ring', shield: 'Off hand', mount: 'Mount', light: 'Light', tool: 'Tool',
+  necklace: 'Neck', neck: 'Neck', ring: 'Ring', ring1: 'Ring', ring2: 'Ring', shield: 'Off hand', mount: 'Mount', light: 'Light', tool: 'Tool', back: 'Back', waist: 'Waist', cape: 'Back', belt: 'Waist',
 };
 export const ALT_SLOT = { weapon: 'offhand', offhand: 'weapon', ring: 'ring2', ring2: 'ring' };
 /** Farhold's ladder plus the extras the generator stamps on. Higher = rarer. */
@@ -27,6 +28,8 @@ export function slotOf(item) {
   if (s === 'ring1') return 'ring';
   if (s === 'mainhand') return 'weapon';
   if (s === 'neck') return 'necklace';
+  if (s === 'cape' || s === 'cloak') return 'back';
+  if (s === 'belt') return 'waist';
   return s;
 }
 /** The other slot it could go in: a one-handed weapon in the off hand, a ring on the other hand. */
@@ -67,7 +70,7 @@ export function filterGroup(item) {
   if (!s) return 'other';
   if (s === 'weapon' || (s === 'offhand' && item.type === 'weapon')) return 'weapon';
   if (s === 'ring' || s === 'ring2' || s === 'necklace') return 'jewel';
-  if (['head', 'chest', 'legs', 'hands', 'feet', 'offhand'].includes(s)) return 'armour';
+  if (['head', 'chest', 'legs', 'hands', 'feet', 'offhand', 'back', 'waist'].includes(s)) return 'armour';
   return 'other';
 }
 
@@ -113,7 +116,7 @@ export const SORTS = [
   { id: 'level', label: 'Level' },
   { id: 'name', label: 'Name' },
 ];
-const SLOT_ORDER = ['weapon', 'offhand', 'head', 'chest', 'legs', 'hands', 'feet', 'necklace', 'ring', 'ring2', 'mount', 'light', 'tool', null];
+const SLOT_ORDER = ['weapon', 'offhand', 'head', 'chest', 'back', 'hands', 'waist', 'legs', 'feet', 'necklace', 'ring', 'ring2', 'light', 'mount', 'tool', null];
 /** Filter + sort a bag (never mutates). `order` is each item's position in the server's bag (newest = last). */
 export function viewBag(bag, { filter = 'all', sort = 'new', equipment = {}, level = 1, score = plainScore, search = '' } = {}) {
   const q = String(search || '').trim().toLowerCase();

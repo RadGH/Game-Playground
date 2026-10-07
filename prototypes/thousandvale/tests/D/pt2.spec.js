@@ -61,9 +61,12 @@ test('R1 + Q21 + Q25: new character = name/people/calling, then the editor in st
   const prev = await page.evaluate(() => thousandvale.actors.get('preview')?.look?.custom || null);
   expect(prev?.hair?.id).toBe('long');
   await shot('title-editor');
-  await page.click('#panel-appearance [data-act="save"]');   // "Create character" enters the world
+  await page.click('#panel-appearance [data-act="save"]');   // "Next: equipment" (play-test 5 T5) — then "Create character" enters the world
   const saved = await page.evaluate(() => thousandvale.S.look);
   expect(saved.custom.hair.id).toBe('long');
+  // step 3 (tests/D/pt5.spec.js checks it): take the first kit; a calling with no kits goes straight in
+  await page.waitForFunction(() => tvui5.state().kits.open || thousandvale.S.phase !== 'title', null, { timeout: 30000 });
+  if (await page.evaluate(() => tvui5.state().kits.open)) await page.click('#panel-kits [data-act="create"]');
   await page.waitForFunction(() => window.tv && tv.state().status === 'online' && tv.state().you?.id != null, null, { timeout: 90000 });
   await page.waitForFunction(() => tv.warm()?.done, null, { timeout: 300000 });
   // the server keeps the look: my own entity's info carries the custom hair
@@ -342,10 +345,12 @@ test('R6 + R3: mana bars (you, target, number on hover) and event countdowns in 
   await page.evaluate(id => { tv.target(id); tvui2.fake('ev', { k: 0, e: [{ type: 'mp', id, n: 30, max: 60 }] }); }, brem);
   await expect(page.locator('#target-mp')).toBeVisible({ timeout: 5000 });
   expect(await page.getAttribute('#target-mp', 'data-tip')).toMatch(/^Mana: \d+ \/ \d+$/);   // the live server's own mp events win over the fake
-  await page.evaluate(() => { const ev = { uid: 'skein', id: 'skein', name: 'Grandmother Skein', x: 0, z: 0, r: 30 }; thousandvale.worldUi.onZoneEvent({ kind: 'soon', ev, at: Date.now() + 14000, inMs: 14000 }); tvui.fake('zoneEvent', { kind: 'soon', ev, at: Date.now() + 14000 }); });
+  // (play-test 5: the countdown lives on the event tracker's card now — ui/event-tracker.js)
+  await page.evaluate(() => { const ev = { uid: 'skein', id: 'skein', name: 'Grandmother Skein', x: 0, z: 0, r: 30 }; tv.fake('zoneEvent', { kind: 'soon', ev, at: Date.now() + 14000, inMs: 14000 }); });
   await page.waitForTimeout(1200);
-  const frame = await page.locator('.tv-eventframe span').textContent();
-  expect(frame).toMatch(/Starts in (1[0-4]|[5-9]) s/);
+  const frame = await page.locator('.tv-evtrack .et-card.soon .et-time').textContent();
+  expect(frame).toMatch(/Starts in 0:(1[0-4]|0[5-9])/);
+  await page.evaluate(() => thousandvale.ui5.tracker.clear());
   const sub = await page.evaluate(() => tvui.atlas().events);
   expect(JSON.stringify(sub)).not.toContain('Starting soon');
   await page.evaluate(() => tvui.fake('zoneEvent', { kind: 'states', list: [{ id: 'skein', name: 'Grandmother Skein', x: 0, z: 0, r: 30, state: 'ready', near: 80 }] }));
@@ -356,18 +361,20 @@ test('R6 + R3: mana bars (you, target, number on hover) and event countdowns in 
 test('play-test 4: S1 event panel tucks into a bubble and never covers the tracker; S2 untracked quests leave the HUD; S3 S12 S20 S21 S23 S19 S4', async () => {
   test.setTimeout(120000);
   // S1
-  await page.evaluate(() => thousandvale.worldUi.onRealm({ kind: 'eventStart', ev: { uid: 'e1', id: 'world_grimtallow', name: 'Grimtallow', kind: 'worldboss', zoneName: 'Blackthorn Scar' } }));
+  await page.evaluate(() => tv.fake('realm', { kind: 'eventStart', ev: { uid: 'e1', id: 'world_grimtallow', name: 'Grimtallow', kind: 'worldboss', zoneName: 'Blackthorn Scar' } }));
   await page.evaluate(() => tvui.fake('quests', { active: [{ id: 'q1', name: 'Rope for Old Pell', steps: [{ text: 'Find rope', n: 0, of: 1 }], step: 0 }, { id: 'q2', name: 'Wolf Pelts', steps: [{ text: 'Kill wolves', n: 1, of: 5 }], step: 0 }], done: [] }));
   await page.waitForTimeout(800);
-  await expect(page.locator('.tv-event')).toBeVisible();
-  const r = await page.evaluate(() => ['.tv-event', '.tv-tracker'].map(s => document.querySelector(s).getBoundingClientRect()).map(b => ({ top: b.top, bottom: b.bottom })));
+  // play-test 5 (T11/T12): the event is a card on the tracker — above the quest tracker, never over it; it folds to one line
+  await expect(page.locator('.tv-evtrack .et-card')).toBeVisible();
+  await expect(page.locator('.tv-event')).toBeHidden();
+  const r = await page.evaluate(() => ['.tv-evtrack', '.tv-tracker'].map(s => document.querySelector(s).getBoundingClientRect()).map(b => ({ top: b.top, bottom: b.bottom })));
   expect(r[0].bottom).toBeLessThanOrEqual(r[1].top + 1);
   await shot('s1-event-tracker');
-  await page.click('.tv-event .ev-x');
-  await expect(page.locator('.ev-bubble')).toBeVisible();
-  await expect(page.locator('.tv-event')).toBeHidden();
-  await page.click('.ev-bubble');
-  await expect(page.locator('.tv-event')).toBeVisible();
+  await page.click('.tv-evtrack .et-x');
+  await expect(page.locator('.tv-evtrack .et-card')).toHaveClass(/folded/);
+  await page.click('.tv-evtrack .et-x');
+  await expect(page.locator('.tv-evtrack .et-card')).not.toHaveClass(/folded/);
+  await page.evaluate(() => thousandvale.ui5.tracker.clear());
   // S2
   const before = await page.locator('.tv-tracker .tr-main, .tv-tracker .tr-row').count();
   await page.evaluate(() => thousandvale.ui2.atlasUntrack('q2'));

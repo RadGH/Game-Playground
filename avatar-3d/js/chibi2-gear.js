@@ -19,6 +19,9 @@ import { profile, taperedCurve } from './chibi2-geometry.js';
  */
 import { buildFarholdHeld, buildFarholdOffhand, strapShield } from './chibi2-weapons.js';
 import { HELD_WEAPON_IDS } from './chibi2-weapon-ids.js';
+// PLAY-TEST 5 (T23): the g5_ models are built by chibi2-gear5.js (called by chibi2.js after this file);
+// the three builders below that have a catch-all default step aside for a g5_ id, and nothing else changes.
+import { isG5 } from './chibi2-gear5-ids.js';
 
 const low = () => new THREE.SphereGeometry(1, 8, 5);
 const gem = () => new THREE.IcosahedronGeometry(1, 0);
@@ -60,7 +63,7 @@ function drape(c, color, { x = 0, top, length, width, bottom, zTop, zBottom, sx 
 // ---------------------------------------------------------------- held (right hand)
 export function buildHeld(a, c) {
   const id = a.held.id, hc = a.held.color, { add, trim, leather, steel } = c;
-  if (id === 'none') return;
+  if (id === 'none' || isG5(id)) return;
   if (buildFarholdHeld(a, c)) return;            // an `fh_` weapon; everything below is unchanged
   const R = 'handR', z = 0.055;
   const shaft = (bone, from, to, r, color) => add(profile([[from, r, r], [to, r, r]], 8), bone, color, { position: [0, 0, z] });
@@ -222,7 +225,7 @@ export function buildHeld(a, c) {
 // ---------------------------------------------------------------- off-hand (left hand)
 export function buildOffhand(a, c) {
   const id = a.offhand.id, oc = a.offhand.color, { add, trim, leather, steel, W, T } = c, L = 'handL';
-  if (id === 'none') return;
+  if (id === 'none' || isG5(id)) return;
   if (buildFarholdOffhand(a, c)) return;         // an `fh_` shield, strapped to the forearm
   if (id === 'dagger') { add(profile([[-0.22, 0.015, 0.015], [0.15, 0.015, 0.015]], 5), L, steel, { position: [0, 0.01, 0.08], metal: true }); return; }
   if (id === 'book') {
@@ -397,7 +400,7 @@ export function buildMarks(a, c) {
 // ---------------------------------------------------------------- capes
 export function buildCape(a, c) {
   const id = a.cape.id, cc = a.cape.color, { add, trim, W, T } = c;
-  if (id === 'none') return;
+  if (id === 'none' || isG5(id)) return;
   const capelet = (low) => {
     add(profile([[low * T, 0.30 * W, 0.215 * W, -0.01], [0.22 * T, 0.29 * W, 0.205 * W, -0.01], [0.30 * T, 0.26 * W, 0.18 * W, -0.012], [0.335 * T, 0.15, 0.12, -0.02], [0.37 * T, 0.09, 0.08, -0.02]], 16), 'chest', cc);
     add(profile([[low * T - 0.012, 0.305 * W, 0.22 * W, -0.01], [low * T + 0.01, 0.305 * W, 0.22 * W, -0.01]], 16), 'chest', tone(cc, 0.75));

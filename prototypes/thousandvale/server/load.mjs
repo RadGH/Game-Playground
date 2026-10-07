@@ -1,7 +1,7 @@
 // Shared server loading (stream A): rules, store, provinces/zones as layouts, classes, the log line.
 // Used by server/main.mjs (gateway, and stage 1's single process) and server/province-proc.mjs (stage 2).
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, appendFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
 import { loadZoneTerrain, standInTerrain } from '../js/sim/terrain.js';
@@ -25,11 +25,43 @@ export async function loadRules(mode) {
   if (existsSync(p)) {
     try {
       const m = await import(pathToFileURL(p).href);
-      if (typeof m.createRules === 'function') return { createRules: m.createRules, rules: 'js/rules' };
+      if (typeof m.createRules === 'function') {
+        // play-test 5 T5: stream C's starter kits (`kitsFor(classId)`): from the rules' index when it exports it, else the module itself
+        let kitsFor = typeof m.kitsFor === 'function' ? m.kitsFor : null;
+        if (!kitsFor) {
+          try {
+            const k = await import(pathToFileURL(join(GAME, 'js/rules/starter-kits.js')).href);
+            if (typeof k.kitsFor === 'function') {
+              // the module wants the booted engine and its table (`setKitSource` — C's engine does this itself once wired)
+              const eng = typeof m.rulesEngine === 'function' ? m.rulesEngine() : null;
+              let table = null; try { table = JSON.parse(readFileSync(join(GAME, 'data/rules/starter-kits.json'), 'utf8')); } catch { /* no table */ }
+              if (typeof k.setKitSource === 'function' && (eng || table)) k.setKitSource(eng, table);
+              kitsFor = cls => k.kitsFor(cls);
+            }
+          } catch { /* no kits yet */ }
+        }
+        return { createRules: m.createRules, rules: 'js/rules', kitsFor };
+      }
       log('js/rules/index.js has no createRules export; using the stand-in rules');
     } catch (err) { log('js/rules/index.js failed to load; using the stand-in rules', { err: err.message }); }
   }
   return { createRules: v0, rules: 'v0' };
+}
+
+/**
+ * Play-test 5 (T19/T21): where feedback reports are ALSO written, one JSON object a line — `<state>/feedback-<env>.jsonl`
+ * (`STATE_DIRECTORY` under systemd, else the game's `.data/`). `{ev:'new', id, at, kind, text, …}` for a report,
+ * `{ev:'state', id, state, by, at, note?}` for a review. tools/feedback-report.mjs reads it when there is no database.
+ */
+export function feedbackFile(env = 'dev') { return join(process.env.TV_FEEDBACK_DIR || process.env.STATE_DIRECTORY || join(GAME, '.data'), `feedback-${env}.jsonl`); }
+export function feedbackSink(env = 'dev', file = feedbackFile(env)) {
+  let made = false;
+  return row => {
+    try {
+      if (!made) { mkdirSync(dirname(file), { recursive: true }); made = true; }
+      appendFileSync(file, JSON.stringify(row) + '\n', { mode: 0o600 });
+    } catch (err) { log('feedback file not written', { file, err: err.message }); }
+  };
 }
 
 export async function makeStore(o) {

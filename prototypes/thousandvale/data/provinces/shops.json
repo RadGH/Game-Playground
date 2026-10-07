@@ -151,6 +151,77 @@
       "use": {
         "type": "trinket"
       }
+    },
+    "angling_rod": {
+      "name": "Hazel Rod",
+      "desc": "A hazel switch, a length of line and a hook. A Tool: it takes no weapon slot. Lets you fish any water.",
+      "use": {
+        "type": "rod",
+        "minSkill": 0,
+        "bonus": {}
+      },
+      "tool": true
+    },
+    "ash_rod": {
+      "name": "Whippy Ash Rod",
+      "desc": "Longer, springier and far too good for gudgeon. The tug band is 15% wider.",
+      "use": {
+        "type": "rod",
+        "minSkill": 25,
+        "bonus": {
+          "band": 0.15
+        }
+      },
+      "tool": true
+    },
+    "river_wardens_rod": {
+      "name": "River Warden's Rod",
+      "desc": "Split cane with a brass reel. The tug band is 25% wider and bites come 20% sooner.",
+      "use": {
+        "type": "rod",
+        "minSkill": 50,
+        "bonus": {
+          "band": 0.25,
+          "wait": -0.2
+        }
+      },
+      "tool": true
+    },
+    "bait_worms": {
+      "name": "Tin of Worms",
+      "desc": "Ten worms. Bites come 25% sooner for the next ten casts.",
+      "use": {
+        "type": "bait",
+        "effect": {
+          "wait": -0.25,
+          "casts": 10
+        }
+      },
+      "stack": 20
+    },
+    "bait_bread_paste": {
+      "name": "Bread Paste",
+      "desc": "Common fish cannot resist it; rare fish can. Ten casts with fewer junk catches.",
+      "use": {
+        "type": "bait",
+        "effect": {
+          "junk": -0.5,
+          "casts": 10
+        }
+      },
+      "stack": 20
+    },
+    "bait_bright_lure": {
+      "name": "Bright Tin Lure",
+      "desc": "Flashes like a perch's dream. Ten casts with a better chance at uncommon and rare fish.",
+      "use": {
+        "type": "bait",
+        "effect": {
+          "rarity": 0.25,
+          "casts": 10
+        }
+      },
+      "stack": 20
     }
   },
   "kinds": {
@@ -186,6 +257,25 @@
             "normal": 0.8,
             "magic": 0.2
           }
+        },
+        "light": {
+          "label": "Lanterns & torches",
+          "bases": [
+            "hand_lantern",
+            "pitch_torch",
+            "g5_cresset",
+            "g5_hexlantern"
+          ],
+          "count": 3,
+          "rarity": {
+            "normal": 0.8,
+            "magic": 0.2
+          },
+          "countBase": 2,
+          "catalog": [
+            "g5_cresset",
+            "g5_hexlantern"
+          ]
         }
       },
       "goods": [
@@ -276,13 +366,42 @@
             "iron_mace",
             "javelin",
             "crossbow",
-            "halberd"
+            "halberd",
+            "g5_wand_dart",
+            "g5_leafblade",
+            "g5_bostaff",
+            "g5_harpoon",
+            "g5_moonaxe",
+            "g5_wand_bell",
+            "g5_headsman",
+            "g5_staff_lens",
+            "g5_staff_branch",
+            "g5_staff_aegis"
           ],
-          "count": 6,
+          "count": 10,
           "rarity": {
             "normal": 0.5,
             "magic": 0.42,
             "rare": 0.08
+          },
+          "countBase": 6,
+          "catalog": [
+            "g5_wand_dart",
+            "g5_leafblade",
+            "g5_bostaff",
+            "g5_harpoon",
+            "g5_moonaxe",
+            "g5_wand_bell",
+            "g5_headsman",
+            "g5_staff_lens",
+            "g5_staff_branch",
+            "g5_staff_aegis"
+          ],
+          "minCap": {
+            "g5_headsman": 7,
+            "g5_staff_lens": 8,
+            "g5_staff_branch": 10,
+            "g5_staff_aegis": 12
           }
         },
         "armor": {
@@ -357,13 +476,42 @@
             "spear",
             "longsword",
             "warhammer",
-            "greatsword"
+            "greatsword",
+            "g5_kris",
+            "g5_leafblade",
+            "g5_mallet",
+            "g5_moonaxe",
+            "g5_morningstar",
+            "g5_partisan",
+            "g5_headsman",
+            "g5_flamberge",
+            "g5_stonemaul",
+            "g5_bardiche"
           ],
-          "count": 13,
+          "count": 17,
           "rarity": {
             "normal": 0.55,
             "magic": 0.38,
             "rare": 0.07
+          },
+          "countBase": 13,
+          "catalog": [
+            "g5_kris",
+            "g5_leafblade",
+            "g5_mallet",
+            "g5_moonaxe",
+            "g5_morningstar",
+            "g5_partisan",
+            "g5_headsman",
+            "g5_flamberge",
+            "g5_stonemaul",
+            "g5_bardiche"
+          ],
+          "minCap": {
+            "g5_headsman": 7,
+            "g5_flamberge": 8,
+            "g5_stonemaul": 9,
+            "g5_bardiche": 10
           }
         },
         "armor": {
@@ -371,13 +519,27 @@
           "bases": [
             "buckler",
             "shield",
-            "kite_shield"
+            "kite_shield",
+            "g5_targe",
+            "g5_scutcheon",
+            "g5_almond",
+            "g5_pavise"
           ],
-          "count": 3,
+          "count": 5,
           "rarity": {
             "normal": 0.6,
             "magic": 0.35,
             "rare": 0.05
+          },
+          "countBase": 3,
+          "catalog": [
+            "g5_targe",
+            "g5_scutcheon",
+            "g5_almond",
+            "g5_pavise"
+          ],
+          "minCap": {
+            "g5_pavise": 10
           }
         }
       },
@@ -431,13 +593,53 @@
             "heavy_gauntlets",
             "light_boots",
             "medium_boots",
-            "heavy_boots"
+            "heavy_boots",
+            "g5_leather_brigandine",
+            "g5_leather_chaps",
+            "g5_leather_cuffboots",
+            "g5_leather_gloves",
+            "g5_leather_slouch",
+            "g5_mail_cap",
+            "g5_mail_chausses",
+            "g5_mail_hauberk",
+            "g5_mail_mitts",
+            "g5_mail_splints",
+            "g5_plate_armet",
+            "g5_plate_cuirass",
+            "g5_plate_cuisses",
+            "g5_plate_gauntlets",
+            "g5_plate_sabatons"
           ],
-          "count": 12,
+          "count": 17,
           "rarity": {
             "normal": 0.55,
             "magic": 0.38,
             "rare": 0.07
+          },
+          "countBase": 12,
+          "catalog": [
+            "g5_leather_brigandine",
+            "g5_leather_chaps",
+            "g5_leather_cuffboots",
+            "g5_leather_gloves",
+            "g5_leather_slouch",
+            "g5_mail_cap",
+            "g5_mail_chausses",
+            "g5_mail_hauberk",
+            "g5_mail_mitts",
+            "g5_mail_splints",
+            "g5_plate_armet",
+            "g5_plate_cuirass",
+            "g5_plate_cuisses",
+            "g5_plate_gauntlets",
+            "g5_plate_sabatons"
+          ],
+          "minCap": {
+            "g5_plate_armet": 9,
+            "g5_plate_cuirass": 9,
+            "g5_plate_cuisses": 9,
+            "g5_plate_gauntlets": 9,
+            "g5_plate_sabatons": 9
           }
         },
         "other": {
@@ -446,13 +648,27 @@
             "buckler",
             "shield",
             "kite_shield",
-            "tower_shield"
+            "tower_shield",
+            "g5_targe",
+            "g5_scutcheon",
+            "g5_almond",
+            "g5_pavise"
           ],
-          "count": 3,
+          "count": 5,
           "rarity": {
             "normal": 0.6,
             "magic": 0.35,
             "rare": 0.05
+          },
+          "countBase": 3,
+          "catalog": [
+            "g5_targe",
+            "g5_scutcheon",
+            "g5_almond",
+            "g5_pavise"
+          ],
+          "minCap": {
+            "g5_pavise": 10
           }
         }
       },
@@ -483,25 +699,42 @@
             "bow",
             "crossbow",
             "javelin",
-            "spear"
+            "spear",
+            "g5_harpoon",
+            "g5_recurve",
+            "g5_arbalest"
           ],
-          "count": 8,
+          "count": 9,
           "rarity": {
             "normal": 0.55,
             "magic": 0.38,
             "rare": 0.07
+          },
+          "countBase": 8,
+          "catalog": [
+            "g5_harpoon",
+            "g5_recurve",
+            "g5_arbalest"
+          ],
+          "minCap": {
+            "g5_arbalest": 8
           }
         },
         "other": {
           "label": "Quivers",
           "bases": [
-            "quiver"
+            "quiver",
+            "g5_hipquiver"
           ],
-          "count": 2,
+          "count": 3,
           "rarity": {
             "normal": 0.6,
             "magic": 0.4
-          }
+          },
+          "countBase": 2,
+          "catalog": [
+            "g5_hipquiver"
+          ]
         }
       },
       "goods": [
@@ -538,13 +771,56 @@
             "scepter",
             "orb",
             "tome",
-            "quarterstaff"
+            "quarterstaff",
+            "g5_staff_spire",
+            "g5_wand_dart",
+            "g5_bostaff",
+            "g5_codex",
+            "g5_staff_horn",
+            "g5_wand_bell",
+            "g5_armillary",
+            "g5_crownsceptre",
+            "g5_staff_halo",
+            "g5_wand_hoop",
+            "g5_staff_lens",
+            "g5_wand_lens",
+            "g5_staff_branch",
+            "g5_wand_fork",
+            "g5_staff_aegis",
+            "g5_wand_ward"
           ],
-          "count": 6,
+          "count": 12,
           "rarity": {
             "normal": 0.5,
             "magic": 0.42,
             "rare": 0.08
+          },
+          "countBase": 6,
+          "catalog": [
+            "g5_staff_spire",
+            "g5_wand_dart",
+            "g5_bostaff",
+            "g5_codex",
+            "g5_staff_horn",
+            "g5_wand_bell",
+            "g5_armillary",
+            "g5_crownsceptre",
+            "g5_staff_halo",
+            "g5_wand_hoop",
+            "g5_staff_lens",
+            "g5_wand_lens",
+            "g5_staff_branch",
+            "g5_wand_fork",
+            "g5_staff_aegis",
+            "g5_wand_ward"
+          ],
+          "minCap": {
+            "g5_staff_lens": 8,
+            "g5_wand_lens": 8,
+            "g5_staff_branch": 10,
+            "g5_wand_fork": 10,
+            "g5_staff_aegis": 12,
+            "g5_wand_ward": 12
           }
         }
       },
@@ -611,7 +887,7 @@
       "light": true,
       "categories": {
         "armor": {
-          "label": "Robes & leathers",
+          "label": "Robes, leathers, cloaks & belts",
           "bases": [
             "cloth_helm",
             "cloth_chest",
@@ -620,14 +896,43 @@
             "light_chest",
             "light_legs",
             "light_gauntlets",
-            "light_boots"
+            "light_boots",
+            "travel_cloak",
+            "leather_belt",
+            "g5_cloth_curltoes",
+            "g5_cloth_handwraps",
+            "g5_cloth_pleats",
+            "g5_cloth_vestment",
+            "g5_cloth_wrap",
+            "g5_girdle",
+            "g5_leather_brigandine",
+            "g5_leather_chaps",
+            "g5_leather_cuffboots",
+            "g5_leather_gloves",
+            "g5_leather_slouch",
+            "g5_swallowtail"
           ],
-          "count": 10,
+          "count": 16,
           "rarity": {
             "normal": 0.55,
             "magic": 0.38,
             "rare": 0.07
-          }
+          },
+          "countBase": 12,
+          "catalog": [
+            "g5_cloth_curltoes",
+            "g5_cloth_handwraps",
+            "g5_cloth_pleats",
+            "g5_cloth_vestment",
+            "g5_cloth_wrap",
+            "g5_girdle",
+            "g5_leather_brigandine",
+            "g5_leather_chaps",
+            "g5_leather_cuffboots",
+            "g5_leather_gloves",
+            "g5_leather_slouch",
+            "g5_swallowtail"
+          ]
         },
         "other": {
           "label": "Caster's off hand",
@@ -637,13 +942,32 @@
             "grimoire",
             "seer_orb",
             "reliquary",
-            "effigy"
+            "effigy",
+            "g5_folio",
+            "g5_starglass",
+            "g5_thurible",
+            "g5_sigilplate",
+            "g5_antlerrod",
+            "g5_seeingmask"
           ],
-          "count": 6,
+          "count": 8,
           "rarity": {
             "normal": 0.5,
             "magic": 0.42,
             "rare": 0.08
+          },
+          "countBase": 6,
+          "catalog": [
+            "g5_folio",
+            "g5_starglass",
+            "g5_thurible",
+            "g5_sigilplate",
+            "g5_antlerrod",
+            "g5_seeingmask"
+          ],
+          "minCap": {
+            "g5_antlerrod": 8,
+            "g5_seeingmask": 8
           }
         }
       },
@@ -673,14 +997,21 @@
             "ring",
             "gold_signet",
             "necklace",
-            "silver_amulet"
+            "silver_amulet",
+            "g5_signet",
+            "g5_torc"
           ],
-          "count": 8,
+          "count": 9,
           "rarity": {
             "normal": 0.35,
             "magic": 0.5,
             "rare": 0.15
-          }
+          },
+          "countBase": 8,
+          "catalog": [
+            "g5_signet",
+            "g5_torc"
+          ]
         }
       },
       "goods": [],
@@ -951,6 +1282,61 @@
         "Sit. No, not there, that's where I keep the leeches.",
         "Whatever it is, I've seen worse. Yesterday, mostly."
       ]
+    },
+    "angler": {
+      "name": "Angler",
+      "role": "angler",
+      "sign": "fish",
+      "light": false,
+      "goods": [
+        {
+          "id": "angling_rod",
+          "source": "good",
+          "price": 4,
+          "minLevel": 1
+        },
+        {
+          "id": "ash_rod",
+          "source": "good",
+          "price": 60,
+          "minLevel": 1,
+          "minSkill": 25
+        },
+        {
+          "id": "river_wardens_rod",
+          "source": "good",
+          "price": 320,
+          "minLevel": 1,
+          "minSkill": 50
+        },
+        {
+          "id": "bait_worms",
+          "source": "good",
+          "price": 2,
+          "minLevel": 1
+        },
+        {
+          "id": "bait_bread_paste",
+          "source": "good",
+          "price": 3,
+          "minLevel": 1
+        },
+        {
+          "id": "bait_bright_lure",
+          "source": "good",
+          "price": 12,
+          "minLevel": 1
+        }
+      ],
+      "buys": [
+        "fish"
+      ],
+      "says": [
+        "Fish pay for themselves. Bring me what you land.",
+        "The pools move when you thin them. Follow the ripples.",
+        "Sit down to eat what you cook. Standing meals do half the good."
+      ],
+      "note": "play-test 5 T25: rods (Tools: no weapon slot) and bait; buys fish at the usual sell factor. One per hub town, standing on the bank (data/provinces/angling-pools.json anglers)."
     }
   },
   "towns": {
@@ -1408,6 +1794,21 @@
           "base": "light_boots",
           "rarity": "magic",
           "cat": "Plain clothes"
+        },
+        {
+          "base": "hand_lantern",
+          "rarity": "normal",
+          "cat": "Lanterns & torches"
+        },
+        {
+          "base": "pitch_torch",
+          "rarity": "normal",
+          "cat": "Lanterns & torches"
+        },
+        {
+          "base": "g5_cresset",
+          "rarity": "magic",
+          "cat": "Lanterns & torches"
         }
       ],
       "markup": 1,
@@ -1497,17 +1898,37 @@
         },
         {
           "base": "shortbow",
-          "rarity": "magic",
+          "rarity": "normal",
           "cat": "Odds and ends"
         },
         {
           "base": "wand",
-          "rarity": "magic",
+          "rarity": "normal",
           "cat": "Odds and ends"
         },
         {
           "base": "hammer",
           "rarity": "magic",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "battleaxe",
+          "rarity": "magic",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "staff",
+          "rarity": "magic",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "iron_mace",
+          "rarity": "magic",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "javelin",
+          "rarity": "rare",
           "cat": "Odds and ends"
         },
         {
@@ -1600,12 +2021,12 @@
         },
         {
           "base": "sword2h",
-          "rarity": "magic",
+          "rarity": "normal",
           "cat": "Blades, axes, maces & polearms"
         },
         {
           "base": "halberd",
-          "rarity": "magic",
+          "rarity": "normal",
           "cat": "Blades, axes, maces & polearms"
         },
         {
@@ -1625,6 +2046,26 @@
         },
         {
           "base": "greatsword",
+          "rarity": "magic",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "g5_kris",
+          "rarity": "magic",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "g5_leafblade",
+          "rarity": "magic",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "g5_mallet",
+          "rarity": "magic",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "g5_moonaxe",
           "rarity": "rare",
           "cat": "Blades, axes, maces & polearms"
         },
@@ -1640,6 +2081,16 @@
         },
         {
           "base": "kite_shield",
+          "rarity": "normal",
+          "cat": "Shields"
+        },
+        {
+          "base": "g5_targe",
+          "rarity": "magic",
+          "cat": "Shields"
+        },
+        {
+          "base": "g5_scutcheon",
           "rarity": "magic",
           "cat": "Shields"
         }
@@ -1709,12 +2160,12 @@
         },
         {
           "base": "light_legs",
-          "rarity": "magic",
+          "rarity": "normal",
           "cat": "Mail & plate"
         },
         {
           "base": "medium_legs",
-          "rarity": "magic",
+          "rarity": "normal",
           "cat": "Mail & plate"
         },
         {
@@ -1729,6 +2180,31 @@
         },
         {
           "base": "medium_gauntlets",
+          "rarity": "magic",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "heavy_gauntlets",
+          "rarity": "magic",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "light_boots",
+          "rarity": "magic",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "medium_boots",
+          "rarity": "magic",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "heavy_boots",
+          "rarity": "magic",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "g5_leather_brigandine",
           "rarity": "rare",
           "cat": "Mail & plate"
         },
@@ -1744,6 +2220,16 @@
         },
         {
           "base": "kite_shield",
+          "rarity": "normal",
+          "cat": "Shields"
+        },
+        {
+          "base": "tower_shield",
+          "rarity": "magic",
+          "cat": "Shields"
+        },
+        {
+          "base": "g5_targe",
           "rarity": "magic",
           "cat": "Shields"
         }
@@ -1786,26 +2272,36 @@
         },
         {
           "base": "spear",
+          "rarity": "normal",
+          "cat": "Bows & throwing spears"
+        },
+        {
+          "base": "g5_harpoon",
+          "rarity": "magic",
+          "cat": "Bows & throwing spears"
+        },
+        {
+          "base": "g5_recurve",
+          "rarity": "magic",
+          "cat": "Bows & throwing spears"
+        },
+        {
+          "base": "g5_arbalest",
           "rarity": "magic",
           "cat": "Bows & throwing spears"
         },
         {
           "base": "shortbow",
-          "rarity": "magic",
-          "cat": "Bows & throwing spears"
-        },
-        {
-          "base": "bow",
-          "rarity": "magic",
-          "cat": "Bows & throwing spears"
-        },
-        {
-          "base": "crossbow",
           "rarity": "rare",
           "cat": "Bows & throwing spears"
         },
         {
           "base": "quiver",
+          "rarity": "normal",
+          "cat": "Quivers"
+        },
+        {
+          "base": "g5_hipquiver",
           "rarity": "normal",
           "cat": "Quivers"
         },
@@ -1854,17 +2350,47 @@
         },
         {
           "base": "orb",
-          "rarity": "magic",
+          "rarity": "normal",
           "cat": "Staves, wands & rods"
         },
         {
           "base": "tome",
-          "rarity": "magic",
+          "rarity": "normal",
           "cat": "Staves, wands & rods"
         },
         {
           "base": "quarterstaff",
+          "rarity": "normal",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "g5_staff_spire",
           "rarity": "magic",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "g5_wand_dart",
+          "rarity": "magic",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "g5_bostaff",
+          "rarity": "magic",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "g5_codex",
+          "rarity": "magic",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "g5_staff_horn",
+          "rarity": "magic",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "g5_wand_bell",
+          "rarity": "rare",
           "cat": "Staves, wands & rods"
         }
       ],
@@ -1929,52 +2455,82 @@
         {
           "base": "cloth_helm",
           "rarity": "normal",
-          "cat": "Robes & leathers"
+          "cat": "Robes, leathers, cloaks & belts"
         },
         {
           "base": "cloth_chest",
           "rarity": "normal",
-          "cat": "Robes & leathers"
+          "cat": "Robes, leathers, cloaks & belts"
         },
         {
           "base": "cloth_legs",
           "rarity": "normal",
-          "cat": "Robes & leathers"
+          "cat": "Robes, leathers, cloaks & belts"
         },
         {
           "base": "light_helm",
           "rarity": "normal",
-          "cat": "Robes & leathers"
+          "cat": "Robes, leathers, cloaks & belts"
         },
         {
           "base": "light_chest",
           "rarity": "normal",
-          "cat": "Robes & leathers"
+          "cat": "Robes, leathers, cloaks & belts"
         },
         {
           "base": "light_legs",
-          "rarity": "magic",
-          "cat": "Robes & leathers"
+          "rarity": "normal",
+          "cat": "Robes, leathers, cloaks & belts"
         },
         {
           "base": "light_gauntlets",
-          "rarity": "magic",
-          "cat": "Robes & leathers"
+          "rarity": "normal",
+          "cat": "Robes, leathers, cloaks & belts"
         },
         {
           "base": "light_boots",
-          "rarity": "magic",
-          "cat": "Robes & leathers"
+          "rarity": "normal",
+          "cat": "Robes, leathers, cloaks & belts"
         },
         {
-          "base": "cloth_helm",
-          "rarity": "magic",
-          "cat": "Robes & leathers"
+          "base": "travel_cloak",
+          "rarity": "normal",
+          "cat": "Robes, leathers, cloaks & belts"
         },
         {
-          "base": "cloth_chest",
+          "base": "leather_belt",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks & belts"
+        },
+        {
+          "base": "g5_cloth_curltoes",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks & belts"
+        },
+        {
+          "base": "g5_cloth_handwraps",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks & belts"
+        },
+        {
+          "base": "g5_cloth_pleats",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks & belts"
+        },
+        {
+          "base": "g5_cloth_vestment",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks & belts"
+        },
+        {
+          "base": "g5_cloth_wrap",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks & belts"
+        },
+        {
+          "base": "g5_girdle",
           "rarity": "rare",
-          "cat": "Robes & leathers"
+          "cat": "Robes, leathers, cloaks & belts"
         },
         {
           "base": "warded_focus",
@@ -1993,7 +2549,7 @@
         },
         {
           "base": "seer_orb",
-          "rarity": "magic",
+          "rarity": "normal",
           "cat": "Caster's off hand"
         },
         {
@@ -2004,6 +2560,16 @@
         {
           "base": "effigy",
           "rarity": "magic",
+          "cat": "Caster's off hand"
+        },
+        {
+          "base": "g5_folio",
+          "rarity": "magic",
+          "cat": "Caster's off hand"
+        },
+        {
+          "base": "g5_starglass",
+          "rarity": "rare",
           "cat": "Caster's off hand"
         }
       ],
@@ -2044,6 +2610,16 @@
           "cat": "Rings & amulets"
         },
         {
+          "base": "g5_signet",
+          "rarity": "magic",
+          "cat": "Rings & amulets"
+        },
+        {
+          "base": "g5_torc",
+          "rarity": "magic",
+          "cat": "Rings & amulets"
+        },
+        {
           "base": "ring",
           "rarity": "magic",
           "cat": "Rings & amulets"
@@ -2055,11 +2631,6 @@
         },
         {
           "base": "necklace",
-          "rarity": "magic",
-          "cat": "Rings & amulets"
-        },
-        {
-          "base": "silver_amulet",
           "rarity": "rare",
           "cat": "Rings & amulets"
         }
@@ -2247,6 +2818,54 @@
           "price": 0
         }
       }
+    },
+    "angler": {
+      "kind": "angler",
+      "title": "Angler",
+      "sells": [],
+      "markup": 1,
+      "sign": "fish",
+      "light": false,
+      "goods": [
+        {
+          "id": "angling_rod",
+          "source": "good",
+          "price": 4,
+          "minLevel": 1
+        },
+        {
+          "id": "ash_rod",
+          "source": "good",
+          "price": 60,
+          "minLevel": 1,
+          "minSkill": 25
+        },
+        {
+          "id": "river_wardens_rod",
+          "source": "good",
+          "price": 320,
+          "minLevel": 1,
+          "minSkill": 50
+        },
+        {
+          "id": "bait_worms",
+          "source": "good",
+          "price": 2,
+          "minLevel": 1
+        },
+        {
+          "id": "bait_bread_paste",
+          "source": "good",
+          "price": 3,
+          "minLevel": 1
+        },
+        {
+          "id": "bait_bright_lure",
+          "source": "good",
+          "price": 12,
+          "minLevel": 1
+        }
+      ]
     }
   },
   "_rolesDoc": "MADE by tools/content-shops.mjs from `kinds` (do not edit by hand): stream A's js/sim/shops.js reads roles.<role> = { title, sells: [{ base, rarity }], markup } (+ goods, services, mounts, sign, light, kind). `cat` = the shop tab (the kind's category label)."

@@ -62,6 +62,45 @@
    "radius": 8,
    "quest": "not_a_chest",
    "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z14_04_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    9,
+    9
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1372,
+   "z": 129,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "fiery"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_lowmoor",
+   "name": "Ysmay Drownfield",
+   "role": "angler",
+   "at": "Lowmoor",
+   "x": 1067,
+   "z": 866,
+   "yaw": -2.36,
+   "angler": true
   }
  ]
 }

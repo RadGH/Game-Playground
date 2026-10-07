@@ -8,6 +8,7 @@
 
 import { clockText, timeName } from './daynight.js';
 import { soonText } from './ui/pt2-core.js';
+import { crateRewards } from './ui/pt5-core.js';
 
 const ROLE_NAME = { smith: 'Smith', merchant: 'Merchant', elder: 'Elder', innkeeper: 'Innkeeper', healer: 'Healer', unbinder: 'Unbinder', broker: 'Broker', guard: 'Guard' };
 /** What town folk say when the server sends no lines (their trade, said plainly). */
@@ -141,7 +142,7 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
 
   // ---- quests (protocol §15.9): offers + turn-ins in the dialog, a tracker, results ----
   const questNames = new Map();
-  const rewardText = r => [r?.xp ? `${Math.round(r.xp * 100)}% of a level` : '', r?.gold ? `${r.gold} gold` : '', r?.item ? `a ${r.item} item` : ''].filter(Boolean).join(', ');
+  const rewardText = r => [r?.xp ? `${Math.round(r.xp * 100)}% of a level` : '', r?.gold ? `${r.gold} gold` : '', r?.item ? (typeof r.item === 'string' ? `a ${r.item} item` : `a ${r.item.tier || 'good'} item`) : '', ...crateRewards(r)].filter(Boolean).join(', ');
   function questHtml(u) {
     const offers = u.offers || [], ready = u.ready || [];
     for (const q of offers) questNames.set(q.id, q.name);
@@ -185,7 +186,7 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
       soonTick();
     }
     else if (m.kind === 'start') { zoneSoon = null; zoneLive(ev); hud.chat(m.text || `${ev.name} has begun nearby — join in, everyone shares the credit.`, 'event'); callout(`${ev.name || 'A zone event'} has begun!`, 'enrage'); onEventFrame({ name: ev.name, hp: ev.hp ?? 1, players: ev.players || 0 }); }
-    else if (m.kind === 'end') { zoneSoon = null; if (liveZone && liveZone === (ev.uid || ev.id || ev.name) && !event.live) { liveZone = null; eventEl.className = 'tv-event ended'; eventEl.querySelector('.ev-kind').textContent = m.won ? 'Victory' : 'It is over'; eventEl.querySelector('.ev-time').textContent = ''; setTimeout(() => { if (!liveZone && !event.live) hideEv(); }, 8000); } if (m.called === 'off') { hud.chat(`${ev.name || 'The event'} was called off — everyone walked away.`, 'event'); return; } if (Number.isFinite(m.next)) hud.chat(`${ev.name || 'It'} will be ready again in ${mmss(m.next - Date.now())}.`, 'system'); hud.chat(m.won ? `${ev.name} is over — well fought!` : `${ev.name} faded away.`, 'event'); if (m.won) callout('Victory!', 'victory'); }
+    else if (m.kind === 'end') { zoneSoon = null; if (liveZone && liveZone === (ev.uid || ev.id || ev.name) && !event.live) { liveZone = null; eventEl.className = 'tv-event ended'; eventEl.querySelector('.ev-kind').textContent = m.won ? 'Victory' : 'It is over'; eventEl.querySelector('.ev-time').textContent = ''; setTimeout(() => { if (!liveZone && !event.live) hideEv(); }, 8000); } if (api.tracker) { if (m.won) callout('Victory!', 'victory'); else if (m.called !== 'off') callout(`${ev.name || 'The event'} — failed`, 'phase'); if (Number.isFinite(m.next)) hud.chat(`${ev.name || 'It'} will be ready again in ${mmss(m.next - Date.now())}.`, 'system'); return; } if (m.called === 'off') { hud.chat(`${ev.name || 'The event'} was called off — everyone walked away.`, 'event'); return; } if (Number.isFinite(m.next)) hud.chat(`${ev.name || 'It'} will be ready again in ${mmss(m.next - Date.now())}.`, 'system'); hud.chat(m.won ? `${ev.name} is over — well fought!` : `${ev.name} faded away.`, 'event'); if (m.won) callout('Victory!', 'victory'); }
     else if (ev.name) onEventFrame({ name: `${ev.name}${ev.waves ? ` — wave ${ev.wave}/${ev.waves}` : ''}`, hp: ev.hp ?? 1, players: ev.players || 0 });
   }
 
@@ -204,6 +205,7 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
   bubble.hidden = true; bubble.type = 'button'; bubble.dataset.tip = 'An event is on — click to show it';
   let tucked = null, evKey = null;
   function showEv(key) {
+    if (api.tracker) { eventEl.hidden = true; bubble.hidden = true; return; }   // play-test 5 T11/T12: ui/event-tracker.js owns events now
     if (key !== evKey) { evKey = key; tucked = null; }
     if (tucked === evKey) { eventEl.hidden = true; bubble.hidden = false; } else { eventEl.hidden = false; bubble.hidden = true; }
   }
@@ -255,11 +257,12 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
       eventEl.querySelector('.ev-kind').textContent = m.won ? 'Victory' : 'It is over';
       eventEl.querySelector('.ev-time').textContent = '';
       eventEl.querySelector('.ev-sub').textContent = m.won ? 'The realm owes you a drink.' : 'It slipped away — this time.';
-      hud.chat(m.won ? `${ev.name} has been defeated!` : `${ev.name} withdrew.`, 'event');
+      if (!api.tracker) hud.chat(m.won ? `${ev.name} has been defeated!` : `${ev.name} withdrew.`, 'event');
       setTimeout(() => { if (!event.live && event.kind === 'eventEnd') hideEv(); }, 12000);
     }
   }
   function onEventFrame(f) {
+    if (api.tracker) return;
     if (!event.live && f.uid !== 'demo' && f.name) zoneLive({ uid: f.uid, name: f.name.replace(/ — wave .*$/, '') }, f);
     else if (event.live) eventEl.querySelector('.ev-time').textContent = f.players ? `${f.players} fighting` : '';
     frameEl.hidden = false; frameUntil = performance.now() + 4000;
@@ -269,7 +272,7 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
   }
   let zoneSoon = null;
   function soonTick() {
-    if (!zoneSoon) return;
+    if (!zoneSoon || api.tracker) return;
     frameEl.hidden = false; frameUntil = performance.now() + 1500;
     frameEl.querySelector('b').textContent = zoneSoon.name;
     frameEl.querySelector('i').style.width = '100%';
@@ -340,7 +343,7 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
     n.on('zoneEvent', onZoneEvent);
   }
   const api = {
-    npcButtons: null, onBanner: null,
+    npcButtons: null, onBanner: null, tracker: null,
     knownWaystones: () => [...known],
     wire, tick, onUsed, openTravel, onQuests, onQuestR, onZoneEvent, setKnown, lore, onRealm, onEventFrame, onGroupHint, onZone, show, callout,
     joined(j) { setKnown(j.you?.waystones); if (j.event) onRealm({ kind: 'eventStart', ev: j.event }); },

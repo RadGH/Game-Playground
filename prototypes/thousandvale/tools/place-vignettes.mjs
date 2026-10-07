@@ -316,6 +316,7 @@ function placeZone(eid, wid) {
   const q = QUESTS[eid];
   const npcKeep = new Map();
   for (const [nid, n] of Object.entries((q && q.npcs) || {})) {
+    if (n.placedBy) continue;                 // play-test 5: the anglers stand where tools/content-pools.mjs puts them (<zone>.quest.json)
     const p = npcSpot(n.at, npcKeep, nid);
     if (!p) { problems.push(`npc ${nid} at ${n.at}`); continue; }
     push({ type: 'npc', id: nid, name: n.name, role: n.role, at: n.at, x: p.x, z: p.z, yaw: p.yaw ?? +(rnd() * 6.28).toFixed(2),

@@ -76,7 +76,7 @@ export function memoryM3(d, { now, changed, sha256Hex, randomHex, packChar, prun
     },
     async loginInfo(username) {
       const a = Object.values(d.accounts).find(x => x.username && lower(x.username) === lower(username));
-      return a ? { account: a.id, passHash: a.passHash, banned: bannedMs(a) } : null;
+      return a ? { account: a.id, passHash: a.passHash, banned: bannedMs(a), admin: !!a.admin } : null;
     },
     async newToken(account, kind = 'session') {
       const token = randomHex(32);
@@ -111,7 +111,7 @@ export function memoryM3(d, { now, changed, sha256Hex, randomHex, packChar, prun
     },
     async accountInfo(account) {
       const a = d.accounts[account];
-      return a ? { id: a.id, claimed: !!a.claimed, username: a.username || null, email: a.email || null, banned: bannedMs(a), banReason: a.banReason || null, created: a.created } : null;
+      return a ? { id: a.id, claimed: !!a.claimed, username: a.username || null, email: a.email || null, banned: bannedMs(a), banReason: a.banReason || null, created: a.created, admin: !!a.admin } : null;
     },
     async banAccount(account, untilMs, reason = '') {
       const a = d.accounts[account]; if (!a) return false;
@@ -249,6 +249,44 @@ export function memoryM3(d, { now, changed, sha256Hex, randomHex, packChar, prun
       let gold = 0; for (const m of Object.values(d.mail)) if (!m.takenAt) gold += m.gold;
       return { items: Object.keys(d.items).length, gold, uids: Object.keys(d.items) };
     },
+
+    // ---- feedback (play-test 5, T19/T21) + admin accounts ----
+    // addFeedback(row) -> { id, first }   first = this character's first report (it earns the thank-you letter, once)
+    // listFeedback({ state, kind, limit, before, hideTrashed }) newest first ; feedbackCounts() ; setFeedbackState(id, state, { by, at, note })
+    // setAdmin(usernameOrAccountId, on) -> { ok, account, username } | { err } ; isAdmin(account) -> bool
+    async addFeedback(row) {
+      d.feedback ||= []; d.nextFeedback ||= 1;
+      const id = d.nextFeedback++;
+      const first = row.char != null && !d.feedback.some(f => f.char === row.char && f.gift);
+      d.feedback.push({ id, ...copy(row), at: row.at ?? now(), state: row.state || 'new', note: '', gift: first });
+      changed();
+      return { id, first };
+    },
+    async feedbackGiftFailed(char) { for (const f of d.feedback || []) if (f.char === char) f.gift = false; changed(); },
+    async listFeedback({ state = null, kind = null, limit = 100, before = null, hideTrashed = false } = {}) {
+      return (d.feedback || []).filter(f => (!state || f.state === state) && (!kind || f.kind === kind) && (!before || f.id < before) && !(hideTrashed && f.state === 'trashed'))
+        .sort((x, y) => y.id - x.id).slice(0, limit).map(copy);
+    },
+    async feedbackCounts() {
+      const c = { new: 0, approved: 0, declined: 0, trashed: 0, total: 0 };
+      for (const f of d.feedback || []) { c[f.state] = (c[f.state] || 0) + 1; c.total++; }
+      return c;
+    },
+    async setFeedbackState(id, state, { by = 'admin', at = now(), note = null } = {}) {
+      const f = (d.feedback || []).find(x => x.id === id);
+      if (!f) return false;
+      f.state = state; f.stateAt = at; f.stateBy = by; if (note != null) f.note = note;
+      changed();
+      return true;
+    },
+    async setAdmin(who, on = true) {
+      const a = typeof who === 'number' ? d.accounts[who] : Object.values(d.accounts).find(x => x.username && lower(x.username) === lower(who));
+      if (!a) return { err: 'missing' };
+      a.admin = !!on; changed();
+      return { ok: true, account: a.id, username: a.username || null, admin: a.admin };
+    },
+    async isAdmin(account) { const a = d.accounts[account]; return !!(a && a.admin); },
+    async listAdmins() { return Object.values(d.accounts).filter(a => a.admin).map(a => ({ account: a.id, username: a.username || null })); },
 
     // ---- reports, chat log, world state, economy ----
     async addReport(r) { const id = d.nextReport++; d.reports.push({ id, ...copy(r), created: r.created ?? now(), handled: 0 }); changed(); return id; },

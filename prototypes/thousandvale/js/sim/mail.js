@@ -5,6 +5,7 @@
 // its uid, so the same item can never be in two letters.
 //
 //   list / read     anywhere                send / take   in a town (the post is in town), not while trading
+//                   (a SYSTEM letter — js/sim/sysmail.js: gifts, event shares — is taken anywhere; play-test 5 T20)
 //   send            a claimed account at level 5+ (PLAN §5.5), up to MAIL.items items + gold, POSTAGE gold (a sink)
 //                   to any character by name (your own other characters too) who is not ignoring you
 //   return          send an untaken letter back to whoever sent it; letters left 30 days go back on their own
@@ -88,14 +89,15 @@ export function createMail({ store, online, journal, syncChar, econ, trades, sen
 
   async function take(o, m) {
     const ch = o.char, op = 'take';
-    if (!inTown(o)) return fail(o, op, 'town', 'Collect letters in a town.');
     if (busy(o)) return fail(o, op, 'busy', 'Busy, try again in a moment.');
     if (trades.of(ch.id)) return fail(o, op, 'trade', 'Finish your trade first.');
     const mail = await store.mailGet(ch.id, m.id ?? -1);
     if (!mail) return fail(o, op, 'missing', 'No such letter.');
+    // play-test 5 (T20): a SYSTEM letter (a gift, an event share) is taken wherever you stand; a player's letter in a town
+    if (mail.kind === 'player' && !inTown(o)) return fail(o, op, 'town', 'Collect letters in a town.');
     if (mail.taken || (!mail.gold && !mail.itemsFull.length)) return fail(o, op, 'empty', 'Nothing in it to take.');
     if (busy(o) || online.get(ch.id) !== o) return fail(o, op, 'busy', 'Busy, try again in a moment.');
-    if ((ch.bag || []).length + mail.itemsFull.length > BAG_MAX) return fail(o, op, 'bagFull', 'Your bag is full.');
+    if ((ch.bag || []).length + mail.itemsFull.length > BAG_MAX) return reply(o, op, { ok: false, why: 'bagFull', msg: 'Your bag is full.', need: mail.itemsFull.length, free: Math.max(0, BAG_MAX - (ch.bag || []).length) });
     o.frozen = true; o.saving = true; o.mailBusy = true;
     syncChar(o);
     const got = mail.itemsFull.map(i => JSON.parse(JSON.stringify(i)));

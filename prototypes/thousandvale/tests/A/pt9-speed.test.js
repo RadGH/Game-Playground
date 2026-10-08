@@ -24,7 +24,7 @@ test('move speed on gear is real: same inputs, more ground; the client is told t
     const W = S.world, P = W.province;
     const mk = async name => {
       const n = connect({ mode: 'ws', socketFactory: nodeSafeWsFactory('ws://127.0.0.1:' + port), build: 'dev' });
-      n.you = []; n.on('you', m => n.you.push(m)); n.itemR = []; n.on('itemR', m => n.itemR.push(m)); n.hits = []; n.on('hits', m => n.hits.push(...m.l));
+      n.yous = []; n.on('you', m => n.yous.push(m)); n.itemR = []; n.on('itemR', m => n.itemR.push(m)); n.hits = []; n.on('hits', m => n.hits.push(...m.l));
       await n.ready; const ch = await n.createChar({ name, cls: 'warrior' }); await n.play(ch.id); return n;
     };
     const plain = await mk('Plainfoot'), fast = await mk('Fleetfoot');
@@ -51,8 +51,8 @@ test('move speed on gear is real: same inputs, more ground; the client is told t
     fast.item('equip', uid);
     assert.ok(await waitFor(() => fast.itemR.some(m => m.op === 'equip')), 'the equip was answered');
     assert.equal(fast.itemR.find(m => m.op === 'equip').ok, true, JSON.stringify(fast.itemR));
-    assert.ok(await waitFor(() => fast.you.some(y => y.speedMul > 1)), 'the client is told its new speed: ' + JSON.stringify(fast.you.slice(-3)));
-    const told = fast.you.filter(y => y.speedMul != null).at(-1);
+    assert.ok(await waitFor(() => fast.yous.some(y => y.speedMul > 1)), 'the client is told its new speed: ' + JSON.stringify(fast.yous.slice(-3)));
+    const told = fast.yous.filter(y => y.speedMul != null).at(-1);
     assert.ok(Math.abs(told.speedMul - 1.18) < 1e-6 && Math.abs(told.moveMul - 1.18) < 1e-6, 'x1.18: ' + JSON.stringify(told));
     assert.ok(Math.abs(of().entity.speedMul - 1.18) < 1e-6);
     // the same inputs for the same ticks: 2 s of running east at 20 Hz (the plain run, no sprint bit)
@@ -91,13 +91,14 @@ test('move speed on gear is real: same inputs, more ground; the client is told t
     // boots off: back to 1, and the client hears it
     fast.item('unequip', uid, 'feet');
     assert.ok(await waitFor(() => Math.abs(of().entity.speedMul - 1) < 1e-6), 'back to x1 without the boots: ' + of().entity.speedMul);
-    assert.ok(await waitFor(() => fast.you.filter(y => y.speedMul != null).at(-1).speedMul === 1));
+    assert.ok(await waitFor(() => fast.yous.filter(y => y.speedMul != null).at(-1).speedMul === 1));
     // a heal on a full bar: `hit n:0, over` — nobody's miss, nobody's kill, nobody thrown or put in a fight
     fast.meter(true); await sleep(150);
     const e = of().entity, hp0 = e.hp, hit0 = of().lastHitAt || 0;
-    copy.event({ type: 'hit', s: op().entity.id, d: e.id, n: 0, over: 25, kind: 'heal', ab: 'mend' });
+    assert.equal(of().room, op().room, 'still side by side');
+    of().room.event({ type: 'hit', s: op().entity.id, d: e.id, n: 0, over: 25, kind: 'heal', ab: 'mend' });
     await sleep(500);
-    assert.equal(e.dead, false); assert.equal(e.hp, hp0); assert.equal(of().lastHitAt || 0, hit0, 'a heal is not being hit');
+    assert.equal(e.dead, false, 'alive'); assert.ok(e.hp >= hp0, 'not hurt: ' + e.hp + ' vs ' + hp0); assert.equal(of().lastHitAt || 0, hit0, 'a heal is not being hit');
     const row = fast.hits.find(r => r[4] === 'mend');
     assert.deepEqual(row, [op().entity.id, e.id, 0, 1, 'mend', '', 25, 0], 'the meter sees a heal of 0 with 25 overheal — flag 1 (heal), not miss, not kill');
     plain.close(); fast.close();

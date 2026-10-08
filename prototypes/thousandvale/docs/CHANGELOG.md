@@ -1133,3 +1133,5 @@ New: `js/client/ui/pt9-core.js` (pure), `js/client/ui/online-window.js`, `css/pt
 - A Sovereign Core drops only from a world boss (25% for each player with credit) and from a won event of level 8 or higher (5%). Nothing gathers, crafts or sells one.
 - A promoted legendary has the rare's three rolled properties plus the power; a dropped legendary rolls five or six — the drop stays the better item.
 - **Round 9 (stream C)**: `hit` events carry `over` (overkill / overheal) and `abs` (absorbed) for the damage meter. Tempering's rare -> legendary promotion checked end to end (tests/C/promote.test.mjs): every promotable power fires in a real fight; six powers nothing in Thousandvale reads are barred from promotion (`INERT_POWERS`); a burn-length power now also lengthens a stacking burn (Firebolt).
+
+- **Move speed is real** (lead / C, 2026-10-08): `entity.speedMul` = foot (sheet `movePct`, held to x0.5..x1.3) x mount; `you {speedMul, moveMul}`; tests/A/pt9-speed.test.js over real sockets. tests/A 291 = 287 pass / 4 skip.

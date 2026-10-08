@@ -38,6 +38,14 @@ export function gearChances(numbers, surplus = 0) {
     return { quality: q, word: names[q] || q, magic: Math.min(1 - Math.min(1, rare), magic), rare: Math.min(1, rare) };
   }).filter(x => x.magic > 0 || x.rare > 0);
 }
+/** How many of a recipe one batch can make: what the materials and the gold allow, up to the server's cap; 1 for gear and for what you cannot make. Pure. */
+export function batchTimes(r, cap = 10, gold = Infinity) {
+  if (!r || !r.can || r.kind === 'gear' || r.kind === 'temper' || r.kind === 'tool') return 1;
+  let k = Math.max(1, cap || 1);
+  for (const n of r.needs || []) k = Math.min(k, Math.floor((n.have ?? 0) / Math.max(1, n.n)));
+  if (r.gold > 0) k = Math.min(k, Math.floor(gold / r.gold));
+  return Math.max(1, k);
+}
 /** The recipes of one craft, the ones you can make first, then by tier and skill. Pure. */
 export function recipeRows(recipes, prof) {
   return (recipes || []).filter(r => r.prof === prof && r.kind !== 'temper').sort((a, b) => (b.can ? 1 : 0) - (a.can ? 1 : 0) || (a.tier || 1) - (b.tier || 1) || (a.skill || 1) - (b.skill || 1) || String(a.name).localeCompare(String(b.name)));
@@ -56,6 +64,7 @@ export function temperCandidates(bag, op) {
 export function createCraftWindow({ net, hud, bag, numbers = () => null, onMake, onTemper }) {
   const S = { list: null, tab: null, npc: null, busy: false, base: {}, op: 'temper_quality', uid: null, index: 0, element: 'fire', quote: null, asked: '', lastTemper: null };
   const panel = createPanel({ id: 'craft', title: 'Crafting', width: 470, cls: 'craft-panel', onOpen: () => { ask(); draw(); }, onClose: () => { S.quote = null; } });
+  const myGold = () => { const g = bag?.state?.gold ?? net()?.joined?.you?.gold; return Number.isFinite(g) ? g : Infinity; };
   const send = (op, a = {}) => { const n = net(); if (!n?.joined || typeof n.craft !== 'function') return false; n.craft(op, a); return true; };
   function ask() { send('list', S.npc != null ? { npc: S.npc } : {}); }
   function askQuote() {
@@ -72,6 +81,7 @@ export function createCraftWindow({ net, hud, bag, numbers = () => null, onMake,
     const N = numbers(), myLevel = S.list?.level?.[r.prof] || 1;
     const bases = (r.bases || []).filter(b => b.can !== false), baseKey = S.base[r.id] && bases.some(b => b.key === S.base[r.id]) ? S.base[r.id] : bases[0]?.key;
     const chances = r.kind === 'gear' ? gearChances(N, myLevel - (r.skill || 1)) : [];
+    const times = batchTimes(r, N?.craft?.batchMax, myGold());
     const makes = r.makes ? `${r.makes.n > 1 ? r.makes.n + ' × ' : ''}${r.makes.name}` : r.name;
     return h('li.pc-row' + (r.can ? '' : '.no'), { dataset: { id: r.id } },
       h('div.pc-main', {},
@@ -83,7 +93,10 @@ export function createCraftWindow({ net, hud, bag, numbers = () => null, onMake,
           'Better work, better gear: ', chances.map(c => `${c.word} ${pct(c.magic)} ${RARITY_NAME.magic.toLowerCase()}${c.rare > 0 ? ', ' + pct(c.rare) + ' ' + RARITY_NAME.rare.toLowerCase() : ''}`).join(' · ')) : null,
         h('div.pc-cost', {}, needChips(r.needs), feeNode(r.gold)),
         r.why ? h('small.pc-why', {}, r.why) : null),
-      h('button.primary.pc-make', { type: 'button', disabled: !r.can || S.busy, dataset: { make: r.id }, onclick: () => { if (S.busy) return; onMake?.(r, { base: baseKey, npc: S.npc }); } }, verbOf(r.prof)));
+      h('div.pc-btns', {},
+        h('button.primary.pc-make', { type: 'button', disabled: !r.can || S.busy, dataset: { make: r.id }, onclick: () => { if (S.busy) return; onMake?.(r, { base: baseKey, npc: S.npc }); } }, verbOf(r.prof)),
+        // a batch: as many as your materials and gold allow (the server's cap), for ONE mini-game — how well you play it counts for all of them
+        times > 1 ? h('button.ghost.pc-batch', { type: 'button', disabled: !r.can || S.busy, dataset: { batch: r.id, n: times, tip: `Make ${times} in one go. One mini-game decides the quality of all of them.` }, onclick: () => { if (S.busy) return; onMake?.(r, { n: times, npc: S.npc }); } }, `× ${times}`) : null));
   }
   const verbOf = prof => ({ smithing: 'Forge', outfitting: 'Stitch', alchemy: 'Brew', cooking: 'Cook', tempering: 'Temper' }[prof] || 'Make');
 
@@ -119,7 +132,7 @@ export function createCraftWindow({ net, hud, bag, numbers = () => null, onMake,
               h('div.pc-cost', {}, needChips(q.needs), feeNode(q.gold)),
               Number.isFinite(q.skill) ? h('small', {}, `Needs Tempering ${q.skill} — yours is ${S.list?.level?.tempering || 1}.`) : null,
               q.can || (q.why && q.why === q.text) ? null : h('small.pc-why', {}, q.why || 'You cannot do that yet.'),
-              h('small.pt-safe', {}, 'A miss spends the materials and the fee. The item is never harmed.'),
+              q.can || (q.needs || []).length ? h('small.pt-safe', {}, 'A miss spends the materials and the fee. The item is never harmed.') : null,
             ],
             S.lastTemper && S.lastTemper.uid === it.uid ? h('p.pt-last', {}, S.lastTemper.text) : null,
             h('button.primary.wide', { type: 'button', disabled: !q?.can || S.busy, dataset: { temper: S.op }, onclick: () => { if (!S.busy) onTemper?.(op, { uid: S.uid, npc: S.npc, ...(S.op === 'temper_reweave' ? { index: S.index } : {}), ...(S.op === 'temper_brand' ? { element: S.element } : {}) }, it); } }, op.name),

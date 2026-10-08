@@ -101,5 +101,12 @@ test('keys do not leak to the game while a mini-game is up; Esc gives up and not
   const r = await done;
   expect(['fail', 'poor', 'good']).toContain(r.quality);
   expect(r.inputs.length).toBeLessThanOrEqual(64);
+  // the server's own clock for worked nodes (`you.professions.nodes`, ms left) replaces the guess made from the bare key list
+  await page.evaluate(() => window.gallery.fake.push('game', { t: 'you', professions: { list: window.tvprof.skills(), nodes: { 'node:a': 60000, 'node:b': 1 } } }));
+  await page.waitForTimeout(150);
+  expect(await page.evaluate(() => [window.tvprof.isSpent('node:a'), window.tvprof.isSpent('node:b'), window.tvprof.isSpent('node:c')])).toEqual([true, false, false]);
+  await page.evaluate(() => window.gallery.fake.push('game', { t: 'you', professions: { list: window.tvprof.skills(), nodes: {} } }));
+  await page.waitForTimeout(100);
+  expect(await page.evaluate(() => window.tvprof.isSpent('node:a')), 'a node the server no longer lists is back').toBe(false);
   await ctx.close();
 });

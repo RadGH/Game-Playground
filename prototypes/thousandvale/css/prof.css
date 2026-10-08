@@ -68,6 +68,7 @@ html[data-prof] #interact, html[data-prof] .interact { visibility: hidden; }
 .pc-fee { color: var(--gold-hi); }
 .pc-why { color: var(--warn) !important; }
 .pc-base { font-size: 13px; color: var(--ink-dim); } .pc-base select { margin-left: 4px; padding: 3px 6px; border-radius: 6px; border: 1px solid var(--edge); background: #1c1611; max-width: 210px; }
+.pc-btns { flex: 0 0 auto; display: flex; flex-direction: column; gap: 5px; align-items: stretch; } .pc-batch { min-height: 30px; padding: 0 10px; font-size: 13px; }
 button.primary.pc-make { flex: 0 0 auto; width: auto; min-width: 82px; padding: 9px 14px; font-size: 14px; }
 /* tempering */
 .pc-needs .kept { border-color: rgba(255, 210, 74, 0.7); color: #ffd24a; } .pc-needs .kept.lack { color: var(--bad); }
@@ -131,4 +132,6 @@ html[data-layout="phone"] button.primary.pc-make { min-height: 44px; }
 html[data-layout="phone"] .pt-item, html[data-layout="phone"] .pt-ops .chip, html[data-layout="phone"] .pt-els .chip, html[data-layout="phone"] .pk-open, html[data-layout="phone"] .tr-row button { min-height: 44px; }
 html[data-layout="phone"] .pc-base select { min-height: 44px; }
 html[data-layout="phone"] .pt-list { max-height: none; }
+@media (orientation: portrait) { html[data-layout="phone"] .pt-list { max-height: 34vh; } }
+html[data-layout="phone"] .pc-batch { min-height: 44px; }
 @media (orientation: portrait) { html[data-layout="phone"] .pt-cols { grid-template-columns: 1fr; } }

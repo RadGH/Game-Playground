@@ -152,3 +152,22 @@ test('every sound the mini-games ask for is in the Sound Lab catalog', () => {
   const cat = JSON.parse(readFileSync(new URL('../../../../sfx/data/catalog.json', import.meta.url), 'utf8')), ids = new Set(Array.isArray(cat.sounds) ? cat.sounds.map(s => s.id) : Object.keys(cat.sounds));
   for (const id of PROF_SOUND_IDS) assert.ok(ids.has(id), id);
 });
+
+test('the crafting window\'s pure parts: a batch is what the materials, the gold and the server\'s cap allow; a legendary power is read from the quote / the result', async () => {
+  globalThis.document ||= { createElement: () => ({ style: {}, setAttribute() {}, appendChild() {}, addEventListener() {}, querySelector: () => ({}), classList: { add() {}, remove() {}, toggle() {} } }), getElementById: () => null, querySelector: () => null, head: { appendChild() {} }, body: { appendChild() {} } };
+  const { batchTimes, powerOf, gearChances, recipeRows, craftTabs, temperCandidates } = await import('../../js/client/ui/prof-craft.js');
+  const L = FX.craftListLegend, smelt = { id: 'x', kind: 'material', can: true, gold: 0, needs: [{ n: 1, have: 7 }, { n: 2, have: 9 }] };
+  assert.equal(batchTimes(smelt, 10), 4); assert.equal(batchTimes(smelt, 3), 3); assert.equal(batchTimes({ ...smelt, gold: 5 }, 10, 12), 2);
+  assert.equal(batchTimes({ ...smelt, can: false }, 10), 1); assert.equal(batchTimes({ ...smelt, kind: 'gear' }, 10), 1);
+  // round 9: the server's own messages
+  assert.equal(powerOf(FX.legendDone), FX.legendDone.now.descriptor); assert.ok(powerOf(FX.legendDone).length > 10);
+  assert.equal(powerOf(FX.legendQuote), null, 'the quote does not name the power (it is rolled when the work succeeds)');
+  assert.equal(powerOf(FX.temperDone), null, 'an ordinary tempering is not a legendary power');
+  assert.ok(FX.legendQuote.needs.some(n => n.kept && n.id === 'sovereign_core') && FX.legendQuote.to === 'legendary');
+  assert.deepEqual(FX.legendMiss.kept, ['sovereign_core']); assert.equal(FX.legendQuoteRefused.can, false); assert.match(FX.legendQuoteRefused.why, /cannot hold a legendary power/);
+  assert.ok(L.recipes.find(r => r.id === 'temper_promote').legendary.skill >= 1);
+  assert.deepEqual(craftTabs(L), ['smithing', 'tempering']);
+  assert.ok(recipeRows(L.recipes, 'smithing').length > 3 && recipeRows(L.recipes, 'smithing').every(r => r.kind !== 'temper'));
+  assert.ok(temperCandidates(FX.bagLegend, 'temper_promote').some(i => i.uid === FX.legendUid));
+  for (const c of gearChances(numbers, 12)) assert.ok(c.magic >= 0 && c.magic + c.rare <= 1.0001, JSON.stringify(c));
+});

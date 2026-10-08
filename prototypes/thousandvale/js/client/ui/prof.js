@@ -103,7 +103,7 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
 
   // ---- making ------------------------------------------------------------------------------------------------
   const craft = createCraftWindow({ net, hud, bag, numbers: () => S.numbers,
-    onMake(r, { base, npc }) { S.pending = { title: r.name, prof: r.prof }; send('craft', 'start', { id: r.id, ...(base ? { base } : {}), ...(npc != null ? { npc } : {}) }); },
+    onMake(r, { base, npc, n }) { S.pending = { title: n > 1 ? `${r.name} × ${n}` : r.name, prof: r.prof }; send('craft', 'start', { id: r.id, ...(base ? { base } : {}), ...(n > 1 ? { n } : {}), ...(npc != null ? { npc } : {}) }); },
     onTemper(op, a, item) { S.pending = { title: `${op.name}: ${item.name}`, prof: 'tempering' }; send('craft', 'start', { id: op.id, ...a }); } });
   function onCraftR(m) {
     if (!m.ok) { if (S.work?.kind === 'craft') stopped(m); refused(m, 'You cannot make that.'); craft.setBusy(false); return; }

@@ -55,13 +55,13 @@ test.afterAll(async () => { await ctx?.close(); srv?.kill('SIGTERM'); });
  * which is exactly what this proves.
  */
 async function botReal(pg, how = 'key') {
-  // ONE question to the page: the flawless times and the wall-clock moment the game began (the page may take a second to answer; the answer is still exact)
-  const { perfect, start, box } = await pg.evaluate(() => ({ perfect: tvprof.mini.run.perfect, start: Date.now() - tvprof.mini.state.clock, box: tvprof.mini.state.canvas }));
-  const off = start;
-  for (const [t] of perfect) {
-    const wait = t - (Date.now() - off) - 4; if (wait > 0) await new Promise(r => setTimeout(r, wait));
-    if (how === 'touch') await pg.touchscreen.tap(box.x + box.w / 2, box.y + box.h / 2);
-    else { const d = pg.keyboard.down('Space'); await pg.keyboard.up('Space'); await d; }
+  // ONE question to the page: the flawless inputs, where a finger would tap for each, and the wall-clock moment the game began
+  // (the page may take a second to answer; the answer is still exact)
+  const { perfect, start, type, pts } = await pg.evaluate(() => { const m = tvprof.mini, run = m.run; return { perfect: run.perfect, type: run.type, start: Date.now() - m.state.clock, pts: run.perfect.map(([, v]) => m.pointFor(v)) }; });
+  for (const [i, [t, v]] of perfect.entries()) {
+    const wait = t - (Date.now() - start) - 4; if (wait > 0) await new Promise(r => setTimeout(r, wait));
+    if (how === 'touch') await pg.touchscreen.tap(pts[i].x, pts[i].y);
+    else { const code = type === 'rhythm' ? (v ? 'KeyD' : 'KeyA') : type === 'pick' ? 'Digit' + (v + 1) : type === 'forge' && v === 1 ? 'KeyD' : 'Space'; const d = pg.keyboard.down(code); await pg.keyboard.up(code); await d; }
   }
 }
 const botKeys = () => botReal(page, 'key');
@@ -232,6 +232,133 @@ test('on a phone (393 × 852, the real phone layout): tap the prompt, play the b
   expect(res.server.q, 'the server scored the same inputs the same way').toBe(res.local.q);
   expect(Math.hypot(res.you.x - before.x, res.you.z - before.z), 'tapping the panel did not walk the character anywhere').toBeLessThan(0.6);
   expect(res.card).not.toMatch(/undefined|null|NaN|\[object/);
+  expect(perr, perr.join('\n')).toEqual([]);
+  await pctx.close();
+});
+
+// ---------------------------------------------------------------------------------------------------------------------
+// MAKING, end to end, in the real game: mine copper and tin -> smelt bronze (a batch, one mini-game) -> forge a blade
+// (the forge mini-game) -> the card and the item in the bag -> temper it once (the gauge). The FLOW is asserted, not how
+// well the synthetic player did: every step must come back from the server and leave what it should in the bag.
+const HOME = { x: 25183, z: 5388 };
+async function makeFlow(pg, name, how) {
+  const act = sel => (how === 'touch' ? pg.locator(sel).first().tap() : pg.locator(sel).first().click());
+  const until = (fn, arg, ms = 30000) => pg.waitForFunction(fn, arg, { timeout: ms });
+  await pg.evaluate(() => {
+    const L = window.__flow = { gather: [], craft: [], cards: [] };
+    thousandvale.S.net.on('gatherDone', m => L.gather.push({ ok: m.ok, q: m.quality, got: (m.got || []).map(g => g.n + ' ' + g.name) }));
+    thousandvale.S.net.on('craftDone', m => { L.craft.push({ id: m.id, ok: m.ok, q: m.quality, items: (m.items || []).map(i => i.name), item: m.item ? { name: m.item.name, quality: m.item.quality, tempered: m.item.tempered } : null, msg: m.msg }); setTimeout(() => L.cards.push(document.querySelector('.prof-card')?.innerText.replace(/\s+/g, ' ') || '(card gone)'), 350); });
+  });
+  const count = id => pg.evaluate(i => thousandvale.bag.state.bag.filter(x => x.id === i).reduce((a, x) => a + (x.count || 1), 0), id);
+  const playUp = async () => { await until(() => tvprof.mini.state.state === 'play', null, 15000); await botReal(pg, how); };
+  expect((await hook('/give', { name, gold: 600, items: 0 })).ok).toBe(true);
+  // 1. learn Mining (Bram teaches at the first word)
+  await hook('/teleport', { name, x: BRAM.x + 2.2, z: BRAM.z + 0.5 });
+  await until(() => [...thousandvale.actors.actors.values()].some(a => a.role === 'prospector'));
+  await pg.evaluate(() => { const b = [...thousandvale.actors.actors.values()].find(a => a.role === 'prospector'); thousandvale.S.net.use(b.id); });
+  await until(() => tvprof.state.list.find(x => x.id === 'mining')?.known, null, 15000);
+  await pg.waitForTimeout(900); await pg.evaluate(() => thousandvale.worldUi.closeDialog?.());
+  // 2. mine: copper and tin boulders by the gate until there is enough for five bars (three for a blade, two to temper it)
+  let mined = 0;
+  for (const st of BRAM.starters) {
+    if ((await count('copper_ore')) >= 5 && (await count('tin_ore')) >= 5) break;
+    if ((await count(st.kind + '_ore')) >= 5) continue;
+    await hook('/teleport', { name, x: st.x + 2.2, z: st.z + 0.4 });
+    await pg.waitForTimeout(1500);
+    await until(() => !document.getElementById('interact').hidden && /Mine/.test(document.getElementById('interact').innerText), null, 30000);
+    const n0 = await pg.evaluate(() => window.__flow.gather.length);
+    if (how === 'touch') await pg.locator('#interact').tap(); else await pg.keyboard.press('KeyE');
+    await playUp();
+    await until(n => window.__flow.gather.length > n, n0, 20000);
+    mined++;
+    await until(() => !tvprof.mini.isOpen, null, 15000);
+  }
+  const ore = { copper: await count('copper_ore'), tin: await count('tin_ore') };
+  expect(ore.copper, `mined ${mined} boulders: ${JSON.stringify(await pg.evaluate(() => window.__flow.gather))}`).toBeGreaterThanOrEqual(5);
+  expect(ore.tin).toBeGreaterThanOrEqual(5);
+  // 3. the smith: learn Smithing and Tempering from his dialog's own button, then "Use the forge"
+  await hook('/teleport', { name, x: HOME.x, z: HOME.z });
+  await until(() => [...thousandvale.actors.actors.values()].some(a => a.role === 'smith'));
+  const at = await pg.evaluate(() => { const a = [...thousandvale.actors.actors.values()].find(x => x.role === 'smith'); return { x: a.pos.x, z: a.pos.z }; });
+  await hook('/teleport', { name, x: at.x + 1.6, z: at.z + 1.2 });
+  await pg.waitForTimeout(1500);
+  const talk = () => pg.evaluate(() => { const a = [...thousandvale.actors.actors.values()].find(x => x.role === 'smith'); thousandvale.S.net.use(a.id); });
+  await talk();
+  await pg.locator('.tv-dialog .prof-dlg', { hasText: /Learn/ }).waitFor({ timeout: 15000 });
+  await act('.tv-dialog .prof-dlg:has-text("Learn")');
+  for (const id of ['smithing', 'tempering']) { await act(`#panel-trade [data-learn="${id}"]`); await until(i => tvprof.state.list.find(x => x.id === i)?.known, id, 15000); }
+  await pg.evaluate(() => tvprof.trainer.close());
+  await talk();
+  await pg.locator('.tv-dialog .prof-dlg', { hasText: 'Use the forge' }).waitFor({ timeout: 15000 });
+  await act('.tv-dialog .prof-dlg:has-text("Use the forge")');
+  await pg.locator('#panel-craft [data-make="smelt_bronze_bar"]').waitFor({ timeout: 15000 });
+  // 4. smelt: a batch of five, ONE mini-game
+  await pg.locator('#panel-craft [data-batch="smelt_bronze_bar"]').waitFor({ timeout: 10000 });
+  expect(await pg.locator('#panel-craft [data-batch="smelt_bronze_bar"]').getAttribute('data-n')).toBe('5');
+  await act('#panel-craft [data-batch="smelt_bronze_bar"]');
+  await playUp();
+  await until(() => window.__flow.craft.some(c => c.id === 'smelt_bronze_bar'), null, 20000);
+  const bars = await count('bronze_bar');
+  expect(bars, JSON.stringify(await pg.evaluate(() => window.__flow.craft))).toBeGreaterThanOrEqual(5);
+  await until(() => !tvprof.mini.isOpen, null, 15000);
+  // 5. forge a blade: the forge mini-game (hammer, and back in the fire), then the card and the item in the bag
+  await pg.locator('#panel-craft [data-make="blades_1"]:not([disabled])').waitFor({ timeout: 15000 });
+  let blade = null;
+  for (let attempt = 0; attempt < 3 && !blade; attempt++) {          // (a botched forging spends nothing and may be tried again at once)
+    const n0 = await pg.evaluate(() => window.__flow.craft.length);
+    await act('#panel-craft [data-make="blades_1"]');
+    await until(() => tvprof.mini.state.state === 'play' && tvprof.mini.state.type === 'forge', null, 15000);
+    await botReal(pg, how);
+    await until(n => window.__flow.craft.length > n && window.__flow.cards.length > n, n0, 25000);
+    blade = await pg.evaluate(() => { const it = thousandvale.bag.state.bag.find(i => i.crafted); return it ? { uid: it.uid, name: it.name, rarity: it.rarity, quality: it.quality, maker: it.maker } : null; });
+    await until(() => !tvprof.mini.isOpen, null, 15000);
+  }
+  const forged = await pg.evaluate(() => ({ craft: window.__flow.craft, cards: window.__flow.cards }));
+  expect(blade, 'a forged blade is in the bag: ' + JSON.stringify(forged.craft)).toBeTruthy();
+  expect(blade.maker).toBe(name);
+  expect(forged.cards.at(-1), 'the result card names the item').toContain(blade.name);
+  await pg.screenshot({ path: join(SHOTS, `w9-make-${how}-forged.png`) });
+  // 6. temper it once: the Tempering tab, the item, the server's quote, the gauge
+  await act('#panel-craft .pc-tab[data-tab="tempering"]');
+  await act(`#panel-craft .pt-item[data-uid="${blade.uid}"]`);
+  await pg.locator('#panel-craft [data-temper="temper_quality"]:not([disabled])').waitFor({ timeout: 20000 });
+  const quote = await pg.locator('#panel-craft .pt-quote').innerText();
+  expect(quote).toMatch(/Bronze Bar/); expect(quote).not.toMatch(/undefined|NaN|\[object/);
+  await pg.screenshot({ path: join(SHOTS, `w9-make-${how}-quote.png`) });
+  const c0 = await pg.evaluate(() => window.__flow.craft.length);
+  await act('#panel-craft [data-temper="temper_quality"]');
+  await until(() => tvprof.mini.state.state === 'play' && tvprof.mini.state.type === 'gauge', null, 15000);
+  await botReal(pg, how);
+  await until(n => window.__flow.craft.length > n && window.__flow.cards.length > n, c0, 25000);
+  const end = await pg.evaluate(uid => ({ temper: window.__flow.craft.at(-1), card: window.__flow.cards.at(-1), item: (() => { const it = thousandvale.bag.state.bag.find(i => i.uid === uid); return it ? { name: it.name, quality: it.quality, tempered: it.tempered || 0 } : null; })(), gather: window.__flow.gather, craft: window.__flow.craft }), blade.uid);
+  await pg.screenshot({ path: join(SHOTS, `w9-make-${how}-tempered.png`) });
+  console.log(`[prof] make (${how}):`, JSON.stringify({ mined, ore, bars, blade, end: { temper: end.temper, card: end.card, item: end.item }, gather: end.gather.map(g => g.q), craft: end.craft.map(c => c.id + ':' + c.q) }));
+  expect(end.temper.id).toBe('temper_quality');
+  expect(end.item, 'tempering never loses the item').toBeTruthy();
+  if (end.temper.ok) { expect(end.item.tempered).toBeGreaterThanOrEqual(1); expect(end.item.quality).not.toBe(blade.quality); }
+  else expect(end.item.quality, 'a missed gauge leaves the item as it was').toBe(blade.quality);
+  expect(end.card).not.toMatch(/undefined|null|NaN|\[object/);
+}
+
+test('MAKE something end to end on a desktop: mine, smelt a batch, forge a blade (card + item in the bag), temper it once', async () => {
+  test.setTimeout(900000);
+  await page.setViewportSize({ width: 560, height: 420 });           // (small: the software renderer; every window still fits)
+  await page.evaluate(() => { tv.hud(true); for (const p of ['bag', 'craft', 'trade']) document.getElementById('panel-' + p)?.querySelector('.tvp-x')?.click(); });
+  await page.keyboard.press('Escape');
+  await makeFlow(page, NAME, 'key');
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('MAKE something end to end on the real phone layout (393 × 852), every step by touch', async ({ browser }) => {
+  test.setTimeout(1200000);
+  const pctx = await browser.newContext({ viewport: { width: 393, height: 852 }, hasTouch: true, isMobile: true, deviceScaleFactor: 1 });
+  const p = await pctx.newPage(); const perr = [];
+  p.on('pageerror', e => perr.push(e.message));
+  await p.goto(`http://127.0.0.1:${port}/prototypes/thousandvale/?autoplay=1&name=Tamsin&cls=ranger&quality=low&tod=0.5&layout=phone`);
+  await p.waitForFunction(() => window.tv && tv.state().status === 'online' && tv.state().you?.id != null, null, { timeout: 60000 });
+  await p.waitForFunction(() => tv.warm()?.done, null, { timeout: 300000 });
+  expect(await p.evaluate(() => document.documentElement.dataset.layout)).toBe('phone');
+  await makeFlow(p, 'Tamsin', 'touch');
   expect(perr, perr.join('\n')).toEqual([]);
   await pctx.close();
 });

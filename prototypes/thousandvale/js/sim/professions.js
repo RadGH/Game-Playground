@@ -266,7 +266,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
       return reply(o, 'gatherDone', { ...base, ok: false, items: [], got: [], xp: 0, skill: skillView(g), reopenMs: 0, msg: w.skin ? 'A botched cut. Try again.' : 'You got nothing out of it. It is still there: try again.' });
     }
     const rng = () => w.room.host.random('prof');
-    const yields = P.gatherYield({ node: w.node, quality: r.quality, rng, tool: w.tool });
+    const yields = P.gatherYield({ node: w.node, quality: r.quality, rng, tool: w.tool, extra: w.room.rules && w.room.rules.gatherBonus ? +w.room.rules.gatherBonus(o.entity) || 0 : 0 });      // (stream C, round 9: Forager's Covenant)
     const items = yields.map(y => P.item(y.id, y.n)).filter(Boolean);
     const got = yields.map(y => gotRow(P.item(y.id, 1), y.n, !!y.bonus));
     const xp = P.xpFor({ tier: w.node.tier, quality: r.quality, skill: w.skill });

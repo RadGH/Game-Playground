@@ -245,7 +245,9 @@ test('healPower, Brimming Cup, dotPct and xpFind in the room', () => {
   const award0 = room.host.award;
   room.host.award = (e, x) => { awards.push(x.xp); return award0(e, x); };
   for (const xp of [0, 50]) {
-    u.derived.xpFind = xp;
+    // (round 9: the sheet is re-derived when a fight starts and a kill lands — the number has to come off gear, as it does in play)
+    R.room.run(() => { u.equipment.ring = xp ? { name: 'test ring', type: 'armor', slot: 'ring', rarity: 'magic', affixes: [{ id: 't_xp', name: 'Test', stat: 'xpFind', value: xp }] } : null; R.room.engine.rpg.refresh(u); });
+    assert.equal(u.derived.xpFind || 0, xp);
     const m = room.spawn({ kind: 'monster', type: 'wolf', level: 20, x: sx + 1, z: sz });
     m.r.unit.hp = 1;
     for (let k = 0; k < 60 && !m.dead; k++) { room.intent(me, { t: 'cast', slot: 0, target: m.id }); room.step(); }

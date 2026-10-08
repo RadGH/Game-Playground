@@ -170,6 +170,8 @@ function auditOnce(line, { steps = 1400, cls: forced = null } = {}) {
       if (t) { if (k % 40 === 0) room.intent(me, { t: 'cast', slot: 1 + (k / 40) % 6, target: t.id, aim: { x: t.x, z: t.z } }); else room.intent(me, { t: 'cast', slot: 0, target: t.id }); }
       room.step();
     }
+    // …and the readers that are not a fight: a gathering node's yield, a crate being opened (ask the module itself)
+    if (!fired().length) { room.rules.gatherBonus?.(me); try { room.rules.openCrate(me, room.rules.makeCrate(me, { slot: 'any' })); } catch { /* a crate this build cannot fill */ } }
   } finally { recording = false; for (const [k, f] of Object.entries(orig)) E[k] = f; }
   const f = fired(), r = readNow(), outside = changed.filter(k => OUTSIDE_READERS[k]);
   const live = f.length > 0 || r.length > 0 || outside.length > 0;

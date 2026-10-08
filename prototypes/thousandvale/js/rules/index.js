@@ -760,8 +760,8 @@ export function createRules(host, opts = {}) {
   function sheetCheck(u) {
     // round 9: gear whose sheet line depends on STATE (kills made, low mana, after dark) is re-derived when that state
     // moves — Farhold re-derives on its own events; here it only ever ran at the next equip
-    const k = sheetKey(u) + (engine.tvGear ? `|${Math.floor((u.kills || 0) / 10)}|${(u.mp || 0) / Math.max(1, u.maxMp || 1) < 0.34 ? 1 : 0}|${u.atNight ? 1 : 0}` : '');
-    if ((u._sheetKey ?? (engine.tvGear ? '0|0|0|0|0' : '0|0')) === k || u.dead) return;
+    const k = sheetKey(u) + (engine.tvGear ? `|${Math.floor((u.kills || 0) / 10)}|${(u.mp || 0) / Math.max(1, u.maxMp || 1) < 0.34 ? 1 : 0}|${u.atNight ? 1 : 0}|${u._fighting ? 1 : 0}` : '');      // (…and in / out of a fight: Roadwarden's Vigil)
+    if ((u._sheetKey ?? (engine.tvGear ? '0|0|0|0|0|0' : '0|0')) === k || u.dead) return;
     u._sheetKey = k;
     engine.rpg.refresh(u);
   }
@@ -1022,7 +1022,8 @@ export function createRules(host, opts = {}) {
   function openCrate(e, item) {
     const u = e?.r?.unit;
     if (!isCrate(item)) return [];
-    const out = openCrateItem(engine, item, { cls: u?.classId || e?.char?.cls || null, level: u?.level || e?.level || 1, rng: room.streams.get('loot'), magicFind: u?.derived?.magicFind || 0 });
+    const out = openCrateItem(engine, item, { cls: u?.classId || e?.char?.cls || null, level: u?.level || e?.level || 1, rng: room.streams.get('loot'), magicFind: u?.derived?.magicFind || 0,
+      luck: u && engine.tvGear ? Math.min(0.5, engine.rpg.fx.sum(u, 'crateLuck') || 0) : 0 });      // round 9: Ragpicker's Fortune
     for (const it of out) it.uid = `${room.id}:m${++madeN}`;
     return out;
   }
@@ -1328,6 +1329,8 @@ export function createRules(host, opts = {}) {
   return {
     /** owner feedback 8 (W1): town guards, a raider's opening target, a newcomer's threat (js/rules/guards.js) */
     spawnGuard, openingTarget, threatScale, newcomer, guards,
+    /** round 9 (Forager's Covenant): the chance of one more of a node's main material — js/rules/professions.js gatherYield `extra` */
+    gatherBonus: e => { const u = e?.r?.unit; return u && engine.tvGear ? Math.min(0.5, engine.rpg.fx.sum(u, 'gatherExtra') || 0) : 0; },
     equip, unequip, canEquip, canUnequip, bagBonus, lightRefundOwed, gear, saveGear,
     /** W22 (A converts what players own): is this a light from before, and what it is paid back at (list price x count) */
     isLightItem, lightRefund,

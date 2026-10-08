@@ -136,7 +136,7 @@ export function fitsCrate(cfg, engine, slot, item) {
  * Open a crate or a gift box. Returns `[item]` (one item today) — never empty for a known slot.
  * `cls` = the opener's class id, `level` = their level, `rng` = the room's loot stream.
  */
-export function openCrate(engine, crateItem, { cls = null, level = 1, rng = null, magicFind = 0 } = {}) {
+export function openCrate(engine, crateItem, { cls = null, level = 1, rng = null, magicFind = 0, luck = 0 } = {}) {
   const cfg = engine.crates || {};
   const rpg = engine.rpg;
   const r = rng || rpg.rng;
@@ -144,7 +144,10 @@ export function openCrate(engine, crateItem, { cls = null, level = 1, rng = null
   const spec = normalizeCrate(cfg, crateItem?.gift ? { slot: 'any', ...raw, min: raw.min || raw.minRarity || 'rare' } : raw);
   const lvl = Math.max(1, Math.min(engine.levelCap || 50, spec.maxLevel || Infinity, level || spec.level || 1));
   const classDef = spec.forClass ? engine.classById(spec.cls || cls) : null;
-  const rule = cfg.min?.[spec.min] || { floor: null, boost: 1 };
+  let rule = cfg.min?.[spec.min] || { floor: null, boost: 1 };
+  // round 9 (Ragpicker's Fortune): `luck` = the opener's chance that the crate holds one rarity better than it promised
+  // (the dice are only thrown for an opener who has some, so everyone else's crates roll exactly as before)
+  if (luck > 0 && r() < luck) { const LADDER = [null, 'magic', 'rare', 'legendary']; const i = Math.max(0, LADDER.indexOf(rule.floor || null)); rule = { ...rule, floor: LADDER[Math.min(LADDER.length - 1, i + 1)], lucky: true }; }
   const pickSlot = () => {
     if (spec.slot !== 'any') return spec.slot;
     const any = cfg.any || { weapon: 1, armor: 1 };

@@ -87,14 +87,49 @@ export function removeSlotless(items) {
  *   stats   (INERT_STATS)   — off the bases' built-in lines
  * Returns `{ uniques: [id], sets: [id], bases: [key] }`.
  */
+/**
+ * The lead's ruling on what the strip left thin: each of the three sets gets a full-set power that fits its NAME and
+ * uses something Thousandvale really has, and each of the three uniques one line of the same family. These are
+ * Thousandvale's own powers, added to the effect registry in memory (`installTvPowers`); every one has a reader and a
+ * knob test in tests/C/dead-data.test.mjs. Numbers are a set bonus, not a build.
+ */
+export const TV_POWERS = Object.freeze({
+  // Roadwarden's Vigil / Roadsong — the rules cannot see road tiles, so: out of a fight (on foot and mounted: the
+  // server moves you by the sheet's movePct, capped at +30% on foot)
+  tv_road_pace: { pct: 10, text: '+10% move speed, on foot and mounted, while nothing is fighting you.' },
+  // Forager's Covenant / Thistlewarden — js/rules/professions.js gatherYield reads rules.gatherBonus
+  tv_forager_hand: { chance: 0.15, text: 'Mining, logging, foraging and skinning have a 15% chance to give one more of the main material.' },
+  // Ragpicker's Fortune — kill gold through the sheet's gold find; js/rules/crates.js openCrate reads the luck
+  tv_ragpicker_luck: { goldFind: 15, crate: 0.1, text: '+15% gold from kills, and a crate you open has a 10% chance to hold an item one rarity better.' },
+});
+/** which dead power becomes which, per item (the rest of the item is untouched) */
+export const INERT_SWAP = Object.freeze({
+  sets: { roadwardens_vigil: 'tv_road_pace', foragers_covenant: 'tv_forager_hand', ragpickers_fortune: 'tv_ragpicker_luck' },
+  uniques: { thistlewarden: 'tv_forager_hand', roadsong: 'tv_road_pace' },
+  /** The Long Watch keeps the night: a fixed line instead of a power ("+20% armour after dark", Farhold's own cond_nightWard) */
+  uniqueLines: { the_long_watch: { stat: 'cond_nightWard', value: 0.2 } },
+});
+const OWNED_SWAP = Object.freeze({ forage_feast: 'tv_forager_hand', road_cache: 'tv_road_pace' });
+export function installTvPowers(EFFECTS, items) {
+  const P = TV_POWERS;
+  const put = (id, spec) => { EFFECTS['legendary:' + id] = { id: 'legendary:' + id, desc: () => P[id].text, tv: true, ...spec }; if (items) (items.legendaryEffects ||= {})[id] = P[id].text; };
+  put('tv_road_pace', { derive: (v, d, unit) => { if (!unit._fighting) d.movePct = (d.movePct || 0) + P.tv_road_pace.pct; } });
+  put('tv_forager_hand', { gatherExtra: () => P.tv_forager_hand.chance });
+  put('tv_ragpicker_luck', { derive: (v, d) => { d.goldFind = (d.goldFind || 0) + P.tv_ragpicker_luck.goldFind; }, crateLuck: () => P.tv_ragpicker_luck.crate });
+}
 export const INERT_STATS = Object.freeze([]);        // (none today: `cond_guardBond` — "town guards deal more damage while you are with them" — is WIRED to Thousandvale's own town guards, js/rules/guards.js)
 export function stripInert(items) {
   const out = { uniques: [], sets: [], bases: [] };
   if (!items) return out;
-  for (const u of items.uniques || []) if (u && INERT_POWERS.includes(u.legendaryEffect)) { delete u.legendaryEffect; out.uniques.push(u.id); }
+  for (const u of items.uniques || []) if (u && INERT_POWERS.includes(u.legendaryEffect)) {
+    if (INERT_SWAP.uniques[u.id]) u.legendaryEffect = INERT_SWAP.uniques[u.id]; else delete u.legendaryEffect;
+    const line = INERT_SWAP.uniqueLines[u.id];
+    if (line && !(u.fixedAffixes || []).some(f => f.stat === line.stat)) (u.fixedAffixes ||= []).push({ ...line });
+    out.uniques.push(u.id);
+  }
   for (const s of items.sets || []) {
     let hit = false;
-    if (INERT_POWERS.includes(s.legendaryEffect)) { delete s.legendaryEffect; hit = true; }
+    if (INERT_POWERS.includes(s.legendaryEffect)) { if (INERT_SWAP.sets[s.id]) s.legendaryEffect = INERT_SWAP.sets[s.id]; else delete s.legendaryEffect; hit = true; }
     for (const [at, id] of Object.entries(s.thresholdPowers || {})) if (INERT_POWERS.includes(id)) { delete s.thresholdPowers[at]; hit = true; }
     if (hit) out.sets.push(s.id);
   }
@@ -108,6 +143,11 @@ export function stripInert(items) {
 /** An item a player already owns: the same lines come off it as it is loaded (it keeps everything else). */
 export function stripInertItem(item) {
   if (!item || typeof item !== 'object' || !Array.isArray(item.affixes)) return item;
+  // an owned unique whose dead power has a replacement gets the replacement (by the unique's id), else loses the line
+  // (only a UNIQUE carries a power on the item itself — a set's is on the set — so the dead power names its replacement)
+  const swap = item.isUnique !== false ? OWNED_SWAP[item.legendaryEffectId] || null : null;
+  if (swap) { item.legendaryEffectId = swap; for (const a of item.affixes) if (a && a.id === 'legendary_effect') { a.legendaryId = swap; a.descriptor = TV_POWERS[swap].text; } item.inertStripped = true; return item; }
+  if (item.legendaryEffectId === 'no_night_raids' && !item.affixes.some(a => a && a.stat === 'cond_nightWard')) item.affixes.push({ id: 'fixed_cond_nightWard', name: 'Night Watch', ...INERT_SWAP.uniqueLines.the_long_watch });      // The Long Watch
   if (INERT_POWERS.includes(item.legendaryEffectId)) { delete item.legendaryEffectId; }
   // (a unique whose power was stripped is still generated with an empty power line by the shared loot code: that goes too)
   const keep = item.affixes.filter(a => !(a && ((a.id === 'legendary_effect' && (!a.legendaryId || INERT_POWERS.includes(a.legendaryId))) || INERT_STATS.includes(a.stat))));
@@ -244,6 +284,7 @@ export function installTvGear(items, cfg, catalog = null) {
   items._tvGear = true;
   report.lights = removeLights(items);          // owner feedback 8 (W22), before anything is added or pooled
   report.slotless = removeSlotless(items);      // Farhold's tool / mount uniques: no slot here
+  installTvPowers(EFFECTS, items);              // Thousandvale's own three powers (the replacements below point at them)
   report.inert = stripInert(items);             // round 9: power / property lines nothing here reads
   for (const [key, base] of Object.entries(cfg.bases?.armor || {})) if (!items.armorBases[key]) { items.armorBases[key] = { ...clone(base), tv: true }; report.added.push(key); }
   for (const [key, base] of Object.entries(cfg.bases?.weapon || {})) if (!items.weaponBases[key]) { items.weaponBases[key] = { ...clone(base), tv: true }; report.added.push(key); }

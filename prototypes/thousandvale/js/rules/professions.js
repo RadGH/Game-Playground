@@ -129,13 +129,14 @@ export function createProfessions(numbers = {}, content = null) {
    * What a node gives for a quality: `[{ id, n }]`. The main material by `yield[quality]`; a better tool may add one
    * (`extra` chance); the kind's `bonus` (a gem, resin, a fang) by `bonusChance[quality]`.
    */
-  function gatherYield({ node, quality = 'good', rng = () => 0.5, tool: tl = null }) {
+  function gatherYield({ node, quality = 'good', rng = () => 0.5, tool: tl = null, extra = 0 }) {
     const out = [];
     const n = Q.yield[quality] || 0;
     if (!n || !node) return out;
     const main = Array.isArray(node.gives) ? node.gives : [{ id: node.gives, n: 1 }];
     for (const g of main) {
-      const k = Math.max(1, Math.round(n * (g.n || 1))) + (tl && tl.extra && rng() < tl.extra ? 1 : 0);
+      const k = Math.max(1, Math.round(n * (g.n || 1))) + (tl && tl.extra && rng() < tl.extra ? 1 : 0)
+        + (extra > 0 && g === main[0] && rng() < extra ? 1 : 0);      // (stream C, round 9) gear: Forager's Covenant — `extra` = rules.gatherBonus(e), one more of the MAIN material
       if (materials[g.id]) out.push({ id: g.id, n: k });
     }
     if (node.bonus && materials[node.bonus] && rng() < (Q.bonusChance[quality] || 0)) out.push({ id: node.bonus, n: 1, bonus: true });

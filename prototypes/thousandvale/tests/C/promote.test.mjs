@@ -146,6 +146,8 @@ test('promote: EVERY power a promotion can hand out has a hook that really runs 
         if (t) { if (k % 40 === 0) w.room.intent(w.me, { t: 'cast', slot: 1 + (k / 40) % 6, target: t.id, aim: { x: t.x, z: t.z } }); else w.room.intent(w.me, { t: 'cast', slot: 0, target: t.id }); }
         w.steps(1);
       }
+      // a power whose reader is not a fight (a gathering node's yield, a crate being opened): ask those modules
+      if (!Object.values(calls).some(c => c > 0)) { w.R.gatherBonus(w.me); try { w.R.openCrate(w.me, w.R.makeCrate(w.me, { slot: 'any' })); } catch { /* a crate this build cannot fill */ } }
       if (!Object.values(calls).some(c => c > 0)) dead.push(`${pid} (${Object.keys(calls).join(', ')})`);
     } finally { for (const [k, f] of Object.entries(orig)) E[k] = f; }
   }

@@ -4265,3 +4265,19 @@ _Status 2026-10-08: LANDED as written (tests/P/core-legendary.test.js, 2 tests).
 
 **What the audit cannot see** (said so nobody over-reads it): a hook that IS called but whose effect is cosmetic or wrong, and base-level fields that are not property lines (`stunChance`, `bleedChance`, `armorPen` on a base). The timed-effects hole was of the first kind and was found by reading, not by the audit; the knob tests in the file cover what was wired.
 - **D-UI**: nothing to change; a stripped unique simply has one line fewer. **P-core**: promotion pool = live powers only, checked by the same test. **E**: if a set should get a NEW full-set power instead of none, name it and C wires it.
+
+## Round 9 — C: replacements for the stripped set powers and unique lines (the lead's ruling) — 2026-10-08 (LANDED) -> A, P-core, E, D-UI
+
+Three Thousandvale powers (`js/rules/tv-gear.js TV_POWERS` / `installTvPowers`, added to the effect registry in memory; card text is the registry's own sentence; each has a reader test in `tests/C/dead-data.test.mjs` and passes the audit):
+
+| item | power | what it does | reader |
+|---|---|---|---|
+| set **Roadwarden's Vigil** (3 pieces); unique **Roadsong** | `tv_road_pace` | "+10% move speed, on foot and mounted, while nothing is fighting you." | the sheet's `movePct` -> A's `speedMul` (the rules cannot see road tiles, so it is "out of a fight", as the lead allowed); off within a second of a monster targeting you, back after |
+| set **Forager's Covenant** (4 pieces); unique **Thistlewarden** | `tv_forager_hand` | "Mining, logging, foraging and skinning have a 15% chance to give one more of the main material." | `rules.gatherBonus(e)` -> `gatherYield({ …, extra })` |
+| set **Ragpicker's Fortune** (3 pieces) | `tv_ragpicker_luck` | "+15% gold from kills, and a crate you open has a 10% chance to hold an item one rarity better." | the sheet's gold find (kill gold); `openCrate({ luck })` in js/rules/crates.js |
+| unique **The Long Watch** | — (a fixed line, no power) | "+20% armour after dark" (Farhold's own `cond_nightWard`) | the sheet, re-derived when night falls |
+
+- **P-core — two marked one-line edits in your files**: `js/rules/professions.js gatherYield` takes `extra` (a chance of +1 of the node's FIRST material; the dice are thrown only when it is above 0, so every existing seeded roll is unchanged) and `js/sim/professions.js` passes `extra: room.rules.gatherBonus(o.entity)`. Angling is not touched. tests/P node suite 49/49. The three powers are promotable where a unique of that weapon kind carries them (a bow may roll the road pace, a sword-family blade the forager's hand) — say if tempering should not hand them out.
+- **A**: `tv_road_pace` flips `movePct` as a fight starts and ends — your `you {speedMul}` patch carries it. Nothing to change.
+- A copy a player already owns: Thistlewarden / Roadsong get the new power as they load, The Long Watch trades its dead power for the night line (`stripInertItem`).
+- **E**: the sets' piece bonuses are untouched (Forager's and Ragpicker's already gave gold find; the new 15% is on top).

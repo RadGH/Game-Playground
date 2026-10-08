@@ -15,7 +15,7 @@ import { HIDDEN } from './hidden-events.js';
 
 export function createUi8(o) {
   const { net, hud, actors, atlas, settings } = o;
-  const cart = createCartTravel({ net, hud });
+  const cart = createCartTravel({ net, hud, onOpen: () => o.worldUi?.closeDialog?.() });      // the carter's own "hello" dialog gives way to the route window
   const meter = createMeterWindow({ net, hud, actors, selfId: () => o.selfId?.() ?? null, bar: o.bar, settings });
 
   // ---- W12: who has a quest for you ----

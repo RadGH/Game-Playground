@@ -240,10 +240,17 @@
         "radius": 90,
         "movedFrom": null,
         "culture": "halfling",
-        "plots": 21,
-        "streets": 56,
+        "plots": 22,
+        "streets": 73,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 21,
+          "plots": 22,
+          "kept": 0,
+          "renumbered": true
+        }
       },
       {
         "name": "Eelwick",
@@ -259,7 +266,14 @@
         "plots": 9,
         "streets": 24,
         "links": 0,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 0,
+        "w6": {
+          "plotsBefore": 9,
+          "plots": 9,
+          "kept": 9,
+          "removed": []
+        }
       }
     ],
     "roads": 1,
@@ -288,13 +302,13 @@
       "x": 1136,
       "z": 878
     },
-    "placements": 198,
+    "placements": 216,
     "vignettesAvoided": 654
   },
   "files": {
-    "terrain.bin": 479013,
-    "nav.bin": 13864,
+    "terrain.bin": 479048,
+    "nav.bin": 13875,
     "scatter.bin": 95164,
-    "placements.json": 133515
+    "placements.json": 140007
   }
 }

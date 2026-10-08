@@ -136,10 +136,17 @@
           "z": 1984
         },
         "culture": "halfling",
-        "plots": 21,
-        "streets": 51,
+        "plots": 24,
+        "streets": 82,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 21,
+          "plots": 24,
+          "kept": 1,
+          "renumbered": true
+        }
       },
       {
         "name": "Gull Steps",
@@ -152,10 +159,43 @@
         "radius": 46,
         "movedFrom": null,
         "culture": "halfling",
-        "plots": 12,
-        "streets": 47,
-        "links": 0,
-        "overlaps": 0
+        "plots": 9,
+        "streets": 48,
+        "links": 1,
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 12,
+          "plots": 9,
+          "kept": 9,
+          "removed": [
+            {
+              "plot": 0,
+              "want": "shop",
+              "office": true
+            },
+            {
+              "plot": 4,
+              "want": "inn",
+              "office": true
+            },
+            {
+              "plot": 5,
+              "want": "hut",
+              "office": false
+            }
+          ],
+          "moved": [
+            {
+              "office": "shop",
+              "to": 7
+            },
+            {
+              "office": "inn",
+              "to": 10
+            }
+          ]
+        }
       }
     ],
     "roads": 3,
@@ -181,13 +221,13 @@
       "x": 872,
       "z": 1620
     },
-    "placements": 186,
+    "placements": 218,
     "vignettesAvoided": 631
   },
   "files": {
-    "terrain.bin": 467909,
-    "nav.bin": 14780,
+    "terrain.bin": 467967,
+    "nav.bin": 14799,
     "scatter.bin": 83508,
-    "placements.json": 128489
+    "placements.json": 139341
   }
 }

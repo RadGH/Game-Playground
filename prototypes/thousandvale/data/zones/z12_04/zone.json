@@ -153,10 +153,17 @@
         "radius": 90,
         "movedFrom": null,
         "culture": "halfling",
-        "plots": 21,
-        "streets": 47,
-        "links": 0,
-        "overlaps": 0
+        "plots": 24,
+        "streets": 83,
+        "links": 1,
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 21,
+          "plots": 24,
+          "kept": 0,
+          "renumbered": true
+        }
       },
       {
         "name": "Netherby",
@@ -170,9 +177,16 @@
         "movedFrom": null,
         "culture": "halfling",
         "plots": 9,
-        "streets": 31,
+        "streets": 30,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 9,
+          "plots": 9,
+          "kept": 9,
+          "removed": []
+        }
       }
     ],
     "roads": 4,
@@ -203,13 +217,13 @@
       "x": 1462,
       "z": 1854
     },
-    "placements": 164,
+    "placements": 202,
     "vignettesAvoided": 657
   },
   "files": {
-    "terrain.bin": 706494,
-    "nav.bin": 61123,
+    "terrain.bin": 706592,
+    "nav.bin": 61177,
     "scatter.bin": 107684,
-    "placements.json": 134349
+    "placements.json": 147075
   }
 }

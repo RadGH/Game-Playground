@@ -987,3 +987,5 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - Quest experience x1.5 (economy.json `quest.xpMult`); `node tools/sim-economy.mjs --curve`.
 - No light items in any shop; backpacks at the tailor and the general store.
 - Tests: tests/E/playtest8.test.js (15); tests/E 235 green.
+- **W1 town guards fight** (stream C): `js/rules/guards.js` — an NPC with `data.guard` is an ownerless friendly fighter built from E's guards.json (reference body +2 levels, health x4, hit x0.2, `vsBossMult` on the raid captain, 75 s down instead of dead, leash, heal after the fight, sergeant rally). Event monsters open on the nearest guard; a newcomer draws a quarter of the threat (`rules.newcomer`). Guard-only kills pay nobody. Two one-line hooks in js/sim/province.js. tests/C/guards.test.mjs (7).
+- Farhold's `tool` / `mount` uniques no longer drop (no slot in Thousandvale).

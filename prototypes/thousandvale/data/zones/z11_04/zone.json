@@ -125,10 +125,17 @@
         "radius": 90,
         "movedFrom": null,
         "culture": "halfling",
-        "plots": 21,
-        "streets": 45,
+        "plots": 23,
+        "streets": 75,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 21,
+          "plots": 23,
+          "kept": 0,
+          "renumbered": true
+        }
       },
       {
         "name": "Thornwick",
@@ -144,7 +151,14 @@
         "plots": 8,
         "streets": 41,
         "links": 0,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 0,
+        "w6": {
+          "plotsBefore": 8,
+          "plots": 8,
+          "kept": 8,
+          "removed": []
+        }
       }
     ],
     "roads": 3,
@@ -173,13 +187,13 @@
       "x": 890,
       "z": 1309
     },
-    "placements": 177,
+    "placements": 209,
     "vignettesAvoided": 668
   },
   "files": {
-    "terrain.bin": 641179,
-    "nav.bin": 52919,
+    "terrain.bin": 641257,
+    "nav.bin": 52969,
     "scatter.bin": 110268,
-    "placements.json": 167979
+    "placements.json": 179172
   }
 }

@@ -12,7 +12,7 @@ import { createPanel, h } from '../ui-panel.js';
 import { cartRows, cartRefusal, rideText } from './pt8-core.js';
 import { distText } from './map-data.js';
 
-export function createCartTravel({ net, hud }) {
+export function createCartTravel({ net, hud, onOpen = null }) {
   const S = { m: null, pick: null, going: false, timer: 0 };
   const panel = createPanel({ id: 'cart', title: 'Ox cart', width: 380, cls: 'cart-panel', onClose: () => { S.pick = null; S.going = false; clearTimeout(S.timer); } });
 
@@ -54,7 +54,7 @@ export function createCartTravel({ net, hud }) {
   function open(m) {
     if (!m || !Array.isArray(m.stops)) return false;
     S.m = { ...m, name: m.name || 'Ox cart' }; S.pick = null; S.going = false;
-    panel.open(); draw();
+    onOpen?.(); panel.open(); draw();
     return true;
   }
   function wire(n) {

@@ -184,10 +184,17 @@
           "z": 448
         },
         "culture": "halfling",
-        "plots": 24,
+        "plots": 25,
         "streets": 77,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 24,
+          "plots": 25,
+          "kept": 24,
+          "removed": []
+        }
       },
       {
         "name": "Scree End",
@@ -203,10 +210,38 @@
           "z": 1472
         },
         "culture": "halfling",
-        "plots": 10,
-        "streets": 39,
+        "plots": 8,
+        "streets": 38,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 10,
+          "plots": 8,
+          "kept": 8,
+          "removed": [
+            {
+              "plot": 5,
+              "want": "shop",
+              "office": true
+            },
+            {
+              "plot": 6,
+              "want": "mill",
+              "office": true
+            }
+          ],
+          "moved": [
+            {
+              "office": "shop",
+              "to": 9
+            },
+            {
+              "office": "mill",
+              "to": 2
+            }
+          ]
+        }
       },
       {
         "name": "Wolditford",
@@ -222,10 +257,34 @@
           "z": 832
         },
         "culture": "halfling",
-        "plots": 11,
-        "streets": 37,
+        "plots": 9,
+        "streets": 36,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 11,
+          "plots": 9,
+          "kept": 9,
+          "removed": [
+            {
+              "plot": 8,
+              "want": "mill",
+              "office": true
+            },
+            {
+              "plot": 10,
+              "want": "house",
+              "office": false
+            }
+          ],
+          "moved": [
+            {
+              "office": "mill",
+              "to": 9
+            }
+          ]
+        }
       }
     ],
     "roads": 10,
@@ -255,13 +314,13 @@
       "x": 1732,
       "z": 560
     },
-    "placements": 293,
+    "placements": 288,
     "vignettesAvoided": 640
   },
   "files": {
-    "terrain.bin": 579888,
-    "nav.bin": 44725,
+    "terrain.bin": 579903,
+    "nav.bin": 44754,
     "scatter.bin": 160932,
-    "placements.json": 220039
+    "placements.json": 218276
   }
 }

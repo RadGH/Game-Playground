@@ -136,10 +136,43 @@
         "radius": 90,
         "movedFrom": null,
         "culture": "desert",
-        "plots": 24,
+        "plots": 21,
         "streets": 45,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 24,
+          "plots": 21,
+          "kept": 21,
+          "removed": [
+            {
+              "plot": 5,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 6,
+              "want": "shop",
+              "office": true
+            },
+            {
+              "plot": 7,
+              "want": "counting_house",
+              "office": true
+            }
+          ],
+          "moved": [
+            {
+              "office": "shop",
+              "to": 22
+            },
+            {
+              "office": "counting_house",
+              "to": 0
+            }
+          ]
+        }
       },
       {
         "name": "Burnt Barns",
@@ -152,10 +185,39 @@
         "radius": 40,
         "movedFrom": null,
         "culture": "desert",
-        "plots": 18,
-        "streets": 43,
-        "links": 0,
-        "overlaps": 0
+        "plots": 15,
+        "streets": 45,
+        "links": 2,
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 18,
+          "plots": 15,
+          "kept": 15,
+          "removed": [
+            {
+              "plot": 4,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 5,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 7,
+              "want": "mill",
+              "office": true
+            }
+          ],
+          "moved": [
+            {
+              "office": "mill",
+              "to": 0
+            }
+          ]
+        }
       }
     ],
     "roads": 2,
@@ -187,13 +249,13 @@
       "x": 1560,
       "z": 1278
     },
-    "placements": 191,
+    "placements": 187,
     "vignettesAvoided": 628
   },
   "files": {
-    "terrain.bin": 705259,
-    "nav.bin": 46878,
+    "terrain.bin": 705267,
+    "nav.bin": 46876,
     "scatter.bin": 86996,
-    "placements.json": 148061
+    "placements.json": 146372
   }
 }

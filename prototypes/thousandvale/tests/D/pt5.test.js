@@ -315,8 +315,9 @@ test('T28: perk and talent picks are staged — undo / redo, replace within a ti
   assert.deepEqual(stagedDependents(src, ['a'], ['b', 'd'], 'd'), []);
 });
 
-test('slots: the paper doll has Back, Waist and Light, in the rules\' order, and their items sort as armour', () => {
-  for (const s of ['back', 'waist', 'light']) { assert.ok([...DOLL_LEFT, ...DOLL_RIGHT, ...DOLL_BOTTOM].includes(s), s + ' has a square'); assert.ok(SLOT_NAME[s]); }
+test('slots: the paper doll has Back and Waist, in the rules\' order, and their items sort as armour (play-test 8 W22: the Light slot is gone)', () => {
+  assert.ok(![...DOLL_LEFT, ...DOLL_RIGHT, ...DOLL_BOTTOM].includes('light'), 'no Light square');
+  for (const s of ['back', 'waist']) { assert.ok([...DOLL_LEFT, ...DOLL_RIGHT, ...DOLL_BOTTOM].includes(s), s + ' has a square'); assert.ok(SLOT_NAME[s]); }
   assert.ok(DOLL_LEFT.indexOf('back') > DOLL_LEFT.indexOf('chest'));
   assert.ok(DOLL_RIGHT.indexOf('waist') < DOLL_RIGHT.indexOf('legs'));
   assert.equal(slotOf({ slot: 'back', type: 'armor' }), 'back'); assert.equal(slotOf({ slot: 'cape' }), 'back'); assert.equal(slotOf({ slot: 'belt' }), 'waist');

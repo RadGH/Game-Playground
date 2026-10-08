@@ -77,7 +77,7 @@
       "x": 256,
       "z": 1920,
       "wfName": "Pohelrow",
-      "radius": 40,
+      "radius": 46,
       "movedFrom": {
         "x": 64,
         "z": 1984
@@ -245,10 +245,61 @@
           "z": 1216
         },
         "culture": "halfling",
-        "plots": 27,
-        "streets": 80,
-        "links": 4,
-        "overlaps": 0
+        "plots": 22,
+        "streets": 76,
+        "links": 3,
+        "overlaps": 0,
+        "highStreets": 3,
+        "w6": {
+          "plotsBefore": 27,
+          "plots": 22,
+          "kept": 22,
+          "removed": [
+            {
+              "plot": 10,
+              "want": "hall",
+              "office": true
+            },
+            {
+              "plot": 15,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 16,
+              "want": "provisioner",
+              "office": true
+            },
+            {
+              "plot": 17,
+              "want": "bowyer",
+              "office": true
+            },
+            {
+              "plot": 18,
+              "want": "market",
+              "office": true
+            }
+          ],
+          "moved": [
+            {
+              "office": "hall",
+              "to": 20
+            },
+            {
+              "office": "provisioner",
+              "to": 24
+            },
+            {
+              "office": "bowyer",
+              "to": 26
+            },
+            {
+              "office": "market",
+              "to": 6
+            }
+          ]
+        }
       },
       {
         "name": "Mawehaven",
@@ -258,16 +309,23 @@
           256,
           1920
         ],
-        "radius": 40,
+        "radius": 46,
         "movedFrom": {
           "x": 64,
           "z": 1984
         },
         "culture": "halfling",
-        "plots": 8,
-        "streets": 29,
-        "links": 0,
-        "overlaps": 0
+        "plots": 9,
+        "streets": 35,
+        "links": 1,
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 8,
+          "plots": 9,
+          "kept": 0,
+          "renumbered": true
+        }
       },
       {
         "name": "Wamonhold",
@@ -286,19 +344,26 @@
         "plots": 9,
         "streets": 44,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 9,
+          "plots": 9,
+          "kept": 9,
+          "removed": []
+        }
       }
     ],
     "roads": 13,
     "bridges": 6,
-    "paths": 25,
-    "pathMetres": 2904,
-    "scatter": 18723,
+    "paths": 24,
+    "pathMetres": 2884,
+    "scatter": 18701,
     "scatterKinds": {
-      "bush": 5776,
+      "bush": 5767,
       "rock_large": 1068,
-      "rock_small": 1964,
-      "tree_broadleaf": 7935,
+      "rock_small": 1963,
+      "tree_broadleaf": 7923,
       "boulder": 107,
       "tree_conifer": 186,
       "reed": 297,
@@ -308,7 +373,7 @@
     },
     "sites": [
       "settlement(HUB) town Torborhold 592 1264 90",
-      "settlement hamlet Mawehaven 256 1920 40",
+      "settlement hamlet Mawehaven 256 1920 46",
       "settlement hamlet Wamonhold 1344 1568 46",
       "crossing ford Fitockpi Ford 48 1857",
       "crossing ford Milhot Ford 1334 1427",
@@ -320,13 +385,13 @@
       "x": 588,
       "z": 1264
     },
-    "placements": 369,
+    "placements": 364,
     "vignettesAvoided": 676
   },
   "files": {
-    "terrain.bin": 605182,
-    "nav.bin": 42253,
-    "scatter.bin": 149868,
-    "placements.json": 293957
+    "terrain.bin": 605107,
+    "nav.bin": 42341,
+    "scatter.bin": 149692,
+    "placements.json": 287127
   }
 }

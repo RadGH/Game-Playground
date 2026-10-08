@@ -152,6 +152,18 @@
       ],
       "h": 254.716,
       "w": 6
+    },
+    {
+      "a": [
+        304.05,
+        570.51
+      ],
+      "b": [
+        318.84,
+        568.05
+      ],
+      "h": 254.716,
+      "w": 6
     }
   ],
   "summary": {
@@ -176,10 +188,43 @@
           "z": 576
         },
         "culture": "halfling",
-        "plots": 29,
-        "streets": 86,
+        "plots": 26,
+        "streets": 84,
         "links": 2,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 29,
+          "plots": 26,
+          "kept": 26,
+          "removed": [
+            {
+              "plot": 1,
+              "want": "hut",
+              "office": false
+            },
+            {
+              "plot": 3,
+              "want": "forge",
+              "office": true
+            },
+            {
+              "plot": 9,
+              "want": "hall",
+              "office": true
+            }
+          ],
+          "moved": [
+            {
+              "office": "forge",
+              "to": 27
+            },
+            {
+              "office": "hall",
+              "to": 10
+            }
+          ]
+        }
       },
       {
         "name": "Pilgrim's Halt",
@@ -196,13 +241,20 @@
         },
         "culture": "halfling",
         "plots": 12,
-        "streets": 39,
+        "streets": 38,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 12,
+          "plots": 12,
+          "kept": 12,
+          "removed": []
+        }
       }
     ],
     "roads": 10,
-    "bridges": 2,
+    "bridges": 3,
     "paths": 11,
     "pathMetres": 1993,
     "scatter": 16390,
@@ -231,13 +283,13 @@
       "x": 340,
       "z": 580
     },
-    "placements": 243,
+    "placements": 238,
     "vignettesAvoided": 646
   },
   "files": {
-    "terrain.bin": 684247,
-    "nav.bin": 50890,
+    "terrain.bin": 684404,
+    "nav.bin": 50897,
     "scatter.bin": 131204,
-    "placements.json": 207382
+    "placements.json": 206930
   }
 }

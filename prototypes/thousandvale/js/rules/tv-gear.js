@@ -55,6 +55,20 @@ export function removeLights(items) {
   }
   return out;
 }
+/**
+ * Farhold's `tool` and `mount` UNIQUES (Prospector's Pride, Quickhand Pick, Brambleback …) fit no slot in Thousandvale —
+ * a mount here is a collectible, a tool is the professions' — yet they dropped (about 1 drop in 7,000). Out of the
+ * table, in memory. Returns the ids removed.
+ */
+export const SLOTLESS_TYPES = Object.freeze(['tool', 'mount']);
+export function removeSlotless(items) {
+  const out = [];
+  if (!items || !Array.isArray(items.uniques)) return out;
+  const keep = [];
+  for (const u of items.uniques) { if (u && (SLOTLESS_TYPES.includes(u.type) || SLOTLESS_TYPES.includes(u.slot))) out.push(u.id); else keep.push(u); }
+  items.uniques.length = 0; items.uniques.push(...keep);
+  return out;
+}
 /** Is this a light a player may still own from before W22 (a worn lantern / torch of any base, or the torch consumable)? */
 export function isLightItem(item, cfg = null) {
   if (!item || typeof item !== 'object') return false;
@@ -176,6 +190,7 @@ export function installTvGear(items, cfg, catalog = null) {
   if (!items || !cfg || items._tvGear) return report;
   items._tvGear = true;
   report.lights = removeLights(items);          // owner feedback 8 (W22), before anything is added or pooled
+  report.slotless = removeSlotless(items);      // Farhold's tool / mount uniques: no slot here
   for (const [key, base] of Object.entries(cfg.bases?.armor || {})) if (!items.armorBases[key]) { items.armorBases[key] = { ...clone(base), tv: true }; report.added.push(key); }
   for (const [key, base] of Object.entries(cfg.bases?.weapon || {})) if (!items.weaponBases[key]) { items.weaponBases[key] = { ...clone(base), tv: true }; report.added.push(key); }
   let rows = [];

@@ -750,6 +750,229 @@
      }
     ]
    }
+  ],
+  "my-reports": [
+   {
+    "t": "feedbackMine",
+    "ok": true,
+    "more": false,
+    "list": [
+     {
+      "id": 45,
+      "at": "@now-5400000",
+      "kind": "bug",
+      "state": "completed",
+      "text": "Smugglers' Stash: I killed the bandits before the rats and could not open the chest. Then it said Won and the chest vanished, with no loot.",
+      "note": "Fixed. An event chest is locked only by its own keepers, whatever order you fight in, and it now stays for two minutes after it opens (or until everyone who took part has looted).",
+      "noteAt": "@now-600000",
+      "done": "Fixed. An event chest is locked only by its own keepers, whatever order you fight in, and it now stays for two minutes after it opens (or until everyone who took part has looted).",
+      "doneAt": "@now-600000"
+     },
+     {
+      "id": 42,
+      "at": "@now-7200000",
+      "kind": "suggestion",
+      "state": "approved",
+      "text": "Add DPS meters. Add an option to show them in the settings (default off).",
+      "note": "Coming in the next update.",
+      "noteAt": "@now-3600000"
+     },
+     {
+      "id": 37,
+      "at": "@now-9000000",
+      "kind": "bug",
+      "state": "new",
+      "text": "The minimap has hover tooltips for some icons, which is great. However it is covered up by another tooltip."
+     },
+     {
+      "id": 31,
+      "at": "@now-86400000",
+      "kind": "suggestion",
+      "state": "declined",
+      "text": "Let me fly.",
+      "note": "Not planned: the valley is built to be walked and ridden.",
+      "noteAt": "@now-80000000"
+     }
+    ]
+   }
+  ],
+  "cart-list": [
+   {
+    "t": "cartList",
+    "id": "@npc",
+    "from": "Torborhold",
+    "name": "The Longroad Carters",
+    "gold": 38,
+    "tokens": 0,
+    "stops": [
+     {
+      "id": "cart_mawehaven",
+      "name": "Mawehaven",
+      "fare": 7,
+      "m": 1850,
+      "s": 5
+     },
+     {
+      "id": "cart_orrinsford",
+      "name": "Orrinsford",
+      "fare": 10,
+      "m": 2700,
+      "s": 6
+     },
+     {
+      "id": "cart_copperdell",
+      "name": "Copperdell",
+      "fare": 20,
+      "m": 5400,
+      "s": 9
+     },
+     {
+      "id": "cart_hollin_toll",
+      "name": "Hollin Toll",
+      "fare": 31,
+      "m": 8100,
+      "s": 11
+     },
+     {
+      "id": "cart_saltmouth",
+      "name": "Saltmouth",
+      "fare": 54,
+      "m": 13900,
+      "s": 14
+     },
+     {
+      "id": "cart_gorsehold",
+      "name": "Gorsehold",
+      "fare": 26,
+      "m": 6800,
+      "s": 10,
+      "locked": true,
+      "why": "level",
+      "msg": "The carter will not take that road with you until you are level 8."
+     }
+    ]
+   }
+  ],
+  "meter-hits": [
+   {
+    "t": "hits",
+    "names": {
+     "90001": "Moor Stalker",
+     "90002": "Moor Stalker"
+    },
+    "l": [
+     [
+      "@self",
+      "@enemy",
+      182,
+      0,
+      "basic",
+      "physical",
+      0,
+      0
+     ],
+     [
+      "@self",
+      "@enemy",
+      344,
+      2,
+      "smite",
+      "holy",
+      0,
+      0
+     ],
+     [
+      "@enemy",
+      "@self",
+      96,
+      0,
+      "basic",
+      "physical",
+      0,
+      0
+     ],
+     [
+      "@self",
+      "@enemy",
+      61,
+      32,
+      "dot",
+      "holy",
+      0,
+      0
+     ],
+     [
+      "@ally",
+      "@enemy",
+      420,
+      0,
+      "cleave",
+      "physical",
+      0,
+      0
+     ],
+     [
+      "@ally",
+      "@enemy",
+      512,
+      2,
+      "cleave",
+      "physical",
+      0,
+      0
+     ],
+     [
+      "@self",
+      "@ally",
+      260,
+      1,
+      "mend",
+      null,
+      40,
+      0
+     ],
+     [
+      "@enemy",
+      "@ally",
+      140,
+      0,
+      "basic",
+      "physical",
+      0,
+      0
+     ],
+     [
+      "@enemy",
+      "@self",
+      0,
+      68,
+      "basic",
+      null,
+      0,
+      0
+     ],
+     [
+      "@ally",
+      "@enemy",
+      388,
+      0,
+      "basic",
+      "physical",
+      0,
+      0
+     ],
+     [
+      "@self",
+      "@enemy",
+      371,
+      10,
+      "smite",
+      "holy",
+      55,
+      0
+     ]
+    ]
+   }
   ]
  },
  "items": {

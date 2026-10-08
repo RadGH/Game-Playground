@@ -182,14 +182,16 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
     push('box', t.square.x - 0.75, g, t.square.z, 0, 0.15, 2.2, 0.15, '#5c4633');
     push('box', t.square.x + 0.75, g, t.square.z, 0, 0.15, 2.2, 0.15, '#5c4633');
     push('gable', t.square.x, g + 2.1, t.square.z, Math.PI / 2, 2.0, 0.7, 2.0, '#6b3a2a');
+    // W6: the stalls stand where the bake put them — beside the streets that enter the square, never in one
+    // (js/client/town-square.js; a square baked before W6 falls back to the old ring of four)
     const kinds = ['produce', 'cloth', 'smith', 'produce'];
-    for (let k = 0; k < 4; k++) {
-      const a = k / 4 * Math.PI * 2 + 0.4, rr = t.square.r * 1.9 + 2.5;
-      const sx = t.square.x + Math.cos(a) * rr, sz = t.square.z + Math.sin(a) * rr;
+    const spots = squareFurniture({ square: t.square, stalls: t.square.stalls }).stalls;
+    for (let k = 0; k < spots.length; k++) {
+      const { x: sx, z: sz, yaw } = spots[k];
       try {
-        const stall = describeStall({ kind: kinds[k], culture: t.culture, seed: t.seed + k });
+        const stall = describeStall({ kind: kinds[k % kinds.length], culture: t.culture, seed: t.seed + k });
         const sy = T.heightAt(sx, sz);
-        for (const part of stallParts(stall)) placePart(part, sx, sz, sy, Math.atan2(t.square.x - sx, t.square.z - sz));
+        for (const part of stallParts(stall)) placePart(part, sx, sz, sy, yaw);
       } catch {}
     }
   }

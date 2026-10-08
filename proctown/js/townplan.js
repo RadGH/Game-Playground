@@ -1088,6 +1088,7 @@ export function linkRoads(out, links = [], high = null) {
  *
  *   width  metres (default the main class's). A hamlet wants a narrower one than a city.
  *   clear  metres of kerb kept free of plots either side, on top of the width (default 0)
+ *   avoid  [{ x, z, r }] things already standing (a waystone, a statue) the street must pass beside
  *   join   (default true) a link whose straight line would run close beside a high street already
  *          laid joins THAT one instead, at a slant, when the walk is at most `detour` (1.18) times
  *          the straight one and it saves at least `saves` (0.3) of the paving — two roads arriving
@@ -1100,7 +1101,7 @@ export function linkRoads(out, links = [], high = null) {
  * Nearest the square first, so a far road can join a near one. Without the option nothing here
  * runs and every existing town is byte-identical.
  */
-function highStreets(out, links, { width = STREET_CLASSES[0].width, clear = 0, join = true, detour = 1.18, saves = 0.3 } = {}) {
+function highStreets(out, links, { width = STREET_CLASSES[0].width, clear = 0, join = true, detour = 1.18, saves = 0.3, avoid = [] } = {}) {
   if (!links.length) return 0;
   const sq = out.square || { cx: 0, cz: 0, r: 4 };
   const order = links.map((l, i) => ({ l, i, d: Math.hypot(l[0] - sq.cx, l[1] - sq.cz) })).sort((a, b) => a.d - b.d);
@@ -1110,6 +1111,22 @@ function highStreets(out, links, { width = STREET_CLASSES[0].width, clear = 0, j
     // straight to the square's edge
     const ex = sq.cx + (lx - sq.cx) / d * sq.r, ez = sq.cz + (lz - sq.cz) / d * sq.r;
     let pts = [[lx, lz], [ex, ez]], to = 'square', joins = null;
+    // `avoid`: things already standing that the street must pass beside ([{ x, z, r }], town coordinates). The street
+    // still ends on the square, but aims at a point a little round its edge — the smallest swing that clears them all.
+    // (something standing ON the square's own paving is square furniture, not in anybody's street)
+    const beside = avoid.filter(a => Math.hypot(a.x - sq.cx, a.z - sq.cz) > sq.r * 1.2 + 0.5);
+    if (beside.length) {
+      const hits = p => beside.some(a => {
+        const dx = p[1][0] - p[0][0], dz = p[1][1] - p[0][1], L2 = dx * dx + dz * dz || 1e-9;
+        const t = Math.max(0, Math.min(1, ((a.x - p[0][0]) * dx + (a.z - p[0][1]) * dz) / L2));
+        return Math.hypot(a.x - p[0][0] - dx * t, a.z - p[0][1] - dz * t) < a.r + width / 2 + clear;
+      });
+      const base = Math.atan2(lz - sq.cz, lx - sq.cx);
+      for (const turn of [0, 0.35, -0.35, 0.7, -0.7, 1.05, -1.05, 1.4, -1.4]) {
+        const p = [[lx, lz], [sq.cx + Math.cos(base + turn) * sq.r, sq.cz + Math.sin(base + turn) * sq.r]];
+        if (!hits(p)) { pts = p; break; }
+      }
+    }
     if (join) {
       // the best place to join a street already laid: least new paving, within the detour allowed
       const direct = d - sq.r;

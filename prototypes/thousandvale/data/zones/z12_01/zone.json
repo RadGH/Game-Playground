@@ -128,10 +128,17 @@
           "z": 1216
         },
         "culture": "halfling",
-        "plots": 29,
-        "streets": 66,
+        "plots": 39,
+        "streets": 117,
         "links": 2,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 29,
+          "plots": 39,
+          "kept": 1,
+          "renumbered": true
+        }
       },
       {
         "name": "Kettle Cross",
@@ -147,7 +154,14 @@
         "plots": 15,
         "streets": 33,
         "links": 0,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 0,
+        "w6": {
+          "plotsBefore": 15,
+          "plots": 15,
+          "kept": 15,
+          "removed": []
+        }
       }
     ],
     "roads": 5,
@@ -177,13 +191,13 @@
       "x": 1412,
       "z": 1336
     },
-    "placements": 257,
+    "placements": 318,
     "vignettesAvoided": 620
   },
   "files": {
-    "terrain.bin": 552265,
-    "nav.bin": 32731,
+    "terrain.bin": 552467,
+    "nav.bin": 32866,
     "scatter.bin": 125700,
-    "placements.json": 195856
+    "placements.json": 216118
   }
 }

@@ -414,7 +414,7 @@ export function planTownWalls(ctx) {
       gates: gateOut.map((g, k) => ({ id: `${id}_gate_${k}`, x: r2(g.gx), z: r2(g.gz), h: r2(groundAt(g.gx, g.gz)), yaw: +Math.atan2(g.ux, g.uz).toFixed(4), out: [+g.ux.toFixed(4), +g.uz.toFixed(4)],
         wallYaw: +Math.atan2(g.nx, g.nz).toFixed(4), open: r2(g.kind === 'gap' ? 2 * R * Math.sin((g.a1 - g.a0) / 2) : g.open),
         width: r2(g.kind === 'gap' ? 2 * R * Math.sin((g.a1 - g.a0) / 2) : g.pass), pass: r2(g.pass), slant: +g.slant.toFixed(3), kind: g.kind,
-        way: g.main.w.id, wayKind: g.main.w.kind, road: g.road ?? (g.main.w.kind === 'road' ? g.main.w.id : null), ways: [...new Set([...g.bundle, ...g.led].map(c => c.w.id))], led: g.led.map(c => c.w.id),
+        way: g.main.w.id, wayKind: g.road ? 'road' : g.main.w.kind, road: g.road ?? (g.main.w.kind === 'road' ? g.main.w.id : null), ways: [...new Set([...g.bundle, ...g.led].map(c => c.w.id))], led: g.led.map(c => c.w.id),
         ends: [at(g.a0), at(g.a1)].map(([x, z]) => [r2(x), r2(z)]),
         // W6: the main street from this gate to the edge of the square (null: a side gate no world road's high street uses)
         main: g.route ? { street: g.route.street, width: g.route.width, pts: g.route.pts.map(([x, z]) => [r2(x), r2(z)]), metres: r2(g.route.pts.reduce((s, q, k) => s + (k ? Math.hypot(q[0] - g.route.pts[k - 1][0], q[1] - g.route.pts[k - 1][1]) : 0), 0)) } : null,

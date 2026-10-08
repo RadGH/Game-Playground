@@ -222,10 +222,29 @@
           "z": 832
         },
         "culture": "halfling",
-        "plots": 41,
-        "streets": 113,
-        "links": 3,
-        "overlaps": 0
+        "plots": 40,
+        "streets": 111,
+        "links": 2,
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 41,
+          "plots": 40,
+          "kept": 40,
+          "removed": [
+            {
+              "plot": 13,
+              "want": "hall",
+              "office": true
+            }
+          ],
+          "moved": [
+            {
+              "office": "hall",
+              "to": 34
+            }
+          ]
+        }
       },
       {
         "name": "Charcoal Burners",
@@ -241,10 +260,38 @@
           "z": 192
         },
         "culture": "halfling",
-        "plots": 27,
-        "streets": 74,
-        "links": 3,
-        "overlaps": 0
+        "plots": 24,
+        "streets": 71,
+        "links": 2,
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 27,
+          "plots": 24,
+          "kept": 23,
+          "removed": [
+            {
+              "plot": 0,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 8,
+              "want": "hut",
+              "office": false
+            },
+            {
+              "plot": 23,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 24,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
       },
       {
         "name": "Wildhaven",
@@ -260,10 +307,23 @@
           "z": 192
         },
         "culture": "halfling",
-        "plots": 10,
-        "streets": 41,
+        "plots": 9,
+        "streets": 40,
         "links": 2,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 10,
+          "plots": 9,
+          "kept": 9,
+          "removed": [
+            {
+              "plot": 2,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
       }
     ],
     "roads": 12,
@@ -295,13 +355,13 @@
       "x": 1100,
       "z": 560
     },
-    "placements": 408,
+    "placements": 397,
     "vignettesAvoided": 558
   },
   "files": {
-    "terrain.bin": 689740,
-    "nav.bin": 49673,
+    "terrain.bin": 689748,
+    "nav.bin": 49708,
     "scatter.bin": 123556,
-    "placements.json": 259864
+    "placements.json": 256760
   }
 }

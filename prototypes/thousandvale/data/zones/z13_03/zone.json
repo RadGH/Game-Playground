@@ -235,6 +235,18 @@
       ],
       "h": 48.97,
       "w": 4.5
+    },
+    {
+      "a": [
+        1030.67,
+        139.69
+      ],
+      "b": [
+        1047.67,
+        139.51
+      ],
+      "h": 57.013,
+      "w": 5.2
     }
   ],
   "summary": {
@@ -259,10 +271,17 @@
           "z": 1472
         },
         "culture": "halfling",
-        "plots": 29,
-        "streets": 65,
+        "plots": 36,
+        "streets": 104,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 29,
+          "plots": 36,
+          "kept": 0,
+          "renumbered": true
+        }
       },
       {
         "name": "Three Wheels",
@@ -278,10 +297,34 @@
           "z": 1472
         },
         "culture": "halfling",
-        "plots": 29,
-        "streets": 72,
+        "plots": 27,
+        "streets": 71,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 29,
+          "plots": 27,
+          "kept": 27,
+          "removed": [
+            {
+              "plot": 3,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 5,
+              "want": "barber",
+              "office": true
+            }
+          ],
+          "moved": [
+            {
+              "office": "barber",
+              "to": 1
+            }
+          ]
+        }
       },
       {
         "name": "Stormrow",
@@ -298,9 +341,16 @@
         },
         "culture": "halfling",
         "plots": 20,
-        "streets": 49,
-        "links": 0,
-        "overlaps": 0
+        "streets": 48,
+        "links": 1,
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 20,
+          "plots": 20,
+          "kept": 20,
+          "removed": []
+        }
       },
       {
         "name": "Ravencross",
@@ -317,9 +367,16 @@
         },
         "culture": "halfling",
         "plots": 8,
-        "streets": 34,
-        "links": 2,
-        "overlaps": 0
+        "streets": 45,
+        "links": 3,
+        "overlaps": 0,
+        "highStreets": 3,
+        "w6": {
+          "plotsBefore": 8,
+          "plots": 8,
+          "kept": 0,
+          "renumbered": true
+        }
       },
       {
         "name": "Wildmere",
@@ -332,14 +389,38 @@
         "radius": 46,
         "movedFrom": null,
         "culture": "halfling",
-        "plots": 10,
-        "streets": 43,
+        "plots": 8,
+        "streets": 41,
         "links": 2,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 10,
+          "plots": 8,
+          "kept": 8,
+          "removed": [
+            {
+              "plot": 1,
+              "want": "shop",
+              "office": true
+            },
+            {
+              "plot": 3,
+              "want": "hut",
+              "office": false
+            }
+          ],
+          "moved": [
+            {
+              "office": "shop",
+              "to": 6
+            }
+          ]
+        }
       }
     ],
     "roads": 16,
-    "bridges": 5,
+    "bridges": 6,
     "paths": 16,
     "pathMetres": 1302,
     "scatter": 18898,
@@ -371,13 +452,13 @@
       "x": 540,
       "z": 1656
     },
-    "placements": 519,
+    "placements": 569,
     "vignettesAvoided": 623
   },
   "files": {
-    "terrain.bin": 545967,
-    "nav.bin": 31724,
+    "terrain.bin": 546236,
+    "nav.bin": 31780,
     "scatter.bin": 151268,
-    "placements.json": 314156
+    "placements.json": 331554
   }
 }

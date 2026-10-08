@@ -12,7 +12,7 @@
 // armour, jewellery, upgrades, other), a sort and a name search sit over the bag. DOM only.
 
 import { DOLL_LEFT, DOLL_RIGHT, DOLL_BOTTOM, DOLL_EXTRA, SLOT_NAME, FILTERS, SORTS, viewBag, slotOf, altSlotOf, levelCheck, isUpgrade, rarityOf } from './ui/inv-core.js';
-import { iconFor, onIcon, specFor, iconsActive } from './ui/item-icons.js';
+import { iconFor, onIcon, specFor, iconsActive, setIconContext } from './ui/item-icons.js';
 import { installItemCards, rememberItems, scoreOf, nameOf, farholdReady } from './ui/item-card.js';
 import { hideTip, installGameTips } from './ui/tips.js';
 import { confirmBox } from './ui-panel.js';
@@ -39,6 +39,7 @@ export function createBag({ net: getNet, hud, me = null }) {
   const S = { bag: [], equipment: {}, gold: 0, fresh: new Set(), level: 1, filter: 'all', sort: 'new', search: '', bagMax: 0 };
   try { Object.assign(S, JSON.parse(localStorage.getItem(UI_KEY) || '{}')); S.search = ''; S.bagMax = 0; } catch {}
   const level = () => (me?.()?.level ?? S.level ?? getNet()?.joined?.you?.level ?? 1);
+  setIconContext({ cls: () => me?.()?.cls || getNet()?.joined?.you?.cls || null });      // W25: icons wear what YOUR class would
   installGameTips();                 // idempotent: the item cards need the shared tooltip engine running
   installItemCards({ equipment: () => S.equipment, level });
 

@@ -298,6 +298,8 @@ export function bakeZone(id, opts = {}) {
 
   // 5. level and plan each placed settlement (proctown — the one planner Farhold uses)
   const plans = [];
+  let standing = [];
+  try { standing = (JSON.parse(readFileSync(join(HERE, '..', 'data', 'vignettes', 'placements', `${id}.json`), 'utf8')).placements || []).filter(v => Number.isFinite(v.x)); } catch { /* E has not placed this zone yet */ }
   for (const s of placed) {
     let sum = 0, n = 0;
     for (let dz = -s.radius; dz <= s.radius; dz += 4) for (let dx = -s.radius; dx <= s.radius; dx += 4) if (dx * dx + dz * dz <= s.radius ** 2) { sum += ground[gIdx(s.x + dx, s.z + dz)]; n++; }
@@ -336,7 +338,9 @@ export function bakeZone(id, opts = {}) {
     // its turning outside the gate, where there is room
     const linkOut = footprintOf(size).walled ? 0 : LINK_OUT;
     const plan = planTown({ ...common, linksAt: radius => linkList(radius + linkOut).map(c => [c.x, c.z]),
-      highStreets: { to: 'square', width: HIGH_STREET_WIDTH[s.kind] || 4.2, clear: 0.6 } });
+      // (stream E's fixed things already standing in town — a waystone by the square — are passed beside, not through)
+      highStreets: { to: 'square', width: HIGH_STREET_WIDTH[s.kind] || 4.2, clear: 0.6,
+        avoid: standing.filter(v => !['npc', 'folk', 'guard', 'camp'].includes(v.type) && Math.hypot(v.x - tx, v.z - tz) < s.radius).map(v => ({ x: v.x - tx, z: v.z - tz, r: (v.radius || 1) + 0.2 })) } });
     // which road each high street carries in (the links are asked again at the radius the chosen plan was built to)
     { const L = linkList(plan.wallRadius + linkOut); for (const st of plan.streets) if (st.high) st.linkRoad = L[st.link]?.road || null; }
     // …and every plot that is still where it was keeps its id and its office (the plan as it was before W6 says which)

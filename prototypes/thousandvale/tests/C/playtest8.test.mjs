@@ -306,6 +306,10 @@ test('W22: no light item can drop, be made, come out of a crate, be in a kit or 
     assert.ok(!(it.affixes || []).some(a => /^cond_light(?!ning)/.test(a.stat || '')), `${it.name} carries a light property`);
   }
   assert.ok(drops > 20000);
+  // Farhold's tool / mount uniques fit no slot here: out of the pool too
+  assert.ok(engine.gearReport.slotless.length >= 2, `${engine.gearReport.slotless}`);
+  assert.equal(items.uniques.filter(u => ['tool', 'mount'].includes(u.type) || ['tool', 'mount'].includes(u.slot)).length, 0);
+  for (let i = 0; i < 30000; i++) { const it = engine.rpg.rollDrop({ level: 1 + i % 40, rng, chance: 1, magicFind: 600 }); assert.ok(!it || !['tool', 'mount'].includes(it.slot), `${it?.name} dropped (slot ${it?.slot})`); }
   // crates: an old "Lamp Box" opens as jewellery; nothing a crate holds is a light
   const w = world();
   const me = w.add('mage', 8);

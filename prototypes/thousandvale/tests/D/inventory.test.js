@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
   slotOf, altSlotOf, requiredLevel, levelCheck, filterGroup, viewBag, compareTo, isUpgrade, plainScore, iconSpec, armourTier,
-  DOLL_SLOTS, SLOT_NAME, ARMOUR_PARTS,
+  DOLL_SLOTS, SLOT_NAME,
 } from '../../js/client/ui/inv-core.js';
 import { prepareRules, rulesEngine } from '../../js/rules/index.js';
 
@@ -68,23 +68,20 @@ test('compare: delta against the worn item, the other slot on request, empty slo
   assert.equal(isUpgrade(sword, { weapon: greatsword }, 9), false);
 });
 
-test('icons (P16): one cache key per distinct picture; weapons held, armour by tier, jewellery as glyphs', () => {
+test('icons (P16, play-test 8 W25): one cache key per distinct picture; every picture is the WORN model (gear-look.js), jewellery the catalog does not draw is a glyph', async () => {
+  const { gearLook } = await import('../../js/client/gear-look.js');
   const a = iconSpec(sword), b = iconSpec({ ...sword, uid: 'other', name: 'Another Sword' });
   assert.equal(a.kind, 'held'); assert.equal(a.key, b.key, 'two plain swords share an icon');
+  assert.equal(a.id, gearLook({ weapon: sword }).held.id, 'the sword in the icon is the sword in the hand');
   assert.notEqual(iconSpec(greatsword).key, a.key);
   const h = iconSpec(helm);
-  assert.equal(h.kind, 'armour'); assert.equal(h.slot, 'hat'); assert.equal(h.id, 'plate_helm'); assert.equal(h.frame, 'bust');
+  assert.equal(h.kind, 'worn'); assert.equal(h.slot, 'hat'); assert.equal(h.frame, 'bust');
+  assert.deepEqual(h.parts.hat, gearLook({ head: helm }).hat, 'the helm in the icon is the helm on the head');
   assert.equal(iconSpec(ring).kind, 'glyph'); assert.equal(iconSpec(ring).id, 'ring');
   assert.equal(iconSpec(junk).id, 'junk');
-  // Farhold's own look function wins when given
-  assert.equal(iconSpec(sword, { held: () => ({ id: 'fh_rapier', color: '#fff', quality: 1 }) }).id, 'fh_rapier');
+  // the caller's `worn` (the game passes wornPart with the catalog and the class kit) decides — nothing here overrides it
+  assert.equal(iconSpec(sword, { worn: () => ({ partSlot: 'held', part: { id: 'fh_rapier', color: '#fff', quality: 1 }, parts: {} }) }).id, 'fh_rapier');
   assert.equal(armourTier({ name: 'Chain Shirt' }), 'medium');
-});
-
-test('every armour part id used for icons exists in the avatar parts catalogue', async () => {
-  const { partIds } = await import('../../../../avatar-2d/js/parts/index.js');
-  const slot = { head: 'hat', chest: 'top', legs: 'bottom', feet: 'shoes', hands: 'decor' };
-  for (const [s, tiers] of Object.entries(ARMOUR_PARTS)) for (const [t, [id]] of Object.entries(tiers)) assert.ok(partIds(slot[s]).includes(id), `${s}/${t}: ${id}`);
 });
 
 test('real Farhold items: every rolled item has a slot, a required level and an icon spec', async () => {

@@ -1551,6 +1551,7 @@ export function createProvince(opts) {
   const GUARD_SAY = ((layouts[0] && layouts[0].guards && layouts[0].guards.raid && layouts[0].guards.raid.say && layouts[0].guards.raid.say.newcomer) || ['Stay behind us, friend. We have the gate.']);
   function newcomerWard(o) {
     const r = o.room, e = o.entity;
+    if (r.rules.newcomer) safeRules(r, 'newcomer', e, isNewcomer(o));      // W1 (stream C, with the lead's leave): a newcomer draws a quarter of the threat and is never a raider's opening target
     if (r.kind !== 'town' || e.dead || !isNewcomer(o)) { o.warded = false; return; }
     const live = (realmRun && realmRun.room === r) || [...zoneRuns.values()].some(z => z.room === r) || [...r.host.near(e.x, e.z, 40)].some(m => m.kind === 'monster' && !m.dead && m.data && (m.data.event || m.data.roadEvent != null));
     if (!live) { o.warded = false; return; }
@@ -1640,6 +1641,7 @@ export function createProvince(opts) {
     for (const pv of P.values()) for (const r of [...pv.towns, ...pv.copies]) {
       for (const n of sched(r)) {
         if (n.removed) continue;
+        if (n.r && n.r.unit && n.r.unit.guard) continue;      // W1 (stream C, with the lead's leave): the combat rules walk a town guard — its post, its fights, its way back
         const sc = n.kind === 'npc' && n.data && n.data.schedule;
         if (!sc || !sc.blocks) continue;
         const goal = blockAt(sc.blocks, t, phases).at;

@@ -98,7 +98,7 @@ export function attachGuards(room, { cfg = null } = {}) {
   const foe = m => m.dying == null && !m.removed && (m.raider || m.guardFoe);
 
   function goDown(g) {
-    g.hp = 0; g.downFor = num(R.respawnSec, 75); g.statuses = {}; g.target = null; g.state = 'down'; g.anim = 'dead'; g.dying = null;
+    g.hp = 0; g.downFor = num(R.respawnSec, 75); g.statuses = {}; g.target = null; g.state = 'down'; g.anim = 'sit'; g.dying = null;
     for (const m of field.monsters) if (m.threat?.has(g.id)) forget(m, g.id);
     field.emit({ t: 'fx', kind: 'guard', id: g.id, down: 1, ms: Math.round(g.downFor * 1000) });
   }

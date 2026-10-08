@@ -11,22 +11,32 @@
 //   const url = iconFor(item);            // a data URL now if cached, else null (rendering starts in the background)
 //   onIcon(() => redraw());               // called each time a new icon is ready
 //
-// Weapons and off-hand pieces are built on their own from avatar-3d/js/chibi2-gear.js (the same builders the
-// characters hold — the Bannerline icon forge's buildItemModel approach). Armour dresses a Chibi 2 body in the
-// matching part and frames that part of the body. Rings, amulets, potions and junk are 2D glyphs.
+// Play-test 8 (W25, report #46 — "the War Helm's icon is a knight's helm, the model on my character is a gold dome with
+// horns"): the icon is now drawn from THE worn model and nothing else. inv-core.js iconSpec asks gear-look.js
+// `wornPart(item, slot, gearOpts(cls))` — the very call that dresses the bodies in the world, with the same options
+// (item bases, the wearer's class kit, armour themes, stream F's gear catalog). Farhold's look tables are no longer read.
+//   weapons, shields, foci   built on their own by the same builders the hands hold (chibi2-gear.js; chibi2-gear5.js for g5_)
+//   armour, cloaks, packs, belts, torcs, catalog rings   a plain Chibi 2 body wearing exactly the item's parts, framed on them
+//   potions, junk, a ring or amulet the catalog does not draw   2D glyphs
+// Nothing is drawn until the look data has loaded (an icon made without the catalog would be the wrong picture, cached).
 
 import * as THREE from 'three';
 import { buildHeld, buildOffhand } from '../../../../../avatar-3d/js/chibi2-gear.js';
+import { G5_WEAPON_BUILDERS, G5_OFFHAND_BUILDERS } from '../../../../../avatar-3d/js/chibi2-gear5.js';
+import { isG5, G5_HELD, G5_OFFHAND } from '../../../../../avatar-3d/js/chibi2-gear5-ids.js';
 import { iconSpec } from './inv-core.js';
+import { wornPart } from '../gear-look.js';
+import { gearOpts, lookDataReady, loadLookData } from '../looks.js';
 
-const VERSION = 'v3';
+const VERSION = 'v4';      // v4: play-test 8 — every picture is the worn model (the v3 cache held the old look tables' pictures)
 const SIZE = 96, PX = SIZE;
 const DB = 'tv-icons', OS = 'icons';
 const mem = new Map();               // key -> object URL
 const waiting = new Set();           // keys queued or rendering
 const listeners = new Set();
-let looks = null;                    // Farhold's heldLookFor / offhandLookFor (loaded once)
-let lookLoad = null;
+let ctx = { cls: () => null };       // whose class kit a rare chest piece wears (the viewer's own: it is their body the icon stands for)
+/** bag.js: tell the icons whose class to dress tier-2 armour as. */
+export function setIconContext(c = {}) { ctx = { ...ctx, ...c }; }
 
 // ---- storage: IndexedDB, blobs keyed by VERSION + icon key (async; a private window just keeps memory) ----
 // the old localStorage cache (big data: URLs parsed synchronously at boot) is removed once
@@ -61,15 +71,19 @@ async function persist(key, blob) {
 const toBlobUrl = c => new Promise(res => c.toBlob(b => res(b ? { blob: b, url: URL.createObjectURL(b) } : null), 'image/png'));
 
 export function onIcon(fn) { listeners.add(fn); return () => listeners.delete(fn); }
+/** The look data the bodies use (bases, class kits, themes, the gear catalog). Icons wait for it. */
+let lookLoad = null;
 export function loadLooks() {
-  if (!lookLoad) lookLoad = import('../../../../farhold/js/rpg.js').then(m => { looks = { held: m.heldLookFor, offhand: m.offhandLookFor }; }).catch(() => { looks = {}; });
+  if (!lookLoad) lookLoad = Promise.resolve().then(() => loadLookData()).catch(() => null).then(() => { for (const fn of listeners) { try { fn('looks'); } catch {} } });
   return lookLoad;
 }
-loadLooks();
-export function specFor(item) { return iconSpec(item, looks || {}); }
+/** The one question both the icon and the body ask (W25). */
+export const wornFor = (item, slot) => wornPart(item, slot, gearOpts(ctx.cls?.() || null));
+export function specFor(item) { return iconSpec(item, { worn: wornFor }); }
 /** The icon for an item: a data URL when ready, else null (and it is queued). */
 export function iconFor(item) {
   if (!item) return null;
+  if (!lookDataReady()) { loadLooks(); return null; }      // the catalog decides the picture: no guess before it is here
   const spec = specFor(item);
   if (!spec) return null;
   const hit = mem.get(spec.key);
@@ -192,7 +206,14 @@ function itemModel(spec) {
   };
   const a = { held: { id: held ? spec.id : 'none', color: spec.color, quality: spec.quality ?? 1 }, offhand: { id: held ? 'none' : spec.id, color: spec.color, quality: spec.quality ?? 1 }, body: {} };
   const c = { add, trim: '#d9b477', leather: '#493c36', steel: '#c4d4d6', darkSteel: '#536a73', W: 1, T: 1, H: 1, A: 1, LW: 1, hipsZ: 0.13, rig: null };
-  if (held) buildHeld(a, c); else buildOffhand(a, c);
+  // the catalog's models (g5_) have builders of their own; a weapon worn in the off hand is still a weapon
+  const part = spec.part || { id: spec.id, color: spec.color, quality: spec.quality ?? 1 };
+  if (isG5(spec.id)) {
+    if (held || (G5_HELD[spec.id] && !G5_OFFHAND[spec.id])) { a.held = { ...part }; a.offhand = { id: 'none' }; G5_WEAPON_BUILDERS[spec.id]?.(c, part.color || '#c8ccd6', part.quality ?? 0, a, a.held); }
+    else { a.offhand = { ...part }; G5_OFFHAND_BUILDERS[spec.id]?.(c, part.color || G5_OFFHAND[spec.id]?.color || '#9aa3ad', part.quality ?? 0, a, a.offhand); }
+  } else if (held) { a.held = { ...a.held, ...part }; buildHeld(a, c); }
+  else { a.offhand = { ...a.offhand, ...part }; buildOffhand(a, c); if (!cloth.length && !metal.length) { a.held = { ...part }; a.offhand = { id: 'none' }; buildHeld(a, c); } }      // a second weapon in the off hand
+  if (!cloth.length && !metal.length) throw new Error('no model for ' + spec.id);
   for (const [list, opts] of [[cloth, { roughness: 0.7, metalness: 0.05 }], [metal, { roughness: 0.32, metalness: 0.75 }]]) {
     for (const [geo, color] of list) {
       if (!geo.attributes.normal) geo.computeVertexNormals();
@@ -202,7 +223,7 @@ function itemModel(spec) {
   }
   // weapons lie on the diagonal pointing up-right (hand space runs the blade along -y); a shield is built
   // facing -x on the forearm, so a quarter turn shows its face
-  if (spec.id === 'bow' || spec.id === 'crossbow') { group.rotation.order = 'ZYX'; group.rotation.set(0, Math.PI / 2, Math.PI * 0.25); }
+  if (spec.id === 'bow' || spec.id === 'crossbow' || G5_HELD[spec.id]?.bow) { group.rotation.order = 'ZYX'; group.rotation.set(0, Math.PI / 2, Math.PI * 0.25); }
   else if (held) group.rotation.set(0, 0, Math.PI * 0.75);
   else group.rotation.set(0, Math.PI / 2, 0);
   return group;
@@ -219,6 +240,11 @@ const PART_FRAMES = {
   legs: { bones: ['kneeL', 'kneeR'], lift: 0.03, radius: 0.2, yaw: 0.45 },
   feet: { bones: ['footL', 'footR'], lift: 0.03, radius: 0.17, yaw: 0.7, pitch: 0.35 },
   hands: { bones: ['handR'], lift: 0, radius: 0.13, yaw: -0.9, pitch: 0.1 },
+  back: { bones: ['chest'], lift: -0.06, radius: 0.34, yaw: Math.PI - 0.5, pitch: 0.1 },       // a cloak or a pack: from behind
+  waist: { bones: ['hips'], lift: 0.02, radius: 0.19, yaw: 0.35, pitch: 0.05 },
+  neck: { bones: ['chest'], lift: 0.1, radius: 0.13, yaw: 0.2, pitch: 0.1 },
+  ring: { bones: ['handR'], lift: 0, radius: 0.075, yaw: -1.2, pitch: 0.35 },
+  carry: { bones: ['chest'], lift: -0.08, radius: 0.5, yaw: 0.45, pitch: 0.08 },
 };
 async function armourShot(spec) {
   const { create, avatarFor } = await bodyModules();
@@ -226,7 +252,8 @@ async function armourShot(spec) {
   // plain clothes everywhere, the piece in its slot, empty hands
   Object.assign(base, { hat: { id: 'none' }, cape: { id: 'none' }, decor: { id: 'none' }, held: { id: 'none' }, offhand: { id: 'none' },
     top: { id: 'tunic', color: '#4a4038' }, bottom: { id: 'pants', color: '#3a3028' }, shoes: { id: 'boots', color: '#3a2a1e' } });
-  base[spec.slot] = { id: spec.id, color: spec.color, ...(spec.color2 ? { color2: spec.color2 } : {}) };
+  // exactly the parts the item puts on a body (W25): the same objects gearLook() hands the world's bodies
+  for (const [k, v] of Object.entries(spec.parts || {})) base[k] = JSON.parse(JSON.stringify(v));
   let t0 = performance.now();
   const actor = await create(base);
   syncSpan(t0, 'body');                             // (the body build: measured as one span, awaits included)
@@ -256,12 +283,14 @@ async function armourShot(spec) {
 async function render(spec) {
   if (spec.kind === 'glyph') return glyphCanvas(spec);
   let shot;
-  if (spec.kind === 'armour') shot = await armourShot(spec);
+  if (spec.kind === 'worn') shot = await armourShot(spec);
   else {
+    // built BEFORE the stage is taken: a piece with no model of its own is shown in the hand of a body instead
+    let obj = null;
+    try { obj = itemModel(spec); } catch { return finish(await armourShot({ frame: 'carry', parts: { [spec.kind === 'held' ? 'held' : 'offhand']: spec.part } })); }
     const release = await lockStage();
     const t0 = performance.now();
     const { scene, camera } = stage();
-    const obj = itemModel(spec);
     scene.add(obj); obj.updateMatrixWorld(true);
     _box.setFromObject(obj);
     const c = _box.getCenter(new THREE.Vector3()), size = _box.getSize(new THREE.Vector3());

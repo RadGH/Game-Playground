@@ -18,7 +18,7 @@ import { buildTvForest } from './perk-forest.js';
 import { installLootPool, buildLootPool } from './loot-pool.js';
 import { installTvSkills } from './tv-skills.js';
 import { buildCasterForms } from './caster-forms.js';
-import { installTvGear, poolTvGear, attachTvGear, removeLights } from './tv-gear.js';
+import { installTvGear, poolTvGear, attachTvGear, removeLights, removeSlotless } from './tv-gear.js';
 import { setKitSource } from './starter-kits.js';
 import { createFishing } from './fishing.js';
 
@@ -56,7 +56,7 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP, tvS
   const rpg = new Rpg(items, { ...balance, seed }, talents);
   // owner feedback 8 (W22): Farhold restates its affix table as `Rpg` boots (its light-only affixes and slot lists come
   // back), so the lights are taken out again AFTER it — nothing rolls on, or for, a carried light
-  if (tvGear && gearReport) { const again = removeLights(items); gearReport.lights = { bases: [...gearReport.lights.bases, ...again.bases], uniques: [...gearReport.lights.uniques, ...again.uniques], affixes: [...gearReport.lights.affixes, ...again.affixes] }; }
+  if (tvGear && gearReport) { gearReport.slotless = [...(gearReport.slotless || []), ...removeSlotless(items)]; const again = removeLights(items); gearReport.lights = { bases: [...gearReport.lights.bases, ...again.bases], uniques: [...gearReport.lights.uniques, ...again.uniques], affixes: [...gearReport.lights.affixes, ...again.affixes] }; }
   // P6 — Thousandvale's perk forest (data/rules/perks.json) replaces Farhold's in the engine's Rpg, so
   // Farhold's own perkBonuses / rpg.derive put every node's grants, flags and powers on the sheet
   const forest = data.tvPerks?.arms ? buildTvForest(data.tvPerks) : rpg.forest;

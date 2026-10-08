@@ -281,7 +281,7 @@ const ui5 = createUi5({ atlas: ui.atlas, objects, inDungeon: () => !!D.view, loo
   ensureNet: () => kitNet(), onKitPreview: g => { S.titleGear = g; previewLook(S.look, 'title'); }, onKitBack: () => { if (S.phase === 'title') { S.titleGear = null; toAppearance(); } }, onKitCreate: c => { S.kit = c; enterWorld(); } });
 // T27: one binding table (js/client/input/bindings.js) drives the keyboard, the gamepad, the hints and — when switched on — touch
 const input = installInput({ controls, hud, setTarget: id => setTarget(id), targetId: () => S.target, pause: () => ui2.escape(), inWorld: () => S.phase === 'world', dead: () => S.self.dead, settings: ui2.settings, chat: () => chat.focus(), cycleTarget: any => cycleTarget(any) });
-const ui8 = createUi8({ net: () => S.net, hud, actors, atlas: ui.atlas, settings: ui2.settings, selfId: () => S.selfId, bar: () => S.bar });
+const ui8 = createUi8({ net: () => S.net, hud, actors, worldUi, atlas: ui.atlas, settings: ui2.settings, selfId: () => S.selfId, bar: () => S.bar });
 const PANELS = { ...ui5.panels, ...ui8.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: () => bag.toggle() }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
 for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());
 window.addEventListener('keydown', e => {

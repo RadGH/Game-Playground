@@ -248,14 +248,14 @@
     {
       "a": [
         408.54,
-        909.3
+        905.42
       ],
       "b": [
-        389.11,
-        863.22
+        386.11,
+        849.85
       ],
       "h": 43.935,
-      "w": 6
+      "w": 7.46
     }
   ],
   "summary": {
@@ -280,10 +280,17 @@
           "z": 832
         },
         "culture": "halfling",
-        "plots": 23,
-        "streets": 79,
-        "links": 5,
-        "overlaps": 0
+        "plots": 25,
+        "streets": 69,
+        "links": 3,
+        "overlaps": 0,
+        "highStreets": 3,
+        "w6": {
+          "plotsBefore": 23,
+          "plots": 25,
+          "kept": 0,
+          "renumbered": true
+        }
       },
       {
         "name": "Cinder Farm",
@@ -299,10 +306,48 @@
           "z": 1728
         },
         "culture": "halfling",
-        "plots": 26,
-        "streets": 69,
-        "links": 4,
-        "overlaps": 0
+        "plots": 22,
+        "streets": 65,
+        "links": 3,
+        "overlaps": 0,
+        "highStreets": 3,
+        "w6": {
+          "plotsBefore": 26,
+          "plots": 22,
+          "kept": 22,
+          "removed": [
+            {
+              "plot": 3,
+              "want": "stable",
+              "office": true
+            },
+            {
+              "plot": 4,
+              "want": "forge",
+              "office": true
+            },
+            {
+              "plot": 21,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 22,
+              "want": "house",
+              "office": false
+            }
+          ],
+          "moved": [
+            {
+              "office": "stable",
+              "to": 18
+            },
+            {
+              "office": "forge",
+              "to": 5
+            }
+          ]
+        }
       },
       {
         "name": "Ravenhaven",
@@ -318,10 +363,34 @@
           "z": 192
         },
         "culture": "halfling",
-        "plots": 14,
-        "streets": 44,
+        "plots": 13,
+        "streets": 43,
         "links": 2,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 14,
+          "plots": 13,
+          "kept": 12,
+          "removed": [
+            {
+              "plot": 10,
+              "want": "hut",
+              "office": false
+            },
+            {
+              "plot": 11,
+              "want": "shop",
+              "office": true
+            }
+          ],
+          "moved": [
+            {
+              "office": "shop",
+              "to": 0
+            }
+          ]
+        }
       },
       {
         "name": "Minfenrow",
@@ -337,10 +406,43 @@
           "z": 1088
         },
         "culture": "halfling",
-        "plots": 11,
+        "plots": 8,
         "streets": 33,
         "links": 2,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 11,
+          "plots": 8,
+          "kept": 8,
+          "removed": [
+            {
+              "plot": 6,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 7,
+              "want": "inn",
+              "office": true
+            },
+            {
+              "plot": 8,
+              "want": "shop",
+              "office": true
+            }
+          ],
+          "moved": [
+            {
+              "office": "inn",
+              "to": 3
+            },
+            {
+              "office": "shop",
+              "to": 5
+            }
+          ]
+        }
       },
       {
         "name": "Bipetwatch",
@@ -356,19 +458,26 @@
           "z": 1472
         },
         "culture": "halfling",
-        "plots": 12,
+        "plots": 13,
         "streets": 45,
         "links": 2,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 12,
+          "plots": 13,
+          "kept": 12,
+          "removed": []
+        }
       }
     ],
     "roads": 15,
     "bridges": 5,
     "paths": 14,
     "pathMetres": 692,
-    "scatter": 18868,
+    "scatter": 18867,
     "scatterKinds": {
-      "tree_broadleaf": 8201,
+      "tree_broadleaf": 8200,
       "bush": 5876,
       "reed": 1221,
       "rock_small": 1608,
@@ -394,13 +503,13 @@
       "x": 388,
       "z": 864
     },
-    "placements": 483,
+    "placements": 463,
     "vignettesAvoided": 634
   },
   "files": {
-    "terrain.bin": 510460,
-    "nav.bin": 34956,
-    "scatter.bin": 151028,
-    "placements.json": 270573
+    "terrain.bin": 510764,
+    "nav.bin": 35249,
+    "scatter.bin": 151020,
+    "placements.json": 257964
   }
 }

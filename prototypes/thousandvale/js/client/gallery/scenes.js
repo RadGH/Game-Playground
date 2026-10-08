@@ -149,6 +149,22 @@ export const SCENES = [
     notes: { all: 'T19: a suggestion or a bug report, with what gets attached written out.', pad: 'The text box opens the on-screen keyboard.' } },
   { id: 'reports', expect: '#panel-reports:not([hidden])', group: 'Windows', title: 'Admin — reports', modules: [U + 'feedback.js'], steps: [['admin'], ['call', 'tvui5.reports'], ['play', 'admin-reports'], ['click', '#panel-reports .rp-row']],
     notes: { all: 'T21: what an admin account sees — every report with its state, the client details and the recent log lines.' } },
+  // ---- play-test 8 (stream D-UI) ----
+  { id: 'my-reports', expect: '#panel-feedback:not([hidden]) .my-row', group: 'Windows', title: 'Feedback — My reports', modules: [U + 'feedback.js', U + 'pt8-core.js'],
+    steps: [['run', async G => { G.S.net.claimed = true; }], ['call', 'tvui5.feedback', 'mine'], ['play', 'my-reports'], ['wait', 200]],
+    notes: { all: 'W29: everything your account has sent, its state, and the team\'s note — for a completed one, how it was fixed. Reply starts a new report that begins with the reference.', phone: 'A full sheet; each report is a card with a Reply button of thumb size.', pad: 'The ring walks the cards; A on Reply opens the form with the reference filled in.' } },
+  { id: 'cart', expect: '#panel-cart:not([hidden]) .cart-row.picked', group: 'Windows', title: 'Ox cart — where to?', modules: [U + 'cart-travel.js', U + 'pt8.js', U + 'pt8-core.js'],
+    steps: [['play', 'cart-list'], ['click', '#panel-cart .cart-row:not(.locked) [data-act="pick"]'], ['wait', 150]],
+    notes: { all: 'W5: paid rides between towns. Every stop with its fare, the road distance and the ride time; a stop you may not ride to says why. Picking one asks once more before the gold goes.', phone: 'Rows wrap: the confirm buttons drop under the name.', pad: 'A picks, A again pays; B backs out.' } },
+  { id: 'meter', expect: '#panel-meter:not([hidden]) .meter-row', group: 'Windows', title: 'Damage meter', modules: [U + 'meter-window.js', U + 'pt8.js', U + 'pt8-core.js'],
+    steps: [['target', 'enemy'], ['play', 'hurt-party'], ['call', 'tvui8.meter', true], ['play', 'meter-hits'], ['wait', 700]],
+    notes: { all: 'W21: the playground\'s damage meter in a window — Settings, Game, "Damage meter" (off by default). Bars for you, your pets and party members near you; click a bar for its skills, a skill for every hit.', phone: 'A sheet; bars are a thumb high.', pad: 'The ring walks the bars; A drills in, B comes back out.' } },
+  { id: 'map-find', expect: '#panel-map:not([hidden]) .map-found', group: 'Windows', title: 'Map — find a shop or service', modules: [U + 'map-tools.js', U + 'worldmap.js', U + 'pt8-core.js'],
+    steps: [['panel', 'map'], ['wait', 1500], ['run', async G => { const W = G.ui.worldMap; await W.find.load(); W.fitPreset('province'); W.find.set({ role: 'stablehand' }); }], ['wait', 700]],
+    notes: { all: 'W15: a filter and a search over every shop and service. Zoomed out, the towns that have one are ringed and the rest fade; the list beside the map is nearest first. The map also opens where you left it.', phone: 'The filter and the search box sit in the top strip, which scrolls sideways.', pad: 'The ring reaches the filter; the list\'s Show buttons move the map.' } },
+  { id: 'event-hidden', expect: '.et-hidden:not([hidden])', group: 'In the world', title: 'HUD — an event you hid', modules: [U + 'hidden-events.js', U + 'event-tracker.js', U + 'pt8.js'],
+    steps: [['play', 'event-far'], ['wait', 300], ['click', '.et-card .et-hide'], ['wait', 300]],
+    notes: { all: 'W13: the crossed eye on an event\'s card takes it off your screen — the card, the minimap pin and its arrow. One line stays to bring it back; the map\'s Events list does the same.', phone: 'The event cards live behind the HUD-info toggle on a phone; the line is there with them.' } },
   { id: 'account', expect: '#panel-account:not([hidden])', group: 'Windows', title: 'Account', modules: ['js/client/account.js'], steps: [['panel', 'account']],
     notes: { all: 'Claim a guest account (free), or see the one you are logged into.' } },
 
@@ -238,8 +254,6 @@ export const sceneFits = (s, deviceId) => !s.only || s.only.includes(deviceId);
  * This is a to-do list, not an exemption: tests/G/gallery.test.js prints it on every run, and the lead's audit reads it.
  */
 export const PENDING_SCENES = {
-  'js/client/ui/cart-travel.js': 'play-test 8 W5 — the ox-cart window (needs a recorded `used {kind: cart}` answer or a hand-kept moment)',
-  'js/client/ui/meter-window.js': 'play-test 8 — the damage meter window',
   'js/client/ui/prof-draw.js': 'play-test 8 — professions drawing helper (shown with prof-games)',
   'js/client/ui/prof-games.js': 'play-test 8 — the profession mini-games',
 };

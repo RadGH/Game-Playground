@@ -47,6 +47,7 @@ else {
 const all = rows;
 rows = rows.filter(r => (want === 'all' ? true : want ? r.state === (want === 'trash' ? 'trashed' : want) : r.state !== 'trashed') && (!kind || r.kind === kind) && (!since || (r.at || 0) >= since)).slice(0, limit);
 
+for (const r of rows) r.env = (r.server && r.server.env) || (file ? null : env);      // owner feedback 9: which server a report came from (old rows: the database it was read from)
 if (a.json) { console.log(JSON.stringify(rows, null, 2)); process.exit(process.exitCode || 0); }
 
 const when = t => (t ? new Date(t).toISOString().replace('T', ' ').slice(0, 16) + ' UTC' : '?');
@@ -74,8 +75,9 @@ for (const k of ['bug', 'suggestion']) {
     out.push('');
     const s = r.server || {}, c = r.client || {};
     const where = [s.roomName || s.room, s.zone && `zone ${s.zone}`, Number.isFinite(s.x) && `x ${s.x}, z ${s.z}`, s.roomKind].filter(Boolean).join(' · ');
+    out.push(`- **Server:** ${s.env || (file ? 'unknown' : env)}${s.server ? ` (${s.server})` : ''}${s.env ? '' : file ? '' : ' — read from the ' + env + ' database'}`);
     if (where) out.push(`- **Where (server):** ${where}`);
-    const sv = flat(s, ['room', 'roomName', 'zone', 'x', 'y', 'z', 'roomKind', 'at', 'via', 'account', 'username']);
+    const sv = flat(s, ['room', 'roomName', 'zone', 'x', 'y', 'z', 'roomKind', 'at', 'via', 'account', 'username', 'env', 'server']);
     if (sv) out.push(`- **Server saw:** ${sv}`);
     if (s.target) out.push(`- **Target:** ${flat(s.target)}`);
     if (Array.isArray(s.events) && s.events.length) out.push(`- **Events running there:** ${s.events.map(e => flat(e)).join(' | ')}`);

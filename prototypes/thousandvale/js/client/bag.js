@@ -15,7 +15,7 @@ import { DOLL_LEFT, DOLL_RIGHT, DOLL_BOTTOM, DOLL_EXTRA, SLOT_NAME, FILTERS, SOR
 import { iconFor, onIcon, specFor, iconsActive, setIconContext } from './ui/item-icons.js';
 import { installItemCards, rememberItems, scoreOf, nameOf, farholdReady } from './ui/item-card.js';
 import { hideTip, installGameTips } from './ui/tips.js';
-import { confirmBox } from './ui-panel.js';
+import { confirmBox, makeDraggable } from './ui-panel.js';
 import { wearSlot } from './ui/pt2-core.js';
 import { offhandRefusal, hasDual2h, BAG_MAX as BAG_CAP } from './ui/pt5-core.js';
 import { UNSEEN } from './ui/unseen.js';
@@ -69,6 +69,8 @@ export function createBag({ net: getNet, hud, me = null }) {
   $('itemcard')?.setAttribute('hidden', '');
 
   $('bag-close').onclick = () => toggle(false);
+  // play-test 9 (X3, S#49): the character window drags by its title bar like every other window (not on a phone: it is a sheet there)
+  const drag = makeDraggable({ root, handle: root.querySelector('header'), id: 'bag' });
   if (btn) btn.onclick = () => toggle();
   el.sort.innerHTML = SORTS.map(s => `<option value="${s.id}">${esc(s.label)}</option>`).join('');
   el.sort.value = S.sort;
@@ -86,7 +88,7 @@ export function createBag({ net: getNet, hud, me = null }) {
   function toggle(open = root.hidden) {
     root.hidden = !open; btn?.classList.toggle('on', open);
     iconsActive(open);                    // icons render only while this window is open (P1: no freezes in play)
-    if (open) draw(); else hideTip();
+    if (open) { draw(); drag.clamp(); } else hideTip();
     for (const fn of toggleFns) fn(open);
     return open;
   }

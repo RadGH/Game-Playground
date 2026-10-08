@@ -3959,7 +3959,42 @@ room objects `info.type === 'node'` (`info.node.look`), `ev fx {kind:'gather'|'c
 - **D-UI** `js/client/ui/char-sheet.js` `sheet.addSection('professions', 'Professions', draw)` and `journal.addTab('professions', 'Professions', draw)` — yours, as you wrote; I only call them.
 - **G** `js/client/gallery/stage.js` (+1 create call) and `scenes.js` (a `Professions` group of scenes).
 
-_Status: contract written 2026-10-07 21:55; code in progress. (Updated below as it lands.)_
+_Status: contract written 2026-10-07 21:55; LANDED 2026-10-08 — the section below is what the code does._
+
+## Round 8 — P-client status (LANDED 2026-10-08; where it differs from "Round 8 contracts — P-client" above, THIS wins) -> P-core, D-world, D-UI, G, lead
+**Built against P-core's section as it landed** (`js/rules/professions-games.js` `makeGame` / `scoreGame` / the curves, the three data files, `net.prof` / `net.gather` / `net.craft`).
+My asks 1–5 above are all moot or met: `makeGame` is exported; `trace` sends exactly `steps` samples at `(k + 0.5) * ms / steps`; forge re-heat is `[t, 1]` on the
+second button; `got: [{name, n, tint, rarity, bonus}]` is what the card shows; `craftList.station.npc` + `used.prof` open the window.
+
+**Files (mine):** `js/client/prof-view.js`, `prof-models.js`, `prof-sound.js`; `js/client/ui/prof.js` (controller), `prof-games.js`, `prof-draw.js`, `prof-minigame.js`,
+`prof-craft.js`, `prof-skills.js`, `prof-icons.js`; `css/prof.css` (injected by prof.js); `avatar-3d/js/chibi2-motion-prof.js` (seven opt-in loops);
+`js/client/gallery/prof-scenes.js` + `fixtures/professions.json` (RECORDED by `tests/P/client-fixtures.mjs` — re-run it after a protocol / content change);
+`tests/P/client-*.{test,spec}.js`, `client-look.html` / `client-look.mjs` / `client-shots.mjs` / `client-sheet.py` (pictures).
+
+**Hooks I added in other streams' files** (all additive, each marked `W9 (P-client)`):
+- `js/client/main.js` — imports; `profView` + `prof` created after `ui8`; `prof.wire(net)`; `profView.clear()` on a room change; `setNode` for `info.type === 'node'`;
+  `setNpc(id, at, info.role)` for town folk (station props); `setWorking(id, info.working)`; `profView.remove(id)` on leave; `onEvent` in the fx line; `update(dt)`;
+  `sample()` in the warm-up extras; `prof`, `profView` on `window.thousandvale`; the objects' `onUse` sends a `node` / `skin` object to `prof.gather`.
+- `js/client/objects.js` — `KINDS.node` and `KINDS.skin` (invisible; prompt "Mine Copper Boulder" / "Skin Moor Hound"; a spent node has no prompt).
+- `js/client/actors.js` — `CHIBI2_PROF_ANIMS` in the clip list, `setWorking(id, clip)`, one line in the clip chooser (`a.working`).
+- `js/client/input/bindings.js` — rows `profWork` (Space, pad A), `profLeft` (A, pad X), `profRight` (D, pad B), all `ctx: 'prof'`; and `partners()` now also returns
+  SIBLINGS (two actions that share the same third key — `hook` and `profWork` both share `jump` — are re-bound together; the "no two actions on one key" test wanted it).
+- `js/client/input/gamepad.js` — one line: while `<html data-prof>` is set the pad's world layer stands back (the mini-game reads the pad; the stick cannot walk you off the node).
+- `js/client/ui/item-card.js` — a material's card: "crafting material" in the kind line + "Crafting material · Mining · tier 1 — sells for 2 gold each"; a tool: "takes no slot"; made gear: "Made by …".
+  `js/client/ui/inv-core.js` — a material's glyph icon takes the material's own `tint`.
+- `js/client/gallery/stage.js` (createProf, `prof.wire`, the `prof` verb, `prof` on the api) and `scenes.js` (group `Professions`, `...PROF_SCENES`, PENDING_SCENES emptied).
+
+**What others can call:** `thousandvale.prof` (`.open(prof?, npc?)`, `.gather(id?)`, `.skills()`, `.demo(type, opts)`, `.state`), `thousandvale.profView` (`.stats`, `.nodes`),
+`window.tvprof` (the same controller, for specs), event `tv:prof {state, prof, game, quality?}`, `<html data-prof="strike|…">` while a mini-game is on screen.
+
+**Asks (none blocking):**
+- **P-core:** `joined.you.opened` lists the spent `node:` keys but not WHEN each reopens, so after a re-join I hold a listed node bare for the longest it could take
+  (`gather.respawnMin[1]` minutes) — a `you.nodes: { '<key>': msLeft }` (or times in `opened`) would make it exact. And the quality words: the owner's brief says
+  "Poor / Good / Fine / Perfect", your data file says "Botched / Rough / Sound / Fine / Perfect" — I print YOURS (one table: `quality.name`), so change them there if the lead prefers.
+- **D-UI:** a material's icon is the generic bundle glyph in its own colour; real `ore` / `bar` / `herb` / `hide` … glyphs (the item's `icon` field names them) are yours when you have a moment.
+- **D-world:** station props stand 2.3 m to the craftsman's right / left (`stationSpots` in prof-view.js). They are not solid and are not on the nav bake. If one stands in a wall in some town, tell me the town.
+- **Lead:** Thousandvale had no sound at all before this; `js/client/prof-sound.js` is the first user of the playground's Sound Lab (`sfx/js/sfx.js`, loaded on the first cue, volume from Settings > Audio).
+
 
 
 ## Round 8 — A status + what each stream reads (2026-10-08; supersedes A's first section where they differ) -> D-UI, D-world, E, C, P-core, P-client, lead
@@ -4106,3 +4141,48 @@ gallery's bag draws 120 squares until the fixtures are re-recorded against the v
 **Not done:** town NPCs out of sight carry no quest mark on the map (A sends none in `mapData` this round — only NPCs the client has are marked).
 - **W18 (B, lead):** the bare mountains in the report are inside LOADED zones: the zone bake scatters almost no trees on the `mountains` biome. I dress them with distant tree spires from the client (`horizon-grid.js buildCanopy`: not solid, nothing the server knows about). If B's scatter ever plants real trees on mountain slopes, set `CANOPY_BIOMES = []`.
 - **Lead:** m3-social.spec is still red at line 194 (`#char-chips .chip` hidden after signing in from the title form) — D-UI's title flow, unchanged from the note of 2026-10-07. freeze.spec is green.
+
+## Round 9 contracts — A (Server core) -> D-UI, D-world, E, lead — 2026-10-08 (owner feedback 9; written FIRST, status line at the end)
+Protocol stays **8** (additive). Schema **v7** (`char_tombstones`; accounts.last_login already exists).
+
+**X6 — delete a character; the limit (gateway socket, title screen).**
+- `charList {chars, limit}` — `limit` = how many characters an account may hold (**20**; server knob `--char-limit` / `TV_CHAR_LIMIT`). `authed` carries `charLimit` too. `create` over the limit -> `err {code:'full', msg:'You have 20 characters, the most an account may hold. Delete one to make room.'}`.
+- **`delete {char:<id>, name:'<typed name>'}`** (`net.deleteChar(id, typedName)`) -> **`deleted {ok, char, name, freeAt?, returned?, why?, msg?}`**, and on success a fresh `charList` follows.
+  `name` must equal the character's name (case does not matter) — the server checks the typed confirmation too. Refusals (`ok:false`, a sentence in `msg`):
+  `name` (the typed name does not match), `online` (it is in the world — on this or another device; "Log it out first."), `lease` (it left the world seconds ago; "Try again in a few seconds."),
+  `missing` (not yours / gone), `slow` (one deletion every 5 s). On success: its unopened letters from other players that still hold items or gold go BACK to their senders (`returned` = how many); the rest of its post, its friend rows and its guild membership go with it
+  (a guild it was the last member of is disbanded; a guild it led passes to the next in rank, as it already does when a leader's account is deleted); feedback it wrote stays (unlinked). The NAME stays reserved for a day (`freeAt` = wall ms) — `create` with it answers `err {code:'name'}` until then.
+- Nothing can be deleted through the province socket, and never a character of another account.
+
+**X1 — who is online (admins) + the message of the day.**
+- `admin {op:'online'}` (either socket; `net.adminOp('online')`) -> **`adminOnline {ok, at, count, accounts, list:[{char, name, level, cls, clsName, province, zone, zoneName, town, room, roomKind, where, account, username, claimed, admin}]}`** — `where` is the line to print ("Torborhold" in a town, else the zone's name, "in a dungeon" inside one); sorted by name. Admin accounts only (`adminR {ok:false, why:'forbidden'}` otherwise). From the province socket it lists this process's players; the client sends it over the gateway socket, which knows everyone.
+- MOTD: on entering the world (each `play`, not on room changes) the gateway sends ONE `chat {ch:'system', name:'The Vale', text, motd:true, online, day}`: "Welcome to Thousandvale, <name>. 3 players are online now; 12 have signed in over the past 24 hours." `online` = characters in the world now (you included), `day` = distinct ACCOUNTS that entered the world in the past 24 hours. The text is an ops knob: `data/ops/motd.json` `{ "text": "Welcome to Thousandvale, {name}. {online} online now; {day} signed in over the past 24 hours.", "lines": ["extra line", …], "off": false }` (tokens `{name} {online} {day} {players} {accounts}`; `{players}`/`{accounts}` are the counts with the right noun), or env `TV_MOTD`.
+
+**X4 — barber free.** Economy knob `barber.mult` (default 1) multiplies every barber price; `data/provinces/economy.json` sets `"barber": {"mult": 0}`. With 0: `used {barber:true, free:true, prices:{… all 0}}` and the `barber` op charges nothing whatever was changed. D-UI: "Save (Free)" when the quoted price is 0.
+
+**X7 — leftovers.**
+- Raid waves enter by a gate: an event with `raid.gates` (E's events.json) spawns each wave 35–55 m outside one of them (`guards.json raid.spawnOutM`), on walkable ground, and it walks in; `eventTrack` / `zoneEvent` gain `gate: {id, x, z}` for the wave now coming (D-world may draw an arrow; optional).
+- Guards: `data.guard.level` = the level of the town's own raid when it has one, else the town's zone band floor (C raises it further when a higher raid arrives); `data.guard.tier` from E's rows.
+- A guaranteed roaming cart: carts.json `roaming.runs[]` become routes that carry only their `only` kinds (js/sim/content.js).
+- Quest marks out of sight: each TOWN row of `mapData.places[]` gains **`marks: [{name, role, x, z, q}]`** (`q` = `offer | turnin | active | later | job`; only NPCs that have a mark for YOUR character; world metres), computed when the map data is asked for (`map {op:'get'}` — ask again when you open the map); `questMarks` keeps doing the NPCs in your room. (Not `npcs[].q`: the server's place rows have no `npcs` list.)
+- Which server a report came from: every report's server context carries `env` (`dev` | `stable`) and `server` (the public host name when the server has one); the admin list rows carry `env`; `tools/feedback-report.mjs` and `feedback-page.mjs` print "Server: stable" on each card (for an old row: the env the tool read it from).
+
+_Status 2026-10-08: ALL LANDED and live on dev (8491). Wire shapes: docs/protocol.md §25. tests/A/pt9.test.js (7, Postgres too); tests/A 290 = 285 pass / 5 skip (4 perf gates, 1 no network) / 0 fail; tests/E 237, tests/C 352 green. What differs from the text above:_
+- _X6: the client also has `net.charLimit` (from `authed` / `charList`) and `net.deleteChar(id, typedName)`. The default limit in the stores was 10, not 8 (the 8 is the client's own); it is 20 now._
+- _X1: `net.adminOnline()` (always the gateway socket). "Signed in over the past 24 hours" counts `accounts.last_login`, which the server already stamped when an account authenticates and now also when it enters the world — on dev the number includes test bots._
+- _X7: quest marks for towns are `mapData.places[].marks` (not `npcs[].q`). `gate` is on the event runner's view (so on `eventTrack` and the zone / realm event views)._
+- _X4: I set `"barber": {"mult": 0}` in E's `data/provinces/economy.json` (one key + a note) — E: yours to keep or change._
+- _Stable needs schema v7 at its next start (automatic, additive: `char_tombstones` + an index)._
+
+
+## Round 9 contracts — D-UI (interface) -> A, G, lead — 2026-10-08 (written first; A's names win)
+New files: `js/client/ui/pt9-core.js` (pure), `js/client/ui/online-window.js`, `css/pt9.css`. I build against "Round 9 contracts — A" as written:
+- **X6** `net.deleteChar(id, typedName)` (else raw gateway `delete {char, name}`) -> `deleted {ok, char, name, returned?, why?, msg?}`; I print `msg`. The limit is
+  `charList.limit` / `authed.charLimit` — **ask of A:** keep it on the client as `net.charLimit` (I read that, then 20). At the limit "New character" is
+  disabled and says why. A character's row gets a Delete button; the confirm asks you to type its name.
+- **X1** `net.adminOp('online')` -> `adminOnline {ok, at, count, accounts, list}`; window `#panel-online` (admins only: a button in the Feedback window next to
+  Reports, and `/online`). Sort by name / level / place, client side. The MOTD is your `chat {ch:'system', motd:true}` line — printed whole, wrapped.
+- **X4** "Save (Free)" whenever the quoted cost is 0 (`used.free`, or every price 0), else "Save (N gold)".
+- **X3** every floating window (and the bag) drags by its title bar on desktop; position kept in `sessionStorage` (`tv.panel.<id>`), clamped on screen,
+  double-click the title to put it back. **G:** nothing in the phone layout moves — dragging is off while `<html data-layout="phone">`.
+- **X7 (reading A's extra):** town NPCs' `mapData.places[].npcs[].q` are drawn on the map as the same `!` / `?` marks when the row has `x`, `z`.

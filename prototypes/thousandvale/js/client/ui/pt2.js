@@ -181,7 +181,7 @@ export function createUi2(o) {
     const id = me()?.id, a = id != null ? actors.get(id) : null;
     const look = a?.look ? { race: a.look.race, seed: a.look.seed, ...(lookCustom(a.look) ? { custom: lookCustom(a.look) } : {}) } : null;
     const svc = await loadBarber();
-    openEditor('barber', { look, npc: u.id, bill: { prices: svc.prices || {}, perLevel: svc.perLevel ?? 0.05, level: me()?.level || 1, free: !!u.free } });
+    openEditor('barber', { look, npc: u.id, bill: { prices: u.prices || svc.prices || {}, perLevel: svc.perLevel ?? 0.05, level: me()?.level || 1, free: !!u.free } });      // play-test 9 (X4): the SERVER's quote wins (`used.prices` — all 0 while the barber is free)
   }
 
   // ---- inputs main.js forwards
@@ -271,7 +271,7 @@ export function createUi2(o) {
     state: () => ({ hotbar: hotbar.ids, buffs: buffs.state, banner: banner.state, loot: loot.state, shop: shop.state, trade: trade.state, following: menu.following, menu: menu.isOpen, settings: settings.all(), pause: settings.pause.isOpen, editor: ed.isOpen ? ed.look : null, portraits: portraits.stats, pops: [...pops.children].filter(c => !c.hidden).map(c => c.textContent) }),
     fake: (ev, msg) => { const fns = fakeTaps.get(ev) || []; for (const fn of fns) fn(msg); return fns.length; },
     banner: b => banner.push(b), context: (id, x = 400, y = 300) => menu.open(id, x, y), follow: id => menu.follow(id), stopFollow: () => menu.stopFollow(true),
-    openShop: (npc, name) => shop.open(npc, name), openLoot: id => loot.open(id), editor: (mode = 'barber') => (mode === 'barber' ? barber({ id: 0, name: 'Barber' }) : openEditor('title', { look: o.titleLook?.() })),
+    openShop: (npc, name) => shop.open(npc, name), openLoot: id => loot.open(id), editor: (mode = 'barber', u = {}) => (mode === 'barber' ? barber({ id: 0, name: 'Barber', ...u }) : openEditor('title', { look: o.titleLook?.() })),
     pauseMenu: () => settings.escape(), staticPortrait: look => portraits.img(look),
   };
   // tvui2.fake: the same handlers a server message reaches (screenshots, specs)

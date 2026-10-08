@@ -12,11 +12,15 @@ import { createCartTravel } from './cart-travel.js';
 import { createMeterWindow } from './meter-window.js';
 import { questMarkMarkers } from './pt8-core.js';
 import { HIDDEN } from './hidden-events.js';
+import { createOnlineWindow } from './online-window.js';      // play-test 9 (X1): the admin's "who is online"
 
 export function createUi8(o) {
   const { net, hud, actors, atlas, settings } = o;
   const cart = createCartTravel({ net, hud, onOpen: () => o.worldUi?.closeDialog?.() });      // the carter's own "hello" dialog gives way to the route window
   const meter = createMeterWindow({ net, hud, actors, selfId: () => o.selfId?.() ?? null, bar: o.bar, settings });
+
+  const online = createOnlineWindow({ net, hud });
+  o.feedback?.setAdminTools?.([{ label: 'Online players', act: 'online', run: () => online.open() }]);
 
   // ---- W12: who has a quest for you ----
   const marks = new Map();        // entity id -> 'offer' | 'turnin' | 'active' | 'later' | 'job'
@@ -29,12 +33,16 @@ export function createUi8(o) {
     const prev = atlas.extraMarkers;
     atlas.extraMarkers = () => {
       const base = prev ? prev() || [] : [];
-      if (!marks.size) return base;
+      // play-test 9 (A, X7): town NPCs you cannot see carry their mark in the map data (`places[].npcs[].q`)
+      const far = [];
+      for (const pl of atlas.places || []) for (const n of pl.npcs || []) if (n && n.q && Number.isFinite(n.x) && !(n.ent != null && marks.has(n.ent))) far.push({ id: 'p:' + (n.id ?? n.name), name: n.name, x: n.x, z: n.z, q: n.q });
+      if (!marks.size && !far.length) return base;
       const bodies = [];
       for (const [id] of marks) { const a = actors.get(id); if (a && !a.dead) bodies.push({ id, name: a.name, x: a.pos.x, z: a.pos.z }); }
       // the journal's own pins (a tracked quest's "hand it in here") win over a mark on the same spot
       const pins = (atlas.quests || []).filter(q => q.loc && (!atlas.isTracked || atlas.isTracked(q.id))).map(q => ({ kind: q.ready ? 'questdone' : 'quest', area: !q.loc.exact, x: q.loc.x, z: q.loc.z }));
-      const mine = questMarkMarkers(bodies, marks, pins);
+      const near = questMarkMarkers(bodies, marks, pins);
+      const mine = near.concat(questMarkMarkers(far.filter(f => !near.some(m => Math.hypot(m.x - f.x, m.z - f.z) < 6)), Object.fromEntries(far.map(f => [f.id, f.q])), pins.concat(near)));
       if (!mine.length) return base;
       const marked = new Set(mine.map(x => 'see:' + x.id.slice(3)));       // the plain "someone in sight" dot gives way to the mark
       return base.filter(x => !marked.has(String(x.id))).concat(mine);
@@ -42,20 +50,22 @@ export function createUi8(o) {
   }
 
   function wire(n) {
-    cart.wire(n); meter.wire(n);
+    cart.wire(n); meter.wire(n); online.wire(n);
     n.on('questMarks', onMarks);
     n.on('joined', j => { marks.clear(); if (j?.you?.marks) onMarks({ marks: j.you.marks, full: true }); });
   }
   function tick() { meter.tick(); }
 
-  const api = { cart, meter, marks, wire, tick,
+  const api = { cart, meter, marks, online, wire, tick,
     /** /meter from chat (true = it was ours). */
-    command(cmd) { if (cmd === 'meter' || cmd === 'dps' || cmd === 'damage') { const on = meter.toggle(); hud.toast(on ? 'Damage meter on.' : 'Damage meter off.', 'info'); return true; } return false; },
-    panels: { meter: meter.panel, cart: cart.panel } };
+    command(cmd) { if (cmd === 'meter' || cmd === 'dps' || cmd === 'damage') { const on = meter.toggle(); hud.toast(on ? 'Damage meter on.' : 'Damage meter off.', 'info'); return true; }
+      if (cmd === 'online' || cmd === 'who') { online.open(); return true; } return false; },
+    panels: { meter: meter.panel, cart: cart.panel, online: online.panel } };
   const fakeTaps = new Map();
   api.wire = n0 => { const n = Object.create(n0); n.on = (ev, fn) => { (fakeTaps.get(ev) || fakeTaps.set(ev, []).get(ev)).push(fn); return n0.on(ev, fn); }; wire(n); };
   window.tvui8 = {
-    state: () => ({ cart: cart.state, meter: meter.state, marks: Object.fromEntries(marks), hidden: HIDDEN.list() }),
+    online: () => online.panel.open(),
+    state: () => ({ online: online.state, cart: cart.state, meter: meter.state, marks: Object.fromEntries(marks), hidden: HIDDEN.list() }),
     fake: (ev, msg) => { if (typeof window.tv?.fake === 'function') return window.tv.fake(ev, msg); const fns = fakeTaps.get(ev) || []; for (const fn of fns) fn(msg); return fns.length; },
     cart: m => cart.open(m), meter: (on = true) => (settings?.set ? settings.set('meter', on) : meter.setOn(on)), hits: rows => { let n = 0; for (const r of rows || []) if (meter.feed(r)) n++; meter.tick(); return n; },
     marks: m => onMarks(m), hide: ev => HIDDEN.hide(ev), show: ev => (ev ? HIDDEN.show(ev) : HIDDEN.showAll()),

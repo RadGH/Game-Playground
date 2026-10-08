@@ -143,6 +143,7 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `sheet` | p | — | 2 / 4 | §21.6: ask for the character sheet again. Answer `sheet`. |
 | `feedback` | both | `kind:str:16, text:str:2000, ctx?:obj` | 0.2 / 5 | §21.7: a suggestion or a bug report (`ctx` = the client's own context). Answer `feedbackR`. |
 | `admin` | both | `op:str:16, id?:int, state?:str:16, kind?:str:16, limit?:int, before?:int, note?:str:500` | 2 / 10 | §21.9: admin accounts only — `reports` (list) / `report` (set a state). Answers `adminReports`, `adminR`. |
+| `delete` | gw | `char:int, name:str:24` | 0.5 / 3 | §25.1: delete a character (the typed name confirms it). Answers `deleted`, then `charList`. |
 | `feedbackMine` | both | `limit?:int, before?:int` | 1 / 5 | §24.1: my own reports (`feedback {op:'mine'}` is the same call). Answer `feedbackMine`. |
 | `cart` | p | `op:str:8, id:id, to?:str:48, token?:bool` | 2 / 4 | §24.5: ox-cart travel — `list` / `go`. Answers `cartList`, `cartR`, `cartRide`. |
 | `meter` | p | `on:bool` | 1 / 4 | §24.6: the damage meter's hit feed on / off. Answers `meterR`, then `hits`. |
@@ -229,6 +230,8 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `eventDone` | `uid, id, name, result, why?, credited, xp, gold, items, onBody?, text, story?` | (game) §21.5: how an event ended, for everyone who was there. |
 | `eventAt` | `uid, id?, realm?` | (game) §21.5: the event whose area you stand in (`uid:null` = none). |
 | `feedbackR` | `ok, id?, first?, why?, msg` | (both) §21.7: answer to `feedback`. |
+| `deleted` | `ok, char, name?, freeAt?, returned?, why?, msg?` | (gw) §25.1: answer to `delete`. |
+| `adminOnline` | `ok, at, count, accounts, list` | (both) §25.2: who is in the world (admin accounts). |
 | `feedbackMine` | `ok, list, more, why?` | (both) §24.1: the account's own reports. |
 | `questMarks` | `marks, full?` | §24.3: per-player quest markers over NPCs. |
 | `hits` | `l` | §24.6: the damage meter's rows (only while `meter {on:true}`). |
@@ -1402,3 +1405,23 @@ Material: `{kind:'material', id, name, desc, tier, prof, icon, tint, rarity, pri
 `{kind:'good', tool:true, id, use:{type:'tool', prof, tier, ease, extra}}` (no slot; using it starts on the nearest node). Crafted gear: the rules' item +
 `crafted: true`, `maker`. Saved on the character: `professions = {known:[ids], xp:{id: n}, made:{recipe: n}, tools:{prof: 1}}` (SAVE_FIELDS; journal `set`),
 and spent nodes in the existing `opened` table. Quest step kinds: `gather {prof?, mat?}`, `craft {prof?, recipe?}`, `learn {prof}`.
+
+## 25. Owner feedback 9 (2026-10-08) — still protocol v8 (additive)
+
+### 25.1 Deleting a character; the limit (X6)
+- `charList {chars, limit}` and `authed {charLimit}`: how many characters an account may hold (20; `--char-limit` / `TV_CHAR_LIMIT`). `create` past it: `err {code:'full', msg}`.
+- `delete {char, name}` (gateway) -> `deleted {ok:true, char, name, freeAt, returned}` + a fresh `charList`, or `{ok:false, why, msg}` with `why` =
+  `name` (typed name wrong) | `online` (in the world) | `lease` (left it seconds ago) | `missing` | `slow` (one every 5 s) | `failed`.
+  Letters from players that still hold items / gold go back to their senders (`returned`); other post, friend rows and the guild row go;
+  the name is reserved until `freeAt` (`create` -> `err {code:'name', msg:'…kept for a day…'}`).
+
+### 25.2 Online list and the message of the day (X1)
+- `admin {op:'online'}` -> `adminOnline {ok, at, count, accounts, list:[{char, name, level, cls, clsName, province, zone, zoneName, town, room, roomKind, where, account, username, claimed, admin}]}`
+  by name; non-admins get `adminR {ok:false, why:'forbidden'}`. Over the province socket: this process's players (`partial: true`).
+- On every `play`: `chat {ch:'system', name:'The Vale', text, motd:true, online, day}` (+ one per `lines` entry of data/ops/motd.json).
+
+### 25.3 Small things (X4, X7)
+- Barber: `used {barber:true, free, priceMult}`; `economy.json barber.mult` 0 = free.
+- `eventTrack` / `zoneEvent.ev` / `realm.ev` views gain `gate {id, x, z}` while a raid wave that came in by a gate is up.
+- `mapData.places[]` town rows gain `marks: [{name, role, x, z, q}]` (quest marks for your character).
+- Feedback rows: `server.env`, `server.server`; admin list rows `env`.

@@ -1076,3 +1076,32 @@ New files: `js/client/ui/pt8.js` (hub: `createUi8`, `window.tvui8`), `pt8-core.j
   gather-then-refine each earn 71-98% of an hour of questing at levels 1, 5, 10 and 20 (20 projected: no tier-4 nodes in this province); skinning adds 5-18% to hunting.
 - Files: js/rules/professions.js, professions-games.js, professions-temper.js, data/rules/professions.json, js/sim/professions.js, tools/content-professions.mjs,
   tools/sim-professions.mjs, data/provinces/professions.json, professions-nodes.json, data/quests/professions.json, docs/professions.md, docs/protocol.md §25. tests/P/core-* (26).
+
+## Round 8 — W9 Professions, client side (stream P-client, 2026-10-08)
+- **In the world**: ore boulders are player-sized rocks with chunks of ore sticking out — the chunk's colour is the metal and its SHAPE is the tier (nuggets, slabs,
+  crystals, shards, star clusters); marked trees wear a painted band; herb patches, mushroom rings and fibre stands. A node you have not worked twinkles so it reads
+  from the road; one you have is bare (no ore and rubble at its foot, the band crossed out, stubble) until it comes back. All of it is instanced: a hundred nodes are
+  about twenty draw calls, two shared materials, warmed at boot. A corpse you may skin carries a "Skin" prompt and a small glint.
+- **Working**: seven new Chibi 2 loops (avatar-3d `js/chibi2-motion-prof.js`, opt-in) — pick swing, hatchet chop, stoop-and-pick, skinning on one knee, hammer on the
+  anvil, stitching, stirring — with the tool in the hand (pick, hatchet, sickle, knife, hammer, needle, spoon). A smith has a forge with an anvil and a tempering
+  bench beside him, a tailor or bowyer a workbench and loom, an apothecary a still.
+- **Eight mini-games in one small frame** (`js/client/ui/prof-minigame.js`), a few seconds each, drawn from the server's pattern and scored by the server's own function:
+  strike the vein (mining), chop in rhythm (logging), pick them ripe (foraging), follow the cut (skinning), strike while it glows (smithing), stitch the seam
+  (outfitting), stop at the mark (alchemy, cooking), stop it in the band (tempering). One thumb, a keyboard, a mouse or a controller (binding rows `profWork` /
+  `profLeft` / `profRight`); an input is stamped with the moment it was MADE, so a slow frame rate does not move your press. A result card (Botched / Rough / Sound /
+  Fine / Perfect) with what you got, the skill gained and when the node is back. Sound for the first time in Thousandvale (the playground's Sound Lab, Settings > Audio).
+- **Windows**: a craftsman's dialog gains "Learn: …" and "Use the forge"; one crafting window for every station (a tab per craft, each recipe with what it needs
+  against what you carry, the fee, the pattern you want and what better work gives); tempering (pick the work, pick an item from your bag, the server's quote with
+  the numbers); a Professions block on the Character menu and a Professions page in the journal (level, rank, tool, what the next band opens, who teaches what you
+  have not learned); a material's card says "Crafting material · Mining · tier 1 — sells for 2 gold each".
+- **Gallery**: 17 scenes in a new "Professions" group (every mini-game, the result card, every window), played from messages RECORDED from the real server
+  (`tests/P/client-fixtures.mjs` -> `js/client/gallery/fixtures/professions.json`).
+- Tests: `tests/P/client-games.test.js` (10) and `client-world.test.js` (9) — node; `client-minigames.spec.js` (all nine trades to a Perfect by a synthetic player with
+  real keys at 60 and 10 fps and with one finger on a phone upright and on its side) and `client-world.spec.js` (the real game against a real server: learn from Bram,
+  see the boulders, mine one end to end, the smith's forge and recipe list, the phone layout with real touches). Pictures: `tests/P/shots/`.
+
+## 2026-10-08 — stream A, owner feedback 9 (protocol 8, schema v7)
+- **X6**: `delete {char, name}` -> `deleted` (typed-name confirm, refused while online / leased, letters holding items or gold returned to sender, friends / guild / post tidied, name reserved a day — `char_tombstones`); character limit 20 as a server knob (`--char-limit`, `TV_CHAR_LIMIT`) sent as `charList.limit` / `authed.charLimit`.
+- **X1**: `admin {op:'online'}` -> `adminOnline` (name, level, class, zone / town, room; admin accounts only); message of the day on every sign-in with players online and accounts in the past 24 hours (`data/ops/motd.json`, `TV_MOTD`); presence carries `where / zoneName / town / roomKind`.
+- **X4**: `economy.json barber.mult` (0 = free).
+- **X7**: raid waves spawn 35-55 m outside a gate E named and walk in (`js/sim/events.js`, `raid.gates` in world metres); `data.guard.level` = the town's raid level (else the zone band floor) + `tier`; carts.json `roaming.runs[]` are routes of their own; `mapData.places[].marks`; reports carry `server.env` / `server.server`, shown by the tools and the admin page.

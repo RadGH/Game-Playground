@@ -9,6 +9,7 @@
 
 import { h, createPanel } from '../ui-panel.js';
 import { FACE_SLOTS, BODY_DIALS, PALETTES, cleanCustom, customFrom, lookWith, lookCustom, diffCustom, mergeCustom, barberCost, freshCustom } from './appearance-core.js';
+import { barberSaveText, barberFree } from './pt9-core.js';
 
 const PRETTY = id => String(id).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
@@ -45,13 +46,14 @@ export function createAppearanceEditor({ parent = null, races = [], raceNames = 
   function paintCost() {
     const b = panel.root.querySelector('[data-act="save"]'); if (!b || E.mode !== 'barber') return;
     const c = cost();
-    b.textContent = E.bill?.free ? 'Save (first visit free)' : c ? `Save (${c} gold)` : 'Save';
+    b.textContent = barberSaveText(c, E.bill);      // play-test 9 (X4): "Save (Free)" / "Save (N gold)" — the long label scrolled the window sideways
     const note = panel.root.querySelector('.ap-bill'); if (note) note.textContent = billText();
   }
   function billText() {
     if (!E.bill) return '';
     const P = E.bill.prices || {}, k = 1 + (E.bill.perLevel ?? 0.05) * ((E.bill.level || 1) - 1);
     const p = n => Math.round((P[n] ?? 0) * k);
+    if (barberFree(E.bill) && !E.bill.free) return 'The barber charges nothing: change whatever you like.';
     return `Prices: hair ${p('hair')} · colour ${p('hairColour')} · beard ${p('beard')} · eyes ${p('eyes')} · face ${p('face')} · skin ${p('skin')} · build ${p('body')} · everything ${p('everything')} gold${E.bill.free ? ' — your first change is free' : ''}.`;
   }
   function changed() { E.look = { ...E.look }; onChange?.(lookWith(E.look, E.custom)); paintCost(); }

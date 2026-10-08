@@ -80,7 +80,12 @@ by something new in `main.js`, add the same `create…()` call to `stage.js` (th
 | Phone, upright | 393 × 852, safe area top 59, bottom 34 | same switch |
 | Controller | 1366 × 768 | the desktop interface with the gamepad layer on (hints as button glyphs, the focus ring, the wheel) |
 
-52 scenes in all: 46 in each desktop frame, 49 in each phone frame, 50 in the controller frame (a few scenes exist
+**Play-test 8 added a `Professions` group of 17 scenes** (every mini-game frozen mid-play, the result card, the craftsman's doors, the crafting and tempering
+windows, the Professions page and block, a material's card). They live in `js/client/gallery/prof-scenes.js` beside `scenes.js` and use one verb, `prof`; the server
+messages they play are RECORDED from the real server by `node tests/P/client-fixtures.mjs` into `fixtures/professions.json` (re-run after a protocol or content
+change). `tests/P/client-shots.mjs` takes a picture of each in every frame; `tests/P/client-minigames.spec.js` plays each mini-game in the stage.
+
+52 scenes in all (before play-test 8): 46 in each desktop frame, 49 in each phone frame, 50 in the controller frame (a few scenes exist
 only where they mean something — the quick wheel, the focus ring, the belt).
 
 **What the spec measured (2026-10-07):** in the proposed phone layout, 0 of ~800 on-screen controls are smaller than

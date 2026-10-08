@@ -127,7 +127,7 @@ const ui5 = createUi5({ net: () => S.net, hud, bag, mail, worldUi, journal: ui.j
   me: worldMe, self: () => S.self, room: () => S.room, bar: () => S.bar,
   targetId: () => S.target, setTarget: id => setTarget(id), stats: () => ({ fps: 60 }), zoneName: () => $('zone-name')?.textContent || null,
   ensureNet: async () => { const n = startNet(); await n.ready; return n; }, onKitPreview: () => {}, onKitBack: () => title?.toAppearance(), onKitCreate: () => hud.toast('In the game this creates the character and walks into the world.', 'info') });
-const ui8 = createUi8({ net: () => S.net, hud, actors, worldUi, atlas: ui.atlas, settings: ui2.settings, selfId: () => S.selfId, bar: () => S.bar });
+const ui8 = createUi8({ net: () => S.net, hud, actors, worldUi, feedback: ui5.feedback, atlas: ui.atlas, settings: ui2.settings, selfId: () => S.selfId, bar: () => S.bar });
 const prof = createProf({ net: () => S.net, hud, bag, sheet: ui5.sheet, journal: ui.journal });   // W9 (P-client)
 const PANELS = { ...ui5.panels, ...ui8.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: f => bag.toggle(f) }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
 for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());

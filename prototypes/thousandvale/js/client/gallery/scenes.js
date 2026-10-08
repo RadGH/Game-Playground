@@ -151,6 +151,13 @@ export const SCENES = [
     notes: { all: 'T19: a suggestion or a bug report, with what gets attached written out.', pad: 'The text box opens the on-screen keyboard.' } },
   { id: 'reports', expect: '#panel-reports:not([hidden])', group: 'Windows', title: 'Admin — reports', modules: [U + 'feedback.js'], steps: [['admin'], ['call', 'tvui5.reports'], ['play', 'admin-reports'], ['click', '#panel-reports .rp-row']],
     notes: { all: 'T21: what an admin account sees — every report with its state, the client details and the recent log lines.' } },
+  // ---- play-test 9 (stream D-UI) ----
+  { id: 'online', expect: '#panel-online:not([hidden]) .on-table tbody tr', group: 'Windows', title: 'Admin — online players', modules: [U + 'online-window.js', U + 'pt9-core.js'],
+    steps: [['admin'], ['call', 'tvui8.online'], ['play', 'admin-online'], ['wait', 200]],
+    notes: { all: 'X1: what an admin account sees — everyone in the world now with level, class and where they are; Refresh asks again, a column heading sorts.', phone: 'A sheet; the class column gives way to the name, level and place.', pad: 'The ring reaches the column headings and Refresh.' } },
+  { id: 'title-delete', expect: '.char-delete input', group: 'Start', title: 'Title — delete a character', stage: 'title', step: 'front', modules: ['js/client/account.js', U + 'pt9-core.js'],
+    steps: [['click', '#char-chips .char-del'], ['wait', 150]],
+    notes: { all: 'X6: every character has a Delete button; the confirm asks you to type its name and says what goes with it. The list scrolls, and the line under it says how many of the account\'s characters are used.', phone: 'The confirm is a centred card; its buttons are thumb-sized.' } },
   // ---- play-test 8 (stream D-UI) ----
   { id: 'my-reports', expect: '#panel-feedback:not([hidden]) .my-row', group: 'Windows', title: 'Feedback — My reports', modules: [U + 'feedback.js', U + 'pt8-core.js'],
     steps: [['run', async G => { const n = G.S.net; try { n.claimed = true; } catch { /* read-only */ } if (n.joined?.you) n.joined.you.acct = { claimed: true, level: n.joined.you.level || 1 }; }], ['call', 'tvui5.feedback', 'mine'], ['wait', 300], ['play', 'my-reports'], ['wait', 200]],

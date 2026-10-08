@@ -31,6 +31,7 @@ import { createCallboard } from './callboard.js';
 import { sha256Hex } from './sha256.js';
 import { cleanLook } from './looks.js';
 import { createFeedback } from './feedback.js';
+import { MAX_CHARS_PER_ACCOUNT } from './store-memory.js';
 import { createSystemMail } from './sysmail.js';
 import { configureEconomy } from './economy-knobs.js';
 
@@ -44,6 +45,7 @@ export function createGateway(opts) {
     starterProvince = null, events = null, clockDayMs = 2 * 3600000, directorOpts = {},
     hasher = null, chatFilter = null, ipSalt = 'thousandvale', chatOpts = {}, guildOpts = {}, callboardOpts = {},
     mailSweepMs = 60000, chargeTimeoutMs = 5000, classNames = null,
+    charLimit = null, nameReserveMs = 86400000, motd = null, env = null, serverName = null,      // owner feedback 9: X6 the character limit + how long a deleted name is kept; X1 the message of the day; which server this is
     kitsFor = null, feedbackSink = null, feedbackOpts = {},      // play-test 5: C's kitsFor(classId) (T5); the JSONL sink + limits (T19)
   } = opts;
   if (opts.economy !== undefined) configureEconomy(opts.economy);          // V2: the guild fee and the gift's rarity come from data/rules/economy.json
@@ -55,6 +57,8 @@ export function createGateway(opts) {
   const procs = new Map();         // proc id -> { bus, provinces: Set, status }
   const provProc = new Map();      // province key -> proc id
   const presence = new Map();      // char id -> { char, name, cls, level, room, province, proc, online, ignore }
+  const CHAR_LIMIT = Math.max(1, Math.min(50, Math.round(+charLimit || MAX_CHARS_PER_ACCOUNT)));      // X6: characters an account may hold (sent to the client)
+  const NAME_RESERVE_MS = Math.max(0, +nameReserveMs || 0);
   const gwByChar = new Map();      // char id -> gateway session
   const names = new Map();         // char id -> { name, cls, level }
   const frames = new Map();        // char id -> latest frame row
@@ -179,7 +183,7 @@ export function createGateway(opts) {
           recent.push(t); guestLog.set(key, recent); guestsAll.push(t);
           return store.createGuest(m.name ? cleanName(m.name) : null).then(({ account, token }) => {
             s.account = account; s.state = 'authed'; counters.logins++; s.token = token; s.claimed = false;
-            s.sendJSON({ t: 'authed', account, token, claimed: false });
+            s.sendJSON({ t: 'authed', account, token, claimed: false, charLimit: CHAR_LIMIT });
           });
         }).catch(err => { log('guest failed', err); s.state = 'anon'; s.err('auth'); });
       }
@@ -191,13 +195,13 @@ export function createGateway(opts) {
           if ((a.banned || 0) > wallNow()) { s.sendJSON({ t: 'refuse', code: 'banned', msg: CODES.banned }); return s.closeSoon('banned'); }
           s.account = a.account; s.state = 'authed'; counters.logins++;
           s.token = m.token; s.claimed = !!a.claimed; s.username = a.username || null; s.admin = !!a.admin;
-          s.sendJSON({ t: 'authed', account: a.account, claimed: !!a.claimed, username: a.username || undefined, ...(a.admin ? { admin: true } : {}) });
+          s.sendJSON({ t: 'authed', account: a.account, claimed: !!a.claimed, username: a.username || undefined, charLimit: CHAR_LIMIT, ...(a.admin ? { admin: true } : {}) });
         }, err => { log('auth failed', err); s.state = 'anon'; s.err('auth'); });
       case 'chars':
         if (s.state !== 'authed') return bad(s, 'order');
         // play-test 2, Q25: the class's NAME ("Ranger", not "Adventurer"); the account settings (Q15) ride along
         return store.listChars(s.account).then(chars => {
-          s.sendJSON({ t: 'charList', chars: chars.map(c => ({ ...c, clsName: clsName(c.cls) })) });
+          s.sendJSON({ t: 'charList', chars: chars.map(c => ({ ...c, clsName: clsName(c.cls) })), limit: CHAR_LIMIT });
           return settingsOf(s.account).then(data => s.sendJSON({ t: 'settings', data }));
         });
       case 'create': {
@@ -211,14 +215,17 @@ export function createGateway(opts) {
         // C's kitsFor(cls). Unknown ids are refused; nothing picked = the first of each (applied on first entry).
         return Promise.resolve(kitChoice(m.cls, m.kit)).then(k => {
           if (k && k.err) { s.err('kit', k.err); return null; }
-          return store.createChar(s.account, { name, cls: m.cls, look, kit: k });
+          return store.createChar(s.account, { name, cls: m.cls, look, kit: k, limit: CHAR_LIMIT });
         }).then(r => {
           if (!r) return;
+          if (r.err === 'full') return s.err('full', 'You have ' + CHAR_LIMIT + ' characters, the most an account may hold. Delete one to make room.');
+          if (r.err === 'name' && r.reserved) return s.err('name', 'That name was just given up and is kept for a day. Pick another, or come back later.');
           if (r.err) return s.err(r.err);
           s.sendJSON({ t: 'created', char: r.char });
         });
       }
       case 'play': return play(s, m);
+      case 'delete': return deleteChar(s, m);
       case 'kits': {
         // The starter kits are public data and ALWAYS answered once the hello is done — signed in or not (owner feedback 7:
         // a new visitor's creation screen asked before its guest account existed, got silence, and fell back to "0 armour").
@@ -234,7 +241,7 @@ export function createGateway(opts) {
         if (m.op === 'mine') return handlers.feedbackMine(s, m);
         const pr = s.charId != null ? presence.get(s.charId) : null;
         const who = { account: s.account, char: pr ? pr.char : null, name: pr ? pr.name : null, cls: pr ? pr.cls : null, level: pr ? pr.level : null };
-        const server = { via: 'gateway', build, protocol: PROTOCOL_VERSION, claimed: !!s.claimed, username: s.username || null, ...(pr ? { room: pr.room, province: pr.province, zone: pr.zone || null, online: !!pr.online } : {}), at: new Date(wallNow()).toISOString() };
+        const server = { via: 'gateway', build, protocol: PROTOCOL_VERSION, ...(env ? { env } : {}), ...(serverName ? { server: serverName } : {}), claimed: !!s.claimed, username: s.username || null, ...(pr ? { room: pr.room, province: pr.province, zone: pr.zone || null, online: !!pr.online } : {}), at: new Date(wallNow()).toISOString() };
         return feedback.submit(who, m, server).then(r => s.sendJSON({ t: 'feedbackR', ...r }), err => { log('feedback failed', err && err.message); s.sendJSON({ t: 'feedbackR', ok: false, why: 'failed', msg: 'That did not go through. Please try again.' }); });
       }
       case 'feedbackMine': {      // round 8, W29: my own reports (every character of the account sees the same list)
@@ -243,6 +250,7 @@ export function createGateway(opts) {
       }
       case 'admin': {
         if (s.state !== 'authed') return bad(s, 'order');
+        if (m.op === 'online') return Promise.resolve(store.isAdmin ? store.isAdmin(s.account) : false).then(ok => s.sendJSON(ok ? onlineList() : { t: 'adminR', op: 'online', ok: false, why: 'forbidden', msg: 'Admins only.' }), () => s.sendJSON({ t: 'adminR', op: 'online', ok: false, why: 'failed', msg: 'That did not work.' }));
         // the flag is read from the store every time: tools/make-admin.mjs takes effect (and is taken away) without a re-login
         return Promise.resolve(store.isAdmin ? store.isAdmin(s.account) : false).then(ok => { s.admin = !!ok; return feedback.adminOp({ admin: !!ok, by: s.username || 'account ' + s.account }, m); })
           .then(r => s.sendJSON(r), err => { log('admin op failed', err && err.message); s.sendJSON({ t: 'adminR', op: m.op, ok: false, why: 'failed', msg: 'That did not work.' }); });
@@ -263,6 +271,70 @@ export function createGateway(opts) {
       case 'leave': return s.closeSoon('leave');
       default: return bad(s, 'socket');
     }
+  }
+
+  /**
+   * X6 (owner feedback 9, dev report #14: "a way to delete a character"). `delete {char, name}`: yours, the typed name
+   * matches, and it is not in the world (here or on another device) nor just out of it (the store's lease). The store does
+   * the rest in one step (js/sim/store-memory-m3.js deleteChar / pg-social.js): letters that hold things go back to their
+   * senders, post / friends / guild rows go, the name is kept for `nameReserveMs` (a day). Answer `deleted`, then `charList`.
+   */
+  function deleteChar(s, m) {
+    if (s.state !== 'authed') return bad(s, 'order');
+    const R = x => s.sendJSON({ t: 'deleted', char: m.char, ...x });
+    const t = now();
+    if (s.deletedAt && t - s.deletedAt < 5000) return R({ ok: false, why: 'slow', msg: 'One at a time: wait a few seconds.' });
+    if (!store.deleteChar) return R({ ok: false, why: 'state', msg: 'Characters cannot be deleted on this server.' });
+    return store.listChars(s.account).then(chars => {
+      const c = chars.find(x => x.id === m.char);
+      if (!c) return R({ ok: false, why: 'missing', msg: 'No such character.' });
+      if (String(m.name || '').trim().toLowerCase() !== String(c.name).toLowerCase()) return R({ ok: false, why: 'name', name: c.name, msg: 'Type the name exactly — ' + c.name + ' — to delete it.' });
+      const pr = presence.get(c.id);
+      if ((pr && pr.online) || (gwByChar.has(c.id) && presence.has(c.id))) return R({ ok: false, why: 'online', name: c.name, msg: c.name + ' is in the world right now. Log it out first.' });
+      s.deletedAt = t;
+      return store.deleteChar(s.account, c.id, { nowMs: wallNow(), reserveMs: NAME_RESERVE_MS }).then(r => {
+        if (!r || r.err) return R({ ok: false, why: (r && r.err) || 'failed', name: c.name, msg: r && r.err === 'lease' ? c.name + ' left the world a moment ago. Try again in a few seconds.' : 'No such character.' });
+        if (gwByChar.get(c.id) === s) { gwByChar.delete(c.id); if (s.charId === c.id) s.charId = null; }
+        presence.delete(c.id); names.delete(c.id);
+        const p = parties.of(c.id);
+        if (p) { const out = parties.leave(c.id); if (out && out.ok) partyChanged([p]); }
+        if (friends.forget) friends.forget(c.id);
+        if (guilds.forget) guilds.forget(c.id, r.guild);
+        counters.charsDeleted = (counters.charsDeleted || 0) + 1;
+        log('character deleted', { account: s.account, char: c.id, name: c.name, level: c.level });
+        R({ ok: true, name: r.name, freeAt: r.freeAt, returned: r.returned || 0 });
+        return store.listChars(s.account).then(list => s.sendJSON({ t: 'charList', chars: list.map(x => ({ ...x, clsName: clsName(x.cls) })), limit: CHAR_LIMIT }));
+      });
+    }).catch(err => { log('delete failed', err && err.message); R({ ok: false, why: 'failed', msg: 'That did not work. Try again.' }); });
+  }
+  /** X1 (owner feedback 9, stable report #51): everyone in the world, for an admin's "Online players" window. */
+  function onlineList() {
+    const list = [...presence.values()].filter(pr => pr.online).map(pr => {
+      const g = gwByChar.get(pr.char);
+      return { char: pr.char, name: pr.name, level: pr.level || 1, cls: pr.cls, clsName: clsName(pr.cls), province: pr.province || null, zone: pr.zone || null, zoneName: pr.zoneName || null, town: pr.town || null,
+        room: pr.room || null, roomKind: pr.roomKind || null, where: pr.where || pr.town || pr.zoneName || pr.zone || pr.province || '?', account: pr.account ?? (g ? g.account : null), username: g ? g.username || null : null, claimed: g ? !!g.claimed : undefined, admin: g ? !!g.admin : undefined };
+    }).sort((a, b) => String(a.name).localeCompare(String(b.name)));
+    return { t: 'adminOnline', ok: true, at: wallNow(), count: list.length, accounts: new Set(list.map(x => x.account)).size, list };
+  }
+  /**
+   * X1: the message of the day — one system chat line as a character enters the world: welcome, how many are online now,
+   * how many accounts signed in over the past 24 hours (`accounts.last_login`, stamped here). The text is an ops knob
+   * (`motd` option: { text, lines, off } from data/ops/motd.json, or a plain string / TV_MOTD).
+   */
+  const MOTD = (() => { const d = typeof motd === 'string' ? { text: motd } : (motd || {}); return { text: d.text || 'Welcome to Thousandvale, {name}. {players} online now; {accounts} signed in over the past 24 hours.', lines: Array.isArray(d.lines) ? d.lines.filter(x => typeof x === 'string' && x.trim()).slice(0, 4) : [], off: !!d.off }; })();
+  const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+  function sendMotd(s, c) {
+    const stamp = store.noteLogin ? Promise.resolve(store.noteLogin(s.account, wallNow())).catch(() => {}) : Promise.resolve();
+    if (MOTD.off) return stamp;
+    return stamp.then(() => (store.loginsSince ? store.loginsSince(wallNow() - 86400000) : 0)).then(day => {
+      if (gwByChar.get(c.id) !== s) return;
+      const online = Math.max(1, [...presence.values()].filter(pr => pr.online || pr.char === c.id).length + (presence.has(c.id) ? 0 : 1));
+      const d = Math.max(1, day | 0);
+      const tok = { name: c.name, online, day: d, players: plural(online, 'player is', 'players are'), accounts: plural(d, 'has', 'have') };
+      const fill = str => String(str).replace(/\{(\w+)\}/g, (x, k) => (tok[k] != null ? String(tok[k]) : x));
+      s.sendJSON({ t: 'chat', ch: 'system', from: 0, name: 'The Vale', text: fill(MOTD.text), motd: true, online, day: d });
+      for (const l of MOTD.lines) s.sendJSON({ t: 'chat', ch: 'system', from: 0, name: 'The Vale', text: fill(l), motd: true });
+    }, err => log('motd failed', err && err.message));
   }
 
   function play(s, m) {
@@ -296,6 +368,7 @@ export function createGateway(opts) {
       if (p) s.sendJSON({ t: 'partyState', party: partyView(p) });
       friends.load(c.id); guilds.load(c.id);
       settingsOf(s.account).then(d => pushSocial(c.id, { tradeFriendsOnly: !!d.tradeFriendsOnly }));
+      sendMotd(s, c);                                  // X1: the message of the day (and the account's last-login stamp)
       if (store.mailUnread) store.mailUnread(c.id).then(n => { if (n && gwByChar.get(c.id) === s) s.sendJSON({ t: 'mailNew', unread: n }); }, () => {});
     });
   }
@@ -331,7 +404,7 @@ export function createGateway(opts) {
   const gwNonce = randomHex(4);
   const sysmail = createSystemMail({ store, newUid: () => `gw-${gwNonce}-${(++gwUid).toString(36)}`, wallNow, notify: c => mailNote(c), log, counters });
   const handlers = { feedbackMine: (s, m) => feedback.listMine({ account: s.account, claimed: !!s.claimed }, m).then(r => s.sendJSON(r), err => { log('feedback list failed', err && err.message); s.sendJSON({ t: 'feedbackMine', ok: false, why: 'failed', list: [], more: false }); }) };
-  const feedback = createFeedback({ store, wallNow, sink: feedbackSink, sysmail, log, counters, filter: chatFilter, opts: feedbackOpts });
+  const feedback = createFeedback({ env, store, wallNow, sink: feedbackSink, sysmail, log, counters, filter: chatFilter, opts: feedbackOpts });
 
   // ---- play-test 2: class names (Q25), account settings (Q15), a title-screen look (Q21) ----
   function clsName(id) {

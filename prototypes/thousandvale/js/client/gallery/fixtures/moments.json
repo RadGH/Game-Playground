@@ -973,6 +973,73 @@
      ]
     ]
    }
+  ],
+  "admin-online": [
+   {
+    "t": "adminOnline",
+    "ok": true,
+    "at": "@now",
+    "count": 5,
+    "accounts": 4,
+    "list": [
+     {
+      "char": 15,
+      "name": "Xanaver",
+      "level": 4,
+      "cls": "pyromancer",
+      "clsName": "Pyromancer",
+      "where": "Torborhold",
+      "roomKind": "town",
+      "username": "radgh",
+      "claimed": true,
+      "admin": true
+     },
+     {
+      "char": 22,
+      "name": "Stormy",
+      "level": 6,
+      "cls": "stormcaller",
+      "clsName": "Stormcaller",
+      "where": "The Torbor Fields",
+      "roomKind": "wilds",
+      "username": "stormy",
+      "claimed": true
+     },
+     {
+      "char": 31,
+      "name": "Stubbs",
+      "level": 1,
+      "cls": "warrior",
+      "clsName": "Warrior",
+      "where": "Torborhold",
+      "roomKind": "town",
+      "claimed": false
+     },
+     {
+      "char": 40,
+      "name": "Brem",
+      "level": 9,
+      "cls": "knight",
+      "clsName": "Knight",
+      "where": "in a dungeon",
+      "roomKind": "instance",
+      "username": "brem",
+      "claimed": true
+     },
+     {
+      "char": 41,
+      "name": "Chronorad",
+      "level": 1,
+      "cls": "chronomancer",
+      "clsName": "Chronomancer",
+      "where": "Orrinsford",
+      "roomKind": "town",
+      "username": "radgh",
+      "claimed": true,
+      "admin": true
+     }
+    ]
+   }
   ]
  },
  "items": {

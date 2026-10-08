@@ -132,10 +132,14 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
   // play-test 4 S9: stream E's wanderers (pedlars with a shop, errand runners with a delivery, storytellers) walk the same
   // routes — their kinds join travellers.json's and every route's allowed list; their `rules` override travellers.json's
   const wd = await opt('data/provinces/wanderers.json');
+  const cartsData = await opt('data/provinces/carts.json');
   const wk = (wd && wd.kinds) || {};
   if (shops && wd && wd.shops) shops.kinds = { ...(shops.kinds || {}), ...wd.shops };      // the pedlar's pack sells like any shop
   const travel = tv && rt ? { kinds: { ...(tv.kinds || {}), ...wk }, rules: { ...(tv.rules || {}), ...((wd && wd.rules) || {}) }, folkKinds: tv.folk || {},
-    routes: (rt.routes || []).map(r => (Array.isArray(r.kinds) && Object.keys(wk).length ? { ...r, kinds: [...r.kinds, ...Object.keys(wk).filter(k => !r.kinds.includes(k))] } : r)),
+    routes: [...(rt.routes || []).map(r => (Array.isArray(r.kinds) && Object.keys(wk).length ? { ...r, kinds: [...r.kinds, ...Object.keys(wk).filter(k => !r.kinds.includes(k))] } : r)),
+      // X7 (owner feedback 9, E's note): a guaranteed cart on the road — each carts.json `roaming.runs[]` is a route of its own over the same road
+      // that carries ONLY its `only` kinds (no wanderer kinds appended), so there is always one to flag down
+      ...(((cartsData && cartsData.roaming && cartsData.roaming.runs) || []).map(run => { const base = (rt.routes || []).find(r => r.id === run.route); return base && Array.isArray(run.only) && run.only.length ? { ...base, id: run.id, kinds: run.only.slice(), run: true, ...(run.carts ? { groups: run.carts } : {}) } : null; }).filter(Boolean))],
     chatter: (await opt('data/names/chatter.json')) || { pools: {}, rules: {} }, names: (await opt('data/names/torbor.json')) || {} } : null;
   const marks = ((await opt(`data/quests/marks/${provinceId}.json`)) || {}).quests || null;   // P17: E's map mark per quest
   // play-test 4: data files that ride straight through buildLayout's `extra` into the province's L
@@ -148,7 +152,7 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
   const professions = profNumbers ? { numbers: profNumbers, content: await opt('data/provinces/professions.json'), nodes: await opt('data/provinces/professions-nodes.json') } : null;
   if (jobs && Array.isArray(jobs.frames) && professions && professions.content && Array.isArray(professions.content.jobs)) for (const f of professions.content.jobs) if (!jobs.frames.some(x => x.id === f.id)) jobs.frames.push(f);
   const extra = { professions, economy: (await opt('data/provinces/economy.json')) || (await opt('data/rules/economy.json')), angling, refunds: await opt('data/provinces/refunds.json'), wanderers: wd, treasure: await opt('data/provinces/road-events.json'), affixes: await opt('data/encounters/affixes.json'), spawnHints: await opt(`data/quests/marks/${provinceId}-hunts.json`),
-    titles: await opt('data/names/titles.json'), givers: await opt('data/quests/marks/givers.json'), carts: await opt('data/provinces/carts.json'), guards: await opt('data/provinces/guards.json'), names: await opt('data/names/torbor.json') };
+    titles: await opt('data/names/titles.json'), givers: await opt('data/quests/marks/givers.json'), carts: cartsData, guards: await opt('data/provinces/guards.json'), names: await opt('data/names/torbor.json') };
   return { extra, travel, marks, key: provinceId, name: sheet ? sheet.name : provinceId, terrain, zones, encounterInfo, events, zoneEvents, directorRules: (evData && evData.director) || null, starter, starterProvince, rares, jobs, schedules, horizon, shops, mounts, offices };
 }
 
@@ -170,6 +174,13 @@ export function provinceEvents(evData, { provinceId, map, terrain, sheet = null,
   const nameOf = eid => ((sheet && sheet.zones && sheet.zones[eid]) || {}).name || null;
   const events = [], zoneEvents = [];
   const min = m => (m == null ? undefined : m * 60000);
+  /** X7 (owner feedback 9): the gates a raid comes in by (E's `raid.gates`, zone metres of `raid.zone`) in world metres. */
+  const raidOf = e => {
+    const g = e.raid && Array.isArray(e.raid.gates) ? e.raid.gates : null, zm = /^z(\d+)_(\d+)$/.exec((e.raid && e.raid.zone) || '');
+    if (!g || !g.length || !zm) return {};
+    const ox = +zm[1] * 2048, oz = +zm[2] * 2048;
+    return { raid: { gates: g.filter(q => Number.isFinite(q.x) && Number.isFinite(q.z)).map(q => ({ id: q.id || null, x: q.x + ox, z: q.z + oz, out: Array.isArray(q.out) ? [+q.out[0] || 0, +q.out[1] || 0] : [0, 0], main: !!q.main })), ...(Array.isArray(e.raid.spawnOutM) ? { spawnOutM: e.raid.spawnOutM } : {}) } };
+  };
   const common = (e, s) => ({ id: e.id, name: e.name || (encounterInfo[e.encounter || e.boss] || {}).name || e.id, kind: e.kind || 'boss', province: provinceId,
     x: s.x, z: s.z, r: Math.max(s.r || s.radius || 40, 30), level: e.level || 5, waves: e.waves || [], boss: e.boss || e.encounter || null, monster: e.monster || null, bossName: e.bossName || null,
     durationMs: min(e.durationMinutes), announce: [].concat(e.announce || []), reward: e.reward || null, enrol: e.autoEnrolMetres || 60,
@@ -188,7 +199,7 @@ export function provinceEvents(evData, { provinceId, map, terrain, sheet = null,
       if (!s) continue;
       // E's `roam`: now and then the boss marches on a neighbouring zone's event arena (the director picks; M3)
       const roamTo = e.roam && Array.isArray(e.roam.toZones) ? e.roam.toZones.map(z => { const a = arenaOf(z); return a && map[z] ? { zone: map[z], zoneName: nameOf(z), x: a.x, z: a.z, r: Math.max(a.r || a.radius || 40, 30) } : null; }).filter(Boolean) : [];
-      events.push({ ...common(e, s), zone: map[e.zone], zoneName: nameOf(e.zone), band: bandOf(e.zone), schedule: e.schedule, minOnline: e.minOnline, minInBand: e.minInBand, weight: e.weight, ...(e.startOn ? { startOn: e.startOn } : {}), ...(roamTo.length ? { roamTo, roam: { chance: e.roam.chance ?? 0.25 } } : {}) });
+      events.push({ ...common(e, s), ...raidOf(e), zone: map[e.zone], zoneName: nameOf(e.zone), band: bandOf(e.zone), schedule: e.schedule, minOnline: e.minOnline, minInBand: e.minInBand, weight: e.weight, ...(e.startOn ? { startOn: e.startOn } : {}), ...(roamTo.length ? { roamTo, roam: { chance: e.roam.chance ?? 0.25 } } : {}) });
     }
     for (const e of evData.zone || []) {
       if (!map[e.zone]) continue;

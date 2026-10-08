@@ -22,7 +22,7 @@ import { packChar, unpackChar } from './save-fields.js';
 import { applyJournal } from './journal.js';
 import { memoryM3 } from './store-memory-m3.js';
 
-export const MAX_CHARS_PER_ACCOUNT = 10;
+export const MAX_CHARS_PER_ACCOUNT = 20;      // owner feedback 9 (X6): the default; the server's own knob (`charLimit`) is passed to createChar
 
 export function createMemoryStore({ now = () => Date.now(), data = null, onChange = null } = {}) {
   const d = data || { nextAccount: 1, nextChar: 1, accounts: {}, chars: {} };
@@ -57,10 +57,12 @@ export function createMemoryStore({ now = () => Date.now(), data = null, onChang
     async listChars(account) {
       return Object.values(d.chars).filter(r => r.account === account).map(r => ({ ...brief(r), look: (r.blob && r.blob.look) || null }));
     },
-    async createChar(account, { name, cls, look = null, kit = null }) {
+    async createChar(account, { name, cls, look = null, kit = null, limit = MAX_CHARS_PER_ACCOUNT }) {
       const lower = name.toLowerCase();
       if (Object.values(d.chars).some(r => r.cols.name.toLowerCase() === lower)) return { err: 'name' };
-      if (Object.values(d.chars).filter(r => r.account === account).length >= MAX_CHARS_PER_ACCOUNT) return { err: 'full' };
+      const tomb = (d.tombstones || {})[lower];             // X6: a deleted character's name stays reserved for a day
+      if (tomb && tomb.freeAt > now()) return { err: 'name', reserved: tomb.freeAt };
+      if (Object.values(d.chars).filter(r => r.account === account).length >= limit) return { err: 'full' };
       const id = d.nextChar++;
       const { cols, blob } = packChar({ name, cls, look, kit, level: 1, xp: 0, gold: 0 });
       d.chars[id] = { id, account, cols, blob, version: 0, lease_owner: null, lease_fence: 0, lease_until: 0 };

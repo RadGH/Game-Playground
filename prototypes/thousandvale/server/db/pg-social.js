@@ -286,6 +286,34 @@ export function pgM3({ pool, q, realm, SAVE_SQL, saveParams }) {
         [JSON.stringify(rows.map(r => ({ at: r.at, ch: r.ch, from_char: r.from ?? null, from_name: r.name ?? null, to_key: r.to == null ? null : String(r.to), text: r.text })))]);
     },
     async pruneChat(beforeMs) { const r = await q('DELETE FROM chat_log WHERE at < $1', [ms(beforeMs)]); return r.rowCount; },
+    // ---- owner feedback 9: delete a character (X6, schema v7 tombstones), who signed in lately (X1) ----
+    async deleteChar(account, id, { nowMs = Date.now(), reserveMs = 86400000 } = {}) {
+      return tx(async c => {
+        const r = await c.query('SELECT id, name, level, cls, lease_owner, (lease_until IS NOT NULL AND lease_until > now()) AS held FROM characters WHERE id = $1 AND account_id = $2 AND realm = $3 FOR UPDATE', [id, account, realm]);
+        if (!r.rows.length) return { err: 'missing' };
+        const row = r.rows[0];
+        if (row.lease_owner && row.held) return { err: 'lease' };
+        // letters from other players that still hold something go back to their senders
+        const held = await c.query(`SELECT m.* FROM mail m JOIN characters s ON s.id = m.from_char
+          WHERE m.to_char = $1 AND m.taken_at IS NULL AND m.kind = 'player' AND m.from_char <> $1
+            AND (m.gold > 0 OR EXISTS (SELECT 1 FROM items i WHERE i.mail_id = m.id)) FOR UPDATE OF m`, [id]);
+        let returned = 0;
+        for (const m of held.rows) { await returnOne(c, m, nowMs); returned++; }
+        await c.query('DELETE FROM items WHERE mail_id IN (SELECT id FROM mail WHERE to_char = $1)', [id]);
+        const g = await c.query('SELECT guild_id FROM guild_members WHERE char_id = $1', [id]);
+        const guild = g.rows.length ? +g.rows[0].guild_id : null;
+        await c.query('DELETE FROM characters WHERE id = $1', [id]);       // mail to it, friends, guild row, journal, chat log: ON DELETE CASCADE; feedback / reports / mail it sent: SET NULL
+        if (guild != null) await c.query('DELETE FROM guilds WHERE id = $1 AND NOT EXISTS (SELECT 1 FROM guild_members WHERE guild_id = $1)', [guild]);
+        await c.query('DELETE FROM char_tombstones WHERE realm = $1 AND free_at <= $2', [realm, ms(nowMs)]);
+        const freeAt = nowMs + reserveMs;
+        await c.query(`INSERT INTO char_tombstones (realm, name_lower, name, account_id, char_id, level, cls, deleted_at, free_at) VALUES ($1, lower($2), $2, $3, $4, $5, $6, $7, $8)
+          ON CONFLICT (realm, name_lower) DO UPDATE SET name = EXCLUDED.name, account_id = EXCLUDED.account_id, char_id = EXCLUDED.char_id, level = EXCLUDED.level, cls = EXCLUDED.cls, deleted_at = EXCLUDED.deleted_at, free_at = EXCLUDED.free_at`,
+          [realm, row.name, account, id, row.level, row.cls, ms(nowMs), ms(freeAt)]);
+        return { ok: true, name: row.name, level: row.level, cls: row.cls, freeAt, returned, guild };
+      });
+    },
+    async noteLogin(account, nowMs = Date.now()) { await q('UPDATE accounts SET last_login = $2 WHERE id = $1', [account, ms(nowMs)]); },
+    async loginsSince(sinceMs) { const r = await q('SELECT count(*)::int AS n FROM accounts WHERE last_login >= $1', [ms(sinceMs)]); return r.rows[0].n; },
     // ---- feedback (play-test 5, T19/T21) + admin accounts (schema v5) ----
     async addFeedback(row) {
       return tx(async c => {

@@ -50,7 +50,7 @@ import { MAX_FRAME, PROTOCOL_VERSION } from '../js/net/protocol.js';
 import { createStaticHandler } from './static.js';
 import { statusPage } from './status-page.js';
 import { turnstileFromEnv } from './turnstile.js';
-import { GAME, PLAYGROUND, log, loadRules, makeStore, loadClasses, loadClassNames, loadLayouts, defaultProvinces, feedbackSink, loadEconomy } from './load.mjs';
+import { GAME, PLAYGROUND, log, loadRules, makeStore, loadClasses, loadClassNames, loadLayouts, defaultProvinces, feedbackSink, loadEconomy, loadMotd } from './load.mjs';
 import { wireSocket, startPinger } from './ws-conn.mjs';
 import { hashPassword, verifyPassword } from './passwords.js';
 import { createChatFilter } from '../js/sim/chatfilter.js';
@@ -84,6 +84,7 @@ function args(argv) {
     else if (k === '--save-every') o.saveEvery = +take();
     else if (k === '--process') o.process = take();
     else if (k === '--env') o.env = take();
+    else if (k === '--char-limit') o.charLimit = +take();              // owner feedback 9 X6: characters an account may hold (default 20; env TV_CHAR_LIMIT)
     else if (k === '--public') o.publicDir = resolve(take());
     else if (k === '--feedback-file') { const f = take(); o.feedbackFile = f === 'off' ? false : resolve(f); }   // T19: where reports are also appended (default <state>/feedback-<env>.jsonl)
     else if (k === '--journal-ms') o.journalMs = +take();   // lease owner prefix: give a second server on the same DB its own name
@@ -134,6 +135,7 @@ export async function startServer(o) {
     guestsPerIpPerHour: o.guestsPerIpHour ?? 20,
     guestsPerHour: o.guestsPerHour ?? (env === 'stable' ? 200 : 0),
     // play-test 5: C's starter kits for `create.kit` (T5); every feedback report also goes to <state>/feedback-<env>.jsonl (T19)
+    env, serverName: process.env.TV_SERVER_NAME || process.env.TV_PUBLIC_HOST || null, charLimit: o.charLimit || +process.env.TV_CHAR_LIMIT || null, motd: loadMotd(),      // owner feedback 9: which server a report came from; X6; X1
     economy: loadEconomy(), kitsFor: kitsFor || null, lightItems: lightItems || null, feedbackSink: o.feedbackFile === false ? null : feedbackSink(env, o.feedbackFile || undefined),
   };
   const unlimitedSockets = new Set(o.unlimitedIp || []);
@@ -156,7 +158,7 @@ export async function startServer(o) {
     const c = { n, provs, proc: null, restarts: 0, bus: null, handlers: [], status: null };
     c.bus = { send: m => { if (c.proc && c.proc.connected) c.proc.send({ bus: m }); }, on: fn => c.handlers.push(fn) };
     const start = () => {
-      const argv = [JSON.stringify({ n, provinces: provs, db: o.db, build: o.build, rules: o.rules, linger: o.linger, saveEvery: o.saveEvery, journalMs: o.journalMs, process: `${o.process}.${n}`, env, feedbackFile: o.feedbackFile ?? null })];
+      const argv = [JSON.stringify({ n, provinces: provs, db: o.db, build: o.build, rules: o.rules, linger: o.linger, saveEvery: o.saveEvery, journalMs: o.journalMs, process: `${o.process}.${n}`, env, serverName: process.env.TV_SERVER_NAME || process.env.TV_PUBLIC_HOST || null, feedbackFile: o.feedbackFile ?? null })];
       c.proc = fork(join(GAME, 'server/province-proc.mjs'), argv, { stdio: ['ignore', 'inherit', 'inherit', 'ipc'] });
       c.proc.on('message', m => { if (m && m.bus) for (const h of c.handlers) h(m.bus); else if (m && m.ready) c.ready = true; });
       c.proc.on('exit', (code, sig) => {

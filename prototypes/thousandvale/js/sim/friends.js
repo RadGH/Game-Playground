@@ -114,6 +114,8 @@ export function createFriends({ store, presence, gwByChar, log = () => {}, onLis
     load: c => load(c).catch(err => log('friends load failed', err && err.message)),
     op: (s, m) => Promise.resolve(op(s, m)).catch(err => { log('friend op failed', err && err.message); s.err('state', 'That did not work.'); }),
     changed, drop,
+    /** X6: a deleted character leaves every loaded list (its own, and anyone's who had it as a friend) */
+    forget(c) { lists.delete(c); unseen.delete(c); watchers.delete(c); for (const l of lists.values()) l.delete(c); for (const w of watchers.values()) w.delete(c); },
     has: (a, b) => !!(lists.get(a) && lists.get(a).has(b)),
     ids: c => (lists.get(c) ? [...lists.get(c).keys()] : []),
     size: () => lists.size,

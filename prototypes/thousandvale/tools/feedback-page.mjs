@@ -17,7 +17,7 @@ const card = r => {
   const s = r.server || {}, c = r.client || {}, t = s.target, p = plan.get(r.id);
   const log = (c.log || c.logs || []).map(l => esc(typeof l === 'string' ? l : `[${l.k || l.kind || ''}] ${l.t || l.text || ''}`)).join('\n');
   return `<article class="fb ${esc(r.kind)} st-${esc(r.state)}" data-kind="${esc(r.kind)}" data-state="${esc(r.state)}">
-<header><b>#${r.id}</b> <span class="kind">${r.kind === 'bug' ? 'Bug' : 'Suggestion'}</span> <span class="state">${esc(r.state)}</span>
+<header><b>${r.env || s.env ? esc(String(r.env || s.env)[0].toUpperCase()) : ''}#${r.id}</b> ${r.env || s.env ? `<span class="env env-${esc(r.env || s.env)}">${esc(r.env || s.env)} server</span> ` : ''}<span class="kind">${r.kind === 'bug' ? 'Bug' : 'Suggestion'}</span> <span class="state">${esc(r.state)}</span>
 <span class="who">${esc(r.name)} · level ${esc(r.level)} ${esc(r.cls)}</span> <time>${new Date(r.at).toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT</time></header>
 <p class="text">${esc(r.text)}</p>
 ${p ? `<p class="plan"><b>${p.item === '—' ? 'Declined' : 'Work item ' + esc(p.item)}:</b> ${esc(p.what)}</p>` : ''}

@@ -1,0 +1,6 @@
+{
+  "_doc": "The message of the day (stream A, owner feedback 9 X1). One system chat line as a character enters the world. Tokens: {name} the character; {online} characters in the world now (a number); {day} accounts that signed in over the past 24 hours (a number); {players} = '3 players are' / '1 player is'; {accounts} = '12 have' / '1 has'. `lines` = extra lines after it (ops news: a restart tonight, what is new), at most four. `off: true` sends nothing. Read at server start (restart to change); env TV_MOTD overrides `text`.",
+  "text": "Welcome to Thousandvale, {name}. {players} online now; {accounts} signed in over the past 24 hours.",
+  "lines": [],
+  "off": false
+}

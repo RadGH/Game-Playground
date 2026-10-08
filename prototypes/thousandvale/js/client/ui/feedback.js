@@ -54,6 +54,7 @@ export function createFeedback({ net, hud, context }) {
     if (!n._raw) return false; n._raw('gw', JSON.stringify(o)); return true;
   };
   const ctxNow = () => feedbackCtx(context?.() || {}, LOG.list());
+  let adminTools = [];          // play-test 9: other admin windows (Online players) put their button beside Reports
 
   /** Signed in (a claimed account)? Guests have nothing to follow: their reports are not tied to anyone. */
   const signedIn = () => { const n = net(); return !!(n?.joined?.you?.acct?.claimed || n?.claimed || n?.account?.claimed || n?.joined?.you?.claimed); };
@@ -115,7 +116,8 @@ export function createFeedback({ net, hud, context }) {
     panel.fill(tabs(),
       h('div.chips.fb-kind', { role: 'radiogroup', 'aria-label': 'Kind of feedback' }, chip('suggestion', 'Suggestion'), chip('bug', 'Bug report')),
       ta, count, details, note,
-      h('div.row.end', {}, isAdmin() ? h('button.ghost.small', { type: 'button', dataset: { act: 'reports' }, onclick: () => reports.panel.open() }, 'Reports (admin)') : null, h('span.grow'), h('button.ghost.small', { type: 'button', onclick: () => panel.close() }, 'Cancel'), go));
+      h('div.row.end', {}, isAdmin() ? h('button.ghost.small', { type: 'button', dataset: { act: 'reports' }, onclick: () => reports.panel.open() }, 'Reports (admin)') : null,
+        ...(isAdmin() ? adminTools.map(t => h('button.ghost.small', { type: 'button', dataset: { act: t.act }, onclick: () => t.run() }, t.label)) : []), h('span.grow'), h('button.ghost.small', { type: 'button', onclick: () => panel.close() }, 'Cancel'), go));
     function submit() {
       const c = feedbackCheck(S.kind, S.text);
       if (!c.ok) { note.textContent = c.why; ta.focus(); return; }
@@ -168,7 +170,7 @@ export function createFeedback({ net, hud, context }) {
         } }, label);
         P.fill(filters,
           h('div.rp-detail', {},
-            h('div.rp-meta', {}, h('span.rp-kind.' + r.kind, {}, KIND[r.kind] || r.kind), h('span.rp-state.' + (r.state || 'new'), {}, STATE[r.state || 'new'] || r.state), h('span', {}, `#${r.id}`), h('span', {}, when(r.at)), h('span', {}, `${r.name || 'Someone'}${r.level ? `, level ${r.level}` : ''}`)),
+            h('div.rp-meta', {}, h('span.rp-kind.' + r.kind, {}, KIND[r.kind] || r.kind), h('span.rp-state.' + (r.state || 'new'), {}, STATE[r.state || 'new'] || r.state), h('span', {}, `#${r.id}`), h('span', {}, when(r.at)), h('span', {}, `${r.name || 'Someone'}${r.level ? `, level ${r.level}` : ''}`), r.env || r.server?.env ? h('span.rp-env', {}, `Server: ${r.env || r.server.env}`) : null),
             h('p.rp-text', {}, r.text || ''),
             p.lines.length ? h('ul.fb-lines', {}, ...p.lines.map(l => h('li', {}, l))) : null,
             p.log.length ? h('details', {}, h('summary', {}, `Log (${p.log.length})`), h('ol.fb-log', {}, ...p.log.map(l => h('li', {}, l)))) : null,
@@ -209,6 +211,6 @@ export function createFeedback({ net, hud, context }) {
     n.on('feedbackMine', mine);
     n.on('joined', () => { if (panel.isOpen) draw(); });
   }
-  return { panel, reports, wire, draw, open(kind) { if (kind === 'mine') S.tab = 'mine'; else if (kind) { S.kind = kind; S.tab = 'write'; } S.sent = null; panel.open(); if (S.tab === 'mine') loadMine(); draw(); }, isAdmin, reply,
+  return { panel, reports, wire, draw, setAdminTools(list) { adminTools = list || []; if (panel.isOpen) draw(); }, open(kind) { if (kind === 'mine') S.tab = 'mine'; else if (kind) { S.kind = kind; S.tab = 'write'; } S.sent = null; panel.open(); if (S.tab === 'mine') loadMine(); draw(); }, isAdmin, reply,
     get state() { return { open: panel.isOpen, tab: S.tab, text: S.text, mine: M.list ? M.list.map(r => ({ id: r.id, state: r.state, note: r.note || '' })) : null, kind: S.kind, sending: S.sending, sent: S.sent, log: LOG.size, admin: isAdmin(), reports: { open: reports.panel.isOpen, n: R.list.length, sel: R.open, kind: R.kind, state: R.state } }; } };
 }

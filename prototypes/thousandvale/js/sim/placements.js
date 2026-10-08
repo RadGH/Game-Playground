@@ -75,7 +75,7 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
         break;
       case 'guard':       // W1 (round 8): a town guard's post (js/sim/guards.js makes the fighter)
         guards.push({ id: p.id, name: p.name || 'Guard', rank: p.rank || 'guard', town: p.town || null, post: p.post || 'gate', gate: p.gate || null, x: p.x, z: p.z, yaw: p.yaw || 0 });
-        objects.push({ type: 'npc', name: p.name || 'Guard', x: p.x, z: p.z, yaw: p.yaw || 0, key: 'guard:' + p.id, npc: { role: 'guard', says: [], titled: false }, guard: { rank: p.rank || 'guard', post: p.post || 'gate', gate: p.gate || null, town: p.town || null },
+        objects.push({ type: 'npc', name: p.name || 'Guard', x: p.x, z: p.z, yaw: p.yaw || 0, key: 'guard:' + p.id, npc: { role: 'guard', says: [], titled: false }, guard: { rank: p.rank || 'guard', post: p.post || 'gate', gate: p.gate || null, town: p.town || null, ...(p.tier ? { tier: p.tier } : {}) },
           schedule: { blocks: [{ from: 0, at: { x: p.x, z: p.z, yaw: p.yaw || 0 }, do: 'guard' }], says: null } });
         break;
       case 'waystone':

@@ -56,6 +56,13 @@ export async function loadRules(mode) {
  * `{ev:'state', id, state, by, at, note?}` for a review. tools/feedback-report.mjs reads it when there is no database.
  */
 export function feedbackFile(env = 'dev') { return join(process.env.TV_FEEDBACK_DIR || process.env.STATE_DIRECTORY || join(GAME, '.data'), `feedback-${env}.jsonl`); }
+/** Owner feedback 9 (X1): the message of the day — data/ops/motd.json ({ text, lines, off }); env TV_MOTD overrides the text. */
+export function loadMotd() {
+  let d = {};
+  try { d = JSON.parse(readFileSync(join(GAME, 'data/ops/motd.json'), 'utf8')); } catch { d = {}; }
+  if (process.env.TV_MOTD) d = { ...d, text: process.env.TV_MOTD };
+  return { text: typeof d.text === 'string' ? d.text : null, lines: Array.isArray(d.lines) ? d.lines : [], off: !!d.off };
+}
 export function feedbackSink(env = 'dev', file = feedbackFile(env)) {
   let made = false;
   return row => {

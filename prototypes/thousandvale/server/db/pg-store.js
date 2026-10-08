@@ -71,9 +71,12 @@ export function createPgStore({ connectionString = process.env.DATABASE_URL, rea
       const r = await q(`SELECT id, name, cls, level, room, blob->'look' AS look FROM characters WHERE account_id = $1 AND realm = $2 ORDER BY id`, [account, realm]);
       return r.rows.map(x => ({ ...brief(x), look: x.look || null }));
     },
-    async createChar(account, { name, cls, look = null, kit = null }) {
+    async createChar(account, { name, cls, look = null, kit = null, limit = MAX_CHARS_PER_ACCOUNT }) {
       const n = await q('SELECT count(*)::int AS n FROM characters WHERE account_id = $1 AND realm = $2', [account, realm]);
-      if (n.rows[0].n >= MAX_CHARS_PER_ACCOUNT) return { err: 'full' };
+      if (n.rows[0].n >= limit) return { err: 'full' };
+      // X6: a deleted character's name stays reserved for a day
+      const tomb = await q('SELECT free_at FROM char_tombstones WHERE realm = $1 AND name_lower = lower($2) AND free_at > now()', [realm, name]).catch(() => ({ rows: [] }));
+      if (tomb.rows.length) return { err: 'name', reserved: new Date(tomb.rows[0].free_at).getTime() };
       const { cols, blob } = packChar({ name, cls, look, kit, level: 1, xp: 0, gold: 0 });
       try {
         const r = await q(

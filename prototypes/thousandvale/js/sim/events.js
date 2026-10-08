@@ -32,6 +32,7 @@ export const LANDING_MS = 3 * 60000;      // a flyover feeds this long at each a
  *      everyone has left or lies dead for `abandonMs` (`'left'` / `'wiped'`, zone events), or when its boss is gone
  *      (`'fled'`). `run.result` / `run.why` say how it ended.
  */
+export const GATE_OUT_M = [35, 55];       // X7: a raid wave appears this far OUTSIDE the gate it comes in by (guards.json raid.spawnOutM)
 export const WAVE_NEAR_M = [16, 24];      // a wave lands this far from the players it is coming for
 export const HUNT_FAR_M = 20;             // a wave monster further than this from every living player is re-aimed
 export const ABANDON_MS = 60000;          // nobody alive in reach for this long: the event is lost (when ev.abandonMs is set)
@@ -64,6 +65,7 @@ export function createEventRunner({ room, ev, rng = Math.random, info = {}, now 
     return d <= R ? { x: f.x, z: f.z } : { x: c.x + (f.x - c.x) / d * R, z: c.z + (f.z - c.z) / d * R };
   }
 
+  let lastGate = null;
   function spawnWave(k) {
     const w = ev.waves[k], c = centre(), f = focus();
     const extra = Math.ceil((ev.scale?.adds || 0) / Math.max(1, ev.waves.length));
@@ -71,6 +73,28 @@ export function createEventRunner({ room, ev, rng = Math.random, info = {}, now 
     // one side: away from the arena centre as seen from the players (they come IN from the edge), a 100 degree fan
     const out = Math.hypot(f.x - c.x, f.z - c.z) > 4 ? Math.atan2(f.z - c.z, f.x - c.x) + Math.PI : rng() * Math.PI * 2;
     waveMobs = [];
+    // X7 (owner feedback 9; E's `raid.gates`): a town raid comes IN BY A GATE — the wave appears 35-55 m outside one of the
+    // town's gates (the main gate first, then any), in a knot across the road, and walks in through it; the rules pick whom
+    // it goes for (the nearest guard). Ground that is not walkable out there (or outside this room) pulls it in toward the gate.
+    const gates = ev.raid && Array.isArray(ev.raid.gates) ? ev.raid.gates.filter(g => Number.isFinite(g.x) && Number.isFinite(g.z)) : [];
+    if (gates.length) {
+      const g = k === 0 ? (gates.find(q => q.main) || gates[0]) : gates[Math.floor(rng() * gates.length) % gates.length];
+      const [d0, d1] = Array.isArray(ev.raid.spawnOutM) ? ev.raid.spawnOutM : GATE_OUT_M;
+      const ol = Math.hypot(g.out[0], g.out[1]) || 1, ux = g.out[0] / ol, uz = g.out[1] / ol;
+      lastGate = { id: g.id, x: Math.round(g.x), z: Math.round(g.z) };
+      for (let i = 0; i < n; i++) {
+        let d = d0 + rng() * (d1 - d0);
+        const side = (n > 1 ? (i / (n - 1) - 0.5) : 0) * Math.min(14, 2.2 * n) + (rng() - 0.5);
+        let x = g.x + ux * d - uz * side, z = g.z + uz * d + ux * side;
+        for (let q = 0; q < 12 && !room.walkable(x, z); q++) { d *= 0.75; x = g.x + ux * d - uz * side * 0.5; z = g.z + uz * d + ux * side * 0.5; }
+        if (!room.walkable(x, z)) { x = g.x - ux * 2; z = g.z - uz * 2; }
+        if (!room.walkable(x, z)) { x = f.x; z = f.z; }
+        const m = room.spawn({ kind: 'monster', type: w.type, level: w.level || ev.level || 1, x, z, yaw: Math.atan2(-uz, -ux), rank: w.rank || 'normal',
+          data: { event: ev.uid, noRank: true, gate: g.id || null, path: [[g.x - ux * 5, g.z - uz * 5], [f.x, f.z]] } });
+        spawned.add(m); waveMobs.push(m);
+      }
+      return;
+    }
     for (let i = 0; i < n; i++) {
       const a = out + (n > 1 ? (i / (n - 1) - 0.5) : 0) * 1.75 + (rng() - 0.5) * 0.2, d = WAVE_NEAR_M[0] + rng() * (WAVE_NEAR_M[1] - WAVE_NEAR_M[0]);
       let x = f.x + Math.cos(a) * d, z = f.z + Math.sin(a) * d;
@@ -177,7 +201,7 @@ export function createEventRunner({ room, ev, rng = Math.random, info = {}, now 
       const st = phase === 'boss' ? stages() : Math.max(0, wave + 1);
       return { uid: ev.uid, id: ev.id, name: ev.name, kind: ev.kind || 'zone', zoneName: ev.zoneName || null, x: c.x, z: c.z, r: R, phase, wave: wave + 1, waves: (ev.waves || []).length,
         boss: boss && !boss.removed ? boss.id : 0, hp: boss && !boss.removed ? boss.hp / Math.max(1, boss.hpMax) : 1, players: enrolled.size,
-        ...(ev.where ? { where: ev.where } : {}), ...(ev.blurb ? { blurb: ev.blurb } : {}),
+        ...(ev.where ? { where: ev.where } : {}), ...(ev.blurb ? { blurb: ev.blurb } : {}), ...(lastGate && phase === 'waves' ? { gate: lastGate } : {}),
         // T12: every event says what it is, what to do, how far along it is and how long is left (room ms; the province adds wall times)
         what: I.what || ev.blurb || (Array.isArray(ev.announce) ? ev.announce[0] : ev.announce) || null, text: I.what || ev.blurb || null,
         goal: (I.objective && I.objective.text) || null, objective: this.objective(), stage: { n: st, of: stages(), name: phase === 'boss' ? bossName() : phase === 'waves' && wave >= 0 && ev.waves[wave] ? 'Wave ' + (wave + 1) : null },

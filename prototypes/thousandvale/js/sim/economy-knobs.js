@@ -28,7 +28,7 @@ export const ECONOMY_DEFAULTS = Object.freeze({
   guild: { fee: 10 },
   shop: { sellFactor: 0.25, perItemLevel: 0.12, fallbackPrice: 15, rarityPrice: { normal: 1, common: 1, magic: 2, uncommon: 2, rare: 4, legendary: 10, set: 10, unique: 20 }, crateSell: 1, buyback: 12, restockMinutes: 30, fishFactor: 1 },
   mounts: {},                                                 // mount id -> { price, level } (E's `mounts` list): overrides the mount table
-  barber: { hair: 5, hairColour: 4, beard: 4, eyes: 6, face: 10, skin: 12, body: 20, everything: 40, perLevel: 0.05 },
+  barber: { hair: 5, hairColour: 4, beard: 4, eyes: 6, face: 10, skin: 12, body: 20, everything: 40, perLevel: 0.05, mult: 1 },      // mult (owner feedback 9, X4): x every barber price — 0 = the barber is free
   bag: { overflowPerItem: 1, base: 40 },                      // base = bag slots without a backpack (W19; a pack adds its own, BAG_MAX 120 is the ceiling)                                // a drop that does not fit pays its value, at least this
   cook: { mealValue: 2 },
   gift: { feedbackMinRarity: 'rare' },                        // the thank-you gift box of a first feedback report

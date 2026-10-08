@@ -177,6 +177,8 @@ export function createGuilds({ store, presence, gwByChar, wallNow, filter = null
   }
 
   return {
+    /** X6: a deleted character left its guild in the store — reload that guild for the members online (or drop it when it is gone) */
+    forget(c, guildId = null) { const id = guildId ?? ofChar.get(c); ofChar.delete(c); if (id != null) refresh(id).then(g => { if (g && g.members.length) { if (!g.members.some(m => m.rank === 0)) { const next = g.members.slice().sort((a, b) => a.rank - b.rank)[0]; return store.guildSetRank(g.id, next.char, 0).then(() => refresh(g.id)).then(g2 => { if (g2) tell(g2); }); } tell(g); } }).catch(err => log('guild forget failed', err && err.message)); },
     load: c => load(c).catch(err => log('guild load failed', err && err.message)),
     op: (s, m) => Promise.resolve(op(s, m)).catch(err => { log('guild op failed', err && err.stack); s.err('state', 'That did not work.'); }),
     /** presence moved (online / level): resend the roster to the members online (at most once per change) */

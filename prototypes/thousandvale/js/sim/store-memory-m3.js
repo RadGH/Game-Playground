@@ -291,6 +291,45 @@ export function memoryM3(d, { now, changed, sha256Hex, randomHex, packChar, prun
     async isAdmin(account) { const a = d.accounts[account]; return !!(a && a.admin); },
     async listAdmins() { return Object.values(d.accounts).filter(a => a.admin).map(a => ({ account: a.id, username: a.username || null })); },
 
+    // ---- owner feedback 9: delete a character (X6), who signed in lately (X1) ----
+    /**
+     * deleteChar(account, id, { nowMs, reserveMs }) -> { ok, name, level, cls, freeAt, returned, guild? } | { err: 'missing' | 'lease' }
+     * One step: unopened letters from other players that still hold items or gold go back to their senders, the rest of
+     * its post and escrow rows go, friend rows both ways go, its guild membership goes (a guild left empty is deleted), its
+     * journal goes, the row goes, and the name is reserved until nowMs + reserveMs. Refused while a lease is live.
+     */
+    async deleteChar(account, id, { nowMs = now(), reserveMs = 86400000 } = {}) {
+      const r = d.chars[id];
+      if (!r || r.account !== account) return { err: 'missing' };
+      if (r.lease_owner && r.lease_until > now()) return { err: 'lease' };
+      let returned = 0;
+      for (const m of Object.values(d.mail)) {
+        if (m.to !== id) continue;
+        const holds = !m.takenAt && (m.gold > 0 || Object.values(d.items).some(x => x.mail === m.id));
+        if (holds && m.kind === 'player' && m.fromChar != null && d.chars[m.fromChar] && m.fromChar !== id) { returnOne(m, nowMs); returned++; continue; }
+        for (const [u, x] of Object.entries(d.items)) if (x.mail === m.id) delete d.items[u];
+        delete d.mail[m.id];
+      }
+      for (const m of Object.values(d.mail)) if (m.fromChar === id) m.fromChar = null;        // letters it SENT stay, unsigned (FK: SET NULL)
+      delete d.friends[id];
+      for (const k of Object.keys(d.friends)) d.friends[k] = d.friends[k].filter(f => f !== id);
+      let guild = null;
+      const mem = d.members[id];
+      if (mem) { guild = mem.guild; delete d.members[id]; if (!Object.values(d.members).some(x => x.guild === guild)) delete d.guilds[guild]; }
+      for (const f of d.feedback || []) if (f.char === id) f.char = null;
+      if (d.journal) delete d.journal[id];
+      d.tombstones ||= {};
+      for (const [k, t] of Object.entries(d.tombstones)) if (t.freeAt <= nowMs) delete d.tombstones[k];
+      const name = r.cols.name, freeAt = nowMs + reserveMs;
+      d.tombstones[name.toLowerCase()] = { name, account, char: id, level: r.cols.level, cls: r.cols.cls, deletedAt: nowMs, freeAt };
+      delete d.chars[id];
+      changed();
+      return { ok: true, name, level: r.cols.level, cls: r.cols.cls, freeAt, returned, guild };
+    },
+    /** X1: stamp an account as having entered the world now; count the distinct accounts that did since `sinceMs`. */
+    async noteLogin(account, nowMs = now()) { const a = d.accounts[account]; if (a) { a.lastLogin = nowMs; changed(); } },
+    async loginsSince(sinceMs) { return Object.values(d.accounts).filter(a => (a.lastLogin || 0) >= sinceMs).length; },
+
     // ---- reports, chat log, world state, economy ----
     async addReport(r) { const id = d.nextReport++; d.reports.push({ id, ...copy(r), created: r.created ?? now(), handled: 0 }); changed(); return id; },
     async listReports(limit = 100) { return d.reports.slice(-limit).reverse().map(copy); },

@@ -185,10 +185,22 @@ export function createProvince(opts) {
       clock: realmClock,
     };
   }
+  /**
+   * X7 (owner feedback 9): a posted guard's level (`data.guard.level`, read by stream C's rules) = the level of the town's own
+   * raid when it has one (a realm event whose arena is the town), else the floor of the town's zone band. C raises it
+   * further when a higher raid arrives.
+   */
+  function guardLevel(L, t) {
+    const raid = (opts.events || []).filter(e => e.province === L.key && Number.isFinite(e.x) && Math.hypot(e.x - t.x, e.z - t.z) <= (t.r || 40) + 60).sort((a, b) => (b.level || 0) - (a.level || 0))[0];
+    if (raid && raid.level) return raid.level;
+    const z = L.zoneOf ? L.zoneOf(t.x, t.z) : null, zs = (L.zones || []).find(q => q.key === z);
+    const band = (zs && zs.sheet && zs.sheet.band) || null;
+    return Math.max(1, (Array.isArray(band) ? band[0] : 1) || 1);
+  }
   function townObjects(L, t, i) {
     const out = [];
     for (const w of L.waystones) if (w.town === i) out.push({ type: 'waystone', name: 'Waystone', x: w.x, z: w.z, key: w.key, waystone: { key: w.key, name: w.name } });
-    if (L.townObjects && L.townObjects[i]) out.push(...L.townObjects[i]);     // E's NPCs, notes… placed inside this town
+    if (L.townObjects && L.townObjects[i]) out.push(...L.townObjects[i].map(o => (o.guard ? { ...o, guard: { ...o.guard, level: guardLevel(L, t) } } : o)));     // E's NPCs, notes… placed inside this town
     // town folk with day and night places (PLAN §4.3): stream E's schedules over stream B's town plan when both are
     // there (js/sim/schedules.js), else the roles round the square by day, at the inn by night
     if (L.schedules) {
@@ -247,7 +259,7 @@ export function createProvince(opts) {
       objects: [
         ...L.doors.map((d, i) => ({ type: d.kind === 'cave' ? 'cave' : 'portal', name: (d.kind !== 'cave' && d.sheet && d.sheet.dungeon && d.sheet.dungeon.name) || d.name, x: d.x, z: d.z, yaw: d.yaw, key: d.key || `door:${L.key}:${i}`, portal: { to: 'dungeon', door: i } })),
         ...L.waystones.filter(w => w.town === undefined).map(w => ({ type: 'waystone', name: 'Waystone', x: w.x, z: w.z, key: w.key, waystone: { key: w.key, name: w.name } })),
-        ...L.objects,
+        ...L.objects.map(o => (o.guard ? { ...o, guard: { ...o.guard, level: guardLevel(L, L.towns.slice().sort((a, b) => Math.hypot(a.x - o.x, a.z - o.z) - Math.hypot(b.x - o.x, b.z - o.z))[0] || { x: o.x, z: o.z }) } } : o)),      // X7: a guard posted just outside a town's ring
       ],
       describeExtra: describeFor(L),
     });
@@ -627,8 +639,11 @@ export function createProvince(opts) {
   }
 
   // ---- presence for the gateway (parties, ignore, the director) ----
+  /** X1 (owner feedback 9): the name of the zone a player stands in, for the admins' online list. */
+  function zoneNameOf(o) { const pv = provOf(o.room); if (!pv) return null; const z = o.zone || (pv.L.zoneOf && o.entity ? pv.L.zoneOf(o.entity.x, o.entity.z) : null); const zs = (pv.L.zones || []).find(q => q.key === z); return (zs && zs.sheet && zs.sheet.name) || pv.L.name || null; }
   function presence(o) {
-    send({ k: 'presence', char: o.char.id, name: o.char.name, cls: o.char.cls, level: o.char.level, room: o.room.id, province: provOf(o.room).L.key, zone: o.zone || null, online: !!o.conn, ignore: o.char.ignore || [], mutedUntil: o.char.mutedUntil || 0, account: o.char.account, look: o.char.look || null });
+    const zn = zoneNameOf(o), town = o.room.kind === 'town' ? o.room.name : null;
+    send({ k: 'presence', where: town || (o.room.kind === 'instance' ? (o.room.name || 'a dungeon') + ' (dungeon)' : zn) || null, zoneName: zn, town, roomKind: o.room.kind, char: o.char.id, name: o.char.name, cls: o.char.cls, level: o.char.level, room: o.room.id, province: provOf(o.room).L.key, zone: o.zone || null, online: !!o.conn, ignore: o.char.ignore || [], mutedUntil: o.char.mutedUntil || 0, account: o.char.account, look: o.char.look || null });
   }
   function sendFrames() {
     const rows = [];
@@ -801,7 +816,7 @@ export function createProvince(opts) {
     if (d.chest) return openChest(o, obj);
     if (d.note) return s.sendJSON({ t: 'used', id, ok: true, kind: 'note', name: obj.name, text: d.note.text, quest: d.note.quest || undefined, ...questOffer(o, obj) });
     if (d.npc) return s.sendJSON({ t: 'used', id, ok: true, kind: 'npc', ...(road ? { road } : {}), ...(d.wanderer ? { wanderer: d.wanderer } : {}), name: obj.name, says: d.npc.says, quest: d.npc.quest || undefined, role: d.npc.role || undefined,
-      ...(shops.kindOf(obj) ? { shop: true, shopKind: shops.kindOf(obj) } : {}), ...(d.npc.role === 'barber' ? { barber: true, free: !(o.char.flags && o.char.flags.barberUsed) } : {}), ...(d.npc.role === 'unbinder' ? { unbinder: true, unbind: unbinderOffer(o) } : {}), ...(d.npc.role === 'innkeeper' && o.room.kind === 'town' ? { bind: true, bound: o.char.bind === o.room.id } : {}), ...(angling.isFire(obj) ? { cook: true } : {}), ...angling.npcExtra(o, obj), ...professions.npcExtra(o, obj) /* W9 (P-core) */,
+      ...(shops.kindOf(obj) ? { shop: true, shopKind: shops.kindOf(obj) } : {}), ...(d.npc.role === 'barber' ? { barber: true, free: barberFree() || !(o.char.flags && o.char.flags.barberUsed), ...(barberFree() ? { priceMult: 0 } : { priceMult: economy().barber.mult }) } : {}), ...(d.npc.role === 'unbinder' ? { unbinder: true, unbind: unbinderOffer(o) } : {}), ...(d.npc.role === 'innkeeper' && o.room.kind === 'town' ? { bind: true, bound: o.char.bind === o.room.id } : {}), ...(angling.isFire(obj) ? { cook: true } : {}), ...angling.npcExtra(o, obj), ...professions.npcExtra(o, obj) /* W9 (P-core) */,
       ...(d.npc.service ? { service: d.npc.service } : {}), ...questOffer(o, obj) });
     if (d.use) return useThing(o, obj);
     if (d.trace) return s.sendJSON({ t: 'used', id, ok: true, kind: d.trace.kind, ...d.trace, ...(d.trace.kind === 'campfire' ? { cook: true } : {}) });   // T25: a fire to cook at
@@ -1983,6 +1998,17 @@ export function createProvince(opts) {
     const events = [];
     if (liveEvent && liveEvent.province === L.key) events.push({ ...eventView(liveEvent), realm: true });
     for (const z of zoneRuns.values()) if (provOf(z.room) === pv && (z.room === o.room || o.room.kind === 'town')) { const v = z.run.view(); events.push({ uid: v.uid, id: v.id, name: v.name, x: v.x, z: v.z, r: v.r, phase: v.phase, zoneName: v.zoneName || null, level: z.def.level || null }); }
+    // X7 (owner feedback 9): quest marks for town NPCs you cannot see from here — each town place carries its NPCs with a mark
+    // for THIS character (`marks: [{name, role, x, z, q}]`, only those with a mark), worked out when the map is asked for
+    const book = pv.book;
+    for (const p of places) {
+      if (p.kind !== 'town') continue;
+      const ti = pv.L.towns.findIndex(t => t.name === p.name), room = ti >= 0 ? pv.towns[ti] : null;
+      if (!room) continue;
+      const npcs = [];
+      for (const x of markCandidates(room, book)) { if (x.removed) continue; const q = book.mark(o.char, giverOf(x)); if (q) npcs.push({ name: x.name, role: (x.data.npc && x.data.npc.role) || null, x: Math.round(x.x), z: Math.round(x.z), q }); }
+      if (npcs.length) p.marks = npcs;
+    }
     return { t: 'mapData', province: L.key, name: L.name, bounds: L.terrain.bounds, zones, places, events, waystones: o.char.waystones || [], horizon: L.horizon ? { bin: L.horizon.file, step: L.horizon.step } : null };
   }
 
@@ -2688,8 +2714,9 @@ export function createProvince(opts) {
    * hair colour, beard, eyes, face, skin, body; a new race = everything), capped at `everything`, × (1 + perLevel × (level
    * - 1)). The first change a character ever makes is free.
    */
+  const barberFree = () => !(economy().barber.mult > 0);      // X4 (owner feedback 9): `barber.mult: 0` in economy.json — free for everyone
   function barberCost(ch, before, after) {
-    if (!(ch.flags && ch.flags.barberUsed)) return 0;
+    if (barberFree() || !(ch.flags && ch.flags.barberUsed)) return 0;
     const svc = (shops.kinds.barber && shops.kinds.barber.services && shops.kinds.barber.services.appearance) || {};
     const EB = economy().barber;
     const P = { ...EB, ...(svc.prices || {}) };
@@ -2710,7 +2737,7 @@ export function createProvince(opts) {
       if (!same(ra, rb) || ['top', 'bottom', 'shoes', 'hat', 'accessory', 'cape', 'decor'].some(k => !same(a[k], b[k]))) sum += P.body;
     }
     sum = Math.min(sum, P.everything);
-    return Math.round(sum * (1 + (svc.perLevel ?? EB.perLevel) * ((ch.level || 1) - 1)));
+    return Math.round(sum * (1 + (svc.perLevel ?? EB.perLevel) * ((ch.level || 1) - 1)) * Math.max(0, economy().barber.mult));
   }
   /** Q22: show / hide your gear (or just the head piece) — for everybody who looks at you. */
   function prefOp(o, m) {
@@ -2932,7 +2959,7 @@ export function createProvince(opts) {
   // ---- play-test 5: system mail (T20), feedback + admins (T19/T21), revives (T4), the character sheet (T18) ----
   /** The ONE mail API (js/sim/sysmail.js): `mailTo({ to, subject, body, items?, gold?, gift?, crate? })` — events, quests, anything. */
   const sysmail = createSystemMail({ store, newUid, wallNow, notify: c => send({ k: 'mailed', to: c }), log, counters });
-  const feedback = createFeedback({ store, wallNow, sink: opts.feedbackSink || null, sysmail, log, counters, filter: chatFilter, opts: opts.feedbackOpts || {} });
+  const feedback = createFeedback({ env: opts.env || null, store, wallNow, sink: opts.feedbackSink || null, sysmail, log, counters, filter: chatFilter, opts: opts.feedbackOpts || {} });
   // W9 (P-core) — professions (js/sim/professions.js over js/rules/professions*.js and data/provinces/professions*.json)
   const professions = createProfessions({ layouts, online, provOf: r => provOf(r), grant: (o, a) => grant(o, a), journal: (o, k, p) => journal(o, k, p), questEvent: (o, ev) => questEvent(o, ev),
     now, wallNow, log, counters, fighting: (o, e) => fighting(o, e), dismount: (o, why) => dismount(o, why), endMeal: (o, why) => endMeal(o, why), stopFishing: (o, why) => angling.stop(o, why),
@@ -3065,7 +3092,7 @@ export function createProvince(opts) {
     for (const x of o.room.host.near(e.x, e.z, 60)) { if (x.kind === 'monster' && !x.dead) monsters++; else if (x.kind === 'player' && x !== e) players++; }
     const zr = [...zoneRuns.values()].filter(z => z.room === o.room).map(z => { const v = z.run.view(); return { id: v.id, phase: v.phase, wave: v.wave, objective: v.objective && v.objective.text, n: v.objective && v.objective.n, of: v.objective && v.objective.of, leftMs: v.leftMs }; });
     const server = {
-      via: 'province', build: opts.build || 'dev', protocol: PROTOCOL_VERSION, process: processName, at: new Date(wallNow()).toISOString(),
+      via: 'province', build: opts.build || 'dev', protocol: PROTOCOL_VERSION, process: processName, ...(opts.env ? { env: opts.env } : {}), ...(opts.serverName ? { server: opts.serverName } : {}), at: new Date(wallNow()).toISOString(),
       account: ch.account, claimed: !!o.claimed, username: o.username || null,
       room: o.room.id, roomKind: o.room.kind, roomName: o.room.name, province: pv ? pv.L.key : null, zone: o.zone || (pv && pv.L.zoneOf ? pv.L.zoneOf(e.x, e.z) : null),
       x: r1(e.x), y: r1(e.y), z: r1(e.z), yaw: r1(e.yaw), hp: Math.round(e.hp), hpMax: e.hpMax, mp: Math.round(e.mp), mpMax: e.mpMax, dead: !!e.dead, state: e.state,
@@ -3098,7 +3125,14 @@ export function createProvince(opts) {
   }
   /** T21: an admin's calls from inside the world (the flag is read from the store each time). */
   function adminOp(o, m) {
-    Promise.resolve(store.isAdmin ? store.isAdmin(o.char.account) : false).then(ok => { o.admin = !!ok; return feedback.adminOp({ admin: !!ok, by: o.username || o.char.name }, m); })
+    Promise.resolve(store.isAdmin ? store.isAdmin(o.char.account) : false).then(ok => {
+      o.admin = !!ok;
+      if (ok && m.op === 'online') {      // X1: this process's players (the client asks the gateway, which knows every process)
+        const list = [...online.values()].filter(x => x.conn).map(x => { const zn = zoneNameOf(x), town = x.room.kind === 'town' ? x.room.name : null; return { char: x.char.id, name: x.char.name, level: x.char.level || 1, cls: x.char.cls, clsName: clsNameOf(x.char.cls), province: (provOf(x.room) || first).L.key, zone: x.zone || null, zoneName: zn, town, room: x.room.id, roomKind: x.room.kind, where: town || (x.room.kind === 'instance' ? (x.room.name || 'a dungeon') + ' (dungeon)' : zn), account: x.char.account, username: x.username || null, claimed: !!x.claimed, admin: !!x.admin }; }).sort((a, b) => String(a.name).localeCompare(String(b.name)));
+        return { t: 'adminOnline', ok: true, at: wallNow(), count: list.length, accounts: new Set(list.map(x => x.account)).size, list, partial: true };
+      }
+      return feedback.adminOp({ admin: !!ok, by: o.username || o.char.name }, m);
+    })
       .then(r => { if (o.conn) o.conn.sendJSON(r); }, err => { log('admin op failed', err && err.message); if (o.conn) o.conn.sendJSON({ t: 'adminR', op: m.op, ok: false, why: 'failed', msg: 'That did not work.' }); });
   }
 

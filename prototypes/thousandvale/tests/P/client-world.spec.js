@@ -48,17 +48,23 @@ test.beforeAll(async ({ browser }) => {
 });
 test.afterAll(async () => { await ctx?.close(); srv?.kill('SIGTERM'); });
 
-/** Play the mini-game that is up with real key events (the same synthetic player as client-minigames.spec.js). */
-const botKeys = () => page.evaluate(async () => {
-  const mini = window.tvprof.mini, sleep = ms => new Promise(r => setTimeout(r, ms));
-  const key = (type, code) => window.dispatchEvent(new KeyboardEvent(type, { code, key: ' ', bubbles: true, cancelable: true }));
-  for (let g = 0; g < 20000; g++) {
-    const st = mini.state; if (!st.open || st.state !== 'play') break;
-    const n = st.next; if (!n) { await sleep(4); continue; }
-    if (st.clock < n.t - 1) { await sleep(Math.min(8, Math.max(0, n.t - st.clock - 3))); continue; }
-    key('keydown', 'Space'); key('keyup', 'Space'); await sleep(2);
+/**
+ * Play the mini-game that is up from OUTSIDE the page: real key presses (or real touches) sent at the moments the
+ * flawless play says. A software renderer draws this scene at a few frames a second and starves the page's own
+ * timers — but a real input carries the time the device reported it, and the frame scores THAT (prof-minigame.js `at`),
+ * which is exactly what this proves.
+ */
+async function botReal(pg, how = 'key') {
+  const perfect = await pg.evaluate(() => tvprof.mini.run.perfect);
+  let off = Infinity, box = null;
+  for (let i = 0; i < 5; i++) { const st = await pg.evaluate(() => ({ clock: tvprof.mini.state.clock, c: tvprof.mini.state.canvas })); off = Math.min(off, Date.now() - st.clock); box = st.c; }
+  for (const [t] of perfect) {
+    const wait = t - (Date.now() - off) - 4; if (wait > 0) await new Promise(r => setTimeout(r, wait));
+    if (how === 'touch') await pg.touchscreen.tap(box.x + box.w / 2, box.y + box.h / 2);
+    else { const d = pg.keyboard.down('Space'); await pg.keyboard.up('Space'); await d; }
   }
-});
+}
+const botKeys = () => botReal(page, 'key');
 
 test('the prospector teaches Mining at the first word; the Professions list has ten trades', async () => {
   test.setTimeout(120000);
@@ -73,6 +79,7 @@ test('the prospector teaches Mining at the first word; the Professions list has 
   expect(st.list.find(p => p.id === 'mining').tool?.name).toBeTruthy();
   await page.waitForTimeout(600);
   await shot('w9-prospector.png');
+  expect(await page.evaluate(() => tvprof.state.trainer.open)).toBe(false);
   await page.evaluate(() => thousandvale.worldUi.closeDialog?.());
   // the journal's page
   await page.evaluate(() => thousandvale.ui.journal.showTab('professions'));
@@ -82,7 +89,7 @@ test('the prospector teaches Mining at the first word; the Professions list has 
 });
 
 test('copper boulders stand by the road, instanced; E starts the mini-game, the character swings a pick; the card shows the server\'s answer; the boulder is bare afterwards', async () => {
-  test.setTimeout(180000);
+  test.setTimeout(300000);
   await hook('/teleport', { name: NAME, x: NODE.x + 2.4, z: NODE.z + 0.6 });
   await page.waitForTimeout(2500);        // (the step may cross from the town's room into the fields: the nodes of the room left behind go, the new room's arrive)
   await page.waitForFunction(() => thousandvale.profView.stats.nodes > 2 && thousandvale.profView.stats.instances > 0, null, { timeout: 30000 }).catch(async () => { throw new Error('no nodes: ' + JSON.stringify(await page.evaluate(() => ({ stats: thousandvale.profView.stats, room: thousandvale.S.room?.kind, objs: [...thousandvale.objects.items.values()].filter(o => o.type === 'node').length, infos: [...thousandvale.S.mirror.infos.values()].filter(i => i.type === 'node').length, pos: tv.state().you })))); });
@@ -110,10 +117,11 @@ test('copper boulders stand by the road, instanced; E starts the mini-game, the 
   // a botched game spends nothing and may be tried again at once — which is also what saves this test when the
   // software renderer starves the synthetic player's timers
   let local = null;
-  for (let attempt = 0; attempt < 5; attempt++) {
+  for (let attempt = 0; attempt < 3; attempt++) {
     if (attempt) { await page.keyboard.press('Space'); await expect(page.locator('.tv-prof')).toBeHidden(); await page.keyboard.press('KeyE'); await page.waitForFunction(() => tvprof.mini.state.state === 'play', null, { timeout: 10000 }); }
+    await page.evaluate(() => { if (!window.__g) { window.__g = []; for (const t of ['gatherR', 'gatherDone']) thousandvale.S.net.on(t, m => window.__g.push({ t, ok: m.ok, why: m.why, msg: m.msg, q: m.quality, state: m.state })); } });
     await botKeys();
-    await page.waitForFunction(() => document.querySelector('.prof-card[data-q]') && !document.querySelector('.prof-wait'), null, { timeout: 10000 });
+    await page.waitForFunction(() => document.querySelector('.prof-card[data-q]') && !document.querySelector('.prof-wait'), null, { timeout: 10000 }).catch(async () => { throw new Error('no answer on the card: ' + JSON.stringify(await page.evaluate(() => ({ msgs: window.__g, st: tvprof.state.mini, work: tvprof.state.work, card: document.querySelector('.prof-card')?.innerText })))); });
     local = await page.evaluate(() => ({ ...tvprof.mini.state.result, server: document.querySelector('.prof-card').dataset.q }));
     if (local.server !== 'fail') break;
     expect(await page.evaluate(() => thousandvale.profView.stats.spent), 'a botched boulder is still there').toBe(0);
@@ -183,7 +191,9 @@ test('on a phone (393 × 852, the real phone layout): tap the prompt, play the b
   await p.waitForFunction(() => [...thousandvale.actors.actors.values()].some(a => a.role === 'prospector'), null, { timeout: 30000 });
   await p.evaluate(() => { const b = [...thousandvale.actors.actors.values()].find(a => a.role === 'prospector'); thousandvale.S.net.use(b.id); });
   await p.waitForFunction(() => tvprof.state.list.find(x => x.id === 'mining')?.known, null, { timeout: 10000 });
+  await p.waitForTimeout(900);
   await p.evaluate(() => thousandvale.worldUi.closeDialog?.());
+  expect(await p.evaluate(() => tvprof.state.trainer.open), 'a prospector who has taught you all he knows opens no window').toBe(false);
   const N2 = BRAM.starters[1];
   await hook('/teleport', { name: 'Pip', x: N2.x + 2.2, z: N2.z + 0.4 });
   await p.waitForTimeout(2500);
@@ -199,12 +209,7 @@ test('on a phone (393 × 852, the real phone layout): tap the prompt, play the b
   await p.waitForTimeout(300);
   await p.screenshot({ path: join(SHOTS, 'w9-phone-mining.png') });
   // one finger: real touches on the panel at the moments the flawless play says
-  for (let g = 0; g < 4000; g++) {
-    const st = await p.evaluate(() => { const s = tvprof.mini.state; return { on: s.open && s.state === 'play', next: s.next, clock: s.clock, c: s.canvas }; });
-    if (!st.on) break;
-    if (!st.next || st.clock < st.next.t - 25) { await p.waitForTimeout(st.next ? Math.max(1, Math.min(30, st.next.t - st.clock - 25)) : 10); continue; }
-    await p.touchscreen.tap(st.c.x + st.c.w / 2, st.c.y + st.c.h / 2);
-  }
+  await botReal(p, 'touch');
   await p.waitForFunction(() => document.querySelector('.prof-card[data-q]') && !document.querySelector('.prof-wait'), null, { timeout: 10000 });
   await p.screenshot({ path: join(SHOTS, 'w9-phone-result.png') });
   const res = await p.evaluate(() => ({ q: document.querySelector('.prof-card').dataset.q, text: document.querySelector('.prof-card').innerText.replace(/\s+/g, ' '), you: { ...tv.state().you }, inputs: tvprof.mini.state.result?.inputs.length }));

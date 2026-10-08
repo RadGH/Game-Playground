@@ -65,11 +65,11 @@ export const NUDGE = Object.freeze({
 
 export const cleanState = s => { const v = String(s || '').toLowerCase(); return v === 'trash' ? 'trashed' : FEEDBACK_STATES.includes(v) ? v : null; };
 
-export function createFeedback({ store, wallNow = () => Date.now(), sink = null, sysmail = null, log = () => {}, counters = {}, filter = null, opts = {} }) {
+export function createFeedback({ env: envName = null, store, wallNow = () => Date.now(), sink = null, sysmail = null, log = () => {}, counters = {}, filter = null, opts = {} }) {
   const R = { ...FEEDBACK, ...opts };
   const sent = new Map();          // account -> [wall ms]
   const view = r => ({ id: r.id, at: r.at, kind: r.kind, text: r.text, state: r.state === 'trashed' ? 'trashed' : r.state, account: r.account ?? null, char: r.char ?? null, name: r.name || null, cls: r.cls || null, level: r.level || null,
-    client: r.client || {}, ctx: r.client || {}, server: r.server || {}, note: r.note || '', stateAt: r.stateAt || null, stateBy: r.stateBy || null, done: r.done || '', doneAt: r.doneAt || null, ref: r.ref ?? null });
+    client: r.client || {}, ctx: r.client || {}, server: r.server || {}, env: (r.server && r.server.env) || envName || null, note: r.note || '', stateAt: r.stateAt || null, stateBy: r.stateBy || null, done: r.done || '', doneAt: r.doneAt || null, ref: r.ref ?? null });
   /** What the SENDER of a report may see of it (W29): no server context, no account, and a trashed report reads `closed`. */
   const mine = r => { const fin = r.state === 'completed'; return { id: r.id, at: r.at, kind: r.kind, text: r.text, name: r.name || null, state: r.state === 'trashed' ? 'closed' : r.state,
     note: fin ? (r.done || '') : (r.note || ''), noteAt: fin ? (r.doneAt || r.stateAt || null) : (r.note ? r.stateAt || null : null), adminNote: r.note || '', done: r.done || '', doneAt: r.doneAt || null, ref: r.ref ?? null }; };

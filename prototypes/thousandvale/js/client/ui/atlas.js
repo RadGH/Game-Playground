@@ -261,7 +261,7 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     get model() { return S.model; }, get world() { return S.world; }, get fog() { return S.fog; }, get dungeon() { return S.dungeon; },
     get quests() { return S.quests; }, get tracked() { return S.tracked; }, get trackedQuest() { return S.quests.find(q => q.id === S.tracked) || null; },
-    get events() { return [...S.events.values()]; }, get pins() { return S.pins; }, get version() { return S.version; },
+    get events() { return [...S.events.values()]; }, get places() { return [...S.placesSrv.values()]; }, get pins() { return S.pins; }, get version() { return S.version; },
     zoneDetail(key) { if (!S.detail.has(key)) { S.detail.set(key, []); src.zoneDetail(key).then(l => { S.detail.set(key, l); changed(); }); } return S.detail.get(key); },
     detailNear(x, z) { const m = new Map(); const k = zoneKeyAt(x, z); m.set(k, this.zoneDetail(k)); return m; },
     whereText: (to, r) => whereText(me(), to, r),

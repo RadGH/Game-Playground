@@ -147,16 +147,25 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
     if (!u || !u.ok || !u.prof) return;
     T.npc = u.id ?? u.npc ?? null; T.name = u.name || u.who || 'Trades'; T.prof = u.prof; T.busy = null; S.lastNpc = T.npc;
     for (const id of u.prof.taught || []) hud.toast(`You have learned ${PROF_NAME[id] || id}.`, 'good');
-    // the craftsman's own dialog (quests, his shop) is usually up as well: put our two doors IN it rather than a window over it
-    setTimeout(() => {
+    // nothing left to do here (he taught it as he spoke, you have the tool, he has no station): no window at all
+    const known = new Set([...(u.prof.known || []), ...(u.prof.taught || [])]);
+    const todo = (u.prof.trains || []).some(id => !known.has(id) || (rowOf(id)?.kind === 'gather' && id !== 'angling' && rowOf(id) && !rowOf(id).tool && !(u.prof.taught || []).includes(id)));
+    if (!todo && !(u.prof.stations || []).length) return;
+    // the craftsman's own dialog (quests, his shop) is usually up as well: put our doors IN it rather than a window over it.
+    // The dialog is drawn by another handler of this same message — give it a moment before deciding it is not coming.
+    const expectDialog = !!(u.says || u.offers || u.shop || u.kind === 'npc'), t0 = performance.now();
+    const place = () => {
+      if (T.npc !== (u.id ?? u.npc ?? null)) return;
       const dlg = [...document.querySelectorAll('.tv-dialog')].find(d => !d.hidden && d.getClientRects().length), foot = dlg?.querySelector('footer');
-      if (!foot) { trainer.open(); drawTrainer(); return; }
+      if (!foot) { if (expectDialog && performance.now() - t0 < 700) { setTimeout(place, 60); return; } api.showTrainer(); return; }
       foot.querySelectorAll('.prof-dlg').forEach(b => b.remove());
-      const add = (text, fn, primary) => { const b = h('button.' + (primary ? 'primary' : 'ghost') + '.prof-dlg', { type: 'button', onclick: () => { dlg.hidden = true; fn(); } }, text); foot.prepend(b); };
+      const add = (text, fn) => { const b = h('button.ghost.prof-dlg', { type: 'button', onclick: () => { dlg.hidden = true; fn(); } }, text); foot.prepend(b); };
       const st = [...new Set((u.prof.stations || []).map(id => (id === 'tempering' ? 'smithing' : id)))];
-      for (const id of st.reverse()) add(`Use ${STATION_WORD[id] || 'the station'}`, () => craft.open({ npc: T.npc, tab: id }), false);
-      if ((u.prof.trains || []).length) add((u.prof.trains || []).every(id => (u.prof.known || []).includes(id)) ? 'Trades' : `Learn: ${(u.prof.trains || []).filter(id => !(u.prof.known || []).includes(id)).map(id => PROF_NAME[id]).join(', ')}`, () => api.showTrainer(), false);
-    }, 90);
+      for (const id of st.reverse()) add(`Use ${STATION_WORD[id] || 'the station'}`, () => craft.open({ npc: T.npc, tab: id }));
+      const fresh = (u.prof.trains || []).filter(id => !known.has(id));
+      if (todo) add(fresh.length ? `Learn: ${fresh.map(id => PROF_NAME[id]).join(', ')}` : 'Trades', () => api.showTrainer());
+    };
+    setTimeout(place, 60);
   }
   function onProfR(m) {
     T.busy = null;

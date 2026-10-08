@@ -134,6 +134,8 @@
   "fee": 30
  },
  "barber": {
+  "mult": 0,
+  "_mult": "owner feedback 9 (X4, dev report #16): the barber is free for now. mult multiplies every price below; 1 = these prices, 0 = free.",
   "hair": 15,
   "hairColour": 12,
   "beard": 12,

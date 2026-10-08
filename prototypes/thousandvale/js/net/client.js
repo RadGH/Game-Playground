@@ -75,11 +75,11 @@ export function connect(opts = {}) {
       case 'refuse': net.lastKick = m; emit('kick', m); setStatus('refused'); stop(); return;
       case 'authed':
         if (m.token) tokenStore.set(m.token);
-        net.account = m.account; net.claimed = !!m.claimed; net.username = m.username || null; net.admin = !!m.admin; attempt = 0;
+        if (m.charLimit) net.charLimit = m.charLimit; net.account = m.account; net.claimed = !!m.claimed; net.username = m.username || null; net.admin = !!m.admin; attempt = 0;
         sendJ(s, { t: 'chars' });
         return;
       case 'charList':
-        net.chars = m.chars; emit('chars', m.chars);
+        net.chars = m.chars; if (m.limit) net.charLimit = m.limit; emit('chars', m.chars);      // charLimit (round 9, X6): how many characters the account may hold
         readyResolve(net);
         if (wantChar != null) sendPlay();
         else setStatus('select');
@@ -352,6 +352,10 @@ export function connect(opts = {}) {
   net.openItem = uid => sendJ(game, { t: 'item', op: 'open', uid: String(uid) });   // a crate / gift box -> itemR {opened}
   /** feedback('suggestion'|'bug', text, ctx?) -> feedbackR. Goes over the game socket when in the world (the server adds where you stand). */
   net.feedback = (kind, text, ctx, ref) => sendJ(game && game.readyState === OPEN && net.joined ? game : gw, { t: 'feedback', kind, text: String(text).slice(0, 2000), ...(ctx ? { ctx } : {}), ...(Number.isSafeInteger(ref) ? { ref } : {}) });
+  /** Round 9 (X6): deleteChar(id, typedName) -> `deleted {ok, char, name, freeAt, returned, why?, msg?}`; a fresh `charList {chars, limit}` follows a success. */
+  net.deleteChar = (id, name) => sendJ(gw, { t: 'delete', char: id, name: String(name || '').slice(0, 24) });
+  /** Round 9 (X1): who is online (admin accounts only) -> `adminOnline {ok, at, count, accounts, list}`. Always asked of the gateway, which knows every process. */
+  net.adminOnline = () => sendJ(gw, { t: 'admin', op: 'online' });
   /** Round 8 (W5): cart('list', id) -> cartList ; cart('go', id, stopId) -> cartR, then cartRide and (ms later) the arrival `joined`. `id` = the carter / cart entity. */
   net.cart = (op, id, to, token) => sendJ(game, { t: 'cart', op, id, ...(to ? { to } : {}), ...(token ? { token: true } : {}) });
   /** Round 8 (W21): meter(true|false) -> `meterR {on}`, then `hits {l: [[src, tgt, n, flags, sk, el, over, abs], …]}` a few times a second while on. */

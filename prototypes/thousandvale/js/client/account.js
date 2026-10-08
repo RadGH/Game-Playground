@@ -6,6 +6,7 @@
 
 import { claimCheck, ACCOUNT_WHY, PUBLIC_LEVEL } from './social-core.js';
 import { createPanel, h } from './ui-panel.js';
+import { nameMatches, charLimit, limitText, deleteRefusal, deleteWarning } from './ui/pt9-core.js';
 import { humanToken } from './turnstile.js';
 import { socketFactory } from '../net/sockets.js';
 import { PROTOCOL_VERSION } from '../net/protocol.js';
@@ -41,7 +42,7 @@ export function anonAccountOp(op, args, { mode = 'ws', url, build = 'dev', timeo
  * @param o.onPick     (char) => void                   play this character
  * @param o.onLoggedOut () => void
  */
-export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, onLoggedOut }) {
+export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, onLoggedOut, onTitleStep = null }) {
   const net = () => getNet();
   const T = {
     tabNew: $('tab-new'), tabLogin: $('tab-login'), newForm: $('login'), signin: $('signin'), user: $('signin-user'), pass: $('signin-pass'),
@@ -67,7 +68,9 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
       const chars = await onLogin(user, pass);
       T.pass.value = '';
       showChars(chars, net()?.username || user);
-      tab('new');
+      // play-test 9: straight to YOUR CHARACTERS (the list lives on the front card, which the Log in tab had hidden —
+      // for two rounds a fresh sign-in landed on the "New character" form with the list out of sight)
+      if ((chars || []).length) front(); else tab('new');
     } catch (err) {
       T.note.textContent = err.why ? ACCOUNT_WHY[err.why] || err.message : err.message || 'Could not log in.';
     } finally { T.go.disabled = false; T.go.textContent = 'Log in'; }
@@ -95,6 +98,57 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
       h('button.ghost.wide', { type: 'button', onclick: set }, 'Set the new password'), msg);
   }
 
+  /** Show the front card: your characters + "New character" (main.js's titleStep('front'), from in here). */
+  function front() {
+    if (typeof onTitleStep === 'function') { onTitleStep('front'); return; }
+    const f = $('front'); if (f) f.hidden = false;
+    T.newForm.hidden = true; T.signin.hidden = true;
+    T.tabNew.setAttribute('aria-selected', 'true'); T.tabLogin.setAttribute('aria-selected', 'false');
+  }
+
+  // ---- play-test 9 (X6, report D#14): delete a character — you type its name to confirm ----
+  const wiredNets = new WeakSet();
+  let delWait = null;
+  function listen(n) {
+    if (!n || wiredNets.has(n)) return; wiredNets.add(n);
+    n.on('deleted', r => { const w = delWait; delWait = null; clearTimeout(w?.timer); w?.done(r); });
+    n.on('chars', list => { if (Array.isArray(list)) { lastChars = list; if (!T.mine.hidden) showChars(list, lastUser); } });
+  }
+  function sendDelete(c, typed) {
+    return new Promise(res => {
+      const n = net(); if (!n) { res({ ok: false, msg: 'You are not connected.' }); return; }
+      listen(n);
+      delWait = { done: res, timer: setTimeout(() => { if (delWait) { delWait = null; res({ ok: false, msg: 'The server did not answer. Try again.' }); } }, 9000) };
+      if (typeof n.deleteChar === 'function') n.deleteChar(c.id, typed); else if (n._raw) n._raw('gw', JSON.stringify({ t: 'delete', char: c.id, name: typed })); else { clearTimeout(delWait.timer); delWait = null; res({ ok: false, msg: 'This server cannot delete characters yet.' }); }
+    });
+  }
+  function askDelete(c) {
+    document.querySelector('.char-delete')?.remove();
+    const input = h('input', { maxLength: 24, 'aria-label': `Type ${c.name} to confirm`, placeholder: c.name, autocomplete: 'off', spellcheck: false });
+    const note = h('p.note');
+    const yes = h('button.danger', { type: 'button', disabled: true, dataset: { act: 'delete' } }, 'Delete for good');
+    const box = h('div.tv-confirm.char-delete', { role: 'alertdialog', 'aria-label': `Delete ${c.name}` },
+      h('strong', {}, `Delete ${c.name}?`), h('p', {}, deleteWarning(c)),
+      h('label', {}, h('span.label', {}, 'Type the character\'s name to confirm'), input), note,
+      h('div.row', {}, h('button.ghost', { type: 'button', dataset: { act: 'keep' }, onclick: () => box.remove() }, 'Keep it'), yes));
+    input.addEventListener('input', () => { yes.disabled = !nameMatches(input.value, c.name); note.textContent = ''; });
+    const go = async () => {
+      if (!nameMatches(input.value, c.name)) { note.textContent = deleteRefusal({ why: 'name' }); return; }
+      yes.disabled = true; yes.textContent = 'Deleting…';
+      const r = await sendDelete(c, input.value.trim());
+      if (!r.ok) { note.textContent = deleteRefusal(r); yes.textContent = 'Delete for good'; yes.disabled = !nameMatches(input.value, c.name); return; }
+      box.remove();
+      lastChars = lastChars.filter(x => x.id !== c.id);
+      showChars(lastChars, lastUser);
+      const said = `${c.name} is deleted.${r.returned ? ` ${r.returned} letter${r.returned === 1 ? '' : 's'} went back to ${r.returned === 1 ? 'its sender' : 'their senders'}.` : ''}`;
+      const ln = $('front')?.querySelector('.char-said'); if (ln) ln.textContent = said;
+    };
+    yes.onclick = go;
+    box.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') box.remove(); if (e.key === 'Enter' && !yes.disabled) go(); });
+    ($('title') || document.body).appendChild(box);
+    input.focus();
+  }
+
   /** Your characters on this account (title screen), clickable. */
   function showChars(chars, username = null) {
     const list = chars || [];
@@ -103,12 +157,22 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     lastChars = list; lastUser = username;
     // play-test 2 Q25: the calling's real name ("Ranger"); Q13: the character's portrait (ui/portraits.js) when ready
     const nice = c => c.clsName || String(c.cls || '').replace(/_/g, ' ').replace(/\b\w/g, x => x.toUpperCase()) || 'Adventurer';
+    listen(net());
+    // X6: one row a character — the chip plays it, Delete asks for its name; the list scrolls (css/pt9.css) once it is long
     T.chips.replaceChildren(...list.map(c => {
       const pic = api.portraitFor?.(c);
-      return h('button.chip.char', { type: 'button', title: `Play ${c.name}`, onclick: () => onPick(c), dataset: { char: String(c.id) } },
-        pic ? h('img.char-pic', { src: pic, alt: '' }) : h('span.char-pic.letter', {}, (c.name[0] || '?').toUpperCase()),
-        h('span.char-txt', {}, c.name, h('small', {}, ` Level ${c.level || 1} ${nice(c)}`)));
+      return h('div.char-row', { dataset: { char: String(c.id) } },
+        h('button.chip.char', { type: 'button', title: `Play ${c.name}`, onclick: () => onPick(c), dataset: { char: String(c.id) } },
+          pic ? h('img.char-pic', { src: pic, alt: '' }) : h('span.char-pic.letter', {}, (c.name[0] || '?').toUpperCase()),
+          h('span.char-txt', {}, c.name, h('small', {}, ` Level ${c.level || 1} ${nice(c)}`))),
+        h('button.ghost.small.char-del', { type: 'button', 'aria-label': `Delete ${c.name}`, title: `Delete ${c.name} — asks you to type the name first`, dataset: { act: 'del' }, onclick: () => askDelete(c) }, 'Delete'));
     }));
+    // the limit is the server's (A: 20, a knob); at the limit "New character" says why it is shut
+    const cap = charLimit(net());
+    let lim = T.mine.querySelector('.char-limit'); if (!lim) { lim = h('p.tiny-left.char-limit'); T.chips.after(lim, h('p.tiny-left.char-said', { 'aria-live': 'polite' })); }
+    lim.textContent = list.length ? limitText(list.length, cap) : '';
+    lim.classList.toggle('full', list.length >= cap);
+    const nb = $('new-char'); if (nb) { nb.disabled = list.length >= cap; nb.dataset.tip = list.length >= cap ? `An account holds ${cap} characters. Delete one to make room.` : ''; }
     const label = T.mine.querySelector('.label');
     if (label) label.textContent = username ? `${username} — your characters` : 'Your characters';
     if (list.length && !$('name').value) $('name').value = list[0].name;

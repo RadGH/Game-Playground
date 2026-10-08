@@ -30,12 +30,25 @@ export const GUARD_DEFAULTS = Object.freeze({
   healsOutOfCombatSec: 8, vsBossMult: 0.02, threatMult: 3, noticeM: 30, speed: 5.2, newcomerThreatMult: 0.25,
 });
 
-export function attachGuards(room, { cfg = null } = {}) {
+/**
+ * Owner feedback 10 (Y21, report #18): "I found an NPC just wandering in the wilderness… stood next to two giant enemy
+ * Ossuary Crawlers but they did not fight. NPCs in the wilderness, at least when a player is nearby, should fight
+ * nearby enemies… If you help or save an NPC, they should sometimes have a special thank you or give you a reward."
+ * A WANDERER is a guard with a different brief (the same unit, the same tick, the same "never a corpse"): it takes on
+ * any monster within `noticeM` of it — but only while a player is within `playerM`; with nobody near it does nothing
+ * and nothing happens to it. When its fight is over and it is still standing, every player who did a real share of the
+ * work on its foes is reported (`field.emit npcHelped`): `saved` if it had dropped under `savedBelow` of its health,
+ * else `helped`. The thanks and the reward are the room's (stream A / E).
+ */
+export const WANDERER_DEFAULTS = Object.freeze({ hpMult: 0.5, dmgMult: 2, playerM: 40, noticeM: 12, leashM: 25, respawnSec: 45, savedBelow: 0.35, helpedShare: 0.2, quietSec: 4 });
+
+export function attachGuards(room, { cfg = null, wanderer = null } = {}) {
   const field = room.field, engine = room.engine, rpg = engine.rpg;
   const R = { ...GUARD_DEFAULTS, ...((cfg && cfg.rules) || {}) };
   const RANKS = (cfg && cfg.ranks) || {};
   const RAID = (cfg && cfg.raid) || {};
-  const G = { list: [], rules: R, newcomerThreatMult: num(RAID.newcomerThreatMult, GUARD_DEFAULTS.newcomerThreatMult) };
+  const W = { ...WANDERER_DEFAULTS, ...(wanderer || {}), ...((RANKS.wanderer && typeof RANKS.wanderer === 'object') ? RANKS.wanderer : {}) };
+  const G = { list: [], rules: R, wanderer: W, newcomerThreatMult: num(RAID.newcomerThreatMult, GUARD_DEFAULTS.newcomerThreatMult) };
   field.guards = G;
   const rng = () => room.streams.get('spawn');
   const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
@@ -44,16 +57,16 @@ export function attachGuards(room, { cfg = null } = {}) {
   /** The nearest standing guard to a point within `within` metres, or null. */
   G.nearest = (x, z, within = Infinity) => {
     let best = null, bd = within;
-    for (const g of G.list) { if (!up(g)) continue; const d = Math.hypot(g.x - x, g.z - z); if (d < bd) { bd = d; best = g; } }
+    for (const g of G.list) { if (!up(g) || g.wanderer) continue; const d = Math.hypot(g.x - x, g.z - z); if (d < bd) { bd = d; best = g; } }      // (a wanderer is nobody's gate guard)
     return best;
   };
   /** Is this spot under a guard's eye (within the leash of some post)? */
-  G.watched = (x, z) => G.list.some(g => Math.hypot(g.post.x - x, g.post.z - z) <= g.leash);
+  G.watched = (x, z) => G.list.some(g => !g.wanderer && Math.hypot(g.post.x - x, g.post.z - z) <= g.leash);
 
   /** Build the numbers of a guard of `rank` at `level` (the town's or the raid's; `levelOver` is added here). */
   function statsFor(level, rank) {
     const def = engine.enemyDef(R.reference) || engine.enemyDef('road_brigand');
-    const K = RANKS[rank] || {};
+    const K = rank === 'wanderer' ? W : (RANKS[rank] || {});
     const lvl = Math.max(1, Math.round(level) + (R.levelOver | 0));
     const body = rpg.makeEnemy(def, lvl, rng(), { rank: 'normal' });
     const maxHp = Math.max(1, Math.round(body.maxHp * R.hpMult * (K.hpMult || 1)));
@@ -66,7 +79,7 @@ export function attachGuards(room, { cfg = null } = {}) {
    * floor or the raid's level BEFORE levelOver). Returns the unit (already in the field).
    */
   G.create = (spec) => {
-    const rank = spec.rank || 'guard';
+    const rank = spec.wanderer ? 'wanderer' : (spec.rank || 'guard');
     const s = statsFor(spec.level || 1, rank);
     const u = s.body;
     Object.assign(u, {
@@ -79,6 +92,7 @@ export function attachGuards(room, { cfg = null } = {}) {
       xp: 0, gold: 0, onHit: [], lifeSteal: 0, owner: null,
     });
     u.bodyR = Math.max(0.4, u.reach * 0.3);
+    if (spec.wanderer) { u.wanderer = true; u.leash = num(W.leashM, 25); u.fight = null; }
     field.add(u, 'ally');
     G.list.push(u);
     return u;
@@ -86,7 +100,7 @@ export function attachGuards(room, { cfg = null } = {}) {
   /** A raid of a higher level than the town: the guards meet it at ITS level (never lowered; health share kept). */
   G.raise = (level, town = null) => {
     for (const g of G.list) {
-      if ((town && g.town && g.town !== town) || !(level > g.baseLevel)) continue;
+      if (g.wanderer || (town && g.town && g.town !== town) || !(level > g.baseLevel)) continue;
       const share = g.maxHp > 0 ? g.hp / g.maxHp : 1;
       const s = statsFor(level, g.rank2);
       g.baseLevel = Math.round(level); g.level = s.lvl; g.maxHp = s.maxHp; g.hp = Math.round(s.maxHp * share); g.dmg = s.dmg; g.armor = s.armor;
@@ -97,8 +111,45 @@ export function attachGuards(room, { cfg = null } = {}) {
   /** Is `m` something a guard fights? A raider, or something that struck a player / a guard under a guard's eye. */
   const foe = m => m.dying == null && !m.removed && (m.raider || m.guardFoe);
 
+  /** Is a wanderer's fight live — a player close enough to see it? */
+  const witnessed = g => field.players.some(p => !p.dead && !p.removed && dist(p, g) <= num(W.playerM, 40));
+  /** A wanderer takes a monster on: the monster knows it (threat, chase) and is fair game for it from now on. */
+  function engage(g, m) {
+    if (m.guardFoe && m.threat?.has(g.id)) return;
+    m.guardFoe = true;
+    const t = m.threat || (m.threat = new Map());
+    t.set(g.id, Math.max(t.get(g.id) || 0, Math.max(8, (m.maxHp || 40) * 0.08)));
+    if (m.state !== 'chase') { m.state = 'chase'; m.lastCombatAt = field.clock; if (m.targetId == null) m.targetId = g.id; }
+  }
+  /** What each player put into a foe of this wanderer's fight, as a share of that foe's health (kept as it falls or leaves). */
+  function tally(g, m) {
+    const F = g.fight;
+    if (!F || F.done.has(m.id)) return;
+    for (const [id, v] of m.damageBy || []) {
+      const p = field.get(id);
+      const who = p?.kind === 'player' ? p : p?.owner?.kind === 'player' ? p.owner : null;
+      if (who) F.dealt.set(who.id, (F.dealt.get(who.id) || 0) + v / Math.max(1, m.maxHp || 1));
+    }
+    F.done.add(m.id);
+  }
+  /** The fight is over. Standing: tell the room who helped. Down: nobody saved anybody. */
+  function endFight(g, standing) {
+    const F = g.fight;
+    g.fight = null;
+    if (!F || !standing || !F.foes.size) return;
+    for (const m of F.live) tally(g, m);
+    const kind = F.low ? 'saved' : 'helped';
+    for (const [pid, share] of F.dealt) {
+      if (share < num(W.helpedShare, 0.2)) continue;
+      field.emit({ t: 'npcHelped', npc: g.id, player: pid, kind, level: g.baseLevel, foes: F.foes.size, share: Math.round(share * 100) / 100 });
+    }
+  }
+  /** Is this fighter in a fight right now (the room leaves its feet alone while it is)? */
+  G.fighting = g => !!g && !g.removed && (g.state === 'chase' || g.state === 'down' || (g.wanderer && !!g.fight));
+
   function goDown(g) {
-    g.hp = 0; g.downFor = num(R.respawnSec, 75); g.statuses = {}; g.target = null; g.state = 'down'; g.anim = 'sit'; g.dying = null;
+    if (g.wanderer) endFight(g, false);
+    g.hp = 0; g.downFor = num(g.wanderer ? W.respawnSec : R.respawnSec, 75); g.statuses = {}; g.target = null; g.state = 'down'; g.anim = 'sit'; g.dying = null;
     for (const m of field.monsters) if (m.threat?.has(g.id)) forget(m, g.id);
     field.emit({ t: 'fx', kind: 'guard', id: g.id, down: 1, ms: Math.round(g.downFor * 1000) });
   }
@@ -117,10 +168,29 @@ export function attachGuards(room, { cfg = null } = {}) {
       if (g.statuses && Object.keys(g.statuses).length) tickStatuses(g, dt);
       if (g.hp <= 0) { goDown(g); continue; }
       g.swingTimer = Math.max(0, g.swingTimer - dt);
-      if (!foes) foes = field.monsters.filter(foe);
+      // Y21: a wanderer — nothing at all unless a player is near; then every monster close to it is its business
+      let mine = null;
+      if (g.wanderer) {
+        if (!witnessed(g)) { if (g.fight) endFight(g, false); g.target = null; g.targetId = null; g.state = 'post'; g.anim = 'idle'; continue; }
+        mine = [];
+        field.eachMonsterNear(g.x, g.z, num(W.noticeM, 12), m => { if (!m.dummy && !m.removed && m.dying == null && !m.statuses?.turned) mine.push(m); });
+        for (const m of mine) engage(g, m);
+        if (mine.length) {
+          const F = g.fight || (g.fight = { foes: new Set(), live: new Set(), done: new Set(), dealt: new Map(), low: false, quiet: 0 });
+          for (const m of mine) { F.foes.add(m.id); F.live.add(m); }
+          F.quiet = 0;
+        }
+        if (g.fight) {
+          const F = g.fight;
+          if (g.hp / Math.max(1, g.maxHp) < num(W.savedBelow, 0.35)) F.low = true;
+          for (const m of [...F.live]) if (m.dying != null || m.removed) { tally(g, m); F.live.delete(m); }
+          if (!mine.length) { F.quiet += dt; if (F.quiet >= num(W.quietSec, 4)) endFight(g, true); }
+        }
+      }
+      if (!foes && !g.wanderer) foes = field.monsters.filter(foe);
       // the nearest foe that is inside this guard's ground (its post's leash)
       let t = null, bd = Infinity;
-      for (const m of foes) {
+      for (const m of (g.wanderer ? mine : foes)) {
         if (m.dying != null) continue;
         if (Math.hypot(m.x - g.post.x, m.z - g.post.z) > g.leash + g.reach) continue;
         const d = dist(m, g);

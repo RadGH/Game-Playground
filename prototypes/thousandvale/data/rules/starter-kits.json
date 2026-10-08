@@ -2321,11 +2321,11 @@
     {
      "id": "gilt_wraps",
      "name": "Gilt-Thread Wraps",
-     "blurb": "Cloth chest, cloth helm and cloth gloves. Nothing on: legs, boots.",
+     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
      "pieces": [
       "cloth_chest",
       "cloth_helm",
-      "cloth_gloves"
+      "light_gauntlets"
      ],
      "lean": "ward"
     }
@@ -2341,13 +2341,29 @@
      "element": "arcane"
     },
     {
-     "id": "wand_fan",
-     "name": "Three-Star Wand and Grimoire",
-     "blurb": "Wand: one-handed, ranged; throws three bolts of arcane force in a fan, with a grimoire in the off hand (every fourth basic attack repeats itself).",
+     "id": "wand_cone",
+     "name": "Stardust Wand and Grimoire",
+     "blurb": "Wand: one-handed; instead of a bolt it breathes a short cone of arcane force, with a grimoire in the off hand (every fourth basic attack repeats itself).",
      "main": "wand",
      "off": "grimoire",
-     "style": "fan",
+     "style": "cone",
      "element": "arcane"
+    },
+    {
+     "id": "staff_lob",
+     "name": "Zenith Staff",
+     "blurb": "Staff: two-handed; its attack lobs a blast of arcane force that bursts where it lands.",
+     "main": "staff",
+     "element": "arcane",
+     "spell": "lob"
+    },
+    {
+     "id": "staff_nova",
+     "name": "Staff of the Turning Sky",
+     "blurb": "Staff: two-handed; its attack is a ring of arcane force around you.",
+     "main": "staff",
+     "element": "arcane",
+     "spell": "nova"
     },
     {
      "id": "tome_rune",
@@ -2357,23 +2373,6 @@
      "off": "seer_orb",
      "style": "tome_rune",
      "element": "arcane"
-    },
-    {
-     "id": "tome_column",
-     "name": "Star Chart and Orb",
-     "blurb": "Tome: main hand, ranged, slower than a wand; casts a long, wide column of arcane force through everything in it, with an orb in the off hand (your hits burst around the enemy struck).",
-     "main": "tome",
-     "off": "orb",
-     "style": "tome_column",
-     "element": "arcane"
-    },
-    {
-     "id": "staff_lance",
-     "name": "Zenith Staff",
-     "blurb": "Staff: two-handed; its attack is an instant lance of arcane force through everything in a line.",
-     "main": "staff",
-     "element": "arcane",
-     "style": "beam"
     }
    ]
   }

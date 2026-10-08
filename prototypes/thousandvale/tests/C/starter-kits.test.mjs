@@ -22,7 +22,7 @@ const isCaster = c => c.primaryAttr === 'INT' && (c.weapons || []).some(w => w =
 const maxTier = c => Math.max(TIER.indexOf(c.armorTier), ...(c.startingArmour || []).filter(k => KIT_ARMOUR_BASES.includes(k)).map(tierOf));
 
 test('every class has 3 armour sets and 3-6 weapon packs, built only from bases that exist', () => {
-  assert.equal(engine.classes.length, 30);
+  assert.equal(engine.classes.length, 31);      // Farhold's thirty and Thousandvale's own Starcaller (owner feedback 10, Y32)
   assert.deepEqual(Object.keys(json.classes).sort(), engine.classes.map(c => c.id).sort());
   const bad = [];
   for (const c of engine.classes) {
@@ -84,7 +84,9 @@ test('weapon packs obey the hands: no off hand with a two-hander, shields only f
       if (magic && !ELEMENTS.includes(w.element)) bad.push(`${c.id}/${w.id}: a caster weapon names its element (${w.element})`);
       if (!magic && (w.element || w.style || w.spell)) bad.push(`${c.id}/${w.id}: element / style / spell on a weapon that casts nothing`);
       if (w.main === 'wand' && !STYLES.includes(w.style)) bad.push(`${c.id}/${w.id}: wand style ${w.style}`);
-      if (w.main !== 'wand' && w.style) bad.push(`${c.id}/${w.id}: only a wand has a style`);
+      // owner feedback 10 (Y16): a tome is a main-hand caster weapon with a form of its own
+      if (w.main === 'tome' && !engine.casterForms.styles[w.style]?.tome) bad.push(`${c.id}/${w.id}: tome form ${w.style}`);
+      if (w.main !== 'wand' && w.main !== 'tome' && w.style) bad.push(`${c.id}/${w.id}: only a wand or a tome has a style`);
       if (w.main === 'staff' && staffSpell({ staffSpell: w.spell }, w.element).key !== w.spell) bad.push(`${c.id}/${w.id}: no ${w.element} staff spell "${w.spell}"`);
       if (w.main !== 'staff' && w.spell) bad.push(`${c.id}/${w.id}: only a staff has a spell`);
       if (c.armorTier === 'cloth' && c.primaryAttr === 'INT' && main.weaponCategory === 'heavy') bad.push(`${c.id}/${w.id}: a cloth caster with ${w.main}`);

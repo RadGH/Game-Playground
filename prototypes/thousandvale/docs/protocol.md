@@ -347,6 +347,7 @@ room routes it to clients whose view covers `(x, z)`, or only to `to` (a local i
 | `open` | `d` | I opened chest `d` (to me only). |
 | `tele` | `id, s, ab, k, ms, shape, x, z, yaw?, r?, r2?, arc?, len?, w?, el?, follow?` | A telegraph (encounters.md §7): `id` = telegraph id, `s` = caster entity, `ab` = ability, `k` = kind (harm/safe/stack/soak), lands at `k_batch * tickMs + ms` on the room clock; shapes `circle ring donut cone line cross` (`yaw` 0 = +z); `follow` = the entity id it rides. |
 | `teleR` | `id, hits?:[entity ids], x?` | The telegraph resolved (flash + remove); `x:1` = cancelled (fade, no burst). |
+| `teleM` | `id, x, z` | Round 10 (C, Y12): a telegraph anchored on its caster MOVED with it (the caster was knocked back) — same `id` as its `tele`; move the drawn shape. `teleR.why` may now be `interrupted` by a knock. |
 | `castbar` | `id, ab, name, ms, int?` | Monster `id` started a cast (`int:1` = interruptible). |
 | `castX` | `id, ab, why` | The cast broke (`interrupt`, `stun`, `phase`, `reset`). |
 | `phase` | `id, n, name?, bar, hpMax?, reset?` | A boss phase turned; `hpMax` = a new health bar. |

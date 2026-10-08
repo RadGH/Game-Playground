@@ -83,22 +83,43 @@ export function goldFound(cfg, amount, goldFind = 0) {
   return Math.max(0, Math.round(amount * (1 + Math.max(0, Math.min(cap, goldFind || 0)) / 100)));
 }
 
-/** An hour of questing gold at `level` (the knob `retrain.hour`, fitted to E's sim) — the yardstick the Unbinder is priced in. */
-export function questHour(cfg, level = 1) {
-  const H = cfg?.retrain?.hour || {};
-  return (H.base ?? 730) + (H.perLevel ?? 520) * Math.max(0, (level || 1) - 1);
+/**
+ * Owner feedback 10 (Y14, Y31): what a character has EARNED IN TOTAL by the time it reaches `level` — the one income
+ * table (data/rules/prices.json `income.lifetime`, rows of [level, gold], straight lines between rows, the last slope
+ * carried on past the end). Stream E owns the numbers; every price that is "a share of what you have earned" reads this.
+ */
+export function lifetimeGold(cfg, level = 1) {
+  const rows = (cfg?.income?.lifetime || []).filter(r => Array.isArray(r) && Number.isFinite(r[0]) && Number.isFinite(r[1])).sort((a, b) => a[0] - b[0]);
+  if (!rows.length) return 0;
+  const L = Math.max(1, +level || 1);
+  if (L <= rows[0][0]) return Math.max(0, rows[0][1]);
+  for (let i = 1; i < rows.length; i++) {
+    if (L <= rows[i][0]) { const [l0, g0] = rows[i - 1], [l1, g1] = rows[i]; return Math.max(0, g0 + (g1 - g0) * (L - l0) / Math.max(1e-9, l1 - l0)); }
+  }
+  const n = rows.length, [l0, g0] = rows[n - 2] || rows[n - 1], [l1, g1] = rows[n - 1];
+  return Math.max(0, g1 + (n > 1 ? (g1 - g0) / Math.max(1e-9, l1 - l0) : 0) * (L - l1));
 }
 /**
- * What the Unbinder charges (owner feedback 7): `kind` talent | perk | spell, `scope` 'one' | 'all'. One taken back costs
- * `minutes[kind]` minutes of questing gold at the character's level, everything of a kind `allHours` hours. Null when
- * the knob is absent (the caller falls back to Farhold's own table).
+ * The gold one LEVEL of play brings at `level` (lifetime(level + 1) - lifetime(level)) — kept under its round-7 name
+ * for stream E's sim, which used to be handed its own "questing hour" back; it is now derived from the one income
+ * table and is a level's worth, not an hour's.
+ */
+export function questHour(cfg, level = 1) {
+  return Math.round(lifetimeGold(cfg, (level || 1) + 1) - lifetimeGold(cfg, level || 1));
+}
+/**
+ * What the Unbinder charges: `kind` talent | perk | spell, `scope` 'one' | 'all'. A share of what a character of that
+ * level has earned in total (`retrain.allShare` for everything of a kind, `retrain.oneShare[kind]` for one), never
+ * under `retrain.min`, rounded to 5 gold. Null when the knob is absent (the caller falls back to Farhold's own table).
  */
 export function retrainPrice(cfg, kind = 'talent', scope = 'one', level = 1) {
   const R = cfg?.retrain;
-  if (!R) return null;
-  const hour = questHour(cfg, level);
-  const share = scope === 'all' ? (R.allHours ?? 2) : (R.minutes?.[kind] ?? 17.5) / 60;
-  return Math.max(1, Math.round(hour * share / 5) * 5);
+  if (!R || !cfg?.income?.lifetime) return null;
+  const earned = lifetimeGold(cfg, level);
+  const all = scope === 'all';
+  const share = all ? (R.allShare ?? 0.15) : (R.oneShare?.[kind] ?? 0.012);
+  const floor = all ? (R.min?.all ?? 25) : (R.min?.one ?? 5);
+  return Math.max(floor, Math.round(earned * share / 5) * 5);
 }
 
 export const PRICE_RARITIES = RARITIES;

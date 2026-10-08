@@ -35,7 +35,7 @@ import { reviveOf, directHealSlot } from './tv-skills.js';
 import { runtimeFor, shapeOfUnit } from './cast-skills.js';
 import { attackReach, basicCard, isHeldFocus, stampCaster } from './caster-forms.js';
 import { TV_SLOTS, bagBonusOf, isLightItem as isLightRaw, lightRefund as lightRefundRaw } from './tv-gear.js';
-import { itemPrice, sellPrice as sellPriceOf, priceParts, killGold as killGoldOf, goldFound, isGear, retrainPrice as retrainPriceTv, questHour as questHourOf } from './economy.js';
+import { itemPrice, sellPrice as sellPriceOf, priceParts, killGold as killGoldOf, goldFound, isGear, retrainPrice as retrainPriceTv, questHour as questHourOf, lifetimeGold as lifetimeGoldOf } from './economy.js';
 import { weaponHands } from './farhold.js';
 import { handOf, handText, fitsHand, handRefusal, autoSlot } from './hands.js';
 import { makeCrate as makeCrateItem, openCrate as openCrateItem, isCrate, crateText } from './crates.js';
@@ -112,6 +112,8 @@ export { goldFound };
 /** The Unbinder's price at a level, and the hour of questing gold it is measured in (for E's sim). */
 export const unbinderPrice = (kind = 'talent', scope = 'one', level = 1) => retrainPriceTv(shared?.prices || null, kind, scope, level);
 export const questHour = (level = 1) => questHourOf(shared?.prices || null, level);
+/** Owner feedback 10 (Y14, Y31): gold a character has earned in total on reaching `level` — the ONE income table (prices.json `income.lifetime`). */
+export const lifetimeGold = (level = 1) => lifetimeGoldOf(shared?.prices || null, level);
 /** The average worth of what a crate opens into at `level` (list price and sell price over `n` opens) — for the sim. */
 export function crateValue(spec = {}, level = 1, cls = null, n = 200) {
   if (!shared) return null;
@@ -281,7 +283,7 @@ export function createRules(host, opts = {}) {
   });
   const entOf = unit => (unit?.id != null ? host.entities.get(unit.id) : null);
   // owner feedback 8 (W1): town guards — ownerless friendly fighters (js/rules/guards.js)
-  const guards = attachGuards(room, { cfg: engine.guardsCfg });
+  const guards = attachGuards(room, { cfg: engine.guardsCfg, wanderer: engine.combatCfg?.wanderer || null });
   let regenClock = 0;
   let builds = 0, handoffs = 0;
 
@@ -311,6 +313,14 @@ export function createRules(host, opts = {}) {
       const e = entOf(p);
       if (!e) continue;
       p.x = e.x; p.y = e.y; p.z = e.z; p.yaw = e.yaw;
+    }
+    // owner feedback 10 (Y21): a wilderness NPC that is NOT fighting stands wherever the room walked it to (the room
+    // owns its feet until a fight starts; then the rules do, and the room leaves it alone — `rules.npcFighting`)
+    for (const g of guards.list) {
+      if (!g.wanderer || guards.fighting(g)) continue;
+      const e = entOf(g);
+      if (!e) continue;
+      g.x = e.x; g.z = e.z; g.post.x = e.x; g.post.z = e.z; if (Number.isFinite(e.yaw)) { g.facing = e.yaw; g.post.yaw = e.yaw; }
     }
   }
 
@@ -436,6 +446,15 @@ export function createRules(host, opts = {}) {
           host.event({ ...rest, type: t });
           break;
         }
+        // owner feedback 10 (Y21): a wilderness NPC's fight ended and it is standing — the room thanks whoever helped
+        case 'npcHelped': {
+          const npc = host.entities.get(ev.npc), pl = host.entities.get(ev.player);
+          if (!npc || !pl) break;
+          const info = { kind: ev.kind, level: ev.level, foes: ev.foes, share: ev.share };
+          host.npcHelped?.(npc, pl, info);
+          host.event({ type: 'fx', kind: 'npcThanks', id: npc.id, to: pl.id, why: ev.kind });
+          break;
+        }
         default: break;              // spawn/gone/death/reward/move are carried by the entities themselves
       }
     }
@@ -480,6 +499,13 @@ export function createRules(host, opts = {}) {
   function adoptGuard(e, spec = {}) {
     const g = e.data?.guard && typeof e.data.guard === 'object' ? e.data.guard : {};
     const unit = guards.create({ id: e.id, name: e.name, x: e.x, z: e.z, yaw: e.yaw, level: spec.level ?? g.level ?? (e.level > 1 ? e.level : null) ?? host.level ?? 1, rank: spec.rank || g.rank || 'guard', town: spec.town ?? g.town ?? null });
+    e.r.unit = unit;
+    e.setMax(unit.maxHp, 0); e.setHp(unit.hp);
+    return unit;
+  }
+  function adoptFighter(e) {
+    const f = e.data?.fighter && typeof e.data.fighter === 'object' ? e.data.fighter : {};
+    const unit = guards.create({ id: e.id, name: e.name, x: e.x, z: e.z, yaw: e.yaw, level: f.level ?? (e.level > 1 ? e.level : null) ?? host.level ?? 1, wanderer: true });
     e.r.unit = unit;
     e.setMax(unit.maxHp, 0); e.setHp(unit.hp);
     return unit;
@@ -557,6 +583,9 @@ export function createRules(host, opts = {}) {
     // owner feedback 8 (W1): an NPC the room spawned with `data.guard` (stream E's guard rows) gets its fighter here —
     // the room needs no call of its own. `data.guard.level` (or the entity's level) is the town's; a raid raises it.
     if (e.kind === 'npc' && e.data?.guard && !e.r.unit) { run(() => adoptGuard(e)); return; }
+    // owner feedback 10 (Y21): an NPC out in the wilds with `data.fighter` (true, or `{ level }`) fights what comes near it
+    // while a player is close (js/rules/guards.js — the same fighter a town guard is, with a wanderer's brief)
+    if (e.kind === 'npc' && e.data?.fighter && !e.r.unit && engine.combatCfg) { run(() => adoptFighter(e)); return; }
     if (e.kind === 'object' || e.kind === 'npc') return;
     run(() => {
       if (e.kind === 'player') {
@@ -1410,6 +1439,8 @@ export function createRules(host, opts = {}) {
     sight: (ax, az, bx, bz) => (field.sight ? field.sight(ax, az, bx, bz) : true),
     /** owner feedback 10 (Y17): training dummies */
     spawnDummy, isDummy,
+    /** owner feedback 10 (Y21): is this NPC fighting right now? (A: leave its wander alone while true) */
+    npcFighting: e => guards.fighting(e?.r?.unit || null),
     /** round 9 (Forager's Covenant): the chance of one more of a node's main material — js/rules/professions.js gatherYield `extra` */
     gatherBonus: e => { const u = e?.r?.unit; return u && engine.tvGear ? Math.min(0.5, engine.rpg.fx.sum(u, 'gatherExtra') || 0) : 0; },
     equip, unequip, canEquip, canUnequip, bagBonus, lightRefundOwed, gear, saveGear,

@@ -569,8 +569,8 @@ test('T15: off-hand focuses add their rider — Burst, Ward, Siphon, Echo — an
     assert.ok(s.mage.r.unit.mp >= 10 + R.siphon.mana, 'a siphon focus gives mana'); }
   { const s = setup('grimoire'); assert.equal(s.off.focusRider, 'echo');      // (owner feedback 10: a tome is a main-hand weapon; Echo is the grimoire's)
     const from = s.w.events.length; s.swing(R.echo.every); s.w.steps(12);      // owner feedback 8: a bolt takes longer to arrive, and the echo follows the hit
-    const bolts = s.w.events.slice(from).filter(e => e.type === 'fx' && e.kind === 'bolt' && e.basic);
-    assert.equal(bolts.length, R.echo.every + 1, `every ${R.echo.every}th attack repeats (${bolts.length} bolts for ${R.echo.every} attacks)`); }
+    const echoes = s.w.events.slice(from).filter(e => e.type === 'fx' && e.kind === 'rider' && e.rider === 'echo');
+    assert.equal(echoes.length, 1, `every ${R.echo.every}th attack repeats (${echoes.length} echoes for ${R.echo.every} attacks)`); }
   { const s = setup('wand', { castStyle: 'bolt', attune: 'fire' });
     const from = s.w.events.length; s.swing(1); s.w.steps(10);
     const casts = s.w.events.slice(from).filter(e => e.type === 'cast' && e.slot === 0);

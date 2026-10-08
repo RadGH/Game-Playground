@@ -39,7 +39,7 @@ test('T18: the stat rows are the derived sheet, in D-UI\'s row shape', () => {
   assert.equal(v('damageMin'), Math.round(d.damage[0])); assert.equal(v('damageMax'), Math.round(d.damage[1]));
   assert.equal(v('armor'), Math.round(d.armor)); assert.equal(v('critChance'), Math.round(d.critChance * 10) / 10);
   assert.equal(v('str'), d.str);
-  assert.ok(core.find(r => r.id === 'attackEvery').lowerIsBetter);
+  assert.ok(core.find(r => r.id === 'aps').value > 0);      // owner feedback 10 (Y26): attacks per second replaced the "attack interval" row
   assert.match(core.find(r => r.id === 'armor').tip, new RegExp(`reduced by ${Math.round(d.armor / (100 + d.armor) * 100)}%`), 'the armour tip is the code\'s own formula');
   assert.ok(adv.some(r => r.id === 'magicFind'), 'advanced: the uncommon stats');
   assert.ok(!adv.some(r => r.id === 'thorns'), 'a zero stat is left out');

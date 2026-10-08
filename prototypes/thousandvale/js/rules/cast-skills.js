@@ -169,13 +169,18 @@ function runtimeOf(combat) {
     obj.caster = ch.id;
     if (spec.taunt || spec.hp) obj.placed = true;
     for (const old of obj.removed || []) field.emit({ t: 'fx', kind: 'unplace', obj: old.id });
-    field.emit({ t: 'fx', kind: 'place', obj: obj.id, skill: obj.owner, x, z, r: obj.r, seconds: obj.left, element: obj.element, ...(!spec.strike && !spec.debuff && !spec.taunt && (spec.heal || spec.buff) ? { helps: true } : {}) });
+    // owner feedback 10 (Y25, report #52): a zone that RIDES someone says who — the rules always moved it (runPlaced),
+    // but the client was never told, so Blessed Earth with Moving Light was drawn where it was cast and left behind
+    const rides = follow === 'self' ? ch.id : (follow && typeof follow === 'object' && follow.id != null ? follow.id : null);
+    field.emit({ t: 'fx', kind: 'place', obj: obj.id, skill: obj.owner, x, z, r: obj.r, seconds: obj.left, element: obj.element, ...(rides != null ? { follow: rides } : {}), ...(!spec.strike && !spec.debuff && !spec.taunt && (spec.heal || spec.buff) ? { helps: true } : {}) });
     if (spec.taunt) {
       const target = objectTarget(obj);
       for (const e of field.near(x, z, obj.r + 2)) threatTaunt(e, target, spec.seconds ?? 6);
     }
     return obj;
   };
+  /** The live placed objects of one caster (tests, tools) — call inside `room.run`. */
+  rt.placedFor = casterId => mechWorld.placed.filter(o => o.caster === casterId);
   /** A placed thing a monster can be taunted onto and swing at: a field entity of kind 'object'. */
   function objectTarget(obj) {
     const id = `obj:${obj.id}`;
@@ -1612,8 +1617,12 @@ function afterCast(combat, rt, ch, plan, ctx) {
     const at = plan.place.follow === 'self' || plan.kind === 'self' || plan.kind === 'around' ? { x: ch.x, z: ch.z } : spot;
     rt.place(ch, plan, plan.place, at.x, at.z, follow);
   } else if (plan.place && plan.kind === 'ground') {
-    const follow = plan.place.follow === 'target' ? aimedEnemy(field, ch, ctx.intent, a, plan.range || 30) : null;
-    rt.place(ch, plan, plan.place, spot.x, spot.z, follow);
+    // owner feedback 10 (Y25): a GROUND skill whose talent says "it follows you" (Moving Sanctuary, Carried Post, Moving
+    // Glyph, Drifting Field) never did — this branch only ever asked about `target` (Farhold's skillrun.js does the
+    // same: reported to the lead as a Farhold finding; a parity engine keeps it). It is put down on the caster and rides.
+    const self = rt.tv && plan.place.follow === 'self';
+    const follow = self ? 'self' : plan.place.follow === 'target' ? aimedEnemy(field, ch, ctx.intent, a, plan.range || 30) : null;
+    rt.place(ch, plan, plan.place, self ? ch.x : spot.x, self ? ch.z : spot.z, follow);
   }
   if (plan.pool && !plan.line && !deferPool) {
     const spec = poolSpec({ element: plan.element, ...plan.pool });

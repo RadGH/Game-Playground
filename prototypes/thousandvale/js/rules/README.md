@@ -273,3 +273,23 @@ Contracts: docs/requests.md "Round 8 contracts — C". Tests: `tests/C/playtest8
 ### Round 9 — the dead-data rule for gear
 
 `tests/C/effect-audit.mjs` + `tests/C/dead-data.test.mjs`: no droppable, craftable, promotable or kit item carries a power or property line nothing reads — proven by wearing each line in a real fight (hook called / changed sheet field read / knob check), not by looking it up in a table. What it changed in the rules: `index.js step` ticks Farhold's timed effects (`rpg.fx.update`, never called before), `sheetCheck` re-derives on kills / low mana / night, the gear barrier refills; `guards.js` reads `guardPower`; `cast.js resolveArrow` reads a quiver's element; `tv-gear.js` `INERT_POWERS` / `stripInert` / `stripInertItem` take the three travel powers off uniques, sets and owned items, and `removeSlotless` the tool / mount properties. All of it is off on a parity engine (`engine.tvGear` null).
+
+## Owner feedback 10 (2026-10-08) — what changed in the rules
+
+Contracts and every number: docs/requests.md "Round 10 — C status". Tests: tests/C/playtest10.test.mjs.
+
+| Item | Where | What |
+|---|---|---|
+| Y9 one number a swing | `cast.js` resolveSwing, `field.js` strike `bonus` / strikeArea `skip` | Farhold's melee swing strikes the arc and then a "splash behind the arc" that re-hits the arc's own targets. With `combat.json` `melee.foldSplash` the splash share is folded into the one hit; the splash only strikes what the arc missed. |
+| Y16 hands | `hands.js`, `caster-forms.js` stampCaster, `character.js` restoreGear, `index.js` equip / canEquip / addEntity | `handOf(item)` -> main / off / one / two. Tomes: ranged main-hand caster weapons (`styles` rows with `tome: true`, `pace` 1.5). Orbs: off-hand, `noAttack`. Saved gear in an illegal hand is moved (`settleHands`) and handed to the room's bag. |
+| Y10 walls | `sight.js`, `field.sight` (an instance only) | One line test over `terrain.walls`, cached. Read by `field.strike` / `strikeArea` / `strikeSegment`, bolts and arrows (`sight.reach`), the skill beam, ground spots, the preflight (`why: sight`), monster melee / shots (`monster-ai.js`), telegraph victims (`encounter.js`), auras and placed zones. |
+| Y7 / Y26 the attack clock | `combat-cfg.js` | `hasteK` (attack speed inside its cap), `movingPace`, `attackRate` — the one clock `cast.js` paces with and the card / sheet print. |
+| Y12 knocks | `encounter.js` knocks / interrupt, `monster-ai.js` knockDx | Caster-anchored telegraphs ride a knock (`teleM`); a knock rolls an interrupt by rank. |
+| Y25 follow | `cast-skills.js` rt.place (`follow` on the event), afterCast ground branch | A ground-cast skill's `place.follow: 'self'` is honoured (Farhold ignores it). |
+| Y20 Storm Beam | `skills-tv.json` patch, `cast-skills.js` channel tick | A channel whose remainder carries over (six pulses on a 50 ms tick), ground effects on the first pulse only, `beam` / `beamPulse` / `beamEnd` events. |
+| Y14 / Y31 income | `economy.js` lifetimeGold / retrainPrice, `prices.json` `income` | One income table; the Unbinder is a share of it. |
+| Y17 dummy | `index.js` makeDummy / spawnDummy, `monster-ai.js` tickDummy, `field.js` (kill / land / credit refuse it) | |
+| Y21 wanderers | `guards.js` (`wanderer` units, engage / tally / endFight), `index.js` adoptFighter, `npcHelped` | The same fighter a town guard is, with a different brief. |
+| Y32 Starcaller | `classes-tv.json`, `tv-skills.js` installTvClasses, `cast-skills.js` `tv.sky` (`fx skyfall`) | A class that exists only here; built and audited by the code every other class goes through. |
+
+Farhold findings 8 and 9 (the melee double hit; a ground skill's `follow: 'self'` ignored) are written up in docs/requests.md.

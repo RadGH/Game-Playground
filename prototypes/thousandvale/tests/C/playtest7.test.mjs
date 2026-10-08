@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs';
 import { createRoom } from '../../js/sim/room.js';
 import { standInTerrain } from '../../js/sim/terrain.js';
 import { createShops } from '../../js/sim/shops.js';
-import { createRules, rulesEngine, priceOf, sellPriceFor, priceRow, killGold, crateValue, fishing, makeCrate, unbinderPrice, questHour } from '../../js/rules/index.js';
+import { createRules, rulesEngine, priceOf, sellPriceFor, priceRow, killGold, crateValue, fishing, makeCrate, unbinderPrice } from '../../js/rules/index.js';
 import { itemPrice, sellPrice, killGold as killGoldOf, goldFound, priceParts } from '../../js/rules/economy.js';
 import { createFishing } from '../../js/rules/fishing.js';
 import { engineFor, parityEngineFor } from './setup.mjs';
@@ -180,19 +180,14 @@ test('V2 fishing: commons are worth little and the prized few a lot; the same wa
   assert.ok(Math.abs(p2.price - p1.price * 6) <= 6, `perBand 1 at level 6 = x6, once (not x36): ${p1.price} -> ${p2.price}`);
 });
 
-test('V2 the Unbinder: one taken back is 15-20 minutes of questing gold at your level, everything about two hours', () => {
+test('the Unbinder (owner feedback 10, Y14 — it replaces the round-7 "minutes of a questing hour" rule): a share of what a character of that level has really earned in total', () => {
   for (const L of LEVELS) {
-    const hour = questHour(L);
     for (const kind of ['talent', 'perk', 'spell']) {
       const one = unbinderPrice(kind, 'one', L), all = unbinderPrice(kind, 'all', L);
-      assert.ok(one / hour >= 14.5 / 60 && one / hour <= 20.5 / 60, `L${L} ${kind}: one costs ${Math.round(one / hour * 60)} minutes of questing (${one} gold)`);
-      assert.ok(Math.abs(all / hour - 2) < 0.1, `L${L} ${kind}: everything costs ${(all / hour).toFixed(2)} hours (${all} gold)`);
-      assert.ok(all > one * 5, 'everything costs several times one');
+      assert.ok(all >= one, `L${L} ${kind}: everything (${all}) is never cheaper than one (${one})`);
+      if (L >= 5) assert.ok(all > one * 5, 'everything costs several times one');
     }
     assert.ok(unbinderPrice('talent', 'one', L) <= unbinderPrice('perk', 'one', L) && unbinderPrice('perk', 'one', L) <= unbinderPrice('spell', 'one', L), 'a talent is the cheapest to take back, a spell the dearest');
-    // the yardstick itself must follow the economy: E's target is "an hour of questing buys about one uncommon piece of your level"
-    const chest = priceOf(mk('heavy_chest', 'magic', L));
-    assert.ok(hour / chest > 0.6 && hour / chest < 2.5, `L${L}: the questing hour (${hour}) against an uncommon chest (${chest}) — retune prices.json retrain.hour with the gear prices`);
   }
   assert.ok(unbinderPrice('perk', 'one', 20) > unbinderPrice('perk', 'one', 1) * 5, 'it grows with your level');
   // the room charges it

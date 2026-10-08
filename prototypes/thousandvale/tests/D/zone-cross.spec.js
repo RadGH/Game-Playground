@@ -105,9 +105,9 @@ for (let run = 1; run <= RUNS; run++) {
     let offsetUs = null;
     { const id = profile.nodes.find(n => n.callFrame.functionName === '__tvGateMarker')?.id; let t = profile.startTime;
       for (let i = 0; i < profile.samples.length; i++) { t += profile.timeDeltas[i]; if (profile.samples[i] === id) { offsetUs = t - mark[0] * 1000; break; } } }
-    const big = A.tasks.filter(x => x.ms > 400).sort((a, b) => b.ms - a.ms).slice(0, 4);
+    const big = A.tasks.filter(x => x.ms > 100).sort((a, b) => b.ms - a.ms).slice(0, 60);
     const cuts = offsetUs == null ? [] : big.map(x => ({ t0: Math.round(x.t0), ms: Math.round(x.ms), ...cut(profile, offsetUs, x.t0, x.ms) }));
-    const report = { run, late: A.late, stalls: A.perf.stalls, links: A.perf.links, zones: A.world.zones, top: A.perf.top.slice(0, 10), longTasks: A.tasks.map(x => [Math.round(x.t0), Math.round(x.ms)]), cuts };
+    const report = { run, offsetUs, mark, late: A.late, stalls: A.perf.stalls, links: A.perf.links, zones: A.world.zones, top: A.perf.top.slice(0, 10), longTasks: A.tasks.map(x => [Math.round(x.t0), Math.round(x.ms)]), cuts };
     writeFileSync(join(SHOTS, `zone-cross-${run}.json`), JSON.stringify(report, null, 1));
     if (A.perf.stalls.maxTaskMs > LIMIT_MS || process.env.TV_CROSS_KEEP) writeFileSync(join(SHOTS, `zone-cross-${run}.cpuprofile`), JSON.stringify(profile));
     console.log(`[cross ${run}]`, JSON.stringify({ stalls: A.perf.stalls, links: A.perf.links, zones: A.world.zones, lateFromBeforeReset: A.late }));

@@ -1,0 +1,20 @@
+
+Raiders at Torborhold — Torborhold, level 3, limit 12 min, 9 guards
+  a guard: level 5, 324 health, 1.8 damage a second   ·   a wave-1 raider: 67 health, 7 a second   ·   a player: 126 health, 23.2 a second (basic attacks only)
+  wave 1, guards alone: cleared in 32 s, 9/9 guards standing, weakest at 71%
+  guards alone        LOST (time, reached stage 4), fewest guards standing 0/9
+  guards + 1 player   WON in 1m41s, fewest guards standing 9/9
+  guards + 2 players  WON in 1m11s, fewest guards standing 9/9
+  guards + 3 players  WON in 1m02s, fewest guards standing 9/9
+  1 player, no guards WON in 7m29s
+  2 players, no guards WON in 3m18s
+
+The Red Banner at Halsbridge — Halsbridge, level 5, limit 18 min, 10 guards
+  a guard: level 7, 488 health, 2.1 damage a second   ·   a wave-1 raider: 81 health, 8 a second   ·   a player: 158 health, 26.7 a second (basic attacks only)
+  wave 1, guards alone: cleared in 53 s, 10/10 guards standing, weakest at 49%
+  guards alone        LOST (time, reached stage 4), fewest guards standing 0/10
+  guards + 1 player   WON in 2m28s, fewest guards standing 10/10
+  guards + 2 players  WON in 1m49s, fewest guards standing 10/10
+  guards + 3 players  WON in 1m14s, fewest guards standing 10/10
+  1 player, no guards LOST (time, reached stage 3)
+  2 players, no guards WON in 7m41s

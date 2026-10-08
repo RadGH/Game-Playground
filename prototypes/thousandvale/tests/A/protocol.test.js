@@ -18,6 +18,7 @@ const GOOD = {
   settings: { op: 'set', data: { tradeFriendsOnly: true } }, look: { char: 2, look: { race: 'dwarf', seed: 9 } },
   // play-test 5
   kits: { cls: 'warrior' }, revive: { op: 'accept', id: 3 }, sheet: {}, feedback: { kind: 'bug', text: 'The wolves never came.', ctx: { where: { x: 1, z: 2 }, logs: ['a', 'b'] } },
+  feedbackMine: { limit: 20, before: 90 }, cart: { op: 'go', id: 12, to: 'cart_torborhold' }, meter: { on: true },
   admin: { op: 'report', id: 4, state: 'approved', note: 'good one' }, fish: { op: 'land', held: 0.7 }, cook: { id: 'cook_fish_on_a_stick', n: 2 },
 };
 

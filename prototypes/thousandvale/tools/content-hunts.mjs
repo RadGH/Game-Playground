@@ -171,6 +171,19 @@ async function main() {
       if (JSON.stringify(m.steps[i]) !== JSON.stringify(nv)) { m.steps[i] = nv; moved++; }
     });
   }
+  // 3c-pre. owner feedback 8 (W5): marks for quests given by a carter and for `ride` steps (the cart stop you ride TO)
+  if (existsSync(P('data/provinces/carts.json'))) {
+    const stops = readJ('data/provinces/carts.json').stops || [];
+    const at = s => { const o = zoneOffset(s.zone); return { zone: s.zone, x: Math.round(s.carter.x + o.ox), z: Math.round(s.carter.z + o.oz), r: 6 }; };
+    for (const d of book.defs.values()) {
+      const giverStop = stops.find(s => s.carter.id === d.giver);
+      const rides = d.steps.some(st => st.kind === 'ride');
+      if (!giverStop && !rides) continue;
+      const m = (marks.quests[d.id] ||= { zone: giverStop ? giverStop.zone : null, giver: null, steps: [] });
+      if (giverStop) { m.zone = giverStop.zone; m.giver = at(giverStop); }
+      d.steps.forEach((st, i) => { if (st.kind !== 'ride') return; const from = stops.find(s => s.id === st.from) || giverStop, to = stops.find(s => s.id === st.to); m.steps[i] = from ? { ...at(from), to: to ? at(to) : null } : (to ? at(to) : null); });
+    }
+  }
   // 3b. play-test 5 T25: marks for the angling quests (the placer knows neither the anglers nor `catch` / `cook` steps)
   if (existsSync(P('data/provinces/angling-pools.json')) && existsSync(P('data/quests/angling.json'))) {
     const AP = readJ('data/provinces/angling-pools.json'), AQ = readJ('data/quests/angling.json');

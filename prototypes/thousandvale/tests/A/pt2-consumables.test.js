@@ -78,7 +78,7 @@ test('with the real rules: a bought healing potion heals through C\'s rules.rest
   a.close(); await srv.stop();
 });
 
-test('C\'s asks: an innkeeper binds a home (saved; respawn goes there); the room host knows the night; oats speed up a ride; a torch bundle counts down and the count survives a reload', async () => {
+test('C\'s asks: an innkeeper binds a home (saved; respawn goes there); the room host knows the night; oats speed up a ride; a torch bundle is refused (lights left the game, W22)', async () => {
   const { srv, clock, world, store } = await realServer();
   const a = await joinReal(srv, clock, 'Homebody', 'warrior');
   const o = recR(world, a);
@@ -108,16 +108,16 @@ test('C\'s asks: an innkeeper binds a home (saved; respawn goes there); the room
   o2.entity.mount = 'trail_horse'; o2.entity.speedMul = 1.4;
   await run(clock, 1200);
   assert.ok(Math.abs(o2.entity.speedMul - 1.4 * 1.1) < 1e-6, 'oats: ' + o2.entity.speedMul + ' (was ' + base + ')');
-  // a torch bundle: one charge per use, the bag item keeps `left`, and the journal carries it (replayed on a reload)
+  // W22 (round 8): torches left the game — the rules refuse to light one, in a sentence. A charged good still counts down
+  // and its count still survives a reload (a whetstone bundle stands in for the old torch bundle).
   world.grant(o2, { items: [{ kind: 'good', id: 'torch_bundle', name: 'Bundle of torches', use: { type: 'light', minutes: 10, charges: 6 } }], gold: 0, reason: 'test' }); await run(clock, 200);
   a.item('use', 'id:torch_bundle'); await run(clock, 200);
-  const tb = o2.char.bag.find(i => i.id === 'torch_bundle');
-  assert.ok(tb && tb.left === 5, 'five torches left: ' + JSON.stringify(got.filter(x => x.t === 'itemR').pop()));
+  const no = got.filter(x => x.t === 'itemR').pop();
+  assert.equal(no.ok, false); assert.equal(no.why, 'gone'); assert.match(no.msg, /removed from the game/);
   await world.flushJournal(); await run(clock, 100);
   const acct = o2.char.account, id = o2.char.id;
   a.close(); await run(clock, 500);
   const re = await store.takeChar(acct, id, 'test-reader', 1000);
-  assert.equal(re.char.bag.find(i => i.id === 'torch_bundle').left, 5, 'the count survives a reload');
   assert.equal(re.char.bind, town.id, 'the home survives a reload');
   await srv.stop();
 });

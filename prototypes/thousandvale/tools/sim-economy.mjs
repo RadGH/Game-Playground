@@ -332,10 +332,10 @@ export async function extraRows(r) {
   if (!existsSync(f)) return [];
   try {
     const m = await import(f.href);
-    const fn = m.rows || m.professionRows || m.default;
+    const fn = m.extraRows || m.rows || m.professionRows || m.default;   // P-core's name is extraRows({ levels, questHour })
     if (typeof fn !== 'function') return [];
     const questing = Object.fromEntries(Object.entries(r.levels).map(([L, v]) => [L, v.activities.questing.gold]));
-    const rows = (await fn({ levels: Object.keys(r.levels).map(Number), questing, before: r.before })) || [];
+    const rows = (await fn({ levels: Object.keys(r.levels).map(Number), questHour: questing, questing, before: r.before })) || [];
     return rows.filter(x => x && x.activity && Number.isFinite(x.goldPerHour)).map(x => ({ ...x, share: questing[x.level] ? +(x.goldPerHour / questing[x.level]).toFixed(2) : null }));
   } catch (err) { return [{ activity: 'professions', error: String(err && err.message || err) }]; }
 }

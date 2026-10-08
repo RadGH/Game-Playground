@@ -127,7 +127,7 @@ export const SCENES = [
       pad: 'A canvas cannot be stepped through, so the ring becomes a POINTER you steer with the left stick: A stages the perk under it, X hands one back, LT / RT zoom, the right stick pans. D-pad leaves the canvas for the buttons (Undo / Redo / Accept).' } },
 
   // ------------------------------------------------------------------------------------------------ Windows
-  { id: 'map', expect: '#panel-map:not([hidden]) canvas', group: 'Windows', title: 'World map', modules: [U + 'worldmap.js', U + 'map-render.js', U + 'map-image-worker.js', U + 'atlas.js'], steps: [['panel', 'map'], ['wait', 1500]],
+  { id: 'map', expect: '#panel-map:not([hidden]) canvas', group: 'Windows', title: 'World map', modules: [U + 'worldmap.js', U + 'map-render.js', U + 'map-image-worker.js', U + 'atlas.js', U + 'map-tools.js', U + 'hidden-events.js', U + 'pt8-core.js'], steps: [['panel', 'map'], ['wait', 1500]],
     pad: { steps: [['cursor', '#panel-map canvas', 0.5, 0.5]] },
     notes: { all: 'The world map: the province with what you have discovered, waystones, quest and event markers, your party. Recorded map data; the fog of war is the character’s own.',
       phone: 'The map fills the sheet: drag pans, pinch zooms, hold drops a pin (the desktop’s right-click). The preset and layer buttons scroll in one row above it. “Hide list” in the title bar folds the quest / event / waystone list away so the map gets the whole screen.', pad: 'The steered pointer again: A selects what is under it (a waystone to travel to), X drops a pin, LT / RT zoom, right stick pans.' } },
@@ -232,3 +232,14 @@ export const DEVICES = [
 export const deviceById = id => DEVICES.find(d => d.id === id) || DEVICES[0];
 /** Is a scene meant for a frame? */
 export const sceneFits = (s, deviceId) => !s.only || s.only.includes(deviceId);
+
+/**
+ * Windows that landed AFTER the gallery's last pass and still need a scene of their own (play-test 8, stream D-UI).
+ * This is a to-do list, not an exemption: tests/G/gallery.test.js prints it on every run, and the lead's audit reads it.
+ */
+export const PENDING_SCENES = {
+  'js/client/ui/cart-travel.js': 'play-test 8 W5 — the ox-cart window (needs a recorded `used {kind: cart}` answer or a hand-kept moment)',
+  'js/client/ui/meter-window.js': 'play-test 8 — the damage meter window',
+  'js/client/ui/prof-draw.js': 'play-test 8 — professions drawing helper (shown with prof-games)',
+  'js/client/ui/prof-games.js': 'play-test 8 — the profession mini-games',
+};

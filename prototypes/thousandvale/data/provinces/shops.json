@@ -889,6 +889,14 @@
             "magic": 0.38,
             "rare": 0.07
           },
+          "minCapBase": {
+            "trail_rucksack": 10,
+            "expedition_pack": 20
+          },
+          "minCap": {
+            "trail_rucksack": 10,
+            "expedition_pack": 20
+          },
           "countBase": 13,
           "catalog": [
             "g5_cloth_curltoes",

@@ -964,3 +964,26 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - **W22**: light items removed (bases, uniques, affixes, loot family, crate slot, the torch buff, the `light` slot); `LIGHT { radius 22, dungeonRadius 28, dungeonAmbient 0.4 }`; a worn light is paid back at list price on the first login.
 - **W23 starter kits**: 4-6 packs a class with no near-duplicates (measure: hands / attack / reach / element / tempo, read off the items), `role` + `diff` text written by code, armour sets with a stat lean, two new starter weapons (Woodsman's Axe, Militia Sabre).
 - tests/C/playtest8.test.mjs (14).
+
+## 2026-10-08 — stream A, owner feedback 8 (protocol v8, schema v6)
+- **W28/W29/W7 feedback**: state `completed` with a changelog note kept apart from the admin note (`done`, `doneAt`); `feedbackMine` (my own reports, by account); replies with `ref` + `#<id>`; an admin's own report is approved on arrival. `tools/feedback-state.mjs --state completed --note`, report + page + admin page print it. server/db/schema-v6.sql.
+- **W11**: the level-5 gate on mail / public chat / whispers / guilds asks the account's highest character (`alv`, `you.acct`); refusals say whether the claim or the level is missing; `admin` / `username` no longer dropped on a border-crossing ticket.
+- **W24**: road-event chests — own keepers only (E's `guardTypes`), the refusal names them, a chest opens only in its own loot window (a corpse's "take all" used to empty it), it stays 120 s or until everyone has looted, an unclaimed share is posted.
+- **W26**: calling a mount holds you still server-side; moving cannot break it; `mount {op:'cancel'}`.
+- **W27**: `info.title` only on NPCs placed for the player (`isTitled`, E's `titled`); filler sends `info.filler`.
+- **W12**: per-player `questMarks` (offer / turnin / active / later / job), `book.mark`.
+- **W19**: bag capacity = 40 + the worn backpack's slots (`bagCap`); the pack cannot come off while its room is in use (`itemR why:'bagSlots'`).
+- **W22**: lanterns and torches in the bag are paid back at entry (and when one arrives later); the `light` slot leaves the save.
+- **W21**: `meter {on}` -> `hits` rows for you, your party and their pets, 4 Hz, only for those who asked.
+- **W5**: ox carts — js/sim/carts.js over E's carts.json: `cartList`, `cart go`, `cartRide`, held ride, arrival beside the other town's cart, `cart_token`, quest step `ride`.
+- **W1**: newcomers (under level 3 or 10 minutes played, `char.played`): events with `clearOfNewcomersM` wait for them to leave (zone + realm); E's guards stand at their posts; a newcomer in a town with an event live is kept on their feet. Guards that FIGHT need a rules-side unit (asked of C).
+- Tests: tests/A/pt8-{feedback,account,chest,marks,bag,meter,carts,newcomer}.test.js (21); older tests updated for W22 / W26 / W27 / W1; tests/A 283 = 279 pass / 4 skip.
+
+## 2026-10-08 — stream E, owner feedback 8 (W1 W5 W27 W12 W24 W4 W22 W19)
+- Town guards: `data/provinces/guards.json` (168 posts, 80 gates), `tools/content-towns.mjs`, `tools/sim-raid.mjs` (docs/economy/raid-guards.txt). Events: `director.newcomer`, `startOn.clearOfNewcomersM`, `raid.gates`.
+- Ox carts: `data/provinces/carts.json` (46 stops, fare table), economy.json `cart`, wanderers.json `ox_carter`, quest `start_wheels_for_hire`, step kind `ride`, good `cart_token`.
+- Titles: `titled` on every NPC record, titles.json `titled`, `tools/content-titled.mjs`. Quest marks: `data/quests/marks/givers.json` (`tools/content-givers.mjs`), `data/provinces/town-services.json`.
+- Chests: road-events.json `rules.chest`, `guardTypes` / `guardFrom`; events.json `director.chest`.
+- Quest experience x1.5 (economy.json `quest.xpMult`); `node tools/sim-economy.mjs --curve`.
+- No light items in any shop; backpacks at the tailor and the general store.
+- Tests: tests/E/playtest8.test.js (15); tests/E 235 green.

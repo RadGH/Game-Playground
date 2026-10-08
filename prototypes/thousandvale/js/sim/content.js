@@ -195,7 +195,7 @@ export function provinceEvents(evData, { provinceId, map, terrain, sheet = null,
       const rest = e.cooldownMinutes || dz.cooldownMinutes || (e.every && e.every.minutes) || [3, 5];
       const cool = [rest[0] * 60000, (rest[1] ?? rest[0]) * 60000];
       zoneEvents.push({ ...common(e, s), zone: map[e.zone], zoneName: nameOf(e.zone), eid: e.zone, everyMs: cool, cooldownMs: cool,
-        countdownMs: Math.round((e.countdownSeconds ?? dz.countdownSeconds ?? 15) * 1000), nearM: e.nearMetres ?? dz.nearMetres ?? 50, warnMs: 0 });
+        countdownMs: Math.round((e.countdownSeconds ?? dz.countdownSeconds ?? 15) * 1000), nearM: e.nearMetres ?? dz.nearMetres ?? 50, warnMs: 0, ...(e.startOn ? { startOn: e.startOn } : {}) });
     }
   } else if (sheet && sheet.worldBoss) {
     const wb = sheet.worldBoss, s = byId(wb.id), info = encounterInfo[wb.id] || {};

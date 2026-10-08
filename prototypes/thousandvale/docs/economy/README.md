@@ -130,3 +130,10 @@ fishing p10-p90   580-790  1401-1952  5166-6018  7302-9931
 legend (once a zone)    not yet    not yet    not yet 6899g/1.9h
 ```
 Killing at level 10 moved from 5,230 to about 6,000 gold an hour (a backpack sells for more than the lantern it replaced in the drop table); every ratio the economy test pins still holds.
+
+## Owner feedback 8 — stream E (2026-10-08)
+
+- **Ox-cart fares** — economy.json `cart {base 3, metresPerGold 250, minGold 4}`; the table for every pair of towns is data/provinces/carts.json `fares`. Next town from Torborhold 7-10 gold (about 1% of a level-1 hour of questing), the dearest ride in the province 93 gold. Always under a waystone for the same road.
+- **Quests against kills (W4)** — `quest.xpMult` 1.5. `node tools/sim-economy.mjs --curve` prints kills and minutes to each level 1-10 by killing alone and by questing: `curve-before.txt` (before stream C raised kill experience), `curve-kills-only.txt` (C's change alone: questing was slower than killing up to level 6), `curve-after.txt` (now). Rule in economy.json `targets.questXp`.
+- **Guards** — `raid-guards.txt` (`node tools/sim-raid.mjs`).
+- **Professions** — the simulator prints `tools/sim-professions.mjs` `extraRows()` rows under the main table when that file exists.

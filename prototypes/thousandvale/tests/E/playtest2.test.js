@@ -49,7 +49,9 @@ const PL = Object.fromEntries(Object.entries(MAP).map(([e, w]) => [e, J(`data/vi
 const HUB = PL.test.settlements.find(s => s.name === 'Torborhold');
 const ENC = new Set(J('data/encounters/index.json').files.map(f => f.replace(/\.json$/, '')));
 const allPlaced = Object.values(PL).flatMap(f => f.placements);
-const npcPlaced = id => allPlaced.find(p => p.type === 'npc' && p.id === id);
+// an NPC another tool places (anglers, carters: `placedBy`) stands in <zone>.quest.json
+const extraPlaced = Object.values(MAP).flatMap(w => { try { return J(`data/vignettes/placements/${w}.quest.json`).placements; } catch { return []; } });
+const npcPlaced = id => allPlaced.find(p => p.type === 'npc' && p.id === id) || extraPlaced.find(p => p.type === 'npc' && p.id === id);
 const SP_OF = new Map(SETP.vignettes.map(v => [v.id, v]));
 
 // ------------------------------------------------------------------------------------------------- Q28
@@ -137,11 +139,14 @@ test('Q27: it leads to another town AND to a mini boss, in either order, then ho
   assert.deepEqual(openAfter(done), ['start_letters_south']);
   done.add('start_letters_south');
   assert.deepEqual(openAfter(done).sort(), ['start_road_to_orrinsford', 'start_signs_of_the_beast'], 'two branches at once');
+  // W5 (owner feedback 8): the carter's free ride is a side step — offered once the letter is delivered, never needed to finish
+  const SIDE = new Set(['start_wheels_for_hire']);
   // branch A then B and B then A both end at home
   for (const order of [['start_road_to_orrinsford', 'start_the_priors_favour', 'start_signs_of_the_beast', 'start_old_gristle'], ['start_signs_of_the_beast', 'start_old_gristle', 'start_road_to_orrinsford', 'start_the_priors_favour']]) {
     const d = new Set(done);
     for (const id of order) { assert.ok(openAfter(d).includes(id), `${id} open in order ${order}`); assert.ok(!openAfter(d).includes('start_home_with_news')); d.add(id); }
-    assert.deepEqual(openAfter(d), ['start_home_with_news']);
+    assert.deepEqual(openAfter(d).filter(x => !SIDE.has(x)), ['start_home_with_news']);
+    assert.ok(openAfter(d).includes('start_wheels_for_hire'), 'the cart ride is on offer once the letter is delivered');
   }
   // another town: a step talks to someone in Orrinsford, a hub town of another zone with its own room
   const orr = chain.flatMap(q => q.steps).find(s => s.npc && ALLNPC[s.npc] && ALLNPC[s.npc].at === 'Orrinsford');
@@ -209,7 +214,7 @@ test('Q27: Old Gristle is winnable at the chain\'s levels — every class at lev
 
 // ------------------------------------------------------------------------------------------------- Q9 / Q11 / Q16 / Q20
 
-const GOOD_SOURCES = { potion: id => !!ITEMS.potions[id], gear: id => !!GEAR_BASES[id], good: id => !!SHOPS.goodsCatalog[id] };
+const GOOD_SOURCES = { potion: id => !!ITEMS.potions[id], gear: id => !!GEAR_BASES[id] || TV_BASES.includes(id),   /* W19: stream C's backpacks (data/rules/gear-tv.json) */ good: id => !!SHOPS.goodsCatalog[id] };
 
 test('Q9/Q11: every shop kind has stock — gear from real bases, goods that exist, sane prices and levels', () => {
   for (const [k, s] of Object.entries(SHOPS.kinds)) {

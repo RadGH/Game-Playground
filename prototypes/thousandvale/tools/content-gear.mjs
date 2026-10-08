@@ -74,6 +74,8 @@ export function shelveCatalog(data, catalog) {
     if (c.countBase != null) c.count = c.countBase;
     delete c.catalog; delete c.minCap; delete c.countBase;
   }
+  // a hand-listed base that only a higher town sells (W19: stream C's bigger backpacks): `minCapBase` is kept, `minCap` rebuilt from it
+  for (const k of Object.values(data.kinds)) for (const c of Object.values(k.categories || {})) if (c.minCapBase) c.minCap = { ...c.minCapBase };
   const unshelved = [], byKind = {};
   let shelved = 0;
   for (const r of rows.slice().sort((a, b) => (a.minLevel || 1) - (b.minLevel || 1) || a.base.localeCompare(b.base))) {

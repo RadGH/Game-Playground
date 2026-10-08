@@ -17,7 +17,7 @@
 // (C's crates.json), shop rows, mounts, potions, barber prices (E's shops.json), quest `reward.gold` multipliers (E's quests).
 
 export const ECONOMY_DEFAULTS = Object.freeze({
-  quest: { goldBase: 3, goldPerLevel: 1, mult: 1 },           // quest gold = reward.gold x (goldBase + goldPerLevel x quest level) x mult
+  quest: { goldBase: 3, goldPerLevel: 1, mult: 1, xpMult: 1 },   // xpMult (round 8, W4): E's knob on quest XP, on top of C's rules.xpMult('quest'); quest gold = reward.gold x (goldBase + goldPerLevel x quest level) x mult
   road: { killGoldBase: 3, killGoldPerLevel: 1, chest: { base: 6, perLevel: 5, randPerLevel: 3 } },
   chest: { base: 5, perLevel: 4 },                            // a dungeon / vignette chest's gold
   treasure: { base: 20, perLevel: 10 },                       // a clue chain's cache

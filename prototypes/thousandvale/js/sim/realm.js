@@ -177,7 +177,7 @@ export function buildLayout({ key, name = null, terrain, zones = [], encounterIn
   const zoneList = zones.length ? zones : [{ key, sheet: null }];
   for (const z of zoneList) if (!z.bounds) z.bounds = multi ? (terrain.zones || []).find(q => q.key === z.key)?.bounds : terrain.bounds;
   const sitesOf = z => (multi ? allSites.filter(s => s.zone === z.key) : allSites);
-  const towns = [], doors = [], camps = [], objects = [], placedWaystones = [], zoneEvents = [], folk = [];
+  const towns = [], doors = [], camps = [], objects = [], placedWaystones = [], zoneEvents = [], folk = [], guardPosts = [];
   for (const z of zoneList) {
     const sites = sitesOf(z);
     const zt = { ...terrain, reader: { ...(terrain.reader || {}), meta: { ...(terrain.reader?.meta || {}), sites } }, spawn: z.bounds ? { x: (z.bounds.minX + z.bounds.maxX) / 2, z: (z.bounds.minZ + z.bounds.maxZ) / 2 } : terrain.spawn };
@@ -201,7 +201,7 @@ export function buildLayout({ key, name = null, terrain, zones = [], encounterIn
     let placed = null;
     if (z.vignettes && vignetteContent) {
       placed = placementContent(z.vignettes.placements, { ...z.vignettes, band: (z.sheet && z.sheet.band) || [1, 6], zone: z.key, encounterInfo, warband: (z.sheet && z.sheet.warband) || null, archetype: (z.sheet && z.sheet.archetype) || null });
-      camps.push(...placed.camps); objects.push(...placed.objects); doors.push(...placed.doors); placedWaystones.push(...placed.waystones); folk.push(...(placed.folk || []));
+      camps.push(...placed.camps); objects.push(...placed.objects); doors.push(...placed.doors); placedWaystones.push(...placed.waystones); folk.push(...(placed.folk || [])); guardPosts.push(...(placed.guards || []));
     }
     // the sheet's camp ring round the main settlement only where E placed no camps (the door guard stays)
     // ...and no door guard of ours where E placed one (`doorGuard`, at the ramp's level — P26)
@@ -263,5 +263,5 @@ export function buildLayout({ key, name = null, terrain, zones = [], encounterIn
     return { kind: st.kind || t.kind, buildings: pl.buildings.filter(b => b.town === st.id), square: pl.squares.find(q => q.town === st.id) || null };
   });
   // play-test 4: `extra` = further province data files (refunds, wanderers, treasure events…) passed straight through to L
-  return { ...(extra || {}), key, name: name || main.name, terrain, towns, townPlans, schedules, shops, mounts, offices, horizon, doors, camps, objects: wildObjects, townObjects, waystones, waystoneAliases: aliases, zoneEvents, travel, folk, marks, rares, jobs, sheet, copyCap, zoneOf, zones: zoneList, gate: townGate(terrain, main, doors.find(d => d.kind !== 'cave') || { x: main.x + 100, z: main.z }) };
+  return { ...(extra || {}), guardPosts, key, name: name || main.name, terrain, towns, townPlans, schedules, shops, mounts, offices, horizon, doors, camps, objects: wildObjects, townObjects, waystones, waystoneAliases: aliases, zoneEvents, travel, folk, marks, rares, jobs, sheet, copyCap, zoneOf, zones: zoneList, gate: townGate(terrain, main, doors.find(d => d.kind !== 'cave') || { x: main.x + 100, z: main.z }) };
 }

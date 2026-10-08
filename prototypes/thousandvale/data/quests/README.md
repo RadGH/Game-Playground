@@ -137,3 +137,11 @@ tools/content-rares.mjs` prints what a newcomer's first half hour meets (before 
 no longer reproduces the committed placement files (every zone moves — the vignette recipes were edited this round and B's wall bake came after the last
 placement), so it needs B's confirming re-bake after it. This round did NOT re-place: pools, anglers and champions all go into `.quest.json`, which
 B's bake never reads.
+
+## Owner feedback 8 (2026-10-08)
+
+- **Quest givers (W12)** — `marks/givers.json` (made by `tools/content-givers.mjs`): per quest NPC `gives`, `takes`, `mustTake` (`needsGiver`), `talks`, `jobs`, `titled`. The server decides the ! / ? per player from it.
+- **`titled`** on every `npcs` entry (W27): written by the same tool; do not set it by hand.
+- **Ox carts (W5)** — every carter is an NPC of its zone file (`role: 'carter'`, `cart: <stop id>`, `placedBy: 'content-towns'`). New step kind `ride` `{ from?, to }` (stop ids of data/provinces/carts.json), quest `tip` (a how-to paragraph), good `cart_token`. `start.json` `start_wheels_for_hire` teaches it (a side step from the carter outside Orrinsford).
+- **Events (W1, W24)** — `director.newcomer`, `director.raid`, `director.chest`; `startOn.clearOfNewcomersM` and `raid.gates` are written by `tools/content-towns.mjs` (not by hand).
+- **Experience (W4)** — a hand-in pays `reward.xp` x the level span x stream C's `questMult` x `data/provinces/economy.json` `quest.xpMult` (1.5). `node tools/sim-economy.mjs --curve`.

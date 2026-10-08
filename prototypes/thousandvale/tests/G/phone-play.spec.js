@@ -85,7 +85,7 @@ test('2. the thumb stick walks the character; nothing you can press is under 44 
 
 test('3. target a monster, fight it with the attack and skill buttons, loot the body', async () => {
   test.setTimeout(300000);
-  await hook('/level', { name: NAME, level: 12 });
+  await hook('/level', { name: NAME, level: 30 });        // sturdy enough that the fight is about the buttons, not about surviving a pack
   // stand near the closest monster (the walk there is not what this checks)
   const near = async () => page.evaluate(() => { const y = tv.state().you; return tv.state().ents.filter(e => e.kind === 'monster' && !e.dead).map(e => ({ ...e, d: Math.hypot(e.x - y.x, e.z - y.z) })).sort((p, q) => p.d - q.d)[0] || null; });
   let m = await near();
@@ -106,7 +106,7 @@ test('3. target a monster, fight it with the attack and skill buttons, loot the 
   await shot('07-target');
   const tid = await page.evaluate(() => tv.state().target);
   const dead = () => page.evaluate(id => { const e = tv.state().ents.find(x => x.id === id); return !e || e.dead; }, tid);
-  for (let i = 0; i < 60 && !(await dead()); i++) {
+  for (let i = 0; i < 45 && !(await dead()); i++) {
     await page.locator('#actionbar > .slot').first().tap();
     if (i % 4 === 1) await page.locator('#actionbar > .slot').nth(2).tap().catch(() => {});
     await page.waitForTimeout(700);

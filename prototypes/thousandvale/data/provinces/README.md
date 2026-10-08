@@ -62,3 +62,12 @@ schedules), `tests/E/quests.test.js` (sites).
   tests/E/playtest7-economy.test.js. A fixed price in `shops.json` must cost at least one kill and at most twenty hours at the level it opens.
 - **Pools (V3)** — `angling-pools.json` now has a `town` pool (always open, tier 1) for every hub town with water in reach, with the angler beside it;
   `byRoad` pools from a second roadside pass; 60% of a zone's pools are tier 1 and 60% are open at once.
+
+## Owner feedback 8 (2026-10-08): town guards, ox carts, titles, town services
+
+- **`guards.json`** (W1) — `rules` (what a guard is), `ranks`, `raid` (how a raid meets them), `hold` (the tuning rule), and the generated `posts` + `gates`. `node tools/sim-raid.mjs` prints whether the guards hold each town raid alone / with players.
+- **`carts.json`** (W5) — the Longroad Carters: `rules`, `stops` (one per settlement), `links`, `fares` (every pair, priced by economy.json `cart`), `roaming`.
+- **`town-services.json`** (W15) — which roles and shop kinds each settlement has, for the map's search.
+- Made by `tools/content-towns.mjs` -> `tools/content-givers.mjs` -> `tools/content-hunts.mjs` (the last copies guards, carters and carts into `data/vignettes/placements/<zone>.quest.json` as `guard`, `npc` and `cart` rows). Run those three after any re-bake that moves a gate. The hand-written blocks of guards.json / carts.json are kept by the tool.
+- `titled: true | false` (W27) is on every NPC record; the rule is `tools/content-titled.mjs` and, as data, `data/names/titles.json` `titled`.
+- `shops.json`: no light items (W22); backpacks at the tailor (W19) — `minCapBase` on a category is the hand-kept version of `minCap` for bases that are not catalog rows.

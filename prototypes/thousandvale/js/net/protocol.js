@@ -6,7 +6,7 @@
 //   parseFrame(str)    -> { msg } | { bad: reason }   (JSON text frame -> validated message)
 //   createBuckets()    -> per-socket rate limiter: take(t) -> true if allowed
 
-export const PROTOCOL_VERSION = 7;      // v7: play-test 5 (create.kit, kits, revive, sheet, feedback, admin, fish, cook) — all additive; v6: play-test 2
+export const PROTOCOL_VERSION = 8;      // v8: owner feedback 8 (feedbackMine, questMarks, cart, meter/hits, you.acct, you.bagMax, mount cancel) — all additive; v7: play-test 5 (create.kit, kits, revive, sheet, feedback, admin, fish, cook) — all additive; v6: play-test 2
 export const SNAP_VERSION = 1;
 export const TICK_MS = 50;
 export const MAX_FRAME = 16 * 1024;

@@ -7,7 +7,8 @@
  },
  "quest": {
   "mult": 2.7,
-  "_doc": "a quest's purse = reward.gold (6-10 for an errand, 20-50 for a dungeon or story step) x one kill's gold x this."
+  "_doc": "a quest's purse = reward.gold (6-10 for an errand, 20-50 for a dungeon or story step) x one kill's gold x this. xpMult (owner feedback 8, W4): a hand-in pays reward.xp x the level span x stream C questMult x THIS. Stream C raised kill experience x1.5 at levels 1-6; without this an hour of questing levelled you SLOWER than an hour of standing in a camp at every level up to 6 (x0.64-0.9). `node tools/sim-economy.mjs --curve` prints the table.",
+  "xpMult": 1.5
  },
  "event": {
   "perLevel": 1,
@@ -109,7 +110,22 @@
    0.04
   ],
   "cartFarthestShare": 0.12,
-  "cartUnderWaystone": true
+  "cartUnderWaystone": true,
+  "questXp": {
+   "questingOverKilling": [
+    0.85,
+    2.2
+   ],
+   "handInShare": [
+    0.45,
+    0.85
+   ],
+   "levels": [
+    2,
+    10
+   ],
+   "_doc": "W4: at every level in `levels`, an hour of questing gives at least questingOverKilling[0] of the experience of an hour of pure killing (and never more than [1] — kills must stay a fair share), and hand-ins are handInShare of a questing hour."
+  }
  },
  "mail": {
   "postage": 3

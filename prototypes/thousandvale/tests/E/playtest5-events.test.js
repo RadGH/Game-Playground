@@ -100,6 +100,8 @@ test('the reward preview promises no rarity the reward does not hold, and nothin
 test('a wanderer that offers something offers an event that has info', () => {
   for (const [id, k] of Object.entries(wanderers.kinds)) {
     if (!k.offers) continue;
+    // W5 (owner feedback 8): a cart for hire offers a ride — its rules are data/provinces/carts.json `roaming`, not a road event
+    if (k.offers === 'cart') { const C = JSON.parse(readFileSync(new URL('../../data/provinces/carts.json', import.meta.url), 'utf8')); assert.equal(C.roaming.kind, id); assert.ok(k.vehicle === 'ox_cart' && k.stopNear >= C.rules.flagDownM); continue; }
     assert.ok(Array.isArray(road[k.offers]) && road[k.offers].length, `${id}: offers "${k.offers}", which road-events.json does not have`);
     for (const s of road[k.offers]) assert.ok(s.info, `${id} -> ${k.offers} ${s.id}`);
   }

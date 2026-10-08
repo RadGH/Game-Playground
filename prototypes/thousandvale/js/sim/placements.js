@@ -43,6 +43,7 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
   const npcs = (quests && quests.npcs) || {};
   const questList = (quests && quests.quests) || [];
   let camped = false, doorGuard = false;
+  const guards = [];
 
   for (const p of list) {
     const h = strHash(p.id || p.type + p.x + p.z);
@@ -74,6 +75,8 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
         break;
       case 'guard':       // W1 (round 8): a town guard's post (js/sim/guards.js makes the fighter)
         guards.push({ id: p.id, name: p.name || 'Guard', rank: p.rank || 'guard', town: p.town || null, post: p.post || 'gate', gate: p.gate || null, x: p.x, z: p.z, yaw: p.yaw || 0 });
+        objects.push({ type: 'npc', name: p.name || 'Guard', x: p.x, z: p.z, yaw: p.yaw || 0, key: 'guard:' + p.id, npc: { role: 'guard', says: [], titled: false }, guard: { rank: p.rank || 'guard', post: p.post || 'gate', gate: p.gate || null, town: p.town || null },
+          schedule: { blocks: [{ from: 0, at: { x: p.x, z: p.z, yaw: p.yaw || 0 }, do: 'guard' }], says: null } });
         break;
       case 'waystone':
         waystones.push({ key: 'ws:' + p.id, name: p.name || 'Waystone', x: p.x, z: p.z, settlement: p.settlement || null, zone });
@@ -154,7 +157,7 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
       default: break;   // vignettes handled above; unknown kinds are left to the client
     }
   }
-  return { camps, objects, doors, waystones, rares, camped, folk, doorGuard };
+  return { camps, objects, doors, waystones, rares, camped, folk, doorGuard, guards };
 }
 
 /** The warband leader for a camp of this level (Farhold data/warbands.json levels: Sootwick 1-16, Ashtusk 5-24, …). */

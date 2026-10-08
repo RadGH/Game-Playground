@@ -1313,7 +1313,7 @@
    "yaw": 1.08,
    "titled": false,
    "x": 1476,
-   "z": 1368
+   "z": 1366
   },
   {
    "id": "guard_ashcombe_1",
@@ -1326,8 +1326,8 @@
    "name": "Ashcombe Guard",
    "yaw": 1.08,
    "titled": false,
-   "x": 1482,
-   "z": 1356
+   "x": 1480,
+   "z": 1358
   },
   {
    "id": "guard_ashcombe_2",
@@ -1396,8 +1396,8 @@
    "name": "Ashcombe Guard",
    "yaw": 2.559,
    "titled": false,
-   "x": 1400,
-   "z": 1254
+   "x": 1398,
+   "z": 1252
   },
   {
    "id": "guard_ashcombe_7",
@@ -1410,8 +1410,8 @@
    "name": "Ashcombe Guard",
    "yaw": 2.559,
    "titled": false,
-   "x": 1388,
-   "z": 1246
+   "x": 1390,
+   "z": 1248
   },
   {
    "id": "guard_ashcombe_8",
@@ -1652,8 +1652,8 @@
    "name": "Copperdell Guard",
    "yaw": -0.983,
    "titled": false,
-   "x": 276,
-   "z": 474
+   "x": 280,
+   "z": 482
   },
   {
    "id": "guard_copperdell_1",
@@ -1666,8 +1666,8 @@
    "name": "Copperdell Guard",
    "yaw": -0.983,
    "titled": false,
-   "x": 290,
-   "z": 496
+   "x": 284,
+   "z": 490
   },
   {
    "id": "guard_copperdell_2",
@@ -1858,7 +1858,7 @@
    "yaw": 1.571,
    "titled": false,
    "x": 628,
-   "z": 1222
+   "z": 1220
   },
   {
    "id": "guard_torborhold_5",
@@ -1871,8 +1871,8 @@
    "name": "Torborhold Guard",
    "yaw": 1.571,
    "titled": false,
-   "x": 628,
-   "z": 1210
+   "x": 630,
+   "z": 1212
   },
   {
    "id": "guard_torborhold_6",
@@ -2211,7 +2211,7 @@
    "name": "Gullwick Guard",
    "yaw": 0,
    "titled": false,
-   "x": 1464,
+   "x": 1468,
    "z": 386
   },
   {
@@ -2225,7 +2225,7 @@
    "name": "Gullwick Guard",
    "yaw": 0,
    "titled": false,
-   "x": 1480,
+   "x": 1476,
    "z": 386
   },
   {
@@ -2239,7 +2239,7 @@
    "name": "Gullwick Guard",
    "yaw": 3.142,
    "titled": false,
-   "x": 1480,
+   "x": 1476,
    "z": 318
   },
   {
@@ -2253,7 +2253,7 @@
    "name": "Gullwick Guard",
    "yaw": 3.142,
    "titled": false,
-   "x": 1464,
+   "x": 1468,
    "z": 318
   },
   {
@@ -2472,7 +2472,7 @@
    "name": "Hermit's Rest Guard",
    "yaw": -3.037,
    "titled": false,
-   "x": 1102,
+   "x": 1096,
    "z": 482
   },
   {
@@ -2486,8 +2486,8 @@
    "name": "Hermit's Rest Guard",
    "yaw": -3.037,
    "titled": false,
-   "x": 1082,
-   "z": 484
+   "x": 1088,
+   "z": 482
   },
   {
    "id": "guard_hermit_s_rest_8",
@@ -2553,7 +2553,7 @@
    "yaw": 1.571,
    "titled": false,
    "x": 304,
-   "z": 198
+   "z": 196
   },
   {
    "id": "guard_charcoal_burners_1",
@@ -2566,8 +2566,8 @@
    "name": "Charcoal Burners Guard",
    "yaw": -1.571,
    "titled": false,
-   "x": 206,
-   "z": 186
+   "x": 208,
+   "z": 188
   },
   {
    "id": "guard_charcoal_burners_2",
@@ -2593,8 +2593,8 @@
    "name": "Wildhaven Guard",
    "yaw": -1.326,
    "titled": false,
-   "x": 1248,
-   "z": 188
+   "x": 1250,
+   "z": 190
   },
   {
    "id": "guard_orrinsford_0",

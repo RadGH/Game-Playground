@@ -4,6 +4,7 @@
 //   T9  a quest's crate reward lands in the bag and opens            T14 `you.reach` follows the weapon in hand
 //   T18 the character sheet arrives after the join and after every equip
 import test from 'node:test';
+import { economy } from '../../js/sim/economy-knobs.js';
 import assert from 'node:assert/strict';
 import { rarityRank, slotFits, crateItem, openCrate } from '../../js/sim/crates.js';
 import { realServer, joinReal, rec, run, until, waitP } from './pt1-helpers.js';
@@ -265,7 +266,7 @@ test('T14 + T18: `you.reach` is the reach of the weapon in hand and follows a sw
   const s0 = sheets[0];
   assert.ok(Array.isArray(s0.core) && s0.core.length >= 3 && Array.isArray(s0.advanced) && Array.isArray(s0.abilities), 'core / advanced / abilities');
   for (const r of s0.core) assert.ok(r.id && r.label && typeof r.value === 'number', 'a row: ' + JSON.stringify(r));
-  assert.ok(s0.angling && s0.angling.level === 1 && s0.bagMax === 120 && Number.isFinite(s0.gold), 'A\'s part: angling, bag, gold');
+  assert.ok(s0.angling && s0.angling.level === 1 && s0.bagMax === economy().bag.base && s0.bagBase === s0.bagMax && Number.isFinite(s0.gold), 'A\'s part: angling, bag, gold');
   // a melee weapon in hand: the reach drops and a new sheet follows
   const eng = rules.room && rules.room.engine;
   const sword = JSON.parse(JSON.stringify((rules.makeItem && rules.makeItem(o.entity, { base: 'longsword', rarity: 'normal', level: 1 })) || eng.rpg.loot.generate('longsword', 'normal', 'low', {})));

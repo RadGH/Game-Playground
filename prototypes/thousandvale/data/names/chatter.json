@@ -865,6 +865,24 @@
    "Learn the first lesson well and the rest will find you.",
    "Everyone wants the big tricks. Nobody wants to learn to stand.",
    "Watch your feet. Your feet lose more fights than your hands."
+  ],
+  "role.carter": [
+   "Slow and sure. Mostly sure.",
+   "The ox knows the way. I am only here to take the fares.",
+   "Every gate in the Downs, and never once on time.",
+   "You can walk it in an hour or ride it sitting down. I know which I would pick.",
+   "Mind the wheel. It has opinions about feet.",
+   "Raining again. The ox does not care, so neither do I.",
+   "A cart, an ox, a road. Nobody ever robbed a turnip cart twice.",
+   "Flag me down any time. The ox likes an excuse to stop."
+  ],
+  "role.guard": [
+   "Gate is open. Keep your blade sheathed inside.",
+   "Quiet watch. I like a quiet watch.",
+   "If the bell rings, get behind us.",
+   "Raiders try the road every few weeks. They have not got past this gate yet.",
+   "New here? The Elder is in the hall on the square.",
+   "Move along. Kindly."
   ]
  }
 }

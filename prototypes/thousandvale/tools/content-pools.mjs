@@ -263,7 +263,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const file = a.sheet === 'test' ? 'data/quests/angling.json' : `data/quests/${a.sheet}.json`;
     let doc; try { doc = readJ(file); } catch { continue; }
     doc.npcs ||= {};
-    doc.npcs[a.id] = { name: def.name, role: 'angler', at: def.town, greeting: def.greeting + ' ' + a.points, placedBy: 'content-pools' };
+    doc.npcs[a.id] = { name: def.name, role: 'angler', at: def.town, greeting: def.greeting + ' ' + a.points, placedBy: 'content-pools', ...(doc.npcs[a.id] && 'titled' in doc.npcs[a.id] ? { titled: doc.npcs[a.id].titled } : {}) };   // W27: tools/content-givers.mjs owns `titled`
     if (a.sheet === 'test') {
       const start = out.zones[a.zone].find(p => p.start);
       for (const q of doc.quests || []) for (const st of q.steps || []) if (st.pool === 'start' || st.startPool) { st.startPool = true; if (start) st.at = { x: start.shore.x, z: start.shore.z, r: 14, name: 'the fish pool' }; }

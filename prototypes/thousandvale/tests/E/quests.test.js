@@ -32,6 +32,8 @@ const BAKED = { test: J('data/zones/test/zone.json').sites.map(s => s.name) };  
 const placesOf = z => new Set([ZONES[z].town, ...(ZONES[z].hamlets || []), ZONES[z].fort, ...(BAKED[z] || [])].filter(Boolean));
 const ALL_PLACES = new Set(Object.keys(ZONES).flatMap(z => [...placesOf(z)]));
 
+// W5 (owner feedback 8): a carter stands at EVERY baked settlement, including the ones the sheet does not name
+const CART_TOWNS = new Set(JSON.parse(readFileSync(new URL('../../data/provinces/carts.json', import.meta.url), 'utf8')).stops.map(s => s.town));
 test('every non-test zone has a quest file with 5-7 quests; quest ids unique across all zone files', () => {
   for (const z of ZONE_FILES) {
     assert.equal(FILES[z].zone, z);
@@ -45,7 +47,7 @@ test('zone quests: givers, places, monster types, encounters, vignettes, rares, 
   const KINDS = ['kill', 'killOne', 'killRare', 'collect', 'visit', 'talk', 'use', 'clear', 'deliver'];
   for (const z of ZONE_FILES) {
     const f = FILES[z];
-    for (const [id, n] of Object.entries(f.npcs)) if (!placesOf(z).has(n.at) && !VIG.has(n.at)) bad.push(`${z} npc ${id} at "${n.at}"`);
+    for (const [id, n] of Object.entries(f.npcs)) if (!placesOf(z).has(n.at) && !VIG.has(n.at) && !(n.placedBy === 'content-towns' && CART_TOWNS.has(n.at))) bad.push(`${z} npc ${id} at "${n.at}"`);
     for (const q of f.quests) {
       if (!f.npcs[q.giver]) bad.push(`${q.id}: giver ${q.giver}`);
       if (!q.offer || !q.done || !q.steps.length) bad.push(`${q.id}: text/steps`);

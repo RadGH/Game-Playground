@@ -1,0 +1,13 @@
+THE LEVEL CURVE — experience to gain each level, by killing alone and by questing (85 kills an hour killing; 4 quests + 32 kills an hour questing)
+level   xp needed   a kill pays   kills to level   minutes killing   a hand-in pays   = kills   minutes questing   hand-ins share of a questing hour   questing / killing
+  1->2         58            4              15             10.2              28        7              14.5                   47%                          x0.71
+  2->3        153          5.5              28             19.6              81     14.8              18.3                   65%                          x1.07
+  3->4        237          8.2              29             20.4             133     16.3              17.9                   67%                          x1.14
+  4->5        316         17.3              19             12.9             188     10.8              14.5                   58%                          x0.89
+  5->6        393         19.4              21             14.3             289     14.9              13.3                   65%                          x1.08
+  6->7        468         21.7              22             15.2             358     16.5              13.2                   67%                          x1.15
+  7->8        539         22.8              24             16.7             455     19.9              12.7                   71%                          x1.31
+  8->9        610         29.7              21             14.5             648     21.8              10.3                   73%                           x1.4
+ 9->10        680         36.6              19             13.1            1041     28.4               7.6                   78%                          x1.72
+10->11        748         50.6              15             10.4             631     12.5              10.8                   61%                          x0.96
+level 1 -> 11: 147 minutes by killing alone, 133 minutes by questing

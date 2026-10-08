@@ -161,7 +161,13 @@
       "done": "There. Your boots thank you. Any carter, any gate, any town: we are slow, but we are everywhere.",
       "reward": {
         "xp": 0.2,
-        "gold": 4
+        "gold": 4,
+        "crates": [
+          {
+            "slot": "back",
+            "min": "common"
+          }
+        ]
       },
       "rewardText": "A little coin and experience, and you know how to cross the Downs sitting down."
     },

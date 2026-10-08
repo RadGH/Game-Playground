@@ -28,6 +28,7 @@ export const START = {
   start_two_good_legs:      [{ slot: 'feet', min: 'common' }],
   start_letters_south:      [{ slot: 'chest', min: 'common' }, { slot: 'back', min: 'common' }],        // a cloak for the road (C's slots addendum)
   start_road_to_orrinsford: [{ slot: 'legs', min: 'uncommon' }, { slot: 'waist', min: 'uncommon' }],
+  start_wheels_for_hire:    [{ slot: 'back', min: 'common' }],                                         // W5 + W19: the cart ride pays something for your back (a cloak or a pack)
   start_the_priors_favour:  [{ slot: 'head', min: 'uncommon' }, { slot: 'neck', min: 'common' }],
   start_signs_of_the_beast: [{ slot: 'hands', min: 'common' }],
   start_old_gristle:        [{ slot: 'weapon', min: 'rare' }],

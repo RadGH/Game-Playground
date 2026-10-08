@@ -41,13 +41,14 @@ import { createRoadEvents } from './roadevents.js';
 import { createShops, SHOP_RANGE } from './shops.js';
 import { configureNpcNames } from './npc-names.js';
 import { createMountBook } from './mounts.js';
+import { createCarts } from './carts.js';
 import { cleanLook } from './looks.js';
 import { effectOf as effectOfRaw, potionAmount, potionCdMs, potionText, GROUP_R as TONIC_R, stackable, stackKey, stackMaxOf, countOf } from './consumables.js';
 import { isCrate, crateItem, openCrate } from './crates.js';
 import { createSystemMail } from './sysmail.js';
 import { createFeedback, NUDGE } from './feedback.js';
 import { createAngling } from './angling.js';
-import { configureEconomy, economy, chestGold, treasureGold, eventGold, travelFare as fareOf } from './economy-knobs.js';
+import { configureEconomy, economy, chestGold, treasureGold, eventGold, travelFare as fareOf, cartFare } from './economy-knobs.js';
 import { mountRefusal, mountSpeedMul, dismounts, MOUNT_RULES } from '../rules/mount.js';   // stream C's riding rules (when, how fast, what throws you)
 
 const LEASE_MS = 30000, HEARTBEAT_MS = 10000, TICKET_WAIT_MS = 3000;
@@ -192,8 +193,10 @@ export function createProvince(opts) {
     if (L.schedules) {
       const staffed = officeFolk(L, t, i, out);          // Q10: stream E's offices.json, when it lists this town
       const quest = out.filter(o => o.type === 'npc' && o.npc && o.npc.id && !o.officeFixed);
-      out.push(...townFolk(t, { plan: L.townPlans && L.townPlans[i], schedules: L.schedules, kind: (L.townPlans && L.townPlans[i] && L.townPlans[i].kind) || t.kind || 'town', key: L.key + ':' + i, questNpcs: quest,
-        onlyFolk: !!staffed, taken: staffed || [] }));
+      const posted = out.some(o => o.guard);              // W1: stream E posted this town's guards (gate + square) — the schedule's own are not added on top
+      const folkOut = townFolk(t, { plan: L.townPlans && L.townPlans[i], schedules: L.schedules, kind: (L.townPlans && L.townPlans[i] && L.townPlans[i].kind) || t.kind || 'town', key: L.key + ':' + i, questNpcs: quest,
+        onlyFolk: !!staffed, taken: staffed || [] });
+      out.push(...(posted ? folkOut.filter(o => !(o.npc && o.npc.role === 'guard')) : folkOut));
       return out;
     }
     const inn = { x: t.x - t.r * 0.35, z: t.z + t.r * 0.3 };
@@ -385,6 +388,9 @@ export function createProvince(opts) {
         if (o.mount && !e.dead) dismount(o, 'cast');            // Q16: attacking or casting gets you off the horse
         const msg = m.held !== undefined ? { ...m, held: Math.max(0, Math.min(5, m.held)) } : m;
         const res = r.intent(e, msg);
+        // round 8 (C's W14: bolts and arrows TRAVEL, the hit lands on arrival): loosing a shot at a monster is fighting from the
+        // moment it leaves the hand — else you could call a mount or board a cart while your own bolt is still in the air
+        if (!(res && res.ok === false)) { const tg = r.entities.get(m.target || e.target); if (tg && tg.kind === 'monster' && !tg.dead) o.lastHitAt = now(); }
         if (res && res.ok === false) {
           // Q1 "not drawn, not drawn, not drawn": one refusal per slot and reason per CAST_REFUSAL_MS (the client
           // repeats its attack every frame while the button is down; the answer does not change that fast)
@@ -425,6 +431,14 @@ export function createProvince(opts) {
       case 'mount': return mountOp(o, m);
       case 'barber': return barberOp(o, m);
       case 'pref': return prefOp(o, m);
+      case 'cart': {      // W5: ox-cart travel
+        const near = o.room.entities.get(m.id);
+        if (!near || near.removed || !carts.stopFor(near)) return s.sendJSON({ t: 'cartR', op: m.op, ok: false, why: 'stop', msg: 'There is no cart here.' });
+        if (m.op === 'go') return void carts.go(o, m, near);
+        if (m.op !== 'list') return bad(s, 'op');
+        if (Math.hypot(near.x - e.x, near.z - e.z) > carts.reachOf(near) + 0.5) return s.sendJSON({ t: 'cartR', op: 'list', ok: false, why: 'far', msg: 'Walk over to the cart first.' });
+        return s.sendJSON(carts.list(o, near));
+      }
       case 'meter': { o.meter = !!m.on; if (o.meter) meterOn.add(o); else { meterOn.delete(o); o.hitRows = null; } return s.sendJSON({ t: 'meterR', on: o.meter }); }      // W21
       case 'follow': return followOp(o, m);
       case 'inspect': return inspectOp(o, m);
@@ -588,7 +602,7 @@ export function createProvince(opts) {
         // play-test 2
         reach: attackReach(o), attackRange: attackReach(o), mounts: mountBook.owned(ch), mount: o.mount || null, speedMul: e.speedMul || 1, prefs: prefsOf(ch), look: ch.look || null, clsName: clsNameOf(ch.cls),
         // play-test 5
-        bagMax: bagCap(o), bagBase: bagBase(), angling: angling.view(ch), acct: acctOf(o), ...(o.admin ? { admin: true } : {}), ...(ch.kit ? { kit: ch.kit } : {}), ...(o.eventAtKey ? { eventAt: o.eventAtKey } : {}),
+        bagMax: bagCap(o), bagBase: bagBase(), angling: angling.view(ch), acct: acctOf(o), ...(rules.LIGHT && rules.LIGHT.radius ? { lightRange: rules.LIGHT.radius, light: rules.LIGHT } : {}), ...(o.admin ? { admin: true } : {}), ...(ch.kit ? { kit: ch.kit } : {}), ...(o.eventAtKey ? { eventAt: o.eventAtKey } : {}),
       },
     };
     // the skill bar only changes on a level-up / form / talent (those arrive as `you {bar}` and refresh o.bar): a room
@@ -772,6 +786,10 @@ export function createProvince(opts) {
     if (d.waystone) return discover(o, obj);
     if (d.treasure) return treasureUse(o, obj);
     if (d.road && roadEvents.use(o, obj)) return;                          // S5: a road event's chest / captive
+    // W5 (round 8): an ox cart — the parked cart itself answers with the route list; a carter answers as an NPC and the list follows
+    const cartStop = carts.stopFor(obj);
+    if (cartStop && !d.npc) { s.sendJSON({ t: 'used', id, ok: true, kind: 'cart', name: obj.name, cart: cartStop.id }); const l = carts.list(o, obj); if (l) s.sendJSON(l); return; }
+    if (cartStop) setTimeoutTicks(() => { if (o.conn && online.get(o.char.id) === o) { const l = carts.list(o, obj); if (l && !obj.removed) o.conn.sendJSON(l); } }, 1);
     if (d.note || d.npc || d.use || d.chest) questTouch(o, obj);          // talk / use steps, and what this one offers
     const road = d.npc ? roadEvents.talk(o, obj) : null;                   // S5/S9: a delivery handed over; a wanderer's lore + tip
     if (d.chest) return openChest(o, obj);
@@ -1176,12 +1194,33 @@ export function createProvince(opts) {
   const realmEvents = (opts.events || []).filter(e => P.has(e.province) && Number.isFinite(e.x));
   const nearSent = new Map();
   const realmNearM = opts.realmNearM ?? 60;
+  /**
+   * W1 (owner feedback 8, report #22: "I just created a new character and the starting town is being raided. I died before I
+   * had a chance to do anything."). A NEWCOMER is a character under `underLevel` (3) OR with less than `firstMinutes` (10) of
+   * played time (stream E's events.json `director.newcomer`). An event whose data says `startOn.clearOfNewcomersM` neither
+   * counts down nor starts while a newcomer stands within that many metres of it — zone events and realm events (a town
+   * raid) alike. And should one be live in a town anyway (they logged in mid-raid), the guards keep them on their feet:
+   * `newcomerWard` below.
+   */
+  const NEWCOMER = { underLevel: 3, firstMinutes: 10, ...((opts.directorOpts && opts.directorOpts.rules && opts.directorOpts.rules.newcomer) || {}), ...(opts.newcomer || {}) };
+  const isNewcomer = o => !!o && ((o.char.level || 1) < NEWCOMER.underLevel || (o.char.played || 0) < NEWCOMER.firstMinutes * 60000);
+  /** Is a newcomer within `m` metres of (x, z) in this province (any wilds copy or town room; not inside a dungeon)? */
+  function newcomerNear(pv, x, z, m) {
+    if (!(m > 0)) return false;
+    for (const o of online.values()) {
+      if (!o.conn || !o.entity || o.room.kind === 'instance' || provOf(o.room) !== pv || !isNewcomer(o)) continue;
+      if (Math.hypot(o.entity.x - x, o.entity.z - z) <= m) return true;
+    }
+    return false;
+  }
+  const clearM = def => (def && def.startOn && +def.startOn.clearOfNewcomersM) || 0;
   function realmNear() {
     if (liveEvent || realmRun || !realmEvents.length) return;
     const t = now();
     for (const e of realmEvents) {
       if (t - (nearSent.get(e.id) || -1e12) < 5000) continue;
       const spots = e.arenas && e.arenas.length ? e.arenas : [e];
+      if (clearM(e) && spots.some(sp => newcomerNear(P.get(e.province), sp.x, sp.z, clearM(e)))) { counters.eventsHeldForNewcomers = (counters.eventsHeldForNewcomers || 0) + 1; continue; }      // W1: no raid while a newcomer is in reach
       const levels = [];
       for (const o of online.values()) {
         if (!o.entity || o.entity.dead || !o.conn || provOf(o.room)?.L.key !== e.province || o.room.kind === 'instance') continue;
@@ -1189,7 +1228,7 @@ export function createProvince(opts) {
       }
       if (!levels.length) continue;
       nearSent.set(e.id, t);
-      send({ k: 'eventNear', id: e.id, levels });
+      send({ k: 'eventNear', id: e.id, levels }); counters.eventNearSent = (counters.eventNearSent || 0) + 1;
     }
   }
   function eventTick() {
@@ -1324,8 +1363,9 @@ export function createProvince(opts) {
           }
           const trig = (def.r || 40) + (def.nearM ?? 50);
           const dist = c => Math.hypot(c.entity.x - def.x, c.entity.z - def.z);
+          const held = clearM(def) && newcomerNear(pv, def.x, def.z, clearM(def));      // W1: not while a newcomer is in reach
           if (w && w.state === 'soon') {
-            if (!players.some(c => dist(c) <= trig * 2.5)) {          // everybody left: called off, armed again
+            if (held || !players.some(c => dist(c) <= trig * 2.5)) {          // everybody left (or a newcomer walked up): called off, armed again
               zoneWait.delete(key);
               tellZone(here, { kind: 'end', ev: w.view, won: false, called: 'off' });
               tellStates(pv, room, def.zone, here);
@@ -1343,6 +1383,7 @@ export function createProvince(opts) {
             tellStates(pv, room, def.zone, here);
             continue;
           }
+          if (held) { counters.eventsHeldForNewcomers = (counters.eventsHeldForNewcomers || 0) + 1; continue; }
           if (!armed || !players.some(c => dist(c) <= trig)) continue;
           const ms = def.countdownMs ?? 15000;
           const view = defView(def, 'soon');
@@ -1502,9 +1543,30 @@ export function createProvince(opts) {
     for (const q of near) if (!had.has(q.m.id)) o.conn.sendJSON({ t: 'rareNear', id: q.m.id, key: q.m.data.encounter, name: q.m.name, x: Math.round(q.m.x), z: Math.round(q.m.z), level: q.m.level, rank: q.m.rank === 'normal' ? 'rare' : q.m.rank, r: q.r });
     o.conn.sendJSON({ t: 'bossNear', list: near.map(q => ({ id: q.m.id, name: q.m.name, x: Math.round(q.m.x), z: Math.round(q.m.z), level: q.m.level, enc: q.m.data.encounter, r: q.r })) });
   }
+  /**
+   * W1: a newcomer in a TOWN while an event is live there (a raid that was already running when they logged in, a zone
+   * event that spilled through the gate) is kept on their feet by the town's guards — healed to full every second and told
+   * once why ("Stay behind us, friend. We have the gate."). They can still fight; they cannot be killed by a raid.
+   */
+  const GUARD_SAY = ((layouts[0] && layouts[0].guards && layouts[0].guards.raid && layouts[0].guards.raid.say && layouts[0].guards.raid.say.newcomer) || ['Stay behind us, friend. We have the gate.']);
+  function newcomerWard(o) {
+    const r = o.room, e = o.entity;
+    if (r.kind !== 'town' || e.dead || !isNewcomer(o)) { o.warded = false; return; }
+    const live = (realmRun && realmRun.room === r) || [...zoneRuns.values()].some(z => z.room === r) || [...r.host.near(e.x, e.z, 40)].some(m => m.kind === 'monster' && !m.dead && m.data && (m.data.event || m.data.roadEvent != null));
+    if (!live) { o.warded = false; return; }
+    if (e.hp < e.hpMax && r.rules.restore) safeRules(r, 'restore', e, { hp: e.hpMax - e.hp });
+    if (!o.warded) {
+      o.warded = true; counters.newcomersWarded = (counters.newcomersWarded || 0) + 1;
+      const g = [...r.objects.values()].filter(x => x.data && x.data.guard).sort((a, b) => Math.hypot(a.x - e.x, a.z - e.z) - Math.hypot(b.x - e.x, b.z - e.z))[0];
+      const line = GUARD_SAY[(o.char.id | 0) % GUARD_SAY.length];
+      if (g) r.emit({ type: 'say', id: g.id, text: line, style: 'bark' });
+      if (o.conn) o.conn.sendJSON({ t: 'chat', ch: 'system', from: 0, name: g ? g.name : 'Town Guard', text: line + ' (The town guard keeps new arrivals on their feet during a raid.)' });
+    }
+  }
   function zoneTick() {
     const bossMemo = new Map();
     for (const o of online.values()) {
+      if (o.conn && o.entity) { o.char.played = (o.char.played || 0) + 1000; if (!(o.char.played % 30000)) o.dirty = true; newcomerWard(o); }      // W1: played time (saved with the blob)
       if (!o.conn || o.room.kind === 'instance') continue;
       const pv = provOf(o.room);
       if (!pv) continue;
@@ -1753,7 +1815,7 @@ export function createProvince(opts) {
     questSaved(o);
     const e = o.entity, rules = o.room.rules, lv = r.reward.level;
     const span = rules.xpFor ? Math.max(1, (safeRules(o.room, 'xpFor', lv + 1) || 0) - (safeRules(o.room, 'xpFor', lv) || 0)) : 100;
-    const xp = Math.round(r.reward.xpShare * span * (rules.xpMult ? safeRules(o.room, 'xpMult', 'quest') || 1 : 1));     // R2: x1.25 (C's progression.json)
+    const xp = Math.round(r.reward.xpShare * span * (rules.xpMult ? safeRules(o.room, 'xpMult', 'quest') || 1 : 1) * (economy().quest.xpMult || 1));     // R2: x1.25 (C's progression.json)
     // E's class-quest items name a base and a name (`reward.item {tier, slot, base, name}`): C's makeItem, else the engine's
     // generator held to that base; plain `{tier}` rolls as before
     const ri = r.reward.item, ilv = Math.max(lv, e.level || 1);
@@ -2415,6 +2477,10 @@ export function createProvince(opts) {
   const roadEvents = createRoadEvents({ data: first.L.treasure || null, wanderers: first.L.wanderers || null, online, corpses, grant: (o, a) => grant(o, a),
     questEvent: (o, ev) => questEvent(o, ev), bookOf: o => bookOf(o), provOf: r => provOf(r), now, wallNow, rng: () => (first.towns[0] || first.copies[0]).host.random('road'), log, counters,
     journal: (o, k, p) => journal(o, k, p), questSaved: o => questSaved(o), sendQuests: o => sendQuests(o), partyOf: c => partyOf.get(c) || null, mailTo: a => sysmail.mailTo(a), enabled: opts.roadEvents !== false });
+  // W5 (owner feedback 8): ox-cart fast travel between towns (js/sim/carts.js over E's data/provinces/carts.json)
+  const carts = createCarts({ data: first.L.carts || opts.cartData || null, layouts, online, journal: (o, k, p) => journal(o, k, p), econ, setTimeoutTicks: (fn, n) => setTimeoutTicks(fn, n),
+    moveTo: (o, p, at, via) => moveTo(o, p, at, via), questEvent: (o, ev) => questEvent(o, ev), fighting: (o, e) => fighting(o, e), dismount: (o, why) => { if (o.mount) dismount(o, why); endMountCast(o); },
+    consume: (o, i) => consume(o, i), tickMs: TICK_MS, log, counters, cartFare });
   const mountBook = createMountBook(first.L.mounts || opts.mountData || null);
   const shops = createShops({ data: first.L.shops || opts.shopData || null, mounts: mountBook, now: wallNow, log, rng: () => (first.towns[0] || first.copies[0]).host.random('shop') });
   const social = new Map();        // char id -> { friends: Set, tradeFriendsOnly } (the gateway keeps it current, Q15)
@@ -2903,14 +2969,17 @@ export function createProvince(opts) {
    * again: once the items are gone there is nothing to pay).
    */
   const LIGHT = opts.lightItems || null;
+  const lightRules = () => { const r = (first.towns[0] || first.copies[0]).rules; return r && typeof r.isLightItem === 'function' ? r : null; };      // C also hangs both helpers on the room rules
   function isLight(it) {
     if (!it || typeof it !== 'object') return false;
     if (LIGHT && LIGHT.is) { try { return !!LIGHT.is(it); } catch { /* fall through */ } }
+    const lr = lightRules(); if (lr) { try { return !!lr.isLightItem(it); } catch { /* fall through */ } }
     return it.slot === 'light' || it.type === 'light' || (it.use && it.use.type === 'light');
   }
   function lightWorth(it) {
     let g = null;
     if (LIGHT && LIGHT.refund) { try { g = LIGHT.refund(it); } catch { g = null; } }
+    else { const lr = lightRules(); if (lr && lr.lightRefund) { try { g = lr.lightRefund(it); } catch { g = null; } } }
     if (!Number.isFinite(g)) g = Math.max(1, Math.round(it.price || it.value || 1)) * countOf(it);
     return Math.max(0, Math.round(g));
   }
@@ -3342,7 +3411,7 @@ export function createProvince(opts) {
     accept, step, init, shutdown, status, rooms, P, online, partyOf, econ, tickStats, owner, counters, trades,
     room: copies[0], townRoom, copies, instances, town, door, gate,
     saveNow, logout, transfer, moveTo, grant, corpses, roadEvents, mute, flushEconomy, newUid, flushJournal, timeOfDay, devSetLevel,
-    mailTo: a => sysmail.mailTo(a), offerRevive, angling, feedback, zoneRuns, kitCache, sheetOf, restack,
+    carts, shops, meterOn, bagCap, isNewcomer, NEWCOMER, realmEvents, liveEventNow: () => liveEvent, mailTo: a => sysmail.mailTo(a), offerRevive, angling, feedback, zoneRuns, kitCache, sheetOf, restack,
     chatterContext: (r, x, z) => chatterContext(provOf(r), r, x, z),
     get liveEvent() { return liveEvent; },
   };

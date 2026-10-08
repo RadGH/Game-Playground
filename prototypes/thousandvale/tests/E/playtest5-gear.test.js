@@ -43,9 +43,10 @@ test('T15/T23: shelving adds each base once, gates late ones by the town\'s leve
   assert.equal(ap.count, before + 1);
   assert.equal(a.data.kinds.armourer.categories.armor.minCap.g5_test_cuirass, 12);
   assert.ok(a.data.kinds.tailor.categories.other.bases.includes('g5_test_idol'));
-  assert.deepEqual(a.unshelved, []);
-  assert.equal(a.shelved, 5);
-  assert.ok(a.data.kinds.general.categories.light.bases.includes('g5_test_lantern'));
+  // W22 (owner feedback 8): light items left the game — a lantern row is shelved NOWHERE
+  assert.deepEqual(a.unshelved.map(x => x.id || x), ['g5_test_lantern']);
+  assert.equal(a.shelved, 4);
+  assert.ok(!JSON.stringify(a.data.kinds).includes('g5_test_lantern'));
   assert.ok(!JSON.stringify(a.data).includes('old_sword'));
   assert.ok(a.data.roles.apothecary.sells.some(s => s.base === 'g5_test_wand') || a.data.roles.apothecary.sells.length >= ap.count, 'roles rebuilt');
   const b = shelveCatalog(JSON.parse(JSON.stringify(a.data)), cat);
@@ -62,10 +63,13 @@ test('T15/T23: with stream F\'s catalog on disk, every new wand, staff, focus an
   const r = shelveCatalog(JSON.parse(text), cat);
   assert.deepEqual(r.data, S, 'run tools/content-gear.mjs');
   const all = new Set(Object.values(S.kinds).flatMap(k => Object.values(k.categories || {}).flatMap(c => c.bases)));
-  for (const x of rows) assert.ok(all.has(x.base), x.id + ' is in no shop');
+  const isLight = x => ['lantern', 'torch'].includes(x.type) || x.gameSlot === 'light';
+  for (const x of rows) if (!isLight(x)) assert.ok(all.has(x.base), x.id + ' is in no shop');
   // play-test 5 slots addendum: cloaks and belts at the tailor, worn lights at the general store — plain bases and catalog rows
   for (const b of ['travel_cloak', 'leather_belt', ...rows.filter(q => ['cloak', 'belt'].includes(q.type)).map(q => q.base)]) assert.ok(S.kinds.tailor.categories.armor.bases.includes(b), b + ' not at the tailor');
-  for (const b of ['hand_lantern', 'pitch_torch', ...rows.filter(q => ['lantern', 'torch'].includes(q.type)).map(q => q.base)]) assert.ok(S.kinds.general.categories.light.bases.includes(b), b + ' not at the general store');
+  // W22: no light anywhere on a shelf
+  for (const b of ['hand_lantern', 'pitch_torch', ...rows.filter(isLight).map(q => q.base)]) assert.ok(!all.has(b), b + ' is still sold');
+  assert.ok(!S.kinds.general.categories.light, 'the Lanterns & torches shelf is gone');
   for (const t of ['wand', 'staff']) assert.ok(rows.some(x => x.kind === 'weapon' && x.type === t && S.kinds.apothecary.categories.weapon.bases.includes(x.base)), 'no new ' + t + ' at the apothecary');
   assert.ok(rows.some(x => x.kind === 'offhand' && S.kinds.tailor.categories.other.bases.includes(x.base)), 'no new focus at the tailor');
 });

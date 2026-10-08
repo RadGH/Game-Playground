@@ -10,9 +10,9 @@ import { memoryTokenStore } from '../../js/net/client.js';
 import { waitP } from './pt1-helpers.js';
 
 const on = (c, t) => { const l = []; c.on(t, m => l.push(m)); return l; };
-const BASES = { back: 'travel_cloak', waist: 'leather_belt', light: 'hand_lantern' };
+const BASES = { back: 'travel_cloak', waist: 'leather_belt' };      // the light slot (hand_lantern) left the game — owner feedback 8, W22
 
-test('back / waist / light: equip into their own slots, others see them on info.gear, unequip by slot, save + reload keeps them worn, mail carries them', async () => {
+test('back / waist (the light slot left the game, W22): equip into their own slots, others see them on info.gear, unequip by slot, save + reload keeps them worn, mail carries them', async () => {
   const { srv, clock, world, store } = await realServer({ roadEvents: false });
   const P = world.province;
   // a client whose login token we keep, so the same account can come back
@@ -23,7 +23,7 @@ test('back / waist / light: equip into their own slots, others see them on info.
   await waitP(clock, a.play(made.id)); await until(clock, () => !!a.joined, 5000);
   const b = await joinReal(srv, clock, 'Watcher', 'mage');
   const o = rec(world, a), ob = rec(world, b), rules = o.room.rules;
-  assert.ok(Array.isArray(rules.SLOTS) && ['back', 'waist', 'light'].every(s => rules.SLOTS.includes(s)), 'the rules know the slots: ' + rules.SLOTS);
+  assert.ok(Array.isArray(rules.SLOTS) && ['back', 'waist'].every(s => rules.SLOTS.includes(s)) && !rules.SLOTS.includes('light'), 'the rules know back and waist, and the light slot is gone (W22): ' + rules.SLOTS);
   const items = Object.entries(BASES).map(([slot, base]) => { const it = rules.makeItem(o.entity, { base, rarity: 'magic', level: 1 }); assert.ok(it && it.slot === slot, base + ' is a ' + slot + ' item: ' + JSON.stringify(it && it.slot)); return JSON.parse(JSON.stringify(it)); });
   P.grant(o, { items, reason: 'test' }); await run(clock, 200);
   const ir = on(a, 'itemR'), eqs = on(a, 'equip');
@@ -61,7 +61,7 @@ test('back / waist / light: equip into their own slots, others see them on info.
   b.close(); await srv.stop();
 });
 
-test('back / waist / light: unequip by slot puts the piece in the bag and off info.gear; it posts by mail; a crate of that slot holds one', async () => {
+test('back / waist: unequip by slot puts the piece in the bag and off info.gear; it posts by mail; a crate of that slot holds one', async () => {
   const { srv, clock, world } = await realServer({ roadEvents: false });
   const P = world.province;
   const a = await joinReal(srv, clock, 'Beltless', 'warrior');
@@ -88,11 +88,11 @@ test('back / waist / light: unequip by slot puts the piece in the bag and off in
   a.item('equip', cloak.uid); await until(clock, () => eqs.length >= 3);
   assert.ok(eqs[2].equipment.back, 'and is worn');
   // crates
-  for (const slot of ['back', 'waist', 'light']) {
+  for (const slot of ['back', 'waist']) {
     const [got] = openCrate(rules, o.entity, crateItem({ slot, min: 'common' }));
     assert.ok(got && slotFits(got, slot), `a ${slot} crate gave ${got && got.name} (${got && got.slot})`);
   }
-  assert.ok(slotFits({ slot: 'back' }, 'jewellery') && slotFits({ slot: 'light' }, 'any'));
+  assert.ok(slotFits({ slot: 'back' }, 'jewellery') && slotFits({ slot: 'waist' }, 'any'));
   a.close(); await srv.stop();
 });
 

@@ -60,7 +60,7 @@ test('zone events: every copy runs its own (waves, then the boss), the zone hear
   // the zone event boss is not a camp that stands there all the time
   assert.ok(!L.camps.some(c => c.encounter === def.boss), 'the event boss only comes with its event');
   const clock = createVirtualClock();
-  const world = createWorld({ layouts: [L], store: createMemoryStore({ now: clock.now }), now: clock.now, lingerMs: 0, log: () => {}, events: C.events, encounterInfo: C.encounterInfo, zoneEventFirstMs: 2000, zoneEventGapMs: 3600000 });
+  const world = createWorld({ layouts: [L], store: createMemoryStore({ now: clock.now }), now: clock.now, lingerMs: 0, log: () => {}, events: C.events, encounterInfo: C.encounterInfo, zoneEventFirstMs: 2000, zoneEventGapMs: 3600000, newcomer: { underLevel: 0, firstMinutes: 0 } });      // round 8 W1: a seconds-old test character would be a newcomer, and events wait for those
   const srv = createLoopbackServer({ clock, world });
   await srv.ready;
   const a = makeClient(srv, clock);

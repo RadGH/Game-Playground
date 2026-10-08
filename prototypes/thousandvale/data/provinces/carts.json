@@ -46,20 +46,20 @@
    "x": 24256,
    "z": 2608,
    "gate": "hollin_toll_gate_0",
-   "fromGate": 15,
+   "fromGate": 14,
    "carter": {
     "id": "carter_hollin_toll",
     "name": "Tibbot Eastmere",
-    "x": 1720,
-    "z": 486,
-    "yaw": 1.817
+    "x": 1718,
+    "z": 488,
+    "yaw": 1.755
    },
    "cart": {
     "id": "cart_hollin_toll",
     "model": "ox_cart",
-    "x": 1718,
-    "z": 486,
-    "yaw": -3.074
+    "x": 1716,
+    "z": 488,
+    "yaw": -3.069
    }
   },
   {
@@ -71,20 +71,20 @@
    "x": 22640,
    "z": 3520,
    "gate": "scree_end_gate_0",
-   "fromGate": 14,
+   "fromGate": 13,
    "carter": {
     "id": "carter_scree_end",
     "name": "Jory Furlong",
-    "x": 116,
-    "z": 1416,
-    "yaw": -1.877
+    "x": 118,
+    "z": 1418,
+    "yaw": -1.768
    },
    "cart": {
     "id": "cart_scree_end",
     "model": "ox_cart",
-    "x": 118,
-    "z": 1416,
-    "yaw": 3.123
+    "x": 120,
+    "z": 1418,
+    "yaw": 3.121
    }
   },
   {
@@ -96,19 +96,19 @@
    "x": 22976,
    "z": 2928,
    "gate": "wolditford_gate_0",
-   "fromGate": 14,
+   "fromGate": 12,
    "carter": {
     "id": "carter_wolditford",
     "name": "Gervase Eastmere",
     "x": 450,
-    "z": 824,
+    "z": 826,
     "yaw": -2.014
    },
    "cart": {
     "id": "cart_wolditford",
     "model": "ox_cart",
     "x": 452,
-    "z": 824,
+    "z": 826,
     "yaw": 3.142
    }
   },
@@ -121,20 +121,20 @@
    "x": 25984,
    "z": 3376,
    "gate": "ashcombe_gate_0",
-   "fromGate": 16,
+   "fromGate": 13,
    "carter": {
     "id": "carter_ashcombe",
     "name": "Jankin Furlong",
-    "x": 1494,
-    "z": 1372,
-    "yaw": -0.812
+    "x": 1492,
+    "z": 1368,
+    "yaw": -0.25
    },
    "cart": {
     "id": "cart_ashcombe",
     "model": "ox_cart",
-    "x": 1492,
-    "z": 1376,
-    "yaw": 1.08
+    "x": 1494,
+    "z": 1366,
+    "yaw": 1.078
    }
   },
   {
@@ -146,18 +146,18 @@
    "x": 25509,
    "z": 2821,
    "gate": "kettle_cross_gate_0",
-   "fromGate": 15,
+   "fromGate": 13,
    "carter": {
     "id": "carter_kettle_cross",
     "name": "Dickon Thatcher",
-    "x": 884,
+    "x": 888,
     "z": 804,
-    "yaw": 2.116
+    "yaw": -2.348
    },
    "cart": {
     "id": "cart_kettle_cross",
     "model": "ox_cart",
-    "x": 886,
+    "x": 890,
     "z": 806,
     "yaw": -0.785
    }
@@ -171,19 +171,19 @@
    "x": 27760,
    "z": 2918,
    "gate": "brackwater_gate_0",
-   "fromGate": 16,
+   "fromGate": 14,
    "carter": {
     "id": "carter_brackwater",
     "name": "Garrick Kettleby",
-    "x": 1116,
-    "z": 794,
-    "yaw": -0.805
+    "x": 1120,
+    "z": 796,
+    "yaw": -1.302
    },
    "cart": {
     "id": "cart_brackwater",
     "model": "ox_cart",
-    "x": 1118,
-    "z": 794,
+    "x": 1122,
+    "z": 796,
     "yaw": -2.858
    }
   },
@@ -196,19 +196,19 @@
    "x": 27788,
    "z": 2475,
    "gate": "eelwick_gate_0",
-   "fromGate": 13,
+   "fromGate": 15,
    "carter": {
     "id": "carter_eelwick",
     "name": "Dickon Pike",
     "x": 1208,
-    "z": 442,
-    "yaw": 1.615
+    "z": 446,
+    "yaw": 2.709
    },
    "cart": {
     "id": "cart_eelwick",
     "model": "ox_cart",
     "x": 1208,
-    "z": 444,
+    "z": 448,
     "yaw": 1.257
    }
   },
@@ -221,20 +221,20 @@
    "x": 29552,
    "z": 3664,
    "gate": "saltmouth_gate_0",
-   "fromGate": 15,
+   "fromGate": 16,
    "carter": {
     "id": "carter_saltmouth",
     "name": "Edda Dunstable",
     "x": 818,
-    "z": 1662,
-    "yaw": 0.785
+    "z": 1658,
+    "yaw": 0.615
    },
    "cart": {
     "id": "cart_saltmouth",
     "model": "ox_cart",
-    "x": 818,
-    "z": 1660,
-    "yaw": -0.898
+    "x": 816,
+    "z": 1656,
+    "yaw": -0.894
    }
   },
   {
@@ -246,20 +246,20 @@
    "x": 28954,
    "z": 3314,
    "gate": "gull_steps_gate_0",
-   "fromGate": 15,
+   "fromGate": 16,
    "carter": {
     "id": "carter_gull_steps",
     "name": "Dickon Fallowfield",
     "x": 332,
-    "z": 1292,
-    "yaw": 2.43
+    "z": 1296,
+    "yaw": 2.976
    },
    "cart": {
     "id": "cart_gull_steps",
     "model": "ox_cart",
-    "x": 332,
-    "z": 1294,
-    "yaw": 1.132
+    "x": 330,
+    "z": 1298,
+    "yaw": 1.128
    }
   },
   {
@@ -271,19 +271,19 @@
    "x": 22880,
    "z": 4544,
    "gate": "copperdell_gate_0",
-   "fromGate": 13,
+   "fromGate": 20,
    "carter": {
     "id": "carter_copperdell",
     "name": "Tobin Cattermole",
-    "x": 270,
-    "z": 500,
-    "yaw": 0.807
+    "x": 276,
+    "z": 506,
+    "yaw": -2.678
    },
    "cart": {
     "id": "cart_copperdell",
     "model": "ox_cart",
-    "x": 270,
-    "z": 498,
+    "x": 278,
+    "z": 508,
     "yaw": -0.984
    }
   },
@@ -300,16 +300,16 @@
    "carter": {
     "id": "carter_pickaxe_row",
     "name": "Wystan Furlong",
-    "x": 960,
-    "z": 1702,
-    "yaw": -2.296
+    "x": 962,
+    "z": 1704,
+    "yaw": -2.718
    },
    "cart": {
     "id": "cart_pickaxe_row",
     "model": "ox_cart",
-    "x": 960,
-    "z": 1704,
-    "yaw": -0.934
+    "x": 964,
+    "z": 1706,
+    "yaw": -0.929
    }
   },
   {
@@ -321,19 +321,19 @@
    "x": 23296,
    "z": 5040,
    "gate": "ashhaven_gate_0",
-   "fromGate": 15,
+   "fromGate": 55,
    "carter": {
     "id": "carter_ashhaven",
     "name": "Hew Greenhill",
-    "x": 730,
-    "z": 986,
-    "yaw": -2.262
+    "x": 694,
+    "z": 1008,
+    "yaw": 0.909
    },
    "cart": {
     "id": "cart_ashhaven",
     "model": "ox_cart",
-    "x": 732,
-    "z": 988,
+    "x": 692,
+    "z": 1006,
     "yaw": -0.805
    }
   },
@@ -346,20 +346,20 @@
    "x": 25168,
    "z": 5360,
    "gate": "torborhold_gate_0",
-   "fromGate": 11,
+   "fromGate": 23,
    "carter": {
     "id": "carter_torborhold",
     "name": "Mabry Brookes",
-    "x": 522,
+    "x": 514,
     "z": 1270,
-    "yaw": -0.785
+    "yaw": 0.951
    },
    "cart": {
     "id": "cart_torborhold",
     "model": "ox_cart",
-    "x": 524,
-    "z": 1272,
-    "yaw": 3.031
+    "x": 512,
+    "z": 1268,
+    "yaw": -0.785
    }
   },
   {
@@ -371,19 +371,19 @@
    "x": 24832,
    "z": 6016,
    "gate": "mawehaven_gate_0",
-   "fromGate": 14,
+   "fromGate": 33,
    "carter": {
     "id": "carter_mawehaven",
     "name": "Tobin Underhill",
-    "x": 238,
-    "z": 1876,
-    "yaw": 2.284
+    "x": 228,
+    "z": 1860,
+    "yaw": 1.969
    },
    "cart": {
     "id": "cart_mawehaven",
     "model": "ox_cart",
-    "x": 242,
-    "z": 1874,
+    "x": 226,
+    "z": 1860,
     "yaw": -2.795
    }
   },
@@ -400,16 +400,16 @@
    "carter": {
     "id": "carter_wamonhold",
     "name": "Idony Fenwick",
-    "x": 1380,
-    "z": 1526,
-    "yaw": -2.804
+    "x": 1374,
+    "z": 1522,
+    "yaw": 0.992
    },
    "cart": {
     "id": "cart_wamonhold",
     "model": "ox_cart",
-    "x": 1382,
-    "z": 1526,
-    "yaw": 2.481
+    "x": 1372,
+    "z": 1520,
+    "yaw": 2.483
    }
   },
   {
@@ -421,19 +421,19 @@
    "x": 28320,
    "z": 5280,
    "gate": "halsbridge_gate_1",
-   "fromGate": 15,
+   "fromGate": 14,
    "carter": {
     "id": "carter_halsbridge",
     "name": "Kitt Dimmock",
-    "x": 1694,
-    "z": 1280,
-    "yaw": 1.571
+    "x": 1692,
+    "z": 1278,
+    "yaw": 1.528
    },
    "cart": {
     "id": "cart_halsbridge",
     "model": "ox_cart",
-    "x": 1692,
-    "z": 1280,
+    "x": 1690,
+    "z": 1278,
     "yaw": 0.011
    }
   },
@@ -446,19 +446,19 @@
    "x": 26832,
    "z": 5552,
    "gate": "mill_end_gate_0",
-   "fromGate": 15,
+   "fromGate": 14,
    "carter": {
     "id": "carter_mill_end",
     "name": "Clement Hobday",
-    "x": 204,
+    "x": 210,
     "z": 1532,
-    "yaw": 0.654
+    "yaw": -1.468
    },
    "cart": {
     "id": "cart_mill_end",
     "model": "ox_cart",
-    "x": 208,
-    "z": 1534,
+    "x": 212,
+    "z": 1532,
     "yaw": -0.028
    }
   },
@@ -471,19 +471,19 @@
    "x": 27328,
    "z": 5648,
    "gate": "lower_mossgate_gate_0",
-   "fromGate": 14,
+   "fromGate": 24,
    "carter": {
     "id": "carter_lower_mossgate",
     "name": "Gwen Fenwick",
-    "x": 702,
-    "z": 1608,
-    "yaw": 1.127
+    "x": 708,
+    "z": 1618,
+    "yaw": -1.338
    },
    "cart": {
     "id": "cart_lower_mossgate",
     "model": "ox_cart",
-    "x": 700,
-    "z": 1608,
+    "x": 710,
+    "z": 1618,
     "yaw": 0
    }
   },
@@ -496,19 +496,19 @@
    "x": 27760,
    "z": 5168,
    "gate": "mirestead_gate_0",
-   "fromGate": 13,
+   "fromGate": 17,
    "carter": {
     "id": "carter_mirestead",
     "name": "Hobb Fenwick",
-    "x": 1092,
-    "z": 1106,
-    "yaw": -0.779
+    "x": 1094,
+    "z": 1112,
+    "yaw": -2.611
    },
    "cart": {
     "id": "cart_mirestead",
     "model": "ox_cart",
-    "x": 1090,
-    "z": 1104,
+    "x": 1096,
+    "z": 1114,
     "yaw": -0.91
    }
   },
@@ -521,20 +521,20 @@
    "x": 30192,
    "z": 4448,
    "gate": "gullwick_gate_0",
-   "fromGate": 14,
+   "fromGate": 15,
    "carter": {
     "id": "carter_gullwick",
     "name": "Alder Rookwood",
-    "x": 1518,
+    "x": 1520,
     "z": 426,
-    "yaw": -1.325
+    "yaw": -1.81
    },
    "cart": {
     "id": "cart_gullwick",
     "model": "ox_cart",
-    "x": 1520,
+    "x": 1522,
     "z": 426,
-    "yaw": -0.062
+    "yaw": -0.067
    }
   },
   {
@@ -546,20 +546,20 @@
    "x": 29088,
    "z": 4656,
    "gate": "ferry_hythe_gate_0",
-   "fromGate": 15,
+   "fromGate": 14,
    "carter": {
     "id": "carter_ferry_hythe",
     "name": "Emmot Sallow",
-    "x": 430,
-    "z": 634,
-    "yaw": 2.246
+    "x": 426,
+    "z": 632,
+    "yaw": 1.723
    },
    "cart": {
     "id": "cart_ferry_hythe",
     "model": "ox_cart",
-    "x": 428,
-    "z": 634,
-    "yaw": 0.219
+    "x": 424,
+    "z": 632,
+    "yaw": 0.216
    }
   },
   {
@@ -571,18 +571,18 @@
    "x": 29520,
    "z": 5968,
    "gate": "wyrmrow_gate_0",
-   "fromGate": 16,
+   "fromGate": 15,
    "carter": {
     "id": "carter_wyrmrow",
     "name": "Rhosyn Cattermole",
-    "x": 890,
+    "x": 886,
     "z": 1918,
-    "yaw": 2.356
+    "yaw": 2.19
    },
    "cart": {
     "id": "cart_wyrmrow",
     "model": "ox_cart",
-    "x": 888,
+    "x": 884,
     "z": 1920,
     "yaw": 0.785
    }
@@ -596,18 +596,18 @@
    "x": 29680,
    "z": 5360,
    "gate": "mirekeep_gate_0",
-   "fromGate": 14,
+   "fromGate": 12,
    "carter": {
     "id": "carter_mirekeep",
     "name": "Alder Brackenridge",
-    "x": 952,
+    "x": 954,
     "z": 1256,
-    "yaw": -0.502
+    "yaw": -0.42
    },
    "cart": {
     "id": "cart_mirekeep",
     "model": "ox_cart",
-    "x": 952,
+    "x": 954,
     "z": 1254,
     "yaw": -1.695
    }
@@ -621,19 +621,19 @@
    "x": 23632,
    "z": 6704,
    "gate": "hermit_s_rest_gate_1",
-   "fromGate": 16,
+   "fromGate": 15,
    "carter": {
     "id": "carter_hermit_s_rest",
     "name": "Bartle Kettleby",
-    "x": 1086,
-    "z": 656,
-    "yaw": 1.571
+    "x": 1092,
+    "z": 654,
+    "yaw": -1.571
    },
    "cart": {
     "id": "cart_hermit_s_rest",
     "model": "ox_cart",
-    "x": 1084,
-    "z": 656,
+    "x": 1094,
+    "z": 654,
     "yaw": 0
    }
   },
@@ -646,19 +646,19 @@
    "x": 22784,
    "z": 6368,
    "gate": "charcoal_burners_gate_1",
-   "fromGate": 16,
+   "fromGate": 17,
    "carter": {
     "id": "carter_charcoal_burners",
     "name": "Bryn Quarrie",
     "x": 322,
-    "z": 196,
+    "z": 198,
     "yaw": 3.142
    },
    "cart": {
     "id": "cart_charcoal_burners",
     "model": "ox_cart",
     "x": 322,
-    "z": 198,
+    "z": 200,
     "yaw": 1.571
    }
   },
@@ -671,20 +671,20 @@
    "x": 23808,
    "z": 6368,
    "gate": "wildhaven_gate_0",
-   "fromGate": 15,
+   "fromGate": 16,
    "carter": {
     "id": "carter_wildhaven",
     "name": "Emrys Kettleby",
     "x": 1232,
-    "z": 198,
-    "yaw": 0.322
+    "z": 194,
+    "yaw": 0.419
    },
    "cart": {
     "id": "cart_wildhaven",
     "model": "ox_cart",
     "x": 1232,
-    "z": 196,
-    "yaw": -1.211
+    "z": 192,
+    "yaw": -1.209
    }
   },
   {
@@ -696,19 +696,19 @@
    "x": 24912,
    "z": 6720,
    "gate": "orrinsford_gate_0",
-   "fromGate": 17,
+   "fromGate": 16,
    "carter": {
     "id": "carter_orrinsford",
     "name": "Gervase Sallow",
-    "x": 258,
-    "z": 580,
-    "yaw": 3.142
+    "x": 260,
+    "z": 570,
+    "yaw": 0
    },
    "cart": {
     "id": "cart_orrinsford",
     "model": "ox_cart",
-    "x": 258,
-    "z": 582,
+    "x": 260,
+    "z": 568,
     "yaw": -1.571
    }
   },
@@ -725,16 +725,16 @@
    "carter": {
     "id": "carter_pilgrim_s_halt",
     "name": "Wat Quarrie",
-    "x": 630,
-    "z": 204,
-    "yaw": -1.312
+    "x": 632,
+    "z": 202,
+    "yaw": -0.795
    },
    "cart": {
     "id": "cart_pilgrim_s_halt",
     "model": "ox_cart",
-    "x": 630,
-    "z": 202,
-    "yaw": -2.239
+    "x": 634,
+    "z": 200,
+    "yaw": -2.238
    }
   },
   {
@@ -746,19 +746,19 @@
    "x": 27168,
    "z": 7792,
    "gate": "millbrook_gate_2",
-   "fromGate": 16,
+   "fromGate": 17,
    "carter": {
     "id": "carter_millbrook",
     "name": "Dowsabel Kettleby",
-    "x": 476,
+    "x": 480,
     "z": 1576,
-    "yaw": -0.271
+    "yaw": -0.683
    },
    "cart": {
     "id": "cart_millbrook",
     "model": "ox_cart",
-    "x": 478,
-    "z": 1576,
+    "x": 482,
+    "z": 1574,
     "yaw": -2.356
    }
   },
@@ -771,19 +771,19 @@
    "x": 28288,
    "z": 7392,
    "gate": "three_wheels_gate_0",
-   "fromGate": 15,
+   "fromGate": 16,
    "carter": {
     "id": "carter_three_wheels",
     "name": "Emmot Ladd",
-    "x": 1710,
+    "x": 1706,
     "z": 1310,
-    "yaw": 2.818
+    "yaw": 2.356
    },
    "cart": {
     "id": "cart_three_wheels",
     "model": "ox_cart",
-    "x": 1708,
-    "z": 1310,
+    "x": 1704,
+    "z": 1312,
     "yaw": 0.662
    }
   },
@@ -796,20 +796,20 @@
    "x": 27696,
    "z": 6288,
    "gate": "stormrow_gate_0",
-   "fromGate": 16,
+   "fromGate": 15,
    "carter": {
     "id": "carter_stormrow",
     "name": "Cressy Ashby",
-    "x": 1010,
-    "z": 136,
-    "yaw": -0.108
+    "x": 1012,
+    "z": 134,
+    "yaw": -0.072
    },
    "cart": {
     "id": "cart_stormrow",
     "model": "ox_cart",
-    "x": 1010,
-    "z": 134,
-    "yaw": -1.653
+    "x": 1012,
+    "z": 132,
+    "yaw": -1.648
    }
   },
   {
@@ -825,14 +825,14 @@
    "carter": {
     "id": "carter_ravencross",
     "name": "Kenric Hayward",
-    "x": 450,
+    "x": 452,
     "z": 488,
-    "yaw": -1.127
+    "yaw": -1.571
    },
    "cart": {
     "id": "cart_ravencross",
     "model": "ox_cart",
-    "x": 452,
+    "x": 454,
     "z": 488,
     "yaw": 0
    }
@@ -852,7 +852,7 @@
     "name": "Tegan Coombe",
     "x": 1656,
     "z": 580,
-    "yaw": 2.562
+    "yaw": 3.142
    },
    "cart": {
     "id": "cart_wildmere",
@@ -871,20 +871,20 @@
    "x": 29056,
    "z": 7008,
    "gate": "redcliff_gate_2",
-   "fromGate": 17,
+   "fromGate": 20,
    "carter": {
     "id": "carter_redcliff",
     "name": "Nell Applegarth",
-    "x": 452,
-    "z": 850,
-    "yaw": -1.797
+    "x": 454,
+    "z": 848,
+    "yaw": -1.03
    },
    "cart": {
     "id": "cart_redcliff",
     "model": "ox_cart",
-    "x": 452,
-    "z": 848,
-    "yaw": -2.499
+    "x": 456,
+    "z": 846,
+    "yaw": -2.548
    }
   },
   {
@@ -896,20 +896,20 @@
    "x": 29888,
    "z": 7856,
    "gate": "cinder_farm_gate_0",
-   "fromGate": 14,
+   "fromGate": 15,
    "carter": {
     "id": "carter_cinder_farm",
     "name": "Alder Harl",
-    "x": 1276,
-    "z": 1754,
-    "yaw": -0.342
+    "x": 1270,
+    "z": 1758,
+    "yaw": 2.151
    },
    "cart": {
     "id": "cart_cinder_farm",
     "model": "ox_cart",
-    "x": 1278,
-    "z": 1754,
-    "yaw": 0.61
+    "x": 1268,
+    "z": 1760,
+    "yaw": 0.607
    }
   },
   {
@@ -921,18 +921,18 @@
    "x": 28784,
    "z": 6368,
    "gate": "ravenhaven_gate_0",
-   "fromGate": 15,
+   "fromGate": 14,
    "carter": {
     "id": "carter_ravenhaven",
     "name": "Cadoc Dunstable",
-    "x": 140,
+    "x": 136,
     "z": 274,
-    "yaw": 1.879
+    "yaw": 2.033
    },
    "cart": {
     "id": "cart_ravenhaven",
     "model": "ox_cart",
-    "x": 138,
+    "x": 134,
     "z": 276,
     "yaw": 0.54
    }
@@ -946,19 +946,19 @@
    "x": 29776,
    "z": 7232,
    "gate": "minfenrow_gate_0",
-   "fromGate": 14,
+   "fromGate": 17,
    "carter": {
     "id": "carter_minfenrow",
     "name": "Kitt Sallow",
     "x": 1132,
-    "z": 1136,
-    "yaw": 1.661
+    "z": 1140,
+    "yaw": 2.456
    },
    "cart": {
     "id": "cart_minfenrow",
     "model": "ox_cart",
-    "x": 1132,
-    "z": 1138,
+    "x": 1130,
+    "z": 1142,
     "yaw": 0.785
    }
   },
@@ -971,19 +971,19 @@
    "x": 28992,
    "z": 7568,
    "gate": "bipetwatch_gate_0",
-   "fromGate": 14,
+   "fromGate": 43,
    "carter": {
     "id": "carter_bipetwatch",
     "name": "Orla Pennock",
-    "x": 376,
-    "z": 1432,
-    "yaw": 2.08
+    "x": 406,
+    "z": 1434,
+    "yaw": -0.715
    },
    "cart": {
     "id": "cart_bipetwatch",
     "model": "ox_cart",
-    "x": 376,
-    "z": 1434,
+    "x": 406,
+    "z": 1432,
     "yaw": 1.429
    }
   },
@@ -996,20 +996,20 @@
    "x": 23418,
    "z": 9497,
    "gate": "last_lantern_gate_0",
-   "fromGate": 14,
+   "fromGate": 15,
    "carter": {
     "id": "carter_last_lantern",
     "name": "Alys Cobbold",
-    "x": 864,
-    "z": 1374,
-    "yaw": 0.514
+    "x": 860,
+    "z": 1372,
+    "yaw": 1.183
    },
    "cart": {
     "id": "cart_last_lantern",
     "model": "ox_cart",
-    "x": 862,
-    "z": 1374,
-    "yaw": -0.338
+    "x": 858,
+    "z": 1372,
+    "yaw": -0.332
    }
   },
   {
@@ -1025,15 +1025,15 @@
    "carter": {
     "id": "carter_thornwick",
     "name": "Blanche Furlong",
-    "x": 1718,
-    "z": 1920,
-    "yaw": 0.355
+    "x": 1724,
+    "z": 1926,
+    "yaw": -2.553
    },
    "cart": {
     "id": "cart_thornwick",
     "model": "ox_cart",
-    "x": 1718,
-    "z": 1918,
+    "x": 1724,
+    "z": 1928,
     "yaw": -1.194
    }
   },
@@ -1050,15 +1050,15 @@
    "carter": {
     "id": "carter_coldwater",
     "name": "Fenna Furlong",
-    "x": 1420,
-    "z": 1900,
-    "yaw": 0.42
+    "x": 1426,
+    "z": 1904,
+    "yaw": -2.27
    },
    "cart": {
     "id": "cart_coldwater",
     "model": "ox_cart",
-    "x": 1418,
-    "z": 1900,
+    "x": 1428,
+    "z": 1906,
     "yaw": -0.755
    }
   },
@@ -1075,16 +1075,16 @@
    "carter": {
     "id": "carter_netherby",
     "name": "Alys Ashby",
-    "x": 704,
+    "x": 712,
     "z": 788,
-    "yaw": 1.308
+    "yaw": -1.52
    },
    "cart": {
     "id": "cart_netherby",
     "model": "ox_cart",
-    "x": 702,
+    "x": 714,
     "z": 788,
-    "yaw": -0.069
+    "yaw": -0.072
    }
   },
   {
@@ -1096,20 +1096,20 @@
    "x": 28188,
    "z": 9478,
    "gate": "gorsehold_gate_0",
-   "fromGate": 15,
+   "fromGate": 13,
    "carter": {
     "id": "carter_gorsehold",
     "name": "Petronel Rookwood",
-    "x": 1636,
-    "z": 1258,
-    "yaw": -2.31
+    "x": 1632,
+    "z": 1262,
+    "yaw": 3.11
    },
    "cart": {
     "id": "cart_gorsehold",
     "model": "ox_cart",
-    "x": 1636,
-    "z": 1260,
-    "yaw": 1.975
+    "x": 1634,
+    "z": 1264,
+    "yaw": 1.972
    }
   },
   {
@@ -1121,20 +1121,20 @@
    "x": 28218,
    "z": 8559,
    "gate": "burnt_barns_gate_0",
-   "fromGate": 15,
+   "fromGate": 14,
    "carter": {
     "id": "carter_burnt_barns",
     "name": "Tibbot Ashby",
-    "x": 1634,
-    "z": 394,
-    "yaw": 2.317
+    "x": 1636,
+    "z": 386,
+    "yaw": -0.203
    },
    "cart": {
     "id": "cart_burnt_barns",
     "model": "ox_cart",
-    "x": 1634,
-    "z": 396,
-    "yaw": 1.028
+    "x": 1638,
+    "z": 384,
+    "yaw": 1.027
    }
   },
   {
@@ -1146,19 +1146,19 @@
    "x": 29891,
    "z": 9218,
    "gate": "lowmoor_gate_0",
-   "fromGate": 14,
+   "fromGate": 13,
    "carter": {
     "id": "carter_lowmoor",
     "name": "Ganna Fenwick",
-    "x": 1214,
-    "z": 950,
-    "yaw": 1.72
+    "x": 1212,
+    "z": 952,
+    "yaw": 1.712
    },
    "cart": {
     "id": "cart_lowmoor",
     "model": "ox_cart",
-    "x": 1212,
-    "z": 950,
+    "x": 1210,
+    "z": 952,
     "yaw": -3.124
    }
   },
@@ -1171,20 +1171,20 @@
    "x": 30019,
    "z": 8481,
    "gate": "deepdene_gate_0",
-   "fromGate": 15,
+   "fromGate": 14,
    "carter": {
     "id": "carter_deepdene",
     "name": "Lambert Sallow",
-    "x": 1344,
-    "z": 338,
-    "yaw": 1.919
+    "x": 1350,
+    "z": 336,
+    "yaw": -1.679
    },
    "cart": {
     "id": "cart_deepdene",
     "model": "ox_cart",
-    "x": 1342,
-    "z": 338,
-    "yaw": -0.019
+    "x": 1352,
+    "z": 336,
+    "yaw": -0.016
    }
   }
  ],

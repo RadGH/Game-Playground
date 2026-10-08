@@ -16,7 +16,7 @@ Readers:
 
 | Constant | Value | Where |
 |---|---|---|
-| `PROTOCOL_VERSION` | `7` | `js/net/protocol.js`. Bumped on any wire change. A client with another value is refused with `refuse {code:'version'}` → the client shows "A new version is out — reload". |
+| `PROTOCOL_VERSION` | `8` | `js/net/protocol.js`. Bumped on any wire change. A client with another value is refused with `refuse {code:'version'}` → the client shows "A new version is out — reload". |
 | `BUILD` | string | The server's build id (dev: `dev`; published copies: the git hash). A client whose `build` differs is refused with `code:'build'` → "reload". The client is always served by the same server as its socket (PLAN §10.1). |
 | `SNAP_VERSION` | `1` | First byte after the type byte of every binary snapshot. |
 | `TICK_MS` | `50` | Simulation 20 Hz (PLAN §8.3). |
@@ -143,6 +143,9 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `sheet` | p | — | 2 / 4 | §21.6: ask for the character sheet again. Answer `sheet`. |
 | `feedback` | both | `kind:str:16, text:str:2000, ctx?:obj` | 0.2 / 5 | §21.7: a suggestion or a bug report (`ctx` = the client's own context). Answer `feedbackR`. |
 | `admin` | both | `op:str:16, id?:int, state?:str:16, kind?:str:16, limit?:int, before?:int, note?:str:500` | 2 / 10 | §21.9: admin accounts only — `reports` (list) / `report` (set a state). Answers `adminReports`, `adminR`. |
+| `feedbackMine` | both | `limit?:int, before?:int` | 1 / 5 | §24.1: my own reports (`feedback {op:'mine'}` is the same call). Answer `feedbackMine`. |
+| `cart` | p | `op:str:8, id:id, to?:str:48, token?:bool` | 2 / 4 | §24.5: ox-cart travel — `list` / `go`. Answers `cartList`, `cartR`, `cartRide`. |
+| `meter` | p | `on:bool` | 1 / 4 | §24.6: the damage meter's hit feed on / off. Answers `meterR`, then `hits`. |
 | `fish` | p | `op:str:8, aim?:vec2, held?:num, score?:num, holds?:nums` | 4 / 8 | §21.10 angling: `cast`, `hook`, `land`, `stop`. Answers `fishR`, `fishBite`, `fishTug`, `fishCatch`. |
 | `cook` | p | `op?:str:8, id?:str:64, n?:int` | 2 / 6 | §21.10: no `id` = list (`cookList`), with `id` = cook it at a fire (`cookR`). |
 
@@ -223,6 +226,13 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `eventDone` | `uid, id, name, result, why?, credited, xp, gold, items, onBody?, text, story?` | (game) §21.5: how an event ended, for everyone who was there. |
 | `eventAt` | `uid, id?, realm?` | (game) §21.5: the event whose area you stand in (`uid:null` = none). |
 | `feedbackR` | `ok, id?, first?, why?, msg` | (both) §21.7: answer to `feedback`. |
+| `feedbackMine` | `ok, list, more, why?` | (both) §24.1: the account's own reports. |
+| `questMarks` | `marks, full?` | §24.3: per-player quest markers over NPCs. |
+| `hits` | `l` | §24.6: the damage meter's rows (only while `meter {on:true}`). |
+| `meterR` | `on` | §24.6: answer to `meter`. |
+| `cartList` | `id, from, name, stops, gold, tokens` | §24.5: where this cart goes and what it costs. |
+| `cartR` | `op, ok, to, fare?, why?, msg?` | §24.5: answer to `cart` (`op:'go'`), and the arrival (`op:'arrive'`). |
+| `cartRide` | `to, from, ms, fare` | §24.5: the ride has begun (the client's presentation). |
 | `adminReports` | `list, counts` | (both) §21.9: feedback reports for an admin. |
 | `adminR` | `op, ok, id?, state?, why?, msg?, counts?` | (both) §21.9: answer to an admin change (or a refusal: `forbidden`). |
 | `fishR` | `ok, state, at?, water?, pool?, why?, msg?` | (game) §21.10: a cast accepted (`state:'wait'`) / refused, or the line coming in (`state:'idle', why`). |
@@ -1280,3 +1290,55 @@ time." / "No reward this time.") and always carries `story`; `realm {kind:'event
 - **Friends unseen:** `friends {list, unseen:[{char, name, kind:'added'|'addedYou', at}], unseenCount}` (a fresh row also has `unseen: true`);
   `friendNew {char, name, kind:'addedYou'}` to someone who was just added; `friend {op:'seen', char?}` clears one or all. Kept in world state
   (`friendsUnseen:<char>`), so the badge survives a reload.
+
+## 24. Owner feedback 8 (2026-10-08) — protocol v8 (every change additive; the bump makes a cached client reload)
+
+### 24.1 Feedback: completed, my reports, replies (W28, W29, W7)
+- `FEEDBACK_STATES` gains `completed`. `admin {op:'report', id, state:'completed', note}`: the note IS the changelog line the sender reads
+  (stored as `done`, apart from the admin's own `note`). `adminR {ok, id, state, done?, counts}`; `counts.completed`; rows carry `done, doneAt, ref`.
+- `feedbackMine {limit?, before?}` (or `feedback {op:'mine'}`) -> `feedbackMine {ok, list:[{id, at, kind, text, name, state, note, noteAt, adminNote, done, doneAt, ref}], more}`:
+  the ACCOUNT's reports, newest first, 50 a page. `state`: `new | approved | declined | completed | closed` (trashed reads closed). `note` = what to
+  print (completion text when completed, else the admin's note). A guest: `{ok:false, why:'guest', list:[]}`.
+- `feedback {kind, text, ctx?, ref?}`: `ref` = one of your own reports -> a NEW report whose text starts `#<ref> ` and whose row keeps `ref`
+  (`feedbackR {why:'ref'}` otherwise). `feedbackR` gains `state` and `ref`. An admin's own report arrives `approved`.
+
+### 24.2 The account, not the character (W11)
+- `joined.you.acct = {claimed, level, admin, username}`; `you {acct}` when it changes. `level` = the account's highest character. Public chat,
+  whispers to strangers, sending mail and founding a guild need a claimed account whose `acct.level` >= 5 — whatever the level of the character
+  you play. Refusals: guest -> `gate` / `chatGate` "needs a claimed account…"; claimed but no level-5 character -> `mailR {why:'level'}` /
+  `chatGate` "opens when one of your characters reaches level 5".
+
+### 24.3 Quest marks (W12)
+- `questMarks {marks: {<entity id>: 'offer'|'turnin'|'active'|'later'|'job'|null}, full?}` — `full: true` = the whole map for the room (after every
+  `joined`); otherwise a patch (null = remove). offer = gold "!", turnin = gold "?", active = grey "?", later = grey "!", job = repeatable work only
+  (dim, or nothing). Never in `info` (it is per player).
+
+### 24.4 Titles, mounts, bags, lights (W27, W26, W19, W22)
+- `info.title` only on NPCs placed for the player; filler folk and guards send `info.filler: 1` and no title. `info.guard: 1` on a town guard.
+- `mount {op:'summon'}` -> `mountR {ok, id, casting, until, stand: true}`: the server holds you still for the call (movement in `in` is ignored);
+  only a hit, death, deep water or being moved 3 m breaks it. `mount {op:'cancel'}` -> `mountR {ok, why:'cancelled'}`.
+- `you.bagMax` (joined, `sheet.bagMax`, and `you {bagMax, bagBase}` on a change) = base 40 + the worn pack's `bagSlots`. Taking a pack off / wearing a
+  smaller one over a too-full bag: `itemR {op, ok:false, why:'bagSlots', need, msg}`.
+- Lights: removed from the bag at entry (and within 5 s when one arrives later) and paid back; a system chat line + a letter say so.
+  `you.lightRange` / `you.light` = C's `LIGHT`.
+
+### 24.5 Ox carts (W5)
+- `use` a parked cart (`info.type:'cart'`, `info.vehicle:'ox_cart'`, `info.cart:<stop id>`) -> `used {kind:'cart'}` + `cartList`; `use` a carter NPC ->
+  the normal `used {kind:'npc'}` and `cartList` one tick later; `cart {op:'list', id}` asks again. A carter on the road has `info.vehicle`.
+- `cartList {id, from, name, stops:[{id, name, fare, m, s, hops?, kind?, zone?, locked?, why?, msg?}], gold, tokens, says?, roaming?}` nearest first.
+- `cart {op:'go', id, to, token?}` -> `cartR {op:'go', ok, to, name, fare, token?, ms}` | `{ok:false, why:'gold'|'far'|'fight'|'dead'|'same'|'stop'|'busy'|'level', msg}`;
+  then `cartRide {to:{id, name, x, z, province}, from:{id, name}, ms, fare, m}`; you are held for `ms`; then the transfer (`joined`, handoff via `cart`)
+  and `cartR {op:'arrive', ok:true, to, name}`. Called off by death / leaving: `cartR {op:'arrive', ok:false, why:'interrupted'}` and the fare back.
+  A `cart_token` good pays one fare when you cannot (or `token:true`). Quest step `{kind:'ride', to, from?}` is credited on arrival.
+
+### 24.6 Damage meter feed (W21)
+- `meter {on}` -> `meterR {on}`. While on, 4 Hz: `hits {l: [[src, tgt, n, flags, sk, el, over, abs], …]}` — every landed hit / heal / miss whose
+  source or target is you, a party member or one of their pets (same room). flags: 1 heal, 2 crit, 4 miss, 8 killing blow, 16 blocked, 32 dot tick,
+  64 dodged. `sk` = ability id (`dot` for a tick). `over` / `abs` are 0 until the rules' hit event carries them.
+
+### 24.7 Events (W24, W1)
+- Road chests: `used {ok:false, why:'guarded', left, keepers, msg}`; an opened chest stays 120 s or until everyone who took part has looted;
+  `eventTrack.leftMs` counts that down; `eventDone` for a chest carries `got` (and `posted: true` when your share went to the post). A chest
+  opens only in its own loot window.
+- Newcomers (under level 3 or under 10 minutes played): events with `startOn.clearOfNewcomersM` do not start near them; in a town with an
+  event live they are healed every second (a guard says why, once).

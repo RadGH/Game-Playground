@@ -290,12 +290,6 @@
      "minLevel": 1
     },
     {
-     "id": "torch_bundle",
-     "source": "good",
-     "price": 6,
-     "minLevel": 1
-    },
-    {
      "id": "whetstone",
      "source": "good",
      "price": 5,

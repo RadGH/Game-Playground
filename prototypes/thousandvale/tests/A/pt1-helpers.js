@@ -26,7 +26,10 @@ export async function realServer(opts = {}) {
   const clock = opts.clock || createVirtualClock();
   const store = createMemoryStore({ now: clock.now });
   const world = createWorld({ store, layouts: C.layouts, events: C.events, encounterInfo: C.encounterInfo, createRules: C.createRules, classes: C.classes, kitsFor: C.kitsFor,
-    now: clock.now, lingerMs: 0, log: () => {}, directorOpts: { rules: C.directorRules || {} }, warm: false, ...opts });
+    now: clock.now, lingerMs: 0, log: () => {}, directorOpts: { rules: C.directorRules || {} }, warm: false,
+    // owner feedback 8 W1: a test character is seconds old, i.e. a NEWCOMER, and events wait for newcomers to leave. The older
+    // tests are about the events themselves, so nobody is a newcomer here unless a test asks for E's rule (`newcomer: null`).
+    newcomer: { underLevel: 0, firstMinutes: 0 }, ...opts });
   const srv = createLoopbackServer({ clock, world });
   await srv.ready;
   return { srv, clock, world, C, store };

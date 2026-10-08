@@ -75,12 +75,16 @@ test('no main-thread stall over 100 ms while the world streams across a zone bor
   await page.evaluate(() => tv.perf(true));
   const goal = { x: ZONE_EAST + 120, z: you.z + 40 };
   const t0 = Date.now();
-  let walked = 0, last = await page.evaluate(() => tv.state().you);
+  let walked = 0, stuck = 0, last = await page.evaluate(() => tv.state().you);
   while (Date.now() - t0 < 120000) {
-    await page.evaluate(([x, z]) => tv.walkTo(x, z), [goal.x, goal.z]);
+    // (since the hedges, fences and walls became solid — play-test 4/5 — a straight line east runs into one after 17 m:
+    //  when a leg makes no ground, the next one goes round to one side, then the other)
+    await page.evaluate(([x, z]) => tv.walkTo(x, z), stuck ? [last.x + 25, last.z + (stuck % 2 ? 45 : -45) * Math.ceil(stuck / 2)] : [goal.x, goal.z]);
     await page.waitForTimeout(3000);
     const s = await page.evaluate(() => tv.state());
-    walked += Math.hypot(s.you.x - last.x, s.you.z - last.z); last = s.you;
+    const step = Math.hypot(s.you.x - last.x, s.you.z - last.z);
+    stuck = step < 1.5 ? stuck + 1 : 0;
+    walked += step; last = s.you;
     if (s.you.dead) await page.evaluate(() => tv.rise());
     // swing at whatever comes close (casts, hits, spell effects and statuses all run through the same frame)
     const foe = s.ents.filter(e => e.kind === 'monster' && !e.dead).sort((p, q) => Math.hypot(p.x - s.you.x, p.z - s.you.z) - Math.hypot(q.x - s.you.x, q.z - s.you.z))[0];

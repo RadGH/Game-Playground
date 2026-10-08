@@ -2,6 +2,9 @@
    the steered pointer, the quick wheel, the on-screen keyboard, the binding tables. Loaded by js/client/input/index.js
    (and listed by the gallery's frame). Nothing here changes a window's layout — the phone layout is css/layout-phone.css. */
 
+/* the phone layer's own elements exist only in the phone layout (rotate / the Settings switch can turn it off again) */
+html:not([data-layout="phone"]) .phone-ui, html:not([data-layout="phone"]) .phone-tabs, html:not([data-layout="phone"]) .phone-sheet, html:not([data-layout="phone"]) .ph-chat-x, html:not([data-layout="phone"]) .ph-headbtn { display: none !important; }
+
 /* ---------------------------------------------------------------- controller glyphs (a <kbd> re-labelled by input/hints.js) */
 kbd.pad-glyph, .slot > .key.pad-glyph { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 11px; border: 1px solid rgba(255, 255, 255, 0.55);
   background: #23262b; color: #fff; font: 700 12px/1 var(--sans, system-ui, sans-serif); letter-spacing: 0; text-shadow: none; box-shadow: 0 1px 0 #000; white-space: nowrap; vertical-align: middle; }
@@ -41,6 +44,7 @@ html[data-input="pad"] :focus { outline: none; }
 .tv-radial { position: fixed; inset: 0; z-index: 99980; pointer-events: auto; display: grid; place-items: center; background: radial-gradient(circle at var(--cx, 50%) var(--cy, 50%), rgba(8, 7, 5, 0.25) 0, rgba(8, 7, 5, 0.72) 70%); --R: 132px; touch-action: none; }
 .tv-radial .rd-ring, .tv-radial .rd-hub { position: absolute; left: var(--cx, 50%); top: var(--cy, 50%); }
 .tv-radial .rd-hub { width: 132px; height: 132px; margin: -66px 0 0 -66px; border-radius: 50%; display: grid; place-content: center; text-align: center; padding: 10px; background: rgba(18, 15, 12, 0.94); border: 1px solid var(--edge-strong, rgba(217, 178, 106, 0.7)); box-shadow: var(--shadow, 0 6px 24px rgba(0, 0, 0, 0.45)); pointer-events: none; }
+.tv-radial:not(.held) .rd-hub { pointer-events: auto; cursor: pointer; }
 .tv-radial .rd-hub strong { font-family: var(--serif, Georgia, serif); font-size: 17px; color: var(--gold-hi, #f1d595); letter-spacing: 0.05em; }
 .tv-radial .rd-hub small { display: block; margin-top: 3px; font-size: 11px; line-height: 1.25; color: var(--ink-dim, #c7b99b); max-height: 2.6em; overflow: hidden; }
 .tv-radial .rd-slice { position: absolute; left: calc(var(--x) * var(--R)); top: calc(var(--y) * var(--R)); width: 76px; height: 76px; margin: -38px 0 0 -38px; border-radius: 50%; display: grid; place-content: center; justify-items: center; gap: 2px; cursor: pointer;

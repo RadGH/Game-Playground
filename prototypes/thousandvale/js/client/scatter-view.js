@@ -62,8 +62,11 @@ export async function prewarmScatter({ quality = 'high' } = {}) {
     const type = art.tree ? 'tree' : art.bush ? 'bush' : art.rock ? 'rock' : 'fern';
     for (const name of art[type]) for (const lod of (type === 'tree' ? (quality === 'low' ? [1, 2] : [0, 1, 2]) : [1])) todo.push([type, name, lod]);
   }
+  // (play-test 7) rest when 12 ms of building have been done, not before every piece: on a renderer that draws a frame
+  // every few seconds an idle callback comes once a frame, and sixty waits were five minutes of boot
+  let at = performance.now();
   for (const [type, name, lod] of todo) {
-    await new Promise(r => (typeof requestIdleCallback === 'function' ? requestIdleCallback(() => r(), { timeout: 400 }) : setTimeout(r, 30)));
+    if (performance.now() - at > 12) { await new Promise(r => (typeof requestIdleCallback === 'function' ? requestIdleCallback(() => r(), { timeout: 400 }) : setTimeout(r, 30))); at = performance.now(); }
     perf.span('scatter:prewarm', () => geoFor(type, name, lod));
   }
   return todo.length;

@@ -3463,3 +3463,30 @@ in town and says so. **A:** `always: true` is on 15 pools now, not 1; `pool.town
   `items`. D-UI: the in-page rules fallback can go; treat `ok:false` as "no kit step".
 - **Friends unseen:** `friends.unseen [{char, name, kind:'added'|'addedYou', at}]` + `unseenCount` + `unseen:true` on the row; `friendNew` when
   someone adds you; `net.friendsSeen(char?)` = `friend {op:'seen'}` clears it. Server-kept, so it survives a reload.
+
+## D-world -> G (phone layout: what to default down on a narrow touch device) — 2026-10-07
+`detectQuality()` (js/client/main.js) already starts a phone on **Medium**; that tier is the right default. What each tier does to the 3D side, so
+the phone settings sheet can show the same three choices and nothing else is needed:
+| setting | High | Medium (phone default) | Low |
+|---|---|---|---|
+| shadows (scene.js) | on, 2048 map | on, 1024 map | off |
+| pixel ratio | up to 1.75 | up to 1.75 | 0.75 x (capped at 1) |
+| standing crops (setpiece-view.js) | 16 blades a patch, stalks within 110 m | 10 blades, 70 m | 8 blades, 60 m |
+| full character bodies / name plates (actors.js) | 30 / 40 | 30 / 40 | 12 / 24 |
+| spell particles (spells.js) | 260 | 260 | 120 |
+| materials for set pieces / crowd | Standard | Standard | Lambert, no wind on leaves |
+- **Recommended for a phone that heats up or drops under 30 fps:** offer "Low" as a one-tap "Battery saver"; it changes everything above at the
+  next load (quality is read once at boot — `?quality=` or the saved Settings > Graphics value).
+- **Live hooks (no reload) you can bind to sliders if you want them:** `setCropDistance(metres)` exported from js/client/setpiece-view.js (20-400;
+  beyond it a field is one flat slab) — say if you want it on `window.tv`. Shadows and draw distance are NOT live settings today (shadow map and
+  the horizon grid are built at boot); if the phone sheet needs a live "Shadows" switch, ask and I add `view.setShadows(on)`.
+- Crops were the heavy item this round: every field is now its own instanced mesh, frustum-culled, stalks only when near.
+
+## D-UI -> G, Lead — 2026-10-07: §23.1 wired; one thing the phone layout hides
+- §23.1 is in: Shift-click a stack = split (number box), drop a stack on the same thing = merge (`js/client/bag.js`); the friends badge is the
+  server's `unseenCount` / `friendNew` and `friend {op:'seen'}` goes out when the list is looked at (`js/client/friends.js`); kits come from
+  `kitsR` only and an `ok:false` skips the step with its reason said in chat (`js/client/ui/kit-step.js` — the page no longer loads the rules).
+- **G / Lead:** with the phone layout ON, `css/layout-phone.css` hides `.right-col` until `data-hudinfo="open"`. That column holds the event
+  tracker (owner's T12: every event says what it is, its objective, time left and reward) and the quest tracker — so on a phone an event's card
+  is not on screen unless the HUD-info toggle is opened. Suggest: keep `.tv-evtrack` visible (folded to one line) while an event is live.
+  `tests/D/pt5.spec.js`'s 390 px test now skips when the phone layout is on (your tests own that layer).

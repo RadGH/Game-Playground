@@ -72,7 +72,7 @@ export function createReveal({ net, hud, bag }) {
     root.hidden = false;
     ok.focus({ preventScroll: true });
     hud.chat?.(`${from === 'gift' ? 'You unwrap the gift' : 'You open the crate'}: ${nameOf(item)}.`, 'loot rarity-' + r);
-    S.timer = setTimeout(() => { if (S.shown === item) close(); }, 12000);
+    S.timer = setTimeout(() => { if (S.shown === item) close(); }, 30000);      // it waits for you; it only tidies itself away after half a minute
   }
   function refuse(r) {
     if (!S.waiting) return;

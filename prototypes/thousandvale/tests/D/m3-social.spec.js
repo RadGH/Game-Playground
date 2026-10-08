@@ -85,7 +85,7 @@ test('title screen: guest / log in tabs, privacy link, local fonts', async ({ br
 });
 
 test('two players: claim, friends, whisper, guild invite + guild chat, mail an item and take it', async ({ browser }) => {
-  test.setTimeout(420000);
+  test.setTimeout(900000)      /* two browsers on one software GPU: the steps pass, the old 7 minutes ran out before the last of them */;
   const A = await join_(browser, 'Alda');
   const B = await join_(browser, 'Brem');
 

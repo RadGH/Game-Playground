@@ -25,9 +25,11 @@ import { windUniform } from './decor.js';
 // with ONE material for the whole page (so one shader program, warmed at boot through cropSample()) swaying on the
 // page's own wind clock.
 let SHEAF_GEO = null, CROP_MAT = null;
-let SHEAF_BLADES = 16;
+let SHEAF_BLADES = 16, CROP_NEAR = 110;
 /** Software / low-quality renderers draw half the blades (main.js calls this once, before any zone is built). */
-export function setCropDetail(blades) { if (!SHEAF_GEO) SHEAF_BLADES = Math.max(4, blades | 0); }
+export function setCropDetail(blades, near = null) { if (!SHEAF_GEO) SHEAF_BLADES = Math.max(4, blades | 0); if (near != null) CROP_NEAR = Math.max(20, +near || 110); }
+/** How far standing crops are drawn as stalks (metres from you to the field's edge); further, a field is a flat slab. A settings hook. */
+export function setCropDistance(m) { CROP_NEAR = Math.max(20, Math.min(400, +m || 110)); }
 const sheafGeo = () => SHEAF_GEO || (SHEAF_GEO = sheafGeometry(THREE, SHEAF_BLADES));
 function cropMaterial() {
   if (!CROP_MAT) CROP_MAT = sheafWind(new THREE.MeshLambertMaterial({ vertexColors: true }), windUniform);
@@ -71,7 +73,7 @@ export function modelParts(id, seed, fallback = null) {
  * -> { parts: [{mesh, x, y, z, w, h, d, yaw, rx, rz, colour, tag}], glass, spin, fires, lights, buildings: [{plot, want, kind, lit, culture}], solids }
  */
 export function planSetPieces({ placements = [], vignettes = [] } = {}, { recipes = new Map(), models = {}, ox = 0, oz = 0 } = {}) {
-  const parts = [], glass = [], spin = [], fires = [], lights = [], buildings = [], solids = [], props = [];
+  const parts = [], glass = [], spin = [], fires = [], lights = [], buildings = [], solids = [], props = [], cropFields = [];
   const put = (p, x, z, yaw, seedTag = '') => {
     // a model/part list at (x, z) turned by yaw: each part's local (x, z) turns with it, its own yaw adds
     const c = Math.cos(yaw), s = Math.sin(yaw);
@@ -128,7 +130,12 @@ export function planSetPieces({ placements = [], vignettes = [] } = {}, { recipe
     // the plot's local +x runs along proctown's angle a: (cos a, sin a); yaw for our turn is the angle that sends
     // local +z to (sin yaw, cos yaw) — +x then goes to (cos yaw, -sin yaw), so yaw = -a
     const T = put(null, x, z, -(d.angle || 0));
-    for (const q of list) parts.push(T(q));
+    // standing stalks carry the field they belong to: each field is its own instanced mesh, drawn only when near
+    // (cropFields: where, how big, what colour — for the flat far stand-in)
+    const fid = 'f:' + rec.id;
+    let n = 0, top = 0, tint = null;
+    for (const q of list) { const w = T(q); if (q.mesh === 'sheaf') { w.fid = fid; n++; top = Math.max(top, q.h); tint ||= q.colour; } parts.push(w); }
+    if (n) cropFields.push({ fid, x, z, w: d.w || 20, d: d.d || 14, yaw: -(d.angle || 0), h: top, colour: tint });
   }
   // ---- stream B: the ground ------------------------------------------------------------------------
   for (const raw of placements) {
@@ -215,7 +222,7 @@ export function planSetPieces({ placements = [], vignettes = [] } = {}, { recipe
     }
     for (const p of rec.props || []) { const w = at(p.x || 0, p.z || 0); props.push({ kind: p.kind, id: p.id, x: w.x, z: w.z, yaw: yaw + (p.yaw || 0), scale: p.scale || 1, dead: !!p.dead }); }
   }
-  return { parts, glass, spin, fires, lights, buildings, solids, props };
+  return { parts, glass, spin, fires, lights, buildings, solids, props, cropFields };
 }
 
 /** Is this E placement a set piece (drawn here, not by the vignette pass)? */
@@ -264,14 +271,31 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
   }
   // every part into one instanced mesh per unit shape
   const byMesh = Object.fromEntries(MESHES.map(m => [m, []]));
-  byMesh.sheaf = [];                                           // standing crops (propkit cropField grain / vine leaves)
-  for (const q of plan.parts) (byMesh[q.mesh] || byMesh.box).push({ q, g: groundOf(q.x, q.z) });
+  // standing crops (propkit cropField grain / vine leaves): ONE instanced mesh per field, so a field out of view or
+  // far away costs nothing (all the fields of a zone in one mesh were always drawn — 700,000 triangles round Torborhold,
+  // which stalled the software renderer the specs run on and would do the same to a phone)
+  const byField = new Map();
+  for (const q of plan.parts) { if (q.mesh === 'sheaf' && q.fid) { if (!byField.has(q.fid)) byField.set(q.fid, []); byField.get(q.fid).push({ q, g: groundOf(q.x, q.z) }); } else (byMesh[q.mesh] || byMesh.box).push({ q, g: groundOf(q.x, q.z) }); }
+  const crops = [];
+  for (const f of plan.cropFields || []) {
+    const list = byField.get(f.fid); if (!list?.length) continue;
+    const m = new THREE.InstancedMesh(sheafGeo(), cropMaterial(), list.length);
+    for (let i = 0; i < list.length; i++) { const { q, g } = list[i]; _e.set(q.rx || 0, q.yaw || 0, q.rz || 0, 'YXZ'); _q.setFromEuler(_e); m.setMatrixAt(i, _m.compose(_v.set(q.x, g + q.y, q.z), _q, _s.set(q.w, q.h, q.d))); m.setColorAt(i, col.set(q.colour || '#c9a84a')); }
+    m.receiveShadow = true; m.computeBoundingSphere(); m.name = 'sp-crop'; m.visible = false; group.add(m); meshes.push(m);
+    // the far stand-in: one low slab in the crop's colour over the plot (a sown field from a distance, never bare earth)
+    const g0 = groundOf(f.x, f.z);
+    const far = new THREE.Mesh(unitGeometry('box'), kitMat.clone()); far.material.color.set(f.colour || '#c9a84a');
+    far.position.set(f.x, g0 + 0.05, f.z); far.rotation.y = f.yaw; far.scale.set(Math.max(1, f.w - 0.4), Math.max(0.3, f.h * 0.72), Math.max(1, f.d - 0.4)); far.receiveShadow = true; far.name = 'sp-crop-far';
+    group.add(far); disposers.push(() => far.material.dispose());
+    crops.push({ m, far, x: f.x, z: f.z, r: Math.hypot(f.w, f.d) / 2 });
+    await budget.slice();
+  }
   for (const q of abs) (byMesh[q.mesh] || byMesh.box).push({ q, g: 0 });
   await budget.slice();
   for (const [kind, list] of Object.entries(byMesh)) {
     if (!list.length) continue;
-    const sheaf = kind === 'sheaf';
-    const m = new THREE.InstancedMesh(sheaf ? sheafGeo() : unitGeometry(kind), sheaf ? cropMaterial() : kitMat, list.length);
+    const sheaf = false;
+    const m = new THREE.InstancedMesh(unitGeometry(kind), kitMat, list.length);
     for (let i = 0; i < list.length; i++) {
       const { q, g } = list[i];
       _e.set(q.rx || 0, q.yaw || 0, q.rz || 0, 'YXZ'); _q.setFromEuler(_e);
@@ -327,7 +351,7 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
   }
   const boards = buildSignBoards(signs);
   if (boards) group.add(boards.mesh);
-  let t = 0, night = 0;
+  let t = 0, night = 0, cropAt = 0;
   function setNight(n) {
     night = n;
     glassMat.emissiveIntensity = 1.6 * n;
@@ -339,6 +363,8 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
     plan,
     update(dt, pos) {
       t += dt;
+      // crops: stalks within CROP_NEAR metres of you, the flat stand-in beyond (checked a few times a second)
+      if (pos && crops.length && t >= cropAt) { cropAt = t + 0.3; for (const c of crops) { const near = Math.hypot(c.x - pos.x, c.z - pos.z) - c.r < CROP_NEAR; c.m.visible = near; c.far.visible = !near; } }
       for (const S of spinners) S.turn.rotation[S.axis] += S.speed * dt;
       for (let i = 0; i < flames.length; i++) { const f = flames[i]; f.scale.y = f.userData.s * (1.2 + Math.sin(t * 9 + i) * 0.12); }
       decor?.update?.(dt, pos);

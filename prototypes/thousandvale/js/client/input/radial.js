@@ -44,14 +44,14 @@ export function createRadial({ run, parent = document.body } = {}) {
     }));
     const cur = L[S.at];
     hub.querySelector('strong').textContent = cur ? cur.label : S.custom ? (S.title || '') : S.ring ? 'Do' : 'Windows';
-    hub.querySelector('small').textContent = cur ? (ACTION_BY_ID[cur.id]?.label || cur.sub || '') : S.custom ? 'Slide to one and let go' : 'Point and let go';
+    hub.querySelector('small').textContent = cur ? (ACTION_BY_ID[cur.id]?.label || cur.sub || '') : S.custom ? 'Slide to one and let go' : S.hold ? 'Point and let go' : 'Tap one — tap here for more';
     root.dataset.ring = String(S.ring);
   }
   function point(i) { if (i === S.at) return; S.at = i; for (const b of ringEl.children) b.classList.toggle('on', +b.dataset.i === i); const cur = list()[i]; hub.querySelector('strong').textContent = cur ? cur.label : ''; hub.querySelector('small').textContent = cur ? (ACTION_BY_ID[cur.id]?.label || cur.sub || '') : ''; }
   /** Point by a stick: x right, y down, magnitude 0..1 (under 0.45 = nothing chosen). */
   function aim(x, y) { const m = Math.hypot(x, y); if (m < 0.45) return; const n = list().length; let a = Math.atan2(y, x) + Math.PI / 2; if (a < 0) a += Math.PI * 2; point(Math.round(a / (Math.PI * 2) * n) % n); }
   function open({ ring = 0, hold = false, point: id = null, items = null, title = '', onPick = null, at = null } = {}) {
-    S.open = true; S.ring = ring; S.hold = hold; S.custom = items; S.title = title; S.onPick = onPick; S.at = -1;
+    S.openedAt = performance.now(); S.open = true; S.ring = ring; S.hold = hold; S.custom = items; S.title = title; S.onPick = onPick; S.at = -1;
     root.hidden = false; root.classList.toggle('held', hold);
     if (at) { root.style.setProperty('--cx', at.x + 'px'); root.style.setProperty('--cy', at.y + 'px'); root.classList.add('placed'); } else root.classList.remove('placed');
     draw();
@@ -68,6 +68,7 @@ export function createRadial({ run, parent = document.body } = {}) {
     return w.id;
   }
   function swap() { if (S.custom) return; S.ring = (S.ring + 1) % lists().length; S.at = -1; draw(); }
-  root.addEventListener('click', () => close());
+  root.addEventListener('click', () => { if (performance.now() - S.openedAt > 400) close(); });   // (the tap that opened it also 'clicks' the overlay a moment later)
+  hub.addEventListener('click', e => { e.stopPropagation(); swap(); });   // touch: tap the middle for the other ring (things you do: mount, fish, camp, map, help)
   return { root, open, close, select, aim, point, swap, get isOpen() { return S.open; }, get at() { return list()[S.at]?.id || null; }, get ring() { return S.ring; } };
 }

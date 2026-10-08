@@ -76,7 +76,7 @@ export function createTouch({ api, input, run, radial }) {
   const jump = mk('ph-jump', 'Jump', ICON.jump);
   jump.addEventListener('pointerdown', e => { e.preventDefault(); device.seen('touch'); actionKey('jump', true); jump.classList.add('on'); });
   for (const t of ['pointerup', 'pointercancel', 'pointerleave']) jump.addEventListener(t, () => { actionKey('jump', false); jump.classList.remove('on'); });
-  const target = mk('ph-target', 'Next enemy', ICON.target); tap(target, () => actionKey('targetNext'));
+  const target = mk('ph-target', 'Next enemy', ICON.target); tap(target, () => (api.cycleTarget ? api.cycleTarget(true) : actionKey('targetNext')));   // nearest first, whichever way the camera looks
   const ally = mk('ph-ally', 'Next party member: your heals go to them', ICON.ally); tap(ally, () => run('allyNext', 'allyNext'));
   const hook = mk('ph-hook', 'Hook the bite; hold to reel', ICON.hook + '<span>Hook!</span>');
   hook.addEventListener('pointerdown', e => { e.preventDefault(); keyDown('Space'); hook.classList.add('on'); });
@@ -266,6 +266,9 @@ export function createTouch({ api, input, run, radial }) {
       const name = m.querySelector('.pm-name')?.firstChild?.textContent || '';
       m.classList.toggle('targeted', !!tname && name === tname);
     }
+    // the menu bar is gone on a phone: the pause menu (wheel > Menu) carries what only it could open
+    const pl = document.querySelector('#panel-pause:not([hidden]) .pause-list');
+    if (pl && !pl.querySelector('.ph-extra')) for (const [mid, label] of [['menu-feedback', 'Feedback: a suggestion or a bug'], ['menu-account', 'Account']]) { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost wide ph-extra'; b.textContent = label; b.onclick = () => { document.querySelector('#panel-pause .tvp-x')?.click(); document.getElementById(mid)?.click(); }; pl.insertBefore(b, pl.lastElementChild); }
     if (id === 'map') headToggle('#panel-map', 'ph-mapside', ['Hide list', 'Show list'], 'mapside');
     if (document.querySelector('#panel-appearance:not([hidden])')) headToggle('#panel-appearance', 'ph-peek', ['Preview', 'Back to editing'], 'peek');
     if (document.querySelector('#panel-kits:not([hidden])')) headToggle('#panel-kits', 'ph-peek', ['Preview', 'Back to choosing'], 'peek');

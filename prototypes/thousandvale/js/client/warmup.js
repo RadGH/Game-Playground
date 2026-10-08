@@ -17,7 +17,15 @@ import { normalizeAvatar } from '../../../../avatar-2d/js/render.js';
 import { bodyTypeFor } from './looks.js';
 import { perf } from './perf.js';
 
-const idle = () => new Promise(r => (typeof requestIdleCallback === 'function' ? requestIdleCallback(() => r(), { timeout: 300 }) : setTimeout(r, 20)));
+const rest = () => new Promise(r => (typeof requestIdleCallback === 'function' ? requestIdleCallback(() => r(), { timeout: 300 }) : setTimeout(r, 20)));
+/**
+ * Yield only when this slice has really used its time (play-test 7). The loop used to wait for an idle callback before
+ * EVERY body — and a body takes about 3 ms to build, so the warm-up's length was 40 waits, not 40 builds. On a slow or
+ * busy renderer (a frame every few seconds) an idle callback comes once a frame: the warm-up took over seven minutes
+ * and the specs that wait for it timed out. Now it builds until 10 ms are spent, then rests once.
+ */
+let sliceAt = 0;
+const idle = async () => { const now = performance.now(); if (now - sliceAt < 10) return; await rest(); sliceAt = performance.now(); };
 const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim'];
 
 export async function warmBodies({ scene, renderer, camera, monsterLooks = {}, maxHumanoids = 12, extraTypes = ['wolf'], extras = [] } = {}) {

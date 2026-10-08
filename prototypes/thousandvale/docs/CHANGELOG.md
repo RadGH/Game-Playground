@@ -953,3 +953,6 @@ Append-only, newest at the bottom, prefixed with the stream letter.
   tuned C's data/rules/prices.json and fishing.json `value` numbers. tests/E/playtest7-economy.test.js pins the ratios.
 - **V3**: 385 pools (was 308), 257 of them tier 1, 238 open at once, a town pool beside 15 of the 16 hub towns with the angler standing by it.
 - (A, D-UI's asks) stack split / merge (`item split|merge`), `kits` answered before sign-in and 40 at once with a complete or plainly-empty reply, friends `unseen` kept server-side (`friend seen`). tests/A/pt7-asks (4).
+- **Stacks**: Shift-click a stack to split some off (a number box); drop one stack on another of the same thing to join them.
+  **Friends badge**: the server's own unseen count (it is still there after a reload); looking at the list clears it for good.
+  **Kits**: only the server's `kitsR`; when it has none the step is skipped and the reason is said in chat. The page no longer loads the rules.

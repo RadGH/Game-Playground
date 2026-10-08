@@ -113,9 +113,12 @@ test('the reference tables: every action appears on every device, and the wheel 
   assert.equal(keyLabel('KeyW'), 'W'); assert.equal(keyLabel('Digit7'), '7'); assert.equal(keyLabel('ShiftLeft'), 'Shift'); assert.equal(keyLabel(null), '—');
 });
 
-test('the phone layout is OFF in the game: one switch, and the stylesheet only ever applies under html[data-layout="phone"]', () => {
-  assert.match(src('js/client/input/layout.js'), /export const PHONE_LAYOUT_ENABLED = false;/);
-  assert.doesNotMatch(src('index.html'), /layout-phone\.css/);
+test('the phone layout: ONE switch (on since the owner approved it), chosen automatically, forceable — and the stylesheet only ever applies under html[data-layout="phone"]', async () => {
+  assert.match(src('js/client/input/layout.js'), /export const PHONE_LAYOUT_ENABLED = true;/);
+  const { decideLayout } = await import('../../js/client/input/layout.js');
+  assert.equal(decideLayout({ phone: true }), 'phone'); assert.equal(decideLayout({ phone: false }), 'desktop');
+  assert.equal(decideLayout({ phone: true, choice: 'desktop' }), 'desktop'); assert.equal(decideLayout({ phone: false, choice: 'phone' }), 'phone');
+  assert.equal(decideLayout({ phone: true, enabled: false }), 'desktop'); assert.equal(decideLayout({ phone: false, asked: 'phone', enabled: false }), 'phone');
   assert.doesNotMatch(src('index.html'), /data-layout/);
   const setters = ['js/client/main.js', 'js/client/hud.js', 'js/client/controls.js'].filter(f => /dataset\.layout\s*=|data-layout/.test(src(f)));
   assert.deepEqual(setters, [], 'only input/layout.js may set data-layout');

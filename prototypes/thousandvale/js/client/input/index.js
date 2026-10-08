@@ -19,7 +19,7 @@ import { createRadial } from './radial.js';
 import { createFocus } from './focus.js';
 import { createOsk } from './osk.js';
 import { createGamepad } from './gamepad.js';
-import { applyLayout } from './layout.js';
+import { applyLayout, onLayout } from './layout.js';
 import { installBindingsUi } from './bindings-ui.js';
 
 let installed = null;
@@ -69,7 +69,9 @@ export function installInput(api = {}) {
     tick(dt) { pad.tick(dt); touch?.tick?.(dt); },
     act: (id, down) => { const a = ACTION_BY_ID[id]; if (!a) return false; if (a.run) { if (down !== false) run(a.run, id); return true; } return actionKey(id, down); },
   };
-  if (layout === 'phone') import('./touch.js').then(m => { touch = out.touch = m.createTouch({ api, input: out, run, radial }); html.dataset.touchReady = '1'; }).catch(e => console.error('[input] touch layer not loaded:', e));
+  const loadTouch = () => { if (touch || loadTouch.busy) return; loadTouch.busy = true; import('./touch.js').then(m => { touch = out.touch = m.createTouch({ api, input: out, run, radial }); html.dataset.touchReady = '1'; device.seen('touch'); }).catch(e => console.error('[input] touch layer not loaded:', e)); };
+  if (layout === 'phone') loadTouch();
+  onLayout(l => { out.layout = l; if (l === 'phone') loadTouch(); else api.controls?.setAnalog?.(null); });   // rotate, resize, or the Settings switch
   installBindingsUi({ api, input: out, save: saveBindings, onBindings });
 
   window.tvinput = { state: () => ({ device: device.current, glyphs: device.glyphs, pad: { ...pad.stats }, layout, radial: radial.isOpen ? radial.at || true : false, osk: osk.isOpen, focus: focus.current ? (focus.current.id || focus.current.className || focus.current.tagName) : null, steering: focus.steering, keys: B.overrides }), device, B, radial, osk, focus, pad, act: out.act, keyTap, get touch() { return touch; } };

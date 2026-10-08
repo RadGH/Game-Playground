@@ -73,7 +73,8 @@ import { createUi5 } from './ui/pt5.js';          // D-UI play-test 5: kit step,
 import { savedQuality } from './ui/settings.js';
 import { lookWith, lookCustom } from './ui/appearance-core.js';
 import { avatarFor } from './looks.js';
-import { installInput } from './input/index.js';   // play-test 5 T27 (stream G): gamepad, re-bound keys, key hints that follow the device (touch only when the phone layout is on)
+import { installInput } from './input/index.js';
+import { looksLikePhone } from './input/layout.js';   // play-test 5 T27 (stream G): gamepad, re-bound keys, key hints that follow the device (touch only when the phone layout is on)
 
 const q = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
@@ -96,10 +97,12 @@ function detectQuality() {
     const e = g && g.getExtension('WEBGL_debug_renderer_info');
     if (/swiftshader|llvmpipe|software/i.test(e ? String(g.getParameter(e.UNMASKED_RENDERER_WEBGL)) : '')) return 'low';
   } catch {}
+  if (looksLikePhone()) return 'medium';              // a phone starts on Medium (stream G, phone go-live): its GPU is good, its battery and heat budget are not
   return 'high';
 }
 const quality = detectQuality();
-if (quality === 'low') setCropDetail(8);          // standing crops: half the blades on a cheap renderer
+// standing crops: half the blades and stalks only close by on a cheap renderer; a phone (Medium) gets 10 blades within 70 m
+if (quality === 'low') setCropDetail(8, 60); else if (quality === 'medium') setCropDetail(10, 70);
 const view = createScene($('view'), { quality });
 const { scene, camera } = view;
 perf.hookGl(view.renderer.getContext());
@@ -266,7 +269,7 @@ const ui5 = createUi5({ atlas: ui.atlas, objects, inDungeon: () => !!D.view, loo
   targetId: () => S.target, setTarget: id => setTarget(id), stats: () => ({ fps: FPS.fps }), zoneName: () => document.getElementById('zone-name')?.textContent || null,
   ensureNet: () => kitNet(), onKitPreview: g => { S.titleGear = g; previewLook(S.look, 'title'); }, onKitBack: () => { if (S.phase === 'title') { S.titleGear = null; toAppearance(); } }, onKitCreate: c => { S.kit = c; enterWorld(); } });
 // T27: one binding table (js/client/input/bindings.js) drives the keyboard, the gamepad, the hints and — when switched on — touch
-const input = installInput({ controls, hud, setTarget: id => setTarget(id), targetId: () => S.target, pause: () => ui2.escape(), inWorld: () => S.phase === 'world', dead: () => S.self.dead, settings: ui2.settings, chat: () => chat.focus() });
+const input = installInput({ controls, hud, setTarget: id => setTarget(id), targetId: () => S.target, pause: () => ui2.escape(), inWorld: () => S.phase === 'world', dead: () => S.self.dead, settings: ui2.settings, chat: () => chat.focus(), cycleTarget: any => cycleTarget(any) });
 const PANELS = { ...ui5.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: () => bag.toggle() }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
 for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());
 window.addEventListener('keydown', e => {
@@ -844,10 +847,10 @@ function retargetAfterKill() {
     .sort((p, r) => Math.hypot(p.pos.x - me.pos.x, p.pos.z - me.pos.z) - Math.hypot(r.pos.x - me.pos.x, r.pos.z - me.pos.z))[0];
   if (next) { setTarget(next.id); if (wasChasing) controls.attack(next.id); }
 }
-function cycleTarget() {
+function cycleTarget(anyWay = false) {   // anyWay (the phone's Target button): enemies behind the camera count too — there is no quick way to turn it with a thumb mid-fight
   if (S.selfId == null) return;
   const p = S.predictor.pos;
-  const id = tabNext(S.mirror, { id: S.selfId, x: p.x, z: p.z, yaw: controls.cam.yaw }, S.target || 0, { range: 40, facing: controls.cam.yaw, arc: Math.PI * 0.9 });
+  const id = tabNext(S.mirror, { id: S.selfId, x: p.x, z: p.z, yaw: controls.cam.yaw }, S.target || 0, { range: 40, facing: controls.cam.yaw, arc: anyWay ? Math.PI * 2 : Math.PI * 0.9 });
   if (!id) { hud.toast('No enemies nearby.', 'warn'); return; }
   setTarget(id);
 }

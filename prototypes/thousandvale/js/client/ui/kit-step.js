@@ -14,7 +14,7 @@
 import { createPanel, h } from '../ui-panel.js';
 import { normaliseKits, kitGear, kitTotals, itemFacts, rarityClass } from './pt5-core.js';
 import { iconFor, onIcon, iconsActive } from './item-icons.js';
-import { rememberItems, nameOf } from './item-card.js';
+import { rememberItems, nameOf, itemByUid } from './item-card.js';
 import { rarityOf } from './inv-core.js';
 
 const cache = new Map();
@@ -80,7 +80,16 @@ export function createKitStep({ parent = null, onPreview, onBack, onCreate, askS
       h('p.note', { dataset: { k: 'kit-note' } }),
       h('div.row.kit-foot', {}, h('button.ghost.small', { type: 'button', dataset: { act: 'back' }, onclick: () => panel.close() }, '‹ Appearance'), h('span.grow'), go));
   }
-  onIcon(() => { if (panel.isOpen) { clearTimeout(draw.t); draw.t = setTimeout(draw, 80); } });
+  // an icon that finishes rendering is put into its square IN PLACE: rebuilding the list for every picture (a dozen arrive one
+  // by one on a slow machine) detached the choice under the pointer and swallowed the click
+  onIcon(() => {
+    if (!panel.isOpen) return;
+    for (const row of panel.body.querySelectorAll('.kit-item')) {
+      const sq = row.querySelector('.islot'); if (!sq || sq.querySelector('img')) continue;
+      const it = itemByUid(row.dataset.tipItem), url = it ? iconFor(it) : null;
+      if (url) sq.replaceChildren(h('img', { src: url, alt: '' }));
+    }
+  });
 
   /** Show the step. Resolves false when there is nothing to choose. */
   async function open({ cls, className = '' } = {}) {

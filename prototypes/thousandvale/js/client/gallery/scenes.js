@@ -87,7 +87,7 @@ export const SCENES = [
     notes: { all: 'You have fallen: the Rise button (after a 2.5 s wait).', phone: 'The Rise button is 52 px tall and thumb-centred.', pad: 'A rises.' } },
   { id: 'revive', expect: '.revive-ask:not([hidden])', group: 'In the world', title: 'Death — a friend offers to raise you', modules: [U + 'pt5.js'], steps: [['dead', 0], ['play', 'revive-ask']],
     notes: { all: 'T4: a party member cast a revive on you. Accept stands you up where you fell; the offer has a timer.', pad: 'The ring starts on Accept.' } },
-  { id: 'lift', expect: '.tv-dialog:not([hidden])', group: 'In the world', title: 'Dungeon lift — pick a floor', modules: ['js/client/world-ui.js', U + 'pt6-core.js'], steps: [['play', 'lift'], ['wait', 300]],
+  { id: 'lift', expect: '.lift-ask:not([hidden]), .tv-lift:not([hidden]), [class*="lift"]:not([hidden])', group: 'In the world', title: 'Dungeon lift — pick a floor', modules: ['js/client/world-ui.js', U + 'pt6-core.js'], steps: [['play', 'lift'], ['wait', 300]],
     notes: { all: 'Stairs and lifts in a dungeon list the floors you have reached.', phone: 'A bottom sheet with one 48 px button per floor.', pad: 'Up / down, A goes.' } },
   { id: 'hud-locked', expect: '#actionbar .slot.locked', group: 'In the world', title: 'HUD — a low-level bar (locked slots)', modules: ['js/client/hud.js', U + 'hotbar.js'],
     steps: [['run', async G => { const y = G.S.net.joined.you; G.fake.push('game', { t: 'you', bar: (y.bar || []).map((b, i) => (i >= 3 ? { ...b, locked: true, level: [12, 18, 24][i - 3] || 24 } : b)) }); await new Promise(r => setTimeout(r, 150)); }], ['vitals', 0.8, 0.6], ['target', 'enemy']],

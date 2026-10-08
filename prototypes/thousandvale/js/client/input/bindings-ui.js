@@ -5,6 +5,7 @@ import { h } from '../ui-panel.js';
 import { ACTIONS, GROUPS, GLYPHS, GLYPH_SETS, referenceRows, padParts, PAD_MENU, keyLabel } from './bindings.js';
 import { B, captureNextKey } from './keyboard.js';
 import { device } from './device.js';
+import { LAYOUTS, layoutChoice, setLayoutChoice } from './layout.js';
 
 let ctx = null, sub = 'keyboard';
 export function installBindingsUi(c) { ctx = c; }
@@ -45,7 +46,10 @@ export function bindingsTab({ redraw }) {
       referenceTable('pad', { set }),
       h('p.tiny-left', {}, 'Controller buttons cannot be moved yet; the keyboard ones can.')];
   }
-  if (sub === 'touch') return [tabs, h('p.tiny-left', {}, 'The touch controls of the phone layout. They are part of a proposal that is not switched on in the game yet.'), referenceTable('touch')];
+  if (sub === 'touch') return [tabs,
+    h('label.set-row', {}, h('span', {}, 'Layout'), h('select', { dataset: { k: 'layout' }, onchange: e => { setLayoutChoice(e.target.value); redraw(); } }, ...LAYOUTS.map(([id, label]) => h('option', { value: id, selected: layoutChoice() === id }, label)))),
+    h('p.tiny-left', {}, 'Automatic uses the phone layout on a touch screen whose short side is under 500 px, and the desktop one everywhere else. Pick one here to force it on this device.'),
+    referenceTable('touch')];
   const row = a => {
     const fixed = !!a.fixed;
     const btn = h('button.ghost.small.bind-key' + (B.changed(a.id) ? '.changed' : ''), { type: 'button', disabled: fixed, dataset: { bindAction: a.id }, title: fixed ? 'This key cannot be moved.' : 'Click, then press the new key. Esc cancels.' }, a.keyText && B.keyOf(a.id) === a.key ? a.keyText : keyLabel(B.keyOf(a.id)));

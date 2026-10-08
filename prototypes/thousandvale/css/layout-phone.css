@@ -17,7 +17,8 @@ html[data-layout="phone"] {
   --tap: 44px;
   -webkit-text-size-adjust: 100%; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
 }
-html[data-layout="phone"] body { font-size: 15px; overscroll-behavior: none; }
+html[data-layout="phone"] body { font-size: 15px; overscroll-behavior: none; position: fixed; inset: 0; width: 100%; }   /* fixed: iOS cannot rubber-band the page */
+html[data-layout="phone"] canvas#view { height: 100%; }
 html[data-layout="phone"] input, html[data-layout="phone"] textarea, html[data-layout="phone"] select { font-size: 16px; user-select: text; -webkit-user-select: text; }   /* 16 px: iOS does not zoom the page on focus */
 
 /* ================================================================ what the desktop has and a phone does not need */

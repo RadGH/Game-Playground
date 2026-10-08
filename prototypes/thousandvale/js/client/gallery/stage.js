@@ -152,7 +152,7 @@ window.addEventListener('keydown', e => {
 
 // the input layer exactly as main.js installs it (gamepad, re-bound keys, hints; touch only under the phone layout)
 const input = installInput({ controls, hud, setTarget: id => setTarget(id), targetId: () => S.target, pause: () => ui2.escape(), inWorld: () => S.phase === 'world', dead: () => S.self.dead,
-  settings: ui2.settings, panels: PANELS, chat: () => chat.focus(), gallery: GX });
+  settings: ui2.settings, panels: PANELS, chat: () => chat.focus(), gallery: GX, cycleTarget: () => cycleTarget() });
 
 // ---- what main.js does between the interface and the server (a slim copy: no prediction, no drawing) ---------------
 function setTarget(id) {

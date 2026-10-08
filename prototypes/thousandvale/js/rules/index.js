@@ -373,11 +373,13 @@ export function createRules(host, opts = {}) {
       switch (ev.t) {
         case 'hit':
           if (ev.dodged) host.event({ type: 'miss', s: ev.src, d: ev.dst, why: 'dodge' });
-          else if (ev.amt > 0 || ev.absorbed > 0) host.event({ type: 'hit', s: ev.src, d: ev.dst, n: ev.amt, crit: ev.crit || undefined, el: ev.element !== 'physical' ? ev.element : undefined, kind: 'dmg', skill: ev.kind, ab: ev.ab });
+          else if (ev.amt > 0 || ev.absorbed > 0) host.event({ type: 'hit', s: ev.src, d: ev.dst, n: ev.amt, crit: ev.crit || undefined, el: ev.element !== 'physical' ? ev.element : undefined, kind: 'dmg', skill: ev.kind, ab: ev.ab,
+            // round 9 (D-UI's meter): `over` = overkill (the part of a killing blow past zero health), `abs` = soaked by a barrier / ward
+            over: ev.over > 0 ? ev.over : undefined, abs: ev.absorbed > 0 ? Math.round(ev.absorbed) : undefined });
           else if (ev.blocked) host.event({ type: 'miss', s: ev.src, d: ev.dst, why: 'block' });
           if (ev.dead) { const v = field.get(ev.dst); if (v?.kind === 'player') v.killedBy = ev.src; }
           break;
-        case 'heal': host.event({ type: 'hit', s: ev.src, d: ev.dst, n: ev.amt, kind: 'heal' }); break;
+        case 'heal': host.event({ type: 'hit', s: ev.src, d: ev.dst, n: ev.amt, kind: 'heal', over: ev.over > 0 ? ev.over : undefined }); break;      // `over` = overheal
         case 'dot': host.event({ type: 'hit', s: 0, d: ev.id, n: Math.round(ev.amt), kind: 'dmg', skill: 'dot' }); break;
         case 'cast': {
           const e = host.entities.get(ev.id);

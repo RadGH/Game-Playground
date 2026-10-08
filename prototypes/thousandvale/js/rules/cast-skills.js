@@ -70,7 +70,9 @@ function runtimeOf(combat) {
     const done = u.hp - before;
     if (done > 0) {
       threatFromHeal(field.monsters, healer, u, done);
-      field.emit({ t: 'heal', src: healer.id, dst: u.id, amt: Math.round(done), hp: Math.round(u.hp) });
+      field.emit({ t: 'heal', src: healer.id, dst: u.id, amt: Math.round(done), over: Math.round(amount - done), hp: Math.round(u.hp) });
+    } else if (amount > 0 && u.hp >= u.maxHp) {
+      field.emit({ t: 'heal', src: healer.id, dst: u.id, amt: 0, over: Math.round(amount), hp: Math.round(u.hp) });     // a heal on a full bar: all of it is overheal (the meter counts it)
     }
     // Brimming Cup: what spilled over goes to the most hurt party member in reach (once, never chained)
     if (spill && healer?.perkFlags?.brimming) perkHealed(field, healer, u, amount, done, (to, n) => healUnit(healer, to, n / (1 + (hp || 0) / 100), false));

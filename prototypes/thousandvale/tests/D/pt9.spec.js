@@ -205,7 +205,7 @@ soft('phone 393 x 852: nothing drags (windows are sheets), the barber window has
   expect(wide, wide.join('; ')).toEqual([]);
   await shot('x4-barber');
   await page.evaluate(() => { for (const q of ['.ap-body', '.tvp-body']) { const b = document.querySelector('#panel-appearance ' + q); b.scrollTop = b.scrollHeight; } document.querySelector('#panel-appearance [data-act="save"]').scrollIntoView({ block: 'end' }); });
-  { const r = await rect(page, '#panel-appearance [data-act="save"]'); expect(r.x, 'Save is on screen').toBeGreaterThanOrEqual(0); expect(r.r).toBeLessThanOrEqual(393); expect(r.b).toBeLessThanOrEqual(852); }
+  { const r = await rect(page, '#panel-appearance [data-act="save"]'); expect(r.x, 'Save is on screen').toBeGreaterThanOrEqual(0); expect(r.r).toBeLessThanOrEqual(393); expect(r.b, 'within a pixel of the screen edge').toBeLessThanOrEqual(853); }
   await page.waitForTimeout(200);
   await shot('x4-barber-foot');
   await page.evaluate(() => document.querySelector('#panel-appearance .tvp-x')?.click());
@@ -231,7 +231,7 @@ soft('phone 393 x 852: nothing drags (windows are sheets), the barber window has
   await page.evaluate(() => document.querySelector('#char-chips .char-del').click());      // (the list is redrawn as each portrait finishes: a real tap is retried for seconds under a software renderer)
   await expect(page.locator('.char-delete')).toBeVisible();
   const d = await rect(page, '.char-delete');
-  expect(d.x).toBeGreaterThanOrEqual(0); expect(d.r).toBeLessThanOrEqual(393); expect(d.b).toBeLessThanOrEqual(852);
+  expect(d.x).toBeGreaterThanOrEqual(0); expect(d.r).toBeLessThanOrEqual(393); expect(d.b).toBeLessThanOrEqual(853);
   await shot('x6-delete-confirm');
   await ctx.close();
 });

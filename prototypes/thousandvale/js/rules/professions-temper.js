@@ -18,6 +18,7 @@
 //   temper_brand    a weapon's hits become an element (C's conversion: it replaces one rolled property). One per weapon.
 // A missed mini-game never reaches temperApply: the item is untouched by design.
 
+import { powerRunsHere } from './tv-gear.js';
 import { canConvert, convertWeapon } from './tv-gear.js';
 import { EFFECTS } from './farhold.js';
 
@@ -49,7 +50,7 @@ export function legendaryPool(engine, item) {
   if (!engine || !item || item.pack) return [];
   const I = engine.items, out = new Map();
   for (const u of I.uniques || []) {
-    if (!u.legendaryEffect || !EFFECTS['legendary:' + u.legendaryEffect]) continue;
+    if (!u.legendaryEffect || !EFFECTS['legendary:' + u.legendaryEffect] || !powerRunsHere(u.legendaryEffect)) continue;      // (stream C, round 9: not a power nothing here reads — tv-gear.js INERT_POWERS)
     const wb = I.weaponBases[u.baseItemId], ab = I.armorBases[u.baseItemId];
     const fits = item.type === 'weapon' ? !!wb && wb.subtype === item.subtype : !wb && !!ab && (u.slot === 'ring1' ? 'ring' : u.slot || ab.slot) === item.slot && !!ab.isShield === !!item.isShield;
     if (fits) out.set(u.legendaryEffect, { id: u.legendaryEffect, text: (I.legendaryEffects || {})[u.legendaryEffect] || '' });

@@ -69,6 +69,14 @@ export function removeSlotless(items) {
   items.uniques.length = 0; items.uniques.push(...keep);
   return out;
 }
+/**
+ * Round 9 (Tempering -> Promote): legendary powers whose hook NOTHING in Thousandvale reads — Farhold's travel layer
+ * (scrap from kills, caches on new ground, night spawns) and `movePct` (the server moves a player at one speed; until it
+ * reads the sheet a "+18% move speed" power does nothing). A promoted item must never be handed one of these.
+ * tests/C/promote.test.mjs runs every other promotable power in a real fight and fails if a hook never fires.
+ */
+export const INERT_POWERS = Object.freeze(['forage_feast', 'road_cache', 'no_night_raids', 'free_move', 'prospector', 'quick_hands']);
+export const powerRunsHere = id => !INERT_POWERS.includes(id);
 /** Is this a light a player may still own from before W22 (a worn lantern / torch of any base, or the torch consumable)? */
 export function isLightItem(item, cfg = null) {
   if (!item || typeof item !== 'object') return false;

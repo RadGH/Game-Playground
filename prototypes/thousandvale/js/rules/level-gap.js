@@ -39,8 +39,22 @@ export function installLevelGap(engine) {
   rpg.strike = function levelGapStrike(attacker, defender, rng, opts) {
     // the level gap, and the perk forest's hit rules (js/rules/perk-rules.js) — one place for both
     const k = gapMult(engine.levelGap, attacker, defender) * strikeMult(attacker, defender, opts) * itemStrikeMult(attacker, defender);   // + shop buffs (buffs.js)
-    if (k === 1) return strike.call(this, attacker, defender, rng, opts);
+    // round 9 (D-UI's damage meter): OVERKILL — Farhold's result carries the whole hit, not what the body had left;
+    // the health before the hit is known only here. `result.over` = the part of a killing blow past zero health.
+    const before = defender ? (defender.hp ?? defender.maxHp ?? 0) : 0;
     const o = opts || {};
-    return strike.call(this, attacker, defender, rng, { ...o, multiplier: (o.multiplier ?? 1) * k });
+    const res = k === 1 ? strike.call(this, attacker, defender, rng, opts) : strike.call(this, attacker, defender, rng, { ...o, multiplier: (o.multiplier ?? 1) * k });
+    if (res && res.dead && res.amount > before && before > 0) res.over = Math.round(res.amount - before);
+    // round 9 (found by tests/C/promote): "Burning damage you apply lasts 2s longer" (and every other `statusLonger`
+    // power) was only asked for statuses that land through landStatus — a skill that STACKS its status (Firebolt's burn:
+    // Farhold's skillmech addStacks, inside the strike) never asked, so the card was true for a wand and false for the
+    // pyromancer's own bolt. The stack's clock is lengthened here, once per hit, never past its base length + the bonus.
+    const stack = o.rules && o.rules.stack;
+    if (stack && res && res.mech && res.mech.stacked && attacker && attacker.equipment && engine.tvGear) {
+      const st = defender.statuses && defender.statuses[stack.status], spec = engine.statuses[stack.status] || {};
+      const longer = st ? this.fx.sum(attacker, 'statusLonger', { type: stack.status, spec }) : 0;
+      if (longer > 0) st.remaining = Math.min(st.remaining + longer, (spec.seconds || 4) + longer);
+    }
+    return res;
   };
 }

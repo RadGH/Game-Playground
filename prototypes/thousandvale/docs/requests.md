@@ -4218,3 +4218,20 @@ A legendary made this way carries 3 rolled properties + the power; a dropped leg
 **E:** nothing to place; the rates are the two numbers above (say if the event reward tables should list the core as a line — `eventDone.items` already carries it when it drops).
 
 _Status 2026-10-08: LANDED as written (tests/P/core-legendary.test.js, 2 tests). A power "fits" when one of the engine's own uniques of that slot — for a weapon, of that weapon kind — carries it (3-18 powers per kind); cloaks, belts and backpacks have no pool and are refused (`code: 'item'`). The power is attached the way a unique carries one (`legendaryEffectId` + the `legendary_effect` affix row) — checked by shape, not yet by a fight. `craftQuote.to` is also sent for the lower steps (`'magic'` / `'rare'`)._
+
+## Round 9 contracts — C (Combat rules) -> D-UI, A, P-core, lead — 2026-10-08 (LANDED)
+
+**`hit` carries `over` and `abs` (D-UI's damage meter).** Additive, on the rules' own `ev hit`:
+- `over` (number, only when > 0): on `kind:'dmg'` = OVERKILL, the part of a killing blow past zero health (`n` stays the whole hit, as before); on `kind:'heal'` = OVERHEAL, what the heal would have restored past a full bar. A heal that lands on a full bar now sends `hit {kind:'heal', n: 0, over}` (it sent nothing) so the meter can count it — a client that draws heal numbers should skip `n === 0`.
+- `abs` (number, only when > 0): what a barrier / ward soaked of that hit (`n` is what got through; a fully absorbed hit is `n: 0, abs`).
+- **A**: your `hits` row already reads `ev.over` and `ev.abs || ev.absorbed` — nothing to change. Not covered: damage-over-time ticks (`skill:'dot'`) carry neither, and a thorns / reflect hit is not an event at all (the attacker's health just drops).
+
+**P-core — Promote rare -> legendary: the power WORKS, with two fixes** (tests/C/promote.test.mjs, 7 tests):
+- Shape was right: the promoted item is on the sheet's power list after an equip, the card line (`affixText`) is the effect registry's own sentence, and your result text says the same words.
+- Every power a promotion can hand out (69 of them over every weapon and armour base) was promoted through `temperApply`, worn, and run in a real fight with its hooks counted: all fire.
+- **Fix 1 — six powers nothing here reads are out of the pool** (one line in YOUR `legendaryPool`, marked "stream C"; the list is `INERT_POWERS` / `powerRunsHere` in js/rules/tv-gear.js): `forage_feast` (scrap from kills), `road_cache` (coin on new ground), `no_night_raids` (night spawns) — Farhold's travel layer; `free_move` (+18% move speed); `prospector`, `quick_hands` (Farhold gathering).
+- **Fix 2 — "Burning damage you apply lasts 2s longer" was false for the pyromancer's own Firebolt**: a skill that STACKS its status applies it inside Farhold's strike and never asked the `statusLonger` powers. The strike wrapper (js/rules/level-gap.js) lengthens the stack's clock now (Thousandvale engine only; a parity engine keeps Farhold's behaviour).
+- Crafted gear: `rules.makeItem` at normal / magic / rare over every base and three levels, plus 500+ tempering rolls (`freshAffix`): never a light property, a unique, a set piece, a legendary, or a tool / mount.
+
+**A / lead — found on the way: move speed on gear does nothing.** `derived.movePct` is on the sheet ("Move speed bonus — added to your run speed") and nothing in js/sim reads it: a player runs at the server's one speed whatever they wear. That is why `free_move` is kept out of promotion; the rollable move-speed properties and skill buffs that set `movePct` have the same hole. A: read `rules`' sheet `movePct` in the movement check (and send it so the client predicts the same speed), then take `free_move` off `INERT_POWERS`.
+- The uniques that carry the same dead powers still drop (Thistlewarden, Roadsong, Wayfarer's Pike, The Long Watch, Mooncloth Wraps, and three sets): their other properties work, the power line does not. Say if they should lose the line or leave the pool.

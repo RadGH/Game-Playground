@@ -225,7 +225,7 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
     field.emit({
       t: 'hit', src: by?.id ?? null, dst: e.id, amt: result.amount, crit: !!result.crit, ab: typeof skill === 'string' ? skill : undefined,
       kind, element: result.element || 'physical', dodged: !!result.dodged, blocked: result.blocked || 0,
-      absorbed: result.absorbed || 0, hp: Math.max(0, Math.round(e.hp)), dead: !!result.dead,
+      absorbed: result.absorbed || 0, over: result.over || 0, hp: Math.max(0, Math.round(e.hp)), dead: !!result.dead,
     });
   }
   field.report = report;

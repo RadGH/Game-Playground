@@ -14,6 +14,8 @@
 //
 // To add a scene: add an entry here. That is all (docs/UI.md "Adding a scene").
 
+import { PROF_SCENES } from './prof-scenes.js';      // W9 (P-client): the profession scenes live beside this file
+
 const U = 'js/client/ui/';
 const chat = [['chat', [
   { text: 'Anyone for the Barrow? Need a tank.', cls: 'say', from: 'Sella' },
@@ -43,7 +45,7 @@ const stagePerks = ['run', async G => {
   T.graph?.fit?.();
 }];
 
-export const GROUPS = ['Start', 'In the world', 'Character', 'Windows', 'Social', 'Loot and trade', 'Angling', 'System', 'Controller', 'Phone', 'Reference'];
+export const GROUPS = ['Start', 'In the world', 'Character', 'Windows', 'Social', 'Loot and trade', 'Angling', 'Professions', 'System', 'Controller', 'Phone', 'Reference'];
 
 export const SCENES = [
   // ------------------------------------------------------------------------------------------------ Start
@@ -227,6 +229,8 @@ export const SCENES = [
   // ------------------------------------------------------------------------------------------------ Reference
   { id: 'controls', expect: '.ctl-three .ctl-ref', group: 'Reference', title: 'Controls — all three devices', modules: ['js/client/input/bindings.js', 'js/client/input/bindings-ui.js'], steps: [['controls']],
     notes: { all: 'The whole binding table, three ways: keyboard and mouse, controller (with its glyphs), touch. This page is GENERATED from js/client/input/bindings.js — the same table the game’s input, the settings tab, the help window and every on-screen hint read — so it cannot be wrong without the game being wrong too.' } },
+  // ------------------------------------------------------------------------------------------------ Professions (W9, P-client)
+  ...PROF_SCENES,
 ];
 
 export const sceneById = id => SCENES.find(s => s.id === id) || null;
@@ -254,6 +258,4 @@ export const sceneFits = (s, deviceId) => !s.only || s.only.includes(deviceId);
  * This is a to-do list, not an exemption: tests/G/gallery.test.js prints it on every run, and the lead's audit reads it.
  */
 export const PENDING_SCENES = {
-  'js/client/ui/prof-draw.js': 'play-test 8 — professions drawing helper (shown with prof-games)',
-  'js/client/ui/prof-games.js': 'play-test 8 — the profession mini-games',
 };

@@ -1,0 +1,71 @@
+<!doctype html>
+<!-- W9 (P-client) look page: ?view=clips | nodes | stations — the work loops with the tool in the hand, every node model
+     (ready and spent, each ore tier), every station. For LOOKING (tests/P/client-look.mjs takes the pictures). -->
+<html lang="en"><head><meta charset="utf-8"><title>Professions — look page</title>
+<style>html,body{margin:0;background:#2a3038;overflow:hidden}canvas{display:block}.lab{position:absolute;color:#fff;font:11px/1.2 monospace;transform:translate(-50%,0);text-align:center;white-space:pre;text-shadow:0 1px 2px #000}</style>
+<script type="importmap">{ "imports": { "three": "../../../../vendor/three/three.module.js", "three/addons/": "../../../../vendor/three/addons/" } }</script>
+</head><body><canvas id="c"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import { createChibi2Character } from '../../../../avatar-3d/js/chibi2.js';
+import { CHIBI2_ANIMS } from '../../../../avatar-3d/js/chibi2-motion.js';
+import { CHIBI2_PROF_ANIMS, CHIBI2_PROF_SECONDS, PROF_TOOL_MOUNT, PROF_BEAT } from '../../../../avatar-3d/js/chibi2-motion-prof.js';
+import { normalizeAvatar } from '../../../../avatar-2d/js/render.js';
+import { createProfView } from '../../js/client/prof-view.js';
+import { toolGeometry, stationGeometry, STATION_KINDS } from '../../js/client/prof-models.js';
+const q = new URLSearchParams(location.search), view = q.get('view') || 'clips', cam = q.get('cam') || 'q';
+const W = innerWidth, H = innerHeight;
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(W, H); renderer.setClearColor('#2a3038'); renderer.shadowMap.enabled = true;
+const scene = new THREE.Scene();
+scene.add(new THREE.HemisphereLight('#ffffff', '#505868', 2.0)); const sun = new THREE.DirectionalLight('#fff', 2.2); sun.position.set(3, 6, 4); scene.add(sun);
+const label = (text, x, y) => { const lab = document.createElement('div'); lab.className = 'lab'; lab.textContent = text; lab.style.left = x + 'px'; lab.style.top = y + 'px'; document.body.appendChild(lab); };
+let camera;
+const plain = new THREE.MeshLambertMaterial({ vertexColors: true });
+if (view === 'clips') {
+  const TOOL = { profMine: 'pick', profChop: 'hatchet', profGather: 'sickle', profSkin: 'knife', profHammer: 'hammer', profStitch: 'needle', profStir: 'spoon' };
+  const us = [0.05, 0.3, PROF_BEAT.profMine, 0.8], cols = us.length, rows = CHIBI2_PROF_ANIMS.length, SX = 1.9, SY = 2.2;
+  camera = new THREE.OrthographicCamera(-cols * SX / 2, cols * SX / 2, rows * SY / 2, -rows * SY / 2, 0.1, 100);
+  for (const [r, name] of CHIBI2_PROF_ANIMS.entries()) for (const [c, u0] of us.entries()) {
+    const u = c === 2 ? PROF_BEAT[name] + 0.04 : u0;
+    const av = normalizeAvatar({ body: { race: 'human' }, top: { id: 'tunic', color: '#6a7a9a' }, bottom: { id: 'pants', color: '#4a4038' }, shoes: { id: 'boots', color: '#3a2e24' } });
+    const b = await createChibi2Character(av, { anims: [...CHIBI2_ANIMS, ...CHIBI2_PROF_ANIMS] });
+    const pivot = new THREE.Group(); pivot.position.set((c - (cols - 1) / 2) * SX, ((rows - 1) / 2 - r) * SY - 0.8, 0);
+    pivot.rotation.y = cam === 'side' ? -Math.PI / 2 : cam === 'front' ? 0 : -0.75;
+    pivot.add(b.group); scene.add(pivot);
+    b.setAnim(name, 0); let t = u * CHIBI2_PROF_SECONDS[name]; while (t > 0) { const d = Math.min(0.04, t); b.update(d); t -= d; }
+    const M = PROF_TOOL_MOUNT[TOOL[name]], tool = new THREE.Mesh(toolGeometry(TOOL[name]), plain); tool.position.set(...M.position); tool.rotation.set(...M.rotation); b.parts[M.bone].add(tool);
+    label(`${name} @${u.toFixed(2)} (${b.anim})`, (c + 0.5) / cols * W, (r + 1) / rows * H - 16);
+  }
+  camera.position.set(0, 0, 20); camera.lookAt(0, 0, 0);
+} else {
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshLambertMaterial({ color: '#56703c' })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+  sun.castShadow = true; sun.shadow.camera.left = -22; sun.shadow.camera.right = 22; sun.shadow.camera.top = 22; sun.shadow.camera.bottom = -22; sun.shadow.mapSize.set(2048, 2048);
+  camera = new THREE.PerspectiveCamera(34, W / H, 0.1, 200);
+  // a 1.8 m figure for scale
+  const av = normalizeAvatar({ body: { race: 'human' }, top: { id: 'tunic', color: '#6a7a9a' }, bottom: { id: 'pants', color: '#4a4038' }, shoes: { id: 'boots', color: '#3a2e24' } });
+  const man = await createChibi2Character(av, { anims: CHIBI2_ANIMS }); man.update(0.1);
+  const bb = new THREE.Box3().setFromObject(man.group), k = 1.8 / (bb.max.y - bb.min.y); man.group.scale.setScalar(k);
+  if (view === 'nodes') {
+    const content = await (await fetch('../../data/provinces/professions.json')).json();
+    const pv = createProfView(scene, { camera, groundY: () => 0 });
+    const kinds = Object.values(content.nodeKinds).filter(x => x && x.look);
+    const mining = kinds.filter(x => x.prof === 'mining').sort((a, b) => a.tier - b.tier), rest = ['ash', 'yew', 'meadowmint', 'field_mushroom', 'flax', 'starcap'].map(id => content.nodeKinds[id]);
+    let id = 1; const spent = new Map();
+    mining.forEach((kd, i) => { for (const row of [0, 1]) { const key = 'node:m' + i + row; pv.setNode(id++, { x: -9 + i * 3.6, z: row ? -4 : 1.5, yaw: i * 0.9 }, { key, name: kd.name, node: { prof: 'mining', kind: kd.id, tier: kd.tier, look: { ...kd.look, v: (i + row) % 4 } } }); if (row) spent.set(key, Date.now() + 9e6); } });
+    rest.forEach((kd, i) => { for (const row of [0, 1]) { const key = 'node:r' + i + row; pv.setNode(id++, { x: -9 + i * 3.6, z: row ? -13.5 : -9, yaw: i }, { key, name: kd.name, node: { prof: kd.prof, kind: kd.id, tier: kd.tier, look: { ...kd.look, v: i % 4 } } }); if (row) spent.set(key, Date.now() + 9e6); } });
+    pv.setSpentAll(spent);
+    man.group.position.set(-7.2, 0, 3.4); scene.add(man.group);
+    camera.position.set(0, 13, 19); camera.lookAt(0, 1.2, -5);
+    pv.update(0.5); pv.update(0.6); window.pv = pv;
+    label('front row: ore boulders tier 1-5 + tin (ready) · 2nd row: the same, spent · 3rd: ash, yew, mint, mushroom, flax, starcap (ready) · back: spent', W / 2, 8);
+  } else {
+    STATION_KINDS.forEach((kind, i) => { const m = new THREE.Mesh(stationGeometry(kind).geometry, plain); m.position.set(-6.5 + i * 4.3, 0, 0); m.castShadow = m.receiveShadow = true; scene.add(m); });
+    man.group.position.set(-9, 0, 0.5); scene.add(man.group);
+    camera.position.set(0, 4.2, 11.5); camera.lookAt(0, 1.0, 0);
+    label('forge · workbench + loom · still · tempering bench', W / 2, 8);
+  }
+}
+renderer.render(scene, camera);
+window.ready = true;
+</script></body></html>

@@ -44,6 +44,13 @@ export function unlockText(row, numbers, content) {
   return `At ${u.at}: ${u.names.join(', ')}${u.more ? ` and ${u.more} more` : ''}.`;
 }
 
+/** How far through its level a row is (0..1): `next` is what is still missing, the level's span comes from the data file's curve. Pure. */
+export function levelFraction(r, numbers) {
+  if (!r.known) return 0; if (r.next == null) return 1;
+  const K = numbers?.skill; if (!K || r.id === 'angling') return r.xp + r.next > 0 && r.id === 'angling' ? Math.max(0, Math.min(1, r.xp / (r.xp + r.next))) : 0;
+  const at = l => { const n = l - 1; return K.xpBase * n + K.xpPerLevel * n * (n + 1) / 2; }, span = at(r.level + 1) - at(r.level);
+  return span > 0 ? Math.max(0, Math.min(1, 1 - r.next / span)) : 0;
+}
 /** The rows as DOM. `compact` = the Character menu's block (one line each); else the journal page (with the unlock line). */
 export function professionRows(rows, { numbers = null, content = null, compact = false, onOpen = null } = {}) {
   if (!rows || !rows.length) return [h('p.empty', {}, 'No professions yet. A craftsman in any town teaches one — it costs nothing.')];
@@ -53,8 +60,8 @@ export function professionRows(rows, { numbers = null, content = null, compact =
     const mine = rows.filter(r => r.kind === kind); if (!mine.length) continue;
     out.push(h('h4.pk-h', {}, title));
     out.push(h('ul.pk-list' + (compact ? '.compact' : ''), {}, ...mine.map(r => {
-      const frac = r.known && r.next ? Math.max(0, Math.min(1, r.xp / r.next)) : r.known ? 1 : 0;
-      const tip = r.known ? `${r.name} ${r.level} of ${r.max || 100}${r.rank ? ' — ' + r.rank : ''}.${r.next ? ` ${fmt(r.xp, { decimals: 0 })} of ${fmt(r.next, { decimals: 0 })} to the next level.` : ''} ${unlockText(r, numbers, content)}` : unlockText(r, numbers, content);
+      const frac = levelFraction(r, numbers);
+      const tip = r.known ? `${r.name} ${r.level} of ${r.max || 100}${r.rank ? ' — ' + r.rank : ''}.${r.next ? ` ${fmt(r.next, { decimals: 0 })} more to the next level.` : ''} ${unlockText(r, numbers, content)}` : unlockText(r, numbers, content);
       return h('li.pk-row' + (r.known ? '' : '.unknown'), { dataset: { prof: r.id, tip }, style: `--pt:${PROF_TINT[r.id] || '#d9b26a'}` },
         h('i.pk-ico', {}, profIcon(r.id, compact ? 18 : 22)),
         h('div.pk-main', {},

@@ -23,7 +23,8 @@ import { avatarFor, bodyTypeFor, loadMonsterLooks } from './looks.js';
 import { normalizeAvatar } from '../../../../avatar-2d/js/render.js';
 import { perf, compileBeforeShow } from './perf.js';
 import { createMount, seatRider, mountSpecFor, CHIBI2_MOUNT_ANIMS } from '../../../../avatar-3d/js/mounts.js';
-import { CHIBI2_DUAL_ANIMS, CHIBI2_ANGLE_ANIMS, CHIBI2_REVIVE_ANIMS, CHIBI2_DUAL_SECONDS, dualAttackFor, dualAttackByCount } from '../../../../avatar-3d/js/chibi2-motion-dual.js';   // play-test 5: T6 dual-wield strikes, T25 angling, T4 standing back up
+import { CHIBI2_DUAL_ANIMS, CHIBI2_ANGLE_ANIMS, CHIBI2_REVIVE_ANIMS, CHIBI2_DUAL_SECONDS, dualAttackFor, dualAttackByCount } from '../../../../avatar-3d/js/chibi2-motion-dual.js';
+import { CHIBI2_PROF_ANIMS } from '../../../../avatar-3d/js/chibi2-motion-prof.js';   // W9 (P-client): work loops — mine, chop, stoop-and-pick, skin, hammer, stitch, stir   // play-test 5: T6 dual-wield strikes, T25 angling, T4 standing back up
 
 /** A creature spec from what the server sent: `{ type, size?, seed, colors? }` — colour varied by seed within its family. */
 function creatureFor(spec) {
@@ -46,7 +47,7 @@ export function rankScale(rank, mods = null) {
 export const modKey = m => (m && typeof m === 'object' ? `${m.id || ''} ${m.name || ''}` : String(m || '')).toLowerCase();
 export const isLeader = mods => Array.isArray(mods) && mods.some(m => /leader|alpha|chief|warlord|pack/.test(modKey(m)));
 const RANK_COLOUR = { rare: '#ffd040', champion: '#5aa0ff', elite: '#c0c0c0' };
-const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim', 'sitGround', 'drink', ...CHIBI2_MOUNT_ANIMS, ...CHIBI2_DUAL_ANIMS, ...CHIBI2_ANGLE_ANIMS, ...CHIBI2_REVIVE_ANIMS];   // sitGround/drink: eating and drinking (S20)   // swim: P25; ride/rideGallop: Q16
+const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim', 'sitGround', 'drink', ...CHIBI2_MOUNT_ANIMS, ...CHIBI2_DUAL_ANIMS, ...CHIBI2_ANGLE_ANIMS, ...CHIBI2_REVIVE_ANIMS, ...CHIBI2_PROF_ANIMS];   // sitGround/drink: eating and drinking (S20)   // swim: P25; ride/rideGallop: Q16
 
 /** Clips that are a strike: asked for again = a new swing, so they restart (T6: the dual-wield strikes too). */
 const STRIKES = new Set(['attack', 'hit', ...CHIBI2_DUAL_ANIMS, 'fishCast', 'fishShow', 'standUp']);
@@ -502,6 +503,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       else if (a.oneShot === 'standUp' && now < a.oneShotUntil && a.speed > 0.6) { a.oneShot = null; want = 'walk'; }   // T4: walking off cuts the getting-up short
       else if (a.oneShot && now < a.oneShotUntil) want = a.oneShot;
       else if (a.fishing && a.speed <= 0.4 && person(a)) want = a.fishing === 'tug' ? 'fishReel' : 'fishWait';   // T25: a line in the water
+      else if (a.working && a.speed <= 0.4 && person(a)) want = a.working;   // W9 (P-client): at a node or a station (prof-view.js names the clip)
       else {
         a.oneShot = null;
         const sp = a.speed;
@@ -586,6 +588,8 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
   }
   /** T25: 'wait' (line out), 'tug' (fighting a fish) or null. Moving, swinging or dying ends it. */
   function setFishing(id, state) { const a = actors.get(id); if (a) a.fishing = state || null; }
+  /** W9 (P-client): a work loop (`profMine` … `profStir`, avatar-3d chibi2-motion-prof.js) or null. Moving shows the walk; a swing or dying ends it. */
+  function setWorking(id, clip) { const a = actors.get(id); if (a) a.working = clip || null; }
   function playHit(id, fromId, amount) {
     const a = actors.get(id); if (!a) return;
     const src = actors.get(fromId);
@@ -663,5 +667,5 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     p.root.classList.toggle('self-plate', !!a.self);
   }
 
-  return { actors, lodStats, setShape, setMount, setEating, add, remove, rekey, say, update, setLook, playAttack, playClip, setFishing, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
+  return { actors, lodStats, setShape, setMount, setEating, add, remove, rekey, say, update, setLook, playAttack, playClip, setFishing, setWorking, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
 }

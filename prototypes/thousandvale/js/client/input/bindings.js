@@ -82,6 +82,10 @@ export const ACTIONS = [
   { id: 'camp', group: 'World', label: 'Make camp (wilds)', key: 'KeyC', pad: pad('RB', true), touch: 'Quick wheel: Camp' },
   { id: 'fish', group: 'World', label: 'Cast your fishing line / reel in', key: 'KeyX', pad: pad('A', true), touch: 'Quick wheel: Fish (or the rod in your bag)' },
   { id: 'hook', group: 'World', label: 'Hook a bite; hold to reel during the tug', key: 'Space', shares: 'jump', pad: pad('A', false, 'while fishing'), ctx: 'fishing', touch: 'The Hook / Reel button (replaces Attack)' },
+  // W9 (P-client): the profession mini-games (js/client/ui/prof-minigame.js). ctx 'prof' = only while a mini-game is on screen
+  { id: 'profWork', group: 'World', label: 'Mini-game: work (strike, pick, stop — hold to lift the knife)', key: 'Space', shares: 'jump', pad: pad('A', false, 'in a mini-game'), ctx: 'prof', touch: 'Tap the mini-game panel' },
+  { id: 'profLeft', group: 'World', label: 'Mini-game: left (chop left, move left, back in the fire)', key: 'KeyA', shares: 'moveL', pad: pad('X', false, 'in a mini-game, or D-pad left'), ctx: 'prof', touch: 'Tap the left half of the panel' },
+  { id: 'profRight', group: 'World', label: 'Mini-game: right (chop right, move right, back in the fire)', key: 'KeyD', shares: 'moveR', pad: pad('B', false, 'in a mini-game, or D-pad right'), ctx: 'prof', touch: 'Tap the right half of the panel' },
   { id: 'mount', group: 'World', label: 'Ride your mount / get down', key: 'KeyH', pad: pad('X', true), touch: 'Quick wheel: Mount' },
   // ---- windows
   { id: 'map', group: 'Windows', label: 'Map', key: 'KeyM', panel: 'map', pad: pad('BACK'), touch: 'Tap the minimap' },
@@ -157,7 +161,7 @@ export function createBindings(overrides = {}) {
   const defaultOf = id => ACTION_BY_ID[id]?.key ?? null;
   const actionsFor = code => ACTIONS.filter(a => keyOf(a.id) === code).map(a => a.id);
   /** Actions that may sit on one key together by design (E turns the camera AND uses; Space jumps AND hooks). */
-  const partners = id => { const a = ACTION_BY_ID[id]; return new Set([a?.shares, ...ACTIONS.filter(x => x.shares === id).map(x => x.id)].filter(Boolean)); };
+  const partners = id => { const a = ACTION_BY_ID[id]; return new Set([a?.shares, ...ACTIONS.filter(x => x.id !== id && (x.shares === id || (a?.shares && x.shares === a.shares))).map(x => x.id)].filter(Boolean)); };   // W9 (P-client): siblings too — hook and profWork both share jump's key
   function set(id, code) {
     const a = ACTION_BY_ID[id];
     if (!a || a.fixed) return { ok: false, why: 'fixed' };

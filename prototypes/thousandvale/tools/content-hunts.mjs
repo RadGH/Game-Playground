@@ -135,6 +135,10 @@ async function main() {
   const givers = existsSync(P('data/quests/marks/givers.json')) ? (readJ('data/quests/marks/givers.json').npcs || {}) : {};
   const mark = id => ({ quests: givers[id] ? givers[id].gives.length : 0, titled: givers[id] ? !!givers[id].titled : true });
   for (const a of anglers) { const o = zoneOffset(a.zone); (added[a.zone] ||= []).push({ type: 'npc', id: a.id, name: a.name, role: 'angler', at: a.town, x: a.x - o.ox, z: a.z - o.oz, yaw: a.yaw, angler: true, ...mark(a.id) }); }
+  // 1c'. round 8 W9 (P-core): the profession trainers tools/content-professions.mjs placed (data/provinces/professions.json
+  // `trainers`, world metres) get a body the same way — an npc row, so quests, marks and titles treat them like any quest NPC
+  const profTrainers = existsSync(P('data/provinces/professions.json')) ? (readJ('data/provinces/professions.json').trainers || []) : [];
+  for (const a of profTrainers) { const o = zoneOffset(a.zone); (added[a.zone] ||= []).push({ type: 'npc', id: a.id, name: a.name, role: a.role, at: a.town, x: +(a.x - o.ox).toFixed(1), z: +(a.z - o.oz).toFixed(1), yaw: a.yaw, trainer: true, ...mark(a.id) }); }
   // 1d. owner feedback 8 — W5: the carter and the parked ox cart outside every town's main gate (data/provinces/carts.json
   // `stops`, tools/content-towns.mjs; already zone metres); W1: the town guards at their posts (data/provinces/guards.json
   // `posts`). New row types `cart` and `guard`: stream A spawns them, B's bake never sees this file.
@@ -200,6 +204,19 @@ async function main() {
         if (sp.kind === 'cook') return nearest(fires, giver);
         return null;
       });
+      const nv = { zone: giver.zone, giver, steps };
+      if (JSON.stringify(marks.quests[qq.id]) !== JSON.stringify(nv)) { marks.quests[qq.id] = nv; moved++; }
+      marks.missing = (marks.missing || []).filter(m => !m.startsWith(qq.id + '#') || !steps[+m.split('#')[1]]);
+    }
+  }
+  // 3c. round 8 W9 (P-core): marks for the profession quests — every step carries its own `at` (made from the bake by
+  // tools/content-professions.mjs); the giver stands where that tool put the trainer
+  if (profTrainers.length && existsSync(P('data/quests/professions.json'))) {
+    const PQ = readJ('data/quests/professions.json');
+    const who = id => { const a = profTrainers.find(x => x.id === id); return a ? { zone: a.zone, x: a.x, z: a.z, r: 6 } : null; };
+    for (const qq of PQ.quests || []) {
+      const giver = who(qq.giver); if (!giver) continue;
+      const steps = (qq.steps || []).map(sp => (sp.kind === 'talk' && who(sp.npc)) || (sp.at ? { zone: L.zoneOf(sp.at.x, sp.at.z), x: Math.round(sp.at.x), z: Math.round(sp.at.z), r: sp.at.r || 10 } : null));
       const nv = { zone: giver.zone, giver, steps };
       if (JSON.stringify(marks.quests[qq.id]) !== JSON.stringify(nv)) { marks.quests[qq.id] = nv; moved++; }
       marks.missing = (marks.missing || []).filter(m => !m.startsWith(qq.id + '#') || !steps[+m.split('#')[1]]);

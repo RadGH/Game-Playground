@@ -188,7 +188,7 @@ export function iconSpec(item, { worn = wornPartOf } = {}) {
     else if (s === 'necklace') spec = { kind: 'glyph', id: 'amulet', color: RARE_TINT[r] || '#3a8ad8' };
     else if (s === 'offhand') spec = { kind: 'glyph', id: 'focus', color: '#8fd0ff' };
     else if (/potion|draught|elixir|tonic/i.test(item.name || '') || item.kind === 'potion') spec = { kind: 'glyph', id: 'potion', color: '#d83838' };
-    else spec = { kind: 'glyph', id: item.kind === 'junk' ? 'junk' : 'bundle', color: '#a08060' };
+    else spec = { kind: 'glyph', id: item.kind === 'junk' ? 'junk' : 'bundle', color: item.kind === 'material' && /^#[0-9a-f]{6}$/i.test(item.tint || '') ? item.tint : '#a08060' };   // W9 (P-client): a material's icon takes the material's own colour
   }
   spec.key = spec.kind === 'worn' ? `worn|${spec.frame}|${JSON.stringify(spec.parts)}` : spec.kind === 'glyph' ? `glyph|${spec.id}|${spec.color}` : `${spec.kind}|${JSON.stringify(spec.part)}`;
   return spec;

@@ -44,6 +44,8 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
   const S = { run: null, t0: 0, raf: 0, resolve: null, opts: null, noteN: 0, canvas: null, ctx: null, w: 0, h: 0, card: null, closeT: 0, padPrev: {}, padAim: false, lastDraw: 0, frames: 0 };
   const PAD = padLayers().ctx?.prof || { A: 'profWork', X: 'profLeft', B: 'profRight' };
   const now = () => performance.now() - S.t0;
+  /** The moment an input was MADE: a real key or finger event carries the time the device reported it, which on a busy frame is well before its handler runs. */
+  const at = e => { const n = performance.now(), ts = e && e.isTrusted && e.timeStamp > 0 && e.timeStamp <= n && n - e.timeStamp < 500 ? e.timeStamp : n; return ts - S.t0; };
   const say = (state, extra = {}) => {
     root.dataset.state = state;
     if (state === 'play') document.documentElement.dataset.prof = S.run.type; else delete document.documentElement.dataset.prof;
@@ -61,12 +63,12 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
     try { if (n.kind === 'perfect') navigator.vibrate?.(18); else if (n.kind === 'hit') navigator.vibrate?.(8); } catch { /* no haptics */ }
   }
   const playing = () => !!S.run && !S.run.done && root.dataset.state === 'play';
-  function act(fn) { if (!playing()) return; S.run.advanceTo(now()); const n = fn(S.run); feedback(n); if (S.run.done) finish(); else draw(); }
-  const work = () => act(r => (r.type === 'trace' ? r.hold(true) : r.type === 'rhythm' ? null : r.press()));
-  const workUp = () => act(r => (r.type === 'trace' ? r.hold(false) : null));
-  const side = dir => act(r => (r.type === 'rhythm' ? r.press(dir > 0 ? 1 : 0) : r.type === 'pick' ? (r.move(dir), r.state.note) : r.type === 'forge' ? r.press(1) : null));
-  const place = i => act(r => (r.type === 'pick' && i < r.game.spots ? r.press(i) : null));
-  const aim = y => { if (!playing() || S.run.type !== 'trace') return; S.run.advanceTo(now()); S.run.aim(y); };
+  function act(fn, e = null) { if (!playing()) return; S.run.advanceTo(Math.max(S.run.t, at(e))); const n = fn(S.run); feedback(n); if (S.run.done) finish(); else draw(); }
+  const work = e => act(r => (r.type === 'trace' ? r.hold(true) : r.type === 'rhythm' ? null : r.press()), e);
+  const workUp = e => act(r => (r.type === 'trace' ? r.hold(false) : null), e);
+  const side = (dir, e) => act(r => (r.type === 'rhythm' ? r.press(dir > 0 ? 1 : 0) : r.type === 'pick' ? (r.move(dir), r.state.note) : r.type === 'forge' ? r.press(1) : null), e);
+  const place = (i, e) => act(r => (r.type === 'pick' && i < r.game.spots ? r.press(i) : null), e);
+  const aim = (y, e) => { if (!playing() || S.run.type !== 'trace') return; S.run.advanceTo(Math.max(S.run.t, at(e))); S.run.aim(y); };
 
   function onKey(e) {
     if (!S.run || root.hidden) return;
@@ -80,10 +82,10 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
     e.preventDefault(); e.stopImmediatePropagation();                     // nothing else in the game hears a key while a game is being played
     if (e.repeat) return;
     if (e.code === 'Escape') { if (down) cancel(); return; }
-    if (WORK.has(e.code) || (S.run.type === 'trace' && UP.has(e.code))) { if (down) work(); else workUp(); return; }
+    if (WORK.has(e.code) || (S.run.type === 'trace' && UP.has(e.code))) { if (down) work(e); else workUp(e); return; }
     if (!down) return;
-    if (LEFT.has(e.code)) side(-1); else if (RIGHT.has(e.code)) side(1);
-    else if (/^(Digit|Numpad)[1-9]$/.test(e.code)) place(+e.code.slice(-1) - 1);
+    if (LEFT.has(e.code)) side(-1, e); else if (RIGHT.has(e.code)) side(1, e);
+    else if (/^(Digit|Numpad)[1-9]$/.test(e.code)) place(+e.code.slice(-1) - 1, e);
   }
   window.addEventListener('keydown', onKey, true); window.addEventListener('keyup', onKey, true);
   window.addEventListener('blur', () => { if (playing() && S.run.type === 'trace') S.run.hold(false); });
@@ -95,8 +97,8 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
     if (e.type === 'pointerdown') {
       e.preventDefault(); try { S.canvas.setPointerCapture(e.pointerId); } catch { /* old browser */ }
       S.padAim = false;
-      if (hit.aim != null) aim(hit.aim); else act(run => run.press(hit.press));
-    } else if (hit.aim != null && (e.pointerType === 'mouse' || e.buttons || e.pressure > 0)) aim(hit.aim);
+      if (hit.aim != null) aim(hit.aim, e); else act(run => run.press(hit.press), e);
+    } else if (hit.aim != null && (e.pointerType === 'mouse' || e.buttons || e.pressure > 0)) aim(hit.aim, e);
   }
   /** The pad, read here while a game is up (input/gamepad.js stands back: see <html data-prof>). */
   function pollPad() {
@@ -130,11 +132,10 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
     const dev = device();
     drawGame(S.ctx, S.run, S.w, S.h, { tint: S.opts.tint, cursor: dev !== 'touch', numbers: dev === 'keyboard' });
     if (S.time) S.time.style.width = (S.run.view().left * 100).toFixed(1) + '%';
-    S.frames++;
   }
   function frame() {
     if (!S.run || root.hidden) return;
-    pollPad();
+    pollPad(); S.frames++;
     if (root.dataset.state === 'play') {
       S.run.advanceTo(now());
       const n = S.run.state.note; if (n && n.n !== S.noteN) { S.noteN = n.n; if (n.auto || n.kind === 'spill' || n.kind === 'over') feedback(n.auto ? null : n); }
@@ -191,12 +192,12 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
     if (!S.card) return;
     const W = words() || QUALITY_WORD, word = W[quality] || QUALITY_WORD[quality] || quality;
     S.card.dataset.q = quality;
-    S.card.replaceChildren(
+    S.card.replaceChildren(...[
       h('strong.prof-q', {}, word), title ? h('span.prof-what', {}, title) : null,
       ...items.map(it => h('span.prof-item' + (it.rarity ? '.r-' + it.rarity : ''), {}, it.tint ? h('i.prof-dot', { style: `background:${it.tint}` }) : null, `${it.count > 1 ? it.count + ' × ' : ''}${it.name}`, it.bonus ? h('em', {}, 'bonus') : null)),
       ...lines.map(l => h('span', {}, l)),
       note ? h('small', {}, note) : null,
-      pending ? h('small.prof-wait', {}, '…') : null);
+      pending ? h('small.prof-wait', {}, '…') : null].filter(Boolean));
   }
   function showResult(o = {}) {
     if (!S.card || root.hidden) return;

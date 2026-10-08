@@ -63,9 +63,9 @@ const POSES = {
     p.head[0] += -0.1 * up + 0.12 * hit; p.head[1] = -0.12 * up;
     p.kneeL[0] += 0.4 * hit; p.kneeR[0] += 0.3 * hit; p.legL[0] -= 0.22 * hit;
     // right hand high on the haft, left hand below it
-    p.armR = [-0.75 - 1.85 * up - 0.25 * hit + 0.1 * jar, -0.35 - 0.15 * up, 0.16 + 0.3 * up];
+    p.armR = [-0.75 - 1.85 * up - 0.25 * hit + 0.1 * jar, -0.35 + 0.3 * up, 0.16 + 0.75 * up];     // (up and OUT past the ear: a chibi head is wide)
     p.elbowR[0] = -0.9 - 0.75 * up + 0.55 * hit;
-    p.armL = [-0.85 - 1.55 * up - 0.3 * hit + 0.1 * jar, 0.75 + 0.1 * up, -0.1 - 0.1 * up];
+    p.armL = [-0.85 - 1.35 * up - 0.3 * hit + 0.1 * jar, 0.75 + 0.35 * up, -0.1 + 0.25 * up];
     p.elbowL[0] = -1.0 - 0.6 * up + 0.45 * hit;
     p.handR[0] = 0.5 * up - 0.35 * hit;
     return {};

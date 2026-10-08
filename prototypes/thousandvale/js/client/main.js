@@ -66,7 +66,9 @@ import { createWeaponFx } from './weapon-fx.js';
 import { createFormFx } from './form-fx.js';             // play-test 5 (D-world): T15 caster forms, T16 sceptre swings
 import { createReviveFx } from './revive-fx.js';         // T4: each class's revive
 import { cropSample, setCropDetail } from './setpiece-view.js';       // play-test 6 (U4): the standing-crop material, warmed at boot
-import { createAngling } from './angling-view.js';      // T25: rod, float, line, catch, fish pools
+import { createAngling } from './angling-view.js';
+import { createProfView } from './prof-view.js';      // W9 (P-client): gathering nodes, stations, tools in hand, the skinning prompt
+import { createProf } from './ui/prof.js';            // W9 (P-client): mini-games, crafting / tempering windows, the Professions list      // T25: rod, float, line, catch, fish pools
 import { basicReach as reachOf, shortenReach } from './reach.js';   // T14: walk into the attack form's real reach
 import { createLootMarkers } from './loot-marker.js';
 import { makeGlowTexture } from './decor.js';
@@ -141,7 +143,8 @@ const questMarks = createQuestMarks(scene, { actors, camera });
 // Q8: auras follow the server's info.st on every body (late arrivals see them; a death clears them)
 const statusSync = createStatusSync({ actors, fx: spells.fx, infoOf: id => S.mirror?.infos.get(id), selfDead: () => S.self.dead, selfId: () => S.selfId, groundY: (x, z) => groundY(x, z) });
 const travel = createTransition({ el: document.getElementById('travel-veil'), view, scene, camera });
-const objects = createObjects(scene, { onUse: (id, o) => (String(id).startsWith('demo:') ? demoUse(o) : S.net?.use(id)), onNear: o => worldUi.lore(o.key || o.id, o.name, o.lore), labelLayer: document.getElementById('plates'), camera, posOf: id => { const a = actors.get(id); return a && !a.dead ? { x: a.pos.x, y: a.pos.y, z: a.pos.z, h: a.height } : null; } });
+const objects = createObjects(scene, { onUse: (id, o) => (String(id).startsWith('demo:') ? demoUse(o) : o.type === 'node' ? prof.gather(id) : o.type === 'skin' ? prof.gather(o.corpse) : S.net?.use(id)),   // W9 (P-client): a node / a skinnable corpse starts a mini-game
+  onNear: o => worldUi.lore(o.key || o.id, o.name, o.lore), labelLayer: document.getElementById('plates'), camera, posOf: id => { const a = actors.get(id); return a && !a.dead ? { x: a.pos.x, y: a.pos.y, z: a.pos.z, h: a.height } : null; } });
 
 // --- session state ----------------------------------------------------------------------------------
 const S = {
@@ -282,6 +285,9 @@ const ui5 = createUi5({ atlas: ui.atlas, objects, inDungeon: () => !!D.view, loo
 // T27: one binding table (js/client/input/bindings.js) drives the keyboard, the gamepad, the hints and — when switched on — touch
 const input = installInput({ controls, hud, setTarget: id => setTarget(id), targetId: () => S.target, pause: () => ui2.escape(), inWorld: () => S.phase === 'world', dead: () => S.self.dead, settings: ui2.settings, chat: () => chat.focus(), cycleTarget: any => cycleTarget(any) });
 const ui8 = createUi8({ net: () => S.net, hud, actors, worldUi, atlas: ui.atlas, settings: ui2.settings, selfId: () => S.selfId, bar: () => S.bar });
+// W9 (P-client): professions — the 3D side and the interface's controller
+const profView = createProfView(scene, { actors, objects, camera, groundY: (x, z) => groundY(x, z), selfId: () => S.selfId });
+const prof = createProf({ net: () => S.net, hud, bag, sheet: ui5.sheet, journal: ui.journal }); prof.setView(profView);
 const PANELS = { ...ui5.panels, ...ui8.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: () => bag.toggle() }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
 for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());
 window.addEventListener('keydown', e => {
@@ -538,6 +544,7 @@ function wireNet(net) {
   bag.wire(net);
   ui5.wire(net);
   ui8.wire(net);
+  prof.wire(net);   // W9 (P-client)
   ui.wire(net);
   worldUi.wire(net);
   ui2.wire(net);
@@ -597,7 +604,7 @@ function onJoined(j) {
   for (const id of [...actors.actors.keys()]) if (id !== keep) actors.remove(id);
   if (keep != null) { actors.rekey(keep, S.selfId); statusSync.dead(S.selfId); }   // C/Q8: the kept body starts the new room with no stale aura or torch
   if (S.target != null) setTarget(null);
-  tele.clear(); objects.clear(); boss.clear(); angling.clearPools(); questMarks.roomChanged(); endCartRide(); carts.clear();
+  tele.clear(); objects.clear(); boss.clear(); angling.clearPools(); profView.clear(); questMarks.roomChanged(); endCartRide(); carts.clear();
   worldUi.joined(j);
   preview = null;
   const you = j.you;
@@ -642,6 +649,7 @@ function ensureActor(id) {
       objects.upsert({ id, type: info.type, name: info.name, x: e.x, z: e.z, yaw: e.yaw || 0, r: info.r, state: info.state, source: 'room', opened: info.type === 'chest' && wasOpened(info.key),
         hidden: !!info.hidden, hint: info.hint, lore: info.lore, shimmer: info.shimmer, key: info.key, banner: info.banner || null, trace: info.trace || null, look: info.look || null, tether: info.tether ?? null });   // R7: look 'chained' + tether
       if (info.type === 'fishpool') angling.setPool(id, { x: e.x, z: e.z }, info.pool || null);
+      if (info.type === 'node') profView.setNode(id, { x: e.x, z: e.z, yaw: e.yaw || 0 }, info);   // W9 (P-client): boulders, marked trees, patches
       if (info.type === 'cart' || info.vehicle) carts.setParked(id, { x: e.x, z: e.z, yaw: e.yaw ?? info.yaw ?? 0 });   // W5: the ox cart by the gate     // T25: ripples and a jumping fish, seen from the road
       objectState(id, info);
       return null;
@@ -658,6 +666,8 @@ function ensureActor(id) {
       x: e.x, y, z: e.z, yaw: e.yaw || 0, rank: info.rank || null, role: info.role || null, pet, mods: info.aff || info.mods || info.affixes || null, sc: info.sc || null,   // S4 (protocol §20.4: aff [{id, name, aura?}], sc)
     });
     if (npc) { objects.upsert({ id, type: 'npc', name: a.name, x: e.x, z: e.z, source: 'room' }); if (info.office) WS.claimOffice(info.office); }   // Q10: its own building, dressed
+    if (npc && info.role) profView.setNpc(id, { x: e.x, z: e.z, yaw: e.yaw || 0 }, info.role);   // W9 (P-client): a craftsman's forge / workbench / still beside him
+    if (kind === 'player' && info.working) profView.setWorking(id, info.working);
     if (e.state & STATE.dead) actors.setDead(id, true);
     if (kind !== 'player' && info.vehicle) carts.setRoaming(id, true);                          // W5: a carter on the road leads an ox cart
     if (kind === 'player' && info.mount) actors.setMount(id, info.mount);
@@ -701,7 +711,8 @@ function refreshFromInfo(id) {
   const a = actors.get(id), info = S.mirror.infos.get(id);
   if (info?.type === 'fishpool' && info.pool) angling.setPool(id, null, info.pool);     // T25: a fished-out pool goes (left 0)
   if (!a || !info) return;
-  if (a.kind === 'player') angling.setLine(id, info.fishing || null);                  // T25: a line in the water (late arrivals see the float)
+  if (a.kind === 'player') angling.setLine(id, info.fishing || null);
+  if (a.kind === 'player') profView.setWorking(id, info.working || null);              // W9 (P-client): at a node or a station (late arrivals see the loop and the tool)                  // T25: a line in the water (late arrivals see the float)
   // play-test 6 (U16/U18): a druid's shape changes the MODEL — `info.form` (group 'shape') carries the creature; null changes back
   if (a.kind === 'player' && 'form' in info) actors.setShape(id, shapeOfForm(info.form));
   // U8: a boss ward for someone who walks in late (`info.ward {max, ms, until}`); the live changes come as `fx shield`
@@ -728,7 +739,7 @@ function onSnap(s) {
   }
   if (s.vitals) { S.self.hp = s.vitals.hp; S.self.hpMax = s.vitals.hpMax; S.self.mp = s.vitals.mp; S.self.mpMax = s.vitals.mpMax; actors.setHp(S.selfId, s.vitals.hp, s.vitals.hpMax); hud.setSelf(S.self); }
   if (S.selfId != null && !!s.dead !== S.self.dead) setSelfDead(!!s.dead);
-  for (const id of s.left) { carts.remove(id); actors.remove(id); objects.remove(id); angling.removePool(id); angling.setPhase(id, 'end'); if (S.target === id) setTarget(null); }
+  for (const id of s.left) { carts.remove(id); actors.remove(id); objects.remove(id); angling.removePool(id); angling.setPhase(id, 'end'); profView.remove(id); if (S.target === id) setTarget(null); }
   for (const r of s.ents) {
     if (r.id === S.selfId) continue;
     const a = ensureActor(r.id); if (!a) continue;
@@ -767,7 +778,7 @@ function onEvent(ev) {
     }
     return;
   }
-  if (ev.type === 'cast' || ev.type === 'hit' || ev.type === 'fx') { spells.onEvent(ev); statusSync.onEvent(ev); statusSync.onChannel(ev); weaponFx.onEvent(ev); formFx.onEvent(ev); reviveFx.onEvent(ev); angling.onEvent(ev); }
+  if (ev.type === 'cast' || ev.type === 'hit' || ev.type === 'fx') { spells.onEvent(ev); statusSync.onEvent(ev); statusSync.onChannel(ev); weaponFx.onEvent(ev); formFx.onEvent(ev); reviveFx.onEvent(ev); angling.onEvent(ev); profView.onEvent(ev); }
   const me = S.selfId;
   switch (ev.type) {
     case 'cast':
@@ -1150,7 +1161,7 @@ function frame(now) {
   fx.update(dt);
   spells.update(dt);
   statusSync.update();
-  weaponFx.update(dt); formFx.update(dt); angling.update(dt); shots.update(dt);
+  weaponFx.update(dt); formFx.update(dt); angling.update(dt); profView.update(dt); shots.update(dt);
   lootMarks.update(dt); questMarks.update(dt); carts.update(dt, elapsed);
   // W5: an arrival inside the SAME room brings no `joined` — step down once the ride's own time is up (on the ride's clock, not the wall's)
   if (S.cartRide && (!carts.riding || carts.rideOver())) { endCartRide(); if (travel.covered) travel.reveal(); }
@@ -1192,7 +1203,7 @@ Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
   S.warm = { done: false };
   import('./scatter-view.js').then(m => m.prewarmScatter({ quality })).catch(() => {})
     .then(() => Promise.all([import('./warmup.js'), loadMonsterLooks()]))
-    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [shots.sample(), questMarks.sample(), weaponFx.sample(), lootMarks.sample(), formFx.sample(), angling.sample(), cropSample()], extraTypes: ['wolf', 'boar', 'crocodile', 'mushroom', 'bear', 'cow'] }))
+    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [shots.sample(), questMarks.sample(), weaponFx.sample(), lootMarks.sample(), formFx.sample(), angling.sample(), profView.sample(), cropSample()], extraTypes: ['wolf', 'boar', 'crocodile', 'mushroom', 'bear', 'cow'] }))
     .then(r => carts.prewarm().then(() => r, () => r))                     // W5: one ox cart built and compiled before anybody meets one
     .then(r => { S.warm = { done: true, ...r }; }, e => { S.warm = { done: true, error: e?.message }; });
 });
@@ -1397,4 +1408,4 @@ const tv = {
   },
 };
 window.tv = tv;
-window.thousandvale = { shots, questMarks, carts, input, formFx, reviveFx, angling, lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui, ui2, ui5, ui8 };
+window.thousandvale = { prof, profView, shots, questMarks, carts, input, formFx, reviveFx, angling, lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui, ui2, ui5, ui8 };

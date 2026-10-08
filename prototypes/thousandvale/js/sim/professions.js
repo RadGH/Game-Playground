@@ -50,6 +50,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
   const nodeData = (D && D.nodes) || null;
   const G = P ? P.gatherNumbers : {}, K = P ? P.craftNumbers : {};
   const working = new Set();                          // province records in a mini-game
+  const trainerIds = new Set((content.trainers || []).map(t => t.id));      // the trainers of this system teach at the first word
   const reply = (o, t, x) => { if (o.conn) o.conn.sendJSON({ t, ...x }); };
   let engine = opts.engine || null, engineAsked = false;
   /** Tempering and the extra-property roll need stream C's engine; it is fetched once, the first time a station is opened. */
@@ -128,6 +129,10 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     }
     // the trainers this system places (the prospector by Torborhold's gate): in the town's room when they stand in a town
     for (const tr of content.trainers || []) {
+      // already placed as a quest NPC (<zone>.quest.json, tools/content-hunts.mjs): then he only has to STAY — a town's
+      // quest folk go to the inn at night, and a newcomer at midnight must still find the trainer by the gate
+      const placed = [...room.objects.values()].find(x => x.data && x.data.key === 'npc:' + tr.id);
+      if (placed) { placed.data = { ...placed.data, schedule: { blocks: [{ from: 0, at: { x: tr.x, z: tr.z, yaw: tr.yaw || 0 }, do: 'work' }], says: null } }; if (Math.hypot(placed.x - tr.x, placed.z - tr.z) > 0.5) placed.moveTo(tr.x, tr.z); continue; }
       const inTown = pv.L.towns.findIndex(q => Math.hypot(tr.x - q.x, tr.z - q.z) < q.r);
       if (room.kind === 'town' ? inTown !== ti : inTown >= 0) continue;
       if (!(pv.L.zones || []).some(q => q.key === tr.zone)) continue;
@@ -487,7 +492,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     if (w.fee) spend(o, w.fee, 'craft');
     const items = [], got = [];
     for (let k = 0; k < w.n; k++) {
-      const res = P.craftResult(rc, { quality: r.quality, skill: w.skill, level: ch.level || 1, base: w.base, rng });
+      const res = P.craftResult(rc, { quality: r.quality, skill: w.skill, level: ch.level || 1, base: w.base, rng, bonus: k === 0 });
       if (res.gear) {
         let it = null;
         try { it = room.rules.makeItem ? room.rules.makeItem(e, { base: res.gear.base, rarity: res.gear.rarity, level: res.gear.level }) : null; } catch (err) { log('professions: makeItem failed', err && err.message); }
@@ -589,7 +594,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     if (!row) return {};
     const ch = o.char;
     let taught = null;
-    if (obj.data.npc.teachOnTalk) for (const id of row.trains || []) if (!knows(ch, id)) { teach(o, id); (taught ||= []).push(id); }
+    if (obj.data.npc.teachOnTalk || trainerIds.has(obj.data.npc.id)) for (const id of row.trains || []) if (!knows(ch, id)) { teach(o, id); (taught ||= []).push(id); }
     return { prof: { trains: (row.trains || []).filter(id => id !== 'angling'), stations: row.stations || [], known: (row.trains || []).filter(id => knows(ch, id)), toolPrice: P.N.toolPrice || 12, ...(taught ? { taught } : {}) } };
   }
   /** A gathering tool used from the bag = start on the nearest node of its trade. Returns true when `item` was a tool. */

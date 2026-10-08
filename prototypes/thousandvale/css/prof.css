@@ -28,6 +28,10 @@
 @keyframes prof-hit { 0% { box-shadow: inset 0 0 30px rgba(143, 240, 160, 0.5); } 100% { box-shadow: inset 0 0 0 rgba(143, 240, 160, 0); } }
 @keyframes prof-miss { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 
+/* while a game is up the world's own prompt steps aside; on a short desktop window the panel sits to the right so the character stays in view */
+html[data-prof] #interact, html[data-prof] .interact { visibility: hidden; }
+@media (min-width: 900px) and (max-height: 820px) { html:not([data-layout="phone"]) .tv-prof { left: auto; right: 96px; transform: none; bottom: 96px; } }
+
 /* the result card: over the stage, as soon as the last input is in */
 .prof-card { position: absolute; left: 12px; right: 12px; top: 96px; bottom: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 10px 14px; text-align: center;
   background: rgba(14, 11, 8, 0.9); border: 2px solid var(--qc, var(--edge-strong)); border-radius: 10px; box-shadow: 0 0 34px -6px var(--qc, transparent); animation: prof-card 0.26s cubic-bezier(0.2, 1.5, 0.4, 1); }
@@ -42,6 +46,69 @@
 @keyframes prof-card { from { opacity: 0; transform: scale(0.86); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .prof-game, .prof-card, .tv-prof.flash-miss .prof-game { animation: none; } }
 
+/* ---------------------------------------------------------------- the crafting window */
+.craft-panel .tvp-body { padding-top: 6px; }
+.pc-tabs { display: flex; gap: 4px; margin: 0 0 8px; overflow-x: auto; scrollbar-width: none; }
+.pc-tab { flex: 1 0 auto; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--edge); background: rgba(0, 0, 0, 0.35); color: var(--ink-dim); cursor: pointer; white-space: nowrap; }
+.pc-tab i { font-style: normal; font-size: 12px; padding: 0 6px; border-radius: 8px; background: rgba(0, 0, 0, 0.5); color: var(--ink); }
+.pc-tab.on { border-color: var(--pt, var(--gold-hi)); color: #fff; background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.3)); box-shadow: inset 0 -2px 0 var(--pt, var(--gold-hi)); }
+.pc-list, .tr-list, .pk-list, .pt-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pc-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; border: 1px solid var(--edge); background: rgba(0, 0, 0, 0.28); }
+.pc-row.no { opacity: 0.78; }
+.pc-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.pc-top { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 9px; }
+.pc-top b { font-family: var(--serif); font-size: 15.5px; color: var(--ink); }
+.pc-kind { font-size: 11.5px; letter-spacing: 0.04em; color: var(--ink-faint); text-transform: uppercase; }
+.pc-main small { font-size: 12.5px; line-height: 1.3; color: var(--ink-dim); }
+.pc-band { color: #b9cdf5 !important; cursor: help; }
+.pc-cost { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.pc-needs { display: contents; }
+.pc-needs span, .pc-fee { font-size: 12.5px; padding: 1px 8px; border-radius: 9px; border: 1px solid var(--edge); background: rgba(0, 0, 0, 0.4); white-space: nowrap; }
+.pc-needs .ok { color: var(--good); border-color: rgba(127, 224, 138, 0.45); } .pc-needs .lack { color: var(--bad); border-color: rgba(255, 106, 85, 0.5); }
+.pc-fee { color: var(--gold-hi); }
+.pc-why { color: var(--warn) !important; }
+.pc-base { font-size: 13px; color: var(--ink-dim); } .pc-base select { margin-left: 4px; padding: 3px 6px; border-radius: 6px; border: 1px solid var(--edge); background: #1c1611; max-width: 210px; }
+button.primary.pc-make { flex: 0 0 auto; width: auto; min-width: 82px; padding: 9px 14px; font-size: 14px; }
+/* tempering */
+.pt { display: flex; flex-direction: column; gap: 8px; }
+.pt-ops, .pt-els { display: flex; flex-wrap: wrap; gap: 6px; }
+.pt-ops .chip.on, .pt-els .chip.on { background: linear-gradient(180deg, #5b4220, #3b2a14); border-color: var(--gold-hi); color: var(--gold-hi); }
+.pt-els .chip { padding: 4px 10px; font-size: 13px; }
+.pt-what { margin: 0; font-size: 13.5px; line-height: 1.35; color: var(--ink-dim); }
+.pt-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
+.pt-h { display: block; margin-bottom: 5px; font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); }
+.pt-list { max-height: 250px; overflow-y: auto; gap: 4px; }
+.pt-item { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 6px 9px; border-radius: 8px; border: 1px solid var(--edge); background: rgba(0, 0, 0, 0.3); cursor: pointer; text-align: left; }
+.pt-item b { color: var(--rc, var(--ink)); font-weight: 600; } .pt-item small { font-size: 12px; color: var(--ink-faint); }
+.pt-item.on { border-color: var(--gold-hi); background: rgba(217, 178, 106, 0.14); }
+.pt-quote { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border-radius: 9px; border: 1px solid var(--edge); background: rgba(0, 0, 0, 0.28); min-height: 150px; }
+.pt-quote strong { font-family: var(--serif); font-size: 15.5px; color: var(--rc, var(--ink)); }
+.pt-quote small { font-size: 12.5px; color: var(--ink-dim); line-height: 1.3; }
+.pt-text { margin: 0; font-size: 13.5px; line-height: 1.35; color: var(--ink); }
+.pt-safe { color: var(--good) !important; }
+.pt-last { margin: 0; padding: 5px 8px; border-radius: 7px; background: rgba(127, 224, 138, 0.1); border: 1px solid rgba(127, 224, 138, 0.35); font-size: 13px; color: var(--ink); }
+.pt-quote button.primary.wide { padding: 9px; font-size: 14.5px; margin-top: auto; }
+
+/* ---------------------------------------------------------------- a craftsman's window */
+.tr-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; border: 1px solid var(--edge); background: rgba(0, 0, 0, 0.28); }
+.tr-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; } .tr-main b { font-family: var(--serif); font-size: 15.5px; } .tr-main small { font-size: 12.5px; line-height: 1.3; color: var(--ink-dim); }
+.tr-row button.primary.small, .tr-row button.ghost.small { flex: 0 0 auto; width: auto; padding: 8px 14px; font-size: 13.5px; min-height: 36px; }
+.tr-stations { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; } .tr-stations button.primary { padding: 10px; font-size: 15px; }
+
+/* ---------------------------------------------------------------- the Professions list */
+.pk-h { margin: 8px 0 5px; font: 600 11.5px var(--sans); letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); }
+.pk-row { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 9px; border: 1px solid var(--edge); background: rgba(0, 0, 0, 0.28); }
+.pk-row.unknown { opacity: 0.62; }
+.pk-ico { flex: 0 0 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; background: rgba(0, 0, 0, 0.45); border: 1px solid color-mix(in srgb, var(--pt, #d9b26a) 55%, transparent); }
+.pk-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.pk-top { display: flex; align-items: baseline; gap: 8px; } .pk-top b { font-family: var(--serif); font-size: 15px; }
+.pk-rank { flex: 1; font-size: 12.5px; color: var(--ink-dim); }
+.pk-lv { font-family: var(--serif); font-size: 17px; color: var(--pt, var(--gold-hi)); } .pk-lv small { font-family: var(--sans); font-size: 11.5px; color: var(--ink-faint); }
+.pk-bar { height: 5px; border-radius: 3px; background: rgba(0, 0, 0, 0.55); overflow: hidden; } .pk-bar i { display: block; height: 100%; background: var(--pt, var(--gold)); }
+.pk-next, .pk-tool { font-size: 12.5px; line-height: 1.3; color: var(--ink-dim); } .pk-tool.lack { color: var(--warn); }
+.pk-open { flex: 0 0 auto; min-height: 34px; }
+.pk-list.compact { gap: 3px; } .pk-list.compact .pk-row { padding: 4px 8px; gap: 8px; } .pk-list.compact .pk-ico { flex-basis: 26px; height: 26px; border-radius: 7px; } .pk-list.compact .pk-top b { font-size: 14px; } .pk-list.compact .pk-lv { font-size: 15px; }
+
 /* ---------------------------------------------------------------- phone: one thumb */
 html[data-layout="phone"] .tv-prof { z-index: 80; bottom: calc(var(--sb) + 8px); width: calc(100vw - var(--sl) - var(--sr) - 12px); max-width: 430px; }
 html[data-layout="phone"] .prof-x { flex-basis: 44px; height: 44px; }
@@ -54,3 +121,9 @@ html[data-layout="phone"] .prof-how { font-size: 15px; }
   html[data-layout="phone"] .prof-canvas { height: min(206px, calc(100vh - var(--st) - var(--sb) - 150px)); }
   html[data-layout="phone"] .prof-card { top: 70px; bottom: 16px; }
 }
+html[data-layout="phone"] .pc-tab { min-height: 44px; }
+html[data-layout="phone"] button.primary.pc-make { min-height: 44px; }
+html[data-layout="phone"] .pt-item, html[data-layout="phone"] .pt-ops .chip, html[data-layout="phone"] .pt-els .chip, html[data-layout="phone"] .pk-open, html[data-layout="phone"] .tr-row button { min-height: 44px; }
+html[data-layout="phone"] .pc-base select { min-height: 44px; }
+html[data-layout="phone"] .pt-list { max-height: none; }
+@media (orientation: portrait) { html[data-layout="phone"] .pt-cols { grid-template-columns: 1fr; } }

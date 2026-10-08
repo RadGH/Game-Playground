@@ -30,6 +30,8 @@ import { createUiSuite } from '../ui/suite.js';
 import { createUi2 } from '../ui/pt2.js';
 import { createUi5 } from '../ui/pt5.js';
 import { createUi8 } from '../ui/pt8.js';
+import { createProf } from '../ui/prof.js';          // W9 (P-client): professions — mini-games, crafting, the Professions list
+import { profStep } from './prof-scenes.js';
 import { loadSkillData, barFromData, barFromServer, initials } from '../skillbar.js';
 import { PLAYABLE_RACES, RACE_NAMES, loadLookData, defaultLook, avatarFor } from '../looks.js';
 import { lookCustom } from '../ui/appearance-core.js';
@@ -126,6 +128,7 @@ const ui5 = createUi5({ net: () => S.net, hud, bag, mail, worldUi, journal: ui.j
   targetId: () => S.target, setTarget: id => setTarget(id), stats: () => ({ fps: 60 }), zoneName: () => $('zone-name')?.textContent || null,
   ensureNet: async () => { const n = startNet(); await n.ready; return n; }, onKitPreview: () => {}, onKitBack: () => title?.toAppearance(), onKitCreate: () => hud.toast('In the game this creates the character and walks into the world.', 'info') });
 const ui8 = createUi8({ net: () => S.net, hud, actors, worldUi, atlas: ui.atlas, settings: ui2.settings, selfId: () => S.selfId, bar: () => S.bar });
+const prof = createProf({ net: () => S.net, hud, bag, sheet: ui5.sheet, journal: ui.journal });   // W9 (P-client)
 const PANELS = { ...ui5.panels, ...ui8.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: f => bag.toggle(f) }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
 for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());
 // the same key handler main.js has (windows, help, chat, Esc) — the input layer turns pads and touch into these keys
@@ -279,6 +282,7 @@ function wireNet(net) {
   bag.wire(net);
   ui5.wire(net);
   ui8.wire(net);
+  prof.wire(net);   // W9 (P-client)
   ui.wire(net);
   worldUi.wire(net);
   ui2.wire(net);
@@ -390,6 +394,8 @@ const VERBS = {
   async calm() { $('toasts')?.replaceChildren(); $('zone-banner')?.classList.remove('show'); document.querySelectorAll('.tv-banner .show, .banner-stack .show').forEach(e => e.classList.remove('show')); },
 };
 VERBS.run = async fn => { await fn(api, VERBS); };
+/** W9 (P-client): a profession scene — ['prof', 'game', 'strike'] · 'result' · 'craft' · 'temper' · 'trainer' · 'skills' (js/client/gallery/prof-scenes.js). */
+VERBS.prof = async (...a) => { await profStep(api, ...a); };
 /** Stand next to a body (shops, loot and trade close when you are too far): an entity id or @token. */
 VERBS.near = async id => { const a = actors.get(id); if (!a) throw new Error('nobody to stand next to: ' + id); S.pos = { x: a.pos.x + 1.2, z: a.pos.z + 1 }; const self = actors.get(S.selfId); if (self) { self.pos.x = S.pos.x; self.pos.z = S.pos.z; } };
 /** Look at what a player wears (the right-click menu's Inspect). */
@@ -415,7 +421,7 @@ async function runSteps(steps = []) {
 
 // ---- boot ----------------------------------------------------------------------------------------------------------
 const title = initTitleLite({ S, account, ui2, ui5, startNet, races: PLAYABLE_RACES, raceNames: RACE_NAMES });
-var api = window.gallery = { S, GX, scene, fake, hud, actors, objects, controls, panels: PANELS, ui, ui2, ui5, bag, social, chat, mail, friends, guild, callboard, account, help, worldUi, boss, menubar, input, title, verbs: VERBS, runSteps, openPanels, setTarget,
+var api = window.gallery = { prof, S, GX, scene, fake, hud, actors, objects, controls, panels: PANELS, ui, ui2, ui5, bag, social, chat, mail, friends, guild, callboard, account, help, worldUi, boss, menubar, input, title, verbs: VERBS, runSteps, openPanels, setTarget,
   /** What the page shows, for the spec: visible text of the interface. */
   text: () => [...document.querySelectorAll('#hud, #title:not([hidden]), .tv-panel, .tipbox, body > .ap-root, body > [class*="kit"], .phone-ui, .pad-ui')].map(e => (e.hidden ? '' : e.innerText)).join('\n'),
   ready: false, done: null };

@@ -71,7 +71,7 @@ export function itemCardHtml(item, { worn = false, level = null, equipment = nul
   const icon = iconFor(item);
   const b = [];
   b.push(`<div class="ic-head">${icon ? `<img class="ic-icon r-${esc(r)}" src="${icon}" alt="">` : ''}<div><div class="ic-name r-${esc(r)}">${esc(nameOf(item))}</div>`
-    + `<div class="ic-kind">${esc(RARITY_NAME[r] || title(r))} ${esc(slot ? SLOT_NAME[slot] || title(slot) : isCrate(item) ? crateLines(item).kind.toLowerCase() : item.kind === 'junk' ? 'junk' : item.kind === 'fish' ? 'fish' : 'item')}`
+    + `<div class="ic-kind">${esc(RARITY_NAME[r] || title(r))} ${esc(slot ? SLOT_NAME[slot] || title(slot) : isCrate(item) ? crateLines(item).kind.toLowerCase() : item.kind === 'junk' ? 'junk' : item.kind === 'fish' ? 'fish' : item.kind === 'material' ? 'crafting material' : item.tool ? 'tool' : 'item')}`
     + `${item.baseName && item.baseName !== item.name ? ' · ' + esc(item.baseName) : ''}${item.twoHanded ? ' · two-handed' : ''}</div></div></div>`);
   // T9 / T20 (play-test 5): a crate or a gift says what it opens into and the lowest rarity it can be
   if (isCrate(item)) {
@@ -92,6 +92,10 @@ export function itemCardHtml(item, { worn = false, level = null, equipment = nul
   if (item.ranged) base.push('ranged');
   if (base.length) b.push(`<div class="ic-base">${base.join(' · ')}</div>`);
   if (item.count > 1) b.push(`<div class="ic-base">A stack of <b>${esc(fmt(item.count, { decimals: 0 }))}</b>${item.stackMax ? ` <span class="ic-dim">(holds ${esc(item.stackMax)})</span>` : ''} — one is used at a time. Shift-click to split it.</div>`);
+  // W9 (P-client): a crafting material says which trade uses it and what one sells for; a tool that it takes no slot; made gear who made it
+  if (item.kind === 'material') b.push(`<div class="ic-base">Crafting material${item.prof ? ` · <b>${esc(title(item.prof))}</b>` : ''}${item.tier ? ` · tier ${esc(item.tier)}` : ''}${item.price ? ` <span class="ic-dim">— sells for ${esc(fmt(item.price, { decimals: 0 }))} gold each</span>` : ''}</div>`);
+  if (item.tool && item.use?.prof) b.push(`<div class="ic-base"><b>${esc(title(item.use.prof))}</b> tool${item.use.tier ? ` · tier ${esc(item.use.tier)}` : ''} <span class="ic-dim">— takes no slot; keep it in your bag</span></div>`);
+  if (item.crafted && item.maker) b.push(`<div class="ic-dim">Made by ${esc(item.maker)}</div>`);
   if (item.kind === 'fish' && item.size) b.push(`<div class="ic-base"><b>${esc(Math.round(item.size * 10) / 10)}</b> cm${item.record ? ' · your biggest' : ''}</div>`);
   let potionSaid = false;
   if (item.kind === 'potion' && potions) {

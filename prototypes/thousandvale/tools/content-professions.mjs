@@ -203,7 +203,7 @@ function buildQuests(trainer, smith) {
   return {
     _doc: 'Stream P-core (round 8, W9 Professions) — MADE by tools/content-professions.mjs (the marks follow the bake); edit the text in the tool. The first meeting: Bram Delver, a prospector just inside Torborhold\'s main gate, teaches Mining the moment you speak to him (and hands over a pick); his chain walks you to the copper, the smith\'s forge and the tempering gauge. Step kinds gather / craft / learn are js/sim/quests.js (W9).',
     zone: 'test', part: 'professions',
-    npcs: { [trainer.id]: { name: trainer.name, role: trainer.role, at: trainer.town, greeting: trainer.greeting, placedBy: 'content-professions' } },
+    npcs: { [trainer.id]: { name: trainer.name, role: trainer.role, at: trainer.town, greeting: trainer.greeting, placedBy: 'content-professions', titled: true } },
     quests: [
       { id: 'prof_three_good_swings', name: 'Three Good Swings', level: 1, giver: trainer.id,
         offer: 'New boots, clean hands. You want work that pays? That pick I just gave you is yours. Walk out of the gate and look for boulders with green lumps sticking out: copper. Three swings each. Hit when the marker crosses the bright spot, not before, not after.',
@@ -212,7 +212,7 @@ function buildQuests(trainer, smith) {
           { kind: 'talk', npc: trainer.id, text: 'Show Bram what you dug out', where: 'Bram Delver, just inside Torborhold\'s main gate', at: me },
         ],
         done: 'That is ore, that is. A clean strike sometimes shakes a stone loose too: sell those dear. The boulders fill again for you in a few minutes, and nobody else can empty yours.',
-        reward: { xp: 0.4, gold: 8, crates: [{ slot: 'any', min: 'uncommon' }] },
+        reward: { xp: 0.4, gold: 8, crates: [{ slot: 'weapon', min: 'uncommon' }] },
         rewardText: 'The Prospector\'s Pick is yours to keep, with a crate from the last fellow who never came back for it.', next: 'prof_bronze_not_copper' },
       { id: 'prof_bronze_not_copper', name: 'Bronze, Not Copper', level: 1, giver: trainer.id, requires: ['prof_three_good_swings'],
         offer: 'Copper alone bends like a spoon. Smelt it with tin and you have bronze. The grey boulders are tin. Take three of each to Garrow at the smithy, ask him to teach you Smithing, and use his fire: three bars, then hammer yourself a blade. Strike while the bar glows in the band. Too cold? Back in the fire.',
@@ -223,7 +223,7 @@ function buildQuests(trainer, smith) {
           { kind: 'talk', npc: trainer.id, text: 'Show Bram your blade', where: 'Bram Delver, just inside Torborhold\'s main gate', at: me },
         ],
         done: 'You made that? With those hands? Well. It will not win prizes, but it is yours, and the next one will be better: the steadier your hammer, the better the blade comes out.',
-        reward: { xp: 0.5, gold: 14 }, rewardText: 'Coin for the ore you burned, and Bram\'s grudging respect.', next: 'prof_an_edge_on_it' },
+        reward: { xp: 0.5, gold: 14, crates: [{ slot: 'armor', min: 'uncommon' }] }, rewardText: 'Coin for the ore you burned, a crate of armour, and Bram\'s grudging respect.', next: 'prof_an_edge_on_it' },
       { id: 'prof_an_edge_on_it', name: 'An Edge on It', level: 2, giver: trainer.id, requires: ['prof_bronze_not_copper'],
         offer: 'One more trick. A smith can TEMPER a thing you already own: better quality, a new property, never a ruined blade. Ask Garrow to teach you Tempering, put your new blade in your bag, and stop the gauge inside the band. It costs two bars and a little coin. Miss, and you lose the bars. Never the blade.',
         steps: [
@@ -335,7 +335,7 @@ export function buildAll() {
       const [, zx, zy] = /^z(\d+)_(\d+)$/.exec(wid).map(Number), ox = zx * ZM, oz = zy * ZM;
       const F = zoneFacts(wid), reach = reachOf(eid);
       const baked = readJ(`data/zones/${wid}/placements.json`).placements || [];
-      const vig = [`${wid}.json`, `${wid}.quest.json`, `${wid}.hunt.json`].flatMap(f => ((opt(`data/vignettes/placements/${f}`) || {}).placements || []));
+      const vig = [`${wid}.json`, `${wid}.quest.json`, `${wid}.hunt.json`].flatMap(f => ((opt(`data/vignettes/placements/${f}`) || {}).placements || [])).filter(p => !p.trainer);      // (not the trainers this tool itself places)
       const Z = placeZone(F, { eid, band: zs.band, reach, baked, vig, content });
       // Torborhold: copper (and a tin) within sight of the gate road, and the prospector just inside the gate
       if (eid === se) {

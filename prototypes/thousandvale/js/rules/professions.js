@@ -205,10 +205,10 @@ export function createProfessions(numbers = {}, content = null) {
   }
   /**
    * What a finished craft makes. -> `{ items: [bag items], gear: {base, rarity, level, extraAffix}|null, n }`.
-   * A material / good recipe makes `makes.n` (one more on a perfect refine); a gear recipe returns the ORDER for the
+   * A material / good recipe makes `makes.n` (a perfect game may add ONE — `bonus: false` for the rest of a batch); a gear recipe returns the ORDER for the
    * rules' item maker (the server calls it). A failed game makes nothing (the server takes nothing).
    */
-  function craftResult(rc, { quality = 'good', skill = 1, level = 1, base = null, rng = () => 0.5 } = {}) {
+  function craftResult(rc, { quality = 'good', skill = 1, level = 1, base = null, rng = () => 0.5, bonus = true } = {}) {
     if (quality === 'fail') return { items: [], gear: null, n: 0 };
     if (rc.kind === 'gear') {
       const bs = basesFor(rc, level).filter(b => b.can);
@@ -219,7 +219,7 @@ export function createProfessions(numbers = {}, content = null) {
       return { items: [], n: 1, gear: { base: pick.key, rarity, level: gearLevel(rc, level), extraAffix: rarity === 'magic' && rng() < ex } };
     }
     const mk = rc.makes || {};
-    const n = (mk.n || 1) + (quality === 'perfect' && rc.bonusOnPerfect !== false && rng() < (rc.kind === 'material' ? 0.5 : 0.25) ? 1 : 0);
+    const n = (mk.n || 1) + (bonus && quality === 'perfect' && rc.bonusOnPerfect !== false && rng() < (rc.kind === 'material' ? 0.5 : 0.25) ? 1 : 0);
     let it = null;
     if (rc.kind === 'material') it = item(mk.id, n);
     else if (rc.kind === 'tool') it = toolItem(mk.id);

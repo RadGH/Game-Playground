@@ -1060,3 +1060,19 @@ New files: `js/client/ui/pt8.js` (hub: `createUi8`, `window.tvui8`), `pt8-core.j
 - New: `tools/gate-streets.mjs` (the table / `--check`), `tools/lib/gate-street-checks.mjs`, `tools/town-plan-png.mjs`, `tests/B/gate-streets.test.js`, `proctown/tests/highstreets.test.js`. All 16 zones, horizon and map re-baked; E's content-towns, content-givers, content-pools, content-hunts re-run.
 - W18, the near half: the range the owner was looking at lies inside a LOADED zone (real terrain, where the bake scatters no trees on the Mountains biome), so `horizon-grid.js` `buildCanopy` adds tree spires there too (one extra mesh per chunk a loaded zone touches, the horizon's material; High 3,600 a chunk, Medium 1,600, Low none). Trees climb to 49-60 degrees and 780-940 m: a quarter of this world's mountain cells are steeper than 53 degrees.
 - W5: the cart ride ends on its own (frame) clock, not a wall-clock timer.
+
+## Round 8 — W9 Professions, server side (stream P-core, 2026-10-08)
+- **Ten professions**, skill 1-100 each, all on the Character sheet (`you.professions`): Mining, Logging, Foraging, Skinning, Angling (gathering) and Smithing, Outfitting,
+  Alchemy, Cooking, Tempering (making). Angling and the fish cooking are unchanged; cooking fish now also teaches Cooking.
+- **2,978 gathering nodes** on the current bake (per zone: 64 ore boulders, 56 marked trees, 66 herb / mushroom / fibre patches; tiers by the zone's level band), never on a
+  road, in a town, a field, water or a main street. Nodes are PER PLAYER: nobody can empty yours; they come back for you in 6-10 minutes. Copper and tin boulders stand within
+  150 m of Torborhold's gate road.
+- **A mini-game for every trade** (3-7 s, can be failed): the server seeds the pattern, the client sends raw input times, the server scores them — no score is ever sent.
+- **125 recipes**: smelting, curing, weaving, tools, 80 semi-random gear patterns over C's catalog (you pick the base; level under yours and under the material's cap; never above
+  rare), potions the game already drinks, campfire meals; **tempering** (quality up, promote to at most rare, reweave one property, brand a weapon) never harms the item.
+- **First meeting**: Bram Delver, a prospector just inside Torborhold's main gate, teaches Mining at the first word and hands over a pick (a tool: no slot); a three-quest chain
+  walks the copper, the forge and the tempering gauge. The town's trade folk teach the rest; the smith, apothecary, tailor and bowyer offer profession jobs.
+- **Economy**: materials stack to 50 and sell at their own price; `tools/sim-professions.mjs` (printed by `tools/sim-economy.mjs`): mining / logging / foraging and
+  gather-then-refine each earn 71-98% of an hour of questing at levels 1, 5, 10 and 20 (20 projected: no tier-4 nodes in this province); skinning adds 5-18% to hunting.
+- Files: js/rules/professions.js, professions-games.js, professions-temper.js, data/rules/professions.json, js/sim/professions.js, tools/content-professions.mjs,
+  tools/sim-professions.mjs, data/provinces/professions.json, professions-nodes.json, data/quests/professions.json, docs/professions.md, docs/protocol.md §25. tests/P/core-* (26).

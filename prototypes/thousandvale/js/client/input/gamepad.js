@@ -88,6 +88,8 @@ export function createGamepad({ api, focus, radial, osk, run }) {
     if (device.current !== 'pad') { for (let i = 0; i < prev.length; i++) prev[i] = B[i]; return; }
     const now = performance.now();
     const container = focus.sync();
+    // W9 (P-client): a profession mini-game reads the pad itself (js/client/ui/prof-minigame.js) — stand back, and let go of the stick
+    if (document.documentElement.dataset.prof) { if (lastMode !== 'prof') { stopHolds(); releaseAll(); lastMode = 'prof'; rep.dir = null; } stats.mode = 'prof'; for (let i = 0; i < prev.length; i++) prev[i] = B[i]; return; }
     const mode = osk.isOpen ? 'osk' : radial.isOpen ? 'radial' : container ? 'menu' : 'world';
     if (mode !== lastMode) { stopHolds(); releaseAll(); lastMode = mode; rep.dir = null; }
     stats.mode = mode;

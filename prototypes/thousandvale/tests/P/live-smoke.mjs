@@ -26,7 +26,6 @@ const fail = m => { console.error('FAILED:', m); process.exit(1); };
 const bot = await startBot({ url, name: 'Smoke' + Array.from({ length: 5 }, () => 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)]).join(''), mode: 'script', cls: 'warrior', log: m => console.log('[bot]', m) });
 bot.fightRadius = 0;
 const net = bot.net;
-const infos0 = []; net.on('info', m => { for (const i of m.ents || []) infos0.push(i); });
 const once = (t, ms = 8000, pred = () => true) => new Promise((res, rej) => { const to = setTimeout(() => rej(new Error('no ' + t + ' in ' + ms + ' ms')), ms); const off = net.on(t, m => { if (!pred(m)) return; clearTimeout(to); if (typeof off === 'function') off(); res(m); }); });
 async function walk(p, r = 1.6, ms = 60000) {
   bot.goal = { x: p.x, z: p.z };
@@ -34,8 +33,7 @@ async function walk(p, r = 1.6, ms = 60000) {
   while (Math.hypot(bot.pos.x - p.x, bot.pos.z - p.z) > r) { if (Date.now() - t0 > ms) fail(`could not walk to ${Math.round(p.x)},${Math.round(p.z)} (at ${Math.round(bot.pos.x)},${Math.round(bot.pos.z)})`); await sleep(100); }
   bot.goal = null; await sleep(250);
 }
-const infos = { [Symbol.iterator]: function* () { const m = new Map(); for (const i of infos0) m.set(i.id, i); yield* m; } };
-const ent = pred => { for (const [id, i] of infos) if (pred(i)) { const e = bot.ents.get(id); return { id, info: i, x: e ? e.x : null, z: e ? e.z : null }; } return null; };
+const ent = pred => { for (const [id, e] of bot.ents) if (pred(e)) return { id, info: e, x: e.x, z: e.z }; return null; };
 async function play(startMsg, doneType, send) {
   const g = startMsg.game, inp = perfectInputs(g);
   await sleep(inp[inp.length - 2] + 80);                 // really wait the game out, as a player would
@@ -63,7 +61,13 @@ for (const s of [starters[0], starters[1], starters[2], starters[4] || starters[
   await sleep(600);
   const node = ent(i => i.key === 'node:' + s.id);
   if (!node) fail('boulder ' + s.id + ' is not in sight');
-  p = once('gatherR'); net.gather('start', { id: node.id }); const st = await p;
+  let st = null;
+  for (let tries = 0; tries < 4; tries++) {            // something with teeth may have wandered up: wait it out, as a player would
+    p = once('gatherR'); net.gather('start', { id: node.id }); st = await p;
+    if (st.ok || st.why !== 'combat') break;
+    log('in a fight by', node.info.name, '- waiting'); await sleep(8000);
+  }
+  if (!st.ok && st.why === 'combat' && Object.keys(got).length) { log('still fighting: leaving this boulder'); continue; }
   if (!st.ok) fail('gather refused: ' + JSON.stringify(st));
   const d = await play(st, 'gatherDone', inputs => net.gather('done', { id: node.id, inputs }));
   log(`mined ${node.info.name}: ${d.quality} (${d.marks.join('')}) -> ${d.got.map(x => x.n + ' ' + x.name).join(', ')} | mining ${d.skill.level}`);

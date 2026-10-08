@@ -42,7 +42,10 @@ const KINDS = {
   npc:     { prop: null, glow: null, label: o => `Talk to ${o.name || 'them'}`, use: true, invisible: true },
   vignette: { prop: null, glow: null, label: () => null, use: false, invisible: true },
   cart:    { prop: null, glow: null, label: o => (o.name && !/^cart$/i.test(o.name) ? `Ask about a ride: ${o.name}` : 'Ask about a ride on the ox cart'), use: true, invisible: true },   // W5: drawn by carts-view.js
-  fishpool: { prop: null, glow: null, label: () => null, use: false, invisible: true },        // T25: drawn on the water by angling-view.js
+  fishpool: { prop: null, glow: null, label: () => null, use: false, invisible: true },
+  // W9 (P-client): gathering nodes and skinnable corpses — drawn by prof-view.js, which also sets `verb` and `spent`; E starts the mini-game (main.js onUse)
+  node:     { prop: null, glow: null, label: o => (o.spent ? null : `${o.verb || 'Gather'} ${o.name || 'this'}`), use: o => !o.spent, invisible: true },
+  skin:     { prop: null, glow: null, label: o => `Skin ${o.name || 'the beast'}`, use: true, invisible: true },        // T25: drawn on the water by angling-view.js
   // stream E's placed content (js/sim/placements.js): the place itself is drawn by site-view.js
   fort:    { prop: null, glow: null, label: () => null, use: false, invisible: true },
   farm:    { prop: null, glow: null, label: () => null, use: false, invisible: true },

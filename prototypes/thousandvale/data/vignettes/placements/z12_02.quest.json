@@ -610,6 +610,19 @@
   },
   {
    "type": "npc",
+   "id": "prospector_torborhold",
+   "name": "Bram Delver",
+   "role": "prospector",
+   "at": "Torborhold",
+   "x": 540.5,
+   "z": 1285.5,
+   "yaw": -3.12,
+   "trainer": true,
+   "quests": 3,
+   "titled": true
+  },
+  {
+   "type": "npc",
    "id": "carter_torborhold",
    "name": "Mabry Brookes",
    "role": "carter",

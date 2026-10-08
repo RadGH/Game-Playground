@@ -3894,7 +3894,30 @@ Higher skill than the work needs, and a better tool, widen `half` / `good` / `ba
 - **C**: nothing needed. I use `rules.makeItem(e, {base, rarity, level})` as it is, `rulesEngine()` (dynamic import) for tempering's quality / affix work, and `canConvert` / `convertWeapon` (tv-gear.js) for the brand. Crafted backpacks use your `sling_satchel` / `trail_rucksack` / `expedition_pack`.
 - **D-UI**: map filter ids for trainers / stations: the NPC roles above (+ `prospector`).
 
-_Status: contract written 2026-10-07; nothing landed yet. (Updated below as it lands.)_
+_Status 2026-10-08: **LANDED — all ten professions, server + rules + content.** Dev (8491) restarted with it; `node tests/P/live-smoke.mjs` walks the whole first
+meeting over a real socket (learn, mine four boulders, hand the quest in, smelt, forge, temper). What differs from the text above (THIS wins):_
+- **Asks answered (P-client):** (1) `makeGame(type, seed, opts?)` works as well as `makeGame(type, {seed, ease, base, steps})`; `GAME_OF` is exported; also `perfectInputs(game)` and
+  `botInputs(game, rng, sloppy)` for a synthetic player, and the curves `markerAt` `lineAt` `levelAt` `heatAt` `gaugeAt` `gaugeHalf`. (2) `trace` has 12 steps; sample k at
+  `(k + 0.5) * ms / steps` is exactly what is scored. (3) Yes: re-heat is `[t, 1]`, your second button; the bar never goes back by itself. A blow inside the `reheat` pause or within
+  `gap` ms of the last one is ignored (not a spent step). (4) `gatherDone.got` / `craftDone.got` = `[{id, name, n, kind, icon, tint, rarity, bonus?}]` — exactly what was gained
+  (`items` are the bag items as they now are: a stack that grew shows its whole count). (5) `craftList.station.npc` is the entity id; `used.prof = {trains, stations, known, toolPrice, taught?}`.
+- Both done messages carry `flags` (`over` / `under` / `hot` / `cold` / `spilled` / `side` / `unripe`, or `inputs:<why>` when the list was refused — then quality is `fail`).
+- `quality.yield` is 1 / 2 / 2 / 3 (poor / good / fine / perfect); a `fine` or `perfect` play is what brings the bonus piece (20% / 65%).
+- A batch: `craft start {n}` (materials and goods only, up to 10) is ONE game for all n; `craftR.n` echoes it.
+- Tempering works on an item in the BAG (`uid`); the row ids are `temper_quality` `temper_promote` `temper_reweave` `temper_brand`; the brand row lists `elements`.
+- `info.node.starter: 1` on the five boulders by Torborhold's gate (back in 2 minutes). `OBJ_TYPES` gained `node`.
+- The prospector (`npc:prospector_torborhold`, Bram Delver) goes through E's pipeline like the anglers: `tools/content-hunts.mjs` copies `data/provinces/professions.json`
+  `trainers[]` into `<zone>.quest.json` (an `npc` row, `trainer: true`) and writes the chain's marks; he is in givers.json and titles.json (`prospector`), and
+  `tools/content-titled.mjs` JOB_ROLES gained smith / apothecary / tailor / bowyer / prospector (the server's list). js/sim/professions.js pins him at the gate day and night
+  (a town's quest folk otherwise go to the inn). Order after a re-bake: `content-professions` -> `content-towns` -> `content-givers` -> `content-hunts`. **D-UI**: for the map filter read
+  `data/rules/professions.json` `roles` to turn E's town roles into "teaches / station for" (smith, armourer, jeweller, bowyer, tailor, stablehand, apothecary, innkeeper, provisioner).
+- Extra hooks beyond the list (all additive, marked `// W9 (P-core)`): province.js `hooks.keepBody` also asks `professions.keepBody(e)` (a beast a skinner has credit on lies up
+  to 60 s); quests.js `stepAt` returns a `gather` / `craft` / `learn` step's own `at`, and `OWN_FRAMES` (smith, apothecary, tailor, bowyer, prospector, angler) offer only frames
+  written for their role; tests/A/protocol.test.js GOOD rows; docs/protocol.md §25 + table rows.
+- **E:** `data/quests/test.json` `include` gained `professions.json`; `tools/sim-professions.mjs` exports `extraRows` and your table prints its 24 rows. After any re-bake
+  run `node tools/content-professions.mjs` (tests/P/core-content.test.js fails when the made files are stale). 8 job frames (`prof_*`) are appended to the board at load.
+- **Not built by P-core (say if wanted):** recipes are not sold / learned one by one (every recipe of a trade is known once your skill reaches it); no profession gear slots;
+  equipped items cannot be tempered in place; tier 4-5 nodes exist as data only (Torbor Downs' zones stop at level 10, so tiers 1-3 are placed).
 
 ## Round 8 contracts — P-client (professions: models, animations, mini-games, windows, W9) -> P-core, D-world, D-UI, G, lead — 2026-10-07 (written after reading P-core's; a status section at the end is kept true)
 

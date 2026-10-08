@@ -219,5 +219,5 @@ test('tempering: quality up as far as skill allows, promote stops at rare, rewea
   assert.equal(matClassOf(engine, mk('magic', 6, 'cloth_chest')), 'cloth'); assert.equal(matClassOf(engine, mk('magic', 6, 'light_chest')), 'leather');
   const c1 = temperCost(P, engine, 'temper_quality', mk('magic', 4), priceOf(mk('magic', 4))), c2 = temperCost(P, engine, 'temper_quality', mk('magic', 12), 5000);
   assert.deepEqual(c1.needs, [{ id: 'bronze_bar', n: 2 }]); assert.equal(c1.skill, 1); assert.ok(c1.gold >= 1);
-  assert.equal(c2.needs[0].id, 'iron_bar'); assert.equal(c2.skill, 25); assert.equal(c2.gold, 200);
+  assert.equal(c2.needs[0].id, 'iron_bar'); assert.equal(c2.skill, 25); assert.equal(c2.gold, 100);
 });

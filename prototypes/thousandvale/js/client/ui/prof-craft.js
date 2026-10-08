@@ -16,6 +16,8 @@ import { RARITY_NAME, rarityOf, slotOf } from './inv-core.js';
 import { rememberItems } from './item-card.js';
 import { profIcon, PROF_NAME, PROF_TINT } from './prof-icons.js';
 
+/** Nested lists of nodes (and nulls) -> one flat list of nodes. */
+const flatKids = k => [k].flat(Infinity).filter(x => x != null && x !== false);
 const pct = v => fmt(v * 100, { decimals: 0 }) + '%';
 const MAKING = ['smithing', 'outfitting', 'alchemy', 'cooking', 'tempering'];
 const KIND_WORD = { material: 'Material', good: 'Goods', potion: 'Potion', tool: 'Tool', gear: 'Gear', temper: 'Tempering' };
@@ -92,6 +94,7 @@ export function createCraftWindow({ net, hud, bag, numbers = () => null, onMake,
     const it = items.find(x => x.uid === S.uid) || null, q = S.quote && S.quote.uid === S.uid && S.quote.id === S.op ? S.quote : null;
     const props = it ? (it.affixes || []).filter(a => !a.baseIntrinsic) : [];
     const pickItem = uid => { S.uid = uid; S.index = 0; S.quote = null; askQuote(); draw(); };
+    const F = flatKids;
     return [
       h('div.pt-ops', { role: 'tablist' }, ...ops.map(o => h('button.chip' + (o.id === S.op ? '.on' : ''), { type: 'button', role: 'tab', 'aria-selected': String(o.id === S.op), dataset: { op: o.id }, onclick: () => { S.op = o.id; S.quote = null; askQuote(); draw(); } }, o.name))),
       h('p.pt-what', {}, op.desc), op.why ? h('p.pc-why', {}, op.why) : null,
@@ -101,20 +104,20 @@ export function createCraftWindow({ net, hud, bag, numbers = () => null, onMake,
             h('b', {}, x.name), h('small', {}, `${RARITY_NAME[rarityOf(x)] || ''}${x.quality ? ' · ' + x.quality + ' quality' : ''}${x.ilvl ? ' · level ' + x.ilvl : ''}`)))))
             : h('p.empty', {}, S.op === 'temper_brand' ? 'No weapon in your bag. Take the one you want branded out of your hands first.' : 'No gear in your bag. Take the piece off first — tempering works on what you carry, not what you wear.')),
         h('div.pt-quote', {}, h('span.pt-h', {}, 'The work'),
-          !it ? h('p.empty', {}, 'Pick an item on the left.') : [
+          ...F(!it ? h('p.empty', {}, 'Pick an item on the left.') : [
             h('strong.r-' + rarityOf(it), {}, it.name),
             S.op === 'temper_reweave' ? (props.length ? h('label.pc-base', {}, 'Replace ', h('select', { onchange: e => { S.index = +e.target.value; S.quote = null; askQuote(); draw(); } }, ...props.map((a, i) => h('option', { value: i, selected: i === S.index }, a.text || a.name || a.stat || `Property ${i + 1}`)))) : h('small.pc-why', {}, 'This item has no rolled property to replace.')) : null,
             S.op === 'temper_brand' ? h('div.pt-els', {}, ...(op.elements || []).map(el => h('button.chip.small' + (el === S.element ? '.on' : ''), { type: 'button', dataset: { el }, onclick: () => { S.element = el; S.quote = null; askQuote(); draw(); } }, ELEMENT_NAME[el] || el))) : null,
             !q ? h('p.dim', {}, 'Asking what it would take…') : [
-              q.text ? h('p.pt-text', {}, q.text) : null,
+              q.text ? h('p.pt-text' + (q.can ? '' : '.pc-why'), {}, q.text) : null,
               h('div.pc-cost', {}, needChips(q.needs), feeNode(q.gold)),
               Number.isFinite(q.skill) ? h('small', {}, `Needs Tempering ${q.skill} — yours is ${S.list?.level?.tempering || 1}.`) : null,
-              q.can ? null : h('small.pc-why', {}, q.why || 'You cannot do that yet.'),
+              q.can || (q.why && q.why === q.text) ? null : h('small.pc-why', {}, q.why || 'You cannot do that yet.'),
               h('small.pt-safe', {}, 'A miss spends the materials and the fee. The item is never harmed.'),
             ],
             S.lastTemper && S.lastTemper.uid === it.uid ? h('p.pt-last', {}, S.lastTemper.text) : null,
             h('button.primary.wide', { type: 'button', disabled: !q?.can || S.busy, dataset: { temper: S.op }, onclick: () => { if (!S.busy) onTemper?.(op, { uid: S.uid, npc: S.npc, ...(S.op === 'temper_reweave' ? { index: S.index } : {}), ...(S.op === 'temper_brand' ? { element: S.element } : {}) }, it); } }, op.name),
-          ])),
+          ]))),
     ];
   }
 
@@ -133,7 +136,7 @@ export function createCraftWindow({ net, hud, bag, numbers = () => null, onMake,
       !L.station ? h('p.tiny-left.warn-text', {}, 'You can read every recipe here. To make one, stand in the craftsman’s building: the smith for metal, the tailor or bowyer for cloth, leather and bows, the apothecary for potions, any fire for cooking.') : null,
       tabs.length ? strip : null,
       !tabs.length ? h('p.empty', {}, 'No recipes yet. A craftsman in town teaches the trade — it costs nothing.')
-        : S.tab === 'tempering' ? h('div.pt', {}, ...temperPane().flat(3).filter(Boolean))
+        : S.tab === 'tempering' ? h('div.pt', {}, ...flatKids(temperPane()))
         : rows.length ? h('ul.pc-list', {}, ...rows.map(recipeRow)) : h('p.empty', {}, `No ${PROF_NAME[S.tab] || ''} recipes at your skill yet.`));
     const t = panel.body.querySelector('.pc-tab.on'); if (t) t.style.setProperty('--pt', PROF_TINT[S.tab] || '#d9b26a');
   }

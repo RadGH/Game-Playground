@@ -9,7 +9,12 @@
   "tollkeeper",
   "broker",
   "innkeeper",
-  "angler"
+  "angler",
+  "smith",
+  "apothecary",
+  "tailor",
+  "bowyer",
+  "prospector"
  ],
  "npcs": {
   "angler_torborhold": {
@@ -1517,6 +1522,32 @@
    "jobs": false,
    "offers": true,
    "service": "cart",
+   "titled": true
+  },
+  "prospector_torborhold": {
+   "name": "Bram Delver",
+   "role": "prospector",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Torborhold",
+   "gives": [
+    "prof_three_good_swings",
+    "prof_bronze_not_copper",
+    "prof_an_edge_on_it"
+   ],
+   "takes": [
+    "prof_three_good_swings",
+    "prof_bronze_not_copper",
+    "prof_an_edge_on_it"
+   ],
+   "mustTake": [],
+   "talks": [
+    "prof_three_good_swings",
+    "prof_bronze_not_copper",
+    "prof_an_edge_on_it"
+   ],
+   "jobs": true,
+   "offers": true,
    "titled": true
   },
   "commander_hild": {

@@ -24,7 +24,7 @@ const SHOTS = join(HERE, 'shots');
 const RUNS = Number(process.env.TV_CROSS_RUNS || 5);
 const LIMIT_MS = 100;
 const ZONE_EAST = 26624;       // z12_02 | z13_02
-test.describe.configure({ mode: 'serial' });
+// (not serial: a red run must not hide the ones after it — the fault is intermittent)
 const freePort = () => new Promise((res, rej) => { const s = createServer(); s.unref(); s.on('error', rej); s.listen(0, '127.0.0.1', () => { const p = s.address().port; s.close(() => res(p)); }); });
 let srv, base;
 test.beforeAll(async () => {
@@ -78,7 +78,7 @@ for (let run = 1; run <= RUNS; run++) {
       try { new PerformanceObserver(l => { for (const e of l.getEntries()) window.__lt.push({ t0: e.startTime, ms: e.duration }); }).observe({ type: 'longtask' }); } catch { /* none */ }
       window.__tvGateMarker = function __tvGateMarker() { const a = performance.now(); let x = 0; while (performance.now() - a < 40) x += Math.sqrt(x + 1); return [a, performance.now()]; };
     });
-    await page.goto(`${base}?autoplay=1&name=Cross${run}&cls=mage&quality=high&tod=0.45`);
+    await page.goto(`${base}?autoplay=1&name=Cross${'abcdefghijklmnop'[run - 1]}&cls=mage&quality=high&tod=0.45`);
     await page.waitForFunction(() => window.tv && tv.state().status === 'online' && tv.state().you?.id != null, null, { timeout: 60000 });
     await page.waitForFunction(() => tv.warm()?.done, null, { timeout: 300000 });
     await page.waitForTimeout(3000);

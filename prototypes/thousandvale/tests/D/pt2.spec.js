@@ -265,7 +265,11 @@ test('Q3 + Q4: the loot window on a body and the Need / Greed / Skip pop-up (wir
 
 test('Q11: a merchant\'s shop — buy, sell, buy back tabs', async () => {
   test.setTimeout(120000);
-  const npc = await page.evaluate(() => { const me = tv.state().you; return tv.state().ents.filter(e => e.kind === 'npc').sort((a, b) => Math.hypot(a.x - me.x, a.z - me.z) - Math.hypot(b.x - me.x, b.z - me.z))[0]; });
+  // the nearest NPC who KEEPS A SHOP (since play-test 8 the nearest NPC is as likely a guard or a craftsman, who answer
+  // "they will not deal" and the window closes) — the role is the rule, not who happens to stand closest
+  const npc = await page.evaluate(() => { const me = tv.state().you, infos = thousandvale.S.mirror.infos, shop = new Set(['merchant', 'smith', 'armourer', 'bowyer', 'tailor', 'apothecary', 'provisioner', 'jeweller', 'trader']);
+    const near = tv.state().ents.filter(e => e.kind === 'npc').sort((a, b) => Math.hypot(a.x - me.x, a.z - me.z) - Math.hypot(b.x - me.x, b.z - me.z));
+    return near.find(e => shop.has(infos.get(e.id)?.role)) || near[0]; });
   expect(npc).toBeTruthy();
   await hook('/teleport', { name: 'Wren', x: npc.x + 2, z: npc.z + 1 });
   await page.waitForTimeout(2500);

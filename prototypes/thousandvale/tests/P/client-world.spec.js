@@ -259,13 +259,16 @@ async function makeFlow(pg, name, how) {
   await until(() => tvprof.state.list.find(x => x.id === 'mining')?.known, null, 15000);
   await pg.waitForTimeout(900); await pg.evaluate(() => thousandvale.worldUi.closeDialog?.());
   // 2. mine: copper and tin boulders by the gate until there is enough for five bars (three for a blade, two to temper it)
+  // (five starter boulders stand there — three copper, two tin — and each is back for you two minutes after you work it: go round again if a poor swing left you short)
   let mined = 0;
-  for (const st of BRAM.starters) {
+  for (let round = 0; round < 9; round++) for (const [k, st] of BRAM.starters.entries()) {
     if ((await count('copper_ore')) >= 5 && (await count('tin_ore')) >= 5) break;
+    if (round && k === 0) await pg.waitForTimeout(25000);              // (waiting for the two-minute boulders to come back)
     if ((await count(st.kind + '_ore')) >= 5) continue;
     await hook('/teleport', { name, x: st.x + 2.2, z: st.z + 0.4 });
     await pg.waitForTimeout(1500);
-    await until(() => !document.getElementById('interact').hidden && /Mine/.test(document.getElementById('interact').innerText), null, 30000);
+    const ready = await until(() => !document.getElementById('interact').hidden && /Mine/.test(document.getElementById('interact').innerText), null, 9000).then(() => true, () => false);
+    if (!ready) continue;                                              // this one is still bare for us
     const n0 = await pg.evaluate(() => window.__flow.gather.length);
     if (how === 'touch') await pg.locator('#interact').tap(); else await pg.keyboard.press('KeyE');
     await playUp();
@@ -294,7 +297,7 @@ async function makeFlow(pg, name, how) {
   await pg.locator('#panel-craft [data-make="smelt_bronze_bar"]').waitFor({ timeout: 15000 });
   // 4. smelt: a batch of five, ONE mini-game
   await pg.locator('#panel-craft [data-batch="smelt_bronze_bar"]').waitFor({ timeout: 10000 });
-  expect(await pg.locator('#panel-craft [data-batch="smelt_bronze_bar"]').getAttribute('data-n')).toBe('5');
+  expect(await pg.locator('#panel-craft [data-batch="smelt_bronze_bar"]').getAttribute('data-n'), 'the batch is what the ore allows').toBe(String(Math.min(10, ore.copper, ore.tin)));
   await act('#panel-craft [data-batch="smelt_bronze_bar"]');
   await playUp();
   await until(() => window.__flow.craft.some(c => c.id === 'smelt_bronze_bar'), null, 20000);

@@ -258,25 +258,27 @@ export function memoryM3(d, { now, changed, sha256Hex, randomHex, packChar, prun
       d.feedback ||= []; d.nextFeedback ||= 1;
       const id = d.nextFeedback++;
       const first = row.char != null && !d.feedback.some(f => f.char === row.char && f.gift);
-      d.feedback.push({ id, ...copy(row), at: row.at ?? now(), state: row.state || 'new', note: '', gift: first });
+      d.feedback.push({ id, ...copy(row), at: row.at ?? now(), state: row.state || 'new', note: '', done: '', doneAt: null, ref: row.ref ?? null, gift: first });
       changed();
       return { id, first };
     },
     async hasFeedback(char) { return (d.feedback || []).some(f => f.char === char); },
     async feedbackGiftFailed(char) { for (const f of d.feedback || []) if (f.char === char) f.gift = false; changed(); },
-    async listFeedback({ state = null, kind = null, limit = 100, before = null, hideTrashed = false } = {}) {
-      return (d.feedback || []).filter(f => (!state || f.state === state) && (!kind || f.kind === kind) && (!before || f.id < before) && !(hideTrashed && f.state === 'trashed'))
+    async getFeedback(id) { const f = (d.feedback || []).find(x => x.id === id); return f ? copy(f) : null; },
+    async listFeedback({ state = null, kind = null, limit = 100, before = null, hideTrashed = false, account = null } = {}) {
+      return (d.feedback || []).filter(f => (account == null || f.account === account) && (!state || f.state === state) && (!kind || f.kind === kind) && (!before || f.id < before) && !(hideTrashed && f.state === 'trashed'))
         .sort((x, y) => y.id - x.id).slice(0, limit).map(copy);
     },
     async feedbackCounts() {
-      const c = { new: 0, approved: 0, declined: 0, trashed: 0, total: 0 };
+      const c = { new: 0, approved: 0, declined: 0, trashed: 0, completed: 0, total: 0 };
       for (const f of d.feedback || []) { c[f.state] = (c[f.state] || 0) + 1; c.total++; }
       return c;
     },
-    async setFeedbackState(id, state, { by = 'admin', at = now(), note = null } = {}) {
+    async setFeedbackState(id, state, { by = 'admin', at = now(), note = null, done = null } = {}) {
       const f = (d.feedback || []).find(x => x.id === id);
       if (!f) return false;
       f.state = state; f.stateAt = at; f.stateBy = by; if (note != null) f.note = note;
+      if (done != null) { f.done = done; f.doneAt = at; }
       changed();
       return true;
     },

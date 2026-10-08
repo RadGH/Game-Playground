@@ -85,11 +85,10 @@ export function createPartyHub({ panels, social, net, hud, chat }) {
       lead && m.char !== mine ? h('button.ghost.small.x', { type: 'button', title: `Remove ${m.name} from the party`, onclick: () => net()?.partyOp('kick', { char: m.char }) }, '×') : null))));
   }
 
-  // one alert dot on the Party button when any tab wants you (unread mail, a group ready)
+  // the Party button's marks: the yellow dot (unread mail) is painted by ui/unseen.js (W10: one indicator per thing);
+  // "in the Group Finder's queue" tints the button green
   setInterval(() => {
     const btn = document.getElementById('party-btn'); if (!btn) return;
-    const mail = document.getElementById('menu-mail');
-    btn.classList.toggle('alert', !!mail?.classList.contains('alert'));
     const q = document.getElementById('menu-callboard');
     btn.classList.toggle('queued', !!q?.classList.contains('queued'));
   }, 1000);

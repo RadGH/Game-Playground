@@ -1,0 +1,3498 @@
+{
+ "_doc": "Stream E (owner feedback 8, W1: \"the starting town is being raided … I died before I had a chance to do anything. Where are the town guards?\"). TOWN GUARDS. `rules` = what a guard is; `ranks` = the sergeant in the square; `hold` = the tuning rule the numbers serve (tests/E/playtest8-guards.test.js checks it with tools/sim-raid.mjs — `node tools/sim-raid.mjs` prints the table); `posts` = where each one stands (zone metres, made by tools/content-towns.mjs from stream B town walls: two just inside every gate facing out, the rest on the rim of the square; tools/content-hunts.mjs copies them into <zone>.quest.json as `type: guard` rows, which is what the server spawns); `gates` = every gate of every settlement (where a raid wave comes in). A guard has a NAME (\"Torborhold Guard\", \"Sergeant Kettleby\") and NO title (W27: `titled: false`).",
+ "rules": {
+  "reference": "road_brigand",
+  "levelOver": 2,
+  "hpMult": 4,
+  "dmgMult": 0.2,
+  "armor": 6,
+  "respawnSec": 75,
+  "leashM": 45,
+  "reachM": 2.6,
+  "look": "town_guard",
+  "weapon": "spear",
+  "shield": true,
+  "fights": [
+   "event",
+   "attacker"
+  ],
+  "attackable": false,
+  "healsOutOfCombatSec": 8,
+  "_doc": "A guard is built on the body of `reference` at (the raid or the town band floor level + levelOver): health x hpMult, hit x dmgMult, + `armor`. It fights only `fights`: monsters that belong to an EVENT (a raid wave, a zone event that spills in) and anything that has hit a player or a guard inside the town ring; it never starts a fight with wildlife outside. Players cannot attack it. It never walks more than leashM from its post and walks back when the fight is over, healing to full healsOutOfCombatSec later. One that falls kneels where it fell and gets up after respawnSec at full health (nobody dies for good). vsBossMult: a guard hit on the raid CAPTAIN (the event boss) is multiplied by this — the guards hold the waves, the captain is the players to break (his armour turns their spears).",
+  "vsBossMult": 0.02
+ },
+ "ranks": {
+  "guard": {
+   "name": "{town} Guard"
+  },
+  "sergeant": {
+   "name": "Sergeant {family}",
+   "hpMult": 1.5,
+   "dmgMult": 1.25,
+   "rally": {
+    "everySec": 20,
+    "healShare": 0.15,
+    "withinM": 14,
+    "say": [
+     "Hold the line!",
+     "On me! Shields up!",
+     "Not one step back!"
+    ]
+   }
+  }
+ },
+ "raid": {
+  "firstTarget": "guard",
+  "neverFirstTarget": "newcomer",
+  "enterBy": "gate",
+  "newcomerThreatMult": 0.25,
+  "spawnOutM": [
+   35,
+   55
+  ],
+  "say": {
+   "start": [
+    "To the gates! Raiders on the road!",
+    "Bar the square! Everyone behind us!"
+   ],
+   "newcomer": [
+    "Stay behind us, friend. We have the gate."
+   ],
+   "won": [
+    "Gate holds. Somebody fetch the sergeant a drink."
+   ],
+   "hardPressed": [
+    "We cannot hold them alone! Any blade that can stand, to the gate!"
+   ]
+  },
+  "_doc": "How a town raid meets the guards (stream A runs it). A wave appears spawnOutM metres OUTSIDE a gate (the event names its gates: events.json `raid.gates`), walks in through it and takes the nearest GUARD as its first target; a newcomer (events.json director.newcomer) is never a wave first target and draws newcomerThreatMult of the threat while any guard stands. The guards call out `say` lines (hardPressed when fewer than half stand)."
+ },
+ "hold": {
+  "wave1": {
+   "guardsAlone": "win",
+   "minStandingShare": 0.6
+  },
+  "wholeRaid": {
+   "guardsAlone": "lose",
+   "withPlayers": [
+    2,
+    "win"
+   ],
+   "underLimitShare": 0.9
+  },
+  "_doc": "THE RULE. The posted guards ALONE clear the first wave with at least minStandingShare of them still on their feet; alone they do NOT finish the whole raid inside its time limit; with withPlayers[0] players of the raid level (basic attacks only, no skills) they do, in under underLimitShare of the limit. So a newcomer can stand behind them and live, and anyone who can fight is needed."
+ },
+ "made": "tools/content-towns.mjs — posts, gates and problems are generated; edit rules / ranks / hold by hand",
+ "gates": [
+  {
+   "id": "hollin_toll_gate_0",
+   "town": "Hollin Toll",
+   "zone": "z11_01",
+   "x": 1723.7,
+   "z": 499.5,
+   "out": [
+    -0.071,
+    -0.998
+   ],
+   "width": 4.7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "scree_end_gate_0",
+   "town": "Scree End",
+   "zone": "z11_01",
+   "x": 112.8,
+   "z": 1429.1,
+   "out": [
+    0.018,
+    -1
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "wolditford_gate_0",
+   "town": "Wolditford",
+   "zone": "z11_01",
+   "x": 448,
+   "z": 837.1,
+   "out": [
+    0,
+    -1
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "ashcombe_gate_0",
+   "town": "Ashcombe",
+   "zone": "z12_01",
+   "x": 1481.5,
+   "z": 1364.3,
+   "out": [
+    0.882,
+    0.472
+   ],
+   "width": 11.63,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "ashcombe_gate_1",
+   "town": "Ashcombe",
+   "zone": "z12_01",
+   "x": 1343.4,
+   "z": 1277.5,
+   "out": [
+    -0.87,
+    -0.493
+   ],
+   "width": 6.77,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "ashcombe_gate_2",
+   "town": "Ashcombe",
+   "zone": "z12_01",
+   "x": 1368.7,
+   "z": 1256,
+   "out": [
+    -0.479,
+    -0.878
+   ],
+   "width": 6.2,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "ashcombe_gate_3",
+   "town": "Ashcombe",
+   "zone": "z12_01",
+   "x": 1396.2,
+   "z": 1246.9,
+   "out": [
+    0.55,
+    -0.835
+   ],
+   "width": 13.56,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "kettle_cross_gate_0",
+   "town": "Kettle Cross",
+   "zone": "z12_01",
+   "x": 894.6,
+   "z": 793.7,
+   "out": [
+    -0.707,
+    0.707
+   ],
+   "width": 4.45,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "brackwater_gate_0",
+   "town": "Brackwater",
+   "zone": "z13_01",
+   "x": 1118.6,
+   "z": 809.8,
+   "out": [
+    -0.278,
+    -0.961
+   ],
+   "width": 4.7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "eelwick_gate_0",
+   "town": "Eelwick",
+   "zone": "z13_01",
+   "x": 1196.6,
+   "z": 437.6,
+   "out": [
+    0.951,
+    0.309
+   ],
+   "width": 4.2,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "saltmouth_gate_0",
+   "town": "Saltmouth",
+   "zone": "z14_01",
+   "x": 831.7,
+   "z": 1654.6,
+   "out": [
+    -0.781,
+    0.625
+   ],
+   "width": 4.7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "gull_steps_gate_0",
+   "town": "Gull Steps",
+   "zone": "z14_01",
+   "x": 320.9,
+   "z": 1284.3,
+   "out": [
+    0.905,
+    0.425
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "copperdell_gate_0",
+   "town": "Copperdell",
+   "zone": "z11_02",
+   "x": 279.5,
+   "z": 488.4,
+   "out": [
+    -0.832,
+    0.555
+   ],
+   "width": 22.82,
+   "kind": "gap",
+   "main": true
+  },
+  {
+   "id": "copperdell_gate_1",
+   "town": "Copperdell",
+   "zone": "z11_02",
+   "x": 434.6,
+   "z": 439.3,
+   "out": [
+    0.98,
+    -0.201
+   ],
+   "width": 6.56,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "pickaxe_row_gate_0",
+   "town": "Pickaxe Row",
+   "zone": "z11_02",
+   "x": 969.8,
+   "z": 1692.3,
+   "out": [
+    -0.804,
+    0.595
+   ],
+   "width": 4.7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "ashhaven_gate_0",
+   "town": "Ashhaven",
+   "zone": "z11_02",
+   "x": 737.1,
+   "z": 973.8,
+   "out": [
+    -0.721,
+    0.693
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "torborhold_gate_0",
+   "town": "Torborhold",
+   "zone": "z12_02",
+   "x": 531.5,
+   "z": 1280.5,
+   "out": [
+    -0.965,
+    0.263
+   ],
+   "width": 4.7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "torborhold_gate_1",
+   "town": "Torborhold",
+   "zone": "z12_02",
+   "x": 594.2,
+   "z": 1201.3,
+   "out": [
+    0.035,
+    -0.999
+   ],
+   "width": 4.4,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "torborhold_gate_2",
+   "town": "Torborhold",
+   "zone": "z12_02",
+   "x": 632.4,
+   "z": 1216,
+   "out": [
+    1,
+    0
+   ],
+   "width": 11.34,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "mawehaven_gate_0",
+   "town": "Mawehaven",
+   "zone": "z12_02",
+   "x": 244.4,
+   "z": 1887.8,
+   "out": [
+    -0.34,
+    -0.94
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "wamonhold_gate_0",
+   "town": "Wamonhold",
+   "zone": "z12_02",
+   "x": 1370.4,
+   "z": 1534.1,
+   "out": [
+    0.614,
+    -0.789
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "halsbridge_gate_0",
+   "town": "Halsbridge",
+   "zone": "z13_02",
+   "x": 1755.5,
+   "z": 1240.4,
+   "out": [
+    0.541,
+    0.841
+   ],
+   "width": 7.22,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "halsbridge_gate_1",
+   "town": "Halsbridge",
+   "zone": "z13_02",
+   "x": 1697,
+   "z": 1266,
+   "out": [
+    0.013,
+    1
+   ],
+   "width": 6.2,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "halsbridge_gate_2",
+   "town": "Halsbridge",
+   "zone": "z13_02",
+   "x": 1670,
+   "z": 1106.2,
+   "out": [
+    -0.535,
+    -0.845
+   ],
+   "width": 7.22,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "mill_end_gate_0",
+   "town": "Mill End",
+   "zone": "z13_02",
+   "x": 206.2,
+   "z": 1518.9,
+   "out": [
+    -0.029,
+    1
+   ],
+   "width": 4.7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "lower_mossgate_gate_0",
+   "town": "Lower Mossgate",
+   "zone": "z13_02",
+   "x": 704,
+   "z": 1595,
+   "out": [
+    0,
+    1
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "lower_mossgate_gate_1",
+   "town": "Lower Mossgate",
+   "zone": "z13_02",
+   "x": 701.3,
+   "z": 1509.1,
+   "out": [
+    -0.242,
+    -0.97
+   ],
+   "width": 5.33,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "mirestead_gate_0",
+   "town": "Mirestead",
+   "zone": "z13_02",
+   "x": 1102.1,
+   "z": 1098.4,
+   "out": [
+    -0.789,
+    0.614
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "gullwick_gate_0",
+   "town": "Gullwick",
+   "zone": "z14_02",
+   "x": 1516.2,
+   "z": 412.6,
+   "out": [
+    -0.062,
+    0.998
+   ],
+   "width": 4.7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "gullwick_gate_1",
+   "town": "Gullwick",
+   "zone": "z14_02",
+   "x": 1472,
+   "z": 389.2,
+   "out": [
+    0,
+    1
+   ],
+   "width": 12.07,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "gullwick_gate_2",
+   "town": "Gullwick",
+   "zone": "z14_02",
+   "x": 1472,
+   "z": 314.9,
+   "out": [
+    0,
+    -1
+   ],
+   "width": 12.07,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "ferry_hythe_gate_0",
+   "town": "Ferry Hythe",
+   "zone": "z14_02",
+   "x": 429,
+   "z": 618.7,
+   "out": [
+    0.217,
+    0.976
+   ],
+   "width": 4.7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "wyrmrow_gate_0",
+   "town": "Wyrmrow",
+   "zone": "z14_02",
+   "x": 881.6,
+   "z": 1905.6,
+   "out": [
+    0.707,
+    0.707
+   ],
+   "width": 4.7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "wyrmrow_gate_1",
+   "town": "Wyrmrow",
+   "zone": "z14_02",
+   "x": 861.5,
+   "z": 1826.5,
+   "out": [
+    0.707,
+    -0.707
+   ],
+   "width": 7.19,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "mirekeep_gate_0",
+   "town": "Mirekeep",
+   "zone": "z14_02",
+   "x": 965.4,
+   "z": 1258.7,
+   "out": [
+    -0.992,
+    -0.124
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "hermit_s_rest_gate_0",
+   "town": "Hermit's Rest",
+   "zone": "z11_03",
+   "x": 1113.8,
+   "z": 641.4,
+   "out": [
+    0.41,
+    0.912
+   ],
+   "width": 7.56,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "hermit_s_rest_gate_1",
+   "town": "Hermit's Rest",
+   "zone": "z11_03",
+   "x": 1088,
+   "z": 640.4,
+   "out": [
+    0,
+    1
+   ],
+   "width": 7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "hermit_s_rest_gate_2",
+   "town": "Hermit's Rest",
+   "zone": "z11_03",
+   "x": 1054.9,
+   "z": 494.3,
+   "out": [
+    -0.332,
+    -0.943
+   ],
+   "width": 7.56,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "hermit_s_rest_gate_3",
+   "town": "Hermit's Rest",
+   "zone": "z11_03",
+   "x": 1091.7,
+   "z": 478.9,
+   "out": [
+    -0.105,
+    -0.995
+   ],
+   "width": 17.03,
+   "kind": "gap",
+   "main": false
+  },
+  {
+   "id": "charcoal_burners_gate_0",
+   "town": "Charcoal Burners",
+   "zone": "z11_03",
+   "x": 204.4,
+   "z": 192.6,
+   "out": [
+    -1,
+    0
+   ],
+   "width": 12.31,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "charcoal_burners_gate_1",
+   "town": "Charcoal Burners",
+   "zone": "z11_03",
+   "x": 307.3,
+   "z": 192,
+   "out": [
+    1,
+    0
+   ],
+   "width": 10.61,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "wildhaven_gate_0",
+   "town": "Wildhaven",
+   "zone": "z11_03",
+   "x": 1247.3,
+   "z": 196.2,
+   "out": [
+    -0.97,
+    0.242
+   ],
+   "width": 12.27,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "wildhaven_gate_1",
+   "town": "Wildhaven",
+   "zone": "z11_03",
+   "x": 1310,
+   "z": 193.3,
+   "out": [
+    0.728,
+    -0.685
+   ],
+   "width": 8.5,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "orrinsford_gate_0",
+   "town": "Orrinsford",
+   "zone": "z12_03",
+   "x": 273.7,
+   "z": 576,
+   "out": [
+    -1,
+    0
+   ],
+   "width": 7.2,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "orrinsford_gate_1",
+   "town": "Orrinsford",
+   "zone": "z12_03",
+   "x": 320,
+   "z": 515.8,
+   "out": [
+    0,
+    -1
+   ],
+   "width": 5.77,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "pilgrim_s_halt_gate_0",
+   "town": "Pilgrim's Halt",
+   "zone": "z12_03",
+   "x": 638.3,
+   "z": 213.4,
+   "out": [
+    -0.785,
+    -0.62
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "millbrook_gate_0",
+   "town": "Millbrook",
+   "zone": "z13_03",
+   "x": 609.8,
+   "z": 1696.9,
+   "out": [
+    0.85,
+    0.528
+   ],
+   "width": 6.5,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "millbrook_gate_1",
+   "town": "Millbrook",
+   "zone": "z13_03",
+   "x": 475.4,
+   "z": 1603.1,
+   "out": [
+    -0.788,
+    -0.616
+   ],
+   "width": 6.5,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "millbrook_gate_2",
+   "town": "Millbrook",
+   "zone": "z13_03",
+   "x": 486,
+   "z": 1590,
+   "out": [
+    -0.707,
+    -0.707
+   ],
+   "width": 6.2,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "three_wheels_gate_0",
+   "town": "Three Wheels",
+   "zone": "z13_03",
+   "x": 1701.4,
+   "z": 1296.1,
+   "out": [
+    0.614,
+    0.789
+   ],
+   "width": 4.7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "stormrow_gate_0",
+   "town": "Stormrow",
+   "zone": "z13_03",
+   "x": 1024.7,
+   "z": 140.2,
+   "out": [
+    -0.997,
+    -0.081
+   ],
+   "width": 4.7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "ravencross_gate_0",
+   "town": "Ravencross",
+   "zone": "z13_03",
+   "x": 448,
+   "z": 475,
+   "out": [
+    0,
+    1
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "ravencross_gate_1",
+   "town": "Ravencross",
+   "zone": "z13_03",
+   "x": 448,
+   "z": 389.1,
+   "out": [
+    0,
+    -1
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "ravencross_gate_2",
+   "town": "Ravencross",
+   "zone": "z13_03",
+   "x": 485.3,
+   "z": 410.7,
+   "out": [
+    0.707,
+    -0.707
+   ],
+   "width": 5.69,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "wildmere_gate_0",
+   "town": "Wildmere",
+   "zone": "z13_03",
+   "x": 1642.9,
+   "z": 578.7,
+   "out": [
+    1,
+    0
+   ],
+   "width": 10.26,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "wildmere_gate_1",
+   "town": "Wildmere",
+   "zone": "z13_03",
+   "x": 1630.4,
+   "z": 545.6,
+   "out": [
+    0.707,
+    -0.707
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "redcliff_gate_0",
+   "town": "Redcliff",
+   "zone": "z14_03",
+   "x": 361.8,
+   "z": 920.3,
+   "out": [
+    -0.6,
+    0.8
+   ],
+   "width": 5.81,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "redcliff_gate_1",
+   "town": "Redcliff",
+   "zone": "z14_03",
+   "x": 338.6,
+   "z": 824,
+   "out": [
+    -0.936,
+    -0.351
+   ],
+   "width": 6.32,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "redcliff_gate_2",
+   "town": "Redcliff",
+   "zone": "z14_03",
+   "x": 444.5,
+   "z": 862.7,
+   "out": [
+    1,
+    -0.021
+   ],
+   "width": 4.7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "cinder_farm_gate_0",
+   "town": "Cinder Farm",
+   "zone": "z14_03",
+   "x": 1266.7,
+   "z": 1745,
+   "out": [
+    0.571,
+    0.821
+   ],
+   "width": 6.3,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "cinder_farm_gate_1",
+   "town": "Cinder Farm",
+   "zone": "z14_03",
+   "x": 1216,
+   "z": 1651.5,
+   "out": [
+    0,
+    -1
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "cinder_farm_gate_2",
+   "town": "Cinder Farm",
+   "zone": "z14_03",
+   "x": 1266,
+   "z": 1677.9,
+   "out": [
+    0.707,
+    -0.707
+   ],
+   "width": 8.02,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "ravenhaven_gate_0",
+   "town": "Ravenhaven",
+   "zone": "z14_03",
+   "x": 134.1,
+   "z": 261.6,
+   "out": [
+    0.514,
+    0.858
+   ],
+   "width": 5.49,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "ravenhaven_gate_1",
+   "town": "Ravenhaven",
+   "zone": "z14_03",
+   "x": 74.2,
+   "z": 202.2,
+   "out": [
+    -0.707,
+    -0.707
+   ],
+   "width": 5.67,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "ravenhaven_gate_2",
+   "town": "Ravenhaven",
+   "zone": "z14_03",
+   "x": 98.2,
+   "z": 182.6,
+   "out": [
+    0,
+    -1
+   ],
+   "width": 4.58,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "minfenrow_gate_0",
+   "town": "Minfenrow",
+   "zone": "z14_03",
+   "x": 1125.8,
+   "z": 1125.8,
+   "out": [
+    0.707,
+    0.707
+   ],
+   "width": 5.67,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "minfenrow_gate_1",
+   "town": "Minfenrow",
+   "zone": "z14_03",
+   "x": 1060.4,
+   "z": 1088,
+   "out": [
+    -1,
+    0
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "bipetwatch_gate_0",
+   "town": "Bipetwatch",
+   "zone": "z14_03",
+   "x": 363.3,
+   "z": 1429.4,
+   "out": [
+    0.99,
+    0.141
+   ],
+   "width": 6.28,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "bipetwatch_gate_1",
+   "town": "Bipetwatch",
+   "zone": "z14_03",
+   "x": 324.7,
+   "z": 1467.4,
+   "out": [
+    -0.707,
+    0.707
+   ],
+   "width": 11.21,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "bipetwatch_gate_2",
+   "town": "Bipetwatch",
+   "zone": "z14_03",
+   "x": 282.3,
+   "z": 1445.9,
+   "out": [
+    -0.707,
+    0.707
+   ],
+   "width": 4.32,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "last_lantern_gate_0",
+   "town": "Last Lantern",
+   "zone": "z11_04",
+   "x": 869.9,
+   "z": 1362.8,
+   "out": [
+    -0.328,
+    0.945
+   ],
+   "width": 4.7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "thornwick_gate_0",
+   "town": "Thornwick",
+   "zone": "z11_04",
+   "x": 1731.5,
+   "z": 1916,
+   "out": [
+    -0.93,
+    0.368
+   ],
+   "width": 4.2,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "coldwater_gate_0",
+   "town": "Coldwater",
+   "zone": "z12_04",
+   "x": 1430.9,
+   "z": 1891.8,
+   "out": [
+    -0.685,
+    0.728
+   ],
+   "width": 4.7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "netherby_gate_0",
+   "town": "Netherby",
+   "zone": "z12_04",
+   "x": 708,
+   "z": 774.9,
+   "out": [
+    -0.069,
+    0.998
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "gorsehold_gate_0",
+   "town": "Gorsehold",
+   "zone": "z13_04",
+   "x": 1621,
+   "z": 1261.7,
+   "out": [
+    0.92,
+    -0.392
+   ],
+   "width": 4.7,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "burnt_barns_gate_0",
+   "town": "Burnt Barns",
+   "zone": "z13_04",
+   "x": 1623.9,
+   "z": 385.1,
+   "out": [
+    0.856,
+    0.517
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "burnt_barns_gate_1",
+   "town": "Burnt Barns",
+   "zone": "z13_04",
+   "x": 1595.2,
+   "z": 332.1,
+   "out": [
+    0.034,
+    -0.999
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "lowmoor_gate_0",
+   "town": "Lowmoor",
+   "zone": "z14_04",
+   "x": 1216.6,
+   "z": 963.7,
+   "out": [
+    -0.021,
+    -1
+   ],
+   "width": 4.76,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "deepdene_gate_0",
+   "town": "Deepdene",
+   "zone": "z14_04",
+   "x": 1346.4,
+   "z": 323.2,
+   "out": [
+    -0.018,
+    1
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "deepdene_gate_1",
+   "town": "Deepdene",
+   "zone": "z14_04",
+   "x": 1346,
+   "z": 254.8,
+   "out": [
+    -0.031,
+    -1
+   ],
+   "width": 4.7,
+   "kind": "posts",
+   "main": false
+  }
+ ],
+ "posts": [
+  {
+   "id": "guard_hollin_toll_0",
+   "town": "Hollin Toll",
+   "settlement": "hollin_toll",
+   "zone": "z11_01",
+   "post": "gate",
+   "gate": "hollin_toll_gate_0",
+   "rank": "guard",
+   "name": "Hollin Toll Guard",
+   "yaw": -3.07,
+   "titled": false,
+   "x": 1728,
+   "z": 502
+  },
+  {
+   "id": "guard_hollin_toll_1",
+   "town": "Hollin Toll",
+   "settlement": "hollin_toll",
+   "zone": "z11_01",
+   "post": "gate",
+   "gate": "hollin_toll_gate_0",
+   "rank": "guard",
+   "name": "Hollin Toll Guard",
+   "yaw": -3.07,
+   "titled": false,
+   "x": 1720,
+   "z": 504
+  },
+  {
+   "id": "guard_hollin_toll_2",
+   "town": "Hollin Toll",
+   "settlement": "hollin_toll",
+   "zone": "z11_01",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Ashby",
+   "yaw": 2.167,
+   "titled": false,
+   "x": 1724,
+   "z": 564
+  },
+  {
+   "id": "guard_hollin_toll_3",
+   "town": "Hollin Toll",
+   "settlement": "hollin_toll",
+   "zone": "z11_01",
+   "post": "square",
+   "rank": "guard",
+   "name": "Hollin Toll Guard",
+   "yaw": -2.108,
+   "titled": false,
+   "x": 1732,
+   "z": 564
+  },
+  {
+   "id": "guard_hollin_toll_4",
+   "town": "Hollin Toll",
+   "settlement": "hollin_toll",
+   "zone": "z11_01",
+   "post": "square",
+   "rank": "guard",
+   "name": "Hollin Toll Guard",
+   "yaw": -0.048,
+   "titled": false,
+   "x": 1728,
+   "z": 556
+  },
+  {
+   "id": "guard_scree_end_0",
+   "town": "Scree End",
+   "settlement": "scree_end",
+   "zone": "z11_01",
+   "post": "gate",
+   "gate": "scree_end_gate_0",
+   "rank": "guard",
+   "name": "Scree End Guard",
+   "yaw": 3.123,
+   "titled": false,
+   "x": 116,
+   "z": 1432
+  },
+  {
+   "id": "guard_wolditford_0",
+   "town": "Wolditford",
+   "settlement": "wolditford",
+   "zone": "z11_01",
+   "post": "gate",
+   "gate": "wolditford_gate_0",
+   "rank": "guard",
+   "name": "Wolditford Guard",
+   "yaw": 3.142,
+   "titled": false,
+   "x": 452,
+   "z": 840
+  },
+  {
+   "id": "guard_ashcombe_0",
+   "town": "Ashcombe",
+   "settlement": "ashcombe",
+   "zone": "z12_01",
+   "post": "gate",
+   "gate": "ashcombe_gate_0",
+   "rank": "guard",
+   "name": "Ashcombe Guard",
+   "yaw": 1.08,
+   "titled": false,
+   "x": 1476,
+   "z": 1368
+  },
+  {
+   "id": "guard_ashcombe_1",
+   "town": "Ashcombe",
+   "settlement": "ashcombe",
+   "zone": "z12_01",
+   "post": "gate",
+   "gate": "ashcombe_gate_0",
+   "rank": "guard",
+   "name": "Ashcombe Guard",
+   "yaw": 1.08,
+   "titled": false,
+   "x": 1482,
+   "z": 1356
+  },
+  {
+   "id": "guard_ashcombe_2",
+   "town": "Ashcombe",
+   "settlement": "ashcombe",
+   "zone": "z12_01",
+   "post": "gate",
+   "gate": "ashcombe_gate_1",
+   "rank": "guard",
+   "name": "Ashcombe Guard",
+   "yaw": -2.087,
+   "titled": false,
+   "x": 1348,
+   "z": 1276
+  },
+  {
+   "id": "guard_ashcombe_3",
+   "town": "Ashcombe",
+   "settlement": "ashcombe",
+   "zone": "z12_01",
+   "post": "gate",
+   "gate": "ashcombe_gate_1",
+   "rank": "guard",
+   "name": "Ashcombe Guard",
+   "yaw": -2.087,
+   "titled": false,
+   "x": 1344,
+   "z": 1284
+  },
+  {
+   "id": "guard_ashcombe_4",
+   "town": "Ashcombe",
+   "settlement": "ashcombe",
+   "zone": "z12_01",
+   "post": "gate",
+   "gate": "ashcombe_gate_2",
+   "rank": "guard",
+   "name": "Ashcombe Guard",
+   "yaw": -2.642,
+   "titled": false,
+   "x": 1374,
+   "z": 1256
+  },
+  {
+   "id": "guard_ashcombe_5",
+   "town": "Ashcombe",
+   "settlement": "ashcombe",
+   "zone": "z12_01",
+   "post": "gate",
+   "gate": "ashcombe_gate_2",
+   "rank": "guard",
+   "name": "Ashcombe Guard",
+   "yaw": -2.642,
+   "titled": false,
+   "x": 1366,
+   "z": 1262
+  },
+  {
+   "id": "guard_ashcombe_6",
+   "town": "Ashcombe",
+   "settlement": "ashcombe",
+   "zone": "z12_01",
+   "post": "gate",
+   "gate": "ashcombe_gate_3",
+   "rank": "guard",
+   "name": "Ashcombe Guard",
+   "yaw": 2.559,
+   "titled": false,
+   "x": 1400,
+   "z": 1254
+  },
+  {
+   "id": "guard_ashcombe_7",
+   "town": "Ashcombe",
+   "settlement": "ashcombe",
+   "zone": "z12_01",
+   "post": "gate",
+   "gate": "ashcombe_gate_3",
+   "rank": "guard",
+   "name": "Ashcombe Guard",
+   "yaw": 2.559,
+   "titled": false,
+   "x": 1388,
+   "z": 1246
+  },
+  {
+   "id": "guard_ashcombe_8",
+   "town": "Ashcombe",
+   "settlement": "ashcombe",
+   "zone": "z12_01",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Longacre",
+   "yaw": 3.002,
+   "titled": false,
+   "x": 1402,
+   "z": 1344
+  },
+  {
+   "id": "guard_ashcombe_9",
+   "town": "Ashcombe",
+   "settlement": "ashcombe",
+   "zone": "z12_01",
+   "post": "square",
+   "rank": "guard",
+   "name": "Ashcombe Guard",
+   "yaw": -1.619,
+   "titled": false,
+   "x": 1410,
+   "z": 1338
+  },
+  {
+   "id": "guard_ashcombe_10",
+   "town": "Ashcombe",
+   "settlement": "ashcombe",
+   "zone": "z12_01",
+   "post": "square",
+   "rank": "guard",
+   "name": "Ashcombe Guard",
+   "yaw": -0.194,
+   "titled": false,
+   "x": 1404,
+   "z": 1332
+  },
+  {
+   "id": "guard_ashcombe_11",
+   "town": "Ashcombe",
+   "settlement": "ashcombe",
+   "zone": "z12_01",
+   "post": "square",
+   "rank": "guard",
+   "name": "Ashcombe Guard",
+   "yaw": 1.334,
+   "titled": false,
+   "x": 1396,
+   "z": 1336
+  },
+  {
+   "id": "guard_kettle_cross_0",
+   "town": "Kettle Cross",
+   "settlement": "kettle_cross",
+   "zone": "z12_01",
+   "post": "gate",
+   "gate": "kettle_cross_gate_0",
+   "rank": "guard",
+   "name": "Kettle Cross Guard",
+   "yaw": -0.785,
+   "titled": false,
+   "x": 894,
+   "z": 788
+  },
+  {
+   "id": "guard_brackwater_0",
+   "town": "Brackwater",
+   "settlement": "brackwater",
+   "zone": "z13_01",
+   "post": "gate",
+   "gate": "brackwater_gate_0",
+   "rank": "guard",
+   "name": "Brackwater Guard",
+   "yaw": -2.86,
+   "titled": false,
+   "x": 1122,
+   "z": 812
+  },
+  {
+   "id": "guard_brackwater_1",
+   "town": "Brackwater",
+   "settlement": "brackwater",
+   "zone": "z13_01",
+   "post": "gate",
+   "gate": "brackwater_gate_0",
+   "rank": "guard",
+   "name": "Brackwater Guard",
+   "yaw": -2.86,
+   "titled": false,
+   "x": 1116,
+   "z": 814
+  },
+  {
+   "id": "guard_brackwater_2",
+   "town": "Brackwater",
+   "settlement": "brackwater",
+   "zone": "z13_01",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Pennock",
+   "yaw": 1.015,
+   "titled": false,
+   "x": 1136,
+   "z": 868
+  },
+  {
+   "id": "guard_brackwater_3",
+   "town": "Brackwater",
+   "settlement": "brackwater",
+   "zone": "z13_01",
+   "post": "square",
+   "rank": "guard",
+   "name": "Brackwater Guard",
+   "yaw": 3.037,
+   "titled": false,
+   "x": 1142,
+   "z": 878
+  },
+  {
+   "id": "guard_brackwater_4",
+   "town": "Brackwater",
+   "settlement": "brackwater",
+   "zone": "z13_01",
+   "post": "square",
+   "rank": "guard",
+   "name": "Brackwater Guard",
+   "yaw": -1.197,
+   "titled": false,
+   "x": 1148,
+   "z": 870
+  },
+  {
+   "id": "guard_eelwick_0",
+   "town": "Eelwick",
+   "settlement": "eelwick",
+   "zone": "z13_01",
+   "post": "gate",
+   "gate": "eelwick_gate_0",
+   "rank": "guard",
+   "name": "Eelwick Guard",
+   "yaw": 1.257,
+   "titled": false,
+   "x": 1192,
+   "z": 440
+  },
+  {
+   "id": "guard_saltmouth_0",
+   "town": "Saltmouth",
+   "settlement": "saltmouth",
+   "zone": "z14_01",
+   "post": "gate",
+   "gate": "saltmouth_gate_0",
+   "rank": "guard",
+   "name": "Saltmouth Guard",
+   "yaw": -0.896,
+   "titled": false,
+   "x": 832,
+   "z": 1650
+  },
+  {
+   "id": "guard_saltmouth_1",
+   "town": "Saltmouth",
+   "settlement": "saltmouth",
+   "zone": "z14_01",
+   "post": "gate",
+   "gate": "saltmouth_gate_0",
+   "rank": "guard",
+   "name": "Saltmouth Guard",
+   "yaw": -0.896,
+   "titled": false,
+   "x": 836,
+   "z": 1656
+  },
+  {
+   "id": "guard_saltmouth_2",
+   "town": "Saltmouth",
+   "settlement": "saltmouth",
+   "zone": "z14_01",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Coombe",
+   "yaw": 1.356,
+   "titled": false,
+   "x": 880,
+   "z": 1602
+  },
+  {
+   "id": "guard_saltmouth_3",
+   "town": "Saltmouth",
+   "settlement": "saltmouth",
+   "zone": "z14_01",
+   "post": "square",
+   "rank": "guard",
+   "name": "Saltmouth Guard",
+   "yaw": -3.012,
+   "titled": false,
+   "x": 890,
+   "z": 1612
+  },
+  {
+   "id": "guard_saltmouth_4",
+   "town": "Saltmouth",
+   "settlement": "saltmouth",
+   "zone": "z14_01",
+   "post": "square",
+   "rank": "guard",
+   "name": "Saltmouth Guard",
+   "yaw": -0.87,
+   "titled": false,
+   "x": 896,
+   "z": 1598
+  },
+  {
+   "id": "guard_gull_steps_0",
+   "town": "Gull Steps",
+   "settlement": "gull_steps",
+   "zone": "z14_01",
+   "post": "gate",
+   "gate": "gull_steps_gate_0",
+   "rank": "guard",
+   "name": "Gull Steps Guard",
+   "yaw": 1.132,
+   "titled": false,
+   "x": 316,
+   "z": 1286
+  },
+  {
+   "id": "guard_copperdell_0",
+   "town": "Copperdell",
+   "settlement": "copperdell",
+   "zone": "z11_02",
+   "post": "gate",
+   "gate": "copperdell_gate_0",
+   "rank": "guard",
+   "name": "Copperdell Guard",
+   "yaw": -0.983,
+   "titled": false,
+   "x": 276,
+   "z": 474
+  },
+  {
+   "id": "guard_copperdell_1",
+   "town": "Copperdell",
+   "settlement": "copperdell",
+   "zone": "z11_02",
+   "post": "gate",
+   "gate": "copperdell_gate_0",
+   "rank": "guard",
+   "name": "Copperdell Guard",
+   "yaw": -0.983,
+   "titled": false,
+   "x": 290,
+   "z": 496
+  },
+  {
+   "id": "guard_copperdell_2",
+   "town": "Copperdell",
+   "settlement": "copperdell",
+   "zone": "z11_02",
+   "post": "gate",
+   "gate": "copperdell_gate_1",
+   "rank": "guard",
+   "name": "Copperdell Guard",
+   "yaw": 1.773,
+   "titled": false,
+   "x": 432,
+   "z": 444
+  },
+  {
+   "id": "guard_copperdell_3",
+   "town": "Copperdell",
+   "settlement": "copperdell",
+   "zone": "z11_02",
+   "post": "gate",
+   "gate": "copperdell_gate_1",
+   "rank": "guard",
+   "name": "Copperdell Guard",
+   "yaw": 1.773,
+   "titled": false,
+   "x": 430,
+   "z": 436
+  },
+  {
+   "id": "guard_copperdell_4",
+   "town": "Copperdell",
+   "settlement": "copperdell",
+   "zone": "z11_02",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Wainwright",
+   "yaw": -1.184,
+   "titled": false,
+   "x": 360,
+   "z": 432
+  },
+  {
+   "id": "guard_copperdell_5",
+   "town": "Copperdell",
+   "settlement": "copperdell",
+   "zone": "z11_02",
+   "post": "square",
+   "rank": "guard",
+   "name": "Copperdell Guard",
+   "yaw": 0.547,
+   "titled": false,
+   "x": 350,
+   "z": 428
+  },
+  {
+   "id": "guard_copperdell_6",
+   "town": "Copperdell",
+   "settlement": "copperdell",
+   "zone": "z11_02",
+   "post": "square",
+   "rank": "guard",
+   "name": "Copperdell Guard",
+   "yaw": 1.989,
+   "titled": false,
+   "x": 346,
+   "z": 438
+  },
+  {
+   "id": "guard_copperdell_7",
+   "town": "Copperdell",
+   "settlement": "copperdell",
+   "zone": "z11_02",
+   "post": "square",
+   "rank": "guard",
+   "name": "Copperdell Guard",
+   "yaw": -2.647,
+   "titled": false,
+   "x": 358,
+   "z": 442
+  },
+  {
+   "id": "guard_pickaxe_row_0",
+   "town": "Pickaxe Row",
+   "settlement": "pickaxe_row",
+   "zone": "z11_02",
+   "post": "gate",
+   "gate": "pickaxe_row_gate_0",
+   "rank": "guard",
+   "name": "Pickaxe Row Guard",
+   "yaw": -0.933,
+   "titled": false,
+   "x": 970,
+   "z": 1688
+  },
+  {
+   "id": "guard_pickaxe_row_1",
+   "town": "Pickaxe Row",
+   "settlement": "pickaxe_row",
+   "zone": "z11_02",
+   "post": "square",
+   "rank": "guard",
+   "name": "Pickaxe Row Guard",
+   "yaw": 1.026,
+   "titled": false,
+   "x": 1010,
+   "z": 1660
+  },
+  {
+   "id": "guard_ashhaven_0",
+   "town": "Ashhaven",
+   "settlement": "ashhaven",
+   "zone": "z11_02",
+   "post": "gate",
+   "gate": "ashhaven_gate_0",
+   "rank": "guard",
+   "name": "Ashhaven Guard",
+   "yaw": -0.805,
+   "titled": false,
+   "x": 738,
+   "z": 968
+  },
+  {
+   "id": "guard_torborhold_0",
+   "town": "Torborhold",
+   "settlement": "torborhold",
+   "zone": "z12_02",
+   "post": "gate",
+   "gate": "torborhold_gate_0",
+   "rank": "guard",
+   "name": "Torborhold Guard",
+   "yaw": -1.305,
+   "titled": false,
+   "x": 534,
+   "z": 1276
+  },
+  {
+   "id": "guard_torborhold_1",
+   "town": "Torborhold",
+   "settlement": "torborhold",
+   "zone": "z12_02",
+   "post": "gate",
+   "gate": "torborhold_gate_0",
+   "rank": "guard",
+   "name": "Torborhold Guard",
+   "yaw": -1.305,
+   "titled": false,
+   "x": 536,
+   "z": 1282
+  },
+  {
+   "id": "guard_torborhold_2",
+   "town": "Torborhold",
+   "settlement": "torborhold",
+   "zone": "z12_02",
+   "post": "gate",
+   "gate": "torborhold_gate_1",
+   "rank": "guard",
+   "name": "Torborhold Guard",
+   "yaw": 3.106,
+   "titled": false,
+   "x": 598,
+   "z": 1204
+  },
+  {
+   "id": "guard_torborhold_3",
+   "town": "Torborhold",
+   "settlement": "torborhold",
+   "zone": "z12_02",
+   "post": "gate",
+   "gate": "torborhold_gate_1",
+   "rank": "guard",
+   "name": "Torborhold Guard",
+   "yaw": 3.106,
+   "titled": false,
+   "x": 590,
+   "z": 1204
+  },
+  {
+   "id": "guard_torborhold_4",
+   "town": "Torborhold",
+   "settlement": "torborhold",
+   "zone": "z12_02",
+   "post": "gate",
+   "gate": "torborhold_gate_2",
+   "rank": "guard",
+   "name": "Torborhold Guard",
+   "yaw": 1.571,
+   "titled": false,
+   "x": 628,
+   "z": 1222
+  },
+  {
+   "id": "guard_torborhold_5",
+   "town": "Torborhold",
+   "settlement": "torborhold",
+   "zone": "z12_02",
+   "post": "gate",
+   "gate": "torborhold_gate_2",
+   "rank": "guard",
+   "name": "Torborhold Guard",
+   "yaw": 1.571,
+   "titled": false,
+   "x": 628,
+   "z": 1210
+  },
+  {
+   "id": "guard_torborhold_6",
+   "town": "Torborhold",
+   "settlement": "torborhold",
+   "zone": "z12_02",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Kettleby",
+   "yaw": 2.169,
+   "titled": false,
+   "x": 574,
+   "z": 1284
+  },
+  {
+   "id": "guard_torborhold_7",
+   "town": "Torborhold",
+   "settlement": "torborhold",
+   "zone": "z12_02",
+   "post": "square",
+   "rank": "guard",
+   "name": "Torborhold Guard",
+   "yaw": -1.947,
+   "titled": false,
+   "x": 586,
+   "z": 1282
+  },
+  {
+   "id": "guard_torborhold_8",
+   "town": "Torborhold",
+   "settlement": "torborhold",
+   "zone": "z12_02",
+   "post": "square",
+   "rank": "guard",
+   "name": "Torborhold Guard",
+   "yaw": 0.284,
+   "titled": false,
+   "x": 578,
+   "z": 1272
+  },
+  {
+   "id": "guard_mawehaven_0",
+   "town": "Mawehaven",
+   "settlement": "mawehaven",
+   "zone": "z12_02",
+   "post": "gate",
+   "gate": "mawehaven_gate_0",
+   "rank": "guard",
+   "name": "Mawehaven Guard",
+   "yaw": -2.795,
+   "titled": false,
+   "x": 248,
+   "z": 1890
+  },
+  {
+   "id": "guard_wamonhold_0",
+   "town": "Wamonhold",
+   "settlement": "wamonhold",
+   "zone": "z12_02",
+   "post": "gate",
+   "gate": "wamonhold_gate_0",
+   "rank": "guard",
+   "name": "Wamonhold Guard",
+   "yaw": 2.481,
+   "titled": false,
+   "x": 1372,
+   "z": 1538
+  },
+  {
+   "id": "guard_halsbridge_0",
+   "town": "Halsbridge",
+   "settlement": "halsbridge",
+   "zone": "z13_02",
+   "post": "gate",
+   "gate": "halsbridge_gate_1",
+   "rank": "guard",
+   "name": "Halsbridge Guard",
+   "yaw": 0.013,
+   "titled": false,
+   "x": 1692,
+   "z": 1262
+  },
+  {
+   "id": "guard_halsbridge_1",
+   "town": "Halsbridge",
+   "settlement": "halsbridge",
+   "zone": "z13_02",
+   "post": "gate",
+   "gate": "halsbridge_gate_1",
+   "rank": "guard",
+   "name": "Halsbridge Guard",
+   "yaw": 0.013,
+   "titled": false,
+   "x": 1702,
+   "z": 1262
+  },
+  {
+   "id": "guard_halsbridge_2",
+   "town": "Halsbridge",
+   "settlement": "halsbridge",
+   "zone": "z13_02",
+   "post": "gate",
+   "gate": "halsbridge_gate_0",
+   "rank": "guard",
+   "name": "Halsbridge Guard",
+   "yaw": 0.571,
+   "titled": false,
+   "x": 1750,
+   "z": 1240
+  },
+  {
+   "id": "guard_halsbridge_3",
+   "town": "Halsbridge",
+   "settlement": "halsbridge",
+   "zone": "z13_02",
+   "post": "gate",
+   "gate": "halsbridge_gate_0",
+   "rank": "guard",
+   "name": "Halsbridge Guard",
+   "yaw": 0.571,
+   "titled": false,
+   "x": 1758,
+   "z": 1234
+  },
+  {
+   "id": "guard_halsbridge_4",
+   "town": "Halsbridge",
+   "settlement": "halsbridge",
+   "zone": "z13_02",
+   "post": "gate",
+   "gate": "halsbridge_gate_2",
+   "rank": "guard",
+   "name": "Halsbridge Guard",
+   "yaw": -2.578,
+   "titled": false,
+   "x": 1676,
+   "z": 1108
+  },
+  {
+   "id": "guard_halsbridge_5",
+   "town": "Halsbridge",
+   "settlement": "halsbridge",
+   "zone": "z13_02",
+   "post": "gate",
+   "gate": "halsbridge_gate_2",
+   "rank": "guard",
+   "name": "Halsbridge Guard",
+   "yaw": -2.578,
+   "titled": false,
+   "x": 1668,
+   "z": 1112
+  },
+  {
+   "id": "guard_halsbridge_6",
+   "town": "Halsbridge",
+   "settlement": "halsbridge",
+   "zone": "z13_02",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Kettleby",
+   "yaw": -2.944,
+   "titled": false,
+   "x": 1698,
+   "z": 1190
+  },
+  {
+   "id": "guard_halsbridge_7",
+   "town": "Halsbridge",
+   "settlement": "halsbridge",
+   "zone": "z13_02",
+   "post": "square",
+   "rank": "guard",
+   "name": "Halsbridge Guard",
+   "yaw": -1.413,
+   "titled": false,
+   "x": 1704,
+   "z": 1182
+  },
+  {
+   "id": "guard_halsbridge_8",
+   "town": "Halsbridge",
+   "settlement": "halsbridge",
+   "zone": "z13_02",
+   "post": "square",
+   "rank": "guard",
+   "name": "Halsbridge Guard",
+   "yaw": 0.088,
+   "titled": false,
+   "x": 1696,
+   "z": 1176
+  },
+  {
+   "id": "guard_halsbridge_9",
+   "town": "Halsbridge",
+   "settlement": "halsbridge",
+   "zone": "z13_02",
+   "post": "square",
+   "rank": "guard",
+   "name": "Halsbridge Guard",
+   "yaw": 1.695,
+   "titled": false,
+   "x": 1690,
+   "z": 1184
+  },
+  {
+   "id": "guard_mill_end_0",
+   "town": "Mill End",
+   "settlement": "mill_end",
+   "zone": "z13_02",
+   "post": "gate",
+   "gate": "mill_end_gate_0",
+   "rank": "guard",
+   "name": "Mill End Guard",
+   "yaw": -0.029,
+   "titled": false,
+   "x": 202,
+   "z": 1516
+  },
+  {
+   "id": "guard_mill_end_1",
+   "town": "Mill End",
+   "settlement": "mill_end",
+   "zone": "z13_02",
+   "post": "gate",
+   "gate": "mill_end_gate_0",
+   "rank": "guard",
+   "name": "Mill End Guard",
+   "yaw": -0.029,
+   "titled": false,
+   "x": 210,
+   "z": 1516
+  },
+  {
+   "id": "guard_mill_end_2",
+   "town": "Mill End",
+   "settlement": "mill_end",
+   "zone": "z13_02",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Oakhurst",
+   "yaw": 2.079,
+   "titled": false,
+   "x": 192,
+   "z": 1462
+  },
+  {
+   "id": "guard_mill_end_3",
+   "town": "Mill End",
+   "settlement": "mill_end",
+   "zone": "z13_02",
+   "post": "square",
+   "rank": "guard",
+   "name": "Mill End Guard",
+   "yaw": -2.045,
+   "titled": false,
+   "x": 206,
+   "z": 1462
+  },
+  {
+   "id": "guard_mill_end_4",
+   "town": "Mill End",
+   "settlement": "mill_end",
+   "zone": "z13_02",
+   "post": "square",
+   "rank": "guard",
+   "name": "Mill End Guard",
+   "yaw": 0.086,
+   "titled": false,
+   "x": 198,
+   "z": 1450
+  },
+  {
+   "id": "guard_lower_mossgate_0",
+   "town": "Lower Mossgate",
+   "settlement": "lower_mossgate",
+   "zone": "z13_02",
+   "post": "gate",
+   "gate": "lower_mossgate_gate_0",
+   "rank": "guard",
+   "name": "Lower Mossgate Guard",
+   "yaw": 0,
+   "titled": false,
+   "x": 700,
+   "z": 1592
+  },
+  {
+   "id": "guard_mirestead_0",
+   "town": "Mirestead",
+   "settlement": "mirestead",
+   "zone": "z13_02",
+   "post": "gate",
+   "gate": "mirestead_gate_0",
+   "rank": "guard",
+   "name": "Mirestead Guard",
+   "yaw": -0.91,
+   "titled": false,
+   "x": 1102,
+   "z": 1094
+  },
+  {
+   "id": "guard_gullwick_0",
+   "town": "Gullwick",
+   "settlement": "gullwick",
+   "zone": "z14_02",
+   "post": "gate",
+   "gate": "gullwick_gate_0",
+   "rank": "guard",
+   "name": "Gullwick Guard",
+   "yaw": -0.062,
+   "titled": false,
+   "x": 1512,
+   "z": 408
+  },
+  {
+   "id": "guard_gullwick_1",
+   "town": "Gullwick",
+   "settlement": "gullwick",
+   "zone": "z14_02",
+   "post": "gate",
+   "gate": "gullwick_gate_0",
+   "rank": "guard",
+   "name": "Gullwick Guard",
+   "yaw": -0.062,
+   "titled": false,
+   "x": 1520,
+   "z": 410
+  },
+  {
+   "id": "guard_gullwick_2",
+   "town": "Gullwick",
+   "settlement": "gullwick",
+   "zone": "z14_02",
+   "post": "gate",
+   "gate": "gullwick_gate_1",
+   "rank": "guard",
+   "name": "Gullwick Guard",
+   "yaw": 0,
+   "titled": false,
+   "x": 1464,
+   "z": 386
+  },
+  {
+   "id": "guard_gullwick_3",
+   "town": "Gullwick",
+   "settlement": "gullwick",
+   "zone": "z14_02",
+   "post": "gate",
+   "gate": "gullwick_gate_1",
+   "rank": "guard",
+   "name": "Gullwick Guard",
+   "yaw": 0,
+   "titled": false,
+   "x": 1480,
+   "z": 386
+  },
+  {
+   "id": "guard_gullwick_4",
+   "town": "Gullwick",
+   "settlement": "gullwick",
+   "zone": "z14_02",
+   "post": "gate",
+   "gate": "gullwick_gate_2",
+   "rank": "guard",
+   "name": "Gullwick Guard",
+   "yaw": 3.142,
+   "titled": false,
+   "x": 1480,
+   "z": 318
+  },
+  {
+   "id": "guard_gullwick_5",
+   "town": "Gullwick",
+   "settlement": "gullwick",
+   "zone": "z14_02",
+   "post": "gate",
+   "gate": "gullwick_gate_2",
+   "rank": "guard",
+   "name": "Gullwick Guard",
+   "yaw": 3.142,
+   "titled": false,
+   "x": 1464,
+   "z": 318
+  },
+  {
+   "id": "guard_gullwick_6",
+   "town": "Gullwick",
+   "settlement": "gullwick",
+   "zone": "z14_02",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Brookes",
+   "yaw": -2.543,
+   "titled": false,
+   "x": 1522,
+   "z": 372
+  },
+  {
+   "id": "guard_gullwick_7",
+   "town": "Gullwick",
+   "settlement": "gullwick",
+   "zone": "z14_02",
+   "post": "square",
+   "rank": "guard",
+   "name": "Gullwick Guard",
+   "yaw": -0.648,
+   "titled": false,
+   "x": 1522,
+   "z": 362
+  },
+  {
+   "id": "guard_gullwick_8",
+   "town": "Gullwick",
+   "settlement": "gullwick",
+   "zone": "z14_02",
+   "post": "square",
+   "rank": "guard",
+   "name": "Gullwick Guard",
+   "yaw": 1.765,
+   "titled": false,
+   "x": 1512,
+   "z": 368
+  },
+  {
+   "id": "guard_ferry_hythe_0",
+   "town": "Ferry Hythe",
+   "settlement": "ferry_hythe",
+   "zone": "z14_02",
+   "post": "gate",
+   "gate": "ferry_hythe_gate_0",
+   "rank": "guard",
+   "name": "Ferry Hythe Guard",
+   "yaw": 0.219,
+   "titled": false,
+   "x": 424,
+   "z": 616
+  },
+  {
+   "id": "guard_ferry_hythe_1",
+   "town": "Ferry Hythe",
+   "settlement": "ferry_hythe",
+   "zone": "z14_02",
+   "post": "square",
+   "rank": "guard",
+   "name": "Ferry Hythe Guard",
+   "yaw": -0.412,
+   "titled": false,
+   "x": 414,
+   "z": 562
+  },
+  {
+   "id": "guard_wyrmrow_0",
+   "town": "Wyrmrow",
+   "settlement": "wyrmrow",
+   "zone": "z14_02",
+   "post": "gate",
+   "gate": "wyrmrow_gate_0",
+   "rank": "guard",
+   "name": "Wyrmrow Guard",
+   "yaw": 0.785,
+   "titled": false,
+   "x": 876,
+   "z": 1906
+  },
+  {
+   "id": "guard_wyrmrow_1",
+   "town": "Wyrmrow",
+   "settlement": "wyrmrow",
+   "zone": "z14_02",
+   "post": "gate",
+   "gate": "wyrmrow_gate_1",
+   "rank": "guard",
+   "name": "Wyrmrow Guard",
+   "yaw": 2.356,
+   "titled": false,
+   "x": 862,
+   "z": 1832
+  },
+  {
+   "id": "guard_wyrmrow_2",
+   "town": "Wyrmrow",
+   "settlement": "wyrmrow",
+   "zone": "z14_02",
+   "post": "square",
+   "rank": "guard",
+   "name": "Wyrmrow Guard",
+   "yaw": 1.77,
+   "titled": false,
+   "x": 834,
+   "z": 1864
+  },
+  {
+   "id": "guard_mirekeep_0",
+   "town": "Mirekeep",
+   "settlement": "mirekeep",
+   "zone": "z14_02",
+   "post": "gate",
+   "gate": "mirekeep_gate_0",
+   "rank": "guard",
+   "name": "Mirekeep Guard",
+   "yaw": -1.695,
+   "titled": false,
+   "x": 970,
+   "z": 1256
+  },
+  {
+   "id": "guard_hermit_s_rest_0",
+   "town": "Hermit's Rest",
+   "settlement": "hermit_s_rest",
+   "zone": "z11_03",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_1",
+   "rank": "guard",
+   "name": "Hermit's Rest Guard",
+   "yaw": 0,
+   "titled": false,
+   "x": 1084,
+   "z": 638
+  },
+  {
+   "id": "guard_hermit_s_rest_1",
+   "town": "Hermit's Rest",
+   "settlement": "hermit_s_rest",
+   "zone": "z11_03",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_1",
+   "rank": "guard",
+   "name": "Hermit's Rest Guard",
+   "yaw": 0,
+   "titled": false,
+   "x": 1092,
+   "z": 638
+  },
+  {
+   "id": "guard_hermit_s_rest_2",
+   "town": "Hermit's Rest",
+   "settlement": "hermit_s_rest",
+   "zone": "z11_03",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_0",
+   "rank": "guard",
+   "name": "Hermit's Rest Guard",
+   "yaw": 0.423,
+   "titled": false,
+   "x": 1108,
+   "z": 640
+  },
+  {
+   "id": "guard_hermit_s_rest_3",
+   "town": "Hermit's Rest",
+   "settlement": "hermit_s_rest",
+   "zone": "z11_03",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_0",
+   "rank": "guard",
+   "name": "Hermit's Rest Guard",
+   "yaw": 0.423,
+   "titled": false,
+   "x": 1116,
+   "z": 636
+  },
+  {
+   "id": "guard_hermit_s_rest_4",
+   "town": "Hermit's Rest",
+   "settlement": "hermit_s_rest",
+   "zone": "z11_03",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_2",
+   "rank": "guard",
+   "name": "Hermit's Rest Guard",
+   "yaw": -2.803,
+   "titled": false,
+   "x": 1060,
+   "z": 496
+  },
+  {
+   "id": "guard_hermit_s_rest_5",
+   "town": "Hermit's Rest",
+   "settlement": "hermit_s_rest",
+   "zone": "z11_03",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_2",
+   "rank": "guard",
+   "name": "Hermit's Rest Guard",
+   "yaw": -2.803,
+   "titled": false,
+   "x": 1052,
+   "z": 500
+  },
+  {
+   "id": "guard_hermit_s_rest_6",
+   "town": "Hermit's Rest",
+   "settlement": "hermit_s_rest",
+   "zone": "z11_03",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_3",
+   "rank": "guard",
+   "name": "Hermit's Rest Guard",
+   "yaw": -3.037,
+   "titled": false,
+   "x": 1102,
+   "z": 482
+  },
+  {
+   "id": "guard_hermit_s_rest_7",
+   "town": "Hermit's Rest",
+   "settlement": "hermit_s_rest",
+   "zone": "z11_03",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_3",
+   "rank": "guard",
+   "name": "Hermit's Rest Guard",
+   "yaw": -3.037,
+   "titled": false,
+   "x": 1082,
+   "z": 484
+  },
+  {
+   "id": "guard_hermit_s_rest_8",
+   "town": "Hermit's Rest",
+   "settlement": "hermit_s_rest",
+   "zone": "z11_03",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Fallowfield",
+   "yaw": 0.324,
+   "titled": false,
+   "x": 1102,
+   "z": 548
+  },
+  {
+   "id": "guard_hermit_s_rest_9",
+   "town": "Hermit's Rest",
+   "settlement": "hermit_s_rest",
+   "zone": "z11_03",
+   "post": "square",
+   "rank": "guard",
+   "name": "Hermit's Rest Guard",
+   "yaw": 1.654,
+   "titled": false,
+   "x": 1098,
+   "z": 554
+  },
+  {
+   "id": "guard_hermit_s_rest_10",
+   "town": "Hermit's Rest",
+   "settlement": "hermit_s_rest",
+   "zone": "z11_03",
+   "post": "square",
+   "rank": "guard",
+   "name": "Hermit's Rest Guard",
+   "yaw": -3.118,
+   "titled": false,
+   "x": 1104,
+   "z": 560
+  },
+  {
+   "id": "guard_hermit_s_rest_11",
+   "town": "Hermit's Rest",
+   "settlement": "hermit_s_rest",
+   "zone": "z11_03",
+   "post": "square",
+   "rank": "guard",
+   "name": "Hermit's Rest Guard",
+   "yaw": -1.33,
+   "titled": false,
+   "x": 1110,
+   "z": 552
+  },
+  {
+   "id": "guard_charcoal_burners_0",
+   "town": "Charcoal Burners",
+   "settlement": "charcoal_burners",
+   "zone": "z11_03",
+   "post": "gate",
+   "gate": "charcoal_burners_gate_1",
+   "rank": "guard",
+   "name": "Charcoal Burners Guard",
+   "yaw": 1.571,
+   "titled": false,
+   "x": 304,
+   "z": 198
+  },
+  {
+   "id": "guard_charcoal_burners_1",
+   "town": "Charcoal Burners",
+   "settlement": "charcoal_burners",
+   "zone": "z11_03",
+   "post": "gate",
+   "gate": "charcoal_burners_gate_0",
+   "rank": "guard",
+   "name": "Charcoal Burners Guard",
+   "yaw": -1.571,
+   "titled": false,
+   "x": 206,
+   "z": 186
+  },
+  {
+   "id": "guard_charcoal_burners_2",
+   "town": "Charcoal Burners",
+   "settlement": "charcoal_burners",
+   "zone": "z11_03",
+   "post": "square",
+   "rank": "guard",
+   "name": "Charcoal Burners Guard",
+   "yaw": 2.487,
+   "titled": false,
+   "x": 248,
+   "z": 228
+  },
+  {
+   "id": "guard_wildhaven_0",
+   "town": "Wildhaven",
+   "settlement": "wildhaven",
+   "zone": "z11_03",
+   "post": "gate",
+   "gate": "wildhaven_gate_0",
+   "rank": "guard",
+   "name": "Wildhaven Guard",
+   "yaw": -1.326,
+   "titled": false,
+   "x": 1248,
+   "z": 188
+  },
+  {
+   "id": "guard_orrinsford_0",
+   "town": "Orrinsford",
+   "settlement": "orrinsford",
+   "zone": "z12_03",
+   "post": "gate",
+   "gate": "orrinsford_gate_0",
+   "rank": "guard",
+   "name": "Orrinsford Guard",
+   "yaw": -1.571,
+   "titled": false,
+   "x": 278,
+   "z": 572
+  },
+  {
+   "id": "guard_orrinsford_1",
+   "town": "Orrinsford",
+   "settlement": "orrinsford",
+   "zone": "z12_03",
+   "post": "gate",
+   "gate": "orrinsford_gate_0",
+   "rank": "guard",
+   "name": "Orrinsford Guard",
+   "yaw": -1.571,
+   "titled": false,
+   "x": 278,
+   "z": 580
+  },
+  {
+   "id": "guard_orrinsford_2",
+   "town": "Orrinsford",
+   "settlement": "orrinsford",
+   "zone": "z12_03",
+   "post": "gate",
+   "gate": "orrinsford_gate_1",
+   "rank": "guard",
+   "name": "Orrinsford Guard",
+   "yaw": 3.142,
+   "titled": false,
+   "x": 324,
+   "z": 520
+  },
+  {
+   "id": "guard_orrinsford_3",
+   "town": "Orrinsford",
+   "settlement": "orrinsford",
+   "zone": "z12_03",
+   "post": "gate",
+   "gate": "orrinsford_gate_1",
+   "rank": "guard",
+   "name": "Orrinsford Guard",
+   "yaw": 3.142,
+   "titled": false,
+   "x": 316,
+   "z": 520
+  },
+  {
+   "id": "guard_orrinsford_4",
+   "town": "Orrinsford",
+   "settlement": "orrinsford",
+   "zone": "z12_03",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Applegarth",
+   "yaw": 2.421,
+   "titled": false,
+   "x": 326,
+   "z": 572
+  },
+  {
+   "id": "guard_orrinsford_5",
+   "town": "Orrinsford",
+   "settlement": "orrinsford",
+   "zone": "z12_03",
+   "post": "square",
+   "rank": "guard",
+   "name": "Orrinsford Guard",
+   "yaw": -1.863,
+   "titled": false,
+   "x": 338,
+   "z": 568
+  },
+  {
+   "id": "guard_orrinsford_6",
+   "town": "Orrinsford",
+   "settlement": "orrinsford",
+   "zone": "z12_03",
+   "post": "square",
+   "rank": "guard",
+   "name": "Orrinsford Guard",
+   "yaw": 0.212,
+   "titled": false,
+   "x": 330,
+   "z": 560
+  },
+  {
+   "id": "guard_pilgrim_s_halt_0",
+   "town": "Pilgrim's Halt",
+   "settlement": "pilgrim_s_halt",
+   "zone": "z12_03",
+   "post": "gate",
+   "gate": "pilgrim_s_halt_gate_0",
+   "rank": "guard",
+   "name": "Pilgrim's Halt Guard",
+   "yaw": -2.239,
+   "titled": false,
+   "x": 644,
+   "z": 212
+  },
+  {
+   "id": "guard_millbrook_0",
+   "town": "Millbrook",
+   "settlement": "millbrook",
+   "zone": "z13_03",
+   "post": "gate",
+   "gate": "millbrook_gate_2",
+   "rank": "guard",
+   "name": "Millbrook Guard",
+   "yaw": -2.356,
+   "titled": false,
+   "x": 492,
+   "z": 1590
+  },
+  {
+   "id": "guard_millbrook_1",
+   "town": "Millbrook",
+   "settlement": "millbrook",
+   "zone": "z13_03",
+   "post": "gate",
+   "gate": "millbrook_gate_2",
+   "rank": "guard",
+   "name": "Millbrook Guard",
+   "yaw": -2.356,
+   "titled": false,
+   "x": 486,
+   "z": 1596
+  },
+  {
+   "id": "guard_millbrook_2",
+   "town": "Millbrook",
+   "settlement": "millbrook",
+   "zone": "z13_03",
+   "post": "gate",
+   "gate": "millbrook_gate_0",
+   "rank": "guard",
+   "name": "Millbrook Guard",
+   "yaw": 1.015,
+   "titled": false,
+   "x": 604,
+   "z": 1698
+  },
+  {
+   "id": "guard_millbrook_3",
+   "town": "Millbrook",
+   "settlement": "millbrook",
+   "zone": "z13_03",
+   "post": "gate",
+   "gate": "millbrook_gate_0",
+   "rank": "guard",
+   "name": "Millbrook Guard",
+   "yaw": 1.015,
+   "titled": false,
+   "x": 610,
+   "z": 1692
+  },
+  {
+   "id": "guard_millbrook_4",
+   "town": "Millbrook",
+   "settlement": "millbrook",
+   "zone": "z13_03",
+   "post": "gate",
+   "gate": "millbrook_gate_1",
+   "rank": "guard",
+   "name": "Millbrook Guard",
+   "yaw": -2.234,
+   "titled": false,
+   "x": 480,
+   "z": 1602
+  },
+  {
+   "id": "guard_millbrook_5",
+   "town": "Millbrook",
+   "settlement": "millbrook",
+   "zone": "z13_03",
+   "post": "gate",
+   "gate": "millbrook_gate_1",
+   "rank": "guard",
+   "name": "Millbrook Guard",
+   "yaw": -2.234,
+   "titled": false,
+   "x": 476,
+   "z": 1608
+  },
+  {
+   "id": "guard_millbrook_6",
+   "town": "Millbrook",
+   "settlement": "millbrook",
+   "zone": "z13_03",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Kettleby",
+   "yaw": -1.859,
+   "titled": false,
+   "x": 564,
+   "z": 1634
+  },
+  {
+   "id": "guard_millbrook_7",
+   "town": "Millbrook",
+   "settlement": "millbrook",
+   "zone": "z13_03",
+   "post": "square",
+   "rank": "guard",
+   "name": "Millbrook Guard",
+   "yaw": -0.387,
+   "titled": false,
+   "x": 558,
+   "z": 1626
+  },
+  {
+   "id": "guard_millbrook_8",
+   "town": "Millbrook",
+   "settlement": "millbrook",
+   "zone": "z13_03",
+   "post": "square",
+   "rank": "guard",
+   "name": "Millbrook Guard",
+   "yaw": 1.141,
+   "titled": false,
+   "x": 548,
+   "z": 1628
+  },
+  {
+   "id": "guard_millbrook_9",
+   "town": "Millbrook",
+   "settlement": "millbrook",
+   "zone": "z13_03",
+   "post": "square",
+   "rank": "guard",
+   "name": "Millbrook Guard",
+   "yaw": 2.616,
+   "titled": false,
+   "x": 552,
+   "z": 1638
+  },
+  {
+   "id": "guard_three_wheels_0",
+   "town": "Three Wheels",
+   "settlement": "three_wheels",
+   "zone": "z13_03",
+   "post": "gate",
+   "gate": "three_wheels_gate_0",
+   "rank": "guard",
+   "name": "Three Wheels Guard",
+   "yaw": 0.661,
+   "titled": false,
+   "x": 1696,
+   "z": 1296
+  },
+  {
+   "id": "guard_three_wheels_1",
+   "town": "Three Wheels",
+   "settlement": "three_wheels",
+   "zone": "z13_03",
+   "post": "gate",
+   "gate": "three_wheels_gate_0",
+   "rank": "guard",
+   "name": "Three Wheels Guard",
+   "yaw": 0.661,
+   "titled": false,
+   "x": 1702,
+   "z": 1292
+  },
+  {
+   "id": "guard_three_wheels_2",
+   "town": "Three Wheels",
+   "settlement": "three_wheels",
+   "zone": "z13_03",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Brookes",
+   "yaw": 1.69,
+   "titled": false,
+   "x": 1656,
+   "z": 1238
+  },
+  {
+   "id": "guard_three_wheels_3",
+   "town": "Three Wheels",
+   "settlement": "three_wheels",
+   "zone": "z13_03",
+   "post": "square",
+   "rank": "guard",
+   "name": "Three Wheels Guard",
+   "yaw": -2.373,
+   "titled": false,
+   "x": 1666,
+   "z": 1242
+  },
+  {
+   "id": "guard_three_wheels_4",
+   "town": "Three Wheels",
+   "settlement": "three_wheels",
+   "zone": "z13_03",
+   "post": "square",
+   "rank": "guard",
+   "name": "Three Wheels Guard",
+   "yaw": -0.439,
+   "titled": false,
+   "x": 1664,
+   "z": 1232
+  },
+  {
+   "id": "guard_stormrow_0",
+   "town": "Stormrow",
+   "settlement": "stormrow",
+   "zone": "z13_03",
+   "post": "gate",
+   "gate": "stormrow_gate_0",
+   "rank": "guard",
+   "name": "Stormrow Guard",
+   "yaw": -1.652,
+   "titled": false,
+   "x": 1028,
+   "z": 136
+  },
+  {
+   "id": "guard_stormrow_1",
+   "town": "Stormrow",
+   "settlement": "stormrow",
+   "zone": "z13_03",
+   "post": "square",
+   "rank": "guard",
+   "name": "Stormrow Guard",
+   "yaw": -0.002,
+   "titled": false,
+   "x": 1066,
+   "z": 134
+  },
+  {
+   "id": "guard_ravencross_0",
+   "town": "Ravencross",
+   "settlement": "ravencross",
+   "zone": "z13_03",
+   "post": "gate",
+   "gate": "ravencross_gate_0",
+   "rank": "guard",
+   "name": "Ravencross Guard",
+   "yaw": 0,
+   "titled": false,
+   "x": 444,
+   "z": 472
+  },
+  {
+   "id": "guard_wildmere_0",
+   "town": "Wildmere",
+   "settlement": "wildmere",
+   "zone": "z13_03",
+   "post": "gate",
+   "gate": "wildmere_gate_0",
+   "rank": "guard",
+   "name": "Wildmere Guard",
+   "yaw": 1.571,
+   "titled": false,
+   "x": 1640,
+   "z": 584
+  },
+  {
+   "id": "guard_redcliff_0",
+   "town": "Redcliff",
+   "settlement": "redcliff",
+   "zone": "z14_03",
+   "post": "gate",
+   "gate": "redcliff_gate_2",
+   "rank": "guard",
+   "name": "Redcliff Guard",
+   "yaw": 1.592,
+   "titled": false,
+   "x": 442,
+   "z": 866
+  },
+  {
+   "id": "guard_redcliff_1",
+   "town": "Redcliff",
+   "settlement": "redcliff",
+   "zone": "z14_03",
+   "post": "gate",
+   "gate": "redcliff_gate_2",
+   "rank": "guard",
+   "name": "Redcliff Guard",
+   "yaw": 1.592,
+   "titled": false,
+   "x": 442,
+   "z": 860
+  },
+  {
+   "id": "guard_redcliff_2",
+   "town": "Redcliff",
+   "settlement": "redcliff",
+   "zone": "z14_03",
+   "post": "gate",
+   "gate": "redcliff_gate_0",
+   "rank": "guard",
+   "name": "Redcliff Guard",
+   "yaw": -0.644,
+   "titled": false,
+   "x": 360,
+   "z": 916
+  },
+  {
+   "id": "guard_redcliff_3",
+   "town": "Redcliff",
+   "settlement": "redcliff",
+   "zone": "z14_03",
+   "post": "gate",
+   "gate": "redcliff_gate_0",
+   "rank": "guard",
+   "name": "Redcliff Guard",
+   "yaw": -0.644,
+   "titled": false,
+   "x": 366,
+   "z": 920
+  },
+  {
+   "id": "guard_redcliff_4",
+   "town": "Redcliff",
+   "settlement": "redcliff",
+   "zone": "z14_03",
+   "post": "gate",
+   "gate": "redcliff_gate_1",
+   "rank": "guard",
+   "name": "Redcliff Guard",
+   "yaw": -1.93,
+   "titled": false,
+   "x": 344,
+   "z": 822
+  },
+  {
+   "id": "guard_redcliff_5",
+   "town": "Redcliff",
+   "settlement": "redcliff",
+   "zone": "z14_03",
+   "post": "gate",
+   "gate": "redcliff_gate_1",
+   "rank": "guard",
+   "name": "Redcliff Guard",
+   "yaw": -1.93,
+   "titled": false,
+   "x": 340,
+   "z": 830
+  },
+  {
+   "id": "guard_redcliff_6",
+   "town": "Redcliff",
+   "settlement": "redcliff",
+   "zone": "z14_03",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Brackenridge",
+   "yaw": -1.489,
+   "titled": false,
+   "x": 386,
+   "z": 870
+  },
+  {
+   "id": "guard_redcliff_7",
+   "town": "Redcliff",
+   "settlement": "redcliff",
+   "zone": "z14_03",
+   "post": "square",
+   "rank": "guard",
+   "name": "Redcliff Guard",
+   "yaw": 0.494,
+   "titled": false,
+   "x": 376,
+   "z": 864
+  },
+  {
+   "id": "guard_redcliff_8",
+   "town": "Redcliff",
+   "settlement": "redcliff",
+   "zone": "z14_03",
+   "post": "square",
+   "rank": "guard",
+   "name": "Redcliff Guard",
+   "yaw": 2.57,
+   "titled": false,
+   "x": 376,
+   "z": 876
+  },
+  {
+   "id": "guard_cinder_farm_0",
+   "town": "Cinder Farm",
+   "settlement": "cinder_farm",
+   "zone": "z14_03",
+   "post": "gate",
+   "gate": "cinder_farm_gate_0",
+   "rank": "guard",
+   "name": "Cinder Farm Guard",
+   "yaw": 0.608,
+   "titled": false,
+   "x": 1262,
+   "z": 1744
+  },
+  {
+   "id": "guard_cinder_farm_1",
+   "town": "Cinder Farm",
+   "settlement": "cinder_farm",
+   "zone": "z14_03",
+   "post": "gate",
+   "gate": "cinder_farm_gate_1",
+   "rank": "guard",
+   "name": "Cinder Farm Guard",
+   "yaw": 3.142,
+   "titled": false,
+   "x": 1220,
+   "z": 1654
+  },
+  {
+   "id": "guard_cinder_farm_2",
+   "town": "Cinder Farm",
+   "settlement": "cinder_farm",
+   "zone": "z14_03",
+   "post": "square",
+   "rank": "guard",
+   "name": "Cinder Farm Guard",
+   "yaw": -1.372,
+   "titled": false,
+   "x": 1224,
+   "z": 1708
+  },
+  {
+   "id": "guard_ravenhaven_0",
+   "town": "Ravenhaven",
+   "settlement": "ravenhaven",
+   "zone": "z14_03",
+   "post": "gate",
+   "gate": "ravenhaven_gate_0",
+   "rank": "guard",
+   "name": "Ravenhaven Guard",
+   "yaw": 0.54,
+   "titled": false,
+   "x": 130,
+   "z": 260
+  },
+  {
+   "id": "guard_minfenrow_0",
+   "town": "Minfenrow",
+   "settlement": "minfenrow",
+   "zone": "z14_03",
+   "post": "gate",
+   "gate": "minfenrow_gate_0",
+   "rank": "guard",
+   "name": "Minfenrow Guard",
+   "yaw": 0.785,
+   "titled": false,
+   "x": 1120,
+   "z": 1126
+  },
+  {
+   "id": "guard_bipetwatch_0",
+   "town": "Bipetwatch",
+   "settlement": "bipetwatch",
+   "zone": "z14_03",
+   "post": "gate",
+   "gate": "bipetwatch_gate_0",
+   "rank": "guard",
+   "name": "Bipetwatch Guard",
+   "yaw": 1.429,
+   "titled": false,
+   "x": 360,
+   "z": 1434
+  },
+  {
+   "id": "guard_last_lantern_0",
+   "town": "Last Lantern",
+   "settlement": "last_lantern",
+   "zone": "z11_04",
+   "post": "gate",
+   "gate": "last_lantern_gate_0",
+   "rank": "guard",
+   "name": "Last Lantern Guard",
+   "yaw": -0.334,
+   "titled": false,
+   "x": 868,
+   "z": 1358
+  },
+  {
+   "id": "guard_last_lantern_1",
+   "town": "Last Lantern",
+   "settlement": "last_lantern",
+   "zone": "z11_04",
+   "post": "gate",
+   "gate": "last_lantern_gate_0",
+   "rank": "guard",
+   "name": "Last Lantern Guard",
+   "yaw": -0.334,
+   "titled": false,
+   "x": 874,
+   "z": 1360
+  },
+  {
+   "id": "guard_last_lantern_2",
+   "town": "Last Lantern",
+   "settlement": "last_lantern",
+   "zone": "z11_04",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Sallow",
+   "yaw": -1.111,
+   "titled": false,
+   "x": 888,
+   "z": 1296
+  },
+  {
+   "id": "guard_last_lantern_3",
+   "town": "Last Lantern",
+   "settlement": "last_lantern",
+   "zone": "z11_04",
+   "post": "square",
+   "rank": "guard",
+   "name": "Last Lantern Guard",
+   "yaw": 1.026,
+   "titled": false,
+   "x": 872,
+   "z": 1296
+  },
+  {
+   "id": "guard_last_lantern_4",
+   "town": "Last Lantern",
+   "settlement": "last_lantern",
+   "zone": "z11_04",
+   "post": "square",
+   "rank": "guard",
+   "name": "Last Lantern Guard",
+   "yaw": 3.019,
+   "titled": false,
+   "x": 878,
+   "z": 1310
+  },
+  {
+   "id": "guard_thornwick_0",
+   "town": "Thornwick",
+   "settlement": "thornwick",
+   "zone": "z11_04",
+   "post": "gate",
+   "gate": "thornwick_gate_0",
+   "rank": "guard",
+   "name": "Thornwick Guard",
+   "yaw": -1.194,
+   "titled": false,
+   "x": 1734,
+   "z": 1912
+  },
+  {
+   "id": "guard_coldwater_0",
+   "town": "Coldwater",
+   "settlement": "coldwater",
+   "zone": "z12_04",
+   "post": "gate",
+   "gate": "coldwater_gate_0",
+   "rank": "guard",
+   "name": "Coldwater Guard",
+   "yaw": -0.755,
+   "titled": false,
+   "x": 1430,
+   "z": 1886
+  },
+  {
+   "id": "guard_coldwater_1",
+   "town": "Coldwater",
+   "settlement": "coldwater",
+   "zone": "z12_04",
+   "post": "gate",
+   "gate": "coldwater_gate_0",
+   "rank": "guard",
+   "name": "Coldwater Guard",
+   "yaw": -0.755,
+   "titled": false,
+   "x": 1436,
+   "z": 1892
+  },
+  {
+   "id": "guard_coldwater_2",
+   "town": "Coldwater",
+   "settlement": "coldwater",
+   "zone": "z12_04",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Eastmere",
+   "yaw": -1.588,
+   "titled": false,
+   "x": 1468,
+   "z": 1830
+  },
+  {
+   "id": "guard_coldwater_3",
+   "town": "Coldwater",
+   "settlement": "coldwater",
+   "zone": "z12_04",
+   "post": "square",
+   "rank": "guard",
+   "name": "Coldwater Guard",
+   "yaw": 0.416,
+   "titled": false,
+   "x": 1456,
+   "z": 1822
+  },
+  {
+   "id": "guard_coldwater_4",
+   "town": "Coldwater",
+   "settlement": "coldwater",
+   "zone": "z12_04",
+   "post": "square",
+   "rank": "guard",
+   "name": "Coldwater Guard",
+   "yaw": 2.55,
+   "titled": false,
+   "x": 1454,
+   "z": 1838
+  },
+  {
+   "id": "guard_netherby_0",
+   "town": "Netherby",
+   "settlement": "netherby",
+   "zone": "z12_04",
+   "post": "gate",
+   "gate": "netherby_gate_0",
+   "rank": "guard",
+   "name": "Netherby Guard",
+   "yaw": -0.069,
+   "titled": false,
+   "x": 704,
+   "z": 772
+  },
+  {
+   "id": "guard_gorsehold_0",
+   "town": "Gorsehold",
+   "settlement": "gorsehold",
+   "zone": "z13_04",
+   "post": "gate",
+   "gate": "gorsehold_gate_0",
+   "rank": "guard",
+   "name": "Gorsehold Guard",
+   "yaw": 1.974,
+   "titled": false,
+   "x": 1620,
+   "z": 1266
+  },
+  {
+   "id": "guard_gorsehold_1",
+   "town": "Gorsehold",
+   "settlement": "gorsehold",
+   "zone": "z13_04",
+   "post": "gate",
+   "gate": "gorsehold_gate_0",
+   "rank": "guard",
+   "name": "Gorsehold Guard",
+   "yaw": 1.974,
+   "titled": false,
+   "x": 1616,
+   "z": 1260
+  },
+  {
+   "id": "guard_gorsehold_2",
+   "town": "Gorsehold",
+   "settlement": "gorsehold",
+   "zone": "z13_04",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Reed",
+   "yaw": 1.087,
+   "titled": false,
+   "x": 1556,
+   "z": 1284
+  },
+  {
+   "id": "guard_gorsehold_3",
+   "town": "Gorsehold",
+   "settlement": "gorsehold",
+   "zone": "z13_04",
+   "post": "square",
+   "rank": "guard",
+   "name": "Gorsehold Guard",
+   "yaw": -2.942,
+   "titled": false,
+   "x": 1564,
+   "z": 1296
+  },
+  {
+   "id": "guard_gorsehold_4",
+   "town": "Gorsehold",
+   "settlement": "gorsehold",
+   "zone": "z13_04",
+   "post": "square",
+   "rank": "guard",
+   "name": "Gorsehold Guard",
+   "yaw": -0.829,
+   "titled": false,
+   "x": 1568,
+   "z": 1282
+  },
+  {
+   "id": "guard_burnt_barns_0",
+   "town": "Burnt Barns",
+   "settlement": "burnt_barns",
+   "zone": "z13_04",
+   "post": "gate",
+   "gate": "burnt_barns_gate_0",
+   "rank": "guard",
+   "name": "Burnt Barns Guard",
+   "yaw": 1.028,
+   "titled": false,
+   "x": 1620,
+   "z": 386
+  },
+  {
+   "id": "guard_lowmoor_0",
+   "town": "Lowmoor",
+   "settlement": "lowmoor",
+   "zone": "z14_04",
+   "post": "gate",
+   "gate": "lowmoor_gate_0",
+   "rank": "guard",
+   "name": "Lowmoor Guard",
+   "yaw": -3.121,
+   "titled": false,
+   "x": 1220,
+   "z": 966
+  },
+  {
+   "id": "guard_lowmoor_1",
+   "town": "Lowmoor",
+   "settlement": "lowmoor",
+   "zone": "z14_04",
+   "post": "gate",
+   "gate": "lowmoor_gate_0",
+   "rank": "guard",
+   "name": "Lowmoor Guard",
+   "yaw": -3.121,
+   "titled": false,
+   "x": 1214,
+   "z": 968
+  },
+  {
+   "id": "guard_lowmoor_2",
+   "town": "Lowmoor",
+   "settlement": "lowmoor",
+   "zone": "z14_04",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Underhill",
+   "yaw": -2.472,
+   "titled": false,
+   "x": 1224,
+   "z": 1014
+  },
+  {
+   "id": "guard_lowmoor_3",
+   "town": "Lowmoor",
+   "settlement": "lowmoor",
+   "zone": "z14_04",
+   "post": "square",
+   "rank": "guard",
+   "name": "Lowmoor Guard",
+   "yaw": -0.562,
+   "titled": false,
+   "x": 1224,
+   "z": 1004
+  },
+  {
+   "id": "guard_lowmoor_4",
+   "town": "Lowmoor",
+   "settlement": "lowmoor",
+   "zone": "z14_04",
+   "post": "square",
+   "rank": "guard",
+   "name": "Lowmoor Guard",
+   "yaw": 1.637,
+   "titled": false,
+   "x": 1214,
+   "z": 1010
+  },
+  {
+   "id": "guard_deepdene_0",
+   "town": "Deepdene",
+   "settlement": "deepdene",
+   "zone": "z14_04",
+   "post": "gate",
+   "gate": "deepdene_gate_0",
+   "rank": "guard",
+   "name": "Deepdene Guard",
+   "yaw": -0.019,
+   "titled": false,
+   "x": 1342,
+   "z": 320
+  }
+ ],
+ "problems": []
+}

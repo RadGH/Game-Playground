@@ -152,7 +152,8 @@ export const CLIENT_MSGS = Object.freeze({
   kits:    { on: 'gw', fields: { cls: 'str:32' }, rate: 10, burst: 40 },      // a creation screen may ask for every calling at once (30): none may be dropped silently
   revive:  { on: 'p', fields: { op: 'str:8', id: '?int' }, rate: 2, burst: 4 },
   sheet:   { on: 'p', fields: {}, rate: 2, burst: 4 },
-  feedback: { on: 'both', fields: { kind: 'str:16', text: 'str:2000', ctx: '?obj' }, rate: 0.5, burst: 10 },      // the real limit is js/sim/feedback.js (1 per 20 s, 12 an hour, answered)
+  feedback: { on: 'both', fields: { kind: '?str:16', text: '?str:2000', ctx: '?obj', ref: '?int', op: '?str:8', limit: '?int', before: '?int' }, rate: 0.5, burst: 10 },      // the real limit is js/sim/feedback.js (answered). ref (round 8, W29): a reply to your own report #ref
+  feedbackMine: { on: 'both', fields: { limit: '?int', before: '?int' }, rate: 1, burst: 5 },      // round 8, W29: my own reports -> feedbackMine (`feedback {op:'mine'}` is the same call)
   admin:   { on: 'both', fields: { op: 'str:16', id: '?int', state: '?str:16', kind: '?str:16', limit: '?int', before: '?int', note: '?str:500' }, rate: 2, burst: 10 },
   fish:    { on: 'p', fields: { op: 'str:8', aim: '?vec2', held: '?num', score: '?num', holds: '?nums' }, rate: 4, burst: 8 },
   cook:    { on: 'p', fields: { op: '?str:8', id: '?str:64', n: '?int' }, rate: 2, burst: 6 },
@@ -235,7 +236,8 @@ export const SERVER_MSGS = Object.freeze({
   eventTrack: ['uid', 'id', 'name', 'state', 'what', 'objective', 'endsAt', 'leftMs', 'reward', 'inside'],
   eventDone: ['uid', 'id', 'name', 'result', 'credited', 'xp', 'gold', 'items', 'text'],
   eventAt: ['uid'],
-  feedbackR: ['ok', 'id', 'first', 'why', 'msg'],
+  feedbackR: ['ok', 'id', 'first', 'why', 'msg', 'state', 'ref'],
+  feedbackMine: ['ok', 'list', 'more', 'why'],
   adminReports: ['list', 'counts'],
   adminR: ['op', 'ok', 'id', 'state'],
   fishR: ['ok', 'state', 'at', 'why', 'msg'],
@@ -247,7 +249,7 @@ export const SERVER_MSGS = Object.freeze({
 });
 /** Play-test 5: feedback kinds + report states (T19/T21), revive answers (T4), fishing ops (T25). */
 export const FEEDBACK_KINDS = Object.freeze(['suggestion', 'bug']);
-export const FEEDBACK_STATES = Object.freeze(['new', 'approved', 'declined', 'trashed']);
+export const FEEDBACK_STATES = Object.freeze(['new', 'approved', 'declined', 'trashed', 'completed']);      // completed (round 8, W28): the fix is live; its note says how it was fixed
 export const REVIVE_OPS = Object.freeze(['accept', 'decline']);
 export const FISH_OPS = Object.freeze(['cast', 'hook', 'land', 'stop', 'cancel']);
 export const ADMIN_OPS = Object.freeze(['reports', 'feedback', 'report', 'state']);

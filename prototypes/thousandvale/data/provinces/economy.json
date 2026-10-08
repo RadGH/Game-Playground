@@ -61,7 +61,7 @@
   }
  ],
  "targets": {
-  "_doc": "The rules, as ratios against an hour of ordinary play (questing) at the same level. tests/E/playtest7-economy.test.js reads THESE bounds.",
+  "_doc": "The rules, as ratios against an hour of ordinary play (questing) at the same level. tests/E/playtest7-economy.test.js reads THESE bounds. cartShare: a ride to the NEXT town costs this share of an hour of questing at level 1 (the poorest rider). cartFarthestShare: the dearest ride in the province costs at most this share of a level-1 hour.",
   "uncommonHours": [
    0.55,
    0.97
@@ -77,7 +77,7 @@
   ],
   "fishingShareAim": [
    0.7,
-   1.0
+   1
   ],
   "fishBestOverCheapest": 25,
   "cratesPerFishingHour": 1,
@@ -103,7 +103,13 @@
   ],
   "extrapolated": [
    20
-  ]
+  ],
+  "cartShare": [
+   0.004,
+   0.04
+  ],
+  "cartFarthestShare": 0.12,
+  "cartUnderWaystone": true
  },
  "mail": {
   "postage": 3
@@ -121,5 +127,11 @@
   "body": 60,
   "everything": 120,
   "perLevel": 0.05
+ },
+ "cart": {
+  "base": 3,
+  "metresPerGold": 250,
+  "minGold": 4,
+  "_doc": "W5 (owner feedback 8): an ox-cart ride. cartFare(metres of road) = max(minGold, round(base + metres / metresPerGold)); the table for every pair of towns is data/provinces/carts.json `fares` (tools/content-towns.mjs). Cheaper than a waystone over the same road (`fare`), and it takes you to a town you have never seen."
  }
 }

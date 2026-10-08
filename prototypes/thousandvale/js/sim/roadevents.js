@@ -26,12 +26,17 @@
 //   R.talk(o, obj) -> extra|null  any NPC talked to: completes deliveries; wanderers' lore + tips
 //   R.events                      Map id -> event   R.spawnFor(o, kind) (tests)
 
-export const ROAD_DEFAULTS = Object.freeze({ firstSec: [45, 90], gapSec: [150, 300], spawnM: [70, 140], quietM: 220, lifeSec: 600, maxPerRoom: 6, ambushEveryM: 170, maxAmbush: 2, escortGiveUpSec: 90 });
+export const ROAD_DEFAULTS = Object.freeze({ firstSec: [45, 90], gapSec: [150, 300], spawnM: [70, 140], quietM: 220, lifeSec: 600, maxPerRoom: 6, ambushEveryM: 170, maxAmbush: 2, escortGiveUpSec: 90,
+  // W24 (round 8, report #45): an opened chest waits `lootSec` for everyone who took part; a keeper further than `keeperM` from its chest no longer locks it
+  chest: { lootSec: 120, keeperM: 45 } });
 import { roadKillGold as KILL_GOLD, roadChestGold } from './economy-knobs.js';       // V2: data/rules/economy.json server.road
 
-export function createRoadEvents({ data = null, wanderers = null, online, corpses, grant, questEvent, bookOf, provOf, now, wallNow, rng = Math.random, log = () => {}, counters = {}, journal = () => {}, questSaved = () => {}, sendQuests = () => {}, partyOf = () => null, enabled = true }) {
+export function createRoadEvents({ data = null, wanderers = null, online, corpses, grant, questEvent, bookOf, provOf, now, wallNow, rng = Math.random, log = () => {}, counters = {}, journal = () => {}, questSaved = () => {}, sendQuests = () => {}, partyOf = () => null, mailTo = null, enabled = true }) {
   const D = data || {};
   const R = { ...ROAD_DEFAULTS, ...(D.rules || {}) };
+  const CH = { ...ROAD_DEFAULTS.chest, ...((D.rules && typeof D.rules.chest === 'object' && D.rules.chest) || {}) };
+  if (!(CH.lootSec > 0)) CH.lootSec = ROAD_DEFAULTS.chest.lootSec;
+  if (!(CH.keeperM > 0)) CH.keeperM = ROAD_DEFAULTS.chest.keeperM;
   const W = wanderers || {};
   const events = new Map();
   let nextId = 1;
@@ -92,8 +97,16 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
     const pl = o.entity.level || 1;
     return Math.max(1, Math.min(pl + 1, Math.max(pl - 1, c ? c.level || pl : pl)));
   }
+  /** W24: a chest that NAMES its keepers (E's `guardTypes`) is kept by those — "Smugglers' Stash" by smugglers wherever it lands, not by
+   *  the rats of the nearest camp while the brigands beside it belong to somebody else. Only types this province really has are used. */
+  function keeperType(L, spec) {
+    const want = spec && Array.isArray(spec.guardTypes) ? spec.guardTypes : spec && typeof spec.guardTypes === 'string' ? [spec.guardTypes] : [];
+    const known = want.filter(t => (L.camps || []).some(c => c.type === t));
+    return known.length ? pick(known) : null;
+  }
   function spawnGuards(room, L, ev, n) {
-    const c = campNear(L, ev.x, ev.z);
+    const named = keeperType(L, ev.spec);
+    const c = named ? { type: named } : campNear(L, ev.x, ev.z);
     if (!c || n <= 0) return;
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2 + rng(), r = 4 + rng() * 3;
@@ -104,7 +117,9 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
       ev.guardType = c.type;
     }
   }
-  const guardsDown = ev => ev.guards.every(m => m.removed || m.dead);
+  /** Keepers still STANDING OVER it: alive and within keeperM of the chest. One dragged off, leashed home or wandered away does not lock it (W24). */
+  const standing = ev => ev.guards.filter(m => !m.removed && !m.dead && !(m.data && m.data.ambush) && (ev.kind !== 'chest' || Math.hypot(m.x - ev.x, m.z - ev.z) <= CH.keeperM));
+  const guardsDown = ev => (ev.kind === 'chest' ? standing(ev).length === 0 : ev.guards.every(m => m.removed || m.dead));
   const guardWord = ev => (ev.guardType ? plural(ev.guardType) : 'brutes');
 
   function spawnFor(o, kind = null) {
@@ -115,7 +130,7 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
     if (!at) return null;
     const w = D.weights || { chest: 45, deliver: 20, escort: 15, rescue: 20 };
     if (!kind) { let r = rng() * Object.values(w).reduce((a, b) => a + b, 0); for (const [k, v] of Object.entries(w)) { r -= v; if (r <= 0) { kind = k; break; } } kind ||= 'chest'; }
-    const ev = { id: nextId++, kind, room, pv, x: at.x, z: at.z, level: levelFor(o, L, at.x, at.z), born: now(), touched: false, guards: [], ents: [], rolled: new Set(), opened: false, for: o.char.id };
+    const ev = { id: nextId++, kind, room, pv, x: at.x, z: at.z, level: levelFor(o, L, at.x, at.z), born: now(), touched: false, guards: [], ents: [], rolled: new Set(), fought: new Set(), took: new Set(), opened: false, for: o.char.id };
     const town = nearestTown(L, at.x, at.z);
     ev.town = town;
     const key = 'road:' + room.id + ':' + ev.id;
@@ -168,8 +183,34 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
   function openUp(ev) {
     if (ev.opened) return;
     ev.opened = true;
+    ev.openedAt = now();
     ev.room.objState(ev.chest, 'unlocked');
-    for (const o of online.values()) if (o.room === ev.room && o.entity && !o.entity.dead && Math.hypot(o.entity.x - ev.x, o.entity.z - ev.z) <= 80) rollShare(ev, o);
+    // everyone who took part gets a share: whoever stands near (alive or not — dying to the last keeper does not cost you the chest) and whoever hit a keeper
+    for (const o of online.values()) if (o.room === ev.room && o.entity && (Math.hypot(o.entity.x - ev.x, o.entity.z - ev.z) <= 80 || ev.fought.has(o.char.id))) rollShare(ev, o);
+    corpses.holdUntil && corpses.holdUntil(ev.room, ev.chest, ev.openedAt + CH.lootSec * 1000 + 5000);
+  }
+  /** W24: has everyone who took part emptied their share? (someone who left the room or logged off no longer holds it open) */
+  function everyoneLooted(ev) {
+    for (const c of ev.rolled) { const o = online.get(c); if (o && o.conn && o.room === ev.room && corpses.hasLootFor && corpses.hasLootFor(ev.room, ev.chest, c)) return false; }
+    return true;
+  }
+  /** W24: a share nobody came for is not lost — it is posted to its owner when the chest packs up (the ONE mail API). */
+  function postLeft(ev) {
+    ev.posted = new Set();
+    if (!mailTo || !corpses.takeShare) return;
+    for (const c of ev.rolled) {
+      const sh = corpses.takeShare(ev.room, ev.chest, c);
+      if (!sh) continue;
+      ev.posted.add(c);
+      counters.road_chestPosted = (counters.road_chestPosted || 0) + 1;
+      Promise.resolve(mailTo({ to: c, subject: infoOf(ev).name, from: 'The Vale', body: 'You left your share of the ' + infoOf(ev).name + ' behind. Here it is.', items: sh.items, gold: sh.gold })).catch(err => log('road chest post', err && err.message));
+    }
+  }
+  /** The province's hit observer: a player who hit one of an event's keepers took part in it. */
+  function noteHit(o, dst) {
+    const id = dst && dst.data && dst.data.roadEvent;
+    const ev = id != null ? events.get(id) : null;
+    if (ev && ev.room === o.room) { (ev.fought ||= new Set()).add(o.char.id); ev.touched = true; }
   }
 
   // ---- quests ----
@@ -280,7 +321,7 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
     if (!ev) { if (s) s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'gone', msg: 'There is nothing here any more.' }); return true; }
     ev.touched = true;
     if (ev.kind === 'chest') {
-      if (!guardsDown(ev)) { if (s) s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'guarded', msg: 'Not with its keepers still standing over it.' }); return true; }
+      if (!guardsDown(ev)) { const n = standing(ev).length; if (s) s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'guarded', left: n, keepers: guardWord(ev), msg: 'Not while the ' + guardWord(ev) + ' still guard it (' + n + ' left).' }); return true; }
       openUp(ev);
       if (!ev.rolled.has(o.char.id)) rollShare(ev, o);
       if (s) s.sendJSON({ t: 'used', id: obj.id, ok: true, kind: 'chest', loot: true, name: obj.name });
@@ -378,7 +419,12 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
       const anyone = nearestPlayer(ev);
       if (ev.kind === 'chest') {
         if (!ev.opened && guardsDown(ev) && anyone && anyone.d <= 80) openUp(ev);
-        if (ev.opened && ev.rolled.size && !corpses.hasLoot(ev.room, ev.chest)) { ev.emptyAt ||= t; if (t - ev.emptyAt > 4000) { result(ev, 'success', null, [...ev.rolled].map(c => online.get(c)).filter(Boolean)); end(ev); continue; } }
+        // W24: an opened chest STAYS until everyone who took part has emptied their share, or lootSec (2 minutes) after it opened
+        if (ev.opened) {
+          const out = t - ev.openedAt >= CH.lootSec * 1000;
+          if (out || (ev.rolled.size && everyoneLooted(ev))) { ev.emptyAt ||= t; if (out || t - ev.emptyAt > 4000) { postLeft(ev); result(ev, 'success', null, [...ev.rolled].map(c => online.get(c)).filter(Boolean)); end(ev); continue; } }
+          else ev.emptyAt = 0;
+        }
       }
       if (ev.leaveAt && t >= ev.leaveAt && ev.npc && !ev.npc.removed) { ev.room.remove(ev.npc); }
       if (ev.follow) followCheck(ev, t);
@@ -389,7 +435,7 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
       // T12 (play-test 5, E's `info.durationSec`): a road event someone took on has a time limit — at 0 it FAILS with its
       // `onFail` line (the quest is given up for them, the NPC leaves). A chest keeps its lifeSec as before.
       const dl = deadline(ev);
-      if (dl && t >= dl && !ev.done) fail(ev, 'time');
+      if (dl && t >= dl && !ev.done && !(ev.kind === 'chest' && ev.opened)) fail(ev, 'time');
     }
   }
   // ---- T11 / T12: every road event says what it is, what to do, how long is left and what it pays; and it ENDS ----
@@ -407,7 +453,7 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
   function deadline(ev) {
     if (ev.virtual || !ev.spec) return null;
     const ms = infoOf(ev).durationSec * 1000;
-    if (ev.kind === 'chest') return ev.born + Math.max(ms, R.lifeSec * 1000);
+    if (ev.kind === 'chest') return ev.opened ? ev.openedAt + CH.lootSec * 1000 : ev.born + Math.max(ms, R.lifeSec * 1000);
     return ev.acceptedAt ? ev.acceptedAt + ms : null;
   }
   function objectiveOf(ev, o) {
@@ -415,7 +461,7 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
     const total = ev.guards.filter(m => !(m.data && m.data.ambush)).length, down = ev.guards.filter(m => !(m.data && m.data.ambush) && (m.removed || m.dead)).length;
     const amb = ev.guards.filter(m => m.data && m.data.ambush && !m.removed && !m.dead).length;
     if (amb) { const A = (D.coded && D.coded.ambush && D.coded.ambush.info) || {}; return { kind: 'defend', text: fill((A.objective && A.objective.text) || 'Kill the ambushers', { ...(ev.tok || {}), name: ev.name || 'them' }), n: 0, of: amb }; }
-    if (ev.kind === 'chest') return total && down < total ? { kind: 'kill', text: 'Defeat the ' + guardWord(ev), n: down, of: total } : { kind: 'open', text: I.goal || 'Open it', n: o && ev.rolled.has(o.char.id) && !corpses.hasLoot(ev.room, ev.chest) ? 1 : 0, of: 1 };
+    if (ev.kind === 'chest') return !ev.opened && standing(ev).length ? { kind: 'kill', text: 'Defeat the ' + guardWord(ev) + ' guarding it', n: total - standing(ev).length, of: total } : { kind: 'open', text: ev.opened ? 'Open it and take your share' : (I.goal || 'Open it'), n: o && ev.rolled.has(o.char.id) && !corpses.hasLoot(ev.room, ev.chest) ? 1 : 0, of: 1 };
     if (ev.kind === 'rescue' && !ev.freed) return total && down < total ? { kind: 'kill', text: 'Defeat the ' + guardWord(ev), n: down, of: total } : { kind: 'rescue', text: 'Free ' + (ev.name || 'the captive'), n: 0, of: 1 };
     if (ev.kind === 'deliver') return { kind: 'deliver', text: I.goal || 'Deliver the parcel', n: ev.done ? 1 : 0, of: 1 };
     return { kind: 'escort', text: ev.kind === 'rescue' ? 'Bring ' + (ev.name || 'them') + ' home to ' + (ev.town ? ev.town.name : 'town') : (I.goal || 'See them safely to town'), n: ev.done ? 1 : 0, of: 1 };
@@ -453,7 +499,10 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
     counters['road_' + (won ? 'won' : 'lost')] = (counters['road_' + (won ? 'won' : 'lost')] || 0) + 1;
     for (const o of new Set(who || [])) {
       if (!o || !o.conn) continue;
-      o.conn.sendJSON({ t: 'eventDone', uid: uidOf(ev), id: (ev.spec && ev.spec.id) || ev.kind, name: I.name, kind: 'road', result: res, won, ...(won ? {} : { why: why || 'time' }), credited: won, xp: 0, gold: 0, items: [], text, story: won ? I.onSuccess : I.onFail });
+      const posted = !!(ev.posted && ev.posted.has(o.char.id));
+      const chest = ev.kind === 'chest' && won ? { got: !posted, ...(posted ? { posted: true } : {}) } : {};
+      if (posted) { o.conn.sendJSON({ t: 'eventDone', uid: uidOf(ev), id: (ev.spec && ev.spec.id) || ev.kind, name: I.name, kind: 'road', result: res, won, credited: true, xp: 0, gold: 0, items: [], ...chest, text: I.name + ': you did not open it in time — your share is in the post.', story: I.onSuccess }); tell(o, I.name + ': your share was sent to you by post.'); continue; }
+      o.conn.sendJSON({ t: 'eventDone', uid: uidOf(ev), id: (ev.spec && ev.spec.id) || ev.kind, name: I.name, kind: 'road', result: res, won, ...(won ? {} : { why: why || 'time' }), credited: won, ...chest, xp: 0, gold: 0, items: [], text, story: won ? I.onSuccess : I.onFail });
       if (!won) tell(o, text);
     }
   }
@@ -533,7 +582,7 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
     counters.roadAmbush = (counters.roadAmbush || 0) + 1;
   }
 
-  return { tick, move, use, offers, accepted, talk, events, spawnFor, end, track, fail, deadline, infoOf, stats: () => ({ live: events.size, ...Object.fromEntries(Object.entries(counters).filter(([k]) => k.startsWith('road'))) }) };
+  return { tick, move, use, offers, accepted, talk, events, spawnFor, end, track, fail, deadline, infoOf, noteHit, CH, stats: () => ({ live: events.size, ...Object.fromEntries(Object.entries(counters).filter(([k]) => k.startsWith('road'))) }) };
 }
 
 const ROLE_WORD = { smith: 'smith', merchant: 'merchant', innkeeper: 'innkeeper', elder: 'elder', apothecary: 'apothecary', healer: 'healer', provisioner: 'provisioner', tailor: 'tailor', armourer: 'armourer', bowyer: 'bowyer', jeweller: 'jeweller', trader: 'trader', stablehand: 'stablehand' };

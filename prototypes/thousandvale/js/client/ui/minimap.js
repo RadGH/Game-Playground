@@ -13,7 +13,7 @@ export const MINI_ZOOMS = [0.35, 0.6, 1.0, 1.7, 2.8];            // px per metre
 
 export function createMinimap({ atlas, me, onOpenMap, store }) {
   const root = h('div.minimap', { role: 'img', 'aria-label': 'Minimap' });
-  const canvas = h('canvas.mm-canvas', { title: 'Minimap — click for the map (M), wheel to zoom' });
+  const canvas = h('canvas.mm-canvas')    /* W16: no title here — the browser's own tooltip covered the pins' cards */;
   const ring = h('div.mm-ring');
   const zone = h('div.mm-zone');
   const card = h('div.tipbox.mm-card', { hidden: true });
@@ -66,7 +66,7 @@ export function createMinimap({ atlas, me, onOpenMap, store }) {
     }
     const v = makeView({ cx, cz, scale, w: SIZE, h: SIZE, rot });
     S.view = v;
-    const all = atlas.markers();
+    const all = atlas.markers().filter(m => !m.hiddenEv);      // W13: an event you hid is not on the minimap (nor on its rim)
     g.save();
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.clearRect(0, 0, canvas.width, canvas.height);

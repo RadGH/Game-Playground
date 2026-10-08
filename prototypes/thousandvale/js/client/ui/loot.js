@@ -7,6 +7,12 @@
 //   lootRolled {roll, item, rolls:[{char,name,choice,n}], winner} -> the lines in chat, the pop-up goes
 //
 // The loot window is a small panel by the corpse list; "Take all" takes everything that fits.
+//
+// Play-test 8 (W8): with the window open, E takes the SELECTED row (the first one to begin with; the arrow keys or the
+// mouse move the selection) and F takes everything. The two hints are printed from the binding table (`data-action`
+// = the `interact` and `strike` actions, input/hints.js), so a re-bound key or a controller shows its own; on a phone
+// the hints are blank and the Take / Take all buttons are the controls. A pad's A presses the focused row, its X
+// ("the other action") takes all.
 
 import { h, createPanel } from '../ui-panel.js';
 import { send2 } from './net2.js';
@@ -15,12 +21,13 @@ import { onIcon, iconsActive } from './item-icons.js';
 import { ROLL_CHOICES, rollLeft, rollLines } from './pt2-core.js';
 import { hideTip } from './tips.js';
 import { rarityOf } from './inv-core.js';
+import { lootRows, lootStep } from './pt8-core.js';
 
 const LOOT_RANGE = 6;
 
 export function createLoot({ net, hud, actors, me }) {
   const lootable = new Map();          // corpse id -> best rarity in it for me (S23: the marker's colour)
-  const W = { id: null, data: null };
+  const W = { id: null, data: null, sel: 0, rows: [] };
   const panel = createPanel({ id: 'loot', title: 'Loot', width: 300, cls: 'loot-panel', onClose: () => { if (W.id != null) send2.loot(net(), 'close', { id: W.id }); W.id = null; W.data = null; iconsActive(false, 'loot'); } });
 
   // ---- the window ----
@@ -28,7 +35,7 @@ export function createLoot({ net, hud, actors, me }) {
     const a = actors.get(id), m = me();
     if (!a || !m) return false;
     if (Math.hypot(a.pos.x - m.x, a.pos.z - m.z) > LOOT_RANGE + 0.5) { hud.toast('Too far away to loot.', 'warn'); return true; }
-    W.id = id; W.data = null;
+    W.id = id; W.data = null; W.sel = 0;
     send2.loot(net(), 'open', { id });
     panel.setTitle(a.name || 'Loot', 'Searching…');
     panel.fill(h('p.dim', {}, 'Searching the body…'));
@@ -40,21 +47,47 @@ export function createLoot({ net, hud, actors, me }) {
     const d = W.data;
     if (!d) return;
     const items = d.items || [], free = d.free || [];
+    W.rows = lootRows(d);
+    W.sel = Math.max(0, Math.min(W.rows.length - 1, W.sel));
     const rows = [];
-    if (d.gold > 0) rows.push(h('div.loot-row.gold', { onclick: () => take('gold') }, h('div.islot.gold-slot', {}, h('span.glyph', {}, '◉')), h('b', {}, goldText(d.gold)), h('button.ghost.small', { type: 'button' }, 'Take')));
-    for (const it of items) rows.push(row(it));
-    if (free.length) { rows.push(h('h4', {}, 'Left by your party (anyone may take it)')); for (const it of free) rows.push(row(it)); }
+    let i = 0;
+    if (d.gold > 0) rows.push(mark(h('div.loot-row.gold', { onclick: () => take('gold') }, h('div.islot.gold-slot', {}, h('span.glyph', {}, '◉')), h('b', {}, goldText(d.gold)), takeBtn()), i++));
+    for (const it of items) rows.push(mark(row(it), i++));
+    if (free.length) { rows.push(h('h4', {}, 'Left by your party (anyone may take it)')); for (const it of free) rows.push(mark(row(it), i++)); }
     const empty = !rows.length;
     const many = (d.corpses || []).length > 1;
     panel.setTitle(d.chest ? (d.name || 'A chest') : many ? `${d.corpses.length} bodies` : (d.name || actors.get(W.id)?.name || 'Loot'), empty ? 'Empty' : `${items.length + free.length} item${items.length + free.length === 1 ? '' : 's'}${d.gold > 0 ? ` · ${goldText(d.gold)}` : ''}`);
     panel.fill(
-      empty ? h('p.dim', {}, 'Nothing left.') : h('div.loot-list', {}, ...rows),
-      h('div.row.end', {}, h('button.ghost.small', { type: 'button', onclick: () => panel.close() }, 'Close'), empty ? null : h('button.primary.small', { type: 'button', dataset: { act: 'all' }, onclick: takeAll }, 'Take all')));
+      empty ? h('p.dim', {}, 'Nothing left.') : h('div.loot-list', { role: 'listbox', 'aria-label': 'What is here' }, ...rows),
+      h('div.row.end.loot-foot', {}, h('button.ghost.small', { type: 'button', onclick: () => panel.close() }, 'Close'), h('span.grow'),
+        empty ? null : h('button.primary.small', { type: 'button', dataset: { act: 'all' }, oncontextmenu: e => e.preventDefault(), onclick: takeAll }, h('kbd', { dataset: { action: 'strike' } }, 'F'), ' Take all')));
+    paintSel();
   }
+  const takeBtn = () => h('button.ghost.small.loot-take', { type: 'button' }, h('kbd', { dataset: { action: 'interact' } }, 'E'), ' Take');
+  /** A row knows its place in the list; pointing at it selects it (W8). */
+  function mark(el, i) { el.dataset.i = String(i); el.setAttribute('role', 'option'); el.addEventListener('pointerenter', () => { if (W.sel !== i) { W.sel = i; paintSel(); } }); return el; }
+  function paintSel() { for (const el of panel.body.querySelectorAll('.loot-row')) { const on = +el.dataset.i === W.sel; el.classList.toggle('sel', on); el.setAttribute('aria-selected', String(on)); } }
   function row(it) {
     // S12: rows from several bodies carry which body they lie on (`corpse`); a party-pile row says so
-    return h('div.loot-row' + (it.shared ? '.shared' : ''), { dataset: { uid: String(it.uid) }, onclick: () => take(it.uid, it.corpse) }, itemCell(it, { small: true }), itemName(it), it.shared ? h('small.dim', {}, 'party') : null, h('button.ghost.small', { type: 'button' }, 'Take'));
+    return h('div.loot-row' + (it.shared ? '.shared' : ''), { dataset: { uid: String(it.uid) }, onclick: () => take(it.uid, it.corpse) }, itemCell(it, { small: true }), itemName(it), it.shared ? h('small.dim', {}, 'party') : null, takeBtn());
   }
+  /** E: the selected row. */
+  function takeSel() { const r = W.rows[W.sel]; if (!r) return false; take(r.uid, r.corpse); return true; }
+  function step(d) { const n = lootStep(W.sel, W.rows.length, d); if (n !== W.sel) { W.sel = n; paintSel(); panel.body.querySelector('.loot-row.sel')?.scrollIntoView?.({ block: 'nearest' }); } }
+  // the keys, ahead of the world's own E (use) and F (strike): only while the window is open and nobody is typing
+  window.addEventListener('keydown', e => {
+    if (!panel.isOpen || !W.data || e.ctrlKey || e.metaKey || e.altKey) return;
+    const a = document.activeElement; if (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) return;
+    let did = true;
+    if (e.code === 'KeyE') { if (!e.repeat) takeSel(); }
+    else if (e.code === 'KeyF') { if (!e.repeat) takeAll(); }
+    else if (e.code === 'ArrowDown') step(1);
+    else if (e.code === 'ArrowUp') step(-1);
+    else did = false;
+    if (did) { e.preventDefault(); e.stopImmediatePropagation(); }
+  }, true);
+  // a controller's "other action" (X) on anything in the window takes everything
+  panel.root.addEventListener('contextmenu', e => { if (W.data && e.target.closest?.('.loot-row')) { e.preventDefault(); takeAll(); } });
   function take(uid, from = null) { if (W.id == null) return; hideTip(); send2.loot(net(), 'take', uid === 'gold' ? { id: W.id, uid: 'gold' } : { id: from ?? W.id, uid }); }
   function takeAll() { if (W.id == null) return; hideTip(); send2.loot(net(), 'all', { id: W.id }); }
   onIcon(() => { if (panel.isOpen && W.data) { clearTimeout(draw.t); draw.t = setTimeout(draw, 80); } });
@@ -147,7 +180,7 @@ export function createLoot({ net, hud, actors, me }) {
   }
   return {
     wire, open, tick: () => { tick(); tickRolls(); }, useKey, onRoll, onRolled, choose, panel,
-    isLootable: id => lootable.has(id), lootable,
-    get state() { return { open: panel.isOpen ? W.id : null, data: W.data, lootable: [...lootable.keys()], rolls: [...rolls.keys()], prompt: !prompt.hidden }; },
+    isLootable: id => lootable.has(id), lootable, takeSel, takeAll, step,
+    get state() { return { open: panel.isOpen ? W.id : null, data: W.data, sel: W.sel, selUid: W.rows[W.sel]?.uid ?? null, lootable: [...lootable.keys()], rolls: [...rolls.keys()], prompt: !prompt.hidden }; },
   };
 }

@@ -140,6 +140,16 @@ export const G5_GLOVES = {
 export const G5_CAPES = {
   g5_swallowtail: { type: 'cloak', gameSlot: 'cape', name: 'Swallowtail Cloak', alias2d: 'cape', color: '#3a4a5a', color2: '#c8a040', minLevel: 3 },
 };
+/**
+ * Backpacks (Thousandvale owner feedback 8, W19) -> avatar.cape.id: the back slot draws a cloak OR a pack.
+ * Models in chibi2-backpacks.js. `size` = how much it carries (the game's bag slots are the game's own numbers).
+ */
+export const G5_PACKS = {
+  g5_pack_satchel: { type: 'pack', gameSlot: 'cape', name: 'Sling Satchel', alias2d: 'none', color: '#7a5a3a', color2: '#c8a040', minLevel: 1, size: 'small' },
+  g5_pack_rucksack: { type: 'pack', gameSlot: 'cape', name: 'Trail Rucksack', alias2d: 'none', color: '#6a6a44', color2: '#c8a040', minLevel: 10, size: 'medium' },
+  g5_pack_frame: { type: 'pack', gameSlot: 'cape', name: 'Frame Pack', alias2d: 'none', color: '#5f6a4a', color2: '#c8a040', minLevel: 20, size: 'large' },
+  g5_pack_explorer: { type: 'pack', gameSlot: 'cape', name: "Explorer's Pack", alias2d: 'none', color: '#7a4a2a', color2: '#d8b040', minLevel: 10, size: 'medium' },
+};
 /** light / belt -> avatar.decor.id */
 export const G5_DECOR = {
   g5_hexlantern: { type: 'lantern', gameSlot: 'light', name: 'Hooded Storm Lantern', alias2d: 'belt_lantern', color: '#4a4a52', minLevel: 2 },
@@ -165,6 +175,7 @@ export const G5_TABLES = [
   { slot: 'shoes', table: G5_SHOES, kind: 'armour', gameSlot: 'feet', type: 'feet', file: 'avatar-3d/js/chibi2-gear5-armour.js', export: 'G5_SHOE_BUILDERS' },
   { slot: 'top', field: 'gloves', table: G5_GLOVES, kind: 'armour', gameSlot: 'hands', type: 'hands', file: 'avatar-3d/js/chibi2-gear5-armour.js', export: 'G5_GLOVE_BUILDERS' },
   { slot: 'cape', table: G5_CAPES, kind: 'accessory', file: 'avatar-3d/js/chibi2-gear5-offhand.js', export: 'G5_CAPE_BUILDERS' },
+  { slot: 'cape', table: G5_PACKS, kind: 'accessory', file: 'avatar-3d/js/chibi2-backpacks.js', export: 'G5_PACK_BUILDERS' },
   { slot: 'decor', table: G5_DECOR, kind: 'accessory', file: 'avatar-3d/js/chibi2-gear5-offhand.js', export: 'G5_DECOR_BUILDERS' },
   { slot: 'accessory', table: G5_ACCESSORY, kind: 'accessory', file: 'avatar-3d/js/chibi2-gear5-offhand.js', export: 'G5_ACCESSORY_BUILDERS' },
   { slot: 'accessory', field: 'ring', table: G5_RINGS, kind: 'accessory', file: 'avatar-3d/js/chibi2-gear5-offhand.js', export: 'G5_RING_BUILDERS' },

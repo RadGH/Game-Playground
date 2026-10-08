@@ -29,6 +29,7 @@ export const RULES_DATA_FILES = {
   fishing: '../../data/rules/fishing.json',
   crates: '../../data/rules/crates.json',
   tvGear: '../../data/rules/gear-tv.json',
+  projectiles: '../../data/rules/projectiles.json',    // owner feedback 8 W14/W2: flight speeds (js/rules/projectiles.js)
   prices: '../../data/rules/prices.json',              // owner feedback 7 V2: item price + kill gold (js/rules/economy.js)
 };
 /**

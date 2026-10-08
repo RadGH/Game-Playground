@@ -3,7 +3,7 @@
 // IS the fog colour (so distant hills melt into the sky instead of ending at a grey wall).
 
 import * as THREE from 'three';
-import { skyAt } from './daynight.js';
+import { skyAt, carriedLight, DUNGEON_AMBIENT } from './daynight.js';
 
 export function createScene(canvas, { quality = 'high' } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: false });
@@ -108,11 +108,12 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     sky.visible = clouds.visible = !dark;
     scene.background = dark ? new THREE.Color(fog) : SKY.horizon.clone();
     scene.fog.color.set(dark ? fog : SKY.horizon);
-    scene.fog.near = dark ? (bright ? 18 : 10) : 140; scene.fog.far = dark ? (bright ? 75 : 48) : 900;
-    hemi.intensity = dark ? (bright ? 2.2 : 1.35) : 1.15; hemi.color.set(dark ? '#8f9cc0' : '#d6e6ff'); hemi.groundColor.set(dark ? '#2a2018' : '#6b5f48');
-    sun.intensity = dark ? 0.25 : 2.6;
+    // play-test 8 (W22): a dungeon is never pitch black — a floor of ambient light under every look, fog pushed back
+    scene.fog.near = dark ? (bright ? DUNGEON_AMBIENT.fogNearBright : DUNGEON_AMBIENT.fogNear) : 140; scene.fog.far = dark ? (bright ? DUNGEON_AMBIENT.fogFarBright : DUNGEON_AMBIENT.fogFar) : 900;
+    hemi.intensity = dark ? (bright ? DUNGEON_AMBIENT.hemiBright : DUNGEON_AMBIENT.hemi) : 1.15; hemi.color.set(dark ? '#9aa6c8' : '#d6e6ff'); hemi.groundColor.set(dark ? '#3a2e24' : '#6b5f48');
+    sun.intensity = dark ? 0.35 : 2.6;
     // never toggle a light's visibility (every lit material would recompile: the P1/P10 freeze) — dim it instead
-    lantern.distance = bright ? 20 : 13; lantern.intensity = dark ? (bright ? 16 : 9) : 0;
+    moodBright = bright; applyCarry();
     stars.visible = moon.visible = false;
     if (!dark && lastSky) applySky(lastSky);
   }
@@ -139,11 +140,20 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     moon.visible = k.night > 0.2; moon.material.opacity = Math.min(1, k.night * 1.3);
     for (const c of clouds.children) c.material.color.copy(_c.setRGB(...k.horizon).lerp(new THREE.Color('#ffffff'), 0.55));
   }
-  // The light you carry underground: warm, close, follows you (placed in follow()).
+  // The light everyone carries (W22): warm, follows you (placed in follow()); underground always, outdoors as night falls.
+  // ONE PointLight that is always in the scene and only ever dimmed — adding, removing or hiding a light recompiles every lit material.
   const lantern = new THREE.PointLight('#ffc98a', 9, 13, 1.6);
   lantern.intensity = 0; scene.add(lantern);
+  let moodBright = false, carryRange = null, carryNight = 0;
+  function applyCarry() {
+    const c = carriedLight({ mood, night: carryNight, range: carryRange, bright: moodBright });
+    lantern.intensity = c.intensity; lantern.distance = c.distance; lantern.decay = c.decay;
+    return c;
+  }
+  /** W22: how dark it is (0..1) and the rules' light radius in metres (null = the client's own). */
+  function setCarryLight({ night = carryNight, range = carryRange } = {}) { carryNight = night; carryRange = range; return applyCarry(); }
 
-  return { renderer, scene, camera, sun, hemi, sunDir, follow, resize, setMood, setTimeOfDay, get sky() { return lastSky; }, render: () => renderer.render(scene, camera) };
+  return { renderer, scene, camera, sun, hemi, sunDir, follow, resize, setMood, setTimeOfDay, setCarryLight, get carry() { return { intensity: lantern.intensity, distance: lantern.distance, hemi: hemi.intensity, fogNear: scene.fog.near, fogFar: scene.fog.far }; }, get sky() { return lastSky; }, render: () => renderer.render(scene, camera) };
 }
 
 function makeCloudSprite() {

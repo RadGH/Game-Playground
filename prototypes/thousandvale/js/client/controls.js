@@ -1,6 +1,7 @@
 // Third-person camera and the controls that drive your character.
 //
-// Keys:   W A S D / arrows   move (camera-relative)      Shift (hold)   sprint      Space   jump
+// Keys:   W A S D / arrows   move (camera-relative; you RUN — play-test 8 W20)      Shift (hold)   walk      Space   jump
+//         Num Lock        auto-run on / off (any move key, a click or Esc ends it)
 //         Tab                next enemy in front          1 / F          attack the target
 //         Esc                clear target / stop          Enter          chat        R   rise (when fallen)
 //         Mouse wheel        zoom                         Q / E          turn the camera
@@ -12,11 +13,27 @@
 // Pure-ish: no three.js import; it is handed a camera and a heightAt. The step function `intent()` is
 // what the game loop samples once per sim step to build an input message.
 
-export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCycleTarget, onClearTarget, onChat, onPickGround, getTarget, onRise, onSkill, onContext }) {
+/** A stick pushed less than this far (0..1) walks; further runs (W20). */
+export const WALK_BELOW = 0.6;
+/**
+ * W20 — do you run this step? Pure. `shift` = the walk key is held; `analog` = the stick record (may carry `walk` or the
+ * older `sprint` flag outright); `stickLen` = how far the stick is pushed when the stick alone is steering (null = keys).
+ */
+export function wantsRun({ shift = false, analog = null, stickLen = null } = {}) {
+  if (shift) return false;
+  if (analog && analog.walk != null) return !analog.walk;
+  if (analog && analog.sprint === true) return true;
+  if (stickLen != null && stickLen > 1e-3) return stickLen >= WALK_BELOW;
+  return true;
+}
+
+export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCycleTarget, onClearTarget, onChat, onPickGround, getTarget, onRise, onSkill, onContext, onAutorun }) {
   const keys = new Set();
   const cam = { yaw: Math.PI, pitch: 0.38, dist: 9, distWant: 9, focus: { x: 0, y: 0, z: 0 }, ready: false };
   let blocker = null;
   let drag = null, moveGoal = null, chase = null, typing = false, facing = Math.PI, jumpQueued = false;
+  let autorun = false;   // W20: keep going forward until a move key, a click-to-move, Esc or a second press
+  let held = false;      // W26: the mount call — nothing moves, and what was asked for is kept for afterwards
   let analog = null;   // T27 (stream G): a stick's vector from js/client/input (gamepad, the phone's thumb stick) — null = keys only
 
   const isTyping = () => typing || (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName));
@@ -26,12 +43,13 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     const k = e.code;
     if (k === 'Tab') { e.preventDefault(); onCycleTarget?.(); return; }
     if (k === 'Enter') { e.preventDefault(); onChat?.(); return; }
-    if (k === 'Escape') { moveGoal = null; chase = null; onClearTarget?.(); return; }
+    if (k === 'Escape') { moveGoal = null; chase = null; autorun = false; onClearTarget?.(); return; }
+    if (k === 'NumLock') { e.preventDefault(); if (!e.repeat) { autorun = !autorun; if (autorun) { moveGoal = null; chase = null; } onAutorun?.(autorun); } return; }
     if (k === 'Space') { e.preventDefault(); if (!e.repeat) jumpQueued = true; return; }
     if (k === 'KeyR') { onRise?.(); return; }
     if (k === 'KeyF') { e.preventDefault(); const t = getTarget?.(); if (t != null) { chase = t; onAttack?.(t); } return; }
     if (/^Digit[1-6]$/.test(k)) { e.preventDefault(); onSkill?.(+k.slice(5)); return; }
-    if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(k)) { moveGoal = null; chase = null; }
+    if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(k)) { moveGoal = null; chase = null; if (autorun && (k === 'KeyW' || k === 'KeyS' || k === 'ArrowUp' || k === 'ArrowDown')) { autorun = false; onAutorun?.(false); } }
     keys.add(k);
   });
   window.addEventListener('keyup', e => keys.delete(e.code));
@@ -67,7 +85,7 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
       return;
     }
     const g = onPickGround?.(ndc);
-    if (g) { moveGoal = { x: g.x, z: g.z }; chase = null; }
+    if (g) { moveGoal = { x: g.x, z: g.z }; chase = null; if (autorun) { autorun = false; onAutorun?.(false); } }
   });
   dom.addEventListener('wheel', e => { e.preventDefault(); cam.distWant = Math.max(2.8, Math.min(26, cam.distWant * (e.deltaY > 0 ? 1.12 : 0.89))); }, { passive: false });
 
@@ -76,15 +94,19 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
    * Returns { mx, mz, yaw, run, attacking }.
    */
   function intent(self, { targetPos = null, reach = 2.9, dead = false } = {}) {
-    if (dead) { moveGoal = null; chase = null; jumpQueued = false; return { mx: 0, mz: 0, yaw: facing, b: 0 }; }
+    if (dead) { moveGoal = null; chase = null; autorun = false; jumpQueued = false; return { mx: 0, mz: 0, yaw: facing, b: 0 }; }
+    // W26: while the mount is being called you stand still. Held keys, the stick, auto-run and a click-to-move goal are all
+    // KEPT (nothing is cleared), so the moment the hold ends you carry on to where you were headed.
+    if (held) { jumpQueued = false; return { mx: 0, mz: 0, yaw: facing, b: 0, held: true }; }
     let fx = 0, fz = 0;
+    if (autorun) fz += 1;
     if (keys.has('KeyW') || keys.has('ArrowUp')) fz += 1;
     if (keys.has('KeyS') || keys.has('ArrowDown')) fz -= 1;
     if (keys.has('KeyA') || keys.has('ArrowLeft')) fx += 1;
     if (keys.has('KeyD') || keys.has('ArrowRight')) fx -= 1;
     if (keys.has('KeyQ')) cam.yaw += 0.045;
     if (keys.has('KeyE')) cam.yaw -= 0.045;
-    if (analog && (analog.mx || analog.mz)) { fz += analog.mz; fx -= analog.mx; moveGoal = null; chase = null; }   // stick: x right, z forward
+    if (analog && (analog.mx || analog.mz)) { fz += analog.mz; fx -= analog.mx; moveGoal = null; chase = null; if (autorun && analog.mz < -0.5) { autorun = false; onAutorun?.(false); } }   // stick: x right, z forward
     // Camera forward on the ground = direction from camera to player.
     const cf = { x: Math.sin(cam.yaw), z: Math.cos(cam.yaw) };
     const cr = { x: Math.cos(cam.yaw), z: -Math.sin(cam.yaw) };
@@ -102,11 +124,15 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     const len = Math.hypot(mx, mz);
     if (len > 1e-3) { mx /= len; mz /= len; if (!(fz < 0 && fx === 0)) facing = Math.atan2(mx, mz); else facing = cam.yaw; }
     if (chase != null && !targetPos) chase = null;
-    const sprint = keys.has('ShiftLeft') || keys.has('ShiftRight') || !!(analog && analog.sprint);
+    // W20: you run unless you ask to walk — Shift held, or a stick pushed less than `WALK_BELOW` of the way (a stick that
+    // says `sprint`/`walk` itself wins). "Run" is the server's IN.SPRINT pace; walking is its plain one.
+    const sprint = wantsRun({ shift: keys.has('ShiftLeft') || keys.has('ShiftRight'), analog, stickLen: analog && !keysMove() ? Math.hypot(analog.mx || 0, analog.mz || 0) : null });
     const b = (sprint && len > 1e-3 ? 1 : 0) | (jumpQueued ? 2 : 0);   // IN.SPRINT = 1, IN.JUMP = 2
     jumpQueued = false;
     return { mx, mz, yaw: facing, b, sprint, inRange, chasing: chase };
   }
+
+  const keysMove = () => autorun || ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].some(k => keys.has(k));
 
   /** Place the camera behind `p` (the drawn player position). Keeps it above the ground. */
   function updateCamera(p, dt, height = 1.7) {
@@ -144,7 +170,13 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     stopChase() { chase = null; },
     attack(id) { chase = id; moveGoal = null; onAttack?.(id); },
     walkTo(x, z) { moveGoal = { x, z }; chase = null; },
-    stop() { moveGoal = null; chase = null; },
+    stop() { moveGoal = null; chase = null; autorun = false; },
+    /** W20: auto-run on / off (the Num Lock key does the same). */
+    setAutorun(v) { autorun = !!v; if (autorun) { moveGoal = null; chase = null; } onAutorun?.(autorun); },
+    get autorun() { return autorun; },
+    /** W26: hold still (the mount call). Nothing asked for is forgotten; `hold(false)` lets it all through again. */
+    hold(v) { held = !!v; },
+    get held() { return held; },
     setHeightAt(f) { heightAt = f; },
     /** fn(ax, ay, az, bx, by, bz) -> 0..1, how far along focus->camera the first solid starts (solids.js firstHit). */
     setBlocker(f) { blocker = f; },

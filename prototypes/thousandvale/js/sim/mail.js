@@ -39,7 +39,10 @@ export function createMail({ store, online, journal, syncChar, econ, trades, sen
 
   async function sendMail(o, m) {
     const ch = o.char, op = 'send';
-    if (!o.claimed || (ch.level || 1) < R.minLevel) return fail(o, op, 'gate', 'Sending mail needs a claimed account at level ' + R.minLevel + '.');
+    // W11 (round 8, report #32): a character on a claimed account IS linked — and the level is the account's (its highest
+    // character, o.alv), so a new alt of an established account posts letters from its first minute
+    if (!o.claimed) return fail(o, op, 'gate', 'Sending mail needs a claimed account. Claim yours from the Account button — it is free.');
+    if (Math.max(ch.level || 1, o.alv || 1) < R.minLevel) return fail(o, op, 'level', 'Sending mail opens when one of your characters reaches level ' + R.minLevel + '.');
     if (!inTown(o)) return fail(o, op, 'town', 'Post letters in a town.');
     if (busy(o)) return fail(o, op, 'busy', 'Busy, try again in a moment.');
     const uids = m.items || [], gold = m.gold || 0;

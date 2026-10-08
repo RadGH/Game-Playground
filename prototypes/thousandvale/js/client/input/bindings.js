@@ -51,13 +51,15 @@ export const ACTIONS = [
   { id: 'moveL', group: 'Moving', label: 'Move left', key: 'KeyA', keys: ['ArrowLeft'], row: 'move', pad: pad('LS'), touch: 'Left thumb stick' },
   { id: 'moveB', group: 'Moving', label: 'Move back', key: 'KeyS', keys: ['ArrowDown'], row: 'move', pad: pad('LS'), touch: 'Left thumb stick' },
   { id: 'moveR', group: 'Moving', label: 'Move right', key: 'KeyD', keys: ['ArrowRight'], row: 'move', pad: pad('LS'), touch: 'Left thumb stick' },
-  { id: 'sprint', group: 'Moving', label: 'Sprint', key: 'ShiftLeft', hold: true, pad: pad('L3', false, 'click the stick: on / off'), touch: 'Push the stick to its outer ring' },
+  // play-test 8 (W20): you run by default. Shift walks; Num Lock keeps you running forward until you steer or stop.
+  { id: 'walk', group: 'Moving', label: 'Walk (you run without it)', key: 'ShiftLeft', hold: true, pad: pad('L3', false, 'click the stick: walk on / off — or just push the stick part-way'), touch: 'Push the stick part-way (a full push runs)' },
+  { id: 'autorun', group: 'Moving', label: 'Auto-run: keep going forward (on / off)', key: 'NumLock', pad: pad('L3', true, 'with LT held'), touch: 'Quick wheel: Auto-run' },
   { id: 'jump', group: 'Moving', label: 'Jump', key: 'Space', pad: pad('A'), touch: 'Jump button' },
   { id: 'camL', group: 'Moving', label: 'Turn the camera left', key: 'KeyQ', hold: true, row: 'cam', rowLabel: 'Turn the camera', pad: pad('RS'), touch: 'Drag on the world' },
   { id: 'camR', group: 'Moving', label: 'Turn the camera right', key: 'KeyE', hold: true, row: 'cam', pad: pad('RS'), touch: 'Drag on the world', shares: 'interact' },
   { id: 'zoom', group: 'Moving', label: 'Zoom the camera', key: null, mouse: 'Mouse wheel', pad: pad('R3', false, 'steps: close · middle · far'), touch: 'Pinch on the world' },
   // ---- fighting
-  { id: 'strike', group: 'Fighting', label: 'Strike (basic attack)', key: 'KeyF', mouse: 'Right-click an enemy', pad: pad('X'), touch: 'Attack button (big, right thumb)' },
+  { id: 'strike', group: 'Fighting', label: 'Strike (basic attack) — in a loot window: take everything', key: 'KeyF', mouse: 'Right-click an enemy', pad: pad('X'), touch: 'Attack button (big, right thumb)' },
   { id: 'skill1', group: 'Fighting', label: 'Skill 1', key: 'Digit1', row: 'skills', rowLabel: 'Skills 1 – 6', pad: pad('Y'), touch: 'Skill arc, button 1' },
   { id: 'skill2', group: 'Fighting', label: 'Skill 2', key: 'Digit2', row: 'skills', pad: pad('B'), touch: 'Skill arc, button 2' },
   { id: 'skill3', group: 'Fighting', label: 'Skill 3', key: 'Digit3', row: 'skills', pad: pad('RB'), touch: 'Skill arc, button 3' },
@@ -76,7 +78,7 @@ export const ACTIONS = [
   { id: 'pause', group: 'Fighting', label: 'Menu: settings, help, log out', key: null, run: 'pause', mouse: 'Esc with nothing open', pad: pad('START'), touch: 'Menu (☰) in the quick wheel' },
   { id: 'rise', group: 'Fighting', label: 'Rise after falling', key: 'KeyR', pad: pad('A', false, 'when fallen'), ctx: 'dead', touch: 'The Rise button' },
   // ---- world
-  { id: 'interact', group: 'World', label: 'Use, talk, open, loot a body', key: 'KeyE', pad: pad('A', false, 'when a prompt shows'), ctx: 'prompt', touch: 'Tap the prompt' },
+  { id: 'interact', group: 'World', label: 'Use, talk, open, loot a body — in a loot window: take the selected item', key: 'KeyE', pad: pad('A', false, 'when a prompt shows'), ctx: 'prompt', touch: 'Tap the prompt' },
   { id: 'camp', group: 'World', label: 'Make camp (wilds)', key: 'KeyC', pad: pad('RB', true), touch: 'Quick wheel: Camp' },
   { id: 'fish', group: 'World', label: 'Cast your fishing line / reel in', key: 'KeyX', pad: pad('A', true), touch: 'Quick wheel: Fish (or the rod in your bag)' },
   { id: 'hook', group: 'World', label: 'Hook a bite; hold to reel during the tug', key: 'Space', shares: 'jump', pad: pad('A', false, 'while fishing'), ctx: 'fishing', touch: 'The Hook / Reel button (replaces Attack)' },
@@ -128,7 +130,7 @@ export const CHAT_ROWS = [['/w Name', 'Whisper'], ['/r', 'Answer the last whispe
 export const ACTION_BY_ID = Object.fromEntries(ACTIONS.map(a => [a.id, a]));
 export const GROUPS = [...new Set(ACTIONS.map(a => a.group))];
 
-const KEY_NAMES = { Space: 'Space', Escape: 'Esc', Enter: 'Enter', Tab: 'Tab', ShiftLeft: 'Shift', ShiftRight: 'Shift', ControlLeft: 'Ctrl', ControlRight: 'Ctrl', AltLeft: 'Alt', AltRight: 'Alt', Slash: '/', Backquote: '`', Minus: '-', Equal: '=', BracketLeft: '[', BracketRight: ']', Semicolon: ';', Quote: "'", Comma: ',', Period: '.', Backslash: '\\', ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→', CapsLock: 'Caps', Backspace: 'Backspace', Delete: 'Del', Insert: 'Ins', Home: 'Home', End: 'End', PageUp: 'PgUp', PageDown: 'PgDn' };
+const KEY_NAMES = { Space: 'Space', Escape: 'Esc', Enter: 'Enter', Tab: 'Tab', ShiftLeft: 'Shift', ShiftRight: 'Shift', ControlLeft: 'Ctrl', ControlRight: 'Ctrl', AltLeft: 'Alt', AltRight: 'Alt', Slash: '/', Backquote: '`', Minus: '-', Equal: '=', BracketLeft: '[', BracketRight: ']', Semicolon: ';', Quote: "'", Comma: ',', Period: '.', Backslash: '\\', ArrowUp: '↑', ArrowDown: '↓', NumLock: 'Num Lock', ArrowLeft: '←', ArrowRight: '→', CapsLock: 'Caps', Backspace: 'Backspace', Delete: 'Del', Insert: 'Ins', Home: 'Home', End: 'End', PageUp: 'PgUp', PageDown: 'PgDn' };
 /** A KeyboardEvent.code as people say it: KeyW -> W, Digit7 -> 7, Numpad3 -> Num 3. */
 export function keyLabel(code) {
   if (!code) return '—';
@@ -243,6 +245,7 @@ export const WHEEL = [
 /** The second ring (phone: swipe the wheel; pad: tap RB while it is open): things you do, not windows. */
 export const WHEEL_ACTIONS = [
   { id: 'mount', label: 'Mount', icon: 'mount' },
+  { id: 'autorun', label: 'Auto-run', icon: 'autorun' },
   { id: 'fish', label: 'Fish', icon: 'fish' },
   { id: 'camp', label: 'Camp', icon: 'camp' },
   { id: 'map', label: 'Map', icon: 'map' },

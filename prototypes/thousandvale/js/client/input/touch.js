@@ -2,7 +2,7 @@
 // <html data-layout="phone"> is set, and only input/layout.js (the game) or the gallery's frame may set that.
 //
 // What it adds (css/layout-phone.css places everything; this file only makes the controls work):
-//   · a floating thumb stick, left          -> controls.setAnalog (push it to the outer ring to sprint)
+//   · a floating thumb stick, left          -> controls.setAnalog (a full push runs, part-way walks — W20)
 //   · Jump / Target / Ally / Belt buttons   -> the same actions the keyboard has (input/bindings.js), as their default keys
 //   · the Belt: tap = potion slot 1, hold = a small wheel of all four consumable slots under your thumb
 //   · the quick-wheel button (every window)  and a chat bubble (the chat folds away while you fight)
@@ -55,9 +55,9 @@ export function createTouch({ api, input, run, radial }) {
   function stickAt(x, y) {
     const dx = x - ST.ox, dy = y - ST.oy, m = Math.hypot(dx, dy), k = m > ST.R ? ST.R / m : 1;
     thumb.style.transform = `translate(${(dx * k).toFixed(1)}px, ${(dy * k).toFixed(1)}px)`;
-    const f = Math.min(1, m / ST.R), sprint = f > 0.94;
+    const f = Math.min(1, m / ST.R), sprint = f >= 0.6;   // W20: run by default — only a part-way push walks
     base.classList.toggle('sprint', sprint);
-    api.controls?.setAnalog?.(f < 0.18 ? null : { mx: dx / (m || 1), mz: -dy / (m || 1), camX: 0, camY: 0, sprint });
+    api.controls?.setAnalog?.(f < 0.18 ? null : { mx: dx / (m || 1), mz: -dy / (m || 1), camX: 0, camY: 0, sprint, walk: !sprint });
   }
   function stickEnd() { ST.id = null; base.classList.remove('on', 'sprint'); thumb.style.transform = ''; api.controls?.setAnalog?.(null); if (html.dataset.variant !== 'b') { base.style.left = ''; base.style.top = ''; } }
   zone.addEventListener('pointerdown', e => {
@@ -125,6 +125,27 @@ export function createTouch({ api, input, run, radial }) {
   const SCROLL = svg('<path d="M6 3h11a2 2 0 0 1 2 2v14a2 2 0 0 0 2 2H8a2 2 0 0 1-2-2Z"/><path d="M6 3a2 2 0 0 0-2 2v2h2"/><path d="M10 8h6M10 12h6M10 16h3"/>');
   const info = mk('ph-info', 'Quests, events and a bigger map', SCROLL + '<b></b>');
   tap(info, () => { html.dataset.hudinfo = html.dataset.hudinfo === 'open' ? '' : 'open'; info.classList.toggle('on', html.dataset.hudinfo === 'open'); });
+  // an event must never start unseen behind the closed bubble: a one-line chip says its name and time for a few seconds
+  // when it starts / you walk into it / it ends, and the bubble pulses for as long as one is running round you
+  const chip = document.createElement('button'); chip.type = 'button'; chip.className = 'ph-chip'; chip.hidden = true; ui.appendChild(chip);
+  tap(chip, () => { html.dataset.hudinfo = 'open'; info.classList.add('on'); chip.hidden = true; });
+  const seenEv = new Map(); let chipT = 0;
+  function eventWatch() {
+    let live = false;
+    for (const c of document.querySelectorAll('.right-col .et-card')) {
+      const key = c.dataset.key || c.querySelector('.et-name')?.textContent || '', st = ['won', 'lost', 'live', 'soon'].find(k => c.classList.contains(k)) || 'live', where = c.classList.contains('inside') ? 'in' : 'out';
+      if (st === 'live' && where === 'in') live = true;
+      const sig = st + ':' + where;
+      if (seenEv.get(key) === sig) continue;
+      const first = !seenEv.has(key); seenEv.set(key, sig);
+      if (html.dataset.hudinfo === 'open') continue;
+      const name = c.querySelector('.et-name')?.textContent || 'An event';
+      const tail = st === 'won' || st === 'lost' ? (c.querySelector('.et-result')?.textContent || (st === 'won' ? 'Done' : 'Over')) : [c.querySelector('.et-state')?.textContent, c.querySelector('.et-time')?.textContent].filter(Boolean).join(' · ');
+      if (first || st === 'won' || st === 'lost' || where === 'in') { chip.textContent = `${name} — ${tail}`; chip.dataset.state = st; chip.hidden = false; clearTimeout(chipT); chipT = setTimeout(() => { chip.hidden = true; }, st === 'won' || st === 'lost' ? 9000 : 7000); }
+    }
+    for (const k of [...seenEv.keys()]) if (![...document.querySelectorAll('.right-col .et-card')].some(c => (c.dataset.key || c.querySelector('.et-name')?.textContent || '') === k)) seenEv.delete(k);
+    info.classList.toggle('pulse', live && html.dataset.hudinfo !== 'open');
+  }
   const pmin = mk('ph-partymin', 'Party frames: small or full', svg('<circle cx="7" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><circle cx="12" cy="17" r="3"/>'));
   const setParty = min => { html.dataset.party = min ? 'min' : ''; pmin.classList.toggle('on', !!min); try { localStorage.setItem('tv.phone.party', min ? 'min' : ''); } catch { /* private window */ } };
   tap(pmin, () => setParty(html.dataset.party !== 'min'));
@@ -258,6 +279,7 @@ export function createTouch({ api, input, run, radial }) {
     // V7: how many quests and events sit behind the bubble; each party row's health / mana as numbers the round frames draw; who is targeted
     const n = document.querySelectorAll('.right-col .et-card, .right-col .tr-main, .right-col .tr-row').length;
     const badge = info.querySelector('b'); if (badge.textContent !== (n ? String(n) : '')) badge.textContent = n ? String(n) : '';
+    eventWatch();
     const tname = document.querySelector('#target-frame:not([hidden]) #target-name')?.textContent || '';
     for (const m of document.querySelectorAll('#party .pmember')) {
       const hp = parseFloat(m.querySelector('.bar.hp i')?.style.width || '100') / 100, mpEl = m.querySelector('.bar.mp'), mp = mpEl && !mpEl.hidden ? parseFloat(mpEl.querySelector('i')?.style.width || '0') / 100 : 0;

@@ -20,14 +20,32 @@ export async function loadLookData() {
   if (!presets) presets = fetch(new URL('../../../../avatar-2d/data/presets.json', import.meta.url)).then(r => r.json());
   if (!outfits) outfits = loadClassOutfits();
   // item bases (emberveil items.json, the table Farhold's loot reads): an armour base's tier, a weapon's subtype
-  if (!bases) bases = fetch(new URL('../../../emberveil/data/items.json', import.meta.url)).then(r => (r.ok ? r.json() : {})).then(d => ({ ...(d.weaponBases || {}), ...(d.armorBases || {}) })).catch(() => ({}));
+  // play-test 8 (W19/W25): plus Thousandvale's own bases (data/rules/gear-tv.json — backpacks, cloaks, belts), which the
+  // server adds to that table in memory; without them a compact `info.gear` entry of one had no tier, no slot, no pack model
+  if (!bases) bases = Promise.all([
+    fetch(new URL('../../../emberveil/data/items.json', import.meta.url)).then(r => (r.ok ? r.json() : {})).catch(() => ({})),
+    fetch(new URL('../../data/rules/gear-tv.json', import.meta.url)).then(r => (r.ok ? r.json() : {})).catch(() => ({})),
+  ]).then(([d, tv]) => ({ ...(d.weaponBases || {}), ...(d.armorBases || {}), ...(tv.bases?.weapon || {}), ...(tv.bases?.armor || {}) })).catch(() => ({}));
   // play-test 4 S18: tier-2 class armour (avatar-3d class-outfits-t2.json) + C/E's themes for themed worn pieces
   if (!outfits2) outfits2 = loadClassOutfits2();
   if (!armourThemes) armourThemes = fetch(new URL('../../data/rules/armour-tiers.json', import.meta.url)).then(r => (r.ok ? r.json() : {})).then(d => d.themes || {}).catch(() => ({}));
   if (!gearCatalog) gearCatalog = Promise.resolve().then(() => loadGearCatalog()).catch(() => null);      // absent = the older tables draw everything
   const [p, o, b, o2, th, gc] = await Promise.all([presets, outfits, bases, outfits2, armourThemes, gearCatalog]);
-  return { presets: p, outfits: o, bases: b, outfits2: o2, themes: th, catalog: gc };
+  loaded = { presets: p, outfits: o, bases: b, outfits2: o2, themes: th, catalog: gc };
+  return loaded;
 }
+
+/**
+ * W25: the options every body in the world is dressed with — and so the ones an item's ICON must be drawn with
+ * (gear-look.js `wornLook(item, slot, gearOpts(cls))`). Sync: before the look data has loaded it answers with empty
+ * tables (the icon queue starts after boot); `await loadLookData()` first where that matters.
+ */
+let loaded = null;
+export function gearOpts(cls = null) {
+  const L = loaded || {};
+  return { baseOf: k => L.bases?.[k] || null, tier2: (cls && L.outfits2?.[cls]) || null, themes: L.themes || null, catalog: L.catalog || null };
+}
+export const lookDataReady = () => !!loaded;
 
 /** The avatar JSON for a player look. Cached by key: a crowd of the same class+seed builds once. */
 const cache = new Map();
@@ -47,7 +65,7 @@ export async function avatarFor(look) {
   const { presets: data, outfits: o, bases: B, outfits2: O2, themes: TH, catalog: GC } = await loadLookData();
   const base = applyCustom(randomChibi2(randomAvatar, data, { race, seed, makeRng, known: (slot, id) => partIds(slot).includes(id) }), custom);
   let a;
-  if (worn) a = { ...base, ...gearLook(look.gear, { baseOf: k => B?.[k] || null, tier2: O2?.[cls] || null, themes: TH, catalog: GC }) };
+  if (worn) a = { ...base, ...gearLook(look.gear, gearOpts(cls)) };      // W25: the one set of options (icons use the same)
   else { const outfit = o[cls] || o.warrior; a = outfit ? dressAs(base, outfit) : base; }
   if (cache.size > 300) cache.delete(cache.keys().next().value);
   cache.set(key, a);

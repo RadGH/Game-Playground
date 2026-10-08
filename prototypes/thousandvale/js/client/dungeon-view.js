@@ -13,6 +13,7 @@ import { makeSurface } from '../../../../highdef-3d/js/kit/textures.js';
 import { unrleTiles, dungeonTerrain } from '../sim/dungeon.js';
 import { makeGlowTexture } from './decor.js';
 import { LIGHTS } from './lightpool.js';
+import { DUNGEON_AMBIENT } from './daynight.js';
 import { perf } from './perf.js';
 const DTEX = new Map();
 
@@ -59,7 +60,8 @@ export function createDungeonView(d, { quality = 'high' } = {}) {
   const lookKey = lookFor(d), LK = LOOKS[lookKey];
   const wallH = LK.wallH || WALL_H;
   // Low quality has no textures and few lights: a faint glow in the stone itself keeps rooms readable
-  const glowF = cheap ? 0.2 : 0, glowW = cheap ? 0.12 : 0;
+  // play-test 8 (W22): and on every quality the stone keeps a trace of its own colour, so no corner is pitch black
+  const glowF = cheap ? 0.2 : DUNGEON_AMBIENT.floorGlow, glowW = cheap ? 0.12 : DUNGEON_AMBIENT.wallGlow;
   const floorMat = new (cheap ? THREE.MeshLambertMaterial : THREE.MeshStandardMaterial)({ map: tex(LK.floor), color: new THREE.Color(LK.fT).multiplyScalar(0.92), emissive: new THREE.Color(LK.fT).multiplyScalar(glowF), ...(cheap ? {} : { roughness: 0.92 }) });
   const wallMat = new (cheap ? THREE.MeshLambertMaterial : THREE.MeshStandardMaterial)({ map: tex(LK.wall), color: new THREE.Color(LK.wT), emissive: new THREE.Color(LK.wT).multiplyScalar(glowW), ...(cheap ? {} : { roughness: 0.95 }) });
 

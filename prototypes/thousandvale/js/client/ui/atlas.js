@@ -13,6 +13,7 @@ import { soonText, eventStateText } from './pt2-core.js';
 import { createMapSource } from './map-load.js';
 import { createFog, collectMarkers, locateQuest, zoneKeyAt, ZONE_M, whereText, titleCase } from './map-data.js';
 import { unrleTiles } from '../../sim/dungeon.js';
+import { HIDDEN } from './hidden-events.js';          // W13: events the player hid from the HUD
 
 const store = {
   get(k, d = null) { try { const v = localStorage.getItem('tv.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
@@ -216,6 +217,8 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
       list.push({ id: 'sp:' + sp.key, kind: 'landmark', x: sp.x, z: sp.z, name: sp.name || 'A place of note', sub: sp.kind === 'hook' ? 'Something worth a closer look' : 'Point of interest', priority: 1, size: 5 });
     }
     for (const x of api.extraMarkers?.() || []) list.push(x);      // play-test 4: loot on corpses, announced mini bosses, quest areas (ui/pt2.js)
+    // W13: an event the player hid stays on the big map (greyed, so it can be brought back) and leaves the minimap
+    if (HIDDEN.size) for (const m of list) if (m.kind === 'liveevent') { const e = [...S.events.values()].find(x => 'ev:' + (x.uid || x.id || x.name) === m.id); if (e && HIDDEN.has(e)) { m.hiddenEv = true; m.dim = true; m.act = null; m.sub = `${m.sub ? m.sub + ' · ' : ''}hidden from your screen`; } }
     const meM = list.find(m => m.kind === 'me'); if (meM && p) meM.yaw = p.yaw;
     return list;
   }
@@ -250,6 +253,7 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
     n.on('mapData', m => { S.server = m; for (const p of m.places || []) learnPlace(p); for (const e of m.events || []) if (Number.isFinite(e.x)) S.events.set(e.realm ? 'realm' : 'zone:' + (e.uid || e.id), { ...e, sub: e.realm ? 'Realm event — waystone travel there is free' : 'Zone event', free: !!e.realm, ...(e.state ? { state: e.state, at: e.at, soon: e.state === 'soon', timed: e.state === 'soon' || e.state === 'cooldown' } : {}) }); for (const e of S.events.values()) if (e.state && !e.free) e.sub = eventStateText(e) + ' — zone event'; changed(); });
     n.on('discover', m => { for (const p of m.places || []) learnPlace(p); changed(); });
     n.on('joined', () => { try { net()?.map?.(); } catch { /* old server */ } });
+    HIDDEN.onChange(changed);
   }
 
   const api = {

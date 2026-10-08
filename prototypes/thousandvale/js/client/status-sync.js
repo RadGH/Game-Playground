@@ -17,22 +17,15 @@
 //   st.dead(id)         // a death
 //   st.update(nowMs)    // every frame
 
-import { wornLightRange } from './gear-look.js';
 import * as THREE from 'three';
 import { statusLook } from './spell-looks.js';
-import { LIGHTS } from './lightpool.js';
 
 const GRACE_MS = 1500;
-/** C's torch (TORCH.lightRange): a lit torch lights 14 m round whoever carries it. */
-export const TORCH_RANGE = 14;
-/** Pure: does a status list carry a lit torch? Exported for tests. */
-export const torchOn = (st, dead) => !dead && Array.isArray(st) && st.includes('item:torch');
-
 /** Pure: the aura names a status list should show (dead bodies show none). Exported for tests. */
 export function wantedAuras(st, dead) {
   if (dead || !Array.isArray(st)) return new Set();
   const out = new Set();
-  // `item:*` are consumable buffs (C: whetted, oiled, well_fed, oats…) — no aura; `item:torch` is a carried light (torchOn)
+  // `item:*` are consumable buffs (C: whetted, oiled, well_fed, oats…) — no aura. (`item:torch` and the worn `light` slot were carried lights until play-test 8, W22: light items are gone and nothing is drawn for one.)
   for (const s of st) { if (String(s).startsWith('item:')) continue; const k = statusLook(s) || String(s || ''); if (k) out.add(k); }
   return out;
 }
@@ -61,15 +54,8 @@ export function auraDiff(drawn, want, grace = new Map(), now = 0) {
   return { on, off };
 }
 
-export function createStatusSync({ actors, fx, infoOf = () => null, selfDead = () => false, selfId = () => null, night = () => 0, groundY = null } = {}) {
+export function createStatusSync({ actors, fx, infoOf = () => null, selfDead = () => false, selfId = () => null, groundY = null } = {}) {
   let next = 0;
-  /** A carried torch: a light SOURCE from the fixed pool riding the body (no new PointLight, so no shader recompile). */
-  function torch(a, on, range = TORCH_RANGE) {
-    if (a.torchLight && on && a.torchLight.distance !== range) a.torchLight.distance = range;      // a worn lantern reaches further than a torch
-    if (on && !a.torchLight) a.torchLight = LIGHTS.add({ x: 0.35, y: 1.9, z: 0.2, color: '#ffb35a', intensity: 0, distance: range, decay: 1.4, flicker: 0.12, follow: a.group });
-    if (!on && a.torchLight) { a.torchLight.remove(); a.torchLight = null; }
-    if (a.torchLight) a.torchLight.intensity = 6 + 14 * night();
-  }
   const book = a => (a.auras ||= { drawn: new Set(), grace: new Map() });
   function set(a, s, on) {
     const b = book(a);
@@ -94,7 +80,7 @@ export function createStatusSync({ actors, fx, infoOf = () => null, selfDead = (
       b.grace.set(s, performance.now() + GRACE_MS);
       if (on) b.grace.delete('-' + s); else b.grace.set('-' + s, 1);
     },
-    dead(id) { const a = actors.get(id); if (a) { clear(a); torch(a, false); } },
+    dead(id) { const a = actors.get(id); if (a) clear(a); },
     /** C's recall charm: `fx {kind:'channel', id, name, ms}` starts the channel, `{kind:'channel', id, end:'done'|'broken'}` ends it. */
     onChannel(ev) {
       if (!ev || ev.type !== 'fx' || ev.kind !== 'channel') return;
@@ -113,10 +99,7 @@ export function createStatusSync({ actors, fx, infoOf = () => null, selfDead = (
         if (a.id === 'preview') continue;
         const info = infoOf(a.id);
         const dead = a.dead || (a.id === me && selfDead());
-        if (dead) { if (a.auras?.drawn.size) clear(a); if (a.torchLight) torch(a, false); continue; }
-        // play-test 5 (C's `light` slot): a worn lantern or torch lights all the time, as far as the item says
-        const worn = a.kind === 'player' ? wornLightRange(a.look?.gear || info?.gear) : 0;
-        torch(a, torchOn(info?.st, false) || worn > 0, worn > 0 ? Math.max(worn, torchOn(info?.st, false) ? TORCH_RANGE : 0) : TORCH_RANGE);
+        if (dead) { if (a.auras?.drawn.size) clear(a); continue; }
         if (!info && !a.auras) continue;
         const want = wantedAuras(info?.st, false);
         for (const k of modAuras(info?.aff || info?.mods || info?.affixes)) want.add(k);     // S4: a burning rare burns all the time
@@ -126,6 +109,6 @@ export function createStatusSync({ actors, fx, infoOf = () => null, selfDead = (
         for (const s of off) set(a, s, false);
       }
     },
-    stats() { let n = 0, t = 0; for (const a of actors.actors.values()) { n += a.auras?.drawn.size || 0; if (a.torchLight) t++; } return { auras: n, torches: t }; },
+    stats() { let n = 0; for (const a of actors.actors.values()) n += a.auras?.drawn.size || 0; return { auras: n, torches: 0 }; },
   };
 }

@@ -19,7 +19,7 @@ const WEAPON_FAMILY = {            // a Farhold base's subtype -> our family
   spear: 'spear', polearm: 'polearm', javelin: 'javelin', bow: 'bow', crossbow: 'crossbow', staff: 'staff',
   wand: 'wand', scepter: 'scepter', orb: 'orb', tome: 'tome',
 };
-const ARMOUR_FAMILY = { head: 'head', chest: 'chest', legs: 'legs', hands: 'hands', feet: 'feet', ring: 'ring', necklace: 'neck', back: 'cloak', waist: 'belt', light: 'light' };   // back / waist / light: play-test 5 slots
+const ARMOUR_FAMILY = { head: 'head', chest: 'chest', legs: 'legs', hands: 'hands', feet: 'feet', ring: 'ring', necklace: 'neck', back: 'cloak', waist: 'belt' };   // back / waist: play-test 5 slots (W22: `light` is gone)
 
 /** The family a base key belongs to (null = not a drop base we know). */
 export function familyOf(items, key) {
@@ -28,6 +28,7 @@ export function familyOf(items, key) {
   const a = items.armorBases && items.armorBases[key];
   if (!a) return null;
   if (a.isShield) return 'shield';
+  if (a.pack) return 'pack';                    // W19: a backpack shares the cloak's slot, not its family
   if (a.slot === 'offhand') return key === 'quiver' ? 'quiver' : 'focus';
   return ARMOUR_FAMILY[a.slot] || null;
 }

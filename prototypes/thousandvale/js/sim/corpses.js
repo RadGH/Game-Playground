@@ -204,8 +204,11 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
   /** Bodies in `o`'s room within LOOT_NEAR_M of them holding something for them, `first` leading. */
   function nearBodies(o, first) {
     const c = o.char.id, e = o.entity, out = [first];
+    // W24 (round 8, report #45): a CONTAINER (an event chest) opens only in its own window. Looting the corpse beside it used to
+    // sweep the chest's share into the same "take all", so the chest read "nothing left on it" and packed up unopened.
+    if (first.e.kind === 'object') return out;
     for (const b of bodies.values()) {
-      if (b === first || b.room !== o.room || b.e.removed || !lootableFor(c, b)) continue;
+      if (b === first || b.room !== o.room || b.e.removed || b.e.kind === 'object' || !lootableFor(c, b)) continue;
       if (Math.hypot(b.e.x - e.x, b.e.z - e.z) <= LOOT_NEAR_M) out.push(b);
     }
     return out;
@@ -370,7 +373,19 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
     return true;
   }
   const hasLoot = (room, e) => { const b = bodies.get(keyOf(room, e)); return !!(b && hasAny(b)); };
+  /** W24: is there anything left on this body FOR this character? ; keep a container's body alive until `untilMs` (room ms). */
+  const hasLootFor = (room, e, charId) => { const b = bodies.get(keyOf(room, e)); return !!(b && lootableFor(charId, b)); };
+  /** W24: lift what is left of one character's personal share off a body (the event posts it to them) -> { gold, items } | null. */
+  function takeShare(room, e, charId) {
+    const b = bodies.get(keyOf(room, e)); const s = b && b.shares.get(charId);
+    if (!s || shareEmpty(s)) return null;
+    const out = { gold: s.gold, items: s.items.splice(0) }; s.gold = 0;
+    tell(charId, { t: 'lootable', id: b.e.id, on: false });
+    if (!hasAny(b)) forget(b);
+    return out;
+  }
+  const holdUntil = (room, e, untilMs) => { const b = bodies.get(keyOf(room, e)); if (b) b.until = Math.max(b.until, untilMs); };
   const forgetBody = (room, e) => { const b = bodies.get(keyOf(room, e)); if (b) forget(b, true); };
 
-  return { hold, partyDrop, keepBody, op, tick, leftRoom, bodies, rolls, view, holdFor, freeOn, hasLoot, forgetBody, bestFor, windows, _resolve: id => { const r = rolls.get(id); if (r) resolve(r); } };
+  return { hold, partyDrop, keepBody, op, tick, leftRoom, bodies, rolls, view, holdFor, freeOn, hasLoot, hasLootFor, holdUntil, takeShare, forgetBody, bestFor, windows, _resolve: id => { const r = rolls.get(id); if (r) resolve(r); } };
 }

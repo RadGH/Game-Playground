@@ -32,7 +32,7 @@ import { cardText, whoOf, whoText } from './wording.js';
 import { reviveOf, directHealSlot } from './tv-skills.js';
 import { runtimeFor, shapeOfUnit } from './cast-skills.js';
 import { attackReach, basicCard, isHeldFocus, stampCaster } from './caster-forms.js';
-import { TV_SLOTS } from './tv-gear.js';
+import { TV_SLOTS, bagBonusOf, isLightItem as isLightRaw, lightRefund as lightRefundRaw } from './tv-gear.js';
 import { itemPrice, sellPrice as sellPriceOf, priceParts, killGold as killGoldOf, goldFound, isGear, retrainPrice as retrainPriceTv, questHour as questHourOf } from './economy.js';
 import { weaponHands } from './farhold.js';
 import { makeCrate as makeCrateItem, openCrate as openCrateItem, isCrate, crateText } from './crates.js';
@@ -52,7 +52,7 @@ import { groundAdapter } from './terrain-read.js';
 import { serializeGear } from './character.js';
 export { serializeGear, restoreGear } from './character.js';
 export { nextTarget, tabOrder, validTarget } from './targeting.js';
-export { BUFF_KINDS, TORCH, RECALL, REVIVE_FLASK } from './buffs.js';
+export { BUFF_KINDS, RECALL, REVIVE_FLASK } from './buffs.js';
 export { MOUNT_RULES, mountRefusal, mountSpeedMul, mountCalm, dismounts } from './mount.js';
 export { LOOT_THRESHOLDS, THRESHOLD_LABELS, DEFAULT_LOOT_THRESHOLD, RARITY_RANK, lootTier, lootRank, normalizeThreshold, locksForRoll, splitLoot, rollWinner } from './loot-rules.js';
 import { xpForLevel, levelFromXp, hashStr } from './farhold.js';
@@ -82,6 +82,16 @@ export const crateLabel = spec => crateText(shared?.crates || null, spec, { gift
 // ---- owner feedback 7 (V2): gold, for the server and E's tools/sim-economy.mjs (no room needed) ----
 /** The LIST price of an item — final (level, slot, rarity in it); a shop multiplies by its town's factor only. */
 export const priceOf = item => itemPrice(shared?.prices || null, item);
+// ---- owner feedback 8: W22 (no light items) and W19 (backpacks), for the server without a room ----
+/** The light everyone carries now: `{ radius, dungeonRadius, dungeonAmbient }` (data/rules/progression.json `light`). */
+const lightOf = engine => Object.freeze({ radius: 22, dungeonRadius: 28, dungeonAmbient: 0.4, ...(engine?.progression?.light ? (({ _doc, ...r }) => r)(engine.progression.light) : {}) });
+export const LIGHT = lightOf(shared);
+/** Is this bag / worn item a light from before W22 (a lantern, a torch, the Bundle of Torches)? A converts these on load. */
+export const isLightItem = item => isLightRaw(item, shared?.tvGear || null);
+/** Gold to pay for one (its LIST price, per item of a stack); 0 when it is not a light. */
+export const lightRefund = item => lightRefundRaw(item, shared?.tvGear || null, it => itemPrice(shared?.prices || null, it));
+/** W19: bag slots an item gives when worn on the back (0 = not a backpack). */
+export { bagBonusOf };
 /** What a merchant pays for it (never more than the list price). */
 export const sellPriceFor = item => sellPriceOf(shared?.prices || null, item);
 /** `{ price, sell, level, slot, parts }` for a tooltip or the sim. */
@@ -448,7 +458,16 @@ export function createRules(host, opts = {}) {
     return { rank: 'normal', modifiers: [] };
   }
 
+  const lightPay = [];
   function addEntity(e) {
+    addEntityInner(e);
+    while (lightPay.length) {
+      const p = lightPay.pop();
+      host.award(p.e, { gold: p.gold, reason: 'lightRefund' });
+      host.event({ type: 'fx', kind: 'notice', id: p.e.id, why: 'lightRefund', gold: p.gold, text: `Lanterns and torches were removed from the game — everyone carries a light now. You were paid ${p.gold} gold for yours.` });
+    }
+  }
+  function addEntityInner(e) {
     if (e.kind === 'npc' && adopting) {
       // a follower this module is putting down (spawnEntity above)
       e.r.unit = adopting;
@@ -482,6 +501,8 @@ export function createRules(host, opts = {}) {
           });
           restoreBuild(unit, ch.build);        // P6: saved talents, perks, unlocks
           if (ch.hp > 0) unit.hp = Math.min(ch.hp, unit.maxHp);
+          // owner feedback 8 (W22): a lantern / torch that was worn is gone from the game — pay its list price back, once
+          if (unit.lightOwed > 0 && host.award) { lightPay.push({ e, gold: unit.lightOwed }); unit.lightOwed = 0; }
           builds++;
         }
         unit.roomRng = room.streams.get('bars');
@@ -711,7 +732,7 @@ export function createRules(host, opts = {}) {
    * Use a consumable whose effect is the rules' (the lead's follow-up to play-test 2). `use` = stream E's
    * goods `use` block (shops.json goodsCatalog) or A's potion effect (`{ type: 'revive' }`):
    *   { type: 'buff', buff: { stat, amount, minutes } }   a timed self-buff (one per kind; buffs.js)
-   *   { type: 'light', minutes }                          a lit torch (light + a night bonus vs undead/beasts)
+   *   { type: 'light' }                                   REFUSED, why 'gone' (owner feedback 8 W22: torches are removed; A refunds them)
    *   { type: 'cleanse', statuses, heal }                 a poultice: those statuses off + a share of max health
    *   { type: 'recall' }                                  a 5 s channel, standing still; `opts.done()` runs when it
    *                                                       completes (A: consume the charm, travel to the bound inn)
@@ -724,8 +745,9 @@ export function createRules(host, opts = {}) {
     if (!u || !use || typeof use !== 'object') return { ok: false, why: 'item', text: 'You cannot use that.' };
     if (u.dead || e.dead) return { ok: false, why: 'dead', text: 'You are dead.' };
     const name = opts.name || 'That';
-    if (use.type === 'buff' || use.type === 'light') {
-      const spec = use.type === 'light' ? { stat: 'light', minutes: use.minutes } : use.buff;
+    if (use.type === 'light') return { ok: false, why: 'gone', text: 'Torches were removed from the game — everyone carries a light now. A merchant will pay you back for it.' };
+    if (use.type === 'buff') {
+      const spec = use.buff;
       const r = run(() => {
         const out = applyItemBuff(u, spec, { source: opts.itemId || null });
         if (out.ok) { host.event({ type: 'fx', id: u.id, kind: 'status', status: out.id, on: true }); sheetCheck(u); }
@@ -767,15 +789,44 @@ export function createRules(host, opts = {}) {
   }
   /** Fighting = a monster has you as its target. */
   const combatNow = u => field.monsters.some(m => m.dying == null && m.targetId === u.id);
-  /** The shop buffs on an entity: { dmgPct, armorPct, mountSpeedPct, light, lightRange, ... } (A: riding speed; D-world: torch light). */
+  /**
+   * The shop buffs on an entity: { dmgPct, armorPct, mountSpeedPct, ... } (A: riding speed). Owner feedback 8 (W22): there
+   * are no light items any more — `lightRange` is the SAME for everyone (LIGHT.radius), kept on this answer so a client
+   * that read it for the torch gets the wider light with no change.
+   */
   function itemBuffs(e) {
     const u = e?.r?.unit;
     if (!u || u.dead) return {};
     const out = itemBuffsOf(u);
-    // play-test 5 slots: a WORN light (a lantern, a torch in the `light` slot) lights as far as its own property says
-    const worn = u.equipment?.light ? (u.derived?.lightRange || 0) : 0;
-    if (worn > 0) { out.light = 1; out.lightRange = Math.max(out.lightRange || 0, worn); out.wornLight = u.equipment.light.g5 || u.equipment.light.baseKey; }
+    out.lightRange = lightOf(engine).radius;
     return out;
+  }
+  /** W19: bag slots the worn backpack gives (0 without one). */
+  const bagBonus = e => bagBonusOf(e?.r?.unit?.equipment?.back);
+  /**
+   * W19: may the thing on the back come off (or be swapped for `item`)? A passes what the bag holds and its own base
+   * size; the answer is `{ ok:false, why:'bagSlots', need, text }` when the bag would no longer fit.
+   */
+  function packCheck(u, incoming, { bagCount = null, bagBase = null } = {}) {
+    if (bagCount == null || bagBase == null) return null;
+    const cap = bagBase + bagBonusOf(incoming);
+    const count = bagCount + (u.equipment?.back ? 1 : 0) - (incoming ? 1 : 0);        // the old one goes INTO the bag; the new one leaves it
+    if (count <= cap) return null;
+    const need = count - cap;
+    return { ok: false, why: 'bagSlots', need, text: `Empty ${need} more bag slot${need === 1 ? '' : 's'} first — the pack's extra room is holding things.` };
+  }
+  function canUnequip(e, slot, opts = {}) {
+    const u = e?.r?.unit;
+    if (!u || !u.equipment?.[slot]) return { ok: false, text: 'Nothing is worn there.' };
+    if (slot === 'back' && bagBonusOf(u.equipment.back) > 0) { const no = packCheck(u, null, opts); if (no) return no; }
+    return { ok: true };
+  }
+  /** W22: gold owed for a light that was worn when this character was last saved (0 when none); reading it clears it. */
+  function lightRefundOwed(e) {
+    const u = e?.r?.unit;
+    const n = u?.lightOwed || 0;
+    if (u) u.lightOwed = 0;
+    return n;
   }
 
   function onLevel(e) {
@@ -837,9 +888,11 @@ export function createRules(host, opts = {}) {
 
   // ------------------------------------------------------------------ gear (protocol.md §7 M1, A's ask 3)
 
-  function equip(e, item, slot = null) {
+  function equip(e, item, slot = null, opts = {}) {
     const u = e.r.unit;
     if (!u || !item || typeof item !== 'object') return { ok: false, text: 'Nothing to equip.' };
+    if (isLightRaw(item, engine.tvGear)) return { ok: false, why: 'gone', text: 'Lanterns and torches were removed from the game — everyone carries a light now.' };
+    if ((slot || item.slot) === 'back' && item.slot === 'back') { const no = packCheck(u, item, opts); if (no) return no; }
     // play-test 5 slots: a cloak (`back`) and a belt (`waist`) are Thousandvale's own slots — Farhold's `equip` does not
     // know them, so they are put on here (its level rule still asked); the sheet sums their properties like any ring's
     const want = slot || item.slot;
@@ -862,9 +915,10 @@ export function createRules(host, opts = {}) {
       return { ok: true, removed };
     });
   }
-  function unequip(e, slot) {
+  function unequip(e, slot, opts = {}) {
     const u = e.r.unit;
     if (!u || !u.equipment?.[slot]) return { ok: false, text: 'Nothing is worn there.' };
+    if (slot === 'back') { const no = packCheck(u, null, opts); if (no) return no; }
     if (TV_SLOTS.includes(slot)) return run(() => { const item = u.equipment[slot]; u.equipment[slot] = null; engine.rpg.refresh(u); return { ok: true, item }; });
     return run(() => {
       const item = engine.rpg.unequip(u, slot);
@@ -950,9 +1004,11 @@ export function createRules(host, opts = {}) {
   }
 
   /** T7: would `item` go into `slot` right now? Asks without doing: `{ ok, text }` (Farhold's own sentence when not). */
-  function canEquip(e, item, slot = null) {
+  function canEquip(e, item, slot = null, opts = {}) {
     const u = e?.r?.unit;
     if (!u || !item || typeof item !== 'object') return { ok: false, text: 'Nothing to equip.' };
+    if (isLightRaw(item, engine.tvGear)) return { ok: false, why: 'gone', text: 'Lanterns and torches were removed from the game — everyone carries a light now.' };
+    if ((slot || item.slot) === 'back' && item.slot === 'back') { const no = packCheck(u, item, opts); if (no) return no; }
     if (TV_SLOTS.includes(slot || item.slot) && item.slot !== (slot || item.slot)) return { ok: false, text: `${item.name || 'That'} will not go in that slot.` };
     const why = engine.rpg.equipRefusal(u, item, { into: slot || null });
     return why ? { ok: false, text: why } : { ok: true };
@@ -1213,7 +1269,9 @@ export function createRules(host, opts = {}) {
   }
 
   return {
-    equip, unequip, canEquip, gear, saveGear, rollLoot, onParty, useObject, bar, backfill, unlock, revived,
+    equip, unequip, canEquip, canUnequip, bagBonus, lightRefundOwed, gear, saveGear,
+    /** owner feedback 8 (W22): the light everyone carries — `{ radius, dungeonRadius, dungeonAmbient }` */
+    LIGHT: lightOf(engine), rollLoot, onParty, useObject, bar, backfill, unlock, revived,
     applyKit, makeItem, makeCrate, openCrate, sheet, sheetWith,
     /** owner feedback 7 (V2): an item's list price (final), what a merchant pays, and the parts for a tooltip */
     price: priceOf, sellPrice: sellPriceFor, priceRow,
@@ -1222,7 +1280,7 @@ export function createRules(host, opts = {}) {
     formOf: e => { const u = e?.r?.unit; return u ? room.run(() => shapeOfUnit(u)) : null; },
     /** U8: a boss ward's bar — `{ on, hp, max, leftMs, ms }` or null */
     wardOf: e => (e?.r?.unit ? enc.wardOf(e.r.unit) : null),
-    /** every worn slot, in paper-doll order (play-test 5: `back`, `waist`, `light` joined) */
+    /** every worn slot, in paper-doll order (play-test 5: `back`, `waist` joined; owner feedback 8 took `light` out) */
     SLOTS: engine.tvGear?.slotOrder || ['weapon', 'offhand', 'head', 'chest', 'legs', 'hands', 'feet', 'necklace', 'ring', 'ring2'],
     /** T25: the angling rules (pure; A drives the cast / bite / tug loop with them) */
     fishing: engine.fishing,

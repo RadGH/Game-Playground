@@ -15,8 +15,9 @@
 //   shields                                                          -> weaponsmith / armor + armourer / other
 //   off-hand focuses (tome, orb, relic, idol, ward, totem…)          -> tailor / other  (where the old foci are)
 //   armour: cloth -> tailor / armor · leather -> tailor / armor + armourer / armor · mail, plate -> armourer / armor
-//   rings, amulets -> jeweller / other · cloaks, belts -> tailor / armor · lanterns, torches you WEAR -> general / light
-//   (the plain bases travel_cloak, leather_belt, hand_lantern, pitch_torch of data/rules/gear-tv.json are hand-listed there)
+//   rings, amulets -> jeweller / other · cloaks, belts, BACKPACKS (W19) -> tailor / armor
+//   lanterns and torches -> NOWHERE (W22, owner feedback 8: "remove lights from the game" — a test fails if one is shelved)
+//   (the plain bases travel_cloak, leather_belt and stream C's backpacks of data/rules/gear-tv.json are hand-listed there)
 //   and one new weapon in three also lies on the market stall (market / weapon).
 // BY BAND: a category gets `minCap: { <base>: <level> }` from the row's `minLevel` — a base is only offered in a town
 // whose `levelCap` reaches it (stream A, js/sim/shops.js build(): docs/requests.md "Round 5 contracts — E"). Rows at
@@ -46,7 +47,7 @@ export function shelfFor(row) {
   if (row.kind === 'offhand') {
     if (t === 'shield') return [['weaponsmith', 'armor'], ['armourer', 'other']];
     if (t === 'quiver') return [['bowyer', 'other']];
-    if (t === 'torch' || t === 'lantern') return [['general', 'light']];
+    if (t === 'torch' || t === 'lantern') return [];                 // W22 (owner feedback 8): light items left the game
     return [['tailor', 'other']];
   }
   if (row.kind === 'armour') {
@@ -57,7 +58,7 @@ export function shelfFor(row) {
   if (row.kind === 'accessory') {
     if (slot === 'ring' || slot === 'necklace' || t === 'ring' || t === 'amulet') return [['jeweller', 'other']];
     if (slot === 'cape' || slot === 'belt' || t === 'cloak' || t === 'belt') return [['tailor', 'armor']];
-    if (slot === 'light' || t === 'lantern' || t === 'torch') return [['general', 'light']];
+    if (slot === 'light' || t === 'lantern' || t === 'torch') return [];   // W22: no light is sold anywhere
   }
   return [];
 }

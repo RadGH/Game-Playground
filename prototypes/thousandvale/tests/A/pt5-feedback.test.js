@@ -128,7 +128,7 @@ test('T21: only an account with the admin flag reads reports and changes their s
   assert.equal((await store.setAdmin('nobody-here', true)).err, 'missing');
   boss.adminOp('reports'); await until(clock, () => reps.length);
   assert.equal(reps[0].list.length, 2);
-  assert.deepEqual(reps[0].counts, { new: 2, approved: 0, declined: 0, trashed: 0, total: 2 });
+  assert.deepEqual(reps[0].counts, { new: 2, approved: 0, declined: 0, trashed: 0, completed: 0, total: 2 });
   const bug = reps[0].list.find(r => r.kind === 'bug');
   assert.ok(bug.text === 'The gate is sideways.' && bug.name === 'Pleb' && bug.server && bug.ctx, 'a full row');
   boss.adminOp('report', { id: bug.id, state: 'approved', note: 'W is on it' }); await until(clock, () => ar.length >= 2);

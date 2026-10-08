@@ -62,8 +62,10 @@ export function createChat({ store, presence, gwByChar, parties, guilds = null, 
     if ((me.mutedUntil || 0) > wallNow()) return s.err('muted');
     const text = clean(m.text);
     if (!text) return;
-    const ch = m.ch, open = !!s.claimed && (me.level || 1) >= R.publicLevel;
-    if (PUBLIC_CHANNELS.includes(ch) && !open) return s.err('chatGate');
+    // W11 (round 8): the gate is about the ACCOUNT — claimed, and ANY of its characters at the level (s.alv), not this one
+    const ch = m.ch, lvOk = Math.max(me.level || 1, s.alv || 1) >= R.publicLevel, open = !!s.claimed && lvOk;
+    const gateMsg = what => (!s.claimed ? what + ' need a claimed account. Claim yours from the Account button — it is free.' : what + ' open when one of your characters reaches level ' + R.publicLevel + '.');
+    if (PUBLIC_CHANNELS.includes(ch) && !open) return s.err('chatGate', gateMsg('Public channels'));
     const base = { t: 'chat', ch, from: s.charId, name: me.name, text };
     let to = [], toKey = null;
     switch (ch) {
@@ -95,7 +97,7 @@ export function createChat({ store, presence, gwByChar, parties, guilds = null, 
       case 'w': {
         const t = findOnline(m.to);
         if (!t || t.char === s.charId) return s.err('notFound');
-        if (!open && !close(s.charId, t.char)) return s.err('chatGate', 'Whispers to strangers open at level ' + R.publicLevel + ' on a claimed account. You can always whisper your party, guild and friends.');
+        if (!open && !close(s.charId, t.char)) return s.err('chatGate', gateMsg('Whispers to strangers') + ' You can always whisper your party, guild and friends.');
         if (ignores(t, s.charId)) return s.err('ignored');
         whispered.set(t.char + ':' + s.charId, wallNow());
         sendTo(t.char, JSON.stringify(base));

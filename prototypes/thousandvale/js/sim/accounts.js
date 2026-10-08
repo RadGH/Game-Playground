@@ -94,7 +94,7 @@ export function createAccounts({ store, hasher = null, verifyHuman = null, wallN
           const r = await store.claimAccount(s.account, { username, passHash, email: email || null });
           if (r.err) return fail(s, op, r.err === 'taken' ? 'user' : r.err, r.err === 'taken' ? 'That username is taken.' : r.err === 'claimed' ? 'This account is already claimed.' : 'No such account.');
           s.claimed = true; s.username = username;
-          sendAll({ k: 'claimed', account: s.account });
+          sendAll({ k: 'claimed', account: s.account, username });
           log('account claimed', { account: s.account });
           return reply(s, op, { ok: true, username, claimed: true });
         } finally { s.busyAccount = false; }

@@ -21,7 +21,9 @@ const card = r => {
 <span class="who">${esc(r.name)} · level ${esc(r.level)} ${esc(r.cls)}</span> <time>${new Date(r.at).toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT</time></header>
 <p class="text">${esc(r.text)}</p>
 ${p ? `<p class="plan"><b>${p.item === '—' ? 'Declined' : 'Work item ' + esc(p.item)}:</b> ${esc(p.what)}</p>` : ''}
+${r.ref != null ? `<p class="plan"><b>Reply to:</b> #${esc(r.ref)}</p>` : ''}
 ${r.note ? `<p class="plan"><b>Admin note:</b> ${esc(r.note)}</p>` : ''}
+${r.state === 'completed' || r.done ? `<p class="plan done"><b>Completed:</b> ${esc(r.done || '(no note)')}</p>` : ''}
 <p class="where">${esc(s.roomName || '')} · zone ${esc(s.zone || '')} · x ${esc(s.x)} z ${esc(s.z)} · ${esc(s.roomKind || '')}${t ? ` · target: ${esc(t.name)} (level ${esc(t.level)}${t.dead ? ', dead' : ''})` : ''} · build ${esc(s.build || '')}</p>
 <details><summary>Everything attached</summary><pre>${esc(JSON.stringify({ server: s, client: { ...c, log: undefined, logs: undefined } }, null, 1))}</pre>${log ? `<h4>Client log</h4><pre>${log}</pre>` : ''}</details>
 </article>`;
@@ -31,7 +33,7 @@ process.stdout.write(`<!doctype html><meta charset="utf-8"><meta name="viewport"
 <title>Thousandvale feedback</title><link rel="stylesheet" href="feedback-page.css">
 <h1>Thousandvale feedback <small>${rows.length} reports · built ${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} PT</small></h1>
 <nav id="f"><button data-f="all" class="on">All ${rows.length}</button><button data-f="bug">Bugs ${count(r => r.kind === 'bug')}</button><button data-f="suggestion">Suggestions ${count(r => r.kind !== 'bug')}</button>
-<button data-f="new">New ${count(r => r.state === 'new')}</button><button data-f="approved">Approved ${count(r => r.state === 'approved')}</button><button data-f="declined">Declined ${count(r => r.state === 'declined')}</button>
+<button data-f="new">New ${count(r => r.state === 'new')}</button><button data-f="approved">Approved ${count(r => r.state === 'approved')}</button><button data-f="declined">Declined ${count(r => r.state === 'declined')}</button><button data-f="completed">Completed ${count(r => r.state === 'completed')}</button>
 <input id="q" placeholder="Search text…"></nav>
 <main>${rows.map(card).join('\n')}</main>
 <script>

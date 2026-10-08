@@ -8,6 +8,7 @@ import { actionKey } from './emit.js';
 const ICON = {
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
   chat: '<path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8Z"/>',
+  autorun: '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/><path d="M4 6v12"/>',
   mount: '<path d="M4 20v-6l3-6 5-3 2 3 4 1 2 4-3 1-3-2-3 3v5"/><path d="M12 5l1-3"/>',
   fish: '<path d="M3 12c3-5 9-6 14-2l4-3v10l-4-3c-5 4-11 3-14-2Z"/><circle cx="8" cy="11" r="1"/>',
   camp: '<path d="M12 3c2 3 4 5 4 8a4 4 0 0 1-8 0c0-3 2-5 4-8Z"/><path d="M4 21l8-4 8 4M4 17l16 4"/>',

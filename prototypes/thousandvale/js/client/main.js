@@ -129,7 +129,7 @@ const angling = createAngling(scene, { actors, forms: formFx, spellFx: spells.fx
 // Q3/S23: a corpse with loot for you sparkles, tinted by the best rarity on it
 const lootMarks = createLootMarkers({ actors, glowTexture: makeGlowTexture() });
 // Q8: auras follow the server's info.st on every body (late arrivals see them; a death clears them)
-const statusSync = createStatusSync({ actors, fx: spells.fx, infoOf: id => S.mirror?.infos.get(id), selfDead: () => S.self.dead, selfId: () => S.selfId, night: () => S.night || 0, groundY: (x, z) => groundY(x, z) });
+const statusSync = createStatusSync({ actors, fx: spells.fx, infoOf: id => S.mirror?.infos.get(id), selfDead: () => S.self.dead, selfId: () => S.selfId, groundY: (x, z) => groundY(x, z) });
 const travel = createTransition({ el: document.getElementById('travel-veil'), view, scene, camera });
 const objects = createObjects(scene, { onUse: (id, o) => (String(id).startsWith('demo:') ? demoUse(o) : S.net?.use(id)), onNear: o => worldUi.lore(o.key || o.id, o.name, o.lore), labelLayer: document.getElementById('plates'), camera, posOf: id => { const a = actors.get(id); return a && !a.dead ? { x: a.pos.x, y: a.pos.y, z: a.pos.z, h: a.height } : null; } });
 
@@ -226,6 +226,7 @@ const controls = createControls({
   onRise: () => rise(),
   onSkill: n => castSkill(n),
   onContext: (id, x, y) => ui2.contextAt(id, x, y),
+  onAutorun: on => hud.toast(on ? 'Auto-run on. Steer with the camera; any move key stops it.' : 'Auto-run off.', 'info'),   // W20
 });
 
 // the camera stops short of buildings, fort walls and big rocks (dungeon walls come in through cameraHeight)
@@ -504,14 +505,19 @@ function wireNet(net) {
     if (Array.isArray(patch.bar)) refreshBar();   // §15.10: level-up, form/stance, talent pick (client.js merged it into joined.you)
     if (levelled) levelFlash(S.selfId);
     // Q16: riding — the predictor walks at the server's speed factor, and my body sits on the mount
+    if (patch.lightRange != null) { S.lightRange = +patch.lightRange || null; view.setCarryLight({ range: S.lightRange }); }   // W22: C's radius, when the server sends one
     if (patch.speedMul != null) S.predictor.speedMul = patch.speedMul;
-    if ('mount' in patch) { S.self.mount = patch.mount || null; actors.setMount(S.selfId, S.self.mount); if (patch.dismount && patch.dismount !== 'asked') hud.toast({ cast: 'You get down to fight.', hit: 'You are thrown from the saddle!', swim: 'Your mount will not swim.', dead: 'You fall from the saddle.' }[patch.dismount] || 'You get down.', 'warn'); }
+    if ('mount' in patch) { endMountCall(); S.self.mount = patch.mount || null; actors.setMount(S.selfId, S.self.mount); if (patch.dismount && patch.dismount !== 'asked') hud.toast({ cast: 'You get down to fight.', hit: 'You are thrown from the saddle!', swim: 'Your mount will not swim.', dead: 'You fall from the saddle.' }[patch.dismount] || 'You get down.', 'warn'); }
     if ('regen' in patch) actors.setEating(S.selfId, patch.regen ? patch.regen.kind || 'food' : null);   // S20
     if (patch.mountNew) hud.toast('You have a mount! Press H to ride.', 'good');
   });
   net.on('lootable', m => lootMarks.set(m.id, m.on !== false, m.best || m.rarity || (m.free ? 'magic' : null)));
   net.on('lootWin', m => { if (m.closed) lootMarks.set(m.id, false); });
-  net.on('mountR', r => { if (!r.ok && r.msg) hud.toast(r.msg, 'warn'); });
+  net.on('mountR', r => {
+    if (!r.ok && r.msg) hud.toast(r.msg, 'warn');
+    if (!r.ok) endMountCall();                                                      // W26: refused or broken — you may move again
+    else if (r.casting && S.mountCall) S.mountCall.until = performance.now() + r.casting + 900;
+  });
   net.on('equip', m => { S.reach = basicReach(m.equipment); });
   net.on('equip', m => { const a = actors.get(S.selfId); if (a && m.equipment) actors.setLook(S.selfId, { ...a.look, gear: ui2.gearFor(m.equipment) }); });   // Q22: shown as the settings say   // P22: what I wear, on me
   net.on('chat', m => { if (m.ch === 'say' && m.from != null) actors.say(m.from, m.text); });   // the line itself: chat.js
@@ -575,6 +581,7 @@ function onJoined(j) {
   S.reach = basicReach(you.equipment);         // Q1: a ranged weapon fires from range
   S.predictor.locked = S.self.dead;
   S.predictor.speedMul = you.speedMul || 1; S.self.mount = you.mount || null;
+  S.lightRange = +you.lightRange || null; view.setCarryLight({ range: S.lightRange }); endMountCall();
   useRoom(j.room, { x: you.x, z: you.z }).then(() => {
     S.predictor.reset({ x: you.x, y: you.y, z: you.z });
     const a = actors.get(S.selfId) || actors.add({ id: S.selfId, kind: 'player', name: you.name, level: you.level, hp: you.hp, hpMax: you.hpMax, hostile: false,
@@ -722,6 +729,7 @@ function remember(ev) { S.events.push(ev); if (S.events.length > 200) S.events.s
 function onEvent(ev) {
   if (!ev.type && ev.t) ev = { ...ev, type: ev.t };   // encounter events may still carry `t`
   remember(ev);
+  if (ev.type === 'fx' && ev.kind === 'channel' && ev.ab === 'mount' && ev.end && ev.id === S.selfId) endMountCall();   // W26
   if (ev.type === 'cast' || ev.type === 'hit' || ev.type === 'fx') { spells.onEvent(ev); statusSync.onEvent(ev); statusSync.onChannel(ev); weaponFx.onEvent(ev); formFx.onEvent(ev); reviveFx.onEvent(ev); angling.onEvent(ev); }
   const me = S.selfId;
   switch (ev.type) {
@@ -804,7 +812,17 @@ function onEvent(ev) {
 function levelFlash(id) { const a = actors.get(id); if (a) fx.burst({ x: a.pos.x, y: a.pos.y + 1, z: a.pos.z }, { color: '#ffe08a', count: 24 }); }
 
 /** Q16: H — call your fastest mount, or get down. The server says no in a fight, in water or indoors (mountR). */
-function toggleMount() { if (!S.net) return; if (S.self.mount) S.net.mount('off'); else S.net.mount('summon'); }
+function toggleMount() {
+  if (!S.net) return;
+  if (S.self.mount || S.mountCall) { endMountCall(); S.net.mount('off'); return; }     // W26: a second press calls it off (the server ends the channel: why 'asked')
+  // W26: you stand still for the call — from the key press, not from the server's answer, so the steps already on their
+  // way are the last ones. Keys, the stick, auto-run and a click-to-move goal are kept and carry on once you are up.
+  S.mountCall = { at: performance.now(), until: performance.now() + 4000 };
+  controls.hold(true);
+  S.net.mount('summon');
+}
+/** W26: the call is over (riding, refused, broken, called off): movement is let through again. */
+function endMountCall() { if (!S.mountCall) return; S.mountCall = null; controls.hold(false); }
 function setSelfDead(dead) {
   if (S.self.dead === dead) return;
   S.self.dead = dead; S.predictor.locked = dead;
@@ -1003,6 +1021,7 @@ function dayNight(dt) {
     S.night = n; dayNight.done = true;
     for (const L of WS.loaded.values()) { L.town?.setNight(n); L.setpieces?.setNight(n); }
     W.horizon?.setNight(n);
+    view.setCarryLight({ night: n, range: S.lightRange ?? null });      // W22: the glow everyone carries comes up with the dark
     // leaves glow a little by day (thin cards read as lit canopy); at night that glow would look like phosphor
     if (leafMats?.leaf?.emissiveIntensity != null) leafMats.leaf.emissiveIntensity = 0.55 * (1 - n * 0.85);
   }
@@ -1028,6 +1047,7 @@ function frame(now) {
       S.acc -= TICK_MS; steps++;
       const t = S.target != null ? actors.get(S.target) : null;
       const chasing = controls.chasing != null && t && !t.dead ? t.pos : null;
+      if (S.mountCall && (performance.now() > S.mountCall.until || S.self.dead)) endMountCall();      // W26: never stuck if an answer is lost
       const it = controls.intent(S.predictor.pos, { targetPos: chasing, reach: Math.max(1.4, S.reach - 0.3), dead: S.self.dead });
       // Never step onto ground that is not drawn yet: prediction would walk on the horizon's rough heights and the
       // server would correct us. Hold still at the edge (a moment, usually) and load that zone now.

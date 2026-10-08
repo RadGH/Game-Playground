@@ -351,7 +351,9 @@ export function connect(opts = {}) {
   net.sheet = () => sendJ(game, { t: 'sheet' });                                    // -> sheet {core, advanced, abilities, angling}
   net.openItem = uid => sendJ(game, { t: 'item', op: 'open', uid: String(uid) });   // a crate / gift box -> itemR {opened}
   /** feedback('suggestion'|'bug', text, ctx?) -> feedbackR. Goes over the game socket when in the world (the server adds where you stand). */
-  net.feedback = (kind, text, ctx) => sendJ(game && game.readyState === OPEN && net.joined ? game : gw, ctx ? { t: 'feedback', kind, text: String(text).slice(0, 2000), ctx } : { t: 'feedback', kind, text: String(text).slice(0, 2000) });
+  net.feedback = (kind, text, ctx, ref) => sendJ(game && game.readyState === OPEN && net.joined ? game : gw, { t: 'feedback', kind, text: String(text).slice(0, 2000), ...(ctx ? { ctx } : {}), ...(Number.isSafeInteger(ref) ? { ref } : {}) });
+  /** Round 8 (W29): myReports({limit?, before?}) -> `feedbackMine {ok, list:[{id, at, kind, text, state, note, noteAt, adminNote, done, doneAt, ref}], more}` — your account's own reports, newest first. */
+  net.myReports = (q = {}) => sendJ(game && game.readyState === OPEN && net.joined ? game : gw, { t: 'feedbackMine', ...(q.limit ? { limit: q.limit } : {}), ...(q.before ? { before: q.before } : {}) });
   /** admin('reports', {kind?, state?, limit?, before?}) -> adminReports ; admin('report', {id, state, note?}) -> adminR (admin accounts only) */
   net.adminOp = (op, a = {}) => sendJ(game && game.readyState === OPEN && net.joined ? game : gw, pick({ t: 'admin', op }, a, ['id', 'state', 'kind', 'limit', 'before', 'note']));
   /** fish('cast', {aim?}) | ('hook') | ('land', {held}) | ('stop') -> fishR / fishBite / fishTug / fishCatch */

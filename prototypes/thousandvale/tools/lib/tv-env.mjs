@@ -49,7 +49,7 @@ export function rowsFromJsonl(text) {
   for (const line of String(text).split('\n')) {
     if (!line.trim()) continue;
     let r; try { r = JSON.parse(line); } catch { continue; }
-    if (r.ev === 'state') { const x = by.get(r.id); if (x) { x.state = r.state; x.stateAt = r.at; x.stateBy = r.by; if (r.note != null) x.note = r.note; } continue; }
+    if (r.ev === 'state') { const x = by.get(r.id); if (x) { x.state = r.state; x.stateAt = r.at; x.stateBy = r.by; if (r.note != null) x.note = r.note; if (r.done != null) { x.done = r.done; x.doneAt = r.at; } } continue; }
     const { ev, ...row } = r; void ev;
     by.set(row.id ?? 'x' + (n++), { state: 'new', note: '', ...row });
   }

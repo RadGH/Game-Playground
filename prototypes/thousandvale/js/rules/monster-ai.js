@@ -20,6 +20,7 @@
 //   transmute scaling (client-side only). Leader escorts, auras, routs and sieges live in
 //   js/rules/warband.js (a siege needs the room's `structures` hook; no room has building yet).
 
+import { monsterSpeed, flightOf, projOf, projFields } from './projectiles.js';
 import {
   applyStatus, tickStatuses, slowOf, incomingFrom, outgoingFrom, groundAt, wetAt, cliffStep,
   climbable, crossesWall, COMBAT_FEEL,
@@ -116,7 +117,7 @@ export function statusOnHit(field, e, target) {
  * A monster's melee swing lands on `victim` (main.js `onEnemyStrike`, line ~9584): Farhold's
  * `rpg.strike` with the buffs both sides carry, life steal, the bite's status. Returns the result.
  */
-export function monsterStrike(field, e, victim, { element = 'physical', ranged = false, mult = 1, kind = null } = {}) {
+export function monsterStrike(field, e, victim, { element = 'physical', ranged = false, mult = 1, kind = null, flew = false } = {}) {
   if (victim?.side === 'foe') {
     // a monster swinging at another monster (it was hard-taunted by a turned one): actors.js strikes
     // the body plainly, `rpg.strike(e, object, rng, {})`, and kills it if it drops
@@ -130,6 +131,14 @@ export function monsterStrike(field, e, victim, { element = 'physical', ranged =
     field.hooks?.onObjectStruck?.(e, victim);
     e.lastCombatAt = field.clock;
     return null;
+  }
+  // owner feedback 8 (W2): a hit that lands from beyond arm's reach and was not itself a flown shot (a telegraphed
+  // Pinning Shot, a caster's special) still shows where it came from — a short, purely cosmetic projectile
+  if (!flew && kind !== 'pool' && kind !== 'dot') {
+    const P = field.room?.engine?.projectiles || null;
+    if (P && Math.hypot(victim.x - e.x, victim.z - e.z) > (e.reach || 2.4) + 3) {
+      field.emit({ t: 'fx', kind: 'shot', id: e.id, to: victim.id, element, ms: P.special.ms, from: { x: e.x, z: e.z }, cosmetic: 1, ...(kind ? { skill: kind } : {}), ...(element === 'physical' ? {} : { proj: projOf(P, { element }) }) });
+    }
   }
   // the victim's own skill statuses (wards, counters, "every N hits" bursts) act as the victim
   const hit = () => field.rpg.strike(e, victim, field.rng, { multiplier: mult * incomingFrom(victim) * outgoingFrom(e), element, ranged });
@@ -161,9 +170,14 @@ export function monsterStrike(field, e, victim, { element = 'physical', ranged =
 function shoot(field, e, target) {
   const spec = e.ranged || { range: 24, element: 'physical' };
   const dist = Math.hypot(target.x - e.x, target.z - e.z);
-  const flight = Math.max(0.11, dist / 40);
-  (field.shots || (field.shots = [])).push({ by: e, target, toX: target.x, toZ: target.z, left: flight, element: spec.element || 'physical' });
-  field.emit({ t: 'fx', kind: 'shot', id: e.id, to: target.id, element: spec.element || 'physical', ms: Math.round(flight * 1000) });
+  // owner feedback 8 (W2): "you take damage without knowing where from" — a slower shot that is SEEN, and that homes
+  // (it lands unless its target died; Farhold's 2.6 m dodge would make every slow arrow miss a walking player)
+  const P = field.room?.engine?.projectiles || null;
+  const element = spec.element || 'physical';
+  const speed = P ? monsterSpeed(P, element) : 40;
+  const flight = P ? flightOf(P, dist, speed) : Math.max(0.11, dist / 40);
+  (field.shots || (field.shots = [])).push({ by: e, target, toX: target.x, toZ: target.z, left: flight, element, home: !!P });
+  field.emit({ t: 'fx', kind: 'shot', id: e.id, to: target.id, element, ms: Math.round(flight * 1000), ...(P ? { from: { x: e.x, z: e.z }, ...projFields(P, { speed, proj: element === 'physical' ? null : projOf(P, { element }), home: true, skill: 'basic' }) } : {}) });
 }
 
 function tickShots(field, dt) {
@@ -176,8 +190,8 @@ function tickShots(field, dt) {
     list.splice(i, 1);
     const v = s.target;
     if (!field.usable(v) || s.by.dying != null || s.by.removed) continue;
-    if (Math.hypot(v.x - s.toX, v.z - s.toZ) > 2.6) continue;
-    monsterStrike(field, s.by, v, { element: s.element, ranged: true });
+    if (!s.home && Math.hypot(v.x - s.toX, v.z - s.toZ) > 2.6) continue;
+    monsterStrike(field, s.by, v, { element: s.element, ranged: true, flew: true });
   }
 }
 

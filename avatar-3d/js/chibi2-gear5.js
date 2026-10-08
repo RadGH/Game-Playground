@@ -13,13 +13,15 @@
 //   chibi2-gear5-weapons.js   everything held in the right hand (and, for one-handers, the left)
 //   chibi2-gear5-armour.js    head / chest / legs / hands / feet x cloth / leather / mail / plate
 //   chibi2-gear5-offhand.js   shields, foci, quiver, torch — and the worn accessories (cloak, lantern, belt, torc, ring)
+//   chibi2-backpacks.js       backpacks, worn on the back in place of a cloak (cape.id = g5_pack_*)
 import { isG5, G5_HELD, G5_OFFHAND } from './chibi2-gear5-ids.js';
 import { G5_WEAPON_BUILDERS } from './chibi2-gear5-weapons.js';
 import { G5_HAT_BUILDERS, G5_TOP_BUILDERS, G5_BOTTOM_BUILDERS, G5_SHOE_BUILDERS, G5_GLOVE_BUILDERS } from './chibi2-gear5-armour.js';
+import { G5_PACK_BUILDERS } from './chibi2-backpacks.js';
 import { G5_OFFHAND_BUILDERS, G5_CAPE_BUILDERS, G5_DECOR_BUILDERS, G5_ACCESSORY_BUILDERS, G5_RING_BUILDERS } from './chibi2-gear5-offhand.js';
 
 export { G5_WEAPON_BUILDERS, G5_HAT_BUILDERS, G5_TOP_BUILDERS, G5_BOTTOM_BUILDERS, G5_SHOE_BUILDERS, G5_GLOVE_BUILDERS,
-  G5_OFFHAND_BUILDERS, G5_CAPE_BUILDERS, G5_DECOR_BUILDERS, G5_ACCESSORY_BUILDERS, G5_RING_BUILDERS };
+  G5_OFFHAND_BUILDERS, G5_CAPE_BUILDERS, G5_DECOR_BUILDERS, G5_ACCESSORY_BUILDERS, G5_RING_BUILDERS, G5_PACK_BUILDERS };
 
 /** Everything in a hand is skinned to that hand's GRIP bone, exactly as chibi2-gear.js does it. */
 function gripped(c) {
@@ -43,7 +45,7 @@ export function buildGear5(a, c) {
   G5_SHOE_BUILDERS[a.shoes?.id]?.(a, c, a.shoes);
   G5_HAT_BUILDERS[a.hat?.id]?.(a, c, a.hat);
   if (gloves) G5_GLOVE_BUILDERS[gloves.id]?.(a, c, gloves);
-  G5_CAPE_BUILDERS[a.cape?.id]?.(a, c, a.cape);
+  (G5_CAPE_BUILDERS[a.cape?.id] || G5_PACK_BUILDERS[a.cape?.id])?.(a, c, a.cape);
   G5_DECOR_BUILDERS[a.decor?.id]?.(a, c, a.decor);
   G5_ACCESSORY_BUILDERS[a.accessory?.id]?.(a, c, a.accessory);
   if (ring) G5_RING_BUILDERS[ring.id]?.(a, c, ring, 'R');

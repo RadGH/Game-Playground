@@ -38,7 +38,9 @@ export function createGamepad({ api, focus, radial, osk, run }) {
     if (btn === PAD_RADIAL) { if (down) radial.open({ hold: true }); return; }
     if (btn === PAD_MOD) return;
     if (!down) { const code = heldAct.get(btn); if (code) { keyUp(code); heldAct.delete(btn); } return; }
-    if (btn === 'L3') { sprint = !sprint; if (sprint) keyDown('ShiftLeft'); else keyUp('ShiftLeft'); return; }
+    if (btn === 'L3' && mod) { keyTap('NumLock'); return; }      // W20: LT + stick click = auto-run
+    if (btn === 'L3') { sprint = !sprint;   // W20: `sprint` here is now the WALK toggle (Shift walks; a part-way stick walks too)
+      if (sprint) keyDown('ShiftLeft'); else keyUp('ShiftLeft'); return; }
     if (btn === 'R3') { zoomI = (zoomI + 1) % ZOOMS.length; if (api.controls?.cam) api.controls.cam.distWant = ZOOMS[zoomI]; return; }
     let id = btn === 'A' && !mod ? aAction() : (mod ? L.mod : L.plain)[btn];
     if (!id) return;

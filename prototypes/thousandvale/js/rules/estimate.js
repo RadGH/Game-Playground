@@ -115,7 +115,6 @@ export function advancedRows(engine, u) {
     ['stealth', 'Stealth', '%', 'Monsters notice you from closer.', 1, false],
     ['movePct', 'Move speed bonus', '%', 'Added to your run speed.', 1, false],
     ['mountSpeed', 'Mount speed', '%', 'Added to your riding speed.', 1, false],
-    ['lightRange', 'Light', 'm', 'How far your light reaches at night.', 1, false],
   ];
   const rows = [];
   for (const [id, label, unit, tip, k, always] of spec) {

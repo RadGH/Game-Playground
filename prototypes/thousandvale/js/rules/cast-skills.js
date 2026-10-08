@@ -35,6 +35,7 @@ export const PENDING_KEYS = [];   // everything a plan can carry is acted on (fo
 /** kinds of plan the dispatcher refuses in a room built without js/rules/followers.js (tests, tools) */
 const REFUSED_KINDS = { summon: 'This place has no room for followers.', form: 'Shapes and stances need the follower system, which this place lacks.' };
 
+import { skillSpeed, basicSpeed, flightOf, projOf, projFields } from './projectiles.js';
 export const BOLT_SPEED = 48;          // main.js
 const ALLY_RANGE = 30;                 // how far an ally-targeted heal/buff reaches
 
@@ -441,6 +442,8 @@ function runtimeOf(combat) {
     if (b.shape === 'bolt') {
       const spot = groundTargetOf(ch, {}, b.range ?? 14);
       const ms = Math.max(0.16, Math.hypot(spot.x - ch.x, spot.z - ch.z) / 22);
+      const P = combat.room.engine.projectiles || null;
+      if (P) field.emit({ t: 'fx', kind: 'bolt', id: ch.id, element: plan.element, from: { x: ch.x, z: ch.z }, to: { x: spot.x, z: spot.z }, ms: Math.round(ms * 1000), basic: 1, form: f.id, ...projFields(P, { speed: 22, proj: projOf(P, { element: plan.element }), skill: 'basic' }) });
       combat.later(ms, () => rt.withCaster(ch, () => {
         const sts = [...(b.status ? [b.status] : []), ...[].concat(b.statuses || [])];
         field.strikeArea(spot.x, spot.z, b.splash ?? 1.5, ch, { power: b.mult ?? 0.7, element: plan.element, falloff: 0.7, applyStatus: combat.hookFor(ch), rules: sts.length ? { skill: plan.skill.id, statuses: sts } : null, kind: 'form' });
@@ -1176,11 +1179,19 @@ function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, 
   }
   const dist = (plan.pierce && !hop) ? plan.range : (target ? target.distance : plan.range);
   const to = { x: origin.x + dx * dist, z: origin.z + dz * dist };
-  const flight = Math.max(0.09, dist / BOLT_SPEED);
   const chase = target?.enemy || null;
-  field.emit({ t: 'fx', kind: 'bolt', id: ch.id, skill: plan.skill?.id, element: plan.element, from: { x: origin.x, z: origin.z }, to: chase ? chase.id : to, ms: Math.round(flight * 1000), ...(plan.fxTag || {}), ...(hop ? { hop, fromId: skip?.id ?? undefined } : {}) });
+  // owner feedback 8 (W14): "Firebolt should have a projectile, not instant damage" — Farhold's 48 m/s crossed a fight
+  // in 4-6 frames. A per-skill speed (data/rules/projectiles.json), timed to the TARGET (a piercing bolt used to be
+  // timed to its full range), a hop quicker than the throw; it lands on the target wherever it is by then.
+  const P = combat.room.engine.projectiles || null;
+  const basicWt = plan.fxTag?.basic ? plan.fxTag.wt : null;
+  const speed = !P ? BOLT_SPEED : (basicWt ? basicSpeed(P, basicWt) : skillSpeed(P, plan.skill?.id, plan.element)) * (hop ? 1.6 : 1);
+  const flight = P ? flightOf(P, chase ? target.distance : dist, speed) : Math.max(0.09, dist / BOLT_SPEED);
+  const extra = P ? projFields(P, { speed, proj: projOf(P, { skillId: plan.skill?.id, element: plan.element, wt: basicWt }), home: !!chase, skill: plan.skill?.id || (basicWt ? 'basic' : null) }) : {};
+  field.emit({ t: 'fx', kind: 'bolt', id: ch.id, skill: plan.skill?.id, element: plan.element, from: { x: origin.x, z: origin.z }, to: chase ? chase.id : to, ms: Math.round(flight * 1000), ...extra, ...(P && plan.pierce && !hop && chase ? { pierce: 1, end: to } : {}), ...(plan.fxTag || {}), ...(hop ? { hop, fromId: skip?.id ?? undefined } : {}) });
   combat.later(flight, () => {
-    const at = chase && chase.dying == null ? { x: chase.x, z: chase.z } : to;
+    // (W14) a target that died on the way: the bolt strikes where it FELL, not where it stood when the bolt left
+    const at = chase && (P || chase.dying == null) ? { x: chase.x, z: chase.z } : to;
     const splash = plan.splash * (combat.room.engine.rpg.fx.sum(ch, 'boltSplash') || 1);
     rt.withCaster(ch, () => {
       const hits = collect(field.strikeArea(at.x, at.z, splash, ch, { falloff: 0.5, ...strikeOpts }));

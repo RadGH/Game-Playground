@@ -73,7 +73,9 @@ function renderInfo() {
   const m = L.mount.metrics();
   info.textContent = `${riding ? 'riding' : 'dismounted'} · ${gaitFor(SPEED[gait], L.key)} (${SPEED[gait]} m/s) · seat ${m.seatY.toFixed(2)} m · ${m.length.toFixed(2)} m long`;
 }
+let frozen = false;   // tests and screenshot scripts freeze the clock and step the mounts by hand (window.mounts3d.freeze)
 scene.addTicker((dt, t) => {
+  if (frozen) return;
   for (const L of live) {
     L.mount.update(dt, t); L.rider.update(dt);
   }
@@ -85,4 +87,4 @@ const right = document.getElementById('right');
 right.append(panel('Use it', el('p', { class: 'small muted', html: '<code>const m = await createMount(mountSpecFor(id))</code><br><code>const unseat = seatRider(m, chibi)</code><br><code>m.setGait(speed); m.update(dt, t)</code><br>Build the rider with <code>CHIBI2_MOUNT_ANIMS</code> in its <code>anims</code>.' })));
 
 renderTypes(); renderGaits(); await rebuild();
-window.mounts3d = { scene, live, setView: async k => { view = k; renderTypes(); await rebuild(); }, setGait: g => { gait = g; for (const L of live) L.mount.setGait(SPEED[g]); renderGaits(); renderInfo(); }, setRiding: v => { riding = v; for (const L of live) seat(L, v); renderInfo(); }, ready: true };
+window.mounts3d = { scene, live, setView: async k => { view = k; renderTypes(); await rebuild(); }, setGait: g => { gait = g; for (const L of live) L.mount.setGait(SPEED[g]); renderGaits(); renderInfo(); }, setRiding: v => { riding = v; for (const L of live) seat(L, v); renderInfo(); }, freeze: v => { frozen = !!v; }, ready: true };

@@ -16,6 +16,7 @@
 // Every refusal returns { ok: false, why } — the client shows `why`, the evil-client suite checks
 // nothing happened.
 
+import { basicSpeed, flightOf, projOf, projFields } from './projectiles.js';
 import { onKill as perkOnKill } from './perk-rules.js';
 import {
   weaponHands, OFFHAND_DAMAGE, strikeAt, withArea, isStaff, elementOf, statusOf,
@@ -134,7 +135,7 @@ export function createCombat(room) {
       });
       // the perk forest's own kill rules (js/rules/perk-rules.js): Momentum, Spoils, Contagion
       perkOnKill(field, p, e, { statuses, lastHit: e.lastHitBy === p.id });
-      let award = rpg.killXpFor(p, e, xpCfg);
+      let award = rpg.killXpFor(p, e, engine.xpCfgFor ? engine.xpCfgFor(e.level) : xpCfg);      // W4: low-level monsters pay more
       // `xpFind` (gear and perks): Farhold's gainXp applies it; when the ROOM awards the experience it
       // never sees the sheet, so it is applied here (and only here)
       if (combat.award && p.derived?.xpFind) award = Math.round(award * (1 + p.derived.xpFind / 100));
@@ -316,15 +317,21 @@ export function createCombat(room) {
       const target = scanLine(ch.x, ch.z, dx, dz, range, 1.1 + homing * 2.6);
       const dist = target ? target.distance : range;
       const at = { x: ch.x + dx * dist, z: ch.z + dz * dist };
-      field.emit({ t: 'fx', kind: 'arrow', id: ch.id, element, from: { x: ch.x, z: ch.z }, to: at, ms: Math.round(dist / speed * 1000), basic: 1, ...weaponTag(weapon, 'arrow'), el: element });
+      // owner feedback 8 (W14): a slower arrow that is seen, and that homes on what it was loosed at
+      const P = room.engine.projectiles || null;
+      const prey = P && target ? target.enemy : null;
+      const fly = P ? basicSpeed(P, weapon?.subtype) : speed;
+      const flight = P ? flightOf(P, dist, fly) : dist / speed;
+      field.emit({ t: 'fx', kind: 'arrow', id: ch.id, element, from: { x: ch.x, z: ch.z }, to: prey ? prey.id : at, ms: Math.round(flight * 1000), basic: 1, ...(P ? projFields(P, { speed: fly, proj: projOf(P, { element, wt: weapon?.subtype }), home: !!prey, skill: 'basic' }) : {}), ...weaponTag(weapon, 'arrow'), el: element });
       const brand = brandFor(ch, leaves);
       // main.js bursts a quiver's arrowBurst at the moment of the shot, around what the scan found
       if (target && burst > 0) {
         const c = target.enemy;
         for (const { enemy, result } of field.strikeArea(c.x, c.z, burst, ch, { falloff: 0.4, power: 0.55, kind: 'burst' })) if (enemy !== c) brand(enemy, result);
       }
-      combat.later(dist / speed, () => {
+      combat.later(flight, () => {
         if (ch.removed) return;
+        if (prey) { at.x = prey.x; at.z = prey.z; }          // where it is now, or where it fell
         const hits = field.strikeArea(at.x, at.z, balance.player?.arrowSplash ?? 2.6, ch, { element, applyStatus: hookFor(ch), power, kind: 'arrow' });   // main.js onArrowLand: the draw's power and nothing else
         for (const { enemy, result } of hits) brand(enemy, result);
         runtimeFor(combat).resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: { x: at.x, z: at.z }, element });

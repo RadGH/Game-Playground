@@ -24,7 +24,7 @@ export function priceSlot(item) {
   return item.slot === 'ring1' ? 'ring' : (item.slot || 'chest');
 }
 
-/** Is this something the gear formula prices (a weapon, armour, jewellery, a cloak, a belt, a worn light)? */
+/** Is this something the gear formula prices (a weapon, armour, jewellery, a cloak or backpack, a belt)? */
 export const isGear = item => !!item && typeof item === 'object' && (item.type === 'weapon' || item.type === 'armor' || item.type === 'accessory') && !item.kind;
 
 /** The parts of a gear price, for a tooltip and the sim: `{ price, level, slot, parts: { base, slot, rarity, extra } }`. */
@@ -39,6 +39,7 @@ export function priceParts(cfg, item) {
   if (item?.isUnique) extra *= G.unique ?? 1.5;
   else if (item?.setId) extra *= G.set ?? 1.25;
   if ((item?.tier || 1) >= 2) extra *= G.tier2 ?? 1.1;
+  if (item?.bagSlots > 0 && item.slot === 'back') extra *= 1 + (G.bagSlot ?? 0.15) * item.bagSlots;      // W19: a backpack is priced by its room
   const price = Math.max(G.min ?? 1, Math.round(base * slotK * rarityK * extra));
   return { price, level, slot, parts: { base, slot: slotK, rarity: rarityK, extra } };
 }

@@ -6,6 +6,7 @@
 // and every fight call is passed its room's own rng. Rooms keep their mutable state in
 // js/rules/room.js, never here.
 
+import { buildProjectiles } from './projectiles.js';
 import { installAffixes } from './affixes.js';
 import {
   Rpg, installUniques, installFoci, installWarbands, tuneFeel, tuneWeapons, setLevelCap, EFFECTS,
@@ -76,6 +77,18 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP, tvS
     progression: data.progression || {},
     /** play-test 3 R2: Farhold's xp rules with Thousandvale's kill multiplier (data/rules/progression.json `xp`) */
     xpCfg: { ...(balance.xp || {}), kill: (balance.xp?.kill ?? 0.2) * (data.progression?.xp?.killMult ?? 1) },
+    /**
+     * owner feedback 8 (W4): the kill rules for a monster of `level` — low-level monsters pay more (progression.json
+     * `xp.killEarly`: `mult` up to level `until`, fading to killMult at `fadeTo`). A parity engine replaces `xpCfg` with
+     * Farhold's own and so never asks.
+     */
+    xpCfgFor(level) {
+      const E = data.progression?.xp?.killEarly, base = data.progression?.xp?.killMult ?? 1;
+      if (!E || !(E.mult > base) || this.xpCfg === balance.xp) return this.xpCfg;
+      const L = Math.max(1, level | 0), a = E.until ?? 6, b = Math.max(a + 1, E.fadeTo ?? 14);
+      const k = L <= a ? E.mult : L >= b ? base : E.mult + (base - E.mult) * (L - a) / (b - a);
+      return { ...this.xpCfg, kill: (balance.xp?.kill ?? 0.2) * k };
+    },
     /** quest / event experience multiplier (a share of a level's span x this) */
     xpMult: kind => data.progression?.xp?.[kind + 'Mult'] ?? 1,
     /** P26 — the level-gap softening (js/rules/level-gap.js); null turns it off (parity fixtures) */
@@ -99,6 +112,8 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP, tvS
   engine.fishing = data.fishing ? createFishing(data.fishing, data.angling || null) : null;
   // play-test 5 (T14-T16): caster forms — how wands, staves, sceptres and foci attack (js/rules/caster-forms.js); off for parity
   engine.casterForms = tvGear ? buildCasterForms(data.casterForms || null) : null;
+  // owner feedback 8 (W14, W2): slower, homing projectiles for skills, weapons and monsters; a parity engine keeps Farhold's
+  engine.projectiles = tvGear ? buildProjectiles(data.projectiles || null) : null;
   installAffixes(engine, data.affixes || null);          // play-test 4 S4: champion / rare rolls, Pack-leader, affix specials
   return engine;
 }

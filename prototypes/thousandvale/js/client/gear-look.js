@@ -29,8 +29,20 @@ export const ARMOUR_LOOK = {
   feet: { cloth: 'sandals', light: 'boots', medium: 'boots', scaled: 'heavy', heavy: 'heavy', plate: 'heavy', runed: 'slippers' },
 };
 const SLOT_PART = { head: 'hat', chest: 'top', legs: 'bottom', feet: 'shoes' };
+/**
+ * Play-test 8 (W25): a BASE whose NAME says what it is draws that model, whatever its weight class ("the War Helm is a
+ * gold dome with white horns": every heavy head piece was the horned helm, a Leather Cap was a feathered cap and a Chain
+ * Coif was a cloth hood). Wins over ARMOUR_LOOK; anything not listed still goes by weight.
+ */
+export const ARMOUR_BY_BASE = {
+  cloth_helm: 'hood', light_helm: 'leather_cap', medium_helm: 'chain_coif', heavy_helm: 'war_helm', plate_helm: 'plate_helm', wyrmscale_helm: 'dragon_helm',
+  medium_chest: 'chainmail', scaled_chest: 'scale_plate', light_chest: 'leather',
+};
 /** Plain colours per tier, so a leather jerkin is brown and plate is steel. */
 const TIER_COLOUR = { cloth: '#7a6a8a', light: '#7a5a3a', medium: '#6a6a4a', scaled: '#6a7a6a', heavy: '#8a9098', plate: '#a0a8b2', runed: '#4a4a7a' };
+
+/** A model that is plainly one material takes that material's colour (mail is steel, not the weight class's olive). */
+const MODEL_COLOUR = { chain_coif: '#9aa2ac', chainmail: '#8a9098', war_helm: '#8f98a2', plate_helm: '#a0a8b2', leather_cap: '#7a5a3a', leather: '#7a5a3a' };
 
 /** Weapon subtype -> held model (Farhold rpg.js HELD_BY_SUBTYPE). */
 export const HELD_BY_SUBTYPE = {
@@ -128,25 +140,42 @@ export function normItem(it, baseOf = () => null) {
 // `info.gear` form carries only `base`). For the slots with NO older model, any item is drawn with the catalog's model
 // for its slot and armour weight, so a pair of leather gloves from the old loot table shows on the hands too.
 
-/** A worn light that is a torch (a flame on a stick) rather than a lantern. */
-export const isTorchItem = (item, row = null) => row?.type === 'torch' || /torch|cresset|brand\b/i.test(`${item?.g5 || ''} ${item?.look?.g5 || ''} ${item?.catalogBase || ''} ${item?.baseKey || item?.base || ''}`);
-/**
- * How far a worn light reaches (metres), 0 for none: the server's own number when it sends one (`lightRange` / `light`),
- * else C's plain bases — a lantern 16 m, a torch 10 m. Pure.
- */
-export function wornLightRange(gear) {
-  const it = gear?.light; if (!it || typeof it !== 'object') return 0;
-  const n = it.lightRange ?? it.range ?? (typeof it.light === 'number' ? it.light : null);
-  return Number.isFinite(n) && n > 0 ? n : isTorchItem(it) ? 10 : 16;
-}
+// play-test 8 (W22): light items are gone from the game. A `light` slot an old character still carries is not drawn at all
+// (no lantern on the hip, no torch in the hand) and is not part of the look's key.
 export const isG5 = id => typeof id === 'string' && id.startsWith('g5_');
+
+// ---------------------------------------------------------------- play-test 8 (W19): backpacks on the back slot
+/** C's backpack bases -> the model each draws (avatar-3d/js/chibi2-backpacks.js). A rare-or-better pack is the explorer's. */
+export const PACK_BY_BASE = { sling_satchel: 'g5_pack_satchel', trail_rucksack: 'g5_pack_rucksack', expedition_pack: 'g5_pack_frame' };
+const PACK_COLOUR = { g5_pack_satchel: '#7a5a3a', g5_pack_rucksack: '#6a6a44', g5_pack_frame: '#5f6a4a', g5_pack_explorer: '#7a4a2a' };
+const PACK_TRIM = { legendary: '#ffb040', unique: '#ffb040', set: '#6fd08a', rare: '#e8d020', magic: '#7fa8e8' };
+const RARE_PACK = new Set(['rare', 'legendary', 'unique', 'set']);
+/**
+ * The pack model a back item draws, or null when it is a cloak. Pure. The item's own word first (`g5` / `look.g5` /
+ * `packLook`), then its base, then anything C marks `pack: true` or names like one.
+ */
+export function packLookId(item) {
+  if (!item) return null;
+  const named = [item.look?.g5, item.g5, item.packLook, item.baseKey, item.base].find(v => typeof v === 'string' && v.startsWith('g5_pack_'));
+  const key = item.catalogBase || item.baseKey || item.base || '';
+  const isPack = !!named || item.pack === true || !!PACK_BY_BASE[key] || /(^|_)(pack|satchel|rucksack|knapsack|haversack)($|_)/.test(key);
+  if (!isPack) return null;
+  if (named && named !== 'g5_pack_rucksack') return named;                 // the rules chose a model outright
+  if (RARE_PACK.has(item.rarity) || item.isUnique || item.unique) return 'g5_pack_explorer';
+  return named || PACK_BY_BASE[key] || 'g5_pack_rucksack';
+}
+/** The avatar part (`cape`) for a worn pack: the bag keeps its own colour, the buckles and piping take the rarity's. */
+export function packPart(item) {
+  const id = packLookId(item); if (!id) return null;
+  return { id, color: item.look?.color || PACK_COLOUR[id] || '#6a5a3a', color2: PACK_TRIM[item.rarity] || '#c8a040' };
+}
 /** Equipment slot -> the catalog's game slot. */
 const G5_SLOT = { weapon: 'weapon', mainhand: 'weapon', offhand: 'offhand', head: 'head', chest: 'chest', legs: 'legs', feet: 'feet', hands: 'hands', gloves: 'hands',
-  back: 'cape', cape: 'cape', cloak: 'cape', necklace: 'necklace', neck: 'necklace', amulet: 'necklace', ring: 'ring', ring2: 'ring', belt: 'belt', waist: 'belt', light: 'light' };
+  back: 'cape', cape: 'cape', cloak: 'cape', necklace: 'necklace', neck: 'necklace', amulet: 'necklace', ring: 'ring', ring2: 'ring', belt: 'belt', waist: 'belt' };
 /** Slots the game drew nothing for before the catalog: every item in them takes the catalog's model for its kind. */
 const G5_ONLY = new Set(['hands', 'necklace', 'ring']);
 /** Slots a worn set is keyed and drawn by, in a fixed order. */
-export const DRAWN_SLOTS = ['head', 'chest', 'legs', 'feet', 'hands', 'weapon', 'offhand', 'back', 'cape', 'necklace', 'neck', 'ring', 'ring2', 'belt', 'waist', 'light'];
+export const DRAWN_SLOTS = ['head', 'chest', 'legs', 'feet', 'hands', 'weapon', 'offhand', 'back', 'cape', 'necklace', 'neck', 'ring', 'ring2', 'belt', 'waist'];
 
 /** The catalog row a worn item is drawn with, or null (the older tables draw it). Pure. */
 export function g5RowFor(item, slot, catalog) {
@@ -161,7 +190,7 @@ export function g5RowFor(item, slot, catalog) {
 /**
  * Lay every catalog-drawn item over a look. `eq` = normalised items by slot. Mirrors gear-catalog.js `applyGear`
  * (one level deep: gloves merge into the top, rings into the accessory) with two game rules on top: a two-hander in
- * the OFF hand is drawn there (T7), and a belt or lantern never replaces a tier-2 kit's own decor.
+ * the OFF hand is drawn there (T7), and a belt never replaces a tier-2 kit's own decor.
  */
 export function applyG5(out, eq, catalog) {
   const drawn = [];
@@ -169,15 +198,10 @@ export function applyG5(out, eq, catalog) {
   for (const slot of DRAWN_SLOTS) {
     const item = eq[slot]; if (!item) continue;
     const row = g5RowFor(item, slot, catalog);
-    // C's slots addendum (play-test 5): `waist` and `light` are worn. A tier-2 kit's decor wins over a belt, a belt over a
-    // lantern; a worn TORCH goes in the off hand when that is empty, else on the hip. Plain bases take the older parts.
+    // C's slots addendum (play-test 5): `waist` is worn. A tier-2 kit's decor wins over a belt; a plain belt takes the older part.
     const gs = G5_SLOT[slot];
-    if (gs === 'light' && isTorchItem(item, row)) {
-      if (free('offhand')) { out.offhand = { id: row?.id || 'torch', color: row?.color || '#ff8c2a' }; if (row) drawn.push(row.id); }
-      else if (free('decor')) out.decor = { id: 'belt_torch', color: '#6a4a2a' };
-      continue;
-    }
-    if (!row && (gs === 'belt' || gs === 'light')) { if (free('decor')) out.decor = { id: gs === 'belt' ? 'belt_pouches' : 'belt_lantern', color: rarityTint(item) || (gs === 'belt' ? '#6a4a2a' : '#c8a040') }; continue; }
+    if (!row && gs === 'belt') { if (free('decor')) out.decor = { id: 'belt_pouches', color: rarityTint(item) || '#6a4a2a' }; continue; }
+    if (packLookId(item) && (slot === 'back' || slot === 'cape')) { drawn.push(out.cape?.id); continue; }   // W19: gearLook already put the pack on (its colours are its own)
     if (!row) continue;
     const el = item.castElement || item.brand || item.el || row.element || null;
     const weapon = row.kind === 'weapon' || row.slot === 'held';
@@ -211,15 +235,16 @@ export function gearLook(equipment = {}, { baseOf = () => null, tierOf = null, t
     const item = eq[slot]; if (!item) continue;
     if (item.look?.worn?.id) { out[part] = JSON.parse(JSON.stringify(item.look.worn)); continue; }
     const tier = item.tier || (slot === 'chest' ? 'medium' : 'light');
-    const id = ARMOUR_LOOK[slot][tier] || ARMOUR_LOOK[slot].medium;
-    out[part] = { id, color: rarityTint(item) || TIER_COLOUR[tier] || '#6a6a6a' };
+    const id = ARMOUR_BY_BASE[item.baseKey] || ARMOUR_LOOK[slot][tier] || ARMOUR_LOOK[slot].medium;
+    out[part] = { id, color: rarityTint(item) || MODEL_COLOUR[id] || TIER_COLOUR[tier] || '#6a6a6a' };
   }
   // a helmet-less chest piece keeps the plain shorts unless legs are worn; plate over shorts reads oddly, so a
   // heavy chest with no legs gets plain trousers
   if (eq.chest && !eq.legs && /plate|scale/.test(out.top.id)) out.bottom = { id: 'pants', color: '#4a4038' };
   out.held = heldLook(eq.weapon || eq.mainhand || null);
   out.offhand = offhandLook(eq.offhand || null);
-  if (eq.back || eq.cape) out.cape = { id: 'travel_cloak', color: rarityTint(eq.back || eq.cape) || '#4a3a2a' };
+  // the back slot draws ONE thing: a backpack (W19) or a cloak
+  if (eq.back || eq.cape) out.cape = packPart(eq.back || eq.cape) || { id: 'travel_cloak', color: rarityTint(eq.back || eq.cape) || '#4a3a2a' };
   // play-test 4 (S18): rare+ armour (or item level >= ITEM_TIER2_LEVEL, or item.look.tier 2) shows the wearer's class
   // tier-2 look — trim, the class emblem on chest and back, the class's t2 kit (avatar-3d class-outfits-t2.json)
   // (S18 data: a themed piece carries `theme` -> data/rules/armour-tiers.json `themes[id]` {emblem, trim, glow}, passed as `themes`)
@@ -237,6 +262,38 @@ export function gearLook(equipment = {}, { baseOf = () => null, tierOf = null, t
   }
   return applyG5(out, eq, catalog);
 }
+
+// ---------------------------------------------------------------- play-test 8 (W25): ONE function for the worn model AND its icon
+//
+// "The War Helm's icon is a knight helm with a red plume; on my character it is a gold dome with horns." The bag's icon
+// came from a second table (ui/inv-core.js ARMOUR_PARTS) that had drifted from this file. There is one answer now:
+//
+//   wornLook(item, slot, opts)   the whole look a body has wearing ONLY that item — exactly gearLook({ [slot]: item }, opts)
+//   wornPart(item, slot, opts)   just what that item changed: { partSlot, part, parts } (parts = every avatar slot it touched)
+//
+// `opts` are the SAME ones the bodies in the world are dressed with (looks.js `gearOpts(cls)`): the item bases, the
+// wearer's class tier-2 kit, the armour themes and the gear catalog. An icon drawn from wornLook cannot disagree with
+// the body, because the body is drawn from the same call.
+/** Equipment slot -> the avatar slot its model mainly lives in. */
+export const PART_OF_SLOT = { head: 'hat', chest: 'top', legs: 'bottom', feet: 'shoes', hands: 'top', gloves: 'top', weapon: 'held', mainhand: 'held', offhand: 'offhand',
+  back: 'cape', cape: 'cape', cloak: 'cape', necklace: 'accessory', neck: 'accessory', amulet: 'accessory', ring: 'accessory', ring2: 'accessory', belt: 'decor', waist: 'decor' };
+export function wornLook(item, slot, opts = {}) { return gearLook({ [slot]: item }, opts); }
+export function wornPart(item, slot, opts = {}) {
+  const look = wornLook(item, slot, opts), parts = {};
+  for (const k of Object.keys(look)) {
+    if (k === 'g5') continue;
+    if (JSON.stringify(look[k]) !== JSON.stringify(PLAIN[k] ?? null)) parts[k] = look[k];
+  }
+  // a chest piece with no legs puts plain trousers on: that is the body's doing, not the item's picture
+  if (slot === 'chest' && parts.bottom && !item?.look?.worn) delete parts.bottom;
+  const partSlot = PART_OF_SLOT[slot] && parts[PART_OF_SLOT[slot]] ? PART_OF_SLOT[slot] : Object.keys(parts)[0] || PART_OF_SLOT[slot] || null;
+  let part = partSlot ? parts[partSlot] ?? null : null;
+  if (part && (slot === 'hands' || slot === 'gloves') && part.gloves) part = part.gloves;
+  if (part && (slot === 'ring' || slot === 'ring2') && (part.ring || part.ring2)) part = part.ring || part.ring2;
+  return { partSlot, part, parts, look };
+}
+/** A short, stable key of an item's picture (two items with the same key draw the same model in the same colours). */
+export function wornKey(item, slot, opts = {}) { const w = wornPart(item, slot, opts); return `${slot}>${w.partSlot || '-'}:${JSON.stringify(w.parts)}`; }
 
 /** A short key of what is drawn (cache key; a change means the body must be re-dressed). */
 export function gearKey(equipment = {}) {

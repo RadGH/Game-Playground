@@ -154,7 +154,7 @@ Settings > Key bindings > Controller. Hints flip between keys and glyphs by whic
 
 | | |
 |---|---|
-| Left stick / right stick | move / camera (click the left stick: sprint; click the right: zoom steps) |
+| Left stick / right stick | move / camera (you run; a part-way push or a click of the left stick walks; LT + click = auto-run; click the right: zoom steps) |
 | X · Y · B · RB · RT | strike · skills 1 · 2 · 3 · 4 |
 | hold LT + Y · B | skills 5 · 6 |
 | hold LT + D-pad | the four potion / food slots |

@@ -8,12 +8,19 @@
 // server's `inRange`, else your distance to its ring) the travel offer disappears and the card is the tracker.
 // Any card folds to one line with its – button; a card you folded stays folded until that event ends.
 //
+// Play-test 8 (W13): a card for an event you are NOT in has a "hide" button (the crossed eye): the event leaves this
+// tracker, the minimap and its rim arrow for the rest of the session. One line at the foot — "2 events hidden · Show" —
+// brings them back, and so does the Events list on the map. You cannot hide an event you are standing in, and walking
+// into a hidden one shows its card for as long as you are there (ui/hidden-events.js, pt8-core.js).
+//
 // Reads: zoneEvent {kind: soon|start|update|end|states, ev, at, won, why, result} · realm {kind: eventSoon|eventStart|
 // eventEnd, ev, at, won} · eventFrame {uid, name, hp, players, n, of, endsAt, inRange} · eventDone {name, xp, gold, items}.
 // pt5-core.js mergeEvent / eventLines / eventResult hold the wording (tests/D/pt5.test.js).
 
 import { h } from '../ui-panel.js';
 import { mergeEvent, eventLines, eventResult, inEvent } from './pt5-core.js';
+import { canHideEvent } from './pt8-core.js';
+import { HIDDEN } from './hidden-events.js';
 
 const RESULT_MS = 14000;
 
@@ -23,6 +30,11 @@ export function createEventTracker({ hud, me, net, parent = null }) {
   const events = new Map();       // key -> entry (pt5-core mergeEvent)
   const folded = new Set();
   const cards = new Map();        // key -> { sig, el }: a card's DOM is kept until its own content changes
+  // W13: the foot line that brings hidden events back
+  const foot = h('div.et-hidden', { hidden: true }, h('span'), h('button.ghost.small', { type: 'button', dataset: { act: 'unhide' } }, 'Show'));
+  const EYE = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6 0 10 7 10 7a17.6 17.6 0 0 1-3.2 3.9M6.5 6.6C3.7 8.4 2 12 2 12s4 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+  const hideBtn = e => { const b = h('button.ghost.et-x.et-hide', { type: 'button', 'aria-label': 'Hide this event', dataset: { act: 'hide', key: e.key, tip: 'Hide this event from your screen. Bring it back from the line under the events, or from the map.' } }); b.innerHTML = EYE; return b; };
+  HIDDEN.onChange(() => draw(true));
 
   /** append, minus the holes: DOM `append(null)` writes the WORD "null" (play-test 6 U9: "Won: Home to Torborhold. null"). */
   const put = (el, ...kids) => { for (const k of kids.flat()) if (k != null && k !== false && k !== '') el.append(k); return el; };
@@ -113,6 +125,7 @@ export function createEventTracker({ hud, me, net, parent = null }) {
     const whereText = L.where || (far != null && far > (e.r || 40) ? `${Math.max(10, Math.round(far / 10) * 10).toLocaleString()} m away` : '');
     const head = h('div.et-head', {},
       h('b.et-state', {}, L.head), L.time ? h('span.et-time' + (L.urgent ? '.urgent' : ''), {}, L.time) : null,
+      canHideEvent(e, L.inside) ? hideBtn(e) : null,
       ended ? h('button.ghost.et-x', { type: 'button', 'aria-label': 'Dismiss', dataset: { act: 'drop', key: e.key } }, '×')
         : h('button.ghost.et-x', { type: 'button', 'aria-label': fold ? 'Show the event' : 'Fold the event to one line', dataset: { act: 'fold', key: e.key, tip: fold ? 'Show it all' : 'Fold to one line' } }, fold ? '+' : '–'));
     const el = h(`section.et-card.${e.state}${L.inside ? '.inside' : '.outside'}${fold ? '.folded' : ''}${e.scope === 'realm' ? '.realm' : ''}`, { dataset: { key: e.key } }, head, h('strong.et-name', {}, L.name));
@@ -146,7 +159,11 @@ export function createEventTracker({ hud, me, net, parent = null }) {
       else if (e.state === 'live' && Number.isFinite(e.endsAt) && now - e.endsAt > 60000) events.delete(k);    // the server went quiet about it
       else if (e.tracked && (e.state === 'live' || e.state === 'soon' || e.state === 'offer') && now - (e.seen || 0) > 15000) events.delete(k);   // you walked out of hearing
     }
-    const list = [...events.values()].sort((a, b) => (inEvent(b, p) - inEvent(a, p)) || (a.since - b.since));
+    // W13: hidden events stay off the screen — unless you are standing in one, or it just ended with a result for you
+    const all = [...events.values()];
+    const shownNow = e => !HIDDEN.has(e) || inEvent(e, p) || ((e.state === 'won' || e.state === 'lost') && !!e.got && !/^No reward/.test(e.got));
+    const list = all.filter(shownNow).sort((a, b) => (inEvent(b, p) - inEvent(a, p)) || (a.since - b.since));
+    const hiddenN = all.length - list.length;
     // the clock ticks every second: when ONLY the time changed, patch the text in place (a rebuilt card would swallow a
     // click that lands between pointer-down and pointer-up, and drop the tooltip under the pointer)
     const lines = list.map(e => eventLines(e, { now, me: p }));
@@ -161,7 +178,10 @@ export function createEventTracker({ hud, me, net, parent = null }) {
       return c.el;
     });
     for (const k of [...cards.keys()]) if (!events.has(k)) cards.delete(k);
-    root.hidden = !list.length;
+    root.hidden = !list.length && !hiddenN;
+    foot.hidden = !hiddenN;
+    if (hiddenN) { const t = `${hiddenN} event${hiddenN === 1 ? '' : 's'} hidden`; if (foot.firstChild.textContent !== t) foot.firstChild.textContent = t; if (foot.parentNode !== root || root.lastChild !== foot) root.append(foot); els.push(foot); }
+    else if (foot.parentNode) foot.remove();
     const cur = [...root.children];
     if (cur.length !== els.length || cur.some((c, i) => c !== els[i])) {
       // put changed cards in place one by one, leaving the untouched ones attached
@@ -174,6 +194,8 @@ export function createEventTracker({ hud, me, net, parent = null }) {
     const k = b.dataset.key;
     if (b.dataset.act === 'fold') { if (folded.has(k)) folded.delete(k); else folded.add(k); }
     else if (b.dataset.act === 'drop') events.delete(k);
+    else if (b.dataset.act === 'hide') { const e = events.get(k); if (e) { HIDDEN.hide(e); hud.toast?.(`${e.name || 'That event'} is hidden. The line under the events (or the map) brings it back.`, 'info'); } return; }
+    else if (b.dataset.act === 'unhide') { for (const e of events.values()) HIDDEN.show(e); HIDDEN.showAll(); return; }
     else if (b.dataset.act === 'travel') net()?.travel?.('event');
     draw(true);
   });
@@ -184,6 +206,8 @@ export function createEventTracker({ hud, me, net, parent = null }) {
     wire(n) { n.on('zoneEvent', onZoneEvent); n.on('realm', onRealm); n.on('eventFrame', onFrame); n.on('eventDone', onDone); n.on('eventTrack', onTrack); n.on('eventAt', onAt); n.on('joined', j => { if (j.event) onRealm({ kind: 'eventStart', ev: j.event }); if (j.you?.eventAt != null) setTimeout(() => onAt({ uid: j.you.eventAt }), 0); }); },
     tick(dt) { acc += dt; if (acc < 0.5) return; acc = 0; draw(); },
     clear() { events.clear(); folded.clear(); draw(true); },
-    get state() { const now = Date.now(), p = me(); return [...events.values()].map(e => ({ ...eventLines(e, { now, me: p }), got: e.got || '', folded: folded.has(e.key) })); },
+    get state() { const now = Date.now(), p = me(); return [...events.values()].map(e => ({ ...eventLines(e, { now, me: p }), got: e.got || '', folded: folded.has(e.key), hidden: HIDDEN.has(e) })); },
+    /** W13: hide / show one event by its key (the map uses the same set through ui/hidden-events.js). */
+    hide(key) { const e = events.get(String(key)); return e ? HIDDEN.hide(e) : false; }, hidden: HIDDEN,
   };
 }

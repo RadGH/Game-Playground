@@ -35,6 +35,18 @@
         5
       ],
       "_doc": "Play-test 3 R3 (stream A js/sim/province.js zoneEventsTick): a zone event waits at its arena, armed, until a player comes within the arena radius + nearMetres; then a countdown of countdownSeconds (sent as a real time, `zoneEvent {kind:'soon', at, inMs}`), then the waves. Everyone walking away during the countdown calls it off. After it ends it rests cooldownMinutes (the map shows when it is ready again: `kind:'cooldown', at`). No real-time schedule."
+    },
+    "newcomer": {
+      "underLevel": 3,
+      "firstMinutes": 10,
+      "_doc": "W1 (owner feedback 8): a NEWCOMER is a character under `underLevel` OR one with less than `firstMinutes` of played time. An event with `startOn.clearOfNewcomersM` may not start, nor run its countdown, while a newcomer stands within that many metres of its centre (the settlement for a town event, the arena for a zone event); a countdown already running is called off. tools/content-towns.mjs writes the distances."
+    },
+    "raid": {
+      "rules": "data/provinces/guards.json raid",
+      "firstTarget": "guard",
+      "neverFirstTarget": "newcomer",
+      "enterBy": "gate",
+      "_doc": "W1: a town raid comes in through the gates listed on the event (`raid.gates`), fights the town guards first, and never opens on a newcomer. The numbers and the guards' lines are in data/provinces/guards.json."
     }
   },
   "realm": [
@@ -188,7 +200,8 @@
       "levelAuthored": 4,
       "startOn": {
         "minLevel": 3,
-        "_doc": "Torborhold is where new characters start: the raid comes only when someone of level 3+ is in town."
+        "_doc": "Torborhold is where new characters start: the raid comes only when someone of level 3+ is in town.",
+        "clearOfNewcomersM": 223
       },
       "info": {
         "name": "Raiders at Torborhold",
@@ -203,6 +216,42 @@
         "onSuccess": "The raiders are broken and Torborhold still has its gates.",
         "onFail": "The raiders take what they came for and ride off with it.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "raid": {
+        "gates": [
+          {
+            "id": "torborhold_gate_0",
+            "x": 531.5,
+            "z": 1280.5,
+            "out": [
+              -0.965,
+              0.263
+            ],
+            "main": true
+          },
+          {
+            "id": "torborhold_gate_1",
+            "x": 594.2,
+            "z": 1201.3,
+            "out": [
+              0.035,
+              -0.999
+            ],
+            "main": false
+          },
+          {
+            "id": "torborhold_gate_2",
+            "x": 632.4,
+            "z": 1216,
+            "out": [
+              1,
+              0
+            ],
+            "main": false
+          }
+        ],
+        "guards": 9,
+        "zone": "z12_02"
       }
     },
     {
@@ -288,6 +337,45 @@
         "onSuccess": "The red banner is down and Halsbridge holds.",
         "onFail": "The warband sacks the market and marches off before anyone can stop it.",
         "rewardText": "A rare item or better for everyone who takes part, a chance of an epic one, gold and about a level of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 242
+      },
+      "raid": {
+        "gates": [
+          {
+            "id": "halsbridge_gate_0",
+            "x": 1755.5,
+            "z": 1240.4,
+            "out": [
+              0.541,
+              0.841
+            ],
+            "main": false
+          },
+          {
+            "id": "halsbridge_gate_1",
+            "x": 1697,
+            "z": 1266,
+            "out": [
+              0.013,
+              1
+            ],
+            "main": true
+          },
+          {
+            "id": "halsbridge_gate_2",
+            "x": 1670,
+            "z": 1106.2,
+            "out": [
+              -0.535,
+              -0.845
+            ],
+            "main": false
+          }
+        ],
+        "guards": 10,
+        "zone": "z13_02"
       }
     },
     {
@@ -444,6 +532,9 @@
         "onSuccess": "The thing in the snow lies still, and the pass is quiet.",
         "onFail": "The snow slides again and buries it all, for now.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -526,6 +617,9 @@
         "onSuccess": "The Warden lies down, and the ruin goes back to being a ruin.",
         "onFail": "The Warden finishes its rounds and returns below, unpaid.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -608,6 +702,9 @@
         "onSuccess": "The bell is silent, and the fen is merely damp.",
         "onFail": "The bell rings itself out and sinks, to ring another day.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -690,6 +787,9 @@
         "onSuccess": "The false lamps are out and the ship sails past.",
         "onFail": "The lamps do their work, and the wreckers go home rich.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -772,6 +872,9 @@
         "onSuccess": "Rustjaw is dead, and the hole is only a hole.",
         "onFail": "The thing digs itself back under the hill.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -854,6 +957,9 @@
         "onSuccess": "Grandmother Skein is dead, and the barley is safe to stand in.",
         "onFail": "Grandmother Skein goes back down the hole to wait.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -936,6 +1042,9 @@
         "onSuccess": "The drum is broken and the market finds its manners again.",
         "onFail": "The mob tires itself out and takes the stalls home with it.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -1018,6 +1127,9 @@
         "onSuccess": "Sluicegrip sinks for good, and the ferry runs again.",
         "onFail": "Sluicegrip eats a boat and goes back under.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -1100,6 +1212,9 @@
         "onSuccess": "The pack leader is dead, and the hunt is over.",
         "onFail": "The hunt passes through and on, and takes its kills with it.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -1182,6 +1297,9 @@
         "onSuccess": "The Gallowmother is down and the procession reaches the top.",
         "onFail": "The pilgrims scatter, and the Gallowmother takes the slowest.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -1264,6 +1382,9 @@
         "onSuccess": "The cart is firewood, and the festival carries on.",
         "onFail": "The cart eats the pies and rolls off into the dark.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -1346,6 +1467,9 @@
         "onSuccess": "The gate is scorched but standing, and the raiders are gone.",
         "onFail": "The gate burns, and the raiders help themselves.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -1428,6 +1552,9 @@
         "onSuccess": "The colossus is down, and the thorn wall closes over the gap.",
         "onFail": "The warband marches on through the breach.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -1592,6 +1719,9 @@
         "onSuccess": "Hask is beaten, and the redoubt keeps its flag.",
         "onFail": "The redoubt falls, and Hask puts his own flag on it.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -1674,6 +1804,9 @@
         "onSuccess": "Greycoat is dead, and the hunters go back to hunting.",
         "onFail": "Greycoat loses interest and pads off into the mist.",
         "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     }
   ]

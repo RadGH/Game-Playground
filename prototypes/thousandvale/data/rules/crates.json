@@ -110,13 +110,11 @@
       "belt"
     ],
     "back": [
-      "cloak"
+      "cloak",
+      "pack"
     ],
     "waist": [
       "belt"
-    ],
-    "light": [
-      "light"
     ]
   },
   "aliases": {
@@ -133,8 +131,11 @@
     "cloak": "back",
     "cape": "back",
     "belt": "waist",
-    "lantern": "light",
-    "torch": "light"
+    "lantern": "jewellery",
+    "torch": "jewellery",
+    "light": "jewellery",
+    "backpack": "back",
+    "pack": "back"
   },
   "any": {
     "weapon": 0.4,
@@ -212,8 +213,7 @@
     "gift": "Gift Box",
     "sunken": "Sunken Crate",
     "back": "Cloak Bundle",
-    "waist": "Belt Box",
-    "light": "Lamp Box"
+    "waist": "Belt Box"
   },
   "what": {
     "weapon": "a weapon",
@@ -228,9 +228,8 @@
     "armor": "a piece of armour",
     "jewellery": "a ring, an amulet, a cloak or a belt",
     "any": "a weapon, a piece of armour or a jewel",
-    "back": "a cloak",
-    "waist": "a belt",
-    "light": "a lantern or a torch"
+    "back": "a cloak or a backpack",
+    "waist": "a belt"
   },
   "maxAbove": 3,
   "tries": 24

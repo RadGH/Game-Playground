@@ -2,7 +2,7 @@
 //   friends   a friend who came online, or a new name on your list, since you last had the Friends tab open
 //   mail      unread letters (the server's count — it re-sends it after every read / take / delete)
 //   bag       items that arrived since you last had the bag open
-// The Party button shows the sum of its tabs (friends + mail + guild). It never shows "how many are in your party" or
+// The Party button shows the sum of its NEWS tabs (friends + guild); unread mail is its yellow dot and not a number (W10). It never shows "how many are in your party" or
 // "how many friends are online" — those are facts, not news; they live in the window titles.
 // Skills / perks keep a QUIET gold number (points waiting to be spent): that is a to-do, not news, and is drawn as one.
 //
@@ -31,16 +31,30 @@ export function createUnseen() {
 export const badgeText = n => (n > 99 ? '99+' : n > 0 ? String(n) : '');
 
 export const UNSEEN = createUnseen();
-const PARTY_TABS = ['friends', 'mail', 'guild'];
+/**
+ * Play-test 8 (W10): ONE indicator per thing. What each menu-bar button and Party tab shows for a set of unseen counts:
+ * `n` is the red number, `dot` the yellow dot. Unread mail is the yellow dot on the Party button and NOTHING else there —
+ * the number of letters is on the Mail tab inside the window (a number, no second mark). Friends / guild news is the red
+ * number. A button never carries both for the same thing.
+ */
+export function badgePlan(c = {}) {
+  const n = k => Math.max(0, c[k] || 0);
+  return {
+    'party-btn': { n: n('friends') + n('guild'), dot: n('mail') > 0 },
+    'menu-friends': { n: n('friends'), dot: false },
+    'menu-guild': { n: n('guild'), dot: false },
+    'menu-mail': { n: n('mail'), dot: false },
+    'bag-btn': { n: n('bag'), dot: false },
+  };
+}
 /** Paint every badge that is fed from here. */
 export function paintBadges(doc = typeof document !== 'undefined' ? document : null) {
   if (!doc) return;
-  const put = (id, n) => { const b = doc.getElementById(id)?.querySelector('b'); if (b && b.textContent !== badgeText(n)) b.textContent = badgeText(n); };
-  put('menu-friends', UNSEEN.count('friends'));
-  put('menu-mail', UNSEEN.count('mail'));
-  put('menu-guild', UNSEEN.count('guild'));
-  put('party-btn', UNSEEN.total(PARTY_TABS));
-  put('bag-btn', UNSEEN.count('bag'));
-  doc.getElementById('menu-mail')?.classList.toggle('alert', UNSEEN.count('mail') > 0);
+  const plan = badgePlan({ friends: UNSEEN.count('friends'), guild: UNSEEN.count('guild'), mail: UNSEEN.count('mail'), bag: UNSEEN.count('bag') });
+  for (const [id, p] of Object.entries(plan)) {
+    const el = doc.getElementById(id); if (!el) continue;
+    const b = el.querySelector('b'); if (b && b.textContent !== badgeText(p.n)) b.textContent = badgeText(p.n);
+    el.classList.toggle('alert', !!p.dot);
+  }
 }
 UNSEEN.onChange(() => paintBadges());

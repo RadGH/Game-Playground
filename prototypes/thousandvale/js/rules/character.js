@@ -6,6 +6,8 @@
 // small proxy whose `rng` is whatever room the character is standing in (`ch.roomRng`), never the
 // engine's shared generator — a fight replays from its room's seed alone.
 
+import { isLightItem, lightRefund } from './tv-gear.js';
+import { itemPrice } from './economy.js';
 import { attuneWeapon, createSkillBar, describeSkill } from './farhold.js';
 
 /**
@@ -140,6 +142,12 @@ export function restoreGear(engine, ch, blob) {
   for (const [slot, item] of Object.entries(blob.equipment || {})) {
     if (!item || typeof item !== 'object') continue;
     const copy = JSON.parse(JSON.stringify(item));
+    // owner feedback 8 (W22): a light worn in an old save is not put back — its list price is owed to the player
+    // (index.js addEntity pays it through host.award, once: the next save no longer holds the item)
+    if (engine.tvGear && (slot === 'light' || isLightItem(copy, engine.tvGear))) {
+      ch.lightOwed = (ch.lightOwed || 0) + lightRefund({ ...copy, slot: 'light' }, engine.tvGear, it => itemPrice(engine.prices, it));
+      continue;
+    }
     engine.finishItem?.(copy, { fresh: false, convert: false });        // an older save's caster item gets its card line (it keeps what it did)
     // play-test 5 T7: the two HANDS are put back exactly as they were saved. Farhold's `equip` clears the off hand
     // when a two-hander goes into the main hand unless the sheet has Doubled Grasp — and a login restores the gear

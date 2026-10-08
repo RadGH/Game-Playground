@@ -9,6 +9,9 @@ import { FRIENDS_MAX, GUILD_MAX } from '../../js/sim/store-memory-m3.js';
 const sha = t => createHash('sha256').update(String(t)).digest('hex');
 const ms = t => (t == null ? null : new Date(t));
 const toMs = t => (t ? new Date(t).getTime() : 0);
+/** One feedback row as the stores hand it out (schema v5 + v6: done / doneAt / ref). */
+const fbRow = x => ({ id: +x.id, at: toMs(x.created_at), account: x.account_id == null ? null : +x.account_id, char: x.char_id == null ? null : +x.char_id, name: x.name, cls: x.cls, level: x.level, kind: x.kind, text: x.text, client: x.client || {}, server: x.server || {},
+  state: x.state, stateAt: x.state_at ? toMs(x.state_at) : null, stateBy: x.state_by, note: x.note || '', done: x.done_note || '', doneAt: x.done_at ? toMs(x.done_at) : null, ref: x.ref == null ? null : +x.ref, gift: !!x.gift });
 const brief = r => ({ id: r.id, name: r.name, cls: r.cls, level: r.level, room: r.room });
 
 export function pgM3({ pool, q, realm, SAVE_SQL, saveParams }) {
@@ -291,28 +294,28 @@ export function pgM3({ pool, q, realm, SAVE_SQL, saveParams }) {
         const acc = row.account != null ? await c.query('SELECT 1 FROM accounts WHERE id = $1', [row.account]) : { rows: [] };
         const had = char != null ? await c.query('SELECT 1 FROM feedback WHERE char_id = $1 AND gift LIMIT 1', [char]) : { rows: [1] };
         const first = char != null && !had.rows.length;
-        const r = await c.query(`INSERT INTO feedback (realm, created_at, account_id, char_id, name, cls, level, kind, text, client, server, state, gift)
-          VALUES ($1, COALESCE($2, now()), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id`,
-          [realm, ms(row.at), acc.rows.length ? row.account : null, char, row.name || null, row.cls || null, row.level || null, row.kind, row.text, JSON.stringify(row.client || {}), JSON.stringify(row.server || {}), row.state || 'new', first]);
+        const r = await c.query(`INSERT INTO feedback (realm, created_at, account_id, char_id, name, cls, level, kind, text, client, server, state, gift, ref, state_by, state_at)
+          VALUES ($1, COALESCE($2, now()), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, CASE WHEN $15::text IS NULL THEN NULL ELSE COALESCE($2, now()) END) RETURNING id`,
+          [realm, ms(row.at), acc.rows.length ? row.account : null, char, row.name || null, row.cls || null, row.level || null, row.kind, row.text, JSON.stringify(row.client || {}), JSON.stringify(row.server || {}), row.state || 'new', first, row.ref ?? null, row.stateBy || null]);
         return { id: r.rows[0].id, first };
       });
     },
     async hasFeedback(char) { const r = await q('SELECT 1 FROM feedback WHERE char_id = $1 LIMIT 1', [char]); return r.rows.length > 0; },
     async feedbackGiftFailed(char) { await q('UPDATE feedback SET gift = false WHERE char_id = $1', [char]); },
-    async listFeedback({ state = null, kind = null, limit = 100, before = null, hideTrashed = false } = {}) {
+    async getFeedback(id) { const r = await q('SELECT * FROM feedback WHERE id = $1 AND realm = $2', [id, realm]); return r.rows.length ? fbRow(r.rows[0]) : null; },
+    async listFeedback({ state = null, kind = null, limit = 100, before = null, hideTrashed = false, account = null } = {}) {
       const r = await q(`SELECT * FROM feedback WHERE realm = $1 AND ($2::text IS NULL OR state = $2) AND ($3::text IS NULL OR kind = $3) AND ($4::bigint IS NULL OR id < $4)
-        AND (NOT $5::boolean OR state <> 'trashed') ORDER BY id DESC LIMIT $6`, [realm, state, kind, before, !!hideTrashed, limit]);
-      return r.rows.map(x => ({ id: x.id, at: toMs(x.created_at), account: x.account_id, char: x.char_id, name: x.name, cls: x.cls, level: x.level, kind: x.kind, text: x.text, client: x.client || {}, server: x.server || {},
-        state: x.state, stateAt: x.state_at ? toMs(x.state_at) : null, stateBy: x.state_by, note: x.note || '', gift: !!x.gift }));
+        AND (NOT $5::boolean OR state <> 'trashed') AND ($7::bigint IS NULL OR account_id = $7) ORDER BY id DESC LIMIT $6`, [realm, state, kind, before, !!hideTrashed, limit, account]);
+      return r.rows.map(fbRow);
     },
     async feedbackCounts() {
       const r = await q('SELECT state, count(*)::int AS n FROM feedback WHERE realm = $1 GROUP BY state', [realm]);
-      const c = { new: 0, approved: 0, declined: 0, trashed: 0, total: 0 };
+      const c = { new: 0, approved: 0, declined: 0, trashed: 0, completed: 0, total: 0 };
       for (const x of r.rows) { c[x.state] = (c[x.state] || 0) + x.n; c.total += x.n; }
       return c;
     },
-    async setFeedbackState(id, state, { by = 'admin', at = Date.now(), note = null } = {}) {
-      const r = await q('UPDATE feedback SET state = $2, state_at = $3, state_by = $4, note = COALESCE($5, note) WHERE id = $1 AND realm = $6', [id, state, ms(at), by, note, realm]);
+    async setFeedbackState(id, state, { by = 'admin', at = Date.now(), note = null, done = null } = {}) {
+      const r = await q('UPDATE feedback SET state = $2, state_at = $3, state_by = $4, note = COALESCE($5, note), done_note = COALESCE($7, done_note), done_at = CASE WHEN $7::text IS NULL THEN done_at ELSE $3 END WHERE id = $1 AND realm = $6', [id, state, ms(at), by, note, realm, done]);
       return r.rowCount > 0;
     },
     async setAdmin(who, on = true) {

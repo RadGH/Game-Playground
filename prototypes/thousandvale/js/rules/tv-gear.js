@@ -23,9 +23,89 @@ const hash01 = text => { let h = 2166136261; for (let i = 0; i < text.length; i+
 const pickBy = (list, key) => list[Math.min(list.length - 1, Math.floor(hash01(key) * list.length))];
 
 /** The catalog rows worth an item base: new, with a base id, of a kind the game wears. */
-/** Thousandvale's own equipment slots (Farhold's slot list has neither): a cloak and a belt. `light` is Farhold's. */
+/** Thousandvale's own equipment slots (Farhold's slot list has neither): a cloak or backpack, and a belt. */
 export const TV_SLOTS = Object.freeze(['back', 'waist']);
-export const EXTRA_SLOTS = Object.freeze(['back', 'waist', 'light']);
+export const EXTRA_SLOTS = Object.freeze(['back', 'waist']);
+
+// ---------------------------------------------------------------------------------------------- W22: no light items
+/**
+ * Owner feedback 8 (W22): "REMOVE light items from the game — I never meant to add those." Everything that is, makes or
+ * improves a carried light leaves the item table (in memory; the shared file is never written): bases worn in the
+ * `light` slot, uniques of type `light`, the affixes that only roll on a light, and `light` from every other affix's
+ * slot list. Returns what it removed. Run after Farhold's uniques are installed.
+ */
+export function removeLights(items) {
+  const out = { bases: [], uniques: [], affixes: [] };
+  if (!items) return out;
+  for (const t of ['armorBases', 'weaponBases']) for (const [k, b] of Object.entries(items[t] || {})) if (b && (b.slot === 'light' || b.type === 'light')) { delete items[t][k]; out.bases.push(k); }
+  if (Array.isArray(items.uniques)) {
+    const keep = [];
+    for (const u of items.uniques) { if (u && (u.type === 'light' || u.slot === 'light')) out.uniques.push(u.id); else keep.push(u); }
+    items.uniques.length = 0; items.uniques.push(...keep);
+  }
+  const lists = Array.isArray(items.affixes) ? [items.affixes] : Object.values(items.affixes || {}).filter(Array.isArray);
+  for (const list of lists) {
+    for (let i = list.length - 1; i >= 0; i--) {
+      const a = list[i];
+      if (!a || typeof a !== 'object') continue;
+      const only = Array.isArray(a.onlySlots) ? a.onlySlots : null;
+      if (/^cond_light(?!ning)/.test(a.stat || '') || (only && only.length && only.every(s => s === 'light'))) { out.affixes.push(a.id); list.splice(i, 1); continue; }
+      if (only && only.includes('light')) a.onlySlots = only.filter(s => s !== 'light');
+    }
+  }
+  return out;
+}
+/** Is this a light a player may still own from before W22 (a worn lantern / torch of any base, or the torch consumable)? */
+export function isLightItem(item, cfg = null) {
+  if (!item || typeof item !== 'object') return false;
+  const L = cfg?.lights || LIGHTS_DEFAULT;
+  if (item.slot === 'light' || item.type === 'light') return true;
+  if (item.use && item.use.type === 'light') return true;
+  const ids = [item.baseKey, item.catalogBase, item.baseItemId, item.g5].filter(Boolean);
+  if (ids.some(id => L.legacy.includes(id))) return true;
+  if ((item.kind === 'good' || item.source === 'good') && L.goods.includes(item.id)) return true;
+  return (item.affixes || []).some(a => /^cond_light(?!ning)/.test(a?.stat || ''));
+}
+const LIGHTS_DEFAULT = Object.freeze({ legacy: ['hand_lantern', 'pitch_torch', 'g5_cresset', 'g5_hexlantern'], goods: ['torch_bundle', 'torch', 'torches', 'lantern'], refund: { slot: 0.6, good: 15 } });
+/**
+ * What a removed light is paid back at: its full LIST price (never the sell price — the owner took it away, the
+ * player loses nothing). `listPrice(item)` = the gear formula's price (js/rules/economy.js). A stack pays per item.
+ */
+export function lightRefund(item, cfg = null, listPrice = null) {
+  if (!isLightItem(item, cfg)) return 0;
+  const R = cfg?.lights?.refund || LIGHTS_DEFAULT.refund;
+  const count = Math.max(1, (item.count | 0) || 1);
+  if (item.use || item.kind === 'good' || item.kind === 'potion') return Math.max(1, Math.round(Number.isFinite(item.price) && item.price > 0 ? item.price : R.good)) * count;
+  const list = listPrice ? listPrice(item) : 0;
+  return Math.max(R.good, Math.round(list * (R.slot ?? 0.6))) * count;
+}
+
+// ---------------------------------------------------------------------------------------------- W19: backpacks
+/** Bag slots an item gives when worn on the back (0 = not a backpack). */
+export const bagBonusOf = item => (item && typeof item === 'object' && item.slot === 'back' && item.bagSlots > 0 ? Math.min(24, item.bagSlots | 0) : 0);
+/**
+ * A backpack as it leaves `generate`: its bag slots on the item, FEWER rolled properties than a cloak of that rarity
+ * (`packs.affixCap`), the name without the words of the properties it gave up, the model it draws.
+ */
+export function finishPack(item, base, cfg) {
+  if (!item || !base?.pack) return item;
+  const P = cfg?.packs || {};
+  const cap = P.affixCap?.[item.rarity] ?? 1;
+  const rolled = (item.affixes || []).filter(a => !a.baseIntrinsic && !a.intrinsic);
+  let name = item.name || base.name;
+  for (const a of rolled.slice(cap)) {
+    item.affixes.splice(item.affixes.indexOf(a), 1);
+    if (a.name && name.startsWith(a.name + ' ')) name = name.slice(a.name.length + 1);
+    else if (a.name && name.endsWith(' ' + a.name)) name = name.slice(0, -a.name.length - 1);
+  }
+  item.name = name;
+  item.pack = true;
+  item.bagSlots = base.bagSlots | 0;
+  item.bagText = `+${item.bagSlots} bag slots`;
+  const g5 = (item.rarity === 'rare' || item.rarity === 'legendary') && P.rareLook ? P.rareLook : base.packLook;
+  if (g5) { item.g5 = g5; item.look = { ...(item.look || {}), g5 }; }
+  return item;
+}
 
 export function catalogRows(catalog) {
   const rows = Array.isArray(catalog) ? catalog : Array.isArray(catalog?.rows) ? catalog.rows : Array.isArray(catalog?.items) ? catalog.items : [];
@@ -95,6 +175,7 @@ export function installTvGear(items, cfg, catalog = null) {
   const report = { added: [], catalog: [], skipped: [] };
   if (!items || !cfg || items._tvGear) return report;
   items._tvGear = true;
+  report.lights = removeLights(items);          // owner feedback 8 (W22), before anything is added or pooled
   for (const [key, base] of Object.entries(cfg.bases?.armor || {})) if (!items.armorBases[key]) { items.armorBases[key] = { ...clone(base), tv: true }; report.added.push(key); }
   for (const [key, base] of Object.entries(cfg.bases?.weapon || {})) if (!items.weaponBases[key]) { items.weaponBases[key] = { ...clone(base), tv: true }; report.added.push(key); }
   let rows = [];
@@ -197,6 +278,7 @@ export function attachTvGear(engine, cfg) {
       const item = gen.call(this, baseKey, rarity, quality, opts);
       fixUnits(item);
       const base = item && (items.weaponBases[baseKey] || items.armorBases[baseKey]);
+      if (item && base?.pack) finishPack(item, base, engine.tvGear);            // W19
       if (item && base?.g5) {
         item.g5 = base.g5;
         // the item answers as its TEMPLATE base to every rule that asks by key (a quarterstaff is a pole, a rapier
@@ -215,6 +297,7 @@ export function attachTvGear(engine, cfg) {
   engine.finishItem = (item, { rng = null, fresh = true, convert = true } = {}) => {
     if (!item || typeof item !== 'object') return item;
     fixUnits(item);                       // an old save's shield (block 0.2) is corrected as it is loaded
+    if (item.pack && item.bagSlots > 0 && !item.bagText) item.bagText = `+${item.bagSlots} bag slots`;
     const c = engine.tvGear?.convert;
     if (convert && fresh && rng && c && canConvert(engine.tvGear, items, item) && rng() < (c.chance ?? 0)) {
       const els = Object.keys(c.affixes || {});
@@ -227,7 +310,7 @@ export function attachTvGear(engine, cfg) {
   };
   /** One item of a named base (E: shop stock, quest rewards; a kit; a test). */
   engine.makeItem = ({ base, rarity = 'normal', level = 1, rng = null, quality = null } = {}) => {
-    if (!base || !(items.weaponBases[base] || items.armorBases[base])) return null;
+    if (!base || !(items.weaponBases[base] || items.armorBases[base])) return null;       // (W22: a light base is no longer in the table)
     const r = rng || rpg.rng;
     rpg.lastDropLevel = level;
     const item = attuneWeapon(loot.generate(base, rarity, quality || rpg.qualityFor(level), { rng: r }));

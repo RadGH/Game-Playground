@@ -76,3 +76,25 @@ export function clockText(t) {
   const mins = Math.floor((((t % 1) + 1) % 1) * 24 * 60);
   return `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
 }
+
+// ---------------------------------------------------------------- play-test 8 (W22): the light everyone carries
+//
+// Worn and carried light ITEMS are gone from the game ("I never meant to add those"). In their place every character
+// has the same glow about them: wide enough to read the ground and the fight at night, wider underground, and a
+// dungeon is never pitch black whatever its look. One PointLight (scene.js `lantern`, always in the scene, so no
+// shader is ever recompiled) is driven from these numbers; the radius is the rules' when the server sends one.
+export const CARRY_LIGHT = Object.freeze({ outdoor: 18, dungeon: 24, brightDungeon: 30 });
+/** Floors a dungeon's own look may not go under (hemisphere light, fog distances). */
+export const DUNGEON_AMBIENT = Object.freeze({ hemi: 2.1, hemiBright: 2.7, fogNear: 16, fogFar: 72, fogNearBright: 22, fogFarBright: 95, floorGlow: 0.07, wallGlow: 0.05 });
+/**
+ * The carried light for a moment. Pure. `mood` 'outdoor' | 'dungeon'; `night` 0..1; `range` = the rules' radius in metres
+ * (null = ours); `bright` = an open-roofed dungeon look. -> { intensity, distance, decay }.
+ */
+export function carriedLight({ mood = 'outdoor', night = 0, range = null, bright = false } = {}) {
+  const dark = mood === 'dungeon';
+  const base = dark ? (bright ? CARRY_LIGHT.brightDungeon : CARRY_LIGHT.dungeon) : CARRY_LIGHT.outdoor;
+  const distance = Math.max(base, Number.isFinite(range) && range > 0 ? (dark ? range * 1.3 : range) : 0);
+  // by day the light is off (dimmed to nothing, never hidden); it comes up through dusk
+  const k = dark ? 1 : Math.max(0, Math.min(1, (night - 0.25) / 0.45));
+  return { intensity: +(k * (dark ? (bright ? 20 : 15) : 12) * (distance / base) ** 0.5).toFixed(2), distance, decay: dark ? 1.25 : 1.35 };
+}

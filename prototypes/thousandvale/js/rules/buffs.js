@@ -17,8 +17,8 @@
 //   armorPct      +% armour                                                    rpg.derive wrapper (here)
 //   hpPct         +% maximum health                                            rpg.derive wrapper (here)
 //   mountSpeedPct +% riding speed                                              stream A (rules.itemBuffs(e))
-//   light (torch) `lightRange` metres of light (D-world draws it from `item:torch` / rules.itemBuffs) and, at
-//                 NIGHT (the room's `host.isNight()`), +TORCH.nightPct to hits on the undead and on beasts
+//   (owner feedback 8, W22: the torch — stat `light`, status `item:torch` — is REMOVED with every other light item;
+//    a torch buff in an old save is dropped on load. Everyone carries the same light: LIGHT in index.js.)
 //
 // Pure.
 
@@ -32,23 +32,19 @@ export const BUFF_KINDS = Object.freeze({
   armorPct: { kind: 'oiled', name: 'Oiled armour' },
   hpPct: { kind: 'well_fed', name: 'Well fed' },
   mountSpeedPct: { kind: 'oats', name: 'Oat-fed mount' },
-  light: { kind: 'torch', name: 'Lit torch' },
 });
 /** Caps, so a data typo can never make a god: no item buff past these. */
-export const BUFF_CAPS = Object.freeze({ dmgPct: 0.25, rangedPct: 0.25, vsUndeadPct: 0.4, armorPct: 0.5, hpPct: 0.25, mountSpeedPct: 0.5, light: 1 });
-/** The lit torch: how far it lights, and its night bonus against the things that come out in the dark. */
-export const TORCH = Object.freeze({ lightRange: 14, nightPct: 0.08, nightFamilies: Object.freeze(['undead', 'beast']), minutes: 10 });
+export const BUFF_CAPS = Object.freeze({ dmgPct: 0.25, rangedPct: 0.25, vsUndeadPct: 0.4, armorPct: 0.5, hpPct: 0.25, mountSpeedPct: 0.5 });
 export const MAX_MINUTES = 60;
 const PREFIX = 'item:';
 
-/** The buffs on a unit as a plain map: { dmgPct: 0.03, light: 1, lightRange: 14, ... }. */
+/** The buffs on a unit as a plain map: { dmgPct: 0.03, armorPct: 0.04, ... }. */
 export function itemBuffs(unit) {
   const out = {};
   for (const [id, st] of Object.entries(unit?.statuses || {})) {
     if (!id.startsWith(PREFIX) || !st.itemBuff) continue;
     const b = st.itemBuff;
     out[b.stat] = (out[b.stat] || 0) + b.amount;
-    if (b.lightRange) out.lightRange = Math.max(out.lightRange || 0, b.lightRange);
   }
   return out;
 }
@@ -57,23 +53,22 @@ export const sheetKey = unit => { const b = itemBuffs(unit); return `${b.armorPc
 
 /**
  * Put a buff on `unit` (one per kind; a re-use refreshes). Returns { ok, id, stat, amount, seconds } or { ok:false, why }.
- * `spec` = E's `use.buff` ({ stat, amount, minutes }) or { stat: 'light' } for a torch.
+ * `spec` = E's `use.buff` ({ stat, amount, minutes }).
  */
 export function applyItemBuff(unit, spec, { source = null } = {}) {
   const stat = spec?.stat;
   const k = BUFF_KINDS[stat];
   if (!unit || !k) return { ok: false, why: 'That does nothing.' };
-  const light = stat === 'light';
-  const amount = light ? 1 : Math.max(0, Math.min(BUFF_CAPS[stat], Number(spec.amount) || 0));
+  const amount = Math.max(0, Math.min(BUFF_CAPS[stat], Number(spec.amount) || 0));
   if (!(amount > 0)) return { ok: false, why: 'That does nothing.' };
-  const seconds = Math.max(1, Math.min(MAX_MINUTES, Number(spec.minutes) || (light ? TORCH.minutes : 15))) * 60;
+  const seconds = Math.max(1, Math.min(MAX_MINUTES, Number(spec.minutes) || 15)) * 60;
   const id = PREFIX + k.kind;
   unit.statuses ||= {};
   const had = unit.statuses[id];
   const keepAmount = had?.itemBuff ? Math.max(had.itemBuff.amount, amount) : amount;
   unit.statuses[id] = {
     type: id, kind: 'buff', name: k.name, remaining: Math.max(seconds, had?.remaining || 0), power: 1,
-    itemBuff: { stat, amount: keepAmount, ...(light ? { lightRange: TORCH.lightRange } : {}), source },
+    itemBuff: { stat, amount: keepAmount, source },
   };
   return { ok: true, id, stat, amount: keepAmount, seconds: unit.statuses[id].remaining, refreshed: !!had };
 }
@@ -82,12 +77,11 @@ export function applyItemBuff(unit, spec, { source = null } = {}) {
 export function itemStrikeMult(attacker, defender) {
   if (!attacker?.statuses) return 1;
   const b = itemBuffs(attacker);
-  if (b.dmgPct == null && b.rangedPct == null && b.vsUndeadPct == null && !b.light) return 1;
+  if (b.dmgPct == null && b.rangedPct == null && b.vsUndeadPct == null) return 1;
   let k = 1 + (b.dmgPct || 0);
   if (b.rangedPct && attacker.equipment) { const w = weaponHands(attacker).main; if (w?.ranged) k *= 1 + b.rangedPct; }
   const undead = defender?.family === 'undead' || !!defender?.statuses?.curse;
   if (b.vsUndeadPct && undead) k *= 1 + b.vsUndeadPct;
-  if (b.light && attacker._night && TORCH.nightFamilies.includes(defender?.family)) k *= 1 + TORCH.nightPct;
   return k;
 }
 

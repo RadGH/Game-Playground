@@ -15,6 +15,7 @@
 // (`npc` = their id — stream A spawns ONE body: the quest NPC, with the office's shop/service) or a house of their own.
 // Same inputs -> same file. Set-piece NPCs (trainers, the Pail and Plough's innkeeper) have the set piece as their
 // office (`setpieces` list), so the uniqueness rule covers them too.
+import { titledOf } from './content-titled.mjs';
 import { writeFileSync } from 'node:fs';
 import { J, ROOT, questFiles, provinceMap } from './content-lib.mjs';
 import { writeShops } from './content-shops.mjs';
@@ -94,6 +95,8 @@ export function officesFor({ town, plots, square, roles, names = null }) {
       sign: r.home ? null : (SIGN[role] ?? null), light: !r.home && (typeof pick.data.lit === 'boolean' && pick.data.role === role ? pick.data.lit : LIT.has(role)),
       ...(pick.data.label && pick.data.role === role ? { label: pick.data.label } : {}),
       ...(r.shop || ROLE_SHOP[role] ? { shop: r.shop || ROLE_SHOP[role] } : {}),
+      // W27 (owner feedback 8): a title only over someone the player can get something from (tools/content-titled.mjs)
+      titled: titledOf({ role, npc: r.npc || null, shop: r.shop || ROLE_SHOP[role] || null, trains: r.trains && r.trains.length ? r.trains : null }),
       ...(r.trains ? { trains: r.trains } : {}), ...(SERVICE[role] ? { service: SERVICE[role] } : {}),
       ...(r.home ? { home: true } : {}),
     });
@@ -148,7 +151,7 @@ export function buildOffices(prov = 'torbor_downs') {
       townShops[name] = shopTown.shops;
       // quest NPCs standing in this town (any zone's quest file, `at` = the town)
       const qnpcs = [];
-      for (const q of quests) for (const [id, n] of Object.entries(q.npcs || {})) if (n.at === name) qnpcs.push({ id, ...n });
+      for (const q of quests) for (const [id, n] of Object.entries(q.npcs || {})) if (n.at === name && !n.placedBy) qnpcs.push({ id, ...n });   // an angler / a carter stands where its own tool puts it: no office
       const roles = [];
       const taken = new Set();
       const linkRole = role => { const n = qnpcs.find(x => !taken.has(x.id) && (x.role === role || (role === 'reeve' && x.role === 'guard' && /reeve/i.test(x.name)))); if (n) { taken.add(n.id); return n; } return null; };
@@ -171,7 +174,7 @@ export function buildOffices(prov = 'torbor_downs') {
   }
   // set-piece NPCs: the set piece is their office (one NPC, one place)
   const setpieces = [];
-  for (const q of quests) for (const [id, n] of Object.entries(q.npcs || {})) if (typeof n.at === 'string' && n.at.startsWith('sp_')) setpieces.push({ npc: id, name: n.name, role: n.role || null, setpiece: n.at, ...(n.trains ? { trains: n.trains } : {}) });
+  for (const q of quests) for (const [id, n] of Object.entries(q.npcs || {})) if (typeof n.at === 'string' && n.at.startsWith('sp_')) setpieces.push({ npc: id, name: n.name, role: n.role || null, setpiece: n.at, titled: true, ...(n.trains ? { trains: n.trains } : {}) });
   void SHEET;
   return {
     _doc: 'Stream E (play-test 2, Q10). Where every town NPC works: one building plot per NPC in every hub town of Torbor Downs (stream B\'s town plans, data/zones/<zone>/placements.json kind building — `plot` is its id; x, z, yaw = the plot, zone metres; `door` = where the NPC stands by day, facing the street, as js/sim/schedules.js front() computes it). Made by tools/content-offices.mjs (re-run by tools/place-vignettes.mjs after every re-bake). `role` = the schedules.json role (its day/night blocks: the office replaces the role\'s day anchor), `shop` = the data/provinces/shops.json kind traded here, `sign` = what hangs over the door and `light` = a lit shopfront (stream D-world: a distinct look per sign; lamps only where `light`), `npc` = a quest NPC id (data/quests/*.json) who IS this office\'s keeper — stream A spawns ONE body (the quest NPC) carrying the office\'s role/shop, not a second generic one; `home: true` = a quest NPC\'s own house (no shop, no light), `trains` = the classes a trainer teaches. No plot is used twice in a town; `setpieces` lists the NPCs whose office is a set piece (data/vignettes/setpieces.json).',

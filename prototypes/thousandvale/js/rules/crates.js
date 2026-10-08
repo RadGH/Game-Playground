@@ -126,7 +126,7 @@ export function fitsCrate(cfg, engine, slot, item) {
   if (slot === 'weapon') return !!w && item.type === 'weapon' && !['orb', 'tome'].includes(w.subtype);
   if (slot === 'offhand') return (!!a && a.slot === 'offhand') || (!!w && ['orb', 'tome'].includes(w.subtype));
   if (slot === 'jewellery') return !!a && ['ring', 'necklace', 'back', 'waist'].includes(a.slot);
-  if (slot === 'back' || slot === 'waist' || slot === 'light') return !!a && a.slot === slot;
+  if (slot === 'back' || slot === 'waist') return !!a && a.slot === slot;
   if (slot === 'armor') return !!a && ['head', 'chest', 'legs', 'hands', 'feet'].includes(a.slot);
   if (slot === 'neck') return !!a && a.slot === 'necklace';
   return !!a && fams.includes(a.slot);

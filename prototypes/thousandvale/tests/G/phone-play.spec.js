@@ -196,6 +196,28 @@ test('6. the map (with its list folded away), casting a line from the wheel, and
   await shot('23-feedback-sent');
 });
 
+test('6b. an event is never invisible behind the closed bubble: a chip names it when it starts, the bubble pulses, opening it shows the card', async () => {
+  test.setTimeout(120000);
+  for (const x of await page.locator('.tv-panel:not([hidden]) .tvp-x').all()) await x.tap().catch(() => {});
+  await expect(page.locator('#right-col')).toBeHidden();                       // collapsed is the phone's resting state (owner feedback 7, V7)
+  await page.evaluate(() => { const y = tv.state().you; tv.fake('eventTrack', { uid: 'e1', id: 'wolves_ford', name: 'Wolves at the Ford', state: 'live', what: 'A starving pack is crossing the ford toward the farms.', objective: { text: 'Defeat the three packs, then the pack mother', n: 2, of: 4 }, leftMs: 372000, endsAt: Date.now() + 372000, rewardText: 'Event cache: a rare item or better', inside: true, inRange: true, players: 3, x: y.x, z: y.z, r: 40 }); });
+  await expect(page.locator('.ph-chip')).toBeVisible({ timeout: 5000 });
+  await expect(page.locator('.ph-chip')).toContainText('Wolves at the Ford');
+  await expect(page.locator('.ph-info')).toHaveClass(/pulse/);
+  await expect(page.locator('.ph-info b')).not.toHaveText('');
+  await shot('23b-event-chip');
+  await page.locator('.ph-chip').tap();
+  await expect(page.locator('#right-col .et-card')).toBeVisible();
+  await expect(page.locator('#right-col .et-card')).toContainText('Defeat the three packs');
+  await shot('23c-event-open');
+  // a boss call-out is drawn in the centre column, which the bubble never hides
+  await page.locator('.ph-info').tap();
+  await page.evaluate(() => thousandvale.boss.callout('The Screelhag draws breath!', 'warn', null, true));
+  await expect(page.locator('.callout.show, #callout.show')).toBeVisible({ timeout: 3000 });
+  await page.evaluate(() => tv.fake('eventDone', { uid: 'e1', id: 'wolves_ford', name: 'Wolves at the Ford', result: 'success', credited: true, xp: 120, gold: 14, text: 'Wolves at the Ford — success' }));
+  await expect(page.locator('.ph-chip')).toBeVisible({ timeout: 5000 });
+});
+
 test('7. turning the phone on its side keeps the phone layout and re-arranges it', async () => {
   test.setTimeout(120000);
   for (const x of await page.locator('.tv-panel:not([hidden]) .tvp-x').all()) await x.tap().catch(() => {});

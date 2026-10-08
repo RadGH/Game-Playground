@@ -558,6 +558,8 @@ function planOnce({
   linksAt = null,
   /** OPT-IN (Thousandvale, 2026-10-05) — an explicit office list instead of WANT_ORDER. See `assignTrades`. */
   trades = null,
+  /** OPT-IN (Thousandvale, 2026-10-07) — `{ to: 'square', width, clear, join }`: a road becomes a main street all the way to the square. See `linkRoads`. */
+  highStreets = null,
 } = {}) {
   const base = CULTURES[culture] || CULTURES.human;
   const cfg = { ...base, ...(squeeze || {}), followGround: followGround ?? 0.35 };
@@ -658,7 +660,7 @@ function planOnce({
    * roads again, which is the one thing this planner exists to make impossible. The plots are then
    * trimmed against the new streets below, since a spur crosses a block rather than bounding it.
    */
-  out.links = linkRoads(out, linkPoints);
+  out.links = linkRoads(out, linkPoints, highStreets);
   out.connect = connectStreets(out);
 
   for (const b of out.blocks) plotsInBlock(b, rng, cfg, out, buildable);
@@ -684,7 +686,8 @@ function planOnce({
   if (added.length) {
     out.plots = out.plots.filter(p => !added.some(st => {
       for (let i = 0; i + 1 < st.pts.length; i++) {
-        if (obbOverlap(p, segmentBox(st.pts[i], st.pts[i + 1], st.width), 0.02)) return true;
+        // a high street (opt-in) also keeps `clear` metres of kerb either side; every other street as before
+        if (obbOverlap(p, segmentBox(st.pts[i], st.pts[i + 1], st.width + 2 * (st.high ? st.clear || 0 : 0)), 0.02)) return true;
       }
       return false;
     }));
@@ -1051,7 +1054,8 @@ export function connectStreets(out, { maxSpur = 26 } = {}) {
  * Each one gets a main street from the edge to wherever the existing network comes closest — which
  * is what a road does when it reaches a town: it becomes the high street.
  */
-export function linkRoads(out, links = []) {
+export function linkRoads(out, links = [], high = null) {
+  if (high && high.to === 'square') return highStreets(out, links, high);
   if (!links.length || !out.streets.length) return 0;
   let made = 0;
   for (const [lx, lz] of links) {
@@ -1065,6 +1069,69 @@ export function linkRoads(out, links = []) {
     made++;
   }
   return made;
+}
+
+/**
+ * OPT-IN — `planTown({ highStreets: { to: 'square', width, clear, join } })`: THE ROAD GOES TO THE SQUARE.
+ *
+ * Reported in Thousandvale (an MMO on this planner), about its starting town: *"improve gate/road
+ * placement … it just leads you right into buildings instead of having a main road."* `linkRoads`
+ * above joins a road to WHEREVER THE NETWORK COMES CLOSEST, and on a plan made of alleys that is an
+ * alley three metres inside the wall: measured on that town, its three roads became high streets
+ * 2.6, 2.0 and 4.3 m long, each ending on a 2.2 m lane between houses, while the one real main
+ * street the split had made reached no gate at all. Connected, yes. A main road, no.
+ *
+ * With this option a link is not joined to the nearest street — it is carried, as ONE STRAIGHT main
+ * street, from the edge of town to the edge of the square, which is where somebody walking in
+ * through a gate is trying to get to. Straight, because the point of a high street is that you can
+ * see the square from the gate.
+ *
+ *   width  metres (default the main class's). A hamlet wants a narrower one than a city.
+ *   clear  metres of kerb kept free of plots either side, on top of the width (default 0)
+ *   join   (default true) a link whose straight line would run close beside a high street already
+ *          laid joins THAT one instead, at a slant, when the walk is at most `detour` (1.18) times
+ *          the straight one and it saves at least `saves` (0.3) of the paving — two roads arriving
+ *          at neighbouring gates make a Y, not two parallel avenues with one row of houses between
+ *
+ * Each street carries `high: true` (and `highway: true`, so the existing trim takes the plots off
+ * it), `link` (its index in `links`), `to: 'square' | 'street'` and, when it joins another, `joins`
+ * (that street object) — so a caller can walk a gate's whole route to the square.
+ *
+ * Nearest the square first, so a far road can join a near one. Without the option nothing here
+ * runs and every existing town is byte-identical.
+ */
+function highStreets(out, links, { width = STREET_CLASSES[0].width, clear = 0, join = true, detour = 1.18, saves = 0.3 } = {}) {
+  if (!links.length) return 0;
+  const sq = out.square || { cx: 0, cz: 0, r: 4 };
+  const order = links.map((l, i) => ({ l, i, d: Math.hypot(l[0] - sq.cx, l[1] - sq.cz) })).sort((a, b) => a.d - b.d);
+  const laid = [];
+  for (const { l: [lx, lz], i, d } of order) {
+    if (d <= sq.r + 0.5) continue;                    // the road arrives ON the square
+    // straight to the square's edge
+    const ex = sq.cx + (lx - sq.cx) / d * sq.r, ez = sq.cz + (lz - sq.cz) / d * sq.r;
+    let pts = [[lx, lz], [ex, ez]], to = 'square', joins = null;
+    if (join) {
+      // the best place to join a street already laid: least new paving, within the detour allowed
+      const direct = d - sq.r;
+      let best = null;
+      for (const h of laid) {
+        if (h.to !== 'square') continue;              // join a trunk, not a branch
+        const [a, b] = h.pts, len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        for (let s = 0; s <= len - 4; s += 1) {       // never right at the square: that is just a second avenue
+          const tx = a[0] + (b[0] - a[0]) * s / len, tz = a[1] + (b[1] - a[1]) * s / len;
+          const fresh = Math.hypot(tx - lx, tz - lz);
+          if (fresh < 3 || fresh + (len - s) > direct * detour || fresh > direct * (1 - saves)) continue;
+          if (!best || fresh < best.fresh) best = { fresh, tx, tz, h };
+        }
+      }
+      if (best) { pts = [[lx, lz], [best.tx, best.tz]]; to = 'street'; joins = best.h; }
+    }
+    const st = { pts, cls: 'main', width, depth: 0, highway: true, high: true, clear, link: i, to };
+    if (joins) st.joins = joins;
+    laid.push(st);
+  }
+  out.streets.push(...laid);
+  return laid.length;
 }
 
 /** How long a street polyline is, end to end. */

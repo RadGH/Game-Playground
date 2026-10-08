@@ -129,6 +129,7 @@ export function createProvince(opts) {
       if (a.xp) journal(o, 'xp', { d: a.xp, level: a.level });
       grant(o, { ...a, goldAdded: true });
       if (a.level >= 2) starterMount(o);                     // Q16: the first mount at level 5
+      if (a.level > (o.alv || 1)) { o.alv = a.level; if (o.conn) o.conn.sendJSON({ t: 'you', acct: acctOf(o) }); }      // W11: the account's level rose
       if (a.level !== o.sheetLevel) { o.sheetLevel = a.level; wantSheet(o); potionCards(o); feedbackNudge(o); }   // T18: a level changes the sheet (and what a potion is worth to you)
     },
     newUid,
@@ -332,7 +333,7 @@ export function createProvince(opts) {
       case 'ignore': { const o = online.get(m.char); if (o) { o.char.ignore = m.list; journal(o, 'set', { k: 'ignore', v: m.list }); o.dirty = true; } return; }
       case 'mute': mute(m.char, m.until); return;
       case 'kick': { const o = online.get(m.char); if (o && o.conn) o.conn.kick(m.code || 'restart'); return; }
-      case 'claimed': { for (const o of online.values()) if (o.char.account === m.account) o.claimed = true; return; }
+      case 'claimed': { for (const o of online.values()) if (o.char.account === m.account) { o.claimed = true; if (m.username) o.username = m.username; if (o.conn) o.conn.sendJSON({ t: 'you', acct: acctOf(o) }); } return; }
       case 'charge': return chargeGold(m);
       case 'callboard': return callboardEnter(m);
       case 'relocated': return relocated(m);
@@ -429,7 +430,8 @@ export function createProvince(opts) {
       // play-test 5
       case 'revive': return reviveOp(o, m);
       case 'sheet': return wantSheet(o);
-      case 'feedback': return feedbackOp(o, m);
+      case 'feedback': if (m.op !== 'mine') return feedbackOp(o, m);      // falls through: `feedback {op:'mine'}` is D-UI's name for feedbackMine
+      case 'feedbackMine': return void feedback.listMine({ account: o.char.account, claimed: !!o.claimed }, m).then(r => { if (o.conn) o.conn.sendJSON(r); }, err => { log('feedback list failed', err && err.message); if (o.conn) o.conn.sendJSON({ t: 'feedbackMine', ok: false, why: 'failed', list: [], more: false }); });
       case 'admin': return adminOp(o, m);
       case 'fish': { const why = angling.fish(o, m); if (typeof why === 'string') bad(s, why); return; }
       case 'cook': { const why = angling.cook(o, m); if (typeof why === 'string') bad(s, why); return; }
@@ -453,7 +455,7 @@ export function createProvince(opts) {
     if (tk.exp < now()) { s.err('ticket'); return s.closeSoon('ticket'); }
     s.state = 'busy'; s.account = tk.account; s.charId = tk.char;
     const existing = online.get(tk.char);
-    if (existing && !existing.relocating) { if (tk.claimed) existing.claimed = true; existing.admin = !!tk.admin; existing.username = tk.username || existing.username || null; takeOver(existing, s); return; }
+    if (existing && !existing.relocating) { if (tk.claimed) existing.claimed = true; existing.admin = !!tk.admin; existing.username = tk.username || existing.username || null; existing.alv = Math.max(existing.alv || 1, tk.alv || 1); takeOver(existing, s); return; }
     return store.takeChar(tk.account, tk.char, owner, LEASE_MS).then(r => {
       if (s.closed) { if (!r.err) store.releaseChar(tk.char, owner); return; }
       if (r.err) { s.err('state', r.err === 'lease' ? 'That character is still logged in elsewhere. Try again in a few seconds.' : 'No such character.'); return s.closeSoon(r.err); }
@@ -476,7 +478,7 @@ export function createProvince(opts) {
     aliasWaystones(ch);
     const place = placeFor(ch, tk);
     const client = makeClient(s);
-    const o = { char: ch, fence: r.fence, entity: null, room: place.room, conn: s, lingerUntil: 0, dirty: false, saving: false, savePending: false, lastSaveAt: now(), homeCopy: null, seq: ch.jseq || 0, savedSeq: ch.jseq || 0, lastPos: null, frozen: false, zone: null, claimed: !!tk.claimed, admin: !!tk.admin, username: tk.username || null };
+    const o = { char: ch, fence: r.fence, entity: null, room: place.room, conn: s, lingerUntil: 0, dirty: false, saving: false, savePending: false, lastSaveAt: now(), homeCopy: null, seq: ch.jseq || 0, savedSeq: ch.jseq || 0, lastPos: null, frozen: false, zone: null, claimed: !!tk.claimed, admin: !!tk.admin, username: tk.username || null, alv: Math.max(tk.alv || 1, ch.level || 1) };
     online.set(ch.id, o);
     o.entity = place.room.addPlayer(ch, client, place.at);
     startingKit(o);
@@ -583,7 +585,7 @@ export function createProvince(opts) {
         // play-test 2
         reach: attackReach(o), attackRange: attackReach(o), mounts: mountBook.owned(ch), mount: o.mount || null, speedMul: e.speedMul || 1, prefs: prefsOf(ch), look: ch.look || null, clsName: clsNameOf(ch.cls),
         // play-test 5
-        bagMax: BAG_MAX, angling: angling.view(ch), ...(o.admin ? { admin: true } : {}), ...(ch.kit ? { kit: ch.kit } : {}), ...(o.eventAtKey ? { eventAt: o.eventAtKey } : {}),
+        bagMax: BAG_MAX, angling: angling.view(ch), acct: acctOf(o), ...(o.admin ? { admin: true } : {}), ...(ch.kit ? { kit: ch.kit } : {}), ...(o.eventAtKey ? { eventAt: o.eventAtKey } : {}),
       },
     };
     // the skill bar only changes on a level-up / form / talent (those arrive as `you {bar}` and refresh o.bar): a room
@@ -659,7 +661,7 @@ export function createProvince(opts) {
     const account = o.char.account;
     Promise.resolve(saveNow(o, true)).then(() => store.releaseChar(o.char.id, owner)).then(() => {
       send({ k: 'gone', char: o.char.id });
-      send({ k: 'relocate', char: o.char.id, account, province, at, via, claimed: !!o.claimed });
+      send({ k: 'relocate', char: o.char.id, account, province, at, via, claimed: !!o.claimed, admin: !!o.admin, username: o.username || null, alv: acctOf(o).level });
     });
     o.relocatingConn = o.conn;
   }
@@ -1393,7 +1395,7 @@ export function createProvince(opts) {
       }
       // your own hits count as fighting too (C: "you hit something in the last 5 s")
       const src = ev.type === 'hit' ? r.entities.get(ev.s) : null;
-      if (src && src.kind === 'player' && src.char && d && d.kind === 'monster') { const os = online.get(src.char.id); if (os) os.lastHitAt = now(); }
+      if (src && src.kind === 'player' && src.char && d && d.kind === 'monster') { const os = online.get(src.char.id); if (os) { os.lastHitAt = now(); if (d.data && d.data.roadEvent != null) roadEvents.noteHit(os, d); } }      // W24: hitting a chest's keeper is taking part
     }
     if (ev.type === 'hit' && ev.kind === 'dmg') {
       const src = r.entities.get(ev.s), dst = r.entities.get(ev.d);
@@ -2367,7 +2369,7 @@ export function createProvince(opts) {
   // S5/S9 (play-test 4): treasure chests, deliveries, escorts and rescues dropped near players; errand runners' letters
   const roadEvents = createRoadEvents({ data: first.L.treasure || null, wanderers: first.L.wanderers || null, online, corpses, grant: (o, a) => grant(o, a),
     questEvent: (o, ev) => questEvent(o, ev), bookOf: o => bookOf(o), provOf: r => provOf(r), now, wallNow, rng: () => (first.towns[0] || first.copies[0]).host.random('road'), log, counters,
-    journal: (o, k, p) => journal(o, k, p), questSaved: o => questSaved(o), sendQuests: o => sendQuests(o), partyOf: c => partyOf.get(c) || null, enabled: opts.roadEvents !== false });
+    journal: (o, k, p) => journal(o, k, p), questSaved: o => questSaved(o), sendQuests: o => sendQuests(o), partyOf: c => partyOf.get(c) || null, mailTo: a => sysmail.mailTo(a), enabled: opts.roadEvents !== false });
   const mountBook = createMountBook(first.L.mounts || opts.mountData || null);
   const shops = createShops({ data: first.L.shops || opts.shopData || null, mounts: mountBook, now: wallNow, log, rng: () => (first.towns[0] || first.copies[0]).host.random('shop') });
   const social = new Map();        // char id -> { friends: Set, tradeFriendsOnly } (the gateway keeps it current, Q15)
@@ -2801,6 +2803,8 @@ export function createProvince(opts) {
   const angling = createAngling({ layouts, online, provOf: r => provOf(r), grant: (o, a) => grant(o, a), journal: (o, k, p) => journal(o, k, p), questEvent: (o, ev) => questEvent(o, ev),
     consume: (o, i) => consume(o, i), now, wallNow, log, counters, safeRules: (r, fn, ...a) => safeRules(r, fn, ...a), dayPhase: () => dayPhase(), fighting: (o, e) => fighting(o, e),
     dismount: (o, why) => dismount(o, why), endMeal: (o, why) => endMeal(o, why), wantSheet: o => wantSheet(o), bagMax: BAG_MAX, setTimeoutTicks: (fn, n) => setTimeoutTicks(fn, n), opts: opts.anglingOpts || {} });
+  /** W11 (round 8): what is true of the ACCOUNT, as the client needs it — `level` = its highest character (gates ask this, not the one you play). */
+  function acctOf(o) { return { claimed: !!o.claimed, level: Math.max(o.alv || 1, o.char.level || 1), admin: !!o.admin, username: o.username || null }; }
   /** T19: a report from inside the world. The server adds what it knows: where you stand, what you are, what is around you. */
   function feedbackOp(o, m) {
     const e = o.entity, ch = o.char, pv = provOf(o.room), r1 = v => Math.round(v * 10) / 10;

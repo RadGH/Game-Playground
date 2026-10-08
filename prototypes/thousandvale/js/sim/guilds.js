@@ -69,7 +69,9 @@ export function createGuilds({ store, presence, gwByChar, wallNow, filter = null
     switch (m.op) {
       case 'create': return serial('c' + me, async () => {
         if (ofChar.get(me)) return fail(s, 'create', 'You are already in a guild.');
-        if (!s.claimed || (pr.level || 1) < R.minLevel) return fail(s, 'create', 'Founding a guild needs a claimed account at level ' + R.minLevel + '.');
+        // W11 (round 8): claimed is the account's; so is the level (its highest character, s.alv)
+        if (!s.claimed) return fail(s, 'create', 'Founding a guild needs a claimed account. Claim yours from the Account button — it is free.');
+        if (Math.max(pr.level || 1, s.alv || 1) < R.minLevel) return fail(s, 'create', 'Founding a guild opens when one of your characters reaches level ' + R.minLevel + '.');
         const name = cleanGuildName(m.name);
         if (!name || (filter && !filter.name(name))) return fail(s, 'create', 'Pick a guild name: 3 to 24 letters, spaces, apostrophes or hyphens.');
         const r = await store.createGuild(name, me);

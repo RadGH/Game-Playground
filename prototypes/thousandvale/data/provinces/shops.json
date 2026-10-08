@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E (play-test 2, Q9/Q11/Q16/Q20). What every trader in Torbor Downs sells, and for how much. Stream A runs the shops (buy, sell, buyback, restock), stream D-UI draws the window (tabs = `categories`, then `goods`), stream D-world draws the shopfront from the shop's `sign` (data/provinces/offices.json says WHICH plot each trader works in). A shop is `kinds.<kind>`; a town lists the kinds it has in `towns.<town>.shops` (every hub town of the province is listed). GEAR (`categories`): rolled from emberveil items.json bases with Farhold's loot generator at the BUYER's level (min 1, never above the town's `levelCap`), `count` items per category, `rarity` weights; rolled once per restock per shop (the same stock for everyone in that town copy), restocked every `pricing.restockMinutes`. GOODS (`goods`): fixed items always in stock — `id` = an items.json `potions` key (`source: 'potion'`), a Farhold js/gear.js GEAR_BASES key (`source: 'gear'`: mounts, lights, quivers) or a Thousandvale good (`source: 'good'`, described in `goodsCatalog` here); `price` = gold, `minLevel` = the level a character must be to buy it. PRICES: gear = Loot.price (items.json basePrice 15 x priceQualityMult x priceRarityMult) x (1 + `pricing.perItemLevel` x (item level - 1)) x the town's `priceMult`; a GEAR_BASES item with its own `basePrice` keeps that (Farhold rpg.price). Selling gives `pricing.sellFactor` of the price; the last `pricing.buyback` items you sold come back at what you were paid. Scale check: a kill pays 3 + level gold (js/sim/quests.js KILL_GOLD), so a level-2 healing potion (9 g) is about two kills, the first horse (60 g) about a dozen kills plus the starting chain's purses (the chain pays ~550 g by level 5). SERVICES: the barber (Q20) and the stable master's stabling are `services`.",
+  "_doc": "Stream E (play-test 2, Q9/Q11/Q16/Q20). What every trader in Torbor Downs sells, and for how much. Stream A runs the shops (buy, sell, buyback, restock), stream D-UI draws the window (tabs = `categories`, then `goods`), stream D-world draws the shopfront from the shop's `sign` (data/provinces/offices.json says WHICH plot each trader works in). A shop is `kinds.<kind>`; a town lists the kinds it has in `towns.<town>.shops` (every hub town of the province is listed). GEAR (`categories`): rolled from emberveil items.json bases with Farhold's loot generator at the BUYER's level (min 1, never above the town's `levelCap`), `count` items per category, `rarity` weights; rolled once per restock per shop (the same stock for everyone in that town copy), restocked every `pricing.restockMinutes`. GOODS (`goods`): fixed items always in stock — `id` = an items.json `potions` key (`source: 'potion'`), a Farhold js/gear.js GEAR_BASES key (`source: 'gear'`: mounts, lights, quivers) or a Thousandvale good (`source: 'good'`, described in `goodsCatalog` here); `price` = gold, `minLevel` = the level a character must be to buy it. PRICES: gear = Loot.price (items.json basePrice 15 x priceQualityMult x priceRarityMult) x (1 + `pricing.perItemLevel` x (item level - 1)) x the town's `priceMult`; a GEAR_BASES item with its own `basePrice` keeps that (Farhold rpg.price). Selling gives `pricing.sellFactor` of the price; the last `pricing.buyback` items you sold come back at what you were paid. Scale check: a kill pays 3 + level gold (js/sim/quests.js KILL_GOLD), so a level-2 healing potion (9 g) is about two kills, the first horse (60 g) about a dozen kills plus the starting chain's purses (the chain pays ~550 g by level 5). SERVICES: the barber (Q20) and the stable master's stabling are `services`. W22 (owner feedback 8): NO light items anywhere — the `light` category, the lantern / torch gear rows and the Bundle of Torches are gone (stream C refunds what a player owns); tests/E/playtest8-shops.test.js fails if one comes back. W5: `cart_token` (goodsCatalog, sold nowhere) pays one ox-cart fare. W19: backpacks (stream C bases with `pack`) are on the tailor's `armor` shelf and the plain satchel at the general store.",
   "pricing": {
     "sellFactor": 0.25,
     "buyback": 12,
@@ -39,15 +39,6 @@
           "amount": 0.05,
           "minutes": 30
         }
-      }
-    },
-    "torch_bundle": {
-      "name": "Bundle of torches",
-      "desc": "Six pitch torches. One lit torch lights a dark room or cave for ten minutes.",
-      "use": {
-        "type": "light",
-        "minutes": 10,
-        "charges": 6
       }
     },
     "recall_charm": {
@@ -222,6 +213,14 @@
         }
       },
       "stack": 20
+    },
+    "cart_token": {
+      "name": "Carter's token",
+      "desc": "A stamped wooden token from the Longroad Carters. Hand it to any carter instead of the fare: one ride to any town, however far.",
+      "use": {
+        "type": "cartToken",
+        "rides": 1
+      }
     }
   },
   "kinds": {
@@ -257,25 +256,6 @@
             "normal": 0.8,
             "magic": 0.2
           }
-        },
-        "light": {
-          "label": "Lanterns & torches",
-          "bases": [
-            "hand_lantern",
-            "pitch_torch",
-            "g5_cresset",
-            "g5_hexlantern"
-          ],
-          "count": 3,
-          "rarity": {
-            "normal": 0.8,
-            "magic": 0.2
-          },
-          "countBase": 2,
-          "catalog": [
-            "g5_cresset",
-            "g5_hexlantern"
-          ]
         }
       },
       "goods": [
@@ -310,33 +290,21 @@
           "minLevel": 1
         },
         {
-          "id": "torch_bundle",
-          "source": "good",
-          "price": 15,
-          "minLevel": 1
-        },
-        {
           "id": "recall_charm",
           "source": "good",
           "price": 75,
           "minLevel": 1
         },
         {
-          "id": "torch",
-          "source": "gear",
-          "price": 60,
-          "minLevel": 1
-        },
-        {
-          "id": "lantern",
-          "source": "gear",
-          "price": 780,
-          "minLevel": 8
-        },
-        {
           "id": "lucky_horseshoe",
           "source": "good",
           "price": 9,
+          "minLevel": 1
+        },
+        {
+          "id": "sling_satchel",
+          "source": "gear",
+          "price": 180,
           "minLevel": 1
         }
       ],
@@ -887,7 +855,7 @@
       "light": true,
       "categories": {
         "armor": {
-          "label": "Robes, leathers, cloaks & belts",
+          "label": "Robes, leathers, cloaks, belts & packs",
           "bases": [
             "cloth_helm",
             "cloth_chest",
@@ -899,6 +867,9 @@
             "light_boots",
             "travel_cloak",
             "leather_belt",
+            "expedition_pack",
+            "trail_rucksack",
+            "sling_satchel",
             "g5_cloth_curltoes",
             "g5_cloth_handwraps",
             "g5_cloth_pleats",
@@ -912,13 +883,13 @@
             "g5_leather_slouch",
             "g5_swallowtail"
           ],
-          "count": 16,
+          "count": 17,
           "rarity": {
             "normal": 0.55,
             "magic": 0.38,
             "rare": 0.07
           },
-          "countBase": 12,
+          "countBase": 13,
           "catalog": [
             "g5_cloth_curltoes",
             "g5_cloth_handwraps",
@@ -977,6 +948,24 @@
           "source": "good",
           "price": 18,
           "minLevel": 1
+        },
+        {
+          "id": "sling_satchel",
+          "source": "gear",
+          "price": 180,
+          "minLevel": 1
+        },
+        {
+          "id": "trail_rucksack",
+          "source": "gear",
+          "price": 2400,
+          "minLevel": 10
+        },
+        {
+          "id": "expedition_pack",
+          "source": "gear",
+          "price": 6500,
+          "minLevel": 20
         }
       ],
       "says": [
@@ -1141,12 +1130,6 @@
           "minLevel": 1
         },
         {
-          "id": "torch_bundle",
-          "source": "good",
-          "price": 12,
-          "minLevel": 1
-        },
-        {
           "id": "recall_charm",
           "source": "good",
           "price": 75,
@@ -1178,7 +1161,7 @@
         }
       ],
       "says": [
-        "Rations, rope, a torch and a lucky horseshoe. Everything a hero forgets.",
+        "Rations, rope, a whetstone and a lucky horseshoe. Everything a hero forgets.",
         "Pack light. Pack bread. Pack more bread.",
         "Going far? Buy two."
       ]
@@ -1812,21 +1795,6 @@
           "base": "light_boots",
           "rarity": "magic",
           "cat": "Plain clothes"
-        },
-        {
-          "base": "hand_lantern",
-          "rarity": "normal",
-          "cat": "Lanterns & torches"
-        },
-        {
-          "base": "pitch_torch",
-          "rarity": "normal",
-          "cat": "Lanterns & torches"
-        },
-        {
-          "base": "g5_cresset",
-          "rarity": "magic",
-          "cat": "Lanterns & torches"
         }
       ],
       "markup": 1,
@@ -1864,33 +1832,21 @@
           "minLevel": 1
         },
         {
-          "id": "torch_bundle",
-          "source": "good",
-          "price": 15,
-          "minLevel": 1
-        },
-        {
           "id": "recall_charm",
           "source": "good",
           "price": 75,
           "minLevel": 1
         },
         {
-          "id": "torch",
-          "source": "gear",
-          "price": 60,
-          "minLevel": 1
-        },
-        {
-          "id": "lantern",
-          "source": "gear",
-          "price": 780,
-          "minLevel": 8
-        },
-        {
           "id": "lucky_horseshoe",
           "source": "good",
           "price": 9,
+          "minLevel": 1
+        },
+        {
+          "id": "sling_satchel",
+          "source": "gear",
+          "price": 180,
           "minLevel": 1
         }
       ]
@@ -2473,82 +2429,87 @@
         {
           "base": "cloth_helm",
           "rarity": "normal",
-          "cat": "Robes, leathers, cloaks & belts"
+          "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
           "base": "cloth_chest",
           "rarity": "normal",
-          "cat": "Robes, leathers, cloaks & belts"
+          "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
           "base": "cloth_legs",
           "rarity": "normal",
-          "cat": "Robes, leathers, cloaks & belts"
+          "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
           "base": "light_helm",
           "rarity": "normal",
-          "cat": "Robes, leathers, cloaks & belts"
+          "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
           "base": "light_chest",
           "rarity": "normal",
-          "cat": "Robes, leathers, cloaks & belts"
+          "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
           "base": "light_legs",
           "rarity": "normal",
-          "cat": "Robes, leathers, cloaks & belts"
+          "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
           "base": "light_gauntlets",
           "rarity": "normal",
-          "cat": "Robes, leathers, cloaks & belts"
+          "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
           "base": "light_boots",
           "rarity": "normal",
-          "cat": "Robes, leathers, cloaks & belts"
+          "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
           "base": "travel_cloak",
           "rarity": "normal",
-          "cat": "Robes, leathers, cloaks & belts"
+          "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
           "base": "leather_belt",
           "rarity": "magic",
-          "cat": "Robes, leathers, cloaks & belts"
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "expedition_pack",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "trail_rucksack",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "sling_satchel",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
           "base": "g5_cloth_curltoes",
           "rarity": "magic",
-          "cat": "Robes, leathers, cloaks & belts"
+          "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
           "base": "g5_cloth_handwraps",
           "rarity": "magic",
-          "cat": "Robes, leathers, cloaks & belts"
+          "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
           "base": "g5_cloth_pleats",
           "rarity": "magic",
-          "cat": "Robes, leathers, cloaks & belts"
+          "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
           "base": "g5_cloth_vestment",
-          "rarity": "magic",
-          "cat": "Robes, leathers, cloaks & belts"
-        },
-        {
-          "base": "g5_cloth_wrap",
-          "rarity": "magic",
-          "cat": "Robes, leathers, cloaks & belts"
-        },
-        {
-          "base": "g5_girdle",
           "rarity": "rare",
-          "cat": "Robes, leathers, cloaks & belts"
+          "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
           "base": "warded_focus",
@@ -2600,6 +2561,24 @@
           "source": "good",
           "price": 18,
           "minLevel": 1
+        },
+        {
+          "id": "sling_satchel",
+          "source": "gear",
+          "price": 180,
+          "minLevel": 1
+        },
+        {
+          "id": "trail_rucksack",
+          "source": "gear",
+          "price": 2400,
+          "minLevel": 10
+        },
+        {
+          "id": "expedition_pack",
+          "source": "gear",
+          "price": 6500,
+          "minLevel": 20
         }
       ]
     },
@@ -2769,12 +2748,6 @@
           "id": "trail_ale",
           "source": "good",
           "price": 9,
-          "minLevel": 1
-        },
-        {
-          "id": "torch_bundle",
-          "source": "good",
-          "price": 12,
           "minLevel": 1
         },
         {

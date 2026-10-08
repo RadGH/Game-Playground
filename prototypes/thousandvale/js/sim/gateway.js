@@ -95,6 +95,7 @@ export function createGateway(opts) {
         const was = presence.get(m.char);
         presence.set(m.char, { ...m, proc: p.id, mutedUntil: Math.max(m.mutedUntil || 0, (was && was.mutedUntil) || 0) });
         names.set(m.char, { name: m.name, cls: m.cls, level: m.level });
+        { const g = gwByChar.get(m.char); if (g && (m.level || 1) > (g.alv || 1)) g.alv = m.level; }      // W11: the account's highest character
         if (!was || was.online !== m.online || was.level !== m.level) { partyChanged([parties.of(m.char)]); guilds.changed(m.char); }
         if (!was || was.online !== m.online || was.level !== m.level || was.zone !== m.zone) friends.changed(m.char);
         if (was && was.online && !m.online) callboard.drop(m.char);
@@ -122,7 +123,9 @@ export function createGateway(opts) {
     const to = provProc.get(m.province);
     if (to === undefined) { sendTo(from.id, { k: 'relocated', char: m.char, error: 'no such province' }); return; }
     const ticket = randomHex(16);
-    sendTo(to, { k: 'ticket', ticket, char: m.char, account: m.account, claimed: !!m.claimed, near: null, at: { province: m.province, x: m.at.x, z: m.at.z, door: m.at.door ?? null, party: m.at.party ?? null }, exp: now() + TICKET_MS });
+    // W11 (round 8): the account's facts ride on EVERY ticket — a border crossing used to drop `admin` and `username`
+    const g = gwByChar.get(m.char);
+    sendTo(to, { k: 'ticket', ticket, char: m.char, account: m.account, claimed: !!(m.claimed || (g && g.claimed)), admin: !!(g ? g.admin : m.admin), username: (g && g.username) || m.username || null, alv: Math.max(m.alv || 1, (g && g.alv) || 1), near: null, at: { province: m.province, x: m.at.x, z: m.at.z, door: m.at.door ?? null, party: m.at.party ?? null }, exp: now() + TICKET_MS });
     counters.relocations++;
     sendTo(from.id, { k: 'relocated', char: m.char, path: '/p/' + to, ticket });
   }
@@ -228,10 +231,15 @@ export function createGateway(opts) {
       }
       case 'feedback': {
         if (s.state !== 'authed') return bad(s, 'order');
+        if (m.op === 'mine') return handlers.feedbackMine(s, m);
         const pr = s.charId != null ? presence.get(s.charId) : null;
         const who = { account: s.account, char: pr ? pr.char : null, name: pr ? pr.name : null, cls: pr ? pr.cls : null, level: pr ? pr.level : null };
         const server = { via: 'gateway', build, protocol: PROTOCOL_VERSION, claimed: !!s.claimed, username: s.username || null, ...(pr ? { room: pr.room, province: pr.province, zone: pr.zone || null, online: !!pr.online } : {}), at: new Date(wallNow()).toISOString() };
         return feedback.submit(who, m, server).then(r => s.sendJSON({ t: 'feedbackR', ...r }), err => { log('feedback failed', err && err.message); s.sendJSON({ t: 'feedbackR', ok: false, why: 'failed', msg: 'That did not go through. Please try again.' }); });
+      }
+      case 'feedbackMine': {      // round 8, W29: my own reports (every character of the account sees the same list)
+        if (s.state !== 'authed') return bad(s, 'order');
+        return handlers.feedbackMine(s, m);
       }
       case 'admin': {
         if (s.state !== 'authed') return bad(s, 'order');
@@ -264,6 +272,7 @@ export function createGateway(opts) {
       if (!c) return s.err('state', 'No such character.');
       if (s.charId && gwByChar.get(s.charId) === s) gwByChar.delete(s.charId);
       s.charId = c.id; gwByChar.set(c.id, s);
+      s.alv = Math.max(1, ...chars.map(x => x.level || 1));      // W11: gates that are about the ACCOUNT ask its highest character
       names.set(c.id, { name: c.name, cls: c.cls, level: c.level });
       let near = null;
       if (m.join !== undefined) {
@@ -279,7 +288,7 @@ export function createGateway(opts) {
       // already in the world somewhere? go back to that process (it takes over the entity)
       const proc = presence.has(c.id) ? procOfChar(c.id) : near ? procOfChar(near) : procForRoom(c.room);
       const ticket = randomHex(16);
-      sendTo(proc, { k: 'ticket', ticket, char: c.id, account: s.account, claimed: !!s.claimed, admin: !!s.admin, username: s.username || null, near, exp: now() + TICKET_MS });
+      sendTo(proc, { k: 'ticket', ticket, char: c.id, account: s.account, claimed: !!s.claimed, admin: !!s.admin, username: s.username || null, alv: s.alv || 1, near, exp: now() + TICKET_MS });
       const p = parties.of(c.id);
       if (p) sendTo(proc, { k: 'party', char: c.id, party: partyBrief(p) });
       // the province process gets the ticket over the bus first; a ticket that arrives later is waited for
@@ -321,6 +330,7 @@ export function createGateway(opts) {
   let gwUid = 0;
   const gwNonce = randomHex(4);
   const sysmail = createSystemMail({ store, newUid: () => `gw-${gwNonce}-${(++gwUid).toString(36)}`, wallNow, notify: c => mailNote(c), log, counters });
+  const handlers = { feedbackMine: (s, m) => feedback.listMine({ account: s.account, claimed: !!s.claimed }, m).then(r => s.sendJSON(r), err => { log('feedback list failed', err && err.message); s.sendJSON({ t: 'feedbackMine', ok: false, why: 'failed', list: [], more: false }); }) };
   const feedback = createFeedback({ store, wallNow, sink: feedbackSink, sysmail, log, counters, filter: chatFilter, opts: feedbackOpts });
 
   // ---- play-test 2: class names (Q25), account settings (Q15), a title-screen look (Q21) ----

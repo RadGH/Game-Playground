@@ -3490,3 +3490,332 @@ the phone settings sheet can show the same three choices and nothing else is nee
   tracker (owner's T12: every event says what it is, its objective, time left and reward) and the quest tracker — so on a phone an event's card
   is not on screen unless the HUD-info toggle is opened. Suggest: keep `.tv-evtrack` visible (folded to one line) while an event is live.
   `tests/D/pt5.spec.js`'s 390 px test now skips when the phone layout is on (your tests own that layer).
+
+## D-world -> lead, D-UI — the two publish-gate reds (2026-10-07)
+- **freeze.spec "tv.warm() never finishes": fixed, three causes.** (1) The standing crops of round 6 were one instanced mesh for a whole zone —
+  every field always drawn, ~3 million triangles round Torborhold at first, 700 k after the first cut: the software renderer drew a frame every
+  few seconds. Each field is now its own frustum-culled mesh with stalks only within 110 / 70 / 60 m (High / Medium / Low) and a flat slab
+  beyond; a blade is 4 triangles. (2) The warm-up waited for an idle callback before EVERY body (40) and every kit piece (60); on a slow
+  renderer that is one a frame, so boot took 7+ minutes whatever it built. Both loops now rest only after 10-12 ms of real work
+  (js/client/warmup.js, scatter-view.js). Measured on this VM under load 11: warm done at 165 s (was not done at 510 s). (3) The spec's own walk
+  ran straight into a now-solid hedge after 17 m (walls/fences block since play-tests 4-5): it goes round now (walked 53 m).
+  **Still open:** one run in two shows a single ~1.8 s task OUTSIDE the frame loop while the second zone streams in (`maxTaskMs` 1806; frames
+  themselves <= 46 ms, no shader links). It was there in round 5 before any of this (1823 ms on 2026-10-06). Not found yet — none of the
+  measured spans (zone:parse 58 ms, zone:ground 74 ms…) accounts for it; `zone:sites` / `zone:setpieces` are sliced.
+- **m3-social.spec "the travel veil stays over the HUD": fixed.** `transition.js` `reveal()` awaited two animation frames; a page that is not
+  being drawn (the second browser of the spec, a background tab) gets none, so the veil sat until its 12 s safety. It now races each frame
+  against 350 ms, the safety is 6 s, and a same-room `travelR` lifts the veil by itself. The spec gets past Mail, the account menu and Log out.
+  **What stops it now is D-UI's title flow (line 194):** after signing in from the title's sign-in form the character chip `#char-chips .chip`
+  exists but is HIDDEN — main.js only switches to the `front` step when `$('signin').hidden`, and the form is still open at that moment.
+  D-UI: either close the sign-in panel on `authed` before `showChars`, or tell me the step the spec should click through.
+
+## Round 8 contracts — D-world (3D client) -> A, C, E, D-UI, P-client, F, lead — 2026-10-07 (written first; where A / C / E name a field differently, THEIR name wins and I re-point — say so in your section)
+- **W2 / W14 projectiles (C, A).** I draw one travelling body for every `ev fx {kind: 'bolt' | 'arrow' | 'shot' | 'thrown', id, to, ms | speed, element | el, from?, proj?, skill?, wt?, miss?}`:
+  `id` = the attacker (the body leaves its HAND — I ignore `from` unless `fromId` / `hop` says the shot starts somewhere else); `to` = an entity id
+  (followed while it flies) or `{x, z}`; `ms` = flight time (or `speed` in m/s — I work the time out from the distance); `proj` (optional) picks the
+  model outright: `arrow | quarrel | knife | axe | javelin | stone | firebolt | orb | shard`. Without `proj` I choose: `arrow` -> arrow; `thrown` ->
+  knife (`wt: 'axe' | 'javelin'` -> those); `shot` (a monster) -> what the attacker's look holds (bow -> arrow, crossbow -> quarrel, nothing -> stone;
+  an element other than physical -> that element's bolt); `bolt` -> the element's bolt (fire = a firebolt with a flame tail). The impact is drawn when
+  the body ARRIVES; please land the damage (`hit`) at that same moment (`combat.later(flight, …)` as bolts already do).
+  **Ask C:** a flight a player can see — arrows / quarrels / thrown <= 30 m/s, spell bolts <= 24 m/s, never under 180 ms (monster `shoot()` is 40 m/s
+  with a 110 ms floor today: at 8 m that is 6 frames); and `fx shot` for EVERY ranged monster attack and monster spell that hits one target at range
+  (some casters send only `hit`). **Firebolt and the other instant single-target bolt skills:** send the same `fx bolt` with `skill` and land the hit after `ms`.
+- **W12 quest markers (A, D-UI).** Per-player, so not in the shared `info`. I read whichever of these A sends: `questMarks { marks: { <entity id>: 'offer' | 'ready' | 'later' | 'active' | null } }`
+  (whole map on join / room change, and a patch `{ id, mark }` whenever one changes) — `offer` = gold "!", `ready` = gold "?", `later` = grey "!"
+  (has a quest you cannot take yet), `active` = grey "?" (yours, not finished), null = nothing. A `you { marks }` field with the same map works too.
+  **D-UI:** `thousandvale.questMarks.list()` -> `[{ id, x, z, mark }]` for the minimap / map, and `questMarks.sprite(mark)` -> a 32 px canvas of the same glyph.
+- **W20 run by default (nobody needs to change anything).** The client now sets the SPRINT bit unless Shift is held, so "run" is the server's
+  `MOVE.sprint` (8.1 m/s) and Shift walks at `MOVE.run` (5.4). Binding rows: `walk` (Shift, hold) replaces `sprint`; `autorun` (Num Lock; LT + stick click on a pad; a tap
+  toggles walking forward until any move key). Controller: stick under 60 % walks; phone stick: under 60 % walks, full push runs.
+  **C / A:** if sprinting drains anything or changes aggro, say so — today it does not.
+- **W22 light (C, A).** Worn / carried light is no longer drawn: `info.gear.light`, the `item:torch` status and the `light` look slot are ignored
+  (no flame in the hand, no lantern on the hip, no pool light riding a body). Everyone carries the same glow instead: radius from
+  `rules.LIGHT?.radius` / `you.lightRange` when C sends one (metres), else **18 m** outdoors at night and **24 m** underground. Dungeons get a
+  floor of ambient light whatever the look. **C:** name the constant; I read `you.lightRange` if it exists.
+- **W26 mount call (A, C).** While the call runs (`fx channel ab:'mount'` / `mountR {casting}`) the client sends NO movement (keys, stick and
+  click-to-move are held back, and remembered), so a step can never break it; pressing H again sends `mount {op:'cancel'}` (fall back: `'off'`).
+  On `you.mount` set, the held-back intent resumes: a held key simply moves again, a click-to-move / follow goal is walked to. **A:** accept
+  `op:'cancel'` during the channel (answer `mountR {why:'cancelled'}` + the channel end), and do not break the call on the client's own
+  correction snaps (< 0.6 m is already your rule).
+- **W5 ox carts (E, A).** I draw (a) a parked cart for an entity / object with `info.type === 'cart'` (or `info.vehicle: 'ox_cart'`; `info.yaw`), the carter
+  NPC is E's own; (b) a travelling one: any entity with `info.vehicle` set moves as a cart with its ox walking (position from snapshots like any
+  body; `info.riders: [ids]` optional -> those players are drawn seated on the bed and hidden on foot); (c) the ride when A moves you:
+  `cartRide { to: { name, x?, z? }, ms?, fare? }` (or `travelR { by: 'cart', toName }`) -> a 2.5 s presentation: you seated on the cart rolling
+  off as the veil closes, then the normal arrival. Names are yours to choose; tell me and I re-point.
+- **W19 backpacks (C, F, D-UI).** New models (avatar-3d/js/chibi2-backpacks.js, registered in chibi2-parts + the gear catalog): `g5_pack_satchel`
+  (small), `g5_pack_rucksack` (medium), `g5_pack_frame` (large, bedroll on top), `g5_pack_explorer` (rare+: pockets, pot, rope). Catalog rows:
+  `slot: 'cape'`, `kind: 'pack'`. An item draws one by `look.g5` / `g5` / base id, like every other catalog piece; a back item whose base matches
+  `/pack|satchel|rucksack|knapsack/` with no `g5` gets the rucksack. C: use these ids on your backpack bases.
+- **W25 icon = model (D-UI).** One function decides both: `wornPart(item, slot, opts)` in js/client/gear-look.js -> the avatar part
+  `{ partSlot, part }` the body draws for that item. `ui/item-icons.js` must build its picture from that part and nothing else; a node test walks
+  every base in loot-pool / gear-tv / items and fails when the icon's part and the worn part differ.
+- **P-client:** W9 visuals are yours; I touch none of them. New client files this round: js/client/projectiles.js, quest-marks.js, carts-view.js.
+
+## Round 8 contracts — D-UI (interface) -> A, C, E, D-world, P-client, G, lead — 2026-10-07 evening (written FIRST; I build against these and re-point to whatever A / C / E publish if a name differs)
+New interface files: `js/client/ui/pt8.js` (hub, `createUi8`, `window.tvui8`), `pt8-core.js` (pure, node-tested), `my-reports.js`, `meter-window.js`,
+`cart-travel.js`, `map-tools.js`; `css/pt8.css`. Every shape below is ADDITIVE; when a field is missing the interface falls back as said.
+
+**W29 / W28 — my reports, Completed (reads A).** I send, on either socket:
+- `feedback {op:'mine'}` -> `feedbackMine {list:[{id, at, kind:'bug'|'suggestion', text, state:'new'|'approved'|'declined'|'completed', note?, noteAt?}]}`
+  (signed-in accounts: every report of the ACCOUNT, newest first; a guest gets `{list:[], why:'guest'}` and the tab says "sign in to follow your reports").
+  `note` = the admin's note / the completion text ("how it was fixed"). A trashed report is simply left out or sent as `declined` — your call; I print the state you send.
+- Reply: no new message. The window opens a new suggestion / bug whose text starts with `#<id> ` — it goes out as an ordinary `feedback {kind, text}`.
+- Admin: `admin {op:'report', id, state:'completed', note}` (the `note:str:500` field is already in the table) -> `adminR {ok, id, state, note}`; the list rows carry `note`.
+  I also send `note` with approve / decline when the admin typed one. The Reports filter gains "Completed".
+- If A names these differently (e.g. `myReports` / `feedbackList`), I take either: the handler listens for `feedbackMine` AND `adminR {op:'mine'}`-style answers are easy to add — tell me the name.
+
+**W8 — loot keys (mine).** No new message: E = `loot {op:'take'}` on the selected row, F = `loot {op:'all'}`. No new binding rows either: the hints are
+`<kbd data-action="interact">` and `<kbd data-action="strike">`, so a re-bound key or a controller glyph shows by itself (G: I add "in a loot window" to
+those two labels in `input/bindings.js`; a pad's A presses the focused row as it does today and its X — "the other action" — takes everything).
+
+**W12 — ! and ? on the map and minimap (reads A's flags; D-world draws the sprite over the head).** I read ONE field from an NPC's `info`:
+`info.q` = `'offer'` (has a quest you can take now) | `'turnin'` (you can hand one in) | `'later'` (has one you cannot take yet / one of yours in progress — grey) | absent.
+If A sends it under another name (`quest`, `qm`), say so. D-world: the same field drives your sprite; colours gold `!`, gold `?`, grey for `later`.
+Town NPCs that are not in view are already on the map from `mapR.places[].npcs` — if A can add `q` there too the whole town shows its marks; without it only NPCs in sight do.
+
+**W13 — hide an event (mine, client only).** Kept per session in `sessionStorage` (`tv.ev.hidden` = event ids). A hidden event leaves the HUD tracker, the banner,
+the minimap rim arrow; it stays on the big map greyed with "Show again". The tracker gets a small "Hidden events (n)" line that brings them back. No server message.
+An event you are INSIDE (taking part) cannot be hidden. E: nothing needed.
+
+**W15 — map services (reads E / A).** The filter and search read what is already in `mapR.places[].npcs[]` (`role`, `title`, `name`) and `places[].services[]` if present.
+Ask of E/A: every town row in the WORLD list (`mapR.world.towns[]` / whatever `map-data.js` reads as settlements) carries `services:[role…]` (roles such as `stable`,
+`angler`, `trainer`, `smith`, `innkeeper`, `barber`, `unbinder`, `merchant`, `carter` (W5), and the profession trainers / stations of W9) so a town you have not walked into
+can still be highlighted. Without it, only towns whose detail the client has seen are highlighted and the search says so.
+
+**W17 — quest zones.** Mine. Reads the journal's objectives (`quest.goals[].area {x,z,r}` as today) — no new field.
+
+**W21 — damage meter (reads A / C).** I import `meters/js/meter.js` + `meter-ui.js` (read-only use; no change to the experiment). I need ONE record per landed hit / heal
+for me AND party members in range. Today the client sees `dmg` / `heal` events `{src, tgt, n, crit?, skill?, el?, miss?, kind?}` for what is in its room; the meter
+window feeds on those. Ask of A/C (additive, the meter works without them, just coarser): on `dmg` — `sk` (skill id or `'basic'`), `el` (element), `crit`, `over` (overkill),
+`abs` (absorbed), `blk` (blocked), `kb` (killing blow) ; on `heal` — `sk`, `over` (overheal), `crit`. If A publishes a dedicated `hit {…}` record instead, I take that — name it in your section.
+Party in range = party members whose actor the client currently has; the window says "party members near you".
+Setting: Settings -> Interface -> "Damage meter" (`tv.set.meter`, default off). No key (a button on the window; `/meter` in chat).
+
+**W5 — ox-cart travel (reads E / A).** `E` on a carter (`npc.role === 'carter'`) or on a cart object -> A sends `cartList {id, from, name, stops:[{id, name, fare, m, s, band?, locked?, why?}], gold}`
+(`m` = road metres, `s` = seconds the ride takes, `locked` + `why` when you may not go: not enough gold, level, not discovered). I send `cart {op:'go', id, to}` ->
+`cartR {ok, to, fare, why?, msg?}`; the travel veil is D-world's as for a waystone. If A reuses `used {kind:'cart', stops}` + `use {id, to}` (as the lift does), I take that instead — same fields.
+
+**W19 — backpack (reads C / A).** Card line "+N bag slots" from `item.bagSlots` (number) — C: put it on the item (or tell me the affix/stat key). Bag size from `inv.size` / `you.bagSize`
+as today (the grid grows by itself). Refusal: `itemR {op:'unequip'|'equip', ok:false, why:'bagSlots', need, msg}` — I print `msg`, else
+"Empty N more bag slots first — the pack's extra room is holding things."; the client also greys "take off" with the same reason before asking.
+
+**W22 — the `light` slot leaves the paper doll** (C removes it from the rules' slot list; I stop drawing it whatever the rules say). **W27** — the name plate prints an
+NPC's title only when `info.title` is sent; A/E stop sending one for filler folk. I also drop it client-side when `info.filler === true` or the NPC has no role and no quest mark.
+
+**W25 — an item's icon IS its worn model. ONE function, owned by D-world in `js/client/gear-look.js`:**
+```js
+/** What ONE item draws on a body when worn in `slot` — the same patch gearLook() merges for that item (g5 catalog first, then the old tables). */
+export function wornLook(item, slot, { baseOf, tierOf, tier2, themes, catalog } = {})   // -> the same partial look gearLook() would produce for {[slot]: item}
+```
+= `gearLook({ [slot]: item }, opts)`. If D-world would rather I call `gearLook` with a one-slot equipment directly, that IS the contract: `ui/item-icons.js` builds every
+armour / held / off-hand icon ONLY from `gearLook({[slot]: item}, <the same opts actors.js passes>)` and `inv-core.js iconSpec` stops carrying a second table.
+D-world: export the opts the actors use as `gearOpts()` (or tell me where they live) so both callers pass the same catalog. Test (mine, `tests/D/pt8.test.js`): for every item
+base in the rules + F's catalog, `iconSpec(item).look` deep-equals `gearLook({[slot]: item}, gearOpts())`.
+
+**P-client (W9):** the Character menu (`ui/char-sheet.js`) gets a "Professions" block: `sheet.addSection(id, title, drawFn)` — you call it with your own draw function, I own
+the frame. The journal gets `journal.addTab(id, label, drawFn)` (the Catch tab moves onto it). Menu bar: no new button (ten is the ceiling on a phone) — professions open
+from the Character menu and from a station / node. Ask me for anything else in your section.
+
+## Round 8 contracts — C (Combat rules: W14 W2 W4 W19 W22 W23) -> A, D-world, D-UI, E, P-core — 2026-10-07 (written first; status line at the end is kept true)
+
+**W14 / W2 — every ranged attack is a travelling projectile (players AND monsters).** The damage is dealt when it ARRIVES. It homes: it lands on its target wherever the target is by then; if the target died on the way it strikes the ground where the target fell (a splash can still catch a neighbour) and never a new victim. Speeds are per skill / weapon / monster in `data/rules/projectiles.json` (much slower than Farhold's 48 m/s, so the flight is seen; minimum flight 0.2 s).
+- The event is the one that already exists — `fx {kind: 'bolt' | 'arrow' | 'shot', id: <shooter>, from: {x,z}, to: <entity id> | {x,z}, ms, element}` — with these fields ADDED on every one: `speed` (m/s, what `ms` was computed from), `from` (now on monster `shot`s too), `home: 1` when `to` is an entity it follows, `proj: 'arrow' | 'bolt' | 'orb' | 'thrown' | 'rock'` (what to draw), and `skill` (skill id, `basic` for a weapon's own attack, the monster ability id for a special). `kind:'shot'` = a monster's; `kind:'arrow'` = a player's bow/crossbow/javelin basic; `kind:'bolt'` = a player's skill bolt or wand/staff basic.
+- The `hit` event for that projectile comes `ms` later (same tick as before the client would have seen it land). Nothing lands at cast time any more for these.
+- **D-world**: draw a projectile for EVERY one of these (start at `from`, fly `ms`, follow the entity when `home`). A monster's telegraphed ranged special (Pinning Shot, Arrow Rain …) that lands on someone also emits `fx {kind:'shot', cosmetic: 1, …}` at the moment it lands with `ms` ~150 — draw it, it carries no second hit.
+- A druid shape's ranged basic now emits `fx bolt` too (it emitted nothing).
+
+**W4 — kill XP.** Only `data/rules/progression.json xp.killMult` moves (final number + before/after kills-to-level and minutes-to-level table in the status line below). The grey-con / level-gap rule is unchanged. No API change.
+
+**W19 — backpacks (slot `back`).** New item bases `sling_satchel` (+4 bag slots, from level 1), `trail_rucksack` (+6, from level 10), `expedition_pack` (+8, from level 20). An item carries `bagSlots: n` and `pack: true`; a backpack rolls FEWER properties than a cloak of the same rarity (normal 0, magic 1, rare 1, legendary 2 — a cloak rolls the usual count). Loot family `pack` (drops), crate slot `back` may hold one.
+- **A**: bag capacity = your base size + `rules.bagBonus(e)` (0 without a pack; also exported pure `bagBonusOf(item)`). The base size is YOURS to choose (owner asked for packs to matter: suggest a base of 24 and BAG_MAX staying the hard ceiling). Taking a pack off (unequip, or swapping to a cloak / smaller pack) when the bag holds more than the new capacity must be REFUSED by you ("Empty N bag slots first") — call `rules.canUnequip(e, 'back', { bagCount, bagBase })` / `rules.canEquip(e, item, slot, { bagCount, bagBase })`, both answer `{ ok:false, why:'bag', text }` for that case when you pass the two numbers. Send `bagMax` = the real capacity in the sheet (D-UI already reads `bagMax`).
+- **D-UI**: item card shows `item.bagText` ("+6 bag slots") as its first line; the bag window draws `bagMax` slots.
+- **D-world / F**: a worn pack is `info.gear.back` with `pack: true` and `g5` when the catalog has a model; until a model exists draw the cloak-less back or a simple box (base keys above).
+- **E**: shop family `pack` (general goods / outfitter): bases above by level; `rules.makeItem(e, {base:'trail_rucksack', rarity, level})` works. **P-core**: Outfitting can craft the three bases.
+
+**W22 — light items are gone.** Removed from the rules: the `light` equipment slot, bases `hand_lantern` / `pitch_torch` and every catalog light (`g5_cresset`, `g5_hexlantern` …), the `light` loot family and crate slot, the light-only affixes (`wide_beam`, `seeking_light`) and uniques of type `light`, the consumable use `{type:'light'}` (the Bundle of Torches) and its `item:torch` status. `rules.SLOTS` no longer lists `light`.
+- **Everyone's light**: `LIGHT = { radius: 22, dungeonAmbient: 0.4 }` (export of js/rules/index.js, from `data/rules/progression.json light`). `rules.itemBuffs(e).lightRange` now ALWAYS answers `LIGHT.radius` (so a client that read it for the torch gets the wider light with no change); `light` / `wornLight` are no longer set. **D-world**: every character carries a `LIGHT.radius` m light at night and in dungeons; dungeons add ambient at `LIGHT.dungeonAmbient` of daylight.
+- **A — converting what players own** (exports of js/rules/index.js): `isLightItem(item)` (true for a worn light of any base incl. old saves, a light unique, and the torch consumable — goods ids `torch_bundle`/`torches`/anything whose `use.type === 'light'`), `lightRefund(item)` -> gold (its full LIST price x count, never the sell price — the owner removed it, the player loses nothing). On character load: for every bag item with `isLightItem` remove it and pay `lightRefund`; `equipment.light` is handled by the rules themselves — `restoreGear` drops it and `rules.addEntity` reports it once via `host.award(e, { gold, why: 'lightRefund', text })` (if you would rather do it yourself, `rules.lightRefundOwed(e)` returns and clears the amount). One mail/system line: "Lanterns and torches were removed from the game — you were paid N gold for yours."
+- **E**: drop `light` from shop families / crate tables / road-chest tables and the Bundle of Torches from every shelf (`use.type:'light'` is refused by `rules.useItem` with `why:'gone'`). **D-UI**: the paper doll loses the Light slot (read `rules.SLOTS` / the sheet's slot list).
+
+**W23 — starter kits.** Same API (`kitsFor(cls)`, `validKit`, `applyKit`); the data changes: each class's weapon packs differ in at least one of {attack pattern, reach band, hands (1h+shield / dual / 2h / ranged / caster form), element} and each armour set has a different stat lean. Every pack and set carries `role` (a 2-4 word tag: "Fast, close", "Slow, heavy reach", "Ranged", "Shield") and `diff` (one plain sentence: what is different about this one) for the kit screen (**D-UI**: show both). New starter bases may appear (list in the status line). Measure used by the test: two packs are near-duplicates when they share the same hand shape AND the same attack pattern family AND the same reach band AND the same element.
+
+**P-core**: `rules.makeItem(e, { base, rarity, level, band })` — see the answer under your ask when you write it; C will add `band: { rarity: [min,max], affixes: [min,max], quality }` on request.
+
+_Status: contract written, nothing landed yet._
+
+## Round 8 contracts — E (Content) -> A, C, D-world, D-UI, P-core — 2026-10-07 (owner feedback 8; written FIRST, a status section follows when it lands)
+
+Everything here is DATA that E writes this round. Field names are final unless the status section says otherwise. Nothing of E's needs a re-placement or a re-bake: new bodies go into `data/vignettes/placements/<zone>.quest.json` (B's bake never reads it; A already spawns `npc` and `camp` rows from it).
+
+### W1 — no raid on a newcomer; town guards (E data, A runs it)
+- `data/quests/events.json` `director.newcomer = { underLevel: 3, firstMinutes: 10 }` — who counts as a newcomer: a character under that level OR one whose character is younger than `firstMinutes` of played time.
+- Every event that can hurt a town or stands close to one carries `startOn.clearOfNewcomersM: <metres>`: the event may NOT start (nor count down) while a newcomer is within that many metres of the event's centre (`map[0]`, or the settlement for `site.settlement`). On every `realm[]` event with `site.settlement` (town radius + 160) and on every `zone[]` event whose arena is within 400 m of a settlement or whose level is <= 4. Torborhold keeps `startOn.minLevel: 3` as well.
+- `director.raid = { firstTarget: 'guard', neverFirstTarget: 'newcomer', enterBy: 'gate', newcomerThreatMult: 0.25 }`: a raid wave spawns outside a gate (`raid.gates` on the event: `[{ id, x, z, out: [dx, dz] }]`, zone metres, from B's `town_wall.gates`), walks in through it, and its opening target is the nearest GUARD; a newcomer is never a wave's first target and draws a quarter of the threat while guards stand.
+- `data/provinces/guards.json` — `rules` (what a guard is: `type` = monster type id for its body/attacks if C has one, else A's NPC fighter; `levelOver` = +levels over the town's band floor; `hpMult`, `dmgMult` against an ordinary monster of that level; `respawnSec`; `leashM`; `fights: ['event']` = only event monsters and anything that hits a player inside the ring; never attackable by players; a guard that falls gets up after `respawnSec`), `ranks` (`guard`, `sergeant`), and `hold` (the tuning rule, tested by arithmetic: the posted guards ALONE beat wave 1 and lose to the whole raid inside its time limit; with two players of the event's level they win).
+- Guard POSTS: `{ "type": "guard", "id", "town", "post": "gate" | "square", "gate"?: "<B gate id>", "rank", "name", "x", "z", "yaw", "titled": false }` rows in `<zone>.quest.json`, made by `tools/content-guards.mjs` (two per gate just inside it, facing out; two to four in the square by town size; hamlets one at their gate). Zone metres like every other row in that file.
+- A guard's NAME is "<Town> Guard" / "Sergeant <family>" and it has NO title (W27).
+
+### W5 — ox-cart fast travel (E data; A runs it; D-world draws the cart; D-UI the route window)
+- `data/provinces/carts.json`:
+  - `rules { boardM: 6, rideSecPerKm, minRideSec, maxRideSec, flagDownM: 12, needsDiscovery: false }` — you may ride to a town you have never seen (that is the difference from a waystone).
+  - `stops[]` = one per town on the road network: `{ id: "cart_<town slug>", town, kind, zone, x, z (WORLD metres, as routes.json), carter: "<npc id>", cart: { x, z, yaw } (zone metres) }`.
+  - `links[]` = `{ a, b, metres, route: "<routes.json id>" }` (direct road neighbours) and `fares` = the full table `{ "<from stop>": [{ to, metres, hops, gold }] }` over the shortest road path, so nobody recomputes a path at run time. `gold` = `cartFare(metres)` below, already rounded.
+  - `roaming { kind: "ox_carter", ... }` = which traveller kind is a cart you can flag down, and where it will take you (the two ends of its route, or on to any stop from its next town at the table's fare).
+- `data/provinces/economy.json` `cart { base, metresPerGold, minGold, levelFree: 0 }` -> `cartFare(m) = max(minGold, round(base + m / metresPerGold))`. Cheaper than a waystone (`fare`) over the same distance; `targets.cartShare` = a ride to the next town costs 2-8% of an hour of questing at the level of the towns it joins (tests/E pins the ratio).
+- Bodies in `<zone>.quest.json`: the carter `{ "type": "npc", "id": "carter_<slug>", "name", "role": "carter", "at": "<town>", "x", "z", "yaw", "cart": "cart_<slug>", "titled": true, "placedBy": "content-carts" }` and the parked cart `{ "type": "cart", "id": "cart_<slug>", "model": "ox_cart", "x", "z", "yaw", "town" }` (D-world: `avatar-3d/js/vehicles.js` `ox_cart`, built facing +x). Carter stands beside the cart, by the gate road, outside the wall.
+- Roaming: `data/provinces/wanderers.json` kind `ox_carter` (`cart: true`, `beast: 'ox'`, `stopNear: 12`, `offer: 'cart'`, crew role `carter`, `titled: true`) — it walks the routes like any traveller; using the carter opens the same route window with that cart's next stop as `from`.
+- Title: `data/names/titles.json` `roles.carter = "Carter — rides to other towns"`.
+- Quest: `data/quests/start.json` gains `start_wheels_for_hire` (after `start_road_to_orrinsford` hands in at Orrinsford): the carter there gives you a free ride back to Torborhold. New step kind **`ride`**: `{ kind: 'ride', from?: "<stop id>", to: "<stop id>", text, where }` — done when a cart ride arrives at `to`. `grant: [{ good: 'cart_token', count: 1 }]` — a `cart_token` good pays ONE fare of any size (shops.json `goods`, not sold). The tutorial tip text lives in the quest's `offer`.
+- Ask of A: message names are yours; E only needs `cartFare` to come from economy.json and the step kind `ride`.
+
+### W27 — titles only on NPCs placed for the player (flag `titled`)
+- EVERY NPC record E writes carries **`titled: true | false`**: quest files' `npcs.*`, offices.json `towns.*.offices[]` and `setpieces[]`, placements `npc` / `folk` / `guard` rows (main + `.quest.json`), `travellers.json` + `wanderers.json` crew entries, `travellers.json` `folk.*`, road-events.json deliver/escort/rescue (true: they offer a quest).
+- The rule (also machine-readable in `data/names/titles.json` `titled`): true when the NPC gives or takes a quest, keeps a shop or sells a service (trainer, healer, barber, unbinder, broker, stable, inn, angler, carter, class trainer), or offers jobs (JOB_ROLES). False for filler: townsfolk, villagers, farm hands, woodcutters, shepherds, travellers on the road with nothing to offer, guards.
+- `titles.json` `titled: { roles: { "<role>": true|false }, default: false }` for bodies spawned from code with no record of their own.
+- Ask of A (`js/sim/npc-names.js` / room.js): send `info.title` only when the record's `titled` is true (record flag first, else `titles.titled.roles[role]`, else false). A filler NPC keeps its real name. Ask of D-UI: draw no title line when `info.title` is absent (and no "Local" fallback).
+- Test: tests/E/playtest8-titles.test.js — every NPC record has the flag; every quest giver / turn-in / shop keeper is true; no `folk` is true.
+
+### W12 — quest givers and turn-ins marked in data
+- `data/quests/marks/givers.json` (made by `tools/content-givers.mjs`): `{ npcs: { "<npcId>": { zone, gives: [questId…], takes: [questId…], jobs: true|false, talks: [questId…] } }, objects: { "<vignette>/<object>": { gives: [...] } } }`. `gives` = quests whose `giver` (or `startsFrom`) is this NPC; `takes` = quests handed in to them (the giver unless the quest names `turnIn`); `talks` = quests with a `talk`/`deliver` step at them (a "?" while that step is the current one); `jobs` = a JOB_ROLES role (always something to offer).
+- Every placement `npc` row also carries `quests: <number of gives>` so a body with no index entry is a bug the test catches. A decides per player which of ! / ? / grey to send.
+
+### W24 — chests that cannot be locked by kill order
+- `data/provinces/road-events.json` `rules.chest = { lockedBy: 'own guards', lootSec: 120, staysUntil: 'every participant looted or lootSec after it opened' }` and every guarded chest names its keepers: `guardTypes: [monster types]` (the smugglers are brigands wherever the chest lands — the report's chest was "guarded" by the rats of the nearest camp while the brigands next to it were somebody else's). A: spawn guards from `guardTypes` when present (level = the event's), count only THOSE bodies, and keep the chest `lootSec` after it opens for everyone who took part.
+- Vignette chests (`objects[].type: 'chest'`): the only lock is the object's own `after` (an object in the same vignette) — E audits all of them so none waits on monsters by name; a test lists every chest with what locks it.
+
+### W4 — XP of quests against kills
+- `tools/sim-economy.mjs --levels` prints, per level 1-10: kills to level by killing alone, minutes by killing alone, minutes by questing (the kills a quest costs + its hand-in), and the quest share of XP in an hour of questing. Before/after C's kill-XP change in docs/economy/levels-before.txt / levels-after.txt.
+- Knob (if needed after C lands): `data/provinces/economy.json` `quest.xpMult` (default 1; A: quest XP = reward.xp x level XP x xpMult). `targets.questXpShare` = the share of an hour's XP that comes from hand-ins while questing: [0.35, 0.6].
+
+### W22 — light items leave the content
+- shops.json: the `light` category and every lantern / torch row go; content-gear puts no light on any shelf; quest crates of slot `light` become another slot; `data/provinces/refunds.json` gains the light bases at their old shop price so A can refund what a player owns. Lore that MENTIONS lamps and lanterns (the town Last Lantern, the Lampwright) stays: those are not items.
+
+### W19 — backpacks
+- When C's backpack bases land (slot `back`, a bag bonus), `tools/content-gear.mjs` shelves them at the TAILOR (`tailor / armor`), the general store sells the plain one, and the start chain's `back` crate may roll one. Drop tables are C's loot pool; E adds nothing there unless C asks.
+
+### P-core (W9)
+- E places nothing for professions. `tools/sim-economy.mjs` keeps `--json` and gains an `extraRows` hook: it imports `tools/sim-professions.mjs` if that file exists and prints the rows it returns (`[{ activity, level, goldPerHour, note }]`) with their share of questing, so the 70-100% rule is checked in one table.
+
+## Round 8 contracts — A (Server core) -> D-UI, D-world, C, E, P-core, lead — 2026-10-07 (owner feedback 8; written first, kept true; status line at the end)
+Protocol goes to **v8** (all additive). Where D-UI / D-world / C / E wrote a name first, I TOOK THEIR NAME — the bullets say which. New schema file: **server/db/schema-v6.sql** (feedback only — P-core: if you need a table, yours is v7).
+
+**W28 — "completed" (LANDED, tests/A/pt8-feedback).** `FEEDBACK_STATES` gains `completed`. A report row gains `done` (the changelog line the SENDER reads), `doneAt`, `ref`. The admin's own `note` is kept apart and survives completion.
+- Admin: `admin {op:'report', id, state:'completed', note}` — on `completed` the `note` you send IS the completion text (stored as `done`); with any other state it is the admin note as before. Answer `adminR {ok, id, state, done?, counts}`; `counts.completed` exists; `admin {op:'reports', state:'completed'}` filters; list rows carry `note`, `done`, `doneAt`, `ref`.
+- Lead: `node tools/feedback-state.mjs 45 --state completed --note "…" [--env stable]` (works before the stable server restarts on schema 6: the tool adds the three columns itself, the same additive statements). `tools/feedback-report.mjs` prints `**Completed <when>:** …` and counts completed (`--state completed`); `tools/feedback-page.mjs` shows it + a Completed filter; the 127.0.0.1 admin page has a "complete" button that asks for the note.
+**W29 — my reports (LANDED).** D-UI's names: send `feedback {op:'mine'}` (or `feedbackMine {limit?, before?}`; `net.myReports({limit, before})`) on either socket -> **`feedbackMine {ok, list:[{id, at, kind, text, name, state, note, noteAt, adminNote, done, doneAt, ref}], more}`**, the ACCOUNT's reports newest first (50 a page; `before` = an id pages back).
+  `state` = `new | approved | declined | completed | closed` (a trashed report reads `closed`). `note` = what to print: the completion text when completed, else the admin's note; `adminNote` / `done` are the two apart. A guest account gets `{ok:false, why:'guest', list:[]}`.
+- Reply: `feedback {kind, text, ref:<id>}` (`net.feedback(kind, text, ctx, ref)`) — `ref` must be one of YOUR account's reports (else `feedbackR {ok:false, why:'ref'}`); the stored text is prefixed `#<id> ` unless it already starts with it; the row keeps `ref`. Sending plain text that starts `#<id> ` with no `ref` still works (no link stored).
+- `feedbackR` gains `state` (`new`, or `approved` for an admin) and `ref`.
+**W7 (LANDED).** A report sent by an account with the admin flag is stored `approved` (`stateBy: 'admin (own report)'`).
+
+**W11 — per-account, not per-character.** The level-5 gate on public chat / whispers to strangers / sending mail / founding a guild now asks the ACCOUNT's highest character (`alv`), not the one you are playing: a level-1 alt of a claimed account with any level-5 character posts mail on day one. A claimed account with no level-5 character yet is told "opens when one of your characters reaches level 5" (`why:'level'`), a guest "needs a claimed account" (`why:'gate'` / `chatGate` as before). `joined.you.acct = {claimed, level, admin, username}` and `you {acct}` whenever it changes (a level-up that raises it, a claim) — **D-UI: gate your buttons on `you.acct.level` (fallback: max level over `net.chars`) instead of the character's level.** Also fixed: `admin` / `username` were dropped from the ticket when a character crossed into a province on another process.
+
+**W12 — quest marks.** Per player, so NOT in the shared `info`: **`questMarks {marks: {<entity id>: 'offer'|'turnin'|'later'|'active'}}`** = the whole map for your room on join / room change (`full: true`), and patches `questMarks {marks: {<id>: mark|null}}` when one changes (an accept, a step, a hand-in, a level, an NPC coming into the room). `offer` = gold "!" (a quest or job you can take now), `turnin` = gold "?" (you can hand one in / your current step is to talk to them), `later` = grey "!" (has one you cannot take yet: level, class, an earlier quest), `active` = grey "?" (yours, not finished). Priority turnin > offer > active > later. D-UI asked for `info.q`: it cannot be per player there — read `questMarks` (D-world keeps the map: `thousandvale.questMarks.list()`). Out-of-sight town NPCs: `mapData.places[].npcs[].q` is NOT sent this round.
+
+**W27 — titles.** `info.title` is sent only when the NPC is `titled` (E's record flag first, else `titles.json titled.roles[role]`, else: it keeps a shop / service / office, gives or takes a quest, offers jobs, or is a road-event / wanderer with an offer). Filler folk and guards send no `title` and `info.filler: 1`. Real names stay.
+
+**W26 — mount call.** `mount {op:'summon'}` -> `mountR {ok, id, casting, until, stand: true}`; while the call runs THE SERVER HOLDS YOU STILL (movement in `in` is ignored, facing still turns), so moving can no longer break it. Only a hit, death or deep water breaks it. `mount {op:'cancel'}` (or `'off'`) during the call -> `mountR {op, ok:true, why:'cancelled'}` + the channel end `fx channel {end:'broken', why:'asked'}`. **D-world: send no movement during the call (as you wrote) — if you do, the server ignores it and your prediction will snap back.**
+
+**W19 — backpacks.** Bag capacity = `economy().bag.base` (**40**; `data/provinces/economy.json` `bag.base` overrides — C suggested 24, the owner's level-4 character already carries 32 things) + `rules.bagBonus(e)`, never over `BAG_MAX` 120. Sent as `you.bagMax` on joined, in the `sheet` (`bagMax`) and as `you {bagMax}` whenever it changes (pack on / off). A character over capacity (an old save) loses nothing: it just cannot pick anything up until it is under. Taking the pack off / swapping to a smaller one while the bag holds more than the new capacity: **`itemR {op, ok:false, why:'bagSlots', need:<n to empty>, msg:'Empty N bag slots first — the pack's extra room is holding things.'}`** (D-UI's name). Uses C's `rules.canUnequip/canEquip(…, {bagCount, bagBase})` when present, else `bagBonusOf(item)`, else `item.bagSlots`.
+
+**W22 — light items.** At every entry: bag items with `rules.isLightItem` are removed and paid `rules.lightRefund(item)` (fallback: E's refunds.json price, else the item's value); a worn `light` is paid through C's `rules.lightRefundOwed(e)` / `host.award(e,{why:'lightRefund'})`, and `equipment.light` leaves the save. ONE system letter ("Lanterns and torches were removed…  you were paid N gold") + `you {gold}`; saved flag `flags.lightRefund`. Letters in the POST that hold a light are converted when taken.
+
+**W21 — damage meter feed.** `meter {on: true|false}` (province socket; `net.meter(on)`) -> while on, the server sends **`hits {l: [[src, tgt, n, flags, sk, el, over, abs], …]}`** a few times a second: one row per landed hit / heal / miss where the source or the target is you, a member of your party, or a pet of one (same room). `flags` bits: 1 heal, 2 crit, 4 miss, 8 killing blow, 16 blocked, 32 dot/tick. `sk` = skill id or `basic`, `el` = element, `over` = overkill / overheal, `abs` = absorbed. `ents` in the first message of a fight name ids the client may not have (`names: {<id>: name}`). Off by default; nothing is sent to anyone who did not ask.
+
+**W5 — ox carts.** D-UI's names. `use` on a carter NPC (`role:'carter'`), a parked cart object (`info.type:'cart'`, `info.vehicle:'ox_cart'`) or a roaming ox-carter -> **`cartList {id, from, name, stops:[{id, name, fare, m, s, level?, locked?, why?, msg?}], gold, tokens}`**. `cart {op:'go', id:<the carter / cart entity>, to:<stop id>}` -> `cartR {ok, to, name, fare, token?, why?, msg?}` then **`cartRide {to:{id, name, x, z}, from:{name}, ms, fare}`** (D-world's presentation) and, `ms` later, the ordinary arrival (`travelR`-style transfer: a `joined` in the destination town by its gate). During the ride you are held (no input, cannot be hit). Fare = E's `fares` table / `cartFare(m)` from economy.json `cart`; a `cart_token` good pays one fare. Refusals: `gold`, `far` (walk up to the cart), `fight`, `dead`, `same`, `stop`. Quest step kind `ride` is credited on arrival (`{kind:'ride', to, from?}`). Roaming carts are travellers with `info.vehicle:'ox_cart'`.
+
+**W24 — event chests.** Keepers are E's `guardTypes` when the chest names them (else the nearest camp's, as before) and the chest NAMES them when it refuses ("Not while the brigands still guard it (2 left)."). Only its OWN keepers lock it; a keeper dragged more than 45 m away or leashed home no longer counts. Once open it stays `rules.chest.lootSec` (120 s) or until everyone who took part (hit a keeper, stood within 80 m when it opened, or opened it) has emptied their share — whichever is first; `eventTrack.leftMs` counts those two minutes down, objective `{kind:'open', text:'Open it and take your share'}`. A chest's share is never swept up by "loot all" on a nearby corpse: a chest opens only in its own window. `eventDone` for a chest carries `got: true|false` (did YOU take anything) and a text that says so.
+
+**W1 — no raid on a newcomer; guards.** Uses E's `director.newcomer`, `startOn.clearOfNewcomersM`, `director.raid`, `data/provinces/guards.json` and `guard` rows. A newcomer = level < 3 OR played time < 10 min (`char.played` ms, saved; counted while online). Events with `clearOfNewcomersM` neither arm nor count down while one stands inside that range (zone events and realm events both); a town room never gets a raid wave while a newcomer is in it. Guards are real fighters on the players' side (`info.kind:'npc'`, `info.guard: 1`, `info.rank`), fight event monsters and anything that attacks a player inside the ring, leash, and get up after `respawnSec`. Raid waves target the nearest guard first; a newcomer is never a wave's opening target.
+
+**W14 / W2 / W4 pass-through.** Every field C puts on `fx` (`from`, `to`, `ms`, `speed`, `home`, `proj`, `skill`, `cosmetic`, `element`) reaches the client unchanged (fx is a JSON event; nothing is whitelisted). Quest XP reads E's `quest.xpMult` (default 1).
+
+_Status: W28 / W29 / W7 landed and green; the rest in progress — this line is replaced at the end._
+
+## Round 8 contracts — W (town geometry) -> E, A, D-world — 2026-10-07 (W6 / report #27; written FIRST, a status section follows when it lands)
+
+**What changes.** Every town is re-planned so that each world road that reaches a gate carries on inside as ONE straight main street to the town square (two roads arriving close together share a street, Y-shaped). The old behaviour joined a road to the nearest alley three metres inside the wall and painted the road on through the houses. All 16 zones are re-baked (`placements.json`, `nav.bin`, `terrain.bin` surface paint inside towns, `scatter.bin` only if a town circle grew, map images).
+
+**Data (placements.json, zone metres) — additions only, nothing renamed:**
+- `street` rows: a main street laid from a gate has `data.high: true`, `data.cls: 'main'`, `data.width` (hamlet 3.6, village 4.2, town 5, city/capital 6), `data.to: 'square' | 'street'` (`'street'` = it joins another high street, `data.joins` = that street's id).
+- `town_wall.data.gates[].main = { street: "<street id>", width, pts: [[x, z]…], metres }` — the centreline a walker follows from the gate to the edge of the square. `null` on a side gate that only a footpath or an alley uses. **Keep it clear**: nothing with a footprint may stand within `width / 2 + its own radius` of `pts`.
+- `town_square.data.stalls = [[x, z]…]` — where the market stalls stand (beside the streets, never in one). `js/client/town-square.js` `squareFurniture({ square, stalls })` is the one function that says where the well and the stalls are (pure; D-world's town-view draws from it).
+- `building` rows: **ids are kept** (`<town>_plot_<n>` means the same plot as before wherever that plot still exists; a plot that stood in a new main street is GONE, so there are gaps in the numbering) and **an office stays in its building** wherever the building survived. Offices whose building was removed move to the nearest free plot to the square. The status section below lists every removed / re-assigned plot per town.
+
+**E — what you will need to re-run** (status section will say exactly which towns): `content-offices` (door spots) for the towns listed, then `content-pools` -> `content-hunts`. NPC rows whose `office` plot is unchanged keep a valid x/z. Guard posts "just inside a gate" (W1) and the parked ox cart + carter (W5): stand them BESIDE `gates[].main`, not on it — the check `tools/gate-streets.mjs` reads `<zone>.json` and `<zone>.quest.json` rows with a `radius` and will name any that sits in a main street.
+**A** — nothing to change; `nav.bin` is re-baked (restart rooms). **D-world** — town-view's well/stalls now come from `squareFurniture`; I make that edit (three lines in `js/client/town-view.js`).
+
+_Status: contract written, nothing landed yet._
+
+## Round 8 contracts — P-core (professions: rules + server + content, W9) -> P-client, A, C, D-UI, D-world, E, lead — 2026-10-07 (written FIRST; a status section at the end is kept true)
+
+**Files (all new, mine):** `js/rules/professions.js` + `professions-games.js` + `professions-temper.js` (pure), `data/rules/professions.json` (every number),
+`js/sim/professions.js` (server), `data/provinces/professions.json` (materials, node kinds, recipes, trainers, skins — MADE by `tools/content-professions.mjs`),
+`data/provinces/professions-nodes.json` (where every node stands, made by the same tool), `data/quests/professions.json`, `tools/sim-professions.mjs`, `tests/P/**`.
+P-client may `fetch` the three JSON files directly (names, colours, looks, recipe texts are all there); nothing below needs a rules import in the page.
+
+### The ten professions (`id`)
+Gathering: `mining` `logging` `foraging` `skinning` `angling` (angling = last round's system, untouched; it only joins the lists). Making: `smithing` `outfitting`
+`alchemy` `cooking` `tempering`. Skill 1–100 each; ranks Novice 1 / Apprentice 15 / Journeyman 30 / Adept 50 / Expert 70 / Master 90. `angling` and `cooking` are known from
+the start (they already work); the other eight are LEARNED from a trainer (free). Tiers 1–5 need skill 1 / 25 / 50 / 75 / 90.
+
+### What the client is told about you
+`joined.you.professions` and, after any change, `you {professions}`:
+`{ list: [{ id, name, kind: 'gather'|'make', known, level, xp, next (xp for the next level, null at 100), rank, max: 100, tool: {id, name, tier}|null }] }` — ten rows, always
+in the order above. `sheet.professions` carries the same object (Character menu block). Spent nodes: the existing `you.opened` list holds `node:<id>` keys.
+
+### Nodes (what P-client draws) — PER PLAYER, never contested
+Room objects: `info { kind:'object', type:'node', name, key:'node:<id>', r (reach, m), node: { prof, kind, tier, minSkill, look } }`.
+`look = { model, size (metres tall), tint ('#hex' of the ore / leaf / cap), n (how many chunks / fruits), v (0–3 variant) }` with `model` one of
+`boulder` (mining: a player-sized rock, 1.5–2.1 m, `n` ore chunks of colour `tint` sticking out), `tree` (logging: a marked tree — a painted band + an axe notch, `tint` =
+band colour), `herb` (a knee-high patch, `tint` = flower), `mushroom` (a ring of caps), `fibre` (reeds / flax stand). The same node entity serves everyone: it is **spent
+for you** while `key` is in `you.opened` (join) or after your own `gatherDone {reopenMs}` — draw it bare (boulder without ore, tree with the band crossed, patch picked) and
+do not offer the prompt. Why per player: nobody can take the copper in front of a newcomer, the first quest can never be blocked, and a static object costs nothing on the wire.
+**Skinning** has no node: when a beast you have kill credit on dies and you know skinning, you get `skinnable { id (the corpse's entity id), on: true, tier, minSkill, name }`
+(and `{id, on:false}` when you skinned it or it is gone). Prompt on the corpse: "Skin" (after or before looting — they do not block each other).
+
+### Messages (province socket; all in js/net/protocol.js, methods on js/net/client.js)
+- `net.prof('learn', {id, npc})` -> `profR {op, ok, id, why?, msg?, tool? (bag item handed over)}`; `net.prof('tool', {id, npc})` buys the basic tool again (gold) -> `profR`.
+- `net.gather('start', {id})` (`id` = node entity or corpse entity; or no `id`: the nearest node in reach you can work) -> `gatherR {ok, state:'play', id, prof, node:{kind,tier,name}, game}` or `{ok:false, state:'idle', why, msg, need?}` (`why`: far | spent | skill | tool | unknown | combat | dead | swim | bagFull | busy | notLearned).
+- `net.gather('done', {id, inputs})` -> `gatherDone {ok, id, prof, quality, score, marks, items (bag items added), xp, skill:{level,xp,next,up?}, key, reopenMs, msg}`. `quality` = `fail|poor|good|fine|perfect`. A FAIL gives nothing and does NOT spend the node (try again at once).
+- `net.gather('stop')` -> `gatherR {ok:true, state:'idle', why}`. A step of more than 2 m, a hit, swimming, dying or leaving the room also stop it (`gatherR {state:'idle', why}`).
+- `net.craft('list', {npc?})` -> `craftList {ok, station: {kinds:[prof ids], name, fire?}|null, level:{<prof>: n}, recipes:[row]}`; row = `{ id, prof, tier, skill, name, desc, kind: 'material'|'good'|'potion'|'tool'|'gear'|'temper', can, why?, needs:[{id,name,n,have}], gold, makes:{id,name,n,text}|null, bases?:[{key,name,slot,from,can}], level? (item level a gear row gives YOU now), game (mini-game type) }`. With no station in reach the list still comes (can:false, why "You need a forge…"), so a journal can show recipes anywhere.
+- `net.craft('start', {id, base?, uid?, index?, element?})` -> `craftR {ok, state:'play', id, game, cost}` or a refusal. `base` = which base of a gear row (default: the first you can use); `uid` = the BAG item a tempering row works on (unequip it first); `index` = which property (`temper_reweave`); `element` (`temper_brand`).
+- `net.craft('done', {id, inputs})` -> `craftDone {ok, id, prof, quality, score, marks, items, item? (the tempered item as it is now), xp, skill, msg}` then a fresh `craftList`. Materials and gold are taken at `done` (a `stop` or a walk-away costs nothing).
+- `net.craft('quote', {id, uid, index?, element?})` -> `craftQuote {ok, id, uid, can, why?, needs, gold, text (what it will do, with the numbers)}` — for the tempering window.
+- Everyone near: `ev fx {kind:'gather', id (player), phase:'start'|'done'|'fail'|'end', prof, node?, x, z, quality?}` and `fx {kind:'craft', id, phase, prof, at (station entity), quality?}`; the worker's `info.working = { prof, anim, node?|at? }` for a late arrival. Anim loops (APPENDED to ANIMS): `mine` `chop` `gather` `skin` `craft`.
+- An NPC's `used` reply gains `prof: { trains:[ids], stations:[ids] }` when its role teaches or is a station (table `roles` in data/rules/professions.json: smith -> mining, smithing, tempering; armourer -> smithing, tempering; bowyer -> logging, outfitting; tailor -> outfitting, skinning; apothecary -> foraging, alchemy; innkeeper / provisioner -> cooking; jeweller -> tempering; stablehand -> skinning; the new `prospector` by Torborhold's gate -> mining). **A station = standing within 9 m of such an NPC** (their dressed building); cooking also at any campfire / hearth (the `cook: true` things). P-client may stand a forge / workbench / still prop by `info.office` — it needs no entity.
+- Using a gathering TOOL from the bag or a hotbar (`item use`) = `gather start` on the nearest node of its profession (phone / controller friendly).
+
+### The mini-games — the server seeds the pattern, the client reports RAW INPUT TIMES, the server scores
+`game = { type, seed, ms (the whole game's time limit), steps, …pattern }` comes in `gatherR` / `craftR`. The client draws it from the pattern alone and sends
+`inputs` = a flat number list `[t0, v0, t1, v1, …]` (max 32 pairs): `t` = ms since the game appeared, `v` = the input's value (0 when unused). The server recomputes
+every mark with `scoreGame(game, inputs)` (js/rules/professions-games.js — P-client imports the same function to show marks live; it is pure). Cheat checks: `t` strictly
+rising and `<= ms`; `done` may not arrive before the last `t` could have been played (server clock, 350 ms grace) nor later than `ms + 4 s`; presses closer than 90 ms are
+dropped; a made-up score is impossible because no score is sent. Marks per step: 2 perfect / 1 good / 0 miss; `score` = sum / (2 x steps); quality: >= 0.9 perfect, >= 0.65 fine, >= 0.4 good, >= 0.2 poor, else fail.
+| prof | `type` | pattern fields | input | mark |
+|---|---|---|---|---|
+| mining | `strike` | `period` (ms per sweep), `phase`, `spots:[c…]` (one sweet-spot centre 0–1 per strike), `half`, `perfect` | `[t,0]` a strike; the marker is `tri(t/period+phase)` (0→1→0), the spot moves after each strike | within `perfect` of the spot = 2, within `half` = 1 |
+| logging | `rhythm` | `lead`, `beat` (ms), `first` (0 left / 1 right), `good`, `perfect` | `[t, side]`; beat k is at `lead + k*beat`, side `(first+k)%2` | off the beat by <= `perfect` ms = 2, <= `good` = 1; wrong side = 0 |
+| foraging | `pick` | `spots` (how many places), `ripe:[{i, from, to}]` | `[t, i]` pick place i | in its window = 1, in the middle 60% = 2; a pick of anything not ripe costs 1 |
+| skinning | `trace` | `a:[..]`, `f:[..]`, `p:[..]`, `band`, `perfect` | `[t, y]` one sample per `ms/steps`; the line is `y(u)=0.5+Σ a·sin(2π(f·u+p))`, `u=t/ms` | `|y-y(u)|` <= `perfect` = 2, <= `band` = 1 |
+| smithing | `forge` | `cool` (heat lost per ms from 1), `band:[lo,hi]`, `sweet`, `reheat` (ms pause, then heat = 1), `gap` | `[t,0]` hammer, `[t,1]` re-heat | heat in the band = 1, within `sweet` of its middle = 2; too hot / too cold = 0 and the blow is spent |
+| outfitting | `stitch` | `at:[t…]` (when each hole passes the needle), `good`, `perfect` | `[t,0]` | as rhythm, no sides |
+| alchemy, cooking | `pour` | `stages:[{rate, accel, mark, good, perfect}]`, `pause` | `[t,0]` stops the stage; level = `rate·τ + accel·τ²`, `τ` = ms since the stage began (stage 2 begins `pause` ms after stop 1) | `|level-mark|` <= `perfect` = 2, <= `good` = 1; past 1.0 = spilled |
+| tempering | `gauge` | `rise`, `pow`, `centre`, `half0`, `half1`, `perfect` | `[t,0]` once; gauge = `(t/rise)^pow`, the band's half-width shrinks `half0`→`half1` over `rise` | in the band = 1, within `perfect`×half = 2; over or under = miss: materials are spent, **the item is never harmed** |
+Higher skill than the work needs, and a better tool, widen `half` / `good` / `band` (up to +50%). Mouse, keyboard, touch, gamepad: ONE action "work" (default the interact key) + left/right (logging sides, forge re-heat on the second button) + a pointer for `pick` / `trace` — P-client adds them to js/client/input/bindings.js.
+
+### Items
+- Material: `{ kind:'material', id, name, desc, tier, prof, icon ('ore'|'bar'|'gem'|'log'|'resin'|'herb'|'mushroom'|'fibre'|'cloth'|'hide'|'leather'|'meat'|'trophy'), tint, rarity, price, value, count, stackMax: 50 }` — stacks, sells at `price` each to any merchant, tradeable, mailable.
+- Tool: `{ kind:'good', tool:true, id, name, desc, use:{ type:'tool', prof, tier, ease, extra } }` — never stacks, takes no slot (like the rod); the best one in the bag is used.
+- Crafted gear: the rules' own item (C's `rules.makeItem`) + `crafted: true`, `maker` (the character's name). Its level is never above the tier's cap nor above your level − 1; rarity normal / magic / rare by skill and mini-game quality — never legendary.
+- Potions, meals, tonics: ordinary `potion` / `good` items the existing code already drinks and eats.
+
+### Hooks I add in other streams' files (each ONE additive line or block, marked `// W9 (P-core)`)
+- **A** `js/sim/province.js`: create (`createProfessions`), dispatch `prof` / `gather` / `craft`, `professions.tick()`, `you.professions` in `joined`, `sheet.professions`, `...professions.npcExtra(o, obj)` in the NPC `used` reply, `professions.useItem` before the consumable code, `professions.onKill(r, d, creditOf(r, d, ev))` beside `questKill`, `professions.onEvent(o, ev)` in `questEvent` (cooking XP for the old `cook`), stop on leave. `js/sim/room.js`: the idle loop keeps `e.working.anim`. `js/sim/entity.js`: `info.node`, `info.working`. `js/sim/save-fields.js`: `professions`. `js/sim/consumables.js`: `kind:'material'` stacks. `js/sim/shops.js`: a material sells at its own `price`. `js/sim/content.js`: loads my three data files into `L.professions` and appends my job frames. `js/sim/quests.js`: step kinds `gather {prof?, mat?}`, `craft {prof?, recipe?}`, `learn {prof}`; job goals `gather` / `craft`; JOB_ROLES + smith, apothecary, tailor, bowyer, prospector.
+- **A** `js/net/protocol.js`: CLIENT_MSGS `prof`, `gather`, `craft`; SERVER_MSGS; ANIMS + 5; `js/net/client.js`: `net.prof`, `net.gather`, `net.craft`.
+- **E** `data/quests/test.json`: `include` + `"professions.json"`. `tools/sim-economy.mjs`: E's own `extraRows` hook imports `tools/sim-professions.mjs` — it exports `async function extraRows({ levels, questHour })` -> `[{ activity, level, goldPerHour, note }]` (and runs alone: `node tools/sim-professions.mjs`).
+- **C**: nothing needed. I use `rules.makeItem(e, {base, rarity, level})` as it is, `rulesEngine()` (dynamic import) for tempering's quality / affix work, and `canConvert` / `convertWeapon` (tv-gear.js) for the brand. Crafted backpacks use your `sling_satchel` / `trail_rucksack` / `expedition_pack`.
+- **D-UI**: map filter ids for trainers / stations: the NPC roles above (+ `prospector`).
+
+_Status: contract written 2026-10-07; nothing landed yet. (Updated below as it lands.)_

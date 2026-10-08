@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream C (owner feedback 7, V2: 'overhaul the gold rewards and item pricing'). The gold FORMULAS the rules own; js/rules/economy.js reads every number from here and tools/sim-economy.mjs (stream E) measures the result. `gear`: an item's list price = (base + perLevel x the level it was made at) x slot x rarity x extras; a merchant pays `sellFactor` of that. `kill`: what a monster pays = (base + perLevel x level) x its own weight (its Farhold `gold` / goldRef, clamped to weight[0..1]) x rank. `goldFind`: the stat multiplies KILL gold only, once, capped. Before this file a kill's gold grew exponentially with level (a level-20 brigand paid 163 gold while the average level-20 drop was priced 65), an item's price ignored its level and its slot, and quests paid less than two kills.",
+  "_doc": "Stream C (owner feedback 7, V2: 'overhaul the gold rewards and item pricing'). The gold FORMULAS the rules own; js/rules/economy.js reads every number from here and tools/sim-economy.mjs (stream E) measures the result. `gear`: an item's list price = (base + perLevel x the level it was made at) x slot x rarity x extras; a merchant pays `sellFactor` of that. `kill`: what a monster pays = (base + perLevel x level) x its own weight (its Farhold `gold` / goldRef, clamped to weight[0..1]) x rank. `goldFind`: the stat multiplies KILL gold only, once, capped. Before this file a kill's gold grew exponentially with level (a level-20 brigand paid 163 gold while the average level-20 drop was priced 65), an item's price ignored its level and its slot, and quests paid less than two kills. Owner feedback 8 (W19): a backpack's price is multiplied by 1 + bagSlot x its bag slots.",
   "gear": {
     "base": 45,
     "perLevel": 144,
@@ -17,8 +17,7 @@
       "ring2": 1.0,
       "necklace": 1.1,
       "back": 0.8,
-      "waist": 0.7,
-      "light": 0.6
+      "waist": 0.7
     },
     "rarity": {
       "normal": 1,
@@ -29,7 +28,8 @@
     "unique": 1.5,
     "set": 1.25,
     "tier2": 1.1,
-    "sellFactor": 0.012
+    "sellFactor": 0.012,
+    "bagSlot": 0.15
   },
   "kill": {
     "base": 4,

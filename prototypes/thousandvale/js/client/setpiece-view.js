@@ -235,7 +235,7 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
   if (!relevant.length && !vignettes.length) return null;
   const budget = createBudget(5);
   // planned a few records at a time (P1: a whole zone at once was ~80 ms of solid work on the test VM)
-  const plan = { parts: [], glass: [], spin: [], fires: [], lights: [], buildings: [], solids: [], props: [] };
+  const plan = { parts: [], glass: [], spin: [], fires: [], lights: [], buildings: [], solids: [], props: [], cropFields: [] };
   const opts = { recipes: byId, models, ox: T.ox || 0, oz: T.oz || 0 };
   const merge = p => { for (const k of Object.keys(plan)) for (const v of p[k]) plan[k].push(v); };
   for (let i = 0; i < relevant.length; i += 6) { merge(planSetPieces({ placements: relevant.slice(i, i + 6) }, opts)); await budget.slice(); }
@@ -275,7 +275,9 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
   // far away costs nothing (all the fields of a zone in one mesh were always drawn — 700,000 triangles round Torborhold,
   // which stalled the software renderer the specs run on and would do the same to a phone)
   const byField = new Map();
-  for (const q of plan.parts) { if (q.mesh === 'sheaf' && q.fid) { if (!byField.has(q.fid)) byField.set(q.fid, []); byField.get(q.fid).push({ q, g: groundOf(q.x, q.z) }); } else (byMesh[q.mesh] || byMesh.box).push({ q, g: groundOf(q.x, q.z) }); }
+  byMesh.sheaf = [];                                           // (a stalk patch with no field record: drawn with the zone)
+  const fieldIds = new Set((plan.cropFields || []).map(f => f.fid));
+  for (const q of plan.parts) { if (q.mesh === 'sheaf' && q.fid && fieldIds.has(q.fid)) { if (!byField.has(q.fid)) byField.set(q.fid, []); byField.get(q.fid).push({ q, g: groundOf(q.x, q.z) }); } else (byMesh[q.mesh] || byMesh.box).push({ q, g: groundOf(q.x, q.z) }); }
   const crops = [];
   for (const f of plan.cropFields || []) {
     const list = byField.get(f.fid); if (!list?.length) continue;
@@ -294,8 +296,8 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
   await budget.slice();
   for (const [kind, list] of Object.entries(byMesh)) {
     if (!list.length) continue;
-    const sheaf = false;
-    const m = new THREE.InstancedMesh(unitGeometry(kind), kitMat, list.length);
+    const sheaf = kind === 'sheaf';
+    const m = new THREE.InstancedMesh(sheaf ? sheafGeo() : unitGeometry(kind), sheaf ? cropMaterial() : kitMat, list.length);
     for (let i = 0; i < list.length; i++) {
       const { q, g } = list[i];
       _e.set(q.rx || 0, q.yaw || 0, q.rz || 0, 'YXZ'); _q.setFromEuler(_e);

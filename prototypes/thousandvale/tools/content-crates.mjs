@@ -7,7 +7,7 @@
 //
 // A quest reward carries `crates: [ { slot, min } ]` (docs/requests.md "Round 5 contracts — E"):
 //   slot  weapon | offhand (both: something YOUR class can use) | head | chest | legs | hands | feet | ring | neck |
-//         back (a cloak) | waist (a belt) | light (a worn lantern or torch) |
+//         back (a cloak) | waist (a belt) | (no `light` crate: W22 removed light items) |
 //         armor (any armour slot) | any
 //   min   common | uncommon | rare | epic — the lowest rarity the crate opens into
 // The old random `reward.item {tier, slot}` on these quests is REPLACED by a crate (same or better rarity, and a named

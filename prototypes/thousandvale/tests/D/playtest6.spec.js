@@ -119,9 +119,14 @@ test('U16 + U18: a druid\'s shape is a creature body under the same name plate â
   await shot('u16-1-briarback-boar.png');
   // it walks and strikes as the creature
   const p = await page.evaluate(() => tv.state().you);
-  await page.evaluate(([x, z]) => tv.walkTo(x, z), [p.x + 9, p.z + 2]);
-  await page.waitForTimeout(2500);
-  const walking = await st(); expect(['walk', 'run']).toContain(walking.clip);
+  // (a wall or a stall may be in the way of any one line: try a few, and take the first on which it is seen walking)
+  let walking = null;
+  for (const [dx, dz] of [[9, 2], [-9, 3], [2, 9], [3, -9]]) {
+    await page.evaluate(([x, z]) => tv.walkTo(x, z), [p.x + dx, p.z + dz]);
+    for (let i = 0; i < 6 && !walking; i++) { await page.waitForTimeout(500); const s = await st(); if (['walk', 'run'].includes(s.clip)) walking = s; }
+    if (walking) break;
+  }
+  expect(walking, 'the shape walks with the creature\'s own gait').not.toBeNull();
   await shot('u16-2-briarback-walking.png');
   await page.evaluate(() => tv.stop());
   await page.waitForTimeout(1500);

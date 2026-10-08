@@ -366,7 +366,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
 
   function remove(id) {
     const a = actors.get(id); if (!a) return;
-    dropMount(a); dropShape(a, true); a.torchLight?.remove(); a.torchLight = null; scene.remove(a.group); a.body?.dispose?.(); a.plate?.root.remove();
+    dropMount(a); dropShape(a, true); scene.remove(a.group); a.body?.dispose?.(); a.plate?.root.remove();
     if (a.ripples) for (const r of a.ripples) { scene.remove(r); r.material.dispose(); }
     a.group.clear();           // detaches any spell aura riding the body (SpellFx drops an aura whose group has no parent)
     actors.delete(id);

@@ -104,7 +104,7 @@ export function temperCheck(P, engine, op, item, { index = 0, element = null, sk
 }
 
 /** A property the item does not carry yet, rolled by the engine's own item maker for the item's level (or null). */
-function freshAffix(engine, item, rng) {
+export function freshAffix(engine, item, rng) {
   const base = item.catalogBase || item.baseKey;
   const have = new Set((item.affixes || []).map(a => a.id));
   for (let tries = 0; tries < 6; tries++) {

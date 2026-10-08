@@ -17,15 +17,15 @@
     "ranks": [[1, "Novice"], [15, "Apprentice"], [30, "Journeyman"], [50, "Adept"], [70, "Expert"], [90, "Master"]]
   },
   "tiers": [
-    { "tier": 1, "minSkill": 1, "levels": [1, 10], "unit": 2, "rarity": "normal" },
-    { "tier": 2, "minSkill": 25, "levels": [8, 20], "unit": 7, "rarity": "normal" },
-    { "tier": 3, "minSkill": 50, "levels": [18, 30], "unit": 13, "rarity": "magic" },
-    { "tier": 4, "minSkill": 75, "levels": [28, 40], "unit": 26, "rarity": "magic" },
-    { "tier": 5, "minSkill": 90, "levels": [38, 50], "unit": 45, "rarity": "rare" }
+    { "tier": 1, "minSkill": 1, "levels": [1, 10], "rarity": "normal" },
+    { "tier": 2, "minSkill": 25, "levels": [8, 20], "rarity": "normal" },
+    { "tier": 3, "minSkill": 50, "levels": [18, 30], "rarity": "magic" },
+    { "tier": 4, "minSkill": 75, "levels": [28, 40], "rarity": "magic" },
+    { "tier": 5, "minSkill": 90, "levels": [38, 50], "rarity": "rare" }
   ],
   "quality": {
     "min": { "poor": 0.2, "good": 0.4, "fine": 0.65, "perfect": 0.9 },
-    "yield": { "fail": 0, "poor": 1, "good": 2, "fine": 3, "perfect": 3 },
+    "yield": { "fail": 0, "poor": 1, "good": 2, "fine": 2, "perfect": 3 },
     "bonusChance": { "fail": 0, "poor": 0, "good": 0.05, "fine": 0.2, "perfect": 0.65 },
     "xp": { "fail": 0.1, "poor": 0.5, "good": 1, "fine": 1.25, "perfect": 1.5 },
     "name": { "fail": "Botched", "poor": "Rough", "good": "Sound", "fine": "Fine", "perfect": "Perfect" }
@@ -80,7 +80,7 @@
     "_doc": "tempering works on a gear item in your BAG. cost: `mat` = how many of the item's own tier material (bar for metal, leather, cloth, wood by what the item is), plus the listed extras; gold = share of the item's list price. Skill needed = the item tier's minSkill + `skill`. A miss spends the materials and gold fee; the item is untouched.",
     "qualities": ["low", "medium", "high", "elite", "exotic"],
     "ops": {
-      "temper_quality": { "name": "Temper", "skill": 0, "mat": 2, "extra": [["resin", 1]], "goldShare": 0.04, "maxQualityBySkill": [[1, "medium"], [25, "high"], [60, "elite"], [90, "exotic"]], "text": "Raises the item's quality one step. Its damage or armour and every rolled property grow with it." },
+      "temper_quality": { "name": "Temper", "skill": 0, "mat": 2, "extra": [], "goldShare": 0.04, "maxQualityBySkill": [[1, "medium"], [25, "high"], [60, "elite"], [90, "exotic"]], "text": "Raises the item's quality one step. Its damage or armour and every rolled property grow with it." },
       "temper_promote": { "name": "Promote", "skill": 10, "mat": 3, "extra": [["gem", 1]], "goldShare": 0.1, "to": { "normal": "magic", "magic": "rare" }, "text": "Raises the item's rarity one step (plain to uncommon, uncommon to rare) and adds one new property. Never above rare." },
       "temper_reweave": { "name": "Reweave", "skill": 15, "mat": 2, "extra": [["gem", 1]], "goldShare": 0.06, "text": "Replaces the one property you choose with a different one, rolled for the item's level." },
       "temper_brand": { "name": "Brand", "skill": 20, "mat": 2, "extra": [["gem", 2], ["resin", 1]], "goldShare": 0.08, "value": [0.05, 0.1], "elements": ["fire", "ice", "lightning", "poison", "shadow", "holy", "arcane"], "text": "Turns a share of a weapon's damage into an element of your choice. One brand per weapon." }

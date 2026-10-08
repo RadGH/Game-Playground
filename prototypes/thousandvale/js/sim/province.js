@@ -48,6 +48,7 @@ import { isCrate, crateItem, openCrate } from './crates.js';
 import { createSystemMail } from './sysmail.js';
 import { createFeedback, NUDGE } from './feedback.js';
 import { createAngling } from './angling.js';
+import { createProfessions } from './professions.js';      // W9 (P-core)
 import { configureEconomy, economy, chestGold, treasureGold, eventGold, travelFare as fareOf, cartFare } from './economy-knobs.js';
 import { mountRefusal, mountSpeedMul, dismounts, MOUNT_RULES } from '../rules/mount.js';   // stream C's riding rules (when, how fast, what throws you)
 
@@ -451,6 +452,10 @@ export function createProvince(opts) {
       case 'admin': return adminOp(o, m);
       case 'fish': { const why = angling.fish(o, m); if (typeof why === 'string') bad(s, why); return; }
       case 'cook': { const why = angling.cook(o, m); if (typeof why === 'string') bad(s, why); return; }
+      // W9 (P-core): professions — learn, gather, make (js/sim/professions.js)
+      case 'prof': { const why = professions.prof(o, m); if (typeof why === 'string') bad(s, why); return; }
+      case 'gather': { const why = professions.gather(o, m); if (typeof why === 'string') bad(s, why); return; }
+      case 'craft': { const why = professions.craft(o, m); if (typeof why === 'string') bad(s, why); return; }
       default: return bad(s, 'socket');
     }
   }
@@ -602,7 +607,7 @@ export function createProvince(opts) {
         // play-test 2
         reach: attackReach(o), attackRange: attackReach(o), mounts: mountBook.owned(ch), mount: o.mount || null, speedMul: e.speedMul || 1, prefs: prefsOf(ch), look: ch.look || null, clsName: clsNameOf(ch.cls),
         // play-test 5
-        bagMax: bagCap(o), bagBase: bagBase(), angling: angling.view(ch), acct: acctOf(o), ...(rules.LIGHT && rules.LIGHT.radius ? { lightRange: rules.LIGHT.radius, light: rules.LIGHT } : {}), ...(o.admin ? { admin: true } : {}), ...(ch.kit ? { kit: ch.kit } : {}), ...(o.eventAtKey ? { eventAt: o.eventAtKey } : {}),
+        bagMax: bagCap(o), bagBase: bagBase(), angling: angling.view(ch), professions: professions.view(ch) /* W9 (P-core) */, acct: acctOf(o), ...(rules.LIGHT && rules.LIGHT.radius ? { lightRange: rules.LIGHT.radius, light: rules.LIGHT } : {}), ...(o.admin ? { admin: true } : {}), ...(ch.kit ? { kit: ch.kit } : {}), ...(o.eventAtKey ? { eventAt: o.eventAtKey } : {}),
       },
     };
     // the skill bar only changes on a level-up / form / talent (those arrive as `you {bar}` and refresh o.bar): a room
@@ -645,6 +650,7 @@ export function createProvince(opts) {
       return;
     }
     if (o.fishing) angling.stop(o, 'left');
+    if (o.work) professions.stop(o, 'left');             // W9 (P-core)
     if (o.reviveAsk) endReviveAsk(o, 'gone');
     syncChar(o);
     const carry = old.r;
@@ -795,7 +801,7 @@ export function createProvince(opts) {
     if (d.chest) return openChest(o, obj);
     if (d.note) return s.sendJSON({ t: 'used', id, ok: true, kind: 'note', name: obj.name, text: d.note.text, quest: d.note.quest || undefined, ...questOffer(o, obj) });
     if (d.npc) return s.sendJSON({ t: 'used', id, ok: true, kind: 'npc', ...(road ? { road } : {}), ...(d.wanderer ? { wanderer: d.wanderer } : {}), name: obj.name, says: d.npc.says, quest: d.npc.quest || undefined, role: d.npc.role || undefined,
-      ...(shops.kindOf(obj) ? { shop: true, shopKind: shops.kindOf(obj) } : {}), ...(d.npc.role === 'barber' ? { barber: true, free: !(o.char.flags && o.char.flags.barberUsed) } : {}), ...(d.npc.role === 'unbinder' ? { unbinder: true, unbind: unbinderOffer(o) } : {}), ...(d.npc.role === 'innkeeper' && o.room.kind === 'town' ? { bind: true, bound: o.char.bind === o.room.id } : {}), ...(angling.isFire(obj) ? { cook: true } : {}), ...angling.npcExtra(o, obj),
+      ...(shops.kindOf(obj) ? { shop: true, shopKind: shops.kindOf(obj) } : {}), ...(d.npc.role === 'barber' ? { barber: true, free: !(o.char.flags && o.char.flags.barberUsed) } : {}), ...(d.npc.role === 'unbinder' ? { unbinder: true, unbind: unbinderOffer(o) } : {}), ...(d.npc.role === 'innkeeper' && o.room.kind === 'town' ? { bind: true, bound: o.char.bind === o.room.id } : {}), ...(angling.isFire(obj) ? { cook: true } : {}), ...angling.npcExtra(o, obj), ...professions.npcExtra(o, obj) /* W9 (P-core) */,
       ...(d.npc.service ? { service: d.npc.service } : {}), ...questOffer(o, obj) });
     if (d.use) return useThing(o, obj);
     if (d.trace) return s.sendJSON({ t: 'used', id, ok: true, kind: d.trace.kind, ...d.trace, ...(d.trace.kind === 'campfire' ? { cook: true } : {}) });   // T25: a fire to cook at
@@ -1464,7 +1470,7 @@ export function createProvince(opts) {
     if (ev.type === 'die') {
       const d = r.entities.get(ev.d);
       if (!d) return;
-      if (d.kind === 'monster') questKill(r, d, ev);
+      if (d.kind === 'monster') { questKill(r, d, ev); professions.onKill(r, d, creditOf(r, d, ev)); }      // W9 (P-core): a beast to skin
       attackers.delete(r.id + ':' + d.id);
       const pv = provOf(r);
       if (d.kind === 'player') {
@@ -1582,6 +1588,7 @@ export function createProvince(opts) {
       discoverNear(o, pv, z);
       waystonesNear(o, pv);
       angling.ensurePools(o.room);                 // T25: a copy's fish pools open when someone is first in it
+      professions.ensureNodes(o.room);             // W9 (P-core): a room's gathering nodes and trainers
       bossNear(o, bossMemo);
       if (pv.book.wantsPosition(o.char)) questEvent(o, { kind: 'visit', x: o.entity.x, z: o.entity.z });
     }
@@ -1716,6 +1723,7 @@ export function createProvince(opts) {
       list.push({ ...ev, at: t });
       while (list.length > RECENT_Q_MAX || (list.length && t - list[0].at > RECENT_Q_MS)) list.shift();
     }
+    professions.onEvent(o, ev);                 // W9 (P-core): the old `cook` teaches cooking
     const b = bookOf(o);
     const moved = b.progress(o.char, ev);
     if (moved.length) {
@@ -2256,6 +2264,7 @@ export function createProvince(opts) {
     const item = ch.bag[idx];
     if (isCrate(item)) return openCrateOp(o, idx, R);         // T9 / T20: a crate or a gift box
     if (angling.useItem(o, item, idx, R)) return;             // T25: a rod casts, bait goes on the hook
+    if (professions.useItem(o, item, idx, R)) return;         // W9 (P-core): a gathering tool works the nearest node
     const ef = effectOf(item);
     if (!ef) return R({ ok: false, why: 'item', id: item.id, msg: 'You cannot use that.' });
     if (ef.kind === 'none') return R({ ok: false, why: 'notYet', id: item.id, msg: (item.name || 'That') + ' does nothing yet. Keep it — it will.' });
@@ -2924,6 +2933,12 @@ export function createProvince(opts) {
   /** The ONE mail API (js/sim/sysmail.js): `mailTo({ to, subject, body, items?, gold?, gift?, crate? })` — events, quests, anything. */
   const sysmail = createSystemMail({ store, newUid, wallNow, notify: c => send({ k: 'mailed', to: c }), log, counters });
   const feedback = createFeedback({ store, wallNow, sink: opts.feedbackSink || null, sysmail, log, counters, filter: chatFilter, opts: opts.feedbackOpts || {} });
+  // W9 (P-core) — professions (js/sim/professions.js over js/rules/professions*.js and data/provinces/professions*.json)
+  const professions = createProfessions({ layouts, online, provOf: r => provOf(r), grant: (o, a) => grant(o, a), journal: (o, k, p) => journal(o, k, p), questEvent: (o, ev) => questEvent(o, ev),
+    now, wallNow, log, counters, fighting: (o, e) => fighting(o, e), dismount: (o, why) => dismount(o, why), endMeal: (o, why) => endMeal(o, why), stopFishing: (o, why) => angling.stop(o, why),
+    wantSheet: o => wantSheet(o), bagCap: o => bagCap(o), isFire: obj => angling.isFire(obj), anglingView: ch => angling.view(ch), tradeHolds: (c, uid) => trades.offered(c, uid),
+    spend: (o, gold, reason) => { o.char.gold -= gold; journal(o, 'gold', { d: -gold }); econ.add('sink', reason || 'craft', { gold }, o.char.level || 1); if (o.conn) o.conn.sendJSON({ t: 'bag', add: [], remove: [], gold: o.char.gold }); o.dirty = true; },
+    potionText: (it, o) => potionText(it, { hpMax: o.entity.hpMax, mpMax: o.entity.mpMax }, potionTable), opts: opts.professionOpts || {} });
   // T25 — angling (js/sim/angling.js over C's js/rules/fishing.js and E's data/provinces/angling*.json)
   const angling = createAngling({ layouts, online, provOf: r => provOf(r), grant: (o, a) => grant(o, a), journal: (o, k, p) => journal(o, k, p), questEvent: (o, ev) => questEvent(o, ev),
     consume: (o, i) => consume(o, i), now, wallNow, log, counters, safeRules: (r, fn, ...a) => safeRules(r, fn, ...a), dayPhase: () => dayPhase(), fighting: (o, e) => fighting(o, e),
@@ -3178,7 +3193,7 @@ export function createProvince(opts) {
       const advanced = Object.entries(d).filter(([, v]) => typeof v === 'number' && Number.isFinite(v)).slice(0, 60).map(([k, v]) => row(k, k.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()), Math.round(v * 1000) / 1000));
       sh = { basic: true, core, advanced, abilities: [] };
     }
-    return { ...sh, gold: ch.gold || 0, bag: (ch.bag || []).length, bagMax: bagCap(o), bagBase: bagBase(), angling: angling.view(ch) };
+    return { ...sh, gold: ch.gold || 0, bag: (ch.bag || []).length, bagMax: bagCap(o), bagBase: bagBase(), angling: angling.view(ch), professions: professions.view(ch) /* W9 (P-core) */ };
   }
   function drainSheets(t0) {
     let n = 0;
@@ -3260,6 +3275,7 @@ export function createProvince(opts) {
     if (ticks % 4 === 3) roadEvents.move(TICK_MS * 4);
     if (ticks % 20 === 11) { foodTick(); mountSpeedTick(); reviveSweep(); }
     angling.tick();
+    professions.tick(); if (ticks % 20 === 15) professions.sweep();      // W9 (P-core)
     for (const o of online.values()) if (o.mountCast) mountCastTick(o);
     if (ticks % 4 === 1) npcTick(TICK_MS * 4);
     roadsTick();
@@ -3413,7 +3429,7 @@ export function createProvince(opts) {
     accept, step, init, shutdown, status, rooms, P, online, partyOf, econ, tickStats, owner, counters, trades,
     room: copies[0], townRoom, copies, instances, town, door, gate,
     saveNow, logout, transfer, moveTo, grant, corpses, roadEvents, mute, flushEconomy, newUid, flushJournal, timeOfDay, devSetLevel,
-    carts, shops, meterOn, bagCap, isNewcomer, NEWCOMER, realmEvents, liveEventNow: () => liveEvent, mailTo: a => sysmail.mailTo(a), offerRevive, angling, feedback, zoneRuns, kitCache, sheetOf, restack,
+    carts, shops, meterOn, bagCap, isNewcomer, NEWCOMER, realmEvents, liveEventNow: () => liveEvent, mailTo: a => sysmail.mailTo(a), offerRevive, angling, professions, feedback, zoneRuns, kitCache, sheetOf, restack,
     chatterContext: (r, x, z) => chatterContext(provOf(r), r, x, z),
     get liveEvent() { return liveEvent; },
   };

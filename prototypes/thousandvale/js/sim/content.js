@@ -143,7 +143,11 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
   const fishNumbers = await opt('data/rules/fishing.json');
   const angling = fishNumbers ? { numbers: fishNumbers, content: await opt('data/provinces/angling.json'), pools: await opt('data/provinces/angling-pools.json') } : null;
   // V2 (owner feedback 7): stream E's economy knobs (js/sim/economy-knobs.js reads them; an older `data/rules/economy.json` `server` block is read too)
-  const extra = { economy: (await opt('data/provinces/economy.json')) || (await opt('data/rules/economy.json')), angling, refunds: await opt('data/provinces/refunds.json'), wanderers: wd, treasure: await opt('data/provinces/road-events.json'), affixes: await opt('data/encounters/affixes.json'), spawnHints: await opt(`data/quests/marks/${provinceId}-hunts.json`),
+  // W9 (P-core): professions — the numbers, the content and where the nodes stand (js/sim/professions.js); its job frames join the board's
+  const profNumbers = await opt('data/rules/professions.json');
+  const professions = profNumbers ? { numbers: profNumbers, content: await opt('data/provinces/professions.json'), nodes: await opt('data/provinces/professions-nodes.json') } : null;
+  if (jobs && Array.isArray(jobs.frames) && professions && professions.content && Array.isArray(professions.content.jobs)) for (const f of professions.content.jobs) if (!jobs.frames.some(x => x.id === f.id)) jobs.frames.push(f);
+  const extra = { professions, economy: (await opt('data/provinces/economy.json')) || (await opt('data/rules/economy.json')), angling, refunds: await opt('data/provinces/refunds.json'), wanderers: wd, treasure: await opt('data/provinces/road-events.json'), affixes: await opt('data/encounters/affixes.json'), spawnHints: await opt(`data/quests/marks/${provinceId}-hunts.json`),
     titles: await opt('data/names/titles.json'), givers: await opt('data/quests/marks/givers.json'), carts: await opt('data/provinces/carts.json'), guards: await opt('data/provinces/guards.json'), names: await opt('data/names/torbor.json') };
   return { extra, travel, marks, key: provinceId, name: sheet ? sheet.name : provinceId, terrain, zones, encounterInfo, events, zoneEvents, directorRules: (evData && evData.director) || null, starter, starterProvince, rares, jobs, schedules, horizon, shops, mounts, offices };
 }

@@ -36,6 +36,7 @@ export const SAVE_FIELDS = Object.freeze([
   { k: 'kit', def: null },         // play-test 5 T5: the starter kit picked at creation { armour, weapons } (applied once, kitV 2)
   { k: 'played', def: 0 },         // owner feedback 8 W1: ms this character has been in the world (a newcomer = under level 3 or under 10 minutes)
   { k: 'angling', def: null },     // play-test 5 T25: { xp, level, casts, catches: { species: { n, best, zone, zones } }, legends: [], titles: [] }
+  { k: 'professions', def: null }, // W9 (P-core): { known: [ids], xp: { id: n }, made: { recipe: n }, tools: { prof: 1 } } (js/sim/professions.js)
   { k: 'jseq', col: 'journal_seq', def: 0 },   // last journal row this blob contains (js/sim/journal.js)
 ]);
 

@@ -67,7 +67,7 @@ export function createShops({ data = null, mounts = null, now = () => Date.now()
   }
   // T25 (play-test 5): a fish, junk, a trophy or a cooked meal sells for its OWN price (E's `price` = what a merchant pays;
   // C scales it by the fish's size) — never the gear formula. Junk is worth nothing (selling it just gets rid of it).
-  const ownPrice = item => item && (item.kind === 'fish' || item.kind === 'junk' || item.kind === 'trophy') && Number.isFinite(item.price);
+  const ownPrice = item => item && (item.kind === 'fish' || item.kind === 'junk' || item.kind === 'trophy' || item.kind === 'material' /* W9 (P-core) */) && Number.isFinite(item.price);
   const sellPrice = (item, rules) => (ownPrice(item) ? Math.max(0, Math.round(item.price * (item.kind === 'fish' ? ES.fishFactor : 1))) : item && (item.kind === 'crate' || item.kind === 'gift') ? ES.crateSell : rules && rules.sellPrice ? Math.max(1, +rules.sellPrice(item) || 1) : Math.max(1, Math.floor(price(item, rules) * pricing.sellFactor)));   // V2: what a merchant pays for gear is the rules' one function when it exists
   /** A goods-catalog item by id (E's quest `grant` / `reward.goods`: a rod, a tin of worms), or null. */
   const goodOf = id => (catalog[id] ? good({ id, source: 'good' }, null) : null);

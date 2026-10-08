@@ -1,0 +1,193 @@
+{
+  "_doc": "Stream P-core (round 8, W9 Professions) — MADE by tools/content-professions.mjs (the marks follow the bake); edit the text in the tool. The first meeting: Bram Delver, a prospector just inside Torborhold's main gate, teaches Mining the moment you speak to him (and hands over a pick); his chain walks you to the copper, the smith's forge and the tempering gauge. Step kinds gather / craft / learn are js/sim/quests.js (W9).",
+  "zone": "test",
+  "part": "professions",
+  "npcs": {
+    "prospector_torborhold": {
+      "name": "Bram Delver",
+      "role": "prospector",
+      "at": "Torborhold",
+      "greeting": "See the boulders with green in them, out past the gate? That is copper, and it is yours for the price of three good swings.",
+      "placedBy": "content-professions"
+    }
+  },
+  "quests": [
+    {
+      "id": "prof_three_good_swings",
+      "name": "Three Good Swings",
+      "level": 1,
+      "giver": "prospector_torborhold",
+      "offer": "New boots, clean hands. You want work that pays? That pick I just gave you is yours. Walk out of the gate and look for boulders with green lumps sticking out: copper. Three swings each. Hit when the marker crosses the bright spot, not before, not after.",
+      "steps": [
+        {
+          "kind": "gather",
+          "prof": "mining",
+          "count": 3,
+          "text": "Mine 3 pieces of ore",
+          "where": "the ore boulders by the road just outside Torborhold's gate",
+          "at": {
+            "x": 25046,
+            "z": 5410,
+            "r": 70,
+            "name": "the boulders outside the gate"
+          }
+        },
+        {
+          "kind": "talk",
+          "npc": "prospector_torborhold",
+          "text": "Show Bram what you dug out",
+          "where": "Bram Delver, just inside Torborhold's main gate",
+          "at": {
+            "x": 25116.5,
+            "z": 5381.5,
+            "r": 5,
+            "name": "Bram Delver"
+          }
+        }
+      ],
+      "done": "That is ore, that is. A clean strike sometimes shakes a stone loose too: sell those dear. The boulders fill again for you in a few minutes, and nobody else can empty yours.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 8,
+        "crates": [
+          {
+            "slot": "any",
+            "min": "uncommon"
+          }
+        ]
+      },
+      "rewardText": "The Prospector's Pick is yours to keep, with a crate from the last fellow who never came back for it.",
+      "next": "prof_bronze_not_copper"
+    },
+    {
+      "id": "prof_bronze_not_copper",
+      "name": "Bronze, Not Copper",
+      "level": 1,
+      "giver": "prospector_torborhold",
+      "requires": [
+        "prof_three_good_swings"
+      ],
+      "offer": "Copper alone bends like a spoon. Smelt it with tin and you have bronze. The grey boulders are tin. Take three of each to Garrow at the smithy, ask him to teach you Smithing, and use his fire: three bars, then hammer yourself a blade. Strike while the bar glows in the band. Too cold? Back in the fire.",
+      "steps": [
+        {
+          "kind": "learn",
+          "prof": "smithing",
+          "text": "Ask the smith to teach you Smithing",
+          "where": "the smithy in Torborhold",
+          "at": {
+            "x": 25160.7,
+            "z": 5378.5,
+            "r": 9,
+            "name": "Garrow Ashby"
+          }
+        },
+        {
+          "kind": "craft",
+          "recipe": "smelt_bronze_bar",
+          "count": 3,
+          "text": "Smelt 3 Bronze Bars at the forge (1 Copper Ore + 1 Tin Ore each)",
+          "where": "the smithy in Torborhold",
+          "at": {
+            "x": 25160.7,
+            "z": 5378.5,
+            "r": 9,
+            "name": "Garrow Ashby"
+          }
+        },
+        {
+          "kind": "craft",
+          "recipe": "blades",
+          "count": 1,
+          "text": "Forge a bronze blade (3 Bronze Bars)",
+          "where": "the smithy in Torborhold",
+          "at": {
+            "x": 25160.7,
+            "z": 5378.5,
+            "r": 9,
+            "name": "Garrow Ashby"
+          }
+        },
+        {
+          "kind": "talk",
+          "npc": "prospector_torborhold",
+          "text": "Show Bram your blade",
+          "where": "Bram Delver, just inside Torborhold's main gate",
+          "at": {
+            "x": 25116.5,
+            "z": 5381.5,
+            "r": 5,
+            "name": "Bram Delver"
+          }
+        }
+      ],
+      "done": "You made that? With those hands? Well. It will not win prizes, but it is yours, and the next one will be better: the steadier your hammer, the better the blade comes out.",
+      "reward": {
+        "xp": 0.5,
+        "gold": 14
+      },
+      "rewardText": "Coin for the ore you burned, and Bram's grudging respect.",
+      "next": "prof_an_edge_on_it"
+    },
+    {
+      "id": "prof_an_edge_on_it",
+      "name": "An Edge on It",
+      "level": 2,
+      "giver": "prospector_torborhold",
+      "requires": [
+        "prof_bronze_not_copper"
+      ],
+      "offer": "One more trick. A smith can TEMPER a thing you already own: better quality, a new property, never a ruined blade. Ask Garrow to teach you Tempering, put your new blade in your bag, and stop the gauge inside the band. It costs two bars and a little coin. Miss, and you lose the bars. Never the blade.",
+      "steps": [
+        {
+          "kind": "learn",
+          "prof": "tempering",
+          "text": "Ask the smith to teach you Tempering",
+          "where": "the smithy in Torborhold",
+          "at": {
+            "x": 25160.7,
+            "z": 5378.5,
+            "r": 9,
+            "name": "Garrow Ashby"
+          }
+        },
+        {
+          "kind": "craft",
+          "prof": "tempering",
+          "count": 1,
+          "text": "Temper any weapon or armour piece from your bag",
+          "where": "the smithy in Torborhold",
+          "at": {
+            "x": 25160.7,
+            "z": 5378.5,
+            "r": 9,
+            "name": "Garrow Ashby"
+          }
+        },
+        {
+          "kind": "talk",
+          "npc": "prospector_torborhold",
+          "text": "Tell Bram how it went",
+          "where": "Bram Delver, just inside Torborhold's main gate",
+          "at": {
+            "x": 25116.5,
+            "z": 5381.5,
+            "r": 5,
+            "name": "Bram Delver"
+          }
+        }
+      ],
+      "done": "There. Now you know the whole road: dig it, smelt it, forge it, temper it. The tailor, the bowyer and the apothecary teach the other trades, and every one of them pays.",
+      "reward": {
+        "xp": 0.5,
+        "gold": 18,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
+      },
+      "rewardText": "A crate with a weapon in it, to practise your tempering on."
+    }
+  ]
+}

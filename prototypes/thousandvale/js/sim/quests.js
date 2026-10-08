@@ -32,7 +32,8 @@ import { killGoldAt, questGold } from './economy-knobs.js';
 
 export const KILL_GOLD = level => killGoldAt(level);     // one kill's gold at a level (quest gold = reward.gold × this) — data/rules/economy.json server.quest (V2)
 export const NEAR_M = 150;                              // a step's `near` place: within this many metres
-const JOB_ROLES = new Set(['elder', 'sergeant', 'captain', 'quartermaster', 'tollkeeper', 'broker', 'innkeeper', 'angler']);   // angler: play-test 5 T25 (frames with giverRole 'angler')
+const OWN_FRAMES = new Set(['angler', 'smith', 'apothecary', 'tailor', 'bowyer', 'prospector']);   // W9 (P-core): these givers offer only frames written for their role
+const JOB_ROLES = new Set(['elder', 'sergeant', 'captain', 'quartermaster', 'tollkeeper', 'broker', 'innkeeper', 'angler', 'smith', 'apothecary', 'tailor', 'bowyer', 'prospector']);   // W9 (P-core): trade folk offer their own frames only (see jobsFor)   // angler: play-test 5 T25 (frames with giverRole 'angler')
 const RARITY_RANK = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4 };
 
 export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null, rng = Math.random, now = () => Date.now(), isNight = () => false, angling = null }) {
@@ -157,6 +158,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       case 'use': { const p = placeOf.get(st.vignette); return p ? { x: p.x, z: p.z, r: p.r || 12, name: p.name } : null; }
       case 'talk': case 'deliver': return npcAt(st.npc);
       case 'clear': { const d = L.doors && L.doors[st.door]; return d ? { x: d.x, z: d.z, r: 8, name: d.name || null } : null; }
+      case 'gather': case 'craft': case 'learn': return st.at && Number.isFinite(st.at.x) ? st.at : null;      // W9 (P-core): the mark its own data gives
       default: return null;
     }
   }
@@ -251,7 +253,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
     // T25: fish this zone's waters hold (E's angling.json, by level band) for the angler's job frames
     pool.fish = ((angling && angling.fish) || []).filter(f => f && f.id && (!Array.isArray(f.bands) || (band[0] <= f.bands[1] && band[1] >= f.bands[0])) && !f.pool).map(f => ({ id: f.id, name: f.name, rarity: f.rarity || 'common', skill: f.skill || 0, x: giver.x, z: giver.z }));
     // a frame written for one kind of giver (`giverRole`) is only that giver's; an angler offers nothing else
-    const frames = jobs.frames.filter(f => (f.giverRole ? f.giverRole === giver.role : giver.role !== 'angler') && !(recent[f.id] && t - recent[f.id] < (R.repeatGapMinutes || 60) * 60000));
+    const frames = jobs.frames.filter(f => (f.giverRole ? f.giverRole === giver.role : !OWN_FRAMES.has(giver.role)) && !(recent[f.id] && t - recent[f.id] < (R.repeatGapMinutes || 60) * 60000));
     const bag = frames.slice();
     for (let guard = 0; list.length < (R.maxOffered || 4) && bag.length && guard < 40; guard++) {
       const total = bag.reduce((a, f) => a + (f.weight || 1), 0);
@@ -275,6 +277,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       else if (g.kind === 'clear') Object.assign(step, { door: at ? at.door : -1, floor: g.floor || null, boss: !!g.boss, zone: zoneKey });
       else if (g.kind === 'catch') Object.assign(step, { fish: target ? target.id : null, pool: !!g.pool, rarity: g.rarity || null });   // T25: an angler's job
       else if (g.kind === 'cook') Object.assign(step, { meal: g.meal || null });
+      else if (g.kind === 'gather' || g.kind === 'craft') Object.assign(step, { prof: g.prof || null, mat: g.mat || null, recipe: g.recipe || null });   // W9 (P-core)
       step.at = round1(stepAt(step, zoneKey, giver));
       huntMark(step, zoneKey, giver);
       const id = `job:${f.id}:${giver.key}:${Math.floor(t / 60000)}`;
@@ -341,6 +344,10 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       // play-test 5 T25 (E's step kinds): a landed fish (never junk or a crate) / a cooked meal
       case 'catch': return ev.kind === 'fish' && (!st.fish || ev.species === st.fish) && (!st.pool || !!ev.pool) && (!st.rarity || (RARITY_RANK[ev.rarity] ?? 0) >= (RARITY_RANK[st.rarity] ?? 0));
       case 'cook': return ev.kind === 'cook' && (!st.meal || ev.meal === st.meal || ev.recipe === st.meal);
+      // round 8 W9 (P-core): a gathered piece / a finished craft / a profession learned
+      case 'gather': return ev.kind === 'gather' && (!st.prof || ev.prof === st.prof) && (!st.mat || ev.mat === st.mat);
+      case 'craft': return ev.kind === 'craft' && (!st.prof || ev.prof === st.prof) && (!st.recipe || ev.recipe === st.recipe || ev.makes === st.recipe);
+      case 'learn': return ev.kind === 'learn' && (!st.prof || ev.prof === st.prof);
       default: return false;
     }
   }

@@ -299,7 +299,7 @@ export function botInputs(game, rng = () => 0.5, sloppy = 0) {
           const hit = Math.round(Math.max(t + g.gap, tMid + side * off + err(span)));
           out.push(hit, 0); t = hit; k++;
         }
-        if (k < g.steps) { const re = t + 80; out.push(re, 1); base = re + g.reheat; t = base; }
+        if (k < g.steps) { const re = t + 140; out.push(re, 1); base = re + g.reheat; t = base; }
       }
       break;
     }

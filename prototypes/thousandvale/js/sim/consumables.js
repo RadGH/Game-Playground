@@ -36,7 +36,7 @@ export const STACK_MAX = 20;
 const STACK_USES = new Set(['food', 'drink', 'buff', 'light', 'cleanse', 'recall', 'bait', 'revive']);
 export function stackable(item) {
   if (!item || typeof item !== 'object' || item.quest || item.noStack || item.tool) return false;
-  if (item.kind === 'potion') return true;
+  if (item.kind === 'potion' || item.kind === 'material') return true;      // W9 (P-core): gathered and refined materials stack (stackMax 50)
   return item.kind === 'good' && !!item.use && STACK_USES.has(item.use.type);
 }
 export const stackKey = item => item.kind + '|' + item.id + (item.cooked ? '|c' : '');

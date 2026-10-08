@@ -4081,3 +4081,5 @@ gallery's bag draws 120 squares until the fixtures are re-recorded against the v
 **For P-client:** `thousandvale.ui5.sheet.addSection('professions', 'Professions', box => nodes)` and `thousandvale.ui.journal.addTab('professions',
 'Professions', page => nodes)` exist as you wrote them (both return a remover; `journal.redraw()` when your facts change).
 **Not done:** town NPCs out of sight carry no quest mark on the map (A sends none in `mapData` this round — only NPCs the client has are marked).
+- **W18 (B, lead):** the bare mountains in the report are inside LOADED zones: the zone bake scatters almost no trees on the `mountains` biome. I dress them with distant tree spires from the client (`horizon-grid.js buildCanopy`: not solid, nothing the server knows about). If B's scatter ever plants real trees on mountain slopes, set `CANOPY_BIOMES = []`.
+- **Lead:** m3-social.spec is still red at line 194 (`#char-chips .chip` hidden after signing in from the title form) — D-UI's title flow, unchanged from the note of 2026-10-07. freeze.spec is green.

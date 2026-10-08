@@ -363,6 +363,13 @@ export function connect(opts = {}) {
   /** fish('cast', {aim?}) | ('hook') | ('land', {held}) | ('stop') -> fishR / fishBite / fishTug / fishCatch */
   net.fish = (op, a = {}) => sendJ(game, pick({ t: 'fish', op }, a, ['aim', 'held', 'score', 'holds']));
   /** cook() -> cookList ; cook(id, n?) -> cookR */
+  // ---- round 8 W9 (P-core, docs/protocol.md §25): professions ----
+  /** prof('learn'|'tool', {id, npc}) -> profR */
+  net.prof = (op, a = {}) => sendJ(game, pick({ t: 'prof', op }, a, ['id', 'npc']));
+  /** gather('start', {id?}) -> gatherR {game} ; gather('done', {id, inputs}) -> gatherDone ; gather('stop') */
+  net.gather = (op, a = {}) => sendJ(game, pick({ t: 'gather', op }, a, ['id', 'inputs']));
+  /** craft('list', {npc?}) -> craftList ; ('start', {id, base?, n?, uid?, index?, element?}) -> craftR ; ('done', {id, inputs}) -> craftDone ; ('quote', {id, uid, index?, element?}) -> craftQuote ; ('stop') */
+  net.craft = (op, a = {}) => sendJ(game, pick({ t: 'craft', op }, a, ['id', 'npc', 'base', 'n', 'uid', 'index', 'element', 'inputs']));
   net.cook = (id, n) => sendJ(game, id ? (n ? { t: 'cook', id, n } : { t: 'cook', id }) : { t: 'cook' });
   // D-UI's first names (play-test 2): the same messages
   net.lootOp = net.loot;

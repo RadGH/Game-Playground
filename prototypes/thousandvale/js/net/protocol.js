@@ -27,7 +27,8 @@ export const KIND_NAMES = Object.freeze(['', 'player', 'monster', 'npc', 'object
 export const ANIMS = Object.freeze(['idle', 'walk', 'run', 'sprint', 'jump', 'fall', 'swim',
   'attack', 'attack2', 'cast', 'channel', 'hit', 'die', 'dead',
   'bite', 'howl', 'emote', 'interact', 'sit',     // 'sit' (play-test 4 S20): eating / drinking — sitting on the ground
-  'fish', 'reel']);                               // play-test 5 T25: a line in the water / fighting the fish
+  'fish', 'reel',
+  'mine', 'chop', 'gather', 'skin', 'craft']);     // round 8 W9 (P-core): working a node / a corpse / at a station                               // play-test 5 T25: a line in the water / fighting the fish
 export const ANIM_ID = Object.freeze(Object.fromEntries(ANIMS.map((n, i) => [n, i])));
 
 export const STATE = Object.freeze({ dead: 1, combat: 2, casting: 4, airborne: 8, swimming: 16, sprinting: 32, elite: 64, friendly: 128 });
@@ -159,6 +160,10 @@ export const CLIENT_MSGS = Object.freeze({
   admin:   { on: 'both', fields: { op: 'str:16', id: '?int', state: '?str:16', kind: '?str:16', limit: '?int', before: '?int', note: '?str:500' }, rate: 2, burst: 10 },
   fish:    { on: 'p', fields: { op: 'str:8', aim: '?vec2', held: '?num', score: '?num', holds: '?nums' }, rate: 4, burst: 8 },
   cook:    { on: 'p', fields: { op: '?str:8', id: '?str:64', n: '?int' }, rate: 2, burst: 6 },
+  // round 8 W9 (P-core, docs/protocol.md §25): professions — learn / gather / make. `inputs` = the mini-game's raw [t, v, t, v, …]
+  prof:    { on: 'p', fields: { op: 'str:8', id: 'str:16', npc: 'id' }, rate: 2, burst: 6 },
+  gather:  { on: 'p', fields: { op: 'str:8', id: '?id', inputs: '?nums' }, rate: 4, burst: 8 },
+  craft:   { on: 'p', fields: { op: '?str:8', id: '?str:48', npc: '?id', base: '?str:48', n: '?int', uid: '?str:40', index: '?int', element: '?str:16', inputs: '?nums' }, rate: 4, burst: 10 },
 });
 
 /** Server -> client JSON messages (documentation + tests; the server is trusted, the client does not validate). */
@@ -255,6 +260,15 @@ export const SERVER_MSGS = Object.freeze({
   fishCatch: ['ok', 'lost', 'kind', 'item', 'species', 'size', 'record', 'skill'],
   cookList: ['fire', 'recipes'],
   cookR: ['ok', 'item', 'items', 'msg'],
+  // round 8 W9 (P-core)
+  profR: ['op', 'ok', 'id', 'why', 'msg', 'tool'],
+  gatherR: ['ok', 'state', 'id', 'prof', 'node', 'game', 'why', 'msg'],
+  gatherDone: ['ok', 'id', 'prof', 'quality', 'score', 'marks', 'items', 'got', 'xp', 'skill', 'key', 'reopenMs', 'msg'],
+  skinnable: ['id', 'on', 'tier', 'minSkill', 'name'],
+  craftList: ['ok', 'station', 'level', 'recipes'],
+  craftR: ['ok', 'state', 'id', 'game', 'cost', 'why', 'msg'],
+  craftDone: ['ok', 'id', 'prof', 'quality', 'score', 'marks', 'items', 'got', 'item', 'xp', 'skill', 'msg'],
+  craftQuote: ['ok', 'id', 'uid', 'can', 'why', 'needs', 'gold', 'text'],
 });
 /** Play-test 5: feedback kinds + report states (T19/T21), revive answers (T4), fishing ops (T25). */
 export const FEEDBACK_KINDS = Object.freeze(['suggestion', 'bug']);

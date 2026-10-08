@@ -449,7 +449,7 @@ export function createRoom(opts) {
         stepMove(st, { mx: 0, mz: 0, b: 0 }, tickMs, terrain);
         commitMove(e, st, 0, 0, 0); c.selfDirty = true;
       }
-      if (!e.dead && !e.airborne && e.kind === 'player') e.loop(e.state & STATE.swimming ? 'swim' : e.sitting ? 'sit' : e.fishing ? (e.fishing.tug ? 'reel' : 'fish') : 'idle');   // T25: a line out is its own pose
+      if (!e.dead && !e.airborne && e.kind === 'player') e.loop(e.state & STATE.swimming ? 'swim' : e.sitting ? 'sit' : e.fishing ? (e.fishing.tug ? 'reel' : 'fish') : e.working ? e.working.anim /* W9 (P-core) */ : 'idle');   // T25: a line out is its own pose
       return;
     }
     let moved = false, lastB = 0, mxs = 0, mzs = 0;
@@ -475,7 +475,7 @@ export function createRoom(opts) {
       e.setState(STATE.sprinting, going && !!(lastB & IN.SPRINT));
       if (e.airborne) e.loop(e.vy > 0 ? 'jump' : 'fall');
       else if (e.state & STATE.swimming) e.loop('swim');
-      else e.loop(going ? ((lastB & IN.SPRINT) ? 'sprint' : 'run') : e.sitting ? 'sit' : e.fishing ? (e.fishing.tug ? 'reel' : 'fish') : 'idle');
+      else e.loop(going ? ((lastB & IN.SPRINT) ? 'sprint' : 'run') : e.sitting ? 'sit' : e.fishing ? (e.fishing.tug ? 'reel' : 'fish') : e.working ? e.working.anim /* W9 (P-core) */ : 'idle');
     }
   }
   function commitMove(e, st) {

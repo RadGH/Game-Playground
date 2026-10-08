@@ -5,7 +5,8 @@
     "start.json",
     "classes.json",
     "setpieces.json",
-    "angling.json"
+    "angling.json",
+    "professions.json"
   ],
   "npcs": {
     "elder_maud": {

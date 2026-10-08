@@ -38,7 +38,7 @@ export function createProfessions(numbers = {}, content = null) {
   const defs = PROFESSIONS.map(id => list(N.professions).find(p => p.id === id) || { id, name: id[0].toUpperCase() + id.slice(1), kind: GATHERING.includes(id) ? 'gather' : 'make' });
   const defById = new Map(defs.map(d => [d.id, d]));
   const S = { max: 100, xpBase: 20, xpPerLevel: 4, ranks: [[1, 'Novice']], ...(N.skill || {}) };
-  const tiers = list(N.tiers).length ? list(N.tiers) : [{ tier: 1, minSkill: 1, levels: [1, 10], unit: 2 }];
+  const tiers = list(N.tiers).length ? list(N.tiers) : [{ tier: 1, minSkill: 1, levels: [1, 10] }];
   const Q = { min: {}, yield: { fail: 0, poor: 1, good: 2, fine: 3, perfect: 3 }, bonusChance: {}, xp: { fail: 0, poor: 0.5, good: 1, fine: 1.25, perfect: 1.5 }, name: {}, ...(N.quality || {}) };
   const G = { reach: 4.5, xpPerTier: 10, greyAfter: 40, greyMult: 0.25, respawnMin: [6, 10], starterRespawnMin: 2, ...(N.gather || {}) };
   const K = { xpPerTier: 12, refineXp: 0.5, levelLag: 1, feeShare: 0.06, batchMax: 10, rarity: {}, ...(N.craft || {}) };
@@ -157,7 +157,7 @@ export function createProfessions(numbers = {}, content = null) {
     const t = tierForLevel(level);
     const hide = (classes.hide || [])[t.tier - 1];
     if (!hide) return null;
-    return { prof: 'skinning', kind: 'corpse', tier: t.tier, name: row.name || type, gives: [{ id: hide, n: 1 }, ...(sk.meat && !row.noMeat ? [{ id: sk.meat, n: 0.5 }] : [])], bonus: row.bonus || sk.bonus || null };
+    return { prof: 'skinning', kind: 'corpse', tier: t.tier, name: row.name || type, gives: [{ id: hide, n: 0.5 }, ...(sk.meat && !row.noMeat ? [{ id: sk.meat, n: 0.34 }] : [])], bonus: row.bonus || sk.bonus || null };
   }
 
   // ---- making ----

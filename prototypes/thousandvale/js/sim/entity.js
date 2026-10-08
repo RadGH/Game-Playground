@@ -136,6 +136,7 @@ export class Entity {
       if (this.sitting) o.sit = 1;                             // S20: sitting down to eat / drink (anim 'sit' too)
       if (this.eating) o.eat = this.eating;                    // S20 (D-world): 'food' | 'drink' while the meal runs
       if (this.fishing) o.fishing = this.fishing;
+      if (this.working) o.working = this.working;              // W9 (P-core): at a node / a station — {prof, anim, node?|at?}
       if (this.form) o.form = this.form;                       // play-test 6 U16: the creature a shape-shifted druid is drawn as (C's shape object)              // T25: a line out — {x, z, tug?} where the bobber floats
     }
     else if (this.type) o.type = this.type;
@@ -173,6 +174,7 @@ export class Entity {
       if (d.leave) o.leave = 1;                                // U10: the way you came in (leaves the dungeon; not the exit portal)
       if (d.lift) o.lift = { here: d.lift.here, floors: d.lift.to.map(t => t.floor) };
       if (d.pool) o.pool = { tier: d.pool.tier, minSkill: d.pool.minSkill, left: d.pool.left, water: d.pool.water, ...(d.pool.shelf ? { shelf: true } : {}), ...(d.pool.always ? { always: 1 } : {}), ...(d.pool.town ? { town: d.pool.town } : {}) };   // T25: a fish pool
+      if (d.node) o.node = d.node;                             // W9 (P-core): a gathering node {prof, kind, tier, minSkill, look}
       if (d.office) o.office = d.office;                       // a service NPC's own building (Q10): {kind, plot, x, z, yaw, lit}                    // a hidden cache glints within this many metres for someone who has every clue
     }
     return o;

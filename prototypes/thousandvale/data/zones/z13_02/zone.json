@@ -256,16 +256,16 @@
           "z": 1728
         },
         "culture": "halfling",
-        "plots": 24,
-        "streets": 79,
+        "plots": 21,
+        "streets": 50,
         "links": 1,
         "overlaps": 0,
         "highStreets": 1,
         "w6": {
           "plotsBefore": 21,
-          "plots": 24,
-          "kept": 1,
-          "renumbered": true
+          "plots": 21,
+          "kept": 21,
+          "removed": []
         }
       },
       {
@@ -282,16 +282,22 @@
           "z": 1600
         },
         "culture": "halfling",
-        "plots": 15,
-        "streets": 40,
+        "plots": 8,
+        "streets": 25,
         "links": 2,
         "overlaps": 0,
         "highStreets": 2,
         "w6": {
           "plotsBefore": 9,
-          "plots": 15,
-          "kept": 0,
-          "renumbered": true
+          "plots": 8,
+          "kept": 8,
+          "removed": [
+            {
+              "plot": 7,
+              "want": "house",
+              "office": false
+            }
+          ]
         }
       },
       {
@@ -308,16 +314,16 @@
           "z": 1088
         },
         "culture": "halfling",
-        "plots": 12,
-        "streets": 38,
-        "links": 2,
+        "plots": 8,
+        "streets": 27,
+        "links": 1,
         "overlaps": 0,
-        "highStreets": 2,
+        "highStreets": 1,
         "w6": {
           "plotsBefore": 8,
-          "plots": 12,
-          "kept": 0,
-          "renumbered": true
+          "plots": 8,
+          "kept": 8,
+          "removed": []
         }
       }
     ],
@@ -351,13 +357,13 @@
       "x": 1696,
       "z": 1180
     },
-    "placements": 496,
+    "placements": 427,
     "vignettesAvoided": 612
   },
   "files": {
-    "terrain.bin": 496881,
-    "nav.bin": 31374,
+    "terrain.bin": 496737,
+    "nav.bin": 31303,
     "scatter.bin": 145884,
-    "placements.json": 312396
+    "placements.json": 289229
   }
 }

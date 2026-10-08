@@ -239,7 +239,7 @@ export function createBag({ net: getNet, hud, me = null }) {
     // W19: with no filter the grid IS the bag — every square you have, used or not (an old save over its capacity keeps its extra rows)
     const cap = S.bagMax || getNet()?.joined?.you?.bagMax || 0;      // 0 = the server has not said: the old four rows
     const want = S.filter === 'all' && !S.search ? (cap ? Math.max(cap, list.length) : Math.max(cols * 4, list.length + 1)) : list.length;
-    const pad = Math.max(0, Math.ceil(want / cols) * cols - list.length);
+    const pad = Math.max(0, (cap && S.filter === 'all' && !S.search ? want : Math.ceil(want / cols) * cols) - list.length);      // a known capacity is drawn exactly: 46 squares are 46
     for (let k = 0; k < pad; k++) cells.push(slotEl(null));
     el.grid.replaceChildren(...cells);
     rehover();
@@ -260,7 +260,19 @@ export function createBag({ net: getNet, hud, me = null }) {
     if (under && root.contains(under)) under.dispatchEvent(new PointerEvent('pointerover', { bubbles: true, clientX: ptr.x, clientY: ptr.y }));
   }
   const redrawSoon = () => { clearTimeout(drawT); drawT = setTimeout(draw, 60); };
-  onIcon(() => { if (!root.hidden) redrawSoon(); });
+  // An icon that finishes is put INTO its square (play-test 8): rebuilding the whole grid for each picture detached the square
+  // under the pointer again and again while a bag of new things was being drawn — a click could land on nothing.
+  function fillIcons() {
+    for (const d of root.querySelectorAll('.islot.pending')) {
+      const uid = d.dataset.tipItem;
+      const it = S.bag.find(i => String(i.uid) === uid) || Object.values(S.equipment || {}).find(i => i && String(i.uid) === uid);
+      const url = it && iconFor(it); if (!url) continue;
+      const img = document.createElement('img'); img.src = url; img.alt = ''; img.draggable = false;
+      const g = d.querySelector('.glyph'); if (g) g.replaceWith(img); else d.prepend(img);
+      d.classList.remove('pending');
+    }
+  }
+  onIcon(() => { if (!root.hidden) fillIcons(); });
   farholdReady().then(() => { if (!root.hidden) draw(); });
 
   function remember() { rememberItems(S.bag); rememberItems(Object.values(S.equipment || {}).filter(Boolean)); }

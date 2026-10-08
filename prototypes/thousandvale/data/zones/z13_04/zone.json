@@ -136,42 +136,16 @@
         "radius": 90,
         "movedFrom": null,
         "culture": "desert",
-        "plots": 21,
+        "plots": 24,
         "streets": 45,
         "links": 1,
         "overlaps": 0,
         "highStreets": 1,
         "w6": {
           "plotsBefore": 24,
-          "plots": 21,
-          "kept": 21,
-          "removed": [
-            {
-              "plot": 5,
-              "want": "house",
-              "office": false
-            },
-            {
-              "plot": 6,
-              "want": "shop",
-              "office": true
-            },
-            {
-              "plot": 7,
-              "want": "counting_house",
-              "office": true
-            }
-          ],
-          "moved": [
-            {
-              "office": "shop",
-              "to": 22
-            },
-            {
-              "office": "counting_house",
-              "to": 0
-            }
-          ]
+          "plots": 24,
+          "kept": 24,
+          "removed": []
         }
       },
       {
@@ -196,6 +170,11 @@
           "kept": 15,
           "removed": [
             {
+              "plot": 2,
+              "want": "hut",
+              "office": false
+            },
+            {
               "plot": 4,
               "want": "house",
               "office": false
@@ -204,17 +183,6 @@
               "plot": 5,
               "want": "house",
               "office": false
-            },
-            {
-              "plot": 7,
-              "want": "mill",
-              "office": true
-            }
-          ],
-          "moved": [
-            {
-              "office": "mill",
-              "to": 0
             }
           ]
         }
@@ -249,13 +217,13 @@
       "x": 1560,
       "z": 1278
     },
-    "placements": 187,
+    "placements": 190,
     "vignettesAvoided": 628
   },
   "files": {
-    "terrain.bin": 705267,
-    "nav.bin": 46876,
+    "terrain.bin": 705263,
+    "nav.bin": 46888,
     "scatter.bin": 86996,
-    "placements.json": 146372
+    "placements.json": 147639
   }
 }

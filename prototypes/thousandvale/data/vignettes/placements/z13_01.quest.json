@@ -168,9 +168,9 @@
    "town": "Brackwater",
    "post": "gate",
    "gate": "brackwater_gate_0",
-   "x": 1122,
+   "x": 1124,
    "z": 812,
-   "yaw": -2.86,
+   "yaw": -2.929,
    "titled": false
   },
   {
@@ -183,9 +183,9 @@
    "town": "Brackwater",
    "post": "gate",
    "gate": "brackwater_gate_0",
-   "x": 1116,
+   "x": 1114,
    "z": 814,
-   "yaw": -2.86,
+   "yaw": -2.929,
    "titled": false
   },
   {
@@ -198,8 +198,8 @@
    "town": "Brackwater",
    "post": "square",
    "x": 1136,
-   "z": 868,
-   "yaw": 1.015,
+   "z": 870,
+   "yaw": 1.262,
    "titled": false
   },
   {

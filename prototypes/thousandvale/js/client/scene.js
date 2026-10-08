@@ -110,7 +110,7 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     scene.fog.color.set(dark ? fog : SKY.horizon);
     // play-test 8 (W22): a dungeon is never pitch black — a floor of ambient light under every look, fog pushed back
     scene.fog.near = dark ? (bright ? DUNGEON_AMBIENT.fogNearBright : DUNGEON_AMBIENT.fogNear) : 140; scene.fog.far = dark ? (bright ? DUNGEON_AMBIENT.fogFarBright : DUNGEON_AMBIENT.fogFar) : 900;
-    hemi.intensity = dark ? (bright ? DUNGEON_AMBIENT.hemiBright : DUNGEON_AMBIENT.hemi) : 1.15; hemi.color.set(dark ? '#9aa6c8' : '#d6e6ff'); hemi.groundColor.set(dark ? '#3a2e24' : '#6b5f48');
+    hemi.intensity = dark ? (bright ? DUNGEON_AMBIENT.hemiBright : DUNGEON_AMBIENT.hemi) * ambientK : 1.15; hemi.color.set(dark ? '#9aa6c8' : '#d6e6ff'); hemi.groundColor.set(dark ? '#3a2e24' : '#6b5f48');
     sun.intensity = dark ? 0.35 : 2.6;
     // never toggle a light's visibility (every lit material would recompile: the P1/P10 freeze) — dim it instead
     moodBright = bright; applyCarry();
@@ -144,14 +144,19 @@ export function createScene(canvas, { quality = 'high' } = {}) {
   // ONE PointLight that is always in the scene and only ever dimmed — adding, removing or hiding a light recompiles every lit material.
   const lantern = new THREE.PointLight('#ffc98a', 9, 13, 1.6);
   lantern.intensity = 0; scene.add(lantern);
-  let moodBright = false, carryRange = null, carryNight = 0;
+  let moodBright = false, carryRange = null, carryNight = 0, carryDungeon = null, ambientK = 1;
   function applyCarry() {
-    const c = carriedLight({ mood, night: carryNight, range: carryRange, bright: moodBright });
+    const c = carriedLight({ mood, night: carryNight, range: carryRange, bright: moodBright, dungeonRange: carryDungeon });
     lantern.intensity = c.intensity; lantern.distance = c.distance; lantern.decay = c.decay;
     return c;
   }
   /** W22: how dark it is (0..1) and the rules' light radius in metres (null = the client's own). */
-  function setCarryLight({ night = carryNight, range = carryRange } = {}) { carryNight = night; carryRange = range; return applyCarry(); }
+  function setCarryLight({ night = carryNight, range = carryRange, dungeonRange = carryDungeon, dungeonAmbient = null } = {}) {
+    carryNight = night; carryRange = range; carryDungeon = dungeonRange;
+    // C's `dungeonAmbient` (0.4 of daylight) is what our floor was tuned at: a different number scales the floor with it
+    if (Number.isFinite(dungeonAmbient) && dungeonAmbient > 0) { ambientK = Math.max(0.6, Math.min(2, dungeonAmbient / 0.4)); if (mood === 'dungeon') hemi.intensity = (moodBright ? DUNGEON_AMBIENT.hemiBright : DUNGEON_AMBIENT.hemi) * ambientK; }
+    return applyCarry();
+  }
 
   return { renderer, scene, camera, sun, hemi, sunDir, follow, resize, setMood, setTimeOfDay, setCarryLight, get carry() { return { intensity: lantern.intensity, distance: lantern.distance, hemi: hemi.intensity, fogNear: scene.fog.near, fogFar: scene.fog.far }; }, get sky() { return lastSky; }, render: () => renderer.render(scene, camera) };
 }

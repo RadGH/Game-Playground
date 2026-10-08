@@ -221,9 +221,9 @@
    "name": "Bryn Quarrie",
    "role": "carter",
    "at": "Charcoal Burners",
-   "x": 322,
-   "z": 198,
-   "yaw": 3.142,
+   "x": 194,
+   "z": 186,
+   "yaw": -0.41,
    "cart": "cart_charcoal_burners",
    "placedBy": "content-towns",
    "quests": 0,
@@ -237,9 +237,9 @@
    "vehicle": "ox_cart",
    "town": "Charcoal Burners",
    "carter": "carter_charcoal_burners",
-   "x": 322,
-   "z": 200,
-   "yaw": 1.571,
+   "x": 196,
+   "z": 184,
+   "yaw": -2.111,
    "radius": 2.2
   },
   {
@@ -248,9 +248,9 @@
    "name": "Emrys Kettleby",
    "role": "carter",
    "at": "Wildhaven",
-   "x": 1232,
-   "z": 194,
-   "yaw": 0.419,
+   "x": 1324,
+   "z": 196,
+   "yaw": 3.142,
    "cart": "cart_wildhaven",
    "placedBy": "content-towns",
    "quests": 0,
@@ -264,9 +264,9 @@
    "vehicle": "ox_cart",
    "town": "Wildhaven",
    "carter": "carter_wildhaven",
-   "x": 1232,
-   "z": 192,
-   "yaw": -1.209,
+   "x": 1324,
+   "z": 198,
+   "yaw": 1.571,
    "radius": 2.2
   },
   {
@@ -280,8 +280,8 @@
    "post": "gate",
    "gate": "hermit_s_rest_gate_1",
    "x": 1084,
-   "z": 638,
-   "yaw": 0,
+   "z": 636,
+   "yaw": -0.18,
    "titled": false
   },
   {
@@ -294,9 +294,9 @@
    "town": "Hermit's Rest",
    "post": "gate",
    "gate": "hermit_s_rest_gate_1",
-   "x": 1092,
+   "x": 1094,
    "z": 638,
-   "yaw": 0,
+   "yaw": -0.18,
    "titled": false
   },
   {
@@ -369,9 +369,9 @@
    "town": "Hermit's Rest",
    "post": "gate",
    "gate": "hermit_s_rest_gate_3",
-   "x": 1096,
+   "x": 1100,
    "z": 482,
-   "yaw": -3.037,
+   "yaw": -3.126,
    "titled": false
   },
   {
@@ -384,9 +384,9 @@
    "town": "Hermit's Rest",
    "post": "gate",
    "gate": "hermit_s_rest_gate_3",
-   "x": 1088,
+   "x": 1090,
    "z": 482,
-   "yaw": -3.037,
+   "yaw": -3.126,
    "titled": false
   },
   {
@@ -398,9 +398,9 @@
    "tier": "city",
    "town": "Hermit's Rest",
    "post": "square",
-   "x": 1102,
+   "x": 1104,
    "z": 548,
-   "yaw": 0.324,
+   "yaw": -0.027,
    "titled": false
   },
   {
@@ -426,9 +426,9 @@
    "tier": "city",
    "town": "Hermit's Rest",
    "post": "square",
-   "x": 1104,
-   "z": 560,
-   "yaw": -3.118,
+   "x": 1106,
+   "z": 562,
+   "yaw": -2.894,
    "titled": false
   },
   {
@@ -454,10 +454,10 @@
    "tier": "village",
    "town": "Charcoal Burners",
    "post": "gate",
-   "gate": "charcoal_burners_gate_1",
-   "x": 304,
-   "z": 196,
-   "yaw": 1.571,
+   "gate": "charcoal_burners_gate_0",
+   "x": 208,
+   "z": 192,
+   "yaw": -2.111,
    "titled": false
   },
   {
@@ -469,10 +469,10 @@
    "tier": "village",
    "town": "Charcoal Burners",
    "post": "gate",
-   "gate": "charcoal_burners_gate_0",
-   "x": 208,
-   "z": 188,
-   "yaw": -1.571,
+   "gate": "charcoal_burners_gate_1",
+   "x": 308,
+   "z": 198,
+   "yaw": 2.047,
    "titled": false
   },
   {
@@ -498,10 +498,10 @@
    "tier": "hamlet",
    "town": "Wildhaven",
    "post": "gate",
-   "gate": "wildhaven_gate_0",
-   "x": 1250,
-   "z": 190,
-   "yaw": -1.326,
+   "gate": "wildhaven_gate_1",
+   "x": 1312,
+   "z": 200,
+   "yaw": 2.344,
    "titled": false
   }
  ]

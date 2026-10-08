@@ -60,7 +60,7 @@ export function createFeedback({ net, hud, context }) {
   function tabs() {
     if (!signedIn()) return null;
     const open = (M.list || []).filter(r => r.state === 'completed' || r.note).length;
-    const t = (id, label) => h('button.chip', { type: 'button', role: 'tab', 'aria-selected': String(S.tab === id), dataset: { tab: id }, onclick: () => { S.tab = id; if (id === 'mine') loadMine(); draw(); } }, label);
+    const t = (id, label) => h('button.chip', { type: 'button', role: 'tab', 'aria-checked': String(S.tab === id), 'aria-selected': String(S.tab === id), dataset: { tab: id }, onclick: () => { S.tab = id; if (id === 'mine') loadMine(); draw(); } }, label);
     return h('div.chips.fb-tabs', { role: 'tablist', 'aria-label': 'Feedback' }, t('write', 'Write'), t('mine', M.list ? `My reports (${M.list.length})` : 'My reports'), open && S.tab !== 'mine' ? h('small.fb-news', {}, `${open} answered`) : null);
   }
   function loadMine() {

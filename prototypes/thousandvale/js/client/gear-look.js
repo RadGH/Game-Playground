@@ -160,9 +160,9 @@ export function packLookId(item) {
   const key = item.catalogBase || item.baseKey || item.base || '';
   const isPack = !!named || item.pack === true || !!PACK_BY_BASE[key] || /(^|_)(pack|satchel|rucksack|knapsack|haversack)($|_)/.test(key);
   if (!isPack) return null;
-  if (named && named !== 'g5_pack_rucksack') return named;                 // the rules chose a model outright
+  if (named) return named;                                                 // the rules chose a model outright (C: `packLook`, and `packs.rareLook` for a rare one)
   if (RARE_PACK.has(item.rarity) || item.isUnique || item.unique) return 'g5_pack_explorer';
-  return named || PACK_BY_BASE[key] || 'g5_pack_rucksack';
+  return PACK_BY_BASE[key] || 'g5_pack_rucksack';
 }
 /** The avatar part (`cape`) for a worn pack: the bag keeps its own colour, the buckles and piping take the rarity's. */
 export function packPart(item) {

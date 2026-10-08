@@ -151,7 +151,7 @@ export const SCENES = [
     notes: { all: 'T21: what an admin account sees — every report with its state, the client details and the recent log lines.' } },
   // ---- play-test 8 (stream D-UI) ----
   { id: 'my-reports', expect: '#panel-feedback:not([hidden]) .my-row', group: 'Windows', title: 'Feedback — My reports', modules: [U + 'feedback.js', U + 'pt8-core.js'],
-    steps: [['run', async G => { G.S.net.claimed = true; }], ['call', 'tvui5.feedback', 'mine'], ['play', 'my-reports'], ['wait', 200]],
+    steps: [['run', async G => { const n = G.S.net; try { n.claimed = true; } catch { /* read-only */ } if (n.joined?.you) n.joined.you.acct = { claimed: true, level: n.joined.you.level || 1 }; }], ['call', 'tvui5.feedback', 'mine'], ['wait', 300], ['play', 'my-reports'], ['wait', 200]],
     notes: { all: 'W29: everything your account has sent, its state, and the team\'s note — for a completed one, how it was fixed. Reply starts a new report that begins with the reference.', phone: 'A full sheet; each report is a card with a Reply button of thumb size.', pad: 'The ring walks the cards; A on Reply opens the form with the reference filled in.' } },
   { id: 'cart', expect: '#panel-cart:not([hidden]) .cart-row.picked', group: 'Windows', title: 'Ox cart — where to?', modules: [U + 'cart-travel.js', U + 'pt8.js', U + 'pt8-core.js'],
     steps: [['play', 'cart-list'], ['click', '#panel-cart .cart-row:not(.locked) [data-act="pick"]'], ['wait', 150]],

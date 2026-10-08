@@ -643,7 +643,7 @@
    "at": "Mawehaven",
    "x": 228,
    "z": 1860,
-   "yaw": 1.969,
+   "yaw": 1.957,
    "cart": "cart_mawehaven",
    "placedBy": "content-towns",
    "quests": 0,
@@ -659,7 +659,7 @@
    "carter": "carter_mawehaven",
    "x": 226,
    "z": 1860,
-   "yaw": -2.795,
+   "yaw": -2.835,
    "radius": 2.2
   },
   {
@@ -701,7 +701,7 @@
    "gate": "torborhold_gate_0",
    "x": 534,
    "z": 1276,
-   "yaw": -1.305,
+   "yaw": -1.547,
    "titled": false
   },
   {
@@ -715,8 +715,8 @@
    "post": "gate",
    "gate": "torborhold_gate_0",
    "x": 536,
-   "z": 1282,
-   "yaw": -1.305,
+   "z": 1286,
+   "yaw": -1.547,
    "titled": false
   },
   {
@@ -729,9 +729,9 @@
    "town": "Torborhold",
    "post": "gate",
    "gate": "torborhold_gate_1",
-   "x": 598,
-   "z": 1204,
-   "yaw": 3.106,
+   "x": 594,
+   "z": 1206,
+   "yaw": 2.383,
    "titled": false
   },
   {
@@ -744,9 +744,9 @@
    "town": "Torborhold",
    "post": "gate",
    "gate": "torborhold_gate_1",
-   "x": 590,
-   "z": 1204,
-   "yaw": 3.106,
+   "x": 588,
+   "z": 1200,
+   "yaw": 2.383,
    "titled": false
   },
   {
@@ -759,9 +759,9 @@
    "town": "Torborhold",
    "post": "gate",
    "gate": "torborhold_gate_2",
-   "x": 628,
-   "z": 1220,
-   "yaw": 1.571,
+   "x": 636,
+   "z": 1222,
+   "yaw": 2.457,
    "titled": false
   },
   {
@@ -775,8 +775,8 @@
    "post": "gate",
    "gate": "torborhold_gate_2",
    "x": 630,
-   "z": 1212,
-   "yaw": 1.571,
+   "z": 1218,
+   "yaw": 2.457,
    "titled": false
   },
   {
@@ -817,8 +817,8 @@
    "town": "Torborhold",
    "post": "square",
    "x": 578,
-   "z": 1272,
-   "yaw": 0.284,
+   "z": 1274,
+   "yaw": 0.376,
    "titled": false
   },
   {
@@ -833,7 +833,7 @@
    "gate": "mawehaven_gate_0",
    "x": 248,
    "z": 1890,
-   "yaw": -2.795,
+   "yaw": -2.835,
    "titled": false
   },
   {
@@ -848,7 +848,7 @@
    "gate": "wamonhold_gate_0",
    "x": 1372,
    "z": 1538,
-   "yaw": 2.481,
+   "yaw": 2.468,
    "titled": false
   }
  ]

@@ -143,7 +143,7 @@
    "at": "Redcliff",
    "x": 400,
    "z": 864,
-   "yaw": 0,
+   "yaw": -0.79,
    "angler": true,
    "quests": 0,
    "titled": true
@@ -154,9 +154,9 @@
    "name": "Nell Applegarth",
    "role": "carter",
    "at": "Redcliff",
-   "x": 454,
-   "z": 848,
-   "yaw": -1.03,
+   "x": 358,
+   "z": 934,
+   "yaw": -2.138,
    "cart": "cart_redcliff",
    "placedBy": "content-towns",
    "quests": 0,
@@ -170,9 +170,9 @@
    "vehicle": "ox_cart",
    "town": "Redcliff",
    "carter": "carter_redcliff",
-   "x": 456,
-   "z": 846,
-   "yaw": -2.548,
+   "x": 360,
+   "z": 936,
+   "yaw": -0.644,
    "radius": 2.2
   },
   {
@@ -181,9 +181,9 @@
    "name": "Alder Harl",
    "role": "carter",
    "at": "Cinder Farm",
-   "x": 1270,
-   "z": 1758,
-   "yaw": 2.151,
+   "x": 1278,
+   "z": 1676,
+   "yaw": -2.713,
    "cart": "cart_cinder_farm",
    "placedBy": "content-towns",
    "quests": 0,
@@ -197,9 +197,9 @@
    "vehicle": "ox_cart",
    "town": "Cinder Farm",
    "carter": "carter_cinder_farm",
-   "x": 1268,
-   "z": 1760,
-   "yaw": 0.607,
+   "x": 1280,
+   "z": 1678,
+   "yaw": 2.157,
    "radius": 2.2
   },
   {
@@ -208,9 +208,9 @@
    "name": "Cadoc Dunstable",
    "role": "carter",
    "at": "Ravenhaven",
-   "x": 136,
+   "x": 138,
    "z": 274,
-   "yaw": 2.033,
+   "yaw": 2.19,
    "cart": "cart_ravenhaven",
    "placedBy": "content-towns",
    "quests": 0,
@@ -224,9 +224,9 @@
    "vehicle": "ox_cart",
    "town": "Ravenhaven",
    "carter": "carter_ravenhaven",
-   "x": 134,
+   "x": 136,
    "z": 276,
-   "yaw": 0.54,
+   "yaw": 0.785,
    "radius": 2.2
   },
   {
@@ -235,9 +235,9 @@
    "name": "Kitt Sallow",
    "role": "carter",
    "at": "Minfenrow",
-   "x": 1132,
-   "z": 1140,
-   "yaw": 2.456,
+   "x": 1048,
+   "z": 1092,
+   "yaw": 3.142,
    "cart": "cart_minfenrow",
    "placedBy": "content-towns",
    "quests": 0,
@@ -251,9 +251,9 @@
    "vehicle": "ox_cart",
    "town": "Minfenrow",
    "carter": "carter_minfenrow",
-   "x": 1130,
-   "z": 1142,
-   "yaw": 0.785,
+   "x": 1048,
+   "z": 1094,
+   "yaw": -1.571,
    "radius": 2.2
   },
   {
@@ -262,9 +262,9 @@
    "name": "Orla Pennock",
    "role": "carter",
    "at": "Bipetwatch",
-   "x": 406,
-   "z": 1434,
-   "yaw": -0.715,
+   "x": 372,
+   "z": 1412,
+   "yaw": 0.785,
    "cart": "cart_bipetwatch",
    "placedBy": "content-towns",
    "quests": 0,
@@ -278,9 +278,9 @@
    "vehicle": "ox_cart",
    "town": "Bipetwatch",
    "carter": "carter_bipetwatch",
-   "x": 406,
-   "z": 1432,
-   "yaw": 1.429,
+   "x": 370,
+   "z": 1410,
+   "yaw": 2.356,
    "radius": 2.2
   },
   {
@@ -292,10 +292,10 @@
    "tier": "town",
    "town": "Redcliff",
    "post": "gate",
-   "gate": "redcliff_gate_2",
-   "x": 442,
-   "z": 866,
-   "yaw": 1.592,
+   "gate": "redcliff_gate_0",
+   "x": 358,
+   "z": 916,
+   "yaw": -0.385,
    "titled": false
   },
   {
@@ -307,10 +307,10 @@
    "tier": "town",
    "town": "Redcliff",
    "post": "gate",
-   "gate": "redcliff_gate_2",
-   "x": 442,
-   "z": 860,
-   "yaw": 1.592,
+   "gate": "redcliff_gate_0",
+   "x": 366,
+   "z": 920,
+   "yaw": -0.385,
    "titled": false
   },
   {
@@ -322,10 +322,10 @@
    "tier": "town",
    "town": "Redcliff",
    "post": "gate",
-   "gate": "redcliff_gate_0",
-   "x": 360,
-   "z": 916,
-   "yaw": -0.644,
+   "gate": "redcliff_gate_1",
+   "x": 342,
+   "z": 828,
+   "yaw": -2.724,
    "titled": false
   },
   {
@@ -337,10 +337,10 @@
    "tier": "town",
    "town": "Redcliff",
    "post": "gate",
-   "gate": "redcliff_gate_0",
-   "x": 366,
-   "z": 920,
-   "yaw": -0.644,
+   "gate": "redcliff_gate_1",
+   "x": 334,
+   "z": 830,
+   "yaw": -2.724,
    "titled": false
   },
   {
@@ -352,10 +352,10 @@
    "tier": "town",
    "town": "Redcliff",
    "post": "gate",
-   "gate": "redcliff_gate_1",
-   "x": 344,
-   "z": 822,
-   "yaw": -1.93,
+   "gate": "redcliff_gate_2",
+   "x": 438,
+   "z": 844,
+   "yaw": 2.057,
    "titled": false
   },
   {
@@ -367,10 +367,10 @@
    "tier": "town",
    "town": "Redcliff",
    "post": "gate",
-   "gate": "redcliff_gate_1",
-   "x": 340,
-   "z": 830,
-   "yaw": -1.93,
+   "gate": "redcliff_gate_2",
+   "x": 434,
+   "z": 836,
+   "yaw": 2.057,
    "titled": false
   },
   {
@@ -383,8 +383,8 @@
    "town": "Redcliff",
    "post": "square",
    "x": 386,
-   "z": 870,
-   "yaw": -1.489,
+   "z": 876,
+   "yaw": -2.272,
    "titled": false
   },
   {
@@ -424,10 +424,10 @@
    "tier": "village",
    "town": "Cinder Farm",
    "post": "gate",
-   "gate": "cinder_farm_gate_0",
-   "x": 1262,
-   "z": 1744,
-   "yaw": 0.608,
+   "gate": "cinder_farm_gate_2",
+   "x": 1264,
+   "z": 1682,
+   "yaw": 2.157,
    "titled": false
   },
   {
@@ -439,10 +439,10 @@
    "tier": "village",
    "town": "Cinder Farm",
    "post": "gate",
-   "gate": "cinder_farm_gate_1",
-   "x": 1220,
-   "z": 1654,
-   "yaw": 3.142,
+   "gate": "cinder_farm_gate_0",
+   "x": 1260,
+   "z": 1748,
+   "yaw": 0.926,
    "titled": false
   },
   {
@@ -455,8 +455,8 @@
    "town": "Cinder Farm",
    "post": "square",
    "x": 1224,
-   "z": 1708,
-   "yaw": -1.372,
+   "z": 1710,
+   "yaw": -1.663,
    "titled": false
   },
   {
@@ -471,7 +471,7 @@
    "gate": "ravenhaven_gate_0",
    "x": 130,
    "z": 260,
-   "yaw": 0.54,
+   "yaw": 0.378,
    "titled": false
   },
   {
@@ -483,10 +483,10 @@
    "tier": "hamlet",
    "town": "Minfenrow",
    "post": "gate",
-   "gate": "minfenrow_gate_0",
-   "x": 1120,
-   "z": 1126,
-   "yaw": 0.785,
+   "gate": "minfenrow_gate_1",
+   "x": 1064,
+   "z": 1082,
+   "yaw": -1.345,
    "titled": false
   },
   {
@@ -500,8 +500,8 @@
    "post": "gate",
    "gate": "bipetwatch_gate_0",
    "x": 360,
-   "z": 1434,
-   "yaw": 1.429,
+   "z": 1428,
+   "yaw": 1.591,
    "titled": false
   }
  ]

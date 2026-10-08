@@ -248,14 +248,26 @@
     {
       "a": [
         408.54,
-        905.42
+        909.3
       ],
       "b": [
-        386.11,
-        849.85
+        389.11,
+        863.22
       ],
       "h": 43.935,
-      "w": 7.46
+      "w": 6
+    },
+    {
+      "a": [
+        405,
+        871.5
+      ],
+      "b": [
+        391,
+        871.48
+      ],
+      "h": 43.935,
+      "w": 6
     }
   ],
   "summary": {
@@ -280,16 +292,32 @@
           "z": 832
         },
         "culture": "halfling",
-        "plots": 25,
-        "streets": 69,
-        "links": 3,
+        "plots": 21,
+        "streets": 74,
+        "links": 4,
         "overlaps": 0,
-        "highStreets": 3,
+        "highStreets": 4,
         "w6": {
           "plotsBefore": 23,
-          "plots": 25,
-          "kept": 0,
-          "renumbered": true
+          "plots": 21,
+          "kept": 20,
+          "removed": [
+            {
+              "plot": 3,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 5,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 13,
+              "want": "hut",
+              "office": false
+            }
+          ]
         }
       },
       {
@@ -306,25 +334,30 @@
           "z": 1728
         },
         "culture": "halfling",
-        "plots": 22,
+        "plots": 21,
         "streets": 65,
         "links": 3,
         "overlaps": 0,
         "highStreets": 3,
         "w6": {
           "plotsBefore": 26,
-          "plots": 22,
-          "kept": 22,
+          "plots": 21,
+          "kept": 21,
           "removed": [
             {
-              "plot": 3,
-              "want": "stable",
-              "office": true
+              "plot": 0,
+              "want": "house",
+              "office": false
             },
             {
-              "plot": 4,
-              "want": "forge",
-              "office": true
+              "plot": 2,
+              "want": "hut",
+              "office": false
+            },
+            {
+              "plot": 10,
+              "want": "hut",
+              "office": false
             },
             {
               "plot": 21,
@@ -335,16 +368,6 @@
               "plot": 22,
               "want": "house",
               "office": false
-            }
-          ],
-          "moved": [
-            {
-              "office": "stable",
-              "to": 18
-            },
-            {
-              "office": "forge",
-              "to": 5
             }
           ]
         }
@@ -364,7 +387,7 @@
         },
         "culture": "halfling",
         "plots": 13,
-        "streets": 43,
+        "streets": 41,
         "links": 2,
         "overlaps": 0,
         "highStreets": 2,
@@ -374,20 +397,14 @@
           "kept": 12,
           "removed": [
             {
-              "plot": 10,
+              "plot": 7,
               "want": "hut",
               "office": false
             },
             {
-              "plot": 11,
-              "want": "shop",
-              "office": true
-            }
-          ],
-          "moved": [
-            {
-              "office": "shop",
-              "to": 0
+              "plot": 10,
+              "want": "hut",
+              "office": false
             }
           ]
         }
@@ -406,40 +423,20 @@
           "z": 1088
         },
         "culture": "halfling",
-        "plots": 8,
-        "streets": 33,
+        "plots": 10,
+        "streets": 32,
         "links": 2,
         "overlaps": 0,
         "highStreets": 2,
         "w6": {
           "plotsBefore": 11,
-          "plots": 8,
-          "kept": 8,
+          "plots": 10,
+          "kept": 10,
           "removed": [
             {
               "plot": 6,
               "want": "house",
               "office": false
-            },
-            {
-              "plot": 7,
-              "want": "inn",
-              "office": true
-            },
-            {
-              "plot": 8,
-              "want": "shop",
-              "office": true
-            }
-          ],
-          "moved": [
-            {
-              "office": "inn",
-              "to": 3
-            },
-            {
-              "office": "shop",
-              "to": 5
             }
           ]
         }
@@ -472,7 +469,7 @@
       }
     ],
     "roads": 15,
-    "bridges": 5,
+    "bridges": 6,
     "paths": 14,
     "pathMetres": 692,
     "scatter": 18867,
@@ -507,9 +504,9 @@
     "vignettesAvoided": 634
   },
   "files": {
-    "terrain.bin": 510764,
-    "nav.bin": 35249,
+    "terrain.bin": 510608,
+    "nav.bin": 34962,
     "scatter.bin": 151020,
-    "placements.json": 257964
+    "placements.json": 260903
   }
 }

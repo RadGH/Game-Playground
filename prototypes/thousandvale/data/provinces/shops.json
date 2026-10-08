@@ -875,15 +875,19 @@
             "g5_cloth_pleats",
             "g5_cloth_vestment",
             "g5_cloth_wrap",
+            "g5_pack_satchel",
             "g5_girdle",
             "g5_leather_brigandine",
             "g5_leather_chaps",
             "g5_leather_cuffboots",
             "g5_leather_gloves",
             "g5_leather_slouch",
-            "g5_swallowtail"
+            "g5_swallowtail",
+            "g5_pack_explorer",
+            "g5_pack_rucksack",
+            "g5_pack_frame"
           ],
-          "count": 17,
+          "count": 19,
           "rarity": {
             "normal": 0.55,
             "magic": 0.38,
@@ -895,7 +899,10 @@
           },
           "minCap": {
             "trail_rucksack": 10,
-            "expedition_pack": 20
+            "expedition_pack": 20,
+            "g5_pack_explorer": 10,
+            "g5_pack_rucksack": 10,
+            "g5_pack_frame": 20
           },
           "countBase": 13,
           "catalog": [
@@ -904,13 +911,17 @@
             "g5_cloth_pleats",
             "g5_cloth_vestment",
             "g5_cloth_wrap",
+            "g5_pack_satchel",
             "g5_girdle",
             "g5_leather_brigandine",
             "g5_leather_chaps",
             "g5_leather_cuffboots",
             "g5_leather_gloves",
             "g5_leather_slouch",
-            "g5_swallowtail"
+            "g5_swallowtail",
+            "g5_pack_explorer",
+            "g5_pack_rucksack",
+            "g5_pack_frame"
           ]
         },
         "other": {
@@ -2481,12 +2492,12 @@
         },
         {
           "base": "leather_belt",
-          "rarity": "magic",
+          "rarity": "normal",
           "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
           "base": "expedition_pack",
-          "rarity": "magic",
+          "rarity": "normal",
           "cat": "Robes, leathers, cloaks, belts & packs"
         },
         {
@@ -2516,6 +2527,16 @@
         },
         {
           "base": "g5_cloth_vestment",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "g5_cloth_wrap",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "g5_pack_satchel",
           "rarity": "rare",
           "cat": "Robes, leathers, cloaks, belts & packs"
         },

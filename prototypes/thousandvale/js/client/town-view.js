@@ -15,6 +15,7 @@ import * as THREE from 'three';
 import { LIGHTS } from './lightpool.js';
 import { describeBuilding, partsFor, radiusOf, MESHES, describeStall, stallParts, wallKitParts, CULTURE_KIT } from '../../../../proctown/js/buildkit.js';
 import { makeGlowTexture, makeFlameTexture } from './decor.js';
+import { squareFurniture } from './town-square.js';
 import { buildSignBoards } from './sign-text.js';
 import { officeDressing, officeKindFor, OFFICE_KINDS } from '../../../../proctown/js/offices.js';
 import { tuneFor } from './building-tune.js';
@@ -96,7 +97,7 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
   // ---- gather -----------------------------------------------------------------------------------
   const towns = new Map();   // town id -> { id, name, x, z, r, culture, seed, lamps: [] }
   for (const p of placements) if (p.kind === 'settlement') towns.set(p.id, { id: p.id, name: p.data?.name || p.id, x: p.x + ox, z: p.z + oz, r: p.data?.radius || 60, kind: p.data?.kind, hub: !!p.data?.hub, culture: 'human', seed: strHash(p.id), lamps: [], square: null });
-  for (const p of placements) if (p.kind === 'town_square') { const t = towns.get(p.data?.town); if (t) { t.culture = p.data?.culture || t.culture; t.square = { x: p.x + ox, z: p.z + oz, r: p.data?.r || 5 }; } }
+  for (const p of placements) if (p.kind === 'town_square') { const t = towns.get(p.data?.town); if (t) { t.culture = p.data?.culture || t.culture; t.square = { x: p.x + ox, z: p.z + oz, r: p.data?.r || 5, stalls: Array.isArray(p.data?.stalls) ? p.data.stalls.map(([x, z]) => [x + ox, z + oz]) : null }; } }
   const cultureOf = id => { const t = towns.get(id); return t && CULTURE_KIT.cultures[t.culture] ? t.culture : 'human'; };
 
   // ---- parts, collected per unit mesh -------------------------------------------------------------

@@ -179,8 +179,8 @@ for (const id of vocab('accessory')) if (await builds('accessory', id)) {
 
 // ---- Thousandvale's items made FROM the catalog (stream C, js/rules/tv-gear.js + data/rules/gear-tv.json): each new row
 // becomes an item base whose key is the row's `base` and whose numbers are copied from a plain `template` base. The
-// plain bases of the three extra slots (travel_cloak, leather_belt, hand_lantern, pitch_torch) land on the old model
-// gear-look draws for them.
+// plain bases of the extra slots (travel_cloak, leather_belt, and the backpacks) land on the model gear-look draws for
+// them. (Light items left Thousandvale in owner feedback 8: the lantern / torch models stay in the catalog for other games.)
 {
   const cfgPath = join(ROOT, 'prototypes/thousandvale/data/rules/gear-tv.json');
   if (existsSync(cfgPath)) {
@@ -196,8 +196,14 @@ for (const id of vocab('accessory')) if (await builds('accessory', id)) {
       if (!['back', 'waist', 'light'].includes(b.slot)) continue;
       const look = gearLook({ [b.slot]: { ...b, baseKey: key } });
       for (const slot of ['cape', 'decor', 'offhand']) {
-        const id = look[slot]?.id, r = id && id !== 'none' && rows.find(x => x.id === id && x.slot === slot && !x.new);
+        // (a backpack base lands on a NEW row — the pack models of owner feedback 8, W19 — so new rows count here too)
+        const id = look[slot]?.id, r = id && id !== 'none' && rows.find(x => x.id === id && x.slot === slot && (!x.new || b.pack));
         if (r && !r.items.some(i => i.base === key)) r.items.push({ game: 'thousandvale', base: key, slot: b.slot });
+      }
+      // a rare-or-better pack draws the model the rules name in `packs.rareLook`
+      if (b.pack && cfg.packs?.rareLook) {
+        const id = gearLook({ [b.slot]: { ...b, baseKey: key, rarity: 'rare', g5: cfg.packs.rareLook } }).cape?.id, r = rows.find(x => x.id === id && x.slot === 'cape');
+        if (r && !r.items.some(i => i.base === key)) r.items.push({ game: 'thousandvale', base: key, slot: b.slot, rarity: 'rare' });
       }
     }
   }

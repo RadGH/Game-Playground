@@ -202,9 +202,9 @@
    "name": "Gervase Sallow",
    "role": "carter",
    "at": "Orrinsford",
-   "x": 260,
-   "z": 570,
-   "yaw": 0,
+   "x": 256,
+   "z": 582,
+   "yaw": 3.11,
    "cart": "cart_orrinsford",
    "placedBy": "content-towns",
    "quests": 1,
@@ -218,9 +218,9 @@
    "vehicle": "ox_cart",
    "town": "Orrinsford",
    "carter": "carter_orrinsford",
-   "x": 260,
-   "z": 568,
-   "yaw": -1.571,
+   "x": 256,
+   "z": 584,
+   "yaw": -1.549,
    "radius": 2.2
   },
   {
@@ -260,9 +260,9 @@
    "town": "Orrinsford",
    "post": "gate",
    "gate": "orrinsford_gate_0",
-   "x": 278,
-   "z": 572,
-   "yaw": -1.571,
+   "x": 276,
+   "z": 570,
+   "yaw": -1.406,
    "titled": false
   },
   {
@@ -277,7 +277,7 @@
    "gate": "orrinsford_gate_0",
    "x": 278,
    "z": 580,
-   "yaw": -1.571,
+   "yaw": -1.406,
    "titled": false
   },
   {
@@ -292,7 +292,7 @@
    "gate": "orrinsford_gate_1",
    "x": 324,
    "z": 520,
-   "yaw": 3.142,
+   "yaw": -3.113,
    "titled": false
   },
   {
@@ -307,7 +307,7 @@
    "gate": "orrinsford_gate_1",
    "x": 316,
    "z": 520,
-   "yaw": 3.142,
+   "yaw": -3.113,
    "titled": false
   },
   {
@@ -362,9 +362,9 @@
    "town": "Pilgrim's Halt",
    "post": "gate",
    "gate": "pilgrim_s_halt_gate_0",
-   "x": 644,
-   "z": 212,
-   "yaw": -2.239,
+   "x": 642,
+   "z": 214,
+   "yaw": -2.347,
    "titled": false
   }
  ]

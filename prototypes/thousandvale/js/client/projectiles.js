@@ -74,8 +74,8 @@ function buildGeometries() {
   // --- glowing ones: vertex colour is BRIGHTNESS (the material's colour is the element's); layers add up to a hot core
   // a firebolt: a hot head and a long tapering flame behind it, two licks off-axis
   G.firebolt = mergeGeometries([
-    ball(0.11, '#ffffff'), ball(0.17, '#b0b0b0', -0.02, 1.25), tip(0.15, -0.05, -0.95, '#8a8a8a', 7), tip(0.085, 0.0, -1.3, '#6a6a6a', 5),
-    at(tip(0.06, 0, -0.5, '#707070', 4), 0.07, 0.06, -0.18, 0.12, 0.1), at(tip(0.05, 0, -0.42, '#707070', 4), -0.08, -0.04, -0.26, -0.1, -0.14),
+    ball(0.1, '#a8a8a8'), ball(0.17, '#6a6a6a', -0.02, 1.25), tip(0.15, -0.05, -0.95, '#5a5a5a', 7), tip(0.085, 0.0, -1.3, '#4a4a4a', 5),      // (kept dim: the layers ADD, and a brighter stack burned out to yellow-white instead of fire orange)
+    at(tip(0.06, 0, -0.5, '#484848', 4), 0.07, 0.06, -0.18, 0.12, 0.1), at(tip(0.05, 0, -0.42, '#484848', 4), -0.08, -0.04, -0.26, -0.1, -0.14),
   ]);
   // an orb: a bright core in a soft shell, a short tail
   G.orb = mergeGeometries([ball(0.1, '#ffffff'), ball(0.2, '#707070', 0, 1), ball(0.28, '#2c2c2c', -0.03, 1.1), tip(0.13, -0.08, -0.62, '#4a4a4a', 6)]);
@@ -151,7 +151,7 @@ export function createProjectiles(scene, { actors = null, groundY = () => 0, nig
     let it = pool.items.find(x => !x.live);
     if (!it) { it = pool.items[pool.next++ % pool.items.length]; stats.reused++; const i = live.indexOf(it); if (i >= 0) live.splice(i, 1); }
     const dist = start.distanceTo(to);
-    it.live = true; it.kind = kind; it.t = 0; it.shooter = ev.id ?? null;
+    it.live = true; it.kind = kind; it.t = 0; it.shooter = ev.id ?? null; it.big = ev.big ? 1.5 : 1;
     it.ms = flightMs({ ...ev, ms: ms ?? ev.ms }, dist, kind.model);
     it.from = (it.from || new THREE.Vector3()).copy(start);
     it.to = (it.to || new THREE.Vector3()).copy(to);
@@ -189,7 +189,7 @@ export function createProjectiles(scene, { actors = null, groundY = () => 0, nig
       _b.copy(place(it, Math.min(1, k + 0.05)));
       if (_b.distanceToSquared(m.position) > 1e-6) m.lookAt(_b);
       if (it.kind.spin) { it.spin += dt * it.kind.spin * Math.PI * 2; m.rotateX(it.spin); }
-      if (it.kind.glow) { const f = 0.88 + 0.24 * Math.sin(it.t * 0.045 + i); m.scale.set(SIZE * f, SIZE * f, SIZE * (1 + 0.18 * Math.sin(it.t * 0.03))); }
+      if (it.kind.glow) { const f = (0.88 + 0.24 * Math.sin(it.t * 0.045 + i)) * (it.kind.scale || 1) * it.big; m.scale.set(SIZE * f, SIZE * f, SIZE * (it.kind.scale || 1) * it.big * (1 + 0.18 * Math.sin(it.t * 0.03))); }
       if (k >= 1) {
         m.visible = false; it.live = false; live.splice(i, 1); stats.landed++;
         const fn = it.onLand; it.onLand = null; it.follow = null;

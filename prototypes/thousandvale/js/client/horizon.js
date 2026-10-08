@@ -17,7 +17,7 @@
 //   hz.setBiomes(reader.biomes) (macro only)    hz.setVisible(bool)  hz.stats()
 
 import * as THREE from 'three';
-import { CHUNK, prepareGrid, buildChunk, gridHeightAt, chunkCounts, chunkRect, rectDistance, coveredBy, touchedBy, lodFor } from './horizon-grid.js';
+import { CHUNK, prepareGrid, buildChunk, gridHeightAt, chunkCounts, chunkRect, rectDistance, coveredBy, touchedBy, lodFor, TREE_SPIRES, CANOPY_SPIRES, buildCanopy } from './horizon-grid.js';
 
 const MAGIC = 'TVWM';
 
@@ -124,7 +124,8 @@ async function chunkSource(url) {
       });
       return {
         info, worker: true, maxInFlight: 8,
-        chunk: (ci, cj, chunk, stride, holes) => new Promise((resolve, reject) => { const id = nextId++; waiting.set(id, { resolve, reject }); w.postMessage({ type: 'chunk', id, ci, cj, chunk, stride, holes }); }),
+        chunk: (ci, cj, chunk, stride, holes, opts) => new Promise((resolve, reject) => { const id = nextId++; waiting.set(id, { resolve, reject }); w.postMessage({ type: 'chunk', id, ci, cj, chunk, stride, holes, opts }); }),
+        canopy: (ci, cj, chunk, holes, opts) => new Promise((resolve, reject) => { const id = nextId++; waiting.set(id, { resolve, reject }); w.postMessage({ type: 'canopy', id, ci, cj, chunk, holes, opts }); }),
         dispose: () => w.terminate(),
       };
     } catch (e) {
@@ -135,10 +136,15 @@ async function chunkSource(url) {
   const r = await fetch(url);
   if (!r.ok) throw new Error('horizon.bin ' + r.status);
   const g = prepareGrid(await r.arrayBuffer());
-  return { info: g, worker: false, maxInFlight: 1, chunk: async (ci, cj, chunk, stride, holes) => buildChunk(g, ci, cj, chunk, stride, holes), dispose() {} };
+  return { info: g, worker: false, maxInFlight: 1, chunk: async (ci, cj, chunk, stride, holes, opts) => buildChunk(g, ci, cj, chunk, stride, holes, opts), canopy: async (ci, cj, chunk, holes, opts) => buildCanopy(g, ci, cj, chunk, holes, opts) || { empty: true }, dispose() {} };
 }
 
 async function createFineHorizon(scene, { quality, base }) {
+  // play-test 8 (W18): far hills are wooded — a canopy tint everywhere, tree spires on the nearest ring (not on Low).
+  // `?horizonTrees=0` turns both off (to compare, and to prove a perf question is or is not this).
+  const treesOff = typeof location !== 'undefined' && new URLSearchParams(location.search).get('horizonTrees') === '0';
+  const treeOpts = { trees: !treesOff, spires: treesOff ? 0 : (TREE_SPIRES[quality] ?? 0) };
+  const canopyOpts = { spires: treesOff ? 0 : (CANOPY_SPIRES[quality] ?? 0) };
   const [src, world] = await Promise.all([
     chunkSource(new URL('horizon.bin', base)),
     fetch(new URL('world.json', base)).then(r => (r.ok ? r.json() : null)).catch(() => null),
@@ -155,7 +161,7 @@ async function createFineHorizon(scene, { quality, base }) {
   scene.add(points);
 
   const chunks = [];
-  for (let cj = 0; cj < cz; cj++) for (let ci = 0; ci < cx; ci++) chunks.push({ ci, cj, rect: chunkRect(g, ci, cj, size), mesh: null, stride: 0, want: 0, pending: 0, covered: false, dist: 0, tris: 0, holesVer: 0, needVer: 0 });
+  for (let cj = 0; cj < cz; cj++) for (let ci = 0; ci < cx; ci++) chunks.push({ ci, cj, rect: chunkRect(g, ci, cj, size), mesh: null, stride: 0, want: 0, pending: 0, covered: false, dist: 0, tris: 0, holesVer: 0, needVer: 0, canopy: null, canopyVer: 0, canopyWant: 0, canopyBusy: false, canopyN: 0 });
   let loadedRects = [], visible = true, inFlight = 0, coverDirty = true, built = 0, holesVer = 0;
 
   function apply(ch, c) {
@@ -173,14 +179,14 @@ async function createFineHorizon(scene, { quality, base }) {
       group.add(ch.mesh);
     }
     ch.mesh.visible = !ch.covered;
-    ch.stride = c.stride; ch.tris = c.tris; built++;
+    ch.stride = c.stride; ch.tris = c.tris; ch.spires = c.spires || 0; built++;
     ch.want = lodFor(ch.dist, quality, ch.stride);
   }
 
   function request(ch, stride) {
     ch.pending = stride; inFlight++;
     const ver = ch.needVer, cut = ver ? loadedRects.filter(r => touchedBy(ch.rect, [r])) : null;
-    src.chunk(ch.ci, ch.cj, size, stride, cut).then(c => { apply(ch, c); ch.holesVer = ver; })
+    src.chunk(ch.ci, ch.cj, size, stride, cut, treeOpts).then(c => { apply(ch, c); ch.holesVer = ver; })
       .catch(e => console.warn('[horizon] chunk failed', ch.ci, ch.cj, e.message))
       .finally(() => { ch.pending = 0; inFlight--; if (src.worker) pump(); });   // keep the worker fed at any frame rate
   }
@@ -195,6 +201,7 @@ async function createFineHorizon(scene, { quality, base }) {
         // partly under loaded zones: rebuild with those cells cut out (and rebuild whole once they unload)
         const touched = !ch.covered && touchedBy(ch.rect, loadedRects);
         ch.needVer = touched ? holesVer : 0;
+        ch.canopyWant = touchedBy(ch.rect, loadedRects) ? holesVer : 0;      // W18: covered chunks too — that is where the bare mountains are
       }
       coverDirty = false;
     }
@@ -203,7 +210,7 @@ async function createFineHorizon(scene, { quality, base }) {
       lodAt.x = cam.x; lodAt.z = cam.z; lodDirty = false;
       for (const ch of chunks) { ch.dist = rectDistance(ch.rect, cam.x, cam.z); ch.want = lodFor(ch.dist, quality, ch.stride); }
     }
-    pump();
+    pump(); pumpCanopy();
   }
   const lastCam = { x: NaN, z: NaN }, lodAt = { x: Infinity, z: Infinity };
   let lodDirty = true;
@@ -223,6 +230,33 @@ async function createFineHorizon(scene, { quality, base }) {
     }
   }
 
+  /**
+   * W18: the canopy over loaded zones. A chunk any loaded zone touches gets ONE extra mesh of tree spires for its bare
+   * mountain cells under those zones (built in the worker, the horizon's own material). Rebuilt when the loaded set
+   * changes, removed when no zone touches the chunk any more. One request at a time, so it never starves the ground.
+   */
+  function pumpCanopy() {
+    if (!canopyOpts.spires || !src.canopy) return;
+    for (const ch of chunks) {
+      if (ch.canopyBusy || ch.canopyVer === ch.canopyWant) continue;
+      if (!ch.canopyWant) { if (ch.canopy) { group.remove(ch.canopy); ch.canopy.geometry.dispose(); ch.canopy = null; ch.canopyN = 0; } ch.canopyVer = 0; continue; }
+      const ver = ch.canopyWant, cut = loadedRects.filter(r => touchedBy(ch.rect, [r]));
+      ch.canopyBusy = true;
+      src.canopy(ch.ci, ch.cj, size, cut, canopyOpts).then(c => {
+        if (ch.canopy) { group.remove(ch.canopy); ch.canopy.geometry.dispose(); ch.canopy = null; ch.canopyN = 0; }
+        if (c && !c.empty) {
+          const geo = new THREE.BufferGeometry();
+          geo.setAttribute('position', new THREE.BufferAttribute(c.pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(c.nor, 3)); geo.setAttribute('color', new THREE.BufferAttribute(c.col, 3));
+          geo.setIndex(new THREE.BufferAttribute(c.idx, 1)); geo.computeBoundingSphere();
+          const mesh = new THREE.Mesh(geo, mat); mesh.name = `horizon-canopy-${ch.ci}-${ch.cj}`; mesh.castShadow = false; mesh.receiveShadow = false; mesh.matrixAutoUpdate = false;
+          group.add(mesh); ch.canopy = mesh; ch.canopyN = c.spires;
+        }
+        ch.canopyVer = ver;
+      }).catch(e => { ch.canopyVer = ver; console.warn('[horizon] canopy failed', ch.ci, ch.cj, e.message); }).finally(() => { ch.canopyBusy = false; });
+      return;                                   // one a call: the next goes out on a later frame
+    }
+  }
+
   function setLoaded(rects) {
     const key = rects.map(r => `${r.minX},${r.minZ},${r.maxX},${r.maxZ}`).sort().join('|');
     if (key === setLoaded.key) return;
@@ -237,11 +271,11 @@ async function createFineHorizon(scene, { quality, base }) {
     setVisible(v) { visible = v; group.visible = v; points.visible = v && lmat.opacity > 0.05; },
     get holes() { return loadedRects; },
     stats() {
-      const lods = {}; let tris = 0, drawn = 0;
-      for (const ch of chunks) if (ch.mesh && !ch.covered) { drawn++; tris += ch.tris; lods[ch.stride] = (lods[ch.stride] || 0) + 1; }
-      return { source: 'horizon.bin', worker: src.worker, chunks: chunks.length, drawn, tris, lods, pending: inFlight, built, cut: chunks.filter(c => c.needVer).length };
+      const lods = {}; let tris = 0, drawn = 0, spires = 0, canopy = 0; for (const ch of chunks) canopy += ch.canopyN || 0;
+      for (const ch of chunks) if (ch.mesh && !ch.covered) { drawn++; tris += ch.tris; spires += ch.spires || 0; lods[ch.stride] = (lods[ch.stride] || 0) + 1; }
+      return { source: 'horizon.bin', worker: src.worker, chunks: chunks.length, drawn, tris, lods, spires, canopy, trees: treeOpts.trees, pending: inFlight, built, cut: chunks.filter(c => c.needVer).length };
     },
-    dispose() { src.dispose(); for (const ch of chunks) ch.mesh?.geometry.dispose(); mat.dispose(); scene.remove(group); scene.remove(points); },
+    dispose() { src.dispose(); for (const ch of chunks) { ch.mesh?.geometry.dispose(); ch.canopy?.geometry.dispose(); } mat.dispose(); scene.remove(group); scene.remove(points); },
   };
 }
 

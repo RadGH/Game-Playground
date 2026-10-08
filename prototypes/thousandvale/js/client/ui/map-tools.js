@@ -97,7 +97,7 @@ export function createMapFind({ atlas, me, onChange = () => {}, onShow = () => {
     return h('section.map-found', {}, h('h4', {}, `${what} — ${S.towns.length} place${S.towns.length === 1 ? '' : 's'}`),
       h('ul.map-foundlist', {}, ...S.towns.slice(0, 24).map(t => h('li', { dataset: { town: t.town } },
         h('div', {}, h('b', {}, t.town), t.lone ? null : h('small', {}, t.labels.slice(0, 4).join(', ') + (t.labels.length > 4 ? '…' : '')),
-          p && t.dist != null ? h('small.dim', {}, `${distText(t.dist)} ${compass(t.x - p.x, t.z - p.z)}`) : null),
+          p && t.dist != null ? h('small.dim', {}, t.dist <= (t.r || 60) + 20 ? 'You are here' : `${distText(t.dist)} ${compass(t.x - p.x, t.z - p.z)}`) : null),
         h('button.ghost.small', { type: 'button', onclick: () => onShow(t) }, 'Show')))),
       S.towns.length > 24 ? h('p.tiny', {}, `…and ${S.towns.length - 24} more. Narrow the search.`) : null);
   }

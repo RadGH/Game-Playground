@@ -119,7 +119,8 @@ export function planTownWalls(ctx) {
     const ext = w => Math.max(...w.pts.map(q => Math.hypot(q[0] - cx, q[1] - cz)));
     // (W6: a high street is never a dead end — it is the street a gate is cut FOR)
     const mine = ways.filter(w => w.kind !== 'road' && !w.high && w.pts.some(q => Math.hypot(q[0] - cx, q[1] - cz) < R + 10));
-    for (let pass = 0; pass < 4; pass++) {
+    // (W6: not for a proctown-walled city — its main streets were carried out to plan.wallRadius, so the wall stays there)
+    for (let pass = 0; pass < 4 && !plan.wall; pass++) {
       let need = R;
       for (const w of mine) { const e = ext(w); if (e < R + 1.5 && w.pts.every(q => Math.hypot(q[0] - cx, q[1] - cz) < R + 1.5) && !(plan.wall && Math.abs(e - plan.wallRadius) < 1.5)) need = Math.max(need, e + w.width / 2 + keepClear + 0.5); }
       if (need <= R + 1e-6) break;
@@ -189,7 +190,7 @@ export function planTownWalls(ctx) {
     // carries in (its own old line through the wall, a few metres along from the gate) it is simply dropped: nothing is
     // painted along that line inside the town any more. Any other road is led to the nearest gate that has a street.
     const looseAll = HIGH && seeds.length ? cand.filter(c => c.w.kind === 'road' && !c.high) : [];
-    const loose = looseAll.filter(c => !seeds.some(sd => sd.high.linkRoad === c.w.id && Math.hypot(sd.x - c.x, sd.z - c.z) < 45));
+    const loose = looseAll.filter(c => !seeds.some(sd => sd.high.linkRoad === c.w.id));
     const pool = looseAll.length ? cand.filter(c => !looseAll.includes(c)) : cand;
     const rankC = c => rank(c.w) + (c.high ? 1000 : 0);
 
@@ -251,7 +252,8 @@ export function planTownWalls(ctx) {
       const main = bundle[0];
       const px = main.uz, pz = -main.ux;              // across the gate
       let lo = -main.w.width / 2, hi = main.w.width / 2;
-      for (const c of bundle.slice(1)) { const q = (c.x - main.x) * px + (c.z - main.z) * pz; lo = Math.min(lo, q - c.w.width / 2); hi = Math.max(hi, q + c.w.width / 2); }
+      // W6: a high street's gate is centred on the street and just wide enough for it, whatever else ends up beside it
+      if (!main.high) for (const c of bundle.slice(1)) { const q = (c.x - main.x) * px + (c.z - main.z) * pz; lo = Math.min(lo, q - c.w.width / 2); hi = Math.max(hi, q + c.w.width / 2); }
       const mid = (lo + hi) / 2;
       const pass = hi - lo + 1.2;                     // the clear passage, square to the road
       // T8b: the gate stands ON the ring and IN its line. Its normal is the ring's; the road crosses it at `th`.
@@ -268,6 +270,11 @@ export function planTownWalls(ctx) {
       const close = a => { const [x, z] = at(a); return bundle.some(c => polyNear(c.w.pts, x, z).d - c.w.width / 2 < st.thick / 2 + 1.0); };
       for (let k = 0; k < 40 && close(a0 - 0.5 / R); k++) a0 -= 0.5 / R;
       for (let k = 0; k < 40 && close(a1 + 0.5 / R); k++) a1 += 0.5 / R;
+      // W6: a high street's gate is not widened for what ends up beside it, but the wall still must not stand on it
+      if (main.high) for (const c of bundle.slice(1)) {
+        const reach = (c.w.width / 2 + POST + st.thick / 2) / R, d = ((c.a - ag + Math.PI * 3) % TAU) - Math.PI;
+        if (d < 0) a0 = Math.min(a0, ag + d - reach); else a1 = Math.max(a1, ag + d + reach);
+      }
       let kind = st.gate;
       if (pass > GATEHOUSE_MAX || open > OPEN_MAX) kind = 'gap';
       return { main, bundle, led, gx, gz, ux: main.ux, uz: main.uz, nx, nz, open, pass, slant: main.slant, a0, a1, kind };
@@ -325,7 +332,7 @@ export function planTownWalls(ctx) {
           const k = Math.floor(L / st.towerEvery);
           for (let q = 1; q <= k; q++) { const a = b0 + (b1 - b0) * q / (k + 1); if (tw.every(t => Math.abs(t - a) * R > st.towerEvery * 0.45)) tw.push(a); }
         }
-        for (const a of tw) { const [x, z, h] = ringAt(a); towers.push({ x, z, h, yaw: +Math.atan2(Math.cos(a), Math.sin(a)).toFixed(4) }); }
+        for (const a of tw) { const [x, z, h] = ringAt(a); if (ways.some(w => w.kind !== 'road' && Math.abs(w.pts[0][0] - x) < 300 && polyNear(w.pts, x, z).d < TOWER_R + 0.9)) continue; towers.push({ x, z, h, yaw: +Math.atan2(Math.cos(a), Math.sin(a)).toFixed(4) }); }
       }
     }
     if (!opens.length) {                                // no way in at all (cannot happen with a road; kept for safety)
@@ -365,10 +372,7 @@ export function planTownWalls(ctx) {
         const startIn = Math.hypot(H.pts[0][0] - cx, H.pts[0][1] - cz) < R - 0.5;
         if (n.d < 0.75) route = [gp, ...H.pts.slice(n.k + 1)];                 // the street runs through the gate itself
         else if (startIn) route = [gp, ...H.pts];                               // the road carries on to where the street starts
-        else {                                                                  // the street started outside: meet it a few metres in
-          const L = Math.hypot(end[0] - near[0], end[1] - near[1]) || 1, f = Math.min(1, 6 / L);
-          route = [gp, [near[0] + (end[0] - near[0]) * f, near[1] + (end[1] - near[1]) * f], end];
-        }
+        else route = [gp, ...H.pts.slice(n.k + 1)];                             // the street started outside and the gate stands a little off it
         // a street that joins another carries on along THAT one to the square
         for (let h = H, guard = 0; h.joins && guard < 6; guard++) {
           const J = highs.find(w => w.id === h.joins); if (!J) break;
@@ -386,6 +390,12 @@ export function planTownWalls(ctx) {
         if (RW && d0 < rimR - 1) {
           const outer = nearestPiece(along(RW, Math.max(d0 - 0.5, 0), rimR), s0[0], s0[1]);
           if (outer.length > 1 && Math.min(...outer.map(q => Math.hypot(q[0] - s0[0], q[1] - s0[1]))) < 4) appr.push({ way: RW.id, width: RW.width, pts: outer });
+        }
+        // a road that passes the town rather than ending in it: its other stretches inside the town circle are painted
+        // too wherever they keep clear of the wall, so the road is not left with a hole in it where it clips the circle
+        if (RW) for (const piece of along(RW, R + st.thick / 2 + RW.width / 2 + 2, rimR)) {
+          if (appr.some(a => a.way === RW.id && a.pts.some(q => Math.hypot(q[0] - piece[0][0], q[1] - piece[0][1]) < 1) && a.pts.some(q => Math.hypot(q[0] - piece[piece.length - 1][0], q[1] - piece[piece.length - 1][1]) < 1))) continue;
+          if (Math.min(...piece.map(q => Math.hypot(q[0] - g.gx, q[1] - g.gz))) < 80) appr.push({ way: RW.id, width: RW.width, pts: piece, passing: true });
         }
         // a street that starts inside the wall: the gate is on the road, so pave the few metres from the gate to it
         if (route.length > 2 && mainW.kind === 'road') appr.push({ way: mainW.id, width: Math.max(mainW.width, H.width), inside: true, pts: densify([route[0], route[1]]) });
@@ -455,7 +465,10 @@ export function wallNav(walls, { SIZE, STEP, mark }) {
       const px = wall ? Math.cos(g.wallYaw) : g.out[1], pz = wall ? -Math.sin(g.wallYaw) : -g.out[0], off = (wall ? g.open : g.width) / 2 + half;
       const J = [[g.x + px * off, g.z + pz * off], [g.x - px * off, g.z - pz * off]];
       for (const j of J) {
-        const e = g.ends.slice().sort((a, b) => Math.hypot(a[0] - j[0], a[1] - j[1]) - Math.hypot(b[0] - j[0], b[1] - j[1]))[0];
+        // each jamb runs to the end of the wall on ITS side of the gate (an opening can reach further one way than the other)
+        const side = (j[0] - g.x) * px + (j[1] - g.z) * pz;
+        const e = g.ends.filter(q => ((q[0] - g.x) * px + (q[1] - g.z) * pz) * side > 0).sort((a, b) => Math.hypot(a[0] - j[0], a[1] - j[1]) - Math.hypot(b[0] - j[0], b[1] - j[1]))[0];
+        if (!e) continue;
         const L = Math.hypot(e[0] - j[0], e[1] - j[1]);
         for (let u = 0; u <= L; u += 0.5) disc(j[0] + (e[0] - j[0]) * u / (L || 1), j[1] + (e[1] - j[1]) * u / (L || 1), half);
       }

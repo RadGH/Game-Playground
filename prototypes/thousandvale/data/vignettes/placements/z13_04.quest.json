@@ -188,9 +188,9 @@
    "town": "Gorsehold",
    "post": "gate",
    "gate": "gorsehold_gate_0",
-   "x": 1620,
-   "z": 1266,
-   "yaw": 1.974,
+   "x": 1614,
+   "z": 1262,
+   "yaw": 1.139,
    "titled": false
   },
   {
@@ -203,9 +203,9 @@
    "town": "Gorsehold",
    "post": "gate",
    "gate": "gorsehold_gate_0",
-   "x": 1616,
-   "z": 1260,
-   "yaw": 1.974,
+   "x": 1618,
+   "z": 1252,
+   "yaw": 1.139,
    "titled": false
   },
   {
@@ -245,9 +245,9 @@
    "tier": "town",
    "town": "Gorsehold",
    "post": "square",
-   "x": 1568,
-   "z": 1282,
-   "yaw": -0.829,
+   "x": 1570,
+   "z": 1284,
+   "yaw": -1.171,
    "titled": false
   },
   {
@@ -262,7 +262,7 @@
    "gate": "burnt_barns_gate_0",
    "x": 1620,
    "z": 386,
-   "yaw": 1.028,
+   "yaw": 0.972,
    "titled": false
   }
  ]

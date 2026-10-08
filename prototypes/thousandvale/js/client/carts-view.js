@@ -27,7 +27,7 @@ export const CART_SPEC = { type: 'ox_cart', size: 1, animal: OX };
 /** How far behind / beside its walking carter a roaming cart is drawn (the carter leads the ox by the head). */
 export const LEAD = { back: 2.9, side: 0.95 };
 /** The ride you see before the veil: how long the cart rolls and how fast it gets. */
-export const RIDE = { showMs: 3200, speed: 2.4, accel: 1.6, veilLeadMs: 900 };
+export const RIDE = { showMs: 3200, speed: 2.4, accel: 1.6, veilLeadMs: 1100 };   // A's `ms` (4-14 s by road length) is how long you watch; the veil closes 1.1 s before it is up
 
 /**
  * Pure: where a roaming cart sits for a carter at (x, z) facing `yaw` — behind the carter and to their right, so the
@@ -57,6 +57,12 @@ export function createCarts(scene, { groundY = () => 0, compile = null, actors =
     if (spare.length) return spare.pop();
     const v = await createVehicle(CART_SPEC);
     v.group.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
+    // the kit stands its animal a step AHEAD of the shaft tips (looked at in a screenshot: an ox walking in front of a
+    // cart it is not attached to). An ox goes BETWEEN the shafts: back it up until its rump is a hand from the bed.
+    try {
+      const root = v.group.children[0], ox = root?.children.find(c => c.userData?.character);
+      if (ox) { const b = new THREE.Box3().setFromObject(ox), bed = v.metrics().seat?.x ?? -0.3; const rumpAt = Math.max(0.95, bed + 1.25); ox.position.x -= Math.max(0, (b.min.x - v.group.position.x) - rumpAt); }
+    } catch { /* drawn where the kit put it */ }
     try { v.seat = v.metrics().seat || { x: -0.3, y: 0.8, z: 0 }; } catch { v.seat = { x: -0.3, y: 0.8, z: 0 }; }
     if (compile) { try { await compile(v.group); } catch { /* drawn anyway */ } }
     stats.built++;
@@ -123,11 +129,13 @@ export function createCarts(scene, { groundY = () => 0, compile = null, actors =
       if (!c) c = await ensure('ride:' + stats.rides, { x: self.x + 1.6, z: self.z, yaw: headingTo(self, msg.to, 0), mode: 'parked' });
       if (!c?.v) return false;
       const total = Math.max(1200, Number.isFinite(msg.ms) ? msg.ms : RIDE.showMs);
-      ride = { cart: c, t: 0, from: { x: c.x, z: c.z }, yaw0: c.yaw, yaw: headingTo(c, msg.to, c.yaw), showMs: Math.min(total, RIDE.showMs), totalMs: total, veiled: false, cover, name: msg.to?.name || msg.toName || 'the next town', was: c.mode };
+      ride = { cart: c, t: 0, from: { x: c.x, z: c.z }, yaw0: c.yaw, yaw: headingTo(c, msg.to, c.yaw), showMs: total, totalMs: total, veiled: false, cover, name: msg.to?.name || msg.toName || 'the next town', was: c.mode };
       c.mode = 'ride'; c.v.setAnim('roll');
       return true;
     },
     get riding() { return !!ride; },
+    /** The ride's own time is up and a moment more (the arrival should have come). */
+    rideOver: () => !!ride && ride.t > ride.totalMs + 1500,
     /** While riding: where you are drawn — sat on the bed of the cart. Returns `drawn` untouched when not riding. */
     ridePos(drawn) {
       if (!ride?.cart?.v) return drawn;

@@ -48,15 +48,17 @@ soft('U1: the Party button, the mail tab, the friends tab and the bag show only 
   expect(await badge('party-btn'), 'the size of your party is not a badge').toBe('');
   // a friend is added and comes online; a letter arrives
   await page.evaluate(() => { tv.fake('friends', { list: [] }); tv.fake('friends', { list: [{ char: 999, name: 'Brem', level: 2, cls: 'warrior', online: false, unseen: true }], unseen: [{ char: 999, name: 'Brem', kind: 'added', at: Date.now() }], unseenCount: 1 }); tv.fake('friendState', { char: 999, name: 'Brem', cls: 'warrior', level: 2, online: true }); tv.fake('mailNew', { unread: 1 }); });
-  expect(await badge('menu-friends')).toBe('2'); expect(await badge('menu-mail')).toBe('1'); expect(await badge('party-btn')).toBe('3');
+  expect(await badge('menu-friends')).toBe('2'); expect(await badge('menu-mail')).toBe('1');
+  // play-test 8 (W10): the Party button's NUMBER is friends + guild news; unread mail is its yellow dot, never a number
+  expect(await badge('party-btn')).toBe('2'); expect(await page.evaluate(() => document.getElementById('party-btn').classList.contains('alert')), 'the yellow dot for mail').toBe(true);
   await shot('u1-badges-unseen');
   // you look at the friends list: that part clears; the letter is read: the rest clears
   await page.evaluate(() => tv.panel('friends', true));
-  expect(await badge('menu-friends')).toBe(''); expect(await badge('party-btn')).toBe('1');
+  expect(await badge('menu-friends')).toBe(''); expect(await badge('party-btn'), 'only the mail dot is left').toBe(''); expect(await page.evaluate(() => document.getElementById('party-btn').classList.contains('alert'))).toBe(true);
   await page.evaluate(() => { tv.panel('mail', true); tv.fake('mailList', { mail: [{ id: 5, from: 'Brem', subject: 'Hello', read: false, sentAt: Date.now() }], unread: 1 }); });
   await page.click('#panel-mail .ml-row');
   await page.evaluate(() => { tv.fake('mailOpen', { mail: { id: 5, from: 'Brem', subject: 'Hello', body: 'Hi.', read: true, sentAt: Date.now() } }); tv.fake('mailNew', { unread: 0 }); });
-  expect(await badge('menu-mail')).toBe(''); expect(await badge('party-btn'), 'read and seen: the red bubble is gone').toBe('');
+  expect(await badge('menu-mail')).toBe(''); expect(await badge('party-btn'), 'read and seen: the red bubble is gone').toBe(''); expect(await page.evaluate(() => document.getElementById('party-btn').classList.contains('alert')), 'and the dot with it').toBe(false);
   await page.evaluate(() => tv.panel('mail', false));
   // the bag: new things only, cleared by opening it
   await page.evaluate(() => tv.fake('bag', { add: [{ uid: 'p1', id: 'healing_potion', kind: 'potion', name: 'Healing Potion', count: 5, stackMax: 20, desc: 'Restores 40 HP.' }], remove: [], gold: 3 }));

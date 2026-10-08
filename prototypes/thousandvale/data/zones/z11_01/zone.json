@@ -210,37 +210,16 @@
           "z": 1472
         },
         "culture": "halfling",
-        "plots": 8,
-        "streets": 38,
+        "plots": 10,
+        "streets": 37,
         "links": 1,
         "overlaps": 0,
         "highStreets": 1,
         "w6": {
           "plotsBefore": 10,
-          "plots": 8,
-          "kept": 8,
-          "removed": [
-            {
-              "plot": 5,
-              "want": "shop",
-              "office": true
-            },
-            {
-              "plot": 6,
-              "want": "mill",
-              "office": true
-            }
-          ],
-          "moved": [
-            {
-              "office": "shop",
-              "to": 9
-            },
-            {
-              "office": "mill",
-              "to": 2
-            }
-          ]
+          "plots": 10,
+          "kept": 10,
+          "removed": []
         }
       },
       {
@@ -257,31 +236,20 @@
           "z": 832
         },
         "culture": "halfling",
-        "plots": 9,
+        "plots": 10,
         "streets": 36,
         "links": 1,
         "overlaps": 0,
         "highStreets": 1,
         "w6": {
           "plotsBefore": 11,
-          "plots": 9,
-          "kept": 9,
+          "plots": 10,
+          "kept": 10,
           "removed": [
-            {
-              "plot": 8,
-              "want": "mill",
-              "office": true
-            },
             {
               "plot": 10,
               "want": "house",
               "office": false
-            }
-          ],
-          "moved": [
-            {
-              "office": "mill",
-              "to": 9
             }
           ]
         }
@@ -314,13 +282,13 @@
       "x": 1732,
       "z": 560
     },
-    "placements": 288,
+    "placements": 290,
     "vignettesAvoided": 640
   },
   "files": {
-    "terrain.bin": 579903,
-    "nav.bin": 44754,
+    "terrain.bin": 579898,
+    "nav.bin": 44745,
     "scatter.bin": 160932,
-    "placements.json": 218276
+    "placements.json": 219373
   }
 }

@@ -136,16 +136,22 @@
           "z": 1984
         },
         "culture": "halfling",
-        "plots": 24,
-        "streets": 82,
+        "plots": 20,
+        "streets": 48,
         "links": 1,
         "overlaps": 0,
         "highStreets": 1,
         "w6": {
           "plotsBefore": 21,
-          "plots": 24,
-          "kept": 1,
-          "renumbered": true
+          "plots": 20,
+          "kept": 20,
+          "removed": [
+            {
+              "plot": 20,
+              "want": "house",
+              "office": false
+            }
+          ]
         }
       },
       {
@@ -159,40 +165,20 @@
         "radius": 46,
         "movedFrom": null,
         "culture": "halfling",
-        "plots": 9,
+        "plots": 11,
         "streets": 48,
         "links": 1,
         "overlaps": 0,
         "highStreets": 1,
         "w6": {
           "plotsBefore": 12,
-          "plots": 9,
-          "kept": 9,
+          "plots": 11,
+          "kept": 11,
           "removed": [
-            {
-              "plot": 0,
-              "want": "shop",
-              "office": true
-            },
-            {
-              "plot": 4,
-              "want": "inn",
-              "office": true
-            },
             {
               "plot": 5,
               "want": "hut",
               "office": false
-            }
-          ],
-          "moved": [
-            {
-              "office": "shop",
-              "to": 7
-            },
-            {
-              "office": "inn",
-              "to": 10
             }
           ]
         }
@@ -221,13 +207,13 @@
       "x": 872,
       "z": 1620
     },
-    "placements": 218,
+    "placements": 182,
     "vignettesAvoided": 631
   },
   "files": {
-    "terrain.bin": 467967,
-    "nav.bin": 14799,
+    "terrain.bin": 467923,
+    "nav.bin": 14789,
     "scatter.bin": 83508,
-    "placements.json": 139341
+    "placements.json": 127461
   }
 }

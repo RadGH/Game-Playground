@@ -571,8 +571,6 @@ function wireNet(net) {
       if (!ok) return;
       controls.hold(true); controls.stop(); actors.setEating(S.selfId, 'food'); S.cartRide = true;
       hud.toast(`You climb aboard${m.to?.name ? ' for ' + m.to.name : ''}.`, 'info');
-      // an arrival inside the SAME room brings no `joined`: step down once the ride's own time is up
-      setTimeout(() => { if (S.cartRide && carts.riding) { endCartRide(); if (travel.covered) travel.reveal(); } }, (m.ms || 3200) + 2500);
     });
   });
   net.on('cartR', r => { if (r && r.ok === false) endCartRide(); });
@@ -607,7 +605,7 @@ function onJoined(j) {
   S.reach = basicReach(you.equipment);         // Q1: a ranged weapon fires from range
   S.predictor.locked = S.self.dead;
   S.predictor.speedMul = you.speedMul || 1; S.self.mount = you.mount || null;
-  S.lightRange = +you.lightRange || null; view.setCarryLight({ range: S.lightRange }); endMountCall();
+  S.lightRange = +you.lightRange || +you.light?.radius || null; view.setCarryLight({ range: S.lightRange, dungeonRange: +you.light?.dungeonRadius || null, dungeonAmbient: +you.light?.dungeonAmbient || null }); endMountCall();
   useRoom(j.room, { x: you.x, z: you.z }).then(() => {
     S.predictor.reset({ x: you.x, y: you.y, z: you.z });
     const a = actors.get(S.selfId) || actors.add({ id: S.selfId, kind: 'player', name: you.name, level: you.level, hp: you.hp, hpMax: you.hpMax, hostile: false,
@@ -758,6 +756,17 @@ function onEvent(ev) {
   if (!ev.type && ev.t) ev = { ...ev, type: ev.t };   // encounter events may still carry `t`
   remember(ev);
   if (ev.type === 'fx' && ev.kind === 'channel' && ev.ab === 'mount' && ev.end && ev.id === S.selfId) endMountCall();   // W26
+  // W1 (C): a town guard never dies — at 0 health it is DOWN on one knee for a while, then up; a sergeant's rally is a shout and a glow
+  if (ev.type === 'fx' && ev.kind === 'guard') {
+    const g = actors.get(ev.id);
+    if (g) {
+      if (ev.down === 1 || ev.down === true) { actors.setEating(ev.id, 'food'); g.guardDown = true; }
+      else if (ev.down === 0 || ev.down === false) { actors.setEating(ev.id, null); g.guardDown = false; actors.playClip(ev.id, 'standUp'); }
+      if (ev.say) actors.say(ev.id, ev.say);
+      if (ev.rally) { try { spells.fx.cast({ at: new THREE.Vector3(g.pos.x, g.pos.y + 1.2, g.pos.z), element: 'holy', ms: 600, ground: g.pos.y }); } catch {} }
+    }
+    return;
+  }
   if (ev.type === 'cast' || ev.type === 'hit' || ev.type === 'fx') { spells.onEvent(ev); statusSync.onEvent(ev); statusSync.onChannel(ev); weaponFx.onEvent(ev); formFx.onEvent(ev); reviveFx.onEvent(ev); angling.onEvent(ev); }
   const me = S.selfId;
   switch (ev.type) {
@@ -795,7 +804,7 @@ function onEvent(ev) {
     }
     case 'die': {
       actors.setDead(ev.d, true); statusSync.dead(ev.d);
-      tele.dropSource(ev.d); spells.ownerGone(ev.d);          // play-test 6 (U3): what the dead were casting is gone with them, at once
+      tele.dropSource(ev.d); spells.ownerGone(ev.d); shots.drop(ev.d);          // (W2: a shot still in the air from the dead lands on nobody — C cancels its hit)          // play-test 6 (U3): what the dead were casting is gone with them, at once
       const a = actors.get(ev.d), by = actors.get(ev.by);
       if (ev.d === me) { setSelfDead(true); hud.chat(by ? `You were slain by ${by.name}.` : 'You have fallen.', 'bad'); }
       else if (a && ev.by === me) hud.chat(`You have slain ${a.name}.`, 'combat');
@@ -842,7 +851,8 @@ function levelFlash(id) { const a = actors.get(id); if (a) fx.burst({ x: a.pos.x
 /** Q16: H — call your fastest mount, or get down. The server says no in a fight, in water or indoors (mountR). */
 function toggleMount() {
   if (!S.net) return;
-  if (S.self.mount || S.mountCall) { endMountCall(); S.net.mount('off'); return; }     // W26: a second press calls it off (the server ends the channel: why 'asked')
+  if (S.mountCall && !S.self.mount) { endMountCall(); S.net.mount('cancel'); return; }     // W26: a second press calls it off (protocol §24)
+  if (S.self.mount) { S.net.mount('off'); return; }     // W26: a second press calls it off (the server ends the channel: why 'asked')
   // W26: you stand still for the call — from the key press, not from the server's answer, so the steps already on their
   // way are the last ones. Keys, the stick, auto-run and a click-to-move goal are kept and carry on once you are up.
   S.mountCall = { at: performance.now(), until: performance.now() + 4000 };
@@ -1142,6 +1152,8 @@ function frame(now) {
   statusSync.update();
   weaponFx.update(dt); formFx.update(dt); angling.update(dt); shots.update(dt);
   lootMarks.update(dt); questMarks.update(dt); carts.update(dt, elapsed);
+  // W5: an arrival inside the SAME room brings no `joined` — step down once the ride's own time is up (on the ride's clock, not the wall's)
+  if (S.cartRide && (!carts.riding || carts.rideOver())) { endCartRide(); if (travel.covered) travel.reveal(); }
   hud.tick(dt);
   input.tick(dt);                           // T27: poll the gamepad, keep the focus ring on its element
   LIGHTS.update(dt, camera.position);

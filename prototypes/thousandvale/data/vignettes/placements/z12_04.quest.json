@@ -234,7 +234,7 @@
    "gate": "coldwater_gate_0",
    "x": 1430,
    "z": 1886,
-   "yaw": -0.755,
+   "yaw": -0.65,
    "titled": false
   },
   {
@@ -249,7 +249,7 @@
    "gate": "coldwater_gate_0",
    "x": 1436,
    "z": 1892,
-   "yaw": -0.755,
+   "yaw": -0.65,
    "titled": false
   },
   {
@@ -304,9 +304,9 @@
    "town": "Netherby",
    "post": "gate",
    "gate": "netherby_gate_0",
-   "x": 704,
-   "z": 772,
-   "yaw": -0.069,
+   "x": 706,
+   "z": 770,
+   "yaw": -0.238,
    "titled": false
   }
  ]

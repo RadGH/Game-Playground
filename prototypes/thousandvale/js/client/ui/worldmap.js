@@ -41,7 +41,7 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
   const side = h('aside.map-side');
   const stage = h('div.map-stage', {}, canvas, zoomBox, legend, card);
   // W15: the filter + search for shops and services (ui/map-tools.js)
-  const find = createMapFind({ atlas, me, onChange: () => { state.lastSide = ''; }, onShow: t => showAt(t.x, t.z, t.lone ? 0.9 : 0.55) });
+  const find = createMapFind({ atlas, me, onChange: () => { state.lastSide = ''; }, onShow: t => { const one = t.list?.length === 1 ? t.list[0] : null; showAt(one ? one.x : t.x, one ? one.z : t.z, 1.6); } });      // close enough to tell one door from the next
   panel.fill(h('div.map-top', {}, presets, find.bar, h('span.grow'), layers), h('div.map-main', {}, stage, side));
 
   const state = { cx: 0, cz: 0, scale: 0.1, preset: 'region', opts: { roads: true, rivers: true, quests: true, events: true, places: true, party: true, names: true }, hover: null, drag: null, w: 0, h: 0, raf: 0, lastSide: '' };

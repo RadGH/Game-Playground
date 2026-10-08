@@ -418,3 +418,24 @@ when a gate has to stand in the wall's line while a road crosses at a slant: the
 
 **Office name board** (`offices.js`): on a front of two storeys or more the board sits clear over the door
 (`door.h + 0.28`); a one-storey front still tucks it under the eave.
+
+## High streets (opt-in, 2026-10-08)
+
+`planTown({ highStreets: { to: 'square', width, clear, keep, avoid, join, attempt } })` — added for Thousandvale, whose
+players reported that a town gate "just leads you right into buildings instead of having a main road". `linkRoads` joins a
+road to wherever the network comes closest, which on a plan of alleys is an alley three metres inside the wall. With this
+option each link is carried as ONE main street from the edge of town to the edge of the square.
+
+| option | meaning |
+|---|---|
+| `width` | metres (default the main class's 5) |
+| `clear` | kerb kept free of plots either side, on top of the width |
+| `keep` | plots `{cx, cz, w, d, angle}` that must survive: the street aims off-centre at the square, or is threaded round them (`threadWay`, a lattice search with the corners cut), or narrows (never under `narrowest`, 3.2 m); only if no way exists does it go through |
+| `avoid` | discs `{x, z, r}` already standing that the street passes beside |
+| `join` | (default on) a link close beside a street already laid forks off it instead of running parallel |
+| `attempt` | 0..6: use exactly that retry attempt of `planTown` (a caller matching a plan it already has) |
+
+Streets carry `high: true`, `highway: true`, `link`, `to: 'square' | 'street'`, `joins`, `clear`. With the option, the
+retry floor is judged on `plan.plotsCut` (plots before the high streets took any) so the same attempt wins as without.
+**Without the option nothing runs and every plan is byte-identical** (`tests/highstreets.test.js`, and Farhold's town
+tests). Thousandvale's use: `prototypes/thousandvale/docs/world.md` §13.

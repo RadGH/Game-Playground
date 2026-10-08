@@ -44,6 +44,58 @@ function hexLinear(hex) {
 }
 const SEA = hexLinear('#2a5468'), LAKE = hexLinear('#2f6378'), ROCK = hexLinear('#7b766d'), SNOW = hexLinear('#e6eaee');
 
+// ---------------------------------------------------------------- play-test 8 (W18): far hills and mountains are WOODED
+//
+// "Mountains in the distance lack trees. In Oregon, mountains are covered in trees!" The horizon painted every biome
+// its map colour and turned anything steeper than ~28 degrees to bare rock, so the far hills (the two commonest land
+// biomes here are Hills and Mountains) were smooth olive and grey. Two things fix that, both decided by ONE rule:
+//
+//   treeCover(biomeKey, y, steep, patch)  -> 0..1   how wooded a sample is
+//
+//   * the TINT: the ground colour is pulled toward that biome's canopy colour by the cover, AFTER the rock tint, so a
+//     wooded slope is dark green right up to the tree line and only cliffs and summits show stone;
+//   * the SHAPES: on the nearest horizon ring (stride 1) wooded cells grow small four-sided spires — one stands for a
+//     clump of trees — built into the chunk's own geometry in the worker. Same mesh, same material, no extra draw call;
+//     the silhouette of a far ridge is a ragged tree line instead of a smooth painted hill.
+/** How wooded each biome is at its best (0 = never a tree). Keys are horizon.bin's biome keys. */
+export const TREE_COVER = {
+  temperateForest: 1, rainforest: 1, borealForest: 1, blighted: 0.9, hallowed: 0.7, mountains: 0.8, hills: 0.62, veiledHills: 0.5,
+  orchard: 0.55, marsh: 0.35, shrubland: 0.3, grassland: 0.16, savanna: 0.1, graveyard: 0.25, pasture: 0.04,
+};
+/** Canopy colour by biome (sRGB hex): conifers are darker and bluer than broadleaf woods. */
+export const CANOPY = { default: '#2c5f2e', temperateForest: '#2f6a33', rainforest: '#1d5a2c', borealForest: '#1f4a36', mountains: '#234f38', hills: '#2f6130', blighted: '#3a2c48', hallowed: '#6fbf8a', veiledHills: '#3d4a5c', marsh: '#35553a', savanna: '#5a6a2e' };
+/** Trees thin out between these heights (metres) and stop: the snow tint starts at 900, so the last trees stand in the first snow. */
+export const TREE_LINE = { from: 780, to: 940 };
+/**
+ * Slope (1 - normal.y): full cover up to `from` (about 49 degrees), none past `to` (60 degrees: a cliff). Measured before
+ * choosing: a quarter of this world's Mountains cells are steeper than 53 degrees — with a real forest's 40-degree limit
+ * the range the owner was looking at stayed two-thirds bare.
+ */
+export const TREE_SLOPE = { from: 0.34, to: 0.5 };
+/** Most tree spires in one chunk by quality (4 triangles each). Low draws the tint only. */
+export const TREE_SPIRES = { high: 2400, medium: 1000, low: 0 };
+const sstep = (a, b, v) => { const t = Math.max(0, Math.min(1, (v - a) / (b - a))); return t * t * (3 - 2 * t); };
+/**
+ * Pure: how wooded a sample is. `patch` (0..1, a slow noise) breaks the cover into woods and clearings: full forest
+ * biomes stay nearly solid, half-wooded ones (hills) become stands of trees with open ground between.
+ */
+export function treeCover(biomeKey, y = 0, steep = 0, patch = 0.5) {
+  const base = TREE_COVER[biomeKey] || 0;
+  if (!base || y < 0.5) return 0;
+  const height = 1 - sstep(TREE_LINE.from, TREE_LINE.to, y), slope = 1 - sstep(TREE_SLOPE.from, TREE_SLOPE.to, steep);
+  const clump = base >= 0.95 ? 0.8 + 0.2 * patch : sstep(1 - base - 0.22, 1 - base + 0.22, patch) * (0.55 + 0.45 * base) + base * 0.18;
+  return Math.max(0, Math.min(1, clump * height * slope));
+}
+/** A stable 0..1 number for a lattice point (no state: a tree stands where it stood last frame and last session). */
+export function hash2(i, j, k = 0) { let h = (Math.imul(i | 0, 374761393) ^ Math.imul(j | 0, 668265263) ^ Math.imul(k | 0, 1274126177)) >>> 0; h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+/** Slow value noise over the sample lattice (cells of `cell` samples), 0..1: where the woods are. */
+export function patchNoise(i, j, cell = 9) {
+  const x = i / cell, z = j / cell, x0 = Math.floor(x), z0 = Math.floor(z), u = x - x0, w = z - z0, su = u * u * (3 - 2 * u), sw = w * w * (3 - 2 * w);
+  const a = hash2(x0, z0, 7), b = hash2(x0 + 1, z0, 7), c = hash2(x0, z0 + 1, 7), e = hash2(x0 + 1, z0 + 1, 7);
+  const big = (a + (b - a) * su) * (1 - sw) + (c + (e - c) * su) * sw;
+  return Math.max(0, Math.min(1, big * 0.8 + hash2(i >> 1, j >> 1, 3) * 0.2));
+}
+
 /** Parse horizon.bin and lay out what the mesh needs: drawn heights (water flattened to its surface), wet flags, biomes. */
 export function prepareGrid(buffer) {
   const h = parseHorizon(buffer);
@@ -56,7 +108,9 @@ export function prepareGrid(buffer) {
     else drawn[k] = hg[k];
   }
   const palette = (h.biomes || []).map(b => hexLinear(b[2]).map(c => c * 0.78));   // map colours are bright: toward the ground textures' tones
-  return { meta: h.meta, W, H, step: h.step, drawn, wet, biome: h.layers.biome, palette };
+  // W18: per biome id, its key (for the cover table) and its canopy colour
+  const keys = (h.biomes || []).map(b => b[0]), canopy = keys.map(k => hexLinear(CANOPY[k] || CANOPY.default));
+  return { meta: h.meta, W, H, step: h.step, drawn, wet, biome: h.layers.biome, palette, keys, canopy };
 }
 
 /** The drawn surface at world metres: the triangle split horizon-read.js uses, clamped to the world. */
@@ -80,12 +134,15 @@ export const chunkCounts = (g, chunk) => ({ cx: Math.ceil((g.W - 1) / chunk), cz
  * loaded in full, world-metre rects) leaves out every cell under one, so nothing is drawn — or rasterised and thrown
  * away — beneath the real ground; zone edges fall on sample lines at every stride (64 is a multiple of 1..16).
  */
-export function buildChunk(g, ci, cj, chunk, stride, holes = null) {
+export function buildChunk(g, ci, cj, chunk, stride, holes = null, opts = null) {
   const { W, H, step, drawn, wet, biome, palette } = g;
+  const keys = g.keys || [], canopy = g.canopy || [], wooded = opts?.trees !== false && keys.length > 0;
+  const maxSpires = stride === 1 && wooded ? Math.max(0, opts?.spires | 0) : 0;
   const i0 = ci * chunk, j0 = cj * chunk;
   const n = Math.ceil(Math.min(chunk, W - 1 - i0) / stride), m = Math.ceil(Math.min(chunk, H - 1 - j0) / stride);
   const nx = n + 1, nz = m + 1, core = nx * nz, ring = 2 * (nx + nz) - 4, V = core + ring;
-  const pos = new Float32Array(V * 3), nor = new Float32Array(V * 3), col = new Float32Array(V * 3);
+  let pos = new Float32Array(V * 3), nor = new Float32Array(V * 3), col = new Float32Array(V * 3);
+  const cover = maxSpires ? new Float32Array(core) : null;
   const si = a => Math.min(W - 1, i0 + a * stride), sj = b => Math.min(H - 1, j0 + b * stride);
   const hAt = (i, j) => drawn[(j < 0 ? 0 : j >= H ? H - 1 : j) * W + (i < 0 ? 0 : i >= W ? W - 1 : i)];
   for (let b = 0, v = 0; b < nz; b++) for (let a = 0; a < nx; a++, v++) {
@@ -102,6 +159,15 @@ export function buildChunk(g, ci, cj, chunk, stride, holes = null) {
       r = p[0]; gg = p[1]; bb = p[2];
       const steep = 1 - ny;                                         // 0 flat .. ~0.3 at 45°
       if (steep > 0.12) { const t = Math.min(1, (steep - 0.12) * 5); r += (ROCK[0] - r) * t; gg += (ROCK[1] - gg) * t; bb += (ROCK[2] - bb) * t; }
+      // W18: wooded ground is canopy-coloured — after the rock tint, so a forested slope stays green up to the tree line
+      if (wooded) {
+        const cv = treeCover(keys[biome[k]], y, steep, patchNoise(i, j));
+        if (cv > 0.01) {
+          const cc = canopy[biome[k]] || canopy[5], mottle = 0.86 + 0.28 * hash2(i, j, 11), t = Math.min(0.92, cv * 1.05);
+          r += (cc[0] * mottle - r) * t; gg += (cc[1] * mottle - gg) * t; bb += (cc[2] * mottle - bb) * t;
+          if (cover) cover[v] = cv;
+        }
+      }
       if (y > 900) { const t = Math.min(1, (y - 900) / 300); r += (SNOW[0] - r) * t; gg += (SNOW[1] - gg) * t; bb += (SNOW[2] - bb) * t; }
     }
     col[v * 3] = r; col[v * 3 + 1] = gg; col[v * 3 + 2] = bb;
@@ -125,8 +191,47 @@ export function buildChunk(g, ci, cj, chunk, stride, holes = null) {
     for (const h of hs) if (x > h.minX && x < h.maxX && z > h.minZ && z < h.maxZ) return true;
     return false;
   };
-  const maxTris = n * m * 2 + edge.length * 2;
-  const full = V > 65535 ? new Uint32Array(maxTris * 3) : new Uint16Array(maxTris * 3);
+  // W18: tree spires on wooded cells (stride 1 only: a cell is one 32 m sample square). Up to two a cell by cover, each
+  // at a stable spot inside it; when a chunk has more wooded cells than its budget, every k-th one is kept (evenly thinned).
+  const spires = [];
+  if (maxSpires && cover) {
+    let wantN = 0;
+    for (let b = 0; b < m; b++) for (let a = 0; a < n; a++) { const cv = cover[b * nx + a]; if (cv > 0.2 && !inHole(a, b)) wantN += cv > 0.6 ? 2 : 1; }
+    const keep = wantN > maxSpires ? maxSpires / wantN : 1;
+    for (let b = 0; b < m; b++) for (let a = 0; a < n; a++) {
+      const v = b * nx + a, cv = cover[v];
+      if (!(cv > 0.2) || inHole(a, b)) continue;
+      const i = si(a), j = sj(b);
+      for (let t = 0; t < (cv > 0.6 ? 2 : 1); t++) {
+        if (keep < 1 && hash2(i, j, 20 + t) > keep) continue;
+        if (hash2(i, j, 30 + t) > cv * 1.15) continue;                 // thin cover = fewer of its cells carry a clump
+        const u = 0.15 + 0.7 * hash2(i, j, 40 + t), w = 0.15 + 0.7 * hash2(i, j, 50 + t);
+        const h00 = pos[v * 3 + 1], h10 = pos[(v + 1) * 3 + 1], h01 = pos[(v + nx) * 3 + 1], h11 = pos[(v + nx + 1) * 3 + 1];
+        const y = (h00 * (1 - u) + h10 * u) * (1 - w) + (h01 * (1 - u) + h11 * u) * w;
+        spires.push(v, (i + u) * step, y, (j + w) * step, 9 + 9 * hash2(i, j, 60 + t), 5.5 + 4 * hash2(i, j, 70 + t), hash2(i, j, 80 + t));
+      }
+    }
+  }
+  const nSp = spires.length / 7, V2 = V + nSp * 5;
+  if (nSp) {
+    const grow = a => { const o = new Float32Array(V2 * 3); o.set(a); return o; };
+    pos = grow(pos); nor = grow(nor); col = grow(col);
+    for (let s = 0; s < nSp; s++) {
+      const src = spires[s * 7], x = spires[s * 7 + 1], y = spires[s * 7 + 2], z = spires[s * 7 + 3], hgt = spires[s * 7 + 4], rad = spires[s * 7 + 5], turn = spires[s * 7 + 6] * 1.5708;
+      const o = V + s * 5, k = (sj(Math.floor(src / nx)) * W + si(src % nx)), cc = canopy[biome[k]] || canopy[5] || [0.03, 0.1, 0.03];
+      for (let q = 0; q < 5; q++) {
+        const ang = turn + q * 1.5708, top = q === 4, px = top ? x : x + Math.cos(ang) * rad, pz = top ? z : z + Math.sin(ang) * rad;
+        const vi = (o + q) * 3, shadeK = top ? 1.25 : 0.72;
+        pos[vi] = px; pos[vi + 1] = top ? y + hgt : y - 1.5; pos[vi + 2] = pz;
+        // lit like the slope it stands on, leaning out a little at the foot so the sides catch the sun differently
+        const nxn = nor[src * 3] + (top ? 0 : Math.cos(ang) * 0.45), nzn = nor[src * 3 + 2] + (top ? 0 : Math.sin(ang) * 0.45), nyn = nor[src * 3 + 1], nl = Math.hypot(nxn, nyn, nzn) || 1;
+        nor[vi] = nxn / nl; nor[vi + 1] = nyn / nl; nor[vi + 2] = nzn / nl;
+        col[vi] = cc[0] * shadeK; col[vi + 1] = cc[1] * shadeK; col[vi + 2] = cc[2] * shadeK;
+      }
+    }
+  }
+  const maxTris = n * m * 2 + edge.length * 2 + nSp * 4;
+  const full = V2 > 65535 ? new Uint32Array(maxTris * 3) : new Uint16Array(maxTris * 3);
   let q = 0;
   for (let b = 0; b < m; b++) for (let a = 0; a < n; a++) {
     if (inHole(a, b)) continue;
@@ -140,9 +245,63 @@ export function buildChunk(g, ci, cj, chunk, stride, holes = null) {
     idx[q++] = a0; idx[q++] = a1; idx[q++] = s0;
     idx[q++] = a1; idx[q++] = s1; idx[q++] = s0;
   }
+  for (let s = 0; s < nSp; s++) { const o = V + s * 5; for (let f = 0; f < 4; f++) { idx[q++] = o + f; idx[q++] = o + 4; idx[q++] = o + (f + 1) % 4; } }
   const tris = q / 3;
   const bounds = { minX: i0 * step, minZ: j0 * step, maxX: si(n) * step, maxZ: sj(m) * step };
-  return { ci, cj, stride, pos, nor, col, idx: q === full.length ? full : full.slice(0, q), tris, bounds, holed: hs.length > 0 };
+  return { ci, cj, stride, pos, nor, col, idx: q === full.length ? full : full.slice(0, q), tris, bounds, holed: hs.length > 0, spires: nSp };
+}
+
+/** Biomes whose slopes the zone bake leaves bare (no scatter trees) and the canopy fills in INSIDE loaded zones. */
+export const CANOPY_BIOMES = ['mountains'];
+/** Most canopy spires in one chunk inside loaded zones, by quality. */
+export const CANOPY_SPIRES = { high: 3600, medium: 1600, low: 0 };      // (looked at: 1,500 left the near range mostly bare rock)
+/**
+ * W18, the other half: the mountains the owner was looking at are two kilometres off — inside a zone that is loaded in
+ * full, where the horizon is cut away and the ground is the real terrain. The zone bake scatters almost no trees on the
+ * Mountains biome, so those slopes were bare rock. This builds ONLY tree spires, for the cells of this chunk that lie
+ * UNDER the loaded zones (`holes`) and whose biome is in CANOPY_BIOMES, by the same cover rule and at the same stable
+ * spots as the horizon's own (so a slope does not change when its zone loads). They are distant dressing — nothing you
+ * can bump into — on ground steep enough that nobody walks it. -> { pos, nor, col, idx, tris, spires } or null.
+ */
+export function buildCanopy(g, ci, cj, chunk, holes = null, opts = null) {
+  const { W, H, step, drawn, wet, biome } = g, keys = g.keys || [], canopy = g.canopy || [];
+  const max = Math.max(0, opts?.spires | 0), allow = new Set(opts?.biomes || CANOPY_BIOMES);
+  if (!max || !holes?.length || !keys.length) return null;
+  const i0 = ci * chunk, j0 = cj * chunk, n = Math.min(chunk, W - 1 - i0), m = Math.min(chunk, H - 1 - j0);
+  const inHole = (x, z) => { for (const h of holes) if (x > h.minX && x < h.maxX && z > h.minZ && z < h.maxZ) return true; return false; };
+  const hAt = (i, j) => drawn[(j < 0 ? 0 : j >= H ? H - 1 : j) * W + (i < 0 ? 0 : i >= W ? W - 1 : i)];
+  const list = [];
+  for (let b = 0; b < m; b++) for (let a = 0; a < n; a++) {
+    const i = i0 + a, j = j0 + b, k = j * W + i;
+    if (wet[k] || !allow.has(keys[biome[k]]) || !inHole((i + 0.5) * step, (j + 0.5) * step)) continue;
+    const ddx = (hAt(i - 1, j) - hAt(i + 1, j)) / (2 * step), ddz = (hAt(i, j - 1) - hAt(i, j + 1)) / (2 * step), len = Math.hypot(ddx, 1, ddz);
+    const cv = treeCover(keys[biome[k]], drawn[k], 1 - 1 / len, patchNoise(i, j));
+    if (!(cv > 0.2)) continue;
+    // up close a slope needs more trees than a far ridge does: up to five clumps a 32 m cell (the first two stand where the
+    // horizon's own stood, so the slope does not rearrange itself when its zone loads)
+    for (let t = 0; t < Math.round(1 + cv * 4); t++) {
+      if (hash2(i, j, 30 + t) > cv * 1.15) continue;
+      const u = 0.1 + 0.8 * hash2(i, j, 40 + t), w = 0.1 + 0.8 * hash2(i, j, 50 + t);
+      const y = (hAt(i, j) * (1 - u) + hAt(i + 1, j) * u) * (1 - w) + (hAt(i, j + 1) * (1 - u) + hAt(i + 1, j + 1) * u) * w;
+      list.push([(i + u) * step, y, (j + w) * step, 9 + 9 * hash2(i, j, 60 + t), 5.5 + 4 * hash2(i, j, 70 + t), hash2(i, j, 80 + t) * 1.5708, ddx / len, 1 / len, ddz / len, biome[k], hash2(i, j, 20 + t)]);
+    }
+  }
+  if (!list.length) return null;
+  const keep = list.length > max ? max / list.length : 1, kept = keep < 1 ? list.filter(s => s[10] <= keep) : list, N = kept.length;
+  if (!N) return null;
+  const pos = new Float32Array(N * 15), nor = new Float32Array(N * 15), col = new Float32Array(N * 15), idx = N * 5 > 65535 ? new Uint32Array(N * 12) : new Uint16Array(N * 12);
+  kept.forEach(([x, y, z, hgt, rad, turn, nx0, ny0, nz0, bi], s) => {
+    const cc = canopy[bi] || [0.03, 0.1, 0.03];
+    for (let q = 0; q < 5; q++) {
+      const ang = turn + q * 1.5708, top = q === 4, vi = (s * 5 + q) * 3, shadeK = top ? 1.25 : 0.72;
+      pos[vi] = top ? x : x + Math.cos(ang) * rad; pos[vi + 1] = top ? y + hgt : y - 1.5; pos[vi + 2] = top ? z : z + Math.sin(ang) * rad;
+      const ax = nx0 + (top ? 0 : Math.cos(ang) * 0.45), az = nz0 + (top ? 0 : Math.sin(ang) * 0.45), nl = Math.hypot(ax, ny0, az) || 1;
+      nor[vi] = ax / nl; nor[vi + 1] = ny0 / nl; nor[vi + 2] = az / nl;
+      col[vi] = cc[0] * shadeK; col[vi + 1] = cc[1] * shadeK; col[vi + 2] = cc[2] * shadeK;
+    }
+    for (let f = 0; f < 4; f++) { idx[s * 12 + f * 3] = s * 5 + f; idx[s * 12 + f * 3 + 1] = s * 5 + 4; idx[s * 12 + f * 3 + 2] = s * 5 + (f + 1) % 4; }
+  });
+  return { ci, cj, pos, nor, col, idx, tris: N * 4, spires: N };
 }
 
 /** How far a chunk's skirt hangs: enough to cover the step between a chunk and a neighbour drawn twice as coarse. */

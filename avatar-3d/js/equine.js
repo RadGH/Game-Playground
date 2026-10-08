@@ -220,7 +220,7 @@ export async function createEquine(spec = {}, { detail = 1 } = {}) {
   // from there to the flank (0.25). Seen from the front or behind it is peaked at the withers, broad and boxy
   // over the quarters and narrow between the forelegs.
   const WITHERS_U = 0.74;
-  const bW = profile([[0, 0.86], [0.16, 1.0], [0.36, 0.95], [0.56, 1.04], [0.78, 0.9], [1, 0.74]]);
+  const bW = profile([[0, 0.86], [0.16, 1.0], [0.36, 0.95], [0.56, 1.04], [0.78, 0.98], [1, 0.86]]);      // (round 2: a broader breast — from the front the forelegs stood under a slab)
   const bTop = profile([[0, 0.8], [0.17, 0.99], [0.34, 0.9], [0.5, 0.86], [0.64, 0.9], [WITHERS_U, 0.98 + Bd.hump * 1.3], [0.86, 0.9], [1, 0.8]]);
   const bBot = profile([[0, 0.55], [0.12, 0.7], [0.25, 0.8], [0.45, 0.94], [0.68, 1.06], [0.86, 0.98], [1, 0.74]]);
   const bPt = profile([[0, 0.82], [0.2, 0.8], [0.45, 0.95], [0.62, 1.15], [WITHERS_U, 1.5], [0.9, 1.25], [1, 1]]);
@@ -256,7 +256,7 @@ export async function createEquine(spec = {}, { detail = 1 } = {}) {
   const Pc = [A0[0] + Math.cos(up) * Ln, A0[1] + Math.sin(up) * Ln];   // the middle of the neck where the head hangs
   const pollAng = up - 0.3;                                      // the top of the neck flattens toward the poll
   const nP = [-Math.sin(pollAng), Math.cos(pollAng)], aP = [Math.cos(pollAng), Math.sin(pollAng)];
-  const Ct = [Pc[0] + nP[0] * 0.095 * nkP, Pc[1] + nP[1] * 0.095 * nkP], Tt = [Pc[0] - nP[0] * 0.115 * nkP, Pc[1] - nP[1] * 0.115 * nkP];
+  const Ct = [Pc[0] + nP[0] * 0.095 * nkP, Pc[1] + nP[1] * 0.095 * nkP], Tt = [Pc[0] - nP[0] * 0.098 * nkP, Pc[1] - nP[1] * 0.098 * nkP];   // (round 2: a finer throat-latch behind the jaw)
   const add2 = (p, q, k = 1) => [p[0] + q[0] * k, p[1] + q[1] * k];
   const crest = bez3(C0, add2(add2(C0, polar(Ln * 0.42, up + 0.2)), [-Math.sin(up), Math.cos(up)], Bd.arch * 1.6), add2(Ct, polar(Ln * 0.34, pollAng + 0.1), -1), Ct);
   const throat = bez3(T0, add2(T0, polar(Ln * 0.3, up - 0.1)), add2(Tt, polar(Ln * 0.3, up + 0.22), -1), Tt);
@@ -278,13 +278,13 @@ export async function createEquine(spec = {}, { detail = 1 } = {}) {
   head.rotation.x = down;
   const headRest = head.rotation.x;
   const HEAD_Z0 = -0.075;
-  const hW = profile([[0, 0.06], [0.13, 0.086], [0.3, 0.096], [0.48, 0.074], [0.7, 0.06], [0.88, 0.066], [1, 0.058]]);
+  const hW = profile([[0, 0.06], [0.13, 0.088], [0.3, 0.102], [0.48, 0.078], [0.7, 0.06], [0.88, 0.07], [1, 0.062]]);
   const hTop = profile([[0, 0.05], [0.14, 0.066], [0.3, 0.064], [0.6, 0.05], [0.86, 0.047], [1, 0.04]]);
   const hBot = profile(isElk
     ? [[0, 0.07], [0.15, 0.12], [0.3, 0.135], [0.48, 0.1], [0.66, 0.076], [0.88, 0.07], [1, 0.06]]
-    : [[0, 0.075], [0.15, 0.14], [0.3, 0.165], [0.46, 0.125], [0.64, 0.086], [0.86, 0.084], [1, 0.07]]);
+    : [[0, 0.075], [0.15, 0.15], [0.3, 0.182], [0.46, 0.128], [0.64, 0.08], [0.86, 0.082], [1, 0.07]]);      // (round 2: a deeper, rounder jowl; the nose a little drier in front of it)
   const hPt = profile([[0, 0.9], [0.2, 0.68], [0.45, 0.74], [0.8, 0.85], [1, 0.9]]);
-  const hPb = profile([[0, 1.1], [0.3, 1.45], [0.6, 1.25], [0.85, 1.0], [1, 1.0]]);
+  const hPb = profile([[0, 1.1], [0.3, 1.25], [0.6, 1.15], [0.85, 0.85], [1, 0.82]]);      // (round 2: the jaw less of a knife edge, the muzzle squarer)
   const headRing = u => { const cp = cap(u, 3.4); return { c: [0, 0, HEAD_Z0 + u * Lh], n: [0, 1, 0], b: [1, 0, 0], rx: hW(u) * hk * cp, top: hTop(u) * hk * cp, bot: hBot(u) * hk * cp, pt: hPt(u), pb: hPb(u) }; };
   const blaze = Bd.blaze;
   const headColour = (u, a, vx, vy) => {
@@ -300,7 +300,7 @@ export async function createEquine(spec = {}, { detail = 1 } = {}) {
     // EYES (W3: "bulging eyes"). A horse's eye sits on the SIDE of the skull, high and well back, and is sunk in:
     // what shows is a dark almond under a brow. So: a flattened dark lens whose centre is INSIDE the skull (it
     // stands 3 mm proud at most), an upper lid over the top third of it, and a brow ridge above.
-    const EU = 0.3, EA = 0.5, Re = at(EU), ang = sx > 0 ? EA : Math.PI - EA, er = 0.021 * hk;
+    const EU = 0.3, EA = 0.5, Re = at(EU), ang = sx > 0 ? EA : Math.PI - EA, er = 0.024 * hk;      // (round 3: a touch larger — at riding distance the eye had vanished; still sunk, still an almond)
     ringPoint(Re, ang, 0.9, P5);
     eyeGeos.push(part(new THREE.SphereGeometry(er, n(10, 6), n(8, 5)), null, { pos: [P5[0], P5[1], P5[2]], rot: [0.2, 0, sx * 0.35], scale: [0.62, 0.82, 1.25] }));
     ringPoint(Re, ang, 0.905, P5);
@@ -317,8 +317,18 @@ export async function createEquine(spec = {}, { detail = 1 } = {}) {
     const ek = (Bd.ears || 1) * hk, EL = 0.125 * ek;
     const earRot = [-down + 0.22, 0, -sx * (isElk ? 0.8 : 0.2)];
     const earPos = [sx * 0.047 * hk, hTop(0.11) * hk * 0.8, at(0.11).c[2]];
-    const eg = new THREE.ConeGeometry(0.034 * ek, EL, n(8, 5)); eg.translate(0, EL / 2, 0); eg.scale(1, 1, 0.6);
-    const ig = new THREE.ConeGeometry(0.021 * ek, EL * 0.74, n(6, 4)); ig.translate(0, EL * 0.4, 0); ig.scale(1, 1, 0.3); ig.translate(0, 0, 0.011 * ek);
+    // (round 2: an ear is a LEAF — widest a third of the way up, a rounded point, cupped to the front — not a spike)
+    const leaf = (rw, len, depth, ws, hs) => {
+      const g = new THREE.SphereGeometry(1, ws, hs), p = g.getAttribute('position');
+      for (let i = 0; i < p.count; i++) {
+        const y = p.getY(i), t = (y + 1) / 2, rad = Math.sqrt(Math.max(0, 1 - y * y)) || 1;
+        const wd = Math.pow(Math.sin(Math.PI * Math.pow(t, 0.62)), 0.8) * (1 - 0.35 * t);      // widest a third of the way up
+        p.setXYZ(i, p.getX(i) / rad * wd * rw, t * len, p.getZ(i) / rad * wd * depth);
+      }
+      g.computeVertexNormals(); return g;
+    };
+    const eg = leaf(0.04 * ek, EL, 0.022 * ek, n(8, 6), n(7, 5));
+    const ig = leaf(0.026 * ek, EL * 0.8, 0.008 * ek, n(6, 5), n(6, 4)); ig.translate(0, EL * 0.06, 0.017 * ek);
     const earGeo = merge([part(eg, cBody), part(ig, col(shade(C.body, -0.5)))]);
     const ear = new THREE.Group(); ear.position.set(...earPos); ear.rotation.set(...earRot); head.add(ear);
     ear.add(mesh(earGeo, C.body, { vc: true }));
@@ -431,8 +441,8 @@ export async function createEquine(spec = {}, { detail = 1 } = {}) {
     // the upper leg: the muscle mass (it sinks into the barrel and moves with the leg) + the forearm / gaskin
     const upCol = u => cBody.clone().lerp(cPoint, smooth(clamp01((u - 0.55) / 0.45)) * 0.85);
     const upper = [limb(a1, scaleP(front ? foreP : thighP, lk * (0.6 + 0.4 * hs)), { rows: n(8, 5), cols: segs, colour: upCol })];
-    if (front) upper.push(part(new THREE.SphereGeometry(1, n(12, 7), n(8, 5)), cBody, { pos: [-sx * 0.015, a1 * 0.1, 0.03], rot: [0.5, 0, 0], scale: [w * 0.44, a1 * 0.46, 0.15 * lk] }));
-    else upper.push(part(new THREE.SphereGeometry(1, n(12, 7), n(8, 5)), cBody, { pos: [-sx * 0.015, a1 * 0.1, 0.0], rot: [-rest - 0.25, 0, 0], scale: [w * 0.5, a1 * 0.5, 0.25 * (0.5 + 0.5 * lk)] }));
+    if (front) upper.push(part(new THREE.SphereGeometry(1, n(12, 7), n(8, 5)), cBody, { pos: [-sx * 0.065, a1 * 0.1, 0.03], rot: [0.5, 0, 0], scale: [w * 0.34, a1 * 0.5, 0.18 * lk] }));
+    else upper.push(part(new THREE.SphereGeometry(1, n(12, 7), n(8, 5)), cBody, { pos: [-sx * 0.045, a1 * 0.1, 0.0], rot: [-rest - 0.25, 0, 0], scale: [w * 0.4, a1 * 0.5, 0.25 * (0.5 + 0.5 * lk)] }));
     pivot.add(coat(upper));
     // the knee / hock and the cannon
     const mid = new THREE.Group(); mid.position.y = -a1; pivot.add(mid);

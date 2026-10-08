@@ -117,10 +117,14 @@ soft('V9: on a phone-width screen the bag\'s Stats button opens the Character me
   await btn.tap();
   await expect(page.locator('#panel-sheet')).toBeVisible();
   const box = await page.evaluate(() => ['#bag', '#panel-sheet'].map(s => { const r = document.querySelector(s).getBoundingClientRect(); return { t: r.top, b: r.bottom, l: r.left, r: r.right }; }));
-  expect(box[1].t).toBeGreaterThanOrEqual(box[0].b - 1); expect(box[1].b).toBeLessThanOrEqual(845); expect(box[1].b - box[1].t).toBeGreaterThan(120);
+  // (play-test 8: with stream G's phone layout ON every window is a full-screen sheet, so the Character menu covers the bag instead of
+  //  sitting under it — the docking rule below is the narrow-desktop one; tests/G owns the phone layer)
+  if (await page.evaluate(() => document.documentElement.dataset.layout === 'phone')) { expect(box[1].b).toBeLessThanOrEqual(845); expect(box[1].r).toBeLessThanOrEqual(391); }
+  else { expect(box[1].t).toBeGreaterThanOrEqual(box[0].b - 1); expect(box[1].b).toBeLessThanOrEqual(845); }
+  expect(box[1].b - box[1].t).toBeGreaterThan(120);
   await page.waitForTimeout(300);
   await page.screenshot({ path: join(SHOTS, 'pt7-v9-phone-stats.png') });
-  await btn.tap();
+  if (await page.evaluate(() => document.documentElement.dataset.layout === 'phone')) await page.evaluate(() => thousandvale.ui5.sheet.panel.close()); else await btn.tap();      // (the sheet covers the button on a phone)
   await expect(page.locator('#panel-sheet')).toBeHidden();
   await ctx.close();
 });

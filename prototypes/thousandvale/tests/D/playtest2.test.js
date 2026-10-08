@@ -123,15 +123,13 @@ test('Q8: auras follow info.st — none on the dead, unknown ids still drawn, fr
   assert.deepEqual(auraDiff(new Set(), new Set(['burn']), offGrace, 500), { on: [], off: [] }, 'a fresh "off" is not undone by a stale "on"');
 });
 
-test('C torch + buffs: item:torch is a carried light, other item buffs draw no aura', async () => {
-  const { torchOn, TORCH_RANGE } = await import('../../js/client/status-sync.js');
-  assert.equal(TORCH_RANGE, 14);
-  assert.equal(torchOn(['item:torch'], false), true);
-  assert.equal(torchOn(['item:torch'], true), false, 'the dead carry no light');
-  assert.equal(torchOn(['burn'], false), false);
+test('C buffs: item buffs draw no aura — and (W22) a torch is no longer a carried light', async () => {
+  const sync = await import('../../js/client/status-sync.js');
+  assert.equal(sync.torchOn, undefined, 'light items are gone: no torch rule left');
+  assert.equal(sync.TORCH_RANGE, undefined);
   assert.equal(wantedAuras(['item:whetted', 'item:torch', 'item:well_fed'], false).size, 0);
   const src = readFileSync(new URL('js/client/status-sync.js', G), 'utf8');
-  assert.ok(/LIGHTS\.add/.test(src) && !/new THREE\.PointLight/.test(src), 'the torch borrows the fixed light pool');
+  assert.ok(!/LIGHTS\.add/.test(src) && !/new THREE\.PointLight/.test(src) && !/torchLight/.test(src), 'no light rides a body any more (no dead pool entries)');
 });
 
 test('R5: every weapon type in the item data has a basic-attack look (and casters/bows are not drawn as swings)', async () => {

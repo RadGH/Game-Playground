@@ -219,49 +219,20 @@
           "z": 448
         },
         "culture": "halfling",
-        "plots": 21,
-        "streets": 70,
+        "plots": 24,
+        "streets": 69,
         "links": 3,
         "overlaps": 0,
         "highStreets": 3,
         "w6": {
           "plotsBefore": 25,
-          "plots": 21,
-          "kept": 21,
+          "plots": 24,
+          "kept": 24,
           "removed": [
             {
-              "plot": 0,
+              "plot": 1,
               "want": "house",
               "office": false
-            },
-            {
-              "plot": 4,
-              "want": "study",
-              "office": true
-            },
-            {
-              "plot": 14,
-              "want": "inn",
-              "office": true
-            },
-            {
-              "plot": 17,
-              "want": "forge",
-              "office": true
-            }
-          ],
-          "moved": [
-            {
-              "office": "study",
-              "to": 24
-            },
-            {
-              "office": "inn",
-              "to": 1
-            },
-            {
-              "office": "forge",
-              "to": 5
             }
           ]
         }
@@ -280,16 +251,16 @@
           "z": 704
         },
         "culture": "halfling",
-        "plots": 27,
-        "streets": 71,
+        "plots": 14,
+        "streets": 48,
         "links": 1,
         "overlaps": 0,
         "highStreets": 1,
         "w6": {
           "plotsBefore": 14,
-          "plots": 27,
-          "kept": 0,
-          "renumbered": true
+          "plots": 14,
+          "kept": 14,
+          "removed": []
         }
       },
       {
@@ -306,16 +277,27 @@
           "z": 1856
         },
         "culture": "halfling",
-        "plots": 23,
-        "streets": 70,
+        "plots": 14,
+        "streets": 43,
         "links": 2,
         "overlaps": 0,
         "highStreets": 2,
         "w6": {
           "plotsBefore": 16,
-          "plots": 23,
-          "kept": 0,
-          "renumbered": true
+          "plots": 14,
+          "kept": 14,
+          "removed": [
+            {
+              "plot": 1,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 2,
+              "want": "house",
+              "office": false
+            }
+          ]
         }
       },
       {
@@ -332,16 +314,16 @@
           "z": 1216
         },
         "culture": "halfling",
-        "plots": 13,
-        "streets": 41,
+        "plots": 9,
+        "streets": 20,
         "links": 1,
         "overlaps": 0,
         "highStreets": 1,
         "w6": {
           "plotsBefore": 9,
-          "plots": 13,
-          "kept": 0,
-          "renumbered": true
+          "plots": 9,
+          "kept": 9,
+          "removed": []
         }
       }
     ],
@@ -375,13 +357,13 @@
       "x": 1512,
       "z": 352
     },
-    "placements": 439,
+    "placements": 344,
     "vignettesAvoided": 660
   },
   "files": {
-    "terrain.bin": 509097,
-    "nav.bin": 38625,
+    "terrain.bin": 508794,
+    "nav.bin": 38248,
     "scatter.bin": 178444,
-    "placements.json": 234232
+    "placements.json": 204563
   }
 }

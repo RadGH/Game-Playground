@@ -187,28 +187,16 @@
           "z": 192
         },
         "culture": "halfling",
-        "plots": 30,
+        "plots": 31,
         "streets": 71,
         "links": 1,
         "overlaps": 0,
         "highStreets": 1,
         "w6": {
           "plotsBefore": 31,
-          "plots": 30,
-          "kept": 30,
-          "removed": [
-            {
-              "plot": 16,
-              "want": "stable",
-              "office": true
-            }
-          ],
-          "moved": [
-            {
-              "office": "stable",
-              "to": 22
-            }
-          ]
+          "plots": 31,
+          "kept": 31,
+          "removed": []
         }
       },
       {
@@ -225,16 +213,16 @@
           "z": 1600
         },
         "culture": "halfling",
-        "plots": 16,
-        "streets": 46,
-        "links": 2,
+        "plots": 14,
+        "streets": 54,
+        "links": 1,
         "overlaps": 0,
-        "highStreets": 2,
+        "highStreets": 1,
         "w6": {
           "plotsBefore": 14,
-          "plots": 16,
-          "kept": 0,
-          "renumbered": true
+          "plots": 14,
+          "kept": 14,
+          "removed": []
         }
       },
       {
@@ -251,37 +239,16 @@
           "z": 1088
         },
         "culture": "halfling",
-        "plots": 9,
+        "plots": 11,
         "streets": 36,
         "links": 1,
         "overlaps": 0,
         "highStreets": 1,
         "w6": {
           "plotsBefore": 11,
-          "plots": 9,
-          "kept": 9,
-          "removed": [
-            {
-              "plot": 6,
-              "want": "shop",
-              "office": true
-            },
-            {
-              "plot": 7,
-              "want": "shrine",
-              "office": true
-            }
-          ],
-          "moved": [
-            {
-              "office": "shop",
-              "to": 9
-            },
-            {
-              "office": "shrine",
-              "to": 10
-            }
-          ]
+          "plots": 11,
+          "kept": 11,
+          "removed": []
         }
       }
     ],
@@ -315,13 +282,13 @@
       "x": 348,
       "z": 444
     },
-    "placements": 337,
+    "placements": 346,
     "vignettesAvoided": 598
   },
   "files": {
-    "terrain.bin": 626256,
-    "nav.bin": 51770,
+    "terrain.bin": 626178,
+    "nav.bin": 51612,
     "scatter.bin": 180588,
-    "placements.json": 261956
+    "placements.json": 265980
   }
 }

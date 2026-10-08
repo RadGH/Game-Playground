@@ -117,6 +117,17 @@ with croup / saddle dip / withers / deep chest, an arched neck out of the chest 
 the poll, jointed legs ending in hooves (socks, feathering on heavy breeds), mane, forelock and tail, and real walk / trot /
 gallop leg patterns with a 0.3 s crossfade. Each type names its `breed` in mount-types.js. Ram and drake still use creatures.js.
 
+**The equine body, rebuilt 2026-10-07/08 (Thousandvale owner feedback 8: "conical neck, bulging eyes — make horses more realistic, even
+for a cartoon game").** Three rounds of front / side / three-quarter renders against a real horse's outline:
+round 1 replaced the tube neck with the space between a CREST curve and a THROAT curve (deep at the chest, half as deep behind the jaw,
+flat-sided), hung a long head from the poll (flat forehead, round jowl, tapering nose, small dark almond eyes sunk under a brow on the
+SIDES of the skull), and made each leg a chain of its own bones (forearm / gaskin, knee / hock, cannon, fetlock, sloping pastern, hoof);
+round 2 turned the spike ears into leaves, deepened the jowl, squared the muzzle, fined the throat-latch and broadened the breast;
+round 3 sank the shoulder and haunch masses into the barrel (they read as lumps on a pale coat), enlarged the eye a touch, and took the
+reins off a riderless mount (a straight rein to an empty saddle cut through the neck). Exports, clip names, `seat` and `metrics()` are
+unchanged, so every caller (Thousandvale's `actors.setMount`, the demo page) works as before. A horse is about 8,000 triangles in ~23
+meshes on 5 materials (10,300 with tack). Shots: `prototypes/thousandvale/tests/D/shots/w3-*.png`.
+
 | type | creature | size | tack |
 |---|---|---|---|
 | `horse` | horse | 1 | saddle, saddlebags |

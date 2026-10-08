@@ -80,9 +80,9 @@
    "town": "Last Lantern",
    "post": "gate",
    "gate": "last_lantern_gate_0",
-   "x": 868,
+   "x": 866,
    "z": 1358,
-   "yaw": -0.334,
+   "yaw": -0.295,
    "titled": false
   },
   {
@@ -97,7 +97,7 @@
    "gate": "last_lantern_gate_0",
    "x": 874,
    "z": 1360,
-   "yaw": -0.334,
+   "yaw": -0.295,
    "titled": false
   },
   {

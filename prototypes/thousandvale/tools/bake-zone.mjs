@@ -55,8 +55,11 @@ const AP = 6;
 /** The skirt ring's ground is raised to at least surface + this, so the water sheet's edge is always under ground (P21). */
 const SKIRT_BURY = 0.15;
 /** Proctown size by settlement kind. */
+/** W6: the plots stream E has already put somebody in (data/provinces/offices.json — shops, and the houses trainers keep): a main street goes round them. */
+const E_PLOTS = new Set();
+try { for (const t of Object.values(JSON.parse(readFileSync(join(HERE, '..', 'data', 'provinces', 'offices.json'), 'utf8')).towns || {})) for (const o of t.offices || []) if (o.plot) E_PLOTS.add(o.plot); } catch { /* no offices yet */ }
 /** W6: how far past the ring of plots a road hands over to its high street, and how close two roads may arrive and still get a street each. */
-const LINK_OUT = 10, LINK_APART = 20;
+const LINK_OUT = 10, LINK_APART = 20, LINK_CHORD = 45;
 const TOWN_SIZE = { hamlet: 1, village: 2, town: 3, city: 4, capital: 5 };
 const ROAD_SURFACE_ID = BIOMES.length + SET_SURFACES.length;    // meta.biomes = World Forge's + the set-piece surfaces + painted road / street (road stays LAST)
 const LEVEL_EASE = 40;                    // metres a levelled town eases back into the land
@@ -322,7 +325,8 @@ export function bakeZone(id, opts = {}) {
       const all = townRoads.flatMap(r => ringCrossings(r.pts, tx, tz, radius).map(([x, z, ux, uz]) => ({ x, z, road: r.id, width: r.width, square: Math.abs(ux * x + uz * z) / (Math.hypot(x, z) || 1) })))
         .sort((a, b) => b.width - a.width || b.square - a.square);
       const kept = [];
-      for (const c of all) if (!kept.some(k => Math.hypot(k.x - c.x, k.z - c.z) < LINK_APART)) kept.push(c);
+      // (a road that only clips the edge of town crosses twice a few strides apart: that is one arrival, not two)
+      for (const c of all) if (!kept.some(k => Math.hypot(k.x - c.x, k.z - c.z) < (k.road === c.road ? LINK_CHORD : LINK_APART))) kept.push(c);
       return kept;
     };
     const trades = OFFICES?.byKind?.[s.kind] ? { list: OFFICES.byKind[s.kind], share: OFFICES.share?.[s.kind] ?? 0.5, pick: 'square' } : null;
@@ -337,14 +341,24 @@ export function bakeZone(id, opts = {}) {
     // a proctown-walled city already asks at its wall), so the street runs gate -> square in one line and the road does
     // its turning outside the gate, where there is room
     const linkOut = footprintOf(size).walled ? 0 : LINK_OUT;
-    const plan = planTown({ ...common, linksAt: radius => linkList(radius + linkOut).map(c => [c.x, c.z]),
+    // the plan as it was before W6: its plot ids and offices are what stream E's NPCs are filed under, so the offices
+    // are handed to the planner as plots to KEEP (a main street goes round a shop, it does not go through one)
+    const before = planTown({ ...common, linksAt: linksBefore });
+    const withHigh = attempt => planTown({ ...common, linksAt: radius => linkList(radius + linkOut).map(c => [c.x, c.z]),
       // (stream E's fixed things already standing in town — a waystone by the square — are passed beside, not through)
-      highStreets: { to: 'square', width: HIGH_STREET_WIDTH[s.kind] || 4.2, clear: 0.6,
+      highStreets: { to: 'square', width: HIGH_STREET_WIDTH[s.kind] || 4.2, clear: 0.6, keep: before.plots.filter((p, i) => p.office || E_PLOTS.has(`${slug(s.name)}_plot_${i}`)), ...(attempt == null ? {} : { attempt }),
         avoid: standing.filter(v => !['npc', 'folk', 'guard', 'camp'].includes(v.type) && Math.hypot(v.x - tx, v.z - tz) < s.radius).map(v => ({ x: v.x - tx, z: v.z - tz, r: (v.radius || 1) + 0.2 })) } });
+    // the planner retries a crowded site finer or wider and keeps the fullest result; with main streets taking plots a
+    // different attempt can win than did before. The SAME one is wanted (same plots, same ids): take the attempt that
+    // shares the most plots with the plan as it was.
+    const plotKey = p => [p.cx, p.cz, p.w, p.d].map(v => v.toFixed(2)).join(',');
+    const had = new Set(before.plots.map(plotKey)), shared = pl => pl.plots.filter(p => had.has(plotKey(p))).length;
+    let plan = withHigh(null);
+    if (shared(plan) < before.plots.length * 0.6) for (let k = 0; k <= 6; k++) { const t = withHigh(k); if (shared(t) > shared(plan)) plan = t; }
     // which road each high street carries in (the links are asked again at the radius the chosen plan was built to)
     { const L = linkList(plan.wallRadius + linkOut); for (const st of plan.streets) if (st.high) st.linkRoad = L[st.link]?.road || null; }
     // …and every plot that is still where it was keeps its id and its office (the plan as it was before W6 says which)
-    keepPlots(plan, planTown({ ...common, linksAt: linksBefore }), trades, size);
+    keepPlots(plan, before, trades, size);
     plan.origin = { x: tx, z: tz }; plan.town = s; plan.culture = culture;
     // the town circle must hold the plan: grow the radius to the plan's own wall/ring + a margin
     const need = (plan.wallRadius || footprintOf(size).ring) + 8;
@@ -601,6 +615,22 @@ export function bakeZone(id, opts = {}) {
       for (let i = Math.max(0, Math.floor((Math.min(...xs) - half) / STEP)); i <= Math.min(SIZE - 1, Math.ceil((Math.max(...xs) + half) / STEP)); i++) {
         const o = j * SIZE + i; if (biome[o] === ROAD_SURFACE_ID || terrain.waterAt(i * STEP, j * STEP).kind !== 'none') continue;
         if (polyDist(a.pts, i * STEP, j * STEP)[0] <= half && !inPlot(i * STEP, j * STEP)) biome[o] = ROAD_SURFACE_ID;
+      }
+  }
+  // W6: no road surface is left under a wall, or inside one leading nowhere. A world road is painted up to where its town's
+  // circle WAS before the plan grew it, along its own old line — which since W6 is no longer the way in (the high street
+  // is). Any road-surface sample from the wall inward that is not on a street, a path or a gate's approach goes back to
+  // the ground it was before the road was painted.
+  for (const w of walls) {
+    const keep = [...ways.filter(q => q.kind !== 'road'), ...w.gates.flatMap(g => g.approaches)];
+    const lim = w.r + w.thick / 2 + 1.0;
+    for (let j = Math.max(0, Math.floor((w.cz - lim) / STEP)); j <= Math.min(SIZE - 1, Math.ceil((w.cz + lim) / STEP)); j++)
+      for (let i = Math.max(0, Math.floor((w.cx - lim) / STEP)); i <= Math.min(SIZE - 1, Math.ceil((w.cx + lim) / STEP)); i++) {
+        const o = j * SIZE + i, x = i * STEP, z = j * STEP; if (biome[o] !== ROAD_SURFACE_ID || Math.hypot(x - w.cx, z - w.cz) > lim) continue;
+        if (w.gates.some(g => Math.hypot(g.x - x, g.z - z) < g.open / 2 - 0.2)) continue;
+        if (keep.some(q => { const xs = q.pts; if (Math.abs(xs[0][0] - x) > 400) return false; return polyDist(q.pts, x, z)[0] <= q.width / 2 + 0.3; })) continue;
+        const b0 = m.biome[ref.warpedIndex(wxOf(i + AP), wzOf(j + AP))];
+        biome[o] = b0 < 4 || b0 === 25 ? 4 : b0;
       }
   }
   const placements = [...placementsFor(meta, plans, roads, bridges, paths), ...wallPlacements(walls), ...setPiecePlacements(pieces, { groundAt: terrain.groundAt, culture: plans[0]?.culture || 'human' })];

@@ -77,29 +77,29 @@
   {
    "kind": "town_square",
    "id": "last_lantern_square",
-   "x": 884.76,
-   "z": 1304.86,
+   "x": 879.19,
+   "z": 1300.36,
    "yaw": 0,
    "data": {
-    "r": 3.7,
+    "r": 6.96,
     "town": "last_lantern",
     "culture": "halfling",
     "stalls": [
      [
-      885.87,
-      1296.9
+      888.81,
+      1304.43
      ],
      [
-      892.99,
-      1309.69
+      875.8,
+      1287.34
      ],
      [
-      873.21,
-      1299.98
+      886.63,
+      1293.02
      ],
      [
-      893.69,
-      1296.06
+      882.76,
+      1287.39
      ]
     ]
    }
@@ -211,8 +211,8 @@
   {
    "kind": "street",
    "id": "last_lantern_street_4",
-   "x": 933.32,
-   "z": 1273.46,
+   "x": 924.94,
+   "z": 1262.83,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -220,16 +220,16 @@
     "width": 2.2,
     "pts": [
      [
-      933.32,
-      1273.46
+      924.94,
+      1262.83
      ],
      [
-      932.48,
-      1275.45
+      920.29,
+      1262.07
      ],
      [
-      931.47,
-      1277.36
+      915.77,
+      1260.77
      ]
     ]
    }
@@ -237,8 +237,8 @@
   {
    "kind": "street",
    "id": "last_lantern_street_5",
-   "x": 923.5,
-   "z": 1269.24,
+   "x": 882.26,
+   "z": 1252.23,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -246,16 +246,16 @@
     "width": 2.2,
     "pts": [
      [
-      923.5,
-      1269.24
+      882.26,
+      1252.23
      ],
      [
-      918.92,
-      1268.19
+      881.49,
+      1261.11
      ],
      [
-      914.32,
-      1267.18
+      881.38,
+      1270.03
      ]
     ]
    }
@@ -263,8 +263,8 @@
   {
    "kind": "street",
    "id": "last_lantern_street_6",
-   "x": 924.32,
-   "z": 1265.61,
+   "x": 892.15,
+   "z": 1254.05,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -272,16 +272,16 @@
     "width": 2.2,
     "pts": [
      [
-      924.32,
-      1265.61
+      892.15,
+      1254.05
      ],
      [
-      919.68,
-      1264.78
+      892.58,
+      1261.7
      ],
      [
-      915.14,
-      1263.54
+      893.98,
+      1269.23
      ]
     ]
    }
@@ -289,8 +289,8 @@
   {
    "kind": "street",
    "id": "last_lantern_street_7",
-   "x": 876.42,
-   "z": 1251.94,
+   "x": 901.25,
+   "z": 1263.22,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -298,16 +298,16 @@
     "width": 2.2,
     "pts": [
      [
-      876.42,
-      1251.94
+      901.25,
+      1263.22
      ],
      [
-      875.89,
-      1260.84
+      898.11,
+      1263.67
      ],
      [
-      875.54,
-      1269.74
+      894.96,
+      1263.98
      ]
     ]
    }
@@ -315,8 +315,8 @@
   {
    "kind": "street",
    "id": "last_lantern_street_8",
-   "x": 893.77,
-   "z": 1253.17,
+   "x": 891.8,
+   "z": 1264.49,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -324,16 +324,16 @@
     "width": 2.2,
     "pts": [
      [
-      893.77,
-      1253.17
+      891.8,
+      1264.49
      ],
      [
-      893.78,
-      1261.52
+      888.4,
+      1264.94
      ],
      [
-      893.75,
-      1269.88
+      884.98,
+      1265.31
      ]
     ]
    }
@@ -341,8 +341,8 @@
   {
    "kind": "street",
    "id": "last_lantern_street_9",
-   "x": 901.59,
-   "z": 1259.79,
+   "x": 873.1,
+   "z": 1252.66,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -350,16 +350,16 @@
     "width": 2.2,
     "pts": [
      [
-      901.59,
-      1259.79
+      873.1,
+      1252.66
      ],
      [
-      898.24,
-      1259.81
+      872.3,
+      1260.85
      ],
      [
-      894.88,
-      1259.78
+      871.44,
+      1269.17
      ]
     ]
    }
@@ -367,8 +367,8 @@
   {
    "kind": "street",
    "id": "last_lantern_street_10",
-   "x": 892.64,
-   "z": 1261.95,
+   "x": 879.78,
+   "z": 1259.85,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -376,16 +376,16 @@
     "width": 2.2,
     "pts": [
      [
-      892.64,
-      1261.95
+      879.78,
+      1259.85
      ],
      [
-      885.29,
-      1262.36
+      876.67,
+      1259.56
      ],
      [
-      877.95,
-      1261.93
+      873.57,
+      1259.23
      ]
     ]
    }
@@ -393,8 +393,8 @@
   {
    "kind": "street",
    "id": "last_lantern_street_11",
-   "x": 885.14,
-   "z": 1253.16,
+   "x": 871.12,
+   "z": 1261.17,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -402,16 +402,16 @@
     "width": 2.2,
     "pts": [
      [
-      885.14,
-      1253.16
+      871.12,
+      1261.17
      ],
      [
-      885.21,
-      1256.79
+      864.24,
+      1260.87
      ],
      [
-      885.13,
-      1260.43
+      858.44,
+      1259.95
      ]
     ]
    }
@@ -419,86 +419,8 @@
   {
    "kind": "street",
    "id": "last_lantern_street_12",
-   "x": 887.95,
-   "z": 1263.46,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      887.95,
-      1263.46
-     ],
-     [
-      887.81,
-      1266.67
-     ],
-     [
-      887.94,
-      1269.87
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_13",
-   "x": 862.95,
-   "z": 1257.11,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      862.95,
-      1257.11
-     ],
-     [
-      862.27,
-      1259.56
-     ],
-     [
-      860.96,
-      1267.14
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_14",
-   "x": 873.97,
-   "z": 1259.34,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      873.97,
-      1259.34
-     ],
-     [
-      869.35,
-      1258.27
-     ],
-     [
-      864.7,
-      1257.26
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_15",
-   "x": 883.39,
-   "z": 1286.14,
+   "x": 897.24,
+   "z": 1291.48,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -506,16 +428,94 @@
     "width": 3.2,
     "pts": [
      [
-      883.39,
-      1286.14
+      897.24,
+      1291.48
      ],
      [
-      872.03,
-      1315.27
+      887.44,
+      1321.2
      ],
      [
-      860.93,
-      1344.49
+      874.78,
+      1349.82
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_13",
+   "x": 924.01,
+   "z": 1341.53,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      924.01,
+      1341.53
+     ],
+     [
+      906.59,
+      1338.41
+     ],
+     [
+      889.56,
+      1333.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_14",
+   "x": 921.35,
+   "z": 1309.28,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      921.35,
+      1309.28
+     ],
+     [
+      915.96,
+      1321.96
+     ],
+     [
+      910.38,
+      1334.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_15",
+   "x": 926.6,
+   "z": 1321.24,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      926.6,
+      1321.24
+     ],
+     [
+      922.67,
+      1319.77
+     ],
+     [
+      918.91,
+      1317.9
      ]
     ]
    }
@@ -523,8 +523,8 @@
   {
    "kind": "street",
    "id": "last_lantern_street_16",
-   "x": 923.26,
-   "z": 1343.67,
+   "x": 921.38,
+   "z": 1333.25,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -532,16 +532,16 @@
     "width": 2.2,
     "pts": [
      [
-      923.26,
-      1343.67
+      921.38,
+      1333.25
      ],
      [
-      898.76,
-      1338.15
+      917.62,
+      1331.41
      ],
      [
-      874.03,
-      1333.8
+      913.7,
+      1329.92
      ]
     ]
    }
@@ -549,8 +549,8 @@
   {
    "kind": "street",
    "id": "last_lantern_street_17",
-   "x": 905.3,
-   "z": 1301.38,
+   "x": 914.59,
+   "z": 1321.88,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -558,16 +558,16 @@
     "width": 2.2,
     "pts": [
      [
-      905.3,
-      1301.38
+      914.59,
+      1321.88
      ],
      [
-      900.95,
-      1318.15
+      905.54,
+      1318.62
      ],
      [
-      896.26,
-      1334.84
+      896.97,
+      1314.24
      ]
     ]
    }
@@ -575,8 +575,8 @@
   {
    "kind": "street",
    "id": "last_lantern_street_18",
-   "x": 925.73,
-   "z": 1321.93,
+   "x": 909.28,
+   "z": 1304.04,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -584,16 +584,16 @@
     "width": 2.2,
     "pts": [
      [
-      925.73,
-      1321.93
+      909.28,
+      1304.04
      ],
      [
-      914.14,
-      1319.18
+      906.93,
+      1309.86
      ],
      [
-      902.74,
-      1315.72
+      904.29,
+      1315.55
      ]
     ]
    }
@@ -601,8 +601,8 @@
   {
    "kind": "street",
    "id": "last_lantern_street_19",
-   "x": 914.95,
-   "z": 1303.98,
+   "x": 904.35,
+   "z": 1319.3,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -610,16 +610,16 @@
     "width": 2.2,
     "pts": [
      [
-      914.95,
-      1303.98
+      904.35,
+      1319.3
      ],
      [
-      913.04,
-      1310.22
+      902.1,
+      1324.65
      ],
      [
-      911.55,
-      1316.57
+      899.73,
+      1329.95
      ]
     ]
    }
@@ -627,839 +627,7 @@
   {
    "kind": "street",
    "id": "last_lantern_street_20",
-   "x": 924.29,
-   "z": 1306.51,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      924.29,
-      1306.51
-     ],
-     [
-      922.75,
-      1312.84
-     ],
-     [
-      920.89,
-      1319.1
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_21",
-   "x": 927.36,
-   "z": 1315.91,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      927.36,
-      1315.91
-     ],
-     [
-      925.35,
-      1315.38
-     ],
-     [
-      923.35,
-      1314.83
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_22",
-   "x": 921.78,
-   "z": 1310.97,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      921.78,
-      1310.97
-     ],
-     [
-      918.33,
-      1310.12
-     ],
-     [
-      914.93,
-      1309.12
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_23",
-   "x": 912.47,
-   "z": 1308.1,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      912.47,
-      1308.1
-     ],
-     [
-      908.85,
-      1307.32
-     ],
-     [
-      905.32,
-      1306.17
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_24",
-   "x": 912.8,
-   "z": 1319.96,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      912.8,
-      1319.96
-     ],
-     [
-      910.53,
-      1329.02
-     ],
-     [
-      907.93,
-      1337.99
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_25",
-   "x": 922.07,
-   "z": 1335.49,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      922.07,
-      1335.49
-     ],
-     [
-      916.31,
-      1334.3
-     ],
-     [
-      910.74,
-      1332.44
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_26",
-   "x": 917.59,
-   "z": 1321.25,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      917.59,
-      1321.25
-     ],
-     [
-      916.35,
-      1326.68
-     ],
-     [
-      914.68,
-      1332
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_27",
-   "x": 924.2,
-   "z": 1327.58,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      924.2,
-      1327.58
-     ],
-     [
-      921,
-      1326.57
-     ],
-     [
-      917.72,
-      1325.83
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_28",
-   "x": 914.46,
-   "z": 1327.74,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      914.46,
-      1327.74
-     ],
-     [
-      913.32,
-      1327.43
-     ],
-     [
-      912.18,
-      1327.13
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_29",
-   "x": 917.89,
-   "z": 1335.87,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      917.89,
-      1335.87
-     ],
-     [
-      917.32,
-      1338.12
-     ],
-     [
-      916.68,
-      1340.35
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_30",
-   "x": 909.72,
-   "z": 1326.48,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      909.72,
-      1326.48
-     ],
-     [
-      905.05,
-      1325.48
-     ],
-     [
-      900.51,
-      1323.99
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_31",
-   "x": 907.88,
-   "z": 1333.3,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      907.88,
-      1333.3
-     ],
-     [
-      903.21,
-      1332.3
-     ],
-     [
-      898.67,
-      1330.81
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_32",
-   "x": 900.42,
-   "z": 1314.57,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      900.42,
-      1314.57
-     ],
-     [
-      890.69,
-      1312.45
-     ],
-     [
-      881.22,
-      1309.39
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_33",
-   "x": 890.41,
-   "z": 1297.36,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      890.41,
-      1297.36
-     ],
-     [
-      888.64,
-      1303.31
-     ],
-     [
-      887.17,
-      1309.35
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_34",
-   "x": 900.79,
-   "z": 1300.16,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      900.79,
-      1300.16
-     ],
-     [
-      899.24,
-      1306.17
-     ],
-     [
-      897.55,
-      1312.15
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_35",
-   "x": 901.68,
-   "z": 1309.91,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      901.68,
-      1309.91
-     ],
-     [
-      900.62,
-      1309.57
-     ],
-     [
-      899.53,
-      1309.32
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_36",
-   "x": 897.59,
-   "z": 1307.51,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      897.59,
-      1307.51
-     ],
-     [
-      893.52,
-      1306.6
-     ],
-     [
-      889.56,
-      1305.34
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_37",
-   "x": 888.18,
-   "z": 1300.79,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      888.18,
-      1300.79
-     ],
-     [
-      886.03,
-      1300.17
-     ],
-     [
-      883.86,
-      1299.62
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_38",
-   "x": 890.07,
-   "z": 1313.42,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      890.07,
-      1313.42
-     ],
-     [
-      887.95,
-      1322.72
-     ],
-     [
-      885.1,
-      1331.82
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_39",
-   "x": 897.61,
-   "z": 1324.98,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      897.61,
-      1324.98
-     ],
-     [
-      893.36,
-      1323.81
-     ],
-     [
-      889.1,
-      1322.68
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_40",
-   "x": 886.32,
-   "z": 1321.59,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      886.32,
-      1321.59
-     ],
-     [
-      882.4,
-      1320.57
-     ],
-     [
-      878.5,
-      1319.47
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_41",
-   "x": 889.25,
-   "z": 1338.89,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      889.25,
-      1338.89
-     ],
-     [
-      887.87,
-      1344.53
-     ],
-     [
-      886.73,
-      1350.22
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_42",
-   "x": 909.46,
-   "z": 1343.39,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      909.46,
-      1343.39
-     ],
-     [
-      908.43,
-      1349.1
-     ],
-     [
-      906.94,
-      1354.72
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_43",
-   "x": 916.31,
-   "z": 1353.3,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      916.31,
-      1353.3
-     ],
-     [
-      914.07,
-      1352.8
-     ],
-     [
-      908.99,
-      1351.67
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_44",
-   "x": 915.34,
-   "z": 1344.7,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      915.34,
-      1344.7
-     ],
-     [
-      914.68,
-      1348.18
-     ],
-     [
-      913.8,
-      1351.61
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_45",
-   "x": 896.2,
-   "z": 1340.44,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      896.2,
-      1340.44
-     ],
-     [
-      894.94,
-      1346.1
-     ],
-     [
-      893.68,
-      1351.77
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_46",
-   "x": 906.79,
-   "z": 1349.22,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      906.79,
-      1349.22
-     ],
-     [
-      901.42,
-      1347.72
-     ],
-     [
-      895.92,
-      1346.8
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_47",
-   "x": 901.93,
-   "z": 1341.71,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      901.93,
-      1341.71
-     ],
-     [
-      901.43,
-      1344.1
-     ],
-     [
-      900.87,
-      1346.47
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_48",
-   "x": 902.34,
-   "z": 1349.67,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      902.34,
-      1349.67
-     ],
-     [
-      901.96,
-      1351.6
-     ],
-     [
-      901.49,
-      1353.51
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_49",
-   "x": 893.75,
-   "z": 1346.35,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      893.75,
-      1346.35
-     ],
-     [
-      891.43,
-      1345.75
-     ],
-     [
-      889.07,
-      1345.31
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_50",
-   "x": 884.5,
-   "z": 1337.83,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      884.5,
-      1337.83
-     ],
-     [
-      883.48,
-      1343.55
-     ],
-     [
-      881.98,
-      1349.17
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_51",
-   "x": 886.47,
-   "z": 1345.76,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      886.47,
-      1345.76
-     ],
-     [
-      885.35,
-      1345.52
-     ],
-     [
-      884.23,
-      1345.26
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_52",
-   "x": 882.53,
+   "x": 908.53,
    "z": 1340.52,
    "yaw": 0,
    "data": {
@@ -1468,25 +636,25 @@
     "width": 2.2,
     "pts": [
      [
-      882.53,
+      908.53,
       1340.52
      ],
      [
-      878.81,
-      1339.65
+      906.95,
+      1347.61
      ],
      [
-      875.07,
-      1338.86
+      905.8,
+      1354.78
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_53",
-   "x": 865.35,
-   "z": 1322.98,
+   "id": "last_lantern_street_21",
+   "x": 918.74,
+   "z": 1351.9,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1494,25 +662,25 @@
     "width": 2.2,
     "pts": [
      [
-      865.35,
-      1322.98
+      918.74,
+      1351.9
      ],
      [
-      854.08,
-      1318.73
+      914.12,
+      1351.17
      ],
      [
-      843.38,
-      1313.22
+      908.11,
+      1349.81
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_54",
-   "x": 872.12,
-   "z": 1303.72,
+   "id": "last_lantern_street_22",
+   "x": 900.43,
+   "z": 1338.97,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1520,25 +688,25 @@
     "width": 2.2,
     "pts": [
      [
-      872.12,
-      1303.72
+      900.43,
+      1338.97
      ],
      [
-      863.65,
-      1298.03
+      899.24,
+      1346.14
      ],
      [
-      854.71,
-      1293.13
+      897.7,
+      1353.23
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_55",
-   "x": 869.94,
-   "z": 1287.58,
+   "id": "last_lantern_street_23",
+   "x": 905.5,
+   "z": 1349.33,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1546,25 +714,25 @@
     "width": 2.2,
     "pts": [
      [
-      869.94,
-      1287.58
+      905.5,
+      1349.33
      ],
      [
-      866.79,
-      1292.16
+      902.72,
+      1348.82
      ],
      [
-      864.18,
-      1297.06
+      899.96,
+      1348.27
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_56",
-   "x": 875.81,
-   "z": 1297.66,
+   "id": "last_lantern_street_24",
+   "x": 898.14,
+   "z": 1344.16,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1572,25 +740,25 @@
     "width": 2.2,
     "pts": [
      [
-      875.81,
-      1297.66
+      898.14,
+      1344.16
      ],
      [
-      872.02,
-      1295.39
+      893.49,
+      1343.38
      ],
      [
-      868.26,
-      1293.07
+      888.89,
+      1342.39
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_57",
-   "x": 865.22,
-   "z": 1292.63,
+   "id": "last_lantern_street_25",
+   "x": 884.01,
+   "z": 1312.74,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1598,25 +766,25 @@
     "width": 2.2,
     "pts": [
      [
-      865.22,
-      1292.63
+      884.01,
+      1312.74
      ],
      [
-      861.54,
-      1290.28
+      867.71,
+      1305.17
      ],
      [
-      857.76,
-      1288.1
+      851.6,
+      1297.19
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_58",
-   "x": 859.11,
-   "z": 1297.63,
+   "id": "last_lantern_street_26",
+   "x": 877.9,
+   "z": 1290.86,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1624,25 +792,25 @@
     "width": 2.2,
     "pts": [
      [
-      859.11,
-      1297.63
+      877.9,
+      1290.86
      ],
      [
-      854.85,
-      1304.2
+      873.57,
+      1296.32
      ],
      [
-      850.98,
-      1310.99
+      869.78,
+      1302.16
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_59",
-   "x": 866.8,
-   "z": 1312.47,
+   "id": "last_lantern_street_27",
+   "x": 859.25,
+   "z": 1303.54,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1650,25 +818,25 @@
     "width": 2.2,
     "pts": [
      [
-      866.8,
-      1312.47
+      859.25,
+      1303.54
      ],
      [
-      861.45,
-      1308.8
+      851.96,
+      1318.48
      ],
      [
-      855.72,
-      1305.74
+      846.21,
+      1334.09
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_60",
-   "x": 863.58,
-   "z": 1300.35,
+   "id": "last_lantern_street_28",
+   "x": 877.53,
+   "z": 1323.92,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1676,25 +844,25 @@
     "width": 2.2,
     "pts": [
      [
-      863.58,
-      1300.35
+      877.53,
+      1323.92
      ],
      [
-      861.76,
-      1303.48
+      867.14,
+      1319.13
      ],
      [
-      859.82,
-      1306.53
+      856.49,
+      1314.94
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_61",
-   "x": 861.56,
-   "z": 1310.99,
+   "id": "last_lantern_street_29",
+   "x": 874.96,
+   "z": 1310.24,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1702,25 +870,25 @@
     "width": 2.2,
     "pts": [
      [
-      861.56,
-      1310.99
+      874.96,
+      1310.24
      ],
      [
-      860.22,
-      1313.39
+      872.79,
+      1314.83
      ],
      [
-      858.71,
-      1315.69
+      870.98,
+      1319.57
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_62",
-   "x": 854.09,
-   "z": 1303.34,
+   "id": "last_lantern_street_30",
+   "x": 866.55,
+   "z": 1320.78,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1728,25 +896,25 @@
     "width": 2.2,
     "pts": [
      [
-      854.09,
-      1303.34
+      866.55,
+      1320.78
      ],
      [
-      852.02,
-      1302.14
+      863,
+      1330.26
      ],
      [
-      850.01,
-      1300.86
+      858.61,
+      1339.38
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_63",
-   "x": 849.24,
-   "z": 1319.21,
+   "id": "last_lantern_street_31",
+   "x": 873.53,
+   "z": 1333.29,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1754,25 +922,25 @@
     "width": 2.2,
     "pts": [
      [
-      849.24,
-      1319.21
+      873.53,
+      1333.29
      ],
      [
-      846.74,
-      1326.45
+      869.1,
+      1331.22
      ],
      [
-      844.33,
-      1333.73
+      864.54,
+      1329.45
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_64",
-   "x": 861.28,
-   "z": 1328.06,
+   "id": "last_lantern_street_32",
+   "x": 859.59,
+   "z": 1333.15,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1780,25 +948,25 @@
     "width": 2.2,
     "pts": [
      [
-      861.28,
-      1328.06
+      859.59,
+      1333.15
      ],
      [
-      855.17,
-      1325.7
+      854.96,
+      1331.26
      ],
      [
-      848.88,
-      1323.86
+      850.39,
+      1329.23
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_65",
-   "x": 856.13,
-   "z": 1321.54,
+   "id": "last_lantern_street_33",
+   "x": 848.37,
+   "z": 1324.1,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1806,25 +974,25 @@
     "width": 2.2,
     "pts": [
      [
-      856.13,
-      1321.54
+      848.37,
+      1324.1
      ],
      [
-      855.64,
-      1323.04
+      844.88,
+      1322.51
      ],
      [
-      855.12,
-      1324.52
+      841.32,
+      1321.1
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_66",
-   "x": 856.62,
-   "z": 1327.93,
+   "id": "last_lantern_street_34",
+   "x": 851.59,
+   "z": 1316.56,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1832,49 +1000,23 @@
     "width": 2.2,
     "pts": [
      [
-      856.62,
-      1327.93
+      851.59,
+      1316.56
      ],
      [
-      855.1,
-      1332.39
+      847.98,
+      1315.26
      ],
      [
-      853.59,
-      1336.86
+      844.54,
+      1313.56
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_67",
-   "x": 845.19,
-   "z": 1327.59,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      845.19,
-      1327.59
-     ],
-     [
-      842.35,
-      1326.62
-     ],
-     [
-      839.5,
-      1325.67
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_68",
+   "id": "last_lantern_street_35",
    "x": 868.68,
    "z": 1366.4,
    "yaw": 0,
@@ -1888,8 +1030,12 @@
       1366.4
      ],
      [
-      883.83,
-      1308.44
+      885.5,
+      1311
+     ],
+     [
+      881.95,
+      1306.74
      ]
     ],
     "high": true,
@@ -1899,9 +1045,9 @@
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_69",
-   "x": 872.03,
-   "z": 1315.27,
+   "id": "last_lantern_street_36",
+   "x": 867.71,
+   "z": 1305.17,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1909,41 +1055,19 @@
     "width": 2.2,
     "pts": [
      [
-      872.03,
-      1315.27
+      867.71,
+      1305.17
      ],
      [
-      878.5,
-      1319.47
+      869.78,
+      1302.16
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_70",
-   "x": 865.35,
-   "z": 1322.98,
-   "yaw": 0,
-   "data": {
-    "town": "last_lantern",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      865.35,
-      1322.98
-     ],
-     [
-      868.63,
-      1324.22
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "last_lantern_street_71",
+   "id": "last_lantern_street_37",
    "x": 894.65,
    "z": 1280.54,
    "yaw": 0,
@@ -1957,15 +1081,81 @@
       1280.54
      ],
      [
-      883.39,
-      1286.14
+      897.24,
+      1291.48
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_72",
+   "id": "last_lantern_street_38",
+   "x": 871.44,
+   "z": 1269.17,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      871.44,
+      1269.17
+     ],
+     [
+      870.14,
+      1275.51
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_39",
+   "x": 884.98,
+   "z": 1265.31,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      884.98,
+      1265.31
+     ],
+     [
+      881.44,
+      1265.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_40",
+   "x": 896.97,
+   "z": 1314.24,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      896.97,
+      1314.24
+     ],
+     [
+      890.45,
+      1312.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_41",
    "x": 908.11,
    "z": 1276.5,
    "yaw": 0,
@@ -1987,9 +1177,9 @@
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_73",
-   "x": 860.96,
-   "z": 1267.14,
+   "id": "last_lantern_street_42",
+   "x": 906.59,
+   "z": 1338.41,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -1997,21 +1187,21 @@
     "width": 2.2,
     "pts": [
      [
-      860.96,
-      1267.14
+      906.59,
+      1338.41
      ],
      [
-      859.68,
-      1273.37
+      910.38,
+      1334.57
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "last_lantern_street_74",
-   "x": 914.32,
-   "z": 1267.18,
+   "id": "last_lantern_street_43",
+   "x": 915.77,
+   "z": 1260.77,
    "yaw": 0,
    "data": {
     "town": "last_lantern",
@@ -2019,12 +1209,12 @@
     "width": 2.2,
     "pts": [
      [
-      914.32,
-      1267.18
+      915.77,
+      1260.77
      ],
      [
-      910.03,
-      1266.36
+      910.76,
+      1260.22
      ]
     ]
    }
@@ -2032,51 +1222,68 @@
   {
    "kind": "building",
    "id": "last_lantern_plot_0",
-   "x": 918.1,
-   "z": 1271.83,
+   "x": 918.79,
+   "z": 1268.75,
    "yaw": 2.9204,
    "data": {
     "town": "last_lantern",
     "want": "house",
     "district": "residential",
-    "w": 3.98,
+    "w": 10.29,
     "d": 8.2,
     "angle": 1.792,
     "front": 4.9335,
-    "streetGap": -0.36
+    "streetGap": -0.4
    }
   },
   {
    "kind": "building",
    "id": "last_lantern_plot_1",
-   "x": 898.24,
-   "z": 1255.92,
-   "yaw": -1.572,
+   "x": 897.43,
+   "z": 1257.96,
+   "yaw": 0.1199,
    "data": {
     "town": "last_lantern",
     "want": "house",
     "district": "residential",
-    "w": 4.28,
-    "d": 5.5,
-    "angle": 1.572,
-    "front": 3.1428,
-    "streetGap": -0.39
+    "w": 7.83,
+    "d": 5.14,
+    "angle": 1.4509,
+    "front": 1.4509,
+    "streetGap": -0.27
    }
   },
   {
    "kind": "building",
    "id": "last_lantern_plot_2",
-   "x": 898.23,
-   "z": 1265.4,
-   "yaw": 3.1404,
+   "x": 887.71,
+   "z": 1259.21,
+   "yaw": 0.1199,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 7.99,
+    "d": 5.67,
+    "angle": 1.4509,
+    "front": 1.4509,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_3",
+   "x": 876.11,
+   "z": 1265.12,
+   "yaw": 3.0415,
    "data": {
     "town": "last_lantern",
     "want": "armoury",
     "district": "residential",
     "w": 7.78,
-    "d": 5.5,
-    "angle": 1.572,
-    "front": 4.7136,
+    "d": 5.04,
+    "angle": 1.6709,
+    "front": 4.8125,
     "streetGap": -0.4,
     "office": "armoury",
     "role": "armourer",
@@ -2086,52 +1293,90 @@
   },
   {
    "kind": "building",
-   "id": "last_lantern_plot_3",
-   "x": 889.48,
-   "z": 1256.8,
-   "yaw": -1.572,
-   "data": {
-    "town": "last_lantern",
-    "want": "house",
-    "district": "residential",
-    "w": 6.07,
-    "d": 5.13,
-    "angle": 1.572,
-    "front": 3.1428,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
    "id": "last_lantern_plot_4",
-   "x": 880.95,
-   "z": 1256.79,
-   "yaw": 1.5696,
+   "x": 866.93,
+   "z": 1265.48,
+   "yaw": 1.4707,
    "data": {
     "town": "last_lantern",
-    "want": "house",
+    "want": "bowyer",
     "district": "residential",
-    "w": 6.07,
-    "d": 4.8,
-    "angle": 1.572,
-    "front": 6.2844,
-    "streetGap": -0.23
+    "w": 5.24,
+    "d": 6.28,
+    "angle": 1.6709,
+    "front": 6.3833,
+    "streetGap": -0.37,
+    "office": "bowyer",
+    "role": "bowyer",
+    "lit": true,
+    "label": "Bowyer"
    }
   },
   {
    "kind": "building",
    "id": "last_lantern_plot_5",
-   "x": 882.32,
-   "z": 1266.66,
-   "yaw": 1.5696,
+   "x": 860.68,
+   "z": 1264.85,
+   "yaw": 3.0415,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 5.24,
+    "d": 6.28,
+    "angle": 1.6709,
+    "front": 4.8125,
+    "streetGap": -0.22
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_6",
+   "x": 924.78,
+   "z": 1314.89,
+   "yaw": -1.98,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 6.37,
+    "d": 7.17,
+    "angle": 1.98,
+    "front": 3.5508,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_7",
+   "x": 920.14,
+   "z": 1325.59,
+   "yaw": -0.4092,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 9.29,
+    "d": 7.17,
+    "angle": 1.98,
+    "front": 1.98,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_8",
+   "x": 912.85,
+   "z": 1312.43,
+   "yaw": -1.98,
    "data": {
     "town": "last_lantern",
     "want": "study",
     "district": "residential",
-    "w": 5.21,
-    "d": 7.57,
-    "angle": 1.572,
-    "front": 6.2844,
+    "w": 11.35,
+    "d": 9.51,
+    "angle": 1.98,
+    "front": 3.5508,
     "streetGap": -0.4,
     "office": "study",
     "role": "unbinder",
@@ -2141,309 +1386,18 @@
   },
   {
    "kind": "building",
-   "id": "last_lantern_plot_6",
-   "x": 868.07,
-   "z": 1263.96,
-   "yaw": 2.9204,
-   "data": {
-    "town": "last_lantern",
-    "want": "bowyer",
-    "district": "residential",
-    "w": 8.13,
-    "d": 8.3,
-    "angle": 1.792,
-    "front": 4.9336,
-    "streetGap": -0.33,
-    "office": "bowyer",
-    "role": "bowyer",
-    "lit": true,
-    "label": "Bowyer"
-   }
-  },
-  {
-   "kind": "building",
-   "id": "last_lantern_plot_7",
-   "x": 917.15,
-   "z": 1314.51,
-   "yaw": 2.8778,
-   "data": {
-    "town": "last_lantern",
-    "want": "counting_house",
-    "district": "craft",
-    "w": 5.7,
-    "d": 5.9,
-    "angle": 1.8346,
-    "front": 4.9762,
-    "streetGap": -0.4,
-    "office": "counting_house",
-    "role": "broker",
-    "lit": false,
-    "label": "Counting House"
-   }
-  },
-  {
-   "kind": "building",
-   "id": "last_lantern_plot_8",
-   "x": 907.63,
-   "z": 1311.82,
-   "yaw": 2.8778,
-   "data": {
-    "town": "last_lantern",
-    "want": "shop",
-    "district": "craft",
-    "w": 5.93,
-    "d": 6.21,
-    "angle": 1.8346,
-    "front": 4.9762,
-    "streetGap": -0.4,
-    "office": "shop",
-    "role": "merchant",
-    "lit": true,
-    "label": "General Goods"
-   }
-  },
-  {
-   "kind": "building",
    "id": "last_lantern_plot_9",
-   "x": 919.92,
-   "z": 1330.57,
-   "yaw": -1.8346,
-   "data": {
-    "town": "last_lantern",
-    "want": "house",
-    "district": "residential",
-    "w": 4.29,
-    "d": 5.51,
-    "angle": 1.8346,
-    "front": 3.4054,
-    "streetGap": -0.28
-   }
-  },
-  {
-   "kind": "building",
-   "id": "last_lantern_plot_10",
-   "x": 906.22,
-   "z": 1321.16,
-   "yaw": -1.8346,
-   "data": {
-    "town": "last_lantern",
-    "want": "stable",
-    "district": "craft",
-    "w": 4.55,
-    "d": 8.34,
-    "angle": 1.8346,
-    "front": 3.4054,
-    "streetGap": -0.39,
-    "office": "stable",
-    "role": "stablehand",
-    "lit": true,
-    "label": "Stables"
-   }
-  },
-  {
-   "kind": "building",
-   "id": "last_lantern_plot_11",
-   "x": 894.77,
-   "z": 1301.98,
-   "yaw": 1.307,
-   "data": {
-    "town": "last_lantern",
-    "want": "hall",
-    "district": "civic",
-    "w": 5.45,
-    "d": 7.12,
-    "angle": 1.8346,
-    "front": 6.547,
-    "streetGap": -0.29,
-    "office": "hall",
-    "role": "elder",
-    "lit": false,
-    "label": "Town Hall"
-   }
-  },
-  {
-   "kind": "building",
-   "id": "last_lantern_plot_12",
-   "x": 894.7,
-   "z": 1318.85,
-   "yaw": -0.2638,
-   "data": {
-    "town": "last_lantern",
-    "want": "forge",
-    "district": "civic",
-    "w": 6.87,
-    "d": 7.61,
-    "angle": 1.8346,
-    "front": 1.8346,
-    "streetGap": -0.4,
-    "office": "forge",
-    "role": "smith",
-    "lit": true,
-    "label": "Smithy"
-   }
-  },
-  {
-   "kind": "building",
-   "id": "last_lantern_plot_13",
-   "x": 891.93,
-   "z": 1329.14,
-   "yaw": 2.8778,
-   "data": {
-    "town": "last_lantern",
-    "want": "temple",
-    "district": "craft",
-    "w": 7.54,
-    "d": 7.61,
-    "angle": 1.8346,
-    "front": 4.9762,
-    "streetGap": -0.35,
-    "office": "temple",
-    "role": "healer",
-    "lit": false,
-    "label": "Temple"
-   }
-  },
-  {
-   "kind": "building",
-   "id": "last_lantern_plot_14",
-   "x": 905.06,
-   "z": 1344.91,
-   "yaw": -1.7898,
-   "data": {
-    "town": "last_lantern",
-    "want": "house",
-    "district": "residential",
-    "w": 3.68,
-    "d": 4.05,
-    "angle": 1.7898,
-    "front": 3.3606,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
-   "id": "last_lantern_plot_15",
-   "x": 892.23,
-   "z": 1342.17,
-   "yaw": -0.219,
-   "data": {
-    "town": "last_lantern",
-    "want": "house",
-    "district": "residential",
-    "w": 3.92,
-    "d": 3.6,
-    "angle": 1.7898,
-    "front": 1.7898,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
-   "id": "last_lantern_plot_16",
-   "x": 863.56,
-   "z": 1286.96,
-   "yaw": -0.5463,
-   "data": {
-    "town": "last_lantern",
-    "want": "barber",
-    "district": "craft",
-    "w": 4.37,
-    "d": 7.52,
-    "angle": 2.1171,
-    "front": 2.1171,
-    "streetGap": -0.4,
-    "office": "barber",
-    "role": "barber",
-    "lit": true,
-    "label": "Barber"
-   }
-  },
-  {
-   "kind": "building",
-   "id": "last_lantern_plot_17",
-   "x": 866.07,
-   "z": 1306.09,
-   "yaw": -2.1171,
-   "data": {
-    "town": "last_lantern",
-    "want": "inn",
-    "district": "craft",
-    "w": 6.03,
-    "d": 6.68,
-    "angle": 2.1171,
-    "front": 3.6879,
-    "streetGap": -0.4,
-    "office": "inn",
-    "role": "innkeeper",
-    "lit": true,
-    "label": "Inn"
-   }
-  },
-  {
-   "kind": "building",
-   "id": "last_lantern_plot_18",
-   "x": 856.32,
-   "z": 1311.03,
-   "yaw": 1.0245,
-   "data": {
-    "town": "last_lantern",
-    "want": "hut",
-    "district": "craft",
-    "w": 4.3,
-    "d": 5.33,
-    "angle": 2.1171,
-    "front": 6.8295,
-    "streetGap": -0.21
-   }
-  },
-  {
-   "kind": "building",
-   "id": "last_lantern_plot_19",
-   "x": 854.29,
-   "z": 1298.41,
-   "yaw": -0.5463,
-   "data": {
-    "town": "last_lantern",
-    "want": "hut",
-    "district": "craft",
-    "w": 5.14,
-    "d": 3.57,
-    "angle": 2.1171,
-    "front": 2.1171,
-    "streetGap": -0.31
-   }
-  },
-  {
-   "kind": "building",
-   "id": "last_lantern_plot_20",
-   "x": 849.63,
-   "z": 1306.07,
-   "yaw": 2.5953,
-   "data": {
-    "town": "last_lantern",
-    "want": "house",
-    "district": "residential",
-    "w": 5.81,
-    "d": 3.57,
-    "angle": 2.1171,
-    "front": 5.2587,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
-   "id": "last_lantern_plot_21",
-   "x": 850.49,
-   "z": 1330.83,
-   "yaw": 1.2445,
+   "x": 907.35,
+   "z": 1326.93,
+   "yaw": -1.98,
    "data": {
     "town": "last_lantern",
     "want": "apothecary",
     "district": "residential",
-    "w": 8.23,
-    "d": 6.33,
-    "angle": 1.8971,
-    "front": 6.6095,
+    "w": 10.41,
+    "d": 8.06,
+    "angle": 1.98,
+    "front": 3.5508,
     "streetGap": -0.4,
     "office": "apothecary",
     "role": "apothecary",
@@ -2453,23 +1407,221 @@
   },
   {
    "kind": "building",
-   "id": "last_lantern_plot_22",
-   "x": 844.01,
-   "z": 1321.73,
-   "yaw": -0.3263,
+   "id": "last_lantern_plot_10",
+   "x": 897.48,
+   "z": 1322.65,
+   "yaw": 1.1616,
    "data": {
     "town": "last_lantern",
-    "want": "tailor",
-    "district": "residential",
-    "w": 6.92,
-    "d": 4.81,
-    "angle": 1.8971,
-    "front": 1.8971,
-    "streetGap": -0.4,
-    "office": "tailor",
-    "role": "tailor",
+    "want": "stable",
+    "district": "craft",
+    "w": 10.41,
+    "d": 6.43,
+    "angle": 1.98,
+    "front": 6.6924,
+    "streetGap": -0.29,
+    "office": "stable",
+    "role": "stablehand",
     "lit": true,
-    "label": "Tailor"
+    "label": "Stables"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_11",
+   "x": 915.14,
+   "z": 1345.81,
+   "yaw": -1.76,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 6.7,
+    "d": 11.12,
+    "angle": 1.76,
+    "front": 3.3308,
+    "streetGap": -0.05
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_12",
+   "x": 892.55,
+   "z": 1348.28,
+   "yaw": 2.9524,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 6.59,
+    "d": 8.22,
+    "angle": 1.76,
+    "front": 4.9016,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_13",
+   "x": 867.02,
+   "z": 1291.61,
+   "yaw": 0.9474,
+   "data": {
+    "town": "last_lantern",
+    "want": "hall",
+    "district": "civic",
+    "w": 12.71,
+    "d": 12.74,
+    "angle": 2.1942,
+    "front": 6.9066,
+    "streetGap": -0.4,
+    "office": "hall",
+    "role": "elder",
+    "lit": false,
+    "label": "Town Hall"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_14",
+   "x": 877.12,
+   "z": 1316.68,
+   "yaw": -0.4034,
+   "data": {
+    "town": "last_lantern",
+    "want": "inn",
+    "district": "civic",
+    "w": 8.94,
+    "d": 5.25,
+    "angle": 1.9742,
+    "front": 1.9742,
+    "streetGap": -0.17,
+    "office": "inn",
+    "role": "innkeeper",
+    "lit": true,
+    "label": "Inn"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_15",
+   "x": 865.41,
+   "z": 1311.68,
+   "yaw": 1.1674,
+   "data": {
+    "town": "last_lantern",
+    "want": "forge",
+    "district": "civic",
+    "w": 8.94,
+    "d": 12.66,
+    "angle": 1.9742,
+    "front": 6.6866,
+    "streetGap": -0.4,
+    "office": "forge",
+    "role": "smith",
+    "lit": true,
+    "label": "Smithy"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_16",
+   "x": 871,
+   "z": 1326.76,
+   "yaw": -0.4034,
+   "data": {
+    "town": "last_lantern",
+    "want": "shop",
+    "district": "craft",
+    "w": 6.3,
+    "d": 8.58,
+    "angle": 1.9742,
+    "front": 1.9742,
+    "streetGap": -0.4,
+    "office": "shop",
+    "role": "merchant",
+    "lit": true,
+    "label": "General Goods"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_17",
+   "x": 866.54,
+   "z": 1337.22,
+   "yaw": -1.9742,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 9,
+    "d": 8.58,
+    "angle": 1.9742,
+    "front": 3.545,
+    "streetGap": -0.18
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_18",
+   "x": 857.99,
+   "z": 1324.16,
+   "yaw": -0.4034,
+   "data": {
+    "town": "last_lantern",
+    "want": "barber",
+    "district": "craft",
+    "w": 11.73,
+    "d": 8.8,
+    "angle": 1.9742,
+    "front": 1.9742,
+    "streetGap": -0.24,
+    "office": "barber",
+    "role": "barber",
+    "lit": true,
+    "label": "Barber"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_19",
+   "x": 852.49,
+   "z": 1304.69,
+   "yaw": 1.1674,
+   "data": {
+    "town": "last_lantern",
+    "want": "temple",
+    "district": "craft",
+    "w": 6.24,
+    "d": 6.46,
+    "angle": 1.9742,
+    "front": 6.6866,
+    "streetGap": 0.25,
+    "office": "temple",
+    "role": "healer",
+    "lit": false,
+    "label": "Temple"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_20",
+   "x": 850.04,
+   "z": 1310.43,
+   "yaw": 1.1674,
+   "data": {
+    "town": "last_lantern",
+    "want": "counting_house",
+    "district": "craft",
+    "w": 6.24,
+    "d": 6.46,
+    "angle": 1.9742,
+    "front": 6.6866,
+    "streetGap": -0.07,
+    "office": "counting_house",
+    "role": "broker",
+    "lit": false,
+    "label": "Counting House"
    }
   },
   {
@@ -11947,251 +11099,260 @@
     "h": 4.5,
     "thick": 0.8,
     "tint": "#8a6a48",
-    "radius": 60.5,
+    "radius": 61.19,
     "solid": true,
     "runs": [
      [
       [
-       865.49,
-       1360.31,
-       1083.17
+       865.53,
+       1361.08,
+       1083.16
       ],
       [
-       853.25,
-       1353.06,
+       853.53,
+       1354.13,
        1082.91
       ],
       [
-       843.04,
-       1343.15,
-       1082.89
-      ],
-      [
-       835.43,
-       1331.13,
-       1082.61
-      ],
-      [
-       830.84,
-       1317.66,
-       1082.41
-      ],
-      [
-       829.52,
-       1303.49,
-       1082.21
-      ],
-      [
-       831.54,
-       1289.41,
-       1082.4
-      ],
-      [
-       836.8,
-       1276.18,
-       1082.65
-      ],
-      [
-       845,
-       1264.56,
-       1083.58
-      ],
-      [
-       855.7,
-       1255.17,
-       1084.16
-      ],
-      [
-       868.28,
-       1248.53,
-       1084.49
-      ],
-      [
-       882.07,
-       1245.02,
-       1084.8
-      ],
-      [
-       896.3,
-       1244.83,
-       1084.93
-      ],
-      [
-       910.18,
-       1247.97,
-       1085.21
-      ],
-      [
-       922.94,
-       1254.26,
-       1085.08
-      ],
-      [
-       933.88,
-       1263.35,
-       1084.91
-      ],
-      [
-       942.4,
-       1274.76,
-       1084.48
-      ],
-      [
-       948.01,
-       1287.83,
-       1083.99
-      ],
-      [
-       950.42,
-       1301.86,
-       1083.61
-      ],
-      [
-       949.48,
-       1316.05,
-       1083.05
-      ],
-      [
-       945.25,
-       1329.64,
+       843.4,
+       1344.65,
        1082.87
       ],
       [
-       937.97,
-       1341.87,
-       1082.77
+       835.67,
+       1333.14,
+       1082.66
       ],
       [
-       928.03,
-       1352.05,
-       1082.42
+       830.72,
+       1320.18,
+       1082.44
       ],
       [
-       915.99,
-       1359.63,
+       828.83,
+       1306.44,
+       1082.18
+      ],
+      [
+       830.08,
+       1292.62,
+       1082.29
+      ],
+      [
+       834.4,
+       1279.44,
+       1082.55
+      ],
+      [
+       841.59,
+       1267.58,
+       1083.29
+      ],
+      [
+       851.26,
+       1257.64,
+       1083.99
+      ],
+      [
+       862.92,
+       1250.13,
+       1084.42
+      ],
+      [
+       875.98,
+       1245.44,
+       1084.73
+      ],
+      [
+       889.75,
+       1243.81,
+       1084.88
+      ],
+      [
+       903.54,
+       1245.33,
+       1085.04
+      ],
+      [
+       916.63,
+       1249.91,
+       1085.27
+      ],
+      [
+       928.35,
+       1257.32,
+       1085.03
+      ],
+      [
+       938.11,
+       1267.19,
+       1084.76
+      ],
+      [
+       945.39,
+       1278.99,
+       1084.29
+      ],
+      [
+       949.82,
+       1292.14,
+       1083.86
+      ],
+      [
+       951.18,
+       1305.94,
+       1083.36
+      ],
+      [
+       949.4,
+       1319.69,
+       1082.88
+      ],
+      [
+       944.56,
+       1332.69,
+       1082.9
+      ],
+      [
+       936.92,
+       1344.27,
+       1082.72
+      ],
+      [
+       926.87,
+       1353.83,
        1082.34
       ],
       [
-       902.51,
-       1364.19,
-       1082.37
+       914.93,
+       1360.88,
+       1082.3
       ],
       [
-       888.34,
-       1365.48,
+       901.7,
+       1365.06,
+       1082.36
+      ],
+      [
+       887.87,
+       1366.15,
        1082.94
       ],
       [
-       874.26,
-       1363.42,
-       1083.24
+       874.16,
+       1364.1,
+       1083.23
       ]
      ]
     ],
     "towers": [
      {
-      "x": 862.87,
-      "z": 1359.08,
-      "h": 1083.1,
-      "yaw": -0.465
+      "x": 862.9,
+      "z": 1359.86,
+      "h": 1083.08,
+      "yaw": -0.4588
      },
      {
-      "x": 877.08,
-      "z": 1364.1,
-      "h": 1083.24,
-      "yaw": -0.2152
+      "x": 876.97,
+      "z": 1364.79,
+      "h": 1083.22,
+      "yaw": -0.2145
      },
      {
-      "x": 833.99,
-      "z": 1327.87,
-      "h": 1082.56,
-      "yaw": -1.1832
+      "x": 833.47,
+      "z": 1328.41,
+      "h": 1082.54,
+      "yaw": -1.1782
      },
      {
-      "x": 833.78,
+      "x": 833.04,
       "z": 1282.64,
-      "h": 1082.56,
-      "yaw": -1.9494
+      "h": 1082.54,
+      "yaw": -1.9449
      },
      {
-      "x": 865,
-      "z": 1249.91,
+      "x": 864.49,
+      "z": 1249.38,
       "h": 1084.44,
-      "yaw": -2.7155
+      "yaw": -2.7116
      },
      {
-      "x": 910.18,
-      "z": 1247.97,
-      "h": 1085.21,
-      "yaw": 2.8015
+      "x": 910.21,
+      "z": 1247.25,
+      "h": 1085.25,
+      "yaw": 2.8049
      },
      {
-      "x": 944.09,
-      "z": 1277.9,
-      "h": 1084.34,
-      "yaw": 2.0353
+      "x": 944.62,
+      "z": 1277.43,
+      "h": 1084.37,
+      "yaw": 2.0382
      },
      {
-      "x": 947.77,
-      "z": 1322.97,
-      "h": 1082.77,
-      "yaw": 1.2692
+      "x": 948.47,
+      "z": 1323.04,
+      "h": 1082.78,
+      "yaw": 1.2715
      },
      {
-      "x": 919.17,
-      "z": 1358.01,
-      "h": 1082.25,
-      "yaw": 0.503
+      "x": 919.59,
+      "z": 1358.56,
+      "h": 1082.22,
+      "yaw": 0.5048
      }
     ],
     "gates": [
      {
       "id": "last_lantern_gate_0",
-      "x": 869.82,
-      "z": 1362.03,
-      "h": 1083.23,
-      "yaw": -0.2556,
+      "x": 869.79,
+      "z": 1362.75,
+      "h": 1083.22,
+      "yaw": -0.2948,
       "out": [
-       -0.2529,
-       0.9675
+       -0.2905,
+       0.9569
       ],
-      "wallYaw": -0.3401,
-      "open": 6.51,
+      "wallYaw": -0.3367,
+      "open": 6.35,
       "width": 6.2,
       "pass": 6.2,
-      "slant": 0.084,
+      "slant": 0.042,
       "kind": "gatehouse",
-      "way": "last_lantern_street_68",
+      "way": "last_lantern_street_35",
       "wayKind": "road",
       "road": "road_link_last_lantern",
       "ways": [
-       "last_lantern_street_68"
+       "last_lantern_street_35"
       ],
       "led": [],
       "ends": [
        [
-        874.26,
-        1363.42
+        874.16,
+        1364.1
        ],
        [
-        865.49,
-        1360.31
+        865.53,
+        1361.08
        ]
       ],
       "main": {
-       "street": "last_lantern_street_68",
+       "street": "last_lantern_street_35",
        "width": 5,
        "pts": [
         [
-         869.82,
-         1362.03
+         869.79,
+         1362.75
         ],
         [
-         883.83,
-         1308.44
+         885.5,
+         1311
+        ],
+        [
+         881.95,
+         1306.74
         ]
        ],
-       "metres": 55.39
+       "metres": 59.63
       },
       "approaches": [
        {

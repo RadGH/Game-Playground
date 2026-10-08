@@ -286,7 +286,7 @@
    "at": "Lower Mossgate",
    "x": 708,
    "z": 1618,
-   "yaw": -1.338,
+   "yaw": -1.768,
    "cart": "cart_lower_mossgate",
    "placedBy": "content-towns",
    "quests": 0,
@@ -302,7 +302,7 @@
    "carter": "carter_lower_mossgate",
    "x": 710,
    "z": 1618,
-   "yaw": 0,
+   "yaw": -0.174,
    "radius": 2.2
   },
   {
@@ -311,9 +311,9 @@
    "name": "Hobb Fenwick",
    "role": "carter",
    "at": "Mirestead",
-   "x": 1094,
-   "z": 1112,
-   "yaw": -2.611,
+   "x": 1052,
+   "z": 1096,
+   "yaw": 0.194,
    "cart": "cart_mirestead",
    "placedBy": "content-towns",
    "quests": 0,
@@ -327,9 +327,9 @@
    "vehicle": "ox_cart",
    "town": "Mirestead",
    "carter": "carter_mirestead",
-   "x": 1096,
-   "z": 1114,
-   "yaw": -0.91,
+   "x": 1052,
+   "z": 1094,
+   "yaw": -1.36,
    "radius": 2.2
   },
   {
@@ -344,7 +344,7 @@
    "gate": "halsbridge_gate_1",
    "x": 1692,
    "z": 1262,
-   "yaw": 0.013,
+   "yaw": 0.005,
    "titled": false
   },
   {
@@ -359,7 +359,7 @@
    "gate": "halsbridge_gate_1",
    "x": 1702,
    "z": 1262,
-   "yaw": 0.013,
+   "yaw": 0.005,
    "titled": false
   },
   {
@@ -431,9 +431,9 @@
    "tier": "city",
    "town": "Halsbridge",
    "post": "square",
-   "x": 1698,
+   "x": 1702,
    "z": 1190,
-   "yaw": -2.944,
+   "yaw": -2.475,
    "titled": false
   },
   {
@@ -488,9 +488,9 @@
    "town": "Mill End",
    "post": "gate",
    "gate": "mill_end_gate_0",
-   "x": 202,
-   "z": 1516,
-   "yaw": -0.029,
+   "x": 200,
+   "z": 1518,
+   "yaw": 0.611,
    "titled": false
   },
   {
@@ -503,9 +503,9 @@
    "town": "Mill End",
    "post": "gate",
    "gate": "mill_end_gate_0",
-   "x": 210,
-   "z": 1516,
-   "yaw": -0.029,
+   "x": 206,
+   "z": 1514,
+   "yaw": 0.611,
    "titled": false
   },
   {
@@ -560,9 +560,9 @@
    "town": "Lower Mossgate",
    "post": "gate",
    "gate": "lower_mossgate_gate_0",
-   "x": 700,
-   "z": 1592,
-   "yaw": 0,
+   "x": 702,
+   "z": 1590,
+   "yaw": -0.174,
    "titled": false
   },
   {
@@ -575,9 +575,9 @@
    "town": "Mirestead",
    "post": "gate",
    "gate": "mirestead_gate_0",
-   "x": 1102,
-   "z": 1094,
-   "yaw": -0.91,
+   "x": 1100,
+   "z": 1088,
+   "yaw": -1.36,
    "titled": false
   }
  ]

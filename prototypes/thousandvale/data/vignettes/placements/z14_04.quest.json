@@ -169,8 +169,8 @@
    "post": "gate",
    "gate": "lowmoor_gate_0",
    "x": 1220,
-   "z": 966,
-   "yaw": -3.121,
+   "z": 968,
+   "yaw": 2.905,
    "titled": false
   },
   {
@@ -183,9 +183,9 @@
    "town": "Lowmoor",
    "post": "gate",
    "gate": "lowmoor_gate_0",
-   "x": 1214,
-   "z": 968,
-   "yaw": -3.121,
+   "x": 1210,
+   "z": 966,
+   "yaw": 2.905,
    "titled": false
   },
   {
@@ -226,8 +226,8 @@
    "town": "Lowmoor",
    "post": "square",
    "x": 1214,
-   "z": 1010,
-   "yaw": 1.637,
+   "z": 1012,
+   "yaw": 1.929,
    "titled": false
   },
   {
@@ -242,7 +242,7 @@
    "gate": "deepdene_gate_0",
    "x": 1342,
    "z": 320,
-   "yaw": -0.019,
+   "yaw": 0.051,
    "titled": false
   }
  ]

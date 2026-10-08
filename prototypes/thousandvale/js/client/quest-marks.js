@@ -8,6 +8,7 @@
 //   turnin  gold "?"   you can hand one in here (or your current step is to talk to them)
 //   later   grey "!"   they have one you cannot take yet
 //   active  grey "?"   yours, not finished
+//   job     blue "!"   paid work on offer (a job board role: always something, never the story)
 // The glyph is a sprite that grows with distance (so it is the same few dozen pixels at 5 m and at 40 m), bobs a little,
 // ignores fog, and hides behind walls like anything else. Four textures made once at boot, four sprite materials, a
 // sprite per marked body taken from a small pool — nothing is compiled or allocated when a mark appears.
@@ -20,12 +21,13 @@
 
 import * as THREE from 'three';
 
-export const MARKS = ['offer', 'turnin', 'later', 'active'];
+export const MARKS = ['offer', 'turnin', 'later', 'active', 'job'];
 /** Glyph and colours per mark. Pure data — the node test and D-UI read it. */
 export const MARK_LOOK = {
   offer: { glyph: '!', fill: '#ffd23a', edge: '#5a3a00', glow: 'rgba(255, 200, 40, 0.55)', label: 'Has a quest for you' },
   turnin: { glyph: '?', fill: '#ffd23a', edge: '#5a3a00', glow: 'rgba(255, 200, 40, 0.55)', label: 'Ready to hand in' },
   later: { glyph: '!', fill: '#b9bcc4', edge: '#2e3036', glow: 'rgba(160, 165, 175, 0.3)', label: 'Has a quest you cannot take yet' },
+  job: { glyph: '!', fill: '#7fc8ff', edge: '#0e3350', glow: 'rgba(110, 190, 255, 0.45)', label: 'Has paid work on offer' },
   active: { glyph: '?', fill: '#b9bcc4', edge: '#2e3036', glow: 'rgba(160, 165, 175, 0.3)', label: 'Your quest — not finished yet' },
 };
 /** Other spellings a server or an older message may use -> ours. */
@@ -41,9 +43,9 @@ export function applyMarks(prev, msg) {
 }
 /**
  * Pure: how tall (metres) the glyph is drawn at a distance, so it stays readable out to 40 m and is not a billboard at 3.
- * About 3.4 % of the distance, between 0.55 m and 1.7 m.
+ * About 4.6 % of the distance, between 0.55 m and 2.4 m (40 px and more at 40 m on a 1000 px tall view).
  */
-export const markSize = dist => Math.max(0.55, Math.min(1.7, 0.034 * Math.max(0, dist) + 0.38));
+export const markSize = dist => Math.max(0.55, Math.min(2.4, 0.046 * Math.max(0, dist) + 0.36));
 
 function drawGlyph(mark, size = 128) {
   const L = MARK_LOOK[mark], c = document.createElement('canvas'); c.width = c.height = size;
@@ -54,7 +56,7 @@ function drawGlyph(mark, size = 128) {
   g.font = `900 ${Math.round(size * 0.86)}px Georgia, "Times New Roman", serif`;
   g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
   g.lineWidth = size * 0.11; g.strokeStyle = L.edge; g.strokeText(L.glyph, m, m * 1.06);
-  g.lineWidth = size * 0.035; g.strokeStyle = '#fff6c8'; if (mark === 'offer' || mark === 'turnin') g.strokeText(L.glyph, m, m * 1.06);
+  g.lineWidth = size * 0.035; g.strokeStyle = '#fff6c8'; if (mark === 'offer' || mark === 'turnin' || mark === 'job') g.strokeText(L.glyph, m, m * 1.06);
   g.fillStyle = L.fill; g.fillText(L.glyph, m, m * 1.06);
   return c;
 }

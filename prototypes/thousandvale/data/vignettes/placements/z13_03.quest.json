@@ -442,9 +442,9 @@
    "name": "Tegan Coombe",
    "role": "carter",
    "at": "Wildmere",
-   "x": 1656,
-   "z": 580,
-   "yaw": 3.142,
+   "x": 1644,
+   "z": 540,
+   "yaw": -2.19,
    "cart": "cart_wildmere",
    "placedBy": "content-towns",
    "quests": 0,
@@ -458,9 +458,9 @@
    "vehicle": "ox_cart",
    "town": "Wildmere",
    "carter": "carter_wildmere",
-   "x": 1656,
-   "z": 582,
-   "yaw": 1.571,
+   "x": 1646,
+   "z": 542,
+   "yaw": 2.356,
    "radius": 2.2
   },
   {
@@ -474,8 +474,8 @@
    "post": "gate",
    "gate": "millbrook_gate_2",
    "x": 492,
-   "z": 1590,
-   "yaw": -2.356,
+   "z": 1588,
+   "yaw": -2.173,
    "titled": false
   },
   {
@@ -490,7 +490,7 @@
    "gate": "millbrook_gate_2",
    "x": 486,
    "z": 1596,
-   "yaw": -2.356,
+   "yaw": -2.173,
    "titled": false
   },
   {
@@ -620,8 +620,8 @@
    "post": "gate",
    "gate": "three_wheels_gate_0",
    "x": 1696,
-   "z": 1296,
-   "yaw": 0.661,
+   "z": 1294,
+   "yaw": 0.429,
    "titled": false
   },
   {
@@ -634,9 +634,9 @@
    "town": "Three Wheels",
    "post": "gate",
    "gate": "three_wheels_gate_0",
-   "x": 1702,
-   "z": 1292,
-   "yaw": 0.661,
+   "x": 1704,
+   "z": 1290,
+   "yaw": 0.429,
    "titled": false
   },
   {
@@ -662,9 +662,9 @@
    "tier": "town",
    "town": "Three Wheels",
    "post": "square",
-   "x": 1666,
+   "x": 1664,
    "z": 1242,
-   "yaw": -2.373,
+   "yaw": -2.648,
    "titled": false
   },
   {
@@ -693,7 +693,7 @@
    "gate": "stormrow_gate_0",
    "x": 1028,
    "z": 136,
-   "yaw": -1.652,
+   "yaw": -1.56,
    "titled": false
   },
   {
@@ -720,9 +720,9 @@
    "town": "Ravencross",
    "post": "gate",
    "gate": "ravencross_gate_0",
-   "x": 444,
+   "x": 442,
    "z": 472,
-   "yaw": 0,
+   "yaw": 0.315,
    "titled": false
   },
   {
@@ -735,9 +735,9 @@
    "town": "Wildmere",
    "post": "gate",
    "gate": "wildmere_gate_0",
-   "x": 1640,
-   "z": 584,
-   "yaw": 1.571,
+   "x": 1632,
+   "z": 552,
+   "yaw": 2.515,
    "titled": false
   }
  ]

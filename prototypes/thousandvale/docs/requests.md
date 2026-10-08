@@ -3812,10 +3812,16 @@ _Status 2026-10-08: ALL of the above LANDED except the fighting half of W1 (see 
 - `town_square.data.stalls = [[x, z]…]` — where the market stalls stand (beside the streets, never in one). `js/client/town-square.js` `squareFurniture({ square, stalls })` is the one function that says where the well and the stalls are (pure; D-world's town-view draws from it).
 - `building` rows: **ids are kept** (`<town>_plot_<n>` means the same plot as before wherever that plot still exists; a plot that stood in a new main street is GONE, so there are gaps in the numbering) and **an office stays in its building** wherever the building survived. Offices whose building was removed move to the nearest free plot to the square. The status section below lists every removed / re-assigned plot per town.
 
-**E — what you will need to re-run** (status section will say exactly which towns): `content-offices` (door spots) for the towns listed, then `content-pools` -> `content-hunts`. NPC rows whose `office` plot is unchanged keep a valid x/z. Guard posts "just inside a gate" (W1) and the parked ox cart + carter (W5): stand them BESIDE `gates[].main`, not on it — the check `tools/gate-streets.mjs` reads `<zone>.json` and `<zone>.quest.json` rows with a `radius` and will name any that sits in a main street.
+**E — what you will need to re-run**: see the status section (NOT `content-offices`: no office moved). NPC rows whose `office` plot is unchanged keep a valid x/z. Guard posts "just inside a gate" (W1) and the parked ox cart + carter (W5): stand them BESIDE `gates[].main`, not on it — the check `tools/gate-streets.mjs` reads `<zone>.json` and `<zone>.quest.json` rows with a `radius` and will name any that sits in a main street.
 **A** — nothing to change; `nav.bin` is re-baked (restart rooms). **D-world** — town-view's well/stalls now come from `squareFurniture`; I make that edit (three lines in `js/client/town-view.js`).
 
-_Status: contract written, nothing landed yet._
+_Status 2026-10-08: LANDED. What differs from the contract above:_
+- **No office moved and no plot was renumbered** — every plot named in `data/provinces/offices.json` and every office plot is kept in place (the streets go round them). **E does NOT need to run `content-offices`.** 38 house plots are gone (list: each zone's `zone.json` `summary.towns[].w6.removed`); none had anybody of E's in it.
+- A high street may bend (29 of 67 do, to go round shops) and one is narrower than its settlement's width (Gorsehold, 4 m). `gates[].main.pts` is the full centreline whatever its shape; `gates[].main.width` is the real width.
+- `gates[].road` = the world road id the gate serves (null on a side gate). `gates[].way` is now the STREET id on those gates and `gates[].out` is the way out along the main street (it can slant to the wall; `wallYaw` is still the way the gate structure faces). `wayKind` is still `'road'` on them, so `content-towns` `mainGate` works unchanged.
+- Run after the bake, in this order (done by W on 2026-10-08, all green): `content-towns` -> `content-givers` -> `content-pools` -> `content-hunts`. `content-pools` was needed (one pool was no longer in water after the re-bake; `tests/E` T25 said so).
+- tests/E after: 235 pass, 2 fail — both are `tools/content-gear.mjs --check` (shops.json against F's catalog), which reads no baked zone file: not W's.
+- `node tools/gate-streets.mjs --check` names anything with a `radius` in `<zone>.json` / `<zone>.quest.json` that stands in a main street. Today: nothing.
 
 ## Round 8 contracts — P-core (professions: rules + server + content, W9) -> P-client, A, C, D-UI, D-world, E, lead — 2026-10-07 (written FIRST; a status section at the end is kept true)
 
@@ -4030,3 +4036,48 @@ Your newcomer ward (heal to full each second) can stay as the belt to these brac
 **W23 `role` / `diff` (E's note)**: they are NOT stored in starter-kits.json — `kitsFor(cls)` writes them from the items on every call (so they cannot drift from the data), and the gateway's `kitsR` sends `kitsFor`'s whole answer, so D-UI receives `role`, `diff`, `sig` on every pack and `lean`, `role`, `diff`, `props` on every armour set. tests/C/playtest8 asserts all 151 packs and 90 sets carry them.
 
 Tests: `tests/C/guards.test.mjs` (7), `tests/A/pt8-newcomer.test.js` green with the two edits.
+
+## Round 8 — D-world status (2026-10-08; where it differs from "Round 8 contracts — D-world" above, THIS wins) -> A, C, E, D-UI, P-client, G, lead
+- **Names I took from others:** A's `questMarks {marks, full?}` with `offer | turnin | active | later | job` (my `ready` is gone; `job` = a blue "!");
+  `mount {op:'cancel'}`; `cartRide {to, from, ms, fare}` (the ride is watched for the whole of `ms`; the veil closes 1.1 s before it is up; the
+  arrival is your `joined`); `you.lightRange` / `you.light {radius, dungeonRadius, dungeonAmbient}`; C's projectile event exactly as landed
+  (`proj` absent on a monster's physical shot = what its look holds, else a stone); C's `fx guard {down, rally, say}` (kneel / stand up / bark).
+- **W25 — the one function (D-UI: already wired on your side, thank you):** `gear-look.js` `wornPart(item, slot, opts)` -> `{ partSlot, part, parts, look }`
+  (and `wornLook` = `gearLook({[slot]: item}, opts)`, `wornKey`), `looks.js` `gearOpts(cls)` / `lookDataReady()`. **A visible change for everyone:**
+  armour bases now draw the model their NAME says (`ARMOUR_BY_BASE`): War Helm -> `war_helm` (was the horned dome), Plate Helm -> `plate_helm`,
+  Leather Cap -> `leather_cap` (was a feathered cap), Chain Coif -> `chain_coif` (was a cloth hood), Chain Shirt -> `chainmail`, Leather Armor ->
+  `leather`, Scaled Hauberk -> `scale_plate`. The client's base table now includes `data/rules/gear-tv.json` bases (packs, cloaks, belts).
+- **W19 (C, F, X):** models `g5_pack_satchel | g5_pack_rucksack | g5_pack_frame | g5_pack_explorer` exist (avatar-3d `js/chibi2-backpacks.js`),
+  are in `avatar-3d/data/gear-catalog.json` (`slot: 'cape'`, `type: 'pack'`, items = C's three bases; the explorer's row lists them at rarity rare).
+  I draw by `g5` / `look.g5` / `packLook` first, else by base, else (anything `pack: true`) the rucksack; rare-or-better with no named model = the explorer's.
+- **W12 (D-UI):** `thousandvale.questMarks.list()` -> `[{ id, x, z, mark, name }]`, `.sprite(mark)` -> a 128 px canvas, `.get(id)`, `MARK_LOOK[mark].label`.
+- **W20 (G):** rows `walk` (Shift, hold) and `autorun` (Num Lock; pad LT + L3; quick-wheel slice `autorun` with its own icon in `input/radial.js`) —
+  `sprint` is gone from `ACTIONS`. `controls.setAnalog({ …, walk })` is understood (`sprint: true` still means run). `controls.setAutorun(bool)`,
+  `controls.autorun`, `controls.hold(bool)` / `.held` are new. `touch.js`: a push under 60 % walks.
+- **W22:** nothing reads `info.gear.light` or `item:torch` any more. `view.setCarryLight({ night, range, dungeonRange, dungeonAmbient })`; `view.carry` for specs.
+- **W5 (E, A):** drawn as sent. The model's ox is the `cow` creature frame (no udder, no patches) backed in between the shafts — the kit stood its
+  animal a step ahead of the shaft tips. Roaming: the cart trails 2.9 m behind and 0.95 m beside the carter's body.
+- **P-client:** your hooks in main.js / actors.js / objects.js are untouched by me. New files of mine: `projectile-kinds.js`, `projectiles.js`,
+  `quest-marks.js`, `carts-view.js`. `KINDS.cart` is in objects.js.
+- **Lead — shared code touched:** avatar-3d `js/equine.js` + `js/mounts.js` (reins off a riderless mount), NEW `js/chibi2-backpacks.js`, additive rows in
+  `js/chibi2-gear5-ids.js` + one dispatch line in `js/chibi2-gear5.js`, `data/gear-catalog.json` regenerated, `tests/gear-catalog.test.js` (lights are no
+  longer Thousandvale items; packs map to the game's own bases); `tools/build-gear-catalog.mjs` (pack bases -> pack rows); `js/client/input/*`
+  (G's files: the W20 rows, the stick threshold, the wheel icon).
+
+## Round 8 — D-UI status (LANDED 2026-10-08; where it differs from "Round 8 contracts — D-UI" above, THIS wins)
+Everything in my list is built against A's / C's / E's final names (protocol §24). What I read, in one place:
+- `feedbackMine` (`net.myReports()`), `net.feedback(kind, text, ctx, ref)`, `admin {op:'report', state:'completed', note}`; states incl. `closed`.
+- `questMarks {marks, full?}` -> kept in `ui/pt8.js` (`thousandvale.ui8.marks`); values `offer | turnin | active | later` drawn, `job` not.
+- `hits {l, names?}` after `net.meter(true)` (re-sent on every `joined`); flags 1 2 4 8 16 32 64. **Ask of C (not urgent):** `over` / `abs` on the
+  rules' `hit` event would fill the meter's overkill / overheal / absorbed columns, which read 0 today.
+- `cartList` / `net.cart('go', id, to)` / `cartR` (`op:'arrive'` is left to the arrival banner) / `cartRide` closes the window.
+- `you.bagMax` (+ `you {bagMax}`), `item.bagText` / `bagSlots`, `itemR why:'bagSlots'`. `info.title` / `info.filler` / `info.guard`.
+- `data/provinces/offices.json`, `town-services.json`, `carts.json` (fetched by the map's search; nothing asked of A).
+- D-world's `wornPart` + `looks.js gearOpts / lookDataReady` (icons). C's kit `role` / `diff`.
+**For G:** (1) `input/bindings.js` — only the LABELS of `interact` and `strike` changed ("… in a loot window: take …"); no new rows. (2) five scenes
+added to `gallery/scenes.js` (`my-reports`, `cart`, `meter`, `map-find`, `event-hidden`), four moments to `fixtures/moments.json`, and `createUi8`
+to `stage.js`; I took `cart-travel.js` and `meter-window.js` off `PENDING_SCENES`. (3) the recorded `session.json` still says `bagMax: 120`, so the
+gallery's bag draws 120 squares until the fixtures are re-recorded against the v8 server (the game draws the server's 40 + pack).
+**For P-client:** `thousandvale.ui5.sheet.addSection('professions', 'Professions', box => nodes)` and `thousandvale.ui.journal.addTab('professions',
+'Professions', page => nodes)` exist as you wrote them (both return a remover; `journal.redraw()` when your facts change).
+**Not done:** town NPCs out of sight carry no quest mark on the map (A sends none in `mapData` this round — only NPCs the client has are marked).

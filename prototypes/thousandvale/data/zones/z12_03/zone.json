@@ -204,24 +204,14 @@
               "office": false
             },
             {
-              "plot": 3,
-              "want": "forge",
-              "office": true
+              "plot": 6,
+              "want": "hut",
+              "office": false
             },
             {
-              "plot": 9,
-              "want": "hall",
-              "office": true
-            }
-          ],
-          "moved": [
-            {
-              "office": "forge",
-              "to": 27
-            },
-            {
-              "office": "hall",
-              "to": 10
+              "plot": 10,
+              "want": "hut",
+              "office": false
             }
           ]
         }
@@ -287,9 +277,9 @@
     "vignettesAvoided": 646
   },
   "files": {
-    "terrain.bin": 684404,
-    "nav.bin": 50897,
+    "terrain.bin": 684393,
+    "nav.bin": 50899,
     "scatter.bin": 131204,
-    "placements.json": 206930
+    "placements.json": 207284
   }
 }

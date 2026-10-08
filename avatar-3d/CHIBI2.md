@@ -586,3 +586,22 @@ Known limits: long shields lie along the raised forearm at `ready` like the exis
 shield pose); robe panels and the hauberk skirt are rigid on the hips like the existing robes; the signet is a glint at
 game distance; old rows' `games` are a text scan of each game's code and data (a heuristic), and `items` lists
 Thousandvale's mapping only.
+
+## Backpacks (2026-10-08, Thousandvale owner feedback 8: W19)
+
+Four packs worn on the BACK in place of a cloak: `avatar.cape = { id, color, color2 }` (`color` = the bag, `color2` = buckles and piping).
+Models in `js/chibi2-backpacks.js` (`G5_PACK_BUILDERS`), ids in `js/chibi2-gear5-ids.js` (`G5_PACKS`, `type: 'pack'`), reached through
+`chibi2-gear5.js` like every other `g5_` part, so they are registered with the shared 2D normaliser and listed in the gear catalog
+(`tools/build-gear-catalog.mjs`) with no extra step.
+
+| id | what | about |
+|---|---|---|
+| `g5_pack_satchel` | a sling bag low behind one hip, one strap across the chest | +596 triangles |
+| `g5_pack_rucksack` | a soft sack with a buckled flap, two shoulder straps, a side pocket | +896 |
+| `g5_pack_frame` | a tall sack lashed to a wooden pack frame, bedroll across the top, a cook pot hung behind, a hip belt | +1,846 |
+| `g5_pack_explorer` | the rare one: tooled flap with a brass plate, a pocket each side, a coil of rope, a map case, the bedroll slung beneath | +1,768 |
+
+Everything hangs off `chest`; the back and chest surfaces are asked of `c.chestZ(x, y, side, lift)`, so a pack sits ON a plate cuirass and
+its straps lie over any body's shoulders. Thousandvale maps its item bases in `js/client/gear-look.js` (`PACK_BY_BASE`, `packLookId`):
+`sling_satchel`, `trail_rucksack`, `expedition_pack`, and the explorer's for a rare one. Contact sheet:
+`G5_IDS=g5_pack_satchel,g5_pack_rucksack,g5_pack_frame,g5_pack_explorer G5_VIEWS=back,left,front,chestBack flock … npx playwright test avatar-3d/tests/gear5-shots.spec.js`.

@@ -229,7 +229,7 @@
    "at": "Mirekeep",
    "x": 954,
    "z": 1256,
-   "yaw": -0.42,
+   "yaw": -0.252,
    "cart": "cart_mirekeep",
    "placedBy": "content-towns",
    "quests": 0,
@@ -245,7 +245,7 @@
    "carter": "carter_mirekeep",
    "x": 954,
    "z": 1254,
-   "yaw": -1.695,
+   "yaw": -1.569,
    "radius": 2.2
   },
   {
@@ -258,9 +258,9 @@
    "town": "Gullwick",
    "post": "gate",
    "gate": "gullwick_gate_0",
-   "x": 1512,
-   "z": 408,
-   "yaw": -0.062,
+   "x": 1510,
+   "z": 410,
+   "yaw": 0.112,
    "titled": false
   },
   {
@@ -274,8 +274,8 @@
    "post": "gate",
    "gate": "gullwick_gate_0",
    "x": 1520,
-   "z": 410,
-   "yaw": -0.062,
+   "z": 408,
+   "yaw": 0.112,
    "titled": false
   },
   {
@@ -288,9 +288,9 @@
    "town": "Gullwick",
    "post": "gate",
    "gate": "gullwick_gate_1",
-   "x": 1468,
-   "z": 386,
-   "yaw": 0,
+   "x": 1482,
+   "z": 392,
+   "yaw": -1.562,
    "titled": false
   },
   {
@@ -303,9 +303,9 @@
    "town": "Gullwick",
    "post": "gate",
    "gate": "gullwick_gate_1",
-   "x": 1476,
-   "z": 386,
-   "yaw": 0,
+   "x": 1482,
+   "z": 400,
+   "yaw": -1.562,
    "titled": false
   },
   {
@@ -320,7 +320,7 @@
    "gate": "gullwick_gate_2",
    "x": 1476,
    "z": 318,
-   "yaw": 3.142,
+   "yaw": -3.108,
    "titled": false
   },
   {
@@ -335,7 +335,7 @@
    "gate": "gullwick_gate_2",
    "x": 1468,
    "z": 318,
-   "yaw": 3.142,
+   "yaw": -3.108,
    "titled": false
   },
   {
@@ -375,9 +375,9 @@
    "tier": "town",
    "town": "Gullwick",
    "post": "square",
-   "x": 1512,
+   "x": 1510,
    "z": 368,
-   "yaw": 1.765,
+   "yaw": 1.72,
    "titled": false
   },
   {
@@ -392,7 +392,7 @@
    "gate": "ferry_hythe_gate_0",
    "x": 424,
    "z": 616,
-   "yaw": 0.219,
+   "yaw": 0.154,
    "titled": false
   },
   {
@@ -421,7 +421,7 @@
    "gate": "wyrmrow_gate_0",
    "x": 876,
    "z": 1906,
-   "yaw": 0.785,
+   "yaw": 0.795,
    "titled": false
   },
   {
@@ -434,9 +434,9 @@
    "town": "Wyrmrow",
    "post": "gate",
    "gate": "wyrmrow_gate_1",
-   "x": 862,
+   "x": 864,
    "z": 1832,
-   "yaw": 2.356,
+   "yaw": 2.608,
    "titled": false
   },
   {
@@ -463,9 +463,9 @@
    "town": "Mirekeep",
    "post": "gate",
    "gate": "mirekeep_gate_0",
-   "x": 970,
-   "z": 1256,
-   "yaw": -1.695,
+   "x": 968,
+   "z": 1254,
+   "yaw": -1.569,
    "titled": false
   }
  ]

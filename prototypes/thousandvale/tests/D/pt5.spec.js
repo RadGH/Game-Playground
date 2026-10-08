@@ -442,11 +442,11 @@ soft('T20: a letter shows what it holds; taking needs bag room and says so; a gi
   await expect(page.locator('#tipbox .ic-crate')).toContainText('Rare at the least', { timeout: 5000 });
   await shot('t20-mail-gift');
   // a full bag: said before the click, with the numbers
-  await page.evaluate(() => { const y = thousandvale.S.net.joined.you; y.__max = y.bagMax; y.bagMax = thousandvale.bag.state.bag.length; thousandvale.mail.draw(); });
+  await page.evaluate(() => { window.__max = thousandvale.bag.max; tv.fake('you', { bagMax: thousandvale.bag.state.bag.length }); thousandvale.mail.draw(); });      // play-test 8: the bag's size is the server's `you {bagMax}` (40 + a pack)
   await expect(page.locator('#panel-mail .ml-room')).toContainText('Your bag is full. Make room for 1 item first.');
   await expect(page.locator('#panel-mail [data-act="take"]')).toBeDisabled();
   await shot('t20-mail-bag-full');
-  await page.evaluate(() => { const y = thousandvale.S.net.joined.you; y.bagMax = y.__max; thousandvale.mail.draw(); });
+  await page.evaluate(() => { tv.fake('you', { bagMax: window.__max }); thousandvale.mail.draw(); });
   // take: the mail message goes out; the gift lands in the bag and is unwrapped at once
   await sent();
   await page.click('#panel-mail [data-act="take"]');

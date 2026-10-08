@@ -256,9 +256,9 @@
    "name": "Hew Greenhill",
    "role": "carter",
    "at": "Ashhaven",
-   "x": 694,
-   "z": 1008,
-   "yaw": 0.909,
+   "x": 734,
+   "z": 986,
+   "yaw": -2.166,
    "cart": "cart_ashhaven",
    "placedBy": "content-towns",
    "quests": 0,
@@ -272,9 +272,9 @@
    "vehicle": "ox_cart",
    "town": "Ashhaven",
    "carter": "carter_ashhaven",
-   "x": 692,
-   "z": 1006,
-   "yaw": -0.805,
+   "x": 736,
+   "z": 988,
+   "yaw": -0.697,
    "radius": 2.2
   },
   {
@@ -287,9 +287,9 @@
    "town": "Copperdell",
    "post": "gate",
    "gate": "copperdell_gate_0",
-   "x": 280,
-   "z": 482,
-   "yaw": -0.983,
+   "x": 284,
+   "z": 488,
+   "yaw": -0.896,
    "titled": false
   },
   {
@@ -302,9 +302,9 @@
    "town": "Copperdell",
    "post": "gate",
    "gate": "copperdell_gate_0",
-   "x": 284,
-   "z": 490,
-   "yaw": -0.983,
+   "x": 290,
+   "z": 494,
+   "yaw": -0.896,
    "titled": false
   },
   {
@@ -403,9 +403,9 @@
    "town": "Pickaxe Row",
    "post": "gate",
    "gate": "pickaxe_row_gate_0",
-   "x": 970,
-   "z": 1688,
-   "yaw": -0.933,
+   "x": 966,
+   "z": 1674,
+   "yaw": -1.253,
    "titled": false
   },
   {
@@ -432,9 +432,9 @@
    "town": "Ashhaven",
    "post": "gate",
    "gate": "ashhaven_gate_0",
-   "x": 738,
+   "x": 736,
    "z": 968,
-   "yaw": -0.805,
+   "yaw": -0.697,
    "titled": false
   }
  ]

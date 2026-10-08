@@ -226,7 +226,7 @@
    "gate": "saltmouth_gate_0",
    "x": 832,
    "z": 1650,
-   "yaw": -0.896,
+   "yaw": -0.848,
    "titled": false
   },
   {
@@ -239,9 +239,9 @@
    "town": "Saltmouth",
    "post": "gate",
    "gate": "saltmouth_gate_0",
-   "x": 836,
+   "x": 838,
    "z": 1656,
-   "yaw": -0.896,
+   "yaw": -0.848,
    "titled": false
   },
   {
@@ -297,8 +297,8 @@
    "post": "gate",
    "gate": "gull_steps_gate_0",
    "x": 316,
-   "z": 1286,
-   "yaw": 1.132,
+   "z": 1282,
+   "yaw": 0.651,
    "titled": false
   }
  ]

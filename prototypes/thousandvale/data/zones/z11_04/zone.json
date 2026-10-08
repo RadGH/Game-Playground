@@ -125,16 +125,16 @@
         "radius": 90,
         "movedFrom": null,
         "culture": "halfling",
-        "plots": 23,
-        "streets": 75,
+        "plots": 21,
+        "streets": 44,
         "links": 1,
         "overlaps": 0,
         "highStreets": 1,
         "w6": {
           "plotsBefore": 21,
-          "plots": 23,
-          "kept": 0,
-          "renumbered": true
+          "plots": 21,
+          "kept": 21,
+          "removed": []
         }
       },
       {
@@ -187,13 +187,13 @@
       "x": 890,
       "z": 1309
     },
-    "placements": 209,
+    "placements": 176,
     "vignettesAvoided": 668
   },
   "files": {
-    "terrain.bin": 641257,
-    "nav.bin": 52969,
+    "terrain.bin": 641191,
+    "nav.bin": 52927,
     "scatter.bin": 110268,
-    "placements.json": 179172
+    "placements.json": 167978
   }
 }

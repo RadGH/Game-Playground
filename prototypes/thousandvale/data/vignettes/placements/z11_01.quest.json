@@ -290,7 +290,7 @@
    "at": "Wolditford",
    "x": 450,
    "z": 826,
-   "yaw": -2.014,
+   "yaw": -2.13,
    "cart": "cart_wolditford",
    "placedBy": "content-towns",
    "quests": 0,
@@ -306,7 +306,7 @@
    "carter": "carter_wolditford",
    "x": 452,
    "z": 826,
-   "yaw": 3.142,
+   "yaw": 3.068,
    "radius": 2.2
   },
   {
@@ -321,7 +321,7 @@
    "gate": "hollin_toll_gate_0",
    "x": 1728,
    "z": 502,
-   "yaw": -3.07,
+   "yaw": -3.076,
    "titled": false
   },
   {
@@ -336,7 +336,7 @@
    "gate": "hollin_toll_gate_0",
    "x": 1720,
    "z": 504,
-   "yaw": -3.07,
+   "yaw": -3.076,
    "titled": false
   },
   {
@@ -376,9 +376,9 @@
    "tier": "town",
    "town": "Hollin Toll",
    "post": "square",
-   "x": 1728,
+   "x": 1724,
    "z": 556,
-   "yaw": -0.048,
+   "yaw": 0.601,
    "titled": false
   },
   {
@@ -393,7 +393,7 @@
    "gate": "scree_end_gate_0",
    "x": 116,
    "z": 1432,
-   "yaw": 3.123,
+   "yaw": 3.119,
    "titled": false
   },
   {
@@ -408,7 +408,7 @@
    "gate": "wolditford_gate_0",
    "x": 452,
    "z": 840,
-   "yaw": 3.142,
+   "yaw": 3.068,
    "titled": false
   }
  ]

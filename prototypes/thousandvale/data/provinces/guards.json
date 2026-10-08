@@ -91,10 +91,10 @@
    "x": 1723.7,
    "z": 499.5,
    "out": [
-    -0.071,
+    -0.066,
     -0.998
    ],
-   "width": 4.7,
+   "width": 6.22,
    "kind": "gatehouse",
    "main": true
   },
@@ -105,10 +105,10 @@
    "x": 112.8,
    "z": 1429.1,
    "out": [
-    0.018,
+    0.022,
     -1
    ],
-   "width": 4.7,
+   "width": 4.81,
    "kind": "posts",
    "main": true
   },
@@ -116,13 +116,13 @@
    "id": "wolditford_gate_0",
    "town": "Wolditford",
    "zone": "z11_01",
-   "x": 448,
+   "x": 447.7,
    "z": 837.1,
    "out": [
-    0,
-    -1
+    0.074,
+    -0.997
    ],
-   "width": 4.7,
+   "width": 5.06,
    "kind": "posts",
    "main": true
   },
@@ -130,13 +130,13 @@
    "id": "ashcombe_gate_0",
    "town": "Ashcombe",
    "zone": "z12_01",
-   "x": 1481.5,
-   "z": 1364.3,
+   "x": 1480.3,
+   "z": 1366.7,
    "out": [
-    0.882,
-    0.472
+    0.884,
+    0.467
    ],
-   "width": 11.63,
+   "width": 7.22,
    "kind": "gatehouse",
    "main": true
   },
@@ -161,10 +161,10 @@
    "x": 1368.7,
    "z": 1256,
    "out": [
-    -0.479,
-    -0.878
+    -0.386,
+    -0.922
    ],
-   "width": 6.2,
+   "width": 7.59,
    "kind": "gatehouse",
    "main": false
   },
@@ -200,13 +200,13 @@
    "id": "brackwater_gate_0",
    "town": "Brackwater",
    "zone": "z13_01",
-   "x": 1118.6,
-   "z": 809.8,
+   "x": 1118.4,
+   "z": 809.9,
    "out": [
-    -0.278,
-    -0.961
+    -0.211,
+    -0.978
    ],
-   "width": 4.7,
+   "width": 6.46,
    "kind": "gatehouse",
    "main": true
   },
@@ -228,13 +228,13 @@
    "id": "saltmouth_gate_0",
    "town": "Saltmouth",
    "zone": "z14_01",
-   "x": 831.7,
-   "z": 1654.6,
+   "x": 831.6,
+   "z": 1654.5,
    "out": [
-    -0.781,
-    0.625
+    -0.75,
+    0.661
    ],
-   "width": 4.7,
+   "width": 6.38,
    "kind": "gatehouse",
    "main": true
   },
@@ -242,13 +242,13 @@
    "id": "gull_steps_gate_0",
    "town": "Gull Steps",
    "zone": "z14_01",
-   "x": 320.9,
-   "z": 1284.3,
+   "x": 321.9,
+   "z": 1282,
    "out": [
-    0.905,
-    0.425
+    0.606,
+    0.795
    ],
-   "width": 4.7,
+   "width": 7.39,
    "kind": "posts",
    "main": true
   },
@@ -256,22 +256,22 @@
    "id": "copperdell_gate_0",
    "town": "Copperdell",
    "zone": "z11_02",
-   "x": 279.5,
-   "z": 488.4,
+   "x": 283.8,
+   "z": 493.5,
    "out": [
-    -0.832,
-    0.555
+    -0.781,
+    0.625
    ],
-   "width": 22.82,
-   "kind": "gap",
+   "width": 7.52,
+   "kind": "gatehouse",
    "main": true
   },
   {
    "id": "copperdell_gate_1",
    "town": "Copperdell",
    "zone": "z11_02",
-   "x": 434.6,
-   "z": 439.3,
+   "x": 433.5,
+   "z": 439.4,
    "out": [
     0.98,
     -0.201
@@ -284,13 +284,13 @@
    "id": "pickaxe_row_gate_0",
    "town": "Pickaxe Row",
    "zone": "z11_02",
-   "x": 969.8,
-   "z": 1692.3,
+   "x": 963.2,
+   "z": 1679.6,
    "out": [
-    -0.804,
-    0.595
+    -0.95,
+    0.312
    ],
-   "width": 4.7,
+   "width": 5.46,
    "kind": "gatehouse",
    "main": true
   },
@@ -298,13 +298,13 @@
    "id": "ashhaven_gate_0",
    "town": "Ashhaven",
    "zone": "z11_02",
-   "x": 737.1,
-   "z": 973.8,
+   "x": 736.7,
+   "z": 973.4,
    "out": [
-    -0.721,
-    0.693
+    -0.642,
+    0.767
    ],
-   "width": 4.7,
+   "width": 5.2,
    "kind": "posts",
    "main": true
   },
@@ -312,13 +312,13 @@
    "id": "torborhold_gate_0",
    "town": "Torborhold",
    "zone": "z12_02",
-   "x": 531.5,
-   "z": 1280.5,
+   "x": 531.4,
+   "z": 1281.1,
    "out": [
-    -0.965,
-    0.263
+    -1,
+    0.024
    ],
-   "width": 4.7,
+   "width": 7.27,
    "kind": "gatehouse",
    "main": true
   },
@@ -326,13 +326,13 @@
    "id": "torborhold_gate_1",
    "town": "Torborhold",
    "zone": "z12_02",
-   "x": 594.2,
-   "z": 1201.3,
+   "x": 592.4,
+   "z": 1201.1,
    "out": [
-    0.035,
-    -0.999
+    0.688,
+    -0.726
    ],
-   "width": 4.4,
+   "width": 11.69,
    "kind": "gatehouse",
    "main": false
   },
@@ -340,13 +340,13 @@
    "id": "torborhold_gate_2",
    "town": "Torborhold",
    "zone": "z12_02",
-   "x": 632.4,
-   "z": 1216,
+   "x": 634.5,
+   "z": 1217.6,
    "out": [
-    1,
-    0
+    0.632,
+    -0.775
    ],
-   "width": 11.34,
+   "width": 6.41,
    "kind": "gatehouse",
    "main": false
   },
@@ -354,13 +354,13 @@
    "id": "mawehaven_gate_0",
    "town": "Mawehaven",
    "zone": "z12_02",
-   "x": 244.4,
-   "z": 1887.8,
+   "x": 244.2,
+   "z": 1887.9,
    "out": [
-    -0.34,
-    -0.94
+    -0.301,
+    -0.954
    ],
-   "width": 4.7,
+   "width": 4.95,
    "kind": "posts",
    "main": true
   },
@@ -368,13 +368,13 @@
    "id": "wamonhold_gate_0",
    "town": "Wamonhold",
    "zone": "z12_02",
-   "x": 1370.4,
+   "x": 1370.3,
    "z": 1534.1,
    "out": [
-    0.614,
-    -0.789
+    0.624,
+    -0.782
    ],
-   "width": 4.7,
+   "width": 4.84,
    "kind": "posts",
    "main": true
   },
@@ -399,10 +399,10 @@
    "x": 1697,
    "z": 1266,
    "out": [
-    0.013,
+    0.005,
     1
    ],
-   "width": 6.2,
+   "width": 7.23,
    "kind": "gatehouse",
    "main": true
   },
@@ -424,13 +424,13 @@
    "id": "mill_end_gate_0",
    "town": "Mill End",
    "zone": "z13_02",
-   "x": 206.2,
+   "x": 204.6,
    "z": 1518.9,
    "out": [
-    -0.029,
-    1
+    0.574,
+    0.819
    ],
-   "width": 4.7,
+   "width": 10.54,
    "kind": "gatehouse",
    "main": true
   },
@@ -438,13 +438,13 @@
    "id": "lower_mossgate_gate_0",
    "town": "Lower Mossgate",
    "zone": "z13_02",
-   "x": 704,
-   "z": 1595,
+   "x": 704.8,
+   "z": 1594.9,
    "out": [
-    0,
-    1
+    -0.173,
+    0.985
    ],
-   "width": 4.7,
+   "width": 5.48,
    "kind": "posts",
    "main": true
   },
@@ -455,10 +455,10 @@
    "x": 701.3,
    "z": 1509.1,
    "out": [
-    -0.242,
-    -0.97
+    -0.237,
+    -0.971
    ],
-   "width": 5.33,
+   "width": 5.41,
    "kind": "posts",
    "main": false
   },
@@ -466,13 +466,13 @@
    "id": "mirestead_gate_0",
    "town": "Mirestead",
    "zone": "z13_02",
-   "x": 1102.1,
-   "z": 1098.4,
+   "x": 1098.2,
+   "z": 1092.3,
    "out": [
-    -0.789,
-    0.614
+    -0.978,
+    0.209
    ],
-   "width": 4.7,
+   "width": 5.86,
    "kind": "posts",
    "main": true
   },
@@ -480,13 +480,13 @@
    "id": "gullwick_gate_0",
    "town": "Gullwick",
    "zone": "z14_02",
-   "x": 1516.2,
-   "z": 412.6,
+   "x": 1515.5,
+   "z": 412.5,
    "out": [
-    -0.062,
-    0.998
+    0.112,
+    0.994
    ],
-   "width": 4.7,
+   "width": 6.95,
    "kind": "gatehouse",
    "main": true
   },
@@ -494,13 +494,13 @@
    "id": "gullwick_gate_1",
    "town": "Gullwick",
    "zone": "z14_02",
-   "x": 1472,
-   "z": 389.2,
+   "x": 1478,
+   "z": 395.8,
    "out": [
-    0,
-    1
+    -1,
+    0.009
    ],
-   "width": 12.07,
+   "width": 12.34,
    "kind": "gatehouse",
    "main": false
   },
@@ -508,13 +508,13 @@
    "id": "gullwick_gate_2",
    "town": "Gullwick",
    "zone": "z14_02",
-   "x": 1472,
-   "z": 314.9,
+   "x": 1472.2,
+   "z": 314.6,
    "out": [
-    0,
+    -0.033,
     -1
    ],
-   "width": 12.07,
+   "width": 13.71,
    "kind": "gatehouse",
    "main": false
   },
@@ -522,13 +522,13 @@
    "id": "ferry_hythe_gate_0",
    "town": "Ferry Hythe",
    "zone": "z14_02",
-   "x": 429,
-   "z": 618.7,
+   "x": 429.3,
+   "z": 618.6,
    "out": [
-    0.217,
-    0.976
+    0.153,
+    0.988
    ],
-   "width": 4.7,
+   "width": 5.65,
    "kind": "gatehouse",
    "main": true
   },
@@ -539,10 +539,10 @@
    "x": 881.6,
    "z": 1905.6,
    "out": [
-    0.707,
-    0.707
+    0.714,
+    0.7
    ],
-   "width": 4.7,
+   "width": 5.44,
    "kind": "gatehouse",
    "main": true
   },
@@ -550,13 +550,13 @@
    "id": "wyrmrow_gate_1",
    "town": "Wyrmrow",
    "zone": "z14_02",
-   "x": 861.5,
-   "z": 1826.5,
+   "x": 862.8,
+   "z": 1826.9,
    "out": [
-    0.707,
-    -0.707
+    0.508,
+    -0.861
    ],
-   "width": 7.19,
+   "width": 6.28,
    "kind": "gatehouse",
    "main": false
   },
@@ -564,13 +564,13 @@
    "id": "mirekeep_gate_0",
    "town": "Mirekeep",
    "zone": "z14_02",
-   "x": 965.4,
-   "z": 1258.7,
+   "x": 965.5,
+   "z": 1258.1,
    "out": [
-    -0.992,
-    -0.124
+    -1,
+    0.002
    ],
-   "width": 4.7,
+   "width": 5.27,
    "kind": "posts",
    "main": true
   },
@@ -595,10 +595,10 @@
    "x": 1088,
    "z": 640.4,
    "out": [
-    0,
-    1
+    -0.179,
+    0.984
    ],
-   "width": 7,
+   "width": 7.26,
    "kind": "gatehouse",
    "main": true
   },
@@ -620,83 +620,83 @@
    "id": "hermit_s_rest_gate_3",
    "town": "Hermit's Rest",
    "zone": "z11_03",
-   "x": 1091.7,
-   "z": 478.9,
+   "x": 1095.4,
+   "z": 478.5,
    "out": [
-    -0.105,
-    -0.995
+    -0.016,
+    -1
    ],
-   "width": 17.03,
-   "kind": "gap",
+   "width": 7.53,
+   "kind": "gatehouse",
    "main": false
   },
   {
    "id": "charcoal_burners_gate_0",
    "town": "Charcoal Burners",
    "zone": "z11_03",
-   "x": 204.4,
-   "z": 192.6,
+   "x": 203.4,
+   "z": 194.1,
    "out": [
-    -1,
-    0
+    -0.858,
+    -0.514
    ],
-   "width": 12.31,
+   "width": 5.48,
    "kind": "gatehouse",
-   "main": false
+   "main": true
   },
   {
    "id": "charcoal_burners_gate_1",
    "town": "Charcoal Burners",
    "zone": "z11_03",
-   "x": 307.3,
-   "z": 192,
+   "x": 308.4,
+   "z": 193.9,
    "out": [
-    1,
-    0
+    0.889,
+    -0.458
    ],
-   "width": 10.61,
+   "width": 5.56,
    "kind": "gatehouse",
-   "main": true
+   "main": false
   },
   {
    "id": "wildhaven_gate_0",
    "town": "Wildhaven",
    "zone": "z11_03",
-   "x": 1247.3,
-   "z": 196.2,
+   "x": 1244.2,
+   "z": 200.3,
    "out": [
-    -0.97,
-    0.242
+    -0.879,
+    -0.477
    ],
-   "width": 12.27,
+   "width": 5.08,
    "kind": "posts",
-   "main": true
+   "main": false
   },
   {
    "id": "wildhaven_gate_1",
    "town": "Wildhaven",
    "zone": "z11_03",
-   "x": 1310,
-   "z": 193.3,
+   "x": 1312,
+   "z": 195.3,
    "out": [
-    0.728,
-    -0.685
+    0.715,
+    -0.699
    ],
-   "width": 8.5,
+   "width": 4.93,
    "kind": "posts",
-   "main": false
+   "main": true
   },
   {
    "id": "orrinsford_gate_0",
    "town": "Orrinsford",
    "zone": "z12_03",
    "x": 273.7,
-   "z": 576,
+   "z": 575.6,
    "out": [
-    -1,
-    0
+    -0.987,
+    0.164
    ],
-   "width": 7.2,
+   "width": 6.88,
    "kind": "gatehouse",
    "main": true
   },
@@ -704,13 +704,13 @@
    "id": "orrinsford_gate_1",
    "town": "Orrinsford",
    "zone": "z12_03",
-   "x": 320,
-   "z": 515.8,
+   "x": 320.1,
+   "z": 515.7,
    "out": [
-    0,
+    -0.029,
     -1
    ],
-   "width": 5.77,
+   "width": 7.16,
    "kind": "gatehouse",
    "main": false
   },
@@ -718,13 +718,13 @@
    "id": "pilgrim_s_halt_gate_0",
    "town": "Pilgrim's Halt",
    "zone": "z12_03",
-   "x": 638.3,
-   "z": 213.4,
+   "x": 638,
+   "z": 213.8,
    "out": [
-    -0.785,
-    -0.62
+    -0.713,
+    -0.701
    ],
-   "width": 4.7,
+   "width": 5.2,
    "kind": "posts",
    "main": true
   },
@@ -763,10 +763,10 @@
    "x": 486,
    "z": 1590,
    "out": [
-    -0.707,
-    -0.707
+    -0.824,
+    -0.566
    ],
-   "width": 6.2,
+   "width": 7.95,
    "kind": "gatehouse",
    "main": true
   },
@@ -774,13 +774,13 @@
    "id": "three_wheels_gate_0",
    "town": "Three Wheels",
    "zone": "z13_03",
-   "x": 1701.4,
-   "z": 1296.1,
+   "x": 1702.2,
+   "z": 1295.5,
    "out": [
-    0.614,
-    0.789
+    0.416,
+    0.909
    ],
-   "width": 4.7,
+   "width": 7.26,
    "kind": "gatehouse",
    "main": true
   },
@@ -789,12 +789,12 @@
    "town": "Stormrow",
    "zone": "z13_03",
    "x": 1024.7,
-   "z": 140.2,
+   "z": 139.8,
    "out": [
-    -0.997,
-    -0.081
+    -1,
+    0.011
    ],
-   "width": 4.7,
+   "width": 5.77,
    "kind": "gatehouse",
    "main": true
   },
@@ -802,13 +802,13 @@
    "id": "ravencross_gate_0",
    "town": "Ravencross",
    "zone": "z13_03",
-   "x": 448,
-   "z": 475,
+   "x": 446.4,
+   "z": 474.9,
    "out": [
-    0,
-    1
+    0.31,
+    0.951
    ],
-   "width": 4.7,
+   "width": 6.21,
    "kind": "posts",
    "main": true
   },
@@ -816,13 +816,13 @@
    "id": "ravencross_gate_1",
    "town": "Ravencross",
    "zone": "z13_03",
-   "x": 448,
+   "x": 446.5,
    "z": 389.1,
    "out": [
-    0,
-    -1
+    0.299,
+    -0.954
    ],
-   "width": 4.7,
+   "width": 6.15,
    "kind": "posts",
    "main": false
   },
@@ -830,13 +830,13 @@
    "id": "ravencross_gate_2",
    "town": "Ravencross",
    "zone": "z13_03",
-   "x": 485.3,
-   "z": 410.7,
+   "x": 484.4,
+   "z": 409.2,
    "out": [
-    0.707,
-    -0.707
+    0.909,
+    -0.417
    ],
-   "width": 5.69,
+   "width": 5.23,
    "kind": "posts",
    "main": false
   },
@@ -844,13 +844,13 @@
    "id": "wildmere_gate_0",
    "town": "Wildmere",
    "zone": "z13_03",
-   "x": 1642.9,
-   "z": 578.7,
+   "x": 1630.9,
+   "z": 546.2,
    "out": [
-    1,
-    0
+    0.586,
+    -0.81
    ],
-   "width": 10.26,
+   "width": 5.41,
    "kind": "posts",
    "main": true
   },
@@ -858,13 +858,13 @@
    "id": "wildmere_gate_1",
    "town": "Wildmere",
    "zone": "z13_03",
-   "x": 1630.4,
-   "z": 545.6,
+   "x": 1643,
+   "z": 575.5,
    "out": [
-    0.707,
-    -0.707
+    0.995,
+    0.1
    ],
-   "width": 4.7,
+   "width": 5.17,
    "kind": "posts",
    "main": false
   },
@@ -872,27 +872,27 @@
    "id": "redcliff_gate_0",
    "town": "Redcliff",
    "zone": "z14_03",
-   "x": 361.8,
-   "z": 920.3,
+   "x": 360.3,
+   "z": 920.7,
    "out": [
-    -0.6,
-    0.8
+    -0.375,
+    0.927
    ],
-   "width": 5.81,
+   "width": 6.24,
    "kind": "gatehouse",
-   "main": false
+   "main": true
   },
   {
    "id": "redcliff_gate_1",
    "town": "Redcliff",
    "zone": "z14_03",
-   "x": 338.6,
-   "z": 824,
+   "x": 335.8,
+   "z": 825.9,
    "out": [
-    -0.936,
-    -0.351
+    -0.406,
+    -0.914
    ],
-   "width": 6.32,
+   "width": 8.8,
    "kind": "gatehouse",
    "main": false
   },
@@ -900,41 +900,55 @@
    "id": "redcliff_gate_2",
    "town": "Redcliff",
    "zone": "z14_03",
-   "x": 444.5,
-   "z": 862.7,
+   "x": 440,
+   "z": 838.6,
    "out": [
-    1,
-    -0.021
+    0.884,
+    -0.468
    ],
-   "width": 4.7,
+   "width": 6.42,
    "kind": "gatehouse",
-   "main": true
+   "main": false
+  },
+  {
+   "id": "redcliff_gate_3",
+   "town": "Redcliff",
+   "zone": "z14_03",
+   "x": 445.5,
+   "z": 863.4,
+   "out": [
+    0.976,
+    -0.22
+   ],
+   "width": 7.07,
+   "kind": "gatehouse",
+   "main": false
   },
   {
    "id": "cinder_farm_gate_0",
    "town": "Cinder Farm",
    "zone": "z14_03",
-   "x": 1266.7,
-   "z": 1745,
+   "x": 1266,
+   "z": 1746.1,
    "out": [
-    0.571,
-    0.821
+    0.799,
+    0.601
    ],
-   "width": 6.3,
+   "width": 5.55,
    "kind": "posts",
-   "main": true
+   "main": false
   },
   {
    "id": "cinder_farm_gate_1",
    "town": "Cinder Farm",
    "zone": "z14_03",
-   "x": 1216,
+   "x": 1215.1,
    "z": 1651.5,
    "out": [
-    0,
-    -1
+    0.216,
+    -0.976
    ],
-   "width": 4.7,
+   "width": 6.26,
    "kind": "posts",
    "main": false
   },
@@ -942,27 +956,27 @@
    "id": "cinder_farm_gate_2",
    "town": "Cinder Farm",
    "zone": "z14_03",
-   "x": 1266,
-   "z": 1677.9,
+   "x": 1265.6,
+   "z": 1677.3,
    "out": [
-    0.707,
-    -0.707
+    0.833,
+    -0.553
    ],
-   "width": 8.02,
+   "width": 5.48,
    "kind": "posts",
-   "main": false
+   "main": true
   },
   {
    "id": "ravenhaven_gate_0",
    "town": "Ravenhaven",
    "zone": "z14_03",
-   "x": 134.1,
-   "z": 261.6,
+   "x": 135.2,
+   "z": 260.9,
    "out": [
-    0.514,
-    0.858
+    0.369,
+    0.929
    ],
-   "width": 5.49,
+   "width": 5.44,
    "kind": "posts",
    "main": true
   },
@@ -970,13 +984,13 @@
    "id": "ravenhaven_gate_1",
    "town": "Ravenhaven",
    "zone": "z14_03",
-   "x": 74.2,
-   "z": 202.2,
+   "x": 75,
+   "z": 201,
    "out": [
-    -0.707,
-    -0.707
+    -0.907,
+    -0.42
    ],
-   "width": 5.67,
+   "width": 5.21,
    "kind": "posts",
    "main": false
   },
@@ -1001,38 +1015,38 @@
    "x": 1125.8,
    "z": 1125.8,
    "out": [
-    0.707,
-    0.707
+    0.698,
+    0.716
    ],
-   "width": 5.67,
+   "width": 5.71,
    "kind": "posts",
-   "main": true
+   "main": false
   },
   {
    "id": "minfenrow_gate_1",
    "town": "Minfenrow",
    "zone": "z14_03",
    "x": 1060.4,
-   "z": 1088,
+   "z": 1087.1,
    "out": [
-    -1,
-    0
+    -0.975,
+    0.224
    ],
-   "width": 4.7,
+   "width": 5.71,
    "kind": "posts",
-   "main": false
+   "main": true
   },
   {
    "id": "bipetwatch_gate_0",
    "town": "Bipetwatch",
    "zone": "z14_03",
-   "x": 363.3,
-   "z": 1429.4,
+   "x": 363.6,
+   "z": 1424.4,
    "out": [
-    0.99,
-    0.141
+    1,
+    -0.02
    ],
-   "width": 6.28,
+   "width": 4.89,
    "kind": "posts",
    "main": true
   },
@@ -1040,13 +1054,13 @@
    "id": "bipetwatch_gate_1",
    "town": "Bipetwatch",
    "zone": "z14_03",
-   "x": 324.7,
-   "z": 1467.4,
+   "x": 320.4,
+   "z": 1467.6,
    "out": [
-    -0.707,
-    0.707
+    -0.015,
+    1
    ],
-   "width": 11.21,
+   "width": 4.87,
    "kind": "posts",
    "main": false
   },
@@ -1068,13 +1082,13 @@
    "id": "last_lantern_gate_0",
    "town": "Last Lantern",
    "zone": "z11_04",
-   "x": 869.9,
+   "x": 869.8,
    "z": 1362.8,
    "out": [
-    -0.328,
-    0.945
+    -0.29,
+    0.957
    ],
-   "width": 4.7,
+   "width": 6.35,
    "kind": "gatehouse",
    "main": true
   },
@@ -1096,13 +1110,13 @@
    "id": "coldwater_gate_0",
    "town": "Coldwater",
    "zone": "z12_04",
-   "x": 1430.9,
-   "z": 1891.8,
+   "x": 1430.7,
+   "z": 1891.6,
    "out": [
-    -0.685,
-    0.728
+    -0.606,
+    0.796
    ],
-   "width": 4.7,
+   "width": 6.61,
    "kind": "gatehouse",
    "main": true
   },
@@ -1110,13 +1124,13 @@
    "id": "netherby_gate_0",
    "town": "Netherby",
    "zone": "z12_04",
-   "x": 708,
+   "x": 708.8,
    "z": 774.9,
    "out": [
-    -0.069,
-    0.998
+    -0.236,
+    0.972
    ],
-   "width": 4.7,
+   "width": 5.45,
    "kind": "posts",
    "main": true
   },
@@ -1124,13 +1138,13 @@
    "id": "gorsehold_gate_0",
    "town": "Gorsehold",
    "zone": "z13_04",
-   "x": 1621,
-   "z": 1261.7,
+   "x": 1619.5,
+   "z": 1258.5,
    "out": [
-    0.92,
-    -0.392
+    0.908,
+    0.418
    ],
-   "width": 4.7,
+   "width": 12.49,
    "kind": "gatehouse",
    "main": true
   },
@@ -1138,13 +1152,13 @@
    "id": "burnt_barns_gate_0",
    "town": "Burnt Barns",
    "zone": "z13_04",
-   "x": 1623.9,
-   "z": 385.1,
+   "x": 1624,
+   "z": 384.9,
    "out": [
-    0.856,
-    0.517
+    0.826,
+    0.563
    ],
-   "width": 4.7,
+   "width": 4.99,
    "kind": "posts",
    "main": true
   },
@@ -1152,13 +1166,13 @@
    "id": "burnt_barns_gate_1",
    "town": "Burnt Barns",
    "zone": "z13_04",
-   "x": 1595.2,
+   "x": 1594.9,
    "z": 332.1,
    "out": [
-    0.034,
-    -0.999
+    0.099,
+    -0.995
    ],
-   "width": 4.7,
+   "width": 5.03,
    "kind": "posts",
    "main": false
   },
@@ -1166,13 +1180,13 @@
    "id": "lowmoor_gate_0",
    "town": "Lowmoor",
    "zone": "z14_04",
-   "x": 1216.6,
+   "x": 1215.9,
    "z": 963.7,
    "out": [
-    -0.021,
-    -1
+    0.235,
+    -0.972
    ],
-   "width": 4.76,
+   "width": 7.47,
    "kind": "gatehouse",
    "main": true
   },
@@ -1180,13 +1194,13 @@
    "id": "deepdene_gate_0",
    "town": "Deepdene",
    "zone": "z14_04",
-   "x": 1346.4,
+   "x": 1346,
    "z": 323.2,
    "out": [
-    -0.018,
-    1
+    0.051,
+    0.999
    ],
-   "width": 4.7,
+   "width": 5.05,
    "kind": "posts",
    "main": true
   },
@@ -1194,13 +1208,13 @@
    "id": "deepdene_gate_1",
    "town": "Deepdene",
    "zone": "z14_04",
-   "x": 1346,
+   "x": 1345.6,
    "z": 254.8,
    "out": [
-    -0.031,
-    -1
+    0.049,
+    -0.999
    ],
-   "width": 4.7,
+   "width": 5.1,
    "kind": "posts",
    "main": false
   }
@@ -1216,7 +1230,7 @@
    "gate": "hollin_toll_gate_0",
    "rank": "guard",
    "name": "Hollin Toll Guard",
-   "yaw": -3.07,
+   "yaw": -3.076,
    "titled": false,
    "x": 1728,
    "z": 502
@@ -1231,7 +1245,7 @@
    "gate": "hollin_toll_gate_0",
    "rank": "guard",
    "name": "Hollin Toll Guard",
-   "yaw": -3.07,
+   "yaw": -3.076,
    "titled": false,
    "x": 1720,
    "z": 504
@@ -1273,9 +1287,9 @@
    "post": "square",
    "rank": "guard",
    "name": "Hollin Toll Guard",
-   "yaw": -0.048,
+   "yaw": 0.601,
    "titled": false,
-   "x": 1728,
+   "x": 1724,
    "z": 556
   },
   {
@@ -1288,7 +1302,7 @@
    "gate": "scree_end_gate_0",
    "rank": "guard",
    "name": "Scree End Guard",
-   "yaw": 3.123,
+   "yaw": 3.119,
    "titled": false,
    "x": 116,
    "z": 1432
@@ -1303,7 +1317,7 @@
    "gate": "wolditford_gate_0",
    "rank": "guard",
    "name": "Wolditford Guard",
-   "yaw": 3.142,
+   "yaw": 3.068,
    "titled": false,
    "x": 452,
    "z": 840
@@ -1318,10 +1332,10 @@
    "gate": "ashcombe_gate_0",
    "rank": "guard",
    "name": "Ashcombe Guard",
-   "yaw": 1.08,
+   "yaw": 1.085,
    "titled": false,
    "x": 1476,
-   "z": 1366
+   "z": 1370
   },
   {
    "id": "guard_ashcombe_1",
@@ -1333,10 +1347,10 @@
    "gate": "ashcombe_gate_0",
    "rank": "guard",
    "name": "Ashcombe Guard",
-   "yaw": 1.08,
+   "yaw": 1.085,
    "titled": false,
    "x": 1480,
-   "z": 1358
+   "z": 1362
   },
   {
    "id": "guard_ashcombe_2",
@@ -1378,10 +1392,10 @@
    "gate": "ashcombe_gate_2",
    "rank": "guard",
    "name": "Ashcombe Guard",
-   "yaw": -2.642,
+   "yaw": -2.745,
    "titled": false,
    "x": 1374,
-   "z": 1256
+   "z": 1258
   },
   {
    "id": "guard_ashcombe_5",
@@ -1393,10 +1407,10 @@
    "gate": "ashcombe_gate_2",
    "rank": "guard",
    "name": "Ashcombe Guard",
-   "yaw": -2.642,
+   "yaw": -2.745,
    "titled": false,
    "x": 1366,
-   "z": 1262
+   "z": 1260
   },
   {
    "id": "guard_ashcombe_6",
@@ -1465,10 +1479,10 @@
    "post": "square",
    "rank": "guard",
    "name": "Ashcombe Guard",
-   "yaw": -0.194,
+   "yaw": -0.144,
    "titled": false,
    "x": 1404,
-   "z": 1332
+   "z": 1330
   },
   {
    "id": "guard_ashcombe_11",
@@ -1509,9 +1523,9 @@
    "gate": "brackwater_gate_0",
    "rank": "guard",
    "name": "Brackwater Guard",
-   "yaw": -2.86,
+   "yaw": -2.929,
    "titled": false,
-   "x": 1122,
+   "x": 1124,
    "z": 812
   },
   {
@@ -1524,9 +1538,9 @@
    "gate": "brackwater_gate_0",
    "rank": "guard",
    "name": "Brackwater Guard",
-   "yaw": -2.86,
+   "yaw": -2.929,
    "titled": false,
-   "x": 1116,
+   "x": 1114,
    "z": 814
   },
   {
@@ -1538,10 +1552,10 @@
    "post": "square",
    "rank": "sergeant",
    "name": "Sergeant Pennock",
-   "yaw": 1.015,
+   "yaw": 1.262,
    "titled": false,
    "x": 1136,
-   "z": 868
+   "z": 870
   },
   {
    "id": "guard_brackwater_3",
@@ -1596,7 +1610,7 @@
    "gate": "saltmouth_gate_0",
    "rank": "guard",
    "name": "Saltmouth Guard",
-   "yaw": -0.896,
+   "yaw": -0.848,
    "titled": false,
    "x": 832,
    "z": 1650
@@ -1611,9 +1625,9 @@
    "gate": "saltmouth_gate_0",
    "rank": "guard",
    "name": "Saltmouth Guard",
-   "yaw": -0.896,
+   "yaw": -0.848,
    "titled": false,
-   "x": 836,
+   "x": 838,
    "z": 1656
   },
   {
@@ -1668,10 +1682,10 @@
    "gate": "gull_steps_gate_0",
    "rank": "guard",
    "name": "Gull Steps Guard",
-   "yaw": 1.132,
+   "yaw": 0.651,
    "titled": false,
    "x": 316,
-   "z": 1286
+   "z": 1282
   },
   {
    "id": "guard_copperdell_0",
@@ -1683,10 +1697,10 @@
    "gate": "copperdell_gate_0",
    "rank": "guard",
    "name": "Copperdell Guard",
-   "yaw": -0.983,
+   "yaw": -0.896,
    "titled": false,
-   "x": 280,
-   "z": 482
+   "x": 284,
+   "z": 488
   },
   {
    "id": "guard_copperdell_1",
@@ -1698,10 +1712,10 @@
    "gate": "copperdell_gate_0",
    "rank": "guard",
    "name": "Copperdell Guard",
-   "yaw": -0.983,
+   "yaw": -0.896,
    "titled": false,
-   "x": 284,
-   "z": 490
+   "x": 290,
+   "z": 494
   },
   {
    "id": "guard_copperdell_2",
@@ -1799,10 +1813,10 @@
    "gate": "pickaxe_row_gate_0",
    "rank": "guard",
    "name": "Pickaxe Row Guard",
-   "yaw": -0.933,
+   "yaw": -1.253,
    "titled": false,
-   "x": 970,
-   "z": 1688
+   "x": 966,
+   "z": 1674
   },
   {
    "id": "guard_pickaxe_row_1",
@@ -1828,9 +1842,9 @@
    "gate": "ashhaven_gate_0",
    "rank": "guard",
    "name": "Ashhaven Guard",
-   "yaw": -0.805,
+   "yaw": -0.697,
    "titled": false,
-   "x": 738,
+   "x": 736,
    "z": 968
   },
   {
@@ -1843,7 +1857,7 @@
    "gate": "torborhold_gate_0",
    "rank": "guard",
    "name": "Torborhold Guard",
-   "yaw": -1.305,
+   "yaw": -1.547,
    "titled": false,
    "x": 534,
    "z": 1276
@@ -1858,10 +1872,10 @@
    "gate": "torborhold_gate_0",
    "rank": "guard",
    "name": "Torborhold Guard",
-   "yaw": -1.305,
+   "yaw": -1.547,
    "titled": false,
    "x": 536,
-   "z": 1282
+   "z": 1286
   },
   {
    "id": "guard_torborhold_2",
@@ -1873,10 +1887,10 @@
    "gate": "torborhold_gate_1",
    "rank": "guard",
    "name": "Torborhold Guard",
-   "yaw": 3.106,
+   "yaw": 2.383,
    "titled": false,
-   "x": 598,
-   "z": 1204
+   "x": 594,
+   "z": 1206
   },
   {
    "id": "guard_torborhold_3",
@@ -1888,10 +1902,10 @@
    "gate": "torborhold_gate_1",
    "rank": "guard",
    "name": "Torborhold Guard",
-   "yaw": 3.106,
+   "yaw": 2.383,
    "titled": false,
-   "x": 590,
-   "z": 1204
+   "x": 588,
+   "z": 1200
   },
   {
    "id": "guard_torborhold_4",
@@ -1903,10 +1917,10 @@
    "gate": "torborhold_gate_2",
    "rank": "guard",
    "name": "Torborhold Guard",
-   "yaw": 1.571,
+   "yaw": 2.457,
    "titled": false,
-   "x": 628,
-   "z": 1220
+   "x": 636,
+   "z": 1222
   },
   {
    "id": "guard_torborhold_5",
@@ -1918,10 +1932,10 @@
    "gate": "torborhold_gate_2",
    "rank": "guard",
    "name": "Torborhold Guard",
-   "yaw": 1.571,
+   "yaw": 2.457,
    "titled": false,
    "x": 630,
-   "z": 1212
+   "z": 1218
   },
   {
    "id": "guard_torborhold_6",
@@ -1960,10 +1974,10 @@
    "post": "square",
    "rank": "guard",
    "name": "Torborhold Guard",
-   "yaw": 0.284,
+   "yaw": 0.376,
    "titled": false,
    "x": 578,
-   "z": 1272
+   "z": 1274
   },
   {
    "id": "guard_mawehaven_0",
@@ -1975,7 +1989,7 @@
    "gate": "mawehaven_gate_0",
    "rank": "guard",
    "name": "Mawehaven Guard",
-   "yaw": -2.795,
+   "yaw": -2.835,
    "titled": false,
    "x": 248,
    "z": 1890
@@ -1990,7 +2004,7 @@
    "gate": "wamonhold_gate_0",
    "rank": "guard",
    "name": "Wamonhold Guard",
-   "yaw": 2.481,
+   "yaw": 2.468,
    "titled": false,
    "x": 1372,
    "z": 1538
@@ -2005,7 +2019,7 @@
    "gate": "halsbridge_gate_1",
    "rank": "guard",
    "name": "Halsbridge Guard",
-   "yaw": 0.013,
+   "yaw": 0.005,
    "titled": false,
    "x": 1692,
    "z": 1262
@@ -2020,7 +2034,7 @@
    "gate": "halsbridge_gate_1",
    "rank": "guard",
    "name": "Halsbridge Guard",
-   "yaw": 0.013,
+   "yaw": 0.005,
    "titled": false,
    "x": 1702,
    "z": 1262
@@ -2094,9 +2108,9 @@
    "post": "square",
    "rank": "sergeant",
    "name": "Sergeant Kettleby",
-   "yaw": -2.944,
+   "yaw": -2.475,
    "titled": false,
-   "x": 1698,
+   "x": 1702,
    "z": 1190
   },
   {
@@ -2151,10 +2165,10 @@
    "gate": "mill_end_gate_0",
    "rank": "guard",
    "name": "Mill End Guard",
-   "yaw": -0.029,
+   "yaw": 0.611,
    "titled": false,
-   "x": 202,
-   "z": 1516
+   "x": 200,
+   "z": 1518
   },
   {
    "id": "guard_mill_end_1",
@@ -2166,10 +2180,10 @@
    "gate": "mill_end_gate_0",
    "rank": "guard",
    "name": "Mill End Guard",
-   "yaw": -0.029,
+   "yaw": 0.611,
    "titled": false,
-   "x": 210,
-   "z": 1516
+   "x": 206,
+   "z": 1514
   },
   {
    "id": "guard_mill_end_2",
@@ -2223,10 +2237,10 @@
    "gate": "lower_mossgate_gate_0",
    "rank": "guard",
    "name": "Lower Mossgate Guard",
-   "yaw": 0,
+   "yaw": -0.174,
    "titled": false,
-   "x": 700,
-   "z": 1592
+   "x": 702,
+   "z": 1590
   },
   {
    "id": "guard_mirestead_0",
@@ -2238,10 +2252,10 @@
    "gate": "mirestead_gate_0",
    "rank": "guard",
    "name": "Mirestead Guard",
-   "yaw": -0.91,
+   "yaw": -1.36,
    "titled": false,
-   "x": 1102,
-   "z": 1094
+   "x": 1100,
+   "z": 1088
   },
   {
    "id": "guard_gullwick_0",
@@ -2253,10 +2267,10 @@
    "gate": "gullwick_gate_0",
    "rank": "guard",
    "name": "Gullwick Guard",
-   "yaw": -0.062,
+   "yaw": 0.112,
    "titled": false,
-   "x": 1512,
-   "z": 408
+   "x": 1510,
+   "z": 410
   },
   {
    "id": "guard_gullwick_1",
@@ -2268,10 +2282,10 @@
    "gate": "gullwick_gate_0",
    "rank": "guard",
    "name": "Gullwick Guard",
-   "yaw": -0.062,
+   "yaw": 0.112,
    "titled": false,
    "x": 1520,
-   "z": 410
+   "z": 408
   },
   {
    "id": "guard_gullwick_2",
@@ -2283,10 +2297,10 @@
    "gate": "gullwick_gate_1",
    "rank": "guard",
    "name": "Gullwick Guard",
-   "yaw": 0,
+   "yaw": -1.562,
    "titled": false,
-   "x": 1468,
-   "z": 386
+   "x": 1482,
+   "z": 392
   },
   {
    "id": "guard_gullwick_3",
@@ -2298,10 +2312,10 @@
    "gate": "gullwick_gate_1",
    "rank": "guard",
    "name": "Gullwick Guard",
-   "yaw": 0,
+   "yaw": -1.562,
    "titled": false,
-   "x": 1476,
-   "z": 386
+   "x": 1482,
+   "z": 400
   },
   {
    "id": "guard_gullwick_4",
@@ -2313,7 +2327,7 @@
    "gate": "gullwick_gate_2",
    "rank": "guard",
    "name": "Gullwick Guard",
-   "yaw": 3.142,
+   "yaw": -3.108,
    "titled": false,
    "x": 1476,
    "z": 318
@@ -2328,7 +2342,7 @@
    "gate": "gullwick_gate_2",
    "rank": "guard",
    "name": "Gullwick Guard",
-   "yaw": 3.142,
+   "yaw": -3.108,
    "titled": false,
    "x": 1468,
    "z": 318
@@ -2370,9 +2384,9 @@
    "post": "square",
    "rank": "guard",
    "name": "Gullwick Guard",
-   "yaw": 1.765,
+   "yaw": 1.72,
    "titled": false,
-   "x": 1512,
+   "x": 1510,
    "z": 368
   },
   {
@@ -2385,7 +2399,7 @@
    "gate": "ferry_hythe_gate_0",
    "rank": "guard",
    "name": "Ferry Hythe Guard",
-   "yaw": 0.219,
+   "yaw": 0.154,
    "titled": false,
    "x": 424,
    "z": 616
@@ -2414,7 +2428,7 @@
    "gate": "wyrmrow_gate_0",
    "rank": "guard",
    "name": "Wyrmrow Guard",
-   "yaw": 0.785,
+   "yaw": 0.795,
    "titled": false,
    "x": 876,
    "z": 1906
@@ -2429,9 +2443,9 @@
    "gate": "wyrmrow_gate_1",
    "rank": "guard",
    "name": "Wyrmrow Guard",
-   "yaw": 2.356,
+   "yaw": 2.608,
    "titled": false,
-   "x": 862,
+   "x": 864,
    "z": 1832
   },
   {
@@ -2458,10 +2472,10 @@
    "gate": "mirekeep_gate_0",
    "rank": "guard",
    "name": "Mirekeep Guard",
-   "yaw": -1.695,
+   "yaw": -1.569,
    "titled": false,
-   "x": 970,
-   "z": 1256
+   "x": 968,
+   "z": 1254
   },
   {
    "id": "guard_hermit_s_rest_0",
@@ -2473,10 +2487,10 @@
    "gate": "hermit_s_rest_gate_1",
    "rank": "guard",
    "name": "Hermit's Rest Guard",
-   "yaw": 0,
+   "yaw": -0.18,
    "titled": false,
    "x": 1084,
-   "z": 638
+   "z": 636
   },
   {
    "id": "guard_hermit_s_rest_1",
@@ -2488,9 +2502,9 @@
    "gate": "hermit_s_rest_gate_1",
    "rank": "guard",
    "name": "Hermit's Rest Guard",
-   "yaw": 0,
+   "yaw": -0.18,
    "titled": false,
-   "x": 1092,
+   "x": 1094,
    "z": 638
   },
   {
@@ -2563,9 +2577,9 @@
    "gate": "hermit_s_rest_gate_3",
    "rank": "guard",
    "name": "Hermit's Rest Guard",
-   "yaw": -3.037,
+   "yaw": -3.126,
    "titled": false,
-   "x": 1096,
+   "x": 1100,
    "z": 482
   },
   {
@@ -2578,9 +2592,9 @@
    "gate": "hermit_s_rest_gate_3",
    "rank": "guard",
    "name": "Hermit's Rest Guard",
-   "yaw": -3.037,
+   "yaw": -3.126,
    "titled": false,
-   "x": 1088,
+   "x": 1090,
    "z": 482
   },
   {
@@ -2592,9 +2606,9 @@
    "post": "square",
    "rank": "sergeant",
    "name": "Sergeant Fallowfield",
-   "yaw": 0.324,
+   "yaw": -0.027,
    "titled": false,
-   "x": 1102,
+   "x": 1104,
    "z": 548
   },
   {
@@ -2620,10 +2634,10 @@
    "post": "square",
    "rank": "guard",
    "name": "Hermit's Rest Guard",
-   "yaw": -3.118,
+   "yaw": -2.894,
    "titled": false,
-   "x": 1104,
-   "z": 560
+   "x": 1106,
+   "z": 562
   },
   {
    "id": "guard_hermit_s_rest_11",
@@ -2646,13 +2660,13 @@
    "zone": "z11_03",
    "tier": "village",
    "post": "gate",
-   "gate": "charcoal_burners_gate_1",
+   "gate": "charcoal_burners_gate_0",
    "rank": "guard",
    "name": "Charcoal Burners Guard",
-   "yaw": 1.571,
+   "yaw": -2.111,
    "titled": false,
-   "x": 304,
-   "z": 196
+   "x": 208,
+   "z": 192
   },
   {
    "id": "guard_charcoal_burners_1",
@@ -2661,13 +2675,13 @@
    "zone": "z11_03",
    "tier": "village",
    "post": "gate",
-   "gate": "charcoal_burners_gate_0",
+   "gate": "charcoal_burners_gate_1",
    "rank": "guard",
    "name": "Charcoal Burners Guard",
-   "yaw": -1.571,
+   "yaw": 2.047,
    "titled": false,
-   "x": 208,
-   "z": 188
+   "x": 308,
+   "z": 198
   },
   {
    "id": "guard_charcoal_burners_2",
@@ -2690,13 +2704,13 @@
    "zone": "z11_03",
    "tier": "hamlet",
    "post": "gate",
-   "gate": "wildhaven_gate_0",
+   "gate": "wildhaven_gate_1",
    "rank": "guard",
    "name": "Wildhaven Guard",
-   "yaw": -1.326,
+   "yaw": 2.344,
    "titled": false,
-   "x": 1250,
-   "z": 190
+   "x": 1312,
+   "z": 200
   },
   {
    "id": "guard_orrinsford_0",
@@ -2708,10 +2722,10 @@
    "gate": "orrinsford_gate_0",
    "rank": "guard",
    "name": "Orrinsford Guard",
-   "yaw": -1.571,
+   "yaw": -1.406,
    "titled": false,
-   "x": 278,
-   "z": 572
+   "x": 276,
+   "z": 570
   },
   {
    "id": "guard_orrinsford_1",
@@ -2723,7 +2737,7 @@
    "gate": "orrinsford_gate_0",
    "rank": "guard",
    "name": "Orrinsford Guard",
-   "yaw": -1.571,
+   "yaw": -1.406,
    "titled": false,
    "x": 278,
    "z": 580
@@ -2738,7 +2752,7 @@
    "gate": "orrinsford_gate_1",
    "rank": "guard",
    "name": "Orrinsford Guard",
-   "yaw": 3.142,
+   "yaw": -3.113,
    "titled": false,
    "x": 324,
    "z": 520
@@ -2753,7 +2767,7 @@
    "gate": "orrinsford_gate_1",
    "rank": "guard",
    "name": "Orrinsford Guard",
-   "yaw": 3.142,
+   "yaw": -3.113,
    "titled": false,
    "x": 316,
    "z": 520
@@ -2810,10 +2824,10 @@
    "gate": "pilgrim_s_halt_gate_0",
    "rank": "guard",
    "name": "Pilgrim's Halt Guard",
-   "yaw": -2.239,
+   "yaw": -2.347,
    "titled": false,
-   "x": 644,
-   "z": 212
+   "x": 642,
+   "z": 214
   },
   {
    "id": "guard_millbrook_0",
@@ -2825,10 +2839,10 @@
    "gate": "millbrook_gate_2",
    "rank": "guard",
    "name": "Millbrook Guard",
-   "yaw": -2.356,
+   "yaw": -2.173,
    "titled": false,
    "x": 492,
-   "z": 1590
+   "z": 1588
   },
   {
    "id": "guard_millbrook_1",
@@ -2840,7 +2854,7 @@
    "gate": "millbrook_gate_2",
    "rank": "guard",
    "name": "Millbrook Guard",
-   "yaw": -2.356,
+   "yaw": -2.173,
    "titled": false,
    "x": 486,
    "z": 1596
@@ -2971,10 +2985,10 @@
    "gate": "three_wheels_gate_0",
    "rank": "guard",
    "name": "Three Wheels Guard",
-   "yaw": 0.661,
+   "yaw": 0.429,
    "titled": false,
    "x": 1696,
-   "z": 1296
+   "z": 1294
   },
   {
    "id": "guard_three_wheels_1",
@@ -2986,10 +3000,10 @@
    "gate": "three_wheels_gate_0",
    "rank": "guard",
    "name": "Three Wheels Guard",
-   "yaw": 0.661,
+   "yaw": 0.429,
    "titled": false,
-   "x": 1702,
-   "z": 1292
+   "x": 1704,
+   "z": 1290
   },
   {
    "id": "guard_three_wheels_2",
@@ -3014,9 +3028,9 @@
    "post": "square",
    "rank": "guard",
    "name": "Three Wheels Guard",
-   "yaw": -2.373,
+   "yaw": -2.648,
    "titled": false,
-   "x": 1666,
+   "x": 1664,
    "z": 1242
   },
   {
@@ -3043,7 +3057,7 @@
    "gate": "stormrow_gate_0",
    "rank": "guard",
    "name": "Stormrow Guard",
-   "yaw": -1.652,
+   "yaw": -1.56,
    "titled": false,
    "x": 1028,
    "z": 136
@@ -3072,9 +3086,9 @@
    "gate": "ravencross_gate_0",
    "rank": "guard",
    "name": "Ravencross Guard",
-   "yaw": 0,
+   "yaw": 0.315,
    "titled": false,
-   "x": 444,
+   "x": 442,
    "z": 472
   },
   {
@@ -3087,10 +3101,10 @@
    "gate": "wildmere_gate_0",
    "rank": "guard",
    "name": "Wildmere Guard",
-   "yaw": 1.571,
+   "yaw": 2.515,
    "titled": false,
-   "x": 1640,
-   "z": 584
+   "x": 1632,
+   "z": 552
   },
   {
    "id": "guard_redcliff_0",
@@ -3099,13 +3113,13 @@
    "zone": "z14_03",
    "tier": "town",
    "post": "gate",
-   "gate": "redcliff_gate_2",
+   "gate": "redcliff_gate_0",
    "rank": "guard",
    "name": "Redcliff Guard",
-   "yaw": 1.592,
+   "yaw": -0.385,
    "titled": false,
-   "x": 442,
-   "z": 866
+   "x": 358,
+   "z": 916
   },
   {
    "id": "guard_redcliff_1",
@@ -3114,13 +3128,13 @@
    "zone": "z14_03",
    "tier": "town",
    "post": "gate",
-   "gate": "redcliff_gate_2",
+   "gate": "redcliff_gate_0",
    "rank": "guard",
    "name": "Redcliff Guard",
-   "yaw": 1.592,
+   "yaw": -0.385,
    "titled": false,
-   "x": 442,
-   "z": 860
+   "x": 366,
+   "z": 920
   },
   {
    "id": "guard_redcliff_2",
@@ -3129,13 +3143,13 @@
    "zone": "z14_03",
    "tier": "town",
    "post": "gate",
-   "gate": "redcliff_gate_0",
+   "gate": "redcliff_gate_1",
    "rank": "guard",
    "name": "Redcliff Guard",
-   "yaw": -0.644,
+   "yaw": -2.724,
    "titled": false,
-   "x": 360,
-   "z": 916
+   "x": 342,
+   "z": 828
   },
   {
    "id": "guard_redcliff_3",
@@ -3144,13 +3158,13 @@
    "zone": "z14_03",
    "tier": "town",
    "post": "gate",
-   "gate": "redcliff_gate_0",
+   "gate": "redcliff_gate_1",
    "rank": "guard",
    "name": "Redcliff Guard",
-   "yaw": -0.644,
+   "yaw": -2.724,
    "titled": false,
-   "x": 366,
-   "z": 920
+   "x": 334,
+   "z": 830
   },
   {
    "id": "guard_redcliff_4",
@@ -3159,13 +3173,13 @@
    "zone": "z14_03",
    "tier": "town",
    "post": "gate",
-   "gate": "redcliff_gate_1",
+   "gate": "redcliff_gate_2",
    "rank": "guard",
    "name": "Redcliff Guard",
-   "yaw": -1.93,
+   "yaw": 2.057,
    "titled": false,
-   "x": 344,
-   "z": 822
+   "x": 438,
+   "z": 844
   },
   {
    "id": "guard_redcliff_5",
@@ -3174,13 +3188,13 @@
    "zone": "z14_03",
    "tier": "town",
    "post": "gate",
-   "gate": "redcliff_gate_1",
+   "gate": "redcliff_gate_2",
    "rank": "guard",
    "name": "Redcliff Guard",
-   "yaw": -1.93,
+   "yaw": 2.057,
    "titled": false,
-   "x": 340,
-   "z": 830
+   "x": 434,
+   "z": 836
   },
   {
    "id": "guard_redcliff_6",
@@ -3191,10 +3205,10 @@
    "post": "square",
    "rank": "sergeant",
    "name": "Sergeant Brackenridge",
-   "yaw": -1.489,
+   "yaw": -2.272,
    "titled": false,
    "x": 386,
-   "z": 870
+   "z": 876
   },
   {
    "id": "guard_redcliff_7",
@@ -3231,13 +3245,13 @@
    "zone": "z14_03",
    "tier": "village",
    "post": "gate",
-   "gate": "cinder_farm_gate_0",
+   "gate": "cinder_farm_gate_2",
    "rank": "guard",
    "name": "Cinder Farm Guard",
-   "yaw": 0.608,
+   "yaw": 2.157,
    "titled": false,
-   "x": 1262,
-   "z": 1744
+   "x": 1264,
+   "z": 1682
   },
   {
    "id": "guard_cinder_farm_1",
@@ -3246,13 +3260,13 @@
    "zone": "z14_03",
    "tier": "village",
    "post": "gate",
-   "gate": "cinder_farm_gate_1",
+   "gate": "cinder_farm_gate_0",
    "rank": "guard",
    "name": "Cinder Farm Guard",
-   "yaw": 3.142,
+   "yaw": 0.926,
    "titled": false,
-   "x": 1220,
-   "z": 1654
+   "x": 1260,
+   "z": 1748
   },
   {
    "id": "guard_cinder_farm_2",
@@ -3263,10 +3277,10 @@
    "post": "square",
    "rank": "guard",
    "name": "Cinder Farm Guard",
-   "yaw": -1.372,
+   "yaw": -1.663,
    "titled": false,
    "x": 1224,
-   "z": 1708
+   "z": 1710
   },
   {
    "id": "guard_ravenhaven_0",
@@ -3278,7 +3292,7 @@
    "gate": "ravenhaven_gate_0",
    "rank": "guard",
    "name": "Ravenhaven Guard",
-   "yaw": 0.54,
+   "yaw": 0.378,
    "titled": false,
    "x": 130,
    "z": 260
@@ -3290,13 +3304,13 @@
    "zone": "z14_03",
    "tier": "hamlet",
    "post": "gate",
-   "gate": "minfenrow_gate_0",
+   "gate": "minfenrow_gate_1",
    "rank": "guard",
    "name": "Minfenrow Guard",
-   "yaw": 0.785,
+   "yaw": -1.345,
    "titled": false,
-   "x": 1120,
-   "z": 1126
+   "x": 1064,
+   "z": 1082
   },
   {
    "id": "guard_bipetwatch_0",
@@ -3308,10 +3322,10 @@
    "gate": "bipetwatch_gate_0",
    "rank": "guard",
    "name": "Bipetwatch Guard",
-   "yaw": 1.429,
+   "yaw": 1.591,
    "titled": false,
    "x": 360,
-   "z": 1434
+   "z": 1428
   },
   {
    "id": "guard_last_lantern_0",
@@ -3323,9 +3337,9 @@
    "gate": "last_lantern_gate_0",
    "rank": "guard",
    "name": "Last Lantern Guard",
-   "yaw": -0.334,
+   "yaw": -0.295,
    "titled": false,
-   "x": 868,
+   "x": 866,
    "z": 1358
   },
   {
@@ -3338,7 +3352,7 @@
    "gate": "last_lantern_gate_0",
    "rank": "guard",
    "name": "Last Lantern Guard",
-   "yaw": -0.334,
+   "yaw": -0.295,
    "titled": false,
    "x": 874,
    "z": 1360
@@ -3410,7 +3424,7 @@
    "gate": "coldwater_gate_0",
    "rank": "guard",
    "name": "Coldwater Guard",
-   "yaw": -0.755,
+   "yaw": -0.65,
    "titled": false,
    "x": 1430,
    "z": 1886
@@ -3425,7 +3439,7 @@
    "gate": "coldwater_gate_0",
    "rank": "guard",
    "name": "Coldwater Guard",
-   "yaw": -0.755,
+   "yaw": -0.65,
    "titled": false,
    "x": 1436,
    "z": 1892
@@ -3482,10 +3496,10 @@
    "gate": "netherby_gate_0",
    "rank": "guard",
    "name": "Netherby Guard",
-   "yaw": -0.069,
+   "yaw": -0.238,
    "titled": false,
-   "x": 704,
-   "z": 772
+   "x": 706,
+   "z": 770
   },
   {
    "id": "guard_gorsehold_0",
@@ -3497,10 +3511,10 @@
    "gate": "gorsehold_gate_0",
    "rank": "guard",
    "name": "Gorsehold Guard",
-   "yaw": 1.974,
+   "yaw": 1.139,
    "titled": false,
-   "x": 1620,
-   "z": 1266
+   "x": 1614,
+   "z": 1262
   },
   {
    "id": "guard_gorsehold_1",
@@ -3512,10 +3526,10 @@
    "gate": "gorsehold_gate_0",
    "rank": "guard",
    "name": "Gorsehold Guard",
-   "yaw": 1.974,
+   "yaw": 1.139,
    "titled": false,
-   "x": 1616,
-   "z": 1260
+   "x": 1618,
+   "z": 1252
   },
   {
    "id": "guard_gorsehold_2",
@@ -3554,10 +3568,10 @@
    "post": "square",
    "rank": "guard",
    "name": "Gorsehold Guard",
-   "yaw": -0.829,
+   "yaw": -1.171,
    "titled": false,
-   "x": 1568,
-   "z": 1282
+   "x": 1570,
+   "z": 1284
   },
   {
    "id": "guard_burnt_barns_0",
@@ -3569,7 +3583,7 @@
    "gate": "burnt_barns_gate_0",
    "rank": "guard",
    "name": "Burnt Barns Guard",
-   "yaw": 1.028,
+   "yaw": 0.972,
    "titled": false,
    "x": 1620,
    "z": 386
@@ -3584,10 +3598,10 @@
    "gate": "lowmoor_gate_0",
    "rank": "guard",
    "name": "Lowmoor Guard",
-   "yaw": -3.121,
+   "yaw": 2.905,
    "titled": false,
    "x": 1220,
-   "z": 966
+   "z": 968
   },
   {
    "id": "guard_lowmoor_1",
@@ -3599,10 +3613,10 @@
    "gate": "lowmoor_gate_0",
    "rank": "guard",
    "name": "Lowmoor Guard",
-   "yaw": -3.121,
+   "yaw": 2.905,
    "titled": false,
-   "x": 1214,
-   "z": 968
+   "x": 1210,
+   "z": 966
   },
   {
    "id": "guard_lowmoor_2",
@@ -3641,10 +3655,10 @@
    "post": "square",
    "rank": "guard",
    "name": "Lowmoor Guard",
-   "yaw": 1.637,
+   "yaw": 1.929,
    "titled": false,
    "x": 1214,
-   "z": 1010
+   "z": 1012
   },
   {
    "id": "guard_deepdene_0",
@@ -3656,7 +3670,7 @@
    "gate": "deepdene_gate_0",
    "rank": "guard",
    "name": "Deepdene Guard",
-   "yaw": -0.019,
+   "yaw": 0.051,
    "titled": false,
    "x": 1342,
    "z": 320

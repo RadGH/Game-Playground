@@ -19,7 +19,8 @@ const { swingClip } = await import('../../js/client/actors.js').catch(() => ({})
 const { approachReach, basicReach, shortenReach, MELEE_REACH } = await import('../../js/client/reach.js');
 const { formLook, FORM_FAMILY, isImbuedSwing, sceptreElement, createFormFx } = await import('../../js/client/form-fx.js');
 const { REVIVE_STYLE, REVIVE_LOOK, reviveStyle, createReviveFx } = await import('../../js/client/revive-fx.js');
-const { gearLook, gearKey, g5RowFor, DRAWN_SLOTS, wornLightRange, isTorchItem } = await import('../../js/client/gear-look.js');
+const GL = await import('../../js/client/gear-look.js');
+const { gearLook, gearKey, g5RowFor, DRAWN_SLOTS } = GL;
 const A = await import('../../js/client/angling-view.js');
 const { holdFor } = await import('../../../../avatar-3d/js/chibi2-weapon-ids.js');
 const { dualAttackFor, dualAttackByCount, ROD_MOUNT } = await import('../../../../avatar-3d/js/chibi2-motion-dual.js');
@@ -170,7 +171,7 @@ test('T4: six revives, six looks — while casting and when the body stands', ()
 // ---------------------------------------------------------------- T23 / T7
 test('T23: every new catalog model is drawn in its slot; gloves, rings, necklaces and belts show', { skip: !catalog && 'avatar-3d/data/gear-catalog.json is not in this tree' }, () => {
   const SLOT_OF = { weapon: 'weapon', offhand: 'offhand', head: 'head', chest: 'chest', legs: 'legs', hands: 'hands', feet: 'feet', cape: 'back', necklace: 'necklace', ring: 'ring', belt: 'belt', light: 'light' };
-  const fresh = catalog.rows.filter(r => r.new && r.gameSlot);
+  const fresh = catalog.rows.filter(r => r.new && r.gameSlot && r.gameSlot !== 'light');     // W22 (play-test 8): light items are gone, their models are no longer worn
   assert.ok(fresh.length >= 40, `${fresh.length} new rows`);
   for (const row of fresh) {
     const slot = SLOT_OF[row.gameSlot]; assert.ok(slot, `${row.id}: game slot ${row.gameSlot}`);
@@ -200,30 +201,26 @@ test('T23: every new catalog model is drawn in its slot; gloves, rings, necklace
   assert.ok(DRAWN_SLOTS.includes('hands') && DRAWN_SLOTS.includes('offhand'));
 });
 
-test('T23 (C\'s slots addendum): back, waist and light are worn and drawn; a worn light lights', () => {
+test('T23 (C\'s slots addendum) + W22: back and waist are worn and drawn; a light is NOT (light items left the game)', () => {
   const L = eq => gearLook(eq, { baseOf, catalog });
   assert.equal(L({ back: { base: 'travel_cloak' } }).cape.id, 'travel_cloak', 'a plain cloak');
   assert.equal(L({ waist: { base: 'leather_belt' } }).decor.id, 'belt_pouches', 'a plain belt');
-  assert.equal(L({ light: { base: 'hand_lantern' } }).decor.id, 'belt_lantern', 'a plain lantern on the hip');
-  assert.equal(L({ light: { base: 'pitch_torch' } }).offhand.id, 'torch', 'a plain torch in the empty off hand');
-  const busy = L({ light: { base: 'pitch_torch' }, offhand: { base: 'shield' } });
-  assert.equal(busy.offhand.id, 'fh_heater_shield'); assert.equal(busy.decor.id, 'belt_torch', 'the off hand is taken: the torch rides the hip');
-  assert.equal(L({ waist: { base: 'leather_belt' }, light: { base: 'hand_lantern' } }).decor.id, 'belt_pouches', 'a belt wins over a lantern');
+  // an old save may still carry a `light`: nothing is drawn for it, in any hand or on the hip, and it is not in the look's key
+  for (const light of [{ base: 'hand_lantern' }, { base: 'pitch_torch' }, { base: 'hand_lantern', g5: 'g5_hexlantern' }, { base: 'pitch_torch', g5: 'g5_cresset' }]) {
+    const look = L({ light });
+    assert.equal(look.decor.id, 'none', JSON.stringify(light)); assert.equal(look.offhand.id, 'none', JSON.stringify(light));
+    assert.equal(gearKey({ light }), gearKey({}), 'a light does not re-dress the body');
+  }
+  assert.equal(L({ waist: { base: 'leather_belt' }, light: { base: 'hand_lantern' } }).decor.id, 'belt_pouches');
   if (catalog) {
     assert.equal(L({ back: { base: 'travel_cloak', g5: 'g5_swallowtail' } }).cape.id, 'g5_swallowtail');
     assert.equal(L({ waist: { base: 'leather_belt', g5: 'g5_girdle' } }).decor.id, 'g5_girdle');
-    assert.equal(L({ light: { base: 'hand_lantern', g5: 'g5_hexlantern' } }).decor.id, 'g5_hexlantern');
-    assert.equal(L({ light: { base: 'pitch_torch', g5: 'g5_cresset' } }).offhand.id, 'g5_cresset');
-    assert.equal(L({ light: { base: 'pitch_torch', g5: 'g5_cresset' }, offhand: { base: 'shield' }, weapon: { base: 'longsword' } }).decor.id, 'belt_torch');
-    assert.equal(L({ waist: { g5: 'g5_girdle', base: 'x' }, light: { g5: 'g5_hexlantern', base: 'y' } }).decor.id, 'g5_girdle');
   }
-  assert.equal(wornLightRange({ light: { base: 'hand_lantern' } }), 16); assert.equal(wornLightRange({ light: { base: 'pitch_torch' } }), 10);
-  assert.equal(wornLightRange({ light: { base: 'x', lightRange: 22 } }), 22); assert.equal(wornLightRange({}), 0); assert.equal(wornLightRange(null), 0);
-  assert.equal(isTorchItem({ g5: 'g5_cresset' }), true); assert.equal(isTorchItem({ base: 'hand_lantern' }), false);
-  for (const s of ['back', 'waist', 'light']) assert.notEqual(gearKey({ [s]: { base: 'a' } }), gearKey({}), s);
-  // status-sync turns the pooled torch light on for a worn light
+  assert.equal(GL.wornLightRange, undefined); assert.equal(GL.isTorchItem, undefined);
+  assert.ok(!DRAWN_SLOTS.includes('light'));
+  for (const s of ['back', 'waist']) assert.notEqual(gearKey({ [s]: { base: 'a' } }), gearKey({}), s);
   const src = readFileSync(new URL('../../js/client/status-sync.js', import.meta.url), 'utf8');
-  assert.match(src, /wornLightRange\(a\.look\?\.gear \|\| info\?\.gear\)/);
+  assert.ok(!/wornLightRange|torchLight|LIGHTS\.add/.test(src), 'status-sync lights nobody');
 });
 
 test('T7: a two-hander in each hand is drawn in each hand', () => {

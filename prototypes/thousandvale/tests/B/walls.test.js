@@ -65,9 +65,10 @@ test('the gates the owner walks through first: Torborhold\'s, at Barrow Lane, th
   const { P } = zone('z12_02');
   const T = P.find(p => p.kind === 'town_wall' && p.data.town === 'torborhold').data;
   assert.ok(T.gates.length >= 3);
-  const north = T.gates.find(g => g.way === 'lane_torbor_north');
+  const north = T.gates.find(g => (g.road || g.way) === 'lane_torbor_north');
   assert.ok(north && north.kind === 'gatehouse', 'Barrow Lane comes in through a gatehouse');
-  assert.ok(north.out[1] < -0.9, 'and that gate faces north, up the lane');
+  // (W6: `out` is the way a walker leaves along the main street, which may slant; the gate STRUCTURE faces the way its wall does)
+  assert.ok(Math.cos(north.wallYaw) < -0.9, 'and that gate stands facing north, up the lane');
   // the west gate takes three roads: the two that do not own it are led round to it
   const west = T.gates.find(g => g.led.length >= 1);
   assert.ok(west, 'roads arriving side by side share one gate');
@@ -170,10 +171,10 @@ test('client: walls-view plans pieces, towers, open doors and grates from the ba
   assert.ok(plan.fires.length >= 4, 'torches at the gatehouses');
   // the doors of Barrow Lane's gate stand open INTO the town: every door part is on the inside of the gate line
   const T = P.find(p => p.kind === 'town_wall' && p.data.town === 'torborhold').data;
-  const g = T.gates.find(q => q.way === 'lane_torbor_north');
-  const doors = plan.parts.filter(p => p.colour === '#7a5a3c' && Math.hypot(p.x - g.x, p.z - g.z) < 6);
+  const g = T.gates.find(q => (q.road || q.way) === 'lane_torbor_north');
+  const doors = plan.parts.filter(p => p.colour === '#7a5a3c' && Math.hypot(p.x - g.x, p.z - g.z) < g.open / 2 + 3);   // (W6: the opening is as wide as the street needs at its slant)
   assert.ok(doors.length >= 8, 'two leaves of planks');
-  for (const p of doors) assert.ok((p.x - g.x) * g.out[0] + (p.z - g.z) * g.out[1] < 0, 'a door swung OUT of the town');
+  for (const p of doors) assert.ok((p.x - g.x) * Math.sin(g.wallYaw) + (p.z - g.z) * Math.cos(g.wallYaw) < 0, 'a door swung OUT of the town');
 });
 
 // --------------------------------------------------------------------------------- play-test 5: T8b + T8a

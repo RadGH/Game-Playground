@@ -37,7 +37,7 @@ const SOLID = {
   stone: { glow: false, arc: 0.1, spin: 1.3, scale: 1, tail: 0 },
 };
 const GLOW = {
-  firebolt: { glow: true, arc: 0, spin: 0, scale: 1, tail: 3.2 },
+  firebolt: { glow: true, arc: 0, spin: 0, scale: 1.3, tail: 3.2 },
   orb: { glow: true, arc: 0, spin: 0.6, scale: 1, tail: 1.6 },
   shard: { glow: true, arc: 0, spin: 0, scale: 1, tail: 1.2 },
   spark: { glow: true, arc: 0, spin: 0, scale: 1, tail: 2.4 },

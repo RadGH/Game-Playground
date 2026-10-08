@@ -107,7 +107,7 @@
       "z": 289,
       "ask": true,
       "askR": 40,
-      "radius": 46
+      "radius": 40
     },
     {
       "type": "dungeon",
@@ -151,37 +151,16 @@
         "radius": 90,
         "movedFrom": null,
         "culture": "halfling",
-        "plots": 22,
+        "plots": 24,
         "streets": 70,
         "links": 1,
         "overlaps": 0,
         "highStreets": 1,
         "w6": {
           "plotsBefore": 24,
-          "plots": 22,
-          "kept": 22,
-          "removed": [
-            {
-              "plot": 5,
-              "want": "shop",
-              "office": true
-            },
-            {
-              "plot": 6,
-              "want": "forge",
-              "office": true
-            }
-          ],
-          "moved": [
-            {
-              "office": "shop",
-              "to": 22
-            },
-            {
-              "office": "forge",
-              "to": 21
-            }
-          ]
+          "plots": 24,
+          "kept": 24,
+          "removed": []
         }
       },
       {
@@ -192,19 +171,30 @@
           1347,
           289
         ],
-        "radius": 46,
+        "radius": 40,
         "movedFrom": null,
         "culture": "halfling",
-        "plots": 8,
+        "plots": 7,
         "streets": 22,
         "links": 2,
         "overlaps": 0,
         "highStreets": 2,
         "w6": {
           "plotsBefore": 9,
-          "plots": 8,
-          "kept": 0,
-          "renumbered": true
+          "plots": 7,
+          "kept": 7,
+          "removed": [
+            {
+              "plot": 6,
+              "want": "hut",
+              "office": false
+            },
+            {
+              "plot": 7,
+              "want": "hut",
+              "office": false
+            }
+          ]
         }
       }
     ],
@@ -212,11 +202,11 @@
     "bridges": 0,
     "paths": 6,
     "pathMetres": 240,
-    "scatter": 11928,
+    "scatter": 11931,
     "scatterKinds": {
-      "rock_large": 742,
-      "tree_acacia": 2423,
-      "bush": 5316,
+      "rock_large": 741,
+      "tree_acacia": 2426,
+      "bush": 5317,
       "rock_small": 2298,
       "tree_broadleaf": 208,
       "boulder": 198,
@@ -230,7 +220,7 @@
       "lair lair The Lamnund Lair 448 1856",
       "lair lair Tifilden 1600 704",
       "settlement(HUB) town Lowmoor 1219 1026 90",
-      "settlement hamlet Deepdene 1347 289 46",
+      "settlement hamlet Deepdene 1347 289 40",
       "dungeon door_1 Barrow entrance 1401 1081  -1.622",
       "event event_sunken_wolds  1068 1007 40"
     ],
@@ -238,13 +228,13 @@
       "x": 1199,
       "z": 1026
     },
-    "placements": 172,
+    "placements": 173,
     "vignettesAvoided": 664
   },
   "files": {
-    "terrain.bin": 499906,
-    "nav.bin": 19322,
-    "scatter.bin": 95508,
-    "placements.json": 92465
+    "terrain.bin": 499712,
+    "nav.bin": 19260,
+    "scatter.bin": 95532,
+    "placements.json": 92599
   }
 }

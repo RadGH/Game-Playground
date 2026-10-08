@@ -233,15 +233,9 @@
           "kept": 40,
           "removed": [
             {
-              "plot": 13,
-              "want": "hall",
-              "office": true
-            }
-          ],
-          "moved": [
-            {
-              "office": "hall",
-              "to": 34
+              "plot": 12,
+              "want": "hut",
+              "office": false
             }
           ]
         }
@@ -359,9 +353,9 @@
     "vignettesAvoided": 558
   },
   "files": {
-    "terrain.bin": 689748,
-    "nav.bin": 49708,
+    "terrain.bin": 689751,
+    "nav.bin": 49694,
     "scatter.bin": 123556,
-    "placements.json": 256760
+    "placements.json": 256054
   }
 }

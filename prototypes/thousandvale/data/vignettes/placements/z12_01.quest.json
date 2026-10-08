@@ -147,8 +147,8 @@
    "role": "carter",
    "at": "Ashcombe",
    "x": 1492,
-   "z": 1368,
-   "yaw": -0.25,
+   "z": 1378,
+   "yaw": 3.005,
    "cart": "cart_ashcombe",
    "placedBy": "content-towns",
    "quests": 0,
@@ -162,9 +162,9 @@
    "vehicle": "ox_cart",
    "town": "Ashcombe",
    "carter": "carter_ashcombe",
-   "x": 1494,
-   "z": 1366,
-   "yaw": 1.078,
+   "x": 1490,
+   "z": 1380,
+   "yaw": 1.08,
    "radius": 2.2
   },
   {
@@ -205,8 +205,8 @@
    "post": "gate",
    "gate": "ashcombe_gate_0",
    "x": 1476,
-   "z": 1366,
-   "yaw": 1.08,
+   "z": 1370,
+   "yaw": 1.085,
    "titled": false
   },
   {
@@ -220,8 +220,8 @@
    "post": "gate",
    "gate": "ashcombe_gate_0",
    "x": 1480,
-   "z": 1358,
-   "yaw": 1.08,
+   "z": 1362,
+   "yaw": 1.085,
    "titled": false
   },
   {
@@ -265,8 +265,8 @@
    "post": "gate",
    "gate": "ashcombe_gate_2",
    "x": 1374,
-   "z": 1256,
-   "yaw": -2.642,
+   "z": 1258,
+   "yaw": -2.745,
    "titled": false
   },
   {
@@ -280,8 +280,8 @@
    "post": "gate",
    "gate": "ashcombe_gate_2",
    "x": 1366,
-   "z": 1262,
-   "yaw": -2.642,
+   "z": 1260,
+   "yaw": -2.745,
    "titled": false
   },
   {
@@ -352,8 +352,8 @@
    "town": "Ashcombe",
    "post": "square",
    "x": 1404,
-   "z": 1332,
-   "yaw": -0.194,
+   "z": 1330,
+   "yaw": -0.144,
    "titled": false
   },
   {

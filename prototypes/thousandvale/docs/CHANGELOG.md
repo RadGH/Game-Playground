@@ -989,3 +989,72 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - Tests: tests/E/playtest8.test.js (15); tests/E 235 green.
 - **W1 town guards fight** (stream C): `js/rules/guards.js` — an NPC with `data.guard` is an ownerless friendly fighter built from E's guards.json (reference body +2 levels, health x4, hit x0.2, `vsBossMult` on the raid captain, 75 s down instead of dead, leash, heal after the fight, sergeant rally). Event monsters open on the nearest guard; a newcomer draws a quarter of the threat (`rules.newcomer`). Guard-only kills pay nobody. Two one-line hooks in js/sim/province.js. tests/C/guards.test.mjs (7).
 - Farhold's `tool` / `mount` uniques no longer drop (no slot in Thousandvale).
+
+## Owner feedback 8 — D-world (3D client) — 2026-10-08
+- **W2 / W14 projectiles** (#23, #35): `js/client/projectile-kinds.js` (pure: which body flies) + `js/client/projectiles.js` — arrow, quarrel,
+  javelin, knife, axe, stone, firebolt, orb, shard, spark; from the shooter's hand bone, the rules' own flight time, homing, impact on arrival.
+  Pooled (fixed meshes per model), two materials warmed at boot, no lights. `spells.js` / `weapon-fx.js` route every `fx bolt | arrow | shot | thrown` through it.
+- **W22 light** (#43): `daynight.js` `carriedLight` / `DUNGEON_AMBIENT`; `scene.js` `setCarryLight` (ONE PointLight, always in the scene, dimmed
+  by day — 22 m at night, 28 m underground, C's `you.light`); dungeons: hemisphere 2.1, fog 16-72 m, a trace of glow in the stone. Every torch
+  / lantern drawing path deleted (`gear-look.js`, `status-sync.js`, `actors.js`): no pool light rides a body.
+- **W20 run by default** (#41): `controls.js` `wantsRun` (Shift walks; a stick under 60 % walks), auto-run on Num Lock (LT + stick click; quick-wheel
+  slice on a phone); binding rows `walk` and `autorun` replace `sprint`.
+- **W12 quest marks** (#33): `js/client/quest-marks.js` — A's per-player `questMarks`: gold "!", gold "?", grey "!" / "?", blue "!" for paid work;
+  a sprite that grows with distance (40 px at 40 m). `thousandvale.questMarks.list()` / `.sprite(mark)` for the minimap.
+- **W26 mount call** (#47): held still from the key press (`controls.hold`), a second press sends `mount {op:'cancel'}`, and held keys / a
+  click-to-move goal / auto-run carry on the moment you are up.
+- **W5 ox carts** (#26): `js/client/carts-view.js` — the parked cart by each gate (`info.type:'cart'`), a cart behind a roaming carter
+  (`info.vehicle`), and the ride on `cartRide` (you sit on the bed, it pulls away, the veil closes 1.1 s before the arrival). The ox is the cow
+  frame without the dairy, backed between the shafts. One cart is built and compiled at boot.
+- **W19 backpacks** (#40): avatar-3d `js/chibi2-backpacks.js` (satchel, rucksack, frame pack, explorer's), catalog rows; `gear-look.js`
+  `packLookId` / `packPart` draw C's three bases and the rare one on the back in place of a cloak.
+- **W25 icon = worn model** (#46): `gear-look.js` `wornLook` / `wornPart` / `wornKey` and `looks.js` `gearOpts(cls)` — the one call bodies AND
+  D-UI's icons use. `ARMOUR_BY_BASE`: a base draws the model its name says (War Helm = `war_helm`, Plate Helm = `plate_helm`, Leather Cap =
+  `leather_cap`, Chain Coif = `chain_coif`, Chain Shirt = `chainmail`). The client now also loads Thousandvale's own bases (gear-tv.json).
+- **W18 far trees** (#39): `horizon-grid.js` `treeCover` — a canopy tint by biome, height and slope on every horizon chunk (after the rock tint,
+  so wooded slopes stay green to the 700-880 m tree line), and tree spires built into the nearest ring's chunks in the worker (High 2,400 a
+  chunk, Medium 1,000, Low none; same mesh, same material). `?horizonTrees=0` turns it off.
+- **W3 horse** (#24): avatar-3d `js/equine.js` rebuilt over three rounds of renders (crest-and-throat neck, real head, leaf ears, jointed legs);
+  reins off a riderless mount. README "Mounts".
+- **W1 guards** (C's half drawn): `fx guard` — down on one knee, up again, the sergeant's rally bark.
+- Tests: `tests/D/playtest8.test.js` (12), `tests/D/playtest8-horizon.test.js` (4), `tests/D/playtest8.spec.js` (9); the three stale light / catalog tests rewritten.
+
+## Play-test 8 — D-UI (interface), 2026-10-08 — reports #29 #31 #34 #36 #37 #38 #40 #42 #43 #46 #48 + W5 W12 W23 W28 W29
+New files: `js/client/ui/pt8.js` (hub: `createUi8`, `window.tvui8`), `pt8-core.js` (pure rules, node-tested), `hidden-events.js`, `map-tools.js`,
+`meter-window.js`, `cart-travel.js`, `css/pt8.css`. Wired in `main.js` and the gallery's `stage.js`; five new gallery scenes + four fixture moments.
+- **W8 loot keys** (#29): with the loot window open, E takes the SELECTED row (the first to begin with; arrow keys or the pointer move it) and F takes
+  everything. The two hints are `<kbd data-action>` on the `interact` / `strike` rows of the binding table, so a re-bound key or a controller glyph
+  shows by itself; on a phone the hints are blank and the Take / Take all buttons are the controls. A pad's X on a row takes all.
+- **W10 one badge per thing** (#31): unread mail is the yellow dot on the Party button and never a red number there; the number of letters is on the
+  Mail tab inside the window. `ui/unseen.js badgePlan` is the one table (friends + guild news = the red number, mail = the dot, bag = its number).
+- **W16** (#37): the minimap canvas has no tooltip of its own any more; the pins keep their cards.
+- **W29 / W28**: Feedback has a "My reports" tab for signed-in accounts (state, the team's note — for Completed, how it was fixed); Reply opens a
+  new report that starts `#<id> ` and carries A's `ref`. The admin's Reports panel has Completed (a note is required) and a Completed filter.
+- **W13 hide an event** (#34): the crossed eye on an event's card (never on one you are standing in) takes it off the tracker, the minimap and its
+  rim arrow for the session; a foot line "N events hidden · Show" and the map's Events list bring it back. Client only (`sessionStorage`).
+- **W15 map** (#36): the map opens where you left it (zoom + position, per session); a service filter and a search box read `offices.json`,
+  the placed NPCs, `carts.json` and E's `town-services.json` — zoomed out the towns that match are ringed (with a count) and the rest fade, zoomed in
+  each match is a pin at its door; the side panel lists matches nearest first.
+- **W17 quest zones** (#38): a zone's ring answers the pointer anywhere inside it with the quest and its objective and lights up, on the map and the
+  minimap; a click inside tracks the quest.
+- **W12**: A's per-player `questMarks` are drawn on the map and minimap as a bare gold / grey `!` or `?` (`job` is not drawn); the plain "someone in
+  sight" dot gives way to the mark, and a mark never sits on top of the journal's own hand-in pin.
+- **W21 damage meter** (#42): the playground's `meters/` experiment, unchanged, in a window. Settings -> Game -> "Damage meter" (default off), or
+  `/meter`. Fed by A's `hits` (asked for with `net.meter(true)`, again after every join); falls back to the `hit` / `miss` events. Fights are cut by
+  8 quiet seconds and named after the first enemy; only our side has bars under "done".
+- **W5 ox-cart window**: stops nearest first with fare, road distance and ride time; a locked stop says why; a second press confirms.
+- **W19 backpacks** (#40): the card's first line is "+N bag slots"; the bag draws exactly `you.bagMax` squares and follows `you {bagMax}`; a pack whose
+  extra room is in use will not come off (or be swapped for a smaller one) and says how many squares to empty; the server's `why:'bagSlots'` is printed.
+- **W22** (#43): no Light slot on the paper doll. **W27** (#48): a title line only for an NPC the server titles; filler folk and guards get none
+  (`pt8-core.js npcTitle`; the role table that titled every woodcutter is gone from `pt2.js`).
+- **W25 icon = model** (#46): `inv-core.js iconSpec` asks D-world's `gear-look.js wornPart(item, slot, gearOpts(cls))` — the call that dresses the
+  bodies — and keeps no table of its own; `item-icons.js` no longer reads Farhold's look functions, waits for the look data, draws catalog (`g5_`)
+  weapons with their own builders and frames cloaks / packs / belts on a body. Cache version v4 (old pictures are dropped).
+- **W11** (interface half): chat / guild gates ask `you.acct.level` (`social-core.js accountLevel`); wording says which half is missing.
+  **W23**: the kit step shows C's `role` tag and `diff` sentence. **P-client**: `sheet.addSection(id, title, draw)`, `journal.addTab(id, label, draw)`.
+- Tests: `tests/D/pt8.test.js` (27 node tests), `tests/D/pt8.spec.js` (desktop 1366 x 800 + phone 393 x 852, 24 screenshots `tests/D/shots/pt8-*.png`).
+
+## 2026-10-08 — play-test 8, stream W: gates lead onto main streets (W6, report #27)
+- Every town re-planned: each world road that reaches a gate carries on as one clear main street to the square (proctown opt-in `highStreets`; `tools/bake-zone.mjs`, `tools/lib/zone-walls.mjs`). 67 road gates in 46 towns: 67 with a main street, 0 m blocked (before: 0 and 1,435 m). Plot ids and every office unchanged; 38 houses that stood in a main street removed.
+- `town_wall.gates[].main` / `.road`, `street.data.high`, `town_square.data.stalls`; `js/client/town-square.js`; market stalls no longer drawn on buildings.
+- New: `tools/gate-streets.mjs` (the table / `--check`), `tools/lib/gate-street-checks.mjs`, `tools/town-plan-png.mjs`, `tests/B/gate-streets.test.js`, `proctown/tests/highstreets.test.js`. All 16 zones, horizon and map re-baked; E's content-towns, content-givers, content-pools, content-hunts re-run.

@@ -484,3 +484,103 @@ not change**, so nav.bin and the NPC spots are untouched.
 | footprint (avg) | 4.78 × 3.82 m | 5.21 × 4.78 m |
 | offices of two storeys or more | 99 of 411 | 316 of 411 |
 | doors showing less than 2.0 m (the tallest body) | 471 of 821 | 0 |
+
+## 13. Play-test 8 (2026-10-08): a gate leads onto a main street (stream W, W6 / report #27)
+
+*"Improve gate/road placement at Torborhold; it just leads you right into buildings instead of having a main road."*
+
+**Cause.** Three things, none of them the gate itself. (1) proctown's `linkRoads` joins a road to wherever the street
+network comes CLOSEST, and on a plan made of alleys that is an alley three metres inside the wall: Torborhold's three roads
+became "high streets" 2.6, 2.0 and 4.3 m long, each ending on a 2.2 m lane between houses, while the one real main street
+the plan had reached no gate. (2) The bake then painted each world road on along its OWN line inside the wall, skipping
+plots — a strip of road surface running into the side of a house. (3) The four market stalls were drawn on a fixed ring
+11.8 m from the well, wherever that fell: at Torborhold, on top of three buildings.
+
+**Now.** All 16 zones re-baked (`placements.json`, `nav.bin`, `terrain.bin` surface paint in towns, `zone.json`), plus
+`horizon.bin` and the map images. `inputHash`, heights, water and scatter rules are unchanged.
+
+- **proctown opt-in `planTown({ highStreets: { to: 'square', width, clear, keep, avoid } })`** (README "High streets").
+  Each road link becomes ONE main street from the edge of town to the edge of the square: straight if it can be; aimed a
+  little round the square or bent round a plot it was asked to `keep`; forked off another high street when two roads
+  arrive close together. Farhold passes no such option and its towns are byte-identical.
+- **The bake** (`tools/bake-zone.mjs`): roads arriving within 20 m of each other share a link (`LINK_APART`; a road that
+  only clips the edge of town counts once, `LINK_CHORD`); the link is asked `LINK_OUT` = 10 m OUTSIDE the ring of plots,
+  so gate, street and square are in one line and the road does its turning outside the gate. Width by settlement:
+  hamlet 3.6, village 4.2, town 5, city 6 m (`HIGH_STREET_WIDTH`), 0.6 m kerb each side.
+- **Plot ids and offices do not move.** The plan as it was before W6 is planned alongside (`keepPlots`): a plot still in
+  place keeps its `<town>_plot_<n>` id; every plot stream E has somebody in (`data/provinces/offices.json`) and every
+  office is handed to the planner as `keep`. Result over 46 towns: **0 offices moved, 0 towns renumbered, 38 houses
+  removed** (they stood in a main street; `zone.json` `summary.towns[].w6.removed` lists them). Where shops ring a
+  square too tightly for the full width the street narrows instead (one case: Gorsehold, 4 m).
+- **The wall planner** (`tools/lib/zone-walls.mjs`): where a town has high streets the GATES FOLLOW THEM — the gate is
+  cut where the street crosses the ring, centred on it; a road with no street of its own is led round to the nearest such
+  gate outside the wall; the road's old line through the wall gets no gate and no paint. `gates[].main = { street, width,
+  pts, metres }` is the walker's centreline from the gate to the edge of the square; `gates[].road` = the world road the
+  gate serves (`wayKind` stays `'road'` for those). Road surface left under a wall or inside one leading nowhere is put
+  back to ground. A proctown-walled city keeps its wall at the planner's radius; towers keep off street ends.
+- **The square**: `town_square.data.stalls = [[x, z]…]` — up to four stalls on the first clear ground out from the paving,
+  a stall's width off every street and plot. `js/client/town-square.js` `squareFurniture()` is the one place that says
+  where the well and stalls are (town-view draws from it, the checks measure against it).
+
+**Measured** (`node tools/gate-streets.mjs [--towns] [--dir <other bake>] [--check]`, lib `tools/lib/gate-street-checks.mjs`):
+for each gate the route to the square — metres, metres with something standing within half the street's width, the
+narrowest clear width, clear metres straight on from the gate, metres nav.bin refuses. Before = the best route the old
+street plan offered, held to the same width. 66 road gates before: 0 with a main street, 62 blocked, 1,435 m blocked in
+all. 67 after: 67 with a main street, 0 blocked, narrowest 4.2 m.
+
+| town | kind | road gates | blocked m (before → after) | narrowest clear m (before → after) | least clear road straight ahead m (before → after) |
+|---|---|---|---|---|---|
+| hollin_toll | town | 1 → 1 | 23.6 → 0.0 | 0.0 → 7.8 | 58 → 57.5 |
+| scree_end | hamlet | 1 → 1 | 19.7 → 0.0 | 1.1 → 4.9 | 60 → 36.5 |
+| wolditford | hamlet | 1 → 1 | 10.5 → 0.0 | 3.4 → 5.0 | 13.5 → 40.5 |
+| copperdell | city | 1 → 1 | 27.5 → 0.0 | 0.0 → 8.8 | 60 → 60 |
+| pickaxe_row | village | 1 → 1 | 11.0 → 0.0 | 1.7 → 6.5 | 51.5 → 50 |
+| ashhaven | hamlet | 1 → 1 | 25.3 → 0.0 | 1.1 → 4.9 | 15.5 → 33 |
+| hermit_s_rest | city | 2 → 2 | 43.1 → 0.0 | 3.2 → 7.4 | 24 → 60 |
+| charcoal_burners | village | 2 → 2 | 66.7 → 0.0 | 0.5 → 7.1 | 17.5 → 52 |
+| wildhaven | hamlet | 2 → 2 | 24.3 → 0.0 | 0.0 → 5.1 | 22 → 33 |
+| last_lantern | town | 1 → 1 | 22.2 → 0.0 | 3.5 → 6.6 | 60 → 58.5 |
+| thornwick | hamlet | 0 (footpath gates only) | – | – | – |
+| ashcombe | city | 2 → 2 | 50.4 → 0.0 | 0.0 → 8.2 | 60 → 60 |
+| kettle_cross | hamlet | 0 (footpath gates only) | – | – | – |
+| torborhold | town | 3 → 3 | 76.6 → 0.0 | 2.2 → 6.2 | 15.5 → 39 |
+| mawehaven | hamlet | 1 → 1 | 5.8 → 0.0 | 3.0 → 5.0 | 6 → 32.5 |
+| wamonhold | hamlet | 1 → 1 | 10.6 → 0.0 | 0.0 → 7.5 | 37 → 36 |
+| orrinsford | town | 2 → 2 | 53.0 → 0.0 | 0.0 → 6.7 | 28 → 36.5 |
+| pilgrim_s_halt | hamlet | 1 → 1 | 14.2 → 0.0 | 1.8 → 5.6 | 40.5 → 41.5 |
+| coldwater | town | 1 → 1 | 9.0 → 0.0 | 0.0 → 6.4 | 60 → 60 |
+| netherby | hamlet | 1 → 1 | 7.4 → 0.0 | 0.0 → 7.6 | 39.5 → 35.5 |
+| brackwater | town | 1 → 1 | 16.5 → 0.0 | 0.0 → 7.3 | 19.5 → 60 |
+| eelwick | hamlet | 0 (footpath gates only) | – | – | – |
+| halsbridge | city | 1 → 1 | 57.7 → 0.0 | 2.7 → 8.4 | 29 → 60 |
+| mill_end | town | 1 → 1 | 39.9 → 0.0 | 1.7 → 6.5 | 16.5 → 37 |
+| lower_mossgate | hamlet | 2 → 2 | 14.7 → 0.0 | 0.0 → 5.7 | 10 → 21.5 |
+| mirestead | hamlet | 1 → 1 | 0.0 → 0.0 | 5.1 → 5.7 | 33 → 39 |
+| millbrook | city | 1 → 1 | 21.0 → 0.0 | 0.0 → 7.9 | 60 → 60 |
+| three_wheels | town | 1 → 1 | 35.3 → 0.0 | 2.6 → 6.8 | 16 → 60 |
+| stormrow | village | 1 → 1 | 35.9 → 0.0 | 0.0 → 6.1 | 46 → 37.5 |
+| ravencross | hamlet | 3 → 3 | 55.7 → 0.0 | 0.0 → 6.6 | 11 → 38 |
+| wildmere | hamlet | 2 → 2 | 14.4 → 0.0 | 0.0 → 5.1 | 17 → 46 |
+| gorsehold | town | 1 → 1 | 66.6 → 0.0 | 2.5 → 4.2 | 14.5 → 60 |
+| burnt_barns | hamlet | 2 → 2 | 47.3 → 0.0 | 2.3 → 4.9 | 12 → 32 |
+| saltmouth | town | 1 → 1 | 31.9 → 0.0 | 3.2 → 7.6 | 15.5 → 60 |
+| gull_steps | hamlet | 1 → 1 | 19.0 → 0.0 | 0.0 → 4.8 | 7 → 26 |
+| gullwick | town | 3 → 3 | 124.4 → 0.0 | 2.5 → 6.2 | 33 → 41.5 |
+| ferry_hythe | village | 1 → 1 | 12.4 → 0.0 | 3.4 → 5.8 | 35 → 43.5 |
+| wyrmrow | village | 2 → 2 | 34.5 → 0.0 | 2.8 → 5.9 | 10 → 39.5 |
+| mirekeep | hamlet | 1 → 1 | 0.0 → 0.0 | 6.0 → 5.8 | 10.5 → 52 |
+| redcliff | town | 3 → 4 | 99.7 → 0.0 | 0.0 → 6.3 | 11.5 → 35 |
+| cinder_farm | village | 3 → 3 | 86.6 → 0.0 | 1.0 → 5.5 | 24.5 → 52 |
+| ravenhaven | hamlet | 2 → 2 | 39.5 → 0.0 | 0.0 → 5.0 | 8.5 → 41 |
+| minfenrow | hamlet | 2 → 2 | 17.1 → 0.0 | 0.0 → 5.5 | 9.5 → 36 |
+| bipetwatch | hamlet | 2 → 2 | 29.0 → 0.0 | 0.3 → 5.7 | 20.5 → 36 |
+| lowmoor | town | 1 → 1 | 28.7 → 0.0 | 2.8 → 6.4 | 32 → 60 |
+| deepdene | hamlet | 2 → 2 | 6.5 → 0.0 | 0.0 → 6.1 | 18 → 24.5 |
+
+(A thing ON the square's paving — the well, a waystone beside it — is square furniture, not "in the street": the street
+ends where the paving starts.)
+
+**Tests**: `tests/B/gate-streets.test.js` (22: every zone's gates keep the promises; Torborhold; stalls off streets; the
+measure notices a house put in the road; the planner with and without the option), `proctown/tests/highstreets.test.js`
+(4), `tests/B/walls.test.js` updated where it read a gate's `way`/`out` as the road's. `tools/town-plan-png.mjs` draws
+any town's plan top-down from the baked files (no browser).

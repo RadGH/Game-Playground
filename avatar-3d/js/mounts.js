@@ -242,6 +242,10 @@ export async function createMount(input, { detail = 1 } = {}) {
   const _a = new THREE.Vector3(), _b = new THREE.Vector3();
   function layReins() {
     if (!reins.length) return;
+    // (W3) with nobody in the saddle the reins lie on the pommel instead of pointing at hands that are not there
+    for (const h of handPts) { h.position.y = rider ? 0.3 : 0.07; h.position.z = rider ? 0.3 : 0.2; }
+    for (const m of reins) m.visible = !!rider;      // a straight rein to an empty saddle cuts through the neck: riderless, the reins are simply off
+    if (!rider) return;
     group.updateMatrixWorld(true);
     for (let i = 0; i < reins.length; i++) {
       bits[i].getWorldPosition(_a); handPts[i].getWorldPosition(_b);

@@ -511,7 +511,11 @@ export function planTown(opts = {}) {
    * anyway, so it never fired on the towns that needed it most.
    */
   const floor = Math.max(8, (opts.size ?? 3) * 7);
-  if (best.plots.length >= floor) return best;
+  // (opt-in highStreets: a town is judged on the plots it cut BEFORE its high streets took some, so asking for main
+  // streets never tips a town into a different plan altogether — the same attempt wins as without them)
+  const count = p => (opts.highStreets ? p.plotsCut ?? p.plots.length : p.plots.length);
+  if (opts.highStreets?.attempt === 0) return best;
+  if (count(best) >= floor && opts.highStreets?.attempt == null) return best;
 
   /**
    * FINER FIRST, THEN WIDER.
@@ -538,10 +542,12 @@ export function planTown(opts = {}) {
     { k: 1, ring: 1.3 }, { k: 0.7, ring: 1.3 },
     { k: 1, ring: 1.65 }, { k: 0.7, ring: 1.65 },
   ];
+  // (opt-in: `highStreets.attempt` = 1..6 asks for exactly that attempt — a caller matching a plan it already has)
+  if (opts.highStreets?.attempt >= 1) { const { k, ring } = attempts[Math.min(attempts.length, opts.highStreets.attempt) - 1]; return planOnce({ ...opts, ringScale: ring, squeeze: squeezeBy(k) }); }
   for (const { k, ring } of attempts) {
     const tried = planOnce({ ...opts, ringScale: ring, squeeze: squeezeBy(k) });   // `opts` carries `links`
-    if (tried.plots.length > best.plots.length) best = tried;
-    if (best.plots.length >= floor) break;
+    if (count(tried) > count(best)) best = tried;
+    if (count(best) >= floor) break;
   }
   return best;
 }
@@ -683,11 +689,23 @@ function planOnce({
    * plots.
    */
   const added = out.streets.filter(st => st.spur || st.highway);
+  if (highStreets) {
+    // what the town would have had with only its spurs trimmed (see `planTown`'s floor)
+    const spurs = added.filter(st => !st.high);
+    out.plotsCut = out.plots.filter(p => !spurs.some(st => st.pts.some((q, i) => i + 1 < st.pts.length && obbOverlap(p, segmentBox(q, st.pts[i + 1], st.width), 0.02)))).length;
+  }
   if (added.length) {
     out.plots = out.plots.filter(p => !added.some(st => {
       for (let i = 0; i + 1 < st.pts.length; i++) {
         // a high street (opt-in) also keeps `clear` metres of kerb either side; every other street as before
-        if (obbOverlap(p, segmentBox(st.pts[i], st.pts[i + 1], st.width + 2 * (st.high ? st.clear || 0 : 0)), 0.02)) return true;
+        if (st.high) {
+          // …and its box is carried half a width past both ends, so the corners of a bent street are as clear as its straights
+          const a = st.pts[i], b = st.pts[i + 1], wide = st.width + 2 * (st.clear || 0), L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+          const ux = (b[0] - a[0]) / L * wide / 2, uz = (b[1] - a[1]) / L * wide / 2;
+          if (obbOverlap(p, segmentBox([a[0] - ux, a[1] - uz], [b[0] + ux, b[1] + uz], wide), 0.02)) return true;
+          continue;
+        }
+        if (obbOverlap(p, segmentBox(st.pts[i], st.pts[i + 1], st.width), 0.02)) return true;
       }
       return false;
     }));
@@ -1089,6 +1107,9 @@ export function linkRoads(out, links = [], high = null) {
  *   width  metres (default the main class's). A hamlet wants a narrower one than a city.
  *   clear  metres of kerb kept free of plots either side, on top of the width (default 0)
  *   avoid  [{ x, z, r }] things already standing (a waystone, a statue) the street must pass beside
+ *   keep   [{ cx, cz, w, d, angle }] plots that must survive (a caller's shops, already furnished): the street
+ *          goes round them — aimed off-centre at the square, or with ONE bend — and only if no such way exists
+ *          does it go through
  *   join   (default true) a link whose straight line would run close beside a high street already
  *          laid joins THAT one instead, at a slant, when the walk is at most `detour` (1.18) times
  *          the straight one and it saves at least `saves` (0.3) of the paving — two roads arriving
@@ -1101,54 +1122,146 @@ export function linkRoads(out, links = [], high = null) {
  * Nearest the square first, so a far road can join a near one. Without the option nothing here
  * runs and every existing town is byte-identical.
  */
-function highStreets(out, links, { width = STREET_CLASSES[0].width, clear = 0, join = true, detour = 1.18, saves = 0.3, avoid = [] } = {}) {
+function highStreets(out, links, { width = STREET_CLASSES[0].width, clear = 0, join = true, detour = 1.18, saves = 0.3, avoid = [], keep = [], narrowest = 3.2 } = {}) {
   if (!links.length) return 0;
   const sq = out.square || { cx: 0, cz: 0, r: 4 };
   const order = links.map((l, i) => ({ l, i, d: Math.hypot(l[0] - sq.cx, l[1] - sq.cz) })).sort((a, b) => a.d - b.d);
   const laid = [];
+  const segHits = (a, b, c, wide = width) => avoid.some(o => {
+    if (Math.hypot(o.x - sq.cx, o.z - sq.cz) <= sq.r * 1.2 + 0.5) return false;
+    const dx = b[0] - a[0], dz = b[1] - a[1], L2 = dx * dx + dz * dz || 1e-9;
+    const t = Math.max(0, Math.min(1, ((o.x - a[0]) * dx + (o.z - a[1]) * dz) / L2));
+    return Math.hypot(o.x - a[0] - dx * t, o.z - a[1] - dz * t) < o.r + wide / 2 + c;
+  }) || (keep.length > 0 && (() => {
+    // (the box is carried half a width past both ends, so a corner of the street is as clear as its straights)
+    const L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, ux = (b[0] - a[0]) / L * (wide / 2 + c), uz = (b[1] - a[1]) / L * (wide / 2 + c);
+    const box = segmentBox([a[0] - ux, a[1] - uz], [b[0] + ux, b[1] + uz], wide + 2 * c);
+    return keep.some(k => obbOverlap(k, box, 0.02));
+  })());
   for (const { l: [lx, lz], i, d } of order) {
     if (d <= sq.r + 0.5) continue;                    // the road arrives ON the square
     // straight to the square's edge
     const ex = sq.cx + (lx - sq.cx) / d * sq.r, ez = sq.cz + (lz - sq.cz) / d * sq.r;
     let pts = [[lx, lz], [ex, ez]], to = 'square', joins = null;
-    // `avoid`: things already standing that the street must pass beside ([{ x, z, r }], town coordinates). The street
-    // still ends on the square, but aims at a point a little round its edge — the smallest swing that clears them all.
-    // (something standing ON the square's own paving is square furniture, not in anybody's street)
+    // `avoid` (discs) and `keep` (plots as { cx, cz, w, d, angle }): things already standing that the street must pass
+    // beside. Straight to the square if that is clear; else aimed a little round the square's edge; else ONE bend —
+    // the shortest two-leg way in that clears them all and turns no more than 70 degrees. If nothing clears them the
+    // straight line stands (and the plots in it go, as without `keep`).
     const beside = avoid.filter(a => Math.hypot(a.x - sq.cx, a.z - sq.cz) > sq.r * 1.2 + 0.5);
-    if (beside.length) {
-      const hits = p => beside.some(a => {
-        const dx = p[1][0] - p[0][0], dz = p[1][1] - p[0][1], L2 = dx * dx + dz * dz || 1e-9;
-        const t = Math.max(0, Math.min(1, ((a.x - p[0][0]) * dx + (a.z - p[0][1]) * dz) / L2));
-        return Math.hypot(a.x - p[0][0] - dx * t, a.z - p[0][1] - dz * t) < a.r + width / 2 + clear;
-      });
+    let kerb = clear, through = false, wide = width;
+    if (beside.length || keep.length) {
+      const edge = a => [sq.cx + Math.cos(a) * sq.r, sq.cz + Math.sin(a) * sq.r];
       const base = Math.atan2(lz - sq.cz, lx - sq.cx);
-      for (const turn of [0, 0.35, -0.35, 0.7, -0.7, 1.05, -1.05, 1.4, -1.4]) {
-        const p = [[lx, lz], [sq.cx + Math.cos(base + turn) * sq.r, sq.cz + Math.sin(base + turn) * sq.r]];
-        if (!hits(p)) { pts = p; break; }
+      let found = null;
+      // with the kerb first; if the shops stand too close together for that, with the bare width; and if they ring
+      // the square so tightly that not even that fits, a narrower street (never under `narrowest`) rather than a shop gone
+      const tiers = [[clear, width], [0.1, width], [0.1, Math.max(narrowest, width * 0.8)], [0.1, Math.max(narrowest, width * 0.65)]].filter(([c, w], k, all) => !k || c !== all[k - 1][0] || w !== all[k - 1][1]);
+      for (const [c, w] of tiers) {
+        for (const turn of [0, 0.35, -0.35, 0.7, -0.7, 1.05, -1.05, 1.4, -1.4]) {
+          const e = edge(base + turn);
+          if (!segHits([lx, lz], e, c, w)) { found = [[lx, lz], e]; break; }
+        }
+        if (!found) found = threadWay([lx, lz], sq, (p, q) => segHits(p, q, c, w), Math.max(Math.hypot(lx, lz), Math.hypot(sq.cx, sq.cz) + sq.r) + 6);
+        if (found) { kerb = c; wide = w; break; }
       }
+      if (found) pts = found; else through = true;
     }
     if (join) {
       // the best place to join a street already laid: least new paving, within the detour allowed
       const direct = d - sq.r;
       let best = null;
       for (const h of laid) {
-        if (h.to !== 'square') continue;              // join a trunk, not a branch
+        if (h.to !== 'square' || h.pts.length !== 2) continue;   // join a straight trunk, not a branch or a bent street
         const [a, b] = h.pts, len = Math.hypot(b[0] - a[0], b[1] - a[1]);
         for (let s = 0; s <= len - 4; s += 1) {       // never right at the square: that is just a second avenue
           const tx = a[0] + (b[0] - a[0]) * s / len, tz = a[1] + (b[1] - a[1]) * s / len;
           const fresh = Math.hypot(tx - lx, tz - lz);
           if (fresh < 3 || fresh + (len - s) > direct * detour || fresh > direct * (1 - saves)) continue;
+          if (segHits([lx, lz], [tx, tz], clear)) continue;
           if (!best || fresh < best.fresh) best = { fresh, tx, tz, h };
         }
       }
       if (best) { pts = [[lx, lz], [best.tx, best.tz]]; to = 'street'; joins = best.h; }
     }
-    const st = { pts, cls: 'main', width, depth: 0, highway: true, high: true, clear, link: i, to };
+    const st = { pts, cls: 'main', width: wide, depth: 0, highway: true, high: true, clear: kerb, link: i, to };
     if (joins) st.joins = joins;
+    if (through && !joins) st.through = true;
     laid.push(st);
+  }
+  // a street that found no way to the square round the plots it must keep joins a street that did, wherever on it
+  // the walk is shortest (and the turn onto it is not a hairpin) — better a fork in the high street than a shop gone
+  for (const st of laid) {
+    if (!st.through) continue;
+    const [lx, lz] = st.pts[0];
+    let best = null;
+    for (const h of laid) {
+      if (h === st || h.through || h.to !== 'square') continue;
+      let rest = 0; for (let k = 0; k + 1 < h.pts.length; k++) rest += Math.hypot(h.pts[k + 1][0] - h.pts[k][0], h.pts[k + 1][1] - h.pts[k][1]);
+      for (let k = 0; k + 1 < h.pts.length; k++) {
+        const a = h.pts[k], b = h.pts[k + 1], len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        for (let q = 0; q <= len; q += 1) {
+          const tx = a[0] + (b[0] - a[0]) * q / len, tz = a[1] + (b[1] - a[1]) * q / len, fresh = Math.hypot(tx - lx, tz - lz);
+          const cos = ((tx - lx) * (b[0] - a[0]) + (tz - lz) * (b[1] - a[1])) / ((fresh || 1) * len);
+          if (fresh < 3 || rest - q < 3 || cos < Math.cos(80 * Math.PI / 180)) continue;
+          const cost = fresh + (rest - q);
+          if (best && cost >= best.cost) continue;
+          const c = [st.clear, 0.1].find(c => !segHits([lx, lz], [tx, tz], c));
+          if (c === undefined) continue;
+          best = { cost, tx, tz, h, c };
+        }
+        rest -= len;
+      }
+    }
+    if (best) { st.pts = [[lx, lz], [best.tx, best.tz]]; st.to = 'street'; st.joins = best.h; st.clear = best.c; delete st.through; }
   }
   out.streets.push(...laid);
   return laid.length;
+}
+
+/**
+ * A way from `from` to the edge of the square that `hits(a, b)` never objects to, with as few bends as it can manage:
+ * a search over a 1.5 m lattice (staying within `reach` of the town's middle), then every corner that can be cut is cut.
+ * Null if there is no way at all. Used only by the opt-in high streets, when the straight line would go through a
+ * plot the caller asked to keep.
+ */
+function threadWay(from, sq, hits, reach) {
+  const STEP = 1.5, n = Math.ceil(reach / STEP) * 2 + 1, half = (n - 1) / 2;
+  const at = (i, j) => [(i - half) * STEP, (j - half) * STEP];
+  const cell = (x, z) => [Math.round(x / STEP + half), Math.round(z / STEP + half)];
+  const ok = (i, j) => i >= 0 && j >= 0 && i < n && j < n && Math.hypot(...at(i, j)) <= reach;
+  const [si, sj] = cell(from[0], from[1]);
+  const goal = (i, j) => { const [x, z] = at(i, j); return Math.hypot(x - sq.cx, z - sq.cz) <= sq.r + STEP; };
+  const dist = new Float64Array(n * n).fill(Infinity), prev = new Int32Array(n * n).fill(-1), open = [[0, si, sj]];
+  dist[sj * n + si] = 0;
+  let end = -1;
+  while (open.length) {
+    let m = 0; for (let k = 1; k < open.length; k++) if (open[k][0] < open[m][0]) m = k;
+    const [, i, j] = open.splice(m, 1)[0], o = j * n + i;
+    if (goal(i, j)) { end = o; break; }
+    for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+      if (!di && !dj) continue;
+      const a = i + di, b = j + dj; if (!ok(a, b)) continue;
+      const w = dist[o] + Math.hypot(di, dj) * STEP, q = b * n + a;
+      if (w >= dist[q] || hits(at(i, j), at(a, b))) continue;
+      dist[q] = w; prev[q] = o;
+      const [x, z] = at(a, b);
+      open.push([w + Math.max(0, Math.hypot(x - sq.cx, z - sq.cz) - sq.r), a, b]);
+    }
+  }
+  if (end < 0) return null;
+  const path = []; for (let o = end; o >= 0; o = prev[o]) path.unshift(at(o % n, (o / n) | 0));
+  path[0] = from;
+  const last = path[path.length - 1], a = Math.atan2(last[1] - sq.cz, last[0] - sq.cx);
+  const e = [sq.cx + Math.cos(a) * sq.r, sq.cz + Math.sin(a) * sq.r];
+  if (!hits(last, e)) path.push(e);
+  // cut every corner that can be cut
+  const out = [path[0]];
+  for (let k = 0; k < path.length - 1;) {
+    let far = k + 1;
+    for (let q = path.length - 1; q > k + 1; q--) if (!hits(path[k], path[q])) { far = q; break; }
+    out.push(path[far]); k = far;
+  }
+  return out;
 }
 
 /** How long a street polyline is, end to end. */

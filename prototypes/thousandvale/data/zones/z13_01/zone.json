@@ -240,16 +240,22 @@
         "radius": 90,
         "movedFrom": null,
         "culture": "halfling",
-        "plots": 22,
-        "streets": 73,
+        "plots": 20,
+        "streets": 54,
         "links": 1,
         "overlaps": 0,
         "highStreets": 1,
         "w6": {
           "plotsBefore": 21,
-          "plots": 22,
-          "kept": 0,
-          "renumbered": true
+          "plots": 20,
+          "kept": 20,
+          "removed": [
+            {
+              "plot": 9,
+              "want": "house",
+              "office": false
+            }
+          ]
         }
       },
       {
@@ -302,13 +308,13 @@
       "x": 1136,
       "z": 878
     },
-    "placements": 216,
+    "placements": 195,
     "vignettesAvoided": 654
   },
   "files": {
-    "terrain.bin": 479048,
-    "nav.bin": 13875,
+    "terrain.bin": 479030,
+    "nav.bin": 13866,
     "scatter.bin": 95164,
-    "placements.json": 140007
+    "placements.json": 132918
   }
 }

@@ -204,7 +204,8 @@ soft('phone 393 x 852: nothing drags (windows are sheets), the barber window has
     if (document.documentElement.scrollWidth > innerWidth) out.push('the page scrolls sideways'); return out; });
   expect(wide, wide.join('; ')).toEqual([]);
   await shot('x4-barber');
-  await page.evaluate(() => { const b = document.querySelector('#panel-appearance .ap-body'); b.scrollTop = b.scrollHeight; });
+  await page.evaluate(() => { for (const q of ['.ap-body', '.tvp-body']) { const b = document.querySelector('#panel-appearance ' + q); b.scrollTop = b.scrollHeight; } document.querySelector('#panel-appearance [data-act="save"]').scrollIntoView({ block: 'end' }); });
+  { const r = await rect(page, '#panel-appearance [data-act="save"]'); expect(r.x, 'Save is on screen').toBeGreaterThanOrEqual(0); expect(r.r).toBeLessThanOrEqual(393); expect(r.b).toBeLessThanOrEqual(852); }
   await page.waitForTimeout(200);
   await shot('x4-barber-foot');
   await page.evaluate(() => document.querySelector('#panel-appearance .tvp-x')?.click());

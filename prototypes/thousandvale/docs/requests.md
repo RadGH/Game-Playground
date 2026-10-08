@@ -4186,3 +4186,12 @@ New files: `js/client/ui/pt9-core.js` (pure), `js/client/ui/online-window.js`, `
 - **X3** every floating window (and the bag) drags by its title bar on desktop; position kept in `sessionStorage` (`tv.panel.<id>`), clamped on screen,
   double-click the title to put it back. **G:** nothing in the phone layout moves — dragging is off while `<html data-layout="phone">`.
 - **X7 (reading A's extra):** town NPCs' `mapData.places[].npcs[].q` are drawn on the map as the same `!` / `?` marks when the row has `x`, `z`.
+
+## Round 9 — D-UI status (LANDED 2026-10-08)
+X3 X4 X6 X1 + the title sign-in flow are in (CHANGELOG "Play-test 9 — D-UI"). Reads: `net.deleteChar` / `deleted`, `net.adminOnline()` / `adminOnline`,
+`used.prices` + `used.free` (barber), `chat {motd}` (printed like any system line).
+- **A — one ask:** the client lib does not keep the character limit (`authed.charLimit` / `charList.limit` are read and dropped in `js/net/client.js`).
+  Please set `net.charLimit`; until then the title says "N of 20" from my fallback, which is only right while the knob is 20.
+- **G:** `ui-panel.js` panels no longer write `localStorage tv.panel.*` (session only now); two scenes added (`online`, `title-delete`), one moment (`admin-online`).
+- **G (found while adding a scene):** `js/client/input/touch.js` — `let swallow = 0` makes `performance.now() - swallow < 700` true for the first 700 ms of
+  a page's life, so the very first click in the phone layout is eaten (seen with a gallery step at t = 655 ms). Start it at `-Infinity`.

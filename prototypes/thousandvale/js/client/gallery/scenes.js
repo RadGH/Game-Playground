@@ -156,7 +156,7 @@ export const SCENES = [
     steps: [['admin'], ['call', 'tvui8.online'], ['play', 'admin-online'], ['wait', 200]],
     notes: { all: 'X1: what an admin account sees — everyone in the world now with level, class and where they are; Refresh asks again, a column heading sorts.', phone: 'A sheet; the class column gives way to the name, level and place.', pad: 'The ring reaches the column headings and Refresh.' } },
   { id: 'title-delete', expect: '.char-delete input', group: 'Start', title: 'Title — delete a character', stage: 'title', step: 'front', modules: ['js/client/account.js', U + 'pt9-core.js'],
-    steps: [['click', '#char-chips .char-del'], ['wait', 150]],
+    steps: [['wait', 900], ['click', '#char-chips .char-del'], ['wait', 150]],      // (the wait: input/touch.js swallows any click in a page's first 700 ms — its `swallow` clock starts at 0)
     notes: { all: 'X6: every character has a Delete button; the confirm asks you to type its name and says what goes with it. The list scrolls, and the line under it says how many of the account\'s characters are used.', phone: 'The confirm is a centred card; its buttons are thumb-sized.' } },
   // ---- play-test 8 (stream D-UI) ----
   { id: 'my-reports', expect: '#panel-feedback:not([hidden]) .my-row', group: 'Windows', title: 'Feedback — My reports', modules: [U + 'feedback.js', U + 'pt8-core.js'],

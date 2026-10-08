@@ -1105,3 +1105,24 @@ New files: `js/client/ui/pt8.js` (hub: `createUi8`, `window.tvui8`), `pt8-core.j
 - **X1**: `admin {op:'online'}` -> `adminOnline` (name, level, class, zone / town, room; admin accounts only); message of the day on every sign-in with players online and accounts in the past 24 hours (`data/ops/motd.json`, `TV_MOTD`); presence carries `where / zoneName / town / roomKind`.
 - **X4**: `economy.json barber.mult` (0 = free).
 - **X7**: raid waves spawn 35-55 m outside a gate E named and walk in (`js/sim/events.js`, `raid.gates` in world metres); `data.guard.level` = the town's raid level (else the zone band floor) + `tier`; carts.json `roaming.runs[]` are routes of their own; `mapData.places[].marks`; reports carry `server.env` / `server.server`, shown by the tools and the admin page.
+
+## Play-test 9 — D-UI (interface), 2026-10-08 — reports S#49 S#51 D#14 D#16 (X3 X4 X6 X1) + the m3-social title flow
+New: `js/client/ui/pt9-core.js` (pure), `js/client/ui/online-window.js`, `css/pt9.css`; gallery scenes `online`, `title-delete`.
+- **X3 windows drag** (S#49): one helper, `ui-panel.js makeDraggable`, for every floating window and the bag — drag by the title bar, the whole
+  window stays on screen (also after a browser resize), the place is kept for the session (`sessionStorage tv.panel.<id>`; it was `localStorage`
+  for the panels and nothing for the bag), a double-click on the title bar puts it back. Off in the phone layout (windows are sheets).
+- **X4 barber** (D#16): the button is "Save (Free)" when the cost is 0 and "Save (N gold)" otherwise (`pt9-core.js barberSaveText`); the editor
+  takes the SERVER's quote (`used.prices`, all 0 while the barber is free) instead of the client's price list; the window cannot scroll sideways.
+- **X6 characters** (D#14): the title's list is one row a character with a Delete button; the confirm asks you to type the name and says what goes
+  with the character; `net.deleteChar` -> `deleted`, refusals printed; the list scrolls; "N of 20 characters" and a shut "New character" at the limit.
+- **X1** (S#51): admin-only "Online players" window (`/online`, or beside Reports in the Feedback window): name, level, place, class; Refresh and
+  click-to-sort. Chat lines wrap whole (the message of the day is one long system line).
+- **Title flow:** signing in from the title's Log in form now lands on Your characters (the list sat on a hidden card for two rounds —
+  `tests/D/m3-social.spec.js` step 7). **X7 (reading A):** `mapData.places[].npcs[].q` marks on the map; a report's `env` on the admin card.
+- Tests: `tests/D/pt9.test.js` (6), `tests/D/pt9.spec.js` (desktop + 393 x 852; a real deletion against the test server).
+
+## Play-test 9 — D-world — 2026-10-08
+- **X2 (S#50) click-to-move marker**: `js/client/move-marker.js` — a gold ring with four chevrons and a closing pulse on the ground where you clicked or tapped, tilted to the slope; it follows `controls.moveGoal`, so arriving, steering by keys or stick, auto-run, attacking, Esc and dying all end it, and a new click moves it. Pooled, one material type, warmed at boot.
+- Raid gate ping: `eventTrack` / `zoneEvent` / `realm` with `gate {id, x, z}` puts a red ring and a bobbing arrow at that gate for 10 s (the same module's `ping`).
+- The shader links freeze.spec counted in its walk were two programs first drawn late: the selection ring under a target (unlit, transparent, no fog) and the night's point sprites (stars / settlement lights). Twins of both are in the warm-up pen (`warmup.js`); freeze.spec now logs the names of any program linked. Links: 0 / 0.
+- Tests: `tests/D/playtest9.test.js` (3), `tests/D/playtest9.spec.js` (desktop + 393x852 touch).

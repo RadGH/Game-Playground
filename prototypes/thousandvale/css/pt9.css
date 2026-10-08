@@ -31,11 +31,14 @@ html[data-layout="phone"] .tv-drag { cursor: default; touch-action: auto; }
 .char-said { margin: 2px 0 0; color: var(--good, #7fe08a); }
 .char-said:empty, .char-limit:empty { display: none; }
 #new-char:disabled { opacity: 0.5; cursor: not-allowed; }
-.tv-confirm.char-delete { position: fixed; left: 50%; top: 22vh; transform: translateX(-50%); z-index: 90; width: min(400px, calc(100vw - 24px)); pointer-events: auto; }
+.tv-confirm.char-delete { position: fixed; left: 50% !important; right: auto !important; bottom: auto !important; top: max(8px, min(22vh, calc(100vh - 330px))) !important; transform: translateX(-50%) !important; z-index: 1000; width: min(400px, calc(100vw - 24px)); max-height: calc(100vh - 16px); overflow-y: auto; pointer-events: auto; display: block; }
 .char-delete strong { display: block; font-family: var(--serif); color: var(--gold-hi); font-size: 17px; margin-bottom: 4px; }
 .char-delete label { display: block; margin: 8px 0 2px; }
 .char-delete .label { display: block; font-size: 12px; color: var(--ink-dim); margin-bottom: 3px; }
-.char-delete input { width: 100%; }
+.char-delete input { width: 100%; padding: 8px 10px; border-radius: 7px; border: 1px solid var(--edge-strong, #6a5230); background: rgba(0, 0, 0, 0.45); color: var(--ink, #efe6d0); font: inherit; }
+.char-delete input::placeholder { color: var(--ink-faint, #8a7f6a); opacity: 0.6; }
+.char-delete input:focus { outline: 2px solid var(--gold, #d9b26a); outline-offset: 1px; }
+.char-delete p { margin: 4px 0; }
 .char-delete .note:empty { display: none; }
 .char-delete .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
 .char-delete button.danger:disabled { opacity: 0.45; cursor: not-allowed; }
@@ -58,3 +61,4 @@ html[data-layout="phone"] .tv-drag { cursor: default; touch-action: auto; }
 html[data-layout="phone"] .char-row .char-del, html[data-layout="phone"] .on-sort, html[data-layout="phone"] .char-delete button { min-height: var(--tap, 44px); min-width: var(--tap, 44px); }
 html[data-layout="phone"] .on-table td { padding: 10px 6px; }
 @media (max-width: 520px) { .on-cls, .on-table th:nth-child(4) { display: none; } .on-acct { display: block; margin-left: 0; } }
+html[data-layout="phone"] .char-delete input { min-height: var(--tap, 44px); }

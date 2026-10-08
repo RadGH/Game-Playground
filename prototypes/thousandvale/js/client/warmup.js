@@ -56,6 +56,17 @@ export async function warmBodies({ scene, renderer, camera, monsterLooks = {}, m
   }
   // samples of the play-test 2-4 effect materials (swing crescents, loot sparkles/beams, rare rings): first drawn mid-fight they compiled on the spot
   for (const o of extras) if (o) pen.add(o);
+  // Round 9: the two programs freeze.spec caught linking mid-walk (logged by name: one `basic`, one `points`). Neither had
+  // a sample here because each is first DRAWN late: the selection ring under a target (actors.js: an unlit transparent
+  // ring with no fog) the first time you pick something, and the night's point sprites (scene.js stars, horizon.js
+  // settlement lights: same parameters) the first dusk. Twins of each, and of the fogged ring (swim ripples, rank marks).
+  {
+    const ring = new THREE.RingGeometry(0.85, 1.0, 12); ring.rotateX(-Math.PI / 2);
+    pen.add(new THREE.Mesh(ring, new THREE.MeshBasicMaterial({ color: '#ff4a3a', transparent: true, opacity: 0.9, depthWrite: false, fog: false })));
+    pen.add(new THREE.Mesh(ring, new THREE.MeshBasicMaterial({ color: '#e8f4ff', transparent: true, opacity: 0.45, depthWrite: false })));
+    const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 0.3, 0.2, 0, -0.3, 0.1, 0], 3));
+    pen.add(new THREE.Points(pg, new THREE.PointsMaterial({ color: '#dfe8ff', size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0.5, depthWrite: false, fog: false })));
+  }
   // lay them out so frustum tests never skip one, compile everything with the scene's lights, then hide the pen
   pen.children.forEach((c, i) => c.position.set((i % 8) * 3, 0, Math.floor(i / 8) * 3));
   const before = renderer.info.programs?.length || 0;

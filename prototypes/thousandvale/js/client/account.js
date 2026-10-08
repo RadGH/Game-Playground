@@ -145,7 +145,7 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     };
     yes.onclick = go;
     box.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') box.remove(); if (e.key === 'Enter' && !yes.disabled) go(); });
-    ($('title') || document.body).appendChild(box);
+    document.body.appendChild(box);
     input.focus();
   }
 

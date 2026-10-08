@@ -53,7 +53,7 @@ export function createAppearanceEditor({ parent = null, races = [], raceNames = 
     if (!E.bill) return '';
     const P = E.bill.prices || {}, k = 1 + (E.bill.perLevel ?? 0.05) * ((E.bill.level || 1) - 1);
     const p = n => Math.round((P[n] ?? 0) * k);
-    if (barberFree(E.bill) && !E.bill.free) return 'The barber charges nothing: change whatever you like.';
+    if (barberFree({ prices: P })) return 'The barber charges nothing: change whatever you like.';      // (a list of zeroes is not a price list)
     return `Prices: hair ${p('hair')} · colour ${p('hairColour')} · beard ${p('beard')} · eyes ${p('eyes')} · face ${p('face')} · skin ${p('skin')} · build ${p('body')} · everything ${p('everything')} gold${E.bill.free ? ' — your first change is free' : ''}.`;
   }
   function changed() { E.look = { ...E.look }; onChange?.(lookWith(E.look, E.custom)); paintCost(); }

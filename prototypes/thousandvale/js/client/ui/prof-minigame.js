@@ -45,7 +45,7 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
   const PAD = padLayers().ctx?.prof || { A: 'profWork', X: 'profLeft', B: 'profRight' };
   const now = () => performance.now() - S.t0;
   /** The moment an input was MADE: a real key or finger event carries the time the device reported it, which on a busy frame is well before its handler runs. */
-  const at = e => { const n = performance.now(), ts = e && e.isTrusted && e.timeStamp > 0 && e.timeStamp <= n && n - e.timeStamp < 500 ? e.timeStamp : n; return ts - S.t0; };
+  const at = e => { const n = performance.now(), ts = e && e.isTrusted && e.timeStamp > 0 && e.timeStamp <= n && n - e.timeStamp < 3000 ? e.timeStamp : n; return ts - S.t0; };
   const say = (state, extra = {}) => {
     root.dataset.state = state;
     if (state === 'play') document.documentElement.dataset.prof = S.run.type; else delete document.documentElement.dataset.prof;

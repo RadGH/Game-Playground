@@ -94,6 +94,7 @@ test('no main-thread stall over 100 ms while the world streams across a zone bor
   const B = await page.evaluate(() => ({ perf: tv.perf(), state: tv.state().stats, world: tv.world(), monsters: tv.state().ents.filter(e => e.kind === 'monster').length }));
   await page.screenshot({ path: join(SHOTS, 'p1-wilds-walk.png') });
   console.log('[B walk]', JSON.stringify({ walked: Math.round(walked), stalls: B.perf.stalls, links: B.perf.links, longFrames: B.perf.longFrames, monsters: B.monsters, lod: B.state.lod, top: B.perf.top.slice(0, 8) }));
+  if (B.perf.links || A.perf.links) console.log('[links]', JSON.stringify({ A: A.perf.newProgramNames, B: B.perf.newProgramNames, keysB: (B.perf.newProgramKeys || []).map(k => String(k).slice(0, 260)) }));
   writeFileSync(join(HERE, 'shots', 'p1-freeze.json'), JSON.stringify({ A: { stalls: A.perf.stalls, links: A.perf.links, top: A.perf.top }, B: { walked, stalls: B.perf.stalls, links: B.perf.links, top: B.perf.top, monsters: B.monsters } }, null, 1));
 
   expect(errors, errors.join('\n')).toEqual([]);

@@ -59,6 +59,7 @@ import { LIGHTS } from './lightpool.js';
 import { createTransition, isJump } from './transition.js';
 import { createSpells } from './spells.js';
 import { createProjectiles } from './projectiles.js';   // play-test 8 (W2/W14)
+import { createMoveMarker } from './move-marker.js';       // play-test 9 (X2): the marker where click-to-move is heading
 import { createCarts } from './carts-view.js';             // play-test 8 (W5): ox carts — parked, on the road, and the ride
 import { createQuestMarks } from './quest-marks.js';     // play-test 8 (W12): ! and ? over quest givers
 import { createStatusSync } from './status-sync.js';
@@ -581,6 +582,9 @@ function wireNet(net) {
     });
   });
   net.on('cartR', r => { if (r && r.ok === false) endCartRide(); });
+  // round 9 (A): a raid wave walks in through a gate — `gate {id, x, z}` on the event's view. A brief red ring and arrow at that gate.
+  const gatePing = m => { const g = m?.gate || m?.ev?.gate; if (!g || !Number.isFinite(g.x) || D.view) return; const k = `${g.id ?? ''}:${Math.round(g.x)}:${Math.round(g.z)}`; if (S.gatePinged === k && performance.now() - (S.gatePingAt || 0) < 20000) return; S.gatePinged = k; S.gatePingAt = performance.now(); moveMark.ping(g.x, g.z, { ms: 10000 }); };
+  net.on('eventTrack', gatePing); net.on('zoneEvent', gatePing); net.on('realm', gatePing);
   net.on('questMarks', m => questMarks.onMessage(m));        // W12 (protocol v8: whole map with `full`, then patches)
   net.on('fishPools', m => { try { angling.setKnown(m.open || m.list || []); } catch {} });
   net.on('castR', r => {
@@ -1042,6 +1046,9 @@ function demoUse(o) {
   else hud.toast(o.name || 'Nothing happens.', 'info');
 }
 
+// X2: a gold ring on the ground where click / tap-to-move is taking you (it follows controls.moveGoal, so every way a goal ends ends it)
+const moveMark = createMoveMarker(scene, { groundY: (x, z) => groundY(x, z), goal: () => (S.phase === 'world' && !S.self.dead ? controls.moveGoal : null) });
+
 // --- the perf crowd (tv.crowd) ------------------------------------------------------------------------
 const CROWD = { list: [] };
 function crowdTick(dt) {
@@ -1162,7 +1169,7 @@ function frame(now) {
   spells.update(dt);
   statusSync.update();
   weaponFx.update(dt); formFx.update(dt); angling.update(dt); profView.update(dt); shots.update(dt);
-  lootMarks.update(dt); questMarks.update(dt); carts.update(dt, elapsed);
+  lootMarks.update(dt); questMarks.update(dt); carts.update(dt, elapsed); moveMark.update(dt);
   // W5: an arrival inside the SAME room brings no `joined` — step down once the ride's own time is up (on the ride's clock, not the wall's)
   if (S.cartRide && (!carts.riding || carts.rideOver())) { endCartRide(); if (travel.covered) travel.reveal(); }
   hud.tick(dt);
@@ -1203,7 +1210,7 @@ Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
   S.warm = { done: false };
   import('./scatter-view.js').then(m => m.prewarmScatter({ quality })).catch(() => {})
     .then(() => Promise.all([import('./warmup.js'), loadMonsterLooks()]))
-    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [shots.sample(), questMarks.sample(), weaponFx.sample(), lootMarks.sample(), formFx.sample(), angling.sample(), profView.sample(), cropSample()], extraTypes: ['wolf', 'boar', 'crocodile', 'mushroom', 'bear', 'cow'] }))
+    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [shots.sample(), moveMark.sample(), questMarks.sample(), weaponFx.sample(), lootMarks.sample(), formFx.sample(), angling.sample(), profView.sample(), cropSample()], extraTypes: ['wolf', 'boar', 'crocodile', 'mushroom', 'bear', 'cow'] }))
     .then(r => carts.prewarm().then(() => r, () => r))                     // W5: one ox cart built and compiled before anybody meets one
     .then(r => { S.warm = { done: true, ...r }; }, e => { S.warm = { done: true, error: e?.message }; });
 });
@@ -1408,4 +1415,4 @@ const tv = {
   },
 };
 window.tv = tv;
-window.thousandvale = { prof, profView, shots, questMarks, carts, input, formFx, reviveFx, angling, lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui, ui2, ui5, ui8 };
+window.thousandvale = { moveMark, prof, profView, shots, questMarks, carts, input, formFx, reviveFx, angling, lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui, ui2, ui5, ui8 };

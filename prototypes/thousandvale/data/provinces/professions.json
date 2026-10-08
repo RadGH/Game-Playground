@@ -381,6 +381,17 @@
    "tint": "#b8504a",
    "price": 1
   },
+  "sovereign_core": {
+   "id": "sovereign_core",
+   "name": "Sovereign Core",
+   "desc": "The hot heart of something that should not have been killed. Only world bosses and the hardest events leave one. A master temperer can promote a rare item to legendary with it.",
+   "tier": 5,
+   "prof": "tempering",
+   "icon": "core",
+   "tint": "#ffd24a",
+   "rarity": "legendary",
+   "price": 1
+  },
   "beast_fang": {
    "id": "beast_fang",
    "name": "Beast Fang",

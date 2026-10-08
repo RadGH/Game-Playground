@@ -1119,6 +1119,7 @@ export function createProvince(opts) {
       }
       // S24: the items wait on the boss's body as YOUR share (the same loot window, sparkling in its rarity); the bonus
       // experience and gold land now and are said out loud
+      { const core = professions.eventDrop(o, { worldBoss: run.ev.kind === 'worldboss', level: run.ev.level || 1, rng: () => room.host.random('event') }); if (core) rw.items = (rw.items || []).concat([core]); }      // X5 (P-core): a Sovereign Core
       const body = run.boss && !run.boss.removed && run.boss.room === room ? run.boss : null;
       let items = rw.items || [];
       if (body && items.length && corpses.holdFor(room, body, c, { items })) items = [];

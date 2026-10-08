@@ -1425,3 +1425,9 @@ and spent nodes in the existing `opened` table. Quest step kinds: `gather {prof?
 - `eventTrack` / `zoneEvent.ev` / `realm.ev` views gain `gate {id, x, z}` while a raid wave that came in by a gate is up.
 - `mapData.places[]` town rows gain `marks: [{name, role, x, z, q}]` (quest marks for your character).
 - Feedback rows: `server.env`, `server.server`; admin list rows `env`.
+
+### 25.6 Promote to legendary (round 9, X5)
+`temper_promote` on a RARE item needs a **Sovereign Core** (`material` `sovereign_core`): `craftQuote` carries `to: 'legendary'` and a `needs` row `{id:'sovereign_core', n:1, have, kept:true}`
+(`kept` = not spent when the gauge is missed); `craftDone` on success carries `to: 'legendary'`, `item` and `now` (the `legendary_effect` affix: `legendaryId`, `descriptor`); on a miss
+`kept: ['sovereign_core']`. The list row has `legendary: {material:{id, name}, skill}`. The core drops only from a world boss (25% per credited player) and a won event of level 8+ (5%):
+`data/rules/professions.json` `temper.legendary`.

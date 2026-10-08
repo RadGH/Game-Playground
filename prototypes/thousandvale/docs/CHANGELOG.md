@@ -1126,3 +1126,9 @@ New: `js/client/ui/pt9-core.js` (pure), `js/client/ui/online-window.js`, `css/pt
 - Raid gate ping: `eventTrack` / `zoneEvent` / `realm` with `gate {id, x, z}` puts a red ring and a bobbing arrow at that gate for 10 s (the same module's `ping`).
 - The shader links freeze.spec counted in its walk were two programs first drawn late: the selection ring under a target (unlit, transparent, no fog) and the night's point sprites (stars / settlement lights). Twins of both are in the warm-up pen (`warmup.js`); freeze.spec now logs the names of any program linked. Links: 0 / 0.
 - Tests: `tests/D/playtest9.test.js` (3), `tests/D/playtest9.spec.js` (desktop + 393x852 touch).
+
+## Round 9 — X5 Promote to legendary (stream P-core, 2026-10-08)
+- Tempering's Promote now takes a RARE item to LEGENDARY: Tempering 60, one **Sovereign Core**, 6 of the item's tier material, 2 gems and a quarter of its list price. The item keeps
+  everything and gains one legendary power that fits its slot. A missed gauge costs the other materials and the gold; the core and the item are kept.
+- A Sovereign Core drops only from a world boss (25% for each player with credit) and from a won event of level 8 or higher (5%). Nothing gathers, crafts or sells one.
+- A promoted legendary has the rare's three rolled properties plus the power; a dropped legendary rolls five or six — the drop stays the better item.

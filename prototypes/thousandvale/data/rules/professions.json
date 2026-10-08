@@ -77,11 +77,12 @@
   "stationHint": { "smithing": "the smith or the armourer", "tempering": "the smith, the armourer or a jeweller", "outfitting": "the tailor or the bowyer", "alchemy": "the apothecary", "cooking": "a campfire or an inn" },
   "toolPrice": 12,
   "temper": {
+    "legendary": { "_doc": "X5 (round 9): temper_promote takes a RARE to LEGENDARY. `material` drops only from a world boss (chance.worldBoss per credited player) and from a won event of level >= topEventLevel (chance.topEvent). Cost: 1 material (KEPT on a miss) + `mat` of the item's tier material + `gem` gems of its tier + goldShare of its list price; Tempering `skill`. The item keeps everything and gains one legendary power that fits its slot.", "material": "sovereign_core", "chance": { "worldBoss": 0.25, "topEvent": 0.05 }, "topEventLevel": 8, "skill": 60, "mat": 6, "gem": 2, "goldShare": 0.25 },
     "_doc": "tempering works on a gear item in your BAG. cost: `mat` = how many of the item's own tier material (bar for metal, leather, cloth, wood by what the item is), plus the listed extras; gold = share of the item's list price. Skill needed = the item tier's minSkill + `skill`. A miss spends the materials and gold fee; the item is untouched.",
     "qualities": ["low", "medium", "high", "elite", "exotic"],
     "ops": {
       "temper_quality": { "name": "Temper", "skill": 0, "mat": 2, "extra": [], "goldShare": 0.02, "maxQualityBySkill": [[1, "medium"], [25, "high"], [60, "elite"], [90, "exotic"]], "text": "Raises the item's quality one step. Its damage or armour and every rolled property grow with it." },
-      "temper_promote": { "name": "Promote", "skill": 10, "mat": 3, "extra": [["gem", 1]], "goldShare": 0.1, "to": { "normal": "magic", "magic": "rare" }, "text": "Raises the item's rarity one step (plain to uncommon, uncommon to rare) and adds one new property. Never above rare." },
+      "temper_promote": { "name": "Promote", "skill": 10, "mat": 3, "extra": [["gem", 1]], "goldShare": 0.1, "to": { "normal": "magic", "magic": "rare" }, "text": "Raises the item's rarity one step: plain to uncommon, uncommon to rare (one new property each), and a rare to legendary with a Sovereign Core (it gains a legendary power)." },
       "temper_reweave": { "name": "Reweave", "skill": 15, "mat": 2, "extra": [["gem", 1]], "goldShare": 0.06, "text": "Replaces the one property you choose with a different one, rolled for the item's level." },
       "temper_brand": { "name": "Brand", "skill": 20, "mat": 2, "extra": [["gem", 2], ["resin", 1]], "goldShare": 0.08, "value": [0.05, 0.1], "elements": ["fire", "ice", "lightning", "poison", "shadow", "holy", "arcane"], "text": "Turns a share of a weapon's damage into an element of your choice. One brand per weapon." }
     }

@@ -79,6 +79,7 @@ function buildContent(numbers, engine, shops) {
   nodeKinds.tin = { id: 'tin', prof: 'mining', tier: 1, name: 'Tin Boulder', gives: 'tin_ore', bonus: GEM[0][0], look: { model: 'boulder', size: 1.6, tint: '#c9ccd2', n: 5 } };
   mat('pine_resin', 'Pine Resin', 1, 'logging', 'resin', '#d9a441', 'resin', 'Sticky sap from a clean cut. Tempering and a few brews need it.');
   mat('game_meat', 'Game Meat', 1, 'skinning', 'meat', '#b8504a', 'meat', 'Fresh meat from a beast. Cook it at any fire.');
+  materials.sovereign_core = { id: 'sovereign_core', name: 'Sovereign Core', desc: 'The hot heart of something that should not have been killed. Only world bosses and the hardest events leave one. A master temperer can promote a rare item to legendary with it.', tier: 5, prof: 'tempering', icon: 'core', tint: '#ffd24a', rarity: 'legendary', price: 1 };      // X5 (round 9)
   mat('beast_fang', 'Beast Fang', 1, 'skinning', 'trophy', '#efe6d2', 'fang', 'A good fang, taken with a careful cut. It sells.');
 
   const classes = { ore: ORE.map(x => x[0]), metal: BAR.map(x => x[0]), gem: GEM.map(x => x[0]), wood: LOG.map(x => x[0]), herb: HERB.map(x => x[0]), mushroom: SHROOM.map(x => x[0]),

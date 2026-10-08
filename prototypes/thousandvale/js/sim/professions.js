@@ -342,7 +342,8 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     const known = knows(ch, 'tempering');
     return { id: op, prof: 'tempering', tier: 1, skill: 1 + (row.skill || 0), name: row.name, desc: row.text, kind: 'temper', can: known && stationOk && skill >= 1 + (row.skill || 0),
       ...(!known ? { why: 'You have not learned Tempering.', code: 'notLearned' } : !stationOk ? { why: `You need ${P.N.stationNames.tempering}: ${P.N.stationHint.tempering}.`, code: 'station' } : skill < 1 + (row.skill || 0) ? { why: `Needs Tempering ${1 + (row.skill || 0)}.`, code: 'skill' } : {}),
-      needs: [], gold: 0, makes: null, game: 'gauge', ...(row.elements ? { elements: row.elements } : {}) };
+      needs: [], gold: 0, makes: null, game: 'gauge', ...(row.elements ? { elements: row.elements } : {}),
+      ...(op === 'temper_promote' && P.temper.legendary ? { legendary: { material: { id: P.temper.legendary.material, name: (P.material(P.temper.legendary.material) || {}).name || 'Sovereign Core' }, skill: P.temper.legendary.skill } } : {}) };
   }
   function craftList(o, m = {}) {
     const ch = o.char;
@@ -378,7 +379,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     if (!chk.ok) return { ok: false, why: chk.why, text: chk.text, need: chk.need };
     const cost = temperKit.temperCost(P, engine, m.id, item, listPrice(o.room, item));
     const counts = P.countsOf(ch.bag);
-    const needs = cost.needs.map(nd => ({ id: nd.id, name: (P.material(nd.id) || {}).name || nd.id, n: nd.n, have: counts[nd.id] || 0 }));
+    const needs = cost.needs.map(nd => ({ id: nd.id, name: (P.material(nd.id) || {}).name || nd.id, n: nd.n, have: counts[nd.id] || 0, ...(nd.kept ? { kept: true } : {}) }));
     const out = { item, cost: { ...cost, needs }, chk, skill };
     if (skill < cost.skill) return { ...out, ok: false, why: 'skill', need: cost.skill, text: `This item needs Tempering ${cost.skill}. Yours is ${skill}.` };
     const short = needs.find(nd => nd.have < nd.n);
@@ -390,7 +391,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     if (!P) return reply(o, 'craftQuote', { ok: false, id: m.id, uid: m.uid, can: false, why: 'Nobody works a trade on this server yet.' });
     const st = stationNear(o, m.npc ?? null);
     const q = temperOrder(o, m, st);
-    reply(o, 'craftQuote', { ok: true, id: m.id, uid: m.uid, can: !!q.ok, ...(q.ok ? {} : { why: q.text, code: q.why }), needs: q.cost ? q.cost.needs : [], gold: q.cost ? q.cost.gold : 0, skill: q.cost ? q.cost.skill : undefined, text: q.chk && q.chk.ok ? q.chk.text : (q.text || '') });
+    reply(o, 'craftQuote', { ok: true, id: m.id, uid: m.uid, can: !!q.ok, ...(q.ok ? {} : { why: q.text, code: q.why }), needs: q.cost ? q.cost.needs : [], gold: q.cost ? q.cost.gold : 0, skill: q.cost ? q.cost.skill : undefined, ...(q.chk && q.chk.to ? { to: q.chk.to } : {}), text: q.chk && q.chk.ok ? q.chk.text : (q.text || '') });
   }
   function craftStart(o, m) {
     const ch = o.char, room = o.room;
@@ -456,12 +457,14 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
       const st = stationNear(o, w.station ? w.station.id : null);
       const q = temperOrder(o, { id: w.temper.op, uid: w.temper.uid, index: w.temper.index, element: w.temper.element }, st);
       if (!q.ok) { stop(o, 'fail', true, 'fail'); reply(o, 'craftDone', { ...base, ok: false, quality: 'fail', items: [], got: [], xp: 0, msg: q.text }); return again(); }
-      if (!takeMats(o, q.cost.needs)) { stop(o, 'fail', true, 'fail'); reply(o, 'craftDone', { ...base, ok: false, quality: 'fail', items: [], got: [], xp: 0, msg: 'The materials are no longer in your bag.' }); return again(); }
+      const miss0 = r.quality === 'fail' || r.marks[0] === 0;
+      const kept = miss0 ? q.cost.needs.filter(nd => nd.kept) : [];      // X5: a Sovereign Core is not lost on a miss
+      if (!takeMats(o, q.cost.needs.filter(nd => !(miss0 && nd.kept)))) { stop(o, 'fail', true, 'fail'); reply(o, 'craftDone', { ...base, ok: false, quality: 'fail', items: [], got: [], xp: 0, msg: 'The materials are no longer in your bag.' }); return again(); }
       if (q.cost.gold) spend(o, q.cost.gold, 'temper');
       const miss = r.quality === 'fail' || r.marks[0] === 0;
       const xp = P.xpFor({ tier: w.tier, quality: miss ? 'poor' : r.quality, skill: w.skill, kind: 'craft' });
       const g = addXp(o, 'tempering', xp);
-      let res = { ok: false, text: r.flags.includes('over') ? 'Too far: the work is spoiled. The materials are gone; the item is unharmed.' : 'Not far enough: the work did not take. The materials are gone; the item is unharmed.' };
+      let res = { ok: false, text: (r.flags.includes('over') ? 'Too far: the work is spoiled.' : 'Not far enough: the work did not take.') + (kept.length ? ' The other materials are gone; the Sovereign Core and the item are unharmed.' : ' The materials are gone; the item is unharmed.') };
       if (!miss) {
         res = temperKit.temperApply(P, engine, w.temper.op, q.item, { index: w.temper.index, element: w.temper.element, rng, quality: r.quality, skill: w.skill });
         if (res.ok) {
@@ -474,7 +477,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
       saved(o);
       stop(o, res.ok ? 'done' : 'fail', true, res.ok ? 'done' : 'fail', r.quality);
       counters.tempered = (counters.tempered || 0) + (res.ok ? 1 : 0);
-      reply(o, 'craftDone', { ...base, ok: !!res.ok, items: [], got: [], item: res.ok ? q.item : undefined, was: res.was, now: res.now, xp, skill: skillView(g), msg: res.text });
+      reply(o, 'craftDone', { ...base, ok: !!res.ok, items: [], got: [], item: res.ok ? q.item : undefined, was: res.was, now: res.now, ...(res.to ? { to: res.to } : {}), ...(kept.length ? { kept: kept.map(nd => nd.id) } : {}), xp, skill: skillView(g), msg: res.text });
       tell(o);
       return again();
     }
@@ -613,6 +616,19 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     gatherStart(o, {}, pr);
     return true;
   }
+  /**
+   * X5 (round 9): a Sovereign Core — only from a world boss (each credited player rolls) and from a WON event of the
+   * province's top levels. Returns the bag item to add to that player's share, or null.
+   */
+  function eventDrop(o, { worldBoss = false, level = 1, rng = Math.random } = {}) {
+    const LG = P && P.temper.legendary;
+    if (!LG || !o || !o.char) return null;
+    const chance = worldBoss ? LG.chance.worldBoss : level >= (LG.topEventLevel || 99) ? LG.chance.topEvent : 0;
+    if (!(chance > 0) || rng() >= chance) return null;
+    counters.sovereignCores = (counters.sovereignCores || 0) + 1;
+    reply(o, 'chat', { ch: 'system', from: 0, name: 'Tempering', text: 'A Sovereign Core! A master temperer can promote a rare item to legendary with it.' });
+    return P.item(LG.material, 1);
+  }
   /** Quest events pass through here too: the old `cook` (fish at a fire) teaches cooking. */
   function onEvent(o, ev) {
     if (!P || !ev || ev.kind !== 'cook' || ev.prof) return;
@@ -649,6 +665,6 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     }
   }
 
-  return { P, prof, gather, craft, tick, sweep, keepBody, stop, view, ensureNodes, npcExtra, useItem, onKill, onEvent, teach, stationNear, nodeNear, nodesIn, working, knows, levelOf, stateOf,
+  return { P, prof, gather, craft, tick, sweep, keepBody, stop, view, ensureNodes, npcExtra, useItem, onKill, onEvent, eventDrop, teach, stationNear, nodeNear, nodesIn, working, knows, levelOf, stateOf,
     get engine() { return engine; }, setEngine(e) { engine = e; }, ready: () => !!P };
 }

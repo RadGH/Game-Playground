@@ -4195,3 +4195,26 @@ X3 X4 X6 X1 + the title sign-in flow are in (CHANGELOG "Play-test 9 — D-UI"). 
 - **G:** `ui-panel.js` panels no longer write `localStorage tv.panel.*` (session only now); two scenes added (`online`, `title-delete`), one moment (`admin-online`).
 - **G (found while adding a scene):** `js/client/input/touch.js` — `let swallow = 0` makes `performance.now() - swallow < 700` true for the first 700 ms of
   a page's life, so the very first click in the phone layout is eaten (seen with a gallery step at t = 655 ms). Start it at `-Infinity`.
+
+## Round 9 contracts — P-core (X5, dev report #15: Tempering -> Promote takes a RARE to LEGENDARY) -> P-client, A, E, lead — 2026-10-08 (written FIRST; status line at the end)
+
+**What the player gets.** `temper_promote` now has a third step: rare -> legendary. It needs a **Sovereign Core** (`sovereign_core`, a `material`, icon `core`, tint `#ffd24a`,
+rarity `legendary`, tier 5, sells for 0, tradeable) — it drops ONLY from a world boss (each credited player, own roll, **25%**) and from a WON zone / realm event whose level is in
+the top band of the province (level >= 8 here; own roll, **5%**). Data: `data/rules/professions.json` `temper.legendary { material, chance: { worldBoss, topEvent }, topEventLevel, skill, mat, gem, goldShare, minLevel }`.
+The work: Tempering **60**, 1 Sovereign Core + 6 of the item's own tier material + 2 gems of its tier + 25% of the item's list price in gold, and the same `gauge` mini-game.
+The item keeps its base, quality, level and every property, becomes `rarity: 'legendary'` and gains ONE legendary power (the affix `legendary_effect`, rolled by C's own item
+maker for that base — so it always fits the slot); the name is kept. A miss costs the gems, the tier materials and the gold — **the Sovereign Core is kept** and the item is never changed.
+A legendary made this way carries 3 rolled properties + the power; a dropped legendary carries 5-6 + the power, so it is never strictly better than a drop of its level.
+
+**Wire (P-client) — nothing new, three fields more:**
+- `craftList` row `temper_promote`: `desc` now says "… and a rare to legendary with a Sovereign Core"; `legendary: { material: {id, name}, skill }`.
+- `craftQuote {id:'temper_promote', uid}` on a RARE item: `to: 'legendary'`, `needs` includes `{ id:'sovereign_core', name:'Sovereign Core', n:1, have, kept: true }` (`kept` = not spent on a miss),
+  `skill: 60`, `text` = "Rare to legendary: it keeps every property and gains one legendary power. A miss costs the other materials and the gold; the Sovereign Core is kept."
+  Refusals (`can:false`, `code`): `needs` (no core / materials), `skill`, `gold`, `max` (already legendary), `item` (a unique / set piece, or a backpack).
+- `craftDone` on success: `item` (now legendary), `now` = the power's affix `{ id:'legendary_effect', name, desc?, … }`, `to: 'legendary'`. On a miss: `ok:false`, `kept: ['sovereign_core']`.
+- The drop itself arrives like any item (`bag` + `loot` event) plus a system chat line "A Sovereign Core! A master temperer can promote a rare item to legendary with it."
+
+**Hook (A's file, additive, marked `// X5 (P-core)`):** js/sim/province.js `rewardEvent`: after a credited player's share is paid, `professions.eventDrop(o, { worldBoss, level, won })`.
+**E:** nothing to place; the rates are the two numbers above (say if the event reward tables should list the core as a line — `eventDone.items` already carries it when it drops).
+
+_Status 2026-10-08: LANDED as written (tests/P/core-legendary.test.js, 2 tests). A power "fits" when one of the engine's own uniques of that slot — for a weapon, of that weapon kind — carries it (3-18 powers per kind); cloaks, belts and backpacks have no pool and are refused (`code: 'item'`). The power is attached the way a unique carries one (`legendaryEffectId` + the `legendary_effect` affix row) — checked by shape, not yet by a fight. `craftQuote.to` is also sent for the lower steps (`'magic'` / `'rare'`)._

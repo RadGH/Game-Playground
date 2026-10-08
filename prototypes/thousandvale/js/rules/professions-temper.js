@@ -19,6 +19,7 @@
 // A missed mini-game never reaches temperApply: the item is untouched by design.
 
 import { canConvert, convertWeapon } from './tv-gear.js';
+import { EFFECTS } from './farhold.js';
 
 const WOOD = new Set(['bow', 'crossbow', 'staff', 'wand', 'scepter', 'orb', 'tome']);
 const FIXED = a => !!(a && (a.baseIntrinsic || a.intrinsic || a.setFixed || a.tvConvert || a.brand || a.id === 'legendary_effect' || a.stat === 'castElement'));
@@ -40,6 +41,23 @@ export function matClassOf(engine, item) {
   return 'cloth';
 }
 
+/**
+ * X5 (round 9): the legendary powers that FIT an item — the powers the engine's own uniques of that slot (for a weapon:
+ * of that weapon kind) carry, and only ones the effect registry really runs. `[{ id, text }]`, sorted (so a seeded roll is steady).
+ */
+export function legendaryPool(engine, item) {
+  if (!engine || !item || item.pack) return [];
+  const I = engine.items, out = new Map();
+  for (const u of I.uniques || []) {
+    if (!u.legendaryEffect || !EFFECTS['legendary:' + u.legendaryEffect]) continue;
+    const wb = I.weaponBases[u.baseItemId], ab = I.armorBases[u.baseItemId];
+    const fits = item.type === 'weapon' ? !!wb && wb.subtype === item.subtype : !wb && !!ab && (u.slot === 'ring1' ? 'ring' : u.slot || ab.slot) === item.slot && !!ab.isShield === !!item.isShield;
+    if (fits) out.set(u.legendaryEffect, { id: u.legendaryEffect, text: (I.legendaryEffects || {})[u.legendaryEffect] || '' });
+  }
+  return [...out.values()].sort((a, b) => (a.id < b.id ? -1 : 1));
+}
+const legendaryStep = (P, op, item) => (op === 'temper_promote' && item && item.rarity === 'rare' && P.temper.legendary ? P.temper.legendary : null);
+
 /** The materials, gold and skill one work on one item costs. */
 export function temperCost(P, engine, op, item, listPrice = 0) {
   const row = (P.temper.ops || {})[op];
@@ -47,6 +65,12 @@ export function temperCost(P, engine, op, item, listPrice = 0) {
   const t = P.tierForLevel(itemLevelOf(item));
   const cls = P.classes || {};
   const at = (c) => (cls[c] || [])[t.tier - 1] || (cls[c] || [])[0] || null;
+  const LG = legendaryStep(P, op, item);
+  if (LG) {
+    const main = at(matClassOf(engine, item)), gem = at('gem');
+    return { needs: [{ id: LG.material, n: 1, kept: true }, ...(main ? [{ id: main, n: LG.mat }] : []), ...(gem ? [{ id: gem, n: LG.gem }] : [])],
+      gold: Math.max(1, Math.round((listPrice || 0) * LG.goldShare)), skill: Math.max(LG.skill, t.minSkill), tier: t.tier, legendary: true };
+  }
   const needs = [];
   const main = at(matClassOf(engine, item));
   if (main && row.mat) needs.push({ id: main, n: row.mat });
@@ -70,7 +94,7 @@ export function temperCheck(P, engine, op, item, { index = 0, element = null, sk
   if (!row) return no('recipe', 'No such work.');
   if (!isGearItem(item)) return no('item', 'Only weapons, armour and jewellery can be tempered.');
   if (item.isUnique || item.setId) return no('item', 'A unique or set piece cannot be reworked.');
-  if (item.rarity === 'legendary') return no('item', 'Legendary gear cannot be reworked.');
+  if (item.rarity === 'legendary') return op === 'temper_promote' ? no('max', 'It is already legendary.') : no('item', 'Legendary gear cannot be reworked.');
   const Q = P.temper.qualities || ['low', 'medium', 'high', 'elite', 'exotic'];
   if (op === 'temper_quality') {
     const at = Math.max(0, Q.indexOf(item.quality || 'medium')), to = Q[at + 1];
@@ -81,6 +105,11 @@ export function temperCheck(P, engine, op, item, { index = 0, element = null, sk
     return { ok: true, to, mult, text: `Quality ${item.quality || 'medium'} to ${to}: its ${item.type === 'weapon' ? 'damage' : 'armour'} and rolled properties grow by ${Math.round((mult - 1) * 100)}%.` };
   }
   if (op === 'temper_promote') {
+    if (legendaryStep(P, op, item)) {
+      if (item.pack) return no('item', 'A backpack cannot hold a legendary power.');
+      if (!legendaryPool(engine, item).length) return no('item', 'No legendary power fits this kind of item.');
+      return { ok: true, to: 'legendary', legendary: true, text: 'Rare to legendary: it keeps every property and gains one legendary power. A miss costs the other materials and the gold; the Sovereign Core is kept.' };
+    }
     const to = (row.to || {})[item.rarity || 'normal'];
     if (!to) return no('max', 'It cannot be promoted any further. Rare is as high as tempering goes.');
     const adds = rolled(item).length < affixRoom(engine, item, to);
@@ -135,6 +164,17 @@ export function temperApply(P, engine, op, item, { index = 0, element = null, rn
     for (const a of item.affixes || []) if (typeof a.value === 'number' && !FIXED(a)) a.value = +(a.value * step).toFixed(2);
     item.tempered = (item.tempered || 0) + 1;
     return { ok: true, text: `Tempered to ${chk.to} quality.` };
+  }
+  if (op === 'temper_promote' && chk.legendary) {
+    const pool = legendaryPool(engine, item);
+    const pw = pool[Math.floor(rng() * pool.length) % pool.length];
+    const affix = { id: 'legendary_effect', name: 'Legendary', stat: 'cond_legendaryEffect', value: 1, legendaryId: pw.id, descriptor: pw.text };
+    (item.affixes || (item.affixes = [])).push(affix);
+    item.legendaryEffectId = pw.id;
+    item.rarity = 'legendary';
+    item.promoted = true;                 // made at the forge, not dropped: 3 rolled properties + the power (a drop rolls 5-6)
+    item.tempered = (item.tempered || 0) + 1;
+    return { ok: true, to: 'legendary', now: affix, text: `Promoted to legendary. New power: ${pw.text || pw.id}` };
   }
   if (op === 'temper_promote') {
     let added = null;

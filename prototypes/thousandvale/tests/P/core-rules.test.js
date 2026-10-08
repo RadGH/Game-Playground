@@ -177,7 +177,7 @@ test('crafted gear is never strictly better than a same-level dungeon rare', () 
   }
 });
 
-test('tempering: quality up as far as skill allows, promote stops at rare, reweave swaps one property, brand once — and the item always survives', () => {
+test('tempering: quality up as far as skill allows, promote needs a core past rare, reweave swaps one property, brand once — and the item always survives', () => {
   const rng = seeded(3);
   const mk = (rarity, level = 6, base = 'longsword') => engine.makeItem({ base, rarity, level, rng });
   // quality
@@ -193,7 +193,8 @@ test('tempering: quality up as far as skill allows, promote stops at rare, rewea
   it = mk('normal');
   assert.ok(temperApply(P, engine, 'temper_promote', it, { rng }).ok); assert.equal(it.rarity, 'magic'); assert.ok(it.affixes.length >= 1);
   assert.ok(temperApply(P, engine, 'temper_promote', it, { rng }).ok); assert.equal(it.rarity, 'rare');
-  assert.equal(temperCheck(P, engine, 'temper_promote', it).why, 'max', 'never above rare');
+  assert.equal(temperCheck(P, engine, 'temper_promote', it).to, 'legendary', 'past rare only with a Sovereign Core (round 9, X5: tests/P/core-legendary.test.js)');
+  assert.ok(temperCost(P, engine, 'temper_promote', it, 100).needs.some(n => n.id === 'sovereign_core'));
   const pack = mk('normal', 6, 'sling_satchel'); temperApply(P, engine, 'temper_promote', pack, { rng }); temperApply(P, engine, 'temper_promote', pack, { rng });
   assert.ok(pack.rarity === 'rare' && pack.affixes.filter(a => !a.baseIntrinsic && !a.intrinsic).length <= 1 && pack.bagSlots === 4, 'a backpack keeps its one property (W19)');
   // reweave

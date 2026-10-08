@@ -232,7 +232,7 @@ export function baseFromRow(items, cfg, row) {
     ...clone(tpl), name: row.name || tpl.name, g5: row.id, look: { g5: row.id }, tvCatalog: true,
     ...(Number.isFinite(row.minLevel) && row.minLevel > 1 ? { minLevel: row.minLevel } : {}), ...extra,
   });
-  if (kind === 'weapon' || (kind === 'offhand' && (row.type === 'orb' || row.type === 'tome'))) {
+  if (kind === 'weapon' || (kind === 'offhand' && row.type === 'orb')) {          // owner feedback 10 (Y16): an off-hand BOOK model is a grimoire (a focus); a tome is a main-hand weapon
     const from = (kind === 'offhand' ? C.offhand : C.weapon)?.[row.type];
     const tpl = from && items.weaponBases?.[from];
     if (!tpl) return { skip: `no weapon base for type "${row.type}"` };

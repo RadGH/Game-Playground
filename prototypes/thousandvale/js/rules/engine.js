@@ -7,6 +7,7 @@
 // js/rules/room.js, never here.
 
 import { buildProjectiles } from './projectiles.js';
+import { buildCombatCfg } from './combat-cfg.js';
 import { installAffixes } from './affixes.js';
 import {
   Rpg, installUniques, installFoci, installWarbands, tuneFeel, tuneWeapons, setLevelCap, EFFECTS,
@@ -16,7 +17,7 @@ import { installItemBuffs } from './buffs.js';
 import { installTalentTrees } from './talents.js';
 import { buildTvForest } from './perk-forest.js';
 import { installLootPool, buildLootPool } from './loot-pool.js';
-import { installTvSkills } from './tv-skills.js';
+import { installTvSkills, installTvClasses } from './tv-skills.js';
 import { buildCasterForms } from './caster-forms.js';
 import { installTvGear, poolTvGear, attachTvGear, removeLights, removeSlotless, stripInert } from './tv-gear.js';
 import { setKitSource } from './starter-kits.js';
@@ -50,6 +51,9 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP, tvS
 
   // play-test 5 (T3, T4): Thousandvale's own skill rows and class lists (data/rules/skills-tv.json), in memory, BEFORE the
   // talent trees are rewritten — a parity engine keeps Farhold's table (`tvSkills: false`)
+  // owner feedback 10 (Y32): Thousandvale's own classes (the Starcaller) — class row, six skills, skill list — first,
+  // so the patch below, the talent policy and every audit see them like any other class
+  const classReport = tvSkills ? installTvClasses(classes, skills, data.tvClasses || null) : null;
   const skillReport = tvSkills ? installTvSkills(skills, data.tvSkills || null) : null;
   // P6 — Thousandvale's talent trees (data/rules/talents.json), in memory, before any bar is built
   const talentReport = installTalentTrees(skills, data.tvTalents || {});
@@ -96,7 +100,7 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP, tvS
     xpMult: kind => data.progression?.xp?.[kind + 'Mult'] ?? 1,
     /** P26 — the level-gap softening (js/rules/level-gap.js); null turns it off (parity fixtures) */
     levelGap: data.progression?.levelGap || null,
-    forest, talentReport, skillReport, gearReport,
+    forest, talentReport, skillReport, gearReport, classReport,
   };
   installLevelGap(engine);
   installItemBuffs(engine);             // shop buffs: armour oil, hearty stew (js/rules/buffs.js)
@@ -118,6 +122,8 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP, tvS
   engine.casterForms = tvGear ? buildCasterForms(data.casterForms || null) : null;
   // owner feedback 8 (W14, W2): slower, homing projectiles for skills, weapons and monsters; a parity engine keeps Farhold's
   engine.projectiles = tvGear ? buildProjectiles(data.projectiles || null) : null;
+  // owner feedback 10: one swing = one number, attacks while moving, attack speed, walls, knock interrupts, dummies (js/rules/combat-cfg.js); off for parity
+  engine.combatCfg = tvGear ? buildCombatCfg(data.combat || null) : null;
   installAffixes(engine, data.affixes || null);          // play-test 4 S4: champion / rare rolls, Pack-leader, affix specials
   return engine;
 }

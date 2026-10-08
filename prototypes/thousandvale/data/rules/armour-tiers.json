@@ -19,6 +19,7 @@
     "fang":      { "name": "Wolfsbane",     "prefix": "Wolfsbane",     "emblem": "claw",      "trim": "#7a2a2a", "glow": "#e05a4a", "element": "blood",     "desc": "fur collar, claw-mark slashes across the chest; a claw emblem" }
   },
   "classes": {
+    "starcaller": { "weight": "cloth", "theme": "rune", "set": "Zenith-Thread Robes" },
     "warrior":      { "weight": "heavy",  "theme": "flame",     "set": "Forgefire Harness" },
     "fighter":      { "weight": "heavy",  "theme": "storm",     "set": "Stormguard Plate" },
     "paladin":      { "weight": "medium", "theme": "dawn",      "set": "Sunsworn Mail" },

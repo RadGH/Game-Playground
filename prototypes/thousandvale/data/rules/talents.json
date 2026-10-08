@@ -129,6 +129,7 @@
     }
   },
   "replace": {
+  "storm_beam:1:held_storm": {"id": "building_storm", "name": "Building Storm", "fx": "charge", "mod": {"channel": {"seconds": 2.2, "every": 0.4, "moveK": 1, "grow": 0.2}, "mul": {"mult": 0.7}}},
     "mend:1:quick_mend": {
       "id": "mending_wave",
       "name": "Mending Wave",

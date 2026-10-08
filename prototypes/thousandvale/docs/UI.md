@@ -85,8 +85,9 @@ windows, the Professions page and block, a material's card). They live in `js/cl
 messages they play are RECORDED from the real server by `node tests/P/client-fixtures.mjs` into `fixtures/professions.json` (re-run after a protocol or content
 change). `tests/P/client-shots.mjs` takes a picture of each in every frame; `tests/P/client-minigames.spec.js` plays each mini-game in the stage.
 
-52 scenes in all (before play-test 8): 46 in each desktop frame, 49 in each phone frame, 50 in the controller frame (a few scenes exist
-only where they mean something — the quick wheel, the focus ring, the belt).
+**82 scenes in all (counted 2026-10-08 from `SCENES`, professions included — 20 of them now):** 75 in each desktop frame
+(Desktop, Laptop), 78 in each phone frame, 79 in the controller frame (a few scenes exist only where they mean something —
+the quick wheel, the focus ring, the belt). Do not trust this line over the code: `SCENES.filter(s => sceneFits(s, id)).length`.
 
 **What the spec measured (2026-10-07):** in the proposed phone layout, 0 of ~800 on-screen controls are smaller than
 44 px or outside the safe area, either way up. With today's layout on the same screen: on its side 765 of 1,014
@@ -98,16 +99,22 @@ rectangle everything must stay inside. The phone's insets are CSS variables (`--
 
 ---
 
-## 3. The phone layout (a proposal — OFF in the game)
+## 3. The phone layout (ON in the game since 2026-10-07)
 
 Real code, not a mock: `css/layout-phone.css` + `js/client/input/touch.js`. It does nothing unless
 `<html data-layout="phone">` is set, and the only place the game may set it is `js/client/input/layout.js`:
 
 ```js
-export const PHONE_LAYOUT_ENABLED = false;      // <- the one switch
+export const PHONE_LAYOUT_ENABLED = true;       // <- the one switch (false = the game never uses it; the gallery still shows it)
 ```
 
-(For trying it in the real game on the LAN before switching it on for everyone: `?layout=phone` on the dev pages.)
+With the switch on, `decideLayout()` picks the phone layout **automatically on a touch screen whose short side is under
+500 CSS px**; Settings > Key bindings > Touch > "Layout" (Automatic / Desktop / Phone, saved in this browser as `tv.layout`)
+overrides that, and `?layout=phone|desktop` on the address wins for one visit. The choice is made again when the screen
+turns or changes size. Any new window must work at 393 × 852, and `tests/G/phone-play.spec.js` plays the game through
+on that screen.
+
+(To see it on a desktop browser: `?layout=phone` on the dev pages.)
 
 Design, in one paragraph: **the left thumb moves, the right thumb fights, everything else is one tap away and never under
 a thumb by accident.** A stick appears wherever the left thumb lands. Attack sits in the bottom-right corner with skills
@@ -121,6 +128,7 @@ The reasoning for each screen is in that scene's notes in the gallery.
 **Variant B** (switch above the frame, on its side only): a flat 2 × 4 grid of skills and a stick that stays put.
 
 ### How a proposal graduates into the game
+(The phone layout has been through all five steps; they are kept as the recipe for the next proposal.)
 1. The owner picks the variant in the gallery and gives notes; change `css/layout-phone.css` / `touch.js` until the
    scenes look right (the spec keeps the 44 px and safe-area rules honest).
 2. Add `css/input.css` and `css/layout-phone.css` to `index.html` (they are no-ops without the attribute).

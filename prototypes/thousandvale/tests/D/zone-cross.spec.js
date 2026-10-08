@@ -89,13 +89,15 @@ for (let run = 1; run <= RUNS; run++) {
     await cdp.send('Profiler.setSamplingInterval', { interval: 500 });
     await cdp.send('Profiler.start');
     const mark = await page.evaluate(() => window.__tvGateMarker());
-    await page.evaluate(() => { window.__lt.length = 0; tv.perf(true); });
+    // (__clearAt: a long task that BEGAN before this line and is delivered after it is the frame before the reset —
+    //  the watchdog must not count it; `late` below says whether this run met that case)
+    await page.evaluate(() => { window.__lt.length = 0; tv.perf(true); window.__clearAt = performance.now(); });
     const A = await page.evaluate(async ([z, from, to]) => {
       const t0 = performance.now(), speed = 12, H = (x, zz) => thousandvale.WS.terrain.heightAt(x, zz) || 0;
       await new Promise(res => { const step = () => { const x = from + (performance.now() - t0) / 1000 * speed; tv.fly(x - 10, H(x, z) + 7, z + 3, x, H(x, z) + 1, z); if (x < to) requestAnimationFrame(step); else res(); }; step(); });
       await new Promise(r => setTimeout(r, 4000));
       tv.fly(null);
-      return { perf: tv.perf(), world: tv.world(), tasks: window.__lt.slice() };
+      return { perf: tv.perf(), world: tv.world(), tasks: window.__lt.slice(), late: window.__lt.filter(x => x.t0 < window.__clearAt).map(x => Math.round(x.ms)) };
     }, [you.z, ZONE_EAST - 520, ZONE_EAST + 380]);
     const { profile } = await cdp.send('Profiler.stop');
 
@@ -105,10 +107,10 @@ for (let run = 1; run <= RUNS; run++) {
       for (let i = 0; i < profile.samples.length; i++) { t += profile.timeDeltas[i]; if (profile.samples[i] === id) { offsetUs = t - mark[0] * 1000; break; } } }
     const big = A.tasks.filter(x => x.ms > 400).sort((a, b) => b.ms - a.ms).slice(0, 4);
     const cuts = offsetUs == null ? [] : big.map(x => ({ t0: Math.round(x.t0), ms: Math.round(x.ms), ...cut(profile, offsetUs, x.t0, x.ms) }));
-    const report = { run, stalls: A.perf.stalls, links: A.perf.links, zones: A.world.zones, top: A.perf.top.slice(0, 10), longTasks: A.tasks.map(x => [Math.round(x.t0), Math.round(x.ms)]), cuts };
+    const report = { run, late: A.late, stalls: A.perf.stalls, links: A.perf.links, zones: A.world.zones, top: A.perf.top.slice(0, 10), longTasks: A.tasks.map(x => [Math.round(x.t0), Math.round(x.ms)]), cuts };
     writeFileSync(join(SHOTS, `zone-cross-${run}.json`), JSON.stringify(report, null, 1));
     if (A.perf.stalls.maxTaskMs > LIMIT_MS || process.env.TV_CROSS_KEEP) writeFileSync(join(SHOTS, `zone-cross-${run}.cpuprofile`), JSON.stringify(profile));
-    console.log(`[cross ${run}]`, JSON.stringify({ stalls: A.perf.stalls, links: A.perf.links, zones: A.world.zones }));
+    console.log(`[cross ${run}]`, JSON.stringify({ stalls: A.perf.stalls, links: A.perf.links, zones: A.world.zones, lateFromBeforeReset: A.late }));
     if (A.perf.stalls.maxTaskMs > LIMIT_MS) console.log(`[cross ${run} cuts]`, JSON.stringify(cuts.map(c => ({ ms: c.ms, self: c.self.slice(0, 6), stacks: c.stacks.slice(0, 2) })), null, 1));
 
     expect(errors, errors.join('\n')).toEqual([]);

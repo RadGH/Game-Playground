@@ -180,7 +180,7 @@ function shoot(field, e, target) {
   const element = spec.element || 'physical';
   const speed = P ? monsterSpeed(P, element) : 40;
   const flight = P ? flightOf(P, dist, speed) : Math.max(0.11, dist / 40);
-  (field.shots || (field.shots = [])).push({ by: e, target, toX: target.x, toZ: target.z, left: flight, element, home: !!P });
+  (field.shots || (field.shots = [])).push({ by: e, target, toX: target.x, toZ: target.z, fromX: e.x, fromZ: e.z, left: flight, element, home: !!P });
   field.emit({ t: 'fx', kind: 'shot', id: e.id, to: target.id, element, ms: Math.round(flight * 1000), ...(P ? { from: { x: e.x, z: e.z }, ...projFields(P, { speed, proj: element === 'physical' ? null : projOf(P, { element }), home: true, skill: 'basic' }) } : {}) });
 }
 
@@ -195,6 +195,12 @@ function tickShots(field, dt) {
     const v = s.target;
     if (!field.usable(v) || s.by.dying != null || s.by.removed) continue;
     if (!s.home && Math.hypot(v.x - s.toX, v.z - s.toZ) > 2.6) continue;
+    // owner feedback 10 (Y10): its target stepped behind a dungeon wall while it flew — it hits the wall
+    if (field.sight && !field.sight(s.fromX ?? s.by.x, s.fromZ ?? s.by.z, v.x, v.z)) {
+      const fx = s.fromX ?? s.by.x, fz = s.fromZ ?? s.by.z, ex = v.x - fx, ez = v.z - fz, len = Math.hypot(ex, ez) || 1, d = field.sight.reach(fx, fz, ex / len, ez / len, len);
+      field.emit({ t: 'fx', kind: 'blocked', id: s.by.id, x: fx + ex / len * d, z: fz + ez / len * d, by: 'wall' });
+      continue;
+    }
     monsterStrike(field, s.by, v, { element: s.element, ranged: true, flew: true });
   }
 }
@@ -351,6 +357,28 @@ export function resetMonster(field, e) {
   field.emit({ t: 'fx', kind: 'leash', id: e.id });
 }
 
+/**
+ * Owner feedback 10 (Y17, report #29): "training dummies… attackable, a ton of HP, auto regenerate". One tick of a
+ * dummy: its statuses burn (so a damage-over-time shows on the meter), it never moves, turns, notices, swings or
+ * builds threat, it cannot be killed (field.kill refuses it), and `resetSec` after the last thing that touched it it is
+ * at full health with nothing on it. It never reaches `field.onKill`, so it pays no experience, gold, loot or credit.
+ */
+export function tickDummy(field, e, dt, hooks = {}) {
+  e.dying = null; e.push = null; e.stagger = 0; e.state = 'wander'; e.targetId = null; e.anim = 'idle';
+  e.x = e.home[0]; e.z = e.home[1];
+  if (e.threat?.size) e.threat.clear();
+  if (e.statuses && Object.keys(e.statuses).length) {
+    const burned = tickStatuses(e, dt);
+    if (burned > 0) { hooks.onStatusDamage?.(e, burned); e.struckAt = field.clock; field.emit({ t: 'dot', id: e.id, amt: burned, hp: Math.max(1, Math.round(e.hp)) }); }
+  }
+  if (e.hp < 1) e.hp = 1;
+  const quiet = field.clock - (e.struckAt ?? -Infinity);
+  if (quiet >= (e.dummy.resetSec ?? 3) && (e.hp < e.maxHp || e.damageBy || e.playerDamage)) {
+    e.hp = e.maxHp; e.statuses = {}; e.damageBy = null; e.playerDamage = 0; e.sunder = 0; e.sunderLeft = 0;
+    field.emit({ t: 'fx', kind: 'dummy', id: e.id, reset: 1 });
+  }
+}
+
 // --------------------------------------------------------------------------- the tick
 
 /**
@@ -395,6 +423,8 @@ export function tickMonsters(field, dtAll, hooks = {}) {
       if (g) { const gd = Math.hypot(g.x - e.x, g.z - e.z); if (gd < dist || ((near?.threatScale ?? 1) < 1 && gd < (e.aggroRange || 26) * 2)) { near = g; dist = gd; } }
     }
 
+    // owner feedback 10 (Y17): a training dummy — it stands, takes everything, and is whole again a moment after the last hit
+    if (e.dummy) { tickDummy(field, e, dt, hooks); continue; }
     if (e.dying != null) {
       e.dying += dt;
       if (e.dying > AI.CORPSE_SECONDS) { field.remove(e); field.emit({ t: 'gone', id: e.id }); }
@@ -497,6 +527,8 @@ export function tickMonsters(field, dtAll, hooks = {}) {
         if (!e.hover && t?.blocked && t.blocked(cx, cz) && !t.blocked(e.x, e.z)) { cx = e.x; cz = e.z; }
         if (!wet(field, cx, cz, e.y) && (e.hover || !t || climbable(t, cx, cz, e.x, e.z, 0, e.y))
           && Math.hypot(cx - e.x, cz - e.z) > step * 0.4) {
+          // owner feedback 10 (Y12): how far a knock carried it this tick — its own wind-up shapes ride along (encounter.js)
+          e.knockDx = (e.knockDx || 0) + (cx - e.x); e.knockDz = (e.knockDz || 0) + (cz - e.z);
           e.x = cx; e.z = cz;
         } else if (!p.walled) {
           p.walled = true;
@@ -620,10 +652,14 @@ export function tickMonsters(field, dtAll, hooks = {}) {
     const aimAt = foe || target || (e.statuses?.turned?.follow ? near : null);
     const adx = aimAt ? aimAt.x - e.x : 0, adz = aimAt ? aimAt.z - e.z : 0;
     const adist = Math.hypot(adx, adz);
+    // owner feedback 10 (Y10): in an instance a monster must have a clear line to what it means to hit — within reach
+    // through a wall is not in reach; it walks round (the planner below) instead of swinging, shooting or casting
+    const seen = !field.sight || !aimAt || field.sight(e.x, e.z, aimAt.x, aimAt.z);
+    e.unseen = !seen;
     e.aimingAt = target && target.kind !== 'player' ? target : null;
 
     // an encounter's special or boss ability (js/rules/encounter.js): while it casts, it holds still
-    if (field.hooks?.think && e.state === 'chase' && !e.statuses?.turned && field.hooks.think(e, target, adist, dt)) {
+    if (field.hooks?.think && e.state === 'chase' && !e.statuses?.turned && field.hooks.think(e, seen ? target : null, adist, dt)) {
       e.y = ground(field, e.x, e.z, e.y);
       continue;
     }
@@ -643,16 +679,16 @@ export function tickMonsters(field, dtAll, hooks = {}) {
     } else if (e.state === 'chase') {
       if (aimAt) {
         // round a wall, a building or a cliff when the straight line is shut (pathfind.js); else straight at it
-        const w = pf && adist > (e.reach || 2.4) + 0.5 ? pf.steer(e, aimAt.x, aimAt.z) : null;
+        const w = pf && (adist > (e.reach || 2.4) + 0.5 || !seen) ? pf.steer(e, aimAt.x, aimAt.z) : null;
         e.facing = w ? Math.atan2(w.x - e.x, w.z - e.z) : Math.atan2(adx, adz);
         // following a path that reaches it counts as not stuck — but only while it keeps getting closer
         if (w && e.path?.reached && (e.pathBest == null || e.path.left < e.pathBest - 0.5)) { e.pathBest = e.path.left; e.pathingAt = field.clock; }
         if (adist <= (e.reach || 2.4) + 1) e.pathBest = null;
       }
       if (standOff > 0 && target) {
-        if (adist > standOff + 3) speed = e.speed;
+        if (adist > standOff + 3 || !seen) speed = e.speed;                    // Y10: no line — come round the wall
         else if (adist < standOff * 0.55) { speed = e.speed * 0.8; e.facing += Math.PI; }
-        if (e.swingTimer <= 0 && adist <= e.ranged.range) {
+        if (seen && e.swingTimer <= 0 && adist <= e.ranged.range) {
           e.swingTimer = e.attackEvery;
           e.anim = 'attack';
           shoot(field, e, target);
@@ -661,7 +697,7 @@ export function tickMonsters(field, dtAll, hooks = {}) {
         speed = 0;
       } else if (!foe && !target) {
         speed = adist > 3.5 ? e.speed : 0;             // turned and following, nobody to fight
-      } else if (foe && adist > e.reach) {
+      } else if (foe && (adist > e.reach || !seen)) {
         speed = e.speed;
       } else if (foe && e.swingTimer <= 0) {
         e.swingTimer = e.attackEvery;
@@ -684,7 +720,7 @@ export function tickMonsters(field, dtAll, hooks = {}) {
           field.emit({ t: 'fx', kind: 'siege', id: e.id, structure: siege.id, destroyed: !!hit?.destroyed });
           if (!hit || hit.destroyed || hit.ok === false) { e.siege = null; e.siegeCheck = 0; }
         }
-      } else if (adist > e.reach) {
+      } else if (adist > e.reach || !seen) {
         speed = e.speed;
       } else if (e.swingTimer <= 0) {
         e.swingTimer = e.attackEvery;
@@ -694,7 +730,7 @@ export function tickMonsters(field, dtAll, hooks = {}) {
         let victim = target;
         if (target?.kind === 'player' && field.allies.length) {
           let pet = null, bd = (e.reach || 2.4) + 0.6;
-          for (const p of field.allies) { if (p.dying != null) continue; const d = Math.hypot(p.x - e.x, p.z - e.z); if (d < bd) { bd = d; pet = p; } }
+          for (const p of field.allies) { if (p.dying != null) continue; const d = Math.hypot(p.x - e.x, p.z - e.z); if (d < bd && (!field.sight || field.sight(e.x, e.z, p.x, p.z))) { bd = d; pet = p; } }
           if (pet && field.rng() < 0.55) victim = pet;
         }
         if (hooks.onStrike) hooks.onStrike(e, victim); else monsterStrike(field, e, victim);

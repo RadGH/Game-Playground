@@ -16,8 +16,10 @@
 
 import {
   wandBehaviour, staffSpell, isStaff, isWand, elementOf, statusOf, hashStr, weaponHands, meleeSpanOf, chargedForm, formOf,
-  OFFHAND_DAMAGE, strikeAt,
+  OFFHAND_DAMAGE, strikeAt, attuneWeapon,
 } from './farhold.js';
+import { isOrb, isTome, stampHand } from './hands.js';
+import { attackRate, weaponAps, apsText, movingPace } from './combat-cfg.js';
 
 const FARHOLD_TO_STYLE = { plain: 'bolt', burst: 'burst', split: 'fan', chain: 'chain', seeking: 'seeking', heavy: 'heavy' };
 /** fireBolt's own chain falloff when a plan names none (js/rules/cast-skills.js). */
@@ -39,10 +41,13 @@ export function buildCasterForms(cfg) {
     const how = st.farhold ? wandBehaviour({ wandBehaviour: st.farhold }) : null;
     styles[key] = { key, ...st, how };
   }
-  const list = Object.values(styles);
+  // owner feedback 10 (Y16): a tome's forms are their own list — a wand never rolls one, a tome never rolls a wand's
+  const list = Object.values(styles).filter(s => !s.tome);
   const total = list.reduce((n, s) => n + (s.w ?? 1), 0);
+  const tomeList = Object.values(styles).filter(s => s.tome);
+  for (const s of tomeList) if (s.pace == null) s.pace = cfg.tomePace ?? 1.5;
   return {
-    styles, list, total,
+    styles, list, total, tomeList, tomeTotal: tomeList.reduce((n, s) => n + (s.w ?? 1), 0),
     staffStyles: Object.fromEntries(Object.entries(cfg.staffStyles || {}).map(([k, v]) => [k, { key: k, ...v }])),
     staffStyleChance: cfg.staffStyleChance ?? 0,
     staffForms: cfg.staffForms || {},
@@ -52,10 +57,17 @@ export function buildCasterForms(cfg) {
     novaReach: cfg.novaReach ?? 0.85,
     rangeSlack: cfg.rangeSlack ?? 1.5,
     offhandBolt: cfg.offhandBolt ?? OFFHAND_DAMAGE,
+    tomeDamage: cfg.tomeDamage ?? 1,
   };
 }
 
 const idOf = item => item.id || item.uid || item.baseKey || '';
+/** Y16: the grip sentence per hand (a two-hander keeps Farhold's own). */
+const HAND_NOTES = Object.freeze({
+  main: 'It is a main-hand weapon: your off hand is free for an orb, a focus or a shield.',
+  one: 'It can go in either hand, or one in each.',
+  off: 'Off hand',
+});
 
 /**
  * A WAND's style row. An item that names one (`castStyle`) keeps it; an older wand that only carries Farhold's
@@ -63,7 +75,19 @@ const idOf = item => item.id || item.uid || item.baseKey || '';
  */
 export function wandStyle(forms, item, { fresh = false } = {}) {
   if (!forms || !item) return null;
-  if (item.castStyle && forms.styles[item.castStyle]) {
+  // owner feedback 10 (Y16): a TOME takes one of the tome forms (by its id; an older tome that carried a wand's
+  // behaviour, or none, is given one the first time it is asked — it keeps it from then on)
+  if (isTome(item) && forms.tomeList?.length) {
+    let st = item.castStyle && forms.styles[item.castStyle]?.tome ? forms.styles[item.castStyle] : null;
+    if (!st) {
+      let r = hash01(idOf(item) + ':tome') * forms.tomeTotal;
+      for (const s of forms.tomeList) { r -= (s.w ?? 1); if (r <= 0) { st = s; break; } }
+      st = st || forms.tomeList[forms.tomeList.length - 1];
+    }
+    item.castStyle = st.key; item.castForm = st.castForm; item.wandBehaviour = 'plain';
+    return st;
+  }
+  if (item.castStyle && forms.styles[item.castStyle] && !forms.styles[item.castStyle].tome) {
     const known = forms.styles[item.castStyle];
     if (item.castForm !== known.castForm) { item.castForm = known.castForm; item.wandBehaviour = known.farhold || 'plain'; }
     return known;
@@ -100,13 +124,13 @@ export function staffStyle(forms, item, { fresh = false } = {}) {
 export function isHeldFocus(off) {
   if (!off) return false;
   if (off.type !== 'weapon') return !off.isShield && off.baseKey !== 'quiver' && (off.slot === 'offhand' || off.subtype === 'offhand');
-  return off.subtype === 'orb' || off.subtype === 'tome';
+  return isOrb(off);        // owner feedback 10 (Y16): a tome is a main-hand weapon now, never a held focus
 }
 
 /** The rider an off-hand focus adds to a caster's main-hand attack, or null. */
 export function riderOf(forms, off) {
   if (!forms || !isHeldFocus(off)) return null;
-  const key = off.focusRider || forms.focusBases[off.baseKey] || (off.subtype === 'orb' ? 'burst' : off.subtype === 'tome' ? 'echo' : null);
+  const key = off.focusRider || forms.focusBases[off.baseKey] || (off.subtype === 'orb' ? 'burst' : null);
   return (key && forms.riders[key]) || null;
 }
 
@@ -124,7 +148,21 @@ export function stampCaster(engine, item, { fresh = false } = {}) {
   const forms = engine?.casterForms;
   if (!forms || !item || typeof item !== 'object') return item;
   const statuses = engine.statuses || {};
-  if (item.type === 'weapon' && isWand(item) && item.ranged) {
+  // owner feedback 10 (Y16): a TOME is an attacking caster weapon — ranged like a wand, its own slower, heavier form.
+  // The shared table files it as something swung, so it is made ranged HERE (and Farhold's own words for it rewritten).
+  if (isTome(item) && item.castElement && forms.tomeList?.length) {
+    const st = wandStyle(forms, item, { fresh });
+    if (!item.ranged || item.castRange !== st.range) { item.ranged = true; item.castRange = st.range; attuneWeapon(item); }
+    // the shared table rolls a tome's damage as a stat stick's (2-6 against a wand's 4-10): raised once, marked on the item
+    if (!item.tvTome && Array.isArray(item.dmg) && forms.tomeDamage !== 1) item.dmg = item.dmg.map(v => Math.max(1, Math.round(v * forms.tomeDamage)));
+    item.tvTome = 1;
+    delete item.focusRider; delete item.focusText;                // it was a held focus before; that line is an orb's
+    item.attackText = wandText(st, item, statuses);
+  } else if (isOrb(item)) {
+    delete item.attackText;                                         // an implement has no attack of its own
+    item.rangeClass = 'none'; item.weaponHeadline = 'Off-hand implement'; item.weaponLine = 'Held in the off hand — it has no attack of its own'; item.handNote = 'Off hand'; item.castLine = null;
+  } else if (item.type === 'weapon' && (item.focusRider || item.focusText)) { delete item.focusRider; delete item.focusText; }
+  if (item.type === 'weapon' && isWand(item) && item.ranged && !isTome(item)) {
     const st = wandStyle(forms, item, { fresh });
     item.attackText = wandText(st, item, statuses);
   } else if (item.type === 'weapon' && isStaff(item)) {
@@ -139,6 +177,24 @@ export function stampCaster(engine, item, { fresh = false } = {}) {
   if (isHeldFocus(item)) {
     const r = riderOf(forms, item);
     if (r) { item.focusRider = r.key; item.castForm = forms.focusForms[r.key] || item.castForm || 'projectile'; item.focusText = riderText(r); }
+  }
+  // Y16: which hand it goes in ("Main hand" | "Off hand" | "One-hand" | "Two-hand"); Y26: a weapon's own attack rate
+  stampHand(item);
+  if (item.hand && item.type === 'weapon') {
+    // Farhold's own words for the grip say "one-handed … it can go in either hand" for every one-hander: rewritten to the hand it really takes
+    const note = HAND_NOTES[item.hand], was = item.handNote;
+    item.gripWord = item.handText;
+    if (item.hand !== 'two' && note) {
+      if (was && typeof item.weaponLine === 'string' && item.weaponLine.includes(was)) item.weaponLine = item.weaponLine.replace(was, note);
+      item.handNote = note;
+      if (typeof item.weaponHeadline === 'string') item.weaponHeadline = item.weaponHeadline.replace('One-handed', item.handText);
+      if (Array.isArray(item.weaponTags)) item.weaponTags = item.weaponTags.map(t => (t === 'One-handed' ? item.handText : t));
+    }
+    if (isOrb(item)) item.weaponTags = ['Off hand', ...(item.weaponTags || []).filter(t => t !== 'Melee' && t !== 'Ranged' && t !== 'Off hand' && t !== 'One-handed')];
+  }
+  if (item.type === 'weapon' && engine.combatCfg) {
+    const aps = weaponAps(item, { style: isTome(item) ? forms.styles[item.castStyle] : null });
+    if (aps) { item.aps = aps; item.apsText = apsText(aps); } else { delete item.aps; delete item.apsText; }
   }
   return item;
 }
@@ -169,6 +225,7 @@ export function wandText(st, item, statuses = {}) {
       if (st.pool) s += ` Where it hits it leaves ${el} ground ${m(st.pool.radius * 2)} across for ${st.pool.seconds}s, striking every 0.75s for ${pct(st.pool.power)} weapon damage.`;
     }
   }
+  if (st.tome && st.name) s = s.replace(/^Basic attack:/, `Basic attack (${st.name}):`);
   return s + leaves(item, statuses);
 }
 
@@ -199,10 +256,10 @@ export function sceptreText(item, statuses = {}) {
 
 export function riderText(r) {
   switch (r.key) {
-    case 'echo': return `Held with a wand or sceptre: every ${nth(r.every)} basic attack repeats itself ${r.delay}s later at ${pct(r.mult)} of its damage.`;
-    case 'burst': return `Held with a wand or sceptre: a basic attack that hits also bursts ${m(r.radius)} around the first enemy struck for ${pct(r.mult)} weapon damage.`;
-    case 'ward': return `Held with a wand or sceptre: a basic attack that hits gives you a barrier of ${pct(r.share)} of your maximum health (it builds up to ${pct(r.cap)}) for ${r.seconds}s.`;
-    case 'siphon': return `Held with a wand or sceptre: a basic attack that hits restores ${r.mana} mana.`;
+    case 'echo': return `Held with a wand, tome or sceptre: every ${nth(r.every)} basic attack repeats itself ${r.delay}s later at ${pct(r.mult)} of its damage.`;
+    case 'burst': return `Held with a wand, tome or sceptre: a basic attack that hits also bursts ${m(r.radius)} around the first enemy struck for ${pct(r.mult)} weapon damage.`;
+    case 'ward': return `Held with a wand, tome or sceptre: a basic attack that hits gives you a barrier of ${pct(r.share)} of your maximum health (it builds up to ${pct(r.cap)}) for ${r.seconds}s.`;
+    case 'siphon': return `Held with a wand, tome or sceptre: a basic attack that hits restores ${r.mana} mana.`;
     default: return '';
   }
 }
@@ -289,10 +346,17 @@ export function basicCard(engine, ch) {
     if (hands.dual && !isHeldFocus(hands.off)) desc += ` Your off hand (${hands.off.name}) swings on its own clock for ${pct(OFFHAND_DAMAGE)} of its damage.`;
   }
   const rider = isCaster(w) ? riderOf(forms, hands.off) : null;
-  if (rider) desc += ` ${cap(hands.off.name)}: ${riderText(rider).replace(/^Held with a wand or sceptre: /, '')}`;
+  if (rider) desc += ` ${cap(hands.off.name)}: ${riderText(rider).replace(/^Held with a wand, tome or sceptre: /, '')}`;
   const reach = attackReach(engine, ch);
+  // owner feedback 10: Y26 — the real rate (the weapon's pattern, a tome's pace, attack speed inside its cap: the same
+  // function js/rules/cast.js paces the attack with); Y7 — what moving does to it (nothing, unless the knob says so)
+  const rate = engine?.combatCfg && kind !== 'form' ? attackRate(engine, ch, 'main', { styleOf: it => (forms && it?.ranged && it?.castElement && !isStaff(it) ? wandStyle(forms, it) : null) }) : null;
+  if (rate) every = rate.every;
+  const pace = movingPace(engine, kind);
   return {
     slot: 0, id: 'basic', name: w?.name || 'Unarmed', desc, kind, form,
+    aps: Math.round(100 / every) / 100,
+    moving: { ok: true, pace },
     reach: reach != null ? Math.round(reach * 10) / 10 : null,
     every: Math.round(every * 1000), el, wt: w?.subtype || w?.baseKey || 'fist',
     two: w?.twoHanded ? 1 : undefined,

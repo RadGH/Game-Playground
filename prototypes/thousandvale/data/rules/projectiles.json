@@ -1,10 +1,10 @@
 {
-  "_doc": "Owner feedback 8 (W14, W2) — stream C, js/rules/projectiles.js. Every ranged attack is a projectile that TRAVELS: the damage is dealt when it arrives. Farhold flew a skill bolt at 48 m/s, an arrow at 42 and a monster's shot at 40 — at fighting distance that is 4 to 6 frames, which read as 'instant damage' and 'I was hit and never saw from where'. These are the speeds (metres a second) a flight is worked out from; `minMs` is the shortest flight there is. A projectile HOMES: it lands on its target wherever the target stands when it arrives; a target that died on the way is not replaced (the shot strikes the ground where it fell). `skill.byId` wins over `skill.byElement` over `skill.default`; `basic` is a weapon's own attack by its type (items.json `subtype`); `monster` is a monster's ranged attack by element. `proj` is what the client draws (D-world's list: arrow, quarrel, knife, axe, javelin, stone, firebolt, orb, shard). A parity engine (tests) has no table and keeps Farhold's speeds and its aimed-at-a-point arrows.",
+  "_doc": "Owner feedback 8 (W14, W2) — stream C, js/rules/projectiles.js. Every ranged attack is a projectile that TRAVELS: the damage is dealt when it arrives. Farhold flew a skill bolt at 48 m/s, an arrow at 42 and a monster's shot at 40 — at fighting distance that is 4 to 6 frames, which read as 'instant damage' and 'I was hit and never saw from where'. These are the speeds (metres a second) a flight is worked out from; `minMs` is the shortest flight there is. A projectile HOMES: it lands on its target wherever the target stands when it arrives; a target that died on the way is not replaced (the shot strikes the ground where it fell). `skill.byId` wins over `skill.byElement` over `skill.default`; `basic` is a weapon's own attack by its type (items.json `subtype`); `monster` is a monster's ranged attack by element. `proj` is what the client draws (D-world's list: arrow, quarrel, knife, axe, javelin, stone, firebolt, orb, shard; owner feedback 10 added `star` — a golden star, the Starcaller's thrown skills — and `skystar`, the star that falls from the sky in a `skyfall` event). A parity engine (tests) has no table and keeps Farhold's speeds and its aimed-at-a-point arrows.",
   "minMs": 200,
   "skill": {
     "default": 21,
     "byElement": { "physical": 28, "lightning": 24, "fire": 20, "ice": 22, "holy": 22, "shadow": 20, "arcane": 22, "nature": 22, "poison": 24 },
-    "byId": { "aimed_shot": 30, "quarry_call": 30, "multi_shot": 28, "pinning_shot": 28, "clockwork_bolt": 30, "junk_toss": 18, "iron_net": 18, "oath_hammer": 18, "poison_dart": 26, "grave_mark": 17, "shadow_lance": 24 }
+    "byId": { "aimed_shot": 30, "quarry_call": 30, "multi_shot": 28, "pinning_shot": 28, "clockwork_bolt": 30, "junk_toss": 18, "iron_net": 18, "oath_hammer": 18, "poison_dart": 26, "grave_mark": 17, "shadow_lance": 24, "star_dart": 20, "star_volley": 20 }
   },
   "basic": { "default": 26, "bow": 30, "shortbow": 30, "longbow": 30, "crossbow": 30, "javelin": 24, "sling": 24, "wand": 22, "staff": 20, "scepter": 20 },
   "monster": { "default": 19, "physical": 26 },
@@ -12,7 +12,7 @@
   "proj": {
     "byElement": { "physical": "arrow", "fire": "firebolt", "ice": "shard" },
     "default": "orb",
-    "byId": { "clockwork_bolt": "quarrel", "junk_toss": "stone", "iron_net": "stone", "oath_hammer": "axe", "poison_dart": "knife" },
+    "byId": { "clockwork_bolt": "quarrel", "junk_toss": "stone", "iron_net": "stone", "oath_hammer": "axe", "poison_dart": "knife", "star_dart": "star", "star_volley": "star" },
     "basic": { "bow": "arrow", "shortbow": "arrow", "longbow": "arrow", "crossbow": "quarrel", "javelin": "javelin", "sling": "stone" }
   }
 }

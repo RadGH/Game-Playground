@@ -242,6 +242,11 @@ test('on a phone (393 × 852, the real phone layout): tap the prompt, play the b
 // well the synthetic player did: every step must come back from the server and leave what it should in the bag.
 const HOME = { x: 25183, z: 5388 };
 async function makeFlow(pg, name, how) {
+  let stage = 'start';
+  try { return await makeFlowSteps(pg, name, how, st => { stage = st; }); }
+  catch (e) { const dump = await pg.evaluate(() => ({ flow: window.__flow, mini: tvprof.state.mini, work: tvprof.state.work, prompt: document.getElementById('interact').hidden ? '' : document.getElementById('interact').innerText, panels: [...document.querySelectorAll('.tv-panel:not([hidden]), .tv-dialog:not([hidden])')].map(x => x.id || x.className), known: tvprof.state.list.filter(x => x.known).map(x => x.id), ore: thousandvale.bag.state.bag.filter(i => i.kind === 'material').map(i => i.id + ':' + (i.count || 1)) })).catch(() => null); e.message = `[at: ${stage}] ${e.message}\n${JSON.stringify(dump)}`; throw e; }
+}
+async function makeFlowSteps(pg, name, how, at) {
   const act = sel => (how === 'touch' ? pg.locator(sel).first().tap() : pg.locator(sel).first().click());
   const until = (fn, arg, ms = 30000) => pg.waitForFunction(fn, arg, { timeout: ms });
   await pg.evaluate(() => {
@@ -253,12 +258,14 @@ async function makeFlow(pg, name, how) {
   const playUp = async () => { await until(() => tvprof.mini.state.state === 'play', null, 15000); await botReal(pg, how); };
   expect((await hook('/give', { name, gold: 600, items: 0 })).ok).toBe(true);
   // 1. learn Mining (Bram teaches at the first word)
+  at('1. learn Mining');
   await hook('/teleport', { name, x: BRAM.x + 2.2, z: BRAM.z + 0.5 });
   await until(() => [...thousandvale.actors.actors.values()].some(a => a.role === 'prospector'));
   await pg.evaluate(() => { const b = [...thousandvale.actors.actors.values()].find(a => a.role === 'prospector'); thousandvale.S.net.use(b.id); });
   await until(() => tvprof.state.list.find(x => x.id === 'mining')?.known, null, 15000);
   await pg.waitForTimeout(900); await pg.evaluate(() => thousandvale.worldUi.closeDialog?.());
   // 2. mine: copper and tin boulders by the gate until there is enough for five bars (three for a blade, two to temper it)
+  at('2. mine');
   // (five starter boulders stand there — three copper, two tin — and each is back for you two minutes after you work it: go round again if a poor swing left you short)
   let mined = 0;
   for (let round = 0; round < 9; round++) for (const [k, st] of BRAM.starters.entries()) {
@@ -280,6 +287,7 @@ async function makeFlow(pg, name, how) {
   expect(ore.copper, `mined ${mined} boulders: ${JSON.stringify(await pg.evaluate(() => window.__flow.gather))}`).toBeGreaterThanOrEqual(5);
   expect(ore.tin).toBeGreaterThanOrEqual(5);
   // 3. the smith: learn Smithing and Tempering from his dialog's own button, then "Use the forge"
+  at('3. the smith');
   await hook('/teleport', { name, x: HOME.x, z: HOME.z });
   await until(() => [...thousandvale.actors.actors.values()].some(a => a.role === 'smith'));
   const at = await pg.evaluate(() => { const a = [...thousandvale.actors.actors.values()].find(x => x.role === 'smith'); return { x: a.pos.x, z: a.pos.z }; });
@@ -296,6 +304,7 @@ async function makeFlow(pg, name, how) {
   await act('.tv-dialog .prof-dlg:has-text("Use the forge")');
   await pg.locator('#panel-craft [data-make="smelt_bronze_bar"]').waitFor({ timeout: 15000 });
   // 4. smelt: a batch of five, ONE mini-game
+  at('4. smelt');
   await pg.locator('#panel-craft [data-batch="smelt_bronze_bar"]').waitFor({ timeout: 10000 });
   expect(await pg.locator('#panel-craft [data-batch="smelt_bronze_bar"]').getAttribute('data-n'), 'the batch is what the ore allows').toBe(String(Math.min(10, ore.copper, ore.tin)));
   await act('#panel-craft [data-batch="smelt_bronze_bar"]');
@@ -305,6 +314,7 @@ async function makeFlow(pg, name, how) {
   expect(bars, JSON.stringify(await pg.evaluate(() => window.__flow.craft))).toBeGreaterThanOrEqual(5);
   await until(() => !tvprof.mini.isOpen, null, 15000);
   // 5. forge a blade: the forge mini-game (hammer, and back in the fire), then the card and the item in the bag
+  at('5. forge a blade');
   await pg.locator('#panel-craft [data-make="blades_1"]:not([disabled])').waitFor({ timeout: 15000 });
   let blade = null;
   for (let attempt = 0; attempt < 3 && !blade; attempt++) {          // (a botched forging spends nothing and may be tried again at once)
@@ -322,6 +332,7 @@ async function makeFlow(pg, name, how) {
   expect(forged.cards.at(-1), 'the result card names the item').toContain(blade.name);
   await pg.screenshot({ path: join(SHOTS, `w9-make-${how}-forged.png`) });
   // 6. temper it once: the Tempering tab, the item, the server's quote, the gauge
+  at('6. temper it once');
   await act('#panel-craft .pc-tab[data-tab="tempering"]');
   await act(`#panel-craft .pt-item[data-uid="${blade.uid}"]`);
   await pg.locator('#panel-craft [data-temper="temper_quality"]:not([disabled])').waitFor({ timeout: 20000 });

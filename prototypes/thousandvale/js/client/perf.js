@@ -24,6 +24,7 @@ export function createPerf({ longMs = 100, keepSpans = 400, keepLong = 40 } = {}
   const busyList = [];
   const frameSpans = [];        // [start, end] of each frame callback: a long task holding one is a frame (GPU wait included)
   let last = 0, frames = 0, longFrames = 0, worstMs = 0, warmUntil = 0, programs = 0, programsAtWarm = 0;
+  let resetAt = 0;              // page clock at the last reset(): long tasks that began before it belong to the run before
 
   function record(name, t0, ms) {
     spans.push({ name, t0, ms });
@@ -34,7 +35,11 @@ export function createPerf({ longMs = 100, keepSpans = 400, keepLong = 40 } = {}
   }
   try {
     if (typeof PerformanceObserver !== 'undefined' && PerformanceObserver.supportedEntryTypes?.includes('longtask')) {
-      new PerformanceObserver(list => { for (const e of list.getEntries()) { tasks.push({ t0: e.startTime, ms: e.duration }); if (tasks.length > 200) tasks.shift(); } }).observe({ type: 'longtask', buffered: false });
+      // An entry is DELIVERED some time after its task ended. A task that ended just before reset() used to arrive just
+      // after it — with the frame span that explains it already wiped — and was reported as "one ~1.8 s task outside
+      // the frame loop" (freeze.spec.js, one run in three or four since round 5; ~1.8 s is simply what one frame's wait
+      // on the software rasteriser costs on the test VM). Nothing that started before the reset is counted.
+      new PerformanceObserver(list => { for (const e of list.getEntries()) { if (e.startTime < resetAt) continue; tasks.push({ t0: e.startTime, ms: e.duration }); if (tasks.length > 200) tasks.shift(); } }).observe({ type: 'longtask', buffered: false });
     }
   } catch { /* no observer: spans still work */ }
 
@@ -68,7 +73,7 @@ export function createPerf({ longMs = 100, keepSpans = 400, keepLong = 40 } = {}
     /** Ignore long frames for `ms` from now (a loading screen is allowed to be slow). */
     quiet(ms) { warmUntil = Math.max(warmUntil, now() + ms); },
     /** Reset the counters (a test starts measuring from here). */
-    reset() { long.length = 0; longFrames = 0; worstMs = 0; frames = 0; totals.clear(); tasks.length = 0; frameSpans.length = 0; maxBusy = 0; busyLong = 0; busyList.length = 0; programsAtWarm = programs; linksAtReset = links; },
+    reset() { long.length = 0; longFrames = 0; worstMs = 0; frames = 0; totals.clear(); tasks.length = 0; frameSpans.length = 0; maxBusy = 0; busyLong = 0; busyList.length = 0; programsAtWarm = programs; linksAtReset = links; resetAt = now(); },
     setPrograms(n) { programs = n; },
     /** Count shader links on a WebGL context (each one is a compile; a burst of them is a freeze). */
     hookGl(gl) {

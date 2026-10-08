@@ -24,6 +24,7 @@ import { createCharacter } from './character.js';
 import { spawnMonster, tickMonsters } from './monster-ai.js';
 import { clearThreat } from './threat.js';
 import { attachGuards } from './guards.js';
+import { sightFor } from './sight.js';
 import { makeRng } from './rng.js';
 import { attachEncounters } from './encounter.js';
 import { attachFollowers } from './followers.js';
@@ -36,6 +37,7 @@ import { attackReach, basicCard, isHeldFocus, stampCaster } from './caster-forms
 import { TV_SLOTS, bagBonusOf, isLightItem as isLightRaw, lightRefund as lightRefundRaw } from './tv-gear.js';
 import { itemPrice, sellPrice as sellPriceOf, priceParts, killGold as killGoldOf, goldFound, isGear, retrainPrice as retrainPriceTv, questHour as questHourOf } from './economy.js';
 import { weaponHands } from './farhold.js';
+import { handOf, handText, fitsHand, handRefusal, autoSlot } from './hands.js';
 import { makeCrate as makeCrateItem, openCrate as openCrateItem, isCrate, crateText } from './crates.js';
 import { kitsFor as kitsForRaw, validKit as validKitRaw, starterGear as starterGearRaw, kitPlan } from './starter-kits.js';
 import { sheetJob, cachedAbilities, statRows, sheetWith as sheetWithItem } from './estimate.js';
@@ -76,6 +78,13 @@ export const validKit = (classId, choice) => validKitRaw(classId, choice, shared
 /** T5: the chosen kit as `char.equipment` (`{ weapon, offhand?, head?, chest?, … }`). */
 export const starterGear = (classId, choice) => starterGearRaw(classId, choice, shared?.kits || null, shared);
 export { kitPlan, isCrate };
+// ---- owner feedback 10 (Y16): which hand an item goes in — for A and the interface without a room ----
+export { handOf, handText, fitsHand };
+/**
+ * Y16 / Y26: bring an item a player already owns up to date (its hand words, a tome's attack, an orb's lack of one,
+ * its attacks per second, the lines nothing reads taken off). Safe to run more than once. A: run it over a loaded bag.
+ */
+export const refreshItem = item => (shared?.finishItem && item && typeof item === 'object' && (item.type === 'weapon' || item.type === 'armor') ? shared.finishItem(item, { fresh: false, convert: false }) : item);
 /** T9 / T20: a crate (or, with `spec.gift`, a gift box) as a bag item. `level` caps how high it can ever roll (level + 3). */
 export const makeCrate = (spec = {}, { level = null, cls = null } = {}) => makeCrateItem(shared?.crates || null, { ...(cls ? { cls } : {}), ...spec, ...(level && spec.level == null && spec.maxLevel == null ? { level } : {}) });
 /** T9: the crate's card line for a spec (quest reward rows). */
@@ -121,6 +130,7 @@ export const TYPE_ALIASES = { wolf: 'moor_hound', hound: 'moor_hound' };
 /** Protocol refusal codes (castR `why`): cooldown, range, mana, dead, target, unknown. */
 function whyCode(text = '') {
   if (/not ready|cooldown/i.test(text)) return 'cooldown';
+  if (/cannot see/i.test(text)) return 'sight';                 // owner feedback 10 (Y10): a wall in the way
   if (/mana/i.test(text)) return 'mana';
   if (/unlocks at level|opens at level/i.test(text)) return 'locked';
   if (/no fallen party member|nobody is left to raise/i.test(text)) return 'target';
@@ -163,6 +173,8 @@ function terrainFrom(host) {
     clampToWorld: (x, z) => [x, z],
     biomeIdAt: () => 0,
     ...(wall ? { blocked: wall } : {}),
+    // owner feedback 10 (Y10): the same wall data is what a BLOW is tested against (js/rules/sight.js) — an instance only
+    ...(dungeon && host.walkable ? { walls: wall } : {}),
     ...(dungeon ? { blockTtl: 3 } : {}),
   };
 }
@@ -211,6 +223,8 @@ export function createRules(host, opts = {}) {
   const room = createRoomContext({ id: String(opts.roomId ?? host.roomId ?? 'room'), seed: opts.seed ?? 1, engine });
   const field = attachField(room, { terrain: terrainFrom(host), safeZones: host.safeZones || [] });
   field.lod = opts.lod !== false;          // perf: idle far-off monsters think every few ticks (monster-ai.js AI.LOD_*)
+  // owner feedback 10 (Y10): walls block attacks in an instance — null anywhere else (and for a parity engine)
+  field.sight = engine.combatCfg ? sightFor(field, engine.combatCfg.sight) : null;
   const combat = createCombat(room);
   room.combat = combat;
   combat.tickMonsters = dt => tickMonsters(field, dt);
@@ -319,7 +333,7 @@ export function createRules(host, opts = {}) {
             if (tid && !e.target) host.event({ type: 'aggro', s: e.id, d: tid });
             e.setTarget(tid);
           }
-          const fighting = u.state === 'chase' && u.dying == null;
+          const fighting = u.state === 'chase' && u.dying == null && !u.dummy;
           e.setState(2, fighting);                    // STATE.combat
           if (u.anim && u.anim !== u._sentAnim) {
             if (ONE_SHOT_ANIMS.has(u.anim)) e.anim(u.anim === 'attack' && u.kind === 'beast' ? 'bite' : u.anim);
@@ -417,7 +431,7 @@ export function createRules(host, opts = {}) {
           break;
         }
         // the encounter engine's events go out as they are (docs/encounters.md "Events")
-        case 'tele': case 'teleR': case 'castbar': case 'castX': case 'phase': case 'say': case 'enrage': case 'obj': case 'boss': {
+        case 'tele': case 'teleR': case 'teleM': case 'castbar': case 'castX': case 'phase': case 'say': case 'enrage': case 'obj': case 'boss': {
           const { t, ...rest } = ev;
           host.event({ ...rest, type: t });
           break;
@@ -490,9 +504,42 @@ export function createRules(host, opts = {}) {
   /** W1: a per-unit threat multiplier set by the room (1 = normal). `newcomer(e, true)` uses guards.json `raid.newcomerThreatMult`. */
   function threatScale(e, k = 1) { const u = e?.r?.unit; if (!u) return false; u.threatScale = Number.isFinite(+k) && +k > 0 ? +k : 1; return true; }
   const newcomer = (e, on = true) => threatScale(e, on ? guards.newcomerThreatMult : 1);
+  /**
+   * Owner feedback 10 (Y17): the unit behind a training dummy. Built on an ordinary monster of its level (so its armour
+   * and resistances are what a real fight at that level meets and the numbers on it mean something), with `hpMult`
+   * times the health (combat.json `dummy`), no attack, no movement, no rank. Runs inside `run`.
+   */
+  function makeDummy(e) {
+    const D = engine.combatCfg?.dummy || { hpMult: 400, resetSec: 3, reference: 'road_brigand' };
+    const def = engine.enemyDef(D.reference) || engine.enemyDef('road_brigand') || engine.enemyDef('moor_hound');
+    const lvl = e.level || e.data?.level || 1;
+    const unit = spawnMonster(field, { ...def, name: e.name || 'Training Dummy', speed: 0, aggroRange: 0, attackEvery: 1e9, ranged: null, phases: null, spawns: null, onHit: null, leads: null }, lvl, e.x, e.z, { id: e.id, rank: 'normal', modifiers: [] });
+    unit.defId = 'training_dummy'; unit.family = 'construct'; unit.role = 'dummy'; unit.kind = 'construct';
+    unit.dummy = { resetSec: D.resetSec ?? 3 };
+    unit.maxHp = Math.max(1000, Math.round(unit.maxHp * (D.hpMult ?? 400))); unit.hp = unit.maxHp;
+    unit.dmg = [0, 0]; unit.speed = 0; unit.aggroRange = 0; unit.xp = 0; unit.gold = 0; unit.goldBase = 0;
+    unit.home = [e.x, e.z]; unit.facing = e.yaw || 0; unit.name = e.name || 'Training Dummy';
+    if (!e.name) e.name = unit.name;
+    return unit;
+  }
+  /** Y17: put a training dummy down — `{ x, z, yaw?, level?, name? }`. Returns the room entity (kind monster, type training_dummy). */
+  function spawnDummy(spec = {}) {
+    return host.spawn({ kind: 'monster', type: 'training_dummy', name: spec.name || 'Training Dummy', level: spec.level || host.level || 1, x: spec.x, z: spec.z, yaw: spec.yaw || 0, rank: 'normal', data: { dummy: true, noRank: true, ...(spec.data || {}) } }) || null;
+  }
+  const isDummy = e => !!e?.r?.unit?.dummy;
   const lightPay = [];
+  const handsPay = [];
   function addEntity(e) {
     addEntityInner(e);
+    // owner feedback 10 (Y16): items that sat in a hand they may no longer use were moved as the gear was restored
+    while (handsPay.length) {
+      const p = handsPay.pop();
+      const out = p.moved.filter(m => m.to === 'bag').map(m => m.item);
+      if (out.length && host.award) host.award(p.e, { items: out, reason: 'handsMoved' });
+      const said = p.moved.map(m => (m.to === 'bag' ? `${m.item.name} was moved to your bag` : `${m.item.name} was moved to your ${m.to === 'offhand' ? 'off hand' : 'main hand'}`));
+      host.event({ type: 'fx', kind: 'notice', id: p.e.id, why: 'handsMoved', items: p.moved.map(m => ({ name: m.item.name, to: m.to })),
+        text: `Weapons now go in the hand they are made for (Main hand, Off hand or One-hand). ${said.join('; ')}.` });
+    }
     while (lightPay.length) {
       const p = lightPay.pop();
       host.award(p.e, { gold: p.gold, reason: 'lightRefund' });
@@ -538,6 +585,7 @@ export function createRules(host, opts = {}) {
           if (ch.hp > 0) unit.hp = Math.min(ch.hp, unit.maxHp);
           // owner feedback 8 (W22): a lantern / torch that was worn is gone from the game — pay its list price back, once
           if (unit.lightOwed > 0 && host.award) { lightPay.push({ e, gold: unit.lightOwed }); unit.lightOwed = 0; }
+          if (unit.handsMoved?.length) { handsPay.push({ e, moved: unit.handsMoved }); unit.handsMoved = null; }
           builds++;
         }
         unit.roomRng = room.streams.get('bars');
@@ -553,6 +601,9 @@ export function createRules(host, opts = {}) {
         e.r.unit = unit;
         e.setMax(unit.maxHp, unit.maxMp ?? 0);
         e.setHp(unit.hp); e.setMp(unit.mp ?? unit.maxMp);
+      } else if (e.kind === 'monster' && (e.data?.dummy || e.type === 'training_dummy')) {
+        e.r.unit = makeDummy(e);
+        e.setMax(e.r.unit.maxHp, 0); e.setHp(e.r.unit.hp);
       } else if (e.kind === 'monster') {
         const def = engine.enemyDef(TYPE_ALIASES[e.type] || e.type) || engine.enemyDef('moor_hound');
         const rk = rankFor(e, def);
@@ -950,6 +1001,13 @@ export function createRules(host, opts = {}) {
     if (!u || !item || typeof item !== 'object') return { ok: false, text: 'Nothing to equip.' };
     if (isLightRaw(item, engine.tvGear)) return { ok: false, why: 'gone', text: 'Lanterns and torches were removed from the game — everyone carries a light now.' };
     if ((slot || item.slot) === 'back' && item.slot === 'back') { const no = packCheck(u, item, opts); if (no) return no; }
+    // owner feedback 10 (Y16): the hand rule — "Main hand" / "Off hand" fit only that slot, "One-hand" either
+    if (engine.casterForms) {
+      engine.finishItem?.(item, { fresh: false, convert: false });        // an item from an old bag gets today's words first
+      if (!slot) slot = autoSlot(item);
+      const no = handRefusal(item, slot || (item.type === 'weapon' ? 'weapon' : item.slot), { doubleGrip: !!u.perkFlags?.doubleGrip });
+      if (no) return { ok: false, why: 'hand', text: no };
+    }
     // play-test 5 slots: a cloak (`back`) and a belt (`waist`) are Thousandvale's own slots — Farhold's `equip` does not
     // know them, so they are put on here (its level rule still asked); the sheet sums their properties like any ring's
     const want = slot || item.slot;
@@ -963,7 +1021,13 @@ export function createRules(host, opts = {}) {
       // the bag is the room's (char.bag), never the sheet's: whatever Farhold moves into `u.bag` is
       // handed back as `removed` and taken off the sheet again
       const bagBefore = u.bag.length;
+      // Y16: with no slot named Farhold puts a second one-hander in the free off hand — but never beside a main-hand
+      // weapon's partner that may not move there (the weapon it would push across must itself fit the off hand)
       const out = engine.rpg.equip(u, item, { into: slot || null });
+      if (engine.casterForms && out && !out.refused) {
+        const fixed = settleHandsNow(u);
+        if (fixed.length) { for (const it of fixed) if (!u.bag.includes(it)) u.bag.push(it); }
+      }
       if (out && out.refused) return { ok: false, text: out.refused };
       const removed = u.bag.splice(bagBefore).filter(it => it !== item);
       u.bag = u.bag.filter(it => it !== item);
@@ -971,6 +1035,13 @@ export function createRules(host, opts = {}) {
       engine.rpg.refresh(u);
       return { ok: true, removed };
     });
+  }
+  /** Y16: after Farhold's own shuffle of the two hands, anything left in a hand it may not use goes to the bag. */
+  function settleHandsNow(u) {
+    const out = [];
+    const grip = { doubleGrip: !!u.perkFlags?.doubleGrip };
+    for (const sl of ['weapon', 'offhand']) { const it = u.equipment[sl]; if (it && !fitsHand(it, sl, grip)) { u.equipment[sl] = null; out.push(it); } }
+    return out;
   }
   function unequip(e, slot, opts = {}) {
     const u = e.r.unit;
@@ -1068,6 +1139,12 @@ export function createRules(host, opts = {}) {
     if (isLightRaw(item, engine.tvGear)) return { ok: false, why: 'gone', text: 'Lanterns and torches were removed from the game — everyone carries a light now.' };
     if ((slot || item.slot) === 'back' && item.slot === 'back') { const no = packCheck(u, item, opts); if (no) return no; }
     if (TV_SLOTS.includes(slot || item.slot) && item.slot !== (slot || item.slot)) return { ok: false, text: `${item.name || 'That'} will not go in that slot.` };
+    if (engine.casterForms) {
+      engine.finishItem?.(item, { fresh: false, convert: false });
+      if (!slot) slot = autoSlot(item);
+      const no = handRefusal(item, slot || (item.type === 'weapon' ? 'weapon' : item.slot), { doubleGrip: !!u.perkFlags?.doubleGrip });
+      if (no) return { ok: false, why: 'hand', text: no };
+    }
     const why = engine.rpg.equipRefusal(u, item, { into: slot || null });
     return why ? { ok: false, text: why } : { ok: true };
   }
@@ -1329,6 +1406,10 @@ export function createRules(host, opts = {}) {
   return {
     /** owner feedback 8 (W1): town guards, a raider's opening target, a newcomer's threat (js/rules/guards.js) */
     spawnGuard, openingTarget, threatScale, newcomer, guards,
+    /** owner feedback 10 (Y10): is there a clear line between two points? Always true outside an instance. */
+    sight: (ax, az, bx, bz) => (field.sight ? field.sight(ax, az, bx, bz) : true),
+    /** owner feedback 10 (Y17): training dummies */
+    spawnDummy, isDummy,
     /** round 9 (Forager's Covenant): the chance of one more of a node's main material — js/rules/professions.js gatherYield `extra` */
     gatherBonus: e => { const u = e?.r?.unit; return u && engine.tvGear ? Math.min(0.5, engine.rpg.fx.sum(u, 'gatherExtra') || 0) : 0; },
     equip, unequip, canEquip, canUnequip, bagBonus, lightRefundOwed, gear, saveGear,

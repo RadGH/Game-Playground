@@ -383,9 +383,10 @@ function withWeapon(w, e, baseKey, patch = {}, slot = 'weapon') {
 
 test('T15: every wand style is a real attack — it damages a target standing at its reach, and its card says what it does', () => {
   const styles = engine.casterForms.styles;
-  assert.equal(Object.keys(styles).length, 13);
+  assert.equal(Object.values(styles).filter(s => !s.tome).length, 13);      // (owner feedback 10: + the four tome forms, which a wand never rolls)
   const forms = new Set();
   for (const st of Object.values(styles)) {
+    if (st.tome) continue;                     // a tome's forms are tested with the tome (tests/C/playtest10)
     forms.add(st.castForm);
     const w = world();
     const mage = w.add('mage');
@@ -566,7 +567,7 @@ test('T15: off-hand focuses add their rider — Burst, Ward, Siphon, Echo — an
   { const s = setup('reliquary'); assert.equal(s.off.focusRider, 'siphon');
     s.mage.r.unit.mp = 10; s.swing(1);
     assert.ok(s.mage.r.unit.mp >= 10 + R.siphon.mana, 'a siphon focus gives mana'); }
-  { const s = setup('tome'); assert.equal(s.off.focusRider, 'echo');
+  { const s = setup('grimoire'); assert.equal(s.off.focusRider, 'echo');      // (owner feedback 10: a tome is a main-hand weapon; Echo is the grimoire's)
     const from = s.w.events.length; s.swing(R.echo.every); s.w.steps(12);      // owner feedback 8: a bolt takes longer to arrive, and the echo follows the hit
     const bolts = s.w.events.slice(from).filter(e => e.type === 'fx' && e.kind === 'bolt' && e.basic);
     assert.equal(bolts.length, R.echo.every + 1, `every ${R.echo.every}th attack repeats (${bolts.length} bolts for ${R.echo.every} attacks)`); }

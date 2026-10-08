@@ -7,6 +7,7 @@
 // engine's shared generator — a fight replays from its room's seed alone.
 
 import { isLightItem, lightRefund } from './tv-gear.js';
+import { settleHands } from './hands.js';
 import { itemPrice } from './economy.js';
 import { attuneWeapon, createSkillBar, describeSkill } from './farhold.js';
 
@@ -155,6 +156,18 @@ export function restoreGear(engine, ch, blob) {
     // …and so are Thousandvale's own slots (a cloak, a belt), which Farhold's `equip` does not know
     if (slot === 'weapon' || slot === 'offhand' || slot === 'back' || slot === 'waist') ch.equipment[slot] = copy;
     else engine.rpg.equip(ch, copy, { into: slot, force: true });
+  }
+  // owner feedback 10 (Y16): an item saved in a hand it may no longer use (a tome in the off hand, an orb as the
+  // weapon, two main-hand items) is moved — to the other hand when that is legal and empty, otherwise out to the bag.
+  // The room's bag is not the sheet's, so what leaves is listed on `ch.handsMoved` for index.js addEntity to hand over
+  // (host.award, once: the next save no longer holds it there). Doubled Grasp is not known yet at this point (perks
+  // are restored after the gear), so a second two-hander is never judged here — only the four hand words are.
+  if (engine.casterForms) {
+    const fixed = settleHands(ch.equipment.weapon, ch.equipment.offhand, { doubleGrip: true });
+    if (fixed.moved.length) {
+      ch.equipment.weapon = fixed.weapon; ch.equipment.offhand = fixed.offhand;
+      ch.handsMoved = [...(ch.handsMoved || []), ...fixed.moved];
+    }
   }
   ch.bag = Array.isArray(blob.bag) ? JSON.parse(JSON.stringify(blob.bag)) : [];
   engine.rpg.refresh(ch, { full: true });

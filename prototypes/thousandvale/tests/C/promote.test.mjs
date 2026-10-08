@@ -139,7 +139,7 @@ test('promote: EVERY power a promotion can hand out has a hook that really runs 
       const u = wear(w, item);
       assert.ok(u.legendaryPowers.includes('legendary:' + pid), `${pid}: on the sheet`);
       for (let k = 0; k < 1500 && !Object.values(calls).some(c => c > 0); k++) {
-        if (k % 300 === 0) for (let j = 0; j < 3; j++) w.mob(j * 2 - 2, 4);
+        if (k % 100 === 0) for (let j = 0; j < 3; j++) w.mob(j * 2 - 2, 4);      // (owner feedback 10: one hit a swing now, so more bodies for the same number of rolls)
         if (pid === 'cheat_death_once') { if (k === 200) u.hp = 2; } else u.hp = Math.max(u.hp, u.maxHp * 0.3);
         u.mp = u.maxMp;
         const t = w.R.field.monsters.find(m => m.dying == null);
@@ -148,7 +148,7 @@ test('promote: EVERY power a promotion can hand out has a hook that really runs 
       }
       // a power whose reader is not a fight (a gathering node's yield, a crate being opened): ask those modules
       if (!Object.values(calls).some(c => c > 0)) { w.R.gatherBonus(w.me); try { w.R.openCrate(w.me, w.R.makeCrate(w.me, { slot: 'any' })); } catch { /* a crate this build cannot fill */ } }
-      if (!Object.values(calls).some(c => c > 0)) dead.push(`${pid} (${Object.keys(calls).join(', ')})`);
+      if (!Object.values(calls).some(c => c > 0)) dead.push(`${pid} (${Object.keys(calls).join(', ')}) on ${item.baseKey} worn by ${w.me.cls}`);
     } finally { for (const [k, f] of Object.entries(orig)) E[k] = f; }
   }
   assert.deepEqual(silent, [], 'every power has a card sentence');

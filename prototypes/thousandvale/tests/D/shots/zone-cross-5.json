@@ -1,0 +1,1133 @@
+{
+ "run": 5,
+ "stalls": {
+  "busyLong": 0,
+  "maxBusyMs": 36,
+  "frames": [],
+  "longTasks": 0,
+  "maxTaskMs": 0
+ },
+ "links": 0,
+ "zones": [
+  "z12_02",
+  "z13_02"
+ ],
+ "top": [
+  {
+   "name": "zone:sites",
+   "n": 1,
+   "ms": 14627,
+   "max": 14627
+  },
+  {
+   "name": "zone:setpieces",
+   "n": 1,
+   "ms": 9630,
+   "max": 9630
+  },
+  {
+   "name": "zone:ground",
+   "n": 1,
+   "ms": 81,
+   "max": 81
+  },
+  {
+   "name": "zone:parse",
+   "n": 1,
+   "ms": 65,
+   "max": 65
+  },
+  {
+   "name": "terrain:water",
+   "n": 1,
+   "ms": 51,
+   "max": 51
+  },
+  {
+   "name": "terrain:chunks",
+   "n": 1,
+   "ms": 25,
+   "max": 25
+  },
+  {
+   "name": "render",
+   "n": 52,
+   "ms": 429,
+   "max": 20
+  },
+  {
+   "name": "world:views",
+   "n": 52,
+   "ms": 193,
+   "max": 19
+  },
+  {
+   "name": "zone:scatter",
+   "n": 1,
+   "ms": 17,
+   "max": 17
+  },
+  {
+   "name": "zone:town",
+   "n": 1,
+   "ms": 15,
+   "max": 15
+  }
+ ],
+ "longTasks": [
+  [
+   175866,
+   2114
+  ],
+  [
+   177991,
+   2106
+  ],
+  [
+   180102,
+   996
+  ],
+  [
+   181102,
+   1713
+  ],
+  [
+   182818,
+   1785
+  ],
+  [
+   184608,
+   1654
+  ],
+  [
+   186266,
+   1511
+  ],
+  [
+   187781,
+   1478
+  ],
+  [
+   189264,
+   1430
+  ],
+  [
+   190699,
+   1654
+  ],
+  [
+   192357,
+   1696
+  ],
+  [
+   194058,
+   1580
+  ],
+  [
+   195651,
+   1541
+  ],
+  [
+   197196,
+   64
+  ],
+  [
+   197282,
+   1619
+  ],
+  [
+   198906,
+   1659
+  ],
+  [
+   200572,
+   1752
+  ],
+  [
+   202328,
+   1811
+  ],
+  [
+   204145,
+   1638
+  ],
+  [
+   205790,
+   1605
+  ],
+  [
+   207400,
+   1679
+  ],
+  [
+   209084,
+   1767
+  ],
+  [
+   210855,
+   1845
+  ],
+  [
+   212705,
+   1872
+  ],
+  [
+   214580,
+   2088
+  ],
+  [
+   216672,
+   1896
+  ],
+  [
+   218573,
+   1832
+  ],
+  [
+   220412,
+   1718
+  ],
+  [
+   222133,
+   1578
+  ],
+  [
+   223724,
+   1545
+  ],
+  [
+   225274,
+   1719
+  ],
+  [
+   226997,
+   1680
+  ],
+  [
+   228681,
+   1703
+  ],
+  [
+   230392,
+   1533
+  ],
+  [
+   231932,
+   1382
+  ],
+  [
+   233318,
+   1413
+  ],
+  [
+   234736,
+   1334
+  ],
+  [
+   236078,
+   1596
+  ],
+  [
+   237678,
+   1626
+  ],
+  [
+   239310,
+   1536
+  ],
+  [
+   240850,
+   1561
+  ],
+  [
+   242416,
+   1512
+  ],
+  [
+   243930,
+   1632
+  ],
+  [
+   245567,
+   1586
+  ],
+  [
+   247156,
+   1358
+  ],
+  [
+   248516,
+   1402
+  ],
+  [
+   249922,
+   1416
+  ],
+  [
+   251341,
+   1401
+  ],
+  [
+   252745,
+   1512
+  ],
+  [
+   254260,
+   1480
+  ],
+  [
+   255742,
+   1610
+  ],
+  [
+   257355,
+   1551
+  ],
+  [
+   258909,
+   1533
+  ]
+ ],
+ "cuts": [
+  {
+   "t0": 175866,
+   "ms": 2114,
+   "self": [
+    [
+     2097,
+     "(program) :0"
+    ],
+    [
+     1,
+     "getBindingState three/three.module.js:1680"
+    ],
+    [
+     1,
+     "multiplyMatrices three/three.core.js:10570"
+    ],
+    [
+     1,
+     "WebGLRenderer.renderBufferDirect three/three.module.js:17233"
+    ],
+    [
+     1,
+     "updatePlates client/actors.js:399"
+    ],
+    [
+     1,
+     "drawElements :0"
+    ],
+    [
+     1,
+     "drawImage :0"
+    ],
+    [
+     1,
+     "get alphaTest three/three.core.js:21547"
+    ],
+    [
+     1,
+     "apply three/three.core.js:52816"
+    ],
+    [
+     1,
+     "setOptional three/three.module.js:6115"
+    ],
+    [
+     1,
+     "update three/three.module.js:242"
+    ],
+    [
+     1,
+     "frame client/perf.js:53"
+    ],
+    [
+     1,
+     "updateMatrixWorld three/three.core.js:13067"
+    ],
+    [
+     1,
+     "setMode three/three.module.js:2279"
+    ]
+   ],
+   "inclusive": [
+    [
+     2114,
+     "(root) :0"
+    ],
+    [
+     2097,
+     "(program) :0"
+    ],
+    [
+     17,
+     "frame client/main.js:1091"
+    ],
+    [
+     12,
+     "WebGLRenderer.render three/three.module.js:17674"
+    ],
+    [
+     12,
+     "render client/scene.js:161"
+    ],
+    [
+     12,
+     "(anon) client/main.js:1179"
+    ],
+    [
+     12,
+     "span client/perf.js:49"
+    ],
+    [
+     7,
+     "WebGLRenderer.renderBufferDirect three/three.module.js:17233"
+    ],
+    [
+     6,
+     "renderObjects three/three.module.js:18165"
+    ],
+    [
+     6,
+     "renderScene three/three.module.js:18015"
+    ],
+    [
+     5,
+     "renderObject three/three.module.js:18192"
+    ],
+    [
+     3,
+     "renderObject three/three.module.js:9569"
+    ],
+    [
+     3,
+     "WebGLShadowMap.render three/three.module.js:9143"
+    ],
+    [
+     3,
+     "setProgram three/three.module.js:18407"
+    ],
+    [
+     2,
+     "update client/actors.js:441"
+    ],
+    [
+     2,
+     "update ui/minimap.js:59"
+    ],
+    [
+     2,
+     "tick ui/suite.js:63"
+    ],
+    [
+     2,
+     "updateMatrixWorld three/three.core.js:13067"
+    ],
+    [
+     1,
+     "getBindingState three/three.module.js:1680"
+    ],
+    [
+     1,
+     "setup three/three.module.js:1623"
+    ],
+    [
+     1,
+     "drawMap ui/map-render.js:85"
+    ],
+    [
+     1,
+     "getProgram three/three.module.js:18224"
+    ],
+    [
+     1,
+     "update three/three.module.js:4612"
+    ],
+    [
+     1,
+     "projectObject three/three.module.js:17897"
+    ],
+    [
+     1,
+     "update three/three.core.js:55820"
+    ],
+    [
+     1,
+     "update js/chibi2.js:489"
+    ],
+    [
+     1,
+     "multiplyMatrices three/three.core.js:10570"
+    ],
+    [
+     1,
+     "updatePlates client/actors.js:399"
+    ],
+    [
+     1,
+     "drawElements :0"
+    ],
+    [
+     1,
+     "render three/three.module.js:4331"
+    ]
+   ],
+   "stacks": [
+    [
+     2097,
+     "(program) :0 < (root) :0"
+    ],
+    [
+     1,
+     "getBindingState three/three.module.js:1680 < setup three/three.module.js:1623 < WebGLRenderer.renderBufferDirect three/three.module.js:17233 < renderObject three/three.module.js:18192 < renderObjects three/three.module.js:18165 < renderScene three/three.module.js:18015 < WebGLRenderer.render three/three.module.js:17674 < render client/scene.js:161 < (anon) client/main.js:1179 < span client/perf.js:49 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "updatePlates client/actors.js:399 < update client/actors.js:441 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "drawElements :0 < render three/three.module.js:4331 < WebGLRenderer.renderBufferDirect three/three.module.js:17233 < renderObject three/three.module.js:9569 < renderObject three/three.module.js:9569 < renderObject three/three.module.js:9569 < WebGLShadowMap.render three/three.module.js:9143 < WebGLRenderer.render three/three.module.js:17674 < render client/scene.js:161 < (anon) client/main.js:1179 < span client/perf.js:49 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "drawImage :0 < drawMap ui/map-render.js:85 < update ui/minimap.js:59 < tick ui/suite.js:63 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "get alphaTest three/three.core.js:21547 < getParameters three/three.module.js:7357 < getProgram three/three.module.js:18224 < setProgram three/three.module.js:18407 < WebGLRenderer.renderBufferDirect three/three.module.js:17233 < renderObject three/three.module.js:18192 < renderObjects three/three.module.js:18165 < renderScene three/three.module.js:18015 < WebGLRenderer.render three/three.module.js:17674 < render client/scene.js:161 < (anon) client/main.js:1179 < span client/perf.js:49 < frame client/main.js:1091 < (root) :0"
+    ]
+   ]
+  },
+  {
+   "t0": 177991,
+   "ms": 2106,
+   "self": [
+    [
+     2089,
+     "(program) :0"
+    ],
+    [
+     2,
+     "projectObject three/three.module.js:17897"
+    ],
+    [
+     2,
+     "updateMatrixWorld three/three.core.js:13067"
+    ],
+    [
+     1,
+     "getParameters three/three.module.js:7357"
+    ],
+    [
+     1,
+     "WebGLRenderer.renderBufferDirect three/three.module.js:17233"
+    ],
+    [
+     1,
+     "bindVertexArray :0"
+    ],
+    [
+     1,
+     "getProgram three/three.module.js:18224"
+    ],
+    [
+     1,
+     "get clientWidth :0"
+    ],
+    [
+     1,
+     "multiplyMatrices three/three.core.js:10570"
+    ],
+    [
+     1,
+     "apply three/three.core.js:52816"
+    ],
+    [
+     1,
+     "getBindingState three/three.module.js:1680"
+    ],
+    [
+     1,
+     "slerpFlat three/three.core.js:3950"
+    ],
+    [
+     1,
+     "setStyle three/three.core.js:14353"
+    ],
+    [
+     1,
+     "sendJ net/client.js:52"
+    ]
+   ],
+   "inclusive": [
+    [
+     2106,
+     "(root) :0"
+    ],
+    [
+     2089,
+     "(program) :0"
+    ],
+    [
+     17,
+     "frame client/main.js:1091"
+    ],
+    [
+     14,
+     "span client/perf.js:49"
+    ],
+    [
+     12,
+     "WebGLRenderer.render three/three.module.js:17674"
+    ],
+    [
+     12,
+     "render client/scene.js:161"
+    ],
+    [
+     12,
+     "(anon) client/main.js:1179"
+    ],
+    [
+     7,
+     "WebGLRenderer.renderBufferDirect three/three.module.js:17233"
+    ],
+    [
+     6,
+     "renderObject three/three.module.js:18192"
+    ],
+    [
+     6,
+     "renderObjects three/three.module.js:18165"
+    ],
+    [
+     6,
+     "renderScene three/three.module.js:18015"
+    ],
+    [
+     3,
+     "setProgram three/three.module.js:18407"
+    ],
+    [
+     3,
+     "renderObject three/three.module.js:9569"
+    ],
+    [
+     3,
+     "WebGLShadowMap.render three/three.module.js:9143"
+    ],
+    [
+     2,
+     "getProgram three/three.module.js:18224"
+    ],
+    [
+     2,
+     "projectObject three/three.module.js:17897"
+    ],
+    [
+     2,
+     "updateMatrixWorld three/three.core.js:13067"
+    ],
+    [
+     2,
+     "setup three/three.module.js:1623"
+    ],
+    [
+     1,
+     "getParameters three/three.module.js:7357"
+    ],
+    [
+     1,
+     "update three/three.core.js:55820"
+    ],
+    [
+     1,
+     "update js/chibi2.js:489"
+    ],
+    [
+     1,
+     "update client/actors.js:441"
+    ],
+    [
+     1,
+     "surface client/terrain-view.js:99"
+    ],
+    [
+     1,
+     "buildChunk client/terrain-view.js:167"
+    ],
+    [
+     1,
+     "(anon) client/terrain-view.js:280"
+    ],
+    [
+     1,
+     "update client/terrain-view.js:270"
+    ],
+    [
+     1,
+     "update client/world-stream.js:141"
+    ],
+    [
+     1,
+     "update ui/minimap.js:59"
+    ],
+    [
+     1,
+     "tick ui/suite.js:63"
+    ],
+    [
+     1,
+     "bindVertexArray :0"
+    ]
+   ],
+   "stacks": [
+    [
+     2089,
+     "(program) :0 < (root) :0"
+    ],
+    [
+     1,
+     "getParameters three/three.module.js:7357 < getProgram three/three.module.js:18224 < setProgram three/three.module.js:18407 < WebGLRenderer.renderBufferDirect three/three.module.js:17233 < renderObject three/three.module.js:18192 < renderObjects three/three.module.js:18165 < renderScene three/three.module.js:18015 < WebGLRenderer.render three/three.module.js:17674 < render client/scene.js:161 < (anon) client/main.js:1179 < span client/perf.js:49 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "WebGLRenderer.renderBufferDirect three/three.module.js:17233 < renderObject three/three.module.js:18192 < renderObjects three/three.module.js:18165 < renderScene three/three.module.js:18015 < WebGLRenderer.render three/three.module.js:17674 < render client/scene.js:161 < (anon) client/main.js:1179 < span client/perf.js:49 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "getProgram three/three.module.js:18224 < setProgram three/three.module.js:18407 < WebGLRenderer.renderBufferDirect three/three.module.js:17233 < renderObject three/three.module.js:18192 < renderObjects three/three.module.js:18165 < renderScene three/three.module.js:18015 < WebGLRenderer.render three/three.module.js:17674 < render client/scene.js:161 < (anon) client/main.js:1179 < span client/perf.js:49 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "get clientWidth :0 < update client/fx.js:38 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "multiplyMatrices three/three.core.js:10570 < renderObject three/three.module.js:18192 < renderObjects three/three.module.js:18165 < renderScene three/three.module.js:18015 < WebGLRenderer.render three/three.module.js:17674 < render client/scene.js:161 < (anon) client/main.js:1179 < span client/perf.js:49 < frame client/main.js:1091 < (root) :0"
+    ]
+   ]
+  },
+  {
+   "t0": 214580,
+   "ms": 2088,
+   "self": [
+    [
+     2067,
+     "(program) :0"
+    ],
+    [
+     2,
+     "bufferSubData :0"
+    ],
+    [
+     2,
+     "update three/three.module.js:4612"
+    ],
+    [
+     1,
+     "renderObject three/three.module.js:9569"
+    ],
+    [
+     1,
+     "WebGLRenderer.renderBufferDirect three/three.module.js:17233"
+    ],
+    [
+     1,
+     "cell rules/terrain-read.js:186"
+    ],
+    [
+     1,
+     "updateMatrixWorld three/three.core.js:13067"
+    ],
+    [
+     1,
+     "bindVertexArray :0"
+    ],
+    [
+     1,
+     "slerpFlat three/three.core.js:3950"
+    ],
+    [
+     1,
+     "rectDistance client/horizon-grid.js:317"
+    ],
+    [
+     1,
+     "bindTexture three/three.module.js:10573"
+    ],
+    [
+     1,
+     "drawArraysInstanced :0"
+    ],
+    [
+     1,
+     "intersectsFrustum three/three.core.js:24185"
+    ],
+    [
+     1,
+     "firstHit client/solids.js:42"
+    ]
+   ],
+   "inclusive": [
+    [
+     2088,
+     "(root) :0"
+    ],
+    [
+     2067,
+     "(program) :0"
+    ],
+    [
+     21,
+     "frame client/main.js:1091"
+    ],
+    [
+     17,
+     "span client/perf.js:49"
+    ],
+    [
+     12,
+     "WebGLRenderer.render three/three.module.js:17674"
+    ],
+    [
+     12,
+     "render client/scene.js:161"
+    ],
+    [
+     12,
+     "(anon) client/main.js:1179"
+    ],
+    [
+     5,
+     "update client/world-stream.js:141"
+    ],
+    [
+     5,
+     "renderObject three/three.module.js:9569"
+    ],
+    [
+     5,
+     "WebGLShadowMap.render three/three.module.js:9143"
+    ],
+    [
+     5,
+     "update client/terrain-view.js:270"
+    ],
+    [
+     4,
+     "buildChunk client/terrain-view.js:167"
+    ],
+    [
+     4,
+     "(anon) client/terrain-view.js:280"
+    ],
+    [
+     4,
+     "update three/three.module.js:4612"
+    ],
+    [
+     3,
+     "WebGLRenderer.renderBufferDirect three/three.module.js:17233"
+    ],
+    [
+     3,
+     "renderScene three/three.module.js:18015"
+    ],
+    [
+     3,
+     "surface client/terrain-view.js:99"
+    ],
+    [
+     2,
+     "renderObjects three/three.module.js:18165"
+    ],
+    [
+     2,
+     "renderObject three/three.module.js:18192"
+    ],
+    [
+     2,
+     "bufferSubData :0"
+    ],
+    [
+     2,
+     "updateBuffer three/three.module.js:141"
+    ],
+    [
+     2,
+     "update three/three.module.js:242"
+    ],
+    [
+     2,
+     "projectObject three/three.module.js:17897"
+    ],
+    [
+     2,
+     "updateMatrixWorld three/three.core.js:13067"
+    ],
+    [
+     1,
+     "update client/actors.js:441"
+    ],
+    [
+     1,
+     "update ui/minimap.js:59"
+    ],
+    [
+     1,
+     "tick ui/suite.js:63"
+    ],
+    [
+     1,
+     "cell rules/terrain-read.js:186"
+    ],
+    [
+     1,
+     "waterAt rules/terrain-read.js:252"
+    ],
+    [
+     1,
+     "waterAt client/terrain.js:32"
+    ]
+   ],
+   "stacks": [
+    [
+     2067,
+     "(program) :0 < (root) :0"
+    ],
+    [
+     2,
+     "bufferSubData :0 < updateBuffer three/three.module.js:141 < update three/three.module.js:242 < update three/three.module.js:4612 < renderObject three/three.module.js:9569 < renderObject three/three.module.js:9569 < renderObject three/three.module.js:9569 < WebGLShadowMap.render three/three.module.js:9143 < WebGLRenderer.render three/three.module.js:17674 < render client/scene.js:161 < (anon) client/main.js:1179 < span client/perf.js:49 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "WebGLRenderer.renderBufferDirect three/three.module.js:17233 < renderObject three/three.module.js:18192 < renderObjects three/three.module.js:18165 < renderScene three/three.module.js:18015 < WebGLRenderer.render three/three.module.js:17674 < render client/scene.js:161 < (anon) client/main.js:1179 < span client/perf.js:49 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "update three/three.module.js:4612 < projectObject three/three.module.js:17897 < projectObject three/three.module.js:17897 < projectObject three/three.module.js:17897 < WebGLRenderer.render three/three.module.js:17674 < render client/scene.js:161 < (anon) client/main.js:1179 < span client/perf.js:49 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "cell rules/terrain-read.js:186 < waterAt rules/terrain-read.js:252 < waterAt client/terrain.js:32 < waterAt client/terrain.js:97 < surface client/terrain-view.js:99 < buildChunk client/terrain-view.js:167 < (anon) client/terrain-view.js:280 < span client/perf.js:49 < update client/terrain-view.js:270 < update client/world-stream.js:141 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "bindVertexArray :0 < bindVertexArrayObject three/three.module.js:1668 < setup three/three.module.js:1623 < WebGLRenderer.renderBufferDirect three/three.module.js:17233 < renderObject three/three.module.js:9569 < renderObject three/three.module.js:9569 < renderObject three/three.module.js:9569 < WebGLShadowMap.render three/three.module.js:9143 < WebGLRenderer.render three/three.module.js:17674 < render client/scene.js:161 < (anon) client/main.js:1179 < span client/perf.js:49 < frame client/main.js:1091 < (root) :0"
+    ]
+   ]
+  },
+  {
+   "t0": 216672,
+   "ms": 1896,
+   "self": [
+    [
+     1885,
+     "(program) :0"
+    ],
+    [
+     1,
+     "setProgram three/three.module.js:18407"
+    ],
+    [
+     1,
+     "multiplyMatrices three/three.core.js:10570"
+    ],
+    [
+     1,
+     "firstHit client/solids.js:42"
+    ],
+    [
+     1,
+     "drawElements :0"
+    ],
+    [
+     1,
+     "drawIcon ui/map-render.js:247"
+    ],
+    [
+     1,
+     "intersectsFrustum three/three.core.js:24185"
+    ],
+    [
+     1,
+     "frame client/main.js:1091"
+    ],
+    [
+     1,
+     "renderObject three/three.module.js:9569"
+    ],
+    [
+     1,
+     "update three/three.module.js:4612"
+    ],
+    [
+     1,
+     "setValueV1f three/three.module.js:5118"
+    ],
+    [
+     1,
+     "get clientWidth :0"
+    ],
+    [
+     1,
+     "updateMatrixWorld three/three.core.js:13067"
+    ],
+    [
+     1,
+     "slerpFlat three/three.core.js:3950"
+    ]
+   ],
+   "inclusive": [
+    [
+     1896,
+     "(root) :0"
+    ],
+    [
+     1885,
+     "(program) :0"
+    ],
+    [
+     10,
+     "frame client/main.js:1091"
+    ],
+    [
+     7,
+     "WebGLRenderer.render three/three.module.js:17674"
+    ],
+    [
+     7,
+     "render client/scene.js:161"
+    ],
+    [
+     7,
+     "(anon) client/main.js:1179"
+    ],
+    [
+     7,
+     "span client/perf.js:49"
+    ],
+    [
+     4,
+     "WebGLRenderer.renderBufferDirect three/three.module.js:17233"
+    ],
+    [
+     2,
+     "setProgram three/three.module.js:18407"
+    ],
+    [
+     2,
+     "renderObject three/three.module.js:18192"
+    ],
+    [
+     2,
+     "renderObjects three/three.module.js:18165"
+    ],
+    [
+     2,
+     "renderScene three/three.module.js:18015"
+    ],
+    [
+     2,
+     "renderObject three/three.module.js:9569"
+    ],
+    [
+     2,
+     "WebGLShadowMap.render three/three.module.js:9143"
+    ],
+    [
+     2,
+     "updateMatrixWorld three/three.core.js:13067"
+    ],
+    [
+     1,
+     "update ui/minimap.js:59"
+    ],
+    [
+     1,
+     "tick ui/suite.js:63"
+    ],
+    [
+     1,
+     "projectObject three/three.module.js:17897"
+    ],
+    [
+     1,
+     "multiplyMatrices three/three.core.js:10570"
+    ],
+    [
+     1,
+     "upload three/three.module.js:6123"
+    ],
+    [
+     1,
+     "firstHit client/solids.js:42"
+    ],
+    [
+     1,
+     "sightLine client/main.js:408"
+    ],
+    [
+     1,
+     "sightMarkers ui/pt6-core.js:28"
+    ],
+    [
+     1,
+     "o.atlas.extraMarkers ui/pt5.js:96"
+    ],
+    [
+     1,
+     "atlas.extraMarkers ui/pt8.js:34"
+    ],
+    [
+     1,
+     "markers ui/atlas.js:191"
+    ],
+    [
+     1,
+     "drawElements :0"
+    ],
+    [
+     1,
+     "render three/three.module.js:4331"
+    ],
+    [
+     1,
+     "drawIcon ui/map-render.js:247"
+    ],
+    [
+     1,
+     "drawMarkers ui/map-render.js:230"
+    ]
+   ],
+   "stacks": [
+    [
+     1885,
+     "(program) :0 < (root) :0"
+    ],
+    [
+     1,
+     "multiplyMatrices three/three.core.js:10570 < updateMatrixWorld three/three.core.js:13067 < updateMatrixWorld three/three.core.js:13067 < updateMatrixWorld three/three.core.js:13067 < WebGLRenderer.render three/three.module.js:17674 < render client/scene.js:161 < (anon) client/main.js:1179 < span client/perf.js:49 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "setProgram three/three.module.js:18407 < WebGLRenderer.renderBufferDirect three/three.module.js:17233 < renderObject three/three.module.js:9569 < renderObject three/three.module.js:9569 < renderObject three/three.module.js:9569 < WebGLShadowMap.render three/three.module.js:9143 < WebGLRenderer.render three/three.module.js:17674 < render client/scene.js:161 < (anon) client/main.js:1179 < span client/perf.js:49 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "firstHit client/solids.js:42 < sightLine client/main.js:408 < sightMarkers ui/pt6-core.js:28 < o.atlas.extraMarkers ui/pt5.js:96 < atlas.extraMarkers ui/pt8.js:34 < markers ui/atlas.js:191 < update ui/minimap.js:59 < tick ui/suite.js:63 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "drawElements :0 < render three/three.module.js:4331 < WebGLRenderer.renderBufferDirect three/three.module.js:17233 < renderObject three/three.module.js:18192 < renderObjects three/three.module.js:18165 < renderScene three/three.module.js:18015 < WebGLRenderer.render three/three.module.js:17674 < render client/scene.js:161 < (anon) client/main.js:1179 < span client/perf.js:49 < frame client/main.js:1091 < (root) :0"
+    ],
+    [
+     1,
+     "drawIcon ui/map-render.js:247 < drawMarkers ui/map-render.js:230 < drawMap ui/map-render.js:85 < update ui/minimap.js:59 < tick ui/suite.js:63 < frame client/main.js:1091 < (root) :0"
+    ]
+   ]
+  }
+ ]
+}

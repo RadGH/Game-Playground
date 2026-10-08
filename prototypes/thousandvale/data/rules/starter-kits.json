@@ -1,5 +1,5 @@
 {
- "_doc": "Stream C (play-test 5, T5): the starting equipment a new character chooses after the look screen. Per class: exactly 3 `armour` sets ({id, name, blurb, pieces: [armour base keys]}, 3 pieces each, budget bases only \u2014 cloth/light/medium/heavy helm, chest, legs, gauntlets, boots; never plate/runed/scaled/dragon gear, never heavier than the class wears) and 3-6 `weapons` packs ({id, name, blurb, main, off?, style?, element?, spell?}). `main`/`off` are item base keys (emberveil items.json weaponBases/armorBases, plus the foci Farhold's foci.js adds in memory: grimoire, seer_orb, reliquary, psalter, effigy). For a caster: `element` is the wand/staff/sceptre's element (fire, ice, lightning, poison, shadow, arcane \u2014 Farhold has no holy attunement), `spell` a staff's spell key (Farhold weapons.js STAFF_SPELLS for that element), `style` a wand's castStyle (docs/requests.md 'Round 5 contracts \u2014 C', T15). The FIRST weapons pack of a class is its old Farhold starter, so a character made with no choice gets what it got before; the first armour set contains the old starting armour. Blurbs say what the thing IS and carry no numbers. Read by js/rules/starter-kits.js (kitsFor / validKit / starterGear); checked by tests/C/starter-kits.test.mjs. This file is GENERATED from a table (the generator lived in the agent scratchpad) but is the source of truth now: edit it by hand. Owner feedback 6 (U15): no pack is strictly worse than another \u2014 every pack fills BOTH hands (a one-hander always has a shield, buckler, focus or second weapon beside it) or is a two-hander; every class with a shield has a one-hander-and-shield pack. Owner feedback 8 (W23, 'too many similar items'): 4-6 packs a class, no two of them near-duplicates (the measure is in js/rules/starter-kits.js packSignature: hands, attack family, reach band, element, tempo \u2014 two packs must differ on at least two, and no more than two packs of a class share a hand shape); every armour set has a `lean` (see `leans`). `role` and `diff` on the kit screen are WRITTEN BY CODE from the signature, never stored here.",
+ "_doc": "Stream C (play-test 5, T5): the starting equipment a new character chooses after the look screen. Per class: exactly 3 `armour` sets ({id, name, blurb, pieces: [armour base keys]}, 3 pieces each, budget bases only — cloth/light/medium/heavy helm, chest, legs, gauntlets, boots; never plate/runed/scaled/dragon gear, never heavier than the class wears) and 3-6 `weapons` packs ({id, name, blurb, main, off?, style?, element?, spell?}). `main`/`off` are item base keys (emberveil items.json weaponBases/armorBases, plus the foci Farhold's foci.js adds in memory: grimoire, seer_orb, reliquary, psalter, effigy). For a caster: `element` is the wand/staff/sceptre's element (fire, ice, lightning, poison, shadow, arcane — Farhold has no holy attunement), `spell` a staff's spell key (Farhold weapons.js STAFF_SPELLS for that element), `style` a wand's castStyle (docs/requests.md 'Round 5 contracts — C', T15). The FIRST weapons pack of a class is its old Farhold starter, so a character made with no choice gets what it got before; the first armour set contains the old starting armour. Blurbs say what the thing IS and carry no numbers. Read by js/rules/starter-kits.js (kitsFor / validKit / starterGear); checked by tests/C/starter-kits.test.mjs. This file is GENERATED from a table (the generator lived in the agent scratchpad) but is the source of truth now: edit it by hand. Owner feedback 6 (U15): no pack is strictly worse than another — every pack fills BOTH hands (a one-hander always has a shield, buckler, focus or second weapon beside it) or is a two-hander; every class with a shield has a one-hander-and-shield pack. Owner feedback 8 (W23, 'too many similar items'): 4-6 packs a class, no two of them near-duplicates (the measure is in js/rules/starter-kits.js packSignature: hands, attack family, reach band, element, tempo — two packs must differ on at least two, and no more than two packs of a class share a hand shape); every armour set has a `lean` (see `leans`). `role` and `diff` on the kit screen are WRITTEN BY CODE from the signature, never stored here.",
  "version": 2,
  "classes": {
   "warrior": {
@@ -432,7 +432,7 @@
     {
      "id": "wand_beam",
      "name": "Lightline Wand and Orb",
-     "blurb": "Wand: one-handed, ranged; fires an instant line of lightning through everything in it, with an orb in the off hand (more spell power).",
+     "blurb": "Wand: one-handed, ranged; fires an instant line of lightning through everything in it, with an orb in the off hand (your hits burst around the enemy struck).",
      "main": "wand",
      "off": "orb",
      "style": "beam",
@@ -507,9 +507,9 @@
     {
      "id": "wand_fan",
      "name": "Three-Note Wand and Songbook",
-     "blurb": "Wand: one-handed, ranged; throws three bolts of arcane force in a fan, with a tome in the off hand (spell power and mana).",
+     "blurb": "Wand: one-handed, ranged; throws three bolts of arcane force in a fan, with a grimoire in the off hand (every fourth basic attack repeats itself).",
      "main": "wand",
-     "off": "tome",
+     "off": "grimoire",
      "style": "fan",
      "element": "arcane"
     },
@@ -580,7 +580,7 @@
     {
      "id": "wand_bolt",
      "name": "Icicle Wand and Orb",
-     "blurb": "Wand: one-handed, ranged; throws a single bolt of frost, with an orb in the off hand (more spell power).",
+     "blurb": "Wand: one-handed, ranged; throws a single bolt of frost, with an orb in the off hand (your hits burst around the enemy struck).",
      "main": "wand",
      "off": "orb",
      "style": "bolt",
@@ -589,16 +589,16 @@
     {
      "id": "wand_burst",
      "name": "Firecracker Wand and Tome",
-     "blurb": "Wand: one-handed, ranged; throws a bolt of fire that bursts where it lands, with a tome in the off hand (spell power and mana).",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of fire that bursts where it lands, with a grimoire in the off hand (every fourth basic attack repeats itself).",
      "main": "wand",
-     "off": "tome",
+     "off": "grimoire",
      "style": "burst",
      "element": "fire"
     },
     {
      "id": "sceptre_orb",
      "name": "Battle-Mage Sceptre and Orb",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal fire damage, with an orb in the off hand (more spell power).",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal fire damage, with an orb in the off hand (your hits burst around the enemy struck).",
      "main": "scepter",
      "off": "orb",
      "element": "fire"
@@ -670,9 +670,9 @@
     {
      "id": "wand_pool",
      "name": "Rot Wand and Tome",
-     "blurb": "Wand: one-handed, ranged; throws a bolt of poison that leaves poisoned ground where it hits, with a tome in the off hand (spell power and mana).",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of poison that leaves poisoned ground where it hits, with a grimoire in the off hand (every fourth basic attack repeats itself).",
      "main": "wand",
-     "off": "tome",
+     "off": "grimoire",
      "style": "pool",
      "element": "poison"
     },
@@ -742,7 +742,7 @@
     {
      "id": "wand_heavy",
      "name": "Leaden Wand and Orb",
-     "blurb": "Wand: one-handed, ranged; throws one slow, heavy bolt of shadow, with an orb in the off hand (more spell power).",
+     "blurb": "Wand: one-handed, ranged; throws one slow, heavy bolt of shadow, with an orb in the off hand (your hits burst around the enemy struck).",
      "main": "wand",
      "off": "orb",
      "style": "heavy",
@@ -751,16 +751,16 @@
     {
      "id": "wand_fork",
      "name": "Split-Tongue Wand and Tome",
-     "blurb": "Wand: one-handed, ranged; throws a bolt of fire that splits on what it hits, with a tome in the off hand (spell power and mana).",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of fire that splits on what it hits, with a grimoire in the off hand (every fourth basic attack repeats itself).",
      "main": "wand",
-     "off": "tome",
+     "off": "grimoire",
      "style": "fork",
      "element": "fire"
     },
     {
      "id": "sceptre_orb",
      "name": "Pactblade Sceptre and Orb",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal shadow damage, with an orb in the off hand (more spell power).",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal shadow damage, with an orb in the off hand (your hits burst around the enemy struck).",
      "main": "scepter",
      "off": "orb",
      "element": "shadow"
@@ -1114,16 +1114,16 @@
     {
      "id": "wand_pool",
      "name": "Tinder Wand and Tome",
-     "blurb": "Wand: one-handed, ranged; throws a bolt of fire that leaves burning ground where it hits, with a tome in the off hand (spell power and mana).",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of fire that leaves burning ground where it hits, with a grimoire in the off hand (every fourth basic attack repeats itself).",
      "main": "wand",
-     "off": "tome",
+     "off": "grimoire",
      "style": "pool",
      "element": "fire"
     },
     {
      "id": "wand_nova",
      "name": "Flare Wand and Orb",
-     "blurb": "Wand: one-handed; instead of a bolt it bursts in a ring around you, with an orb (more spell power) in the off hand.",
+     "blurb": "Wand: one-handed; instead of a bolt it bursts in a ring around you, with an orb in the off hand (your hits burst around the enemy struck).",
      "main": "wand",
      "off": "orb",
      "style": "nova",
@@ -1188,9 +1188,9 @@
     {
      "id": "wand_beam",
      "name": "Bright-Line Wand and Tome",
-     "blurb": "Wand: one-handed, ranged; fires an instant line of lightning through everything in it, with a tome in the off hand (spell power and mana).",
+     "blurb": "Wand: one-handed, ranged; fires an instant line of lightning through everything in it, with a grimoire in the off hand (every fourth basic attack repeats itself).",
      "main": "wand",
-     "off": "tome",
+     "off": "grimoire",
      "style": "beam",
      "element": "lightning"
     },
@@ -1213,7 +1213,7 @@
     {
      "id": "sceptre_orb",
      "name": "Stormrod and Orb",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal lightning damage, with an orb in the off hand (more spell power).",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal lightning damage, with an orb in the off hand (your hits burst around the enemy struck).",
      "main": "scepter",
      "off": "orb",
      "element": "lightning"
@@ -1432,9 +1432,9 @@
     {
      "id": "sword_tome",
      "name": "Longsword and Field Manual",
-     "blurb": "Longsword: one-handed, with a tome in the off hand (spell power and mana).",
+     "blurb": "Longsword: one-handed, with a grimoire in the off hand (every fourth basic attack repeats itself).",
      "main": "longsword",
-     "off": "tome"
+     "off": "grimoire"
     },
     {
      "id": "halberd",
@@ -1515,7 +1515,7 @@
     {
      "id": "wand_nova",
      "name": "Still-Frame Wand and Orb",
-     "blurb": "Wand: one-handed, ranged; bursts a ring of frost around you, with an orb in the off hand (more spell power).",
+     "blurb": "Wand: one-handed, ranged; bursts a ring of frost around you, with an orb in the off hand (your hits burst around the enemy struck).",
      "main": "wand",
      "off": "orb",
      "style": "nova",
@@ -1524,7 +1524,7 @@
     {
      "id": "sceptre_orb",
      "name": "Hour-Hand Sceptre and Orb",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal arcane damage, with an orb in the off hand (more spell power).",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal arcane damage, with an orb in the off hand (your hits burst around the enemy struck).",
      "main": "scepter",
      "off": "orb",
      "element": "arcane"
@@ -1907,7 +1907,7 @@
     {
      "id": "sceptre_orb",
      "name": "Wildfire Sceptre and Orb",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal fire damage, with an orb in the off hand (more spell power).",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal fire damage, with an orb in the off hand (your hits burst around the enemy struck).",
      "main": "scepter",
      "off": "orb",
      "element": "fire"
@@ -2269,7 +2269,7 @@
     {
      "id": "wand_cone",
      "name": "Hoarfrost Wand and Orb",
-     "blurb": "Wand: one-handed; instead of a bolt it breathes a short cone of frost, with an orb in the off hand (more spell power).",
+     "blurb": "Wand: one-handed; instead of a bolt it breathes a short cone of frost, with an orb in the off hand (your hits burst around the enemy struck).",
      "main": "wand",
      "off": "orb",
      "style": "cone",
@@ -2278,19 +2278,102 @@
     {
      "id": "wand_nova",
      "name": "Hush Wand and Tome",
-     "blurb": "Wand: one-handed, ranged; bursts a ring of arcane force around you, with a tome in the off hand (spell power and mana).",
+     "blurb": "Wand: one-handed, ranged; bursts a ring of arcane force around you, with a grimoire in the off hand (every fourth basic attack repeats itself).",
      "main": "wand",
-     "off": "tome",
+     "off": "grimoire",
      "style": "nova",
      "element": "arcane"
     },
     {
      "id": "sceptre_orb",
      "name": "Glamour Sceptre and Orb",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal frost damage, with an orb in the off hand (more spell power).",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal frost damage, with an orb in the off hand (your hits burst around the enemy struck).",
      "main": "scepter",
      "off": "orb",
      "element": "ice"
+    }
+   ]
+  },
+  "starcaller": {
+   "armour": [
+    {
+     "id": "night_robes",
+     "name": "Night-Sky Robes",
+     "blurb": "Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "cloth_legs"
+     ],
+     "lean": "wise"
+    },
+    {
+     "id": "wayfarer_coat",
+     "name": "Star-Reader's Coat",
+     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_legs",
+      "light_boots"
+     ],
+     "lean": "focus"
+    },
+    {
+     "id": "gilt_wraps",
+     "name": "Gilt-Thread Wraps",
+     "blurb": "Cloth chest, cloth helm and cloth gloves. Nothing on: legs, boots.",
+     "pieces": [
+      "cloth_chest",
+      "cloth_helm",
+      "cloth_gloves"
+     ],
+     "lean": "ward"
+    }
+   ],
+   "weapons": [
+    {
+     "id": "wand_seeking",
+     "name": "Wishing Wand and Orb",
+     "blurb": "Wand: one-handed, ranged; throws a bolt of arcane force that turns after its target, with an orb in the off hand (your hits burst around the enemy struck).",
+     "main": "wand",
+     "off": "orb",
+     "style": "seeking",
+     "element": "arcane"
+    },
+    {
+     "id": "wand_fan",
+     "name": "Three-Star Wand and Grimoire",
+     "blurb": "Wand: one-handed, ranged; throws three bolts of arcane force in a fan, with a grimoire in the off hand (every fourth basic attack repeats itself).",
+     "main": "wand",
+     "off": "grimoire",
+     "style": "fan",
+     "element": "arcane"
+    },
+    {
+     "id": "tome_rune",
+     "name": "Almanac and Seeing Glass",
+     "blurb": "Tome: main hand, ranged, slower than a wand; lobs a heavy rune of arcane force that bursts wide, with a seer's orb (a focus with its own power) in the off hand.",
+     "main": "tome",
+     "off": "seer_orb",
+     "style": "tome_rune",
+     "element": "arcane"
+    },
+    {
+     "id": "tome_column",
+     "name": "Star Chart and Orb",
+     "blurb": "Tome: main hand, ranged, slower than a wand; casts a long, wide column of arcane force through everything in it, with an orb in the off hand (your hits burst around the enemy struck).",
+     "main": "tome",
+     "off": "orb",
+     "style": "tome_column",
+     "element": "arcane"
+    },
+    {
+     "id": "staff_lance",
+     "name": "Zenith Staff",
+     "blurb": "Staff: two-handed; its attack is an instant lance of arcane force through everything in a line.",
+     "main": "staff",
+     "element": "arcane",
+     "style": "beam"
     }
    ]
   }

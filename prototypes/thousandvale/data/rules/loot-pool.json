@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream C/E, play-test 4 S17 ('only swords seen'). Which BASE a random drop is, when the dropper does not name its own bases (bosses with dropBases keep theirs). Farhold's balance.json lootTiers give levels 1-4 only dagger/sword/wand/shortbow, so a melee character saw swords and nothing else (measured: swords 34.8% of weapon drops at L1-8; axes, maces, spears, polearms, crossbows, javelins, shields, orbs, tomes 0%). Read by js/rules/loot-pool.js: first a GROUP by `groups` weight, then a FAMILY inside it (equal weight unless `w`), then a BASE of that family whose `from` level is reached (bases opened in the last `freshLevels` levels weigh 1, older ones `oldWeight`). Farhold's own lootTiers bases are merged in automatically at their minLevel (classified by the base's subtype/slot), so the higher-level bases still drop. Parity fixtures switch it off (engine.lootPool = null).",
+  "_doc": "Owner feedback 10 (Y16): the `orb` family is an OFF-HAND family (an orb is an implement with no attack of its own); `tome` stays a weapon family (a main-hand caster weapon). Stream C/E, play-test 4 S17 ('only swords seen'). Which BASE a random drop is, when the dropper does not name its own bases (bosses with dropBases keep theirs). Farhold's balance.json lootTiers give levels 1-4 only dagger/sword/wand/shortbow, so a melee character saw swords and nothing else (measured: swords 34.8% of weapon drops at L1-8; axes, maces, spears, polearms, crossbows, javelins, shields, orbs, tomes 0%). Read by js/rules/loot-pool.js: first a GROUP by `groups` weight, then a FAMILY inside it (equal weight unless `w`), then a BASE of that family whose `from` level is reached (bases opened in the last `freshLevels` levels weigh 1, older ones `oldWeight`). Farhold's own lootTiers bases are merged in automatically at their minLevel (classified by the base's subtype/slot), so the higher-level bases still drop. Parity fixtures switch it off (engine.lootPool = null).",
   "freshLevels": 10,
   "oldWeight": 0.35,
   "groups": { "weapon": 0.4, "armour": 0.36, "jewellery": 0.08, "offhand": 0.16 },
@@ -17,7 +17,7 @@
     "staff":     { "group": "weapon", "bases": [["staff", 1], ["quarterstaff", 4], ["pilgrims_staff", 8], ["bramble_staff", 9]] },
     "wand":      { "group": "weapon", "bases": [["wand", 1]] },
     "scepter":   { "group": "weapon", "bases": [["scepter", 1], ["gravebound_scepter", 16]] },
-    "orb":       { "group": "weapon", "bases": [["orb", 1]] },
+    "orb":       { "group": "offhand", "bases": [["orb", 1]] },
     "tome":      { "group": "weapon", "bases": [["tome", 1]] },
     "head":      { "group": "armour", "bases": [["cloth_helm", 1], ["light_helm", 1], ["medium_helm", 1], ["heavy_helm", 3]] },
     "chest":     { "group": "armour", "bases": [["cloth_chest", 1], ["light_chest", 1], ["medium_chest", 1], ["scaled_chest", 6], ["heavy_chest", 3]] },

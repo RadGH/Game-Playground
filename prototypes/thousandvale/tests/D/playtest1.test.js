@@ -228,3 +228,33 @@ test("P20: C's fx 'spell' (exact place/radius/delay) and fx 'impact' {el, ab} ar
   assert.equal(sp.stats.areas, a0, 'the cast no longer guesses the area once fx spell is flowing');
   for (let i = 0; i < 10; i++) sp.update(0.05);
 });
+
+// Gate (2026-10-08): freeze.spec.js had recorded "one ~1.8 s task outside the frame loop" on one run in three or four
+// since round 5. It was the LAST FRAME BEFORE the spec's own tv.perf(true): a longtask entry is delivered after its
+// task ends, so a frame that ended a few ms before the reset arrived just after it — its frame span already wiped —
+// and nothing was left to say it was a frame. The rule: a task that began before the reset is not this run's.
+test('the frame watchdog does not count a long task that began before the last reset (late longtask delivery)', () => {
+  globalThis.document ||= { hidden: false };
+  const realNow = performance.now.bind(performance), RealPO = globalThis.PerformanceObserver;
+  let t = realNow() + 60000, deliver = null;
+  performance.now = () => t;
+  globalThis.PerformanceObserver = class { constructor(cb) { deliver = entries => cb({ getEntries: () => entries }); } observe() {} };
+  globalThis.PerformanceObserver.supportedEntryTypes = ['longtask'];
+  try {
+    const p = createPerf({ longMs: 100 });
+    assert.ok(deliver, 'the watchdog listens for long tasks');
+    // a frame: its callback runs 20 ms, then the thread waits 1.8 s on the rasteriser — one long task holding one frame
+    const f0 = t; p.frame(t); t += 20; p.frameEnd(t); t += 1800;
+    const late = { startTime: f0 - 1, duration: t - f0 + 1 };
+    t += 10; p.reset();                    // the spec starts measuring…
+    deliver([late]);                       // …and the frame before it is reported only now
+    assert.equal(p.stalls().longTasks, 0, 'the frame before the reset is not a stall of this run');
+    assert.equal(p.stalls().maxTaskMs, 0);
+    // a task with no frame in it AFTER the reset is still caught
+    t += 50; const s0 = t; t += 400; deliver([{ startTime: s0, duration: 400 }]);
+    assert.equal(p.stalls().longTasks, 1); assert.equal(p.stalls().maxTaskMs, 400);
+    // and a later frame's own long task is still recognised as a frame
+    t += 30; const f1 = t; p.frame(t); t += 20; p.frameEnd(t); t += 900; deliver([{ startTime: f1 - 1, duration: t - f1 + 1 }]);
+    assert.equal(p.stalls().longTasks, 1, 'a frame waiting on the GPU is not a stall');
+  } finally { performance.now = realNow; globalThis.PerformanceObserver = RealPO; }
+});

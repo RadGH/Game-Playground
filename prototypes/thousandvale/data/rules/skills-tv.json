@@ -1,5 +1,5 @@
 {
- "_doc": "Stream C (play-test 5: T3 direct heals, T4 revives). What Thousandvale changes in Farhold's skill table, applied IN MEMORY at engine boot by js/rules/tv-skills.js (Farhold's data/skills.json is shared with a live game and is never written). `patch`: fields merged onto an existing row (a `forms` entry is merged per form; null removes a field). `add`: whole new rows, each with its own talent tree in Farhold's format (4 tiers x 2 nodes, every node a rule \u2014 never a plain number). `classes`: the six skill ids of a class, by key 1-6. A row's `tv` block holds what only Thousandvale's rules read (js/rules/cast-skills.js): `tv.revive` = { share (health the body returns with, 0..1), mp (mana share, optional), castTime (seconds, 0 = instant), combat (may it be cast while a monster attacks you), mass (every fallen party member in range, else one), range (m), style (the look D-world draws), apply: { status: {id, seconds?}, barrier: {share, seconds}, debuff: {id, name, seconds, dealLess, takeMore} } }. The card sentences for a `tv` block are written from these numbers by js/rules/wording.js. The parity fixtures build their engine with tvSkills off (tests/C/setup.mjs). `tv.touch` = a touch heal's reach in metres (a party member further than that is not reached: it lands on the caster). `form.pack` (Thousandvale's, the Moonpelt talent Wolf Pack) = followers called when the shape is taken: { def, name, count, seconds }; they take no follower slot and leave when the shape ends or their time is up.",
+ "_doc": "Stream C (play-test 5: T3 direct heals, T4 revives). What Thousandvale changes in Farhold's skill table, applied IN MEMORY at engine boot by js/rules/tv-skills.js (Farhold's data/skills.json is shared with a live game and is never written). `patch`: fields merged onto an existing row (a `forms` entry is merged per form; null removes a field). `add`: whole new rows, each with its own talent tree in Farhold's format (4 tiers x 2 nodes, every node a rule — never a plain number). `classes`: the six skill ids of a class, by key 1-6. A row's `tv` block holds what only Thousandvale's rules read (js/rules/cast-skills.js): `tv.revive` = { share (health the body returns with, 0..1), mp (mana share, optional), castTime (seconds, 0 = instant), combat (may it be cast while a monster attacks you), mass (every fallen party member in range, else one), range (m), style (the look D-world draws), apply: { status: {id, seconds?}, barrier: {share, seconds}, debuff: {id, name, seconds, dealLess, takeMore} } }. The card sentences for a `tv` block are written from these numbers by js/rules/wording.js. The parity fixtures build their engine with tvSkills off (tests/C/setup.mjs). `tv.touch` = a touch heal's reach in metres (a party member further than that is not reached: it lands on the caster). `form.pack` (Thousandvale's, the Moonpelt talent Wolf Pack) = followers called when the shape is taken: { def, name, count, seconds }; they take no follower slot and leave when the shape ends or their time is up. Owner feedback 10 (Y20, report #19): `storm_beam` is a PULSING beam — a channel of 6 pulses over 2.2 s (one every 0.4 s, the first at once), each a full-length 30 m line from the caster through everything on it for `mult` 0.4 (6 x 0.4 = 2.4 against the single 2.2 it was: +9% for standing in the open for 2.2 s), free to move while it runs (`moveK` 1), ended by a second press. (Y25) rows that gain a `followTalent` are listed in data/rules/talents.json `replace`.",
  "healers": [
   "cleric",
   "priest",
@@ -62,6 +62,14 @@
      "onHit": null,
      "statusMult": 0.35
     }
+   }
+  },
+  "storm_beam": {
+   "mult": 0.4,
+   "channel": {
+    "seconds": 2.2,
+    "every": 0.4,
+    "moveK": 1
    }
   }
  },

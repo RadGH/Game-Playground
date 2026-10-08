@@ -25,7 +25,8 @@ import { spawnMonster, tickMonsters } from './monster-ai.js';
 import { flatTerrain } from './terrain-flat.js';
 import { makeRng } from './rng.js';
 import { weaponHands, mechWorld } from './farhold.js';
-import { attackReach, basicCard, isHeldFocus } from './caster-forms.js';
+import { attackReach, basicCard, isHeldFocus, wandStyle } from './caster-forms.js';
+import { attackRate, hastePct } from './combat-cfg.js';
 import { reviveOf } from './tv-skills.js';
 
 export const SHEET = Object.freeze({
@@ -55,8 +56,11 @@ export function coreRows(engine, u) {
     { id: 'maxMp', label: 'Mana', value: Math.round(u.maxMp || d.maxMp || 0), unit: '', tip: 'Your maximum mana: your level, Intelligence and gear.' },
     { id: 'damageMin', label: 'Weapon damage (low)', value: Math.round(dmg[0]), unit: '', tip: 'The lowest a basic hit rolls before the target\'s armour. Every ability\'s "weapon damage" is a share of this roll.' },
     { id: 'damageMax', label: 'Weapon damage (high)', value: Math.round(dmg[1]), unit: '', tip: 'The highest a basic hit rolls before the target\'s armour.' },
-    ...(hands.dual && d.offDamage ? [{ id: 'offDamage', label: 'Off-hand damage (high)', value: Math.round(d.offDamage[1]), unit: '', tip: 'Your off hand swings on its own clock; its hits deal 60% of this roll.' }] : []),
-    { id: 'attackEvery', label: 'Attack interval', value: r2(d.attackEvery ?? 0.62), unit: 's', lowerIsBetter: true, tip: 'The base time between basic attacks before your weapon\'s own pattern; haste shortens it.' },
+    ...(hands.dual && d.offDamage && !hands.off?.noAttack ? [{ id: 'offDamage', label: 'Off-hand damage (high)', value: Math.round(d.offDamage[1]), unit: '', tip: 'Your off hand swings on its own clock; its hits deal 60% of this roll.' }] : []),
+    // owner feedback 10 (Y26): attacks per second — the weapon's own pattern, a tome's slower clock and your attack speed
+    // (inside its cap), from the same function the attack is paced with (js/rules/combat-cfg.js). A parity engine keeps
+    // Farhold's "attack interval" row.
+    ...(engine.combatCfg ? apsRows(engine, u) : [{ id: 'attackEvery', label: 'Attack interval', value: r2(d.attackEvery ?? 0.62), unit: 's', lowerIsBetter: true, tip: 'The base time between basic attacks before your weapon\'s own pattern; haste shortens it.' }]),
     { id: 'critChance', label: 'Critical chance', value: r1(d.critChance || 0), unit: '%', tip: 'The chance a hit is a critical hit.' },
     { id: 'critDamage', label: 'Critical damage', value: Math.round(d.critDamage ?? 50), unit: '%', tip: 'How much more a critical hit deals.' },
     { id: 'spellPower', label: 'Spell power', value: Math.round((d.spellPower || 0) * 100), unit: '%', tip: 'Added to every hit that is not physical: fire, ice, lightning, poison, shadow, holy, arcane.' },
@@ -69,6 +73,18 @@ export function coreRows(engine, u) {
     { id: 'moveSpeed', label: 'Move speed', value: r2(d.moveSpeed || 0), unit: 'm/s', tip: 'How fast you run on foot.' },
   ];
   for (const k of ['str', 'dex', 'int', 'con']) rows.push({ id: k, label: ATTR[k], value: Math.round(d[k] ?? u.attrs?.[k] ?? 0), unit: '', tip: ATTR_TIP[k] });
+  return rows;
+}
+/** Y26: the "Attacks per second" rows (main hand; the off hand too when it holds a weapon that attacks). */
+function apsRows(engine, u) {
+  const forms = engine.casterForms || null;
+  const styleOf = it => (forms && it?.ranged && it?.castElement && !it?.twoHanded ? wandStyle(forms, it) : null);
+  const cap = engine.combatCfg.speed.capPct, h = Math.round(hastePct(engine.combatCfg, u));
+  const main = attackRate(engine, u, 'main', { styleOf }), off = attackRate(engine, u, 'off', { styleOf });
+  const bonus = h ? ` Your attack speed is ${h > 0 ? '+' : ''}${h}%${(u.derived?.haste || 0) > cap ? ` (the most all bonuses together can give is +${cap}%)` : ''}.` : ` Attack speed bonuses raise it (up to +${cap}% in all).`;
+  const rows = [];
+  if (main) rows.push({ id: 'aps', label: 'Attacks per second', value: main.aps, unit: '/s', tip: `How often your basic attack lands: one every ${r2(main.every)} s with what you are holding.${bonus}` });
+  if (off) rows.push({ id: 'apsOff', label: 'Off-hand attacks per second', value: off.aps, unit: '/s', tip: `Your off hand attacks on its own clock: one every ${r2(off.every)} s.` });
   return rows;
 }
 /** The share of a physical hit armour takes off, in percent to one decimal — Farhold rpg.strike: `amount *= 100 / (100 + armour)`. */
@@ -89,7 +105,7 @@ export function advancedRows(engine, u) {
     ['blockPower', 'Block power', '', 'How much a block takes off the hit.', 1, false],
     ['maxBarrier', 'Barrier', '', 'A shield of this much damage from your off-hand focus; it regenerates out of a fight.', 1, false],
     ['barrierRegen', 'Barrier regeneration', '/s', 'How fast that barrier comes back.', 1, false],
-    ['haste', 'Haste', '%', 'Faster basic attacks.', 1, true],
+    ['haste', 'Attack speed', '%', 'Faster basic attacks — melee, bows, wands, tomes and staves alike. All bonuses together count up to the cap shown on "Attacks per second".', 1, true],
     ['cooldownReduction', 'Cooldown reduction', '%', 'Taken off every ability\'s cooldown.', 1, true],
     ['areaPct', 'Attack area', '%', 'Bigger swings, cones and blasts.', 1, true],
     ['damagePct', 'Damage', '%', 'Added to every hit you deal.', 1, false],

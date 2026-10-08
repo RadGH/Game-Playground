@@ -63,3 +63,31 @@ export function directHealSlot(skillData, classId) {
   }
   return 0;
 }
+
+/**
+ * Owner feedback 10 (Y32): classes that exist only in Thousandvale (data/rules/classes-tv.json — the Starcaller). Their
+ * class rows go into the loaded class list and their skills and skill lists into the loaded skill table, IN MEMORY,
+ * before the talent trees are rewritten — so a new class is built, checked and described by exactly the code every
+ * other class goes through. Idempotent. Returns `{ classes: [id], skills: [id], skipped: [why] }`.
+ */
+export function installTvClasses(classData, skillData, cfg) {
+  const report = { classes: [], skills: [], skipped: [] };
+  if (!cfg || !classData?.classes || !skillData?.skills || skillData._tvClasses) return report;
+  for (const [id, row] of Object.entries(cfg.skills || {})) {
+    if (skillData.skills[id]) { report.skipped.push(`skill ${id} exists`); continue; }
+    skillData.skills[id] = { ...JSON.parse(JSON.stringify(row)), tvNew: true };
+    report.skills.push(id);
+  }
+  for (const row of cfg.classes || []) {
+    if (!row?.id || classData.classes.some(c => c.id === row.id)) { report.skipped.push(`class ${row?.id} exists`); continue; }
+    const missing = (row.skills || []).filter(id => !skillData.skills[id]);
+    if (missing.length || (row.skills || []).length !== 6) { report.skipped.push(`class ${row.id}: ${missing.join(',') || 'needs six skills'}`); continue; }
+    classData.classes.push(JSON.parse(JSON.stringify(row)));
+    skillData.classes[row.id] = [...row.skills];
+    report.classes.push(row.id);
+  }
+  skillData._tvClasses = true;
+  return report;
+}
+/** The falling-star block of a row (`tv.sky`), or null. */
+export const skyOf = row => row?.tv?.sky || null;

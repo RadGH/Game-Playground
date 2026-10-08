@@ -25,11 +25,13 @@ export const RULES_DATA_FILES = {
   armourTiers: '../../data/rules/armour-tiers.json',
   // play-test 5: T3/T4 skill changes, T15 caster forms, T5 starter kits, T25 angling numbers, T9/T17 crates + conversion
   tvSkills: '../../data/rules/skills-tv.json',
+  tvClasses: '../../data/rules/classes-tv.json',        // owner feedback 10 (Y32): classes that exist only here (the Starcaller)
   casterForms: '../../data/rules/caster-forms.json',
   fishing: '../../data/rules/fishing.json',
   crates: '../../data/rules/crates.json',
   tvGear: '../../data/rules/gear-tv.json',
   projectiles: '../../data/rules/projectiles.json',    // owner feedback 8 W14/W2: flight speeds (js/rules/projectiles.js)
+  combat: '../../data/rules/combat.json',              // owner feedback 10: Thousandvale's own combat knobs (js/rules/combat-cfg.js)
   prices: '../../data/rules/prices.json',              // owner feedback 7 V2: item price + kill gold (js/rules/economy.js)
 };
 /**

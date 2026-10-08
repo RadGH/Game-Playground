@@ -216,6 +216,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       say(st, ab.say, target);
       if (castS > 0) {
         st.cast = { ab, start: now(), end: now() + castS, target, tele: [], gone: false };
+        e.knockDx = 0; e.knockDz = 0; e.knockSeen = e.knockedAt;            // (Y12) only a knock DURING the cast counts
         emit({ t: 'castbar', id: e.id, ab: ab.id, name: ab.name || ab.id, ms: Math.round(castS * 1000), int: ab.interrupt ? 1 : undefined });
         // play-test 1 P12: the ground is marked when the cast STARTS, not when it ends — the red zone
         // is on the client for the whole cast bar plus the wind-up, and goes off at the same moment
@@ -328,12 +329,16 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       r: spec.r != null ? spec.r * sc * grow : undefined, r2: spec.r2 != null ? spec.r2 * sc * grow : undefined,
       arc: spec.arc, len: spec.len != null ? spec.len * sc * grow : undefined, w: spec.w,
       follow: spec.follow && anchor.unit ? anchor.unit : null,
+      // owner feedback 10 (Y12): a shape that starts AT its caster rides the caster when a knock moves it
+      onCaster: at === 'self' && !anchor.point,
       placed: now(), at: now() + lead + windFor(st, spec, lead), dead: false,
     };
     if (t.shape === 'line' && t.len == null) t.len = 20;
     if (t.shape === 'line' && t.w == null) t.w = 3;
     if (t.shape === 'cone' && t.arc == null) t.arc = Math.PI / 3;
     if (t.shape === 'cross' && t.w == null) t.w = 3;
+    // (Y12) a knock from BEFORE this wind-up began neither moves it nor breaks it
+    if (!tele.some(o => !o.dead && o.owner === e) && !st.cast?.tele?.length) { e.knockDx = 0; e.knockDz = 0; e.knockSeen = e.knockedAt; }
     tele.push(t);
     enc.stats.placed++;
     emit({ t: 'tele', id: t.id, s: e.id, ab: ab.id, k: t.kind, ms: Math.round((t.at - t.placed) * 1000), el: spec.element || undefined, follow: t.follow?.id, ...wireShape(t) });
@@ -355,6 +360,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     const t0 = now();
     // followed telegraphs ride their unit until they go off
     for (const t of tele) if (t.follow && !t.follow.dead) { t.x = t.follow.x; t.z = t.follow.z; }
+    knocks();
     // resolve everything due, a safe group all at once
     const due = tele.filter(t => !t.dead && t.at <= t0 + 1e-9);
     if (!due.length) { if (tele.some(t => t.dead)) prune(); return; }
@@ -367,6 +373,47 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     for (const g of groups.values()) resolveSafe(g);
     prune();
   }
+  /**
+   * Owner feedback 10 (Y12, report #44): "if an enemy is knocked back during a cone effect (1) it should sometimes be
+   * interrupted and (2) the cone area should be knocked back too." Once a tick, for every monster a knock touched:
+   *   * its wind-up shapes anchored on itself move by exactly what the knock moved it (`teleM`);
+   *   * a fresh knock of `minPush` metres or more rolls against its RANK (combat.json `knockInterrupt`: an ordinary
+   *     monster often, a champion or a rare sometimes, a boss never) — an interrupt ends every one of its wind-ups at
+   *     once and its cast bar with them (the round-6 rule: the shape goes the moment the cast does).
+   */
+  const KI = () => field.room.engine.combatCfg?.knockInterrupt || null;
+  function knocks() {
+    const cfg = KI();
+    if (!cfg) return;
+    const owners = new Set();
+    for (const t of tele) if (!t.dead) owners.add(t.owner);
+    for (const st of states.values()) if (st.cast) owners.add(st.e);
+    for (const e of owners) {
+      const dx = e.knockDx || 0, dz = e.knockDz || 0;
+      if (dx || dz) {
+        e.knockDx = 0; e.knockDz = 0;
+        for (const t of tele) if (!t.dead && t.owner === e && t.onCaster) { t.x += dx; t.z += dz; emit({ t: 'teleM', id: t.id, x: Math.round(t.x * 100) / 100, z: Math.round(t.z * 100) / 100 }); }
+      }
+      if (e.knockedAt != null && e.knockedAt !== e.knockSeen) {
+        e.knockSeen = e.knockedAt;
+        if ((e.knockedM || 0) < (cfg.minPush ?? 0.5) || e.dying != null) continue;
+        const rank = e.boss ? 'boss' : (e.rank in cfg ? e.rank : 'normal');
+        const chance = cfg[rank] ?? 0;
+        if (!(chance > 0) || rng() >= chance) continue;
+        interrupt(e, 'knock');
+      }
+    }
+  }
+  /** End every wind-up of `e` now: its cast bar (if any) and every live shape it owns. */
+  function interrupt(e, by = 'knock') {
+    const st = states.get(e);
+    let n = 0;
+    if (st?.cast) { cancelCast(st, 'interrupt'); n++; }
+    for (const t of tele) if (!t.dead && t.owner === e) { t.dead = true; n++; emit({ t: 'teleR', id: t.id, x: 1, why: 'interrupted' }); }
+    if (n) emit({ t: 'fx', kind: 'interrupt', id: e.id, by });
+    return n;
+  }
+  enc.interrupt = interrupt;
   function prune() { for (let i = tele.length - 1; i >= 0; i--) if (tele[i].dead) tele.splice(i, 1); }
 
   /** Who is inside (players and their allies), minus anyone a blocker hides when the spec says `los`. */
@@ -374,6 +421,8 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     const out = [];
     for (const f of friends()) {
       if (!inside(t, f.x, f.z, BODY_RADIUS)) continue;
+      // owner feedback 10 (Y10): a red zone does not reach through a dungeon wall (measured from the shape's own anchor)
+      if (field.sight && !field.sight(t.x, t.z, f.x, f.z)) continue;
       if (t.spec.los && hiddenBy(t.owner, f, t)) continue;
       out.push(f);
     }
@@ -757,6 +806,8 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
   }
   enc.sweepOwner = sweepOwner;
   enc.tick = tick;
+  /** for tests: make a monster use an ability now (inside `room.run`) */
+  enc.fireForTest = (st, ab, target) => fire(st, ab, target);
   enc.think = think;
   enc.beforeKill = beforeKill;
 

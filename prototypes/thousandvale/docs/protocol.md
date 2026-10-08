@@ -148,6 +148,9 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `meter` | p | `on:bool` | 1 / 4 | §24.6: the damage meter's hit feed on / off. Answers `meterR`, then `hits`. |
 | `fish` | p | `op:str:8, aim?:vec2, held?:num, score?:num, holds?:nums` | 4 / 8 | §21.10 angling: `cast`, `hook`, `land`, `stop`. Answers `fishR`, `fishBite`, `fishTug`, `fishCatch`. |
 | `cook` | p | `op?:str:8, id?:str:64, n?:int` | 2 / 6 | §21.10: no `id` = list (`cookList`), with `id` = cook it at a fire (`cookR`). |
+| `prof` | p | `op:str:8, id:str:16, npc:id` | 2 / 6 | §25 professions: `learn` a profession from the trainer `npc`, or buy its basic `tool` again. Answers `profR`. |
+| `gather` | p | `op:str:8, id?:id, inputs?:nums` | 4 / 8 | §25: `start` (a node or a skinnable corpse; no `id` = the nearest node in reach), `done` (the mini-game's raw inputs), `stop`. Answers `gatherR`, `gatherDone`. |
+| `craft` | p | `op?:str:8, id?:str:48, npc?:id, base?:str:48, n?:int, uid?:str:40, index?:int, element?:str:16, inputs?:nums` | 4 / 10 | §25: `list`, `start`, `done`, `stop`, `quote` (tempering). Answers `craftList`, `craftR`, `craftDone`, `craftQuote`. |
 
 ### 3.2 Server → client
 
@@ -241,6 +244,14 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `fishCatch` | `ok, lost?, kind, item?, items?, species?, size?, record?, first?, skill, pool?, title?, monster?, msg?` | (game) §21.10: what came out of the water. |
 | `cookList` | `ok, fire, level, recipes` | (game) §21.10: recipes, what each needs and whether you can cook it here. |
 | `cookR` | `ok, id, item?, items?, n?, why?, msg?` | (game) §21.10: answer to `cook {id}`. |
+| `profR` | `op, ok, id, why?, msg?, tool?` | (game) §25: a profession learned / a tool bought, or why not. |
+| `gatherR` | `ok, state, id?, prof?, node?, game?, tool?, why?, msg?, need?` | (game) §25: a gathering mini-game to play (`state:'play'`) / refused / ended (`state:'idle', why`). |
+| `gatherDone` | `ok, id, prof, quality, score, marks, flags, items, got, xp, skill, key?, reopenMs, msg` | (game) §25: the result the SERVER worked out from your inputs. |
+| `skinnable` | `id, on, tier?, minSkill?, name?` | (game) §25.2: a corpse you may skin (or may no longer). |
+| `craftList` | `ok, station, level, recipes` | (game) §25.3: what can be made here (or anywhere, greyed, with no station in reach). |
+| `craftR` | `ok, state, id, game?, n?, cost?, why?, msg?, need?` | (game) §25.3: a crafting / tempering mini-game to play, a refusal, or the work ended. |
+| `craftDone` | `ok, id, prof, quality, score, marks, flags, items, got, item?, was?, now?, xp, skill, msg` | (game) §25.3: what was made (or why nothing was). |
+| `craftQuote` | `ok, id, uid, can, why?, code?, needs, gold, skill?, text` | (game) §25.3: what a tempering work would do to an item, and its cost. |
 
 ---
 
@@ -1342,3 +1353,52 @@ time." / "No reward this time.") and always carries `story`; `realm {kind:'event
   opens only in its own loot window.
 - Newcomers (under level 3 or under 10 minutes played): events with `startOn.clearOfNewcomersM` do not start near them; in a town with an
   event live they are healed every second (a guard says why, once).
+
+## 25. Professions (round 8, W9; stream P-core) — protocol v8, additive
+
+Ten professions, skill 1-100 each: `mining` `logging` `foraging` `skinning` `angling` (gathering) and `smithing` `outfitting` `alchemy` `cooking` `tempering`
+(making). The rules are `js/rules/professions.js` (+ `professions-games.js`, `professions-temper.js`) over `data/rules/professions.json`; the server is
+`js/sim/professions.js`; the content (`data/provinces/professions.json`, `professions-nodes.json`, `data/quests/professions.json`) is made by
+`tools/content-professions.mjs`. Angling and the fish `cook` of §21.10 are unchanged; they only appear in the list (and the old `cook` now teaches Cooking).
+
+### 25.1 What you are told
+`joined.you.professions`, `you {professions}` after any change, and `sheet.professions`:
+`{ list: [{ id, name, kind: 'gather'|'make', known, level, xp, next, rank, max, tool: {id, name, tier}|null }] }` — ten rows, the order above. `angling` and
+`cooking` are known from the start; the rest are learned from a trainer.
+
+### 25.2 Nodes are per player
+A node is a room object: `info { type: 'node', name, key: 'node:<id>', r, node: { prof, kind, tier, minSkill, look: { model, size, tint, n, v }, starter? } }`
+(`look.model`: `boulder` | `tree` | `herb` | `mushroom` | `fibre`). One entity for everyone; it is SPENT only for the character who worked it — `key` is in
+`you.opened` (join) and `gatherDone { key, reopenMs }` says when it is back (6-10 minutes; 2 for the starter boulders by Torborhold's gate). A wilds copy holds
+every node of its zones; a town's room also holds the ones within 160 m of its edge. **Skinning** has no node: a beast that dies with your kill credit while you
+know Skinning sends `skinnable { id, on: true, tier, minSkill, name }` (`{ id, on: false }` once skinned or gone); the corpse lies up to a minute for you.
+
+### 25.3 The loop
+- `prof {op:'learn', id, npc}` -> `profR {op, ok, id, why?, msg?, tool?}`. A trainer = an NPC whose role is in `data/rules/professions.json` `roles` (`used.prof =
+  { trains, stations, known, toolPrice, taught? }` says so when you talk to one). Learning a gathering trade hands over its basic tool once; `op:'tool'` buys it again.
+  The prospector by Torborhold's gate teaches at the first word (`used.prof.taught`).
+- `gather {op:'start', id?}` -> `gatherR {ok, state:'play', id, prof, node:{kind, tier, name}, game, tool?}` — you are held still (`e.held = 'work'`) — or
+  `{ok:false, state:'idle', why, msg, need?}` (`far` `spent` `skill` `tool` `notLearned` `notYours` `unknown` `combat` `dead` `swim` `busy` `bagFull`).
+- `gather {op:'done', id, inputs}` -> `gatherDone {ok, id, prof, quality, score, marks, flags, items, got:[{id, name, n, icon, tint, rarity, bonus?}], xp, skill:{level, xp, next, up?}, key, reopenMs, msg}`.
+  A `fail` gives nothing and does not spend the node. `gather {op:'stop'}`, a hit, being moved more than 2 m, swimming, dying or leaving end it: `gatherR {state:'idle', why}`.
+- `craft {op:'list', npc?}` -> `craftList {ok, station:{kinds, name, npc, fire?}|null, level:{prof: n}, recipes:[row]}`; a station = within 9 m of an NPC whose role
+  has `stations`, or (cooking) a fire. Row: `{id, prof, tier, skill, name, desc, kind: 'material'|'tool'|'gear'|'potion'|'good'|'temper', can, why?, code?, needs:[{id, name, n, have}], gold, makes, bases?, level?, levels?, game, elements?}`.
+- `craft {op:'start', id, npc?, base?, n?, uid?, index?, element?}` -> `craftR {ok, state:'play', id, game, n?, cost:{needs, gold}}`; `craft {op:'done', id, inputs}` ->
+  `craftDone {ok, id, prof, quality, score, marks, flags, items, got, item?, was?, now?, xp, skill, msg}` and a fresh `craftList`. Materials and gold are taken at `done`.
+  A failed game uses nothing — except tempering, where a miss spends the materials and the fee and the item is never changed.
+- `craft {op:'quote', id, uid, index?, element?}` -> `craftQuote {ok, id, uid, can, why?, code?, needs, gold, skill, text}` (tempering: `temper_quality`,
+  `temper_promote`, `temper_reweave`, `temper_brand`, on a gear item in the BAG).
+- Everyone near: `ev fx {kind:'gather'|'craft', id, phase:'start'|'done'|'fail'|'end', prof, node?|at?, quality?}`; `info.working = {prof, anim, node?|at?}`; anims `mine` `chop` `gather` `skin` `craft`.
+
+### 25.4 The mini-games
+`game = {type, seed, ms, steps, …pattern}`; `inputs` = flat `[t0, v0, t1, v1, …]` (at most 32 pairs), `t` = ms since the game appeared. The server scores them with
+`scoreGame(game, inputs)` after `checkInputs` (strictly rising times inside `ms`, the answer not earlier than its own last input could have been played (350 ms grace)
+nor later than `ms + 4 s`, presses closer than 90 ms dropped). No score is ever sent by a client. Types: `strike` mining, `rhythm` logging, `pick` foraging,
+`trace` skinning, `forge` smithing, `stitch` outfitting, `pour` alchemy and cooking (one stage), `gauge` tempering. Marks 2 / 1 / 0 per step; quality
+`perfect` >= 0.9, `fine` >= 0.65, `good` >= 0.4, `poor` >= 0.2, else `fail`. Pattern fields per type: docs/requests.md "Round 8 contracts — P-core".
+
+### 25.5 Items and saving
+Material: `{kind:'material', id, name, desc, tier, prof, icon, tint, rarity, price, value, count, stackMax: 50}` (stacks; sells at `price` each). Tool:
+`{kind:'good', tool:true, id, use:{type:'tool', prof, tier, ease, extra}}` (no slot; using it starts on the nearest node). Crafted gear: the rules' item +
+`crafted: true`, `maker`. Saved on the character: `professions = {known:[ids], xp:{id: n}, made:{recipe: n}, tools:{prof: 1}}` (SAVE_FIELDS; journal `set`),
+and spent nodes in the existing `opened` table. Quest step kinds: `gather {prof?, mat?}`, `craft {prof?, recipe?}`, `learn {prof}`.

@@ -140,7 +140,7 @@ export function createProvince(opts) {
     observe: (ev, r) => observe(ev, r),
     // play-test 2, Q3: a kill's gold + items wait on the corpse (js/sim/corpses.js); the body stays while they do
     holdKill: opts.corpseLoot === false ? null : (e, from, a, r) => corpses.hold(r, e, from, potionDrop(e, from, a, r)),
-    keepBody: (e, r) => corpses.keepBody(e, r),
+    keepBody: (e, r) => Math.max(corpses.keepBody(e, r) || 0, professions.keepBody(e)),      // W9 (P-core): a beast someone may still skin lies a little longer
     isNight: () => isNight(),
     partyLoot: opts.corpseLoot === false ? null : (members, items, corpse, partyId, r) => corpses.partyDrop(r, members, items, corpse, partyId),
     offerRevive: (caster, target, spec, r) => offerRevive(caster, target, spec, r),       // T4 (play-test 5)

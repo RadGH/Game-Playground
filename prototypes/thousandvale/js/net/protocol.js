@@ -335,7 +335,7 @@ export const EVENT_FIELDS = Object.freeze({
 export const TELE_SHAPES = Object.freeze(['circle', 'ring', 'donut', 'cone', 'line', 'cross']);
 export const OBJ_STATES = Object.freeze(['idle', 'lit', 'used', 'broken', 'open', 'closed']);
 export const OBJ_TYPES = Object.freeze(['portal', 'stairs', 'exit', 'chest', 'gate', 'lever', 'pillar', 'rock', 'brazier', 'pool', 'cracked_floor', 'sarcophagus', 'support_beam', 'ore_cart',
-  'door', 'lift', 'fishpool']);      // play-test 6: the way you came in (U10), the stair up that asks which floor (U12); play-test 5 fish pools
+  'door', 'lift', 'fishpool', 'node']);      // play-test 6: the way you came in (U10), the stair up that asks which floor (U12); play-test 5 fish pools
 
 /** Validate a decoded client message. Returns null when fine, else a reason. */
 export function validate(msg, socketKind = null) {

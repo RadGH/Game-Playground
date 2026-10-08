@@ -79,7 +79,7 @@
    "prof": "mining",
    "icon": "ore",
    "tint": "#8a8f98",
-   "price": 7
+   "price": 6
   },
   "garnet": {
    "id": "garnet",
@@ -109,7 +109,7 @@
    "prof": "foraging",
    "icon": "herb",
    "tint": "#d8c24a",
-   "price": 9
+   "price": 7
   },
   "amber_cap": {
    "id": "amber_cap",
@@ -119,7 +119,7 @@
    "prof": "foraging",
    "icon": "mushroom",
    "tint": "#d98a2b",
-   "price": 9
+   "price": 7
   },
   "hemp": {
    "id": "hemp",
@@ -129,7 +129,7 @@
    "prof": "foraging",
    "icon": "fibre",
    "tint": "#8aa35a",
-   "price": 9
+   "price": 7
   },
   "thick_hide": {
    "id": "thick_hide",
@@ -149,7 +149,7 @@
    "prof": "mining",
    "icon": "ore",
    "tint": "#d5dbe3",
-   "price": 20
+   "price": 24
   },
   "amethyst": {
    "id": "amethyst",
@@ -169,7 +169,7 @@
    "prof": "logging",
    "icon": "log",
    "tint": "#b0623a",
-   "price": 24
+   "price": 30
   },
   "moonpetal": {
    "id": "moonpetal",
@@ -179,7 +179,7 @@
    "prof": "foraging",
    "icon": "herb",
    "tint": "#c9d4f2",
-   "price": 26
+   "price": 32
   },
   "ghost_morel": {
    "id": "ghost_morel",
@@ -189,7 +189,7 @@
    "prof": "foraging",
    "icon": "mushroom",
    "tint": "#cfd6d2",
-   "price": 26
+   "price": 32
   },
   "silkweed": {
    "id": "silkweed",
@@ -199,7 +199,7 @@
    "prof": "foraging",
    "icon": "fibre",
    "tint": "#f0e6f4",
-   "price": 26
+   "price": 32
   },
   "rugged_hide": {
    "id": "rugged_hide",
@@ -239,7 +239,7 @@
    "prof": "logging",
    "icon": "log",
    "tint": "#5e5348",
-   "price": 44
+   "price": 50
   },
   "frostbloom": {
    "id": "frostbloom",
@@ -309,7 +309,7 @@
    "prof": "logging",
    "icon": "log",
    "tint": "#7a2f2a",
-   "price": 72
+   "price": 80
   },
   "sunroot": {
    "id": "sunroot",
@@ -432,7 +432,7 @@
    "prof": "smithing",
    "icon": "bar",
    "tint": "#9aa0aa",
-   "price": 18,
+   "price": 14,
    "made": true
   },
   "thick_leather": {
@@ -443,7 +443,7 @@
    "prof": "outfitting",
    "icon": "leather",
    "tint": "#9c764c",
-   "price": 10,
+   "price": 9,
    "made": true
   },
   "canvas_bolt": {
@@ -454,7 +454,7 @@
    "prof": "outfitting",
    "icon": "cloth",
    "tint": "#b9ad8a",
-   "price": 23,
+   "price": 16,
    "made": true
   },
   "silversteel_bar": {
@@ -465,7 +465,7 @@
    "prof": "smithing",
    "icon": "bar",
    "tint": "#dfe6ee",
-   "price": 59,
+   "price": 62,
    "made": true
   },
   "rugged_leather": {
@@ -476,7 +476,7 @@
    "prof": "outfitting",
    "icon": "leather",
    "tint": "#7c5c3c",
-   "price": 20,
+   "price": 18,
    "made": true
   },
   "silk_bolt": {
@@ -487,7 +487,7 @@
    "prof": "outfitting",
    "icon": "cloth",
    "tint": "#f2e8f6",
-   "price": 65,
+   "price": 74,
    "made": true
   },
   "blackiron_bar": {
@@ -498,7 +498,7 @@
    "prof": "smithing",
    "icon": "bar",
    "tint": "#4a4f5c",
-   "price": 95,
+   "price": 87,
    "made": true
   },
   "heavy_leather": {
@@ -509,7 +509,7 @@
    "prof": "outfitting",
    "icon": "leather",
    "tint": "#624830",
-   "price": 35,
+   "price": 32,
    "made": true
   },
   "moonweave_bolt": {
@@ -520,7 +520,7 @@
    "prof": "outfitting",
    "icon": "cloth",
    "tint": "#c2ccf4",
-   "price": 120,
+   "price": 110,
    "made": true
   },
   "sunsteel_bar": {
@@ -531,7 +531,7 @@
    "prof": "smithing",
    "icon": "bar",
    "tint": "#f4cf5a",
-   "price": 160,
+   "price": 147,
    "made": true
   },
   "drake_leather": {
@@ -542,7 +542,7 @@
    "prof": "outfitting",
    "icon": "leather",
    "tint": "#588a66",
-   "price": 60,
+   "price": 55,
    "made": true
   },
   "sunsilk_bolt": {
@@ -553,7 +553,7 @@
    "prof": "outfitting",
    "icon": "cloth",
    "tint": "#f8e29a",
-   "price": 195,
+   "price": 179,
    "made": true
   }
  },
@@ -1022,7 +1022,7 @@
    "tier": 2,
    "ease": 0.2,
    "extra": 0.1,
-   "price": 76,
+   "price": 61,
    "desc": "A better pick: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1033,7 +1033,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 241,
+   "price": 259,
    "desc": "A better pick: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1055,7 +1055,7 @@
    "tier": 2,
    "ease": 0.2,
    "extra": 0.1,
-   "price": 76,
+   "price": 61,
    "desc": "A better hatchet: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1066,7 +1066,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 241,
+   "price": 259,
    "desc": "A better hatchet: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1088,7 +1088,7 @@
    "tier": 2,
    "ease": 0.2,
    "extra": 0.1,
-   "price": 76,
+   "price": 61,
    "desc": "A better skinning knife: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1099,7 +1099,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 241,
+   "price": 259,
    "desc": "A better skinning knife: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1121,7 +1121,7 @@
    "tier": 2,
    "ease": 0.2,
    "extra": 0.1,
-   "price": 76,
+   "price": 61,
    "desc": "A better sickle: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1132,7 +1132,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 241,
+   "price": 259,
    "desc": "A better sickle: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   }
  ],

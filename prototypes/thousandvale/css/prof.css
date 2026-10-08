@@ -1,0 +1,56 @@
+/* Thousandvale — W9 professions (stream P-client): the mini-game frame, the result card, the crafting and tempering
+   windows, the Professions block. Injected by js/client/ui/prof.js (no index.html line). Phone rules at the end. */
+
+/* ---------------------------------------------------------------- the mini-game frame */
+.tv-prof { position: fixed; left: 50%; bottom: 150px; transform: translateX(-50%); z-index: 400; width: min(410px, calc(100vw - 16px)); pointer-events: none; }
+.tv-prof[hidden] { display: none; }
+.prof-game { position: relative; pointer-events: auto; padding: 10px 12px 10px; background: var(--panel-solid); border: 1px solid var(--edge-strong); border-radius: 14px; box-shadow: var(--shadow), 0 0 0 100vmax rgba(0, 0, 0, 0.18); user-select: none; -webkit-user-select: none; animation: prof-in 0.16s ease-out; }
+.prof-head { display: flex; align-items: center; gap: 10px; }
+.prof-ico { flex: 0 0 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: rgba(0, 0, 0, 0.45); border: 1px solid var(--edge); }
+.prof-svg { display: block; }
+.prof-titles { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.15; }
+.prof-titles strong { font-family: var(--serif); font-size: 17px; color: var(--gold-hi); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prof-titles span { font-size: 12.5px; color: var(--ink-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prof-x { flex: 0 0 36px; height: 36px; border-radius: 9px; border: 1px solid var(--edge); background: rgba(0, 0, 0, 0.35); color: var(--ink-dim); font-size: 20px; line-height: 1; cursor: pointer; }
+.prof-x:hover { color: #fff; border-color: var(--gold-hi); }
+.prof-how { margin: 8px 2px 8px; min-height: 36px; font-size: 14px; line-height: 1.3; color: var(--ink); }
+.prof-how kbd { display: inline-grid; place-items: center; min-width: 24px; height: 22px; padding: 0 6px; margin: 0 1px; border-radius: 5px; background: #2a2016; border: 1px solid var(--gold); color: #fff; font: 600 12.5px var(--sans); vertical-align: 1px; }
+.prof-stage { border-radius: 10px; overflow: hidden; background: radial-gradient(120% 90% at 50% 20%, #2a2219, #0f0c09 78%); border: 1px solid var(--edge); }
+.prof-canvas { display: block; width: 100%; height: 232px; touch-action: none; cursor: pointer; }
+.tv-prof[data-type="trace"] .prof-canvas { cursor: ns-resize; }
+.prof-time { height: 5px; margin-top: 8px; background: rgba(0, 0, 0, 0.55); border-radius: 3px; overflow: hidden; }
+.prof-time i { display: block; height: 100%; width: 100%; background: var(--gold); }
+.tv-prof.flash-perfect .prof-stage { animation: prof-perfect 0.3s ease-out; }
+.tv-prof.flash-hit .prof-stage { animation: prof-hit 0.22s ease-out; }
+.tv-prof.flash-miss .prof-game { animation: prof-miss 0.22s linear; }
+@keyframes prof-in { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes prof-perfect { 0% { box-shadow: 0 0 0 0 rgba(255, 225, 122, 0.95), inset 0 0 40px rgba(255, 225, 122, 0.55); } 100% { box-shadow: 0 0 0 16px rgba(255, 225, 122, 0), inset 0 0 0 rgba(255, 225, 122, 0); } }
+@keyframes prof-hit { 0% { box-shadow: inset 0 0 30px rgba(143, 240, 160, 0.5); } 100% { box-shadow: inset 0 0 0 rgba(143, 240, 160, 0); } }
+@keyframes prof-miss { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+/* the result card: over the stage, as soon as the last input is in */
+.prof-card { position: absolute; left: 12px; right: 12px; top: 96px; bottom: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 10px 14px; text-align: center;
+  background: rgba(14, 11, 8, 0.9); border: 2px solid var(--qc, var(--edge-strong)); border-radius: 10px; box-shadow: 0 0 34px -6px var(--qc, transparent); animation: prof-card 0.26s cubic-bezier(0.2, 1.5, 0.4, 1); }
+.prof-card[data-q="perfect"] { --qc: #ffe17a; } .prof-card[data-q="fine"] { --qc: #8fb4ff; } .prof-card[data-q="good"] { --qc: #8ff0a0; } .prof-card[data-q="poor"] { --qc: #c7b99b; } .prof-card[data-q="fail"] { --qc: #ff6a55; }
+.prof-q { font-family: var(--serif); font-size: 30px; letter-spacing: 0.05em; color: var(--qc, #eee); text-shadow: 0 2px 8px #000; }
+.prof-what { font-size: 13px; color: var(--ink-dim); }
+.prof-card > span { font-size: 14px; color: var(--ink); }
+.prof-item { display: inline-flex; align-items: center; gap: 7px; font-size: 16px !important; font-weight: 600; color: var(--rc, var(--ink)) !important; }
+.prof-item em { font-style: normal; font-size: 11px; padding: 1px 6px; border-radius: 8px; background: rgba(255, 225, 122, 0.18); color: #ffe17a; border: 1px solid rgba(255, 225, 122, 0.5); }
+.prof-dot { width: 13px; height: 13px; border-radius: 4px; transform: rotate(45deg); border: 1px solid rgba(0, 0, 0, 0.6); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25); }
+.prof-card small { margin-top: 3px; font-size: 12px; color: var(--ink-faint); }
+@keyframes prof-card { from { opacity: 0; transform: scale(0.86); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .prof-game, .prof-card, .tv-prof.flash-miss .prof-game { animation: none; } }
+
+/* ---------------------------------------------------------------- phone: one thumb */
+html[data-layout="phone"] .tv-prof { z-index: 80; bottom: calc(var(--sb) + 8px); width: calc(100vw - var(--sl) - var(--sr) - 12px); max-width: 430px; }
+html[data-layout="phone"] .prof-x { flex-basis: 44px; height: 44px; }
+html[data-layout="phone"] .prof-canvas { height: 264px; }
+html[data-layout="phone"] .prof-how { font-size: 15px; }
+@media (orientation: landscape) {
+  html[data-layout="phone"] .tv-prof { left: auto; right: calc(var(--sr) + 8px); transform: none; bottom: calc(var(--sb) + 4px); width: 400px; }
+  html[data-layout="phone"] .prof-game { padding: 6px 10px 8px; }
+  html[data-layout="phone"] .prof-how { margin: 4px 2px 5px; min-height: 0; font-size: 13.5px; }
+  html[data-layout="phone"] .prof-canvas { height: min(206px, calc(100vh - var(--st) - var(--sb) - 150px)); }
+  html[data-layout="phone"] .prof-card { top: 70px; bottom: 16px; }
+}

@@ -47,9 +47,9 @@ const TREE = ['Ash', 'Oak', 'Yew', 'Ironbark', 'Heartwood'];
  * What a merchant pays for ONE raw piece, by tier 1-5 — the knob tools/sim-professions.mjs is tuned with (the rule: an
  * hour of gathering = 70-100% of an hour of questing at the level that tier is worked at; tests/P/economy.test.js).
  */
-export const RAW_PRICE = { ore: [2, 7, 20, 38, 64], gem: [5, 14, 36, 70, 120], log: [2, 9, 24, 44, 72], herb: [2, 9, 26, 48, 78], mushroom: [2, 9, 26, 48, 78], fibre: [2, 9, 26, 48, 78],
+export const RAW_PRICE = { ore: [2, 6, 24, 38, 64], gem: [5, 14, 36, 70, 120], log: [2, 9, 30, 50, 80], herb: [2, 7, 32, 48, 78], mushroom: [2, 7, 32, 48, 78], fibre: [2, 7, 32, 48, 78],
   hide: [1, 4, 8, 14, 24], resin: [3], meat: [1], fang: [1] };
-const REFINE_MARKUP = 1.25;      // a refined good sells for its inputs x this (the mini-game's labour)
+const REFINE_MARKUP = 1.15;      // a refined good sells for its inputs x this (the mini-game's labour)
 
 function buildContent(numbers, engine, shops) {
   const materials = {}, nodeKinds = {}, recipes = [], goods = {};
@@ -87,7 +87,7 @@ function buildContent(numbers, engine, shops) {
   // ---- refining (smithing: bars; outfitting: leather, cloth) ----
   const refine = (prof, t, out, needs, verb, icon, cls) => {
     const [id, name, tint] = out;
-    materials[id] = { id, name, desc: verb, tier: t, prof, icon, tint, price: Math.max(1, Math.round(priceOf(needs) * REFINE_MARKUP)), made: true };
+    materials[id] = { id, name, desc: verb, tier: t, prof, icon, tint, price: Math.max(priceOf(needs) + 1, Math.round(priceOf(needs) * REFINE_MARKUP)), made: true };
     recipes.push({ id: `${prof === 'smithing' ? 'smelt' : cls}_${id}`, prof, tier: t, skill: skillAt(t), name, desc: verb, kind: 'material', refine: true, needs, makes: { id, n: 1 } });
   };
   for (let t = 1; t <= 5; t++) {
@@ -238,7 +238,7 @@ function buildQuests(trainer, smith) {
 }
 
 // ------------------------------------------------------------------------------------------------ placement
-export const PLACE = Object.freeze({ lattice: 8, edge: 48, perZone: { mining: 64, logging: 56, foraging: 84 }, gapSame: 60, gapAny: 16, road: [9, 400], starterR: 150, starterN: 5, keepOff: 6 });
+export const PLACE = Object.freeze({ lattice: 8, edge: 48, perZone: { mining: 64, logging: 56, foraging: 66 }, gapSame: 60, gapAny: 16, road: [9, 400], starterR: 150, starterN: 5, keepOff: 6 });
 
 function zoneFacts(wid) {
   const t = parseTerrain(readFileSync(P(`data/zones/${wid}/terrain.bin`)));

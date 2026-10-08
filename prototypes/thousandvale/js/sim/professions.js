@@ -188,7 +188,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     if (e.dead) return { why: 'dead', msg: 'You are dead.' };
     if (e.state & STATE.swimming) return { why: 'swim', msg: 'Not while swimming.' };
     if (e.airborne) return { why: 'busy', msg: 'Land first.' };
-    if (fighting(o, e)) return { why: 'combat', msg: 'Not while fighting.' };
+    if (e.state & STATE.combat) return { why: 'combat', msg: 'Not while fighting.' };      // (a hit also ends work under way: tick)
     if (e.held && e.held !== 'work') return { why: 'busy', msg: 'You are busy.' };
     return null;
   }
@@ -628,15 +628,22 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
       if (why) stop(o, why);
     }
   }
+  /** How much longer (ms) a dead beast must lie because a skinner with credit has not been to it yet (0 = let it go). */
+  function keepBody(e) {
+    if (!P || !e || e.kind !== 'monster' || !e.dead) return 0;
+    const t = now();
+    for (const o of online.values()) { const s = o.skins && o.skins.get(e.id); if (s && s.ent === e && t - s.at < (G.skinKeepMs || 60000)) return 5000; }
+    return 0;
+  }
   /** 1 Hz housekeeping: forget corpses that are gone. */
   function sweep() {
     for (const o of online.values()) {
       if (!o.skins || !o.skins.size) continue;
       const t = now();
-      for (const [id, s] of o.skins) if (s.ent.removed || t - s.at > (G.skinKeepMs || 180000) || (s.ent.room && o.room !== s.ent.room)) { o.skins.delete(id); reply(o, 'skinnable', { id, on: false }); }
+      for (const [id, s] of o.skins) if (s.ent.removed || t - s.at > (G.skinKeepMs || 60000) || (s.ent.room && o.room !== s.ent.room)) { o.skins.delete(id); reply(o, 'skinnable', { id, on: false }); }
     }
   }
 
-  return { P, prof, gather, craft, tick, sweep, stop, view, ensureNodes, npcExtra, useItem, onKill, onEvent, teach, stationNear, nodeNear, nodesIn, working, knows, levelOf, stateOf,
+  return { P, prof, gather, craft, tick, sweep, keepBody, stop, view, ensureNodes, npcExtra, useItem, onKill, onEvent, teach, stationNear, nodeNear, nodesIn, working, knows, levelOf, stateOf,
     get engine() { return engine; }, setEngine(e) { engine = e; }, ready: () => !!P };
 }

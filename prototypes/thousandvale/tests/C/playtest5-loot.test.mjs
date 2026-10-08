@@ -386,5 +386,5 @@ test('T23 slots: cloaks and belts drop, and a crate can promise one', () => {
     assert.equal(w.room.rules.canEquip(me, it).ok, true);
   }
   assert.equal(makeCrate({ slot: 'cloak' }).crate.slot, 'back', 'E may write cloak / belt / lantern');
-  if (engine.gearReport.catalog.length) assert.deepEqual(engine.gearReport.skipped.filter(x => !/lantern|torch/.test(x.why)), [], 'F\'s whole catalog is injected: nothing skipped but the removed lights');
+  if (engine.gearReport.catalog.length) assert.deepEqual(engine.gearReport.skipped.filter(x => !/lantern|torch|type "pack"/.test(x.why)), [], 'F\'s whole catalog is injected: nothing skipped but the removed lights and the backpack models (W19: packs are C\'s own bases sling_satchel / trail_rucksack / expedition_pack, drawn with these models by gear-look packLookId)');
 });

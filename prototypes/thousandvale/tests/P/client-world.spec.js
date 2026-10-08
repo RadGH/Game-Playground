@@ -106,11 +106,19 @@ test('copper boulders stand by the road, instanced; E starts the mini-game, the 
   expect(working.clip).toBe('profMine'); expect(working.tool).toBe('pick'); expect(working.inHand).toBe(true);
   await shot('w9-mining.png');
   // (a software renderer draws this scene at a few frames a second; the synthetic player needs its timers, so the view is made small while it plays)
-  await page.setViewportSize({ width: 420, height: 300 }); await page.waitForTimeout(200);
-  await botKeys();
-  const local = await page.evaluate(() => tvprof.mini.state.result);
+  await page.setViewportSize({ width: 320, height: 220 }); await page.waitForTimeout(200);
+  // a botched game spends nothing and may be tried again at once — which is also what saves this test when the
+  // software renderer starves the synthetic player's timers
+  let local = null;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    if (attempt) { await page.keyboard.press('Space'); await expect(page.locator('.tv-prof')).toBeHidden(); await page.keyboard.press('KeyE'); await page.waitForFunction(() => tvprof.mini.state.state === 'play', null, { timeout: 10000 }); }
+    await botKeys();
+    await page.waitForFunction(() => document.querySelector('.prof-card[data-q]') && !document.querySelector('.prof-wait'), null, { timeout: 10000 });
+    local = await page.evaluate(() => ({ ...tvprof.mini.state.result, server: document.querySelector('.prof-card').dataset.q }));
+    if (local.server !== 'fail') break;
+    expect(await page.evaluate(() => thousandvale.profView.stats.spent), 'a botched boulder is still there').toBe(0);
+  }
   await page.setViewportSize({ width: 1100, height: 680 });
-  await page.waitForFunction(() => document.querySelector('.prof-card[data-q]') && !document.querySelector('.prof-wait'), null, { timeout: 10000 });
   const card = await page.locator('.prof-card').innerText();
   expect(card, 'local ' + JSON.stringify(local)).toMatch(/Copper Ore|Tin Ore/); expect(card).not.toMatch(/undefined|null|NaN|\[object/);
   await shot('w9-result.png');
@@ -160,4 +168,51 @@ test('the smith has a forge and a tempering bench beside him; his dialog opens t
   await expect(page.locator('#tipbox')).toContainText(/Crafting material/i, { timeout: 5000 });
   await shot('w9-material-card.png');
   expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('on a phone (393 × 852, the real phone layout): tap the prompt, play the boulder with one finger, the character does not walk off', async ({ browser }) => {
+  test.setTimeout(480000);
+  const pctx = await browser.newContext({ viewport: { width: 393, height: 852 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
+  const p = await pctx.newPage(); const perr = [];
+  p.on('pageerror', e => perr.push(e.message));
+  await p.goto(`http://127.0.0.1:${port}/prototypes/thousandvale/?autoplay=1&name=Pip&cls=ranger&quality=low&tod=0.5&layout=phone`);
+  await p.waitForFunction(() => window.tv && tv.state().status === 'online' && tv.state().you?.id != null, null, { timeout: 60000 });
+  await p.waitForFunction(() => tv.warm()?.done, null, { timeout: 300000 });
+  expect(await p.evaluate(() => document.documentElement.dataset.layout)).toBe('phone');
+  await hook('/teleport', { name: 'Pip', x: BRAM.x + 2.2, z: BRAM.z + 0.5 });
+  await p.waitForFunction(() => [...thousandvale.actors.actors.values()].some(a => a.role === 'prospector'), null, { timeout: 30000 });
+  await p.evaluate(() => { const b = [...thousandvale.actors.actors.values()].find(a => a.role === 'prospector'); thousandvale.S.net.use(b.id); });
+  await p.waitForFunction(() => tvprof.state.list.find(x => x.id === 'mining')?.known, null, { timeout: 10000 });
+  await p.evaluate(() => thousandvale.worldUi.closeDialog?.());
+  const N2 = BRAM.starters[1];
+  await hook('/teleport', { name: 'Pip', x: N2.x + 2.2, z: N2.z + 0.4 });
+  await p.waitForTimeout(2500);
+  await p.waitForFunction(() => thousandvale.profView.stats.nodes > 2 && !document.getElementById('interact').hidden, null, { timeout: 30000 });
+  await expect(p.locator('#interact')).toContainText(/Mine/);
+  await p.screenshot({ path: join(SHOTS, 'w9-phone-prompt.png') });
+  const before = await p.evaluate(() => ({ ...tv.state().you }));
+  await p.locator('#interact').tap();
+  await p.waitForFunction(() => tvprof.mini.state.state === 'play', null, { timeout: 10000 });
+  const box = await p.evaluate(() => { const r = document.querySelector('.prof-game').getBoundingClientRect(), c = document.querySelector('.prof-canvas').getBoundingClientRect(); return { top: r.top, bottom: r.bottom, w: r.width, canvasH: c.height, vh: innerHeight, vw: innerWidth, x: document.querySelector('.prof-x').getBoundingClientRect().width }; });
+  expect(box.bottom).toBeLessThanOrEqual(box.vh); expect(box.w).toBeGreaterThan(box.vw - 30); expect(box.canvasH).toBeGreaterThanOrEqual(240); expect(box.x).toBeGreaterThanOrEqual(44);
+  expect(box.top, 'the panel is in the lower half: under a thumb, the character above it').toBeGreaterThan(box.vh * 0.4);
+  await p.waitForTimeout(300);
+  await p.screenshot({ path: join(SHOTS, 'w9-phone-mining.png') });
+  // one finger: real touches on the panel at the moments the flawless play says
+  for (let g = 0; g < 4000; g++) {
+    const st = await p.evaluate(() => { const s = tvprof.mini.state; return { on: s.open && s.state === 'play', next: s.next, clock: s.clock, c: s.canvas }; });
+    if (!st.on) break;
+    if (!st.next || st.clock < st.next.t - 25) { await p.waitForTimeout(st.next ? Math.max(1, Math.min(30, st.next.t - st.clock - 25)) : 10); continue; }
+    await p.touchscreen.tap(st.c.x + st.c.w / 2, st.c.y + st.c.h / 2);
+  }
+  await p.waitForFunction(() => document.querySelector('.prof-card[data-q]') && !document.querySelector('.prof-wait'), null, { timeout: 10000 });
+  await p.screenshot({ path: join(SHOTS, 'w9-phone-result.png') });
+  const res = await p.evaluate(() => ({ q: document.querySelector('.prof-card').dataset.q, text: document.querySelector('.prof-card').innerText.replace(/\s+/g, ' '), you: { ...tv.state().you }, inputs: tvprof.mini.state.result?.inputs.length }));
+  console.log('[prof] phone:', JSON.stringify({ box, res }));
+  expect(res.inputs, 'three taps were taken as three strikes').toBe(6);
+  expect(Math.hypot(res.you.x - before.x, res.you.z - before.z), 'tapping the panel did not walk the character anywhere').toBeLessThan(0.6);
+  expect(res.text).not.toMatch(/undefined|null|NaN|\[object/);
+  await p.locator('.prof-card').tap();
+  expect(perr, perr.join('\n')).toEqual([]);
+  await pctx.close();
 });

@@ -201,7 +201,7 @@ export function createTouch({ api, input, run, radial }) {
     sheet.hidden = false;
     return true;
   }
-  let press = null, swallow = 0;
+  let press = null, swallow = -Infinity;
   document.addEventListener('pointerdown', e => {
     if (e.pointerType === 'mouse' && !html.dataset.safeEmulated) return;
     const host = tipHost(e.target); if (!host || host.closest('.phone-sheet, .ph-btn, .phone-tabs')) return;
@@ -212,7 +212,7 @@ export function createTouch({ api, input, run, radial }) {
   for (const t of ['pointerup', 'pointercancel']) document.addEventListener(t, () => { if (press) { clearTimeout(press.t); press = null; } }, true);
   // the click that ends a hold must not also press the thing; and a tap on a bag item opens its sheet instead of wearing it at once
   document.addEventListener('click', e => {
-    if (performance.now() - swallow < 700) { e.stopPropagation(); e.preventDefault(); swallow = 0; return; }
+    if (performance.now() - swallow < 700) { e.stopPropagation(); e.preventDefault(); swallow = -Infinity; return; }
     if (e.tvPass) return;
     const cell = e.target.closest?.('#bag .islot:not(.empty)');
     if (cell && cell.dataset.tipRender) { e.stopPropagation(); e.preventDefault(); itemSheet(cell); return; }

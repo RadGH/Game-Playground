@@ -617,7 +617,7 @@ export function createProvince(opts) {
         seen: ch.seen || { zones: [], places: [] },
         opened: Object.keys(ch.opened || {}).filter(k => ch.opened[k] > t),
         // play-test 2
-        reach: attackReach(o), attackRange: attackReach(o), mounts: mountBook.owned(ch), mount: o.mount || null, speedMul: e.speedMul || 1, prefs: prefsOf(ch), look: ch.look || null, clsName: clsNameOf(ch.cls),
+        reach: attackReach(o), attackRange: attackReach(o), mounts: mountBook.owned(ch), mount: o.mount || null, speedMul: (e.speedMul = speedOf(o)), moveMul: footMul(o), prefs: prefsOf(ch), look: ch.look || null, clsName: clsNameOf(ch.cls),
         // play-test 5
         bagMax: bagCap(o), bagBase: bagBase(), angling: angling.view(ch), professions: professions.view(ch) /* W9 (P-core) */, acct: acctOf(o), ...(rules.LIGHT && rules.LIGHT.radius ? { lightRange: rules.LIGHT.radius, light: rules.LIGHT } : {}), ...(o.admin ? { admin: true } : {}), ...(ch.kit ? { kit: ch.kit } : {}), ...(o.eventAtKey ? { eventAt: o.eventAtKey } : {}),
       },
@@ -2534,15 +2534,15 @@ export function createProvince(opts) {
   function applyMount(o) {
     const e = o.entity, def = mountBook.get(o.mount);
     if (!def) { o.mount = null; return; }
-    e.mount = def.id; e.speedMul = mountSpeed(o, def); e.infoVer++;
+    e.mount = def.id; e.speedMul = footMul(o) * mountSpeed(o, def); e.infoVer++;
     const c = o.room.clients.get(e.id); if (c) c.selfDirty = true;
-    if (o.conn) o.conn.sendJSON({ t: 'you', mount: def.id, speedMul: e.speedMul });
+    if (o.conn) o.conn.sendJSON({ t: 'you', mount: def.id, speedMul: e.speedMul, moveMul: footMul(o) });
   }
   function dismount(o, why) {
     const e = o.entity;
     o.mount = null;
-    if (e.mount) { e.mount = null; e.speedMul = 1; e.infoVer++; }
-    if (o.conn) o.conn.sendJSON({ t: 'you', mount: null, speedMul: 1, dismount: why });
+    if (e.mount) { e.mount = null; e.speedMul = footMul(o); e.infoVer++; }
+    if (o.conn) o.conn.sendJSON({ t: 'you', mount: null, speedMul: e.speedMul, moveMul: e.speedMul, dismount: why });
   }
   /** Q16 with stream C's rules (js/rules/mount.js): calling a mount is a 1.5 s cast standing still; a hit breaks it.
    *  W26 (round 8, report #47 "You stopped calling your mount" x3): the call HOLDS you still (`e.held`, js/sim/room.js) — moving no longer
@@ -2775,11 +2775,29 @@ export function createProvince(opts) {
     const b = o.room.rules.itemBuffs ? safeRules(o.room, 'itemBuffs', o.entity) || {} : {};
     return mountSpeedMul(def) * (1 + (+b.mountSpeedPct || 0));
   }
+  /**
+   * MOVE SPEED IS REAL (lead, 2026-10-08; C found that the sheet's "Move speed bonus" was read by nothing — a card promising
+   * +18% changed no step). ONE number moves a player: `entity.speedMul`, which the room's stepMove multiplies the on-foot
+   * speeds by and the client's predictor reads from `you.speedMul` — so the server's check and the client's prediction can
+   * never disagree, and a speed hack is measured against the same figure.
+   *   speedMul = footMul x (riding ? the mount's factor : 1)
+   *   footMul  = 1 + movePct / 100 from the rules' own sheet (`unit.derived.movePct`: boots, properties, powers, skill buffs,
+   *              a druid shape's stride, a slow), held to MOVE_MUL = [0.5, 1.3] — at most +30% on foot, never under half.
+   * A mount multiplies what your feet do (fast boots make a slightly faster rider), and stepMove's own ceiling (x3) holds
+   * the product. Checked 4 times a second for everyone online; sent as `you {speedMul, moveMul}` only when it changes.
+   */
+  const MOVE_MUL = Object.freeze([0.5, 1.3]);
+  function footMul(o) {
+    const u = o.entity && o.entity.r && o.entity.r.unit, pct = u && u.derived ? +u.derived.movePct : 0;
+    return Number.isFinite(pct) && pct ? Math.max(MOVE_MUL[0], Math.min(MOVE_MUL[1], 1 + pct / 100)) : 1;
+  }
+  function speedOf(o) { const f = footMul(o); if (o.mount && o.entity.mount) { const def = mountBook.get(o.mount); return def ? f * mountSpeed(o, def) : f; } return f; }
+  function speedTell(o, v) { o.entity.speedMul = v; const c = o.room.clients.get(o.entity.id); if (c) c.selfDirty = true; if (o.conn) o.conn.sendJSON({ t: 'you', speedMul: v, moveMul: footMul(o) }); }
   function mountSpeedTick() {
     for (const o of online.values()) {
-      if (!o.mount || !o.entity.mount) continue;
-      const def = mountBook.get(o.mount), v = def ? mountSpeed(o, def) : 1;
-      if (Math.abs(v - o.entity.speedMul) > 1e-6) { o.entity.speedMul = v; const c = o.room.clients.get(o.entity.id); if (c) c.selfDirty = true; if (o.conn) o.conn.sendJSON({ t: 'you', speedMul: v }); }
+      if (!o.entity) continue;
+      const v = speedOf(o);
+      if (Math.abs(v - (o.entity.speedMul || 1)) > 1e-6) speedTell(o, v);
     }
   }
   /** Q2 (D-UI's right-click menu): what someone is wearing. */
@@ -3308,7 +3326,8 @@ export function createProvince(opts) {
     if (ticks % 20 === 11) questMarksTick();      // W12: quest marks over NPCs, per player
     if (ticks % 20 === 13) roadEvents.tick();     // S5: random road events near lone players
     if (ticks % 4 === 3) roadEvents.move(TICK_MS * 4);
-    if (ticks % 20 === 11) { foodTick(); mountSpeedTick(); reviveSweep(); }
+    if (ticks % 20 === 11) { foodTick(); reviveSweep(); }
+    if (ticks % 5 === 2) mountSpeedTick();      // move speed (boots, buffs, shapes, the mount): 4 Hz
     angling.tick();
     professions.tick(); if (ticks % 20 === 15) professions.sweep();      // W9 (P-core)
     for (const o of online.values()) if (o.mountCast) mountCastTick(o);

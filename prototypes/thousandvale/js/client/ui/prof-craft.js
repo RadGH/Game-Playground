@@ -16,6 +16,8 @@ import { RARITY_NAME, rarityOf, slotOf } from './inv-core.js';
 import { rememberItems } from './item-card.js';
 import { profIcon, PROF_NAME, PROF_TINT } from './prof-icons.js';
 
+/** The legendary power a quote or a finished work names (the server's `power` / `now`), as one sentence — or null. Pure. */
+export function powerOf(m) { const p = m && (m.power || m.now); if (!p || typeof p !== 'object') return null; if (p.id && p.id !== 'legendary_effect' && !p.legendaryId) return null; return p.descriptor || p.text || p.desc || (p.name && p.name !== 'Legendary' ? p.name : null); }
 /** Nested lists of nodes (and nulls) -> one flat list of nodes. */
 const flatKids = k => [k].flat(Infinity).filter(x => x != null && x !== false);
 const pct = v => fmt(v * 100, { decimals: 0 }) + '%';
@@ -62,7 +64,8 @@ export function createCraftWindow({ net, hud, bag, numbers = () => null, onMake,
     send('quote', { id: S.op, uid: S.uid, npc: S.npc ?? undefined, ...(S.op === 'temper_reweave' ? { index: S.index } : {}), ...(S.op === 'temper_brand' ? { element: S.element } : {}) });
   }
 
-  const needChips = needs => h('span.pc-needs', {}, ...(needs || []).map(n => h('span.' + ((n.have ?? 0) >= n.n ? 'ok' : 'lack'), {}, `${fmt(n.have ?? 0, { decimals: 0 })}/${fmt(n.n, { decimals: 0 })} ${n.name}`)));
+  // (round 9, X5: a `kept` material — the Sovereign Core — is needed but NOT spent when the gauge is missed: its chip says so)
+  const needChips = needs => h('span.pc-needs', {}, ...(needs || []).map(n => h('span.' + ((n.have ?? 0) >= n.n ? 'ok' : 'lack') + (n.kept ? '.kept' : ''), n.kept ? { dataset: { tip: `${n.name} is needed for this work, and you keep it if the gauge is missed.` } } : {}, `${fmt(n.have ?? 0, { decimals: 0 })}/${fmt(n.n, { decimals: 0 })} ${n.name}`, n.kept ? h('em', {}, 'kept on a miss') : null)));
   const feeNode = gold => (gold > 0 ? h('span.pc-fee', {}, `${fmt(gold, { decimals: 0 })} gold`) : null);
 
   function recipeRow(r) {
@@ -98,6 +101,7 @@ export function createCraftWindow({ net, hud, bag, numbers = () => null, onMake,
     return [
       h('div.pt-ops', { role: 'tablist' }, ...ops.map(o => h('button.chip' + (o.id === S.op ? '.on' : ''), { type: 'button', role: 'tab', 'aria-selected': String(o.id === S.op), dataset: { op: o.id }, onclick: () => { S.op = o.id; S.quote = null; askQuote(); draw(); } }, o.name))),
       h('p.pt-what', {}, op.desc), op.why ? h('p.pc-why', {}, op.why) : null,
+      op.legendary ? h('p.pt-legend', {}, h('b.r-legendary', {}, 'Rare to legendary'), ` needs a ${op.legendary.material?.name || 'Sovereign Core'} and Tempering ${op.legendary.skill}. The item keeps every property and gains one legendary power.`) : null,
       h('div.pt-cols', {},
         h('div.pt-items', {}, h('span.pt-h', {}, 'From your bag'),
           items.length ? h('ul.pt-list', {}, ...items.map(x => h('li', {}, h('button.pt-item.r-' + rarityOf(x) + (x.uid === S.uid ? '.on' : ''), { type: 'button', dataset: { uid: x.uid, tipItem: x.uid }, onclick: () => pickItem(x.uid) },
@@ -109,7 +113,9 @@ export function createCraftWindow({ net, hud, bag, numbers = () => null, onMake,
             S.op === 'temper_reweave' ? (props.length ? h('label.pc-base', {}, 'Replace ', h('select', { onchange: e => { S.index = +e.target.value; S.quote = null; askQuote(); draw(); } }, ...props.map((a, i) => h('option', { value: i, selected: i === S.index }, a.text || a.name || a.stat || `Property ${i + 1}`)))) : h('small.pc-why', {}, 'This item has no rolled property to replace.')) : null,
             S.op === 'temper_brand' ? h('div.pt-els', {}, ...(op.elements || []).map(el => h('button.chip.small' + (el === S.element ? '.on' : ''), { type: 'button', dataset: { el }, onclick: () => { S.element = el; S.quote = null; askQuote(); draw(); } }, ELEMENT_NAME[el] || el))) : null,
             !q ? h('p.dim', {}, 'Asking what it would take…') : [
+              q.to ? h('div.pt-to', {}, h('span.r-' + rarityOf(it), {}, RARITY_NAME[rarityOf(it)] || rarityOf(it)), h('i', { 'aria-hidden': 'true' }, '→'), h('b.r-' + q.to, {}, RARITY_NAME[q.to] || q.to)) : null,
               q.text ? h('p.pt-text' + (q.can ? '' : '.pc-why'), {}, q.text) : null,
+              powerOf(q) ? h('p.pt-power.r-legendary', {}, 'It will gain: ', h('b', {}, powerOf(q))) : null,
               h('div.pc-cost', {}, needChips(q.needs), feeNode(q.gold)),
               Number.isFinite(q.skill) ? h('small', {}, `Needs Tempering ${q.skill} — yours is ${S.list?.level?.tempering || 1}.`) : null,
               q.can || (q.why && q.why === q.text) ? null : h('small.pc-why', {}, q.why || 'You cannot do that yet.'),

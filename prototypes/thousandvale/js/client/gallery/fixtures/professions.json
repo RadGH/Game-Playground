@@ -89,7 +89,7 @@
     "remote": true
    },
    {
-    "id": "job:prof_prospectors_round:npc:prospector_torborhold:29858034",
+    "id": "job:prof_prospectors_round:npc:prospector_torborhold:29858248",
     "name": "Mine 8 pieces of ore",
     "level": 3,
     "zone": "z12_02",
@@ -215,7 +215,7 @@
     "value": 2,
     "count": 3,
     "stackMax": 50,
-    "uid": "p0-d1f7e6da-4"
+    "uid": "p0-37bcef53-4"
    }
   ],
   "got": [
@@ -265,7 +265,7 @@
   },
   "offers": [
    {
-    "id": "job:prof_tin_too:npc:torbor_downs:0:torborhold_plot_11:29858034",
+    "id": "job:prof_tin_too:npc:torbor_downs:0:torborhold_plot_11:29858248",
     "name": "Mine 4 Tin Ore",
     "level": 3,
     "zone": "z12_02",
@@ -302,7 +302,7 @@
     "remote": true
    },
    {
-    "id": "job:prof_copper_for_the_forge:npc:torbor_downs:0:torborhold_plot_11:29858034",
+    "id": "job:prof_copper_for_the_forge:npc:torbor_downs:0:torborhold_plot_11:29858248",
     "name": "Mine 6 Copper Ore",
     "level": 3,
     "zone": "z12_02",
@@ -339,7 +339,7 @@
     "remote": true
    },
    {
-    "id": "job:prof_bars_on_the_rack:npc:torbor_downs:0:torborhold_plot_11:29858034",
+    "id": "job:prof_bars_on_the_rack:npc:torbor_downs:0:torborhold_plot_11:29858248",
     "name": "Smelt 3 Bronze Bars",
     "level": 3,
     "zone": "z12_02",
@@ -450,7 +450,7 @@
     "value": 5,
     "count": 10,
     "stackMax": 50,
-    "uid": "p0-d1f7e6da-6"
+    "uid": "p0-37bcef53-6"
    }
   ],
   "got": [
@@ -599,7 +599,7 @@
     "elementNote": null,
     "castLine": null,
     "dropLevel": 1,
-    "uid": "p0-d1f7e6da-7",
+    "uid": "p0-37bcef53-7",
     "crafted": true,
     "maker": "Maren",
     "ruid": "torbor_downs/town:0:m2"
@@ -2529,7 +2529,7 @@
     "tier": 1,
     "skill": 11,
     "name": "Promote",
-    "desc": "Raises the item's rarity one step (plain to uncommon, uncommon to rare) and adds one new property. Never above rare.",
+    "desc": "Raises the item's rarity one step: plain to uncommon, uncommon to rare (one new property each), and a rare to legendary with a Sovereign Core (it gains a legendary power).",
     "kind": "temper",
     "can": false,
     "why": "Needs Tempering 11.",
@@ -2537,7 +2537,14 @@
     "needs": [],
     "gold": 0,
     "makes": null,
-    "game": "gauge"
+    "game": "gauge",
+    "legendary": {
+     "material": {
+      "id": "sovereign_core",
+      "name": "Sovereign Core"
+     },
+     "skill": 60
+    }
    },
    {
     "id": "temper_reweave",
@@ -2586,7 +2593,7 @@
   "t": "craftQuote",
   "ok": true,
   "id": "temper_quality",
-  "uid": "p0-d1f7e6da-7",
+  "uid": "p0-37bcef53-7",
   "can": true,
   "needs": [
    {
@@ -2598,6 +2605,7 @@
   ],
   "gold": 50,
   "skill": 1,
+  "to": "medium",
   "text": "Quality low to medium: its damage and rolled properties grow by 43%."
  },
  "temperR": {
@@ -2605,7 +2613,7 @@
   "ok": true,
   "state": "play",
   "id": "temper_quality",
-  "uid": "p0-d1f7e6da-7",
+  "uid": "p0-37bcef53-7",
   "game": {
    "type": "gauge",
    "seed": 328820253,
@@ -2725,7 +2733,7 @@
    "elementNote": null,
    "castLine": null,
    "dropLevel": 1,
-   "uid": "p0-d1f7e6da-7",
+   "uid": "p0-37bcef53-7",
    "crafted": true,
    "maker": "Maren",
    "ruid": "torbor_downs/town:0:m2",
@@ -2743,7 +2751,7 @@
   "t": "craftQuote",
   "ok": true,
   "id": "temper_quality",
-  "uid": "p0-d1f7e6da-7",
+  "uid": "p0-37bcef53-7",
   "can": false,
   "why": "Raising it to high quality needs Tempering 25.",
   "code": "skill",
@@ -2835,7 +2843,7 @@
     "elementNote": null,
     "castLine": null,
     "dropLevel": 1,
-    "uid": "p0-d1f7e6da-8",
+    "uid": "p0-37bcef53-8",
     "crafted": true,
     "maker": "Maren",
     "ruid": "torbor_downs/town:0:m3"
@@ -2863,7 +2871,7 @@
   "t": "craftQuote",
   "ok": true,
   "id": "temper_quality",
-  "uid": "p0-d1f7e6da-8",
+  "uid": "p0-37bcef53-8",
   "can": true,
   "needs": [
    {
@@ -2875,9 +2883,10 @@
   ],
   "gold": 11,
   "skill": 1,
+  "to": "medium",
   "text": "Quality low to medium: its damage and rolled properties grow by 43%."
  },
- "blade2Uid": "p0-d1f7e6da-8",
+ "blade2Uid": "p0-37bcef53-8",
  "craftListAway": {
   "t": "craftList",
   "ok": true,
@@ -6922,7 +6931,7 @@
     "tier": 1,
     "skill": 11,
     "name": "Promote",
-    "desc": "Raises the item's rarity one step (plain to uncommon, uncommon to rare) and adds one new property. Never above rare.",
+    "desc": "Raises the item's rarity one step: plain to uncommon, uncommon to rare (one new property each), and a rare to legendary with a Sovereign Core (it gains a legendary power).",
     "kind": "temper",
     "can": false,
     "why": "You need a forge: the smith, the armourer or a jeweller.",
@@ -6930,7 +6939,14 @@
     "needs": [],
     "gold": 0,
     "makes": null,
-    "game": "gauge"
+    "game": "gauge",
+    "legendary": {
+     "material": {
+      "id": "sovereign_core",
+      "name": "Sovereign Core"
+     },
+     "skill": 60
+    }
    },
    {
     "id": "temper_reweave",
@@ -6975,7 +6991,2648 @@
    }
   ]
  },
- "professions": {
+ "legendQuoteLack": {
+  "t": "craftQuote",
+  "ok": true,
+  "id": "temper_promote",
+  "uid": "p0-37bcef53-9",
+  "can": false,
+  "why": "You need 6 Iron Bar (you have 0).",
+  "code": "needs",
+  "needs": [
+   {
+    "id": "sovereign_core",
+    "name": "Sovereign Core",
+    "n": 1,
+    "have": 1,
+    "kept": true
+   },
+   {
+    "id": "iron_bar",
+    "name": "Iron Bar",
+    "n": 6,
+    "have": 0
+   },
+   {
+    "id": "garnet",
+    "name": "Garnet",
+    "n": 2,
+    "have": 0
+   }
+  ],
+  "gold": 3950,
+  "skill": 60,
+  "to": "legendary",
+  "text": "Rare to legendary: it keeps every property and gains one legendary power. A miss costs the other materials and the gold; the Sovereign Core is kept."
+ },
+ "legendQuote": {
+  "t": "craftQuote",
+  "ok": true,
+  "id": "temper_promote",
+  "uid": "p0-37bcef53-9",
+  "can": true,
+  "needs": [
+   {
+    "id": "sovereign_core",
+    "name": "Sovereign Core",
+    "n": 1,
+    "have": 1,
+    "kept": true
+   },
+   {
+    "id": "iron_bar",
+    "name": "Iron Bar",
+    "n": 6,
+    "have": 12
+   },
+   {
+    "id": "garnet",
+    "name": "Garnet",
+    "n": 2,
+    "have": 4
+   }
+  ],
+  "gold": 3950,
+  "skill": 60,
+  "to": "legendary",
+  "text": "Rare to legendary: it keeps every property and gains one legendary power. A miss costs the other materials and the gold; the Sovereign Core is kept."
+ },
+ "legendQuoteRefused": {
+  "t": "craftQuote",
+  "ok": true,
+  "id": "temper_promote",
+  "uid": "p0-37bcef53-a",
+  "can": false,
+  "why": "A backpack cannot hold a legendary power.",
+  "code": "item",
+  "needs": [],
+  "gold": 0,
+  "text": "A backpack cannot hold a legendary power."
+ },
+ "craftListLegend": {
+  "t": "craftList",
+  "ok": true,
+  "station": {
+   "kinds": [
+    "smithing",
+    "tempering"
+   ],
+   "name": "Garrow Ashby",
+   "npc": 24
+  },
+  "level": {
+   "mining": 1,
+   "logging": 1,
+   "foraging": 1,
+   "skinning": 1,
+   "angling": 1,
+   "smithing": 2,
+   "outfitting": 1,
+   "alchemy": 1,
+   "cooking": 1,
+   "tempering": 62
+  },
+  "recipes": [
+   {
+    "id": "smelt_bronze_bar",
+    "prof": "smithing",
+    "tier": 1,
+    "skill": 1,
+    "name": "Bronze Bar",
+    "desc": "Copper and tin, smelted together. The metal of a first sword.",
+    "kind": "material",
+    "can": true,
+    "needs": [
+     {
+      "id": "copper_ore",
+      "name": "Copper Ore",
+      "n": 1,
+      "have": 11
+     },
+     {
+      "id": "tin_ore",
+      "name": "Tin Ore",
+      "n": 1,
+      "have": 5
+     }
+    ],
+    "gold": 0,
+    "makes": {
+     "id": "bronze_bar",
+     "name": "Bronze Bar",
+     "n": 1,
+     "text": "Copper and tin, smelted together. The metal of a first sword."
+    },
+    "game": "forge"
+   },
+   {
+    "id": "smelt_iron_bar",
+    "prof": "smithing",
+    "tier": 2,
+    "skill": 25,
+    "name": "Iron Bar",
+    "desc": "Smelted iron ore, ready for the anvil.",
+    "kind": "material",
+    "can": false,
+    "why": "Needs Smithing 25. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "iron_ore",
+      "name": "Iron Ore",
+      "n": 2,
+      "have": 0
+     }
+    ],
+    "gold": 0,
+    "makes": {
+     "id": "iron_bar",
+     "name": "Iron Bar",
+     "n": 1,
+     "text": "Smelted iron ore, ready for the anvil."
+    },
+    "game": "forge"
+   },
+   {
+    "id": "tool_iron_pick",
+    "prof": "smithing",
+    "tier": 2,
+    "skill": 30,
+    "name": "Iron Pick",
+    "desc": "A gathering tool.",
+    "kind": "tool",
+    "can": false,
+    "why": "Needs Smithing 30. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "iron_bar",
+      "name": "Iron Bar",
+      "n": 3,
+      "have": 12
+     },
+     {
+      "id": "oak_log",
+      "name": "Oak Log",
+      "n": 1,
+      "have": 0
+     }
+    ],
+    "gold": 0,
+    "makes": {
+     "id": "iron_pick",
+     "name": "Iron Pick",
+     "n": 1,
+     "text": "A better pick: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
+    },
+    "game": "forge"
+   },
+   {
+    "id": "tool_iron_hatchet",
+    "prof": "smithing",
+    "tier": 2,
+    "skill": 30,
+    "name": "Iron Hatchet",
+    "desc": "A gathering tool.",
+    "kind": "tool",
+    "can": false,
+    "why": "Needs Smithing 30. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "iron_bar",
+      "name": "Iron Bar",
+      "n": 3,
+      "have": 12
+     },
+     {
+      "id": "oak_log",
+      "name": "Oak Log",
+      "n": 1,
+      "have": 0
+     }
+    ],
+    "gold": 0,
+    "makes": {
+     "id": "iron_hatchet",
+     "name": "Iron Hatchet",
+     "n": 1,
+     "text": "A better hatchet: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
+    },
+    "game": "forge"
+   },
+   {
+    "id": "tool_iron_knife",
+    "prof": "smithing",
+    "tier": 2,
+    "skill": 30,
+    "name": "Iron Skinning Knife",
+    "desc": "A gathering tool.",
+    "kind": "tool",
+    "can": false,
+    "why": "Needs Smithing 30. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "iron_bar",
+      "name": "Iron Bar",
+      "n": 3,
+      "have": 12
+     },
+     {
+      "id": "oak_log",
+      "name": "Oak Log",
+      "n": 1,
+      "have": 0
+     }
+    ],
+    "gold": 0,
+    "makes": {
+     "id": "iron_knife",
+     "name": "Iron Skinning Knife",
+     "n": 1,
+     "text": "A better skinning knife: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
+    },
+    "game": "forge"
+   },
+   {
+    "id": "tool_iron_sickle",
+    "prof": "smithing",
+    "tier": 2,
+    "skill": 30,
+    "name": "Iron Sickle",
+    "desc": "A gathering tool.",
+    "kind": "tool",
+    "can": false,
+    "why": "Needs Smithing 30. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "iron_bar",
+      "name": "Iron Bar",
+      "n": 3,
+      "have": 12
+     },
+     {
+      "id": "oak_log",
+      "name": "Oak Log",
+      "n": 1,
+      "have": 0
+     }
+    ],
+    "gold": 0,
+    "makes": {
+     "id": "iron_sickle",
+     "name": "Iron Sickle",
+     "n": 1,
+     "text": "A better sickle: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
+    },
+    "game": "forge"
+   },
+   {
+    "id": "blades_1",
+    "prof": "smithing",
+    "tier": 1,
+    "skill": 1,
+    "name": "Bronze-grade Blades",
+    "desc": "Swords and daggers. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "You need 3 Bronze Bar (you have 2).",
+    "code": "needs",
+    "needs": [
+     {
+      "id": "bronze_bar",
+      "name": "Bronze Bar",
+      "n": 3,
+      "have": 2
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "dagger",
+      "name": "Dagger",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "militia_sabre",
+      "name": "Militia Sabre",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "rapier",
+      "name": "Rapier",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "sword",
+      "name": "Sword",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "g5_leafblade",
+      "name": "Marsh Leafblade",
+      "slot": "weapon",
+      "from": 2,
+      "can": false
+     },
+     {
+      "key": "g5_kris",
+      "name": "Tidewater Kris",
+      "slot": "weapon",
+      "from": 2,
+      "can": false
+     },
+     {
+      "key": "forager_blade",
+      "name": "Forager's Blade",
+      "slot": "weapon",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "tithe_dagger",
+      "name": "Tithe Dagger",
+      "slot": "weapon",
+      "from": 4,
+      "can": false
+     },
+     {
+      "key": "longsword",
+      "name": "Longsword",
+      "slot": "weapon",
+      "from": 6,
+      "can": false
+     },
+     {
+      "key": "houndmasters_lash",
+      "name": "Houndmaster's Lash",
+      "slot": "weapon",
+      "from": 8,
+      "can": false
+     },
+     {
+      "key": "rimecut_sabre",
+      "name": "Rimecut Sabre",
+      "slot": "weapon",
+      "from": 9,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     1,
+     10
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "blades_2",
+    "prof": "smithing",
+    "tier": 2,
+    "skill": 25,
+    "name": "Iron-grade Blades",
+    "desc": "Swords and daggers. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 25. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "iron_bar",
+      "name": "Iron Bar",
+      "n": 3,
+      "have": 12
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "dagger",
+      "name": "Dagger",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "militia_sabre",
+      "name": "Militia Sabre",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "rapier",
+      "name": "Rapier",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "sword",
+      "name": "Sword",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "g5_leafblade",
+      "name": "Marsh Leafblade",
+      "slot": "weapon",
+      "from": 2,
+      "can": false
+     },
+     {
+      "key": "g5_kris",
+      "name": "Tidewater Kris",
+      "slot": "weapon",
+      "from": 2,
+      "can": false
+     },
+     {
+      "key": "forager_blade",
+      "name": "Forager's Blade",
+      "slot": "weapon",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "tithe_dagger",
+      "name": "Tithe Dagger",
+      "slot": "weapon",
+      "from": 4,
+      "can": false
+     },
+     {
+      "key": "longsword",
+      "name": "Longsword",
+      "slot": "weapon",
+      "from": 6,
+      "can": false
+     },
+     {
+      "key": "houndmasters_lash",
+      "name": "Houndmaster's Lash",
+      "slot": "weapon",
+      "from": 8,
+      "can": false
+     },
+     {
+      "key": "rimecut_sabre",
+      "name": "Rimecut Sabre",
+      "slot": "weapon",
+      "from": 9,
+      "can": false
+     },
+     {
+      "key": "obsidian_scimitar",
+      "name": "Obsidian Scimitar",
+      "slot": "weapon",
+      "from": 14,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     8,
+     20
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "axes_1",
+    "prof": "smithing",
+    "tier": 1,
+    "skill": 4,
+    "name": "Bronze-grade Axes",
+    "desc": "Axes, one-handed and great. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 4. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "bronze_bar",
+      "name": "Bronze Bar",
+      "n": 4,
+      "have": 2
+     },
+     {
+      "id": "ash_log",
+      "name": "Ash Log",
+      "n": 2,
+      "have": 0
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "battleaxe",
+      "name": "Battleaxe",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "woodsman_axe",
+      "name": "Woodsman's Axe",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "axe2h",
+      "name": "Greataxe",
+      "slot": "weapon",
+      "from": 2,
+      "can": false
+     },
+     {
+      "key": "g5_moonaxe",
+      "name": "Halfmoon Axe",
+      "slot": "weapon",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "g5_headsman",
+      "name": "Headsman's Longaxe",
+      "slot": "weapon",
+      "from": 7,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     1,
+     10
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "axes_2",
+    "prof": "smithing",
+    "tier": 2,
+    "skill": 28,
+    "name": "Iron-grade Axes",
+    "desc": "Axes, one-handed and great. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 28. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "iron_bar",
+      "name": "Iron Bar",
+      "n": 4,
+      "have": 12
+     },
+     {
+      "id": "oak_log",
+      "name": "Oak Log",
+      "n": 2,
+      "have": 0
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "battleaxe",
+      "name": "Battleaxe",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "woodsman_axe",
+      "name": "Woodsman's Axe",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "axe2h",
+      "name": "Greataxe",
+      "slot": "weapon",
+      "from": 2,
+      "can": false
+     },
+     {
+      "key": "g5_moonaxe",
+      "name": "Halfmoon Axe",
+      "slot": "weapon",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "g5_headsman",
+      "name": "Headsman's Longaxe",
+      "slot": "weapon",
+      "from": 7,
+      "can": false
+     },
+     {
+      "key": "breakers_pick",
+      "name": "Breaker's Pick",
+      "slot": "weapon",
+      "from": 12,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     8,
+     20
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "maces_1",
+    "prof": "smithing",
+    "tier": 1,
+    "skill": 4,
+    "name": "Bronze-grade Maces and Hammers",
+    "desc": "Maces, hammers and mauls. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 4. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "bronze_bar",
+      "name": "Bronze Bar",
+      "n": 4,
+      "have": 2
+     },
+     {
+      "id": "ash_log",
+      "name": "Ash Log",
+      "n": 1,
+      "have": 0
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "hammer",
+      "name": "Hammer",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "iron_mace",
+      "name": "Iron Mace",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "g5_mallet",
+      "name": "Cooper's Mallet",
+      "slot": "weapon",
+      "from": 2,
+      "can": false
+     },
+     {
+      "key": "lantern_mace",
+      "name": "Lantern Mace",
+      "slot": "weapon",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "g5_morningstar",
+      "name": "Thornhead Morningstar",
+      "slot": "weapon",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "warhammer",
+      "name": "Warhammer",
+      "slot": "weapon",
+      "from": 6,
+      "can": false
+     },
+     {
+      "key": "g5_stonemaul",
+      "name": "Quarrybound Sledge",
+      "slot": "weapon",
+      "from": 9,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     1,
+     10
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "maces_2",
+    "prof": "smithing",
+    "tier": 2,
+    "skill": 28,
+    "name": "Iron-grade Maces and Hammers",
+    "desc": "Maces, hammers and mauls. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 28. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "iron_bar",
+      "name": "Iron Bar",
+      "n": 4,
+      "have": 12
+     },
+     {
+      "id": "oak_log",
+      "name": "Oak Log",
+      "n": 1,
+      "have": 0
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "hammer",
+      "name": "Hammer",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "iron_mace",
+      "name": "Iron Mace",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "g5_mallet",
+      "name": "Cooper's Mallet",
+      "slot": "weapon",
+      "from": 2,
+      "can": false
+     },
+     {
+      "key": "lantern_mace",
+      "name": "Lantern Mace",
+      "slot": "weapon",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "g5_morningstar",
+      "name": "Thornhead Morningstar",
+      "slot": "weapon",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "warhammer",
+      "name": "Warhammer",
+      "slot": "weapon",
+      "from": 6,
+      "can": false
+     },
+     {
+      "key": "g5_stonemaul",
+      "name": "Quarrybound Sledge",
+      "slot": "weapon",
+      "from": 9,
+      "can": false
+     },
+     {
+      "key": "axle_club",
+      "name": "Wagon-Axle Club",
+      "slot": "weapon",
+      "from": 11,
+      "can": false
+     },
+     {
+      "key": "dawnwarden_hammer",
+      "name": "Dawnwarden Hammer",
+      "slot": "weapon",
+      "from": 16,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     8,
+     20
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "greatblades_1",
+    "prof": "smithing",
+    "tier": 1,
+    "skill": 7,
+    "name": "Bronze-grade Greatswords",
+    "desc": "Two-handed swords. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 7. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "bronze_bar",
+      "name": "Bronze Bar",
+      "n": 5,
+      "have": 2
+     },
+     {
+      "id": "ash_log",
+      "name": "Ash Log",
+      "n": 1,
+      "have": 0
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "sword2h",
+      "name": "Greatsword",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "greatsword",
+      "name": "Greatsword",
+      "slot": "weapon",
+      "from": 8,
+      "can": false
+     },
+     {
+      "key": "g5_flamberge",
+      "name": "Rippled Greatblade",
+      "slot": "weapon",
+      "from": 8,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     1,
+     10
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "greatblades_2",
+    "prof": "smithing",
+    "tier": 2,
+    "skill": 31,
+    "name": "Iron-grade Greatswords",
+    "desc": "Two-handed swords. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 31. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "iron_bar",
+      "name": "Iron Bar",
+      "n": 5,
+      "have": 12
+     },
+     {
+      "id": "oak_log",
+      "name": "Oak Log",
+      "n": 1,
+      "have": 0
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "sword2h",
+      "name": "Greatsword",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "greatsword",
+      "name": "Greatsword",
+      "slot": "weapon",
+      "from": 8,
+      "can": false
+     },
+     {
+      "key": "g5_flamberge",
+      "name": "Rippled Greatblade",
+      "slot": "weapon",
+      "from": 8,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     8,
+     20
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "polearms_1",
+    "prof": "smithing",
+    "tier": 1,
+    "skill": 7,
+    "name": "Bronze-grade Spears and Polearms",
+    "desc": "Spears, javelins and halberds. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 7. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "bronze_bar",
+      "name": "Bronze Bar",
+      "n": 2,
+      "have": 2
+     },
+     {
+      "id": "ash_log",
+      "name": "Ash Log",
+      "n": 3,
+      "have": 0
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "halberd",
+      "name": "Halberd",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "javelin",
+      "name": "Javelin",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "spear",
+      "name": "Spear",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "g5_harpoon",
+      "name": "Barbed Harpoon",
+      "slot": "weapon",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "pathfinder_javelin",
+      "name": "Pathfinder Javelin",
+      "slot": "weapon",
+      "from": 4,
+      "can": false
+     },
+     {
+      "key": "g5_partisan",
+      "name": "Winged Partisan",
+      "slot": "weapon",
+      "from": 4,
+      "can": false
+     },
+     {
+      "key": "g5_bardiche",
+      "name": "Reaper's Bardiche",
+      "slot": "weapon",
+      "from": 10,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     1,
+     10
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "polearms_2",
+    "prof": "smithing",
+    "tier": 2,
+    "skill": 31,
+    "name": "Iron-grade Spears and Polearms",
+    "desc": "Spears, javelins and halberds. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 31. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "iron_bar",
+      "name": "Iron Bar",
+      "n": 2,
+      "have": 12
+     },
+     {
+      "id": "oak_log",
+      "name": "Oak Log",
+      "n": 3,
+      "have": 0
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "halberd",
+      "name": "Halberd",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "javelin",
+      "name": "Javelin",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "spear",
+      "name": "Spear",
+      "slot": "weapon",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "g5_harpoon",
+      "name": "Barbed Harpoon",
+      "slot": "weapon",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "pathfinder_javelin",
+      "name": "Pathfinder Javelin",
+      "slot": "weapon",
+      "from": 4,
+      "can": false
+     },
+     {
+      "key": "g5_partisan",
+      "name": "Winged Partisan",
+      "slot": "weapon",
+      "from": 4,
+      "can": false
+     },
+     {
+      "key": "g5_bardiche",
+      "name": "Reaper's Bardiche",
+      "slot": "weapon",
+      "from": 10,
+      "can": false
+     },
+     {
+      "key": "watchfire_glaive",
+      "name": "Watchfire Glaive",
+      "slot": "weapon",
+      "from": 16,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     8,
+     20
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "shields_1",
+    "prof": "smithing",
+    "tier": 1,
+    "skill": 6,
+    "name": "Bronze-grade Shields",
+    "desc": "Bucklers to tower shields. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 6. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "bronze_bar",
+      "name": "Bronze Bar",
+      "n": 3,
+      "have": 2
+     },
+     {
+      "id": "ash_log",
+      "name": "Ash Log",
+      "n": 2,
+      "have": 0
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "buckler",
+      "name": "Buckler",
+      "slot": "offhand",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "shield",
+      "name": "Shield",
+      "slot": "offhand",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "g5_targe",
+      "name": "Studded Targe",
+      "slot": "offhand",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "kite_shield",
+      "name": "Kite Shield",
+      "slot": "offhand",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "g5_scutcheon",
+      "name": "Notched Scutcheon",
+      "slot": "offhand",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "g5_almond",
+      "name": "Almond Kite",
+      "slot": "offhand",
+      "from": 6,
+      "can": false
+     },
+     {
+      "key": "tower_shield",
+      "name": "Tower Shield",
+      "slot": "offhand",
+      "from": 6,
+      "can": false
+     },
+     {
+      "key": "g5_pavise",
+      "name": "Ridged Pavise",
+      "slot": "offhand",
+      "from": 10,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     1,
+     10
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "shields_2",
+    "prof": "smithing",
+    "tier": 2,
+    "skill": 30,
+    "name": "Iron-grade Shields",
+    "desc": "Bucklers to tower shields. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 30. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "iron_bar",
+      "name": "Iron Bar",
+      "n": 3,
+      "have": 12
+     },
+     {
+      "id": "oak_log",
+      "name": "Oak Log",
+      "n": 2,
+      "have": 0
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "buckler",
+      "name": "Buckler",
+      "slot": "offhand",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "shield",
+      "name": "Shield",
+      "slot": "offhand",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "g5_targe",
+      "name": "Studded Targe",
+      "slot": "offhand",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "kite_shield",
+      "name": "Kite Shield",
+      "slot": "offhand",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "g5_scutcheon",
+      "name": "Notched Scutcheon",
+      "slot": "offhand",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "g5_almond",
+      "name": "Almond Kite",
+      "slot": "offhand",
+      "from": 6,
+      "can": false
+     },
+     {
+      "key": "tower_shield",
+      "name": "Tower Shield",
+      "slot": "offhand",
+      "from": 6,
+      "can": false
+     },
+     {
+      "key": "g5_pavise",
+      "name": "Ridged Pavise",
+      "slot": "offhand",
+      "from": 10,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     8,
+     20
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "mail_1",
+    "prof": "smithing",
+    "tier": 1,
+    "skill": 9,
+    "name": "Bronze-grade Mail",
+    "desc": "Medium armour: mail and scale. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 9. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "bronze_bar",
+      "name": "Bronze Bar",
+      "n": 4,
+      "have": 2
+     },
+     {
+      "id": "light_leather",
+      "name": "Light Leather",
+      "n": 1,
+      "have": 0
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "medium_boots",
+      "name": "Chain Boots",
+      "slot": "feet",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "medium_helm",
+      "name": "Chain Coif",
+      "slot": "head",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "medium_gauntlets",
+      "name": "Chain Gauntlets",
+      "slot": "hands",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "medium_legs",
+      "name": "Chain Legs",
+      "slot": "legs",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "medium_chest",
+      "name": "Chain Shirt",
+      "slot": "chest",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "g5_mail_cap",
+      "name": "Banded Cap and Aventail",
+      "slot": "head",
+      "from": 5,
+      "can": false
+     },
+     {
+      "key": "g5_mail_chausses",
+      "name": "Mail Chausses",
+      "slot": "legs",
+      "from": 5,
+      "can": false
+     },
+     {
+      "key": "g5_mail_mitts",
+      "name": "Mail Mittens",
+      "slot": "hands",
+      "from": 5,
+      "can": false
+     },
+     {
+      "key": "g5_mail_splints",
+      "name": "Splinted Boots",
+      "slot": "feet",
+      "from": 5,
+      "can": false
+     },
+     {
+      "key": "g5_mail_hauberk",
+      "name": "Yoked Hauberk",
+      "slot": "chest",
+      "from": 5,
+      "can": false
+     },
+     {
+      "key": "scaled_legs",
+      "name": "Scaled Greaves",
+      "slot": "legs",
+      "from": 6,
+      "can": false
+     },
+     {
+      "key": "scaled_chest",
+      "name": "Scaled Hauberk",
+      "slot": "chest",
+      "from": 6,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     1,
+     10
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "mail_2",
+    "prof": "smithing",
+    "tier": 2,
+    "skill": 33,
+    "name": "Iron-grade Mail",
+    "desc": "Medium armour: mail and scale. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 33. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "iron_bar",
+      "name": "Iron Bar",
+      "n": 4,
+      "have": 12
+     },
+     {
+      "id": "thick_leather",
+      "name": "Thick Leather",
+      "n": 1,
+      "have": 0
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "medium_boots",
+      "name": "Chain Boots",
+      "slot": "feet",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "medium_helm",
+      "name": "Chain Coif",
+      "slot": "head",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "medium_gauntlets",
+      "name": "Chain Gauntlets",
+      "slot": "hands",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "medium_legs",
+      "name": "Chain Legs",
+      "slot": "legs",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "medium_chest",
+      "name": "Chain Shirt",
+      "slot": "chest",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "g5_mail_cap",
+      "name": "Banded Cap and Aventail",
+      "slot": "head",
+      "from": 5,
+      "can": false
+     },
+     {
+      "key": "g5_mail_chausses",
+      "name": "Mail Chausses",
+      "slot": "legs",
+      "from": 5,
+      "can": false
+     },
+     {
+      "key": "g5_mail_mitts",
+      "name": "Mail Mittens",
+      "slot": "hands",
+      "from": 5,
+      "can": false
+     },
+     {
+      "key": "g5_mail_splints",
+      "name": "Splinted Boots",
+      "slot": "feet",
+      "from": 5,
+      "can": false
+     },
+     {
+      "key": "g5_mail_hauberk",
+      "name": "Yoked Hauberk",
+      "slot": "chest",
+      "from": 5,
+      "can": false
+     },
+     {
+      "key": "scaled_legs",
+      "name": "Scaled Greaves",
+      "slot": "legs",
+      "from": 6,
+      "can": false
+     },
+     {
+      "key": "scaled_chest",
+      "name": "Scaled Hauberk",
+      "slot": "chest",
+      "from": 6,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     8,
+     20
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "plate_1",
+    "prof": "smithing",
+    "tier": 1,
+    "skill": 15,
+    "name": "Bronze-grade Plate",
+    "desc": "Heavy armour. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 15. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "bronze_bar",
+      "name": "Bronze Bar",
+      "n": 6,
+      "have": 2
+     },
+     {
+      "id": "light_leather",
+      "name": "Light Leather",
+      "n": 1,
+      "have": 0
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "heavy_chest",
+      "name": "Plate Armor",
+      "slot": "chest",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "heavy_boots",
+      "name": "Plate Boots",
+      "slot": "feet",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "heavy_gauntlets",
+      "name": "Plate Gauntlets",
+      "slot": "hands",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "heavy_legs",
+      "name": "Plate Legs",
+      "slot": "legs",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "heavy_helm",
+      "name": "War Helm",
+      "slot": "head",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "g5_plate_cuisses",
+      "name": "Fan-kneed Cuisses",
+      "slot": "legs",
+      "from": 9,
+      "can": false
+     },
+     {
+      "key": "g5_plate_cuirass",
+      "name": "Fluted Cuirass",
+      "slot": "chest",
+      "from": 9,
+      "can": false
+     },
+     {
+      "key": "g5_plate_armet",
+      "name": "Houndsnout Armet",
+      "slot": "head",
+      "from": 9,
+      "can": false
+     },
+     {
+      "key": "g5_plate_gauntlets",
+      "name": "Hourglass Gauntlets",
+      "slot": "hands",
+      "from": 9,
+      "can": false
+     },
+     {
+      "key": "g5_plate_sabatons",
+      "name": "Pointed Sabatons",
+      "slot": "feet",
+      "from": 9,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     1,
+     10
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "plate_2",
+    "prof": "smithing",
+    "tier": 2,
+    "skill": 39,
+    "name": "Iron-grade Plate",
+    "desc": "Heavy armour. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 39. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "iron_bar",
+      "name": "Iron Bar",
+      "n": 6,
+      "have": 12
+     },
+     {
+      "id": "thick_leather",
+      "name": "Thick Leather",
+      "n": 1,
+      "have": 0
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "heavy_chest",
+      "name": "Plate Armor",
+      "slot": "chest",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "heavy_boots",
+      "name": "Plate Boots",
+      "slot": "feet",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "heavy_gauntlets",
+      "name": "Plate Gauntlets",
+      "slot": "hands",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "heavy_legs",
+      "name": "Plate Legs",
+      "slot": "legs",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "heavy_helm",
+      "name": "War Helm",
+      "slot": "head",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "g5_plate_cuisses",
+      "name": "Fan-kneed Cuisses",
+      "slot": "legs",
+      "from": 9,
+      "can": false
+     },
+     {
+      "key": "g5_plate_cuirass",
+      "name": "Fluted Cuirass",
+      "slot": "chest",
+      "from": 9,
+      "can": false
+     },
+     {
+      "key": "g5_plate_armet",
+      "name": "Houndsnout Armet",
+      "slot": "head",
+      "from": 9,
+      "can": false
+     },
+     {
+      "key": "g5_plate_gauntlets",
+      "name": "Hourglass Gauntlets",
+      "slot": "hands",
+      "from": 9,
+      "can": false
+     },
+     {
+      "key": "g5_plate_sabatons",
+      "name": "Pointed Sabatons",
+      "slot": "feet",
+      "from": 9,
+      "can": false
+     },
+     {
+      "key": "plate_helm",
+      "name": "Plate Helm",
+      "slot": "head",
+      "from": 16,
+      "can": false
+     },
+     {
+      "key": "runed_chest",
+      "name": "Runed Cuirass",
+      "slot": "chest",
+      "from": 16,
+      "can": false
+     },
+     {
+      "key": "runed_gauntlets",
+      "name": "Runed Gauntlets",
+      "slot": "hands",
+      "from": 16,
+      "can": false
+     },
+     {
+      "key": "runed_boots",
+      "name": "Runed Sabatons",
+      "slot": "feet",
+      "from": 16,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     8,
+     20
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "jewellery_1",
+    "prof": "smithing",
+    "tier": 1,
+    "skill": 11,
+    "name": "Bronze-grade Rings and Amulets",
+    "desc": "A ring or an amulet, set with a stone. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 11. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "bronze_bar",
+      "name": "Bronze Bar",
+      "n": 1,
+      "have": 2
+     },
+     {
+      "id": "rough_quartz",
+      "name": "Rough Quartz",
+      "n": 1,
+      "have": 0
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "necklace",
+      "name": "Necklace",
+      "slot": "necklace",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "ring",
+      "name": "Ring",
+      "slot": "ring",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "g5_signet",
+      "name": "Signet Band",
+      "slot": "ring",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "g5_torc",
+      "name": "Twisted Torc",
+      "slot": "necklace",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "gold_signet",
+      "name": "Gold Signet",
+      "slot": "ring",
+      "from": 6,
+      "can": false
+     },
+     {
+      "key": "silver_amulet",
+      "name": "Silver Amulet",
+      "slot": "necklace",
+      "from": 6,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     1,
+     10
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "jewellery_2",
+    "prof": "smithing",
+    "tier": 2,
+    "skill": 35,
+    "name": "Iron-grade Rings and Amulets",
+    "desc": "A ring or an amulet, set with a stone. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+    "kind": "gear",
+    "can": false,
+    "why": "Needs Smithing 35. Yours is 2.",
+    "code": "skill",
+    "needs": [
+     {
+      "id": "iron_bar",
+      "name": "Iron Bar",
+      "n": 1,
+      "have": 12
+     },
+     {
+      "id": "garnet",
+      "name": "Garnet",
+      "n": 1,
+      "have": 4
+     }
+    ],
+    "gold": 14,
+    "makes": null,
+    "bases": [
+     {
+      "key": "necklace",
+      "name": "Necklace",
+      "slot": "necklace",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "ring",
+      "name": "Ring",
+      "slot": "ring",
+      "from": 1,
+      "can": true
+     },
+     {
+      "key": "g5_signet",
+      "name": "Signet Band",
+      "slot": "ring",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "g5_torc",
+      "name": "Twisted Torc",
+      "slot": "necklace",
+      "from": 3,
+      "can": false
+     },
+     {
+      "key": "gold_signet",
+      "name": "Gold Signet",
+      "slot": "ring",
+      "from": 6,
+      "can": false
+     },
+     {
+      "key": "silver_amulet",
+      "name": "Silver Amulet",
+      "slot": "necklace",
+      "from": 6,
+      "can": false
+     }
+    ],
+    "level": 1,
+    "levels": [
+     8,
+     20
+    ],
+    "game": "forge"
+   },
+   {
+    "id": "temper_quality",
+    "prof": "tempering",
+    "tier": 1,
+    "skill": 1,
+    "name": "Temper",
+    "desc": "Raises the item's quality one step. Its damage or armour and every rolled property grow with it.",
+    "kind": "temper",
+    "can": true,
+    "needs": [],
+    "gold": 0,
+    "makes": null,
+    "game": "gauge"
+   },
+   {
+    "id": "temper_promote",
+    "prof": "tempering",
+    "tier": 1,
+    "skill": 11,
+    "name": "Promote",
+    "desc": "Raises the item's rarity one step: plain to uncommon, uncommon to rare (one new property each), and a rare to legendary with a Sovereign Core (it gains a legendary power).",
+    "kind": "temper",
+    "can": true,
+    "needs": [],
+    "gold": 0,
+    "makes": null,
+    "game": "gauge",
+    "legendary": {
+     "material": {
+      "id": "sovereign_core",
+      "name": "Sovereign Core"
+     },
+     "skill": 60
+    }
+   },
+   {
+    "id": "temper_reweave",
+    "prof": "tempering",
+    "tier": 1,
+    "skill": 16,
+    "name": "Reweave",
+    "desc": "Replaces the one property you choose with a different one, rolled for the item's level.",
+    "kind": "temper",
+    "can": true,
+    "needs": [],
+    "gold": 0,
+    "makes": null,
+    "game": "gauge"
+   },
+   {
+    "id": "temper_brand",
+    "prof": "tempering",
+    "tier": 1,
+    "skill": 21,
+    "name": "Brand",
+    "desc": "Turns a share of a weapon's damage into an element of your choice. One brand per weapon.",
+    "kind": "temper",
+    "can": true,
+    "needs": [],
+    "gold": 0,
+    "makes": null,
+    "game": "gauge",
+    "elements": [
+     "fire",
+     "ice",
+     "lightning",
+     "poison",
+     "shadow",
+     "holy",
+     "arcane"
+    ]
+   }
+  ]
+ },
+ "bagLegend": [
+  {
+   "kind": "good",
+   "tool": true,
+   "id": "plain_pick",
+   "name": "Prospector's Pick",
+   "desc": "A tool, not a weapon: it takes no slot. With it in your bag you can mine ore boulders.",
+   "rarity": "normal",
+   "stack": 1,
+   "noStack": true,
+   "value": 12,
+   "use": {
+    "type": "tool",
+    "prof": "mining",
+    "tier": 1,
+    "ease": 0,
+    "extra": 0
+   },
+   "uid": "p0-37bcef53-3"
+  },
+  {
+   "kind": "material",
+   "id": "copper_ore",
+   "name": "Copper Ore",
+   "desc": "Broken out of a boulder. A smith smelts it into bronze, with tin.",
+   "tier": 1,
+   "prof": "mining",
+   "icon": "ore",
+   "tint": "#b87333",
+   "rarity": "normal",
+   "price": 2,
+   "value": 2,
+   "count": 11,
+   "stackMax": 50,
+   "uid": "p0-37bcef53-4"
+  },
+  {
+   "kind": "material",
+   "id": "tin_ore",
+   "name": "Tin Ore",
+   "desc": "Soft grey ore. Smelted with copper it makes bronze.",
+   "tier": 1,
+   "prof": "mining",
+   "icon": "ore",
+   "tint": "#c9ccd2",
+   "rarity": "normal",
+   "price": 2,
+   "value": 2,
+   "count": 5,
+   "stackMax": 50,
+   "uid": "p0-37bcef53-5"
+  },
+  {
+   "kind": "material",
+   "id": "bronze_bar",
+   "name": "Bronze Bar",
+   "desc": "Copper and tin, smelted together. The metal of a first sword.",
+   "tier": 1,
+   "prof": "smithing",
+   "icon": "bar",
+   "tint": "#c08a4a",
+   "rarity": "normal",
+   "price": 5,
+   "value": 5,
+   "count": 2,
+   "stackMax": 50,
+   "uid": "p0-37bcef53-6"
+  },
+  {
+   "id": "i_apk1sy",
+   "baseKey": "dagger",
+   "name": "Sharp Dagger of Focus",
+   "baseName": "Dagger",
+   "type": "weapon",
+   "subtype": "dagger",
+   "slot": "weapon",
+   "weaponCategory": "light",
+   "twoHanded": false,
+   "offHandOk": true,
+   "isShield": false,
+   "isMagicShield": false,
+   "rarity": "rare",
+   "quality": "medium",
+   "affixes": [
+    {
+     "id": "of_mp",
+     "name": "of Focus",
+     "stat": "mp",
+     "min": 6,
+     "max": 16,
+     "minIlvl": 1,
+     "growth": 3,
+     "value": 19.57,
+     "ilvl": 2,
+     "tier": "crude"
+    },
+    {
+     "id": "sharp",
+     "name": "Sharp",
+     "stat": "dmg",
+     "min": 2,
+     "max": 5,
+     "descriptor": "MELEE",
+     "physicalOnly": true,
+     "minIlvl": 1,
+     "growth": 6,
+     "value": 5.57,
+     "ilvl": 2,
+     "tier": "crude"
+    },
+    {
+     "id": "of_hp",
+     "name": "of Vitality",
+     "stat": "hp",
+     "min": 8,
+     "max": 22,
+     "minIlvl": 1,
+     "growth": 5,
+     "value": 27.71,
+     "ilvl": 2,
+     "tier": "crude"
+    }
+   ],
+   "statScaling": "dex",
+   "attackSpeed": "fast",
+   "armorPen": 0.1,
+   "ranged": false,
+   "dmg": [
+    3,
+    7
+   ],
+   "ilvl": 2,
+   "levelReq": 1,
+   "hands": 1,
+   "rangeClass": "melee",
+   "gripWord": "One-handed",
+   "familyName": "Dagger",
+   "weaponTags": [
+    "Melee",
+    "One-handed",
+    "Dagger"
+   ],
+   "weaponHeadline": "Melee · One-handed · Dagger",
+   "weaponLine": "A one-handed dagger, swung in melee. It can go in either hand, so the off hand stays free.",
+   "handNote": "It can go in either hand, so the off hand stays free.",
+   "elementName": null,
+   "elementNote": null,
+   "castLine": null,
+   "dropLevel": 1,
+   "uid": "p0-37bcef53-7",
+   "crafted": true,
+   "maker": "Maren",
+   "ruid": "torbor_downs/town:0:m2",
+   "tempered": 1
+  },
+  {
+   "id": "i_305ggl",
+   "baseKey": "sword",
+   "name": "Sharp Sword of Haste",
+   "baseName": "Sword",
+   "type": "weapon",
+   "subtype": "sword",
+   "slot": "weapon",
+   "weaponCategory": "heavy",
+   "twoHanded": false,
+   "offHandOk": true,
+   "isShield": false,
+   "isMagicShield": false,
+   "rarity": "magic",
+   "quality": "low",
+   "affixes": [
+    {
+     "id": "sharp",
+     "name": "Sharp",
+     "stat": "dmg",
+     "min": 2,
+     "max": 5,
+     "descriptor": "MELEE",
+     "physicalOnly": true,
+     "minIlvl": 1,
+     "growth": 6,
+     "value": 3.7,
+     "ilvl": 2,
+     "tier": "crude"
+    },
+    {
+     "id": "of_speed",
+     "name": "of Haste",
+     "stat": "initiative",
+     "min": 1.5,
+     "max": 3.5,
+     "minIlvl": 2,
+     "growth": 2,
+     "value": 2.9,
+     "ilvl": 2,
+     "tier": "crude"
+    }
+   ],
+   "statScaling": "str_dex",
+   "attackSpeed": "normal",
+   "armorPen": 0,
+   "ranged": false,
+   "dmg": [
+    4,
+    10
+   ],
+   "ilvl": 2,
+   "levelReq": 1,
+   "hands": 1,
+   "rangeClass": "melee",
+   "gripWord": "One-handed",
+   "familyName": "Sword",
+   "weaponTags": [
+    "Melee",
+    "One-handed",
+    "Sword"
+   ],
+   "weaponHeadline": "Melee · One-handed · Sword",
+   "weaponLine": "A one-handed sword, swung in melee. It can go in either hand, so the off hand stays free.",
+   "handNote": "It can go in either hand, so the off hand stays free.",
+   "elementName": null,
+   "elementNote": null,
+   "castLine": null,
+   "dropLevel": 1,
+   "uid": "p0-37bcef53-8",
+   "crafted": true,
+   "maker": "Maren",
+   "ruid": "torbor_downs/town:0:m3"
+  },
+  {
+   "id": "i_4yijr5",
+   "baseKey": "longsword",
+   "name": "Reinforced Longsword of Regeneration",
+   "baseName": "Longsword",
+   "type": "weapon",
+   "subtype": "sword",
+   "slot": "weapon",
+   "weaponCategory": "heavy",
+   "twoHanded": false,
+   "offHandOk": true,
+   "isShield": false,
+   "isMagicShield": false,
+   "rarity": "rare",
+   "quality": "medium",
+   "affixes": [
+    {
+     "id": "sturdy",
+     "name": "Reinforced",
+     "stat": "armor",
+     "min": 2,
+     "max": 5,
+     "minIlvl": 1,
+     "growth": 5,
+     "value": 3.6,
+     "ilvl": 2,
+     "tier": "crude"
+    },
+    {
+     "id": "of_str",
+     "name": "Sturdy",
+     "stat": "str",
+     "min": 2,
+     "max": 5,
+     "minIlvl": 1,
+     "growth": 4.5,
+     "value": 3.4,
+     "ilvl": 2,
+     "tier": "crude"
+    },
+    {
+     "id": "of_mana_regen",
+     "name": "of Regeneration",
+     "stat": "mana_regen",
+     "min": 0.6,
+     "max": 1.6,
+     "minIlvl": 2,
+     "growth": 3,
+     "value": 0.8,
+     "ilvl": 2,
+     "tier": "crude"
+    }
+   ],
+   "statScaling": "str_dex",
+   "attackSpeed": "normal",
+   "armorPen": 0,
+   "ranged": false,
+   "dmg": [
+    8,
+    16
+   ],
+   "ilvl": 2,
+   "levelReq": 1,
+   "hands": 1,
+   "rangeClass": "melee",
+   "gripWord": "One-handed",
+   "familyName": "Longsword",
+   "weaponTags": [
+    "Melee",
+    "One-handed",
+    "Longsword"
+   ],
+   "weaponHeadline": "Melee · One-handed · Longsword",
+   "weaponLine": "A one-handed longsword, swung in melee. It can go in either hand, so the off hand stays free.",
+   "handNote": "It can go in either hand, so the off hand stays free.",
+   "elementName": null,
+   "elementNote": null,
+   "castLine": null,
+   "dropLevel": 8,
+   "uid": "p0-37bcef53-9",
+   "ruid": "torbor_downs/town:0:m4"
+  },
+  {
+   "id": "i_casans",
+   "baseKey": "trail_rucksack",
+   "name": "Trail Rucksack of Focus",
+   "baseName": "Trail Rucksack",
+   "type": "armor",
+   "subtype": "back",
+   "slot": "back",
+   "weaponCategory": null,
+   "twoHanded": false,
+   "offHandOk": false,
+   "isShield": false,
+   "isMagicShield": false,
+   "rarity": "rare",
+   "quality": "medium",
+   "affixes": [
+    {
+     "id": "of_mp",
+     "name": "of Focus",
+     "stat": "mp",
+     "min": 6,
+     "max": 16,
+     "minIlvl": 1,
+     "growth": 3,
+     "value": 7.3,
+     "ilvl": 4,
+     "tier": "crude"
+    }
+   ],
+   "attackSpeed": "normal",
+   "armorPen": 0,
+   "ranged": false,
+   "armor": 0,
+   "ilvl": 4,
+   "levelReq": 3,
+   "pack": true,
+   "bagSlots": 6,
+   "bagText": "+6 bag slots",
+   "g5": "g5_pack_explorer",
+   "look": {
+    "g5": "g5_pack_explorer"
+   },
+   "dropLevel": 8,
+   "uid": "p0-37bcef53-a",
+   "ruid": "torbor_downs/town:0:m5"
+  },
+  {
+   "kind": "material",
+   "id": "sovereign_core",
+   "name": "Sovereign Core",
+   "desc": "The hot heart of something that should not have been killed. Only world bosses and the hardest events leave one. A master temperer can promote a rare item to legendary with it.",
+   "tier": 5,
+   "prof": "tempering",
+   "icon": "core",
+   "tint": "#ffd24a",
+   "rarity": "legendary",
+   "price": 1,
+   "value": 1,
+   "count": 1,
+   "stackMax": 50,
+   "uid": "p0-37bcef53-b"
+  },
+  {
+   "kind": "material",
+   "id": "iron_bar",
+   "name": "Iron Bar",
+   "desc": "Smelted iron ore, ready for the anvil.",
+   "tier": 2,
+   "prof": "smithing",
+   "icon": "bar",
+   "tint": "#9aa0aa",
+   "rarity": "normal",
+   "price": 14,
+   "value": 14,
+   "count": 12,
+   "stackMax": 50,
+   "uid": "p0-37bcef53-c"
+  },
+  {
+   "kind": "material",
+   "id": "garnet",
+   "name": "Garnet",
+   "desc": "A stone that sometimes comes out with the ore on a clean strike. Jewellery, casters' tools and tempering use it.",
+   "tier": 2,
+   "prof": "mining",
+   "icon": "gem",
+   "tint": "#a8243a",
+   "rarity": "normal",
+   "price": 14,
+   "value": 14,
+   "count": 4,
+   "stackMax": 50,
+   "uid": "p0-37bcef53-d"
+  }
+ ],
+ "legendUid": "p0-37bcef53-9",
+ "packUid": "p0-37bcef53-a",
+ "legendR": {
+  "t": "craftR",
+  "ok": true,
+  "state": "play",
+  "id": "temper_promote",
+  "uid": "p0-37bcef53-9",
+  "game": {
+   "type": "gauge",
+   "seed": 1194294545,
+   "ms": 4200,
+   "steps": 1,
+   "rise": 3298,
+   "pow": 1.6,
+   "centre": 0.757,
+   "half0": 0.144,
+   "half1": 0.051,
+   "perfect": 0.4
+  },
+  "cost": {
+   "needs": [
+    {
+     "id": "sovereign_core",
+     "name": "Sovereign Core",
+     "n": 1,
+     "have": 1,
+     "kept": true
+    },
+    {
+     "id": "iron_bar",
+     "name": "Iron Bar",
+     "n": 6,
+     "have": 12
+    },
+    {
+     "id": "garnet",
+     "name": "Garnet",
+     "n": 2,
+     "have": 4
+    }
+   ],
+   "gold": 3950
+  },
+  "text": "Rare to legendary: it keeps every property and gains one legendary power. A miss costs the other materials and the gold; the Sovereign Core is kept."
+ },
+ "legendMiss": {
+  "t": "craftDone",
+  "id": "temper_promote",
+  "prof": "tempering",
+  "quality": "fail",
+  "score": 0,
+  "marks": [
+   0
+  ],
+  "flags": [
+   "over"
+  ],
+  "ok": false,
+  "items": [],
+  "got": [],
+  "kept": [
+   "sovereign_core"
+  ],
+  "xp": 12,
+  "skill": {
+   "level": 62,
+   "xp": 8796,
+   "next": 256
+  },
+  "msg": "Too far: the work is spoiled. The other materials are gone; the Sovereign Core and the item are unharmed."
+ },
+ "legendDone": {
+  "t": "craftDone",
+  "id": "temper_promote",
+  "prof": "tempering",
+  "quality": "perfect",
+  "score": 1,
+  "marks": [
+   2
+  ],
+  "flags": [],
+  "ok": true,
+  "items": [],
+  "got": [],
+  "item": {
+   "id": "i_4yijr5",
+   "baseKey": "longsword",
+   "name": "Reinforced Longsword of Regeneration",
+   "baseName": "Longsword",
+   "type": "weapon",
+   "subtype": "sword",
+   "slot": "weapon",
+   "weaponCategory": "heavy",
+   "twoHanded": false,
+   "offHandOk": true,
+   "isShield": false,
+   "isMagicShield": false,
+   "rarity": "legendary",
+   "quality": "medium",
+   "affixes": [
+    {
+     "id": "sturdy",
+     "name": "Reinforced",
+     "stat": "armor",
+     "min": 2,
+     "max": 5,
+     "minIlvl": 1,
+     "growth": 5,
+     "value": 3.6,
+     "ilvl": 2,
+     "tier": "crude"
+    },
+    {
+     "id": "of_str",
+     "name": "Sturdy",
+     "stat": "str",
+     "min": 2,
+     "max": 5,
+     "minIlvl": 1,
+     "growth": 4.5,
+     "value": 3.4,
+     "ilvl": 2,
+     "tier": "crude"
+    },
+    {
+     "id": "of_mana_regen",
+     "name": "of Regeneration",
+     "stat": "mana_regen",
+     "min": 0.6,
+     "max": 1.6,
+     "minIlvl": 2,
+     "growth": 3,
+     "value": 0.8,
+     "ilvl": 2,
+     "tier": "crude"
+    },
+    {
+     "id": "legendary_effect",
+     "name": "Legendary",
+     "stat": "cond_legendaryEffect",
+     "value": 1,
+     "legendaryId": "shatter",
+     "descriptor": "+50% damage to Chilled, Frostbitten or Frozen enemies."
+    }
+   ],
+   "statScaling": "str_dex",
+   "attackSpeed": "normal",
+   "armorPen": 0,
+   "ranged": false,
+   "dmg": [
+    8,
+    16
+   ],
+   "ilvl": 2,
+   "levelReq": 1,
+   "hands": 1,
+   "rangeClass": "melee",
+   "gripWord": "One-handed",
+   "familyName": "Longsword",
+   "weaponTags": [
+    "Melee",
+    "One-handed",
+    "Longsword"
+   ],
+   "weaponHeadline": "Melee · One-handed · Longsword",
+   "weaponLine": "A one-handed longsword, swung in melee. It can go in either hand, so the off hand stays free.",
+   "handNote": "It can go in either hand, so the off hand stays free.",
+   "elementName": null,
+   "elementNote": null,
+   "castLine": null,
+   "dropLevel": 8,
+   "uid": "p0-37bcef53-9",
+   "ruid": "torbor_downs/town:0:m4",
+   "legendaryEffectId": "shatter",
+   "promoted": true,
+   "tempered": 1
+  },
+  "now": {
+   "id": "legendary_effect",
+   "name": "Legendary",
+   "stat": "cond_legendaryEffect",
+   "value": 1,
+   "legendaryId": "shatter",
+   "descriptor": "+50% damage to Chilled, Frostbitten or Frozen enemies."
+  },
+  "to": "legendary",
+  "xp": 36,
+  "skill": {
+   "level": 62,
+   "xp": 8832,
+   "next": 220
+  },
+  "msg": "Promoted to legendary. New power: +50% damage to Chilled, Frostbitten or Frozen enemies."
+ },
+ "professionsTemper": {
+  "nodes": {
+   "node:z12_02_1": 119594
+  },
   "list": [
    {
     "id": "mining",
@@ -7094,16 +9751,150 @@
     "name": "Tempering",
     "kind": "make",
     "known": true,
+    "level": 62,
+    "xp": 8832,
+    "next": 220,
+    "rank": "Adept",
+    "max": 100,
+    "tool": null
+   }
+  ]
+ },
+ "professions": {
+  "nodes": {
+   "node:z12_02_1": 119594
+  },
+  "list": [
+   {
+    "id": "mining",
+    "name": "Mining",
+    "kind": "gather",
+    "known": true,
     "level": 1,
-    "xp": 18,
-    "next": 6,
+    "xp": 15,
+    "next": 9,
     "rank": "Novice",
+    "max": 100,
+    "tool": {
+     "id": "plain_pick",
+     "name": "Prospector's Pick",
+     "tier": 1
+    }
+   },
+   {
+    "id": "logging",
+    "name": "Logging",
+    "kind": "gather",
+    "known": false,
+    "level": 1,
+    "xp": 0,
+    "next": 24,
+    "rank": "Novice",
+    "max": 100,
+    "tool": null
+   },
+   {
+    "id": "foraging",
+    "name": "Foraging",
+    "kind": "gather",
+    "known": false,
+    "level": 1,
+    "xp": 0,
+    "next": 24,
+    "rank": "Novice",
+    "max": 100,
+    "tool": null
+   },
+   {
+    "id": "skinning",
+    "name": "Skinning",
+    "kind": "gather",
+    "known": false,
+    "level": 1,
+    "xp": 0,
+    "next": 24,
+    "rank": "Novice",
+    "max": 100,
+    "tool": null
+   },
+   {
+    "id": "angling",
+    "name": "Angling",
+    "kind": "gather",
+    "known": true,
+    "level": 1,
+    "xp": 0,
+    "next": 18,
+    "rank": "Dabbler",
+    "max": 100,
+    "tool": null
+   },
+   {
+    "id": "smithing",
+    "name": "Smithing",
+    "kind": "make",
+    "known": true,
+    "level": 2,
+    "xp": 45,
+    "next": 7,
+    "rank": "Novice",
+    "max": 100,
+    "tool": null
+   },
+   {
+    "id": "outfitting",
+    "name": "Outfitting",
+    "kind": "make",
+    "known": false,
+    "level": 1,
+    "xp": 0,
+    "next": 24,
+    "rank": "Novice",
+    "max": 100,
+    "tool": null
+   },
+   {
+    "id": "alchemy",
+    "name": "Alchemy",
+    "kind": "make",
+    "known": false,
+    "level": 1,
+    "xp": 0,
+    "next": 24,
+    "rank": "Novice",
+    "max": 100,
+    "tool": null
+   },
+   {
+    "id": "cooking",
+    "name": "Cooking",
+    "kind": "make",
+    "known": true,
+    "level": 1,
+    "xp": 0,
+    "next": 24,
+    "rank": "Novice",
+    "max": 100,
+    "tool": null
+   },
+   {
+    "id": "tempering",
+    "name": "Tempering",
+    "kind": "make",
+    "known": true,
+    "level": 62,
+    "xp": 8832,
+    "next": 220,
+    "rank": "Adept",
     "max": 100,
     "tool": null
    }
   ]
  },
  "professionsSeasoned": {
+  "nodes": {
+   "node:z12_02_1": 119594
+  },
   "list": [
    {
     "id": "mining",
@@ -7249,7 +10040,7 @@
     "ease": 0,
     "extra": 0
    },
-   "uid": "p0-d1f7e6da-3"
+   "uid": "p0-37bcef53-3"
   },
   {
    "kind": "material",
@@ -7265,7 +10056,7 @@
    "value": 2,
    "count": 11,
    "stackMax": 50,
-   "uid": "p0-d1f7e6da-4"
+   "uid": "p0-37bcef53-4"
   },
   {
    "kind": "material",
@@ -7281,7 +10072,7 @@
    "value": 2,
    "count": 5,
    "stackMax": 50,
-   "uid": "p0-d1f7e6da-5"
+   "uid": "p0-37bcef53-5"
   },
   {
    "kind": "material",
@@ -7297,7 +10088,7 @@
    "value": 5,
    "count": 2,
    "stackMax": 50,
-   "uid": "p0-d1f7e6da-6"
+   "uid": "p0-37bcef53-6"
   },
   {
    "id": "i_apk1sy",
@@ -7380,7 +10171,7 @@
    "elementNote": null,
    "castLine": null,
    "dropLevel": 1,
-   "uid": "p0-d1f7e6da-7",
+   "uid": "p0-37bcef53-7",
    "crafted": true,
    "maker": "Maren",
    "ruid": "torbor_downs/town:0:m2",
@@ -7455,12 +10246,151 @@
    "elementNote": null,
    "castLine": null,
    "dropLevel": 1,
-   "uid": "p0-d1f7e6da-8",
+   "uid": "p0-37bcef53-8",
    "crafted": true,
    "maker": "Maren",
    "ruid": "torbor_downs/town:0:m3"
+  },
+  {
+   "id": "i_4yijr5",
+   "baseKey": "longsword",
+   "name": "Reinforced Longsword of Regeneration",
+   "baseName": "Longsword",
+   "type": "weapon",
+   "subtype": "sword",
+   "slot": "weapon",
+   "weaponCategory": "heavy",
+   "twoHanded": false,
+   "offHandOk": true,
+   "isShield": false,
+   "isMagicShield": false,
+   "rarity": "legendary",
+   "quality": "medium",
+   "affixes": [
+    {
+     "id": "sturdy",
+     "name": "Reinforced",
+     "stat": "armor",
+     "min": 2,
+     "max": 5,
+     "minIlvl": 1,
+     "growth": 5,
+     "value": 3.6,
+     "ilvl": 2,
+     "tier": "crude"
+    },
+    {
+     "id": "of_str",
+     "name": "Sturdy",
+     "stat": "str",
+     "min": 2,
+     "max": 5,
+     "minIlvl": 1,
+     "growth": 4.5,
+     "value": 3.4,
+     "ilvl": 2,
+     "tier": "crude"
+    },
+    {
+     "id": "of_mana_regen",
+     "name": "of Regeneration",
+     "stat": "mana_regen",
+     "min": 0.6,
+     "max": 1.6,
+     "minIlvl": 2,
+     "growth": 3,
+     "value": 0.8,
+     "ilvl": 2,
+     "tier": "crude"
+    },
+    {
+     "id": "legendary_effect",
+     "name": "Legendary",
+     "stat": "cond_legendaryEffect",
+     "value": 1,
+     "legendaryId": "shatter",
+     "descriptor": "+50% damage to Chilled, Frostbitten or Frozen enemies."
+    }
+   ],
+   "statScaling": "str_dex",
+   "attackSpeed": "normal",
+   "armorPen": 0,
+   "ranged": false,
+   "dmg": [
+    8,
+    16
+   ],
+   "ilvl": 2,
+   "levelReq": 1,
+   "hands": 1,
+   "rangeClass": "melee",
+   "gripWord": "One-handed",
+   "familyName": "Longsword",
+   "weaponTags": [
+    "Melee",
+    "One-handed",
+    "Longsword"
+   ],
+   "weaponHeadline": "Melee · One-handed · Longsword",
+   "weaponLine": "A one-handed longsword, swung in melee. It can go in either hand, so the off hand stays free.",
+   "handNote": "It can go in either hand, so the off hand stays free.",
+   "elementName": null,
+   "elementNote": null,
+   "castLine": null,
+   "dropLevel": 8,
+   "uid": "p0-37bcef53-9",
+   "ruid": "torbor_downs/town:0:m4",
+   "legendaryEffectId": "shatter",
+   "promoted": true,
+   "tempered": 1
+  },
+  {
+   "id": "i_casans",
+   "baseKey": "trail_rucksack",
+   "name": "Trail Rucksack of Focus",
+   "baseName": "Trail Rucksack",
+   "type": "armor",
+   "subtype": "back",
+   "slot": "back",
+   "weaponCategory": null,
+   "twoHanded": false,
+   "offHandOk": false,
+   "isShield": false,
+   "isMagicShield": false,
+   "rarity": "rare",
+   "quality": "medium",
+   "affixes": [
+    {
+     "id": "of_mp",
+     "name": "of Focus",
+     "stat": "mp",
+     "min": 6,
+     "max": 16,
+     "minIlvl": 1,
+     "growth": 3,
+     "value": 7.3,
+     "ilvl": 4,
+     "tier": "crude"
+    }
+   ],
+   "attackSpeed": "normal",
+   "armorPen": 0,
+   "ranged": false,
+   "armor": 0,
+   "ilvl": 4,
+   "levelReq": 3,
+   "pack": true,
+   "bagSlots": 6,
+   "bagText": "+6 bag slots",
+   "g5": "g5_pack_explorer",
+   "look": {
+    "g5": "g5_pack_explorer"
+   },
+   "dropLevel": 8,
+   "uid": "p0-37bcef53-a",
+   "ruid": "torbor_downs/town:0:m5"
   }
  ],
- "gold": 262,
- "bladeUid": "p0-d1f7e6da-7"
+ "gold": 4100,
+ "bladeUid": "p0-37bcef53-7"
 }

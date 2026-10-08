@@ -61,6 +61,23 @@ await run(clock, 300); a.craft('list', { npc: smith.id }); await wait('craftList
 // away from any station: the list still comes, nothing can be made
 P.transfer(o, bram.rm, { x: smith.x + 40, z: smith.z }, 'fixture'); await run(clock, 700);
 a.craft('list', {}); await wait('craftList'); out.craftListAway = last('craftList');
+// ---- round 9 (X5): Promote a RARE to LEGENDARY with a Sovereign Core — the quote, a miss (the core is kept), a hit; and the refusal for a backpack
+P.transfer(o, bram.rm, { x: smith.x + 1.5, z: smith.z }, 'fixture'); await run(clock, 700);
+o.char.professions.xp.tempering = W.P.xpAt(62); o.char.level = Math.max(o.char.level, 9); o.char.gold = 12000;
+const mk = (base, rarity = 'rare') => o.room.rules.makeItem(null, { base, rarity, level: 8 });
+P.grant(o, { items: [mk('longsword'), mk('trail_rucksack'), W.P.item('sovereign_core', 1)], reason: 'fixture' }); await run(clock, 300);
+const rareSword = o.char.bag.find(i => i.baseKey === 'longsword' && i.rarity === 'rare'), pack = o.char.bag.find(i => i.baseKey === 'trail_rucksack');
+a.craft('quote', { id: 'temper_promote', uid: rareSword.uid, npc: smith.id }); await wait('craftQuote'); out.legendQuoteLack = last('craftQuote');
+P.grant(o, { items: out.legendQuoteLack.needs.filter(n => n.have < n.n).map(n => W.P.item(n.id, (n.n - n.have) * 2)), reason: 'fixture' }); await run(clock, 300);
+a.craft('quote', { id: 'temper_promote', uid: rareSword.uid, npc: smith.id }); await wait('craftQuote'); out.legendQuote = last('craftQuote');
+a.craft('quote', { id: 'temper_promote', uid: pack.uid, npc: smith.id }); await wait('craftQuote'); out.legendQuoteRefused = last('craftQuote');
+a.craft('list', { npc: smith.id }); await wait('craftList'); out.craftListLegend = last('craftList');
+out.bagLegend = JSON.parse(JSON.stringify(o.char.bag)); out.legendUid = rareSword.uid; out.packUid = pack.uid;
+
+{ a.craft('start', { id: 'temper_promote', uid: rareSword.uid, npc: smith.id }); await wait('craftR'); const g = last('craftR'); out.legendR = g; if (!g.game) throw new Error('refused: ' + JSON.stringify(g)); await run(clock, g.game.ms - 80);
+  a.craft('done', { id: 'temper_promote', inputs: [g.game.ms - 100, 0] }); await wait('craftDone'); out.legendMiss = last('craftDone'); }
+r = await make('temper_promote', { uid: rareSword.uid }); out.legendDone = r.done;
+out.professionsTemper = W.view(o.char);
 out.professions = W.view(o.char);
 // a seasoned character's list (same view function, more experience) for the Professions page
 const xpAt = lv => W.P.xpAt(lv);

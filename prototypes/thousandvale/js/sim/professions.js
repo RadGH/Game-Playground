@@ -79,7 +79,11 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
   function view(ch) {
     if (!P) return { list: [] };
     const s = peek(ch);
-    return { list: PROFESSIONS.map(id => {
+    // W9 (P-client): how long each node this character has worked stays bare (ms left) — `you.opened` has the keys but
+    // not the times, so after a re-join the client held every listed node bare for the longest respawn there is
+    const nodes = {}, tNow = wallNow();
+    for (const [k, until] of Object.entries(ch.opened || {})) if (k.startsWith('node:') && until > tNow) nodes[k] = Math.round(until - tNow);
+    return { nodes, list: PROFESSIONS.map(id => {
       const d = P.def(id);
       const tl = d.kind === 'gather' && id !== 'angling' ? P.bestTool(ch.bag, id) : null;
       if (id === 'angling') { const a = anglingView(ch); return { id, name: d.name, kind: d.kind, known: true, level: a.level || 1, xp: a.xp || 0, next: a.next ?? null, rank: a.rank || P.rank(a.level || 1), max: a.max || 100, tool: null }; }

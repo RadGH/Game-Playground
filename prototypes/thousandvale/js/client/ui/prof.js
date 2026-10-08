@@ -18,7 +18,7 @@
 import { createPanel, h } from '../ui-panel.js';
 import { fmt } from '../../../../../shared/format.js';
 import { createMinigame } from './prof-minigame.js';
-import { createCraftWindow } from './prof-craft.js';
+import { createCraftWindow, powerOf } from './prof-craft.js';
 import { professionRows, teachersOf } from './prof-skills.js';
 import { makeGame, GAME_OF, QUALITY_WORD } from './prof-games.js';
 import { profIcon, PROF_NAME, PROF_TINT } from './prof-icons.js';
@@ -116,7 +116,11 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
     const made = (m.items || []).filter(it => it && it.name), gear = made.find(it => it.crafted || it.slot);
     const items = gear ? [{ name: gear.name, count: 1, rarity: gear.rarity || 'normal' }] : gotItems(m);
     const tempered = m.item ? [{ name: m.item.name, count: 1, rarity: m.item.rarity || 'normal' }] : [];
-    mini.showResult({ quality: m.quality, items: items.length ? items : tempered, lines: [...(m.item && m.msg ? [m.msg] : []), ...skillLines(m, m.prof)], note: m.ok ? (gear ? 'It is in your bag.' : null) : (m.msg || 'Nothing was made.'), stay: gear || m.item ? 4200 : 3000 });
+    // round 9 (X5): a promotion to legendary names the power gained; a miss says what was kept
+    const power = m.ok && m.to === 'legendary' ? powerOf(m) : null, kept = !m.ok && Array.isArray(m.kept) && m.kept.length ? m.kept.map(id => S.content?.materials?.[id]?.name || id) : null;
+    mini.showResult({ quality: m.quality, title: m.ok && m.to ? `Now ${m.to === 'magic' ? 'magic' : m.to}` : null, items: items.length ? items : tempered,
+      lines: [...(power ? [`New power: ${power}`] : m.item && m.msg ? [m.msg] : []), ...(kept ? [`Kept: ${kept.join(', ')}. The item is unharmed.`] : []), ...skillLines(m, m.prof)],
+      note: m.ok ? (gear ? 'It is in your bag.' : null) : (kept ? 'The other materials and the fee are gone.' : m.msg || 'Nothing was made.'), stay: power ? 6500 : gear || m.item ? 4200 : 3000 });
     if (m.item) craft.onTempered(m);
     if (m.ok && (items.length || tempered.length)) hud.chat?.(m.msg || `You made ${items.map(i => i.name).join(', ')}.`, 'loot' + (gear?.rarity ? ' rarity-' + gear.rarity : ''));
     if (m.skill?.up) hud.toast(`${PROF_NAME[m.prof]} ${m.skill.level}`, 'good');
@@ -175,15 +179,20 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
   }
 
   // ---- what the server says about you ------------------------------------------------------------------------
-  function setList(p) { if (p && Array.isArray(p.list)) { S.list = p.list; redraw(); drawTrainer(); } }
+  function setList(p) {
+    if (p && Array.isArray(p.list)) { S.list = p.list; redraw(); drawTrainer(); }
+    // the server's own clock for each node you have worked (ms left): exact, and it replaces any guess made from the bare key list
+    if (p && p.nodes && typeof p.nodes === 'object') { const now = Date.now(); for (const k of [...S.opened.keys()]) if (!(k in p.nodes)) S.opened.delete(k); for (const [k, ms] of Object.entries(p.nodes)) S.opened.set(k, now + ms); S.exact = true; S.view?.setSpentAll(S.opened); }
+  }
   function setOpened(keys) {
     // the join list has the keys but not when each reopens: hold a node bare for the longest it could take
     const N = S.numbers?.gather, hold = ((N?.respawnMin?.[1]) || 10) * 60000, now = Date.now();
+    if (S.exact) return;                                   // (the server sent the times: nothing to guess)
     for (const k of keys || []) if (String(k).startsWith('node:') && !S.opened.has(k)) S.opened.set(k, now + hold);
     S.view?.setSpentAll(S.opened);
   }
   function wire(n) {
-    n.on('joined', j => { S.joinAt = Date.now(); S.skins.clear(); S.view?.clearSkins?.(); setList(j.you?.professions); const o = j.you?.opened; setOpened(Array.isArray(o) ? o : Object.keys(o || {})); if (S.work) { mini.cancel(); S.work = null; craft.setBusy(false); } mount(); });
+    n.on('joined', j => { S.joinAt = Date.now(); S.exact = false; S.skins.clear(); S.view?.clearSkins?.(); setList(j.you?.professions); const o = j.you?.opened; setOpened(Array.isArray(o) ? o : Object.keys(o || {})); if (S.work) { mini.cancel(); S.work = null; craft.setBusy(false); } mount(); });
     n.on('you', p => { if (p.professions) setList(p.professions); });
     n.on('sheet', s => { if (s?.professions) setList(s.professions); });
     n.on('gatherR', onGatherR); n.on('gatherDone', onGatherDone);

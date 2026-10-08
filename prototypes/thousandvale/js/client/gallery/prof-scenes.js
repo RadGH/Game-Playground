@@ -35,6 +35,12 @@ export const PROF_SCENES = [
     notes: { all: 'Opened from the journal with no station in reach: every recipe can be read, none can be made, and each says where to go.' } },
   { id: 'prof-temper', group: 'Professions', title: 'Tempering — an item, a work, the quote', modules: [U + 'prof-craft.js'], expect: '#panel-craft:not([hidden]) .pt-quote', steps: [['prof', 'temper'], ['calm']],
     notes: { all: 'Tempering works on gear in your bag. Pick the work, pick the item; the server quotes what it will cost and what it will do, with the numbers. A miss spends the materials, never the item.', phone: 'Upright the item list sits above the quote; on its side they are two columns.', pad: 'LB / RB to the Tempering tab; A picks.' } },
+  { id: 'prof-legend', group: 'Professions', title: 'Tempering — promote a rare to legendary', modules: [U + 'prof-craft.js'], expect: '#panel-craft:not([hidden]) .pc-needs .kept', steps: [['prof', 'legend'], ['calm']],
+    notes: { all: 'Promote on a rare item (round 9): the Sovereign Core is listed with the other materials and marked "kept on a miss"; the quote says what the item becomes and what a miss costs. The power itself is rolled when the work succeeds — the result card names it. Recorded from the real server.', phone: 'The same pane; the core’s chip wraps onto its own line.' } },
+  { id: 'prof-legend-refused', group: 'Professions', title: 'Tempering — what cannot be promoted', modules: [U + 'prof-craft.js'], expect: '#panel-craft:not([hidden]) .pt-quote .pc-why', steps: [['prof', 'legend', { refused: true }], ['calm']],
+    notes: { all: 'A cloak, a belt or a backpack has no legendary power to gain: the server refuses, and its own sentence is shown where the quote would be. The button stays off.' } },
+  { id: 'prof-legend-done', group: 'Professions', title: 'Tempering — the legendary result', modules: [U + 'prof.js', U + 'prof-minigame.js'], expect: '.prof-card[data-q]', steps: [['prof', 'legend', { done: true }], ['calm']],
+    notes: { all: 'The card after a promotion that worked: the item, now legendary, and the power it gained in the server’s words.' } },
   { id: 'prof-skills', group: 'Professions', title: 'Journal — the Professions page', modules: [U + 'prof-skills.js', U + 'journal.js'], expect: '#panel-journal:not([hidden]) .pk-row', steps: [['prof', 'skills', 'journal'], ['calm']],
     notes: { all: 'Ten trades with their level, rank, your tool, and what the next band opens — or who teaches the ones you have not learned. "Recipes" opens the crafting window on that craft.', phone: 'A page of the journal sheet.' } },
   { id: 'prof-sheet', group: 'Professions', title: 'Character menu — the Professions block', modules: [U + 'prof-skills.js', U + 'char-sheet.js'], expect: '#panel-sheet:not([hidden]) .pk-row', steps: [['prof', 'skills', 'sheet'], ['calm']],
@@ -79,6 +85,19 @@ export async function profStep(G, what, a, b = {}) {
     prof.craft.open({ npc: F.craftList.station.npc, tab: 'tempering' }); await sleep(60); push(F.craftList); await sleep(150);
     document.querySelector(`#panel-craft .pt-item[data-uid="${F.blade2Uid}"]`)?.scrollIntoView({ block: 'center' }); document.querySelector(`#panel-craft .pt-item[data-uid="${F.blade2Uid}"]`)?.click(); await sleep(80);
     push(F.craftQuote2); await sleep(150);
+  } else if (what === 'legend') {
+    const o = a || {};
+    push({ t: 'bag', add: F.bagLegend, remove: [], gold: 12000 }); push({ t: 'you', professions: F.professionsTemper });
+    if (o.done) {
+      const res = prof.mini.play({ game: clone(F.legendR.game), prof: 'tempering', title: 'Promote: ' + F.legendDone.item.name, sub: F.legendR.text });
+      await sleep(40); const run = prof.mini.run; for (const [t, v] of run.perfect) { run.advanceTo(t); run.press(v); }
+      await sleep(120); res.catch?.(() => {}); prof._test.onCraftDone(clone(F.legendDone)); await sleep(350); return;
+    }
+    prof.craft.open({ npc: F.craftListLegend.station.npc, tab: 'tempering' }); await sleep(60); push(F.craftListLegend); await sleep(150);
+    document.querySelector('#panel-craft [data-op="temper_promote"]')?.click(); await sleep(80);
+    const uid = o.refused ? F.packUid : F.legendUid, el = document.querySelector(`#panel-craft .pt-item[data-uid="${uid}"]`);
+    el?.scrollIntoView({ block: 'center' }); el?.click(); await sleep(80);
+    push(o.refused ? F.legendQuoteRefused : F.legendQuote); await sleep(150);
   } else if (what === 'skills') {
     push({ t: 'you', professions: F.professionsSeasoned }); await sleep(60);
     if (a === 'sheet') { G.panels.sheet.open(); await sleep(250); document.querySelector('#panel-sheet .pk-row')?.scrollIntoView({ block: 'center' }); }

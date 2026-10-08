@@ -33,7 +33,19 @@
   "from": "data/provinces/wanderers.json kinds.ox_carter",
   "takesYouTo": "any stop, at the fare from the stop the cart is walking TO (its next town)",
   "flagDown": "use the carter or the cart while it is within rules.flagDownM; the group stops for you (stopNear)",
-  "_doc": "A few carts walk the real routes like any traveller. Flag one down and the same route window opens, priced from the town it is heading for."
+  "_doc": "A few carts walk the real routes like any traveller. Flag one down and the same route window opens, priced from the town it is heading for.",
+  "runs": [
+   {
+    "id": "cart_run_torborhold_orrinsford",
+    "route": "route_torborhold_orrinsford",
+    "only": [
+     "ox_carter"
+    ],
+    "carts": 1,
+    "name": "the Orrinsford run",
+    "_doc": "A cart that is ALWAYS on the road between Torborhold and Orrinsford, so a newcomer walking the start chain meets one and a test can flag one down: a route of its own over the same road (`route` = the data/provinces/torbor_downs-routes.json id whose points it uses) on which ONLY `only` kinds walk. tests/E/playtest8-roaming.test.js walks a real cart along it and flags it down through js/sim/travellers.js + js/sim/carts.js. Ask of stream A (two lines, js/sim/content.js): add each run to `travel.routes` as { ...route, id, kinds: only, only: true } and do NOT append the wanderer kinds to a route with `only`."
+   }
+  ]
  },
  "made": "tools/content-towns.mjs — stops, links, fares and problems are generated; edit rules / roaming by hand",
  "stops": [

@@ -23,6 +23,7 @@ import { createCombat } from './cast.js';
 import { createCharacter } from './character.js';
 import { spawnMonster, tickMonsters } from './monster-ai.js';
 import { clearThreat } from './threat.js';
+import { attachGuards } from './guards.js';
 import { makeRng } from './rng.js';
 import { attachEncounters } from './encounter.js';
 import { attachFollowers } from './followers.js';
@@ -265,6 +266,8 @@ export function createRules(host, opts = {}) {
     },
   });
   const entOf = unit => (unit?.id != null ? host.entities.get(unit.id) : null);
+  // owner feedback 8 (W1): town guards — ownerless friendly fighters (js/rules/guards.js)
+  const guards = attachGuards(room, { cfg: engine.guardsCfg });
   let regenClock = 0;
   let builds = 0, handoffs = 0;
 
@@ -324,7 +327,7 @@ export function createRules(host, opts = {}) {
             u._sentAnim = u.anim;
           }
           if (u.dying != null && u.statuses && Object.keys(u.statuses).length) endStatuses(u);   // Q8: nothing burns on a corpse
-          if (u.dying != null && !e.dead) { e.setHp(0); e.kill(u.owner ? null : entOf({ id: lastHitBy(u) })); if (!u.owner) host.despawn(e, 8000); continue; }
+          if (u.dying != null && !e.dead && !u.guard) { e.setHp(0); e.kill(u.owner ? null : entOf({ id: lastHitBy(u) })); if (!u.owner) host.despawn(e, 8000); continue; }
         } else if ((u.x !== e.x || u.z !== e.z) && !(u.kind === 'player' && (u.dead || e.dead))) {
           e.moveTo(u.x, u.z);                         // a dash or a knock moved a player (never a dead one: P8)
         } else if (u.kind === 'player' && (u.dead || e.dead)) {
@@ -458,6 +461,33 @@ export function createRules(host, opts = {}) {
     return { rank: 'normal', modifiers: [] };
   }
 
+  function adoptGuard(e, spec = {}) {
+    const g = e.data?.guard && typeof e.data.guard === 'object' ? e.data.guard : {};
+    const unit = guards.create({ id: e.id, name: e.name, x: e.x, z: e.z, yaw: e.yaw, level: spec.level ?? g.level ?? (e.level > 1 ? e.level : null) ?? host.level ?? 1, rank: spec.rank || g.rank || 'guard', town: spec.town ?? g.town ?? null });
+    e.r.unit = unit;
+    e.setMax(unit.maxHp, 0); e.setHp(unit.hp);
+    return unit;
+  }
+  /**
+   * W1: put a town guard down. `spec`: `{ x, z, yaw, name, level, rank: 'guard' | 'sergeant', town, post, gate }`.
+   * Returns the room entity (kind npc, team 1, `data.guard`), fighter attached. (A room that already spawns E's guard
+   * rows as NPCs with `data.guard` needs no call: addEntity attaches the fighter.)
+   */
+  function spawnGuard(spec = {}) {
+    const ent = host.spawn({ kind: 'npc', type: 'guard', name: spec.name || 'Guard', level: spec.level || 1, x: spec.x, z: spec.z, yaw: spec.yaw || 0, team: 1,
+      data: { guard: { rank: spec.rank || 'guard', post: spec.post || 'gate', gate: spec.gate || null, town: spec.town || null, level: spec.level || 1 }, filler: true, ...(spec.data || {}) } });
+    if (ent && !ent.r.unit) run(() => adoptGuard(ent, spec));
+    return ent || null;
+  }
+  /** W1: a raider's opening target — `hint` 'guard' (nearest standing guard) or an entity; marks the monster a raider. */
+  function openingTarget(m, hint = 'guard', opts = {}) {
+    const u = m?.r?.unit;
+    if (!u) return null;
+    return run(() => { const who = guards.opening(u, hint && typeof hint === 'object' ? hint.r?.unit || null : hint, opts); return who ? entOf(who) || null : null; });
+  }
+  /** W1: a per-unit threat multiplier set by the room (1 = normal). `newcomer(e, true)` uses guards.json `raid.newcomerThreatMult`. */
+  function threatScale(e, k = 1) { const u = e?.r?.unit; if (!u) return false; u.threatScale = Number.isFinite(+k) && +k > 0 ? +k : 1; return true; }
+  const newcomer = (e, on = true) => threatScale(e, on ? guards.newcomerThreatMult : 1);
   const lightPay = [];
   function addEntity(e) {
     addEntityInner(e);
@@ -475,6 +505,9 @@ export function createRules(host, opts = {}) {
       e.setHp(adopting.hp);
       return;
     }
+    // owner feedback 8 (W1): an NPC the room spawned with `data.guard` (stream E's guard rows) gets its fighter here —
+    // the room needs no call of its own. `data.guard.level` (or the entity's level) is the town's; a raid raises it.
+    if (e.kind === 'npc' && e.data?.guard && !e.r.unit) { run(() => adoptGuard(e)); return; }
     if (e.kind === 'object' || e.kind === 'npc') return;
     run(() => {
       if (e.kind === 'player') {
@@ -526,6 +559,9 @@ export function createRules(host, opts = {}) {
         const script = enc.scriptFor({ defId: def.id, boss: !!rk.boss, rank: rk.rolled ? 'normal' : rk.rank, encounterId: e.data?.encounter || null });   // S4: a rolled champion / rare fights with its modifiers' specials, not the default elite script
         if (script) rk.modifiers = [];
         const unit = spawnMonster(field, def, e.level || 1, e.x, e.z, { id: e.id, rank: rk.rank, modifiers: rk.modifiers, boss: rk.boss, name: script?.name || rk.name || null });
+        // owner feedback 8 (W1): an EVENT's monster (a raid wave, its captain) is a raider — the town's guards meet it at
+        // its level, and its opening target is the nearest guard, never a newcomer
+        if (e.data?.event != null && guards.list.length) { guards.raise(e.level || 1); guards.opening(unit, 'guard'); }
         // play-test 4 S4: a champion / rare is visibly bigger (a floor, so a Giant stays giant), and the room entity says so
         if (!script && (rk.rank === 'champion' || rk.rank === 'rare') && !rk.boss) {
           const floor = sizeFloor(engine, rk.rank);
@@ -575,7 +611,7 @@ export function createRules(host, opts = {}) {
       if (u.channel) breakChannel(u, 'left');             // a recall does not survive a room change
       combat.skillRt?.forget(u);
       if (e.kind === 'player') { room.followers.release(u); field.detach(u); }   // sheet and followers live on in the next room
-      else if (e.kind === 'npc') field.detach(u);
+      else if (e.kind === 'npc') { if (u.guard) guards.remove(u); field.detach(u); }
       else field.remove(u);
     });
   }
@@ -632,6 +668,7 @@ export function createRules(host, opts = {}) {
     run(() => {
       room.clock.advance(dt);
       combat.tick(dt);                 // due wind-ups, then the monsters (tickMonsters below), bars, runtime
+      guards.tick(dt);                 // W1: town guards (after the monsters: one that fell this tick goes down, not dead)
       // Farhold's one-second regen tick (main.js ~9762) and the cast barrier running down
       regenClock += dt;
       const second = regenClock >= 1;
@@ -1269,6 +1306,8 @@ export function createRules(host, opts = {}) {
   }
 
   return {
+    /** owner feedback 8 (W1): town guards, a raider's opening target, a newcomer's threat (js/rules/guards.js) */
+    spawnGuard, openingTarget, threatScale, newcomer, guards,
     equip, unequip, canEquip, canUnequip, bagBonus, lightRefundOwed, gear, saveGear,
     /** W22 (A converts what players own): is this a light from before, and what it is paid back at (list price x count) */
     isLightItem, lightRefund,

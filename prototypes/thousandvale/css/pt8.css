@@ -1,0 +1,127 @@
+/* Play-test 8 (stream D-UI): the loot window's keys, My reports, hiding an event, the map's search, quest zones,
+   the damage meter, the ox-cart window, backpacks. One file; index.html lists it after pt7.css (the gallery frame
+   takes index.html's list, so it follows by itself). */
+
+/* ---- W8: the loot window — E takes the selected row, F takes everything ---- */
+.loot-row.sel { border-color: var(--gold); background: rgba(217, 178, 106, 0.16); }
+.loot-row .loot-take kbd, .loot-foot kbd { margin-right: 4px; font-size: 10.5px; padding: 0 5px; }
+.loot-row:not(.sel) .loot-take kbd { display: none; }
+.loot-row .loot-take { flex: none; }
+.loot-foot { margin-top: 8px; }
+kbd.hint-empty { display: none; }
+
+/* ---- W10: one mark per thing. Unread mail = the yellow dot (bottom right, clear of the red number's corner) ---- */
+#party-btn.alert::after { top: auto; bottom: 2px; right: 2px; }
+.hub-tab.alert { color: inherit; }
+
+/* ---- W29: My reports ---- */
+.fb-tabs { margin-bottom: 10px; align-items: center; }
+.fb-tabs .fb-news { margin-left: auto; color: var(--good, #7fe08a); font-size: 12px; }
+.my-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-height: min(56vh, 520px); overflow-y: auto; }
+.my-row { border: 1px solid rgba(217, 178, 106, 0.2); border-radius: 8px; padding: 8px 10px; background: rgba(0, 0, 0, 0.22); }
+.my-row.completed { border-color: rgba(127, 224, 138, 0.45); }
+.my-head { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-faint); }
+.my-head b { color: var(--ink); }
+.my-head .rp-kind { padding: 2px 8px; }
+.my-text { margin: 6px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.my-text.clip { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
+.my-note { margin: 6px 0; padding: 6px 9px; border-left: 3px solid var(--gold); background: rgba(217, 178, 106, 0.08); border-radius: 0 6px 6px 0; }
+.my-note.completed { border-left-color: var(--good, #7fe08a); background: rgba(127, 224, 138, 0.09); }
+.my-note.declined, .my-note.closed { border-left-color: #a8a296; }
+.my-note .label { display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+.my-note p { margin: 2px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.my-note small { color: var(--ink-faint); font-size: 11.5px; }
+.rp-state.completed { color: var(--good, #7fe08a); border-color: rgba(127, 224, 138, 0.5); }
+.rp-state.closed, .rp-state.declined { color: #a8a296; }
+/* W28: the admin's note box */
+.rp-notelabel { display: block; margin-top: 10px; }
+.rp-notelabel .label { display: block; font-size: 11.5px; color: var(--ink-faint); margin-bottom: 3px; }
+.rp-note { width: 100%; min-height: 52px; }
+.rp-acts { flex-wrap: wrap; gap: 6px; }
+
+/* ---- W13: hide an event ---- */
+.et-hide { display: inline-grid; place-items: center; margin-left: auto; padding: 2px 6px !important; }
+.et-hide + .et-x { margin-left: 0; }
+.et-time + .et-hide { margin-left: 0; }
+.et-hidden { display: flex; align-items: center; gap: 8px; padding: 4px 8px; font-size: 12px; color: var(--ink-dim); background: rgba(12, 10, 8, 0.6); border: 1px dashed rgba(217, 178, 106, 0.3); border-radius: 7px; pointer-events: auto; }
+.et-hidden[hidden] { display: none; }
+.et-hidden button { margin-left: auto; }
+.map-ev.hid b { color: var(--ink-dim); }
+.map-events .row { flex-wrap: wrap; }
+
+/* ---- W15: the map's filter and search ---- */
+.map-find { display: flex; align-items: center; gap: 6px; }
+.map-find[hidden] { display: none; }
+.map-find select { max-width: 150px; }
+.map-find input { width: 190px; }
+.map-found { border-color: rgba(255, 216, 74, 0.55) !important; }
+.map-foundlist { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; max-height: 240px; overflow-y: auto; }
+.map-foundlist li { display: flex; align-items: center; gap: 8px; padding: 3px 0; border-bottom: 1px solid rgba(217, 178, 106, 0.12); }
+.map-foundlist li > div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.map-foundlist small { font-size: 11.5px; color: var(--ink-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.map-foundlist small.dim { color: var(--ink-faint); }
+
+/* ---- W17: a quest zone's card ---- */
+.qz-row { align-items: baseline; gap: 10px; }
+.qz-row .qz-label { flex: none; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+.qz-row span:last-child { text-align: right; }
+.mm-card { max-width: 220px; }
+
+/* ---- W21: the damage meter (the playground's meter, dressed for this game) ---- */
+.meter-panel .tvp-body { padding-top: 6px; }
+.tv-meter .meter-head { gap: 4px; margin-bottom: 6px; font-size: 12px; }
+.tv-meter .meter-head button { padding: 2px 8px; border-radius: 6px; border: 1px solid var(--edge); background: rgba(0, 0, 0, 0.3); color: var(--ink-dim); cursor: pointer; font: inherit; }
+.tv-meter .meter-head button.on { background: linear-gradient(180deg, rgba(91, 66, 32, 0.9), rgba(59, 42, 20, 0.9)); color: var(--gold-hi); border-color: var(--gold); }
+.tv-meter .meter-head button:nth-of-type(5) { display: none; }          /* "Statuses": the game sends no status records */
+.tv-meter .meter-head select { max-width: 150px; font-size: 12px; }
+.tv-meter .meter-head .tiny { color: var(--ink-faint); font-size: 11px; }
+.tv-meter .meter-head .tiny + .tiny { flex-basis: 100%; }
+.tv-meter .meter-list { max-height: min(46vh, 380px); overflow-y: auto; }
+.tv-meter .meter-row { background: rgba(0, 0, 0, 0.35); color: var(--ink); height: 24px; line-height: 24px; }
+.tv-meter .meter-row:hover { outline-color: var(--gold); }
+.tv-meter .meter-crumb { cursor: pointer; padding: 3px 2px; color: var(--gold-hi); }
+.tv-meter .meter-hits { width: 100%; font-size: 11.5px; border-collapse: collapse; }
+.tv-meter .meter-hits th { text-align: left; color: var(--ink-faint); font-weight: 600; }
+.tv-meter .meter-hits td, .tv-meter .meter-hits th { padding: 1px 5px; }
+.meter-foot { margin: 6px 0 4px; color: var(--ink-faint); }
+
+/* ---- W5: the ox-cart window ---- */
+.cart-lead { margin: 0 0 8px; color: var(--ink-dim); font-size: 13px; }
+.cart-list { list-style: none; margin: 0; padding: 0; max-height: min(52vh, 440px); overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.cart-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border: 1px solid transparent; border-radius: 7px; background: rgba(0, 0, 0, 0.25); }
+.cart-row.picked { border-color: var(--gold); background: rgba(217, 178, 106, 0.12); flex-wrap: wrap; }
+.cart-row.locked .cart-where b, .cart-row.locked .cart-fare { color: var(--ink-faint); }
+.cart-where { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.cart-where small { font-size: 11.5px; color: var(--ink-dim); }
+.cart-where small.bad { color: var(--warn, #e0a050); }
+.cart-fare { flex: none; color: var(--gold-hi); font-weight: 700; font-size: 13px; }
+.cart-fare.free { color: var(--good, #7fe08a); }
+.cart-confirm { display: flex; gap: 6px; margin-left: auto; }
+.cart-purse { font-size: 12px; color: var(--ink-dim); }
+
+/* ---- W19: backpacks ---- */
+.ic-bag { margin: 4px 0; color: var(--gold-hi); }
+#inv-count.over { color: var(--warn, #e0a050); }
+
+/* ---- W23: what sets a starting kit apart ---- */
+.kit-role { margin-left: 8px; padding: 1px 8px; border-radius: 9px; border: 1px solid rgba(217, 178, 106, 0.4); color: var(--gold-hi); font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+.kit-diff { margin: 3px 0 4px; color: var(--ink); font-size: 13px; }
+
+/* ---- blocks other streams add to the Character menu and the journal ---- */
+.sh-extra { margin-top: 10px; }
+.j-extra { min-height: 120px; }
+
+/* ---- narrow screens (and the phone layout): windows are sheets; rows must not need a hover ---- */
+@media (max-width: 520px) {
+  .map-find { flex: 1 1 100%; }
+  .map-find input { flex: 1; width: auto; min-width: 0; }
+  .cart-row { flex-wrap: wrap; }
+  .tv-meter .meter-head .tiny { display: none; }
+}
+html[data-layout="phone"] .loot-row .loot-take kbd, html[data-layout="phone"] .loot-foot kbd { display: none; }
+html[data-layout="phone"] .cart-row, html[data-layout="phone"] .my-row, html[data-layout="phone"] .map-foundlist li { min-height: var(--tap, 44px); }
+html[data-layout="phone"] .et-hide, html[data-layout="phone"] .et-hidden button, html[data-layout="phone"] .fb-tabs .chip, html[data-layout="phone"] .cart-row button, html[data-layout="phone"] .my-row button, html[data-layout="phone"] .map-foundlist button, html[data-layout="phone"] .map-events button { min-width: var(--tap, 44px); min-height: var(--tap, 44px); }
+html[data-layout="phone"] .map-find select, html[data-layout="phone"] .map-find input { min-height: var(--tap, 44px); }
+html[data-layout="phone"] .tv-meter .meter-head button, html[data-layout="phone"] .tv-meter .meter-head select { min-height: var(--tap, 44px); min-width: var(--tap, 44px); }
+html[data-layout="phone"] .tv-meter .meter-row { height: var(--tap, 44px); line-height: var(--tap, 44px); }
+html[data-layout="phone"] .tv-meter .meter-crumb { min-height: var(--tap, 44px); display: flex; align-items: center; }

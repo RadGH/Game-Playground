@@ -108,6 +108,7 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP, tvS
   if (tvGear) attachTvGear(engine, data.tvGear || null);
   // owner feedback 7 (V2): the gold formulas (js/rules/economy.js); a parity engine keeps Farhold's own gold
   engine.prices = tvGear ? (data.prices || null) : null;
+  engine.guardsCfg = data.guards || null;                 // W1: stream E's guards.json (js/rules/guards.js)
   engine.crates = data.crates || null;                    // T9 / T20 (js/rules/crates.js)
   engine.kits = data.starterKits || null;                 // T5 (js/rules/starter-kits.js)
   setKitSource(engine, engine.kits);

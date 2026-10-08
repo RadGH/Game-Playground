@@ -13,6 +13,7 @@ import { slotOf, altSlotOf, SLOT_NAME, RARITY_NAME, rarityOf, levelCheck, compar
 import { iconFor } from './item-icons.js';
 import { isCrate, crateLines, rarityClass } from './pt5-core.js';
 import { potionLine } from './pt6-core.js';
+import { bagSlotsText } from './pt8-core.js';
 import { fmt, pct } from '../../../../../shared/format.js';
 
 const items = new Map();                       // uid -> item
@@ -77,6 +78,8 @@ export function itemCardHtml(item, { worn = false, level = null, equipment = nul
     const c = crateLines(item);
     b.push(`<div class="ic-crate"><div class="ic-crate-what">${esc(c.opens)}</div><div class="ic-crate-min r-${esc(rarityClass(c.min))}">${esc(c.rarity)}</div><div class="ic-dim">${esc(c.how)}</div></div>`);
   }
+  // W19 (C): a backpack's first line — what it is FOR
+  { const bt = bagSlotsText(item); if (bt) b.push(`<div class="ic-bag"><b>${esc(bt)}</b> <span class="ic-dim">while it is on your back</span></div>`); }
   if (slot) {
     const req = levelCheck(item, lv, eq);
     b.push(`<div class="ic-req">${item.ilvl ? `Item level ${esc(item.ilvl)} · ` : ''}<span class="${req.ok ? (req.reduced ? 'req-cut' : 'req-ok') : 'req-no'}">Requires level ${req.level}</span>`

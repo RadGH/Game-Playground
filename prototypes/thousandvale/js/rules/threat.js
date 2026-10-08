@@ -35,7 +35,8 @@ export function addThreat(m, who, amount) {
   if (!m || !who || who.id == null || !(amount > 0) || m.dying != null) return 0;
   // a tank stance's `threatMult`, times the perk forest's threat rules (js/rules/perk-rules.js)
   const f = who.perkFlags;
-  const k = (who.threatMult ?? 1) * (f ? (f.quietHand ? PERK_RULES.quietHand.threat : 1) * (f.ironPresence ? PERK_RULES.ironPresence.threat : 1) * (1 + (who.derived?.threatPct || 0) / 100) : 1);
+  // `threatScale`: the room's own per-unit multiplier (owner feedback 8 W1: a newcomer in a raided town draws a quarter)
+  const k = (who.threatMult ?? 1) * (who.threatScale ?? 1) * (f ? (f.quietHand ? PERK_RULES.quietHand.threat : 1) * (f.ironPresence ? PERK_RULES.ironPresence.threat : 1) * (1 + (who.derived?.threatPct || 0) / 100) : 1);
   const t = table(m);
   const v = (t.get(who.id) || 0) + amount * k;
   t.set(who.id, v);

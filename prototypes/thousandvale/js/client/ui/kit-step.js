@@ -64,8 +64,11 @@ export function createKitStep({ parent = null, onPreview, onBack, onCreate, askS
     const sum = group === 'armour' ? `${t.armour} armour in all` : '';
     return h('div.kit-choice' + (on ? '.on' : ''), { role: 'radio', 'aria-checked': String(on), tabIndex: 0, dataset: { group, id: k.id },
       onclick: () => { S[group] = k.id; changed(); }, onkeydown: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); S[group] = k.id; changed(); } } },
-      h('div.kit-head', {}, h('span.kit-radio', { 'aria-hidden': 'true' }), h('strong', {}, k.name), sum ? h('em', {}, sum) : null),
-      k.blurb ? h('p.kit-blurb', {}, k.blurb) : null,
+      // play-test 8 (W23, C): `role` = a short tag of what this choice IS ("Weapon and shield · steady, arm's length"), `diff` = the one
+      // plain sentence that sets it apart from the others — both written by the rules from the items themselves
+      h('div.kit-head', {}, h('span.kit-radio', { 'aria-hidden': 'true' }), h('strong', {}, k.name), k.role ? h('span.kit-role', {}, k.role) : null, sum ? h('em', {}, sum) : null),
+      k.diff ? h('p.kit-diff', {}, k.diff) : null,
+      k.blurb && k.blurb !== k.diff ? h('p.kit-blurb', {}, k.blurb) : null,
       on ? h('ul.kit-items', {}, ...k.items.map(itemRow)) : h('p.kit-short', {}, k.items.map(nameOf).join(' · ')));
   }
   function draw() {

@@ -145,7 +145,7 @@ async function main() {
     carts++;
   }
   if (existsSync(P('data/provinces/guards.json'))) for (const g of readJ('data/provinces/guards.json').posts || []) {
-    (added[g.zone] ||= []).push({ type: 'guard', id: g.id, name: g.name, role: 'guard', rank: g.rank, town: g.town, post: g.post, ...(g.gate ? { gate: g.gate } : {}), x: g.x, z: g.z, yaw: g.yaw, titled: false });
+    (added[g.zone] ||= []).push({ type: 'guard', id: g.id, name: g.name, role: 'guard', rank: g.rank, tier: g.tier, town: g.town, post: g.post, ...(g.gate ? { gate: g.gate } : {}), x: g.x, z: g.z, yaw: g.yaw, titled: false });
     guards++;
   }
   console.log(`carters + carts: ${carts}; guard posts: ${guards}`);

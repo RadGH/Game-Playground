@@ -114,6 +114,8 @@ export const SERVICES = {
 /** The filter list of the map, in the order players ask for them. */
 export const SERVICE_FILTERS = ['stablehand', 'angler', 'trainer', 'carter', 'innkeeper', 'smith', 'armourer', 'bowyer', 'tailor', 'apothecary', 'provisioner', 'merchant', 'trader', 'jeweller', 'healer', 'barber', 'unbinder', 'broker', 'elder'];
 const titleOf = s => String(s || '').replace(/[_-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+/** Shop kinds (shops.json) -> the role that keeps them. */
+const SHOP_ROLE = { general: 'merchant', weaponsmith: 'smith', stable: 'stablehand', inn: 'innkeeper', market: 'trader', cart: 'carter', carts: 'carter', hall: 'elder', forge: 'smith', shop: 'merchant', temple: 'healer' };
 export const serviceLabel = role => SERVICES[role]?.label || titleOf(role);
 const zoneOrigin = key => { const m = /^z(\d+)_(\d+)$/.exec(String(key)); return m ? { x: +m[1] * 2048, z: +m[2] * 2048 } : null; };
 /**
@@ -123,7 +125,7 @@ const zoneOrigin = key => { const m = /^z(\d+)_(\d+)$/.exec(String(key)); return
  *   towns    = [{ name, x, z, r }] in world metres (to say which town a lone NPC belongs to)
  * -> [{ id, role, label, name, town, x, z, keeper }] — `label` is what hangs over the door when the data names it.
  */
-export function buildServices({ offices = null, npcs = [], towns = [] } = {}) {
+export function buildServices({ offices = null, npcs = [], towns = [], townServices = null } = {}) {
   const out = [], seen = new Set();
   const townList = towns.slice();
   for (const [key, t] of Object.entries(offices?.towns || {})) {
@@ -143,6 +145,16 @@ export function buildServices({ offices = null, npcs = [], towns = [] } = {}) {
     let town = n.at || '', best = Infinity;
     if (!town) for (const t of townList) { const d = Math.hypot(t.x - n.x, t.z - n.z); if (d < (t.r || 90) + 220 && d < best) { best = d; town = t.name; } }
     out.push({ id: 'npc:' + (n.id ?? `${n.role}:${Math.round(n.x)}:${Math.round(n.z)}`), role: n.role, label: serviceLabel(n.role), name: n.name || '', town, x: n.x, z: n.z, keeper: serviceLabel(n.role) });
+  }
+  // E's data/provinces/town-services.json: what EVERY settlement has (roles and shop kinds), also the ones with no door on record —
+  // those are pinned at the settlement itself, so a town you have never walked into can still be ringed
+  for (const [name, list] of Object.entries(townServices?.towns || {})) {
+    const t = townList.find(x => x.name === name); if (!t) continue;
+    for (const raw of Array.isArray(list) ? list : []) {
+      const role = SHOP_ROLE[raw] || raw;
+      if (!SERVICES[role] || out.some(s => s.town === name && s.role === role)) continue;
+      out.push({ id: `ts:${name}:${role}`, role, label: serviceLabel(role), name: '', town: name, x: t.x, z: t.z, keeper: serviceLabel(role), approx: true });
+    }
   }
   return out;
 }
@@ -214,7 +226,7 @@ export function questMarkMarkers(bodies, marks, others = []) {
   const get = id => (marks instanceof Map ? marks.get(id) ?? marks.get(String(id)) ?? marks.get(+id) : marks?.[id]);
   const out = [];
   for (const b of bodies || []) {
-    const mk = get(b.id), d = QUEST_MARKS[mk];
+    const mk = get(b.id), d = QUEST_MARKS[mk];          // (`job` — only repeatable board work — is deliberately not drawn)
     if (!d || !Number.isFinite(b.x)) continue;
     // the journal's own "hand it in here" pin already stands on this spot: one mark per thing
     if (others.some(o => (o.kind === 'questdone' || (o.kind === 'quest' && !o.area)) && Math.hypot(o.x - b.x, o.z - b.z) < 7)) continue;
@@ -241,8 +253,9 @@ export function npcTitle(info, name = '') {
 }
 
 // ------------------------------------------------------------------------------------------- W21: the damage meter
-export const HIT_FLAGS = { heal: 1, crit: 2, miss: 4, kill: 8, blocked: 16, dot: 32 };
+export const HIT_FLAGS = { heal: 1, crit: 2, miss: 4, kill: 8, blocked: 16, dot: 32, dodged: 64 };
 const BASIC_SKILLS = new Set(['basic', 'melee', 'arrow', 'bolt', 'attack', '']);
+const DOT_NAMES = { fire: 'Burning', poison: 'Poison', bleed: 'Bleeding', shadow: 'Withering', ice: 'Frostbite', lightning: 'Shock', holy: 'Searing light', arcane: 'Arcane burn' };
 /**
  * One row of A's `hits {l:[[src, tgt, n, flags, sk, el, over, abs], …]}` -> a record for meters/js/meter.js.
  * `nameOf(id)` -> a name or '', `skillName(id)` -> a skill's name or '' (the id is tidied when unknown), `t` = seconds.
@@ -252,18 +265,20 @@ export function meterRecord(row, { t = 0, nameOf = () => '', skillName = () => '
   const [src, tgt, n, flags = 0, sk = 'basic', el = null, over = 0, abs = 0] = row;
   const heal = !!(flags & HIT_FLAGS.heal), miss = !!(flags & HIT_FLAGS.miss), dot = !!(flags & HIT_FLAGS.dot);
   const basic = BASIC_SKILLS.has(String(sk ?? ''));
-  const viaName = basic ? (heal ? 'Healing' : 'Weapon attack') : (skillName(sk) || titleOf(sk)) + (dot ? ' (over time)' : '');
+  // A sends `sk: 'dot'` for a tick with no skill of its own: name it by what it is made of
+  const tick = String(sk) === 'dot';
+  const viaName = tick ? (heal ? 'Healing over time' : DOT_NAMES[el] || 'Damage over time') : basic ? (heal ? 'Healing' : 'Weapon attack') : (skillName(sk) || titleOf(sk)) + (dot ? ' (over time)' : '');
   const rec = {
     t, source: src == null ? 'world' : String(src), sourceName: (src == null ? '' : nameOf(src)) || (src == null ? 'The world' : `#${src}`),
     target: String(tgt), targetName: nameOf(tgt) || `#${tgt}`,
     kind: miss ? 'miss' : heal ? 'heal' : 'damage', amount: miss ? 0 : Math.max(0, Math.round(+n || 0)),
-    crit: !!(flags & HIT_FLAGS.crit), dtype: heal ? 'holy' : String(el || 'physical'), via: basic ? 'attack' : `${dot ? 'dot' : 'skill'}:${sk}`, viaName,
+    crit: !!(flags & HIT_FLAGS.crit), dtype: heal ? 'holy' : String(el || 'physical'), via: tick ? `dot:${el || 'physical'}` : basic ? 'attack' : `${dot ? 'dot' : 'skill'}:${sk}`, viaName,
     killingBlow: !!(flags & HIT_FLAGS.kill), tags: [],
   };
   if (heal) rec.overheal = Math.max(0, Math.round(+over || 0)); else rec.overkill = Math.max(0, Math.round(+over || 0));
   if (abs > 0) rec.absorbed = Math.round(abs);
-  if (flags & HIT_FLAGS.blocked) rec.tags.push('blocked');
-  if (miss) rec.tags.push(flags & HIT_FLAGS.blocked ? 'blocked' : 'missed');
+  if (flags & HIT_FLAGS.blocked && !miss) rec.tags.push('blocked');
+  if (miss) rec.tags.push(flags & HIT_FLAGS.blocked ? 'blocked' : flags & HIT_FLAGS.dodged ? 'dodged' : 'missed');
   return rec;
 }
 /** The older feed (the `ev` stream every client sees): `hit {s, d, n, crit, el, kind, skill}` / `miss {s, d, why}` -> a `hits` row. */
@@ -313,7 +328,7 @@ export function rideText(s) {
   const m = Math.round(s / 60);
   return `about ${m} minute${m === 1 ? '' : 's'}`;
 }
-const CART_WHY = { gold: 'You cannot afford this ride.', far: 'Walk up to the cart first.', fight: 'Not while you are fighting.', dead: 'Not while you are down.', same: 'You are already there.', stop: 'The cart does not go there.', level: 'That road is too dangerous for you yet.' };
+const CART_WHY = { busy: 'You are already on a cart.', interrupted: 'The ride was called off. Your fare was given back.', gold: 'You cannot afford this ride.', far: 'Walk up to the cart first.', fight: 'Not while you are fighting.', dead: 'Not while you are down.', same: 'You are already there.', stop: 'The cart does not go there.', level: 'That road is too dangerous for you yet.' };
 /**
  * The rows of the cart window from A's `cartList {from, stops:[{id, name, fare, m, s, level?, locked?, why?, msg?}], gold, tokens}`:
  * nearest first; each row says the fare, the road distance, the ride time, and — when you may not go — why, in words.

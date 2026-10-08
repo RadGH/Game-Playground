@@ -112,6 +112,7 @@ export const ERR_TEXT = {
 };
 export const MAIL_WHY = {
   gate: `Sending mail needs a claimed account with a character at level ${PUBLIC_LEVEL}.`,
+  level: `Sending mail opens when one of your characters reaches level ${PUBLIC_LEVEL}.`,
   town: 'You can only send or take mail in a town.',
   busy: 'Finish your trade first.',
   items: 'A letter holds at most 6 items.',

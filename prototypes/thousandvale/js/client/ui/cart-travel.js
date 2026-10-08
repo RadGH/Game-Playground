@@ -16,7 +16,7 @@ export function createCartTravel({ net, hud }) {
   const S = { m: null, pick: null, going: false, timer: 0 };
   const panel = createPanel({ id: 'cart', title: 'Ox cart', width: 380, cls: 'cart-panel', onClose: () => { S.pick = null; S.going = false; clearTimeout(S.timer); } });
 
-  const send = (id, to) => { const n = net(); if (!n) return false; if (typeof n.cart === 'function') { n.cart('go', { id, to }); return true; } if (!n._raw) return false; n._raw('game', JSON.stringify({ t: 'cart', op: 'go', id, to })); return true; };
+  const send = (id, to) => { const n = net(); if (!n) return false; if (typeof n.cart === 'function') { n.cart('go', id, to); return true; } if (!n._raw) return false; n._raw('game', JSON.stringify({ t: 'cart', op: 'go', id, to })); return true; };
   const gold = () => (Number.isFinite(S.m?.gold) ? S.m.gold : net()?.joined?.you?.gold ?? null);
 
   function draw() {
@@ -61,6 +61,7 @@ export function createCartTravel({ net, hud }) {
     n.on('cartList', open);
     n.on('used', u => { if (u && u.ok && u.kind === 'cart' && Array.isArray(u.stops)) open(u); });
     n.on('cartR', r => {
+      if (r.op === 'arrive') { if (r.ok === false) hud.toast(cartRefusal(r), 'warn'); return; }      // the end of the ride: the arrival banner says the rest
       S.going = false; clearTimeout(S.timer);
       if (r.ok === false) { const text = cartRefusal(r); if (panel.isOpen) { draw(); const el = panel.body.querySelector('.note'); if (el) el.textContent = text; } else hud.toast(text, 'warn'); return; }
       hud.chat?.(`You climb onto the cart for ${r.name || 'the next town'}${r.token ? ' (a cart token paid the fare)' : r.fare ? ` — ${r.fare} gold` : ''}.`, 'system');

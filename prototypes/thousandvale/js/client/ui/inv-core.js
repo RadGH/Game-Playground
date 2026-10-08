@@ -3,10 +3,10 @@
 // the compare delta, and the icon key an item's picture is cached under. tests/D/inventory.test.js drives it.
 
 /** The paper doll, Farhold's equipment slots (rpg.js SLOTS) in the order the doll draws them. */
-// play-test 5 (C's slots addendum): back (cloak), waist (belt) and light (a worn lantern or torch) are real slots — order as rules.SLOTS
+// play-test 5 (C's slots addendum): back (cloak — or a backpack, W19) and waist (belt) are real slots — order as rules.SLOTS
 export const DOLL_LEFT = ['head', 'necklace', 'chest', 'back', 'hands'];
 export const DOLL_RIGHT = ['waist', 'legs', 'feet', 'ring', 'ring2'];
-export const DOLL_BOTTOM = ['weapon', 'offhand', 'light'];
+export const DOLL_BOTTOM = ['weapon', 'offhand'];          // play-test 8 (W22): light items left the game — there is no Light slot
 export const DOLL_EXTRA = ['mount', 'tool'];        // drawn only when something is worn there
 export const DOLL_SLOTS = [...DOLL_LEFT, ...DOLL_RIGHT, ...DOLL_BOTTOM];
 
@@ -150,45 +150,49 @@ export function armourTier(item) {
   if (/robe|linen|hood|cloth|silk/.test(n)) return 'cloth';
   return 'light';
 }
-/** The Chibi 2 part an armour piece is drawn as: { slot (avatar slot), id, color, color2, frame }. */
-export const ARMOUR_PARTS = {
-  head: { cloth: ['hood', '#4a4a5a'], light: ['leather_cap', '#7a5a3a'], medium: ['chain_coif', '#a8b0b8'], heavy: ['plate_helm', '#c0c8d0'] },
-  chest: { cloth: ['robe', '#5a3a6a', '#d9b477'], light: ['leather', '#7a5034', '#4a3424'], medium: ['chainmail', '#a8b0b8', '#6a2a2a'], heavy: ['plate', '#c8d0d8', '#2f5d9e'] },
-  legs: { cloth: ['leggings', '#4a4058'], light: ['pants', '#6a4a30'], medium: ['greaves', '#a0a8b0'], heavy: ['greaves', '#c8d0d8'] },
-  feet: { cloth: ['slippers', '#5a4a6a'], light: ['boots', '#5a4232'], medium: ['boots', '#7a7f88'], heavy: ['heavy', '#b8bec8'] },
-  hands: { cloth: ['rune_bracers', '#6a5a7a'], light: ['rune_bracers', '#7a5a3a'], medium: ['rune_bracers', '#a0a8b0'], heavy: ['rune_bracers', '#c8d0d8'] },
-};
-const AVATAR_SLOT = { head: 'hat', chest: 'top', legs: 'bottom', feet: 'shoes', hands: 'decor' };
-const FRAME = { head: 'bust', chest: 'torso', legs: 'legs', feet: 'feet', hands: 'hands' };
+// Play-test 8 (W25, report #46): AN ITEM'S ICON IS A PICTURE OF THE MODEL IT DRAWS WHEN WORN. There is no table of
+// "icon parts" here any more — the old one gave a War Helm a knight's helm while the body wore a horned dome. The icon's
+// part comes from the same function the bodies in the world are dressed with: gear-look.js `wornPart(item, slot, opts)`
+// (D-world's; = gearLook({[slot]: item}, opts)). ui/item-icons.js passes the game's own options (looks.js gearOpts);
+// with none (node tests) the plain tables answer, exactly as a body built without the catalog would look.
+import { wornPart as wornPartOf } from '../gear-look.js';
+
+/** Which part of the body an armour icon frames. */
+const FRAME = { head: 'bust', chest: 'torso', legs: 'legs', feet: 'feet', hands: 'hands', back: 'back', waist: 'waist', necklace: 'neck', ring: 'ring', ring2: 'ring' };
 const RARE_TINT = { rare: '#e8d020', legendary: '#ffb040', unique: '#ffb040', set: '#63e07a' };
+const empty = p => !p || !p.id || p.id === 'none';
 
 /**
- * How an item's icon is made, as plain data: { kind: 'held'|'offhand'|'armour'|'glyph', … } plus `key`, the
- * cache key (identical pictures share one key, so a bag of 40 swords renders one sword). `looks` are Farhold's
- * heldLookFor/offhandLookFor (optional; without them a plain mapping is used).
+ * How an item's icon is made, as plain data, plus `key`, the cache key (identical pictures share one key, so a bag of 40
+ * swords renders one sword):
+ *   { kind: 'held' | 'offhand', id, color, quality, part }      a weapon / shield / focus, built on its own
+ *   { kind: 'worn', slot, frame, id, parts }                     armour, a cloak, a pack, a belt…: a plain body wearing exactly `parts`
+ *   { kind: 'glyph', id, color }                                 things with no model (potions, junk, a ring the catalog does not draw)
+ * `worn(item, slot)` -> gear-look.js wornPart's answer `{ partSlot, part, parts }`.
  */
-export function iconSpec(item, { held = null, offhand = null } = {}) {
+export function iconSpec(item, { worn = wornPartOf } = {}) {
   if (!item) return null;
   const s = slotOf(item), r = rarityOf(item);
-  let spec;
-  if (item.type === 'weapon' || s === 'weapon') {
-    const L = held ? held(item) : { id: PLAIN_HELD[item.subtype || item.baseKey] || 'fh_sword', color: '#b9c2cc', quality: RARITY_RANK[r] > 1 ? 2 : 0 };
-    if (L.id === 'book' || L.id === 'orb') spec = { kind: 'offhand', id: L.id, color: L.color || '#5a2a2a' };
-    else spec = { kind: 'held', id: L.id || 'fh_sword', color: L.color || '#b9c2cc', quality: L.quality ?? 0 };
-  } else if (s === 'offhand') {
-    const L = offhand ? offhand(item) : { id: item.isShield ? 'fh_heater_shield' : /quiver/.test(item.baseKey || '') ? 'quiver' : 'book', color: '#8d97a3' };
-    spec = L.id && L.id !== 'none' ? { kind: 'offhand', id: L.id, color: L.color || '#8d97a3', quality: L.quality ?? 0 } : { kind: 'glyph', id: 'focus', color: '#8fd0ff' };
-  } else if (ARMOUR_PARTS[s]) {
-    const tier = armourTier(item), [id, color, color2] = ARMOUR_PARTS[s][tier];
-    spec = { kind: 'armour', slot: AVATAR_SLOT[s], frame: FRAME[s], id, color: RARE_TINT[r] && s !== 'legs' ? mixHex(color, RARE_TINT[r], 0.25) : color, color2: color2 || null };
-  } else if (s === 'ring' || s === 'ring2') spec = { kind: 'glyph', id: 'ring', color: RARE_TINT[r] || '#d0a040' };
-  else if (s === 'necklace') spec = { kind: 'glyph', id: 'amulet', color: RARE_TINT[r] || '#3a8ad8' };
-  else if (/potion|draught|elixir|tonic/i.test(item.name || '') || item.kind === 'potion') spec = { kind: 'glyph', id: 'potion', color: '#d83838' };
-  else spec = { kind: 'glyph', id: item.kind === 'junk' ? 'junk' : 'bundle', color: '#a08060' };
-  spec.key = [spec.kind, spec.slot || '', spec.id, spec.color, spec.color2 || '', spec.quality ?? ''].join('|');
+  const drawn = s && (s === 'weapon' || s === 'offhand' || FRAME[s]);
+  let w = null;
+  if (drawn) { try { w = worn(item, s === 'ring2' ? 'ring' : s); } catch { w = null; } }
+  let spec = null;
+  if (w && !empty(w.part)) {
+    const part = w.part;
+    if (w.partSlot === 'held') spec = { kind: 'held', id: part.id, color: part.color || '#b9c2cc', quality: part.quality ?? 0, part };
+    else if (w.partSlot === 'offhand') spec = { kind: 'offhand', id: part.id, color: part.color || '#8d97a3', quality: part.quality ?? 0, part };
+    else spec = { kind: 'worn', slot: w.partSlot, frame: FRAME[s] || 'torso', id: part.id, parts: w.parts };
+  }
+  if (!spec) {
+    if (s === 'ring' || s === 'ring2') spec = { kind: 'glyph', id: 'ring', color: RARE_TINT[r] || '#d0a040' };
+    else if (s === 'necklace') spec = { kind: 'glyph', id: 'amulet', color: RARE_TINT[r] || '#3a8ad8' };
+    else if (s === 'offhand') spec = { kind: 'glyph', id: 'focus', color: '#8fd0ff' };
+    else if (/potion|draught|elixir|tonic/i.test(item.name || '') || item.kind === 'potion') spec = { kind: 'glyph', id: 'potion', color: '#d83838' };
+    else spec = { kind: 'glyph', id: item.kind === 'junk' ? 'junk' : 'bundle', color: '#a08060' };
+  }
+  spec.key = spec.kind === 'worn' ? `worn|${spec.frame}|${JSON.stringify(spec.parts)}` : spec.kind === 'glyph' ? `glyph|${spec.id}|${spec.color}` : `${spec.kind}|${JSON.stringify(spec.part)}`;
   return spec;
 }
-const PLAIN_HELD = { dagger: 'fh_daggers', sword: 'fh_sword', longsword: 'fh_longsword', greatsword: 'fh_greatsword', sword2h: 'fh_greatsword', axe2h: 'fh_greataxe', axe: 'fh_axe', battleaxe: 'fh_axe', mace: 'fh_mace', hammer: 'fh_hammer', warhammer: 'fh_maul', spear: 'fh_spear', halberd: 'fh_halberd', javelin: 'fh_javelin', staff: 'staff_orb', quarterstaff: 'fh_quarterstaff', wand: 'fh_wand', scepter: 'fh_scepter', bow: 'bow', shortbow: 'bow', crossbow: 'crossbow', tome: 'book', orb: 'orb' };
 export function mixHex(a, b, t) {
   const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
   const A = p(a), B = p(b);

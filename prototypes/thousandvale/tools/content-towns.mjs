@@ -102,7 +102,7 @@ export function guardPosts(S, names) {
     const offStreet = (x, z) => mains.every(m => { for (let i = 1; i < m.pts.length; i++) if (segDist(x, z, m.pts[i - 1], m.pts[i]) < (m.width || 5) / 2 + 0.6) return false; return true; });
     const free = (x, z) => offStreet(x, z) && !taken.some(p => Math.hypot(p.x - x, p.z - z) < 1.8);
     const family = i => names.family[(hash(s.id + ':guard:' + i) >>> 5) % names.family.length];
-    const add = (rec, at) => { taken.push(at); posts.push({ id: `guard_${s.id}_${posts.filter(p => p.town === s.name).length}`, town: s.name, settlement: s.id, zone: s.wid, ...rec, x: at.x, z: at.z }); };
+    const add = (rec, at) => { taken.push(at); posts.push({ id: `guard_${s.id}_${posts.filter(p => p.town === s.name).length}`, town: s.name, settlement: s.id, zone: s.wid, tier: GUARDS[s.kind] ? s.kind : 'hamlet', ...rec, x: at.x, z: at.z }); };
     const ordered = [mainGate(s), ...s.gates.filter(g => g !== mainGate(s))].filter(Boolean).slice(0, G.gates);
     for (const g of s.gates) gates.push({ id: g.id, town: s.name, zone: s.wid, x: r1(g.x), z: r1(g.z), out: [+g.out[0].toFixed(3), +g.out[1].toFixed(3)], width: g.open || g.width || 4.5, kind: g.kind, main: g === mainGate(s) });
     for (const g of ordered) {

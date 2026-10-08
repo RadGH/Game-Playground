@@ -65,9 +65,9 @@ export async function raidTable({ guards = null, events = null, set = null } = {
   const out = [];
   for (const e of EV.realm.filter(x => x.site && x.site.settlement && Array.isArray(x.waves))) {
     const posts = G.posts.filter(p => p.town === e.site.settlement);
-    const R = G.rules, lvl = (e.level || 1) + (R.levelOver || 0);
+    const R = G.rules, tier = (G.tiers && posts[0] && G.tiers[posts[0].tier]) || {}, lvl = (e.level || 1) + (tier.levelOver ?? R.levelOver ?? 0);
     const ref = body(R.reference || 'road_brigand', lvl);
-    const guardOf = rank => { const k = (G.ranks && G.ranks[rank]) || {}; return { hp: ref.hp * R.hpMult * (k.hpMult || 1), armor: ref.armor + (R.armor || 0), dps: ref.dps * R.dmgMult * (k.dmgMult || 1), guard: true }; };
+    const guardOf = rank => { const k = (G.ranks && G.ranks[rank]) || {}; return { hp: ref.hp * R.hpMult * (k.hpMult || 1) * (tier.hpMult || 1), armor: ref.armor + (R.armor || 0), dps: ref.dps * R.dmgMult * (k.dmgMult || 1) * (tier.dmgMult || 1), guard: true }; };
     const P = player(e.level || 1);
     const run = (nPlayers, withGuards = true) => {
       const def = [...(withGuards ? posts.map(p => ({ ...guardOf(p.rank), max: 0, down: 0 })) : []), ...Array.from({ length: nPlayers }, () => ({ ...P, player: true, down: 0 }))];

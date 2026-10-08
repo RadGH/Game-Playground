@@ -19,6 +19,7 @@ import { confirmBox } from './ui-panel.js';
 import { wearSlot } from './ui/pt2-core.js';
 import { offhandRefusal, hasDual2h, BAG_MAX as BAG_CAP } from './ui/pt5-core.js';
 import { UNSEEN } from './ui/unseen.js';
+import { packRefusal, bagSlotsOf } from './ui/pt8-core.js';      // W19: a backpack's extra squares
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -33,9 +34,10 @@ export function createBag({ net: getNet, hud, me = null }) {
   const toggleFns = new Set();
   /** T7 (play-test 5): the Doubled Grasp perk lets a two-handed weapon sit in each hand. */
   const dual2h = () => hasDual2h(getNet()?.joined?.you);
-  const bagMax = () => getNet()?.joined?.you?.bagMax || BAG_MAX;
-  const S = { bag: [], equipment: {}, gold: 0, fresh: new Set(), level: 1, filter: 'all', sort: 'new', search: '' };
-  try { Object.assign(S, JSON.parse(localStorage.getItem(UI_KEY) || '{}')); S.search = ''; } catch {}
+  // W19: the bag is 40 squares + the worn pack's (the server's `you.bagMax`, kept current by `you {bagMax}`)
+  const bagMax = () => S.bagMax || getNet()?.joined?.you?.bagMax || BAG_MAX;
+  const S = { bag: [], equipment: {}, gold: 0, fresh: new Set(), level: 1, filter: 'all', sort: 'new', search: '', bagMax: 0 };
+  try { Object.assign(S, JSON.parse(localStorage.getItem(UI_KEY) || '{}')); S.search = ''; S.bagMax = 0; } catch {}
   const level = () => (me?.()?.level ?? S.level ?? getNet()?.joined?.you?.level ?? 1);
   installGameTips();                 // idempotent: the item cards need the shared tooltip engine running
   installItemCards({ equipment: () => S.equipment, level });
@@ -130,6 +132,8 @@ export function createBag({ net: getNet, hud, me = null }) {
     // Q12: a click on a second ring puts it on the EMPTY hand (never over the first); a drag onto an exact ring slot
     // names it ('ring1' / 'ring2' on the wire — 'ring' alone means "you pick" to the server, protocol v6)
     if (slot === 'offhand') { const no = offhandRefusal(it, S.equipment, { dual2h: dual2h() }); if (no) { hud.toast(no, 'warn'); return; } }
+    // W19: a cloak (or a smaller pack) over a pack whose extra squares are in use — say why before asking the server
+    if (slotOf(it) === 'back' && S.equipment?.back) { const no = packRefusal(S.equipment.back, { bagCount: S.bag.length, bagMax: bagMax(), next: it }); if (no) { hud.toast(no, 'warn'); return; } }
     const wire = slot === 'ring' ? 'ring1' : slot || wearSlot(it, S.equipment) || undefined;
     getNet()?.item('equip', it.uid, wire === 'ring' ? undefined : wire); hideTip();
   }
@@ -147,8 +151,14 @@ export function createBag({ net: getNet, hud, me = null }) {
   el.grid.addEventListener('drop', e => {
     e.preventDefault();
     let d; try { d = JSON.parse(e.dataTransfer.getData('text/x-tv-item')); } catch { return; }
-    if (d.worn) { getNet()?.item('unequip', d.uid, d.worn); hideTip(); }
+    if (d.worn) takeOff(S.equipment?.[d.worn] || { uid: d.uid }, d.worn);
   });
+  /** Take a worn piece off. W19: a pack whose extra squares are holding things stays on, and says how many to empty. */
+  function takeOff(it, sl) {
+    const no = packRefusal(it, { bagCount: S.bag.length, bagMax: bagMax() });
+    if (no) { hud.toast(no, 'warn'); return false; }
+    getNet()?.item('unequip', it.uid, sl); hideTip(); return true;
+  }
 
   /** U7 (play-test 6): the numbers under the figure are the CHARACTER MENU's (the server's sheet) — one source. fn() -> [{label, text, tip}] | null */
   let sheetLines = null;
@@ -191,9 +201,9 @@ export function createBag({ net: getNet, hud, me = null }) {
     if (!root.hidden) UNSEEN.seen('bag');      // U1: the badge is "new since you last looked", not how much you carry
     if (root.hidden) return;
     const worn = S.equipment || {};
-    const put = (box, list) => { box.replaceChildren(...list.map(sl => { const it = worn[sl] || null; const d = slotEl(it, { slot: sl, worn: !!it }); if (it) d.onclick = () => { getNet()?.item('unequip', it.uid, sl); hideTip(); }; return d; })); };
+    const put = (box, list) => { box.replaceChildren(...list.map(sl => { const it = worn[sl] || null; const d = slotEl(it, { slot: sl, worn: !!it }); if (it) d.onclick = () => takeOff(it, sl); return d; })); };
     put(el.left, DOLL_LEFT); put(el.right, DOLL_RIGHT);
-    put(el.bottom, [...DOLL_BOTTOM, ...DOLL_EXTRA.filter(s => worn[s])]);
+    put(el.bottom, [...DOLL_BOTTOM, ...DOLL_EXTRA.filter(s => worn[s])]);          // (W22: no Light slot — an old save's `light` is refunded by the server and never drawn)
     el.stats.innerHTML = stats();
     for (const b of el.filters.children) b.setAttribute('aria-checked', String(b.dataset.f === S.filter));
     el.sort.value = S.sort;
@@ -225,12 +235,17 @@ export function createBag({ net: getNet, hud, me = null }) {
       return d;
     });
     const cols = Math.max(1, (getComputedStyle(el.grid).gridTemplateColumns || '').split(' ').filter(Boolean).length || 6);
-    const want = S.filter === 'all' && !S.search ? Math.max(cols * 4, list.length + 1) : list.length;
+    // W19: with no filter the grid IS the bag — every square you have, used or not (an old save over its capacity keeps its extra rows)
+    const cap = S.bagMax || getNet()?.joined?.you?.bagMax || 0;      // 0 = the server has not said: the old four rows
+    const want = S.filter === 'all' && !S.search ? (cap ? Math.max(cap, list.length) : Math.max(cols * 4, list.length + 1)) : list.length;
     const pad = Math.max(0, Math.ceil(want / cols) * cols - list.length);
     for (let k = 0; k < pad; k++) cells.push(slotEl(null));
     el.grid.replaceChildren(...cells);
     rehover();
+    const pack = bagSlotsOf(worn.back);
     el.count.textContent = `${S.bag.length} / ${bagMax()}${list.length !== S.bag.length ? ` (showing ${list.length})` : ''} ·`;
+    el.count.dataset.tip = pack ? `${bagMax() - pack} squares of your own + ${pack} from ${nameOf(worn.back)}.` : 'A backpack in the Back slot adds squares.';
+    el.count.classList.toggle('over', S.bag.length > bagMax());
     el.sub.textContent = S.filter !== 'all' ? FILTERS.find(f => f.id === S.filter)?.label || '' : '';
   }
   // A redraw replaces the square under the pointer, and the tooltip engine only hears about a square when the
@@ -252,8 +267,8 @@ export function createBag({ net: getNet, hud, me = null }) {
   function warm() { for (const it of [...S.bag, ...Object.values(S.equipment || {})]) if (it) iconFor(it); }
 
   function wire(n) {
-    n.on('joined', j => { S.bag = [...(j.you.bag || [])]; S.equipment = { ...(j.you.equipment || {}) }; S.gold = j.you.gold || 0; if (j.you.level) S.level = j.you.level; remember(); warm(); draw(); });
-    n.on('you', p => { let ch = false; if (p.gold != null) { S.gold = p.gold; ch = true; } if (p.level != null && p.level !== S.level) { S.level = p.level; ch = true; } if (ch) draw(); });
+    n.on('joined', j => { S.bagMax = j.you.bagMax || 0; S.bag = [...(j.you.bag || [])]; S.equipment = { ...(j.you.equipment || {}) }; S.gold = j.you.gold || 0; if (j.you.level) S.level = j.you.level; remember(); warm(); draw(); });
+    n.on('you', p => { let ch = false; if (p.bagMax != null && p.bagMax !== S.bagMax) { S.bagMax = p.bagMax; ch = true; } if (p.gold != null) { S.gold = p.gold; ch = true; } if (p.level != null && p.level !== S.level) { S.level = p.level; ch = true; } if (ch) draw(); });
     n.on('bag', m => {
       const rm = new Set(m.remove || []);
       // U5: a stack that changed arrives as remove + add of the SAME uid — it keeps its place, and only a bigger count is news
@@ -272,6 +287,8 @@ export function createBag({ net: getNet, hud, me = null }) {
       remember(); draw();
     });
     n.on('equip', m => { S.equipment = { ...(m.equipment || {}) }; remember(); draw(); if (m.item) hud.chat(`You equip ${nameOf(m.item)}.`, 'system'); });
+    // W19: the server's own refusal (it has the last word on what fits)
+    n.on('itemR', r => { if (r.ok === false && r.why === 'bagSlots' && !(r.op === 'equip' && r.msg)) hud.toast(r.msg || `Empty ${r.need || 'some'} more bag slot${r.need === 1 ? '' : 's'} first — the pack's extra room is holding things.`, 'warn'); });
     n.on('itemR', r => { if ((r.op === 'split' || r.op === 'merge') && r.ok === false) hud.toast(r.msg || ({ count: 'There are not that many in the stack.', bagFull: 'Your bag is full — a split needs a free square.', full: 'That stack is full.', item: 'Those two do not go together.' }[r.why]) || 'That did not work.', 'warn'); });
     n.on('err', e => { if (e.code === 'item' || e.code === 'bagFull') hud.toast(e.msg || 'You cannot do that.', 'warn'); });
   }
@@ -283,7 +300,7 @@ export function createBag({ net: getNet, hud, me = null }) {
     onToggle(fn) { toggleFns.add(fn); return () => toggleFns.delete(fn); },
     /** U7: where the stat lines under the figure come from (the Character menu's sheet). */
     setStats(fn) { sheetLines = fn; if (!root.hidden) draw(); },
-    get max() { return bagMax(); }, get dual2h() { return dual2h(); },
+    get max() { return bagMax(); }, takeOff, get dual2h() { return dual2h(); },
     /** fn(item) -> true when it USED the item (a consumable) instead of wearing it. */
     setUseHook(fn) { useHook = fn; },
     /** Kept for older callers: the card is the shared tooltip now (data-tip-render="item"). */

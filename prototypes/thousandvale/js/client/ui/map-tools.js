@@ -4,7 +4,8 @@
 //        somebody serves you. Zoomed in, each match is a pin at its door; zoomed out, the TOWNS that have a match are
 //        ringed (with how many) and the other towns fade, and the side panel lists them nearest first.
 //        The facts are the game's own data files, read once: data/provinces/offices.json (every town's working
-//        buildings), the placed NPCs of the map model (anglers, trainers at their camps) and data/provinces/carts.json.
+//        buildings), the placed NPCs of the map model (anglers, trainers at their camps), data/provinces/carts.json and E's
+//        data/provinces/town-services.json (what all 46 settlements have, also the ones with no door on record).
 //   W15  the map REMEMBERS where you left it for the session (sessionStorage `tv.map.view`).
 //   W17  quest zones: the ring answers the pointer anywhere inside it — a card with the quest and its objective — and
 //        lights up while the pointer is in it (map-render.js draws `hot`).
@@ -34,12 +35,12 @@ export function createMapFind({ atlas, me, onChange = () => {}, onShow = () => {
     if (S.list || S.loading) return S.loading;
     S.loading = (async () => {
       const model = atlas.model || await atlas.src.model().catch(() => null);
-      const [offices, carts] = await Promise.all([j('provinces/offices.json'), j('provinces/carts.json')]);
+      const [offices, carts, townServices] = await Promise.all([j('provinces/offices.json'), j('provinces/carts.json'), j('provinces/town-services.json')]);
       const towns = (model?.pois || []).filter(p => TOWN_KINDS.has(p.kind)).map(p => ({ name: p.name, x: p.x, z: p.z, r: p.r || 90 }));
       const npcs = [...(model?.npcs || new Map()).entries()].map(([id, n]) => ({ id, ...n }));
       // the ox carts' stops (W5, stream E): one carter per town on the road network, world metres
-      for (const st of carts?.stops || []) if (Number.isFinite(st.x)) npcs.push({ id: st.carter || st.id, role: 'carter', name: '', at: st.town, x: st.x, z: st.z });
-      S.list = buildServices({ offices, npcs, towns });
+      for (const st of carts?.stops || []) if (Number.isFinite(st.x)) npcs.push({ id: st.carter?.id || st.id, role: 'carter', name: st.carter?.name || '', at: st.town, x: st.x, z: st.z });
+      S.list = buildServices({ offices, npcs, towns, townServices });
       S.townAt = new Map(towns.map(t => [t.name, t]));
       drawSelect(); refresh();
     })();

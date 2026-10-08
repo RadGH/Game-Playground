@@ -186,7 +186,7 @@
    ]
   },
   "ox_carter": {
-   "night": false,
+   "night": true,
    "name": "Longroad Cart",
    "weight": 3,
    "speedMps": 1.15,

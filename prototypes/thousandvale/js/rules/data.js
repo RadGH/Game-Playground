@@ -39,6 +39,7 @@ export const RULES_DATA_FILES = {
 export const OPTIONAL_DATA_FILES = {
   starterKits: '../../data/rules/starter-kits.json',
   angling: '../../data/provinces/angling.json',
+  guards: '../../data/provinces/guards.json',          // owner feedback 8 W1: stream E's town guards (js/rules/guards.js reads `rules`, `ranks`, `raid`)
   gearCatalog: '../../../../avatar-3d/data/gear-catalog.json',
 };
 

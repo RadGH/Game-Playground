@@ -148,11 +148,15 @@ export function monsterStrike(field, e, victim, { element = 'physical', ranged =
   if (e.lifeSteal) e.hp = Math.min(e.maxHp, e.hp + Math.round(result.amount * e.lifeSteal));
   if (e.onHit?.length) statusOnHit(field, e, victim);
   e.lastCombatAt = field.clock;
+  // W1: whatever strikes a guard, or a player under a guard's eye, is the guards' business from now on
+  if (field.guards?.list.length && !e.guardFoe && (victim.guard || (victim.kind === 'player' && field.guards.watched(victim.x, victim.z)))) e.guardFoe = true;
   field.report(e, victim, result, kind || (ranged ? 'shot' : 'bite'));
   if (result.dead && victim.hp <= 0) {
     if (victim.kind === 'player') {
       victim.dead = true;
       field.emit({ t: 'death', id: victim.id, by: e.id });
+    } else if (victim.guard) {
+      victim.hp = 0;                       // a town guard goes DOWN and gets up again (js/rules/guards.js), it is never a corpse
     } else {
       victim.dying = 0;
       field.emit({ t: 'death', id: victim.id, by: e.id });
@@ -374,6 +378,7 @@ export function tickMonsters(field, dtAll, hooks = {}) {
   // M2 perf: the nearest player through a bucket grid of THINK_RADIUS cells (a 3 x 3 look finds every
   // player within THINK_RADIUS — exactly what the scan found inside it; beyond it nobody thinks anyway)
   const nearestOf = playerBuckets(friends);
+  const guardList = field.guards?.list.length ? field.guards : null;
   // the room's planner (js/rules/pathfind.js): null on a terrain that cannot block (Farhold, the parity fixtures)
   const pf = pathfinderFor(field);
   if (pf) pf.beginTick(field.clock);
@@ -382,7 +387,13 @@ export function tickMonsters(field, dtAll, hooks = {}) {
     const e = list[i];
     if (e.removed) continue;
     let dt = dtAll;
-    const { friend: near, dist } = nearestOf(e);
+    let { friend: near, dist } = nearestOf(e);
+    // owner feedback 8 (W1): a RAIDER (rules.openingTarget) or something already fighting a guard also notices town
+    // guards — and when the nearest player is a newcomer (`threatScale` < 1) it goes for a guard in sight instead
+    if (guardList && (e.raider || e.guardFoe)) {
+      const g = guardList.nearest(e.x, e.z, AI.THINK_RADIUS);
+      if (g) { const gd = Math.hypot(g.x - e.x, g.z - e.z); if (gd < dist || ((near?.threatScale ?? 1) < 1 && gd < (e.aggroRange || 26) * 2)) { near = g; dist = gd; } }
+    }
 
     if (e.dying != null) {
       e.dying += dt;

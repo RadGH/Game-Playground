@@ -29,6 +29,7 @@ import { loadZoneNames, learnZone } from '../names.js';
 import { createUiSuite } from '../ui/suite.js';
 import { createUi2 } from '../ui/pt2.js';
 import { createUi5 } from '../ui/pt5.js';
+import { createUi8 } from '../ui/pt8.js';
 import { loadSkillData, barFromData, barFromServer, initials } from '../skillbar.js';
 import { PLAYABLE_RACES, RACE_NAMES, loadLookData, defaultLook, avatarFor } from '../looks.js';
 import { lookCustom } from '../ui/appearance-core.js';
@@ -100,7 +101,7 @@ const chat = createChat({ net: () => S.net, hud, social, me, onTyping: on => con
   openAccount: () => account.panel.open(), openFriends: () => friends.panel.open(),
   friendAdd: n => friends.add(n), friendRemove: n => friends.remove(n), isFriend: n => friends.isFriend(n),
   guildInvite: n => guild.invite(n), canGuildInvite: () => guild.canInvite(),
-  command: (cmd, arg, rest) => ui2.command(cmd, arg, rest) || ui5.command(cmd, arg, rest),
+  command: (cmd, arg, rest) => ui2.command(cmd, arg, rest) || ui5.command(cmd, arg, rest) || ui8.command(cmd, arg, rest),
 } });
 hud.chat = chat.line;
 hud.focusChat = prefill => chat.focus(prefill);
@@ -124,7 +125,8 @@ const ui5 = createUi5({ net: () => S.net, hud, bag, mail, worldUi, journal: ui.j
   me: worldMe, self: () => S.self, room: () => S.room, bar: () => S.bar,
   targetId: () => S.target, setTarget: id => setTarget(id), stats: () => ({ fps: 60 }), zoneName: () => $('zone-name')?.textContent || null,
   ensureNet: async () => { const n = startNet(); await n.ready; return n; }, onKitPreview: () => {}, onKitBack: () => title?.toAppearance(), onKitCreate: () => hud.toast('In the game this creates the character and walks into the world.', 'info') });
-const PANELS = { ...ui5.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: f => bag.toggle(f) }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
+const ui8 = createUi8({ net: () => S.net, hud, actors, atlas: ui.atlas, settings: ui2.settings, selfId: () => S.selfId, bar: () => S.bar });
+const PANELS = { ...ui5.panels, ...ui8.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: f => bag.toggle(f) }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
 for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());
 // the same key handler main.js has (windows, help, chat, Esc) — the input layer turns pads and touch into these keys
 window.addEventListener('keydown', e => {
@@ -276,6 +278,7 @@ function wireNet(net) {
   chat.wire(net); friends.wire(net); guild.wire(net); mail.wire(net); callboard.wire(net); account.wire(net);
   bag.wire(net);
   ui5.wire(net);
+  ui8.wire(net);
   ui.wire(net);
   worldUi.wire(net);
   ui2.wire(net);
@@ -312,7 +315,7 @@ function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
   if (S.phase === 'world') {
-    worldUi.tick(S.tod); ui.tick(dt); ui2.tick(dt); ui5.tick(dt); boss.update(dt);
+    worldUi.tick(S.tod); ui.tick(dt); ui2.tick(dt); ui5.tick(dt); ui8.tick(dt); boss.update(dt);
     hud.death(S.self.dead ? Math.max(0, (S.self.riseIn ?? 2.5) - (now - S.self.deadAt) / 1000) : null);
     const tgt = S.target != null ? actors.get(S.target) : null;
     if (tgt) { hud.setTarget(tgt); hud.usable(0, !tgt.dead && tgt.hostile); } else hud.usable(0, false);

@@ -286,7 +286,7 @@ async function makeFlow(pg, name, how) {
   await talk();
   await pg.locator('.tv-dialog .prof-dlg', { hasText: /Learn/ }).waitFor({ timeout: 15000 });
   await act('.tv-dialog .prof-dlg:has-text("Learn")');
-  for (const id of ['smithing', 'tempering']) { await act(`#panel-trade [data-learn="${id}"]`); await until(i => tvprof.state.list.find(x => x.id === i)?.known, id, 15000); }
+  for (const id of ['smithing', 'tempering']) { await act(`#panel-trainer [data-learn="${id}"]`); await until(i => tvprof.state.list.find(x => x.id === i)?.known, id, 15000); }
   await pg.evaluate(() => tvprof.trainer.close());
   await talk();
   await pg.locator('.tv-dialog .prof-dlg', { hasText: 'Use the forge' }).waitFor({ timeout: 15000 });
@@ -343,7 +343,7 @@ async function makeFlow(pg, name, how) {
 test('MAKE something end to end on a desktop: mine, smelt a batch, forge a blade (card + item in the bag), temper it once', async () => {
   test.setTimeout(900000);
   await page.setViewportSize({ width: 560, height: 420 });           // (small: the software renderer; every window still fits)
-  await page.evaluate(() => { tv.hud(true); for (const p of ['bag', 'craft', 'trade']) document.getElementById('panel-' + p)?.querySelector('.tvp-x')?.click(); });
+  await page.evaluate(() => { tv.hud(true); for (const p of ['bag', 'craft', 'trainer']) document.getElementById('panel-' + p)?.querySelector('.tvp-x')?.click(); });
   await page.keyboard.press('Escape');
   await makeFlow(page, NAME, 'key');
   expect(errors, errors.join('\n')).toEqual([]);

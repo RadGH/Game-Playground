@@ -22,7 +22,7 @@ for (const dev of DEVICES.filter(d => devs.includes(d.id))) {
     const stage = ok ? await page.evaluate(() => window.__gallery.errors) : ['never became ready'];
     await page.waitForTimeout(250);
     await page.screenshot({ path: `${OUT}${dev.id}/${s.id}.png` });
-    if (dev.w > 900) { const box = await page.evaluate(() => { const e = [...document.querySelectorAll('.tv-prof .prof-game, #panel-craft, #panel-trade, #panel-journal, #panel-sheet, .tipbox')].find(x => !x.hidden && x.getClientRects().length && !x.closest('[hidden]')); if (!e) return null; const r = e.getBoundingClientRect(); return { x: Math.max(0, r.left - 6), y: Math.max(0, r.top - 6), width: r.width + 12, height: r.height + 12 }; }); if (box) await page.screenshot({ path: `${OUT}${dev.id}/${s.id}.crop.png`, clip: box }).catch(e => console.log('crop', e.message)); }
+    if (dev.w > 900) { const box = await page.evaluate(() => { const e = [...document.querySelectorAll('.tv-prof .prof-game, #panel-craft, #panel-trainer, #panel-journal, #panel-sheet, .tipbox')].find(x => !x.hidden && x.getClientRects().length && !x.closest('[hidden]')); if (!e) return null; const r = e.getBoundingClientRect(); return { x: Math.max(0, r.left - 6), y: Math.max(0, r.top - 6), width: r.width + 12, height: r.height + 12 }; }); if (box) await page.screenshot({ path: `${OUT}${dev.id}/${s.id}.crop.png`, clip: box }).catch(e => console.log('crop', e.message)); }
     const all = [...stage, ...errs]; if (all.length) bad++;
     console.log(`${dev.id.padEnd(8)} ${s.id.padEnd(18)} ${all.length ? 'ERR ' + all.join(' | ').slice(0, 500) : 'ok'}`);
     await page.close();

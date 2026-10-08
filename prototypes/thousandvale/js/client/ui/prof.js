@@ -128,7 +128,8 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
 
   // ---- a craftsman: learn, buy the tool again, use the station -----------------------------------------------
   const T = { npc: null, name: '', prof: null, busy: null };
-  const trainer = createPanel({ id: 'trade', title: 'Trades', width: 360, cls: 'trade-panel' });
+  // (id 'trainer', not 'trade': the player-to-player trade window is #panel-trade, and two panels with one id broke both)
+  const trainer = createPanel({ id: 'trainer', title: 'Trades', width: 360, cls: 'trade-panel' });
   function drawTrainer() {
     if (!trainer.isOpen || !T.prof) return;
     trainer.setTitle(T.name || 'Trades', 'Teaches for nothing');

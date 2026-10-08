@@ -4243,3 +4243,25 @@ _Status 2026-10-08: LANDED as written (tests/P/core-legendary.test.js, 2 tests).
 - **C: you can take `free_move` off `INERT_POWERS`** (and the rollable move-speed properties / `movePct` skill buffs are true now). If a card prints the bonus, print it capped at +30%. If you want another cap, say the number.
 - Heals on a full bar (`hit {n:0, over, kind:'heal'}`): nothing in js/sim reads `n:0` as a miss or a kill — event contribution, "being hit" (mount throw, combat timer) and kill credit all ask `kind === 'dmg' && n > 0`; the meter row is `[src, tgt, 0, 1, sk, el, over, 0]`.
 - Test: tests/A/pt9-speed.test.js over REAL WebSockets — same inputs for 2 s: 10.8 m plain, x1.18 in boots with `free_move`; the predictor's own arithmetic with the told factor lands where the server did; the cap, the floor, a mount on top, boots off -> x1.
+
+## Round 9 — C: the dead-data audit of gear (after A made move speed real) — 2026-10-08 (LANDED) -> A, P-core, D-UI, E, lead
+
+**The rule, as a test** (`tests/C/dead-data.test.mjs`, 9 tests; the method is `tests/C/effect-audit.mjs`, `node tests/C/effect-audit.mjs` prints the table): every power and property line an item can carry in Thousandvale — rollable, built into a base, on a unique, on a set, the conversion, a kit's lean: 164 lines — is put on a real character in a real fight and is LIVE only if one of its effect hooks is actually called, or a sheet field it changed is actually read (a Proxy on the sheet records reads), or the engine's scan for it changes an answer (a knob check). Then every drop (40,000 rolls, every unique and set piece by name), every crafted base, every tempering roll, every promotion pool and every kit item is checked to carry only audited-live lines. The audit is checked against controls: the three stripped powers and a made-up field nobody reads are found dead.
+
+**WIRED (was dead, a few lines each):**
+- **Move speed** (A's work): `free_move` is off `INERT_POWERS` and back in the promotion pool; `movePct` is a named outside reader (js/sim/province.js).
+- **Every TIMED gear effect.** Farhold's `rpg.fx.update` "has to be called every frame" and Thousandvale never called it: "+damage for every 5 s you stay in a fight" never grew, a kill's rush / the opening rush never reached the sheet (and would never have ended), Frenzy never decayed, Stillness never counted, "once a fight" (cheat death) was once a login. Ticked per player in `rules.step`; the sheet is re-derived only when a timer changes what it pays. **A**: a kill's rush moves `movePct` — your 250 ms `speedMul` patch picks it up.
+- **Sheet lines that wait on state** — "+N per 10 kills", "+mana a second below 34% mana", "+armour after dark" — were only re-derived at the next equip; now within a second of the state moving (`sheetCheck`; night = `host.isNight()`).
+- **The gear barrier** (a focus's / shield's "barrier" property; the sheet said "it regenerates out of a fight"): nothing refilled it. +8% of the pool a second out of a fight, plus its `barrierRegen` always, never above the pool, a bigger skill barrier left alone (Farhold main.js ~9794).
+- **"Town guards deal more damage while you are with them"** (the Covenant Hammer's built-in line): it means Thousandvale's own town guards now — the best bond among players within 20 m multiplies a guard's hit.
+- **"Every arrow deals this quiver's element"** (Emberwing Quiver): the arrow asked only the bow; a worn quiver with the line and an element now gives it to the arrow, with that element's status.
+- (from the promotion job) a burn-length power on a stacking burn.
+
+**STRIPPED (no reader, and none that makes sense here; the item stays, items.json untouched):**
+- powers `forage_feast` (scrap from kills), `road_cache` (coin on new ground), `no_night_raids` (fewer night spawns) — off the uniques **Thistlewarden, Roadsong, The Long Watch** (they keep every other property) and off the sets **Roadwarden's Vigil, Forager's Covenant, Ragpicker's Fortune** (piece bonuses stay; the full-set power is gone). An item a player already owns loses the same line as it is loaded (`engine.finishItem` -> `stripInertItem`, marked `inertStripped`).
+- the eight properties that only roll on a tool or a mount (surefoot, longwind, trample, calm, keen edge, thrifty, long-handled, attuned head) and the four tool / mount uniques.
+- `engine.gearReport.inert` / `.slotless` list all of it.
+- **Now alive without a change of mine**: Wayfarer's Pike and Mooncloth Wraps (`free_move`).
+
+**What the audit cannot see** (said so nobody over-reads it): a hook that IS called but whose effect is cosmetic or wrong, and base-level fields that are not property lines (`stunChance`, `bleedChance`, `armorPen` on a base). The timed-effects hole was of the first kind and was found by reading, not by the audit; the knob tests in the file cover what was wired.
+- **D-UI**: nothing to change; a stripped unique simply has one line fewer. **P-core**: promotion pool = live powers only, checked by the same test. **E**: if a set should get a NEW full-set power instead of none, name it and C wires it.

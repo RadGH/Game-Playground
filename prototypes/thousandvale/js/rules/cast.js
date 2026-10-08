@@ -300,8 +300,13 @@ export function createCombat(room) {
     // swingWith posts the weapon's strike shape for every kind of attack; a melee skill borrows it
     feel.swing.charge = null;
     ch.lastStrike = { ...withArea(strikeAt(weapon, step), ch.derived.areaPct || 0) };
-    const element = mods.element || elementOf(weapon);
-    const leaves = mods.element ? ELEMENT_LEAVES[mods.element] || null : statusOf(weapon);
+    // round 9 (the dead-data audit): "Every arrow deals this quiver's own element as damage instead of physical" — the
+    // line is on the quiver (Emberwing Quiver) and nothing here asked the quiver. A worn quiver that carries the line
+    // and an element gives it to the arrow, and the arrow leaves that element's status.
+    const quiver = engine.tvGear ? ch.equipment?.offhand : null;
+    const quiverEl = quiver?.element && quiver.element !== 'physical' && (quiver.affixes || []).some(a => a.stat === 'cond_quiverElement') ? quiver.element : null;
+    const element = mods.element || quiverEl || elementOf(weapon);
+    const leaves = mods.element ? ELEMENT_LEAVES[mods.element] || null : quiverEl ? ELEMENT_LEAVES[quiverEl] || null : statusOf(weapon);
     const plan = ch.derived.swing?.main;
     const range = plan?.range ?? balance.player?.arrowRange ?? 46;
     const speed = balance.player?.arrowSpeed ?? 42;

@@ -683,13 +683,29 @@ export function createRules(host, opts = {}) {
         if (p.channel) tickChannel(p, dt);
         if (p.dead) continue;
         perkTick(field, p, dt, second);    // perk forest: standing still, the Banner's aura
+        // round 9 (the dead-data audit): Farhold's TIMED gear effects run on `rpg.fx.update`, "which has to be called every
+        // frame" — and Thousandvale never called it. So "more damage the longer the fight" never grew, a kill's rush and
+        // the opening rush never started on the sheet nor ended, Frenzy never decayed, Stillness never counted, and
+        // "once a fight" was once a login. Ticked here; the sheet is re-derived only when a timer changes what it pays.
+        if (engine.tvGear) {
+          p.moving = p._mx !== undefined && (Math.abs(p.x - p._mx) + Math.abs(p.z - p._mz)) > 0.01 ? 1 : 0;
+          p._mx = p.x; p._mz = p.z;
+          if (engine.rpg.fx.update(p, dt, { fighting: !!p._fighting }).dirty) engine.rpg.refresh(p);
+        }
         if (!second) continue;
         p._night = night;                  // a lit torch's night bonus (buffs.js itemStrikeMult)
+        p.atNight = night;                 // Farhold's "after dark" gear (cond_nightWard) reads this in `derive`
+        p._fighting = fought.has(p.id);
         sheetCheck(p);                     // an armour / health buff ran out: re-derive the sheet
         const fighting = fought.has(p.id);
         const mending = fighting ? 0 : p.maxHp * (engine.balance.player?.outOfCombatRegen ?? 0.015);
         p.hp = Math.min(p.maxHp, p.hp + (p.derived.hpRegen || 0) + mending);
         if (!Object.values(p.statuses || {}).some(st => st.noManaRegen)) p.mp = Math.min(p.maxMp, p.mp + (p.derived.mpRegen || 0) + (fighting ? 0 : p.maxMp * 0.02));
+        // round 9 (the dead-data audit): the GEAR's barrier (a focus's or a shield's "barrier" property — the sheet said
+        // "it regenerates out of a fight" and nothing refilled it) — main.js ~9794: +8% of it a second out of a fight, plus
+        // `barrierRegen` always, never above the gear's pool; a bigger barrier a skill put up is left alone
+        const pool = engine.tvGear ? (p.derived.barrier || 0) : 0;
+        if (pool > 0 && (p.barrier || 0) < pool) p.barrier = Math.min(pool, Math.max(p.barrier || 0, 0) + (p.derived.barrierRegen || 0) + (fighting ? 0 : pool * 0.08));
         const ent = entOf(p);
         if (ent) ent.setState(2, fighting);
       }
@@ -742,8 +758,10 @@ export function createRules(host, opts = {}) {
   const channelsDone = [];
   /** An armour/health buff came or went: re-derive the sheet (health keeps its share). Never on the dead. */
   function sheetCheck(u) {
-    const k = sheetKey(u);
-    if ((u._sheetKey ?? '0|0') === k || u.dead) return;
+    // round 9: gear whose sheet line depends on STATE (kills made, low mana, after dark) is re-derived when that state
+    // moves — Farhold re-derives on its own events; here it only ever ran at the next equip
+    const k = sheetKey(u) + (engine.tvGear ? `|${Math.floor((u.kills || 0) / 10)}|${(u.mp || 0) / Math.max(1, u.maxMp || 1) < 0.34 ? 1 : 0}|${u.atNight ? 1 : 0}` : '');
+    if ((u._sheetKey ?? (engine.tvGear ? '0|0|0|0|0' : '0|0')) === k || u.dead) return;
     u._sheetKey = k;
     engine.rpg.refresh(u);
   }

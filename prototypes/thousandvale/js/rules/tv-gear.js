@@ -67,7 +67,52 @@ export function removeSlotless(items) {
   const keep = [];
   for (const u of items.uniques) { if (u && (SLOTLESS_TYPES.includes(u.type) || SLOTLESS_TYPES.includes(u.slot))) out.push(u.id); else keep.push(u); }
   items.uniques.length = 0; items.uniques.push(...keep);
+  // …and the properties that only ever roll ON a tool or a mount (surefoot, longwind, keen edge, thrifty …)
+  for (const list of Object.values(items.affixes || {}).filter(Array.isArray)) {
+    for (let i = list.length - 1; i >= 0; i--) {
+      const a = list[i], only = Array.isArray(a?.onlySlots) ? a.onlySlots : null;
+      if (!only) continue;
+      if (only.length && only.every(s => SLOTLESS_TYPES.includes(s))) { out.push('affix:' + a.id); list.splice(i, 1); }
+      else if (only.some(s => SLOTLESS_TYPES.includes(s))) a.onlySlots = only.filter(s => !SLOTLESS_TYPES.includes(s));
+    }
+  }
   return out;
+}
+
+/**
+ * Round 9, the dead-data rule: lines that NOTHING in Thousandvale reads are taken off the items that carry them, in
+ * memory (the item stays; the shared items.json is never written). tests/C/dead-data.test.mjs finds them by putting
+ * every reachable line on a real character in a real fight (tests/C/effect-audit.mjs).
+ *   powers  (INERT_POWERS)  — off the uniques and sets that carried them
+ *   stats   (INERT_STATS)   — off the bases' built-in lines
+ * Returns `{ uniques: [id], sets: [id], bases: [key] }`.
+ */
+export const INERT_STATS = Object.freeze([]);        // (none today: `cond_guardBond` — "town guards deal more damage while you are with them" — is WIRED to Thousandvale's own town guards, js/rules/guards.js)
+export function stripInert(items) {
+  const out = { uniques: [], sets: [], bases: [] };
+  if (!items) return out;
+  for (const u of items.uniques || []) if (u && INERT_POWERS.includes(u.legendaryEffect)) { delete u.legendaryEffect; out.uniques.push(u.id); }
+  for (const s of items.sets || []) {
+    let hit = false;
+    if (INERT_POWERS.includes(s.legendaryEffect)) { delete s.legendaryEffect; hit = true; }
+    for (const [at, id] of Object.entries(s.thresholdPowers || {})) if (INERT_POWERS.includes(id)) { delete s.thresholdPowers[at]; hit = true; }
+    if (hit) out.sets.push(s.id);
+  }
+  for (const t of ['weaponBases', 'armorBases']) for (const [k, b] of Object.entries(items[t] || {})) {
+    if (!Array.isArray(b.intrinsic) || !b.intrinsic.some(f => INERT_STATS.includes(f.stat))) continue;
+    b.intrinsic = b.intrinsic.filter(f => !INERT_STATS.includes(f.stat));
+    out.bases.push(k);
+  }
+  return out;
+}
+/** An item a player already owns: the same lines come off it as it is loaded (it keeps everything else). */
+export function stripInertItem(item) {
+  if (!item || typeof item !== 'object' || !Array.isArray(item.affixes)) return item;
+  if (INERT_POWERS.includes(item.legendaryEffectId)) { delete item.legendaryEffectId; }
+  // (a unique whose power was stripped is still generated with an empty power line by the shared loot code: that goes too)
+  const keep = item.affixes.filter(a => !(a && ((a.id === 'legendary_effect' && (!a.legendaryId || INERT_POWERS.includes(a.legendaryId))) || INERT_STATS.includes(a.stat))));
+  if (keep.length !== item.affixes.length) { item.affixes = keep; item.inertStripped = true; }
+  return item;
 }
 /**
  * Round 9 (Tempering -> Promote): legendary powers whose hook NOTHING in Thousandvale reads — Farhold's travel layer
@@ -75,7 +120,7 @@ export function removeSlotless(items) {
  * reads the sheet a "+18% move speed" power does nothing). A promoted item must never be handed one of these.
  * tests/C/promote.test.mjs runs every other promotable power in a real fight and fails if a hook never fires.
  */
-export const INERT_POWERS = Object.freeze(['forage_feast', 'road_cache', 'no_night_raids', 'free_move', 'prospector', 'quick_hands']);
+export const INERT_POWERS = Object.freeze(['forage_feast', 'road_cache', 'no_night_raids', 'prospector', 'quick_hands']);
 export const powerRunsHere = id => !INERT_POWERS.includes(id);
 /** Is this a light a player may still own from before W22 (a worn lantern / torch of any base, or the torch consumable)? */
 export function isLightItem(item, cfg = null) {
@@ -199,6 +244,7 @@ export function installTvGear(items, cfg, catalog = null) {
   items._tvGear = true;
   report.lights = removeLights(items);          // owner feedback 8 (W22), before anything is added or pooled
   report.slotless = removeSlotless(items);      // Farhold's tool / mount uniques: no slot here
+  report.inert = stripInert(items);             // round 9: power / property lines nothing here reads
   for (const [key, base] of Object.entries(cfg.bases?.armor || {})) if (!items.armorBases[key]) { items.armorBases[key] = { ...clone(base), tv: true }; report.added.push(key); }
   for (const [key, base] of Object.entries(cfg.bases?.weapon || {})) if (!items.weaponBases[key]) { items.weaponBases[key] = { ...clone(base), tv: true }; report.added.push(key); }
   let rows = [];
@@ -315,11 +361,17 @@ export function attachTvGear(engine, cfg) {
       return item;
     };
   }
+  if (!loot._tvUnique && typeof loot.generateUnique === 'function') {
+    loot._tvUnique = true;
+    const genU = loot.generateUnique;
+    loot.generateUnique = function tvUnique(...a) { return stripInertItem(genU.apply(this, a)); };      // round 9: no empty / dead power line on a unique
+  }
   engine.tvGear = cfg || null;
   /** Every new item passes through here once: T17 conversion (drops only), then the caster stamp. */
   engine.finishItem = (item, { rng = null, fresh = true, convert = true } = {}) => {
     if (!item || typeof item !== 'object') return item;
     fixUnits(item);                       // an old save's shield (block 0.2) is corrected as it is loaded
+    stripInertItem(item);                 // round 9: a line nothing here reads comes off an item already owned
     if (item.pack && item.bagSlots > 0 && !item.bagText) item.bagText = `+${item.bagSlots} bag slots`;
     const c = engine.tvGear?.convert;
     if (convert && fresh && rng && c && canConvert(engine.tvGear, items, item) && rng() < (c.chance ?? 0)) {

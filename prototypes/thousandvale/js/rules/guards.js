@@ -136,7 +136,11 @@ export function attachGuards(room, { cfg = null } = {}) {
         else if (g.swingTimer <= 0) {
           g.swingTimer = g.attackEvery || 1.6;
           g.anim = 'attack';
-          const result = rpg.strike(g, t, field.rng, { multiplier: t.boss ? num(R.vsBossMult, 1) : 1 });
+          // round 9: Farhold's "town guards deal more damage while you are with them" (`cond_guardBond`, the Covenant
+          // Hammer's own line) had no guards to mean — it means these now: the best bond among players within 20 m
+          let bond = 1;
+          for (const p of field.players) if (!p.dead && p.equipment && dist(p, g) <= 20) bond = Math.max(bond, rpg.fx.product(p, 'guardPower') || 1);
+          const result = rpg.strike(g, t, field.rng, { multiplier: (t.boss ? num(R.vsBossMult, 1) : 1) * bond });
           field.land(t, result, { fromX: g.x, fromZ: g.z, by: g });
           field.report(g, t, result, 'guard');
           if (result.dead) field.kill(t);

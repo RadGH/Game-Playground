@@ -336,6 +336,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       case 'reach': return (ev.kind === 'visit' && within(st.place, ev.x, ev.z, 6)) || (ev.kind === 'talk' && within(st.place, ev.x, ev.z, 10));
       case 'use': return ev.kind === 'use' && ev.vignette === st.vignette && (!st.object || ev.name === st.object);
       case 'talk': case 'deliver': return ev.kind === 'talk' && ev.npcId === st.npc;
+      case 'ride': return ev.kind === 'ride' && (!st.to || ev.to === st.to) && (!st.from || ev.from === st.from);      // W5 (round 8): an ox-cart ride that arrived
       case 'clear': return ev.kind === 'clear' && ev.door === st.door && ev.zone === st.zone && (st.boss || st.floor == null ? ev.boss : ev.floor >= st.floor || ev.boss);
       // play-test 5 T25 (E's step kinds): a landed fish (never junk or a crate) / a cooked meal
       case 'catch': return ev.kind === 'fish' && (!st.fish || ev.species === st.fish) && (!st.pool || !!ev.pool) && (!st.rarity || (RARITY_RANK[ev.rarity] ?? 0) >= (RARITY_RANK[st.rarity] ?? 0));

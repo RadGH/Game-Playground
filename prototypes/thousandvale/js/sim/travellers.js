@@ -117,7 +117,7 @@ export function createTravellers({ room, travel, folk = [], rng = Math.random, c
       const wand = lead && (k.shop || k.offers || k.curious) ? { kind: g.kind, ...(k.offers ? { offers: k.offers } : {}), ...(k.curious ? { curious: true } : {}), ...(k.shop ? { shop: k.shop } : {}) } : null;
       c.e = room.spawn({ kind: 'npc', type: 'npc', name: c.name, x: p.x, z: p.z, yaw: p.yaw, team: 1, state: 128,
         data: { key: 'trav:' + g.id + ':' + i, npc: { role: c.role, ...(typeof c.titled === 'boolean' ? { titled: c.titled || !!wand } : {}), says: k.blurb ? [k.blurb] : [], traveller: g.kind, ...(wand && k.shop ? { shop: k.shop } : {}), ...(wand ? { title: k.name || null } : {}) },
-          traveller: { kind: g.kind, group: g.id, name: k.name || g.kind, from: endName(g, -1), to: endName(g, 1), beast: k.beast || null, cart: !!k.cart, armed: c.armed || undefined }, ...(wand ? { wanderer: wand } : {}) } });
+          traveller: { kind: g.kind, group: g.id, name: k.name || g.kind, from: endName(g, -1), to: endName(g, 1), beast: k.beast || null, cart: !!k.cart, ...(k.vehicle ? { vehicle: k.vehicle } : {}), armed: c.armed || undefined }, ...(wand ? { wanderer: wand } : {}) } });
     });
     g.live = true; counters.materialised++;
   }

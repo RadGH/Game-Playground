@@ -17,7 +17,7 @@ export function setLayoutChoice(v) { try { if (v === 'auto') localStorage.remove
 
 /** Is this a phone-sized touch screen? (coarse pointer, short side under 500 CSS px) */
 export function looksLikePhone(w = window) {
-  try { return w.matchMedia('(pointer: coarse)').matches && Math.min(w.innerWidth, w.innerHeight) < 500; } catch { return false; }
+  try { return (w.matchMedia('(pointer: coarse)').matches || (w.navigator && w.navigator.maxTouchPoints > 0)) && Math.min(w.innerWidth, w.innerHeight) < 500; } catch { return false; }
 }
 /** Which layout should be in force right now. Pure given its inputs — tests/G/bindings.test.js. */
 export function decideLayout({ enabled = PHONE_LAYOUT_ENABLED, choice = 'auto', asked = null, phone = false } = {}) {

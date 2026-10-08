@@ -567,7 +567,7 @@ test('T15: off-hand focuses add their rider — Burst, Ward, Siphon, Echo — an
     s.mage.r.unit.mp = 10; s.swing(1);
     assert.ok(s.mage.r.unit.mp >= 10 + R.siphon.mana, 'a siphon focus gives mana'); }
   { const s = setup('tome'); assert.equal(s.off.focusRider, 'echo');
-    const from = s.w.events.length; s.swing(R.echo.every);
+    const from = s.w.events.length; s.swing(R.echo.every); s.w.steps(12);      // owner feedback 8: a bolt takes longer to arrive, and the echo follows the hit
     const bolts = s.w.events.slice(from).filter(e => e.type === 'fx' && e.kind === 'bolt' && e.basic);
     assert.equal(bolts.length, R.echo.every + 1, `every ${R.echo.every}th attack repeats (${bolts.length} bolts for ${R.echo.every} attacks)`); }
   { const s = setup('wand', { castStyle: 'bolt', attune: 'fire' });

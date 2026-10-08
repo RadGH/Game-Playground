@@ -204,7 +204,7 @@ test('6. the map (with its list folded away), casting a line from the wheel, and
 
 test('6b. an event is never invisible behind the closed bubble: a chip names it when it starts, the bubble pulses, opening it shows the card', async () => {
   test.setTimeout(120000);
-  for (const x of await page.locator('.tv-panel:not([hidden]) .tvp-x').all()) await x.tap().catch(() => {});
+  await page.evaluate(() => { for (let i = 0; i < 4; i++) for (const x of document.querySelectorAll('.tv-panel:not([hidden]) .tvp-x, #bag:not([hidden]) #bag-close')) x.click(); }); await page.waitForTimeout(400);
   await expect(page.locator('#right-col')).toBeHidden();                       // collapsed is the phone's resting state (owner feedback 7, V7)
   await page.evaluate(() => { const y = tv.state().you; tv.fake('eventTrack', { uid: 'e1', id: 'wolves_ford', name: 'Wolves at the Ford', state: 'live', what: 'A starving pack is crossing the ford toward the farms.', objective: { text: 'Defeat the three packs, then the pack mother', n: 2, of: 4 }, leftMs: 372000, endsAt: Date.now() + 372000, rewardText: 'Event cache: a rare item or better', inside: true, inRange: true, players: 3, x: y.x, z: y.z, r: 40 }); });
   await expect(page.locator('.ph-chip')).toBeVisible({ timeout: 5000 });
@@ -226,7 +226,7 @@ test('6b. an event is never invisible behind the closed bubble: a chip names it 
 
 test('7. turning the phone on its side keeps the phone layout and re-arranges it', async () => {
   test.setTimeout(120000);
-  for (const x of await page.locator('.tv-panel:not([hidden]) .tvp-x').all()) await x.tap().catch(() => {});
+  await page.evaluate(() => { for (let i = 0; i < 4; i++) for (const x of document.querySelectorAll('.tv-panel:not([hidden]) .tvp-x, #bag:not([hidden]) #bag-close')) x.click(); }); await page.waitForTimeout(400);
   await page.setViewportSize({ width: 852, height: 393 });
   await page.waitForTimeout(2500);
   expect(await page.evaluate(() => document.documentElement.dataset.layout)).toBe('phone');

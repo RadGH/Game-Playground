@@ -69,6 +69,12 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
           respawnMs: Array.isArray(r) ? [r[0] * 60000, r[1] * 60000] : r * 60000, path: Array.isArray(p.path) && p.path.length > 1 ? p.path : null, place: p.id });
         break;
       }
+      case 'cart':        // W5 (round 8): a parked ox cart — the stop it stands for; the carter beside it is an `npc` row with `cart`
+        objects.push({ type: 'cart', name: p.name || 'Ox Cart', x: p.x, z: p.z, yaw: p.yaw || 0, key: 'cart:' + p.id, r: p.radius || 2.2, cart: { stop: p.id, vehicle: p.vehicle || p.model || 'ox_cart', town: p.town || null } });
+        break;
+      case 'guard':       // W1 (round 8): a town guard's post (js/sim/guards.js makes the fighter)
+        guards.push({ id: p.id, name: p.name || 'Guard', rank: p.rank || 'guard', town: p.town || null, post: p.post || 'gate', gate: p.gate || null, x: p.x, z: p.z, yaw: p.yaw || 0 });
+        break;
       case 'waystone':
         waystones.push({ key: 'ws:' + p.id, name: p.name || 'Waystone', x: p.x, z: p.z, settlement: p.settlement || null, zone });
         break;

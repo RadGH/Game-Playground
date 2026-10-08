@@ -425,6 +425,7 @@ export function createProvince(opts) {
       case 'mount': return mountOp(o, m);
       case 'barber': return barberOp(o, m);
       case 'pref': return prefOp(o, m);
+      case 'meter': { o.meter = !!m.on; if (o.meter) meterOn.add(o); else { meterOn.delete(o); o.hitRows = null; } return s.sendJSON({ t: 'meterR', on: o.meter }); }      // W21
       case 'follow': return followOp(o, m);
       case 'inspect': return inspectOp(o, m);
       case 'bind': return bindOp(o, m);
@@ -483,6 +484,7 @@ export function createProvince(opts) {
     online.set(ch.id, o);
     o.entity = place.room.addPlayer(ch, client, place.at);
     startingKit(o);
+    lightSweep(o);                            // W22: lanterns and torches left the game — what the bag holds is paid back
     restack(o, false);                        // U5: an old save's loose potions become stacks before the first `joined`
     potionCards(o, false);                    // U17: their cards say what they do for THIS character
     applyRefunds(o);
@@ -586,7 +588,7 @@ export function createProvince(opts) {
         // play-test 2
         reach: attackReach(o), attackRange: attackReach(o), mounts: mountBook.owned(ch), mount: o.mount || null, speedMul: e.speedMul || 1, prefs: prefsOf(ch), look: ch.look || null, clsName: clsNameOf(ch.cls),
         // play-test 5
-        bagMax: BAG_MAX, angling: angling.view(ch), acct: acctOf(o), ...(o.admin ? { admin: true } : {}), ...(ch.kit ? { kit: ch.kit } : {}), ...(o.eventAtKey ? { eventAt: o.eventAtKey } : {}),
+        bagMax: bagCap(o), bagBase: bagBase(), angling: angling.view(ch), acct: acctOf(o), ...(o.admin ? { admin: true } : {}), ...(ch.kit ? { kit: ch.kit } : {}), ...(o.eventAtKey ? { eventAt: o.eventAtKey } : {}),
       },
     };
     // the skill bar only changes on a level-up / form / talent (those arrive as `you {bar}` and refresh o.bar): a room
@@ -601,6 +603,7 @@ export function createProvince(opts) {
     s.sendJSON(msg);
     if (o.reviveAsk && e.dead && o.reviveAsk.until > now()) s.sendJSON(reviveAskMsg(o.reviveAsk));   // a reconnect while an offer is open
     if (!handoff || handoff.via === 'relocate') wantSheet(o);      // T18: the sheet follows the join (queued, not inside this tick's budget)
+    if (o.lightNote) { s.sendJSON({ t: 'chat', ch: 'system', from: 0, name: 'The Vale', text: o.lightNote }); o.lightNote = null; }      // W22
     o.marks = null; o.marksFull = true; o.marksDirty = true;       // W12: entity ids are the room's — the whole map of marks follows within a second
   }
 
@@ -1387,6 +1390,7 @@ export function createProvince(opts) {
     return d;
   }
   function observe(ev, r) {
+    if (meterOn.size && (ev.type === 'hit' || ev.type === 'miss')) meterFeed(ev, r);
     if (ev.type === 'hit' || ev.type === 'die') contribute(ev, r);
     if ((ev.type === 'hit' && ev.kind === 'dmg' && (ev.n || 0) > 0) || ev.type === 'die') {      // Q16: a hit (unless the mount keeps calm) or a death unhorses you
       const d = r.entities.get(ev.d);
@@ -1943,7 +1947,7 @@ export function createProvince(opts) {
       if (item.kind === 'potion') { const t = potionText(item, { hpMax: o.entity.hpMax, mpMax: o.entity.mpMax }, potionTable); if (t) { item.desc = t.desc; if (t.restore) item.restore = t.restore; } }
       if (item.uid) item.ruid = item.uid;
       item.uid = newUid();
-      if (ch.bag.length >= BAG_MAX) { overflow += Math.max(economy().bag.overflowPerItem, Math.round(item.value || 1)) * countOf(item); continue; }
+      if (ch.bag.length >= bagCap(o)) { overflow += Math.max(economy().bag.overflowPerItem, Math.round(item.value || 1)) * countOf(item); continue; }
       ch.bag.push(item); added.push(item);
       if (RARE.has(item.rarity)) urgent = true;
     }
@@ -2018,7 +2022,7 @@ export function createProvince(opts) {
     if (m.op === 'split') {
       const n = m.n | 0;
       if (n < 1 || n >= countOf(src)) return R({ ok: false, why: 'count', msg: 'Split off at least one and leave at least one.' });
-      if (ch.bag.length >= BAG_MAX) return R({ ok: false, why: 'bagFull', msg: CODES.bagFull });
+      if (ch.bag.length >= bagCap(o)) return R({ ok: false, why: 'bagFull', msg: CODES.bagFull });
       const made = { ...JSON.parse(JSON.stringify(src)), uid: newUid(), count: n, apart: 1 };
       delete made.left; delete made.ruid;
       src.count = countOf(src) - n;
@@ -2135,7 +2139,7 @@ export function createProvince(opts) {
       const into = isWeapon && weaponN++ > 0 ? 'offhand' : null;
       const r = safeRules(o.room, 'equip', e, item, into);
       const back = r && r.ok ? (r.removed || []) : [item];
-      for (const it of back) if (ch.bag.length < BAG_MAX) { ch.bag.push(it); journal(o, 'bagAdd', { item: it }); }
+      for (const it of back) if (ch.bag.length < BAG_MAX) {      /* the kit swap may overfill a pack-less bag: nothing is lost */ ch.bag.push(it); journal(o, 'bagAdd', { item: it }); }
     }
     counters.kits = (counters.kits || 0) + 1;
     return true;
@@ -2256,7 +2260,7 @@ export function createProvince(opts) {
     if (e.dead) return R({ ok: false, why: 'dead', id: item.id, msg: 'You are dead.' });
     if (o.frozen) return R({ ok: false, why: 'busy', id: item.id, msg: CODES.busy });
     const got = openCrate(o.room.rules, e, item, { safe: (fn, ...a) => safeRules(o.room, fn, ...a) });
-    if (ch.bag.length - 1 + got.length > BAG_MAX) return R({ ok: false, why: 'bagFull', id: item.id, msg: CODES.bagFull, need: got.length, free: Math.max(0, BAG_MAX - ch.bag.length + 1) });
+    if (ch.bag.length - 1 + got.length > bagCap(o)) return R({ ok: false, why: 'bagFull', id: item.id, msg: CODES.bagFull, need: got.length, free: Math.max(0, bagCap(o) - ch.bag.length + 1) });
     const from = item.kind === 'gift' || item.gift ? 'gift' : 'crate';
     consume(o, idx);
     const added = grant(o, { items: got, gold: 0, reason: from }) || [];
@@ -2350,6 +2354,9 @@ export function createProvince(opts) {
       const slot = into || item.slot || (item.type === 'weapon' ? 'weapon' : null);
       if (!slot) return s.err('item', 'That cannot be worn.');
       let removed = [];
+      // W19: a smaller pack (or a cloak) over a pack whose extra room is in use — refused, with how many slots to empty
+      const packNo = packRefusal(o, slot, item);
+      if (packNo) { s.sendJSON({ t: 'itemR', op: 'equip', uid: item.uid, slot: m.slot || null, ok: false, why: 'bagSlots', need: packNo.need, msg: packNo.msg }); return s.err('item', packNo.msg); }
       if (rules.equip) {
         // Q12: no slot named (or the item's own generic slot) -> the rules pick: the free ring hand, the free off hand
         const r = safeRules(o.room, 'equip', e, item, into);
@@ -2375,15 +2382,18 @@ export function createProvince(opts) {
       const eqv = equipView(o);
       const worn = Object.keys(eqv).find(k => eqv[k] === item || (eqv[k] && eqv[k].uid === item.uid)) || slot;
       s.sendJSON({ t: 'you', reach: attackReach(o), attackRange: attackReach(o) });
-      wantSheet(o);
+      wantSheet(o); bagCapTell(o);
       s.sendJSON({ t: 'itemR', op: 'equip', uid: item.uid, slot: worn, ok: true });
       return s.sendJSON({ t: 'equip', slot: worn, item, equipment: eqv });
     }
     if (m.op === 'unequip') {
-      if (ch.bag.length >= BAG_MAX) return s.err('bagFull');
       const eq = equipView(o);
       const slot = m.slot || Object.keys(eq).find(k => eq[k] && eq[k].uid === m.uid);
       if (!slot || !eq[slot] || eq[slot].uid !== m.uid) return s.err('item');
+      // W19: the pack cannot come off while its extra slots hold things — say why and how many
+      const packNo = packRefusal(o, slot, null);
+      if (packNo) { s.sendJSON({ t: 'itemR', op: 'unequip', uid: m.uid, slot, ok: false, why: 'bagSlots', need: packNo.need, msg: packNo.msg }); return s.err('item', packNo.msg); }
+      if (ch.bag.length >= bagCap(o)) return s.err('bagFull');
       let item;
       if (rules.unequip) { const r = safeRules(o.room, 'unequip', e, slot); if (!r || !r.ok) return s.err('item', (r && r.text) || 'Not now.'); item = r.item; }
       else { item = ch.equipment[slot]; delete ch.equipment[slot]; }
@@ -2394,13 +2404,13 @@ export function createProvince(opts) {
       s.sendJSON({ t: 'bag', add: [item], remove: [], gold: ch.gold });
       gearLook(o);
       s.sendJSON({ t: 'you', reach: attackReach(o), attackRange: attackReach(o) });
-      wantSheet(o);
+      wantSheet(o); bagCapTell(o);
       return s.sendJSON({ t: 'equip', slot, item: null, equipment: equipView(o) });
     }
   }
 
   // ---- play-test 2: corpse loot (Q3/Q4), shops (Q11), mounts (Q16), barber (Q20), prefs (Q22), follow (Q2) ----
-  const corpses = createCorpses({ now, newUid, rng: () => (first.towns[0] || first.copies[0]).host.random('roll'), partyOf: c => partyOf.get(c) || null, online, grant: (o, a) => grant(o, a), log, counters, bagMax: BAG_MAX });
+  const corpses = createCorpses({ now, newUid, rng: () => (first.towns[0] || first.copies[0]).host.random('roll'), partyOf: c => partyOf.get(c) || null, online, grant: (o, a) => grant(o, a), log, counters, bagMax: o => bagCap(o) });
   // S5/S9 (play-test 4): treasure chests, deliveries, escorts and rescues dropped near players; errand runners' letters
   const roadEvents = createRoadEvents({ data: first.L.treasure || null, wanderers: first.L.wanderers || null, online, corpses, grant: (o, a) => grant(o, a),
     questEvent: (o, ev) => questEvent(o, ev), bookOf: o => bookOf(o), provOf: r => provOf(r), now, wallNow, rng: () => (first.towns[0] || first.copies[0]).host.random('road'), log, counters,
@@ -2515,7 +2525,7 @@ export function createProvince(opts) {
       if (!row) return R({ ok: false, why: 'item', msg: 'That is not for sale here any more.' });
       if (row.level && (ch.level || 1) < row.level) return R({ ok: false, why: 'level', msg: 'You need to be level ' + row.level + ' for that.' });
       if ((ch.gold || 0) < row.price) return R({ ok: false, why: 'gold', msg: 'That costs ' + row.price + ' gold.', cost: row.price });
-      if (!row.mount && ch.bag.length >= BAG_MAX) return R({ ok: false, why: 'bagFull', msg: CODES.bagFull });
+      if (!row.mount && ch.bag.length >= bagCap(o)) return R({ ok: false, why: 'bagFull', msg: CODES.bagFull });
       ch.gold -= row.price; journal(o, 'gold', { d: -row.price }); econ.add('sink', 'shop', { gold: row.price }, ch.level || 1);
       if (row.mount) {
         ch.mounts ||= [];
@@ -2563,7 +2573,7 @@ export function createProvince(opts) {
     if (k < 0) return R({ ok: false, why: 'item', msg: 'That is gone.' });
     const b = o.buyback[k];
     if ((ch.gold || 0) < b.price) return R({ ok: false, why: 'gold', msg: 'That costs ' + b.price + ' gold.', cost: b.price });
-    if (ch.bag.length >= BAG_MAX) return R({ ok: false, why: 'bagFull', msg: CODES.bagFull });
+    if (ch.bag.length >= bagCap(o)) return R({ ok: false, why: 'bagFull', msg: CODES.bagFull });
     o.buyback.splice(k, 1);
     ch.gold -= b.price; ch.bag.push(b.item);
     journal(o, 'gold', { d: -b.price }); journal(o, 'bagAdd', { item: b.item });
@@ -2804,7 +2814,7 @@ export function createProvince(opts) {
     };
     const ia = take(a, t.a), ib = take(b, t.b);
     if (!ia || !ib) return fail('tradeFailed');
-    if ((a.char.bag.length - ia.length + ib.length) > BAG_MAX || (b.char.bag.length - ib.length + ia.length) > BAG_MAX) return fail('bagFull');
+    if ((a.char.bag.length - ia.length + ib.length) > bagCap(a) || (b.char.bag.length - ib.length + ia.length) > bagCap(b)) return fail('bagFull');
     t.committing = true;
     a.frozen = b.frozen = true; a.saving = b.saving = true;
     syncChar(a); syncChar(b);
@@ -2840,7 +2850,7 @@ export function createProvince(opts) {
   }
   const tickTimers = [];
   function setTimeoutTicks(fn, n) { tickTimers.push({ at: ticks + n, fn }); }
-  const mail = createMail({ store, online, journal, syncChar: o => syncChar(o), econ, trades, send, setTimeoutTicks, wallNow, filter: chatFilter, log, counters, BAG_MAX, saveNow: o => saveNow(o), opts: mailOpts, restack: o => restack(o) });
+  const mail = createMail({ store, online, journal, syncChar: o => syncChar(o), econ, trades, send, setTimeoutTicks, wallNow, filter: chatFilter, log, counters, BAG_MAX: o => bagCap(o), saveNow: o => saveNow(o), opts: mailOpts, restack: o => restack(o) });
 
   // ---- play-test 5: system mail (T20), feedback + admins (T19/T21), revives (T4), the character sheet (T18) ----
   /** The ONE mail API (js/sim/sysmail.js): `mailTo({ to, subject, body, items?, gold?, gift?, crate? })` — events, quests, anything. */
@@ -2849,7 +2859,116 @@ export function createProvince(opts) {
   // T25 — angling (js/sim/angling.js over C's js/rules/fishing.js and E's data/provinces/angling*.json)
   const angling = createAngling({ layouts, online, provOf: r => provOf(r), grant: (o, a) => grant(o, a), journal: (o, k, p) => journal(o, k, p), questEvent: (o, ev) => questEvent(o, ev),
     consume: (o, i) => consume(o, i), now, wallNow, log, counters, safeRules: (r, fn, ...a) => safeRules(r, fn, ...a), dayPhase: () => dayPhase(), fighting: (o, e) => fighting(o, e),
-    dismount: (o, why) => dismount(o, why), endMeal: (o, why) => endMeal(o, why), wantSheet: o => wantSheet(o), bagMax: BAG_MAX, setTimeoutTicks: (fn, n) => setTimeoutTicks(fn, n), opts: opts.anglingOpts || {} });
+    dismount: (o, why) => dismount(o, why), endMeal: (o, why) => endMeal(o, why), wantSheet: o => wantSheet(o), bagMax: o => bagCap(o), setTimeoutTicks: (fn, n) => setTimeoutTicks(fn, n), opts: opts.anglingOpts || {} });
+  /**
+   * W21 (owner feedback 8, report #42 "DPS meters — a settings option, default off"). The client's own events carry only what
+   * is drawn; the meter wants one exact record per landed hit / heal / miss for YOU and YOUR PARTY (and their pets). Sent only
+   * to clients that asked (`meter {on:true}`), batched four times a second:
+   *   hits { l: [[src, tgt, n, flags, sk, el, over, abs], …] }
+   * src / tgt = entity ids (src 0 = a damage-over-time tick with no living source); flags: 1 heal, 2 crit, 4 miss, 8 killing
+   * blow, 16 blocked, 32 dot tick, 64 dodged; sk = the ability id (`basic` for a weapon's own swing, `dot` for a tick);
+   * el = element ('' = physical); over = overkill / overheal; abs = absorbed (both 0 until C's hit event carries them).
+   */
+  const meterOn = new Set();
+  const METER_FLAG = Object.freeze({ heal: 1, crit: 2, miss: 4, kill: 8, block: 16, dot: 32, dodge: 64 });
+  function meterFeed(ev, r) {
+    const src = ev.s ? r.entities.get(ev.s) : null, dst = r.entities.get(ev.d);
+    if (!dst) return;
+    const charOf = x => (!x ? null : x.kind === 'player' && x.char ? x.char.id : x.data && x.data.pet && x.data.owner ? ((r.entities.get(x.data.owner) || {}).char || {}).id ?? null : null);
+    const sc = charOf(src), dc = charOf(dst);
+    if (sc == null && dc == null) return;
+    let row = null;
+    for (const o of meterOn) {
+      if (o.room !== r || !o.conn) continue;
+      const me = o.char.id, p = partyOf.get(me);
+      const mine = c => c != null && (c === me || (p && p.members.includes(c)));
+      if (!mine(sc) && !mine(dc)) continue;
+      if (!row) {
+        const miss = ev.type === 'miss', heal = ev.kind === 'heal', dot = ev.skill === 'dot';
+        const flags = (heal ? 1 : 0) | (ev.crit ? 2 : 0) | (miss ? 4 : 0) | (!miss && !heal && (dst.dead || dst.hp <= 0) ? 8 : 0) | (miss && ev.why === 'block' ? 16 : 0) | (dot ? 32 : 0) | (miss && ev.why === 'dodge' ? 64 : 0);
+        row = [ev.s || 0, ev.d, Math.round(ev.n || 0), flags, dot ? 'dot' : (ev.ab || ev.skill || 'basic'), ev.el || '', Math.round(ev.over || 0), Math.round(ev.abs || ev.absorbed || 0)];
+      }
+      (o.hitRows ||= []).push(row);
+      if (o.hitRows.length >= 60) meterFlush(o);
+    }
+  }
+  function meterFlush(o) { if (o.hitRows && o.hitRows.length && o.conn) o.conn.sendJSON({ t: 'hits', l: o.hitRows }); o.hitRows = null; }
+  function meterTick() { for (const o of meterOn) { if (!online.has(o.char.id) || online.get(o.char.id) !== o) { meterOn.delete(o); continue; } meterFlush(o); } }
+  /**
+   * W22 (owner feedback 8, report #43: "REMOVE light items from the game — I never meant to add those"). At every entry:
+   * each lantern / torch in the BAG is removed and paid back at stream C's `lightRefund(item)` (its full list price x count;
+   * without C's helper: the item's own value, at least 1). A WORN light is C's part (`rules.addEntity` drops it and pays
+   * through `host.award(e, {reason:'lightRefund'})`); a save's `equipment.light` is dropped here too so it cannot come back.
+   * One system line + one letter say what happened; `flags.lightRefund` keeps the total (the sweep itself is safe to run
+   * again: once the items are gone there is nothing to pay).
+   */
+  const LIGHT = opts.lightItems || null;
+  function isLight(it) {
+    if (!it || typeof it !== 'object') return false;
+    if (LIGHT && LIGHT.is) { try { return !!LIGHT.is(it); } catch { /* fall through */ } }
+    return it.slot === 'light' || it.type === 'light' || (it.use && it.use.type === 'light');
+  }
+  function lightWorth(it) {
+    let g = null;
+    if (LIGHT && LIGHT.refund) { try { g = LIGHT.refund(it); } catch { g = null; } }
+    if (!Number.isFinite(g)) g = Math.max(1, Math.round(it.price || it.value || 1)) * countOf(it);
+    return Math.max(0, Math.round(g));
+  }
+  function lightSweep(o, live = false) {
+    const ch = o.char, gone = [];
+    let gold = 0, n = 0;
+    for (let i = (ch.bag || []).length - 1; i >= 0; i--) {
+      const it = ch.bag[i];
+      if (!isLight(it)) continue;
+      gold += lightWorth(it); n += countOf(it);
+      ch.bag.splice(i, 1); gone.push(it.uid);
+      journal(o, 'bagDel', { uid: it.uid });
+    }
+    if (ch.equipment && ch.equipment.light) {          // the rules pay for a worn one; the slot itself leaves the save
+      const it = ch.equipment.light;
+      if (!(o.room.rules && o.room.rules.lightRefundOwed)) { gold += lightWorth(it); n++; }
+      delete ch.equipment.light;
+      journal(o, 'set', { k: 'equipment', v: ch.equipment });
+    }
+    if (!n && !gold) return 0;
+    ch.gold = (ch.gold || 0) + gold;
+    journal(o, 'gold', { d: gold, reason: 'lightRefund' });
+    econ.add('faucet', 'lightRefund', { gold }, ch.level || 1);
+    ch.flags = { ...(ch.flags || {}), lightRefund: ((ch.flags && ch.flags.lightRefund) || 0) + gold };
+    journal(o, 'set', { k: 'flags', v: ch.flags });
+    o.dirty = true; counters.lightRefunds = (counters.lightRefunds || 0) + n;
+    const text = 'Lanterns and torches were removed from the game — everyone carries a light now. You were paid ' + gold + ' gold for yours.';
+    if (live && o.conn) { o.conn.sendJSON({ t: 'bag', add: [], remove: gone, gold: ch.gold }); o.conn.sendJSON({ t: 'chat', ch: 'system', from: 0, name: 'The Vale', text }); }
+    else o.lightNote = text;                           // said once the client is listening (after `joined`)
+    Promise.resolve(sysmail.mailTo({ to: ch.id, subject: 'Lanterns and torches', from: 'The Vale', body: text })).catch(err => log('light refund letter', err && err.message));
+    return gold;
+  }
+  /**
+   * W19 (owner feedback 8, report #40 "backpacks: fewer affix slots than a cape but bonus inventory slots"). Bag capacity =
+   * economy `bag.base` (40) + the worn pack's slots (C's `rules.bagBonus(e)` / `bagBonusOf(item)`), never over BAG_MAX. A bag
+   * already over its capacity (an old save from the 120-slot days) loses nothing — it only takes nothing more until it is under.
+   */
+  const bagBase = () => Math.max(1, Math.min(BAG_MAX, Math.round(economy().bag.base || 40)));
+  const packSlots = it => (it ? Math.max(0, Math.round(+it.bagSlots || 0)) : 0);      // C: a backpack item carries `bagSlots: n` (js/rules/tv-gear.js bagBonusOf reads the same field)
+  function bagBonus(o) {
+    const r = o.room && o.room.rules;
+    if (r && r.bagBonus && o.entity) { const n = safeRules(o.room, 'bagBonus', o.entity); if (Number.isFinite(n)) return Math.max(0, n); }
+    return packSlots(equipView(o).back);
+  }
+  const bagCap = o => Math.min(BAG_MAX, bagBase() + bagBonus(o));
+  function bagCapTell(o) { const c = bagCap(o); if (o.bagCapSent !== c) { o.bagCapSent = c; if (o.conn) o.conn.sendJSON({ t: 'you', bagMax: c, bagBase: bagBase() }); } }
+  /** Would wearing `incoming` in `slot` (null = taking it off) leave more in the bag than it can hold? -> { need, msg } | null */
+  function packRefusal(o, slot, incoming) {
+    if (slot !== 'back') return null;
+    const worn = equipView(o).back;
+    const had = packSlots(worn), will = packSlots(incoming);
+    if (had <= will) return null;
+    const count = (o.char.bag || []).length + (worn ? 1 : 0) - (incoming ? 1 : 0);      // the old one goes INTO the bag, the new one leaves it
+    const cap = Math.min(BAG_MAX, bagBase() + will);
+    if (count <= cap) return null;
+    const need = count - cap;
+    return { need, msg: 'Empty ' + need + ' more bag slot' + (need === 1 ? '' : 's') + ' first — the pack\'s extra room is holding things.' };
+  }
   /** W11 (round 8): what is true of the ACCOUNT, as the client needs it — `level` = its highest character (gates ask this, not the one you play). */
   function acctOf(o) { return { claimed: !!o.claimed, level: Math.max(o.alv || 1, o.char.level || 1), admin: !!o.admin, username: o.username || null }; }
   /** T19: a report from inside the world. The server adds what it knows: where you stand, what you are, what is around you. */
@@ -2988,7 +3107,7 @@ export function createProvince(opts) {
       const advanced = Object.entries(d).filter(([, v]) => typeof v === 'number' && Number.isFinite(v)).slice(0, 60).map(([k, v]) => row(k, k.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()), Math.round(v * 1000) / 1000));
       sh = { basic: true, core, advanced, abilities: [] };
     }
-    return { ...sh, gold: ch.gold || 0, bag: (ch.bag || []).length, bagMax: BAG_MAX, angling: angling.view(ch) };
+    return { ...sh, gold: ch.gold || 0, bag: (ch.bag || []).length, bagMax: bagCap(o), bagBase: bagBase(), angling: angling.view(ch) };
   }
   function drainSheets(t0) {
     let n = 0;
@@ -3063,6 +3182,8 @@ export function createProvince(opts) {
     if (ticks % 20 === 5) eventTick();           // events (realm + zone) at 1 Hz
     if (ticks % 20 === 7) zoneTick();
     if (ticks % 20 === 9) corpses.tick();
+    if (ticks % 100 === 37) for (const o of online.values()) if (o.conn && o.entity && !o.frozen && !o.saving && !o.mailBusy) lightSweep(o, true);      // W22: a light that arrived by post or trade after the entry sweep
+    if (meterOn.size && ticks % 5 === 3) meterTick();      // W21: the meter's hit feed, 4 Hz, only for those who asked
     if (ticks % 20 === 11) questMarksTick();      // W12: quest marks over NPCs, per player
     if (ticks % 20 === 13) roadEvents.tick();     // S5: random road events near lone players
     if (ticks % 4 === 3) roadEvents.move(TICK_MS * 4);

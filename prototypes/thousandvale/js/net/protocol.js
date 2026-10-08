@@ -153,6 +153,8 @@ export const CLIENT_MSGS = Object.freeze({
   revive:  { on: 'p', fields: { op: 'str:8', id: '?int' }, rate: 2, burst: 4 },
   sheet:   { on: 'p', fields: {}, rate: 2, burst: 4 },
   feedback: { on: 'both', fields: { kind: '?str:16', text: '?str:2000', ctx: '?obj', ref: '?int', op: '?str:8', limit: '?int', before: '?int' }, rate: 0.5, burst: 10 },      // the real limit is js/sim/feedback.js (answered). ref (round 8, W29): a reply to your own report #ref
+  cart:    { on: 'p', fields: { op: 'str:8', id: 'id', to: '?str:48', token: '?bool' }, rate: 2, burst: 4 },      // owner feedback 8, W5: ox-cart travel — op list | go
+  meter:   { on: 'p', fields: { on: 'bool' }, rate: 1, burst: 4 },      // owner feedback 8, W21: the damage meter's per-hit feed (`hits`) on / off — off by default
   feedbackMine: { on: 'both', fields: { limit: '?int', before: '?int' }, rate: 1, burst: 5 },      // round 8, W29: my own reports -> feedbackMine (`feedback {op:'mine'}` is the same call)
   admin:   { on: 'both', fields: { op: 'str:16', id: '?int', state: '?str:16', kind: '?str:16', limit: '?int', before: '?int', note: '?str:500' }, rate: 2, burst: 10 },
   fish:    { on: 'p', fields: { op: 'str:8', aim: '?vec2', held: '?num', score: '?num', holds: '?nums' }, rate: 4, burst: 8 },
@@ -240,6 +242,11 @@ export const SERVER_MSGS = Object.freeze({
   feedbackMine: ['ok', 'list', 'more', 'why'],
   // owner feedback 8 (docs/protocol.md §24)
   questMarks: ['marks', 'full'],
+  hits: ['l'],
+  cartList: ['id', 'from', 'name', 'stops', 'gold', 'tokens'],
+  cartR: ['op', 'ok', 'to', 'fare', 'why', 'msg'],
+  cartRide: ['to', 'from', 'ms', 'fare'],
+  meterR: ['on'],
   adminReports: ['list', 'counts'],
   adminR: ['op', 'ok', 'id', 'state'],
   fishR: ['ok', 'state', 'at', 'why', 'msg'],

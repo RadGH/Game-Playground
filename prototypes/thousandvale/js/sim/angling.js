@@ -257,7 +257,7 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
     const A = stateOf(ch);
     const rod = rodOf(ch, A.level);
     if (!rod) return refuse(o, 'noRod', 'You need a fishing rod. An angler by the water sells them.');
-    if ((ch.bag || []).length >= bagMax) return refuse(o, 'bagFull', 'Your bag is full.');
+    if ((ch.bag || []).length >= (typeof bagMax === 'function' ? bagMax(o) : bagMax)) return refuse(o, 'bagFull', 'Your bag is full.');
     ensurePools(room);
     if (o.fishing) stop(o, 'recast', true);
     const hit = castAt(o, m.aim);

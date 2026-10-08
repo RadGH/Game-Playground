@@ -352,6 +352,10 @@ export function connect(opts = {}) {
   net.openItem = uid => sendJ(game, { t: 'item', op: 'open', uid: String(uid) });   // a crate / gift box -> itemR {opened}
   /** feedback('suggestion'|'bug', text, ctx?) -> feedbackR. Goes over the game socket when in the world (the server adds where you stand). */
   net.feedback = (kind, text, ctx, ref) => sendJ(game && game.readyState === OPEN && net.joined ? game : gw, { t: 'feedback', kind, text: String(text).slice(0, 2000), ...(ctx ? { ctx } : {}), ...(Number.isSafeInteger(ref) ? { ref } : {}) });
+  /** Round 8 (W5): cart('list', id) -> cartList ; cart('go', id, stopId) -> cartR, then cartRide and (ms later) the arrival `joined`. `id` = the carter / cart entity. */
+  net.cart = (op, id, to, token) => sendJ(game, { t: 'cart', op, id, ...(to ? { to } : {}), ...(token ? { token: true } : {}) });
+  /** Round 8 (W21): meter(true|false) -> `meterR {on}`, then `hits {l: [[src, tgt, n, flags, sk, el, over, abs], …]}` a few times a second while on. */
+  net.meter = on => sendJ(game, { t: 'meter', on: !!on });
   /** Round 8 (W29): myReports({limit?, before?}) -> `feedbackMine {ok, list:[{id, at, kind, text, state, note, noteAt, adminNote, done, doneAt, ref}], more}` — your account's own reports, newest first. */
   net.myReports = (q = {}) => sendJ(game && game.readyState === OPEN && net.joined ? game : gw, { t: 'feedbackMine', ...(q.limit ? { limit: q.limit } : {}), ...(q.before ? { before: q.before } : {}) });
   /** admin('reports', {kind?, state?, limit?, before?}) -> adminReports ; admin('report', {id, state, note?}) -> adminR (admin accounts only) */

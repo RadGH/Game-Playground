@@ -252,3 +252,18 @@ Contracts: docs/requests.md "Round 6 contracts — C". Tests: `tests/C/playtest6
 ## Owner feedback 7 (2026-10-07) — gold (V2)
 
 `economy.js` + `data/rules/prices.json`: `itemPrice` (list price = (base + perLevel x made-at level) x slot x rarity x extras — FINAL; a shop multiplies by its town only), `sellPrice` (gear x `sellFactor`, own-priced things their price, a crate 1), `killGold` ((base + perLevel x level) x the monster's weight x rank — linear, paid in `cast.js`), `goldFound` (gold find on kill gold, once, capped). On the rules object: `price`, `sellPrice`, `priceRow`, `killGold`; module exports `priceOf`, `sellPriceFor`, `priceRow`, `killGold`, `crateValue`. `fishing.json value` prices a catch (species price x size x rarity x mult x zone factor, applied inside `roll`); water above every species' band falls back to the top-band fish. A parity engine has `engine.prices = null` and keeps Farhold's gold. Tests: `tests/C/playtest7.test.mjs` (rules and ratios, never the numbers). Before / after tables: docs/requests.md "Round 7 contracts — C".
+
+
+## Owner feedback 8 (2026-10-08) — what changed in the rules
+
+Contracts: docs/requests.md "Round 8 contracts — C". Tests: `tests/C/playtest8.test.mjs` (14); `tests/C/xp-walk.mjs` prints the experience tables.
+
+| # | What | Where |
+|---|---|---|
+| W14 / W2 | **Projectiles.** The rules always flew bolts, arrows and monster shots, but at 48 / 42 / 40 m/s — a handful of frames, which read as instant damage and as being hit from nowhere. Per-skill / per-weapon / per-monster speeds a player can watch, a 200 ms floor, homing (it lands on the target wherever it is; a target that died is not replaced), a piercing bolt timed to its first target rather than its full range, and one complete event for all three kinds (`from`, `to`, `ms`, `speed`, `home`, `proj`, `skill`). A monster's hit from beyond its reach that was not a flown shot sends a cosmetic `shot`. Farhold's 2.6 m dodge of a monster's arrow is gone (it would make every slow arrow miss). `engine.projectiles` is null on a parity engine. | `projectiles.js`, `data/rules/projectiles.json`, `cast-skills.js fireBolt`, `cast.js resolveArrow`, `monster-ai.js shoot / monsterStrike` |
+| W4 | **Kill experience at low levels**: `engine.xpCfgFor(monsterLevel)` — x2.25 up to level 6, fading to the base x1.5 at 14. Grey-con unchanged. | `engine.js`, `cast.js onKill`, `progression.json xp.killEarly` |
+| W19 | **Backpacks** share the `back` slot with cloaks: `bagSlots` from the base (4 / 6 / 8), fewer rolled properties (`packs.affixCap`), `rules.bagBonus(e)`, and `canUnequip` / `equip` / `unequip` answer `why: 'bagSlots'` when A passes `{ bagCount, bagBase }`. | `tv-gear.js finishPack`, `index.js packCheck`, `gear-tv.json` |
+| W22 | **No light items.** `removeLights(items)` runs at boot and again after Farhold's `Rpg` restates its affixes (the light-only affixes came back otherwise). `LIGHT` is the light everyone carries; `itemBuffs(e).lightRange` answers it. `isLightItem` / `lightRefund` convert what a player owned; a worn one is paid by `addEntity` through `host.award`. | `tv-gear.js`, `buffs.js`, `character.js restoreGear`, `index.js` |
+| W23 | **Starter kits that differ.** `packSignature` reads five axes off the real items; `kitDistance` < 2 = near-duplicate; `packWords` writes `role` / `diff`. Armour sets carry a `lean` (two properties on the chest piece). New bases `woodsman_axe`, `militia_sabre`. | `starter-kits.js`, `starter-kits.json` v2, `gear-tv.json` |
+
+**Farhold finding 8** (left as it is in Farhold): `Rpg`'s constructor re-applies `affixes.js` slot rules to the shared affix table, so anything removed from that table before `new Rpg(...)` returns — an in-memory edit of affixes must run after it.

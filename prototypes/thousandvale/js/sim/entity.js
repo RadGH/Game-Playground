@@ -150,6 +150,9 @@ export class Entity {
       if (d.lore) o.lore = d.lore;
       if (d.npc && d.npc.role) o.role = d.npc.role;
       if (d.title) o.title = d.title;                          // S19: the line above an NPC's name ('Weaponsmith', 'Unbinder — resets talents & perks'); W27: only for NPCs placed for the player
+      if (d.cart) { o.vehicle = d.cart.vehicle || 'ox_cart'; o.cart = d.cart.stop; o.yaw = Math.round(this.yaw * 1000) / 1000; }      // W5: a parked ox cart (and which stop it is)
+      else if (d.traveller && d.traveller.cart && d.traveller.vehicle && d.npc && d.npc.role === 'carter') o.vehicle = d.traveller.vehicle;      // W5: a carter on the road leads an ox cart
+      if (d.guard) { o.guard = 1; if (d.guard.rank) o.rank2 = d.guard.rank; }      // W1: a town guard (fights for the town)
       if (d.filler) o.filler = 1;                              // W27: a filler body (townsfolk, woodcutter, guard) — a name, no title
       if (this.kind === 'npc') o.type = this.type;
       const key = d.key || (d.chest && d.chest.key);

@@ -3616,32 +3616,102 @@ base in the rules + F's catalog, `iconSpec(item).look` deep-equals `gearLook({[s
 the frame. The journal gets `journal.addTab(id, label, drawFn)` (the Catch tab moves onto it). Menu bar: no new button (ten is the ceiling on a phone) — professions open
 from the Character menu and from a station / node. Ask me for anything else in your section.
 
-## Round 8 contracts — C (Combat rules: W14 W2 W4 W19 W22 W23) -> A, D-world, D-UI, E, P-core — 2026-10-07 (written first; status line at the end is kept true)
+## Round 8 contracts — C (Combat rules: W14 W2 W4 W19 W22 W23) -> A, D-world, D-UI, E, P-core, P-client — 2026-10-07 / 08 (LANDED — this text is what the code does; it replaces C's first draft)
 
-**W14 / W2 — every ranged attack is a travelling projectile (players AND monsters).** The damage is dealt when it ARRIVES. It homes: it lands on its target wherever the target is by then; if the target died on the way it strikes the ground where the target fell (a splash can still catch a neighbour) and never a new victim. Speeds are per skill / weapon / monster in `data/rules/projectiles.json` (much slower than Farhold's 48 m/s, so the flight is seen; minimum flight 0.2 s).
-- The event is the one that already exists — `fx {kind: 'bolt' | 'arrow' | 'shot', id: <shooter>, from: {x,z}, to: <entity id> | {x,z}, ms, element}` — with these fields ADDED on every one: `speed` (m/s, what `ms` was computed from), `from` (now on monster `shot`s too), `home: 1` when `to` is an entity it follows, `proj: 'arrow' | 'bolt' | 'orb' | 'thrown' | 'rock'` (what to draw), and `skill` (skill id, `basic` for a weapon's own attack, the monster ability id for a special). `kind:'shot'` = a monster's; `kind:'arrow'` = a player's bow/crossbow/javelin basic; `kind:'bolt'` = a player's skill bolt or wand/staff basic.
-- The `hit` event for that projectile comes `ms` later (same tick as before the client would have seen it land). Nothing lands at cast time any more for these.
-- **D-world**: draw a projectile for EVERY one of these (start at `from`, fly `ms`, follow the entity when `home`). A monster's telegraphed ranged special (Pinning Shot, Arrow Rain …) that lands on someone also emits `fx {kind:'shot', cosmetic: 1, …}` at the moment it lands with `ms` ~150 — draw it, it carries no second hit.
-- A druid shape's ranged basic now emits `fx bolt` too (it emitted nothing).
+**Finding first (for D-world and the lead):** the rules ALREADY flew every bolt, arrow and monster shot and already sent `fx bolt | arrow | shot` with `ms` — but at Farhold's 48 / 42 / 40 m/s, which is 4-6 frames at fighting distance. That is why Firebolt read as "instant damage" and a brigand's arrow was never seen. So W14 / W2 are (1) much slower, per-skill speeds, (2) homing, (3) a complete event — and the client drawing it (D-world's `js/client/projectiles.js`).
 
-**W4 — kill XP.** Only `data/rules/progression.json xp.killMult` moves (final number + before/after kills-to-level and minutes-to-level table in the status line below). The grey-con / level-gap rule is unchanged. No API change.
+### W14 / W2 — the projectile event (players AND monsters) — `js/rules/projectiles.js`, `data/rules/projectiles.json`
+```
+ev fx { kind: 'bolt' | 'arrow' | 'shot',     // bolt = a player's skill bolt or wand / staff basic; arrow = a player's bow / crossbow / javelin basic; shot = a monster's
+        id,                                  // the shooter (entity id)
+        from: { x, z },                      // where it starts (the shooter's feet; a chain hop starts at the body it left — `hop`, `fromId`)
+        to: <entity id> | { x, z },          // an entity id when it follows a target, else the ground point it flies to
+        ms,                                  // flight time; the `hit` event comes this long after (never before)
+        speed,                               // m/s that `ms` was worked out from
+        home: 1,                             // present when `to` is an entity: it lands on that entity wherever it is by then
+        proj,                                // what to draw: arrow | quarrel | knife | axe | javelin | stone | firebolt | orb | shard (D-world's list). ABSENT on a monster's physical shot: pick from what it holds
+        skill,                               // skill id; 'basic' for a weapon's / monster's own attack; the ability id on a cosmetic special
+        element, el,                         // as before
+        basic: 1, wk, wt, form,              // as before on a weapon's basic attack (weapon kind / type / caster form)
+        pierce: 1, end: { x, z },            // a piercing bolt: it is timed to its first target, `end` is where the line stops
+        cosmetic: 1 }                        // monsters only: see below
+```
+- **Speeds** (m/s; `data/rules/projectiles.json`): skill bolts 20-24 by element (fire 20, shadow 20, ice / arcane / holy / nature 22, lightning / poison 24), physical skill shots 28-30 (Long Draw 30), thrown junk / nets / hammers 18; basic attacks: bow / crossbow 30, javelin 24, wand 22, staff 20; monsters: arrows 26, spells 19. Shortest flight 200 ms. A chain hop flies 1.6x faster than the throw. (D-world asked for arrows <= 30, spells <= 24, never under 180 ms: met.)
+- **Homing (the owner's "decide simply")**: a projectile lands on its target wherever the target stands when it arrives. If the target DIED on the way it strikes the ground where the body fell (its splash can catch a neighbour standing there) and never picks a new victim. A monster's shot no longer misses a player who moved 2.6 m (Farhold's rule would make every slow arrow miss a walking player); it is lost only if the shooter or the target is dead / gone when it lands.
+- **Monsters (W2)**: every basic ranged attack is `fx shot` with all of the above (`from` was missing before). A hit that lands from beyond the monster's reach + 3 m and was NOT itself a flown shot — a telegraphed Pinning Shot, Arrow Rain, a caster's special — emits `fx {kind:'shot', cosmetic: 1, id, to, from, ms: 160, skill: <ability id>, element, proj?}` at the moment it lands: draw it, there is no second `hit`. So no ranged hit reaches a player without a projectile from its attacker (tests/C/playtest8 walks 80 s of two ranged monsters and every bestiary ranged type).
+- A druid shape's ranged basic now sends `fx bolt` (it sent nothing).
+- **Meter (D-UI W21)**: `hit` events already carry `s`, `d`, `n`, `el`, `kind`, `skill`, `ab` (the skill id) and `fx impact` carries `crit` / `killed`; I added nothing new this round — ask if `over` / `abs` are wanted on `hit`.
+- **Parity**: `engine.projectiles` is null on a parity engine (Farhold's own speeds, aimed-at-a-point arrows).
 
-**W19 — backpacks (slot `back`).** New item bases `sling_satchel` (+4 bag slots, from level 1), `trail_rucksack` (+6, from level 10), `expedition_pack` (+8, from level 20). An item carries `bagSlots: n` and `pack: true`; a backpack rolls FEWER properties than a cloak of the same rarity (normal 0, magic 1, rare 1, legendary 2 — a cloak rolls the usual count). Loot family `pack` (drops), crate slot `back` may hold one.
-- **A**: bag capacity = your base size + `rules.bagBonus(e)` (0 without a pack; also exported pure `bagBonusOf(item)`). The base size is YOURS to choose (owner asked for packs to matter: suggest a base of 24 and BAG_MAX staying the hard ceiling). Taking a pack off (unequip, or swapping to a cloak / smaller pack) when the bag holds more than the new capacity must be REFUSED by you ("Empty N bag slots first") — call `rules.canUnequip(e, 'back', { bagCount, bagBase })` / `rules.canEquip(e, item, slot, { bagCount, bagBase })`, both answer `{ ok:false, why:'bag', text }` for that case when you pass the two numbers. Send `bagMax` = the real capacity in the sheet (D-UI already reads `bagMax`).
-- **D-UI**: item card shows `item.bagText` ("+6 bag slots") as its first line; the bag window draws `bagMax` slots.
-- **D-world / F**: a worn pack is `info.gear.back` with `pack: true` and `g5` when the catalog has a model; until a model exists draw the cloak-less back or a simple box (base keys above).
-- **E**: shop family `pack` (general goods / outfitter): bases above by level; `rules.makeItem(e, {base:'trail_rucksack', rarity, level})` works. **P-core**: Outfitting can craft the three bases.
+### W4 — kill experience — `data/rules/progression.json xp.killEarly`, `engine.xpCfgFor(level)`
+A monster of level 6 or lower pays x2.25 of Farhold's kill share (it was x1.5); the multiplier fades in a straight line back to x1.5 at monster level 14. Past 14 nothing changed (it was already a level every ~8 minutes of killing). The grey-con rule (-20% a level below you, nothing at five below; +15% a level above) and the level gap are untouched. No API change for anyone: `cast.js` asks `engine.xpCfgFor(monster.level)`.
+Measured with the real tables (`node tests/C/xp-walk.mjs`; E's hour: 85 kills grinding, 4 quests + 32 kills questing):
+```
+BEFORE (killMult 1.5)
+level  xp-to-next  xp/kill  kills-to-level  minutes(grind)  minutes(quest)  kill-share-of-questing  grind/quest xp
+    1          58        4              15              10              15                     57%            151%
+    2         153      7.4              21              15              16                     42%            111%
+    3         237     10.6              22              16              18                     42%            112%
+    4         316     23.2              14              10              13                     52%            137%
+    5         393     26.3              15              11              13                     45%            119%
+    6         468     26.8              17              12              14                     42%            111%
+    7         539     27.2              20              14              11                     30%             81%
+    8         610     38.7              16              11              10                     35%             92%
+    9         680     46.4              15              10               7                     25%             66%
+   10         748     69.2              11               8               6                     31%             82%
+   11         815     69.9              12               8               6                     29%             78%
+   12         881     78.2              11               8               6                     30%             80%
+level 1 -> 10: 155 kills, 109 minutes killing, 117 minutes questing
+AFTER (monsters up to level 6 pay x2.25, fading to x1.5 at level 14) (killMult 1.5)
+level  xp-to-next  xp/kill  kills-to-level  minutes(grind)  minutes(quest)  kill-share-of-questing  grind/quest xp
+    1          58        5              12               8              13                     62%            165%
+    2         153     11.1              14              10              13                     52%            138%
+    3         237     15.9              15              11              15                     52%            139%
+    4         316     34.8               9               6              10                     61%            163%
+    5         393     39.4              10               7              10                     55%            146%
+    6         468     40.1              12               8              11                     52%            138%
+    7         539     39.2              14              10              10                     39%            103%
+    8         610     53.2              11               8               9                     42%            112%
+    9         680       61              11               8               6                     30%             80%
+   10         748     86.6               9               6               6                     36%             95%
+   11         815     82.9              10               7               6                     33%             88%
+   12         881       88              10               7               6                     33%             86%
+level 1 -> 10: 108 kills, 76 minutes killing, 97 minutes questing
+```
+In words: levels 1-10 took 155 kills / 109 minutes of pure killing and take 108 kills / 76 minutes; a level is 9-15 kills instead of 14-22. An hour of killing now earns 80-165% of the experience of an hour of questing at levels 1-10 (it was 66-151%), and kills are 30-62% of a questing hour's experience (25-57%). **E**: your `tools/sim-economy.mjs --levels` should read `engine.xpCfgFor(u.level)` instead of `engine.xpCfg` for a kill (tests/C/xp-walk.mjs is the same walk, import it if you like: `xpWalk({ early: false })` is "before").
 
-**W22 — light items are gone.** Removed from the rules: the `light` equipment slot, bases `hand_lantern` / `pitch_torch` and every catalog light (`g5_cresset`, `g5_hexlantern` …), the `light` loot family and crate slot, the light-only affixes (`wide_beam`, `seeking_light`) and uniques of type `light`, the consumable use `{type:'light'}` (the Bundle of Torches) and its `item:torch` status. `rules.SLOTS` no longer lists `light`.
-- **Everyone's light**: `LIGHT = { radius: 22, dungeonAmbient: 0.4 }` (export of js/rules/index.js, from `data/rules/progression.json light`). `rules.itemBuffs(e).lightRange` now ALWAYS answers `LIGHT.radius` (so a client that read it for the torch gets the wider light with no change); `light` / `wornLight` are no longer set. **D-world**: every character carries a `LIGHT.radius` m light at night and in dungeons; dungeons add ambient at `LIGHT.dungeonAmbient` of daylight.
-- **A — converting what players own** (exports of js/rules/index.js): `isLightItem(item)` (true for a worn light of any base incl. old saves, a light unique, and the torch consumable — goods ids `torch_bundle`/`torches`/anything whose `use.type === 'light'`), `lightRefund(item)` -> gold (its full LIST price x count, never the sell price — the owner removed it, the player loses nothing). On character load: for every bag item with `isLightItem` remove it and pay `lightRefund`; `equipment.light` is handled by the rules themselves — `restoreGear` drops it and `rules.addEntity` reports it once via `host.award(e, { gold, why: 'lightRefund', text })` (if you would rather do it yourself, `rules.lightRefundOwed(e)` returns and clears the amount). One mail/system line: "Lanterns and torches were removed from the game — you were paid N gold for yours."
-- **E**: drop `light` from shop families / crate tables / road-chest tables and the Bundle of Torches from every shelf (`use.type:'light'` is refused by `rules.useItem` with `why:'gone'`). **D-UI**: the paper doll loses the Light slot (read `rules.SLOTS` / the sheet's slot list).
+### W19 — backpacks (slot `back`) — `data/rules/gear-tv.json bases.armor / packs`, `js/rules/tv-gear.js finishPack`
+| base | name | bag slots | from level | model (`item.g5`, `item.look.g5`) |
+|---|---|---|---|---|
+| `sling_satchel` | Sling Satchel | +4 | 1 | `g5_pack_satchel` |
+| `trail_rucksack` | Trail Rucksack | +6 | 10 | `g5_pack_rucksack` |
+| `expedition_pack` | Expedition Pack | +8 | 20 | `g5_pack_frame` |
+A rare or legendary pack of any base draws `g5_pack_explorer` (D-world's "rare+" model). The slots come from the BASE only (rarity never changes them — predictable). An item carries `pack: true`, `bagSlots: n`, `bagText: '+n bag slots'`. A pack has no built-in armour and rolls FEWER properties than a cloak: normal 0, magic 1, rare 1, legendary 2 (a cloak rolls up to 2 / 3 / 6, on top of its two built-in lines). Price = the `back` price x (1 + 0.15 x bag slots). Loot family `pack` (weight 0.5 in the jewellery group: about 1 drop in 100 is a pack); a `back` crate may hold a cloak or a pack; `familyOf` answers `pack`.
+- **A** (you already wired this — confirming the names): `rules.bagBonus(e)` -> 0 | 4 | 6 | 8; pure `bagBonusOf(item)` (export of js/rules/index.js). `rules.canUnequip(e, 'back', { bagCount, bagBase })`, `rules.canEquip(e, item, slot, { bagCount, bagBase })`, and `rules.unequip(e, slot, opts)` / `rules.equip(e, item, slot, opts)` with the same opts answer `{ ok: false, why: 'bagSlots', need, text }` when the bag would no longer fit (the old pack going INTO the bag and the new one coming OUT of it are counted). Without the two numbers the rules do not judge the bag.
+- **D-UI**: `item.bagText` is the card's first line; refusal `why: 'bagSlots'` + `need` + `text` as you asked.
+- **E**: shelf the three bases by level; `rules.makeItem(e, { base: 'trail_rucksack', rarity, level })`. **P-core**: Outfitting crafts the same three.
 
-**W23 — starter kits.** Same API (`kitsFor(cls)`, `validKit`, `applyKit`); the data changes: each class's weapon packs differ in at least one of {attack pattern, reach band, hands (1h+shield / dual / 2h / ranged / caster form), element} and each armour set has a different stat lean. Every pack and set carries `role` (a 2-4 word tag: "Fast, close", "Slow, heavy reach", "Ranged", "Shield") and `diff` (one plain sentence: what is different about this one) for the kit screen (**D-UI**: show both). New starter bases may appear (list in the status line). Measure used by the test: two packs are near-duplicates when they share the same hand shape AND the same attack pattern family AND the same reach band AND the same element.
+### W22 — light items are gone
+- Removed (in memory at engine boot, `tv-gear.js removeLights`, run again after Farhold's `Rpg` restates its affix table): bases worn in `light` (`hand_lantern`, `pitch_torch`; the catalog's `g5_cresset`, `g5_hexlantern` are skipped with a reason), uniques of type `light` (Lantern of Morrow, Sunjar), the light-only affixes (`wide_beam`, `seeking_light`) and `light` from every other affix's slot list, the `light` loot family, crate slot (an old "Lamp Box" in a bag opens as a jewel box), price slot, sheet row, and `rules.SLOTS` entry. `rules.useItem` refuses `{type:'light'}` with `why: 'gone'` (not spent). `rules.equip` / `canEquip` refuse a light with `why: 'gone'`. The `item:torch` status and `TORCH` export no longer exist.
+- **The light everyone carries**: `LIGHT = { radius: 22, dungeonRadius: 28, dungeonAmbient: 0.4 }` — export of js/rules/index.js and `rules.LIGHT` (numbers in `data/rules/progression.json light`). `rules.itemBuffs(e).lightRange` ALWAYS answers `LIGHT.radius` now. **D-world**: `radius` m at night outdoors, `dungeonRadius` m underground, and a dungeon is never darker than `dungeonAmbient` of daylight. **A**: send `you.lightRange = rules.LIGHT.radius` if D-world wants it on `you`.
+- **A — converting what players own**: `rules.isLightItem(item)` / `rules.lightRefund(item)` (also module exports): a lantern / torch of any base (by slot, base id, catalog id or a `cond_light*` property), and the consumables `torch_bundle` / `torch` / `torches` / `lantern` or anything with `use.type === 'light'`. Refund = the gear formula's LIST price x 0.6 (the old `light` slot factor: what it listed for), at least 15; a consumable its `price` (else 15); x `count`. A WORN light is handled by the rules: `restoreGear` does not put it back, and `rules.addEntity` pays it once through `host.award(e, { gold, reason: 'lightRefund' })` and `ev fx { kind: 'notice', why: 'lightRefund', gold, text }` — the next save has no `equipment.light`, so it cannot be paid twice. (`rules.lightRefundOwed(e)` exists but answers 0 after that; you do not need it.)
+- **E**: nothing in shops.json names a light today (tests/C/playtest8 "sold nowhere" reads your file and is green). **D-UI**: no Light slot.
 
-**P-core**: `rules.makeItem(e, { base, rarity, level, band })` — see the answer under your ask when you write it; C will add `band: { rarity: [min,max], affixes: [min,max], quality }` on request.
+### W23 — starter kits — `data/rules/starter-kits.json` (v2), `js/rules/starter-kits.js`
+- Same API (`kitsFor`, `validKit`, `starterGear`, `rules.applyKit`). A saved choice whose pack id no longer exists falls back to the class's first pack (as before).
+- **The measure** (`packSignature(items)`, read off the real items — Farhold's swing profile, the caster style on the item): `hands` (shield | dual | focus | two | staff | wand | ranged | thrown), `family` (first move of the swing: slash / thrust / overhead / cleave / jab / sweep / pole; bow / crossbow / javelin; a caster's style; `imbue` for a sceptre), `reach` (short / mid / long / pole; casters self / near / midrange / far), `element`, `tempo` (quick <= 0.6 s a swing, steady <= 0.9, slow). Two packs are NEAR-DUPLICATES when they differ on fewer than 2 of the 5; a class offers at most 2 packs of one hand shape and at least 3 hand shapes. 30 classes: 4-6 packs each (was 4-7), 151 packs, no near-duplicates.
+- **D-UI — new fields on `kitsFor(cls)`**: every weapon pack has `sig` (the five axes), `role` ("Weapon and shield · steady, arm's length") and `diff` (one plain sentence: "One hand strikes, the other blocks. Heavy downward blows that crack armour."); every armour set has `lean`, `role` ("Heavy · Sturdy"), `diff` ("Sturdier: more armour and more health.") and `props: [{stat, value}]`. All written by code from the items — show `role` as the tag and `diff` under the name.
+- **Armour sets differ in STATS**: each set has a lean whose two properties sit on its chest piece (real properties, on the card and the sheet): Sturdy (+4 armour, +14 health), Fierce (+2 damage, +4% crit), Nimble (+4 dodge, +2 initiative), Deep (+12 mana, +0.8 mana a second), Potent (+6% spell power, +6 mana), Warded (+12 health, +5 magic resistance). STR classes: Sturdy / Fierce / Nimble; DEX: Nimble / Fierce / Sturdy; INT: Deep / Potent / Warded.
+- **New starter-grade bases** (also drop from level 1; **D-world / F**: no new model needed — they draw as their family): `woodsman_axe` (Woodsman's Axe: one-handed axe, chopping blows that bleed — `subtype: 'axe'`, draws as an axe) and `militia_sabre` (Militia Sabre: fast curved sword — `look.held: 'saber'`, the model Rimecut Sabre already uses). New packs built from existing bases: hatchet pairs (warrior, ranger, dragon knight, witch hunter), sceptre and orb for seven casters, a wand that bursts around you (pyromancer, oracle), sabre packs (swashbuckler, shadow dancer, knight), greatswords for paladin and knight, a halberd and a crossbow for the tactician, a halberd for the runesmith, a shortbow for the rogue, thrown javelins for swashbuckler and shadow dancer.
 
-_Status: contract written, nothing landed yet._
+### P-core / P-client
+Nothing asked of C in your sections; `rules.makeItem(e, { base, rarity, level })` is unchanged and makes the three packs and the two new weapon bases. If tempering needs a rarity / property BAND on makeItem, write the ask here and C adds `band`.
+
+### Found on the way (not C's this round — for the lead)
+- Farhold's `tool` and `mount` uniques (Prospector's Pride, Quickhand Pick, Brambleback …) still DROP in Thousandvale (about 1 drop in 7,000) and fit no slot here. With W9 a pick may want to be a real tool; until someone decides, they are dead loot. One line in `removeLights`' neighbour would take them out — say the word.
+- The lead's checkpoint commit 85a6d8e holds C's half-done round-8 data, so `tools/sim-economy.mjs --before` (git HEAD) is no longer "before round 8" for C's files.
+
+_Status 2026-10-08: ALL SIX LANDED. tests/C/playtest8.test.mjs 14/14; whole tests/C result in the C checklist / report._
 
 ## Round 8 contracts — E (Content) -> A, C, D-world, D-UI, P-core — 2026-10-07 (owner feedback 8; written FIRST, a status section follows when it lands)
 

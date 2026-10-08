@@ -25,6 +25,7 @@ async function intoWilds(world, clock, c, at) {
   const o = rec(world, c);
   world.transfer(o, wildSpot(world).room, at, 'test'); await run(clock, 400);
   o.roadNextAt = Infinity;
+  o.entity.hpMax = 1e7; o.entity.hp = 1e7;                        // the keepers bite: this file is about the chest, not the fight
   return o;
 }
 const tp = (o, x, z) => o.entity.moveTo(x, z, undefined, true);
@@ -32,6 +33,8 @@ function guardedChest(R, o, min = 2) {
   let ev = null;
   for (let k = 0; k < 80 && !(ev && ev.guards.length >= min); k++) { if (ev) R.end(ev); ev = R.spawnFor(o, 'chest'); }
   assert.ok(ev && ev.guards.length >= min, 'a guarded chest');
+  // the wilds are not empty and keepers bite: this file is about the chest, so nothing but its keepers stands near, and they are slow to notice
+  for (const m of o.room.entities.values()) if (m.kind === 'monster' && !m.dead && !ev.guards.includes(m) && Math.hypot(m.x - ev.x, m.z - ev.z) < 150) o.room.remove(m);
   return ev;
 }
 /** Kill a keeper the way a fight does: the player's hit lands, the body stays, its loot is held on the corpse. */
@@ -46,6 +49,7 @@ test('W24: the report — keepers killed beside the chest, their corpses looted 
   const a = await joinReal(srv, clock, 'Xanaver', 'warrior');
   const o = await intoWilds(world, clock, a, wildSpot(world).at);
   const R = world.roadEvents, ev = guardedChest(R, o);
+  world.devSetLevel(o.char.id, 40); await run(clock, 100);          // keepers of a level-1 chest cannot hurt this one
   const got = box(a, ['used', 'lootWin', 'lootable', 'eventDone', 'eventTrack']);
   tp(o, ev.chest.x + 1.5, ev.chest.z); await run(clock, 300);
   // shut, and it says WHO keeps it and how many are left
@@ -54,12 +58,14 @@ test('W24: the report — keepers killed beside the chest, their corpses looted 
   assert.equal(no.why, 'guarded'); assert.equal(no.left, ev.guards.length);
   assert.match(no.msg, new RegExp('^Not while the .+ still guard it \\(' + ev.guards.length + ' left\\)\\.$'));
   assert.ok(no.keepers && no.msg.includes(no.keepers), 'the refusal names the keepers: ' + no.msg);
-  // the tracker's objective names the same bodies
-  await run(clock, 1200);
+  // the tracker's objective names the same bodies (watched from out of their reach)
+  tp(o, ev.chest.x + 55, ev.chest.z); await run(clock, 1200);
   const tr = got.filter(m => m.t === 'eventTrack').at(-1);
   assert.equal(tr.objective.kind, 'kill'); assert.ok(tr.objective.text.includes(no.keepers)); assert.equal(tr.objective.of, ev.guards.length);
   // the fight: every keeper dies right beside the chest, each leaving loot on its corpse
   for (const m of ev.guards) { m.moveTo(ev.chest.x + 2, ev.chest.z + 1, undefined, true); slay(world, o, m); }
+  if (o.entity.dead) o.entity.revive(1);
+  tp(o, ev.chest.x + 1.5, ev.chest.z);
   await run(clock, 1500);                               // the 1 Hz upkeep opens the chest and rolls my share
   assert.equal(ev.opened, true);
   assert.ok(world.corpses.hasLootFor(o.room, ev.chest, o.char.id), 'my share is on the chest');
@@ -73,9 +79,12 @@ test('W24: the report — keepers killed beside the chest, their corpses looted 
   await run(clock, 9000);
   assert.ok(!ev.chest.removed && R.events.has(ev.id), 'the chest is still there, waiting for me');
   assert.ok(!got.some(m => m.t === 'eventDone'), 'and nothing has been "won" yet');
-  // now the chest itself
+  // now the chest itself (the wilds are not empty: whatever wandered up in those nine seconds is not this test's subject)
+  for (const m of o.room.entities.values()) if (m.kind === 'monster' && !m.dead && Math.hypot(m.x - o.entity.x, m.z - o.entity.z) < 80) o.room.remove(m);
+  if (o.entity.dead) o.entity.revive(1);
+  tp(o, ev.chest.x + 1.5, ev.chest.z); await run(clock, 200);
   a.use(ev.chest.id); await run(clock, 300);
-  assert.ok(got.some(m => m.t === 'used' && m.ok && m.kind === 'chest'), 'it opens');
+  assert.ok(got.some(m => m.t === 'used' && m.ok && m.kind === 'chest'), 'it opens: ' + JSON.stringify(got.filter(m => m.t === 'used').at(-1)));
   const cw = got.filter(m => m.t === 'lootWin' && m.id === ev.chest.id && !m.closed).at(-1);
   assert.ok(cw && (cw.gold > 0 || cw.items.length), 'with loot in it');
   const g0 = o.char.gold;
@@ -94,6 +103,7 @@ test('W24: an opened chest waits two minutes for everyone who took part; a share
   const at = wildSpot(world).at;
   const oa = await intoWilds(world, clock, a, at), ob = await intoWilds(world, clock, b, at);
   const R = world.roadEvents, ev = guardedChest(R, oa);
+  world.devSetLevel(oa.char.id, 40); world.devSetLevel(ob.char.id, 40); await run(clock, 100);
   assert.equal(R.CH.lootSec, 120);
   const ga = box(a, ['eventDone', 'eventTrack']), gb = box(b, ['eventDone', 'mailNew', 'chat']);
   tp(oa, ev.chest.x + 1.5, ev.chest.z); tp(ob, ev.chest.x + 30, ev.chest.z + 30); await run(clock, 300);
@@ -126,6 +136,7 @@ test('W24: kill order and stray keepers never lock it — a keeper dragged away 
   const a = await joinReal(srv, clock, 'Kiter', 'warrior');
   const o = await intoWilds(world, clock, a, wildSpot(world).at);
   const R = world.roadEvents, ev = guardedChest(R, o);
+  world.devSetLevel(o.char.id, 40); await run(clock, 100);          // keepers of a level-1 chest cannot hurt this one
   const got = box(a, ['used']);
   tp(o, ev.chest.x + 1.5, ev.chest.z); await run(clock, 300);
   // one keeper dies, the other is far away (it chased somebody, or leashed back to a camp)

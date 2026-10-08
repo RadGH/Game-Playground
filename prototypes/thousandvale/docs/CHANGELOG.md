@@ -956,3 +956,11 @@ Append-only, newest at the bottom, prefixed with the stream letter.
 - **Stacks**: Shift-click a stack to split some off (a number box); drop one stack on another of the same thing to join them.
   **Friends badge**: the server's own unseen count (it is still there after a reload); looking at the list clears it for good.
   **Kits**: only the server's `kitsR`; when it has none the step is skipped and the reason is said in chat. The page no longer loads the rules.
+
+## Owner feedback 8 — stream C (combat rules), 2026-10-08
+- **W14 / W2 projectiles**: every bolt, arrow, thrown weapon and monster shot flies at a speed you can watch (spells 20-24 m/s, arrows 26-30; Farhold's 48 / 42 / 40 crossed a fight in 4-6 frames), homes on its target and deals its damage on arrival. `fx bolt | arrow | shot` carry `from`, `to`, `ms`, `speed`, `home`, `proj`, `skill`; a monster's telegraphed ranged special sends a cosmetic shot. `js/rules/projectiles.js`, `data/rules/projectiles.json`.
+- **W4**: monsters up to level 6 pay x2.25 kill experience (was x1.5), fading to x1.5 by level 14: levels 1-10 take 108 kills / 76 minutes of killing instead of 155 / 109. `progression.json xp.killEarly`, `tests/C/xp-walk.mjs`.
+- **W19 backpacks**: `sling_satchel` +4, `trail_rucksack` +6, `expedition_pack` +8 bag slots on the back, fewer properties than a cloak. `rules.bagBonus`, `rules.canUnequip`.
+- **W22**: light items removed (bases, uniques, affixes, loot family, crate slot, the torch buff, the `light` slot); `LIGHT { radius 22, dungeonRadius 28, dungeonAmbient 0.4 }`; a worn light is paid back at list price on the first login.
+- **W23 starter kits**: 4-6 packs a class with no near-duplicates (measure: hands / attack / reach / element / tempo, read off the items), `role` + `diff` text written by code, armour sets with a stat lean, two new starter weapons (Woodsman's Axe, Militia Sabre).
+- tests/C/playtest8.test.mjs (14).

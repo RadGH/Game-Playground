@@ -40,7 +40,9 @@ export async function loadRules(mode) {
             }
           } catch { /* no kits yet */ }
         }
-        return { createRules: m.createRules, rules: 'js/rules', kitsFor };
+        // owner feedback 8, W22: C's two helpers for the light items that left the game (what counts as one, what it is paid back at)
+        const lightItems = typeof m.isLightItem === 'function' ? { is: m.isLightItem, refund: typeof m.lightRefund === 'function' ? m.lightRefund : null } : null;
+        return { createRules: m.createRules, rules: 'js/rules', kitsFor, lightItems };
       }
       log('js/rules/index.js has no createRules export; using the stand-in rules');
     } catch (err) { log('js/rules/index.js failed to load; using the stand-in rules', { err: err.message }); }

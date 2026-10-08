@@ -192,7 +192,7 @@ test('T23: a catalog row becomes an item base with its template\'s numbers; a mi
     const d = await loadData();
     const rep = installTvGear(d.items, d.tvGear, bad);
     assert.deepEqual(rep.catalog, [], JSON.stringify(bad)?.slice(0, 40));
-    assert.deepEqual(rep.added, ['cloth_gloves', 'cloth_shoes', 'travel_cloak', 'leather_belt', 'hand_lantern', 'pitch_torch'], 'Thousandvale\'s own bases are added regardless');
+    assert.deepEqual(rep.added, ['cloth_gloves', 'cloth_shoes', 'travel_cloak', 'leather_belt', 'sling_satchel', 'trail_rucksack', 'expedition_pack', 'woodsman_axe', 'militia_sabre'], 'Thousandvale\'s own bases are added regardless');
   }
   // a whole engine boots without the file
   const e0 = createEngine({ ...(await loadData()), gearCatalog: null }, { seed: 3 });
@@ -286,23 +286,23 @@ test('T5: kitsFor / validKit / starterGear from the booted rules; applyKit dress
       if (pack.style && it === pack.items[0]) { assert.equal(it.castStyle, pack.style, `${cls}/${pack.id}`); assert.ok(engine.casterForms.styles[pack.style], `${cls}/${pack.id}: ${pack.style} is a real style`); }
     }
   }
-  assert.deepEqual(validKit('mage', { armour: 'nope', weapons: 'wand_beam' }), { ok: true, armour: kitsFor('mage').armour[0].id, weapons: 'wand_beam', fell: ['armour'] });
+  assert.deepEqual(validKit('mage', { armour: 'nope', weapons: 'wand_burst' }), { ok: true, armour: kitsFor('mage').armour[0].id, weapons: 'wand_burst', fell: ['armour'] });
   const w = world();
   const me = w.add('mage', 1);
-  const pick = { armour: kitsFor('mage').armour[2].id, weapons: 'wand_beam' };
+  const pick = { armour: kitsFor('mage').armour[2].id, weapons: 'wand_burst' };
   const r = w.room.rules.applyKit(me, pick);
   assert.ok(r.ok);
   assert.deepEqual(r.kit, pick);
   const gear = starterGear('mage', pick);
   assert.deepEqual(Object.keys(w.room.rules.gear(me)).filter(s => w.room.rules.gear(me)[s]).sort(), Object.keys(gear).sort());
-  assert.equal(me.r.unit.equipment.weapon.castStyle, 'beam');
-  assert.equal(w.room.rules.attackRange(me), engine.casterForms.styles.beam.range, 'and its reach is the beam\'s');
+  assert.equal(me.r.unit.equipment.weapon.castStyle, 'burst');
+  assert.equal(w.room.rules.attackRange(me), engine.casterForms.styles.burst.range, 'and its reach is that style\'s');
   assert.equal(me.r.unit.hp, me.r.unit.maxHp);
   // the saved gear comes back the same on a fresh login
   const saved = w.room.rules.saveGear(me);
   const w2 = world();
   const again = w2.room.addPlayer({ id: 99, name: 'again', cls: 'mage', level: 1, xp: 0, gold: 0, room: 'x', x: SX, z: SZ, equipment: saved }, null);
-  assert.equal(again.r.unit.equipment.weapon.castStyle, 'beam');
+  assert.equal(again.r.unit.equipment.weapon.castStyle, 'burst');
   assert.equal(again.r.unit.equipment.weapon.attackText, me.r.unit.equipment.weapon.attackText);
 });
 
@@ -334,54 +334,51 @@ test('T10: champions and rares roll from level 2 at the configured rate through 
 
 // ============================================================================ T23 slots addendum: back, waist, light
 
-test('T23 slots: a cloak, a belt and a lantern are worn in their own slots, count on the sheet, save and come back', () => {
+test('T23 slots: a cloak and a belt are worn in their own slots, count on the sheet, save and come back', () => {
   const w = world();
   const me = w.add('ranger', 10);
   const u = me.r.unit;
-  assert.deepEqual(w.room.rules.SLOTS, ['weapon', 'offhand', 'head', 'chest', 'back', 'hands', 'waist', 'legs', 'feet', 'necklace', 'ring', 'ring2', 'light']);
+  assert.deepEqual(w.room.rules.SLOTS, ['weapon', 'offhand', 'head', 'chest', 'back', 'hands', 'waist', 'legs', 'feet', 'necklace', 'ring', 'ring2']);      // owner feedback 8 (W22): no `light` slot
   const mk = base => w.room.rules.makeItem(me, { base, rarity: 'normal', level: 10 });
-  const before = { armor: u.derived.armor, hp: u.maxHp, mres: u.derived.magicResist, light: u.derived.lightRange };
-  const cloak = mk('travel_cloak'), belt = mk('leather_belt'), lamp = mk('hand_lantern');
-  assert.deepEqual([cloak.slot, belt.slot, lamp.slot], ['back', 'waist', 'light']);
+  const before = { armor: u.derived.armor, hp: u.maxHp, mres: u.derived.magicResist };
+  const cloak = mk('travel_cloak'), belt = mk('leather_belt');
+  assert.equal(mk('hand_lantern'), null, 'W22: no lantern can be made');
+  assert.deepEqual([cloak.slot, belt.slot], ['back', 'waist']);
   assert.equal(w.room.rules.canEquip(me, cloak).ok, true);
   assert.equal(w.room.rules.canEquip(me, cloak, 'waist').ok, false, 'a cloak is not a belt');
   assert.equal(w.room.rules.equip(me, belt, 'back').ok, false);
-  for (const it of [cloak, belt, lamp]) { const r = w.room.rules.equip(me, it); assert.ok(r.ok, `${it.name}: ${r.text}`); assert.deepEqual(r.removed, []); }
-  assert.equal(u.equipment.back, cloak); assert.equal(u.equipment.waist, belt); assert.equal(u.equipment.light, lamp);
+  for (const it of [cloak, belt]) { const r = w.room.rules.equip(me, it); assert.ok(r.ok, `${it.name}: ${r.text}`); assert.deepEqual(r.removed, []); }
+  assert.equal(u.equipment.back, cloak); assert.equal(u.equipment.waist, belt);
   assert.equal(u.derived.armor, before.armor + 4, 'cloak +2 and belt +2 armour');
   assert.equal(u.derived.magicResist, before.mres + 2, 'cloak +2 magic resistance');
   assert.ok(u.maxHp >= before.hp + 8, `belt +8 health (${before.hp} -> ${u.maxHp})`);
-  assert.equal(u.derived.lightRange, before.light + 16, 'the lantern lights 16 m');
   const buffs = w.room.rules.itemBuffs(me);
-  assert.equal(buffs.light, 1); assert.equal(buffs.lightRange, 16); assert.equal(buffs.wornLight, 'hand_lantern');
+  assert.equal(buffs.light, undefined); assert.equal(buffs.lightRange, w.room.rules.LIGHT.radius); assert.equal(buffs.wornLight, undefined);
   // a second cloak takes the first one off and hands it back
   const cloak2 = mk('g5_swallowtail') || mk('travel_cloak');
   const swap = w.room.rules.equip(me, cloak2);
   assert.ok(swap.ok); assert.deepEqual(swap.removed, [cloak]);
   // saved, and back after a login
   const saved = w.room.rules.saveGear(me);
-  assert.ok(saved.back && saved.waist && saved.light, 'saveGear carries back / waist / light');
+  assert.ok(saved.back && saved.waist && !saved.light, 'saveGear carries back / waist');
   const w2 = world();
   const again = w2.room.addPlayer({ id: 98, name: 'again', cls: 'ranger', level: 10, xp: 0, gold: 0, room: 'x', x: SX, z: SZ, equipment: saved }, null);
   const u2 = again.r.unit;
-  assert.equal(u2.equipment.back?.name, cloak2.name); assert.equal(u2.equipment.waist?.name, belt.name); assert.equal(u2.equipment.light?.name, lamp.name);
-  assert.equal(u2.derived.lightRange, 16);
+  assert.equal(u2.equipment.back?.name, cloak2.name); assert.equal(u2.equipment.waist?.name, belt.name);
   assert.equal(u2.derived.armor, u.derived.armor, 'the same sheet after a login');
   // off again
   const off = w.room.rules.unequip(me, 'waist');
   assert.ok(off.ok); assert.equal(off.item, belt); assert.equal(u.equipment.waist, null);
-  assert.equal(w.room.rules.unequip(me, 'light').item, lamp);
-  assert.ok(!w.room.rules.itemBuffs(me).light, 'no light without the lantern');
 });
 
-test('T23 slots: cloaks, belts and lights drop, and a crate can promise one', () => {
+test('T23 slots: cloaks and belts drop, and a crate can promise one', () => {
   const rng = makeRng(909);
-  const seen = { back: 0, waist: 0, light: 0 };
+  const seen = { back: 0, waist: 0, light: 0 };      // `light` must stay 0 (W22)
   for (let i = 0; i < 12000; i++) { const it = engine.rpg.rollDrop({ level: 8, rng, chance: 1 }); if (it && seen[it.slot] != null) seen[it.slot]++; }
-  assert.ok(seen.back > 20 && seen.waist > 20 && seen.light > 10, JSON.stringify(seen));
+  assert.ok(seen.back > 20 && seen.waist > 20 && seen.light === 0, JSON.stringify(seen));
   const w = world();
   const me = w.add('mage', 6);
-  for (const slot of ['back', 'waist', 'light']) for (let k = 0; k < 6; k++) {
+  for (const slot of ['back', 'waist']) for (let k = 0; k < 6; k++) {
     const crate = w.room.rules.makeCrate(me, { slot, min: 'uncommon' });
     const [it] = w.room.rules.openCrate(me, crate);
     assert.equal(it?.slot, slot, `${slot} crate: ${it?.name}`);
@@ -389,5 +386,5 @@ test('T23 slots: cloaks, belts and lights drop, and a crate can promise one', ()
     assert.equal(w.room.rules.canEquip(me, it).ok, true);
   }
   assert.equal(makeCrate({ slot: 'cloak' }).crate.slot, 'back', 'E may write cloak / belt / lantern');
-  if (engine.gearReport.catalog.length) assert.deepEqual(engine.gearReport.skipped, [], 'F\'s whole catalog is injected: nothing skipped');
+  if (engine.gearReport.catalog.length) assert.deepEqual(engine.gearReport.skipped.filter(x => !/lantern|torch/.test(x.why)), [], 'F\'s whole catalog is injected: nothing skipped but the removed lights');
 });

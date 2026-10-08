@@ -103,7 +103,8 @@ export function createMail({ store, online, journal, syncChar, econ, trades, sen
     if (mail.kind === 'player' && !inTown(o)) return fail(o, op, 'town', 'Collect letters in a town.');
     if (mail.taken || (!mail.gold && !mail.itemsFull.length)) return fail(o, op, 'empty', 'Nothing in it to take.');
     if (busy(o) || online.get(ch.id) !== o) return fail(o, op, 'busy', 'Busy, try again in a moment.');
-    if ((ch.bag || []).length + mail.itemsFull.length > BAG_MAX) return reply(o, op, { ok: false, why: 'bagFull', msg: 'Your bag is full.', need: mail.itemsFull.length, free: Math.max(0, BAG_MAX - (ch.bag || []).length) });
+    const cap = typeof BAG_MAX === 'function' ? BAG_MAX(o) : BAG_MAX;      // W19: a backpack changes it per player
+    if ((ch.bag || []).length + mail.itemsFull.length > cap) return reply(o, op, { ok: false, why: 'bagFull', msg: 'Your bag is full.', need: mail.itemsFull.length, free: Math.max(0, cap - (ch.bag || []).length) });
     o.frozen = true; o.saving = true; o.mailBusy = true;
     syncChar(o);
     const got = mail.itemsFull.map(i => JSON.parse(JSON.stringify(i)));

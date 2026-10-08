@@ -81,3 +81,52 @@ fishing an hour:  L1: 168.41 fish, 8.24 crates, 0 legends, 39.56 pools | L5: 167
 - `data/provinces/angling.json` (E): species and legend prices, the sunken-crate chance.
 
 Try a knob without editing a file: `node tools/sim-economy.mjs --set=prices.gear.sellFactor=0.02 --set=fishing.value.mult=1.1`.
+
+## Owner feedback 8 (W4, W19, W22) — stream C, 2026-10-08
+
+**Experience from kills** (`node tests/C/xp-walk.mjs`; the hour is the `ASSUME` table above: 85 kills grinding, 4 quests + 32 kills questing). A monster of level 6 or lower pays x2.25 of Farhold's kill share instead of x1.5, fading back to x1.5 at monster level 14 (`data/rules/progression.json xp.killEarly`). The grey-con rule is unchanged.
+```
+BEFORE (killMult 1.5)
+level  xp-to-next  xp/kill  kills-to-level  minutes(grind)  minutes(quest)  kill-share-of-questing  grind/quest xp
+    1          58        4              15              10              15                     57%            151%
+    2         153      7.4              21              15              16                     42%            111%
+    3         237     10.6              22              16              18                     42%            112%
+    4         316     23.2              14              10              13                     52%            137%
+    5         393     26.3              15              11              13                     45%            119%
+    6         468     26.8              17              12              14                     42%            111%
+    7         539     27.2              20              14              11                     30%             81%
+    8         610     38.7              16              11              10                     35%             92%
+    9         680     46.4              15              10               7                     25%             66%
+   10         748     69.2              11               8               6                     31%             82%
+   11         815     69.9              12               8               6                     29%             78%
+   12         881     78.2              11               8               6                     30%             80%
+level 1 -> 10: 155 kills, 109 minutes killing, 117 minutes questing
+AFTER (monsters up to level 6 pay x2.25, fading to x1.5 at level 14) (killMult 1.5)
+level  xp-to-next  xp/kill  kills-to-level  minutes(grind)  minutes(quest)  kill-share-of-questing  grind/quest xp
+    1          58        5              12               8              13                     62%            165%
+    2         153     11.1              14              10              13                     52%            138%
+    3         237     15.9              15              11              15                     52%            139%
+    4         316     34.8               9               6              10                     61%            163%
+    5         393     39.4              10               7              10                     55%            146%
+    6         468     40.1              12               8              11                     52%            138%
+    7         539     39.2              14              10              10                     39%            103%
+    8         610     53.2              11               8               9                     42%            112%
+    9         680       61              11               8               6                     30%             80%
+   10         748     86.6               9               6               6                     36%             95%
+   11         815     82.9              10               7               6                     33%             88%
+   12         881       88              10               7               6                     33%             86%
+level 1 -> 10: 108 kills, 76 minutes killing, 97 minutes questing
+```
+**Gold after W4 / W19 / W22** (`node tools/sim-economy.mjs`, working tree): backpacks drop (priced by their room: the `back` price x (1 + 0.15 x bag slots)), light items no longer do. `tests/E/playtest7-economy.test.js` 9/9.
+```
+THE ECONOMY — working tree — gold per hour, everything sold
+activity          level 1    level 5   level 10   level 20
+questing              727       2450       5867      10468
+killing               424       2175       5992      11073
+events                644       2292       4837       9232
+dungeon              1942       3734       6264      11998
+fishing               675       1670       5568       8618
+fishing p10-p90   580-790  1401-1952  5166-6018  7302-9931
+legend (once a zone)    not yet    not yet    not yet 6899g/1.9h
+```
+Killing at level 10 moved from 5,230 to about 6,000 gold an hour (a backpack sells for more than the lantern it replaced in the drop table); every ratio the economy test pins still holds.

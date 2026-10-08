@@ -122,7 +122,7 @@ export async function startServer(o) {
   const verifyHuman = turnstileFromEnv(process.env, { log });
   const humanSiteKey = verifyHuman ? process.env.TV_TURNSTILE_SITEKEY || null : null;
   const store = await makeStore(o);
-  const { createRules, rules, kitsFor } = await loadRules(o.rules);
+  const { createRules, rules, kitsFor, lightItems } = await loadRules(o.rules);
   const classes = loadClasses();
   const publicMode = !!o.publicDir;
   const chatFilter = createChatFilter();
@@ -134,7 +134,7 @@ export async function startServer(o) {
     guestsPerIpPerHour: o.guestsPerIpHour ?? 20,
     guestsPerHour: o.guestsPerHour ?? (env === 'stable' ? 200 : 0),
     // play-test 5: C's starter kits for `create.kit` (T5); every feedback report also goes to <state>/feedback-<env>.jsonl (T19)
-    economy: loadEconomy(), kitsFor: kitsFor || null, feedbackSink: o.feedbackFile === false ? null : feedbackSink(env, o.feedbackFile || undefined),
+    economy: loadEconomy(), kitsFor: kitsFor || null, lightItems: lightItems || null, feedbackSink: o.feedbackFile === false ? null : feedbackSink(env, o.feedbackFile || undefined),
   };
   const unlimitedSockets = new Set(o.unlimitedIp || []);
 

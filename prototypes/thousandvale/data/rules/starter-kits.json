@@ -740,12 +740,12 @@
      "spell": "cone"
     },
     {
-     "id": "wand_chain",
-     "name": "Tangle Wand and Effigy",
-     "blurb": "Wand: one-handed, ranged; throws a bolt of shadow that jumps to more enemies, with an effigy (a focus with its own power).",
+     "id": "wand_heavy",
+     "name": "Leaden Wand and Orb",
+     "blurb": "Wand: one-handed, ranged; throws one slow, heavy bolt of shadow, with an orb in the off hand (more spell power).",
      "main": "wand",
-     "off": "effigy",
-     "style": "chain",
+     "off": "orb",
+     "style": "heavy",
      "element": "shadow"
     },
     {
@@ -1823,6 +1823,13 @@
      "name": "Tourney Greatsword",
      "blurb": "Greatsword: two-handed; slow, wide sweeps that catch several enemies.",
      "main": "greatsword"
+    },
+    {
+     "id": "sabre_dagger",
+     "name": "Riding Sabre and Dagger",
+     "blurb": "Sabre: one-handed, quick curved cuts, with a dagger in the off hand (it swings too, for less).",
+     "main": "militia_sabre",
+     "off": "dagger"
     }
    ]
   },
@@ -2260,13 +2267,13 @@
      "spell": "nova"
     },
     {
-     "id": "wand_fork",
-     "name": "Two-Minds Wand and Glass",
-     "blurb": "Wand: one-handed, ranged; throws a bolt of arcane force that splits on what it hits, with a seer's orb (a focus with its own power).",
+     "id": "wand_cone",
+     "name": "Hoarfrost Wand and Orb",
+     "blurb": "Wand: one-handed; instead of a bolt it breathes a short cone of frost, with an orb in the off hand (more spell power).",
      "main": "wand",
-     "off": "seer_orb",
-     "style": "fork",
-     "element": "arcane"
+     "off": "orb",
+     "style": "cone",
+     "element": "ice"
     },
     {
      "id": "wand_nova",

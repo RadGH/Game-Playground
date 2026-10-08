@@ -4,13 +4,14 @@
 // rules.useItem). Timed self-buffs (one per kind, survive a zone change and a logout, end on death), the torch,
 // the poultice, the recall charm's 5 s channel and the revive flask; and A's consumables.js hands each one over.
 
+import { LIGHT } from '../../js/rules/index.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRoom } from '../../js/sim/room.js';
 import { standInTerrain } from '../../js/sim/terrain.js';
 import { createRules, rulesEngine } from '../../js/rules/index.js';
-import { itemStrikeMult, BUFF_KINDS, TORCH, RECALL, REVIVE_FLASK } from '../../js/rules/buffs.js';
+import { itemStrikeMult, BUFF_KINDS, RECALL, REVIVE_FLASK } from '../../js/rules/buffs.js';
 import { effectOf } from '../../js/sim/consumables.js';
 import { makeRng } from '../../js/rules/rng.js';
 import { attuneWeapon } from '../../js/rules/farhold.js';
@@ -124,17 +125,15 @@ test('silver dust bites the undead; fletching only helps a bow; a torch lights a
   const sword = roomWith({ id: 'bft2', cls: 'warrior' });
   sword.R.useItem(sword.me, use('fletching_kit'));
   assert.equal(itemStrikeMult(sword.me.r.unit, { family: 'beast' }), 1, 'no help to a sword');
+  // owner feedback 8 (W22): torches are removed — using one is refused (and not spent), nobody carries `item:torch`,
+  // and everyone's light is the same rules constant
   const torch = roomWith({ id: 'bft3', cls: 'warrior', host: { isNight: () => night } });
-  const r = torch.R.useItem(torch.me, use('torch_bundle'), { name: 'Bundle of torches' });
-  assert.equal(r.ok, true); assert.equal(r.ms, 10 * 60000);
-  assert.equal(torch.R.itemBuffs(torch.me).lightRange, TORCH.lightRange, 'D-world draws this much light');
-  assert.ok(torch.R.statusesOf(torch.me).includes('item:torch'));
-  steps(torch.room, 21);
-  assert.equal(itemStrikeMult(torch.me.r.unit, { family: 'beast' }), 1, 'by day: just light');
+  const r = torch.R.useItem(torch.me, { type: 'light', minutes: 10 }, { name: 'Bundle of torches' });
+  assert.equal(r.ok, false); assert.equal(r.why, 'gone');
+  assert.equal(torch.R.itemBuffs(torch.me).lightRange, LIGHT.radius, 'everyone carries the same light');
+  assert.ok(!torch.R.statusesOf(torch.me).includes('item:torch'));
   night = true; steps(torch.room, 21);
-  assert.ok(Math.abs(itemStrikeMult(torch.me.r.unit, { family: 'beast' }) - (1 + TORCH.nightPct)) < 1e-9, 'at night: beasts');
-  assert.ok(Math.abs(itemStrikeMult(torch.me.r.unit, { family: 'undead' }) - (1 + TORCH.nightPct)) < 1e-9, 'and the dead');
-  assert.equal(itemStrikeMult(torch.me.r.unit, { family: 'humanoid' }), 1);
+  assert.equal(itemStrikeMult(torch.me.r.unit, { family: 'beast' }), 1, 'no night bonus without a torch to carry');
 });
 
 test('a poultice stops a bleed and heals a little; nothing to treat is refused (not wasted)', () => {

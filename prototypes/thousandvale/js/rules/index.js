@@ -1270,6 +1270,8 @@ export function createRules(host, opts = {}) {
 
   return {
     equip, unequip, canEquip, canUnequip, bagBonus, lightRefundOwed, gear, saveGear,
+    /** W22 (A converts what players own): is this a light from before, and what it is paid back at (list price x count) */
+    isLightItem, lightRefund,
     /** owner feedback 8 (W22): the light everyone carries — `{ radius, dungeonRadius, dungeonAmbient }` */
     LIGHT: lightOf(engine), rollLoot, onParty, useObject, bar, backfill, unlock, revived,
     applyKit, makeItem, makeCrate, openCrate, sheet, sheetWith,

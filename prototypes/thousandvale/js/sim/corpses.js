@@ -39,6 +39,7 @@ export const DEFAULT_LOOT_MIN = 'rare';
 export const LOOT_NEAR_M = 8;           // S12: bodies this close to YOU join the one loot window
 
 export function createCorpses({ now, newUid, rng = Math.random, partyOf, online, grant, log = () => {}, counters = {}, bagMax = 120 }) {
+  const capOf = o => (typeof bagMax === 'function' ? bagMax(o) : bagMax);      // W19: a backpack changes it per player
   const bodies = new Map();       // `${room.id}:${entity.id}` -> body
   const windows = new Map();      // S12: char id -> { room, keys: [body keys], main: entity id } (a grouped window)
   const rolls = new Map();        // roll id -> roll
@@ -150,7 +151,7 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
       return { char: c, name: o ? o.char.name : '?', choice, n, o };
     });
     // C's rollWinner (need beats greed, highest number inside it) over the players who can still receive it
-    const able = out.filter(x => x.o && x.o.conn && x.o.room === r.body.room && x.o.char.bag && x.o.char.bag.length < bagMax);
+    const able = out.filter(x => x.o && x.o.conn && x.o.room === r.body.room && x.o.char.bag && x.o.char.bag.length < capOf(x.o));
     const best = rollWinner(able.map(x => ({ id: x.char, choice: x.choice, n: x.n })));
     const win = best ? able.find(x => x.char === best.id) : null;
     if (win) grant(win.o, { items: [r.item], gold: 0, reason: 'roll', from: r.body.e });
@@ -280,7 +281,7 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
     if (i < 0 && b.pileFor.has(c)) { list = b.pile; i = list.findIndex(x => x.uid === uid); }
     if (i < 0) { list = b.free; i = list.findIndex(x => x.uid === uid); }
     if (i < 0) return 'item';
-    if ((o.char.bag || []).length >= bagMax) return 'bagFull';
+    if ((o.char.bag || []).length >= capOf(o)) return 'bagFull';
     const [it] = list.splice(i, 1);
     grant(o, { items: [it], gold: 0, reason: 'kill', from: b.e });
     return null;

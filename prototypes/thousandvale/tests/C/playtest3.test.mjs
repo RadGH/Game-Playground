@@ -317,13 +317,16 @@ test('R2: experience is a little faster — kills x1.5, quests and events x1.25;
   assert.ok(now >= 3 && now > before, `a level-1 hound pays ${now} (was ${before})`);
   // grey cons still pay nothing
   const { me: me6 } = roomOn(terrain, { id: 'r2xp6', cls: 'warrior', level: 6 });
-  assert.equal(engine.rpg.killXpFor(me6.r.unit, m.r.unit, engine.xpCfg), 0, 'five levels below pays nothing');
+  assert.equal(engine.rpg.killXpFor(me6.r.unit, m.r.unit, engine.xpCfgFor(1)), 0, 'five levels below pays nothing');
   // a real kill pays the new amount
   const xp0 = me.char.xp || 0;
   const near = room.spawn({ kind: 'monster', type: 'moor_hound', level: 1, x: terrain.spawn.x + 1.4, z: terrain.spawn.z });
   for (let k = 0; k < 100 && !near.dead; k++) { room.rules.room.run(() => { near.r.unit.hp = Math.min(near.r.unit.hp, 1); }); room.intent(me, { t: 'cast', slot: 0, target: near.id }); room.step(); }
   assert.ok(near.dead, 'killed');
-  assert.equal((me.char.xp || 0) - xp0, now);
+  // owner feedback 8 (W4): a low-level monster pays more than the base rule (progression.json xp.killEarly)
+  const early = engine.rpg.killXpFor(me.r.unit, near.r.unit, engine.xpCfgFor(1));
+  assert.ok(early > now, `early kills pay more (${now} -> ${early})`);
+  assert.equal((me.char.xp || 0) - xp0, early);
 });
 
 test('R2: Old Gristle is a level-2 boss with level-2 health, and his quest (and the one before it) are level 2', () => {

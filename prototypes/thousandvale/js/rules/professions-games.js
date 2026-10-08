@@ -27,6 +27,8 @@ export function seeded(seed) {
 }
 
 export const GAME_TYPES = Object.freeze(['strike', 'rhythm', 'pick', 'trace', 'forge', 'stitch', 'pour', 'gauge']);
+/** Which game each profession plays (angling keeps its own tug: js/rules/fishing.js). */
+export const GAME_OF = Object.freeze({ mining: 'strike', logging: 'rhythm', foraging: 'pick', skinning: 'trace', smithing: 'forge', outfitting: 'stitch', alchemy: 'pour', cooking: 'pour', tempering: 'gauge' });
 
 /** What each type falls back to when the data file gives nothing (the file's numbers win). */
 export const GAME_DEFAULTS = Object.freeze({
@@ -47,7 +49,9 @@ const wide = (v, ease) => v * (1 + 0.5 * clamp(ease || 0, 0, 1));
  * Build one game. Same seed + same ease + same base = the same game, on any machine.
  * `opts.steps` overrides the number of steps (cooking's one-stage `pour`).
  */
-export function makeGame(type, { seed = 1, ease = 0, base = null, steps = null } = {}) {
+export function makeGame(type, a = {}, b = null) {
+  // makeGame(type, seed, opts?) is accepted too (P-client's ask)
+  const { seed = 1, ease = 0, base = null, steps = null } = typeof a === 'number' ? { ...(b || {}), seed: a } : (a || {});
   if (!GAME_TYPES.includes(type)) return null;
   const B = { ...GAME_DEFAULTS[type], ...(base || {}) };
   const rng = seeded(seed);

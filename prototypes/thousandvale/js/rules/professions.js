@@ -165,7 +165,7 @@ export function createProfessions(numbers = {}, content = null) {
   /** Bag -> how many of each material id it holds. */
   function countsOf(bag) {
     const c = {};
-    for (const it of bag || []) if (it && (it.kind === 'material' || (it.kind === 'fish' && !it.legend))) { const id = it.kind === 'fish' ? 'fish' : it.id; c[id] = (c[id] || 0) + Math.max(1, it.count | 0 || 1); }
+    for (const it of bag || []) if (it && it.kind === 'material') { const id = it.id; c[id] = (c[id] || 0) + Math.max(1, it.count | 0 || 1); }
     return c;
   }
   /** The gold a recipe costs to make (a share of a plain item's list price for gear; a fixed fee otherwise). */

@@ -31,16 +31,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Sawyer Cobbold",
+     "name": "Jory Coombe",
      "plot": "hollin_toll_plot_8",
      "want": "shop",
      "x": 1706.54,
@@ -62,7 +62,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Wynne Furlong",
+     "name": "Bryn Ashby",
      "plot": "hollin_toll_plot_9",
      "want": "forge",
      "x": 1703.35,
@@ -84,7 +84,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Wynne Nettlefold",
+     "name": "Bryn Torbor",
      "plot": "hollin_toll_plot_22",
      "want": "armoury",
      "x": 1766.27,
@@ -106,7 +106,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Jory Longacre",
+     "name": "Jory Hollis",
      "plot": "hollin_toll_plot_2",
      "want": "bowyer",
      "x": 1688.93,
@@ -128,7 +128,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Sawyer Eastmere",
+     "name": "Oswy Hollis",
      "plot": "hollin_toll_plot_16",
      "want": "apothecary",
      "x": 1753.49,
@@ -150,7 +150,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Cressy Sallow",
+     "name": "Gwen Fenwick",
      "plot": "hollin_toll_plot_7",
      "want": "tailor",
      "x": 1699.66,
@@ -172,7 +172,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Tibbot Harl",
+     "name": "Corwin Coombe",
      "plot": "hollin_toll_plot_4",
      "want": "stable",
      "x": 1699.08,
@@ -194,7 +194,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Petronel Pennock",
+     "name": "Isolde Harl",
      "plot": "hollin_toll_plot_12",
      "want": "inn",
      "x": 1726.33,
@@ -216,7 +216,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Dunnet Cattermole",
+     "name": "Dunnet Pike",
      "plot": "hollin_toll_plot_11",
      "want": "provisioner",
      "x": 1725.86,
@@ -238,7 +238,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Kenric Rookwood",
+     "name": "Hobb Gallowsby",
      "plot": "hollin_toll_plot_13",
      "want": "barber",
      "x": 1733.53,
@@ -260,7 +260,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Nesta Ladd",
+     "name": "Orla Reed",
      "plot": "hollin_toll_plot_19",
      "want": "counting_house",
      "x": 1760.03,
@@ -282,7 +282,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Hester Thatcher",
+     "name": "Nell Torbor",
      "plot": "hollin_toll_plot_3",
      "want": "study",
      "x": 1694.15,
@@ -304,7 +304,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Nesta Hobday",
+     "name": "Tamsin Harl",
      "plot": "hollin_toll_plot_18",
      "want": "temple",
      "x": 1755.32,
@@ -337,7 +337,7 @@
     {
      "role": "elder",
      "title": "Elder",
-     "name": "Isolde Millward",
+     "name": "Mabry Ashby",
      "plot": "ashcombe_plot_10",
      "want": "hall",
      "x": 1415.53,
@@ -353,16 +353,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Cressy Hollis",
+     "name": "Bryn Gallowsby",
      "plot": "ashcombe_plot_4",
      "want": "shop",
      "x": 1387.74,
@@ -384,7 +384,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Tibbot Dimmock",
+     "name": "Corwin Torbor",
      "plot": "ashcombe_plot_8",
      "want": "forge",
      "x": 1391.9,
@@ -406,7 +406,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Emrys Wainwright",
+     "name": "Emrys Harl",
      "plot": "ashcombe_plot_11",
      "want": "armoury",
      "x": 1420.26,
@@ -428,7 +428,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Kitt Underhill",
+     "name": "Edda Millward",
      "plot": "ashcombe_plot_6",
      "want": "bowyer",
      "x": 1404.13,
@@ -450,7 +450,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Marjory Oakhurst",
+     "name": "Wenna Millward",
      "plot": "ashcombe_plot_14",
      "want": "apothecary",
      "x": 1439.16,
@@ -472,7 +472,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Dunnet Nettlefold",
+     "name": "Emrys Torbor",
      "plot": "ashcombe_plot_22",
      "want": "tailor",
      "x": 1438.12,
@@ -494,7 +494,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Hild Barrowman",
+     "name": "Hild Reed",
      "plot": "ashcombe_plot_2",
      "want": "stable",
      "x": 1369.64,
@@ -516,7 +516,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Jankin Oakhurst",
+     "name": "Emrys Ashby",
      "plot": "ashcombe_plot_9",
      "want": "inn",
      "x": 1411.8,
@@ -538,7 +538,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Hawise Hobday",
+     "name": "Orla Coombe",
      "plot": "ashcombe_plot_12",
      "want": "provisioner",
      "x": 1431.09,
@@ -560,7 +560,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Rosamund Torbor",
+     "name": "Rosamund Thatcher",
      "plot": "ashcombe_plot_13",
      "want": "barber",
      "x": 1431.11,
@@ -582,7 +582,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Randal Thatcher",
+     "name": "Cadoc Thatcher",
      "plot": "ashcombe_plot_3",
      "want": "counting_house",
      "x": 1382.57,
@@ -604,7 +604,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Hamon Furlong",
+     "name": "Aled Ashby",
      "plot": "ashcombe_plot_5",
      "want": "study",
      "x": 1398.34,
@@ -626,7 +626,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Drogo Hobday",
+     "name": "Corwin Harl",
      "plot": "ashcombe_plot_7",
      "want": "temple",
      "x": 1404.74,
@@ -664,8 +664,8 @@
      },
      "sign": null,
      "light": false,
-     "titled": true,
-     "home": true
+     "home": true,
+     "titled": true
     }
    ]
   },
@@ -698,16 +698,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Edda Dunstable",
+     "name": "Nell Barrowman",
      "plot": "brackwater_plot_17",
      "want": "shop",
      "x": 1166.54,
@@ -729,7 +729,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Milo Pennock",
+     "name": "Corwin Coombe",
      "plot": "brackwater_plot_10",
      "want": "forge",
      "x": 1136.33,
@@ -751,7 +751,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Nicol Brackenridge",
+     "name": "Aled Ashby",
      "plot": "brackwater_plot_3",
      "want": "armoury",
      "x": 1105.01,
@@ -773,7 +773,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Tegan Cobbold",
+     "name": "Maud Coombe",
      "plot": "brackwater_plot_7",
      "want": "bowyer",
      "x": 1123.52,
@@ -795,7 +795,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Olwen Hollis",
+     "name": "Bryn Gallowsby",
      "plot": "brackwater_plot_20",
      "want": "apothecary",
      "x": 1180.49,
@@ -839,7 +839,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Sawyer Rookwood",
+     "name": "Oswy Hollis",
      "plot": "brackwater_plot_16",
      "want": "inn",
      "x": 1151.07,
@@ -861,7 +861,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Hawise Gallowsby",
+     "name": "Orla Hollis",
      "plot": "brackwater_plot_19",
      "want": "barber",
      "x": 1170.5,
@@ -883,7 +883,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Godric Longacre",
+     "name": "Pell Hollis",
      "plot": "brackwater_plot_18",
      "want": "counting_house",
      "x": 1177.09,
@@ -905,7 +905,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Hew Cattermole",
+     "name": "Emrys Fenwick",
      "plot": "brackwater_plot_13",
      "want": "study",
      "x": 1159.32,
@@ -927,7 +927,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Milo Quarrie",
+     "name": "Corwin Barrowman",
      "plot": "brackwater_plot_5",
      "want": "temple",
      "x": 1117.58,
@@ -977,16 +977,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Piers Furlong",
+     "name": "Emrys Millward",
      "plot": "saltmouth_plot_2",
      "want": "shop",
      "x": 914.92,
@@ -1008,7 +1008,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Edda Tanner",
+     "name": "Edda Torbor",
      "plot": "saltmouth_plot_6",
      "want": "forge",
      "x": 878.93,
@@ -1030,7 +1030,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Tegan Greenhill",
+     "name": "Maud Thatcher",
      "plot": "saltmouth_plot_11",
      "want": "armoury",
      "x": 850.3,
@@ -1052,7 +1052,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Dunnet Merriweather",
+     "name": "Emrys Gallowsby",
      "plot": "saltmouth_plot_14",
      "want": "bowyer",
      "x": 893,
@@ -1096,7 +1096,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Kenric Quarrie",
+     "name": "Cadoc Reed",
      "plot": "saltmouth_plot_3",
      "want": "stable",
      "x": 893.8,
@@ -1118,7 +1118,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Orla Fallowfield",
+     "name": "Orla Pike",
      "plot": "saltmouth_plot_5",
      "want": "inn",
      "x": 881.28,
@@ -1140,7 +1140,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Walter Nettlefold",
+     "name": "Pell Thatcher",
      "plot": "saltmouth_plot_8",
      "want": "barber",
      "x": 862.53,
@@ -1162,7 +1162,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Petronel Dunstable",
+     "name": "Isolde Reed",
      "plot": "saltmouth_plot_1",
      "want": "counting_house",
      "x": 920.8,
@@ -1184,7 +1184,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Ganna Inchley",
+     "name": "Maud Harl",
      "plot": "saltmouth_plot_4",
      "want": "study",
      "x": 884.52,
@@ -1206,7 +1206,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Cecily Wainwright",
+     "name": "Rosamund Coombe",
      "plot": "saltmouth_plot_10",
      "want": "temple",
      "x": 862.17,
@@ -1256,16 +1256,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Isolde Gallowsby",
+     "name": "Isolde Hollis",
      "plot": "copperdell_plot_7",
      "want": "shop",
      "x": 338.29,
@@ -1287,7 +1287,7 @@
     {
      "role": "trader",
      "title": "Market trader",
-     "name": "Cecily Greenhill",
+     "name": "Hild Torbor",
      "plot": "copperdell_plot_23",
      "want": "market",
      "x": 362.06,
@@ -1309,7 +1309,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Simkin Brookes",
+     "name": "Oswy Gallowsby",
      "plot": "copperdell_plot_6",
      "want": "forge",
      "x": 355.37,
@@ -1331,7 +1331,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Ivo Reed",
+     "name": "Pell Reed",
      "plot": "copperdell_plot_3",
      "want": "armoury",
      "x": 348.03,
@@ -1353,7 +1353,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Letty Yeoman",
+     "name": "Hild Barrowman",
      "plot": "copperdell_plot_1",
      "want": "bowyer",
      "x": 371.82,
@@ -1375,7 +1375,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Brenna Longacre",
+     "name": "Tamsin Gallowsby",
      "plot": "copperdell_plot_17",
      "want": "apothecary",
      "x": 317.11,
@@ -1397,7 +1397,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Corwin Brackenridge",
+     "name": "Tobin Ashby",
      "plot": "copperdell_plot_10",
      "want": "tailor",
      "x": 323.57,
@@ -1419,7 +1419,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Maud Tanner",
+     "name": "Maud Torbor",
      "plot": "copperdell_plot_16",
      "want": "stable",
      "x": 328.34,
@@ -1441,7 +1441,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Ivo Yeoman",
+     "name": "Wat Barrowman",
      "plot": "copperdell_plot_8",
      "want": "inn",
      "x": 342.77,
@@ -1463,7 +1463,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Cressy Underhill",
+     "name": "Gwen Millward",
      "plot": "copperdell_plot_2",
      "want": "provisioner",
      "x": 389.35,
@@ -1485,7 +1485,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Bryn Harl",
+     "name": "Gwen Coombe",
      "plot": "copperdell_plot_11",
      "want": "barber",
      "x": 325.82,
@@ -1529,7 +1529,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Benet Hobday",
+     "name": "Cadoc Coombe",
      "plot": "copperdell_plot_4",
      "want": "study",
      "x": 332.74,
@@ -1551,7 +1551,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Garrick Greenhill",
+     "name": "Garrick Torbor",
      "plot": "copperdell_plot_5",
      "want": "temple",
      "x": 350.89,
@@ -1601,11 +1601,11 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
@@ -1957,11 +1957,11 @@
      },
      "sign": "keys",
      "light": false,
-     "titled": true,
      "service": [
       "quests",
       "bounties"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "trainer",
@@ -1982,7 +1982,6 @@
      },
      "sign": "crest",
      "light": true,
-     "titled": true,
      "trains": [
       "cleric",
       "priest",
@@ -1991,7 +1990,8 @@
      "service": [
       "class quest",
       "teach"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "trainer",
@@ -2012,7 +2012,6 @@
      },
      "sign": "crest",
      "light": true,
-     "titled": true,
      "trains": [
       "mage",
       "sorcerer",
@@ -2024,7 +2023,8 @@
      "service": [
       "class quest",
       "teach"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "trainer",
@@ -2045,7 +2045,6 @@
      },
      "sign": "crest",
      "light": true,
-     "titled": true,
      "trains": [
       "rogue",
       "shadow_dancer",
@@ -2054,7 +2053,8 @@
      "service": [
       "class quest",
       "teach"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "trainer",
@@ -2075,14 +2075,14 @@
      },
      "sign": "crest",
      "light": true,
-     "titled": true,
      "trains": [
       "runesmith"
      ],
      "service": [
       "class quest",
       "teach"
-     ]
+     ],
+     "titled": true
     }
    ]
   },
@@ -2115,16 +2115,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Wat Sallow",
+     "name": "Wat Fenwick",
      "plot": "halsbridge_plot_8",
      "want": "shop",
      "x": 1674.77,
@@ -2169,7 +2169,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Hild Gallowsby",
+     "name": "Hild Hollis",
      "plot": "halsbridge_plot_10",
      "want": "forge",
      "x": 1687.17,
@@ -2191,7 +2191,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Avice Rookwood",
+     "name": "Isolde Hollis",
      "plot": "halsbridge_plot_29",
      "want": "armoury",
      "x": 1740.12,
@@ -2213,7 +2213,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Tibbot Cobbold",
+     "name": "Tobin Harl",
      "plot": "halsbridge_plot_14",
      "want": "bowyer",
      "x": 1686.35,
@@ -2235,7 +2235,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Corwin Longacre",
+     "name": "Tobin Gallowsby",
      "plot": "halsbridge_plot_3",
      "want": "apothecary",
      "x": 1659.52,
@@ -2257,7 +2257,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Petronel Coombe",
+     "name": "Mabry Harl",
      "plot": "halsbridge_plot_4",
      "want": "tailor",
      "x": 1676.87,
@@ -2279,7 +2279,7 @@
     {
      "role": "jeweller",
      "title": "Jeweller",
-     "name": "Sawyer Millward",
+     "name": "Jory Millward",
      "plot": "halsbridge_plot_18",
      "want": "jeweller",
      "x": 1722.1,
@@ -2301,7 +2301,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Ulf Ashby",
+     "name": "Aled Ashby",
      "plot": "halsbridge_plot_6",
      "want": "stable",
      "x": 1664.86,
@@ -2323,7 +2323,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Ganna Quarrie",
+     "name": "Wenna Reed",
      "plot": "halsbridge_plot_9",
      "want": "inn",
      "x": 1679.18,
@@ -2345,7 +2345,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Ivo Merriweather",
+     "name": "Pell Gallowsby",
      "plot": "halsbridge_plot_17",
      "want": "provisioner",
      "x": 1704.93,
@@ -2367,7 +2367,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Simkin Wainwright",
+     "name": "Jory Coombe",
      "plot": "halsbridge_plot_5",
      "want": "barber",
      "x": 1675.56,
@@ -2389,7 +2389,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Nell Hayward",
+     "name": "Edda Ashby",
      "plot": "halsbridge_plot_27",
      "want": "counting_house",
      "x": 1734.05,
@@ -2411,7 +2411,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Nesta Brookes",
+     "name": "Tamsin Hollis",
      "plot": "halsbridge_plot_25",
      "want": "study",
      "x": 1722.19,
@@ -2433,7 +2433,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Hester Cattermole",
+     "name": "Nell Fenwick",
      "plot": "halsbridge_plot_7",
      "want": "temple",
      "x": 1670.17,
@@ -2483,16 +2483,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Mabry Merriweather",
+     "name": "Isolde Hollis",
      "plot": "gullwick_plot_13",
      "want": "shop",
      "x": 1492.28,
@@ -2514,7 +2514,7 @@
     {
      "role": "trader",
      "title": "Market trader",
-     "name": "Joan Nettlefold",
+     "name": "Hild Torbor",
      "plot": "gullwick_plot_6",
      "want": "market",
      "x": 1507.15,
@@ -2536,7 +2536,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Hamon Nettlefold",
+     "name": "Aled Torbor",
      "plot": "gullwick_plot_17",
      "want": "forge",
      "x": 1518.6,
@@ -2558,7 +2558,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Colin Ladd",
+     "name": "Pell Reed",
      "plot": "gullwick_plot_11",
      "want": "armoury",
      "x": 1480.82,
@@ -2580,7 +2580,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Sabeth Ladd",
+     "name": "Hild Barrowman",
      "plot": "gullwick_plot_3",
      "want": "bowyer",
      "x": 1488.16,
@@ -2602,7 +2602,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Orla Eastmere",
+     "name": "Tamsin Gallowsby",
      "plot": "gullwick_plot_12",
      "want": "apothecary",
      "x": 1481.87,
@@ -2624,7 +2624,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Hobb Fallowfield",
+     "name": "Cadoc Fenwick",
      "plot": "gullwick_plot_2",
      "want": "tailor",
      "x": 1481.45,
@@ -2646,7 +2646,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Blanche Longacre",
+     "name": "Edda Gallowsby",
      "plot": "gullwick_plot_19",
      "want": "stable",
      "x": 1524.7,
@@ -2668,7 +2668,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Colin Quarrie",
+     "name": "Wat Barrowman",
      "plot": "gullwick_plot_14",
      "want": "inn",
      "x": 1498.05,
@@ -2690,7 +2690,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Edda Kettleby",
+     "name": "Edda Reed",
      "plot": "gullwick_plot_8",
      "want": "provisioner",
      "x": 1517.07,
@@ -2734,7 +2734,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Bartle Dunstable",
+     "name": "Aled Reed",
      "plot": "gullwick_plot_9",
      "want": "counting_house",
      "x": 1507.36,
@@ -2756,7 +2756,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Randal Wainwright",
+     "name": "Cadoc Coombe",
      "plot": "gullwick_plot_4",
      "want": "study",
      "x": 1496.05,
@@ -2778,7 +2778,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Jory Longacre",
+     "name": "Jory Gallowsby",
      "plot": "gullwick_plot_15",
      "want": "temple",
      "x": 1504.57,
@@ -2811,7 +2811,7 @@
     {
      "role": "elder",
      "title": "Elder",
-     "name": "Milo Longacre",
+     "name": "Corwin Hollis",
      "plot": "hermit_s_rest_plot_13",
      "want": "hall",
      "x": 1103.75,
@@ -2827,16 +2827,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Corwin Dunstable",
+     "name": "Tobin Reed",
      "plot": "hermit_s_rest_plot_30",
      "want": "shop",
      "x": 1110.97,
@@ -2858,7 +2858,7 @@
     {
      "role": "trader",
      "title": "Market trader",
-     "name": "Tibbot Hayward",
+     "name": "Corwin Millward",
      "plot": "hermit_s_rest_plot_29",
      "want": "market",
      "x": 1148.46,
@@ -2880,7 +2880,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Cecily Eastmere",
+     "name": "Rosamund Gallowsby",
      "plot": "hermit_s_rest_plot_22",
      "want": "forge",
      "x": 1119.35,
@@ -2902,7 +2902,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Emmot Rookwood",
+     "name": "Orla Hollis",
      "plot": "hermit_s_rest_plot_24",
      "want": "armoury",
      "x": 1134.95,
@@ -2924,7 +2924,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Godric Hollis",
+     "name": "Wat Hollis",
      "plot": "hermit_s_rest_plot_6",
      "want": "bowyer",
      "x": 1066.96,
@@ -2946,7 +2946,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Cadoc Dimmock",
+     "name": "Hobb Thatcher",
      "plot": "hermit_s_rest_plot_33",
      "want": "apothecary",
      "x": 1120.37,
@@ -2968,7 +2968,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Isolde Longacre",
+     "name": "Isolde Hollis",
      "plot": "hermit_s_rest_plot_5",
      "want": "tailor",
      "x": 1063.17,
@@ -2990,7 +2990,7 @@
     {
      "role": "jeweller",
      "title": "Jeweller",
-     "name": "Ulf Dimmock",
+     "name": "Aled Torbor",
      "plot": "hermit_s_rest_plot_3",
      "want": "jeweller",
      "x": 1058.22,
@@ -3012,7 +3012,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Bartle Millward",
+     "name": "Garrick Millward",
      "plot": "hermit_s_rest_plot_19",
      "want": "stable",
      "x": 1113.78,
@@ -3034,7 +3034,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Nell Kettleby",
+     "name": "Edda Reed",
      "plot": "hermit_s_rest_plot_21",
      "want": "inn",
      "x": 1117.01,
@@ -3078,7 +3078,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Lambert Thatcher",
+     "name": "Oswy Torbor",
      "plot": "hermit_s_rest_plot_23",
      "want": "barber",
      "x": 1126.43,
@@ -3100,7 +3100,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Dulcie Harl",
+     "name": "Wenna Coombe",
      "plot": "hermit_s_rest_plot_31",
      "want": "counting_house",
      "x": 1122.08,
@@ -3122,7 +3122,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Nesta Cobbold",
+     "name": "Orla Coombe",
      "plot": "hermit_s_rest_plot_32",
      "want": "study",
      "x": 1131.5,
@@ -3144,7 +3144,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Rhosyn Sallow",
+     "name": "Edda Fenwick",
      "plot": "hermit_s_rest_plot_25",
      "want": "temple",
      "x": 1129.72,
@@ -3166,7 +3166,7 @@
     {
      "role": "farmer",
      "title": "Farmer",
-     "name": "Tamsin Gallowsby",
+     "name": "Orla Hollis",
      "plot": "hermit_s_rest_plot_14",
      "want": "granary",
      "x": 1107.82,
@@ -3187,7 +3187,7 @@
     {
      "role": "miller",
      "title": "Miller",
-     "name": "Marjory Kettleby",
+     "name": "Maud Reed",
      "plot": "hermit_s_rest_plot_27",
      "want": "mill",
      "x": 1142.9,
@@ -3203,10 +3203,10 @@
      "sign": "wheel",
      "light": false,
      "label": "Mill",
-     "titled": false,
      "service": [
       "flour"
-     ]
+     ],
+     "titled": false
     },
     {
      "role": "hermit",
@@ -3227,8 +3227,8 @@
      },
      "sign": null,
      "light": false,
-     "titled": true,
-     "home": true
+     "home": true,
+     "titled": true
     }
    ]
   },
@@ -3261,16 +3261,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Brenna Yeoman",
+     "name": "Tamsin Reed",
      "plot": "orrinsford_plot_4",
      "want": "shop",
      "x": 348.79,
@@ -3292,7 +3292,7 @@
     {
      "role": "trader",
      "title": "Market trader",
-     "name": "Brenna Harl",
+     "name": "Tamsin Coombe",
      "plot": "orrinsford_plot_23",
      "want": "market",
      "x": 349.55,
@@ -3314,7 +3314,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Ulf Furlong",
+     "name": "Aled Millward",
      "plot": "orrinsford_plot_3",
      "want": "forge",
      "x": 328.43,
@@ -3336,7 +3336,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Ralf Merriweather",
+     "name": "Cadoc Hollis",
      "plot": "orrinsford_plot_19",
      "want": "armoury",
      "x": 364.52,
@@ -3358,7 +3358,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Cecily Hollis",
+     "name": "Hild Hollis",
      "plot": "orrinsford_plot_14",
      "want": "bowyer",
      "x": 298.22,
@@ -3380,7 +3380,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Tamsin Cattermole",
+     "name": "Tamsin Pike",
      "plot": "orrinsford_plot_0",
      "want": "apothecary",
      "x": 333.97,
@@ -3402,7 +3402,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Corwin Fallowfield",
+     "name": "Tobin Fenwick",
      "plot": "orrinsford_plot_15",
      "want": "tailor",
      "x": 302.51,
@@ -3424,7 +3424,7 @@
     {
      "role": "jeweller",
      "title": "Jeweller",
-     "name": "Edda Inchley",
+     "name": "Nell Coombe",
      "plot": "orrinsford_plot_21",
      "want": "jeweller",
      "x": 375.98,
@@ -3446,7 +3446,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Wenna Brackenridge",
+     "name": "Maud Ashby",
      "plot": "orrinsford_plot_2",
      "want": "stable",
      "x": 335.85,
@@ -3468,7 +3468,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Hobb Kettleby",
+     "name": "Hobb Reed",
      "plot": "orrinsford_plot_8",
      "want": "inn",
      "x": 305.76,
@@ -3490,7 +3490,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Ganna Gallowsby",
+     "name": "Maud Hollis",
      "plot": "orrinsford_plot_16",
      "want": "provisioner",
      "x": 377.52,
@@ -3512,7 +3512,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Edda Dimmock",
+     "name": "Edda Thatcher",
      "plot": "orrinsford_plot_12",
      "want": "barber",
      "x": 304.53,
@@ -3534,7 +3534,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Dunnet Millward",
+     "name": "Emrys Ashby",
      "plot": "orrinsford_plot_5",
      "want": "counting_house",
      "x": 312.7,
@@ -3556,7 +3556,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Randal Hollis",
+     "name": "Cadoc Gallowsby",
      "plot": "orrinsford_plot_7",
      "want": "study",
      "x": 299.9,
@@ -3578,7 +3578,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Fulk Cobbold",
+     "name": "Jory Harl",
      "plot": "orrinsford_plot_13",
      "want": "temple",
      "x": 312.03,
@@ -3600,7 +3600,7 @@
     {
      "role": "farmer",
      "title": "Farmer",
-     "name": "Pell Harl",
+     "name": "Wat Harl",
      "plot": "orrinsford_plot_25",
      "want": "granary",
      "x": 368.16,
@@ -3649,16 +3649,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Colin Merriweather",
+     "name": "Pell Hollis",
      "plot": "millbrook_plot_23",
      "want": "shop",
      "x": 565.64,
@@ -3702,7 +3702,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Joan Dunstable",
+     "name": "Rosamund Barrowman",
      "plot": "millbrook_plot_26",
      "want": "armoury",
      "x": 584.97,
@@ -3724,7 +3724,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Randal Stannard",
+     "name": "Hobb Fenwick",
      "plot": "millbrook_plot_11",
      "want": "bowyer",
      "x": 550.19,
@@ -3746,7 +3746,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Tibbot Dunstable",
+     "name": "Corwin Reed",
      "plot": "millbrook_plot_19",
      "want": "apothecary",
      "x": 543.18,
@@ -3768,7 +3768,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Sabeth Applegarth",
+     "name": "Hild Torbor",
      "plot": "millbrook_plot_28",
      "want": "tailor",
      "x": 595.59,
@@ -3790,7 +3790,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Dickon Dunstable",
+     "name": "Dunnet Reed",
      "plot": "millbrook_plot_17",
      "want": "stable",
      "x": 529.23,
@@ -3812,7 +3812,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Edda Wainwright",
+     "name": "Edda Harl",
      "plot": "millbrook_plot_22",
      "want": "inn",
      "x": 574.41,
@@ -3834,7 +3834,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Walter Brackenridge",
+     "name": "Wat Millward",
      "plot": "millbrook_plot_8",
      "want": "provisioner",
      "x": 524.54,
@@ -3856,7 +3856,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Simkin Fenwick",
+     "name": "Oswy Fenwick",
      "plot": "millbrook_plot_24",
      "want": "barber",
      "x": 587.93,
@@ -3878,7 +3878,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Alys Coombe",
+     "name": "Wenna Coombe",
      "plot": "millbrook_plot_27",
      "want": "counting_house",
      "x": 588.68,
@@ -3900,7 +3900,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Avice Millward",
+     "name": "Mabry Ashby",
      "plot": "millbrook_plot_18",
      "want": "study",
      "x": 535.11,
@@ -3922,7 +3922,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Rhosyn Applegarth",
+     "name": "Edda Torbor",
      "plot": "millbrook_plot_25",
      "want": "temple",
      "x": 578.87,
@@ -3955,7 +3955,7 @@
     {
      "role": "elder",
      "title": "Elder",
-     "name": "Ralf Harl",
+     "name": "Cadoc Coombe",
      "plot": "redcliff_plot_15",
      "want": "hall",
      "x": 371.58,
@@ -3971,16 +3971,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Tobin Harl",
+     "name": "Corwin Harl",
      "plot": "redcliff_plot_4",
      "want": "shop",
      "x": 411.53,
@@ -4002,7 +4002,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Fenna Barrowman",
+     "name": "Hild Barrowman",
      "plot": "redcliff_plot_14",
      "want": "forge",
      "x": 376.31,
@@ -4024,7 +4024,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Rosamund Dunstable",
+     "name": "Hild Reed",
      "plot": "redcliff_plot_2",
      "want": "armoury",
      "x": 413.18,
@@ -4046,7 +4046,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Walter Pennock",
+     "name": "Pell Harl",
      "plot": "redcliff_plot_12",
      "want": "bowyer",
      "x": 372.69,
@@ -4068,7 +4068,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Cadoc Sallow",
+     "name": "Cadoc Fenwick",
      "plot": "redcliff_plot_17",
      "want": "apothecary",
      "x": 354.32,
@@ -4090,7 +4090,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Brenna Torbor",
+     "name": "Orla Thatcher",
      "plot": "redcliff_plot_21",
      "want": "tailor",
      "x": 351.19,
@@ -4112,7 +4112,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Ulf Millward",
+     "name": "Aled Ashby",
      "plot": "redcliff_plot_10",
      "want": "stable",
      "x": 393.44,
@@ -4134,7 +4134,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Bryn Millward",
+     "name": "Bryn Ashby",
      "plot": "redcliff_plot_19",
      "want": "inn",
      "x": 362.8,
@@ -4156,7 +4156,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Clement Pike",
+     "name": "Jory Fenwick",
      "plot": "redcliff_plot_18",
      "want": "barber",
      "x": 352.07,
@@ -4178,7 +4178,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Dulcie Hobday",
+     "name": "Maud Harl",
      "plot": "redcliff_plot_8",
      "want": "counting_house",
      "x": 401.76,
@@ -4200,7 +4200,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Una Inchley",
+     "name": "Tamsin Coombe",
      "plot": "redcliff_plot_22",
      "want": "study",
      "x": 343.05,
@@ -4222,7 +4222,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Elsbet Hollis",
+     "name": "Nell Hollis",
      "plot": "redcliff_plot_20",
      "want": "temple",
      "x": 354.55,
@@ -4261,8 +4261,8 @@
      "sign": null,
      "light": false,
      "shop": "market",
-     "titled": true,
-     "home": true
+     "home": true,
+     "titled": true
     }
    ]
   },
@@ -4295,16 +4295,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Rhosyn Hollis",
+     "name": "Nell Gallowsby",
      "plot": "last_lantern_plot_16",
      "want": "shop",
      "x": 871,
@@ -4326,7 +4326,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Godric Fallowfield",
+     "name": "Wat Pike",
      "plot": "last_lantern_plot_15",
      "want": "forge",
      "x": 865.41,
@@ -4348,7 +4348,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Bartle Oakhurst",
+     "name": "Aled Millward",
      "plot": "last_lantern_plot_3",
      "want": "armoury",
      "x": 876.11,
@@ -4370,7 +4370,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Ganna Inchley",
+     "name": "Maud Coombe",
      "plot": "last_lantern_plot_4",
      "want": "bowyer",
      "x": 866.93,
@@ -4392,7 +4392,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Idony Greenhill",
+     "name": "Bryn Torbor",
      "plot": "last_lantern_plot_9",
      "want": "apothecary",
      "x": 907.35,
@@ -4414,7 +4414,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Avice Fallowfield",
+     "name": "Isolde Fenwick",
      "plot": "last_lantern_plot_10",
      "want": "stable",
      "x": 897.48,
@@ -4436,7 +4436,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Dunnet Coombe",
+     "name": "Emrys Coombe",
      "plot": "last_lantern_plot_14",
      "want": "inn",
      "x": 877.12,
@@ -4458,7 +4458,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Orla Fenwick",
+     "name": "Orla Pike",
      "plot": "last_lantern_plot_18",
      "want": "barber",
      "x": 857.99,
@@ -4480,7 +4480,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Drogo Marlow",
+     "name": "Tobin Fenwick",
      "plot": "last_lantern_plot_20",
      "want": "counting_house",
      "x": 850.04,
@@ -4502,7 +4502,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Hamon Millward",
+     "name": "Aled Ashby",
      "plot": "last_lantern_plot_8",
      "want": "study",
      "x": 912.85,
@@ -4524,7 +4524,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Colin Dimmock",
+     "name": "Wat Torbor",
      "plot": "last_lantern_plot_19",
      "want": "temple",
      "x": 852.49,
@@ -4574,16 +4574,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Alder Applegarth",
+     "name": "Tobin Thatcher",
      "plot": "coldwater_plot_2",
      "want": "shop",
      "x": 1468.65,
@@ -4605,7 +4605,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Rosamund Ashby",
+     "name": "Rosamund Millward",
      "plot": "coldwater_plot_5",
      "want": "forge",
      "x": 1447.16,
@@ -4627,7 +4627,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Emmot Quarrie",
+     "name": "Orla Reed",
      "plot": "coldwater_plot_10",
      "want": "armoury",
      "x": 1444.5,
@@ -4649,7 +4649,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Randal Cobbold",
+     "name": "Hobb Coombe",
      "plot": "coldwater_plot_15",
      "want": "bowyer",
      "x": 1490.69,
@@ -4693,7 +4693,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Fulk Yeoman",
+     "name": "Jory Barrowman",
      "plot": "coldwater_plot_3",
      "want": "stable",
      "x": 1477.67,
@@ -4715,7 +4715,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Gwen Underhill",
+     "name": "Gwen Millward",
      "plot": "coldwater_plot_7",
      "want": "inn",
      "x": 1443.07,
@@ -4737,7 +4737,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Fulk Barrowman",
+     "name": "Oswy Reed",
      "plot": "coldwater_plot_6",
      "want": "barber",
      "x": 1427.67,
@@ -4759,7 +4759,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Cressy Pennock",
+     "name": "Bryn Coombe",
      "plot": "coldwater_plot_9",
      "want": "counting_house",
      "x": 1435.4,
@@ -4781,7 +4781,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Hawise Barrowman",
+     "name": "Orla Reed",
      "plot": "coldwater_plot_1",
      "want": "study",
      "x": 1491.13,
@@ -4803,7 +4803,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Kitt Longacre",
+     "name": "Edda Hollis",
      "plot": "coldwater_plot_8",
      "want": "temple",
      "x": 1452.07,
@@ -4836,7 +4836,7 @@
     {
      "role": "elder",
      "title": "Elder",
-     "name": "Alder Oakhurst",
+     "name": "Corwin Ashby",
      "plot": "gorsehold_plot_14",
      "want": "hall",
      "x": 1549.42,
@@ -4852,16 +4852,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Walter Thatcher",
+     "name": "Pell Torbor",
      "plot": "gorsehold_plot_6",
      "want": "shop",
      "x": 1582.34,
@@ -4883,7 +4883,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Tamsin Rookwood",
+     "name": "Orla Hollis",
      "plot": "gorsehold_plot_12",
      "want": "forge",
      "x": 1561.27,
@@ -4905,7 +4905,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Dowsabel Kettleby",
+     "name": "Mabry Barrowman",
      "plot": "gorsehold_plot_9",
      "want": "armoury",
      "x": 1558.35,
@@ -4927,7 +4927,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Osric Rookwood",
+     "name": "Wat Gallowsby",
      "plot": "gorsehold_plot_10",
      "want": "bowyer",
      "x": 1543.29,
@@ -4949,7 +4949,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Alder Sallow",
+     "name": "Corwin Fenwick",
      "plot": "gorsehold_plot_15",
      "want": "apothecary",
      "x": 1532.91,
@@ -4971,7 +4971,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Nesta Ladd",
+     "name": "Tamsin Barrowman",
      "plot": "gorsehold_plot_8",
      "want": "tailor",
      "x": 1584.14,
@@ -4993,7 +4993,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Hew Sallow",
+     "name": "Dunnet Fenwick",
      "plot": "gorsehold_plot_2",
      "want": "stable",
      "x": 1580.43,
@@ -5015,7 +5015,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Tegan Thatcher",
+     "name": "Maud Torbor",
      "plot": "gorsehold_plot_18",
      "want": "inn",
      "x": 1562.45,
@@ -5037,7 +5037,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Benet Fenwick",
+     "name": "Hobb Fenwick",
      "plot": "gorsehold_plot_20",
      "want": "provisioner",
      "x": 1562.29,
@@ -5059,7 +5059,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Piers Cattermole",
+     "name": "Emrys Fenwick",
      "plot": "gorsehold_plot_19",
      "want": "barber",
      "x": 1546.55,
@@ -5081,7 +5081,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Edda Wainwright",
+     "name": "Nell Harl",
      "plot": "gorsehold_plot_7",
      "want": "counting_house",
      "x": 1583.42,
@@ -5103,7 +5103,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Brenna Hayward",
+     "name": "Orla Ashby",
      "plot": "gorsehold_plot_16",
      "want": "study",
      "x": 1534.04,
@@ -5125,7 +5125,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Marjory Ladd",
+     "name": "Maud Barrowman",
      "plot": "gorsehold_plot_13",
      "want": "temple",
      "x": 1548.45,
@@ -5164,8 +5164,8 @@
      "sign": null,
      "light": false,
      "shop": "market",
-     "titled": true,
-     "home": true
+     "home": true,
+     "titled": true
     }
    ]
   },
@@ -5198,16 +5198,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
-     "titled": true,
      "service": [
       "quests",
       "town news"
-     ]
+     ],
+     "titled": true
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Dunnet Oakhurst",
+     "name": "Emrys Ashby",
      "plot": "lowmoor_plot_5",
      "want": "shop",
      "x": 1221.67,
@@ -5229,7 +5229,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Wynne Cobbold",
+     "name": "Gwen Coombe",
      "plot": "lowmoor_plot_6",
      "want": "forge",
      "x": 1214.85,
@@ -5251,7 +5251,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Nell Fallowfield",
+     "name": "Edda Fenwick",
      "plot": "lowmoor_plot_11",
      "want": "armoury",
      "x": 1185.92,
@@ -5273,7 +5273,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Hamon Yeoman",
+     "name": "Aled Reed",
      "plot": "lowmoor_plot_19",
      "want": "bowyer",
      "x": 1200.66,
@@ -5295,7 +5295,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Piers Greenhill",
+     "name": "Dunnet Torbor",
      "plot": "lowmoor_plot_12",
      "want": "apothecary",
      "x": 1179.62,
@@ -5317,7 +5317,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Gwen Brookes",
+     "name": "Bryn Gallowsby",
      "plot": "lowmoor_plot_13",
      "want": "tailor",
      "x": 1250.64,
@@ -5339,7 +5339,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Godric Coombe",
+     "name": "Pell Coombe",
      "plot": "lowmoor_plot_10",
      "want": "stable",
      "x": 1194.36,
@@ -5361,7 +5361,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Jenet Thatcher",
+     "name": "Mabry Torbor",
      "plot": "lowmoor_plot_4",
      "want": "inn",
      "x": 1231.07,
@@ -5383,7 +5383,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Piers Eastmere",
+     "name": "Emrys Gallowsby",
      "plot": "lowmoor_plot_20",
      "want": "provisioner",
      "x": 1204.95,
@@ -5405,7 +5405,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Walter Harl",
+     "name": "Pell Harl",
      "plot": "lowmoor_plot_16",
      "want": "barber",
      "x": 1231.99,
@@ -5427,7 +5427,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Brenna Fenwick",
+     "name": "Tamsin Fenwick",
      "plot": "lowmoor_plot_1",
      "want": "counting_house",
      "x": 1246.7,
@@ -5449,7 +5449,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Ganna Thatcher",
+     "name": "Maud Thatcher",
      "plot": "lowmoor_plot_0",
      "want": "study",
      "x": 1250.84,
@@ -5471,7 +5471,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Letty Coombe",
+     "name": "Rosamund Harl",
      "plot": "lowmoor_plot_3",
      "want": "temple",
      "x": 1245.51,
@@ -5506,7 +5506,6 @@
    "name": "Sergeant-at-Arms Brede Holloway",
    "role": "trainer",
    "setpiece": "sp_drill_field",
-   "titled": true,
    "trains": [
     "warrior",
     "fighter",
@@ -5514,81 +5513,82 @@
     "swashbuckler",
     "dragon_knight",
     "tactician"
-   ]
+   ],
+   "titled": true
   },
   {
    "npc": "trainer_hunt",
    "name": "Oswy Greyfletch",
    "role": "trainer",
    "setpiece": "sp_greyfletch_camp",
-   "titled": true,
    "trains": [
     "ranger",
     "witch_hunter",
     "demon_hunter"
-   ]
+   ],
+   "titled": true
   },
   {
    "npc": "trainer_wilds",
    "name": "Wenna of the Stones",
    "role": "trainer",
    "setpiece": "sp_nine_maidens",
-   "titled": true,
    "trains": [
     "druid",
     "shaman"
-   ]
+   ],
+   "titled": true
   },
   {
    "npc": "trainer_grave",
    "name": "Old Mother Quell",
    "role": "trainer",
    "setpiece": "sp_saint_hulda_yard",
-   "titled": true,
    "trains": [
     "necromancer"
-   ]
+   ],
+   "titled": true
   },
   {
    "npc": "trainer_pact",
    "name": "Ysolde Coldharrow",
    "role": "trainer",
    "setpiece": "sp_coldharrow_ruins",
-   "titled": true,
    "trains": [
     "warlock"
-   ]
+   ],
+   "titled": true
   },
   {
    "npc": "trainer_mind",
    "name": "Brother Cadoc",
    "role": "trainer",
    "setpiece": "sp_kind_mother_shrine",
-   "titled": true,
    "trains": [
     "monk",
     "oracle"
-   ]
+   ],
+   "titled": true
   },
   {
    "npc": "trainer_tinker",
    "name": "Jory Millward",
    "role": "trainer",
    "setpiece": "sp_turnwater_mill",
-   "titled": true,
    "trains": [
     "tinker"
-   ]
+   ],
+   "titled": true
   },
   {
    "npc": "trainer_bard",
    "name": "Lute-master Emrys Fenwick",
    "role": "trainer",
    "setpiece": "sp_pail_and_plough",
-   "titled": true,
    "trains": [
     "bard"
-   ]
+   ],
+   "titled": true
   },
   {
    "npc": "corporal_jenk",

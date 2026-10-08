@@ -8,7 +8,8 @@
       "role": "angler",
       "at": "Torborhold",
       "greeting": "Ever held a rod? No? Good. No bad habits to fix. See the ripples, just south of where I'm standing? That's the town pool. It never fishes out.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
     }
   },
   "quests": [

@@ -6,32 +6,64 @@
       "name": "Tollkeeper Brann",
       "role": "elder",
       "at": "Hollin Toll",
-      "greeting": "Toll's a copper. For the road, not for me. Mostly not for me."
+      "greeting": "Toll's a copper. For the road, not for me. Mostly not for me.",
+      "titled": true
     },
     "goatherd_isolde": {
       "name": "Isolde the goatherd",
       "role": "farmer",
       "at": "Scree End",
-      "greeting": "Mind the goats. They don't mind you."
+      "greeting": "Mind the goats. They don't mind you.",
+      "titled": true
     },
     "fort_sergeant": {
       "name": "Sergeant Kettle",
       "role": "guard",
       "at": "Hollin Toll Fort",
-      "greeting": "The fort guards the pass. The pass guards the fort. Nobody guards the sergeant."
+      "greeting": "The fort guards the pass. The pass guards the fort. Nobody guards the sergeant.",
+      "titled": true
     },
     "climber_cadoc": {
       "name": "Cadoc the climber",
       "role": "scout",
       "at": "Scree End",
-      "greeting": "I climb things. Mostly to get away from other things."
+      "greeting": "I climb things. Mostly to get away from other things.",
+      "titled": true
     },
     "angler_hollin_toll": {
       "name": "Greta Icewell",
       "role": "angler",
       "at": "Hollin Toll",
       "greeting": "Cut a hole, drop a line, do not fall in. That is the whole craft up here. See the ripples, just north-east of where I'm standing? That's the town pool. It never fishes out.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_hollin_toll": {
+      "name": "Tibbot Eastmere",
+      "role": "carter",
+      "at": "Hollin Toll",
+      "greeting": "Walking is free. Riding is nearly free, and you arrive with your legs.",
+      "cart": "cart_hollin_toll",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_scree_end": {
+      "name": "Jory Furlong",
+      "role": "carter",
+      "at": "Scree End",
+      "greeting": "Climb up. Mind the turnips. A few coins and you are in another town before your boots notice.",
+      "cart": "cart_scree_end",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_wolditford": {
+      "name": "Gervase Eastmere",
+      "role": "carter",
+      "at": "Wolditford",
+      "greeting": "The ox is called Thunder. It is a joke. Where are we going?",
+      "cart": "cart_wolditford",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

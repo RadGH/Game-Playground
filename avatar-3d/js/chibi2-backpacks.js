@@ -141,8 +141,8 @@ export const G5_PACK_BUILDERS = {
     const cc = part?.color || '#5f6a4a', trim = part?.color2 || BRASS;
     const y = 0.06 * T, d = 0.21, zf = back(0, 0.1 * T, 0.03), z = zf - d * 0.5;
     // the frame: two uprights and three rungs, standing a hand above the shoulders
-    for (const s of [-1, 1]) add(taperedCurve([[s * 0.15 * W, -0.19 * T, zf - 0.01], [s * 0.155 * W, 0.1 * T, zf], [s * 0.14 * W, 0.44 * T, zf - 0.015]], [0.016, 0.015, 0.013], 5, 8), 'chest', WOOD);
-    for (const yy of [-0.16, 0.12, 0.4]) add(cyl(0.011, 0.011, 0.31 * W, 6), 'chest', tone(WOOD, 0.85), { position: [0, yy * T, zf - 0.006], rotation: [0, 0, Math.PI / 2] });
+    for (const s of [-1, 1]) add(taperedCurve([[s * 0.15 * W, -0.19 * T, zf - 0.01], [s * 0.155 * W, 0.1 * T, zf], [s * 0.15 * W, 0.4 * T, zf - 0.02]], [0.018, 0.017, 0.015], 5, 8), 'chest', WOOD);
+    for (const yy of [-0.16, 0.12, 0.37]) add(cyl(0.012, 0.012, 0.31 * W, 6), 'chest', tone(WOOD, 0.85), { position: [0, yy * T, zf - 0.006], rotation: [0, 0, Math.PI / 2] });
     // the sack, lashed on with two cross ropes
     sack(add, { y, z: z - 0.01, w: 0.4 * W, h: 0.46, d, colour: cc, belly: 1.1 });
     flap(add, { y: y + 0.2, z: z - 0.01, w: 0.4 * W, drop: 0.14, d, colour: tone(cc, 0.8), trim });
@@ -152,7 +152,7 @@ export const G5_PACK_BUILDERS = {
       add(taperedCurve(ring, ring.map(() => 0.006), 4, 12), 'chest', ROPE);
     }
     // bedroll across the top rung, cook pot hung from the lowest
-    bedroll(add, { y: 0.42 * T + 0.03, z: zf - 0.07, len: 0.42 * W, r: 0.058, colour: part?.color2 && part.color2 !== BRASS ? part.color2 : WOOL });
+    bedroll(add, { y: y + 0.285, z: z - 0.015, len: 0.44 * W, r: 0.056, colour: WOOL });
     add(new THREE.SphereGeometry(1, 10, 6, 0, Math.PI * 2, Math.PI * 0.42, Math.PI * 0.58), 'chest', IRON, { position: [0.11 * W, -0.17 * T, z - d * 0.5 - 0.02], scale: [0.06, 0.07, 0.06], metal: true });
     add(tor(0.05, 0.005, 10, Math.PI), 'chest', IRON, { position: [0.11 * W, -0.165 * T, z - d * 0.5 - 0.02], metal: true });
     for (const s of [-1, 1]) R.shoulderStrap(s, { topY: 0.24, lowY: -0.12, packZ: zf + 0.005, r: 0.016 });

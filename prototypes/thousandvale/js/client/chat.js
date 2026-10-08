@@ -3,7 +3,7 @@
 // on any name (whisper, party invite, friend, guild invite, mute here, ignore, report). Takes over `hud.chat` so
 // every system/combat/loot line in the game lands here too (on the All tab). DOM only; rules in social-core.js.
 
-import { CHANNELS, CHANNEL_BY_ID, tabOf, linePrefix, parseChatLine, CHAT_HELP, channelGate, ERR_TEXT } from './social-core.js';
+import { CHANNELS, CHANNEL_BY_ID, tabOf, linePrefix, parseChatLine, CHAT_HELP, channelGate, ERR_TEXT, accountLevel } from './social-core.js';
 import { h, createPanel } from './ui-panel.js';
 
 const $ = id => document.getElementById(id);
@@ -113,7 +113,7 @@ export function createChat({ net: getNet, hud, social, me, actions = {}, onTypin
       return true;
     }
     if (r.kind === 'send') {
-      const gate = channelGate(r.ch, { claimed: n.claimed, level: me().level, party: !!social?.party, guild: !!me().inGuild });
+      const gate = channelGate(r.ch, { claimed: n.claimed, level: accountLevel(n, me().level), party: !!social?.party, guild: !!me().inGuild });
       if (gate) { gateLine(gate, r.ch); return true; }
       if (S.mutedUntil > Date.now()) { line(`You are muted for ${Math.ceil((S.mutedUntil - Date.now()) / 60000)} more minute(s).`, 'bad'); return true; }
       if (r.ch === 'say') n.say(r.text);

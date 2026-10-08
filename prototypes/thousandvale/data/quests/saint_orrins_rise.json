@@ -6,32 +6,55 @@
       "name": "Prior Wendel",
       "role": "elder",
       "at": "Orrinsford",
-      "greeting": "Welcome, pilgrim. Please wipe your feet. Not on the saint."
+      "greeting": "Welcome, pilgrim. Please wipe your feet. Not on the saint.",
+      "titled": true
     },
     "sister_hild": {
       "name": "Sister Hild",
       "role": "healer",
       "at": "Pilgrim's Halt",
-      "greeting": "You look like someone who walks into graveyards on purpose."
+      "greeting": "You look like someone who walks into graveyards on purpose.",
+      "titled": true
     },
     "brother_tobin": {
       "name": "Brother Tobin",
       "role": "guard",
       "at": "the Abbey Wall",
-      "greeting": "I am the abbey's entire guard. I also do the bread."
+      "greeting": "I am the abbey's entire guard. I also do the bread.",
+      "titled": true
     },
     "pilgrim_nell": {
       "name": "Nell the pilgrim",
       "role": "pilgrim",
       "at": "drowned_shrine",
-      "greeting": "I came to pray. The shrine had other plans and also frogs."
+      "greeting": "I came to pray. The shrine had other plans and also frogs.",
+      "titled": true
     },
     "angler_orrinsford": {
       "name": "Sister Brindle",
       "role": "angler",
       "at": "Orrinsford",
       "greeting": "The Prior calls it idleness. I call it contemplation with a hook in it. See the ripples, just west of where I'm standing? That's the town pool. It never fishes out.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_orrinsford": {
+      "name": "Gervase Sallow",
+      "role": "carter",
+      "at": "Orrinsford",
+      "greeting": "The ox is called Thunder. It is a joke. Where are we going?",
+      "cart": "cart_orrinsford",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_pilgrim_s_halt": {
+      "name": "Wat Quarrie",
+      "role": "carter",
+      "at": "Pilgrim's Halt",
+      "greeting": "The ox is called Thunder. It is a joke. Where are we going?",
+      "cart": "cart_pilgrim_s_halt",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

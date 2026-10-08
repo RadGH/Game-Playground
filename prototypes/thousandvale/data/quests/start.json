@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E (play-test 2, Q27). THE STARTING CHAIN every new character gets, whatever the class: 'The South Road'. Merged into zone 'test' (The Torbor Fields) by test.json `include`. Elder Maud in Torborhold -> the south road -> the Pail and Plough (a crossroads inn, set piece sp_pail_and_plough) -> TWO branches the innkeeper hands out together, done in either order: (A) on to Orrinsford, the next town (Prior Wendel, zone saint_orrins_rise) and his small favour at Saint Hulda's Yard; (B) Greyfletch Camp's huntmaster, the beast's signs, then the mini boss Old Gristle at Gristle's Hollow (data/encounters/mb_old_gristle.json, level 2 since play-test 3 R2; Signs of the Beast and Old Gristle are level-2 quests). Both done -> 'Home with News' back to Maud, which leads into the province story (toll_at_fitockpi). Levels 1 -> 5 over ~1.7 km of road, with fights on the way so a new character levels into the boss. NEW FIELDS for stream A (docs/requests.md, E -> A play-test 2): `auto: true` = granted to every new character (and to any character that has neither done nor holds it) — it starts in the quest log; `requires: [ids]` = offered only when EVERY listed quest is done (on top of the `next` rule). `rewardText` = one player-facing line summing up the reward.",
+  "_doc": "Stream E (play-test 2, Q27). THE STARTING CHAIN every new character gets, whatever the class: 'The South Road'. Merged into zone 'test' (The Torbor Fields) by test.json `include`. Elder Maud in Torborhold -> the south road -> the Pail and Plough (a crossroads inn, set piece sp_pail_and_plough) -> TWO branches the innkeeper hands out together, done in either order: (A) on to Orrinsford, the next town (Prior Wendel, zone saint_orrins_rise) and his small favour at Saint Hulda's Yard; (B) Greyfletch Camp's huntmaster, the beast's signs, then the mini boss Old Gristle at Gristle's Hollow (data/encounters/mb_old_gristle.json, level 2 since play-test 3 R2; Signs of the Beast and Old Gristle are level-2 quests). Both done -> 'Home with News' back to Maud, which leads into the province story (toll_at_fitockpi). Levels 1 -> 5 over ~1.7 km of road, with fights on the way so a new character levels into the boss. NEW FIELDS for stream A (docs/requests.md, E -> A play-test 2): `auto: true` = granted to every new character (and to any character that has neither done nor holds it) — it starts in the quest log; `requires: [ids]` = offered only when EVERY listed quest is done (on top of the `next` rule). `rewardText` = one player-facing line summing up the reward. W5 (owner feedback 8): `start_wheels_for_hire` — the carter outside Orrinsford's gate (`carter_orrinsford`, an NPC of saint_orrins_rise.json made by tools/content-towns.mjs) offers it once the letter is delivered: a free token and one ride back to Torborhold, where the Prior's favour is anyway. It is a side step, not required by Home with News. New: step kind `ride` {from?, to} (stop ids of data/provinces/carts.json; done when a cart ride arrives at `to`), quest `tip` (one paragraph the client may show as a how-to when the quest is taken).",
   "zone": "test",
   "part": "start",
   "npcs": {
@@ -7,7 +7,8 @@
       "name": "Marra Thatcher",
       "role": "innkeeper",
       "at": "sp_pail_and_plough",
-      "greeting": "Sit down before you fall down. Stew's a copper. Trouble's free, and I've plenty of it."
+      "greeting": "Sit down before you fall down. Stew's a copper. Trouble's free, and I've plenty of it.",
+      "titled": true
     }
   },
   "quests": [
@@ -129,8 +130,40 @@
           }
         ]
       },
-      "rewardText": "Coin, and you have reached Orrinsford — the Prior has a favour to ask.",
+      "rewardText": "Coin, and you have reached Orrinsford — the Prior has a favour to ask. The carter outside the gate will run you back north for a few coins.",
       "next": "start_the_priors_favour"
+    },
+    {
+      "id": "start_wheels_for_hire",
+      "name": "Wheels for Hire",
+      "level": 3,
+      "giver": "carter_orrinsford",
+      "requires": [
+        "start_road_to_orrinsford"
+      ],
+      "offer": "You walked here from Torborhold? On purpose? Sit down. The Longroad Carters keep a cart outside the gate of every town in the Downs: tell the carter where, pay the fare, and the ox does the walking. Dearer the further you go, and it will take you to towns you have never set eyes on. Here, a token: the first ride is on the Prior. Try it back to Torborhold.",
+      "grant": [
+        {
+          "good": "cart_token",
+          "count": 1
+        }
+      ],
+      "steps": [
+        {
+          "kind": "ride",
+          "from": "cart_orrinsford",
+          "to": "cart_torborhold",
+          "text": "Ride an ox cart from Orrinsford to Torborhold",
+          "where": "Talk to the carter by the ox cart outside Orrinsford's gate, and pick Torborhold"
+        }
+      ],
+      "tip": "Ox carts: a carter stands by a parked cart outside every town's main gate. Talk to one (E), pick a town and pay the fare to ride there. You do not need to have been there before. Now and then a cart is on the road too: flag it down the same way.",
+      "done": "There. Your boots thank you. Any carter, any gate, any town: we are slow, but we are everywhere.",
+      "reward": {
+        "xp": 0.2,
+        "gold": 4
+      },
+      "rewardText": "A little coin and experience, and you know how to cross the Downs sitting down."
     },
     {
       "id": "start_the_priors_favour",

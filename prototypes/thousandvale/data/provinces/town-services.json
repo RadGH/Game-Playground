@@ -1,0 +1,463 @@
+{
+ "_doc": "Stream E (owner feedback 8, W15: the map's search \"finds shops and highlights the towns that have them\"). MADE by tools/content-givers.mjs. `towns.<settlement name>` = the roles and shop kinds found there (offices.json offices that offer something, the angler, the carter). A settlement not listed has none.",
+ "province": "torbor_downs",
+ "towns": {
+  "Hollin Toll": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "inn",
+   "innkeeper",
+   "merchant",
+   "provisioner",
+   "smith",
+   "stable",
+   "stablehand",
+   "tailor",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Ashcombe": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "inn",
+   "innkeeper",
+   "merchant",
+   "provisioner",
+   "scholar",
+   "smith",
+   "stable",
+   "stablehand",
+   "tailor",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Brackwater": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "inn",
+   "innkeeper",
+   "merchant",
+   "smith",
+   "stable",
+   "stablehand",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Saltmouth": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "inn",
+   "innkeeper",
+   "merchant",
+   "smith",
+   "stable",
+   "stablehand",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Copperdell": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "inn",
+   "innkeeper",
+   "market",
+   "merchant",
+   "provisioner",
+   "smith",
+   "stable",
+   "stablehand",
+   "tailor",
+   "trader",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Torborhold": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "inn",
+   "innkeeper",
+   "jeweller",
+   "market",
+   "merchant",
+   "provisioner",
+   "reeve",
+   "smith",
+   "stable",
+   "stablehand",
+   "tailor",
+   "trader",
+   "trainer",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Halsbridge": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "inn",
+   "innkeeper",
+   "jeweller",
+   "market",
+   "merchant",
+   "provisioner",
+   "smith",
+   "stable",
+   "stablehand",
+   "tailor",
+   "trader",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Gullwick": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "inn",
+   "innkeeper",
+   "market",
+   "merchant",
+   "provisioner",
+   "smith",
+   "stable",
+   "stablehand",
+   "tailor",
+   "trader",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Hermit's Rest": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "hermit",
+   "inn",
+   "innkeeper",
+   "jeweller",
+   "market",
+   "merchant",
+   "provisioner",
+   "smith",
+   "stable",
+   "stablehand",
+   "tailor",
+   "trader",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Orrinsford": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "inn",
+   "innkeeper",
+   "jeweller",
+   "market",
+   "merchant",
+   "provisioner",
+   "smith",
+   "stable",
+   "stablehand",
+   "tailor",
+   "trader",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Millbrook": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "inn",
+   "innkeeper",
+   "merchant",
+   "provisioner",
+   "smith",
+   "stable",
+   "stablehand",
+   "tailor",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Redcliff": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "inn",
+   "innkeeper",
+   "market",
+   "merchant",
+   "smith",
+   "stable",
+   "stablehand",
+   "tailor",
+   "trader",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Last Lantern": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "inn",
+   "innkeeper",
+   "merchant",
+   "smith",
+   "stable",
+   "stablehand",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Coldwater": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "inn",
+   "innkeeper",
+   "merchant",
+   "smith",
+   "stable",
+   "stablehand",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Gorsehold": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "inn",
+   "innkeeper",
+   "market",
+   "merchant",
+   "provisioner",
+   "smith",
+   "stable",
+   "stablehand",
+   "tailor",
+   "trader",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Lowmoor": [
+   "angler",
+   "apothecary",
+   "armourer",
+   "barber",
+   "bowyer",
+   "broker",
+   "carter",
+   "elder",
+   "general",
+   "healer",
+   "inn",
+   "innkeeper",
+   "merchant",
+   "provisioner",
+   "smith",
+   "stable",
+   "stablehand",
+   "tailor",
+   "unbinder",
+   "weaponsmith"
+  ],
+  "Scree End": [
+   "carter"
+  ],
+  "Wolditford": [
+   "carter"
+  ],
+  "Kettle Cross": [
+   "carter"
+  ],
+  "Eelwick": [
+   "carter"
+  ],
+  "Gull Steps": [
+   "carter"
+  ],
+  "Pickaxe Row": [
+   "carter"
+  ],
+  "Ashhaven": [
+   "carter"
+  ],
+  "Mawehaven": [
+   "carter"
+  ],
+  "Wamonhold": [
+   "carter"
+  ],
+  "Mill End": [
+   "carter"
+  ],
+  "Lower Mossgate": [
+   "carter"
+  ],
+  "Mirestead": [
+   "carter"
+  ],
+  "Ferry Hythe": [
+   "carter"
+  ],
+  "Wyrmrow": [
+   "carter"
+  ],
+  "Mirekeep": [
+   "carter"
+  ],
+  "Charcoal Burners": [
+   "carter"
+  ],
+  "Wildhaven": [
+   "carter"
+  ],
+  "Pilgrim's Halt": [
+   "carter"
+  ],
+  "Three Wheels": [
+   "carter"
+  ],
+  "Stormrow": [
+   "carter"
+  ],
+  "Ravencross": [
+   "carter"
+  ],
+  "Wildmere": [
+   "carter"
+  ],
+  "Cinder Farm": [
+   "carter"
+  ],
+  "Ravenhaven": [
+   "carter"
+  ],
+  "Minfenrow": [
+   "carter"
+  ],
+  "Bipetwatch": [
+   "carter"
+  ],
+  "Thornwick": [
+   "carter"
+  ],
+  "Netherby": [
+   "carter"
+  ],
+  "Burnt Barns": [
+   "carter"
+  ],
+  "Deepdene": [
+   "carter"
+  ]
+ }
+}

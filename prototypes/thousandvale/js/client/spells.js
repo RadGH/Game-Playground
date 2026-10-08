@@ -22,7 +22,7 @@ import { perf } from './perf.js';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 
-export function createSpells(scene, { camera, renderer = null, actors, groundY = () => 0, skillOf = () => null, quality = 'high', lights = null } = {}) {
+export function createSpells(scene, { camera, renderer = null, actors, groundY = () => 0, skillOf = () => null, quality = 'high', lights = null, shots = null } = {}) {
   const fx = new SpellFx(scene, { camera, scale: 1.15, maxParticles: quality === 'low' ? 120 : 260, maxLive: quality === 'low' ? 20 : 40 });
   let ready = false;
   Assets.open(new URL('../../../../assets/', import.meta.url).href)
@@ -161,8 +161,27 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
     const a = actorAt(ev.id);
     const el = elementOf(ev.element || ev.el || (ev.kind === 'arrow' || ev.kind === 'shot' ? 'physical' : 'arcane'));
     switch (ev.kind) {
-      case 'bolt': case 'arrow': case 'shot': {
+      case 'bolt': case 'arrow': case 'shot': case 'thrown': {
         const L = lookOf(ev.skill);
+        // play-test 8 (W2/W14): every shot is ONE body that leaves the hand and lands when the rules' damage does
+        // (projectiles.js: arrow, quarrel, knife, stone, firebolt…). A skill's own look still decides the burst on arrival.
+        if (shots) {
+          const to0 = target(ev.to); if (!to0) break;
+          const follow = typeof ev.to !== 'object' && ev.to != null ? () => target(ev.to) : null;
+          const n = L?.travel?.count || 1, hop = ev.hop || ev.fromId != null || ev.fork;
+          const start = hop && ev.from ? V(ev.from.x, g(ev.from) + 1.1, ev.from.z) : !a && ev.from ? V(ev.from.x, g(ev.from) + 1.1, ev.from.z) : null;
+          for (let k = 0; k < n; k++) {
+            const off = n > 1 ? (k / (n - 1) - 0.5) * 1.6 : 0;
+            const end = off ? to0.clone().add(V(Math.cos(off * 2) * off, 0, Math.sin(off * 2) * off)) : to0;
+            stats.projectiles++;
+            shots.fire(ev, { to: end, follow: off ? null : follow, from: start, ms: ev.ms, onLand: p => {
+              if (ev.miss) return;
+              impactAt(p, el, { scale: L ? L.scale : ev.kind === 'bolt' ? 0.8 : 0.6 });
+              if (L?.area?.kind === 'burst') area(L, p, 0);
+            } });
+          }
+          break;
+        }
         const from = ev.from ? V(ev.from.x, g(ev.from) + (a ? Math.max(0.5, a.height * 0.6) : 1.1), ev.from.z) : a ? chest(a) : null;
         const to = target(ev.to);
         const n = L?.travel?.count || 1;

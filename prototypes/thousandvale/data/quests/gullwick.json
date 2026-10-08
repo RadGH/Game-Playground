@@ -6,32 +6,73 @@
       "name": "Ferrywoman Nell",
       "role": "trader",
       "at": "Ferry Hythe",
-      "greeting": "Ferry's a copper. Swimming's free. The serpents are also free."
+      "greeting": "Ferry's a copper. Swimming's free. The serpents are also free.",
+      "titled": true
     },
     "elder_hollis": {
       "name": "Elder Hollis",
       "role": "elder",
       "at": "Gullwick",
-      "greeting": "The lakes feed us. The lakes also try to eat us. Fair trade."
+      "greeting": "The lakes feed us. The lakes also try to eat us. Fair trade.",
+      "titled": true
     },
     "stilt_guard": {
       "name": "Stilt-guard Emrys",
       "role": "guard",
       "at": "Stilt Fort",
-      "greeting": "Fort's on stilts. Very defensible. Very wobbly."
+      "greeting": "Fort's on stilts. Very defensible. Very wobbly.",
+      "titled": true
     },
     "angler_tobin": {
       "name": "Tobin the angler",
       "role": "fisher",
       "at": "drowned_shrine",
-      "greeting": "Best fishing's by the old shrine. Worst wisps, too."
+      "greeting": "Best fishing's by the old shrine. Worst wisps, too.",
+      "titled": true
     },
     "angler_gullwick": {
       "name": "Josey Fourlakes",
       "role": "angler",
       "at": "Gullwick",
       "greeting": "Four lakes, and I have a favourite stone on each. No, I will not say which. See the ripples, just west of where I'm standing? That's the town pool. It never fishes out.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_gullwick": {
+      "name": "Alder Rookwood",
+      "role": "carter",
+      "at": "Gullwick",
+      "greeting": "The ox is called Thunder. It is a joke. Where are we going?",
+      "cart": "cart_gullwick",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_ferry_hythe": {
+      "name": "Emmot Sallow",
+      "role": "carter",
+      "at": "Ferry Hythe",
+      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "cart": "cart_ferry_hythe",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_wyrmrow": {
+      "name": "Rhosyn Cattermole",
+      "role": "carter",
+      "at": "Wyrmrow",
+      "greeting": "Longroad Carters. We go everywhere there is a gate, and we are never late, because we never say when.",
+      "cart": "cart_wyrmrow",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_mirekeep": {
+      "name": "Alder Brackenridge",
+      "role": "carter",
+      "at": "Mirekeep",
+      "greeting": "The ox is called Thunder. It is a joke. Where are we going?",
+      "cart": "cart_mirekeep",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

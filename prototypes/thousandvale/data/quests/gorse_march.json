@@ -6,26 +6,48 @@
       "name": "Captain Hollis Gorse",
       "role": "guard",
       "at": "Gorsehold Redoubt",
-      "greeting": "The redoubt holds the march. The gorse holds everything else, prickly."
+      "greeting": "The redoubt holds the march. The gorse holds everything else, prickly.",
+      "titled": true
     },
     "barn_widow": {
       "name": "Widow Edda",
       "role": "farmer",
       "at": "Burnt Barns",
-      "greeting": "They burned the barns. I'm still here. They should be worried."
+      "greeting": "They burned the barns. I'm still here. They should be worried.",
+      "titled": true
     },
     "march_trader": {
       "name": "Garrick the pedlar",
       "role": "trader",
       "at": "Gorsehold",
-      "greeting": "Pins, needles, arrowheads. All pointy. It's that sort of country."
+      "greeting": "Pins, needles, arrowheads. All pointy. It's that sort of country.",
+      "titled": true
     },
     "angler_gorsehold": {
       "name": "Corporal Finch Loach",
       "role": "angler",
       "at": "Gorsehold",
       "greeting": "Sentry duty by the river, they said. Nobody said I could not bring a rod. See the ripples, just south of where I'm standing? That's the town pool. It never fishes out.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_gorsehold": {
+      "name": "Petronel Rookwood",
+      "role": "carter",
+      "at": "Gorsehold",
+      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "cart": "cart_gorsehold",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_burnt_barns": {
+      "name": "Tibbot Ashby",
+      "role": "carter",
+      "at": "Burnt Barns",
+      "greeting": "Walking is free. Riding is nearly free, and you arrive with your legs.",
+      "cart": "cart_burnt_barns",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

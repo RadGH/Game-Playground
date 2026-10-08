@@ -7,73 +7,85 @@
       "name": "Corporal Jenk",
       "role": "guard",
       "at": "sp_drill_field",
-      "greeting": "Sergeant says I'm to keep the dummies in good repair. I say the dummies started it."
+      "greeting": "Sergeant says I'm to keep the dummies in good repair. I say the dummies started it.",
+      "titled": true
     },
     "hesketh_brannock": {
       "name": "Hesketh Brannock",
       "role": "farmer",
       "at": "sp_brannock_fields",
-      "greeting": "Mind the wheat. Mind the turnips. Mind the scarecrow, he's had a hard week."
+      "greeting": "Mind the wheat. Mind the turnips. Mind the scarecrow, he's had a hard week.",
+      "titled": true
     },
     "ada_orchard": {
       "name": "Ada of the Orchard",
       "role": "orchardist",
       "at": "sp_brannock_fields",
-      "greeting": "The apples are early, the bees are cross and the cider is nearly a crime. Lovely season."
+      "greeting": "The apples are early, the bees are cross and the cider is nearly a crime. Lovely season.",
+      "titled": true
     },
     "hob_turnwater": {
       "name": "Miller Hob Turnwater",
       "role": "miller",
       "at": "sp_turnwater_mill",
-      "greeting": "If you hear squeaking, it's the wheel. If you hear squeaking and chewing, it's not."
+      "greeting": "If you hear squeaking, it's the wheel. If you hear squeaking and chewing, it's not.",
+      "titled": true
     },
     "abel_fenn": {
       "name": "Sexton Abel Fenn",
       "role": "sexton",
       "at": "sp_saint_hulda_yard",
-      "greeting": "Come to visit someone? Everybody here is in. Nobody's going anywhere. Usually."
+      "greeting": "Come to visit someone? Everybody here is in. Nobody's going anywhere. Usually.",
+      "titled": true
     },
     "kit_greyfletch": {
       "name": "Kit Greyfletch",
       "role": "hunter",
       "at": "sp_greyfletch_camp",
-      "greeting": "Uncle Oswy does the big hunts. I do the tally board. One day the tally board will do me."
+      "greeting": "Uncle Oswy does the big hunts. I do the tally board. One day the tally board will do me.",
+      "titled": true
     },
     "bettony": {
       "name": "Bettony the herb-woman",
       "role": "herbalist",
       "at": "sp_nine_maidens",
-      "greeting": "Step round the mushrooms, dear. They hold grudges against feet."
+      "greeting": "Step round the mushrooms, dear. They hold grudges against feet.",
+      "titled": true
     },
     "pilgrim_orla": {
       "name": "Orla the pilgrim",
       "role": "pilgrim",
       "at": "sp_kind_mother_shrine",
-      "greeting": "I walked here barefoot from Mill End. In hindsight, a mistake."
+      "greeting": "I walked here barefoot from Mill End. In hindsight, a mistake.",
+      "titled": true
     },
     "warden_maddoc": {
       "name": "Warden Maddoc",
       "role": "guard",
       "at": "sp_coldharrow_ruins",
-      "greeting": "Coldharrow was a fine house once. Now it's a fine place to get stabbed."
+      "greeting": "Coldharrow was a fine house once. Now it's a fine place to get stabbed.",
+      "titled": true
     },
     "edda_ashby": {
       "name": "Foreman Edda Ashby",
       "role": "foreman",
       "at": "sp_ashby_lumber_camp",
-      "greeting": "Every tree we fell, the forest sends something to complain about it."
+      "greeting": "Every tree we fell, the forest sends something to complain about it.",
+      "titled": true
     },
     "old_wat": {
       "name": "Old Wat the fisher",
       "role": "fisher",
       "at": "sp_tench_pool",
-      "greeting": "Forty years at this pool. The croakers have been here a fortnight and they think they own it."
+      "greeting": "Forty years at this pool. The croakers have been here a fortnight and they think they own it.",
+      "titled": true
     },
     "drover_gil": {
       "name": "Gil the drover",
       "role": "drover",
       "at": "sp_pail_and_plough",
-      "greeting": "Have you seen an ox? Big, brown, looks disappointed in you? That's Duchess."
+      "greeting": "Have you seen an ox? Big, brown, looks disappointed in you? That's Duchess.",
+      "titled": true
     }
   },
   "quests": [

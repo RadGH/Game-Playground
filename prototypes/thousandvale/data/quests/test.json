@@ -12,43 +12,77 @@
       "name": "Elder Maud Torbor",
       "role": "elder",
       "at": "Torborhold",
-      "greeting": "You've a sword and two good legs. That makes you the most useful person in Torborhold this week."
+      "greeting": "You've a sword and two good legs. That makes you the most useful person in Torborhold this week.",
+      "titled": true
     },
     "reeve_corwin": {
       "name": "Reeve Corwin Ashby",
       "role": "guard",
       "at": "Torborhold",
-      "greeting": "Half the watch is down with the cough and the other half is scared of a man called Hobb."
+      "greeting": "Half the watch is down with the cough and the other half is scared of a man called Hobb.",
+      "titled": true
     },
     "bryn_bonesetter": {
       "name": "Bryn the Bonesetter",
       "role": "healer",
       "at": "Torborhold",
-      "greeting": "Sit. No, not there, that's where I keep the leeches."
+      "greeting": "Sit. No, not there, that's where I keep the leeches.",
+      "titled": true
     },
     "goody_harl": {
       "name": "Goody Harl",
       "role": "farmer",
       "at": "Wamonhold",
-      "greeting": "If you're here about the pig, you're too late, she ate the last fellow's boots."
+      "greeting": "If you're here about the pig, you're too late, she ate the last fellow's boots.",
+      "titled": true
     },
     "old_pell": {
       "name": "Old Pell",
       "role": "shepherd",
       "at": "Wamonhold",
-      "greeting": "Have you seen my brother Aled? He went to the ford with the flock money."
+      "greeting": "Have you seen my brother Aled? He went to the ford with the flock money.",
+      "titled": true
     },
     "tamsin_reed": {
       "name": "Tamsin Reed",
       "role": "fisher",
       "at": "Mawehaven",
-      "greeting": "Mind the frogs. No, I mean it. MIND the frogs."
+      "greeting": "Mind the frogs. No, I mean it. MIND the frogs.",
+      "titled": true
     },
     "dunnet": {
       "name": "Dunnet the carter",
       "role": "trader",
       "at": "overturned_cart",
-      "greeting": "Are they gone?"
+      "greeting": "Are they gone?",
+      "titled": true
+    },
+    "carter_torborhold": {
+      "name": "Mabry Brookes",
+      "role": "carter",
+      "at": "Torborhold",
+      "greeting": "I do not go fast, I do not go far in the dark, and I do not stop for wolves. Fares are on the board.",
+      "cart": "cart_torborhold",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_mawehaven": {
+      "name": "Tobin Underhill",
+      "role": "carter",
+      "at": "Mawehaven",
+      "greeting": "Out of Mawehaven by cart is the only way to leave with dignity. Pick a town.",
+      "cart": "cart_mawehaven",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_wamonhold": {
+      "name": "Idony Fenwick",
+      "role": "carter",
+      "at": "Wamonhold",
+      "greeting": "I do not go fast, I do not go far in the dark, and I do not stop for wolves. Fares are on the board.",
+      "cart": "cart_wamonhold",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

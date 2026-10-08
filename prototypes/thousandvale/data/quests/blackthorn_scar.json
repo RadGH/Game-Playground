@@ -6,26 +6,48 @@
       "name": "Rosa of Last Lantern",
       "role": "elder",
       "at": "Last Lantern",
-      "greeting": "As long as the lantern burns, the Scar doesn't take the village. It's very important you don't sneeze on it."
+      "greeting": "As long as the lantern burns, the Scar doesn't take the village. It's very important you don't sneeze on it.",
+      "titled": true
     },
     "penitent_jory": {
       "name": "Jory the penitent",
       "role": "pilgrim",
       "at": "Thornwick",
-      "greeting": "I joined the cult by mistake. I thought it was a baking club."
+      "greeting": "I joined the cult by mistake. I thought it was a baking club.",
+      "titled": true
     },
     "outrider_garrick": {
       "name": "Outrider Garrick",
       "role": "scout",
       "at": "the Warband Stockade",
-      "greeting": "Their stockade. My vantage. Their arrows. My problem."
+      "greeting": "Their stockade. My vantage. Their arrows. My problem.",
+      "titled": true
     },
     "angler_last_lantern": {
       "name": "Wick Thornaby",
       "role": "angler",
       "at": "Last Lantern",
       "greeting": "Throw back anything with thorns. Throw back anything that asks you to. No water for a mile, and what there was the blight drank. Sell me what you bring from elsewhere.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_last_lantern": {
+      "name": "Alys Cobbold",
+      "role": "carter",
+      "at": "Last Lantern",
+      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "cart": "cart_last_lantern",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_thornwick": {
+      "name": "Blanche Furlong",
+      "role": "carter",
+      "at": "Thornwick",
+      "greeting": "Longroad Carters. We go everywhere there is a gate, and we are never late, because we never say when.",
+      "cart": "cart_thornwick",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

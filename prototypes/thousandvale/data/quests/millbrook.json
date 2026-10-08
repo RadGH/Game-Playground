@@ -6,32 +6,82 @@
       "name": "Reeve Garrick Pike",
       "role": "elder",
       "at": "Millbrook",
-      "greeting": "Three mills, one river, endless arguments about whose water it is."
+      "greeting": "Three mills, one river, endless arguments about whose water it is.",
+      "titled": true
     },
     "goodwife_edda": {
       "name": "Goodwife Edda",
       "role": "farmer",
       "at": "Three Wheels",
-      "greeting": "If you've come about the boar, get in line behind the boar."
+      "greeting": "If you've come about the boar, get in line behind the boar.",
+      "titled": true
     },
     "castellan_oswy": {
       "name": "Castellan Oswy",
       "role": "guard",
       "at": "Millbrook Keep",
-      "greeting": "The keep is very secure. Mostly against us getting out."
+      "greeting": "The keep is very secure. Mostly against us getting out.",
+      "titled": true
     },
     "tinker_cadoc": {
       "name": "Cadoc the tinker",
       "role": "trader",
       "at": "tinker_wagon",
-      "greeting": "Pots mended, knives sharpened, carts un-overturned. Usually."
+      "greeting": "Pots mended, knives sharpened, carts un-overturned. Usually.",
+      "titled": true
     },
     "angler_millbrook": {
       "name": "Jed Weirside",
       "role": "angler",
       "at": "Millbrook",
       "greeting": "The miller says the chub are his. The chub and I disagree. See the ripples, just west of where I'm standing? That's the town pool. It never fishes out.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_millbrook": {
+      "name": "Dowsabel Kettleby",
+      "role": "carter",
+      "at": "Millbrook",
+      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "cart": "cart_millbrook",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_three_wheels": {
+      "name": "Emmot Ladd",
+      "role": "carter",
+      "at": "Three Wheels",
+      "greeting": "I do not go fast, I do not go far in the dark, and I do not stop for wolves. Fares are on the board.",
+      "cart": "cart_three_wheels",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_stormrow": {
+      "name": "Cressy Ashby",
+      "role": "carter",
+      "at": "Stormrow",
+      "greeting": "Where to? The ox knows every road in the Downs, and takes most of them slowly.",
+      "cart": "cart_stormrow",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_ravencross": {
+      "name": "Kenric Hayward",
+      "role": "carter",
+      "at": "Ravencross",
+      "greeting": "Climb up. Mind the turnips. A few coins and you are in another town before your boots notice.",
+      "cart": "cart_ravencross",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_wildmere": {
+      "name": "Tegan Coombe",
+      "role": "carter",
+      "at": "Wildmere",
+      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "cart": "cart_wildmere",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

@@ -226,6 +226,8 @@ export function safeEvents(ev, S, guards) {
     _doc: 'W1 (owner feedback 8): a NEWCOMER is a character under `underLevel` OR one with less than `firstMinutes` of played time. An event with `startOn.clearOfNewcomersM` may not start, nor run its countdown, while a newcomer stands within that many metres of its centre (the settlement for a town event, the arena for a zone event); a countdown already running is called off. tools/content-towns.mjs writes the distances.' };
   out.director.raid = { rules: 'data/provinces/guards.json raid', firstTarget: 'guard', neverFirstTarget: 'newcomer', enterBy: 'gate',
     _doc: 'W1: a town raid comes in through the gates listed on the event (`raid.gates`), fights the town guards first, and never opens on a newcomer. The numbers and the guards\' lines are in data/provinces/guards.json.' };
+  out.director.chest = { opensOn: 'won', lockedBy: 'nothing', lootSec: 120, forEveryone: 'who took part',
+    _doc: 'W24 (owner feedback 8, report #45): a chest an event leaves (`reward.chest`) is open from the moment the event is won — no kill order, no leftover monster and no missing add can keep it shut — and it stays until everyone who took part has looted it or `lootSec` seconds have passed. The result line ("Won") is only shown once the chest can be opened. Road-event chests follow the same rule: data/provinces/road-events.json `rules.chest`.' };
   const world = s => { const o = zoneOffset(s.wid); return { x: s.x + o.ox, z: s.z + o.oz }; };
   for (const e of out.realm) {
     const s = e.site && e.site.settlement ? S.find(x => x.name === e.site.settlement) : null;
@@ -239,6 +241,28 @@ export function safeEvents(ev, S, guards) {
     for (const s of S) { const w = world(s); near = Math.min(near, Math.hypot(w.x - at.x, w.z - at.z) - s.r); }
     if (near <= NEWCOMER.zoneNear || (e.level || 1) <= NEWCOMER.zoneLevel) e.startOn = { ...(e.startOn || {}), clearOfNewcomersM: NEWCOMER.zoneClear };
     else if (e.startOn && e.startOn.clearOfNewcomersM) { delete e.startOn.clearOfNewcomersM; if (!Object.keys(e.startOn).length) delete e.startOn; }
+  }
+  return out;
+}
+
+/** What a carter says when you walk up (one per carter, by a hash of the town; `{town}` = its own town). */
+export const CARTER_GREETINGS = Object.freeze([
+  'Where to? The ox knows every road in the Downs, and takes most of them slowly.',
+  'Climb up. Mind the turnips. A few coins and you are in another town before your boots notice.',
+  'Longroad Carters. We go everywhere there is a gate, and we are never late, because we never say when.',
+  'Walking is free. Riding is nearly free, and you arrive with your legs.',
+  'Name a town. If it has a gate, I have been stuck outside it.',
+  'The ox is called Thunder. It is a joke. Where are we going?',
+  'I do not go fast, I do not go far in the dark, and I do not stop for wolves. Fares are on the board.',
+  'Out of {town} by cart is the only way to leave with dignity. Pick a town.',
+]);
+
+/** W5: every carter is an NPC of its zone's quest file (`placedBy`: the placer and the offices tool leave it alone). */
+function carterNpcs(stops) {
+  const out = {};
+  for (const s of stops) {
+    const g = CARTER_GREETINGS[hash('greet:' + s.id) % CARTER_GREETINGS.length].replace('{town}', s.town);
+    (out[s.sheet] ||= {})[s.carter.id] = { name: s.carter.name, role: 'carter', at: s.town, greeting: g, cart: s.id, placedBy: 'content-towns' };
   }
   return out;
 }
@@ -267,6 +291,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     put('data/provinces/guards.json', { made: 'tools/content-towns.mjs — posts, gates and problems are generated; edit rules / ranks / hold by hand', gates: g.gates, posts: g.posts, problems: g.problems }),
     put('data/provinces/carts.json', { made: 'tools/content-towns.mjs — stops, links, fares and problems are generated; edit rules / roaming by hand', stops: c.stops, links: t.links, fares: t.fares, problems: c.problems }),
   ];
+  // W5: the carters join their zone's quest file (stream A gives a quest NPC a body, a greeting and its quests)
+  for (const [sheet, npcs] of Object.entries(carterNpcs(c.stops))) {
+    const f = `data/quests/${sheet}.json`, src = readFileSync(P(f), 'utf8'), j = JSON.parse(src);
+    for (const k of Object.keys(j.npcs || {})) if (j.npcs[k].placedBy === 'content-towns' && !npcs[k]) delete j.npcs[k];
+    for (const [id, n] of Object.entries(npcs)) j.npcs[id] = { ...n, ...(j.npcs[id] && 'titled' in j.npcs[id] ? { titled: j.npcs[id].titled } : {}) };
+    const ind = /^\{\n( +)"/.exec(src), next = JSON.stringify(j, null, ind ? ind[1].length : 1) + '\n';
+    if (next !== src) { changed.push(true); if (!CHECK) writeFileSync(P(f), next); }
+  }
   // W1: the events that may not start beside a newcomer, and the gates a raid comes in by
   {
     const cur = readFileSync(P('data/quests/events.json'), 'utf8'), ev = JSON.parse(cur);

@@ -6,26 +6,48 @@
       "name": "Warden Oswy",
       "role": "guard",
       "at": "Mere Tower",
-      "greeting": "Coldwater by name. Coldwater by nature. Coldwater down your boots."
+      "greeting": "Coldwater by name. Coldwater by nature. Coldwater down your boots.",
+      "titled": true
     },
     "elder_wenna": {
       "name": "Elder Wenna",
       "role": "elder",
       "at": "Coldwater",
-      "greeting": "Come in, warm up. Not too warm; the house is made of reeds."
+      "greeting": "Come in, warm up. Not too warm; the house is made of reeds.",
+      "titled": true
     },
     "netherby_fisher": {
       "name": "Pike of Netherby",
       "role": "fisher",
       "at": "Netherby",
-      "greeting": "Netherby's the last village before the mere gets deep. And odd."
+      "greeting": "Netherby's the last village before the mere gets deep. And odd.",
+      "titled": true
     },
     "angler_coldwater": {
       "name": "Marta Stillmere",
       "role": "angler",
       "at": "Coldwater",
       "greeting": "Hear that bell? There is no bell. Lovely evening for it, though. See the ripples, just south-west of where I'm standing? That's the town pool. It never fishes out.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_coldwater": {
+      "name": "Fenna Furlong",
+      "role": "carter",
+      "at": "Coldwater",
+      "greeting": "Where to? The ox knows every road in the Downs, and takes most of them slowly.",
+      "cart": "cart_coldwater",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_netherby": {
+      "name": "Alys Ashby",
+      "role": "carter",
+      "at": "Netherby",
+      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "cart": "cart_netherby",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

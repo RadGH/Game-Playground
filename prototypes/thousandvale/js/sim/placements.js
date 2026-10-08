@@ -76,7 +76,7 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
         const n = npcs[p.id] || {};
         const gives = questList.filter(q => q.giver === p.id).map(q => q.id);
         objects.push({ type: 'npc', name: p.name || n.name || 'Stranger', x: p.x, z: p.z, yaw: p.yaw || 0, key: 'npc:' + p.id,
-          npc: { id: p.id, role: p.role || n.role || null, says: n.greeting ? [n.greeting] : [], quest: gives[0] || null, quests: gives, zone } });
+          npc: { id: p.id, role: p.role || n.role || null, says: n.greeting ? [n.greeting] : [], quest: gives[0] || null, quests: gives, zone, ...(typeof (p.titled ?? n.titled) === 'boolean' ? { titled: p.titled ?? n.titled } : {}), ...(p.cart ? { cart: p.cart } : {}) } });
         break;
       }
       case 'fort': {

@@ -6,32 +6,55 @@
       "name": "Harbourmaster Orla Pike",
       "role": "elder",
       "at": "Saltmouth",
-      "greeting": "Ships in, ships out, smugglers in between."
+      "greeting": "Ships in, ships out, smugglers in between.",
+      "titled": true
     },
     "net_mender": {
       "name": "Old Netty",
       "role": "fisher",
       "at": "Gull Steps",
-      "greeting": "Nets mended. Gulls insulted. Both for free."
+      "greeting": "Nets mended. Gulls insulted. Both for free.",
+      "titled": true
     },
     "gunner_wat": {
       "name": "Gunner Wat",
       "role": "guard",
       "at": "Saltmouth Battery",
-      "greeting": "The battery's guns face the sea. The trouble keeps coming from land."
+      "greeting": "The battery's guns face the sea. The trouble keeps coming from land.",
+      "titled": true
     },
     "smuggler_jory": {
       "name": "Jory Coombe",
       "role": "smuggler",
       "at": "smugglers_cellar",
-      "greeting": "I'm a respectable importer. Of things. Don't look in the barrel."
+      "greeting": "I'm a respectable importer. Of things. Don't look in the barrel.",
+      "titled": true
     },
     "angler_saltmouth": {
       "name": "Skipper Hale Tarrow",
       "role": "angler",
       "at": "Saltmouth",
       "greeting": "Rivers! Ponds! Hah. Come back when you have been pulled off a harbour wall. See the ripples, just north-east of where I'm standing? That's the town pool. It never fishes out.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_saltmouth": {
+      "name": "Edda Dunstable",
+      "role": "carter",
+      "at": "Saltmouth",
+      "greeting": "Longroad Carters. We go everywhere there is a gate, and we are never late, because we never say when.",
+      "cart": "cart_saltmouth",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_gull_steps": {
+      "name": "Dickon Fallowfield",
+      "role": "carter",
+      "at": "Gull Steps",
+      "greeting": "Out of Gull Steps by cart is the only way to leave with dignity. Pick a town.",
+      "cart": "cart_gull_steps",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

@@ -6,32 +6,55 @@
       "name": "Reeve Mabry Fenwick",
       "role": "elder",
       "at": "Brackwater",
-      "greeting": "Mind the planks. Mind the water. Mind everything, really."
+      "greeting": "Mind the planks. Mind the water. Mind everything, really.",
+      "titled": true
     },
     "eel_woman_wenna": {
       "name": "Wenna Eelwife",
       "role": "fisher",
       "at": "Eelwick",
-      "greeting": "Eels. Want some? No? More for me."
+      "greeting": "Eels. Want some? No? More for me.",
+      "titled": true
     },
     "tower_keeper_hob": {
       "name": "Keeper Haskel",
       "role": "guard",
       "at": "Reedwall Tower",
-      "greeting": "Reedwall Tower: the only dry spot for a mile, and it's damp."
+      "greeting": "Reedwall Tower: the only dry spot for a mile, and it's damp.",
+      "titled": true
     },
     "witch_mabry": {
       "name": "Old Mabry",
       "role": "hedge-witch",
       "at": "fen_witch_hut",
-      "greeting": "My jars are open and my slimes are loose. Help a poor old woman, dear, it's slightly your fault for existing."
+      "greeting": "My jars are open and my slimes are loose. Help a poor old woman, dear, it's slightly your fault for existing.",
+      "titled": true
     },
     "angler_brackwater": {
       "name": "Mog Eelwright",
       "role": "angler",
       "at": "Brackwater",
       "greeting": "If it wriggles, I sell it. If it does not, give it a minute. See the ripples, just south-east of where I'm standing? That's the town pool. It never fishes out.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_brackwater": {
+      "name": "Garrick Kettleby",
+      "role": "carter",
+      "at": "Brackwater",
+      "greeting": "Walking is free. Riding is nearly free, and you arrive with your legs.",
+      "cart": "cart_brackwater",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_eelwick": {
+      "name": "Dickon Pike",
+      "role": "carter",
+      "at": "Eelwick",
+      "greeting": "The ox is called Thunder. It is a joke. Where are we going?",
+      "cart": "cart_eelwick",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

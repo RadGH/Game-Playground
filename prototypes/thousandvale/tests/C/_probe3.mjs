@@ -1,2 +1,0 @@
-import { xpWalk, printWalk } from './xp-walk.mjs';
-for (const k of [1.5, 2.25, 2.5, 3]) { const w = await xpWalk({ killMult: k, top: 20 }); console.log(printWalk(w, 'k')); const s = (f, a, b) => w.rows.filter(r => r.level >= a && r.level <= b).reduce((x, r) => x + r[f], 0); console.log('minutes 1->10 grind', s('grindMin', 1, 9), 'quest', s('questMin', 1, 9), '| 10->20 grind', s('grindMin', 10, 19), 'quest', s('questMin', 10, 19)); }

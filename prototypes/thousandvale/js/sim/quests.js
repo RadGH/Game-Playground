@@ -344,6 +344,14 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
     }
   }
 
+  // W12: who gives what, built once (a mark is asked for every NPC in sight of every player)
+  const giverDefs = new Map(), startDefs = [], talkNpcs = new Set();
+  for (const def of defs.values()) {
+    if (def.giver) { let l = giverDefs.get(def.giver); if (!l) giverDefs.set(def.giver, l = []); l.push(def); }
+    if (def.startsFrom) startDefs.push(def);
+    for (const st of def.steps || []) if ((st.kind === 'talk' || st.kind === 'deliver') && st.npc) talkNpcs.add(st.npc);
+  }
+
   return {
     defs, npcs, placeOf, nextOf, hunt,
     offers(ch, giver) {
@@ -434,6 +442,40 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       const rw = def.reward || {};
       return { ok: true, def, next: nextOf.get(id) || def.next || null, reward: { xpShare: rw.xp || 0, level: def.level || 1, gold: questGold(rw.gold, def.level || 1), item: rw.item || null } };
     },
+    /**
+     * W12 (owner feedback 8, report #33): the marker over a giver's head FOR THIS CHARACTER —
+     *   'turnin' (gold ?)  a finished quest of yours goes back to them, or your current step is to talk / deliver to them
+     *   'offer'  (gold !)  they have a story quest you can take now
+     *   'active' (grey ?)  a quest of theirs is in your log, not finished
+     *   'later'  (grey !)  they have a quest you cannot take yet (level, class, an earlier quest)
+     *   'job'              only repeatable work on offer (a job board role) — drawn dim, or not at all
+     *   null               nothing for you
+     * Priority in that order. Cheap: no job is generated, nothing is written.
+     */
+    mark(ch, giver) {
+      if (!giver) return null;
+      const s = stateOf(ch);
+      let active = false, offer = false, later = false;
+      for (const [id, a] of Object.entries(s.active)) {
+        const def = defOf(ch, id);
+        if (!def) continue;
+        const done = a.step >= def.steps.length;
+        if (done) { if (gives(def, giver)) return 'turnin'; continue; }
+        const open = def.order === 'any' ? def.steps : [def.steps[a.step]];
+        for (const st of open) if (st && (st.kind === 'talk' || st.kind === 'deliver') && giver.npcId && st.npc === giver.npcId) return 'turnin';
+        if (def.road && def.road.target && giver.key && def.road.target.key === giver.key) return 'turnin';      // a road delivery's named recipient
+        if (gives(def, giver)) active = true;
+      }
+      const mine = giverDefs.get(giver.npcId || '') || [];
+      for (const def of mine) { if (s.done[def.id] || s.active[def.id]) continue; if (available(ch, def)) { offer = true; break; } later = true; }
+      if (!offer && giver.vignette) for (const def of startDefs) { if (!gives(def, giver) || s.done[def.id] || s.active[def.id]) continue; if (available(ch, def)) { offer = true; break; } later = true; }
+      if (offer) return 'offer';
+      if (active) return 'active';
+      if (later) return 'later';
+      return jobs && jobs.frames && giver.role && JOB_ROLES.has(giver.role) ? 'job' : null;
+    },
+    /** Could this giver EVER carry a mark? (a quest NPC, a quest-starting object, a job role, a talk / deliver target) */
+    marks(giver) { return !!giver && (giverDefs.has(giver.npcId || '') || talkNpcs.has(giver.npcId || '') || (!!giver.role && JOB_ROLES.has(giver.role)) || (!!giver.vignette && startDefs.some(d => gives(d, giver)))); },
     view(ch) { const s = stateOf(ch); return { active: Object.entries(s.active).map(([id, a]) => { const d = defOf(ch, id); return d ? view(ch, d, a) : null; }).filter(Boolean), done: Object.keys(s.done) }; },
     npcInfo: id => npcs.get(id) || null,
     /** S5 (play-test 4): the quest-log view of a generated def (road events offer job-shaped quests through the job path). */

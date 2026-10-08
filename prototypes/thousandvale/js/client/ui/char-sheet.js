@@ -77,6 +77,17 @@ export function createCharSheet({ net, hud, bag, self, bar }) {
     return out;
   }
   bag?.setStats?.(bagLines);
+  // Play-test 8: other streams add a block of their own under the stats (P-client: "Professions"). They own what is IN the
+  // block; this window owns the frame, the order and when it is drawn.
+  const extra = new Map();      // id -> { id, title, draw(box) -> Node | Node[] | void, tip? }
+  function extraBlocks() {
+    return [...extra.values()].map(sec => {
+      const box = h('div.sh-extra', { dataset: { section: sec.id, ...(sec.tip ? { tip: sec.tip } : {}) } }, h('h4', {}, sec.title));
+      try { const kids = sec.draw(box); if (kids) box.append(...[kids].flat().filter(k => k != null && k !== false)); }
+      catch (e) { console.warn(`[sheet] section ${sec.id}:`, e?.message || e); box.append(h('p.sh-note', {}, 'This part could not be drawn.')); }
+      return box;
+    });
+  }
   function draw() {
     bag?.draw?.();
     if (!panel.isOpen) return;
@@ -98,6 +109,7 @@ export function createCharSheet({ net, hud, bag, self, bar }) {
       h('h4', { title: 'What each ability deals in a second of use against an even-level enemy, counting its cooldown. An estimate, not a promise.' }, 'Damage a second (estimated)'),
       (sh.abilities || []).length ? h('ul.sh-list.abilities', { dataset: { part: 'abilities' } }, ...sh.abilities.map(ability)) : h('p.sh-note', {}, 'No abilities yet.'),
       a ? h('div.sh-angling', { dataset: { tip: 'Rises with every catch. A higher skill hooks better fish, opens the better pools and makes the tug easier.' } }, h('h4', {}, 'Angling'), h('div.sh-angbar', {}, h('i', { style: `width:${(a.frac * 100).toFixed(1)}%` }), h('span', {}, a.text)), h('small', {}, a.sub)) : null,
+      ...extraBlocks(),
       sh.basic && S.server ? h('p.sh-note.basic', {}, 'Basic numbers for now — the full sheet (perks, talents, every ability) follows in a moment.') : sh.basic ? h('p.sh-note.basic', {}, 'Basic view: added up here from your level and what you wear. The full numbers (perks, talents, buffs, every ability) come from the server.') : null);
   }
 
@@ -107,5 +119,9 @@ export function createCharSheet({ net, hud, bag, self, bar }) {
     n.on('equip', () => { setTimeout(() => { refresh(); if (panel.isOpen && S.server) ask(); }, 0); });
     n.on('you', p => { if (p.sheet) setSheet(p.sheet, true); else if (p.angling) { S.angling = { ...(S.angling || {}), ...p.angling }; draw(); } else if (p.level != null || p.hpMax != null || p.mpMax != null || p.bar) setTimeout(refresh, 0); });
   }
-  return { panel, wire, draw, refresh, setSheet, dock, get state() { return { open: panel.isOpen, server: S.server, advanced: S.advanced, diff: S.diff, rows: [...panel.body.querySelectorAll('.sh-row')].map(e => e.textContent), docked: document.body.classList.contains('sheet-with-bag') }; } };
+  return { panel, wire, draw, refresh, setSheet, dock,
+    /** A block under the stats, drawn by its owner: addSection('professions', 'Professions', box => [nodes…]). Returns a remover. */
+    addSection(id, title, drawFn, { tip = '' } = {}) { extra.set(String(id), { id: String(id), title, draw: drawFn, tip }); if (panel.isOpen) draw(); return () => { extra.delete(String(id)); if (panel.isOpen) draw(); }; },
+    get sections() { return [...extra.keys()]; },
+    get state() { return { open: panel.isOpen, server: S.server, advanced: S.advanced, diff: S.diff, rows: [...panel.body.querySelectorAll('.sh-row')].map(e => e.textContent), docked: document.body.classList.contains('sheet-with-bag') }; } };
 }

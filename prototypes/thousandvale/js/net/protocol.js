@@ -238,6 +238,8 @@ export const SERVER_MSGS = Object.freeze({
   eventAt: ['uid'],
   feedbackR: ['ok', 'id', 'first', 'why', 'msg', 'state', 'ref'],
   feedbackMine: ['ok', 'list', 'more', 'why'],
+  // owner feedback 8 (docs/protocol.md §24)
+  questMarks: ['marks', 'full'],
   adminReports: ['list', 'counts'],
   adminR: ['op', 'ok', 'id', 'state'],
   fishR: ['ok', 'state', 'at', 'why', 'msg'],
@@ -264,7 +266,7 @@ export const LOOT_OPS = Object.freeze(['open', 'take', 'all', 'close', 'roll']);
 /** Shop op aliases D-UI's first draft used ('list' = open, 'buyback' = back, 'repair' = refused: no durability). */
 export const ROLL_CHOICES = Object.freeze(['need', 'greed', 'skip']);
 export const SHOP_OPS = Object.freeze(['open', 'buy', 'sell', 'back', 'list', 'buyback', 'repair']);
-export const MOUNT_OPS = Object.freeze(['summon', 'off']);
+export const MOUNT_OPS = Object.freeze(['summon', 'off', 'cancel']);      // cancel (round 8, W26): stop the call, stay on foot
 export const PREF_KEYS = Object.freeze(['showGear', 'showHelm']);
 /** Party loot thresholds (`party {op:'loot', code}`), lowest first; Farhold's rarity ladder. */
 export const LOOT_MINS = Object.freeze(['magic', 'rare', 'legendary', 'unique']);   // = C's js/rules/loot-rules.js LOOT_THRESHOLDS ('epic' -> legendary)

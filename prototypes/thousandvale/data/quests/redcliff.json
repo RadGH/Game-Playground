@@ -6,32 +6,82 @@
       "name": "Commander Hild Barrowman",
       "role": "guard",
       "at": "Redcliff Fort",
-      "greeting": "Redcliff holds. Barely. Ask again tomorrow."
+      "greeting": "Redcliff holds. Barely. Ask again tomorrow.",
+      "titled": true
     },
     "farmer_wat": {
       "name": "Wat of Cinder Farm",
       "role": "farmer",
       "at": "Cinder Farm",
-      "greeting": "They burned the barn twice. I've stopped building barns. I've started building grudges."
+      "greeting": "They burned the barn twice. I've stopped building barns. I've started building grudges.",
+      "titled": true
     },
     "quartermaster_pike": {
       "name": "Quartermaster Pike",
       "role": "trader",
       "at": "Redcliff",
-      "greeting": "Arrows, bandages, and coffins. Two of those sell well."
+      "greeting": "Arrows, bandages, and coffins. Two of those sell well.",
+      "titled": true
     },
     "scout_orla": {
       "name": "Scout Tamsin",
       "role": "scout",
       "at": "cult_cellar",
-      "greeting": "Shh. Smugglers. And worse than smugglers. Cultists. Who smuggle."
+      "greeting": "Shh. Smugglers. And worse than smugglers. Cultists. Who smuggle.",
+      "titled": true
     },
     "angler_redcliff": {
       "name": "Corwen Claywater",
       "role": "angler",
       "at": "Redcliff",
       "greeting": "The river runs red here. It is only the clay. Mostly it is the clay. See the ripples, just west of where I'm standing? That's the town pool. It never fishes out.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_redcliff": {
+      "name": "Nell Applegarth",
+      "role": "carter",
+      "at": "Redcliff",
+      "greeting": "Where to? The ox knows every road in the Downs, and takes most of them slowly.",
+      "cart": "cart_redcliff",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_cinder_farm": {
+      "name": "Alder Harl",
+      "role": "carter",
+      "at": "Cinder Farm",
+      "greeting": "Walking is free. Riding is nearly free, and you arrive with your legs.",
+      "cart": "cart_cinder_farm",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_ravenhaven": {
+      "name": "Cadoc Dunstable",
+      "role": "carter",
+      "at": "Ravenhaven",
+      "greeting": "Climb up. Mind the turnips. A few coins and you are in another town before your boots notice.",
+      "cart": "cart_ravenhaven",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_minfenrow": {
+      "name": "Kitt Sallow",
+      "role": "carter",
+      "at": "Minfenrow",
+      "greeting": "Longroad Carters. We go everywhere there is a gate, and we are never late, because we never say when.",
+      "cart": "cart_minfenrow",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_bipetwatch": {
+      "name": "Orla Pennock",
+      "role": "carter",
+      "at": "Bipetwatch",
+      "greeting": "Longroad Carters. We go everywhere there is a gate, and we are never late, because we never say when.",
+      "cart": "cart_bipetwatch",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

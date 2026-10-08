@@ -6,6 +6,9 @@
 //   node tools/sim-economy.mjs --before        the same from the data as committed in git (HEAD) — what it was
 //   node tools/sim-economy.mjs --json          the numbers (tests/E/playtest7-economy.test.js imports `simulate`)
 //   node tools/sim-economy.mjs --levels=1,3,8  other levels;  --hours=400  more simulated fishing hours
+//   node tools/sim-economy.mjs --curve         THE LEVEL CURVE (owner feedback 8, W4): kills and minutes to gain each level 1-10 by
+//                                              killing alone and by questing, and how much of a questing hour's experience is hand-ins.
+//                                              `--curve --set=progression.xp.killEarly.mult=0` = the same before stream C raised kill experience
 //   node tools/sim-economy.mjs --set=prices.kill.perLevel=0.5 --set=fishing.value.mult=0.6     WHAT-IF: try a knob without editing data
 //
 // NOTHING HERE IS A COPY OF A RULE. Every number comes out of the module the game runs:
@@ -16,7 +19,7 @@
 //   a dungeon                   js/rules/dungeon-tiers.js planDungeon
 //   crates                      js/rules/crates.js openCrate
 // What IS assumed is how a person spends an hour — and it is all in ASSUME, in one place, in plain words.
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { loadRulesData } from '../js/rules/data.js';
@@ -30,6 +33,7 @@ import { openCrate, makeCrate } from '../js/rules/crates.js';
 import { killGold as ruleKillGold, itemPrice as ruleItemPrice, sellPrice as ruleSellPrice } from '../js/rules/economy.js';
 import { createShops } from '../js/sim/shops.js';
 import { createMountBook } from '../js/sim/mounts.js';
+import { xpForLevel } from '../js/rules/farhold.js';
 import { configureEconomy, economy, questGold, chestGold, roadChestGold, eventGold, travelFare, treasureGold } from '../js/sim/economy-knobs.js';
 
 const ROOT = new URL('../', import.meta.url);
@@ -73,7 +77,7 @@ export async function simulate({ before = false, levels = [1, 5, 10, 20], hours 
   // changes a number in memory only (the first word names the file), so a knob can be tried before anyone edits data.
   const econData = R.opt('data/provinces/economy.json') || R.opt('data/rules/economy.json') || {};
   const shopData = R.rel('data/provinces/shops.json');
-  const roots = { prices: data.prices, fishing: data.fishing, angling: data.angling, economy: econData, shops: shopData };
+  const roots = { prices: data.prices, fishing: data.fishing, angling: data.angling, economy: econData, shops: shopData, progression: (data.progression ||= {}) };
   for (const [path, v] of Object.entries(set || {})) { const ks = path.split('.'); let o = roots[ks[0]]; if (!o) continue; for (const k of ks.slice(1, -1)) o = (o[k] ||= {}); o[ks[ks.length - 1]] = v; }
   const engine = createEngine(data, { seed });
   const room = createRoomContext({ id: 'econ', seed, engine });
@@ -130,6 +134,33 @@ export async function simulate({ before = false, levels = [1, 5, 10, 20], hours 
 
   const out = { before, assume: A, economy: E, levels: {}, fish: null, shopRows: [] };
   const mountsTable = (() => { try { return createMountBook(R.opt('data/provinces/mounts.json')).forSale({ mounts: [] }).map(r => ({ id: r.mount.id || r.id, price: r.price, level: r.level })); } catch { return null; } })();
+
+  // ---- THE LEVEL CURVE (W4): experience, measured the same way as gold — the game's own tables, ASSUME's hour
+  /** What ONE kill of a same-level monster pays a level-L character (the average over what stands in the world at L). */
+  function killXp(L) {
+    const ts = typesAt(L); let sum = 0;
+    for (const t of ts) {
+      const def = engine.enemyDef(t) || engine.enemyDef('moor_hound');
+      const u = room.run(() => spawnMonster(room.field, def, L, 0, 0, {}));
+      sum += engine.rpg.killXpFor({ level: L }, u, engine.xpCfgFor ? engine.xpCfgFor(u.level) : engine.xpCfg);
+      room.run(() => { try { room.field.remove ? room.field.remove(u) : null; } catch { /* scratch */ } });
+    }
+    return sum / Math.max(1, ts.length);
+  }
+  const questXpMult = (engine.xpMult ? engine.xpMult('quest') : 1) * (Number.isFinite((econData.quest || {}).xpMult) ? econData.quest.xpMult : 1);
+  out.curve = {};
+  for (let L = 1; L <= 10; L++) {
+    const span = Math.max(1, xpForLevel(L + 1, engine.levelCap) - xpForLevel(L, engine.levelCap));
+    const kx = killXp(L);
+    const shares = questsAt(L).map(q => q.reward.xp || 0);
+    // the same hour as the gold table: three ordinary quests and one notable one
+    const share = (3 * pct(shares, 0.5) + pct(shares, 0.9)) / 4;
+    const questXp = share * span * questXpMult;
+    const hourQuest = A.quest.perHour * questXp + A.quest.killsPerHour * kx, hourKill = A.grind.killsPerHour * kx;
+    out.curve[L] = { span, killXp: +kx.toFixed(1), killsToLevel: Math.ceil(span / kx), minutesKilling: +(span / hourKill * 60).toFixed(1),
+      questShare: +share.toFixed(2), questXp: Math.round(questXp), questsWorthKills: +(questXp / kx).toFixed(1),
+      minutesQuesting: +(span / hourQuest * 60).toFixed(1), handInShare: +(A.quest.perHour * questXp / hourQuest).toFixed(2), questingOverKilling: +(hourQuest / hourKill).toFixed(2) };
+  }
 
   for (const L of levels) {
     const K = killAvg(L);
@@ -282,10 +313,44 @@ export function print(r) {
   return lines.join('\n');
 }
 
+/** The level curve as a table (W4). */
+export function printCurve(r) {
+  const lines = ['THE LEVEL CURVE — experience to gain each level, by killing alone and by questing (' + r.assume.grind.killsPerHour + ' kills an hour killing; ' + r.assume.quest.perHour + ' quests + ' + r.assume.quest.killsPerHour + ' kills an hour questing)',
+    'level   xp needed   a kill pays   kills to level   minutes killing   a hand-in pays   = kills   minutes questing   hand-ins share of a questing hour   questing / killing'];
+  let tk = 0, tq = 0;
+  for (const [L, c] of Object.entries(r.curve)) {
+    tk += c.minutesKilling; tq += c.minutesQuesting;
+    lines.push(`${pad(L + '->' + (+L + 1), 6)}${pad(c.span, 11)}${pad(c.killXp, 13)}${pad(c.killsToLevel, 16)}${pad(c.minutesKilling, 17)}${pad(c.questXp, 16)}${pad(c.questsWorthKills, 9)}${pad(c.minutesQuesting, 18)}${pad(Math.round(c.handInShare * 100) + '%', 22)}${pad('x' + c.questingOverKilling, 31)}`);
+  }
+  lines.push(`level 1 -> 11: ${Math.round(tk)} minutes by killing alone, ${Math.round(tq)} minutes by questing`);
+  return lines.join('\n');
+}
+
+/** Rows another stream's simulator adds (W9: P-core's tools/sim-professions.mjs `export async function rows({ levels, questing })`). */
+export async function extraRows(r) {
+  const f = new URL('sim-professions.mjs', import.meta.url);
+  if (!existsSync(f)) return [];
+  try {
+    const m = await import(f.href);
+    const fn = m.rows || m.professionRows || m.default;
+    if (typeof fn !== 'function') return [];
+    const questing = Object.fromEntries(Object.entries(r.levels).map(([L, v]) => [L, v.activities.questing.gold]));
+    const rows = (await fn({ levels: Object.keys(r.levels).map(Number), questing, before: r.before })) || [];
+    return rows.filter(x => x && x.activity && Number.isFinite(x.goldPerHour)).map(x => ({ ...x, share: questing[x.level] ? +(x.goldPerHour / questing[x.level]).toFixed(2) : null }));
+  } catch (err) { return [{ activity: 'professions', error: String(err && err.message || err) }]; }
+}
+export function printExtra(rows) {
+  if (!rows.length) return '';
+  const lines = ['', 'PROFESSIONS (tools/sim-professions.mjs) — gold per hour and its share of an hour of questing at that level (the rule: 70-100%)'];
+  for (const x of rows) lines.push(x.error ? `  could not run: ${x.error}` : `  L${String(x.level).padEnd(3)}${String(x.activity).padEnd(22)}${pad(Math.round(x.goldPerHour), 8)}  ${x.share == null ? '' : pad(Math.round(x.share * 100) + '%', 5)}  ${x.note || ''}`);
+  return lines.join('\n');
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   const arg = k => { const a = process.argv.find(x => x.startsWith('--' + k + '=')); return a ? a.split('=')[1] : null; };
   const set = Object.fromEntries(process.argv.filter(x => x.startsWith('--set=')).map(x => { const [k, v] = x.slice(6).split('='); return [k, JSON.parse(v)]; }));
   const r = await simulate({ set, before: process.argv.includes('--before'), levels: arg('levels') ? arg('levels').split(',').map(Number) : undefined, hours: arg('hours') ? +arg('hours') : undefined });
-  console.log(process.argv.includes('--json') ? JSON.stringify(r, null, 1) : print(r));
+  r.professions = await extraRows(r);
+  console.log(process.argv.includes('--json') ? JSON.stringify(r, null, 1) : process.argv.includes('--curve') ? printCurve(r) : print(r) + printExtra(r.professions));
   process.exit(0);
 }

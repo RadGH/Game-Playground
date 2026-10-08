@@ -6,32 +6,55 @@
       "name": "Orla Coombe",
       "role": "scholar",
       "at": "Ashcombe",
-      "greeting": "Ruins are just history that's fallen over. I help it stand up again, on paper."
+      "greeting": "Ruins are just history that's fallen over. I help it stand up again, on paper.",
+      "titled": true
     },
     "digger_tobin": {
       "name": "Old Tobin the digger",
       "role": "trader",
       "at": "Kettle Cross",
-      "greeting": "I dig. Sometimes I find things. Sometimes things find me."
+      "greeting": "I dig. Sometimes I find things. Sometimes things find me.",
+      "titled": true
     },
     "captain_rosamund": {
       "name": "Captain Rosamund",
       "role": "guard",
       "at": "the Broken Keep",
-      "greeting": "The keep is broken. My temper is next."
+      "greeting": "The keep is broken. My temper is next.",
+      "titled": true
     },
     "scav_jory": {
       "name": "Mudfoot",
       "role": "scavenger",
       "at": "duel_stones",
-      "greeting": "Finders keepers. I find, you keep me alive, we split it."
+      "greeting": "Finders keepers. I find, you keep me alive, we split it.",
+      "titled": true
     },
     "angler_ashcombe": {
       "name": "Old Nettie Cray",
       "role": "angler",
       "at": "Ashcombe",
       "greeting": "The cellars flooded forty years back. The fishing has never been better. See the ripples, just west of where I'm standing? That's the town pool. It never fishes out.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_ashcombe": {
+      "name": "Jankin Furlong",
+      "role": "carter",
+      "at": "Ashcombe",
+      "greeting": "Walking is free. Riding is nearly free, and you arrive with your legs.",
+      "cart": "cart_ashcombe",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_kettle_cross": {
+      "name": "Dickon Thatcher",
+      "role": "carter",
+      "at": "Kettle Cross",
+      "greeting": "Out of Kettle Cross by cart is the only way to leave with dignity. Pick a town.",
+      "cart": "cart_kettle_cross",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

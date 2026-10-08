@@ -93,7 +93,7 @@ test('S21: calling a mount sends channel start (ms) and end done / broken for th
   assert.equal(rec(W, a).entity.mount, 'trail_horse');
   a.mount('off'); await run(clock, 200);
   a.mount('summon'); await run(clock, 300);
-  W.transfer(o, o.room, { x: o.entity.x + 3, z: o.entity.z }, 'test'); await run(clock, 300);
+  W.transfer(o, o.room, { x: o.entity.x + 6, z: o.entity.z }, 'test'); await run(clock, 300);      // W26: only being MOVED (3 m+) breaks it now, never your own step
   const end = ch().pop();
   assert.equal(end.end, 'broken'); assert.equal(end.why, 'moved');
   a.close(); await srv.stop();

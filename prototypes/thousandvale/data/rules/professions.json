@@ -1,0 +1,89 @@
+{
+  "_doc": "Stream P-core (round 8, W9) — every NUMBER of the ten professions. Read by js/rules/professions.js (pure), js/sim/professions.js (server), tools/content-professions.mjs (content: materials, node kinds, recipes, placement -> data/provinces/professions*.json) and tools/sim-professions.mjs (gold per hour). Player-facing names live here and in the content file; nothing is hard-coded in the server.",
+  "professions": [
+    { "id": "mining", "name": "Mining", "kind": "gather", "verb": "Mine", "anim": "mine", "game": "strike", "tool": "pick", "blurb": "Break ore out of boulders. Three strikes: time each one as the marker crosses the bright spot." },
+    { "id": "logging", "name": "Logging", "kind": "gather", "verb": "Fell", "anim": "chop", "game": "rhythm", "tool": "hatchet", "blurb": "Fell marked trees for timber. Chop left, right, left, on the beat." },
+    { "id": "foraging", "name": "Foraging", "kind": "gather", "verb": "Gather", "anim": "gather", "game": "pick", "tool": "sickle", "blurb": "Herbs, mushrooms and fibre. Pick the ripe ones before they close; leave the rest." },
+    { "id": "skinning", "name": "Skinning", "kind": "gather", "verb": "Skin", "anim": "skin", "game": "trace", "tool": "knife", "blurb": "Hides and meat from beasts you killed. Follow the cut line with a steady hand." },
+    { "id": "angling", "name": "Angling", "kind": "gather", "verb": "Fish", "anim": "fish", "game": "tug", "tool": "rod", "start": true, "own": true, "blurb": "Fish any water. Wait for the float to dip, then keep the fish in the band." },
+    { "id": "smithing", "name": "Smithing", "kind": "make", "verb": "Forge", "anim": "craft", "game": "forge", "station": "forge", "blurb": "Smelt bars; forge metal weapons, shields, mail and plate. Hammer while the bar glows in the band; re-heat when it cools." },
+    { "id": "outfitting", "name": "Outfitting", "kind": "make", "verb": "Stitch", "anim": "craft", "game": "stitch", "station": "workbench", "blurb": "Cure leather, weave cloth; make cloth and leather armour, cloaks, belts, backpacks and bows. Stitch as each hole passes the needle." },
+    { "id": "alchemy", "name": "Alchemy", "kind": "make", "verb": "Brew", "anim": "craft", "game": "pour", "station": "still", "blurb": "Potions, tonics and casters' tools. Stop the pour at the mark, then the stir." },
+    { "id": "cooking", "name": "Cooking", "kind": "make", "verb": "Cook", "anim": "craft", "game": "pour", "station": "fire", "start": true, "blurb": "Meals from fish, meat and what you forage, at any fire. Take the pot off at the mark." },
+    { "id": "tempering", "name": "Tempering", "kind": "make", "verb": "Temper", "anim": "craft", "game": "gauge", "station": "forge", "blurb": "Improve gear you already own: raise its quality, promote its rarity, reweave a property, brand a weapon. Stop the gauge in the narrowing band. A miss costs the materials, never the item." }
+  ],
+  "skill": {
+    "max": 100, "xpBase": 20, "xpPerLevel": 4,
+    "ranks": [[1, "Novice"], [15, "Apprentice"], [30, "Journeyman"], [50, "Adept"], [70, "Expert"], [90, "Master"]]
+  },
+  "tiers": [
+    { "tier": 1, "minSkill": 1, "levels": [1, 10], "unit": 2, "rarity": "normal" },
+    { "tier": 2, "minSkill": 25, "levels": [8, 20], "unit": 7, "rarity": "normal" },
+    { "tier": 3, "minSkill": 50, "levels": [18, 30], "unit": 13, "rarity": "magic" },
+    { "tier": 4, "minSkill": 75, "levels": [28, 40], "unit": 26, "rarity": "magic" },
+    { "tier": 5, "minSkill": 90, "levels": [38, 50], "unit": 45, "rarity": "rare" }
+  ],
+  "quality": {
+    "min": { "poor": 0.2, "good": 0.4, "fine": 0.65, "perfect": 0.9 },
+    "yield": { "fail": 0, "poor": 1, "good": 2, "fine": 3, "perfect": 3 },
+    "bonusChance": { "fail": 0, "poor": 0, "good": 0.05, "fine": 0.2, "perfect": 0.65 },
+    "xp": { "fail": 0.1, "poor": 0.5, "good": 1, "fine": 1.25, "perfect": 1.5 },
+    "name": { "fail": "Botched", "poor": "Rough", "good": "Sound", "fine": "Fine", "perfect": "Perfect" }
+  },
+  "ease": { "perSkill": 0.025, "_doc": "ease = (skill - the work's skill) x perSkill + the tool's own ease, 0..1; it widens every 'good' window by up to +50%" },
+  "gather": {
+    "reach": 4.5, "driftM": 2, "graceMs": 350, "lateMs": 4000, "minGapMs": 90,
+    "respawnMin": [6, 10], "starterRespawnMin": 2, "skinReach": 4, "skinKeepMs": 180000,
+    "xpPerTier": 10, "greyAfter": 40, "greyMult": 0.25,
+    "townBorderM": 160
+  },
+  "craft": {
+    "stationM": 9, "fireM": 6, "xpPerTier": 12, "refineXp": 0.5, "levelLag": 1,
+    "feeShare": 0.06,
+    "rarity": {
+      "_doc": "crafted gear: chance of magic / rare by mini-game quality, + perSkill for each skill point past the recipe (to maxSurplus). Never above rare. extraAffix: a magic item may carry one more property (never a rare).",
+      "magic": { "poor": 0, "good": 0.25, "fine": 0.45, "perfect": 0.6 },
+      "rare": { "poor": 0, "good": 0, "fine": 0.04, "perfect": 0.12 },
+      "perSkill": { "magic": 0.01, "rare": 0.003 }, "maxSurplus": 30,
+      "extraAffix": { "fine": 0.1, "perfect": 0.25 }
+    },
+    "batchMax": 10
+  },
+  "games": {
+    "strike": { "steps": 3, "ms": 6000, "period": [1150, 1500], "half": 0.11, "perfect": 0.38 },
+    "rhythm": { "steps": 5, "ms": 5200, "lead": 900, "beat": [480, 560], "good": 130, "perfect": 55 },
+    "pick": { "steps": 3, "ms": 5000, "spots": 6, "open": [900, 1300], "gap": [250, 700], "lead": 500 },
+    "trace": { "steps": 12, "ms": 3600, "amp": [0.16, 0.07], "freq": [0.9, 2.3], "band": 0.11, "perfect": 0.045 },
+    "forge": { "steps": 4, "ms": 7000, "cool": 0.00034, "band": [0.45, 0.78], "sweet": 0.07, "reheat": 900, "gap": 300 },
+    "stitch": { "steps": 6, "ms": 5600, "lead": 800, "gap": [380, 780], "good": 120, "perfect": 50 },
+    "pour": { "steps": 2, "ms": 6000, "rate": [0.00028, 0.00038], "accel": [1.2e-7, 2.2e-7], "mark": [0.55, 0.9], "good": 0.06, "perfect": 0.022, "pause": 400 },
+    "gauge": { "steps": 1, "ms": 4200, "rise": [2600, 3300], "pow": 1.6, "centre": [0.6, 0.85], "half0": 0.14, "half1": 0.05, "perfect": 0.4 }
+  },
+  "roles": {
+    "_doc": "which town folk teach a profession (`trains`) and whose building is a station for one (`stations`). A station = standing within craft.stationM of them.",
+    "prospector": { "trains": ["mining"], "stations": [] },
+    "smith": { "trains": ["mining", "smithing", "tempering"], "stations": ["smithing", "tempering"] },
+    "armourer": { "trains": ["smithing", "tempering"], "stations": ["smithing", "tempering"] },
+    "jeweller": { "trains": ["tempering"], "stations": ["tempering", "smithing"] },
+    "bowyer": { "trains": ["logging", "outfitting"], "stations": ["outfitting"] },
+    "tailor": { "trains": ["outfitting", "skinning"], "stations": ["outfitting"] },
+    "stablehand": { "trains": ["skinning"], "stations": [] },
+    "apothecary": { "trains": ["foraging", "alchemy"], "stations": ["alchemy"] },
+    "innkeeper": { "trains": ["cooking"], "stations": ["cooking"] },
+    "provisioner": { "trains": ["foraging", "cooking"], "stations": ["cooking"] },
+    "angler": { "trains": ["angling"], "stations": [] }
+  },
+  "stationNames": { "smithing": "a forge", "tempering": "a forge", "outfitting": "a workbench", "alchemy": "a still", "cooking": "a fire" },
+  "stationHint": { "smithing": "the smith or the armourer", "tempering": "the smith, the armourer or a jeweller", "outfitting": "the tailor or the bowyer", "alchemy": "the apothecary", "cooking": "a campfire or an inn" },
+  "toolPrice": 12,
+  "temper": {
+    "_doc": "tempering works on a gear item in your BAG. cost: `mat` = how many of the item's own tier material (bar for metal, leather, cloth, wood by what the item is), plus the listed extras; gold = share of the item's list price. Skill needed = the item tier's minSkill + `skill`. A miss spends the materials and gold fee; the item is untouched.",
+    "qualities": ["low", "medium", "high", "elite", "exotic"],
+    "ops": {
+      "temper_quality": { "name": "Temper", "skill": 0, "mat": 2, "extra": [["resin", 1]], "goldShare": 0.04, "maxQualityBySkill": [[1, "medium"], [25, "high"], [60, "elite"], [90, "exotic"]], "text": "Raises the item's quality one step. Its damage or armour and every rolled property grow with it." },
+      "temper_promote": { "name": "Promote", "skill": 10, "mat": 3, "extra": [["gem", 1]], "goldShare": 0.1, "to": { "normal": "magic", "magic": "rare" }, "text": "Raises the item's rarity one step (plain to uncommon, uncommon to rare) and adds one new property. Never above rare." },
+      "temper_reweave": { "name": "Reweave", "skill": 15, "mat": 2, "extra": [["gem", 1]], "goldShare": 0.06, "text": "Replaces the one property you choose with a different one, rolled for the item's level." },
+      "temper_brand": { "name": "Brand", "skill": 20, "mat": 2, "extra": [["gem", 2], ["resin", 1]], "goldShare": 0.08, "value": [0.05, 0.1], "elements": ["fire", "ice", "lightning", "poison", "shadow", "holy", "arcane"], "text": "Turns a share of a weapon's damage into an element of your choice. One brand per weapon." }
+    }
+  }
+}

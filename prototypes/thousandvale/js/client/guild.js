@@ -3,7 +3,7 @@
 // hand on the lead, the message of the day, leave and disband. Guild chat is the Guild tab in chat.js.
 // Server: guildState {guild|null, joined?, left?, kicked?, disbanded?}, guildInvite {guild, name, from, ms}, guildR.
 
-import { guildPerms, sortRoster, RANK_NAMES, GUILD_FEE, PUBLIC_LEVEL, guildNameCheck } from './social-core.js';
+import { guildPerms, sortRoster, RANK_NAMES, GUILD_FEE, PUBLIC_LEVEL, guildNameCheck, accountLevel } from './social-core.js';
 import { createPanel, h, confirmBox } from './ui-panel.js';
 import { zoneName, className } from './names.js';
 
@@ -59,7 +59,7 @@ export function createGuild({ net: getNet, hud, chat, me, onMotd }) {
   }
   function drawNone() {
     panel.setTitle('Guild', 'You are not in a guild');
-    const n = net(), lv = me().level || 1;
+    const n = net(), lv = accountLevel(n, me().level || 1);      // W11: the account's best character counts
     const name = h('input', { maxLength: 24, placeholder: 'Guild name', 'aria-label': 'Guild name' });
     const note = h('p.note');
     const can = n?.claimed && lv >= PUBLIC_LEVEL;
@@ -67,7 +67,7 @@ export function createGuild({ net: getNet, hud, chat, me, onMotd }) {
       h('p', {}, 'A guild is a standing group: its own chat, a roster with ranks and a message for everyone who logs in.'),
       invite ? h('div.g-invite', {}, h('p', {}, `${invite.from} invites you to `, h('b', {}, invite.name), '.'), h('div.row', {}, h('button.primary.small', { type: 'button', onclick: () => answer(true) }, 'Join'), h('button.ghost', { type: 'button', onclick: () => answer(false) }, 'No thanks'))) : null,
       h('h4', {}, 'Found a guild'),
-      h('p.tiny-left', {}, `Costs ${GUILD_FEE} gold. Needs a claimed account at level ${PUBLIC_LEVEL}.${can ? '' : n?.claimed ? ` You are level ${lv}.` : ' Your account is a guest account.'}`),
+      h('p.tiny-left', {}, `Costs ${GUILD_FEE} gold. Needs a claimed account with a character at level ${PUBLIC_LEVEL}.${can ? '' : n?.claimed ? ` Your highest character is level ${lv}.` : ' Your account is a guest account.'}`),
       h('div.row', {}, name, h('button.primary.small', { type: 'button', disabled: !can, onclick: () => { const bad = guildNameCheck(name.value); if (bad) { note.textContent = bad; return; } note.textContent = ''; n.guild('create', { name: name.value.trim() }); } }, 'Found')),
       note,
       !n?.claimed ? h('button.linkish', { type: 'button', onclick: () => document.getElementById('menu-account')?.click() }, 'Claim my account') : null);

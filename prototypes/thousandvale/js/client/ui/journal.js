@@ -27,6 +27,7 @@ export function createJournal({ atlas, net, me, hud, worldMap }) {
   const S = { sel: null, tab: 'active', done: [], last: '' };
   // T25 (play-test 5): the Catch tab — set by ui/pt5.js: { data: () => E's angling.json, angling: () => you.angling }
   let catchSrc = null;
+  const extraTabs = [];          // play-test 8: [{ id, label, draw(page) }]
   function catchModel() {
     const a = catchSrc?.angling?.() || null, d = catchSrc?.data?.() || null;
     if (!d || !(d.fish || []).length) return null;
@@ -72,8 +73,19 @@ export function createJournal({ atlas, net, me, hud, worldMap }) {
     const tabs = h('div.chips.j-tabs', { role: 'tablist' },
       h('button.chip', { type: 'button', role: 'tab', 'aria-checked': String(S.tab === 'active'), onclick: () => { S.tab = 'active'; draw(true); } }, `Quests (${qs.length})`),
       h('button.chip', { type: 'button', role: 'tab', 'aria-checked': String(S.tab === 'done'), onclick: () => { S.tab = 'done'; draw(true); } }, `Finished (${S.done.length})`),
-      catchSrc ? h('button.chip', { type: 'button', role: 'tab', dataset: { tab: 'catch' }, 'aria-checked': String(S.tab === 'catch'), onclick: () => { S.tab = 'catch'; draw(true); } }, 'Catch') : null);
+      catchSrc ? h('button.chip', { type: 'button', role: 'tab', dataset: { tab: 'catch' }, 'aria-checked': String(S.tab === 'catch'), onclick: () => { S.tab = 'catch'; draw(true); } }, 'Catch') : null,
+      // play-test 8: tabs other streams add (P-client: "Professions") — they draw the page, the journal owns the tab row
+      ...extraTabs.map(t => h('button.chip', { type: 'button', role: 'tab', dataset: { tab: t.id }, 'aria-checked': String(S.tab === t.id), onclick: () => { S.tab = t.id; draw(true); } }, typeof t.label === 'function' ? t.label() : t.label)));
     if (S.tab === 'catch') { drawCatch(tabs); return; }
+    const xt = extraTabs.find(t => t.id === S.tab);
+    if (xt) {
+      const page = h('div.j-extra', { dataset: { tab: xt.id } });
+      panel.fill(tabs, page);
+      try { const kids = xt.draw(page); if (kids) page.append(...[kids].flat().filter(k => k != null && k !== false)); }
+      catch (e) { console.warn(`[journal] tab ${xt.id}:`, e?.message || e); page.append(h('p.empty', {}, 'This page could not be drawn.')); }
+      return;
+    }
+    if (!['active', 'done'].includes(S.tab)) S.tab = 'active';
     if (S.tab === 'done') {
       const names = S.done.map(id => atlas.model?.quests.get(id)?.name || titleCase(String(id).replace(/^job:([^:]+).*/, '$1'))).filter(Boolean);
       panel.fill(tabs, names.length ? h('ul.j-done', {}, ...names.map(n => h('li', {}, '✓ ', n))) : h('p.empty', {}, 'Nothing finished yet. Talk to people in town — anyone with a request has a gold mark over them.'));
@@ -144,5 +156,8 @@ export function createJournal({ atlas, net, me, hud, worldMap }) {
     n.on('questR', r => { if (r.ok && r.op === 'abandon') draw(true); });
   }
   atlas.onChange(() => { draw(); drawTracker(); });
-  return { panel, wire, draw, drawTracker, setCatch(src) { catchSrc = src; draw(true); }, showTab(t) { S.tab = t; panel.open(); draw(true); }, tick: () => { drawTracker(); draw(); }, get state() { return { sel: S.sel, tab: S.tab, done: S.done.length }; } };
+  return { panel, wire, draw, drawTracker,
+    /** A page of its own in the journal: addTab('professions', 'Professions', page => [nodes…]). `redraw()` when its facts change. */
+    addTab(id, label, drawFn) { const t = { id: String(id), label, draw: drawFn }; const i = extraTabs.findIndex(x => x.id === t.id); if (i >= 0) extraTabs[i] = t; else extraTabs.push(t); draw(true); return () => { const k = extraTabs.indexOf(t); if (k >= 0) extraTabs.splice(k, 1); draw(true); }; },
+    redraw() { draw(true); }, get tabs() { return ['active', 'done', ...(catchSrc ? ['catch'] : []), ...extraTabs.map(t => t.id)]; }, setCatch(src) { catchSrc = src; draw(true); }, showTab(t) { S.tab = t; panel.open(); draw(true); }, tick: () => { drawTracker(); draw(); }, get state() { return { sel: S.sel, tab: S.tab, done: S.done.length }; } };
 }

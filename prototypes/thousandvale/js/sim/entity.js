@@ -149,7 +149,8 @@ export class Entity {
       if (d.hidden) { o.hidden = 1; if (d.hint) o.hint = d.hint; }
       if (d.lore) o.lore = d.lore;
       if (d.npc && d.npc.role) o.role = d.npc.role;
-      if (d.title) o.title = d.title;                          // S19: the line above an NPC's name ('Weaponsmith', 'Unbinder — resets talents & perks')
+      if (d.title) o.title = d.title;                          // S19: the line above an NPC's name ('Weaponsmith', 'Unbinder — resets talents & perks'); W27: only for NPCs placed for the player
+      if (d.filler) o.filler = 1;                              // W27: a filler body (townsfolk, woodcutter, guard) — a name, no title
       if (this.kind === 'npc') o.type = this.type;
       const key = d.key || (d.chest && d.chest.key);
       if (key) o.key = key;

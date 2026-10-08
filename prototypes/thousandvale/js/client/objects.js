@@ -41,6 +41,7 @@ const KINDS = {
   campfire: { prop: 'campfire', glow: '#ffae5c', label: o => o.name || 'A campfire', use: true, fire: true },
   npc:     { prop: null, glow: null, label: o => `Talk to ${o.name || 'them'}`, use: true, invisible: true },
   vignette: { prop: null, glow: null, label: () => null, use: false, invisible: true },
+  cart:    { prop: null, glow: null, label: o => (o.name && !/^cart$/i.test(o.name) ? `Ask about a ride: ${o.name}` : 'Ask about a ride on the ox cart'), use: true, invisible: true },   // W5: drawn by carts-view.js
   fishpool: { prop: null, glow: null, label: () => null, use: false, invisible: true },        // T25: drawn on the water by angling-view.js
   // stream E's placed content (js/sim/placements.js): the place itself is drawn by site-view.js
   fort:    { prop: null, glow: null, label: () => null, use: false, invisible: true },

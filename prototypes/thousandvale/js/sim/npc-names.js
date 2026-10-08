@@ -16,9 +16,10 @@ const DEFAULT_NAMES = { given: { f: ['Maud', 'Tamsin', 'Edda', 'Orla'], m: ['Cor
 /** Roles whose real name keeps the rank in front ("Sergeant Hollis"), the way a soldier or an official is addressed. */
 const RANKS = new Set(['sergeant', 'captain', 'castellan', 'quartermaster', 'reeve', 'elder', 'foreman']);
 
-let T = DEFAULT_TITLES, N = DEFAULT_NAMES, placeholders = new Set(DEFAULT_TITLES.placeholders);
+let T = DEFAULT_TITLES, N = DEFAULT_NAMES, placeholders = new Set(DEFAULT_TITLES.placeholders), G = {};
 
-export function configureNpcNames({ titles = null, names = null } = {}) {
+export function configureNpcNames({ titles = null, names = null, givers = null } = {}) {
+  G = (givers && givers.npcs) || {};
   if (titles) { T = { ...DEFAULT_TITLES, ...titles }; placeholders = new Set((T.placeholders || []).map(s => String(s).toLowerCase())); }
   if (names && names.given && names.family) N = names;
 }
@@ -66,7 +67,35 @@ export function titleFor(npc, name, explicit = null) {
   return tradeIn(name) || (n.role ? cap(String(n.role).replace(/[-_]/g, ' ')) : null) || T.fallback || 'Local';
 }
 
-/** { name, title } for a spawn spec. */
+/**
+ * W27 (owner feedback 8, report #48: "only show titles for NPCs the player interacts with, intentionally placed for the
+ * player to find; not random NPC fillers like woodcutter"). Does this NPC show a title? Stream E's order
+ * (data/names/titles.json `titled`): the record's own `titled` flag -> the placement type (`folk`, `guard` are filler) ->
+ * a quest NPC listed in data/quests/marks/givers.json -> anyone who keeps a shop / service / office or has an offer ->
+ * `roles[role]` -> `default`. Without E's block (an old data set, a test world) the same rule is applied from what the
+ * spec says: a quest NPC, a shop, a service, an office or an offer shows a title; nobody else does.
+ */
+export function isTitled(spec) {
+  const d = (spec && spec.data) || {}, npc = d.npc || {};
+  if (typeof d.titled === 'boolean') return d.titled;
+  if (typeof npc.titled === 'boolean') return npc.titled;
+  const R = (T.titled && typeof T.titled === 'object') ? T.titled : null;
+  const types = (R && R.types) || { folk: false, guard: false };
+  if (d.guard) return types.guard === true;
+  if (d.folk && !d.npc) return types.folk === true;
+  const has = v => (Array.isArray(v) ? v.length > 0 : !!v);                               // `service: []` offers nothing
+  const office = d.office && !d.office.home && (d.office.shop || d.office.sign || d.office.title || (d.office.kind && !/^(house|hut|home)$/.test(d.office.kind)));
+  if (d.folk && !npc.id && !has(npc.shop) && !has(npc.service)) return types.folk === true;
+  if (npc.id && G[npc.id] && typeof G[npc.id].titled === 'boolean') return G[npc.id].titled;
+  if (npc.id) return R ? (R.types && R.types.npc) !== false : true;                        // a quest NPC placed for the player
+  if (R && R.roles && npc.role && R.roles[npc.role] === false && !has(npc.shop) && !has(npc.trains) && !d.road && !d.wanderer && !npc.title) return false;      // a guard at his post, a farmer with a house: filler whatever building they stand by
+  if (has(npc.shop) || has(npc.service) || has(npc.trains) || office || d.road || d.wanderer || npc.title) return R ? R.shops !== false : true;
+  if (npc.quest || (Array.isArray(npc.quests) && npc.quests.length)) return true;
+  if (R && R.roles && npc.role && typeof R.roles[npc.role] === 'boolean') return R.roles[npc.role];
+  return R ? !!R.default : false;
+}
+
+/** { name, title, titled } for a spawn spec. `title` is null for filler folk (W27): they keep their real name and show nothing above it. */
 export function npcIdentity(spec) {
   const d = (spec && spec.data) || {};
   const npc = d.npc || (d.folk ? { role: d.folk.role } : null) || {};
@@ -75,5 +104,6 @@ export function npcIdentity(spec) {
     const seed = d.key || (d.traveller ? 'tr:' + d.traveller.group + ':' + (spec.name || '') + ':' + Math.round(spec.x || 0) : null) || `${npc.role || 'npc'}:${Math.round((spec.x || 0) * 2)}:${Math.round((spec.z || 0) * 2)}`;
     name = personName(seed, npc.role);
   }
-  return { name, title: titleFor(npc, name, d.title || null) };
+  const titled = isTitled(spec);
+  return { name, title: titled ? titleFor(npc, name, d.title || null) : null, titled };
 }

@@ -177,7 +177,7 @@ function inline(v) {
   if (v && typeof v === 'object') { const ks = Object.keys(v); return ks.length ? '{ ' + ks.map(k => JSON.stringify(k) + ': ' + inline(v[k])).join(', ') + ' }' : '{}'; }
   return JSON.stringify(v);
 }
-function roadText(d) {
+export function roadText(d) {
   const out = [];
   for (const [k, v] of Object.entries(d)) {
     if (Array.isArray(v) && v.length && v.every(x => x && typeof x === 'object' && !Array.isArray(x))) out.push(`  ${JSON.stringify(k)}: [\n${v.map(x => '    ' + inline(x)).join(',\n')}\n  ]`);

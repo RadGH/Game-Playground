@@ -164,8 +164,10 @@ export function drawMap(ctx, view, src) {
     if (m.hidden) continue;
     if ((m.kind === 'quest' && m.area) || m.kind === 'liveevent') {
       ctx.beginPath(); ctx.arc(m.x, m.z, Math.max(m.r || 40, px * 10), 0, Math.PI * 2);
-      ctx.fillStyle = m.kind === 'liveevent' ? 'rgba(255,90,58,0.16)' : 'rgba(255,207,58,0.13)'; ctx.fill();
-      ctx.lineWidth = px * 1.5; ctx.strokeStyle = m.kind === 'liveevent' ? 'rgba(255,90,58,0.8)' : 'rgba(255,207,58,0.75)'; ctx.setLineDash(m.kind === 'quest' ? [px * 4, px * 3] : []); ctx.stroke(); ctx.setLineDash([]);
+      if (m.dim) { ctx.fillStyle = 'rgba(120,112,100,0.10)'; ctx.fill(); ctx.lineWidth = px * 1.2; ctx.strokeStyle = 'rgba(150,140,125,0.55)'; ctx.setLineDash([px * 3, px * 4]); ctx.stroke(); ctx.setLineDash([]); continue; }   // W13: an event you hid
+      // W17: the zone under the pointer lights up (a fuller fill, a solid thicker edge)
+      ctx.fillStyle = m.kind === 'liveevent' ? 'rgba(255,90,58,0.16)' : m.hot ? 'rgba(255,214,90,0.34)' : 'rgba(255,207,58,0.13)'; ctx.fill();
+      ctx.lineWidth = px * (m.hot ? 3 : 1.5); ctx.strokeStyle = m.kind === 'liveevent' ? 'rgba(255,90,58,0.8)' : m.hot ? 'rgba(255,236,150,1)' : 'rgba(255,207,58,0.75)'; ctx.setLineDash(m.kind === 'quest' && !m.hot ? [px * 4, px * 3] : []); ctx.stroke(); ctx.setLineDash([]);
     }
   }
   screen(ctx);
@@ -232,7 +234,11 @@ export function drawMarkers(ctx, view, markers, opts = {}) {
     if (m.kind === 'me' && opts.noMe) continue;
     const [x, y] = view.toScreen(m.x, m.z);
     if (x < -20 || y < -20 || x > view.w + 20 || y > view.h + 20) continue;
+    // W15: a town the search did not find fades; one it found wears a gold ring.  W13: a hidden event is greyed.
+    if (m.dim) ctx.globalAlpha = 0.38;
+    if (m.found) { ctx.beginPath(); ctx.arc(x, y, (m.size || 6) * 1.9, 0, Math.PI * 2); ctx.lineWidth = 2.5; ctx.strokeStyle = '#ffd84a'; ctx.stroke(); ctx.lineWidth = 1; ctx.strokeStyle = '#3a2600'; ctx.beginPath(); ctx.arc(x, y, (m.size || 6) * 1.9 + 2, 0, Math.PI * 2); ctx.stroke(); }
     drawIcon(ctx, m.kind, x, y, (m.size || 6) * (opts.minimap ? 0.85 : 1), m, t, view);
+    if (m.dim) ctx.globalAlpha = 1;
 
   }
 }
@@ -286,6 +292,29 @@ export function drawIcon(ctx, kind, x, y, size = 6, m = {}, t = 0, view = null) 
     case 'loot': { ctx.beginPath(); for (let i = 0; i < 8; i++) { const r = i % 2 ? S * 0.35 : S * 0.85, an = i / 8 * Math.PI * 2 - Math.PI / 2; ctx.lineTo(Math.cos(an) * r, Math.sin(an) * r); } ctx.closePath(); fill(m.color || '#e8e0c8', '#1b130a', 1); break; }
     case 'rare': { ctx.beginPath(); ctx.arc(0, 0, S * 0.8, 0, Math.PI * 2); fill(m.color || '#ffcf3a', '#2a0606', 1.6); ctx.beginPath(); ctx.arc(0, 0, S * 0.3, 0, Math.PI * 2); ctx.fillStyle = '#2a0606'; ctx.fill(); break; }
     case 'npc': ctx.beginPath(); ctx.arc(0, 0, S * 0.5, 0, Math.PI * 2); fill('#7fe08a', '#0a2a10', 1); break;          // U14: someone in sight
+    case 'npcmark': {
+      // W12: the mark that floats over an NPC's head — a bare "!" or "?" (gold: for you now; grey: not yet), no disc, so it is not
+      // mistaken for a quest GOAL (the gold disc)
+      ctx.font = `900 ${Math.round(S * 2.5)}px Georgia, serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+      ctx.lineWidth = Math.max(2.5, S * 0.55); ctx.strokeStyle = m.grey ? '#1e1c18' : '#3a2600'; ctx.strokeText(m.glyph || '!', 0, 0);
+      ctx.fillStyle = m.grey ? '#a8a296' : '#ffd23a'; ctx.fillText(m.glyph || '!', 0, 0);
+      break;
+    }
+    case 'service': {
+      // W15: a shop or service the search found — a small gold shield at its door
+      const p = 1 + 0.1 * Math.sin(t * 4);
+      ctx.beginPath(); ctx.arc(0, 0, S * 1.5 * p, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,216,74,0.28)'; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-S * 0.8, -S * 0.8); ctx.lineTo(S * 0.8, -S * 0.8); ctx.lineTo(S * 0.8, S * 0.1); ctx.quadraticCurveTo(S * 0.8, S * 0.8, 0, S * 1.1); ctx.quadraticCurveTo(-S * 0.8, S * 0.8, -S * 0.8, S * 0.1); ctx.closePath(); fill('#ffd84a', '#3a2600', 1.6);
+      break;
+    }
+    case 'townhl': {
+      // W15, zoomed out: a town that has what you are looking for — a ring with how many
+      const p = 1 + 0.06 * Math.sin(t * 3.5);
+      ctx.beginPath(); ctx.arc(0, 0, S * p, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,216,74,0.22)'; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#ffd84a'; ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, 0, S * p + 2, 0, Math.PI * 2); ctx.lineWidth = 1; ctx.strokeStyle = '#3a2600'; ctx.stroke();
+      if (m.n > 1) { ctx.beginPath(); ctx.arc(S * 0.8, -S * 0.8, 7, 0, Math.PI * 2); fill('#ffd84a', '#3a2600', 1.2); ctx.fillStyle = '#2a1a00'; ctx.font = '800 9px Alegreya Sans, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(m.n > 9 ? '9+' : m.n), S * 0.8, -S * 0.75); }
+      break;
+    }
     case 'player': ctx.beginPath(); ctx.arc(0, 0, S * 0.5, 0, Math.PI * 2); fill('#bfe0ff', '#06223a', 1); break;
     case 'monster': ctx.beginPath(); ctx.arc(0, 0, S * 0.5, 0, Math.PI * 2); fill(m.boss ? '#ff3a3a' : '#d84a3a', '#2a0606', 1); break;
     case 'object': ctx.beginPath(); ctx.rect(-S * 0.55, -S * 0.55, S * 1.1, S * 1.1); fill(m.color || '#e0c060', '#2a1e06', 1.2); break;

@@ -1,6 +1,6 @@
 {
- "_doc": "Stream C (play-test 5, T5): the starting equipment a new character chooses after the look screen. Per class: exactly 3 `armour` sets ({id, name, blurb, pieces: [armour base keys]}, 3 pieces each, budget bases only \u2014 cloth/light/medium/heavy helm, chest, legs, gauntlets, boots; never plate/runed/scaled/dragon gear, never heavier than the class wears) and 3-6 `weapons` packs ({id, name, blurb, main, off?, style?, element?, spell?}). `main`/`off` are item base keys (emberveil items.json weaponBases/armorBases, plus the foci Farhold's foci.js adds in memory: grimoire, seer_orb, reliquary, psalter, effigy). For a caster: `element` is the wand/staff/sceptre's element (fire, ice, lightning, poison, shadow, arcane \u2014 Farhold has no holy attunement), `spell` a staff's spell key (Farhold weapons.js STAFF_SPELLS for that element), `style` a wand's castStyle (docs/requests.md 'Round 5 contracts \u2014 C', T15). The FIRST weapons pack of a class is its old Farhold starter, so a character made with no choice gets what it got before; the first armour set contains the old starting armour. Blurbs say what the thing IS and carry no numbers. Read by js/rules/starter-kits.js (kitsFor / validKit / starterGear); checked by tests/C/starter-kits.test.mjs. This file is GENERATED from a table (the generator lived in the agent scratchpad) but is the source of truth now: edit it by hand. Owner feedback 6 (U15): no pack is strictly worse than another \u2014 every pack fills BOTH hands (a one-hander always has a shield, buckler, focus or second weapon beside it) or is a two-hander; every class with a shield has a one-hander-and-shield pack.",
- "version": 1,
+ "_doc": "Stream C (play-test 5, T5): the starting equipment a new character chooses after the look screen. Per class: exactly 3 `armour` sets ({id, name, blurb, pieces: [armour base keys]}, 3 pieces each, budget bases only \u2014 cloth/light/medium/heavy helm, chest, legs, gauntlets, boots; never plate/runed/scaled/dragon gear, never heavier than the class wears) and 3-6 `weapons` packs ({id, name, blurb, main, off?, style?, element?, spell?}). `main`/`off` are item base keys (emberveil items.json weaponBases/armorBases, plus the foci Farhold's foci.js adds in memory: grimoire, seer_orb, reliquary, psalter, effigy). For a caster: `element` is the wand/staff/sceptre's element (fire, ice, lightning, poison, shadow, arcane \u2014 Farhold has no holy attunement), `spell` a staff's spell key (Farhold weapons.js STAFF_SPELLS for that element), `style` a wand's castStyle (docs/requests.md 'Round 5 contracts \u2014 C', T15). The FIRST weapons pack of a class is its old Farhold starter, so a character made with no choice gets what it got before; the first armour set contains the old starting armour. Blurbs say what the thing IS and carry no numbers. Read by js/rules/starter-kits.js (kitsFor / validKit / starterGear); checked by tests/C/starter-kits.test.mjs. This file is GENERATED from a table (the generator lived in the agent scratchpad) but is the source of truth now: edit it by hand. Owner feedback 6 (U15): no pack is strictly worse than another \u2014 every pack fills BOTH hands (a one-hander always has a shield, buckler, focus or second weapon beside it) or is a two-hander; every class with a shield has a one-hander-and-shield pack. Owner feedback 8 (W23, 'too many similar items'): 4-6 packs a class, no two of them near-duplicates (the measure is in js/rules/starter-kits.js packSignature: hands, attack family, reach band, element, tempo \u2014 two packs must differ on at least two, and no more than two packs of a class share a hand shape); every armour set has a `lean` (see `leans`). `role` and `diff` on the kit screen are WRITTEN BY CODE from the signature, never stored here.",
+ "version": 2,
  "classes": {
   "warrior": {
    "armour": [
@@ -12,7 +12,8 @@
       "heavy_chest",
       "heavy_helm",
       "heavy_gauntlets"
-     ]
+     ],
+     "lean": "guard"
     },
     {
      "id": "march_harness",
@@ -22,7 +23,8 @@
       "medium_chest",
       "heavy_helm",
       "medium_boots"
-     ]
+     ],
+     "lean": "keen"
     },
     {
      "id": "pit_leathers",
@@ -32,7 +34,8 @@
       "light_chest",
       "light_gauntlets",
       "light_boots"
-     ]
+     ],
+     "lean": "swift"
     }
    ],
    "weapons": [
@@ -64,17 +67,11 @@
      "off": "shield"
     },
     {
-     "id": "great_axe",
-     "name": "Woodcutter's Answer",
-     "blurb": "Two-handed axe.",
-     "main": "axe2h"
-    },
-    {
-     "id": "spear_shield",
-     "name": "Line Spear and Shield",
-     "blurb": "Spear: one-handed, long reach, with a shield in the off hand (armour and a chance to block).",
-     "main": "spear",
-     "off": "shield"
+     "id": "twin_axes",
+     "name": "Woodcutter's Pair",
+     "blurb": "Two woodsman's axes, one in each hand: chopping blows that leave bleeding wounds.",
+     "main": "woodsman_axe",
+     "off": "woodsman_axe"
     }
    ]
   },
@@ -88,7 +85,8 @@
       "medium_chest",
       "heavy_helm",
       "heavy_gauntlets"
-     ]
+     ],
+     "lean": "guard"
     },
     {
      "id": "duel_mail",
@@ -98,7 +96,8 @@
       "medium_chest",
       "medium_gauntlets",
       "medium_boots"
-     ]
+     ],
+     "lean": "keen"
     },
     {
      "id": "salle_leathers",
@@ -108,7 +107,8 @@
       "light_chest",
       "light_helm",
       "light_legs"
-     ]
+     ],
+     "lean": "swift"
     }
    ],
    "weapons": [
@@ -144,13 +144,6 @@
      "blurb": "Hammer: one-handed, with a second hammer in the off hand (it swings too, for less).",
      "main": "hammer",
      "off": "hammer"
-    },
-    {
-     "id": "mace_shield",
-     "name": "Drill Mace and Shield",
-     "blurb": "Mace: one-handed, with a shield in the off hand (armour and a chance to block).",
-     "main": "iron_mace",
-     "off": "shield"
     }
    ]
   },
@@ -164,7 +157,8 @@
       "medium_chest",
       "medium_helm",
       "medium_gauntlets"
-     ]
+     ],
+     "lean": "guard"
     },
     {
      "id": "pilgrim_harness",
@@ -174,7 +168,8 @@
       "medium_chest",
       "light_boots",
       "medium_legs"
-     ]
+     ],
+     "lean": "keen"
     },
     {
      "id": "penitent_wraps",
@@ -184,7 +179,8 @@
       "light_chest",
       "light_gauntlets",
       "light_boots"
-     ]
+     ],
+     "lean": "swift"
     }
    ],
    "weapons": [
@@ -218,11 +214,10 @@
      "element": "arcane"
     },
     {
-     "id": "hammer_psalter",
-     "name": "Hammer and Hymnal",
-     "blurb": "Warhammer: one-handed, heavy, with a psalter (a focus: spell power and mana).",
-     "main": "warhammer",
-     "off": "psalter"
+     "id": "greatsword",
+     "name": "Vigil Greatsword",
+     "blurb": "Two-handed sword: slow, wide sweeps that catch several enemies.",
+     "main": "sword2h"
     }
    ]
   },
@@ -236,7 +231,8 @@
       "light_chest",
       "light_boots",
       "light_gauntlets"
-     ]
+     ],
+     "lean": "swift"
     },
     {
      "id": "hide_hood",
@@ -246,7 +242,8 @@
       "light_chest",
       "light_helm",
       "light_legs"
-     ]
+     ],
+     "lean": "keen"
     },
     {
      "id": "warden_greens",
@@ -256,7 +253,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_boots"
-     ]
+     ],
+     "lean": "guard"
     }
    ],
    "weapons": [
@@ -265,12 +263,6 @@
      "name": "Hunter's Shortbow",
      "blurb": "Shortbow: two-handed, ranged, quick to draw.",
      "main": "shortbow"
-    },
-    {
-     "id": "longbow",
-     "name": "Long Yew",
-     "blurb": "Bow: two-handed, ranged.",
-     "main": "bow"
     },
     {
      "id": "crossbow",
@@ -291,6 +283,13 @@
      "blurb": "Sword: one-handed, for when they close in, with a buckler in the off hand (a little armour and a chance to block).",
      "main": "sword",
      "off": "buckler"
+    },
+    {
+     "id": "twin_axes",
+     "name": "Trapper's Hatchets",
+     "blurb": "Two woodsman's axes, one in each hand: chopping blows that leave bleeding wounds.",
+     "main": "woodsman_axe",
+     "off": "woodsman_axe"
     }
    ]
   },
@@ -304,7 +303,8 @@
       "light_chest",
       "light_boots",
       "light_gauntlets"
-     ]
+     ],
+     "lean": "swift"
     },
     {
      "id": "rooftop_hood",
@@ -314,7 +314,8 @@
       "light_chest",
       "light_helm",
       "light_legs"
-     ]
+     ],
+     "lean": "keen"
     },
     {
      "id": "fence_coat",
@@ -324,7 +325,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_boots"
-     ]
+     ],
+     "lean": "guard"
     }
    ],
    "weapons": [
@@ -343,25 +345,17 @@
      "off": "dagger"
     },
     {
-     "id": "sword_dagger",
-     "name": "Short Blade and Shiv",
-     "blurb": "Sword: one-handed, with a dagger in the off hand (it swings too, for less).",
+     "id": "sword_buckler",
+     "name": "Cutpurse Blade and Buckler",
+     "blurb": "Sword: one-handed, with a buckler in the off hand (a little armour and a chance to block).",
      "main": "sword",
-     "off": "dagger"
-    },
-    {
-     "id": "dagger_buckler",
-     "name": "Knife and Buckler",
-     "blurb": "Dagger: one-handed, fast, short reach, with a buckler (a small shield that blocks).",
-     "main": "dagger",
      "off": "buckler"
     },
     {
-     "id": "twin_swords",
-     "name": "Back-alley Blades",
-     "blurb": "Sword: one-handed, with a second sword in the off hand (it swings too, for less).",
-     "main": "sword",
-     "off": "sword"
+     "id": "shortbow",
+     "name": "Alley Shortbow",
+     "blurb": "Shortbow: two-handed, ranged; hold the draw longer to hit harder.",
+     "main": "shortbow"
     }
    ]
   },
@@ -375,7 +369,8 @@
       "medium_chest",
       "medium_helm",
       "medium_boots"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "alms_coat",
@@ -385,7 +380,8 @@
       "light_chest",
       "medium_helm",
       "light_boots"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "wayside_robe",
@@ -395,7 +391,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_boots"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -408,14 +405,6 @@
      "off": "shield"
     },
     {
-     "id": "sceptre_reliquary",
-     "name": "Sceptre and Reliquary",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal frost damage, with a reliquary (a focus: a barrier and its own power).",
-     "main": "scepter",
-     "off": "reliquary",
-     "element": "ice"
-    },
-    {
      "id": "staff_ring",
      "name": "Staff of the Circle",
      "blurb": "Staff: two-handed; its attack is a ring of arcane force around you.",
@@ -426,10 +415,10 @@
     {
      "id": "staff_frost",
      "name": "Winter Crook",
-     "blurb": "Staff: two-handed; its attack is a ring of frost around you.",
+     "blurb": "Staff: two-handed; its attack is a short cone of frost in front of you.",
      "main": "staff",
      "element": "ice",
-     "spell": "nova"
+     "spell": "cone"
     },
     {
      "id": "wand_ward",
@@ -468,7 +457,8 @@
       "light_chest",
       "light_gauntlets",
       "light_legs"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "tavern_best",
@@ -478,7 +468,8 @@
       "light_chest",
       "light_boots",
       "light_helm"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "festival_silks",
@@ -488,7 +479,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_boots"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -506,11 +498,11 @@
      "off": "dagger"
     },
     {
-     "id": "rapier_dagger",
-     "name": "Stage Rapier and Dirk",
-     "blurb": "Rapier: one-handed, light, with a dagger in the off hand (it swings too, for less).",
+     "id": "rapier_buckler",
+     "name": "Stage Rapier and Buckler",
+     "blurb": "Rapier: one-handed and quick, with a buckler in the off hand (a little armour and a chance to block).",
      "main": "rapier",
-     "off": "dagger"
+     "off": "buckler"
     },
     {
      "id": "wand_fan",
@@ -529,13 +521,6 @@
      "off": "seer_orb",
      "style": "chain",
      "element": "lightning"
-    },
-    {
-     "id": "rapier_buckler",
-     "name": "Stage Rapier and Buckler",
-     "blurb": "Rapier: one-handed and quick, with a buckler in the off hand (a little armour and a chance to block).",
-     "main": "rapier",
-     "off": "buckler"
     }
    ]
   },
@@ -549,7 +534,8 @@
       "cloth_chest",
       "cloth_helm",
       "cloth_legs"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "travel_robes",
@@ -559,7 +545,8 @@
       "cloth_chest",
       "cloth_legs",
       "light_boots"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "lab_wraps",
@@ -569,7 +556,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_gauntlets"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -580,14 +568,6 @@
      "main": "staff",
      "element": "ice",
      "spell": "cone"
-    },
-    {
-     "id": "staff_nova",
-     "name": "Staff of the Still Pond",
-     "blurb": "Staff: two-handed; its attack is a ring of frost around you.",
-     "main": "staff",
-     "element": "ice",
-     "spell": "nova"
     },
     {
      "id": "staff_lob",
@@ -616,13 +596,12 @@
      "element": "fire"
     },
     {
-     "id": "wand_beam",
-     "name": "Ruled-Line Wand and Grimoire",
-     "blurb": "Wand: one-handed, ranged; fires an instant line of arcane force through everything in it, with a grimoire (a focus: mana and its own power).",
-     "main": "wand",
-     "off": "grimoire",
-     "style": "beam",
-     "element": "arcane"
+     "id": "sceptre_orb",
+     "name": "Battle-Mage Sceptre and Orb",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal fire damage, with an orb in the off hand (more spell power).",
+     "main": "scepter",
+     "off": "orb",
+     "element": "fire"
     }
    ]
   },
@@ -636,7 +615,8 @@
       "cloth_chest",
       "cloth_helm",
       "cloth_legs"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "barrow_shroud",
@@ -646,7 +626,8 @@
       "cloth_chest",
       "cloth_legs",
       "light_boots"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "embalmer_wraps",
@@ -656,7 +637,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_gauntlets"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -675,14 +657,6 @@
      "main": "staff",
      "element": "poison",
      "spell": "ground"
-    },
-    {
-     "id": "staff_nova",
-     "name": "Staff of the Last Breath",
-     "blurb": "Staff: two-handed; its attack is a ring of shadow around you.",
-     "main": "staff",
-     "element": "shadow",
-     "spell": "nova"
     },
     {
      "id": "wand_seeking",
@@ -722,7 +696,8 @@
       "cloth_chest",
       "cloth_helm",
       "cloth_legs"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "crossroads_coat",
@@ -732,7 +707,8 @@
       "cloth_chest",
       "cloth_legs",
       "light_boots"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "binding_wraps",
@@ -742,7 +718,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_gauntlets"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -763,29 +740,12 @@
      "spell": "cone"
     },
     {
-     "id": "staff_ground",
-     "name": "Staff of the Sinking Dark",
-     "blurb": "Staff: two-handed; its attack is a thrown blast of shadow that bursts wide where it lands.",
-     "main": "staff",
-     "element": "shadow",
-     "spell": "ground"
-    },
-    {
      "id": "wand_chain",
      "name": "Tangle Wand and Effigy",
      "blurb": "Wand: one-handed, ranged; throws a bolt of shadow that jumps to more enemies, with an effigy (a focus with its own power).",
      "main": "wand",
      "off": "effigy",
      "style": "chain",
-     "element": "shadow"
-    },
-    {
-     "id": "wand_heavy",
-     "name": "Leaden Wand and Orb",
-     "blurb": "Wand: one-handed, ranged; throws one slow bolt of shadow that lands hard, with an orb in the off hand (more spell power).",
-     "main": "wand",
-     "off": "orb",
-     "style": "heavy",
      "element": "shadow"
     },
     {
@@ -796,6 +756,14 @@
      "off": "tome",
      "style": "fork",
      "element": "fire"
+    },
+    {
+     "id": "sceptre_orb",
+     "name": "Pactblade Sceptre and Orb",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal shadow damage, with an orb in the off hand (more spell power).",
+     "main": "scepter",
+     "off": "orb",
+     "element": "shadow"
     }
    ]
   },
@@ -809,7 +777,8 @@
       "light_chest",
       "light_boots",
       "light_gauntlets"
-     ]
+     ],
+     "lean": "swift"
     },
     {
      "id": "stake_coat",
@@ -819,7 +788,8 @@
       "light_chest",
       "light_helm",
       "light_legs"
-     ]
+     ],
+     "lean": "keen"
     },
     {
      "id": "ash_cloak",
@@ -829,7 +799,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_boots"
-     ]
+     ],
+     "lean": "guard"
     }
    ],
    "weapons": [
@@ -878,7 +849,8 @@
       "light_chest",
       "light_boots",
       "light_gauntlets"
-     ]
+     ],
+     "lean": "swift"
     },
     {
      "id": "picker_hood",
@@ -888,7 +860,8 @@
       "light_chest",
       "light_helm",
       "light_legs"
-     ]
+     ],
+     "lean": "keen"
     },
     {
      "id": "rag_layers",
@@ -898,7 +871,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_boots"
-     ]
+     ],
+     "lean": "guard"
     }
    ],
    "weapons": [
@@ -955,7 +929,8 @@
       "light_chest",
       "light_boots",
       "light_helm"
-     ]
+     ],
+     "lean": "swift"
     },
     {
      "id": "captain_coat",
@@ -965,7 +940,8 @@
       "light_chest",
       "light_gauntlets",
       "light_legs"
-     ]
+     ],
+     "lean": "keen"
     },
     {
      "id": "port_finery",
@@ -975,7 +951,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_boots"
-     ]
+     ],
+     "lean": "guard"
     }
    ],
    "weapons": [
@@ -987,25 +964,25 @@
      "off": "buckler"
     },
     {
-     "id": "rapier_dagger",
-     "name": "Rapier and Left-Hand Dagger",
-     "blurb": "Rapier: one-handed, light, with a dagger in the off hand (it swings too, for less).",
-     "main": "rapier",
+     "id": "sabre_dagger",
+     "name": "Sabre and Main-Gauche",
+     "blurb": "Sabre: one-handed, quick curved cuts, with a dagger in the off hand (it swings too, for less).",
+     "main": "militia_sabre",
      "off": "dagger"
     },
     {
-     "id": "twin_swords",
-     "name": "Brace of Cutlasses",
-     "blurb": "Sword: one-handed, with a second sword in the off hand (it swings too, for less).",
-     "main": "sword",
-     "off": "sword"
+     "id": "axe_buckler",
+     "name": "Boarding Axe and Buckler",
+     "blurb": "Woodsman's axe: one-handed chopping blows that leave bleeding wounds, with a buckler (a little armour and a chance to block).",
+     "main": "woodsman_axe",
+     "off": "buckler"
     },
     {
-     "id": "sword_dagger",
-     "name": "Sword and Main-gauche",
-     "blurb": "Sword: one-handed, with a dagger in the off hand (it swings too, for less).",
-     "main": "sword",
-     "off": "dagger"
+     "id": "javelins",
+     "name": "Boarding Javelins and Buckler",
+     "blurb": "Javelins: one-handed, thrown, with a buckler in the off hand (a little armour and a chance to block).",
+     "main": "javelin",
+     "off": "buckler"
     }
    ]
   },
@@ -1019,7 +996,8 @@
       "heavy_chest",
       "heavy_helm",
       "heavy_gauntlets"
-     ]
+     ],
+     "lean": "guard"
     },
     {
      "id": "wyrm_rider",
@@ -1029,7 +1007,8 @@
       "heavy_chest",
       "medium_legs",
       "heavy_boots"
-     ]
+     ],
+     "lean": "keen"
     },
     {
      "id": "cinder_leathers",
@@ -1039,7 +1018,8 @@
       "medium_chest",
       "medium_legs",
       "light_boots"
-     ]
+     ],
+     "lean": "swift"
     }
    ],
    "weapons": [
@@ -1057,12 +1037,6 @@
      "main": "greatsword"
     },
     {
-     "id": "great_axe",
-     "name": "Headsman's Axe",
-     "blurb": "Two-handed axe.",
-     "main": "axe2h"
-    },
-    {
      "id": "halberd",
      "name": "Drake-Hook Halberd",
      "blurb": "Halberd: two-handed polearm.",
@@ -1074,6 +1048,13 @@
      "blurb": "Spear: one-handed, long reach, with a buckler in the off hand (a little armour and a chance to block).",
      "main": "spear",
      "off": "buckler"
+    },
+    {
+     "id": "twin_axes",
+     "name": "Drake-Tooth Axes",
+     "blurb": "Two woodsman's axes, one in each hand: chopping blows that leave bleeding wounds.",
+     "main": "woodsman_axe",
+     "off": "woodsman_axe"
     }
    ]
   },
@@ -1087,7 +1068,8 @@
       "cloth_chest",
       "cloth_helm",
       "cloth_legs"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "soot_coat",
@@ -1097,7 +1079,8 @@
       "cloth_chest",
       "cloth_legs",
       "light_boots"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "firewalker_wraps",
@@ -1107,7 +1090,8 @@
       "cloth_chest",
       "light_boots",
       "light_gauntlets"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1120,14 +1104,6 @@
      "spell": "cone"
     },
     {
-     "id": "staff_wave",
-     "name": "Staff of the Running Fire",
-     "blurb": "Staff: two-handed; its attack is a line of fire straight ahead.",
-     "main": "staff",
-     "element": "fire",
-     "spell": "wave"
-    },
-    {
      "id": "staff_burst",
      "name": "Bombard Staff",
      "blurb": "Staff: two-handed; its attack is a thrown blast of fire that bursts where it lands.",
@@ -1136,21 +1112,21 @@
      "spell": "burst"
     },
     {
-     "id": "wand_burst",
-     "name": "Squib Wand and Orb",
-     "blurb": "Wand: one-handed, ranged; throws a bolt of fire that bursts where it lands, with an orb in the off hand (more spell power).",
-     "main": "wand",
-     "off": "orb",
-     "style": "burst",
-     "element": "fire"
-    },
-    {
      "id": "wand_pool",
      "name": "Tinder Wand and Tome",
      "blurb": "Wand: one-handed, ranged; throws a bolt of fire that leaves burning ground where it hits, with a tome in the off hand (spell power and mana).",
      "main": "wand",
      "off": "tome",
      "style": "pool",
+     "element": "fire"
+    },
+    {
+     "id": "wand_nova",
+     "name": "Flare Wand and Orb",
+     "blurb": "Wand: one-handed; instead of a bolt it bursts in a ring around you, with an orb (more spell power) in the off hand.",
+     "main": "wand",
+     "off": "orb",
+     "style": "nova",
      "element": "fire"
     },
     {
@@ -1173,7 +1149,8 @@
       "cloth_chest",
       "cloth_helm",
       "cloth_legs"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "hilltop_coat",
@@ -1183,7 +1160,8 @@
       "cloth_chest",
       "cloth_legs",
       "light_boots"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "kite_wraps",
@@ -1193,7 +1171,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_gauntlets"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1205,15 +1184,6 @@
      "style": "chain",
      "element": "lightning",
      "off": "orb"
-    },
-    {
-     "id": "wand_fork",
-     "name": "Splinter Wand and Orb",
-     "blurb": "Wand: one-handed, ranged; throws a bolt of lightning that splits on what it hits, with an orb in the off hand (more spell power).",
-     "main": "wand",
-     "off": "orb",
-     "style": "fork",
-     "element": "lightning"
     },
     {
      "id": "wand_beam",
@@ -1241,12 +1211,12 @@
      "spell": "nova"
     },
     {
-     "id": "staff_wave",
-     "name": "Weathervane Staff",
-     "blurb": "Staff: two-handed; its attack is a line of lightning straight ahead.",
-     "main": "staff",
-     "element": "lightning",
-     "spell": "wave"
+     "id": "sceptre_orb",
+     "name": "Stormrod and Orb",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal lightning damage, with an orb in the off hand (more spell power).",
+     "main": "scepter",
+     "off": "orb",
+     "element": "lightning"
     }
    ]
   },
@@ -1260,7 +1230,8 @@
       "medium_chest",
       "medium_helm",
       "medium_boots"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "bark_harness",
@@ -1270,7 +1241,8 @@
       "light_chest",
       "medium_helm",
       "medium_legs"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "moss_leathers",
@@ -1280,7 +1252,8 @@
       "light_chest",
       "light_gauntlets",
       "light_boots"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1315,15 +1288,6 @@
      "element": "poison"
     },
     {
-     "id": "wand_lob",
-     "name": "Acorn Wand and Glass",
-     "blurb": "Wand: one-handed, ranged; lobs an arc of poison that lands on the target, with a seer's orb (a focus with its own power).",
-     "main": "wand",
-     "off": "seer_orb",
-     "style": "lob",
-     "element": "poison"
-    },
-    {
      "id": "spear",
      "name": "Boar Spear",
      "blurb": "Spear: one-handed, long reach, with a buckler in the off hand (a little armour and a chance to block).",
@@ -1342,7 +1306,8 @@
       "cloth_chest",
       "cloth_helm",
       "cloth_legs"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "pilgrim_robes",
@@ -1352,7 +1317,8 @@
       "cloth_chest",
       "cloth_legs",
       "light_boots"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "augur_wraps",
@@ -1362,7 +1328,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_gauntlets"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1373,14 +1340,6 @@
      "main": "scepter",
      "element": "arcane",
      "off": "warded_focus"
-    },
-    {
-     "id": "sceptre_orb",
-     "name": "Sceptre and Seeing Glass",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal frost damage, with a seer's orb (a focus with its own power).",
-     "main": "scepter",
-     "off": "seer_orb",
-     "element": "ice"
     },
     {
      "id": "staff_lob",
@@ -1408,13 +1367,13 @@
      "element": "arcane"
     },
     {
-     "id": "wand_ward",
-     "name": "Turn-Aside Wand and Tome",
-     "blurb": "Wand: one-handed, ranged; throws a bolt of arcane force; each hit gives you a small barrier, with a tome in the off hand (spell power and mana).",
+     "id": "wand_nova",
+     "name": "Stillwater Wand and Glass",
+     "blurb": "Wand: one-handed; instead of a bolt it bursts in a ring around you, with a seeing glass (a focus) in the off hand.",
      "main": "wand",
-     "off": "tome",
-     "style": "ward",
-     "element": "arcane"
+     "off": "seer_orb",
+     "style": "nova",
+     "element": "ice"
     }
    ]
   },
@@ -1428,7 +1387,8 @@
       "medium_chest",
       "medium_helm",
       "medium_boots"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "field_harness",
@@ -1438,7 +1398,8 @@
       "medium_chest",
       "light_boots",
       "light_gauntlets"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "scout_leathers",
@@ -1448,7 +1409,8 @@
       "light_chest",
       "light_helm",
       "light_legs"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1459,14 +1421,6 @@
      "main": "scepter",
      "element": "arcane",
      "off": "shield"
-    },
-    {
-     "id": "sceptre_shield",
-     "name": "Baton and Shield",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal lightning damage, with a shield (blocks).",
-     "main": "scepter",
-     "off": "shield",
-     "element": "lightning"
     },
     {
      "id": "sword_shield",
@@ -1483,18 +1437,16 @@
      "off": "tome"
     },
     {
-     "id": "spear_shield",
-     "name": "Spear and Shield",
-     "blurb": "Spear: one-handed, long reach, with a shield (blocks).",
-     "main": "spear",
-     "off": "shield"
+     "id": "halberd",
+     "name": "Signal Halberd",
+     "blurb": "Halberd: two-handed, the longest reach there is; thrusts that hit everything in a line.",
+     "main": "halberd"
     },
     {
-     "id": "mace_shield",
-     "name": "Officer's Mace and Shield",
-     "blurb": "Mace: one-handed, with a shield in the off hand (armour and a chance to block).",
-     "main": "iron_mace",
-     "off": "shield"
+     "id": "crossbow",
+     "name": "Captain's Crossbow",
+     "blurb": "Crossbow: two-handed, ranged; slow to reload, hits hard and passes through bodies.",
+     "main": "crossbow"
     }
    ]
   },
@@ -1508,7 +1460,8 @@
       "cloth_chest",
       "cloth_helm",
       "cloth_legs"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "hourglass_coat",
@@ -1518,7 +1471,8 @@
       "cloth_chest",
       "cloth_legs",
       "light_boots"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "pendulum_wraps",
@@ -1528,7 +1482,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_gauntlets"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1549,29 +1504,12 @@
      "spell": "cone"
     },
     {
-     "id": "staff_arcane_cone",
-     "name": "Staff of the Thin Moment",
-     "blurb": "Staff: two-handed; its attack is a short cone of arcane force in front of you.",
-     "main": "staff",
-     "element": "arcane",
-     "spell": "cone"
-    },
-    {
      "id": "wand_seeking",
      "name": "Second-Hand Wand and Glass",
      "blurb": "Wand: one-handed, ranged; throws a bolt of arcane force that turns after its target, with a seer's orb (a focus with its own power).",
      "main": "wand",
      "off": "seer_orb",
      "style": "seeking",
-     "element": "arcane"
-    },
-    {
-     "id": "wand_heavy",
-     "name": "Late-Bell Wand and Tome",
-     "blurb": "Wand: one-handed, ranged; throws one slow bolt of arcane force that lands hard, with a tome in the off hand (spell power and mana).",
-     "main": "wand",
-     "off": "tome",
-     "style": "heavy",
      "element": "arcane"
     },
     {
@@ -1582,6 +1520,14 @@
      "off": "orb",
      "style": "nova",
      "element": "ice"
+    },
+    {
+     "id": "sceptre_orb",
+     "name": "Hour-Hand Sceptre and Orb",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal arcane damage, with an orb in the off hand (more spell power).",
+     "main": "scepter",
+     "off": "orb",
+     "element": "arcane"
     }
    ]
   },
@@ -1595,7 +1541,8 @@
       "cloth_chest",
       "light_boots",
       "cloth_legs"
-     ]
+     ],
+     "lean": "swift"
     },
     {
      "id": "novice_robes",
@@ -1605,7 +1552,8 @@
       "cloth_chest",
       "cloth_helm",
       "cloth_legs"
-     ]
+     ],
+     "lean": "keen"
     },
     {
      "id": "mountain_bindings",
@@ -1615,7 +1563,8 @@
       "cloth_chest",
       "light_boots",
       "light_gauntlets"
-     ]
+     ],
+     "lean": "guard"
     }
    ],
    "weapons": [
@@ -1645,13 +1594,6 @@
      "blurb": "Hammer: one-handed, with a second hammer in the off hand (it swings too, for less).",
      "main": "hammer",
      "off": "hammer"
-    },
-    {
-     "id": "mace_buckler",
-     "name": "Cudgel and Buckler",
-     "blurb": "Mace: one-handed, with a buckler in the off hand (a little armour and a chance to block).",
-     "main": "iron_mace",
-     "off": "buckler"
     }
    ]
   },
@@ -1665,7 +1607,8 @@
       "medium_chest",
       "medium_helm",
       "medium_boots"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "totem_harness",
@@ -1675,7 +1618,8 @@
       "light_chest",
       "medium_helm",
       "medium_legs"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "fen_leathers",
@@ -1685,7 +1629,8 @@
       "light_chest",
       "light_gauntlets",
       "light_boots"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1747,7 +1692,8 @@
       "medium_chest",
       "light_boots",
       "medium_legs"
-     ]
+     ],
+     "lean": "swift"
     },
     {
      "id": "writ_mail",
@@ -1757,7 +1703,8 @@
       "medium_chest",
       "medium_helm",
       "medium_gauntlets"
-     ]
+     ],
+     "lean": "keen"
     },
     {
      "id": "lantern_leathers",
@@ -1767,7 +1714,8 @@
       "light_chest",
       "light_boots",
       "light_helm"
-     ]
+     ],
+     "lean": "guard"
     }
    ],
    "weapons": [
@@ -1784,11 +1732,11 @@
      "main": "crossbow"
     },
     {
-     "id": "sword_dagger",
-     "name": "Sword and Bodkin",
-     "blurb": "Sword: one-handed, with a dagger in the off hand (it swings too, for less).",
-     "main": "sword",
-     "off": "dagger"
+     "id": "twin_axes",
+     "name": "Stake-Cutter Axes",
+     "blurb": "Two woodsman's axes, one in each hand: chopping blows that leave bleeding wounds.",
+     "main": "woodsman_axe",
+     "off": "woodsman_axe"
     },
     {
      "id": "sword_buckler",
@@ -1823,7 +1771,8 @@
       "heavy_chest",
       "heavy_helm",
       "heavy_gauntlets"
-     ]
+     ],
+     "lean": "guard"
     },
     {
      "id": "tourney_harness",
@@ -1833,7 +1782,8 @@
       "heavy_chest",
       "heavy_helm",
       "heavy_boots"
-     ]
+     ],
+     "lean": "keen"
     },
     {
      "id": "squire_mail",
@@ -1843,7 +1793,8 @@
       "medium_chest",
       "medium_helm",
       "medium_legs"
-     ]
+     ],
+     "lean": "swift"
     }
    ],
    "weapons": [
@@ -1862,24 +1813,16 @@
      "off": "shield"
     },
     {
-     "id": "spear_shield",
-     "name": "Lance-Point and Heater",
-     "blurb": "Spear: one-handed, long reach, with a shield (blocks).",
-     "main": "spear",
-     "off": "shield"
-    },
-    {
      "id": "halberd",
      "name": "Gate-Guard Halberd",
      "blurb": "Halberd: two-handed polearm.",
      "main": "halberd"
     },
     {
-     "id": "mace_shield",
-     "name": "Sworn Mace and Shield",
-     "blurb": "Mace: one-handed, with a shield in the off hand (armour and a chance to block).",
-     "main": "iron_mace",
-     "off": "shield"
+     "id": "greatsword",
+     "name": "Tourney Greatsword",
+     "blurb": "Greatsword: two-handed; slow, wide sweeps that catch several enemies.",
+     "main": "greatsword"
     }
    ]
   },
@@ -1893,7 +1836,8 @@
       "cloth_chest",
       "cloth_helm",
       "cloth_legs"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "hedge_coat",
@@ -1903,7 +1847,8 @@
       "cloth_chest",
       "cloth_legs",
       "light_boots"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "spark_wraps",
@@ -1913,7 +1858,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_gauntlets"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1925,24 +1871,6 @@
      "style": "bolt",
      "element": "arcane",
      "off": "orb"
-    },
-    {
-     "id": "wand_burst",
-     "name": "Popping Wand and Orb",
-     "blurb": "Wand: one-handed, ranged; throws a bolt of arcane force that bursts where it lands, with an orb in the off hand (more spell power).",
-     "main": "wand",
-     "off": "orb",
-     "style": "burst",
-     "element": "arcane"
-    },
-    {
-     "id": "wand_fan",
-     "name": "Wildfire Wand and Tome",
-     "blurb": "Wand: one-handed, ranged; throws three bolts of fire in a fan, with a tome in the off hand (spell power and mana).",
-     "main": "wand",
-     "off": "tome",
-     "style": "fan",
-     "element": "fire"
     },
     {
      "id": "wand_lob",
@@ -1968,6 +1896,14 @@
      "main": "staff",
      "element": "lightning",
      "spell": "arc"
+    },
+    {
+     "id": "sceptre_orb",
+     "name": "Wildfire Sceptre and Orb",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal fire damage, with an orb in the off hand (more spell power).",
+     "main": "scepter",
+     "off": "orb",
+     "element": "fire"
     }
    ]
   },
@@ -1981,7 +1917,8 @@
       "heavy_chest",
       "heavy_helm",
       "heavy_boots"
-     ]
+     ],
+     "lean": "guard"
     },
     {
      "id": "anvil_harness",
@@ -1991,7 +1928,8 @@
       "medium_chest",
       "heavy_helm",
       "medium_boots"
-     ]
+     ],
+     "lean": "keen"
     },
     {
      "id": "apron_leathers",
@@ -2001,7 +1939,8 @@
       "light_chest",
       "light_gauntlets",
       "light_boots"
-     ]
+     ],
+     "lean": "swift"
     }
    ],
    "weapons": [
@@ -2010,13 +1949,6 @@
      "name": "Smith's Hammer",
      "blurb": "Hammer: one-handed, with a shield in the off hand (armour and a chance to block).",
      "main": "hammer",
-     "off": "shield"
-    },
-    {
-     "id": "warhammer_shield",
-     "name": "Sledge and Rune Shield",
-     "blurb": "Warhammer: one-handed, heavy, with a shield (blocks).",
-     "main": "warhammer",
      "off": "shield"
     },
     {
@@ -2033,11 +1965,10 @@
      "off": "hammer"
     },
     {
-     "id": "axe_shield",
-     "name": "Forge Axe and Shield",
-     "blurb": "Battleaxe: one-handed, with a shield in the off hand (armour and a chance to block).",
-     "main": "battleaxe",
-     "off": "shield"
+     "id": "halberd",
+     "name": "Rune-Etched Halberd",
+     "blurb": "Halberd: two-handed, the longest reach there is; thrusts that hit everything in a line.",
+     "main": "halberd"
     }
    ]
   },
@@ -2051,7 +1982,8 @@
       "light_chest",
       "light_boots",
       "light_helm"
-     ]
+     ],
+     "lean": "swift"
     },
     {
      "id": "soft_step",
@@ -2061,7 +1993,8 @@
       "light_chest",
       "light_gauntlets",
       "light_legs"
-     ]
+     ],
+     "lean": "keen"
     },
     {
      "id": "masque_silks",
@@ -2071,7 +2004,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_boots"
-     ]
+     ],
+     "lean": "guard"
     }
    ],
    "weapons": [
@@ -2090,17 +2024,17 @@
      "off": "dagger"
     },
     {
-     "id": "twin_swords",
-     "name": "Twin Sabres",
-     "blurb": "Sword: one-handed, with a second sword in the off hand (it swings too, for less).",
-     "main": "sword",
-     "off": "sword"
+     "id": "sabre_buckler",
+     "name": "Night Sabre and Buckler",
+     "blurb": "Sabre: one-handed, quick curved cuts, with a buckler in the off hand (a little armour and a chance to block).",
+     "main": "militia_sabre",
+     "off": "buckler"
     },
     {
-     "id": "dagger_buckler",
-     "name": "Dusk Knife and Buckler",
-     "blurb": "Dagger: one-handed and fast, with a buckler in the off hand (a little armour and a chance to block).",
-     "main": "dagger",
+     "id": "javelins",
+     "name": "Throwing Spikes and Buckler",
+     "blurb": "Javelins: one-handed, thrown, with a buckler in the off hand (a little armour and a chance to block).",
+     "main": "javelin",
      "off": "buckler"
     }
    ]
@@ -2115,7 +2049,8 @@
       "medium_chest",
       "light_boots",
       "medium_legs"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "rivet_harness",
@@ -2125,7 +2060,8 @@
       "medium_chest",
       "light_boots",
       "light_gauntlets"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "tool_leathers",
@@ -2135,7 +2071,8 @@
       "light_chest",
       "light_gauntlets",
       "light_legs"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -2191,7 +2128,8 @@
       "medium_chest",
       "medium_helm",
       "medium_boots"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "vesper_coat",
@@ -2201,7 +2139,8 @@
       "cloth_chest",
       "cloth_helm",
       "medium_boots"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "dawn_robes",
@@ -2211,7 +2150,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_boots"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -2222,14 +2162,6 @@
      "main": "scepter",
      "element": "shadow",
      "off": "shield"
-    },
-    {
-     "id": "sceptre_reliquary",
-     "name": "Sceptre and Saint's Box",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal arcane force damage, with a reliquary (a focus: a barrier and its own power).",
-     "main": "scepter",
-     "off": "reliquary",
-     "element": "arcane"
     },
     {
      "id": "staff_nova",
@@ -2284,7 +2216,8 @@
       "light_chest",
       "light_boots",
       "light_helm"
-     ]
+     ],
+     "lean": "wise"
     },
     {
      "id": "glamour_hood",
@@ -2294,7 +2227,8 @@
       "light_chest",
       "light_helm",
       "light_legs"
-     ]
+     ],
+     "lean": "focus"
     },
     {
      "id": "salon_robes",
@@ -2304,7 +2238,8 @@
       "cloth_chest",
       "cloth_helm",
       "light_boots"
-     ]
+     ],
+     "lean": "ward"
     }
    ],
    "weapons": [
@@ -2325,14 +2260,6 @@
      "spell": "nova"
     },
     {
-     "id": "staff_ground",
-     "name": "Staff of Bad Dreams",
-     "blurb": "Staff: two-handed; its attack is a thrown blast of shadow that bursts wide where it lands.",
-     "main": "staff",
-     "element": "shadow",
-     "spell": "ground"
-    },
-    {
      "id": "wand_fork",
      "name": "Two-Minds Wand and Glass",
      "blurb": "Wand: one-handed, ranged; throws a bolt of arcane force that splits on what it hits, with a seer's orb (a focus with its own power).",
@@ -2351,13 +2278,111 @@
      "element": "arcane"
     },
     {
-     "id": "wand_cone",
-     "name": "Shiver Wand and Orb",
-     "blurb": "Wand: one-handed, ranged; sprays a short cone of frost in front of you, with an orb in the off hand (more spell power).",
-     "main": "wand",
+     "id": "sceptre_orb",
+     "name": "Glamour Sceptre and Orb",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal frost damage, with an orb in the off hand (more spell power).",
+     "main": "scepter",
      "off": "orb",
-     "style": "cone",
      "element": "ice"
+    }
+   ]
+  }
+ },
+ "leans": {
+  "_doc": "Owner feedback 8 (W23): the three armour sets of a class differ in STATS, not only in weight. A set's `lean` puts these properties on its CHEST piece (kit items only; shown on the item card like any property).",
+  "guard": {
+   "name": "Sturdy",
+   "text": "Sturdier: more armour and more health.",
+   "props": [
+    {
+     "stat": "armor",
+     "value": 4,
+     "name": "Reinforced"
+    },
+    {
+     "stat": "hp",
+     "value": 14,
+     "name": "Padded"
+    }
+   ]
+  },
+  "swift": {
+   "name": "Nimble",
+   "text": "Lighter on your feet: you dodge more and act sooner.",
+   "props": [
+    {
+     "stat": "dodge",
+     "value": 4,
+     "name": "Loose-Cut"
+    },
+    {
+     "stat": "initiative",
+     "value": 2,
+     "name": "Unburdened"
+    }
+   ]
+  },
+  "keen": {
+   "name": "Fierce",
+   "text": "Hits harder: more damage and more critical hits.",
+   "props": [
+    {
+     "stat": "dmg",
+     "value": 2,
+     "name": "Weighted Cuffs"
+    },
+    {
+     "stat": "critChance",
+     "value": 4,
+     "name": "Eager"
+    }
+   ]
+  },
+  "wise": {
+   "name": "Deep",
+   "text": "A deeper well: more mana, and it comes back faster.",
+   "props": [
+    {
+     "stat": "mp",
+     "value": 12,
+     "name": "Inked"
+    },
+    {
+     "stat": "mana_regen",
+     "value": 0.8,
+     "name": "Restful"
+    }
+   ]
+  },
+  "focus": {
+   "name": "Potent",
+   "text": "Stronger spells: more spell power.",
+   "props": [
+    {
+     "stat": "spellPower",
+     "value": 0.06,
+     "name": "Charged"
+    },
+    {
+     "stat": "mp",
+     "value": 6,
+     "name": "Inked"
+    }
+   ]
+  },
+  "ward": {
+   "name": "Warded",
+   "text": "Safer: more health and resistance to magic.",
+   "props": [
+    {
+     "stat": "hp",
+     "value": 12,
+     "name": "Padded"
+    },
+    {
+     "stat": "magicResist",
+     "value": 5,
+     "name": "Stitched Sigils"
     }
    ]
   }

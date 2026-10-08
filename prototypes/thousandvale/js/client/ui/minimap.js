@@ -7,6 +7,7 @@ import { h } from '../ui-panel.js';
 import { makeView, rimPoint, hitTest, distText, compass, bandText, bandTone } from './map-data.js';
 import { drawMap, drawDungeon, label } from './map-render.js';
 import { esc } from './tips.js';
+import { questZoneAt } from './map-tools.js';      // W17: a quest zone answers the pointer anywhere inside its ring
 
 const SIZE = 184;
 export const MINI_ZOOMS = [0.35, 0.6, 1.0, 1.7, 2.8];            // px per metre outdoors (0.6 ≈ 150 m radius)
@@ -41,6 +42,10 @@ export function createMinimap({ atlas, me, onOpenMap, store }) {
     const hit = hitTest(S.markers, sx, sy, S.view, 9).find(m => m.kind !== 'me');
     const arrow = S.arrows?.find(a => Math.hypot(a.x - sx, a.y - sy) < 11);
     const m = hit || arrow?.m;
+    // W17: no pin under the pointer — is it inside a quest zone? Its card says the objective, and the ring lights up.
+    const zone = !m || (m.area && m.kind === 'quest') ? questZoneAt(S.markers, ...S.view.toWorld(sx, sy), atlas.quests) : null;
+    S.hot = zone ? zone.marker.id : null;
+    if (zone) { card.innerHTML = zone.html; card.hidden = false; card.classList.add('show'); card.style.left = (sx / k - card.offsetWidth - 14) + 'px'; card.style.top = (sy / k + 10) + 'px'; return; }
     if (!m) { card.hidden = true; return; }
     const p = me();
     const dist = p ? `${distText(Math.hypot(m.x - p.x, m.z - p.z))} ${compass(m.x - p.x, m.z - p.z)}` : '';
@@ -48,7 +53,7 @@ export function createMinimap({ atlas, me, onOpenMap, store }) {
     card.hidden = false; card.classList.add('show');
     card.style.left = (sx / k - card.offsetWidth - 14) + 'px'; card.style.top = (sy / k + 10) + 'px';
   });
-  canvas.addEventListener('pointerleave', () => { card.hidden = true; });
+  canvas.addEventListener('pointerleave', () => { card.hidden = true; S.hot = null; });
 
   /** Draw at ~12 fps (and on demand); cheap enough to leave on. */
   function update(force = false) {
@@ -72,6 +77,7 @@ export function createMinimap({ atlas, me, onOpenMap, store }) {
     g.clearRect(0, 0, canvas.width, canvas.height);
     g.beginPath(); g.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2 - 1, 0, Math.PI * 2); g.clip();
     const shown = all.filter(m => !['farm', 'ford', 'bridge'].includes(m.kind) || scale > 0.9);
+    if (S.hot) for (const m of shown) if (m.id === S.hot) m.hot = true;
     if (dun) drawDungeon(g, v, { floors: dun.floors, cell: dun.cell, fog: dun.fog, markers: shown, opts: { minimap: true } });
     else drawMap(g, v, { model: atlas.model, world: atlas.world, zoneImage: k => atlas.src.zoneImage(k), fog: atlas.fog, markers: shown, detail: scale > 0.45 ? atlas.detailNear(p.x, p.z) : null, opts: { minimap: true, zones: true, labels: true, level: p.level } });
     g.restore();
@@ -106,8 +112,10 @@ export function createMinimap({ atlas, me, onOpenMap, store }) {
   }
   return {
     root, update, setZoom,
-    get state() { return { zoom: S.zoom, rotate: S.rotate, markers: S.markers.map(m => ({ id: m.id, kind: m.kind, name: m.name })), arrows: (S.arrows || []).map(a => ({ id: a.m.id, kind: a.m.kind, name: a.m.name })) }; },
+    get state() { return { zoom: S.zoom, rotate: S.rotate, hot: S.hot || null, card: card.hidden ? '' : card.textContent, tip: canvas.dataset.tip || canvas.title || '', markers: S.markers.map(m => ({ id: m.id, kind: m.kind, name: m.name })), arrows: (S.arrows || []).map(a => ({ id: a.m.id, kind: a.m.kind, name: a.m.name })) }; },
     setRotate(on) { S.rotate = !!on; paintRotBtn(); },
+    /** tests: put the pointer over a world point of the minimap. */
+    hoverAt(x, z) { if (!S.view) return ''; const r = canvas.getBoundingClientRect(), [sx, sy] = S.view.toScreen(x, z), k = SIZE / Math.max(1, r.width); canvas.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: r.left + sx / k, clientY: r.top + sy / k })); return card.hidden ? '' : card.textContent; },
     show(on) { root.hidden = !on; },
   };
 }

@@ -43,7 +43,7 @@ export function weaponLook(wt, wk = null) {
   return { kind: 'slash', width: 0.26, tilt: 0.2, trail: 'crescent' };
 }
 
-export function createWeaponFx(scene, { spellFx = null, actors = null, groundY = () => 0, pool = 14, targetOf = () => null } = {}) {
+export function createWeaponFx(scene, { spellFx = null, actors = null, groundY = () => 0, pool = 14, targetOf = () => null, shots = null } = {}) {
   // crescent geometries: a 1 m ring sector lying flat and centred on +z, one per arc width (rounded to 0.2 rad, made on
   // first use — a geometry is not a program, so nothing recompiles), scaled to the reach per swing
   const GEO = new Map();
@@ -140,6 +140,8 @@ export function createWeaponFx(scene, { spellFx = null, actors = null, groundY =
         const from = new THREE.Vector3(a.pos.x, a.pos.y + Math.max(0.6, a.height * 0.6), a.pos.z);
         const to = t ? new THREE.Vector3(t.pos.x, t.pos.y + Math.max(0.4, t.height * 0.55), t.pos.z) : from.clone().add(new THREE.Vector3(Math.sin(a.yaw) * 6, 0, Math.cos(a.yaw) * 6));
         stats.shots++;
+        // W2/W14: the same pooled bodies every other shot uses (an arrow from the hand), not a second kind of streak
+        if (shots) { try { shots.fire({ kind: p.ev.wk === 'arrow' ? 'arrow' : 'bolt', id, el, wt: p.ev.wt, ms: Math.max(140, from.distanceTo(to) / 26 * 1000) }, { to, follow: t ? () => new THREE.Vector3(t.pos.x, t.pos.y + Math.max(0.4, t.height * 0.55), t.pos.z) : null }); } catch {} continue; }
         try { spellFx.projectile({ from, to, element: el === 'physical' && p.ev.wk === 'bolt' ? 'arcane' : el, shape: p.ev.wk === 'arrow' ? 'arrow' : null, ms: Math.max(90, from.distanceTo(to) / 40 * 1000) }); } catch {}
       }
     }

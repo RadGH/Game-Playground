@@ -131,7 +131,24 @@ async function main() {
   // an npc record like the placer's own, so the server gives them a body, their greeting, their quests and their shop
   let anglers = [];
   if (existsSync(P('data/provinces/angling-pools.json'))) anglers = readJ('data/provinces/angling-pools.json').anglers || [];
-  for (const a of anglers) { const o = zoneOffset(a.zone); (added[a.zone] ||= []).push({ type: 'npc', id: a.id, name: a.name, role: 'angler', at: a.town, x: a.x - o.ox, z: a.z - o.oz, yaw: a.yaw, angler: true }); }
+  // owner feedback 8 (W12 / W27): `quests` = how many quests the NPC hands out (data/quests/marks/givers.json) and `titled`
+  const givers = existsSync(P('data/quests/marks/givers.json')) ? (readJ('data/quests/marks/givers.json').npcs || {}) : {};
+  const mark = id => ({ quests: givers[id] ? givers[id].gives.length : 0, titled: givers[id] ? !!givers[id].titled : true });
+  for (const a of anglers) { const o = zoneOffset(a.zone); (added[a.zone] ||= []).push({ type: 'npc', id: a.id, name: a.name, role: 'angler', at: a.town, x: a.x - o.ox, z: a.z - o.oz, yaw: a.yaw, angler: true, ...mark(a.id) }); }
+  // 1d. owner feedback 8 — W5: the carter and the parked ox cart outside every town's main gate (data/provinces/carts.json
+  // `stops`, tools/content-towns.mjs; already zone metres); W1: the town guards at their posts (data/provinces/guards.json
+  // `posts`). New row types `cart` and `guard`: stream A spawns them, B's bake never sees this file.
+  let carts = 0, guards = 0;
+  if (existsSync(P('data/provinces/carts.json'))) for (const s of readJ('data/provinces/carts.json').stops || []) {
+    (added[s.zone] ||= []).push({ type: 'npc', id: s.carter.id, name: s.carter.name, role: 'carter', at: s.town, x: s.carter.x, z: s.carter.z, yaw: s.carter.yaw, cart: s.id, placedBy: 'content-towns', ...mark(s.carter.id) });
+    added[s.zone].push({ type: 'cart', id: s.cart.id, name: 'Longroad Cart', model: s.cart.model, vehicle: s.cart.model, town: s.town, carter: s.carter.id, x: s.cart.x, z: s.cart.z, yaw: s.cart.yaw, radius: 2.2 });
+    carts++;
+  }
+  if (existsSync(P('data/provinces/guards.json'))) for (const g of readJ('data/provinces/guards.json').posts || []) {
+    (added[g.zone] ||= []).push({ type: 'guard', id: g.id, name: g.name, role: 'guard', rank: g.rank, town: g.town, post: g.post, ...(g.gate ? { gate: g.gate } : {}), x: g.x, z: g.z, yaw: g.yaw, titled: false });
+    guards++;
+  }
+  console.log(`carters + carts: ${carts}; guard posts: ${guards}`);
   for (const wid of Object.keys(mains)) writeFileSync(P(`data/vignettes/placements/${wid}.quest.json`), JSON.stringify({
     _doc: `Stream E (play-test 4 S14). Copies of camps already standing in world zone ${wid}, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at ${NEED_CAP}). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.`,
     zone: wid, terrainHash: mains[wid].terrainHash, placements: added[wid] || [] }, null, 1) + '\n');

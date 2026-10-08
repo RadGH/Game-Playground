@@ -20,6 +20,7 @@ import { createBuffs } from './buffs.js';
 import { send2 } from './net2.js';
 import { LOOT_TIERS, DEFAULT_THRESHOLD, xpText, className, gearShown } from './pt2-core.js';
 import { lookWith, lookCustom } from './appearance-core.js';
+import { npcTitle } from './pt8-core.js';
 
 const LOOKS_KEY = 'tv.looks';
 const lookStore = {
@@ -152,7 +153,7 @@ export function createUi2(o) {
       if (Math.hypot(a.pos.x - p.x, a.pos.z - p.z) > 120) continue;
       out.push({ id: 'rare:' + a.id, kind: 'rare', x: a.pos.x, z: a.pos.z, name: a.name, sub: `${a.rank[0].toUpperCase() + a.rank.slice(1)} · level ${a.level}`, color: a.rank === 'boss' ? '#ff3a3a' : '#ffb03a', priority: 4, size: 6 });
     }
-    for (const [qid, list] of questAreas) if (!o.atlas.isTracked || o.atlas.isTracked(qid)) for (const [i, ar] of list.entries()) if (Math.hypot(ar.x - p.x, ar.z - p.z) < 400 + (ar.r || 40)) out.push({ id: `qa:${qid}:${i}`, kind: 'quest', area: true, x: ar.x, z: ar.z, r: ar.r || 40, name: ar.label || 'Where they live', sub: `${ar.n ? '~' + ar.n + ' ' : ''}${ar.what || 'of what you hunt'}${ar.lv ? ` · level ${ar.lv[0]}–${ar.lv[1]}` : ''}`, priority: 2, size: 5 });
+    for (const [qid, list] of questAreas) if (!o.atlas.isTracked || o.atlas.isTracked(qid)) for (const [i, ar] of list.entries()) if (Math.hypot(ar.x - p.x, ar.z - p.z) < 400 + (ar.r || 40)) out.push({ id: `qa:${qid}:${i}`, kind: 'quest', area: true, quest: qid, x: ar.x, z: ar.z, r: ar.r || 40, name: ar.label || 'Where they live', sub: `${ar.n ? '~' + ar.n + ' ' : ''}${ar.what || 'of what you hunt'}${ar.lv ? ` · level ${ar.lv[0]}–${ar.lv[1]}` : ''}`, priority: 2, size: 5 });
     return out;
   };
   worldUi.onBanner = b => banner.push(b);          // Q6: a vignette's lore is a place banner
@@ -228,15 +229,15 @@ export function createUi2(o) {
     n.on('ev', ({ e }) => { for (const ev of e || []) if ((ev.type || ev.t) === 'mp') { const a = actors.get(ev.id); if (a) { a.mp = ev.n; if (ev.max > 0) a.mpMax = ev.max; } } });
     n.on('bindR', r => { if (r.ok) { hud.toast(`${r.town || 'This inn'} is your home now.`, 'good'); hud.chat(`You make ${r.town || 'this inn'} your home: you wake here, and the recall charm brings you back here.`, 'system'); } else hud.toast(r.msg || 'Not here.', 'warn'); });
   }
-  // S19: every town NPC wears what they are over their name — the server's title, else their office or role
-  const ROLE_TITLE = { smith: 'Smith', merchant: 'Merchant', elder: 'Elder', innkeeper: 'Innkeeper', healer: 'Healer', unbinder: 'Unbinder — resets talents and perks', broker: 'Broker', guard: 'Guard', barber: 'Barber', stablehand: 'Stable master', trader: 'Trader', armourer: 'Armourer', apothecary: 'Apothecary', bowyer: 'Bowyer', tailor: 'Tailor', provisioner: 'Provisioner', jeweller: 'Jeweller', miller: 'Miller', farmer: 'Farmer', trainer: 'Trainer' };
+  // S19: a town NPC who SERVES you wears what they are over their name — the server's title (W27: nobody else does)
+  // (play-test 8, W27: the title rule lives in pt8-core.js npcTitle — the role table that titled every woodcutter is gone)
   let titleAt = 0;
   function titles() {
     for (const a of actors.actors.values()) {
       if (a.kind !== 'npc' || a.pet) continue;
       const i = infoOf(a.id) || {};
-      const t = i.title || i.data?.npc?.title || i.office?.title || (i.role ? ROLE_TITLE[i.role] || className(i.role) : '') || '';
-      if (t && t !== a.name && a.npcTitle !== t) { a.npcTitle = t; actors.refreshPlate(a); }
+      const t = npcTitle(i, a.name);            // W27: only somebody placed for you to find wears a title — filler folk get none
+      if ((a.npcTitle || '') !== t) { a.npcTitle = t; actors.refreshPlate(a); }
     }
   }
   function tick(dt) {

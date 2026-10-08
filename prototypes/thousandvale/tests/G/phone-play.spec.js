@@ -13,7 +13,7 @@ import { mkdirSync } from 'node:fs';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SHOTS = join(HERE, 'shots', 'phone-play');
 mkdirSync(SHOTS, { recursive: true });
-test.describe.configure({ mode: 'serial' });
+// one worker, one shared page, in file order — but a failed step does not stop the ones after it (each says what it needs)
 const freePort = () => new Promise((res, rej) => { const s = createServer(); s.unref(); s.on('error', rej); s.listen(0, '127.0.0.1', () => { const p = s.address().port; s.close(() => res(p)); }); });
 let srv, base, hookBase, ctx, page; const errors = [];
 const hook = (path, body) => fetch(hookBase + path, { method: 'POST', body: JSON.stringify(body) }).then(r => r.json()).catch(e => ({ ok: false, err: e.message }));
@@ -93,9 +93,15 @@ test('3. target a monster, fight it with the attack and skill buttons, loot the 
   const home = await you();
   for (const [dx, dz] of [[220, 0], [0, 220], [-220, 0], [0, -220], [380, 380], [-380, 380], [380, -380], [-380, -380]]) { if (m) break; await hook('/teleport', { name: NAME, x: home.x + dx, z: home.z + dz }); await page.waitForTimeout(4500); m = await near(); }
   test.skip(!m, 'no monster in view of the starter town in this bake');
-  await hook('/teleport', { name: NAME, x: m.x + 3, z: m.z + 3 });
-  await page.waitForTimeout(2500);
-  await tap('.ph-target');
+  // stand by it (monsters wander: do it again if the Target button finds nothing within its 40 m)
+  for (let i = 0; i < 5; i++) {
+    m = (await near()) || m;
+    await hook('/teleport', { name: NAME, x: m.x + 3, z: m.z + 3 });
+    await page.waitForTimeout(3000);
+    await tap('.ph-target');
+    if (await page.locator('#target-frame').isVisible().catch(() => false)) break;
+    await page.waitForTimeout(1500);
+  }
   await expect(page.locator('#target-frame')).toBeVisible({ timeout: 10000 });
   await shot('07-target');
   const tid = await page.evaluate(() => tv.state().target);

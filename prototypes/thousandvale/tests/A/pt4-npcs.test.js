@@ -48,20 +48,25 @@ test('S11: every village and hamlet stream B planned (no town room) has a trader
   assert.ok(n >= 25, 'settlements checked: ' + n);
 });
 
-test('S19: every NPC has a title above its name and a real name (no "Townsfolk", "Guard", "Smith" placeholders)', async () => {
+test('S19 + W27: every NPC has a real name; a title only on the ones placed for the player (no "Townsfolk", "Guard", "Smith" placeholders)', async () => {
   const { world: w, srv, clock } = await world();
   const pv = w.P.values().next().value;
   const a = await joinReal(srv, clock, 'Namecheck', 'warrior'); await run(clock, 1500);
-  let n = 0;
+  let n = 0, fill = 0, titled = 0;
   for (const r of [...pv.towns, ...pv.copies]) for (const x of r.entities.values()) {
     if (x.kind !== 'npc' || !x.data || !(x.data.npc || x.data.folk)) continue;
     n++;
     const i = x.info();
-    assert.ok(i.title && String(i.title).trim(), `${i.name} (${i.role}) has no title`);
+    // W27 (round 8, report #48): a title only on NPCs placed for the player; filler folk have a real name and nothing above it
+    if (i.filler) { fill++; assert.ok(!i.title, `${i.name} (${i.role}) is filler and must show no title, has "${i.title}"`); assert.ok(!(x.data.npc && x.data.npc.shop), `${i.name} (${i.role}) keeps a shop and was called filler`); }
+    else { titled++; assert.ok(i.title && String(i.title).trim() && i.title !== 'Local', `${i.name} (${i.role}) is titled and has no title`); }
+    if (['townsfolk', 'villager', 'woodcutter', 'farmer', 'farmhand', 'shepherd', 'guard', 'traveller'].includes(i.role) && !(x.data.npc && (x.data.npc.id || x.data.npc.shop))) assert.ok(!i.title, `a ${i.role} shows "${i.title}"`);
     assert.ok(!PLACEHOLDER.test(i.name), `"${i.name}" is a job, not a name (${i.role})`);
     assert.ok(!/townsfolk|villager|\bnpc\b/i.test(i.name), i.name);
   }
   assert.ok(n > 300, 'npcs checked ' + n);
+  assert.ok(fill > 50 && titled > 50, `both kinds exist: ${titled} titled, ${fill} filler`);
+  console.log(`W27: ${titled} titled NPCs, ${fill} filler (no title)`);
   // service titles say what they do
   const t0 = pv.towns[0];
   const by = role => [...t0.objects.values()].find(x => x.kind === 'npc' && x.data.npc && x.data.npc.role === role).info();

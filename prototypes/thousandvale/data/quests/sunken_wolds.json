@@ -6,26 +6,48 @@
       "name": "Elder Coombe",
       "role": "elder",
       "at": "Lowmoor",
-      "greeting": "The wolds sank, the village didn't. Yet."
+      "greeting": "The wolds sank, the village didn't. Yet.",
+      "titled": true
     },
     "bastion_keeper": {
       "name": "Keeper Isolde",
       "role": "guard",
       "at": "the Mossy Bastion",
-      "greeting": "The bastion's covered in moss. So is the keeper, some mornings."
+      "greeting": "The bastion's covered in moss. So is the keeper, some mornings.",
+      "titled": true
     },
     "deepdene_digger": {
       "name": "Digger Wat",
       "role": "miner",
       "at": "Deepdene",
-      "greeting": "There's caves under everything here. And things in the caves. And under the things, more caves."
+      "greeting": "There's caves under everything here. And things in the caves. And under the things, more caves.",
+      "titled": true
     },
     "angler_lowmoor": {
       "name": "Ysmay Drownfield",
       "role": "angler",
       "at": "Lowmoor",
       "greeting": "My grandmother's house is under that water. The perch keep it tidy. See the ripples, just west of where I'm standing? That's the town pool. It never fishes out.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_lowmoor": {
+      "name": "Ganna Fenwick",
+      "role": "carter",
+      "at": "Lowmoor",
+      "greeting": "I do not go fast, I do not go far in the dark, and I do not stop for wolves. Fares are on the board.",
+      "cart": "cart_lowmoor",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_deepdene": {
+      "name": "Lambert Sallow",
+      "role": "carter",
+      "at": "Deepdene",
+      "greeting": "Walking is free. Riding is nearly free, and you arrive with your legs.",
+      "cart": "cart_deepdene",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

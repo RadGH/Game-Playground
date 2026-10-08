@@ -108,12 +108,33 @@ test('Q16: a mount at level 5; summon, faster, off when you cast or get hit; ref
   assert.ok(got.some(x => x.t === 'you' && x.mountNew === 'trail_horse'));
   for (const c of [a, b]) W.transfer(rec(W, c), W.copies[0], { x: W.gate.x + 30, z: W.gate.z + (c === b ? 3 : 0) }, 'test');
   await run(clock, 300);
-  // calling a mount is a 1.5 s cast (C's rules): a step breaks it
+  // calling a mount is a 1.5 s cast (C's rules). W26 (round 8, report #47): the call HOLDS you still — walking keys do not
+  // break it and do not move you; you are in the saddle when it ends
   a.mount('summon'); await run(clock, 300);
-  assert.equal(got.filter(x => x.t === 'mountR').pop().casting, 1500);
-  W.transfer(rec(W, a), rec(W, a).room, { x: rec(W, a).entity.x + 2, z: rec(W, a).entity.z }, 'test');
+  const call = got.filter(x => x.t === 'mountR').pop();
+  assert.equal(call.casting, 1500); assert.equal(call.stand, true);
+  const x0 = rec(W, a).entity.x, z0 = rec(W, a).entity.z;
+  for (let k = 0; k < 14; k++) { a.input({ s: 100 + k, dt: 50, mx: 1, mz: 0, yaw: 0, b: 0 }); await run(clock, 50); }
+  assert.ok(Math.hypot(rec(W, a).entity.x - x0, rec(W, a).entity.z - z0) < 0.05, 'held still while calling');
+  assert.ok(rec(W, a).mountCast, 'and the call goes on');
+  await run(clock, 900);
+  assert.equal(rec(W, a).entity.mount, 'trail_horse', 'moving did NOT break the call');
+  assert.equal(rec(W, a).entity.held, null, 'released once mounted');
+  a.input({ s: 200, dt: 50, mx: 1, mz: 0, yaw: 0, b: 0 }); await run(clock, 100);
+  assert.ok(rec(W, a).entity.x - x0 > 0.2, 'and you ride on');
+  // off, then: cancel during the call ends it and leaves you on foot, free to walk
+  a.mount('off'); await run(clock, 200);
+  a.mount('summon'); await run(clock, 300);
+  a.mount('cancel'); await run(clock, 200);
+  assert.equal(got.filter(x => x.t === 'mountR').pop().why, 'cancelled');
+  assert.equal(rec(W, a).mountCast, null); assert.equal(rec(W, a).entity.held, null);
+  await run(clock, 1600);
+  assert.equal(rec(W, a).entity.mount, null, 'a cancelled call does not mount you');
+  // being MOVED (a knock-back, a teleport) still breaks it
+  a.mount('summon'); await run(clock, 300);
+  W.transfer(rec(W, a), rec(W, a).room, { x: rec(W, a).entity.x + 6, z: rec(W, a).entity.z }, 'test');
   await run(clock, 1500);
-  assert.equal(rec(W, a).entity.mount, null, 'moving broke the call');
+  assert.equal(rec(W, a).entity.mount, null, 'being thrown across the field broke the call');
   assert.equal(got.filter(x => x.t === 'mountR').pop().why, 'interrupted');
   a.mount('summon'); await run(clock, 1700);
   const e = rec(W, a).entity;

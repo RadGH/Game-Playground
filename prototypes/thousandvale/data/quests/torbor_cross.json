@@ -6,32 +6,73 @@
       "name": "Provost Isolde Hollis",
       "role": "elder",
       "at": "Halsbridge",
-      "greeting": "Halsbridge welcomes you. Halsbridge also taxes you. Both warmly."
+      "greeting": "Halsbridge welcomes you. Halsbridge also taxes you. Both warmly.",
+      "titled": true
     },
     "watch_sergeant_wat": {
       "name": "Sergeant Wat",
       "role": "guard",
       "at": "Halsbridge Gatehouse",
-      "greeting": "State your business. Actually, don't, I'm on my break."
+      "greeting": "State your business. Actually, don't, I'm on my break.",
+      "titled": true
     },
     "miller_emrys": {
       "name": "Emrys Millward",
       "role": "farmer",
       "at": "Mill End",
-      "greeting": "The wheel turns, the flour flows, the rats eat it. The circle of life."
+      "greeting": "The wheel turns, the flour flows, the rats eat it. The circle of life.",
+      "titled": true
     },
     "ratcatcher_jory": {
       "name": "Jory the ratcatcher",
       "role": "trader",
       "at": "Halsbridge",
-      "greeting": "Rats is my trade. Business has never been better, which is the problem."
+      "greeting": "Rats is my trade. Business has never been better, which is the problem.",
+      "titled": true
     },
     "angler_halsbridge": {
       "name": "Perrin Underarch",
       "role": "angler",
       "at": "Halsbridge",
       "greeting": "Best spot in the province is right under the bridge. The pike thinks so too. See the ripples, just west of where I'm standing? That's the town pool. It never fishes out.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_halsbridge": {
+      "name": "Kitt Dimmock",
+      "role": "carter",
+      "at": "Halsbridge",
+      "greeting": "Where to? The ox knows every road in the Downs, and takes most of them slowly.",
+      "cart": "cart_halsbridge",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_mill_end": {
+      "name": "Clement Hobday",
+      "role": "carter",
+      "at": "Mill End",
+      "greeting": "Out of Mill End by cart is the only way to leave with dignity. Pick a town.",
+      "cart": "cart_mill_end",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_lower_mossgate": {
+      "name": "Gwen Fenwick",
+      "role": "carter",
+      "at": "Lower Mossgate",
+      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "cart": "cart_lower_mossgate",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_mirestead": {
+      "name": "Hobb Fenwick",
+      "role": "carter",
+      "at": "Mirestead",
+      "greeting": "Out of Mirestead by cart is the only way to leave with dignity. Pick a town.",
+      "cart": "cart_mirestead",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

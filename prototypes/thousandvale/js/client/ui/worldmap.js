@@ -3,21 +3,29 @@
 // live events, quest markers, your pins, your position and your party; zoom from the whole world down to the streets
 // of a town; drag to pan, wheel or pinch to zoom; fog over what you have not seen; a hover card for every marker and
 // for every zone. Inside a dungeon it is the dungeon's map instead (P13), drawn from the room's tiles.
+//
+// Play-test 8: the map opens where you LEFT it (zoom and position, for the session — W15); a filter and a search find
+// shops and services and ring the towns that have them (W15, ui/map-tools.js); a quest zone answers the pointer anywhere
+// inside its ring with the objective and lights up (W17); the Events list can hide an event from your screen and bring
+// it back (W13); NPCs with a quest for you show their ! or ? (W12).
 
 import { createPanel, h } from '../ui-panel.js';
 import { makeView, zoomAt, hitTest, bandText, bandTone, distText, compass, titleCase, zoneKeyAt, ZONE_M, poiLabel } from './map-data.js';
 import { drawMap, drawDungeon, drawIcon, COLORS } from './map-render.js';
 import { estimateFare } from '../world-ui.js';
 import { esc } from './tips.js';
+import { createMapFind, questZoneAt, savedView, saveView } from './map-tools.js';
+import { HIDDEN } from './hidden-events.js';
 
 const LEGEND = [
   ['me', 'You'], ['party', 'Party member'], ['quest', 'Quest goal'], ['questdone', 'Hand a quest in'], ['liveevent', 'Event happening now'],
   ['waystone', 'Waystone (touched)'], ['town', 'Town'], ['hamlet', 'Hamlet / village'], ['dungeon', 'Dungeon'], ['cave', 'Cave'], ['fort', 'Fort'],
   ['event', 'Event arena'], ['farm', 'Farm'], ['landmark', 'Landmark'], ['pin', 'Your pin (right-click the map)'],
+  ['npcmark', 'Someone with a quest: ! take it, ? hand it in'], ['service', 'A shop or service you searched for'],
 ];
 
 export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => false }) {
-  const panel = createPanel({ id: 'map', title: 'Map', width: 0, cls: 'map-panel centered', onOpen: () => { fitPreset(state.preset || 'region'); loop(); }, onClose: () => { hideCard(); } });
+  const panel = createPanel({ id: 'map', title: 'Map', width: 0, cls: 'map-panel centered', onOpen: () => { openView(); find.load(); loop(); }, onClose: () => { hideCard(); remember(); } });
   const canvas = h('canvas.map-canvas', { 'aria-label': 'World map' });
   const card = h('div.tipbox.map-card', { hidden: true, role: 'tooltip' });
   const zoomBox = h('div.map-zoom', {},
@@ -25,14 +33,16 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
     h('button.ghost', { type: 'button', title: 'Zoom out', 'aria-label': 'Zoom out', onclick: () => zoomBy(1 / 1.6) }, '−'),
     h('button.ghost', { type: 'button', title: 'Centre on me', 'aria-label': 'Centre on me', onclick: () => centreOnMe() }, '⌖'));
   const legend = h('div.map-legend', { hidden: true }, ...LEGEND.map(([k, t]) => {
-    const c = document.createElement('canvas'); c.width = 22; c.height = 22; const g = c.getContext('2d'); drawIcon(g, k, 11, 11, 6, { known: true, yaw: Math.PI });
+    const c = document.createElement('canvas'); c.width = 22; c.height = 22; const g = c.getContext('2d'); drawIcon(g, k, 11, 11, k === 'npcmark' ? 5 : 6, { known: true, yaw: Math.PI, glyph: '!' });
     return h('div.lg-row', {}, c, h('span', {}, t));
   }));
   const presets = h('div.map-presets', { role: 'tablist' });
   const layers = h('div.map-layers');
   const side = h('aside.map-side');
   const stage = h('div.map-stage', {}, canvas, zoomBox, legend, card);
-  panel.fill(h('div.map-top', {}, presets, h('span.grow'), layers), h('div.map-main', {}, stage, side));
+  // W15: the filter + search for shops and services (ui/map-tools.js)
+  const find = createMapFind({ atlas, me, onChange: () => { state.lastSide = ''; }, onShow: t => showAt(t.x, t.z, t.lone ? 0.9 : 0.55) });
+  panel.fill(h('div.map-top', {}, presets, find.bar, h('span.grow'), layers), h('div.map-main', {}, stage, side));
 
   const state = { cx: 0, cz: 0, scale: 0.1, preset: 'region', opts: { roads: true, rivers: true, quests: true, events: true, places: true, party: true, names: true }, hover: null, drag: null, w: 0, h: 0, raf: 0, lastSide: '' };
   const PRESETS = [['world', 'World'], ['province', 'Province'], ['region', 'Region'], ['here', 'Around me']];
@@ -60,6 +70,18 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
     state.cx = (minX + maxX) / 2; state.cz = (minZ + maxZ) / 2;
     state.scale = Math.min(state.w / ((maxX - minX) * (1 + pad * 2)), state.h / ((maxZ - minZ) * (1 + pad * 2)));
   }
+  // W15: the map opens where you left it. `ctx` = which map that was (the outdoors, or one dungeon); a different one fits afresh.
+  function openView() {
+    const ctx = atlas.dungeon ? 'd:' + atlas.dungeon.id : 'out';
+    find.bar.hidden = !!atlas.dungeon;
+    if (state.ctx === ctx && state.seen) { drawPresets(); return; }
+    state.ctx = ctx; state.seen = true;
+    const v = !atlas.dungeon ? savedView() : null;
+    if (v) { size(); state.cx = v.cx; state.cz = v.cz; state.scale = v.scale; state.preset = v.preset || null; hideCard(); drawPresets(); }
+    else fitPreset(atlas.dungeon ? 'floor' : 'region');
+  }
+  function remember() { if (!atlas.dungeon && state.seen && state.ctx === 'out') saveView(state); }
+  addEventListener('pagehide', () => { if (panel.isOpen) remember(); });
   function fitPreset(k) {
     state.preset = k;
     hideCard();
@@ -81,7 +103,11 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
   function markers() {
     const all = atlas.markers();
     const o = state.opts;
-    return all.filter(m => {
+    const found = atlas.dungeon ? [] : find.markersFor(all, state.scale);      // W15 (also fades the towns without a match)
+    const list = all.filter(shown).concat(found);
+    if (state.hot) for (const m of list) if (m.id === state.hot) m.hot = true;      // W17
+    return list;
+    function shown(m) {
       if (m.kind === 'quest' || m.kind === 'questdone') return o.quests;
       if (m.kind === 'liveevent') return o.events;
       if (['town', 'city', 'capital', 'hamlet', 'village', 'dungeon', 'cave', 'fort', 'farm', 'event', 'ford', 'bridge', 'landmark'].includes(m.kind)) {
@@ -93,8 +119,9 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
         if (m.kind === 'town' && state.scale < 0.02 && m.priority < 3) return false;
       }
       if (m.kind === 'waystone' && state.scale < 0.03) return false;
+      if (m.kind === 'npcmark') return o.quests && state.scale > 0.25;       // W12: the marks over heads, once you are close enough to tell people apart
       return true;
-    });
+    }
   }
   let lastMarkers = [];
   function draw() {
@@ -145,10 +172,12 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
     const ws = (net()?.joined?.room?.waystones || []);
     const known = new Set(worldUi?.knownWaystones?.() || []);
     const atStone = ws.find(w => Math.hypot(w.x - p.x, w.z - p.z) < 8);
-    const key = JSON.stringify([z?.key, tq?.id, tq?.goal, tq?.loc && Math.round(Math.hypot(tq.loc.x - p.x, tq.loc.z - p.z) / 20), evs.map(e => e.uid + e.sub), [...known].join(), !!atStone, atlas.dungeon?.id, atlas.quests.length, Math.round((atlas.fog?.version || 0) / 20)]);
+    const key = JSON.stringify([z?.key, tq?.id, tq?.goal, tq?.loc && Math.round(Math.hypot(tq.loc.x - p.x, tq.loc.z - p.z) / 20), evs.map(e => e.uid + e.sub), [...known].join(), !!atStone, atlas.dungeon?.id, atlas.quests.length, Math.round((atlas.fog?.version || 0) / 20), find.state.sig, evs.map(e => HIDDEN.has(e)).join(), HIDDEN.size]);
     if (key === state.lastSide) return;
     state.lastSide = key;
     const kids = [];
+    const found = atlas.dungeon ? null : find.section();
+    if (found) kids.push(found);
     if (atlas.dungeon) {
       const d = atlas.dungeon, f = atlas.floorAt(p.x, p.z);
       kids.push(h('section', {}, h('h4', {}, d.name), h('p', {}, `Floor ${(f?.index ?? 0) + 1} of ${d.floors.length}${d.level ? ` · level ${d.level}` : ''}`), h('p.tiny', {}, 'The map fills in as you explore. Stairs, the way out and the reward chest are marked once you have seen them.')));
@@ -165,8 +194,14 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
         tq.loc ? h('button.ghost.small', { type: 'button', onclick: () => showAt(tq.loc.x, tq.loc.z, tq.loc.exact ? 0.6 : 0.2) }, 'Show on map') : null));
     }
     if (evs.length) {
-      kids.push(h('section', {}, h('h4', {}, 'Events'), ...evs.map(e => h('div.map-ev', {}, h('b', {}, e.name || 'Event'), h('p.tiny', {}, `${e.sub || ''}${Number.isFinite(e.x) ? ' — ' + atlas.whereText(e, e.r) : ''}`),
-        h('div.row', {}, Number.isFinite(e.x) ? h('button.ghost.small', { type: 'button', onclick: () => showAt(e.x, e.z, 0.5) }, 'Show') : null, e.free ? h('button.primary.small', { type: 'button', onclick: () => travel('event') }, 'Travel there free') : null)))));
+      // W13: each event can be hidden from your screen (the tracker, the minimap) and brought back here
+      kids.push(h('section.map-events', {}, h('h4', {}, 'Events'), ...evs.map(e => {
+        const hid = HIDDEN.has(e);
+        return h('div.map-ev' + (hid ? '.hid' : ''), { dataset: { ev: String(e.uid || e.id || e.name) } }, h('b', {}, e.name || 'Event'), h('p.tiny', {}, `${e.sub || ''}${Number.isFinite(e.x) ? ' — ' + atlas.whereText(e, e.r) : ''}${hid ? ' · hidden from your screen' : ''}`),
+          h('div.row', {}, Number.isFinite(e.x) ? h('button.ghost.small', { type: 'button', onclick: () => showAt(e.x, e.z, 0.5) }, 'Show on map') : null,
+            h('button.ghost.small', { type: 'button', dataset: { act: hid ? 'unhide' : 'hide' }, title: hid ? 'Put it back on your screen: the event card and the minimap arrow.' : 'Take it off your screen: no event card, no minimap arrow. It stays here on the map.', onclick: () => { if (hid) HIDDEN.show(e); else HIDDEN.hide(e); state.lastSide = ''; } }, hid ? 'Show on my screen' : 'Hide from my screen'),
+            e.free && !hid ? h('button.primary.small', { type: 'button', onclick: () => travel('event') }, 'Travel there free') : null));
+      })));
     }
     if (!atlas.dungeon) {
       const rows = ws.filter(w => known.has(w.key)).map(w => {
@@ -198,7 +233,8 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
     const where = p && m.kind !== 'me' ? `${distText(d)} ${compass(m.x - p.x, m.z - p.z)}` : '';
     const lvl = m.level ? `<span class="${'tone-' + bandTone([m.level, m.level], p?.level || 1)}">level ${esc(m.level)}</span>` : '';
     const act = m.act === 'travel' ? (net()?.joined?.room?.waystones || []).some(w => Math.hypot(w.x - p.x, w.z - p.z) < 8) ? `Click to travel here (${estimateFare(p, m)} gold)` : 'Stand at any waystone to travel here'
-      : m.act === 'track' ? (m.tracked ? 'Tracked — shown on the minimap' : 'Click to track this quest') : m.act === 'unpin' ? 'Click to remove the pin' : m.act === 'event' ? 'Click to travel there free' : '';
+      : m.act === 'track' ? (m.tracked ? 'Tracked — shown on the minimap' : 'Click to track this quest') : m.act === 'unpin' ? 'Click to remove the pin' : m.act === 'event' ? 'Click to travel there free'
+      : m.act === 'zoom' ? 'Click to look closer' : m.hiddenEv ? 'Hidden from your screen — the Events list beside the map brings it back' : '';
     return `<div class="tip-title">${esc(m.name)}</div>${m.sub ? `<div class="tip-sub">${esc(m.sub)}</div>` : ''}${lvl || where ? `<div class="tip-row"><span>${lvl}</span><span>${esc(where)}</span></div>` : ''}${act ? `<hr><div class="tip-act">${esc(act)}</div>` : ''}`;
   }
   function zoneCard(x, z) {
@@ -226,7 +262,7 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
     if (y + ch > r.height - 6) y = Math.max(6, sy - ch - 10);
     card.style.left = Math.max(6, x) + 'px'; card.style.top = y + 'px';
   }
-  function hideCard() { card.hidden = true; card.classList.remove('show'); state.hover = null; }
+  function hideCard() { card.hidden = true; card.classList.remove('show'); state.hover = null; state.hot = null; }
 
   // ---- input: drag, wheel, pinch, hover, click, right-click ----
   const pointers = new Map();
@@ -254,10 +290,15 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
   });
   function hover(sx, sy) {
     const hit = hitTest(lastMarkers, sx, sy, view(), 12)[0] || null;
+    const [wx, wz] = view().toWorld(sx, sy);
+    // W17: a quest zone answers anywhere inside its ring (an icon under the pointer still wins), and lights up
+    const zone = !atlas.dungeon && (!hit || (hit.area && (hit.kind === 'quest' || hit.kind === 'questdone'))) ? questZoneAt(lastMarkers, wx, wz, atlas.quests) : null;
+    state.hot = zone ? zone.marker.id : null;
+    if (zone) { state.hover = zone.marker; canvas.style.cursor = zone.marker.act ? 'pointer' : 'grab'; showCard(zone.html, sx, sy); state.hover = zone.marker; return; }
     state.hover = hit;
     canvas.style.cursor = hit?.act ? 'pointer' : 'grab';
-    if (hit) showCard(cardFor(hit), sx, sy);
-    else if (!atlas.dungeon) { const [wx, wz] = view().toWorld(sx, sy); showCard(zoneCard(wx, wz), sx, sy); }
+    if (hit) { showCard(cardFor(hit), sx, sy); state.hover = hit; }
+    else if (!atlas.dungeon) showCard(zoneCard(wx, wz), sx, sy);
     else hideCard();
   }
   const endPointer = e => {
@@ -268,10 +309,12 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
     if (d.moved > 4) { drawPresets(); return; }
     const [sx, sy] = local(e);
     if (d.button === 2) { const [wx, wz] = view().toWorld(sx, sy); atlas.addPin(wx, wz); hud.toast('Pin dropped — it shows on your minimap.', 'info'); return; }
-    const hit = hitTest(lastMarkers, sx, sy, view(), 12)[0];
+    let hit = hitTest(lastMarkers, sx, sy, view(), 12)[0];
+    if (!hit && !atlas.dungeon) { const [wx, wz] = view().toWorld(sx, sy); hit = questZoneAt(lastMarkers, wx, wz, atlas.quests)?.marker || null; }    // W17: a click inside a quest zone tracks it
     if (!hit) return;
+    if (hit.act === 'zoom') { showAt(hit.x, hit.z, 0.55); return; }
     if (hit.act === 'travel') travel(hit.key);
-    else if (hit.act === 'track') { atlas.setTracked(hit.quest); hud.toast(`Tracking: ${hit.name}`, 'info'); }
+    else if (hit.act === 'track' && hit.quest != null) { atlas.setTracked(hit.quest); hud.toast(`Tracking: ${atlas.quests.find(q => q.id === hit.quest)?.name || hit.name}`, 'info'); }
     else if (hit.act === 'unpin') atlas.removePin(hit.pin);
     else if (hit.act === 'event') travel('event');
     else if (['dungeon', 'town', 'city', 'cave', 'fort'].includes(hit.kind) && state.scale < 0.5) { showAt(hit.x, hit.z, Math.min(1.2, state.scale * 3)); }
@@ -289,8 +332,10 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
 
   drawPresets();
   return {
-    panel, draw, fitPreset, showAt,
-    get state() { return { cx: state.cx, cz: state.cz, scale: state.scale, preset: state.preset, markers: lastMarkers.map(m => ({ id: m.id, kind: m.kind, name: m.name, x: m.x, z: m.z })) }; },
+    panel, draw, fitPreset, showAt, find, zoomBy,
+    /** tests: move the view (as a drag + wheel would). */
+    setView(v) { Object.assign(state, { cx: v.cx ?? state.cx, cz: v.cz ?? state.cz, scale: v.scale ?? state.scale, preset: null }); drawPresets(); },
+    get state() { return { cx: state.cx, cz: state.cz, scale: state.scale, preset: state.preset, hot: state.hot || null, find: find.state, markers: lastMarkers.map(m => ({ id: m.id, kind: m.kind, name: m.name, x: m.x, z: m.z })) }; },
     /** tests: what the hover card says for a marker id (or a world point when no id). */
     cardText(id, x, z) { const m = lastMarkers.find(k => k.id === id); const d = document.createElement('div'); d.innerHTML = m ? cardFor(m) : zoneCard(x, z) || ''; return d.textContent; },
     hoverAt(x, z) { const [sx, sy] = view().toScreen(x, z); hover(sx, sy); return card.hidden ? '' : card.textContent; },

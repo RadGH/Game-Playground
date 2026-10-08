@@ -6,32 +6,64 @@
       "name": "The Hermit of Wychwood",
       "role": "hermit",
       "at": "Hermit's Rest",
-      "greeting": "I came here to be alone. Then everyone else came here too."
+      "greeting": "I came here to be alone. Then everyone else came here too.",
+      "titled": true
     },
     "collier_nan": {
       "name": "Collier Nan",
       "role": "trader",
       "at": "Charcoal Burners",
-      "greeting": "Charcoal, kindling, and spiders. The spiders are free."
+      "greeting": "Charcoal, kindling, and spiders. The spiders are free.",
+      "titled": true
     },
     "warden_emrys": {
       "name": "Warden Emrys",
       "role": "guard",
       "at": "the Antler Stockade",
-      "greeting": "The stockade's antlers are decorative. The arrows are not."
+      "greeting": "The stockade's antlers are decorative. The arrows are not.",
+      "titled": true
     },
     "lost_hunter": {
       "name": "Hob the hunter",
       "role": "hunter",
       "at": "hunters_hide",
-      "greeting": "Lost my bow, lost my dog, lost my way. Found a lot of boar."
+      "greeting": "Lost my bow, lost my dog, lost my way. Found a lot of boar.",
+      "titled": true
     },
     "angler_hermits_rest": {
       "name": "Quiet Oswin",
       "role": "angler",
       "at": "Hermit's Rest",
       "greeting": "...Shh. You will scare them. Fine. What do you want? See the ripples, just east of where I'm standing? That's the town pool. It never fishes out.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_hermit_s_rest": {
+      "name": "Bartle Kettleby",
+      "role": "carter",
+      "at": "Hermit's Rest",
+      "greeting": "Climb up. Mind the turnips. A few coins and you are in another town before your boots notice.",
+      "cart": "cart_hermit_s_rest",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_charcoal_burners": {
+      "name": "Bryn Quarrie",
+      "role": "carter",
+      "at": "Charcoal Burners",
+      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "cart": "cart_charcoal_burners",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_wildhaven": {
+      "name": "Emrys Kettleby",
+      "role": "carter",
+      "at": "Wildhaven",
+      "greeting": "The ox is called Thunder. It is a joke. Where are we going?",
+      "cart": "cart_wildhaven",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

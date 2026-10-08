@@ -6,32 +6,64 @@
       "name": "Foreman Hollis",
       "role": "elder",
       "at": "Copperdell",
-      "greeting": "Mine's open, seams are rich, and everyone's terrified. Normal week."
+      "greeting": "Mine's open, seams are rich, and everyone's terrified. Normal week.",
+      "titled": true
     },
     "lampwoman_gwen": {
       "name": "Gwen Lampwright",
       "role": "trader",
       "at": "Pickaxe Row",
-      "greeting": "Lamps! Oil! Candles! Everything you need to see what's eating you."
+      "greeting": "Lamps! Oil! Candles! Everything you need to see what's eating you.",
+      "titled": true
     },
     "sergeant_cadoc": {
       "name": "Sergeant Brask",
       "role": "guard",
       "at": "the Old Headframe Fort",
-      "greeting": "Headframe fort. Holds the hill. Also holds the lift, which is broken."
+      "greeting": "Headframe fort. Holds the hill. Also holds the lift, which is broken.",
+      "titled": true
     },
     "old_miner_pike": {
       "name": "Old Pike",
       "role": "miner",
       "at": "dry_well",
-      "greeting": "Down the well's quicker than the shaft, if you don't mind the rats."
+      "greeting": "Down the well's quicker than the shaft, if you don't mind the rats.",
+      "titled": true
     },
     "angler_copperdell": {
       "name": "Dunmer Slagfoot",
       "role": "angler",
       "at": "Copperdell",
       "greeting": "Twelve hours underground, then I come up here and stare at water. Do not talk to me about ore. See the ripples, just south-west of where I'm standing? That's the town pool. It never fishes out.",
-      "placedBy": "content-pools"
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_copperdell": {
+      "name": "Tobin Cattermole",
+      "role": "carter",
+      "at": "Copperdell",
+      "greeting": "Climb up. Mind the turnips. A few coins and you are in another town before your boots notice.",
+      "cart": "cart_copperdell",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_pickaxe_row": {
+      "name": "Wystan Furlong",
+      "role": "carter",
+      "at": "Pickaxe Row",
+      "greeting": "Climb up. Mind the turnips. A few coins and you are in another town before your boots notice.",
+      "cart": "cart_pickaxe_row",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_ashhaven": {
+      "name": "Hew Greenhill",
+      "role": "carter",
+      "at": "Ashhaven",
+      "greeting": "Out of Ashhaven by cart is the only way to leave with dignity. Pick a town.",
+      "cart": "cart_ashhaven",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [

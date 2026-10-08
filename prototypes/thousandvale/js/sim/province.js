@@ -129,6 +129,7 @@ export function createProvince(opts) {
       if (a.xp) journal(o, 'xp', { d: a.xp, level: a.level });
       grant(o, { ...a, goldAdded: true });
       if (a.level >= 2) starterMount(o);                     // Q16: the first mount at level 5
+      if (a.level !== o.sheetLevel) o.marksDirty = true;      // W12: a level can open a quest that was grey
       if (a.level > (o.alv || 1)) { o.alv = a.level; if (o.conn) o.conn.sendJSON({ t: 'you', acct: acctOf(o) }); }      // W11: the account's level rose
       if (a.level !== o.sheetLevel) { o.sheetLevel = a.level; wantSheet(o); potionCards(o); feedbackNudge(o); }   // T18: a level changes the sheet (and what a potion is worth to you)
     },
@@ -146,7 +147,7 @@ export function createProvince(opts) {
   const host = r => r.host;
 
   // S19 (play-test 4): titles above NPC names + real names for job-only placeholders (stream E's data/names/titles.json)
-  configureNpcNames({ titles: (layouts[0] && layouts[0].titles) || null, names: (layouts[0] && ((layouts[0].travel && layouts[0].travel.names) || layouts[0].names)) || null });
+  configureNpcNames({ givers: (layouts[0] && layouts[0].givers) || null, titles: (layouts[0] && layouts[0].titles) || null, names: (layouts[0] && ((layouts[0].travel && layouts[0].travel.names) || layouts[0].names)) || null });
   for (const L of layouts) {
     const pv = { L, towns: [], copies: [], instances: new Map() };
     P.set(L.key, pv);
@@ -223,7 +224,7 @@ export function createProvince(opts) {
       const at = { x: door.x + dx, z: door.z + dz, yaw: door.yaw || 0 };
       const office = { kind: of.want || of.role, plot: of.plot || null, want: of.want || null, x: Math.round((of.x + dx) * 10) / 10, z: Math.round((of.z + dz) * 10) / 10, yaw: of.yaw || 0, w: of.w || null, d: of.d || null,
         lit: !!of.light, sign: of.sign || null, title: of.title || null, shop: of.shop || null, ...(of.home ? { home: true } : {}) };
-      const npcInfo = { role: of.role, shop: of.shop || null, service: of.service || null, ...(of.trains ? { trains: of.trains } : {}) };
+      const npcInfo = { role: of.role, shop: of.shop || null, service: of.service || null, ...(of.trains ? { trains: of.trains } : {}), ...(typeof of.titled === 'boolean' ? { titled: of.titled } : {}) };
       const schedule = { blocks: [{ from: 0, at, do: 'work' }], says: null };
       const q = of.npc ? out.find(o => o.type === 'npc' && o.npc && o.npc.id === of.npc) : null;
       if (q) { q.npc = { ...q.npc, ...npcInfo }; Object.assign(q, { x: at.x, z: at.z, yaw: at.yaw, office, schedule, officeFixed: true }); }
@@ -600,6 +601,7 @@ export function createProvince(opts) {
     s.sendJSON(msg);
     if (o.reviveAsk && e.dead && o.reviveAsk.until > now()) s.sendJSON(reviveAskMsg(o.reviveAsk));   // a reconnect while an offer is open
     if (!handoff || handoff.via === 'relocate') wantSheet(o);      // T18: the sheet follows the join (queued, not inside this tick's budget)
+    o.marks = null; o.marksFull = true; o.marksDirty = true;       // W12: entity ids are the room's — the whole map of marks follows within a second
   }
 
   // ---- presence for the gateway (parties, ignore, the director) ----
@@ -1604,8 +1606,41 @@ export function createProvince(opts) {
     const m = /^vig:([^:]+):\d+$/.exec(key);
     return { key, npcId: (d.npc && d.npc.id) || null, name: obj.name, role: (d.npc && d.npc.role) || null, x: obj.x, z: obj.z, vignette: m ? m[1] : null, objectName: obj.name };
   }
-  function sendQuests(o) { if (o.conn) o.conn.sendJSON({ t: 'quests', ...bookOf(o).view(o.char) }); }
-  function questSaved(o) { journal(o, 'set', { k: 'quests', v: o.char.quests }); o.dirty = true; }
+  function sendQuests(o) { if (o.conn) o.conn.sendJSON({ t: 'quests', ...bookOf(o).view(o.char) }); o.marksDirty = true; }
+  function questSaved(o) { journal(o, 'set', { k: 'quests', v: o.char.quests }); o.dirty = true; o.marksDirty = true; }
+  /**
+   * W12 (owner feedback 8, report #33: "! above an NPC with a quest for you, ? when you can turn one in, greyed when not
+   * yet"). Per PLAYER, so it cannot ride in the shared `info`: `questMarks {marks: {<entity id>: mark}, full?}` — the whole
+   * map for the room on entry (`full: true`), then only what changed. Marks: js/sim/quests.js `book.mark`; a road-event
+   * NPC with something to offer is an `offer`. Asked when the quest log / level / room changes and every few seconds
+   * (NPCs walk in and out of a wilds room); a room's candidate NPCs are cached until its object count changes.
+   */
+  const MARKS_EVERY_MS = 4000;
+  function markCandidates(room, b) {
+    const c = room._qm;
+    if (c && c.n === room.objects.size && c.book === b) return c.list;
+    const list = [];
+    for (const x of room.objects.values()) { const d = x.data || {}; if (x.removed || !(d.npc || d.note || d.use)) continue; if ((d.road && d.road.kind !== 'chest') || d.wanderer || b.marks(giverOf(x))) list.push(x); }
+    room._qm = { n: room.objects.size, book: b, list };
+    return list;
+  }
+  function questMarks(o, full = false) {
+    if (!o.conn || !o.room || !o.entity) return;
+    const b = bookOf(o), now2 = {}, was = full ? {} : (o.marks || {}), diff = {};
+    for (const x of markCandidates(o.room, b)) {
+      if (x.removed) continue;
+      const d = x.data || {};
+      let m = b.mark(o.char, giverOf(x));
+      if (!m && d.road && d.road.kind !== 'chest') { const ev = roadEvents.events.get(d.road.ev); if (ev && !ev.acceptedAt && !ev.done && !ev.freed) m = 'offer'; }
+      if (!m && d.wanderer && d.wanderer.offers) m = 'offer';
+      if (m) now2[x.id] = m;
+    }
+    for (const [id, m] of Object.entries(now2)) if (was[id] !== m) diff[id] = m;
+    for (const id of Object.keys(was)) if (!(id in now2)) diff[id] = null;
+    o.marks = now2; o.marksDirty = false; o.marksAt = now();
+    if (full || Object.keys(diff).length) o.conn.sendJSON({ t: 'questMarks', marks: full ? now2 : diff, ...(full ? { full: true } : {}) });
+  }
+  function questMarksTick() { const t = now(); for (const o of online.values()) if (o.conn && o.entity && (o.marksDirty || t - (o.marksAt || 0) >= MARKS_EVERY_MS)) { const full = !!o.marksFull; o.marksFull = false; questMarks(o, full); } }
   function questEvent(o, ev) {
     // remember what this character did lately (P17): a quest accepted just after the fight it asks for counts it
     if (ev.kind === 'kill' || ev.kind === 'event' || ev.kind === 'clear' || ev.kind === 'use') {
@@ -2202,7 +2237,7 @@ export function createProvince(opts) {
     if (e.state & STATE.swimming) return R({ ok: false, why: 'swim', id: item.id, msg: 'Not while swimming.' });
     if (e.airborne) return R({ ok: false, why: 'busy', id: item.id, msg: 'Land first.' });
     if (o.mount) dismount(o, 'eat');
-    if (o.mountCast) { o.room.emit({ type: 'fx', kind: 'channel', id: e.id, ab: 'mount', name: o.mountCast.name, end: 'broken', why: 'eat' }); o.mountCast = null; }
+    if (o.mountCast) { o.room.emit({ type: 'fx', kind: 'channel', id: e.id, ab: 'mount', name: o.mountCast.name, end: 'broken', why: 'eat' }); endMountCast(o); }
     consume(o, idx);
     o.regen = { kind: ef.kind, hpRate: ef.hpRate, mpRate: ef.mpRate, start: t, until: t + ef.ms };
     if (ef.buff && rules.useItem) safeRules(o.room, 'useItem', e, { type: 'buff', buff: ef.buff }, { name: item.name, itemId: item.id });   // hearty stew: +5% health after
@@ -2395,32 +2430,44 @@ export function createProvince(opts) {
     if (e.mount) { e.mount = null; e.speedMul = 1; e.infoVer++; }
     if (o.conn) o.conn.sendJSON({ t: 'you', mount: null, speedMul: 1, dismount: why });
   }
-  /** Q16 with stream C's rules (js/rules/mount.js): calling a mount is a 1.5 s cast standing still; a hit or a step breaks it. */
+  /** Q16 with stream C's rules (js/rules/mount.js): calling a mount is a 1.5 s cast standing still; a hit breaks it.
+   *  W26 (round 8, report #47 "You stopped calling your mount" x3): the call HOLDS you still (`e.held`, js/sim/room.js) — moving no longer
+   *  cancels it, the server simply does not move you until you are in the saddle. `cancel` (or `off`) during the call ends it. */
+  function endMountCast(o) { o.mountCast = null; if (o.entity.held === 'mount') o.entity.held = null; }
   const fighting = (o, e) => !!(e.state & STATE.combat) || (now() - (o.lastHitAt || -1e9)) < MOUNT_RULES.combatSeconds * 1000;
   function mountOp(o, m) {
     const s = o.conn, e = o.entity;
     if (!MOUNT_OPS.includes(m.op)) return bad(s, 'op');
     const R = x => s.sendJSON({ t: 'mountR', op: m.op, ...x });
-    if (m.op === 'off') { if (o.mountCast) o.room.emit({ type: 'fx', kind: 'channel', id: e.id, ab: 'mount', name: o.mountCast.name, end: 'broken', why: 'asked' }); o.mountCast = null; if (o.mount) dismount(o, 'asked'); return R({ ok: true }); }
+    if (m.op === 'off' || m.op === 'cancel') {
+      const was = !!o.mountCast;
+      if (was) { o.room.emit({ type: 'castX', id: e.id, ab: 'mount', why: 'asked' }); o.room.emit({ type: 'fx', kind: 'channel', id: e.id, ab: 'mount', name: o.mountCast.name, end: 'broken', why: 'asked' }); }
+      endMountCast(o);
+      if (m.op === 'off' && o.mount) dismount(o, 'asked');
+      return R({ ok: true, ...(was ? { why: 'cancelled' } : {}) });
+    }
     const def = m.id ? mountBook.get(m.id) : mountBook.best(o.char);
     if (!def || !(o.char.mounts || []).includes(def.id)) return R({ ok: false, why: 'none', msg: (o.char.level || 1) < 5 ? 'You get your first mount at level 5. A stablehand sells others.' : 'You do not own that mount. A stablehand sells them.' });
     const why = mountRefusal({ dead: e.dead, swimming: !!(e.state & STATE.swimming), fighting: fighting(o, e), roomKind: o.room.kind, now: now() / 1000, thrownAt: o.thrownAt != null ? o.thrownAt / 1000 : null, casting: !!o.mountCast });
     if (why) return R({ ok: false, why: e.dead ? 'dead' : (e.state & STATE.swimming) ? 'swim' : o.room.kind === 'instance' ? 'indoors' : fighting(o, e) ? 'combat' : 'busy', msg: why });
     const ms = Math.round(MOUNT_RULES.castSeconds * 1000);
     o.mountCast = { id: def.id, until: now() + ms, x: e.x, z: e.z, name: 'Call ' + def.name };
+    e.held = 'mount';
     o.room.emit({ type: 'castbar', id: e.id, ab: 'mount', name: 'Call ' + def.name, ms });
     // S21 (play-test 4): the same channel events as the recall charm, so the client's cast bar draws the call's progress
     o.room.emit({ type: 'fx', kind: 'channel', id: e.id, ab: 'mount', name: 'Call ' + def.name, ms });
-    return R({ ok: true, id: def.id, casting: ms, until: o.mountCast.until });
+    return R({ ok: true, id: def.id, casting: ms, until: o.mountCast.until, stand: true });
   }
   /** Each tick for someone calling a mount: a step past castDrift or a hit breaks it; done -> riding. */
   function mountCastTick(o) {
     const c = o.mountCast, e = o.entity;
     if (!c) return;
-    const broke = e.dead || (e.state & STATE.swimming) || Math.hypot(e.x - c.x, e.z - c.z) > MOUNT_RULES.castDrift || (o.lastHitAt || 0) > c.until - MOUNT_RULES.castSeconds * 1000;
-    if (broke) { o.mountCast = null; o.room.emit({ type: 'castX', id: e.id, ab: 'mount', why: 'moved' }); o.room.emit({ type: 'fx', kind: 'channel', id: e.id, ab: 'mount', name: c.name, end: 'broken', why: e.dead ? 'dead' : (o.lastHitAt || 0) > c.until - MOUNT_RULES.castSeconds * 1000 ? 'hit' : 'moved' }); if (o.conn) o.conn.sendJSON({ t: 'mountR', op: 'summon', ok: false, why: 'interrupted', msg: 'You stopped calling your mount.' }); return; }
+    // a step can no longer break it (you are held); being MOVED can (a knock-back, a transfer): 3 m, not the old 0.6 m drift
+    const hit = (o.lastHitAt || 0) > c.until - MOUNT_RULES.castSeconds * 1000, shoved = Math.hypot(e.x - c.x, e.z - c.z) > 3;
+    const broke = e.dead || (e.state & STATE.swimming) || shoved || hit;
+    if (broke) { endMountCast(o); o.room.emit({ type: 'castX', id: e.id, ab: 'mount', why: e.dead ? 'dead' : hit ? 'hit' : 'moved' }); o.room.emit({ type: 'fx', kind: 'channel', id: e.id, ab: 'mount', name: c.name, end: 'broken', why: e.dead ? 'dead' : hit ? 'hit' : 'moved' }); if (o.conn) o.conn.sendJSON({ t: 'mountR', op: 'summon', ok: false, why: 'interrupted', msg: hit ? 'A hit broke the call.' : 'The call was broken.' }); return; }
     if (now() < c.until) return;
-    o.mountCast = null;
+    endMountCast(o);
     o.room.emit({ type: 'castX', id: e.id, ab: 'mount', why: 'done' });
     o.room.emit({ type: 'fx', kind: 'channel', id: e.id, ab: 'mount', name: c.name, end: 'done' });
     o.mount = c.id; applyMount(o);
@@ -3016,6 +3063,7 @@ export function createProvince(opts) {
     if (ticks % 20 === 5) eventTick();           // events (realm + zone) at 1 Hz
     if (ticks % 20 === 7) zoneTick();
     if (ticks % 20 === 9) corpses.tick();
+    if (ticks % 20 === 11) questMarksTick();      // W12: quest marks over NPCs, per player
     if (ticks % 20 === 13) roadEvents.tick();     // S5: random road events near lone players
     if (ticks % 4 === 3) roadEvents.move(TICK_MS * 4);
     if (ticks % 20 === 11) { foodTick(); mountSpeedTick(); reviveSweep(); }

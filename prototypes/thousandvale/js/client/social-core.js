@@ -78,20 +78,31 @@ export const CHAT_HELP = [
   '/ginvite Name · /gleave · /motd text · /claim (save your account)',
 ];
 
-/** A client-side hint for why a channel is shut (the server decides; this saves a round trip and explains it). */
+/**
+ * Play-test 8 (W11): the level-5 gates ask the ACCOUNT, not the character you are on — a level-1 alt of an account that has a
+ * level-5 character talks, posts mail and founds a guild from day one. `you.acct.level` is the server's number; before it
+ * is known, the highest level among the account's characters, else the character's own.
+ */
+export function accountLevel(net, own = 1) {
+  const a = net?.joined?.you?.acct?.level;
+  if (Number.isFinite(a)) return Math.max(a, own || 1);
+  const best = Math.max(0, ...(net?.chars || []).map(c => c?.level || 0));
+  return Math.max(best, own || 1);
+}
+/** A client-side hint for why a channel is shut (the server decides; this saves a round trip and explains it). `level` = the ACCOUNT's (accountLevel). */
 export function channelGate(ch, { claimed = false, level = 1, party = false, guild = false } = {}) {
   if (ch === 'party' && !party) return 'You are not in a party.';
   if (ch === 'guild' && !guild) return 'You are not in a guild.';
   if (['zone', 'trade', 'world'].includes(ch)) {
     if (!claimed) return 'Public channels need a claimed account. Claim yours (it is free) to talk here.';
-    if (level < PUBLIC_LEVEL) return `Public channels open at level ${PUBLIC_LEVEL}.`;
+    if (level < PUBLIC_LEVEL) return `Public channels open when one of your characters reaches level ${PUBLIC_LEVEL}.`;
   }
   return null;
 }
 
 /** Plain words for refusals that come without a msg. */
 export const ERR_TEXT = {
-  chatGate: `That needs a claimed account at level ${PUBLIC_LEVEL}.`,
+  chatGate: `That needs a claimed account with a character at level ${PUBLIC_LEVEL}.`,
   slow: 'Slow down a little — that channel has a short wait between lines.',
   muted: 'You are muted for now.',
   ignored: 'They are not taking messages from you.',
@@ -100,7 +111,7 @@ export const ERR_TEXT = {
   guild: 'You are not in a guild.',
 };
 export const MAIL_WHY = {
-  gate: `Sending mail needs a claimed account at level ${PUBLIC_LEVEL}.`,
+  gate: `Sending mail needs a claimed account with a character at level ${PUBLIC_LEVEL}.`,
   town: 'You can only send or take mail in a town.',
   busy: 'Finish your trade first.',
   items: 'A letter holds at most 6 items.',

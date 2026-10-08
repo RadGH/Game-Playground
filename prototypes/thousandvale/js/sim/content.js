@@ -144,7 +144,7 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
   const angling = fishNumbers ? { numbers: fishNumbers, content: await opt('data/provinces/angling.json'), pools: await opt('data/provinces/angling-pools.json') } : null;
   // V2 (owner feedback 7): stream E's economy knobs (js/sim/economy-knobs.js reads them; an older `data/rules/economy.json` `server` block is read too)
   const extra = { economy: (await opt('data/provinces/economy.json')) || (await opt('data/rules/economy.json')), angling, refunds: await opt('data/provinces/refunds.json'), wanderers: wd, treasure: await opt('data/provinces/road-events.json'), affixes: await opt('data/encounters/affixes.json'), spawnHints: await opt(`data/quests/marks/${provinceId}-hunts.json`),
-    titles: await opt('data/names/titles.json'), names: await opt('data/names/torbor.json') };
+    titles: await opt('data/names/titles.json'), givers: await opt('data/quests/marks/givers.json'), carts: await opt('data/provinces/carts.json'), guards: await opt('data/provinces/guards.json'), names: await opt('data/names/torbor.json') };
   return { extra, travel, marks, key: provinceId, name: sheet ? sheet.name : provinceId, terrain, zones, encounterInfo, events, zoneEvents, directorRules: (evData && evData.director) || null, starter, starterProvince, rares, jobs, schedules, horizon, shops, mounts, offices };
 }
 

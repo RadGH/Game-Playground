@@ -42,6 +42,8 @@ const boxDist = (x, z, b) => {
   const dx = x - b.x, dz = z - b.z, lx = Math.abs(dx * b.c + dz * b.s) - b.w / 2, lz = Math.abs(-dx * b.s + dz * b.c) - b.d / 2;
   return lx <= 0 && lz <= 0 ? 0 : Math.hypot(Math.max(lx, 0), Math.max(lz, 0));
 };
+/** The radius of the paved disc the client draws for a square of plan radius r (town-view: diameter r x 2.4). */
+export const paved = r => Math.max(r * 1.2, 2.5);
 const lengthOf = pts => pts.reduce((s, p, k) => s + (k ? Math.hypot(p[0] - pts[k - 1][0], p[1] - pts[k - 1][1]) : 0), 0);
 /** Points every `step` metres along a polyline (always includes both ends). */
 export function walk(pts, step = 0.5) {
@@ -69,11 +71,13 @@ export function townObstacles({ P, town, bodies = [] }) {
   }
   if (sq) {
     const f = squareFurniture({ square: { x: sq.x, z: sq.z, r: sq.data.r }, stalls: sq.data.stalls });
-    discs.push({ ...f.well, what: 'the well' });
+    // (the well stands in the middle of the paving: on the square, not in a street)
     f.stalls.forEach((s, k) => discs.push({ ...s, what: `market stall ${k}` }));
   }
   if (S) for (const b of bodies) {
     if (!Number.isFinite(b.x) || WALKERS.has(b.type) || Math.hypot(b.x - S.x, b.z - S.z) > S.data.radius + 10) continue;
+    // a thing ON the square's paving (the waystone beside the well) is square furniture, like the well: the street ends where the paving starts
+    if (sq && Math.hypot(b.x - sq.x, b.z - sq.z) <= paved(sq.data.r) + 0.5) continue;
     discs.push({ x: b.x, z: b.z, r: b.radius || 0.5, what: `${b.type} ${b.id}` });
   }
   const clearance = (x, z) => {
@@ -124,7 +128,7 @@ export function measureGates({ P, nav = null, bodies = [] }) {
   for (const W of P.filter(p => p.kind === 'town_wall')) {
     const town = W.data.town, O = townObstacles({ P, town, bodies }), sq = O.sq, kind = W.data.settlement;
     if (!sq) continue;
-    const sqR = Math.max(sq.data.r, 2.5);
+    const sqR = paved(sq.data.r);
     for (const g of W.data.gates) {
       const hasMain = !!(g.main && g.main.pts?.length > 1);
       const width = hasMain ? g.main.width : HIGH_STREET_WIDTH[kind] || 4;
@@ -152,7 +156,7 @@ export function measureGates({ P, nav = null, bodies = [] }) {
         if (Math.hypot(x - W.x, z - W.z) > W.data.radius + 1) { firstAhead = 'out of town again'; break; }
         ahead = s;
       }
-      rows.push({ town, kind, gate: g.id, wayKind: g.wayKind, gateKind: g.kind, road: g.wayKind === 'road', hasMain, width,
+      rows.push({ town, kind, gate: g.id, wayKind: g.wayKind, gateKind: g.kind, road: g.road !== undefined ? !!g.road : g.wayKind === 'road', hasMain, width,
         metres: +lengthOf(route).toFixed(1), blocked: +blocked.toFixed(1), narrowest: +Math.min(16, narrowest).toFixed(1), ahead, firstAhead: firstAhead || 'clear for 60 m',
         navBlocked: nav ? +navBlocked.toFixed(1) : null, ends: +(Math.hypot(route[route.length - 1][0] - sq.x, route[route.length - 1][1] - sq.z)).toFixed(1), sqR,
         hits: [...hits.entries()].sort((a, b) => b[1] - a[1]).map(([w, m]) => `${w} (${m.toFixed(1)} m)`) });

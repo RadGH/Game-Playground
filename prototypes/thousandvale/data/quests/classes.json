@@ -20,7 +20,8 @@
         "Again! Like you mean it this time.",
         "The dummy has won four bouts this week. Don't make it five.",
         "Sweat is free. Blood costs extra."
-      ]
+      ],
+      "titled": true
     },
     "trainer_holy": {
       "name": "Mother Ansel",
@@ -37,7 +38,8 @@
         "Kneel if you like. The floor is cleaner than it looks.",
         "Prayer, then porridge. That is the order of things.",
         "Mind the candles. They have opinions."
-      ]
+      ],
+      "titled": true
     },
     "trainer_arcane": {
       "name": "Magister Pellam Voss",
@@ -57,7 +59,8 @@
         "The scorch marks are load-bearing, leave them.",
         "Magic is just arithmetic that shouts.",
         "If my eyebrows grow back, I'll have won."
-      ]
+      ],
+      "titled": true
     },
     "trainer_shadow": {
       "name": "Sly Mabry",
@@ -74,7 +77,8 @@
         "Pockets are just boxes people forget to lock.",
         "Walk soft. The floorboards are on the reeve's side.",
         "Everything has a price. Mine is reasonable."
-      ]
+      ],
+      "titled": true
     },
     "trainer_runes": {
       "name": "Garrick Stonehand",
@@ -89,7 +93,8 @@
         "Tap, tap, listen. The metal tells you where.",
         "Don't sneeze near wet ink.",
         "My hammer's older than the town."
-      ]
+      ],
+      "titled": true
     },
     "trainer_hunt": {
       "name": "Oswy Greyfletch",
@@ -105,7 +110,8 @@
         "Tracks don't lie. People do.",
         "Every arrow you lose is a lesson you paid for.",
         "The wood's watching. So am I."
-      ]
+      ],
+      "titled": true
     },
     "trainer_wilds": {
       "name": "Wenna of the Stones",
@@ -120,7 +126,8 @@
         "Nine maidens, one fiddler, and a very long dance.",
         "Bare feet on the grass. It listens better that way.",
         "The spirits are chatty today. Mostly about you."
-      ]
+      ],
+      "titled": true
     },
     "trainer_grave": {
       "name": "Old Mother Quell",
@@ -134,7 +141,8 @@
         "Mind the soft patch. That's Gaffer Wat.",
         "Everyone ends up here. Some of us just visit early.",
         "A spade is a very honest tool."
-      ]
+      ],
+      "titled": true
     },
     "trainer_pact": {
       "name": "Ysolde Coldharrow",
@@ -148,7 +156,8 @@
         "Everything costs. I just read the price first.",
         "The ash still whispers, if you lean close.",
         "Bleed a little. It clears the head."
-      ]
+      ],
+      "titled": true
     },
     "trainer_mind": {
       "name": "Brother Cadoc",
@@ -163,7 +172,8 @@
         "Stand on one leg. Now the other. Now neither.",
         "The road south is long. So is patience.",
         "I dreamed you'd come. You were taller."
-      ]
+      ],
+      "titled": true
     },
     "trainer_tinker": {
       "name": "Jory Millward",
@@ -177,7 +187,8 @@
         "If it squeaks, oil it. If it explodes, write it down.",
         "The wheel never stops. I wish I could say the same.",
         "Hand me that. No, the other that."
-      ]
+      ],
+      "titled": true
     },
     "trainer_bard": {
       "name": "Lute-master Emrys Fenwick",
@@ -191,7 +202,8 @@
         "This next one's about a goat. They're all about a goat.",
         "Tune your strings and your temper.",
         "Applause is accepted in coin."
-      ]
+      ],
+      "titled": true
     }
   },
   "quests": [

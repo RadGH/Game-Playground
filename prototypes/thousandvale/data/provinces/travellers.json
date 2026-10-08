@@ -26,7 +26,8 @@
       1
      ],
      "name": "{first} {family}, Trader",
-     "armed": false
+     "armed": false,
+     "titled": false
     },
     {
      "role": "caravan_guard",
@@ -35,7 +36,8 @@
       2
      ],
      "name": "Caravan Guard",
-     "armed": true
+     "armed": true,
+     "titled": false
     },
     {
      "role": "porter",
@@ -44,7 +46,8 @@
       1
      ],
      "name": "Porter",
-     "armed": false
+     "armed": false,
+     "titled": false
     }
    ],
    "beast": "mule",
@@ -73,7 +76,8 @@
       3
      ],
      "name": "Patrol Warden",
-     "armed": true
+     "armed": true,
+     "titled": false
     }
    ],
    "beast": "none",
@@ -99,7 +103,8 @@
       4
      ],
      "name": "Pilgrim",
-     "armed": false
+     "armed": false,
+     "titled": false
     }
    ],
    "beast": "none",
@@ -125,7 +130,8 @@
       3
      ],
      "name": "{first} the Hunter",
-     "armed": true
+     "armed": true,
+     "titled": false
     }
    ],
    "beast": "none",
@@ -151,7 +157,8 @@
       1
      ],
      "name": "{first}, Courier",
-     "armed": false
+     "armed": false,
+     "titled": false
     }
    ],
    "beast": "horse",
@@ -177,7 +184,8 @@
       2
      ],
      "name": "Drover",
-     "armed": false
+     "armed": false,
+     "titled": false
     }
    ],
    "beast": "ox",
@@ -204,7 +212,8 @@
       3
      ],
      "name": "{first} the Minstrel",
-     "armed": false
+     "armed": false,
+     "titled": false
     }
    ],
    "beast": "mule",
@@ -230,7 +239,8 @@
       1
      ],
      "name": "{first} the Tinker",
-     "armed": false
+     "armed": false,
+     "titled": false
     }
    ],
    "beast": "mule",
@@ -256,7 +266,8 @@
       4
      ],
      "name": "Refugee",
-     "armed": false
+     "armed": false,
+     "titled": false
     }
    ],
    "beast": "none",
@@ -283,7 +294,8 @@
       2
      ],
      "name": "Woodcarter",
-     "armed": false
+     "armed": false,
+     "titled": false
     }
    ],
    "beast": "ox",
@@ -309,7 +321,8 @@
       1
      ],
      "name": "{first} {family}, Collector",
-     "armed": false
+     "armed": false,
+     "titled": false
     },
     {
      "role": "guard_patrol",
@@ -318,7 +331,8 @@
       2
      ],
      "name": "Escort",
-     "armed": true
+     "armed": true,
+     "titled": false
     }
    ],
    "beast": "horse",
@@ -345,7 +359,8 @@
       2
      ],
      "name": "Gravedigger",
-     "armed": false
+     "armed": false,
+     "titled": false
     }
    ],
    "beast": "mule",
@@ -397,7 +412,8 @@
      "yaw": 1.2
     }
    ],
-   "weight": 3
+   "weight": 3,
+   "titled": false
   },
   "shepherd": {
    "name": "Shepherd",
@@ -439,7 +455,8 @@
      "yaw": 0
     }
    ],
-   "weight": 3
+   "weight": 3,
+   "titled": false
   },
   "herbalist": {
    "name": "Herbalist",
@@ -469,7 +486,8 @@
      "yaw": 0
     }
    ],
-   "weight": 2
+   "weight": 2,
+   "titled": false
   },
   "prospector": {
    "name": "Prospector",
@@ -504,7 +522,8 @@
      "yaw": 0
     }
    ],
-   "weight": 2
+   "weight": 2,
+   "titled": false
   },
   "charcoal_burner": {
    "name": "Charcoal burner",
@@ -545,7 +564,8 @@
      "yaw": 0.9
     }
    ],
-   "weight": 2
+   "weight": 2,
+   "titled": false
   },
   "hermit": {
    "name": "Hermit",
@@ -581,7 +601,8 @@
      "yaw": 0.2
     }
    ],
-   "weight": 1
+   "weight": 1,
+   "titled": false
   },
   "fisher": {
    "name": "Fisher",
@@ -618,7 +639,8 @@
      "yaw": 0.5
     }
    ],
-   "weight": 2
+   "weight": 2,
+   "titled": false
   },
   "hunter_lone": {
    "name": "Hunter",
@@ -648,7 +670,8 @@
      "yaw": 0.3
     }
    ],
-   "weight": 2
+   "weight": 2,
+   "titled": false
   },
   "poacher": {
    "name": "Poacher",
@@ -667,7 +690,8 @@
    "chatter": [
     "role.poacher"
    ],
-   "weight": 1
+   "weight": 1,
+   "titled": false
   },
   "surveyor": {
    "name": "Surveyor",
@@ -698,7 +722,8 @@
      "yaw": 0
     }
    ],
-   "weight": 1
+   "weight": 1,
+   "titled": false
   },
   "pilgrim_resting": {
    "name": "Resting pilgrim",
@@ -713,7 +738,8 @@
    "chatter": [
     "role.pilgrim"
    ],
-   "weight": 2
+   "weight": 2,
+   "titled": false
   },
   "scarecrow_maker": {
    "name": "Scarecrow maker",
@@ -752,7 +778,8 @@
      "yaw": 0
     }
    ],
-   "weight": 1
+   "weight": 1,
+   "titled": false
   },
   "beekeeper": {
    "name": "Beekeeper",
@@ -787,7 +814,8 @@
      "yaw": 0.3
     }
    ],
-   "weight": 1
+   "weight": 1,
+   "titled": false
   },
   "gravedigger": {
    "name": "Gravedigger",
@@ -829,7 +857,8 @@
      "yaw": 0
     }
    ],
-   "weight": 1
+   "weight": 1,
+   "titled": false
   },
   "farmer": {
    "name": "Farmer",
@@ -854,7 +883,8 @@
      "yaw": 0.3
     }
    ],
-   "weight": 0
+   "weight": 0,
+   "titled": false
   },
   "orchard_keeper": {
    "name": "Orchard keeper",
@@ -879,7 +909,8 @@
      "yaw": 0.2
     }
    ],
-   "weight": 0
+   "weight": 0,
+   "titled": false
   },
   "sexton": {
    "name": "Sexton",
@@ -897,7 +928,8 @@
     "role.gravedigger"
    ],
    "props": [],
-   "weight": 0
+   "weight": 0,
+   "titled": false
   },
   "hunter": {
    "name": "Hunter",
@@ -922,7 +954,8 @@
      "yaw": 0.5
     }
    ],
-   "weight": 0
+   "weight": 0,
+   "titled": false
   },
   "foreman": {
    "name": "Foreman",
@@ -939,7 +972,8 @@
     "role.foreman"
    ],
    "props": [],
-   "weight": 0
+   "weight": 0,
+   "titled": false
   },
   "stablehand": {
    "name": "Stablehand",
@@ -964,7 +998,8 @@
      "yaw": 0
     }
    ],
-   "weight": 0
+   "weight": 0,
+   "titled": false
   },
   "innkeeper": {
    "name": "Innkeeper",
@@ -989,7 +1024,8 @@
      "yaw": 0
     }
    ],
-   "weight": 0
+   "weight": 0,
+   "titled": false
   },
   "miller": {
    "name": "Miller",
@@ -1014,7 +1050,8 @@
      "yaw": 0
     }
    ],
-   "weight": 0
+   "weight": 0,
+   "titled": false
   }
  }
 }

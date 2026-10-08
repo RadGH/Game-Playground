@@ -15,7 +15,90 @@
 //   validKit(classId, choice, json?)         { ok, armour, weapons } — unknown / missing ids fall back to the first
 //   starterGear(classId, choice, json?, engine?)   { slot: item } ready to be `char.equipment`
 
-import { attuneWeapon, makeRng, hashStr } from './farhold.js';
+import { attuneWeapon, makeRng, hashStr, profileOf } from './farhold.js';
+
+// ------------------------------------------------------------------------------------------------ W23: the measure
+// Owner feedback 8: "Starting equipment offers too many similar items — make the choices clearly different."
+// What makes two packs play differently is read off the ITEMS (Farhold's own swing profile, the caster style the item
+// carries), never off a label in the data:
+//   hands    shield | dual | focus | two | staff | wand | ranged | thrown
+//   family   the first move of the swing pattern (slash, thrust, overhead, cleave, jab, sweep; `pole` for a quarterstaff's jab-and-sweep), a bow / crossbow /
+//            javelin, a caster's style (bolt, burst, cone, nova, lob, chain …), `imbue` for a sceptre's elemental swing
+//   reach    melee: short (< 2.7 m) | mid (< 3.6) | long (< 4.5) | pole; casters: self | near | midrange | far;
+//            a bow or crossbow: far; a thrown weapon: midrange
+//   element  physical, or what a caster weapon is attuned to
+//   tempo    quick (a swing every 0.6 s or less) | steady (0.9 or less) | slow
+// Two packs are NEAR-DUPLICATES when they differ on fewer than two of the five; and a class may offer at most two packs
+// of one hand shape (three "one-hander and shield" packs read as the same choice three times, whatever the weapon).
+export const KIT_AXES = Object.freeze(['hands', 'family', 'reach', 'element', 'tempo']);
+export const KIT_MIN_DIFF = 2;
+export const KIT_MAX_PER_HANDS = 2;
+const CASTER_REACH = { nova: 'self', cone: 'near', wave: 'near', beam: 'midrange', lob: 'midrange' };
+const FOCUS_KEYS = ['orb', 'tome', 'grimoire', 'seer_orb', 'reliquary', 'psalter', 'effigy', 'warded_focus', 'spellguard_orb'];
+
+/** The five-axis signature of a pack from its real items (`[main, off?]`). */
+export function packSignature(items) {
+  const [m, o] = items || [];
+  if (!m) return null;
+  const p = profileOf(m) || {};
+  const caster = m.weaponCategory === 'magic' && (m.subtype === 'wand' || (m.subtype === 'staff' && m.baseKey !== 'quarterstaff'));
+  const sceptre = m.subtype === 'scepter';
+  const missile = !caster && (m.ranged || p.ranged);
+  let hands, family, reach;
+  if (caster) {
+    hands = m.subtype;
+    family = m.castStyle || m.staffSpell || m.wandBehaviour || 'bolt';
+    reach = CASTER_REACH[family] || 'far';
+  } else if (missile) {
+    hands = m.twoHanded ? 'ranged' : 'thrown';
+    family = m.subtype === 'bow' ? 'bow' : m.subtype;
+    reach = m.twoHanded ? 'far' : 'midrange';
+  } else {
+    const offKey = o ? (o.baseKey || '') : '';
+    hands = m.twoHanded ? 'two' : !o ? 'one' : o.isShield || /shield|buckler/.test(offKey) ? 'shield' : (o.type === 'weapon' && !FOCUS_KEYS.includes(offKey)) ? 'dual' : 'focus';
+    const pat = p.pattern || ['slash'];
+    family = sceptre ? 'imbue' : (pat[0] === 'jab' && pat.includes('sweep')) ? 'pole' : pat[0];
+    reach = p.reach < 2.7 ? 'short' : p.reach < 3.6 ? 'mid' : p.reach < 4.5 ? 'long' : 'pole';
+  }
+  const every = p.every || 0.7;
+  return { hands, family, reach, element: m.castElement || 'physical', tempo: every <= 0.6 ? 'quick' : every <= 0.9 ? 'steady' : 'slow' };
+}
+/** On how many of the five axes two signatures differ. */
+export const kitDistance = (a, b) => KIT_AXES.filter(k => a[k] !== b[k]).length;
+
+const HANDS_WORD = { shield: 'Weapon and shield', dual: 'Two weapons', focus: 'Weapon and focus', two: 'Two-hander', one: 'One-hander', staff: 'Spell staff', wand: 'Wand and focus', ranged: 'Ranged', thrown: 'Thrown' };
+const HANDS_TEXT = {
+  shield: 'One hand strikes, the other blocks.', dual: 'Both hands strike, and nothing blocks.', focus: 'A weapon in one hand, a focus that feeds your spells in the other.',
+  two: 'Both hands on one big weapon.', one: 'One weapon, one empty hand.', staff: 'A two-handed staff: your basic attack is its spell.', wand: 'A wand casts from range; the focus beside it adds to your magic.',
+  ranged: 'You fight from a distance with both hands.', thrown: 'You throw from a distance and keep a buckler up.',
+};
+const FAMILY_TEXT = {
+  slash: 'Quick cuts in an arc.', thrust: 'Straight thrusts that run through everything in a line.', overhead: 'Heavy downward blows that crack armour.', cleave: 'Chopping blows that leave bleeding wounds.',
+  jab: 'Very fast stabs, strongest from behind.', pole: 'Fast jabs and low sweeps with a pole that keep enemies off you.', sweep: 'Wide sweeps that catch several enemies at once.', imbue: 'Its swings deal elemental damage, up close.',
+  bow: 'Hold the draw longer to hit harder.', crossbow: 'Slow to reload; hits hard and passes through bodies.', javelin: 'Fast throws at a shorter range.',
+  bolt: 'One bolt at one target.', burst: 'A bolt that bursts on impact and catches those nearby.', fan: 'Three bolts in a fan.', chain: 'A bolt that jumps from enemy to enemy.',
+  seeking: 'A bolt that turns after its target.', heavy: 'A slow, heavy bolt.', cone: 'A short cone in front of you.', wave: 'A wave that rolls out in front of you.', beam: 'A straight beam through everything in its line.',
+  nova: 'A ring that bursts around you.', lob: 'An arc that lands on a spot and bursts.', fork: 'A bolt that splits on impact.', ward: 'A bolt that also shields you.', pool: 'A bolt that leaves a burning pool.',
+  ground: 'It strikes a patch of ground at range.', arc: 'Lightning that leaps between enemies.', shard: 'A shard that pierces at long range.',
+};
+const REACH_WORD = { short: 'close', mid: 'arm\'s length', long: 'long reach', pole: 'longest reach', self: 'around you', near: 'short range', midrange: 'medium range', far: 'long range' };
+/** `role` (a few words) and `diff` (one plain sentence) for the kit screen, written from the signature. */
+export function packWords(sig) {
+  if (!sig) return { role: '', diff: '' };
+  const el = sig.element !== 'physical' ? `, ${sig.element === 'ice' ? 'frost' : sig.element}` : '';
+  return {
+    role: `${HANDS_WORD[sig.hands] || sig.hands} · ${sig.tempo}, ${REACH_WORD[sig.reach] || sig.reach}${el}`,
+    diff: `${HANDS_TEXT[sig.hands] || ''} ${FAMILY_TEXT[sig.family] || ''}`.trim(),
+  };
+}
+/** Put a set's lean (data `leans`) on its chest piece: real properties, summed by the sheet like any other. */
+function applyLean(item, lean, leanId) {
+  if (!item || !lean || item.slot !== 'chest') return item;
+  item.affixes = [...(item.affixes || []), ...(lean.props || []).map((p, i) => ({ id: `kit_${leanId}_${i}`, name: p.name || lean.name, stat: p.stat, value: p.value, starterLean: leanId }))];
+  item.lean = leanId;
+  return item;
+}
+const WEIGHT_WORD = { cloth: 'Cloth', light: 'Leather', medium: 'Mail', heavy: 'Heavy' };
 
 /** The only armour a kit may hand out: the plain piece of each weight. Nothing plate, runed, scaled or dragon-made. */
 export const KIT_ARMOUR_BASES = Object.freeze([
@@ -41,8 +124,11 @@ export function kitPlan(classId, json = null) {
   return { cls: classId, armour: (row.armour || []).map(a => ({ ...a, pieces: [...(a.pieces || [])] })), weapons: (row.weapons || []).map(w => ({ ...w })) };
 }
 
+const leansOf = json => (json && json.leans) || (SRC.json && SRC.json.leans) || null;
+const leanOf = (set, json) => { const row = set?.lean ? leansOf(json)?.[set.lean] : null; return row ? { id: set.lean, row } : null; };
+
 /** One kit item: generated, attuned, stamped. `tune` = what the pack says about a caster weapon. Null for an unknown base. */
-function makeItem(engine, classId, kitId, baseKey, tune = null) {
+function makeItem(engine, classId, kitId, baseKey, tune = null, lean = null) {
   const rng = makeRng(hashStr(`kit:${classId}:${kitId}:${baseKey}`));
   const item = engine.rpg.loot.generate(baseKey, 'normal', 'low', { rng });
   if (!item) return null;
@@ -54,6 +140,7 @@ function makeItem(engine, classId, kitId, baseKey, tune = null) {
   }
   attuneWeapon(item);
   item.starter = true;
+  if (lean) applyLean(item, lean.row, lean.id);
   // what a caster item IS (its style's own card sentence, a focus's rider): js/rules/tv-gear.js, when the engine has it
   engine.finishItem?.(item, { fresh: false, convert: false });
   return item;
@@ -76,15 +163,25 @@ export function kitsFor(classId, json = null, engine = null) {
   const eng = engine || SRC.engine;
   return {
     cls: classId,
-    armour: plan.armour.map(a => ({
-      id: a.id, name: a.name, blurb: a.blurb, pieces: a.pieces,
-      items: eng ? a.pieces.map(k => makeItem(eng, classId, a.id, k)).filter(Boolean) : [],
-    })),
-    weapons: plan.weapons.map(w => ({
-      id: w.id, name: w.name, blurb: w.blurb, main: w.main, off: w.off || null,
-      ...(w.style ? { style: w.style } : {}), ...(w.element ? { element: w.element } : {}), ...(w.spell ? { spell: w.spell } : {}),
-      items: eng ? packItems(eng, classId, w) : [],
-    })),
+    armour: plan.armour.map(a => {
+      const lean = leanOf(a, json);
+      const items = eng ? a.pieces.map(k => makeItem(eng, classId, a.id, k, null, lean)).filter(Boolean) : [];
+      const heaviest = (a.pieces.find(k => /_chest$/.test(k)) || a.pieces[0] || 'cloth_').split('_')[0];
+      return {
+        id: a.id, name: a.name, blurb: a.blurb, pieces: a.pieces, items,
+        // W23: what is DIFFERENT about this set — its weight and its lean (the lean's properties are on the chest piece)
+        ...(lean ? { lean: lean.id, role: `${WEIGHT_WORD[heaviest]} · ${lean.row.name}`, diff: lean.row.text, props: (lean.row.props || []).map(p => ({ stat: p.stat, value: p.value })) } : {}),
+      };
+    }),
+    weapons: plan.weapons.map(w => {
+      const items = eng ? packItems(eng, classId, w) : [];
+      const sig = items.length ? packSignature(items) : null;
+      return {
+        id: w.id, name: w.name, blurb: w.blurb, main: w.main, off: w.off || null,
+        ...(w.style ? { style: w.style } : {}), ...(w.element ? { element: w.element } : {}), ...(w.spell ? { spell: w.spell } : {}),
+        items, ...(sig ? { sig, ...packWords(sig) } : {}),
+      };
+    }),
   };
 }
 
@@ -118,8 +215,9 @@ export function starterGear(classId, choice = null, json = null, engine = null) 
   const [main, off] = packItems(eng, classId, pack);
   if (main) out.weapon = main;
   if (off && pack.off) out.offhand = off;
+  const lean = leanOf(set, json);
   for (const key of set.pieces) {
-    const it = makeItem(eng, classId, set.id, key);
+    const it = makeItem(eng, classId, set.id, key, null, lean);
     if (it && it.slot && !out[it.slot]) out[it.slot] = it;
   }
   return out;

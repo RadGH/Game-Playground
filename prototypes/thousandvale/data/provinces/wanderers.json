@@ -21,7 +21,8 @@
       1
      ],
      "name": "{first} the Pedlar",
-     "armed": false
+     "armed": false,
+     "titled": true
     }
    ],
    "chatter": [
@@ -45,7 +46,8 @@
       1
      ],
      "name": "{first} {family}, Rag-and-Bone",
-     "armed": false
+     "armed": false,
+     "titled": true
     },
     {
      "role": "porter",
@@ -54,7 +56,8 @@
       1
      ],
      "name": "Porter",
-     "armed": false
+     "armed": false,
+     "titled": false
     }
    ],
    "chatter": [
@@ -78,7 +81,8 @@
       1
      ],
      "name": "{first}, Errand Runner",
-     "armed": false
+     "armed": false,
+     "titled": true
     }
    ],
    "chatter": [
@@ -101,7 +105,8 @@
       1
      ],
      "name": "{first} {family}",
-     "armed": false
+     "armed": false,
+     "titled": true
     }
    ],
    "chatter": [
@@ -123,7 +128,8 @@
       1
      ],
      "name": "{first} the Storyteller",
-     "armed": false
+     "armed": false,
+     "titled": true
     }
    ],
    "chatter": [
@@ -146,7 +152,8 @@
       1
      ],
      "name": "{first} {family}, Scholar",
-     "armed": false
+     "armed": false,
+     "titled": true
     }
    ],
    "chatter": [
@@ -169,7 +176,8 @@
       1
      ],
      "name": "Old {first}",
-     "armed": true
+     "armed": true,
+     "titled": true
     }
    ],
    "chatter": [

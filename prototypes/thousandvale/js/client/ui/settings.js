@@ -5,6 +5,7 @@
 //   Graphics quality (applies after a reload) · Master / music / effects volume · Interface size
 //   Only allow trade requests from friends (default off)  -> gw settings {op:'set', data:{tradeFriendsOnly}}
 //   Show equipment / Show helm (default on)                -> pref {k:'showGear'|'showHelm', v} (others see it too)
+//   Damage meter (play-test 8 W21, default OFF)            -> ui/meter-window.js listens (settings.on)
 //   Key bindings (the list the help window shows)
 //
 //   const settings = createSettings({ net, hud, help, onLogout, onGear });
@@ -72,6 +73,7 @@ export function createSettings({ net, hud, help, onLogout, onGear }) {
       check('showHelm', 'Show helm', 'Off: your helm or hat is hidden, so your face shows. Everyone sees the choice.'),
       h('h4', {}, 'Interface'),
       slider('ui', 'Interface size', 0.8, 1.4, 0.05, v => `${Math.round(v * 100)}%`),
+      check('meter', 'Damage meter', 'A window that counts the damage and healing of you, your pets and party members near you, fight by fight. Off by default. /meter in chat switches it too.'),
     ];
     else if (tab === 'graphics') body = [
       h('label.set-row', {}, h('span', {}, 'Graphics quality'), h('select', { dataset: { k: 'quality' }, onchange: e => { set('quality', e.target.value); hud.toast('Quality applies after a reload.', 'info'); } }, ...QUALITIES.map(q => h('option', { value: q.id, selected: S.quality === q.id }, q.label)))),

@@ -3819,3 +3819,45 @@ Higher skill than the work needs, and a better tool, widen `half` / `good` / `ba
 - **D-UI**: map filter ids for trainers / stations: the NPC roles above (+ `prospector`).
 
 _Status: contract written 2026-10-07; nothing landed yet. (Updated below as it lands.)_
+
+## Round 8 contracts — P-client (professions: models, animations, mini-games, windows, W9) -> P-core, D-world, D-UI, G, lead — 2026-10-07 (written after reading P-core's; a status section at the end is kept true)
+
+**Files (all new, mine):** `js/client/prof-view.js` (nodes, stations, tools in hand, skinning prompt, fx), `js/client/prof-models.js` (every model, no scene),
+`js/client/prof-sound.js`, `js/client/ui/prof.js` (the controller: gather / craft flow, wires the socket), `js/client/ui/prof-games.js` (view-model of the eight
+games over P-core's patterns), `prof-draw.js` (canvas drawers), `prof-minigame.js` (the frame: keys, pointer, pad, sound, result card), `prof-craft.js` (station
+window + tempering), `prof-skills.js` (the Professions block / journal tab), `css/prof.css` (injected by prof.js — no `index.html` line needed),
+`avatar-3d/js/chibi2-motion-prof.js` (opt-in clips), `tests/P/client-*.{test,spec}.js`.
+
+### I build against P-core's section exactly as written. What I read:
+`gatherR` / `gatherDone` / `craftList` / `craftR` / `craftDone` / `craftQuote` / `profR` / `skinnable`, `you.professions` + `sheet.professions`, `you.opened` (`node:<id>`),
+room objects `info.type === 'node'` (`info.node.look`), `ev fx {kind:'gather'|'craft'}`, `info.working`, `used.prof`, and `scoreGame` from `js/rules/professions-games.js`.
+
+### Asks of P-core (small; say no and I work round it)
+1. `js/rules/professions-games.js` also exports **`makeGame(type, seed, opts?)`** (the same generator the server uses) — the gallery, my node tests and the spec's
+   synthetic player need real patterns without a server. And **`GAME_OF = { mining: 'strike', … }`** if it is not there already.
+2. Inputs are capped at 32 pairs: for `trace` please make `steps` <= 28 so a cancelled sample never overflows; I send exactly `steps` samples, sample k taken at
+   `t = (k + 0.5) * ms / steps` (tell me if you want `k * ms / steps`).
+3. `forge`: I show re-heat on the SECOND button (`[t, 1]`; left / right on a keyboard, X / B on a pad, the "Fire" half of the panel on a phone). If the bar should
+   go back in the fire by itself when it is cold, say so and I drop the button.
+4. `gatherDone.items` / `craftDone.items`: full bag items (I show name, count, rarity, `tint`, `icon`) — and `bonus: true` on a row that came from a perfect game.
+5. A station's entity: `craftList.station.npc` (the entity id I stand the fx at) and `used.prof.stations` are enough — I open the craft window from the NPC's
+   `used` reply when `prof.stations` is there (a button "Use the forge" next to "Learn …" in the same small window).
+
+### What others can call (all optional)
+- `thousandvale.prof` (the controller): `.open(prof?)` crafting window, `.gather(id?)`, `.skills()` -> the last `professions.list`, `.demo(type, opts)` (plays a mini-game with no server — gallery / specs).
+- `window` event **`tv:prof`** `detail: { state: 'play'|'result'|'idle', prof, game: type, quality? }` (D-world may hold the camera still on it; I already stop the pad's stick — see hooks).
+- `<html data-prof="strike|rhythm|…">` is set while a mini-game is on screen (CSS / input layers can follow it).
+
+### Hooks I add in other streams' files (each ONE additive line or block, marked `// W9 (P-client)`) — D-world, D-UI, G: shout if one is in your way
+- **D-world** `js/client/main.js`: `import { createProfView } from './prof-view.js'` + create beside `angling`; `profView.onEvent(ev)` in the fx line; `profView.setNode(id, e, info)` /
+  `.remove(id)` / `.clear()` beside the `fishpool` lines (objects of `type:'node'`); `profView.setWorking(id, info.working)` beside `angling.setLine`; `profView.update(dt)`;
+  `profView.sample()` in the warm-up `extras`; `profView` on `window.thousandvale`. And `createProf({...})` (the UI controller) beside `createUi5`, `.wire(net)`.
+- **D-world** `js/client/objects.js`: `node: { invisible: true, … }` in `KINDS` (drawn by prof-view.js, prompt by prof.js through the same `#interact` element).
+- **D-world** `js/client/actors.js`: `CHIBI2_PROF_ANIMS` appended to the clip list, `setWorking(id, clip|null)` next to `setFishing`, one `else if (a.working …)` in the clip chooser.
+- **G / D-UI** `js/client/input/bindings.js`: three rows — `profWork` (Space, shares `jump`; pad A; touch: tap the panel), `profLeft` (A, shares `moveL`; pad X),
+  `profRight` (D, shares `moveR`; pad B) — all `ctx: 'prof'`. `js/client/input/gamepad.js`: ONE line — while `<html data-prof>` is set the pad's world layer is paused
+  (prof-minigame.js reads the pad itself: hold-free, so the stick cannot walk you off the node mid-game).
+- **D-UI** `js/client/ui/char-sheet.js` `sheet.addSection('professions', 'Professions', draw)` and `journal.addTab('professions', 'Professions', draw)` — yours, as you wrote; I only call them.
+- **G** `js/client/gallery/stage.js` (+1 create call) and `scenes.js` (a `Professions` group of scenes).
+
+_Status: contract written 2026-10-07 21:55; code in progress. (Updated below as it lands.)_

@@ -80,7 +80,7 @@ export function createTravellers({ room, travel, folk = [], rng = Math.random, c
   function crewFor(kindId) {
     const k = kinds[kindId] || {};
     const crew = [];
-    for (const spec of k.crew || []) { const n = range(spec.count, 1); for (let i = 0; i < n; i++) crew.push({ role: spec.role, name: nameFor(spec), armed: !!spec.armed, e: null, recent: [] }); }
+    for (const spec of k.crew || []) { const n = range(spec.count, 1); for (let i = 0; i < n; i++) crew.push({ role: spec.role, name: nameFor(spec), armed: !!spec.armed, ...(typeof spec.titled === 'boolean' ? { titled: spec.titled } : {}), e: null, recent: [] }); }
     if (!crew.length) crew.push({ role: 'traveller', name: 'Traveller', e: null, recent: [] });
     return crew;
   }
@@ -116,7 +116,7 @@ export function createTravellers({ room, travel, folk = [], rng = Math.random, c
       const lead = i === 0;
       const wand = lead && (k.shop || k.offers || k.curious) ? { kind: g.kind, ...(k.offers ? { offers: k.offers } : {}), ...(k.curious ? { curious: true } : {}), ...(k.shop ? { shop: k.shop } : {}) } : null;
       c.e = room.spawn({ kind: 'npc', type: 'npc', name: c.name, x: p.x, z: p.z, yaw: p.yaw, team: 1, state: 128,
-        data: { key: 'trav:' + g.id + ':' + i, npc: { role: c.role, says: k.blurb ? [k.blurb] : [], traveller: g.kind, ...(wand && k.shop ? { shop: k.shop } : {}), ...(wand ? { title: k.name || null } : {}) },
+        data: { key: 'trav:' + g.id + ':' + i, npc: { role: c.role, ...(typeof c.titled === 'boolean' ? { titled: c.titled || !!wand } : {}), says: k.blurb ? [k.blurb] : [], traveller: g.kind, ...(wand && k.shop ? { shop: k.shop } : {}), ...(wand ? { title: k.name || null } : {}) },
           traveller: { kind: g.kind, group: g.id, name: k.name || g.kind, from: endName(g, -1), to: endName(g, 1), beast: k.beast || null, cart: !!k.cart, armed: c.armed || undefined }, ...(wand ? { wanderer: wand } : {}) } });
     });
     g.live = true; counters.materialised++;

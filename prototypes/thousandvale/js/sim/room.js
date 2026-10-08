@@ -196,7 +196,7 @@ export function createRoom(opts) {
   // ---- entities ----
   room.spawn = function (spec) {
     // S19 (play-test 4): every NPC you can talk to gets a title above its name and a real name (js/sim/npc-names.js)
-    if (spec.kind === 'npc' && spec.data && (spec.data.npc || spec.data.folk)) { const id = npcIdentity(spec); spec = { ...spec, name: id.name, data: { ...spec.data, title: id.title } }; }
+    if (spec.kind === 'npc' && spec.data && (spec.data.npc || spec.data.folk)) { const id = npcIdentity(spec); spec = { ...spec, name: id.name, data: { ...spec.data, title: id.title, ...(id.titled ? {} : { filler: 1 }) } }; }
     if (nextId > 0xFFFE) nextId = 1;
     while (entities.has(nextId)) nextId++;
     const e = new Entity(room, nextId++, spec);
@@ -460,10 +460,11 @@ export function createRoom(opts) {
       if (dt <= 0) continue;
       c.budget -= dt;
       const st = { x: e.x, y: e.y, z: e.z, vy: e.vy, airborne: e.airborne, speedMul: e.speedMul || 1 };
-      stepMove(st, m, dt, terrain);
+      // W26 (round 8): while `e.held` (calling a mount, riding a cart) you STAND — the client's movement is ignored, facing still turns
+      stepMove(st, e.held ? { ...m, mx: 0, mz: 0, b: 0 } : m, dt, terrain);
       commitMove(e, st);
       e.face(m.yaw);
-      moved = true; lastB = m.b; mxs = m.mx; mzs = m.mz;
+      moved = true; lastB = e.held ? 0 : m.b; mxs = e.held ? 0 : m.mx; mzs = e.held ? 0 : m.mz;
     }
     c.inputs.length = 0;
     c.selfDirty = true;

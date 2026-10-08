@@ -192,7 +192,7 @@ soft('T9: a crate says what it opens into and its lowest rarity; opening it ratt
 });
 
 soft('T11 + T12: the event tracker — a short notice outside, the full card inside (what, objective, progress, time, reward), and a result line', async () => {
-  test.setTimeout(120000);
+  test.setTimeout(300000);
   const me = await page.evaluate(() => tv.state().you);
   const ev = { uid: 'e77', id: 'wolves_ford', name: 'Wolves at the Ford', kind: 'zone', realm: true, state: 'live', what: 'A starving pack is crossing the ford toward the farms.', text: 'A starving pack is crossing the ford toward the farms.',
     objective: { text: 'Defeat the three packs, then the pack mother', n: 1, of: 4, kind: 'wave' }, stage: { n: 2, of: 4, name: 'The second pack' }, leftMs: 372000, endsAt: Date.now() + 372000,

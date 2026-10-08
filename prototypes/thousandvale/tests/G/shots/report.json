@@ -1,20 +1,6 @@
 {
   "desktop-current": {
-    "scenes": 46,
-    "controls": 0,
-    "small": 0,
-    "unsafe": 0,
-    "worst": []
-  },
-  "laptop-current": {
-    "scenes": 46,
-    "controls": 0,
-    "small": 0,
-    "unsafe": 0,
-    "worst": []
-  },
-  "pad-proposed": {
-    "scenes": 50,
+    "scenes": 48,
     "controls": 0,
     "small": 0,
     "unsafe": 0,

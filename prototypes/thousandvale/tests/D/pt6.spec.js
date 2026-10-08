@@ -47,7 +47,7 @@ soft('U1: the Party button, the mail tab, the friends tab and the bag show only 
   await page.evaluate(() => tv.fake('party', { id: 1, code: 'ABCD', leader: tv.state().you.id, members: [{ char: thousandvale.S.net.joined.you.char, name: 'Odda', level: 1, cls: 'cleric', online: true }, { char: 999, name: 'Brem', level: 2, cls: 'warrior', online: true }] }));
   expect(await badge('party-btn'), 'the size of your party is not a badge').toBe('');
   // a friend is added and comes online; a letter arrives
-  await page.evaluate(() => { tv.fake('friends', { list: [] }); tv.fake('friends', { list: [{ char: 999, name: 'Brem', level: 2, cls: 'warrior', online: false }] }); tv.fake('friendState', { char: 999, name: 'Brem', cls: 'warrior', level: 2, online: true }); tv.fake('mailNew', { unread: 1 }); });
+  await page.evaluate(() => { tv.fake('friends', { list: [] }); tv.fake('friends', { list: [{ char: 999, name: 'Brem', level: 2, cls: 'warrior', online: false, unseen: true }], unseen: [{ char: 999, name: 'Brem', kind: 'added', at: Date.now() }], unseenCount: 1 }); tv.fake('friendState', { char: 999, name: 'Brem', cls: 'warrior', level: 2, online: true }); tv.fake('mailNew', { unread: 1 }); });
   expect(await badge('menu-friends')).toBe('2'); expect(await badge('menu-mail')).toBe('1'); expect(await badge('party-btn')).toBe('3');
   await shot('u1-badges-unseen');
   // you look at the friends list: that part clears; the letter is read: the rest clears

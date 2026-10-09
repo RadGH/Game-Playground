@@ -9,6 +9,7 @@
 import { clockText, timeName } from './daynight.js';
 import { soonText } from './ui/pt2-core.js';
 import { crateRewards } from './ui/pt5-core.js';
+import { eventListed } from './ui/pt10-core.js';
 
 const ROLE_NAME = { smith: 'Smith', merchant: 'Merchant', elder: 'Elder', innkeeper: 'Innkeeper', healer: 'Healer', unbinder: 'Unbinder', broker: 'Broker', guard: 'Guard' };
 /** What town folk say when the server sends no lines (their trade, said plainly). */
@@ -190,7 +191,9 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
     else if (ev.name) onEventFrame({ name: `${ev.name}${ev.waves ? ` — wave ${ev.wave}/${ev.waves}` : ''}`, hp: ev.hp ?? 1, players: ev.players || 0 });
   }
 
+  function dropRealm() { event.live = null; event.at = 0; event.kind = 'eventEnd'; if (!liveZone) hideEv(); document.querySelector('.ws-event')?.remove(); }
   function onTravel(r) {
+    if (!r.ok && (r.gone || r.why === 'noEvent')) { dropRealm(); hud.toast(r.msg || 'That event is over.', 'info'); return; }
     if (!r.ok) { hud.toast(r.msg || ({ dead: 'You are dead.', combat: 'Not while fighting.', far: 'Stand at a waystone to travel.', gold: `The fare is ${r.cost} gold.`, undiscovered: 'You have not found that waystone yet.', noEvent: 'Nothing is happening right now.' }[r.why]) || 'You cannot travel now.', 'warn'); return; }
     hud.toast(r.to === 'event' ? 'The waystones carry you to the fight — free of charge.' : `You travel by waystone${r.cost ? ` (${r.cost} gold)` : ''}.`, 'good');
   }
@@ -334,6 +337,11 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
 
   function wire(n) {
     n.on('travelR', onTravel);
+    // play-test 10 (Y11): the server's list of running events after a (re)join — an old panel does not outlive its event
+    n.on('eventSync', m => {
+      if (event.live && !eventListed({ uid: event.live.uid, id: event.live.id, scope: 'realm' }, m)) dropRealm();
+      if (liveZone && !eventListed({ uid: liveZone, id: liveZone }, m)) { liveZone = null; if (!event.live) hideEv(); }
+    });
     n.on('realm', onRealm);
     n.on('eventFrame', onEventFrame);
     n.on('groupHint', onGroupHint);

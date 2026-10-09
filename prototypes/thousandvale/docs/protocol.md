@@ -143,6 +143,8 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `sheet` | p | — | 2 / 4 | §21.6: ask for the character sheet again. Answer `sheet`. |
 | `feedback` | both | `kind:str:16, text:str:2000, ctx?:obj` | 0.2 / 5 | §21.7: a suggestion or a bug report (`ctx` = the client's own context). Answer `feedbackR`. |
 | `admin` | both | `op:str:16, id?:int, state?:str:16, kind?:str:16, limit?:int, before?:int, note?:str:500` | 2 / 10 | §21.9: admin accounts only — `reports` (list) / `report` (set a state). Answers `adminReports`, `adminR`. |
+| `emote` | p | `id:str:16` | 0.7 / 3 | §26: wave / sit / dance / cheer / bow / point. Answers `emoteR`; those in view get the event `emote`. |
+| `track` | gw | `char:int, off?:bool` | 2 / 8 | §26: follow where a party member / mutual friend is. Answers `trackR`, then `whereabouts` at 1 Hz. |
 | `delete` | gw | `char:int, name:str:24` | 0.5 / 3 | §25.1: delete a character (the typed name confirms it). Answers `deleted`, then `charList`. |
 | `feedbackMine` | both | `limit?:int, before?:int` | 1 / 5 | §24.1: my own reports (`feedback {op:'mine'}` is the same call). Answer `feedbackMine`. |
 | `cart` | p | `op:str:8, id:id, to?:str:48, token?:bool` | 2 / 4 | §24.5: ox-cart travel — `list` / `go`. Answers `cartList`, `cartR`, `cartRide`. |
@@ -230,6 +232,10 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `eventDone` | `uid, id, name, result, why?, credited, xp, gold, items, onBody?, text, story?` | (game) §21.5: how an event ended, for everyone who was there. |
 | `eventAt` | `uid, id?, realm?` | (game) §21.5: the event whose area you stand in (`uid:null` = none). |
 | `feedbackR` | `ok, id?, first?, why?, msg` | (both) §21.7: answer to `feedback`. |
+| `emoteR` | `id, ok, why?, msg?` | §26: answer to `emote`. |
+| `eventSync` | `live, realm, at` | §26: every event running for you now — drop any other from the HUD. |
+| `trackR` | `ok, char, why?, msg?, tracking?` | (gw) §26: answer to `track`. |
+| `whereabouts` | `l` | (gw) §26: rows `[char, name, province, zoneName, town, x, z, roomKind, level, cls]` for those you track. |
 | `deleted` | `ok, char, name?, freeAt?, returned?, why?, msg?` | (gw) §25.1: answer to `delete`. |
 | `adminOnline` | `ok, at, count, accounts, list` | (both) §25.2: who is in the world (admin accounts). |
 | `feedbackMine` | `ok, list, more, why?` | (both) §24.1: the account's own reports. |
@@ -347,6 +353,7 @@ room routes it to clients whose view covers `(x, z)`, or only to `to` (a local i
 | `open` | `d` | I opened chest `d` (to me only). |
 | `tele` | `id, s, ab, k, ms, shape, x, z, yaw?, r?, r2?, arc?, len?, w?, el?, follow?` | A telegraph (encounters.md §7): `id` = telegraph id, `s` = caster entity, `ab` = ability, `k` = kind (harm/safe/stack/soak), lands at `k_batch * tickMs + ms` on the room clock; shapes `circle ring donut cone line cross` (`yaw` 0 = +z); `follow` = the entity id it rides. |
 | `teleR` | `id, hits?:[entity ids], x?` | The telegraph resolved (flash + remove); `x:1` = cancelled (fade, no burst). |
+| `emote` | `id, e, ms?, end?` | Round 10 (Y5): entity `id` plays emote `e` (`wave | sit | dance | cheer | bow | point`); `ms` = how long (the mount call's wave), `end:1` = a looping one stopped. |
 | `teleM` | `id, x, z` | Round 10 (C, Y12): a telegraph anchored on its caster MOVED with it (the caster was knocked back) — same `id` as its `tele`; move the drawn shape. `teleR.why` may now be `interrupted` by a knock. |
 | `castbar` | `id, ab, name, ms, int?` | Monster `id` started a cast (`int:1` = interruptible). |
 | `castX` | `id, ab, why` | The cast broke (`interrupt`, `stun`, `phase`, `reset`). |
@@ -1432,3 +1439,13 @@ and spent nodes in the existing `opened` table. Quest step kinds: `gather {prof?
 (`kept` = not spent when the gauge is missed); `craftDone` on success carries `to: 'legendary'`, `item` and `now` (the `legendary_effect` affix: `legendaryId`, `descriptor`); on a miss
 `kept: ['sovereign_core']`. The list row has `legendary: {material:{id, name}, skill}`. The core drops only from a world boss (25% per credited player) and a won event of level 8+ (5%):
 `data/rules/professions.json` `temper.legendary`.
+
+## 26. Owner feedback 10 (2026-10-08) — still protocol v8 (additive)
+- **Party (Y37):** every `partyState` carries `me` (the client lib puts it on `party.me`); it is sent again (`rejoin: true`) once the character is in the world after a login or reconnect. `partyFrames` never repeats a character.
+- **Events (Y11):** `eventSync {live:[uid…], realm, at}` after every `joined`, after a travel to a dead event, and every 15 s. `travelR {ok:false, why:'noEvent', gone:true, msg}`.
+- **Emotes (Y5):** `emote {id}` -> `emoteR`; event `emote {id:<entity>, e, ms?, end?}`. `sit` sets `info.sit`; `dance` ends by itself after 20 s, on a step, an action or a fight (`end:1`). A mount call emits `emote {e:'wave', ms}`.
+- **Tracking (Y36):** `track {char}` / `{char, off:true}` / `{char:0}` -> `trackR {ok, tracking}` | `why: notFriend | offline | hidden | full | self`; `whereabouts {l}` at 1 Hz. Setting `shareLocation` (default true).
+- **Changelog (Y30):** `GET /changelog.json`; `charList.changelog {latest, seen, first?}` (ids are the file's own strings, newest first); `settings {op:'set', data:{changelogSeen:<id>}}` (a known id, never backwards).
+- **Targets (Y8):** `targetR {ok:false, why:'empty'}` for a dead monster holding nothing for you.
+- **Angling (Y15):** `you.angling.learned`; `fishR {why:'unlearned'}`; an angler's `used {taught:'angling'}`.
+- **Classes (Y32):** `starcaller` is a valid `create.cls`. Event `teleM {id, x, z}` (C).

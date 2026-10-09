@@ -17,10 +17,10 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function waitFor(fn, ms = 10000) { const end = Date.now() + ms; while (Date.now() < end) { if (await fn()) return true; await sleep(50); } return !!(await fn()); }
 const status = async port => (await fetch(`http://127.0.0.1:${port}/status`)).json();
 
-test('stage 2: gateway + 2 province processes; relocate across processes; a killed province process comes back', { skip: !HAVE_PG && 'no PG* environment', timeout: 120000 }, async () => {
+test('stage 2: gateway + 2 province processes; relocate across processes; a killed province process comes back', { skip: !HAVE_PG && 'no PG* environment', timeout: 180000 }, async () => {
   const port = await freePort();
   const srv = spawn(process.execPath, [MAIN, '--port', String(port), '--host', '127.0.0.1', '--db', 'pg', '--procs', '2', '--province', 'test,torbor_downs',
-    '--process', 's2test', '--event-first', '4000', '--event-announce', '0', '--save-every', '1000'], { stdio: ['ignore', 'pipe', 'pipe'] });
+    '--process', 's2test', '--event-first', '4000', '--event-announce', '0', '--event-every', '6000', '--save-every', '1000'], { stdio: ['ignore', 'pipe', 'pipe'] });
   let out = ''; srv.stdout.on('data', d => { out += d; }); srv.stderr.on('data', d => { out += d; });
   const net = connect({ mode: 'ws', url: 'ws://127.0.0.1:' + port, tokenStore: memoryTokenStore(), build: 'dev' });
   try {
@@ -44,7 +44,8 @@ test('stage 2: gateway + 2 province processes; relocate across processes; a kill
     // the realm event (Torbor Downs' world boss, in process 1) starts; travel there is free
     // (it may have started before we logged in: then `joined.event` carries it)
     let realm = last.event ? { ev: last.event } : null; net.on('realm', m => { if (m.kind === 'eventStart') realm = m; });
-    assert.ok(await waitFor(() => realm || (last.event && (realm = { ev: last.event })), 15000), 'the realm event is live');
+    // (on a loaded machine the first one can start and be abandoned before the children are even up: another follows every 6 s)
+    assert.ok(await waitFor(() => realm || (last.event && (realm = { ev: last.event })), 45000), 'the realm event is live; server said:\n' + out.split('\n').filter(l => /event|error|Error|director/i.test(l)).slice(-12).join('\n') + '\nSTATUS ' + JSON.stringify((await status(port)).gateway || {}).slice(0, 600));
     let tr = null; net.on('travelR', m => { tr = m; });
     net.travel('event');
     assert.ok(await waitFor(() => tr, 5000)); assert.equal(tr.ok, true); assert.equal(tr.cost, 0);

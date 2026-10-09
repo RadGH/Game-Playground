@@ -1,6 +1,8 @@
 // The heads-up display: your frame, the target frame, the action bar, chat, the connection pill,
 // toasts, the zone banner and the death screen. DOM only (index.html holds the markup), no game rules.
 
+import { skillIconSvg } from './ui/skill-icons.js';
+
 const $ = id => document.getElementById(id);
 
 const ICONS = {
@@ -65,7 +67,7 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
     const how = sk.ally && !sk.revive ? '<div class="tip-who">To heal someone else: click their party frame (or press T for the next party member), then this key. No one targeted: it lands on you.</div>' : '';
     const who = sk.targets ? `<div class="tip-who">Affects: ${escH(sk.targets)}</div>` : '';
     const rv = sk.revive ? `<div class="tip-who">Revive: ${[sk.revive.mass ? 'every fallen party member near you' : 'one fallen party member', Number.isFinite(sk.revive.hpPct) ? `back at ${Math.round(sk.revive.hpPct * 100)}% health` : '', sk.revive.castMs ? `${(sk.revive.castMs / 1000).toFixed(sk.revive.castMs % 1000 ? 1 : 0)} s cast` : 'instant', sk.revive.combat ? 'works in a fight' : 'out of a fight only'].filter(Boolean).map(escH).join(' · ')}</div>` : '';
-    return `<div class="tip-title">${escH(sk.name)}</div>${sk.locked ? `<div class="bad">${escH(sk.lockedText || `Unlocks at level ${sk.level}`)}</div>` : ''}${facts ? `<div class="tip-sub">${escH(facts)}</div>` : ''}${who}${how}${rv}${sk.desc ? `<hr><div>${escH(sk.desc)}</div>` : ''}`;
+    return `<div class="tip-title">${skillIconSvg(sk.id, 26) || ''}${escH(sk.name)}</div>${sk.locked ? `<div class="bad">${escH(sk.lockedText || `Unlocks at level ${sk.level}`)}</div>` : ''}${facts ? `<div class="tip-sub">${escH(facts)}</div>` : ''}${who}${how}${rv}${sk.desc ? `<hr><div>${escH(sk.desc)}</div>` : ''}`;
   }
 
   return {
@@ -118,7 +120,8 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
         s.b.classList.toggle('empty', !sk);
         s.b.classList.toggle('locked', !!sk?.locked);
         s.b.classList.toggle('ally', !!sk?.ally);
-        if (s.face) s.face.textContent = sk ? initials(sk.name) : '';
+        // play-test 10 (Y32): a skill with a picture shows it (ui/skill-icons.js); the rest keep their two initials
+        if (s.face) { const ico = sk ? skillIconSvg(sk.id, 40) : null; s.face.classList.toggle('has-ico', !!ico); if (ico) { if (s.face.dataset.ico !== sk.id) { s.face.innerHTML = ico; s.face.dataset.ico = sk.id; } } else { delete s.face.dataset.ico; s.face.textContent = sk ? initials(sk.name) : ''; } }
         // play-test 6 U11: a locked key says WHEN it opens, on the key itself ("my heal did nothing" was a level-3 skill at level 2)
         if (s.lockat) s.lockat.textContent = sk?.locked ? `Lv ${sk.level}` : '';
         // P5: a rich skill card on the shared tooltip (readable while a key is held)

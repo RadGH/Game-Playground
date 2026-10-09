@@ -33,7 +33,7 @@ const ROLE_NAMES = { guard: 'Guard', sergeant: 'Sergeant', quartermaster: 'Quart
   farmer: 'Farmer', farmhand: 'Farmhand', shepherd: 'Shepherd', swineherd: 'Swineherd', orchardist: 'Orchard keeper', fisher: 'Fisher', miller: 'Miller' };
 const roleName = r => ROLE_NAMES[r] || (r ? r[0].toUpperCase() + r.slice(1) : 'Villager');
 
-export function placementContent(placements, { recipes = [], sites = null, hooks = [], treasure = [], wayside = {}, quests = null, band = [1, 6], zone = null, respawnMs = 30000, encounterInfo = {}, warband: sheetWarband = null, archetype = null } = {}) {
+export function placementContent(placements, { recipes = [], sites = null, hooks = [], treasure = [], wayside = {}, quests = null, band = [1, 6], zone = null, respawnMs = [90000, 150000], encounterInfo = {}, warband: sheetWarband = null, archetype = null } = {}) {
   const camps = [], objects = [], doors = [], waystones = [], rares = new Set(), folk = [];
   const list = placements || [];
   const vig = vignetteContent(list.filter(p => !p.type || p.type === 'vignette' || p.type === 'curio'), recipes, { band });
@@ -43,7 +43,7 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
   const npcs = (quests && quests.npcs) || {};
   const questList = (quests && quests.quests) || [];
   let camped = false, doorGuard = false;
-  const guards = [];
+  const guards = [], dummies = [];
 
   for (const p of list) {
     const h = strHash(p.id || p.type + p.x + p.z);
@@ -73,6 +73,9 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
       case 'cart':        // W5 (round 8): a parked ox cart — the stop it stands for; the carter beside it is an `npc` row with `cart`
         objects.push({ type: 'cart', name: p.name || 'Ox Cart', x: p.x, z: p.z, yaw: p.yaw || 0, key: 'cart:' + p.id, r: p.radius || 2.2, cart: { stop: p.id, vehicle: p.vehicle || p.model || 'ox_cart', town: p.town || null } });
         break;
+      case 'dummy':       // Y17 (round 10): a training dummy (C's rules.spawnDummy) — E's rows `{type:'dummy', id, name?, x, z, yaw?, level?, town?}`
+        dummies.push({ id: p.id, name: p.name || 'Training Dummy', x: p.x, z: p.z, yaw: p.yaw || 0, level: p.level || null, town: p.town || null });
+        break;
       case 'guard':       // W1 (round 8): a town guard's post (js/sim/guards.js makes the fighter)
         guards.push({ id: p.id, name: p.name || 'Guard', rank: p.rank || 'guard', town: p.town || null, post: p.post || 'gate', gate: p.gate || null, x: p.x, z: p.z, yaw: p.yaw || 0 });
         objects.push({ type: 'npc', name: p.name || 'Guard', x: p.x, z: p.z, yaw: p.yaw || 0, key: 'guard:' + p.id, npc: { role: 'guard', says: [], titled: false }, guard: { rank: p.rank || 'guard', post: p.post || 'gate', gate: p.gate || null, town: p.town || null, ...(p.tier ? { tier: p.tier } : {}) },
@@ -85,7 +88,7 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
         const n = npcs[p.id] || {};
         const gives = questList.filter(q => q.giver === p.id).map(q => q.id);
         objects.push({ type: 'npc', name: p.name || n.name || 'Stranger', x: p.x, z: p.z, yaw: p.yaw || 0, key: 'npc:' + p.id,
-          npc: { id: p.id, role: p.role || n.role || null, says: n.greeting ? [n.greeting] : [], quest: gives[0] || null, quests: gives, zone, ...(typeof (p.titled ?? n.titled) === 'boolean' ? { titled: p.titled ?? n.titled } : {}), ...(p.cart ? { cart: p.cart } : {}) } });
+          npc: { id: p.id, role: p.role || n.role || null, says: n.greeting ? [n.greeting] : [], quest: gives[0] || null, quests: gives, zone, ...(typeof (p.titled ?? n.titled) === 'boolean' ? { titled: p.titled ?? n.titled } : {}), ...(p.cart ? { cart: p.cart } : {}) }, ...(p.fighter ? { fighter: p.fighter } : {}) });      // fighter (round 10, Y21): E marks wilderness NPCs who fight what comes near
         break;
       }
       case 'fort': {
@@ -157,7 +160,7 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
       default: break;   // vignettes handled above; unknown kinds are left to the client
     }
   }
-  return { camps, objects, doors, waystones, rares, camped, folk, doorGuard, guards };
+  return { camps, objects, doors, waystones, rares, camped, folk, doorGuard, guards, dummies };
 }
 
 /** The warband leader for a camp of this level (Farhold data/warbands.json levels: Sootwick 1-16, Ashtusk 5-24, …). */

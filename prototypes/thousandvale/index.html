@@ -20,6 +20,7 @@
 <link rel="stylesheet" href="css/pt7.css">
 <link rel="stylesheet" href="css/pt8.css">
 <link rel="stylesheet" href="css/pt9.css">
+<link rel="stylesheet" href="css/pt10.css">
 <script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
 </head>
 <body>
@@ -108,19 +109,20 @@
     <p>A thousand valleys. One world. Everyone in it.</p>
   </header>
   <div class="card-tabs" role="tablist" aria-label="How to play">
-    <button type="button" role="tab" id="tab-new" aria-selected="true">New adventurer</button>
+    <button type="button" role="tab" id="tab-new" aria-selected="true">Play</button>
     <button type="button" role="tab" id="tab-login" aria-selected="false">Log in</button>
   </div>
-  <section id="front" class="card front" hidden aria-label="Your characters">
+  <section id="front" class="card front" aria-label="Your characters">
+    <p class="front-state busy" id="front-state" aria-live="polite">Finding your characters…</p>
     <div class="field mychars" id="mychars" hidden>
       <span class="label">Your characters</span>
       <p class="signed" id="front-who"></p>
       <div class="chips char-list" id="char-chips"></div>
     </div>
-    <button type="button" class="primary" id="new-char">New character</button>
-    <p class="tiny">Click a character to play. Your characters are kept on this browser until you claim the account.</p>
+    <button type="button" class="primary" id="new-char" hidden>Create character</button>
+    <p class="tiny" hidden>Click a character to play. Your characters are kept on this browser until you claim the account.</p>
   </section>
-  <form id="login" class="card" autocomplete="off">
+  <form id="login" class="card" autocomplete="off" hidden>
     <p class="step-title"><button type="button" class="linkish" id="back-front" hidden>‹ Your characters</button><b>New character</b><span>Step 1 of 2 — name, people, calling</span></p>
     <div class="field">
       <label for="name">Name</label>
@@ -137,6 +139,7 @@
       <span class="label">Calling</span>
       <div class="chips classes" id="classes" role="radiogroup" aria-label="Calling"></div>
       <select id="class-more" aria-label="More callings"></select>
+      <div class="class-card" id="class-card" aria-live="polite" hidden></div>
     </div>
     <div class="human-check" id="human-check" hidden></div>
     <p class="note" id="login-note"></p>
@@ -158,7 +161,7 @@
     <p class="tiny"><button type="button" class="linkish" id="signin-forgot">Forgot your password?</button></p>
     <div class="reset" id="reset" hidden></div>
   </form>
-  <nav class="title-foot"><a href="public/privacy.html" target="_blank" rel="noopener">Privacy</a><span id="build-tag"></span></nav>
+  <nav class="title-foot"><button type="button" class="linkish cl-open" id="title-changelog">What's new</button><a href="public/privacy.html" target="_blank" rel="noopener">Privacy</a><span id="build-tag"></span></nav>
   <div class="loading" id="loading"><i></i><span id="loading-text">Waking the valley…</span></div>
 </main>
 

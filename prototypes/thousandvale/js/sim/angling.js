@@ -78,7 +78,24 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
     const a = ch.angling && typeof ch.angling === 'object' ? ch.angling : null;
     const xp = a ? Math.max(0, +a.xp || 0) : 0, level = F ? F.levelOf(xp) : 1;
     return { level, xp, next: F ? F.next(level) : null, rank: F ? F.rank(level) : null, max: F ? F.maxLevel : 100, casts: a ? a.casts | 0 : 0,
-      catches: a && a.catches ? a.catches : {}, legends: a && a.legends ? a.legends : [], titles: a && a.titles ? a.titles : [], bait: a && a.bait && a.bait.left > 0 ? { id: a.bait.id, name: a.bait.name, left: a.bait.left } : null };
+      learned: learned(ch), catches: a && a.catches ? a.catches : {}, legends: a && a.legends ? a.legends : [], titles: a && a.titles ? a.titles : [], bait: a && a.bait && a.bait.left > 0 ? { id: a.bait.id, name: a.bait.name, left: a.bait.left } : null };
+  }
+  /**
+   * Y15 (round 10, dev report #33): Angling is LEARNED from an NPC like the other professions. A character who has ever
+   * fished, earned angling experience or owns a rod already knows it (existing anglers keep it); everyone else is taught
+   * by an angler (the province's `use` on a `role:'angler'` NPC, or P-core's trainer path) — free, with the starting rod.
+   */
+  function learned(ch) {
+    const a = ch.angling && typeof ch.angling === 'object' ? ch.angling : null;
+    return !!(a && (a.learned || a.xp > 0 || (a.casts | 0) > 0 || (a.catches && Object.keys(a.catches).length))) || (ch.bag || []).some(isRod);
+  }
+  function learn(o) {
+    const a = stateOf(o.char);
+    if (a.learned) return false;
+    const fresh = !learned(o.char);
+    a.learned = true; saved(o); wantSheet(o);
+    if (o.conn) o.conn.sendJSON({ t: 'you', angling: view(o.char) });
+    return fresh;
   }
   function saved(o) { journal(o, 'set', { k: 'angling', v: o.char.angling }); o.dirty = true; }
 
@@ -254,7 +271,9 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
     if (e.state & STATE.swimming) return refuse(o, 'swim', 'Not while swimming.');
     if (e.airborne) return refuse(o, 'busy', 'Land first.');
     if (fighting(o, e)) return refuse(o, 'combat', 'Not while fighting.');
+    if (!learned(ch)) return refuse(o, 'unlearned', 'Learn Angling from an angler first — there is one by the water in most towns.');
     const A = stateOf(ch);
+    if (!A.learned) { A.learned = true; saved(o); }
     const rod = rodOf(ch, A.level);
     if (!rod) return refuse(o, 'noRod', 'You need a fishing rod. An angler by the water sells them.');
     if ((ch.bag || []).length >= (typeof bagMax === 'function' ? bagMax(o) : bagMax)) return refuse(o, 'bagFull', 'Your bag is full.');
@@ -512,7 +531,7 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
   }
 
   return {
-    fish, cook, tick, stop, view, isFire, useItem, isRod, isBait, ensurePools, poolNear, poolsIn, lines, F, R,
+    fish, cook, tick, stop, view, learn, learned, isFire, useItem, isRod, isBait, ensurePools, poolNear, poolsIn, lines, F, R,
     npcExtra: (o, obj) => (obj && obj.data && obj.data.npc && obj.data.npc.role === 'angler' ? { angler: true, angling: view(o.char) } : {}),
     /** Tests: the fish list for a spot. */
     listAt(room, x, z, skill = 1) { const pv = provOf(room), wid = zoneOf(pv, x, z), zr = zoneRow(pv, wid); const w = waterAt(room, x, z); return F && w ? F.listFor({ water: waterKind(wid, w.kind), band: (zr && zr.sheet && zr.sheet.band) || 1, time: dayPhase(), skill }) : []; },

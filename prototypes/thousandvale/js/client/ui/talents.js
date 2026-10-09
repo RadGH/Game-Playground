@@ -17,9 +17,10 @@
 //   T.wire(net); T.skills.toggle(); T.perks.toggle(); T.refresh();
 
 import { createPanel, h, confirmBox } from '../ui-panel.js';
+import { skillIconSvg } from './skill-icons.js';
 import { loadSkillData } from '../skillbar.js';
 import { searchForest, createStage, stagedForest, stageCheck, stagedDependents, pointsText } from './talent-model.js';
-import { makeSource, skillLadder, nextUnlockText, treeState, pickCheck, talentPicksWaiting, forestState, perkCheck, refundCheck, perkTotals, talentsFromServer, perksFromServer, forestFromJson } from './talent-model.js';
+import { makeSource, skillLadder, nextUnlockText, treeState, pickCheck, talentPicksWaiting, picksWaitingOn, forestState, perkCheck, refundCheck, perkTotals, talentsFromServer, perksFromServer, forestFromJson } from './talent-model.js';
 import { createPerkGraph } from './perk-forest.js';
 import { esc } from './tips.js';
 
@@ -98,12 +99,13 @@ export function createTalentsUi({ net: getNet, hud, me }) {
     skills.setTitle('Skills & Talents', `Level ${level}${waiting ? ` · ${waiting} talent pick${waiting > 1 ? 's' : ''} waiting` : ''}`);
     const next = nextUnlockText(ladder, level);
     const list = h('ol.tvt-ladder', { 'aria-label': 'Your skills, in the order they unlock' }, ...ladder.map(s => {
-      const w = s.unlocked && s.hasTalents ? treeState(S.src.tree(s.id), S.talents[s.id] || {}, level).waiting : 0;
+      const w = picksWaitingOn(S.src, s, S.talents, level);      // Y38: the server's tree decides, not Farhold's row
       return h('li', {},
         h('button.tvt-skill' + (s.unlocked ? '' : '.locked') + (s.next ? '.next' : '') + (S.sel === s.id ? '.on' : ''), {
           type: 'button', dataset: { skill: s.id, tipHtml: skillTipHtml(s) }, onclick: () => { S.sel = s.id; drawSkills(); },
         },
         h('span.tvt-lv', {}, String(s.level)),
+        icoSpan(s.id),
         h('span.tvt-sname', {}, s.name, h('small', {}, s.unlocked ? `Key ${s.slot}` : s.next ? `Next — unlocks at level ${s.level}` : `Unlocks at level ${s.level}`)),
         w ? h('b.tvt-dot', { dataset: { tip: `${w} talent pick${w > 1 ? 's' : ''} waiting` } }, String(w)) : null));
     }));
@@ -115,6 +117,8 @@ export function createTalentsUi({ net: getNet, hud, me }) {
       h('div.tvt-cols', {}, list, s ? detail(s, level) : h('p.empty', {}, 'No skills yet.')),
     );
   }
+  /** Y32: the skill's picture when it has one (ui/skill-icons.js). */
+  function icoSpan(id) { const svg = skillIconSvg(id, 26); if (!svg) return null; const e = h('span.tvt-ico'); e.innerHTML = svg; return e; }
   function skillTipHtml(s) {
     const facts = [s.mp ? `${s.mp} mana` : '', s.cd ? `${(s.cd / 1000).toFixed(s.cd % 1000 ? 1 : 0)} s cooldown` : '', s.element && s.element !== 'physical' ? s.element : ''].filter(Boolean).join(' · ');
     return `<div class="tip-title">${esc(s.name)}</div><div class="${s.unlocked ? 'good' : 'bad'}">${s.unlocked ? 'Unlocked' : `Unlocks at level ${s.level}`}</div>${facts ? `<div class="tip-sub">${esc(facts)}</div>` : ''}${s.targets ? `<div class="tip-who">Affects: ${esc(s.targets)}</div>` : ''}${s.desc ? `<hr><div>${esc(s.desc)}</div>` : ''}`;

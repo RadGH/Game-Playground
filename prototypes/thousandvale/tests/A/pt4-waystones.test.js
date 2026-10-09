@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { realServer, joinReal, rec, run } from './pt1-helpers.js';
 
-test('S8: home stone at creation, a town stone on entering the town, any stone by walking within 15 m', async () => {
+test('S8: home stone at creation, a town stone on entering the town, any stone by walking within 30 m', async () => {
   const { srv, clock, world } = await realServer();
   const a = await joinReal(srv, clock, 'Wayfarer', 'ranger');
   const o = rec(world, a);
@@ -20,14 +20,14 @@ test('S8: home stone at creation, a town stone on entering the town, any stone b
   world.transfer(o, town, { x: L.towns[ti].x + 25, z: L.towns[ti].z }, 'test'); await run(clock, 1500);
   assert.ok(o.char.waystones.includes(tw.key), 'town stone learned on entering');
   assert.ok(said.some(m => m.op === 'learned' && m.key === tw.key && m.how === 'town'));
-  // a wild stone (a dungeon door's): 20 m away = not yet, 12 m = learned
+  // a wild stone (a dungeon door's): 45 m away = not yet, 25 m = learned (round 10, Y24: the reach went from 15 m to 30 m — roads pass most stones at 15-25 m)
   const wild = L.waystones.find(w => w.town === undefined && !o.char.waystones.includes(w.key));
   assert.ok(wild, 'a wild waystone');
   const copy = pv.copies[0];
-  world.transfer(o, copy, { x: wild.x + 20, z: wild.z }, 'test'); await run(clock, 1500);
-  assert.ok(!o.char.waystones.includes(wild.key), 'not from 20 m');
-  o.entity.x = wild.x + 12; await run(clock, 1500);
-  assert.ok(o.char.waystones.includes(wild.key), 'learned from 12 m, no E');
+  world.transfer(o, copy, { x: wild.x + 45, z: wild.z }, 'test'); await run(clock, 1500);
+  assert.ok(!o.char.waystones.includes(wild.key), 'not from 45 m');
+  o.entity.x = wild.x + 25; await run(clock, 1500);
+  assert.ok(o.char.waystones.includes(wild.key), 'learned from 25 m, no E');
   assert.ok(said.some(m => m.key === wild.key && m.how === 'near'));
   a.close(); await srv.stop();
 });

@@ -32,6 +32,7 @@ soft('V5 + V11: changing Beard (or anything) in the character editor keeps the l
   const page = await ctx.newPage(); page.setDefaultTimeout(20000);
   await page.goto(base + '?quality=low&fresh=1&tod=0.45');
   await page.waitForSelector('#loading.done', { timeout: 120000 });
+  await page.click('#new-char');      // play-test 10 (Y29): the title opens on the front card
   await page.fill('#name', 'Scrolla');
   await page.click('#enter');
   await expect(page.locator('#panel-appearance')).toBeVisible();
@@ -136,6 +137,7 @@ soft('§23.1: split a stack (Shift-click, a number box), join two by dropping on
   // kits: the server answers before you are in the world; a calling it does not know comes back with the reason, and nothing runs in the page
   await page.goto(base + '?quality=low&fresh=1&tod=0.45');
   await page.waitForSelector('#loading.done', { timeout: 120000 });
+  await page.click('#new-char');      // play-test 10 (Y29)
   await page.fill('#name', 'Splitta');
   const loaded = await page.evaluate(async () => { const real = await thousandvale.ui5.kits.load('warrior'); const none = await thousandvale.ui5.kits.load('no_such_calling'); return { sets: real ? real.armour.length : 0, items: real ? real.armour[0].items.length : 0, none, why: thousandvale.ui5.kits.why, rules: performance.getEntriesByType('resource').some(r => /js\/rules\/index\.js/.test(r.name)) }; });
   expect(loaded.sets).toBe(3); expect(loaded.items).toBeGreaterThan(0);

@@ -42,7 +42,9 @@ test('X6: the typed name must be the character\'s (case and outer spaces aside);
 
 test('the title flow: signing in from the title form lands on YOUR CHARACTERS, not on the hidden list', () => {
   const acc = src('js/client/account.js');
-  assert.match(acc, /if \(\(chars \|\| \[\]\)\.length\) front\(\); else tab\('new'\);/);
+  // (play-test 10, Y29: also with NO characters — the front card then offers "Create character"; never straight into the form)
+  const login = acc.slice(acc.indexOf('const chars = await onLogin(user, pass);'), acc.indexOf("T.note.textContent = err.why"));
+  assert.match(login, /showChars\(chars,[\s\S]*?\bfront\(\);/); assert.doesNotMatch(login, /tab\('new'\)/);
   assert.match(src('js/client/main.js'), /onTitleStep: step => titleStep\(step\)/);
 });
 

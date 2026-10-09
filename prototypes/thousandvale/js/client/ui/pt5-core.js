@@ -86,11 +86,13 @@ function kitSlot(it) {
 /** One honest line for an item on the kit screen: "4–7 damage · two-handed · slow attacks". */
 export function itemFacts(it) {
   const out = [];
-  if (Array.isArray(it?.dmg)) out.push(`${whole(it.dmg[0])}–${whole(it.dmg[1])} damage`);
+  // play-test 10: Y16 an orb / focus has no attack (no damage line); the hand in the rules' words; Y26 attacks per second
+  if (Array.isArray(it?.dmg) && !it.noAttack) out.push(`${whole(it.dmg[0])}–${whole(it.dmg[1])} damage`);
   if (it?.armor) out.push(`${whole(it.armor)} armour`);
-  if (it?.twoHanded) out.push('two-handed');
+  if (it?.handText) out.push(String(it.handText).toLowerCase()); else if (it?.twoHanded) out.push('two-handed');
   if (it?.ranged) out.push('ranged');
-  if (it?.attackSpeed && it.attackSpeed !== 'normal' && typeof it.attackSpeed === 'string') out.push(`${it.attackSpeed} attacks`);
+  if (it?.apsText && !it.noAttack) out.push(it.apsText);
+  else if (it?.attackSpeed && it.attackSpeed !== 'normal' && typeof it.attackSpeed === 'string' && !it.noAttack) out.push(`${it.attackSpeed} attacks`);
   if (it?.block) out.push(`blocks ${whole(it.block)}`);
   return out.join(' · ');
 }
@@ -275,9 +277,9 @@ const SPEED_EVERY = { 'very fast': 0.7, fast: 0.85, normal: 1.0, slow: 1.3, 'ver
 export function basicSheet(you = {}, equipment = {}) {
   const worn = Object.values(equipment || {}).filter(Boolean);
   const armour = worn.reduce((s, it) => s + (it.armor || 0), 0);
-  const w = equipment?.weapon || null, off = equipment?.offhand?.dmg ? equipment.offhand : null;
+  const w = equipment?.weapon || null, off = equipment?.offhand?.dmg && !equipment.offhand.noAttack ? equipment.offhand : null;
   const avg = it => (it?.dmg ? (it.dmg[0] + it.dmg[1]) / 2 : 0);
-  const every = it => (Number.isFinite(it?.every) ? it.every / 1000 : Number.isFinite(it?.attackEvery) ? it.attackEvery : SPEED_EVERY[it?.attackSpeed] || 1);
+  const every = it => (Number.isFinite(it?.aps) && it.aps > 0 ? 1 / it.aps : Number.isFinite(it?.every) ? it.every / 1000 : Number.isFinite(it?.attackEvery) ? it.attackEvery : SPEED_EVERY[it?.attackSpeed] || 1);
   const core = [
     { id: 'level', label: 'Level', value: you.level || 1, tip: 'Your level. Each level raises health, mana and what you may wear.' },
     { id: 'hpMax', label: 'Health', value: Math.round(you.hpMax || 0), tip: 'The most health you can have, from your level, your calling and your gear.' },
@@ -286,6 +288,8 @@ export function basicSheet(you = {}, equipment = {}) {
   core.push({ id: 'armour', label: 'Armour', value: armour, tip: `Added up from everything you wear (${worn.filter(i => i.armor).length} pieces). Armour takes a share off physical hits.` });
   if (w?.dmg) {
     core.push({ id: 'weapon', label: 'Weapon damage', value: [w.dmg[0], w.dmg[1]], tip: `The damage range printed on ${w.name || 'your main-hand weapon'}, before your skills and perks.` });
+    // Y26: attacks per second, as the weapon's own card says it (the server's sheet row `aps` replaces this one when it arrives)
+    if (Number.isFinite(w.aps) && w.aps > 0) core.push({ id: 'aps', label: 'Attacks per second', value: Math.round(w.aps * 100) / 100, tip: `How often ${w.name || 'your weapon'} strikes, before attack-speed bonuses.` });
     const dps = avg(w) / every(w) + (off ? avg(off) / every(off) * 0.5 : 0);
     core.push({ id: 'weaponDps', label: 'Basic attack', value: dps, unit: '/s', tip: `Average weapon damage (${fmt(avg(w))}) divided by the time between swings (${fmt(every(w))} s)${off ? ', plus half of the off-hand weapon the same way' : ''}. Gear only — perks and buffs are not counted here.` });
   } else core.push({ id: 'weapon', label: 'Weapon damage', text: 'Bare hands', tip: 'You hold no weapon.' });

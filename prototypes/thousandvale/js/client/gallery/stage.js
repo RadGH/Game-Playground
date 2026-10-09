@@ -30,6 +30,7 @@ import { createUiSuite } from '../ui/suite.js';
 import { createUi2 } from '../ui/pt2.js';
 import { createUi5 } from '../ui/pt5.js';
 import { createUi8 } from '../ui/pt8.js';
+import { createUi10 } from '../ui/pt10.js';
 import { createProf } from '../ui/prof.js';          // W9 (P-client): professions — mini-games, crafting, the Professions list
 import { profStep } from './prof-scenes.js';
 import { loadSkillData, barFromData, barFromServer, initials } from '../skillbar.js';
@@ -42,6 +43,7 @@ import { installInput } from '../input/index.js';
 import { createFakeServer } from './fake-net.js';
 import { SCENES, sceneById } from './scenes.js';
 import { initTitleLite } from './title-lite.js';
+import { createTitleFront } from '../ui/title-front.js';
 import { installFrameChrome } from './frame-chrome.js';
 
 const GX = window.__gallery;
@@ -103,7 +105,7 @@ const chat = createChat({ net: () => S.net, hud, social, me, onTyping: on => con
   openAccount: () => account.panel.open(), openFriends: () => friends.panel.open(),
   friendAdd: n => friends.add(n), friendRemove: n => friends.remove(n), isFriend: n => friends.isFriend(n),
   guildInvite: n => guild.invite(n), canGuildInvite: () => guild.canInvite(),
-  command: (cmd, arg, rest) => ui2.command(cmd, arg, rest) || ui5.command(cmd, arg, rest) || ui8.command(cmd, arg, rest),
+  command: (cmd, arg, rest) => ui2.command(cmd, arg, rest) || ui5.command(cmd, arg, rest) || ui8.command(cmd, arg, rest) || ui10.command(cmd, arg, rest),
 } });
 hud.chat = chat.line;
 hud.focusChat = prefill => chat.focus(prefill);
@@ -128,6 +130,8 @@ const ui5 = createUi5({ net: () => S.net, hud, bag, mail, worldUi, journal: ui.j
   targetId: () => S.target, setTarget: id => setTarget(id), stats: () => ({ fps: 60 }), zoneName: () => $('zone-name')?.textContent || null,
   ensureNet: async () => { const n = startNet(); await n.ready; return n; }, onKitPreview: () => {}, onKitBack: () => title?.toAppearance(), onKitCreate: () => hud.toast('In the game this creates the character and walks into the world.', 'info') });
 const ui8 = createUi8({ net: () => S.net, hud, actors, worldUi, feedback: ui5.feedback, atlas: ui.atlas, settings: ui2.settings, selfId: () => S.selfId, bar: () => S.bar });
+const ui10 = createUi10({ net: () => S.net, hud, actors, atlas: ui.atlas, me, pos: () => S.pos, worldMap: ui.worldMap, settings: ui2.settings, camYaw: () => S.yaw || 0, room: () => S.room });
+friends.tracker = ui10;
 const prof = createProf({ net: () => S.net, hud, bag, sheet: ui5.sheet, journal: ui.journal });   // W9 (P-client)
 const PANELS = { ...ui5.panels, ...ui8.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: f => bag.toggle(f) }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
 for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());
@@ -158,6 +162,7 @@ window.addEventListener('keydown', e => {
 // the input layer exactly as main.js installs it (gamepad, re-bound keys, hints; touch only under the phone layout)
 const input = installInput({ controls, hud, setTarget: id => setTarget(id), targetId: () => S.target, pause: () => ui2.escape(), inWorld: () => S.phase === 'world', dead: () => S.self.dead,
   settings: ui2.settings, panels: PANELS, chat: () => chat.focus(), gallery: GX, cycleTarget: () => cycleTarget() });
+ui10.useRadial(input.radial);      // Y5: the quick wheel's emote ring
 
 // ---- what main.js does between the interface and the server (a slim copy: no prediction, no drawing) ---------------
 function setTarget(id) {
@@ -281,7 +286,7 @@ function wireNet(net) {
   chat.wire(net); friends.wire(net); guild.wire(net); mail.wire(net); callboard.wire(net); account.wire(net);
   bag.wire(net);
   ui5.wire(net);
-  ui8.wire(net);
+  ui8.wire(net); ui10.wire(net);
   prof.wire(net);   // W9 (P-client)
   ui.wire(net);
   worldUi.wire(net);
@@ -319,7 +324,7 @@ function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
   if (S.phase === 'world') {
-    worldUi.tick(S.tod); ui.tick(dt); ui2.tick(dt); ui5.tick(dt); ui8.tick(dt); boss.update(dt);
+    worldUi.tick(S.tod); ui.tick(dt); ui2.tick(dt); ui5.tick(dt); ui8.tick(dt); ui10.tick(dt); boss.update(dt);
     hud.death(S.self.dead ? Math.max(0, (S.self.riseIn ?? 2.5) - (now - S.self.deadAt) / 1000) : null);
     const tgt = S.target != null ? actors.get(S.target) : null;
     if (tgt) { hud.setTarget(tgt); hud.usable(0, !tgt.dead && tgt.hostile); } else hud.usable(0, false);
@@ -420,7 +425,8 @@ async function runSteps(steps = []) {
 }
 
 // ---- boot ----------------------------------------------------------------------------------------------------------
-const title = initTitleLite({ S, account, ui2, ui5, startNet, races: PLAYABLE_RACES, raceNames: RACE_NAMES });
+const titleFront = createTitleFront({ onShow: () => {} });      // play-test 10 (Y29): the title's front card, the game's own module
+const title = initTitleLite({ S, account, ui2, ui5, startNet, races: PLAYABLE_RACES, raceNames: RACE_NAMES, front: titleFront });
 var api = window.gallery = { prof, S, GX, scene, fake, hud, actors, objects, controls, panels: PANELS, ui, ui2, ui5, bag, social, chat, mail, friends, guild, callboard, account, help, worldUi, boss, menubar, input, title, verbs: VERBS, runSteps, openPanels, setTarget,
   /** What the page shows, for the spec: visible text of the interface. */
   text: () => [...document.querySelectorAll('#hud, #title:not([hidden]), .tv-panel, .tipbox, body > .ap-root, body > [class*="kit"], .phone-ui, .pad-ui')].map(e => (e.hidden ? '' : e.innerText)).join('\n'),

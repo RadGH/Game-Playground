@@ -42,7 +42,7 @@ export async function loadRules(mode) {
         }
         // owner feedback 8, W22: C's two helpers for the light items that left the game (what counts as one, what it is paid back at)
         const lightItems = typeof m.isLightItem === 'function' ? { is: m.isLightItem, refund: typeof m.lightRefund === 'function' ? m.lightRefund : null } : null;
-        return { createRules: m.createRules, rules: 'js/rules', kitsFor, lightItems };
+        return { createRules: m.createRules, rules: 'js/rules', kitsFor, lightItems, refreshItem: typeof m.refreshItem === 'function' ? m.refreshItem : null };      // refreshItem (round 10, C's Y16): today's words on an old bag item
       }
       log('js/rules/index.js has no createRules export; using the stand-in rules');
     } catch (err) { log('js/rules/index.js failed to load; using the stand-in rules', { err: err.message }); }
@@ -63,6 +63,8 @@ export function loadMotd() {
   if (process.env.TV_MOTD) d = { ...d, text: process.env.TV_MOTD };
   return { text: typeof d.text === 'string' ? d.text : null, lines: Array.isArray(d.lines) ? d.lines : [], off: !!d.off };
 }
+/** Owner feedback 10 (Y30): the lead's player-facing changelog (data/ops/changelog.json), served at /changelog.json. */
+export function loadChangelog() { try { return JSON.parse(readFileSync(join(GAME, 'data/ops/changelog.json'), 'utf8')); } catch { return null; } }
 export function feedbackSink(env = 'dev', file = feedbackFile(env)) {
   let made = false;
   return row => {
@@ -82,14 +84,16 @@ export async function makeStore(o) {
   return createMemoryStore();
 }
 
+/** Thousandvale's OWN classes (round 10, Y32: stream C's data/rules/classes-tv.json — the Starcaller), added to Farhold's thirty wherever class ids are listed. */
+function tvClasses() { try { return JSON.parse(readFileSync(join(GAME, 'data/rules/classes-tv.json'), 'utf8')).classes || []; } catch { return []; } }
 export function loadClasses() {
-  try { return JSON.parse(readFileSync(join(PLAYGROUND, 'prototypes/farhold/data/classes.json'), 'utf8')).classes.map(c => c.id); }
+  try { return [...new Set([...JSON.parse(readFileSync(join(PLAYGROUND, 'prototypes/farhold/data/classes.json'), 'utf8')).classes.map(c => c.id), ...tvClasses().map(c => c.id)])]; }
   catch { return null; }
 }
 
 /** Class id -> display name (play-test 2, Q25: the character list showed "Adventurer" for a ranger). */
 export function loadClassNames() {
-  try { return Object.fromEntries(JSON.parse(readFileSync(join(PLAYGROUND, 'prototypes/farhold/data/classes.json'), 'utf8')).classes.map(c => [c.id, c.name || c.id])); }
+  try { return Object.fromEntries([...JSON.parse(readFileSync(join(PLAYGROUND, 'prototypes/farhold/data/classes.json'), 'utf8')).classes, ...tvClasses()].map(c => [c.id, c.name || c.id])); }
   catch { return null; }
 }
 

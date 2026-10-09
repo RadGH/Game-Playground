@@ -28,6 +28,11 @@ export const VIEW = Object.freeze({
 const MAX_QUEUED_INPUTS = 30, MOVE_BUDGET_CAP = 500;
 export const DORMANT_MS = 30000;      // a camp nobody has been within awakeR of for this long (and calm) is parked
 
+/** Y23 (round 10): a wilds camp's body comes back 90-150 s after it died (it was 30 s, on one clock a camp); a camp may name its own `respawnMs`. */
+export const CAMP_RESPAWN_MS = Object.freeze([90000, 150000]);
+/** …and never within RESPAWN_IN_VIEW_MS of its death while a player is within RESPAWN_VIEW_M of the camp. */
+export const RESPAWN_IN_VIEW_MS = 60000, RESPAWN_VIEW_M = 60;
+
 export function createRoom(opts) {
   const { id, name = id, terrain, seed = 1, createRules, hooks = {}, tickMs = TICK_MS, camps = [], objects = [], kind = 'wilds', area = null, safeZones = [], meta = null } = opts;
   const bounds = terrain.bounds;
@@ -50,7 +55,7 @@ export function createRoom(opts) {
   // not fighting) is parked — removed, with its warband escort — and comes back as it was when someone walks near.
   // Respawn timers keep running while parked. The rules (stream C) then only ever see monsters near players.
   const dormant = !!opts.dormantCamps;
-  const campState = camps.map(c => ({ ...c, live: new Set(), nextAt: 0, parked: dormant ? (c.count || 1) : 0, idleSince: 0 }));
+  const campState = camps.map(c => ({ ...c, live: new Set(), due: [], nextAt: 0, parked: dormant ? (c.count || 1) : 0, idleSince: 0 }));
   const spawnPoint = opts.spawn ? { ...opts.spawn } : { ...terrain.spawn };
 
   const room = {
@@ -111,6 +116,7 @@ export function createRoom(opts) {
       // a telegraph's END is sent to whoever could see the telegraph: `teleR` has no place of its own, and its `x` is the
       // "cancelled" flag, not a coordinate — routed by position it reached nobody (which is why a cancelled zone stayed drawn)
       case 'teleR': { const t = liveTele.get(ev.id); if (t) { routed(ev, t); liveTele.delete(ev.id); } break; }
+      case 'teleM': { const t = liveTele.get(ev.id); if (t && Number.isFinite(ev.x) && Number.isFinite(ev.z)) { t.x = ev.x; t.z = ev.z; } break; }      // C (round 10, Y12): a knocked-back caster carries its wind-up — the later teleR is routed from where it now is
       case 'fx':
         if (ev.kind === 'pool' && !ev.end && ev.id != null) { const src = entities.get(ev.id); if (src && src.kind === 'monster') { const l = livePools.get(ev.id) || []; l.push({ x: ev.x, z: ev.z, until: room.now() + (ev.seconds || 4) * 1000 }); livePools.set(ev.id, l); } }
         break;
@@ -156,6 +162,7 @@ export function createRoom(opts) {
     walkable: room.walkable,
     isAwake(x, z) { return awake[grid.cellOf(x, z)] === awakeGen; },
     event: room.event,
+    npcHelped: (npc, pl, info) => { if (hooks.npcHelped) hooks.npcHelped(npc, pl, info, room); },      // Y21 (round 10): C's wilderness-NPC fights -> the province's thanks
     spawn: spec => room.spawn(spec),
     despawn(e, delayMs = 0) { if (delayMs > 0) despawns.push({ at: room.now() + delayMs, e }); else room.remove(e); },
     award: (e, a) => room.award(e, a),
@@ -353,7 +360,7 @@ export function createRoom(opts) {
     c.live.add(m.id);
   }
   /** A camp's respawn delay: a number, or [min, max] picked on the room's 'spawn' stream (rares: 20-60 min). */
-  function respawnOf(c) { const r = c.respawnMs ?? 30000; return Array.isArray(r) ? r[0] + host.random('spawn') * (r[1] - r[0]) : r; }
+  function respawnOf(c) { const r = c.respawnMs ?? CAMP_RESPAWN_MS; return Array.isArray(r) ? r[0] + host.random('spawn') * (r[1] - r[0]) : r; }
   const campCalm = c => { for (const idd of c.live) { const m = entities.get(idd); if (!m || m.dead || (m.state & STATE.combat) || m.hp < m.hpMax) return false; } return true; };
   function parkCamp(c) {
     for (const idd of c.live) {
@@ -365,23 +372,31 @@ export function createRoom(opts) {
     c.parked += c.live.size; c.live.clear(); c.idleSince = 0;
     stats.parked = (stats.parked || 0) + 1;
   }
+  const playerNear = (x, z, r) => { for (const cl of clients.values()) { const p = cl.entity; if (p && !p.removed && Math.abs(p.x - x) <= r && Math.abs(p.z - z) <= r && Math.hypot(p.x - x, p.z - z) <= r) return true; } return false; };
   function fillCamps(now, initial = false) {
     for (const c of campState) {
-      for (const idd of c.live) { const m = entities.get(idd); if (!m || m.dead) c.live.delete(idd); }
+      // Y23 (round 10, dev report #55 "enemies respawn 2-5 s after I kill them"): EVERY death starts its own clock. There used
+      // to be one clock a camp, started at the first death — so the second wolf you killed, 27 s into it, was "back" 3 s later.
+      for (const idd of c.live) { const m = entities.get(idd); if (!m || m.dead) { c.live.delete(idd); if (!initial) c.due.push({ at: now + respawnOf(c), died: now }); } }
+      if (c.due.length > 1) c.due.sort((a, b) => a.at - b.at);
+      while (c.live.size + c.parked + c.due.length < c.count && !initial) c.due.push({ at: now + respawnOf(c), died: now });      // a body lost some other way
       if (dormant) {
         if (awake[grid.cellOf(c.x, c.z)] !== awakeGen) {
           // out of reach: count respawns on paper, park a calm camp after a while
-          if (c.live.size + c.parked < c.count) { if (!c.nextAt) c.nextAt = now + respawnOf(c); if (now >= c.nextAt) { c.parked++; c.nextAt = 0; } }
+          while (c.due.length && now >= c.due[0].at) { c.due.shift(); c.parked++; }
           if (c.live.size) { c.idleSince ||= now || 1; if (now - c.idleSince >= DORMANT_MS && campCalm(c)) parkCamp(c); }
           continue;
         }
         c.idleSince = 0;
         while (c.parked > 0) { c.parked--; spawnInCamp(c); }
       }
-      if (initial) { while (c.live.size < c.count) spawnInCamp(c); continue; }
-      if (c.live.size >= c.count) { c.nextAt = 0; continue; }
-      if (!c.nextAt) c.nextAt = now + respawnOf(c);
-      if (now >= c.nextAt) { spawnInCamp(c); c.nextAt = c.live.size < c.count ? now + respawnOf(c) : 0; }
+      if (initial) { while (c.live.size < c.count) spawnInCamp(c); c.due.length = 0; continue; }
+      if (c.live.size >= c.count) { c.due.length = 0; continue; }
+      // ...and never back inside a minute while a player still stands within sight of the camp (whatever its own timer says)
+      while (c.due.length && now >= c.due[0].at && c.live.size < c.count) {
+        if (now - c.due[0].died < RESPAWN_IN_VIEW_MS && playerNear(c.x, c.z, RESPAWN_VIEW_M)) break;
+        c.due.shift(); spawnInCamp(c);
+      }
     }
   }
   room.camps = campState;
@@ -632,7 +647,7 @@ export function createRoom(opts) {
       data: { portal: o.portal || null, chest: o.chest || null, gate: o.gate || null, lever: o.lever || null, rules: !!o.rules, key: o.key || null, r: o.r || null, state: o.state || null, room: o.room ?? null,
         note: o.note || null, use: o.use || null, npc: o.npc || null, hidden: !!o.hidden, hint: o.hint || null, lore: o.lore || null, waystone: o.waystone || null, schedule: o.schedule || null,
         treasure: o.treasure || null, site: o.site || null, shimmer: o.shimmer || null, office: o.office || null,
-        /* play-test 6: dungeon floors, the lift, the way in */ ...(o.lift ? { lift: o.lift } : {}), ...(o.floor ? { floor: o.floor } : {}), ...(o.dir ? { dir: o.dir } : {}), ...(o.leave ? { leave: true } : {}), ...(npc && o.title ? { title: o.title } : {}), ...(o.cart ? { cart: o.cart } : {}), ...(o.guard ? { guard: o.guard } : {}) } });
+        /* play-test 6: dungeon floors, the lift, the way in */ ...(o.lift ? { lift: o.lift } : {}), ...(o.floor ? { floor: o.floor } : {}), ...(o.dir ? { dir: o.dir } : {}), ...(o.leave ? { leave: true } : {}), ...(npc && o.title ? { title: o.title } : {}), ...(o.cart ? { cart: o.cart } : {}), ...(o.guard ? { guard: o.guard } : {}), ...(o.fighter ? { fighter: o.fighter } : {}) } });
   }
   /** Change an object's state (lit, used, broken, open…): late joiners see it in `info`, everyone near gets `obj`. */
   room.objState = function (o, state, extra = {}) {

@@ -75,9 +75,13 @@ import { createLootMarkers } from './loot-marker.js';
 import { makeGlowTexture } from './decor.js';
 import { createUi2 } from './ui/pt2.js';          // D-UI play-test 2: menus, loot, rolls, shops, trade, pause/settings, portraits, editor
 import { tileLos } from './ui/pt6-core.js';
+import { createUi10 } from './ui/pt10.js';        // D-UI play-test 10: changelog, tracking a friend, emotes
 import { createUi8 } from './ui/pt8.js';          // D-UI play-test 8: ox-cart window, damage meter, quest marks on the map
 import { createUi5 } from './ui/pt5.js';          // D-UI play-test 5: kit step, crates, event tracker, character sheet, feedback, angling
 import { savedQuality } from './ui/settings.js';
+import { createTitleFront, rememberGear, rememberedGear } from './ui/title-front.js';   // D-UI play-test 10 (Y29): the title's front card + whose figure it shows
+import { titleCharLook } from './ui/pt10-core.js';
+import { loadCallings, drawClassCard } from './ui/class-card.js';
 import { lookWith, lookCustom } from './ui/appearance-core.js';
 import { avatarFor } from './looks.js';
 import { installInput } from './input/index.js';
@@ -258,7 +262,7 @@ const chat = createChat({ net: () => S.net, hud, social, me, onTyping: on => con
   openAccount: () => account.panel.open(), openFriends: () => friends.panel.open(),
   friendAdd: n => friends.add(n), friendRemove: n => friends.remove(n), isFriend: n => friends.isFriend(n),
   guildInvite: n => guild.invite(n), canGuildInvite: () => guild.canInvite(),
-  command: (cmd, arg, rest) => ui2.command(cmd, arg, rest) || ui5.command(cmd, arg, rest) || ui8.command(cmd, arg, rest),
+  command: (cmd, arg, rest) => ui2.command(cmd, arg, rest) || ui5.command(cmd, arg, rest) || ui8.command(cmd, arg, rest) || ui10.command(cmd, arg, rest),
 } });
 hud.chat = chat.line;                 // every system/combat/loot line lands in the chat window's All tab
 hud.focusChat = prefill => chat.focus(prefill);
@@ -286,6 +290,9 @@ const ui5 = createUi5({ atlas: ui.atlas, objects, inDungeon: () => !!D.view, loo
 // T27: one binding table (js/client/input/bindings.js) drives the keyboard, the gamepad, the hints and — when switched on — touch
 const input = installInput({ controls, hud, setTarget: id => setTarget(id), targetId: () => S.target, pause: () => ui2.escape(), inWorld: () => S.phase === 'world', dead: () => S.self.dead, settings: ui2.settings, chat: () => chat.focus(), cycleTarget: any => cycleTarget(any) });
 const ui8 = createUi8({ net: () => S.net, hud, actors, worldUi, feedback: ui5.feedback, atlas: ui.atlas, settings: ui2.settings, selfId: () => S.selfId, bar: () => S.bar });
+const ui10 = createUi10({ net: () => S.net, hud, actors, atlas: ui.atlas, me, pos: () => S.predictor.pos, worldMap: ui.worldMap, settings: ui2.settings, camYaw: () => controls.cam.yaw, room: () => S.room });
+friends.tracker = ui10;
+ui10.useRadial(input.radial);      // Y5: the quick wheel's emote ring
 // W9 (P-client): professions — the 3D side and the interface's controller
 const profView = createProfView(scene, { actors, objects, camera, groundY: (x, z) => groundY(x, z), selfId: () => S.selfId });
 const prof = createProf({ net: () => S.net, hud, bag, sheet: ui5.sheet, journal: ui.journal }); prof.setView(profView);
@@ -311,9 +318,11 @@ window.addEventListener('keydown', e => {
 
 // --- title screen -------------------------------------------------------------------------------------
 let preview = null;
+let CALLINGS = [];     // play-test 10 (Y32): every calling's own row — Farhold's thirty and Thousandvale's own (the Starcaller) — for the card
 async function loadClasses() {
-  try { const d = await (await fetch(new URL('../../../farhold/data/classes.json', import.meta.url))).json(); return d.classes.map(c => ({ id: c.id, name: c.name || c.id })); }
-  catch { return STARTERS.map(id => ({ id, name: id[0].toUpperCase() + id.slice(1) })); }
+  const list = await loadCallings();
+  if (list.length) { CALLINGS = list; return list; }
+  return STARTERS.map(id => ({ id, name: id[0].toUpperCase() + id.slice(1) }));
 }
 function initTitle() {
   $('name').value = q.get('name') || store.get('name', '') || '';
@@ -342,16 +351,41 @@ function initTitle() {
   // appearance editor with the figure in starting clothes (class gear on a toggle); "Create character" enters the world
   $('new-char')?.addEventListener('click', () => titleStep('new'));
   $('back-front')?.addEventListener('click', () => titleStep('front'));
-  $('tab-new')?.addEventListener('click', () => titleStep(account.hasChars?.() ? 'front' : 'new'));
+  $('tab-new')?.addEventListener('click', () => titleStep('front'));     // Y29: always the front card — never straight into creation
   $('tab-login')?.addEventListener('click', () => { $('front').hidden = true; });
   $('build-tag').textContent = `client ${q.get('build') || 'dev'} · ${netMode() === 'ws' ? 'online' : 'offline (in-browser server)'}`;
   $('login').addEventListener('submit', e => { e.preventDefault(); toAppearance(); });
   refreshChips();
+  // Y29 (play-test 10): the title opens on the front card — "finding your characters" while the list is on its way,
+  // then the list, or one "Create character" button. The new-character form shows only when you ask for it.
+  titleFront = createTitleFront({ onShow: c => { S.titleChar = c; if (S.titleStep === 'front') refreshTitleFigure(); } });
+  account.onChars = (list, user) => { titleFront.chars(list); titleFront.set({ hasToken: true, loaded: true, count: list.length }); };
+  const expecting = !!TOKENS().get() && q.get('fresh') !== '1';
+  titleFront.set({ hasToken: expecting });
+  if (expecting) setTimeout(() => { if (titleFront.state.state === 'loading') titleFront.set({ hasToken: true, failed: true }); }, 12000);
+  if (!AUTOPLAY && q.get('tab') !== 'login') titleStep('front');
 }
+/** Y29: what you are wearing, kept in this browser so the title can dress your figure next time (trimmed to what the body builder reads). */
+const GEAR_KEYS = ['look', 'rarity', 'baseKey', 'base', 'subtype', 'sub', 'type', 'tier', 'isUnique', 'unique', 'isShield', 'isMagicShield', 'g5', 'el', 'castElement', 'brand', 'setId', 'packLook', 'pack', 'catalogBase', 'slot', 'twoHanded', 'hand'];
+function saveTitleGear() {
+  const you = S.net?.joined?.you, a = S.selfId != null ? actors.get(S.selfId) : null;
+  if (S.phase !== 'world' || you?.char == null || !a?.look?.gear) return;
+  const out = {};
+  for (const [slot, it] of Object.entries(a.look.gear)) if (it && typeof it === 'object') { out[slot] = {}; for (const k of GEAR_KEYS) if (it[k] != null) out[slot][k] = it[k]; }
+  rememberGear(you.char, out);
+}
+setInterval(saveTitleGear, 20000);
+addEventListener('pagehide', saveTitleGear);
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveTitleGear(); });
+let titleFront = null;
+const AUTOPLAY = (q.get('autoplay') === '1' || q.get('auto') === '1') && !!q.get('name');
+/** Y29: put the title's figure in step with what the title is showing (a listed character, or the one being made). */
+function refreshTitleFigure() { if (S.phase === 'world' || !W.spot) return; if (preview && actors.get('preview')) actors.setLook('preview', titleLook()); else rebuildPreview(); }
 function refreshChips() {
   for (const b of document.querySelectorAll('#races .chip')) b.setAttribute('aria-checked', String(b.dataset.race === S.look.race));
   for (const b of document.querySelectorAll('#classes .chip')) b.setAttribute('aria-checked', String(b.dataset.cls === S.cls));
   const more = $('class-more'); if (more) more.value = STARTERS.includes(S.cls) ? '' : S.cls;
+  drawClassCard($('class-card'), CALLINGS.find(c => c.id === S.cls) || null);      // Y32: what the calling is, before you pick it
 }
 function rebuildPreview() {
   if (!W.spot || S.phase === 'world') return;
@@ -377,16 +411,22 @@ function previewLook(look, mode) {
   if (preview && actors.get('preview')) actors.setLook('preview', titleLook()); else rebuildPreview();
 }
 /** The title figure: the class outfit, or plain starting clothes while you customise (unless "Show class gear"). */
-function titleLook() { return { ...S.look, cls: S.cls, ...(S.titleGear ? { gear: S.titleGear } : S.titleBare ? { gear: {} } : {}) }; }   // T5: the kit you are choosing, worn
+function titleLook() {
+  // Y29 (report #37): on the front card the figure IS the listed character — its saved look and the gear it wears, through
+  // the same lookFor() that dresses the body in the world — never whatever the new-character form last held
+  if (S.titleStep === 'front' && S.titleChar) { const L = titleCharLook(S.titleChar, { remembered: rememberedGear(S.titleChar.id) }); const out = lookFor(L, S.titleChar.id, S.titleChar.cls, L.gear); if (!L.gear) delete out.gear; return out; }
+  return { ...S.look, cls: S.cls, ...(S.titleGear ? { gear: S.titleGear } : S.titleBare ? { gear: {} } : {}) };   // T5: the kit you are choosing, worn
+}
 /** R1: which title card shows — 'front' (your characters), 'new' (name/people/calling), 'look' (the editor). */
 function titleStep(step) {
+  const was = S.titleStep;
   S.titleStep = step;
-  const has = !!account.hasChars?.();
   $('front').hidden = step !== 'front';
   $('login').hidden = step !== 'new';
   $('signin').hidden = true;
-  $('back-front').hidden = !has;
+  $('back-front').hidden = false;
   $('tab-new')?.setAttribute('aria-selected', 'true'); $('tab-login')?.setAttribute('aria-selected', 'false');
+  if ((was === 'front') !== (step === 'front') && S.titleChar) refreshTitleFigure();     // the figure follows: a listed character <-> the one being made
   if (step !== 'look' && S.titleBare) { S.titleBare = false; previewLook(S.look, 'title'); }
   if (step !== 'kit' && S.titleGear) { S.titleGear = null; previewLook(S.look, 'title'); }
   if (step === 'new') setTimeout(() => $('name').focus(), 0);
@@ -458,7 +498,7 @@ async function loginFromTitle(user, pass) {
   });
 }
 /** Logged out (or the account was): back to a clean title screen. */
-function backToTitle() { try { S.net?.close(); } catch {} location.href = location.pathname; }
+function backToTitle() { saveTitleGear(); try { S.net?.close(); } catch {} location.href = location.pathname; }
 
 async function enterWorld(pick = null) {
   const name = pick ? pick.name : cleanName($('name').value);
@@ -485,6 +525,7 @@ async function enterWorld(pick = null) {
     const join = (q.get('join') || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 8) || null;
     await net.play(ch.id, join ? { join } : {});
     clearTimeout(timer);
+    titleFront?.played(ch);
   } catch (e) {
     clearTimeout(timer);
     fail(e.code === 'name' ? 'That name is taken. Try another.' : e.code === 'full' ? 'This account has all the characters it can hold.' : (e.message || 'Could not enter the world.'));
@@ -544,7 +585,7 @@ function wireNet(net) {
   chat.wire(net); friends.wire(net); guild.wire(net); mail.wire(net); callboard.wire(net); account.wire(net);
   bag.wire(net);
   ui5.wire(net);
-  ui8.wire(net);
+  ui8.wire(net); ui10.wire(net);
   prof.wire(net);   // W9 (P-client)
   ui.wire(net);
   worldUi.wire(net);
@@ -1138,7 +1179,7 @@ function frame(now) {
     worldUi.tick(S.tod);
     ui.tick(dt);
     ui2.tick(dt);
-    ui5.tick(dt); ui8.tick(dt);
+    ui5.tick(dt); ui8.tick(dt); ui10.tick(dt);
     D.view?.update(dt, S.fly ? { x: S.fly.lx, z: S.fly.lz } : drawn);
     tele.update(dt);
     boss.update(dt);
@@ -1195,12 +1236,12 @@ async function titleWorld() {
   S.predictor.terrain = outdoorTerrain();
 }
 // Autoplay (tests, bots, a quick second tab) connects straight away; the title scene loads alongside.
-const AUTO = (q.get('autoplay') === '1' || q.get('auto') === '1') && q.get('name');
+const AUTO = AUTOPLAY;
 if (AUTO) Promise.all([loadLookData(), loadMonsterLooks()]).then(() => enterWorld());
 // A browser that already has an account: connect now and list its characters on the title screen (M3).
 else if (TOKENS().get() && q.get('fresh') !== '1') {
   const net = startNet();
-  net.ready.then(n => { if (S.phase === 'title') { account.showChars(n.chars, n.claimed ? n.username : null); if (n.chars?.length && S.titleStep !== 'look' && $('signin').hidden) titleStep('front'); } }).catch(() => {});
+  net.ready.then(n => { if (S.phase === 'title') { account.showChars(n.chars, n.claimed ? n.username : null); if (n.chars?.length && S.titleStep !== 'look' && S.titleStep !== 'new' && $('signin').hidden) titleStep('front'); } }).catch(() => { titleFront?.set({ hasToken: true, failed: true }); });
 }
 Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
   rebuildPreview();
@@ -1415,4 +1456,4 @@ const tv = {
   },
 };
 window.tv = tv;
-window.thousandvale = { moveMark, prof, profView, shots, questMarks, carts, input, formFx, reviveFx, angling, lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui, ui2, ui5, ui8 };
+window.thousandvale = { ui10, tracking: () => ui10.tracking(), titleFront: () => titleFront, moveMark, prof, profView, shots, questMarks, carts, input, formFx, reviveFx, angling, lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui, ui2, ui5, ui8 };

@@ -39,6 +39,9 @@ export function createFriends({ net: getNet, hud, chat, social }) {
       h('div.fr-acts', {},
         f.online ? h('button.ghost.small', { type: 'button', title: 'Whisper', onclick: () => chat.whisper(f.name) }, 'Whisper') : null,
         f.online ? h('button.ghost.small', { type: 'button', title: 'Invite to your party', onclick: () => social?.invite(f.name) }, 'Invite') : null,
+        // play-test 10 (Y36): follow a friend — an arrow at the edge of the screen and on the minimap, a marker on the map (ui/pt10.js)
+        f.online && api.tracker && f.char != null ? h('button.ghost.small.fr-track' + (api.tracker.isTracked(f.char) ? '.on' : ''), { type: 'button', 'aria-pressed': String(api.tracker.isTracked(f.char)), dataset: { act: 'track' },
+          title: api.tracker.isTracked(f.char) ? `Stop tracking ${f.name}` : `Track ${f.name}: an arrow leads you to them`, onclick: () => { api.tracker.track(f.char, f.name, 'friend'); draw(); } }, api.tracker.isTracked(f.char) ? 'Tracked' : 'Track') : null,
         h('button.ghost.small.x', { type: 'button', title: 'Remove friend', 'aria-label': `Remove ${f.name}`, onclick: () => remove(f.name) }, '×'))));
     panel.fill(
       h('div.row', {}, input, h('button.ghost', { type: 'button', onclick: () => { add(input.value); input.value = ''; } }, 'Add')),
@@ -72,6 +75,6 @@ export function createFriends({ net: getNet, hud, chat, social }) {
     const pic = api.portraitFor?.(f);
     return pic ? h('span.fr-pic', { title: f.online ? 'Online' : 'Offline' }, h('img', { src: pic, alt: '' }), h('i.dot')) : h('i.dot', { title: f.online ? 'Online' : 'Offline' });
   }
-  const api = { wire, panel, add, remove, isFriend, draw, portraitFor: null, get list() { return list; } };
+  const api = { wire, panel, add, remove, isFriend, draw, portraitFor: null, tracker: null, get list() { return list; } };
   return api;
 }

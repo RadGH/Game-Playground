@@ -43,6 +43,7 @@ test('1. the phone layout chooses itself; creating a character — name, calling
   expect(await page.evaluate(() => document.querySelector('meta[name="viewport"]').content)).toMatch(/user-scalable=no.*viewport-fit=cover/);
   expect(await page.evaluate(() => thousandvale.view.renderer ? window.tv.state().stats.quality : null)).toMatch(/low|medium/);
   await shot('01-title');
+  await tap('#new-char');      // play-test 10 (Y29, D-UI): the title opens on the front card — "Create character" first
   await page.locator('#name').tap(); await page.locator('#name').fill(NAME);
   await tap('#classes [data-cls="cleric"]');
   await tap('#enter');

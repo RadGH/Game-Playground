@@ -4394,3 +4394,92 @@ All eleven items, the Starcaller (Y32) and the income table (Y31) are in; `tests
 9. `skillrun.js` afterCast: a GROUND skill's `place.follow: 'self'` is ignored (only `'target'` is read), so Moving Sanctuary, Carried Post and Moving Glyph never follow.
 
 **Not done / left to others**: Y5/Y8 etc. are not C's. The lethargy zone (enchanter) was looked at for a follow option and left a ground control zone. Wheeling Stars reads 0 in the sheet's MEASURED damage column: orbiting stars only act "in a fight" (a monster chasing you) and the estimator's dummy never chases — Storm Orbs is only measured because its opening pool wakes the dummy. In a real fight the stars strike (tested). Left as it is rather than change how every class is measured; say if you want the estimator's dummy to count as a fight.
+
+## Round 10 contracts — A (Server core) -> D-UI, D-world, phone layer, P, E, lead — 2026-10-08 (owner feedback 10; written FIRST; a status block follows at the end)
+Protocol stays **8** (all additive). No schema change (the changelog marker lives in account settings).
+
+**Y37 — one row per party member.** `partyState.party.members` and `partyFrames` never list a character twice, and never list YOU a second time after a reconnect. (Server fix; if the duplicate turns out to be drawn client-side from a stale frame row, the server now also sends `partyState` again on every re-join so the client can rebuild from it — D-UI: on `partyState`, REPLACE your member list, and drop frame rows whose char is not in it.)
+
+**Y11 — events re-synced.** After every `joined` (login, reconnect, room change) the server sends **`eventSync { live: [uid…], realm: <uid|null>, at }`** = every event that is running for you right now (the realm event if one is live, zone events of your room / zone, road events you are on). **D-UI: on `eventSync`, drop every tracker / banner / "Travel there" row whose `uid` is not in `live`.** `travel {to:'event'}` with nothing running answers `travelR {ok:false, why:'noEvent', gone:true, msg:'That event is over.'}` — remove the row on `gone`. A realm event's end is also re-sent to a client that reconnects within a minute of it (`realm {kind:'end', ev, late:true}`).
+
+**Y5 — emotes.** `emote {id}` (province socket; `net.emote(id)`), ids `wave | sit | dance | cheer | bow | point` -> everyone in view gets `ev {type:'emote', id:<entity>, e:<emote id>}` (an ordinary event: `EVENT_TYPES` gains `emote`, fields `['id', 'e']`); the sender gets `emoteR {ok, id, why?, msg?}`. One every 1.5 s (burst 3); refused when dead / swimming / riding (`why:'mounted'` for sit and dance; wave works in the saddle) / fighting (dance and sit only). `sit` uses the same sitting state as a meal (`info.sit`), ended by moving; `dance` loops until you move, act or 20 s pass (`ev emote {id, e:'dance', end:1}`). Calling a mount also emits `ev emote {id, e:'wave', ms}` with the channel (D-world: play the wave clip for `ms`). D-UI: `/wave /sit /dance /cheer /bow /point` -> `net.emote`.
+
+**Y36 — where are my friends.** Party: `partyFrames` rows already carry room + x,z for every member at 2 Hz (index 3, 4, 5). Friends and anyone in another room / province: **`track {char:<id>|0}`** (gateway socket; `net.track(charId)`; 0 = stop; up to 5 tracked at once — send one message per character, `track {char, off:true}` to drop one) -> `trackR {ok, char, why?, msg?}` (`why`: `notFriend` — only a party member or a mutual friend; `offline`; `hidden` — they switched it off) and then **`whereabouts { l: [[char, name, province, zoneName, town|null, x, z, roomKind, level, cls]…] }`** once a second while anyone you track is online (gateway socket). Privacy: account setting `settings.data.shareLocation` (default true; `settings {op:'set', data:{shareLocation:false}}`) — off = friends get `hidden`; party members always see each other.
+
+**Y30 — changelog.** `GET /changelog.json` (the file `data/ops/changelog.json`, the lead's: `{ entries: [{ id:<int, rising>, date, title, items:[…] }] }`). `authed` / `charList` carry `changelog: { latest:<id>, seen:<id> }` (seen = the account's marker; a NEW account starts at latest, so it sees no popup). `settings {op:'set', data:{changelogSeen:<id>}}` moves the marker (never backwards). D-UI: popup when `latest > seen`; highlight entries with `id > seen`.
+
+**Y8 — corpses.** `target {id}` on a dead monster with nothing on it FOR YOU answers `targetR {ok:false, why:'empty'}` and the server will not hold it as your target; one that still holds loot for you is targetable (to loot). `lootable {id, on:false}` already tells you when a corpse is emptied — D-world: stop hit-testing it then. Tab order is the client's; the server only validates.
+
+**Y7 — auto-attack while moving.** Nothing in js/sim cancels a basic attack on movement any more (see status for what did). `castR` for slot 0 is never `why:'moving'`.
+
+**Y10 / Y16 pass-through.** `castR {ok:false, why:'sight', msg}` and `itemR {ok:false, why:'hand', msg}` arrive with the rules' sentence. Items moved out of an illegal hand at login arrive as `bag {add}` + a system chat line "… was moved to your bag: it no longer fits that hand." (by post when the bag is full).
+
+**Y17 — training dummies.** E's `dummy` placement rows (`{type:'dummy', id, name, x, z, yaw, level?, town}`) spawn C's `training_dummy` (`info.type:'training_dummy'`, `info.dummy:1`); attacking one is allowed inside a town; no XP, no loot, no event credit; the meter feed carries hits on it.
+
+**Y21 — wilderness NPCs fight; thanks.** E's `fighter: true | {level}` on an NPC row / traveller crew reaches the rules as `data.fighter`. When C's `host.npcHelped` fires: the NPC barks a thanks line (always), and you get — by `data/provinces/economy.json` `npcThanks { goldChance, goldPerLevel:[min,max], itemChance, tier, lines:[…] }` (defaults 0.5, [1,3] x level, 0.05, 'magic') — gold and rarely an item: `ev fx {kind:'npcThanks'}` is C's; A adds `bag` + a system line "<Name> thanks you: +N gold".
+
+**Y15 — angling is learned.** `you.angling.learned` (bool). A character that has ever cast, caught, or owns a rod is learned (existing anglers keep it). Others: `fish {op:'cast'}` -> `fishR {ok:false, why:'unlearned', msg:'Learn Angling from an angler first.'}`; an NPC with role `angler` teaches it for free on `use` (`used {…, taught:'angling'}`, the free starting rod in the bag, `you {angling}`), or P-core's trainer path calls `angling.learn(o)` (exported on the province) if professions want to own the lesson. P-core: list `angling` under Gathering in `sheet.professions` — A's `sheet.angling` stays for the Catch tab.
+
+**Y23 — respawns.** See status for the old and new timers. Rule now: a camp body does not come back while a player who fought it is within 60 m and under a minute has passed since the kill; wilds camps wait 90–150 s (was 30 s).
+
+**Y24 — waystones.** Auto-claim radius 15 m -> 30 m, and a stone further than that from its road is claimed when you pass its nearest road point within 12 m (status lists Deepdene's numbers).
+
+**Y31 — knobs.** Every gold number the server applies is in `js/sim/economy-knobs.js` (read from `data/provinces/economy.json`); status lists any that were still literals and are knobs now.
+
+**Starcaller / `teleM`.** `starcaller` is accepted wherever a class id is checked; `teleM` is in `EVENT_TYPES` / `EVENT_FIELDS` and moves the stored telegraph.
+
+_Status 2026-10-08: LANDED and live on dev (8491). Wire shapes: docs/protocol.md §26. tests/A/pt10.test.js (6) + updated older tests. Where this differs from the text above, THIS wins:_
+
+**For D-UI**
+- Y37: every `partyState` has `me` (client lib: `party.me`) and comes again with `rejoin:true` once you are in the world after a login / reconnect. Tested over real sockets with a drop: the server never lists a member twice — so the duplicate self was the client filtering "others" by `myChar()` before `joined` had told it who it is. **Filter by `party.me`, and rebuild the list on every `partyState`.**
+- Y11: `eventSync {live:[uid…], realm, at}` after every `joined`, after `travel` to a dead event (`travelR {why:'noEvent', gone:true, msg:'That event is over.'}`) and every 15 s. Drop anything not in `live`. `live` holds the realm event's uid, the zone events of your room and the road events of your room (uids as `eventTrack.uid`).
+- Y30: `GET /changelog.json`; `charList.changelog {latest, seen, first?}` (NOT on `authed`; `net.changelog`, event `changelog`). Ids are the file's strings (`"2026-10-08"`), newest first — "newer" = earlier in the file, do not compare as numbers. Mark read: `settings {op:'set', data:{changelogSeen:'<id>'}}`. An account with no marker starts at `latest` (`first:true`): no popup for a brand-new player.
+- Y36: `net.track(char)` / `net.track(char, true)` / `net.track(0)`; `trackR {ok, tracking:[ids]}` or `why: notFriend | offline | hidden | full | self` + `msg`; `whereabouts {l:[[char, name, province, zoneName, town, x, z, roomKind, level, cls]]}` at 1 Hz on the gateway socket. Party members need no `track` for the same room/province (they are in `partyFrames` with room + x,z) but `track` works for them too and is the only way to get `zoneName` / `town`. Setting `shareLocation` (bool, default true) in the account settings — add a toggle.
+- Y5: `/wave /sit /dance /cheer /bow /point` -> `net.emote(id)`; print `emoteR.msg` on a refusal.
+- Y8: `targetR {ok:false, why:'empty'}`. Y15: `you.angling.learned`; `fishR.why:'unlearned'`; `used.taught:'angling'` (a system chat line is sent too). Y10/Y16: `castR.why:'sight'`, `itemR.why:'hand'` carry `msg`; the hands-moved notice is a system chat line (+ `bag {add}` when it happens after login).
+
+**For D-world**
+- Y5: event `emote {id:<entity>, e, ms?, end?}` — play clip `e` on that actor: `wave | cheer | bow | point` once (`ms` given), `sit` (also `info.sit`) and `dance` loop until `end:1`. A mount call sends `emote {e:'wave', ms}` beside its channel.
+- Y17: `info.type:'training_dummy'` monsters (C's unit: never dies, `fx dummy reset`). Until E places rows, two stand-ins are put by the edge of the starting town's square (they go away the moment E's data has ANY `dummy` row).
+- Y21: NPCs with `data.fighter` are moved by the rules while they fight (they are skipped by the schedule walker); `fx npcThanks` is C's; the NPC's thanks is an ordinary `say` bark.
+- Y8: stop hit-testing a corpse on `lootable {id, on:false}` (the server refuses it as a target anyway). Y24: light a stone on `waystone {op:'learned'}` — the server learns it from 30 m now; at Deepdene the reported spot (13.9 m from the stone) learns it on the server, so if it looked unlit there the drawing missed the message.
+
+**For E**
+- Y17: rows `{type:'dummy', id, name?, x, z, yaw?, level?, town?}` in a zone's placements / `.quest.json`. Y21: `fighter: true | {level}` on an `npc` row (travellers / wanderers crew: tell me the field you want and I pass it — today only placement `npc` rows carry it). Knob block `npcThanks { goldChance 0.5, goldPerLevel [1,3], itemChance 0.05, tier 'magic', cooldownSec 60, lines[] }` in economy.json.
+- Y23: placements may still name `respawnMin` per camp; the default is now 90-150 s.
+- Y31: every gold number the server applies is a knob in `js/sim/economy-knobs.js` read from `data/provinces/economy.json`: `unit / quest (mult, xpMult) / road / roadChest / chest / treasure / event / fare / cart / mail / guild / sell / shop (rarityPrice, perItemLevel, fallbackPrice, buyback, restockMinutes, crateSell, fishFactor) / mounts / barber (+mult) / bag (base, overflowPerItem) / cook / gift / npcThanks`. The literals left in js/sim (`MAIL.postage`, `GUILD.fee`, the mount table's prices) are only the fall-backs those knobs override. Item prices, kill gold and retrain prices are C's (`data/rules/prices.json`).
+
+**For P (professions)**
+- Y15: `angling.learned(ch)` / `angling.learn(o)` are on the province's `angling` object (and `you.angling.learned`): list Angling under Gathering with `known: learned`. An NPC with role `angler` teaches it on `use` (free, with `angling_rod`); if your trainer flow should own the lesson, call `angling.learn(o)` and I will drop mine — say so.
+
+**Numbers stated**
+- Y23 respawn: OLD — one clock per camp, 30 s from the FIRST death, so in a camp of three the second wolf you killed was back 30 s after the first died (2-5 s after it, at a normal kill pace). NEW — every death has its own clock; wilds camps 90-150 s (a camp's own `respawnMin` still wins); and no body returns within 60 s of its death while any player stands within 60 m of the camp. Dungeons never respawn (unchanged); rares / elites keep their 20-60 min.
+- Y24 waystone auto-claim: 15 m -> 30 m. Of 63 stones, 50 stand more than 15 m from their nearest road point. Deepdene's stone is at (30007.2, 8423.9); the report was filed 13.9 m from it.
+- Y7: nothing in js/sim cancels a basic attack on movement, and nothing did: auto-attack is the CLIENT re-sending `cast {slot:0}`; the server never answers `why:'moving'`. The stop on movement is in the client's repeat loop (D-world).
+- Y21: thanks line always; gold 50% (x1.5 when "saved"), 1-3 gold a level; an item 5% (x2 when saved); one purse a minute.
+
+**Not done / open**
+- Y21: only placement `npc` rows carry `fighter`; roaming travellers do not yet (waiting for E's field).
+- tests/A/stage2.test.js (two real province processes on the dev database) passes alone (5 of 5) and fails inside the full parallel suite this round ("the realm event is live": the demo director starts no event in 50 s). Not traced to a cause; it is not red with any single neighbouring file. The other 296 tests are green.
+
+
+## Round 10 contracts — D-UI (interface) -> A, D-world, phone layer (G2), P, lead — 2026-10-08 (written first; A's and C's names win — I build against "Round 10 contracts — A" and "Round 10 — C status")
+
+**What I read from others (no new asks unless marked ASK):**
+* A: `eventSync {live, realm}`, `travelR {gone}`, `partyState` (replace, never append), `partyFrames` rows (room, x, z), `net.track(char)` / `trackR` / `whereabouts`, `net.emote(id)` / `emoteR`, `/changelog.json` + `authed|charList.changelog {latest, seen}` + `settings {op:'set', data:{changelogSeen}}`, `you.angling.learned`, `itemR why:'hand'`, `castR why:'sight'`.
+* C: `item.handText`, `item.noAttack`, `item.attackText` / `focusText`, `item.apsText`, sheet core rows `aps` / `apsOff`, the `starcaller` class row (`hook`, `signature`), `unit.mech.res.starlight`.
+* **ASK (A):** `charList` rows must carry what the title picture needs to dress the body the way the game does: the saved `look` AND the worn gear in the same shape `info.look.gear` has in the world (whatever `looks.js` reads). If a row has only `look`, the title shows the saved face and race with the class's plain outfit.
+* **ASK (P-core / E, Y22):** a quest step that can be done anywhere (craft, smelt, cook, "reach level", hand-in by post) must come without an area: either no `r` on its mark, or `anywhere: true`. I treat BOTH as "no circle" (map, minimap, tracker "Show on map").
+
+**What others read from me:**
+* **Y33 (D-world, phone layer):** the live 3D portrait is now drawn ONLY on a desktop pointer device whose canvas box matches its drawing buffer; iOS, the phone layout and any coarse-pointer device get the 2D picture (`ui/svg-portrait.js`). Decision is the pure `livePortraitAllowed(env)` in `js/client/ui/portrait-mode.js`. **FOUND, for D-world (scene.js):** `resize()` runs only on `window.resize`; on iOS Safari the canvas box changes when the toolbar slides without the buffer following, so the 3D picture is stretched (~12% in the owner's screenshot) and anything positioned by "CSS rect -> GL viewport" lands in the wrong place. A `ResizeObserver` on the canvas (and `visualViewport.resize`) calling `resize()` fixes that at the source.
+* **Y39:** one stacking rule: `css/pt10.css` `--z-confirm`; every confirm / ask dialog is opened through `ui-panel.js` `confirmOver()` (or carries class `tv-confirm`) and is appended to `<body>` above every window and phone sheet. A new confirm dialog must use it.
+* **Y27:** `js/client/ui/keep-scroll.js` `keepScroll(el, fn)` / `patchList()` — any list that redraws from server data wraps its redraw in it; `tests/D/pt10.spec.js` re-renders every scrolling list and fails on a reset. A new scrolling list needs a row in `SCROLL_LISTS` there.
+* **Y36 (D-world):** the tracked player is `window.thousandvale.tracking()` -> `{ char, name, x, z, room, province } | null` for an in-world arrow; I draw the minimap rim arrow, the map marker and the HUD edge arrow + distance myself (DOM).
+* **Y5 (phone layer):** the quick wheel gets an emote row from `EMOTES` in `js/client/ui/pt10-core.js` (`[{id, label, cmd}]`); chat commands `/wave /sit /dance /cheer /bow /point`.
+
+**D-UI, addendum (2026-10-08) — two asks found while building:**
+* **ASK (A; C's accessor) — class resources never reach the client.** The rules keep every calling's signature resource in `unit.mech.res.<id> = { n, max }` (the Starcaller's `starlight`, the Swashbuckler's Flair …) and NOTHING sends it: no class resource has ever been on the HUD. `js/client/ui/class-res.js` is built and waiting for `joined.you.res = [{ id, name?, n, max }]` and `you { res: [...] }` whenever one changes (at most ~4 a second), or the event `res { id, n, max }`. Until then Starlight is counted by the rules and described on the cards but not drawn.
+* **ASK (A) — `charList.chars[].gear`**: the same compact `gear` an entity's `info` carries (`{slot: {base, sub?, rarity, g5?, el?}}`, after the wearer's show-gear / show-helm choice). The title's figure is dressed from it. Until it is there the title uses what THIS browser last saw the character wearing (kept in localStorage on leaving the world), and with neither, the saved face in the calling's plain outfit.
+* **Y5 — the quick wheel has a third ring, "Emotes"** (`input/radial.js` `addRing`, a small generic addition to G's file; the ring's slices come from `ui/pt10-core.js` `EMOTES`). Pad: hold LB, RB steps Windows -> Do -> Emotes. Phone: tap the wheel's middle to step.
+* **Y29 — the title opens on the FRONT card for everyone** (a new visitor sees "Create character", never the form). Any spec that types into `#name` straight after loading the title must click `#new-char` first. I changed tests/D/pt2, pt5, pt7 and `tests/G/phone-play.spec.js` line 46 (one added tap) for that.

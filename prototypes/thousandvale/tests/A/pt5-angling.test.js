@@ -73,9 +73,9 @@ test('T25 the loop: no rod = refused; E\'s first quest hands over the rod; cast,
   P.devSetLevel(o.char.id, 20);
   P.transfer(o, room, { x: s.shore.x, z: s.shore.z }, 'test');
   await run(clock, 1200);
-  // no rod yet
+  // never taught and no rod yet (round 10, Y15: Angling is learned from an angler — the quest's rod, or an angler's lesson, teaches it)
   let r = await castOnce(a, clock);
-  assert.ok(r.refused && r.refused.why === 'noRod', JSON.stringify(r.refused));
+  assert.ok(r.refused && r.refused.why === 'unlearned', JSON.stringify(r.refused));
   // Tam Sedgeley's first quest: accept -> the rod is in the bag (E's `grant`)
   const tam = [...P.rooms.values()].flatMap(rm => [...rm.objects.values()].map(e => ({ e, rm }))).find(x => x.e.data && x.e.data.npc && x.e.data.npc.id === 'angler_torborhold');
   let questing = false;

@@ -1,0 +1,107 @@
+/* Play-test 10 (2026-10-08) — D-UI. Loaded after pt9.css (index.html's list; the gallery frame reads the same list).
+   Y39 one stacking rule for confirms · Y27 scrollbar gutters · Y30 changelog · Y29 title loading · Y28/Y36 map + tracking · Y5 emotes */
+
+/* ---- Y39: ONE stacking rule ---------------------------------------------------------------------------------------
+   Windows raise themselves with an inline z-index that climbs on every click (ui-panel.js keeps it under 900).
+   Anything that ASKS you something sits above every window, the bag and every phone sheet, and below only the
+   controller's ring / on-screen keyboard:
+     --z-ask      pop-ups in the top-centre column (party invite, trade, rumour, group ready) + toasts
+     --z-confirm  a confirm dialog (confirmBox, split a stack, delete a character) — always mounted on <body> */
+:root { --z-ask: 5000; --z-confirm: 99500; }
+.tv-confirm, html[data-layout="phone"] .tv-confirm, .tv-confirm.char-delete { position: fixed; z-index: var(--z-confirm) !important; }
+.tv-confirm { font-family: var(--sans); font-size: 14px; color: var(--ink); max-height: calc(100vh - 16px); overflow-y: auto; }
+.center-stack, html[data-layout="phone"] .center-stack, .cb-pop, .revive-ask { z-index: var(--z-ask); }
+
+/* ---- Y27: lists reserve their scrollbar, so a bar appearing (or a hover changing the card) never shifts the row ---- */
+.tvp-body, .shop-list, .shop-cardbody, .cart-list, .j-list, .jc-body, .loot-panel .loot-list, .my-list, .char-list, .cl-list { scrollbar-gutter: stable; }
+.shop-panel .tvp-body { overflow-y: scroll; }
+/* the compare card keeps one height: pointing at a different row must not move the Buy button or the hint under it */
+html:not([data-layout="phone"]) .shop-cardbody { height: min(26vh, 220px); }
+html:not([data-layout="phone"]) .shop-card > .dim { min-height: calc(min(26vh, 220px) + 38px); }
+
+/* ---- Y29: the title's front card — loading, the list, or one "Create character" button ---- */
+.front-state { margin: 0 0 10px; color: var(--ink-dim); font-size: 14px; }
+.front-state[hidden] { display: none; }
+.front-state.busy { display: flex; align-items: center; gap: 10px; font-style: italic; min-height: 44px; }
+.front-state.busy::before { content: ""; flex: none; width: 16px; height: 16px; border: 2px solid var(--edge); border-top-color: var(--gold-hi); border-radius: 50%; animation: spin 0.9s linear infinite; }
+#front[data-state="empty"] #new-char { margin-top: 4px; }
+/* the character whose figure stands on the title */
+.char-row.shown .chip.char { border-color: var(--gold-hi); box-shadow: 0 0 0 1px var(--gold-hi) inset; }
+
+/* ---- Y30: the changelog — a popup on the title, and a window over anything (the HUD does not exist on the title) ---- */
+.tv-updated { position: fixed; z-index: 40; top: max(14px, env(safe-area-inset-top)); right: 14px; width: min(340px, calc(100vw - 28px)); padding: 12px 14px; pointer-events: auto;
+  background: var(--panel-solid); border: 1px solid var(--gold-hi); border-radius: 10px; box-shadow: var(--shadow), 0 0 26px -8px var(--gold); font-size: 14px; }
+.tv-updated[hidden] { display: none; }
+.tv-updated strong { display: block; font-family: var(--serif); font-size: 18px; color: var(--gold-hi); }
+.tv-updated p { margin: 4px 0 10px; color: var(--ink); }
+.tv-updated .row { display: flex; gap: 8px; margin: 0; } .tv-updated .row button { width: auto; flex: none; }
+.tv-changelog { position: fixed; z-index: 9000; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(620px, calc(100vw - 24px)); max-height: min(78vh, 720px); display: flex; flex-direction: column;
+  background: var(--panel-solid); border: 1px solid var(--edge-strong); border-radius: 10px; box-shadow: 0 16px 60px rgba(0, 0, 0, 0.75); color: var(--ink); font-family: var(--sans); font-size: 14px; pointer-events: auto; outline: none; }
+.tv-changelog[hidden] { display: none; }
+.cl-head { display: flex; align-items: baseline; gap: 10px; padding: 10px 12px 8px 16px; border-bottom: 1px solid var(--edge); }
+.cl-head h3 { margin: 0; font-family: var(--serif); font-size: 19px; color: var(--gold-hi); } .cl-sub { flex: 1; color: var(--ink-dim); font-size: 12.5px; }
+.cl-head .cl-x { flex: none; width: 30px; height: 30px; padding: 0; font-size: 20px; line-height: 1; }
+.cl-list { overflow-y: auto; padding: 10px 16px 14px; display: flex; flex-direction: column; gap: 12px; overscroll-behavior: contain; }
+.cl-entry { padding: 10px 12px; border: 1px solid var(--edge); border-radius: 8px; background: rgba(0, 0, 0, 0.25); }
+.cl-entry.new { border-color: var(--gold-hi); background: rgba(217, 178, 106, 0.1); }
+.cl-entry header { display: flex; align-items: center; gap: 8px; } .cl-entry time { color: var(--ink-dim); font-size: 12.5px; }
+.cl-new { padding: 1px 8px; border-radius: 9px; background: var(--gold-hi); color: #1a1408; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
+.cl-entry h4 { margin: 4px 0 6px; font-family: var(--serif); font-size: 16px; color: var(--ink); }
+.cl-entry ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; } .cl-entry li { line-height: 1.4; }
+.cl-open { position: relative; } .cl-open.has-new::after { content: ""; position: absolute; top: -2px; right: -8px; width: 8px; height: 8px; border-radius: 50%; background: #ffd24a; box-shadow: 0 0 6px #ffd24a; }
+.title-foot .cl-open { margin-right: 14px; }
+html[data-layout="phone"] .tv-changelog { left: 0; top: 0; transform: none; width: 100vw; max-height: none; height: 100%; border-radius: 0; border-width: 0; padding: var(--st, 0px) var(--sr, 0px) var(--sb, 0px) var(--sl, 0px); }
+html[data-layout="phone"] .cl-head .cl-x { width: var(--tap, 44px); height: var(--tap, 44px); }
+html[data-layout="phone"] .tv-updated { top: calc(var(--st, 0px) + 8px); right: calc(var(--sr, 0px) + 8px); } html[data-layout="phone"] .tv-updated button { min-height: var(--tap, 44px); }
+@media (max-width: 520px) { .tv-changelog { width: 100vw; max-height: 100%; height: 100%; left: 0; top: 0; transform: none; border-radius: 0; } }
+
+/* ---- Y28: Locate player (top-left of the map) · Y36: the map's Party section, tracking arrows ---- */
+.map-locate { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-color: var(--gold); color: var(--gold-hi); white-space: nowrap; }
+.map-locate svg { flex: none; }
+.map-people { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.map-person { display: grid; grid-template-columns: 1fr auto auto; gap: 6px; align-items: center; padding: 2px 4px; border-radius: 6px; }
+.map-person:hover, .map-side [data-wx]:hover { background: rgba(217, 178, 106, 0.08); }
+.map-person.self .mp-name em { color: var(--ink-dim); font-style: normal; }
+.map-person.offline .mp-name { color: var(--ink-faint); }
+.map-person.tracked { box-shadow: inset 2px 0 0 #4aa8ff; }
+.mp-name { min-width: 0; display: flex; flex-direction: column; overflow: hidden; text-overflow: ellipsis; }
+.mp-name small { color: var(--ink-dim); font-size: 11.5px; }
+.map-person button.on { border-color: #4aa8ff; color: #bfe0ff; }
+html[data-layout="phone"] .map-person button, html[data-layout="phone"] .map-locate { min-height: var(--tap, 44px); min-width: var(--tap, 44px); }
+html[data-layout="phone"] .map-locate span { display: none; }
+@media (max-width: 760px) { .map-locate span { display: none; } }
+/* the arrow on the edge of the screen for someone you track */
+.tv-trackarrows { position: fixed; inset: 0; pointer-events: none; z-index: 8; }
+.tv-trackarrow { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.tv-trackarrow i { position: absolute; left: -15px; top: -15px; width: 30px; height: 30px; background: #4aa8ff; clip-path: polygon(100% 50%, 12% 8%, 30% 50%, 12% 92%); filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.9)); }
+.tv-trackarrow span { position: absolute; left: 0; top: 18px; transform: translateX(-50%); white-space: nowrap; padding: 1px 7px; border-radius: 9px; background: rgba(10, 14, 20, 0.78); color: #d7ecff; font: 700 12px var(--sans); text-shadow: 0 1px 2px #000; }
+.fr-track.on { border-color: #4aa8ff; color: #bfe0ff; }
+
+/* ---- Y32: the calling's card on the new-character form; skill pictures (the Starcaller's six); a class resource on your frame ---- */
+.class-card { margin-top: 8px; padding: 8px 10px; border: 1px solid var(--edge); border-radius: 8px; background: rgba(0, 0, 0, 0.3); font-size: 13.5px; }
+.class-card[hidden] { display: none; }
+.class-card .cc-name { font-family: var(--serif); font-size: 16px; color: var(--gold-hi); margin-right: 8px; }
+.class-card .cc-role { color: var(--ink-dim); font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.05em; }
+.class-card p { margin: 4px 0 0; } .class-card .cc-facts { color: var(--ink-dim); font-size: 12.5px; }
+.class-card .cc-sig { color: #e6d59a; font-size: 13px; }
+.actionbar .slot .face.has-ico { display: grid; place-items: center; font-size: 0; }
+.actionbar .slot .face.has-ico svg { width: 78%; height: 78%; display: block; }
+.actionbar .slot.locked .face.has-ico svg { opacity: 0.45; filter: grayscale(0.6); }
+.tip-title .sk-ico { vertical-align: -6px; margin-right: 6px; }
+.tvt-ico { flex: none; display: grid; place-items: center; }
+/* a class resource (Starlight, …): pips under your mana bar */
+.uf-res { display: flex; align-items: center; gap: 3px; margin-top: 3px; height: 9px; }
+.uf-res[hidden] { display: none; }
+.uf-res i { width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg) scale(0.8); background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(230, 193, 74, 0.45); transition: background 0.15s; }
+.uf-res i.on { background: var(--res, #e6c14a); box-shadow: 0 0 6px var(--res, #e6c14a); }
+.uf-res.full i.on { animation: resFull 0.9s ease-in-out infinite alternate; }
+.uf-res em { margin-left: 5px; font-style: normal; font-size: 10.5px; color: var(--ink-dim); white-space: nowrap; }
+.uf-res .uf-resbar { flex: 1; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.1); overflow: hidden; } .uf-res .uf-resbar b { display: block; height: 100%; background: var(--res, #e6c14a); }
+@keyframes resFull { from { filter: brightness(1); } to { filter: brightness(1.6); } }
+html[data-layout="phone"] .uf-res em { display: none; }
+
+/* ---- Y34: the fishing control reads as fishing (a rod, a line, a fish) and says "Cast a line" under it ---- */
+.fish-btn { position: relative; margin-right: 34px; }
+.fish-btn .fish-glyph { width: auto; height: auto; border: 0; border-radius: 0; transform: none; display: grid; place-items: center; color: var(--gold-hi); filter: drop-shadow(0 1px 1px #000); }
+.fish-btn .fish-cap { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: 3px; white-space: nowrap; font: 600 10.5px var(--sans); color: var(--ink-dim); text-shadow: 0 1px 2px #000; pointer-events: none; }
+.fish-btn.on .fish-cap { color: var(--gold-hi); }

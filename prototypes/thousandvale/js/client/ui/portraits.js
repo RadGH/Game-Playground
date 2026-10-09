@@ -21,6 +21,7 @@ import * as THREE from 'three';
 
 export { softwareRenderer, svgPortrait } from './svg-portrait.js';
 import { softwareRenderer, svgPortrait } from './svg-portrait.js';
+import { deviceAllowsLive, canvasMatches, squareOnCanvas } from './portrait-mode.js';
 
 export const PORTRAIT_LAYER = 1;
 const VERSION = 'p1';
@@ -29,8 +30,13 @@ const DB = 'tv-portraits', OS = 'p';
 
 export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 6, software = null } = {}) {
   // software renderer: no live pass and no static 3D renders — the 2D picture instead (freeze spec: zero long tasks)
-  const SOFT = software ?? softwareRenderer(renderer);
+  // Y33 (play-test 10): and no live pass on iOS / a phone / any finger-first device either — see ui/portrait-mode.js.
+  const nav = typeof navigator !== 'undefined' ? navigator : {};
+  const coarse = (() => { try { return matchMedia('(pointer: coarse)').matches; } catch { return false; } })();
+  const SOFT = software ?? (softwareRenderer(renderer) || !deviceAllowsLive({ ua: nav.userAgent || '', platform: nav.platform || '', maxTouchPoints: nav.maxTouchPoints || 0, coarse }));
   const VER = VERSION + (SOFT ? 's' : '');
+  let flat = SOFT;                  // this pass: the 2D picture (true) or the live 3D one (false)
+  let flatWhy = SOFT ? 'device' : '';
   // ---------------------------------------------------------------- live
   const cam = new THREE.PerspectiveCamera(28, 1, 0.05, 6);
   cam.layers.set(PORTRAIT_LAYER);
@@ -41,11 +47,13 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
   const stats = { renders: 0, maxMs: 0 };
 
   function live(el, get, { kind = 'self' } = {}) {
-    if (SOFT) return liveSvg(el, get);
+    const svg = liveSvg(el, get);                 // every slot has the 2D picture; the live canvas is an extra where allowed
+    if (SOFT) return svg;
     const cv = document.createElement('canvas');
     cv.className = 'portrait-live';
     el.prepend(cv);
-    const s = { el, cv, ctx: cv.getContext('2d'), get, kind, on: false, actorId: null, pbo: null, fence: null, w: 0, h: 0, buf: null, img: null };
+    svg.img.style.display = 'none';              // live until a pass says otherwise (setFlat swaps the two)
+    const s = { el, cv, svg, ctx: cv.getContext('2d'), get, kind, on: false, actorId: null, pbo: null, fence: null, w: 0, h: 0, buf: null, img: null };
     slots.push(s);
     return s;
   }
@@ -60,13 +68,14 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
   }
   async function svgPass() {
     for (const s of svgSlots) {
+      if (!flat) return;
       const a = s.get();
       const humanoid = a && (a.kind === 'player' || (a.kind === 'npc' && !a.pet)) && a.look;
       const key = humanoid ? JSON.stringify([a.id, a.look.race, a.look.seed, a.look.custom || a.look.avatar || null, a.look.cls]) : '';
       if (key === s.key) continue;
       s.key = key;
       if (!humanoid) { s.el.classList.remove('has-live'); s.img.removeAttribute('src'); continue; }
-      try { const av = await avatarFor({ ...a.look, gear: undefined }); if (s.key === key) { s.img.src = svgPortrait(av); s.el.classList.add('has-live'); } } catch { /* keep the letter */ }
+      try { const av = await avatarFor({ ...a.look, gear: undefined }); if (s.key === key && flat) { s.img.src = svgPortrait(av); s.el.classList.add('has-live'); } } catch { /* keep the letter */ }
     }
   }
   /** Lights must be on the portrait layer too, or the face would be drawn with a different light set (a new shader). */
@@ -124,23 +133,44 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
       s.el.classList.add('has-live');
     }
   }
+  /** Y33: may THIS pass draw into the game's canvas? Not in the phone layout, and not when the canvas box and its
+   *  drawing buffer disagree (then "frame rectangle -> viewport" points somewhere else and the face shows in the open). */
+  let crNow = null;
+  function flatNow() {
+    if (document.documentElement.dataset.layout === 'phone') { flatWhy = 'phone'; return true; }
+    const cv = renderer.domElement; crNow = cv.getBoundingClientRect();
+    if (!canvasMatches({ cssW: crNow.width, cssH: crNow.height, bufW: cv.width, bufH: cv.height, dpr: renderer.getPixelRatio() })) { flatWhy = 'canvas'; return true; }
+    flatWhy = ''; return false;
+  }
+  function setFlat(f) {
+    if (f === flat) return;
+    flat = f; last = 0;
+    for (const s of slots) {
+      s.on = false; s.el.classList.remove('has-live');
+      s.ctx.clearRect(0, 0, s.cv.width, s.cv.height);
+      s.cv.style.display = f ? 'none' : ''; s.svg.img.style.display = f ? '' : 'none';
+      s.svg.key = '';                              // the 2D picture is fetched again when we come back to it
+    }
+  }
   function pass() {
     const now = performance.now();
-    if (SOFT) { if (now - last > 500) { last = now; svgPass(); } return; }
+    if (!SOFT) setFlat(flatNow());
+    if (flat) { if (!SOFT) collect(); if (now - last > 500) { last = now; svgPass(); } return; }
     collect();
     if (now - last < 1000 / fps) return;
     last = now;
     let any = false;
     for (const s of slots) {
       const a = s.get();
-      const ok = !!(a && a.body && a.model && a.lod !== 'far' && !a.dead && s.el.offsetParent !== null);
+      // Y33: a square that is not wholly on the canvas would be clamped and drawn somewhere the frame does not cover
+      const ok = !!(a && a.body && a.model && a.lod !== 'far' && !a.dead && s.el.offsetParent !== null) && squareOnCanvas(s.el.getBoundingClientRect(), crNow);
       if (ok !== s.on) { s.on = ok; if (!ok) { s.el.classList.remove('has-live'); s.ctx.clearRect(0, 0, s.cv.width, s.cv.height); } }
       if (ok) any = true;
     }
     if (!any) return;
     lightsOnLayer(now);
     const t0 = performance.now();
-    const cr = renderer.domElement.getBoundingClientRect(), dpr = renderer.getPixelRatio();
+    const cr = crNow, dpr = renderer.getPixelRatio();
     const info = renderer.info.render, keepInfo = { calls: info.calls, triangles: info.triangles, points: info.points, lines: info.lines };
     renderer.getViewport(vp); renderer.getScissor(sc);
     const scTest = renderer.getScissorTest(), ac = renderer.autoClear, sm = renderer.shadowMap.autoUpdate;
@@ -279,7 +309,7 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
     /** A player's look seen in the world (info.look), kept for later static portraits by character id / name. */
     remember(id, look) { if (id != null && look) looks.set(String(id), look); },
     lookOf(id) { return looks.get(String(id)) || null; },
-    get stats() { return { ...stats, software: SOFT, live: slots.filter(s => s.on).length, cached: mem.size, waiting: waiting.size }; },
+    get stats() { return { ...stats, software: SOFT, flat, flatWhy, live: slots.filter(s => s.on).length, cached: mem.size, waiting: waiting.size }; },
   };
 }
 function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); }

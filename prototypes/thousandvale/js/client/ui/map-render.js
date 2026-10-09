@@ -163,6 +163,9 @@ export function drawMap(ctx, view, src) {
   for (const m of markers) {
     if (m.hidden) continue;
     if ((m.kind === 'quest' && m.area) || m.kind === 'liveevent') {
+      // play-test 10 (Y22): on the minimap a "somewhere in this region" ring is bigger than the minimap itself — standing in
+      // it painted the whole disc yellow and said nothing. The big map still draws it; the minimap keeps the rim arrow only.
+      if (opts.minimap && m.kind === 'quest' && (m.r || 0) * view.scale > Math.max(view.w, view.h) * 0.75) continue;
       ctx.beginPath(); ctx.arc(m.x, m.z, Math.max(m.r || 40, px * 10), 0, Math.PI * 2);
       if (m.dim) { ctx.fillStyle = 'rgba(120,112,100,0.10)'; ctx.fill(); ctx.lineWidth = px * 1.2; ctx.strokeStyle = 'rgba(150,140,125,0.55)'; ctx.setLineDash([px * 3, px * 4]); ctx.stroke(); ctx.setLineDash([]); continue; }   // W13: an event you hid
       // W17: the zone under the pointer lights up (a fuller fill, a solid thicker edge)

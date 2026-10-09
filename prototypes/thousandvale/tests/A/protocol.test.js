@@ -18,7 +18,7 @@ const GOOD = {
   settings: { op: 'set', data: { tradeFriendsOnly: true } }, look: { char: 2, look: { race: 'dwarf', seed: 9 } },
   // play-test 5
   kits: { cls: 'warrior' }, revive: { op: 'accept', id: 3 }, sheet: {}, feedback: { kind: 'bug', text: 'The wolves never came.', ctx: { where: { x: 1, z: 2 }, logs: ['a', 'b'] } },
-  delete: { char: 7, name: 'Aldra' }, feedbackMine: { limit: 20, before: 90 }, cart: { op: 'go', id: 12, to: 'cart_torborhold' }, meter: { on: true },
+  emote: { id: 'wave' }, track: { char: 12 }, delete: { char: 7, name: 'Aldra' }, feedbackMine: { limit: 20, before: 90 }, cart: { op: 'go', id: 12, to: 'cart_torborhold' }, meter: { on: true },
   admin: { op: 'report', id: 4, state: 'approved', note: 'good one' }, fish: { op: 'land', held: 0.7 }, cook: { id: 'cook_fish_on_a_stick', n: 2 },
   prof: { op: 'learn', id: 'mining', npc: 9 }, gather: { op: 'done', id: 12, inputs: [410, 0, 980, 0, 1630, 0] }, craft: { op: 'start', id: 'blades_1', npc: 9, base: 'dagger' },   // W9 (P-core)
 };

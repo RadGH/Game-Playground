@@ -31,7 +31,9 @@ export const ECONOMY_DEFAULTS = Object.freeze({
   barber: { hair: 5, hairColour: 4, beard: 4, eyes: 6, face: 10, skin: 12, body: 20, everything: 40, perLevel: 0.05, mult: 1 },      // mult (owner feedback 9, X4): x every barber price — 0 = the barber is free
   bag: { overflowPerItem: 1, base: 40 },                      // base = bag slots without a backpack (W19; a pack adds its own, BAG_MAX 120 is the ceiling)                                // a drop that does not fit pays its value, at least this
   cook: { mealValue: 2 },
-  gift: { feedbackMinRarity: 'rare' },                        // the thank-you gift box of a first feedback report
+  gift: { feedbackMinRarity: 'rare' },
+  // Y21 (round 10): what a rescued wilderness NPC gives — always thanks; sometimes gold (x level), rarely an item of `tier`; one purse per `cooldownSec`
+  npcThanks: { goldChance: 0.5, goldPerLevel: [1, 3], itemChance: 0.05, tier: 'magic', cooldownSec: 60, lines: ['Thank you, friend. I would not have seen the morning.', 'You came just in time. Bless you.', 'I thought that was the end of me. Take this, with my thanks.', 'Remind me to stay on the road next time.'] },                        // the thank-you gift box of a first feedback report
 });
 
 const isObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);

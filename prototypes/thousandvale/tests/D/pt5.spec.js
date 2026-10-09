@@ -81,6 +81,7 @@ test('T5: after name + appearance comes "starting equipment" — three armour se
   test.setTimeout(420000);
   await page.goto(base + '?quality=low&fresh=1&tod=0.45');
   await page.waitForSelector('#loading.done', { timeout: 120000 });
+  await page.click('#new-char');      // play-test 10 (Y29): the title opens on the front card
   await page.fill('#name', 'Wren');
   await page.click('#classes [data-cls="cleric"]');
   await page.click('#enter');                                   // step 1 -> step 2
@@ -649,6 +650,7 @@ soft('phone size: the kit step, the tracker, the sheet under the bag, the tug an
   // the kit step on the title screen
   await p.goto(base + '?quality=low&fresh=1&tod=0.45');
   await p.waitForSelector('#loading.done', { timeout: 120000 });
+  await p.click('#new-char');      // play-test 10 (Y29)
   await p.fill('#name', 'Pip');
   await p.click('#classes [data-cls="warrior"]');
   await p.click('#enter');

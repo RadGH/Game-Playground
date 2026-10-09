@@ -70,7 +70,7 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
       showChars(chars, net()?.username || user);
       // play-test 9: straight to YOUR CHARACTERS (the list lives on the front card, which the Log in tab had hidden —
       // for two rounds a fresh sign-in landed on the "New character" form with the list out of sight)
-      if ((chars || []).length) front(); else tab('new');
+      front();                       // play-test 10 (Y29): also with no characters — the front card then offers "Create character"
     } catch (err) {
       T.note.textContent = err.why ? ACCOUNT_WHY[err.why] || err.message : err.message || 'Could not log in.';
     } finally { T.go.disabled = false; T.go.textContent = 'Log in'; }
@@ -155,6 +155,7 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     T.mine.hidden = !list.length && !username;
     T.who.textContent = username ? `Logged in as ${username}` : '';
     lastChars = list; lastUser = username;
+    try { api.onChars?.(list, username); } catch { /* the title's front card (ui/title-front.js) */ }
     // play-test 2 Q25: the calling's real name ("Ranger"); Q13: the character's portrait (ui/portraits.js) when ready
     const nice = c => c.clsName || String(c.cls || '').replace(/_/g, ' ').replace(/\b\w/g, x => x.toUpperCase()) || 'Adventurer';
     listen(net());
@@ -253,7 +254,7 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     b.dataset.tip = n && n.claimed ? `Account: ${n.username}` : 'Account: you are a guest — claim it to keep it (free)';
   }
 
-  const api = { wire, panel, draw, showChars, tab, refreshPill, portraitFor: null, hasChars: () => lastChars.length > 0,
+  const api = { wire, panel, draw, showChars, tab, refreshPill, portraitFor: null, onChars: null, hasChars: () => lastChars.length > 0,
     /** Redraw the title's character list (a portrait arrived, or a new charList). */
     redrawChars(chars = null) { if (chars) lastChars = chars; if (lastChars.length && !T.mine.hidden) showChars(lastChars, lastUser); } };
   return api;

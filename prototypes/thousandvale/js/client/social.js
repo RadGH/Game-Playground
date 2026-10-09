@@ -5,6 +5,7 @@
 const $ = id => document.getElementById(id);
 const CLASS_NAME = id => String(id || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
+import { partyRows } from './ui/pt10-core.js';
 export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
   const el = {
     frames: $('party'), btn: $('party-btn'), menu: $('party-menu'), name: $('invite-name'), go: $('invite-go'), link: $('join-link'), copy: $('join-copy'),
@@ -58,8 +59,8 @@ export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
 
   // --- frames -------------------------------------------------------------------------------------
   function render() {
-    const me = myChar();
-    const others = party ? party.members.filter(m => m.char !== me) : [];
+    // play-test 10 (Y37): one row per member and never yourself — also right after a reconnect (ui/pt10-core.js partyRows)
+    const others = party ? partyRows(party, { me: myChar(), name: net()?.joined?.you?.name ?? null }).others : [];
     el.frames.hidden = !others.length;
     // (play-test 6 U1: the Party button's badge is NEWS only — unseen mail / friends, ui/unseen.js — never the size of your party)
     const keep = new Set();

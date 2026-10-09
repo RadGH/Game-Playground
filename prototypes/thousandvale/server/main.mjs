@@ -50,7 +50,7 @@ import { MAX_FRAME, PROTOCOL_VERSION } from '../js/net/protocol.js';
 import { createStaticHandler } from './static.js';
 import { statusPage } from './status-page.js';
 import { turnstileFromEnv } from './turnstile.js';
-import { GAME, PLAYGROUND, log, loadRules, makeStore, loadClasses, loadClassNames, loadLayouts, defaultProvinces, feedbackSink, loadEconomy, loadMotd } from './load.mjs';
+import { GAME, PLAYGROUND, log, loadRules, makeStore, loadClasses, loadClassNames, loadLayouts, defaultProvinces, feedbackSink, loadEconomy, loadMotd, loadChangelog } from './load.mjs';
 import { wireSocket, startPinger } from './ws-conn.mjs';
 import { hashPassword, verifyPassword } from './passwords.js';
 import { createChatFilter } from '../js/sim/chatfilter.js';
@@ -123,7 +123,7 @@ export async function startServer(o) {
   const verifyHuman = turnstileFromEnv(process.env, { log });
   const humanSiteKey = verifyHuman ? process.env.TV_TURNSTILE_SITEKEY || null : null;
   const store = await makeStore(o);
-  const { createRules, rules, kitsFor, lightItems } = await loadRules(o.rules);
+  const { createRules, rules, kitsFor, lightItems, refreshItem } = await loadRules(o.rules);
   const classes = loadClasses();
   const publicMode = !!o.publicDir;
   const chatFilter = createChatFilter();
@@ -135,8 +135,8 @@ export async function startServer(o) {
     guestsPerIpPerHour: o.guestsPerIpHour ?? 20,
     guestsPerHour: o.guestsPerHour ?? (env === 'stable' ? 200 : 0),
     // play-test 5: C's starter kits for `create.kit` (T5); every feedback report also goes to <state>/feedback-<env>.jsonl (T19)
-    env, serverName: process.env.TV_SERVER_NAME || process.env.TV_PUBLIC_HOST || null, charLimit: o.charLimit || +process.env.TV_CHAR_LIMIT || null, motd: loadMotd(),      // owner feedback 9: which server a report came from; X6; X1
-    economy: loadEconomy(), kitsFor: kitsFor || null, lightItems: lightItems || null, feedbackSink: o.feedbackFile === false ? null : feedbackSink(env, o.feedbackFile || undefined),
+    env, serverName: process.env.TV_SERVER_NAME || process.env.TV_PUBLIC_HOST || null, charLimit: o.charLimit || +process.env.TV_CHAR_LIMIT || null, motd: loadMotd(), changelog: loadChangelog(),      // owner feedback 9: which server a report came from; X6; X1
+    economy: loadEconomy(), kitsFor: kitsFor || null, lightItems: lightItems || null, refreshItem: refreshItem || null, feedbackSink: o.feedbackFile === false ? null : feedbackSink(env, o.feedbackFile || undefined),
   };
   const unlimitedSockets = new Set(o.unlimitedIp || []);
 
@@ -191,6 +191,7 @@ export async function startServer(o) {
   const server = http.createServer((req, res) => {
     const path = req.url.split('?')[0];
     if (publicMode) for (const [k, v] of Object.entries(PUBLIC_HEADERS)) res.setHeader(k, v);
+    if (path === '/changelog.json') { let body = '{"entries":[]}'; try { body = readFileSync(join(GAME, 'data/ops/changelog.json')); } catch { /* none yet */ } res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-cache' }); res.end(body); return; }      // Y30
     if (path === '/privacy.json') { res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'max-age=300' }); res.end(PRIVACY); return; }
     if (path === '/status') {
       res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' });

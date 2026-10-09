@@ -191,6 +191,19 @@ export function zoneAt(model, x, z) { return model.zones.get(zoneKeyAt(x, z)) ||
  * is read from stream E's quest file (data/quests/<zone>.json) and resolved the way js/sim/quests.js does.
  * Returns { x, z, r, name, zone, exact } — `exact: false` means "somewhere in this zone" (a big circle).
  */
+/**
+ * Play-test 10 Y22 (report #17: "Smelt 3 bronze bars" drew a circle the size of a zone and turned the minimap yellow).
+ * A step is about a PLACE only when it is one of these kinds — or carries its own spot (`at`). Crafting, cooking,
+ * learning, riding, reaching a level: those are done wherever you are, so they get no marker and no circle at all.
+ */
+export const PLACE_STEPS = new Set(['kill', 'collect', 'killOne', 'killRare', 'clear', 'visit', 'escort', 'use', 'talk', 'deliver', 'reach']);
+export function stepHasPlace(st, def = null) {
+  if (st?.anywhere || def?.anywhere) return false;
+  if (st?.at && Number.isFinite(st.at.x)) return true;
+  if (st?.place && Number.isFinite(st.place.x)) return true;
+  const kind = st?.kind || def?.kind || null;
+  return kind == null ? true : PLACE_STEPS.has(kind);       // an unknown step keeps the old behaviour ("somewhere in the region")
+}
 export function locateQuest(q, model, me = null) {
   if (!q) return null;
   const st = q.steps?.[q.step];
@@ -201,12 +214,15 @@ export function locateQuest(q, model, me = null) {
     if (q.turnIn && Number.isFinite(q.turnIn.x)) return at(q.turnIn, q.turnIn.name || q.giverName, q.turnIn.r || 6);
     if (q.giverAt) return at(q.giverAt, q.giverAt.name, 6);
     const npc = model.npcs.get(q.giver);
-    return npc && Number.isFinite(npc.x) ? at(npc, npc.name, 6) : (q.zone ? zoneCircle(q.zone) : null);
+    // a hand-in the post carries (`remote`) has no place either; nor does a quest that says so
+    return npc && Number.isFinite(npc.x) ? at(npc, npc.name, 6) : (q.zone && !q.remote && !q.anywhere ? zoneCircle(q.zone) : null);
   }
+  if (q.anywhere) return null;
   if (st?.at && Number.isFinite(st.at.x)) return at(st.at, st.at.name, st.at.r || 30);
   const def = model.quests.get(q.id);
   const ds = def?.steps?.[q.step] || q.def?.steps?.[q.step] || null;
   const wk = def?.zone || q.zone || null;
+  if (!stepHasPlace(st, ds || q.def?.steps?.[q.step] || null)) return null;      // Y22: done anywhere — no marker, no circle
   if (ds) {
     const site = name => (name ? (model.sites.get(name) || model.vigs.get(name) || [...model.pois].find(p => p.name && bare(p.name) === bare(name)) || null) : null);
     let p = null, name = '';
@@ -362,7 +378,7 @@ export function collectMarkers({ model, room, known = new Set(), fog = null, que
     if (!q.loc) continue;
     out.push({ id: 'q:' + q.id, kind: q.ready ? 'questdone' : 'quest', x: q.loc.x, z: q.loc.z, r: q.loc.exact ? q.loc.r : q.loc.r, area: !q.loc.exact, name: q.name, sub: q.ready ? 'Ready to hand in' : (q.goal || ''), level: q.level || null, priority: q.id === tracked ? 6 : 4, size: q.id === tracked ? 9 : 7, tracked: q.id === tracked, act: 'track', quest: q.id });
   }
-  for (const m of party) if (Number.isFinite(m.x)) out.push({ id: 'pm:' + m.char, kind: 'party', x: m.x, z: m.z, name: m.name, sub: m.sub || 'Party member', priority: 4, size: 6 });
+  for (const m of party) if (Number.isFinite(m.x)) out.push({ id: 'pm:' + m.char, kind: 'party', x: m.x, z: m.z, name: m.name, sub: m.sub || 'Party member', priority: m.tracked ? 7 : 4, size: m.tracked ? 8 : 6, tracked: !!m.tracked });
   for (const p of pins) out.push({ id: 'pin:' + p.id, kind: 'pin', x: p.x, z: p.z, name: p.name || 'Your pin', sub: 'Click to remove', priority: 3, size: 7, act: 'unpin', pin: p.id });
   if (me) out.push({ id: 'me', kind: 'me', x: me.x, z: me.z, name: 'You', sub: '', priority: 10, size: 8 });
   return out;

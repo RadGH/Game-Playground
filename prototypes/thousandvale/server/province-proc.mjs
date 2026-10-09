@@ -19,12 +19,12 @@ const handlers = [];
 const bus = { send: m => { if (process.connected) process.send({ bus: m }); }, on: fn => handlers.push(fn) };
 
 const store = await makeStore(cfg);
-const { createRules, kitsFor, lightItems } = await loadRules(cfg.rules);
+const { createRules, kitsFor, lightItems, refreshItem } = await loadRules(cfg.rules);
 const { layouts, events, encounterInfo, directorRules } = await loadLayouts(cfg.provinces);
 const province = createProvince({
   env: cfg.env || 'dev', serverName: cfg.serverName || null, proc: cfg.n, layouts, store, bus, createRules, encounterInfo, build: cfg.build, now, log, newcomer: directorRules && directorRules.newcomer, eventSize: directorRules && directorRules.size, events, realmNearM: directorRules && directorRules.nearMetres,   // R3: realm events start when someone walks up
   lingerMs: cfg.linger, saveEveryMs: cfg.saveEvery, journalMs: cfg.journalMs, processName: cfg.process, chatFilter: createChatFilter(), classes: loadClasses(),
-  economy: loadEconomy(), kitsFor: kitsFor || null, lightItems: lightItems || null, feedbackSink: cfg.feedbackFile === false ? null : feedbackSink(cfg.env || 'dev', cfg.feedbackFile || undefined),      // play-test 5: T5 kits, T19 feedback file
+  economy: loadEconomy(), kitsFor: kitsFor || null, lightItems: lightItems || null, refreshItem: refreshItem || null, feedbackSink: cfg.feedbackFile === false ? null : feedbackSink(cfg.env || 'dev', cfg.feedbackFile || undefined),      // play-test 5: T5 kits, T19 feedback file
 });
 await province.init();
 bus.send({ k: 'hello', proc: cfg.n, provinces: layouts.map(L => L.key), events });

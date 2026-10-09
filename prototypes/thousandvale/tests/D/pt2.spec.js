@@ -43,6 +43,7 @@ test('R1 + Q21 + Q25: new character = name/people/calling, then the editor in st
   test.setTimeout(300000);
   await page.goto(base + '?quality=low&fresh=1&tod=0.45');
   await page.waitForSelector('#loading.done', { timeout: 120000 });
+  await page.click('#new-char');      // play-test 10 (Y29): the title opens on the front card — "Create character" first
   await page.fill('#name', 'Wren');
   await page.click('#classes [data-cls="ranger"]');
   await page.click('#enter');                       // step 1 -> step 2 (R1)
@@ -374,9 +375,10 @@ test('play-test 4: S1 event panel tucks into a bubble and never covers the track
   const r = await page.evaluate(() => ['.tv-evtrack', '.tv-tracker'].map(s => document.querySelector(s).getBoundingClientRect()).map(b => ({ top: b.top, bottom: b.bottom })));
   expect(r[0].bottom).toBeLessThanOrEqual(r[1].top + 1);
   await shot('s1-event-tracker');
-  await page.click('.tv-evtrack .et-x');
+  // (the FOLD button by what it does: since play-test 8 a card also carries a Hide button with the same .et-x class, and it comes first)
+  await page.click('.tv-evtrack .et-card [data-act="fold"]');
   await expect(page.locator('.tv-evtrack .et-card')).toHaveClass(/folded/);
-  await page.click('.tv-evtrack .et-x');
+  await page.click('.tv-evtrack .et-card [data-act="fold"]');
   await expect(page.locator('.tv-evtrack .et-card')).not.toHaveClass(/folded/);
   await page.evaluate(() => thousandvale.ui5.tracker.clear());
   // S2

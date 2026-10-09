@@ -41,6 +41,13 @@ code (it lives inside `main.js`; `gallery/title-lite.js` is a 60-line copy of th
 
 So: **change a window in the game and the gallery changes with it; add a window and a test tells you to give it a scene.**
 
+### What a new window must also do (play-test 10)
+- **Ask something? Mount it with `mountConfirm(box)`** (`js/client/ui-panel.js`): it goes on `<body>` under `css/pt10.css`'s one stacking rule, above every
+  window and every phone sheet. Never append a dialog to `#hud` with a z-index of your own.
+- **A list that redraws from server data needs nothing** — `ui/keep-scroll.js` keeps its scroll position as long as the new list element sits at the same place
+  in the same window. If your redraw clears first and fills after an `await`, wrap it in `keepScroll(root, redraw)`.
+- **Title-screen windows cannot be HUD panels** (the HUD is hidden there): see `ui/changelog.js` for an overlay that works in both.
+
 ### Adding a scene
 One entry in `js/client/gallery/scenes.js`:
 
@@ -85,8 +92,8 @@ windows, the Professions page and block, a material's card). They live in `js/cl
 messages they play are RECORDED from the real server by `node tests/P/client-fixtures.mjs` into `fixtures/professions.json` (re-run after a protocol or content
 change). `tests/P/client-shots.mjs` takes a picture of each in every frame; `tests/P/client-minigames.spec.js` plays each mini-game in the stage.
 
-**82 scenes in all (counted 2026-10-08 from `SCENES`, professions included — 20 of them now):** 75 in each desktop frame
-(Desktop, Laptop), 78 in each phone frame, 79 in the controller frame (a few scenes exist only where they mean something —
+**89 scenes in all (counted 2026-10-08 after play-test 10 from `SCENES`, professions included):** 81 in each desktop frame
+(Desktop, Laptop), 85 in each phone frame, 86 in the controller frame (a few scenes exist only where they mean something —
 the quick wheel, the focus ring, the belt). Do not trust this line over the code: `SCENES.filter(s => sceneFits(s, id)).length`.
 
 **What the spec measured (2026-10-07):** in the proposed phone layout, 0 of ~800 on-screen controls are smaller than
@@ -222,6 +229,7 @@ secure). The gallery's Controller frame works on any address for looking; a real
 | `js/client/gallery/scenes.js` | the scenes (data), the frames, `NO_SCREEN` |
 | `js/client/gallery/fake-net.js`, `fixtures/` | the recorded server |
 | `js/client/gallery/title-lite.js`, `frame-chrome.js` | title-screen glue; the island / home bar / on-phone scene picker |
+| `js/client/ui/title-front.js`, `class-card.js` | (D-UI, play-test 10) the title's front card and the calling's card — real modules the game and the gallery share, the start of moving the title's glue out of `main.js` |
 | `tools/record-ui-fixtures.mjs` | re-record |
 | `js/client/input/bindings.js` | THE table (pure) |
 | `js/client/input/{index,keyboard,emit,device,hints}.js` | install, re-bound keys, default-key events, last device, hint labels |

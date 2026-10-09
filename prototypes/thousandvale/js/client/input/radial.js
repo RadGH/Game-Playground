@@ -28,7 +28,8 @@ export function createRadial({ run, parent = document.body } = {}) {
   parent.appendChild(root);
   const ringEl = root.querySelector('.rd-ring'), hub = root.querySelector('.rd-hub');
   const S = { open: false, ring: 0, at: -1, hold: false, onPick: null, custom: null };
-  const lists = () => [WHEEL, WHEEL_ACTIONS];
+  const extra = [];               // play-test 10 (Y5): more rings added by the game — { title, items, onPick } (the emotes)
+  const lists = () => [WHEEL, WHEEL_ACTIONS, ...extra.map(r => r.items)];
   const list = () => S.custom || lists()[S.ring];
 
   function draw() {
@@ -44,7 +45,7 @@ export function createRadial({ run, parent = document.body } = {}) {
       return b;
     }));
     const cur = L[S.at];
-    hub.querySelector('strong').textContent = cur ? cur.label : S.custom ? (S.title || '') : S.ring ? 'Do' : 'Windows';
+    hub.querySelector('strong').textContent = cur ? cur.label : S.custom ? (S.title || '') : S.ring >= 2 ? (extra[S.ring - 2]?.title || '') : S.ring ? 'Do' : 'Windows';
     hub.querySelector('small').textContent = cur ? (ACTION_BY_ID[cur.id]?.label || cur.sub || '') : S.custom ? 'Slide to one and let go' : S.hold ? 'Point and let go' : 'Tap one — tap here for more';
     root.dataset.ring = String(S.ring);
   }
@@ -64,6 +65,7 @@ export function createRadial({ run, parent = document.body } = {}) {
     const w = list()[S.at]; const pick = S.onPick; close();
     if (!w) return null;
     if (pick) { pick(w); return w.id; }
+    if (!S.custom && S.ring >= 2) { extra[S.ring - 2]?.onPick?.(w); return w.id; }
     const a = ACTION_BY_ID[w.id];
     if (a?.run || w.id === 'chat') run?.(a?.run || w.id, w.id); else actionKey(w.id);
     return w.id;
@@ -71,5 +73,7 @@ export function createRadial({ run, parent = document.body } = {}) {
   function swap() { if (S.custom) return; S.ring = (S.ring + 1) % lists().length; S.at = -1; draw(); }
   root.addEventListener('click', () => { if (performance.now() - S.openedAt > 400) close(); });   // (the tap that opened it also 'clicks' the overlay a moment later)
   hub.addEventListener('click', e => { e.stopPropagation(); swap(); });   // touch: tap the middle for the other ring (things you do: mount, fish, camp, map, help)
-  return { root, open, close, select, aim, point, swap, get isOpen() { return S.open; }, get at() { return list()[S.at]?.id || null; }, get ring() { return S.ring; } };
+  /** Y5: one more ring after Windows and Do (tap the middle / RB steps through them). `items` = [{ id, label, html?, sub? }]. */
+  function addRing({ title = '', items = [], onPick = null } = {}) { if (!items.length) return -1; extra.push({ title, items, onPick }); return 1 + extra.length; }
+  return { root, open, close, select, aim, point, swap, addRing, get rings() { return lists().length; }, get isOpen() { return S.open; }, get at() { return list()[S.at]?.id || null; }, get ring() { return S.ring; } };
 }

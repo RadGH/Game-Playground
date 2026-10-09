@@ -30,6 +30,7 @@ async function boot() {
   catch (err) { console.warn('[worker] no baked terrain, using the stand-in field:', err.message); terrain = standInTerrain(1, 2048); }
   let classes = null;
   try { classes = (await (await fetch(new URL('../../../farhold/data/classes.json', import.meta.url))).json()).classes.map(c => c.id); } catch { /* any class id */ }
+  try { if (classes) classes.push(...((await (await fetch(new URL('../../data/rules/classes-tv.json', import.meta.url))).json()).classes || []).map(c => c.id)); } catch { /* Thousandvale's own classes (the Starcaller): absent = Farhold's thirty */ }
   let createRules;
   if (params.get('rules') !== 'v0') {
     try { createRules = (await import('../rules/index.js')).createRules; } catch { /* stream C not landed yet */ }

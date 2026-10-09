@@ -13,7 +13,8 @@ import { soonText, eventStateText } from './pt2-core.js';
 import { createMapSource } from './map-load.js';
 import { createFog, collectMarkers, locateQuest, zoneKeyAt, ZONE_M, whereText, titleCase } from './map-data.js';
 import { unrleTiles } from '../../sim/dungeon.js';
-import { HIDDEN } from './hidden-events.js';          // W13: events the player hid from the HUD
+import { HIDDEN } from './hidden-events.js';
+import { staleEvents } from './pt10-core.js';          // W13: events the player hid from the HUD
 
 const store = {
   get(k, d = null) { try { const v = localStorage.getItem('tv.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
@@ -179,12 +180,15 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
     const out = [];
     const mine = net()?.joined?.you?.char;
     const myRoom = net()?.joined?.room?.id;
+    const seenChar = new Set();
     for (const r of S.party) {
-      if (r.char === mine || !r.online) continue;
+      if (r.char === mine || !r.online || seenChar.has(r.char)) continue;      // (Y37: never yourself, never twice)
+      seenChar.add(r.char);
       const a = r.id != null ? actors?.get(r.id) : null;
       const name = a?.name || (net()?.party?.members || []).find(m => m.char === r.char)?.name || 'Party member';
-      if (a) out.push({ char: r.char, name, x: a.pos.x, z: a.pos.z, sub: r.dead ? 'Fallen' : 'Party member' });
-      else if (r.room === myRoom && Number.isFinite(r.x)) out.push({ char: r.char, name, x: r.x, z: r.z, sub: r.dead ? 'Fallen' : 'Party member' });
+      const tracked = !!api.trackedChar?.(r.char);      // play-test 10 (Y36): a tracked member gets the distance on the minimap's rim
+      if (a) out.push({ char: r.char, name, x: a.pos.x, z: a.pos.z, sub: r.dead ? 'Fallen' : 'Party member', tracked });
+      else if (r.room === myRoom && Number.isFinite(r.x)) out.push({ char: r.char, name, x: r.x, z: r.z, sub: r.dead ? 'Fallen' : 'Party member', tracked });
     }
     return out;
   }
@@ -245,6 +249,9 @@ export function createAtlas({ net, me, room, actors, objects, worldUi }) {
     });
     n.on('quests', onQuests);
     n.on('realm', onRealm);
+    // play-test 10 (Y11): drop pins / list rows for events the server no longer lists; never offer travel to a dead one
+    n.on('eventSync', m => { const gone = staleEvents([...S.events].map(([key, e]) => ({ key, uid: e.uid, id: e.id, realm: key === 'realm', state: e.state || (e.soon ? 'soon' : 'live'), at: e.at })), m); for (const k of gone) S.events.delete(k); if (gone.length) changed(); });
+    n.on('travelR', r => { if (r && r.ok === false && (r.gone || r.why === 'noEvent') && S.events.has('realm') && !S.events.get('realm').soon) { S.events.delete('realm'); changed(); } });
     n.on('zoneEvent', onZoneEvent);
     n.on('zone', z => { if (Array.isArray(z.events)) applyStates(z.events); });   // R3: the zone's events + states on arrival
     n.on('partyFrames', onPartyFrames);

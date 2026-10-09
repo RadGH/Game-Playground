@@ -45,7 +45,7 @@ export function createGateway(opts) {
     starterProvince = null, events = null, clockDayMs = 2 * 3600000, directorOpts = {},
     hasher = null, chatFilter = null, ipSalt = 'thousandvale', chatOpts = {}, guildOpts = {}, callboardOpts = {},
     mailSweepMs = 60000, chargeTimeoutMs = 5000, classNames = null,
-    charLimit = null, nameReserveMs = 86400000, motd = null, env = null, serverName = null,      // owner feedback 9: X6 the character limit + how long a deleted name is kept; X1 the message of the day; which server this is
+    charLimit = null, nameReserveMs = 86400000, motd = null, env = null, serverName = null, changelog = null,      // owner feedback 9: X6 the character limit + how long a deleted name is kept; X1 the message of the day; which server this is
     kitsFor = null, feedbackSink = null, feedbackOpts = {},      // play-test 5: C's kitsFor(classId) (T5); the JSONL sink + limits (T19)
   } = opts;
   if (opts.economy !== undefined) configureEconomy(opts.economy);          // V2: the guild fee and the gift's rarity come from data/rules/economy.json
@@ -101,6 +101,10 @@ export function createGateway(opts) {
         names.set(m.char, { name: m.name, cls: m.cls, level: m.level });
         { const g = gwByChar.get(m.char); if (g && (m.level || 1) > (g.alv || 1)) g.alv = m.level; }      // W11: the account's highest character
         if (!was || was.online !== m.online || was.level !== m.level) { partyChanged([parties.of(m.char)]); guilds.changed(m.char); }
+        // Y37 (round 10, stable report #55 "after reconnecting my OWN character is listed at the bottom of the party"): the party is
+        // sent again, to this one socket, once the character is IN the world — the copy sent with the ticket arrives before the
+        // client's `joined`, i.e. before it knows which member is itself. Every partyState also says `me`.
+        if (m.online && (!was || !was.online)) { const p0 = parties.of(m.char), g0 = gwByChar.get(m.char); if (p0 && g0) g0.sendJSON({ t: 'partyState', party: partyView(p0), me: m.char, rejoin: true }); }
         if (!was || was.online !== m.online || was.level !== m.level || was.zone !== m.zone) friends.changed(m.char);
         if (was && was.online && !m.online) callboard.drop(m.char);
         if ((!was || was.proc !== p.id) && social.has(m.char)) p.bus.send({ k: 'social', char: m.char, ...social.get(m.char) });
@@ -201,7 +205,7 @@ export function createGateway(opts) {
         if (s.state !== 'authed') return bad(s, 'order');
         // play-test 2, Q25: the class's NAME ("Ranger", not "Adventurer"); the account settings (Q15) ride along
         return store.listChars(s.account).then(chars => {
-          s.sendJSON({ t: 'charList', chars: chars.map(c => ({ ...c, clsName: clsName(c.cls) })), limit: CHAR_LIMIT });
+          changelogOf(s.account).then(cl => s.sendJSON({ t: 'charList', chars: chars.map(c => ({ ...c, clsName: clsName(c.cls) })), limit: CHAR_LIMIT, ...(cl ? { changelog: cl } : {}) }));
           return settingsOf(s.account).then(data => s.sendJSON({ t: 'settings', data }));
         });
       case 'create': {
@@ -225,6 +229,7 @@ export function createGateway(opts) {
         });
       }
       case 'play': return play(s, m);
+      case 'track': return trackOp(s, m);
       case 'delete': return deleteChar(s, m);
       case 'kits': {
         // The starter kits are public data and ALWAYS answered once the hello is done — signed in or not (owner feedback 7:
@@ -365,7 +370,7 @@ export function createGateway(opts) {
       if (p) sendTo(proc, { k: 'party', char: c.id, party: partyBrief(p) });
       // the province process gets the ticket over the bus first; a ticket that arrives later is waited for
       s.sendJSON({ t: 'ticket', path: '/p/' + proc, ticket, room: 'zone' });
-      if (p) s.sendJSON({ t: 'partyState', party: partyView(p) });
+      if (p) s.sendJSON({ t: 'partyState', party: partyView(p), me: c.id });
       friends.load(c.id); guilds.load(c.id);
       settingsOf(s.account).then(d => pushSocial(c.id, { tradeFriendsOnly: !!d.tradeFriendsOnly }));
       sendMotd(s, c);                                  // X1: the message of the day (and the account's last-login stamp)
@@ -412,13 +417,85 @@ export function createGateway(opts) {
     return String(id || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
   /** Account settings, stored per account (world_state `settings:<account>`, both stores have it). */
-  const SETTING_KEYS = { tradeFriendsOnly: 'bool' };
-  const SETTING_DEFAULTS = { tradeFriendsOnly: false };
+  const SETTING_KEYS = { tradeFriendsOnly: 'bool', shareLocation: 'bool', changelogSeen: 'changelog' };      // shareLocation (round 10, Y36): friends may track you; changelogSeen (Y30): the newest changelog entry this account has read
+  const SETTING_DEFAULTS = { tradeFriendsOnly: false, shareLocation: true };
   const settingsCache = new Map();
   function settingsOf(account) {
     if (settingsCache.has(account)) return Promise.resolve(settingsCache.get(account));
     const get = store.getWorld ? store.getWorld('settings:' + account) : Promise.resolve(null);
     return Promise.resolve(get).then(v => { const d = { ...SETTING_DEFAULTS, ...(v && typeof v === 'object' ? v : {}) }; settingsCache.set(account, d); return d; }, () => ({ ...SETTING_DEFAULTS }));
+  }
+  /**
+   * Y30 (round 10, dev report #25): the changelog. The lead's data/ops/changelog.json ({entries:[{id, date, title, items}]},
+   * newest first) is served at /changelog.json; `authed` and `charList` say `changelog {latest, seen}`. `seen` is the
+   * account's marker (`settings.changelogSeen`); an account with no marker is treated as having seen everything up to its
+   * first sight of the list (a new player gets no "the game was updated" popup). Ids are compared by their place in the file.
+   */
+  const CHANGELOG_IDS = Array.isArray(changelog && changelog.entries) ? changelog.entries.map(e => String(e.id)) : [];
+  const changelogRank = id => { const i = CHANGELOG_IDS.indexOf(String(id)); return i < 0 ? -1 : CHANGELOG_IDS.length - i; };      // bigger = newer
+  const CHANGELOG_LATEST = CHANGELOG_IDS[0] || null;
+  function changelogOf(account) {
+    if (!CHANGELOG_LATEST) return Promise.resolve(null);
+    return settingsOf(account).then(d => {
+      if (d.changelogSeen == null || changelogRank(d.changelogSeen) < 0) {
+        const fresh = { ...d, changelogSeen: CHANGELOG_LATEST, changelogFirst: true };
+        settingsCache.set(account, fresh);
+        if (store.setWorld) Promise.resolve(store.setWorld('settings:' + account, fresh)).catch(() => {});
+        return { latest: CHANGELOG_LATEST, seen: CHANGELOG_LATEST, first: true };
+      }
+      return { latest: CHANGELOG_LATEST, seen: String(d.changelogSeen) };
+    }, () => ({ latest: CHANGELOG_LATEST, seen: CHANGELOG_LATEST }));
+  }
+  /**
+   * Y36 (round 10: "I had difficulty locating my friends"). `track {char, off?}`: follow where a party member or a MUTUAL
+   * friend is, wherever they are — `whereabouts {l:[[char, name, province, zoneName, town, x, z, roomKind, level, cls]…]}`
+   * once a second while any of them is online. At most TRACK_MAX each; a friend who switched `shareLocation` off answers
+   * `hidden` (party members always see each other). The provinces are told whom to report (`watch`), so nobody else's
+   * position ever leaves its process.
+   */
+  const TRACK_MAX = 5;
+  const tracks = new Map();        // tracker char -> Set(target char)
+  let watchSent = '';
+  function syncWatch() {
+    const all = new Set(); for (const set of tracks.values()) for (const c of set) all.add(c);
+    const key = [...all].sort((a, b) => a - b).join(',');
+    if (key === watchSent) return;
+    watchSent = key;
+    for (const q of procs.values()) q.bus.send({ k: 'watch', chars: [...all] });
+  }
+  function dropWatchersOf(account) {
+    for (const [me, set] of tracks) for (const c of [...set]) { const pr = presence.get(c); if (pr && pr.account === account && !(parties.of(me) && parties.of(me).members.includes(c))) { set.delete(c); const g = gwByChar.get(me); if (g) g.sendJSON({ t: 'trackR', ok: false, char: c, why: 'hidden', msg: (pr.name || 'They') + ' stopped sharing where they are.' }); } }
+    syncWatch();
+  }
+  function trackOp(s, m) {
+    const me = s.charId;
+    const R = x => s.sendJSON({ t: 'trackR', char: m.char, ...x });
+    if (!me || !presence.get(me)) return s.err('state', 'Enter the world first.');
+    const set = tracks.get(me) || new Set();
+    if (!m.char) { tracks.delete(me); syncWatch(); return R({ ok: true, off: true, tracking: [] }); }
+    if (m.off) { set.delete(m.char); if (set.size) tracks.set(me, set); else tracks.delete(me); syncWatch(); return R({ ok: true, off: true, tracking: [...set] }); }
+    if (m.char === me) return R({ ok: false, why: 'self', msg: 'That is you.' });
+    const p = parties.of(me), inParty = !!(p && p.members.includes(m.char));
+    const mutual = friends.has(me, m.char) && friends.has(m.char, me);
+    if (!inParty && !mutual) return R({ ok: false, why: 'notFriend', msg: friends.has(me, m.char) ? 'They have not added you as a friend yet.' : 'You can only track a party member or a friend.' });
+    const pr = presence.get(m.char);
+    if (!pr || !pr.online) return R({ ok: false, why: 'offline', msg: ((names.get(m.char) || {}).name || 'They') + ' is not online.' });
+    if (!set.has(m.char) && set.size >= TRACK_MAX) return R({ ok: false, why: 'full', msg: 'You can track ' + TRACK_MAX + ' people at once.' });
+    return (inParty ? Promise.resolve({ shareLocation: true }) : settingsOf(pr.account)).then(d => {
+      if (d.shareLocation === false) return R({ ok: false, why: 'hidden', msg: pr.name + ' is not sharing where they are.' });
+      set.add(m.char); tracks.set(me, set); syncWatch();
+      R({ ok: true, name: pr.name, tracking: [...set] });
+    });
+  }
+  function sendWhereabouts() {
+    for (const [me, set] of tracks) {
+      const g = gwByChar.get(me);
+      if (!g || !presence.get(me) || !presence.get(me).online) { tracks.delete(me); continue; }
+      const l = [];
+      for (const c of set) { const pr = presence.get(c), f = frames.get(c); if (!pr || !pr.online) continue; l.push([c, pr.name, pr.province || null, pr.zoneName || null, pr.town || null, f ? f[4] : null, f ? f[5] : null, pr.roomKind || null, pr.level || 1, pr.cls || null]); }
+      if (l.length) g.sendJSON({ t: 'whereabouts', l });
+    }
+    syncWatch();
   }
   function settingsOp(s, m) {
     if (s.state !== 'authed') return bad(s, 'order');
@@ -426,7 +503,11 @@ export function createGateway(opts) {
     if (m.op !== 'set' || !m.data) return bad(s, 'op');
     return settingsOf(s.account).then(cur => {
       const next = { ...cur };
-      for (const [k, v] of Object.entries(m.data)) { if (SETTING_KEYS[k] === 'bool' && typeof v === 'boolean') next[k] = v; }
+      for (const [k, v] of Object.entries(m.data)) {
+        if (SETTING_KEYS[k] === 'bool' && typeof v === 'boolean') next[k] = v;
+        else if (SETTING_KEYS[k] === 'changelog' && (typeof v === 'string' || typeof v === 'number') && changelogRank(v) >= 0 && changelogRank(v) >= changelogRank(next[k])) next[k] = String(v);      // a known entry, never backwards
+      }
+      if (next.shareLocation === false) dropWatchersOf(s.account);
       settingsCache.set(s.account, next);
       const save = store.setWorld ? store.setWorld('settings:' + s.account, next) : null;
       return Promise.resolve(save).then(() => {
@@ -474,13 +555,13 @@ export function createGateway(opts) {
       if (!p) continue;
       const view = partyView(p), brief = partyBrief(p);
       for (const c of p.members) {
-        const g = gwByChar.get(c); if (g) g.sendJSON({ t: 'partyState', party: view });
+        const g = gwByChar.get(c); if (g) g.sendJSON({ t: 'partyState', party: view, me: c });
         const proc = procOfChar(c); if (proc !== undefined) sendTo(proc, { k: 'party', char: c, party: brief });
       }
     }
   }
   function leftParty(c) {
-    const g = gwByChar.get(c); if (g) g.sendJSON({ t: 'partyState', party: null });
+    const g = gwByChar.get(c); if (g) g.sendJSON({ t: 'partyState', party: null, me: c });
     const proc = procOfChar(c); if (proc !== undefined) sendTo(proc, { k: 'party', char: c, party: null });
   }
   const findByName = name => { const n = String(name || '').toLowerCase(); for (const pr of presence.values()) if (pr.online && pr.name.toLowerCase() === n) return pr; return null; };
@@ -524,7 +605,7 @@ export function createGateway(opts) {
   function sendPartyFrames() {
     for (const p of parties.byId.values()) {
       if (p.members.length < 2) continue;
-      const rows = p.members.map(c => frames.get(c) || [c, 0, 0, null, 0, 0, 0, presence.get(c)?.online ? 1 : 0, 0, 0, 0]);
+      const rows = [...new Set(p.members)].map(c => frames.get(c) || [c, 0, 0, null, 0, 0, 0, presence.get(c)?.online ? 1 : 0, 0, 0, 0]);
       if (!rows.some(r => r[7])) continue;
       const msg = JSON.stringify({ t: 'partyFrames', m: rows });
       for (const c of p.members) { const g = gwByChar.get(c); if (g && presence.get(c)) g.send(msg); }
@@ -622,6 +703,7 @@ export function createGateway(opts) {
   function step() {
     ticks++;
     if (ticks % 10 === 0) sendPartyFrames();
+    if (tracks.size && ticks % 20 === 5) sendWhereabouts();      // Y36: 1 Hz
     director.step();
     if (now() - lastSweep >= 30000) { lastSweep = now(); sweepParties(); }
     if (timers.length) for (let i = timers.length - 1; i >= 0; i--) if (timers[i].at <= ticks) { const f = timers[i].fn; timers.splice(i, 1); f(); }

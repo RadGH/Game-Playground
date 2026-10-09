@@ -43,7 +43,7 @@ test('scenes are well-formed data: unique ids, a group, a title, notes, and only
     assert.ok((s.modules || []).length, `${s.id}: names no module`);
     for (const list of [s.steps, s.phone?.steps, s.pad?.steps, s.phoneCurrent]) for (const st of list || []) assert.ok(verbs.has(st[0]), `${s.id}: the stage has no verb "${st[0]}"`);
     if (s.only) for (const d of s.only) assert.ok(DEVICES.some(x => x.id === d), `${s.id}: unknown frame ${d}`);
-    if (s.stage === 'title') assert.ok(['new', 'front', 'login', 'look', 'kit'].includes(s.step), `${s.id}: unknown title step`);
+    if (s.stage === 'title') assert.ok(['new', 'front', 'login', 'look', 'kit', 'front-loading', 'front-empty'].includes(s.step), `${s.id}: unknown title step`);
   }
   for (const d of DEVICES) assert.ok(SCENES.filter(s => sceneFits(s, d.id)).length >= 40, `${d.id}: too few scenes`);
 });

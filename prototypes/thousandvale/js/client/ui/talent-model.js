@@ -173,8 +173,23 @@ export function pickCheck(tree, picks = {}, level = 1, tier, nodeId, { skillUnlo
 /** Talent picks waiting across the whole ladder (the K button's badge). */
 export function talentPicksWaiting(src, ladder, talents = {}, level = 1) {
   let n = 0;
-  for (const s of ladder) if (s.unlocked && s.hasTalents) n += treeState(src.tree(s.id), talents[s.id] || {}, level).waiting;
+  for (const s of ladder) if (s.unlocked && hasTree(src, s)) n += treeState(src.tree(s.id), talents[s.id] || {}, level).waiting;
   return n;
+}
+/**
+ * Does this skill have talents to pick? Play-test 10 Y38 (report D#58: Mercy's Touch showed no number although it had
+ * picks waiting): the answer used to be "is there a `talents` block on the skill's row in Farhold's skills.json" — and a
+ * skill Thousandvale adds itself (the healers' and revive skills of rounds 5-9, Moonpelt, the Starcaller's six) has no
+ * such row, so it never counted. The SERVER'S tree is the truth when it sent one; the local row only when it did not.
+ */
+export function hasTree(src, s) {
+  const t = src.tree(s.id);
+  if (t && t.offer === 'server') return (t.tiers || []).some(x => (x.nodes || []).length > 0);
+  return !!s.hasTalents;
+}
+/** Picks waiting on one skill of the ladder (its number badge). */
+export function picksWaitingOn(src, s, talents = {}, level = 1) {
+  return s.unlocked && hasTree(src, s) ? treeState(src.tree(s.id), talents[s.id] || {}, level).waiting : 0;
 }
 
 // ---------------------------------------------------------------- the perk forest

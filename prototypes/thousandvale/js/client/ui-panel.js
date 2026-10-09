@@ -2,9 +2,15 @@
 // title bar you can drag, a close button, a body, and one registry so Esc closes the top one and a hotkey toggles
 // its own window. Positions are remembered per window for the session (makeDraggable below, play-test 9). DOM only.
 
+import { installKeepScroll } from './ui/keep-scroll.js';
+
+// play-test 10 (Y27): every list in every window keeps its scroll position through a redraw (ui/keep-scroll.js)
+installKeepScroll();
+
 const OPEN = [];                 // open panels, last = on top
 const ALL = new Map();           // id -> panel
 let zTop = 30;
+const Z_WINDOW_MAX = 900;       // css/pt10.css: --z-ask (5000) and --z-confirm (99500) sit above this
 const posKey = id => 'tv.panel.' + id;
 
 export function createPanel({ id, title, cls = '', width = 340, parent = null, onOpen = null, onClose = null, closable = true }) {
@@ -27,7 +33,12 @@ export function createPanel({ id, title, cls = '', width = 340, parent = null, o
   root.addEventListener('keydown', e => { if (e.key === 'Escape') { panel.close(); e.preventDefault(); } e.stopPropagation(); });
   root.querySelector('.tvp-x')?.addEventListener('click', () => panel.close());
 
-  function raise() { root.style.zIndex = String(++zTop); const i = OPEN.indexOf(panel); if (i >= 0) { OPEN.splice(i, 1); OPEN.push(panel); } }
+  function raise() {
+    const i = OPEN.indexOf(panel); if (i >= 0) { OPEN.splice(i, 1); OPEN.push(panel); }
+    root.style.zIndex = String(++zTop);
+    // play-test 10 (Y39): the counter never climbs past the things that must stay above every window (css/pt10.css)
+    if (zTop > Z_WINDOW_MAX) { zTop = 30; for (const p of ALL.values()) if (!OPEN.includes(p)) p.root.style.zIndex = '30'; for (const p of OPEN) p.root.style.zIndex = String(++zTop); }
+  }
   function clampOnScreen() { clampPlaced(root); }
 
   const panel = {
@@ -142,6 +153,10 @@ export function h(tag, props = {}, ...kids) {
   return e;
 }
 
+/** Play-test 10 (Y39, report D#59: "the abandon quest confirmation appears beneath the journal"): every dialog that asks
+ *  a question is mounted on <body> with class `tv-confirm` — css/pt10.css puts that above every window, on every layout. */
+export function mountConfirm(box) { box.classList.add('tv-confirm'); document.body.appendChild(box); return box; }
+
 /** A modal-ish confirm drawn in the HUD (no browser confirm(): it freezes the frame loop and the socket pings). */
 export function confirmBox(text, { yes = 'Yes', no = 'Cancel', danger = false } = {}) {
   return new Promise(res => {
@@ -152,7 +167,7 @@ export function confirmBox(text, { yes = 'Yes', no = 'Cancel', danger = false } 
         h('button.' + (danger ? 'danger' : 'primary'), { onclick: () => done(true) }, yes)));
     const done = v => { box.remove(); res(v); };
     box.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') done(false); if (e.key === 'Enter') done(true); });
-    (document.getElementById('hud') || document.body).appendChild(box);
+    mountConfirm(box);
     box.querySelector('button:last-child').focus();
   });
 }

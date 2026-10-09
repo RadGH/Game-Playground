@@ -1139,3 +1139,39 @@ New: `js/client/ui/pt9-core.js` (pure), `js/client/ui/online-window.js`, `css/pt
 - **Round 9 (stream C)**: three Thousandvale set powers replace the stripped ones — Roadwarden's Vigil / Roadsong +10% move speed out of a fight, Forager's Covenant / Thistlewarden 15% chance of an extra material from a gathering node, Ragpicker's Fortune +15% kill gold and a 10% chance a crate holds one rarity better; The Long Watch gets +20% armour after dark.
 - **Round 10 (stream C, owner feedback 10)**: one damage number a melee swing (Farhold's "splash behind the arc" folded into the arc's hit — Y9); hands are Main hand / Off hand / One-hand / Two-hand (`js/rules/hands.js`), tomes are main-hand caster weapons with four slower, heavier forms, orbs are off-hand implements with no attack, saved items in a now-illegal hand are moved, never deleted (Y16); dungeon walls block every attack both ways (`js/rules/sight.js` — Y10); every basic attack fires while moving (Y7); attacks per second on the weapon card and the sheet, attack speed capped at +40% and applied to bows, staves, wands and tomes (Y26); a knock moves a caster-anchored wind-up (`teleM`) and may interrupt it by rank (Y12); carried zones tell the client who they ride, and three ground-cast ones follow for the first time (Y25); Storm Beam is a six-pulse held beam (Y20); the Unbinder costs a share of lifetime income — 515 gold for everything at level 9, from the one `income.lifetime` table in prices.json (Y14, Y31); training dummies (Y17); wilderness NPCs that fight beside a player and report who helped (Y21, `js/rules/guards.js`). New knob file `data/rules/combat.json`. tests/C/playtest10.test.mjs (21).
 - **The Starcaller (Y32, stream C)**: a 31st class, Thousandvale-only, injected from `data/rules/classes-tv.json` — arcane, cloth, Mana; Star Dart, Scattered Stars, Called Star, Star Field, Wheeling Stars, Heavens' Barrage, each with a four-tier talent tree; signature Constellation (Starlight, 5 at most: thrown stars fill it, the big skills spend it); five starter packs incl. the first main-hand tome kit; projectile kinds `star` and `skystar` (`fx skyfall`). Measured beside mage / stormcaller / pyromancer at 5 / 10 / 20: 40 / 86 / 233 against 34-40 / 78-86 / 205-235.
+
+## Play-test 10 — D-UI (interface) — 2026-10-08
+- **Y33 (iPhone)**: the portrait floating below the unit frame, flickering. Cause: the live portrait draws the body a second time INTO the game's canvas, in the
+  square the frame covers, and reads it back; on iOS Safari the canvas box changed height (the toolbar) while the drawing buffer did not, so "frame rectangle ->
+  GL viewport" pointed 86 px low and the face was drawn in the open, six times a second on a canvas repainting sixty. Now the live path is used only on a desktop
+  pointer device whose canvas box matches its buffer that frame (`ui/portrait-mode.js`); iOS, the phone layout and any finger-first device get the 2D picture
+  (`ui/svg-portrait.js`), an `<img>` inside the frame. `scene.js` `resize()` only on `window.resize` is the underlying fault (D-world's, in docs/requests.md).
+- **Y27** (#27 #38 #40 #57 #51): every list keeps its scroll position through a redraw — one rule (`ui/keep-scroll.js`, installed by `ui-panel.js`): a scrolled
+  element that is REPLACED by a new one at the same place in the same window (same tab) is put back where it was, before the browser paints. Shop lists and the
+  compare card reserve their scrollbar and keep one height, so hovering shifts nothing. The spec redraws every scrolling list of every window.
+- **Y39** (D#59): one stacking rule (`css/pt10.css`): `--z-ask` (pop-ups that ask) and `--z-confirm` above every window; every confirm is mounted on `<body>`
+  (`mountConfirm`); the windows' own z counter is held under 900 (it used to climb past the confirm's 60 after thirty clicks — that was the bug).
+- **Y38** (D#58): a skill's talent badge is decided by the SERVER's tree, not by a `talents` block on Farhold's row — a skill Thousandvale adds itself had none.
+- **Y37** (S#55): party rows are de-duplicated and never include you (`partyRows`: the server's `party.me`, else your id, else your name).
+- **Y11** (#35): `eventSync {live, realm}` and `travelR {gone}` drop tracker cards, the waystone line and map pins for events that are over.
+- **Y29** (#37): the title opens on the front card for everyone — "Finding your characters…", then the list, or one "Create character" button; the form opens
+  only when asked for. The 3D figure is the listed character (saved look + the server's `gear`, else what this browser last saw it wearing), through `lookFor`.
+- **Y30** (#25): the changelog — a popup on the title after an update, a window listing every entry newest first with unread ones marked New (`ui/changelog.js`);
+  "What's new" on the title's foot line and in the pause menu; `/changelog`. The marker is the account's (`settings.changelogSeen`) or the browser's.
+- **Y28** (#39): "Locate player" at the top-left of the map. **Y36** (S#54): a Party section on the map (yourself first; Show / Track per member); tracking a
+  party member or a friend (friends list: Track) = a marker, the minimap's rim arrow with the distance, and an arrow at the edge of the screen until within 25 m;
+  pointing at a side-list row whose target is off the map draws an edge arrow. `thousandvale.tracking()` for D-world's in-world arrow.
+- **Y22** (#17): a step done anywhere (craft / cook / learn / ride …) has no place: no marker, no ring; the minimap no longer fills with a region-sized ring.
+- **Y16 / Y26** (#31 #32 #50): cards print the rules' hand ("Main hand" / "Off hand" / "One-hand" / "Two-hand"), attacks per second under the damage, no damage
+  line for an orb; a wrong-hand drop is refused in the rules' words before the round trip. **Y15** (#33): Angling is under Gathering (no block of its own).
+- **Y6** (#28): a ring's icon is the ring — a 2D loop in the model's own metal and stone colours — not a close-up of a fist.
+- **Y32**: a calling's card on the new-character form (role, armour, stat, resource, hook, signature) fed by one list that includes Thousandvale's own callings;
+  pictures for the Starcaller's six skills (`ui/skill-icons.js`; other skills keep initials); `ui/class-res.js` draws a class resource as pips on your frame —
+  WAITING on the server to send it (no class resource has ever been sent; see docs/requests.md).
+- **Y5** (#53): `/wave /sit /dance /cheer /bow /point`, `/emotes`; a third ring "Emotes" on the quick wheel. **Y34** (desktop half): the fishing control is a rod,
+  a line and a fish with "Cast a line" under it.
+- Tests: `tests/D/pt10.test.js` (19), `tests/D/pt10.spec.js` (desktop + 393 x 852 as an iPhone), nine gallery scenes.
+
+## 2026-10-08 — stream A, owner feedback 10 (protocol 8, no schema change)
+- `teleM` + `emote` event types; `starcaller` accepted (server/load.mjs reads data/rules/classes-tv.json). Y37 `partyState.me` + a resend after rejoin. Y11 `eventSync`, `travelR.gone`. Y23 per-death respawn clocks, wilds 90-150 s, no respawn in view inside a minute. Y24 waystones claim at 30 m. Y8 empty corpses are not targets. Y5 `emote`. Y17 dummies (`dummy` rows; stand-ins in the first town). Y21 `data.fighter`, `npcHelped` thanks (`npcThanks` knobs). Y15 angling is learned (anglers teach). Y16 hands-moved items to the bag / post, `refreshItem` over the bag. Y30 `/changelog.json`, `charList.changelog`, `settings.changelogSeen`. Y36 `track` / `whereabouts`, `settings.shareLocation`.
+- tests/A/pt10.test.js (6); tests/A 297 = 292 pass / 4 skip / 1 red in the parallel run (stage2, passes alone).

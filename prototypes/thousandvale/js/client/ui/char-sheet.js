@@ -95,7 +95,9 @@ export function createCharSheet({ net, hud, bag, self, bar }) {
     panel.setTitle('Character', `${me.name || ''}${me.level ? ` · level ${me.level}` : ''}${me.cls ? ' ' + pretty(me.cls) : ''}`);
     const changed = Object.keys(S.diff).length;
     const ang = S.angling || net()?.joined?.you?.angling || null;
-    const a = ang ? anglingText(ang) : null;
+    // play-test 10 (Y15, report #33): Angling is a gathering trade — it is listed under Gathering in the Professions block
+    // below (P-client's rows, which carry it). The block of its own only remains when there is no Professions block at all.
+    const a = ang && !extra.has('professions') ? anglingText(ang) : null;
     panel.fill(
       h('div.sh-top', {},
         h('button.ghost.small', { type: 'button', dataset: { act: 'bag' }, title: 'Open your bag beside this window: equip something and watch the numbers change', onclick: () => { bag?.toggle(!bag.isOpen); dock(); draw(); } }, bag?.isOpen ? 'Hide bag' : 'Open bag beside this'),

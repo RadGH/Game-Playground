@@ -14,6 +14,7 @@ import { iconFor } from './item-icons.js';
 import { isCrate, crateLines, rarityClass } from './pt5-core.js';
 import { potionLine } from './pt6-core.js';
 import { bagSlotsText } from './pt8-core.js';
+import { handLine, apsLine, showsDamage } from './pt10-core.js';
 import { fmt, pct } from '../../../../../shared/format.js';
 
 const items = new Map();                       // uid -> item
@@ -70,9 +71,11 @@ export function itemCardHtml(item, { worn = false, level = null, equipment = nul
   const r = rarityOf(item), slot = slotOf(item);
   const icon = iconFor(item);
   const b = [];
+  // play-test 10 (Y16): which hand, in the rules' own words — "Main hand" / "Off hand" / "One-hand" / "Two-hand" (C's item.handText)
+  const hand = handLine(item);
   b.push(`<div class="ic-head">${icon ? `<img class="ic-icon r-${esc(r)}" src="${icon}" alt="">` : ''}<div><div class="ic-name r-${esc(r)}">${esc(nameOf(item))}</div>`
     + `<div class="ic-kind">${esc(RARITY_NAME[r] || title(r))} ${esc(slot ? SLOT_NAME[slot] || title(slot) : isCrate(item) ? crateLines(item).kind.toLowerCase() : item.kind === 'junk' ? 'junk' : item.kind === 'fish' ? 'fish' : item.kind === 'material' ? 'crafting material' : item.tool ? 'tool' : 'item')}`
-    + `${item.baseName && item.baseName !== item.name ? ' · ' + esc(item.baseName) : ''}${item.twoHanded ? ' · two-handed' : ''}</div></div></div>`);
+    + `${item.baseName && item.baseName !== item.name ? ' · ' + esc(item.baseName) : ''}${hand ? ' · ' + esc(hand) : item.twoHanded ? ' · two-handed' : ''}</div></div></div>`);
   // T9 / T20 (play-test 5): a crate or a gift says what it opens into and the lowest rarity it can be
   if (isCrate(item)) {
     const c = crateLines(item);
@@ -86,9 +89,13 @@ export function itemCardHtml(item, { worn = false, level = null, equipment = nul
       + `${req.ok ? '' : ` <i>— you are level ${lv}</i>`}</div>`);
   }
   const base = [];
-  if (item.dmg) base.push(`<b>${item.dmg[0]}–${item.dmg[1]}</b> damage`);
+  // Y16: an orb or focus has no attack of its own (`noAttack`) — no damage line and no attack speed for it
+  if (item.dmg && showsDamage(item)) base.push(`<b>${item.dmg[0]}–${item.dmg[1]}</b> damage`);
   if (item.armor) base.push(`<b>${item.armor}</b> armour`);
-  if (item.attackSpeed && item.type === 'weapon' && item.attackSpeed !== 'normal') base.push(`${esc(item.attackSpeed)} attacks`);
+  // Y26 (report #50): attacks per second under the damage, from the rules (`item.apsText`); the old "fast attacks" word only without it
+  const aps = apsLine(item);
+  if (aps) base.push(esc(aps).replace(/^([\d.]+)/, '<b>$1</b>'));
+  else if (item.attackSpeed && item.type === 'weapon' && item.attackSpeed !== 'normal' && showsDamage(item)) base.push(`${esc(item.attackSpeed)} attacks`);
   if (item.ranged) base.push('ranged');
   if (base.length) b.push(`<div class="ic-base">${base.join(' · ')}</div>`);
   if (item.count > 1) b.push(`<div class="ic-base">A stack of <b>${esc(fmt(item.count, { decimals: 0 }))}</b>${item.stackMax ? ` <span class="ic-dim">(holds ${esc(item.stackMax)})</span>` : ''} — one is used at a time. Shift-click to split it.</div>`);
@@ -119,7 +126,8 @@ export function itemCardHtml(item, { worn = false, level = null, equipment = nul
       b.push(`<div class="ic-compare">Instead of <b class="r-${esc(rarityOf(c.worn))}">${esc(nameOf(c.worn))}</b> <span class="ic-dim">(${esc(SLOT_NAME[c.slot] || c.slot)})</span> `
         + `<span class="${d > 0 ? 'up' : d < 0 ? 'down' : ''}">${d > 0 ? '▲ +' : d < 0 ? '▼ ' : '= '}${d}</span></div>`);
       const was = [];
-      if (c.worn.dmg) was.push(`${c.worn.dmg[0]}–${c.worn.dmg[1]} damage`);
+      if (c.worn.dmg && showsDamage(c.worn)) was.push(`${c.worn.dmg[0]}–${c.worn.dmg[1]} damage`);
+      if (apsLine(c.worn)) was.push(apsLine(c.worn));
       if (c.worn.armor) was.push(`${c.worn.armor} armour`);
       const lose = (c.worn.affixes || []).filter(a => !a.baseIntrinsic).map(affixText);
       if (was.length || lose.length) b.push(`<div class="ic-dim">You would lose: ${esc([...was, ...lose].join(' · '))}</div>`);

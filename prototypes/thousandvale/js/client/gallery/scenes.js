@@ -174,6 +174,26 @@ export const SCENES = [
   { id: 'event-hidden', expect: '.et-hidden:not([hidden])', group: 'In the world', title: 'HUD — an event you hid', only: ['desktop', 'laptop', 'pad'],      /* the phone layout keeps the whole event column behind its HUD-info toggle (flagged to G last round) */ modules: [U + 'hidden-events.js', U + 'event-tracker.js', U + 'pt8.js'],
     steps: [['play', 'event-far'], ['wait', 300], ['call', 'tvui8.hide', { uid: 'e78', id: 'stone_snow', name: 'The Stone in the Snow' }], ['wait', 300]],      // (the same set the card's crossed-eye button writes; the card itself sits behind the HUD-info toggle on a phone)
     notes: { all: 'W13: the crossed eye on an event\'s card takes it off your screen — the card, the minimap pin and its arrow. One line stays to bring it back; the map\'s Events list does the same.', phone: 'The event cards live behind the HUD-info toggle on a phone; the line is there with them.' } },
+  // ---- play-test 10 (stream D-UI) ----
+  { id: 'title-loading', expect: '#front[data-state="loading"] .front-state.busy', group: 'Start', title: 'Title — finding your characters', stage: 'title', step: 'front-loading', modules: [U + 'title-front.js', U + 'pt10-core.js', 'index.html'],
+    notes: { all: 'Y29: what a returning player sees for the moment before the character list arrives — one line and nothing to click. The new-character form no longer shows through.', phone: 'The same card, full width.' } },
+  { id: 'title-empty', expect: '#front[data-state="empty"] #new-char:not([hidden])', group: 'Start', title: 'Title — no characters yet', stage: 'title', step: 'front-empty', modules: [U + 'title-front.js', U + 'pt10-core.js'],
+    notes: { all: 'Y29: a new visitor (or an account with nobody on it) gets one button, "Create character" — the form opens when it is pressed, never by itself.', phone: 'The button is the full width of the card.' } },
+  { id: 'title-calling', expect: '#class-card:not([hidden]) .cc-sig', group: 'Start', title: 'Title — the calling\'s card (Starcaller)', stage: 'title', step: 'new', modules: [U + 'class-card.js', 'index.html'],
+    steps: [['wait', 900], ['run', async () => { const m = document.getElementById('class-more'); m.value = 'starcaller'; m.dispatchEvent(new Event('change')); }], ['wait', 200]],
+    notes: { all: 'Y32: under the callings, a card for the one picked — its role, what it wears and runs on, its hook and its signature mechanic, in the class data\'s own words. Shown: the Starcaller, the calling that exists only in Thousandvale.', phone: 'The card is part of the scrolling form.' } },
+  { id: 'changelog', expect: '.tv-changelog:not([hidden]) .cl-entry', group: 'Start', title: 'Changelog — what is new', stage: 'title', step: 'front', modules: [U + 'changelog.js', U + 'pt10.js', U + 'pt10-core.js'],
+    steps: [['wait', 900], ['run', async () => { window.tvui10.changelog.open(); }], ['wait', 600]],
+    notes: { all: 'Y30: every update, newest first; the ones you have not read are marked New. Opened from "What\'s new" on the title, the pause menu, or the popup that appears on the title after an update.', phone: 'A full-screen sheet that scrolls.', pad: 'B closes it; the right stick scrolls.' } },
+  { id: 'changelog-popup', expect: '.tv-updated:not([hidden])', group: 'Start', title: 'Title — "The game was updated"', stage: 'title', step: 'front', modules: [U + 'changelog.js'],
+    steps: [['wait', 900], ['run', async () => { const c = window.tvui10.changelog; await c.check(); try { localStorage.setItem('tv.changelog.seen', '2026-10-06'); } catch { /* in-memory storage */ } c.wire({ changelog: { latest: '2026-10-08', seen: '2026-10-06' }, on() {} }); await c.check(); }], ['wait', 300]],
+    notes: { all: 'Y30: on the title after an update, a card in the corner says how many updates there have been since you last played, with a button to read them. A brand-new player never sees it.', phone: 'Top of the screen, under the island.' } },
+  { id: 'map-party', expect: '#panel-map:not([hidden]) .map-party .map-person', group: 'Windows', title: 'Map — Locate player, the Party list, tracking', modules: [U + 'worldmap.js', U + 'pt10.js', U + 'pt10-core.js', 'js/client/friends.js'],
+    steps: [['play', 'hurt-party'], ['panel', 'map'], ['wait', 1500], ['run', async G => { const P = window.tvui10.people().find(p => !p.self && p.placed) || window.tvui10.people().find(p => !p.self); if (P && !window.tvui10.isTracked(P.char)) window.tvui10.track(P.char, P.name, 'party'); G.ui.worldMap.fitPreset('region'); if (P && P.placed) G.ui.worldMap.pointAt(P.x + 9000, P.z); }], ['wait', 700]],
+    notes: { all: 'Y28 + Y36: "Locate player" sits at the top-left and centres the map on you. The Party section lists everyone, yourself first, each with Show (zoom to them) and Track. Pointing at a row whose target is off the map draws an arrow on the map\'s edge towards it. A tracked person also gets an arrow at the edge of the game screen, with the distance, until you are near.', phone: 'The side lists sit under the map; the buttons are thumb-sized.', pad: 'The ring reaches Locate player and the list\'s buttons.' } },
+  { id: 'emote-wheel', expect: '.tv-radial:not([hidden]) [data-id="emote:wave"]', group: 'In the world', title: 'Quick wheel — emotes', only: ['pad', 'phone-l', 'phone-p'], modules: [U + 'pt10.js', 'js/client/input/radial.js'],
+    steps: [['run', async () => { window.gallery.input.radial.open({ ring: 2, hold: false }); }], ['wait', 200]],
+    notes: { all: 'Y5: the wheel\'s third ring — wave, sit, dance, cheer, bow, point. The same six as /wave /sit /dance … in chat.', phone: 'Tap the wheel\'s middle to step from Windows to Do to Emotes.', pad: 'Hold LB, press RB to step the rings, point and let go.' } },
   { id: 'account', expect: '#panel-account:not([hidden])', group: 'Windows', title: 'Account', modules: ['js/client/account.js'], steps: [['panel', 'account']],
     notes: { all: 'Claim a guest account (free), or see the one you are logged into.' } },
 
@@ -246,6 +266,10 @@ export const sceneById = id => SCENES.find(s => s.id === id) || null;
 export const NO_SCREEN = {
   'js/client/ui/net2.js': 'only sends messages (no markup)',
   'js/client/ui/svg-portrait.js': 'a helper of portraits.js — seen wherever a portrait is (Title — your characters, the HUD frames)',
+  'js/client/ui/portrait-mode.js': 'a rule of portraits.js: where the live 3D portrait may be used (play-test 10, Y33) — no markup',
+  'js/client/ui/keep-scroll.js': 'keeps every list\'s scroll position through a redraw (Y27) — no markup of its own; tests/D/pt10.spec.js exercises it',
+  'js/client/ui/skill-icons.js': 'SVG strings for skill faces (Y32) — seen on the action bar and in the Skills window when the class has them',
+  'js/client/ui/class-res.js': 'the class resource pips on your frame (Y32) — drawn only when the server reports a resource; see docs/requests.md',
 };
 
 /** The frames. `w`/`h` in CSS px; `safe` = the iPhone 15 Pro's insets in that orientation. */

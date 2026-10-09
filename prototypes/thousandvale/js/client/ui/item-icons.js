@@ -311,15 +311,37 @@ function finish(subject) {
   return c;
 }
 
+/** A hex colour lightened (t > 0, towards white) or darkened (t < 0, towards black). */
+function shade(hex, t) {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex || ''); if (!m) return hex;
+  const n = parseInt(m[1], 16), to = t > 0 ? 255 : 0, k = Math.abs(t);
+  const ch = sh => Math.round(((n >> sh) & 255) + (to - ((n >> sh) & 255)) * k);
+  return '#' + [16, 8, 0].map(sh => ch(sh).toString(16).padStart(2, '0')).join('');
+}
 /** 2D pictures for things with no model: ring, amulet, potion, focus, junk, a bundle (a canvas). */
 export function glyphCanvas(spec) {
   const c = canvas2d(SIZE), g = c.getContext('2d'), s = SIZE / 128, col = spec.color || '#d0a040';
   g.save(); g.translate(SIZE / 2, SIZE / 2); g.scale(s, s); g.lineJoin = 'round'; g.lineCap = 'round';
   g.shadowColor = 'rgba(0,0,0,0.6)'; g.shadowBlur = 6; g.shadowOffsetY = 2;
   if (spec.id === 'ring') {
-    g.strokeStyle = col; g.lineWidth = 11; g.beginPath(); g.ellipse(0, 10, 30, 24, 0, 0, Math.PI * 2); g.stroke();
-    g.strokeStyle = 'rgba(255,255,255,0.35)'; g.lineWidth = 3; g.beginPath(); g.ellipse(-2, 6, 30, 24, 0, Math.PI * 1.1, Math.PI * 1.7); g.stroke();
-    g.fillStyle = '#9fe0ff'; g.strokeStyle = '#f4f0e0'; g.lineWidth = 3; g.beginPath(); g.moveTo(0, -38); g.lineTo(15, -22); g.lineTo(0, -8); g.lineTo(-15, -22); g.closePath(); g.fill(); g.stroke();
+    // Y6 (play-test 10): the ring itself — a band seen a little from above, so the loop reads as a loop, with its
+    // bezel and stone on top. Band = the model's metal, stone = the model's stone (the same two colours the hand wears).
+    const stone = spec.color2 || '#9fe0ff';
+    const band = (rx, ry, lw, style) => { g.strokeStyle = style; g.lineWidth = lw; g.beginPath(); g.ellipse(0, 14, rx, ry, 0, 0, Math.PI * 2); g.stroke(); };
+    band(34, 27, 15, shade(col, -0.45));                                         // the dark outside edge
+    band(34, 27, 11, col);                                                        // the metal
+    g.shadowColor = 'transparent';
+    g.strokeStyle = shade(col, -0.3); g.lineWidth = 4; g.beginPath(); g.ellipse(0, 16, 27, 20, 0, Math.PI * 0.05, Math.PI * 0.95); g.stroke();      // inside of the loop, far side in shadow
+    g.strokeStyle = shade(col, 0.5); g.lineWidth = 3.5; g.beginPath(); g.ellipse(-1, 12, 35, 28, 0, Math.PI * 1.08, Math.PI * 1.42); g.stroke();   // a glint on the near shoulder
+    g.strokeStyle = shade(col, 0.3); g.lineWidth = 2.5; g.beginPath(); g.ellipse(0, 14, 34, 27, 0, Math.PI * 0.2, Math.PI * 0.42); g.stroke();
+    // the bezel: a small collar where the band passes over the top, and the cut stone in it
+    g.fillStyle = shade(col, -0.2); g.strokeStyle = shade(col, -0.5); g.lineWidth = 2.5;
+    g.beginPath(); g.moveTo(-17, -6); g.lineTo(17, -6); g.lineTo(13, -20); g.lineTo(-13, -20); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = stone; g.strokeStyle = shade(stone, -0.5); g.lineWidth = 2.5;
+    g.beginPath(); g.moveTo(0, -46); g.lineTo(16, -32); g.lineTo(11, -17); g.lineTo(-11, -17); g.lineTo(-16, -32); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = shade(stone, 0.45); g.beginPath(); g.moveTo(0, -46); g.lineTo(16, -32); g.lineTo(0, -30); g.lineTo(-16, -32); g.closePath(); g.fill();   // the crown facet catches the light
+    g.strokeStyle = shade(stone, -0.35); g.lineWidth = 1.5; g.beginPath(); g.moveTo(0, -30); g.lineTo(0, -17); g.moveTo(-16, -32); g.lineTo(16, -32); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,0.7)'; g.beginPath(); g.arc(-6, -37, 2.6, 0, Math.PI * 2); g.fill();
   } else if (spec.id === 'amulet') {
     g.strokeStyle = '#c8b070'; g.lineWidth = 4; g.beginPath(); g.moveTo(-34, -46); g.quadraticCurveTo(0, 10, 34, -46); g.stroke();
     g.fillStyle = '#d9b477'; g.beginPath(); g.arc(0, 12, 24, 0, Math.PI * 2); g.fill();

@@ -79,7 +79,7 @@ export function connect(opts = {}) {
         sendJ(s, { t: 'chars' });
         return;
       case 'charList':
-        net.chars = m.chars; if (m.limit) net.charLimit = m.limit; emit('chars', m.chars);      // charLimit (round 9, X6): how many characters the account may hold
+        net.chars = m.chars; if (m.limit) net.charLimit = m.limit; if (m.changelog) { net.changelog = m.changelog; emit('changelog', m.changelog); }      /* changelog {latest, seen} (round 10, Y30) */ emit('chars', m.chars);      // charLimit (round 9, X6): how many characters the account may hold
         readyResolve(net);
         if (wantChar != null) sendPlay();
         else setStatus('select');
@@ -97,7 +97,7 @@ export function connect(opts = {}) {
         return;
       case 'kick': net.lastKick = m; emit('kick', m); if (NO_RETRY.has(m.code)) { setStatus('kicked'); stop(); } return;
       case 'pong': onPong(m); return;
-      case 'partyState': net.party = m.party; emit('party', m.party); return;
+      case 'partyState': if (m.party && m.me != null) m.party.me = m.me; net.party = m.party; emit('party', m.party); return;      // party.me (round 10, Y37): which member is YOU, said by the server
       case 'partyInvite': emit('partyInvite', m); return;
       case 'partyFrames': emit('partyFrames', m.m.map(r => ({ char: r[0], hp: r[1], hpMax: r[2], room: r[3], x: r[4], z: r[5], dead: !!r[6], online: !!r[7], id: r[8], mp: r[9], mpMax: r[10] }))); return;
       case 'chat': emit('chat', m); return;
@@ -358,6 +358,10 @@ export function connect(opts = {}) {
   net.adminOnline = () => sendJ(gw, { t: 'admin', op: 'online' });
   /** Round 8 (W5): cart('list', id) -> cartList ; cart('go', id, stopId) -> cartR, then cartRide and (ms later) the arrival `joined`. `id` = the carter / cart entity. */
   net.cart = (op, id, to, token) => sendJ(game, { t: 'cart', op, id, ...(to ? { to } : {}), ...(token ? { token: true } : {}) });
+  /** Round 10 (Y36): track(charId) / track(charId, true) to stop / track(0) to stop all -> trackR; then `whereabouts {l:[[char, name, province, zoneName, town, x, z, roomKind, level, cls]…]}` at 1 Hz. */
+  net.track = (char, off) => sendJ(gw, { t: 'track', char: char | 0, ...(off ? { off: true } : {}) });
+  /** Round 10 (Y5): emote('wave'|'sit'|'dance'|'cheer'|'bow'|'point') -> emoteR; everyone in view gets the event `emote {id, e}`. */
+  net.emote = id => sendJ(game, { t: 'emote', id: String(id) });
   /** Round 8 (W21): meter(true|false) -> `meterR {on}`, then `hits {l: [[src, tgt, n, flags, sk, el, over, abs], …]}` a few times a second while on. */
   net.meter = on => sendJ(game, { t: 'meter', on: !!on });
   /** Round 8 (W29): myReports({limit?, before?}) -> `feedbackMine {ok, list:[{id, at, kind, text, state, note, noteAt, adminNote, done, doneAt, ref}], more}` — your account's own reports, newest first. */

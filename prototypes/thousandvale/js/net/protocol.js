@@ -155,7 +155,9 @@ export const CLIENT_MSGS = Object.freeze({
   sheet:   { on: 'p', fields: {}, rate: 2, burst: 4 },
   feedback: { on: 'both', fields: { kind: '?str:16', text: '?str:2000', ctx: '?obj', ref: '?int', op: '?str:8', limit: '?int', before: '?int' }, rate: 0.5, burst: 10 },      // the real limit is js/sim/feedback.js (answered). ref (round 8, W29): a reply to your own report #ref
   cart:    { on: 'p', fields: { op: 'str:8', id: 'id', to: '?str:48', token: '?bool' }, rate: 2, burst: 4 },      // owner feedback 8, W5: ox-cart travel — op list | go
+  emote:   { on: 'p', fields: { id: 'str:16' }, rate: 0.7, burst: 3 },      // owner feedback 10, Y5: wave | sit | dance | cheer | bow | point
   meter:   { on: 'p', fields: { on: 'bool' }, rate: 1, burst: 4 },      // owner feedback 8, W21: the damage meter's per-hit feed (`hits`) on / off — off by default
+  track:   { on: 'gw', fields: { char: 'int', off: '?bool' }, rate: 2, burst: 8 },      // owner feedback 10, Y36: follow where a party member / mutual friend is -> trackR, whereabouts (char 0 = stop all)
   delete:  { on: 'gw', fields: { char: 'int', name: 'str:24' }, rate: 0.5, burst: 3 },      // owner feedback 9, X6: delete a character (the typed name confirms it) -> deleted, then charList
   feedbackMine: { on: 'both', fields: { limit: '?int', before: '?int' }, rate: 1, burst: 5 },      // round 8, W29: my own reports -> feedbackMine (`feedback {op:'mine'}` is the same call)
   admin:   { on: 'both', fields: { op: 'str:16', id: '?int', state: '?str:16', kind: '?str:16', limit: '?int', before: '?int', note: '?str:500' }, rate: 2, burst: 10 },
@@ -251,6 +253,10 @@ export const SERVER_MSGS = Object.freeze({
   deleted: ['ok', 'char', 'name', 'freeAt', 'returned', 'why', 'msg'],
   adminOnline: ['ok', 'at', 'count', 'accounts', 'list'],
   hits: ['l'],
+  emoteR: ['id', 'ok', 'why', 'msg'],
+  eventSync: ['live', 'realm', 'at'],
+  trackR: ['ok', 'char', 'why', 'msg', 'tracking'],
+  whereabouts: ['l'],
   cartList: ['id', 'from', 'name', 'stops', 'gold', 'tokens'],
   cartR: ['op', 'ok', 'to', 'fare', 'why', 'msg'],
   cartRide: ['to', 'from', 'ms', 'fare'],
@@ -306,7 +312,7 @@ export const MAIL_OPS = Object.freeze(['list', 'read', 'send', 'take', 'return',
 export const ROOM_KINDS = Object.freeze(['wilds', 'town', 'instance']);
 
 export const EVENT_TYPES = Object.freeze(['cast', 'hit', 'miss', 'die', 'xp', 'level', 'loot', 'aggro', 'fx', 'open',
-  'tele', 'teleR', 'castbar', 'castX', 'phase', 'enrage', 'say', 'obj', 'boss', 'mp']);
+  'tele', 'teleR', 'teleM', 'castbar', 'castX', 'phase', 'enrage', 'say', 'obj', 'boss', 'mp', 'emote']);      // teleM (C, round 10 Y12): a wind-up moved with its caster; emote (Y5)
 
 /**
  * Event fields (docs/protocol.md §6, encounter rows from docs/encounters.md §7). Every event also has
@@ -325,6 +331,8 @@ export const EVENT_FIELDS = Object.freeze({
   open: ['d'],
   tele: ['id', 's', 'ab', 'k', 'ms', 'shape', 'yaw?', 'r?', 'r2?', 'arc?', 'len?', 'w?', 'el?', 'follow?'],
   teleR: ['id', 'hits?', 'x?'],
+  teleM: ['id', 'x', 'z'],
+  emote: ['id', 'e', 'ms?', 'end?'],
   castbar: ['id', 'ab', 'name', 'ms', 'int?'],
   castX: ['id', 'ab', 'why'],
   phase: ['id', 'n', 'name?', 'bar', 'hpMax?', 'reset?'],

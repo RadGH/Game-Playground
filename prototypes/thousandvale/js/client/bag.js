@@ -15,9 +15,10 @@ import { DOLL_LEFT, DOLL_RIGHT, DOLL_BOTTOM, DOLL_EXTRA, SLOT_NAME, FILTERS, SOR
 import { iconFor, onIcon, specFor, iconsActive, setIconContext } from './ui/item-icons.js';
 import { installItemCards, rememberItems, scoreOf, nameOf, farholdReady } from './ui/item-card.js';
 import { hideTip, installGameTips } from './ui/tips.js';
-import { confirmBox, makeDraggable } from './ui-panel.js';
+import { confirmBox, makeDraggable, mountConfirm } from './ui-panel.js';
 import { wearSlot } from './ui/pt2-core.js';
 import { offhandRefusal, hasDual2h, BAG_MAX as BAG_CAP } from './ui/pt5-core.js';
+import { handRefusal } from './ui/pt10-core.js';
 import { UNSEEN } from './ui/unseen.js';
 import { packRefusal, bagSlotsOf } from './ui/pt8-core.js';      // W19: a backpack's extra squares
 
@@ -134,6 +135,7 @@ export function createBag({ net: getNet, hud, me = null }) {
     if (!req.ok) { hud.toast(`${nameOf(it)} needs level ${req.level} — you are level ${level()}.`, 'warn'); return; }
     // Q12: a click on a second ring puts it on the EMPTY hand (never over the first); a drag onto an exact ring slot
     // names it ('ring1' / 'ring2' on the wire — 'ring' alone means "you pick" to the server, protocol v6)
+    { const no = handRefusal(it, slot === 'offhand' ? 'offhand' : slot === 'weapon' ? 'weapon' : null); if (no) { hud.toast(no, 'warn'); return; } }      // Y16: Main hand / Off hand items fit only that hand
     if (slot === 'offhand') { const no = offhandRefusal(it, S.equipment, { dual2h: dual2h() }); if (no) { hud.toast(no, 'warn'); return; } }
     // W19: a cloak (or a smaller pack) over a pack whose extra squares are in use — say why before asking the server
     if (slotOf(it) === 'back' && S.equipment?.back) { const no = packRefusal(S.equipment.back, { bagCount: S.bag.length, bagMax: bagMax(), next: it }); if (no) { hud.toast(no, 'warn'); return; } }
@@ -146,6 +148,7 @@ export function createBag({ net: getNet, hud, me = null }) {
     const it = find(d.uid); if (!it) return;
     // T7: the off hand takes a second two-hander when the perk is owned — and says why not otherwise
     const hand = slot === 'offhand' && slotOf(it) === 'weapon';
+    { const no = handRefusal(it, slot); if (no) { hud.toast(no, 'warn'); return; } }
     if (hand) { const no = offhandRefusal(it, S.equipment, { dual2h: dual2h() }); if (no) { hud.toast(no, 'warn'); return; } }
     else if (slotOf(it) !== slot && altSlotOf(it) !== slot) { hud.toast(`${nameOf(it)} does not go in ${SLOT_NAME[slot] || slot}.`, 'warn'); return; }
     wear(it, slot);
@@ -190,7 +193,7 @@ export function createBag({ net: getNet, hud, me = null }) {
     no.onclick = () => done(false); yes.onclick = () => done(true);
     box.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') done(false); if (e.key === 'Enter') done(true); });
     row.append(no, yes); box.append(p, range, num, row); paint();
-    (document.getElementById('hud') || document.body).appendChild(box);
+    mountConfirm(box);
     num.focus(); num.select();
   }
   const sameStack = (a, b) => !!a && !!b && a.uid !== b.uid && a.kind === b.kind && (a.id ?? a.baseKey) === (b.id ?? b.baseKey) && !!a.cooked === !!b.cooked && (a.stackMax || b.stackMax || a.count > 1 || b.count > 1 || a.kind === 'potion');

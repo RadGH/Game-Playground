@@ -23,6 +23,7 @@ export const rarityOf = it => (it?.setId ? 'set' : it?.rarity || 'normal');
 /** The worn slot an item belongs in (weapons -> weapon, ring1 -> ring). Null for things you cannot wear. */
 export function slotOf(item) {
   if (!item) return null;
+  if (item.hand === 'off') return 'offhand';                     // play-test 10 (Y16): the rules' hand wins — an orb is an off-hand item whatever its type says
   if (item.type === 'weapon') return 'weapon';
   const s = item.slot || null;
   if (s === 'ring1') return 'ring';
@@ -36,6 +37,7 @@ export function slotOf(item) {
 export function altSlotOf(item) {
   const s = slotOf(item), alt = ALT_SLOT[s];
   if (!alt) return null;
+  if (s === 'weapon' && item.hand) return item.hand === 'one' ? alt : null;      // Y16: only a One-hand weapon fits either hand
   if (s === 'weapon' && (item.twoHanded || !item.offHandOk)) return null;
   if (s === 'offhand') return null;                              // shields/foci stay in the off hand
   return alt;
@@ -177,6 +179,13 @@ export function iconSpec(item, { worn = wornPartOf } = {}) {
   let w = null;
   if (drawn) { try { w = worn(item, s === 'ring2' ? 'ring' : s); } catch { w = null; } }
   let spec = null;
+  // play-test 10 (Y6, report #28: "ring icons look bad — show the ring itself, not a ring on a hand"): a ring's picture is
+  // the LOOP, drawn from the same colours its model wears (band `color`, stone `color2`); the close-up of a fist is gone
+  if (s === 'ring' || s === 'ring2') {
+    const rp = (w && (w.part?.ring || w.parts?.accessory?.ring || w.part)) || {};
+    const hex = v => (typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v : null);
+    spec = { kind: 'glyph', id: 'ring', color: hex(rp.color) || '#d8b040', color2: hex(rp.color2) || RARE_TINT[r] || '#9fe0ff', style: rp.id || 'band' };
+  } else
   if (w && !empty(w.part)) {
     const part = w.part;
     if (w.partSlot === 'held') spec = { kind: 'held', id: part.id, color: part.color || '#b9c2cc', quality: part.quality ?? 0, part };
@@ -184,13 +193,12 @@ export function iconSpec(item, { worn = wornPartOf } = {}) {
     else spec = { kind: 'worn', slot: w.partSlot, frame: FRAME[s] || 'torso', id: part.id, parts: w.parts };
   }
   if (!spec) {
-    if (s === 'ring' || s === 'ring2') spec = { kind: 'glyph', id: 'ring', color: RARE_TINT[r] || '#d0a040' };
-    else if (s === 'necklace') spec = { kind: 'glyph', id: 'amulet', color: RARE_TINT[r] || '#3a8ad8' };
+    if (s === 'necklace') spec = { kind: 'glyph', id: 'amulet', color: RARE_TINT[r] || '#3a8ad8' };
     else if (s === 'offhand') spec = { kind: 'glyph', id: 'focus', color: '#8fd0ff' };
     else if (/potion|draught|elixir|tonic/i.test(item.name || '') || item.kind === 'potion') spec = { kind: 'glyph', id: 'potion', color: '#d83838' };
     else spec = { kind: 'glyph', id: item.kind === 'junk' ? 'junk' : 'bundle', color: item.kind === 'material' && /^#[0-9a-f]{6}$/i.test(item.tint || '') ? item.tint : '#a08060' };   // W9 (P-client): a material's icon takes the material's own colour
   }
-  spec.key = spec.kind === 'worn' ? `worn|${spec.frame}|${JSON.stringify(spec.parts)}` : spec.kind === 'glyph' ? `glyph|${spec.id}|${spec.color}` : `${spec.kind}|${JSON.stringify(spec.part)}`;
+  spec.key = spec.kind === 'worn' ? `worn|${spec.frame}|${JSON.stringify(spec.parts)}` : spec.kind === 'glyph' ? `glyph|${spec.id}|${spec.color}${spec.color2 ? '|' + spec.color2 + '|r2' : ''}` : `${spec.kind}|${JSON.stringify(spec.part)}`;
   return spec;
 }
 export function mixHex(a, b, t) {

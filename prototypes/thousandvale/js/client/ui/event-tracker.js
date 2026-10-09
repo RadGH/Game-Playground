@@ -21,6 +21,7 @@ import { h } from '../ui-panel.js';
 import { mergeEvent, eventLines, eventResult, inEvent } from './pt5-core.js';
 import { canHideEvent } from './pt8-core.js';
 import { HIDDEN } from './hidden-events.js';
+import { staleEvents } from './pt10-core.js';
 
 const RESULT_MS = 14000;
 
@@ -200,10 +201,21 @@ export function createEventTracker({ hud, me, net, parent = null }) {
     draw(true);
   });
 
+  /** Play-test 10 (Y11): the server's list of what is running for you (`eventSync`, after every join / reconnect) —
+   *  a card that still claims to be running and is not on it goes away, with its "Travel there free" button. */
+  function onSync(m) {
+    const gone = staleEvents([...events.values()].map(e => ({ key: e.key, uid: e.uid, id: e.id, scope: e.scope, state: e.state, at: e.at })), m);
+    for (const k of gone) { events.delete(k); folded.delete(k); }
+    if (gone.length) draw(true);
+    return gone;
+  }
+  /** `travelR {gone:true}`: "that event is over" — every running realm event card goes. */
+  function onGone() { onSync({ live: [...events.values()].filter(e => e.scope !== 'realm' && !e.free).map(e => e.uid ?? e.id ?? e.key), realm: null }); }
+
   let acc = 0;
   return {
-    root, onZoneEvent, onRealm, onFrame, onDone, onTrack, onAt, draw,
-    wire(n) { n.on('zoneEvent', onZoneEvent); n.on('realm', onRealm); n.on('eventFrame', onFrame); n.on('eventDone', onDone); n.on('eventTrack', onTrack); n.on('eventAt', onAt); n.on('joined', j => { if (j.event) onRealm({ kind: 'eventStart', ev: j.event }); if (j.you?.eventAt != null) setTimeout(() => onAt({ uid: j.you.eventAt }), 0); }); },
+    root, onZoneEvent, onRealm, onFrame, onDone, onTrack, onAt, onSync, onGone, draw,
+    wire(n) { n.on('eventSync', onSync); n.on('travelR', r => { if (r && r.ok === false && (r.gone || r.why === 'noEvent')) onGone(); }); n.on('zoneEvent', onZoneEvent); n.on('realm', onRealm); n.on('eventFrame', onFrame); n.on('eventDone', onDone); n.on('eventTrack', onTrack); n.on('eventAt', onAt); n.on('joined', j => { if (j.event) onRealm({ kind: 'eventStart', ev: j.event }); if (j.you?.eventAt != null) setTimeout(() => onAt({ uid: j.you.eventAt }), 0); }); },
     tick(dt) { acc += dt; if (acc < 0.5) return; acc = 0; draw(); },
     clear() { events.clear(); folded.clear(); draw(true); },
     get state() { const now = Date.now(), p = me(); return [...events.values()].map(e => ({ ...eventLines(e, { now, me: p }), got: e.got || '', folded: folded.has(e.key), hidden: HIDDEN.has(e) })); },

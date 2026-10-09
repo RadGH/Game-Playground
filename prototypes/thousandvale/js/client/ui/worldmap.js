@@ -16,6 +16,7 @@ import { estimateFare } from '../world-ui.js';
 import { esc } from './tips.js';
 import { createMapFind, questZoneAt, savedView, saveView } from './map-tools.js';
 import { HIDDEN } from './hidden-events.js';
+import { edgeArrow, metresText } from './pt10-core.js';
 
 const LEGEND = [
   ['me', 'You'], ['party', 'Party member'], ['quest', 'Quest goal'], ['questdone', 'Hand a quest in'], ['liveevent', 'Event happening now'],
@@ -44,12 +45,16 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
   const find = createMapFind({ atlas, me, onChange: () => { state.lastSide = ''; }, onShow: t => { const one = t.list?.length === 1 ? t.list[0] : null; showAt(one ? one.x : t.x, one ? one.z : t.z, 1.6); } });      // close enough to tell one door from the next
   panel.fill(h('div.map-top', {}, presets, find.bar, h('span.grow'), layers), h('div.map-main', {}, stage, side));
 
+  let people = null;              // play-test 10 (Y36): the party's rows, from ui/pt10.js (setPeople)
   const state = { cx: 0, cz: 0, scale: 0.1, preset: 'region', opts: { roads: true, rivers: true, quests: true, events: true, places: true, party: true, names: true }, hover: null, drag: null, w: 0, h: 0, raf: 0, lastSide: '' };
   const PRESETS = [['world', 'World'], ['province', 'Province'], ['region', 'Region'], ['here', 'Around me']];
   const DPRESETS = [['floor', 'This floor'], ['all', 'Whole dungeon']];
   function drawPresets() {
     const list = atlas.dungeon ? DPRESETS : PRESETS;
-    presets.replaceChildren(...list.map(([k, t]) => h('button.chip', { type: 'button', role: 'tab', 'aria-checked': String(state.preset === k), onclick: () => fitPreset(k) }, t)),
+    // play-test 10 (Y28, report #39): "Locate player" at the top-left, left of World / Province / Region
+    const locate = h('button.ghost.small.map-locate', { type: 'button', title: 'Centre the map on where you stand', dataset: { act: 'locate' }, onclick: () => locateMe() });
+    locate.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span>Locate player</span>';
+    presets.replaceChildren(locate, ...list.map(([k, t]) => h('button.chip', { type: 'button', role: 'tab', 'aria-checked': String(state.preset === k), onclick: () => fitPreset(k) }, t)),
       h('button.ghost.small', { type: 'button', title: 'What the symbols mean', onclick: () => { legend.hidden = !legend.hidden; } }, 'Legend'));
     layers.replaceChildren(...(atlas.dungeon ? [] : [['roads', 'Roads'], ['rivers', 'Rivers'], ['places', 'Places'], ['quests', 'Quests'], ['events', 'Events'], ['names', 'Names']].map(([k, t]) =>
       h('label.map-toggle', {}, h('input', { type: 'checkbox', checked: state.opts[k], onchange: e => { state.opts[k] = e.target.checked; } }), t))));
@@ -97,6 +102,8 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
     drawPresets();
   }
   function zoomBy(f, sx = state.w / 2, sy = state.h / 2) { const z = zoomAt(view(), sx, sy, f, { min: 0.003, max: atlas.dungeon ? 40 : 4 }); Object.assign(state, z); state.preset = null; drawPresets(); }
+  /** Y28: centre on you, close enough to see where you stand (a dungeon keeps its own zoom); the view stops being a preset. */
+  function locateMe() { const p = me(); if (!p) return; hideCard(); state.cx = p.x; state.cz = p.z; if (!atlas.dungeon && state.scale < 0.35) state.scale = 0.6; state.preset = null; state.ping = { x: p.x, z: p.z, t: performance.now() }; drawPresets(); }
   function centreOnMe() { const p = me(); if (p) { state.cx = p.x; state.cz = p.z; if (state.scale < 0.2 && !atlas.dungeon) state.scale = 0.5; } }
 
   // ---- drawing ----
@@ -137,6 +144,7 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
       if (!atlas.model) { g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#e8dcc0'; g.font = '600 15px Alegreya Sans, sans-serif'; g.textAlign = 'center'; g.fillText('Unrolling the map…', state.w / 2 * (g.__dpr || 1), state.h / 2 * (g.__dpr || 1)); }
       drawScale(g, v);
     }
+    drawPoint(g, v);
     drawSide();
   }
   function detailOnScreen(v) {
@@ -172,12 +180,14 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
     const ws = (net()?.joined?.room?.waystones || []);
     const known = new Set(worldUi?.knownWaystones?.() || []);
     const atStone = ws.find(w => Math.hypot(w.x - p.x, w.z - p.z) < 8);
-    const key = JSON.stringify([z?.key, tq?.id, tq?.goal, tq?.loc && Math.round(Math.hypot(tq.loc.x - p.x, tq.loc.z - p.z) / 20), evs.map(e => e.uid + e.sub), [...known].join(), !!atStone, atlas.dungeon?.id, atlas.quests.length, Math.round((atlas.fog?.version || 0) / 20), find.state.sig, evs.map(e => HIDDEN.has(e)).join(), HIDDEN.size]);
+    const key = JSON.stringify([z?.key, tq?.id, tq?.goal, tq?.loc && Math.round(Math.hypot(tq.loc.x - p.x, tq.loc.z - p.z) / 20), evs.map(e => e.uid + e.sub), [...known].join(), !!atStone, atlas.dungeon?.id, atlas.quests.length, Math.round((atlas.fog?.version || 0) / 20), find.state.sig, evs.map(e => HIDDEN.has(e)).join(), HIDDEN.size, peopleSig()]);
     if (key === state.lastSide) return;
     state.lastSide = key;
     const kids = [];
     const found = atlas.dungeon ? null : find.section();
     if (found) kids.push(found);
+    const crew = partySection(p);
+    if (crew) kids.push(crew);
     if (atlas.dungeon) {
       const d = atlas.dungeon, f = atlas.floorAt(p.x, p.z);
       kids.push(h('section', {}, h('h4', {}, d.name), h('p', {}, `Floor ${(f?.index ?? 0) + 1} of ${d.floors.length}${d.level ? ` · level ${d.level}` : ''}`), h('p.tiny', {}, 'The map fills in as you explore. Stairs, the way out and the reward chest are marked once you have seen them.')));
@@ -189,7 +199,7 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
         h('p.tiny', {}, `${m?.playable?.name || ''}${m?.playable?.band ? ` (${bandText(m.playable.band)})` : ''}`)));
     }
     if (tq) {
-      kids.push(h('section.map-quest', {}, h('h4', {}, 'Tracked quest'), h('b', {}, tq.name), h('p', {}, tq.goal),
+      kids.push(h('section.map-quest', { dataset: tq.loc ? { wx: String(tq.loc.x), wz: String(tq.loc.z) } : {} }, h('h4', {}, 'Tracked quest'), h('b', {}, tq.name), h('p', {}, tq.goal),
         tq.loc ? h('p.tiny', {}, tq.loc.exact ? `${tq.loc.name ? tq.loc.name + ' — ' : ''}${atlas.whereText(tq.loc, tq.loc.r)}` : `Somewhere in ${tq.loc.name} — ${atlas.whereText(tq.loc, 0)}`) : null,
         tq.loc ? h('button.ghost.small', { type: 'button', onclick: () => showAt(tq.loc.x, tq.loc.z, tq.loc.exact ? 0.6 : 0.2) }, 'Show on map') : null));
     }
@@ -197,7 +207,7 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
       // W13: each event can be hidden from your screen (the tracker, the minimap) and brought back here
       kids.push(h('section.map-events', {}, h('h4', {}, 'Events'), ...evs.map(e => {
         const hid = HIDDEN.has(e);
-        return h('div.map-ev' + (hid ? '.hid' : ''), { dataset: { ev: String(e.uid || e.id || e.name) } }, h('b', {}, e.name || 'Event'), h('p.tiny', {}, `${e.sub || ''}${Number.isFinite(e.x) ? ' — ' + atlas.whereText(e, e.r) : ''}${hid ? ' · hidden from your screen' : ''}`),
+        return h('div.map-ev' + (hid ? '.hid' : ''), { dataset: { ev: String(e.uid || e.id || e.name), ...(Number.isFinite(e.x) ? { wx: String(e.x), wz: String(e.z) } : {}) } }, h('b', {}, e.name || 'Event'), h('p.tiny', {}, `${e.sub || ''}${Number.isFinite(e.x) ? ' — ' + atlas.whereText(e, e.r) : ''}${hid ? ' · hidden from your screen' : ''}`),
           h('div.row', {}, Number.isFinite(e.x) ? h('button.ghost.small', { type: 'button', onclick: () => showAt(e.x, e.z, 0.5) }, 'Show on map') : null,
             h('button.ghost.small', { type: 'button', dataset: { act: hid ? 'unhide' : 'hide' }, title: hid ? 'Put it back on your screen: the event card and the minimap arrow.' : 'Take it off your screen: no event card, no minimap arrow. It stays here on the map.', onclick: () => { if (hid) HIDDEN.show(e); else HIDDEN.hide(e); state.lastSide = ''; } }, hid ? 'Show on my screen' : 'Hide from my screen'),
             e.free && !hid ? h('button.primary.small', { type: 'button', onclick: () => travel('event') }, 'Travel there free') : null));
@@ -206,7 +216,7 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
     if (!atlas.dungeon) {
       const rows = ws.filter(w => known.has(w.key)).map(w => {
         const here = atStone && atStone.key === w.key;
-        return h('li', {}, h('span', {}, w.name), h('small', {}, here ? 'You are here' : `${estimateFare(p, w)} g · ${distText(Math.hypot(w.x - p.x, w.z - p.z))}`),
+        return h('li', { dataset: { wx: String(w.x), wz: String(w.z) } }, h('span', {}, w.name), h('small', {}, here ? 'You are here' : `${estimateFare(p, w)} g · ${distText(Math.hypot(w.x - p.x, w.z - p.z))}`),
           !here ? h('button.ghost.small', { type: 'button', disabled: !atStone, title: atStone ? `Travel for ${estimateFare(p, w)} gold` : 'Stand at any waystone to travel', onclick: () => travel(w.key) }, 'Travel') : null);
       });
       kids.push(h('section', {}, h('h4', {}, `Waystones (${known.size} of ${ws.length})`),
@@ -214,6 +224,41 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
         rows.length ? h('ul.map-ws', {}, rows) : h('p.tiny', {}, 'You have not touched a waystone yet.')));
     }
     side.replaceChildren(...kids);
+  }
+  // ---- Y36 (report S#54): the Party section — everyone in your party, yourself first, each with a zoom-to button ----
+  const peopleList = () => { try { return people?.list?.() || []; } catch { return []; } };
+  const peopleSig = () => peopleList().map(q => [q.char, q.placed ? 1 : 0, q.tracked ? 1 : 0, q.where, q.online ? 1 : 0, q.dist != null ? Math.round(q.dist / 25) : ''].join(':')).join('|');
+  function partySection(p) {
+    const list = peopleList();
+    if (list.length < 2 && !(list[0] && net()?.party)) return null;          // not in a party: no section
+    return h('section.map-party', { dataset: { k: 'party' } }, h('h4', {}, `Party (${list.length})`),
+      h('ul.map-people', {}, ...list.map(q => h('li.map-person' + (q.self ? '.self' : '') + (q.online ? '' : '.offline') + (q.tracked ? '.tracked' : ''), { dataset: { char: String(q.char), ...(q.placed ? { wx: String(q.x), wz: String(q.z) } : {}) } },
+        h('span.mp-name', {}, q.leader ? '♛ ' : '', q.name, q.self ? h('em', {}, ' (you)') : null,
+          h('small', {}, [q.level ? `Level ${q.level}` : '', q.self ? '' : q.where, !q.self && q.dist != null ? metresText(q.dist) : ''].filter(Boolean).join(' · '))),
+        h('button.ghost.small', { type: 'button', disabled: !q.placed, dataset: { act: 'zoom' }, title: q.placed ? `Show ${q.self ? 'yourself' : q.name} on the map` : q.online ? `${q.name} is in a dungeon — not on this map` : `${q.name} is offline`, onclick: () => { if (q.self) locateMe(); else { showAt(q.x, q.z, 0.6); state.ping = { x: q.x, z: q.z, t: performance.now() }; } } }, 'Show'),
+        q.self ? null : h('button.ghost.small' + (q.tracked ? '.on' : ''), { type: 'button', disabled: !q.canTrack && !q.tracked, dataset: { act: 'track' }, 'aria-pressed': String(!!q.tracked),
+          title: q.tracked ? `Stop tracking ${q.name}` : `Track ${q.name}: an arrow at the edge of your screen and on the minimap leads to them`, onclick: () => { people?.track?.(q.char, q.name); state.lastSide = ''; } }, q.tracked ? 'Tracked' : 'Track')))));
+  }
+  // hovering (or focusing) any row of the side lists that knows a spot: a ring on it — or, when it is off the edge of the
+  // map (or hard against it), an arrow on the edge pointing to it
+  const pointFrom = e => { const li = e.target.closest?.('[data-wx]'); state.point = li ? { x: +li.dataset.wx, z: +li.dataset.wz } : null; };
+  side.addEventListener('pointerover', pointFrom); side.addEventListener('focusin', pointFrom);
+  side.addEventListener('pointerleave', () => { state.point = null; }); side.addEventListener('focusout', () => { state.point = null; });
+  function drawPoint(g, v) {
+    const d = g.__dpr || 1, now = performance.now();
+    g.setTransform(d, 0, 0, d, 0, 0);
+    const ring = (x, z, k) => { const [sx, sy] = v.toScreen(x, z); g.beginPath(); g.arc(sx, sy, 12 + k * 14, 0, Math.PI * 2); g.lineWidth = 2.5; g.strokeStyle = `rgba(255,236,150,${(1 - k).toFixed(2)})`; g.stroke(); };
+    if (state.ping) { const k = (now - state.ping.t) / 1400; if (k >= 1) state.ping = null; else { ring(state.ping.x, state.ping.z, k % 1); ring(state.ping.x, state.ping.z, (k * 2) % 1); } }
+    state.arrow = null;
+    if (!state.point) return;
+    const [sx, sy] = v.toScreen(state.point.x, state.point.z);
+    const a = edgeArrow(sx, sy, state.w, state.h, { margin: 26, near: 34 });
+    ring(state.point.x, state.point.z, (now / 900) % 1);
+    if (!a) return;
+    state.arrow = { x: Math.round(a.x), y: Math.round(a.y), outside: a.outside };
+    g.save(); g.translate(a.x, a.y); g.rotate(a.angle);
+    g.beginPath(); g.moveTo(16, 0); g.lineTo(-10, -11); g.lineTo(-4, 0); g.lineTo(-10, 11); g.closePath();
+    g.fillStyle = '#ffe07a'; g.fill(); g.lineWidth = 2; g.strokeStyle = '#1b130a'; g.stroke(); g.restore();
   }
   function showAt(x, z, scale) { state.cx = x; state.cz = z; if (scale) state.scale = Math.max(state.scale, scale); state.preset = null; drawPresets(); }
   function travel(key) {
@@ -332,10 +377,14 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
 
   drawPresets();
   return {
-    panel, draw, fitPreset, showAt, find, zoomBy,
+    panel, draw, fitPreset, showAt, find, zoomBy, locateMe,
+    /** Y36: who is in the party (ui/pt10.js): { list() -> rows, track(char, name), onChange(fn) }. */
+    setPeople(p) { people = p; p?.onChange?.(() => { state.lastSide = ''; }); },
+    /** tests: point at a world spot as hovering a list row would. */
+    pointAt(x, z) { state.point = x == null ? null : { x, z }; },
     /** tests: move the view (as a drag + wheel would). */
     setView(v) { Object.assign(state, { cx: v.cx ?? state.cx, cz: v.cz ?? state.cz, scale: v.scale ?? state.scale, preset: null }); drawPresets(); },
-    get state() { return { cx: state.cx, cz: state.cz, scale: state.scale, preset: state.preset, hot: state.hot || null, find: find.state, markers: lastMarkers.map(m => ({ id: m.id, kind: m.kind, name: m.name, x: m.x, z: m.z })) }; },
+    get state() { return { cx: state.cx, cz: state.cz, scale: state.scale, preset: state.preset, hot: state.hot || null, arrow: state.arrow || null, point: state.point || null, find: find.state, markers: lastMarkers.map(m => ({ id: m.id, kind: m.kind, name: m.name, x: m.x, z: m.z })) }; },
     /** tests: what the hover card says for a marker id (or a world point when no id). */
     cardText(id, x, z) { const m = lastMarkers.find(k => k.id === id); const d = document.createElement('div'); d.innerHTML = m ? cardFor(m) : zoneCard(x, z) || ''; return d.textContent; },
     hoverAt(x, z) { const [sx, sy] = view().toScreen(x, z); hover(sx, sy); return card.hidden ? '' : card.textContent; },

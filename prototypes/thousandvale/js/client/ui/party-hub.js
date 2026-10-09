@@ -15,6 +15,7 @@ export const HUB_TABS = [
   { id: 'callboard', label: 'Group Finder' },
 ];
 
+import { partyRows } from './pt10-core.js';
 export function createPartyHub({ panels, social, net, hud, chat }) {
   const hub = createPanel({ id: 'partyhub', title: 'Party', width: 440, cls: 'hub-panel', onClose: () => closeCurrent() });
   const tabBar = h('div.hub-tabs', { role: 'tablist' });
@@ -78,7 +79,7 @@ export function createPartyHub({ panels, social, net, hud, chat }) {
     const mine = net()?.joined?.you?.char;
     if (!party || !party.members?.length) { members.replaceChildren(h('p.tiny', {}, 'You are not in a party. Invite someone by name, or send them your join link.')); return; }
     const lead = party.leader === mine;
-    members.replaceChildren(h('ul.hub-list', {}, ...party.members.map(m => h('li' + (m.online ? '' : '.offline'), {},
+    members.replaceChildren(h('ul.hub-list', {}, ...partyRows(party, { me: mine }).all.map(m => h('li' + (m.online ? '' : '.offline'), {},
       h('span.hub-name', {}, party.leader === m.char ? '♛ ' : '', m.name, h('small', {}, ` ${m.level || ''} ${String(m.cls || '').replace(/_/g, ' ')}${m.online ? '' : ' · offline'}`)),
       m.char !== mine && m.online ? h('button.ghost.small', { type: 'button', title: `Whisper ${m.name}`, onclick: () => chat?.whisper?.(m.name) }, 'Whisper') : null,
       lead && m.char !== mine ? h('button.ghost.small', { type: 'button', title: `Make ${m.name} the leader`, onclick: () => net()?.partyOp('lead', { char: m.char }) }, 'Lead') : null,

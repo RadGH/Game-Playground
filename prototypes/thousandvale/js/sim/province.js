@@ -125,9 +125,11 @@ export function createProvince(opts) {
     log,
     standUp: (e, why) => { const o = e.char ? online.get(e.char.id) : null; if (o && o.entity === e) endMeal(o, why); },   // S20
     dirty: (ch, urgent) => { const o = online.get(ch.id); if (o) { o.dirty = true; if (urgent) saveNow(o); if (urgent) presence(o); } },
+    npcHelped: (npc, pl, info, room) => { try { npcHelped(npc, pl, info, room); } catch (err) { log('npcHelped', err && err.message); } },
     award: (e, a) => {
       const o = e.char && online.get(e.char.id);
       if (!o || o.entity !== e) return;
+      if (a.reason === 'handsMoved') return handsMoved(o, a.items || []);      // Y16 (C): items moved out of a hand they no longer fit
       if (a.xp) journal(o, 'xp', { d: a.xp, level: a.level });
       grant(o, { ...a, goldAdded: true });
       if (a.level >= 2) starterMount(o);                     // Q16: the first mount at level 5
@@ -350,6 +352,7 @@ export function createProvince(opts) {
       case 'ignore': { const o = online.get(m.char); if (o) { o.char.ignore = m.list; journal(o, 'set', { k: 'ignore', v: m.list }); o.dirty = true; } return; }
       case 'mute': mute(m.char, m.until); return;
       case 'kick': { const o = online.get(m.char); if (o && o.conn) o.conn.kick(m.code || 'restart'); return; }
+      case 'watch': { watched.clear(); for (const c of m.chars || []) watched.add(c); return; }
       case 'claimed': { for (const o of online.values()) if (o.char.account === m.account) { o.claimed = true; if (m.username) o.username = m.username; if (o.conn) o.conn.sendJSON({ t: 'you', acct: acctOf(o) }); } return; }
       case 'charge': return chargeGold(m);
       case 'callboard': return callboardEnter(m);
@@ -389,7 +392,8 @@ export function createProvince(opts) {
       case 'target': {
         if (m.id) {
           const t = r.entities.get(m.id);
-          const why = !t ? 'target' : t.kind === 'object' ? 'target' : Math.hypot(t.x - e.x, t.z - e.z) > TARGET_RANGE ? 'range' : null;
+          // Y8 (round 10, dev report #20): a dead monster with nothing on it FOR YOU is not a target (one that still holds your loot is)
+          const why = !t ? 'target' : t.kind === 'object' ? 'target' : Math.hypot(t.x - e.x, t.z - e.z) > TARGET_RANGE ? 'range' : (t.dead && t.kind === 'monster' && !corpses.hasLootFor(r, t, o.char.id)) ? 'empty' : null;
           if (why) { s.sendJSON({ t: 'targetR', id: m.id, ok: false, why }); return; }
         }
         r.intent(e, m);
@@ -444,6 +448,7 @@ export function createProvince(opts) {
       case 'mount': return mountOp(o, m);
       case 'barber': return barberOp(o, m);
       case 'pref': return prefOp(o, m);
+      case 'emote': return emoteOp(o, m);
       case 'cart': {      // W5: ox-cart travel
         const near = o.room.entities.get(m.id);
         if (!near || near.removed || !carts.stopFor(near)) return s.sendJSON({ t: 'cartR', op: m.op, ok: false, why: 'stop', msg: 'There is no cart here.' });
@@ -515,6 +520,7 @@ export function createProvince(opts) {
     online.set(ch.id, o);
     o.entity = place.room.addPlayer(ch, client, place.at);
     startingKit(o);
+    if (opts.refreshItem) for (const it of ch.bag || []) { try { opts.refreshItem(it); } catch { /* an item the rules do not know stays as it is */ } }      // Y16 (C): old bag items carry today's words (hand, a tome's attack, attacks per second)
     lightSweep(o);                            // W22: lanterns and torches left the game — what the bag holds is paid back
     restack(o, false);                        // U5: an old save's loose potions become stacks before the first `joined`
     potionCards(o, false);                    // U17: their cards say what they do for THIS character
@@ -634,7 +640,10 @@ export function createProvince(opts) {
     s.sendJSON(msg);
     if (o.reviveAsk && e.dead && o.reviveAsk.until > now()) s.sendJSON(reviveAskMsg(o.reviveAsk));   // a reconnect while an offer is open
     if (!handoff || handoff.via === 'relocate') wantSheet(o);      // T18: the sheet follows the join (queued, not inside this tick's budget)
+    o.joinedOnce = true;
+    if (o.handsNote) { s.sendJSON({ t: 'chat', ch: 'system', from: 0, name: 'The Vale', text: o.handsNote }); o.handsNote = null; }      // Y16
     if (o.lightNote) { s.sendJSON({ t: 'chat', ch: 'system', from: 0, name: 'The Vale', text: o.lightNote }); o.lightNote = null; }      // W22
+    eventSync(o);                                    // Y11 (round 10): what is running right now, so a client back from a disconnect drops the rest
     o.marks = null; o.marksFull = true; o.marksDirty = true;       // W12: entity ids are the room's — the whole map of marks follows within a second
   }
 
@@ -645,11 +654,12 @@ export function createProvince(opts) {
     const zn = zoneNameOf(o), town = o.room.kind === 'town' ? o.room.name : null;
     send({ k: 'presence', where: town || (o.room.kind === 'instance' ? (o.room.name || 'a dungeon') + ' (dungeon)' : zn) || null, zoneName: zn, town, roomKind: o.room.kind, char: o.char.id, name: o.char.name, cls: o.char.cls, level: o.char.level, room: o.room.id, province: provOf(o.room).L.key, zone: o.zone || null, online: !!o.conn, ignore: o.char.ignore || [], mutedUntil: o.char.mutedUntil || 0, account: o.char.account, look: o.char.look || null });
   }
+  const watched = new Set();       // Y36: characters whose position the gateway asked for (`watch`): tracked by a party member or a mutual friend
   function sendFrames() {
     const rows = [];
     for (const o of online.values()) {
       const p = partyOf.get(o.char.id);
-      if (!p || p.members.length < 2) continue;
+      if ((!p || p.members.length < 2) && !watched.has(o.char.id)) continue;      // party members; and (round 10, Y36) anyone a friend is tracking
       const e = o.entity;
       rows.push([o.char.id, Math.round(e.hp), e.hpMax, o.room.id, Math.round(e.x * 10) / 10, Math.round(e.z * 10) / 10, e.dead ? 1 : 0, o.conn ? 1 : 0, e.id, Math.round(e.mp || 0), e.mpMax || 0]);   // [9] mp [10] mpMax (R6+)
     }
@@ -808,6 +818,9 @@ export function createProvince(opts) {
     if (d.treasure) return treasureUse(o, obj);
     if (d.road && roadEvents.use(o, obj)) return;                          // S5: a road event's chest / captive
     // W5 (round 8): an ox cart — the parked cart itself answers with the route list; a carter answers as an NPC and the list follows
+    // Y15 (round 10): Angling is learned from an angler — free, with the starting rod (existing anglers already know it)
+    let taught = null;
+    if (d.npc && d.npc.role === 'angler' && !angling.learned(o.char)) { angling.learn(o); taught = 'angling'; const rod = shops.goodOf('angling_rod'); if (rod && !(o.char.bag || []).some(angling.isRod)) grant(o, { items: [rod], gold: 0, reason: 'taught', from: obj }); s.sendJSON({ t: 'chat', ch: 'system', from: 0, name: obj.name, text: obj.name + ' shows you how to fish. You have learned Angling' + (rod ? ' and been handed a rod' : '') + '.' }); }
     const cartStop = carts.stopFor(obj);
     if (cartStop && !d.npc) { s.sendJSON({ t: 'used', id, ok: true, kind: 'cart', name: obj.name, cart: cartStop.id }); const l = carts.list(o, obj); if (l) s.sendJSON(l); return; }
     if (cartStop) setTimeoutTicks(() => { if (o.conn && online.get(o.char.id) === o) { const l = carts.list(o, obj); if (l && !obj.removed) o.conn.sendJSON(l); } }, 1);
@@ -815,7 +828,7 @@ export function createProvince(opts) {
     const road = d.npc ? roadEvents.talk(o, obj) : null;                   // S5/S9: a delivery handed over; a wanderer's lore + tip
     if (d.chest) return openChest(o, obj);
     if (d.note) return s.sendJSON({ t: 'used', id, ok: true, kind: 'note', name: obj.name, text: d.note.text, quest: d.note.quest || undefined, ...questOffer(o, obj) });
-    if (d.npc) return s.sendJSON({ t: 'used', id, ok: true, kind: 'npc', ...(road ? { road } : {}), ...(d.wanderer ? { wanderer: d.wanderer } : {}), name: obj.name, says: d.npc.says, quest: d.npc.quest || undefined, role: d.npc.role || undefined,
+    if (d.npc) return s.sendJSON({ t: 'used', id, ok: true, kind: 'npc', ...(taught ? { taught } : {}), ...(road ? { road } : {}), ...(d.wanderer ? { wanderer: d.wanderer } : {}), name: obj.name, says: d.npc.says, quest: d.npc.quest || undefined, role: d.npc.role || undefined,
       ...(shops.kindOf(obj) ? { shop: true, shopKind: shops.kindOf(obj) } : {}), ...(d.npc.role === 'barber' ? { barber: true, free: barberFree() || !(o.char.flags && o.char.flags.barberUsed), ...(barberFree() ? { priceMult: 0 } : { priceMult: economy().barber.mult }) } : {}), ...(d.npc.role === 'unbinder' ? { unbinder: true, unbind: unbinderOffer(o) } : {}), ...(d.npc.role === 'innkeeper' && o.room.kind === 'town' ? { bind: true, bound: o.char.bind === o.room.id } : {}), ...(angling.isFire(obj) ? { cook: true } : {}), ...angling.npcExtra(o, obj), ...professions.npcExtra(o, obj) /* W9 (P-core) */,
       ...(d.npc.service ? { service: d.npc.service } : {}), ...questOffer(o, obj) });
     if (d.use) return useThing(o, obj);
@@ -993,7 +1006,7 @@ export function createProvince(opts) {
   }
   // S8 (play-test 4): the starting town's waystone is always known; walking into a town learns its stone; walking within
   // WAYSTONE_AUTO_M of any stone learns it (no E needed). Told with `waystone {op:'learned', key, name, how, known}`.
-  const WAYSTONE_AUTO_M = 15;
+  const WAYSTONE_AUTO_M = 30;      // Y24 (round 10, dev report #56): was 15 — roads pass most stones at 15-25 m, so you walked by unlit ones
   function learnWaystone(o, w, how) {
     const ch = o.char;
     ch.waystones ||= [];
@@ -1029,7 +1042,7 @@ export function createProvince(opts) {
     if (e.state & STATE.combat) return s.sendJSON({ t: 'travelR', ok: false, why: 'combat', msg: 'Not while fighting.' });
     if (o.room.kind === 'instance') return s.sendJSON({ t: 'travelR', ok: false, why: 'instance', msg: 'Leave the dungeon first.' });
     if (to === 'event') {
-      if (!liveEvent) return s.sendJSON({ t: 'travelR', ok: false, why: 'noEvent', msg: 'Nothing is happening right now.' });
+      if (!liveEvent) { s.sendJSON({ t: 'travelR', ok: false, why: 'noEvent', gone: true, to: 'event', msg: 'That event is over.' }); return eventSync(o); }      // Y11: `gone` = remove the row; the list of what IS running follows
       // T11: already standing in it — nothing to travel to
       if (provOf(o.room) && provOf(o.room).L.key === liveEvent.province && Math.hypot(e.x - liveEvent.x, e.z - liveEvent.z) <= (liveEvent.r || 50) + 15) return s.sendJSON({ t: 'travelR', ok: false, why: 'here', msg: 'You are already there.' });
       counters.travels++;
@@ -1604,6 +1617,7 @@ export function createProvince(opts) {
       discoverNear(o, pv, z);
       waystonesNear(o, pv);
       angling.ensurePools(o.room);                 // T25: a copy's fish pools open when someone is first in it
+      ensureDummies(o.room);                       // Y17: E's training dummies
       professions.ensureNodes(o.room);             // W9 (P-core): a room's gathering nodes and trainers
       bossNear(o, bossMemo);
       if (pv.book.wantsPosition(o.char)) questEvent(o, { kind: 'visit', x: o.entity.x, z: o.entity.z });
@@ -1664,7 +1678,8 @@ export function createProvince(opts) {
     for (const pv of P.values()) for (const r of [...pv.towns, ...pv.copies]) {
       for (const n of sched(r)) {
         if (n.removed) continue;
-        if (n.r && n.r.unit && n.r.unit.guard) continue;      // W1 (stream C, with the lead's leave): the combat rules walk a town guard — its post, its fights, its way back
+        if (n.r && n.r.unit && n.r.unit.guard) continue;
+        if (n.data && n.data.fighter && r.rules.npcFighting && r.rules.npcFighting(n)) continue;      // Y21 (C): the rules own a fighting NPC's feet until the fight is over      // W1 (stream C, with the lead's leave): the combat rules walk a town guard — its post, its fights, its way back
         const sc = n.kind === 'npc' && n.data && n.data.schedule;
         if (!sc || !sc.blocks) continue;
         const goal = blockAt(sc.blocks, t, phases).at;
@@ -2570,6 +2585,7 @@ export function createProvince(opts) {
     o.room.emit({ type: 'castbar', id: e.id, ab: 'mount', name: 'Call ' + def.name, ms });
     // S21 (play-test 4): the same channel events as the recall charm, so the client's cast bar draws the call's progress
     o.room.emit({ type: 'fx', kind: 'channel', id: e.id, ab: 'mount', name: 'Call ' + def.name, ms });
+    endEmote(o); o.room.emit({ type: 'emote', id: e.id, e: 'wave', ms });      // Y5: you wave the horse over while it comes
     return R({ ok: true, id: def.id, casting: ms, until: o.mountCast.until, stand: true });
   }
   /** Each tick for someone calling a mount: a step past castDrift or a hit breaks it; done -> riding. */
@@ -3103,6 +3119,110 @@ export function createProvince(opts) {
   }
   /** W11 (round 8): what is true of the ACCOUNT, as the client needs it — `level` = its highest character (gates ask this, not the one you play). */
   function acctOf(o) { return { claimed: !!o.claimed, level: Math.max(o.alv || 1, o.char.level || 1), admin: !!o.admin, username: o.username || null }; }
+  /**
+   * Y16 (round 10; C's `host.award(e, {items, reason:'handsMoved'})` at login): an item that sat in a hand it may no longer
+   * be worn in goes to the bag — by post when the bag is full, never turned into gold — and a line says what happened.
+   */
+  function handsMoved(o, items) {
+    const ch = o.char, kept = [], posted = [];
+    for (const raw of items) { if (!raw || typeof raw !== 'object') continue; const it = { ...raw, uid: raw.uid || newUid() }; if ((ch.bag || []).length < bagCap(o)) { ch.bag.push(it); journal(o, 'bagAdd', { item: it }); kept.push(it); } else posted.push(it); }
+    if (!kept.length && !posted.length) return;
+    journalGear(o); o.dirty = true; counters.handsMoved = (counters.handsMoved || 0) + kept.length + posted.length;
+    const names = [...kept, ...posted].map(i => i.name).join(', ');
+    const text = names + (kept.length + posted.length === 1 ? ' was' : ' were') + ' moved ' + (posted.length ? (kept.length ? 'to your bag and the post' : 'to the post (your bag is full)') : 'to your bag') + ': ' + (kept.length + posted.length === 1 ? 'it no longer fits' : 'they no longer fit') + ' that hand.';
+    if (posted.length) Promise.resolve(sysmail.mailTo({ to: ch.id, subject: 'Moved out of your hands', from: 'The Vale', body: text, items: posted })).catch(err => log('handsMoved post', err && err.message));
+    if (o.joinedOnce && o.conn) { o.conn.sendJSON({ t: 'bag', add: kept, remove: [], gold: ch.gold }); o.conn.sendJSON({ t: 'chat', ch: 'system', from: 0, name: 'The Vale', text }); }
+    else o.handsNote = text;
+  }
+  /**
+   * Y11 (round 10, dev report #35: "after disconnects a finished event stayed on the HUD; pressing it says nothing is
+   * happening"). `eventSync {live:[uid…], realm, at}` — the authoritative list of what is running for this player: the
+   * realm event if one is live, the zone events of their room, the road events of their room. Sent after every `joined`,
+   * after a travel to a dead event, and every 15 s. The client drops any tracker / banner / travel row not in it.
+   */
+  function eventSync(o) {
+    if (!o.conn || !o.room) return;
+    const live = [];
+    if (liveEvent && liveEvent.uid) live.push(liveEvent.uid);
+    for (const z of zoneRuns.values()) if (z.room === o.room || o.room.kind === 'town') { const v = z.run.view(); if (v.uid && provOf(z.room) === provOf(o.room)) live.push(v.uid); }
+    for (const ev of roadEvents.events.values()) if (!ev.virtual && ev.room === o.room) live.push('road:' + ev.room.id + ':' + ev.id);
+    o.conn.sendJSON({ t: 'eventSync', live: [...new Set(live)], realm: liveEvent ? liveEvent.uid || null : null, at: wallNow() });
+  }
+  /**
+   * Y5 (round 10, dev report #53): emotes. `emote {id}` -> everyone in view gets the event `emote {id:<entity>, e}`. wave /
+   * cheer / bow / point play once; sit uses the meal's sitting state (a step stands you up); dance loops until you move,
+   * act, or 20 s pass. Calling a mount waves too (mountOp).
+   */
+  const EMOTES = Object.freeze({ wave: { ms: 2200, ride: true }, cheer: { ms: 2200, ride: true }, bow: { ms: 2000 }, point: { ms: 1800, ride: true }, sit: { hold: true, calm: true }, dance: { hold: true, calm: true, ms: 20000 } });
+  function emoteOp(o, m) {
+    const s = o.conn, e = o.entity, def = EMOTES[m.id];
+    const R = x => s.sendJSON({ t: 'emoteR', id: m.id, ...x });
+    if (!def) return R({ ok: false, why: 'unknown', msg: 'No such emote. Try /wave, /sit, /dance, /cheer, /bow or /point.' });
+    if (e.dead) return R({ ok: false, why: 'dead', msg: 'You are dead.' });
+    if (e.state & STATE.swimming) return R({ ok: false, why: 'swim', msg: 'Not while swimming.' });
+    if (o.mount && !def.ride) return R({ ok: false, why: 'mounted', msg: 'Get down from your mount first.' });
+    if (def.calm && fighting(o, e)) return R({ ok: false, why: 'combat', msg: 'Not while you are fighting.' });
+    if (o.cartRide || o.fishing) return R({ ok: false, why: 'busy', msg: 'You are busy.' });
+    endEmote(o);
+    if (m.id === 'sit') { if (!e.sitting) { e.sitting = true; e.infoVer++; e.loop('sit'); } o.emote = { id: 'sit', x: e.x, z: e.z, until: Infinity }; }
+    else if (def.hold) o.emote = { id: m.id, x: e.x, z: e.z, until: now() + def.ms };
+    o.room.emit({ type: 'emote', id: e.id, e: m.id, ...(def.ms && !def.hold ? { ms: def.ms } : {}) });
+    counters.emotes = (counters.emotes || 0) + 1;
+    return R({ ok: true });
+  }
+  function endEmote(o, why = null) {
+    const em = o.emote; if (!em) return;
+    o.emote = null;
+    const e = o.entity;
+    if (em.id === 'sit' && e.sitting && !e.eating) { e.sitting = false; e.infoVer++; if (!e.dead) e.loop('idle'); }
+    if (o.room && e && !e.removed) o.room.emit({ type: 'emote', id: e.id, e: em.id, end: 1, ...(why ? { why } : {}) });
+  }
+  function emoteTick() {
+    const t = now();
+    for (const o of online.values()) {
+      const em = o.emote; if (!em) continue;
+      const e = o.entity;
+      if (e.dead || t >= em.until || Math.hypot(e.x - em.x, e.z - em.z) > 0.4 || (e.state & (STATE.combat | STATE.casting | STATE.swimming)) || (em.id === 'sit' && !e.sitting)) endEmote(o, 'moved');
+    }
+  }
+  /**
+   * Y21 (round 10, dev report #18): C's rules let a wilderness NPC (`data.fighter`) fight what threatens it and call
+   * `host.npcHelped(npc, player, {kind:'saved'|'helped', level, foes, share})` once per helping player when it is over and the
+   * NPC stands. The NPC always says thanks; by the `npcThanks` economy knobs you sometimes get gold and rarely an item.
+   */
+  function npcHelped(npc, pl, info, room) {
+    const o = pl && pl.char ? online.get(pl.char.id) : null;
+    if (!o || o.entity !== pl || !npc || npc.removed) return;
+    const K = economy().npcThanks, lvl = Math.max(1, (info && info.level) || o.char.level || 1), saved = info && info.kind === 'saved';
+    const roll = () => room.host.random('thanks');
+    const lines = Array.isArray(K.lines) && K.lines.length ? K.lines : ['Thank you, friend. I would not have seen the morning.'];
+    room.emit({ type: 'say', id: npc.id, text: lines[Math.floor(roll() * lines.length) % lines.length], style: 'bark' });
+    const t = now();
+    if (o.thankedAt && t - o.thankedAt < (K.cooldownSec || 0) * 1000) return;      // one purse a while, however many wanderers you rescue
+    let gold = 0; const items = [];
+    if (roll() < K.goldChance * (saved ? 1.5 : 1)) gold = Math.max(1, Math.round((K.goldPerLevel[0] + roll() * (K.goldPerLevel[1] - K.goldPerLevel[0])) * lvl));
+    if (roll() < K.itemChance * (saved ? 2 : 1) && room.rules.rollLoot) { const got = safeRules(room, 'rollLoot', pl, { level: lvl, tier: K.tier || 'magic' }) || []; if (got[0]) items.push(got[0]); }
+    if (!gold && !items.length) return;
+    o.thankedAt = t;
+    grant(o, { items, gold, reason: 'npcThanks', from: npc });
+    counters.npcThanks = (counters.npcThanks || 0) + 1;
+    if (o.conn) o.conn.sendJSON({ t: 'chat', ch: 'system', from: 0, name: npc.name, text: npc.name + ' thanks you: ' + [gold ? '+' + gold + ' gold' : null, ...items.map(i => i.name)].filter(Boolean).join(' and ') + '.' });
+  }
+  /** Y17 (round 10, dev report #29): E's training dummies (rows `dummy`), put down with C's `rules.spawnDummy` the first time a room is looked at. */
+  function ensureDummies(room) {
+    if (room._dummies || !room.rules || !room.rules.spawnDummy || room.kind === 'instance') return;
+    room._dummies = true;
+    const pv = provOf(room); if (!pv) return;
+    const inRoom = d => (room.kind === 'town' ? room.area && Math.hypot(d.x - room.area.x, d.z - room.area.z) <= (room.area.r || 0) : !pv.L.towns.some(t => Math.hypot(d.x - t.x, d.z - t.z) < t.r));
+    let list = (pv.L.dummies || []).filter(inRoom);
+    // until E places some: two by the edge of the starting town's square, so there is something to hit on day one
+    if (!(pv.L.dummies || []).length && room.kind === 'town' && room.meta && room.meta.town === 0 && room.area) {
+      list = [];
+      for (let k = 0; k < 24 && list.length < 2; k++) { const a = k * 0.9 + 0.4, d = 16 + (k % 3) * 3, x = room.area.x + Math.cos(a) * d, z = room.area.z + Math.sin(a) * d; if (room.walkable(x, z) && !list.some(q => Math.hypot(q.x - x, q.z - z) < 4)) list.push({ id: 'standin_' + list.length, name: 'Training Dummy', x, z, yaw: a + Math.PI, level: null }); }
+    }
+    for (const d of list) { try { safeRules(room, 'spawnDummy', { x: d.x, z: d.z, yaw: d.yaw, name: d.name, level: d.level || Math.max(1, guardLevelAt(pv.L, d)) }); counters.dummies = (counters.dummies || 0) + 1; } catch (err) { log('dummy spawn', err && err.message); } }
+  }
+  const guardLevelAt = (L, d) => { const z = L.zoneOf ? L.zoneOf(d.x, d.z) : null, zs = (L.zones || []).find(q => q.key === z), band = (zs && zs.sheet && zs.sheet.band) || null; return (Array.isArray(band) ? band[0] : 1) || 1; };
   /** T19: a report from inside the world. The server adds what it knows: where you stand, what you are, what is around you. */
   function feedbackOp(o, m) {
     const e = o.entity, ch = o.char, pv = provOf(o.room), r1 = v => Math.round(v * 10) / 10;
@@ -3327,7 +3447,8 @@ export function createProvince(opts) {
     if (ticks % 20 === 13) roadEvents.tick();     // S5: random road events near lone players
     if (ticks % 4 === 3) roadEvents.move(TICK_MS * 4);
     if (ticks % 20 === 11) { foodTick(); reviveSweep(); }
-    if (ticks % 5 === 2) mountSpeedTick();      // move speed (boots, buffs, shapes, the mount): 4 Hz
+    if (ticks % 5 === 2) { mountSpeedTick(); emoteTick(); }
+    if (ticks % 300 === 151) for (const o of online.values()) eventSync(o);      // Y11: every 15 s      // move speed (boots, buffs, shapes, the mount): 4 Hz
     angling.tick();
     professions.tick(); if (ticks % 20 === 15) professions.sweep();      // W9 (P-core)
     for (const o of online.values()) if (o.mountCast) mountCastTick(o);

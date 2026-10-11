@@ -9,7 +9,7 @@ import { h } from '../ui-panel.js';
 import { fmt } from '../../../../../shared/format.js';
 import { profIcon, PROF_TINT } from './prof-icons.js';
 
-const ROLE_WORD = { prospector: 'the prospector', smith: 'a smith', armourer: 'an armourer', jeweller: 'a jeweller', bowyer: 'a bowyer', tailor: 'a tailor', stablehand: 'a stablehand', apothecary: 'an apothecary', innkeeper: 'an innkeeper', provisioner: 'a provisioner', angler: 'an angler' };
+const ROLE_WORD = { prospector: 'a mining trainer', logger: 'a logging trainer', forager: 'a foraging trainer', skinner: 'a skinning trainer', smith: 'a smith', armourer: 'an armourer', jeweller: 'a jeweller', bowyer: 'a bowyer', tailor: 'a tailor', stablehand: 'a stablehand', apothecary: 'an apothecary', innkeeper: 'an innkeeper', provisioner: 'a provisioner', angler: 'an angler' };
 const list = a => (a.length <= 1 ? a.join('') : a.slice(0, -1).join(', ') + ' or ' + a[a.length - 1]);
 
 /** Who teaches a profession, in words ("a smith or the prospector"), from the data file's `roles`. Pure. */

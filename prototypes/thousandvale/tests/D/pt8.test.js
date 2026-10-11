@@ -122,6 +122,25 @@ const towns = Object.entries(townServices.towns).map(([name], i) => ({ name, x: 
 const officeTowns = Object.values(offices.towns).map(t => { const m = /^z(\d+)_(\d+)$/.exec(t.zone); return { name: t.name, x: t.x + m[1] * 2048, z: t.z + m[2] * 2048, r: t.r }; });
 const allTowns = [...officeTowns, ...towns.filter(t => !officeTowns.some(o => o.name === t.name))];
 const services = C.buildServices({ offices, townServices, towns: allTowns, npcs: [{ id: 'angler_torborhold', role: 'angler', name: 'Tam Sedgeley', at: 'Torborhold', x: 25190, z: 5420 }, { id: 'shep', role: 'shepherd', name: 'Nobody', x: 1, z: 1 }] });
+test('profession searches find teachers in every major town, including Bram at Torborhold\'s gate', () => {
+  const professions = json('data/rules/professions.json');
+  const trainers = json('data/provinces/professions.json').trainers;
+  const list = C.buildServices({ offices, townServices, towns: allTowns, npcs: trainers, professions });
+  for (const p of professions.professions.filter(p => !p.start)) {
+    const matches = C.findServices(list, { query: `${p.name} trainer` });
+    for (const town of officeTowns) assert.ok(matches.some(s => s.town === town.name && !s.approx), `${town.name}: ${p.name} has a precise map pin`);
+    for (const s of matches) assert.ok(professions.roles[s.role].trains.includes(p.id), `${s.name} really teaches ${p.id}`);
+  }
+  const bram = trainers.find(t => t.id === 'prospector_torborhold');
+  const matches = C.findServices(list, { query: 'mining trainer Torborhold' });
+  const pin = matches.find(s => s.id === 'npc:' + bram.id);
+  assert.ok(pin, 'Bram is visible in the mining search');
+  assert.equal(pin.x, bram.x); assert.equal(pin.z, bram.z);
+  assert.equal(pin.town, 'Torborhold'); assert.equal(pin.label, 'Mining trainer');
+  assert.equal(matches.filter(s => s.id === pin.id).length, 1);
+  assert.ok(C.findServices(list, { role: 'prospector' }).some(s => s.id === pin.id));
+  for (const role of ['prospector', 'logger', 'forager', 'skinner']) assert.ok(C.serviceRoles(list).includes(role));
+});
 test('W15: the service list is built from the game\'s own data — every town\'s offices in world metres, placed NPCs, and E\'s town-services for the rest', () => {
   assert.ok(services.length > 200, `${services.length} services`);
   const stable = services.filter(s => s.role === 'stablehand');

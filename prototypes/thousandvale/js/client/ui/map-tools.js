@@ -35,12 +35,17 @@ export function createMapFind({ atlas, me, onChange = () => {}, onShow = () => {
     if (S.list || S.loading) return S.loading;
     S.loading = (async () => {
       const model = atlas.model || await atlas.src.model().catch(() => null);
-      const [offices, carts, townServices] = await Promise.all([j('provinces/offices.json'), j('provinces/carts.json'), j('provinces/town-services.json')]);
+      const [offices, carts, townServices, professions, professionContent] = await Promise.all([j('provinces/offices.json'), j('provinces/carts.json'), j('provinces/town-services.json'), j('rules/professions.json'), j('provinces/professions.json')]);
       const towns = (model?.pois || []).filter(p => TOWN_KINDS.has(p.kind)).map(p => ({ name: p.name, x: p.x, z: p.z, r: p.r || 90 }));
       const npcs = [...(model?.npcs || new Map()).entries()].map(([id, n]) => ({ id, ...n }));
+      for (const trainer of professionContent?.trainers || []) {
+        const existing = npcs.findIndex(n => n.id === trainer.id);
+        if (existing >= 0) npcs[existing] = { ...npcs[existing], ...trainer };
+        else npcs.push(trainer);
+      }
       // the ox carts' stops (W5, stream E): one carter per town on the road network, world metres
       for (const st of carts?.stops || []) if (Number.isFinite(st.x)) npcs.push({ id: st.carter?.id || st.id, role: 'carter', name: st.carter?.name || '', at: st.town, x: st.x, z: st.z });
-      S.list = buildServices({ offices, npcs, towns, townServices });
+      S.list = buildServices({ offices, npcs, towns, townServices, professions });
       S.townAt = new Map(towns.map(t => [t.name, t]));
       drawSelect(); refresh();
     })();
@@ -92,7 +97,7 @@ export function createMapFind({ atlas, me, onChange = () => {}, onShow = () => {
     if (!active()) return null;
     if (!S.list) return h('section.map-found', {}, h('h4', {}, 'Looking…'));
     const what = S.role ? serviceLabel(S.role) : `“${S.query.trim()}”`;
-    if (!S.towns.length) return h('section.map-found', {}, h('h4', {}, `Nothing found for ${what}`), h('p.tiny', {}, 'Try a plainer word: stable, angler, trainer, smith, inn, potions, barber.'));
+    if (!S.towns.length) return h('section.map-found', {}, h('h4', {}, `Nothing found for ${what}`), h('p.tiny', {}, 'Try a service or profession: mining, foraging, smithing, stable, angler, trainer, inn.'));
     const p = me();
     return h('section.map-found', {}, h('h4', {}, `${what} — ${S.towns.length} place${S.towns.length === 1 ? '' : 's'}`),
       h('ul.map-foundlist', {}, ...S.towns.slice(0, 24).map(t => h('li', { dataset: { town: t.town } },

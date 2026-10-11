@@ -16,13 +16,15 @@
 // Same inputs -> same file. Set-piece NPCs (trainers, the Pail and Plough's innkeeper) have the set piece as their
 // office (`setpieces` list), so the uniqueness rule covers them too.
 import { titledOf } from './content-titled.mjs';
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { parseNav, NAV } from '../js/rules/terrain-read.js';
 import { J, ROOT, questFiles, provinceMap } from './content-lib.mjs';
 import { writeShops } from './content-shops.mjs';
 
 /** Plot `want`s a role prefers, best first. Stream B's town plan tags the plot each role works in (data.role, from
  *  data/world/town-offices.json) and that always wins; these wants are the fallback for a town B gave no such plot. */
 export const ROLE_WANT = {
+  prospector: ['house', 'hut'], logger: ['house', 'hut'], forager: ['house', 'hut'], skinner: ['house', 'hut'],
   elder: ['hall'], smith: ['forge'], merchant: ['shop', 'market'], trader: ['market', 'shop'], innkeeper: ['inn'], healer: ['temple', 'chapel', 'shrine'],
   stablehand: ['stable'], broker: ['counting_house', 'warehouse', 'barracks'], unbinder: ['study', 'shrine', 'chapel'], armourer: ['armoury', 'barracks'],
   bowyer: ['bowyer'], apothecary: ['apothecary'], tailor: ['tailor'], jeweller: ['jeweller'], barber: ['barber'], provisioner: ['provisioner', 'granary'],
@@ -32,6 +34,7 @@ export const ROLE_WANT = {
 export const SHOP_ROLE = { general: 'merchant', market: 'trader', weaponsmith: 'smith', armourer: 'armourer', bowyer: 'bowyer', apothecary: 'apothecary', tailor: 'tailor',
   jeweller: 'jeweller', stable: 'stablehand', inn: 'innkeeper', provisioner: 'provisioner', barber: 'barber', broker: 'broker', unbinder: 'unbinder', healer: 'healer' };
 export const TITLES = { elder: 'Elder', smith: 'Smith', merchant: 'Merchant', trader: 'Market trader', innkeeper: 'Innkeeper', healer: 'Healer', stablehand: 'Stable master',
+  prospector: 'Mining trainer', logger: 'Logging trainer', forager: 'Foraging trainer', skinner: 'Skinning trainer',
   broker: 'Broker', unbinder: 'Unbinder', armourer: 'Armourer', bowyer: 'Bowyer', apothecary: 'Apothecary', tailor: 'Tailor', jeweller: 'Jeweller', provisioner: 'Provisioner',
   barber: 'Barber', reeve: 'Reeve', trainer: 'Trainer', miller: 'Miller', farmer: 'Farmer', quartermaster: 'Quartermaster', resident: '' };
 /** the sign over the door (stream D-world draws a distinct front per sign; shops.json repeats it per kind) */
@@ -50,6 +53,7 @@ export const NAMED = {
 };
 /** what a role says while working, beyond shops.json `says` (D-UI/A barks) */
 const SERVICE = { elder: ['quests', 'town news'], reeve: ['quests', 'bounties'], trainer: ['class quest', 'teach'], miller: ['flour'], quartermaster: ['supplies'] };
+const GATHERING_ROLES = ['prospector', 'logger', 'forager', 'skinner'];
 
 const hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 
@@ -163,10 +167,35 @@ export function buildOffices(prov = 'torbor_downs') {
       for (const role of [...bRoles].filter(r => !roles.some(x => x.role === r))) add(role);      // B's working roles that sell nothing (miller, farmer)
       for (const n of qnpcs.filter(x => x.role === 'trainer' && !taken.has(x.id))) { taken.add(n.id); roles.push({ role: 'trainer', npc: n.id, name: n.name, trains: n.trains || [], title: 'Trainer' }); }
       for (const n of qnpcs.filter(x => !taken.has(x.id))) { taken.add(n.id); roles.push({ role: n.role || 'resident', npc: n.id, name: n.name, home: true, title: '' }); }
+      // Every major town has dedicated gathering teachers as well as its crafting shopkeepers.
+      // Keep existing offices in place; the new teachers use the remaining houses.
+      for (const role of GATHERING_ROLES) {
+        const placed = quests.some(q => Object.values(q.npcs || {}).some(n => n.at === name && n.role === role && n.placedBy));
+        if (!placed && !roles.some(r => r.role === role)) add(role);
+      }
       const names = { ...(NAMED[name] || {}) };
       for (const r of roles) if (!r.name && !names[r.role]) names[r.role] = nameFor(N, name, r.role);
       const list = officesFor({ town: { x: s.x, z: s.z }, plots, square, roles, names });
       spreadDoors(list);
+      // A house's calculated door can land in a neighbouring footprint or water. Keep each new
+      // teacher on clear ground in front of their house, with room to talk beside the other keepers.
+      const nav = parseNav(readFileSync(new URL(`data/zones/${wid}/nav.bin`, ROOT)));
+      for (const o of list.filter(o => GATHERING_ROLES.includes(o.role) && o.door)) {
+        const base = o.door, candidates = [base];
+        for (let r = 0.5; r <= 10; r += 0.5) for (let i = 0; i < 64; i++) {
+          const a = i * Math.PI / 32;
+          candidates.push({ ...base, x: +(base.x + Math.cos(a) * r).toFixed(1), z: +(base.z + Math.sin(a) * r).toFixed(1) });
+        }
+        const door = candidates.find(p => {
+          const bits = nav.at(p.x, p.z);
+          return (bits & NAV.WALK) && !(bits & (NAV.BUILDING | NAV.SOLID | NAV.DEEP | NAV.SHALLOW | NAV.STEEP))
+            && Math.hypot(p.x - s.x, p.z - s.z) < s.data.radius
+            && (p.x - o.x) * Math.sin(o.yaw) + (p.z - o.z) * Math.cos(o.yaw) >= (o.d || 6) / 2 + 0.8
+            && list.every(other => other === o || !other.door || Math.hypot(other.door.x - p.x, other.door.z - p.z) >= DOOR_GAP);
+        });
+        if (door) o.door = door;
+        else problems.push(`${name}: no clear door for ${o.role}`);
+      }
       for (const o of list) if (o.problem) problems.push(`${name}: ${o.role} — ${o.problem}`);
       towns[s.id] = { name, zone: wid, sheetZone: eid, kind: s.data.kind, x: s.x, z: s.z, r: s.data.radius, offices: list.filter(o => !o.problem) };
       void rename;

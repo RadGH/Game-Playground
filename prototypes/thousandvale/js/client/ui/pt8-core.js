@@ -94,6 +94,10 @@ export const SERVICES = {
   stablehand: { label: 'Stable', words: 'stable stables horse mount stablemaster' },
   angler: { label: 'Angler', words: 'angler fishing fish rod bait' },
   trainer: { label: 'Class trainer', words: 'trainer training class skills teacher' },
+  prospector: { label: 'Mining trainer', words: 'prospector mining miner ore pick trainer teacher' },
+  logger: { label: 'Logging trainer', words: 'logger logging woodcutting lumber timber hatchet trainer teacher' },
+  forager: { label: 'Foraging trainer', words: 'forager foraging herbs mushrooms fibre sickle trainer teacher' },
+  skinner: { label: 'Skinning trainer', words: 'skinner skinning hides leather knife trainer teacher' },
   smith: { label: 'Weaponsmith', words: 'smith smithy weapons blacksmith forge' },
   armourer: { label: 'Armourer', words: 'armourer armour armor shields' },
   bowyer: { label: 'Bowyer', words: 'bowyer bows arrows fletcher' },
@@ -112,7 +116,7 @@ export const SERVICES = {
   carter: { label: 'Ox cart', words: 'cart carter ox travel ride' },
 };
 /** The filter list of the map, in the order players ask for them. */
-export const SERVICE_FILTERS = ['stablehand', 'angler', 'trainer', 'carter', 'innkeeper', 'smith', 'armourer', 'bowyer', 'tailor', 'apothecary', 'provisioner', 'merchant', 'trader', 'jeweller', 'healer', 'barber', 'unbinder', 'broker', 'elder'];
+export const SERVICE_FILTERS = ['stablehand', 'angler', 'trainer', 'prospector', 'logger', 'forager', 'skinner', 'carter', 'innkeeper', 'smith', 'armourer', 'bowyer', 'tailor', 'apothecary', 'provisioner', 'merchant', 'trader', 'jeweller', 'healer', 'barber', 'unbinder', 'broker', 'elder'];
 const titleOf = s => String(s || '').replace(/[_-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 /** Shop kinds (shops.json) -> the role that keeps them. */
 const SHOP_ROLE = { general: 'merchant', weaponsmith: 'smith', stable: 'stablehand', inn: 'innkeeper', market: 'trader', cart: 'carter', carts: 'carter', hall: 'elder', forge: 'smith', shop: 'merchant', temple: 'healer' };
@@ -125,7 +129,7 @@ const zoneOrigin = key => { const m = /^z(\d+)_(\d+)$/.exec(String(key)); return
  *   towns    = [{ name, x, z, r }] in world metres (to say which town a lone NPC belongs to)
  * -> [{ id, role, label, name, town, x, z, keeper }] — `label` is what hangs over the door when the data names it.
  */
-export function buildServices({ offices = null, npcs = [], towns = [], townServices = null } = {}) {
+export function buildServices({ offices = null, npcs = [], towns = [], townServices = null, professions = null } = {}) {
   const out = [], seen = new Set();
   const townList = towns.slice();
   for (const [key, t] of Object.entries(offices?.towns || {})) {
@@ -142,7 +146,7 @@ export function buildServices({ offices = null, npcs = [], towns = [], townServi
     if (!n || !n.role || !Number.isFinite(n.x) || seen.has(n.id)) continue;
     if (!SERVICES[n.role]) continue;                               // a shepherd or a hermit is not a service
     if (out.some(s => s.role === n.role && Math.hypot(s.x - n.x, s.z - n.z) < 12)) continue;
-    let town = n.at || '', best = Infinity;
+    let town = n.town || n.at || '', best = Infinity;
     if (!town) for (const t of townList) { const d = Math.hypot(t.x - n.x, t.z - n.z); if (d < (t.r || 90) + 220 && d < best) { best = d; town = t.name; } }
     out.push({ id: 'npc:' + (n.id ?? `${n.role}:${Math.round(n.x)}:${Math.round(n.z)}`), role: n.role, label: serviceLabel(n.role), name: n.name || '', town, x: n.x, z: n.z, keeper: serviceLabel(n.role) });
   }
@@ -156,6 +160,7 @@ export function buildServices({ offices = null, npcs = [], towns = [], townServi
       out.push({ id: `ts:${name}:${role}`, role, label: serviceLabel(role), name: '', town: name, x: t.x, z: t.z, keeper: serviceLabel(role), approx: true });
     }
   }
+  for (const s of out) s.professions = (professions?.roles?.[s.role]?.trains || []).map(id => professions.professions?.find(p => p.id === id)?.name || titleOf(id));
   return out;
 }
 /** The roles that actually exist in the data, in filter order (unknown ones at the end): what the filter offers. */
@@ -167,7 +172,8 @@ export function serviceRoles(list) {
 export function serviceMatches(s, query) {
   const q = String(query || '').toLowerCase().trim();
   if (!q) return true;
-  const hay = `${s.label} ${s.keeper} ${s.name} ${s.town} ${s.role} ${SERVICES[s.role]?.words || ''}`.toLowerCase();
+  const teaching = s.professions?.length ? `profession trainer teacher training ${s.professions.join(' ')}` : '';
+  const hay = `${s.label} ${s.keeper} ${s.name} ${s.town} ${s.role} ${SERVICES[s.role]?.words || ''} ${teaching}`.toLowerCase();
   return q.split(/\s+/).every(w => hay.includes(w));
 }
 /** The services a filter + a search leave ({ role: '' } = any role). Nothing asked for = nothing highlighted. */

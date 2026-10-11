@@ -140,7 +140,7 @@ test('the Professions list says true things: what the next band opens comes from
   assert.equal(u.at, numbers.tiers.find(t => t.minSkill > by('mining').level).minSkill);
   for (const n of u.names) assert.ok(Object.values(content.nodeKinds).some(k => k && k.name === n && k.tier === u.tier), n);
   assert.match(unlockText(by('outfitting'), numbers, content), /Not learned\. Taught by .*(tailor|bowyer)/);
-  assert.equal(teachersOf('mining', numbers), 'the prospector or a smith');
+  assert.equal(teachersOf('mining', numbers), 'a mining trainer or a smith');
   for (const r of rows) { const f = levelFraction(r, numbers); assert.ok(f >= 0 && f <= 1, r.id); const t = unlockText(r, numbers, content); assert.ok(!/undefined|NaN|null/.test(t), `${r.id}: ${t}`); }
   // a fresh level is an empty bar, one point short of the next is nearly full
   const K = numbers.skill, at = l => K.xpBase * (l - 1) + K.xpPerLevel * (l - 1) * l / 2;

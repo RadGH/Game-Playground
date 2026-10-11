@@ -9,7 +9,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { parseNav, NAV } from '../../js/rules/terrain-read.js';
 import { cartFare, settlements, GUARDS, NEWCOMER } from '../../tools/content-towns.mjs';
-import { titledOf, JOB_ROLES } from '../../tools/content-titled.mjs';
+import { titledOf, JOB_ROLES, SERVICE_ROLES } from '../../tools/content-titled.mjs';
 import { raidTable } from '../../tools/sim-raid.mjs';
 import { simulate } from '../../tools/sim-economy.mjs';
 import { travelFare, configureEconomy } from '../../js/sim/economy-knobs.js';
@@ -205,7 +205,7 @@ test('W27: EVERY NPC record carries `titled`, true only for someone the player c
   const O = J('data/provinces/offices.json');
   for (const t of Object.values(O.towns)) for (const o of t.offices) {
     flag(o.titled, t.name + ' ' + o.role);
-    const service = !!(o.shop || o.npc || JOB_ROLES.includes(o.role) || shopRoles.has(o.role) || o.role === 'trainer' || o.role === 'reeve');
+    const service = !!(o.shop || o.npc || JOB_ROLES.includes(o.role) || shopRoles.has(o.role) || SERVICE_ROLES.includes(o.role));
     assert.equal(o.titled, service, `${t.name} ${o.role} ${o.name}`);
   }
   for (const s of O.setpieces) flag(s.titled, s.npc);

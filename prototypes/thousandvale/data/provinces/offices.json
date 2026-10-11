@@ -31,16 +31,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Jory Coombe",
+     "name": "Sawyer Cobbold",
      "plot": "hollin_toll_plot_8",
      "want": "shop",
      "x": 1706.54,
@@ -62,7 +62,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Bryn Ashby",
+     "name": "Wynne Furlong",
      "plot": "hollin_toll_plot_9",
      "want": "forge",
      "x": 1703.35,
@@ -84,7 +84,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Bryn Torbor",
+     "name": "Wynne Nettlefold",
      "plot": "hollin_toll_plot_22",
      "want": "armoury",
      "x": 1766.27,
@@ -106,7 +106,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Jory Hollis",
+     "name": "Jory Longacre",
      "plot": "hollin_toll_plot_2",
      "want": "bowyer",
      "x": 1688.93,
@@ -128,7 +128,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Oswy Hollis",
+     "name": "Sawyer Eastmere",
      "plot": "hollin_toll_plot_16",
      "want": "apothecary",
      "x": 1753.49,
@@ -150,7 +150,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Gwen Fenwick",
+     "name": "Cressy Sallow",
      "plot": "hollin_toll_plot_7",
      "want": "tailor",
      "x": 1699.66,
@@ -172,7 +172,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Corwin Coombe",
+     "name": "Tibbot Harl",
      "plot": "hollin_toll_plot_4",
      "want": "stable",
      "x": 1699.08,
@@ -194,7 +194,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Isolde Harl",
+     "name": "Petronel Pennock",
      "plot": "hollin_toll_plot_12",
      "want": "inn",
      "x": 1726.33,
@@ -216,7 +216,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Dunnet Pike",
+     "name": "Dunnet Cattermole",
      "plot": "hollin_toll_plot_11",
      "want": "provisioner",
      "x": 1725.86,
@@ -238,7 +238,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Hobb Gallowsby",
+     "name": "Kenric Rookwood",
      "plot": "hollin_toll_plot_13",
      "want": "barber",
      "x": 1733.53,
@@ -260,7 +260,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Orla Reed",
+     "name": "Nesta Ladd",
      "plot": "hollin_toll_plot_19",
      "want": "counting_house",
      "x": 1760.03,
@@ -282,7 +282,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Nell Torbor",
+     "name": "Hester Thatcher",
      "plot": "hollin_toll_plot_3",
      "want": "study",
      "x": 1694.15,
@@ -304,7 +304,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Tamsin Harl",
+     "name": "Nesta Hobday",
      "plot": "hollin_toll_plot_18",
      "want": "temple",
      "x": 1755.32,
@@ -322,6 +322,86 @@
      "label": "Temple",
      "shop": "healer",
      "titled": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Brenna Merriweather",
+     "plot": "hollin_toll_plot_5",
+     "want": "house",
+     "x": 1692.03,
+     "z": 576.33,
+     "yaw": -0.7418,
+     "w": 3.92,
+     "d": 5.64,
+     "door": {
+      "x": 1689.3,
+      "z": 579.3,
+      "yaw": 2.4
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Aled Kettleby",
+     "plot": "hollin_toll_plot_14",
+     "want": "house",
+     "x": 1740.76,
+     "z": 602.51,
+     "yaw": -2.2787,
+     "w": 6.6,
+     "d": 4.34,
+     "door": {
+      "x": 1738.2,
+      "z": 600.3,
+      "yaw": 0.863
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Jankin Reed",
+     "plot": "hollin_toll_plot_0",
+     "want": "house",
+     "x": 1683.41,
+     "z": 566.22,
+     "yaw": -0.5218,
+     "w": 5.28,
+     "d": 7.6,
+     "door": {
+      "x": 1680.9,
+      "z": 570.6,
+      "yaw": 2.62
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Kenric Cobbold",
+     "plot": "hollin_toll_plot_20",
+     "want": "house",
+     "x": 1763.5,
+     "z": 534.22,
+     "yaw": 0.5561,
+     "w": 5.14,
+     "d": 3.71,
+     "door": {
+      "x": 1765.1,
+      "z": 536.8,
+      "yaw": 3.698
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
     }
    ]
   },
@@ -337,7 +417,7 @@
     {
      "role": "elder",
      "title": "Elder",
-     "name": "Mabry Ashby",
+     "name": "Isolde Millward",
      "plot": "ashcombe_plot_10",
      "want": "hall",
      "x": 1415.53,
@@ -353,16 +433,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Bryn Gallowsby",
+     "name": "Cressy Hollis",
      "plot": "ashcombe_plot_4",
      "want": "shop",
      "x": 1387.74,
@@ -384,7 +464,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Corwin Torbor",
+     "name": "Tibbot Dimmock",
      "plot": "ashcombe_plot_8",
      "want": "forge",
      "x": 1391.9,
@@ -406,7 +486,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Emrys Harl",
+     "name": "Emrys Wainwright",
      "plot": "ashcombe_plot_11",
      "want": "armoury",
      "x": 1420.26,
@@ -428,7 +508,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Edda Millward",
+     "name": "Kitt Underhill",
      "plot": "ashcombe_plot_6",
      "want": "bowyer",
      "x": 1404.13,
@@ -450,7 +530,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Wenna Millward",
+     "name": "Marjory Oakhurst",
      "plot": "ashcombe_plot_14",
      "want": "apothecary",
      "x": 1439.16,
@@ -472,7 +552,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Emrys Torbor",
+     "name": "Dunnet Nettlefold",
      "plot": "ashcombe_plot_22",
      "want": "tailor",
      "x": 1438.12,
@@ -494,7 +574,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Hild Reed",
+     "name": "Hild Barrowman",
      "plot": "ashcombe_plot_2",
      "want": "stable",
      "x": 1369.64,
@@ -516,7 +596,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Emrys Ashby",
+     "name": "Jankin Oakhurst",
      "plot": "ashcombe_plot_9",
      "want": "inn",
      "x": 1411.8,
@@ -538,7 +618,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Orla Coombe",
+     "name": "Hawise Hobday",
      "plot": "ashcombe_plot_12",
      "want": "provisioner",
      "x": 1431.09,
@@ -560,7 +640,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Rosamund Thatcher",
+     "name": "Rosamund Torbor",
      "plot": "ashcombe_plot_13",
      "want": "barber",
      "x": 1431.11,
@@ -582,7 +662,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Cadoc Thatcher",
+     "name": "Randal Thatcher",
      "plot": "ashcombe_plot_3",
      "want": "counting_house",
      "x": 1382.57,
@@ -604,7 +684,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Aled Ashby",
+     "name": "Hamon Furlong",
      "plot": "ashcombe_plot_5",
      "want": "study",
      "x": 1398.34,
@@ -626,7 +706,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Corwin Harl",
+     "name": "Drogo Hobday",
      "plot": "ashcombe_plot_7",
      "want": "temple",
      "x": 1404.74,
@@ -664,7 +744,87 @@
      },
      "sign": null,
      "light": false,
-     "home": true,
+     "titled": true,
+     "home": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Walter Ladd",
+     "plot": "ashcombe_plot_17",
+     "want": "house",
+     "x": 1421.67,
+     "z": 1296.79,
+     "yaw": 0.9303,
+     "w": 6.2,
+     "d": 8.88,
+     "door": {
+      "x": 1426.2,
+      "z": 1300.2,
+      "yaw": 4.072
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Cressy Sallow",
+     "plot": "ashcombe_plot_0",
+     "want": "house",
+     "x": 1358.94,
+     "z": 1351.42,
+     "yaw": -0.1232,
+     "w": 6.97,
+     "d": 8.36,
+     "door": {
+      "x": 1358.3,
+      "z": 1356.8,
+      "yaw": 3.018
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Sabeth Stannard",
+     "plot": "ashcombe_plot_1",
+     "want": "house",
+     "x": 1354.13,
+     "z": 1333.7,
+     "yaw": 1.2276,
+     "w": 11.75,
+     "d": 10.16,
+     "door": {
+      "x": 1360,
+      "z": 1335.8,
+      "yaw": 4.369
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Alys Nettlefold",
+     "plot": "ashcombe_plot_15",
+     "want": "house",
+     "x": 1394.03,
+     "z": 1286.79,
+     "yaw": -1.993,
+     "w": 8.4,
+     "d": 7.03,
+     "door": {
+      "x": 1389.7,
+      "z": 1284.9,
+      "yaw": 1.149
+     },
+     "sign": null,
+     "light": false,
      "titled": true
     }
    ]
@@ -698,16 +858,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Nell Barrowman",
+     "name": "Edda Dunstable",
      "plot": "brackwater_plot_17",
      "want": "shop",
      "x": 1166.54,
@@ -729,7 +889,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Corwin Coombe",
+     "name": "Milo Pennock",
      "plot": "brackwater_plot_10",
      "want": "forge",
      "x": 1136.33,
@@ -751,7 +911,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Aled Ashby",
+     "name": "Nicol Brackenridge",
      "plot": "brackwater_plot_3",
      "want": "armoury",
      "x": 1105.01,
@@ -773,7 +933,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Maud Coombe",
+     "name": "Tegan Cobbold",
      "plot": "brackwater_plot_7",
      "want": "bowyer",
      "x": 1123.52,
@@ -795,7 +955,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Bryn Gallowsby",
+     "name": "Olwen Hollis",
      "plot": "brackwater_plot_20",
      "want": "apothecary",
      "x": 1180.49,
@@ -839,7 +999,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Oswy Hollis",
+     "name": "Sawyer Rookwood",
      "plot": "brackwater_plot_16",
      "want": "inn",
      "x": 1151.07,
@@ -861,7 +1021,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Orla Hollis",
+     "name": "Hawise Gallowsby",
      "plot": "brackwater_plot_19",
      "want": "barber",
      "x": 1170.5,
@@ -883,7 +1043,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Pell Hollis",
+     "name": "Godric Longacre",
      "plot": "brackwater_plot_18",
      "want": "counting_house",
      "x": 1177.09,
@@ -905,7 +1065,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Emrys Fenwick",
+     "name": "Hew Cattermole",
      "plot": "brackwater_plot_13",
      "want": "study",
      "x": 1159.32,
@@ -927,7 +1087,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Corwin Barrowman",
+     "name": "Milo Quarrie",
      "plot": "brackwater_plot_5",
      "want": "temple",
      "x": 1117.58,
@@ -944,6 +1104,86 @@
      "light": false,
      "label": "Temple",
      "shop": "healer",
+     "titled": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Osric Brookes",
+     "plot": "brackwater_plot_4",
+     "want": "house",
+     "x": 1110.4,
+     "z": 893.56,
+     "yaw": 2.2666,
+     "w": 6.01,
+     "d": 9.95,
+     "door": {
+      "x": 1115.1,
+      "z": 889.6,
+      "yaw": 5.408
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Rhosyn Marlow",
+     "plot": "brackwater_plot_8",
+     "want": "house",
+     "x": 1126.26,
+     "z": 910.38,
+     "yaw": -1.095,
+     "w": 8.12,
+     "d": 5.98,
+     "door": {
+      "x": 1122.5,
+      "z": 912.3,
+      "yaw": 2.047
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Brenna Fenwick",
+     "plot": "brackwater_plot_11",
+     "want": "house",
+     "x": 1142.2,
+     "z": 829.12,
+     "yaw": 0.5931,
+     "w": 8.24,
+     "d": 8.35,
+     "door": {
+      "x": 1145.2,
+      "z": 833.6,
+      "yaw": 3.735
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Hester Barrowman",
+     "plot": "brackwater_plot_2",
+     "want": "house",
+     "x": 1094.95,
+     "z": 875.8,
+     "yaw": 2.1573,
+     "w": 9.17,
+     "d": 8.03,
+     "door": {
+      "x": 1097.1,
+      "z": 869.6,
+      "yaw": 5.299
+     },
+     "sign": null,
+     "light": false,
      "titled": true
     }
    ]
@@ -977,16 +1217,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Emrys Millward",
+     "name": "Piers Furlong",
      "plot": "saltmouth_plot_2",
      "want": "shop",
      "x": 914.92,
@@ -1008,7 +1248,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Edda Torbor",
+     "name": "Edda Tanner",
      "plot": "saltmouth_plot_6",
      "want": "forge",
      "x": 878.93,
@@ -1030,7 +1270,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Maud Thatcher",
+     "name": "Tegan Greenhill",
      "plot": "saltmouth_plot_11",
      "want": "armoury",
      "x": 850.3,
@@ -1052,7 +1292,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Emrys Gallowsby",
+     "name": "Dunnet Merriweather",
      "plot": "saltmouth_plot_14",
      "want": "bowyer",
      "x": 893,
@@ -1096,7 +1336,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Cadoc Reed",
+     "name": "Kenric Quarrie",
      "plot": "saltmouth_plot_3",
      "want": "stable",
      "x": 893.8,
@@ -1118,7 +1358,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Orla Pike",
+     "name": "Orla Fallowfield",
      "plot": "saltmouth_plot_5",
      "want": "inn",
      "x": 881.28,
@@ -1140,7 +1380,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Pell Thatcher",
+     "name": "Walter Nettlefold",
      "plot": "saltmouth_plot_8",
      "want": "barber",
      "x": 862.53,
@@ -1162,7 +1402,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Isolde Reed",
+     "name": "Petronel Dunstable",
      "plot": "saltmouth_plot_1",
      "want": "counting_house",
      "x": 920.8,
@@ -1184,7 +1424,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Maud Harl",
+     "name": "Ganna Inchley",
      "plot": "saltmouth_plot_4",
      "want": "study",
      "x": 884.52,
@@ -1206,7 +1446,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Rosamund Coombe",
+     "name": "Cecily Wainwright",
      "plot": "saltmouth_plot_10",
      "want": "temple",
      "x": 862.17,
@@ -1223,6 +1463,86 @@
      "light": false,
      "label": "Temple",
      "shop": "healer",
+     "titled": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Jenet Yeoman",
+     "plot": "saltmouth_plot_17",
+     "want": "house",
+     "x": 867.39,
+     "z": 1641.87,
+     "yaw": 2.3915,
+     "w": 5.93,
+     "d": 8.67,
+     "door": {
+      "x": 871.2,
+      "z": 1637.8,
+      "yaw": 5.533
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Nicol Furlong",
+     "plot": "saltmouth_plot_9",
+     "want": "house",
+     "x": 850.42,
+     "z": 1581.53,
+     "yaw": -0.1086,
+     "w": 7.82,
+     "d": 8.85,
+     "door": {
+      "x": 849.8,
+      "z": 1587.1,
+      "yaw": 3.033
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Bartle Sallow",
+     "plot": "saltmouth_plot_19",
+     "want": "house",
+     "x": 844.47,
+     "z": 1621.08,
+     "yaw": 1.0355,
+     "w": 10.22,
+     "d": 6.59,
+     "door": {
+      "x": 848.3,
+      "z": 1623.4,
+      "yaw": 4.177
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Walter Cattermole",
+     "plot": "saltmouth_plot_12",
+     "want": "house",
+     "x": 903.12,
+     "z": 1652.19,
+     "yaw": -0.5301,
+     "w": 8.06,
+     "d": 6.95,
+     "door": {
+      "x": 900.8,
+      "z": 1656.2,
+      "yaw": 2.611
+     },
+     "sign": null,
+     "light": false,
      "titled": true
     }
    ]
@@ -1256,16 +1576,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Isolde Hollis",
+     "name": "Isolde Gallowsby",
      "plot": "copperdell_plot_7",
      "want": "shop",
      "x": 338.29,
@@ -1287,7 +1607,7 @@
     {
      "role": "trader",
      "title": "Market trader",
-     "name": "Hild Torbor",
+     "name": "Cecily Greenhill",
      "plot": "copperdell_plot_23",
      "want": "market",
      "x": 362.06,
@@ -1309,7 +1629,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Oswy Gallowsby",
+     "name": "Simkin Brookes",
      "plot": "copperdell_plot_6",
      "want": "forge",
      "x": 355.37,
@@ -1331,7 +1651,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Pell Reed",
+     "name": "Ivo Reed",
      "plot": "copperdell_plot_3",
      "want": "armoury",
      "x": 348.03,
@@ -1353,7 +1673,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Hild Barrowman",
+     "name": "Letty Yeoman",
      "plot": "copperdell_plot_1",
      "want": "bowyer",
      "x": 371.82,
@@ -1375,7 +1695,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Tamsin Gallowsby",
+     "name": "Brenna Longacre",
      "plot": "copperdell_plot_17",
      "want": "apothecary",
      "x": 317.11,
@@ -1397,7 +1717,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Tobin Ashby",
+     "name": "Corwin Brackenridge",
      "plot": "copperdell_plot_10",
      "want": "tailor",
      "x": 323.57,
@@ -1419,7 +1739,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Maud Torbor",
+     "name": "Maud Tanner",
      "plot": "copperdell_plot_16",
      "want": "stable",
      "x": 328.34,
@@ -1441,7 +1761,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Wat Barrowman",
+     "name": "Ivo Yeoman",
      "plot": "copperdell_plot_8",
      "want": "inn",
      "x": 342.77,
@@ -1463,7 +1783,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Gwen Millward",
+     "name": "Cressy Underhill",
      "plot": "copperdell_plot_2",
      "want": "provisioner",
      "x": 389.35,
@@ -1485,7 +1805,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Gwen Coombe",
+     "name": "Bryn Harl",
      "plot": "copperdell_plot_11",
      "want": "barber",
      "x": 325.82,
@@ -1529,7 +1849,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Cadoc Coombe",
+     "name": "Benet Hobday",
      "plot": "copperdell_plot_4",
      "want": "study",
      "x": 332.74,
@@ -1551,7 +1871,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Garrick Torbor",
+     "name": "Garrick Greenhill",
      "plot": "copperdell_plot_5",
      "want": "temple",
      "x": 350.89,
@@ -1568,6 +1888,86 @@
      "light": false,
      "label": "Temple",
      "shop": "healer",
+     "titled": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Simkin Applegarth",
+     "plot": "copperdell_plot_22",
+     "want": "house",
+     "x": 371.19,
+     "z": 474.54,
+     "yaw": 1.7134,
+     "w": 10.25,
+     "d": 5.63,
+     "door": {
+      "x": 375.2,
+      "z": 474,
+      "yaw": 4.855
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Nesta Dunstable",
+     "plot": "copperdell_plot_12",
+     "want": "house",
+     "x": 313.47,
+     "z": 415.15,
+     "yaw": -1.3667,
+     "w": 8.9,
+     "d": 6.71,
+     "door": {
+      "x": 309,
+      "z": 416.1,
+      "yaw": 1.775
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Ganna Underhill",
+     "plot": "copperdell_plot_18",
+     "want": "house",
+     "x": 308,
+     "z": 447.1,
+     "yaw": 1.7749,
+     "w": 10.54,
+     "d": 5.29,
+     "door": {
+      "x": 311.8,
+      "z": 446.3,
+      "yaw": 4.916
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Letty Torbor",
+     "plot": "copperdell_plot_0",
+     "want": "house",
+     "x": 379.39,
+     "z": 393.98,
+     "yaw": -0.8235,
+     "w": 5.93,
+     "d": 6.93,
+     "door": {
+      "x": 377.6,
+      "z": 398.9,
+      "yaw": 2.318
+     },
+     "sign": null,
+     "light": false,
      "titled": true
     }
    ]
@@ -1601,11 +2001,11 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
@@ -1957,11 +2357,11 @@
      },
      "sign": "keys",
      "light": false,
+     "titled": true,
      "service": [
       "quests",
       "bounties"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "trainer",
@@ -1982,6 +2382,7 @@
      },
      "sign": "crest",
      "light": true,
+     "titled": true,
      "trains": [
       "cleric",
       "priest",
@@ -1990,8 +2391,7 @@
      "service": [
       "class quest",
       "teach"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "trainer",
@@ -2012,6 +2412,7 @@
      },
      "sign": "crest",
      "light": true,
+     "titled": true,
      "trains": [
       "mage",
       "sorcerer",
@@ -2023,8 +2424,7 @@
      "service": [
       "class quest",
       "teach"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "trainer",
@@ -2045,6 +2445,7 @@
      },
      "sign": "crest",
      "light": true,
+     "titled": true,
      "trains": [
       "rogue",
       "shadow_dancer",
@@ -2053,8 +2454,7 @@
      "service": [
       "class quest",
       "teach"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "trainer",
@@ -2075,13 +2475,73 @@
      },
      "sign": "crest",
      "light": true,
+     "titled": true,
      "trains": [
       "runesmith"
      ],
      "service": [
       "class quest",
       "teach"
-     ],
+     ]
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Wystan Ladd",
+     "plot": "torborhold_plot_20",
+     "want": "house",
+     "x": 626.86,
+     "z": 1242.33,
+     "yaw": -1.0352,
+     "w": 6.14,
+     "d": 7.8,
+     "door": {
+      "x": 622.5,
+      "z": 1244.9,
+      "yaw": 2.106
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Emrys Merriweather",
+     "plot": "torborhold_plot_24",
+     "want": "house",
+     "x": 639.18,
+     "z": 1260.01,
+     "yaw": -1.2431,
+     "w": 5.74,
+     "d": 4.24,
+     "door": {
+      "x": 636.7,
+      "z": 1263.2,
+      "yaw": 1.898
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Kenric Stannard",
+     "plot": "torborhold_plot_26",
+     "want": "house",
+     "x": 642.94,
+     "z": 1269.09,
+     "yaw": -1.2431,
+     "w": 4.47,
+     "d": 6.97,
+     "door": {
+      "x": 639.3,
+      "z": 1273,
+      "yaw": 1.898
+     },
+     "sign": null,
+     "light": false,
      "titled": true
     }
    ]
@@ -2115,16 +2575,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Wat Fenwick",
+     "name": "Wat Sallow",
      "plot": "halsbridge_plot_8",
      "want": "shop",
      "x": 1674.77,
@@ -2169,7 +2629,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Hild Hollis",
+     "name": "Hild Gallowsby",
      "plot": "halsbridge_plot_10",
      "want": "forge",
      "x": 1687.17,
@@ -2191,7 +2651,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Isolde Hollis",
+     "name": "Avice Rookwood",
      "plot": "halsbridge_plot_29",
      "want": "armoury",
      "x": 1740.12,
@@ -2213,7 +2673,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Tobin Harl",
+     "name": "Tibbot Cobbold",
      "plot": "halsbridge_plot_14",
      "want": "bowyer",
      "x": 1686.35,
@@ -2235,7 +2695,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Tobin Gallowsby",
+     "name": "Corwin Longacre",
      "plot": "halsbridge_plot_3",
      "want": "apothecary",
      "x": 1659.52,
@@ -2257,7 +2717,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Mabry Harl",
+     "name": "Petronel Coombe",
      "plot": "halsbridge_plot_4",
      "want": "tailor",
      "x": 1676.87,
@@ -2279,7 +2739,7 @@
     {
      "role": "jeweller",
      "title": "Jeweller",
-     "name": "Jory Millward",
+     "name": "Sawyer Millward",
      "plot": "halsbridge_plot_18",
      "want": "jeweller",
      "x": 1722.1,
@@ -2301,7 +2761,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Aled Ashby",
+     "name": "Ulf Ashby",
      "plot": "halsbridge_plot_6",
      "want": "stable",
      "x": 1664.86,
@@ -2323,7 +2783,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Wenna Reed",
+     "name": "Ganna Quarrie",
      "plot": "halsbridge_plot_9",
      "want": "inn",
      "x": 1679.18,
@@ -2345,7 +2805,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Pell Gallowsby",
+     "name": "Ivo Merriweather",
      "plot": "halsbridge_plot_17",
      "want": "provisioner",
      "x": 1704.93,
@@ -2367,7 +2827,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Jory Coombe",
+     "name": "Simkin Wainwright",
      "plot": "halsbridge_plot_5",
      "want": "barber",
      "x": 1675.56,
@@ -2389,7 +2849,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Edda Ashby",
+     "name": "Nell Hayward",
      "plot": "halsbridge_plot_27",
      "want": "counting_house",
      "x": 1734.05,
@@ -2411,7 +2871,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Tamsin Hollis",
+     "name": "Nesta Brookes",
      "plot": "halsbridge_plot_25",
      "want": "study",
      "x": 1722.19,
@@ -2433,7 +2893,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Nell Fenwick",
+     "name": "Hester Cattermole",
      "plot": "halsbridge_plot_7",
      "want": "temple",
      "x": 1670.17,
@@ -2450,6 +2910,86 @@
      "light": false,
      "label": "Temple",
      "shop": "healer",
+     "titled": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Bryn Quarrie",
+     "plot": "halsbridge_plot_22",
+     "want": "house",
+     "x": 1709.39,
+     "z": 1133.53,
+     "yaw": -2.6287,
+     "w": 5.7,
+     "d": 10.06,
+     "door": {
+      "x": 1706.3,
+      "z": 1128.1,
+      "yaw": 0.513
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Tobin Ladd",
+     "plot": "halsbridge_plot_13",
+     "want": "house",
+     "x": 1676.7,
+     "z": 1230.71,
+     "yaw": 0.4862,
+     "w": 5.45,
+     "d": 8.12,
+     "door": {
+      "x": 1679.2,
+      "z": 1235.4,
+      "yaw": 3.628
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Ivo Hollis",
+     "plot": "halsbridge_plot_1",
+     "want": "house",
+     "x": 1654.08,
+     "z": 1212.92,
+     "yaw": 2.2863,
+     "w": 9.99,
+     "d": 7.84,
+     "door": {
+      "x": 1657.2,
+      "z": 1208.9,
+      "yaw": 5.428
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Nicol Greenhill",
+     "plot": "halsbridge_plot_28",
+     "want": "house",
+     "x": 1746.36,
+     "z": 1162.6,
+     "yaw": -1.1432,
+     "w": 6.45,
+     "d": 9.34,
+     "door": {
+      "x": 1741,
+      "z": 1165,
+      "yaw": 1.998
+     },
+     "sign": null,
+     "light": false,
      "titled": true
     }
    ]
@@ -2483,16 +3023,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Isolde Hollis",
+     "name": "Mabry Merriweather",
      "plot": "gullwick_plot_13",
      "want": "shop",
      "x": 1492.28,
@@ -2514,7 +3054,7 @@
     {
      "role": "trader",
      "title": "Market trader",
-     "name": "Hild Torbor",
+     "name": "Joan Nettlefold",
      "plot": "gullwick_plot_6",
      "want": "market",
      "x": 1507.15,
@@ -2536,7 +3076,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Aled Torbor",
+     "name": "Hamon Nettlefold",
      "plot": "gullwick_plot_17",
      "want": "forge",
      "x": 1518.6,
@@ -2558,7 +3098,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Pell Reed",
+     "name": "Colin Ladd",
      "plot": "gullwick_plot_11",
      "want": "armoury",
      "x": 1480.82,
@@ -2580,7 +3120,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Hild Barrowman",
+     "name": "Sabeth Ladd",
      "plot": "gullwick_plot_3",
      "want": "bowyer",
      "x": 1488.16,
@@ -2602,7 +3142,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Tamsin Gallowsby",
+     "name": "Orla Eastmere",
      "plot": "gullwick_plot_12",
      "want": "apothecary",
      "x": 1481.87,
@@ -2624,7 +3164,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Cadoc Fenwick",
+     "name": "Hobb Fallowfield",
      "plot": "gullwick_plot_2",
      "want": "tailor",
      "x": 1481.45,
@@ -2646,7 +3186,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Edda Gallowsby",
+     "name": "Blanche Longacre",
      "plot": "gullwick_plot_19",
      "want": "stable",
      "x": 1524.7,
@@ -2668,7 +3208,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Wat Barrowman",
+     "name": "Colin Quarrie",
      "plot": "gullwick_plot_14",
      "want": "inn",
      "x": 1498.05,
@@ -2690,7 +3230,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Edda Reed",
+     "name": "Edda Kettleby",
      "plot": "gullwick_plot_8",
      "want": "provisioner",
      "x": 1517.07,
@@ -2734,7 +3274,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Aled Reed",
+     "name": "Bartle Dunstable",
      "plot": "gullwick_plot_9",
      "want": "counting_house",
      "x": 1507.36,
@@ -2756,7 +3296,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Cadoc Coombe",
+     "name": "Randal Wainwright",
      "plot": "gullwick_plot_4",
      "want": "study",
      "x": 1496.05,
@@ -2778,7 +3318,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Jory Gallowsby",
+     "name": "Jory Longacre",
      "plot": "gullwick_plot_15",
      "want": "temple",
      "x": 1504.57,
@@ -2796,6 +3336,86 @@
      "label": "Temple",
      "shop": "healer",
      "titled": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Jankin Gallowsby",
+     "plot": "gullwick_plot_24",
+     "want": "house",
+     "x": 1563.76,
+     "z": 366.91,
+     "yaw": 1.83,
+     "w": 4.94,
+     "d": 8.34,
+     "door": {
+      "x": 1569,
+      "z": 365.5,
+      "yaw": 4.972
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Sabeth Hayward",
+     "plot": "gullwick_plot_5",
+     "want": "house",
+     "x": 1506.42,
+     "z": 317.31,
+     "yaw": 0.0787,
+     "w": 5.6,
+     "d": 6.3,
+     "door": {
+      "x": 1506.8,
+      "z": 321.6,
+      "yaw": 3.22
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Edda Fallowfield",
+     "plot": "gullwick_plot_7",
+     "want": "house",
+     "x": 1516.34,
+     "z": 315.53,
+     "yaw": 0.0787,
+     "w": 6.78,
+     "d": 4.31,
+     "door": {
+      "x": 1519.4,
+      "z": 318.7,
+      "yaw": 3.22
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Isolde Rookwood",
+     "plot": "gullwick_plot_22",
+     "want": "house",
+     "x": 1562.89,
+     "z": 340.67,
+     "yaw": -1.0916,
+     "w": 5.83,
+     "d": 5.02,
+     "door": {
+      "x": 1559.6,
+      "z": 342.4,
+      "yaw": 2.05
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
     }
    ]
   },
@@ -2811,7 +3431,7 @@
     {
      "role": "elder",
      "title": "Elder",
-     "name": "Corwin Hollis",
+     "name": "Milo Longacre",
      "plot": "hermit_s_rest_plot_13",
      "want": "hall",
      "x": 1103.75,
@@ -2827,16 +3447,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Tobin Reed",
+     "name": "Corwin Dunstable",
      "plot": "hermit_s_rest_plot_30",
      "want": "shop",
      "x": 1110.97,
@@ -2858,7 +3478,7 @@
     {
      "role": "trader",
      "title": "Market trader",
-     "name": "Corwin Millward",
+     "name": "Tibbot Hayward",
      "plot": "hermit_s_rest_plot_29",
      "want": "market",
      "x": 1148.46,
@@ -2880,7 +3500,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Rosamund Gallowsby",
+     "name": "Cecily Eastmere",
      "plot": "hermit_s_rest_plot_22",
      "want": "forge",
      "x": 1119.35,
@@ -2902,7 +3522,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Orla Hollis",
+     "name": "Emmot Rookwood",
      "plot": "hermit_s_rest_plot_24",
      "want": "armoury",
      "x": 1134.95,
@@ -2924,7 +3544,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Wat Hollis",
+     "name": "Godric Hollis",
      "plot": "hermit_s_rest_plot_6",
      "want": "bowyer",
      "x": 1066.96,
@@ -2946,7 +3566,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Hobb Thatcher",
+     "name": "Cadoc Dimmock",
      "plot": "hermit_s_rest_plot_33",
      "want": "apothecary",
      "x": 1120.37,
@@ -2968,7 +3588,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Isolde Hollis",
+     "name": "Isolde Longacre",
      "plot": "hermit_s_rest_plot_5",
      "want": "tailor",
      "x": 1063.17,
@@ -2990,7 +3610,7 @@
     {
      "role": "jeweller",
      "title": "Jeweller",
-     "name": "Aled Torbor",
+     "name": "Ulf Dimmock",
      "plot": "hermit_s_rest_plot_3",
      "want": "jeweller",
      "x": 1058.22,
@@ -3012,7 +3632,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Garrick Millward",
+     "name": "Bartle Millward",
      "plot": "hermit_s_rest_plot_19",
      "want": "stable",
      "x": 1113.78,
@@ -3034,7 +3654,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Edda Reed",
+     "name": "Nell Kettleby",
      "plot": "hermit_s_rest_plot_21",
      "want": "inn",
      "x": 1117.01,
@@ -3078,7 +3698,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Oswy Torbor",
+     "name": "Lambert Thatcher",
      "plot": "hermit_s_rest_plot_23",
      "want": "barber",
      "x": 1126.43,
@@ -3100,7 +3720,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Wenna Coombe",
+     "name": "Dulcie Harl",
      "plot": "hermit_s_rest_plot_31",
      "want": "counting_house",
      "x": 1122.08,
@@ -3122,7 +3742,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Orla Coombe",
+     "name": "Nesta Cobbold",
      "plot": "hermit_s_rest_plot_32",
      "want": "study",
      "x": 1131.5,
@@ -3144,7 +3764,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Edda Fenwick",
+     "name": "Rhosyn Sallow",
      "plot": "hermit_s_rest_plot_25",
      "want": "temple",
      "x": 1129.72,
@@ -3166,7 +3786,7 @@
     {
      "role": "farmer",
      "title": "Farmer",
-     "name": "Orla Hollis",
+     "name": "Tamsin Gallowsby",
      "plot": "hermit_s_rest_plot_14",
      "want": "granary",
      "x": 1107.82,
@@ -3187,7 +3807,7 @@
     {
      "role": "miller",
      "title": "Miller",
-     "name": "Maud Reed",
+     "name": "Marjory Kettleby",
      "plot": "hermit_s_rest_plot_27",
      "want": "mill",
      "x": 1142.9,
@@ -3203,10 +3823,10 @@
      "sign": "wheel",
      "light": false,
      "label": "Mill",
+     "titled": false,
      "service": [
       "flour"
-     ],
-     "titled": false
+     ]
     },
     {
      "role": "hermit",
@@ -3227,7 +3847,87 @@
      },
      "sign": null,
      "light": false,
-     "home": true,
+     "titled": true,
+     "home": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Hester Fallowfield",
+     "plot": "hermit_s_rest_plot_34",
+     "want": "house",
+     "x": 1114.81,
+     "z": 602.09,
+     "yaw": 1.7463,
+     "w": 4.8,
+     "d": 5.92,
+     "door": {
+      "x": 1118.9,
+      "z": 601.4,
+      "yaw": 4.888
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Alder Merriweather",
+     "plot": "hermit_s_rest_plot_2",
+     "want": "house",
+     "x": 1053.66,
+     "z": 546.73,
+     "yaw": 0.6053,
+     "w": 6.52,
+     "d": 4.12,
+     "door": {
+      "x": 1055.5,
+      "z": 549.4,
+      "yaw": 3.747
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Hobb Brackenridge",
+     "plot": "hermit_s_rest_plot_35",
+     "want": "house",
+     "x": 1122.72,
+     "z": 600.68,
+     "yaw": -1.3953,
+     "w": 4.15,
+     "d": 5.92,
+     "door": {
+      "x": 1119,
+      "z": 603.9,
+      "yaw": 1.746
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Sawyer Millward",
+     "plot": "hermit_s_rest_plot_38",
+     "want": "house",
+     "x": 1145.74,
+     "z": 586.06,
+     "yaw": 3.0971,
+     "w": 4.77,
+     "d": 4.71,
+     "door": {
+      "x": 1145.9,
+      "z": 582.5,
+      "yaw": 6.239
+     },
+     "sign": null,
+     "light": false,
      "titled": true
     }
    ]
@@ -3261,16 +3961,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Tamsin Reed",
+     "name": "Brenna Yeoman",
      "plot": "orrinsford_plot_4",
      "want": "shop",
      "x": 348.79,
@@ -3292,7 +3992,7 @@
     {
      "role": "trader",
      "title": "Market trader",
-     "name": "Tamsin Coombe",
+     "name": "Brenna Harl",
      "plot": "orrinsford_plot_23",
      "want": "market",
      "x": 349.55,
@@ -3314,7 +4014,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Aled Millward",
+     "name": "Ulf Furlong",
      "plot": "orrinsford_plot_3",
      "want": "forge",
      "x": 328.43,
@@ -3336,7 +4036,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Cadoc Hollis",
+     "name": "Ralf Merriweather",
      "plot": "orrinsford_plot_19",
      "want": "armoury",
      "x": 364.52,
@@ -3358,7 +4058,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Hild Hollis",
+     "name": "Cecily Hollis",
      "plot": "orrinsford_plot_14",
      "want": "bowyer",
      "x": 298.22,
@@ -3380,7 +4080,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Tamsin Pike",
+     "name": "Tamsin Cattermole",
      "plot": "orrinsford_plot_0",
      "want": "apothecary",
      "x": 333.97,
@@ -3402,7 +4102,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Tobin Fenwick",
+     "name": "Corwin Fallowfield",
      "plot": "orrinsford_plot_15",
      "want": "tailor",
      "x": 302.51,
@@ -3424,7 +4124,7 @@
     {
      "role": "jeweller",
      "title": "Jeweller",
-     "name": "Nell Coombe",
+     "name": "Edda Inchley",
      "plot": "orrinsford_plot_21",
      "want": "jeweller",
      "x": 375.98,
@@ -3446,7 +4146,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Maud Ashby",
+     "name": "Wenna Brackenridge",
      "plot": "orrinsford_plot_2",
      "want": "stable",
      "x": 335.85,
@@ -3468,7 +4168,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Hobb Reed",
+     "name": "Hobb Kettleby",
      "plot": "orrinsford_plot_8",
      "want": "inn",
      "x": 305.76,
@@ -3490,7 +4190,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Maud Hollis",
+     "name": "Ganna Gallowsby",
      "plot": "orrinsford_plot_16",
      "want": "provisioner",
      "x": 377.52,
@@ -3512,7 +4212,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Edda Thatcher",
+     "name": "Edda Dimmock",
      "plot": "orrinsford_plot_12",
      "want": "barber",
      "x": 304.53,
@@ -3534,7 +4234,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Emrys Ashby",
+     "name": "Dunnet Millward",
      "plot": "orrinsford_plot_5",
      "want": "counting_house",
      "x": 312.7,
@@ -3556,7 +4256,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Cadoc Gallowsby",
+     "name": "Randal Hollis",
      "plot": "orrinsford_plot_7",
      "want": "study",
      "x": 299.9,
@@ -3578,7 +4278,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Jory Harl",
+     "name": "Fulk Cobbold",
      "plot": "orrinsford_plot_13",
      "want": "temple",
      "x": 312.03,
@@ -3600,7 +4300,7 @@
     {
      "role": "farmer",
      "title": "Farmer",
-     "name": "Wat Harl",
+     "name": "Pell Harl",
      "plot": "orrinsford_plot_25",
      "want": "granary",
      "x": 368.16,
@@ -3617,6 +4317,86 @@
      "light": false,
      "label": "Granary",
      "titled": false
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Fulk Rookwood",
+     "plot": "orrinsford_plot_22",
+     "want": "house",
+     "x": 349.78,
+     "z": 598.35,
+     "yaw": 0.9509,
+     "w": 3.81,
+     "d": 3.7,
+     "door": {
+      "x": 353,
+      "z": 598.8,
+      "yaw": 4.092
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Una Fallowfield",
+     "plot": "orrinsford_plot_20",
+     "want": "house",
+     "x": 369.51,
+     "z": 590.42,
+     "yaw": 2.5429,
+     "w": 3.75,
+     "d": 5.63,
+     "door": {
+      "x": 371.8,
+      "z": 587.1,
+      "yaw": 5.684
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Alys Furlong",
+     "plot": "orrinsford_plot_11",
+     "want": "house",
+     "x": 287.87,
+     "z": 586.92,
+     "yaw": -2.0624,
+     "w": 4.95,
+     "d": 3.68,
+     "door": {
+      "x": 284.9,
+      "z": 585.9,
+      "yaw": 1.079
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Letty Tanner",
+     "plot": "orrinsford_plot_28",
+     "want": "house",
+     "x": 340.68,
+     "z": 615.41,
+     "yaw": 0.7309,
+     "w": 4.3,
+     "d": 3.91,
+     "door": {
+      "x": 342.8,
+      "z": 617.8,
+      "yaw": 3.872
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
     }
    ]
   },
@@ -3649,16 +4429,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Pell Hollis",
+     "name": "Colin Merriweather",
      "plot": "millbrook_plot_23",
      "want": "shop",
      "x": 565.64,
@@ -3702,7 +4482,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Rosamund Barrowman",
+     "name": "Joan Dunstable",
      "plot": "millbrook_plot_26",
      "want": "armoury",
      "x": 584.97,
@@ -3724,7 +4504,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Hobb Fenwick",
+     "name": "Randal Stannard",
      "plot": "millbrook_plot_11",
      "want": "bowyer",
      "x": 550.19,
@@ -3746,7 +4526,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Corwin Reed",
+     "name": "Tibbot Dunstable",
      "plot": "millbrook_plot_19",
      "want": "apothecary",
      "x": 543.18,
@@ -3768,7 +4548,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Hild Torbor",
+     "name": "Sabeth Applegarth",
      "plot": "millbrook_plot_28",
      "want": "tailor",
      "x": 595.59,
@@ -3790,7 +4570,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Dunnet Reed",
+     "name": "Dickon Dunstable",
      "plot": "millbrook_plot_17",
      "want": "stable",
      "x": 529.23,
@@ -3812,7 +4592,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Edda Harl",
+     "name": "Edda Wainwright",
      "plot": "millbrook_plot_22",
      "want": "inn",
      "x": 574.41,
@@ -3834,7 +4614,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Wat Millward",
+     "name": "Walter Brackenridge",
      "plot": "millbrook_plot_8",
      "want": "provisioner",
      "x": 524.54,
@@ -3856,7 +4636,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Oswy Fenwick",
+     "name": "Simkin Fenwick",
      "plot": "millbrook_plot_24",
      "want": "barber",
      "x": 587.93,
@@ -3878,7 +4658,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Wenna Coombe",
+     "name": "Alys Coombe",
      "plot": "millbrook_plot_27",
      "want": "counting_house",
      "x": 588.68,
@@ -3900,7 +4680,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Mabry Ashby",
+     "name": "Avice Millward",
      "plot": "millbrook_plot_18",
      "want": "study",
      "x": 535.11,
@@ -3922,7 +4702,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Edda Torbor",
+     "name": "Rhosyn Applegarth",
      "plot": "millbrook_plot_25",
      "want": "temple",
      "x": 578.87,
@@ -3940,6 +4720,86 @@
      "label": "Temple",
      "shop": "healer",
      "titled": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Kitt Cobbold",
+     "plot": "millbrook_plot_7",
+     "want": "house",
+     "x": 516.05,
+     "z": 1661.38,
+     "yaw": 1.0755,
+     "w": 10.43,
+     "d": 6.92,
+     "door": {
+      "x": 522.3,
+      "z": 1659.5,
+      "yaw": 4.217
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Pell Coombe",
+     "plot": "millbrook_plot_13",
+     "want": "house",
+     "x": 558.83,
+     "z": 1681.92,
+     "yaw": -2.3226,
+     "w": 5.47,
+     "d": 9.01,
+     "door": {
+      "x": 555.7,
+      "z": 1676.9,
+      "yaw": 0.819
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Osric Harl",
+     "plot": "millbrook_plot_16",
+     "want": "house",
+     "x": 522.85,
+     "z": 1592.9,
+     "yaw": -0.5111,
+     "w": 9.87,
+     "d": 6.5,
+     "door": {
+      "x": 520.9,
+      "z": 1597.2,
+      "yaw": 2.63
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Lambert Thatcher",
+     "plot": "millbrook_plot_4",
+     "want": "house",
+     "x": 506.08,
+     "z": 1656.27,
+     "yaw": -0.4953,
+     "w": 10.91,
+     "d": 7.59,
+     "door": {
+      "x": 504.1,
+      "z": 1661,
+      "yaw": 2.646
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
     }
    ]
   },
@@ -3955,7 +4815,7 @@
     {
      "role": "elder",
      "title": "Elder",
-     "name": "Cadoc Coombe",
+     "name": "Ralf Harl",
      "plot": "redcliff_plot_15",
      "want": "hall",
      "x": 371.58,
@@ -3971,16 +4831,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Corwin Harl",
+     "name": "Tobin Harl",
      "plot": "redcliff_plot_4",
      "want": "shop",
      "x": 411.53,
@@ -4002,7 +4862,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Hild Barrowman",
+     "name": "Fenna Barrowman",
      "plot": "redcliff_plot_14",
      "want": "forge",
      "x": 376.31,
@@ -4024,7 +4884,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Hild Reed",
+     "name": "Rosamund Dunstable",
      "plot": "redcliff_plot_2",
      "want": "armoury",
      "x": 413.18,
@@ -4046,7 +4906,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Pell Harl",
+     "name": "Walter Pennock",
      "plot": "redcliff_plot_12",
      "want": "bowyer",
      "x": 372.69,
@@ -4068,7 +4928,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Cadoc Fenwick",
+     "name": "Cadoc Sallow",
      "plot": "redcliff_plot_17",
      "want": "apothecary",
      "x": 354.32,
@@ -4090,7 +4950,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Orla Thatcher",
+     "name": "Brenna Torbor",
      "plot": "redcliff_plot_21",
      "want": "tailor",
      "x": 351.19,
@@ -4112,7 +4972,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Aled Ashby",
+     "name": "Ulf Millward",
      "plot": "redcliff_plot_10",
      "want": "stable",
      "x": 393.44,
@@ -4134,7 +4994,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Bryn Ashby",
+     "name": "Bryn Millward",
      "plot": "redcliff_plot_19",
      "want": "inn",
      "x": 362.8,
@@ -4156,7 +5016,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Jory Fenwick",
+     "name": "Clement Pike",
      "plot": "redcliff_plot_18",
      "want": "barber",
      "x": 352.07,
@@ -4178,7 +5038,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Maud Harl",
+     "name": "Dulcie Hobday",
      "plot": "redcliff_plot_8",
      "want": "counting_house",
      "x": 401.76,
@@ -4200,7 +5060,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Tamsin Coombe",
+     "name": "Una Inchley",
      "plot": "redcliff_plot_22",
      "want": "study",
      "x": 343.05,
@@ -4222,7 +5082,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Nell Hollis",
+     "name": "Elsbet Hollis",
      "plot": "redcliff_plot_20",
      "want": "temple",
      "x": 354.55,
@@ -4261,7 +5121,87 @@
      "sign": null,
      "light": false,
      "shop": "market",
-     "home": true,
+     "titled": true,
+     "home": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Olwen Coombe",
+     "plot": "redcliff_plot_1",
+     "want": "house",
+     "x": 425.64,
+     "z": 887.2,
+     "yaw": -2.7985,
+     "w": 5.67,
+     "d": 6.49,
+     "door": {
+      "x": 424.1,
+      "z": 883,
+      "yaw": 0.343
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Ivo Inchley",
+     "plot": "redcliff_plot_0",
+     "want": "house",
+     "x": 431.31,
+     "z": 876.49,
+     "yaw": 0.3431,
+     "w": 4.67,
+     "d": 4.14,
+     "door": {
+      "x": 432.4,
+      "z": 879.6,
+      "yaw": 3.485
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Milo Applegarth",
+     "plot": "redcliff_plot_6",
+     "want": "house",
+     "x": 420.87,
+     "z": 838.14,
+     "yaw": -3.0673,
+     "w": 5.6,
+     "d": 4.24,
+     "door": {
+      "x": 420.6,
+      "z": 834.8,
+      "yaw": 0.074
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Jankin Dunstable",
+     "plot": "redcliff_plot_9",
+     "want": "house",
+     "x": 398.79,
+     "z": 819.41,
+     "yaw": 0.0743,
+     "w": 6.23,
+     "d": 8.32,
+     "door": {
+      "x": 399.2,
+      "z": 824.8,
+      "yaw": 3.216
+     },
+     "sign": null,
+     "light": false,
      "titled": true
     }
    ]
@@ -4295,16 +5235,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Nell Gallowsby",
+     "name": "Rhosyn Hollis",
      "plot": "last_lantern_plot_16",
      "want": "shop",
      "x": 871,
@@ -4326,7 +5266,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Wat Pike",
+     "name": "Godric Fallowfield",
      "plot": "last_lantern_plot_15",
      "want": "forge",
      "x": 865.41,
@@ -4348,7 +5288,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Aled Millward",
+     "name": "Bartle Oakhurst",
      "plot": "last_lantern_plot_3",
      "want": "armoury",
      "x": 876.11,
@@ -4370,7 +5310,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Maud Coombe",
+     "name": "Ganna Inchley",
      "plot": "last_lantern_plot_4",
      "want": "bowyer",
      "x": 866.93,
@@ -4392,7 +5332,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Bryn Torbor",
+     "name": "Idony Greenhill",
      "plot": "last_lantern_plot_9",
      "want": "apothecary",
      "x": 907.35,
@@ -4414,7 +5354,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Isolde Fenwick",
+     "name": "Avice Fallowfield",
      "plot": "last_lantern_plot_10",
      "want": "stable",
      "x": 897.48,
@@ -4436,7 +5376,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Emrys Coombe",
+     "name": "Dunnet Coombe",
      "plot": "last_lantern_plot_14",
      "want": "inn",
      "x": 877.12,
@@ -4458,7 +5398,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Orla Pike",
+     "name": "Orla Fenwick",
      "plot": "last_lantern_plot_18",
      "want": "barber",
      "x": 857.99,
@@ -4480,7 +5420,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Tobin Fenwick",
+     "name": "Drogo Marlow",
      "plot": "last_lantern_plot_20",
      "want": "counting_house",
      "x": 850.04,
@@ -4502,7 +5442,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Aled Ashby",
+     "name": "Hamon Millward",
      "plot": "last_lantern_plot_8",
      "want": "study",
      "x": 912.85,
@@ -4524,7 +5464,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Wat Torbor",
+     "name": "Colin Dimmock",
      "plot": "last_lantern_plot_19",
      "want": "temple",
      "x": 852.49,
@@ -4541,6 +5481,86 @@
      "light": false,
      "label": "Temple",
      "shop": "healer",
+     "titled": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Tobin Thatcher",
+     "plot": "last_lantern_plot_17",
+     "want": "house",
+     "x": 866.54,
+     "z": 1337.22,
+     "yaw": -1.9742,
+     "w": 9,
+     "d": 8.58,
+     "door": {
+      "x": 861.5,
+      "z": 1335.1,
+      "yaw": 1.167
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Rhosyn Hollis",
+     "plot": "last_lantern_plot_5",
+     "want": "house",
+     "x": 860.68,
+     "z": 1264.85,
+     "yaw": 3.0415,
+     "w": 5.24,
+     "d": 6.28,
+     "door": {
+      "x": 861.1,
+      "z": 1260.5,
+      "yaw": 6.183
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Mabry Nettlefold",
+     "plot": "last_lantern_plot_2",
+     "want": "house",
+     "x": 887.71,
+     "z": 1259.21,
+     "yaw": 0.1199,
+     "w": 7.99,
+     "d": 5.67,
+     "door": {
+      "x": 888.2,
+      "z": 1263.2,
+      "yaw": 3.261
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Ganna Fenwick",
+     "plot": "last_lantern_plot_1",
+     "want": "house",
+     "x": 897.43,
+     "z": 1257.96,
+     "yaw": 0.1199,
+     "w": 7.83,
+     "d": 5.14,
+     "door": {
+      "x": 897.9,
+      "z": 1261.7,
+      "yaw": 3.261
+     },
+     "sign": null,
+     "light": false,
      "titled": true
     }
    ]
@@ -4574,16 +5594,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Tobin Thatcher",
+     "name": "Alder Applegarth",
      "plot": "coldwater_plot_2",
      "want": "shop",
      "x": 1468.65,
@@ -4605,7 +5625,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Rosamund Millward",
+     "name": "Rosamund Ashby",
      "plot": "coldwater_plot_5",
      "want": "forge",
      "x": 1447.16,
@@ -4627,7 +5647,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Orla Reed",
+     "name": "Emmot Quarrie",
      "plot": "coldwater_plot_10",
      "want": "armoury",
      "x": 1444.5,
@@ -4649,7 +5669,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Hobb Coombe",
+     "name": "Randal Cobbold",
      "plot": "coldwater_plot_15",
      "want": "bowyer",
      "x": 1490.69,
@@ -4693,7 +5713,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Jory Barrowman",
+     "name": "Fulk Yeoman",
      "plot": "coldwater_plot_3",
      "want": "stable",
      "x": 1477.67,
@@ -4715,7 +5735,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Gwen Millward",
+     "name": "Gwen Underhill",
      "plot": "coldwater_plot_7",
      "want": "inn",
      "x": 1443.07,
@@ -4737,7 +5757,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Oswy Reed",
+     "name": "Fulk Barrowman",
      "plot": "coldwater_plot_6",
      "want": "barber",
      "x": 1427.67,
@@ -4759,7 +5779,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Bryn Coombe",
+     "name": "Cressy Pennock",
      "plot": "coldwater_plot_9",
      "want": "counting_house",
      "x": 1435.4,
@@ -4781,7 +5801,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Orla Reed",
+     "name": "Hawise Barrowman",
      "plot": "coldwater_plot_1",
      "want": "study",
      "x": 1491.13,
@@ -4803,7 +5823,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Edda Hollis",
+     "name": "Kitt Longacre",
      "plot": "coldwater_plot_8",
      "want": "temple",
      "x": 1452.07,
@@ -4821,6 +5841,86 @@
      "label": "Temple",
      "shop": "healer",
      "titled": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Maud Millward",
+     "plot": "coldwater_plot_17",
+     "want": "house",
+     "x": 1462.22,
+     "z": 1879.55,
+     "yaw": 2.0453,
+     "w": 9.98,
+     "d": 11.87,
+     "door": {
+      "x": 1468.6,
+      "z": 1876.3,
+      "yaw": 5.187
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Randal Coombe",
+     "plot": "coldwater_plot_14",
+     "want": "house",
+     "x": 1502.48,
+     "z": 1860.87,
+     "yaw": -2.5093,
+     "w": 7.7,
+     "d": 5.48,
+     "door": {
+      "x": 1499.6,
+      "z": 1856.9,
+      "yaw": 0.632
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Pell Dunstable",
+     "plot": "coldwater_plot_12",
+     "want": "house",
+     "x": 1509.8,
+     "z": 1847.84,
+     "yaw": 2.4231,
+     "w": 7.98,
+     "d": 10.5,
+     "door": {
+      "x": 1514,
+      "z": 1843,
+      "yaw": 5.565
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Jankin Stannard",
+     "plot": "coldwater_plot_11",
+     "want": "house",
+     "x": 1512.73,
+     "z": 1834.92,
+     "yaw": 0.8523,
+     "w": 5.64,
+     "d": 5.89,
+     "door": {
+      "x": 1515.9,
+      "z": 1837.6,
+      "yaw": 3.994
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
     }
    ]
   },
@@ -4836,7 +5936,7 @@
     {
      "role": "elder",
      "title": "Elder",
-     "name": "Corwin Ashby",
+     "name": "Alder Oakhurst",
      "plot": "gorsehold_plot_14",
      "want": "hall",
      "x": 1549.42,
@@ -4852,16 +5952,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Pell Torbor",
+     "name": "Walter Thatcher",
      "plot": "gorsehold_plot_6",
      "want": "shop",
      "x": 1582.34,
@@ -4883,7 +5983,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Orla Hollis",
+     "name": "Tamsin Rookwood",
      "plot": "gorsehold_plot_12",
      "want": "forge",
      "x": 1561.27,
@@ -4905,7 +6005,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Mabry Barrowman",
+     "name": "Dowsabel Kettleby",
      "plot": "gorsehold_plot_9",
      "want": "armoury",
      "x": 1558.35,
@@ -4927,7 +6027,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Wat Gallowsby",
+     "name": "Osric Rookwood",
      "plot": "gorsehold_plot_10",
      "want": "bowyer",
      "x": 1543.29,
@@ -4949,7 +6049,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Corwin Fenwick",
+     "name": "Alder Sallow",
      "plot": "gorsehold_plot_15",
      "want": "apothecary",
      "x": 1532.91,
@@ -4971,7 +6071,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Tamsin Barrowman",
+     "name": "Nesta Ladd",
      "plot": "gorsehold_plot_8",
      "want": "tailor",
      "x": 1584.14,
@@ -4993,7 +6093,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Dunnet Fenwick",
+     "name": "Hew Sallow",
      "plot": "gorsehold_plot_2",
      "want": "stable",
      "x": 1580.43,
@@ -5015,7 +6115,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Maud Torbor",
+     "name": "Tegan Thatcher",
      "plot": "gorsehold_plot_18",
      "want": "inn",
      "x": 1562.45,
@@ -5037,7 +6137,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Hobb Fenwick",
+     "name": "Benet Fenwick",
      "plot": "gorsehold_plot_20",
      "want": "provisioner",
      "x": 1562.29,
@@ -5059,7 +6159,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Emrys Fenwick",
+     "name": "Piers Cattermole",
      "plot": "gorsehold_plot_19",
      "want": "barber",
      "x": 1546.55,
@@ -5081,7 +6181,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Nell Harl",
+     "name": "Edda Wainwright",
      "plot": "gorsehold_plot_7",
      "want": "counting_house",
      "x": 1583.42,
@@ -5103,7 +6203,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Orla Ashby",
+     "name": "Brenna Hayward",
      "plot": "gorsehold_plot_16",
      "want": "study",
      "x": 1534.04,
@@ -5125,7 +6225,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Maud Barrowman",
+     "name": "Marjory Ladd",
      "plot": "gorsehold_plot_13",
      "want": "temple",
      "x": 1548.45,
@@ -5164,7 +6264,87 @@
      "sign": null,
      "light": false,
      "shop": "market",
-     "home": true,
+     "titled": true,
+     "home": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Ganna Stannard",
+     "plot": "gorsehold_plot_4",
+     "want": "house",
+     "x": 1600.14,
+     "z": 1286.52,
+     "yaw": -1.6507,
+     "w": 10.47,
+     "d": 10.48,
+     "door": {
+      "x": 1593.7,
+      "z": 1286,
+      "yaw": 1.491
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Osric Longacre",
+     "plot": "gorsehold_plot_0",
+     "want": "house",
+     "x": 1579.28,
+     "z": 1322.79,
+     "yaw": -1.6507,
+     "w": 18.5,
+     "d": 9.76,
+     "door": {
+      "x": 1570.7,
+      "z": 1322.8,
+      "yaw": 1.491
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Tobin Brackenridge",
+     "plot": "gorsehold_plot_23",
+     "want": "house",
+     "x": 1532.16,
+     "z": 1260.22,
+     "yaw": -1.6507,
+     "w": 9.24,
+     "d": 9.79,
+     "door": {
+      "x": 1526.1,
+      "z": 1259.7,
+      "yaw": 1.491
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Ulf Reed",
+     "plot": "gorsehold_plot_1",
+     "want": "house",
+     "x": 1598.21,
+     "z": 1306.02,
+     "yaw": -1.6507,
+     "w": 10.99,
+     "d": 19.91,
+     "door": {
+      "x": 1586.1,
+      "z": 1315.1,
+      "yaw": 1.491
+     },
+     "sign": null,
+     "light": false,
      "titled": true
     }
    ]
@@ -5198,16 +6378,16 @@
      "sign": "banner",
      "light": false,
      "label": "Town Hall",
+     "titled": true,
      "service": [
       "quests",
       "town news"
-     ],
-     "titled": true
+     ]
     },
     {
      "role": "merchant",
      "title": "Merchant",
-     "name": "Emrys Ashby",
+     "name": "Dunnet Oakhurst",
      "plot": "lowmoor_plot_5",
      "want": "shop",
      "x": 1221.67,
@@ -5229,7 +6409,7 @@
     {
      "role": "smith",
      "title": "Smith",
-     "name": "Gwen Coombe",
+     "name": "Wynne Cobbold",
      "plot": "lowmoor_plot_6",
      "want": "forge",
      "x": 1214.85,
@@ -5251,7 +6431,7 @@
     {
      "role": "armourer",
      "title": "Armourer",
-     "name": "Edda Fenwick",
+     "name": "Nell Fallowfield",
      "plot": "lowmoor_plot_11",
      "want": "armoury",
      "x": 1185.92,
@@ -5273,7 +6453,7 @@
     {
      "role": "bowyer",
      "title": "Bowyer",
-     "name": "Aled Reed",
+     "name": "Hamon Yeoman",
      "plot": "lowmoor_plot_19",
      "want": "bowyer",
      "x": 1200.66,
@@ -5295,7 +6475,7 @@
     {
      "role": "apothecary",
      "title": "Apothecary",
-     "name": "Dunnet Torbor",
+     "name": "Piers Greenhill",
      "plot": "lowmoor_plot_12",
      "want": "apothecary",
      "x": 1179.62,
@@ -5317,7 +6497,7 @@
     {
      "role": "tailor",
      "title": "Tailor",
-     "name": "Bryn Gallowsby",
+     "name": "Gwen Brookes",
      "plot": "lowmoor_plot_13",
      "want": "tailor",
      "x": 1250.64,
@@ -5339,7 +6519,7 @@
     {
      "role": "stablehand",
      "title": "Stable master",
-     "name": "Pell Coombe",
+     "name": "Godric Coombe",
      "plot": "lowmoor_plot_10",
      "want": "stable",
      "x": 1194.36,
@@ -5361,7 +6541,7 @@
     {
      "role": "innkeeper",
      "title": "Innkeeper",
-     "name": "Mabry Torbor",
+     "name": "Jenet Thatcher",
      "plot": "lowmoor_plot_4",
      "want": "inn",
      "x": 1231.07,
@@ -5383,7 +6563,7 @@
     {
      "role": "provisioner",
      "title": "Provisioner",
-     "name": "Emrys Gallowsby",
+     "name": "Piers Eastmere",
      "plot": "lowmoor_plot_20",
      "want": "provisioner",
      "x": 1204.95,
@@ -5405,7 +6585,7 @@
     {
      "role": "barber",
      "title": "Barber",
-     "name": "Pell Harl",
+     "name": "Walter Harl",
      "plot": "lowmoor_plot_16",
      "want": "barber",
      "x": 1231.99,
@@ -5427,7 +6607,7 @@
     {
      "role": "broker",
      "title": "Broker",
-     "name": "Tamsin Fenwick",
+     "name": "Brenna Fenwick",
      "plot": "lowmoor_plot_1",
      "want": "counting_house",
      "x": 1246.7,
@@ -5449,7 +6629,7 @@
     {
      "role": "unbinder",
      "title": "Unbinder",
-     "name": "Maud Thatcher",
+     "name": "Ganna Thatcher",
      "plot": "lowmoor_plot_0",
      "want": "study",
      "x": 1250.84,
@@ -5471,7 +6651,7 @@
     {
      "role": "healer",
      "title": "Healer",
-     "name": "Rosamund Harl",
+     "name": "Letty Coombe",
      "plot": "lowmoor_plot_3",
      "want": "temple",
      "x": 1245.51,
@@ -5488,6 +6668,86 @@
      "light": false,
      "label": "Temple",
      "shop": "healer",
+     "titled": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Fenna Fallowfield",
+     "plot": "lowmoor_plot_2",
+     "want": "house",
+     "x": 1254.53,
+     "z": 1006.7,
+     "yaw": -2.9663,
+     "w": 5.5,
+     "d": 3.62,
+     "door": {
+      "x": 1254,
+      "z": 1003.7,
+      "yaw": 0.175
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Sawyer Tanner",
+     "plot": "lowmoor_plot_8",
+     "want": "house",
+     "x": 1199.44,
+     "z": 978.02,
+     "yaw": -0.2564,
+     "w": 3.53,
+     "d": 3.84,
+     "door": {
+      "x": 1198.6,
+      "z": 981,
+      "yaw": 2.885
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Garrick Pike",
+     "plot": "lowmoor_plot_17",
+     "want": "house",
+     "x": 1230.26,
+     "z": 1047.72,
+     "yaw": 1.496,
+     "w": 4.22,
+     "d": 3.55,
+     "door": {
+      "x": 1233.2,
+      "z": 1047.9,
+      "yaw": 4.638
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Tobin Dimmock",
+     "plot": "lowmoor_plot_15",
+     "want": "house",
+     "x": 1244.8,
+     "z": 1056.72,
+     "yaw": 3.0668,
+     "w": 3.51,
+     "d": 4.43,
+     "door": {
+      "x": 1245.1,
+      "z": 1053.3,
+      "yaw": 6.208
+     },
+     "sign": null,
+     "light": false,
      "titled": true
     }
    ]
@@ -5506,6 +6766,7 @@
    "name": "Sergeant-at-Arms Brede Holloway",
    "role": "trainer",
    "setpiece": "sp_drill_field",
+   "titled": true,
    "trains": [
     "warrior",
     "fighter",
@@ -5513,82 +6774,81 @@
     "swashbuckler",
     "dragon_knight",
     "tactician"
-   ],
-   "titled": true
+   ]
   },
   {
    "npc": "trainer_hunt",
    "name": "Oswy Greyfletch",
    "role": "trainer",
    "setpiece": "sp_greyfletch_camp",
+   "titled": true,
    "trains": [
     "ranger",
     "witch_hunter",
     "demon_hunter"
-   ],
-   "titled": true
+   ]
   },
   {
    "npc": "trainer_wilds",
    "name": "Wenna of the Stones",
    "role": "trainer",
    "setpiece": "sp_nine_maidens",
+   "titled": true,
    "trains": [
     "druid",
     "shaman"
-   ],
-   "titled": true
+   ]
   },
   {
    "npc": "trainer_grave",
    "name": "Old Mother Quell",
    "role": "trainer",
    "setpiece": "sp_saint_hulda_yard",
+   "titled": true,
    "trains": [
     "necromancer"
-   ],
-   "titled": true
+   ]
   },
   {
    "npc": "trainer_pact",
    "name": "Ysolde Coldharrow",
    "role": "trainer",
    "setpiece": "sp_coldharrow_ruins",
+   "titled": true,
    "trains": [
     "warlock"
-   ],
-   "titled": true
+   ]
   },
   {
    "npc": "trainer_mind",
    "name": "Brother Cadoc",
    "role": "trainer",
    "setpiece": "sp_kind_mother_shrine",
+   "titled": true,
    "trains": [
     "monk",
     "oracle"
-   ],
-   "titled": true
+   ]
   },
   {
    "npc": "trainer_tinker",
    "name": "Jory Millward",
    "role": "trainer",
    "setpiece": "sp_turnwater_mill",
+   "titled": true,
    "trains": [
     "tinker"
-   ],
-   "titled": true
+   ]
   },
   {
    "npc": "trainer_bard",
    "name": "Lute-master Emrys Fenwick",
    "role": "trainer",
    "setpiece": "sp_pail_and_plough",
+   "titled": true,
    "trains": [
     "bard"
-   ],
-   "titled": true
+   ]
   },
   {
    "npc": "corporal_jenk",

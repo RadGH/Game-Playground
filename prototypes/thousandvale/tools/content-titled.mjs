@@ -17,7 +17,7 @@
 /** Roles that give radiant jobs (js/sim/quests.js JOB_ROLES; a test keeps the two lists the same). */
 export const JOB_ROLES = Object.freeze(['elder', 'sergeant', 'captain', 'quartermaster', 'tollkeeper', 'broker', 'innkeeper', 'angler', 'smith', 'apothecary', 'tailor', 'bowyer', 'prospector']);      // the last five: round 8 W9 (P-core) — profession jobs
 /** Roles that ARE a service wherever they stand. */
-export const SERVICE_ROLES = Object.freeze(['trainer', 'carter', 'angler', 'stablemaster', 'reeve', 'castellan']);
+export const SERVICE_ROLES = Object.freeze(['trainer', 'carter', 'angler', 'stablemaster', 'reeve', 'castellan', 'prospector', 'logger', 'forager', 'skinner']);
 
 /**
  * @param rec   { role?, npc? | id? (a quest NPC id), shop?, quests? (number it gives/takes), trains?, offers?, curious?, type? }

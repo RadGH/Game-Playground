@@ -2,6 +2,16 @@
  "_doc": "Player-facing changelog, newest first. The lead appends an entry at each publish (from the feedback reports' Completed notes). `id` is stable; the client remembers the last id a player has seen and highlights newer ones. Plain language, no internal names.",
  "entries": [
   {
+   "id": "2026-10-11-trainers",
+   "date": "2026-10-11",
+   "title": "Profession trainers in every major town",
+   "items": [
+    "Every major town now has dedicated Mining, Logging, Foraging and Skinning trainers, alongside its crafting teachers. Lessons and your first gathering tool are free.",
+    "Search the map for a profession, such as mining or foraging, to find its teachers. Gathering trainers also have their own map filters.",
+    "Bram Delver now appears on the map as a Mining trainer at Torborhold's main gate."
+   ]
+  },
+  {
    "id": "2026-10-10",
    "date": "2026-10-10",
    "title": "Better phone controls, steady auto-attack and party tracking",

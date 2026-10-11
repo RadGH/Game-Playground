@@ -62,6 +62,9 @@
   "roles": {
     "_doc": "which town folk teach a profession (`trains`) and whose building is a station for one (`stations`). A station = standing within craft.stationM of them.",
     "prospector": { "trains": ["mining"], "stations": [] },
+    "logger": { "trains": ["logging"], "stations": [] },
+    "forager": { "trains": ["foraging"], "stations": [] },
+    "skinner": { "trains": ["skinning"], "stations": [] },
     "smith": { "trains": ["mining", "smithing", "tempering"], "stations": ["smithing", "tempering"] },
     "armourer": { "trains": ["smithing", "tempering"], "stations": ["smithing", "tempering"] },
     "jeweller": { "trains": ["tempering"], "stations": ["tempering", "smithing"] },

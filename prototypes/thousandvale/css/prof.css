@@ -135,3 +135,11 @@ html[data-layout="phone"] .pt-list { max-height: none; }
 @media (orientation: portrait) { html[data-layout="phone"] .pt-list { max-height: 34vh; } }
 html[data-layout="phone"] .pc-batch { min-height: 44px; }
 @media (orientation: portrait) { html[data-layout="phone"] .pt-cols { grid-template-columns: 1fr; } }
+
+/* Y19 (G2): the READY card — the game's picture at time 0 with "Tap to begin" over it; the canvas underneath takes the touch */
+.prof-stage { position: relative; }
+.prof-ready { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 10px 16px; text-align: center; background: rgba(8, 6, 4, 0.5); pointer-events: none; animation: prof-card 0.18s ease-out; }
+.prof-ready strong { font: 700 22px var(--serif, var(--sans)); color: var(--gold-hi); text-shadow: 0 2px 6px #000; }
+.prof-ready span { max-width: 300px; font: 500 14px/1.35 var(--sans); color: var(--ink); text-shadow: 0 1px 3px #000; }
+.prof-ready small { margin-top: 4px; font: 500 12px var(--sans); color: var(--ink-dim); }
+.tv-prof[data-type="trace"] .prof-ready { justify-content: flex-start; background: linear-gradient(rgba(8, 6, 4, 0.72), rgba(8, 6, 4, 0.1) 62%, transparent); }

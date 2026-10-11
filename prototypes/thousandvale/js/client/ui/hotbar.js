@@ -11,9 +11,10 @@
 import { h } from '../ui-panel.js';
 import { iconFor, onIcon } from './item-icons.js';
 import { rememberItems, nameOf } from './item-card.js';
+import { isRod } from './angling.js';
 
 export const CONSUMABLE_KINDS = new Set(['potion', 'good', 'food', 'drink']);
-export const isConsumable = it => !!it && (CONSUMABLE_KINDS.has(it.kind) || !!it.use) && !it.slot && it.type !== 'weapon';
+export const isConsumable = it => !!it && !isRod(it) && !it.tool && it.kind !== 'tool' && (CONSUMABLE_KINDS.has(it.kind) || !!it.use) && !it.slot && it.type !== 'weapon';
 const KEYS = ['Digit7', 'Digit8', 'Digit9', 'Digit0'];
 const LABEL = ['7', '8', '9', '0'];
 const potionLike = it => it?.kind === 'potion' || /potion|tonic|antidote|draught|elixir/i.test(it?.name || '');
@@ -52,6 +53,12 @@ export function createHotbar({ net, hud, bag, me }) {
   /** Fill empty slots with the potions/meals you carry (first time you have them). */
   function autoFill() {
     let changed = false;
+    // Repair saved slots from before tools were excluded, so a rod cannot keep a potion key occupied.
+    ids = ids.map(id => {
+      const it = bag.state.bag.find(x => kindOf(x) === id);
+      if (id && (isRod({ id }) || (it && !isConsumable(it)))) { changed = true; return null; }
+      return id;
+    });
     for (const it of bag.state.bag) {
       if (!isConsumable(it) || ids.includes(kindOf(it))) continue;
       const free = ids.indexOf(null); if (free < 0) break;

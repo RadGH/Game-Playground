@@ -153,13 +153,16 @@ async function scrollAudit(page) {
       const raf = n => new Promise(res => { let i = 0; const f = () => (++i >= n ? res() : requestAnimationFrame(f)); requestAnimationFrame(f); });
       try { fns[which]?.(); } catch (e) { return { which, error: String(e.message) }; }
       await new Promise(r => setTimeout(r, 450));
+      // bring the inner lists up: the key-binding list, "My reports", the map's legend
+      if (which === 'settings') { [...document.querySelectorAll('#panel-settings .set-tabs .chip')].find(c => /key/i.test(c.textContent))?.click(); await new Promise(r => setTimeout(r, 250)); }
+      if (which === 'feedback') { try { tvui5.feedback('mine'); } catch { /* guests have none */ } await new Promise(r => setTimeout(r, 250)); }
+      if (which === 'map') { const lg = document.querySelector('#panel-map .map-legend'); if (lg) lg.hidden = false; await new Promise(r => setTimeout(r, 900)); }
       const vis = e => { const b = e.getBoundingClientRect(); return b.width > 30 && b.height > 30 && getComputedStyle(e).visibility !== 'hidden'; };
       const roots = [...document.querySelectorAll('.tv-panel:not([hidden]), #bag:not([hidden]), .tv-changelog:not([hidden])')].filter(vis);
       const out = [];
       for (const root of roots) for (const el of [root, ...root.querySelectorAll('*')]) {
         const cs = getComputedStyle(el); if (!/(auto|scroll)/.test(cs.overflowY) || !vis(el) || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.tagName === 'CANVAS') continue;
-        if (!el.parentElement || el === root) { // the window's own scrolling body is not replaced by a redraw; its children are
-          continue; }
+        if (!el.parentElement || el === root || el.closest('[data-pad]')) continue;
         // long enough to scroll
         const pad = document.createElement('div'); pad.style.cssText = 'height:1400px;flex:none;'; pad.dataset.pad = '1'; el.appendChild(pad);
         el.scrollTop = 173; await raf(3);
@@ -179,6 +182,7 @@ async function scrollAudit(page) {
     report.push(r);
   }
   const all = report.flatMap(r => (r.lists || []).map(l => ({ ...l, window: r.which })));
+  console.log('[pt10] scroll audit per window:', report.map(r => `${r.which}=${r.error ? 'ERR ' + r.error : (r.lists || []).map(l => l.label.split(' ').pop()).join('+') || 'none'}`).join('  '));
   console.log('[pt10] scroll audit:', all.length, 'scrolling lists in', report.filter(r => (r.lists || []).length).length, 'windows —', all.map(l => l.label).join(' | '));
   expect(all.length, 'the audit found scrolling lists to test').toBeGreaterThan(8);
   for (const l of all) expect(l.got, `${l.window}: ${l.label} keeps its scroll position through a redraw`).toBe(l.want);
@@ -202,8 +206,6 @@ soft('desktop 1366 x 800: every item of play-test 10 in the world', async ({ bro
 
   // ---- Y27
   await scrollKept(page, false);
-  const lists = await scrollAudit(page);
-  expect(lists.some(l => /journal/.test(l.window)) || lists.some(l => /bag/.test(l.window)), 'the journal or the bag is among the audited windows').toBe(true);
 
   // ---- Y39: the journal on top after many clicks, then the confirm
   await page.evaluate(() => { thousandvale.ui.journal.panel.open(); thousandvale.ui5.sheet.panel.open(); });
@@ -269,9 +271,9 @@ soft('desktop 1366 x 800: every item of play-test 10 in the world', async ({ bro
 
   // ---- Y36 + Y28: the map's Party section, Locate player, tracking, edge arrows
   const fr = [{ char: 901, hp: 80, hpMax: 100, room: you.room, x: you.x + 300, z: you.z + 40, dead: false, online: true }, { char: 902, hp: 100, hpMax: 100, room: 'i:barrow:1', x: 10, z: 10, dead: false, online: true }, { char: you.char, hp: 100, hpMax: 100, room: you.room, x: you.x, z: you.z, online: true }];
-  await page.evaluate(([p, f]) => { tv.fake('party', p); tv.fake('partyFrames', f); }, [party, fr]);
+  await page.evaluate(([p, f]) => { tv.fake('party', p); tv.fake('partyFrames', f); tvui10.holdFrames(f); }, [party, fr]);      // (held: the real server's own party rows — you are in no party there — would overwrite them twice a second)
   await page.keyboard.press('KeyM');
-  await expect(page.locator('#panel-map canvas')).toBeVisible();
+  await expect(page.locator('#panel-map canvas.map-canvas')).toBeVisible();
   await expect(page.locator('#panel-map .map-party .map-person')).toHaveCount(3, { timeout: 15000 });
   expect(await page.locator('#panel-map .map-person .mp-name').first().textContent(), 'yourself first').toContain('(you)');
   const loc = await rect(page, '#panel-map .map-locate'), firstChip = await rect(page, '#panel-map .map-presets .chip');
@@ -296,7 +298,7 @@ soft('desktop 1366 x 800: every item of play-test 10 in the world', async ({ bro
   await page.locator('#panel-map .map-person[data-char="901"] .mp-name').hover(); await frames(page, 4);
   const arrow = await page.evaluate(() => thousandvale.ui.worldMap.state.arrow);
   expect(arrow, 'an edge arrow for a party member off the map').toBeTruthy(); expect(arrow.outside).toBe(true);
-  const canvasW = (await rect(page, '#panel-map canvas')).w;
+  const canvasW = (await rect(page, '#panel-map canvas.map-canvas')).w;
   expect(arrow.x, 'on the right edge: they are to the east').toBeGreaterThan(canvasW - 60);
   await shot('y36-map-party-arrow');
   await page.evaluate(([x, z]) => { thousandvale.ui.worldMap.setView({ cx: x + 150, cz: z, scale: 0.6 }); }, [you.x, you.z]);
@@ -314,10 +316,11 @@ soft('desktop 1366 x 800: every item of play-test 10 in the world', async ({ bro
   expect(mm, 'a tracked party member is a marker (the minimap draws its rim arrow with the distance)').toContainEqual({ id: 'pm:901', tracked: true });
   await shot('y36-track-arrow');
   // near: the arrow goes away
-  await page.evaluate(([f, x, z]) => tv.fake('partyFrames', f.map(r => (r.char === 901 ? { ...r, x: x + 10, z: z + 5 } : r))), [fr, you.x, you.z]); await frames(page, 4);
+  await page.evaluate(([f, x, z]) => tvui10.holdFrames(f.map(r => (r.char === 901 ? { ...r, x: x + 10, z: z + 5 } : r))), [fr, you.x, you.z]); await frames(page, 4);
   await expect(page.locator('.tv-trackarrow')).toHaveCount(0);
   // a friend: Track in the friends list; the server's whereabouts place them; a refusal says why
-  await page.evaluate(() => { window.__tracked = []; const n = thousandvale.S.net, t0 = n.track; n.track = (c, off) => { window.__tracked.push([c, !!off]); return t0?.call(n, c, off); }; tv.fake('friends', { list: [{ char: 950, name: 'Mira', cls: 'mage', level: 11, online: true, zone: 'z12_02' }, { char: 951, name: 'Odo', cls: 'rogue', level: 4, online: true, zone: 'z12_02' }] }); thousandvale.friends.panel.open(); });
+  await page.evaluate(() => { window.__tracked = []; const n = thousandvale.S.net; window.__realTrack = n.track; n.track = (c, off) => { window.__tracked.push([c, !!off]); }; // Fixture friends do not exist on the real server; their replies are injected below.
+ tv.fake('friends', { list: [{ char: 950, name: 'Mira', cls: 'mage', level: 11, online: true, zone: 'z12_02' }, { char: 951, name: 'Odo', cls: 'rogue', level: 4, online: true, zone: 'z12_02' }] }); thousandvale.friends.panel.open(); });
   await expect(page.locator('#panel-friends .fr-track')).toHaveCount(2);
   await page.locator('#panel-friends .fr-track').first().click();
   await expect(page.locator('#panel-friends .fr-track').first()).toHaveText('Tracked');
@@ -328,7 +331,7 @@ soft('desktop 1366 x 800: every item of play-test 10 in the world', async ({ bro
   await page.evaluate(() => tv.fake('trackR', { ok: false, char: 951, why: 'hidden' })); await frames(page, 2);
   expect(await page.evaluate(() => tvui10.isTracked(951)), 'a refused friend is not tracked').toBe(false);
   await shot('y36-friends-track');
-  await page.evaluate(() => { tvui10.untrack(950, { quiet: true }); tvui10.untrack(901, { quiet: true }); document.querySelector('#panel-friends .tvp-x').click(); tv.fake('party', null); thousandvale.S.net.party = null; });
+  await page.evaluate(() => { tvui10.untrack(950, { quiet: true }); tvui10.untrack(901, { quiet: true }); thousandvale.S.net.track = window.__realTrack; tvui10.holdFrames(null); document.querySelector('#panel-friends .tvp-x').click(); tv.fake('party', null); thousandvale.S.net.party = null; });
 
   // ---- Y11: an event the server no longer lists goes away, with its "Travel there free"
   const ev = { uid: 'e77', id: 'grimtallow', name: 'Grimtallow the siege husk', kind: 'worldboss', province: 'torbor', zoneName: 'Torbor Downs', x: you.x + 900, z: you.z, r: 60 };
@@ -445,6 +448,10 @@ soft('desktop 1366 x 800: every item of play-test 10 in the world', async ({ bro
   await shot('y30-changelog-ingame');
   await page.locator('.tv-changelog .cl-x').click();
   await expect(page.locator('.tv-changelog')).toBeHidden();
+
+  // ---- Y27, the audit: every scrolling list of every window (last in the world: it swaps real elements for copies)
+  const lists = await scrollAudit(page);
+  for (const w of ['bag', 'map', 'changelog']) expect(lists.some(l => l.window === w), `the ${w} window has a scrolling list in the audit`).toBe(true);
 
   expect(errors, 'no page errors in the world').toEqual([]);
 
@@ -589,7 +596,7 @@ soft('phone 393 x 852: the portrait stays in its frame; lists, confirms, the map
   // ---- Y28 / Y36: the map
   const you = await page.evaluate(() => ({ char: thousandvale.S.net.joined.you.char, name: thousandvale.S.self.name, room: thousandvale.S.net.joined.room.id, x: thousandvale.S.predictor.pos.x, z: thousandvale.S.predictor.pos.z }));
   const party = { leader: 901, me: you.char, members: [{ char: 901, name: 'Aldra', level: 9, cls: 'cleric', online: true }, { char: you.char, name: you.name, level: 1, cls: 'starcaller', online: true }, { char: you.char, name: you.name, level: 1, cls: 'starcaller', online: false }] };
-  await page.evaluate(([p, x, z, room, me]) => { thousandvale.S.net.party = p; tv.fake('party', p); tv.fake('partyFrames', [{ char: 901, hp: 50, hpMax: 100, room, x: x + 260, z: z - 30, online: true }, { char: me, hp: 100, hpMax: 100, room, x, z, online: true }]); }, [party, you.x, you.z, you.room, you.char]);
+  await page.evaluate(([p, x, z, room, me]) => { thousandvale.S.net.party = p; tv.fake('party', p); tvui10.holdFrames([{ char: 901, hp: 50, hpMax: 100, room, x: x + 260, z: z - 30, online: true }, { char: me, hp: 100, hpMax: 100, room, x, z, online: true }]); }, [party, you.x, you.z, you.room, you.char]);
   await expect(page.locator('#party .pmember'), 'Y37: one frame — not yourself').toHaveCount(1);
   await page.evaluate(() => thousandvale.ui.worldMap.panel.open());
   await expect(page.locator('#panel-map .map-locate')).toBeVisible();
@@ -610,7 +617,7 @@ soft('phone 393 x 852: the portrait stays in its frame; lists, confirms, the map
   const ar = await rect(page, '.tv-trackarrow span');
   expect(ar.x, 'the arrow\'s label is on the screen').toBeGreaterThanOrEqual(0); expect(ar.r).toBeLessThanOrEqual(W); expect(ar.y).toBeGreaterThanOrEqual(0); expect(ar.b).toBeLessThanOrEqual(H);
   await shot('y36-track-arrow');
-  await page.evaluate(() => { tvui10.untrack(901, { quiet: true }); tv.fake('party', null); thousandvale.S.net.party = null; });
+  await page.evaluate(() => { tvui10.untrack(901, { quiet: true }); tvui10.holdFrames(null); tv.fake('party', null); thousandvale.S.net.party = null; });
 
   // ---- Y30: the changelog is a sheet
   await page.evaluate(() => tvui10.changelog.open());

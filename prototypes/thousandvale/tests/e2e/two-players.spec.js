@@ -71,11 +71,15 @@ test('two players see each other move and hit a wolf together', async ({ browser
       for (const w of walls) for (const g of w.data.gates || []) {
         const gx = g.x + ox, gz = g.z + oz;
         if (Math.hypot(gx - area.x, gz - area.z) > area.r) continue;
-        const sc = g.out[0] * ux + g.out[1] * uz; if (sc > bs) { bs = sc; best = { gx, gz, o: g.out }; }
+        const sc = g.out[0] * ux + g.out[1] * uz; if (sc > bs) { bs = sc; best = { gx, gz, o: g.out, main: g.main?.pts || null }; }
       }
       if (!best) return null;
-      const { gx, gz, o } = best, far = area.r + 30 - Math.hypot(gx - area.x, gz - area.z);
-      return [[gx - o[0] * 7, gz - o[1] * 7], [gx + o[0] * 8, gz + o[1] * 8], [gx + o[0] * Math.max(20, far), gz + o[1] * Math.max(20, far)]];
+      const { gx, gz, o, main } = best, far = area.r + 30 - Math.hypot(gx - area.x, gz - area.z);
+      // play-test 8 (W2): every gate has a clear main street from the square (`gate.main.pts`, gate first). tv.walkTo is a
+      // straight line and the houses, stalls and walls are solid, so the way to the gate is that street, corner by
+      // corner — a straight line from the square to the gate stopped against a house wall and never made leg 0.
+      const street = (main || []).slice(1).reverse().map(([x, z]) => [x + ox, z + oz]);
+      return [...street, [gx - o[0] * 7, gz - o[1] * 7], [gx + o[0] * 8, gz + o[1] * 8], [gx + o[0] * Math.max(20, far), gz + o[1] * Math.max(20, far)]];
     }, [ux, uz, area]);
     const route = gateRoute || [[area.x + ux * (area.r + 25), area.z + uz * (area.r + 25)]];
     // at ~4 fps headless a 115 m walk is slow: wait on each leg, not on a clock (re-issue the walk if it stalled)

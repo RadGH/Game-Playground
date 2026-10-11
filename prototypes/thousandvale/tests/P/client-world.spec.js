@@ -106,7 +106,7 @@ test('copper boulders stand by the road, instanced; E starts the mini-game, the 
   await expect(page.locator('#interact')).toContainText(/Mine .*Boulder/);
   await shot('w9-node-prompt.png');
   await page.keyboard.press('KeyE');
-  await page.waitForFunction(() => tvprof.mini.state.state === 'play', null, { timeout: 10000 });
+  await page.waitForFunction(() => (tvprof.mini.state.state === 'ready' && tvprof.mini.begin(), tvprof.mini.state.state === 'play'), null, { timeout: 10000 });
   const type = await page.evaluate(() => tvprof.mini.state.type); expect(type).toBe('strike');
   await page.waitForTimeout(350);
   const working = await page.evaluate(() => { const a = thousandvale.actors.get(tv.state().you.id), w = thousandvale.profView.workers.get(a.id); return { clip: a.working, anim: a.anim, tool: w?.tool, inHand: !!w?.mesh?.parent }; });
@@ -119,12 +119,12 @@ test('copper boulders stand by the road, instanced; E starts the mini-game, the 
   expect(await page.evaluate(() => thousandvale.profView.stats.spent)).toBe(0);
   // (a software renderer draws this scene at a few frames a second; the synthetic player needs its timers, so the view is made small while it plays)
   await page.setViewportSize({ width: 320, height: 220 }); await page.waitForTimeout(400);
-  await page.keyboard.press('KeyE'); await page.waitForFunction(() => tvprof.mini.state.state === 'play', null, { timeout: 10000 });
+  await page.keyboard.press('KeyE'); await page.waitForFunction(() => (tvprof.mini.state.state === 'ready' && tvprof.mini.begin(), tvprof.mini.state.state === 'play'), null, { timeout: 10000 });
   // a botched game spends nothing and may be tried again at once — which is also what saves this test when the
   // software renderer starves the synthetic player's timers
   let local = null;
   for (let attempt = 0; attempt < 3; attempt++) {
-    if (attempt) { await page.keyboard.press('Space'); await expect(page.locator('.tv-prof')).toBeHidden(); await page.keyboard.press('KeyE'); await page.waitForFunction(() => tvprof.mini.state.state === 'play', null, { timeout: 10000 }); }
+    if (attempt) { await page.keyboard.press('Space'); await expect(page.locator('.tv-prof')).toBeHidden(); await page.keyboard.press('KeyE'); await page.waitForFunction(() => (tvprof.mini.state.state === 'ready' && tvprof.mini.begin(), tvprof.mini.state.state === 'play'), null, { timeout: 10000 }); }
     await page.evaluate(() => { if (!window.__g) { window.__g = []; window.addEventListener('tv:prof', e => { if (e.detail.state === 'result') (window.__r ||= []).push({ q: e.detail.quality, pairs: tvprof.mini.run.pairs.map(p => p[0]), perfect: tvprof.mini.run.perfect.map(p => p[0]), frames: tvprof.mini.state.frames }); }); for (const t of ['gatherR', 'gatherDone']) thousandvale.S.net.on(t, m => window.__g.push({ t, ok: m.ok, why: m.why, msg: m.msg, q: m.quality, state: m.state })); } });
     await botKeys();
     await page.waitForFunction(() => document.querySelector('.prof-card[data-q]') && !document.querySelector('.prof-wait'), null, { timeout: 10000 }).catch(async () => { throw new Error('no answer on the card: ' + JSON.stringify(await page.evaluate(() => ({ r: window.__r, msgs: window.__g, st: tvprof.state.mini, work: tvprof.state.work, card: document.querySelector('.prof-card')?.innerText })))); });
@@ -217,7 +217,7 @@ test('on a phone (393 × 852, the real phone layout): tap the prompt, play the b
     return { ...tv.state().you };
   });
   await p.locator('#interact').tap();
-  await p.waitForFunction(() => tvprof.mini.state.state === 'play', null, { timeout: 15000 });
+  await p.waitForFunction(() => (tvprof.mini.state.state === 'ready' && tvprof.mini.begin(), tvprof.mini.state.state === 'play'), null, { timeout: 15000 });
   await botReal(p, 'touch');          // one finger: real touches on the panel at the moments the flawless play says
   await p.waitForFunction(() => window.__ph.card, null, { timeout: 30000 });
   await p.screenshot({ path: join(SHOTS, 'w9-phone-result.png') });
@@ -255,7 +255,7 @@ async function makeFlowSteps(pg, name, how, at) {
     thousandvale.S.net.on('craftDone', m => { L.craft.push({ id: m.id, ok: m.ok, q: m.quality, items: (m.items || []).map(i => i.name), item: m.item ? { name: m.item.name, quality: m.item.quality, tempered: m.item.tempered } : null, msg: m.msg }); setTimeout(() => L.cards.push(document.querySelector('.prof-card')?.innerText.replace(/\s+/g, ' ') || '(card gone)'), 350); });
   });
   const count = id => pg.evaluate(i => thousandvale.bag.state.bag.filter(x => x.id === i).reduce((a, x) => a + (x.count || 1), 0), id);
-  const playUp = async () => { await until(() => tvprof.mini.state.state === 'play', null, 15000); await botReal(pg, how); };
+  const playUp = async () => { await until(() => (tvprof.mini.state.state === 'ready' && tvprof.mini.begin(), tvprof.mini.state.state === 'play'), null, 15000); await botReal(pg, how); };
   expect((await hook('/give', { name, gold: 600, items: 0 })).ok).toBe(true);
   // 1. learn Mining (Bram teaches at the first word)
   at('1. learn Mining');
@@ -290,8 +290,8 @@ async function makeFlowSteps(pg, name, how, at) {
   at('3. the smith');
   await hook('/teleport', { name, x: HOME.x, z: HOME.z });
   await until(() => [...thousandvale.actors.actors.values()].some(a => a.role === 'smith'));
-  const at = await pg.evaluate(() => { const a = [...thousandvale.actors.actors.values()].find(x => x.role === 'smith'); return { x: a.pos.x, z: a.pos.z }; });
-  await hook('/teleport', { name, x: at.x + 1.6, z: at.z + 1.2 });
+  const smithAt = await pg.evaluate(() => { const a = [...thousandvale.actors.actors.values()].find(x => x.role === 'smith'); return { x: a.pos.x, z: a.pos.z }; });
+  await hook('/teleport', { name, x: smithAt.x + 1.6, z: smithAt.z + 1.2 });
   await pg.waitForTimeout(1500);
   const talk = () => pg.evaluate(() => { const a = [...thousandvale.actors.actors.values()].find(x => x.role === 'smith'); thousandvale.S.net.use(a.id); });
   await talk();
@@ -320,7 +320,7 @@ async function makeFlowSteps(pg, name, how, at) {
   for (let attempt = 0; attempt < 3 && !blade; attempt++) {          // (a botched forging spends nothing and may be tried again at once)
     const n0 = await pg.evaluate(() => window.__flow.craft.length);
     await act('#panel-craft [data-make="blades_1"]');
-    await until(() => tvprof.mini.state.state === 'play' && tvprof.mini.state.type === 'forge', null, 15000);
+    await until(() => (tvprof.mini.state.state === 'ready' && tvprof.mini.begin(), tvprof.mini.state.state === 'play') && tvprof.mini.state.type === 'forge', null, 15000);
     await botReal(pg, how);
     await until(n => window.__flow.craft.length > n && window.__flow.cards.length > n, n0, 25000);
     blade = await pg.evaluate(() => { const it = thousandvale.bag.state.bag.find(i => i.crafted); return it ? { uid: it.uid, name: it.name, rarity: it.rarity, quality: it.quality, maker: it.maker } : null; });
@@ -341,7 +341,7 @@ async function makeFlowSteps(pg, name, how, at) {
   await pg.screenshot({ path: join(SHOTS, `w9-make-${how}-quote.png`) });
   const c0 = await pg.evaluate(() => window.__flow.craft.length);
   await act('#panel-craft [data-temper="temper_quality"]');
-  await until(() => tvprof.mini.state.state === 'play' && tvprof.mini.state.type === 'gauge', null, 15000);
+  await until(() => (tvprof.mini.state.state === 'ready' && tvprof.mini.begin(), tvprof.mini.state.state === 'play') && tvprof.mini.state.type === 'gauge', null, 15000);
   await botReal(pg, how);
   await until(n => window.__flow.craft.length > n && window.__flow.cards.length > n, c0, 25000);
   const end = await pg.evaluate(uid => ({ temper: window.__flow.craft.at(-1), card: window.__flow.cards.at(-1), item: (() => { const it = thousandvale.bag.state.bag.find(i => i.uid === uid); return it ? { name: it.name, quality: it.quality, tempered: it.tempered || 0 } : null; })(), gather: window.__flow.gather, craft: window.__flow.craft }), blade.uid);

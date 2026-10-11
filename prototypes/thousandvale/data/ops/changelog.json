@@ -2,6 +2,20 @@
  "_doc": "Player-facing changelog, newest first. The lead appends an entry at each publish (from the feedback reports' Completed notes). `id` is stable; the client remembers the last id a player has seen and highlights newer ones. Plain language, no internal names.",
  "entries": [
   {
+   "id": "2026-10-10",
+   "date": "2026-10-10",
+   "title": "Better phone controls, steady auto-attack and party tracking",
+   "items": [
+    "Tap Attack to pick an enemy, move into reach and keep attacking. Tap again to stop; moving by hand keeps auto-attack on.",
+    "Phones now have named Fish and Mount buttons, useful button labels, and a guide to the controls. Fishing rods no longer occupy potion slots.",
+    "Profession mini-games wait for your first input before starting, or begin after six seconds. Starting an activity releases held movement.",
+    "Party members off screen have direction arrows. Hold a party portrait to track someone.",
+    "The map controls wrap on phones, and the game view follows changes to the size of the screen.",
+    "Saved characters show their equipped gear on the title screen. Class resources such as Starlight now update on your character frame.",
+    "Fixed scrolling lists and update notices covering the game. Silver ore sells for slightly more to keep mining income in line with other activities."
+   ]
+  },
+  {
    "id": "2026-10-08",
    "date": "2026-10-08",
    "title": "Professions, phone play, guards and thirty fixes from your reports",

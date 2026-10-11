@@ -17,9 +17,12 @@
 // While a game is on screen every other game key is swallowed (the character does not walk off, jump or strike), and
 // <html data-prof="<type>"> tells the input layer to leave the pad's world layer alone (the stick would walk you away).
 //
-// TIME — the clock starts when play() is called (the server started its own when it sent the game) and every input is
-// stamped with the moment it was made, not the moment a frame was drawn: at 10 frames a second a press still lands
-// where it was pressed. The picture is one <canvas>, redrawn each frame.
+// TIME — Y19 (G2, report #21: "I do not know where to put the mouse before it begins"): every game opens in a READY
+// state — the picture at time 0 and "Tap to begin" over it. The clock starts at the first work key, click or touch (that
+// press is NOT an input of the game), or by itself after READY_MAX_MS; the server started its own clock when it sent the
+// game, which is why its `lateMs` allowance (data/rules/professions.json) is longer than this wait. From then on every
+// input is stamped with the moment it was made, not the moment a frame was drawn: at 10 frames a second a press still
+// lands where it was pressed. The picture is one <canvas>, redrawn each frame.
 
 import { h } from '../ui-panel.js';
 import { createRun, HOW, GAME_INPUT, QUALITY_WORD, PROF_OF_GAME } from './prof-games.js';
@@ -30,6 +33,13 @@ import { profIcon, PROF_NAME } from './prof-icons.js';
 const WORK = new Set(['Space', 'KeyE', 'Enter', 'NumpadEnter', 'KeyF']);
 const LEFT = new Set(['KeyA', 'ArrowLeft']), RIGHT = new Set(['KeyD', 'ArrowRight']), UP = new Set(['KeyW', 'ArrowUp']);
 const PASS = /^(F\d+|Tab|Meta|OS|Control|Alt|Shift|CapsLock|PrintScreen)/;          // keys the browser keeps
+/** Y19 (G2): how long a game waits for the player before it starts by itself (the server allows lateMs = 10 s). */
+export const READY_MAX_MS = 6000;
+const READY_HOW = {
+  keyboard: { trace: 'Put the mouse on the knife, then click — or press Space — to begin.', any: 'Press Space (or click) when you are ready.' },
+  pad: { trace: 'Press the work button when you are ready.', any: 'Press the work button when you are ready.' },
+  touch: { trace: 'Put your finger on the knife to begin.', any: 'Tap when you are ready.' },
+};
 const device = () => document.documentElement.dataset.input || (window.matchMedia?.('(pointer: coarse)').matches ? 'touch' : 'keyboard');
 
 /** "{work} when …" -> text nodes and key caps (input/hints.js re-labels a <kbd data-action> for the device in use). */
@@ -48,7 +58,7 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
   const at = e => { const n = performance.now(), ts = e && e.isTrusted && e.timeStamp > 0 && e.timeStamp <= n && n - e.timeStamp < 3000 ? e.timeStamp : n; return ts - S.t0; };
   const say = (state, extra = {}) => {
     root.dataset.state = state;
-    if (state === 'play') document.documentElement.dataset.prof = S.run.type; else delete document.documentElement.dataset.prof;
+    if (state === 'play' || state === 'ready') document.documentElement.dataset.prof = S.run.type; else delete document.documentElement.dataset.prof;   // Y19 (G2): the pad and the keys stand back from "ready" on
     window.dispatchEvent(new CustomEvent('tv:prof', { detail: { state, prof: S.opts?.prof || null, game: S.run?.type || null, ...extra } }));
   };
 
@@ -63,6 +73,18 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
     try { if (n.kind === 'perfect') navigator.vibrate?.(18); else if (n.kind === 'hit') navigator.vibrate?.(8); } catch { /* no haptics */ }
   }
   const playing = () => !!S.run && !S.run.done && root.dataset.state === 'play';
+  const waiting = () => !!S.run && root.dataset.state === 'ready';
+  /** Y19 (G2): the player is ready — the clock starts NOW. Returns true when this call started it. */
+  function begin() {
+    if (!waiting()) return false;
+    clearTimeout(S.readyT); clearInterval(S.readyTick);
+    root.querySelector('.prof-ready')?.remove();
+    S.t0 = performance.now(); S.beganAt = S.t0;
+    say('play'); draw();
+    sound?.note(S.run.type, 'start');
+    clearTimeout(S.dog); S.dog = setTimeout(watchdog, 250);
+    return true;
+  }
   function act(fn, e = null) { if (!playing()) return; S.run.advanceTo(Math.max(S.run.t, at(e))); const n = fn(S.run); feedback(n); if (S.run.done) finish(); else draw(); }
   const work = e => act(r => (r.type === 'trace' ? r.hold(true) : r.type === 'rhythm' ? null : r.press()), e);
   const workUp = e => act(r => (r.type === 'trace' ? r.hold(false) : null), e);
@@ -82,6 +104,9 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
     e.preventDefault(); e.stopImmediatePropagation();                     // nothing else in the game hears a key while a game is being played
     if (e.repeat) return;
     if (e.code === 'Escape') { if (down) cancel(); return; }
+    // Y19 (G2): ready — the first work / side / number key starts the clock and is not an input of the game
+    if (waiting()) { if (down && (WORK.has(e.code) || LEFT.has(e.code) || RIGHT.has(e.code) || UP.has(e.code) || /^(Digit|Numpad)[1-9]$/.test(e.code))) { S.startKey = e.code; begin(); } return; }
+    if (!down && e.code === S.startKey) { S.startKey = null; return; }       // … and neither is letting that key go
     if (WORK.has(e.code) || (S.run.type === 'trace' && UP.has(e.code))) { if (down) work(e); else workUp(e); return; }
     if (!down) return;
     if (LEFT.has(e.code)) side(-1, e); else if (RIGHT.has(e.code)) side(1, e);
@@ -91,6 +116,8 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
   window.addEventListener('blur', () => { if (playing() && S.run.type === 'trace') S.run.hold(false); });
 
   function pointer(e) {
+    // Y19 (G2): ready — the first touch / click starts the clock; in the trace game it also puts the knife under the finger
+    if (waiting()) { if (e.type !== 'pointerdown') return; e.preventDefault(); begin(); if (S.run.type !== 'trace') return; }
     if (!playing()) return;
     const r = S.canvas.getBoundingClientRect(), x = (e.clientX - r.left) * (S.w / r.width), y = (e.clientY - r.top) * (S.h / r.height);
     const hit = hitTest(S.run, S.w, S.h, x, y);
@@ -109,6 +136,7 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
     const state = { work: Object.keys(PAD).some(b => PAD[b] === 'profWork' && on(b)), left: Object.keys(PAD).some(b => PAD[b] === 'profLeft' && on(b)) || on('LEFT') || lx < -0.6, right: Object.keys(PAD).some(b => PAD[b] === 'profRight' && on(b)) || on('RIGHT') || lx > 0.6, back: on('START') };
     const P = S.padPrev;
     if (root.dataset.state === 'result') { if (state.work && !P.work && performance.now() - S.cardAt > 350) close(); }
+    else if (waiting()) { if ((state.work && !P.work) || (state.left && !P.left) || (state.right && !P.right)) begin(); else if (state.back && !P.back) cancel(); }      // Y19 (G2)
     else {
       if (state.work !== !!P.work) { if (state.work) work(); else workUp(); }
       if (state.left && !P.left) side(-1);
@@ -160,17 +188,23 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
       h('header.prof-head', {}, h('i.prof-ico', {}, profIcon(prof, 24)),
         h('div.prof-titles', {}, h('strong', {}, opts.title || HOW[type].title), h('span', {}, opts.sub || PROF_NAME[prof] || '')), x),
       h('p.prof-how', {}, ...howNodes(HOW[type][dev] || HOW[type].keyboard)),
-      h('div.prof-stage', {}, S.canvas),
+      h('div.prof-stage', {}, S.canvas,
+        // Y19 (G2): the ready card — nothing moves until the player says so (or READY_MAX_MS pass)
+        h('div.prof-ready', { role: 'status' }, h('strong', {}, dev === 'touch' ? 'Tap to begin' : 'Ready?'), h('span', {}, (READY_HOW[dev] || READY_HOW.keyboard)[type === 'trace' ? 'trace' : 'any']), S.readyLeft = h('small', {}, `Begins by itself in ${Math.round(READY_MAX_MS / 1000)} s`))),
       h('div.prof-time', {}, S.time));
     for (const ev of ['pointerdown', 'pointermove']) S.canvas.addEventListener(ev, pointer);
     S.canvas.addEventListener('contextmenu', e => e.preventDefault());
     root.dataset.type = type; root.dataset.prof = prof; root.hidden = false; root.replaceChildren(panel);
     root.classList.remove('flash-perfect', 'flash-hit', 'flash-miss');
-    S.t0 = performance.now();
-    size(); say('play'); draw();
-    sound?.note(type, 'start');
+    S.t0 = performance.now(); S.startKey = null; S.beganAt = 0;
+    size(); say('ready'); draw();
     cancelAnimationFrame(S.raf); S.raf = requestAnimationFrame(frame);
-    clearTimeout(S.dog); S.dog = setTimeout(watchdog, 250);
+    clearTimeout(S.dog);
+    // Y19 (G2): wait for the player — but not for ever (the server's clock is already running)
+    const wait = Number.isFinite(opts.readyMs) ? opts.readyMs : READY_MAX_MS, shownAt = performance.now();
+    clearTimeout(S.readyT); clearInterval(S.readyTick);
+    if (wait <= 0) begin();
+    else { S.readyT = setTimeout(begin, wait); S.readyTick = setInterval(() => { const left = Math.max(0, Math.ceil((wait - (performance.now() - shownAt)) / 1000)); if (S.readyLeft) S.readyLeft.textContent = `Begins by itself in ${left} s`; }, 250); }
     return new Promise(res => { S.resolve = res; });
   }
   function finish() {
@@ -204,13 +238,13 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
     paintCard(o); S.cardAt = performance.now();
     clearTimeout(S.closeT); S.closeT = setTimeout(close, o.stay ?? 3400);
   }
-  function abort() { cancelAnimationFrame(S.raf); clearTimeout(S.dog); clearTimeout(S.closeT); const res = S.resolve; S.resolve = null; S.run = null; res?.(null); }
+  function abort() { cancelAnimationFrame(S.raf); clearTimeout(S.dog); clearTimeout(S.closeT); clearTimeout(S.readyT); clearInterval(S.readyTick); const res = S.resolve; S.resolve = null; S.run = null; res?.(null); }
   function cancel() { if (!S.run) return; abort(); root.hidden = true; root.replaceChildren(); say('idle', { cancelled: true }); }
-  function close() { if (root.hidden) return; cancelAnimationFrame(S.raf); clearTimeout(S.closeT); clearTimeout(S.dog); const res = S.resolve; S.resolve = null; res?.(null); S.run = null; S.card = null; root.hidden = true; root.replaceChildren(); say('idle'); }
+  function close() { if (root.hidden) return; cancelAnimationFrame(S.raf); clearTimeout(S.closeT); clearTimeout(S.dog); clearTimeout(S.readyT); clearInterval(S.readyTick); const res = S.resolve; S.resolve = null; res?.(null); S.run = null; S.card = null; root.hidden = true; root.replaceChildren(); say('idle'); }
   window.addEventListener('resize', () => { if (S.run && !root.hidden) { size(); draw(); } });
 
   return {
-    root, play, showResult, close, cancel,
+    root, play, showResult, close, cancel, begin,
     get isOpen() { return !root.hidden; }, get run() { return S.run; },
     /** For specs and the gallery: where things are on the page right now. */
     get state() {
@@ -221,6 +255,6 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
     /** Page coordinates of the thing a finger would tap for input v (the spec's synthetic touch uses this). */
     pointFor(v) { const r = S.canvas.getBoundingClientRect(), [x, y] = pointFor(S.run, S.w, S.h, null, v); return { x: r.left + x * (r.width / S.w), y: r.top + y * (r.height / S.h) }; },
     /** Freeze the game at a moment (the gallery's still pictures): the clock is moved so `ms` is now, and stops. */
-    freezeAt(ms, inputs = []) { if (!S.run) return; cancelAnimationFrame(S.raf); clearTimeout(S.dog); for (const [t, v] of inputs) { S.run.advanceTo(t); if (S.run.type === 'trace') S.run.aim(v); else S.run.press(v); } S.run.advanceTo(ms); size(); draw(); },
+    freezeAt(ms, inputs = []) { if (!S.run) return; begin(); cancelAnimationFrame(S.raf); clearTimeout(S.dog); for (const [t, v] of inputs) { S.run.advanceTo(t); if (S.run.type === 'trace') S.run.aim(v); else S.run.press(v); } S.run.advanceTo(ms); size(); draw(); },
   };
 }

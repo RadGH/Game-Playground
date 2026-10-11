@@ -243,7 +243,7 @@ export function createRoom(opts) {
     client.inputs = [];
     client.ack = client.ack || 0;
     client.budget = 0;
-    client.lastSelf = null; client.lastVitals = null; client.selfDirty = true;
+    client.lastSelf = null; client.lastVitals = null; client.lastResources = null; client.selfDirty = true;
     clients.set(e.id, client);
   };
   room.detach = function (e) { clients.delete(e.id); };
@@ -623,6 +623,10 @@ export function createRoom(opts) {
       }
       if (newInfo.length) c.send('{"t":"info","ents":[' + newInfo.join(',') + ']}');
       // self block
+      if (c.you && rules.resources) {
+        const res = rules.resources(me), sig = JSON.stringify(res);
+        if (sig !== c.lastResources) { c.lastResources = sig; c.you({ res }); }
+      }
       let self = null, vitals = null;
       if (c.selfDirty || !c.lastSelf) { self = { x: me.x, y: me.y, z: me.z, vy: me.vy }; c.selfDirty = false; c.lastSelf = self; }
       const lv = c.lastVitals;

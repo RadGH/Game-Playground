@@ -66,7 +66,9 @@ test('S7: Torborhold — stone curtain, towers, three gates on the roads, doors 
   const T = wallsOf('z12_02').find(w => w.data.town === 'torborhold').data;
   for (const [k, g] of T.gates.entries()) await shootGate('z12_02', g, `torborhold-gate${k}`);
   // from inside: the doors swung in against the passage
-  const g = T.gates.find(q => q.way === 'lane_torbor_north');
+  // (the gate that faces most nearly north, by its own outward vector — play-test 8's re-bake renamed every gate's
+  //  `way` after the street it opens onto, and the name this line used to look for no longer exists)
+  const g = [...T.gates].sort((p, q) => p.out[1] - q.out[1])[0];
   await shootGate('z12_02', g, 'torborhold-north-inside', { dist: -18, rise: 6, side: 4 });
   // the whole ring from above
   const o = originOf('z12_02');

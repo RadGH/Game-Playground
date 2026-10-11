@@ -617,6 +617,7 @@ export function createProvince(opts) {
       you: {
         id: e.id, char: ch.id, name: ch.name, cls: ch.cls, level: ch.level, xp: ch.xp || 0,
         xpNext: rules.xpFor ? rules.xpFor((ch.level || 1) + 1) : null, gold: ch.gold || 0,
+        res: rules.resources?.(e) || [],
         x: e.x, y: e.y, z: e.z, yaw: e.yaw, hp: e.hp, hpMax: e.hpMax, mp: Math.round(e.mp), mpMax: e.mpMax,
         bag: ch.bag || [], equipment: equipView(o), ignore: ch.ignore || [], waystones: ch.waystones || [], treasure: ch.treasure || {},
         quests: (provOf(o.room) || first).book.view(ch),

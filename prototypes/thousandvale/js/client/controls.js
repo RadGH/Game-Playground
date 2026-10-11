@@ -35,6 +35,12 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
   let autorun = false;   // W20: keep going forward until a move key, a click-to-move, Esc or a second press
   let held = false;      // W26: the mount call — nothing moves, and what was asked for is kept for afterwards
   let analog = null;   // T27 (stream G): a stick's vector from js/client/input (gamepad, the phone's thumb stick) — null = keys only
+  // Y7/Y35 (G2): AUTO-ATTACK is its own state. `chase` = "walk toward that enemy"; `auto` = "keep striking it". A move key
+  // or the stick ends the walk, never the attack (report #45: moving switched auto-attack off).
+  let auto = null;
+  // Y1 (G2): keys let go by release() — ignored until pressed AGAIN (their key-up may have been swallowed by a window)
+  const dropped = new Set();
+  const MOVE_KEYS = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 
   const isTyping = () => typing || (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName));
 
@@ -43,17 +49,18 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     const k = e.code;
     if (k === 'Tab') { e.preventDefault(); onCycleTarget?.(); return; }
     if (k === 'Enter') { e.preventDefault(); onChat?.(); return; }
-    if (k === 'Escape') { moveGoal = null; chase = null; autorun = false; onClearTarget?.(); return; }
+    if (k === 'Escape') { moveGoal = null; chase = null; auto = null; autorun = false; onClearTarget?.(); return; }
     if (k === 'NumLock') { e.preventDefault(); if (!e.repeat) { autorun = !autorun; if (autorun) { moveGoal = null; chase = null; } onAutorun?.(autorun); } return; }
     if (k === 'Space') { e.preventDefault(); if (!e.repeat) jumpQueued = true; return; }
     if (k === 'KeyR') { onRise?.(); return; }
-    if (k === 'KeyF') { e.preventDefault(); const t = getTarget?.(); if (t != null) { chase = t; onAttack?.(t); } return; }
+    if (k === 'KeyF') { e.preventDefault(); const t = getTarget?.(); if (t != null) { chase = t; auto = t; onAttack?.(t); } return; }
     if (/^Digit[1-6]$/.test(k)) { e.preventDefault(); onSkill?.(+k.slice(5)); return; }
+    if (e.repeat && dropped.has(k)) return; else if (!e.repeat) dropped.delete(k);   // Y1 (G2): a key let go by release() stays quiet until it is pressed again
     if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(k)) { moveGoal = null; chase = null; if (autorun && (k === 'KeyW' || k === 'KeyS' || k === 'ArrowUp' || k === 'ArrowDown')) { autorun = false; onAutorun?.(false); } }
     keys.add(k);
   });
-  window.addEventListener('keyup', e => keys.delete(e.code));
-  window.addEventListener('blur', () => keys.clear());
+  window.addEventListener('keyup', e => { keys.delete(e.code); dropped.delete(e.code); });
+  window.addEventListener('blur', () => { keys.clear(); dropped.clear(); });
 
   dom.addEventListener('contextmenu', e => e.preventDefault());
   dom.addEventListener('pointerdown', e => {
@@ -80,7 +87,7 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     const hit = onSelect?.(ndc, d.button);   // returns { id, hostile } or null
     if (hit) {
       // play-test 2 Q2: right-click a friend / town folk / corpse = the menu; an enemy is still attacked (Shift = menu)
-      if (d.button === 2 && hit.hostile && !e.shiftKey) { chase = hit.id; moveGoal = null; onAttack?.(hit.id); }
+      if (d.button === 2 && hit.hostile && !e.shiftKey) { chase = hit.id; auto = hit.id; moveGoal = null; onAttack?.(hit.id); }
       else if (d.button === 2) onContext?.(hit.id, e.clientX, e.clientY);
       return;
     }
@@ -94,7 +101,7 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
    * Returns { mx, mz, yaw, run, attacking }.
    */
   function intent(self, { targetPos = null, reach = 2.9, dead = false } = {}) {
-    if (dead) { moveGoal = null; chase = null; autorun = false; jumpQueued = false; return { mx: 0, mz: 0, yaw: facing, b: 0 }; }
+    if (dead) { moveGoal = null; chase = null; auto = null; autorun = false; jumpQueued = false; return { mx: 0, mz: 0, yaw: facing, b: 0 }; }
     // W26: while the mount is being called you stand still. Held keys, the stick, auto-run and a click-to-move goal are all
     // KEPT (nothing is cleared), so the moment the hold ends you carry on to where you were headed.
     if (held) { jumpQueued = false; return { mx: 0, mz: 0, yaw: facing, b: 0, held: true }; }
@@ -124,12 +131,14 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     const len = Math.hypot(mx, mz);
     if (len > 1e-3) { mx /= len; mz /= len; if (!(fz < 0 && fx === 0)) facing = Math.atan2(mx, mz); else facing = cam.yaw; }
     if (chase != null && !targetPos) chase = null;
+    // Y7/Y35 (G2): in reach while you run past counts too — the caller strikes on `auto`, not on standing still
+    const manual = fx !== 0 || fz !== 0;
     // W20: you run unless you ask to walk — Shift held, or a stick pushed less than `WALK_BELOW` of the way (a stick that
     // says `sprint`/`walk` itself wins). "Run" is the server's IN.SPRINT pace; walking is its plain one.
     const sprint = wantsRun({ shift: keys.has('ShiftLeft') || keys.has('ShiftRight'), analog, stickLen: analog && !keysMove() ? Math.hypot(analog.mx || 0, analog.mz || 0) : null });
     const b = (sprint && len > 1e-3 ? 1 : 0) | (jumpQueued ? 2 : 0);   // IN.SPRINT = 1, IN.JUMP = 2
     jumpQueued = false;
-    return { mx, mz, yaw: facing, b, sprint, inRange, chasing: chase };
+    return { mx, mz, yaw: facing, b, sprint, inRange, chasing: chase, auto, manual };
   }
 
   const keysMove = () => autorun || ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].some(k => keys.has(k));
@@ -167,10 +176,19 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
   return {
     cam, intent, updateCamera,
     setTyping(v) { typing = v; if (v) keys.clear(); },
-    stopChase() { chase = null; },
-    attack(id) { chase = id; moveGoal = null; onAttack?.(id); },
+    stopChase() { chase = null; auto = null; },
+    attack(id) { chase = id; auto = id; moveGoal = null; onAttack?.(id); },
+    /** Y7/Y35 (G2): the id being auto-attacked (null = off); stopAuto() ends the attack and the walk toward it. */
+    get auto() { return auto; },
+    stopAuto() { auto = null; chase = null; },
+    /**
+     * Y1 (G2): let go of everything that is moving you — held move keys, the stick, auto-run, a click-to-move goal.
+     * A key that is physically still down stays ignored until it is pressed again (report #46: its key-up was swallowed
+     * by the mini-game that opened, so the character kept walking after it closed).
+     */
+    release() { for (const k of keys) if (MOVE_KEYS.includes(k) || k === 'KeyQ' || k === 'KeyE') dropped.add(k); keys.clear(); analog = null; moveGoal = null; chase = null; jumpQueued = false; if (autorun) { autorun = false; onAutorun?.(false); } },
     walkTo(x, z) { moveGoal = { x, z }; chase = null; },
-    stop() { moveGoal = null; chase = null; autorun = false; },
+    stop() { moveGoal = null; chase = null; auto = null; autorun = false; },
     /** W20: auto-run on / off (the Num Lock key does the same). */
     setAutorun(v) { autorun = !!v; if (autorun) { moveGoal = null; chase = null; } onAutorun?.(autorun); },
     get autorun() { return autorun; },

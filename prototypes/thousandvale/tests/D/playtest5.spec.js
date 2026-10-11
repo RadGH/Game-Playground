@@ -256,33 +256,33 @@ test('T25: a pool seen from the road, the cast, the bite, the tug and the catch'
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
-test('T23 slots (C\'s addendum): a cloak, a belt, a lantern and a worn torch are drawn, and the light lights', async () => {
+// (Rewritten at the 2026-10-08 gate. Play-test 5 drew the light slot and hung a point light on the body; play-test 8
+//  W22 took both away — "no worn or carried light is drawn any more" (tests/D/playtest8.test.js) — and this test went
+//  on asserting the old picture. The rule now: cloak and belt are drawn; a light in the light slot changes NOTHING you
+//  can see — no lantern on the belt, no torch in the off hand, no light on the body — and never pushes a shield out.)
+test('T23 slots (C\'s addendum, as amended by W22): a cloak and a belt are drawn; a worn lantern or torch draws nothing and lights nothing', async () => {
   test.setTimeout(180000);
-  await page.evaluate(() => { tv.view(3.4, 0.2, Math.PI * 0.2); tv.setTime?.(0.98); });
+  await page.evaluate(() => { tv.view(3.4, 0.2, Math.PI * 0.2); });
   const worn = gear => page.evaluate(async gear => {
     const a = thousandvale.actors.get(tv.state().you.id);
     await thousandvale.actors.setLook(a.id, { ...a.look, gear });
     await new Promise(r => setTimeout(r, 1500));
     const av = await (await import('./js/client/looks.js')).avatarFor(a.look);
-    return { cape: av.cape?.id, decor: av.decor?.id, offhand: av.offhand?.id, light: !!a.torchLight, range: a.torchLight?.distance ?? null };
+    let lights = 0; a.body?.group?.traverse?.(o => { if (o.isLight) lights++; });
+    return { cape: av.cape?.id, decor: av.decor?.id, offhand: av.offhand?.id, lights };
   }, gear);
   const a = await worn({ chest: { base: 'light_chest', rarity: 'normal' }, back: { base: 'travel_cloak', g5: 'g5_swallowtail', rarity: 'rare' }, waist: { base: 'leather_belt', g5: 'g5_girdle', rarity: 'normal' }, light: { base: 'hand_lantern', g5: 'g5_hexlantern', rarity: 'normal' } });
   console.log('[T23 slots] cloak + belt + lantern:', JSON.stringify(a));
-  expect(a.cape).toBe('g5_swallowtail'); expect(a.decor).toBe('g5_girdle'); expect(a.light).toBe(true); expect(a.range).toBe(16);
+  expect(a.cape).toBe('g5_swallowtail'); expect(a.decor).toBe('g5_girdle'); expect(a.lights).toBe(0);
   await shot('t23-cloak-belt-back.png');
+  const bare = await worn({ chest: { base: 'light_chest', rarity: 'normal' } });
   const b = await worn({ chest: { base: 'light_chest', rarity: 'normal' }, light: { base: 'hand_lantern', g5: 'g5_hexlantern', rarity: 'normal' } });
-  expect(b.decor).toBe('g5_hexlantern');
-  await page.evaluate(() => tv.view(3.4, 0.2, Math.PI));
-  await page.waitForTimeout(800);
-  await shot('t23-lantern-night.png');
+  expect(b, 'a lantern in the light slot looks exactly like not wearing one').toEqual(bare);
+  const sword = await worn({ weapon: { base: 'longsword', rarity: 'normal' } });
   const c = await worn({ weapon: { base: 'longsword', rarity: 'normal' }, light: { base: 'pitch_torch', g5: 'g5_cresset', rarity: 'normal' } });
   console.log('[T23 slots] worn torch:', JSON.stringify(c));
-  expect(c.offhand).toBe('g5_cresset'); expect(c.light).toBe(true); expect(c.range).toBe(10);
-  await shot('t23-torch-offhand-night.png');
+  expect(c, 'a torch in the light slot is not put in the free hand').toEqual(sword);
   const d = await worn({ weapon: { base: 'longsword', rarity: 'normal' }, offhand: { base: 'shield', rarity: 'normal' }, light: { base: 'pitch_torch', g5: 'g5_cresset', rarity: 'normal' } });
-  expect(d.offhand).toBe('fh_heater_shield'); expect(d.decor).toBe('belt_torch');
-  const e = await worn({ weapon: { base: 'longsword', rarity: 'normal' } });
-  expect(e.light, 'the light goes out when the lantern comes off').toBe(false);
-  await page.evaluate(() => tv.setTime?.(0.45));
+  expect(d.offhand, 'the shield stays on the arm').toBe('fh_heater_shield'); expect(d.lights).toBe(0);
   expect(errors, errors.join('\n')).toEqual([]);
 });

@@ -46,6 +46,7 @@ test('pg store: guest, characters, leases, fencing, versions', { skip: !HAVE_PG 
     assert.equal(await st.saveChar(t2.char, t3.fence), true);
     const t4 = await st.takeChar(g.account, char.id, 'ptest:b', 30000);
     assert.equal(t4.char.bag[0].uid, 'p0-aa-1'); assert.equal(t4.char.equipment.head.uid, 'p0-aa-2');
+    assert.deepEqual((await st.listChars(g.account))[0].gear, t4.char.equipment, 'the title gets saved equipped items');
     const hour = '2001-01-01T00:00:00.000Z';
     await st.logEconomy([{ hour, band: 9, kind: 'faucet', reason: 'pgtest', gold: 5, items: 1, count: 1 }]);
     await st.logEconomy([{ hour, band: 9, kind: 'faucet', reason: 'pgtest', gold: 7, items: 0, count: 1 }]);

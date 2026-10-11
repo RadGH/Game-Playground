@@ -55,7 +55,8 @@ export function createMemoryStore({ now = () => Date.now(), data = null, onChang
       return { account: a.id, claimed: !!a.claimed, username: a.username || null, banned: a.bannedUntil || 0, kind: t ? t.kind : 'guest', admin: !!a.admin };
     },
     async listChars(account) {
-      return Object.values(d.chars).filter(r => r.account === account).map(r => ({ ...brief(r), look: (r.blob && r.blob.look) || null }));
+      return Object.values(d.chars).filter(r => r.account === account).map(r => ({ ...brief(r), look: (r.blob && r.blob.look) || null,
+        gear: JSON.parse(JSON.stringify(r.blob?.equipment?.equipment || r.blob?.equipment || {})) }));
     },
     async createChar(account, { name, cls, look = null, kit = null, limit = MAX_CHARS_PER_ACCOUNT }) {
       const lower = name.toLowerCase();

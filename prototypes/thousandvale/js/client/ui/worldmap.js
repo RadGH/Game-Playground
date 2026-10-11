@@ -180,8 +180,10 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
     const ws = (net()?.joined?.room?.waystones || []);
     const known = new Set(worldUi?.knownWaystones?.() || []);
     const atStone = ws.find(w => Math.hypot(w.x - p.x, w.z - p.z) < 8);
-    const key = JSON.stringify([z?.key, tq?.id, tq?.goal, tq?.loc && Math.round(Math.hypot(tq.loc.x - p.x, tq.loc.z - p.z) / 20), evs.map(e => e.uid + e.sub), [...known].join(), !!atStone, atlas.dungeon?.id, atlas.quests.length, Math.round((atlas.fog?.version || 0) / 20), find.state.sig, evs.map(e => HIDDEN.has(e)).join(), HIDDEN.size, peopleSig()]);
-    if (key === state.lastSide) return;
+    const key = JSON.stringify([z?.key, tq?.id, tq?.goal, tq?.loc && Math.round(Math.hypot(tq.loc.x - p.x, tq.loc.z - p.z) / 20), evs.map(e => e.uid + (e.soon ? ':soon' : '') + (e.state || '') + (e.free ? ':free' : '')), [...known].join(), !!atStone, atlas.dungeon?.id, atlas.quests.length, Math.round((atlas.fog?.version || 0) / 20), find.state.sig, evs.map(e => HIDDEN.has(e)).join(), HIDDEN.size, peopleSig()]);
+    // play-test 10 (Y27): a countdown ticking ("Starts in 8:41") patches its own line — it used to rebuild the whole side
+    // list once a second, which threw away whatever was under the pointer
+    if (key === state.lastSide) { for (const e of evs) { const el = side.querySelector(`.map-ev[data-ev="${CSS.escape(String(e.uid || e.id || e.name))}"] p.tiny`); const t = evLine(e); if (el && el.textContent !== t) el.textContent = t; } return; }
     state.lastSide = key;
     const kids = [];
     const found = atlas.dungeon ? null : find.section();
@@ -207,7 +209,7 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
       // W13: each event can be hidden from your screen (the tracker, the minimap) and brought back here
       kids.push(h('section.map-events', {}, h('h4', {}, 'Events'), ...evs.map(e => {
         const hid = HIDDEN.has(e);
-        return h('div.map-ev' + (hid ? '.hid' : ''), { dataset: { ev: String(e.uid || e.id || e.name), ...(Number.isFinite(e.x) ? { wx: String(e.x), wz: String(e.z) } : {}) } }, h('b', {}, e.name || 'Event'), h('p.tiny', {}, `${e.sub || ''}${Number.isFinite(e.x) ? ' — ' + atlas.whereText(e, e.r) : ''}${hid ? ' · hidden from your screen' : ''}`),
+        return h('div.map-ev' + (hid ? '.hid' : ''), { dataset: { ev: String(e.uid || e.id || e.name), ...(Number.isFinite(e.x) ? { wx: String(e.x), wz: String(e.z) } : {}) } }, h('b', {}, e.name || 'Event'), h('p.tiny', {}, evLine(e)),
           h('div.row', {}, Number.isFinite(e.x) ? h('button.ghost.small', { type: 'button', onclick: () => showAt(e.x, e.z, 0.5) }, 'Show on map') : null,
             h('button.ghost.small', { type: 'button', dataset: { act: hid ? 'unhide' : 'hide' }, title: hid ? 'Put it back on your screen: the event card and the minimap arrow.' : 'Take it off your screen: no event card, no minimap arrow. It stays here on the map.', onclick: () => { if (hid) HIDDEN.show(e); else HIDDEN.hide(e); state.lastSide = ''; } }, hid ? 'Show on my screen' : 'Hide from my screen'),
             e.free && !hid ? h('button.primary.small', { type: 'button', onclick: () => travel('event') }, 'Travel there free') : null));
@@ -260,6 +262,7 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
     g.beginPath(); g.moveTo(16, 0); g.lineTo(-10, -11); g.lineTo(-4, 0); g.lineTo(-10, 11); g.closePath();
     g.fillStyle = '#ffe07a'; g.fill(); g.lineWidth = 2; g.strokeStyle = '#1b130a'; g.stroke(); g.restore();
   }
+  const evLine = e => `${e.sub || ''}${Number.isFinite(e.x) ? ' — ' + atlas.whereText(e, e.r) : ''}${HIDDEN.has(e) ? ' · hidden from your screen' : ''}`;
   function showAt(x, z, scale) { state.cx = x; state.cz = z; if (scale) state.scale = Math.max(state.scale, scale); state.preset = null; drawPresets(); }
   function travel(key) {
     const n = net(); if (!n) return;

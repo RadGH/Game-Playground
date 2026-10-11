@@ -17,6 +17,7 @@ import { makeServer, joinAs, run, until, waitP, makeClient } from './helpers.js'
 import { createMemoryStore } from '../../js/sim/store-memory.js';
 import { m3Server, claimedAs } from './m3-helpers.js';
 import { realServer, joinReal, rec } from './pt1-helpers.js';
+import { gainResource } from '../../js/rules/farhold.js';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const waitFor = async (fn, ms = 5000) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (fn()) return true; await sleep(20); } return !!fn(); };
@@ -254,4 +255,31 @@ test('Y24 + Y17 + Y21 on the real world: a waystone lights from 25 m; training d
   assert.ok(paid >= 4 && paid <= 12, 'sometimes a purse of 1-3 gold a level (level 4): ' + paid);
   assert.ok(chat.some(m => /Hob the Tinker thanks you: \+\d+ gold/.test(m.text)), JSON.stringify(chat.slice(-2)));
   a.close(); await srv.stop();
+});
+
+test('Y29 + Y32: saved title gear and live class resources reach the client', async () => {
+  const { srv, clock, world, store } = await realServer();
+  let a;
+  try {
+    a = await joinReal(srv, clock, 'Starlit', 'starcaller');
+    const o = world.online.get(a.joined.you.char);
+    const res = a.joined.you.res.find(r => r.id === 'starlight');
+    assert.deepEqual(res, { id: 'starlight', n: 0, max: 5 }, 'the first frame can draw the empty pool');
+    const updates = on(a, 'you');
+    gainResource(o.entity.r.unit, 'starlight', 3);
+    await run(clock, 300);
+    assert.ok(updates.some(p => p.res?.some(r => r.id === 'starlight' && r.n === 3 && r.max === 5)), 'resource gains reach the HUD');
+    updates.length = 0;
+    await run(clock, 300);
+    assert.equal(updates.filter(p => p.res).length, 0, 'an unchanged pool is not sent repeatedly');
+    o.entity.r.unit.mech.res.starlight.n = 0;
+    await run(clock, 300);
+    assert.ok(updates.some(p => p.res?.some(r => r.id === 'starlight' && r.n === 0)), 'spending the pool clears the pips');
+    const expected = o.room.rules.saveGear(o.entity);
+    const account = o.char.account, id = o.char.id;
+    a.close(); a = null;
+    await run(clock, 500);
+    const row = (await store.listChars(account)).find(c => c.id === id);
+    assert.deepEqual(row.gear, expected, 'the title receives the saved equipped items on a fresh browser');
+  } finally { a?.close(); await srv.stop(); }
 });

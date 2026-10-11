@@ -99,6 +99,9 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     camera.aspect = w / h; camera.updateProjectionMatrix();
   }
   window.addEventListener('resize', resize);
+  // Safari's toolbars can resize the canvas without a window resize event.
+  new ResizeObserver(resize).observe(canvas);
+  window.visualViewport?.addEventListener('resize', resize);
   resize();
 
   /** 'outdoor' (sky, sun, long fog) or 'dungeon' (no sky, dim cold fill, close dark fog). */

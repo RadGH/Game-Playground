@@ -105,3 +105,4 @@ html[data-layout="phone"] .uf-res em { display: none; }
 .fish-btn .fish-glyph { width: auto; height: auto; border: 0; border-radius: 0; transform: none; display: grid; place-items: center; color: var(--gold-hi); filter: drop-shadow(0 1px 1px #000); }
 .fish-btn .fish-cap { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: 3px; white-space: nowrap; font: 600 10.5px var(--sans); color: var(--ink-dim); text-shadow: 0 1px 2px #000; pointer-events: none; }
 .fish-btn.on .fish-cap { color: var(--gold-hi); }
+.cart-row.picked .cart-where { flex: 1 1 55%; min-width: 170px; }      /* the picked row: its facts keep their width, the confirm buttons wrap under when there is no room */

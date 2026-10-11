@@ -12,9 +12,14 @@
 //   · pinch on the world = zoom (the wheel the camera already listens for)
 // The skill buttons themselves are NOT made here: they are the game's own action-bar slots (#actionbar .slot), moved
 // into the thumb's arc by the stylesheet — same cooldown sweep, same card, same click.
-import { ACTION_BY_ID } from './bindings.js';
+//   · play-test 10 (G2): a Mount button and a Fish button of their own (Y34: the Belt's bottle was taken for a "drink"
+//     button — its first slot held the fishing rod); the Attack button's lit ring while auto-attack is on (Y35); a label on
+//     a long press of any control and a "What do these buttons do?" overlay, both read from TOUCH_CONTROLS in
+//     input/bindings.js; hold a party portrait = Track (Y36)
+import { ACTION_BY_ID, TOUCH_CONTROLS } from './bindings.js';
 import { actionKey, keyDown, keyUp } from './emit.js';
 import { device } from './device.js';
+import { waterInReach } from './water-reach.js';
 
 const HOLD_MS = 380;
 const svg = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
@@ -27,7 +32,12 @@ const ICON = {
   chat: svg('<path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8Z"/>'),
   close: svg('<path d="M6 6l12 12M18 6 6 18"/>'),
   hook: svg('<path d="M12 3v11a4 4 0 0 1-8 0v-2"/><path d="m2 14 2-2 2 2"/><circle cx="12" cy="3" r="1"/>'),
+  // Y34: a rod with its line and a fish on it (the same drawing idea as the desktop's cast button), and a horse's head
+  fish: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 28 21 4"/><path d="M21 4q6 1 5 9"/><path d="M26 13v4"/><path d="M7.5 23.5l3 2.2" stroke-width="3.2"/><path d="M11 23c3.4-4.6 9-4.6 12.4-1.2L27 19.4v7.2l-3.6-2.4C20 27.6 14.400 27.600 11 23Z" fill="currentColor" stroke="none"/><circle cx="15" cy="22.6" r="0.9" fill="#10202c" stroke="none"/></svg>',
+  mount: '<svg viewBox="0 0 32 32" fill="currentColor" stroke="none" aria-hidden="true"><path d="M9 29h15v-3.500c0-6-1.200-9.500-3.400-12.500.8-3.200-.2-6.300-2.400-8.500l-1.700 2.300C12.200 6.800 8.300 10 7.200 15l-2.600 4.200 2.300 2.600 4.300-2c1.200 0 2.300-.3 3.300-1-1 4.200-5.500 5.200-5.500 10.200Z"/><circle cx="13" cy="12.500" r="1.100" fill="#1a1206"/></svg>',
 };
+const ROD_KIND = /(^|_)rod($|_)|angling_rod|fishing/i;      // a tool is not a potion: the Belt never uses it (Y34)
+const FISH_HOW = ['Tap Fish — it lights up when water is in reach.', 'Wait. When it says “A bite!”, tap Hook (the big blue button).', 'Then hold to reel in and let go to give line: keep the float inside the green band.'];
 /** The sheets a tab stands for: tab id (an action id) -> what is on screen when it is open. */
 const TABS = [
   { id: 'bag', label: 'Bag', sel: '#bag' }, { id: 'sheet', label: 'Character', sel: '#panel-sheet' }, { id: 'skills', label: 'Skills', sel: '#panel-skills' },
@@ -59,7 +69,7 @@ export function createTouch({ api, input, run, radial }) {
     base.classList.toggle('sprint', sprint);
     api.controls?.setAnalog?.(f < 0.18 ? null : { mx: dx / (m || 1), mz: -dy / (m || 1), camX: 0, camY: 0, sprint, walk: !sprint });
   }
-  function stickEnd() { ST.id = null; base.classList.remove('on', 'sprint'); thumb.style.transform = ''; api.controls?.setAnalog?.(null); if (html.dataset.variant !== 'b') { base.style.left = ''; base.style.top = ''; } }
+  function stickEnd() { if (ST.id != null) { try { zone.releasePointerCapture?.(ST.id); } catch { /* already gone */ } } ST.id = null; base.classList.remove('on', 'sprint'); thumb.style.transform = ''; api.controls?.setAnalog?.(null); if (html.dataset.variant !== 'b') { base.style.left = ''; base.style.top = ''; } }
   zone.addEventListener('pointerdown', e => {
     if (ST.id != null) return;
     device.seen('touch'); e.preventDefault();
@@ -82,17 +92,51 @@ export function createTouch({ api, input, run, radial }) {
   hook.addEventListener('pointerdown', e => { e.preventDefault(); keyDown('Space'); hook.classList.add('on'); });
   for (const t of ['pointerup', 'pointercancel', 'pointerleave']) hook.addEventListener(t, () => { keyUp('Space'); hook.classList.remove('on'); });
 
-  // the belt: tap = slot 1; hold = the four consumable slots as a wheel under the thumb (slide to one, let go)
+  // the belt: tap = the first potion or food you carry; hold = the four consumable slots as a wheel under the thumb
+  // (slide to one, let go). Y34: a slot holding a TOOL (the fishing rod auto-filled the first potion key of a new
+  // character, so the bottle cast a line — the owner's "drink button") is not a belt item: skipped here, and the button
+  // wears the picture of what a tap will really use.
   const belt = mk('ph-belt', 'Potions and food: tap for the first, hold for all four', ICON.belt);
   function beltItems() {
     return [...document.querySelectorAll('#actionbar .hb-slot')].map((s, i) => {
       const img = s.querySelector('.hb-face img'), n = s.querySelector('.hb-n')?.textContent || '';
       const kind = window.tvui2?.state?.().hotbar?.[i];                                   // the item kind on that key (ui/hotbar.js)
+      const tool = !!kind && ROD_KIND.test(String(kind));
+      const empty = tool || s.classList.contains('empty') || s.classList.contains('none-left');
       const name = kind ? String(kind).replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase()) : `Slot ${i + 1}`;
-      return { id: 'item' + (i + 1), label: s.classList.contains('empty') ? 'Empty' : (name.length > 16 ? name.slice(0, 15) + '…' : name) + (n ? ` ×${n}` : ''), html: img ? `<img src="${img.src}" alt="">` : ICON.belt, sub: ACTION_BY_ID['item' + (i + 1)].label };
+      return { id: 'item' + (i + 1), empty, label: empty ? 'Empty' : (name.length > 16 ? name.slice(0, 15) + '…' : name) + (n ? ` ×${n}` : ''), html: img && !empty ? `<img src="${img.src}" alt="">` : ICON.belt, src: img && !empty ? img.src : '', sub: ACTION_BY_ID['item' + (i + 1)].label };
     });
   }
-  holdWheel(belt, { tapFn: () => actionKey('item1'), open: at => radial.open({ items: beltItems(), title: 'Belt', hold: true, at, onPick: w => actionKey(w.id) }) });
+  function beltTap() {
+    const first = beltItems().find(w => !w.empty);
+    if (!first) { api.hud?.toast?.('Your belt is empty. Potions and food you pick up or buy go on it.', 'info'); return; }
+    actionKey(first.id);
+  }
+  holdWheel(belt, { tapFn: beltTap, open: at => radial.open({ items: beltItems(), title: 'Belt', hold: true, at, onPick: w => { if (!w.empty) actionKey(w.id); } }) });
+
+  // ---------------------------------------------------------------- Y34: Mount and Fish, each a button of its own with its name on it
+  const mount = mk('ph-mount ph-cap', 'Mount', `${ICON.mount}<small>Mount</small><i class="ph-prog" aria-hidden="true"></i>`);
+  tap(mount, () => (api.mount ? api.mount() : actionKey('mount')));
+  const fish = mk('ph-fish ph-cap', 'Fish', `${ICON.fish}<small>Fish</small>`); fish.hidden = true;
+  const fishState = () => document.querySelector('.tv-fish:not([hidden])')?.dataset.state || 'idle';
+  let water = null, waterAt = 0;
+  tap(fish, () => {
+    if (fishState() !== 'idle') { actionKey('fish'); return; }                     // a line is out: this reels it in
+    if (api.self && !water) { api.hud?.toast?.('No water in reach. Stand at the water’s edge and face it.', 'warn'); fishHint(); return; }
+    fishHint(); actionKey('fish');
+  });
+  // the first time (per character) you could fish, say how — the owner asked "how to fish on mobile"
+  const hintBox = document.createElement('div'); hintBox.className = 'ph-hint'; hintBox.hidden = true; hintBox.setAttribute('role', 'dialog'); hintBox.setAttribute('aria-label', 'How to fish'); ui.appendChild(hintBox);
+  const hintKey = () => 'tv.hint.fish.' + String(document.getElementById('self-name')?.textContent || 'x').trim().toLowerCase();
+  function fishHint(force = false) {
+    try { if (!force && localStorage.getItem(hintKey())) return false; localStorage.setItem(hintKey(), '1'); } catch { if (!force && fishHint.shown) return false; }
+    fishHint.shown = true;
+    hintBox.innerHTML = `<strong>${ICON.fish} How to fish</strong><ol>${FISH_HOW.map(t => `<li>${t}</li>`).join('')}</ol><button type="button" class="primary">Got it</button>`;
+    hintBox.querySelector('button').onclick = e => { e.stopPropagation(); hintBox.hidden = true; };
+    hintBox.hidden = false;
+    clearTimeout(fishHint.t); if (!force) fishHint.t = setTimeout(() => { hintBox.hidden = true; }, 20000);
+    return true;
+  }
   // the quick wheel: tap = it stays open (tap a slice); hold = slide to a slice and let go
   const wheel = mk('ph-wheel', 'Quick wheel: every window', ICON.wheel);
   holdWheel(wheel, { tapFn: () => radial.open({ hold: false }), open: () => radial.open({ hold: true }) });
@@ -151,6 +195,9 @@ export function createTouch({ api, input, run, radial }) {
   tap(pmin, () => setParty(html.dataset.party !== 'min'));
   try { if (localStorage.getItem('tv.phone.party') === 'min') setParty(true); } catch { /* private window */ }
 
+  // Y35: pressing Attack ends the stick's push (the finger may stay down; it steers again after it is lifted)
+  document.querySelector('#actionbar > .slot')?.addEventListener('pointerdown', () => { if (ST.id != null) stickEnd(); });
+
   // ---------------------------------------------------------------- prompts are buttons
   hud.addEventListener('click', e => { const p = e.target.closest?.('.interact'); if (p && !p.hidden) { e.stopPropagation(); actionKey('interact'); } }, true);
   document.getElementById('minimap')?.addEventListener('click', () => {}, true);
@@ -201,15 +248,83 @@ export function createTouch({ api, input, run, radial }) {
     sheet.hidden = false;
     return true;
   }
+  // Y34: a long press on a control says what it is (TOUCH_CONTROLS). Skills keep their own card; the Belt and the wheel
+  // open their wheels on a hold; a party portrait opens Track (Y36).
+  const LABELLED = TOUCH_CONTROLS.filter(c => !c.skill && !c.area && !['belt', 'wheel', 'party', 'prompt', 'minimap', 'self', 'hook'].includes(c.id));
+  const controlAt = el => { for (const c of LABELLED) { const hit = el?.closest?.(c.sel); if (hit) return { row: c, el: hit }; } return null; };
+  const label = document.createElement('div'); label.className = 'ph-label'; label.hidden = true; label.setAttribute('role', 'tooltip'); ui.appendChild(label);
+  let labelT = 0;
+  const nameOfControl = c => (c.id === 'mount' ? mount.querySelector('small').textContent : c.name);
+  function showLabel(row, el) {
+    label.innerHTML = `<b></b><span></span>`; label.firstChild.textContent = nameOfControl(row); label.lastChild.textContent = row.what;
+    label.hidden = false;
+    const r = el.getBoundingClientRect(), w = Math.min(250, innerWidth - 24); label.style.width = w + 'px';
+    const h = label.offsetHeight, x = Math.max(12, Math.min(innerWidth - w - 12, r.left + r.width / 2 - w / 2));
+    const y = r.top - h - 10 > 50 ? r.top - h - 10 : r.bottom + 10;
+    label.style.left = x + 'px'; label.style.top = y + 'px';
+    clearTimeout(labelT); labelT = setTimeout(() => { label.hidden = true; }, 4200);
+  }
+  /** A sheet with plain words and buttons (no item card behind it). */
+  function plainSheet(title, text, actions = []) {
+    const box = document.createElement('div'); box.className = 'ps-tip ps-plain';
+    const t = document.createElement('strong'); t.textContent = title; const p = document.createElement('span'); p.textContent = text; box.append(t, p);
+    sBody.replaceChildren(box);
+    const x = document.createElement('button'); x.type = 'button'; x.className = 'ghost ps-x'; x.textContent = 'Close'; x.onclick = closeSheet;
+    sActs.replaceChildren(...actions.map(a => { const b = document.createElement('button'); b.type = 'button'; b.className = (a.primary ? 'primary' : 'ghost') + ' ps-act'; b.textContent = a.label; b.onclick = () => { closeSheet(); a.run(); }; return b; }), x);
+    sheet.hidden = false; return true;
+  }
+  /** Y36: hold a party portrait — where they are, and Track (an arrow at the edge of the screen leads you to them). */
+  function partySheet(pm) {
+    const name = pm.querySelector('.pm-name')?.firstChild?.textContent || 'Party member';
+    const T = api.tracker?.() || window.tvui10 || null;
+    const row = T?.people?.().find(p => !p.self && p.name === name) || null;
+    const on = !!(row && T.isTracked?.(row.char));
+    const where = row ? [row.where, Number.isFinite(row.dist) ? `${row.dist >= 1000 ? (row.dist / 1000).toFixed(1) + ' km' : Math.round(row.dist / 5) * 5 + ' m'} away` : ''].filter(Boolean).join(' · ') : '';
+    const acts = [];
+    if (row) acts.push({ label: on ? 'Stop tracking' : 'Track', primary: true, run: () => T.track(row.char, row.name, 'party') });
+    acts.push({ label: 'Target (heals go to them)', run: () => { const ev = new MouseEvent('click', { bubbles: true, cancelable: true }); ev.tvPass = true; pm.dispatchEvent(ev); } });
+    return plainSheet(name, where || (row ? 'In your party.' : 'In your party — not in reach right now.') + (on ? ' You are tracking them.' : ''), acts);
+  }
   let press = null, swallow = -Infinity;
   document.addEventListener('pointerdown', e => {
+    if (!label.hidden && !e.target.closest?.('.ph-label')) label.hidden = true;
     if (e.pointerType === 'mouse' && !html.dataset.safeEmulated) return;
-    const host = tipHost(e.target); if (!host || host.closest('.phone-sheet, .ph-btn, .phone-tabs')) return;
+    const ctl = controlAt(e.target), pm = ctl ? null : e.target.closest?.('#party .pmember') || null;
+    const host = ctl || pm ? null : tipHost(e.target);
+    if (!ctl && !pm && (!host || host.closest('.phone-sheet, .ph-btn, .phone-tabs'))) return;
     clearTimeout(press?.t);
-    press = { x: e.clientX, y: e.clientY, host, t: setTimeout(() => { if (!press) return; const h = press.host; press = null; swallow = performance.now(); sheetFor(h); }, HOLD_MS + 80) };
+    const P = press = { x: e.clientX, y: e.clientY, fired: false, t: setTimeout(() => {
+      if (press !== P) return;
+      P.fired = true; swallow = performance.now();
+      if (ctl) showLabel(ctl.row, ctl.el); else if (pm) partySheet(pm); else sheetFor(host);
+    }, HOLD_MS + 80) };
   }, true);
-  document.addEventListener('pointermove', e => { if (press && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 10) { clearTimeout(press.t); press = null; } }, true);
-  for (const t of ['pointerup', 'pointercancel']) document.addEventListener(t, () => { if (press) { clearTimeout(press.t); press = null; } }, true);
+  document.addEventListener('pointermove', e => { if (press && !press.fired && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 10) { clearTimeout(press.t); press = null; } }, true);
+  // (the click that ends a hold is swallowed however long the finger stayed down)
+  for (const t of ['pointerup', 'pointercancel']) document.addEventListener(t, () => { if (press) { clearTimeout(press.t); if (press.fired) swallow = performance.now(); press = null; } }, true);
+
+  // ---------------------------------------------------------------- Y34: "What do these buttons do?" — every control on screen, numbered and named
+  const explainBox = document.createElement('div'); explainBox.className = 'ph-explain'; explainBox.hidden = true; explainBox.setAttribute('role', 'dialog'); explainBox.setAttribute('aria-label', 'What the buttons do');
+  document.body.appendChild(explainBox);
+  const seen = el => !!el && !el.hidden && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden' && getComputedStyle(el).display !== 'none';
+  function explain() {
+    closeSheets(); radial.close?.(); closeSheet(); setChat(false);
+    const rows = []; const marks = [];
+    for (const c of TOUCH_CONTROLS) {
+      const el = [...document.querySelectorAll(c.sel)].find(seen);
+      if (!el || (c.skill && el.classList.contains('empty'))) continue;
+      const r = (c.area ? base.querySelector('.ph-ring') || el : el).getBoundingClientRect();
+      let name = nameOfControl(c);
+      if (c.skill) { const m = /class="tip-title">(?:\s*<svg[\s\S]*?<\/svg>)?\s*([^<]+)/.exec(el.dataset.tipHtml || ''); if (m) name = m[1].trim(); }
+      rows.push({ n: rows.length + 1, name, what: c.what, id: c.id });
+      marks.push(`<b class="ph-ex-n" style="left:${Math.round(r.left + r.width / 2)}px;top:${Math.round(r.top + r.height / 2)}px">${rows.length}</b>`);
+    }
+    explainBox.innerHTML = `${marks.join('')}<div class="ph-ex-card"><strong>What the buttons do</strong><ol>${rows.map(w => `<li data-id="${w.id}"><b>${w.n}</b><span><em></em><i></i></span></li>`).join('')}</ol><p>Hold any button for a moment to see its name again.</p><button type="button" class="primary">Got it</button></div>`;
+    explainBox.querySelectorAll('li').forEach((li, i) => { li.querySelector('em').textContent = rows[i].name; li.querySelector('i').textContent = rows[i].what; });
+    explainBox.querySelector('button').onclick = e => { e.stopPropagation(); explainBox.hidden = true; };
+    explainBox.hidden = false;
+    return rows;
+  }
   // the click that ends a hold must not also press the thing; and a tap on a bag item opens its sheet instead of wearing it at once
   document.addEventListener('click', e => {
     if (performance.now() - swallow < 700) { e.stopPropagation(); e.preventDefault(); swallow = -Infinity; return; }
@@ -290,17 +405,44 @@ export function createTouch({ api, input, run, radial }) {
     }
     // the menu bar is gone on a phone: the pause menu (wheel > Menu) carries what only it could open
     const pl = document.querySelector('#panel-pause:not([hidden]) .pause-list');
-    if (pl && !pl.querySelector('.ph-extra')) for (const [mid, label] of [['menu-feedback', 'Feedback: a suggestion or a bug'], ['menu-account', 'Account']]) { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost wide ph-extra'; b.textContent = label; b.onclick = () => { document.querySelector('#panel-pause .tvp-x')?.click(); document.getElementById(mid)?.click(); }; pl.insertBefore(b, pl.lastElementChild); }
+    if (pl && !pl.querySelector('.ph-extra')) {
+      for (const [mid, label] of [['menu-feedback', 'Feedback: a suggestion or a bug'], ['menu-account', 'Account']]) { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost wide ph-extra'; b.textContent = label; b.onclick = () => { document.querySelector('#panel-pause .tvp-x')?.click(); document.getElementById(mid)?.click(); }; pl.insertBefore(b, pl.lastElementChild); }
+      // Y34: every on-screen control, named (generated from the binding table)
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost wide ph-extra ph-explain-open'; b.textContent = 'What do these buttons do?'; b.onclick = () => { document.querySelector('#panel-pause .tvp-x')?.click(); setTimeout(explain, 60); }; pl.insertBefore(b, pl.firstElementChild);
+    }
     if (id === 'map') headToggle('#panel-map', 'ph-mapside', ['Hide list', 'Show list'], 'mapside');
     if (document.querySelector('#panel-appearance:not([hidden])')) headToggle('#panel-appearance', 'ph-peek', ['Preview', 'Back to editing'], 'peek');
     if (document.querySelector('#panel-kits:not([hidden])')) headToggle('#panel-kits', 'ph-peek', ['Preview', 'Back to choosing'], 'peek');
     const fs = document.querySelector('.tv-fish:not([hidden])')?.dataset.state || '';
     const f = fs === 'bite' || fs === 'tug' ? fs : '';
     if (html.dataset.fishing !== f) { html.dataset.fishing = f; hook.querySelector('span').textContent = f === 'tug' ? 'Reel' : 'Hook!'; }
+    // Y34 — Mount: its name is what a tap will do; the ring fills while the mount is being called
+    const me = api.self?.() || null, nowT = performance.now();
+    const mText = me?.mount ? 'Dismount' : me?.calling ? 'Calling…' : 'Mount';
+    const mSmall = mount.querySelector('small'); if (api.self && mSmall.textContent !== mText) { mSmall.textContent = mText; mount.setAttribute('aria-label', mText === 'Calling…' ? 'Calling your mount: tap to call it off' : mText); mount.classList.toggle('on', !!me?.mount); mount.classList.toggle('calling', !!me?.calling && !me?.mount); }
+    if (me?.calling && !me.mount) mount.style.setProperty('--p', Math.max(0, Math.min(1, (nowT - me.calling.at) / Math.max(1, me.calling.until - me.calling.at))).toFixed(3));
+    // Y34 — Fish: there only with a rod; lit only when a cast would land (the server's own rule, input/water-reach.js)
+    const rodBtn = document.querySelector('.fish-btn'), hasRod = fishHint.demo || (rodBtn ? !rodBtn.hidden : false);
+    if (fish.hidden === hasRod) fish.hidden = !hasRod;
+    if (hasRod && nowT - waterAt > 350) {
+      waterAt = nowT;
+      water = fishHint.demo ? { demo: true } : me && !me.indoors ? waterInReach(me, api.waterAt, api.pools?.() || []) : null;
+      const out = fs && fs !== 'idle';
+      fish.classList.toggle('dim', !water && !out); fish.classList.toggle('lit', !!water && !out); fish.classList.toggle('on', !!out);
+      const fText = out ? 'Reel in' : 'Fish'; const fSmall = fish.querySelector('small'); if (fSmall.textContent !== fText) { fSmall.textContent = fText; fish.setAttribute('aria-label', out ? 'Reel in' : water ? 'Fish: cast your line' : 'Fish: no water in reach'); }
+      if (water && !water.demo && !out) fishHint();                                   // the first time water is in reach
+      // … or at the angler: once the talk is over
+      const dlg = document.querySelector('.tv-dialog:not([hidden])'); if (dlg && /\bangl|fishing rod|cast a line/i.test(dlg.textContent || '')) fishHint.pending = true; else if (fishHint.pending) { fishHint.pending = false; fishHint(); }
+    }
+    // the Belt wears the picture of what a tap will use (never the rod)
+    if (nowT - (tick.beltAt || 0) > 500) { tick.beltAt = nowT; const first = beltItems().find(w => !w.empty), sig = first ? first.src || first.id : ''; if (belt.dataset.sig !== sig) { belt.dataset.sig = sig; belt.innerHTML = first && first.src ? `<img src="${first.src}" alt="">` : ICON.belt; belt.classList.toggle('empty', !first); } }
   }
 
   return {
-    ui, tabs, sheet, tick, sheetFor, itemSheet, shopSheet, closeSheet, closeSheets, setChat, setParty,
+    ui, tabs, sheet, tick, sheetFor, itemSheet, shopSheet, closeSheet, closeSheets, setChat, setParty, explain, fishHint, showLabel, partySheet,
+    /** Y1: an activity started — the stick lets go (the finger may stay down; it steers again after it is lifted). */
+    release() { if (ST.id != null) stickEnd(); },
+    get water() { return water; },
     setInfo(on) { html.dataset.hudinfo = on ? 'open' : ''; info.classList.toggle('on', !!on); },
     /** For the gallery's still pictures: show a control mid-press. */
     demo(what, a = 0.7, b = -0.5) {
@@ -311,6 +453,12 @@ export function createTouch({ api, input, run, radial }) {
       else if (what === 'party') setParty(a !== false && a !== 0);
       else if (what === 'info') { html.dataset.hudinfo = 'open'; info.classList.add('on'); }
       else if (what === 'shop') { const r = document.querySelector('#panel-shop .shop-row'); if (r) return shopSheet(r); }
+      else if (what === 'explain') return explain();
+      else if (what === 'fish') { fishHint.demo = true; fish.hidden = false; fish.classList.add('lit'); fish.classList.remove('dim'); }
+      else if (what === 'fishhint') { fishHint.demo = true; fish.hidden = false; fish.classList.add('lit'); fish.classList.remove('dim'); return fishHint(true); }
+      else if (what === 'label') { const c = TOUCH_CONTROLS.find(x => x.id === (typeof a === 'string' ? a : 'attack')), el = c && document.querySelector(c.sel); if (el) showLabel(c, el); }
+      else if (what === 'mount') { const sm = mount.querySelector('small'); sm.textContent = a === 'calling' ? 'Calling…' : a === 'on' ? 'Dismount' : 'Mount'; mount.classList.toggle('on', a === 'on'); mount.classList.toggle('calling', a === 'calling'); mount.style.setProperty('--p', '0.6'); }
+      else if (what === 'track') { const pm = document.querySelector('#party .pmember'); if (pm) return partySheet(pm); }
     },
   };
 }

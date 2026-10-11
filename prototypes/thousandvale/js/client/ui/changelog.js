@@ -81,7 +81,10 @@ export function createChangelog({ net = () => null, storage = null, load = null,
     h('strong', {}, 'The game was updated'), h('p'),
     h('div.row', {}, h('button.primary.small', { type: 'button', dataset: { act: 'view' }, onclick: () => open() }, 'See what changed'),
       h('button.ghost.small', { type: 'button', dataset: { act: 'later' }, onclick: () => { popup.hidden = true; S.popupDismissed = true; } }, 'Later')));
-  (titleEl || document.getElementById('title') || document.body).appendChild(popup);
+  // on <body>, not inside the title's markup: a test or a script that asks the title for "its primary button" must never
+  // get this one (tests/D/m3-social.spec.js did, and walked into the world with the changelog open over everything)
+  document.body.appendChild(popup);
+  const onTitle = () => { const t = titleEl || document.getElementById('title'); return !!t && !t.hidden && getComputedStyle(t).display !== 'none'; };
   const dots = new Set();
   function paintDots() { const n = S.entries ? view().unseen : 0; for (const el of dots) { el.classList.toggle('has-new', n > 0); el.dataset.new = n > 0 ? String(n) : ''; } }
   /** A button that opens the window; it wears a dot while something is unread. */
@@ -91,9 +94,12 @@ export function createChangelog({ net = () => null, storage = null, load = null,
   async function check() {
     await ensure();
     const v = view();
-    if (v.first) { if (v.latest) markSeen(v.latest); popup.hidden = true; paintDots(); return v; }   // a first visit: nothing is "new"
+    // A first visit: nothing is "new". The marker is only written here for a browser with NO account on the way — one that
+    // is connecting must wait for the account's own marker (writing "latest" now would hide the popup from a returning
+    // player on a new browser); a new account's marker is set by the server.
+    if (v.first) { if (v.latest && !S.account && !net()) setLocal(v.latest); popup.hidden = true; paintDots(); return v; }
     paintDots();
-    if (v.unseen > 0 && !S.popupDismissed && root.hidden) {
+    if (v.unseen > 0 && !S.popupDismissed && root.hidden && onTitle()) {
       popup.querySelector('p').textContent = `${changelogPopupText(v.unseen)}${v.rows[0]?.title ? ` Latest: ${v.rows[0].title}.` : ''}`;
       popup.hidden = false;
     } else popup.hidden = true;
@@ -103,6 +109,8 @@ export function createChangelog({ net = () => null, storage = null, load = null,
     if (!n) return;
     if (n.changelog) { S.account = n.changelog; check(); }
     n.on?.('changelog', c => { S.account = c; check(); });
+    // walking into the world puts both away: the popup belongs to the title, and nothing may sit over the game unasked
+    n.on?.('joined', () => { popup.hidden = true; close(); });
   }
   check();
   return { root, popup, open, close, check, wire, button, markSeen, get isOpen() { return !root.hidden; },

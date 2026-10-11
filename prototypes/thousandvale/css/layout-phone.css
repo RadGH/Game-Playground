@@ -444,9 +444,9 @@ html[data-layout="phone"][data-mapside="1"] .map-side { display: none; }
 html[data-layout="phone"] .map-main { flex-direction: column; gap: 6px; padding: 0 8px 8px; }
 html[data-layout="phone"] .map-stage { flex: 1 1 auto; min-height: 180px; }
 html[data-layout="phone"] .map-side { width: auto; max-height: 38%; }
-html[data-layout="phone"] .map-top { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 6px 8px; gap: 6px; }
+html[data-layout="phone"] .map-top { flex-wrap: wrap; padding: 6px 8px; gap: 6px; }
 html[data-layout="phone"] .map-top > *, html[data-layout="phone"] .map-presets > *, html[data-layout="phone"] .map-layers > * { flex: none; }
-html[data-layout="phone"] .map-presets, html[data-layout="phone"] .map-layers { display: flex; flex-wrap: nowrap; gap: 6px; }
+html[data-layout="phone"] .map-presets, html[data-layout="phone"] .map-layers { display: flex; flex-wrap: wrap; max-width: 100%; gap: 6px; }
 @media (orientation: landscape) { html[data-layout="phone"] .map-main { flex-direction: row; } html[data-layout="phone"] .map-side { width: 240px; max-height: none; } }
 /* V13: a shop row is one big tap target (the tap opens its card with the Buy button) */
 html[data-layout="phone"] .shop-row { cursor: pointer; padding: 4px 8px; gap: 10px; }
@@ -486,3 +486,73 @@ html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .ph-chip { display: n
 html[data-layout="phone"] .interact { z-index: 7; }
 html[data-layout="phone"] .interact.loot-prompt { bottom: calc(var(--sb) + 74px); }
 @media (orientation: portrait) { html[data-layout="phone"] .interact { bottom: calc(var(--sb) + 262px); } html[data-layout="phone"] .interact.loot-prompt { bottom: calc(var(--sb) + 318px); } html[data-layout="phone"] .ally-note { bottom: calc(var(--sb) + 374px) !important; } html[data-layout="phone"] .tv-fish { bottom: calc(var(--sb) + 262px); } }
+
+/* ================================================================ play-test 10 (G2) */
+/* Y35: the Attack button while auto-attack is on (the ring itself is css/input.css .slot.auto, every layout) */
+html[data-layout="phone"] .actionbar > .slot.auto:nth-child(1) { border-color: #ffd36b; background: radial-gradient(circle at 40% 35%, rgba(150, 96, 30, 0.96), rgba(46, 26, 8, 0.94) 75%); }
+html[data-layout="phone"] .actionbar > .slot:nth-child(1)::after { content: 'Attack'; position: absolute; left: 50%; bottom: 7px; transform: translateX(-50%); font: 700 9.5px var(--sans); letter-spacing: 0.03em; color: rgba(243, 234, 216, 0.82); text-shadow: 0 1px 2px #000; pointer-events: none; }
+html[data-layout="phone"] .actionbar > .slot.auto:nth-child(1)::after { content: 'Attacking'; color: #ffe3a0; }
+html[data-layout="phone"] .actionbar > .slot:nth-child(1) svg { margin-top: -8px; }
+
+/* Y34: Mount and Fish — a shape of their own (not one more round fight button), each with its NAME on it */
+html[data-layout="phone"] .ph-btn.ph-cap { position: absolute; width: 58px; height: 52px; border-radius: 16px; pointer-events: auto; touch-action: none; grid-template-rows: 27px 15px; align-content: center; gap: 0; overflow: hidden; }
+html[data-layout="phone"] .ph-btn.ph-cap svg { width: 25px; height: 25px; }
+html[data-layout="phone"] .ph-btn.ph-cap small { font: 700 10px/1.1 var(--sans); letter-spacing: 0.01em; white-space: nowrap; color: #f3ead8; text-shadow: 0 1px 2px #000; }
+html[data-layout="phone"] .ph-btn.ph-cap[hidden] { display: none; }
+/* on its side: a pair just right of the stick's resting place (the right thumb's corner is full, the top row is the far reach) */
+html[data-layout="phone"] .ph-btn.ph-mount { left: calc(var(--sl) + 162px); bottom: calc(var(--sb) + 10px); border-color: #d9b26a; }
+html[data-layout="phone"] .ph-btn.ph-fish { left: calc(var(--sl) + 162px); bottom: calc(var(--sb) + 70px); border-color: #7fc4ee; color: #cfeaff; }
+/* upright: a column on the right edge, just above the skill arcs */
+@media (orientation: portrait) {
+  html[data-layout="phone"] .ph-btn.ph-mount { left: auto; right: calc(var(--sr) + 6px); bottom: calc(var(--sb) + 240px); }
+  html[data-layout="phone"] .ph-btn.ph-fish { left: auto; right: calc(var(--sr) + 6px); bottom: calc(var(--sb) + 300px); }
+}
+html[data-layout="phone"] .ph-btn.ph-fish.lit { background: rgba(28, 92, 140, 0.92); border-color: #bfe6ff; box-shadow: 0 0 12px rgba(120, 200, 255, 0.55), 0 2px 8px rgba(0, 0, 0, 0.5); }
+html[data-layout="phone"] .ph-btn.ph-fish.dim { opacity: 0.5; border-style: dashed; }
+html[data-layout="phone"] .ph-btn.ph-fish.dim small::after { content: ''; }
+html[data-layout="phone"] .ph-btn.ph-mount .ph-prog { display: none; position: absolute; left: 0; bottom: 0; height: 4px; width: calc(var(--p, 0) * 100%); background: #ffd36b; }
+html[data-layout="phone"] .ph-btn.ph-mount.calling .ph-prog { display: block; }
+html[data-layout="phone"] .ph-btn.ph-mount.calling { border-color: #ffd36b; }
+html[data-layout="phone"][data-fishing="bite"] .ph-btn.ph-fish, html[data-layout="phone"][data-fishing="tug"] .ph-btn.ph-fish { opacity: 0.4; }
+html[data-layout="phone"][data-chat="open"] .ph-btn.ph-cap { display: none; }
+/* the Belt wears the picture of what a tap will use */
+html[data-layout="phone"] .ph-btn.ph-belt img { width: 30px; height: 30px; object-fit: contain; border-radius: 6px; pointer-events: none; }
+html[data-layout="phone"] .ph-btn.ph-belt.empty { opacity: 0.55; }
+
+/* a long press on a control: its name and one sentence */
+html[data-layout="phone"] .ph-label { position: fixed; z-index: 98000; pointer-events: none; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--gold-hi); background: rgba(16, 13, 10, 0.96); color: var(--ink); font: 400 13.5px/1.35 var(--sans); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7); }
+html[data-layout="phone"] .ph-label[hidden] { display: none; }
+html[data-layout="phone"] .ph-label b { display: block; margin-bottom: 2px; font: 700 14.5px var(--sans); color: var(--gold-hi); }
+
+/* the first-time fishing hint */
+html[data-layout="phone"] .ph-hint { position: absolute; z-index: 9; pointer-events: auto; left: 50%; top: calc(var(--st) + 112px); transform: translateX(-50%); width: min(330px, calc(100% - 28px)); padding: 12px 14px; border-radius: 14px; border: 1px solid #7fc4ee; background: rgba(12, 18, 24, 0.96); color: var(--ink); font: 400 14px/1.4 var(--sans); box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7); }
+html[data-layout="phone"] .ph-hint[hidden] { display: none; }
+html[data-layout="phone"] .ph-hint strong { display: flex; align-items: center; gap: 8px; font: 700 15.5px var(--sans); color: #cfeaff; }
+html[data-layout="phone"] .ph-hint strong svg { width: 24px; height: 24px; flex: none; }
+html[data-layout="phone"] .ph-hint ol { margin: 8px 0 10px; padding-left: 22px; }
+html[data-layout="phone"] .ph-hint li { margin: 3px 0; }
+html[data-layout="phone"] .ph-hint button { min-height: 44px; width: 100%; font-size: 15px; }
+@media (orientation: landscape) { html[data-layout="phone"] .ph-hint { top: calc(var(--st) + 60px); width: 340px; } html[data-layout="phone"] .ph-hint ol { margin: 4px 0 6px; } }
+html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .ph-hint { display: none; }
+
+/* "What do these buttons do?": a number on every control on screen, and the list that names them */
+html[data-layout="phone"] .ph-explain { position: fixed; inset: 0; z-index: 99500; background: rgba(0, 0, 0, 0.46); }
+html[data-layout="phone"] .ph-explain[hidden] { display: none; }
+html[data-layout="phone"] .ph-ex-n { position: absolute; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; display: grid; place-items: center; background: #ffd36b; color: #1a1206; font: 800 12.5px var(--sans); box-shadow: 0 0 0 2px #1a1206, 0 2px 6px rgba(0, 0, 0, 0.7); pointer-events: none; }
+html[data-layout="phone"] .ph-ex-card { position: absolute; left: calc(var(--sl) + 12px); right: calc(var(--sr) + 12px); top: calc(var(--st) + 112px); max-height: calc(100% - var(--st) - var(--sb) - 400px); min-height: 200px; display: flex; flex-direction: column; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--gold-hi); background: rgba(18, 14, 10, 0.97); color: var(--ink); box-shadow: 0 6px 22px rgba(0, 0, 0, 0.75); }
+html[data-layout="phone"] .ph-ex-card > strong { font: 700 16px var(--sans); color: var(--gold-hi); flex: none; }
+html[data-layout="phone"] .ph-ex-card ol { list-style: none; margin: 8px 0; padding: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1 1 auto; min-height: 0; }
+html[data-layout="phone"] .ph-ex-card li { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+html[data-layout="phone"] .ph-ex-card li > b { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: #ffd36b; color: #1a1206; font: 800 12px var(--sans); }
+html[data-layout="phone"] .ph-ex-card li em { display: block; font: 700 14px var(--sans); font-style: normal; color: #f3ead8; }
+html[data-layout="phone"] .ph-ex-card li i { display: block; font: 400 13px/1.35 var(--sans); font-style: normal; color: var(--ink-dim); }
+html[data-layout="phone"] .ph-ex-card p { flex: none; margin: 0 0 8px; font-size: 13px; color: var(--ink-dim); }
+html[data-layout="phone"] .ph-ex-card button { flex: none; min-height: 46px; font-size: 15px; }
+@media (orientation: landscape) { html[data-layout="phone"] .ph-ex-card { left: calc(var(--sl) + 236px); right: calc(var(--sr) + 262px); top: calc(var(--st) + 58px); bottom: calc(var(--sb) + 10px); max-height: none; min-height: 0; padding: 8px 12px; } html[data-layout="phone"] .ph-ex-card p { display: none; } }
+
+/* a plain sheet (hold a party portrait: Track) */
+html[data-layout="phone"] .ps-plain strong { display: block; font: 700 17px var(--sans); color: var(--gold-hi); margin-bottom: 4px; }
+html[data-layout="phone"] .ps-plain span { display: block; color: var(--ink-dim); }
+/* Y36: the party's small edge arrows keep clear of the island and the home bar by their own margin; nothing to press */
+/* a long press is OURS on a phone (labels, cards, Track): iOS must not answer it with its own callout / magnifier */
+html[data-layout="phone"] .ph-btn, html[data-layout="phone"] .actionbar .slot, html[data-layout="phone"] .pmember, html[data-layout="phone"] .islot, html[data-layout="phone"] .pmember img, html[data-layout="phone"] .islot img { -webkit-touch-callout: none; }

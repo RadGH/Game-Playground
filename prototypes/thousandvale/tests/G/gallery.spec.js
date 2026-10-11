@@ -10,7 +10,7 @@
 //
 // Run (shared browser lock):
 //   cd ~/claude/playground && flock /tmp/claude-1000/farhold-pw.lock npx playwright test prototypes/thousandvale/tests/G/gallery.spec.js
-// One frame only:  G_FRAME=phone-l npx playwright test …      one scene only:  G_SCENE=perks
+// One frame only:  G_FRAME=phone-l npx playwright test …      one scene only:  G_SCENE=perks   (or several: G_SCENE=perks,map)
 import { test, expect } from '@playwright/test';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -18,7 +18,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { SCENES, DEVICES, sceneFits } from '../../js/client/gallery/scenes.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const SHOTS = join(HERE, 'shots');
+const SHOTS = join(HERE, process.env.G_SHOTS_SUFFIX ? 'shots' + process.env.G_SHOTS_SUFFIX : 'shots');      // G_SHOTS_SUFFIX=-webkit with --browser=webkit: its own folder, so Chromium's pictures of record stay
 const BASE = 'prototypes/thousandvale/';
 const BAD = /undefined|\[object |NaN\b|\d\.\d{4,}/;
 test.describe.configure({ mode: 'serial' });
@@ -78,7 +78,7 @@ for (const pass of [...PASSES, ...EXTRA]) {
     let errs = [];
     page.on('pageerror', e => errs.push('page error: ' + e.message.split('\n')[0]));
     page.on('console', m => { if (m.type() === 'error' && !/favicon|ERR_|404/.test(m.text())) errs.push('console: ' + m.text().slice(0, 200)); });
-    const scenes = SCENES.filter(s => sceneFits(s, pass.device) && !(pass.layout === 'current' && s.proposedOnly) && (!pass.scenes || pass.scenes.includes(s.id)) && (!process.env.G_SCENE || process.env.G_SCENE === s.id));
+    const scenes = SCENES.filter(s => sceneFits(s, pass.device) && !(pass.layout === 'current' && s.proposedOnly) && (!pass.scenes || pass.scenes.includes(s.id)) && (!process.env.G_SCENE || process.env.G_SCENE.split(',').includes(s.id)));
     const failures = [], counts = { scenes: 0, controls: 0, small: 0, unsafe: 0, worst: [] };
     for (const s of scenes) {
       errs = [];

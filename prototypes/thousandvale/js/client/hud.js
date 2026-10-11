@@ -26,7 +26,7 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
     const b = document.createElement('button');
     b.className = 'slot' + (i ? ' empty' : '');
     b.innerHTML = `<span class="key">${i ? i : 'F'}</span>${i === 0 ? ICONS.sword : '<span class="face"></span>'}<span class="cd"></span><span class="lockat"></span>`;
-    b.dataset.tip = i === 0 ? 'Strike — a basic weapon attack on your target (F, or right-click an enemy)' : 'Empty';
+    b.dataset.tip = i === 0 ? 'Attack — pick a nearby enemy, walk into reach and keep attacking. Press again to stop.' : 'Empty';
     b.addEventListener('click', () => onSlot?.(i));
     el.bar.appendChild(b);
     slots.push({ b, cd: b.querySelector('.cd'), face: b.querySelector('.face'), lockat: b.querySelector('.lockat'), until: 0, len: 1 });

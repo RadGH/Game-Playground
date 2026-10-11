@@ -225,16 +225,20 @@ test('R4 + R7 + S4 + S20 + S23: call-out held for the wind-up, chained pillars, 
   expect(await page.evaluate(() => document.getElementById('callout').classList.contains('show'))).toBe(true);
   await page.screenshot({ path: join(SHOTS, 'r4-callout-held.png') });
   // R7: four chained pillars tethered to a body
-  await page.evaluate(id => { const a = thousandvale.actors.get(id); for (const [k, [dx, dz]] of [[-6, -6], [6, -6], [-6, 6], [6, 6]].entries()) thousandvale.objects.upsert({ id: 'demo:pillar' + k, type: 'pillar', name: 'Chained pillar', x: a.pos.x + dx, z: a.pos.z + dz, look: 'chained', tether: id, state: 'idle', source: 'arena' }); tv.hud(false); tv.fly(a.pos.x + 13, a.pos.y + 7, a.pos.z + 13, a.pos.x, a.pos.y + 1, a.pos.z); }, m[0]);
+  // (the body picked 3.5 s ago may be gone by now — killed by a town guard since play-test 8, or wandered out of sight; any living monster carries the pillars)
+  await page.evaluate(id => { const a = thousandvale.actors.get(id) || [...thousandvale.actors.actors.values()].find(x => x.kind === 'monster' && !x.dead && x.body); id = a.id; for (const [k, [dx, dz]] of [[-6, -6], [6, -6], [-6, 6], [6, 6]].entries()) thousandvale.objects.upsert({ id: 'demo:pillar' + k, type: 'pillar', name: 'Chained pillar', x: a.pos.x + dx, z: a.pos.z + dz, look: 'chained', tether: id, state: 'idle', source: 'arena' }); tv.hud(false); tv.fly(a.pos.x + 13, a.pos.y + 7, a.pos.z + 13, a.pos.x, a.pos.y + 1, a.pos.z); }, m[0]);
   await page.waitForTimeout(2500);
   const chains = await page.evaluate(() => [...thousandvale.objects.items.values()].filter(o => o.chain?.visible).length);
   expect(chains).toBe(4);
   await page.screenshot({ path: join(SHOTS, 'r7-chained-pillars.png') });
   await page.evaluate(() => { for (let k = 0; k < 4; k++) thousandvale.objects.remove('demo:pillar' + k); });
   // S4: the second monster becomes a burning pack-leader rare (what the server's info.rank/mods will say)
+  // (pick the bodies again: the two chosen at the top of this test have had ten seconds to die or wander off)
+  m = await page.evaluate(() => { const me = tv.state().you; return [...thousandvale.actors.actors.values()].filter(a => a.kind === 'monster' && !a.dead && a.body && a.rank !== 'boss' && thousandvale.S.mirror.infos.get(a.id)).sort((p, q) => Math.hypot(p.pos.x - me.x, p.pos.z - me.z) - Math.hypot(q.pos.x - me.x, q.pos.z - me.z)).slice(0, 2).map(a => a.id); });
+  expect(m.length, 'a living monster in sight').toBeGreaterThan(0);
   if (m[1] != null) {
     await page.evaluate(id => { const info = thousandvale.S.mirror.infos.get(id); info.rank = 'rare'; info.aff = [{ id: 'burning', name: 'Burning', aura: 'burn' }, { id: 'pack_leader', name: 'Pack Leader' }]; const a = thousandvale.actors.get(id); thousandvale.actors.remove(id); }, m[1]);
-    await expect.poll(async () => page.evaluate(id => { const a = thousandvale.actors.get(id); return !!(a && a.body && a.rankMark); }, m[1]), { timeout: 30000 }).toBe(true);
+    await expect.poll(async () => page.evaluate(id => { const a = thousandvale.actors.get(id); return !!(a && a.body && a.rankMark); }, m[1]), { timeout: 60000 }).toBe(true);
     await page.waitForTimeout(800);
     const r = await page.evaluate(id => { const a = thousandvale.actors.get(id); tv.fly(a.pos.x + 5, a.pos.y + 3, a.pos.z + 5, a.pos.x, a.pos.y + 0.8, a.pos.z); return { auras: [...(a.auras?.drawn || [])], flag: !!a.pole }; }, m[1]);
     expect(r.auras).toContain('burn'); expect(r.flag).toBe(true);

@@ -105,3 +105,17 @@ html[data-input="pad"] :focus { outline: none; }
 .step-title b { font-family: var(--serif, Georgia, serif); font-size: 17px; color: var(--gold-hi, #f1d595); letter-spacing: 0.04em; }
 .step-title span { flex: 1 1 100%; color: var(--ink-dim, #c7b99b); font-size: 13px; }
 .step-title .linkish { flex: 1 1 100%; text-align: left; padding: 0; }
+
+/* ---- play-test 10 (G2) ---- */
+/* Y35: auto-attack is ON — the Attack slot wears a lit, slowly breathing ring (every layout; the phone adds its own words) */
+.actionbar > .slot.auto, #actionbar > .slot.auto { border-color: #ffd36b; box-shadow: 0 0 0 2px rgba(255, 211, 107, 0.85), 0 0 14px rgba(255, 190, 70, 0.7); animation: tv-auto 1.6s ease-in-out infinite; }
+@keyframes tv-auto { 50% { box-shadow: 0 0 0 3px rgba(255, 211, 107, 0.55), 0 0 22px rgba(255, 190, 70, 0.9); } }
+@media (prefers-reduced-motion: reduce) { .actionbar > .slot.auto, #actionbar > .slot.auto { animation: none; } }
+/* Y36: a small arrow on the screen's edge for each party member who is off the screen (input/party-arrows.js) */
+.tv-partyarrows { position: fixed; inset: 0; pointer-events: none; z-index: 7; }
+.tv-partyarrow { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.tv-partyarrow i { position: absolute; left: -17px; top: -17px; width: 34px; height: 34px; background: #6fd08a; clip-path: polygon(100% 50%, 62% 26%, 62% 74%); filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.9)); }
+.tv-partyarrow b { position: absolute; left: -10px; top: -10px; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: rgba(10, 20, 14, 0.9); border: 1.5px solid #6fd08a; color: #d9ffe2; font: 700 11px var(--sans, sans-serif); }
+.tv-partyarrow span { position: absolute; left: 0; top: 13px; transform: translateX(-50%); white-space: nowrap; padding: 0 5px; border-radius: 7px; background: rgba(10, 14, 12, 0.72); color: #d9ffe2; font: 600 10.5px var(--sans, sans-serif); }
+.tv-partyarrow span:empty { display: none; }
+html[data-sheet]:not([data-sheet=""]) .tv-partyarrows { display: none; }

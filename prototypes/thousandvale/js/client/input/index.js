@@ -21,6 +21,8 @@ import { createOsk } from './osk.js';
 import { createGamepad } from './gamepad.js';
 import { applyLayout, onLayout } from './layout.js';
 import { installBindingsUi } from './bindings-ui.js';
+import { createActivity } from './activity.js';
+import { createPartyArrows } from './party-arrows.js';
 
 let installed = null;
 export function installInput(api = {}) {
@@ -65,8 +67,20 @@ export function installInput(api = {}) {
   // ---- the phone layout (off in the game until the owner approves it: input/layout.js)
   let touch = null;
   const layout = applyLayout();
-  const out = { device, bindings: B, radial, osk, focus, pad, hints, run, layout, touch: null, hintFor,
-    tick(dt) { pad.tick(dt); touch?.tick?.(dt); },
+  // Y1 (G2): an activity starting (a mini-game, a cast, a talk, a shop) lets go of whatever was moving you, on every device
+  const activity = createActivity({ release: [() => api.controls?.release?.(), () => pad.release?.(), () => touch?.release?.()] });
+  // Y36 (G2): a small arrow on the screen's edge for every party member who is off the screen
+  const partyArrows = createPartyArrows({ api, parent: hudEl });
+  // Y35 (G2): the Attack slot wears a lit ring for as long as auto-attack is on (every layout; css/input.css)
+  let slot0 = null, autoWas = null;
+  function autoLamp() {
+    const on = api.controls?.auto != null;
+    if (on === autoWas) return; autoWas = on;
+    slot0 = slot0 || document.querySelector('#actionbar > .slot');
+    if (slot0) { slot0.classList.toggle('auto', on); slot0.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+  }
+  const out = { device, bindings: B, radial, osk, focus, pad, hints, run, layout, touch: null, hintFor, activity, partyArrows,
+    tick(dt) { activity.tick(); pad.tick(dt); touch?.tick?.(dt); autoLamp(); partyArrows.tick(dt); },
     act: (id, down) => { const a = ACTION_BY_ID[id]; if (!a) return false; if (a.run) { if (down !== false) run(a.run, id); return true; } return actionKey(id, down); },
   };
   const loadTouch = () => { if (touch || loadTouch.busy) return; loadTouch.busy = true; import('./touch.js').then(m => { touch = out.touch = m.createTouch({ api, input: out, run, radial }); html.dataset.touchReady = '1'; device.seen('touch'); }).catch(e => console.error('[input] touch layer not loaded:', e)); };

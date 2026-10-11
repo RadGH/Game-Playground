@@ -148,7 +148,7 @@ export function createUi10(o) {
 
   function wire(n) {
     changelog.wire(n); classRes.wire(n);
-    n.on('partyFrames', list => { T.frames = list || []; });
+    n.on('partyFrames', list => { if (!T.hold) T.frames = list || []; });
     n.on('party', p => {
       // someone who left the party is no longer tracked as a party member
       const ids = new Set((p?.members || []).map(m => String(m.char)));
@@ -170,6 +170,8 @@ export function createUi10(o) {
 
   const api = { changelog, classRes, useRadial, wire, tick, command, emote, EMOTES, people, track, untrack, spot,
     isTracked: char => T.tracked.has(String(char)),
+    /** tests: party frames that the server's own 2 Hz rows do not overwrite (null = let them through again). */
+    holdFrames(list) { T.hold = !!list; if (list) T.frames = list; changed(); },
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     /** D-world: who the in-world arrow should point at (the first tracked person with a known spot). */
     tracking() { for (const t of T.tracked.values()) { const s = spot(t.char); if (s && Number.isFinite(s.x)) return { char: t.char, name: t.name, x: s.x, z: s.z, where: s.where }; } return null; },

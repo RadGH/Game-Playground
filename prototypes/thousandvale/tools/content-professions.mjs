@@ -47,7 +47,7 @@ const TREE = ['Ash', 'Oak', 'Yew', 'Ironbark', 'Heartwood'];
  * What a merchant pays for ONE raw piece, by tier 1-5 — the knob tools/sim-professions.mjs is tuned with (the rule: an
  * hour of gathering = 70-100% of an hour of questing at the level that tier is worked at; tests/P/economy.test.js).
  */
-export const RAW_PRICE = { ore: [2, 6, 24, 38, 64], gem: [5, 14, 36, 70, 120], log: [2, 9, 30, 50, 80], herb: [2, 7, 32, 48, 78], mushroom: [2, 7, 32, 48, 78], fibre: [2, 7, 32, 48, 78],
+export const RAW_PRICE = { ore: [2, 6, 26, 38, 64], gem: [5, 14, 36, 70, 120], log: [2, 9, 30, 50, 80], herb: [2, 7, 32, 48, 78], mushroom: [2, 7, 32, 48, 78], fibre: [2, 7, 32, 48, 78],
   hide: [1, 4, 8, 14, 24], resin: [3], meat: [1], fang: [1] };
 const REFINE_MARKUP = 1.15;      // a refined good sells for its inputs x this (the mini-game's labour)
 

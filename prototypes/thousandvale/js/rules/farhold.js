@@ -28,7 +28,7 @@ export {
 export {
   world as mechWorld, setMechEnv, mechEnv, resetWorld, untargetable, crossesWall, blocksRanged,
   placeObject, tickPlaced, addCorpse, takeCorpses, addWall, tickWalls, controlFor, isRooted,
-  isAsleep, isSilenced, CAPS as MECH_CAPS, ringsFor, gainResource, resourceOf,
+  isAsleep, isSilenced, CAPS as MECH_CAPS, ringsFor, gainResource, resourceOf, resourceMax,
   statusRef, queue as queueMech, formOf, repeatsOf, statusStatsKey,
 } from '../../../farhold/js/skillmech.js';
 

@@ -89,7 +89,7 @@
     "remote": true
    },
    {
-    "id": "job:prof_prospectors_round:npc:prospector_torborhold:29858248",
+    "id": "job:prof_prospectors_round:npc:prospector_torborhold:29858687",
     "name": "Mine 8 pieces of ore",
     "level": 3,
     "zone": "z12_02",
@@ -215,7 +215,7 @@
     "value": 2,
     "count": 3,
     "stackMax": 50,
-    "uid": "p0-37bcef53-4"
+    "uid": "p0-c483d72a-4"
    }
   ],
   "got": [
@@ -265,7 +265,7 @@
   },
   "offers": [
    {
-    "id": "job:prof_tin_too:npc:torbor_downs:0:torborhold_plot_11:29858248",
+    "id": "job:prof_tin_too:npc:torbor_downs:0:torborhold_plot_11:29858687",
     "name": "Mine 4 Tin Ore",
     "level": 3,
     "zone": "z12_02",
@@ -302,7 +302,7 @@
     "remote": true
    },
    {
-    "id": "job:prof_copper_for_the_forge:npc:torbor_downs:0:torborhold_plot_11:29858248",
+    "id": "job:prof_copper_for_the_forge:npc:torbor_downs:0:torborhold_plot_11:29858687",
     "name": "Mine 6 Copper Ore",
     "level": 3,
     "zone": "z12_02",
@@ -339,7 +339,7 @@
     "remote": true
    },
    {
-    "id": "job:prof_bars_on_the_rack:npc:torbor_downs:0:torborhold_plot_11:29858248",
+    "id": "job:prof_bars_on_the_rack:npc:torbor_downs:0:torborhold_plot_11:29858687",
     "name": "Smelt 3 Bronze Bars",
     "level": 3,
     "zone": "z12_02",
@@ -450,7 +450,7 @@
     "value": 5,
     "count": 10,
     "stackMax": 50,
-    "uid": "p0-37bcef53-6"
+    "uid": "p0-c483d72a-6"
    }
   ],
   "got": [
@@ -585,21 +585,25 @@
     "levelReq": 1,
     "hands": 1,
     "rangeClass": "melee",
-    "gripWord": "One-handed",
+    "gripWord": "One-hand",
     "familyName": "Dagger",
     "weaponTags": [
      "Melee",
-     "One-handed",
+     "One-hand",
      "Dagger"
     ],
-    "weaponHeadline": "Melee · One-handed · Dagger",
-    "weaponLine": "A one-handed dagger, swung in melee. It can go in either hand, so the off hand stays free.",
-    "handNote": "It can go in either hand, so the off hand stays free.",
+    "weaponHeadline": "Melee · One-hand · Dagger",
+    "weaponLine": "A one-handed dagger, swung in melee. It can go in either hand, or one in each.",
+    "handNote": "It can go in either hand, or one in each.",
     "elementName": null,
     "elementNote": null,
     "castLine": null,
     "dropLevel": 1,
-    "uid": "p0-37bcef53-7",
+    "hand": "one",
+    "handText": "One-hand",
+    "aps": 4.41,
+    "apsText": "4.41 attacks per second",
+    "uid": "p0-c483d72a-7",
     "crafted": true,
     "maker": "Maren",
     "ruid": "torbor_downs/town:0:m2"
@@ -2593,7 +2597,7 @@
   "t": "craftQuote",
   "ok": true,
   "id": "temper_quality",
-  "uid": "p0-37bcef53-7",
+  "uid": "p0-c483d72a-7",
   "can": true,
   "needs": [
    {
@@ -2613,7 +2617,7 @@
   "ok": true,
   "state": "play",
   "id": "temper_quality",
-  "uid": "p0-37bcef53-7",
+  "uid": "p0-c483d72a-7",
   "game": {
    "type": "gauge",
    "seed": 328820253,
@@ -2719,21 +2723,25 @@
    "levelReq": 1,
    "hands": 1,
    "rangeClass": "melee",
-   "gripWord": "One-handed",
+   "gripWord": "One-hand",
    "familyName": "Dagger",
    "weaponTags": [
     "Melee",
-    "One-handed",
+    "One-hand",
     "Dagger"
    ],
-   "weaponHeadline": "Melee · One-handed · Dagger",
-   "weaponLine": "A one-handed dagger, swung in melee. It can go in either hand, so the off hand stays free.",
-   "handNote": "It can go in either hand, so the off hand stays free.",
+   "weaponHeadline": "Melee · One-hand · Dagger",
+   "weaponLine": "A one-handed dagger, swung in melee. It can go in either hand, or one in each.",
+   "handNote": "It can go in either hand, or one in each.",
    "elementName": null,
    "elementNote": null,
    "castLine": null,
    "dropLevel": 1,
-   "uid": "p0-37bcef53-7",
+   "hand": "one",
+   "handText": "One-hand",
+   "aps": 4.41,
+   "apsText": "4.41 attacks per second",
+   "uid": "p0-c483d72a-7",
    "crafted": true,
    "maker": "Maren",
    "ruid": "torbor_downs/town:0:m2",
@@ -2751,7 +2759,7 @@
   "t": "craftQuote",
   "ok": true,
   "id": "temper_quality",
-  "uid": "p0-37bcef53-7",
+  "uid": "p0-c483d72a-7",
   "can": false,
   "why": "Raising it to high quality needs Tempering 25.",
   "code": "skill",
@@ -2829,21 +2837,25 @@
     "levelReq": 1,
     "hands": 1,
     "rangeClass": "melee",
-    "gripWord": "One-handed",
+    "gripWord": "One-hand",
     "familyName": "Sword",
     "weaponTags": [
      "Melee",
-     "One-handed",
+     "One-hand",
      "Sword"
     ],
-    "weaponHeadline": "Melee · One-handed · Sword",
-    "weaponLine": "A one-handed sword, swung in melee. It can go in either hand, so the off hand stays free.",
-    "handNote": "It can go in either hand, so the off hand stays free.",
+    "weaponHeadline": "Melee · One-hand · Sword",
+    "weaponLine": "A one-handed sword, swung in melee. It can go in either hand, or one in each.",
+    "handNote": "It can go in either hand, or one in each.",
     "elementName": null,
     "elementNote": null,
     "castLine": null,
     "dropLevel": 1,
-    "uid": "p0-37bcef53-8",
+    "hand": "one",
+    "handText": "One-hand",
+    "aps": 1.59,
+    "apsText": "1.59 attacks per second",
+    "uid": "p0-c483d72a-8",
     "crafted": true,
     "maker": "Maren",
     "ruid": "torbor_downs/town:0:m3"
@@ -2871,7 +2883,7 @@
   "t": "craftQuote",
   "ok": true,
   "id": "temper_quality",
-  "uid": "p0-37bcef53-8",
+  "uid": "p0-c483d72a-8",
   "can": true,
   "needs": [
    {
@@ -2886,7 +2898,7 @@
   "to": "medium",
   "text": "Quality low to medium: its damage and rolled properties grow by 43%."
  },
- "blade2Uid": "p0-37bcef53-8",
+ "blade2Uid": "p0-c483d72a-8",
  "craftListAway": {
   "t": "craftList",
   "ok": true,
@@ -6995,7 +7007,7 @@
   "t": "craftQuote",
   "ok": true,
   "id": "temper_promote",
-  "uid": "p0-37bcef53-9",
+  "uid": "p0-c483d72a-9",
   "can": false,
   "why": "You need 6 Iron Bar (you have 0).",
   "code": "needs",
@@ -7029,7 +7041,7 @@
   "t": "craftQuote",
   "ok": true,
   "id": "temper_promote",
-  "uid": "p0-37bcef53-9",
+  "uid": "p0-c483d72a-9",
   "can": true,
   "needs": [
    {
@@ -7061,7 +7073,7 @@
   "t": "craftQuote",
   "ok": true,
   "id": "temper_promote",
-  "uid": "p0-37bcef53-a",
+  "uid": "p0-c483d72a-a",
   "can": false,
   "why": "A backpack cannot hold a legendary power.",
   "code": "item",
@@ -9046,7 +9058,7 @@
     "ease": 0,
     "extra": 0
    },
-   "uid": "p0-37bcef53-3"
+   "uid": "p0-c483d72a-3"
   },
   {
    "kind": "material",
@@ -9062,7 +9074,7 @@
    "value": 2,
    "count": 11,
    "stackMax": 50,
-   "uid": "p0-37bcef53-4"
+   "uid": "p0-c483d72a-4"
   },
   {
    "kind": "material",
@@ -9078,7 +9090,7 @@
    "value": 2,
    "count": 5,
    "stackMax": 50,
-   "uid": "p0-37bcef53-5"
+   "uid": "p0-c483d72a-5"
   },
   {
    "kind": "material",
@@ -9094,7 +9106,7 @@
    "value": 5,
    "count": 2,
    "stackMax": 50,
-   "uid": "p0-37bcef53-6"
+   "uid": "p0-c483d72a-6"
   },
   {
    "id": "i_apk1sy",
@@ -9163,21 +9175,25 @@
    "levelReq": 1,
    "hands": 1,
    "rangeClass": "melee",
-   "gripWord": "One-handed",
+   "gripWord": "One-hand",
    "familyName": "Dagger",
    "weaponTags": [
     "Melee",
-    "One-handed",
+    "One-hand",
     "Dagger"
    ],
-   "weaponHeadline": "Melee · One-handed · Dagger",
-   "weaponLine": "A one-handed dagger, swung in melee. It can go in either hand, so the off hand stays free.",
-   "handNote": "It can go in either hand, so the off hand stays free.",
+   "weaponHeadline": "Melee · One-hand · Dagger",
+   "weaponLine": "A one-handed dagger, swung in melee. It can go in either hand, or one in each.",
+   "handNote": "It can go in either hand, or one in each.",
    "elementName": null,
    "elementNote": null,
    "castLine": null,
    "dropLevel": 1,
-   "uid": "p0-37bcef53-7",
+   "hand": "one",
+   "handText": "One-hand",
+   "aps": 4.41,
+   "apsText": "4.41 attacks per second",
+   "uid": "p0-c483d72a-7",
    "crafted": true,
    "maker": "Maren",
    "ruid": "torbor_downs/town:0:m2",
@@ -9238,21 +9254,25 @@
    "levelReq": 1,
    "hands": 1,
    "rangeClass": "melee",
-   "gripWord": "One-handed",
+   "gripWord": "One-hand",
    "familyName": "Sword",
    "weaponTags": [
     "Melee",
-    "One-handed",
+    "One-hand",
     "Sword"
    ],
-   "weaponHeadline": "Melee · One-handed · Sword",
-   "weaponLine": "A one-handed sword, swung in melee. It can go in either hand, so the off hand stays free.",
-   "handNote": "It can go in either hand, so the off hand stays free.",
+   "weaponHeadline": "Melee · One-hand · Sword",
+   "weaponLine": "A one-handed sword, swung in melee. It can go in either hand, or one in each.",
+   "handNote": "It can go in either hand, or one in each.",
    "elementName": null,
    "elementNote": null,
    "castLine": null,
    "dropLevel": 1,
-   "uid": "p0-37bcef53-8",
+   "hand": "one",
+   "handText": "One-hand",
+   "aps": 1.59,
+   "apsText": "1.59 attacks per second",
+   "uid": "p0-c483d72a-8",
    "crafted": true,
    "maker": "Maren",
    "ruid": "torbor_downs/town:0:m3"
@@ -9322,21 +9342,25 @@
    "levelReq": 1,
    "hands": 1,
    "rangeClass": "melee",
-   "gripWord": "One-handed",
+   "gripWord": "One-hand",
    "familyName": "Longsword",
    "weaponTags": [
     "Melee",
-    "One-handed",
+    "One-hand",
     "Longsword"
    ],
-   "weaponHeadline": "Melee · One-handed · Longsword",
-   "weaponLine": "A one-handed longsword, swung in melee. It can go in either hand, so the off hand stays free.",
-   "handNote": "It can go in either hand, so the off hand stays free.",
+   "weaponHeadline": "Melee · One-hand · Longsword",
+   "weaponLine": "A one-handed longsword, swung in melee. It can go in either hand, or one in each.",
+   "handNote": "It can go in either hand, or one in each.",
    "elementName": null,
    "elementNote": null,
    "castLine": null,
    "dropLevel": 8,
-   "uid": "p0-37bcef53-9",
+   "hand": "one",
+   "handText": "One-hand",
+   "aps": 1.32,
+   "apsText": "1.32 attacks per second",
+   "uid": "p0-c483d72a-9",
    "ruid": "torbor_downs/town:0:m4"
   },
   {
@@ -9382,7 +9406,7 @@
     "g5": "g5_pack_explorer"
    },
    "dropLevel": 8,
-   "uid": "p0-37bcef53-a",
+   "uid": "p0-c483d72a-a",
    "ruid": "torbor_downs/town:0:m5"
   },
   {
@@ -9399,7 +9423,7 @@
    "value": 1,
    "count": 1,
    "stackMax": 50,
-   "uid": "p0-37bcef53-b"
+   "uid": "p0-c483d72a-b"
   },
   {
    "kind": "material",
@@ -9415,7 +9439,7 @@
    "value": 14,
    "count": 12,
    "stackMax": 50,
-   "uid": "p0-37bcef53-c"
+   "uid": "p0-c483d72a-c"
   },
   {
    "kind": "material",
@@ -9431,17 +9455,17 @@
    "value": 14,
    "count": 4,
    "stackMax": 50,
-   "uid": "p0-37bcef53-d"
+   "uid": "p0-c483d72a-d"
   }
  ],
- "legendUid": "p0-37bcef53-9",
- "packUid": "p0-37bcef53-a",
+ "legendUid": "p0-c483d72a-9",
+ "packUid": "p0-c483d72a-a",
  "legendR": {
   "t": "craftR",
   "ok": true,
   "state": "play",
   "id": "temper_promote",
-  "uid": "p0-37bcef53-9",
+  "uid": "p0-c483d72a-9",
   "game": {
    "type": "gauge",
    "seed": 1194294545,
@@ -9592,21 +9616,25 @@
    "levelReq": 1,
    "hands": 1,
    "rangeClass": "melee",
-   "gripWord": "One-handed",
+   "gripWord": "One-hand",
    "familyName": "Longsword",
    "weaponTags": [
     "Melee",
-    "One-handed",
+    "One-hand",
     "Longsword"
    ],
-   "weaponHeadline": "Melee · One-handed · Longsword",
-   "weaponLine": "A one-handed longsword, swung in melee. It can go in either hand, so the off hand stays free.",
-   "handNote": "It can go in either hand, so the off hand stays free.",
+   "weaponHeadline": "Melee · One-hand · Longsword",
+   "weaponLine": "A one-handed longsword, swung in melee. It can go in either hand, or one in each.",
+   "handNote": "It can go in either hand, or one in each.",
    "elementName": null,
    "elementNote": null,
    "castLine": null,
    "dropLevel": 8,
-   "uid": "p0-37bcef53-9",
+   "hand": "one",
+   "handText": "One-hand",
+   "aps": 1.32,
+   "apsText": "1.32 attacks per second",
+   "uid": "p0-c483d72a-9",
    "ruid": "torbor_downs/town:0:m4",
    "legendaryEffectId": "shatter",
    "promoted": true,
@@ -9631,7 +9659,7 @@
  },
  "professionsTemper": {
   "nodes": {
-   "node:z12_02_1": 119594
+   "node:z12_02_1": 119549
   },
   "list": [
    {
@@ -9762,7 +9790,7 @@
  },
  "professions": {
   "nodes": {
-   "node:z12_02_1": 119594
+   "node:z12_02_1": 119549
   },
   "list": [
    {
@@ -9893,7 +9921,7 @@
  },
  "professionsSeasoned": {
   "nodes": {
-   "node:z12_02_1": 119594
+   "node:z12_02_1": 119549
   },
   "list": [
    {
@@ -10040,7 +10068,7 @@
     "ease": 0,
     "extra": 0
    },
-   "uid": "p0-37bcef53-3"
+   "uid": "p0-c483d72a-3"
   },
   {
    "kind": "material",
@@ -10056,7 +10084,7 @@
    "value": 2,
    "count": 11,
    "stackMax": 50,
-   "uid": "p0-37bcef53-4"
+   "uid": "p0-c483d72a-4"
   },
   {
    "kind": "material",
@@ -10072,7 +10100,7 @@
    "value": 2,
    "count": 5,
    "stackMax": 50,
-   "uid": "p0-37bcef53-5"
+   "uid": "p0-c483d72a-5"
   },
   {
    "kind": "material",
@@ -10088,7 +10116,7 @@
    "value": 5,
    "count": 2,
    "stackMax": 50,
-   "uid": "p0-37bcef53-6"
+   "uid": "p0-c483d72a-6"
   },
   {
    "id": "i_apk1sy",
@@ -10157,21 +10185,25 @@
    "levelReq": 1,
    "hands": 1,
    "rangeClass": "melee",
-   "gripWord": "One-handed",
+   "gripWord": "One-hand",
    "familyName": "Dagger",
    "weaponTags": [
     "Melee",
-    "One-handed",
+    "One-hand",
     "Dagger"
    ],
-   "weaponHeadline": "Melee · One-handed · Dagger",
-   "weaponLine": "A one-handed dagger, swung in melee. It can go in either hand, so the off hand stays free.",
-   "handNote": "It can go in either hand, so the off hand stays free.",
+   "weaponHeadline": "Melee · One-hand · Dagger",
+   "weaponLine": "A one-handed dagger, swung in melee. It can go in either hand, or one in each.",
+   "handNote": "It can go in either hand, or one in each.",
    "elementName": null,
    "elementNote": null,
    "castLine": null,
    "dropLevel": 1,
-   "uid": "p0-37bcef53-7",
+   "hand": "one",
+   "handText": "One-hand",
+   "aps": 4.41,
+   "apsText": "4.41 attacks per second",
+   "uid": "p0-c483d72a-7",
    "crafted": true,
    "maker": "Maren",
    "ruid": "torbor_downs/town:0:m2",
@@ -10232,21 +10264,25 @@
    "levelReq": 1,
    "hands": 1,
    "rangeClass": "melee",
-   "gripWord": "One-handed",
+   "gripWord": "One-hand",
    "familyName": "Sword",
    "weaponTags": [
     "Melee",
-    "One-handed",
+    "One-hand",
     "Sword"
    ],
-   "weaponHeadline": "Melee · One-handed · Sword",
-   "weaponLine": "A one-handed sword, swung in melee. It can go in either hand, so the off hand stays free.",
-   "handNote": "It can go in either hand, so the off hand stays free.",
+   "weaponHeadline": "Melee · One-hand · Sword",
+   "weaponLine": "A one-handed sword, swung in melee. It can go in either hand, or one in each.",
+   "handNote": "It can go in either hand, or one in each.",
    "elementName": null,
    "elementNote": null,
    "castLine": null,
    "dropLevel": 1,
-   "uid": "p0-37bcef53-8",
+   "hand": "one",
+   "handText": "One-hand",
+   "aps": 1.59,
+   "apsText": "1.59 attacks per second",
+   "uid": "p0-c483d72a-8",
    "crafted": true,
    "maker": "Maren",
    "ruid": "torbor_downs/town:0:m3"
@@ -10324,21 +10360,25 @@
    "levelReq": 1,
    "hands": 1,
    "rangeClass": "melee",
-   "gripWord": "One-handed",
+   "gripWord": "One-hand",
    "familyName": "Longsword",
    "weaponTags": [
     "Melee",
-    "One-handed",
+    "One-hand",
     "Longsword"
    ],
-   "weaponHeadline": "Melee · One-handed · Longsword",
-   "weaponLine": "A one-handed longsword, swung in melee. It can go in either hand, so the off hand stays free.",
-   "handNote": "It can go in either hand, so the off hand stays free.",
+   "weaponHeadline": "Melee · One-hand · Longsword",
+   "weaponLine": "A one-handed longsword, swung in melee. It can go in either hand, or one in each.",
+   "handNote": "It can go in either hand, or one in each.",
    "elementName": null,
    "elementNote": null,
    "castLine": null,
    "dropLevel": 8,
-   "uid": "p0-37bcef53-9",
+   "hand": "one",
+   "handText": "One-hand",
+   "aps": 1.32,
+   "apsText": "1.32 attacks per second",
+   "uid": "p0-c483d72a-9",
    "ruid": "torbor_downs/town:0:m4",
    "legendaryEffectId": "shatter",
    "promoted": true,
@@ -10387,10 +10427,10 @@
     "g5": "g5_pack_explorer"
    },
    "dropLevel": 8,
-   "uid": "p0-37bcef53-a",
+   "uid": "p0-c483d72a-a",
    "ruid": "torbor_downs/town:0:m5"
   }
  ],
  "gold": 4100,
- "bladeUid": "p0-37bcef53-7"
+ "bladeUid": "p0-c483d72a-7"
 }

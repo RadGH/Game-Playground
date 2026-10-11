@@ -214,11 +214,13 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
     showTrainer() { if (T.prof) { trainer.open(); drawTrainer(); } },
     isSpent: key => (S.opened.get(key) || 0) > Date.now(),
     verb: prof => VERB[prof] || 'Work',
+    /** Y19 (G2): put a game up in its READY state and leave it there (the gallery's still picture). Returns at once. */
+    ready(type, o = {}) { this.demo(type, { ...o, readyMs: 3600000 }); },
     /** Play a mini-game with no server (the gallery, specs): demo('strike', { seed, ease }) -> the result. */
-    async demo(type, { seed = 7, ease = 0, prof = null, title = null, sub = null, tint = null } = {}) {
+    async demo(type, { seed = 7, ease = 0, prof = null, title = null, sub = null, tint = null, readyMs = undefined } = {}) {
       await dataP;
       const t = GAME_OF[type] || type, game = makeGame(t, { seed, ease, base: S.numbers?.games?.[t], ...(type === 'cooking' ? { steps: 1 } : {}) });
-      const res = await mini.play({ game, prof: prof || (GAME_OF[type] ? type : null), mins: S.numbers?.quality?.min, title, sub, tint });
+      const res = await mini.play({ game, prof: prof || (GAME_OF[type] ? type : null), mins: S.numbers?.quality?.min, title, sub, tint, readyMs });   // readyMs — Y19 (G2): a spec may shorten the wait
       if (res) setTimeout(() => mini.showResult({ quality: res.quality, lines: ['A practice round — nothing was made.'], stay: 2600 }), 250);
       return res;
     },

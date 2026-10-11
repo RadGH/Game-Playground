@@ -364,7 +364,7 @@ test('R6 + R3: mana bars (you, target, number on hover) and event countdowns in 
 });
 
 test('play-test 4: S1 event panel tucks into a bubble and never covers the tracker; S2 untracked quests leave the HUD; S3 S12 S20 S21 S23 S19 S4', async () => {
-  test.setTimeout(120000);
+  test.setTimeout(300000);   // (a click costs several software-rendered frames here; the fold block may run twice)
   // S1
   await page.evaluate(() => tv.fake('realm', { kind: 'eventStart', ev: { uid: 'e1', id: 'world_grimtallow', name: 'Grimtallow', kind: 'worldboss', zoneName: 'Blackthorn Scar' } }));
   await page.evaluate(() => tvui.fake('quests', { active: [{ id: 'q1', name: 'Rope for Old Pell', steps: [{ text: 'Find rope', n: 0, of: 1 }], step: 0 }, { id: 'q2', name: 'Wolf Pelts', steps: [{ text: 'Kill wolves', n: 1, of: 5 }], step: 0 }], done: [] }));
@@ -375,11 +375,17 @@ test('play-test 4: S1 event panel tucks into a bubble and never covers the track
   const r = await page.evaluate(() => ['.tv-evtrack', '.tv-tracker'].map(s => document.querySelector(s).getBoundingClientRect()).map(b => ({ top: b.top, bottom: b.bottom })));
   expect(r[0].bottom).toBeLessThanOrEqual(r[1].top + 1);
   await shot('s1-event-tracker');
-  // (the FOLD button by what it does: since play-test 8 a card also carries a Hide button with the same .et-x class, and it comes first)
-  await page.click('.tv-evtrack .et-card [data-act="fold"]');
-  await expect(page.locator('.tv-evtrack .et-card')).toHaveClass(/folded/);
-  await page.click('.tv-evtrack .et-card [data-act="fold"]');
-  await expect(page.locator('.tv-evtrack .et-card')).not.toHaveClass(/folded/);
+  // (the FOLD button by what it does: since play-test 8 a card also carries a Hide button with the same .et-x class.
+  //  And since play-test 10 the server says every 15 s what is really running (`eventSync`) and the tracker drops any
+  //  running card that is not on that list — which a card faked by this test never is. So the fold is tried as one
+  //  short block that puts the card back first, and tried again if a sync landed in the middle of it.)
+  await expect(async () => {
+    await page.evaluate(() => { if (!document.querySelector('.tv-evtrack .et-card')) tv.fake('realm', { kind: 'eventStart', ev: { uid: 'e1', id: 'world_grimtallow', name: 'Grimtallow', kind: 'worldboss', zoneName: 'Blackthorn Scar' } }); });
+    await page.click('.tv-evtrack .et-card:not(.folded) [data-act="fold"]', { timeout: 12000 });
+    await expect(page.locator('.tv-evtrack .et-card')).toHaveClass(/folded/, { timeout: 6000 });
+    await page.click('.tv-evtrack .et-card.folded [data-act="fold"]', { timeout: 12000 });
+    await expect(page.locator('.tv-evtrack .et-card')).not.toHaveClass(/folded/, { timeout: 6000 });
+  }).toPass({ timeout: 150000 });
   await page.evaluate(() => thousandvale.ui5.tracker.clear());
   // S2
   const before = await page.locator('.tv-tracker .tr-main, .tv-tracker .tr-row').count();

@@ -149,7 +149,7 @@
    "prof": "mining",
    "icon": "ore",
    "tint": "#d5dbe3",
-   "price": 24
+   "price": 26
   },
   "amethyst": {
    "id": "amethyst",
@@ -476,7 +476,7 @@
    "prof": "smithing",
    "icon": "bar",
    "tint": "#dfe6ee",
-   "price": 62,
+   "price": 67,
    "made": true
   },
   "rugged_leather": {
@@ -1044,7 +1044,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 259,
+   "price": 277,
    "desc": "A better pick: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1077,7 +1077,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 259,
+   "price": 277,
    "desc": "A better hatchet: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1110,7 +1110,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 259,
+   "price": 277,
    "desc": "A better skinning knife: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1143,7 +1143,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 259,
+   "price": 277,
    "desc": "A better sickle: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   }
  ],

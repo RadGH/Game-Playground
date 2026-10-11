@@ -1175,3 +1175,28 @@ New: `js/client/ui/pt9-core.js` (pure), `js/client/ui/online-window.js`, `css/pt
 ## 2026-10-08 — stream A, owner feedback 10 (protocol 8, no schema change)
 - `teleM` + `emote` event types; `starcaller` accepted (server/load.mjs reads data/rules/classes-tv.json). Y37 `partyState.me` + a resend after rejoin. Y11 `eventSync`, `travelR.gone`. Y23 per-death respawn clocks, wilds 90-150 s, no respawn in view inside a minute. Y24 waystones claim at 30 m. Y8 empty corpses are not targets. Y5 `emote`. Y17 dummies (`dummy` rows; stand-ins in the first town). Y21 `data.fighter`, `npcHelped` thanks (`npcThanks` knobs). Y15 angling is learned (anglers teach). Y16 hands-moved items to the bag / post, `refreshItem` over the bag. Y30 `/changelog.json`, `charList.changelog`, `settings.changelogSeen`. Y36 `track` / `whereabouts`, `settings.shareLocation`.
 - tests/A/pt10.test.js (6); tests/A 297 = 292 pass / 4 skip / 1 red in the parallel run (stage2, passes alone).
+
+## 2026-10-08 — stream G2 (phone touch layer, controller, gallery), owner feedback 10
+- **Y35 / Y7** (#45): the Attack button is a switch. One tap picks the nearest enemy when you have none, ends whatever was moving you, turns you, walks you
+  into the attack's real reach and keeps attacking; a second tap stops (taps under 0.6 s apart count as "attack"). Auto-attack is its own state now
+  (`controls.auto`), separate from the walk toward the enemy (`controls.chasing`), so moving by hand — keys or stick — no longer switches it off. The slot wears a
+  lit ring while it is on (every layout). `controls.js` / `main.js` edits are marked "Y7/Y35 (G2)".
+- **Y34** (S#52, S#53): the "drink button" was the Belt (a bottle) whose first slot held the fishing rod. The Belt never uses a tool and wears the picture of what a
+  tap will use; **Fish** and **Mount** are buttons of their own with their names on them (Fish lit only with water in casting range — the server's own sweep in
+  `input/water-reach.js` — dim with "No water in reach" otherwise; Mount reads Mount / Calling… / Dismount with a progress bar). A first-time fishing hint.
+  Every on-screen control has a row in `TOUCH_CONTROLS` (`input/bindings.js`): a long press shows its name, Pause > "What do these buttons do?" numbers and lists
+  them all, Settings > Key bindings > Touch prints the table.
+- **Y1** (#46): `controls.release()` + `input/activity.js` — a mini-game, a cast, a talk or a shop STARTING lets go of held move keys (ignored until pressed again),
+  auto-run, the pad's stick (until it re-centres) and the phone's stick.
+- **Y19** (#21): every profession mini-game opens READY and waits for the first key / click / touch (not counted as a move); it starts itself after 6 s.
+  `data/rules/professions.json` `lateMs` 4000 -> 10000 so the server's clock allows the wait. `tvprof.mini.begin()`, `tvprof.ready(type)`.
+- **Y36**: `input/party-arrows.js` — a small edge arrow (initial + distance) for every party member who is off the screen; on the phone, hold a party portrait
+  for "Track".
+- Tools / tests: `tests/G/pt10.test.js` (8, node), `tests/G/phone-play.spec.js` (+5 steps: one-tap attack, the toggle + Y1, Fish / Mount / Belt, labels + the
+  overlay, party arrows + Track), `tests/G/phone-goover.mjs` (the real game on an iPhone-sized browser, Chromium or WebKit: every newer window measured and
+  photographed), `tests/P/client-minigames.spec.js` (+1: the ready state). Five new gallery scenes (94 in all).
+
+## 2026-10-10 — round 10 completion
+- Finished phone/desktop control integration: tools excluded from potion slots, stale rod assignments repaired, Attack releases movement and stays available outside reach, phone map toolbar wraps, canvas follows element/visual viewport size.
+- Connected saved title equipment and live class resources to both storage implementations and the game protocol.
+- Rebuilt profession content with silver ore at 26 gold; gathering-income gate passes without changing its thresholds. Fixed browser test parsing and synthetic friend tracking.

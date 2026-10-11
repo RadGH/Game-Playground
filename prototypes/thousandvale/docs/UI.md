@@ -32,6 +32,9 @@ code (it lives inside `main.js`; `gallery/title-lite.js` is a 60-line copy of th
   called by `stage.js`; every moment a scene plays exists in the fixtures; the frame page contains none of the game's
   markup; nothing private is in the fixtures.
 - `bindings.test.js` (node) — the binding table (section 4).
+- `pt10.test.js` (node) — play-test 10: the on-screen control table against the code that builds the controls, water in reach against the
+  server's numbers, activities, the party arrows, and `controls.js` itself on a fake window (auto-attack survives movement; `release()`).
+- `phone-play.spec.js` (Playwright, a REAL server, an iPhone-sized touch browser) — the game played end to end by taps.
 - `gallery.spec.js` (Playwright) — opens every scene in every frame and fails on a console error, a scene that did not
   reach its state, text reading `undefined` / `[object Object]` / `NaN` / a long float, and — in the proposed phone
   layout — any control smaller than 44 × 44 px or outside the safe area. For today's layout on a phone it **reports**
@@ -92,9 +95,9 @@ windows, the Professions page and block, a material's card). They live in `js/cl
 messages they play are RECORDED from the real server by `node tests/P/client-fixtures.mjs` into `fixtures/professions.json` (re-run after a protocol or content
 change). `tests/P/client-shots.mjs` takes a picture of each in every frame; `tests/P/client-minigames.spec.js` plays each mini-game in the stage.
 
-**89 scenes in all (counted 2026-10-08 after play-test 10 from `SCENES`, professions included):** 81 in each desktop frame
-(Desktop, Laptop), 85 in each phone frame, 86 in the controller frame (a few scenes exist only where they mean something —
-the quick wheel, the focus ring, the belt). Do not trust this line over the code: `SCENES.filter(s => sceneFits(s, id)).length`.
+**94 scenes in all (counted 2026-10-08 after play-test 10, G2 included, from `SCENES`, professions included):** 82 in each desktop frame
+(Desktop, Laptop), 90 in each phone frame, 87 in the controller frame (a few scenes exist only where they mean something —
+the quick wheel, the focus ring, the belt, "What do these buttons do?"). Do not trust this line over the code: `SCENES.filter(s => sceneFits(s, id)).length`.
 
 **What the spec measured (2026-10-07):** in the proposed phone layout, 0 of ~800 on-screen controls are smaller than
 44 px or outside the safe area, either way up. With today's layout on the same screen: on its side 765 of 1,014
@@ -133,6 +136,25 @@ sheet. Every control is at least 44 × 44 px and nothing sits under the island o
 The reasoning for each screen is in that scene's notes in the gallery.
 
 **Variant B** (switch above the frame, on its side only): a flat 2 × 4 grid of skills and a stick that stays put.
+
+### Play-test 10 (the owner on a real iPhone) — what changed and the rules that came out of it
+| | |
+|---|---|
+| **Attack is a switch** (Y35) | One tap: the nearest enemy is picked if you have none, whatever was moving you ends (the stick's push too), you turn, walk into the attack's real reach (`js/client/reach.js`) and keep attacking — moving by hand does not switch it off (the desktop's F had the same fault: `controls.auto` is the attack, `controls.chasing` only the walk). A second tap stops it; taps closer than 0.6 s together are "attack!", not on-off-on. The slot wears class `auto` (a lit ring on every layout; the phone writes "Attacking" on it). |
+| **Mount and Fish are buttons** (Y34) | `.ph-mount` / `.ph-fish`: a different SHAPE from the round fight buttons, each with its name written on it (the name is what the next tap does: Mount / Calling… / Dismount; Fish / Reel in). On its side they sit just right of the stick; upright, on the right edge above the arcs. Fish exists only with a rod, is lit only when a cast would land (`input/water-reach.js` = the server's own sweep) and dim otherwise — a tap then says "No water in reach". |
+| **A picture must be of the thing** | The owner took the Belt's bottle for a "drink" button — and what it did was cast his fishing rod, because the rod had auto-filled the first potion key. The Belt now wears the picture of what a tap will really use and never uses a tool. Rule: **a control that can hold different things shows the thing, not a symbol for the slot.** |
+| **Every control can say its name** | `TOUCH_CONTROLS` in `input/bindings.js` (one row per on-screen control: selector, action, name, one sentence). A long press shows it (`.ph-label`; letting go does not press); Pause menu > "What do these buttons do?" numbers every control on screen and lists them (`.ph-explain`); Settings > Key bindings > Touch prints the table. `tests/G/pt10.test.js` fails when touch.js makes a `.ph-*` button with no row. |
+| **First-time hints** | Fishing by touch: three steps, once per character (`tv.hint.fish.<name>` in this browser) — the first time water is in reach with a rod, after talking to an angler, or on the first tap of Fish. |
+| **Activities let go of movement** (Y1) | `input/activity.js`: when a mini-game, a cast, a talk or a shop STARTS, held move keys, auto-run, the pad's stick (until it re-centres) and the phone's stick are let go — never when it ends. |
+| **Mini-games wait for you** (Y19) | Every game opens READY: the first key / click / touch starts the clock (and is not a move); six seconds and it starts itself. |
+| **Where is my party** (Y36) | `input/party-arrows.js`: a small green edge arrow (initial + distance) for every party member who is off the screen, on every layout; hold a party portrait on the phone for "Track" (D-UI's big named arrow then takes over for that person). |
+
+**The go-over tool:** `tests/G/phone-goover.mjs [chromium|webkit]` plays the real game on an iPhone-sized touch browser, opens every newer window at four screen sizes
+(full screen and with Safari's bars, both ways up), measures (44 px, off-screen, sideways scroll, draggable title bars, broken text) and writes pictures + `report.json`
+to `tests/G/shots/goover-<engine>/`. **WebKit** (the nearest thing here to Safari) is installed for Playwright but needs four system libraries that want sudo; they are
+unpacked from their `.deb`s under `~/.cache/ms-playwright/webkit-extra-libs` and passed with
+`LD_LIBRARY_PATH=$HOME/.cache/ms-playwright/webkit-extra-libs/usr/lib/x86_64-linux-gnu PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1` (the lead can make that unnecessary:
+`sudo apt-get install libevent-2.1-7t64 libavif16`). `phone-play.spec.js` runs under it too: add `--browser=webkit` and `G_SHOTS=phone-play-webkit`.
 
 ### How a proposal graduates into the game
 (The phone layout has been through all five steps; they are kept as the recipe for the next proposal.)
@@ -234,7 +256,9 @@ secure). The gallery's Controller frame works on any address for looking; a real
 | `js/client/input/bindings.js` | THE table (pure) |
 | `js/client/input/{index,keyboard,emit,device,hints}.js` | install, re-bound keys, default-key events, last device, hint labels |
 | `js/client/input/{gamepad,focus,radial,osk}.js` | controller, focus ring + steered pointer, quick wheel, on-screen keyboard |
-| `js/client/input/{touch,layout}.js`, `css/layout-phone.css` | the phone proposal and its switch |
+| `js/client/input/{touch,layout}.js`, `css/layout-phone.css` | the phone layout and its switch |
+| `js/client/input/{activity,water-reach,party-arrows}.js` | play-test 10: activities let go of movement; "is there water I could cast into"; the party's edge arrows |
+| `tests/G/pt10.test.js`, `tests/G/phone-play.spec.js`, `tests/G/phone-goover.mjs` | play-test 10's pure rules; the phone play-through (real server); the go-over tool |
 | `js/client/input/bindings-ui.js`, `css/input.css` | the settings tab, the reference tables, glyph / ring / wheel styles |
 | `tests/G/{gallery,bindings}.test.js`, `tests/G/{gallery,gamepad}.spec.js`, `tests/G/shots/` | the guarantees |
 

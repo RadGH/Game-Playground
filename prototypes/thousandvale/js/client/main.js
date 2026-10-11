@@ -33,7 +33,7 @@ import { gearKey } from './gear-look.js';
 import { connect, localTokenStore } from '../net/client.js';
 import { createMirror } from '../net/mirror.js';
 import { ANIMS, STATE, KIND_NAMES, TICK_MS, cleanName } from '../net/protocol.js';
-import { tabNext } from '../net/tab.js';
+import { tabNext, tabOrder } from '../net/tab.js';
 import { createTelegraphs } from './telegraphs.js';
 import { createBossUi } from './boss.js';
 import { createObjects } from './objects.js';
@@ -221,7 +221,7 @@ async function useRoom(room, at) {
 }
 
 const hud = createHud({
-  onSlot: i => (i ? castSkill(i) : tryStrike(true)),
+  onSlot: i => (i ? castSkill(i) : attackButton()),   // Y7/Y35 (G2): the Attack button starts (or stops) auto-attack
   onChatSubmit: text => chat.submit(text),
   onChatFocus: on => controls.setTyping(on),
   onRise: () => rise(),
@@ -288,7 +288,12 @@ const ui5 = createUi5({ atlas: ui.atlas, objects, inDungeon: () => !!D.view, loo
   targetId: () => S.target, setTarget: id => setTarget(id), stats: () => ({ fps: FPS.fps }), zoneName: () => document.getElementById('zone-name')?.textContent || null,
   ensureNet: () => kitNet(), onKitPreview: g => { S.titleGear = g; previewLook(S.look, 'title'); }, onKitBack: () => { if (S.phase === 'title') { S.titleGear = null; toAppearance(); } }, onKitCreate: c => { S.kit = c; enterWorld(); } });
 // T27: one binding table (js/client/input/bindings.js) drives the keyboard, the gamepad, the hints and — when switched on — touch
-const input = installInput({ controls, hud, setTarget: id => setTarget(id), targetId: () => S.target, pause: () => ui2.escape(), inWorld: () => S.phase === 'world', dead: () => S.self.dead, settings: ui2.settings, chat: () => chat.focus(), cycleTarget: any => cycleTarget(any) });
+const input = installInput({ controls, hud, setTarget: id => setTarget(id), targetId: () => S.target, pause: () => ui2.escape(), inWorld: () => S.phase === 'world', dead: () => S.self.dead, settings: ui2.settings, chat: () => chat.focus(), cycleTarget: any => cycleTarget(any),
+  // Y34/Y35/Y36 (G2): what the phone's own controls need to know and do (docs/requests.md "Round 10 contracts — G")
+  self: () => (S.selfId != null && S.phase === 'world' ? { x: S.predictor.pos.x, z: S.predictor.pos.z, yaw: S.lastInput?.yaw ?? controls.cam.yaw, mount: S.self.mount || null, calling: S.mountCall ? { at: S.mountCall.at, until: S.mountCall.until } : null, dead: !!S.self.dead, room: S.room?.id ?? null, indoors: !!D.view } : null),
+  mount: () => toggleMount(), attackButton: () => attackButton(), tracker: () => ui10,
+  waterAt: (x, z) => (D.view ? null : WS.terrain.waterAt(x, z)), pools: () => angling.list(),
+  project: (x, y, z) => { const v = camera.position.clone().set(x, y ?? groundY(x, z) + 1.4, z).project(camera); return { x: (v.x + 1) / 2 * innerWidth, y: (1 - v.y) / 2 * innerHeight, behind: v.z > 1 }; } });
 const ui8 = createUi8({ net: () => S.net, hud, actors, worldUi, feedback: ui5.feedback, atlas: ui.atlas, settings: ui2.settings, selfId: () => S.selfId, bar: () => S.bar });
 const ui10 = createUi10({ net: () => S.net, hud, actors, atlas: ui.atlas, me, pos: () => S.predictor.pos, worldMap: ui.worldMap, settings: ui2.settings, camYaw: () => controls.cam.yaw, room: () => S.room });
 friends.tracker = ui10;
@@ -954,7 +959,7 @@ function setTarget(id) {
   hud.setTarget(id != null ? actors.get(id) : null);
 }
 function retargetAfterKill() {
-  const wasChasing = controls.chasing != null;
+  const wasChasing = controls.auto != null;      // Y7/Y35 (G2): the ATTACK carries over to the next enemy on you, whether or not you were walking at it
   controls.stopChase();
   const me = actors.get(S.selfId); if (!me) return;
   const next = [...actors.actors.values()].filter(x => x.hostile && !x.dead && x.tgt === S.selfId)
@@ -1013,6 +1018,33 @@ function basicReach(eq) {
   S.reachKnown = out.known;
   return out.reach;
 }
+/**
+ * Y7/Y35 (G2): the Attack BUTTON (action-bar slot 0 — the phone's big button, a click on desktop). One press starts
+ * attacking and keeps going: it picks the nearest enemy when you have none, ends whatever was moving you, faces the
+ * target and walks into the attack's real reach (reach.js through `S.reach`). A second press switches it off — unless it
+ * comes within 0.6 s of the last one (someone hammering the button means "attack", not "on, off, on, off").
+ */
+function attackButton() {
+  if (S.phase !== 'world' || S.self.dead || !S.net) return false;
+  const now = performance.now(), fast = now - (S.attackTapAt || 0) < 600;
+  S.attackTapAt = now;
+  let t = S.target != null ? actors.get(S.target) : null;
+  if (controls.auto != null && t && t.hostile && !t.dead && !fast) { controls.stopAuto(); hud.toast('You stop attacking.', 'info'); return false; }
+  if (!t || !t.hostile || t.dead) {
+    const p = S.predictor.pos;
+    // whoever is already on you first (nearest), else the nearest enemy all round
+    const onMe = [...actors.actors.values()].filter(x => x.hostile && !x.dead && x.tgt === S.selfId).sort((q, r) => Math.hypot(q.pos.x - p.x, q.pos.z - p.z) - Math.hypot(r.pos.x - p.x, r.pos.z - p.z))[0];
+    // (a training dummy is only "the nearest enemy" when nothing real is about)
+    const order = tabOrder(S.mirror, { id: S.selfId, x: p.x, z: p.z, yaw: controls.cam.yaw }, { range: 40, facing: controls.cam.yaw, arc: Math.PI * 2 });
+    const id = onMe ? onMe.id : order.find(i => !S.mirror.infos.get(i)?.dummy && S.mirror.infos.get(i)?.type !== 'training_dummy') || order[0] || 0;
+    if (!id) { hud.toast('No enemy near enough to attack.', 'warn'); return false; }
+    setTarget(id); t = actors.get(id);
+  }
+  if (S.self.mount) { /* the server gets you down to fight (you {dismount:'cast'}) */ }
+  controls.release(); input.pad.release(); input.touch?.release();
+  controls.attack(S.target);                      // -> onAttack -> tryStrike(true); out of reach, the controls walk you in
+  return true;
+}
 function tryStrike(fromKey, slot = 0) {
   if (S.phase !== 'world' || S.self.dead || !S.net) return false;
   const t = actors.get(S.target);
@@ -1023,7 +1055,7 @@ function tryStrike(fromKey, slot = 0) {
   if (d > S.reach + 0.6) return false;                 // controls walk us into range; the auto-strike fires there
   if (now - S.swing.attempt < 250 || now - S.swing.last < S.swing.ms * 0.92) return false;
   S.swing.attempt = now;
-  controls.setFacing(Math.atan2(t.pos.x - S.predictor.pos.x, t.pos.z - S.predictor.pos.z));
+  if (!S.movingByHand) controls.setFacing(Math.atan2(t.pos.x - S.predictor.pos.x, t.pos.z - S.predictor.pos.z));   // Y7/Y35 (G2): a strike on the run does not wrench you round
   S.net.cast({ slot, target: t.id, aim: { x: t.pos.x, z: t.pos.z } });
   actors.playAttack(S.selfId, t.id);
   hud.cooldown(0, S.swing.ms); hud.press(0);
@@ -1162,7 +1194,11 @@ function frame(now) {
       S.net.input(inp);
       S.lastInput = it;
       S.movingSpeed = Math.hypot(it.mx, it.mz) > 0.01 && !S.self.dead ? (it.b & 1 ? MOVE.sprint : MOVE.run) : 0;
-      if (it.inRange && controls.chasing != null) tryStrike(false);
+      // Y7/Y35 (G2, report #45): auto-attack does not need you to stand still — in reach is enough (tryStrike measures it).
+      // Moving by hand used to clear `chasing`, and with it the attack; the attack is `controls.auto` now.
+      S.movingByHand = !!it.manual;
+      if (controls.auto != null && (!t || !t.hostile)) controls.stopAuto();      // the target was cleared or swapped for a friend: the attack is over
+      if (controls.auto != null && (it.inRange || it.manual || controls.chasing == null)) tryStrike(false);
     }
     if (steps === 5 || !online) S.acc = Math.min(S.acc, TICK_MS);
     const drawn = carts.ridePos(S.predictor.render(S.acc / TICK_MS, dt));      // W5: on a cart you are drawn on its bed
@@ -1189,8 +1225,9 @@ function frame(now) {
     hud.death(S.self.dead ? Math.max(0, 2.5 - (now - S.self.deadAt) / 1000) : null);
     if (S.self.dead && now - S.self.deadAt > 30000) rise();
     const tgt = S.target != null ? actors.get(S.target) : null;
-    if (tgt) { hud.setTarget(tgt); hud.usable(0, !tgt.dead && Math.hypot(tgt.pos.x - drawn.x, tgt.pos.z - drawn.z) <= S.reach + 0.6); }
-    else hud.usable(0, false);
+    if (tgt) hud.setTarget(tgt);
+    // Attack can pick an enemy and walk into reach; it remains available before either has happened.
+    hud.usable(0, !S.self.dead);
   } else if (W.spot) {
     // Title screen (and while joining): a slow orbit around the preview character, framed right of the panel.
     titleOrbit += dt * 0.06;

@@ -36,6 +36,9 @@ const hook = (path, body) => fetch(hookBase + path, { method: 'POST', body: JSON
 async function join_(browser, name) {
   const ctx = await browser.newContext({ viewport: { width: 1180, height: 720 } });
   const page = await ctx.newPage();
+  // (play-test 10, Y30: after a sign-in the game opens "what is new" over the screen when there is news you have not
+  //  seen. That is the game being right and this test being in the way — read it away whenever it turns up.)
+  await page.addLocatorHandler(page.locator('.tv-changelog:not([hidden]) .cl-x'), async x => { await x.click(); });
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.goto(`${base}?autoplay=1&name=${name}&cls=warrior&quality=low`);
@@ -63,6 +66,9 @@ async function say(P, text) {
 test('title screen: guest / log in tabs, privacy link, local fonts', async ({ browser }) => {
   const ctx = await browser.newContext({ viewport: { width: 1180, height: 720 } });
   const page = await ctx.newPage();
+  // (play-test 10, Y30: after a sign-in the game opens "what is new" over the screen when there is news you have not
+  //  seen. That is the game being right and this test being in the way — read it away whenever it turns up.)
+  await page.addLocatorHandler(page.locator('.tv-changelog:not([hidden]) .cl-x'), async x => { await x.click(); });
   const remote = [];
   page.on('request', r => { if (/fonts\.(googleapis|gstatic)\.com|challenges\.cloudflare/.test(r.url())) remote.push(r.url()); });
   await page.goto(`${base}?quality=low`);

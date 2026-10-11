@@ -161,7 +161,11 @@ window.addEventListener('keydown', e => {
 
 // the input layer exactly as main.js installs it (gamepad, re-bound keys, hints; touch only under the phone layout)
 const input = installInput({ controls, hud, setTarget: id => setTarget(id), targetId: () => S.target, pause: () => ui2.escape(), inWorld: () => S.phase === 'world', dead: () => S.self.dead,
-  settings: ui2.settings, panels: PANELS, chat: () => chat.focus(), gallery: GX, cycleTarget: () => cycleTarget() });
+  settings: ui2.settings, panels: PANELS, chat: () => chat.focus(), gallery: GX, cycleTarget: () => cycleTarget(),
+  // play-test 10 (G2): what main.js hands the phone's own controls — here on stand-ins (no 3D: the "camera" looks straight down, 2.2 px a metre)
+  self: () => ({ x: S.pos.x, z: S.pos.z, yaw: S.yaw || 0, mount: S.self.mount || null, calling: null, dead: !!S.self.dead, room: S.room?.id ?? null, indoors: false }),
+  tracker: () => ui10, mount: () => hud.toast('In the game this calls your mount.', 'info'), waterAt: () => null, pools: () => [],
+  project: (x, _y, z) => ({ x: innerWidth / 2 + (x - S.pos.x) * 2.2, y: innerHeight / 2 - (z - S.pos.z) * 2.2, behind: false }) });
 ui10.useRadial(input.radial);      // Y5: the quick wheel's emote ring
 
 // ---- what main.js does between the interface and the server (a slim copy: no prediction, no drawing) ---------------

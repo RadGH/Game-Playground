@@ -2,7 +2,7 @@
 // glyphs, read the touch controls) and the three-way reference the gallery's "Controls" scene and the help window show.
 // Everything is generated from input/bindings.js; nothing here names a key.
 import { h } from '../ui-panel.js';
-import { ACTIONS, GROUPS, GLYPHS, GLYPH_SETS, referenceRows, padParts, PAD_MENU, keyLabel } from './bindings.js';
+import { ACTIONS, GROUPS, GLYPHS, GLYPH_SETS, referenceRows, padParts, PAD_MENU, keyLabel, TOUCH_CONTROLS } from './bindings.js';
 import { B, captureNextKey } from './keyboard.js';
 import { device } from './device.js';
 import { LAYOUTS, layoutChoice, setLayoutChoice } from './layout.js';
@@ -24,12 +24,17 @@ export function referenceTable(dev, { set = device.glyphs } = {}) {
           : dev === 'touch' ? r.keys.map(k => h('span.touch-ctl', {}, k)) : r.keys.flatMap((k, i) => [i ? ' ' : null, h('kbd', { dataset: { hinted: '1', key0: '' } }, k)]))),
       h('dd', {}, r.label, r.note ? h('small', {}, ' — ' + r.note) : null)])))));
 }
+/** Y34 (G2): every control the phone puts on screen, by the name a long press shows (TOUCH_CONTROLS). */
+export function touchControlsTable() {
+  return h('div.ctl-ref.ctl-onscreen', { dataset: { device: 'touch' } }, h('section', {}, h('h4', {}, 'The buttons on screen'),
+    h('dl', {}, ...TOUCH_CONTROLS.flatMap(c => [h('dt', {}, h('span.touch-ctl', {}, c.name)), h('dd', {}, c.what)]))));
+}
 /** All three, side by side (ui-gallery.html#scene=controls). */
 export function controlsReference({ set = device.glyphs } = {}) {
   return h('div.ctl-three', {},
     h('article', {}, h('h3', {}, 'Keyboard and mouse'), referenceTable('keyboard')),
     h('article', {}, h('h3', {}, `Controller — ${GLYPHS[set].name} glyphs`), referenceTable('pad', { set })),
-    h('article', {}, h('h3', {}, 'Touch (the phone layout — a proposal)'), referenceTable('touch')));
+    h('article', {}, h('h3', {}, 'Touch (the phone layout)'), touchControlsTable(), referenceTable('touch')));
 }
 
 /** The body of Settings > Key bindings. `redraw` = draw the settings window again. */
@@ -49,7 +54,8 @@ export function bindingsTab({ redraw }) {
   if (sub === 'touch') return [tabs,
     h('label.set-row', {}, h('span', {}, 'Layout'), h('select', { dataset: { k: 'layout' }, onchange: e => { setLayoutChoice(e.target.value); redraw(); } }, ...LAYOUTS.map(([id, label]) => h('option', { value: id, selected: layoutChoice() === id }, label)))),
     h('p.tiny-left', {}, 'Automatic uses the phone layout on a touch screen whose short side is under 500 px, and the desktop one everywhere else. Pick one here to force it on this device.'),
-    referenceTable('touch')];
+    h('button.ghost.wide', { type: 'button', dataset: { act: 'explain' }, hidden: !ctx?.input?.touch, onclick: () => { document.querySelector('#panel-settings .tvp-x')?.click(); setTimeout(() => ctx?.input?.touch?.explain?.(), 80); } }, 'Show me what the buttons do'),
+    touchControlsTable(), referenceTable('touch')];
   const row = a => {
     const fixed = !!a.fixed;
     const btn = h('button.ghost.small.bind-key' + (B.changed(a.id) ? '.changed' : ''), { type: 'button', disabled: fixed, dataset: { bindAction: a.id }, title: fixed ? 'This key cannot be moved.' : 'Click, then press the new key. Esc cancels.' }, a.keyText && B.keyOf(a.id) === a.key ? a.keyText : keyLabel(B.keyOf(a.id)));

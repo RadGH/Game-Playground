@@ -21,6 +21,7 @@ export function createGamepad({ api, focus, radial, osk, run }) {
   const heldAct = new Map();            // button name -> key code held down for it
   const rep = { dir: null, at: 0 };
   let sprint = false, padId = '', zoomI = 1, lastMode = 'world', seen = false;
+  let muted = false;                    // Y1 (G2): after release() the move stick is ignored until it has come back to the middle
   const stats = { polls: 0, presses: 0, mode: 'none', id: '' };
 
   const pick = () => { let pads = []; try { pads = [...(navigator.getGamepads?.() || [])].filter(Boolean); } catch { return null; } return pads.find(p => p.connected !== false && p.mapping === 'standard') || pads.find(p => p.connected !== false) || null; };
@@ -109,7 +110,8 @@ export function createGamepad({ api, focus, radial, osk, run }) {
     }
     // sticks
     if (mode === 'world') {
-      api.controls?.setAnalog?.({ mx: lx, mz: -ly, camX: rx, camY: ry });
+      if (muted && !lx && !ly) muted = false;
+      api.controls?.setAnalog?.({ mx: muted ? 0 : lx, mz: muted ? 0 : -ly, camX: rx, camY: ry });
       if (sprint && !lx && !ly) { sprint = false; keyUp('ShiftLeft'); }
     } else {
       api.controls?.setAnalog?.(null);
@@ -125,5 +127,7 @@ export function createGamepad({ api, focus, radial, osk, run }) {
   }
   window.addEventListener('gamepaddisconnected', () => stopHolds());
   window.addEventListener('blur', () => stopHolds());
-  return { tick, stats, get padId() { return padId; }, glyphs: () => GLYPHS[device.glyphs], aAction };
+  return { tick, stats, get padId() { return padId; }, glyphs: () => GLYPHS[device.glyphs], aAction,
+    /** Y1 (G2): an activity started — a stick that is still pushed over does not walk you off when it ends. */
+    release() { if (seen) muted = true; stopHolds(); } };
 }

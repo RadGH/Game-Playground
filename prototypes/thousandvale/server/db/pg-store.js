@@ -68,8 +68,8 @@ export function createPgStore({ connectionString = process.env.DATABASE_URL, rea
       return { account: x.id, claimed: x.claimed, username: x.username, banned: x.banned_until ? new Date(x.banned_until).getTime() : 0, kind: x.kind, admin: !!x.admin };
     },
     async listChars(account) {
-      const r = await q(`SELECT id, name, cls, level, room, blob->'look' AS look FROM characters WHERE account_id = $1 AND realm = $2 ORDER BY id`, [account, realm]);
-      return r.rows.map(x => ({ ...brief(x), look: x.look || null }));
+      const r = await q(`SELECT id, name, cls, level, room, blob->'look' AS look, blob->'equipment' AS gear FROM characters WHERE account_id = $1 AND realm = $2 ORDER BY id`, [account, realm]);
+      return r.rows.map(x => ({ ...brief(x), look: x.look || null, gear: x.gear?.equipment || x.gear || {} }));
     },
     async createChar(account, { name, cls, look = null, kit = null, limit = MAX_CHARS_PER_ACCOUNT }) {
       const n = await q('SELECT count(*)::int AS n FROM characters WHERE account_id = $1 AND realm = $2', [account, realm]);

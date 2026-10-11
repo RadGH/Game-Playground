@@ -56,7 +56,7 @@ for (const [label, device, how, fps] of [['desktop keyboard, 60 fps', 'desktop',
     const rows = [];
     for (const [i, prof] of PROFS.entries()) {
       const done = page.evaluate(([p, seed]) => window.tvprof.demo(p, { seed }), [prof, 3 + i * 7]);
-      await page.waitForFunction(() => window.tvprof.mini.state.state === 'play', null, { timeout: 10000 });
+      await page.waitForFunction(() => (tvprof.mini.state.state === 'ready' && tvprof.mini.begin(), tvprof.mini.state.state === 'play'), null, { timeout: 10000 });
       // the stick and the fight buttons must not be reachable THROUGH the panel, and the character must hear no key
       const box = await page.evaluate(() => { const r = document.querySelector('.prof-game').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height, vw: innerWidth, vh: innerHeight, prof: document.documentElement.dataset.prof }; });
       expect(box.prof, 'the input layer is told a game is up').toBeTruthy();
@@ -87,7 +87,7 @@ test('keys do not leak to the game while a mini-game is up; Esc gives up and not
   await page.waitForFunction(() => document.documentElement.dataset.ready === '1', null, { timeout: 60000 });
   await page.evaluate(() => { window.__heard = []; window.addEventListener('keydown', e => window.__heard.push(e.code)); });
   let done = page.evaluate(() => window.tvprof.demo('mining', { seed: 5 }));
-  await page.waitForFunction(() => window.tvprof.mini.state.state === 'play');
+  await page.waitForFunction(() => (tvprof.mini.state.state === 'ready' && tvprof.mini.begin(), tvprof.mini.state.state === 'play'));
   for (const k of ['KeyW', 'KeyB', 'Digit1', 'KeyJ', 'KeyM']) await page.keyboard.press(k);
   expect(await page.evaluate(() => window.__heard), 'no game key reached a bubbling listener').toEqual([]);
   expect(await page.evaluate(() => window.gallery.openPanels()), 'no window opened').toEqual([]);
@@ -96,8 +96,8 @@ test('keys do not leak to the game while a mini-game is up; Esc gives up and not
   await expect(page.locator('.tv-prof')).toBeHidden();
   // mashing Space
   done = page.evaluate(() => window.tvprof.demo('outfitting', { seed: 9 }));
-  await page.waitForFunction(() => window.tvprof.mini.state.state === 'play');
-  for (let i = 0; i < 60; i++) { await page.keyboard.press('Space'); await page.waitForTimeout(70); if (!(await page.evaluate(() => window.tvprof.mini.state.state === 'play'))) break; }
+  await page.waitForFunction(() => (tvprof.mini.state.state === 'ready' && tvprof.mini.begin(), tvprof.mini.state.state === 'play'));
+  for (let i = 0; i < 60; i++) { await page.keyboard.press('Space'); await page.waitForTimeout(70); if (!(await page.evaluate(() => (tvprof.mini.state.state === 'ready' && tvprof.mini.begin(), tvprof.mini.state.state === 'play')))) break; }
   const r = await done;
   expect(['fail', 'poor', 'good']).toContain(r.quality);
   expect(r.inputs.length).toBeLessThanOrEqual(64);
@@ -108,5 +108,48 @@ test('keys do not leak to the game while a mini-game is up; Esc gives up and not
   await page.evaluate(() => window.gallery.fake.push('game', { t: 'you', professions: { list: window.tvprof.skills(), nodes: {} } }));
   await page.waitForTimeout(100);
   expect(await page.evaluate(() => window.tvprof.isSpent('node:a')), 'a node the server no longer lists is back').toBe(false);
+  await ctx.close();
+});
+
+// Y19 (G2, report #21 "I do not know where to put the mouse before it begins"): every game waits for the player.
+test('Y19: a mini-game opens READY — nothing moves and no key leaks until the first key / click / touch, which is not an input of the game; it begins by itself in the end', async ({ browser }) => {
+  test.setTimeout(120000);
+  const ctx = await browser.newContext({ viewport: { width: 393, height: 852 }, hasTouch: true });
+  const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}ui-gallery-frame.html?scene=hud&device=phone-p&layout=proposed`);
+  await page.waitForFunction(() => document.documentElement.dataset.ready === '1', null, { timeout: 60000 });
+  await page.evaluate(() => { window.__heard = []; window.addEventListener('keydown', e => window.__heard.push(e.code)); window.__states = []; window.addEventListener('tv:prof', e => window.__states.push(e.detail.state)); });
+  const state = () => page.evaluate(() => { const s = window.tvprof.mini.state; return { state: s.state, t: s.t }; });
+  // skinning (the trace): ready, the clock is not running, the pad / keys are told to stand back
+  let done = page.evaluate(() => window.tvprof.demo('skinning', { seed: 4 }));
+  await page.waitForFunction(() => window.tvprof.mini.state.state === 'ready');
+  await expect(page.locator('.prof-ready')).toBeVisible();
+  await expect(page.locator('.prof-ready')).toContainText(/finger|Tap/i);
+  expect(await page.evaluate(() => document.documentElement.dataset.prof), 'the input layer stands back while it waits').toBeTruthy();
+  await page.waitForTimeout(900);
+  expect((await state()).t, 'time has not moved').toBe(0);
+  await page.keyboard.press('KeyW'); await page.keyboard.press('KeyB');
+  expect(await page.evaluate(() => window.__heard), 'no key reached the game while it waited').toEqual([]);
+  await page.screenshot({ path: 'prototypes/thousandvale/tests/G/shots/phone-play/y19-ready-skinning.png' });
+  // a finger on the canvas: it begins, and the knife is under the finger
+  const c = await page.locator('.prof-canvas').boundingBox();
+  await page.locator('.prof-canvas').dispatchEvent('pointerdown', { pointerType: 'touch', pointerId: 9, clientX: c.x + c.width * 0.3, clientY: c.y + c.height * 0.5, bubbles: true, buttons: 1, pressure: 0.5, isPrimary: true });
+  await page.waitForFunction(() => window.tvprof.mini.state.state === 'play');
+  await expect(page.locator('.prof-ready')).toHaveCount(0);
+  expect(await page.evaluate(() => window.__states.slice(0, 2))).toEqual(['ready', 'play']);
+  await page.keyboard.press('Escape'); expect(await done).toBeNull();
+  // mining with a key: Space begins it and is NOT a strike
+  done = page.evaluate(() => window.tvprof.demo('mining', { seed: 5 }));
+  await page.waitForFunction(() => window.tvprof.mini.state.state === 'ready');
+  await page.keyboard.press('Space');
+  await page.waitForFunction(() => window.tvprof.mini.state.state === 'play');
+  expect(await page.evaluate(() => window.tvprof.mini.run.result().inputs.length), 'the press that began it is not an input').toBe(0);
+  await page.keyboard.press('Escape'); expect(await done).toBeNull();
+  // nobody touches anything: it begins by itself (the wait is given short here; the game's own is READY_MAX_MS)
+  done = page.evaluate(() => window.tvprof.demo('mining', { seed: 5, readyMs: 700 }));
+  await page.waitForFunction(() => window.tvprof.mini.state.state === 'ready');
+  await page.waitForFunction(() => window.tvprof.mini.state.state === 'play', null, { timeout: 4000 });
+  await page.keyboard.press('Escape'); expect(await done).toBeNull();
+  expect(errors, errors.join('\n')).toEqual([]);
   await ctx.close();
 });

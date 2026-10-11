@@ -36,7 +36,7 @@ import { runtimeFor, shapeOfUnit } from './cast-skills.js';
 import { attackReach, basicCard, isHeldFocus, stampCaster } from './caster-forms.js';
 import { TV_SLOTS, bagBonusOf, isLightItem as isLightRaw, lightRefund as lightRefundRaw } from './tv-gear.js';
 import { itemPrice, sellPrice as sellPriceOf, priceParts, killGold as killGoldOf, goldFound, isGear, retrainPrice as retrainPriceTv, questHour as questHourOf, lifetimeGold as lifetimeGoldOf } from './economy.js';
-import { weaponHands } from './farhold.js';
+import { weaponHands, resourceOf, resourceMax } from './farhold.js';
 import { handOf, handText, fitsHand, handRefusal, autoSlot } from './hands.js';
 import { makeCrate as makeCrateItem, openCrate as openCrateItem, isCrate, crateText } from './crates.js';
 import { kitsFor as kitsForRaw, validKit as validKitRaw, starterGear as starterGearRaw, kitPlan } from './starter-kits.js';
@@ -1439,6 +1439,14 @@ export function createRules(host, opts = {}) {
     sight: (ax, az, bx, bz) => (field.sight ? field.sight(ax, az, bx, bz) : true),
     /** owner feedback 10 (Y17): training dummies */
     spawnDummy, isDummy,
+    /** Y32: the owner's signature resources, shared by the join and change-only updates. */
+    resources: e => {
+      const u = e?.r?.unit; if (!u) return [];
+      // A pool is made lazily on the first hit. Show its empty state from the class's skill definitions before that.
+      const ids = new Set((engine.skillData.classes[u.classId] || []).map(id => engine.skillData.skills[id]?.resource?.id).filter(Boolean));
+      for (const id of Object.keys(u.mech?.res || {})) ids.add(id);
+      return [...ids].map(id => ({ id, n: resourceOf(u, id), max: resourceMax(u, id) }));
+    },
     /** owner feedback 10 (Y21): is this NPC fighting right now? (A: leave its wander alone while true) */
     npcFighting: e => guards.fighting(e?.r?.unit || null),
     /** round 9 (Forager's Covenant): the chance of one more of a node's main material — js/rules/professions.js gatherYield `extra` */

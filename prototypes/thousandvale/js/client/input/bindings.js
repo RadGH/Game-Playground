@@ -59,7 +59,7 @@ export const ACTIONS = [
   { id: 'camR', group: 'Moving', label: 'Turn the camera right', key: 'KeyE', hold: true, row: 'cam', pad: pad('RS'), touch: 'Drag on the world', shares: 'interact' },
   { id: 'zoom', group: 'Moving', label: 'Zoom the camera', key: null, mouse: 'Mouse wheel', pad: pad('R3', false, 'steps: close · middle · far'), touch: 'Pinch on the world' },
   // ---- fighting
-  { id: 'strike', group: 'Fighting', label: 'Strike (basic attack) — in a loot window: take everything', key: 'KeyF', mouse: 'Right-click an enemy', pad: pad('X'), touch: 'Attack button (big, right thumb)' },
+  { id: 'strike', group: 'Fighting', label: 'Strike (basic attack) — in a loot window: take everything', key: 'KeyF', mouse: 'Right-click an enemy', pad: pad('X'), touch: 'Attack button (big, right thumb): one tap keeps attacking, a second stops' },
   { id: 'skill1', group: 'Fighting', label: 'Skill 1', key: 'Digit1', row: 'skills', rowLabel: 'Skills 1 – 6', pad: pad('Y'), touch: 'Skill arc, button 1' },
   { id: 'skill2', group: 'Fighting', label: 'Skill 2', key: 'Digit2', row: 'skills', pad: pad('B'), touch: 'Skill arc, button 2' },
   { id: 'skill3', group: 'Fighting', label: 'Skill 3', key: 'Digit3', row: 'skills', pad: pad('RB'), touch: 'Skill arc, button 3' },
@@ -80,13 +80,13 @@ export const ACTIONS = [
   // ---- world
   { id: 'interact', group: 'World', label: 'Use, talk, open, loot a body — in a loot window: take the selected item', key: 'KeyE', pad: pad('A', false, 'when a prompt shows'), ctx: 'prompt', touch: 'Tap the prompt' },
   { id: 'camp', group: 'World', label: 'Make camp (wilds)', key: 'KeyC', pad: pad('RB', true), touch: 'Quick wheel: Camp' },
-  { id: 'fish', group: 'World', label: 'Cast a line / reel in', key: 'KeyX', pad: pad('A', true), touch: 'Quick wheel: Fish (or the rod in your bag)' },
+  { id: 'fish', group: 'World', label: 'Cast a line / reel in', key: 'KeyX', pad: pad('A', true), touch: 'Fish button (lit when water is in reach), or the quick wheel' },
   { id: 'hook', group: 'World', label: 'Hook a bite; hold to reel during the tug', key: 'Space', shares: 'jump', pad: pad('A', false, 'while fishing'), ctx: 'fishing', touch: 'The Hook / Reel button (replaces Attack)' },
   // W9 (P-client): the profession mini-games (js/client/ui/prof-minigame.js). ctx 'prof' = only while a mini-game is on screen
   { id: 'profWork', group: 'World', label: 'Mini-game: work (strike, pick, stop — hold to lift the knife)', key: 'Space', shares: 'jump', pad: pad('A', false, 'in a mini-game'), ctx: 'prof', touch: 'Tap the mini-game panel' },
   { id: 'profLeft', group: 'World', label: 'Mini-game: left (chop left, move left, back in the fire)', key: 'KeyA', shares: 'moveL', pad: pad('X', false, 'in a mini-game, or D-pad left'), ctx: 'prof', touch: 'Tap the left half of the panel' },
   { id: 'profRight', group: 'World', label: 'Mini-game: right (chop right, move right, back in the fire)', key: 'KeyD', shares: 'moveR', pad: pad('B', false, 'in a mini-game, or D-pad right'), ctx: 'prof', touch: 'Tap the right half of the panel' },
-  { id: 'mount', group: 'World', label: 'Ride your mount / get down', key: 'KeyH', pad: pad('X', true), touch: 'Quick wheel: Mount' },
+  { id: 'mount', group: 'World', label: 'Ride your mount / get down', key: 'KeyH', pad: pad('X', true), touch: 'Mount button, or the quick wheel' },
   // ---- windows
   { id: 'map', group: 'Windows', label: 'Map', key: 'KeyM', panel: 'map', pad: pad('BACK'), touch: 'Tap the minimap' },
   { id: 'journal', group: 'Windows', label: 'Journal (quests)', key: 'KeyJ', panel: 'journal', radial: true, touch: 'Quick wheel, or tap the quest tracker' },
@@ -256,6 +256,40 @@ export const WHEEL_ACTIONS = [
   { id: 'help', label: 'Help', icon: 'help' },
 ];
 
+/**
+ * Play-test 10 (Y34): every control the phone layout puts ON SCREEN — one row each. `action` = the row of ACTIONS it
+ * presses; `sel` = the element (css/layout-phone.css places it, input/touch.js makes it work); `name` = the two words a
+ * player would call it; `what` = one sentence. Read by: the label a long press shows, the pause menu's "What do these
+ * buttons do?" overlay (input/touch.js), the gallery's Controls scene, and tests/G/bindings.test.js.
+ * A new on-screen control = one row here.
+ */
+export const TOUCH_CONTROLS = [
+  { id: 'stick', action: 'moveF', sel: '.ph-stickzone', name: 'Move', what: 'Put your left thumb anywhere on this side and push. A full push runs; part-way walks.', area: true },
+  { id: 'attack', action: 'strike', sel: '#actionbar > .slot:nth-child(1)', name: 'Attack', what: 'One tap: you turn to your target (or the nearest enemy), walk into reach and keep attacking. Tap again to stop.' },
+  { id: 'skill1', action: 'skill1', sel: '#actionbar > .slot:nth-child(2)', name: 'Skill 1', what: 'Your first skill. Hold it to read its card.', skill: 1 },
+  { id: 'skill2', action: 'skill2', sel: '#actionbar > .slot:nth-child(3)', name: 'Skill 2', what: 'Your second skill. Hold it to read its card.', skill: 2 },
+  { id: 'skill3', action: 'skill3', sel: '#actionbar > .slot:nth-child(4)', name: 'Skill 3', what: 'Your third skill. Hold it to read its card.', skill: 3 },
+  { id: 'skill4', action: 'skill4', sel: '#actionbar > .slot:nth-child(5)', name: 'Skill 4', what: 'Your fourth skill. Hold it to read its card.', skill: 4 },
+  { id: 'skill5', action: 'skill5', sel: '#actionbar > .slot:nth-child(6)', name: 'Skill 5', what: 'Your fifth skill. Hold it to read its card.', skill: 5 },
+  { id: 'skill6', action: 'skill6', sel: '#actionbar > .slot:nth-child(7)', name: 'Skill 6', what: 'Your sixth skill. Hold it to read its card.', skill: 6 },
+  { id: 'belt', action: 'item1', sel: '.ph-belt', name: 'Belt', what: 'Potions and food. Tap: use the first one you carry. Hold: choose from all four.' },
+  { id: 'target', action: 'targetNext', sel: '.ph-target', name: 'Next enemy', what: 'Picks the nearest enemy; tap again for the next one. (You can also tap an enemy.)' },
+  { id: 'ally', action: 'allyNext', sel: '.ph-ally', name: 'Next friend', what: 'Picks a party member — the most hurt first — so your heals and wards go to them.' },
+  { id: 'jump', action: 'jump', sel: '.ph-jump', name: 'Jump', what: 'Jump.' },
+  { id: 'mount', action: 'mount', sel: '.ph-mount', name: 'Mount', what: 'Calls your mount (stand still while the ring fills). Tap again to get down.' },
+  { id: 'fish', action: 'fish', sel: '.ph-fish', name: 'Fish', what: 'Casts your line. Lit when water is in reach. Then: tap Hook when it bites, and hold / let go to keep the float in the green.' },
+  { id: 'hook', action: 'hook', sel: '.ph-hook', name: 'Hook / Reel', what: 'Shows while you fish: tap when it bites, then hold to reel and let go to give line.' },
+  { id: 'wheel', action: 'radial', sel: '.ph-wheel', name: 'Quick wheel', what: 'Every window: bag, character, skills, perks, journal, social, the menu. Tap its middle for more: map, camp, auto-run, emotes.' },
+  { id: 'chat', action: 'chat', sel: '.ph-chat', name: 'Chat', what: 'Opens the chat. The number is how many lines you have not read.' },
+  { id: 'info', action: 'journal', sel: '.ph-info', name: 'Quests and events', what: 'Shows or hides your tracked quests and the events around you.' },
+  { id: 'partymin', action: 'party', sel: '.ph-partymin', name: 'Party size', what: 'Party frames as small round portraits, or full rows.' },
+  { id: 'party', action: 'allyPrev', sel: '#party .pmember', name: 'Party member', what: 'Tap: target them (your heals go there). Hold: track them — an arrow leads you to them.' },
+  { id: 'self', action: 'targetClear', sel: '#self-frame', name: 'You', what: 'Tap to clear your target, so heals land on you.' },
+  { id: 'minimap', action: 'map', sel: '#minimap', name: 'Map', what: 'Tap the little map to open the big one.' },
+  { id: 'prompt', action: 'interact', sel: '#interact, .interact', name: 'Use / talk / loot', what: 'Appears when something is in reach. Tap it.' },
+];
+export const TOUCH_CONTROL_BY_ID = Object.fromEntries(TOUCH_CONTROLS.map(c => [c.id, c]));
+
 /** One short row list per group for a device: [{ group, rows: [{ keys:[…text], label, ids:[…], note }] }]. `B` = createBindings(). */
 export function referenceRows(device = 'keyboard', { B = createBindings(), set = 'xbox' } = {}) {
   const G = GLYPHS[set] || GLYPHS.xbox;
@@ -329,5 +363,14 @@ export function auditBindings() {
   for (const w of [...WHEEL, ...WHEEL_ACTIONS]) if (!ACTION_BY_ID[w.id]) bad.push(`wheel slice ${w.id} is not an action`);
   for (const a of ACTIONS) if (a.radial && ![...WHEEL, ...WHEEL_ACTIONS].some(w => w.id === a.id)) bad.push(`${a.id} says it is in the wheel and is not`);
   if (PAD_MOD === PAD_RADIAL) bad.push('modifier and wheel on one button');
+  // Y34: every on-screen phone control names a real action, once, in plain words
+  const seenC = new Set();
+  for (const c of TOUCH_CONTROLS) {
+    if (seenC.has(c.id)) bad.push(`touch control ${c.id} twice`); seenC.add(c.id);
+    if (!ACTION_BY_ID[c.action]) bad.push(`touch control ${c.id}: ${c.action} is not an action`);
+    if (!c.sel || !c.name || !c.what) bad.push(`touch control ${c.id}: needs sel, name and what`);
+    if (c.name && c.name.length > 18) bad.push(`touch control ${c.id}: the name must fit under a 46 px button`);
+  }
+  for (const id of ['strike', 'mount', 'fish', 'jump', 'targetNext', 'allyNext', 'radial', 'chat']) if (!TOUCH_CONTROLS.some(c => c.action === id)) bad.push(`${id} has no on-screen phone control`);
   return bad;
 }
